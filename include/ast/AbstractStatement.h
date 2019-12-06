@@ -7,7 +7,9 @@
 class AbstractStatement {
 public:
     // TODO implement interface 'Visitor'
-    virtual ~AbstractStatement()=default;
+    virtual ~AbstractStatement() = default;
+
+    virtual void print();
 };
 
 

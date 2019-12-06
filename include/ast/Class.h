@@ -10,9 +10,13 @@ class Class : public AbstractStatement {
     std::string name;
 
 private:
-    Class* superclass;
+    Class *superclass;
     std::vector<Function> methods;
 public:
+    /// Represents a class within the AST.
+    /// \param name
+    /// \param superclass
+    /// \param methods
     Class(std::string name, Class *superclass, std::vector<Function> methods);
 };
 

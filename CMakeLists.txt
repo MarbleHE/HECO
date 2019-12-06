@@ -54,4 +54,4 @@ add_executable(master_thesis_code
         src/ast/Function.cpp
         include/ast/FunctionParameter.h
         src/ast/FunctionParameter.cpp
-        )
+        main.h)

@@ -4,7 +4,9 @@
 
 class AbstractExpr {
 public:
-    virtual ~AbstractExpr()=default;
+    virtual ~AbstractExpr() = default;
+
+    virtual void print();
     // TODO implement interface 'Visitor'
 };
 

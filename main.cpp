@@ -1,57 +1,20 @@
-#include <iostream>
-#include "include/ast/LiteralInt.h"
-#include "include/ast/LiteralBool.h"
-#include "include/ast/LiteralString.h"
-#include "include/ast/VarDecl.h"
-#include "include/ast/Variable.h"
-#include "include/ast/Block.h"
-#include "include/ast/BinaryExpr.h"
-#include "include/ast/VarAssignm.h"
-#include "include/ast/Group.h"
-#include "include/ast/If.h"
-#include "include/ast/Return.h"
-#include "include/ast/Function.h"
-#include "include/ast/FunctionParameter.h"
+#include "main.h"
 
 using namespace std;
 
-/* generateDemo generates an AST for the following code:
- *
- *   int computePrivate(int x) {        // Function
- *      int a = 4;                      // VarDecl, LiteralInt
- *      int k;                          // VarDecl
- *      if (x > 32) {                   // If, Block, Variable
- *          k = x * a;                  // VarAssignm, BinaryExpr, Operator, Variable
- *      } else {                        // Block
- *          k = (x * a) + 42;           // VarAssignm, Group, BinaryExpr, BinaryExpr, Variable
- *      }
- *      return k;                       // Return
- *   }
- *
- *   // Missing
- *   - Call
- *   - Class
- *   - ExpressionStmt
- *   - LiteralBool
- *   - LiteralString
- *   - LogicalExpr
- *   - UnaryExpr
- *   - While
- */
-void generateDemo() {
+AbstractStatement *generateDemo() {
 
     std::vector<std::unique_ptr<AbstractStatement>> funcBody;
 
     // int a = 4;
     LiteralInt four(4);
-    LiteralBool demoBool(true);
-    LiteralString demoString("Blah.");
     auto varDeclA = make_unique<VarDecl>("a", "int", &four);
+    varDeclA->print();
     // accessing a make_unique pointer
-    std::cout << "This works before 'move': " << varDeclA->datatype << std::endl;
+    //std::cout << "This works before 'move': " << varDeclA->datatype << std::endl;
     funcBody.push_back(std::move(varDeclA));
     // accessing the VarDeclA after pushing to the vector
-    std::cout << dynamic_cast<VarDecl*>(funcBody.back().get())->datatype << std::endl;
+    //std::cout << dynamic_cast<VarDecl*>(funcBody.back().get())->datatype << std::endl;
 
     // int k;
     auto declareK = make_unique<VarDecl>("k", "int", nullptr);
@@ -98,18 +61,16 @@ void generateDemo() {
     FunctionParameter paramX("x", "int");
     func.addParameter(paramX);
 
-    cout << "Generation finished.";
-
     // BACKUP
     // funcBody.emplace_back(std::move(varDeclA));
     // VarDecl *ptr = dynamic_cast<VarDecl*>(funcBody.at(0).get());
 }
 
+
 int main() {
     // generate AST
-    cout << "Running generateDemo()...";
-    generateDemo();
-    cout << "done." << endl;
+    cout << "Running generateDemo()..." << endl;
+    auto root = generateDemo();
 
     // print AST as JSON
     // rootNode.print(format="json");

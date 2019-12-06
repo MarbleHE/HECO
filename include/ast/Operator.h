@@ -1,7 +1,7 @@
 #ifndef MASTER_THESIS_CODE_OPERATOR_H
 #define MASTER_THESIS_CODE_OPERATOR_H
 
-enum OperatorType {
+enum OperatorType : char {
     addition, subtraction, multiplication, division,
     smaller, smallerEqual, greater, greaterEqual,
     equal, unequal

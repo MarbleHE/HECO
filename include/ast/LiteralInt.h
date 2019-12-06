@@ -9,6 +9,8 @@ class LiteralInt : public Literal {
     int value;
 public:
     LiteralInt(int value);
+
+    void print();
 };
 
 
