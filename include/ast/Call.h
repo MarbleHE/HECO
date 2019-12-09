@@ -5,13 +5,15 @@
 
 #include <string>
 #include <vector>
-#include "ExpressionStmt.h"
+#include "AbstractExpr.h"
+#include "FunctionParameter.h"
+#include "AbstractStatement.h"
 
-class Call : public AbstractExpr {
-    AbstractExpr callee; // any expression that evaluates to a function or a Function
-    std::vector<AbstractExpr> arguments;
+class Call : public AbstractExpr, public AbstractStatement {
+    AbstractExpr *callee; // any expression that evaluates to a function or a Function
+    std::vector<FunctionParameter> arguments;
 public:
-    Call(const AbstractExpr &callee, const std::vector<AbstractExpr> &arguments);
+    Call(AbstractExpr *callee, const std::vector<FunctionParameter> &arguments);
 };
 
 

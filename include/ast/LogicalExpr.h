@@ -3,15 +3,16 @@
 #define MASTER_THESIS_CODE_LOGICALEXPR_H
 
 
-#include "ExpressionStmt.h"
 #include "Operator.h"
+#include "AbstractExpr.h"
 
 class LogicalExpr : public AbstractExpr {
-    AbstractExpr left;
-    Operator op;
-    AbstractExpr right;
+    AbstractExpr *left;
+    LogicalCompOperator op;
+    AbstractExpr *right;
 public:
-    LogicalExpr(const AbstractExpr &left, const Operator &op, const AbstractExpr &right);
+
+    LogicalExpr(AbstractExpr *left, LogicalCompOperator op, AbstractExpr *right);
 };
 
 

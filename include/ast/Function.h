@@ -12,10 +12,18 @@ class Function : public AbstractStatement {
 public:
     std::string name;
     std::vector<FunctionParameter> params;
+
+
     std::vector<std::unique_ptr<AbstractStatement>> body;
 
+    /// Copy constructor
+    /// \param func The function to be copied.
+    Function(const Function &func);
+
     Function(std::string name, std::vector<std::unique_ptr<AbstractStatement>> bodyStatements);
-    void addParameter(FunctionParameter param);
+
+    void addParameter(const FunctionParameter &param);
+
 };
 
 

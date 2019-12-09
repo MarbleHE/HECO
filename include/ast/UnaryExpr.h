@@ -4,13 +4,14 @@
 
 
 #include <string>
-#include "ExpressionStmt.h"
+#include "AbstractExpr.h"
+#include "Operator.h"
 
-class UnaryExpr : AbstractExpr {
-    std::string op;
+class UnaryExpr : public AbstractExpr {
+    UnaryOperator op;
     AbstractExpr right;
 public:
-    UnaryExpr(const std::string &op, const AbstractExpr &right);
+    UnaryExpr(const UnaryOperator &op, const AbstractExpr &right);
 };
 
 

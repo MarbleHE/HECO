@@ -2,3 +2,4 @@
 cmake-build-debug/
 doc/*
 !doc/doxygen
+/test/CMakeFiles/

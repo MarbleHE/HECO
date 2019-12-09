@@ -24,15 +24,15 @@ set(SOURCE_FILES
         ${master_thesis_code_SOURCE_DIR}/src/ast/Group.cpp
         ${master_thesis_code_SOURCE_DIR}/src/ast/If.cpp
         ${master_thesis_code_SOURCE_DIR}/src/ast/Call.cpp
+        ${master_thesis_code_SOURCE_DIR}/src/ast/CallExternal.cpp
         ${master_thesis_code_SOURCE_DIR}/src/ast/Class.cpp
-        ${master_thesis_code_SOURCE_DIR}/src/ast/ExpressionStmt.cpp
         ${master_thesis_code_SOURCE_DIR}/src/ast/LogicalExpr.cpp
         ${master_thesis_code_SOURCE_DIR}/src/ast/Return.cpp
         ${master_thesis_code_SOURCE_DIR}/src/ast/UnaryExpr.cpp
         ${master_thesis_code_SOURCE_DIR}/src/ast/While.cpp
         ${master_thesis_code_SOURCE_DIR}/src/ast/Function.cpp
         ${master_thesis_code_SOURCE_DIR}/src/ast/FunctionParameter.cpp
-        ${master_thesis_code_SOURCE_DIR}/src/ast/Ast.cpp)
+        ${master_thesis_code_SOURCE_DIR}/src/ast/CallExternal.cpp)
 
 add_executable(master_thesis_code
         ${master_thesis_code_SOURCE_DIR}/main.cpp

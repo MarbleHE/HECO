@@ -1,8 +1,12 @@
 #include "../../include/ast/Block.h"
 
 #include <utility>
+#include <iostream>
+#include <VarDecl.h>
 
 
-Block::Block(std::vector<std::unique_ptr<AbstractStatement>> *statements) {
-    this->statements = statements;
+Block::Block() = default;
+
+void Block::addStatement(std::unique_ptr<AbstractStatement> &&statement) {
+    blockStatements.push_back(std::move(statement));
 }

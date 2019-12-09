@@ -8,10 +8,11 @@
 
 class Block : public AbstractStatement {
 public:
-    std::vector<std::unique_ptr<AbstractStatement>> *statements;
-    Block(std::vector<std::unique_ptr<AbstractStatement>> *statements);
+    std::vector<std::unique_ptr<AbstractStatement>> blockStatements;
 
+    Block();
 
+    void addStatement(std::unique_ptr<AbstractStatement> &&statement);
 };
 
 
