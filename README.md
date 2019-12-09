@@ -32,7 +32,7 @@ include/ast     – contains the header files (.h)
 src/ast         – contains the implementation (.cpp)
 ```
 
-For auto-formatting in the CLion IDE, please use the code style definition provided in [clion/codestyle](clion/codestyle).
+For auto-formatting in the CLion IDE, please use the code style definition provided in [doc/clion/codestyle](doc/clion/codestyle).
 
 #### Documentation
 

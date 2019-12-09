@@ -34,6 +34,12 @@ int main();
 ///  }
 /// \endcode
 ///
-AbstractStatement *generateDemo();
+void generateDemoOne();
+
+/// Generates an sample AST for the following code:
+///
+///  \code{.cpp}
+///  \endcode
+void generateDemoTwo();
 
 #endif //MASTER_THESIS_CODE_MAIN_H

@@ -1,9 +1,32 @@
+#include <Ast.h>
 #include "main.h"
 
 using namespace std;
 
-AbstractStatement *generateDemo() {
 
+int main() {
+    // generate AST DemoOne
+    cout << "Running generateDemoOne()..." << endl;
+    //Ast *astOne;
+    //generateDemoOne(astOne);
+    generateDemoOne();
+
+    // generate AST for DemoTwo
+    cout << "Running generateDemoTwo()..." << endl;
+    generateDemoTwo();
+
+    // print AST as JSON
+    // rootNode.print(format="json");
+
+    // calculate multiplicative depth
+    // AstStatistics.calcMultiplicativeDepth(rootNode);
+
+    return 0;
+}
+
+
+void generateDemoOne() {
+    // statements of the function's body
     std::vector<std::unique_ptr<AbstractStatement>> funcBody;
 
     // int a = 4;
@@ -61,22 +84,11 @@ AbstractStatement *generateDemo() {
     FunctionParameter paramX("x", "int");
     func.addParameter(paramX);
 
-    // BACKUP
-    // funcBody.emplace_back(std::move(varDeclA));
-    // VarDecl *ptr = dynamic_cast<VarDecl*>(funcBody.at(0).get());
+    // ast.addRootNode(&func);
 }
 
 
-int main() {
-    // generate AST
-    cout << "Running generateDemo()..." << endl;
-    auto root = generateDemo();
+void generateDemoTwo() {
 
-    // print AST as JSON
-    // rootNode.print(format="json");
-
-    // calculate multiplicative depth
-    // AstStatistics.calcMultiplicativeDepth(rootNode);
-
-    return 0;
 }
+

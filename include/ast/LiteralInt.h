@@ -6,8 +6,10 @@
 #include "Literal.h"
 
 class LiteralInt : public Literal {
-    int value;
 public:
+
+    int value;
+
     LiteralInt(int value);
 
     void print();
