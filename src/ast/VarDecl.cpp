@@ -7,12 +7,3 @@ VarDecl::VarDecl(const std::string &name, const std::string &datatype, AbstractE
                                                                                                     datatype(datatype),
                                                                                                     initializer(
                                                                                                             initializer) {}
-
-void VarDecl::print() {
-    printf("VarDecl { name: %s, datatype: %s, initializer: ", name.c_str(), datatype.c_str());
-    initializer->print();
-    printf("}\n");
-
-}
-
-

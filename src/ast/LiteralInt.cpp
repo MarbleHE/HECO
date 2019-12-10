@@ -4,6 +4,6 @@
 
 LiteralInt::LiteralInt(int value) : value(value) {}
 
-void LiteralInt::print() {
-    printf("LiteralInt { \n\tvalue: %d \n}", value);
+std::string LiteralInt::toString() const {
+    return std::to_string(this->value);
 }

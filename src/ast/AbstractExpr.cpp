@@ -1,6 +1,10 @@
 #include <iostream>
 #include "../../include/ast/AbstractExpr.h"
 
-void AbstractExpr::print() {
-    std::cout << "AbstractExpr" << std::endl;
+std::string AbstractExpr::toString() const {
+    return std::string("AbstractExpr");
+}
+
+std::ostream &operator<<(std::ostream &outs, const AbstractExpr &obj) {
+    return outs << obj.toString();
 }

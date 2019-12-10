@@ -1,12 +1,17 @@
 #include <Call.h>
 #include "main.h"
+#include <experimental/type_traits>
+#include <sstream>
 
 using namespace std;
 
 
 int main() {
     // generate AST for DemoOne
-    auto rootNodeOne = generateDemoOne();
+    //đauto rootNodeOne = generateDemoOne();
+
+    LiteralInt lint(312);
+    std::cout << lint << std::endl;
 
     // generate AST for DemoTwo
     auto rootNodeTwo = generateDemoTwo();

@@ -14,8 +14,6 @@ public:
     VarDecl(const std::string &name, const std::string &datatype);
 
     VarDecl(const std::string &name, const std::string &datatype, AbstractExpr *initializer);
-
-    void print();
 };
 
 

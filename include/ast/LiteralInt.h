@@ -6,13 +6,13 @@
 #include "Literal.h"
 
 class LiteralInt : public Literal {
-public:
-
+private:
     int value;
 
+public:
     LiteralInt(int value);
 
-    void print();
+    std::string toString() const;
 };
 
 
