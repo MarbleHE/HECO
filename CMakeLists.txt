@@ -3,6 +3,33 @@ set(CMAKE_CXX_STANDARD 14)
 project(master_thesis_code)
 
 ##############################
+# Download nlohmann-json
+##############################
+
+# exclude the tests from the build
+set(JSON_BuildTests OFF CACHE INTERNAL "")
+
+configure_file(libs/nlohmann-json.txt.in nlohmann-json-download/CMakeLists.txt)
+execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+        RESULT_VARIABLE result
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download)
+if (result)
+    message(FATAL_ERROR "CMake step for googletest failed: ${result}")
+endif ()
+execute_process(COMMAND ${CMAKE_COMMAND} --build .
+        RESULT_VARIABLE result
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download)
+if (result)
+    message(FATAL_ERROR "Build step for googletest failed: ${result}")
+endif ()
+
+
+# Add googletest directly to our build. This defines the gtest and gtest_main targets.
+add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/nlohmann-json-src
+        ${CMAKE_CURRENT_BINARY_DIR}/nlohmann-json-build
+        EXCLUDE_FROM_ALL)
+
+##############################
 # TARGET: master_thesis_code
 ##############################
 
@@ -38,11 +65,19 @@ add_executable(master_thesis_code
         ${master_thesis_code_SOURCE_DIR}/main.cpp
         ${SOURCE_FILES})
 
+target_link_libraries(master_thesis_code PRIVATE nlohmann_json::nlohmann_json)
+
+
 ##############################
-# TARGET: testing
-# built by subdirectory CMakeLists.txt
+# TARGET: master_thesis_code_lib
+# built by subdirectory test/CMakeLists.txt
 ##############################
 
 add_subdirectory(test)
 
+# build a library out of the code to be used by
 add_library(master_thesis_code_lib ${SOURCE_FILES})
+target_link_libraries(master_thesis_code_lib PRIVATE nlohmann_json::nlohmann_json)
+
+
+

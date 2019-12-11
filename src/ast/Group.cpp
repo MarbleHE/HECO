@@ -1,3 +1,10 @@
 #include "../../include/ast/Group.h"
 
-Group::Group(AbstractExpr *expr) : expr(expr) {}
+json Group::toJson() const {
+    json j;
+    j["type"] = "Group";
+    j["expr"] = this->expr->toJson();
+    return j;
+}
+
+Group::Group(std::unique_ptr<AbstractExpr> expr) : expr(std::move(expr)) {}

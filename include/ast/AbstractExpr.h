@@ -2,7 +2,9 @@
 #define MASTER_THESIS_CODE_ABSTRACTEXPR_H
 
 #include <string>
+#include <nlohmann/json.hpp>
 
+using json = nlohmann::json;
 
 class AbstractExpr {
 public:
@@ -10,9 +12,10 @@ public:
 
     virtual std::string toString() const;
 
+    virtual json toJson() const;
 };
 
-std::ostream &operator<<(std::ostream &outs, const AbstractExpr &obj);
+std::ostream &operator<<(std::ostream &outs, AbstractExpr &obj);
 
 
 #endif //MASTER_THESIS_CODE_ABSTRACTEXPR_H

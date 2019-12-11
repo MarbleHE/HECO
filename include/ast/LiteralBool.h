@@ -9,6 +9,8 @@ class LiteralBool : public Literal {
     bool value;
 public:
     explicit LiteralBool(bool value);
+
+    json toJson() const;
 };
 
 

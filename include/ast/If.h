@@ -10,11 +10,19 @@
 #include "AbstractExpr.h"
 
 class If : public AbstractStatement {
-    AbstractExpr* condition;
-    AbstractStatement* thenBranch;
-    AbstractStatement* elseBranch;
 public:
-    If(AbstractExpr *condition, AbstractStatement *thenBranch, AbstractStatement *elseBranch);
+
+
+    std::unique_ptr<AbstractExpr> condition;
+    std::unique_ptr<AbstractStatement> thenBranch;
+    std::unique_ptr<AbstractStatement> elseBranch;
+
+    If(std::unique_ptr<AbstractExpr> condition, std::unique_ptr<AbstractStatement> thenBranch);
+
+    If(std::unique_ptr<AbstractExpr> condition, std::unique_ptr<AbstractStatement> thenBranch,
+       std::unique_ptr<AbstractStatement> elseBranch);
+
+    json toJson() const;
 };
 
 

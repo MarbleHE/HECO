@@ -20,35 +20,38 @@ The computation of code-based **statistics** that are relevant for FHE-based opt
 The AST to be used as foundation for FHE optimizations consists of nodes that are derived from either `AbstractExpr` or `AbstractStatement`, depending on whether the operation is an expression or a statement, respectively.
 
 - `AbstractExpr`
-    - `BinaryExpr`
-    - `Call`
-    - `CallExternal`
-    - `FunctionParameter`
-    - `Group`
-    - `Literal`
-    - `LiteralBool`
-    - `LiteralInt`
-    - `LiteralString`
-    - `LogicalExpr`
-    - `UnaryExpr`
+    - `BinaryExpr` – a binary expression 
+    - `Call` – a call to an internal function, i.e., its implementation is represented in the AST.
+    - `CallExternal` – a call to an external function which is treated as "black box", i.e., without looking into its definition.
+    - `FunctionParameter` – 
+    - `Group` – 
+    - `Literal` – 
+    - `LiteralBool` – 
+    - `LiteralInt` – 
+    - `LiteralString` – 
+    - `LogicalExpr` – 
+    - `UnaryExpr` – 
 - `AbstractStatement`
-    - `Block`
-    - `Class`
-    - `Call`
-    - `CallExternal`
-    - `Function`
-    - `If`
-    - `Return`
-    - `VarAssignm`
-    - `VarDecl`
-    - `While`
+    - `Block` – a code block `{...}`, e.g., the then-clause of an if statement.
+    - `Class` – a class 
+    - `Call` – see above.
+    - `CallExternal` –  see above.
+    - `Function` – a function definition.
+    - `If` – an if-conditional statement.
+    - `Return` – a return statement of a method.
+    - `VarAssignm` – the assignment of a variable.
+    - `VarDecl` – a variable declaration.
+    - `While` – a while-loop.
 
 ## Getting Started
 
 The following tools are required to get this project running:
-- cmake (version ≥ 3.15), tested with v3.15.5
-- gcc or clang, tested with Apple clang v11.0.0
-- doxygen, tested wth v1.8.16
+- cmake (version ≥ 3.15) to build the project
+    - tested with v3.15.5
+- gcc or clang to compile the sources
+    - tested with Apple clang v11.0.0
+- doxygen to build the documentation files (html)
+    - tested wth v1.8.16
 
 The easiest way to use this library is to import the project into [CLion](https://www.jetbrains.com/clion/) which automatically loads the containing cmake build files and adds the respective targets.
 

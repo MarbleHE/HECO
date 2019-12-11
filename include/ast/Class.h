@@ -7,17 +7,14 @@
 #include "Function.h"
 
 class Class : public AbstractStatement {
-    std::string name;
-
 private:
-    Class *superclass;
+    std::string name;
+    std::string superclass;
     std::vector<Function> methods;
 public:
-    /// Represents a class within the AST.
-    /// \param name
-    /// \param superclass
-    /// \param methods
-    Class(std::string name, Class *superclass, std::vector<Function> methods);
+    Class(const std::string &name, const std::string &superclass, const std::vector<Function> &methods);
+
+    json toJson() const;
 };
 
 

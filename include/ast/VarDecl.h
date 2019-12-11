@@ -9,11 +9,13 @@ class VarDecl : public AbstractStatement {
 public:
     std::string name;
     std::string datatype;
-    AbstractExpr *initializer;
+    std::unique_ptr<AbstractExpr> initializer;
 
-    VarDecl(const std::string &name, const std::string &datatype);
+    VarDecl(std::string name, std::string datatype);
 
-    VarDecl(const std::string &name, const std::string &datatype, AbstractExpr *initializer);
+    VarDecl(std::string name, std::string datatype, std::unique_ptr<AbstractExpr> initializer);
+
+    json toJson() const;
 };
 
 

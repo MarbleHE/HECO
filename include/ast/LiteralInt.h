@@ -8,11 +8,13 @@
 class LiteralInt : public Literal {
 private:
     int value;
+public:
+    int getValue() const;
 
 public:
     LiteralInt(int value);
 
-    std::string toString() const;
+    json toJson() const;
 };
 
 

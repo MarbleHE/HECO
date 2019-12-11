@@ -12,6 +12,8 @@ public:
     CallExternal(const std::string &functionName);
 
     CallExternal(const std::string &functionName, const std::vector<FunctionParameter> &arguments);
+
+    json toJson() const;
 };
 
 

@@ -7,9 +7,12 @@
 #include "AbstractExpr.h"
 
 class Variable : public AbstractExpr {
-    std::string identifier;
 public:
     Variable(const std::string &identifier);
+
+    std::string identifier;
+
+    json toJson() const;
 };
 
 

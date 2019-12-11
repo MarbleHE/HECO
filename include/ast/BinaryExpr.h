@@ -6,15 +6,25 @@
 
 class BinaryExpr : public AbstractExpr {
 public:
-    AbstractExpr *left;
+
+    std::unique_ptr<AbstractExpr> left;
     BinaryOperator op;
-    AbstractExpr *right;
+    std::unique_ptr<AbstractExpr> right;
 
     /// Represents an expression of the form "left op right", e.g., "2 + a" or "53 * 3".
     /// \param left is the left operand of the expression.
     /// \param op is the operator of the expression.
     /// \param right is the right operand of the expression.
-    BinaryExpr(AbstractExpr *left, const BinaryOperator &op, AbstractExpr *right);
+    BinaryExpr(std::unique_ptr<AbstractExpr> left, const BinaryOperator &op, std::unique_ptr<AbstractExpr> right);
+
+    json toJson() const;
+
+    BinaryOperator getOp() const;
+
+
+    AbstractExpr *getRight() const;
+
+    AbstractExpr *getLeft() const;
 };
 
 

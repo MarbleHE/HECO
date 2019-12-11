@@ -12,6 +12,8 @@ class UnaryExpr : public AbstractExpr {
     AbstractExpr right;
 public:
     UnaryExpr(const UnaryOperator &op, const AbstractExpr &right);
+
+    json toJson() const;
 };
 
 

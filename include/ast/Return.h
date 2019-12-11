@@ -11,9 +11,12 @@
 #include "AbstractExpr.h"
 
 class Return : public AbstractStatement {
-    AbstractExpr* value;
 public:
-    Return(AbstractExpr *value);
+    std::unique_ptr<AbstractExpr> value;
+
+    Return(std::unique_ptr<AbstractExpr> value);
+
+    json toJson() const;
 };
 
 

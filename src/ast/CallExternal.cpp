@@ -9,3 +9,12 @@ CallExternal::CallExternal(const std::string &functionName, const std::vector<Fu
 CallExternal::CallExternal(const std::string &functionName) {
 
 }
+
+
+json CallExternal::toJson() const {
+    json j;
+    j["type"] = "CallExternal";
+    j["functionName"] = this->functionName;
+    j["arguments"] = this->arguments;
+    return j;
+}

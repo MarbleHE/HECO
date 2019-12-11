@@ -14,6 +14,8 @@ class Call : public AbstractExpr, public AbstractStatement {
     std::vector<FunctionParameter> arguments;
 public:
     Call(AbstractExpr *callee, const std::vector<FunctionParameter> &arguments);
+
+    json toJson() const;
 };
 
 

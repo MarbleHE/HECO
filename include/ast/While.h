@@ -10,6 +10,8 @@ class While : public AbstractStatement {
     AbstractStatement *body;
 public:
     While(const AbstractExpr *condition, AbstractStatement *body);
+
+    json toJson() const;
 };
 
 

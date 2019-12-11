@@ -6,9 +6,11 @@
 #include "AbstractExpr.h"
 
 class Group : public AbstractExpr {
-    AbstractExpr* expr;
+    std::unique_ptr<AbstractExpr> expr;
 public:
-    Group(AbstractExpr *expr);
+    Group(std::unique_ptr<AbstractExpr> expr);
+
+    json toJson() const;
 };
 
 

@@ -8,11 +8,17 @@
 
 class Block : public AbstractStatement {
 public:
+
     std::vector<std::unique_ptr<AbstractStatement>> blockStatements;
 
     Block();
 
+    Block(std::vector<std::unique_ptr<AbstractStatement>> stat);
+
     void addStatement(std::unique_ptr<AbstractStatement> &&statement);
+
+    json toJson() const;
+
 };
 
 

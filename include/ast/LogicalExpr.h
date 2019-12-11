@@ -7,12 +7,15 @@
 #include "AbstractExpr.h"
 
 class LogicalExpr : public AbstractExpr {
-    AbstractExpr *left;
+    std::unique_ptr<AbstractExpr> left;
     LogicalCompOperator op;
-    AbstractExpr *right;
+    std::unique_ptr<AbstractExpr> right;
 public:
 
-    LogicalExpr(AbstractExpr *left, LogicalCompOperator op, AbstractExpr *right);
+    LogicalExpr(const std::unique_ptr<AbstractExpr> left, LogicalCompOperator op,
+                const std::unique_ptr<AbstractExpr> right);
+
+    json toJson() const;
 };
 
 

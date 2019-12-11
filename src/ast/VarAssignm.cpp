@@ -1,4 +1,15 @@
 
 #include "../../include/ast/VarAssignm.h"
 
-VarAssignm::VarAssignm(const std::string &identifier, AbstractExpr *value) : identifier(identifier), value(value) {}
+json VarAssignm::toJson() const {
+    json j;
+    j["type"] = "VarAssignm";
+    j["identifier"] = this->identifier;
+    j["value"] = this->value->toJson();
+    return j;
+}
+
+VarAssignm::VarAssignm(const std::string &identifier, std::unique_ptr<AbstractExpr> value) : identifier(identifier),
+                                                                                             value(std::move(value)) {
+
+}

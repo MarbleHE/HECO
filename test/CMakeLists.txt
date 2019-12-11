@@ -1,11 +1,12 @@
 include_directories("${PROJECT_SOURCE_DIR}")
 
+
 ##############################
 # Download GoogleTest framework
 ##############################
 
 # Download and unpack googletest at configure time
-configure_file(CMakeLists.txt.in googletest-download/CMakeLists.txt)
+configure_file(${PROJECT_SOURCE_DIR}/libs/googletest.in googletest-download/CMakeLists.txt)
 execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
         RESULT_VARIABLE result
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download)
@@ -44,6 +45,11 @@ add_executable(testing-all
         main.cpp
         ${TEST_FILES})
 
+# this is important to have code coverage in CLion
 set(CMAKE_CXX_FLAGS "-fprofile-instr-generate -fcoverage-mapping")
 
-target_link_libraries(testing-all gtest master_thesis_code_lib)
+target_link_libraries(testing-all gtest master_thesis_code_lib nlohmann_json::nlohmann_json)
+
+# make sure that master_thesis_code_lib is built before the testing-all target
+add_dependencies(testing-all master_thesis_code_lib)
+

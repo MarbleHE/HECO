@@ -10,6 +10,8 @@ class LiteralString : public Literal {
     std::string value;
 public:
     LiteralString(const std::string &value);
+
+    json toJson() const;
 };
 
 

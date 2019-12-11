@@ -26,42 +26,4 @@
 /// Program's entry point.
 int main();
 
-/// Generates an sample AST for the following code:
-///
-///  \code{.cpp}
-///  int computePrivate(int x) {        // Function
-///     int a = 4;                      // VarDecl, LiteralInt
-///     int k;                          // VarDecl
-///     if (x > 32) {                   // If, Block, Variable
-///         k = x * a;                  // VarAssignm, BinaryExpr, Operator, Variable
-///     } else {                        // Block
-///         k = (x * a) + 42;           // VarAssignm, Group, BinaryExpr, BinaryExpr, Variable
-///     }
-///     return k;                       // Return
-///  }
-/// \endcode
-///
-Function generateDemoOne();
-
-/// Generates an sample AST for the following code:
-///
-///  \code{.cpp}
-///  int determineSuitableX(int encryptedA, int encryptedB) {
-///      int randInt = rand() % 42;                  // Call
-///      bool b = encryptedA < 2;                    // LiteralBool
-///      int sum = 0;                                // LiteralInt
-///
-///      while (randInt > 0 && !b == true) {         // While, LogicalExpr, UnaryExpr
-///          sum = sum + encryptedB;                 // VarAssignm, BinaryExpr
-///          randInt--;                              // BinaryExpr
-///      };
-///
-///      String outStr = "Computation finished!";    // LiteralString
-///      printf(outStr);
-///
-///      return sum;
-///  }
-///  \endcode
-Function generateDemoTwo();
-
 #endif //MASTER_THESIS_CODE_MAIN_H
