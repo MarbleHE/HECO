@@ -7,8 +7,6 @@
 
 class If : public AbstractStatement {
 public:
-
-
     AbstractExpr *condition;
     AbstractStatement *thenBranch;
     AbstractStatement *elseBranch;
@@ -17,7 +15,10 @@ public:
 
     If(AbstractExpr *condition, AbstractStatement *thenBranch);
 
-    json toJson() const;
+    json toJson() const override;
+
+    virtual void accept(Visitor &v) override;
+
 };
 
 

@@ -9,3 +9,7 @@ json Return::toJson() const {
 }
 
 Return::Return(AbstractExpr *value) : value(value) {}
+
+void Return::accept(Visitor &v) {
+    v.visit(*this);
+}

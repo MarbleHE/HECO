@@ -17,7 +17,10 @@ public:
 
     VarDecl(std::string name, std::string datatype, int i);
 
-    json toJson() const;
+    json toJson() const override;
+
+    virtual void accept(Visitor &v) override;
+
 };
 
 

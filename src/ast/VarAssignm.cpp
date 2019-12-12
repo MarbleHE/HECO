@@ -11,4 +11,8 @@ json VarAssignm::toJson() const {
 
 VarAssignm::VarAssignm(const std::string &identifier, AbstractExpr *value) : identifier(identifier), value(value) {}
 
+void VarAssignm::accept(Visitor &v) {
+    v.visit(*this);
+}
+
 

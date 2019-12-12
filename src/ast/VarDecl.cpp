@@ -32,3 +32,7 @@ VarDecl::VarDecl(std::string name, std::string datatype, int i) : name(name), da
         initializer = new LiteralInt(i);
     }
 }
+
+void VarDecl::accept(Visitor &v) {
+    v.visit(*this);
+}

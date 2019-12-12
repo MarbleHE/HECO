@@ -26,3 +26,7 @@ CallExternal::CallExternal(std::string functionName, std::vector<FunctionParamet
 CallExternal::CallExternal(std::string functionName) : functionName(functionName) {
 
 }
+
+void CallExternal::accept(Visitor &v) {
+    v.visit(*this);
+}

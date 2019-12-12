@@ -9,7 +9,10 @@ class LiteralBool : public Literal {
 public:
     explicit LiteralBool(bool value);
 
-    json toJson() const;
+    json toJson() const override;
+
+    virtual void accept(Visitor &v) override;
+
 };
 
 

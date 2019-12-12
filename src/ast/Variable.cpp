@@ -9,3 +9,7 @@ json Variable::toJson() const {
     j["identifier"] = this->identifier;
     return j;
 }
+
+void Variable::accept(Visitor &v) {
+    v.visit(*this);
+}

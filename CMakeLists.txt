@@ -35,6 +35,7 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/nlohmann-json-src
 
 include_directories(${master_thesis_code_SOURCE_DIR}/include/ast)
 
+
 set(SOURCE_FILES
         ${master_thesis_code_SOURCE_DIR}/src/ast/AbstractExpr.cpp
         ${master_thesis_code_SOURCE_DIR}/src/ast/AbstractStatement.cpp
@@ -59,7 +60,11 @@ set(SOURCE_FILES
         ${master_thesis_code_SOURCE_DIR}/src/ast/While.cpp
         ${master_thesis_code_SOURCE_DIR}/src/ast/Function.cpp
         ${master_thesis_code_SOURCE_DIR}/src/ast/FunctionParameter.cpp
-        ${master_thesis_code_SOURCE_DIR}/src/ast/CallExternal.cpp src/ast/Ast.cpp include/ast/Ast.h)
+        ${master_thesis_code_SOURCE_DIR}/src/ast/CallExternal.cpp
+        ${master_thesis_code_SOURCE_DIR}/src/ast/Ast.cpp
+        ${master_thesis_code_SOURCE_DIR}/src/visitor/Visitor.cpp
+        ${master_thesis_code_SOURCE_DIR}/src/visitor/StatisticsVisitor.cpp
+        )
 
 add_executable(master_thesis_code
         ${master_thesis_code_SOURCE_DIR}/main.cpp

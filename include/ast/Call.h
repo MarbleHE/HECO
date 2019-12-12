@@ -14,7 +14,10 @@ class Call : public AbstractExpr, public AbstractStatement {
 public:
     Call(AbstractExpr *callee, const std::vector<FunctionParameter> &arguments);
 
-    json toJson() const;
+    json toJson() const override;
+
+    virtual void accept(Visitor &v) override;
+
 };
 
 

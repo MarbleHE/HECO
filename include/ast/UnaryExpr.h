@@ -12,7 +12,10 @@ class UnaryExpr : public AbstractExpr {
 public:
     UnaryExpr(UnaryOperator op, AbstractExpr *right);
 
-    json toJson() const;
+    json toJson() const override;
+
+    virtual void accept(Visitor &v) override;
+
 };
 
 

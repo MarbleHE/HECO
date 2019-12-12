@@ -13,3 +13,7 @@ json While::toJson() const {
     j["body"] = body->toJson();
     return j;
 }
+
+void While::accept(Visitor &v) {
+    v.visit(*this);
+}

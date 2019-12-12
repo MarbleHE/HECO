@@ -9,7 +9,10 @@ class Group : public AbstractExpr {
 public:
     Group(std::unique_ptr<AbstractExpr> expr);
 
-    json toJson() const;
+    json toJson() const override;
+
+    virtual void accept(Visitor &v) override;
+
 };
 
 

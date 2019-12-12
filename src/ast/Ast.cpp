@@ -15,3 +15,7 @@ AbstractStatement *Ast::setRootNode(AbstractStatement *rootNode) {
 AbstractStatement *Ast::getRootNode() const {
     return rootNode;
 }
+
+void Ast::accept(Visitor &v) {
+    v.visit(*this);
+}

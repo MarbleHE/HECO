@@ -9,3 +9,7 @@ json LiteralBool::toJson() const {
     j["value"] = this->value;
     return j;
 }
+
+void LiteralBool::accept(Visitor &v) {
+    v.visit(*this);
+}

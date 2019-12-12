@@ -10,10 +10,11 @@ private:
 public:
     int getValue() const;
 
-public:
     LiteralInt(int value);
 
-    json toJson() const;
+    json toJson() const override;
+
+    void accept(Visitor &v) override;
 };
 
 

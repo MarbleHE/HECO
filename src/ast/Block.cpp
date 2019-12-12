@@ -26,3 +26,7 @@ Block::Block(std::vector<AbstractStatement *> *statements) : statements(statemen
 
 }
 
+void Block::accept(Visitor &v) {
+    v.visit(*this);
+}
+

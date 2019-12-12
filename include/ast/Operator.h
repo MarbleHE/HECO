@@ -6,6 +6,8 @@
 // https://stackoverflow.com/a/6281535/3017719 using th-thielemann.de/tools/cpp-enum-to-string.html
 // or https://stackoverflow.com/a/3342891/3017719
 
+#include "../visitor/Visitor.h"
+
 enum class BinaryOperator : char {
     // arithmetic operator
             addition, subtraction, multiplication, division, modulo,
@@ -30,6 +32,9 @@ public:
     BinaryOperator op;
 
     Operator(BinaryOperator op);
+
+    virtual void accept(Visitor &v);
+
 };
 
 

@@ -19,3 +19,7 @@ json FunctionParameter::toJson() const {
     //to_json(j, *this);
     return j;
 }
+
+void FunctionParameter::accept(Visitor &v) {
+    v.visit(*this);
+}

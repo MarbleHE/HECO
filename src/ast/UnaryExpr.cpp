@@ -10,3 +10,7 @@ json UnaryExpr::toJson() const {
 }
 
 UnaryExpr::UnaryExpr(UnaryOperator op, AbstractExpr *right) : op(op), right(right) {}
+
+void UnaryExpr::accept(Visitor &v) {
+    v.visit(*this);
+}

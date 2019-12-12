@@ -11,7 +11,10 @@ class While : public AbstractStatement {
 public:
     While(AbstractExpr *condition, AbstractStatement *body);
 
-    json toJson() const;
+    json toJson() const override;
+
+    virtual void accept(Visitor &v) override;
+
 };
 
 

@@ -13,7 +13,10 @@ public:
 
     CallExternal(std::string functionName, std::vector<FunctionParameter> *arguments);
 
-    json toJson() const;
+    json toJson() const override;
+
+    virtual void accept(Visitor &v) override;
+
 };
 
 

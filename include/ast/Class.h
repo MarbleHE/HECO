@@ -14,7 +14,9 @@ private:
 public:
     Class(const std::string &name, const std::string &superclass, const std::vector<Function> &methods);
 
-    json toJson() const;
+    json toJson() const override;
+
+    virtual void accept(Visitor &v) override;
 };
 
 

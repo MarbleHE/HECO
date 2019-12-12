@@ -26,13 +26,15 @@ public:
 
     BinaryExpr(int literalIntLeft, BinaryOperator op, int literalIntRight);
 
-    json toJson() const;
+    json toJson() const override;
 
     AbstractExpr *getLeft() const;
 
     BinaryOperator getOp() const;
 
     AbstractExpr *getRight() const;
+
+    virtual void accept(Visitor &v) override;
 
 };
 

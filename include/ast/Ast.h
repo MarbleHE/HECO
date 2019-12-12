@@ -4,6 +4,7 @@
 
 
 #include "AbstractStatement.h"
+#include "../visitor/Visitor.h"
 
 class Ast {
 private:
@@ -16,6 +17,10 @@ public:
     AbstractStatement *setRootNode(AbstractStatement *rootNode);
 
     AbstractStatement *getRootNode() const;
+
+    virtual void accept(Visitor &v);
+
+
 };
 
 

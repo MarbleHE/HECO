@@ -21,7 +21,9 @@ public:
 
     void addStatement(std::unique_ptr<AbstractStatement> &&statement);
 
-    json toJson() const;
+    json toJson() const override;
+
+    virtual void accept(Visitor &v) override;
 
 };
 

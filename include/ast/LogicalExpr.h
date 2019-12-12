@@ -26,7 +26,10 @@ public:
 //    template <typename T>
 //    LogicalExpr(T variableLeft, LogicalCompOperator op, T variableRight);
 
-    json toJson() const;
+    json toJson() const override;
+
+    virtual void accept(Visitor &v) override;
+
 };
 
 

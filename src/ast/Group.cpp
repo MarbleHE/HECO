@@ -8,3 +8,7 @@ json Group::toJson() const {
 }
 
 Group::Group(std::unique_ptr<AbstractExpr> expr) : expr(std::move(expr)) {}
+
+void Group::accept(Visitor &v) {
+    v.visit(*this);
+}

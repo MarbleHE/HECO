@@ -12,7 +12,10 @@ class VarAssignm : public AbstractStatement {
 public:
     VarAssignm(const std::string &identifier, AbstractExpr *value);
 
-    json toJson() const;
+    json toJson() const override;
+
+    virtual void accept(Visitor &v) override;
+
 };
 
 #endif //MASTER_THESIS_CODE_VARASSIGNM_H

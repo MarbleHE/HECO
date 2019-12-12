@@ -49,3 +49,7 @@ BinaryExpr::BinaryExpr(int literalIntLeft, BinaryOperator op, int literalIntRigh
     this->op = op;
     this->right = new LiteralInt(literalIntRight);
 }
+
+void BinaryExpr::accept(Visitor &v) {
+    v.visit(*this);
+}

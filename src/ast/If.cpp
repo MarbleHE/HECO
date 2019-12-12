@@ -17,3 +17,7 @@ If::If(AbstractExpr *condition, AbstractStatement *thenBranch, AbstractStatement
 
 If::If(AbstractExpr *condition, AbstractStatement *thenBranch) : condition(condition), thenBranch(thenBranch) {}
 
+void If::accept(Visitor &v) {
+    v.visit(*this);
+}
+

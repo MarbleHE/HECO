@@ -30,9 +30,6 @@ void to_json(json &j, const Function &func) {
             {"type",   "Function"},
             {"params", func.getParams()},
             {"body",   func.getBody()}
-
-//            {"params", func.getParams()},
-//            {"body",   func.getBody()}
     };
 }
 
@@ -63,6 +60,10 @@ const std::vector<FunctionParameter> &Function::getParams() const {
 
 const std::vector<std::unique_ptr<AbstractStatement>> &Function::getBody() const {
     return body;
+}
+
+void Function::accept(Visitor &v) {
+    v.visit(*this);
 }
 
 

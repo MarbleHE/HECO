@@ -10,7 +10,9 @@ public:
 
     std::string datatype;
 
-    json toJson() const;
+    json toJson() const override;
+
+    virtual void accept(Visitor &v) override;
 };
 
 /// Defines the JSON representation to be used for vector<FunctionParameter> objects.

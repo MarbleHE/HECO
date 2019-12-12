@@ -15,3 +15,7 @@ json Class::toJson() const {
     j["methods"] = this->methods;
     return j;
 }
+
+void Class::accept(Visitor &v) {
+    v.visit(*this);
+}

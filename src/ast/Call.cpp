@@ -11,3 +11,7 @@ json Call::toJson() const {
     j["callee"] = this->callee->toString();
     return j;
 }
+
+void Call::accept(Visitor &v) {
+    v.visit(*this);
+}

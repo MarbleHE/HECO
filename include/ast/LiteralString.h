@@ -10,7 +10,10 @@ class LiteralString : public Literal {
 public:
     LiteralString(const std::string &value);
 
-    json toJson() const;
+    json toJson() const override;
+
+    virtual void accept(Visitor &v) override;
+
 };
 
 

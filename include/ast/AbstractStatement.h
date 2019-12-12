@@ -3,6 +3,7 @@
 
 #include <string>
 #include <nlohmann/json.hpp>
+#include "../visitor/Visitor.h"
 
 using json = nlohmann::json;
 
@@ -14,6 +15,9 @@ public:
     virtual std::string toString() const;
 
     virtual json toJson() const;
+
+    virtual void accept(Visitor &v);
+
 };
 
 std::ostream &operator<<(std::ostream &outs, const AbstractStatement &obj);

@@ -16,3 +16,7 @@ json LiteralInt::toJson() const {
 int LiteralInt::getValue() const {
     return value;
 }
+
+void LiteralInt::accept(Visitor &v) {
+
+}

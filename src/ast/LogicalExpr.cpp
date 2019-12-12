@@ -17,6 +17,10 @@ json LogicalExpr::toJson() const {
 LogicalExpr::LogicalExpr(AbstractExpr *left, LogicalCompOperator op, AbstractExpr *right) :
         left(left), op(op), right(right) {}
 
+void LogicalExpr::accept(Visitor &v) {
+    v.visit(*this);
+}
+
 //template <typename T>
 //LogicalExpr::LogicalExpr(T variableLeft, LogicalCompOperator op, T variableRight) {
 //    this->op = op;

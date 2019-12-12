@@ -9,3 +9,7 @@ json LiteralString::toJson() const {
     j["value"] = this->value;
     return j;
 }
+
+void LiteralString::accept(Visitor &v) {
+    v.visit(*this);
+}

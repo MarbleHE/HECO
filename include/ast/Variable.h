@@ -11,7 +11,10 @@ public:
 
     std::string identifier;
 
-    json toJson() const;
+    json toJson() const override;
+
+    virtual void accept(Visitor &v) override;
+
 };
 
 
