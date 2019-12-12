@@ -9,6 +9,5 @@ json LogicalExpr::toJson() const {
     return j;
 }
 
-LogicalExpr::LogicalExpr(std::unique_ptr<AbstractExpr> left, LogicalCompOperator op,
-                         std::unique_ptr<AbstractExpr> right) :
-        left(std::move(left)), op(op), right(std::move(right)) {}
+LogicalExpr::LogicalExpr(AbstractExpr *left, LogicalCompOperator op, AbstractExpr *right) : left(left), op(op),
+                                                                                            right(right) {}

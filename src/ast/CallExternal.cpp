@@ -1,20 +1,28 @@
 
+#include <utility>
 #include <vector>
 #include <FunctionParameter.h>
 #include "CallExternal.h"
 
-CallExternal::CallExternal(const std::string &functionName, const std::vector<FunctionParameter> &arguments)
-        : functionName(functionName), arguments(arguments) {}
 
-CallExternal::CallExternal(const std::string &functionName) {
-
-}
 
 
 json CallExternal::toJson() const {
-    json j;
-    j["type"] = "CallExternal";
-    j["functionName"] = this->functionName;
-    j["arguments"] = this->arguments;
+    json j = {
+            {"type",         "CallExternal"},
+            {"functionName", this->functionName},
+    };
+    if (this->arguments != nullptr) {
+        j["arguments"] = *(this->arguments);
+    }
     return j;
+}
+
+CallExternal::CallExternal(std::string functionName, std::vector<FunctionParameter> *arguments) : functionName(
+        std::move(functionName)) {
+    this->arguments = arguments;
+}
+
+CallExternal::CallExternal(std::string functionName) : functionName(functionName) {
+
 }

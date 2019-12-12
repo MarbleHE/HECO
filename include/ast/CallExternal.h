@@ -7,11 +7,11 @@
 class CallExternal : public AbstractExpr, public AbstractStatement {
 public:
     std::string functionName;
-    std::vector<FunctionParameter> arguments;
+    std::vector<FunctionParameter> *arguments;
 
-    CallExternal(const std::string &functionName);
+    explicit CallExternal(std::string functionName);
 
-    CallExternal(const std::string &functionName, const std::vector<FunctionParameter> &arguments);
+    CallExternal(std::string functionName, std::vector<FunctionParameter> *arguments);
 
     json toJson() const;
 };

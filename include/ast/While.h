@@ -9,7 +9,7 @@ class While : public AbstractStatement {
     AbstractExpr *condition;
     AbstractStatement *body;
 public:
-    While(const AbstractExpr *condition, AbstractStatement *body);
+    While(AbstractExpr *condition, AbstractStatement *body);
 
     json toJson() const;
 };

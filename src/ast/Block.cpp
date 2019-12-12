@@ -18,7 +18,11 @@ json Block::toJson() const {
     return j;
 }
 
-Block::Block(std::vector<std::unique_ptr<AbstractStatement>> stat) : blockStatements(std::move(stat)) {
+Block::Block(AbstractStatement *stat) {
+    blockStatements.emplace_back(stat);
+}
+
+Block::Block(std::vector<AbstractStatement *> *statements) : statements(statements) {
 
 }
 

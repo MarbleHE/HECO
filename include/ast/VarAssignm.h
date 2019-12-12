@@ -8,9 +8,9 @@
 
 class VarAssignm : public AbstractStatement {
     std::string identifier;
-    std::unique_ptr<AbstractExpr> value;
+    AbstractExpr *value;
 public:
-    VarAssignm(const std::string &identifier, std::unique_ptr<AbstractExpr> value);
+    VarAssignm(const std::string &identifier, AbstractExpr *value);
 
     json toJson() const;
 };

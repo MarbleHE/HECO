@@ -1,4 +1,3 @@
-
 #ifndef MASTER_THESIS_CODE_UNARYEXPR_H
 #define MASTER_THESIS_CODE_UNARYEXPR_H
 
@@ -9,9 +8,9 @@
 
 class UnaryExpr : public AbstractExpr {
     UnaryOperator op;
-    AbstractExpr right;
+    AbstractExpr *right;
 public:
-    UnaryExpr(const UnaryOperator &op, const AbstractExpr &right);
+    UnaryExpr(UnaryOperator op, AbstractExpr *right);
 
     json toJson() const;
 };

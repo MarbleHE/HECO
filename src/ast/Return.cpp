@@ -1,6 +1,5 @@
 #include "../../include/ast/Return.h"
 
-Return::Return(std::unique_ptr<AbstractExpr> value) : value(std::move(value)) {}
 
 json Return::toJson() const {
     json j;
@@ -8,3 +7,5 @@ json Return::toJson() const {
     j["value"] = this->value->toJson();
     return j;
 }
+
+Return::Return(AbstractExpr *value) : value(value) {}

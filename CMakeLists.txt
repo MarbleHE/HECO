@@ -59,7 +59,7 @@ set(SOURCE_FILES
         ${master_thesis_code_SOURCE_DIR}/src/ast/While.cpp
         ${master_thesis_code_SOURCE_DIR}/src/ast/Function.cpp
         ${master_thesis_code_SOURCE_DIR}/src/ast/FunctionParameter.cpp
-        ${master_thesis_code_SOURCE_DIR}/src/ast/CallExternal.cpp)
+        ${master_thesis_code_SOURCE_DIR}/src/ast/CallExternal.cpp src/ast/Ast.cpp include/ast/Ast.h)
 
 add_executable(master_thesis_code
         ${master_thesis_code_SOURCE_DIR}/main.cpp

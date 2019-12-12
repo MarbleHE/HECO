@@ -3,9 +3,7 @@
 #include "gtest/gtest.h"
 
 TEST(BinaryExprTests, leftOperand) {
-    LiteralInt four(4);
-    LiteralInt two(2);
-    BinaryExpr bexp(&four, BinaryOperator::addition, &two);
+    BinaryExpr bexp(new LiteralInt(4), BinaryOperator::addition, new LiteralInt(2));
     EXPECT_EQ(dynamic_cast<LiteralInt *>(bexp.left)->getValue(), 4);
 }
 
@@ -20,5 +18,5 @@ TEST(BinaryExprTests, binaryOperator) {
     LiteralInt four(4);
     LiteralInt two(2);
     BinaryExpr bexp(&four, BinaryOperator::addition, &two);
-    EXPECT_EQ(bexp.getOp(), BinaryOperator::addition);
+    EXPECT_EQ(bexp.op, BinaryOperator::addition);
 }

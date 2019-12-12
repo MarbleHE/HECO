@@ -1,7 +1,3 @@
-//
-// Created by Patrick Jattke on 04.12.19.
-//
-
 #ifndef MASTER_THESIS_CODE_RETURN_H
 #define MASTER_THESIS_CODE_RETURN_H
 
@@ -12,9 +8,9 @@
 
 class Return : public AbstractStatement {
 public:
-    std::unique_ptr<AbstractExpr> value;
+    AbstractExpr *value;
 
-    Return(std::unique_ptr<AbstractExpr> value);
+    Return(AbstractExpr *value);
 
     json toJson() const;
 };

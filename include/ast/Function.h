@@ -10,11 +10,17 @@
 
 class Function : public AbstractStatement {
 public:
-    Function();
-
     std::string name;
     std::vector<FunctionParameter> params;
     std::vector<std::unique_ptr<AbstractStatement>> body;
+
+    Function();
+
+    const std::string &getName() const;
+
+    const std::vector<FunctionParameter> &getParams() const;
+
+    const std::vector<std::unique_ptr<AbstractStatement>> &getBody() const;
 
     /// Copy constructor
     /// \param func The function to be copied.
@@ -22,12 +28,17 @@ public:
 
     Function(std::string name, std::vector<std::unique_ptr<AbstractStatement>> bodyStatements);
 
+    Function(std::string name);
+
     void addParameter(const FunctionParameter &param);
 
+    void addStatement(AbstractStatement *pDecl);
+
     json toJson() const;
+
 };
 
 /// Defines the JSON representation to be used for vector<Function> objects.
-void to_json(json &j, const Function &param);
+void to_json(json &j, const Function &func);
 
 #endif //MASTER_THESIS_CODE_FUNCTION_H

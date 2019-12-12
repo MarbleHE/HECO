@@ -9,7 +9,6 @@ json VarAssignm::toJson() const {
     return j;
 }
 
-VarAssignm::VarAssignm(const std::string &identifier, std::unique_ptr<AbstractExpr> value) : identifier(identifier),
-                                                                                             value(std::move(value)) {
+VarAssignm::VarAssignm(const std::string &identifier, AbstractExpr *value) : identifier(identifier), value(value) {}
 
-}
+

@@ -1,7 +1,3 @@
-//
-// Created by Patrick Jattke on 04.12.19.
-//
-
 #ifndef MASTER_THESIS_CODE_IF_H
 #define MASTER_THESIS_CODE_IF_H
 
@@ -13,14 +9,13 @@ class If : public AbstractStatement {
 public:
 
 
-    std::unique_ptr<AbstractExpr> condition;
-    std::unique_ptr<AbstractStatement> thenBranch;
-    std::unique_ptr<AbstractStatement> elseBranch;
+    AbstractExpr *condition;
+    AbstractStatement *thenBranch;
+    AbstractStatement *elseBranch;
 
-    If(std::unique_ptr<AbstractExpr> condition, std::unique_ptr<AbstractStatement> thenBranch);
+    If(AbstractExpr *condition, AbstractStatement *thenBranch, AbstractStatement *elseBranch);
 
-    If(std::unique_ptr<AbstractExpr> condition, std::unique_ptr<AbstractStatement> thenBranch,
-       std::unique_ptr<AbstractStatement> elseBranch);
+    If(AbstractExpr *condition, AbstractStatement *thenBranch);
 
     json toJson() const;
 };

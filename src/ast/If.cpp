@@ -1,11 +1,5 @@
 #include "../../include/ast/If.h"
 
-If::If(std::unique_ptr<AbstractExpr> condition, std::unique_ptr<AbstractStatement> thenBranch)
-        : condition(std::move(condition)), thenBranch(std::move(thenBranch)) {}
-
-If::If(std::unique_ptr<AbstractExpr> condition, std::unique_ptr<AbstractStatement> thenBranch,
-       std::unique_ptr<AbstractStatement> elseBranch)
-        : condition(std::move(condition)), thenBranch(std::move(thenBranch)), elseBranch(std::move(elseBranch)) {}
 
 json If::toJson() const {
     json j;
@@ -15,4 +9,11 @@ json If::toJson() const {
     j["elseBranch"] = this->elseBranch->toJson();
     return j;
 }
+
+If::If(AbstractExpr *condition, AbstractStatement *thenBranch, AbstractStatement *elseBranch) : condition(condition),
+                                                                                                thenBranch(thenBranch),
+                                                                                                elseBranch(
+                                                                                                        elseBranch) {}
+
+If::If(AbstractExpr *condition, AbstractStatement *thenBranch) : condition(condition), thenBranch(thenBranch) {}
 

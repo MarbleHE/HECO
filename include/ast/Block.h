@@ -1,4 +1,3 @@
-
 #ifndef MASTER_THESIS_CODE_BLOCK_H
 #define MASTER_THESIS_CODE_BLOCK_H
 
@@ -11,9 +10,14 @@ public:
 
     std::vector<std::unique_ptr<AbstractStatement>> blockStatements;
 
+    std::vector<AbstractStatement *> *statements;
+
+
     Block();
 
-    Block(std::vector<std::unique_ptr<AbstractStatement>> stat);
+    Block(AbstractStatement *stat);
+
+    Block(std::vector<AbstractStatement *> *statements);
 
     void addStatement(std::unique_ptr<AbstractStatement> &&statement);
 

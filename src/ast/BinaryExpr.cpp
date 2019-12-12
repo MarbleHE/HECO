@@ -9,19 +9,5 @@ json BinaryExpr::toJson() const {
     return j;
 }
 
-AbstractExpr *BinaryExpr::getLeft() const {
-    return left.get();
-}
 
-BinaryOperator BinaryExpr::getOp() const {
-    return op;
-}
-
-AbstractExpr *BinaryExpr::getRight() const {
-    return right.get();
-}
-
-BinaryExpr::BinaryExpr(std::unique_ptr<AbstractExpr> left, const BinaryOperator &op,
-                       std::unique_ptr<AbstractExpr> right) : left(std::move(left)), right(std::move(right)), op(op) {
-
-}
+BinaryExpr::BinaryExpr(AbstractExpr *left, BinaryOperator op, AbstractExpr *right) : left(left), op(op), right(right) {}
