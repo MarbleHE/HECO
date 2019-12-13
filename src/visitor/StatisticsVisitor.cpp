@@ -1,6 +1,7 @@
 
 #include <iostream>
 #include <Function.h>
+#include <Operator.h>
 #include "../../include/visitor/StatisticsVisitor.h"
 
 void StatisticsVisitor::visit(Ast &elem) {
@@ -18,8 +19,7 @@ void StatisticsVisitor::visit(Block &elem) {
 }
 
 void StatisticsVisitor::visit(Call &elem) {
-    std::cout << "object Call visited." << std::endl;
-
+    std::cout << "object Call visited." << std::endl;;
 }
 
 void StatisticsVisitor::visit(CallExternal &elem) {

@@ -4,31 +4,35 @@
 
 #include "Operator.h"
 #include "AbstractExpr.h"
+#include "Literal.h"
+#include "LiteralInt.h"
+#include "LiteralBool.h"
+#include "LiteralString.h"
 
 
 class LogicalExpr : public AbstractExpr {
+protected:
     AbstractExpr *left;
-    LogicalCompOperator op;
+    Operator *op;
     AbstractExpr *right;
+
 public:
 
-    LogicalExpr(AbstractExpr *left, LogicalCompOperator op, AbstractExpr *right);
+    LogicalExpr(AbstractExpr *left, OpSymb::LogCompOp op, AbstractExpr *right);
 
-    // TODO implement constructors or find better way to solve that
-    // helper constructors that automatically instantiate the underlying objects for common variations
-//    LogicalExpr(int literalIntLeft, LogicalCompOperator op, std::string variableRight);
-//    LogicalExpr(int literalIntLeft, LogicalCompOperator op, bool literalBoolRight);
-//    LogicalExpr(std::string variableLeft, LogicalCompOperator op, int literalIntRight);
-//    LogicalExpr(std::string variableLeft, LogicalCompOperator op, bool literalBoolRight);
-//    LogicalExpr(bool literalBoolLeft, LogicalCompOperator op, std::string variableRight);
-//    LogicalExpr(bool literalBoolLeft, LogicalCompOperator op, int literalIntRight);
-//    // -- constructors with same type on lhs and rhs
-//    template <typename T>
-//    LogicalExpr(T variableLeft, LogicalCompOperator op, T variableRight);
+    template<typename T1, typename T2>
+    LogicalExpr(T1 left, OpSymb::LogCompOp op, T2 right) {
+        this->left = createParam(left);
+        this->op = new Operator(op);
+        this->right = createParam(right);
+    }
 
-    json toJson() const override;
+    json toJson() const
+    override;
 
-    virtual void accept(Visitor &v) override;
+    virtual void accept(Visitor &v)
+    override;
+
 
 };
 

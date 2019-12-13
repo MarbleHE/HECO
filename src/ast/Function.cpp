@@ -5,8 +5,8 @@
 #include <LiteralInt.h>
 #include <BinaryExpr.h>
 
-void Function::addParameter(const FunctionParameter &param) {
-    this->params.push_back(param);
+void Function::addParameter(FunctionParameter *param) {
+    this->params.emplace_back(*param);
 }
 
 Function::Function(std::string name, std::vector<std::unique_ptr<AbstractStatement>> pt) : name(std::move(name)),
@@ -65,5 +65,3 @@ const std::vector<std::unique_ptr<AbstractStatement>> &Function::getBody() const
 void Function::accept(Visitor &v) {
     v.visit(*this);
 }
-
-

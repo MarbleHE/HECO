@@ -36,7 +36,7 @@ void generateDemoOne(Ast &ast) {
 
     // int computePrivate(int x) { ... }
     Function *func = dynamic_cast<Function *>(ast.setRootNode(new Function("computePrivate")));
-    func->addParameter(FunctionParameter("x", "int"));
+    func->addParameter(new FunctionParameter("x", "int"));
 
     // int a = 4;
     func->addStatement(new VarDecl("x", "int", 4));
@@ -47,25 +47,25 @@ void generateDemoOne(Ast &ast) {
     // if ( x > 32 ) { k = x * a; } else { k = (x * a) + 42; }
     func->addStatement(new If(
             // if (x > 32)
-            new LogicalExpr(new Variable("x"), LogicalCompOperator::greater, new LiteralInt(32)),
+            new LogicalExpr("x", OpSymb::LogCompOp::greater, 32),
             // { k = x * a}
             new Block(
                     new VarAssignm("k",
                                    new BinaryExpr(
-                                           new Variable("x"),
-                                           BinaryOperator::multiplication,
-                                           new Variable("a")))
+                                           "x",
+                                           OpSymb::BinaryOp::multiplication,
+                                           "a"))
             ),
             // else { k = (x * a) + 42; }
             new Block(
                     new VarAssignm("k",
                                    new BinaryExpr(
                                            new BinaryExpr(
-                                                   new Variable("x"),
-                                                   BinaryOperator::multiplication,
-                                                   new Variable("a")),
-                                           BinaryOperator::addition,
-                                           new LiteralInt(42))))));
+                                                   "x",
+                                                   OpSymb::BinaryOp::multiplication,
+                                                   "a"),
+                                           OpSymb::BinaryOp::addition,
+                                           42)))));
 
     // return k
     func->addStatement(new Return(new Variable("k")));
@@ -75,13 +75,13 @@ void generateDemoOne(Ast &ast) {
 ///
 ///  \code{.cpp}
 ///  int determineSuitableX(int encryptedA, int encryptedB) {
-///      int randInt = std::rand() % 42;                  // Call
+///      int randInt = std::rand() % 42;             // Call
 ///      bool b = encryptedA < 2;                    // LiteralBool
 ///      int sum = 0;                                // LiteralInt
 ///
 ///      while (randInt > 0 && !b == true) {         // While, LogicalExpr, UnaryExpr
 ///          sum = sum + encryptedB;                 // VarAssignm, BinaryExpr
-///          randInt--;                              // BinaryExpr
+///          randInt = randInt -1;                   // BinaryExpr
 ///      };
 ///
 ///      String outStr = "Computation finished!";    // LiteralString
@@ -95,15 +95,15 @@ void generateDemoTwo(Ast &ast) {
 
     // int determineSuitableX(int encryptedA, int encryptedB) {...}
     Function *func = dynamic_cast<Function *>(ast.setRootNode(new Function("determineSuitableX")));
-    func->addParameter(FunctionParameter("encryptedA", "int"));
-    func->addParameter(FunctionParameter("encryptedB", "int"));
+    func->addParameter(new FunctionParameter("encryptedA", "int"));
+    func->addParameter(new FunctionParameter("encryptedB", "int"));
 
     // int randInt = rand() % 42;
     func->addStatement(
             new VarDecl("randInt", "int",
                         new BinaryExpr(
                                 new CallExternal("std::rand"),
-                                BinaryOperator::modulo,
+                                OpSymb::BinaryOp::modulo,
                                 new LiteralInt(42)
                         )));
 
@@ -112,7 +112,7 @@ void generateDemoTwo(Ast &ast) {
             new VarDecl("b", "bool",
                         new LogicalExpr(
                                 new Variable("encryptedA"),
-                                LogicalCompOperator::smaller,
+                                OpSymb::LogCompOp::smaller,
                                 new LiteralInt(2))
             ));
 
@@ -126,13 +126,13 @@ void generateDemoTwo(Ast &ast) {
                     // randInt > 0
                     new LogicalExpr(
                             new Variable("randInt"),
-                            LogicalCompOperator::greater,
+                            OpSymb::LogCompOp::greater,
                             new LiteralInt(0)),
-                    LogicalCompOperator::logicalAnd,
+                    OpSymb::LogCompOp::logicalAnd,
                     // !b == true
                     new LogicalExpr(
-                            new UnaryExpr(UnaryOperator::negation, new Variable("b")),
-                            LogicalCompOperator::equal,
+                            new UnaryExpr(OpSymb::UnaryOp::negation, new Variable("b")),
+                            OpSymb::LogCompOp::equal,
                             new LiteralBool(true))
             ),
             // { sum = sum + encryptedB; randInt--; };
@@ -140,11 +140,11 @@ void generateDemoTwo(Ast &ast) {
                     new std::vector<AbstractStatement *>{
                             // sum = sum + encryptedB
                             new VarAssignm("sum", new BinaryExpr(new Variable("sum"),
-                                                                 BinaryOperator::addition,
+                                                                 OpSymb::BinaryOp::addition,
                                                                  new Variable("encryptedB"))),
                             // randInt = randInt-1;
                             new VarAssignm("randInt", new BinaryExpr(new Variable("randInt"),
-                                                                     BinaryOperator::subtraction,
+                                                                     OpSymb::BinaryOp::subtraction,
                                                                      new LiteralInt(1)))}
             )));
 

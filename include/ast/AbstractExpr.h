@@ -5,9 +5,20 @@
 #include <nlohmann/json.hpp>
 #include "../visitor/Visitor.h"
 
+
 using json = nlohmann::json;
 
+
 class AbstractExpr {
+private:
+    static LiteralInt *createParam(int i);
+
+    static LiteralBool *createParam(bool b);
+
+    static LiteralString *createParam(const std::string &str);
+
+    static AbstractExpr *createParam(AbstractExpr *abstractExpr);
+
 public:
     virtual ~AbstractExpr() = default;
 

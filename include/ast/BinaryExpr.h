@@ -3,11 +3,15 @@
 
 #include "Operator.h"
 #include "AbstractExpr.h"
+#include "Literal.h"
+#include "LiteralInt.h"
+#include "LiteralBool.h"
+#include "LiteralString.h"
 
 class BinaryExpr : public AbstractExpr {
 protected:
     AbstractExpr *left;
-    BinaryOperator op;
+    Operator *op;
     AbstractExpr *right;
 
 public:
@@ -15,26 +19,26 @@ public:
     /// \param left is the left operand of the expression.
     /// \param op is the operator of the expression.
     /// \param right is the right operand of the expression.
-    BinaryExpr(AbstractExpr *left, BinaryOperator op, AbstractExpr *right);
+    BinaryExpr(AbstractExpr *left, OpSymb::BinaryOp op, AbstractExpr *right);
 
-    // helper constructors that automatically instantiate the underlying objects for common variations
-    BinaryExpr(const std::string &variableLeft, BinaryOperator op, const std::string &variableRight);
-
-    BinaryExpr(int literalIntLeft, BinaryOperator op, const std::string &variableRight);
-
-    BinaryExpr(const std::string &variableLeft, BinaryOperator op, int literalIntRight);
-
-    BinaryExpr(int literalIntLeft, BinaryOperator op, int literalIntRight);
+    template<typename T1, typename T2>
+    BinaryExpr(T1 left, OpSymb::BinaryOp op, T2 right) {
+        this->left = createParam(left);
+        this->op = new Operator(op);
+        this->right = createParam(right);
+    }
 
     json toJson() const override;
 
     AbstractExpr *getLeft() const;
 
-    BinaryOperator getOp() const;
+    std::string getOp() const;
 
     AbstractExpr *getRight() const;
 
     virtual void accept(Visitor &v) override;
+
+
 
 };
 

@@ -7,10 +7,10 @@
 #include "Operator.h"
 
 class UnaryExpr : public AbstractExpr {
-    UnaryOperator op;
+    Operator *op;
     AbstractExpr *right;
 public:
-    UnaryExpr(UnaryOperator op, AbstractExpr *right);
+    UnaryExpr(OpSymb::UnaryOp op, AbstractExpr *right);
 
     json toJson() const override;
 

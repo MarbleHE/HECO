@@ -30,7 +30,7 @@ public:
 
     Function(std::string name);
 
-    void addParameter(const FunctionParameter &param);
+    void addParameter(FunctionParameter *param);
 
     void addStatement(AbstractStatement *pDecl);
 

@@ -9,11 +9,11 @@ json VarDecl::toJson() const {
     j["type"] = "VarDecl";
     j["name"] = name;
     j["datatype"] = datatype;
-    if (this->initializer != nullptr) {
-        j["initializer"] = this->initializer->toJson();
-    } else {
-        j["initializer"] = "";
-    }
+//    if (this->initializer != nullptr) {
+//        j["initializer"] = this->initializer->toJson();
+//    } else {
+    j["initializer"] = "";
+//    }
     return j;
 }
 

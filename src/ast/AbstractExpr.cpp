@@ -1,5 +1,9 @@
 #include <iostream>
 #include "../../include/ast/AbstractExpr.h"
+#include "Literal.h"
+#include "LiteralInt.h"
+#include "LiteralBool.h"
+#include "LiteralString.h"
 
 std::string AbstractExpr::toString() const {
     return this->toJson().dump();
@@ -15,4 +19,20 @@ void AbstractExpr::accept(Visitor &v) {
 
 std::ostream &operator<<(std::ostream &outs, const AbstractExpr &obj) {
     return outs << obj.toString();
+}
+
+LiteralInt *AbstractExpr::createParam(int i) {
+    return new LiteralInt(i);
+}
+
+LiteralBool *AbstractExpr::createParam(bool b) {
+    return new LiteralBool(b);
+}
+
+LiteralString *AbstractExpr::createParam(const std::string &str) {
+    return new LiteralString(str);
+}
+
+AbstractExpr *AbstractExpr::createParam(AbstractExpr *abstractExpr) {
+    return abstractExpr;
 }

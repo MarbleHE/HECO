@@ -1,37 +1,59 @@
 #ifndef MASTER_THESIS_CODE_OPERATOR_H
 #define MASTER_THESIS_CODE_OPERATOR_H
 
-// TODO find a solution to obtain a textual enum representation to be used within JSON output
-// maybe create a namedEnum class that can be used for BinaryOp, LogicCompOp and UnaryOp similar to
-// https://stackoverflow.com/a/6281535/3017719 using th-thielemann.de/tools/cpp-enum-to-string.html
-// or https://stackoverflow.com/a/3342891/3017719
-
 #include "../visitor/Visitor.h"
 
-enum class BinaryOperator : char {
-    // arithmetic operator
-            addition, subtraction, multiplication, division, modulo,
+class OpSymb {
+protected:
+public:
+    enum BinaryOp : char {
+        // arithmetic operator
+                addition = 0, subtraction, multiplication, division, modulo,
+    };
+
+    enum LogCompOp : char {
+        // logical operator
+                logicalAnd = 0, logicalOr, logicalXor,
+        // relational operator
+                smaller, smallerEqual, greater, greaterEqual, equal, unequal
+    };
+
+    enum UnaryOp : char {
+        // logical operator
+                negation = 0,
+        // arithmetic operator
+                increment, decrement
+    };
+
+    static std::string getTextRepr(BinaryOp bop) {
+        static const std::string binaryOpStrings[] = {"add", "sub", "mult", "div", "mod"};
+        return binaryOpStrings[bop];
+    }
+
+    static std::string getTextRepr(LogCompOp lcop) {
+        static const std::string logicalOpStrings[] = {"AND", "OR", "XOR", "<", ">", ">=", "==", "!="};
+        return logicalOpStrings[lcop];
+    }
+
+    static std::string getTextRepr(UnaryOp uop) {
+        static const std::string unaryOpStrings[] = {"!", "++", "--"};
+        return unaryOpStrings[uop];
+    }
+
 };
 
-enum class LogicalCompOperator : char {
-    // logical operator
-            logicalAnd, logicalOr, logicalXor,
-    // relational operator
-            smaller, smallerEqual, greater, greaterEqual, equal, unequal
-};
-
-enum class UnaryOperator : char {
-    // logical operator
-            negation,
-    // arithmetic operator
-            increment, decrement
-};
 
 class Operator {
+private:
+    std::string operatorString;
 public:
-    BinaryOperator op;
+    Operator(OpSymb::LogCompOp op);
 
-    Operator(BinaryOperator op);
+    Operator(OpSymb::BinaryOp op);
+
+    Operator(OpSymb::UnaryOp op);
+
+    const std::string &getOperatorString() const;
 
     virtual void accept(Visitor &v);
 
