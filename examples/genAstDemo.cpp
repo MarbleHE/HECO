@@ -32,7 +32,7 @@
 /// \endcode
 ///
 void generateDemoOne(Ast &ast) {
-    std::cout << "Running generateDemoOne()..." << std::endl;
+    _DEBUG_RUNNING();
 
     // int computePrivate(int x) { ... }
     Function *func = dynamic_cast<Function *>(ast.setRootNode(new Function("computePrivate")));
@@ -42,7 +42,7 @@ void generateDemoOne(Ast &ast) {
     func->addStatement(new VarDecl("x", "int", 4));
 
     // int k;
-    func->addStatement(new VarDecl("x", "int"));
+    func->addStatement(new VarDecl("k", "int"));
 
     // if ( x > 32 ) { k = x * a; } else { k = (x * a) + 42; }
     func->addStatement(new If(
@@ -60,10 +60,11 @@ void generateDemoOne(Ast &ast) {
             new Block(
                     new VarAssignm("k",
                                    new BinaryExpr(
-                                           new BinaryExpr(
-                                                   "x",
-                                                   OpSymb::BinaryOp::multiplication,
-                                                   "a"),
+                                           new Group(
+                                                   new BinaryExpr(
+                                                           "x",
+                                                           OpSymb::BinaryOp::multiplication,
+                                                           "a")),
                                            OpSymb::BinaryOp::addition,
                                            42)))));
 
@@ -91,7 +92,7 @@ void generateDemoOne(Ast &ast) {
 ///  }
 ///  \endcode
 void generateDemoTwo(Ast &ast) {
-    std::cout << "Running generateDemoTwo()..." << std::endl;
+    _DEBUG_RUNNING();
 
     // int determineSuitableX(int encryptedA, int encryptedB) {...}
     Function *func = dynamic_cast<Function *>(ast.setRootNode(new Function("determineSuitableX")));

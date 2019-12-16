@@ -4,7 +4,7 @@
 
 #include "Literal.h"
 
-class LiteralInt : public Literal {
+class LiteralInt : public Literal, public Node {
 private:
     int value;
 public:
@@ -15,6 +15,8 @@ public:
     json toJson() const override;
 
     void accept(Visitor &v) override;
+
+    std::string getNodeName() const override;
 };
 
 

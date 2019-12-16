@@ -14,3 +14,7 @@ Operator::Operator(OpSymb::UnaryOp op) : operatorString(OpSymb::getTextRepr(op))
 const std::string &Operator::getOperatorString() const {
     return operatorString;
 }
+
+std::string Operator::getNodeName() const {
+    return "Operator";
+}

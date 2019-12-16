@@ -4,7 +4,8 @@
 
 #include "Literal.h"
 
-class LiteralBool : public Literal {
+class LiteralBool : public Literal, public Node {
+private:
     bool value;
 public:
     explicit LiteralBool(bool value);
@@ -13,6 +14,11 @@ public:
 
     virtual void accept(Visitor &v) override;
 
+    bool isValue() const;
+
+    std::string getTextValue() const;
+
+    std::string getNodeName() const override;
 };
 
 

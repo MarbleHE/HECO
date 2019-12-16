@@ -10,14 +10,13 @@
 #include "LiteralString.h"
 
 
-class LogicalExpr : public AbstractExpr {
-protected:
+class LogicalExpr : public AbstractExpr, public Node {
+private:
     AbstractExpr *left;
     Operator *op;
     AbstractExpr *right;
 
 public:
-
     LogicalExpr(AbstractExpr *left, OpSymb::LogCompOp op, AbstractExpr *right);
 
     template<typename T1, typename T2>
@@ -27,12 +26,19 @@ public:
         this->right = createParam(right);
     }
 
+    AbstractExpr *getLeft() const;
+
+    Operator *getOp() const;
+
+    AbstractExpr *getRight() const;
+
     json toJson() const
     override;
 
     virtual void accept(Visitor &v)
     override;
 
+    std::string getNodeName() const override;
 
 };
 

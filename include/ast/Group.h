@@ -4,15 +4,20 @@
 
 #include "AbstractExpr.h"
 
-class Group : public AbstractExpr {
-    std::unique_ptr<AbstractExpr> expr;
+class Group : public AbstractExpr, public Node {
+private:
+    AbstractExpr *expr;
 public:
-    Group(std::unique_ptr<AbstractExpr> expr);
 
     json toJson() const override;
 
     virtual void accept(Visitor &v) override;
 
+    std::string getNodeName() const override;
+
+    AbstractExpr *getExpr() const;
+
+    Group(AbstractExpr *expr);
 };
 
 

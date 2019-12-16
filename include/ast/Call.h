@@ -8,16 +8,24 @@
 #include "FunctionParameter.h"
 #include "AbstractStatement.h"
 
-class Call : public AbstractExpr, public AbstractStatement {
+class Call : public AbstractExpr, public AbstractStatement, public Node {
+private:
     AbstractExpr *callee; // any expression that evaluates to a function or a Function
-    std::vector<FunctionParameter> arguments;
+    std::vector<FunctionParameter *> arguments;
 public:
-    Call(AbstractExpr *callee, const std::vector<FunctionParameter> &arguments);
+    Call(AbstractExpr *callee, std::vector<FunctionParameter *> arguments);
+
+    Call(AbstractExpr *callee);
 
     json toJson() const override;
 
     virtual void accept(Visitor &v) override;
 
+    AbstractExpr *getCallee() const;
+
+    const std::vector<FunctionParameter *> &getArguments() const;
+
+    std::string getNodeName() const override;
 };
 
 

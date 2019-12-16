@@ -5,11 +5,13 @@
 #include "AbstractStatement.h"
 #include "AbstractExpr.h"
 
-class VarDecl : public AbstractStatement {
-public:
-    std::string name;
+class VarDecl : public AbstractStatement, public Node {
+private:
+    std::string identifier;
     std::string datatype;
     AbstractExpr *initializer;
+
+public:
 
     VarDecl(std::string name, std::string datatype);
 
@@ -21,6 +23,13 @@ public:
 
     virtual void accept(Visitor &v) override;
 
+    std::string getNodeName() const override;
+
+    const std::string &getIdentifier() const;
+
+    const std::string &getDatatype() const;
+
+    AbstractExpr *getInitializer() const;
 };
 
 

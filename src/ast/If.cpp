@@ -3,7 +3,7 @@
 
 json If::toJson() const {
     json j;
-    j["type"] = "If";
+    j["type"] = getNodeName();
     j["condition"] = this->condition->toJson();
     j["thenBranch"] = this->thenBranch->toJson();
     j["elseBranch"] = this->elseBranch->toJson();
@@ -21,3 +21,18 @@ void If::accept(Visitor &v) {
     v.visit(*this);
 }
 
+std::string If::getNodeName() const {
+    return "If";
+}
+
+AbstractExpr *If::getCondition() const {
+    return condition;
+}
+
+AbstractStatement *If::getThenBranch() const {
+    return thenBranch;
+}
+
+AbstractStatement *If::getElseBranch() const {
+    return elseBranch;
+}

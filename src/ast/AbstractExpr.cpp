@@ -29,10 +29,14 @@ LiteralBool *AbstractExpr::createParam(bool b) {
     return new LiteralBool(b);
 }
 
-LiteralString *AbstractExpr::createParam(const std::string &str) {
+LiteralString *AbstractExpr::createParam(const char *str) {
     return new LiteralString(str);
 }
 
 AbstractExpr *AbstractExpr::createParam(AbstractExpr *abstractExpr) {
     return abstractExpr;
+}
+
+void to_json(json &j, const AbstractExpr &absExpr) {
+    j = absExpr.toJson();
 }

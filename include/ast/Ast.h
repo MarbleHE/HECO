@@ -20,7 +20,6 @@ public:
 
     virtual void accept(Visitor &v);
 
-
 };
 
 

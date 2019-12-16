@@ -5,7 +5,8 @@
 #include "AbstractStatement.h"
 #include "AbstractExpr.h"
 
-class While : public AbstractStatement {
+class While : public AbstractStatement, public Node {
+private:
     AbstractExpr *condition;
     AbstractStatement *body;
 public:
@@ -15,6 +16,11 @@ public:
 
     virtual void accept(Visitor &v) override;
 
+    AbstractExpr *getCondition() const;
+
+    AbstractStatement *getBody() const;
+
+    std::string getNodeName() const override;
 };
 
 

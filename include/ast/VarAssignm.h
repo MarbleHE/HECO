@@ -6,7 +6,8 @@
 #include "AbstractStatement.h"
 #include "AbstractExpr.h"
 
-class VarAssignm : public AbstractStatement {
+class VarAssignm : public AbstractStatement, public Node {
+private:
     std::string identifier;
     AbstractExpr *value;
 public:
@@ -16,6 +17,11 @@ public:
 
     virtual void accept(Visitor &v) override;
 
+    const std::string &getIdentifier() const;
+
+    AbstractExpr *getValue() const;
+
+    std::string getNodeName() const override;
 };
 
 #endif //MASTER_THESIS_CODE_VARASSIGNM_H

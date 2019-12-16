@@ -5,42 +5,28 @@
 #include <LiteralInt.h>
 #include <BinaryExpr.h>
 
+
 void Function::addParameter(FunctionParameter *param) {
     this->params.emplace_back(*param);
 }
 
-Function::Function(std::string name, std::vector<std::unique_ptr<AbstractStatement>> pt) : name(std::move(name)),
-                                                                                           body(std::move(pt)) {
+Function::Function(std::string name, std::vector<AbstractStatement *> pt) : name(std::move(name)),
+                                                                            body(std::move(pt)) {
+
 }
 
 Function::Function(std::string name) : name(std::move(name)) {}
 
 Function::Function(const Function &func) {
-    // copy 'name'
+    // copy 'identifier'
     this->name = std::string(func.name);
     // copy 'params'
     for (const auto &p : func.params) this->params.push_back(p);
     // copy 'body'
     this->body.reserve(func.body.size());
-    for (const auto &e : func.body) this->body.push_back(std::make_unique<AbstractStatement>(*e));
+    for (const auto &e : func.body) this->body.emplace_back(e);
 }
 
-void to_json(json &j, const Function &func) {
-    j = {
-            {"type",   "Function"},
-            {"params", func.getParams()},
-            {"body",   func.getBody()}
-    };
-}
-
-json Function::toJson() const {
-    json j = {
-            {"type",   "Function"},
-            {"params", params},
-            {"body",   body}
-    };
-    return j;
-}
 
 Function::Function() {
 
@@ -58,10 +44,32 @@ const std::vector<FunctionParameter> &Function::getParams() const {
     return params;
 }
 
-const std::vector<std::unique_ptr<AbstractStatement>> &Function::getBody() const {
-    return body;
-}
-
 void Function::accept(Visitor &v) {
     v.visit(*this);
 }
+
+const std::vector<AbstractStatement *> &Function::getBody() const {
+    return body;
+}
+
+void to_json(json &j, const Function &func) {
+    j = {
+            {"type",   func.getNodeName()},
+            {"params", func.getParams()}
+    };
+//            {"body",   func.getBody()} // FIXME doesn't work anymore
+//    };
+}
+
+json Function::toJson() const {
+    json j = {
+            {"type",   getNodeName()},
+            {"params", params}};
+    //{"body",   body}}; // FIXME doesn't work anymore
+    return j;
+}
+
+std::string Function::getNodeName() const {
+    return "Function";
+}
+

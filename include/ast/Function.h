@@ -8,11 +8,12 @@
 #include "FunctionParameter.h"
 #include "VarDecl.h"
 
-class Function : public AbstractStatement {
-public:
+class Function : public AbstractStatement, public Node {
+private:
     std::string name;
     std::vector<FunctionParameter> params;
-    std::vector<std::unique_ptr<AbstractStatement>> body;
+    std::vector<AbstractStatement *> body;
+public:
 
     Function();
 
@@ -20,13 +21,13 @@ public:
 
     const std::vector<FunctionParameter> &getParams() const;
 
-    const std::vector<std::unique_ptr<AbstractStatement>> &getBody() const;
+    const std::vector<AbstractStatement *> &getBody() const;
 
     /// Copy constructor
     /// \param func The function to be copied.
     Function(const Function &func);
 
-    Function(std::string name, std::vector<std::unique_ptr<AbstractStatement>> bodyStatements);
+    Function(std::string name, std::vector<AbstractStatement *> bodyStatements);
 
     Function(std::string name);
 
@@ -37,6 +38,8 @@ public:
     json toJson() const override;
 
     virtual void accept(Visitor &v) override;
+
+    std::string getNodeName() const override;
 
 };
 

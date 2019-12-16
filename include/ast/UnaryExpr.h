@@ -6,9 +6,11 @@
 #include "AbstractExpr.h"
 #include "Operator.h"
 
-class UnaryExpr : public AbstractExpr {
+class UnaryExpr : public AbstractExpr, public Node {
+private:
     Operator *op;
     AbstractExpr *right;
+
 public:
     UnaryExpr(OpSymb::UnaryOp op, AbstractExpr *right);
 
@@ -16,6 +18,11 @@ public:
 
     virtual void accept(Visitor &v) override;
 
+    Operator *getOp() const;
+
+    AbstractExpr *getRight() const;
+
+    std::string getNodeName() const override;
 };
 
 

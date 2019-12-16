@@ -1,10 +1,14 @@
 
-#ifndef MASTER_THESIS_CODE_STATISTICSVISITOR_H
-#define MASTER_THESIS_CODE_STATISTICSVISITOR_H
+#ifndef MASTER_THESIS_CODE_PRINTVISITOR_H
+#define MASTER_THESIS_CODE_PRINTVISITOR_H
 
 #include "Visitor.h"
+#include <list>
 
-class StatisticsVisitor : public Visitor {
+
+class PrintVisitor : public Visitor {
+protected:
+    int level;
 public:
     virtual void visit(Ast &elem) override;
 
@@ -25,8 +29,6 @@ public:
     virtual void visit(Group &elem) override;
 
     virtual void visit(If &elem) override;
-
-    virtual void visit(Literal &elem) override;
 
     virtual void visit(LiteralBool &elem) override;
 
@@ -50,7 +52,18 @@ public:
 
     virtual void visit(While &elem) override;
 
+    PrintVisitor(const int level);
+
+    void incrementLevel();
+
+    void decrementLevel();
+
+    void resetLevel();
+
+    std::string getIndentation();
+
+    std::string formatOutputStr(const std::list<std::string> &args);
 };
 
 
-#endif //MASTER_THESIS_CODE_STATISTICSVISITOR_H
+#endif //MASTER_THESIS_CODE_PRINTVISITOR_H

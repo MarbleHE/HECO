@@ -8,7 +8,7 @@
 #include "LiteralBool.h"
 #include "LiteralString.h"
 
-class BinaryExpr : public AbstractExpr {
+class BinaryExpr : public AbstractExpr, public Node {
 protected:
     AbstractExpr *left;
     Operator *op;
@@ -32,14 +32,13 @@ public:
 
     AbstractExpr *getLeft() const;
 
-    std::string getOp() const;
+    Operator &getOp() const;
 
     AbstractExpr *getRight() const;
 
     virtual void accept(Visitor &v) override;
 
-
-
+    std::string getNodeName() const override;
 };
 
 

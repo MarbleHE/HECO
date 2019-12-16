@@ -5,12 +5,13 @@
 #include "AbstractStatement.h"
 #include "AbstractExpr.h"
 
-class If : public AbstractStatement {
-public:
+class If : public AbstractStatement, public Node {
+private:
     AbstractExpr *condition;
     AbstractStatement *thenBranch;
     AbstractStatement *elseBranch;
 
+public:
     If(AbstractExpr *condition, AbstractStatement *thenBranch, AbstractStatement *elseBranch);
 
     If(AbstractExpr *condition, AbstractStatement *thenBranch);
@@ -19,6 +20,13 @@ public:
 
     virtual void accept(Visitor &v) override;
 
+    std::string getNodeName() const override;
+
+    AbstractExpr *getCondition() const;
+
+    AbstractStatement *getThenBranch() const;
+
+    AbstractStatement *getElseBranch() const;
 };
 
 

@@ -7,26 +7,33 @@
 
 Block::Block() = default;
 
-void Block::addStatement(std::unique_ptr<AbstractStatement> &&statement) {
-    blockStatements.push_back(std::move(statement));
-}
-
 json Block::toJson() const {
     json j;
-    j["type"] = "Block";
-    j["statements"] = this->blockStatements;
+    j["type"] = getNodeName();
+    //j["statements"] = *this->statements; // FIXME
     return j;
 }
 
+
 Block::Block(AbstractStatement *stat) {
-    blockStatements.emplace_back(stat);
+    auto *vec = new std::vector<AbstractStatement *>;
+    vec->emplace_back(stat);
+    this->statements = vec;
 }
 
-Block::Block(std::vector<AbstractStatement *> *statements) : statements(statements) {
-
+Block::Block(std::vector<AbstractStatement *> *statements) {
+    this->statements = statements;
 }
 
 void Block::accept(Visitor &v) {
     v.visit(*this);
+}
+
+std::string Block::getNodeName() const {
+    return "Block";
+}
+
+std::vector<AbstractStatement *> *Block::getStatements() const {
+    return statements;
 }
 

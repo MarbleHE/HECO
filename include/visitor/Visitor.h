@@ -76,8 +76,6 @@ public:
 
     virtual void visit(If &elem) = 0;
 
-    virtual void visit(Literal &elem) = 0;
-
     virtual void visit(LiteralBool &elem) = 0;
 
     virtual void visit(LiteralInt &elem) = 0;

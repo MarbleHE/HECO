@@ -63,8 +63,8 @@ set(SOURCE_FILES
         ${master_thesis_code_SOURCE_DIR}/src/ast/CallExternal.cpp
         ${master_thesis_code_SOURCE_DIR}/src/ast/Ast.cpp
         ${master_thesis_code_SOURCE_DIR}/src/visitor/Visitor.cpp
-        ${master_thesis_code_SOURCE_DIR}/src/visitor/StatisticsVisitor.cpp
-        )
+        ${master_thesis_code_SOURCE_DIR}/src/visitor/PrintVisitor.cpp
+        ${master_thesis_code_SOURCE_DIR}/src/visitor/MultRewriteVisitor.cpp ${master_thesis_code_SOURCE_DIR}/src/ast/Node.cpp)
 
 add_executable(master_thesis_code
         ${master_thesis_code_SOURCE_DIR}/main.cpp
@@ -78,11 +78,11 @@ target_link_libraries(master_thesis_code PRIVATE nlohmann_json::nlohmann_json)
 # built by subdirectory test/CMakeLists.txt
 ##############################
 
-add_subdirectory(test)
-
-# build a library out of the code to be used by
+# build a library out of the code to be used by the tests
 add_library(master_thesis_code_lib ${SOURCE_FILES})
 target_link_libraries(master_thesis_code_lib PRIVATE nlohmann_json::nlohmann_json)
+
+add_subdirectory(test)
 
 
 

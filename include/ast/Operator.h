@@ -2,6 +2,7 @@
 #define MASTER_THESIS_CODE_OPERATOR_H
 
 #include "../visitor/Visitor.h"
+#include "Node.h"
 
 class OpSymb {
 protected:
@@ -40,10 +41,11 @@ public:
         return unaryOpStrings[uop];
     }
 
+
 };
 
 
-class Operator {
+class Operator : public Node {
 private:
     std::string operatorString;
 public:
@@ -56,6 +58,8 @@ public:
     const std::string &getOperatorString() const;
 
     virtual void accept(Visitor &v);
+
+    std::string getNodeName() const override;
 
 };
 

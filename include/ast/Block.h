@@ -5,13 +5,10 @@
 #include <vector>
 #include "AbstractStatement.h"
 
-class Block : public AbstractStatement {
-public:
-
-    std::vector<std::unique_ptr<AbstractStatement>> blockStatements;
-
+class Block : public AbstractStatement, public Node {
+private:
     std::vector<AbstractStatement *> *statements;
-
+public:
 
     Block();
 
@@ -19,12 +16,13 @@ public:
 
     Block(std::vector<AbstractStatement *> *statements);
 
-    void addStatement(std::unique_ptr<AbstractStatement> &&statement);
-
     json toJson() const override;
 
     virtual void accept(Visitor &v) override;
 
+    std::string getNodeName() const override;
+
+    std::vector<AbstractStatement *> *getStatements() const;
 };
 
 

@@ -1,5 +1,8 @@
 #include <iostream>
 #include "../../include/ast/AbstractStatement.h"
+#include "../../include/ast/Block.h"
+#include "../../include/ast/Call.h"
+
 
 std::string AbstractStatement::toString() const {
     return this->toJson().dump();
@@ -17,6 +20,8 @@ std::ostream &operator<<(std::ostream &outs, const AbstractStatement &obj) {
     return outs << obj.toString();
 }
 
-void to_json(json &j, const std::unique_ptr<AbstractStatement> &param) {
-    j = param->toJson();
+void to_json(json &j, const AbstractStatement &absStat) {
+    j = absStat.toJson();
 }
+
+

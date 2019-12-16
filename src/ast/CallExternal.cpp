@@ -5,11 +5,9 @@
 #include "CallExternal.h"
 
 
-
-
 json CallExternal::toJson() const {
     json j = {
-            {"type",         "CallExternal"},
+            {"type",         getNodeName()},
             {"functionName", this->functionName},
     };
     if (this->arguments != nullptr) {
@@ -24,9 +22,21 @@ CallExternal::CallExternal(std::string functionName, std::vector<FunctionParamet
 }
 
 CallExternal::CallExternal(std::string functionName) : functionName(functionName) {
-
+    this->arguments = nullptr;
 }
 
 void CallExternal::accept(Visitor &v) {
     v.visit(*this);
+}
+
+const std::string &CallExternal::getFunctionName() const {
+    return functionName;
+}
+
+std::vector<FunctionParameter> *CallExternal::getArguments() const {
+    return arguments;
+}
+
+std::string CallExternal::getNodeName() const {
+    return "CallExternal";
 }

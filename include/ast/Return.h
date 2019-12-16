@@ -6,9 +6,11 @@
 #include "AbstractStatement.h"
 #include "AbstractExpr.h"
 
-class Return : public AbstractStatement {
-public:
+class Return : public AbstractStatement, public Node {
+private:
     AbstractExpr *value;
+
+public:
 
     Return(AbstractExpr *value);
 
@@ -16,6 +18,9 @@ public:
 
     virtual void accept(Visitor &v) override;
 
+    AbstractExpr *getValue() const;
+
+    std::string getNodeName() const override;
 };
 
 

@@ -6,7 +6,7 @@
 #include "VarDecl.h"
 #include "Function.h"
 
-class Class : public AbstractStatement {
+class Class : public AbstractStatement, public Node {
 private:
     std::string name;
     std::string superclass;
@@ -17,6 +17,14 @@ public:
     json toJson() const override;
 
     virtual void accept(Visitor &v) override;
+
+    const std::string &getName() const;
+
+    const std::string &getSuperclass() const;
+
+    const std::vector<Function> &getMethods() const;
+
+    std::string getNodeName() const override;
 };
 
 
