@@ -63,6 +63,7 @@ public:
     std::string getIndentation();
 
     std::string formatOutputStr(const std::list<std::string> &args);
+
 };
 
 
