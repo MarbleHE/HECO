@@ -27,6 +27,8 @@ public:
     AbstractStatement *getThenBranch() const;
 
     AbstractStatement *getElseBranch() const;
+
+    virtual ~If();
 };
 
 

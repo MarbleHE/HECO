@@ -17,6 +17,8 @@ public:
 
     Call(AbstractExpr *callee);
 
+    virtual ~Call();
+
     json toJson() const override;
 
     virtual void accept(Visitor &v) override;

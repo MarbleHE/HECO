@@ -37,3 +37,7 @@ std::vector<AbstractStatement *> *Block::getStatements() const {
     return statements;
 }
 
+Block::~Block() {
+    delete statements;
+}
+

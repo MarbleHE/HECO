@@ -2,7 +2,7 @@
 
 #include <utility>
 #include <LiteralInt.h>
-
+#include "BinaryExpr.h"
 
 json VarDecl::toJson() const {
     json j;
@@ -52,4 +52,15 @@ const std::string &VarDecl::getDatatype() const {
 
 AbstractExpr *VarDecl::getInitializer() const {
     return initializer;
+}
+
+BinaryExpr *VarDecl::contains(BinaryExpr *bexpTemplate) {
+    if (auto *castedBexp = dynamic_cast<BinaryExpr *>(this->getInitializer())) {
+        return castedBexp->containsValuesFrom(bexpTemplate);
+    }
+    return nullptr;
+}
+
+VarDecl::~VarDecl() {
+    delete initializer;
 }

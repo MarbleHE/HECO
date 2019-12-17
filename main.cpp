@@ -11,19 +11,21 @@ int main() {
 
     // Test for the visitor pattern
     Ast ast;
-    generateDemoOne(ast);
+    generateDemoThree(ast);
 
     // Print the generated tree
     PrintVisitor pv(0);
     pv.visit(ast);
+    std::cout << "------------------------------------------------" << std::endl;
 
     // Rewrite the tree
-//    MultRewriteVisitor mrv();
-//    mrv.visit(ast);
+    MultRewriteVisitor mrv;
+    mrv.visit(ast);
+    std::cout << "------------------------------------------------" << std::endl;
 
     // Print the modified tree
-//    pv.resetLevel();
-//    pv.visit(ast);
+    pv.visit(ast);
+    std::cout << "------------------------------------------------" << std::endl;
 
     return 0;
 }

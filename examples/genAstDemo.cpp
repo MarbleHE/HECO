@@ -162,6 +162,65 @@ void generateDemoTwo(Ast &ast) {
             new Return(new Variable("sum")));
 }
 
+void generateDemoThree(Ast &ast) {
+    _DEBUG_RUNNING();
+
+    // int determineSuitableX(int encryptedA, int encryptedB) {...}
+    Function *func = dynamic_cast<Function *>(ast.setRootNode(new Function("computeMult")));
+
+    // int a = 3;
+    func->addStatement(new VarDecl("a", "int", new LiteralInt(3)));
+
+    // int b = 7;
+    func->addStatement(new VarDecl("b", "int", new LiteralInt(7)));
+
+    // int c = 9;
+    func->addStatement(new VarDecl("c", "int", new LiteralInt(9)));
+
+    // int result = a * b;
+    func->addStatement(
+            new VarDecl("result", "int",
+                        new BinaryExpr("a", OpSymb::BinaryOp::multiplication, "b")));
+
+    // result = result * c;
+    func->addStatement(
+            new VarAssignm("result",
+                           new BinaryExpr("result", OpSymb::BinaryOp::multiplication, "c")));
+}
+
+void generateDemoFour(Ast &ast) {
+    _DEBUG_RUNNING();
+
+    // int determineSuitableX(int encryptedA, int encryptedB) {...}
+    Function *func = dynamic_cast<Function *>(ast.setRootNode(new Function("computeMult")));
+
+    // int a = 3;
+    func->addStatement(new VarDecl("a", "int", new LiteralInt(3)));
+
+    // int b = 7;
+    func->addStatement(new VarDecl("b", "int", new LiteralInt(7)));
+
+    // int c = 9;
+    func->addStatement(new VarDecl("c", "int", new LiteralInt(9)));
+
+    // int result = a * b;
+    func->addStatement(
+            new VarDecl("result", "int",
+                        new BinaryExpr("a", OpSymb::BinaryOp::multiplication, "b")));
+
+    // if (4 > 3) {
+    //   int exampleVal = 3
+    // }
+    func->addStatement(
+            new If(new LogicalExpr(new LiteralInt(4), OpSymb::LogCompOp::greater, new LiteralInt(3)),
+                   new VarDecl("exampleVal", "int", new LiteralInt(3))));
+
+    // result = result * c;
+    func->addStatement(
+            new VarAssignm("result",
+                           new BinaryExpr("result", OpSymb::BinaryOp::multiplication, "c")));
+}
+
 void runDemo(void(*func)(Ast &), bool printTree = true) {
     Ast ast;
     func(ast);

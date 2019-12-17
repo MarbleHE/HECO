@@ -22,3 +22,7 @@ AbstractExpr *Group::getExpr() const {
     return expr;
 }
 
+Group::~Group() {
+    delete expr;
+}
+

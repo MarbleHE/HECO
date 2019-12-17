@@ -1,4 +1,3 @@
-
 #include "Ast.h"
 
 Ast::Ast(AbstractStatement *rootNode) : rootNode(rootNode) {}
@@ -18,4 +17,8 @@ AbstractStatement *Ast::getRootNode() const {
 
 void Ast::accept(Visitor &v) {
     v.visit(*this);
+}
+
+Ast::~Ast() {
+    delete rootNode;
 }

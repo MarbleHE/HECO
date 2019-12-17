@@ -37,3 +37,9 @@ std::string LogicalExpr::getNodeName() const {
     return "LogicalExpr";
 }
 
+LogicalExpr::~LogicalExpr() {
+    delete left;
+    delete right;
+    delete op;
+}
+

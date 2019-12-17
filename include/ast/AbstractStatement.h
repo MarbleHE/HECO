@@ -19,6 +19,8 @@ public:
 
     virtual void accept(Visitor &v);
 
+    virtual BinaryExpr *contains(BinaryExpr *bexpTemplate);
+
 };
 
 std::ostream &operator<<(std::ostream &outs, const AbstractStatement &obj);

@@ -23,6 +23,8 @@ public:
     std::string getNodeName() const override;
 
     std::vector<AbstractStatement *> *getStatements() const;
+
+    virtual ~Block();
 };
 
 

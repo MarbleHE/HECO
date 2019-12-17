@@ -28,3 +28,8 @@ AbstractExpr *UnaryExpr::getRight() const {
 std::string UnaryExpr::getNodeName() const {
     return "UnaryExpr";
 }
+
+UnaryExpr::~UnaryExpr() {
+    delete op;
+    delete right;
+}

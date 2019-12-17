@@ -1,4 +1,3 @@
-
 #ifndef MASTER_THESIS_CODE_AST_H
 #define MASTER_THESIS_CODE_AST_H
 
@@ -13,6 +12,8 @@ public:
     Ast(AbstractStatement *rootNode);
 
     Ast();
+
+    virtual ~Ast();
 
     AbstractStatement *setRootNode(AbstractStatement *rootNode);
 

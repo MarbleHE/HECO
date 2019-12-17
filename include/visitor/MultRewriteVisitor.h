@@ -1,12 +1,14 @@
-
 #ifndef MASTER_THESIS_CODE_MULTREWRITEVISITOR_H
 #define MASTER_THESIS_CODE_MULTREWRITEVISITOR_H
 
 
 #include "Visitor.h"
+#include "../utilities/Scope.h"
 
 class MultRewriteVisitor : public Visitor {
 public:
+    MultRewriteVisitor() = default;
+
     void visit(Ast &elem) override;
 
     void visit(BinaryExpr &elem) override;

@@ -64,7 +64,9 @@ set(SOURCE_FILES
         ${master_thesis_code_SOURCE_DIR}/src/ast/Ast.cpp
         ${master_thesis_code_SOURCE_DIR}/src/visitor/Visitor.cpp
         ${master_thesis_code_SOURCE_DIR}/src/visitor/PrintVisitor.cpp
-        ${master_thesis_code_SOURCE_DIR}/src/visitor/MultRewriteVisitor.cpp ${master_thesis_code_SOURCE_DIR}/src/ast/Node.cpp)
+        ${master_thesis_code_SOURCE_DIR}/src/visitor/MultRewriteVisitor.cpp
+        ${master_thesis_code_SOURCE_DIR}/src/ast/Node.cpp
+        ${master_thesis_code_SOURCE_DIR}/src/utilities/Scope.cpp)
 
 add_executable(master_thesis_code
         ${master_thesis_code_SOURCE_DIR}/main.cpp

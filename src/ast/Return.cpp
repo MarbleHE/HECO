@@ -21,3 +21,7 @@ AbstractExpr *Return::getValue() const {
 std::string Return::getNodeName() const {
     return "Return";
 }
+
+Return::~Return() {
+    delete value;
+}

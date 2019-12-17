@@ -21,6 +21,8 @@ public:
     AbstractStatement *getBody() const;
 
     std::string getNodeName() const override;
+
+    virtual ~While();
 };
 
 

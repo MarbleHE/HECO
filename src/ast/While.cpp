@@ -28,3 +28,8 @@ AbstractStatement *While::getBody() const {
 std::string While::getNodeName() const {
     return "While";
 }
+
+While::~While() {
+    delete condition;
+    delete body;
+}

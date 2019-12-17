@@ -1,6 +1,5 @@
 #include "../../include/ast/If.h"
 
-
 json If::toJson() const {
     json j;
     j["type"] = getNodeName();
@@ -35,4 +34,10 @@ AbstractStatement *If::getThenBranch() const {
 
 AbstractStatement *If::getElseBranch() const {
     return elseBranch;
+}
+
+If::~If() {
+    delete condition;
+    delete thenBranch;
+    delete elseBranch;
 }

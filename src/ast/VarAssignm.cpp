@@ -1,5 +1,5 @@
-
 #include "../../include/ast/VarAssignm.h"
+#include "BinaryExpr.h"
 
 json VarAssignm::toJson() const {
     json j;
@@ -26,3 +26,15 @@ AbstractExpr *VarAssignm::getValue() const {
 std::string VarAssignm::getNodeName() const {
     return "VarAssignm";
 }
+
+BinaryExpr *VarAssignm::contains(BinaryExpr *bexpTemplate) {
+    if (auto *castedBexp = dynamic_cast<BinaryExpr *>(this->getValue())) {
+        return castedBexp->containsValuesFrom(bexpTemplate);
+    }
+    return nullptr;
+}
+
+VarAssignm::~VarAssignm() {
+    delete value;
+}
+

@@ -28,7 +28,11 @@ public:
         this->right = createParam(right);
     }
 
+    BinaryExpr(Operator *op);
+
     json toJson() const override;
+
+    virtual ~BinaryExpr();
 
     AbstractExpr *getLeft() const;
 
@@ -39,6 +43,16 @@ public:
     virtual void accept(Visitor &v) override;
 
     std::string getNodeName() const override;
+
+    BinaryExpr *containsValuesFrom(BinaryExpr *bexpTemplate);
+
+    void setLeft(AbstractExpr *left);
+
+    void setOp(Operator *op);
+
+    void setRight(AbstractExpr *right);
+
+    void static swapOperandsLeftAWithRightB(BinaryExpr *bexpA, BinaryExpr *bexpB);
 };
 
 

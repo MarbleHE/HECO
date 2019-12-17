@@ -1,4 +1,3 @@
-
 #ifndef MASTER_THESIS_CODE_PRINTVISITOR_H
 #define MASTER_THESIS_CODE_PRINTVISITOR_H
 
@@ -9,7 +8,13 @@
 class PrintVisitor : public Visitor {
 protected:
     int level;
+    Scope *lastPrintedScope;
+
 public:
+    PrintVisitor(const int level);
+
+    virtual ~PrintVisitor();
+
     virtual void visit(Ast &elem) override;
 
     virtual void visit(BinaryExpr &elem) override;
@@ -52,8 +57,6 @@ public:
 
     virtual void visit(While &elem) override;
 
-    PrintVisitor(const int level);
-
     void incrementLevel();
 
     void decrementLevel();
@@ -63,6 +66,10 @@ public:
     std::string getIndentation();
 
     std::string formatOutputStr(const std::list<std::string> &args);
+
+    Scope *getLastPrintedScope() const;
+
+    void setLastPrintedScope(Scope *scope);
 
 };
 

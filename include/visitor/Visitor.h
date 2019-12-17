@@ -1,4 +1,3 @@
-
 #ifndef MASTER_THESIS_CODE_VISITOR_H
 #define MASTER_THESIS_CODE_VISITOR_H
 
@@ -53,6 +52,8 @@ class Variable;
 
 class While;
 
+class Scope;
+
 
 class Visitor {
 public:
@@ -97,6 +98,12 @@ public:
     virtual void visit(Variable &elem);
 
     virtual void visit(While &elem);
+
+    Scope *currentScope;
+
+    void changeToOuterScope();
+
+    void changeToInnerScope(const std::string &nodeId);
 };
 
 

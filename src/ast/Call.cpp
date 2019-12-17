@@ -31,3 +31,7 @@ const std::vector<FunctionParameter *> &Call::getArguments() const {
 std::string Call::getNodeName() const {
     return "Call";
 }
+
+Call::~Call() {
+    delete callee;
+}

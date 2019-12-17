@@ -22,6 +22,10 @@ public:
     AbstractExpr *getValue() const;
 
     std::string getNodeName() const override;
+
+    BinaryExpr *contains(BinaryExpr *bexpTemplate) override;
+
+    virtual ~VarAssignm();
 };
 
 #endif //MASTER_THESIS_CODE_VARASSIGNM_H

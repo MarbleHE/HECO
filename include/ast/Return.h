@@ -21,6 +21,8 @@ public:
     AbstractExpr *getValue() const;
 
     std::string getNodeName() const override;
+
+    virtual ~Return();
 };
 
 

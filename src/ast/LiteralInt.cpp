@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include "../../include/ast/LiteralInt.h"
 

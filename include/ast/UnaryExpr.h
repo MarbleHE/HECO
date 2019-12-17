@@ -23,6 +23,8 @@ public:
     AbstractExpr *getRight() const;
 
     std::string getNodeName() const override;
+
+    virtual ~UnaryExpr();
 };
 
 

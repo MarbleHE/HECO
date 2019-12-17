@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include <Function.h>
 #include <Operator.h>
@@ -20,10 +19,13 @@
 
 #include "../../include/visitor/PrintVisitor.h"
 #include "../../main.h"
+#include "../utilities/Scope.h"
 
 
 void PrintVisitor::visit(Ast &elem) {
     _DEBUG_RUNNING();
+    resetLevel();
+    lastPrintedScope = nullptr;
     Visitor::visit(elem);
 }
 
@@ -182,6 +184,24 @@ std::string PrintVisitor::formatOutputStr(const std::list<std::string> &args) {
     for (auto it = std::next(args.begin()); it != args.end(); ++it) {
         ss << "(" << *it << ")";
     }
+    // only print scope where statement belongs to if statement has changed since last print
+    if (getLastPrintedScope() == nullptr || currentScope != getLastPrintedScope()) {
+        ss << "\t[" << this->currentScope->getScopeIdentifier() << "]";
+        setLastPrintedScope(currentScope);
+    }
     ss << std::endl;
     return ss.str();
 }
+
+Scope *PrintVisitor::getLastPrintedScope() const {
+    return lastPrintedScope;
+}
+
+void PrintVisitor::setLastPrintedScope(Scope *scope) {
+    this->lastPrintedScope = scope;
+}
+
+PrintVisitor::~PrintVisitor() {
+    delete lastPrintedScope;
+}
+

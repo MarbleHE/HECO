@@ -30,6 +30,10 @@ public:
     const std::string &getDatatype() const;
 
     AbstractExpr *getInitializer() const;
+
+    BinaryExpr *contains(BinaryExpr *bexpTemplate) override;
+
+    virtual ~VarDecl();
 };
 
 

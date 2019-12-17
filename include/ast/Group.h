@@ -18,6 +18,8 @@ public:
     AbstractExpr *getExpr() const;
 
     Group(AbstractExpr *expr);
+
+    virtual ~Group();
 };
 
 

@@ -40,6 +40,8 @@ public:
 
     std::string getNodeName() const override;
 
+    virtual ~LogicalExpr();
+
 };
 
 
