@@ -8,15 +8,15 @@ class LiteralInt : public Literal, public Node {
 private:
     int value;
 public:
-    int getValue() const;
+    [[nodiscard]] int getValue() const;
 
-    LiteralInt(int value);
+    explicit LiteralInt(int value);
 
-    json toJson() const override;
+    [[nodiscard]] json toJson() const override;
 
     void accept(Visitor &v) override;
 
-    std::string getNodeName() const override;
+    [[nodiscard]] std::string getNodeName() const override;
 };
 
 

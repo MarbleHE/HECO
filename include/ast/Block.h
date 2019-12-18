@@ -8,21 +8,21 @@
 class Block : public AbstractStatement, public Node {
 private:
     std::vector<AbstractStatement *> *statements;
-public:
 
+public:
     Block();
 
-    Block(AbstractStatement *stat);
+    explicit Block(AbstractStatement *stat);
 
-    Block(std::vector<AbstractStatement *> *statements);
+    explicit Block(std::vector<AbstractStatement *> *statements);
 
-    json toJson() const override;
+    [[nodiscard]] json toJson() const override;
 
-    virtual void accept(Visitor &v) override;
+    void accept(Visitor &v) override;
 
-    std::string getNodeName() const override;
+    [[nodiscard]] std::string getNodeName() const override;
 
-    std::vector<AbstractStatement *> *getStatements() const;
+    [[nodiscard]] std::vector<AbstractStatement *> *getStatements() const;
 
     virtual ~Block();
 };

@@ -1,21 +1,34 @@
+
 #include "../../include/ast/FunctionParameter.h"
 
 #include <utility>
 
-FunctionParameter::FunctionParameter(const std::string &identifier,
-                                     std::string datatype) : Variable(identifier), datatype(std::move(datatype)) {}
+
+FunctionParameter::FunctionParameter(std::string datatype, AbstractExpr *value)
+        : datatype(std::move(datatype)), value(value) {}
 
 void to_json(json &j, const FunctionParameter &funcParam) {
     j = {
-            {"type",       funcParam.getNodeName()},
-            {"identifier", funcParam.getIdentifier()},
-            {"datatype",   funcParam.getDatatype()}
+            {"type",     funcParam.getNodeName()},
+            {"value",    funcParam.getValue()->toJson()},
+            {"datatype", funcParam.getDatatype()}
+    };
+}
+
+void to_json(json &j, const FunctionParameter *funcParam) {
+    j = {
+            {"type",     funcParam->getNodeName()},
+            {"value",    funcParam->getValue()->toJson()},
+            {"datatype", funcParam->getDatatype()}
     };
 }
 
 json FunctionParameter::toJson() const {
-    json j;
-    //to_json(j, *this); // TODO implement me!
+    json j = {
+            {"type",     getNodeName()},
+            {"value",    getValue()->toJson()},
+            {"datatype", getDatatype()}
+    };
     return j;
 }
 
@@ -29,4 +42,8 @@ std::string FunctionParameter::getNodeName() const {
 
 const std::string &FunctionParameter::getDatatype() const {
     return datatype;
+}
+
+AbstractExpr *FunctionParameter::getValue() const {
+    return value;
 }

@@ -1,11 +1,8 @@
 #include "../../include/ast/Class.h"
 
-#include <utility>
 
-Class::Class(const std::string &name, const std::string &superclass, const std::vector<Function> &methods) : name(name),
-                                                                                                             superclass(
-                                                                                                                     superclass),
-                                                                                                             methods(methods) {}
+Class::Class(std::string name, std::string superclass, std::vector<Function> methods)
+        : name(std::move(name)), superclass(std::move(superclass)), methods(std::move(methods)) {}
 
 json Class::toJson() const {
     json j;

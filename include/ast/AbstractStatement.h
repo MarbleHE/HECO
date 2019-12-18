@@ -13,9 +13,9 @@ class AbstractStatement {
 public:
     virtual ~AbstractStatement() = default;
 
-    virtual std::string toString() const;
+    [[nodiscard]] virtual std::string toString() const;
 
-    virtual json toJson() const;
+    [[nodiscard]] virtual json toJson() const;
 
     virtual void accept(Visitor &v);
 
@@ -29,5 +29,6 @@ std::ostream &operator<<(std::ostream &outs, const AbstractStatement &obj);
 /// JSON representation to be used for vector<AbstractStatement> objects.
 void to_json(json &j, const AbstractStatement &absStat);
 
+void to_json(json &j, const AbstractStatement *absStat);
 
 #endif //MASTER_THESIS_CODE_ABSTRACTSTATEMENT_H

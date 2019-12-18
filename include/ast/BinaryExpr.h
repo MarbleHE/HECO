@@ -28,21 +28,21 @@ public:
         this->right = createParam(right);
     }
 
-    BinaryExpr(Operator *op);
+    explicit BinaryExpr(Operator *op);
 
-    json toJson() const override;
+    [[nodiscard]] json toJson() const override;
 
-    virtual ~BinaryExpr();
+    ~BinaryExpr() override;
 
-    AbstractExpr *getLeft() const;
+    [[nodiscard]] AbstractExpr *getLeft() const;
 
-    Operator &getOp() const;
+    [[nodiscard]] Operator &getOp() const;
 
-    AbstractExpr *getRight() const;
+    [[nodiscard]] AbstractExpr *getRight() const;
 
-    virtual void accept(Visitor &v) override;
+    void accept(Visitor &v) override;
 
-    std::string getNodeName() const override;
+    [[nodiscard]] std::string getNodeName() const override;
 
     BinaryExpr *containsValuesFrom(BinaryExpr *bexpTemplate);
 

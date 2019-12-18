@@ -12,17 +12,17 @@ private:
 
 public:
 
-    Return(AbstractExpr *value);
+    explicit Return(AbstractExpr *value);
 
-    json toJson() const override;
+    [[nodiscard]] json toJson() const override;
 
-    virtual void accept(Visitor &v) override;
+    void accept(Visitor &v) override;
 
-    AbstractExpr *getValue() const;
+    [[nodiscard]] AbstractExpr *getValue() const;
 
-    std::string getNodeName() const override;
+    [[nodiscard]] std::string getNodeName() const override;
 
-    virtual ~Return();
+    ~Return() override;
 };
 
 

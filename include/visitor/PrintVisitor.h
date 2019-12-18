@@ -3,59 +3,63 @@
 
 #include "Visitor.h"
 #include <list>
-
+#include <sstream>
 
 class PrintVisitor : public Visitor {
 protected:
     int level;
     Scope *lastPrintedScope;
+    std::stringstream ss;
+    bool printScreen;
 
 public:
-    PrintVisitor(const int level);
+    explicit PrintVisitor();
+
+    PrintVisitor(bool printScreen);
 
     virtual ~PrintVisitor();
 
-    virtual void visit(Ast &elem) override;
+    void visit(Ast &elem) override;
 
-    virtual void visit(BinaryExpr &elem) override;
+    void visit(BinaryExpr &elem) override;
 
-    virtual void visit(Block &elem) override;
+    void visit(Block &elem) override;
 
-    virtual void visit(Call &elem) override;
+    void visit(Call &elem) override;
 
-    virtual void visit(CallExternal &elem) override;
+    void visit(CallExternal &elem) override;
 
-    virtual void visit(Class &elem) override;
+    void visit(Class &elem) override;
 
-    virtual void visit(Function &elem) override;
+    void visit(Function &elem) override;
 
-    virtual void visit(FunctionParameter &elem) override;
+    void visit(FunctionParameter &elem) override;
 
-    virtual void visit(Group &elem) override;
+    void visit(Group &elem) override;
 
-    virtual void visit(If &elem) override;
+    void visit(If &elem) override;
 
-    virtual void visit(LiteralBool &elem) override;
+    void visit(LiteralBool &elem) override;
 
-    virtual void visit(LiteralInt &elem) override;
+    void visit(LiteralInt &elem) override;
 
-    virtual void visit(LiteralString &elem) override;
+    void visit(LiteralString &elem) override;
 
-    virtual void visit(LogicalExpr &elem) override;
+    void visit(LogicalExpr &elem) override;
 
-    virtual void visit(Operator &elem) override;
+    void visit(Operator &elem) override;
 
-    virtual void visit(Return &elem) override;
+    void visit(Return &elem) override;
 
-    virtual void visit(UnaryExpr &elem) override;
+    void visit(UnaryExpr &elem) override;
 
-    virtual void visit(VarAssignm &elem) override;
+    void visit(VarAssignm &elem) override;
 
-    virtual void visit(VarDecl &elem) override;
+    void visit(VarDecl &elem) override;
 
-    virtual void visit(Variable &elem) override;
+    void visit(Variable &elem) override;
 
-    virtual void visit(While &elem) override;
+    void visit(While &elem) override;
 
     void incrementLevel();
 
@@ -65,12 +69,16 @@ public:
 
     std::string getIndentation();
 
-    std::string formatOutputStr(const std::list<std::string> &args);
+    void addOutputStr(const std::list<std::string> &args);
 
-    Scope *getLastPrintedScope() const;
+    [[nodiscard]] Scope *getLastPrintedScope() const;
 
     void setLastPrintedScope(Scope *scope);
 
+    template<typename T>
+    void printChildNodesIndented(T &elem);
+
+    std::string getOutput() const;
 };
 
 

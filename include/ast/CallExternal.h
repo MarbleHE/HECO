@@ -14,15 +14,15 @@ public:
 
     CallExternal(std::string functionName, std::vector<FunctionParameter> *arguments);
 
-    json toJson() const override;
+    [[nodiscard]] json toJson() const override;
 
-    virtual void accept(Visitor &v) override;
+    void accept(Visitor &v) override;
 
-    const std::string &getFunctionName() const;
+    [[nodiscard]] const std::string &getFunctionName() const;
 
-    std::vector<FunctionParameter> *getArguments() const;
+    [[nodiscard]] std::vector<FunctionParameter> *getArguments() const;
 
-    std::string getNodeName() const override;
+    [[nodiscard]] std::string getNodeName() const override;
 };
 
 

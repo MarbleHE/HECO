@@ -18,11 +18,11 @@ private:
 public:
     Scope(std::string scopeIdentifier, Scope *outerScope);
 
-    Scope *getOuterScope() const;
+    [[nodiscard]] Scope *getOuterScope() const;
 
-    const std::string &getScopeIdentifier() const;
+    [[nodiscard]] const std::string &getScopeIdentifier() const;
 
-    const std::vector<AbstractStatement *> &getScopeStatements() const;
+    [[nodiscard]] const std::vector<AbstractStatement *> &getScopeStatements() const;
 
     Scope *getOrCreateInnerScope(const std::string &identifier);
 

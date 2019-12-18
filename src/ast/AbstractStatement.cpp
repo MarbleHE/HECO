@@ -29,3 +29,8 @@ void to_json(json &j, const AbstractStatement &absStat) {
 }
 
 
+void to_json(json &j, const AbstractStatement *absStat) {
+    j = absStat->toJson();
+}
+
+

@@ -10,15 +10,15 @@ private:
 public:
     explicit LiteralBool(bool value);
 
-    json toJson() const override;
+    [[nodiscard]] json toJson() const override;
 
-    virtual void accept(Visitor &v) override;
+    void accept(Visitor &v) override;
 
-    bool isValue() const;
+    [[nodiscard]] bool isValue() const;
 
-    std::string getTextValue() const;
+    [[nodiscard]] std::string getTextValue() const;
 
-    std::string getNodeName() const override;
+    [[nodiscard]] std::string getNodeName() const override;
 };
 
 

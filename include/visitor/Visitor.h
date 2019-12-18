@@ -104,6 +104,8 @@ public:
     void changeToOuterScope();
 
     void changeToInnerScope(const std::string &nodeId);
+
+    Visitor();
 };
 
 

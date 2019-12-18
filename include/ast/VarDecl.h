@@ -17,23 +17,23 @@ public:
 
     VarDecl(std::string name, std::string datatype, AbstractExpr *initializer);
 
-    VarDecl(std::string name, std::string datatype, int i);
+    VarDecl(std::string name, const std::string &datatype, int i);
 
-    json toJson() const override;
+    [[nodiscard]] json toJson() const override;
 
-    virtual void accept(Visitor &v) override;
+    void accept(Visitor &v) override;
 
-    std::string getNodeName() const override;
+    [[nodiscard]] std::string getNodeName() const override;
 
-    const std::string &getIdentifier() const;
+    [[nodiscard]] const std::string &getIdentifier() const;
 
-    const std::string &getDatatype() const;
+    [[nodiscard]] const std::string &getDatatype() const;
 
-    AbstractExpr *getInitializer() const;
+    [[nodiscard]] AbstractExpr *getInitializer() const;
 
     BinaryExpr *contains(BinaryExpr *bexpTemplate) override;
 
-    virtual ~VarDecl();
+    ~VarDecl() override;
 };
 
 

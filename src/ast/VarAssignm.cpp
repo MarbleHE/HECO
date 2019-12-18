@@ -1,3 +1,6 @@
+#include <utility>
+
+
 #include "../../include/ast/VarAssignm.h"
 #include "BinaryExpr.h"
 
@@ -9,7 +12,7 @@ json VarAssignm::toJson() const {
     return j;
 }
 
-VarAssignm::VarAssignm(const std::string &identifier, AbstractExpr *value) : identifier(identifier), value(value) {}
+VarAssignm::VarAssignm(std::string identifier, AbstractExpr *value) : identifier(std::move(identifier)), value(value) {}
 
 void VarAssignm::accept(Visitor &v) {
     v.visit(*this);

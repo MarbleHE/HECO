@@ -9,17 +9,17 @@ private:
     AbstractExpr *expr;
 public:
 
-    json toJson() const override;
+    [[nodiscard]] json toJson() const override;
 
-    virtual void accept(Visitor &v) override;
+    void accept(Visitor &v) override;
 
-    std::string getNodeName() const override;
+    [[nodiscard]] std::string getNodeName() const override;
 
-    AbstractExpr *getExpr() const;
+    [[nodiscard]] AbstractExpr *getExpr() const;
 
-    Group(AbstractExpr *expr);
+    explicit Group(AbstractExpr *expr);
 
-    virtual ~Group();
+    ~Group();
 };
 
 

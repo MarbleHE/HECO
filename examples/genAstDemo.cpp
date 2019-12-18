@@ -14,6 +14,7 @@
 #include <VarAssignm.h>
 #include <While.h>
 #include <Ast.h>
+#include <If.h>
 
 
 /// Generates a sample AST for the following code:
@@ -32,14 +33,12 @@
 /// \endcode
 ///
 void generateDemoOne(Ast &ast) {
-    _DEBUG_RUNNING();
-
     // int computePrivate(int x) { ... }
     Function *func = dynamic_cast<Function *>(ast.setRootNode(new Function("computePrivate")));
-    func->addParameter(new FunctionParameter("x", "int"));
+    func->addParameter(new FunctionParameter("int", new Variable("x")));
 
     // int a = 4;
-    func->addStatement(new VarDecl("x", "int", 4));
+    func->addStatement(new VarDecl("a", "int", 4));
 
     // int k;
     func->addStatement(new VarDecl("k", "int"));
@@ -92,12 +91,10 @@ void generateDemoOne(Ast &ast) {
 ///  }
 ///  \endcode
 void generateDemoTwo(Ast &ast) {
-    _DEBUG_RUNNING();
-
     // int determineSuitableX(int encryptedA, int encryptedB) {...}
     Function *func = dynamic_cast<Function *>(ast.setRootNode(new Function("determineSuitableX")));
-    func->addParameter(new FunctionParameter("encryptedA", "int"));
-    func->addParameter(new FunctionParameter("encryptedB", "int"));
+    func->addParameter(new FunctionParameter("int", new Variable("encryptedA")));
+    func->addParameter(new FunctionParameter("int", new Variable("encryptedB")));
 
     // int randInt = rand() % 42;
     func->addStatement(
@@ -155,7 +152,9 @@ void generateDemoTwo(Ast &ast) {
     // printf(outStr);
     func->addStatement(
             new CallExternal("printf",
-                             new std::vector<FunctionParameter>{FunctionParameter("outStr", "string")}));
+                             new std::vector<FunctionParameter>(
+                                     {{"string", new Variable("outStr")}}
+                             )));
 
     // return sum;
     func->addStatement(
@@ -163,8 +162,6 @@ void generateDemoTwo(Ast &ast) {
 }
 
 void generateDemoThree(Ast &ast) {
-    _DEBUG_RUNNING();
-
     // int determineSuitableX(int encryptedA, int encryptedB) {...}
     Function *func = dynamic_cast<Function *>(ast.setRootNode(new Function("computeMult")));
 
@@ -189,8 +186,6 @@ void generateDemoThree(Ast &ast) {
 }
 
 void generateDemoFour(Ast &ast) {
-    _DEBUG_RUNNING();
-
     // int determineSuitableX(int encryptedA, int encryptedB) {...}
     Function *func = dynamic_cast<Function *>(ast.setRootNode(new Function("computeMult")));
 

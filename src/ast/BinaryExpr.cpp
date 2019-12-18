@@ -70,8 +70,8 @@ void BinaryExpr::swapOperandsLeftAWithRightB(BinaryExpr *bexpA, BinaryExpr *bexp
 
 BinaryExpr::~BinaryExpr() {
     delete left;
-    delete op;
     delete right;
+    delete op;
 }
 
 

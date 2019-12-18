@@ -5,32 +5,32 @@
 #include "BinaryExpr.h"
 
 json VarDecl::toJson() const {
-    json j;
-    j["type"] = getNodeName();
-    j["identifier"] = identifier;
-    j["datatype"] = datatype;
-//    if (this->initializer != nullptr) {
-//        j["initializer"] = this->initializer->toJson();
-//    } else {
-    j["initializer"] = ""; // FIXME
-//    }
+    json j = {{"type",       getNodeName()},
+              {"identifier", identifier},
+              {"datatype",   datatype}};
+    if (this->initializer != nullptr) {
+        j["initializer"] = this->initializer->toJson();
+    }
     return j;
 }
 
 VarDecl::VarDecl(std::string name, std::string datatype, AbstractExpr *initializer)
-        : identifier(name), datatype(datatype), initializer(std::move(initializer)) {
+        : identifier(std::move(std::move(name))), datatype(std::move(std::move(datatype))), initializer(initializer) {
 
 }
 
-VarDecl::VarDecl(std::string name, std::string datatype) : identifier(name), datatype(datatype) {
+VarDecl::VarDecl(std::string name, std::string datatype) : identifier(std::move(std::move(name))),
+                                                           datatype(std::move(std::move(datatype))) {
     this->initializer = nullptr;
 }
 
-VarDecl::VarDecl(std::string name, std::string datatype, int i) : identifier(name), datatype(datatype) {
-    if (datatype != "int") {
-        throw std::logic_error("test");
-    } else {
+VarDecl::VarDecl(std::string name, const std::string &datatype, int i) : identifier(std::move(std::move(name))),
+
+                                                                         datatype(datatype) {
+    if (datatype == "int") {
         initializer = new LiteralInt(i);
+    } else {
+        throw std::logic_error("test");
     }
 }
 

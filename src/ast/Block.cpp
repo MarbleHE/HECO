@@ -1,19 +1,18 @@
 #include "../../include/ast/Block.h"
 
-#include <utility>
 #include <iostream>
 #include <VarDecl.h>
 
 
-Block::Block() = default;
-
-json Block::toJson() const {
-    json j;
-    j["type"] = getNodeName();
-    //j["statements"] = *this->statements; // FIXME
-    return j;
+Block::Block() {
+    statements = nullptr;
 }
 
+json Block::toJson() const {
+    json j = {{"type",       getNodeName()},
+              {"statements", *this->statements}};
+    return j;
+}
 
 Block::Block(AbstractStatement *stat) {
     auto *vec = new std::vector<AbstractStatement *>;

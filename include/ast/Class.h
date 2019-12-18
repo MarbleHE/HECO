@@ -12,7 +12,7 @@ private:
     std::string superclass;
     std::vector<Function> methods;
 public:
-    Class(const std::string &name, const std::string &superclass, const std::vector<Function> &methods);
+    Class(std::string name, std::string superclass, std::vector<Function> methods);
 
     json toJson() const override;
 

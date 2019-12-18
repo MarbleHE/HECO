@@ -11,21 +11,21 @@ private:
     std::string identifier;
     AbstractExpr *value;
 public:
-    VarAssignm(const std::string &identifier, AbstractExpr *value);
+    VarAssignm(std::string identifier, AbstractExpr *value);
 
-    json toJson() const override;
+    [[nodiscard]] json toJson() const override;
 
-    virtual void accept(Visitor &v) override;
+    void accept(Visitor &v) override;
 
-    const std::string &getIdentifier() const;
+    [[nodiscard]] const std::string &getIdentifier() const;
 
-    AbstractExpr *getValue() const;
+    [[nodiscard]] AbstractExpr *getValue() const;
 
-    std::string getNodeName() const override;
+    [[nodiscard]] std::string getNodeName() const override;
 
     BinaryExpr *contains(BinaryExpr *bexpTemplate) override;
 
-    virtual ~VarAssignm();
+    ~VarAssignm();
 };
 
 #endif //MASTER_THESIS_CODE_VARASSIGNM_H

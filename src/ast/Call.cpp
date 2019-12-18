@@ -3,10 +3,9 @@
 #include <utility>
 
 json Call::toJson() const {
-    json j;
-    j["type"] = getNodeName();
-    //j["arguments"] = (this->arguments); // FIXME
-    j["callee"] = this->callee->toString();
+    json j = {{"type",      getNodeName()},
+              {"arguments", this->arguments},
+              {"callee",    this->callee->toJson()}};
     return j;
 }
 

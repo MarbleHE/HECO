@@ -20,15 +20,13 @@ private:
     static AbstractExpr *createParam(AbstractExpr *abstractExpr);
 
 public:
-
     virtual ~AbstractExpr() = default;
 
-    virtual std::string toString() const;
+    [[nodiscard]] virtual std::string toString() const;
 
-    virtual json toJson() const;
+    [[nodiscard]] virtual json toJson() const;
 
     virtual void accept(Visitor &v);
-
 };
 
 /// JSON representation to be used for vector<AbstractExpr> objects.

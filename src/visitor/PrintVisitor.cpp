@@ -21,144 +21,130 @@
 #include "../../main.h"
 #include "../utilities/Scope.h"
 
+template<typename T>
+void PrintVisitor::printChildNodesIndented(T &elem) {
+    incrementLevel();  // increment the indentation (tabs) used by addOutputStr
+    Visitor::visit(elem); // continue traversal by visiting child nodes
+    decrementLevel();
+}
 
 void PrintVisitor::visit(Ast &elem) {
-    _DEBUG_RUNNING();
     resetLevel();
     lastPrintedScope = nullptr;
     Visitor::visit(elem);
+    // at the end of traversal print the tree if printScreen is true
+    if (printScreen) {
+        std::cout << ss.str() << std::endl;
+    }
 }
 
 void PrintVisitor::visit(BinaryExpr &elem) {
-    std::cout << formatOutputStr({elem.getNodeName()});
-    this->incrementLevel();
-    Visitor::visit(elem);
-    this->decrementLevel();
+    addOutputStr({elem.getNodeName()});
+    printChildNodesIndented(elem);
 }
 
 void PrintVisitor::visit(Block &elem) {
-    std::cout << formatOutputStr({elem.getNodeName()});
-    this->incrementLevel();
-    Visitor::visit(elem);
-    this->decrementLevel();
+    addOutputStr({elem.getNodeName()});
+    printChildNodesIndented(elem);
 }
 
 void PrintVisitor::visit(Call &elem) {
-    std::cout << formatOutputStr({elem.getNodeName()});
-    this->incrementLevel();
-    Visitor::visit(elem);
-    this->decrementLevel();
+    addOutputStr({elem.getNodeName()});
+    printChildNodesIndented(elem);
 }
 
 void PrintVisitor::visit(CallExternal &elem) {
-    std::cout << formatOutputStr({elem.getNodeName(), elem.getFunctionName()});
-    this->incrementLevel();
-    Visitor::visit(elem);
-    this->decrementLevel();
+    addOutputStr({elem.getNodeName(), elem.getFunctionName()});
+    printChildNodesIndented(elem);
 }
 
 void PrintVisitor::visit(Class &elem) {
-    std::cout << formatOutputStr({elem.getNodeName(), elem.getName(), elem.getSuperclass()});
-    this->incrementLevel();
-    Visitor::visit(elem);
-    this->decrementLevel();
+    addOutputStr({elem.getNodeName(), elem.getName(), elem.getSuperclass()});
+    printChildNodesIndented(elem);
 }
 
 void PrintVisitor::visit(Function &elem) {
-    std::cout << formatOutputStr({elem.getNodeName()});
-    this->incrementLevel();
-    Visitor::visit(elem);
-    this->decrementLevel();
+    addOutputStr({elem.getNodeName()});
+    printChildNodesIndented(elem);
 }
 
 void PrintVisitor::visit(FunctionParameter &elem) {
-    std::cout << formatOutputStr({elem.getNodeName(), elem.getDatatype() + " " + elem.getIdentifier()});
+    addOutputStr({elem.getNodeName(), elem.getDatatype()});
+    printChildNodesIndented(elem);
 }
 
 void PrintVisitor::visit(Group &elem) {
-    std::cout << formatOutputStr({elem.getNodeName()});
+    addOutputStr({elem.getNodeName()});
     // group statements
-    this->incrementLevel();
-    Visitor::visit(elem);
-    this->decrementLevel();
+    printChildNodesIndented(elem);
 }
 
 void PrintVisitor::visit(If &elem) {
-    std::cout << formatOutputStr({elem.getNodeName()});
-    this->incrementLevel();
-    Visitor::visit(elem);
-    this->decrementLevel();
+    addOutputStr({elem.getNodeName()});
+    printChildNodesIndented(elem);
 }
 
 void PrintVisitor::visit(LiteralBool &elem) {
-    std::cout << formatOutputStr({elem.getNodeName(), elem.getTextValue()});
+    addOutputStr({elem.getNodeName(), elem.getTextValue()});
 }
 
 void PrintVisitor::visit(LiteralInt &elem) {
-    std::cout << formatOutputStr({elem.getNodeName(), std::to_string(elem.getValue())});
+    addOutputStr({elem.getNodeName(), std::to_string(elem.getValue())});
 }
 
 void PrintVisitor::visit(LiteralString &elem) {
-    std::cout << formatOutputStr({elem.getNodeName(), elem.getValue()});
+    addOutputStr({elem.getNodeName(), elem.getValue()});
 }
 
 void PrintVisitor::visit(LogicalExpr &elem) {
-    std::cout << formatOutputStr({elem.getNodeName()});
-    this->incrementLevel();
-    Visitor::visit(elem);
-    this->decrementLevel();
+    addOutputStr({elem.getNodeName()});
+    printChildNodesIndented(elem);
 }
 
 void PrintVisitor::visit(Operator &elem) {
-    std::cout << formatOutputStr({elem.getNodeName(), elem.getOperatorString()});
+    addOutputStr({elem.getNodeName(), elem.getOperatorString()});
 }
 
 void PrintVisitor::visit(Return &elem) {
-    std::cout << formatOutputStr({elem.getNodeName()});
-    this->incrementLevel();
-    Visitor::visit(elem);
-    this->decrementLevel();
+    addOutputStr({elem.getNodeName()});
+    printChildNodesIndented(elem);
 }
 
 void PrintVisitor::visit(UnaryExpr &elem) {
-    std::cout << formatOutputStr({elem.getNodeName()});
-    this->incrementLevel();
-    Visitor::visit(elem);
-    this->decrementLevel();
+    addOutputStr({elem.getNodeName()});
+    printChildNodesIndented(elem);
 }
 
 void PrintVisitor::visit(VarAssignm &elem) {
-    std::cout << formatOutputStr({elem.getNodeName(), elem.getIdentifier()});
-    this->incrementLevel();
-    Visitor::visit(elem);
-    this->decrementLevel();
+    addOutputStr({elem.getNodeName(), elem.getIdentifier()});
+    printChildNodesIndented(elem);
 }
 
 void PrintVisitor::visit(VarDecl &elem) {
-    std::cout << formatOutputStr({elem.getNodeName(), elem.getDatatype() + " " + elem.getIdentifier()});
-    this->incrementLevel();
-    Visitor::visit(elem);
-    this->decrementLevel();
+    addOutputStr({elem.getNodeName(), elem.getDatatype() + " " + elem.getIdentifier()});
+    printChildNodesIndented(elem);
 }
 
 void PrintVisitor::visit(Variable &elem) {
-    std::cout << formatOutputStr({elem.getNodeName(), elem.getIdentifier()});
+    addOutputStr({elem.getNodeName(), elem.getIdentifier()});
 }
 
 void PrintVisitor::visit(While &elem) {
-    std::cout << formatOutputStr({elem.getNodeName()});
-    this->incrementLevel();
-    Visitor::visit(elem);
-    this->decrementLevel();
-
-
+    addOutputStr({elem.getNodeName()});
+    printChildNodesIndented(elem);
 }
 
 // ------------–------
 // Constructor & Utility functions
 // ------------–------
 
-PrintVisitor::PrintVisitor(const int level) : level(level) {}
+PrintVisitor::PrintVisitor() : PrintVisitor(true) {
+}
+
+PrintVisitor::PrintVisitor(bool printScreen) : printScreen(printScreen), level(0), lastPrintedScope(nullptr) {
+
+}
+
 
 void PrintVisitor::incrementLevel() {
     this->level = (this->level + 1);
@@ -176,10 +162,11 @@ void PrintVisitor::resetLevel() {
     this->level = 0;
 }
 
-std::string PrintVisitor::formatOutputStr(const std::list<std::string> &args) {
-    std::ostringstream ss;
+void PrintVisitor::addOutputStr(const std::list<std::string> &args) {
+    //std::ostringstream tempStream;
     // print AST node type (e.g., FunctionParameter)
-    ss << getIndentation() << args.front() << ": ";
+    ss << getIndentation() << args.front() << ":";
+    if (args.size() > 1) ss << " ";
     // print primitive parameters related to AST (e.g., int, string)
     for (auto it = std::next(args.begin()); it != args.end(); ++it) {
         ss << "(" << *it << ")";
@@ -190,7 +177,6 @@ std::string PrintVisitor::formatOutputStr(const std::list<std::string> &args) {
         setLastPrintedScope(currentScope);
     }
     ss << std::endl;
-    return ss.str();
 }
 
 Scope *PrintVisitor::getLastPrintedScope() const {
@@ -205,3 +191,6 @@ PrintVisitor::~PrintVisitor() {
     delete lastPrintedScope;
 }
 
+std::string PrintVisitor::getOutput() const {
+    return ss.str();
+}

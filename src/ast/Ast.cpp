@@ -3,7 +3,7 @@
 Ast::Ast(AbstractStatement *rootNode) : rootNode(rootNode) {}
 
 Ast::Ast() {
-
+    rootNode = nullptr;
 }
 
 AbstractStatement *Ast::setRootNode(AbstractStatement *rootNode) {

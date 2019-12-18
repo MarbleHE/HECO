@@ -15,19 +15,19 @@ private:
 public:
     Call(AbstractExpr *callee, std::vector<FunctionParameter *> arguments);
 
-    Call(AbstractExpr *callee);
+    explicit Call(AbstractExpr *callee);
 
-    virtual ~Call();
+    ~Call();
 
-    json toJson() const override;
+    [[nodiscard]] json toJson() const override;
 
-    virtual void accept(Visitor &v) override;
+    void accept(Visitor &v) override;
 
-    AbstractExpr *getCallee() const;
+    [[nodiscard]] AbstractExpr *getCallee() const;
 
-    const std::vector<FunctionParameter *> &getArguments() const;
+    [[nodiscard]] const std::vector<FunctionParameter *> &getArguments() const;
 
-    std::string getNodeName() const override;
+    [[nodiscard]] std::string getNodeName() const override;
 };
 
 

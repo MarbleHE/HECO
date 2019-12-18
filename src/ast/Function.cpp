@@ -17,7 +17,7 @@ Function::Function(std::string name, std::vector<AbstractStatement *> pt) : name
 
 Function::Function(std::string name) : name(std::move(name)) {}
 
-Function::Function(const Function &func) {
+Function::Function(const Function &func) : Node(func) {
     // copy 'identifier'
     this->name = std::string(func.name);
     // copy 'params'
@@ -27,10 +27,6 @@ Function::Function(const Function &func) {
     for (const auto &e : func.body) this->body.emplace_back(e);
 }
 
-
-Function::Function() {
-
-}
 
 void Function::addStatement(AbstractStatement *statement) {
     this->body.emplace_back(statement);
@@ -55,21 +51,24 @@ const std::vector<AbstractStatement *> &Function::getBody() const {
 void to_json(json &j, const Function &func) {
     j = {
             {"type",   func.getNodeName()},
-            {"params", func.getParams()}
-    };
-//            {"body",   func.getBody()} // FIXME doesn't work anymore
-//    };
+            {"params", func.getParams()},
+            {"body",   func.getBody()}};
 }
 
 json Function::toJson() const {
     json j = {
             {"type",   getNodeName()},
-            {"params", params}};
-    //{"body",   body}}; // FIXME doesn't work anymore
+            {"params", params},
+            {"body",   getBody()}
+    };
     return j;
 }
 
 std::string Function::getNodeName() const {
     return "Function";
+}
+
+void Function::setParams(std::vector<FunctionParameter> *paramsVec) {
+    this->params = *paramsVec;
 }
 

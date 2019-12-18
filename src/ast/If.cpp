@@ -14,7 +14,9 @@ If::If(AbstractExpr *condition, AbstractStatement *thenBranch, AbstractStatement
                                                                                                 elseBranch(
                                                                                                         elseBranch) {}
 
-If::If(AbstractExpr *condition, AbstractStatement *thenBranch) : condition(condition), thenBranch(thenBranch) {}
+If::If(AbstractExpr *condition, AbstractStatement *thenBranch) : condition(condition), thenBranch(thenBranch) {
+    elseBranch = nullptr;
+}
 
 void If::accept(Visitor &v) {
     v.visit(*this);

@@ -15,13 +15,13 @@ private:
     std::vector<AbstractStatement *> body;
 public:
 
-    Function();
+    Function() = default;
 
-    const std::string &getName() const;
+    [[nodiscard]] const std::string &getName() const;
 
-    const std::vector<FunctionParameter> &getParams() const;
+    [[nodiscard]] const std::vector<FunctionParameter> &getParams() const;
 
-    const std::vector<AbstractStatement *> &getBody() const;
+    [[nodiscard]] const std::vector<AbstractStatement *> &getBody() const;
 
     /// Copy constructor
     /// \param func The function to be copied.
@@ -29,18 +29,19 @@ public:
 
     Function(std::string name, std::vector<AbstractStatement *> bodyStatements);
 
-    Function(std::string name);
+    explicit Function(std::string name);
 
     void addParameter(FunctionParameter *param);
 
     void addStatement(AbstractStatement *pDecl);
 
-    json toJson() const override;
+    [[nodiscard]] json toJson() const override;
 
-    virtual void accept(Visitor &v) override;
+    void accept(Visitor &v) override;
 
-    std::string getNodeName() const override;
+    [[nodiscard]] std::string getNodeName() const override;
 
+    void setParams(std::vector<FunctionParameter> *paramsVec);
 };
 
 /// Defines the JSON representation to be used for vector<Function> objects.

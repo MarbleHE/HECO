@@ -29,6 +29,7 @@ LiteralBool *AbstractExpr::createParam(bool b) {
 }
 
 LiteralString *AbstractExpr::createParam(const char *str) {
+    // TODO think if this shouldn't be a Variable instead
     return new LiteralString(str);
 }
 

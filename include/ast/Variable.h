@@ -10,15 +10,15 @@ private:
     std::string identifier;
 
 public:
-    Variable(const std::string &identifier);
+    explicit Variable(std::string identifier);
 
-    json toJson() const override;
+    [[nodiscard]] json toJson() const override;
 
-    virtual void accept(Visitor &v) override;
+    void accept(Visitor &v) override;
 
-    std::string getNodeName() const override;
+    [[nodiscard]] std::string getNodeName() const override;
 
-    const std::string &getIdentifier() const;
+    [[nodiscard]] const std::string &getIdentifier() const;
 };
 
 

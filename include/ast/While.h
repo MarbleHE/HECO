@@ -12,17 +12,17 @@ private:
 public:
     While(AbstractExpr *condition, AbstractStatement *body);
 
-    json toJson() const override;
+    [[nodiscard]] json toJson() const override;
 
-    virtual void accept(Visitor &v) override;
+    void accept(Visitor &v) override;
 
-    AbstractExpr *getCondition() const;
+    [[nodiscard]] AbstractExpr *getCondition() const;
 
-    AbstractStatement *getBody() const;
+    [[nodiscard]] AbstractStatement *getBody() const;
 
-    std::string getNodeName() const override;
+    [[nodiscard]] std::string getNodeName() const override;
 
-    virtual ~While();
+    ~While() override;
 };
 
 

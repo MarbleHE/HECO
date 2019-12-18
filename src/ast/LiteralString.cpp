@@ -1,6 +1,9 @@
+#include <utility>
+
+
 #include "../../include/ast/LiteralString.h"
 
-LiteralString::LiteralString(const std::string &value) : value(value) {}
+LiteralString::LiteralString(std::string value) : value(std::move(value)) {}
 
 json LiteralString::toJson() const {
     json j;

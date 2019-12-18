@@ -26,21 +26,20 @@ public:
         this->right = createParam(right);
     }
 
-    AbstractExpr *getLeft() const;
+    [[nodiscard]] AbstractExpr *getLeft() const;
 
-    Operator *getOp() const;
+    [[nodiscard]] Operator *getOp() const;
 
-    AbstractExpr *getRight() const;
+    [[nodiscard]] AbstractExpr *getRight() const;
 
-    json toJson() const
+    [[nodiscard]] json toJson() const
     override;
 
-    virtual void accept(Visitor &v)
-    override;
+    void accept(Visitor &v) override;
 
-    std::string getNodeName() const override;
+    [[nodiscard]] std::string getNodeName() const override;
 
-    virtual ~LogicalExpr();
+    ~LogicalExpr() override;
 
 };
 

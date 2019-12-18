@@ -1,6 +1,9 @@
+#include <utility>
+
+
 #include "../../include/ast/Variable.h"
 
-Variable::Variable(const std::string &identifier) : identifier(identifier) {}
+Variable::Variable(std::string identifier) : identifier(std::move(identifier)) {}
 
 json Variable::toJson() const {
     json j;

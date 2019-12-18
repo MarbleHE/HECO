@@ -14,17 +14,17 @@ private:
 public:
     UnaryExpr(OpSymb::UnaryOp op, AbstractExpr *right);
 
-    json toJson() const override;
+    [[nodiscard]] json toJson() const override;
 
-    virtual void accept(Visitor &v) override;
+    void accept(Visitor &v) override;
 
-    Operator *getOp() const;
+    [[nodiscard]] Operator *getOp() const;
 
-    AbstractExpr *getRight() const;
+    [[nodiscard]] AbstractExpr *getRight() const;
 
-    std::string getNodeName() const override;
+    [[nodiscard]] std::string getNodeName() const override;
 
-    virtual ~UnaryExpr();
+    ~UnaryExpr() override;
 };
 
 

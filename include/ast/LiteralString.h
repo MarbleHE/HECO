@@ -9,15 +9,15 @@ class LiteralString : public Literal, public Node {
 private:
     std::string value;
 public:
-    LiteralString(const std::string &value);
+    explicit LiteralString(std::string value);
 
-    json toJson() const override;
+    [[nodiscard]] json toJson() const override;
 
-    const std::string &getValue() const;
+    [[nodiscard]] const std::string &getValue() const;
 
-    virtual void accept(Visitor &v) override;
+    void accept(Visitor &v) override;
 
-    std::string getNodeName() const override;
+    [[nodiscard]] std::string getNodeName() const override;
 };
 
 

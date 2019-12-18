@@ -63,9 +63,9 @@ void Visitor::visit(CallExternal &elem) {
 
 void Visitor::visit(Class &elem) {
     currentScope->addStatement(&elem);
-    // functions
     // TODO Think if it makes sense to represent classes at all because this output does not represent the execution
-    // flow; maybe it's enough to have a list of function names in a Class?
+    // flow; if yes, maybe it's enough to have a list of function names in a Class?
+    // functions
     for (Function f : elem.getMethods()) {
         f.accept(*this);
     }
@@ -86,7 +86,7 @@ void Visitor::visit(Function &elem) {
 }
 
 void Visitor::visit(FunctionParameter &elem) {
-
+    elem.getValue()->accept(*this);
 }
 
 void Visitor::visit(Group &elem) {
@@ -104,7 +104,7 @@ void Visitor::visit(If &elem) {
 
     // thenBranch
     if (auto *thenBranch = dynamic_cast<Block *>(elem.getThenBranch())) {
-        elem.getThenBranch()->accept(*this);
+        thenBranch->accept(*this);
     } else {
         // if thenBranch is no Block we need to manually open a new scope here
         Node *thenNode = dynamic_cast<Node *>(elem.getThenBranch());
@@ -114,7 +114,7 @@ void Visitor::visit(If &elem) {
         changeToOuterScope();
     }
 
-    if (elem.getElseBranch() != NULL) {
+    if (elem.getElseBranch() != nullptr) {
         // elseBranch
         if (auto *elseBranch = dynamic_cast<Node *>(elem.getElseBranch())) {
             elem.getElseBranch()->accept(*this);
@@ -192,7 +192,7 @@ void Visitor::visit(While &elem) {
     // if statements following While are nested in a Block, a new scope will be created automatically;
     // if only a single statement is following, we manually need to open a new scope
     if (auto *thenBlock = dynamic_cast<Block *>(elem.getBody())) {
-        elem.getBody()->accept(*this);
+        thenBlock->accept(*this);
     } else {
         Node *block = dynamic_cast<Node *>(elem.getBody());
         assert(block != nullptr);
@@ -210,5 +210,9 @@ void Visitor::changeToOuterScope() {
 void Visitor::changeToInnerScope(const std::string &nodeId) {
     auto temp = currentScope->getOrCreateInnerScope(nodeId);
     this->currentScope = temp;
+}
+
+Visitor::Visitor() {
+    currentScope = nullptr;
 }
 

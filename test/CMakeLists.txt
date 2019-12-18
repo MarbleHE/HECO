@@ -39,7 +39,10 @@ endif ()
 ##############################
 
 set(TEST_FILES
-        BinaryExpr-test.cpp)
+        BinaryExprTest.cpp
+        JsonOutputTest.cpp
+        PrintVisitorTest.cpp
+        MultRewriteTest.cpp AstTestingGenerator.cpp AstTestingGenerator.h)
 
 add_executable(testing-all
         main.cpp

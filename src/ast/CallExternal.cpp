@@ -20,7 +20,7 @@ CallExternal::CallExternal(std::string functionName, std::vector<FunctionParamet
     this->arguments = arguments;
 }
 
-CallExternal::CallExternal(std::string functionName) : functionName(functionName) {
+CallExternal::CallExternal(std::string functionName) : functionName(std::move(std::move(functionName))) {
     this->arguments = nullptr;
 }
 

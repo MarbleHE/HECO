@@ -32,7 +32,7 @@ public:
     }
 
     static std::string getTextRepr(LogCompOp lcop) {
-        static const std::string logicalOpStrings[] = {"AND", "OR", "XOR", "<", ">", ">=", "==", "!="};
+        static const std::string logicalOpStrings[] = {"AND", "OR", "XOR", "<", "<=", ">", ">=", "!="};
         return logicalOpStrings[lcop];
     }
 
@@ -40,8 +40,6 @@ public:
         static const std::string unaryOpStrings[] = {"!", "++", "--"};
         return unaryOpStrings[uop];
     }
-
-
 };
 
 
@@ -49,17 +47,17 @@ class Operator : public Node {
 private:
     std::string operatorString;
 public:
-    Operator(OpSymb::LogCompOp op);
+    explicit Operator(OpSymb::LogCompOp op);
 
-    Operator(OpSymb::BinaryOp op);
+    explicit Operator(OpSymb::BinaryOp op);
 
-    Operator(OpSymb::UnaryOp op);
+    explicit Operator(OpSymb::UnaryOp op);
 
-    const std::string &getOperatorString() const;
+    [[nodiscard]] const std::string &getOperatorString() const;
 
     virtual void accept(Visitor &v);
 
-    std::string getNodeName() const override;
+    [[nodiscard]] std::string getNodeName() const override;
 
 };
 
