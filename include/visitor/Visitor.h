@@ -67,8 +67,6 @@ public:
 
     virtual void visit(CallExternal &elem);
 
-    virtual void visit(Class &elem);
-
     virtual void visit(Function &elem);
 
     virtual void visit(FunctionParameter &elem);

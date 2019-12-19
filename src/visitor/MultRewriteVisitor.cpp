@@ -39,10 +39,6 @@ void MultRewriteVisitor::visit(CallExternal &elem) {
     Visitor::visit(elem);
 }
 
-void MultRewriteVisitor::visit(Class &elem) {
-    Visitor::visit(elem);
-}
-
 void MultRewriteVisitor::visit(Function &elem) {
     Visitor::visit(elem);
 }

@@ -53,7 +53,6 @@ set(SOURCE_FILES
         ${master_thesis_code_SOURCE_DIR}/src/ast/If.cpp
         ${master_thesis_code_SOURCE_DIR}/src/ast/Call.cpp
         ${master_thesis_code_SOURCE_DIR}/src/ast/CallExternal.cpp
-        ${master_thesis_code_SOURCE_DIR}/src/ast/Class.cpp
         ${master_thesis_code_SOURCE_DIR}/src/ast/LogicalExpr.cpp
         ${master_thesis_code_SOURCE_DIR}/src/ast/Return.cpp
         ${master_thesis_code_SOURCE_DIR}/src/ast/UnaryExpr.cpp

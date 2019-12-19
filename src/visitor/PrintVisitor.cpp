@@ -14,7 +14,6 @@
 #include <While.h>
 #include <UnaryExpr.h>
 #include <Call.h>
-#include <Class.h>
 #include <sstream>
 
 #include "../../include/visitor/PrintVisitor.h"
@@ -55,11 +54,6 @@ void PrintVisitor::visit(Call &elem) {
 
 void PrintVisitor::visit(CallExternal &elem) {
     addOutputStr({elem.getNodeName(), elem.getFunctionName()});
-    printChildNodesIndented(elem);
-}
-
-void PrintVisitor::visit(Class &elem) {
-    addOutputStr({elem.getNodeName(), elem.getName(), elem.getSuperclass()});
     printChildNodesIndented(elem);
 }
 

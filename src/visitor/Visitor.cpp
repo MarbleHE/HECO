@@ -15,7 +15,6 @@
 #include <While.h>
 #include <UnaryExpr.h>
 #include <Call.h>
-#include <Class.h>
 #include "../utilities/Scope.h"
 
 void Visitor::visit(Ast &elem) {
@@ -58,16 +57,6 @@ void Visitor::visit(CallExternal &elem) {
         for (auto &fp : *elem.getArguments()) {
             fp.accept(*this);
         }
-    }
-}
-
-void Visitor::visit(Class &elem) {
-    currentScope->addStatement(&elem);
-    // TODO Think if it makes sense to represent classes at all because this output does not represent the execution
-    // flow; if yes, maybe it's enough to have a list of function names in a Class?
-    // functions
-    for (Function f : elem.getMethods()) {
-        f.accept(*this);
     }
 }
 

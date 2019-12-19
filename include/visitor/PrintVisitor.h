@@ -29,8 +29,6 @@ public:
 
     void visit(CallExternal &elem) override;
 
-    void visit(Class &elem) override;
-
     void visit(Function &elem) override;
 
     void visit(FunctionParameter &elem) override;
