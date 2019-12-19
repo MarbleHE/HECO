@@ -1,37 +1,91 @@
 #include <Call.h>
 #include <iostream>
-#include <Function.h>
-#include <LiteralInt.h>
-#include <LogicalExpr.h>
-#include <BinaryExpr.h>
-#include <Block.h>
-#include <Group.h>
-#include <CallExternal.h>
-#include <UnaryExpr.h>
-#include <LiteralBool.h>
-#include <LiteralString.h>
-#include <Return.h>
-#include <VarAssignm.h>
-#include <While.h>
-#include <Ast.h>
-#include <If.h>
 
+#include "Ast.h"
+#include "BinaryExpr.h"
+#include "Block.h"
+#include "CallExternal.h"
+#include "Function.h"
+#include "Group.h"
+#include "If.h"
+#include "LiteralBool.h"
+#include "LiteralInt.h"
+#include "LiteralString.h"
+#include "LogicalExpr.h"
+#include "Return.h"
+#include "UnaryExpr.h"
+#include "VarAssignm.h"
+#include "While.h"
+#include "genAstDemo.h"
+#include "../include/visitor/PrintVisitor.h"
+#include "../include/visitor/MultRewriteVisitor.h"
 
-/// Generates a sample AST for the following code:
-///
-///  \code{.cpp}
-///  int computePrivate(int x) {        // Function
-///     int a = 4;                      // VarDecl, LiteralInt
-///     int k;                          // VarDecl
-///     if (x > 32) {                   // If, Block, Variable
-///         k = x * a;                  // VarAssignm, BinaryExpr, Operator, Variable
-///     } else {                        // Block
-///         k = (x * a) + 42;           // VarAssignm, Group, BinaryExpr, BinaryExpr, Variable
-///     }
-///     return k;                       // Return
-///  }
-/// \endcode
-///
+void runInteractiveDemo() {
+    // ask which tree to be used for demo
+    int treeNo;
+    std::cout << "Choose a demo tree by specifying a number between 1 and [4]: ";
+    std::cin >> treeNo;
+
+    // generate AST
+    Ast ast;
+    switch (treeNo) {
+        case 1:
+            generateDemoOne(ast);
+            break;
+        case 2:
+            generateDemoTwo(ast);
+            break;
+        case 3:
+            generateDemoThree(ast);
+            break;
+        case 4:
+        default:
+            generateDemoFour(ast);
+            break;
+    }
+
+    // this runs 'forever' as the users probably wants to first print the tree, perform some action on it,
+    // and afterwards again print the transformed tree
+    while (true) {
+        // ask which action to perform
+        int actionNo = 0;
+        std::cout << "Please choose what to do with the generated tree: " << std::endl;
+        std::cout << "\t1 Print the tree as indented text." << std::endl;
+        std::cout << "\t2 Print the tree as JSON." << std::endl;
+        std::cout << "\t3 Print the tree as pretty-printed JSON." << std::endl;
+        std::cout << "\t4 Perform a simple rewrite operation (A*(B*C)) -> (C*(B*A))." << std::endl;
+        std::cout << "Your choice [Press 0 to exit]: ";
+        std::cin >> actionNo;
+
+        // perform selected action
+        switch (actionNo) {
+            case 0:
+                exit(0);;
+            case 1: {
+                PrintVisitor pv;
+                pv.visit(ast);
+                break;
+            }
+            case 2: {
+                std::cout << *ast.getRootNode() << std::endl;
+                break;
+            }
+            case 3: {
+                std::cout << ast.getRootNode()->toJson().dump(2) << std::endl;
+                break;
+            }
+            case 4: {
+                MultRewriteVisitor mrv;
+                mrv.visit(ast);
+                break;
+            }
+            default:
+                exit(0);
+        }
+
+    } // while (true)
+}
+
 void generateDemoOne(Ast &ast) {
     // int computePrivate(int x) { ... }
     Function *func = dynamic_cast<Function *>(ast.setRootNode(new Function("computePrivate")));
@@ -71,25 +125,6 @@ void generateDemoOne(Ast &ast) {
     func->addStatement(new Return(new Variable("k")));
 }
 
-/// Generates an sample AST for the following code:
-///
-///  \code{.cpp}
-///  int determineSuitableX(int encryptedA, int encryptedB) {
-///      int randInt = std::rand() % 42;             // Call
-///      bool b = encryptedA < 2;                    // LiteralBool
-///      int sum = 0;                                // LiteralInt
-///
-///      while (randInt > 0 && !b == true) {         // While, LogicalExpr, UnaryExpr
-///          sum = sum + encryptedB;                 // VarAssignm, BinaryExpr
-///          randInt = randInt -1;                   // BinaryExpr
-///      };
-///
-///      String outStr = "Computation finished!";    // LiteralString
-///      printf(outStr);
-///
-///      return sum;
-///  }
-///  \endcode
 void generateDemoTwo(Ast &ast) {
     // int determineSuitableX(int encryptedA, int encryptedB) {...}
     Function *func = dynamic_cast<Function *>(ast.setRootNode(new Function("determineSuitableX")));
@@ -162,7 +197,7 @@ void generateDemoTwo(Ast &ast) {
 }
 
 void generateDemoThree(Ast &ast) {
-    // int determineSuitableX(int encryptedA, int encryptedB) {...}
+    // void computeMult() {...}
     Function *func = dynamic_cast<Function *>(ast.setRootNode(new Function("computeMult")));
 
     // int a = 3;
@@ -186,7 +221,7 @@ void generateDemoThree(Ast &ast) {
 }
 
 void generateDemoFour(Ast &ast) {
-    // int determineSuitableX(int encryptedA, int encryptedB) {...}
+    // int computeMult() {...}
     Function *func = dynamic_cast<Function *>(ast.setRootNode(new Function("computeMult")));
 
     // int a = 3;
@@ -214,15 +249,4 @@ void generateDemoFour(Ast &ast) {
     func->addStatement(
             new VarAssignm("result",
                            new BinaryExpr("result", OpSymb::BinaryOp::multiplication, "c")));
-}
-
-void runDemo(void(*func)(Ast &), bool printTree = true) {
-    Ast ast;
-    func(ast);
-    if (printTree) std::cout << *(ast.getRootNode()) << std::endl;
-}
-
-void run() {
-    runDemo(generateDemoOne);
-    runDemo(generateDemoTwo);
 }
