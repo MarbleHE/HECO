@@ -1,0 +1,65 @@
+{
+  "type": "Function",
+  "params": [
+    {
+      "type": "FunctionParameter",
+      "datatype": "int",
+      "value": {
+        "type": "Variable",
+        "identifier": "a"
+      }
+    },
+    {
+      "datatype": "bool",
+      "type": "FunctionParameter",
+      "value": {
+        "type": "Variable",
+        "identifier": "b"
+      }
+    },
+    {
+      "datatype": "int",
+      "type": "FunctionParameter",
+      "value": {
+        "type": "Variable",
+        "identifier": "z"
+      }
+    }
+  ],
+  "body": [
+    {
+      "type": "Return",
+      "value": {
+        "type": "BinaryExpr",
+        "leftOperand": {
+          "type": "BinaryExpr",
+          "leftOperand": {
+            "type": "Group",
+            "expr": {
+              "type": "BinaryExpr",
+              "leftOperand": {
+                "type": "Variable",
+                "identifier": "a"
+              },
+              "operator": "add",
+              "rightOperand": {
+                "type": "LiteralInt",
+                "value": 221
+              }
+            }
+          },
+          "operator": "mult",
+          "rightOperand": {
+            "type": "Variable",
+            "identifier": "b"
+          }
+        },
+        "operator": "add",
+        "rightOperand": {
+          "type": "Variable",
+          "identifier": "z"
+        }
+      }
+    }
+  ]
+}

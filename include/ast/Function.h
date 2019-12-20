@@ -29,6 +29,9 @@ public:
 
     Function(std::string name, std::vector<AbstractStatement *> bodyStatements);
 
+    Function(std::string name, std::vector<FunctionParameter> params,
+             std::vector<AbstractStatement *> body);
+
     explicit Function(std::string name);
 
     void addParameter(FunctionParameter *param);

@@ -1,0 +1,22 @@
+{
+  "type": "CallExternal",
+  "functionName": "printf",
+  "arguments": [
+    {
+      "type": "FunctionParameter",
+      "datatype": "std::string",
+      "value": {
+        "type": "LiteralString",
+        "value": "Hello %s"
+      }
+    },
+    {
+      "type": "FunctionParameter",
+      "datatype": "const char*",
+      "value": {
+        "type": "Variable",
+        "identifier": "name"
+      }
+    }
+  ]
+}

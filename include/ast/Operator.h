@@ -32,7 +32,7 @@ public:
     }
 
     static std::string getTextRepr(LogCompOp lcop) {
-        static const std::string logicalOpStrings[] = {"AND", "OR", "XOR", "<", "<=", ">", ">=", "!="};
+        static const std::string logicalOpStrings[] = {"AND", "OR", "XOR", "<", "<=", ">", ">=", "==", "!="};
         return logicalOpStrings[lcop];
     }
 

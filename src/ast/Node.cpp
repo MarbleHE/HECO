@@ -32,3 +32,7 @@ int Node::getNodeIdCounter() {
 std::string Node::getNodeName() const {
     return "Node";
 }
+
+void Node::resetNodeIdCounter() {
+    Node::nodeIdCounter = 0;
+}

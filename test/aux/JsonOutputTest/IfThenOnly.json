@@ -1,0 +1,39 @@
+{
+  "type": "If",
+  "condition": {
+    "type": "LogicalExpr",
+    "leftOperand": {
+      "type": "LogicalExpr",
+      "leftOperand": {
+        "identifier": "b",
+        "type": "Variable"
+      },
+      "operator": "==",
+      "rightOperand": {
+        "type": "LiteralBool",
+        "value": true
+      }
+    },
+    "operator": "AND",
+    "rightOperand": {
+      "type": "LogicalExpr",
+      "leftOperand": {
+        "identifier": "z",
+        "type": "Variable"
+      },
+      "operator": ">=",
+      "rightOperand": {
+        "type": "LiteralInt",
+        "value": 17
+      }
+    }
+  },
+  "thenBranch": {
+    "type": "VarAssignm",
+    "identifier": "isValid",
+    "value": {
+      "type": "LiteralBool",
+      "value": true
+    }
+  }
+}

@@ -4,8 +4,8 @@ json If::toJson() const {
     json j;
     j["type"] = getNodeName();
     j["condition"] = this->condition->toJson();
-    j["thenBranch"] = this->thenBranch->toJson();
-    j["elseBranch"] = this->elseBranch->toJson();
+    if (thenBranch != nullptr) j["thenBranch"] = this->thenBranch->toJson();
+    if (elseBranch != nullptr) j["elseBranch"] = this->elseBranch->toJson();
     return j;
 }
 

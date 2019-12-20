@@ -19,6 +19,8 @@ public:
     [[nodiscard]] virtual std::string getNodeName() const;
 
     std::string getUniqueNodeId();
+
+    static void resetNodeIdCounter();
 };
 
 

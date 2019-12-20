@@ -72,3 +72,7 @@ void Function::setParams(std::vector<FunctionParameter> *paramsVec) {
     this->params = *paramsVec;
 }
 
+Function::Function(std::string name, std::vector<FunctionParameter> params,
+                   std::vector<AbstractStatement *> body) : name(std::move(name)), params(std::move(params)),
+                                                            body(std::move(body)) {}
+

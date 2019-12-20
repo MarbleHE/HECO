@@ -10,12 +10,12 @@
 
 class Call : public AbstractExpr, public AbstractStatement, public Node {
 private:
-    AbstractExpr *callee; // any expression that evaluates to a function or a Function
+    Function *func;
     std::vector<FunctionParameter *> arguments;
 public:
-    Call(AbstractExpr *callee, std::vector<FunctionParameter *> arguments);
+    Call(std::vector<FunctionParameter *> arguments, Function *func);
 
-    explicit Call(AbstractExpr *callee);
+    Call(Function *func);
 
     ~Call();
 
@@ -23,11 +23,11 @@ public:
 
     void accept(Visitor &v) override;
 
-    [[nodiscard]] AbstractExpr *getCallee() const;
-
     [[nodiscard]] const std::vector<FunctionParameter *> &getArguments() const;
 
     [[nodiscard]] std::string getNodeName() const override;
+
+    Function *getFunc() const;
 };
 
 

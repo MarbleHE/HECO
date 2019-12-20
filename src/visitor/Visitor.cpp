@@ -42,7 +42,7 @@ void Visitor::visit(Call &elem) {
     currentScope->addStatement(&elem);
     changeToInnerScope(elem.getUniqueNodeId());
     // callee
-    elem.getCallee()->accept(*this);
+    elem.getFunc()->accept(*this);
     changeToOuterScope();
     // arguments
     for (auto arg : elem.getArguments()) {

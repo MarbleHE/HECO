@@ -1,0 +1,48 @@
+Function:	[global]
+	FunctionParameter: (int)	[Function_0]
+		Variable: (encryptedA)
+	FunctionParameter: (int)
+		Variable: (encryptedB)
+	VarDecl: (int randInt)
+		BinaryExpr:
+			CallExternal: (std::rand)
+			Operator: (mod)
+			LiteralInt: (42)
+	VarDecl: (bool b)
+		LogicalExpr:
+			Variable: (encryptedA)
+			Operator: (<)
+			LiteralInt: (2)
+	VarDecl: (int sum)
+		LiteralInt: (0)
+	While:
+		LogicalExpr:
+			LogicalExpr:
+				Variable: (randInt)
+				Operator: (>)
+				LiteralInt: (0)
+			Operator: (AND)
+			LogicalExpr:
+				UnaryExpr:
+					Operator: (!)
+					Variable: (b)
+				Operator: (==)
+				LiteralBool: (true)
+		Block:
+			VarAssignm: (sum)	[Block_1]
+				BinaryExpr:
+					Variable: (sum)
+					Operator: (add)
+					Variable: (encryptedB)
+			VarAssignm: (randInt)
+				BinaryExpr:
+					Variable: (randInt)
+					Operator: (sub)
+					LiteralInt: (1)
+	VarDecl: (string outStr)	[Function_0]
+		LiteralString: (Computation finished!)
+	CallExternal: (printf)
+		FunctionParameter: (string)
+			Variable: (outStr)
+	Return:
+		Variable: (sum)

@@ -1,0 +1,43 @@
+{
+  "type": "Call",
+  "arguments": [
+    {
+      "type": "FunctionParameter",
+      "datatype": "int",
+      "value": {
+        "type": "LiteralInt",
+        "value": 33
+      }
+    }
+  ],
+  "function": {
+    "type": "Function",
+    "body": [
+      {
+        "type": "Return",
+        "value": {
+          "type": "BinaryExpr",
+          "leftOperand": {
+            "type": "Variable",
+            "identifier": "inputA"
+          },
+          "operator": "mult",
+          "rightOperand": {
+            "type": "LiteralInt",
+            "value": 32
+          }
+        }
+      }
+    ],
+    "params": [
+      {
+        "type": "FunctionParameter",
+        "datatype": "int",
+        "value": {
+          "type": "Variable",
+          "identifier": "inputA"
+        }
+      }
+    ]
+  }
+}

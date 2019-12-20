@@ -1,0 +1,29 @@
+Function:	[global]
+	FunctionParameter: (int)	[Function_0]
+		Variable: (x)
+	VarDecl: (int a)
+		LiteralInt: (4)
+	VarDecl: (int k)
+	If:
+		LogicalExpr:
+			LiteralString: (x)
+			Operator: (>)
+			LiteralInt: (32)
+		Block:
+			VarAssignm: (k)	[Block_1]
+				BinaryExpr:
+					LiteralString: (x)
+					Operator: (mult)
+					LiteralString: (a)
+		Block:	[Function_0]
+			VarAssignm: (k)	[Block_2]
+				BinaryExpr:
+					Group:
+						BinaryExpr:
+							LiteralString: (x)
+							Operator: (mult)
+							LiteralString: (a)
+					Operator: (add)
+					LiteralInt: (42)
+	Return:	[Function_0]
+		Variable: (k)

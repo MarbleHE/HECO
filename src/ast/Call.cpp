@@ -1,11 +1,12 @@
 #include "../../include/ast/Call.h"
 
 #include <utility>
+#include "Function.h"
 
 json Call::toJson() const {
     json j = {{"type",      getNodeName()},
               {"arguments", this->arguments},
-              {"callee",    this->callee->toJson()}};
+              {"function",  this->func->toJson()}};
     return j;
 }
 
@@ -13,15 +14,6 @@ void Call::accept(Visitor &v) {
     v.visit(*this);
 }
 
-Call::Call(AbstractExpr *callee) : callee(callee) {
-}
-
-Call::Call(AbstractExpr *callee, std::vector<FunctionParameter *> arguments) : callee(callee),
-                                                                               arguments(std::move(arguments)) {}
-
-AbstractExpr *Call::getCallee() const {
-    return callee;
-}
 
 const std::vector<FunctionParameter *> &Call::getArguments() const {
     return arguments;
@@ -32,5 +24,13 @@ std::string Call::getNodeName() const {
 }
 
 Call::~Call() {
-    delete callee;
+    delete func;
+}
+
+Call::Call(Function *func) : func(func) {}
+
+Call::Call(std::vector<FunctionParameter *> arguments, Function *func) : func(func), arguments(std::move(arguments)) {}
+
+Function *Call::getFunc() const {
+    return func;
 }
