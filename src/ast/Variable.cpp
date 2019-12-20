@@ -23,3 +23,15 @@ std::string Variable::getNodeName() const {
 const std::string &Variable::getIdentifier() const {
     return identifier;
 }
+
+bool Variable::contains(Variable *var) {
+    return *this == *var;
+}
+
+bool Variable::operator==(const Variable &rhs) const {
+    return identifier == rhs.identifier;
+}
+
+bool Variable::operator!=(const Variable &rhs) const {
+    return !(rhs == *this);
+}

@@ -41,10 +41,10 @@ void Scope::addStatement(AbstractStatement *absStatement) {
     this->scopeStatements.emplace_back(absStatement);
 }
 
-/// Prints the nth last element of the scope statements.
+/// Returns the nth last element of the scope statements.
 /// For example, n=1 prints the last element and n=2 the penultimate element.
-/// \param n
-/// \return
+/// \param n The position of the element counted from back of the vector.
+/// \return The AbstractStatement at the n-th last position.
 AbstractStatement *Scope::getNthLastStatement(int n) {
     if (n > scopeStatements.size()) {
         return nullptr;
@@ -53,6 +53,10 @@ AbstractStatement *Scope::getNthLastStatement(int n) {
         auto pv = std::prev(it, n);
         return *pv;
     }
+}
+
+AbstractStatement *Scope::getLastStatement() {
+    return getNthLastStatement(1);
 }
 
 const std::vector<AbstractStatement *> &Scope::getScopeStatements() const {

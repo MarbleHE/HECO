@@ -16,8 +16,12 @@ void AbstractStatement::accept(Visitor &v) {
     std::cout << "This shouldn't be executed!" << std::endl;
 }
 
-BinaryExpr *AbstractStatement::contains(BinaryExpr *bexpTemplate) {
+BinaryExpr *AbstractStatement::contains(BinaryExpr *bexpTemplate, BinaryExpr *excludedSubtree) {
     return nullptr;
+}
+
+std::string AbstractStatement::getVarTargetIdentifier() {
+    return std::string();
 }
 
 std::ostream &operator<<(std::ostream &outs, const AbstractStatement &obj) {

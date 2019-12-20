@@ -10,8 +10,11 @@ class VarAssignm : public AbstractStatement, public Node {
 private:
     std::string identifier;
     AbstractExpr *value;
+
 public:
     VarAssignm(std::string identifier, AbstractExpr *value);
+
+    ~VarAssignm();
 
     [[nodiscard]] json toJson() const override;
 
@@ -23,9 +26,9 @@ public:
 
     [[nodiscard]] std::string getNodeName() const override;
 
-    BinaryExpr *contains(BinaryExpr *bexpTemplate) override;
+    BinaryExpr *contains(BinaryExpr *bexpTemplate, BinaryExpr *excludedSubtree) override;
 
-    ~VarAssignm();
+    std::string getVarTargetIdentifier() override;
 };
 
 #endif //MASTER_THESIS_CODE_VARASSIGNM_H

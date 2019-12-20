@@ -19,6 +19,12 @@ public:
     [[nodiscard]] std::string getNodeName() const override;
 
     [[nodiscard]] const std::string &getIdentifier() const;
+
+    bool operator==(const Variable &rhs) const;
+
+    bool operator!=(const Variable &rhs) const;
+
+    bool contains(Variable *var) override;
 };
 
 

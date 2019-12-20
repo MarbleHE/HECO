@@ -27,6 +27,12 @@ public:
     [[nodiscard]] virtual json toJson() const;
 
     virtual void accept(Visitor &v);
+
+    // TODO check out if excludedSubtree can be AbstractExpr instead
+    virtual BinaryExpr *contains(BinaryExpr *bexpTemplate, BinaryExpr *excludedSubtree);
+
+    virtual bool contains(Variable *var);
+
 };
 
 /// JSON representation to be used for vector<AbstractExpr> objects.

@@ -1,3 +1,4 @@
+#include <variant>
 #include "../../include/ast/Operator.h"
 
 
@@ -17,4 +18,20 @@ const std::string &Operator::getOperatorString() const {
 
 std::string Operator::getNodeName() const {
     return "Operator";
+}
+
+bool Operator::isUndefined() {
+    return operatorString.empty();
+}
+
+bool Operator::operator==(const Operator &rhs) const {
+    return operatorString == rhs.operatorString;
+}
+
+bool Operator::operator!=(const Operator &rhs) const {
+    return !(rhs == *this);
+}
+
+bool Operator::equals(std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp> op) const {
+    return this->getOperatorString() == OpSymb::getTextRepr(op);
 }

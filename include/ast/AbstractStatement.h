@@ -19,8 +19,9 @@ public:
 
     virtual void accept(Visitor &v);
 
-    virtual BinaryExpr *contains(BinaryExpr *bexpTemplate);
+    virtual BinaryExpr *contains(BinaryExpr *bexpTemplate, BinaryExpr *excludedSubtree);
 
+    virtual std::string getVarTargetIdentifier();
 };
 
 std::ostream &operator<<(std::ostream &outs, const AbstractStatement &obj);

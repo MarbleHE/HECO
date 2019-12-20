@@ -28,8 +28,7 @@ void PrintVisitor::printChildNodesIndented(T &elem) {
 }
 
 void PrintVisitor::visit(Ast &elem) {
-    resetLevel();
-    lastPrintedScope = nullptr;
+    resetVisitor();
     Visitor::visit(elem);
     // at the end of traversal print the tree if printScreen is true
     if (printScreen) {
@@ -166,9 +165,9 @@ void PrintVisitor::addOutputStr(const std::list<std::string> &args) {
         ss << "(" << *it << ")";
     }
     // only print scope where statement belongs to if statement has changed since last print
-    if (getLastPrintedScope() == nullptr || currentScope != getLastPrintedScope()) {
-        ss << "\t[" << this->currentScope->getScopeIdentifier() << "]";
-        setLastPrintedScope(currentScope);
+    if (getLastPrintedScope() == nullptr || curScope != getLastPrintedScope()) {
+        ss << "\t[" << this->curScope->getScopeIdentifier() << "]";
+        setLastPrintedScope(curScope);
     }
     ss << std::endl;
 }
@@ -187,4 +186,11 @@ PrintVisitor::~PrintVisitor() {
 
 std::string PrintVisitor::getOutput() const {
     return ss.str();
+}
+
+void PrintVisitor::resetVisitor() {
+    resetLevel();
+    lastPrintedScope = nullptr;
+    ss.clear();
+    ss.str(std::string());
 }

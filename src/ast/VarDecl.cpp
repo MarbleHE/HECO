@@ -3,6 +3,7 @@
 #include <utility>
 #include <LiteralInt.h>
 #include "BinaryExpr.h"
+#include "Group.h"
 
 json VarDecl::toJson() const {
     json j = {{"type",       getNodeName()},
@@ -54,13 +55,14 @@ AbstractExpr *VarDecl::getInitializer() const {
     return initializer;
 }
 
-BinaryExpr *VarDecl::contains(BinaryExpr *bexpTemplate) {
-    if (auto *castedBexp = dynamic_cast<BinaryExpr *>(this->getInitializer())) {
-        return castedBexp->containsValuesFrom(bexpTemplate);
-    }
-    return nullptr;
+BinaryExpr *VarDecl::contains(BinaryExpr *bexpTemplate, BinaryExpr *excludedSubtree) {
+    return this->getInitializer()->contains(bexpTemplate, excludedSubtree);
 }
 
 VarDecl::~VarDecl() {
     delete initializer;
+}
+
+std::string VarDecl::getVarTargetIdentifier() {
+    return this->getIdentifier();
 }

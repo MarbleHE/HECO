@@ -31,6 +31,8 @@ public:
     void addStatement(AbstractStatement *absStatement);
 
     AbstractStatement *getNthLastStatement(int n);
+
+    AbstractStatement *getLastStatement();
 };
 
 

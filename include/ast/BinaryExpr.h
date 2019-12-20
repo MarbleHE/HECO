@@ -28,11 +28,9 @@ public:
         this->right = createParam(right);
     }
 
-    explicit BinaryExpr(Operator *op);
+    ~BinaryExpr() override;
 
     [[nodiscard]] json toJson() const override;
-
-    ~BinaryExpr() override;
 
     [[nodiscard]] AbstractExpr *getLeft() const;
 
@@ -44,8 +42,6 @@ public:
 
     [[nodiscard]] std::string getNodeName() const override;
 
-    BinaryExpr *containsValuesFrom(BinaryExpr *bexpTemplate);
-
     void setLeft(AbstractExpr *left);
 
     void setOp(Operator *op);
@@ -53,6 +49,13 @@ public:
     void setRight(AbstractExpr *right);
 
     void static swapOperandsLeftAWithRightB(BinaryExpr *bexpA, BinaryExpr *bexpB);
+
+    BinaryExpr(OpSymb::BinaryOp op);
+
+
+    BinaryExpr *contains(BinaryExpr *bexpTemplate, BinaryExpr *excludedSubtree) override;
+
+    bool contains(Variable *var) override;
 };
 
 

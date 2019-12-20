@@ -3,6 +3,7 @@
 
 #include "../visitor/Visitor.h"
 #include "Node.h"
+#include <variant>
 
 class OpSymb {
 protected:
@@ -40,6 +41,19 @@ public:
         static const std::string unaryOpStrings[] = {"!", "++", "--"};
         return unaryOpStrings[uop];
     }
+
+    static std::string getTextRepr(std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp> opVar) {
+        switch (opVar.index()) {
+            case 0:
+                return getTextRepr(std::get<0>(opVar));
+            case 1:
+                return getTextRepr(std::get<1>(opVar));
+            case 2:
+                return getTextRepr(std::get<2>(opVar));
+            default:
+                return "";
+        };
+    }
 };
 
 
@@ -59,6 +73,13 @@ public:
 
     [[nodiscard]] std::string getNodeName() const override;
 
+    bool isUndefined();
+
+    bool operator==(const Operator &rhs) const;
+
+    bool operator!=(const Operator &rhs) const;
+
+    bool equals(std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp> op) const;
 };
 
 

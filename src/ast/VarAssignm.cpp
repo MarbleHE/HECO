@@ -30,14 +30,15 @@ std::string VarAssignm::getNodeName() const {
     return "VarAssignm";
 }
 
-BinaryExpr *VarAssignm::contains(BinaryExpr *bexpTemplate) {
-    if (auto *castedBexp = dynamic_cast<BinaryExpr *>(this->getValue())) {
-        return castedBexp->containsValuesFrom(bexpTemplate);
-    }
-    return nullptr;
+BinaryExpr *VarAssignm::contains(BinaryExpr *bexpTemplate, BinaryExpr *excludedSubtree) {
+    return this->getValue()->contains(bexpTemplate, excludedSubtree);
 }
 
 VarAssignm::~VarAssignm() {
     delete value;
+}
+
+std::string VarAssignm::getVarTargetIdentifier() {
+    return this->getIdentifier();
 }
 

@@ -1,4 +1,5 @@
 #include "../../include/ast/Group.h"
+#include "BinaryExpr.h"
 
 json Group::toJson() const {
     json j;
@@ -24,5 +25,12 @@ AbstractExpr *Group::getExpr() const {
 
 Group::~Group() {
     delete expr;
+}
+
+BinaryExpr *Group::contains(BinaryExpr *bexpTemplate, BinaryExpr *excludedSubtree) {
+    if (auto *child = dynamic_cast<BinaryExpr *>(this->expr)) {
+        return child->contains(bexpTemplate, excludedSubtree);
+    }
+    return nullptr;
 }
 

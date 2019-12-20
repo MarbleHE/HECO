@@ -20,6 +20,8 @@ public:
     explicit Group(AbstractExpr *expr);
 
     ~Group();
+
+    BinaryExpr *contains(BinaryExpr *bexpTemplate, BinaryExpr *excludedSubtree) override;
 };
 
 

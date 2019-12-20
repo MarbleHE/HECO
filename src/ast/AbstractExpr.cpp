@@ -1,4 +1,5 @@
 #include <iostream>
+#include <Variable.h>
 #include "../../include/ast/AbstractExpr.h"
 #include "LiteralInt.h"
 #include "LiteralBool.h"
@@ -35,6 +36,14 @@ LiteralString *AbstractExpr::createParam(const char *str) {
 
 AbstractExpr *AbstractExpr::createParam(AbstractExpr *abstractExpr) {
     return abstractExpr;
+}
+
+BinaryExpr *AbstractExpr::contains(BinaryExpr *bexpTemplate, BinaryExpr *excludedSubtree) {
+    return nullptr;
+}
+
+bool AbstractExpr::contains(Variable *var) {
+    return false;
 }
 
 void to_json(json &j, const AbstractExpr &absExpr) {

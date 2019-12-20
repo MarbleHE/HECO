@@ -31,9 +31,11 @@ public:
 
     [[nodiscard]] AbstractExpr *getInitializer() const;
 
-    BinaryExpr *contains(BinaryExpr *bexpTemplate) override;
+    BinaryExpr *contains(BinaryExpr *bexpTemplate, BinaryExpr *excludedSubtree) override;
 
     ~VarDecl() override;
+
+    std::string getVarTargetIdentifier() override;
 };
 
 

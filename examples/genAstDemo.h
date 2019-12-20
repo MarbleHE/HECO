@@ -80,4 +80,7 @@ void generateDemoThree(Ast &ast);
 /// \param ast The Ast object this tree should be written into.
 void generateDemoFour(Ast &ast);
 
+void generateDemoFive(Ast &ast);
+
+
 #endif //MASTER_THESIS_CODE_GENASTDEMO_H

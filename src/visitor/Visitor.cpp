@@ -19,7 +19,7 @@
 
 void Visitor::visit(Ast &elem) {
     // assumption: AST is always the enclosing object that points to the root
-    this->currentScope = new Scope("global", nullptr);
+    this->curScope = new Scope("global", nullptr);
     elem.getRootNode()->accept(*this);
 }
 
@@ -30,7 +30,7 @@ void Visitor::visit(BinaryExpr &elem) {
 }
 
 void Visitor::visit(Block &elem) {
-    currentScope->addStatement(&elem);
+    curScope->addStatement(&elem);
     changeToInnerScope(elem.getUniqueNodeId());
     for (auto &stat : *elem.getStatements()) {
         stat->accept(*this);
@@ -39,7 +39,7 @@ void Visitor::visit(Block &elem) {
 }
 
 void Visitor::visit(Call &elem) {
-    currentScope->addStatement(&elem);
+    curScope->addStatement(&elem);
     changeToInnerScope(elem.getUniqueNodeId());
     // callee
     elem.getFunc()->accept(*this);
@@ -51,7 +51,7 @@ void Visitor::visit(Call &elem) {
 }
 
 void Visitor::visit(CallExternal &elem) {
-    currentScope->addStatement(&elem);
+    curScope->addStatement(&elem);
     // arguments for calling function
     if (elem.getArguments() != nullptr) {
         for (auto &fp : *elem.getArguments()) {
@@ -61,7 +61,7 @@ void Visitor::visit(CallExternal &elem) {
 }
 
 void Visitor::visit(Function &elem) {
-    currentScope->addStatement(&elem);
+    curScope->addStatement(&elem);
     changeToInnerScope(elem.getUniqueNodeId());
     // visit FunctionParameter
     for (auto fp : elem.getParams()) {
@@ -83,7 +83,7 @@ void Visitor::visit(Group &elem) {
 }
 
 void Visitor::visit(If &elem) {
-    currentScope->addStatement(&elem);
+    curScope->addStatement(&elem);
 
     // condition
     elem.getCondition()->accept(*this);
@@ -143,7 +143,7 @@ void Visitor::visit(Operator &elem) {
 }
 
 void Visitor::visit(Return &elem) {
-    currentScope->addStatement(&elem);
+    curScope->addStatement(&elem);
     elem.getValue()->accept(*this);
 }
 
@@ -155,12 +155,12 @@ void Visitor::visit(UnaryExpr &elem) {
 }
 
 void Visitor::visit(VarAssignm &elem) {
-    currentScope->addStatement(&elem);
+    curScope->addStatement(&elem);
     elem.getValue()->accept(*this);
 }
 
 void Visitor::visit(VarDecl &elem) {
-    currentScope->addStatement(&elem);
+    curScope->addStatement(&elem);
     // visit initializer
     if (elem.getInitializer() != nullptr) {
         elem.getInitializer()->accept(*this);
@@ -172,7 +172,7 @@ void Visitor::visit(Variable &elem) {
 }
 
 void Visitor::visit(While &elem) {
-    currentScope->addStatement(&elem);
+    curScope->addStatement(&elem);
 
     // condition
     elem.getCondition()->accept(*this);
@@ -192,16 +192,16 @@ void Visitor::visit(While &elem) {
 }
 
 void Visitor::changeToOuterScope() {
-    auto temp = currentScope->getOuterScope();
-    this->currentScope = temp;
+    auto temp = curScope->getOuterScope();
+    this->curScope = temp;
 }
 
 void Visitor::changeToInnerScope(const std::string &nodeId) {
-    auto temp = currentScope->getOrCreateInnerScope(nodeId);
-    this->currentScope = temp;
+    auto temp = curScope->getOrCreateInnerScope(nodeId);
+    this->curScope = temp;
 }
 
 Visitor::Visitor() {
-    currentScope = nullptr;
+    curScope = nullptr;
 }
 

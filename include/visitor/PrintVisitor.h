@@ -77,6 +77,8 @@ public:
     void printChildNodesIndented(T &elem);
 
     std::string getOutput() const;
+
+    void resetVisitor();
 };
 
 

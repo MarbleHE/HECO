@@ -35,19 +35,20 @@ std::string BinaryExpr::getNodeName() const {
     return "BinaryExpr";
 }
 
-BinaryExpr::BinaryExpr(Operator *op) : op(op) {
+BinaryExpr::BinaryExpr(OpSymb::BinaryOp op) : op(new Operator(op)) {
     this->left = nullptr;
     this->right = nullptr;
 }
 
-BinaryExpr *BinaryExpr::containsValuesFrom(BinaryExpr *bexpTemplate) {
-    if ((bexpTemplate->getLeft() == nullptr || bexpTemplate->getLeft() == this->getLeft())
-        && (bexpTemplate->getRight() == nullptr || bexpTemplate->getRight() == this->getRight())
-        && (bexpTemplate->getOp().getOperatorString().empty() ||
-            bexpTemplate->getOp().getOperatorString() == this->getOp().getOperatorString())) {
-        return this;
+BinaryExpr *BinaryExpr::contains(BinaryExpr *bexpTemplate, BinaryExpr *excludedSubtree) {
+    if (excludedSubtree != nullptr && this == excludedSubtree) {
+        return nullptr;
+    } else {
+        bool emptyOrEqualLeft = (!bexpTemplate->getLeft() || bexpTemplate->getLeft() == this->getLeft());
+        bool emptyOrEqualRight = (!bexpTemplate->getRight() || bexpTemplate->getRight() == this->getRight());
+        bool emptyOrEqualOp = (bexpTemplate->getOp().isUndefined() || this->getOp() == bexpTemplate->getOp());
+        return (emptyOrEqualLeft && emptyOrEqualRight && emptyOrEqualOp) ? this : nullptr;
     }
-    return nullptr;
 }
 
 void BinaryExpr::setLeft(AbstractExpr *left) {
@@ -75,3 +76,6 @@ BinaryExpr::~BinaryExpr() {
 }
 
 
+bool BinaryExpr::contains(Variable *var) {
+    return (getLeft()->contains(var) || getRight()->contains(var));
+}

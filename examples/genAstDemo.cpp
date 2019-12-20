@@ -212,12 +212,18 @@ void generateDemoThree(Ast &ast) {
     // int result = a * b;
     func->addStatement(
             new VarDecl("result", "int",
-                        new BinaryExpr("a", OpSymb::BinaryOp::multiplication, "b")));
+                        new BinaryExpr(
+                                new Variable("a"),
+                                OpSymb::BinaryOp::multiplication,
+                                new Variable("b"))));
 
     // result = result * c;
     func->addStatement(
             new VarAssignm("result",
-                           new BinaryExpr("result", OpSymb::BinaryOp::multiplication, "c")));
+                           new BinaryExpr(
+                                   new Variable("result"),
+                                   OpSymb::BinaryOp::multiplication,
+                                   new Variable("c"))));
 }
 
 void generateDemoFour(Ast &ast) {
@@ -249,4 +255,56 @@ void generateDemoFour(Ast &ast) {
     func->addStatement(
             new VarAssignm("result",
                            new BinaryExpr("result", OpSymb::BinaryOp::multiplication, "c")));
+}
+
+void generateDemoFive(Ast &ast) {
+    // int computeMult() {...}
+    Function *func = dynamic_cast<Function *>(ast.setRootNode(new Function("multiMult")));
+
+    // int result = (inA * (inB * inC));
+    func->addStatement(new VarDecl("result", "int",
+                                   new BinaryExpr(
+                                           new Variable("inA"),
+                                           OpSymb::multiplication,
+                                           new BinaryExpr(
+                                                   new Variable("inB"),
+                                                   OpSymb::multiplication,
+                                                   new Variable("inC")))));
+
+    // return result;
+    func->addStatement(new Return(new Variable("result")));
+}
+
+void generateDemoSix(Ast &ast) {
+    //(Z * (A * (B * C))) --> ((B * C) * (A * Z))
+    // int computeMult() {...}
+    Function *func = dynamic_cast<Function *>(ast.setRootNode(new Function("multiMult")));
+
+//    // int result = (inA * (inB * inC));
+//    func->addStatement(new VarDecl("result", "int",
+//                                   new BinaryExpr(new Variable("inZ"),
+//                                                  OpSymb::multiplication,
+//                                                  new BinaryExpr(
+//                                                          new Variable("inA"),
+//                                                          OpSymb::multiplication,
+//                                                          new BinaryExpr(
+//                                                                  new Variable("inB"),
+//                                                                  OpSymb::multiplication,
+//                                                                  new Variable("inC"))))));
+
+    // int result = (inA * (inB * inC));
+    func->addStatement(new VarDecl("result", "int",
+                                   new Group(new BinaryExpr(new Variable("inZ"),
+                                                            OpSymb::multiplication,
+                                                            new Group(new BinaryExpr(
+                                                                    new Variable("inA"),
+                                                                    OpSymb::multiplication,
+                                                                    new Group(new BinaryExpr(
+                                                                            new Variable("inB"),
+                                                                            OpSymb::multiplication,
+                                                                            new Variable("inC")))))))));
+
+
+    // return result;
+    func->addStatement(new Return(new Variable("result")));
 }

@@ -97,7 +97,7 @@ public:
 
     virtual void visit(While &elem);
 
-    Scope *currentScope;
+    Scope *curScope;
 
     void changeToOuterScope();
 
