@@ -1,35 +1,34 @@
 #include "../../include/ast/UnaryExpr.h"
 
-
 json UnaryExpr::toJson() const {
-    json j;
-    j["type"] = getNodeName();
-    j["operator"] = this->op->getOperatorString();
-    j["rightOperand"] = this->right->toJson();
-    return j;
+  json j;
+  j["type"] = getNodeName();
+  j["operator"] = this->op->getOperatorString();
+  j["rightOperand"] = this->right->toJson();
+  return j;
 }
 
 UnaryExpr::UnaryExpr(OpSymb::UnaryOp op, AbstractExpr *right) : right(right) {
-    this->op = new Operator(op);
+  this->op = new Operator(op);
 }
 
 void UnaryExpr::accept(Visitor &v) {
-    v.visit(*this);
+  v.visit(*this);
 }
 
 Operator *UnaryExpr::getOp() const {
-    return op;
+  return op;
 }
 
 AbstractExpr *UnaryExpr::getRight() const {
-    return right;
+  return right;
 }
 
 std::string UnaryExpr::getNodeName() const {
-    return "UnaryExpr";
+  return "UnaryExpr";
 }
 
 UnaryExpr::~UnaryExpr() {
-    delete op;
-    delete right;
+  delete op;
+  delete right;
 }

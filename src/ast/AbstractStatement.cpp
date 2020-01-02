@@ -24,6 +24,10 @@ std::string AbstractStatement::getVarTargetIdentifier() {
     return std::string();
 }
 
+bool AbstractStatement::isEqual(AbstractStatement *as) {
+    return false;
+}
+
 std::ostream &operator<<(std::ostream &outs, const AbstractStatement &obj) {
     return outs << obj.toString();
 }
@@ -31,7 +35,6 @@ std::ostream &operator<<(std::ostream &outs, const AbstractStatement &obj) {
 void to_json(json &j, const AbstractStatement &absStat) {
     j = absStat.toJson();
 }
-
 
 void to_json(json &j, const AbstractStatement *absStat) {
     j = absStat->toJson();

@@ -8,7 +8,7 @@ int getLiteralIntValue(AbstractExpr *abExpr) {
     return dynamic_cast<LiteralInt *>(abExpr)->getValue();
 }
 
-TEST(BinaryExprTests, bexp3Add11) {
+TEST(BinaryExprTests, bexp3Add11) { /* NOLINT */
     int valLhs = 3, valRhs = 11;
     auto *b = new BinaryExpr(valLhs, OpSymb::BinaryOp::addition, valRhs);
     EXPECT_EQ(getLiteralIntValue(b->getLeft()), valLhs);
@@ -16,7 +16,7 @@ TEST(BinaryExprTests, bexp3Add11) {
     EXPECT_EQ(b->getOp().getOperatorString(), "add");
 }
 
-TEST(BinaryExprTests, bexp2Mult9Add3) {
+TEST(BinaryExprTests, bexp2Mult9Add3) { /* NOLINT */
     int valLeft = 2, valMid = 9, valRight = 3;
     auto *b = new BinaryExpr(valLeft, OpSymb::BinaryOp::multiplication,
                              new BinaryExpr(valMid, OpSymb::BinaryOp::addition, valRight));

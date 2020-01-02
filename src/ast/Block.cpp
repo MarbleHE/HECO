@@ -3,40 +3,39 @@
 #include <iostream>
 #include <VarDecl.h>
 
-
 Block::Block() {
-    statements = nullptr;
+  statements = nullptr;
 }
 
 json Block::toJson() const {
-    json j = {{"type",       getNodeName()},
-              {"statements", *this->statements}};
-    return j;
+  json j = {{"type", getNodeName()},
+            {"statements", *this->statements}};
+  return j;
 }
 
 Block::Block(AbstractStatement *stat) {
-    auto *vec = new std::vector<AbstractStatement *>;
-    vec->emplace_back(stat);
-    this->statements = vec;
+  auto *vec = new std::vector<AbstractStatement *>;
+  vec->emplace_back(stat);
+  this->statements = vec;
 }
 
 Block::Block(std::vector<AbstractStatement *> *statements) {
-    this->statements = statements;
+  this->statements = statements;
 }
 
 void Block::accept(Visitor &v) {
-    v.visit(*this);
+  v.visit(*this);
 }
 
 std::string Block::getNodeName() const {
-    return "Block";
+  return "Block";
 }
 
 std::vector<AbstractStatement *> *Block::getStatements() const {
-    return statements;
+  return statements;
 }
 
 Block::~Block() {
-    delete statements;
+  delete statements;
 }
 

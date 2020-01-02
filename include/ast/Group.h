@@ -1,28 +1,27 @@
 #ifndef MASTER_THESIS_CODE_GROUP_H
 #define MASTER_THESIS_CODE_GROUP_H
 
-
 #include "AbstractExpr.h"
+#include <string>
 
 class Group : public AbstractExpr, public Node {
-private:
-    AbstractExpr *expr;
-public:
+ private:
+  AbstractExpr *expr;
 
-    [[nodiscard]] json toJson() const override;
+ public:
+  explicit Group(AbstractExpr *expr);
 
-    void accept(Visitor &v) override;
+  ~Group() override;
 
-    [[nodiscard]] std::string getNodeName() const override;
+  [[nodiscard]] json toJson() const override;
 
-    [[nodiscard]] AbstractExpr *getExpr() const;
+  void accept(Visitor &v) override;
 
-    explicit Group(AbstractExpr *expr);
+  [[nodiscard]] std::string getNodeName() const override;
 
-    ~Group();
+  [[nodiscard]] AbstractExpr *getExpr() const;
 
-    BinaryExpr *contains(BinaryExpr *bexpTemplate, BinaryExpr *excludedSubtree) override;
+  BinaryExpr *contains(BinaryExpr *bexpTemplate, AbstractExpr *excludedSubtree) override;
 };
-
 
 #endif //MASTER_THESIS_CODE_GROUP_H

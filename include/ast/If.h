@@ -1,35 +1,34 @@
 #ifndef MASTER_THESIS_CODE_IF_H
 #define MASTER_THESIS_CODE_IF_H
 
-
 #include "AbstractStatement.h"
 #include "AbstractExpr.h"
+#include <string>
 
 class If : public AbstractStatement, public Node {
-private:
-    AbstractExpr *condition;
-    AbstractStatement *thenBranch;
-    AbstractStatement *elseBranch;
+ private:
+  AbstractExpr *condition;
+  AbstractStatement *thenBranch;
+  AbstractStatement *elseBranch;
 
-public:
-    If(AbstractExpr *condition, AbstractStatement *thenBranch, AbstractStatement *elseBranch);
+ public:
+  If(AbstractExpr *condition, AbstractStatement *thenBranch);
 
-    If(AbstractExpr *condition, AbstractStatement *thenBranch);
+  If(AbstractExpr *condition, AbstractStatement *thenBranch, AbstractStatement *elseBranch);
 
-    json toJson() const override;
+  ~If();
 
-    virtual void accept(Visitor &v) override;
+  [[nodiscard]] json toJson() const override;
 
-    std::string getNodeName() const override;
+  void accept(Visitor &v) override;
 
-    AbstractExpr *getCondition() const;
+  [[nodiscard]] std::string getNodeName() const override;
 
-    AbstractStatement *getThenBranch() const;
+  [[nodiscard]] AbstractExpr *getCondition() const;
 
-    AbstractStatement *getElseBranch() const;
+  [[nodiscard]] AbstractStatement *getThenBranch() const;
 
-    virtual ~If();
+  [[nodiscard]] AbstractStatement *getElseBranch() const;
 };
-
 
 #endif //MASTER_THESIS_CODE_IF_H

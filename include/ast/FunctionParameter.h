@@ -1,26 +1,26 @@
 #ifndef MASTER_THESIS_CODE_FUNCTIONPARAMETER_H
 #define MASTER_THESIS_CODE_FUNCTIONPARAMETER_H
 
-
 #include "Variable.h"
+#include <string>
 
 class FunctionParameter : public AbstractExpr, public Node {
-private:
-    std::string datatype;
-    AbstractExpr *value;
+ private:
+  std::string datatype;
+  AbstractExpr *value;
 
-public:
-    FunctionParameter(std::string datatype, AbstractExpr *value);
+ public:
+  FunctionParameter(std::string datatype, AbstractExpr *value);
 
-    [[nodiscard]] json toJson() const override;
+  [[nodiscard]] json toJson() const override;
 
-    void accept(Visitor &v) override;
+  void accept(Visitor &v) override;
 
-    [[nodiscard]] std::string getNodeName() const override;
+  [[nodiscard]] std::string getNodeName() const override;
 
-    [[nodiscard]] const std::string &getDatatype() const;
+  [[nodiscard]] const std::string &getDatatype() const;
 
-    [[nodiscard]] AbstractExpr *getValue() const;
+  [[nodiscard]] AbstractExpr *getValue() const;
 };
 
 /// Defines the JSON representation to be used for vector<FunctionParameter> objects.

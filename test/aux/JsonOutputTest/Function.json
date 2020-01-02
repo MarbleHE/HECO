@@ -1,5 +1,6 @@
 {
   "type": "Function",
+  "name": "computeX",
   "params": [
     {
       "type": "FunctionParameter",

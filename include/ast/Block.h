@@ -1,31 +1,30 @@
 #ifndef MASTER_THESIS_CODE_BLOCK_H
 #define MASTER_THESIS_CODE_BLOCK_H
 
-
 #include <vector>
 #include "AbstractStatement.h"
+#include <string>
 
 class Block : public AbstractStatement, public Node {
-private:
-    std::vector<AbstractStatement *> *statements;
+ private:
+  std::vector<AbstractStatement *> *statements;
 
-public:
-    Block();
+ public:
+  Block();
 
-    explicit Block(AbstractStatement *stat);
+  ~Block();
 
-    explicit Block(std::vector<AbstractStatement *> *statements);
+  explicit Block(AbstractStatement *stat);
 
-    [[nodiscard]] json toJson() const override;
+  explicit Block(std::vector<AbstractStatement *> *statements);
 
-    void accept(Visitor &v) override;
+  [[nodiscard]] json toJson() const override;
 
-    [[nodiscard]] std::string getNodeName() const override;
+  void accept(Visitor &v) override;
 
-    [[nodiscard]] std::vector<AbstractStatement *> *getStatements() const;
+  [[nodiscard]] std::string getNodeName() const override;
 
-    virtual ~Block();
+  [[nodiscard]] std::vector<AbstractStatement *> *getStatements() const;
 };
-
 
 #endif //MASTER_THESIS_CODE_BLOCK_H

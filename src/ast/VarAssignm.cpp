@@ -1,6 +1,5 @@
 #include <utility>
 
-
 #include "../../include/ast/VarAssignm.h"
 #include "BinaryExpr.h"
 
@@ -42,3 +41,10 @@ std::string VarAssignm::getVarTargetIdentifier() {
     return this->getIdentifier();
 }
 
+bool VarAssignm::isEqual(AbstractStatement *as) {
+    if (auto otherVarAssignm = dynamic_cast<VarAssignm *>(as)) {
+        return this->getIdentifier() == otherVarAssignm->getIdentifier() &&
+                this->getValue()->isEqual(otherVarAssignm->getValue());
+    }
+    return false;
+}

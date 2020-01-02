@@ -6,37 +6,37 @@
 #include "AbstractExpr.h"
 
 class VarDecl : public AbstractStatement, public Node {
-private:
-    std::string identifier;
-    std::string datatype;
-    AbstractExpr *initializer;
+ private:
+  std::string identifier;
+  std::string datatype;
+  AbstractExpr *initializer;
 
-public:
+ public:
+  VarDecl(std::string name, std::string datatype);
 
-    VarDecl(std::string name, std::string datatype);
+  VarDecl(std::string name, std::string datatype, AbstractExpr *initializer);
 
-    VarDecl(std::string name, std::string datatype, AbstractExpr *initializer);
+  VarDecl(std::string name, const std::string &datatype, int i);
 
-    VarDecl(std::string name, const std::string &datatype, int i);
+  [[nodiscard]] json toJson() const override;
 
-    [[nodiscard]] json toJson() const override;
+  void accept(Visitor &v) override;
 
-    void accept(Visitor &v) override;
+  [[nodiscard]] std::string getNodeName() const override;
 
-    [[nodiscard]] std::string getNodeName() const override;
+  [[nodiscard]] const std::string &getIdentifier() const;
 
-    [[nodiscard]] const std::string &getIdentifier() const;
+  [[nodiscard]] const std::string &getDatatype() const;
 
-    [[nodiscard]] const std::string &getDatatype() const;
+  [[nodiscard]] AbstractExpr *getInitializer() const;
 
-    [[nodiscard]] AbstractExpr *getInitializer() const;
+  BinaryExpr *contains(BinaryExpr *bexpTemplate, BinaryExpr *excludedSubtree) override;
 
-    BinaryExpr *contains(BinaryExpr *bexpTemplate, BinaryExpr *excludedSubtree) override;
+  ~VarDecl() override;
 
-    ~VarDecl() override;
+  std::string getVarTargetIdentifier() override;
 
-    std::string getVarTargetIdentifier() override;
+  bool isEqual(AbstractStatement *as) override;
 };
-
 
 #endif //MASTER_THESIS_CODE_VARDECL_H

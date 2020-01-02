@@ -6,38 +6,167 @@
 #include "AstTestingGenerator.h"
 #include "Function.h"
 #include "BinaryExpr.h"
+#include "VarAssignm.h"
 
-/// Trivial case where multiplication happens in subsequent statements.
-/// Expected: Rewriting
-TEST(MultRewriteTest, rewriteSuccessfulSimpleAst) { /* NOLINT */
+/// Check to ensure that the AST testing generator works as expected.
+TEST(MultRewriteTest, astTestingGeneratorTest) { /* NOLINT */
+  const int HIGHEST_CASE_NUM = 6;
+  int i = 1;
+  for (; i < HIGHEST_CASE_NUM; i++) {
     Ast ast;
-    AstTestingGenerator::getRewritingAst(2, ast);
-
-    // perform rewriting
-    MultRewriteVisitor mrv;
-    mrv.visit(ast);
-
-    // check for expected changes
-    auto func = dynamic_cast<Function *>(ast.getRootNode());
-    auto prodDecl = dynamic_cast<VarDecl *>(func->getBody().at(0));
-    auto expectedProdDecl = new VarDecl("prod", "int",
-                                        new BinaryExpr(
-                                                new Variable("inputC"),
-                                                OpSymb::multiplication,
-                                                new Variable("inputB")));
-    // TODO implement (virtual) operator== for AbstractStatement to enable EXPECT_EQ for AbstractStatements
-    // TODO implement comparison in derived classes
-    // EXPECT_EQ(*prodDecl, *expectedProdDecl);
-
+    AstTestingGenerator::generateAst(i, ast);
+    EXPECT_NE(ast.getRootNode(), nullptr);
+  }
+  Ast ast;
+  EXPECT_THROW(AstTestingGenerator::generateAst(i+1, ast), std::logic_error);
 }
 
-/// Expected: No rewriting
-//TEST(MultRewriteTest, rewriteNotApplicable) { /* NOLINT */
-//    Ast ast;
-//    // generate an AST to be used for rewriting test
-//    AstTestingGenerator::getRewritingAst(2, ast);
-//
-//    std::cout << "test";
-//
-//
-//}
+/// Case where multiplication happens in subsequent statements:
+///     int prod = inputA * inputB;
+///     prod = prod * inputC;
+/// [Expected] Rewriting is performed:
+///     int prod = inputC * inputB;
+///     prod = prod * inputA;
+TEST(MultRewriteTest, rewriteSuccessfulSubsequentStatementsMultiplication) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(2, ast);
+
+  // perform rewriting
+  MultRewriteVisitor mrv;
+  mrv.visit(ast);
+  EXPECT_EQ(mrv.getNumChanges(), 1);
+
+  // check presence of expected changes
+
+  //  int prod = inputC * inputB;
+  auto func = dynamic_cast<Function *>(ast.getRootNode());
+  auto prodDecl = dynamic_cast<VarDecl *>(func->getBody().at(0));
+  auto expectedProdDecl = new VarDecl("prod", "int",
+                                      new BinaryExpr(
+                                          new Variable("inputC"),
+                                          OpSymb::multiplication,
+                                          new Variable("inputB")));
+  EXPECT_TRUE(prodDecl->isEqual(expectedProdDecl));
+
+  //  prod = prod * inputA;
+  auto prodAssignm = dynamic_cast<VarAssignm *>(func->getBody().at(1));
+  auto expectedProdAssignm = new VarAssignm("prod", new BinaryExpr(
+      new Variable("prod"),
+      OpSymb::multiplication,
+      new Variable("inputA")));
+  EXPECT_TRUE(prodAssignm->isEqual(expectedProdAssignm));
+}
+
+/// Case where multiplication happens in a single statement:
+///     int prod = [inputA * [inputB * inputC]]
+/// [Expected] Rewriting is performed:
+///     int prod = [inputC * [inputB * inputA]]
+TEST(MultRewriteTest, rewriteSuccessfulSingleStatementMultiplication) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(1, ast);
+
+  // perform rewriting
+  MultRewriteVisitor mrv;
+  mrv.visit(ast);
+  EXPECT_EQ(mrv.getNumChanges(), 1);
+
+
+  // check presence of expected changes
+
+  //  int prod = [inputC * [inputB * inputA]]
+  auto func = dynamic_cast<Function *>(ast.getRootNode());
+  auto prodDecl = dynamic_cast<VarDecl *>(func->getBody().at(0));
+  auto expectedProdDecl = new VarDecl("prod", "int",
+                                      new BinaryExpr(
+                                          new Variable("inputC"),
+                                          OpSymb::multiplication,
+                                          new BinaryExpr(
+                                              new Variable("inputB"),
+                                              OpSymb::multiplication,
+                                              new Variable("inputA"))));
+
+  EXPECT_TRUE(prodDecl->isEqual(expectedProdDecl));
+}
+
+/// Case where multiplications happen subsequent but there is a statement in between:
+///     int prod = inputA * inputB;
+///     int rInt = rand();
+///     prod = prod * inputC;
+/// [Expected] No rewriting is performed.
+TEST(MultRewriteTest, noRewriteIfStatementInBetween) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(3, ast);
+
+  // perform rewriting
+  MultRewriteVisitor mrv;
+  mrv.visit(ast);
+
+  EXPECT_EQ(mrv.changedAst(), false);
+}
+
+/// Case where multiplications do happen subsequent but prior statement is in other scope:
+///     int prod = inputA * inputB;
+///     if (prod > 42) {
+///         prod = prod * inputC;
+///     }
+/// [Expected] No rewriting is performed.
+TEST(MultRewriteTest, noRewriteIfOutOfScope) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(4, ast);
+
+  // perform rewriting
+  MultRewriteVisitor mrv;
+  mrv.visit(ast);
+
+  EXPECT_EQ(mrv.changedAst(), false);
+}
+
+/// Case where multiplications do happen subsequent but variable from first statement is not involved in second
+/// statement:
+///     int prod = inputA * inputB;
+///     argPow2 = inputC * inputC;
+/// [Expected] No rewriting is performed.
+TEST(MultRewriteTest, noRewriteForIndependentStatements) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(5, ast);
+
+  // perform rewriting
+  MultRewriteVisitor mrv;
+  mrv.visit(ast);
+
+  EXPECT_EQ(mrv.changedAst(), false);
+}
+
+/// Case where multiplications do happen subsequent with other variable as assignment target:
+///     int prod = inputA * inputB;
+///     int prod2 = prod * inputC;
+/// [Expected] Rewriting is performed:
+///     int prod = inputC * inputB;
+///     int prod2 = prod * inputA;
+TEST(MultRewriteTest, rewriteNotApplicable) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(6, ast);
+
+  // perform rewriting
+  MultRewriteVisitor mrv;
+  mrv.visit(ast);
+  EXPECT_EQ(mrv.getNumChanges(), 1);
+
+  //  int prod = inputC * inputB;
+  auto func = dynamic_cast<Function *>(ast.getRootNode());
+  auto prodDecl = dynamic_cast<VarDecl *>(func->getBody().at(0));
+  auto expectedProdDecl = new VarDecl("prod", "int",
+                                      new BinaryExpr(
+                                          new Variable("inputC"),
+                                          OpSymb::multiplication,
+                                          new Variable("inputB")));
+  EXPECT_TRUE(prodDecl->isEqual(expectedProdDecl));
+
+  //  int prod2 = prod * inputA;
+  prodDecl = dynamic_cast<VarDecl *>(func->getBody().at(1));
+  expectedProdDecl = new VarDecl("prod2", "int", new BinaryExpr(
+      new Variable("prod"),
+      OpSymb::multiplication,
+      new Variable("inputA")));
+  EXPECT_TRUE(prodDecl->isEqual(expectedProdDecl));
+}

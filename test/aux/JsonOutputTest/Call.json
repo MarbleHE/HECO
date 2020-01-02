@@ -12,6 +12,7 @@
   ],
   "function": {
     "type": "Function",
+    "name": "computeSecret",
     "body": [
       {
         "type": "Return",

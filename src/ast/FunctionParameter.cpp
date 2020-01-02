@@ -3,31 +3,30 @@
 
 #include <utility>
 
-
 FunctionParameter::FunctionParameter(std::string datatype, AbstractExpr *value)
-        : datatype(std::move(datatype)), value(value) {}
+    : datatype(std::move(datatype)), value(value) {}
 
 void to_json(json &j, const FunctionParameter &funcParam) {
     j = {
-            {"type",     funcParam.getNodeName()},
-            {"value",    funcParam.getValue()->toJson()},
-            {"datatype", funcParam.getDatatype()}
+        {"type", funcParam.getNodeName()},
+        {"value", funcParam.getValue()->toJson()},
+        {"datatype", funcParam.getDatatype()}
     };
 }
 
 void to_json(json &j, const FunctionParameter *funcParam) {
     j = {
-            {"type",     funcParam->getNodeName()},
-            {"value",    funcParam->getValue()->toJson()},
-            {"datatype", funcParam->getDatatype()}
+        {"type", funcParam->getNodeName()},
+        {"value", funcParam->getValue()->toJson()},
+        {"datatype", funcParam->getDatatype()}
     };
 }
 
 json FunctionParameter::toJson() const {
     json j = {
-            {"type",     getNodeName()},
-            {"value",    getValue()->toJson()},
-            {"datatype", getDatatype()}
+        {"type", getNodeName()},
+        {"value", getValue()->toJson()},
+        {"datatype", getDatatype()}
     };
     return j;
 }

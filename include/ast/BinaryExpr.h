@@ -7,56 +7,57 @@
 #include "LiteralInt.h"
 #include "LiteralBool.h"
 #include "LiteralString.h"
+#include <string>
 
 class BinaryExpr : public AbstractExpr, public Node {
-protected:
-    AbstractExpr *left;
-    Operator *op;
-    AbstractExpr *right;
+ protected:
+  AbstractExpr *left;
+  Operator *op;
+  AbstractExpr *right;
 
-public:
-    /// Represents an expression of the form "left op right", e.g., "2 + a" or "53 * 3".
-    /// \param left is the left operand of the expression.
-    /// \param op is the operator of the expression.
-    /// \param right is the right operand of the expression.
-    BinaryExpr(AbstractExpr *left, OpSymb::BinaryOp op, AbstractExpr *right);
+ public:
+  /// Represents an expression of the form "left op right", e.g., "2 + a" or "53 * 3".
+  /// \param left is the left operand of the expression.
+  /// \param op is the operator of the expression.
+  /// \param right is the right operand of the expression.
+  BinaryExpr(AbstractExpr *left, OpSymb::BinaryOp op, AbstractExpr *right);
 
-    template<typename T1, typename T2>
-    BinaryExpr(T1 left, OpSymb::BinaryOp op, T2 right) {
-        this->left = createParam(left);
-        this->op = new Operator(op);
-        this->right = createParam(right);
-    }
+  template<typename T1, typename T2>
+  BinaryExpr(T1 left, OpSymb::BinaryOp op, T2 right) {
+      this->left = createParam(left);
+      this->op = new Operator(op);
+      this->right = createParam(right);
+  }
 
-    ~BinaryExpr() override;
+  ~BinaryExpr() override;
 
-    [[nodiscard]] json toJson() const override;
+  [[nodiscard]] json toJson() const override;
 
-    [[nodiscard]] AbstractExpr *getLeft() const;
+  [[nodiscard]] AbstractExpr *getLeft() const;
 
-    [[nodiscard]] Operator &getOp() const;
+  [[nodiscard]] Operator &getOp() const;
 
-    [[nodiscard]] AbstractExpr *getRight() const;
+  [[nodiscard]] AbstractExpr *getRight() const;
 
-    void accept(Visitor &v) override;
+  void accept(Visitor &v) override;
 
-    [[nodiscard]] std::string getNodeName() const override;
+  [[nodiscard]] std::string getNodeName() const override;
 
-    void setLeft(AbstractExpr *left);
+  void setLeft(AbstractExpr *value);
 
-    void setOp(Operator *op);
+  void setOp(Operator *operatore);
 
-    void setRight(AbstractExpr *right);
+  void setRight(AbstractExpr *rhs);
 
-    void static swapOperandsLeftAWithRightB(BinaryExpr *bexpA, BinaryExpr *bexpB);
+  static void swapOperandsLeftAWithRightB(BinaryExpr *bexpA, BinaryExpr *bexpB);
 
-    BinaryExpr(OpSymb::BinaryOp op);
+  explicit BinaryExpr(OpSymb::BinaryOp op);
 
+  BinaryExpr *contains(BinaryExpr *bexpTemplate, AbstractExpr *excludedSubtree) override;
 
-    BinaryExpr *contains(BinaryExpr *bexpTemplate, BinaryExpr *excludedSubtree) override;
+  bool contains(Variable *var) override;
 
-    bool contains(Variable *var) override;
+  bool isEqual(AbstractExpr *other) override;
 };
-
 
 #endif //MASTER_THESIS_CODE_BINARYEXPR_H

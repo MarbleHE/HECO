@@ -107,12 +107,18 @@ The easiest way to use this library is to import the project into [CLion](https:
 
 Alternatively, you can build the project manually by running...
 
+```bash
+mkdir build
+cmake ../
+make
+```
+
 
 ## Extending the Library
 
 ### Code Style
 
-The code is written in C++ using [K&R style](https://en.wikipedia.org/wiki/Indentation_style#K&R_style). Classes are divided into implementation and header:
+The code is written in C++ and formatted according to the [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html). Classes are divided into implementation and header:
 
 ```
 include/ast     – contains the header files (.h)
@@ -137,7 +143,7 @@ The code is covered by unit tests to achieve high code quality and avoid introdu
 For that, the [Google Test]() framework is used.
 The library is automatically cloned from its GitHub repository using cmake, see [CMakeLists.txt](test/CMakeLists.txt).
 
-The tests can be found in the [`test`](test/) directory.
+The tests can be found in the [`test`](test) directory.
 
 
 

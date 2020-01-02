@@ -2,8 +2,6 @@
 #ifndef MASTER_THESIS_CODE_MAIN_H
 #define MASTER_THESIS_CODE_MAIN_H
 
-#define _DEBUG_RUNNING() std::cerr << "[" << __FILE_NAME__ << ":" << __LINE__ << "]"  << " ▶︎ Running "<< __PRETTY_FUNCTION__ << "..." << std::endl;
-
 #include <iostream>
 #include "include/ast/LiteralInt.h"
 #include "include/ast/LiteralString.h"
@@ -23,7 +21,6 @@
 #include "include/ast/LiteralBool.h"
 #include "include/ast/UnaryExpr.h"
 #include "include/ast/CallExternal.h"
-
 
 /// Program's entry point.
 int main();

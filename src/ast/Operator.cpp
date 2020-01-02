@@ -1,7 +1,6 @@
 #include <variant>
 #include "../../include/ast/Operator.h"
 
-
 void Operator::accept(Visitor &v) {
     v.visit(*this);
 }

@@ -8,35 +8,33 @@
 
 using json = nlohmann::json;
 
-
 class AbstractExpr {
-private:
-    static LiteralInt *createParam(int i);
+ private:
+  static LiteralInt *createParam(int i);
 
-    static LiteralBool *createParam(bool b);
+  static LiteralBool *createParam(bool b);
 
-    static LiteralString *createParam(const char *str);
+  static LiteralString *createParam(const char *str);
 
-    static AbstractExpr *createParam(AbstractExpr *abstractExpr);
+  static AbstractExpr *createParam(AbstractExpr *abstractExpr);
 
-public:
-    virtual ~AbstractExpr() = default;
+ public:
+  virtual ~AbstractExpr() = default;
 
-    [[nodiscard]] virtual std::string toString() const;
+  [[nodiscard]] virtual std::string toString() const;
 
-    [[nodiscard]] virtual json toJson() const;
+  [[nodiscard]] virtual json toJson() const;
 
-    virtual void accept(Visitor &v);
+  virtual void accept(Visitor &v);
 
-    // TODO check out if excludedSubtree can be AbstractExpr instead
-    virtual BinaryExpr *contains(BinaryExpr *bexpTemplate, BinaryExpr *excludedSubtree);
+  virtual BinaryExpr *contains(BinaryExpr *bexpTemplate, AbstractExpr *excludedSubtree);
 
-    virtual bool contains(Variable *var);
+  virtual bool contains(Variable *var);
 
+  virtual bool isEqual(AbstractExpr *other);
 };
 
 /// JSON representation to be used for vector<AbstractExpr> objects.
 std::ostream &operator<<(std::ostream &outs, const AbstractExpr &obj);
-
 
 #endif //MASTER_THESIS_CODE_ABSTRACTEXPR_H

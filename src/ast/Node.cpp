@@ -4,35 +4,35 @@
 int Node::nodeIdCounter = 0;
 
 std::string Node::genUniqueNodeId() {
-    std::stringstream ss;
-    ss << getNodeName();
-    ss << "_";
-    ss << getAndIncrementNodeId();
-    return ss.str();
+  std::stringstream ss;
+  ss << getNodeName();
+  ss << "_";
+  ss << getAndIncrementNodeId();
+  return ss.str();
 }
 
 std::string Node::getUniqueNodeId() {
-    if (uniqueNodeId.empty()) {
-        std::string nodeId = genUniqueNodeId();
-        this->uniqueNodeId = nodeId;
-    }
-    return uniqueNodeId;
+  if (uniqueNodeId.empty()) {
+    std::string nodeId = genUniqueNodeId();
+    this->uniqueNodeId = nodeId;
+  }
+  return uniqueNodeId;
 }
 
 int Node::getAndIncrementNodeId() {
-    int current = Node::getNodeIdCounter();
-    Node::nodeIdCounter += 1;
-    return current;
+  int current = Node::getNodeIdCounter();
+  Node::nodeIdCounter += 1;
+  return current;
 }
 
 int Node::getNodeIdCounter() {
-    return nodeIdCounter;
+  return nodeIdCounter;
 }
 
 std::string Node::getNodeName() const {
-    return "Node";
+  return "Node";
 }
 
 void Node::resetNodeIdCounter() {
-    Node::nodeIdCounter = 0;
+  Node::nodeIdCounter = 0;
 }

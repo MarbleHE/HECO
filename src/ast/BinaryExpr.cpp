@@ -26,7 +26,6 @@ AbstractExpr *BinaryExpr::getRight() const {
     return right;
 }
 
-
 void BinaryExpr::accept(Visitor &v) {
     v.visit(*this);
 }
@@ -40,7 +39,7 @@ BinaryExpr::BinaryExpr(OpSymb::BinaryOp op) : op(new Operator(op)) {
     this->right = nullptr;
 }
 
-BinaryExpr *BinaryExpr::contains(BinaryExpr *bexpTemplate, BinaryExpr *excludedSubtree) {
+BinaryExpr *BinaryExpr::contains(BinaryExpr *bexpTemplate, AbstractExpr *excludedSubtree) {
     if (excludedSubtree != nullptr && this == excludedSubtree) {
         return nullptr;
     } else {
@@ -51,16 +50,16 @@ BinaryExpr *BinaryExpr::contains(BinaryExpr *bexpTemplate, BinaryExpr *excludedS
     }
 }
 
-void BinaryExpr::setLeft(AbstractExpr *left) {
-    BinaryExpr::left = left;
+void BinaryExpr::setLeft(AbstractExpr *value) {
+    this->left = value;
 }
 
-void BinaryExpr::setOp(Operator *op) {
-    BinaryExpr::op = op;
+void BinaryExpr::setOp(Operator *operatore) {
+    this->op = operatore;
 }
 
-void BinaryExpr::setRight(AbstractExpr *right) {
-    BinaryExpr::right = right;
+void BinaryExpr::setRight(AbstractExpr *rhs) {
+    this->right = rhs;
 }
 
 void BinaryExpr::swapOperandsLeftAWithRightB(BinaryExpr *bexpA, BinaryExpr *bexpB) {
@@ -75,7 +74,18 @@ BinaryExpr::~BinaryExpr() {
     delete op;
 }
 
-
 bool BinaryExpr::contains(Variable *var) {
     return (getLeft()->contains(var) || getRight()->contains(var));
 }
+
+bool BinaryExpr::isEqual(AbstractExpr *other) {
+    if (auto otherBexp = dynamic_cast<BinaryExpr *>(other)) {
+        auto sameLeft = this->getLeft()->isEqual(otherBexp->getLeft());
+        auto sameRight = this->getRight()->isEqual(otherBexp->getRight());
+        auto sameOp = this->getOp() == otherBexp->getOp();
+        return sameLeft && sameRight && sameOp;
+    }
+    return false;
+}
+
+

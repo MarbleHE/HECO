@@ -1,4 +1,4 @@
-Function:	[global]
+Function: (computePrivate)	[global]
 	FunctionParameter: (int)	[Function_0]
 		Variable: (x)
 	VarDecl: (int a)
@@ -6,23 +6,23 @@ Function:	[global]
 	VarDecl: (int k)
 	If:
 		LogicalExpr:
-			LiteralString: (x)
+			Variable: (x)
 			Operator: (>)
 			LiteralInt: (32)
 		Block:
 			VarAssignm: (k)	[Block_1]
 				BinaryExpr:
-					LiteralString: (x)
+					Variable: (x)
 					Operator: (mult)
-					LiteralString: (a)
+					Variable: (a)
 		Block:	[Function_0]
 			VarAssignm: (k)	[Block_2]
 				BinaryExpr:
 					Group:
 						BinaryExpr:
-							LiteralString: (x)
+							Variable: (x)
 							Operator: (mult)
-							LiteralString: (a)
+							Variable: (a)
 					Operator: (add)
 					LiteralInt: (42)
 	Return:	[Function_0]

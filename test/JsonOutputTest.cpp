@@ -99,8 +99,7 @@ TEST(JsonOutputTest, BinaryExpr) { /* NOLINT */
     auto *bexp = new BinaryExpr(
             new Variable(varIdentifier),
             OpSymb::BinaryOp::addition,
-            new LiteralInt(lintValue)
-    );
+            new LiteralInt(lintValue));
     json j = {{"type",         "BinaryExpr"},
               {"leftOperand",  {
                                        {"type", "Variable"},
@@ -167,8 +166,7 @@ TEST(JsonOutputTest, Group) { /* NOLINT */
     auto gp = new Group(new BinaryExpr(
             new Variable(varIdentifier),
             OpSymb::BinaryOp::division,
-            new LiteralInt(lintValue)
-    ));
+            new LiteralInt(lintValue)));
 
     json j = {{"type", "Group"},
               {"expr", {{"type", "BinaryExpr"},
@@ -191,8 +189,7 @@ TEST(JsonOutputTest, LogicalExpr) { /* NOLINT */
     auto *lexp = new LogicalExpr(
             new Variable(varIdentifier),
             OpSymb::smaller,
-            new Variable(varIdentifierMax)
-    );
+            new Variable(varIdentifierMax));
     json j = {{"type",         "LogicalExpr"},
               {"leftOperand",  {
                                        {"type", "Variable"},
@@ -263,7 +260,7 @@ TEST(JsonOutputTest, Call) {/* NOLINT */
                          }));
 
     // retrieve expected result
-    std::ifstream f("../../test/aux/JsonOutputTest/CallTest.json");
+    std::ifstream f("../../test/aux/JsonOutputTest/Call.json");
     json expected = json::parse(f);
 
     EXPECT_EQ(call->AbstractStatement::toString(), expected.dump());
@@ -290,10 +287,7 @@ TEST(JsonOutputTest, Function) { /* NOLINT */
                                                              OpSymb::multiplication,
                                                              new Variable("b")),
                                                      OpSymb::addition,
-                                                     new Variable("z")))
-
-                             }
-    );
+                                                     new Variable("z")))});
 
     // retrieve expected result
     std::ifstream f("../../test/aux/JsonOutputTest/Function.json");
@@ -303,7 +297,6 @@ TEST(JsonOutputTest, Function) { /* NOLINT */
 }
 
 TEST(JsonOutputTest, IfThenOnly) { /* NOLINT */
-    // TODO implement me!
     // if (b == true && z >= 17) {
     //    isValid = true;
     // }
@@ -312,15 +305,12 @@ TEST(JsonOutputTest, IfThenOnly) { /* NOLINT */
                     new LogicalExpr(
                             new Variable("b"),
                             OpSymb::equal,
-                            new LiteralBool(true)
-                    ),
+                            new LiteralBool(true)),
                     OpSymb::logicalAnd,
                     new LogicalExpr(
                             new Variable("z"),
                             OpSymb::greaterEqual,
-                            new LiteralInt(17)
-                    )
-            ),
+                            new LiteralInt(17))),
             new VarAssignm("isValid", new LiteralBool(true)));
 
     // retrieve expected result
@@ -343,15 +333,12 @@ TEST(JsonOutputTest, If) { /* NOLINT */
             new LogicalExpr(
                     new Variable("b"),
                     OpSymb::equal,
-                    new LiteralBool(true)
-            ),
+                    new LiteralBool(true)),
             OpSymb::logicalAnd,
             new LogicalExpr(
                     new Variable("z"),
                     OpSymb::greaterEqual,
-                    new LiteralInt(17)
-            )
-    );
+                    new LiteralInt(17)));
 
     auto thenBranch = new VarAssignm("isValid", new LiteralBool(true));
 
@@ -393,5 +380,4 @@ TEST(JsonOutputTest, While) { /* NOLINT */
     json expected = json::parse(f);
 
     EXPECT_EQ(whileStmt->toString(), expected.dump());
-
 }

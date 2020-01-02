@@ -6,9 +6,9 @@
 #include "Group.h"
 
 json VarDecl::toJson() const {
-    json j = {{"type",       getNodeName()},
+    json j = {{"type", getNodeName()},
               {"identifier", identifier},
-              {"datatype",   datatype}};
+              {"datatype", datatype}};
     if (this->initializer != nullptr) {
         j["initializer"] = this->initializer->toJson();
     }
@@ -16,22 +16,20 @@ json VarDecl::toJson() const {
 }
 
 VarDecl::VarDecl(std::string name, std::string datatype, AbstractExpr *initializer)
-        : identifier(std::move(std::move(name))), datatype(std::move(std::move(datatype))), initializer(initializer) {
-
-}
+        : identifier(std::move(std::move(name))), datatype(std::move(std::move(datatype))), initializer(initializer) {}
 
 VarDecl::VarDecl(std::string name, std::string datatype) : identifier(std::move(std::move(name))),
                                                            datatype(std::move(std::move(datatype))) {
     this->initializer = nullptr;
 }
 
-VarDecl::VarDecl(std::string name, const std::string &datatype, int i) : identifier(std::move(std::move(name))),
-
-                                                                         datatype(datatype) {
+VarDecl::VarDecl(std::string name, const std::string &datatype, int i)
+        : identifier(std::move(std::move(name))), datatype(datatype) {
     if (datatype == "int") {
         initializer = new LiteralInt(i);
     } else {
-        throw std::logic_error("test");
+        std::string errorMsg("Datatype 'int' and provided value (" + std::to_string(i) + ") do not match!");
+        throw std::logic_error(errorMsg);
     }
 }
 
@@ -65,4 +63,13 @@ VarDecl::~VarDecl() {
 
 std::string VarDecl::getVarTargetIdentifier() {
     return this->getIdentifier();
+}
+
+bool VarDecl::isEqual(AbstractStatement *as) {
+    if (auto otherVarDecl = dynamic_cast<VarDecl *>(as)) {
+        return (this->getIdentifier() == otherVarDecl->getIdentifier())
+                && (this->getDatatype() == otherVarDecl->getDatatype())
+                && (this->getInitializer()->isEqual(otherVarDecl->getInitializer()));
+    }
+    return false;
 }

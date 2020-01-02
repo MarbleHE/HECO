@@ -1,35 +1,32 @@
 #include "../../include/ast/While.h"
 
-
-While::While(AbstractExpr *condition, AbstractStatement *body) : condition(condition), body(body) {
-
-}
+While::While(AbstractExpr *condition, AbstractStatement *body) : condition(condition), body(body) {}
 
 json While::toJson() const {
-    json j;
-    j["type"] = getNodeName();
-    j["condition"] = condition->toJson();
-    j["body"] = body->toJson();
-    return j;
+  json j;
+  j["type"] = getNodeName();
+  j["condition"] = condition->toJson();
+  j["body"] = body->toJson();
+  return j;
 }
 
 void While::accept(Visitor &v) {
-    v.visit(*this);
+  v.visit(*this);
 }
 
 AbstractExpr *While::getCondition() const {
-    return condition;
+  return condition;
 }
 
 AbstractStatement *While::getBody() const {
-    return body;
+  return body;
 }
 
 std::string While::getNodeName() const {
-    return "While";
+  return "While";
 }
 
 While::~While() {
-    delete condition;
-    delete body;
+  delete condition;
+  delete body;
 }
