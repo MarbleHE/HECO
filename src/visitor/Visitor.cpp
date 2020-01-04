@@ -127,7 +127,7 @@ void Visitor::visit(LogicalExpr &elem) {
   // left
   elem.getLeft()->accept(*this);
   // operator
-  elem.getOp()->accept(*this);
+  elem.getOp().accept(*this);
   // right
   elem.getRight()->accept(*this);
 }
@@ -141,7 +141,7 @@ void Visitor::visit(Return &elem) {
 
 void Visitor::visit(UnaryExpr &elem) {
   // operator
-  elem.getOp()->accept(*this);
+  elem.getOp().accept(*this);
   // rhs operand
   elem.getRight()->accept(*this);
 }

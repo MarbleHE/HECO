@@ -42,7 +42,9 @@ set(TEST_FILES
         BinaryExprTest.cpp
         JsonOutputTest.cpp
         PrintVisitorTest.cpp
-        MultRewriteTest.cpp AstTestingGenerator.cpp AstTestingGenerator.h)
+        MultRewriteTest.cpp
+        AstTestingGenerator.cpp
+        AstTestingGenerator.h AstEvaluationTest.cpp)
 
 add_executable(testing-all
         main.cpp

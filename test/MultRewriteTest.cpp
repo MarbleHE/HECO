@@ -10,7 +10,7 @@
 
 /// Check to ensure that the AST testing generator works as expected.
 TEST(MultRewriteTest, astTestingGeneratorTest) { /* NOLINT */
-  const int HIGHEST_CASE_NUM = 6;
+  const int HIGHEST_CASE_NUM = 11;
   int i = 1;
   for (; i < HIGHEST_CASE_NUM; i++) {
     Ast ast;

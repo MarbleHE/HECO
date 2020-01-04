@@ -22,3 +22,19 @@ const std::string &LiteralString::getValue() const {
 std::string LiteralString::getNodeName() const {
   return "LiteralString";
 }
+
+LiteralString::~LiteralString() = default;
+
+Literal* LiteralString::evaluate(Ast &ast) {
+  return this;
+}
+
+void LiteralString::print(std::ostream &str) const {
+  str << this->getValue();
+}
+bool LiteralString::operator==(const LiteralString &rhs) const {
+  return value == rhs.value;
+}
+bool LiteralString::operator!=(const LiteralString &rhs) const {
+  return !(rhs == *this);
+}

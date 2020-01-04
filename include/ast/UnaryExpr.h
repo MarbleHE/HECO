@@ -17,13 +17,15 @@ class UnaryExpr : public AbstractExpr, public Node {
 
   void accept(Visitor &v) override;
 
-  [[nodiscard]] Operator *getOp() const;
+  [[nodiscard]] Operator &getOp() const;
 
   [[nodiscard]] AbstractExpr *getRight() const;
 
   [[nodiscard]] std::string getNodeName() const override;
 
   ~UnaryExpr() override;
+
+  Literal* evaluate(Ast &ast) override;
 };
 
 #endif //MASTER_THESIS_CODE_UNARYEXPR_H

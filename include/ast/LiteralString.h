@@ -7,8 +7,14 @@
 class LiteralString : public Literal, public Node {
  private:
   std::string value;
+
+ protected:
+  void print(std::ostream &str) const override;
+
  public:
   explicit LiteralString(std::string value);
+
+  ~LiteralString() override;
 
   [[nodiscard]] json toJson() const override;
 
@@ -17,6 +23,12 @@ class LiteralString : public Literal, public Node {
   void accept(Visitor &v) override;
 
   [[nodiscard]] std::string getNodeName() const override;
+
+  Literal* evaluate(Ast &ast) override;
+
+  bool operator==(const LiteralString &rhs) const;
+
+  bool operator!=(const LiteralString &rhs) const;
 };
 
 #endif //MASTER_THESIS_CODE_LITERALSTRING_H

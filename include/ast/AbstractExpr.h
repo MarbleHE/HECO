@@ -5,6 +5,7 @@
 #include <nlohmann/json.hpp>
 #include "../visitor/Visitor.h"
 #include "Node.h"
+#include "Ast.h"
 
 using json = nlohmann::json;
 
@@ -32,6 +33,8 @@ class AbstractExpr {
   virtual bool contains(Variable *var);
 
   virtual bool isEqual(AbstractExpr *other);
+
+  virtual Literal* evaluate(Ast &ast);
 };
 
 /// JSON representation to be used for vector<AbstractExpr> objects.

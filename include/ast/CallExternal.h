@@ -8,12 +8,12 @@
 class CallExternal : public AbstractExpr, public AbstractStatement, public Node {
  private:
   std::string functionName;
-  std::vector<FunctionParameter> *arguments;
+  std::vector<FunctionParameter>* arguments;
 
  public:
   explicit CallExternal(std::string functionName);
 
-  CallExternal(std::string functionName, std::vector<FunctionParameter> *arguments);
+  CallExternal(std::string functionName, std::vector<FunctionParameter>* arguments);
 
   [[nodiscard]] json toJson() const override;
 
@@ -21,9 +21,11 @@ class CallExternal : public AbstractExpr, public AbstractStatement, public Node 
 
   [[nodiscard]] const std::string &getFunctionName() const;
 
-  [[nodiscard]] std::vector<FunctionParameter> *getArguments() const;
+  [[nodiscard]] std::vector<FunctionParameter>* getArguments() const;
 
   [[nodiscard]] std::string getNodeName() const override;
+
+  Literal* evaluate(Ast &ast) override;
 };
 
 #endif //MASTER_THESIS_CODE_CALLEXTERNAL_H

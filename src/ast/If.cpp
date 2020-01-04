@@ -1,4 +1,5 @@
 #include "../../include/ast/If.h"
+#include "LiteralBool.h"
 
 json If::toJson() const {
   json j;
@@ -9,12 +10,10 @@ json If::toJson() const {
   return j;
 }
 
-If::If(AbstractExpr *condition, AbstractStatement *thenBranch, AbstractStatement *elseBranch) : condition(condition),
-                                                                                                thenBranch(thenBranch),
-                                                                                                elseBranch(
-                                                                                                    elseBranch) {}
+If::If(AbstractExpr* condition, AbstractStatement* thenBranch, AbstractStatement* elseBranch)
+    : condition(condition), thenBranch(thenBranch), elseBranch(elseBranch) {}
 
-If::If(AbstractExpr *condition, AbstractStatement *thenBranch) : condition(condition), thenBranch(thenBranch) {
+If::If(AbstractExpr* condition, AbstractStatement* thenBranch) : condition(condition), thenBranch(thenBranch) {
   elseBranch = nullptr;
 }
 
@@ -26,15 +25,15 @@ std::string If::getNodeName() const {
   return "If";
 }
 
-AbstractExpr *If::getCondition() const {
+AbstractExpr* If::getCondition() const {
   return condition;
 }
 
-AbstractStatement *If::getThenBranch() const {
+AbstractStatement* If::getThenBranch() const {
   return thenBranch;
 }
 
-AbstractStatement *If::getElseBranch() const {
+AbstractStatement* If::getElseBranch() const {
   return elseBranch;
 }
 
@@ -42,4 +41,14 @@ If::~If() {
   delete condition;
   delete thenBranch;
   delete elseBranch;
+}
+
+Literal* If::evaluate(Ast &ast) {
+  auto cond = dynamic_cast<LiteralBool*>(getCondition()->evaluate(ast));
+  if (*cond == LiteralBool(true)) {
+    return thenBranch->evaluate(ast);
+  } else if (elseBranch != nullptr) {
+    return elseBranch->evaluate(ast);
+  }
+  return nullptr;
 }

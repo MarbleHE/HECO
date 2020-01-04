@@ -21,6 +21,8 @@ class Return : public AbstractStatement, public Node {
   [[nodiscard]] std::string getNodeName() const override;
 
   ~Return() override;
+
+  Literal *evaluate(Ast &ast) override;
 };
 
 

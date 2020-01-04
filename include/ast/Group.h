@@ -22,6 +22,8 @@ class Group : public AbstractExpr, public Node {
   [[nodiscard]] AbstractExpr *getExpr() const;
 
   BinaryExpr *contains(BinaryExpr *bexpTemplate, AbstractExpr *excludedSubtree) override;
+
+  Literal* evaluate(Ast &ast) override;
 };
 
 #endif //MASTER_THESIS_CODE_GROUP_H

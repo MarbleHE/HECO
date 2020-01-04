@@ -25,6 +25,9 @@ class Block : public AbstractStatement, public Node {
   [[nodiscard]] std::string getNodeName() const override;
 
   [[nodiscard]] std::vector<AbstractStatement *> *getStatements() const;
+
+  Literal* evaluate(Ast &ast) override;
+
 };
 
 #endif //MASTER_THESIS_CODE_BLOCK_H

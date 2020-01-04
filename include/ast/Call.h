@@ -27,6 +27,8 @@ class Call : public AbstractExpr, public AbstractStatement, public Node {
   [[nodiscard]] std::string getNodeName() const override;
 
   [[nodiscard]] Function *getFunc() const;
+
+  Literal* evaluate(Ast &ast) override;
 };
 
 #endif //MASTER_THESIS_CODE_CALL_H

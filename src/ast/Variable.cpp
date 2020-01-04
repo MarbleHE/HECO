@@ -1,6 +1,7 @@
 #include <utility>
 
 #include "../../include/ast/Variable.h"
+#include "Ast.h"
 
 Variable::Variable(std::string identifier) : identifier(std::move(identifier)) {}
 
@@ -40,4 +41,7 @@ bool Variable::isEqual(AbstractExpr *other) {
     return this->getIdentifier() == otherVar->getIdentifier();
   }
   return false;
+}
+Literal *Variable::evaluate(Ast &ast) {
+  return ast.getVarValue(this->getIdentifier());
 }

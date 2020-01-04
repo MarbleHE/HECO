@@ -58,6 +58,8 @@ class BinaryExpr : public AbstractExpr, public Node {
   bool contains(Variable *var) override;
 
   bool isEqual(AbstractExpr *other) override;
+
+  Literal *evaluate(Ast &ast) override;
 };
 
 #endif //MASTER_THESIS_CODE_BINARYEXPR_H

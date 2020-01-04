@@ -5,6 +5,10 @@
 #include <string>
 #include "../visitor/Visitor.h"
 #include "Node.h"
+#include "LiteralString.h"
+#include "LiteralBool.h"
+#include "LiteralInt.h"
+#include <iostream>
 
 class OpSymb {
  public:
@@ -55,6 +59,8 @@ class OpSymb {
 class Operator : public Node {
  private:
   std::string operatorString;
+  OpSymb operatorSymbol;
+
  public:
   explicit Operator(OpSymb::LogCompOp op);
 
@@ -75,6 +81,37 @@ class Operator : public Node {
   bool operator!=(const Operator &rhs) const;
 
   [[nodiscard]] bool equals(std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp> op) const;
+
+  Literal* applyOperator(Literal* lhs, Literal* rhs);
+
+  Literal* applyOperator(Literal* rhs);
+
+  template<typename A>
+  Literal* applyOperator(A* lhs, Literal* rhs);
+
+  Literal* applyOperator(LiteralInt* lhs, LiteralInt* rhs);
+
+  Literal* applyOperator(LiteralBool* lhs, LiteralBool* rhs);
+
+  Literal* applyOperator(LiteralInt* lhs, LiteralBool* rhs);
+
+  Literal* applyOperator(LiteralBool* lhs, LiteralInt* rhs);
+
+  Literal* applyOperator(LiteralString* lhs, LiteralString* rhs);
+
+  Literal* applyOperator(LiteralBool* lhs, LiteralString* rhs);
+
+  Literal* applyOperator(LiteralString* lhs, LiteralBool* rhs);
+
+  Literal* applyOperator(LiteralInt* lhs, LiteralString* rhs);
+
+  Literal* applyOperator(LiteralString* lhs, LiteralInt* rhs);
+
+  Literal* applyOperator(LiteralInt* rhs);
+
+  Literal* applyOperator(LiteralBool* rhs);
+
+  Literal* applyOperator(LiteralString* rhs);
 };
 
 #endif //MASTER_THESIS_CODE_OPERATOR_H

@@ -44,6 +44,8 @@ class Function : public AbstractStatement, public Node {
   [[nodiscard]] std::string getNodeName() const override;
 
   void setParams(std::vector<FunctionParameter> *paramsVec);
+
+  Literal* evaluate(Ast &ast) override;
 };
 
 /// Defines the JSON representation to be used for vector<Function> objects.

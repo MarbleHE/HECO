@@ -25,9 +25,11 @@ class LogicalExpr : public AbstractExpr, public Node {
     this->right = createParam(right);
   }
 
+  ~LogicalExpr() override;
+
   [[nodiscard]] AbstractExpr *getLeft() const;
 
-  [[nodiscard]] Operator *getOp() const;
+  [[nodiscard]] Operator &getOp() const;
 
   [[nodiscard]] AbstractExpr *getRight() const;
 
@@ -38,7 +40,7 @@ class LogicalExpr : public AbstractExpr, public Node {
 
   [[nodiscard]] std::string getNodeName() const override;
 
-  ~LogicalExpr() override;
+  Literal* evaluate(Ast &ast) override;
 };
 
 #endif //MASTER_THESIS_CODE_LOGICALEXPR_H

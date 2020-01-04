@@ -29,6 +29,8 @@ class If : public AbstractStatement, public Node {
   [[nodiscard]] AbstractStatement *getThenBranch() const;
 
   [[nodiscard]] AbstractStatement *getElseBranch() const;
+
+  Literal* evaluate(Ast &ast) override;
 };
 
 #endif //MASTER_THESIS_CODE_IF_H

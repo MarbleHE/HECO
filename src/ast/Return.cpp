@@ -24,3 +24,6 @@ std::string Return::getNodeName() const {
 Return::~Return() {
   delete value;
 }
+Literal *Return::evaluate(Ast &ast) {
+  return this->getValue()->evaluate(ast);
+}

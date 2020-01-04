@@ -12,6 +12,8 @@ class While : public AbstractStatement, public Node {
  public:
   While(AbstractExpr *condition, AbstractStatement *body);
 
+  ~While() override;
+
   [[nodiscard]] json toJson() const override;
 
   void accept(Visitor &v) override;
@@ -22,7 +24,7 @@ class While : public AbstractStatement, public Node {
 
   [[nodiscard]] std::string getNodeName() const override;
 
-  ~While() override;
+  Literal* evaluate(Ast &ast) override;
 };
 
 #endif //MASTER_THESIS_CODE_WHILE_H

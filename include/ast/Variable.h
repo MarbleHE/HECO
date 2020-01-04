@@ -26,6 +26,8 @@ class Variable : public AbstractExpr, public Node {
   bool contains(Variable *var) override;
 
   bool isEqual(AbstractExpr *other) override;
+
+  Literal *evaluate(Ast &ast) override;
 };
 
 #endif //MASTER_THESIS_CODE_VARIABLE_H

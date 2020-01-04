@@ -37,6 +37,8 @@ class VarDecl : public AbstractStatement, public Node {
   std::string getVarTargetIdentifier() override;
 
   bool isEqual(AbstractStatement *as) override;
+
+  Literal* evaluate(Ast &ast) override;
 };
 
 #endif //MASTER_THESIS_CODE_VARDECL_H

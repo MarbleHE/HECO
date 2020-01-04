@@ -33,7 +33,7 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/nlohmann-json-src
 # TARGET: master_thesis_code
 ##############################
 
-include_directories(${master_thesis_code_SOURCE_DIR}/include/ast)
+include_directories(${master_thesis_code_SOURCE_DIR}/include/ast ${master_thesis_code_SOURCE_DIR}/examples)
 
 
 set(SOURCE_FILES
@@ -66,7 +66,7 @@ set(SOURCE_FILES
         ${master_thesis_code_SOURCE_DIR}/src/visitor/MultRewriteVisitor.cpp
         ${master_thesis_code_SOURCE_DIR}/src/ast/Node.cpp
         ${master_thesis_code_SOURCE_DIR}/src/utilities/Scope.cpp
-        ${master_thesis_code_SOURCE_DIR}/include/utilities/globals.h examples/genAstDemo.h)
+        ${master_thesis_code_SOURCE_DIR}/examples/genAstDemo.cpp)
 
 add_executable(master_thesis_code
         ${master_thesis_code_SOURCE_DIR}/main.cpp

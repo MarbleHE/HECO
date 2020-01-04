@@ -1,5 +1,7 @@
 #include <iostream>
 #include <Variable.h>
+#include <AbstractExpr.h>
+
 #include "LiteralInt.h"
 #include "LiteralBool.h"
 #include "LiteralString.h"
@@ -46,6 +48,9 @@ bool AbstractExpr::contains(Variable *var) {
 
 bool AbstractExpr::isEqual(AbstractExpr *other) {
     return false;
+}
+Literal *AbstractExpr::evaluate(Ast &ast) {
+  return nullptr;
 }
 
 void to_json(json &j, const AbstractExpr &absExpr) {

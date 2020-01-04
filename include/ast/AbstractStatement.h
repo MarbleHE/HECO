@@ -5,6 +5,7 @@
 #include <nlohmann/json.hpp>
 #include "../visitor/Visitor.h"
 #include "Node.h"
+#include "Ast.h"
 
 using json = nlohmann::json;
 
@@ -23,6 +24,8 @@ class AbstractStatement {
   virtual std::string getVarTargetIdentifier();
 
   virtual bool isEqual(AbstractStatement *as);
+
+  virtual Literal* evaluate(Ast &ast);
 };
 
 std::ostream &operator<<(std::ostream &outs, const AbstractStatement &obj);

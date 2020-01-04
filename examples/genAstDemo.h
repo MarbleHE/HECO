@@ -82,4 +82,8 @@ void generateDemoFour(Ast &ast);
 
 void generateDemoFive(Ast &ast);
 
+void generateDemoSix(Ast &ast);
+
+void generateDemoSeven(Ast &ast);
+
 #endif //MASTER_THESIS_CODE_GENASTDEMO_H

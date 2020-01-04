@@ -32,4 +32,7 @@ BinaryExpr *Group::contains(BinaryExpr *bexpTemplate, AbstractExpr *excludedSubt
   }
   return nullptr;
 }
+Literal* Group::evaluate(Ast &ast) {
+  return this->getExpr()->evaluate(ast);
+}
 

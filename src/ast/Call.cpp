@@ -33,3 +33,7 @@ Call::Call(std::vector<FunctionParameter *> arguments, Function *func) : func(fu
 Function *Call::getFunc() const {
   return func;
 }
+
+Literal* Call::evaluate(Ast &ast) {
+  throw std::runtime_error("evaluate(Ast &ast) not implemented for class Call yet!");
+}
