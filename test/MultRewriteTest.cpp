@@ -3,6 +3,7 @@
 #include <include/visitor/MultRewriteVisitor.h>
 #include <include/visitor/PrintVisitor.h>
 #include <Operator.h>
+#include <include/utilities/TestUtils .h>
 #include "AstTestingGenerator.h"
 #include "Function.h"
 #include "BinaryExpr.h"
@@ -18,7 +19,7 @@ TEST(MultRewriteTest, astTestingGeneratorTest) { /* NOLINT */
     EXPECT_NE(ast.getRootNode(), nullptr);
   }
   Ast ast;
-  EXPECT_THROW(AstTestingGenerator::generateAst(i+1, ast), std::logic_error);
+  EXPECT_THROW(AstTestingGenerator::generateAst(i + 1, ast), std::logic_error);
 }
 
 /// Case where multiplication happens in subsequent statements:
@@ -39,8 +40,8 @@ TEST(MultRewriteTest, rewriteSuccessfulSubsequentStatementsMultiplication) { /* 
   // check presence of expected changes
 
   //  int prod = inputC * inputB;
-  auto func = dynamic_cast<Function *>(ast.getRootNode());
-  auto prodDecl = dynamic_cast<VarDecl *>(func->getBody().at(0));
+  auto func = dynamic_cast<Function*>(ast.getRootNode());
+  auto prodDecl = dynamic_cast<VarDecl*>(func->getBody().at(0));
   auto expectedProdDecl = new VarDecl("prod", "int",
                                       new BinaryExpr(
                                           new Variable("inputC"),
@@ -49,7 +50,7 @@ TEST(MultRewriteTest, rewriteSuccessfulSubsequentStatementsMultiplication) { /* 
   EXPECT_TRUE(prodDecl->isEqual(expectedProdDecl));
 
   //  prod = prod * inputA;
-  auto prodAssignm = dynamic_cast<VarAssignm *>(func->getBody().at(1));
+  auto prodAssignm = dynamic_cast<VarAssignm*>(func->getBody().at(1));
   auto expectedProdAssignm = new VarAssignm("prod", new BinaryExpr(
       new Variable("prod"),
       OpSymb::multiplication,
@@ -74,8 +75,8 @@ TEST(MultRewriteTest, rewriteSuccessfulSingleStatementMultiplication) { /* NOLIN
   // check presence of expected changes
 
   //  int prod = [inputC * [inputB * inputA]]
-  auto func = dynamic_cast<Function *>(ast.getRootNode());
-  auto prodDecl = dynamic_cast<VarDecl *>(func->getBody().at(0));
+  auto func = dynamic_cast<Function*>(ast.getRootNode());
+  auto prodDecl = dynamic_cast<VarDecl*>(func->getBody().at(0));
   auto expectedProdDecl = new VarDecl("prod", "int",
                                       new BinaryExpr(
                                           new Variable("inputC"),
@@ -153,8 +154,8 @@ TEST(MultRewriteTest, rewriteNotApplicable) { /* NOLINT */
   EXPECT_EQ(mrv.getNumChanges(), 1);
 
   //  int prod = inputC * inputB;
-  auto func = dynamic_cast<Function *>(ast.getRootNode());
-  auto prodDecl = dynamic_cast<VarDecl *>(func->getBody().at(0));
+  auto func = dynamic_cast<Function*>(ast.getRootNode());
+  auto prodDecl = dynamic_cast<VarDecl*>(func->getBody().at(0));
   auto expectedProdDecl = new VarDecl("prod", "int",
                                       new BinaryExpr(
                                           new Variable("inputC"),
@@ -163,10 +164,101 @@ TEST(MultRewriteTest, rewriteNotApplicable) { /* NOLINT */
   EXPECT_TRUE(prodDecl->isEqual(expectedProdDecl));
 
   //  int prod2 = prod * inputA;
-  prodDecl = dynamic_cast<VarDecl *>(func->getBody().at(1));
+  prodDecl = dynamic_cast<VarDecl*>(func->getBody().at(1));
   expectedProdDecl = new VarDecl("prod2", "int", new BinaryExpr(
       new Variable("prod"),
       OpSymb::multiplication,
       new Variable("inputA")));
   EXPECT_TRUE(prodDecl->isEqual(expectedProdDecl));
 }
+
+TEST(MultRewriteTest, rewriteSuccessfulSingleStatementMultiplication_EquivTest) { /* NOLINT */
+  // create ASTs
+  Ast unmodifiedAst;
+  AstTestingGenerator::generateAst(1, unmodifiedAst);
+  Ast rewrittenAst;
+  AstTestingGenerator::generateAst(1, rewrittenAst);
+  MultRewriteVisitor().visit(rewrittenAst);
+
+  // create params for eval
+  std::map<std::string, Literal*> params = {{"inputA", new LiteralInt(12)},
+                                            {"inputB", new LiteralInt(25)},
+                                            {"inputC", new LiteralInt(37)}
+  };
+
+  // run tests
+  astOutputComparer(unmodifiedAst, rewrittenAst, 352734853, 30, params);
+}
+
+TEST(MultRewriteTest, noRewriteIfStatementInBetween_EquivTest) { /* NOLINT */
+  // create ASTs
+  Ast unmodifiedAst;
+  AstTestingGenerator::generateAst(2, unmodifiedAst);
+  Ast rewrittenAst;
+  AstTestingGenerator::generateAst(2, rewrittenAst);
+  MultRewriteVisitor().visit(rewrittenAst);
+
+  // create params for eval
+  std::map<std::string, Literal*> params = {{"inputA", new LiteralInt(12)},
+                                            {"inputB", new LiteralInt(25)},
+                                            {"inputC", new LiteralInt(37)}
+  };
+
+  // run tests
+  astOutputComparer(unmodifiedAst, rewrittenAst, 2341156, 30, params);
+}
+
+TEST(MultRewriteTest, noRewriteIfOutOfScope_EquivTest) { /* NOLINT */
+  // create ASTs
+  Ast unmodifiedAst;
+  AstTestingGenerator::generateAst(4, unmodifiedAst);
+  Ast rewrittenAst;
+  AstTestingGenerator::generateAst(4, rewrittenAst);
+  MultRewriteVisitor().visit(rewrittenAst);
+
+  // create params for eval
+  std::map<std::string, Literal*> params = {{"inputA", new LiteralInt(12)},
+                                            {"inputB", new LiteralInt(25)},
+                                            {"inputC", new LiteralInt(37)}
+  };
+
+  // run tests
+  astOutputComparer(unmodifiedAst, rewrittenAst, 678653456, 30, params);
+}
+
+TEST(MultRewriteTest, noRewriteForIndependentStatements_EquivTest) { /* NOLINT */
+  // create ASTs
+  Ast unmodifiedAst;
+  AstTestingGenerator::generateAst(5, unmodifiedAst);
+  Ast rewrittenAst;
+  AstTestingGenerator::generateAst(5, rewrittenAst);
+  MultRewriteVisitor().visit(rewrittenAst);
+
+  // create params for eval
+  std::map<std::string, Literal*> params = {{"inputA", new LiteralInt(12)},
+                                            {"inputB", new LiteralInt(25)},
+                                            {"inputC", new LiteralInt(37)}
+  };
+
+  // run tests
+  astOutputComparer(unmodifiedAst, rewrittenAst, 87237482, 30, params);
+}
+
+TEST(MultRewriteTest, rewriteNotApplicable_EquivTest) { /* NOLINT */
+  // create ASTs
+  Ast unmodifiedAst;
+  AstTestingGenerator::generateAst(6, unmodifiedAst);
+  Ast rewrittenAst;
+  AstTestingGenerator::generateAst(6, rewrittenAst);
+  MultRewriteVisitor().visit(rewrittenAst);
+
+  // create params for eval
+  std::map<std::string, Literal*> params = {{"inputA", new LiteralInt(111)},
+                                            {"inputB", new LiteralInt(455)},
+                                            {"inputC", new LiteralInt(3447)}
+  };
+
+  // run tests
+  astOutputComparer(unmodifiedAst, rewrittenAst, 87237482, 30, params);
+}
+

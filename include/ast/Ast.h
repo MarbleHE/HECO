@@ -30,7 +30,7 @@ class Ast {
 
   void updateVarValue(const std::string &variableIdentifier, Literal* newValue);
 
-  Literal* evaluate(const std::map<std::string, Literal*> &paramValues, bool printResult);
+  Literal* evaluate(std::map<std::string, Literal*> &paramValues, bool printResult);
 };
 
 #endif //MASTER_THESIS_CODE_AST_H

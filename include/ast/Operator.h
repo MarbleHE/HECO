@@ -3,12 +3,12 @@
 
 #include <variant>
 #include <string>
+#include <iostream>
 #include "../visitor/Visitor.h"
 #include "Node.h"
 #include "LiteralString.h"
 #include "LiteralBool.h"
 #include "LiteralInt.h"
-#include <iostream>
 
 class OpSymb {
  public:

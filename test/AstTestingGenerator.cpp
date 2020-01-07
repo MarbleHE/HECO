@@ -27,11 +27,8 @@ void AstTestingGenerator::generateAst(int id, Ast &ast) {
       {11, genAstEvalFive}
   };
   auto it = call.find(id);
-  if (it == call.end()) {
-    throw std::logic_error("Cannot continue. Invalid id given!");
-  } else {
-    it->second(ast);
-  }
+  if (it == call.end()) throw std::logic_error("Cannot continue. Invalid id given!");
+  it->second(ast);
 }
 
 void AstTestingGenerator::genAstRewritingOne(Ast &ast) {
@@ -330,7 +327,6 @@ void AstTestingGenerator::genAstEvalThree(Ast &ast) {
 }
 
 void AstTestingGenerator::genAstEvalFour(Ast &ast) {
-  // bool computeLogical(int inputA, bool strong, bool negate, int inputB)
   auto func = new Function("concatString");
   auto funcParams = new std::vector<FunctionParameter>();
   funcParams->emplace_back("string", new Variable("strA"));

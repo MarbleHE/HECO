@@ -31,7 +31,7 @@ Ast::~Ast() {
   delete rootNode;
 }
 
-Literal* Ast::evaluate(const std::map<std::string, Literal*> &paramValues, bool printResult = false) {
+Literal* Ast::evaluate(std::map<std::string, Literal*> &paramValues, bool printResult = false) {
   // store param values into a temporary map
   variablesValues.clear();
   for (const auto &[k, v] : paramValues) {
