@@ -90,27 +90,16 @@ class Operator : public Node {
   Literal* applyOperator(A* lhs, Literal* rhs);
 
   Literal* applyOperator(LiteralInt* lhs, LiteralInt* rhs);
-
   Literal* applyOperator(LiteralBool* lhs, LiteralBool* rhs);
-
   Literal* applyOperator(LiteralInt* lhs, LiteralBool* rhs);
-
   Literal* applyOperator(LiteralBool* lhs, LiteralInt* rhs);
-
   Literal* applyOperator(LiteralString* lhs, LiteralString* rhs);
-
   Literal* applyOperator(LiteralBool* lhs, LiteralString* rhs);
-
   Literal* applyOperator(LiteralString* lhs, LiteralBool* rhs);
-
   Literal* applyOperator(LiteralInt* lhs, LiteralString* rhs);
-
   Literal* applyOperator(LiteralString* lhs, LiteralInt* rhs);
-
   Literal* applyOperator(LiteralInt* rhs);
-
   Literal* applyOperator(LiteralBool* rhs);
-
   Literal* applyOperator(LiteralString* rhs);
   Literal* applyOperator(LiteralFloat* lhs, LiteralFloat* rhs);
   Literal* applyOperator(LiteralFloat* lhs, LiteralInt* rhs);

@@ -365,7 +365,7 @@ void AstTestingGenerator::_genAstEvalFive(Ast &ast) {
                       new LiteralInt(2))));
 
   // int sum = 0;
-  func->addStatement(new VarDecl("sum", "int", 0));
+  func->addStatement(new VarDecl("sum", 0));
 
   // while (randInt > 0 && !b == true) { sum = sum + encryptedB; randInt--; };
   func->addStatement(new While(
@@ -451,10 +451,10 @@ void AstTestingGenerator::_genAstPrintVisitorOne(Ast &ast) {
   func->addParameter(new FunctionParameter("int", new Variable("x")));
 
   // int a = 4;
-  func->addStatement(new VarDecl("a", "int", 4));
+  func->addStatement(new VarDecl("a", 4));
 
   // int k;
-  func->addStatement(new VarDecl("k", "int"));
+  func->addStatement(new VarDecl("k", "int", nullptr));
 
   // if ( x > 32 ) { k = x * a; } else { k = (x * a) + 42; }
   func->addStatement(new If(
@@ -506,7 +506,7 @@ void AstTestingGenerator::_genAstPrintVisitorTwo(Ast &ast) {
                       new LiteralInt(2))));
 
   // int sum = 0;
-  func->addStatement(new VarDecl("sum", "int", 0));
+  func->addStatement(new VarDecl("sum", 0));
 
   // while (randInt > 0 && !b == true) { sum = sum + encryptedB; randInt--; };
   func->addStatement(new While(

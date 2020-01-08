@@ -4,19 +4,20 @@
 #include <string>
 #include "AbstractStatement.h"
 #include "AbstractExpr.h"
+#include "../utilities/Datatypes.h"
 
 class VarDecl : public AbstractStatement {
  private:
   std::string identifier;
-  std::string datatype;
+  Datatype* datatype;
   AbstractExpr* initializer;
 
  public:
-  VarDecl(std::string name, std::string datatype);
-
-  VarDecl(std::string name, std::string datatype, AbstractExpr* initializer);
-
-  VarDecl(std::string name, const std::string &datatype, int i);
+  VarDecl(std::string name, const std::string &datatype, AbstractExpr* initializer);
+  VarDecl(std::string name, int value);
+  VarDecl(std::string name, bool value);
+  VarDecl(std::string name, float value);
+  VarDecl(std::string name, std::string value);
 
   [[nodiscard]] json toJson() const override;
 
@@ -26,7 +27,7 @@ class VarDecl : public AbstractStatement {
 
   [[nodiscard]] const std::string &getIdentifier() const;
 
-  [[nodiscard]] const std::string &getDatatype() const;
+  [[nodiscard]] Datatype* getDatatype() const;
 
   [[nodiscard]] AbstractExpr* getInitializer() const;
 

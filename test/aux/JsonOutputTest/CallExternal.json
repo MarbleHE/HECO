@@ -4,18 +4,10 @@
   "arguments": [
     {
       "type": "FunctionParameter",
-      "datatype": "std::string",
+      "datatype": "string",
       "value": {
         "type": "LiteralString",
-        "value": "Hello %s"
-      }
-    },
-    {
-      "type": "FunctionParameter",
-      "datatype": "const char*",
-      "value": {
-        "type": "Variable",
-        "identifier": "name"
+        "value": "Hello world!"
       }
     }
   ]

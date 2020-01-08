@@ -10,11 +10,21 @@ enum class TYPES {
 
 class Datatype {
  public:
-  const TYPES val;
+  TYPES val;
   bool isEncrypted = false;
 
-  explicit Datatype(TYPES di) : val(di) {};
-  explicit Datatype(TYPES di, bool isEncrypted) : val(di), isEncrypted(isEncrypted) {};
+  explicit Datatype(TYPES di) : val(di) {}
+  explicit Datatype(TYPES di, bool isEncrypted) : val(di), isEncrypted(isEncrypted) {}
+  explicit Datatype(std::string type) {
+    static const std::map<std::string, TYPES> string_to_types = {
+        {"int", TYPES::INT},
+        {"float", TYPES::FLOAT},
+        {"string", TYPES::STRING},
+        {"bool", TYPES::BOOL}};
+    auto result = string_to_types.find(type);
+    if (result == string_to_types.end()) throw std::invalid_argument("Unsupported datatype given: " + type);
+    val = result->second;
+  }
 
   std::string enum_to_string(const TYPES identifiers) const {
     static const std::map<TYPES, std::string> types_to_string = {
@@ -31,6 +41,19 @@ class Datatype {
 
   operator TYPES() const {
     return val;
+  }
+
+  std::string toString() const {
+    return enum_to_string(val);
+  }
+
+  bool operator==(const Datatype &rhs) const {
+    return val == rhs.val &&
+        isEncrypted == rhs.isEncrypted;
+  }
+
+  bool operator!=(const Datatype &rhs) const {
+    return !(rhs == *this);
   }
 };
 

@@ -22,10 +22,6 @@ class Function : public AbstractStatement {
 
   [[nodiscard]] const std::vector<AbstractStatement*> &getBody() const;
 
-  /// Copy constructor
-  /// \param func The function to be copied.
-  Function(const Function &func);
-
   Function(std::string name, std::vector<AbstractStatement*> bodyStatements);
 
   Function(std::string name, std::vector<FunctionParameter> params,

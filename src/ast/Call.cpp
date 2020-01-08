@@ -53,8 +53,8 @@ Literal* Call::evaluate(Ast &ast) {
 
   for (int i = 0; i < this->getFunc()->getParams().size(); i++) {
     // validation: make sure that datatypes in Call and Function are equal
-    auto datatypeCall = this->getArguments().at(i)->getDatatype();
-    auto datatypeFunc = this->getFunc()->getParams().at(i).getDatatype();
+    auto datatypeCall = *this->getArguments().at(i)->getDatatype();
+    auto datatypeFunc = *this->getFunc()->getParams().at(i).getDatatype();
     if (datatypeCall != datatypeFunc)
       throw std::logic_error("Datatype in Call and Function mismatch! Cannot continue."
                              "Position of parameters in Call and Function must be equal.");

@@ -62,7 +62,7 @@ void PrintVisitor::visit(Function &elem) {
 }
 
 void PrintVisitor::visit(FunctionParameter &elem) {
-  addOutputStr({elem.getNodeName(), elem.getDatatype()});
+  addOutputStr({elem.getNodeName(), elem.getDatatype()->toString()});
   printChildNodesIndented(elem);
 }
 
@@ -118,7 +118,7 @@ void PrintVisitor::visit(VarAssignm &elem) {
 }
 
 void PrintVisitor::visit(VarDecl &elem) {
-  addOutputStr({elem.getNodeName(), elem.getDatatype() + " " + elem.getIdentifier()});
+  addOutputStr({elem.getNodeName(), elem.getDatatype()->toString() + " " + elem.getIdentifier()});
   printChildNodesIndented(elem);
 }
 
