@@ -26,6 +26,8 @@ class AstTestingGenerator {
   static void genAstEvalThree(Ast &ast);
   static void genAstEvalFour(Ast &ast);
   static void genAstEvalFive(Ast &ast);
+  static void genAstEvalSix(Ast &ast);
+  static void genAstEvalSeven(Ast &ast);
 };
 
 #endif //MASTER_THESIS_CODE_ASTTESTINGGENERATOR_H

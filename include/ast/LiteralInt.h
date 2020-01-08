@@ -5,7 +5,7 @@
 #include <string>
 #include <ostream>
 
-class LiteralInt : public Literal, public Node {
+class LiteralInt : public Literal {
  private:
   int value;
 
@@ -31,6 +31,8 @@ class LiteralInt : public Literal, public Node {
   bool operator==(const LiteralInt &rhs) const;
 
   bool operator!=(const LiteralInt &rhs) const;
+
+  void storeParameterValue(std::string identifier, std::map<std::string, Literal*> &paramsMap) override;
 
  protected:
   void print(std::ostream &str) const override;

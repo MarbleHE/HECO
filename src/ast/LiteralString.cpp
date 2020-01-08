@@ -32,9 +32,15 @@ Literal* LiteralString::evaluate(Ast &ast) {
 void LiteralString::print(std::ostream &str) const {
   str << this->getValue();
 }
+
 bool LiteralString::operator==(const LiteralString &rhs) const {
   return value == rhs.value;
 }
+
 bool LiteralString::operator!=(const LiteralString &rhs) const {
   return !(rhs == *this);
+}
+
+void LiteralString::storeParameterValue(std::string identifier, std::map<std::string, Literal*> &paramsMap) {
+  paramsMap.emplace(identifier, this);
 }

@@ -9,14 +9,14 @@
 #include "LiteralString.h"
 #include <string>
 
-class LogicalExpr : public AbstractExpr, public Node {
+class LogicalExpr : public AbstractExpr {
  private:
-  AbstractExpr *left;
-  Operator *op;
-  AbstractExpr *right;
+  AbstractExpr* left;
+  Operator* op;
+  AbstractExpr* right;
 
  public:
-  LogicalExpr(AbstractExpr *left, OpSymb::LogCompOp op, AbstractExpr *right);
+  LogicalExpr(AbstractExpr* left, OpSymb::LogCompOp op, AbstractExpr* right);
 
   template<typename T1, typename T2>
   LogicalExpr(T1 left, OpSymb::LogCompOp op, T2 right) {
@@ -27,11 +27,11 @@ class LogicalExpr : public AbstractExpr, public Node {
 
   ~LogicalExpr() override;
 
-  [[nodiscard]] AbstractExpr *getLeft() const;
+  [[nodiscard]] AbstractExpr* getLeft() const;
 
   [[nodiscard]] Operator &getOp() const;
 
-  [[nodiscard]] AbstractExpr *getRight() const;
+  [[nodiscard]] AbstractExpr* getRight() const;
 
   [[nodiscard]] json toJson() const
   override;

@@ -10,6 +10,7 @@
 #include "CallExternal.h"
 #include "Block.h"
 #include "While.h"
+#include "Call.h"
 
 void AstTestingGenerator::generateAst(int id, Ast &ast) {
   // generate AST
@@ -24,7 +25,9 @@ void AstTestingGenerator::generateAst(int id, Ast &ast) {
       {8, genAstEvalTwo},
       {9, genAstEvalThree},
       {10, genAstEvalFour},
-      {11, genAstEvalFive}
+      {11, genAstEvalFive},
+      {12, genAstEvalSix},
+      {13, genAstEvalSeven}
   };
   auto it = call.find(id);
   if (it == call.end()) throw std::logic_error("Cannot continue. Invalid id given!");
@@ -389,6 +392,48 @@ void AstTestingGenerator::genAstEvalFive(Ast &ast) {
   // return sum;
   func->addStatement(
       new Return(new Variable("sum")));
+}
 
-  ast.setRootNode(func);
+void AstTestingGenerator::genAstEvalSix(Ast &ast) {
+  // int nestedCall() { ...
+  auto* fnc = new Function("nestedCall");
+  ast.setRootNode(fnc);
+
+  // int result = computeSecret(33);
+  // -> computeSecret(int inputA) { return inputA * 32 }
+  fnc->addStatement(new VarAssignm("result", new Call(
+      {new FunctionParameter("int", new LiteralInt(33))},
+      new Function("computeSecret",
+                   {FunctionParameter("int", new Variable("inputA"))},
+                   {new Return(
+                       new BinaryExpr(
+                           new Variable("inputA"),
+                           OpSymb::multiplication,
+                           new LiteralInt(32)))
+                   }))));
+
+  // return result;
+  fnc->addStatement(new Return(new Variable("result")));
+}
+
+void AstTestingGenerator::genAstEvalSeven(Ast &ast) {
+  // int nestedCall() { ...
+  auto* fnc = new Function("nestedCall");
+  ast.setRootNode(fnc);
+
+  // int result = computeSecret(33);
+  // -> computeSecret(int inputA) { return inputA * 32 }
+  fnc->addStatement(new VarAssignm("result", new Call(
+      {new FunctionParameter("int", new BinaryExpr(new LiteralInt(11), OpSymb::addition, new LiteralInt(213)))},
+      new Function("computeSecret",
+                   {FunctionParameter("int", new Variable("inputA"))},
+                   {new Return(
+                       new BinaryExpr(
+                           new Variable("inputA"),
+                           OpSymb::multiplication,
+                           new LiteralInt(32)))
+                   }))));
+
+  // return result;
+  fnc->addStatement(new Return(new Variable("result")));
 }

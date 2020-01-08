@@ -1,9 +1,17 @@
 #include <Ast.h>
+#include <Operator.h>
 #include "gtest/gtest.h"
 #include "AstTestingGenerator.h"
 #include "LiteralInt.h"
 #include "LiteralBool.h"
 #include "LiteralString.h"
+#include "FunctionParameter.h"
+#include "Variable.h"
+#include "BinaryExpr.h"
+#include "Return.h"
+#include "Function.h"
+#include "Call.h"
+#include "VarAssignm.h"
 
 TEST(AstEvaluationTests, simpleAstEvaluation1) {
   Ast ast;
@@ -115,3 +123,18 @@ TEST(AstEvaluationTests, complexAstEvaluationWhileExecutedThreeTimes) {
   ASSERT_EQ(*result, *new LiteralInt(21));
 }
 
+TEST(AstEvaluationTests, complexAstEvaluationWithNestedFunctionCall_LiteralParameterValue) {
+  Ast ast;
+  AstTestingGenerator::generateAst(12, ast);
+  std::map<std::string, Literal*> params;
+  auto result = dynamic_cast<LiteralInt*>(ast.evaluate(params, false));
+  ASSERT_EQ(*result, *new LiteralInt(1'056));
+}
+
+TEST(AstEvaluationTests, complexAstEvaluationWithNestedFunctionCall_BexpParameterValue) {
+  Ast ast;
+  AstTestingGenerator::generateAst(13, ast);
+  std::map<std::string, Literal*> params;
+  auto result = dynamic_cast<LiteralInt*>(ast.evaluate(params, false));
+  ASSERT_EQ(*result, *new LiteralInt(7'168));
+}

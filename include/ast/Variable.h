@@ -4,7 +4,7 @@
 #include <string>
 #include "AbstractExpr.h"
 
-class Variable : public AbstractExpr, public Node {
+class Variable : public AbstractExpr {
  private:
   std::string identifier;
 
@@ -23,11 +23,11 @@ class Variable : public AbstractExpr, public Node {
 
   bool operator!=(const Variable &rhs) const;
 
-  bool contains(Variable *var) override;
+  bool contains(Variable* var) override;
 
-  bool isEqual(AbstractExpr *other) override;
+  bool isEqual(AbstractExpr* other) override;
 
-  Literal *evaluate(Ast &ast) override;
+  Literal* evaluate(Ast &ast) override;
 };
 
 #endif //MASTER_THESIS_CODE_VARIABLE_H

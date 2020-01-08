@@ -7,14 +7,15 @@
 #include "FunctionParameter.h"
 #include "AbstractStatement.h"
 
-class Call : public AbstractExpr, public AbstractStatement, public Node {
+class Call : public AbstractExpr, public AbstractStatement {
  private:
-  Function *func;
-  std::vector<FunctionParameter *> arguments;
- public:
-  Call(std::vector<FunctionParameter *> arguments, Function *func);
+  Function* func;
+  std::vector<FunctionParameter*> arguments;
 
-  explicit Call(Function *func);
+ public:
+  Call(std::vector<FunctionParameter*> arguments, Function* func);
+
+  explicit Call(Function* func);
 
   ~Call() override;
 
@@ -22,11 +23,11 @@ class Call : public AbstractExpr, public AbstractStatement, public Node {
 
   void accept(Visitor &v) override;
 
-  [[nodiscard]] const std::vector<FunctionParameter *> &getArguments() const;
+  [[nodiscard]] const std::vector<FunctionParameter*> &getArguments() const;
 
   [[nodiscard]] std::string getNodeName() const override;
 
-  [[nodiscard]] Function *getFunc() const;
+  [[nodiscard]] Function* getFunc() const;
 
   Literal* evaluate(Ast &ast) override;
 };

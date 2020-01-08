@@ -14,7 +14,7 @@ json CallExternal::toJson() const {
   return j;
 }
 
-CallExternal::CallExternal(std::string functionName, std::vector<FunctionParameter> *arguments) : functionName(
+CallExternal::CallExternal(std::string functionName, std::vector<FunctionParameter>* arguments) : functionName(
     std::move(functionName)) {
   this->arguments = arguments;
 }
@@ -31,7 +31,7 @@ const std::string &CallExternal::getFunctionName() const {
   return functionName;
 }
 
-std::vector<FunctionParameter> *CallExternal::getArguments() const {
+std::vector<FunctionParameter>* CallExternal::getArguments() const {
   return arguments;
 }
 
@@ -39,5 +39,5 @@ std::string CallExternal::getNodeName() const {
   return "CallExternal";
 }
 Literal* CallExternal::evaluate(Ast &ast) {
-  throw std::runtime_error("evaluate(Ast &ast) not implemented for class CallExternal yet!");
+  throw std::runtime_error("evaluate(Ast &ast) not implemented for class CallExternal yet! Consider using Call instead.");
 }

@@ -4,7 +4,7 @@
 #include <string>
 #include "Literal.h"
 
-class LiteralString : public Literal, public Node {
+class LiteralString : public Literal {
  private:
   std::string value;
 
@@ -29,6 +29,8 @@ class LiteralString : public Literal, public Node {
   bool operator==(const LiteralString &rhs) const;
 
   bool operator!=(const LiteralString &rhs) const;
+
+  void storeParameterValue(std::string identifier, std::map<std::string, Literal*> &paramsMap) override;
 };
 
 #endif //MASTER_THESIS_CODE_LITERALSTRING_H

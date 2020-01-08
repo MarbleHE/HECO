@@ -5,12 +5,13 @@
 #include "AbstractExpr.h"
 #include <string>
 
-class While : public AbstractStatement, public Node {
+class While : public AbstractStatement {
  private:
-  AbstractExpr *condition;
-  AbstractStatement *body;
+  AbstractExpr* condition;
+  AbstractStatement* body;
+
  public:
-  While(AbstractExpr *condition, AbstractStatement *body);
+  While(AbstractExpr* condition, AbstractStatement* body);
 
   ~While() override;
 
@@ -18,9 +19,9 @@ class While : public AbstractStatement, public Node {
 
   void accept(Visitor &v) override;
 
-  [[nodiscard]] AbstractExpr *getCondition() const;
+  [[nodiscard]] AbstractExpr* getCondition() const;
 
-  [[nodiscard]] AbstractStatement *getBody() const;
+  [[nodiscard]] AbstractStatement* getBody() const;
 
   [[nodiscard]] std::string getNodeName() const override;
 

@@ -15,16 +15,6 @@ Function::Function(std::string name, std::vector<AbstractStatement*> pt) : name(
 
 Function::Function(std::string name) : name(std::move(name)) {}
 
-Function::Function(const Function &func) : Node(func) {
-  // copy 'identifier'
-  this->name = std::string(func.name);
-  // copy 'params'
-  for (const auto &p : func.params) this->params.push_back(p);
-  // copy 'body'
-  this->body.reserve(func.body.size());
-  for (const auto &e : func.body) this->body.emplace_back(e);
-}
-
 void Function::addStatement(AbstractStatement* statement) {
   this->body.emplace_back(statement);
 }

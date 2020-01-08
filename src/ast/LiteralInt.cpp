@@ -47,3 +47,7 @@ bool LiteralInt::operator==(const LiteralInt &rhs) const {
 bool LiteralInt::operator!=(const LiteralInt &rhs) const {
   return !(rhs == *this);
 }
+
+void LiteralInt::storeParameterValue(std::string identifier, std::map<std::string, Literal*> &paramsMap) {
+  paramsMap.emplace(identifier, this);
+}

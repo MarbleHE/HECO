@@ -7,11 +7,11 @@
 #include "FunctionParameter.h"
 #include "VarDecl.h"
 
-class Function : public AbstractStatement, public Node {
+class Function : public AbstractStatement {
  private:
   std::string name;
   std::vector<FunctionParameter> params;
-  std::vector<AbstractStatement *> body;
+  std::vector<AbstractStatement*> body;
 
  public:
   Function() = default;
@@ -20,22 +20,22 @@ class Function : public AbstractStatement, public Node {
 
   [[nodiscard]] const std::vector<FunctionParameter> &getParams() const;
 
-  [[nodiscard]] const std::vector<AbstractStatement *> &getBody() const;
+  [[nodiscard]] const std::vector<AbstractStatement*> &getBody() const;
 
   /// Copy constructor
   /// \param func The function to be copied.
   Function(const Function &func);
 
-  Function(std::string name, std::vector<AbstractStatement *> bodyStatements);
+  Function(std::string name, std::vector<AbstractStatement*> bodyStatements);
 
   Function(std::string name, std::vector<FunctionParameter> params,
-           std::vector<AbstractStatement *> body);
+           std::vector<AbstractStatement*> body);
 
   explicit Function(std::string name);
 
-  void addParameter(FunctionParameter *param);
+  void addParameter(FunctionParameter* param);
 
-  void addStatement(AbstractStatement *pDecl);
+  void addStatement(AbstractStatement* pDecl);
 
   [[nodiscard]] json toJson() const override;
 
@@ -43,7 +43,7 @@ class Function : public AbstractStatement, public Node {
 
   [[nodiscard]] std::string getNodeName() const override;
 
-  void setParams(std::vector<FunctionParameter> *paramsVec);
+  void setParams(std::vector<FunctionParameter>* paramsVec);
 
   Literal* evaluate(Ast &ast) override;
 };

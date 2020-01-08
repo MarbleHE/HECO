@@ -4,7 +4,7 @@
 #include "Literal.h"
 #include <string>
 
-class LiteralBool : public Literal, public Node {
+class LiteralBool : public Literal {
  private:
   bool value;
 
@@ -24,8 +24,13 @@ class LiteralBool : public Literal, public Node {
   [[nodiscard]] std::string getNodeName() const override;
 
   Literal* evaluate(Ast &ast) override;
+
   bool operator==(const LiteralBool &rhs) const;
+
   bool operator!=(const LiteralBool &rhs) const;
+
+  void storeParameterValue(std::string identifier, std::map<std::string, Literal*> &paramsMap) override;
+
  protected:
   void print(std::ostream &str) const override;
 };

@@ -5,13 +5,13 @@
 #include "AbstractExpr.h"
 #include "Operator.h"
 
-class UnaryExpr : public AbstractExpr, public Node {
+class UnaryExpr : public AbstractExpr {
  private:
-  Operator *op;
-  AbstractExpr *right;
+  Operator* op;
+  AbstractExpr* right;
 
  public:
-  UnaryExpr(OpSymb::UnaryOp op, AbstractExpr *right);
+  UnaryExpr(OpSymb::UnaryOp op, AbstractExpr* right);
 
   [[nodiscard]] json toJson() const override;
 
@@ -19,7 +19,7 @@ class UnaryExpr : public AbstractExpr, public Node {
 
   [[nodiscard]] Operator &getOp() const;
 
-  [[nodiscard]] AbstractExpr *getRight() const;
+  [[nodiscard]] AbstractExpr* getRight() const;
 
   [[nodiscard]] std::string getNodeName() const override;
 

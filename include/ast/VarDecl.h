@@ -5,16 +5,16 @@
 #include "AbstractStatement.h"
 #include "AbstractExpr.h"
 
-class VarDecl : public AbstractStatement, public Node {
+class VarDecl : public AbstractStatement {
  private:
   std::string identifier;
   std::string datatype;
-  AbstractExpr *initializer;
+  AbstractExpr* initializer;
 
  public:
   VarDecl(std::string name, std::string datatype);
 
-  VarDecl(std::string name, std::string datatype, AbstractExpr *initializer);
+  VarDecl(std::string name, std::string datatype, AbstractExpr* initializer);
 
   VarDecl(std::string name, const std::string &datatype, int i);
 
@@ -28,15 +28,15 @@ class VarDecl : public AbstractStatement, public Node {
 
   [[nodiscard]] const std::string &getDatatype() const;
 
-  [[nodiscard]] AbstractExpr *getInitializer() const;
+  [[nodiscard]] AbstractExpr* getInitializer() const;
 
-  BinaryExpr *contains(BinaryExpr *bexpTemplate, BinaryExpr *excludedSubtree) override;
+  BinaryExpr* contains(BinaryExpr* bexpTemplate, BinaryExpr* excludedSubtree) override;
 
   ~VarDecl() override;
 
   std::string getVarTargetIdentifier() override;
 
-  bool isEqual(AbstractStatement *as) override;
+  bool isEqual(AbstractStatement* as) override;
 
   Literal* evaluate(Ast &ast) override;
 };

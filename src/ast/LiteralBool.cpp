@@ -42,3 +42,7 @@ bool LiteralBool::operator==(const LiteralBool &rhs) const {
 bool LiteralBool::operator!=(const LiteralBool &rhs) const {
   return !(rhs == *this);
 }
+
+void LiteralBool::storeParameterValue(std::string identifier, std::map<std::string, Literal*> &paramsMap) {
+  paramsMap.emplace(identifier, this);
+}

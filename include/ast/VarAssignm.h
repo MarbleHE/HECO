@@ -5,13 +5,13 @@
 #include "AbstractStatement.h"
 #include "AbstractExpr.h"
 
-class VarAssignm : public AbstractStatement, public Node {
+class VarAssignm : public AbstractStatement {
  private:
   std::string identifier;
-  AbstractExpr *value;
+  AbstractExpr* value;
 
  public:
-  VarAssignm(std::string identifier, AbstractExpr *value);
+  VarAssignm(std::string identifier, AbstractExpr* value);
 
   ~VarAssignm() override;
 
@@ -21,15 +21,15 @@ class VarAssignm : public AbstractStatement, public Node {
 
   [[nodiscard]] const std::string &getIdentifier() const;
 
-  [[nodiscard]] AbstractExpr *getValue() const;
+  [[nodiscard]] AbstractExpr* getValue() const;
 
   [[nodiscard]] std::string getNodeName() const override;
 
-  BinaryExpr *contains(BinaryExpr *bexpTemplate, BinaryExpr *excludedSubtree) override;
+  BinaryExpr* contains(BinaryExpr* bexpTemplate, BinaryExpr* excludedSubtree) override;
 
   std::string getVarTargetIdentifier() override;
 
-  bool isEqual(AbstractStatement *as) override;
+  bool isEqual(AbstractStatement* as) override;
 
   Literal* evaluate(Ast &ast) override;
 };

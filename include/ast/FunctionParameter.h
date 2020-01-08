@@ -4,13 +4,13 @@
 #include "Variable.h"
 #include <string>
 
-class FunctionParameter : public AbstractExpr, public Node {
+class FunctionParameter : public AbstractExpr {
  private:
   std::string datatype;
-  AbstractExpr *value;
+  AbstractExpr* value;
 
  public:
-  FunctionParameter(std::string datatype, AbstractExpr *value);
+  FunctionParameter(std::string datatype, AbstractExpr* value);
 
   [[nodiscard]] json toJson() const override;
 
@@ -20,13 +20,13 @@ class FunctionParameter : public AbstractExpr, public Node {
 
   [[nodiscard]] const std::string &getDatatype() const;
 
-  [[nodiscard]] AbstractExpr *getValue() const;
+  [[nodiscard]] AbstractExpr* getValue() const;
 };
 
 /// Defines the JSON representation to be used for vector<FunctionParameter> objects.
 void to_json(json &j, const FunctionParameter &funcParam);
 
 /// Defines the JSON representation to be used for vector<FunctionParameter *> objects.
-void to_json(json &j, const FunctionParameter *funcParam);
+void to_json(json &j, const FunctionParameter* funcParam);
 
 #endif //MASTER_THESIS_CODE_FUNCTIONPARAMETER_H

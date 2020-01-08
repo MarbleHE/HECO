@@ -40,7 +40,7 @@ void Visitor::visit(Block &elem) {
 
 void Visitor::visit(Call &elem) {
   curScope->addStatement(&elem);
-  changeToInnerScope(elem.getUniqueNodeId());
+  changeToInnerScope(elem.AbstractStatement::getUniqueNodeId());
   // callee
   elem.getFunc()->accept(*this);
   changeToOuterScope();

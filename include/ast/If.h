@@ -5,16 +5,16 @@
 #include "AbstractExpr.h"
 #include <string>
 
-class If : public AbstractStatement, public Node {
+class If : public AbstractStatement {
  private:
-  AbstractExpr *condition;
-  AbstractStatement *thenBranch;
-  AbstractStatement *elseBranch;
+  AbstractExpr* condition;
+  AbstractStatement* thenBranch;
+  AbstractStatement* elseBranch;
 
  public:
-  If(AbstractExpr *condition, AbstractStatement *thenBranch);
+  If(AbstractExpr* condition, AbstractStatement* thenBranch);
 
-  If(AbstractExpr *condition, AbstractStatement *thenBranch, AbstractStatement *elseBranch);
+  If(AbstractExpr* condition, AbstractStatement* thenBranch, AbstractStatement* elseBranch);
 
   ~If();
 
@@ -24,11 +24,11 @@ class If : public AbstractStatement, public Node {
 
   [[nodiscard]] std::string getNodeName() const override;
 
-  [[nodiscard]] AbstractExpr *getCondition() const;
+  [[nodiscard]] AbstractExpr* getCondition() const;
 
-  [[nodiscard]] AbstractStatement *getThenBranch() const;
+  [[nodiscard]] AbstractStatement* getThenBranch() const;
 
-  [[nodiscard]] AbstractStatement *getElseBranch() const;
+  [[nodiscard]] AbstractStatement* getElseBranch() const;
 
   Literal* evaluate(Ast &ast) override;
 };

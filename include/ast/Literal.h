@@ -3,8 +3,10 @@
 
 #include <variant>
 #include <ostream>
-#include "AbstractExpr.h"
+#include <map>
+#include <string>
 #include <vector>
+#include "AbstractExpr.h"
 
 class Literal : public AbstractExpr {
  protected:
@@ -17,6 +19,8 @@ class Literal : public AbstractExpr {
   bool operator==(const Literal &rhs) const;
 
   bool operator!=(const Literal &rhs) const;
+
+  virtual void storeParameterValue(std::string identifier, std::map<std::string, Literal*> &paramsMap) = 0;
 };
 
 inline std::ostream &operator<<(std::ostream &os, const std::vector<Literal*> &v) {

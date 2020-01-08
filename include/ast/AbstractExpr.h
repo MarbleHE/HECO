@@ -9,15 +9,15 @@
 
 using json = nlohmann::json;
 
-class AbstractExpr {
+class AbstractExpr : public Node {
  private:
-  static LiteralInt *createParam(int i);
+  static LiteralInt* createParam(int i);
 
-  static LiteralBool *createParam(bool b);
+  static LiteralBool* createParam(bool b);
 
-  static LiteralString *createParam(const char *str);
+  static LiteralString* createParam(const char* str);
 
-  static AbstractExpr *createParam(AbstractExpr *abstractExpr);
+  static AbstractExpr* createParam(AbstractExpr* abstractExpr);
 
  public:
   virtual ~AbstractExpr() = default;
@@ -28,11 +28,11 @@ class AbstractExpr {
 
   virtual void accept(Visitor &v);
 
-  virtual BinaryExpr *contains(BinaryExpr *bexpTemplate, AbstractExpr *excludedSubtree);
+  virtual BinaryExpr* contains(BinaryExpr* bexpTemplate, AbstractExpr* excludedSubtree);
 
-  virtual bool contains(Variable *var);
+  virtual bool contains(Variable* var);
 
-  virtual bool isEqual(AbstractExpr *other);
+  virtual bool isEqual(AbstractExpr* other);
 
   virtual Literal* evaluate(Ast &ast);
 };

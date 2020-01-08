@@ -4,12 +4,12 @@
 #include "AbstractExpr.h"
 #include <string>
 
-class Group : public AbstractExpr, public Node {
+class Group : public AbstractExpr {
  private:
-  AbstractExpr *expr;
+  AbstractExpr* expr;
 
  public:
-  explicit Group(AbstractExpr *expr);
+  explicit Group(AbstractExpr* expr);
 
   ~Group() override;
 
@@ -19,9 +19,9 @@ class Group : public AbstractExpr, public Node {
 
   [[nodiscard]] std::string getNodeName() const override;
 
-  [[nodiscard]] AbstractExpr *getExpr() const;
+  [[nodiscard]] AbstractExpr* getExpr() const;
 
-  BinaryExpr *contains(BinaryExpr *bexpTemplate, AbstractExpr *excludedSubtree) override;
+  BinaryExpr* contains(BinaryExpr* bexpTemplate, AbstractExpr* excludedSubtree) override;
 
   Literal* evaluate(Ast &ast) override;
 };
