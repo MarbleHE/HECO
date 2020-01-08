@@ -9,6 +9,7 @@
 #include "If.h"
 #include "LiteralBool.h"
 #include "LiteralInt.h"
+#include "LiteralFloat.h"
 #include "LiteralString.h"
 #include "LogicalExpr.h"
 #include "Return.h"
@@ -32,6 +33,15 @@ TEST(JsonOutputTest, LiteralInt) { /* NOLINT */
               {"value", val}};
     EXPECT_EQ(lint->toString(), j.dump());
 }
+
+TEST(JsonOutputTest, LiteralFloat) { /* NOLINT */
+  float val = 33.214;
+  auto *lint = new LiteralFloat(val);
+  json j = {{"type",  "LiteralFloat"},
+            {"value", val}};
+  EXPECT_EQ(lint->toString(), j.dump());
+}
+
 
 TEST(JsonOutputTest, LiteralBool) { /* NOLINT */
     bool val = true;

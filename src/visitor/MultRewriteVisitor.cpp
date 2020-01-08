@@ -77,6 +77,10 @@ void MultRewriteVisitor::visit(LiteralInt &elem) {
   Visitor::visit(elem);
 }
 
+void MultRewriteVisitor::visit(LiteralFloat &elem) {
+  Visitor::visit(elem);
+}
+
 void MultRewriteVisitor::visit(LiteralString &elem) {
   Visitor::visit(elem);
 }

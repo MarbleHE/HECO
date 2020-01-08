@@ -29,3 +29,4 @@ bool Literal::operator==(const Literal &rhs) const {
 bool Literal::operator!=(const Literal &rhs) const {
   return !(rhs == *this);
 }
+

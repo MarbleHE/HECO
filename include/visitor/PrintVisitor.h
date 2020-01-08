@@ -44,6 +44,8 @@ class PrintVisitor : public Visitor {
 
   void visit(LiteralString &elem) override;
 
+  void visit(LiteralFloat &elem) override;
+
   void visit(LogicalExpr &elem) override;
 
   void visit(Operator &elem) override;

@@ -3,6 +3,7 @@
 
 #include <string>
 #include "Literal.h"
+#include <map>
 
 class LiteralString : public Literal {
  private:
@@ -30,7 +31,9 @@ class LiteralString : public Literal {
 
   bool operator!=(const LiteralString &rhs) const;
 
-  void storeParameterValue(std::string identifier, std::map<std::string, Literal*> &paramsMap) override;
+  void addLiteralValue(std::string identifier, std::map<std::string, Literal*> &paramsMap) override;
+  void setValue(const std::string &newValue);
+  void setRandomValue(RandLiteralGen &rlg) override;
 };
 
 #endif //MASTER_THESIS_CODE_LITERALSTRING_H

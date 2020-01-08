@@ -1,6 +1,7 @@
 #include <utility>
 
 #include "../../include/ast/LiteralString.h"
+#include "../utilities/RandNumGen.h"
 
 LiteralString::LiteralString(std::string value) : value(std::move(value)) {}
 
@@ -41,6 +42,14 @@ bool LiteralString::operator!=(const LiteralString &rhs) const {
   return !(rhs == *this);
 }
 
-void LiteralString::storeParameterValue(std::string identifier, std::map<std::string, Literal*> &paramsMap) {
+void LiteralString::addLiteralValue(std::string identifier, std::map<std::string, Literal*> &paramsMap) {
   paramsMap.emplace(identifier, this);
+}
+
+void LiteralString::setValue(const std::string &newValue) {
+  this->value = newValue;
+}
+
+void LiteralString::setRandomValue(RandLiteralGen &rlg) {
+  setValue(rlg.getRandomString(RandLiteralGen::stringDefaultMaxLength));
 }

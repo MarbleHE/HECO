@@ -112,6 +112,14 @@ class Operator : public Node {
   Literal* applyOperator(LiteralBool* rhs);
 
   Literal* applyOperator(LiteralString* rhs);
+  Literal* applyOperator(LiteralFloat* lhs, LiteralFloat* rhs);
+  Literal* applyOperator(LiteralFloat* lhs, LiteralInt* rhs);
+  Literal* applyOperator(LiteralInt* lhs, LiteralFloat* rhs);
+  Literal* applyOperator(LiteralFloat* lhs, LiteralBool* rhs);
+  Literal* applyOperator(LiteralBool* lhs, LiteralFloat* rhs);
+  Literal* applyOperator(LiteralFloat* lhs, LiteralString* rhs);
+  Literal* applyOperator(LiteralString* lhs, LiteralFloat* rhs);
+  Literal* applyOperator(LiteralFloat* rhs);
 };
 
 #endif //MASTER_THESIS_CODE_OPERATOR_H

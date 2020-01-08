@@ -4,6 +4,7 @@
 #include "Literal.h"
 #include <string>
 #include <ostream>
+#include <map>
 
 class LiteralInt : public Literal {
  private:
@@ -32,7 +33,10 @@ class LiteralInt : public Literal {
 
   bool operator!=(const LiteralInt &rhs) const;
 
-  void storeParameterValue(std::string identifier, std::map<std::string, Literal*> &paramsMap) override;
+  void addLiteralValue(std::string identifier, std::map<std::string, Literal*> &paramsMap) override;
+
+  void setRandomValue(RandLiteralGen &rlg) override;
+  void setValue(int newValue);
 
  protected:
   void print(std::ostream &str) const override;

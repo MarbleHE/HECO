@@ -45,6 +45,8 @@ If::~If() {
 
 Literal* If::evaluate(Ast &ast) {
   auto cond = dynamic_cast<LiteralBool*>(getCondition()->evaluate(ast));
+  if (cond == nullptr)
+    throw std::logic_error("Condition in If statement must evaluate to a LiteralBool! Cannot continue.");
   if (*cond == LiteralBool(true)) {
     return thenBranch->evaluate(ast);
   } else if (elseBranch != nullptr) {

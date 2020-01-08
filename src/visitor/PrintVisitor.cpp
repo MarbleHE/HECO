@@ -4,6 +4,7 @@
 #include <If.h>
 #include <LiteralInt.h>
 #include <LiteralBool.h>
+#include <LiteralFloat.h>
 #include <LogicalExpr.h>
 #include <VarAssignm.h>
 #include <Block.h>
@@ -88,6 +89,10 @@ void PrintVisitor::visit(LiteralString &elem) {
   addOutputStr({elem.getNodeName(), elem.getValue()});
 }
 
+void PrintVisitor::visit(LiteralFloat &elem) {
+  addOutputStr({elem.getNodeName(), std::to_string(elem.getValue())});
+}
+
 void PrintVisitor::visit(LogicalExpr &elem) {
   addOutputStr({elem.getNodeName()});
   printChildNodesIndented(elem);
@@ -169,11 +174,11 @@ void PrintVisitor::addOutputStr(const std::list<std::string> &args) {
   ss << std::endl;
 }
 
-Scope *PrintVisitor::getLastPrintedScope() const {
+Scope* PrintVisitor::getLastPrintedScope() const {
   return lastPrintedScope;
 }
 
-void PrintVisitor::setLastPrintedScope(Scope *scope) {
+void PrintVisitor::setLastPrintedScope(Scope* scope) {
   this->lastPrintedScope = scope;
 }
 

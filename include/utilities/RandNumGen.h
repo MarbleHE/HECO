@@ -11,6 +11,7 @@
 #include "../../include/ast/LiteralInt.h"
 #include "../../include/ast/LiteralBool.h"
 #include "../../include/ast/LiteralString.h"
+#include "../../include/ast/LiteralFloat.h"
 
 class RandLiteralGen {
  private:
@@ -19,9 +20,12 @@ class RandLiteralGen {
   std::uniform_int_distribution<size_t> distInt_;
   std::uniform_int_distribution<size_t> distBool_;
   std::uniform_int_distribution<size_t> distString_;
+  std::uniform_real_distribution<double> distFloat_;
 
   static constexpr const std::pair<int, int> intRange = std::make_pair(0, 999'999);
-  static const int stringDefaultMaxLength = 12;
+  // note: increasing the maximum of floatRange trims the number of decimal places
+  static constexpr const std::pair<double, double> floatRange = std::make_pair(0.0, 999.0);
+
   constexpr static const char charset[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
   int getRandomIntForStringGen() {
@@ -40,9 +44,15 @@ class RandLiteralGen {
   }
 
  public:
+  static const int stringDefaultMaxLength = 12;
+
   explicit RandLiteralGen(std::mt19937::result_type seed)
-      : seed(seed), distInt_{intRange.first, intRange.second}, distBool_{0, 1},
-        distString_{0, sizeof(charset) - 2}, gen_(seed) {}
+      : seed(seed),
+        distInt_{intRange.first, intRange.second},
+        distBool_{0, 1},
+        distFloat_{floatRange.first, floatRange.second},
+        distString_{0, sizeof(charset) - 2},
+        gen_(seed) {}
 
   int getRandomInt() {
     return distInt_(gen_);
@@ -68,18 +78,19 @@ class RandLiteralGen {
     return new LiteralString(getRandomString(length));
   }
 
-  std::map<std::string, Literal*> getRandomValues(const std::map<std::string, Literal*> &vals) {
+  float getRandomFloat() {
+    return distFloat_(gen_);;
+  }
+
+  LiteralFloat* getRandomLiteralFloat() {
+    return new LiteralFloat(getRandomFloat());
+  }
+
+  void randomizeValues(const std::map<std::string, Literal*> &vals) {
     std::map<std::string, Literal*> randomizedInputs;
     for (auto &[identifier, lit] : vals) {
-      if (dynamic_cast<LiteralBool*>(lit)) {
-        randomizedInputs.emplace(identifier, getRandomLiteralBool());
-      } else if (dynamic_cast<LiteralString*>(lit)) {
-        randomizedInputs.emplace(identifier, getRandomLiteralString());
-      } else if (dynamic_cast<LiteralInt*>(lit)) {
-        randomizedInputs.emplace(identifier, getRandomLiteralInt());
-      }
+      lit->setRandomValue(*this);
     }
-    return randomizedInputs;
   }
 };
 

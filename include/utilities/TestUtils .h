@@ -9,17 +9,17 @@
 #include "RandNumGen.h"
 
 static void astOutputComparer(Ast &unmodifiedAst, Ast &rewrittenAst, unsigned int seed, int numTestRuns,
-                              const std::map<std::string, Literal*> &evalExampleParams) {
+                              std::map<std::string, Literal*> &evalParams) {
   // create random number generator with test-specific seed
   RandLiteralGen rng(seed);
 
   for (int i = 0; i < numTestRuns; i++) {
     // generate new parameter values
-    auto currentParameterSet = rng.getRandomValues(evalExampleParams);
+    rng.randomizeValues(evalParams);
 
     // evaluate both ASTs with previously generated params
-    auto resultExpected = unmodifiedAst.evaluate(currentParameterSet, false);
-    auto resultRewrittenAst = rewrittenAst.evaluate(currentParameterSet, false);
+    auto resultExpected = unmodifiedAst.evaluate(evalParams, false);
+    auto resultRewrittenAst = rewrittenAst.evaluate(evalParams, false);
 
     // compare results of original and rewritten AST
     ASSERT_EQ(*resultExpected, *resultRewrittenAst);

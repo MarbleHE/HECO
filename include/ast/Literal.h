@@ -8,6 +8,8 @@
 #include <vector>
 #include "AbstractExpr.h"
 
+class RandLiteralGen;
+
 class Literal : public AbstractExpr {
  protected:
   ~Literal();
@@ -20,7 +22,9 @@ class Literal : public AbstractExpr {
 
   bool operator!=(const Literal &rhs) const;
 
-  virtual void storeParameterValue(std::string identifier, std::map<std::string, Literal*> &paramsMap) = 0;
+  virtual void addLiteralValue(std::string identifier, std::map<std::string, Literal*> &paramsMap) = 0;
+
+  virtual void setRandomValue(RandLiteralGen &rlg) = 0;
 };
 
 inline std::ostream &operator<<(std::ostream &os, const std::vector<Literal*> &v) {

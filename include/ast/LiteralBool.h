@@ -3,6 +3,7 @@
 
 #include "Literal.h"
 #include <string>
+#include <map>
 
 class LiteralBool : public Literal {
  private:
@@ -29,7 +30,10 @@ class LiteralBool : public Literal {
 
   bool operator!=(const LiteralBool &rhs) const;
 
-  void storeParameterValue(std::string identifier, std::map<std::string, Literal*> &paramsMap) override;
+  void addLiteralValue(std::string identifier, std::map<std::string, Literal*> &paramsMap) override;
+
+  void setRandomValue(RandLiteralGen &rlg) override;
+  void setValue(bool newValue);
 
  protected:
   void print(std::ostream &str) const override;

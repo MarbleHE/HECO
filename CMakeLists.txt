@@ -44,6 +44,7 @@ set(SOURCE_FILES
         ${master_thesis_code_SOURCE_DIR}/src/ast/LiteralBool.cpp
         ${master_thesis_code_SOURCE_DIR}/src/ast/LiteralInt.cpp
         ${master_thesis_code_SOURCE_DIR}/src/ast/LiteralString.cpp
+        ${master_thesis_code_SOURCE_DIR}/src/ast/LiteralFloat.cpp
         ${master_thesis_code_SOURCE_DIR}/src/ast/VarDecl.cpp
         ${master_thesis_code_SOURCE_DIR}/src/ast/Block.cpp
         ${master_thesis_code_SOURCE_DIR}/src/ast/Operator.cpp
@@ -67,7 +68,8 @@ set(SOURCE_FILES
         ${master_thesis_code_SOURCE_DIR}/src/ast/Node.cpp
         ${master_thesis_code_SOURCE_DIR}/src/utilities/Scope.cpp
         ${master_thesis_code_SOURCE_DIR}/examples/genAstDemo.cpp
-        ${master_thesis_code_SOURCE_DIR}/include/utilities/RandNumGen.h)
+        ${master_thesis_code_SOURCE_DIR}/include/utilities/RandNumGen.h
+        ${master_thesis_code_SOURCE_DIR}/include/utilities/Datatypes.h)
 
 add_executable(master_thesis_code
         ${master_thesis_code_SOURCE_DIR}/main.cpp

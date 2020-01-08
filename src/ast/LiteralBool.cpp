@@ -1,4 +1,5 @@
 #include "../../include/ast/LiteralBool.h"
+#include "../utilities/RandNumGen.h"
 
 LiteralBool::LiteralBool(bool value) : value(value) {}
 
@@ -43,6 +44,14 @@ bool LiteralBool::operator!=(const LiteralBool &rhs) const {
   return !(rhs == *this);
 }
 
-void LiteralBool::storeParameterValue(std::string identifier, std::map<std::string, Literal*> &paramsMap) {
+void LiteralBool::addLiteralValue(std::string identifier, std::map<std::string, Literal*> &paramsMap) {
   paramsMap.emplace(identifier, this);
+}
+
+void LiteralBool::setValue(bool newValue) {
+  this->value = newValue;
+}
+
+void LiteralBool::setRandomValue(RandLiteralGen &rlg) {
+  setValue(rlg.getRandomBool());
 }

@@ -38,6 +38,8 @@ class MultRewriteVisitor : public Visitor {
 
   void visit(LiteralInt &elem) override;
 
+  void visit(LiteralFloat &elem) override;
+
   void visit(LiteralString &elem) override;
 
   void visit(LogicalExpr &elem) override;

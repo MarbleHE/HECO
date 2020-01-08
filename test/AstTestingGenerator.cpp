@@ -11,30 +11,37 @@
 #include "Block.h"
 #include "While.h"
 #include "Call.h"
+#include "Group.h"
+
+static std::map<int, std::function<void(Ast &)> > call = {
+    {1, AstTestingGenerator::_genAstRewritingOne},
+    {2, AstTestingGenerator::_genAstRewritingTwo},
+    {3, AstTestingGenerator::_genAstRewritingThree},
+    {4, AstTestingGenerator::_genAstRewritingFour},
+    {5, AstTestingGenerator::_genAstRewritingFive},
+    {6, AstTestingGenerator::_genAstRewritingSix},
+    {7, AstTestingGenerator::_genAstEvalOne},
+    {8, AstTestingGenerator::_genAstEvalTwo},
+    {9, AstTestingGenerator::_genAstEvalThree},
+    {10, AstTestingGenerator::_genAstEvalFour},
+    {11, AstTestingGenerator::_genAstEvalFive},
+    {12, AstTestingGenerator::_genAstEvalSix},
+    {13, AstTestingGenerator::_genAstEvalSeven},
+    {14, AstTestingGenerator::_genAstPrintVisitorOne},
+    {15, AstTestingGenerator::_genAstPrintVisitorTwo}
+};
 
 void AstTestingGenerator::generateAst(int id, Ast &ast) {
-  // generate AST
-  std::map<int, std::function<void(Ast &)> > call = {
-      {1, genAstRewritingOne},
-      {2, genAstRewritingTwo},
-      {3, genAstRewritingThree},
-      {4, genAstRewritingFour},
-      {5, genAstRewritingFive},
-      {6, genAstRewritingSix},
-      {7, genAstEvalOne},
-      {8, genAstEvalTwo},
-      {9, genAstEvalThree},
-      {10, genAstEvalFour},
-      {11, genAstEvalFive},
-      {12, genAstEvalSix},
-      {13, genAstEvalSeven}
-  };
   auto it = call.find(id);
   if (it == call.end()) throw std::logic_error("Cannot continue. Invalid id given!");
   it->second(ast);
 }
 
-void AstTestingGenerator::genAstRewritingOne(Ast &ast) {
+int AstTestingGenerator::getLargestId() {
+  return call.size();
+}
+
+void AstTestingGenerator::_genAstRewritingOne(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computePrivate");
   auto funcParams = new std::vector<FunctionParameter>();
@@ -62,7 +69,7 @@ void AstTestingGenerator::genAstRewritingOne(Ast &ast) {
   ast.setRootNode(func);
 }
 
-void AstTestingGenerator::genAstRewritingTwo(Ast &ast) {
+void AstTestingGenerator::_genAstRewritingTwo(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computePrivate");
   auto funcParams = new std::vector<FunctionParameter>();
@@ -94,7 +101,7 @@ void AstTestingGenerator::genAstRewritingTwo(Ast &ast) {
   ast.setRootNode(func);
 }
 
-void AstTestingGenerator::genAstRewritingThree(Ast &ast) {
+void AstTestingGenerator::_genAstRewritingThree(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computePrivate");
   auto funcParams = new std::vector<FunctionParameter>();
@@ -129,7 +136,7 @@ void AstTestingGenerator::genAstRewritingThree(Ast &ast) {
   ast.setRootNode(func);
 }
 
-void AstTestingGenerator::genAstRewritingFour(Ast &ast) {
+void AstTestingGenerator::_genAstRewritingFour(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computePrivate");
   auto funcParams = new std::vector<FunctionParameter>();
@@ -163,7 +170,7 @@ void AstTestingGenerator::genAstRewritingFour(Ast &ast) {
   ast.setRootNode(func);
 }
 
-void AstTestingGenerator::genAstRewritingFive(Ast &ast) {
+void AstTestingGenerator::_genAstRewritingFive(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computePrivate");
   auto funcParams = new std::vector<FunctionParameter>();
@@ -195,7 +202,7 @@ void AstTestingGenerator::genAstRewritingFive(Ast &ast) {
   ast.setRootNode(func);
 }
 
-void AstTestingGenerator::genAstRewritingSix(Ast &ast) {
+void AstTestingGenerator::_genAstRewritingSix(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computePrivate");
   auto funcParams = new std::vector<FunctionParameter>();
@@ -227,7 +234,7 @@ void AstTestingGenerator::genAstRewritingSix(Ast &ast) {
   ast.setRootNode(func);
 }
 
-void AstTestingGenerator::genAstEvalOne(Ast &ast) {
+void AstTestingGenerator::_genAstEvalOne(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computeAvg");
   auto funcParams = new std::vector<FunctionParameter>();
@@ -255,7 +262,7 @@ void AstTestingGenerator::genAstEvalOne(Ast &ast) {
   ast.setRootNode(func);
 }
 
-void AstTestingGenerator::genAstEvalTwo(Ast &ast) {
+void AstTestingGenerator::_genAstEvalTwo(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computePrivate");
   auto funcParams = new std::vector<FunctionParameter>();
@@ -292,7 +299,7 @@ void AstTestingGenerator::genAstEvalTwo(Ast &ast) {
   ast.setRootNode(func);
 }
 
-void AstTestingGenerator::genAstEvalThree(Ast &ast) {
+void AstTestingGenerator::_genAstEvalThree(Ast &ast) {
   // bool computeLogical(int inputA, bool strong, bool negate, int inputB)
   auto func = new Function("computePrivate");
   auto funcParams = new std::vector<FunctionParameter>();
@@ -329,7 +336,7 @@ void AstTestingGenerator::genAstEvalThree(Ast &ast) {
   ast.setRootNode(func);
 }
 
-void AstTestingGenerator::genAstEvalFour(Ast &ast) {
+void AstTestingGenerator::_genAstEvalFour(Ast &ast) {
   auto func = new Function("concatString");
   auto funcParams = new std::vector<FunctionParameter>();
   funcParams->emplace_back("string", new Variable("strA"));
@@ -342,7 +349,7 @@ void AstTestingGenerator::genAstEvalFour(Ast &ast) {
   ast.setRootNode(func);
 }
 
-void AstTestingGenerator::genAstEvalFive(Ast &ast) {
+void AstTestingGenerator::_genAstEvalFive(Ast &ast) {
   // int determineSuitableX(int encryptedA, int encryptedB) {...}
   Function* func = dynamic_cast<Function*>(ast.setRootNode(new Function("determineSuitableX")));
   func->addParameter(new FunctionParameter("int", new Variable("encryptedA")));
@@ -394,7 +401,7 @@ void AstTestingGenerator::genAstEvalFive(Ast &ast) {
       new Return(new Variable("sum")));
 }
 
-void AstTestingGenerator::genAstEvalSix(Ast &ast) {
+void AstTestingGenerator::_genAstEvalSix(Ast &ast) {
   // int nestedCall() { ...
   auto* fnc = new Function("nestedCall");
   ast.setRootNode(fnc);
@@ -416,7 +423,7 @@ void AstTestingGenerator::genAstEvalSix(Ast &ast) {
   fnc->addStatement(new Return(new Variable("result")));
 }
 
-void AstTestingGenerator::genAstEvalSeven(Ast &ast) {
+void AstTestingGenerator::_genAstEvalSeven(Ast &ast) {
   // int nestedCall() { ...
   auto* fnc = new Function("nestedCall");
   ast.setRootNode(fnc);
@@ -437,3 +444,110 @@ void AstTestingGenerator::genAstEvalSeven(Ast &ast) {
   // return result;
   fnc->addStatement(new Return(new Variable("result")));
 }
+
+void AstTestingGenerator::_genAstPrintVisitorOne(Ast &ast) {
+  // int computePrivate(int x) { ... }
+  Function* func = dynamic_cast<Function*>(ast.setRootNode(new Function("computePrivate")));
+  func->addParameter(new FunctionParameter("int", new Variable("x")));
+
+  // int a = 4;
+  func->addStatement(new VarDecl("a", "int", 4));
+
+  // int k;
+  func->addStatement(new VarDecl("k", "int"));
+
+  // if ( x > 32 ) { k = x * a; } else { k = (x * a) + 42; }
+  func->addStatement(new If(
+      // if (x > 32)
+      new LogicalExpr(new Variable("x"), OpSymb::LogCompOp::greater, 32),
+      // { k = x * a}
+      new Block(
+          new VarAssignm("k",
+                         new BinaryExpr(
+                             new Variable("x"),
+                             OpSymb::BinaryOp::multiplication,
+                             new Variable("a")))),
+      // else { k = (x * a) + 42; }
+      new Block(
+          new VarAssignm("k",
+                         new BinaryExpr(
+                             new Group(
+                                 new BinaryExpr(
+                                     new Variable("x"),
+                                     OpSymb::BinaryOp::multiplication,
+                                     new Variable("a"))),
+                             OpSymb::BinaryOp::addition,
+                             42)))));
+
+  // return k
+  func->addStatement(new Return(new Variable("k")));
+}
+
+void AstTestingGenerator::_genAstPrintVisitorTwo(Ast &ast) {
+// int determineSuitableX(int encryptedA, int encryptedB) {...}
+  Function* func = dynamic_cast<Function*>(ast.setRootNode(new Function("determineSuitableX")));
+  func->addParameter(new FunctionParameter("int", new Variable("encryptedA")));
+  func->addParameter(new FunctionParameter("int", new Variable("encryptedB")));
+
+  // int randInt = rand() % 42;
+  func->addStatement(
+      new VarDecl("randInt", "int",
+                  new BinaryExpr(
+                      new CallExternal("std::rand"),
+                      OpSymb::BinaryOp::modulo,
+                      new LiteralInt(42))));
+
+  // bool b = encryptedA < 2;
+  func->addStatement(
+      new VarDecl("b", "bool",
+                  new LogicalExpr(
+                      new Variable("encryptedA"),
+                      OpSymb::LogCompOp::smaller,
+                      new LiteralInt(2))));
+
+  // int sum = 0;
+  func->addStatement(new VarDecl("sum", "int", 0));
+
+  // while (randInt > 0 && !b == true) { sum = sum + encryptedB; randInt--; };
+  func->addStatement(new While(
+      // (randInt > 0 && !b == true)
+      new LogicalExpr(
+          // randInt > 0
+          new LogicalExpr(
+              new Variable("randInt"),
+              OpSymb::LogCompOp::greater,
+              new LiteralInt(0)),
+          OpSymb::LogCompOp::logicalAnd,
+          // !b == true
+          new LogicalExpr(
+              new UnaryExpr(OpSymb::UnaryOp::negation, new Variable("b")),
+              OpSymb::LogCompOp::equal,
+              new LiteralBool(true))),
+      // { sum = sum + encryptedB; randInt--; };
+      new Block(
+          new std::vector<AbstractStatement*>{
+              // sum = sum + encryptedB
+              new VarAssignm("sum", new BinaryExpr(
+                  new Variable("sum"),
+                  OpSymb::BinaryOp::addition,
+                  new Variable("encryptedB"))),
+              // randInt = randInt-1;
+              new VarAssignm("randInt", new BinaryExpr(
+                  new Variable("randInt"),
+                  OpSymb::BinaryOp::subtraction,
+                  new LiteralInt(1)))})));
+
+  // String outStr = "Computation finished!";
+  func->addStatement(new VarDecl("outStr", "string", new LiteralString("Computation finished!")));
+
+  // printf(outStr);
+  func->addStatement(
+      new CallExternal("printf",
+                       new std::vector<FunctionParameter>(
+                           {{"string", new Variable("outStr")}})));
+
+  // return sum;
+  func->addStatement(
+      new Return(new Variable("sum")));
+}
+

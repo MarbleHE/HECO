@@ -3,6 +3,7 @@
 #include "LiteralBool.h"
 #include <sstream>
 #include "LiteralString.h"
+#include "../utilities/RandNumGen.h"
 
 LiteralInt::LiteralInt(int value) : value(value) {}
 
@@ -48,6 +49,15 @@ bool LiteralInt::operator!=(const LiteralInt &rhs) const {
   return !(rhs == *this);
 }
 
-void LiteralInt::storeParameterValue(std::string identifier, std::map<std::string, Literal*> &paramsMap) {
+void LiteralInt::addLiteralValue(std::string identifier, std::map<std::string, Literal*> &paramsMap) {
   paramsMap.emplace(identifier, this);
 }
+
+void LiteralInt::setValue(int newValue) {
+  this->value = newValue;
+}
+
+void LiteralInt::setRandomValue(RandLiteralGen &rlg) {
+  setValue(rlg.getRandomInt());
+}
+

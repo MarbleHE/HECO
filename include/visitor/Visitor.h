@@ -35,6 +35,8 @@ class LiteralInt;
 
 class LiteralString;
 
+class LiteralFloat;
+
 class LogicalExpr;
 
 class Operator;
@@ -76,6 +78,8 @@ class Visitor {
   virtual void visit(LiteralInt &elem);
 
   virtual void visit(LiteralString &elem);
+
+  virtual void visit(LiteralFloat &elem);
 
   virtual void visit(LogicalExpr &elem);
 

@@ -123,6 +123,8 @@ void Visitor::visit(LiteralInt &elem) {}
 
 void Visitor::visit(LiteralString &elem) {}
 
+void Visitor::visit(LiteralFloat &elem) {}
+
 void Visitor::visit(LogicalExpr &elem) {
   // left
   elem.getLeft()->accept(*this);

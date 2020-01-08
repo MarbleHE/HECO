@@ -17,6 +17,8 @@ class AbstractExpr : public Node {
 
   static LiteralString* createParam(const char* str);
 
+  static LiteralFloat* createParam(float f);
+
   static AbstractExpr* createParam(AbstractExpr* abstractExpr);
 
  public:

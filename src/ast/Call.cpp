@@ -75,7 +75,7 @@ Literal* Call::evaluate(Ast &ast) {
 
     // store value of lit in vector paramValues with its variable identifier
     // this is to be used to evaluate the Function called by Call
-    lit->storeParameterValue(varIdentifier, paramValues);
+    lit->addLiteralValue(varIdentifier, paramValues);
   }
 
   // evaluate called function (returns nullptr if function is void)
