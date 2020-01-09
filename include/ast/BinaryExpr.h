@@ -16,6 +16,8 @@ class BinaryExpr : public AbstractExpr {
   AbstractExpr* right;
 
  public:
+  BinaryExpr();
+
   /// Represents an expression of the form "left op right", e.g., "2 + a" or "53 * 3".
   /// \param left is the left operand of the expression.
   /// \param op is the operator of the expression.
@@ -60,6 +62,9 @@ class BinaryExpr : public AbstractExpr {
   bool isEqual(AbstractExpr* other) override;
 
   Literal* evaluate(Ast &ast) override;
+
+  int countByTemplate(AbstractExpr* abstractExpr) override;
+  std::vector<std::string> getVariableIdentifiers() override;
 };
 
 #endif //MASTER_THESIS_CODE_BINARYEXPR_H

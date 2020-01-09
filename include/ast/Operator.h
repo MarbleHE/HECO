@@ -59,7 +59,7 @@ class OpSymb {
 class Operator : public Node {
  private:
   std::string operatorString;
-  OpSymb operatorSymbol;
+  std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp> operatorSymbol;
 
  public:
   explicit Operator(OpSymb::LogCompOp op);

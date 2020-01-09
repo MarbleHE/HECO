@@ -32,6 +32,10 @@ class AbstractExpr : public Node {
 
   virtual BinaryExpr* contains(BinaryExpr* bexpTemplate, AbstractExpr* excludedSubtree);
 
+  virtual int countByTemplate(AbstractExpr* abstractExpr);
+
+  virtual std::vector<std::string> getVariableIdentifiers();
+
   virtual bool contains(Variable* var);
 
   virtual bool isEqual(AbstractExpr* other);

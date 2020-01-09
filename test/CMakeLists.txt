@@ -44,7 +44,7 @@ set(TEST_FILES
         PrintVisitorTest.cpp
         MultRewriteTest.cpp
         AstTestingGenerator.cpp
-        AstTestingGenerator.h AstEvaluationTest.cpp "../include/utilities/TestUtils .h")
+        AstTestingGenerator.h AstEvaluationTest.cpp "../include/utilities/TestUtils .h" MultDepthVisitorTest.cpp)
 
 add_executable(testing-all
         main.cpp

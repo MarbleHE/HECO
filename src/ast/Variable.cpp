@@ -24,7 +24,7 @@ const std::string &Variable::getIdentifier() const {
   return identifier;
 }
 
-bool Variable::contains(Variable *var) {
+bool Variable::contains(Variable* var) {
   return *this == *var;
 }
 
@@ -36,12 +36,17 @@ bool Variable::operator!=(const Variable &rhs) const {
   return !(rhs == *this);
 }
 
-bool Variable::isEqual(AbstractExpr *other) {
-  if (auto otherVar = dynamic_cast<Variable *>(other)) {
+bool Variable::isEqual(AbstractExpr* other) {
+  if (auto otherVar = dynamic_cast<Variable*>(other)) {
     return this->getIdentifier() == otherVar->getIdentifier();
   }
   return false;
 }
-Literal *Variable::evaluate(Ast &ast) {
+
+Literal* Variable::evaluate(Ast &ast) {
   return ast.getVarValue(this->getIdentifier());
+}
+
+std::vector<std::string> Variable::getVariableIdentifiers() {
+  return {{this->getIdentifier()}};
 }

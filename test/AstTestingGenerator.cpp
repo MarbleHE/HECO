@@ -28,7 +28,9 @@ static std::map<int, std::function<void(Ast &)> > call = {
     {12, AstTestingGenerator::_genAstEvalSix},
     {13, AstTestingGenerator::_genAstEvalSeven},
     {14, AstTestingGenerator::_genAstPrintVisitorOne},
-    {15, AstTestingGenerator::_genAstPrintVisitorTwo}
+    {15, AstTestingGenerator::_genAstPrintVisitorTwo},
+    {16, AstTestingGenerator::_genAstMultDepthOne},
+    {17, AstTestingGenerator::_genAstMultDepthTwo}
 };
 
 void AstTestingGenerator::generateAst(int id, Ast &ast) {
@@ -551,3 +553,96 @@ void AstTestingGenerator::_genAstPrintVisitorTwo(Ast &ast) {
       new Return(new Variable("sum")));
 }
 
+void AstTestingGenerator::_genAstMultDepthOne(Ast &ast) {
+  // int computePrivate(int inputA, int inputB, int inputC)
+  auto func = new Function("computePrivate");
+  auto funcParams = new std::vector<FunctionParameter>();
+  funcParams->emplace_back("int", new Variable("inputA"));
+  funcParams->emplace_back("int", new Variable("inputB"));
+  funcParams->emplace_back("int", new Variable("inputC"));
+  func->setParams(funcParams);
+
+  // int prod = inputA * inputB;
+  func->addStatement(new VarDecl("prod", "int",
+                                 new BinaryExpr(
+                                     new Variable("inputA"),
+                                     OpSymb::multiplication,
+                                     new Variable("inputB"))));
+
+  // prod = prod * inputC
+  func->addStatement(
+      new VarAssignm("prod", new BinaryExpr(
+          new Variable("prod"),
+          OpSymb::multiplication,
+          new Variable("inputC"))));
+
+  // return prod * 3;
+  func->addStatement(new Return(new BinaryExpr(
+      new Variable("prod"),
+      OpSymb::multiplication,
+      new LiteralInt(3))));
+
+  ast.setRootNode(func);
+}
+
+void AstTestingGenerator::_genAstMultDepthTwo(Ast &ast) {
+  // int computePrivate(int inputA, int inputB, int inputC)
+  auto func = new Function("computePrivate");
+  auto funcParams = new std::vector<FunctionParameter>();
+  funcParams->emplace_back("int", new Variable("base"));
+  funcParams->emplace_back("int", new Variable("defaultC"));
+  funcParams->emplace_back("bool", new Variable("useBase"));
+
+  // int stdA = 512;
+  func->addStatement(new VarDecl("stdA", 512));
+
+  // int stdB = 2 * stdA;
+  func->addStatement(
+      new VarDecl("stdB",
+                  "int",
+                  new BinaryExpr(new LiteralInt(2),
+                                 OpSymb::multiplication,
+                                 new Variable("stdA"))));
+
+  // int prod = [base * stdA] + [base * stdB];
+  func->addStatement(new VarDecl("prod", "int",
+                                 new BinaryExpr(
+                                     new BinaryExpr(
+                                         new Variable("base"),
+                                         OpSymb::multiplication,
+                                         new Variable("stdA")),
+                                     OpSymb::addition,
+                                     new BinaryExpr(
+                                         new Variable("base"),
+                                         OpSymb::multiplication,
+                                         new Variable("stdB")))));
+
+  // int condVal = [22 * defaultC] + [base * useBase];
+  func->addStatement(
+      new VarDecl("condVal", "int",
+                  new BinaryExpr(
+                      new BinaryExpr(
+                          new LiteralInt(22),
+                          OpSymb::multiplication,
+                          new Variable("defaultC")),
+                      OpSymb::addition,
+                      new BinaryExpr(
+                          new Variable("base"),
+                          OpSymb::multiplication,
+                          new Variable("useBase")))));
+
+  // return [prod > 1024] && [condVal >= 112];
+  func->addStatement(new Return(
+      new LogicalExpr(
+          new LogicalExpr(
+              new Variable("prod"),
+              OpSymb::greater,
+              new LiteralInt(1024)),
+          OpSymb::logicalAnd,
+          new LogicalExpr(
+              new Variable("condVal"),
+              OpSymb::greaterEqual,
+              new LiteralInt(112)))));
+
+  ast.setRootNode(func);
+}

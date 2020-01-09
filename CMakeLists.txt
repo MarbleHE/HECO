@@ -69,7 +69,9 @@ set(SOURCE_FILES
         ${master_thesis_code_SOURCE_DIR}/src/utilities/Scope.cpp
         ${master_thesis_code_SOURCE_DIR}/examples/genAstDemo.cpp
         ${master_thesis_code_SOURCE_DIR}/include/utilities/RandNumGen.h
-        ${master_thesis_code_SOURCE_DIR}/include/utilities/Datatypes.h)
+        ${master_thesis_code_SOURCE_DIR}/include/utilities/Datatypes.h
+        ${master_thesis_code_SOURCE_DIR}/src/visitor/MultDepthVisitor.cpp
+        ${master_thesis_code_SOURCE_DIR}/include/visitor/MultDepthVisitor.h)
 
 add_executable(master_thesis_code
         ${master_thesis_code_SOURCE_DIR}/main.cpp

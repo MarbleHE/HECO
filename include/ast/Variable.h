@@ -3,6 +3,7 @@
 
 #include <string>
 #include "AbstractExpr.h"
+#include <vector>
 
 class Variable : public AbstractExpr {
  private:
@@ -28,6 +29,8 @@ class Variable : public AbstractExpr {
   bool isEqual(AbstractExpr* other) override;
 
   Literal* evaluate(Ast &ast) override;
+
+  std::vector<std::string> getVariableIdentifiers() override;
 };
 
 #endif //MASTER_THESIS_CODE_VARIABLE_H

@@ -73,10 +73,14 @@ Literal* Ast::evaluate(std::map<std::string, Literal*> &paramValues, bool printR
 bool Ast::hasVarValue(Variable* var) {
   return getVarValue(var->getIdentifier()) != nullptr;
 }
+
 Literal* Ast::getVarValue(const std::string &variableIdentifier) {
   auto it = variablesValues.find(variableIdentifier);
-  return it != variablesValues.end() ? it->second : nullptr;
+  if (it == variablesValues.end())
+    throw std::logic_error("Trying to retrieve value for variable not declared yet: " + variableIdentifier);
+  return it->second;
 }
+
 void Ast::updateVarValue(const std::string &variableIdentifier, Literal* newValue) {
   variablesValues[variableIdentifier] = newValue;
 }

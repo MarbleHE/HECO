@@ -11,7 +11,7 @@ void Operator::accept(Visitor &v) {
   v.visit(*this);
 }
 
-Operator::Operator(OpSymb::LogCompOp op) : operatorString(OpSymb::getTextRepr(op)) {}
+Operator::Operator(OpSymb::LogCompOp op) : operatorString(OpSymb::getTextRepr(op)), operatorSymbol(op) {}
 
 Operator::Operator(OpSymb::BinaryOp op) : operatorString(OpSymb::getTextRepr(op)) {}
 
@@ -36,6 +36,7 @@ bool Operator::operator==(const Operator &rhs) const {
 bool Operator::operator!=(const Operator &rhs) const {
   return !(rhs == *this);
 }
+
 
 bool Operator::equals(std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp> op) const {
   return this->getOperatorString() == OpSymb::getTextRepr(op);

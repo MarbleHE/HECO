@@ -87,8 +87,10 @@ Literal* VarDecl::evaluate(Ast &ast) {
     auto value = this->getInitializer()->evaluate(ast);
     ast.updateVarValue(this->getIdentifier(), value);
     return value;
+  } else {
+    ast.updateVarValue(this->getIdentifier(), nullptr);
+    return nullptr;
   }
-  return nullptr;
 }
 
 Datatype* VarDecl::getDatatype() const {

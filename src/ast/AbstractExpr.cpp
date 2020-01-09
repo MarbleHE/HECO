@@ -56,6 +56,12 @@ Literal* AbstractExpr::evaluate(Ast &ast) {
 LiteralFloat* AbstractExpr::createParam(float f) {
   return new LiteralFloat(f);
 }
+int AbstractExpr::countByTemplate(AbstractExpr* abstractExpr) {
+  return 0;
+}
+std::vector<std::string> AbstractExpr::getVariableIdentifiers() {
+  return std::vector<std::string>();
+}
 
 void to_json(json &j, const AbstractExpr &absExpr) {
   j = absExpr.toJson();

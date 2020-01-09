@@ -16,6 +16,10 @@ class LogicalExpr : public AbstractExpr {
   AbstractExpr* right;
 
  public:
+  LogicalExpr();
+
+  explicit LogicalExpr(OpSymb::LogCompOp op);
+
   LogicalExpr(AbstractExpr* left, OpSymb::LogCompOp op, AbstractExpr* right);
 
   template<typename T1, typename T2>
@@ -41,6 +45,12 @@ class LogicalExpr : public AbstractExpr {
   [[nodiscard]] std::string getNodeName() const override;
 
   Literal* evaluate(Ast &ast) override;
+
+  std::vector<std::string> getVariableIdentifiers() override;
+
+  int countByTemplate(AbstractExpr* abstractExpr) override;
+
+  LogicalExpr* contains(LogicalExpr* lexpTemplate, AbstractExpr* excludedSubtree);
 };
 
 #endif //MASTER_THESIS_CODE_LOGICALEXPR_H

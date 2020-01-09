@@ -91,5 +91,26 @@ Literal* BinaryExpr::evaluate(Ast &ast) {
   // we first need to evaluate the left-handside and right-handside as they can consists of nested binary expressions
   return this->getOp().applyOperator(this->getLeft()->evaluate(ast), this->getRight()->evaluate(ast));
 }
+BinaryExpr::BinaryExpr() : left(nullptr), op(nullptr), right(nullptr) {}
 
+int BinaryExpr::countByTemplate(AbstractExpr* abstractExpr) {
+  // check if abstractExpr is of type BinaryExpr
+  if (auto expr = dynamic_cast<BinaryExpr*>(abstractExpr)) {
+    // check if current BinaryExpr fulfills requirements of template abstractExpr
+    // also check left and right operands for nested BinaryExps
+    return (this->contains(expr, nullptr) != nullptr ? 1 : 0)
+        + left->countByTemplate(abstractExpr)
+        + right->countByTemplate(abstractExpr);
+  } else {
+    return 0;
+  }
+}
+
+std::vector<std::string> BinaryExpr::getVariableIdentifiers() {
+  auto leftVec = left->getVariableIdentifiers();
+  auto rightVec = right->getVariableIdentifiers();
+  leftVec.reserve(leftVec.size() + rightVec.size());
+  leftVec.insert(leftVec.end(), rightVec.begin(), rightVec.end());
+  return leftVec;
+}
 

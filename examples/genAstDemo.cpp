@@ -99,7 +99,7 @@ void generateDemoOne(Ast &ast) {
   func->addStatement(new VarDecl("a", 4));
 
   // int k;
-  func->addStatement(new VarDecl("k", "int"));
+  func->addStatement(new VarDecl("k", "int", nullptr));
 
   // if ( x > 32 ) { k = x * a; } else { k = (x * a) + 42; }
   func->addStatement(new If(
