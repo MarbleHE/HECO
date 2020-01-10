@@ -3,13 +3,21 @@ set(CMAKE_CXX_STANDARD 17)
 project(master_thesis_code)
 
 ##############################
+# Download boost
+##############################
+
+# macOS: if not present, install using 'brew install icu4c'
+list(APPEND CMAKE_PREFIX_PATH /usr/local/opt/icu4c)
+add_subdirectory(libs/boost-cmake)
+
+##############################
 # Download nlohmann-json
 ##############################
 
 # exclude the tests from the build
 set(JSON_BuildTests OFF CACHE INTERNAL "")
 
-configure_file(libs/nlohmann-json.txt.in nlohmann-json-download/CMakeLists.txt)
+configure_file(libs/nlohmann-json.in nlohmann-json-download/CMakeLists.txt)
 execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
         RESULT_VARIABLE result
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-download)
@@ -79,6 +87,7 @@ add_executable(master_thesis_code
 
 target_link_libraries(master_thesis_code PRIVATE nlohmann_json::nlohmann_json)
 
+target_link_libraries(master_thesis_code PUBLIC Boost::graph ${ICU_LIBRARIES})
 
 ##############################
 # TARGET: master_thesis_code_lib

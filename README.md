@@ -95,6 +95,8 @@ Function: determineSuitableX
 
 ## Getting Started
 
+Before starting, make sure to clone this repository **including its submodules** using: `git clone --recursive https://github.com/pjattke/msc-thesis-code-AST.git`
+
 The following tools are required to get this project running:
 - cmake (version ≥ 3.15) to build the project
     - tested with v3.15.5
