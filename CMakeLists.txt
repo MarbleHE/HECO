@@ -3,14 +3,6 @@ set(CMAKE_CXX_STANDARD 17)
 project(master_thesis_code)
 
 ##############################
-# Download boost
-##############################
-
-# macOS: if not present, install using 'brew install icu4c'
-list(APPEND CMAKE_PREFIX_PATH /usr/local/opt/icu4c)
-add_subdirectory(libs/boost-cmake)
-
-##############################
 # Download nlohmann-json
 ##############################
 
@@ -86,8 +78,6 @@ add_executable(master_thesis_code
         ${SOURCE_FILES})
 
 target_link_libraries(master_thesis_code PRIVATE nlohmann_json::nlohmann_json)
-
-target_link_libraries(master_thesis_code PUBLIC Boost::graph ${ICU_LIBRARIES})
 
 ##############################
 # TARGET: master_thesis_code_lib
