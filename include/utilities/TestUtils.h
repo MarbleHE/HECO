@@ -4,7 +4,6 @@
 #include <map>
 #include <string>
 #include <iostream>
-#include "cmake-build-debug/test/googletest-src/googletest/include/gtest/gtest.h"
 #include "../include/ast/Ast.h"
 #include "RandNumGen.h"
 

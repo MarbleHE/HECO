@@ -10,7 +10,9 @@ set(TEST_FILES
         PrintVisitorTest.cpp
         MultRewriteTest.cpp
         AstTestingGenerator.cpp
-        AstTestingGenerator.h AstEvaluationTest.cpp "../include/utilities/TestUtils .h" MultDepthVisitorTest.cpp)
+        AstTestingGenerator.h AstEvaluationTest.cpp
+        ${master_thesis_code_SOURCE_DIR}/include/utilities/TestUtils.h
+        MultDepthVisitorTest.cpp)
 
 add_executable(testing-all
         main.cpp

@@ -3,7 +3,7 @@
 #include <include/visitor/MultRewriteVisitor.h>
 #include <include/visitor/PrintVisitor.h>
 #include <Operator.h>
-#include <include/utilities/TestUtils .h>
+#include <include/utilities/TestUtils.h>
 #include "AstTestingGenerator.h"
 #include "Function.h"
 #include "BinaryExpr.h"
