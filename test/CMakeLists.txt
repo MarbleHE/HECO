@@ -19,7 +19,12 @@ add_executable(testing-all
         ${TEST_FILES})
 
 # this is important to have code coverage in CLion
-set(CMAKE_CXX_FLAGS "-fprofile-instr-generate -fcoverage-mapping")
+if(CMAKE_COMPILER_IS_GNUCXX)
+    set(CMAKE_CXX_FLAGS "--coverage")
+elseif("${CMAKE_C_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang"
+        OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang")
+    set(CMAKE_CXX_FLAGS "-fprofile-instr-generate -fcoverage-mapping")
+endif()
 
 target_link_libraries(testing-all gtest master_thesis_code_lib nlohmann_json::nlohmann_json)
 
