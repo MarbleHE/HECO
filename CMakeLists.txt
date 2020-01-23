@@ -1,10 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 set(CMAKE_CXX_STANDARD 17)
-project(master_thesis_code)
-
-if(NOT DEFINED BUILD_TYPE_AST)
-        set(BUILD_TYPE_AST TESTING)
-endif()
+project(ast_optimizer)
 
 ##############################
 # Download GoogleTest framework
@@ -65,101 +61,98 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/nlohmann-json-src
         EXCLUDE_FROM_ALL)
 
 ##############################
-# TARGET: master_thesis_code
+# TARGET: ast_optimizer
 ##############################
 
-include_directories(${master_thesis_code_SOURCE_DIR}/include/ast ${master_thesis_code_SOURCE_DIR}/examples)
-
+include_directories(${ast_optimizer_SOURCE_DIR}/include/ast ${ast_optimizer_SOURCE_DIR}/examples)
 
 set(SOURCE_FILES
-        ${master_thesis_code_SOURCE_DIR}/src/ast/AbstractExpr.cpp
-        ${master_thesis_code_SOURCE_DIR}/src/ast/AbstractStatement.cpp
-        ${master_thesis_code_SOURCE_DIR}/src/ast/Variable.cpp
-        ${master_thesis_code_SOURCE_DIR}/src/ast/Literal.cpp
-        ${master_thesis_code_SOURCE_DIR}/src/ast/LiteralBool.cpp
-        ${master_thesis_code_SOURCE_DIR}/src/ast/LiteralInt.cpp
-        ${master_thesis_code_SOURCE_DIR}/src/ast/LiteralString.cpp
-        ${master_thesis_code_SOURCE_DIR}/src/ast/LiteralFloat.cpp
-        ${master_thesis_code_SOURCE_DIR}/src/ast/VarDecl.cpp
-        ${master_thesis_code_SOURCE_DIR}/src/ast/Block.cpp
-        ${master_thesis_code_SOURCE_DIR}/src/ast/Operator.cpp
-        ${master_thesis_code_SOURCE_DIR}/src/ast/BinaryExpr.cpp
-        ${master_thesis_code_SOURCE_DIR}/src/ast/VarAssignm.cpp
-        ${master_thesis_code_SOURCE_DIR}/src/ast/Group.cpp
-        ${master_thesis_code_SOURCE_DIR}/src/ast/If.cpp
-        ${master_thesis_code_SOURCE_DIR}/src/ast/Call.cpp
-        ${master_thesis_code_SOURCE_DIR}/src/ast/CallExternal.cpp
-        ${master_thesis_code_SOURCE_DIR}/src/ast/LogicalExpr.cpp
-        ${master_thesis_code_SOURCE_DIR}/src/ast/Return.cpp
-        ${master_thesis_code_SOURCE_DIR}/src/ast/UnaryExpr.cpp
-        ${master_thesis_code_SOURCE_DIR}/src/ast/While.cpp
-        ${master_thesis_code_SOURCE_DIR}/src/ast/Function.cpp
-        ${master_thesis_code_SOURCE_DIR}/src/ast/FunctionParameter.cpp
-        ${master_thesis_code_SOURCE_DIR}/src/ast/CallExternal.cpp
-        ${master_thesis_code_SOURCE_DIR}/src/ast/Ast.cpp
-        ${master_thesis_code_SOURCE_DIR}/src/visitor/Visitor.cpp
-        ${master_thesis_code_SOURCE_DIR}/src/visitor/PrintVisitor.cpp
-        ${master_thesis_code_SOURCE_DIR}/src/visitor/MultRewriteVisitor.cpp
-        ${master_thesis_code_SOURCE_DIR}/src/ast/Node.cpp
-        ${master_thesis_code_SOURCE_DIR}/src/utilities/Scope.cpp
-        #${master_thesis_code_SOURCE_DIR}/examples/genAstDemo.cpp
-        ${master_thesis_code_SOURCE_DIR}/include/utilities/RandNumGen.h
-        ${master_thesis_code_SOURCE_DIR}/include/utilities/Datatypes.h
-        ${master_thesis_code_SOURCE_DIR}/src/visitor/MultDepthVisitor.cpp
-        ${master_thesis_code_SOURCE_DIR}/include/visitor/MultDepthVisitor.h)
+        ${ast_optimizer_SOURCE_DIR}/src/ast/AbstractExpr.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/AbstractStatement.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/Variable.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/Literal.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/LiteralBool.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/LiteralInt.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/LiteralString.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/LiteralFloat.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/VarDecl.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/Block.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/Operator.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/BinaryExpr.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/VarAssignm.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/Group.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/If.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/Call.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/CallExternal.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/LogicalExpr.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/Return.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/UnaryExpr.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/While.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/Function.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/FunctionParameter.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/CallExternal.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/Ast.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/Visitor.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/PrintVisitor.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/MultRewriteVisitor.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/Node.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/utilities/Scope.cpp
+        #${ast_optimizer_SOURCE_DIR}/examples/genAstDemo.cpp
+        ${ast_optimizer_SOURCE_DIR}/include/utilities/RandNumGen.h
+        ${ast_optimizer_SOURCE_DIR}/include/utilities/Datatypes.h
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/MultDepthVisitor.cpp
+        ${ast_optimizer_SOURCE_DIR}/include/visitor/MultDepthVisitor.h)
 
-if(BUILD_TYPE_AST STREQUAL DEMO OR BUILD_TYPE_AST STREQUAL TESTING)
-        set(SOURCE_FILES
-                ${master_thesis_code_SOURCE_DIR}/src/ast/AbstractExpr.cpp
-                ${master_thesis_code_SOURCE_DIR}/src/ast/AbstractStatement.cpp
-                ${master_thesis_code_SOURCE_DIR}/src/ast/Variable.cpp
-                ${master_thesis_code_SOURCE_DIR}/src/ast/Literal.cpp
-                ${master_thesis_code_SOURCE_DIR}/src/ast/LiteralBool.cpp
-                ${master_thesis_code_SOURCE_DIR}/src/ast/LiteralInt.cpp
-                ${master_thesis_code_SOURCE_DIR}/src/ast/LiteralString.cpp
-                ${master_thesis_code_SOURCE_DIR}/src/ast/LiteralFloat.cpp
-                ${master_thesis_code_SOURCE_DIR}/src/ast/VarDecl.cpp
-                ${master_thesis_code_SOURCE_DIR}/src/ast/Block.cpp
-                ${master_thesis_code_SOURCE_DIR}/src/ast/Operator.cpp
-                ${master_thesis_code_SOURCE_DIR}/src/ast/BinaryExpr.cpp
-                ${master_thesis_code_SOURCE_DIR}/src/ast/VarAssignm.cpp
-                ${master_thesis_code_SOURCE_DIR}/src/ast/Group.cpp
-                ${master_thesis_code_SOURCE_DIR}/src/ast/If.cpp
-                ${master_thesis_code_SOURCE_DIR}/src/ast/Call.cpp
-                ${master_thesis_code_SOURCE_DIR}/src/ast/CallExternal.cpp
-                ${master_thesis_code_SOURCE_DIR}/src/ast/LogicalExpr.cpp
-                ${master_thesis_code_SOURCE_DIR}/src/ast/Return.cpp
-                ${master_thesis_code_SOURCE_DIR}/src/ast/UnaryExpr.cpp
-                ${master_thesis_code_SOURCE_DIR}/src/ast/While.cpp
-                ${master_thesis_code_SOURCE_DIR}/src/ast/Function.cpp
-                ${master_thesis_code_SOURCE_DIR}/src/ast/FunctionParameter.cpp
-                ${master_thesis_code_SOURCE_DIR}/src/ast/CallExternal.cpp
-                ${master_thesis_code_SOURCE_DIR}/src/ast/Ast.cpp
-                ${master_thesis_code_SOURCE_DIR}/src/visitor/Visitor.cpp
-                ${master_thesis_code_SOURCE_DIR}/src/visitor/PrintVisitor.cpp
-                ${master_thesis_code_SOURCE_DIR}/src/visitor/MultRewriteVisitor.cpp
-                ${master_thesis_code_SOURCE_DIR}/src/ast/Node.cpp
-                ${master_thesis_code_SOURCE_DIR}/src/utilities/Scope.cpp
-                ${master_thesis_code_SOURCE_DIR}/examples/genAstDemo.cpp
-                ${master_thesis_code_SOURCE_DIR}/include/utilities/RandNumGen.h
-                ${master_thesis_code_SOURCE_DIR}/include/utilities/Datatypes.h
-                ${master_thesis_code_SOURCE_DIR}/src/visitor/MultDepthVisitor.cpp
-                ${master_thesis_code_SOURCE_DIR}/include/visitor/MultDepthVisitor.h)
-        add_executable(master_thesis_code
-                ${master_thesis_code_SOURCE_DIR}/main.cpp
-                ${SOURCE_FILES})
-        target_link_libraries(master_thesis_code PRIVATE nlohmann_json::nlohmann_json)
-endif()
+set(SOURCE_FILES
+        ${ast_optimizer_SOURCE_DIR}/src/ast/AbstractExpr.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/AbstractStatement.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/Variable.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/Literal.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/LiteralBool.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/LiteralInt.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/LiteralString.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/LiteralFloat.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/VarDecl.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/Block.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/Operator.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/BinaryExpr.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/VarAssignm.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/Group.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/If.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/Call.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/CallExternal.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/LogicalExpr.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/Return.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/UnaryExpr.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/While.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/Function.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/FunctionParameter.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/CallExternal.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/Ast.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/Visitor.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/PrintVisitor.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/MultRewriteVisitor.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/Node.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/utilities/Scope.cpp
+        ${ast_optimizer_SOURCE_DIR}/examples/genAstDemo.cpp
+        ${ast_optimizer_SOURCE_DIR}/include/utilities/RandNumGen.h
+        ${ast_optimizer_SOURCE_DIR}/include/utilities/Datatypes.h
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/MultDepthVisitor.cpp
+        ${ast_optimizer_SOURCE_DIR}/include/visitor/MultDepthVisitor.h)
+
+add_executable(ast_demo
+        ${ast_optimizer_SOURCE_DIR}/main.cpp
+        ${SOURCE_FILES})
+target_link_libraries(ast_demo PRIVATE nlohmann_json::nlohmann_json)
 
 ##############################
-# TARGET: master_thesis_code_lib
+# TARGET: ast_lib
 # built by subdirectory test/CMakeLists.txt
 ##############################
 
 # build a library out of the code to be used by the tests
-add_library(master_thesis_code_lib ${SOURCE_FILES})
-target_link_libraries(master_thesis_code_lib PUBLIC nlohmann_json::nlohmann_json)
+add_library(ast_lib ${SOURCE_FILES})
+target_link_libraries(ast_lib PUBLIC nlohmann_json::nlohmann_json)
 
-if(BUILD_TYPE_AST STREQUAL TESTING)
-        add_subdirectory(test)
-endif()
+add_subdirectory(test)
+
