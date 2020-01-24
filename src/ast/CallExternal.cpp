@@ -38,6 +38,7 @@ std::vector<FunctionParameter>* CallExternal::getArguments() const {
 std::string CallExternal::getNodeName() const {
   return "CallExternal";
 }
+
 Literal* CallExternal::evaluate(Ast &ast) {
   throw std::runtime_error("evaluate(Ast &ast) not implemented for class CallExternal yet! Consider using Call instead.");
 }

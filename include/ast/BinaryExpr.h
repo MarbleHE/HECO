@@ -8,6 +8,7 @@
 #include "LiteralBool.h"
 #include "LiteralString.h"
 #include <string>
+#include <vector>
 
 class BinaryExpr : public AbstractExpr {
  protected:
@@ -45,12 +46,6 @@ class BinaryExpr : public AbstractExpr {
 
   [[nodiscard]] std::string getNodeName() const override;
 
-  void setLeft(AbstractExpr* value);
-
-  void setOp(Operator* operatore);
-
-  void setRight(AbstractExpr* rhs);
-
   static void swapOperandsLeftAWithRightB(BinaryExpr* bexpA, BinaryExpr* bexpB);
 
   explicit BinaryExpr(OpSymb::BinaryOp op);
@@ -64,7 +59,9 @@ class BinaryExpr : public AbstractExpr {
   Literal* evaluate(Ast &ast) override;
 
   int countByTemplate(AbstractExpr* abstractExpr) override;
+
   std::vector<std::string> getVariableIdentifiers() override;
+  void setAttributes(AbstractExpr* leftOperand, Operator* operatore, AbstractExpr* rightOperand);
 };
 
 #endif //MASTER_THESIS_CODE_BINARYEXPR_H

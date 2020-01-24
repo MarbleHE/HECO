@@ -8,6 +8,7 @@
 #include "LiteralBool.h"
 #include "LiteralString.h"
 #include <string>
+#include <vector>
 
 class LogicalExpr : public AbstractExpr {
  private:
@@ -20,13 +21,14 @@ class LogicalExpr : public AbstractExpr {
 
   explicit LogicalExpr(OpSymb::LogCompOp op);
 
-  LogicalExpr(AbstractExpr* left, OpSymb::LogCompOp op, AbstractExpr* right);
-
   template<typename T1, typename T2>
   LogicalExpr(T1 left, OpSymb::LogCompOp op, T2 right) {
     this->left = createParam(left);
     this->op = new Operator(op);
     this->right = createParam(right);
+    std::vector<Node *> nodes{this->left, this->op, this->right};
+    this->addChildren(nodes);
+    Node::addParent(this, nodes);
   }
 
   ~LogicalExpr() override;

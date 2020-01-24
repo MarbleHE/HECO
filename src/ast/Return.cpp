@@ -7,13 +7,16 @@ json Return::toJson() const {
   return j;
 }
 
-Return::Return(AbstractExpr *value) : value(value) {}
+Return::Return(AbstractExpr* value) : value(value) {
+  this->addChild(value);
+  value->addParent(this);
+}
 
 void Return::accept(Visitor &v) {
   v.visit(*this);
 }
 
-AbstractExpr *Return::getValue() const {
+AbstractExpr* Return::getValue() const {
   return value;
 }
 
@@ -24,6 +27,9 @@ std::string Return::getNodeName() const {
 Return::~Return() {
   delete value;
 }
-Literal *Return::evaluate(Ast &ast) {
+
+Literal* Return::evaluate(Ast &ast) {
   return this->getValue()->evaluate(ast);
 }
+
+Return::Return() {}

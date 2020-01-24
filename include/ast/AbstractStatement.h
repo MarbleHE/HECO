@@ -5,7 +5,6 @@
 #include <nlohmann/json.hpp>
 #include "../visitor/Visitor.h"
 #include "Node.h"
-#include "Ast.h"
 
 using json = nlohmann::json;
 

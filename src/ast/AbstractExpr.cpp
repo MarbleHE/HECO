@@ -50,15 +50,19 @@ bool AbstractExpr::contains(Variable* var) {
 bool AbstractExpr::isEqual(AbstractExpr* other) {
   return false;
 }
+
 Literal* AbstractExpr::evaluate(Ast &ast) {
   return nullptr;
 }
+
 LiteralFloat* AbstractExpr::createParam(float f) {
   return new LiteralFloat(f);
 }
+
 int AbstractExpr::countByTemplate(AbstractExpr* abstractExpr) {
   return 0;
 }
+
 std::vector<std::string> AbstractExpr::getVariableIdentifiers() {
   return std::vector<std::string>();
 }

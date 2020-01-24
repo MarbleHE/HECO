@@ -20,6 +20,11 @@ Block::Block(AbstractStatement* stat) {
 }
 
 Block::Block(std::vector<AbstractStatement*>* statements) {
+  if (statements->empty()) {
+    std::string errorMsg = "Block statement vector is empty!"
+                           "If this is intended, use the parameter-less constructor instead.";
+    throw std::logic_error(errorMsg);
+  }
   this->statements = statements;
 }
 
@@ -45,4 +50,3 @@ Literal* Block::evaluate(Ast &ast) {
   }
   return nullptr;
 }
-

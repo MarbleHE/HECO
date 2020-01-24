@@ -31,6 +31,7 @@ class If : public AbstractStatement {
   [[nodiscard]] AbstractStatement* getElseBranch() const;
 
   Literal* evaluate(Ast &ast) override;
+  void updateTree();
 };
 
 #endif //MASTER_THESIS_CODE_IF_H

@@ -10,8 +10,8 @@ json BinaryExpr::toJson() const {
   return j;
 }
 
-BinaryExpr::BinaryExpr(AbstractExpr* left, OpSymb::BinaryOp op, AbstractExpr* right) : left(left), right(right) {
-  this->op = new Operator(op);
+BinaryExpr::BinaryExpr(AbstractExpr* left, OpSymb::BinaryOp op, AbstractExpr* right) {
+  setAttributes(left, new Operator(op), right);
 }
 
 AbstractExpr* BinaryExpr::getLeft() const {
@@ -50,22 +50,21 @@ BinaryExpr* BinaryExpr::contains(BinaryExpr* bexpTemplate, AbstractExpr* exclude
   }
 }
 
-void BinaryExpr::setLeft(AbstractExpr* value) {
-  this->left = value;
-}
-
-void BinaryExpr::setOp(Operator* operatore) {
+void BinaryExpr::setAttributes(AbstractExpr* leftOperand, Operator* operatore, AbstractExpr* rightOperand) {
+  this->left = leftOperand;
   this->op = operatore;
-}
-
-void BinaryExpr::setRight(AbstractExpr* rhs) {
-  this->right = rhs;
+  this->right = rightOperand;
+  // update tree structure
+  this->removeChildren();
+  this->addChildren({leftOperand, operatore, rightOperand});
+  Node::addParent(this, {leftOperand, operatore, rightOperand});
 }
 
 void BinaryExpr::swapOperandsLeftAWithRightB(BinaryExpr* bexpA, BinaryExpr* bexpB) {
-  auto previousBexpLeftOp = bexpA->getLeft();
-  bexpA->setLeft(bexpB->getRight());
-  bexpB->setRight(previousBexpLeftOp);
+  auto lopA = bexpA->getLeft();
+  auto ropB = bexpB->getRight();
+  bexpA->setAttributes(ropB, &bexpA->getOp(), bexpA->getRight());
+  bexpB->setAttributes(bexpB->getLeft(), &bexpB->getOp(), lopA);
 }
 
 BinaryExpr::~BinaryExpr() {
@@ -87,10 +86,12 @@ bool BinaryExpr::isEqual(AbstractExpr* other) {
   }
   return false;
 }
+
 Literal* BinaryExpr::evaluate(Ast &ast) {
   // we first need to evaluate the left-handside and right-handside as they can consists of nested binary expressions
   return this->getOp().applyOperator(this->getLeft()->evaluate(ast), this->getRight()->evaluate(ast));
 }
+
 BinaryExpr::BinaryExpr() : left(nullptr), op(nullptr), right(nullptr) {}
 
 int BinaryExpr::countByTemplate(AbstractExpr* abstractExpr) {
@@ -101,9 +102,8 @@ int BinaryExpr::countByTemplate(AbstractExpr* abstractExpr) {
     return (this->contains(expr, nullptr) != nullptr ? 1 : 0)
         + left->countByTemplate(abstractExpr)
         + right->countByTemplate(abstractExpr);
-  } else {
-    return 0;
   }
+  return 0;
 }
 
 std::vector<std::string> BinaryExpr::getVariableIdentifiers() {

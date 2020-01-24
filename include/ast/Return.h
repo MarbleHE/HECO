@@ -7,7 +7,7 @@
 
 class Return : public AbstractStatement {
  private:
-  AbstractExpr* value;
+  AbstractExpr* value{};
 
  public:
   explicit Return(AbstractExpr* value);
@@ -23,6 +23,7 @@ class Return : public AbstractStatement {
   ~Return() override;
 
   Literal* evaluate(Ast &ast) override;
+  Return();
 };
 
 #endif //MASTER_THESIS_CODE_RETURN_H

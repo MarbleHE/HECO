@@ -10,11 +10,6 @@ json LogicalExpr::toJson() const {
   return j;
 }
 
-LogicalExpr::LogicalExpr(AbstractExpr* left, OpSymb::LogCompOp op, AbstractExpr* right) :
-    left(left), right(right) {
-  this->op = new Operator(op);
-}
-
 void LogicalExpr::accept(Visitor &v) {
   v.visit(*this);
 }
@@ -83,3 +78,5 @@ int LogicalExpr::countByTemplate(AbstractExpr* abstractExpr) {
     return 0;
   }
 }
+
+

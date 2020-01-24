@@ -10,12 +10,31 @@ void Function::addParameter(FunctionParameter* param) {
   this->params.emplace_back(*param);
 }
 
-Function::Function(std::string name, std::vector<AbstractStatement*> pt) : name(std::move(name)),
-                                                                           body(std::move(pt)) {}
+Function::Function(std::string name, std::vector<AbstractStatement*> pt) : name(std::move(name)), body(std::move(pt)) {
+  for (auto &stmt : getBody()) {
+    auto previous = *(&stmt - 1);
+    auto next = *(&stmt + 1);
+    if (previous != nullptr) {
+      stmt->addParent(previous);
+    }
+    if (next != nullptr) {
+      stmt->addChild(next);
+    }
+  }
+}
 
-Function::Function(std::string name) : name(std::move(name)) {}
+Function::Function(std::string name) : name(std::move(name)) {
+}
 
 void Function::addStatement(AbstractStatement* statement) {
+  if (this->getBody().empty()) {
+    this->addChild(statement);
+    statement->addParent(this);
+  } else {
+    auto lastStatement = this->getBody().back();
+    lastStatement->addChild(statement);
+    statement->addParent(lastStatement);
+  }
   this->body.emplace_back(statement);
 }
 
@@ -62,7 +81,8 @@ void Function::setParams(std::vector<FunctionParameter>* paramsVec) {
 }
 
 Function::Function(std::string name, std::vector<FunctionParameter> params,
-                   std::vector<AbstractStatement*> body) : name(std::move(name)), params(std::move(params)),
+                   std::vector<AbstractStatement*> body) : name(std::move(name)),
+                                                           params(std::move(params)),
                                                            body(std::move(body)) {}
 
 Literal* Function::evaluate(Ast &ast) {

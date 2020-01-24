@@ -14,9 +14,13 @@ class VarDecl : public AbstractStatement {
 
  public:
   VarDecl(std::string name, const std::string &datatype, AbstractExpr* initializer);
+
   VarDecl(std::string name, int value);
+
   VarDecl(std::string name, bool value);
+
   VarDecl(std::string name, float value);
+
   VarDecl(std::string name, std::string value);
 
   [[nodiscard]] json toJson() const override;

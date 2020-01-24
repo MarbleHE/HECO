@@ -27,6 +27,7 @@ std::string AbstractStatement::getVarTargetIdentifier() {
 bool AbstractStatement::isEqual(AbstractStatement *as) {
     return false;
 }
+
 Literal *AbstractStatement::evaluate(Ast &ast) {
   return nullptr;
 }

@@ -31,6 +31,7 @@ While::~While() {
   delete condition;
   delete body;
 }
+
 Literal* While::evaluate(Ast &ast) {
   while (*dynamic_cast<LiteralBool*>(getCondition()->evaluate(ast)) == LiteralBool(true)) {
     getBody()->evaluate(ast);

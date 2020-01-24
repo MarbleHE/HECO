@@ -12,7 +12,7 @@ class Block : public AbstractStatement {
  public:
   Block();
 
-  ~Block();
+  ~Block() override;
 
   explicit Block(AbstractStatement* stat);
 
@@ -27,7 +27,6 @@ class Block : public AbstractStatement {
   [[nodiscard]] std::vector<AbstractStatement*>* getStatements() const;
 
   Literal* evaluate(Ast &ast) override;
-
 };
 
 #endif //MASTER_THESIS_CODE_BLOCK_H

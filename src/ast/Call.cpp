@@ -2,6 +2,8 @@
 
 #include <utility>
 #include <sstream>
+#include <typeindex>
+#include <iostream>
 #include "Function.h"
 #include "Literal.h"
 #include "LiteralInt.h"
@@ -31,9 +33,11 @@ Call::~Call() {
   delete func;
 }
 
-Call::Call(Function* func) : func(func) {}
+Call::Call(Function* func) : func(func) {
+}
 
-Call::Call(std::vector<FunctionParameter*> arguments, Function* func) : func(func), arguments(std::move(arguments)) {}
+Call::Call(std::vector<FunctionParameter*> arguments, Function* func) : func(func), arguments(std::move(arguments)) {
+}
 
 Function* Call::getFunc() const {
   return func;

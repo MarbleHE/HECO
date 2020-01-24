@@ -9,6 +9,7 @@
 class Ast {
  private:
   AbstractStatement* rootNode;
+
   std::map<std::string, Literal*> variablesValues;
 
  public:

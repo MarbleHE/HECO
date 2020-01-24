@@ -9,7 +9,7 @@
 
 class Call : public AbstractExpr, public AbstractStatement {
  private:
-  Function* func;
+  Function* func{};
   std::vector<FunctionParameter*> arguments;
 
  public:
