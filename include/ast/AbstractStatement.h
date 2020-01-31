@@ -9,22 +9,22 @@
 using json = nlohmann::json;
 
 class AbstractStatement : public Node {
- public:
-  virtual ~AbstractStatement() = default;
+public:
+    virtual ~AbstractStatement() = default;
 
-  [[nodiscard]] virtual std::string toString() const;
+    [[nodiscard]] std::string toString() const override;
 
-  [[nodiscard]] virtual json toJson() const;
+    [[nodiscard]] json toJson() const override;
 
-  virtual void accept(Visitor &v);
+    void accept(Visitor &v) override;
 
-  virtual BinaryExpr* contains(BinaryExpr* bexpTemplate, BinaryExpr* excludedSubtree);
+    virtual BinaryExpr *contains(BinaryExpr *bexpTemplate, BinaryExpr *excludedSubtree);
 
-  virtual std::string getVarTargetIdentifier();
+    virtual std::string getVarTargetIdentifier();
 
-  virtual bool isEqual(AbstractStatement* as);
+    virtual bool isEqual(AbstractStatement *as);
 
-  virtual Literal* evaluate(Ast &ast);
+    Literal *evaluate(Ast &ast) override;
 };
 
 std::ostream &operator<<(std::ostream &outs, const AbstractStatement &obj);
@@ -32,6 +32,6 @@ std::ostream &operator<<(std::ostream &outs, const AbstractStatement &obj);
 /// JSON representation to be used for vector<AbstractStatement> objects.
 void to_json(json &j, const AbstractStatement &absStat);
 
-void to_json(json &j, const AbstractStatement* absStat);
+void to_json(json &j, const AbstractStatement *absStat);
 
 #endif //MASTER_THESIS_CODE_ABSTRACTSTATEMENT_H

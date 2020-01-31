@@ -38,6 +38,8 @@ class LiteralInt : public Literal {
   void setRandomValue(RandLiteralGen &rlg) override;
   void setValue(int newValue);
 
+    std::string toString() const override;
+
  protected:
   void print(std::ostream &str) const override;
 };

@@ -44,15 +44,23 @@ class LogicalExpr : public AbstractExpr {
 
   void accept(Visitor &v) override;
 
-  [[nodiscard]] std::string getNodeName() const override;
+    [[nodiscard]] std::string getNodeName() const override;
 
-  Literal* evaluate(Ast &ast) override;
+    Literal *evaluate(Ast &ast) override;
 
-  std::vector<std::string> getVariableIdentifiers() override;
+    std::vector<std::string> getVariableIdentifiers() override;
 
-  int countByTemplate(AbstractExpr* abstractExpr) override;
+    int countByTemplate(AbstractExpr *abstractExpr) override;
 
-  LogicalExpr* contains(LogicalExpr* lexpTemplate, AbstractExpr* excludedSubtree);
+    LogicalExpr *contains(LogicalExpr *lexpTemplate, AbstractExpr *excludedSubtree);
+
+    void setLeft(AbstractExpr *l);
+
+    void setOp(Operator *operatore);
+
+    void setRight(AbstractExpr *r);
+
+    Node *clone() override;
 };
 
 #endif //MASTER_THESIS_CODE_LOGICALEXPR_H

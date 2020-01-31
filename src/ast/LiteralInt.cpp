@@ -31,9 +31,11 @@ LiteralInt::~LiteralInt() = default;
 Literal* LiteralInt::evaluate(Ast &ast) {
   return this;
 }
+
 LiteralInt LiteralInt::operator+(LiteralInt const &lint) {
   return LiteralInt(this->getValue() + lint.getValue());
 }
+
 std::ostream &operator<<(std::ostream &os, const LiteralInt &an_int) {
   os << an_int.getValue();
   return os;
@@ -42,9 +44,11 @@ std::ostream &operator<<(std::ostream &os, const LiteralInt &an_int) {
 void LiteralInt::print(std::ostream &str) const {
   str << this->value;
 }
+
 bool LiteralInt::operator==(const LiteralInt &rhs) const {
   return value == rhs.value;
 }
+
 bool LiteralInt::operator!=(const LiteralInt &rhs) const {
   return !(rhs == *this);
 }
@@ -61,3 +65,6 @@ void LiteralInt::setRandomValue(RandLiteralGen &rlg) {
   setValue(rlg.getRandomInt());
 }
 
+std::string LiteralInt::toString() const {
+    return std::to_string(this->getValue());
+}

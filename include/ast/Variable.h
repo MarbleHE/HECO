@@ -4,6 +4,7 @@
 #include <string>
 #include "AbstractExpr.h"
 #include <vector>
+#include <map>
 
 class Variable : public AbstractExpr {
  private:
@@ -22,15 +23,17 @@ class Variable : public AbstractExpr {
 
   bool operator==(const Variable &rhs) const;
 
-  bool operator!=(const Variable &rhs) const;
+    bool operator!=(const Variable &rhs) const;
 
-  bool contains(Variable* var) override;
+    bool contains(Variable *var) override;
 
-  bool isEqual(AbstractExpr* other) override;
+    bool isEqual(AbstractExpr *other) override;
 
-  Literal* evaluate(Ast &ast) override;
+    Literal *evaluate(Ast &ast) override;
 
-  std::vector<std::string> getVariableIdentifiers() override;
+    std::vector<std::string> getVariableIdentifiers() override;
+
+    std::string toString() const override;
 };
 
 #endif //MASTER_THESIS_CODE_VARIABLE_H

@@ -13,9 +13,9 @@ void Operator::accept(Visitor &v) {
 
 Operator::Operator(OpSymb::LogCompOp op) : operatorString(OpSymb::getTextRepr(op)), operatorSymbol(op) {}
 
-Operator::Operator(OpSymb::BinaryOp op) : operatorString(OpSymb::getTextRepr(op)) {}
+Operator::Operator(OpSymb::BinaryOp op) : operatorString(OpSymb::getTextRepr(op)), operatorSymbol(op) {}
 
-Operator::Operator(OpSymb::UnaryOp op) : operatorString(OpSymb::getTextRepr(op)) {}
+Operator::Operator(OpSymb::UnaryOp op) : operatorString(OpSymb::getTextRepr(op)), operatorSymbol(op) {}
 
 const std::string &Operator::getOperatorString() const {
   return operatorString;
@@ -36,7 +36,6 @@ bool Operator::operator==(const Operator &rhs) const {
 bool Operator::operator!=(const Operator &rhs) const {
   return !(rhs == *this);
 }
-
 
 bool Operator::equals(std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp> op) const {
   return this->getOperatorString() == OpSymb::getTextRepr(op);
@@ -299,7 +298,16 @@ Literal* Operator::applyOperator(LiteralInt* lhs, LiteralInt* rhs) {
   else if (this->equals(OpSymb::unequal)) return new LiteralBool(lhsVal != rhsVal);
 
   else
-    throw std::logic_error("applyOperator(LiteralInt* lhs, LiteralInt* rhs) failed!");
+      throw std::logic_error("applyOperator(LiteralInt* lhs, LiteralInt* rhs) failed!");
+}
+
+std::string Operator::toString() const {
+    return this->getOperatorString();
+}
+
+Operator::Operator(std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp> opVar) {
+    this->operatorSymbol = opVar;
+    this->operatorString = OpSymb::getTextRepr(opVar);
 }
 
 

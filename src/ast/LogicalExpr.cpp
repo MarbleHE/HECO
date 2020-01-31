@@ -69,14 +69,30 @@ LogicalExpr* LogicalExpr::contains(LogicalExpr* lexpTemplate, AbstractExpr* excl
 int LogicalExpr::countByTemplate(AbstractExpr* abstractExpr) {
   // check if abstractExpr is of type BinaryExpr
   if (auto expr = dynamic_cast<LogicalExpr*>(abstractExpr)) {
-    // check if current BinaryExpr fulfills requirements of template abstractExpr
-    // also check left and right operands for nested BinaryExps
-    return (this->contains(expr, nullptr) != nullptr ? 1 : 0)
-        + left->countByTemplate(abstractExpr)
-        + right->countByTemplate(abstractExpr);
+      // check if current BinaryExpr fulfills requirements of template abstractExpr
+      // also check left and right operands for nested BinaryExps
+      return (this->contains(expr, nullptr) != nullptr ? 1 : 0)
+             + left->countByTemplate(abstractExpr)
+             + right->countByTemplate(abstractExpr);
   } else {
-    return 0;
+      return 0;
   }
 }
 
+Node *LogicalExpr::clone() {
+    auto clonedLexp = new LogicalExpr();
+    clonedLexp->setUniqueNodeId(this->getUniqueNodeId());
+    return clonedLexp;
+}
 
+void LogicalExpr::setLeft(AbstractExpr *l) {
+    LogicalExpr::left = l;
+}
+
+void LogicalExpr::setOp(Operator *operatore) {
+    LogicalExpr::op = operatore;
+}
+
+void LogicalExpr::setRight(AbstractExpr *r) {
+    LogicalExpr::right = r;
+}

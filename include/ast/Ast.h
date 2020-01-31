@@ -3,35 +3,46 @@
 
 #include <map>
 #include <string>
-#include "AbstractStatement.h"
+#include "../include/ast/Node.h"
 #include "../visitor/Visitor.h"
 
 class Ast {
- private:
-  AbstractStatement* rootNode;
+private:
+    Node *rootNode;
 
-  std::map<std::string, Literal*> variablesValues;
+    std::map<std::string, Literal *> variablesValues;
 
- public:
-  Ast();
+    bool reversedEdges{false};
 
-  explicit Ast(AbstractStatement* rootNode);
+public:
+    Ast();
 
-  ~Ast();
+    explicit Ast(Node *rootNode);
 
-  AbstractStatement* setRootNode(AbstractStatement* node);
+    ~Ast();
 
-  [[nodiscard]] AbstractStatement* getRootNode() const;
+    Node *setRootNode(Node *node);
 
-  virtual void accept(Visitor &v);
+    [[nodiscard]] Node *getRootNode() const;
 
-  bool hasVarValue(Variable* var);
+    virtual void accept(Visitor &v);
 
-  Literal* getVarValue(const std::string &variableIdentifier);
+    bool hasVarValue(Variable *var);
 
-  void updateVarValue(const std::string &variableIdentifier, Literal* newValue);
+    Literal *getVarValue(const std::string &variableIdentifier);
 
-  Literal* evaluate(std::map<std::string, Literal*> &paramValues, bool printResult);
+    void updateVarValue(const std::string &variableIdentifier, Literal *newValue);
+
+    Literal *evaluate(std::map<std::string, Literal *> &paramValues, bool printResult);
+
+    void toggleIsReversed();
+
+    [[nodiscard]] bool isReversed() const;
+
+    void printGraphviz();
 };
 
 #endif //MASTER_THESIS_CODE_AST_H
+
+
+

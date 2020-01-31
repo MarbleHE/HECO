@@ -34,6 +34,8 @@ class LiteralString : public Literal {
   void addLiteralValue(std::string identifier, std::map<std::string, Literal*> &paramsMap) override;
   void setValue(const std::string &newValue);
   void setRandomValue(RandLiteralGen &rlg) override;
+
+    std::string toString() const override;
 };
 
 #endif //MASTER_THESIS_CODE_LITERALSTRING_H

@@ -1,50 +1,49 @@
 #ifndef MASTER_THESIS_CODE_ABSTRACTEXPR_H
 #define MASTER_THESIS_CODE_ABSTRACTEXPR_H
 
+#include <vector>
 #include <string>
 #include <nlohmann/json.hpp>
 #include "../visitor/Visitor.h"
 #include "Ast.h"
 #include "Node.h"
-#include <vector>
 
 using json = nlohmann::json;
 
 class AbstractExpr : public Node {
- private:
-  static LiteralInt* createParam(int i);
+private:
+    static LiteralInt *createParam(int i);
 
-  static LiteralBool* createParam(bool b);
+    static LiteralBool *createParam(bool b);
 
-  static LiteralString* createParam(const char* str);
+    static LiteralString *createParam(const char *str);
 
-  static LiteralFloat* createParam(float f);
+    static LiteralFloat *createParam(float f);
 
-  static AbstractExpr* createParam(AbstractExpr* abstractExpr);
+    static AbstractExpr *createParam(AbstractExpr *abstractExpr);
 
- public:
-  virtual ~AbstractExpr() = default;
+public:
+    virtual ~AbstractExpr() = default;
 
-  [[nodiscard]] virtual std::string toString() const;
+    [[nodiscard]] std::string toString() const override;
 
-  [[nodiscard]] virtual json toJson() const;
+    [[nodiscard]] json toJson() const override;
 
-  virtual void accept(Visitor &v);
+    void accept(Visitor &v) override;
 
-  virtual BinaryExpr* contains(BinaryExpr* bexpTemplate, AbstractExpr* excludedSubtree);
+    virtual BinaryExpr *contains(BinaryExpr *bexpTemplate, AbstractExpr *excludedSubtree);
 
-  virtual int countByTemplate(AbstractExpr* abstractExpr);
+    virtual int countByTemplate(AbstractExpr *abstractExpr);
 
-  virtual std::vector<std::string> getVariableIdentifiers();
+    virtual std::vector<std::string> getVariableIdentifiers();
 
-  virtual bool contains(Variable* var);
+    virtual bool contains(Variable *var);
 
-  virtual bool isEqual(AbstractExpr* other);
+    virtual bool isEqual(AbstractExpr *other);
 
-  virtual Literal* evaluate(Ast &ast);
+    Literal *evaluate(Ast &ast) override;
 };
 
-/// JSON representation to be used for vector<AbstractExpr> objects.
 std::ostream &operator<<(std::ostream &outs, const AbstractExpr &obj);
 
 #endif //MASTER_THESIS_CODE_ABSTRACTEXPR_H

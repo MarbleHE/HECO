@@ -35,6 +35,8 @@ class LiteralBool : public Literal {
   void setRandomValue(RandLiteralGen &rlg) override;
   void setValue(bool newValue);
 
+    std::string toString() const override;
+
  protected:
   void print(std::ostream &str) const override;
 };

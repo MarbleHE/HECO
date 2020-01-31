@@ -27,76 +27,76 @@
 
 
 TEST(JsonOutputTest, LiteralInt) { /* NOLINT */
-  int val = 2;
-  auto* lint = new LiteralInt(val);
-  json j = {{"type", "LiteralInt"},
-            {"value", val}};
-  EXPECT_EQ(lint->toString(), j.dump());
+    int val = 2;
+    auto *lint = new LiteralInt(val);
+    json j = {{"type",  "LiteralInt"},
+              {"value", val}};
+    EXPECT_EQ(lint->toJson(), j);
 }
 
 TEST(JsonOutputTest, LiteralFloat) { /* NOLINT */
-  float val = 33.214;
-  auto* lint = new LiteralFloat(val);
-  json j = {{"type", "LiteralFloat"},
-            {"value", val}};
-  EXPECT_EQ(lint->toString(), j.dump());
+    float val = 33.214;
+    auto *lint = new LiteralFloat(val);
+    json j = {{"type",  "LiteralFloat"},
+              {"value", val}};
+    EXPECT_EQ(lint->toJson(), j);
 }
 
 TEST(JsonOutputTest, LiteralBool) { /* NOLINT */
-  bool val = true;
-  auto* lbool = new LiteralBool(val);
-  json j = {{"type", "LiteralBool"},
-            {"value", val}};
-  EXPECT_EQ(lbool->toString(), j.dump());
+    bool val = true;
+    auto *lbool = new LiteralBool(val);
+    json j = {{"type",  "LiteralBool"},
+              {"value", val}};
+    EXPECT_EQ(lbool->toJson(), j);
 }
 
 TEST(JsonOutputTest, LiteralString) { /* NOLINT */
-  std::string val = "hello world!";
-  auto* lString = new LiteralString(val);
-  json j = {{"type", "LiteralString"},
-            {"value", val}};
-  EXPECT_EQ(lString->toString(), j.dump());
+    std::string val = "hello world!";
+    auto *lString = new LiteralString(val);
+    json j = {{"type",  "LiteralString"},
+              {"value", val}};
+    EXPECT_EQ(lString->toJson(), j);
 }
 
 TEST(JsonOutputTest, VarAssignm) { /* NOLINT */
   std::string identifier = "myCustomVar";
   int val = 2;
-  auto* lint = new LiteralInt(val);
-  // myCustomVar = 2;
-  auto* assignm = new VarAssignm(identifier, lint);
-  json j = {{"type", "VarAssignm"},
-            {"identifier", identifier},
-            {"value", {
-                {"type", "LiteralInt"},
-                {"value", val}
-            }
-            }};
-  EXPECT_EQ(assignm->toString(), j.dump());
+    auto *lint = new LiteralInt(val);
+    // myCustomVar = 2;
+    auto *assignm = new VarAssignm(identifier, lint);
+    json j = {{"type",       "VarAssignm"},
+              {"identifier", identifier},
+              {"value",      {
+                                     {"type", "LiteralInt"},
+                                     {"value", val}
+                             }
+              }};
+    EXPECT_EQ(assignm->toJson(), j);
 }
 
 TEST(JsonOutputTest, Variable) { /* NOLINT */
-  std::string varIdentifier = "myVar";
-  auto var = new Variable(varIdentifier);
-  json j = {{"type", "Variable"},
-            {"identifier", varIdentifier}};
-  EXPECT_EQ(var->toString(), j.dump());
+    std::string varIdentifier = "myVar";
+    auto var = new Variable(varIdentifier);
+    json j = {{"type",       "Variable"},
+              {"identifier", varIdentifier}};
+    EXPECT_EQ(var->toJson(), j);
 }
 
 TEST(JsonOutputTest, VarDecl) { /* NOLINT */
   auto identifier = "numIterations";
   auto datatype = "int";
   auto initializer = 3;
-  // int numIterations = 3;
-  auto* var = new VarDecl(identifier, initializer);
-  json j = {{"type", "VarDecl"},
-            {"identifier", identifier},
-            {"datatype", datatype},
-            {"initializer", {
-                {"type", "LiteralInt"},
-                {"value", initializer}}
-            }
-  };
-  EXPECT_EQ(var->toString(), j.dump());
+    // int numIterations = 3;
+    auto *var = new VarDecl(identifier, initializer);
+    json j = {{"type",        "VarDecl"},
+              {"identifier",  identifier},
+              {"datatype",    datatype},
+              {"initializer", {
+                                      {"type", "LiteralInt"},
+                                      {"value", initializer}}
+              }
+    };
+    EXPECT_EQ(var->toJson(), j);
 }
 
 TEST(JsonOutputTest, BinaryExpr) { /* NOLINT */
@@ -104,19 +104,19 @@ TEST(JsonOutputTest, BinaryExpr) { /* NOLINT */
   auto varIdentifier = "x";
   // x + 22;
   auto* bexp = new BinaryExpr(
-      new Variable(varIdentifier),
-      OpSymb::BinaryOp::addition,
-      new LiteralInt(lintValue));
-  json j = {{"type", "BinaryExpr"},
-            {"leftOperand", {
-                {"type", "Variable"},
-                {"identifier", varIdentifier}}},
-            {"operator", OpSymb::getTextRepr(OpSymb::addition)},
-            {"rightOperand", {
-                {"type", "LiteralInt"},
-                {"value", lintValue}
-            }}};
-  EXPECT_EQ(bexp->toString(), j.dump());
+          new Variable(varIdentifier),
+          OpSymb::BinaryOp::addition,
+          new LiteralInt(lintValue));
+    json j = {{"type",         "BinaryExpr"},
+              {"leftOperand",  {
+                                       {"type", "Variable"},
+                                       {"identifier", varIdentifier}}},
+              {"operator",     OpSymb::getTextRepr(OpSymb::addition)},
+              {"rightOperand", {
+                                       {"type", "LiteralInt"},
+                                       {"value",      lintValue}
+                               }}};
+    EXPECT_EQ(bexp->toJson(), j);
 }
 
 TEST(JsonOutputTest, Return) { /* NOLINT */
@@ -127,41 +127,41 @@ TEST(JsonOutputTest, Return) { /* NOLINT */
       {"type", "Return"},
       {"value", {
           {"type", "LogicalExpr"},
-          {"leftOperand", {
-              {"type", "Variable"},
-              {"identifier", "x"}
-          }},
-          {"rightOperand", {
-              {"type", "LiteralInt"},
-              {"value", 22}
-          }},
-          {"operator", ">"}}
+                       {"leftOperand", {
+                                               {"type", "Variable"},
+                                               {"identifier", "x"}
+                                       }},
+                       {"rightOperand", {
+                                                {"type", "LiteralInt"},
+                                                {"value", 22}
+                                        }},
+                       {"operator", ">"}}
       }};
-  EXPECT_EQ(ret->toString(), j.dump());
+    EXPECT_EQ(ret->toJson(), j);
 }
 
 TEST(JsonOutputTest, UnaryExpr) { /* NOLINT */
-  auto varIdentifier = "x";
-  // !x
-  auto unaryExp = new UnaryExpr(OpSymb::UnaryOp::negation, new Variable(varIdentifier));
-  json j = {{"type", "UnaryExpr"},
-            {"operator", OpSymb::getTextRepr(OpSymb::negation)},
-            {"rightOperand", {
-                {"type", "Variable"},
-                {"identifier", varIdentifier}}
-            }};
-  EXPECT_EQ(unaryExp->toString(), j.dump());
+    auto varIdentifier = "x";
+    // !x
+    auto unaryExp = new UnaryExpr(OpSymb::UnaryOp::negation, new Variable(varIdentifier));
+    json j = {{"type",         "UnaryExpr"},
+              {"operator",     OpSymb::getTextRepr(OpSymb::negation)},
+              {"rightOperand", {
+                                       {"type", "Variable"},
+                                       {"identifier", varIdentifier}}
+              }};
+    EXPECT_EQ(unaryExp->toJson(), j);
 }
 
 TEST(JsonOutputTest, FunctionParameter) { /* NOLINT */
-  auto fp = new FunctionParameter("int", new Variable("y"));
-  json j = {{"type", "FunctionParameter"},
-            {"datatype", "int"},
-            {"value", {
-                {"type", "Variable"},
-                {"identifier", "y"}
-            }}};
-  EXPECT_EQ(fp->toString(), j.dump());
+    auto fp = new FunctionParameter("int", new Variable("y"));
+    json j = {{"type",     "FunctionParameter"},
+              {"datatype", "int"},
+              {"value",    {
+                                   {"type", "Variable"},
+                                   {"identifier", "y"}
+                           }}};
+    EXPECT_EQ(fp->toJson(), j);
 }
 
 TEST(JsonOutputTest, Group) { /* NOLINT */
@@ -173,17 +173,17 @@ TEST(JsonOutputTest, Group) { /* NOLINT */
       OpSymb::BinaryOp::division,
       new LiteralInt(lintValue)));
 
-  json j = {{"type", "Group"},
-            {"expr", {{"type", "BinaryExpr"},
-                      {"leftOperand", {
-                          {"type", "Variable"},
-                          {"identifier", varIdentifier}}},
-                      {"operator", OpSymb::getTextRepr(OpSymb::division)},
-                      {"rightOperand", {
-                          {"type", "LiteralInt"},
-                          {"value", lintValue}
-                      }}}}};
-  EXPECT_EQ(gp->toString(), j.dump());
+    json j = {{"type", "Group"},
+              {"expr", {{"type", "BinaryExpr"},
+                               {"leftOperand", {
+                                                       {"type", "Variable"},
+                                                       {"identifier", varIdentifier}}},
+                               {"operator", OpSymb::getTextRepr(OpSymb::division)},
+                               {"rightOperand", {
+                                                        {"type", "LiteralInt"},
+                                                        {"value", lintValue}
+                                                }}}}};
+    EXPECT_EQ(gp->toJson(), j);
 }
 
 TEST(JsonOutputTest, LogicalExpr) { /* NOLINT */
@@ -191,19 +191,19 @@ TEST(JsonOutputTest, LogicalExpr) { /* NOLINT */
   auto varIdentifierMax = "maxIterations";
   // numIterations < maxIterations
   auto* lexp = new LogicalExpr(
-      new Variable(varIdentifier),
-      OpSymb::smaller,
-      new Variable(varIdentifierMax));
-  json j = {{"type", "LogicalExpr"},
-            {"leftOperand", {
-                {"type", "Variable"},
-                {"identifier", varIdentifier}}},
-            {"operator", OpSymb::getTextRepr(OpSymb::smaller)},
-            {"rightOperand", {
-                {"type", "Variable"},
-                {"identifier", varIdentifierMax}
-            }}};
-  EXPECT_EQ(lexp->toString(), j.dump());
+          new Variable(varIdentifier),
+          OpSymb::smaller,
+          new Variable(varIdentifierMax));
+    json j = {{"type",         "LogicalExpr"},
+              {"leftOperand",  {
+                                       {"type", "Variable"},
+                                       {"identifier", varIdentifier}}},
+              {"operator",     OpSymb::getTextRepr(OpSymb::smaller)},
+              {"rightOperand", {
+                                       {"type", "Variable"},
+                                       {"identifier", varIdentifierMax}
+                               }}};
+    EXPECT_EQ(lexp->toJson(), j);
 }
 
 TEST(JsonOutputTest, Operator) { /* NOLINT */
@@ -218,16 +218,16 @@ TEST(JsonOutputTest, Operator) { /* NOLINT */
 }
 
 TEST(JsonOutputTest, Block) { /* NOLINT */
-  auto bl = new Block(new VarDecl("width", "int", new LiteralInt(22)));
-  json j = {{"type", "Block"},
-            {"statements", {{
-                                {"type", "VarDecl"},
-                                {"datatype", "int"},
-                                {"identifier", "width"},
-                                {"initializer", {
-                                    {"type", "LiteralInt"},
-                                    {"value", 22}}}}}}};
-  EXPECT_EQ(bl->toString(), j.dump());
+    auto bl = new Block(new VarDecl("width", "int", new LiteralInt(22)));
+    json j = {{"type",       "Block"},
+              {"statements", {{
+                                      {"type", "VarDecl"},
+                                      {"datatype", "int"},
+                                      {"identifier", "width"},
+                                      {"initializer", {
+                                                              {"type", "LiteralInt"},
+                                                              {"value", 22}}}}}}};
+    EXPECT_EQ(bl->toJson(), j);
 }
 
 TEST(JsonOutputTest, CallExternal) { /* NOLINT */
@@ -240,8 +240,8 @@ TEST(JsonOutputTest, CallExternal) { /* NOLINT */
   auto callExt = new CallExternal("printf", funcParams);
 
   // read expected output from hard-coded file
-  std::ifstream f("../../test/aux/JsonOutputTest/CallExternal.json");
-  json j = json::parse(f);
+    std::ifstream f("../../test/auxoutput/JsonOutputTest/CallExternal.json");
+    json j = json::parse(f);
 
   EXPECT_EQ(callExt->AbstractStatement::toString(), j.dump());
   EXPECT_EQ(callExt->AbstractExpr::toString(), j.dump());
@@ -261,8 +261,8 @@ TEST(JsonOutputTest, Call) {/* NOLINT */
                    }));
 
   // retrieve expected result
-  std::ifstream f("../../test/aux/JsonOutputTest/Call.json");
-  json expected = json::parse(f);
+    std::ifstream f("../../test/auxoutput/JsonOutputTest/Call.json");
+    json expected = json::parse(f);
 
   EXPECT_EQ(call->AbstractStatement::toString(), expected.dump());
   EXPECT_EQ(call->AbstractExpr::toString(), expected.dump());
@@ -282,19 +282,19 @@ TEST(JsonOutputTest, Function) { /* NOLINT */
                                        new BinaryExpr(
                                            new Group(
                                                new BinaryExpr(
-                                                   new Variable("a"),
-                                                   OpSymb::addition,
-                                                   new LiteralInt(221))),
+                                                       new Variable("a"),
+                                                       OpSymb::addition,
+                                                       new LiteralInt(221))),
                                            OpSymb::multiplication,
                                            new Variable("b")),
                                        OpSymb::addition,
                                        new Variable("z")))});
 
-  // retrieve expected result
-  std::ifstream f("../../test/aux/JsonOutputTest/Function.json");
-  json expected = json::parse(f);
+    // retrieve expected result
+    std::ifstream f("../../test/auxoutput/JsonOutputTest/Function.json");
+    json expected = json::parse(f);
 
-  EXPECT_EQ(func->toString(), expected.dump());
+    EXPECT_EQ(func->toJson(), expected);
 }
 
 TEST(JsonOutputTest, IfThenOnly) { /* NOLINT */
@@ -303,22 +303,22 @@ TEST(JsonOutputTest, IfThenOnly) { /* NOLINT */
   // }
   auto ifStmt = new If(
       new LogicalExpr(
-          new LogicalExpr(
+              new LogicalExpr(
               new Variable("b"),
               OpSymb::equal,
               new LiteralBool(true)),
-          OpSymb::logicalAnd,
-          new LogicalExpr(
-              new Variable("z"),
-              OpSymb::greaterEqual,
-              new LiteralInt(17))),
+              OpSymb::logicalAnd,
+              new LogicalExpr(
+                      new Variable("z"),
+                      OpSymb::greaterEqual,
+                      new LiteralInt(17))),
       new VarAssignm("isValid", new LiteralBool(true)));
 
-  // retrieve expected result
-  std::ifstream f("../../test/aux/JsonOutputTest/IfThenOnly.json");
-  json expected = json::parse(f);
+    // retrieve expected result
+    std::ifstream f("../../test/auxoutput/JsonOutputTest/IfThenOnly.json");
+    json expected = json::parse(f);
 
-  EXPECT_EQ(ifStmt->toString(), expected.dump());
+    EXPECT_EQ(ifStmt->toJson(), expected);
 }
 
 TEST(JsonOutputTest, If) { /* NOLINT */
@@ -343,17 +343,17 @@ TEST(JsonOutputTest, If) { /* NOLINT */
   auto thenBranch = new VarAssignm("isValid", new LiteralBool(true));
 
   std::vector<AbstractStatement*> elseStatement = {
-      new VarAssignm("isValid", new LiteralBool(false)),
-      new VarAssignm("c", new BinaryExpr(new Variable("a"), OpSymb::subtraction, new Variable("z")))
+          new VarAssignm("isValid", new LiteralBool(false)),
+          new VarAssignm("c", new BinaryExpr(new Variable("a"), OpSymb::subtraction, new Variable("z")))
   };
-  auto* elseBranch = new Block(&elseStatement);
-  auto ifStmt = new If(condition, thenBranch, elseBranch);
+    auto *elseBranch = new Block(&elseStatement);
+    auto ifStmt = new If(condition, thenBranch, elseBranch);
 
-  // retrieve expected result
-  std::ifstream f("../../test/aux/JsonOutputTest/If.json");
-  json expected = json::parse(f);
+    // retrieve expected result
+    std::ifstream f("../../test/auxoutput/JsonOutputTest/If.json");
+    json expected = json::parse(f);
 
-  EXPECT_EQ(ifStmt->toString(), expected.dump());
+    EXPECT_EQ(ifStmt->toJson(), expected);
 }
 
 TEST(JsonOutputTest, While) { /* NOLINT */
@@ -369,15 +369,15 @@ TEST(JsonOutputTest, While) { /* NOLINT */
                          OpSymb::multiplication,
                          new Variable("i"))));
   blockStatements.emplace_back(
-      new VarAssignm("i", new UnaryExpr(OpSymb::increment, new Variable("i"))));
+          new VarAssignm("i", new UnaryExpr(OpSymb::increment, new Variable("i"))));
 
-  auto whileStmt = new While(
-      new LogicalExpr(new Variable("i"), OpSymb::smaller, new LiteralInt(10)),
-      new Block(&blockStatements));
+    auto whileStmt = new While(
+            new LogicalExpr(new Variable("i"), OpSymb::smaller, new LiteralInt(10)),
+            new Block(&blockStatements));
 
-  // retrieve expected result
-  std::ifstream f("../../test/aux/JsonOutputTest/While.json");
-  json expected = json::parse(f);
+    // retrieve expected result
+    std::ifstream f("../../test/auxoutput/JsonOutputTest/While.json");
+    json expected = json::parse(f);
 
-  EXPECT_EQ(whileStmt->toString(), expected.dump());
+    EXPECT_EQ(whileStmt->toJson(), expected);
 }

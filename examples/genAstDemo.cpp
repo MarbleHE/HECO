@@ -71,7 +71,7 @@ void runInteractiveDemo() {
         break;
       }
       case 2: {
-        std::cout << *ast.getRootNode() << std::endl;
+        std::cout << ast.getRootNode() << std::endl;
         break;
       }
       case 3: {

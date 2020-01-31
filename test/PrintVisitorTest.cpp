@@ -21,7 +21,7 @@ TEST_F(PrintVisitorTest, printDemoTreeOne) { /* NOLINT */
   pv.visit(a);
 
   // read expected output file
-  std::ifstream ifs("../../test/aux/PrintVisitorTest/printDemoTreeOne.txt");
+  std::ifstream ifs("../../test/auxoutput/PrintVisitorTest/printDemoTreeOne.txt");
   std::stringstream buffer;
   buffer << ifs.rdbuf();
 
@@ -35,7 +35,7 @@ TEST_F(PrintVisitorTest, printDemoTreeTwo) { /* NOLINT */
   pv.visit(a);
 
   // read expected output file
-  std::ifstream ifs("../../test/aux/PrintVisitorTest/printDemoTreeTwo.txt");
+  std::ifstream ifs("../../test/auxoutput/PrintVisitorTest/printDemoTreeTwo.txt");
   std::stringstream buffer;
   buffer << ifs.rdbuf();
 

@@ -110,6 +110,7 @@ set(SOURCE_FILES
 add_executable(ast_demo
         ${ast_optimizer_SOURCE_DIR}/main.cpp
         ${SOURCE_FILES})
+
 target_link_libraries(ast_demo PRIVATE nlohmann_json::nlohmann_json)
 
 ##############################

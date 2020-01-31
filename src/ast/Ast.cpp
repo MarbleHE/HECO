@@ -3,24 +3,26 @@
 #include <utility>
 #include <variant>
 #include <iostream>
+#include <deque>
+#include <sstream>
 #include "Literal.h"
 #include "Variable.h"
 #include "Function.h"
 #include "Return.h"
 
-Ast::Ast(AbstractStatement* rootNode) : rootNode(rootNode) {}
+Ast::Ast(Node *rootNode) : rootNode(rootNode) {}
 
 Ast::Ast() {
-  rootNode = nullptr;
+    rootNode = nullptr;
 }
 
-AbstractStatement* Ast::setRootNode(AbstractStatement* node) {
-  this->rootNode = node;
-  return node;
+Node *Ast::setRootNode(Node *node) {
+    this->rootNode = node;
+    return node;
 }
 
-AbstractStatement* Ast::getRootNode() const {
-  return rootNode;
+Node *Ast::getRootNode() const {
+    return rootNode;
 }
 
 void Ast::accept(Visitor &v) {
@@ -55,7 +57,6 @@ Literal* Ast::evaluate(std::map<std::string, Literal*> &paramValues, bool printR
     }
   }
 
-  // start evaluation traversal
   auto result = getRootNode()->evaluate(*this);
 
   // print result
@@ -75,13 +76,43 @@ bool Ast::hasVarValue(Variable* var) {
 }
 
 Literal* Ast::getVarValue(const std::string &variableIdentifier) {
-  auto it = variablesValues.find(variableIdentifier);
-  if (it == variablesValues.end())
-    throw std::logic_error("Trying to retrieve value for variable not declared yet: " + variableIdentifier);
-  return it->second;
+    auto it = variablesValues.find(variableIdentifier);
+    if (it == variablesValues.end())
+        throw std::logic_error("Trying to retrieve value for variable not declared yet: " + variableIdentifier);
+    return it->second;
 }
 
-void Ast::updateVarValue(const std::string &variableIdentifier, Literal* newValue) {
-  variablesValues[variableIdentifier] = newValue;
+void Ast::updateVarValue(const std::string &variableIdentifier, Literal *newValue) {
+    variablesValues[variableIdentifier] = newValue;
+}
+
+void Ast::toggleIsReversed() {
+    reversedEdges = !reversedEdges;
+}
+
+bool Ast::isReversed() const {
+    return reversedEdges;
+}
+
+void Ast::printGraphviz() {
+    std::stringstream ss;
+    ss << "digraph D {" << std::endl;
+
+    std::deque<std::pair<Node *, int>> q;
+    q.emplace_back(getRootNode(), 1);
+    while (!q.empty()) {
+        auto curNode = q.front().first;
+        auto il = q.front().second;
+        q.pop_front();
+        std::string outStr;
+        ss << curNode->getDotFormattedString(isReversed(), "\t", true);
+        auto nodes = (isReversed()) ? curNode->getParents() : curNode->getChildren();
+        for_each(nodes.rbegin(), nodes.rend(), [&q, il](Node *n) {
+            q.emplace_front(n, il + 1);
+        });
+    }
+
+    ss << "}" << std::endl;
+    std::cout << ss.str();
 }
 

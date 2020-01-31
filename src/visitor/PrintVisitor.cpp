@@ -15,6 +15,7 @@
 #include <While.h>
 #include <UnaryExpr.h>
 #include <Call.h>
+#include <Group.h>
 
 #include "../../include/visitor/PrintVisitor.h"
 #include "../../main.h"

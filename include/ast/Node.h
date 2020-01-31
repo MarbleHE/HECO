@@ -3,54 +3,95 @@
 
 #include <string>
 #include <vector>
+#include <nlohmann/json.hpp>
+#include "../include/visitor/Visitor.h"
+
+using json = nlohmann::json;
+
+class Literal;
+
+class Ast;
 
 class Node {
- private:
-  std::vector<Node*> children{};
+private:
+    std::vector<Node *> children{};
 
-  std::vector<Node*> parents{};
+    std::vector<Node *> parents{};
 
-  static int nodeIdCounter;
+    static int nodeIdCounter;
 
-  std::string uniqueNodeId;
+    std::string uniqueNodeId;
 
-  std::string genUniqueNodeId();
+    /// This attributes is used to link back to the original Node in an overlay circuit.
+    Node *underlyingNode;
 
-  static int getAndIncrementNodeId();
+private:
 
-  static int getNodeIdCounter();
+    std::string genUniqueNodeId();
 
- public:
+    static int getAndIncrementNodeId();
 
-  Node();
+    static int getNodeIdCounter();
 
-  [[nodiscard]] virtual std::string getNodeName() const;
+public:
 
-  std::string getUniqueNodeId();
+    Node();
 
-  static void resetNodeIdCounter();
+    Node *getUnderlyingNode() const;
 
-  [[nodiscard]] const std::vector<Node*> &getChildren() const;
+    void setUnderlyingNode(Node *uNode);
 
-  void addChild(Node* child);
+    [[nodiscard]] virtual std::string getNodeName() const;
 
-  [[nodiscard]] const std::vector<Node*> &getParents() const;
+    std::string getUniqueNodeId();
 
-  void removeChild(Node* child);
+    static void resetNodeIdCounter();
 
-  void removeChildren();
+    [[nodiscard]] const std::vector<Node *> &getChildren() const;
 
-  void removeParent(Node* node);
+    void addChild(Node *child);
 
-  void removeParents();
+    [[nodiscard]] const std::vector<Node *> &getParents() const;
 
-  void addChildren(std::vector<Node*> c);
+    [[nodiscard]] const std::vector<Node *> &getPred() const;
 
-  static void addParent(Node* parentNode, std::vector<Node*> nodesToAddParentTo);
+    [[nodiscard]] const std::vector<Node *> &getSucc() const;
 
-  void addParent(Node* n);
+    void removeChild(Node *child);
 
-  void swapChildrenParents();
+    void removeChildren();
+
+    void removeParent(Node *node);
+
+    void removeParents();
+
+    void addChildren(std::vector<Node *> c);
+
+    static void addParent(Node *parentNode, std::vector<Node *> nodesToAddParentTo);
+
+    void addParent(Node *n);
+
+    void swapChildrenParents();
+
+    virtual Literal *evaluate(Ast &ast);
+
+    virtual void accept(Visitor &v);
+
+    [[nodiscard]] virtual json toJson() const;
+
+    [[nodiscard]] virtual std::string toString() const;
+
+    friend std::ostream &operator<<(std::ostream &os, const std::vector<Node *> &v);
+
+    std::string getDotFormattedString(bool isReversed, const std::string &indentation, bool showMultDepth);
+
+    [[nodiscard]] virtual Node *clone();
+
+    void setUniqueNodeId(const std::string &unique_node_id);
+
+    void printAncestorsDescendants(std::vector<Node *> nodes);
+
+    void printAncestorsDescendants(Node *n);
 };
 
 #endif //MASTER_THESIS_CODE_NODE_H
