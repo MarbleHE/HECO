@@ -11,7 +11,7 @@ set(TEST_FILES
         MultRewriteTest.cpp
         AstTestingGenerator.cpp
         AstTestingGenerator.h AstEvaluationTest.cpp
-        ${master_thesis_code_SOURCE_DIR}/include/utilities/TestUtils.h
+        ${ast_optimizer_SOURCE_DIR}/include/utilities/TestUtils.h
         MultDepthVisitorTest.cpp)
 
 add_executable(testing-all
