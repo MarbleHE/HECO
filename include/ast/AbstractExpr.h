@@ -11,7 +11,7 @@
 using json = nlohmann::json;
 
 class AbstractExpr : public Node {
-private:
+protected:
     static LiteralInt *createParam(int i);
 
     static LiteralBool *createParam(bool b);

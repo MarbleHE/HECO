@@ -26,8 +26,18 @@ endif ()
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
 # Add googletest to our build as an external target
-execute_process(COMMAND ${CMAKE_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/googletest-src -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/googletest-install WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-build)
-execute_process(COMMAND ${CMAKE_EXECUTABLE} --build ${CMAKE_CURRENT_BINARY_DIR}/googletest-build --target install)
+execute_process(COMMAND ${CMAKE_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/googletest-src -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/googletest-install
+        RESULT_VARIABLE result
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-build)
+if (result)
+    message(FATAL_ERROR "Build step for googletest failed: ${result}")
+endif ()
+
+execute_process(COMMAND ${CMAKE_EXECUTABLE} --build ${CMAKE_CURRENT_BINARY_DIR}/googletest-build --target install
+        RESULT_VARIABLE result)
+if (result)
+    message(FATAL_ERROR "Build step for googletest failed: ${result}")
+endif ()
 
 # The gtest/gtest_main targets carry header search path dependencies automatically when using CMake 2.8.11 or later.
 # Otherwise we have to add them here ourselves.
