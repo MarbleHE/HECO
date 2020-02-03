@@ -25,10 +25,9 @@ endif ()
 # Prevent overriding the parent project's compiler/linker settings on Windows
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 
-# Add googletest directly to our build. This defines the gtest and gtest_main targets.
-add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
-        ${CMAKE_CURRENT_BINARY_DIR}/googletest-build
-        EXCLUDE_FROM_ALL)
+# Add googletest to our build as an external target
+execute_process(COMMAND ${CMAKE_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/googletest-src -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/googletest-install WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/googletest-build)
+execute_process(COMMAND ${CMAKE_EXECUTABLE} --build ${CMAKE_CURRENT_BINARY_DIR}/googletest-build --target install)
 
 # The gtest/gtest_main targets carry header search path dependencies automatically when using CMake 2.8.11 or later.
 # Otherwise we have to add them here ourselves.
