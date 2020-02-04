@@ -25,6 +25,8 @@ private:
     /// This attributes is used to link back to the original Node in an overlay circuit.
     Node *underlyingNode;
 
+    bool hasReversedEdge = false;
+
 private:
 
     std::string genUniqueNodeId();
@@ -67,6 +69,9 @@ public:
 
     void addChildren(std::vector<Node *> c);
 
+    void addParents(std::vector<Node *> c);
+
+
     static void addParent(Node *parentNode, std::vector<Node *> nodesToAddParentTo);
 
     void addParent(Node *n);
@@ -83,15 +88,28 @@ public:
 
     friend std::ostream &operator<<(std::ostream &os, const std::vector<Node *> &v);
 
-    std::string getDotFormattedString(bool isReversed, const std::string &indentation, bool showMultDepth);
+    std::string
+    getDotFormattedString(bool isReversed, const std::string &indentation, bool showMultDepth);
 
     [[nodiscard]] virtual Node *clone();
 
     void setUniqueNodeId(const std::string &unique_node_id);
 
-    void printAncestorsDescendants(std::vector<Node *> nodes);
+    static void printAncestorsDescendants(std::vector<Node *> nodes);
 
     void printAncestorsDescendants(Node *n);
+
+    std::vector<Node *> getAnc();
+
+    int depthValue();
+
+    int getMultDepthL();
+
+    int getReverseMultDepthR();
+
+    void ensureNonReversedEdge();
+
+    void ensureReversedEdge();
 };
 
 #endif //MASTER_THESIS_CODE_NODE_H

@@ -11,38 +11,38 @@
 #include <vector>
 
 class LogicalExpr : public AbstractExpr {
- private:
-  AbstractExpr* left;
-  Operator* op;
-  AbstractExpr* right;
+private:
+    AbstractExpr *left;
+    Operator *op;
+    AbstractExpr *right;
 
- public:
-  LogicalExpr();
+public:
+    LogicalExpr();
 
-  explicit LogicalExpr(OpSymb::LogCompOp op);
+    explicit LogicalExpr(OpSymb::LogCompOp op);
 
-  template<typename T1, typename T2>
-  LogicalExpr(T1 left, OpSymb::LogCompOp op, T2 right) {
-    this->left = createParam(left);
-    this->op = new Operator(op);
-    this->right = createParam(right);
-    std::vector<Node *> nodes{this->left, this->op, this->right};
-    this->addChildren(nodes);
-    Node::addParent(this, nodes);
-  }
+    template<typename T1, typename T2>
+    LogicalExpr(T1 left, OpSymb::LogCompOp op, T2 right) {
+        this->left = createParam(left);
+        this->op = new Operator(op);
+        this->right = createParam(right);
+        std::vector<Node *> nodes{this->left, this->op, this->right};
+        this->addChildren(nodes);
+        Node::addParent(this, nodes);
+    }
 
-  ~LogicalExpr() override;
+    ~LogicalExpr() override;
 
-  [[nodiscard]] AbstractExpr* getLeft() const;
+    [[nodiscard]] AbstractExpr *getLeft() const;
 
-  [[nodiscard]] Operator &getOp() const;
+    [[nodiscard]] Operator &getOp() const;
 
-  [[nodiscard]] AbstractExpr* getRight() const;
+    [[nodiscard]] AbstractExpr *getRight() const;
 
-  [[nodiscard]] json toJson() const
-  override;
+    [[nodiscard]] json toJson() const
+    override;
 
-  void accept(Visitor &v) override;
+    void accept(Visitor &v) override;
 
     [[nodiscard]] std::string getNodeName() const override;
 
@@ -54,13 +54,9 @@ class LogicalExpr : public AbstractExpr {
 
     LogicalExpr *contains(LogicalExpr *lexpTemplate, AbstractExpr *excludedSubtree);
 
-    void setLeft(AbstractExpr *l);
-
-    void setOp(Operator *operatore);
-
-    void setRight(AbstractExpr *r);
-
     Node *clone() override;
+
+    void setOperands(AbstractExpr *lexp, AbstractExpr *rexp);
 };
 
 #endif //MASTER_THESIS_CODE_LOGICALEXPR_H

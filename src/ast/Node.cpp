@@ -1,6 +1,7 @@
 #include <sstream>
 #include <iostream>
 #include <set>
+#include <queue>
 #include "../include/optimizer/ConeRewriter.h"
 #include "AbstractExpr.h"
 #include "Node.h"
@@ -19,65 +20,65 @@ std::string Node::genUniqueNodeId() {
 Node::Node() = default;
 
 std::string Node::getUniqueNodeId() {
-  if (uniqueNodeId.empty()) {
-    std::string nodeId = genUniqueNodeId();
-    this->uniqueNodeId = nodeId;
-  }
-  return uniqueNodeId;
+    if (uniqueNodeId.empty()) {
+        std::string nodeId = genUniqueNodeId();
+        this->uniqueNodeId = nodeId;
+    }
+    return uniqueNodeId;
 }
 
 int Node::getAndIncrementNodeId() {
-  int current = Node::getNodeIdCounter();
-  Node::nodeIdCounter += 1;
-  return current;
+    int current = Node::getNodeIdCounter();
+    Node::nodeIdCounter += 1;
+    return current;
 }
 
 int Node::getNodeIdCounter() {
-  return nodeIdCounter;
+    return nodeIdCounter;
 }
 
 std::string Node::getNodeName() const {
-  return "Node";
+    return "Node";
 }
 
 void Node::resetNodeIdCounter() {
-  Node::nodeIdCounter = 0;
+    Node::nodeIdCounter = 0;
 }
 
-const std::vector<Node*> &Node::getChildren() const {
-  return children;
+const std::vector<Node *> &Node::getChildren() const {
+    return children;
 }
 
-void Node::addChild(Node* child) {
-  children.push_back(child);
+void Node::addChild(Node *child) {
+    children.push_back(child);
 }
 
-void Node::addChildren(std::vector<Node*> c) {
-  std::for_each(c.begin(), c.end(), [&](Node* n) {
-    children.push_back(n);
-  });
+void Node::addChildren(std::vector<Node *> c) {
+    std::for_each(c.begin(), c.end(), [&](Node *n) {
+        children.push_back(n);
+    });
 }
 
-void Node::removeChild(Node* child) {
-  auto it = std::find(children.begin(), children.end(), child);
-  if (it != children.end()) children.erase(it);
+void Node::removeChild(Node *child) {
+    auto it = std::find(children.begin(), children.end(), child);
+    if (it != children.end()) children.erase(it);
 }
 
-const std::vector<Node*> &Node::getParents() const {
-  return parents;
+const std::vector<Node *> &Node::getParents() const {
+    return parents;
 }
 
-void Node::addParent(Node* n) {
-  parents.push_back(n);
+void Node::addParent(Node *n) {
+    parents.push_back(n);
 }
 
-void Node::removeParent(Node* parent) {
-  auto it = std::find(parents.begin(), parents.end(), parent);
-  if (it != parents.end()) parents.erase(it);
+void Node::removeParent(Node *parent) {
+    auto it = std::find(parents.begin(), parents.end(), parent);
+    if (it != parents.end()) parents.erase(it);
 }
 
 void Node::removeChildren() {
-  children.clear();
+    children.clear();
 }
 
 void Node::removeParents() {
@@ -116,13 +117,7 @@ std::string Node::toString() const {
     return this->toJson().dump();
 }
 
-std::pair<int, int> getDepthsLR(Node &n) {
-    return std::pair<int, int>(ConeRewriter::getMultDepthL(&n), ConeRewriter::getReverseMultDepthR(&n));
-}
-
-std::string Node::getDotFormattedString(bool isReversed,
-                                        const std::string &indentation = "",
-                                        bool showMultDepth = false) {
+std::string Node::getDotFormattedString(bool isReversed, const std::string &indentation, bool showMultDepth) {
     // depending on whether the graph is reversed we are interested in the parents or children
     auto vec = (isReversed) ? this->getParents() : this->getChildren();
 
@@ -142,7 +137,8 @@ std::string Node::getDotFormattedString(bool isReversed,
     // show multiplicative depth in the tree nodes depending on parameter showMultDepth
     std::string multDepth;
     if (showMultDepth) {
-        auto[L, R] = getDepthsLR(*this);
+        auto L = getMultDepthL();
+        auto R = getReverseMultDepthR();
         multDepth = "\\n[l(v): " + std::to_string(L) + ", r(v): " + std::to_string(R) + "]";
     }
 
@@ -248,3 +244,68 @@ const std::vector<Node *> &Node::getPred() const {
 const std::vector<Node *> &Node::getSucc() const {
     return getChildren();
 }
+
+std::vector<Node *> Node::getAnc() {
+    // use a set to avoid duplicates as there may be common ancestors between this node and any of the node's parents
+    std::set<Node *> result;
+    std::queue<Node *> processQueue{{this}};
+    while (!processQueue.empty()) {
+        auto curNode = processQueue.front();
+        processQueue.pop();
+        auto nextNodes = curNode->getParents();
+        std::for_each(nextNodes.begin(), nextNodes.end(), [&](Node *node) {
+            result.insert(node);
+            processQueue.push(node);
+        });
+    }
+    return std::vector<Node *>(result.begin(), result.end());
+}
+
+int Node::getMultDepthL() {
+    // |pred(v)| = 0 <=> v does not have any parent node
+    if (this->getPred().empty()) return 0;
+
+    // otherwise return max_{u ∈ pred(v)} l(u) + d(v)
+    int max = 0;
+    for (auto &u : this->getPred()) {
+        max = std::max(u->getMultDepthL() + this->depthValue(), max);
+    }
+    return max;
+}
+
+
+int Node::getReverseMultDepthR() {
+    if (this->getChildren().empty()) return 0;
+    int max = 0;
+    for (auto &u : this->getSucc()) {
+        max = std::max(u->getReverseMultDepthR() + u->depthValue(), max);
+    }
+    return max;
+}
+
+
+int Node::depthValue() {
+    if (auto lexp = dynamic_cast<LogicalExpr *>(this)) {
+        return lexp->getOp().equals(OpSymb::logicalAnd) ? 1 : 0;
+    }
+    return 0;
+}
+
+void Node::addParents(std::vector<Node *> c) {
+    std::for_each(c.begin(), c.end(), [&](Node *n) {
+        parents.push_back(n);
+    });
+}
+
+void Node::ensureNonReversedEdge() {
+    if (this->hasReversedEdge)
+        this->swapChildrenParents();
+    this->hasReversedEdge = false;
+}
+
+void Node::ensureReversedEdge() {
+    if (!this->hasReversedEdge)
+        this->swapChildrenParents();
+    this->hasReversedEdge = true;
+}
+

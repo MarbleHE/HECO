@@ -5,6 +5,8 @@
 #include <vector>
 #include <random>
 #include <Ast.h>
+#include <utility>
+#include "Operator.h"
 
 /// This class implements the Cone Rewriting method described in
 /// [Aubry, P. et al.: Faster Homomorphic Encryption Is Not Enough: Improved Heuristic for Multiplicative Depth
@@ -14,7 +16,7 @@ private:
     // ------------------------------------–
     // Internal (non-universal) helper methods
     // ------------------------------------–
-    static Ast &rewriteCones(std::vector<Node *> vector);
+    static Ast &rewriteCones(std::vector<Node *> coneEndNodes);
 
     static bool isCriticalNode(int lMax, Node *n);
 
@@ -38,15 +40,7 @@ private:
 
     static std::vector<Node *> *getCriticalPredecessors(Node *v);
 
-    static int getMultDepthL(Node *v);
-
-    static int getReverseMultDepthR(Node *v);
-
-    static int depthValue(Node *n);
-
     static int computeMinDepth(Node *v);
-
-    static std::vector<Node *> getAnc(Node *n);
 
     // ------------------------------------–
     // Algorithms presented in the paper
@@ -69,8 +63,6 @@ private:
     /// Implements the algorithm that constructs the graph C_{AND} of critical AND nodes [see paragraph 3.2, page 10].
     static std::vector<Node *> getAndCriticalCircuit(std::vector<Node *> delta);
 
-    static std::vector<Node *> getAndCriticalCircuit(const Ast &ast);
-
     /// Implements the cone selection algorithm [see Algorithm 3, page 11]
     static std::vector<Node *> selectCones(std::vector<Node *> cAndCkt);
 
@@ -78,8 +70,11 @@ public:
     /// This is the only entry point that should be used to apply cone rewriting.
     static Ast &applyConeRewriting(Ast &ast);
 
-    /// Returns the depth (L) and reverse depth (R), computed using the internal helper methods.
-    friend std::pair<int, int> getDepthsLR(Node &n);
+    static void printConesAsGraphviz(std::vector<Node *> &nodes);
+
+    static void printAllNodesAsGraphviz(Node *pNode);
+
+    static std::vector<Node *> rewriteMultiInputGate(std::vector<Node *> inputNodes, OpSymb::LogCompOp gateType);
 };
 
 /// Returns a random element from a
