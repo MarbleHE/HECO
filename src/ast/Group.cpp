@@ -21,7 +21,7 @@ Group::Group(AbstractExpr* expr) {
 }
 
 AbstractExpr* Group::getExpr() const {
-  return reinterpret_cast<AbstractExpr*>(getChildAtIndex(0));
+  return reinterpret_cast<AbstractExpr*>(getChildAtIndex(0, true));
 }
 
 Group::~Group() {

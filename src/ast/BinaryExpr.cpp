@@ -24,15 +24,15 @@ BinaryExpr::BinaryExpr() {
 }
 
 AbstractExpr* BinaryExpr::getLeft() const {
-  return reinterpret_cast<AbstractExpr* >(getChildAtIndex(0));
+  return reinterpret_cast<AbstractExpr* >(getChildAtIndex(0, true));
 }
 
 Operator* BinaryExpr::getOp() const {
-  return reinterpret_cast<Operator*>(getChildAtIndex(1));
+  return reinterpret_cast<Operator*>(getChildAtIndex(1, true));
 }
 
 AbstractExpr* BinaryExpr::getRight() const {
-  return reinterpret_cast<AbstractExpr* >(getChildAtIndex(2));
+  return reinterpret_cast<AbstractExpr* >(getChildAtIndex(2, true));
 }
 
 void BinaryExpr::accept(Visitor &v) {

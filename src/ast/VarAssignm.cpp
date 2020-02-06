@@ -24,7 +24,7 @@ const std::string &VarAssignm::getIdentifier() const {
 }
 
 AbstractExpr* VarAssignm::getValue() const {
-  return reinterpret_cast<AbstractExpr*>(getChildAtIndex(0));
+  return reinterpret_cast<AbstractExpr*>(getChildAtIndex(0, true));
 }
 
 std::string VarAssignm::getNodeName() const {

@@ -19,21 +19,12 @@ std::string Node::genUniqueNodeId() {
 Node::Node() = default;
 
 std::string Node::getUniqueNodeId() {
-  if (uniqueNodeId.empty()) {
-    std::string nodeId = genUniqueNodeId();
-    this->uniqueNodeId = nodeId;
-  }
+  if (uniqueNodeId.empty()) this->uniqueNodeId = genUniqueNodeId();
   return uniqueNodeId;
 }
 
 int Node::getAndIncrementNodeId() {
-  int current = Node::getNodeIdCounter();
-  Node::nodeIdCounter += 1;
-  return current;
-}
-
-int Node::getNodeIdCounter() {
-  return nodeIdCounter;
+  return nodeIdCounter++;
 }
 
 std::string Node::getNodeName() const {
@@ -142,6 +133,8 @@ void Node::swapChildrenParents() {
   std::vector<Node*> oldParents = this->parents;
   this->parents = this->children;
   this->children = oldParents;
+  // toggle the isReversed boolean
+  isReversed = !isReversed;
 }
 
 Literal* Node::evaluate(Ast &ast) {
@@ -165,6 +158,7 @@ std::string Node::toString() const {
 }
 
 std::string Node::getDotFormattedString(bool isReversed, const std::string &indentation, bool showMultDepth) {
+
   // depending on whether the graph is reversed we are interested in the parents or children
   auto vec = (isReversed) ? this->getParents() : this->getChildren();
 
@@ -319,20 +313,11 @@ Node* Node::cloneRecursiveDeep() {
 }
 
 bool Node::hasParent(Node* n) {
-  for (auto &p : getParents()) {
-    if (p == n) return true;
-  }
-  return false;
+  return std::any_of(getParents().begin(), getParents().end(), [&n](Node* p) { return (p == n); });
 }
 
-std::vector<Node*> Node::getChildrenNonNull() const {
-  std::vector<Node*> childrenNonNull;
-  for (auto &c : getChildren()) {
-    if (c != nullptr) {
-      childrenNonNull.push_back(c);
-    }
-  }
-  return childrenNonNull;
+int Node::countChildrenNonNull() const {
+  return std::count_if(getChildren().begin(), getChildren().end(), [](Node* n) { return n != nullptr; });
 }
 
 int Node::getMaxNumberChildren() {
@@ -344,8 +329,13 @@ bool Node::supportsCircuitMode() {
 }
 
 Node* Node::getChildAtIndex(int idx) const {
+  return getChildAtIndex(idx, false);
+}
+
+Node* Node::getChildAtIndex(int idx, bool isEdgeDirectionAware) const {
   try {
-    return children.at(idx);
+    if (isEdgeDirectionAware && isReversed) return parents.at(idx);
+    else return children.at(idx);
   } catch (std::out_of_range const &e) {
     return nullptr;
   }

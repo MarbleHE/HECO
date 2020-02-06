@@ -54,9 +54,8 @@ void runInteractiveDemo() {
     int actionNo = 0;
     std::cout << "Please choose what to do with the generated tree: " << std::endl;
     std::cout << "\t1 Print the tree as indented text." << std::endl;
-    std::cout << "\t2 Print the tree as JSON." << std::endl;
-    std::cout << "\t3 Print the tree as pretty-printed JSON." << std::endl;
-    std::cout << "\t4 Perform a simple rewrite operation (A*(B*C)) -> (C*(B*A))." << std::endl;
+    std::cout << "\t2 Print the tree as pretty-printed JSON." << std::endl;
+    std::cout << "\t3 Perform a simple rewrite operation (A*(B*C)) -> (C*(B*A))." << std::endl;
     std::cout << "Your choice [Press 0 to exit]: ";
     std::cin >> actionNo;
 
@@ -71,14 +70,10 @@ void runInteractiveDemo() {
         break;
       }
       case 2: {
-        std::cout << ast.getRootNode() << std::endl;
-        break;
-      }
-      case 3: {
         std::cout << ast.getRootNode()->toJson().dump(2) << std::endl;
         break;
       }
-      case 4: {
+      case 3: {
         MultRewriteVisitor mrv;
         mrv.visit(ast);
         break;

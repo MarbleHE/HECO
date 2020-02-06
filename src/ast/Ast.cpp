@@ -5,10 +5,8 @@
 #include <iostream>
 #include <deque>
 #include <sstream>
-#include <ConeRewriter.h>
 #include <set>
 #include <queue>
-#include <stack>
 #include "Literal.h"
 #include "Variable.h"
 #include "Function.h"
@@ -55,24 +53,19 @@ Literal* Ast::evaluate(std::map<std::string, Literal*> &paramValues, bool printR
 
   // make sure that all parameters specified by the function have a defined value
   for (const auto &fp : func->getParams()) {
-    if (auto var = dynamic_cast<Variable*>(fp.getValue())) {
-      if (!hasVarValue(var)) {
-        throw std::invalid_argument(
-            "AST evaluation requires parameter value for parameter " + var->getIdentifier());
-      }
+    auto var = dynamic_cast<Variable*>(fp.getValue());
+    if (var != nullptr && !hasVarValue(var)) {
+      throw std::invalid_argument(
+          "AST evaluation requires parameter value for parameter " + var->getIdentifier());
     }
   }
 
+  // perform evaluation recursively, starting at the root node
   auto result = getRootNode()->evaluate(*this);
 
-  // print result
-  if (printResult) {
-    if (result == nullptr) {
-      std::cout << "void" << std::endl;
-    } else {
-      std::cout << *result << std::endl;
-    }
-  }
+  // print result if flag is set
+  if (printResult)
+    std::cout << (result == nullptr ? "void" : result->toString()) << std::endl;
 
   return result;
 }
@@ -92,12 +85,9 @@ void Ast::updateVarValue(const std::string &variableIdentifier, Literal* newValu
   variableValuesForEvaluation[variableIdentifier] = newValue;
 }
 
-void Ast::toggleIsReversed() {
-  hasReversedEdges = !hasReversedEdges;
-}
-
 bool Ast::isReversed() const {
-  return hasReversedEdges;
+  auto allNodes = getAllNodes();
+  return std::all_of(allNodes.begin(), allNodes.end(), [](Node* n) { return n->isReversed; });
 }
 
 void Ast::printGraphviz() {
@@ -140,16 +130,14 @@ void Ast::reverseEdges() {
   while (!nodesToCheck.empty()) {
     auto curNode = nodesToCheck.front();
     nodesToCheck.pop();
-    auto nextNodesToAdd = isReversed() ? curNode->getParents() : curNode->getChildren();
-    std::for_each(nextNodesToAdd.begin(), nextNodesToAdd.end(), [&](Node* n) {
-      nodesToCheck.push(n);
-    });
+    auto nextNodesToAdd = curNode->isReversed ? curNode->getParents() : curNode->getChildren();
+    // enqueue nodes to be processed next
+    for (auto &n : nextNodesToAdd) nodesToCheck.push(n);
     curNode->swapChildrenParents();
   }
-  toggleIsReversed();
 }
 
-std::set<Node*> Ast::getAllNodes() {
+std::set<Node*> Ast::getAllNodes() const {
   std::set<Node*> allNodes{getRootNode()};
   std::queue<Node*> nodesToCheck{{getRootNode()}};
   while (!nodesToCheck.empty()) {

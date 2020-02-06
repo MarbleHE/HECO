@@ -23,7 +23,7 @@ class Node {
   std::string uniqueNodeId;
 
   /// This attributes is used to link back to the original Node in an overlay circuit.
-  Node* underlyingNode;
+  Node* underlyingNode{};
 
   /// Generates a new node ID in the form "<NodeTypeName>_nodeIdCounter++" where <NodeTypeName> is the value obtained by
   /// getNodeName() and nodeIdCounter an ongoing counter of created Node objects.
@@ -32,7 +32,12 @@ class Node {
 
   static int getAndIncrementNodeId();
 
-  static int getNodeIdCounter();
+  /// This special variant of getChildAtIndex returns the n-th parent instead of n-th child if isEdgeDirectionAware is
+  /// passed and is true, and the current node has the property isReversed set to True.
+  /// \param idx The position of the child to be retrieved.
+  /// \param isEdgeDirectionAware If the node's status of isReversed should be considered.
+  /// \return A reference to the node at the specified index in the children or parent vector.
+  [[nodiscard]] Node* getChildAtIndex(int idx, bool isEdgeDirectionAware) const;
 
  public:
   Node();
@@ -47,23 +52,33 @@ class Node {
   static void resetNodeIdCounter();
 
   [[nodiscard]] const std::vector<Node*> &getPred() const;
+  [[nodiscard]] const std::vector<Node*> &getParents() const;
+
   [[nodiscard]] const std::vector<Node*> &getSucc() const;
+  [[nodiscard]] const std::vector<Node*> &getChildren() const;
+
+  /// Returns all the ancestor nodes of the current node.
+  /// \return A list of ancestor nodes.
+  std::vector<Node*> getAnc();
 
   // Functions for handling children
   void addChild(Node* child, bool addBackReference = false);
   void addChildBilateral(Node* child);
-  virtual void addChildren(const std::vector<Node*> &childrenToAdd, bool addBackReference = false);
+  void addChildren(const std::vector<Node*> &childrenToAdd, bool addBackReference = false);
   void setChild(std::__wrap_iter<Node* const*> position, Node* value);
   void removeChild(Node* child);
   void removeChildren();
-  [[nodiscard]] const std::vector<Node*> &getChildren() const;
-  [[nodiscard]] std::vector<Node*> getChildrenNonNull() const;
+  [[nodiscard]] int countChildrenNonNull() const;
+
+  /// Returns the child at the given index.
+  /// \param idx The position of the children in the Node::children vector.
+  /// \return The child at the given index of the children vector, or a nullptr if there is no child at this position.
+  [[nodiscard]] Node* getChildAtIndex(int idx) const;
 
   // Functions for handling parents
   void addParent(Node* n);
   void removeParent(Node* node);
   void removeParents();
-  [[nodiscard]] const std::vector<Node*> &getParents() const;
   bool hasParent(Node* n);
 
   static void addParentTo(Node* parentNode, std::vector<Node*> nodesToAddParentTo);
@@ -88,23 +103,36 @@ class Node {
 
   void setUniqueNodeId(const std::string &unique_node_id);
 
-  std::vector<Node*> getAnc();
-
+  /// Determine the value of this node for computing the multiplicative depth and reverse multiplicative depth,
+  /// getMultDepthL() and getReverseMultDepthR(), respectively.
+  /// \return Returns 1 iff this node is a LogicalExpr containing an AND operator, otherwise 0.
   int depthValue();
 
+  /// Calculates the multiplicative depth based on the definition given in
+  /// [Aubry, P. et al.: Faster Homomorphic Encryption Is Not Enough: Improved Heuristic for Multiplicative Depth
+  ///  Minimization of Boolean Circuits. (2019)].
+  /// \return The multiplicative depth of the current node.
   int getMultDepthL();
 
+  /// Calculates the reverse multiplicative depth based on the definition given in
+  /// [Aubry, P. et al.: Faster Homomorphic Encryption Is Not Enough: Improved Heuristic for Multiplicative Depth
+  ///  Minimization of Boolean Circuits. (2019)].
+  /// \return The reverse multiplicative depth of the current node.
   int getReverseMultDepthR();
 
-/// This method should return True iff the class derived from Node class does properly use the child/parent fields as
-/// it would be expected in a circuit.
+  /// This method returns True iff the class derived from the Node class properly makes use of the child/parent fields
+  /// as it would be expected in a circuit.
   virtual bool supportsCircuitMode();
-  Node* getChildAtIndex(int idx) const;
-/// Indicates the number of children that are allowed for a specific node.
-/// For example, a binary expression accepts exactly three attributes and hence also exactly three children:
-/// left operand, right operand, and operator.
-/// \return -1 iff the number of the node's children is unlimited, otherwise an integer number.
+
+  /// Indicates the number of children that are allowed for a specific node.
+  /// For example, a binary expression accepts exactly three attributes and hence also exactly three children:
+  /// left operand, right operand, and operator.
+  /// If the node does not implement support for child/parent relationships, getMaxNumberChildren() return 0.
+  /// \return An integer indicating the number of allowed children for a specific node.
   virtual int getMaxNumberChildren();
+
+  /// Indicates whether the edges of this node are reversed compared to its initial state.
+  bool isReversed{false};
 };
 
 #endif //MASTER_THESIS_CODE_NODE_H

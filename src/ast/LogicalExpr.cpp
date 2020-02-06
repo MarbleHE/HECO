@@ -15,15 +15,15 @@ void LogicalExpr::accept(Visitor &v) {
 }
 
 AbstractExpr* LogicalExpr::getLeft() const {
-  return reinterpret_cast<AbstractExpr* >(getChildAtIndex(0));
+  return reinterpret_cast<AbstractExpr* >(getChildAtIndex(0, true));
 }
 
 Operator* LogicalExpr::getOp() const {
-  return reinterpret_cast<Operator*>(getChildAtIndex(1));
+  return reinterpret_cast<Operator*>(getChildAtIndex(1, true));
 }
 
 AbstractExpr* LogicalExpr::getRight() const {
-  return reinterpret_cast<AbstractExpr* >(getChildAtIndex(2));
+  return reinterpret_cast<AbstractExpr* >(getChildAtIndex(2, true));
 }
 
 std::string LogicalExpr::getNodeName() const {

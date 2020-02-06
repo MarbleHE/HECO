@@ -63,11 +63,11 @@ const std::string &VarDecl::getIdentifier() const {
 }
 
 Datatype* VarDecl::getDatatype() const {
-  return reinterpret_cast<Datatype*>(getChildAtIndex(0));
+  return reinterpret_cast<Datatype*>(getChildAtIndex(0, true));
 }
 
 AbstractExpr* VarDecl::getInitializer() const {
-  return reinterpret_cast<AbstractExpr*>(getChildAtIndex(1));
+  return reinterpret_cast<AbstractExpr*>(getChildAtIndex(1, true));
 }
 
 BinaryExpr* VarDecl::contains(BinaryExpr* bexpTemplate, BinaryExpr* excludedSubtree) {

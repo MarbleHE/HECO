@@ -13,10 +13,6 @@ class Ast {
 
   std::map<std::string, Literal*> variableValuesForEvaluation;
 
-  bool hasReversedEdges{false};
-
-  void toggleIsReversed();
-
  public:
   Ast();
 
@@ -55,7 +51,7 @@ class Ast {
   void reverseEdges();
 
   /// Traverses through the tree in BFS-style and collects all the nodes of the AST.
-  std::set<Node*> getAllNodes();
+  std::set<Node*> getAllNodes() const;
 };
 
 #endif //MASTER_THESIS_CODE_AST_H

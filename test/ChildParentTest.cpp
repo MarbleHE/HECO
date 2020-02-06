@@ -56,7 +56,7 @@ TEST_F(BinaryExprFixture, BinaryExprStandardConstructor) {  /* NOLINT */
 TEST_F(BinaryExprFixture, BinaryExprEmptyConstructor) {  /* NOLINT */
   BinaryExpr binaryExpr;
   ASSERT_EQ(binaryExpr.getChildren().size(), 3);
-  ASSERT_EQ(binaryExpr.getChildrenNonNull().size(), 0);
+  ASSERT_EQ(binaryExpr.countChildrenNonNull(), 0);
   ASSERT_EQ(binaryExpr.getParents().size(), 0);
 }
 
@@ -65,7 +65,7 @@ TEST_F(BinaryExprFixture, BinaryExprOperatorOnlyConstructor) {  /* NOLINT */
 
   // children
   ASSERT_EQ(binaryExpr->getChildren().size(), 3);
-  ASSERT_EQ(binaryExpr->getChildrenNonNull().size(), 1);
+  ASSERT_EQ(binaryExpr->countChildrenNonNull(), 1);
   ASSERT_EQ(binaryExpr->getChildAtIndex(0), nullptr);
   ASSERT_TRUE(reinterpret_cast<Operator*>(binaryExpr->getChildAtIndex(1))->equals(opSymb));
   ASSERT_EQ(binaryExpr->getChildAtIndex(2), nullptr);
@@ -336,7 +336,7 @@ TEST_F(LogicalExprFixture, LogicalExprStandardConstructor) {  /* NOLINT */
 TEST_F(LogicalExprFixture, LogicalExprEmptyConstructor) {  /* NOLINT */
   BinaryExpr logicalExpr;
   ASSERT_EQ(logicalExpr.getChildren().size(), 3);
-  ASSERT_EQ(logicalExpr.getChildrenNonNull().size(), 0);
+  ASSERT_EQ(logicalExpr.countChildrenNonNull(), 0);
   ASSERT_EQ(logicalExpr.getParents().size(), 0);
 }
 
@@ -345,7 +345,7 @@ TEST_F(LogicalExprFixture, LogicalExprOperatorOnlyConstructor) {  /* NOLINT */
 
   // children
   ASSERT_EQ(logicalExpr->getChildren().size(), 3);
-  ASSERT_EQ(logicalExpr->getChildrenNonNull().size(), 1);
+  ASSERT_EQ(logicalExpr->countChildrenNonNull(), 1);
   ASSERT_EQ(logicalExpr->getChildAtIndex(0), nullptr);
   ASSERT_TRUE(reinterpret_cast<Operator*>(logicalExpr->getChildAtIndex(1))->equals(opSymb));
   ASSERT_EQ(logicalExpr->getChildAtIndex(2), nullptr);
@@ -424,7 +424,7 @@ TEST_F(ReturnStatementFixture, ReturnStatementStandardConstructor) {  /* NOLINT 
 TEST_F(ReturnStatementFixture, ReturnStatementEmptyConstructor) {  /* NOLINT */
   Return returnStatement;
   ASSERT_EQ(returnStatement.getChildren().size(), 1);
-  ASSERT_EQ(returnStatement.getChildrenNonNull().size(), 0);
+  ASSERT_EQ(returnStatement.countChildrenNonNull(), 0);
   ASSERT_EQ(returnStatement.getParents().size(), 0);
 }
 
