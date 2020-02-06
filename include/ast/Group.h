@@ -5,9 +5,6 @@
 #include <string>
 
 class Group : public AbstractExpr {
- private:
-  AbstractExpr* expr;
-
  public:
   explicit Group(AbstractExpr* expr);
 
@@ -24,6 +21,11 @@ class Group : public AbstractExpr {
   BinaryExpr* contains(BinaryExpr* bexpTemplate, AbstractExpr* excludedSubtree) override;
 
   Literal* evaluate(Ast &ast) override;
+
+  bool supportsCircuitMode() override;
+
+  int getMaxNumberChildren() override;
+  void setAttributes(AbstractExpr* expression);
 };
 
 #endif //MASTER_THESIS_CODE_GROUP_H

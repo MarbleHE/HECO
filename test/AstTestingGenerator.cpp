@@ -34,8 +34,10 @@ static std::map<int, std::function<void(Ast &)> > call = {
 };
 
 void AstTestingGenerator::generateAst(int id, Ast &ast) {
+  // determine the functions this ID is associated to
   auto it = call.find(id);
   if (it == call.end()) throw std::logic_error("Cannot continue. Invalid id given!");
+  // call the function by passing the AST object to be written into
   it->second(ast);
 }
 
@@ -53,7 +55,7 @@ void AstTestingGenerator::_genAstRewritingOne(Ast &ast) {
   func->setParams(funcParams);
 
   // int prod = [inputA * [inputB * inputC]]
-  func->addStatement(new VarDecl("prod", "int",
+  func->addStatement(new VarDecl("prod", TYPES::INT,
                                  new BinaryExpr(
                                      new Variable("inputA"),
                                      OpSymb::multiplication,
@@ -81,7 +83,7 @@ void AstTestingGenerator::_genAstRewritingTwo(Ast &ast) {
   func->setParams(funcParams);
 
   // int prod = inputA * inputB;
-  func->addStatement(new VarDecl("prod", "int",
+  func->addStatement(new VarDecl("prod", TYPES::INT,
                                  new BinaryExpr(
                                      new Variable("inputA"),
                                      OpSymb::multiplication,
@@ -113,14 +115,14 @@ void AstTestingGenerator::_genAstRewritingThree(Ast &ast) {
   func->setParams(funcParams);
 
   // int prod = inputA * inputB;
-  func->addStatement(new VarDecl("prod", "int",
+  func->addStatement(new VarDecl("prod", TYPES::INT,
                                  new BinaryExpr(
                                      new Variable("inputA"),
                                      OpSymb::multiplication,
                                      new Variable("inputB"))));
 
   // int rInt = rand()
-  func->addStatement(new VarDecl("rInt", "int", new CallExternal("std::rand")));
+  func->addStatement(new VarDecl("rInt", TYPES::INT, new CallExternal("std::rand")));
 
   // prod = prod * inputC
   func->addStatement(
@@ -148,7 +150,7 @@ void AstTestingGenerator::_genAstRewritingFour(Ast &ast) {
   func->setParams(funcParams);
 
   // int prod = inputA * inputB;
-  func->addStatement(new VarDecl("prod", "int",
+  func->addStatement(new VarDecl("prod", TYPES::INT,
                                  new BinaryExpr(
                                      new Variable("inputA"),
                                      OpSymb::multiplication,
@@ -182,7 +184,7 @@ void AstTestingGenerator::_genAstRewritingFive(Ast &ast) {
   func->setParams(funcParams);
 
   // int prod = inputA * inputB;
-  func->addStatement(new VarDecl("prod", "int",
+  func->addStatement(new VarDecl("prod", TYPES::INT,
                                  new BinaryExpr(
                                      new Variable("inputA"),
                                      OpSymb::multiplication,
@@ -214,14 +216,14 @@ void AstTestingGenerator::_genAstRewritingSix(Ast &ast) {
   func->setParams(funcParams);
 
   // int prod = inputA * inputB;
-  func->addStatement(new VarDecl("prod", "int",
+  func->addStatement(new VarDecl("prod", TYPES::INT,
                                  new BinaryExpr(
                                      new Variable("inputA"),
                                      OpSymb::multiplication,
                                      new Variable("inputB"))));
 
   // int prod = inputA * inputB;
-  func->addStatement(new VarDecl("prod2", "int",
+  func->addStatement(new VarDecl("prod2", TYPES::INT,
                                  new BinaryExpr(
                                      new Variable("prod"),
                                      OpSymb::multiplication,
@@ -246,7 +248,7 @@ void AstTestingGenerator::_genAstEvalOne(Ast &ast) {
   func->setParams(funcParams);
 
   // int prod = inputA * inputB * inputC
-  func->addStatement(new VarDecl("prod", "int",
+  func->addStatement(new VarDecl("prod", TYPES::INT,
                                  new BinaryExpr(
                                      new Variable("width"),
                                      OpSymb::multiplication,
@@ -274,7 +276,7 @@ void AstTestingGenerator::_genAstEvalTwo(Ast &ast) {
   func->setParams(funcParams);
 
   // int prod = inputA * inputB;
-  func->addStatement(new VarDecl("prod", "int",
+  func->addStatement(new VarDecl("prod", TYPES::INT,
                                  new BinaryExpr(
                                      new Variable("inputA"),
                                      OpSymb::multiplication,
@@ -360,7 +362,7 @@ void AstTestingGenerator::_genAstEvalFive(Ast &ast) {
 
   // bool b = encryptedA < 2;
   func->addStatement(
-      new VarDecl("b", "bool",
+      new VarDecl("b", TYPES::BOOL,
                   new LogicalExpr(
                       new Variable("encryptedA"),
                       OpSymb::LogCompOp::smaller,
@@ -456,7 +458,7 @@ void AstTestingGenerator::_genAstPrintVisitorOne(Ast &ast) {
   func->addStatement(new VarDecl("a", 4));
 
   // int k;
-  func->addStatement(new VarDecl("k", "int", nullptr));
+  func->addStatement(new VarDecl("k", TYPES::INT, nullptr));
 
   // if ( x > 32 ) { k = x * a; } else { k = (x * a) + 42; }
   func->addStatement(new If(
@@ -493,7 +495,7 @@ void AstTestingGenerator::_genAstPrintVisitorTwo(Ast &ast) {
 
   // int randInt = rand() % 42;
   func->addStatement(
-      new VarDecl("randInt", "int",
+      new VarDecl("randInt", TYPES::INT,
                   new BinaryExpr(
                       new CallExternal("std::rand"),
                       OpSymb::BinaryOp::modulo,
@@ -501,7 +503,7 @@ void AstTestingGenerator::_genAstPrintVisitorTwo(Ast &ast) {
 
   // bool b = encryptedA < 2;
   func->addStatement(
-      new VarDecl("b", "bool",
+      new VarDecl("b", TYPES::BOOL,
                   new LogicalExpr(
                       new Variable("encryptedA"),
                       OpSymb::LogCompOp::smaller,
@@ -540,7 +542,7 @@ void AstTestingGenerator::_genAstPrintVisitorTwo(Ast &ast) {
                   new LiteralInt(1)))})));
 
   // String outStr = "Computation finished!";
-  func->addStatement(new VarDecl("outStr", "string", new LiteralString("Computation finished!")));
+  func->addStatement(new VarDecl("outStr", "Computation finished!"));
 
   // printf(outStr);
   func->addStatement(
@@ -563,7 +565,7 @@ void AstTestingGenerator::_genAstMultDepthOne(Ast &ast) {
   func->setParams(funcParams);
 
   // int prod = inputA * inputB;
-  func->addStatement(new VarDecl("prod", "int",
+  func->addStatement(new VarDecl("prod", TYPES::INT,
                                  new BinaryExpr(
                                      new Variable("inputA"),
                                      OpSymb::multiplication,
@@ -599,13 +601,13 @@ void AstTestingGenerator::_genAstMultDepthTwo(Ast &ast) {
   // int stdB = 2 * stdA;
   func->addStatement(
       new VarDecl("stdB",
-                  "int",
+                  TYPES::INT,
                   new BinaryExpr(new LiteralInt(2),
                                  OpSymb::multiplication,
                                  new Variable("stdA"))));
 
   // int prod = [base * stdA] + [base * stdB];
-  func->addStatement(new VarDecl("prod", "int",
+  func->addStatement(new VarDecl("prod", TYPES::INT,
                                  new BinaryExpr(
                                      new BinaryExpr(
                                          new Variable("base"),
@@ -619,7 +621,7 @@ void AstTestingGenerator::_genAstMultDepthTwo(Ast &ast) {
 
   // int condVal = [22 * defaultC] + [base * useBase];
   func->addStatement(
-      new VarDecl("condVal", "int",
+      new VarDecl("condVal", TYPES::INT,
                   new BinaryExpr(
                       new BinaryExpr(
                           new LiteralInt(22),

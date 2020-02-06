@@ -36,12 +36,14 @@ class LiteralInt : public Literal {
   void addLiteralValue(std::string identifier, std::map<std::string, Literal*> &paramsMap) override;
 
   void setRandomValue(RandLiteralGen &rlg) override;
+
   void setValue(int newValue);
 
-    std::string toString() const override;
+  std::string toString() const override;
 
  protected:
   void print(std::ostream &str) const override;
+  bool supportsCircuitMode() override;
 };
 
 #endif //MASTER_THESIS_CODE_LITERALINT_H

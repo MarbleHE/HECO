@@ -10,11 +10,11 @@ void MultRewriteVisitor::visit(Ast &elem) {
 
 void MultRewriteVisitor::visit(BinaryExpr &elem) {
   // If current BinaryExpr is a multiplication
-  if (elem.getOp().equals(OpSymb::BinaryOp::multiplication)) {
+  if (elem.getOp()->equals(OpSymb::BinaryOp::multiplication)) {
     // A. For case "int result = (A * (B * C))" where multiple BinaryExpr are in the same statement
     if (auto lStat = curScope->getLastStatement()) {
       // If the statement contains another (higher tree level) BinaryExpr (exclude subtree of cur. BinaryExpr) ...
-      if (BinaryExpr *lastStat = lStat->contains(new BinaryExpr(OpSymb::multiplication), &elem)) {
+      if (BinaryExpr* lastStat = lStat->contains(new BinaryExpr(OpSymb::multiplication), &elem)) {
         // ... then swap previousBexpLeftOp with currentBexpRightOp
         BinaryExpr::swapOperandsLeftAWithRightB(lastStat, &elem);
         numChanges++;
@@ -26,7 +26,7 @@ void MultRewriteVisitor::visit(BinaryExpr &elem) {
     // (-> Check penultimate statement b/c the statement this BinaryExpr (elem) belongs to was already added)
     if (auto puStat = curScope->getNthLastStatement(2)) {
       // If previous statement in scope contains a BinaryExpr multiplication...
-      if (BinaryExpr *lastStat = puStat->contains(new BinaryExpr(OpSymb::multiplication), nullptr)) {
+      if (BinaryExpr* lastStat = puStat->contains(new BinaryExpr(OpSymb::multiplication), nullptr)) {
         // Retrieve variable identifier from last statement (VarDecl or VarAssignm)
         std::string identifier = puStat->getVarTargetIdentifier();
         // Check that left operand reuses variable of previous statement in its left branch
@@ -116,9 +116,11 @@ void MultRewriteVisitor::visit(Variable &elem) {
 void MultRewriteVisitor::visit(While &elem) {
   Visitor::visit(elem);
 }
+
 int MultRewriteVisitor::getNumChanges() const {
   return numChanges;
 }
+
 bool MultRewriteVisitor::changedAst() const {
   return numChanges != 0;
 }

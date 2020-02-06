@@ -41,7 +41,8 @@ class LiteralFloat : public Literal {
   void setRandomValue(RandLiteralGen &rlg) override;
   void setValue(float val);
 
-    std::string toString() const override;
+  std::string toString() const override;
+  bool supportsCircuitMode() override;
 };
 
 #endif //MASTER_THESIS_CODE_LITERALFLOAT_H

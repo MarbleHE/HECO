@@ -12,37 +12,42 @@
 json VarDecl::toJson() const {
   json j = {{"type", getNodeName()},
             {"identifier", identifier},
-            {"datatype", datatype->toString()}};
-  if (this->initializer != nullptr) {
-    j["initializer"] = this->initializer->toJson();
+            {"datatype", getDatatype() ? getDatatype()->toString() : ""}};
+  if (getInitializer() != nullptr) {
+    j["initializer"] = getInitializer()->toJson();
   }
   return j;
 }
 
-VarDecl::VarDecl(std::string name, const std::string &datatype, AbstractExpr* initializer)
-    : identifier(std::move(std::move(name))), initializer(initializer) {
-  this->datatype = new Datatype(datatype);
+VarDecl::VarDecl(std::string name, TYPES datatype, AbstractExpr* initializer) {
+  setAttributes(std::move(name), new Datatype(datatype), initializer);
 }
 
-VarDecl::VarDecl(std::string name, std::string value) : identifier(std::move(std::move(name))) {
-  this->initializer = nullptr;
-  this->datatype = new Datatype(TYPES::STRING);
-  this->initializer = new LiteralString(std::move(value));
+VarDecl::VarDecl(std::string name, std::string valueAssignedTo) {
+  setAttributes(std::move(name), new Datatype(TYPES::STRING), new LiteralString(std::move(valueAssignedTo)));
 }
 
-VarDecl::VarDecl(std::string name, int value) : identifier(std::move(std::move(name))) {
-  this->datatype = new Datatype(TYPES::INT);
-  this->initializer = new LiteralInt(value);
+VarDecl::VarDecl(std::string name, int valueAssignedTo) {
+  setAttributes(std::move(name), new Datatype(TYPES::INT), new LiteralInt(valueAssignedTo));
 }
 
-VarDecl::VarDecl(std::string name, float value) : identifier(std::move(std::move(name))) {
-  this->datatype = new Datatype(TYPES::INT);
-  this->initializer = new LiteralFloat(value);
+VarDecl::VarDecl(std::string name, float valueAssignedTo) {
+  setAttributes(std::move(name), new Datatype(TYPES::FLOAT), new LiteralFloat(valueAssignedTo));
 }
 
-VarDecl::VarDecl(std::string name, bool value) : identifier(std::move(std::move(name))) {
-  this->datatype = new Datatype(TYPES::INT);
-  this->initializer = new LiteralBool(value);
+VarDecl::VarDecl(std::string name, bool valueAssignedTo) {
+  setAttributes(std::move(name), new Datatype(TYPES::BOOL), new LiteralBool(valueAssignedTo));
+}
+
+VarDecl::VarDecl(std::string name, const char* valueAssignedTo) : VarDecl(name, std::string(valueAssignedTo)) {}
+
+void VarDecl::setAttributes(std::string varIdentifier, Datatype* varDatatype, AbstractExpr* varValue) {
+  // handle primitive attributes
+  this->identifier = std::move(varIdentifier);
+  // handle attributes that are itself nodes
+  removeChildren();
+  addChildren({varDatatype, varValue});
+  Node::addParentTo(this, {varDatatype, varValue});
 }
 
 void VarDecl::accept(Visitor &v) {
@@ -57,8 +62,12 @@ const std::string &VarDecl::getIdentifier() const {
   return identifier;
 }
 
+Datatype* VarDecl::getDatatype() const {
+  return reinterpret_cast<Datatype*>(getChildAtIndex(0));
+}
+
 AbstractExpr* VarDecl::getInitializer() const {
-  return initializer;
+  return reinterpret_cast<AbstractExpr*>(getChildAtIndex(1));
 }
 
 BinaryExpr* VarDecl::contains(BinaryExpr* bexpTemplate, BinaryExpr* excludedSubtree) {
@@ -66,7 +75,7 @@ BinaryExpr* VarDecl::contains(BinaryExpr* bexpTemplate, BinaryExpr* excludedSubt
 }
 
 VarDecl::~VarDecl() {
-  delete initializer;
+  for (auto &c : getChildren()) delete c;
 }
 
 std::string VarDecl::getVarTargetIdentifier() {
@@ -93,6 +102,11 @@ Literal* VarDecl::evaluate(Ast &ast) {
   }
 }
 
-Datatype* VarDecl::getDatatype() const {
-  return datatype;
+bool VarDecl::supportsCircuitMode() {
+  return true;
 }
+
+int VarDecl::getMaxNumberChildren() {
+  return 2;
+}
+

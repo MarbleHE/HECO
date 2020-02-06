@@ -12,69 +12,65 @@
 /// [Aubry, P. et al.: Faster Homomorphic Encryption Is Not Enough: Improved Heuristic for Multiplicative Depth
 /// Minimization of Boolean Circuits. (2019)].
 class ConeRewriter {
-private:
-    // ------------------------------------–
-    // Internal (non-universal) helper methods
-    // ------------------------------------–
-    static Ast &rewriteCones(std::vector<Node *> coneEndNodes);
+ private:
+  // ------------------------------------–
+  // Internal (non-universal) helper methods
+  // ------------------------------------–
+  static void rewriteCones(Ast &ast, const std::vector<Node*> &coneEndNodes);
 
-    static bool isCriticalNode(int lMax, Node *n);
+  static bool isCriticalNode(int lMax, Node* n);
 
-    static int getMaxMultDepth(const Ast &ast);
+  static int getMaxMultDepth(const Ast &ast);
 
-    static Node *getNonCriticalLeafNode(Ast &ast);
+  static Node* getNonCriticalLeafNode(Ast &ast);
 
-    static void addElements(std::vector<Node *> &result, std::vector<Node *> newElements);
+  static void addElements(std::vector<Node*> &result, std::vector<Node*> newElements);
 
-    static void flattenVectors(std::vector<Node *> &resultVector, std::vector<std::vector<Node *>> vectorOfVectors);
+  static void flattenVectors(std::vector<Node*> &resultVector, std::vector<std::vector<Node*>> vectorOfVectors);
 
-    static void reverseEdges(Ast &ast);
+  static void reverseEdges(const std::vector<Node*> &nodes);
 
-    static void reverseEdges(const std::vector<Node *> &nodes);
+  static std::vector<Node*> computeReducibleCones(Ast &ast);
 
-    static void validateCircuit(Ast &ast);
+  static std::vector<Node*> sortTopologically(const std::vector<Node*> &nodes);
 
-    static std::vector<Node *> computeReducibleCones(Ast &ast);
+  static std::vector<Node*>* getCriticalPredecessors(Node* v);
 
-    static std::vector<Node *> sortTopologically(const std::vector<Node *> &nodes);
+  static int computeMinDepth(Node* v);
 
-    static std::vector<Node *> *getCriticalPredecessors(Node *v);
+  // ------------------------------------–
+  // Algorithms presented in the paper
+  // ------------------------------------–
+  /// Implements the recursive cone construction algorithm [see Algorithm 1, page 8]
+  /// \param v The starting node for the cone construction procedure.
+  /// \param minDepth The minimal multiplicative depth to which cone search will be performed.
+  /// \return The cone to be rewritten, or an empty set if the cone ending at v cannot be reduced.
+  static std::vector<Node*> getReducibleCones(Node* v, int minDepth);
 
-    static int computeMinDepth(Node *v);
+  static std::vector<Node*> getReducibleCones(Ast &ast);
 
-    // ------------------------------------–
-    // Algorithms presented in the paper
-    // ------------------------------------–
-    /// Implements the recursive cone construction algorithm [see Algorithm 1, page 8]
-    /// \param v The starting node for the cone construction procedure.
-    /// \param minDepth The minimal multiplicative depth to which cone search will be performed.
-    /// \return The cone to be rewritten, or an empty set if the cone ending at v cannot be reduced.
-    static std::vector<Node *> getReducibleCones(Node *v, int minDepth);
+  /// Calls and prints the output of getReducibleCones for each node in the given Ast
+  static void getReducibleConesForEveryPossibleStartingNode(Ast &ast);
 
-    static std::vector<Node *> getReducibleCones(Ast &ast);
+  /// Implements the multiplicative depth minimization heuristic [see Algorithm 2, page 10]
 
-    /// Calls and prints the output of getReducibleCones for each node in the given Ast
-    static void getReducibleConesForEveryPossibleStartingNode(Ast &ast);
+  static Ast &applyMinMultDepthHeuristic(Ast &ast);
 
-    /// Implements the multiplicative depth minimization heuristic [see Algorithm 2, page 10]
+  /// Implements the algorithm that constructs the graph C_{AND} of critical AND nodes [see paragraph 3.2, page 10].
+  static std::vector<Node*> getAndCriticalCircuit(std::vector<Node*> delta);
 
-    static Ast &applyMinMultDepthHeuristic(Ast &ast);
+  /// Implements the cone selection algorithm [see Algorithm 3, page 11]
+  static std::vector<Node*> selectCones(std::vector<Node*> cAndCkt);
 
-    /// Implements the algorithm that constructs the graph C_{AND} of critical AND nodes [see paragraph 3.2, page 10].
-    static std::vector<Node *> getAndCriticalCircuit(std::vector<Node *> delta);
+ public:
+  /// This is the only entry point that should be used to apply cone rewriting.
+  static Ast &applyConeRewriting(Ast &ast);
 
-    /// Implements the cone selection algorithm [see Algorithm 3, page 11]
-    static std::vector<Node *> selectCones(std::vector<Node *> cAndCkt);
+  static void printConesAsGraphviz(std::vector<Node*> &nodes);
 
-public:
-    /// This is the only entry point that should be used to apply cone rewriting.
-    static Ast &applyConeRewriting(Ast &ast);
+  static void printAllNodesAsGraphviz(Node* pNode);
 
-    static void printConesAsGraphviz(std::vector<Node *> &nodes);
-
-    static void printAllNodesAsGraphviz(Node *pNode);
-
-    static std::vector<Node *> rewriteMultiInputGate(std::vector<Node *> inputNodes, OpSymb::LogCompOp gateType);
+  static std::vector<Node*> rewriteMultiInputGate(std::vector<Node*> inputNodes, OpSymb::LogCompOp gateType);
 };
 
 /// Returns a random element from a

@@ -49,13 +49,17 @@ void LiteralBool::addLiteralValue(std::string identifier, std::map<std::string, 
 }
 
 void LiteralBool::setValue(bool newValue) {
-    this->value = newValue;
+  this->value = newValue;
 }
 
 void LiteralBool::setRandomValue(RandLiteralGen &rlg) {
-    setValue(rlg.getRandomBool());
+  setValue(rlg.getRandomBool());
 }
 
 std::string LiteralBool::toString() const {
-    return this->getTextValue();
+  return this->getTextValue();
+}
+
+bool LiteralBool::supportsCircuitMode() {
+  return true;
 }

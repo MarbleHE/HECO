@@ -7,8 +7,8 @@
 
 class UnaryExpr : public AbstractExpr {
  private:
-  Operator* op;
-  AbstractExpr* right;
+//  Operator* op;
+//  AbstractExpr* right;
 
  public:
   UnaryExpr(OpSymb::UnaryOp op, AbstractExpr* right);
@@ -17,7 +17,7 @@ class UnaryExpr : public AbstractExpr {
 
   void accept(Visitor &v) override;
 
-  [[nodiscard]] Operator &getOp() const;
+  [[nodiscard]] Operator* getOp() const;
 
   [[nodiscard]] AbstractExpr* getRight() const;
 
@@ -26,6 +26,10 @@ class UnaryExpr : public AbstractExpr {
   ~UnaryExpr() override;
 
   Literal* evaluate(Ast &ast) override;
+ protected:
+  bool supportsCircuitMode() override;
+  int getMaxNumberChildren() override;
+  void setAttributes(OpSymb::UnaryOp op, AbstractExpr* expr);
 };
 
 #endif //MASTER_THESIS_CODE_UNARYEXPR_H

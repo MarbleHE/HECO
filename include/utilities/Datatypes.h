@@ -8,13 +8,15 @@ enum class TYPES {
   INT, FLOAT, STRING, BOOL
 };
 
-class Datatype {
+class Datatype : public Node {
  public:
   TYPES val;
   bool isEncrypted = false;
 
   explicit Datatype(TYPES di) : val(di) {}
+
   explicit Datatype(TYPES di, bool isEncrypted) : val(di), isEncrypted(isEncrypted) {}
+
   explicit Datatype(std::string type) {
     static const std::map<std::string, TYPES> string_to_types = {
         {"int", TYPES::INT},
@@ -26,7 +28,7 @@ class Datatype {
     val = result->second;
   }
 
-  std::string enum_to_string(const TYPES identifiers) const {
+  static std::string enum_to_string(const TYPES identifiers) {
     static const std::map<TYPES, std::string> types_to_string = {
         {TYPES::INT, "int"},
         {TYPES::FLOAT, "float"},

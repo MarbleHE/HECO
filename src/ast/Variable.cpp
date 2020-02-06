@@ -43,17 +43,18 @@ bool Variable::isEqual(AbstractExpr* other) {
   return false;
 }
 
-Literal *Variable::evaluate(Ast &ast) {
-    return ast.getVarValue(this->getIdentifier());
+Literal* Variable::evaluate(Ast &ast) {
+  return ast.getVarValue(this->getIdentifier());
 }
 
 std::vector<std::string> Variable::getVariableIdentifiers() {
-    return {{this->getIdentifier()}};
+  return {{this->getIdentifier()}};
 }
 
 std::string Variable::toString() const {
-    return this->getIdentifier();
+  return this->getIdentifier();
 }
 
-
-
+bool Variable::supportsCircuitMode() {
+  return true;
+}

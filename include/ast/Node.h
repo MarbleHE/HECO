@@ -1,7 +1,6 @@
 #ifndef MASTER_THESIS_CODE_NODE_H
 #define MASTER_THESIS_CODE_NODE_H
 
-#include <string>
 #include <vector>
 #include <nlohmann/json.hpp>
 #include "../include/visitor/Visitor.h"
@@ -13,103 +12,99 @@ class Literal;
 class Ast;
 
 class Node {
-private:
-    std::vector<Node *> children{};
+ protected:
+  std::vector<Node*> children{};
 
-    std::vector<Node *> parents{};
+  std::vector<Node*> parents{};
 
-    static int nodeIdCounter;
+  static int nodeIdCounter;
 
-    std::string uniqueNodeId;
+  /// An identifier that is unique among all nodes during runtime.
+  std::string uniqueNodeId;
 
-    /// This attributes is used to link back to the original Node in an overlay circuit.
-    Node *underlyingNode;
+  /// This attributes is used to link back to the original Node in an overlay circuit.
+  Node* underlyingNode;
 
-    bool hasReversedEdge = false;
+  /// Generates a new node ID in the form "<NodeTypeName>_nodeIdCounter++" where <NodeTypeName> is the value obtained by
+  /// getNodeName() and nodeIdCounter an ongoing counter of created Node objects.
+  /// \return An unique node ID to be used as uniqueNodeId for the current node.
+  std::string genUniqueNodeId();
 
-private:
+  static int getAndIncrementNodeId();
 
-    std::string genUniqueNodeId();
+  static int getNodeIdCounter();
 
-    static int getAndIncrementNodeId();
+ public:
+  Node();
 
-    static int getNodeIdCounter();
+  [[nodiscard]] Node* getUnderlyingNode() const;
+  void setUnderlyingNode(Node* uNode);
 
-public:
+  [[nodiscard]] virtual std::string getNodeName() const;
 
-    Node();
+  std::string getUniqueNodeId();
 
-    Node *getUnderlyingNode() const;
+  static void resetNodeIdCounter();
 
-    void setUnderlyingNode(Node *uNode);
+  [[nodiscard]] const std::vector<Node*> &getPred() const;
+  [[nodiscard]] const std::vector<Node*> &getSucc() const;
 
-    [[nodiscard]] virtual std::string getNodeName() const;
+  // Functions for handling children
+  void addChild(Node* child, bool addBackReference = false);
+  void addChildBilateral(Node* child);
+  virtual void addChildren(const std::vector<Node*> &childrenToAdd, bool addBackReference = false);
+  void setChild(std::__wrap_iter<Node* const*> position, Node* value);
+  void removeChild(Node* child);
+  void removeChildren();
+  [[nodiscard]] const std::vector<Node*> &getChildren() const;
+  [[nodiscard]] std::vector<Node*> getChildrenNonNull() const;
 
-    std::string getUniqueNodeId();
+  // Functions for handling parents
+  void addParent(Node* n);
+  void removeParent(Node* node);
+  void removeParents();
+  [[nodiscard]] const std::vector<Node*> &getParents() const;
+  bool hasParent(Node* n);
 
-    static void resetNodeIdCounter();
+  static void addParentTo(Node* parentNode, std::vector<Node*> nodesToAddParentTo);
 
-    [[nodiscard]] const std::vector<Node *> &getChildren() const;
+  void swapChildrenParents();
 
-    void addChild(Node *child);
+  virtual Literal* evaluate(Ast &ast);
 
-    [[nodiscard]] const std::vector<Node *> &getParents() const;
+  virtual void accept(Visitor &v);
 
-    [[nodiscard]] const std::vector<Node *> &getPred() const;
+  [[nodiscard]] virtual json toJson() const;
 
-    [[nodiscard]] const std::vector<Node *> &getSucc() const;
+  [[nodiscard]] virtual std::string toString() const;
 
-    void removeChild(Node *child);
+  friend std::ostream &operator<<(std::ostream &os, const std::vector<Node*> &v);
 
-    void removeChildren();
+  std::string getDotFormattedString(bool isReversed, const std::string &indentation, bool showMultDepth);
 
-    void removeParent(Node *node);
+  [[nodiscard]] virtual Node* clone();
 
-    void removeParents();
+  [[nodiscard]] virtual Node* cloneRecursiveDeep();
 
-    void addChildren(std::vector<Node *> c);
+  void setUniqueNodeId(const std::string &unique_node_id);
 
-    void addParents(std::vector<Node *> c);
+  std::vector<Node*> getAnc();
 
+  int depthValue();
 
-    static void addParent(Node *parentNode, std::vector<Node *> nodesToAddParentTo);
+  int getMultDepthL();
 
-    void addParent(Node *n);
+  int getReverseMultDepthR();
 
-    void swapChildrenParents();
-
-    virtual Literal *evaluate(Ast &ast);
-
-    virtual void accept(Visitor &v);
-
-    [[nodiscard]] virtual json toJson() const;
-
-    [[nodiscard]] virtual std::string toString() const;
-
-    friend std::ostream &operator<<(std::ostream &os, const std::vector<Node *> &v);
-
-    std::string
-    getDotFormattedString(bool isReversed, const std::string &indentation, bool showMultDepth);
-
-    [[nodiscard]] virtual Node *clone();
-
-    void setUniqueNodeId(const std::string &unique_node_id);
-
-    static void printAncestorsDescendants(std::vector<Node *> nodes);
-
-    void printAncestorsDescendants(Node *n);
-
-    std::vector<Node *> getAnc();
-
-    int depthValue();
-
-    int getMultDepthL();
-
-    int getReverseMultDepthR();
-
-    void ensureNonReversedEdge();
-
-    void ensureReversedEdge();
+/// This method should return True iff the class derived from Node class does properly use the child/parent fields as
+/// it would be expected in a circuit.
+  virtual bool supportsCircuitMode();
+  Node* getChildAtIndex(int idx) const;
+/// Indicates the number of children that are allowed for a specific node.
+/// For example, a binary expression accepts exactly three attributes and hence also exactly three children:
+/// left operand, right operand, and operator.
+/// \return -1 iff the number of the node's children is unlimited, otherwise an integer number.
+  virtual int getMaxNumberChildren();
 };
 
 #endif //MASTER_THESIS_CODE_NODE_H

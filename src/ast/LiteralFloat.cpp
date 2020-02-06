@@ -53,17 +53,21 @@ bool LiteralFloat::operator!=(const LiteralFloat &rhs) const {
 }
 
 void LiteralFloat::addLiteralValue(std::string identifier, std::map<std::string, Literal*> &paramsMap) {
-    paramsMap.emplace(identifier, this);
+  paramsMap.emplace(identifier, this);
 }
 
 void LiteralFloat::setValue(float newValue) {
-    this->value = newValue;
+  this->value = newValue;
 }
 
 void LiteralFloat::setRandomValue(RandLiteralGen &rlg) {
-    setValue(rlg.getRandomFloat());
+  setValue(rlg.getRandomFloat());
 }
 
 std::string LiteralFloat::toString() const {
-    return std::to_string(this->getValue());
+  return std::to_string(this->getValue());
+}
+
+bool LiteralFloat::supportsCircuitMode() {
+  return true;
 }

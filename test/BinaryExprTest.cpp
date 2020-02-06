@@ -15,7 +15,7 @@ TEST(BinaryExprTests, bexp3Add11) { /* NOLINT */
   auto* b = new BinaryExpr(valLhs, OpSymb::BinaryOp::addition, valRhs);
   EXPECT_EQ(getLiteralIntValue(b->getLeft()), valLhs);
   EXPECT_EQ(getLiteralIntValue(b->getRight()), valRhs);
-  EXPECT_EQ(b->getOp().getOperatorString(), "add");
+  EXPECT_EQ(b->getOp()->getOperatorString(), "add");
 }
 
 TEST(BinaryExprTests, bexp2Mult9Add3) { /* NOLINT */
@@ -24,12 +24,12 @@ TEST(BinaryExprTests, bexp2Mult9Add3) { /* NOLINT */
                            new BinaryExpr(valMid, OpSymb::BinaryOp::addition, valRight));
   // lhs: outer BExp
   EXPECT_EQ(getLiteralIntValue(b->getLeft()), valLeft);
-  EXPECT_EQ(b->getOp().getOperatorString(), OpSymb::getTextRepr(OpSymb::BinaryOp::multiplication));
+  EXPECT_EQ(b->getOp()->getOperatorString(), OpSymb::getTextRepr(OpSymb::BinaryOp::multiplication));
 
   // rhs: inner Bexp
   auto* r = dynamic_cast<BinaryExpr*>(b->getRight());
   EXPECT_EQ(getLiteralIntValue(r->getLeft()), valMid);
   EXPECT_EQ(getLiteralIntValue(r->getRight()), valRight);
-  EXPECT_EQ(r->getOp().getOperatorString(), OpSymb::getTextRepr(OpSymb::BinaryOp::addition));
+  EXPECT_EQ(r->getOp()->getOperatorString(), OpSymb::getTextRepr(OpSymb::BinaryOp::addition));
 }
 

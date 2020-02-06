@@ -13,7 +13,7 @@ TEST(MultDepthVisitorTests, SingleStatementMultiplication) { // NOLINT
   Ast ast;
   // void f() { int abc = 22 * 32; }
   auto* f = new Function("f");
-  f->addStatement(new VarDecl("abc", "int",
+  f->addStatement(new VarDecl("abc", TYPES::INT,
                               new BinaryExpr(
                                   new LiteralInt(22),
                                   OpSymb::multiplication,
@@ -33,7 +33,7 @@ TEST(MultDepthVisitorTests, NestedMultiplication) { // NOLINT
   // void f() { int abc = 22 * (32 * 53); }
   auto* f = new Function("f");
   f->addStatement(new VarDecl("abc",
-                              "int",
+                              TYPES::INT,
                               new BinaryExpr(
                                   new LiteralInt(22),
                                   OpSymb::multiplication,
@@ -59,13 +59,13 @@ TEST(MultDepthVisitorTests, MultipleStatementMultiplication) { // NOLINT
   ast.setRootNode(f);
   f->addParameter(new FunctionParameter("int", new Variable("num")));
 
-  f->addStatement(new VarDecl("alpha", "int", new BinaryExpr(
+  f->addStatement(new VarDecl("alpha", TYPES::INT, new BinaryExpr(
       new LiteralInt(32),
       OpSymb::multiplication,
       new Variable("num"))));
 
   f->addStatement(new VarDecl("beta",
-                              "int",
+                              TYPES::INT,
                               new BinaryExpr(
                                   new Variable("alpha"),
                                   OpSymb::multiplication,
@@ -83,7 +83,7 @@ TEST(MultDepthVisitorTests, SingleStatementLogicalAnd) { // NOLINT
   Ast ast;
   // void f() { int abc = 22 * 32; }
   auto* f = new Function("f");
-  f->addStatement(new VarDecl("abc", "int",
+  f->addStatement(new VarDecl("abc", TYPES::INT,
                               new LogicalExpr(
                                   new LiteralBool(true),
                                   OpSymb::logicalAnd,
@@ -103,7 +103,7 @@ TEST(MultDepthVisitorTests, NestedStatementLogicalAnd) { // NOLINT
   // void f() { int abc = 22 * (32 * 53); }
   auto* f = new Function("f");
   f->addStatement(new VarDecl("abc",
-                              "bool",
+                              TYPES::BOOL,
                               new LogicalExpr(
                                   new LiteralBool(false),
                                   OpSymb::logicalAnd,
@@ -129,13 +129,13 @@ TEST(MultDepthVisitorTests, MultipleStatementsLogicalAnd) { // NOLINT
   ast.setRootNode(f);
   f->addParameter(new FunctionParameter("int", new Variable("num")));
 
-  f->addStatement(new VarDecl("alpha", "bool",
+  f->addStatement(new VarDecl("alpha", TYPES::BOOL,
                               new LogicalExpr(
                                   new LiteralBool(true),
                                   OpSymb::logicalAnd,
                                   new LiteralBool(false))));
 
-  f->addStatement(new VarDecl("beta", "bool",
+  f->addStatement(new VarDecl("beta", TYPES::BOOL,
                               new LogicalExpr(
                                   new Variable("alpha"),
                                   OpSymb::logicalAnd,

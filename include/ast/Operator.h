@@ -58,34 +58,35 @@ class OpSymb {
 
 class Operator : public Node {
  private:
-    std::string operatorString;
-    std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp> operatorSymbol;
+  std::string operatorString;
+  std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp> operatorSymbol;
 
-public:
-    explicit Operator(OpSymb::LogCompOp op);
+ public:
+  explicit Operator(OpSymb::LogCompOp op);
 
-    explicit Operator(OpSymb::BinaryOp op);
+  explicit Operator(OpSymb::BinaryOp op);
 
-    explicit Operator(OpSymb::UnaryOp op);
+  explicit Operator(OpSymb::UnaryOp op);
 
-    explicit Operator(std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp> op);
+  explicit Operator(std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp> op);
 
-    [[nodiscard]] const std::string &getOperatorString() const;
+  [[nodiscard]] const std::string &getOperatorString() const;
 
-    void accept(Visitor &v) override;
+  [[nodiscard]] const std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp> &getOperatorSymbol() const;
 
-    [[nodiscard]] std::string getNodeName() const override;
+  void accept(Visitor &v) override;
 
-    bool isUndefined();
+  [[nodiscard]] std::string getNodeName() const override;
 
-    bool operator==(const Operator &rhs) const;
+  bool isUndefined();
+
+  bool operator==(const Operator &rhs) const;
 
   bool operator!=(const Operator &rhs) const;
 
   [[nodiscard]] bool equals(std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp> op) const;
 
   Literal* applyOperator(Literal* lhs, Literal* rhs);
-
   Literal* applyOperator(Literal* rhs);
 
   template<typename A>
@@ -101,28 +102,19 @@ public:
   Literal* applyOperator(LiteralInt* lhs, LiteralString* rhs);
   Literal* applyOperator(LiteralString* lhs, LiteralInt* rhs);
   Literal* applyOperator(LiteralInt* rhs);
+  Literal* applyOperator(LiteralBool* rhs);
+  Literal* applyOperator(LiteralString* rhs);
+  Literal* applyOperator(LiteralFloat* lhs, LiteralFloat* rhs);
+  Literal* applyOperator(LiteralFloat* lhs, LiteralInt* rhs);
+  Literal* applyOperator(LiteralInt* lhs, LiteralFloat* rhs);
+  Literal* applyOperator(LiteralFloat* lhs, LiteralBool* rhs);
+  Literal* applyOperator(LiteralBool* lhs, LiteralFloat* rhs);
+  Literal* applyOperator(LiteralFloat* lhs, LiteralString* rhs);
+  Literal* applyOperator(LiteralString* lhs, LiteralFloat* rhs);
+  Literal* applyOperator(LiteralFloat* rhs);
 
-    Literal *applyOperator(LiteralBool *rhs);
-
-    Literal *applyOperator(LiteralString *rhs);
-
-    Literal *applyOperator(LiteralFloat *lhs, LiteralFloat *rhs);
-
-    Literal *applyOperator(LiteralFloat *lhs, LiteralInt *rhs);
-
-    Literal *applyOperator(LiteralInt *lhs, LiteralFloat *rhs);
-
-    Literal *applyOperator(LiteralFloat *lhs, LiteralBool *rhs);
-
-    Literal *applyOperator(LiteralBool *lhs, LiteralFloat *rhs);
-
-    Literal *applyOperator(LiteralFloat *lhs, LiteralString *rhs);
-
-    Literal *applyOperator(LiteralString *lhs, LiteralFloat *rhs);
-
-    Literal *applyOperator(LiteralFloat *rhs);
-
-    std::string toString() const override;
+  [[nodiscard]] std::string toString() const override;
+  bool supportsCircuitMode() override;
 };
 
 #endif //MASTER_THESIS_CODE_OPERATOR_H

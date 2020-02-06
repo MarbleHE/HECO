@@ -25,7 +25,7 @@ void Visitor::visit(Ast &elem) {
 
 void Visitor::visit(BinaryExpr &elem) {
   elem.getLeft()->accept(*this);
-  elem.getOp().accept(*this);
+  elem.getOp()->accept(*this);
   elem.getRight()->accept(*this);
 }
 
@@ -92,11 +92,11 @@ void Visitor::visit(If &elem) {
   // consisting of multiple commands, we need in the following manually open a new scope
 
   // thenBranch
-  if (auto *thenBranch = dynamic_cast<Block *>(elem.getThenBranch())) {
+  if (auto* thenBranch = dynamic_cast<Block*>(elem.getThenBranch())) {
     thenBranch->accept(*this);
   } else {
     // if thenBranch is no Block we need to manually open a new scope here
-    Node *thenNode = dynamic_cast<Node *>(elem.getThenBranch());
+    Node* thenNode = dynamic_cast<Node*>(elem.getThenBranch());
     assert(thenNode != nullptr); // this should never happen
     changeToInnerScope(thenNode->getUniqueNodeId());
     elem.getThenBranch()->accept(*this);
@@ -105,10 +105,10 @@ void Visitor::visit(If &elem) {
 
   if (elem.getElseBranch() != nullptr) {
     // elseBranch
-    if (auto *elseBranch = dynamic_cast<Node *>(elem.getElseBranch())) {
+    if (auto* elseBranch = dynamic_cast<Node*>(elem.getElseBranch())) {
       elem.getElseBranch()->accept(*this);
     } else {
-      Node *elseNode = dynamic_cast<Node *>(elem.getElseBranch());
+      Node* elseNode = dynamic_cast<Node*>(elem.getElseBranch());
       assert(elseNode != nullptr);
       changeToInnerScope(elseBranch->getUniqueNodeId());
       elem.getElseBranch()->accept(*this);
@@ -129,7 +129,7 @@ void Visitor::visit(LogicalExpr &elem) {
   // left
   elem.getLeft()->accept(*this);
   // operator
-  elem.getOp().accept(*this);
+  elem.getOp()->accept(*this);
   // right
   elem.getRight()->accept(*this);
 }
@@ -138,12 +138,12 @@ void Visitor::visit(Operator &elem) {}
 
 void Visitor::visit(Return &elem) {
   curScope->addStatement(&elem);
-  elem.getValue()->accept(*this);
+  elem.getReturnExpr()->accept(*this);
 }
 
 void Visitor::visit(UnaryExpr &elem) {
   // operator
-  elem.getOp().accept(*this);
+  elem.getOp()->accept(*this);
   // rhs operand
   elem.getRight()->accept(*this);
 }
@@ -172,10 +172,10 @@ void Visitor::visit(While &elem) {
   // then-block
   // if statements following While are nested in a Block, a new scope will be created automatically;
   // if only a single statement is following, we manually need to open a new scope
-  if (auto *thenBlock = dynamic_cast<Block *>(elem.getBody())) {
+  if (auto* thenBlock = dynamic_cast<Block*>(elem.getBody())) {
     thenBlock->accept(*this);
   } else {
-    Node *block = dynamic_cast<Node *>(elem.getBody());
+    Node* block = dynamic_cast<Node*>(elem.getBody());
     assert(block != nullptr);
     changeToInnerScope(block->getUniqueNodeId());
     elem.getBody()->accept(*this);

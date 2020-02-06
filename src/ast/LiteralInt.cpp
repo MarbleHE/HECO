@@ -66,5 +66,9 @@ void LiteralInt::setRandomValue(RandLiteralGen &rlg) {
 }
 
 std::string LiteralInt::toString() const {
-    return std::to_string(this->getValue());
+  return std::to_string(this->getValue());
+}
+
+bool LiteralInt::supportsCircuitMode() {
+  return true;
 }

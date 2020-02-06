@@ -35,10 +35,11 @@ class LiteralBool : public Literal {
   void setRandomValue(RandLiteralGen &rlg) override;
   void setValue(bool newValue);
 
-    std::string toString() const override;
+  std::string toString() const override;
 
  protected:
   void print(std::ostream &str) const override;
+  bool supportsCircuitMode() override;
 };
 
 #endif //MASTER_THESIS_CODE_LITERALBOOL_H

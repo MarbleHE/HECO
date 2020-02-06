@@ -85,7 +85,7 @@ TEST(JsonOutputTest, Variable) { /* NOLINT */
 TEST(JsonOutputTest, VarDecl) { /* NOLINT */
   auto identifier = "numIterations";
   auto datatype = "int";
-  auto initializer = 3;
+  int initializer = 3;
     // int numIterations = 3;
     auto *var = new VarDecl(identifier, initializer);
     json j = {{"type",        "VarDecl"},
@@ -218,15 +218,15 @@ TEST(JsonOutputTest, Operator) { /* NOLINT */
 }
 
 TEST(JsonOutputTest, Block) { /* NOLINT */
-    auto bl = new Block(new VarDecl("width", "int", new LiteralInt(22)));
-    json j = {{"type",       "Block"},
-              {"statements", {{
-                                      {"type", "VarDecl"},
-                                      {"datatype", "int"},
-                                      {"identifier", "width"},
-                                      {"initializer", {
-                                                              {"type", "LiteralInt"},
-                                                              {"value", 22}}}}}}};
+  auto bl = new Block(new VarDecl("width", TYPES::INT, new LiteralInt(22)));
+  json j = {{"type", "Block"},
+            {"statements", {{
+                                {"type", "VarDecl"},
+                                {"datatype", "int"},
+                                {"identifier", "width"},
+                                {"initializer", {
+                                    {"type", "LiteralInt"},
+                                    {"value", 22}}}}}}};
     EXPECT_EQ(bl->toJson(), j);
 }
 

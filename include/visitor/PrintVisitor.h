@@ -9,7 +9,7 @@
 class PrintVisitor : public Visitor {
  protected:
   int level;
-  Scope *lastPrintedScope;
+  Scope* lastPrintedScope;
   std::stringstream ss;
   bool printScreen;
 
@@ -72,9 +72,9 @@ class PrintVisitor : public Visitor {
 
   void addOutputStr(const std::list<std::string> &args);
 
-  [[nodiscard]] Scope *getLastPrintedScope() const;
+  [[nodiscard]] Scope* getLastPrintedScope() const;
 
-  void setLastPrintedScope(Scope *scope);
+  void setLastPrintedScope(Scope* scope);
 
   template<typename T>
   void printChildNodesIndented(T &elem);
