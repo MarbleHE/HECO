@@ -51,10 +51,8 @@ class Node {
 
   static void resetNodeIdCounter();
 
-  [[nodiscard]] const std::vector<Node*> &getPred() const;
   [[nodiscard]] const std::vector<Node*> &getParents() const;
 
-  [[nodiscard]] const std::vector<Node*> &getSucc() const;
   [[nodiscard]] const std::vector<Node*> &getChildren() const;
 
   /// Returns all the ancestor nodes of the current node.
@@ -95,8 +93,6 @@ class Node {
 
   friend std::ostream &operator<<(std::ostream &os, const std::vector<Node*> &v);
 
-  std::string getDotFormattedString(bool isReversed, const std::string &indentation, bool showMultDepth);
-
   [[nodiscard]] virtual Node* clone();
 
   [[nodiscard]] virtual Node* cloneRecursiveDeep();
@@ -112,13 +108,13 @@ class Node {
   /// [Aubry, P. et al.: Faster Homomorphic Encryption Is Not Enough: Improved Heuristic for Multiplicative Depth
   ///  Minimization of Boolean Circuits. (2019)].
   /// \return The multiplicative depth of the current node.
-  int getMultDepthL();
+  int getMultDepthL(std::map<std::string, int>* storedDepthsMap = nullptr);
 
   /// Calculates the reverse multiplicative depth based on the definition given in
   /// [Aubry, P. et al.: Faster Homomorphic Encryption Is Not Enough: Improved Heuristic for Multiplicative Depth
   ///  Minimization of Boolean Circuits. (2019)].
   /// \return The reverse multiplicative depth of the current node.
-  int getReverseMultDepthR();
+  int getReverseMultDepthR(std::map<std::string, int>* storedDepthsMap = nullptr);
 
   /// This method returns True iff the class derived from the Node class properly makes use of the child/parent fields
   /// as it would be expected in a circuit.
@@ -133,6 +129,13 @@ class Node {
 
   /// Indicates whether the edges of this node are reversed compared to its initial state.
   bool isReversed{false};
+  std::vector<Node*> getChildrenNonNull() const;
+  std::vector<Node*> getParentsNonNull() const;
+  void isolateNode();
+  void removeChildBilateral(Node* child);
+  virtual ~Node();
+
+  bool hasReversedEdges() const;
 };
 
 #endif //MASTER_THESIS_CODE_NODE_H

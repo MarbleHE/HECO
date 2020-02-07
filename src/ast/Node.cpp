@@ -2,6 +2,7 @@
 #include <Operator.h>
 #include <set>
 #include <queue>
+#include <utility>
 #include "../include/ast/Node.h"
 #include "../include/ast/LogicalExpr.h"
 #include "Function.h"
@@ -10,9 +11,7 @@ int Node::nodeIdCounter = 0;
 
 std::string Node::genUniqueNodeId() {
   std::stringstream ss;
-  ss << getNodeName();
-  ss << "_";
-  ss << getAndIncrementNodeId();
+  ss << getNodeName() << "_" << getAndIncrementNodeId();
   return ss.str();
 }
 
@@ -37,6 +36,20 @@ void Node::resetNodeIdCounter() {
 
 const std::vector<Node*> &Node::getChildren() const {
   return children;
+}
+
+std::vector<Node*> Node::getChildrenNonNull() const {
+  std::vector<Node*> childrenFiltered;
+  std::copy_if(children.begin(), children.end(), std::back_inserter(childrenFiltered),
+               [](Node* n) { return n != nullptr; });
+  return childrenFiltered;
+}
+
+std::vector<Node*> Node::getParentsNonNull() const {
+  std::vector<Node*> parentsFiltered;
+  std::copy_if(parents.begin(), parents.end(), std::back_inserter(parentsFiltered),
+               [](Node* n) { return n != nullptr; });
+  return parentsFiltered;
 }
 
 void Node::addChildBilateral(Node* child) {
@@ -102,6 +115,18 @@ void Node::removeChild(Node* child) {
   if (it != children.end()) *it = nullptr; //children.erase(it);
 }
 
+void Node::removeChildBilateral(Node* child) {
+  child->removeParent(this);
+  this->removeChild(child);
+}
+
+void Node::isolateNode() {
+  for (auto &p : getParentsNonNull()) p->removeChild(this);
+  for (auto &c : getChildrenNonNull()) c->removeParent(this);
+  removeChildren();
+  removeParents();
+}
+
 const std::vector<Node*> &Node::getParents() const {
   return parents;
 }
@@ -157,78 +182,6 @@ std::string Node::toString() const {
   return this->toJson().dump();
 }
 
-std::string Node::getDotFormattedString(bool isReversed, const std::string &indentation, bool showMultDepth) {
-
-  // depending on whether the graph is reversed we are interested in the parents or children
-  auto vec = (isReversed) ? this->getParents() : this->getChildren();
-
-  // -------------------
-  // print node data
-  // e.g., 	Return_1 [label="Return_1\n[l(v): 3, r(v): 0]" shape=oval style=filled fillcolor=white]
-  // -------------------
-  std::stringstream ss;
-  ss << indentation << this->getUniqueNodeId() << " [";
-
-  // only print node details (e.g., operator type for Operator) for tree leaves
-  std::string nodeDetails;
-  if (vec.empty()) {
-    nodeDetails = "\\n" + this->toString();
-  }
-
-  // show multiplicative depth in the tree nodes depending on parameter showMultDepth
-  std::string multDepth;
-  if (showMultDepth) {
-    auto L = getMultDepthL();
-    auto R = getReverseMultDepthR();
-    multDepth = "\\n[l(v): " + std::to_string(L) + ", r(v): " + std::to_string(R) + "]";
-  }
-
-  // construct the string of node details
-  ss << "label=\"" << this->getUniqueNodeId() << multDepth << nodeDetails << "\" ";
-  std::string shape = (dynamic_cast<AbstractExpr*>(this)) ? "rect" : "oval";
-  std::string fillColor("white");
-  if (auto lexp = dynamic_cast<LogicalExpr*>(this)) {
-    if (lexp->getOp() != nullptr && lexp->getOp()->equals(OpSymb::logicalAnd)) {
-      fillColor = "red";
-    }
-  }
-  ss << "shape=" << shape << " ";
-  ss << "style=filled fillcolor=" << fillColor;
-  ss << "]" << std::endl;
-
-  // only print edges if there are any edges at all
-  if (vec.empty()) goto end;
-
-  // -------------------
-  // print edges
-  // e.g., { LogicalExpr_3, Operator_4, Variable_5 } -> LogicalExpr_2
-  // -------------------
-
-  // if AST is reversed -> consider children
-  if (isReversed) {
-    // build a string like '{child1, child2, ..., childN} ->
-    ss << indentation << "{ ";
-    for (auto ci = vec.begin(); ci != vec.end(); ++ci) {
-      ss << (*ci)->getUniqueNodeId();
-      if ((ci + 1) != vec.end()) ss << ", ";
-    }
-    ss << " } -> " << this->getUniqueNodeId();
-  } else {  // if AST is not reversed --> consider parents
-    // build a string like 'nodeName -> {parent1, parent2, ..., parentN}'
-    ss << indentation << this->getUniqueNodeId();
-    ss << " -> {";
-    for (auto ci = vec.begin(); ci != vec.end(); ++ci) {
-      ss << (*ci)->getUniqueNodeId();
-      if ((ci + 1) != vec.end()) ss << ", ";
-    }
-    ss << "}";
-  }
-  ss << std::endl;
-
-  end:
-  return ss.str();
-}
-
 std::ostream &operator<<(std::ostream &os, const std::vector<Node*> &v) {
   os << "[";
   for (int i = 0; i < v.size(); ++i) {
@@ -256,14 +209,6 @@ void Node::setUniqueNodeId(const std::string &unique_node_id) {
   uniqueNodeId = unique_node_id;
 }
 
-const std::vector<Node*> &Node::getPred() const {
-  return getParents();
-}
-
-const std::vector<Node*> &Node::getSucc() const {
-  return getChildren();
-}
-
 std::vector<Node*> Node::getAnc() {
   // use a set to avoid duplicates as there may be common ancestors between this node and any of the node's parents
   std::set<Node*> result;
@@ -280,24 +225,67 @@ std::vector<Node*> Node::getAnc() {
   return std::vector<Node*>(result.begin(), result.end());
 }
 
-int Node::getMultDepthL() {
-  // |pred(v)| = 0 <=> v does not have any parent node
-  if (this->getPred().empty()) return 0;
-
-  // otherwise return max_{u ∈ pred(v)} l(u) + d(v)
-  int max = 0;
-  for (auto &u : this->getPred()) {
-    max = std::max(u->getMultDepthL() + this->depthValue(), max);
+int Node::getMultDepthL(std::map<std::string, int>* storedDepthsMap) {
+  // check if we have calculated the multiplicative depth previously
+  if (storedDepthsMap != nullptr) {
+    auto it = storedDepthsMap->find(getUniqueNodeId());
+    if (it != storedDepthsMap->end())
+      return it->second;
   }
+
+  // we need to be aware whether this node (and its whole AST, hopefully) is reversed or not
+  auto nextNodesToConsider = isReversed ? getParentsNonNull() : getChildrenNonNull();
+
+  // we need to compute the multiplicative depth
+  // trivial case: v is a leaf node, i.e., does not have any parent node
+  // |pred(v)| = 0 => multiplicative depth = 0
+  if (nextNodesToConsider.empty()) {
+    if (storedDepthsMap != nullptr) (*storedDepthsMap)[getUniqueNodeId()] = 0;
+    return 0;
+  }
+
+  // otherwise compute max_{u ∈ pred(v)} l(u) + d(v)
+  int max = 0;
+  for (auto &u : nextNodesToConsider) {
+    int uDepth;
+    // compute the multiplicative depth of parent u
+    uDepth = u->getMultDepthL();
+    // store the computed depth
+    if (storedDepthsMap != nullptr) (*storedDepthsMap)[u->getUniqueNodeId()] = uDepth;
+    max = std::max(uDepth + this->depthValue(), max);
+  }
+
   return max;
 }
 
-int Node::getReverseMultDepthR() {
-  if (this->getChildren().empty()) return 0;
-  int max = 0;
-  for (auto &u : this->getSucc()) {
-    max = std::max(u->getReverseMultDepthR() + u->depthValue(), max);
+int Node::getReverseMultDepthR(std::map<std::string, int>* storedReverseDepthsMap) {
+  // check if we have calculated the reverse multiplicative depth previously
+  if (storedReverseDepthsMap != nullptr) {
+    auto it = storedReverseDepthsMap->find(getUniqueNodeId());
+    if (it != storedReverseDepthsMap->end())
+      return it->second;
   }
+
+  // we need to be aware whether this node (and its whole AST, hopefully) is reversed or not
+  auto nextNodesToConsider = isReversed ? getChildrenNonNull() : getParentsNonNull();
+
+  // we need to compute the reverse multiplicative depth
+  if (nextNodesToConsider.empty()) {
+    if (storedReverseDepthsMap != nullptr) (*storedReverseDepthsMap)[getUniqueNodeId()] = 0;
+    return 0;
+  }
+
+  // otherwise compute the reverse depth
+  int max = 0;
+  for (auto &u : nextNodesToConsider) {
+    int uDepthR;
+    // compute the multiplicative depth of parent u
+    uDepthR = u->getReverseMultDepthR();
+    // store the computed depth
+    if (storedReverseDepthsMap != nullptr) (*storedReverseDepthsMap)[u->getUniqueNodeId()] = uDepthR;
+    max = std::max(uDepthR + u->depthValue(), max);
+  }
+
   return max;
 }
 
@@ -339,4 +327,12 @@ Node* Node::getChildAtIndex(int idx, bool isEdgeDirectionAware) const {
   } catch (std::out_of_range const &e) {
     return nullptr;
   }
+}
+
+Node::~Node() {
+  for (auto* c : getChildrenNonNull()) delete c;
+}
+
+bool Node::hasReversedEdges() const {
+  return isReversed;
 }

@@ -9,8 +9,11 @@
 
 class Ast {
  private:
+  /// The root node of the AST. All other nodes of the AST must somehow be referenced by the rootNode.
+  /// For example, an AST root node can be an object of Function class.
   Node* rootNode;
 
+  ///
   std::map<std::string, Literal*> variableValuesForEvaluation;
 
  public:
@@ -19,6 +22,8 @@ class Ast {
   // copy constructor
   Ast(const Ast &otherAst);
 
+  /// Creates a new Abstract Syntax Tree (AST).
+  /// \param rootNode The node to be defined as root for this AST.
   explicit Ast(Node* rootNode);
 
   ~Ast();
@@ -37,10 +42,9 @@ class Ast {
 
   Literal* evaluate(std::map<std::string, Literal*> &paramValues, bool printResult);
 
+  /// Checks whether the AST (more specifically, all of the AST's edges) are reversed.
+  /// \return True iff all edges of the AST are reversed, otherwise false.
   [[nodiscard]] bool isReversed() const;
-
-  /// Prints the AST in DOT language as used by graphviz, see https://www.graphviz.org/doc/info/lang.html.
-  void printGraphviz();
 
   /// Checks whether the current AST consists of nodes that are circuit-compatible, i.e., that define the child/parent
   /// nodes and can be looked at as a circuit.
@@ -51,7 +55,12 @@ class Ast {
   void reverseEdges();
 
   /// Traverses through the tree in BFS-style and collects all the nodes of the AST.
-  std::set<Node*> getAllNodes() const;
+  [[nodiscard]] std::set<Node*> getAllNodes() const;
+
+  /// Deletes a node from the AST.
+  /// \param node The node to delete from the AST.
+  /// \param deleteSubtreeRecursively Determines whether children should be deleted recursively.
+  Node* deleteNode(Node* node, bool deleteSubtreeRecursively = false);
 };
 
 #endif //MASTER_THESIS_CODE_AST_H

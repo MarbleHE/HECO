@@ -30,10 +30,6 @@ std::string LogicalExpr::getNodeName() const {
   return "LogicalExpr";
 }
 
-LogicalExpr::~LogicalExpr() {
-  for (auto &child : getChildren()) delete child;
-}
-
 Literal* LogicalExpr::evaluate(Ast &ast) {
   // we first need to evaluate the left-handside and right-handside as they can consists of nested binary expressions
   return this->getOp()->applyOperator(this->getLeft()->evaluate(ast), this->getRight()->evaluate(ast));

@@ -58,3 +58,5 @@ std::string Variable::toString() const {
 bool Variable::supportsCircuitMode() {
   return true;
 }
+
+Variable::~Variable() = default;

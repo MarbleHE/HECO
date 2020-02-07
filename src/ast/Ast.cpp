@@ -1,10 +1,7 @@
 #include "Ast.h"
 
-#include <utility>
 #include <variant>
 #include <iostream>
-#include <deque>
-#include <sstream>
 #include <set>
 #include <queue>
 #include "Literal.h"
@@ -90,27 +87,6 @@ bool Ast::isReversed() const {
   return std::all_of(allNodes.begin(), allNodes.end(), [](Node* n) { return n->isReversed; });
 }
 
-void Ast::printGraphviz() {
-  std::stringstream ss;
-  ss << "digraph D {" << std::endl;
-  std::deque<std::pair<Node*, int>> q;
-  q.emplace_back(getRootNode(), 1);
-  while (!q.empty()) {
-    auto curNode = q.front().first;
-    auto il = q.front().second;
-    q.pop_front();
-    std::string outStr;
-    if (curNode == nullptr) continue;
-    ss << curNode->getDotFormattedString(isReversed(), "\t", true);
-    auto nodes = (isReversed()) ? curNode->getParents() : curNode->getChildren();
-    for_each(nodes.rbegin(), nodes.rend(), [&q, il](Node* n) {
-      q.emplace_front(n, il + 1);
-    });
-  }
-  ss << "}" << std::endl;
-  std::cout << ss.str();
-}
-
 Ast::Ast(const Ast &otherAst) {
   std::cout << "Copy constructor called!" << std::endl;
   Ast* clonedAst = new Ast;
@@ -145,8 +121,21 @@ std::set<Node*> Ast::getAllNodes() const {
     nodesToCheck.pop();
     if (curNode == nullptr) continue;
     allNodes.insert(curNode);
-    for (auto &c : curNode->getChildren()) nodesToCheck.push(c);
+    auto nextNodesToConsider = curNode->isReversed ? curNode->getParentsNonNull() : curNode->getChildrenNonNull();
+    for (auto &c : nextNodesToConsider) nodesToCheck.push(c);
   }
   return allNodes;
+}
+
+Node* Ast::deleteNode(Node* node, bool deleteSubtreeRecursively) {
+  if (deleteSubtreeRecursively) {
+    for (auto &c : node->getChildrenNonNull()) deleteNode(c, true);
+  } else if (!node->getChildrenNonNull().empty()) {
+    throw std::logic_error("Cannot remove node (" + node->getUniqueNodeId()
+                               + ") because node has children but deleteSubtreeRecursively is not set (false).");
+  }
+  node->isolateNode();
+  delete node;
+  return nullptr;
 }
 

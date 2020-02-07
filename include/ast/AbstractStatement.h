@@ -10,8 +10,6 @@ using json = nlohmann::json;
 
 class AbstractStatement : public Node {
  public:
-  virtual ~AbstractStatement() = default;
-
   [[nodiscard]] std::string toString() const override;
 
   [[nodiscard]] json toJson() const override;

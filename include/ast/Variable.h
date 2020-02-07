@@ -14,6 +14,7 @@ class Variable : public AbstractExpr {
   explicit Variable(std::string identifier);
 
   [[nodiscard]] json toJson() const override;
+  virtual ~Variable();
 
   void accept(Visitor &v) override;
 

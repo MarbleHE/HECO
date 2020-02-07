@@ -13,7 +13,7 @@ set(TEST_FILES
         AstTestingGenerator.h AstEvaluationTest.cpp
         ${master_thesis_code_SOURCE_DIR}/include/utilities/TestUtils.h
         MultDepthVisitorTest.cpp
-        ChildParentTest.cpp)
+        ChildParentTest.cpp AstClassTest.cpp)
 
 add_executable(testing-all
         main.cpp

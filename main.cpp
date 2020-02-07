@@ -54,14 +54,15 @@ void buildMultDepthRewritingCircuitSample0(Ast &ast) {
 }
 
 int main() {
-  runInteractiveDemo();
+  // runInteractiveDemo();
 
   // build demo circuit
-  //Ast ast;
-  //buildMultDepthRewritingCircuitSample1(ast);
+  Ast ast;
+  buildMultDepthRewritingCircuitSample1(ast);
 
   // apply cone rewriting to AST
-  //ConeRewriter::applyConeRewriting(ast);
+  ConeRewriter coneRewriter(ast);
+  coneRewriter.applyConeRewriting();
 
   return 0;
 }

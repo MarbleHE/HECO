@@ -21,8 +21,6 @@ class LogicalExpr : public AbstractExpr {
     setAttributes(AbstractExpr::createParam(left), new Operator(op), AbstractExpr::createParam(right));
   }
 
-  ~LogicalExpr() override;
-
   [[nodiscard]] AbstractExpr* getLeft() const;
 
   [[nodiscard]] Operator* getOp() const;

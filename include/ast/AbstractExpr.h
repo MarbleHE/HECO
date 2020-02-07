@@ -23,8 +23,6 @@ class AbstractExpr : public Node {
   static AbstractExpr* createParam(AbstractExpr* abstractExpr);
 
  public:
-  virtual ~AbstractExpr() = default;
-
   [[nodiscard]] std::string toString() const override;
 
   [[nodiscard]] json toJson() const override;
