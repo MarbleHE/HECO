@@ -317,3 +317,5 @@ bool Operator::supportsCircuitMode() {
 const std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp> &Operator::getOperatorSymbol() const {
   return operatorSymbol;
 }
+
+Operator::~Operator() = default;

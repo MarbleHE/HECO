@@ -60,7 +60,7 @@ class Ast {
   /// Deletes a node from the AST.
   /// \param node The node to delete from the AST.
   /// \param deleteSubtreeRecursively Determines whether children should be deleted recursively.
-  Node* deleteNode(Node* node, bool deleteSubtreeRecursively = false);
+  void deleteNode(Node** node, bool deleteSubtreeRecursively = false);
 };
 
 #endif //MASTER_THESIS_CODE_AST_H

@@ -115,6 +115,7 @@ class Operator : public Node {
 
   [[nodiscard]] std::string toString() const override;
   bool supportsCircuitMode() override;
+  virtual ~Operator();
 };
 
 #endif //MASTER_THESIS_CODE_OPERATOR_H

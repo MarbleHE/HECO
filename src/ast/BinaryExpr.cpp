@@ -68,9 +68,7 @@ void BinaryExpr::swapOperandsLeftAWithRightB(BinaryExpr* bexpA, BinaryExpr* bexp
   bexpB->setAttributes(bexpB->getLeft(), bexpB->getOp(), lopA);
 }
 
-BinaryExpr::~BinaryExpr() {
-  for (auto &child : getChildren()) delete child;
-}
+BinaryExpr::~BinaryExpr() = default;
 
 bool BinaryExpr::contains(Variable* var) {
   return (getLeft()->contains(var) || getRight()->contains(var));

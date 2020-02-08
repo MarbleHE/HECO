@@ -677,7 +677,7 @@ void ConeRewriter::rewriteCones(Ast &astToRewrite, const std::vector<Node*> &con
     for (auto &gate : xorFinalGate) { gate->getUniqueNodeId(); }
 
     // remove coneEnd
-    coneEnd = astToRewrite.deleteNode(coneEnd, true);
+    astToRewrite.deleteNode(&coneEnd, true);
     assert(coneEnd == nullptr);
 
     // connect final XOR (i.e., last LogicalExpr in the chain of XOR nodes) to cone output

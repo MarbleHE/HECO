@@ -127,15 +127,26 @@ std::set<Node*> Ast::getAllNodes() const {
   return allNodes;
 }
 
-Node* Ast::deleteNode(Node* node, bool deleteSubtreeRecursively) {
+void Ast::deleteNode(Node** node, bool deleteSubtreeRecursively) {
+  Node* nodePtr = *node;
+  nodePtr->getUniqueNodeId();
+  // if deleteSubtreeRecursively is set, we need to delete all children first
   if (deleteSubtreeRecursively) {
-    for (auto &c : node->getChildrenNonNull()) deleteNode(c, true);
-  } else if (!node->getChildrenNonNull().empty()) {
-    throw std::logic_error("Cannot remove node (" + node->getUniqueNodeId()
+    for (auto &c : nodePtr->getChildrenNonNull()) {
+      c->getUniqueNodeId();
+      deleteNode(&c, true);
+    }
+  }
+    // if deleteSubtreesRecursively is not set but there are children, we cannot continue.
+    // probably the user by mistake deleted the whole subtree.
+  else if (!nodePtr->getChildrenNonNull().empty()) {
+    throw std::logic_error("Cannot remove node (" + nodePtr->getUniqueNodeId()
                                + ") because node has children but deleteSubtreeRecursively is not set (false).");
   }
-  node->isolateNode();
-  delete node;
-  return nullptr;
+  // first isolate the node from its parents, then deallocate the heap memory
+  nodePtr->isolateNode();
+  delete nodePtr;
+  // "clear" the pointer to avoid the further use of this deleted node
+  *node = nullptr;
 }
 

@@ -1,4 +1,5 @@
 #include <utility>
+#include <iostream>
 
 #include "../../include/ast/Variable.h"
 #include "Ast.h"
