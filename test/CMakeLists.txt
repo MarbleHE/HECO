@@ -13,19 +13,20 @@ set(TEST_FILES
         AstTestingGenerator.h AstEvaluationTest.cpp
         ${master_thesis_code_SOURCE_DIR}/include/utilities/TestUtils.h
         MultDepthVisitorTest.cpp
-        ChildParentTest.cpp AstClassTest.cpp)
+        ChildParentTest.cpp
+        AstClassTest.cpp
+        DotPrinterTest.cpp)
 
 add_executable(testing-all
         main.cpp
         ${TEST_FILES})
 
 # this is important to have code coverage in CLion
-if(CMAKE_COMPILER_IS_GNUCXX)
+if (CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS "--coverage")
-elseif("${CMAKE_C_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang"
-        OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang")
+elseif ("${CMAKE_C_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang" OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang")
     set(CMAKE_CXX_FLAGS "-fprofile-instr-generate -fcoverage-mapping")
-endif()
+endif ()
 
 target_link_libraries(testing-all gtest ast_lib nlohmann_json::nlohmann_json)
 

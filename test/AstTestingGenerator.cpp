@@ -13,7 +13,7 @@
 #include "Call.h"
 #include "Group.h"
 
-static std::map<int, std::function<void(Ast &)> > call = {
+static std::map<int, std::function<void(Ast &)> > call = {  /* NOLINT */
     {1, AstTestingGenerator::_genAstRewritingOne},
     {2, AstTestingGenerator::_genAstRewritingTwo},
     {3, AstTestingGenerator::_genAstRewritingThree},
@@ -30,7 +30,9 @@ static std::map<int, std::function<void(Ast &)> > call = {
     {14, AstTestingGenerator::_genAstPrintVisitorOne},
     {15, AstTestingGenerator::_genAstPrintVisitorTwo},
     {16, AstTestingGenerator::_genAstMultDepthOne},
-    {17, AstTestingGenerator::_genAstMultDepthTwo}
+    {17, AstTestingGenerator::_genAstMultDepthTwo},
+    {18, AstTestingGenerator::_genAstRewritingSimple},
+    {19, AstTestingGenerator::_genAstRewritingSimpleExtended}
 };
 
 void AstTestingGenerator::generateAst(int id, Ast &ast) {
@@ -647,4 +649,112 @@ void AstTestingGenerator::_genAstMultDepthTwo(Ast &ast) {
               new LiteralInt(112)))));
 
   ast.setRootNode(func);
+}
+
+void AstTestingGenerator::_genAstRewritingSimple(Ast &ast) {
+  // -----------------------------
+  // Schematic diagram of the AST
+  // -----------------------------
+  // ┌───────┐   ┌───────┐   ┌───────┐   ┌───────┐
+  // │a_1^(1)│   │a_2^(1)│   │a_1^(2)│   │a_2^(2)│
+  // └───────┘   └───────┘   └───────┘   └───────┘
+  //    ▲    .─.    ▲           ▲    .─.    ▲
+  //    └───( & )───┘           └───( & )───┘
+  //         `─'                     `─'
+  //          ▲          .─.          ▲
+  //          └─────────( + )─────────┘
+  //                     `─'
+  //                      ▲
+  //                      │     .─.     ┌───────┐
+  //                      └────( + )───▶│  y_1  │
+  //                            `─'     └───────┘
+  //                             ▲
+  //                             │     .─.      ┌───────┐
+  //                             └────( & )────▶│  a_t  │
+  //                                   `─'      └───────┘
+  //                                    ▲
+  //                                    │
+  //                               ┌─────────┐
+  //                               │ return  │
+  //                               └─────────┘
+  auto* returnStatement = new Return(new LogicalExpr(
+      new LogicalExpr(
+          new LogicalExpr(
+              new LogicalExpr(
+                  new Variable("a_1^(1)"),
+                  OpSymb::logicalAnd,
+                  new Variable("a_2^(1)")),
+              OpSymb::logicalXor,
+              new LogicalExpr(
+                  new Variable("a_1^(2)"),
+                  OpSymb::logicalAnd,
+                  new Variable("a_2^(2)"))),
+          OpSymb::logicalXor,
+          new Variable("y_1")),
+      OpSymb::logicalAnd,
+      new Variable("a_t")));
+  ast.setRootNode(returnStatement);
+}
+
+void AstTestingGenerator::_genAstRewritingSimpleExtended(Ast &ast) {
+  // -----------------------------
+  // Schematic diagram of the AST
+  // -----------------------------
+  // ┌────────────┐    ┌─────────────┐ ┌────────────┐     ┌─────────────┐     ┌────────────┐    ┌─────────────┐ ┌────────────┐     ┌─────────────┐
+  // │a_1^(1)_left│    │a_1^(1)_right│ │a_1^(2)_left│     │a_1^(2)_right│     │a_1^(2)_left│    │a_1^(2)_right│ │a_2^(2)_left│     │a_2^(2)_right│
+  // └────────────┘    └─────────────┘ └────────────┘     └─────────────┘     └────────────┘    └─────────────┘ └────────────┘     └─────────────┘
+  //       ▲                 ▲               ▲                  ▲                   ▲                 ▲               ▲                  ▲
+  //       │       .─.       │               │        .─.       │                   │       .─.       │               │        .─.       │
+  //       └──────( & )──────┘               └───────( + )──────┘                   └──────( & )──────┘               └───────( + )──────┘
+  //               `─'                                `─'                                   `─'                                `─'
+  //                ▲                                  ▲                                     ▲                                  ▲
+  //                │               .─.                │                                     │                .─.               │
+  //                └──────────────( & )───────────────┘                                     └───────────────( & )──────────────┘
+  //                                `─'                                                                       `─'
+  //                                 ▲                                                                         ▲
+  //                                 │                              .─.                                        │
+  //                                 └─────────────────────────────( + )───────────────────────────────────────┘
+  //                                                                `─'
+  //                                                                 ▲
+  //                                                                 │     .─.     ┌───────┐
+  //                                                                 └────( + )───▶│  y_1  │
+  //                                                                       `─'     └───────┘
+  //                                                                        ▲
+  //                                                                        │     .─.      ┌───────┐
+  //                                                                        └────( & )────▶│  a_t  │
+  //                                                                              `─'      └───────┘
+  //                                                                               ▲
+  //                                                                               │
+  //                                                                          ┌─────────┐
+  //                                                                          │ return  │
+  //                                                                          └─────────┘
+  auto* returnStatement = new Return(new LogicalExpr(
+      new LogicalExpr(
+          new LogicalExpr(
+              new LogicalExpr(
+                  new LogicalExpr(
+                      new Variable("a_1^(1)_left"),
+                      OpSymb::logicalAnd,
+                      new Variable("a_1^(1)_right")),
+                  OpSymb::logicalAnd,
+                  new LogicalExpr(
+                      new Variable("a_2^(1)_left"),
+                      OpSymb::logicalXor,
+                      new Variable("a_2^(1)_right"))),
+              OpSymb::logicalXor,
+              new LogicalExpr(
+                  new LogicalExpr(
+                      new Variable("a_1^(2)_left"),
+                      OpSymb::logicalAnd,
+                      new Variable("a_1^(2)_right")),
+                  OpSymb::logicalAnd,
+                  new LogicalExpr(
+                      new Variable("a_2^(2)_left"),
+                      OpSymb::logicalXor,
+                      new Variable("a_2^(2)_right")))),
+          OpSymb::logicalXor,
+          new Variable("y_1")),
+      OpSymb::logicalAnd,
+      new Variable("a_t")));
+  ast.setRootNode(returnStatement);
 }

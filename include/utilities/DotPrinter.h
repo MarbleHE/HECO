@@ -3,14 +3,11 @@
 
 #include <string>
 #include <sstream>
-#include <deque>
+#include <queue>
 #include "../include/ast/Operator.h"
 #include "../include/ast/AbstractStatement.h"
 #include "../include/ast/Node.h"
 #include "../include/ast/LogicalExpr.h"
-
-/// Utilities to print the AST in DOT language as used by graphviz, see https://www.graphviz.org/doc/info/lang.html.
-namespace DotPrinter {
 
 // Dot vertex represents a Node in the DOT graph language
 // e.g., Return_1 [label="Return_1\n[l(v): 3, r(v): 0]" shape=oval style=filled fillcolor=white]
@@ -125,7 +122,7 @@ struct DotEdge {
     ss << indentation;
     ss << "{ ";
     ss << getLhsArrow();
-    ss << " } -> {";
+    ss << " } -> { ";
     ss << getRhsArrow();
     ss << " }";
     ss << std::endl;
@@ -133,55 +130,83 @@ struct DotEdge {
   }
 };
 
-static std::string getDotFormattedString(Node* n, const std::string &indentation, bool showMultDepth = false) {
-  std::stringstream finalString;
+/// Utilities to print the AST in DOT language as used by graphviz, see https://www.graphviz.org/doc/info/lang.html.
+class DotPrinter {
+ protected:
+  bool showMultDepth{false};
+  std::string indentationCharacter{'\t'};
+  std::ostream* outputStream{&std::cout};
 
-  // depending on whether the graph is reversed we are interested in the parents or children
-  auto vec = (n->hasReversedEdges() ? n->getParentsNonNull() : n->getChildrenNonNull());
+ public:
+  DotPrinter() {}
 
-  // vec.empty(): only print node details (e.g., operator type for Operator) for tree leaves
-  finalString << DotVertex(n, showMultDepth, vec.empty()).buildVertexString(indentation);
-
-  // only print edges if there are any edges at all
-  if (vec.empty()) return finalString.str();
-
-  // otherwise also generate string for edge and return both
-  finalString << DotEdge(n, n->hasReversedEdges()).buildEdgeString(indentation);
-  return finalString.str();
-}
-
-void printAsDotFormattedGraph(Ast &ast) {
-  std::stringstream ss;
-  ss << "digraph D {" << std::endl;
-  std::deque<std::pair<Node*, int>> q;
-  q.emplace_back(ast.getRootNode(), 1);
-  while (!q.empty()) {
-    auto curNode = q.front().first;
-    auto il = q.front().second;
-    q.pop_front();
-    ss << getDotFormattedString(curNode, "\t", true);
-    auto nodes = (ast.isReversed()) ? curNode->getParentsNonNull() : curNode->getChildrenNonNull();
-    for (auto &n : nodes) q.emplace_front(n, il + 1);
+  DotPrinter &setShowMultDepth(bool show_mult_depth) {
+    showMultDepth = show_mult_depth;
+    return *this;
   }
-  ss << "}" << std::endl;
-  std::cout << ss.str();
-}
 
-void printAllReachableNodes(Node* pNode) {
-  std::set<Node*> printedNodes;
-  std::queue<Node*> q{{pNode}};
-  while (!q.empty()) {
-    auto curNode = q.front();
-    q.pop();
-    if (printedNodes.count(curNode) == 0) {
-      std::cout << DotPrinter::getDotFormattedString(curNode, "\t", false);
-      for (auto &c : curNode->getChildrenNonNull()) q.push(c);
-      for (auto &p : curNode->getParentsNonNull()) q.push(p);
-      printedNodes.insert(curNode);
+  DotPrinter &setIndentationCharacter(const std::string &indentation_character) {
+    indentationCharacter = indentation_character;
+    return *this;
+  }
+
+  DotPrinter &setOutputStream(std::ostream &stream) {
+    outputStream = &stream;
+    return *this;
+  }
+
+  std::string getDotFormattedString(Node* n) {
+    // we cannot print the node as DOT graph if it does not support the circuit mode (child/parent relationship)
+    if (!n->supportsCircuitMode())
+      throw std::logic_error(
+          "Cannot execute 'getDotFormattedString(" + n->getUniqueNodeId() + ") as node is not circuit-compatible!");
+
+    std::stringstream finalString;
+
+    // depending on whether the graph is reversed we are interested in the parents or children
+    auto vec = (n->hasReversedEdges() ? n->getParentsNonNull() : n->getChildrenNonNull());
+
+    // vec.empty(): only print node details (e.g., operator type for Operator) for tree leaves
+    finalString << DotVertex(n, this->showMultDepth, vec.empty()).buildVertexString(this->indentationCharacter);
+
+    // only print edges if there are any edges at all
+    if (vec.empty()) return finalString.str();
+
+    // otherwise also generate string for edge and return both
+    finalString << DotEdge(n, n->hasReversedEdges()).buildEdgeString(this->indentationCharacter);
+    return finalString.str();
+  }
+
+  void printAsDotFormattedGraph(Ast &ast) {
+    *outputStream << "digraph D {" << std::endl;
+    std::deque<std::pair<Node*, int>> q;
+    q.emplace_back(ast.getRootNode(), 1);
+    while (!q.empty()) {
+      auto curNode = q.front().first;
+      auto il = q.front().second;
+      q.pop_front();
+      *outputStream << getDotFormattedString(curNode);
+      auto nodes = (ast.isReversed()) ? curNode->getParentsNonNull() : curNode->getChildrenNonNull();
+      for (auto &n : nodes) q.emplace_front(n, il + 1);
+    }
+    *outputStream << "}" << std::endl;
+  }
+
+  void printAllReachableNodes(Node* pNode) {
+    std::set<Node*> printedNodes;
+    std::queue<Node*> q{{pNode}};
+    while (!q.empty()) {
+      auto curNode = q.front();
+      q.pop();
+      if (printedNodes.count(curNode) == 0) {
+        *outputStream << DotPrinter::getDotFormattedString(curNode);
+        for (auto &c : curNode->getChildrenNonNull()) { q.push(c); }
+        for (auto &p : curNode->getParentsNonNull()) { q.push(p); }
+        printedNodes.insert(curNode);
+      }
     }
   }
-}
 
-}
+};
 
 #endif //AST_OPTIMIZER_INCLUDE_UTILITIES_DOTPRINTER_H_

@@ -503,7 +503,9 @@ void ConeRewriter::printConesAsGraphviz(std::vector<Node*> &nodes) {
       q.pop();
       // make sure that every node is only printed once
       if (printedNodes.count(curNode) > 0) continue;
-      std::cout << DotPrinter::getDotFormattedString(curNode, "\t", true) << std::endl;
+      DotPrinter dp;
+      dp.setShowMultDepth(true);
+      std::cout << dp.getDotFormattedString(curNode) << std::endl;
       printedNodes.insert(curNode);
       // only consider curNode's children if the node is the starting node or not an AND node (= end of cone)
       auto curNodeLexp = dynamic_cast<LogicalExpr*>(curNode);
@@ -558,7 +560,7 @@ void ConeRewriter::rewriteCones(Ast &astToRewrite, const std::vector<Node*> &con
   auto multDepths = new std::map<std::string, int>();
   auto reverseMultDepths = new std::map<std::string, int>();
   assert(astToRewrite.isReversed());
-  DotPrinter::printAsDotFormattedGraph(astToRewrite);
+
   if (astToRewrite.isReversed()) {
     astToRewrite.reverseEdges();
     precomputeMultDepths(astToRewrite, multDepths, reverseMultDepths);
@@ -685,7 +687,8 @@ void ConeRewriter::rewriteCones(Ast &astToRewrite, const std::vector<Node*> &con
     xorFinalGate.back()->addParent(rNode);
 
     std::cout << "----" << std::endl;
-    DotPrinter::printAllReachableNodes(rNode);
+
+    DotPrinter().printAllReachableNodes(rNode);
     std::cout << "----" << std::endl;
 
     delete multDepths;
@@ -740,7 +743,7 @@ std::pair<Node*, Node*> ConeRewriter::getCriticalAndNonCriticalInput(int lMax,
                                                                      std::map<std::string, int>* reverseMultDepthsMap) {
   auto node = dynamic_cast<LogicalExpr*>(n);
   bool leftIsCritical = isCriticalNode(lMax, node->getLeft(), multDepthsMap, reverseMultDepthsMap);
-  bool rightIsCritical = isCriticalNode(lMax, node->getRight(), reverseMultDepthsMap, reverseMultDepthsMap);
+  bool rightIsCritical = isCriticalNode(lMax, node->getRight(), multDepthsMap, reverseMultDepthsMap);
   if (leftIsCritical && rightIsCritical) {
     throw std::invalid_argument("Cannot rewrite given AST because input of cone's end node are both critical!");
   } else if (!leftIsCritical && !rightIsCritical) {

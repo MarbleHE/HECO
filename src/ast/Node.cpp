@@ -291,6 +291,7 @@ int Node::getReverseMultDepthR(std::map<std::string, int>* storedReverseDepthsMa
 
 int Node::depthValue() {
   if (auto lexp = dynamic_cast<LogicalExpr*>(this)) {
+    // the multiplicative depth considers logical AND nodes only
     return (lexp->getOp() != nullptr && lexp->getOp()->equals(OpSymb::logicalAnd));
   }
   return 0;
@@ -329,9 +330,7 @@ Node* Node::getChildAtIndex(int idx, bool isEdgeDirectionAware) const {
   }
 }
 
-Node::~Node() {
-  for (auto* c : getChildrenNonNull()) delete c;
-}
+Node::~Node() = default;
 
 bool Node::hasReversedEdges() const {
   return isReversed;
