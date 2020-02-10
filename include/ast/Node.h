@@ -13,8 +13,17 @@ class Ast;
 
 class Node {
  protected:
+  /// Temporarily stores the reserved node ID until the first call of getUniqueNodeId() at which the reserved ID is
+  /// fetched and the node's ID is assigned (field uniqueNodeId) based on the node's name and this reserved ID.
+  /// This is a workaround because getNodeName() is a virtual method that cannot be called from derived classes and
+  /// their constructor. After retrieving the node ID and assigning it to the uniqueNodeId field, it is deleted from
+  /// this map.
+  std::map<Node*, int> assignedNodeIds{};
+
+  /// Stores the children of the current node if the node supports the circuit mode (see supportsCircuitMode()).
   std::vector<Node*> children{};
 
+  /// Stores the parent nodes of the current node if the node supports the circuit mode (see supportsCircuitMode()).
   std::vector<Node*> parents{};
 
   static int nodeIdCounter;
@@ -43,6 +52,7 @@ class Node {
   Node();
 
   [[nodiscard]] Node* getUnderlyingNode() const;
+
   void setUnderlyingNode(Node* uNode);
 
   [[nodiscard]] virtual std::string getNodeName() const;

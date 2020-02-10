@@ -9,15 +9,32 @@
 int Node::nodeIdCounter = 0;
 
 std::string Node::genUniqueNodeId() {
+  int nodeNo;
+  try {
+    nodeNo = assignedNodeIds.at(this);
+  } catch (std::out_of_range) {
+    throw std::logic_error(
+        "Could not find any reserved ID for node. Node constructor needs to reserve ID for node (see empty constructor).");
+  }
+
+  // clear the node entry as we will save the node ID in the uniqueNodeId field
+  assignedNodeIds.erase(this);
+
+  // build and return the node ID string
   std::stringstream ss;
-  ss << getNodeName() << "_" << getAndIncrementNodeId();
+  ss << getNodeName() << "_" << nodeNo;
   return ss.str();
 }
 
-Node::Node() = default;
+Node::Node() {
+  // save the ID reserved for this node but do not
+  assignedNodeIds[this] = getAndIncrementNodeId();
+}
 
 std::string Node::getUniqueNodeId() {
+  // if there is no ID defined yet, create and assign an ID
   if (uniqueNodeId.empty()) this->uniqueNodeId = genUniqueNodeId();
+  // otherwise just return the previously generated ID
   return uniqueNodeId;
 }
 
