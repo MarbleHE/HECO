@@ -86,7 +86,7 @@ class Node {
   void addChild(Node* child, bool addBackReference = false);
   void addChildBilateral(Node* child);
   void addChildren(const std::vector<Node*> &childrenToAdd, bool addBackReference = false);
-  void setChild(std::__wrap_iter<Node* const*> position, Node* value);
+  void setChild(std::vector<Node*>::const_iterator position, Node* value);
   void removeChild(Node* child);
   void removeChildren();
   [[nodiscard]] int countChildrenNonNull() const;
