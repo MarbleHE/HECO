@@ -1,9 +1,8 @@
+#include "../include/ast/Node.h"
 #include <sstream>
 #include <Operator.h>
 #include <set>
 #include <queue>
-#include <utility>
-#include "../include/ast/Node.h"
 #include "../include/ast/LogicalExpr.h"
 #include "Function.h"
 
@@ -223,78 +222,6 @@ std::vector<Node*> Node::getAnc() {
     });
   }
   return std::vector<Node*>(result.begin(), result.end());
-}
-
-int Node::getMultDepthL(std::map<std::string, int>* storedDepthsMap) {
-  // check if we have calculated the multiplicative depth previously
-  if (storedDepthsMap != nullptr) {
-    auto it = storedDepthsMap->find(getUniqueNodeId());
-    if (it != storedDepthsMap->end())
-      return it->second;
-  }
-
-  // we need to be aware whether this node (and its whole AST, hopefully) is reversed or not
-  auto nextNodesToConsider = isReversed ? getParentsNonNull() : getChildrenNonNull();
-
-  // we need to compute the multiplicative depth
-  // trivial case: v is a leaf node, i.e., does not have any parent node
-  // |pred(v)| = 0 => multiplicative depth = 0
-  if (nextNodesToConsider.empty()) {
-    if (storedDepthsMap != nullptr) (*storedDepthsMap)[getUniqueNodeId()] = 0;
-    return 0;
-  }
-
-  // otherwise compute max_{u ∈ pred(v)} l(u) + d(v)
-  int max = 0;
-  for (auto &u : nextNodesToConsider) {
-    int uDepth;
-    // compute the multiplicative depth of parent u
-    uDepth = u->getMultDepthL();
-    // store the computed depth
-    if (storedDepthsMap != nullptr) (*storedDepthsMap)[u->getUniqueNodeId()] = uDepth;
-    max = std::max(uDepth + this->depthValue(), max);
-  }
-
-  return max;
-}
-
-int Node::getReverseMultDepthR(std::map<std::string, int>* storedReverseDepthsMap) {
-  // check if we have calculated the reverse multiplicative depth previously
-  if (storedReverseDepthsMap != nullptr) {
-    auto it = storedReverseDepthsMap->find(getUniqueNodeId());
-    if (it != storedReverseDepthsMap->end())
-      return it->second;
-  }
-
-  // we need to be aware whether this node (and its whole AST, hopefully) is reversed or not
-  auto nextNodesToConsider = isReversed ? getChildrenNonNull() : getParentsNonNull();
-
-  // we need to compute the reverse multiplicative depth
-  if (nextNodesToConsider.empty()) {
-    if (storedReverseDepthsMap != nullptr) (*storedReverseDepthsMap)[getUniqueNodeId()] = 0;
-    return 0;
-  }
-
-  // otherwise compute the reverse depth
-  int max = 0;
-  for (auto &u : nextNodesToConsider) {
-    int uDepthR;
-    // compute the multiplicative depth of parent u
-    uDepthR = u->getReverseMultDepthR();
-    // store the computed depth
-    if (storedReverseDepthsMap != nullptr) (*storedReverseDepthsMap)[u->getUniqueNodeId()] = uDepthR;
-    max = std::max(uDepthR + u->depthValue(), max);
-  }
-
-  return max;
-}
-
-int Node::depthValue() {
-  if (auto lexp = dynamic_cast<LogicalExpr*>(this)) {
-    // the multiplicative depth considers logical AND nodes only
-    return (lexp->getOp() != nullptr && lexp->getOp()->equals(OpSymb::logicalAnd));
-  }
-  return 0;
 }
 
 Node* Node::cloneRecursiveDeep() {

@@ -8,6 +8,7 @@
 #include "../include/ast/AbstractStatement.h"
 #include "../include/ast/Node.h"
 #include "../include/ast/LogicalExpr.h"
+#include "../include/utilities/MultiplicativeDepthCalculator.h"
 
 // Dot vertex represents a Node in the DOT graph language
 // e.g., Return_1 [label="Return_1\n[l(v): 3, r(v): 0]" shape=oval style=filled fillcolor=white]
@@ -50,10 +51,15 @@ struct DotVertex {
     return multDepthString;
   }
 
-  void buildMultDepthsString() {
-    auto L = node->getMultDepthL();
-    auto R = node->getReverseMultDepthR();
-    multDepthString = "\\n[l(v): " + std::to_string(L) + ", r(v): " + std::to_string(R) + "]";
+  void buildMultDepthsString(MultiplicativeDepthCalculator &mdc) {
+    auto L = mdc.getMultDepthL(node);
+    auto R = mdc.getReverseMultDepthR(node);
+    std::stringstream ss;
+    ss << "\\n[";
+    ss << "l(v): " << std::to_string(L) << ", ";
+    ss << "r(v): " + std::to_string(R);
+    ss << +"]";
+    multDepthString = ss.str();
   }
 
   std::string getStyle() {
@@ -61,9 +67,9 @@ struct DotVertex {
   }
 
  public:
-  DotVertex(Node* node, bool showMultDepth, bool showDetails) : node(node) {
+  DotVertex(Node* node, bool showMultDepth, MultiplicativeDepthCalculator* mdc, bool showDetails) : node(node) {
     // show multiplicative depth in the tree nodes depending on parameter showMultDepth
-    if (showMultDepth) buildMultDepthsString();
+    if (showMultDepth) buildMultDepthsString(*mdc);
     // show extra information if this node is a leaf node
     if (showDetails) buildDetailsString();
   }
@@ -133,15 +139,21 @@ struct DotEdge {
 /// Utilities to print the AST in DOT language as used by graphviz, see https://www.graphviz.org/doc/info/lang.html.
 class DotPrinter {
  protected:
+  MultiplicativeDepthCalculator* mdc;
   bool showMultDepth{false};
   std::string indentationCharacter{'\t'};
   std::ostream* outputStream{&std::cout};
 
  public:
-  DotPrinter() {}
+  DotPrinter() : mdc(nullptr) {}
 
   DotPrinter &setShowMultDepth(bool show_mult_depth) {
     showMultDepth = show_mult_depth;
+    if (show_mult_depth && mdc == nullptr) {
+      throw std::logic_error(
+          "Printing the multiplicative depth for nodes requires providing a MultiplicativeDepthCalculator instance "
+          "using setMultiplicativeDepthsCalculator(...) prior calling setShowMultDepth(true).");
+    }
     return *this;
   }
 
@@ -152,6 +164,11 @@ class DotPrinter {
 
   DotPrinter &setOutputStream(std::ostream &stream) {
     outputStream = &stream;
+    return *this;
+  }
+
+  DotPrinter &setMultiplicativeDepthsCalculator(MultiplicativeDepthCalculator &multiplicativeDepthCalculator) {
+    mdc = &multiplicativeDepthCalculator;
     return *this;
   }
 
@@ -167,7 +184,8 @@ class DotPrinter {
     auto vec = (n->hasReversedEdges() ? n->getParentsNonNull() : n->getChildrenNonNull());
 
     // vec.empty(): only print node details (e.g., operator type for Operator) for tree leaves
-    finalString << DotVertex(n, this->showMultDepth, vec.empty()).buildVertexString(this->indentationCharacter);
+    finalString << DotVertex(n, this->showMultDepth, this->mdc, vec.empty())
+        .buildVertexString(this->indentationCharacter);
 
     // only print edges if there are any edges at all
     if (vec.empty()) return finalString.str();

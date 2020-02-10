@@ -99,23 +99,6 @@ class Node {
 
   void setUniqueNodeId(const std::string &unique_node_id);
 
-  /// Determine the value of this node for computing the multiplicative depth and reverse multiplicative depth,
-  /// getMultDepthL() and getReverseMultDepthR(), respectively.
-  /// \return Returns 1 iff this node is a LogicalExpr containing an AND operator, otherwise 0.
-  int depthValue();
-
-  /// Calculates the multiplicative depth based on the definition given in
-  /// [Aubry, P. et al.: Faster Homomorphic Encryption Is Not Enough: Improved Heuristic for Multiplicative Depth
-  ///  Minimization of Boolean Circuits. (2019)].
-  /// \return The multiplicative depth of the current node.
-  int getMultDepthL(std::map<std::string, int>* storedDepthsMap = nullptr);
-
-  /// Calculates the reverse multiplicative depth based on the definition given in
-  /// [Aubry, P. et al.: Faster Homomorphic Encryption Is Not Enough: Improved Heuristic for Multiplicative Depth
-  ///  Minimization of Boolean Circuits. (2019)].
-  /// \return The reverse multiplicative depth of the current node.
-  int getReverseMultDepthR(std::map<std::string, int>* storedDepthsMap = nullptr);
-
   /// This method returns True iff the class derived from the Node class properly makes use of the child/parent fields
   /// as it would be expected in a circuit.
   virtual bool supportsCircuitMode();
@@ -129,13 +112,18 @@ class Node {
 
   /// Indicates whether the edges of this node are reversed compared to its initial state.
   bool isReversed{false};
-  std::vector<Node*> getChildrenNonNull() const;
-  std::vector<Node*> getParentsNonNull() const;
+
+  [[nodiscard]] std::vector<Node*> getChildrenNonNull() const;
+  [[nodiscard]] std::vector<Node*> getParentsNonNull() const;
+
+  /// Removes this node from all of its parents and children, and also removes all parents and children from this node.
   void isolateNode();
+
   void removeChildBilateral(Node* child);
+
   virtual ~Node();
 
-  bool hasReversedEdges() const;
+  [[nodiscard]] bool hasReversedEdges() const;
 };
 
 #endif //MASTER_THESIS_CODE_NODE_H

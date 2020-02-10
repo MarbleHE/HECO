@@ -7,23 +7,22 @@
 #include <Ast.h>
 #include <utility>
 #include "Operator.h"
+#include "../utilities/MultiplicativeDepthCalculator.h"
 
 /// This class implements the Cone Rewriting method described in
 /// [Aubry, P. et al.: Faster Homomorphic Encryption Is Not Enough: Improved Heuristic for Multiplicative Depth
 /// Minimization of Boolean Circuits. (2019)].
 class ConeRewriter {
  private:
-  std::map<std::string, int>* multiplicativeDepths;
-  std::map<std::string, int>* multiplicativeDepthsReversed;
-  int maximumMultiplicativeDepth{};
   Ast &ast;
+  MultiplicativeDepthCalculator mdc;
 
   // ------------------------------------–
   // Internal (non-universal) helper methods
   // ------------------------------------–
   void rewriteCones(Ast &astToRewrite, const std::vector<Node*> &coneEndNodes);
 
-  bool isCriticalNode(int lMax, Node* n);
+  bool isCriticalNode(Node* n);
 
   int getMaxMultDepth(Ast &ast);
 
@@ -55,9 +54,9 @@ class ConeRewriter {
   std::vector<Node*> getReducibleCones();
 
   /// Calls and prints the output of getReducibleCones for each node in the given Ast
-  void getReducibleConesForEveryPossibleStartingNode(Ast &ast);
+  void getReducibleConesForEveryPossibleStartingNode(Ast &inputAst);
 
-  /// Implements the multiplicative depth minimization heuristic [see Algorithm 2, page 10]
+  /// Implements the multiplicative depth miniOmization heuristic [see Algorithm 2, page 10]
   Ast &applyMinMultDepthHeuristic();
 
   /// Implements the algorithm that constructs the graph C_{AND} of critical AND nodes [see paragraph 3.2, page 10].
@@ -67,29 +66,16 @@ class ConeRewriter {
   static std::vector<Node*> selectCones(std::vector<Node*> cAndCkt);
 
  public:
+  ConeRewriter(Ast &ast, MultiplicativeDepthCalculator &mdc);
   explicit ConeRewriter(Ast &ast);
+  virtual ~ConeRewriter();
 
   /// This is the only entry point that should be used to apply cone rewriting.
   Ast &applyConeRewriting();
 
-  static void printConesAsGraphviz(std::vector<Node*> &nodes);
-
   static std::vector<Node*> rewriteMultiInputGate(std::vector<Node*> inputNodes, OpSymb::LogCompOp gateType);
-  std::pair<Node*, Node*> getCriticalAndNonCriticalInput(int lMax, Node* n);
-  std::pair<Node*, Node*> getCriticalAndNonCriticalInput(int lMax, Node* n,
-                                                         std::map<std::string, int>* multDepthsMap,
-                                                         std::map<std::string, int>* reverseMultDepthsMap);
 
-  void precomputeMultDepths();
-  void precomputeMultDepths(Ast &ast,
-                            std::map<std::string, int>* multDepthsMap,
-                            std::map<std::string, int>* reverseMultDepthsMap);
-  virtual ~ConeRewriter();
-
-  bool isCriticalNode(int lMax,
-                      Node* n,
-                      std::map<std::string, int>* multDepthsMap,
-                      std::map<std::string, int>* reverseMultDepthsMap);
+  std::pair<Node*, Node*> getCriticalAndNonCriticalInput(LogicalExpr* n);
 };
 
 /// Returns a random element from a
