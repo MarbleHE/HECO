@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <nlohmann/json.hpp>
+#include <sstream>
 #include "../include/visitor/Visitor.h"
 
 using json = nlohmann::json;
@@ -50,6 +51,8 @@ class Node {
 
  public:
   Node();
+
+  virtual ~Node();
 
   [[nodiscard]] Node* getUnderlyingNode() const;
 
@@ -103,9 +106,9 @@ class Node {
 
   friend std::ostream &operator<<(std::ostream &os, const std::vector<Node*> &v);
 
-  [[nodiscard]] virtual Node* clone();
+  [[nodiscard]] virtual Node* cloneFlat();
 
-  [[nodiscard]] virtual Node* cloneRecursiveDeep();
+  [[nodiscard]] virtual Node* cloneRecursiveDeep(bool keepOriginalUniqueNodeId);
 
   void setUniqueNodeId(const std::string &unique_node_id);
 
@@ -129,11 +132,29 @@ class Node {
   /// Removes this node from all of its parents and children, and also removes all parents and children from this node.
   void isolateNode();
 
+  /// Removes the node 'child' bilateral, i.e., on both ends of the edge. In other words, removes the node 'child' from
+  /// this node, and this node from the parents list of 'child' node.
+  /// \param child The child to be removed from this node.
   void removeChildBilateral(Node* child);
 
-  virtual ~Node();
-
   [[nodiscard]] bool hasReversedEdges() const;
+
+  /// Casts a node to type T which must be the specific derived class of the node to cast successfully.
+  /// \tparam T The derived class of the node object.
+  /// \return A pointer to the casted object, or a std::logic_error if cast was unsuccessful.
+  template<typename T>
+  T* castTo() {
+    if (auto castedNode = dynamic_cast<T*>(this)) {
+      return castedNode;
+    } else {
+      std::stringstream outputMsg;
+      outputMsg << "Cannot cast object of type Node to given class ";
+      outputMsg << typeid(T).name() << ".";
+      outputMsg << "Because node (" << this->getUniqueNodeId() << ") is of type ";
+      outputMsg << this->getNodeName() << ".";
+      throw std::logic_error(outputMsg.str());
+    }
+  }
 };
 
 #endif //MASTER_THESIS_CODE_NODE_H

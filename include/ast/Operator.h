@@ -116,6 +116,8 @@ class Operator : public Node {
   [[nodiscard]] std::string toString() const override;
   bool supportsCircuitMode() override;
   virtual ~Operator();
+
+  Node* cloneRecursiveDeep(bool keepOriginalUniqueNodeId) override;
 };
 
 #endif //MASTER_THESIS_CODE_OPERATOR_H

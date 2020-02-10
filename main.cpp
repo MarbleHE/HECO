@@ -1,4 +1,5 @@
 #include <genAstDemo.h>
+#include <DotPrinter.h>
 #include "main.h"
 #include "test/AstTestingGenerator.h"
 
@@ -6,12 +7,14 @@ int main() {
   // runInteractiveDemo();
 
   // build demo circuit
-  Ast ast;
-  AstTestingGenerator::generateAst(19, ast);
+  Ast* ast = new Ast;
+  AstTestingGenerator::generateAst(19, *ast);
 
   // apply cone rewriting to AST
   ConeRewriter coneRewriter(ast);
-  coneRewriter.applyConeRewriting();
+  auto optimizedAst = coneRewriter.applyConeRewriting();
+
+  DotPrinter().printAsDotFormattedGraph(optimizedAst);
 
   return 0;
 }

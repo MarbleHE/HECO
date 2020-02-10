@@ -21,6 +21,11 @@ class LogicalExpr : public AbstractExpr {
     setAttributes(AbstractExpr::createParam(left), new Operator(op), AbstractExpr::createParam(right));
   }
 
+  template<typename T1, typename T2>
+  LogicalExpr(T1 left, Operator* op, T2 right) {
+    setAttributes(AbstractExpr::createParam(left), op, AbstractExpr::createParam(right));
+  }
+
   [[nodiscard]] AbstractExpr* getLeft() const;
 
   [[nodiscard]] Operator* getOp() const;
@@ -41,9 +46,11 @@ class LogicalExpr : public AbstractExpr {
 
   LogicalExpr* contains(LogicalExpr* lexpTemplate, AbstractExpr* excludedSubtree);
 
-  Node* clone() override;
+  Node* cloneFlat() override;
 
   void setAttributes(AbstractExpr* leftOperand, Operator* operatore, AbstractExpr* rightOperand);
+
+  Node* cloneRecursiveDeep(bool keepOriginalUniqueNodeId) override;
 
  protected:
   int getMaxNumberChildren() override;

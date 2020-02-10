@@ -48,3 +48,14 @@ AbstractExpr* Return::getReturnExpr() const {
 bool Return::supportsCircuitMode() {
   return true;
 }
+
+Node* Return::cloneRecursiveDeep(bool keepOriginalUniqueNodeId) {
+  // clone Return statement and its child recursively
+  auto clonedReturnStmt =
+      new Return(this->getReturnExpr()->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
+  // if keepOriginalUniqueNodeId is set: copy the ID of this node
+  if (keepOriginalUniqueNodeId) {
+    clonedReturnStmt->setUniqueNodeId(this->getUniqueNodeId());
+  }
+  return clonedReturnStmt;
+}

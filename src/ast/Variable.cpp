@@ -61,3 +61,11 @@ bool Variable::supportsCircuitMode() {
 }
 
 Variable::~Variable() = default;
+
+Node* Variable::cloneRecursiveDeep(bool keepOriginalUniqueNodeId) {
+  auto clonedVariable = new Variable(this->identifier);
+  if (keepOriginalUniqueNodeId) {
+    clonedVariable->setUniqueNodeId(this->getUniqueNodeId());
+  }
+  return clonedVariable;
+}

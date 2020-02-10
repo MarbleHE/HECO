@@ -75,7 +75,7 @@ int LogicalExpr::countByTemplate(AbstractExpr* abstractExpr) {
   }
 }
 
-Node* LogicalExpr::clone() {
+Node* LogicalExpr::cloneFlat() {
   auto clonedLexp = new LogicalExpr();
   clonedLexp->setUniqueNodeId(this->getUniqueNodeId());
   return clonedLexp;
@@ -96,3 +96,24 @@ bool LogicalExpr::supportsCircuitMode() {
   return true;
 }
 
+Node* LogicalExpr::cloneRecursiveDeep(bool keepOriginalUniqueNodeId) {
+  OpSymb::LogCompOp opSymbol;
+  try {
+    opSymbol = std::get<OpSymb::LogCompOp>(getOp()->getOperatorSymbol());
+  } catch (std::bad_variant_access &) {
+    throw std::logic_error(
+        "LogicalExpr contains unexpected operator. Expected operator of symbol enum OpSymb::LogCompOp.");
+  }
+
+  auto clonedLogicalExpr =
+      new LogicalExpr(getLeft()->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
+                      getOp()->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<Operator>(),
+                      getRight()->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
+
+  // if keepOriginalUniqueNodeId is set: copy the ID of this node
+  if (keepOriginalUniqueNodeId) {
+    clonedLogicalExpr->setUniqueNodeId(this->getUniqueNodeId());
+  }
+
+  return clonedLogicalExpr;
+}

@@ -23,9 +23,10 @@ class Return : public AbstractStatement {
 
   [[nodiscard]] AbstractExpr* getReturnExpr() const;
 
+  Node* cloneRecursiveDeep(bool keepOriginalUniqueNodeId) override;
+
  protected:
   int getMaxNumberChildren() override;
-
   void setAttributes(AbstractExpr* returnExpr);
   bool supportsCircuitMode() override;
 };

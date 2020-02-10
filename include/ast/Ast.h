@@ -19,8 +19,9 @@ class Ast {
  public:
   Ast();
 
-  // copy constructor
+  // copy constructors
   Ast(const Ast &otherAst);
+  Ast(const Ast &otherAst, bool keepOriginalUniqueNodeId);
 
   /// Creates a new Abstract Syntax Tree (AST).
   /// \param rootNode The node to be defined as root for this AST.

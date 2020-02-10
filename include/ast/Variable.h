@@ -35,7 +35,10 @@ class Variable : public AbstractExpr {
   std::vector<std::string> getVariableIdentifiers() override;
 
   [[nodiscard]] std::string toString() const override;
+
   bool supportsCircuitMode() override;
+
+  Node* cloneRecursiveDeep(bool keepOriginalUniqueNodeId) override;
 };
 
 #endif //MASTER_THESIS_CODE_VARIABLE_H

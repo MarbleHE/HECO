@@ -87,11 +87,13 @@ bool Ast::isReversed() const {
   return std::all_of(allNodes.begin(), allNodes.end(), [](Node* n) { return n->isReversed; });
 }
 
-Ast::Ast(const Ast &otherAst) {
+Ast::Ast(const Ast &otherAst, bool keepOriginalUniqueNodeId) {
   std::cout << "Copy constructor called!" << std::endl;
-  Ast* clonedAst = new Ast;
-  clonedAst->setRootNode(otherAst.getRootNode()->cloneRecursiveDeep());
-  throw std::logic_error("Copy constructor for AST not implemented yet!");
+  this->setRootNode(otherAst.getRootNode()->cloneRecursiveDeep(keepOriginalUniqueNodeId));
+}
+
+Ast::Ast(const Ast &otherAst) : Ast(otherAst, false) {
+
 }
 
 bool Ast::isValidCircuit() {

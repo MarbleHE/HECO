@@ -209,8 +209,8 @@ std::ostream &operator<<(std::ostream &os, const std::vector<Node*> &v) {
   return os;
 }
 
-Node* Node::clone() {
-  throw std::logic_error("ERROR: clone() not implemented for node of type " + getNodeName());
+Node* Node::cloneFlat() {
+  throw std::logic_error("ERROR: cloneFlat() not implemented for node of type " + getNodeName());
 }
 
 Node* Node::getUnderlyingNode() const {
@@ -241,7 +241,7 @@ std::vector<Node*> Node::getAnc() {
   return std::vector<Node*>(result.begin(), result.end());
 }
 
-Node* Node::cloneRecursiveDeep() {
+Node* Node::cloneRecursiveDeep(bool keepOriginalUniqueNodeId) {
   throw std::logic_error("ERROR: cloneRecursiveDeep() not implemented for node of type " + getNodeName());
 }
 

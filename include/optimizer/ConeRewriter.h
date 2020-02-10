@@ -14,7 +14,7 @@
 /// Minimization of Boolean Circuits. (2019)].
 class ConeRewriter {
  private:
-  Ast &ast;
+  Ast* ast;
   MultiplicativeDepthCalculator mdc;
 
   // ------------------------------------–
@@ -26,7 +26,7 @@ class ConeRewriter {
 
   int getMaxMultDepth(Ast &ast);
 
-  Node* getNonCriticalLeafNode();
+  Node* getBFSLastNonCriticalLeafNode();
 
   static void addElements(std::vector<Node*> &result, std::vector<Node*> newElements);
 
@@ -38,7 +38,7 @@ class ConeRewriter {
 
   static std::vector<Node*> sortTopologically(const std::vector<Node*> &nodes);
 
-  std::vector<Node*>* getCriticalPredecessors(Node* v);
+  std::vector<Node*>* getPredecessorOnCriticalPath(Node* v);
 
   int computeMinDepth(Node* v);
 
@@ -53,10 +53,10 @@ class ConeRewriter {
 
   std::vector<Node*> getReducibleCones();
 
-  /// Calls and prints the output of getReducibleCones for each node in the given Ast
+  /// Calls and prints the output of getReducibleCones for each node in the given Ast.
   void getReducibleConesForEveryPossibleStartingNode(Ast &inputAst);
 
-  /// Implements the multiplicative depth miniOmization heuristic [see Algorithm 2, page 10]
+  /// Implements the multiplicative depth minimization heuristic [see Algorithm 2, page 10].
   Ast &applyMinMultDepthHeuristic();
 
   /// Implements the algorithm that constructs the graph C_{AND} of critical AND nodes [see paragraph 3.2, page 10].
@@ -65,17 +65,20 @@ class ConeRewriter {
   /// Implements the cone selection algorithm [see Algorithm 3, page 11]
   static std::vector<Node*> selectCones(std::vector<Node*> cAndCkt);
 
+  static std::vector<Node*> rewriteMultiInputGateToBinaryGatesChain(std::vector<Node*> inputNodes,
+                                                                    OpSymb::LogCompOp gateType);
+
+  std::pair<Node*, Node*> getCriticalAndNonCriticalInput(LogicalExpr* n);
+
  public:
-  ConeRewriter(Ast &ast, MultiplicativeDepthCalculator &mdc);
-  explicit ConeRewriter(Ast &ast);
+  ConeRewriter(Ast* ast);
+
+  ConeRewriter(Ast* ast, MultiplicativeDepthCalculator &mdc);
+
   virtual ~ConeRewriter();
 
   /// This is the only entry point that should be used to apply cone rewriting.
   Ast &applyConeRewriting();
-
-  static std::vector<Node*> rewriteMultiInputGate(std::vector<Node*> inputNodes, OpSymb::LogCompOp gateType);
-
-  std::pair<Node*, Node*> getCriticalAndNonCriticalInput(LogicalExpr* n);
 };
 
 /// Returns a random element from a
