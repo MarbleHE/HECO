@@ -110,3 +110,27 @@ TEST_F(AstTestFixture, deleteNode_ChildrenExisting) {
   // verify that children are deleted
   ASSERT_EQ(binaryExpr->countChildrenNonNull(), binaryExprNumChildren);
 }
+
+TEST_F(AstTestFixture, deepCopy) {
+  // Test that copying an AST object properly performs a deep copy
+  auto number_of_nodes = ast.getAllNodes().size();
+  if (number_of_nodes != 0) {
+    Ast copy = ast;
+
+    // Delete all nodes in the copy
+    auto nodes = copy.getAllNodes();
+    for (auto x: nodes) {
+      copy.deleteNode(&x);
+      ASSERT_EQ(x, nullptr);
+    }
+
+    // Ensure that the copy is empty
+    ASSERT_TRUE(copy.getAllNodes().empty());
+
+    // Ensure that original still has all nodes
+    EXPECT_EQ(ast.getAllNodes().size(), number_of_nodes);
+
+  } else {
+    GTEST_SKIP_("Cannot perform deep copy test on empty AST");
+  }
+}
