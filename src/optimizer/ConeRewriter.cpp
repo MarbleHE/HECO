@@ -605,7 +605,7 @@ void ConeRewriter::rewriteCones(Ast &astToRewrite, const std::vector<Node*> &con
                             OpSymb::logicalAnd,
                             inputsY1ToYm.front()->castTo<AbstractExpr>());
     } else if (inputsY1ToYm.size() > 1) {  // otherwise there are inputs y_1, y_2, ..., y_m
-      // TODO check that this branch works
+      // TODO(pjattke): check that this branch works
       // otherwise build XOR chain of inputs and connect last one as input of u_y
       std::vector<Node*> yXorChain =
           ConeRewriter::rewriteMultiInputGateToBinaryGatesChain(inputsY1ToYm, OpSymb::logicalXor);

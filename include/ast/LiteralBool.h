@@ -36,6 +36,7 @@ class LiteralBool : public Literal {
   void setValue(bool newValue);
 
   std::string toString() const override;
+  bool supportsDatatype(Datatype &datatype) override;
 
  protected:
   void print(std::ostream &str) const override;

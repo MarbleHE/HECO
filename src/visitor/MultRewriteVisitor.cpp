@@ -23,17 +23,22 @@ void MultRewriteVisitor::visit(BinaryExpr &elem) {
 
     // B. For case { int tmp = B*C; tmp = tmp*A; } where both BinaryExp are in separate statements.
     // If there is a last statement (i.e., this is not the first statement of the scope).
-    // (-> Check penultimate statement b/c the statement this BinaryExpr (elem) belongs to was already added)
+    // (-> Check penultimate statement b/c the statement this BinaryExpr (elem) belongs to was already added to curScope)
     if (auto puStat = curScope->getNthLastStatement(2)) {
       // If previous statement in scope contains a BinaryExpr multiplication...
       if (BinaryExpr* lastStat = puStat->contains(new BinaryExpr(OpSymb::multiplication), nullptr)) {
         // Retrieve variable identifier from last statement (VarDecl or VarAssignm)
-        std::string identifier = puStat->getVarTargetIdentifier();
+        std::string puVarTargetIdentifier = puStat->getVarTargetIdentifier();
+        std::string curBexpTargetIdentifier = curScope->getLastStatement()->getVarTargetIdentifier();
         // Check that left operand reuses variable of previous statement in its left branch
-        if (!identifier.empty() && elem.getLeft()->contains(new Variable(identifier))) {
-          // ... then swap previousBexpLeftOp with currentBexpRightOp
-          BinaryExpr::swapOperandsLeftAWithRightB(lastStat, &elem);
-          numChanges++;
+        if (!puVarTargetIdentifier.empty() && elem.getLeft()->contains(new Variable(puVarTargetIdentifier))) {
+          // Check that both target variables are the same, otherwise this transformation will change semantics.
+          // For example, here rewriting is NOT applicable: { int tmp = B*C; int tmp2 = tmp*A; }
+          if (puVarTargetIdentifier == curBexpTargetIdentifier) {
+            // ... then swap previousBexpLeftOp with currentBexpRightOp
+            BinaryExpr::swapOperandsLeftAWithRightB(lastStat, &elem);
+            numChanges++;
+          }
         }
       }
     }

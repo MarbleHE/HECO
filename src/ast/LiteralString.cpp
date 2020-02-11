@@ -1,4 +1,5 @@
 #include <utility>
+#include <Datatypes.h>
 
 #include "../../include/ast/LiteralString.h"
 #include "../utilities/RandNumGen.h"
@@ -60,4 +61,8 @@ std::string LiteralString::toString() const {
 
 bool LiteralString::supportsCircuitMode() {
   return true;
+}
+
+bool LiteralString::supportsDatatype(Datatype &datatype) {
+  return datatype.getType() == TYPES::STRING;
 }

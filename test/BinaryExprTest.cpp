@@ -7,8 +7,10 @@ int getLiteralIntValue(AbstractExpr* abExpr) {
   return dynamic_cast<LiteralInt*>(abExpr)->getValue();
 }
 
-// TODO create tests for all possible combinations of operators and operands
+// TODO(pjattke): create tests for all possible combinations of operators and operands
 // => 4 operand types * 2 combinations (lhs or rhs) * 14 binary operators + 4 unary operators
+// = 116 Tests. Generate these tests somehow automatically?
+// TODO(pjattke): after having tests, improve evaluation mechanism of BinaryExpr
 
 TEST(BinaryExprTests, bexp3Add11) { /* NOLINT */
   int valLhs = 3, valRhs = 11;

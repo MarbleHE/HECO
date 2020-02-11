@@ -3,6 +3,7 @@
 
 #include <string>
 #include <map>
+#include "../include/ast/Node.h"
 
 enum class TYPES {
   INT, FLOAT, STRING, BOOL
@@ -56,6 +57,10 @@ class Datatype : public Node {
 
   bool operator!=(const Datatype &rhs) const {
     return !(rhs == *this);
+  }
+
+  TYPES getType() const {
+    return val;
   }
 };
 

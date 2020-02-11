@@ -1,9 +1,10 @@
-#include <iostream>
 #include "../../include/ast/LiteralInt.h"
-#include "LiteralBool.h"
-#include <sstream>
-#include "LiteralString.h"
+#include <AbstractExpr.h>
 #include "../utilities/RandNumGen.h"
+
+bool LiteralInt::supportsDatatype(Datatype &datatype) {
+  return datatype.getType() == TYPES::INT;
+}
 
 LiteralInt::LiteralInt(int value) : value(value) {}
 
@@ -72,3 +73,5 @@ std::string LiteralInt::toString() const {
 bool LiteralInt::supportsCircuitMode() {
   return true;
 }
+
+

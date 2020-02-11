@@ -84,5 +84,5 @@ Literal* Call::evaluate(Ast &ast) {
 
   // evaluate called function (returns nullptr if function is void)
   Ast subAst(this->getFunc());
-  return subAst.evaluate(paramValues, false);
+  return subAst.evaluateAst(paramValues, false);
 }

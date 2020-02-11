@@ -14,8 +14,6 @@ int main() {
   ConeRewriter coneRewriter(ast);
   auto optimizedAst = coneRewriter.applyConeRewriting();
 
-  DotPrinter().printAsDotFormattedGraph(optimizedAst);
-
   return 0;
 }
 

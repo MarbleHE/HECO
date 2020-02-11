@@ -188,7 +188,7 @@ TEST_F(FunctionFixture, FunctionNotSupportedInCircuitMode) {  /* NOLINT */
 }
 
 TEST(ChildParentTests, FunctionParameter) {  /* NOLINT */
-  // TODO implement me!
+  // TODO(pjattke): implement me!
 }
 
 class GroupFixture : public ::testing::Test {
@@ -645,7 +645,7 @@ TEST(ChildParentTests, While) {  /* NOLINT */
 }
 
 TEST(ChildParentTests, ComplexCircuit1_CountNumberOfReachableNodes) {  /* NOLINT */
-  // TODO implement me!
+  // TODO(pjattke): implement me!
 
   // count number of nodes reachable using forward edges (children) starting from AST root node
 

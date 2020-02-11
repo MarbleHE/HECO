@@ -65,6 +65,7 @@ class Ast {
   /// \param deleteSubtreeRecursively Determines whether children should be deleted recursively.
   void deleteNode(Node** node, bool deleteSubtreeRecursively = false);
   Literal* evaluate(bool printResult);
+  std::set<Node*> getAllNodes(const std::function<bool(Node*)> &predicate) const;
 };
 
 #endif //MASTER_THESIS_CODE_AST_H

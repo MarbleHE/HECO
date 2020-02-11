@@ -36,7 +36,10 @@ class LiteralString : public Literal {
   void setRandomValue(RandLiteralGen &rlg) override;
 
   std::string toString() const override;
+
   bool supportsCircuitMode() override;
+
+  bool supportsDatatype(Datatype &datatype) override;
 };
 
 #endif //MASTER_THESIS_CODE_LITERALSTRING_H

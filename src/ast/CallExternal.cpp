@@ -40,5 +40,6 @@ std::string CallExternal::getNodeName() const {
 }
 
 Literal* CallExternal::evaluate(Ast &ast) {
-  throw std::runtime_error("evaluate(Ast &ast) not implemented for class CallExternal yet! Consider using Call instead.");
+  throw std::runtime_error(
+      "evaluateAst(Ast &ast) not implemented for class CallExternal yet! Consider using Call instead.");
 }

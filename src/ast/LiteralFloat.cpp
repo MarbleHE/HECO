@@ -1,7 +1,6 @@
-#include <iostream>
 #include <AbstractExpr.h>
+#include <Datatypes.h>
 #include "../../include/ast/LiteralFloat.h"
-#include "../../include/visitor/Visitor.h"
 #include "../utilities/RandNumGen.h"
 
 LiteralFloat::LiteralFloat(float value) : value(value) {}
@@ -70,4 +69,8 @@ std::string LiteralFloat::toString() const {
 
 bool LiteralFloat::supportsCircuitMode() {
   return true;
+}
+
+bool LiteralFloat::supportsDatatype(Datatype &datatype) {
+  return datatype.getType() == TYPES::FLOAT;
 }

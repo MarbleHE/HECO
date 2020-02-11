@@ -33,38 +33,101 @@ Ast::~Ast() {
   delete rootNode;
 }
 
-Literal* Ast::evaluate(std::map<std::string, Literal*> &paramValues, bool printResult = false) {
+Literal* Ast::evaluate(bool printResult) {
+  // perform evaluation recursively, starting at the root node
+  auto result = getRootNode()->evaluate(*this);
+
+  // print result if flag is set
+  if (printResult) std::cout << (result == nullptr ? "void" : result->toString()) << std::endl;
+
+  return result;
+}
+
+Literal* Ast::evaluateCircuit(const std::map<std::string, Literal*> &paramValues, bool printResult = false) {
+  // ensure that circuit is not reversed
+  if (isReversed()) {
+    throw std::invalid_argument(
+        "Cannot evaluate reversed circuit. Ensure that all edges of the circuit are reversed, then try again.");
+  }
+
   // store param values into a temporary map
   variableValuesForEvaluation.clear();
-  for (const auto &[k, v] : paramValues) {
-    variableValuesForEvaluation.emplace(std::pair(k, v));
+  variableValuesForEvaluation = paramValues;
+
+  // go through all nodes and collect all identifiers of Variable nodes
+  std::set<std::string> varIdentifiersReqValue;
+  auto isVariableNode = [](Node* node) { return dynamic_cast<Variable*>(node) != nullptr; };
+  for (auto &node : getAllNodes(isVariableNode)) {
+    varIdentifiersReqValue.insert(node->castTo<Variable>()->getIdentifier());
   }
+
+  // Remove those variable identifiers from variableIdentifiersRequiringValue that are defined using a VarDecl in
+  // the circuit -> those do not need a value.
+  auto isVarDeclNode = [](Node* node) { return dynamic_cast<VarDecl*>(node) != nullptr; };
+  for (auto &node : getAllNodes(isVarDeclNode)) {
+    varIdentifiersReqValue.erase(
+        std::find(varIdentifiersReqValue.begin(),
+                  varIdentifiersReqValue.end(),
+                  node->castTo<VarDecl>()->getVarTargetIdentifier()));
+  }
+
+  // ensure that the provided number of parameters equals the number of required ones
+  if (paramValues.size() != varIdentifiersReqValue.size())
+    throw std::invalid_argument("AST evaluation requires parameter value for all variables!");
+
+  // Make sure that all variables collected previously have a defined value.
+  // Note: On contrary to the sanity checks in evaluateAst(...), we cannot check the datatypes as we do not have
+  // a FunctionParameter with datatype information as used by Function objects. Therefore, we limit the check to the
+  // presence of any value.
+  for (auto &var : varIdentifiersReqValue) {
+    if (paramValues.find(var) == paramValues.end()) {
+      std::stringstream ss;
+      ss << "No parameter value was given for Variable ";
+      ss << var << ".";
+      throw std::logic_error(ss.str());
+    }
+  }
+
+  return evaluate(printResult);
+}
+
+Literal* Ast::evaluateAst(const std::map<std::string, Literal*> &paramValues, bool printResult = false) {
+  // store param values into a temporary map
+  variableValuesForEvaluation.clear();
+  variableValuesForEvaluation = paramValues;
 
   // ensure that the root node is a Function
   auto func = dynamic_cast<Function*>(this->getRootNode());
-  if (!func) throw std::logic_error("AST evaluation only supported for 'Function' root node!");
+  if (!func) {
+    throw std::logic_error(
+        "AST evaluation only supported for 'Function' root node! Consider using evaluateCircuit(...) instead.");
+  }
 
-  // make sure that the provided number of parameters equals the required one
+  // ensure that the provided number of parameters equals the number of required ones
   if (paramValues.size() != func->getParams().size())
     throw std::invalid_argument("AST evaluation requires parameter value for all parameters!");
 
   // make sure that all parameters specified by the function have a defined value
   for (const auto &fp : func->getParams()) {
-    auto var = dynamic_cast<Variable*>(fp.getValue());
-    if (var != nullptr && !hasVarValue(var)) {
-      throw std::invalid_argument(
-          "AST evaluation requires parameter value for parameter " + var->getIdentifier());
+    // check if FunctionParameter is a variable (can also be a hard-coded value, e.g., a LiteralInt)
+    if (auto var = dynamic_cast<Variable*>(fp.getValue())) {
+      // throw an error if variable value for var is not defined
+      if (!hasVarValue(var)) {
+        throw std::invalid_argument("AST evaluation requires parameter value for parameter " + var->getIdentifier());
+      }
+      // throw an error if type of given parameter value and type of expected value do not match
+      if (!getVarValue(var->getIdentifier())->supportsDatatype(*fp.getDatatype())) {
+        std::stringstream ss;
+        ss << "AST evaluation cannot proceed because datatype of given parameter and expected datatype differs:\n";
+        ss << "Variable " << var->getIdentifier() << " ";
+        ss << "(value: " << *getVarValue(var->getIdentifier()) << ")";
+        ss << " is not of type ";
+        ss << fp.getDatatype()->toString() << ".";
+        throw std::invalid_argument(ss.str());
+      }
     }
   }
-
-  // perform evaluation recursively, starting at the root node
-  auto result = getRootNode()->evaluate(*this);
-
-  // print result if flag is set
-  if (printResult)
-    std::cout << (result == nullptr ? "void" : result->toString()) << std::endl;
-
-  return result;
+  return evaluate(printResult);
 }
 
 bool Ast::hasVarValue(Variable* var) {
@@ -88,13 +151,10 @@ bool Ast::isReversed() const {
 }
 
 Ast::Ast(const Ast &otherAst, bool keepOriginalUniqueNodeId) {
-  std::cout << "Copy constructor called!" << std::endl;
   this->setRootNode(otherAst.getRootNode()->cloneRecursiveDeep(keepOriginalUniqueNodeId));
 }
 
-Ast::Ast(const Ast &otherAst) : Ast(otherAst, false) {
-
-}
+Ast::Ast(const Ast &otherAst) : Ast(otherAst, false) {}
 
 bool Ast::isValidCircuit() {
   std::set<Node*> allAstNodes = getAllNodes();
@@ -116,13 +176,24 @@ void Ast::reverseEdges() {
 }
 
 std::set<Node*> Ast::getAllNodes() const {
-  std::set<Node*> allNodes{getRootNode()};
+  return getAllNodes(nullptr);
+}
+
+std::set<Node*> Ast::getAllNodes(const std::function<bool(Node*)> &predicate) const {
+  // the result set of all nodes in the AST
+  std::set<Node*> allNodes{};
+  // the nodes still required to be processed
   std::queue<Node*> nodesToCheck{{getRootNode()}};
+  // continue while there are still unprocessed nodes
   while (!nodesToCheck.empty()) {
+    // deque next node to process
     auto curNode = nodesToCheck.front();
     nodesToCheck.pop();
+    // skip curNode if its a nullptr
     if (curNode == nullptr) continue;
-    allNodes.insert(curNode);
+    // if (no predicate is set) OR (predicate is set AND node fulfills predicate) -> add node to result set
+    if (predicate == nullptr || predicate(curNode)) allNodes.insert(curNode);
+    // depending on the status of the node, enqueue the next nodes
     auto nextNodesToConsider = curNode->isReversed ? curNode->getParentsNonNull() : curNode->getChildrenNonNull();
     for (auto &c : nextNodesToConsider) nodesToCheck.push(c);
   }
@@ -132,23 +203,22 @@ std::set<Node*> Ast::getAllNodes() const {
 void Ast::deleteNode(Node** node, bool deleteSubtreeRecursively) {
   Node* nodePtr = *node;
   nodePtr->getUniqueNodeId();
-  // if deleteSubtreeRecursively is set, we need to delete all children first
   if (deleteSubtreeRecursively) {
+    // if deleteSubtreeRecursively is set, we need to delete all children first
     for (auto &c : nodePtr->getChildrenNonNull()) {
       c->getUniqueNodeId();
       deleteNode(&c, true);
     }
-  }
+  } else if (!nodePtr->getChildrenNonNull().empty()) {
     // if deleteSubtreesRecursively is not set but there are children, we cannot continue.
-    // probably the user by mistake deleted the whole subtree.
-  else if (!nodePtr->getChildrenNonNull().empty()) {
+    // probably the user's intention was not to delete the whole subtree.
     throw std::logic_error("Cannot remove node (" + nodePtr->getUniqueNodeId()
                                + ") because node has children but deleteSubtreeRecursively is not set (false).");
   }
   // first isolate the node from its parents, then deallocate the heap memory
   nodePtr->isolateNode();
   delete nodePtr;
-  // "clear" the pointer to avoid the further use of this deleted node
+  // "clear" the passed pointer to avoid the further use of this deleted node
   *node = nullptr;
 }
 

@@ -33,16 +33,18 @@ class LiteralInt : public Literal {
 
   bool operator!=(const LiteralInt &rhs) const;
 
+  bool supportsDatatype(Datatype &datatype) override;
+
   void addLiteralValue(std::string identifier, std::map<std::string, Literal*> &paramsMap) override;
 
   void setRandomValue(RandLiteralGen &rlg) override;
 
   void setValue(int newValue);
 
-  std::string toString() const override;
+  [[nodiscard]] std::string toString() const override;
 
- protected:
   void print(std::ostream &str) const override;
+
   bool supportsCircuitMode() override;
 };
 

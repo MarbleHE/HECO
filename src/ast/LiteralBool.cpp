@@ -1,3 +1,4 @@
+#include <Datatypes.h>
 #include "../../include/ast/LiteralBool.h"
 #include "../utilities/RandNumGen.h"
 
@@ -62,4 +63,8 @@ std::string LiteralBool::toString() const {
 
 bool LiteralBool::supportsCircuitMode() {
   return true;
+}
+
+bool LiteralBool::supportsDatatype(Datatype &datatype) {
+  return datatype.getType() == TYPES::BOOL;
 }
