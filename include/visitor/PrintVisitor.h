@@ -70,7 +70,7 @@ class PrintVisitor : public Visitor {
 
   std::string getIndentation();
 
-  void addOutputStr(const std::list<std::string> &args);
+  void addOutputStr(Node &node, const std::list<std::string> &args);
 
   [[nodiscard]] Scope* getLastPrintedScope() const;
 
@@ -82,6 +82,12 @@ class PrintVisitor : public Visitor {
   std::string getOutput() const;
 
   void resetVisitor();
+
+  void printScope();
+
+  void addOutputStr(Node &node);
+
+  void printNodeName(Node &node);
 };
 
 #endif //MASTER_THESIS_CODE_PRINTVISITOR_H
