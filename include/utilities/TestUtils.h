@@ -17,8 +17,8 @@ static void astOutputComparer(Ast &unmodifiedAst, Ast &rewrittenAst, unsigned in
     rng.randomizeValues(evalParams);
 
     // evaluate both ASTs with previously generated params
-    auto resultExpected = unmodifiedAst.evaluate(evalParams, false);
-    auto resultRewrittenAst = rewrittenAst.evaluate(evalParams, false);
+    auto resultExpected = unmodifiedAst.evaluateAst(evalParams, false);
+    auto resultRewrittenAst = rewrittenAst.evaluateAst(evalParams, false);
 
     // compare results of original and rewritten AST
     ASSERT_EQ(*resultExpected, *resultRewrittenAst);

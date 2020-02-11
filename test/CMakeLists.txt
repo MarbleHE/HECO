@@ -15,7 +15,7 @@ set(TEST_FILES
         MultDepthVisitorTest.cpp
         ChildParentTest.cpp
         AstClassTest.cpp
-        DotPrinterTest.cpp)
+        DotPrinterTest.cpp ConeRewriterTest.cpp LiteralTest.cpp)
 
 add_executable(testing-all
         main.cpp

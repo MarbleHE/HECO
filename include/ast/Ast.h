@@ -41,7 +41,9 @@ class Ast {
 
   void updateVarValue(const std::string &variableIdentifier, Literal* newValue);
 
-  Literal* evaluate(std::map<std::string, Literal*> &paramValues, bool printResult);
+  Literal* evaluateAst(const std::map<std::string, Literal*> &paramValues, bool printResult);
+
+  Literal* evaluateCircuit(const std::map<std::string, Literal*> &paramValues, bool printResult);
 
   /// Checks whether the AST (more specifically, all of the AST's edges) are reversed.
   /// \return True iff all edges of the AST are reversed, otherwise false.
@@ -62,6 +64,7 @@ class Ast {
   /// \param node The node to delete from the AST.
   /// \param deleteSubtreeRecursively Determines whether children should be deleted recursively.
   void deleteNode(Node** node, bool deleteSubtreeRecursively = false);
+  Literal* evaluate(bool printResult);
 };
 
 #endif //MASTER_THESIS_CODE_AST_H
