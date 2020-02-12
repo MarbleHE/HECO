@@ -63,7 +63,7 @@ Literal* Ast::evaluateCircuit(const std::map<std::string, Literal*> &paramValues
 
   // Remove those variable identifiers from variableIdentifiersRequiringValue that are defined using a VarDecl in
   // the circuit -> those do not need a value.
-  auto isVarDeclNode = [](Node* node) { return dynamic_cast<VarDecl*>(node) != nullptr; };
+  auto isVarDeclNode = [](Node *node) { return dynamic_cast<VarDecl *>(node) != nullptr; };
   for (auto &node : getAllNodes(isVarDeclNode)) {
     varIdentifiersReqValue.erase(
         std::find(varIdentifiersReqValue.begin(),
@@ -72,15 +72,15 @@ Literal* Ast::evaluateCircuit(const std::map<std::string, Literal*> &paramValues
   }
 
   // ensure that the provided number of parameters equals the number of required ones
-  if (paramValues.size() != varIdentifiersReqValue.size())
-    throw std::invalid_argument("AST evaluation requires parameter value for all variables!");
+//  if (variableValuesForEvaluation.size() != varIdentifiersReqValue.size())
+//    throw std::invalid_argument("AST evaluation requires parameter value for all variables!");
 
   // Make sure that all variables collected previously have a defined value.
   // Note: On contrary to the sanity checks in evaluateAst(...), we cannot check the datatypes as we do not have
   // a FunctionParameter with datatype information as used by Function objects. Therefore, we limit the check to the
   // presence of any value.
   for (auto &var : varIdentifiersReqValue) {
-    if (paramValues.find(var) == paramValues.end()) {
+    if (variableValuesForEvaluation.find(var) == variableValuesForEvaluation.end()) {
       std::stringstream ss;
       ss << "No parameter value was given for Variable ";
       ss << var << ".";

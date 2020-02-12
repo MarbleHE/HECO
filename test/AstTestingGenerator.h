@@ -36,6 +36,7 @@ class AstTestingGenerator {
   static void _genAstRewritingSimple(Ast &ast);
   static void _genAstRewritingSimpleExtended(Ast &ast);
   static void _genAstRewritingMultiInputY(Ast &ast);
+  static void _genAstRewritingTwoDepth2ConesButSingleVNode(Ast &ast);
 };
 
 #endif //MASTER_THESIS_CODE_ASTTESTINGGENERATOR_H

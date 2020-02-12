@@ -297,7 +297,8 @@ std::vector<Node*> Node::rewriteMultiInputGateToBinaryGatesChain(std::vector<Nod
       inputNodes.push_back(new LiteralBool(true));
     } else {
       throw std::runtime_error(
-          "Method rewriteMultiInputGateToBinaryGatesChain only supports 1-input gates of type logical-XOR and logical-AND.");
+          "Method rewriteMultiInputGateToBinaryGatesChain currently supports 1-input gates of type logical-XOR "
+          "or logical-AND only.");
     }
   }
 

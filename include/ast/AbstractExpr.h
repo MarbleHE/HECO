@@ -12,15 +12,17 @@ using json = nlohmann::json;
 
 class AbstractExpr : public Node {
  protected:
-  static LiteralInt* createParam(int i);
+  static LiteralInt *createParam(int i);
 
-  static LiteralBool* createParam(bool b);
+  static LiteralBool *createParam(bool b);
 
-  static LiteralString* createParam(const char* str);
+  static LiteralString *createParam(const char *str);
 
-  static LiteralFloat* createParam(float f);
+  static LiteralFloat *createParam(float f);
 
-  static AbstractExpr* createParam(AbstractExpr* abstractExpr);
+  static AbstractExpr *createParam(AbstractExpr *abstractExpr);
+
+  static Node *createParam(Node *node);
 
  public:
   [[nodiscard]] std::string toString() const override;
@@ -29,7 +31,7 @@ class AbstractExpr : public Node {
 
   void accept(Visitor &v) override;
 
-  virtual BinaryExpr* contains(BinaryExpr* bexpTemplate, AbstractExpr* excludedSubtree);
+  virtual BinaryExpr *contains(BinaryExpr *bexpTemplate, AbstractExpr *excludedSubtree);
 
   virtual int countByTemplate(AbstractExpr* abstractExpr);
 

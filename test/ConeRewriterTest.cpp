@@ -1,32 +1,33 @@
 #include <Ast.h>
 #include <ConeRewriter.h>
 #include <TestUtils.h>
+#include <DotPrinter.h>
 #include "gtest/gtest.h"
 #include "AstTestingGenerator.h"
 #include "../include/ast/Variable.h"
 
 class ConeRewriterFixture : public ::testing::Test {
  private:
-  std::map<std::string, Literal*>* evaluationParameters;
+  std::map<std::string, Literal *> *evaluationParameters;
 
  protected:
   ConeRewriterFixture() : evaluationParameters(nullptr) {};
 
-  static Ast* generateAst(int demoAstId) {
-    Ast* newAst = new Ast;
-    AstTestingGenerator::generateAst(19, *newAst);
+  static Ast *generateAst(int demoAstId) {
+    Ast *newAst = new Ast;
+    AstTestingGenerator::generateAst(demoAstId, *newAst);
     return newAst;
   }
 
   void SetUp() override {}
 
-  virtual void SetUp(std::map<std::string, Literal*> &evalParams) {
+  virtual void SetUp(std::map<std::string, Literal *> &evalParams) {
     evaluationParameters = &evalParams;
   }
 
   bool getBoolValue(const std::string &evalParamsKey) {
     try {
-      return dynamic_cast<LiteralBool*>(evaluationParameters->at(evalParamsKey))->getValue();
+      return dynamic_cast<LiteralBool *>(evaluationParameters->at(evalParamsKey))->getValue();
     } catch (std::out_of_range &exception) {
       throw std::out_of_range("");
     }
@@ -50,7 +51,7 @@ class ConeRewriterFixture : public ::testing::Test {
             & at);
   }
 
-  static void rewriteAndAssertMultiplicativeDepthDecreased(Ast* astToRewrite) {
+  static void rewriteAndAssertMultiplicativeDepthDecreased(Ast *astToRewrite) {
     // save original multiplicative depth
     MultiplicativeDepthCalculator mdc(*astToRewrite);
     auto originalMaxMultDepth = mdc.getMaximumMultiplicativeDepth();
@@ -64,9 +65,9 @@ class ConeRewriterFixture : public ::testing::Test {
     auto newMaxMultDepth = mdc.getMaximumMultiplicativeDepth();
 
     // check if multiplicative depth is reduced
+    std::cout << "Depth (before / after): (" << originalMaxMultDepth << " / " << newMaxMultDepth << ")" << std::endl;
     ASSERT_TRUE(originalMaxMultDepth > newMaxMultDepth);
   }
-
 };
 
 TEST_F(ConeRewriterFixture, simpleStaticConeTest) {
@@ -77,7 +78,7 @@ TEST_F(ConeRewriterFixture, simpleStaticConeTest) {
   // ---------------------------------------------------
 
   // build demo circuit
-  Ast* astToRewrite = generateAst(DEMO_CIRCUIT_NO);
+  Ast *astToRewrite = generateAst(DEMO_CIRCUIT_NO);
 
   // do rewriting and check that multiplicative depth decreased
   rewriteAndAssertMultiplicativeDepthDecreased(astToRewrite);
@@ -87,9 +88,9 @@ TEST_F(ConeRewriterFixture, simpleStaticConeTest) {
   // ---------------------------------------------------
 
   // check if rewritten circuit is logically equivalent to original one
-  Ast* originalAst = generateAst(DEMO_CIRCUIT_NO);
+  Ast *originalAst = generateAst(DEMO_CIRCUIT_NO);
 
-  std::map<std::string, Literal*> inputValues =
+  std::map<std::string, Literal *> inputValues =
       {{std::string("a_1^(1)_left"), new LiteralBool(true)},
        {std::string("a_1^(1)_right"), new LiteralBool(true)},
        {std::string("a_2^(1)_left"), new LiteralBool(false)},
@@ -113,7 +114,7 @@ TEST_F(ConeRewriterFixture, simpleStaticConeTest) {
   ASSERT_EQ(*resultOriginal->castTo<LiteralBool>(), *resultRewritten->castTo<LiteralBool>());
 }
 
-TEST_F(ConeRewriterFixture, evaluationBasedTestForSimpleExtendedCircuit) {
+TEST_F(ConeRewriterFixture, evaluationBasedTestForExtendedCircuit) {
   const int DEMO_CIRCUIT_NO = 19;
 
   // -------–------------------------------------------
@@ -121,7 +122,7 @@ TEST_F(ConeRewriterFixture, evaluationBasedTestForSimpleExtendedCircuit) {
   // ---------------------------------------------------
 
   // build demo circuit
-  Ast* astToRewrite = generateAst(DEMO_CIRCUIT_NO);
+  Ast *astToRewrite = generateAst(DEMO_CIRCUIT_NO);
 
   // do rewriting and check that multiplicative depth decreased
   rewriteAndAssertMultiplicativeDepthDecreased(astToRewrite);
@@ -132,7 +133,7 @@ TEST_F(ConeRewriterFixture, evaluationBasedTestForSimpleExtendedCircuit) {
 
   // define expected input parameters and some arbitrary input values
   // (values will be overwritten by circuitOutputComparer)
-  std::map<std::string, Literal*> inputValues =
+  std::map<std::string, Literal *> inputValues =
       {{std::string("a_1^(1)_left"), new LiteralBool(true)},
        {std::string("a_1^(1)_right"), new LiteralBool(true)},
        {std::string("a_2^(1)_left"), new LiteralBool(false)},
@@ -145,6 +146,103 @@ TEST_F(ConeRewriterFixture, evaluationBasedTestForSimpleExtendedCircuit) {
        {std::string("a_t"), new LiteralBool(true)}};
 
   // perform evaluation-based testing on original and rewritten circuit
-  Ast* originalAst = generateAst(DEMO_CIRCUIT_NO);
+  Ast *originalAst = generateAst(DEMO_CIRCUIT_NO);
   circuitOutputComparer(*originalAst, *astToRewrite, 934471, 5000, inputValues);
+}
+
+TEST_F(ConeRewriterFixture, evaluationBasedTestForExtendedCircuitWithMultipleInputs) {
+  const int DEMO_CIRCUIT_NO = 20;
+
+  // -------–------------------------------------------
+  // Check that the multiplicative depth decreased
+  // ---------------------------------------------------
+
+  // build demo circuit
+  Ast *astToRewrite = generateAst(DEMO_CIRCUIT_NO);
+
+  // do rewriting and check that multiplicative depth decreased
+  rewriteAndAssertMultiplicativeDepthDecreased(astToRewrite);
+
+  // -------–------------------------------------------
+  // Check that the original circuit and the rewritten are logically equivalent
+  // ---------------------------------------------------
+
+  // define expected input parameters and some arbitrary input values
+  // (values will be overwritten by circuitOutputComparer)
+  bool anyBool = false;
+  std::map<std::string, Literal *> inputValues =
+      {{std::string("a_1^(1)_left"), new LiteralBool(anyBool)},
+       {std::string("a_1^(1)_right"), new LiteralBool(anyBool)},
+       {std::string("a_2^(1)_left"), new LiteralBool(anyBool)},
+       {std::string("a_2^(1)_right"), new LiteralBool(anyBool)},
+       {std::string("a_1^(2)_left"), new LiteralBool(anyBool)},
+       {std::string("a_1^(2)_right"), new LiteralBool(anyBool)},
+       {std::string("a_2^(2)_left"), new LiteralBool(anyBool)},
+       {std::string("a_2^(2)_right"), new LiteralBool(anyBool)},
+       {std::string("y_1"), new LiteralBool(anyBool)},
+       {std::string("y_2"), new LiteralBool(anyBool)},
+       {std::string("y_3"), new LiteralBool(anyBool)},
+       {std::string("a_t"), new LiteralBool(anyBool)}};
+
+  // perform evaluation-based testing on original and rewritten circuit
+  Ast *originalAst = generateAst(DEMO_CIRCUIT_NO);
+  circuitOutputComparer(*originalAst, *astToRewrite, 886447, 4'096, inputValues);
+}
+
+TEST_F(ConeRewriterFixture, evaluationBasedTestForCircuitWithTwoCones) {
+  const int DEMO_CIRCUIT_NO = 21;
+
+  // -------–------------------------------------------
+  // Check that the multiplicative depth decreased
+  // ---------------------------------------------------
+
+  // build demo circuit
+  Ast *astToRewrite = generateAst(DEMO_CIRCUIT_NO);
+
+  // do rewriting and check that multiplicative depth decreased
+  rewriteAndAssertMultiplicativeDepthDecreased(astToRewrite);
+
+  // -------–------------------------------------------
+  // Check that the original circuit and the rewritten are logically equivalent
+  // ---------------------------------------------------
+
+  // define expected input parameters and some arbitrary input values
+  // (values will be overwritten by circuitOutputComparer)
+  bool anyBool = false;
+  std::map<std::string, Literal *> inputValues = {
+      {std::string("a_1^(1)_left"), new LiteralBool(anyBool)},
+      {std::string("a_1^(1)_right"), new LiteralBool(anyBool)},
+      {std::string("a_2^(1)_left"), new LiteralBool(anyBool)},
+      {std::string("a_2^(1)_right"), new LiteralBool(anyBool)},
+      {std::string("a_1^(2)_left"), new LiteralBool(anyBool)},
+      {std::string("a_1^(2)_right"), new LiteralBool(anyBool)},
+      {std::string("a_2^(2)_left"), new LiteralBool(anyBool)},
+      {std::string("a_2^(2)_right"), new LiteralBool(anyBool)},
+      {std::string("y_1"), new LiteralBool(anyBool)},
+      {std::string("y_2"), new LiteralBool(anyBool)},
+      {std::string("y_3"), new LiteralBool(anyBool)},
+      {std::string("y_4"), new LiteralBool(anyBool)},
+      {std::string("a_t"), new LiteralBool(anyBool)},
+      {std::string("b_1^(1)_left"), new LiteralBool(anyBool)},
+      {std::string("b_1^(1)_right"), new LiteralBool(anyBool)},
+      {std::string("b_2^(1)_left"), new LiteralBool(anyBool)},
+      {std::string("b_2^(1)_right"), new LiteralBool(anyBool)},
+      {std::string("z_1"), new LiteralBool(anyBool)},
+      {std::string("z_2"), new LiteralBool(anyBool)},
+      {std::string("z_3"), new LiteralBool(anyBool)},
+      {std::string("z_4"), new LiteralBool(anyBool)},
+      {std::string("b_t"), new LiteralBool(anyBool)}};
+
+  // FIXME(pjattke): Second rewriting fails because rewriteCones does not handle case where no node is in between cone end node
+  //  and cone start node -- verify that rewriting is applicable and extend it!
+
+// perform evaluation-based testing on original and rewritten circuit
+  Ast *originalAst = generateAst(DEMO_CIRCUIT_NO);
+  EvalPrinter evalPrinter;
+  evalPrinter.setEvaluationParameters(&inputValues)
+      .setFlagPrintEachParameterSet(true)
+      .setFlagPrintVariableHeaderOnceOnly(true)
+      .setFlagPrintEvaluationResult(true);
+  circuitOutputComparer(*originalAst, *astToRewrite,
+                        886447, 4'096, inputValues, &evalPrinter);
 }
