@@ -32,7 +32,8 @@ static std::map<int, std::function<void(Ast &)> > call = {  /* NOLINT */
     {16, AstTestingGenerator::_genAstMultDepthOne},
     {17, AstTestingGenerator::_genAstMultDepthTwo},
     {18, AstTestingGenerator::_genAstRewritingSimple},
-    {19, AstTestingGenerator::_genAstRewritingSimpleExtended}
+    {19, AstTestingGenerator::_genAstRewritingSimpleExtended},
+    {20, AstTestingGenerator::_genAstRewritingMultiInputY}
 };
 
 void AstTestingGenerator::generateAst(int id, Ast &ast) {
@@ -754,6 +755,43 @@ void AstTestingGenerator::_genAstRewritingSimpleExtended(Ast &ast) {
                       new Variable("a_2^(2)_right")))),
           OpSymb::logicalXor,
           new Variable("y_1")),
+      OpSymb::logicalAnd,
+      new Variable("a_t")));
+  ast.setRootNode(returnStatement);
+}
+
+void AstTestingGenerator::_genAstRewritingMultiInputY(Ast &ast) {
+  // TODO(pjattke): Implement me!
+
+  auto* returnStatement = new Return(new LogicalExpr(
+      new LogicalExpr(
+          new LogicalExpr(
+              new LogicalExpr(
+                  new LogicalExpr(
+                      new LogicalExpr(
+                          new Variable("a_1^(1)_left"),
+                          OpSymb::logicalAnd,
+                          new Variable("a_1^(1)_right")),
+                      OpSymb::logicalAnd,
+                      new LogicalExpr(
+                          new Variable("a_2^(1)_left"),
+                          OpSymb::logicalXor,
+                          new Variable("a_2^(1)_right"))),
+                  OpSymb::logicalXor,
+                  new LogicalExpr(
+                      new LogicalExpr(
+                          new Variable("a_1^(2)_left"),
+                          OpSymb::logicalAnd,
+                          new Variable("a_1^(2)_right")),
+                      OpSymb::logicalAnd,
+                      new LogicalExpr(
+                          new Variable("a_2^(2)_left"),
+                          OpSymb::logicalXor,
+                          new Variable("a_2^(2)_right")))),
+              OpSymb::logicalXor,
+              new Variable("y_1")),
+          OpSymb::logicalXor,
+          new Variable("y_2")),
       OpSymb::logicalAnd,
       new Variable("a_t")));
   ast.setRootNode(returnStatement);

@@ -110,7 +110,7 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/include/visitor/MultDepthVisitor.h
         ${ast_optimizer_SOURCE_DIR}/src/utilities/MultiplicativeDepthCalculator.cpp
         ${ast_optimizer_SOURCE_DIR}/test/AstTestingGenerator.cpp
-        )
+        include/ast/OpSymbEnum.h)
 
 add_executable(ast_demo
         ${ast_optimizer_SOURCE_DIR}/main.cpp

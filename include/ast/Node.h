@@ -5,6 +5,7 @@
 #include <nlohmann/json.hpp>
 #include <sstream>
 #include "../include/visitor/Visitor.h"
+#include "OpSymbEnum.h"
 
 using json = nlohmann::json;
 
@@ -27,12 +28,15 @@ class Node {
   /// Stores the parent nodes of the current node if the node supports the circuit mode (see supportsCircuitMode()).
   std::vector<Node*> parents{};
 
+  /// A static ongoing counter that is incremented after creating a new Node object. The counter's value is used to
+  /// build the unique node ID.
   static int nodeIdCounter;
 
   /// An identifier that is unique among all nodes during runtime.
   std::string uniqueNodeId;
 
-  /// This attributes is used to link back to the original Node in an overlay circuit.
+  /// This attributes is used to link back to the original Node if this node is part of an overlay circuit representing
+  /// only a subset of certain nodes. Required, for example, by cone rewriting.
   Node* underlyingNode{};
 
   /// Generates a new node ID in the form "<NodeTypeName>_nodeIdCounter++" where <NodeTypeName> is the value obtained by
@@ -62,10 +66,15 @@ class Node {
 
   std::string getUniqueNodeId();
 
+  /// Resets the static node ID counter that is used to build the unique node ID. This method is required for testing.
   static void resetNodeIdCounter();
 
+  /// Returns a reference to the vector of parent nodes.
+  /// \return A reference to the vector of this node's parents.
   [[nodiscard]] const std::vector<Node*> &getParents() const;
 
+  /// Returns a reference to the vector of children nodes.
+  /// \return A reference to the vector of this node's children.
   [[nodiscard]] const std::vector<Node*> &getChildren() const;
 
   /// Returns all the ancestor nodes of the current node.
@@ -137,7 +146,25 @@ class Node {
   /// \param child The child to be removed from this node.
   void removeChildBilateral(Node* child);
 
+  /// Checks whether the edges of this node are reversed (i.e., node's parents and children are swapped).
+  /// \return True iff the node's edges are reversed.
   [[nodiscard]] bool hasReversedEdges() const;
+
+  /// Transforms a multi-input gate taking N inputs into a sequence of binary gates.
+  ///
+  /// For example, consider a N input logical-AND (&) with inputs y_1 to y_m:
+  ///   <pre> &_{i=1}^{n} y_1, y_2, y_3, ..., y_m. </pre>
+  /// It is transformed by this method into the expression:
+  ///   <pre> ((((y_1 & y_2) & y_3) ...) & y_m), </pre>
+  /// wherein each AND-gate only has two inputs (binary gates).
+
+  /// \param inputNodes The inputs y_1, ..., y_m that are connected to the multi-input gate. It is required that m>=2.
+  /// \param gateType The gate that all inputs are connected to.
+  /// \return A vector of Node objects of type LogicalExpr that represent the chain of LogicalExpr required to represent
+  /// the intended multi-input gate. The last node in inputNodes (i.e., inputNodes.back()) is always the output of this
+  /// chain.
+  static std::vector<Node*> rewriteMultiInputGateToBinaryGatesChain(std::vector<Node*> inputNodes,
+                                                                    OpSymb::LogCompOp gateType);
 
   /// Casts a node to type T which must be the specific derived class of the node to cast successfully.
   /// \tparam T The derived class of the node object.

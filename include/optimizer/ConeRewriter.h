@@ -65,9 +65,6 @@ class ConeRewriter {
   /// Implements the cone selection algorithm [see Algorithm 3, page 11]
   static std::vector<Node*> selectCones(std::vector<Node*> cAndCkt);
 
-  static std::vector<Node*> rewriteMultiInputGateToBinaryGatesChain(std::vector<Node*> inputNodes,
-                                                                    OpSymb::LogCompOp gateType);
-
   std::pair<Node*, Node*> getCriticalAndNonCriticalInput(LogicalExpr* n);
 
  public:

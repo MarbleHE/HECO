@@ -3,10 +3,14 @@
 #include <TestUtils.h>
 #include "gtest/gtest.h"
 #include "AstTestingGenerator.h"
+#include "../include/ast/Variable.h"
 
 class ConeRewriterFixture : public ::testing::Test {
- public:
-  ConeRewriterFixture() {}
+ private:
+  std::map<std::string, Literal*>* evaluationParameters;
+
+ protected:
+  ConeRewriterFixture() : evaluationParameters(nullptr) {};
 
   static Ast* generateAst(int demoAstId) {
     Ast* newAst = new Ast;
@@ -14,28 +18,33 @@ class ConeRewriterFixture : public ::testing::Test {
     return newAst;
   }
 
-  static bool computeResultForCircuit19() {
-    // a_1^(1)_left
-    unsigned a11_left = 1;
-    // a_1^(1)_right
-    unsigned a11_right = 1;
-    // a_2^(1)_left
-    unsigned a21_left = 0;
-    // a_2^(1)_right
-    unsigned a21_right = 1;
-    // a_1^(2)_left
-    unsigned a12_left = 1;
-    // a_1^(2)_right
-    unsigned a12_right = 0;
-    // a_2^(2)_left
-    unsigned a22_left = 1;
-    // a_2^(2)_right
-    unsigned a22_right = 1;
-    // y_1
-    unsigned y1 = 1;
-    // a_t
-    unsigned at = 1;
-    // compute and return result
+  void SetUp() override {}
+
+  virtual void SetUp(std::map<std::string, Literal*> &evalParams) {
+    evaluationParameters = &evalParams;
+  }
+
+  bool getBoolValue(const std::string &evalParamsKey) {
+    try {
+      return dynamic_cast<LiteralBool*>(evaluationParameters->at(evalParamsKey))->getValue();
+    } catch (std::out_of_range &exception) {
+      throw std::out_of_range("");
+    }
+  }
+
+  bool computeResultForCircuit19() {
+    unsigned a11_left = getBoolValue("a_1^(1)_left");
+    unsigned a11_right = getBoolValue("a_1^(1)_right");
+    unsigned a21_left = getBoolValue("a_2^(1)_left");
+    unsigned a21_right = getBoolValue("a_2^(1)_right");
+    unsigned a12_left = getBoolValue("a_1^(2)_left");
+    unsigned a12_right = getBoolValue("a_1^(2)_right");
+    unsigned a22_left = getBoolValue("a_2^(2)_left");
+    unsigned a22_right = getBoolValue("a_2^(2)_right");
+    unsigned y1 = getBoolValue("y_1");
+    unsigned at = getBoolValue("a_t");
+
+    // evaluate expression that represents circuit 19 to manually verify evaluation result
     return (
         ((((a11_left & a11_right) & (a21_left ^ a21_right)) ^ ((a12_left & a12_right) & (a22_left ^ a22_right))) ^ y1)
             & at);
@@ -96,10 +105,11 @@ TEST_F(ConeRewriterFixture, simpleStaticConeTest) {
   auto resultOriginal = originalAst->evaluateCircuit(inputValues, false);
   auto resultRewritten = astToRewrite->evaluateCircuit(inputValues, false);
 
-  // check that the result matches the expected result
-  // the expected result was computed manually using computeResultForCircuit19()
-  ASSERT_EQ(*resultOriginal->castTo<LiteralBool>(), LiteralBool(false));
-  // check that the rewriting does not modify the AST's evaluation result
+  // check evaluation results by verifying that...
+  // 1. the circuit in general correctly evaluates by comparison to a trivial implementation
+  SetUp(inputValues);
+  ASSERT_EQ(*resultOriginal->castTo<LiteralBool>(), LiteralBool(computeResultForCircuit19()));
+  // 2. the rewriting does not modify the AST's semantics compared to the original AST (-> logical equivalence)
   ASSERT_EQ(*resultOriginal->castTo<LiteralBool>(), *resultRewritten->castTo<LiteralBool>());
 }
 

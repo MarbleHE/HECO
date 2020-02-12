@@ -494,32 +494,6 @@ Node* ConeRewriter::getBFSLastNonCriticalLeafNode() {
   return candidateNode;
 }
 
-std::vector<Node*> ConeRewriter::rewriteMultiInputGateToBinaryGatesChain(std::vector<Node*> inputNodes,
-                                                                         OpSymb::LogCompOp gateType) {
-  // Transforms a multi-input gate taking n inputs into a sequence of binary gates
-  // For example, consider a n-input logical AND (&):
-  //   &_{i=1}^{n} y_1, y_2, y_3, ..., y_m
-  // that is transformed into the expression
-  //   ((((y_1 & y_2) & y_3) ...) & y_m)
-  // where each AND-gate only has two inputs
-
-  // vector of resulting binary gates
-  std::vector<Node*> outputNodes;
-
-  // handle first "special" gate -> takes two inputs as specified in inputNodes
-  auto it = std::begin(inputNodes);
-  auto recentLexp = new LogicalExpr((*it++)->castTo<AbstractExpr>(), gateType, (*it++)->castTo<AbstractExpr>());
-  outputNodes.push_back(recentLexp);
-
-  // handle all other gates -> are connected with each other
-  for (auto end = std::end(inputNodes); it != end; ++it) {
-    auto newLexp = new LogicalExpr(recentLexp, gateType, (*it)->castTo<AbstractExpr>());
-    outputNodes.push_back(newLexp);
-    recentLexp = newLexp;
-  }
-  return outputNodes;
-}
-
 void ConeRewriter::rewriteCones(Ast &astToRewrite, const std::vector<Node*> &coneEndNodes) {
   std::cout << ">> Running rewriteCones..." << std::endl;
 
@@ -608,7 +582,7 @@ void ConeRewriter::rewriteCones(Ast &astToRewrite, const std::vector<Node*> &con
       // TODO(pjattke): check that this branch works
       // otherwise build XOR chain of inputs and connect last one as input of u_y
       std::vector<Node*> yXorChain =
-          ConeRewriter::rewriteMultiInputGateToBinaryGatesChain(inputsY1ToYm, OpSymb::logicalXor);
+          Node::rewriteMultiInputGateToBinaryGatesChain(inputsY1ToYm, OpSymb::logicalXor);
       std::for_each(yXorChain.begin(), yXorChain.end(), [&](Node* n) { n->swapChildrenParents(); });
       u_y = new LogicalExpr(a_t, OpSymb::logicalAnd, yXorChain.back());
     } else {
@@ -646,7 +620,7 @@ void ConeRewriter::rewriteCones(Ast &astToRewrite, const std::vector<Node*> &con
 
     // convert multi-input XOR into binary XOR nodes
     std::vector<Node*> xorFinalGate =
-        ConeRewriter::rewriteMultiInputGateToBinaryGatesChain(finalXorInputs, OpSymb::logicalXor);
+        Node::rewriteMultiInputGateToBinaryGatesChain(finalXorInputs, OpSymb::logicalXor);
     for (auto &gate : xorFinalGate) { gate->getUniqueNodeId(); }
 
     // remove coneEnd
