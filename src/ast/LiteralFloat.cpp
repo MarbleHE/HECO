@@ -1,8 +1,8 @@
 #include <iostream>
-#include <AbstractExpr.h>
-#include "../../include/ast/LiteralFloat.h"
-#include "../../include/visitor/Visitor.h"
-#include "../utilities/RandNumGen.h"
+#include "AbstractExpr.h"
+#include "LiteralFloat.h"
+#include "Visitor.h"
+#include "RandNumGen.h"
 
 LiteralFloat::LiteralFloat(float value) : value(value) {}
 

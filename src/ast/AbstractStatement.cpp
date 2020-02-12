@@ -1,15 +1,15 @@
 #include <iostream>
-#include "../../include/ast/AbstractStatement.h"
-#include "../../include/ast/Block.h"
-#include "../../include/ast/Call.h"
+#include "AbstractStatement.h"
+#include "Block.h"
+#include "Call.h"
 #include "BinaryExpr.h"
 
 std::string AbstractStatement::toString() const {
-    return this->toJson().dump();
+  return this->toJson().dump();
 }
 
 json AbstractStatement::toJson() const {
-    return json({"type", "AbstractStatement"});
+  return json({"type", "AbstractStatement"});
 }
 
 void AbstractStatement::accept(Visitor &v) {

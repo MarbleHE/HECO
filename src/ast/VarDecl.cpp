@@ -1,5 +1,4 @@
-#include "../../include/ast/VarDecl.h"
-
+#include "VarDecl.h"
 #include <utility>
 #include "LiteralInt.h"
 #include "LiteralBool.h"
@@ -7,7 +6,6 @@
 #include "BinaryExpr.h"
 #include "Group.h"
 #include "Ast.h"
-#include "../../include/utilities/Datatypes.h"
 
 json VarDecl::toJson() const {
   json j = {{"type", getNodeName()},

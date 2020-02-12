@@ -33,6 +33,8 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/nlohmann-json-src
 include_directories(
         ${ast_optimizer_SOURCE_DIR}/include/ast
         ${ast_optimizer_SOURCE_DIR}/include/optimizer
+        ${ast_optimizer_SOURCE_DIR}/include/utilities
+        ${ast_optimizer_SOURCE_DIR}/include/visitor
         ${ast_optimizer_SOURCE_DIR}/examples)
 
 set(SOURCE_FILES
@@ -67,15 +69,17 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/ast/Node.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/Scope.cpp
         ${ast_optimizer_SOURCE_DIR}/examples/genAstDemo.cpp
-        ${ast_optimizer_SOURCE_DIR}/include/utilities/RandNumGen.h
-        ${ast_optimizer_SOURCE_DIR}/include/utilities/Datatypes.h
         ${ast_optimizer_SOURCE_DIR}/src/visitor/MultDepthVisitor.cpp
-        ${ast_optimizer_SOURCE_DIR}/include/visitor/MultDepthVisitor.h
         ${ast_optimizer_SOURCE_DIR}/src/optimizer/ConeRewriter.cpp)
+
+set(HEADER_ONLY_SOURCES
+        ${ast_optimizer_SOURCE_DIR}/include/utilities/RandNumGen.h
+        ${ast_optimizer_SOURCE_DIR}/include/utilities/Datatypes.h)
 
 add_executable(ast_demo
         ${ast_optimizer_SOURCE_DIR}/main.cpp
-        ${SOURCE_FILES})
+        ${SOURCE_FILES}
+        ${HEADER_ONLY_SOURCES})
 
 target_link_libraries(ast_demo PRIVATE nlohmann_json::nlohmann_json)
 

@@ -1,5 +1,4 @@
-#include "../../include/ast/Block.h"
-
+#include "Block.h"
 #include <iostream>
 #include <VarDecl.h>
 

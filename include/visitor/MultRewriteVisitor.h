@@ -2,7 +2,7 @@
 #define MASTER_THESIS_CODE_MULTREWRITEVISITOR_H
 
 #include "Visitor.h"
-#include "../utilities/Scope.h"
+#include "Scope.h"
 
 /// This visitor is an example fi an AST rewrite operation.
 class MultRewriteVisitor : public Visitor {

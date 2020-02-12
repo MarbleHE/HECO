@@ -5,7 +5,7 @@
 #include <queue>
 #include <vector>
 #include <string>
-#include "../ast/AbstractStatement.h"
+#include "AbstractStatement.h"
 
 class Scope {
  private:

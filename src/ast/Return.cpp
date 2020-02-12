@@ -1,4 +1,4 @@
-#include "../../include/ast/Return.h"
+#include "Return.h"
 
 json Return::toJson() const {
   json j;

@@ -1,5 +1,4 @@
-#include "../../include/utilities/Scope.h"
-
+#include "Scope.h"
 #include <utility>
 
 Scope::Scope(std::string scopeIdentifier, Scope *outerScope) :

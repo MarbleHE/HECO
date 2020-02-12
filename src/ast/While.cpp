@@ -1,4 +1,4 @@
-#include "../../include/ast/While.h"
+#include "While.h"
 #include "LiteralBool.h"
 
 While::While(AbstractExpr* condition, AbstractStatement* body) : condition(condition), body(body) {}

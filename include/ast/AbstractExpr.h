@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 #include <nlohmann/json.hpp>
-#include "../visitor/Visitor.h"
+#include "Visitor.h"
 #include "Ast.h"
 #include "Node.h"
 

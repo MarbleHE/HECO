@@ -1,5 +1,5 @@
-#include "../../include/ast/BinaryExpr.h"
-#include "../../include/ast/Variable.h"
+#include "BinaryExpr.h"
+#include "Variable.h"
 
 json BinaryExpr::toJson() const {
   json j;

@@ -4,7 +4,7 @@
 #include <string>
 #include "AbstractStatement.h"
 #include "AbstractExpr.h"
-#include "../utilities/Datatypes.h"
+#include "Datatypes.h"
 
 class VarDecl : public AbstractStatement {
  private:

@@ -1,7 +1,7 @@
 #include <sstream>
 #include <iostream>
 #include <set>
-#include "../include/optimizer/ConeRewriter.h"
+#include "ConeRewriter.h"
 #include "AbstractExpr.h"
 #include "Node.h"
 #include "LogicalExpr.h"

@@ -4,7 +4,7 @@
 #include <map>
 #include <string>
 #include <iostream>
-#include "../include/ast/Ast.h"
+#include "Ast.h"
 #include "RandNumGen.h"
 
 static void astOutputComparer(Ast &unmodifiedAst, Ast &rewrittenAst, unsigned int seed, int numTestRuns,

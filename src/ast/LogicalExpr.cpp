@@ -1,5 +1,5 @@
-#include "../../include/ast/LogicalExpr.h"
-#include <Variable.h>
+#include "LogicalExpr.h"
+#include "Variable.h"
 
 json LogicalExpr::toJson() const {
   json j;

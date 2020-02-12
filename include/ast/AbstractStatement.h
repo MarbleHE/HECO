@@ -3,7 +3,7 @@
 
 #include <string>
 #include <nlohmann/json.hpp>
-#include "../visitor/Visitor.h"
+#include "Visitor.h"
 #include "Node.h"
 
 using json = nlohmann::json;

@@ -1,9 +1,9 @@
 #include <iostream>
-#include "../../include/ast/LiteralInt.h"
+#include "LiteralInt.h"
 #include "LiteralBool.h"
 #include <sstream>
 #include "LiteralString.h"
-#include "../utilities/RandNumGen.h"
+#include "RandNumGen.h"
 
 LiteralInt::LiteralInt(int value) : value(value) {}
 

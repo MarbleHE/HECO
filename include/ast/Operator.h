@@ -4,7 +4,7 @@
 #include <variant>
 #include <string>
 #include <iostream>
-#include "../visitor/Visitor.h"
+#include "Visitor.h"
 #include "Node.h"
 #include "LiteralString.h"
 #include "LiteralBool.h"

@@ -1,5 +1,5 @@
-#include "../../include/ast/LiteralBool.h"
-#include "../utilities/RandNumGen.h"
+#include "LiteralBool.h"
+#include "RandNumGen.h"
 
 LiteralBool::LiteralBool(bool value) : value(value) {}
 

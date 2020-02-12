@@ -1,25 +1,24 @@
 #include <iostream>
-#include <Function.h>
-#include <Operator.h>
-#include <If.h>
-#include <LiteralInt.h>
-#include <LiteralBool.h>
-#include <LiteralFloat.h>
-#include <LogicalExpr.h>
-#include <VarAssignm.h>
-#include <Block.h>
-#include <Return.h>
-#include <BinaryExpr.h>
-#include <Ast.h>
-#include <CallExternal.h>
-#include <While.h>
-#include <UnaryExpr.h>
-#include <Call.h>
-#include <Group.h>
-
-#include "../../include/visitor/PrintVisitor.h"
+#include "Function.h"
+#include "Operator.h"
+#include "If.h"
+#include "LiteralInt.h"
+#include "LiteralBool.h"
+#include "LiteralFloat.h"
+#include "LogicalExpr.h"
+#include "VarAssignm.h"
+#include "Block.h"
+#include "Return.h"
+#include "BinaryExpr.h"
+#include "Ast.h"
+#include "CallExternal.h"
+#include "While.h"
+#include "UnaryExpr.h"
+#include "Call.h"
+#include "Group.h"
+#include "PrintVisitor.h"
 #include "../../main.h"
-#include "../utilities/Scope.h"
+#include "Scope.h"
 
 template<typename T>
 void PrintVisitor::printChildNodesIndented(T &elem) {

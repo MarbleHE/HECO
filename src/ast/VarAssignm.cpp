@@ -1,6 +1,5 @@
 #include <utility>
-
-#include "../../include/ast/VarAssignm.h"
+#include "VarAssignm.h"
 #include "BinaryExpr.h"
 
 json VarAssignm::toJson() const {

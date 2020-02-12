@@ -1,7 +1,6 @@
 #include <utility>
-
-#include "../../include/ast/LiteralString.h"
-#include "../utilities/RandNumGen.h"
+#include "LiteralString.h"
+#include "RandNumGen.h"
 
 LiteralString::LiteralString(std::string value) : value(std::move(value)) {}
 

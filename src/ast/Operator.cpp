@@ -1,7 +1,7 @@
 #include <variant>
 #include <typeindex>
 #include <iostream>
-#include "../../include/ast/Operator.h"
+#include "Operator.h"
 #include "LiteralInt.h"
 #include "LiteralString.h"
 #include "LiteralBool.h"

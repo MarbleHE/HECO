@@ -3,18 +3,18 @@
 
 #include <map>
 #include <string>
-#include "../include/ast/Node.h"
-#include "../visitor/Visitor.h"
+#include "Node.h"
+#include "Visitor.h"
 
 class Ast {
-private:
-    Node *rootNode;
+ private:
+  Node *rootNode;
 
-    std::map<std::string, Literal *> variablesValues;
+  std::map<std::string, Literal *> variablesValues;
 
-    bool reversedEdges{false};
+  bool reversedEdges{false};
 
-public:
+ public:
     Ast();
 
     explicit Ast(Node *rootNode);

@@ -1,4 +1,4 @@
-#include "../../include/ast/Group.h"
+#include "Group.h"
 #include "BinaryExpr.h"
 
 json Group::toJson() const {

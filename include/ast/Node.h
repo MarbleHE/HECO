@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 #include <nlohmann/json.hpp>
-#include "../include/visitor/Visitor.h"
+#include "Visitor.h"
 
 using json = nlohmann::json;
 

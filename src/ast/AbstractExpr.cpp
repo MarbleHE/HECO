@@ -1,7 +1,6 @@
 #include <iostream>
-#include <Variable.h>
-#include <AbstractExpr.h>
-
+#include "Variable.h"
+#include "AbstractExpr.h"
 #include "LiteralInt.h"
 #include "LiteralBool.h"
 #include "LiteralString.h"

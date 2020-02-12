@@ -1,21 +1,21 @@
-#include "../../include/visitor/Visitor.h"
+#include "Visitor.h"
 #include "Ast.h"
-#include <Function.h>
-#include <Operator.h>
-#include <If.h>
-#include <LiteralInt.h>
-#include <LiteralBool.h>
-#include <LogicalExpr.h>
-#include <VarAssignm.h>
-#include <Group.h>
-#include <Block.h>
-#include <Return.h>
-#include <BinaryExpr.h>
-#include <CallExternal.h>
-#include <While.h>
-#include <UnaryExpr.h>
-#include <Call.h>
-#include "../utilities/Scope.h"
+#include "Function.h"
+#include "Operator.h"
+#include "If.h"
+#include "LiteralInt.h"
+#include "LiteralBool.h"
+#include "LogicalExpr.h"
+#include "VarAssignm.h"
+#include "Group.h"
+#include "Block.h"
+#include "Return.h"
+#include "BinaryExpr.h"
+#include "CallExternal.h"
+#include "While.h"
+#include "UnaryExpr.h"
+#include "Call.h"
+#include "Scope.h"
 
 void Visitor::visit(Ast &elem) {
   // assumption: AST is always the enclosing object that points to the root

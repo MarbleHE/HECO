@@ -1,6 +1,5 @@
 #include <utility>
-
-#include "../../include/ast/Variable.h"
+#include "Variable.h"
 #include "Ast.h"
 
 Variable::Variable(std::string identifier) : identifier(std::move(identifier)) {}

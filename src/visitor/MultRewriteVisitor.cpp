@@ -1,5 +1,5 @@
 #include <iostream>
-#include "../../include/visitor/MultRewriteVisitor.h"
+#include "MultRewriteVisitor.h"
 #include "BinaryExpr.h"
 #include "Block.h"
 #include "../../main.h"

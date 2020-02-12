@@ -1,4 +1,4 @@
-#include "../../include/ast/UnaryExpr.h"
+#include "UnaryExpr.h"
 
 json UnaryExpr::toJson() const {
   json j;

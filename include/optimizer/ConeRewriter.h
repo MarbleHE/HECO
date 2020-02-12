@@ -4,7 +4,7 @@
 #include <Node.h>
 #include <vector>
 #include <random>
-#include <Ast.h>
+#include "Ast.h"
 
 /// This class implements the Cone Rewriting method described in
 /// [Aubry, P. et al.: Faster Homomorphic Encryption Is Not Enough: Improved Heuristic for Multiplicative Depth

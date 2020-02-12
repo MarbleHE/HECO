@@ -1,7 +1,7 @@
-#include "../../include/ast/Literal.h"
-#include "../../include/ast/LiteralInt.h"
-#include "../../include/ast/LiteralString.h"
-#include "../../include/ast/LiteralBool.h"
+#include "Literal.h"
+#include "LiteralInt.h"
+#include "LiteralString.h"
+#include "LiteralBool.h"
 
 Literal::~Literal() = default;
 

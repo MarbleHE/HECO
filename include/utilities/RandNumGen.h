@@ -7,11 +7,11 @@
 #include <string>
 #include <random>
 #include <utility>
-#include "../ast/AbstractStatement.h"
-#include "../../include/ast/LiteralInt.h"
-#include "../../include/ast/LiteralBool.h"
-#include "../../include/ast/LiteralString.h"
-#include "../../include/ast/LiteralFloat.h"
+#include "AbstractStatement.h"
+#include "LiteralInt.h"
+#include "LiteralBool.h"
+#include "LiteralString.h"
+#include "LiteralFloat.h"
 
 class RandLiteralGen {
  private:
