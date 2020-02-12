@@ -35,8 +35,11 @@ class LiteralBool : public Literal {
   void setRandomValue(RandLiteralGen &rlg) override;
   void setValue(bool newValue);
 
-  std::string toString() const override;
+  [[nodiscard]] std::string toString() const override;
+
   bool supportsDatatype(Datatype &datatype) override;
+
+  Node* cloneRecursiveDeep(bool keepOriginalUniqueNodeId) override;
 
  protected:
   void print(std::ostream &str) const override;
