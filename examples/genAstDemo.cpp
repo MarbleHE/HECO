@@ -183,8 +183,7 @@ void generateDemoTwo(Ast &ast) {
   // printf(outStr);
   func->addStatement(
       new CallExternal("printf",
-                       new std::vector<FunctionParameter>(
-                           {{"string", new Variable("outStr")}})));
+                       {new FunctionParameter("string", new Variable("outStr"))}));
 
   // return sum;
   func->addStatement(

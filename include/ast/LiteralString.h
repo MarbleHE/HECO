@@ -11,6 +11,8 @@ class LiteralString : public Literal {
 
  protected:
   void print(std::ostream &str) const override;
+ private:
+  Node* createClonedNode(bool keepOriginalUniqueNodeId) override;
 
  public:
   explicit LiteralString(std::string value);

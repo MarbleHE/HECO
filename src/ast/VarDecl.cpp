@@ -110,3 +110,8 @@ int VarDecl::getMaxNumberChildren() {
   return 2;
 }
 
+Node* VarDecl::createClonedNode(bool keepOriginalUniqueNodeId) {
+  return new VarDecl(this->getVarTargetIdentifier(),
+                     this->getDatatype()->getType(),
+                     getInitializer()->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
+}

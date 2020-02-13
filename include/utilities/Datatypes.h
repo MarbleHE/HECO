@@ -10,9 +10,15 @@ enum class TYPES {
 };
 
 class Datatype : public Node {
- public:
+ private:
+  Node* createClonedNode(bool keepOriginalUniqueNodeId) override {
+    return new Datatype(this->getType());
+  }
+
   TYPES val;
   bool isEncrypted = false;
+
+ public:
 
   explicit Datatype(TYPES di) : val(di) {}
 
@@ -25,7 +31,10 @@ class Datatype : public Node {
         {"string", TYPES::STRING},
         {"bool", TYPES::BOOL}};
     auto result = string_to_types.find(type);
-    if (result == string_to_types.end()) throw std::invalid_argument("Unsupported datatype given: " + type);
+    if (result == string_to_types.end()) {
+      throw std::invalid_argument(
+          "Unsupported datatype given: " + type + ". See the supported datatypes in Datatypes.h.");
+    }
     val = result->second;
   }
 
@@ -46,7 +55,7 @@ class Datatype : public Node {
     return val;
   }
 
-  std::string toString() const {
+  std::string toString() const override {
     return enum_to_string(val);
   }
 

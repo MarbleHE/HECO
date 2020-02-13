@@ -95,3 +95,5 @@ TEST(NodeTest, rewriteMultiInputGateToBinaryGatesChain_multipleInputs) {
       false);
   ASSERT_EQ(*resultEval, LiteralBool(false));
 }
+
+

@@ -555,8 +555,8 @@ void ConeRewriter::rewriteCones(Ast &astToRewrite, const std::vector<Node *> &co
     std::vector<Node *> inputsY1ToYm;
     auto currentNode = xorStartNode;
 //    while (currentNode != xorEndNode) {
-    while (true) {
-      auto *currentNodeAsLogicalExpr = dynamic_cast<LogicalExpr *>(currentNode);
+    while (true) {/**/
+      auto* currentNodeAsLogicalExpr = dynamic_cast<LogicalExpr*>(currentNode);
       if (currentNode == nullptr)
         throw std::logic_error("Node between cone end and cone start node is expected to be a logical expression!");
       auto[critIn, nonCritIn] = getCriticalAndNonCriticalInput(currentNodeAsLogicalExpr);
@@ -580,7 +580,6 @@ void ConeRewriter::rewriteCones(Ast &astToRewrite, const std::vector<Node *> &co
         break;
       }
     }
-
 
     // XorEndNode: remove incoming edges from nodes v_1, ..., v_n
     for (auto &p : xorEndNode->getChildrenNonNull()) {

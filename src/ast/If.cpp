@@ -54,3 +54,9 @@ Literal* If::evaluate(Ast &ast) {
   }
   return nullptr;
 }
+
+Node* If::createClonedNode(bool keepOriginalUniqueNodeId) {
+  return new If(this->condition->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
+                this->thenBranch->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractStatement>(),
+                this->elseBranch->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractStatement>());
+}

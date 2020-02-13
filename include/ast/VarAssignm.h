@@ -37,6 +37,8 @@ class VarAssignm : public AbstractStatement {
   int getMaxNumberChildren() override;
 
   void setAttribute(AbstractExpr* assignmentValue);
+ private:
+  Node* createClonedNode(bool keepOriginalUniqueNodeId) override;
 };
 
 #endif //MASTER_THESIS_CODE_VARASSIGNM_H

@@ -25,6 +25,11 @@ class BinaryExpr : public AbstractExpr {
     setAttributes(AbstractExpr::createParam(left), new Operator(op), AbstractExpr::createParam(right));
   }
 
+  template<typename T1, typename T2>
+  BinaryExpr(T1 left, Operator* op, T2 right) {
+    setAttributes(AbstractExpr::createParam(left), op, AbstractExpr::createParam(right));
+  }
+
   ~BinaryExpr() override;
 
   [[nodiscard]] json toJson() const override;
@@ -52,11 +57,14 @@ class BinaryExpr : public AbstractExpr {
   int countByTemplate(AbstractExpr* abstractExpr) override;
 
   std::vector<std::string> getVariableIdentifiers() override;
+
   void setAttributes(AbstractExpr* leftOperand, Operator* operatore, AbstractExpr* rightOperand);
 
- private:
   int getMaxNumberChildren() override;
+
   bool supportsCircuitMode() override;
+ private:
+  Node* createClonedNode(bool keepOriginalUniqueNodeId) override;
 };
 
 #endif //MASTER_THESIS_CODE_BINARYEXPR_H

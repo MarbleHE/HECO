@@ -52,11 +52,11 @@ int AstTestingGenerator::getLargestId() {
 void AstTestingGenerator::_genAstRewritingOne(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computePrivate");
-  auto funcParams = new std::vector<FunctionParameter>();
-  funcParams->emplace_back(new Datatype(TYPES::INT), new Variable("inputA"));
-  funcParams->emplace_back(new Datatype(TYPES::INT), new Variable("inputB"));
-  funcParams->emplace_back(new Datatype(TYPES::INT), new Variable("inputC"));
-  func->setParams(funcParams);
+  auto funcParams = new std::vector<FunctionParameter*>();
+  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputA")));
+  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputB")));
+  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputC")));
+  func->setParams(*funcParams);
 
   // int prod = [inputA * [inputB * inputC]]
   func->addStatement(new VarDecl("prod", TYPES::INT,
@@ -80,11 +80,11 @@ void AstTestingGenerator::_genAstRewritingOne(Ast &ast) {
 void AstTestingGenerator::_genAstRewritingTwo(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computePrivate");
-  auto funcParams = new std::vector<FunctionParameter>();
-  funcParams->emplace_back(new Datatype(TYPES::INT), new Variable("inputA"));
-  funcParams->emplace_back(new Datatype(TYPES::INT), new Variable("inputB"));
-  funcParams->emplace_back(new Datatype(TYPES::INT), new Variable("inputC"));
-  func->setParams(funcParams);
+  auto funcParams = new std::vector<FunctionParameter*>();
+  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputA")));
+  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputB")));
+  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputC")));
+  func->setParams(*funcParams);
 
   // int prod = inputA * inputB;
   func->addStatement(new VarDecl("prod", TYPES::INT,
@@ -112,11 +112,11 @@ void AstTestingGenerator::_genAstRewritingTwo(Ast &ast) {
 void AstTestingGenerator::_genAstRewritingThree(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computePrivate");
-  auto funcParams = new std::vector<FunctionParameter>();
-  funcParams->emplace_back(new Datatype(TYPES::INT), new Variable("inputA"));
-  funcParams->emplace_back(new Datatype(TYPES::INT), new Variable("inputB"));
-  funcParams->emplace_back(new Datatype(TYPES::INT), new Variable("inputC"));
-  func->setParams(funcParams);
+  auto funcParams = new std::vector<FunctionParameter*>();
+  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputA")));
+  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputB")));
+  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputC")));
+  func->setParams(*funcParams);
 
   // int prod = inputA * inputB;
   func->addStatement(new VarDecl("prod", TYPES::INT,
@@ -147,11 +147,11 @@ void AstTestingGenerator::_genAstRewritingThree(Ast &ast) {
 void AstTestingGenerator::_genAstRewritingFour(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computePrivate");
-  auto funcParams = new std::vector<FunctionParameter>();
-  funcParams->emplace_back(new Datatype(TYPES::INT), new Variable("inputA"));
-  funcParams->emplace_back(new Datatype(TYPES::INT), new Variable("inputB"));
-  funcParams->emplace_back(new Datatype(TYPES::INT), new Variable("inputC"));
-  func->setParams(funcParams);
+  auto funcParams = new std::vector<FunctionParameter*>();
+  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputA")));
+  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputB")));
+  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputC")));
+  func->setParams(*funcParams);
 
   // int prod = inputA * inputB;
   func->addStatement(new VarDecl("prod", TYPES::INT,
@@ -181,11 +181,11 @@ void AstTestingGenerator::_genAstRewritingFour(Ast &ast) {
 void AstTestingGenerator::_genAstRewritingFive(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computePrivate");
-  auto funcParams = new std::vector<FunctionParameter>();
-  funcParams->emplace_back(new Datatype(TYPES::INT), new Variable("inputA"));
-  funcParams->emplace_back(new Datatype(TYPES::INT), new Variable("inputB"));
-  funcParams->emplace_back(new Datatype(TYPES::INT), new Variable("inputC"));
-  func->setParams(funcParams);
+  auto funcParams = new std::vector<FunctionParameter*>();
+  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputA")));
+  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputB")));
+  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputC")));
+  func->setParams(*funcParams);
 
   // int prod = inputA * inputB;
   func->addStatement(new VarDecl("prod", TYPES::INT,
@@ -213,11 +213,11 @@ void AstTestingGenerator::_genAstRewritingFive(Ast &ast) {
 void AstTestingGenerator::_genAstRewritingSix(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computePrivate");
-  auto funcParams = new std::vector<FunctionParameter>();
-  funcParams->emplace_back(new Datatype(TYPES::INT), new Variable("inputA"));
-  funcParams->emplace_back(new Datatype(TYPES::INT), new Variable("inputB"));
-  funcParams->emplace_back(new Datatype(TYPES::INT), new Variable("inputC"));
-  func->setParams(funcParams);
+  auto funcParams = new std::vector<FunctionParameter*>();
+  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputA")));
+  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputB")));
+  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputC")));
+  func->setParams(*funcParams);
 
   // int prod = inputA * inputB;
   func->addStatement(new VarDecl("prod", TYPES::INT,
@@ -245,11 +245,11 @@ void AstTestingGenerator::_genAstRewritingSix(Ast &ast) {
 void AstTestingGenerator::_genAstEvalOne(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computeAvg");
-  auto funcParams = new std::vector<FunctionParameter>();
-  funcParams->emplace_back(new Datatype(TYPES::INT), new Variable("width"));
-  funcParams->emplace_back(new Datatype(TYPES::INT), new Variable("length"));
-  funcParams->emplace_back(new Datatype(TYPES::INT), new Variable("depth"));
-  func->setParams(funcParams);
+  auto funcParams = new std::vector<FunctionParameter*>();
+  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("width")));
+  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("length")));
+  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("depth")));
+  func->setParams(*funcParams);
 
   // int prod = inputA * inputB * inputC
   func->addStatement(new VarDecl("prod", TYPES::INT,
@@ -273,11 +273,11 @@ void AstTestingGenerator::_genAstEvalOne(Ast &ast) {
 void AstTestingGenerator::_genAstEvalTwo(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computePrivate");
-  auto funcParams = new std::vector<FunctionParameter>();
-  funcParams->emplace_back(new Datatype(TYPES::INT), new Variable("inputA"));
-  funcParams->emplace_back(new Datatype(TYPES::INT), new Variable("inputB"));
-  funcParams->emplace_back(new Datatype(TYPES::BOOL), new Variable("takeIf"));
-  func->setParams(funcParams);
+  auto funcParams = new std::vector<FunctionParameter*>();
+  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputA")));
+  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputB")));
+  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::BOOL), new Variable("takeIf")));
+  func->setParams(*funcParams);
 
   // int prod = inputA * inputB;
   func->addStatement(new VarDecl("prod", TYPES::INT,
@@ -310,12 +310,12 @@ void AstTestingGenerator::_genAstEvalTwo(Ast &ast) {
 void AstTestingGenerator::_genAstEvalThree(Ast &ast) {
   // bool computeLogical(int inputA, bool strong, bool negate, int inputB)
   auto func = new Function("computePrivate");
-  auto funcParams = new std::vector<FunctionParameter>();
-  funcParams->emplace_back(new Datatype(TYPES::INT), new Variable("inputA"));
-  funcParams->emplace_back(new Datatype(TYPES::BOOL), new Variable("strong"));
-  funcParams->emplace_back(new Datatype(TYPES::BOOL), new Variable("negate"));
-  funcParams->emplace_back(new Datatype(TYPES::INT), new Variable("inputB"));
-  func->setParams(funcParams);
+  auto funcParams = new std::vector<FunctionParameter*>();
+  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputA")));
+  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::BOOL), new Variable("strong")));
+  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::BOOL), new Variable("negate")));
+  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputB")));
+  func->setParams(*funcParams);
 
   // if (strong == true) { inputA = inputA * 42; } else { inputA = inputA + 42; }
   func->addStatement(new If(
@@ -346,10 +346,10 @@ void AstTestingGenerator::_genAstEvalThree(Ast &ast) {
 
 void AstTestingGenerator::_genAstEvalFour(Ast &ast) {
   auto func = new Function("concatString");
-  auto funcParams = new std::vector<FunctionParameter>();
-  funcParams->emplace_back(new Datatype(TYPES::STRING), new Variable("strA"));
-  funcParams->emplace_back(new Datatype(TYPES::STRING), new Variable("strB"));
-  func->setParams(funcParams);
+  auto funcParams = new std::vector<FunctionParameter*>();
+  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::STRING), new Variable("strA")));
+  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::STRING), new Variable("strB")));
+  func->setParams(*funcParams);
 
   // return strA + strB
   func->addStatement(new Return(new BinaryExpr(new Variable("strA"), OpSymb::addition, new Variable("strB"))));
@@ -419,7 +419,7 @@ void AstTestingGenerator::_genAstEvalSix(Ast &ast) {
   fnc->addStatement(new VarAssignm("result", new Call(
       {new FunctionParameter("int", new LiteralInt(33))},
       new Function("computeSecret",
-                   {FunctionParameter("int", new Variable("inputA"))},
+                   {new FunctionParameter("int", new Variable("inputA"))},
                    {new Return(
                        new BinaryExpr(
                            new Variable("inputA"),
@@ -441,7 +441,7 @@ void AstTestingGenerator::_genAstEvalSeven(Ast &ast) {
   fnc->addStatement(new VarAssignm("result", new Call(
       {new FunctionParameter("int", new BinaryExpr(new LiteralInt(11), OpSymb::addition, new LiteralInt(213)))},
       new Function("computeSecret",
-                   {FunctionParameter("int", new Variable("inputA"))},
+                   {new FunctionParameter("int", new Variable("inputA"))},
                    {new Return(
                        new BinaryExpr(
                            new Variable("inputA"),
@@ -550,9 +550,8 @@ void AstTestingGenerator::_genAstPrintVisitorTwo(Ast &ast) {
 
   // printf(outStr);
   func->addStatement(
-      new CallExternal("printf",
-                       new std::vector<FunctionParameter>(
-                           {{"string", new Variable("outStr")}})));
+      new CallExternal("printf", {
+          new FunctionParameter("string", new Variable("outStr"))}));
 
   // return sum;
   func->addStatement(
@@ -562,11 +561,11 @@ void AstTestingGenerator::_genAstPrintVisitorTwo(Ast &ast) {
 void AstTestingGenerator::_genAstMultDepthOne(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computePrivate");
-  auto funcParams = new std::vector<FunctionParameter>();
-  funcParams->emplace_back(new Datatype(TYPES::INT), new Variable("inputA"));
-  funcParams->emplace_back(new Datatype(TYPES::INT), new Variable("inputB"));
-  funcParams->emplace_back(new Datatype(TYPES::INT), new Variable("inputC"));
-  func->setParams(funcParams);
+  auto funcParams = new std::vector<FunctionParameter*>();
+  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputA")));
+  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputB")));
+  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputC")));
+  func->setParams(*funcParams);
 
   // int prod = inputA * inputB;
   func->addStatement(new VarDecl("prod", TYPES::INT,
@@ -594,10 +593,10 @@ void AstTestingGenerator::_genAstMultDepthOne(Ast &ast) {
 void AstTestingGenerator::_genAstMultDepthTwo(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computePrivate");
-  auto funcParams = new std::vector<FunctionParameter>();
-  funcParams->emplace_back(new Datatype(TYPES::INT), new Variable("base"));
-  funcParams->emplace_back(new Datatype(TYPES::INT), new Variable("defaultC"));
-  funcParams->emplace_back(new Datatype(TYPES::BOOL), new Variable("useBase"));
+  auto funcParams = new std::vector<FunctionParameter*>();
+  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("base")));
+  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("defaultC")));
+  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::BOOL), new Variable("useBase")));
 
   // int stdA = 512;
   func->addStatement(new VarDecl("stdA", 512));

@@ -58,13 +58,13 @@ Literal* Call::evaluate(Ast &ast) {
   for (int i = 0; i < this->getFunc()->getParams().size(); i++) {
     // validation: make sure that datatypes in Call and Function are equal
     auto datatypeCall = *this->getArguments().at(i)->getDatatype();
-    auto datatypeFunc = *this->getFunc()->getParams().at(i).getDatatype();
+    auto datatypeFunc = *this->getFunc()->getParams().at(i)->getDatatype();
     if (datatypeCall != datatypeFunc)
       throw std::logic_error("Datatype in Call and Function mismatch! Cannot continue."
                              "Position of parameters in Call and Function must be equal.");
 
     // variable identifier: retrieve the variable identifier to bind the value to
-    auto val = this->getFunc()->getParams().at(i).getValue();
+    auto val = this->getFunc()->getParams().at(i)->getValue();
     std::string varIdentifier;
     if (auto var = dynamic_cast<Variable*>(val)) {
       varIdentifier = var->getIdentifier();
@@ -85,4 +85,13 @@ Literal* Call::evaluate(Ast &ast) {
   // evaluate called function (returns nullptr if function is void)
   Ast subAst(this->getFunc());
   return subAst.evaluateAst(paramValues, false);
+}
+
+Node* Call::createClonedNode(bool keepOriginalUniqueNodeId) {
+  std::vector<FunctionParameter*> clonedArgs;
+  for (auto &arg : getArguments()) {
+    clonedArgs.push_back(arg->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<FunctionParameter>());
+  }
+  return static_cast<AbstractStatement*>(
+      new Call(clonedArgs, this->getFunc()->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<Function>()));
 }

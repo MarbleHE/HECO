@@ -53,9 +53,9 @@ void Visitor::visit(Call &elem) {
 void Visitor::visit(CallExternal &elem) {
   curScope->addStatement(&elem);
   // arguments for calling function
-  if (elem.getArguments() != nullptr) {
-    for (auto &fp : *elem.getArguments()) {
-      fp.accept(*this);
+  if (!elem.getArguments().empty()) {
+    for (auto &fp : elem.getArguments()) {
+      fp->accept(*this);
     }
   }
 }
@@ -65,7 +65,7 @@ void Visitor::visit(Function &elem) {
   changeToInnerScope(elem.getUniqueNodeId());
   // visit FunctionParameter
   for (auto fp : elem.getParams()) {
-    fp.accept(*this);
+    fp->accept(*this);
   }
   // visit Body statements
   for (auto &stmt : elem.getBody()) {

@@ -42,6 +42,7 @@ class Operator : public Node {
   [[nodiscard]] bool equals(std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp> op) const;
 
   Literal* applyOperator(Literal* lhs, Literal* rhs);
+
   Literal* applyOperator(Literal* rhs);
 
   template<typename A>
@@ -69,10 +70,12 @@ class Operator : public Node {
   Literal* applyOperator(LiteralFloat* rhs);
 
   [[nodiscard]] std::string toString() const override;
+
   bool supportsCircuitMode() override;
+
   virtual ~Operator();
 
-  Node* cloneRecursiveDeep(bool keepOriginalUniqueNodeId) override;
+  Node* createClonedNode(bool keepOriginalUniqueNodeId) override;
 };
 
 #endif //MASTER_THESIS_CODE_OPERATOR_H

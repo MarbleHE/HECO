@@ -10,10 +10,13 @@ class Variable : public AbstractExpr {
  private:
   std::string identifier;
 
+  Node* createClonedNode(bool keepOriginalUniqueNodeId) override;
+
  public:
   explicit Variable(std::string identifier);
 
   [[nodiscard]] json toJson() const override;
+
   virtual ~Variable();
 
   void accept(Visitor &v) override;
@@ -37,8 +40,6 @@ class Variable : public AbstractExpr {
   [[nodiscard]] std::string toString() const override;
 
   bool supportsCircuitMode() override;
-
-  Node* cloneRecursiveDeep(bool keepOriginalUniqueNodeId) override;
 };
 
 #endif //MASTER_THESIS_CODE_VARIABLE_H

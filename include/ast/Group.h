@@ -5,6 +5,9 @@
 #include <string>
 
 class Group : public AbstractExpr {
+ private:
+  Node* createClonedNode(bool keepOriginalUniqueNodeId) override;
+
  public:
   explicit Group(AbstractExpr* expr);
 
@@ -25,6 +28,7 @@ class Group : public AbstractExpr {
   bool supportsCircuitMode() override;
 
   int getMaxNumberChildren() override;
+
   void setAttributes(AbstractExpr* expression);
 };
 

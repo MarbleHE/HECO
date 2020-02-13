@@ -69,8 +69,6 @@ bool LiteralBool::supportsDatatype(Datatype &datatype) {
   return datatype.getType() == TYPES::BOOL;
 }
 
-Node* LiteralBool::cloneRecursiveDeep(bool keepOriginalUniqueNodeId) {
-  Node* clonedLiteralBool = new LiteralBool(this->getValue());
-  if (keepOriginalUniqueNodeId) clonedLiteralBool->setUniqueNodeId(this->getUniqueNodeId());
-  return clonedLiteralBool;
+Node* LiteralBool::createClonedNode(bool keepOriginalUniqueNodeId) {
+  return new LiteralBool(this->getValue());
 }

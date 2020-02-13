@@ -6,10 +6,6 @@
 #include "Operator.h"
 
 class UnaryExpr : public AbstractExpr {
- private:
-//  Operator* op;
-//  AbstractExpr* right;
-
  public:
   UnaryExpr(OpSymb::UnaryOp op, AbstractExpr* right);
 
@@ -26,10 +22,16 @@ class UnaryExpr : public AbstractExpr {
   ~UnaryExpr() override;
 
   Literal* evaluate(Ast &ast) override;
+
+  void setAttributes(OpSymb::UnaryOp op, AbstractExpr* expr);
+
  protected:
   bool supportsCircuitMode() override;
+
   int getMaxNumberChildren() override;
-  void setAttributes(OpSymb::UnaryOp op, AbstractExpr* expr);
+
+ private:
+  Node* createClonedNode(bool keepOriginalUniqueNodeId) override;
 };
 
 #endif //MASTER_THESIS_CODE_UNARYEXPR_H

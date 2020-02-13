@@ -7,29 +7,25 @@
 #include "Return.h"
 
 void Function::addParameter(FunctionParameter* param) {
-  this->params.emplace_back(*param);
+  this->params.emplace_back(param);
 }
 
 Function::Function(std::string name, std::vector<AbstractStatement*> pt) : name(std::move(name)), body(std::move(pt)) {
   for (auto &stmt : getBody()) {
     auto previous = *(&stmt - 1);
     auto next = *(&stmt + 1);
-    if (previous != nullptr) {
-      stmt->addParent(previous);
-    }
-    if (next != nullptr) {
-      stmt->addChild(next);
-    }
+    if (previous != nullptr) stmt->addParent(previous);
+    if (next != nullptr) stmt->addChild(next);
   }
 }
 
 Function::Function(std::string name) : name(std::move(name)) {
 }
 
-Function::Function(std::string name, std::vector<FunctionParameter> params,
-                   std::vector<AbstractStatement*> body) : name(std::move(name)),
-                                                           params(std::move(params)),
-                                                           body(std::move(body)) {}
+Function::Function(std::string functionName, std::vector<FunctionParameter*> functionParameters,
+                   std::vector<AbstractStatement*> functionStatements) : name(std::move(functionName)),
+                                                                         params(std::move(functionParameters)),
+                                                                         body(std::move(functionStatements)) {}
 
 void Function::addStatement(AbstractStatement* statement) {
   this->body.emplace_back(statement);
@@ -37,10 +33,6 @@ void Function::addStatement(AbstractStatement* statement) {
 
 const std::string &Function::getName() const {
   return name;
-}
-
-const std::vector<FunctionParameter> &Function::getParams() const {
-  return params;
 }
 
 void Function::accept(Visitor &v) {
@@ -73,8 +65,8 @@ std::string Function::getNodeName() const {
   return "Function";
 }
 
-void Function::setParams(std::vector<FunctionParameter>* paramsVec) {
-  this->params = *paramsVec;
+void Function::setParams(std::vector<FunctionParameter*> paramsVec) {
+  this->params = std::move(paramsVec);
 }
 
 Literal* Function::evaluate(Ast &ast) {
@@ -91,3 +83,18 @@ Literal* Function::evaluate(Ast &ast) {
   return nullptr;
 }
 
+Node* Function::createClonedNode(bool keepOriginalUniqueNodeId) {
+  std::vector<FunctionParameter*> clonedParams;
+  for (auto &fp : getParams()) {
+    clonedParams.push_back(fp->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<FunctionParameter>());
+  }
+  std::vector<AbstractStatement*> clonedBody;
+  for (auto &statement : getBody()) {
+    clonedBody.push_back(statement->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractStatement>());
+  }
+  return new Function(this->getName(), clonedParams, clonedBody);
+}
+
+const std::vector<FunctionParameter*> &Function::getParams() const {
+  return params;
+}

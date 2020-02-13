@@ -66,3 +66,7 @@ bool LiteralString::supportsCircuitMode() {
 bool LiteralString::supportsDatatype(Datatype &datatype) {
   return datatype.getType() == TYPES::STRING;
 }
+
+Node* LiteralString::createClonedNode(bool keepOriginalUniqueNodeId) {
+  return new LiteralString(this->getValue());
+}

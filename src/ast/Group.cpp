@@ -53,3 +53,6 @@ void Group::setAttributes(AbstractExpr* expression) {
   Node::addParentTo(this, {expression});
 }
 
+Node* Group::createClonedNode(bool keepOriginalUniqueNodeId) {
+  return new Group(this->getExpr()->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
+}

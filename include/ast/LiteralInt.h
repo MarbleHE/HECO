@@ -46,6 +46,8 @@ class LiteralInt : public Literal {
   void print(std::ostream &str) const override;
 
   bool supportsCircuitMode() override;
+ private:
+  Node* createClonedNode(bool keepOriginalUniqueNodeId) override;
 };
 
 #endif //MASTER_THESIS_CODE_LITERALINT_H

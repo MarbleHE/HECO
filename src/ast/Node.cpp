@@ -209,10 +209,6 @@ std::ostream &operator<<(std::ostream &os, const std::vector<Node*> &v) {
   return os;
 }
 
-Node* Node::cloneFlat() {
-  throw std::logic_error("ERROR: cloneFlat() not implemented for node of type " + getNodeName());
-}
-
 Node* Node::getUnderlyingNode() const {
   return underlyingNode;
 }
@@ -241,8 +237,26 @@ std::vector<Node*> Node::getAnc() {
   return std::vector<Node*>(result.begin(), result.end());
 }
 
+Node* Node::cloneFlat() {
+  throw std::logic_error("ERROR: cloneFlat() not implemented for node of type " + getNodeName());
+}
+
 Node* Node::cloneRecursiveDeep(bool keepOriginalUniqueNodeId) {
-  throw std::logic_error("ERROR: cloneRecursiveDeep() not implemented for node of type " + getNodeName());
+  // call polymorphic createClonedNode to copy derived class-specific fields
+  Node* clonedNode = this->createClonedNode(keepOriginalUniqueNodeId);
+
+  // perform cloning of fields belonging to Node
+  if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
+  if (this->isReversed) clonedNode->swapChildrenParents();
+  if (this->underlyingNode != nullptr) clonedNode->setUnderlyingNode(this->getUnderlyingNode());
+
+  return clonedNode;
+}
+
+Node* Node::createClonedNode(bool keepOriginalUniqueNodeId) {
+  throw std::logic_error(
+      "ERROR: Cannot execute cloneRecursiveDeep(...) because createClonedNode(...) is not implemented for node of type "
+          + getNodeName());
 }
 
 bool Node::hasParent(Node* n) {

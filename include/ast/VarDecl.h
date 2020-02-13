@@ -49,9 +49,14 @@ class VarDecl : public AbstractStatement {
   bool isEqual(AbstractStatement* as) override;
 
   Literal* evaluate(Ast &ast) override;
+
   void setAttributes(std::string varIdentifier, Datatype* datatype, AbstractExpr* value);
+
   bool supportsCircuitMode() override;
+
   int getMaxNumberChildren() override;
+ private:
+  Node* createClonedNode(bool keepOriginalUniqueNodeId) override;
 };
 
 #endif //MASTER_THESIS_CODE_VARDECL_H

@@ -320,10 +320,7 @@ const std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp> &Operat
 
 Operator::~Operator() = default;
 
-Node* Operator::cloneRecursiveDeep(bool keepOriginalUniqueNodeId) {
-  auto clonedOperator = new Operator(this->getOperatorSymbol());
-  if (keepOriginalUniqueNodeId) {
-    clonedOperator->setUniqueNodeId(this->getUniqueNodeId());
-  }
-  return clonedOperator;
+Node* Operator::createClonedNode(bool keepOriginalUniqueNodeId) {
+  return new Operator(this->getOperatorSymbol());
 }
+

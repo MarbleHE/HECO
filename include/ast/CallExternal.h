@@ -8,12 +8,14 @@
 class CallExternal : public AbstractExpr, public AbstractStatement {
  private:
   std::string functionName;
-  std::vector<FunctionParameter>* arguments;
+  std::vector<FunctionParameter*> arguments;
+
+  Node* createClonedNode(bool keepOriginalUniqueNodeId) override;
 
  public:
   explicit CallExternal(std::string functionName);
 
-  CallExternal(std::string functionName, std::vector<FunctionParameter>* arguments);
+  CallExternal(std::string functionName, std::vector<FunctionParameter*> arguments);
 
   [[nodiscard]] json toJson() const override;
 
@@ -21,7 +23,7 @@ class CallExternal : public AbstractExpr, public AbstractStatement {
 
   [[nodiscard]] const std::string &getFunctionName() const;
 
-  [[nodiscard]] std::vector<FunctionParameter>* getArguments() const;
+  [[nodiscard]] const std::vector<FunctionParameter*> &getArguments() const;
 
   [[nodiscard]] std::string getNodeName() const override;
 

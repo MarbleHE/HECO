@@ -9,8 +9,10 @@
 
 class Call : public AbstractExpr, public AbstractStatement {
  private:
-  Function* func{};
+  Function* func{nullptr};
   std::vector<FunctionParameter*> arguments;
+
+  Node* createClonedNode(bool keepOriginalUniqueNodeId) override;
 
  public:
   Call(std::vector<FunctionParameter*> arguments, Function* func);

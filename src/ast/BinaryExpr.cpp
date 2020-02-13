@@ -116,3 +116,9 @@ int BinaryExpr::getMaxNumberChildren() {
 bool BinaryExpr::supportsCircuitMode() {
   return true;
 }
+
+Node* BinaryExpr::createClonedNode(bool keepOriginalUniqueNodeId) {
+  return new BinaryExpr(this->getLeft()->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
+                        this->getOp()->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<Operator>(),
+                        this->getRight()->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
+}

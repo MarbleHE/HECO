@@ -32,6 +32,8 @@ class If : public AbstractStatement {
 
   Literal* evaluate(Ast &ast) override;
   void updateTree();
+ private:
+  Node* createClonedNode(bool keepOriginalUniqueNodeId) override;
 };
 
 #endif //MASTER_THESIS_CODE_IF_H

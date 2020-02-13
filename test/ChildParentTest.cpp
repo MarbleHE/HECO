@@ -187,8 +187,97 @@ TEST_F(FunctionFixture, FunctionNotSupportedInCircuitMode) {  /* NOLINT */
   ASSERT_EQ(funcComputeX->getMaxNumberChildren(), 0);
 }
 
-TEST(ChildParentTests, FunctionParameter) {  /* NOLINT */
-  // TODO(pjattke): implement me!
+class FunctionParameterFixture : public ::testing::Test {
+ protected:
+  Datatype* datatype;
+  Datatype* datatype2;
+  TYPES datatypeEnum;
+  std::string datatypeAsString;
+  AbstractExpr* variableThreshold;
+  AbstractExpr* variableSecret;
+
+  FunctionParameterFixture() {
+    datatypeEnum = TYPES::INT;
+    datatypeAsString = Datatype::enum_to_string(datatypeEnum);
+    datatype = new Datatype(datatypeEnum);
+    datatype2 = new Datatype(TYPES::FLOAT);
+    variableThreshold = new Variable("threshold");
+    variableSecret = new Variable("secretNumber");
+  }
+};
+
+TEST_F(FunctionParameterFixture, FunctionParameterStandardConstructor) {  /* NOLINT */
+  auto* functionParameter = new FunctionParameter(datatypeAsString, variableThreshold);
+
+  // children
+  ASSERT_EQ(functionParameter->getChildren().size(), 2);
+  ASSERT_EQ(functionParameter->getChildAtIndex(0)->castTo<Datatype>()->getType(), datatypeEnum);
+  ASSERT_EQ(functionParameter->getChildAtIndex(1), variableThreshold);
+
+  // parents
+  ASSERT_EQ(functionParameter->getParents().size(), 0);
+  ASSERT_EQ(functionParameter->getChildAtIndex(0)->getParents().size(), 1);
+  ASSERT_TRUE(functionParameter->getChildAtIndex(0)->hasParent(functionParameter));
+  ASSERT_EQ(functionParameter->getChildAtIndex(1)->getParents().size(), 1);
+  ASSERT_TRUE(functionParameter->getChildAtIndex(1)->hasParent(functionParameter));
+}
+
+TEST_F(FunctionParameterFixture, FunctionParameterAddChildExceptionDatatypeConstructor) {  /* NOLINT */
+  auto* functionParameter = new FunctionParameter(datatype, variableThreshold);
+
+  // children
+  ASSERT_EQ(functionParameter->getChildren().size(), 2);
+  ASSERT_EQ(functionParameter->getChildAtIndex(0), datatype);
+  ASSERT_EQ(functionParameter->getChildAtIndex(1), variableThreshold);
+
+  // parents
+  ASSERT_EQ(functionParameter->getParents().size(), 0);
+  ASSERT_EQ(functionParameter->getChildAtIndex(0)->getParents().size(), 1);
+  ASSERT_TRUE(functionParameter->getChildAtIndex(0)->hasParent(functionParameter));
+  ASSERT_EQ(functionParameter->getChildAtIndex(1)->getParents().size(), 1);
+  ASSERT_TRUE(functionParameter->getChildAtIndex(1)->hasParent(functionParameter));
+}
+
+TEST_F(FunctionParameterFixture, FunctionParameterAddChildException_NoEmptyChildSpotAvailable) {  /* NOLINT */
+  auto* functionParameter = new FunctionParameter(datatype, variableThreshold);
+  EXPECT_THROW(functionParameter->addChild(variableSecret), std::logic_error);
+}
+
+TEST_F(FunctionParameterFixture, FunctionParameterAddChildException_TooManyChildrenAdded) {  /* NOLINT */
+  auto* functionParameter = new FunctionParameter(datatype, variableThreshold);
+  EXPECT_THROW(functionParameter->addChildren({{datatype, variableSecret, variableThreshold}}), std::invalid_argument);
+}
+
+TEST_F(FunctionParameterFixture, FunctionParameter_AddChildSuccess) {  /* NOLINT */
+  auto* functionParameter = new FunctionParameter(datatype, variableThreshold);
+
+  functionParameter->removeChild(variableThreshold);
+  functionParameter->addChildBilateral(variableSecret);
+
+  // children
+  EXPECT_EQ(functionParameter->getChildren().size(), 2);
+  EXPECT_EQ(functionParameter->getValue(), variableSecret);
+  EXPECT_EQ(functionParameter->getChildAtIndex(1), variableSecret);
+
+  // parents
+  EXPECT_EQ(functionParameter->getParents().size(), 0);
+  EXPECT_EQ(variableSecret->getParents().size(), 1);
+  EXPECT_EQ(variableSecret->getParents().front(), functionParameter);
+  EXPECT_TRUE(variableSecret->hasParent(functionParameter));
+
+  functionParameter->removeChild(datatype);
+  functionParameter->addChildBilateral(datatype2);
+
+  // children
+  EXPECT_EQ(functionParameter->getChildren().size(), 2);
+  EXPECT_EQ(functionParameter->getDatatype(), datatype2);
+  EXPECT_EQ(functionParameter->getChildAtIndex(0), datatype2);
+
+  // parents
+  EXPECT_EQ(functionParameter->getParents().size(), 0);
+  EXPECT_EQ(datatype2->getParents().size(), 1);
+  EXPECT_EQ(datatype2->getParents().front(), functionParameter);
+  EXPECT_TRUE(datatype2->hasParent(functionParameter));
 }
 
 class GroupFixture : public ::testing::Test {
@@ -225,7 +314,7 @@ TEST_F(GroupFixture, GroupAddChildException_TooManyChildrenAdded) {  /* NOLINT *
   EXPECT_THROW(groupStatement->addChildren({{expression2, expression}}), std::invalid_argument);
 }
 
-TEST_F(GroupFixture, GroupAddChildException_AddChildSuccess) {  /* NOLINT */
+TEST_F(GroupFixture, Group_AddChildSuccess) {  /* NOLINT */
   auto* groupStatement = new Group(expression);
   groupStatement->removeChild(expression);
   groupStatement->addChildBilateral(expression2);
@@ -486,7 +575,7 @@ TEST_F(UnaryExprFixture, UnaryExprAddChildException_TooManyChildrenAdded) {  /* 
   EXPECT_THROW(unaryExpr->addChildren({new Operator(OpSymb::decrement), new LiteralBool(false)}), std::logic_error);
 }
 
-TEST_F(UnaryExprFixture, UnaryExprAddChildException_AddChildSuccess) {  /* NOLINT */
+TEST_F(UnaryExprFixture, UnaryExprtion_AddChildSuccess) {  /* NOLINT */
   auto* unaryExpr = new UnaryExpr(opSymbNegation, literalBoolTrue);
 
   unaryExpr->removeChild(unaryExpr->getOp());
@@ -642,12 +731,4 @@ TEST(ChildParentTests, While) {  /* NOLINT */
   ASSERT_EQ(whileStatement->getParents().size(), 0);
   ASSERT_FALSE(whileStatement->supportsCircuitMode());
   ASSERT_EQ(whileStatement->getMaxNumberChildren(), 0);
-}
-
-TEST(ChildParentTests, ComplexCircuit1_CountNumberOfReachableNodes) {  /* NOLINT */
-  // TODO(pjattke): implement me!
-
-  // count number of nodes reachable using forward edges (children) starting from AST root node
-
-  // count number of nodes reachable using backward edges (parents) starting from leaf nodes
 }

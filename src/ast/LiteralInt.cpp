@@ -74,4 +74,8 @@ bool LiteralInt::supportsCircuitMode() {
   return true;
 }
 
+Node* LiteralInt::createClonedNode(bool keepOriginalUniqueNodeId) {
+  return new LiteralInt(this->getValue());
+}
+
 

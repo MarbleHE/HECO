@@ -50,11 +50,13 @@ class LogicalExpr : public AbstractExpr {
 
   void setAttributes(AbstractExpr* leftOperand, Operator* operatore, AbstractExpr* rightOperand);
 
-  Node* cloneRecursiveDeep(bool keepOriginalUniqueNodeId) override;
-
  protected:
   int getMaxNumberChildren() override;
+
   bool supportsCircuitMode() override;
+
+ private:
+  Node* createClonedNode(bool keepOriginalUniqueNodeId) override;
 };
 
 #endif //MASTER_THESIS_CODE_LOGICALEXPR_H

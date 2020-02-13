@@ -50,3 +50,13 @@ void UnaryExpr::setAttributes(OpSymb::UnaryOp op, AbstractExpr* expr) {
   addChildren(nodesToBeAdded);
   Node::addParentTo(this, nodesToBeAdded);
 }
+
+Node* UnaryExpr::createClonedNode(bool keepOriginalUniqueNodeId) {
+  try {
+    return new UnaryExpr(std::get<OpSymb::UnaryOp>(this->getOp()->getOperatorSymbol()),
+                         this->getRight()->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
+  } catch (std::bad_variant_access &exc) {
+    throw std::runtime_error(
+        "Failed to clone UnaryExpr - unexpected Operator encountered! Expected operator of Enum OpSymb::UnaryOp.");
+  }
+}

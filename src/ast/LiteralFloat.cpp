@@ -74,3 +74,7 @@ bool LiteralFloat::supportsCircuitMode() {
 bool LiteralFloat::supportsDatatype(Datatype &datatype) {
   return datatype.getType() == TYPES::FLOAT;
 }
+
+Node* LiteralFloat::createClonedNode(bool keepOriginalUniqueNodeId) {
+  return new LiteralFloat(this->getValue());;
+}

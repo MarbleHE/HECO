@@ -10,8 +10,7 @@ class LiteralFloat : public Literal {
  private:
   float value;
 
- protected:
-  void print(std::ostream &str) const override;
+  Node* createClonedNode(bool keepOriginalUniqueNodeId) override;
 
  public:
   explicit LiteralFloat(float value);
@@ -39,11 +38,16 @@ class LiteralFloat : public Literal {
   void addLiteralValue(std::string identifier, std::map<std::string, Literal*> &paramsMap) override;
 
   void setRandomValue(RandLiteralGen &rlg) override;
+
   void setValue(float val);
 
   [[nodiscard]] std::string toString() const override;
+
   bool supportsCircuitMode() override;
+
   bool supportsDatatype(Datatype &datatype) override;
+
+  void print(std::ostream &str) const override;
 };
 
 #endif //MASTER_THESIS_CODE_LITERALFLOAT_H

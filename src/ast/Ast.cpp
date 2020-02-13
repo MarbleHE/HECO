@@ -110,19 +110,19 @@ Literal* Ast::evaluateAst(const std::map<std::string, Literal*> &paramValues, bo
   // make sure that all parameters specified by the function have a defined value
   for (const auto &fp : func->getParams()) {
     // check if FunctionParameter is a variable (can also be a hard-coded value, e.g., a LiteralInt)
-    if (auto var = dynamic_cast<Variable*>(fp.getValue())) {
+    if (auto var = dynamic_cast<Variable*>(fp->getValue())) {
       // throw an error if variable value for var is not defined
       if (!hasVarValue(var)) {
         throw std::invalid_argument("AST evaluation requires parameter value for parameter " + var->getIdentifier());
       }
       // throw an error if type of given parameter value and type of expected value do not match
-      if (!getVarValue(var->getIdentifier())->supportsDatatype(*fp.getDatatype())) {
+      if (!getVarValue(var->getIdentifier())->supportsDatatype(*fp->getDatatype())) {
         std::stringstream ss;
         ss << "AST evaluation cannot proceed because datatype of given parameter and expected datatype differs:\n";
         ss << "Variable " << var->getIdentifier() << " ";
         ss << "(value: " << *getVarValue(var->getIdentifier()) << ")";
         ss << " is not of type ";
-        ss << fp.getDatatype()->toString() << ".";
+        ss << fp->getDatatype()->toString() << ".";
         throw std::invalid_argument(ss.str());
       }
     }

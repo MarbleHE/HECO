@@ -36,16 +36,46 @@ std::string FunctionParameter::getNodeName() const {
 }
 
 AbstractExpr* FunctionParameter::getValue() const {
-  return value;
+  return reinterpret_cast<AbstractExpr* >(getChildAtIndex(1, true));
 }
 
-FunctionParameter::FunctionParameter(Datatype* datatype, AbstractExpr* value) : datatype(datatype), value(value) {}
+FunctionParameter::FunctionParameter(Datatype* datatype, AbstractExpr* value) {
+  setAttributes(datatype, value);
+}
 
-FunctionParameter::FunctionParameter(std::string datatype, AbstractExpr* value) : value(value) {
-  this->datatype = new Datatype(std::move(datatype));
+FunctionParameter::FunctionParameter(std::string datatypeEnumString, AbstractExpr* value) {
+  setAttributes(new Datatype(std::move(datatypeEnumString)), value);
 }
 
 Datatype* FunctionParameter::getDatatype() const {
-  return datatype;
+  return reinterpret_cast<Datatype* >(getChildAtIndex(0, true));
+}
+
+Node* FunctionParameter::createClonedNode(bool keepOriginalUniqueNodeId) {
+  return new FunctionParameter(this->getDatatype()->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<Datatype>(),
+                               this->getValue()->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
+}
+
+int FunctionParameter::getMaxNumberChildren() {
+  return 2;
+}
+
+bool FunctionParameter::supportsCircuitMode() {
+  return true;
+}
+
+void FunctionParameter::setAttributes(Datatype* datatype, AbstractExpr* value) {
+  // update tree structure
+  removeChildren();
+  addChildren({datatype, value}, false);
+  Node::addParentTo(this, {datatype, value});
+}
+
+bool FunctionParameter::operator==(const FunctionParameter &rhs) const {
+  return getValue() == rhs.getValue() && getDatatype()->getType() == rhs.getDatatype()->getType();
+}
+
+bool FunctionParameter::operator!=(const FunctionParameter &rhs) const {
+  return !(rhs == *this);
 }
 

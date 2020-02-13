@@ -117,8 +117,6 @@ class Node {
 
   [[nodiscard]] virtual Node* cloneFlat();
 
-  [[nodiscard]] virtual Node* cloneRecursiveDeep(bool keepOriginalUniqueNodeId);
-
   void setUniqueNodeId(const std::string &unique_node_id);
 
   /// This method returns True iff the class derived from the Node class properly makes use of the child/parent fields
@@ -176,12 +174,19 @@ class Node {
     } else {
       std::stringstream outputMsg;
       outputMsg << "Cannot cast object of type Node to given class ";
-      outputMsg << typeid(T).name() << ".";
+      outputMsg << typeid(T).name() << ". ";
       outputMsg << "Because node (" << this->getUniqueNodeId() << ") is of type ";
       outputMsg << this->getNodeName() << ".";
       throw std::logic_error(outputMsg.str());
     }
   }
+
+ public:
+  Node* cloneRecursiveDeep(bool keepOriginalUniqueNodeId);
+
+ private:
+  [[nodiscard]] virtual Node* createClonedNode(bool keepOriginalUniqueNodeId);
+
 };
 
 #endif //MASTER_THESIS_CODE_NODE_H
