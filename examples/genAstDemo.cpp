@@ -278,7 +278,7 @@ void generateDemoFive(Ast &ast) {
 }
 
 void generateDemoSix(Ast &ast) {
-  //(Z * (A * (B * C))) --> ((B * C) * (A * Z))
+  //(Z * (A * (B * C))) --demo rewriter--> ((B * C) * (A * Z))
   // int computeMult() {...}
   Function* func = dynamic_cast<Function*>(ast.setRootNode(new Function("multiMult")));
 
