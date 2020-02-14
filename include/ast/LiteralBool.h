@@ -1,5 +1,5 @@
-#ifndef MASTER_THESIS_CODE_LITERALBOOL_H
-#define MASTER_THESIS_CODE_LITERALBOOL_H
+#ifndef AST_OPTIMIZER_INCLUDE_LITERALBOOL_H
+#define AST_OPTIMIZER_INCLUDE_LITERALBOOL_H
 
 #include "Literal.h"
 #include <string>
@@ -47,4 +47,4 @@ class LiteralBool : public Literal {
   bool supportsCircuitMode() override;
 };
 
-#endif //MASTER_THESIS_CODE_LITERALBOOL_H
+#endif //AST_OPTIMIZER_INCLUDE_LITERALBOOL_H

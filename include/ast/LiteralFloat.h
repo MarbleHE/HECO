@@ -1,5 +1,5 @@
-#ifndef MASTER_THESIS_CODE_LITERALFLOAT_H
-#define MASTER_THESIS_CODE_LITERALFLOAT_H
+#ifndef AST_OPTIMIZER_INCLUDE_LITERALFLOAT_H
+#define AST_OPTIMIZER_INCLUDE_LITERALFLOAT_H
 
 #include "Literal.h"
 #include <string>
@@ -50,4 +50,4 @@ class LiteralFloat : public Literal {
   void print(std::ostream &str) const override;
 };
 
-#endif //MASTER_THESIS_CODE_LITERALFLOAT_H
+#endif //AST_OPTIMIZER_INCLUDE_LITERALFLOAT_H

@@ -1,5 +1,5 @@
-#ifndef MASTER_THESIS_CODE_ABSTRACTSTATEMENT_H
-#define MASTER_THESIS_CODE_ABSTRACTSTATEMENT_H
+#ifndef AST_OPTIMIZER_INCLUDE_ABSTRACTSTATEMENT_H
+#define AST_OPTIMIZER_INCLUDE_ABSTRACTSTATEMENT_H
 
 #include <string>
 #include <nlohmann/json.hpp>
@@ -32,4 +32,4 @@ void to_json(json &j, const AbstractStatement &absStat);
 
 void to_json(json &j, const AbstractStatement* absStat);
 
-#endif //MASTER_THESIS_CODE_ABSTRACTSTATEMENT_H
+#endif //AST_OPTIMIZER_INCLUDE_ABSTRACTSTATEMENT_H

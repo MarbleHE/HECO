@@ -1,5 +1,5 @@
-#ifndef MASTER_THESIS_CODE_LITERAL_H
-#define MASTER_THESIS_CODE_LITERAL_H
+#ifndef AST_OPTIMIZER_INCLUDE_LITERAL_H
+#define AST_OPTIMIZER_INCLUDE_LITERAL_H
 
 #include <variant>
 #include <ostream>
@@ -38,4 +38,4 @@ inline std::ostream &operator<<(std::ostream &os, const std::vector<Literal*> &v
   return os;
 }
 
-#endif //MASTER_THESIS_CODE_LITERAL_H
+#endif //AST_OPTIMIZER_INCLUDE_LITERAL_H

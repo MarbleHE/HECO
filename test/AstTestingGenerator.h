@@ -16,6 +16,7 @@ class AstTestingGenerator {
   static int getLargestId();
 
   // Methods to generate sample ASTs to be used for tests.
+  static void _genSuperSimpleAst(Ast &ast);
   static void _genAstRewritingOne(Ast &ast);
   static void _genAstRewritingTwo(Ast &ast);
   static void _genAstRewritingThree(Ast &ast);

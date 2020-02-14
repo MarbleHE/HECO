@@ -1,5 +1,5 @@
-#ifndef MASTER_THESIS_CODE_VISITOR_H
-#define MASTER_THESIS_CODE_VISITOR_H
+#ifndef AST_OPTIMIZER_INCLUDE_VISITOR_H
+#define AST_OPTIMIZER_INCLUDE_VISITOR_H
 
 #include <string>
 
@@ -110,4 +110,4 @@ class Visitor {
   virtual void visit(Ast &elem);
 };
 
-#endif //MASTER_THESIS_CODE_VISITOR_H
+#endif //AST_OPTIMIZER_INCLUDE_VISITOR_H

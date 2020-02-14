@@ -1,5 +1,5 @@
-#ifndef MASTER_THESIS_CODE_OPERATOR_H
-#define MASTER_THESIS_CODE_OPERATOR_H
+#ifndef AST_OPTIMIZER_INCLUDE_OPERATOR_H
+#define AST_OPTIMIZER_INCLUDE_OPERATOR_H
 
 #include <variant>
 #include <string>
@@ -78,4 +78,4 @@ class Operator : public Node {
   Node* createClonedNode(bool keepOriginalUniqueNodeId) override;
 };
 
-#endif //MASTER_THESIS_CODE_OPERATOR_H
+#endif //AST_OPTIMIZER_INCLUDE_OPERATOR_H

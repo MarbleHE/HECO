@@ -12,8 +12,10 @@
 #include "While.h"
 #include "Call.h"
 #include "Group.h"
+#include "LiteralFloat.h"
 
 static std::map<int, std::function<void(Ast &)> > call = {  /* NOLINT */
+    {0, AstTestingGenerator::_genSuperSimpleAst},
     {1, AstTestingGenerator::_genAstRewritingOne},
     {2, AstTestingGenerator::_genAstRewritingTwo},
     {3, AstTestingGenerator::_genAstRewritingThree},
@@ -47,6 +49,14 @@ void AstTestingGenerator::generateAst(int id, Ast &ast) {
 
 int AstTestingGenerator::getLargestId() {
   return call.size();
+}
+
+void AstTestingGenerator::_genSuperSimpleAst(Ast &ast) {
+  // float getPiApproximated()
+  auto func = new Function("getPiApproximated");
+  // return 3.14159265359;
+  func->addStatement(new Return(new LiteralFloat(3.14159265359f)));
+  ast.setRootNode(func);
 }
 
 void AstTestingGenerator::_genAstRewritingOne(Ast &ast) {

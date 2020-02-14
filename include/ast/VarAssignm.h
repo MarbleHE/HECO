@@ -1,5 +1,5 @@
-#ifndef MASTER_THESIS_CODE_VARASSIGNM_H
-#define MASTER_THESIS_CODE_VARASSIGNM_H
+#ifndef AST_OPTIMIZER_INCLUDE_VARASSIGNM_H
+#define AST_OPTIMIZER_INCLUDE_VARASSIGNM_H
 
 #include <string>
 #include "AbstractStatement.h"
@@ -41,4 +41,4 @@ class VarAssignm : public AbstractStatement {
   Node* createClonedNode(bool keepOriginalUniqueNodeId) override;
 };
 
-#endif //MASTER_THESIS_CODE_VARASSIGNM_H
+#endif //AST_OPTIMIZER_INCLUDE_VARASSIGNM_H

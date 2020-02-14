@@ -1,5 +1,5 @@
-#ifndef MASTER_THESIS_CODE_VARDECL_H
-#define MASTER_THESIS_CODE_VARDECL_H
+#ifndef AST_OPTIMIZER_INCLUDE_VARDECL_H
+#define AST_OPTIMIZER_INCLUDE_VARDECL_H
 
 #include <string>
 #include "AbstractStatement.h"
@@ -59,4 +59,4 @@ class VarDecl : public AbstractStatement {
   Node* createClonedNode(bool keepOriginalUniqueNodeId) override;
 };
 
-#endif //MASTER_THESIS_CODE_VARDECL_H
+#endif //AST_OPTIMIZER_INCLUDE_VARDECL_H

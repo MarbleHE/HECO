@@ -1,5 +1,5 @@
-#ifndef MASTER_THESIS_CODE_FUNCTION_H
-#define MASTER_THESIS_CODE_FUNCTION_H
+#ifndef AST_OPTIMIZER_INCLUDE_FUNCTION_H
+#define AST_OPTIMIZER_INCLUDE_FUNCTION_H
 
 #include <string>
 #include <vector>
@@ -49,4 +49,4 @@ class Function : public AbstractStatement {
 /// Defines the JSON representation to be used for vector<Function> objects.
 void to_json(json &j, const Function &func);
 
-#endif //MASTER_THESIS_CODE_FUNCTION_H
+#endif //AST_OPTIMIZER_INCLUDE_FUNCTION_H

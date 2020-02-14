@@ -1,5 +1,5 @@
-#ifndef MASTER_THESIS_CODE_NODE_H
-#define MASTER_THESIS_CODE_NODE_H
+#ifndef AST_OPTIMIZER_INCLUDE_NODE_H
+#define AST_OPTIMIZER_INCLUDE_NODE_H
 
 #include <vector>
 #include <nlohmann/json.hpp>
@@ -191,4 +191,4 @@ class Node {
 
 };
 
-#endif //MASTER_THESIS_CODE_NODE_H
+#endif //AST_OPTIMIZER_INCLUDE_NODE_H

@@ -1,5 +1,5 @@
-#ifndef MASTER_THESIS_CODE_AST_H
-#define MASTER_THESIS_CODE_AST_H
+#ifndef AST_OPTIMIZER_INCLUDE_AST_H
+#define AST_OPTIMIZER_INCLUDE_AST_H
 
 #include <map>
 #include <string>
@@ -70,7 +70,7 @@ class Ast {
   std::set<Node*> getAllNodes(const std::function<bool(Node*)> &predicate) const;
 };
 
-#endif //MASTER_THESIS_CODE_AST_H
+#endif //AST_OPTIMIZER_INCLUDE_AST_H
 
 
 

@@ -1,5 +1,5 @@
-#ifndef MASTER_THESIS_CODE_INCLUDE_UTILITIES_TESTUTILS_H_
-#define MASTER_THESIS_CODE_INCLUDE_UTILITIES_TESTUTILS_H_
+#ifndef AST_OPTIMIZER_INCLUDE_INCLUDE_UTILITIES_TESTUTILS_H_
+#define AST_OPTIMIZER_INCLUDE_INCLUDE_UTILITIES_TESTUTILS_H_
 
 #include "gtest/gtest.h"
 #include <map>
@@ -21,7 +21,7 @@ struct EvalPrinter {
   bool flagPrintEvaluationResult{false};
 
   // the evaluation parameters associated to the test run
-  std::map<std::string, Literal *> *evaluationParameters;
+  std::map<std::string, Literal*>* evaluationParameters;
 
   void ensureEvalParamsIsSet() {
     if (evaluationParameters == nullptr) {
@@ -43,7 +43,7 @@ struct EvalPrinter {
     return *this;
   }
 
-  EvalPrinter &setEvaluationParameters(std::map<std::string, Literal *> *evalParams) {
+  EvalPrinter &setEvaluationParameters(std::map<std::string, Literal*>* evalParams) {
     EvalPrinter::evaluationParameters = evalParams;
     return *this;
   }
@@ -54,15 +54,17 @@ struct EvalPrinter {
   }
 
   void printHeader() {
-    if (flagPrintEachParameterSet) {
-      ensureEvalParamsIsSet();
-      for (auto &[varIdentifier, literal] : *evaluationParameters) std::cout << varIdentifier << ", ";
-      std::cout << "\b\b" << std::endl;
+    if (flagPrintEachParameterSet || flagPrintEvaluationResult) {
+      if (flagPrintEachParameterSet) {
+        ensureEvalParamsIsSet();
+        for (auto &[varIdentifier, literal] : *evaluationParameters) std::cout << varIdentifier << ", ";
+        std::cout << "\b\b" << std::endl;
+      }
+      if (flagPrintEvaluationResult) {
+        std::cout << "Evaluation Result (original / rewritten)" << std::endl;
+      }
+      std::cout << std::endl;
     }
-    if (flagPrintEvaluationResult) {
-      std::cout << "Evaluation Result (original / rewritten)" << std::endl;
-    }
-    std::cout << std::endl;
   }
 
   void printCurrentParameterSet() {
@@ -79,7 +81,7 @@ struct EvalPrinter {
     }
   }
 
-  void printEvaluationResults(Literal *resultExpected, Literal *resultRewrittenAst) {
+  void printEvaluationResults(Literal* resultExpected, Literal* resultRewrittenAst) {
     if (flagPrintEvaluationResult) {
       std::cout << "(" << *resultExpected << " / " << *resultRewrittenAst << ")" << std::endl;
     }
@@ -91,7 +93,7 @@ struct EvalPrinter {
 };
 
 static void astOutputComparer(Ast &unmodifiedAst, Ast &rewrittenAst, unsigned int seed, int numTestRuns,
-                              std::map<std::string, Literal *> &evalParams, EvalPrinter *evalPrinter = nullptr) {
+                              std::map<std::string, Literal*> &evalParams, EvalPrinter* evalPrinter = nullptr) {
   // create random number generator with test-specific seed
   RandLiteralGen rng(seed);
 
@@ -106,7 +108,7 @@ static void astOutputComparer(Ast &unmodifiedAst, Ast &rewrittenAst, unsigned in
     rng.randomizeValues(evalParams);
 
     // evaluate both ASTs with previously generated params
-    Literal *resultExpected, *resultRewrittenAst;
+    Literal* resultExpected, * resultRewrittenAst;
     if (isCircuit) {
       resultExpected = unmodifiedAst.evaluateCircuit(evalParams, false);
       resultRewrittenAst = rewrittenAst.evaluateCircuit(evalParams, false);
@@ -129,10 +131,10 @@ static void astOutputComparer(Ast &unmodifiedAst, Ast &rewrittenAst, unsigned in
 
 // circuitOutputComparer with all supported parameters
 static void circuitOutputComparer(Ast &unmodifiedAst, Ast &rewrittenAst, unsigned int seed, int numMaxTestRuns,
-                                  std::map<std::string, Literal *> &evalParams, EvalPrinter *evalPrinter) {
+                                  std::map<std::string, Literal*> &evalParams, EvalPrinter* evalPrinter) {
   // a function that returns True if the given evalParams entry is a LiteralBool
   auto isLiteralBool = [](const auto &mapEntry) {
-    return (dynamic_cast<LiteralBool *>(mapEntry.second) != nullptr);
+    return (dynamic_cast<LiteralBool*>(mapEntry.second) != nullptr);
   };
 
   // Check if we can perform exhaustive testing. We need to fall-back to randomized testing if:
@@ -149,7 +151,7 @@ static void circuitOutputComparer(Ast &unmodifiedAst, Ast &rewrittenAst, unsigne
     /// the number of circuit inputs is small.
     struct LiteralBoolCombinationsGen {
      private:
-      std::vector<LiteralBool *> params;
+      std::vector<LiteralBool*> params;
       std::bitset<CIRCUIT_MAX_TEST_RUNS> nextBitCombination;
 
       void updateParams() {
@@ -164,7 +166,7 @@ static void circuitOutputComparer(Ast &unmodifiedAst, Ast &rewrittenAst, unsigne
       }
 
      public:
-      explicit LiteralBoolCombinationsGen(std::map<std::string, Literal *> &evalParams) {
+      explicit LiteralBoolCombinationsGen(std::map<std::string, Literal*> &evalParams) {
         nextBitCombination = std::bitset<CIRCUIT_MAX_TEST_RUNS>(0);
         // convert params into vector of literals
         for (auto &[varIdentifier, literal] : evalParams) params.push_back(literal->castTo<LiteralBool>());
@@ -210,14 +212,14 @@ static void circuitOutputComparer(Ast &unmodifiedAst, Ast &rewrittenAst, unsigne
 
 // circuitOutputComparer with EvalPrinter pointer
 static void circuitOutputComparer(Ast &unmodifiedAst, Ast &rewrittenAst, unsigned int seed, int numMaxTestRuns,
-                                  std::map<std::string, Literal *> &evalParams) {
+                                  std::map<std::string, Literal*> &evalParams) {
   return circuitOutputComparer(unmodifiedAst, rewrittenAst, seed, numMaxTestRuns, evalParams, nullptr);
 }
 
 // circuitOutputComparer without numMaxTestRuns
 static void circuitOutputComparer(Ast &unmodifiedAst, Ast &rewrittenAst, unsigned int seed,
-                                  std::map<std::string, Literal *> &evalParams) {
+                                  std::map<std::string, Literal*> &evalParams) {
   return circuitOutputComparer(unmodifiedAst, rewrittenAst, seed, CIRCUIT_MAX_TEST_RUNS, evalParams, nullptr);
 }
 
-#endif //MASTER_THESIS_CODE_INCLUDE_UTILITIES_TESTUTILS_H_
+#endif //AST_OPTIMIZER_INCLUDE_INCLUDE_UTILITIES_TESTUTILS_H_

@@ -1,5 +1,5 @@
-#ifndef MASTER_THESIS_CODE_LITERALINT_H
-#define MASTER_THESIS_CODE_LITERALINT_H
+#ifndef AST_OPTIMIZER_INCLUDE_LITERALINT_H
+#define AST_OPTIMIZER_INCLUDE_LITERALINT_H
 
 #include "Literal.h"
 #include <string>
@@ -50,4 +50,4 @@ class LiteralInt : public Literal {
   Node* createClonedNode(bool keepOriginalUniqueNodeId) override;
 };
 
-#endif //MASTER_THESIS_CODE_LITERALINT_H
+#endif //AST_OPTIMIZER_INCLUDE_LITERALINT_H

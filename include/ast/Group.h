@@ -1,5 +1,5 @@
-#ifndef MASTER_THESIS_CODE_GROUP_H
-#define MASTER_THESIS_CODE_GROUP_H
+#ifndef AST_OPTIMIZER_INCLUDE_GROUP_H
+#define AST_OPTIMIZER_INCLUDE_GROUP_H
 
 #include "AbstractExpr.h"
 #include <string>
@@ -32,4 +32,4 @@ class Group : public AbstractExpr {
   void setAttributes(AbstractExpr* expression);
 };
 
-#endif //MASTER_THESIS_CODE_GROUP_H
+#endif //AST_OPTIMIZER_INCLUDE_GROUP_H

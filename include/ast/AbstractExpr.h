@@ -1,5 +1,5 @@
-#ifndef MASTER_THESIS_CODE_ABSTRACTEXPR_H
-#define MASTER_THESIS_CODE_ABSTRACTEXPR_H
+#ifndef AST_OPTIMIZER_INCLUDE_ABSTRACTEXPR_H
+#define AST_OPTIMIZER_INCLUDE_ABSTRACTEXPR_H
 
 #include <vector>
 #include <string>
@@ -48,4 +48,4 @@ protected:
 
 std::ostream &operator<<(std::ostream &outs, const AbstractExpr &obj);
 
-#endif //MASTER_THESIS_CODE_ABSTRACTEXPR_H
+#endif //AST_OPTIMIZER_INCLUDE_ABSTRACTEXPR_H

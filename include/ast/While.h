@@ -1,5 +1,5 @@
-#ifndef MASTER_THESIS_CODE_WHILE_H
-#define MASTER_THESIS_CODE_WHILE_H
+#ifndef AST_OPTIMIZER_INCLUDE_WHILE_H
+#define AST_OPTIMIZER_INCLUDE_WHILE_H
 
 #include "AbstractStatement.h"
 #include "AbstractExpr.h"
@@ -28,4 +28,4 @@ class While : public AbstractStatement {
   Literal* evaluate(Ast &ast) override;
 };
 
-#endif //MASTER_THESIS_CODE_WHILE_H
+#endif //AST_OPTIMIZER_INCLUDE_WHILE_H

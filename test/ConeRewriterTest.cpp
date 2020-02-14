@@ -65,7 +65,7 @@ class ConeRewriterFixture : public ::testing::Test {
     auto newMaxMultDepth = mdc.getMaximumMultiplicativeDepth();
 
     // check if multiplicative depth is reduced
-    std::cout << "Depth (before / after): (" << originalMaxMultDepth << " / " << newMaxMultDepth << ")" << std::endl;
+    //std::cout << "Depth (before / after): (" << originalMaxMultDepth << " / " << newMaxMultDepth << ")" << std::endl;
     ASSERT_TRUE(originalMaxMultDepth > newMaxMultDepth);
   }
 };

@@ -1,5 +1,5 @@
-#ifndef MASTER_THESIS_CODE_FUNCTIONPARAMETER_H
-#define MASTER_THESIS_CODE_FUNCTIONPARAMETER_H
+#ifndef AST_OPTIMIZER_INCLUDE_FUNCTIONPARAMETER_H
+#define AST_OPTIMIZER_INCLUDE_FUNCTIONPARAMETER_H
 
 #include "Variable.h"
 #include <string>
@@ -45,4 +45,4 @@ void to_json(json &j, const FunctionParameter &funcParam);
 /// Defines the JSON representation to be used for vector<FunctionParameter *> objects.
 void to_json(json &j, const FunctionParameter* funcParam);
 
-#endif //MASTER_THESIS_CODE_FUNCTIONPARAMETER_H
+#endif //AST_OPTIMIZER_INCLUDE_FUNCTIONPARAMETER_H

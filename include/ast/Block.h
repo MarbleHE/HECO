@@ -1,5 +1,5 @@
-#ifndef MASTER_THESIS_CODE_BLOCK_H
-#define MASTER_THESIS_CODE_BLOCK_H
+#ifndef AST_OPTIMIZER_INCLUDE_BLOCK_H
+#define AST_OPTIMIZER_INCLUDE_BLOCK_H
 
 #include <vector>
 #include "AbstractStatement.h"
@@ -31,4 +31,4 @@ class Block : public AbstractStatement {
   Literal* evaluate(Ast &ast) override;
 };
 
-#endif //MASTER_THESIS_CODE_BLOCK_H
+#endif //AST_OPTIMIZER_INCLUDE_BLOCK_H

@@ -1,5 +1,5 @@
-#ifndef MASTER_THESIS_CODE_CALLEXTERNAL_H
-#define MASTER_THESIS_CODE_CALLEXTERNAL_H
+#ifndef AST_OPTIMIZER_INCLUDE_CALLEXTERNAL_H
+#define AST_OPTIMIZER_INCLUDE_CALLEXTERNAL_H
 
 #include "AbstractStatement.h"
 #include <vector>
@@ -30,4 +30,4 @@ class CallExternal : public AbstractExpr, public AbstractStatement {
   Literal* evaluate(Ast &ast) override;
 };
 
-#endif //MASTER_THESIS_CODE_CALLEXTERNAL_H
+#endif //AST_OPTIMIZER_INCLUDE_CALLEXTERNAL_H

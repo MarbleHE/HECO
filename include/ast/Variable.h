@@ -1,5 +1,5 @@
-#ifndef MASTER_THESIS_CODE_VARIABLE_H
-#define MASTER_THESIS_CODE_VARIABLE_H
+#ifndef AST_OPTIMIZER_INCLUDE_VARIABLE_H
+#define AST_OPTIMIZER_INCLUDE_VARIABLE_H
 
 #include <string>
 #include "AbstractExpr.h"
@@ -42,4 +42,4 @@ class Variable : public AbstractExpr {
   bool supportsCircuitMode() override;
 };
 
-#endif //MASTER_THESIS_CODE_VARIABLE_H
+#endif //AST_OPTIMIZER_INCLUDE_VARIABLE_H
