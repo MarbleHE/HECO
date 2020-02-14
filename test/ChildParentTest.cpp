@@ -336,10 +336,10 @@ TEST(ChildParentTests, If) {  /* NOLINT */
       new LogicalExpr(new LiteralInt(33), OpSymb::greater, new CallExternal("computeX")),
       new Block(),
       new Block());
-  ASSERT_EQ(ifStatement->AbstractExpr::getChildren().size(), 0);
-  ASSERT_EQ(ifStatement->AbstractExpr::getParents().size(), 0);
-  ASSERT_FALSE(ifStatement->AbstractExpr::supportsCircuitMode());
-  ASSERT_EQ(ifStatement->AbstractExpr::getMaxNumberChildren(), 0);
+  ASSERT_EQ(ifStatement->AbstractStatement::getChildren().size(), 0);
+  ASSERT_EQ(ifStatement->AbstractStatement::getParents().size(), 0);
+  ASSERT_FALSE(ifStatement->AbstractStatement::supportsCircuitMode());
+  ASSERT_EQ(ifStatement->AbstractStatement::getMaxNumberChildren(), 0);
 }
 
 TEST(ChildParentTests, LiteralBoolHasNoChildrenOrParents) {  /* NOLINT */
