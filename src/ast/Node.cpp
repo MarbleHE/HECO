@@ -263,6 +263,10 @@ bool Node::hasParent(Node* n) {
   return std::any_of(getParents().begin(), getParents().end(), [&n](Node* p) { return (p == n); });
 }
 
+bool Node::hasChild(Node* n) {
+  return std::any_of(getChildren().begin(), getChildren().end(), [&n](Node* p) { return (p == n); });
+}
+
 int Node::countChildrenNonNull() const {
   return std::count_if(getChildren().begin(), getChildren().end(), [](Node* n) { return n != nullptr; });
 }

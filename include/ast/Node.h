@@ -181,6 +181,7 @@ class Node {
     }
   }
 
+  bool hasChild(Node* n);
  public:
   Node* cloneRecursiveDeep(bool keepOriginalUniqueNodeId);
 

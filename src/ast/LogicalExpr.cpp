@@ -5,7 +5,7 @@ json LogicalExpr::toJson() const {
   json j;
   j["type"] = getNodeName();
   j["leftOperand"] = getLeft() ? getLeft()->toJson() : "";
-  j["operator"] = getOp()->getOperatorString();
+  j["operator"] = getOp() ? getOp()->getOperatorString() : "";
   j["rightOperand"] = getRight() ? getRight()->toJson() : "";
   return j;
 }

@@ -233,16 +233,13 @@ TEST_F(ConeRewriterFixture, evaluationBasedTestForCircuitWithTwoCones) {
       {std::string("z_4"), new LiteralBool(anyBool)},
       {std::string("b_t"), new LiteralBool(anyBool)}};
 
-  // FIXME(pjattke): Second rewriting fails because rewriteCones does not handle case where no node is in between cone end node
-  //  and cone start node -- verify that rewriting is applicable and extend it!
-
 // perform evaluation-based testing on original and rewritten circuit
-  Ast *originalAst = generateAst(DEMO_CIRCUIT_NO);
-  EvalPrinter evalPrinter;
-  evalPrinter.setEvaluationParameters(&inputValues)
-      .setFlagPrintEachParameterSet(true)
-      .setFlagPrintVariableHeaderOnceOnly(true)
-      .setFlagPrintEvaluationResult(true);
+  Ast* originalAst = generateAst(DEMO_CIRCUIT_NO);
+//  EvalPrinter evalPrinter;
+//  evalPrinter.setEvaluationParameters(&inputValues)
+//      .setFlagPrintEachParameterSet(true)
+//      .setFlagPrintVariableHeaderOnceOnly(true)
+//      .setFlagPrintEvaluationResult(true);
   circuitOutputComparer(*originalAst, *astToRewrite,
-                        886447, 4'096, inputValues, &evalPrinter);
+                        886447, 4'096, inputValues);
 }

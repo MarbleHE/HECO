@@ -10,10 +10,12 @@
 class Ast {
  private:
   /// The root node of the AST. All other nodes of the AST must somehow be referenced by the rootNode.
-  /// For example, an AST root node can be an object of Function class.
+  /// For example, an AST root node can be an object of Function class that references statements (i.e., objects derived
+  /// from AbstractStatement) that represent the computations.
   Node* rootNode;
 
-  ///
+  /// This map stores the values passed to evaluateAst or evaluateCircuit for variables in the computation and serves
+  /// as lookup table and central storage during the evaluation process.
   std::map<std::string, Literal*> variableValuesForEvaluation;
 
  public:

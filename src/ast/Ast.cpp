@@ -63,7 +63,7 @@ Literal* Ast::evaluateCircuit(const std::map<std::string, Literal*> &paramValues
 
   // Remove those variable identifiers from variableIdentifiersRequiringValue that are defined using a VarDecl in
   // the circuit -> those do not need a value.
-  auto isVarDeclNode = [](Node *node) { return dynamic_cast<VarDecl *>(node) != nullptr; };
+  auto isVarDeclNode = [](Node* node) { return dynamic_cast<VarDecl*>(node) != nullptr; };
   for (auto &node : getAllNodes(isVarDeclNode)) {
     varIdentifiersReqValue.erase(
         std::find(varIdentifiersReqValue.begin(),
@@ -146,8 +146,18 @@ void Ast::updateVarValue(const std::string &variableIdentifier, Literal* newValu
 }
 
 bool Ast::isReversed() const {
+  int sum = 0;
   auto allNodes = getAllNodes();
-  return std::all_of(allNodes.begin(), allNodes.end(), [](Node* n) { return n->isReversed; });
+  for (auto &node : allNodes) { if (node->isReversed) sum++; }
+
+  // check that we are in a consistent state, i.e., either all of the nodes have reversed edges or none of them
+  bool allReversed = (sum == allNodes.size());
+  bool noneReversed = (sum == 0);
+  if (!allReversed && !noneReversed) {
+    throw std::runtime_error("Inconsistent state! AST consists of some nodes that have reversed edges.");
+  } else {
+    return allReversed;
+  }
 }
 
 Ast::Ast(const Ast &otherAst, bool keepOriginalUniqueNodeId) {
@@ -163,16 +173,7 @@ bool Ast::isValidCircuit() {
 }
 
 void Ast::reverseEdges() {
-  std::queue<Node*> nodesToCheck;
-  nodesToCheck.push(getRootNode());
-  while (!nodesToCheck.empty()) {
-    auto curNode = nodesToCheck.front();
-    nodesToCheck.pop();
-    auto nextNodesToAdd = curNode->isReversed ? curNode->getParents() : curNode->getChildren();
-    // enqueue nodes to be processed next
-    for (auto &n : nextNodesToAdd) nodesToCheck.push(n);
-    curNode->swapChildrenParents();
-  }
+  for (auto &node : getAllNodes()) node->swapChildrenParents();
 }
 
 std::set<Node*> Ast::getAllNodes() const {
