@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
-#include <Ast.h>
-#include <include/visitor/MultRewriteVisitor.h>
-#include <include/visitor/PrintVisitor.h>
-#include <Operator.h>
-#include <include/utilities/TestUtils.h>
+#include "Ast.h"
+#include "MultRewriteVisitor.h"
+#include "PrintVisitor.h"
+#include "Operator.h"
+#include "TestUtils.h"
 #include "AstTestingGenerator.h"
 #include "Function.h"
 #include "BinaryExpr.h"

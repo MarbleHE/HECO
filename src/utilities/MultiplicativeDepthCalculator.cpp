@@ -1,7 +1,7 @@
-#include <Node.h>
-#include <Operator.h>
-#include "../include/utilities/MultiplicativeDepthCalculator.h"
-#include "../include/ast/LogicalExpr.h"
+#include "Node.h"
+#include "Operator.h"
+#include "MultiplicativeDepthCalculator.h"
+#include "LogicalExpr.h"
 
 int MultiplicativeDepthCalculator::depthValue(Node* n) {
   if (auto lexp = dynamic_cast<LogicalExpr*>(n)) {

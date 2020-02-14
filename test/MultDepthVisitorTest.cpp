@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
-#include <Ast.h>
-#include <include/visitor/MultDepthVisitor.h>
+#include "Ast.h"
+#include "MultDepthVisitor.h"
 #include "Operator.h"
 #include "Function.h"
 #include "BinaryExpr.h"

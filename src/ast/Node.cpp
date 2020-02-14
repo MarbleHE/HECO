@@ -1,7 +1,7 @@
 #include <sstream>
 #include <queue>
 #include <set>
-#include <Operator.h>
+#include "Operator.h"
 #include "AbstractExpr.h"
 #include "LogicalExpr.h"
 #include "Function.h"

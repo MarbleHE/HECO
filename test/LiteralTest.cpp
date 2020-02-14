@@ -1,8 +1,8 @@
-#include <Literal.h>
-#include <LiteralBool.h>
-#include <LiteralInt.h>
-#include <LiteralFloat.h>
-#include <LiteralString.h>
+#include "Literal.h"
+#include "LiteralBool.h"
+#include "LiteralInt.h"
+#include "LiteralFloat.h"
+#include "LiteralString.h"
 #include "gtest/gtest.h"
 
 TEST(LiteralTest, compareLiterals_literalsOfDifferentTypeAreAlwaysUnequal) { /* NOLINT */

@@ -1,7 +1,7 @@
-#include <Ast.h>
-#include <ConeRewriter.h>
-#include <TestUtils.h>
-#include <DotPrinter.h>
+#include "Ast.h"
+#include "ConeRewriter.h"
+#include "TestUtils.h"
+#include "DotPrinter.h"
 #include "gtest/gtest.h"
 #include "AstTestingGenerator.h"
 #include "../include/ast/Variable.h"

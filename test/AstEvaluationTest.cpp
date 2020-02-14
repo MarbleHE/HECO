@@ -1,5 +1,5 @@
-#include <Ast.h>
-#include <Operator.h>
+#include "Ast.h"
+#include "Operator.h"
 #include "gtest/gtest.h"
 #include "AstTestingGenerator.h"
 #include "LiteralInt.h"

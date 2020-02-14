@@ -1,6 +1,6 @@
 #include "Block.h"
 #include <iostream>
-#include <VarDecl.h>
+#include "VarDecl.h"
 
 Block::Block() {
   statements = nullptr;

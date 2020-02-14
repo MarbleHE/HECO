@@ -1,9 +1,9 @@
-#include <Node.h>
-#include <Operator.h>
-#include <Variable.h>
-#include <BinaryExpr.h>
-#include <Function.h>
-#include <include/utilities/DotPrinter.h>
+#include "Node.h"
+#include "Operator.h"
+#include "Variable.h"
+#include "BinaryExpr.h"
+#include "Function.h"
+#include "DotPrinter.h"
 #include <fstream>
 #include "gtest/gtest.h"
 #include "AstTestingGenerator.h"

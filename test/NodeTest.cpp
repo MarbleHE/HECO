@@ -1,6 +1,6 @@
-#include <Node.h>
-#include <Variable.h>
-#include <LiteralBool.h>
+#include "Node.h"
+#include "Variable.h"
+#include "LiteralBool.h"
 #include "gtest/gtest.h"
 
 TEST(NodeTest, rewriteMultiInputGateToBinaryGatesChain_emptyInputs) { /* NOLINT */
