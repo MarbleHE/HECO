@@ -9,6 +9,8 @@ class VarAssignm : public AbstractStatement {
  private:
   std::string identifier;
 
+  Node* createClonedNode(bool keepOriginalUniqueNodeId) override;
+
  public:
   VarAssignm(std::string identifier, AbstractExpr* value);
 
@@ -37,8 +39,6 @@ class VarAssignm : public AbstractStatement {
   int getMaxNumberChildren() override;
 
   void setAttribute(AbstractExpr* assignmentValue);
- private:
-  Node* createClonedNode(bool keepOriginalUniqueNodeId) override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_VARASSIGNM_H

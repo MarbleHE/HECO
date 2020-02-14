@@ -4,11 +4,15 @@
 #include <string>
 #include <sstream>
 #include <queue>
-#include "../include/ast/Operator.h"
-#include "../include/ast/AbstractStatement.h"
-#include "../include/ast/Node.h"
-#include "../include/ast/LogicalExpr.h"
-#include "../include/utilities/MultiplicativeDepthCalculator.h"
+#include "Operator.h"
+#include "AbstractStatement.h"
+#include "Node.h"
+#include "LogicalExpr.h"
+#include "MultiplicativeDepthCalculator.h"
+#include <vector>
+#include <deque>
+#include <set>
+#include <utility>
 
 // Dot vertex represents a Node in the DOT graph language
 // e.g., Return_1 [label="Return_1\n[l(v): 3, r(v): 0]" shape=oval style=filled fillcolor=white]
@@ -224,7 +228,6 @@ class DotPrinter {
       }
     }
   }
-
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_UTILITIES_DOTPRINTER_H_

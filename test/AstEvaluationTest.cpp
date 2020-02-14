@@ -13,7 +13,7 @@
 #include "Call.h"
 #include "VarAssignm.h"
 
-TEST(AstEvaluationTests, simpleAstEvaluation1) {
+TEST(AstEvaluationTests, simpleAstEvaluation1) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(7, ast);
   std::map<std::string, Literal*> params = {
@@ -25,7 +25,7 @@ TEST(AstEvaluationTests, simpleAstEvaluation1) {
   ASSERT_EQ(*result, *new LiteralInt(693'129));
 }
 
-TEST(AstEvaluationTests, simpleAstEvaluationIfThenBranch) {
+TEST(AstEvaluationTests, simpleAstEvaluationIfThenBranch) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(8, ast);
   std::map<std::string, Literal*> params = {
@@ -37,7 +37,7 @@ TEST(AstEvaluationTests, simpleAstEvaluationIfThenBranch) {
   ASSERT_EQ(*result, *new LiteralInt(0));
 }
 
-TEST(AstEvaluationTests, simpleAstEvaluationIfElseBranch) {
+TEST(AstEvaluationTests, simpleAstEvaluationIfElseBranch) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(8, ast);
   std::map<std::string, Literal*> params = {
@@ -49,7 +49,7 @@ TEST(AstEvaluationTests, simpleAstEvaluationIfElseBranch) {
   ASSERT_EQ(*result, *new LiteralInt(5943));
 }
 
-TEST(AstEvaluationTests, simpleAstEvaluationUnaryLogExpr1) {
+TEST(AstEvaluationTests, simpleAstEvaluationUnaryLogExpr1) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(9, ast);
   std::map<std::string, Literal*> params = {
@@ -62,7 +62,7 @@ TEST(AstEvaluationTests, simpleAstEvaluationUnaryLogExpr1) {
   ASSERT_EQ(*result, *new LiteralBool(true));
 }
 
-TEST(AstEvaluationTests, simpleAstEvaluationUnaryLogExpr2) {
+TEST(AstEvaluationTests, simpleAstEvaluationUnaryLogExpr2) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(9, ast);
   std::map<std::string, Literal*> params = {
@@ -75,7 +75,7 @@ TEST(AstEvaluationTests, simpleAstEvaluationUnaryLogExpr2) {
   ASSERT_EQ(*result, *new LiteralBool(false));
 }
 
-TEST(AstEvaluationTests, simpleAstEvaluationUnaryLogExpr3) {
+TEST(AstEvaluationTests, simpleAstEvaluationUnaryLogExpr3) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(9, ast);
   std::map<std::string, Literal*> params = {
@@ -88,7 +88,7 @@ TEST(AstEvaluationTests, simpleAstEvaluationUnaryLogExpr3) {
   ASSERT_EQ(*result, *new LiteralBool(true));
 }
 
-TEST(AstEvaluationTests, simpleAstEvaluationStringConcat) {
+TEST(AstEvaluationTests, simpleAstEvaluationStringConcat) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(10, ast);
   std::map<std::string, Literal*> params = {
@@ -99,7 +99,7 @@ TEST(AstEvaluationTests, simpleAstEvaluationStringConcat) {
   ASSERT_EQ(*result, *new LiteralString("hello world!"));
 }
 
-TEST(AstEvaluationTests, complexAstEvaluationWhileNotExecuted) {
+TEST(AstEvaluationTests, complexAstEvaluationWhileNotExecuted) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(11, ast);
   std::map<std::string, Literal*> params = {
@@ -111,7 +111,7 @@ TEST(AstEvaluationTests, complexAstEvaluationWhileNotExecuted) {
   ASSERT_EQ(*result, *new LiteralInt(0));
 }
 
-TEST(AstEvaluationTests, complexAstEvaluationWhileExecutedThreeTimes) {
+TEST(AstEvaluationTests, complexAstEvaluationWhileExecutedThreeTimes) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(11, ast);
   std::map<std::string, Literal*> params = {
@@ -123,7 +123,7 @@ TEST(AstEvaluationTests, complexAstEvaluationWhileExecutedThreeTimes) {
   ASSERT_EQ(*result, *new LiteralInt(21));
 }
 
-TEST(AstEvaluationTests, complexAstEvaluationWithNestedFunctionCall_LiteralParameterValue) {
+TEST(AstEvaluationTests, complexAstEvaluationWithNestedFunctionCall_LiteralParameterValue) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(12, ast);
   std::map<std::string, Literal*> params;
@@ -131,7 +131,7 @@ TEST(AstEvaluationTests, complexAstEvaluationWithNestedFunctionCall_LiteralParam
   ASSERT_EQ(*result, *new LiteralInt(1'056));
 }
 
-TEST(AstEvaluationTests, complexAstEvaluationWithNestedFunctionCall_BexpParameterValue) {
+TEST(AstEvaluationTests, complexAstEvaluationWithNestedFunctionCall_BexpParameterValue) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(13, ast);
   std::map<std::string, Literal*> params;

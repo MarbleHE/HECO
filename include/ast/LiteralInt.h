@@ -10,6 +10,8 @@ class LiteralInt : public Literal {
  private:
   int value;
 
+  Node* createClonedNode(bool keepOriginalUniqueNodeId) override;
+
  public:
   explicit LiteralInt(int value);
 
@@ -46,8 +48,6 @@ class LiteralInt : public Literal {
   void print(std::ostream &str) const override;
 
   bool supportsCircuitMode() override;
- private:
-  Node* createClonedNode(bool keepOriginalUniqueNodeId) override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_LITERALINT_H

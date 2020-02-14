@@ -15,8 +15,8 @@
 #include "UnaryExpr.h"
 #include "VarAssignm.h"
 #include "While.h"
-#include "../include/visitor/MultRewriteVisitor.h"
-#include "../include/visitor/PrintVisitor.h"
+#include "MultRewriteVisitor.h"
+#include "PrintVisitor.h"
 
 void runInteractiveDemo() {
   // ask which tree to be used for demo
@@ -193,13 +193,13 @@ void generateDemoThree(Ast &ast) {
   Function* func = dynamic_cast<Function*>(ast.setRootNode(new Function("computeMult")));
 
   // int a = 3;
-  func->addStatement(new VarDecl("a", new LiteralInt(3)));
+  func->addStatement(new VarDecl("a", 3));
 
   // int b = 7;
-  func->addStatement(new VarDecl("b", new LiteralInt(7)));
+  func->addStatement(new VarDecl("b", 7));
 
   // int c = 9;
-  func->addStatement(new VarDecl("c", new LiteralInt(9)));
+  func->addStatement(new VarDecl("c", 9));
 
   // int result = a * b;
   func->addStatement(
@@ -223,13 +223,13 @@ void generateDemoFour(Ast &ast) {
   Function* func = dynamic_cast<Function*>(ast.setRootNode(new Function("computeMult")));
 
   // int a = 3;
-  func->addStatement(new VarDecl("a", new LiteralInt(3)));
+  func->addStatement(new VarDecl("a", 3));
 
   // int b = 7;
-  func->addStatement(new VarDecl("b", new LiteralInt(7)));
+  func->addStatement(new VarDecl("b", 7));
 
   // int c = 9;
-  func->addStatement(new VarDecl("c", new LiteralInt(9)));
+  func->addStatement(new VarDecl("c", 9));
 
   // int result = a * b;
   func->addStatement(

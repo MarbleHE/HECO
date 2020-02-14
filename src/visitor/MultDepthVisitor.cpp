@@ -114,7 +114,6 @@ void MultDepthVisitor::analyzeMultiplicativeDepth(const std::string &varIdentifi
       // update depth counter by maxDepth + numMults
       //depthsPerVariable[varIdentifier] = getDepth(*maxDepthElement) + numMults;
       updateDepthStructures(stmt, varIdentifier, getDepth(*maxDepthElement) + numMults);
-
     }
   }
 }

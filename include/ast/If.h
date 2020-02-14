@@ -16,7 +16,7 @@ class If : public AbstractStatement {
 
   If(AbstractExpr* condition, AbstractStatement* thenBranch, AbstractStatement* elseBranch);
 
-  ~If();
+  ~If() override;
 
   [[nodiscard]] json toJson() const override;
 
@@ -31,7 +31,7 @@ class If : public AbstractStatement {
   [[nodiscard]] AbstractStatement* getElseBranch() const;
 
   Literal* evaluate(Ast &ast) override;
-  void updateTree();
+
  private:
   Node* createClonedNode(bool keepOriginalUniqueNodeId) override;
 };

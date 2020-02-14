@@ -79,7 +79,7 @@ class RandLiteralGen {
   }
 
   float getRandomFloat() {
-    return distFloat_(gen_);;
+    return distFloat_(gen_);
   }
 
   LiteralFloat* getRandomLiteralFloat() {

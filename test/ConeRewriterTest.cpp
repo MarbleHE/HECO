@@ -11,7 +11,7 @@ class ConeRewriterFixture : public ::testing::Test {
   std::map<std::string, Literal*>* evaluationParameters;
 
  protected:
-  ConeRewriterFixture() : evaluationParameters(nullptr) {};
+  ConeRewriterFixture() : evaluationParameters(nullptr) {}
 
   static Ast* generateAst(int demoAstId) {
     Ast* newAst = new Ast;
@@ -34,16 +34,16 @@ class ConeRewriterFixture : public ::testing::Test {
   }
 
   bool computeResultForCircuit19() {
-    unsigned a11_left = getBoolValue("a_1^(1)_left");
-    unsigned a11_right = getBoolValue("a_1^(1)_right");
-    unsigned a21_left = getBoolValue("a_2^(1)_left");
-    unsigned a21_right = getBoolValue("a_2^(1)_right");
-    unsigned a12_left = getBoolValue("a_1^(2)_left");
-    unsigned a12_right = getBoolValue("a_1^(2)_right");
-    unsigned a22_left = getBoolValue("a_2^(2)_left");
-    unsigned a22_right = getBoolValue("a_2^(2)_right");
-    unsigned y1 = getBoolValue("y_1");
-    unsigned at = getBoolValue("a_t");
+    bool a11_left = getBoolValue("a_1^(1)_left");
+    bool a11_right = getBoolValue("a_1^(1)_right");
+    bool a21_left = getBoolValue("a_2^(1)_left");
+    bool a21_right = getBoolValue("a_2^(1)_right");
+    bool a12_left = getBoolValue("a_1^(2)_left");
+    bool a12_right = getBoolValue("a_1^(2)_right");
+    bool a22_left = getBoolValue("a_2^(2)_left");
+    bool a22_right = getBoolValue("a_2^(2)_right");
+    bool y1 = getBoolValue("y_1");
+    bool at = getBoolValue("a_t");
 
     // evaluate expression that represents circuit 19 to manually verify evaluation result
     return (
@@ -70,7 +70,7 @@ class ConeRewriterFixture : public ::testing::Test {
   }
 };
 
-TEST_F(ConeRewriterFixture, simpleStaticConeTest) {
+TEST_F(ConeRewriterFixture, simpleStaticConeTest) { /* NOLINT */
   const int DEMO_CIRCUIT_NO = 19;
 
   // -------–------------------------------------------
@@ -114,7 +114,7 @@ TEST_F(ConeRewriterFixture, simpleStaticConeTest) {
   ASSERT_EQ(*resultOriginal->castTo<LiteralBool>(), *resultRewritten->castTo<LiteralBool>());
 }
 
-TEST_F(ConeRewriterFixture, evaluationBasedTestForExtendedCircuit) {
+TEST_F(ConeRewriterFixture, evaluationBasedTestForExtendedCircuit) { /* NOLINT */
   const int DEMO_CIRCUIT_NO = 19;
 
   // -------–------------------------------------------
@@ -150,7 +150,7 @@ TEST_F(ConeRewriterFixture, evaluationBasedTestForExtendedCircuit) {
   circuitOutputComparer(*originalAst, *astToRewrite, 934471, 5000, inputValues);
 }
 
-TEST_F(ConeRewriterFixture, evaluationBasedTestForExtendedCircuitWithMultipleInputs) {
+TEST_F(ConeRewriterFixture, evaluationBasedTestForExtendedCircuitWithMultipleInputs) { /* NOLINT */
   const int DEMO_CIRCUIT_NO = 20;
 
   // -------–------------------------------------------
@@ -189,7 +189,7 @@ TEST_F(ConeRewriterFixture, evaluationBasedTestForExtendedCircuitWithMultipleInp
   circuitOutputComparer(*originalAst, *astToRewrite, 886447, 4'096, inputValues);
 }
 
-TEST_F(ConeRewriterFixture, evaluationBasedTestForCircuitWithTwoCones) {
+TEST_F(ConeRewriterFixture, evaluationBasedTestForCircuitWithTwoCones) { /* NOLINT */
   const int DEMO_CIRCUIT_NO = 21;
 
   // -------–------------------------------------------

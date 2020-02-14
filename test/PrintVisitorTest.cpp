@@ -2,7 +2,6 @@
 #include <include/visitor/PrintVisitor.h>
 #include <fstream>
 #include "gtest/gtest.h"
-#include "examples/genAstDemo.cpp"
 #include "AstTestingGenerator.h"
 
 class PrintVisitorTest : public ::testing::Test {
@@ -24,8 +23,6 @@ TEST_F(PrintVisitorTest, printDemoTreeOne) { /* NOLINT */
   std::ifstream ifs("../../test/auxoutput/PrintVisitorTest/printDemoTreeOne.txt");
   std::stringstream buffer;
   buffer << ifs.rdbuf();
-
-  std::cout << pv.getOutput();
 
   EXPECT_EQ(pv.getOutput(), buffer.str());
 }

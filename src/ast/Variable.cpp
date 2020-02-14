@@ -61,6 +61,6 @@ bool Variable::supportsCircuitMode() {
 
 Variable::~Variable() = default;
 
-Node* Variable::createClonedNode(bool keepOriginalUniqueNodeId) {
+Node* Variable::createClonedNode(bool) {
   return new Variable(this->identifier);
 }

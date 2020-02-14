@@ -50,5 +50,5 @@ bool Return::supportsCircuitMode() {
 }
 
 Node* Return::createClonedNode(bool keepOriginalUniqueNodeId) {
-  return new Return(this->getReturnExpr()->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());;
+  return new Return(this->getReturnExpr()->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
 }

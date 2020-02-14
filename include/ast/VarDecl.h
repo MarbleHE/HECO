@@ -13,12 +13,14 @@ class VarDecl : public AbstractStatement {
  public:
   VarDecl(std::string name, TYPES datatype, AbstractExpr* initializer);
 
+  VarDecl(std::string name, void* abstractExpr);
+
   VarDecl(std::string name, int value);
 
   VarDecl(std::string name, bool value);
 
   /// This is just a helper constructor that allows to call VarDecl("randomString", "aiermkr");
-  /// without this constructor the call will be wrongly forwarded to the VarDecl(std::string, bool) constructor.
+  /// without this constructor the call will wrongly be forwarded to the VarDecl(std::string, bool) constructor.
   /// See https://stackoverflow.com/q/14770252/3017719.
   /// \param name The variable's identifier.
   /// \param valueAssignedTo The value assigned to the variable.
@@ -55,6 +57,7 @@ class VarDecl : public AbstractStatement {
   bool supportsCircuitMode() override;
 
   int getMaxNumberChildren() override;
+
  private:
   Node* createClonedNode(bool keepOriginalUniqueNodeId) override;
 };

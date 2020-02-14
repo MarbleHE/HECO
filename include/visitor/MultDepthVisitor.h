@@ -5,6 +5,7 @@
 #include <string>
 #include "Node.h"
 #include "Visitor.h"
+#include <utility>
 
 class MultDepthVisitor : public Visitor {
  private:

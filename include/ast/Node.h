@@ -2,10 +2,11 @@
 #define AST_OPTIMIZER_INCLUDE_NODE_H
 
 #include <vector>
+#include <map>
+#include <sstream>
+#include <string>
 #include <nlohmann/json.hpp>
 #include "Visitor.h"
-#include <sstream>
-#include "../include/visitor/Visitor.h"
 #include "OpSymbEnum.h"
 
 using json = nlohmann::json;
@@ -183,12 +184,11 @@ class Node {
   }
 
   bool hasChild(Node* n);
- public:
+
   Node* cloneRecursiveDeep(bool keepOriginalUniqueNodeId);
 
  private:
   [[nodiscard]] virtual Node* createClonedNode(bool keepOriginalUniqueNodeId);
-
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_NODE_H

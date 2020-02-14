@@ -11,11 +11,17 @@ void Operator::accept(Visitor &v) {
   v.visit(*this);
 }
 
-Operator::Operator(OpSymb::LogCompOp op) : operatorString(OpSymb::getTextRepr(op)), operatorSymbol(op) {}
+Operator::Operator(OpSymb::LogCompOp op) : operatorString(OpSymb::getTextRepr(op)) {
+  operatorSymbol = std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp>(op);
+}
 
-Operator::Operator(OpSymb::BinaryOp op) : operatorString(OpSymb::getTextRepr(op)), operatorSymbol(op) {}
+Operator::Operator(OpSymb::BinaryOp op) : operatorString(OpSymb::getTextRepr(op)) {
+  operatorSymbol = std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp>(op);
+}
 
-Operator::Operator(OpSymb::UnaryOp op) : operatorString(OpSymb::getTextRepr(op)), operatorSymbol(op) {}
+Operator::Operator(OpSymb::UnaryOp op) : operatorString(OpSymb::getTextRepr(op)) {
+  operatorSymbol = std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp>(op);
+}
 
 const std::string &Operator::getOperatorString() const {
   return operatorString;
@@ -39,6 +45,21 @@ bool Operator::operator!=(const Operator &rhs) const {
 
 bool Operator::equals(std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp> op) const {
   return this->getOperatorString() == OpSymb::getTextRepr(op);
+}
+
+bool Operator::equals(OpSymb::BinaryOp op) const {
+  return this->getOperatorString()
+      == OpSymb::getTextRepr(std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp>(op));
+}
+
+bool Operator::equals(OpSymb::LogCompOp op) const {
+  return this->getOperatorString()
+      == OpSymb::getTextRepr(std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp>(op));
+}
+
+bool Operator::equals(OpSymb::UnaryOp op) const {
+  return this->getOperatorString()
+      == OpSymb::getTextRepr(std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp>(op));
 }
 
 Literal* Operator::applyOperator(Literal* rhs) {
@@ -70,12 +91,12 @@ Literal* Operator::applyOperator(LiteralBool* rhs) {
         "Could not apply unary operator (" + this->getOperatorString() + ") on (" + this->getNodeName() + ").");
 }
 
-Literal* Operator::applyOperator(LiteralString* rhs) {
+Literal* Operator::applyOperator(LiteralString*) {
   throw std::logic_error(
       "Could not apply unary operator (" + this->getOperatorString() + ") on (" + this->getNodeName() + ").");
 }
 
-Literal* Operator::applyOperator(LiteralFloat* rhs) {
+Literal* Operator::applyOperator(LiteralFloat*) {
   throw std::logic_error(
       "Could not apply unary operator (" + this->getOperatorString() + ") on (" + this->getNodeName() + ").");
 }
@@ -164,28 +185,27 @@ Literal* Operator::applyOperator(LiteralBool* lhs, LiteralFloat* rhs) {
   return applyOperator(lhsFloat, rhs);
 }
 
-Literal* Operator::applyOperator(LiteralFloat* lhs, LiteralString* rhs) {
+Literal* Operator::applyOperator(LiteralFloat*, LiteralString*) {
   throw std::invalid_argument("Operators on (float, string) not supported!");
-
 }
 
-Literal* Operator::applyOperator(LiteralString* lhs, LiteralFloat* rhs) {
+Literal* Operator::applyOperator(LiteralString*, LiteralFloat*) {
   throw std::invalid_argument("Operators on (string, float) not supported!");
 }
 
-Literal* Operator::applyOperator(LiteralString* lhs, LiteralInt* rhs) {
+Literal* Operator::applyOperator(LiteralString*, LiteralInt*) {
   throw std::invalid_argument("Operators on (string, int) not supported!");
 }
 
-Literal* Operator::applyOperator(LiteralInt* lhs, LiteralString* rhs) {
+Literal* Operator::applyOperator(LiteralInt*, LiteralString*) {
   throw std::invalid_argument("Operators on (int, string) not supported!");
 }
 
-Literal* Operator::applyOperator(LiteralString* lhs, LiteralBool* rhs) {
+Literal* Operator::applyOperator(LiteralString*, LiteralBool*) {
   throw std::invalid_argument("Operators on (string, bool) not supported!");
 }
 
-Literal* Operator::applyOperator(LiteralBool* lhs, LiteralString* rhs) {
+Literal* Operator::applyOperator(LiteralBool*, LiteralString*) {
   throw std::invalid_argument("Operators on (bool, string) not supported!");
 }
 
@@ -261,7 +281,7 @@ Literal* Operator::applyOperator(LiteralBool* lhs, LiteralBool* rhs) {
 
   else if (this->equals(OpSymb::logicalAnd)) return new LiteralBool(lhsVal && rhsVal);
   else if (this->equals(OpSymb::logicalOr)) return new LiteralBool(lhsVal || rhsVal);
-  else if (this->equals(OpSymb::logicalXor)) return new LiteralBool(lhsVal != rhsVal);
+  else if (this->equals(OpSymb::logicalXor) || this->equals(OpSymb::unequal)) return new LiteralBool(lhsVal != rhsVal);
 
   else if (this->equals(OpSymb::smaller)) return new LiteralBool(lhsVal < rhsVal);
   else if (this->equals(OpSymb::smallerEqual)) return new LiteralBool(lhsVal <= rhsVal);
@@ -269,7 +289,6 @@ Literal* Operator::applyOperator(LiteralBool* lhs, LiteralBool* rhs) {
   else if (this->equals(OpSymb::greaterEqual)) return new LiteralBool(lhsVal >= rhsVal);
 
   else if (this->equals(OpSymb::equal)) return new LiteralBool(lhsVal == rhsVal);
-  else if (this->equals(OpSymb::unequal)) return new LiteralBool(lhsVal != rhsVal);
 
   else
     throw std::logic_error("applyOperator(LiteralBool* lhs, LiteralBool* rhs) failed!");
@@ -320,7 +339,7 @@ const std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp> &Operat
 
 Operator::~Operator() = default;
 
-Node* Operator::createClonedNode(bool keepOriginalUniqueNodeId) {
+Node* Operator::createClonedNode(bool) {
   return new Operator(this->getOperatorSymbol());
 }
 

@@ -15,7 +15,7 @@ class LiteralFloat : public Literal {
  public:
   explicit LiteralFloat(float value);
 
-  ~LiteralFloat();
+  ~LiteralFloat() override;
 
   [[nodiscard]] float getValue() const;
 

@@ -1,8 +1,7 @@
-#include "Call.h"
-#include <utility>
-#include <sstream>
 #include <typeindex>
-#include <iostream>
+#include <sstream>
+#include <utility>
+#include "Call.h"
 #include "Function.h"
 #include "Literal.h"
 #include "LiteralInt.h"
@@ -54,7 +53,7 @@ Literal* Call::evaluate(Ast &ast) {
   // create vector to store parameter values for Function evaluation
   std::map<std::string, Literal*> paramValues;
 
-  for (int i = 0; i < this->getFunc()->getParams().size(); i++) {
+  for (size_t i = 0; i < this->getFunc()->getParams().size(); i++) {
     // validation: make sure that datatypes in Call and Function are equal
     auto datatypeCall = *this->getArguments().at(i)->getDatatype();
     auto datatypeFunc = *this->getFunc()->getParams().at(i)->getDatatype();

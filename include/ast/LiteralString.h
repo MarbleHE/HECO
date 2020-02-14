@@ -9,10 +9,10 @@ class LiteralString : public Literal {
  private:
   std::string value;
 
+  Node* createClonedNode(bool keepOriginalUniqueNodeId) override;
+
  protected:
   void print(std::ostream &str) const override;
- private:
-  Node* createClonedNode(bool keepOriginalUniqueNodeId) override;
 
  public:
   explicit LiteralString(std::string value);
@@ -37,7 +37,7 @@ class LiteralString : public Literal {
   void setValue(const std::string &newValue);
   void setRandomValue(RandLiteralGen &rlg) override;
 
-  std::string toString() const override;
+  [[nodiscard]] std::string toString() const override;
 
   bool supportsCircuitMode() override;
 

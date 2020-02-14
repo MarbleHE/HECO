@@ -13,7 +13,7 @@ class AstTestingGenerator {
 
   /// Returns the largest ID that is supported by method generateAst.
   /// \return An integer specifying the largest ID supported by generateAst.
-  static int getLargestId();
+  static size_t getLargestId();
 
   // Methods to generate sample ASTs to be used for tests.
   static void _genSuperSimpleAst(Ast &ast);

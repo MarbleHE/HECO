@@ -16,7 +16,7 @@ class FunctionParameter : public AbstractExpr {
   /// \deprecated This constructor should not be used anymore, use the one requiring a Datatype instead.
   /// \param datatypeEnumString A valid datatype according to TYPES in Datatype.h
   /// \param value The value of the function parameter.
-  FunctionParameter(std::string datatypeEnumString, AbstractExpr* value);
+  FunctionParameter(const std::string &datatypeEnumString, AbstractExpr* value);
 
   [[nodiscard]] json toJson() const override;
 

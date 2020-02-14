@@ -1,18 +1,19 @@
 #ifndef AST_OPTIMIZER_INCLUDE_INCLUDE_UTILITIES_TESTUTILS_H_
 #define AST_OPTIMIZER_INCLUDE_INCLUDE_UTILITIES_TESTUTILS_H_
 
-#include "gtest/gtest.h"
 #include <map>
 #include <string>
 #include <iostream>
+#include <vector>
 #include <bitset>
+#include "gtest/gtest.h"
 #include "Ast.h"
 #include "RandNumGen.h"
 
 /// Defines the default number of test runs to be performed, if not passed as parameter to astOutputComparer.
 /// Decides whether exhaustive testing (i.e., comparing all possible inputs) will be used or not.
 /// 2^12 = 4,096
-const static int CIRCUIT_MAX_TEST_RUNS = 4'096;
+static const int CIRCUIT_MAX_TEST_RUNS = 4'096;
 
 struct EvalPrinter {
  private:
@@ -32,7 +33,7 @@ struct EvalPrinter {
   }
 
  public:
-  EvalPrinter() {}
+  EvalPrinter() : evaluationParameters(nullptr) {}
 
   EvalPrinter &setFlagPrintEachParameterSet(bool printEachParameterSet) {
     EvalPrinter::flagPrintEachParameterSet = printEachParameterSet;
@@ -86,9 +87,9 @@ struct EvalPrinter {
     if (flagPrintEvaluationResult) {
       std::cout << "(" << *resultExpected << " / " << *resultRewrittenAst << ")" << std::endl;
     }
-
   }
-  void printEndOfEvaluationTestRun() {
+
+  static void printEndOfEvaluationTestRun() {
     std::cout << std::endl;
   }
 };
@@ -148,8 +149,8 @@ static void circuitOutputComparer(Ast &unmodifiedAst, Ast &rewrittenAst, unsigne
 
   } else {
     /// This class provides a way for exhaustive testing for circuits with binary inputs.
-    /// Its implementation is naive and not very efficient. However, exhaustive testing should anyway only be performed if
-    /// the number of circuit inputs is small.
+    /// Its implementation is naive and not very efficient. However, exhaustive testing should anyway only be performed
+    /// if the number of circuit inputs is small.
     struct LiteralBoolCombinationsGen {
      private:
       std::vector<LiteralBool*> params;
@@ -157,10 +158,10 @@ static void circuitOutputComparer(Ast &unmodifiedAst, Ast &rewrittenAst, unsigne
 
       void updateParams() {
         // Update all LiteralBools in params based on the current bit states in nextBitCombination.
-        // Iterator 'index' is limited by params.size() because nextBitCombination is larger as its size must be known at
-        // compile-time. A better approach would be to initially update all bits but in further iterations remember the last
-        // modified bit and based on that exit the loop earlier.
-        for (auto index = 0; index < params.size(); ++index) {
+        // Iterator 'index' is limited by params.size() because nextBitCombination is larger as its size must be known
+        // at compile-time. A better approach would be to initially update all bits but in further iterations remember
+        // the last modified bit and based on that exit the loop earlier.
+        for (size_t index = 0; index < params.size(); ++index) {
           bool bitValue = nextBitCombination[index];
           params.at(index)->setValue(bitValue);
         }
@@ -175,7 +176,7 @@ static void circuitOutputComparer(Ast &unmodifiedAst, Ast &rewrittenAst, unsigne
 
       bool hasNextAndUpdate() {
         // stop if we already built all possible combinations for 2^{params.size()} bits
-        if (double(nextBitCombination.to_ulong()) < pow(2, params.size())) {
+        if (static_cast<double>(nextBitCombination.to_ulong()) < pow(2, params.size())) {
           // modify params map based on combination in nextBitCombination
           updateParams();
           // increment nextBitCombination map to represent next value

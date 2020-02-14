@@ -46,7 +46,7 @@ void AstTestingGenerator::generateAst(int id, Ast &ast) {
   it->second(ast);
 }
 
-int AstTestingGenerator::getLargestId() {
+size_t AstTestingGenerator::getLargestId() {
   return call.size();
 }
 
@@ -602,9 +602,12 @@ void AstTestingGenerator::_genAstMultDepthTwo(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computePrivate");
   auto funcParams = new std::vector<FunctionParameter*>();
-  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("base")));
-  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("defaultC")));
-  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::BOOL), new Variable("useBase")));
+  funcParams->push_back(new FunctionParameter(
+      new Datatype(TYPES::INT), new Variable("base")));
+  funcParams->push_back(new FunctionParameter(
+      new Datatype(TYPES::INT), new Variable("defaultC")));
+  funcParams->push_back(new FunctionParameter(
+      new Datatype(TYPES::BOOL), new Variable("useBase")));
 
   // int stdA = 512;
   func->addStatement(new VarDecl("stdA", 512));

@@ -1,0 +1,41 @@
+digraph D {
+	Return_28 [label="Return_28\n[l(v): 3, r(v): 0]" shape=rect style=filled fillcolor=white]
+	{ Return_28 } -> { LogicalExpr_26 }
+	LogicalExpr_26 [label="LogicalExpr_26\n[l(v): 3, r(v): 0]" shape=oval style=filled fillcolor=red]
+	{ LogicalExpr_26 } -> { LogicalExpr_23, Operator_27, Variable_25 }
+	Variable_25 [label="Variable_25\n[l(v): 0, r(v): 1]\na_t" shape=oval style=filled fillcolor=white]
+	Operator_27 [label="Operator_27\n[l(v): 0, r(v): 1]\nAND" shape=oval style=filled fillcolor=white]
+	LogicalExpr_23 [label="LogicalExpr_23\n[l(v): 2, r(v): 1]" shape=oval style=filled fillcolor=white]
+	{ LogicalExpr_23 } -> { LogicalExpr_20, Operator_24, Variable_22 }
+	Variable_22 [label="Variable_22\n[l(v): 0, r(v): 1]\ny_1" shape=oval style=filled fillcolor=white]
+	Operator_24 [label="Operator_24\n[l(v): 0, r(v): 1]\nXOR" shape=oval style=filled fillcolor=white]
+	LogicalExpr_20 [label="LogicalExpr_20\n[l(v): 2, r(v): 1]" shape=oval style=filled fillcolor=white]
+	{ LogicalExpr_20 } -> { LogicalExpr_8, Operator_21, LogicalExpr_18 }
+	LogicalExpr_18 [label="LogicalExpr_18\n[l(v): 2, r(v): 1]" shape=oval style=filled fillcolor=red]
+	{ LogicalExpr_18 } -> { LogicalExpr_12, Operator_19, LogicalExpr_16 }
+	LogicalExpr_16 [label="LogicalExpr_16\n[l(v): 0, r(v): 2]" shape=oval style=filled fillcolor=white]
+	{ LogicalExpr_16 } -> { Variable_14, Operator_17, Variable_15 }
+	Variable_15 [label="Variable_15\n[l(v): 0, r(v): 2]\na_2^(2)_right" shape=oval style=filled fillcolor=white]
+	Operator_17 [label="Operator_17\n[l(v): 0, r(v): 2]\nXOR" shape=oval style=filled fillcolor=white]
+	Variable_14 [label="Variable_14\n[l(v): 0, r(v): 2]\na_2^(2)_left" shape=oval style=filled fillcolor=white]
+	Operator_19 [label="Operator_19\n[l(v): 0, r(v): 2]\nAND" shape=oval style=filled fillcolor=white]
+	LogicalExpr_12 [label="LogicalExpr_12\n[l(v): 1, r(v): 2]" shape=oval style=filled fillcolor=red]
+	{ LogicalExpr_12 } -> { Variable_10, Operator_13, Variable_11 }
+	Variable_11 [label="Variable_11\n[l(v): 0, r(v): 3]\na_1^(2)_right" shape=oval style=filled fillcolor=white]
+	Operator_13 [label="Operator_13\n[l(v): 0, r(v): 3]\nAND" shape=oval style=filled fillcolor=white]
+	Variable_10 [label="Variable_10\n[l(v): 0, r(v): 3]\na_1^(2)_left" shape=oval style=filled fillcolor=white]
+	Operator_21 [label="Operator_21\n[l(v): 0, r(v): 1]\nXOR" shape=oval style=filled fillcolor=white]
+	LogicalExpr_8 [label="LogicalExpr_8\n[l(v): 2, r(v): 1]" shape=oval style=filled fillcolor=red]
+	{ LogicalExpr_8 } -> { LogicalExpr_2, Operator_9, LogicalExpr_6 }
+	LogicalExpr_6 [label="LogicalExpr_6\n[l(v): 0, r(v): 2]" shape=oval style=filled fillcolor=white]
+	{ LogicalExpr_6 } -> { Variable_4, Operator_7, Variable_5 }
+	Variable_5 [label="Variable_5\n[l(v): 0, r(v): 2]\na_2^(1)_right" shape=oval style=filled fillcolor=white]
+	Operator_7 [label="Operator_7\n[l(v): 0, r(v): 2]\nXOR" shape=oval style=filled fillcolor=white]
+	Variable_4 [label="Variable_4\n[l(v): 0, r(v): 2]\na_2^(1)_left" shape=oval style=filled fillcolor=white]
+	Operator_9 [label="Operator_9\n[l(v): 0, r(v): 2]\nAND" shape=oval style=filled fillcolor=white]
+	LogicalExpr_2 [label="LogicalExpr_2\n[l(v): 1, r(v): 2]" shape=oval style=filled fillcolor=red]
+	{ LogicalExpr_2 } -> { Variable_0, Operator_3, Variable_1 }
+	Variable_1 [label="Variable_1\n[l(v): 0, r(v): 3]\na_1^(1)_right" shape=oval style=filled fillcolor=white]
+	Operator_3 [label="Operator_3\n[l(v): 0, r(v): 3]\nAND" shape=oval style=filled fillcolor=white]
+	Variable_0 [label="Variable_0\n[l(v): 0, r(v): 3]\na_1^(1)_left" shape=oval style=filled fillcolor=white]
+}

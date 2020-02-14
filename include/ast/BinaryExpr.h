@@ -63,6 +63,7 @@ class BinaryExpr : public AbstractExpr {
   int getMaxNumberChildren() override;
 
   bool supportsCircuitMode() override;
+
  private:
   Node* createClonedNode(bool keepOriginalUniqueNodeId) override;
 };

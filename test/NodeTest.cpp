@@ -3,12 +3,12 @@
 #include <LiteralBool.h>
 #include "gtest/gtest.h"
 
-TEST(NodeTest, rewriteMultiInputGateToBinaryGatesChain_emptyInputs) {
+TEST(NodeTest, rewriteMultiInputGateToBinaryGatesChain_emptyInputs) { /* NOLINT */
   std::vector<Node*> inputs{};
   ASSERT_THROW(Node::rewriteMultiInputGateToBinaryGatesChain(inputs, OpSymb::logicalAnd), std::invalid_argument);
 }
 
-TEST(NodeTest, rewriteMultiInputGateToBinaryGatesChain_oneInputAND) {
+TEST(NodeTest, rewriteMultiInputGateToBinaryGatesChain_oneInputAND) { /* NOLINT */
   std::vector<Node*> inputs{new Variable("alpha")};
   OpSymb::LogCompOp gateType = OpSymb::logicalAnd;
   auto result = Node::rewriteMultiInputGateToBinaryGatesChain(inputs, gateType);
@@ -25,7 +25,7 @@ TEST(NodeTest, rewriteMultiInputGateToBinaryGatesChain_oneInputAND) {
   ASSERT_EQ(*resultEval, LiteralBool(true));
 }
 
-TEST(NodeTest, rewriteMultiInputGateToBinaryGatesChain_oneInputXOR) {
+TEST(NodeTest, rewriteMultiInputGateToBinaryGatesChain_oneInputXOR) { /* NOLINT */
   std::vector<Node*> inputs{new Variable("alpha")};
   OpSymb::LogCompOp gateType = OpSymb::logicalXor;
   auto result = Node::rewriteMultiInputGateToBinaryGatesChain(inputs, gateType);
@@ -42,13 +42,13 @@ TEST(NodeTest, rewriteMultiInputGateToBinaryGatesChain_oneInputXOR) {
   ASSERT_EQ(*resultEval, LiteralBool(true));
 }
 
-TEST(NodeTest, rewriteMultiInputGateToBinaryGatesChain_oneInputUnsupportedException) {
+TEST(NodeTest, rewriteMultiInputGateToBinaryGatesChain_oneInputUnsupportedException) { /* NOLINT */
   std::vector<Node*> inputs{new Variable("alpha")};
   OpSymb::LogCompOp gateType = OpSymb::logicalOr;
   ASSERT_THROW(Node::rewriteMultiInputGateToBinaryGatesChain(inputs, gateType), std::runtime_error);
 }
 
-TEST(NodeTest, rewriteMultiInputGateToBinaryGatesChain_multipleInputs) {
+TEST(NodeTest, rewriteMultiInputGateToBinaryGatesChain_multipleInputs) { /* NOLINT */
   std::vector<Node*> inputs{new Variable("alpha"),
                             new Variable("beta"),
                             new Variable("gamma"),

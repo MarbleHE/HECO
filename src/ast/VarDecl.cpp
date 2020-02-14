@@ -16,12 +16,19 @@ json VarDecl::toJson() const {
   return j;
 }
 
+VarDecl::VarDecl(std::string, void*) {
+  throw std::invalid_argument("VarDecl(std::string, AbstractExpr*) not accepted as datatype cannot be determined. "
+                              "Use VarDecl(std::string, TYPES, AbstractExpr*) or one of the other constructors.");
+}
+
 VarDecl::VarDecl(std::string name, TYPES datatype, AbstractExpr* initializer) {
   setAttributes(std::move(name), new Datatype(datatype), initializer);
 }
 
 VarDecl::VarDecl(std::string name, std::string valueAssignedTo) {
-  setAttributes(std::move(name), new Datatype(TYPES::STRING), new LiteralString(std::move(valueAssignedTo)));
+  setAttributes(std::move(name),
+                new Datatype(TYPES::STRING),
+                new LiteralString(std::move(valueAssignedTo)));
 }
 
 VarDecl::VarDecl(std::string name, int valueAssignedTo) {
@@ -36,7 +43,8 @@ VarDecl::VarDecl(std::string name, bool valueAssignedTo) {
   setAttributes(std::move(name), new Datatype(TYPES::BOOL), new LiteralBool(valueAssignedTo));
 }
 
-VarDecl::VarDecl(std::string name, const char* valueAssignedTo) : VarDecl(name, std::string(valueAssignedTo)) {}
+VarDecl::VarDecl(std::string name, const char* valueAssignedTo)
+    : VarDecl(std::move(name), std::string(valueAssignedTo)) {}
 
 void VarDecl::setAttributes(std::string varIdentifier, Datatype* varDatatype, AbstractExpr* varValue) {
   // handle primitive attributes
@@ -106,7 +114,6 @@ bool VarDecl::supportsCircuitMode() {
 int VarDecl::getMaxNumberChildren() {
   return 2;
 }
-
 Node* VarDecl::createClonedNode(bool keepOriginalUniqueNodeId) {
   return new VarDecl(this->getVarTargetIdentifier(),
                      this->getDatatype()->getType(),

@@ -68,7 +68,7 @@ class ConeRewriter {
   std::pair<Node*, Node*> getCriticalAndNonCriticalInput(LogicalExpr* n);
 
  public:
-  ConeRewriter(Ast* ast);
+  explicit ConeRewriter(Ast* ast);
 
   ConeRewriter(Ast* ast, MultiplicativeDepthCalculator &mdc);
 

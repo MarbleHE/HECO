@@ -66,6 +66,6 @@ bool LiteralString::supportsDatatype(Datatype &datatype) {
   return datatype.getType() == TYPES::STRING;
 }
 
-Node* LiteralString::createClonedNode(bool keepOriginalUniqueNodeId) {
+Node* LiteralString::createClonedNode(bool) {
   return new LiteralString(this->getValue());
 }

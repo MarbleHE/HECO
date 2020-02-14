@@ -23,10 +23,11 @@ void MultRewriteVisitor::visit(BinaryExpr &elem) {
 
     // B. For case { int tmp = B*C; tmp = tmp*A; } where both BinaryExp are in separate statements.
     // If there is a last statement (i.e., this is not the first statement of the scope).
-    // (-> Check penultimate statement b/c the statement this BinaryExpr (elem) belongs to was already added to curScope)
+    // (-> Check penultimate statement b/c the statement this BinaryExpr elem belongs to was already added to curScope)
     if (auto puStat = curScope->getNthLastStatement(2)) {
       // If previous statement in scope contains a BinaryExpr multiplication...
-      if (BinaryExpr* lastStat = puStat->contains(new BinaryExpr(OpSymb::multiplication), nullptr)) {
+      if (BinaryExpr* lastStat = puStat->contains(
+          new BinaryExpr(OpSymb::multiplication), nullptr)) {
         // Retrieve variable identifier from last statement (VarDecl or VarAssignm)
         std::string puVarTargetIdentifier = puStat->getVarTargetIdentifier();
         std::string curBexpTargetIdentifier = curScope->getLastStatement()->getVarTargetIdentifier();

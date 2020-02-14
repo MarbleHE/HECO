@@ -1,12 +1,9 @@
-#include "../include/ast/Node.h"
 #include <sstream>
-#include <Operator.h>
-#include <set>
-#include "ConeRewriter.h"
-#include "AbstractExpr.h"
-#include "Node.h"
-#include "LogicalExpr.h"
 #include <queue>
+#include <set>
+#include <Operator.h>
+#include "AbstractExpr.h"
+#include "LogicalExpr.h"
 #include "Function.h"
 
 int Node::nodeIdCounter = 0;
@@ -15,9 +12,9 @@ std::string Node::genUniqueNodeId() {
   int nodeNo;
   try {
     nodeNo = assignedNodeIds.at(this);
-  } catch (std::out_of_range) {
-    throw std::logic_error(
-        "Could not find any reserved ID for node. Node constructor needs to reserve ID for node (see empty constructor).");
+  } catch (std::out_of_range &exception) {
+    throw std::logic_error("Could not find any reserved ID for node. "
+                           "Node constructor needs to reserve ID for node (see empty constructor).");
   }
 
   // clear the node entry as we will save the node ID in the uniqueNodeId field
@@ -106,7 +103,7 @@ void Node::addChildren(const std::vector<Node*> &childrenToAdd, bool addBackRefe
     // fill remaining slots with nullptr values
     children.insert(children.end(), getMaxNumberChildren() - getChildren().size(), nullptr);
   } else {  // otherwise we need to add the children one-by-one by looking for free slots
-    int childIdx = 0;
+    size_t childIdx = 0;
     // add child in first empty spot
     for (auto it = getChildren().begin(); it != getChildren().end() && childIdx < childrenToAdd.size(); ++it) {
       if (*it == nullptr) {
@@ -256,7 +253,7 @@ Node* Node::cloneRecursiveDeep(bool keepOriginalUniqueNodeId) {
   return clonedNode;
 }
 
-Node* Node::createClonedNode(bool keepOriginalUniqueNodeId) {
+Node* Node::createClonedNode(bool) {
   throw std::logic_error(
       "ERROR: Cannot execute cloneRecursiveDeep(...) because createClonedNode(...) is not implemented for node of type "
           + getNodeName());
@@ -288,8 +285,7 @@ Node* Node::getChildAtIndex(int idx) const {
 
 Node* Node::getChildAtIndex(int idx, bool isEdgeDirectionAware) const {
   try {
-    if (isEdgeDirectionAware && isReversed) return parents.at(idx);
-    else return children.at(idx);
+    return (isEdgeDirectionAware && isReversed) ? parents.at(idx) : children.at(idx);
   } catch (std::out_of_range const &e) {
     return nullptr;
   }

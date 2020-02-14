@@ -53,10 +53,10 @@ class Operator : public Node {
   Literal* applyOperator(LiteralInt* lhs, LiteralBool* rhs);
   Literal* applyOperator(LiteralBool* lhs, LiteralInt* rhs);
   Literal* applyOperator(LiteralString* lhs, LiteralString* rhs);
-  Literal* applyOperator(LiteralBool* lhs, LiteralString* rhs);
-  Literal* applyOperator(LiteralString* lhs, LiteralBool* rhs);
-  Literal* applyOperator(LiteralInt* lhs, LiteralString* rhs);
-  Literal* applyOperator(LiteralString* lhs, LiteralInt* rhs);
+  static Literal* applyOperator(LiteralBool* lhs, LiteralString* rhs);
+  static Literal* applyOperator(LiteralString* lhs, LiteralBool* rhs);
+  static Literal* applyOperator(LiteralInt* lhs, LiteralString* rhs);
+  static Literal* applyOperator(LiteralString* lhs, LiteralInt* rhs);
   Literal* applyOperator(LiteralInt* rhs);
   Literal* applyOperator(LiteralBool* rhs);
   Literal* applyOperator(LiteralString* rhs);
@@ -65,17 +65,23 @@ class Operator : public Node {
   Literal* applyOperator(LiteralInt* lhs, LiteralFloat* rhs);
   Literal* applyOperator(LiteralFloat* lhs, LiteralBool* rhs);
   Literal* applyOperator(LiteralBool* lhs, LiteralFloat* rhs);
-  Literal* applyOperator(LiteralFloat* lhs, LiteralString* rhs);
-  Literal* applyOperator(LiteralString* lhs, LiteralFloat* rhs);
+  static Literal* applyOperator(LiteralFloat* lhs, LiteralString* rhs);
+  static Literal* applyOperator(LiteralString* lhs, LiteralFloat* rhs);
   Literal* applyOperator(LiteralFloat* rhs);
 
   [[nodiscard]] std::string toString() const override;
 
   bool supportsCircuitMode() override;
 
-  virtual ~Operator();
+  ~Operator() override;
 
   Node* createClonedNode(bool keepOriginalUniqueNodeId) override;
+
+  [[nodiscard]] bool equals(OpSymb::BinaryOp op) const;
+
+  [[nodiscard]] bool equals(OpSymb::LogCompOp op) const;
+
+  [[nodiscard]] bool equals(OpSymb::UnaryOp op) const;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_OPERATOR_H

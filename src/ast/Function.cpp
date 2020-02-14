@@ -69,7 +69,7 @@ void Function::setParams(std::vector<FunctionParameter*> paramsVec) {
 }
 
 Literal* Function::evaluate(Ast &ast) {
-  for (int i = 0; i < this->getBody().size(); i++) {
+  for (size_t i = 0; i < this->getBody().size(); i++) {
     auto currentStatement = this->getBody().at(i);
     // last statement: check if it is a Return statement
     if (i == this->getBody().size() - 1) {
@@ -84,11 +84,11 @@ Literal* Function::evaluate(Ast &ast) {
 
 Node* Function::createClonedNode(bool keepOriginalUniqueNodeId) {
   std::vector<FunctionParameter*> clonedParams;
-  for (auto &fp : getParams()) {
+  for (auto &fp : this->getParams()) {
     clonedParams.push_back(fp->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<FunctionParameter>());
   }
   std::vector<AbstractStatement*> clonedBody;
-  for (auto &statement : getBody()) {
+  for (auto &statement : this->getBody()) {
     clonedBody.push_back(statement->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractStatement>());
   }
   return new Function(this->getName(), clonedParams, clonedBody);

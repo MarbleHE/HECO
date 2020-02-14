@@ -1,12 +1,10 @@
-#include "ConeRewriter.h"
-#include "LogicalExpr.h"
 #include <set>
 #include <queue>
 #include <utility>
+#include "ConeRewriter.h"
+#include "LogicalExpr.h"
 #include "Return.h"
 #include "Function.h"
-#include "DotPrinter.h"
-#include "MultiplicativeDepthCalculator.h"
 
 ConeRewriter::ConeRewriter(Ast* ast)
     : ast(ast), mdc(MultiplicativeDepthCalculator{*ast}) {
@@ -499,7 +497,7 @@ void ConeRewriter::rewriteCones(Ast &astToRewrite, const std::vector<Node*> &con
           if (isCriticalNode(xorEndNodeAsLogicalExpr->getLeft())
               != isCriticalNode(xorEndNodeAsLogicalExpr->getRight())) {
             // then we need to collect this non-critical input
-            auto[unused, nonCriticalInput] = getCriticalAndNonCriticalInput(xorEndNodeAsLogicalExpr);
+            auto nonCriticalInput = getCriticalAndNonCriticalInput(xorEndNodeAsLogicalExpr).second;
             inputsY1ToYm.push_back(nonCriticalInput);
           }
           // stop traversing further as we reached the xorEndNode
@@ -527,7 +525,7 @@ void ConeRewriter::rewriteCones(Ast &astToRewrite, const std::vector<Node*> &con
         throw std::logic_error("Unexpected number (0) of non-critical inputs y_1, ..., y_m.");
 
       // build new node u_y that is connected to inputs y_1, ..., y_m and a_t
-      AbstractExpr* u_y_rightOperand;
+      AbstractExpr* u_y_rightOperand = nullptr;
       if (inputsY1ToYm.size() == 1) {
         // if y_1 only exists: connect input y_1 directly to u_y -> trivial case
         u_y_rightOperand = inputsY1ToYm.front()->castTo<AbstractExpr>();
@@ -580,9 +578,7 @@ void ConeRewriter::rewriteCones(Ast &astToRewrite, const std::vector<Node*> &con
     // connect final XOR (i.e., last LogicalExpr in the chain of XOR nodes) to cone output
     rNode->addChild(xorFinalGate.back());
     xorFinalGate.back()->addParent(rNode);
-
   } //end: for (auto coneEnd : coneEndNodes)
-
 }
 
 std::pair<Node*, Node*> ConeRewriter::getCriticalAndNonCriticalInput(LogicalExpr* logicalExpr) {

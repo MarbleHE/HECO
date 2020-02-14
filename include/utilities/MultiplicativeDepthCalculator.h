@@ -1,6 +1,9 @@
 #ifndef AST_OPTIMIZER_INCLUDE_UTILITIES_MULTIPLICATIVEDEPTHCALCULATOR_H_
 #define AST_OPTIMIZER_INCLUDE_UTILITIES_MULTIPLICATIVEDEPTHCALCULATOR_H_
 
+#include <map>
+#include <string>
+
 class MultiplicativeDepthCalculator {
  private:
   std::map<std::string, int> multiplicativeDepths{};
@@ -8,7 +11,7 @@ class MultiplicativeDepthCalculator {
   int maximumMultiplicativeDepth{};
 
  public:
-  MultiplicativeDepthCalculator(Ast &ast);
+  explicit MultiplicativeDepthCalculator(Ast &ast);
 
   /// Calculates the multiplicative depth based on the definition given in
   /// [Aubry, P. et al.: Faster Homomorphic Encryption Is Not Enough: Improved Heuristic for Multiplicative Depth
@@ -19,7 +22,7 @@ class MultiplicativeDepthCalculator {
   /// Determine the value of this node for computing the multiplicative depth and reverse multiplicative depth,
   /// getMultDepthL() and getReverseMultDepthR(), respectively.
   /// \return Returns 1 iff this node is a LogicalExpr containing an AND operator, otherwise 0.
-  int depthValue(Node* n);
+  static int depthValue(Node* n);
 
   /// Calculates the reverse multiplicative depth based on the definition given in
   /// [Aubry, P. et al.: Faster Homomorphic Encryption Is Not Enough: Improved Heuristic for Multiplicative Depth

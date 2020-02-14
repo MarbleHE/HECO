@@ -17,7 +17,7 @@ class Variable : public AbstractExpr {
 
   [[nodiscard]] json toJson() const override;
 
-  virtual ~Variable();
+  ~Variable() override;
 
   void accept(Visitor &v) override;
 

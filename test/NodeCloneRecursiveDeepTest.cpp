@@ -1,7 +1,6 @@
 #include "gtest/gtest.h"
 #include "AbstractExpr.h"
 #include "AbstractStatement.h"
-#include "Ast.h"
 #include "BinaryExpr.h"
 #include "Block.h"
 #include "Call.h"
@@ -15,7 +14,6 @@
 #include "LiteralInt.h"
 #include "LiteralString.h"
 #include "LogicalExpr.h"
-#include "Node.h"
 #include "OpSymbEnum.h"
 #include "Operator.h"
 #include "Return.h"
@@ -47,26 +45,27 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_BinaryExpr) {  /* NOLINT */
   auto lhsOperand = new LiteralInt(0);
   auto operatore = new Operator(OpSymb::addition);
   auto rhsOperand = new LiteralInt(987);
-  auto binaryExpression = new LogicalExpr(lhsOperand, operatore, rhsOperand);
+  auto binaryExpression = new BinaryExpr(lhsOperand, operatore, rhsOperand);
   // clone the logical expression
-  auto clonedBinaryExpression = binaryExpression->cloneRecursiveDeep(KEEP_ORIGINAL_ID);
+  auto clonedBinaryExprAsNode = binaryExpression->cloneRecursiveDeep(KEEP_ORIGINAL_ID);
+  auto clonedBinaryExprCasted = clonedBinaryExprAsNode->castTo<BinaryExpr>();
   // test if all fields belonging to Node class were copied
-  assertNodeAttributes(KEEP_ORIGINAL_ID, binaryExpression, clonedBinaryExpression);
+  assertNodeAttributes(KEEP_ORIGINAL_ID, binaryExpression, clonedBinaryExprAsNode);
 
   // make changes to the left operand and check whether clone changes too
   lhsOperand->castTo<LiteralInt>()->setValue(111);
   ASSERT_EQ(binaryExpression->getLeft()->castTo<LiteralInt>()->getValue(), 111);
-  ASSERT_EQ(clonedBinaryExpression->castTo<LogicalExpr>()->getLeft()->castTo<LiteralInt>()->getValue(), 0);
+  ASSERT_EQ(clonedBinaryExprCasted->getLeft()->castTo<LiteralInt>()->getValue(), 0);
 
   // make changes to the right operand and check whether clone changes too
   rhsOperand->castTo<LiteralInt>()->setValue(42);
   ASSERT_EQ(binaryExpression->getRight()->castTo<LiteralInt>()->getValue(), 42);
-  ASSERT_EQ(clonedBinaryExpression->castTo<LogicalExpr>()->getRight()->castTo<LiteralInt>()->getValue(), 987);
+  ASSERT_EQ(clonedBinaryExprCasted->getRight()->castTo<LiteralInt>()->getValue(), 987);
 
   // make changes to the operator and check whether clone changes too
   *operatore = *new Operator(OpSymb::multiplication);
   ASSERT_TRUE(binaryExpression->getOp()->castTo<Operator>()->equals(OpSymb::multiplication));
-  ASSERT_TRUE(clonedBinaryExpression->castTo<LogicalExpr>()->getOp()->equals(OpSymb::addition));
+  ASSERT_TRUE(clonedBinaryExprCasted->getOp()->equals(OpSymb::addition));
 }
 
 TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_LogicalExpr) {  /* NOLINT */
@@ -85,24 +84,28 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_LogicalExpr) {  /* NOLINT */
   // make changes to the left operand and check whether clone changes too
   lhsOperand->castTo<LiteralInt>()->setValue(111);
   ASSERT_EQ(logicalExpression->getLeft()->castTo<LiteralInt>()->getValue(), 111);
-  ASSERT_EQ(clonedLogicalExpression->castTo<LogicalExpr>()->getLeft()->castTo<LiteralInt>()->getValue(), 0);
+  auto clonedLogicalExpr = clonedLogicalExpression->castTo<LogicalExpr>();
+  ASSERT_EQ(clonedLogicalExpr->getLeft()->castTo<LiteralInt>()->getValue(), 0);
 
   // make changes to the right operand and check whether clone changes too
   rhsOperand->castTo<LiteralInt>()->setValue(42);
   ASSERT_EQ(logicalExpression->getRight()->castTo<LiteralInt>()->getValue(), 42);
-  ASSERT_EQ(clonedLogicalExpression->castTo<LogicalExpr>()->getRight()->castTo<LiteralInt>()->getValue(), 987);
+  ASSERT_EQ(clonedLogicalExpr->getRight()->castTo<LiteralInt>()->getValue(), 987);
 
   // make changes to the operator and check whether clone changes too
   *operatore = *new Operator(OpSymb::smaller);
   ASSERT_TRUE(logicalExpression->getOp()->castTo<Operator>()->equals(OpSymb::smaller));
-  ASSERT_TRUE(clonedLogicalExpression->castTo<LogicalExpr>()->getOp()->equals(OpSymb::greater));
+  ASSERT_TRUE(clonedLogicalExpr->getOp()->equals(OpSymb::greater));
 }
 
 TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_If) {  /* NOLINT */
   const bool KEEP_ORIGINAL_ID = true;
 
   // create new If object
-  auto ifStmtCondition = new LogicalExpr(new LiteralInt(12), OpSymb::greater, new LiteralInt(43));
+  auto ifStmtCondition = new LogicalExpr(
+      new LiteralInt(12),
+      OpSymb::greater,
+      new LiteralInt(43));
   auto ifStmtThenBranch = new Block(new VarAssignm("alpha", new LiteralBool(true)));
   auto ifStmtElseBranch = new Block(new VarAssignm("alpha", new LiteralBool(false)));
   auto ifStmt = new If(ifStmtCondition, ifStmtThenBranch, ifStmtElseBranch);
@@ -118,36 +121,41 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_If) {  /* NOLINT */
   assertNodeAttributes(KEEP_ORIGINAL_ID, ifStmt, clonedIfStmt);
 
   // check if changing the condition in the original also changes the cloned If statement
-  ifStmtCondition->setAttributes(new LiteralInt(99), new Operator(OpSymb::smaller), new LiteralInt(1));
+  ifStmtCondition->setAttributes(new LiteralInt(99),
+                                 new Operator(OpSymb::smaller),
+                                 new LiteralInt(1));
   // check if changes were applied to the original one
   ASSERT_EQ(ifStmt->getCondition()->castTo<LogicalExpr>()->getLeft()->castTo<LiteralInt>()->getValue(), 99);
   ASSERT_TRUE(ifStmt->getCondition()->castTo<LogicalExpr>()->getOp()->equals(OpSymb::smaller));
   ASSERT_EQ(ifStmt->getCondition()->castTo<LogicalExpr>()->getRight()->castTo<LiteralInt>()->getValue(), 1);
   // check if changes were applied to the cloned one
-  ASSERT_EQ(clonedIfStmt->getCondition()->castTo<LogicalExpr>()->getLeft()->castTo<LiteralInt>()->getValue(), 12);
-  ASSERT_TRUE(clonedIfStmt->getCondition()->castTo<LogicalExpr>()->getOp()->equals(OpSymb::greater));
-  ASSERT_EQ(clonedIfStmt->getCondition()->castTo<LogicalExpr>()->getRight()->castTo<LiteralInt>()->getValue(), 43);
+  auto clonedIfCondition = clonedIfStmt->getCondition()->castTo<LogicalExpr>();
+  ASSERT_EQ(clonedIfCondition->getLeft()->castTo<LiteralInt>()->getValue(), 12);
+  ASSERT_TRUE(clonedIfCondition->getOp()->equals(OpSymb::greater));
+  ASSERT_EQ(clonedIfCondition->getRight()->castTo<LiteralInt>()->getValue(), 43);
 
   // check if changing the then branch in the original also changes the cloned If statement
   *ifStmtThenBranch = *new Block(new VarAssignm("beta", new LiteralBool(false)));
-  ASSERT_EQ(ifStmt->getThenBranch()->castTo<Block>()->getStatements()->front()->castTo<VarAssignm>()->getIdentifier(),
-            "beta");
-  ASSERT_EQ(clonedIfStmt->getThenBranch()->castTo<Block>()->getStatements()->front()->castTo<VarAssignm>()->getIdentifier(),
-            "alpha");
+  auto ifFirstThenStatement = ifStmt->getThenBranch()->castTo<Block>()->getStatements()->front();
+  ASSERT_EQ(ifFirstThenStatement->castTo<VarAssignm>()->getIdentifier(), "beta");
+  auto clonedIfStmtFirstThenStatement =
+      clonedIfStmt->getThenBranch()->castTo<Block>()->getStatements()->front()->castTo<VarAssignm>()->getIdentifier();
+  ASSERT_EQ(clonedIfStmtFirstThenStatement, "alpha");
 
   // check if changing the else branch in the original also changes the cloned If statement
   *ifStmtElseBranch = *new Block(new VarAssignm("gamma", new LiteralBool(true)));
-  ASSERT_EQ(ifStmt->getElseBranch()->castTo<Block>()->getStatements()->front()->castTo<VarAssignm>()->getIdentifier(),
-            "gamma");
-  ASSERT_EQ(clonedIfStmt->getElseBranch()->castTo<Block>()->getStatements()->front()->castTo<VarAssignm>()->getIdentifier(),
-            "alpha");
+  auto ifFirstStatementElseBranch = ifStmt->getElseBranch()->castTo<Block>()->getStatements()->front();
+  ASSERT_EQ(ifFirstStatementElseBranch->castTo<VarAssignm>()->getIdentifier(), "gamma");
+  auto clonedIfFirstElseStatement = clonedIfStmt->getElseBranch()->castTo<Block>()->getStatements()->front();
+  ASSERT_EQ(clonedIfFirstElseStatement->castTo<VarAssignm>()->getIdentifier(), "alpha");
 }
 
 TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_Call) {  /* NOLINT */
   const bool KEEP_ORIGINAL_ID = false;
 
   // create new Call object 'call'
-  auto callFunctionParam = new FunctionParameter(new Datatype(TYPES::INT), new Variable("pinCode"));
+  auto callFunctionParam = new FunctionParameter(new Datatype(TYPES::INT),
+                                                 new Variable("pinCode"));
   auto callFunction = new Function("determineSecurityLevel");
   auto call = new Call({callFunctionParam}, callFunction);
   // verify that all parameters are set
@@ -190,7 +198,8 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_Function) {  /* NOLINT */
   // verify that all parameters are set
   ASSERT_EQ(functionStmt->getName(), functionName);
   ASSERT_EQ(functionStmt->getParams().size(), 1);
-  ASSERT_EQ(functionStmt->getParams().front(), args.front());
+  auto functionFirstParam = functionStmt->getParams().front();
+  ASSERT_EQ(functionFirstParam, args.front());
   ASSERT_EQ(functionStmt->getBody(), bodyStatements);
 
   // clone functionStmt as clonedFunctionStmt
@@ -199,23 +208,26 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_Function) {  /* NOLINT */
   assertNodeAttributes(KEEP_ORIGINAL_ID, functionStmt, clonedFunctionStmt);
 
   // test if changing the original FunctionParameter changes the cloned one too
-  ASSERT_EQ(clonedFunctionStmt->getParams().front()->getDatatype()->getType(), TYPES::INT);
-  ASSERT_EQ(clonedFunctionStmt->getParams().front()->getValue()->castTo<Variable>()->getIdentifier(), "seed");
+  auto clonedFunctionFirstParam = clonedFunctionStmt->getParams().front();
+  ASSERT_EQ(clonedFunctionFirstParam->getDatatype()->getType(), TYPES::INT);
+  ASSERT_EQ(clonedFunctionFirstParam->getValue()->castTo<Variable>()->getIdentifier(), "seed");
   funcParam->setAttributes(new Datatype(TYPES::FLOAT), new Variable("floatThreshold"));
-  ASSERT_EQ(functionStmt->getParams().front()->getDatatype()->getType(), TYPES::FLOAT);
-  ASSERT_EQ(clonedFunctionStmt->getParams().front()->getDatatype()->getType(), TYPES::INT);
-  ASSERT_EQ(functionStmt->getParams().front()->getValue()->castTo<Variable>()->getIdentifier(), "floatThreshold");
-  ASSERT_EQ(clonedFunctionStmt->getParams().front()->getValue()->castTo<Variable>()->getIdentifier(), "seed");
+  ASSERT_EQ(functionFirstParam->getDatatype()->getType(), TYPES::FLOAT);
+  ASSERT_EQ(clonedFunctionFirstParam->getDatatype()->getType(), TYPES::INT);
+  ASSERT_EQ(functionFirstParam->getValue()->castTo<Variable>()->getIdentifier(), "floatThreshold");
+  ASSERT_EQ(clonedFunctionFirstParam->getValue()->castTo<Variable>()->getIdentifier(), "seed");
 
   // test if adding a new FunctionParameter to the original Function
   ASSERT_EQ(functionStmt->getParams().size(), 1);
   ASSERT_EQ(clonedFunctionStmt->getParams().size(), 1);
-  functionStmt->addParameter(new FunctionParameter(new Datatype(TYPES::INT, true), new Variable("randomNumber")));
+  functionStmt->addParameter(
+      new FunctionParameter(new Datatype(TYPES::INT, true),
+                            new Variable("randomNumber")));
   ASSERT_EQ(functionStmt->getParams().size(), 2);
   ASSERT_EQ(clonedFunctionStmt->getParams().size(), 1);
 }
 
-TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_FunctionParameter) {
+TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_FunctionParameter) { /* NOLINT */
   const bool KEEP_ORIGINAL_ID = true;
   auto varExpr = new Variable("alpha");
   auto functionParam = new FunctionParameter(new Datatype(TYPES::INT), varExpr);
@@ -260,9 +272,10 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_CallExternal) {  /* NOLINT */
   ASSERT_EQ(callExternal->getArguments().size(), 1);
   ASSERT_EQ(clonedCallExternal->getArguments().size(), 1);
   ASSERT_EQ(callExternal->getArguments().front()->getDatatype()->getType(), TYPES::FLOAT);
-  ASSERT_EQ(clonedCallExternal->getArguments().front()->getDatatype()->getType(), TYPES::INT);
+  auto clonedCallFirstArgument = clonedCallExternal->getArguments().front();
+  ASSERT_EQ(clonedCallFirstArgument->getDatatype()->getType(), TYPES::INT);
   ASSERT_EQ(callExternal->getArguments().front()->getValue()->castTo<Variable>()->getIdentifier(), "input");
-  ASSERT_EQ(clonedCallExternal->getArguments().front()->getValue()->castTo<Variable>()->getIdentifier(), "blah");
+  ASSERT_EQ(clonedCallFirstArgument->getValue()->castTo<Variable>()->getIdentifier(), "blah");
 }
 
 TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_Block) {  /* NOLINT */

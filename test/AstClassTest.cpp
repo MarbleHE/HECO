@@ -18,7 +18,7 @@ class AstTestFixture : public ::testing::Test {
   }
 };
 
-TEST_F(AstTestFixture, deleteNode_deleteSingleLeafNodeOnly) {
+TEST_F(AstTestFixture, deleteNode_deleteSingleLeafNodeOnly) { /* NOLINT */
   // retrieve the binary expression of interest
   auto func = dynamic_cast<Function*>(ast.getRootNode());
   ASSERT_NE(func, nullptr);
@@ -36,7 +36,7 @@ TEST_F(AstTestFixture, deleteNode_deleteSingleLeafNodeOnly) {
   ASSERT_EQ(variable, nullptr);
 }
 
-TEST_F(AstTestFixture, deleteNode_deleteRecursiveSubtreeNonEmpty) {
+TEST_F(AstTestFixture, deleteNode_deleteRecursiveSubtreeNonEmpty) { /* NOLINT */
   // retrieve the binary expression of interest
   auto func = dynamic_cast<Function*>(ast.getRootNode());
   ASSERT_NE(func, nullptr);
@@ -46,7 +46,6 @@ TEST_F(AstTestFixture, deleteNode_deleteRecursiveSubtreeNonEmpty) {
 
   // save and check node's children
   const auto &binaryExprChildren = binaryExpr->getChildren();
-  Node* childOne = binaryExprChildren.at(0);
   for (auto &c : binaryExprChildren)
     ASSERT_EQ(c->getParentsNonNull().front(), binaryExpr);
 
@@ -60,7 +59,7 @@ TEST_F(AstTestFixture, deleteNode_deleteRecursiveSubtreeNonEmpty) {
   ASSERT_TRUE(binaryExprChildren.empty());
 }
 
-TEST_F(AstTestFixture, deleteNode_deleteRecursiveSubtreeEmpty) {
+TEST_F(AstTestFixture, deleteNode_deleteRecursiveSubtreeEmpty) { /* NOLINT */
   // The same test as deleteNode_deleteSingleLeafNodeOnly but now we use the 'deleteSubtreeRecursively' flag
   // this should not change anything though if there are no children present
 
@@ -81,7 +80,7 @@ TEST_F(AstTestFixture, deleteNode_deleteRecursiveSubtreeEmpty) {
   ASSERT_EQ(variable, nullptr);
 }
 
-TEST_F(AstTestFixture, deleteNode_ChildrenExisting) {
+TEST_F(AstTestFixture, deleteNode_ChildrenExisting) { /* NOLINT */
   // The same test as deleteNode_deleteRecursiveSubtreeNonEmpty but now we simulate forgetting the use of the
   // 'deleteSubtreeRecursively' flag which should throw an exception
 
@@ -111,7 +110,7 @@ TEST_F(AstTestFixture, deleteNode_ChildrenExisting) {
   ASSERT_EQ(binaryExpr->countChildrenNonNull(), binaryExprNumChildren);
 }
 
-TEST_F(AstTestFixture, deepCopy) {
+TEST_F(AstTestFixture, deepCopy) { /* NOLINT */
   // Test that copying an AST object properly performs a deep copy
   auto number_of_nodes = ast.getAllNodes().size();
   if (number_of_nodes != 0) {
@@ -119,7 +118,7 @@ TEST_F(AstTestFixture, deepCopy) {
 
     // Delete all nodes in the copy
     auto nodes = copy.getAllNodes();
-    for (auto x: nodes) {
+    for (auto x : nodes) {
       copy.deleteNode(&x);
       ASSERT_EQ(x, nullptr);
     }

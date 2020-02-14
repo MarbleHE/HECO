@@ -2,7 +2,6 @@
 #include "Datatypes.h"
 #include "AbstractExpr.h"
 #include "LiteralFloat.h"
-#include "Visitor.h"
 #include "RandNumGen.h"
 
 LiteralFloat::LiteralFloat(float value) : value(value) {}
@@ -77,6 +76,6 @@ bool LiteralFloat::supportsDatatype(Datatype &datatype) {
   return datatype.getType() == TYPES::FLOAT;
 }
 
-Node* LiteralFloat::createClonedNode(bool keepOriginalUniqueNodeId) {
-  return new LiteralFloat(this->getValue());;
+Node* LiteralFloat::createClonedNode(bool) {
+  return new LiteralFloat(this->getValue());
 }

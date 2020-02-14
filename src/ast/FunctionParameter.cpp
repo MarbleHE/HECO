@@ -43,8 +43,8 @@ FunctionParameter::FunctionParameter(Datatype* datatype, AbstractExpr* value) {
   setAttributes(datatype, value);
 }
 
-FunctionParameter::FunctionParameter(std::string datatypeEnumString, AbstractExpr* value) {
-  setAttributes(new Datatype(std::move(datatypeEnumString)), value);
+FunctionParameter::FunctionParameter(const std::string &datatypeEnumString, AbstractExpr* value) {
+  setAttributes(new Datatype(datatypeEnumString), value);
 }
 
 Datatype* FunctionParameter::getDatatype() const {

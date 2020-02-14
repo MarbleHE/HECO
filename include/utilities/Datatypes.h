@@ -19,12 +19,11 @@ class Datatype : public Node {
   bool isEncrypted = false;
 
  public:
-
   explicit Datatype(TYPES di) : val(di) {}
 
   explicit Datatype(TYPES di, bool isEncrypted) : val(di), isEncrypted(isEncrypted) {}
 
-  explicit Datatype(std::string type) {
+  explicit Datatype(const std::string &type) {
     static const std::map<std::string, TYPES> string_to_types = {
         {"int", TYPES::INT},
         {"float", TYPES::FLOAT},
@@ -47,15 +46,15 @@ class Datatype : public Node {
     return types_to_string.find(identifiers)->second;
   }
 
-  operator std::string() const {
+  explicit operator std::string() const {
     return enum_to_string(val);
   }
 
-  operator TYPES() const {
+  explicit operator TYPES() const {
     return val;
   }
 
-  std::string toString() const override {
+  [[nodiscard]] std::string toString() const override {
     return enum_to_string(val);
   }
 
@@ -68,7 +67,7 @@ class Datatype : public Node {
     return !(rhs == *this);
   }
 
-  TYPES getType() const {
+  [[nodiscard]] TYPES getType() const {
     return val;
   }
 };

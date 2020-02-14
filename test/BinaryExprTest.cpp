@@ -1,7 +1,6 @@
-#include <include/ast/LiteralInt.h>
+#include "LiteralInt.h"
 #include "BinaryExpr.h"
 #include "gtest/gtest.h"
-#include "Operator.h"
 
 int getLiteralIntValue(AbstractExpr* abExpr) {
   return dynamic_cast<LiteralInt*>(abExpr)->getValue();

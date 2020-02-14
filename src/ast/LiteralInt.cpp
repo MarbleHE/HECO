@@ -1,8 +1,5 @@
 #include <iostream>
 #include "LiteralInt.h"
-#include "LiteralBool.h"
-#include <sstream>
-#include "LiteralString.h"
 #include "RandNumGen.h"
 #include "AbstractExpr.h"
 
@@ -78,7 +75,7 @@ bool LiteralInt::supportsCircuitMode() {
   return true;
 }
 
-Node* LiteralInt::createClonedNode(bool keepOriginalUniqueNodeId) {
+Node* LiteralInt::createClonedNode(bool) {
   return new LiteralInt(this->getValue());
 }
 

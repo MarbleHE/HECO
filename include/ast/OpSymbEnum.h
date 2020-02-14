@@ -42,9 +42,9 @@ class OpSymb {
 
   static std::string getTextRepr(std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp> opVar) {
     switch (opVar.index()) {
-      case 0: return getTextRepr(std::get<0>(opVar));
-      case 1: return getTextRepr(std::get<1>(opVar));
-      case 2: return getTextRepr(std::get<2>(opVar));
+      case 0: return getTextRepr(std::get<OpSymb::BinaryOp>(opVar));
+      case 1: return getTextRepr(std::get<OpSymb::LogCompOp>(opVar));
+      case 2: return getTextRepr(std::get<OpSymb::UnaryOp>(opVar));
       default: return "";
     }
   }
