@@ -9,15 +9,20 @@
 class VarDecl : public AbstractStatement {
  private:
   std::string identifier;
-  Datatype* datatype;
-  AbstractExpr* initializer;
 
  public:
-  VarDecl(std::string name, const std::string &datatype, AbstractExpr* initializer);
+  VarDecl(std::string name, TYPES datatype, AbstractExpr* initializer);
 
   VarDecl(std::string name, int value);
 
   VarDecl(std::string name, bool value);
+
+  /// This is just a helper constructor that allows to call VarDecl("randomString", "aiermkr");
+  /// without this constructor the call will be wrongly forwarded to the VarDecl(std::string, bool) constructor.
+  /// See https://stackoverflow.com/q/14770252/3017719.
+  /// \param name The variable's identifier.
+  /// \param valueAssignedTo The value assigned to the variable.
+  VarDecl(std::string name, const char* valueAssignedTo);
 
   VarDecl(std::string name, float value);
 
@@ -44,6 +49,14 @@ class VarDecl : public AbstractStatement {
   bool isEqual(AbstractStatement* as) override;
 
   Literal* evaluate(Ast &ast) override;
+
+  void setAttributes(std::string varIdentifier, Datatype* datatype, AbstractExpr* value);
+
+  bool supportsCircuitMode() override;
+
+  int getMaxNumberChildren() override;
+ private:
+  Node* createClonedNode(bool keepOriginalUniqueNodeId) override;
 };
 
 #endif //MASTER_THESIS_CODE_VARDECL_H

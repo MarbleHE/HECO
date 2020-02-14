@@ -6,24 +6,31 @@
 #include "AbstractExpr.h"
 
 class Return : public AbstractStatement {
- private:
-  AbstractExpr* value{};
-
  public:
+  Return();
+
   explicit Return(AbstractExpr* value);
 
   [[nodiscard]] json toJson() const override;
 
   void accept(Visitor &v) override;
 
-  [[nodiscard]] AbstractExpr* getValue() const;
-
   [[nodiscard]] std::string getNodeName() const override;
 
   ~Return() override;
 
   Literal* evaluate(Ast &ast) override;
-  Return();
+
+  [[nodiscard]] AbstractExpr* getReturnExpr() const;
+
+  Node* createClonedNode(bool keepOriginalUniqueNodeId) override;
+
+  void setAttributes(AbstractExpr* returnExpr);
+
+ protected:
+  int getMaxNumberChildren() override;
+
+  bool supportsCircuitMode() override;
 };
 
 #endif //MASTER_THESIS_CODE_RETURN_H

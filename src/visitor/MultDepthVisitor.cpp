@@ -63,7 +63,7 @@ void MultDepthVisitor::visit(Operator &elem) {
 }
 
 void MultDepthVisitor::visit(Return &elem) {
-  analyzeMultiplicativeDepth("<ReturnValue>", &elem, elem.getValue());
+  analyzeMultiplicativeDepth("<ReturnValue>", &elem, elem.getReturnExpr());
   Visitor::visit(elem);
 }
 
@@ -94,7 +94,9 @@ void MultDepthVisitor::visit(Ast &elem) {
   if (verbose) std::cout << "Call now function getMaxDepth() to retrieve the calculated depth" << std::endl;
 }
 
-void MultDepthVisitor::analyzeMultiplicativeDepth(const std::string &varIdentifier, AbstractStatement* stmt, AbstractExpr* initializer) {
+void MultDepthVisitor::analyzeMultiplicativeDepth(const std::string &varIdentifier,
+                                                  AbstractStatement* stmt,
+                                                  AbstractExpr* initializer) {
   // if VarDecl contains BinaryExpr or contains LogicalExpr
   std::string initializerNodeType = initializer->getNodeName();
   if (initializerNodeType == BinaryExpr().getNodeName() || initializerNodeType == LogicalExpr().getNodeName()) {

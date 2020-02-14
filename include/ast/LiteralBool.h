@@ -9,6 +9,8 @@ class LiteralBool : public Literal {
  private:
   bool value;
 
+  Node* createClonedNode(bool keepOriginalUniqueNodeId) override;
+
  public:
   explicit LiteralBool(bool value);
 
@@ -33,12 +35,16 @@ class LiteralBool : public Literal {
   void addLiteralValue(std::string identifier, std::map<std::string, Literal*> &paramsMap) override;
 
   void setRandomValue(RandLiteralGen &rlg) override;
+
   void setValue(bool newValue);
 
-    std::string toString() const override;
+  [[nodiscard]] std::string toString() const override;
 
- protected:
+  bool supportsDatatype(Datatype &datatype) override;
+
   void print(std::ostream &str) const override;
+
+  bool supportsCircuitMode() override;
 };
 
 #endif //MASTER_THESIS_CODE_LITERALBOOL_H

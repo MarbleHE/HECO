@@ -35,46 +35,50 @@ include_directories(
         ${ast_optimizer_SOURCE_DIR}/include/optimizer
         ${ast_optimizer_SOURCE_DIR}/include/utilities
         ${ast_optimizer_SOURCE_DIR}/include/visitor
-        ${ast_optimizer_SOURCE_DIR}/examples)
+        ${ast_optimizer_SOURCE_DIR}/examples
+        ${ast_optimizer_SOURCE_DIR}/test)
 
 set(SOURCE_FILES
+        ${ast_optimizer_SOURCE_DIR}/examples/genAstDemo.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/AbstractExpr.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/AbstractStatement.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/Variable.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/Literal.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/LiteralBool.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/LiteralInt.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/LiteralString.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/LiteralFloat.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/VarDecl.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/Block.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/Operator.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/Ast.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/BinaryExpr.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/VarAssignm.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/Group.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/If.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/Block.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/Call.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/CallExternal.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/LogicalExpr.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/Return.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/UnaryExpr.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/While.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/Function.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/FunctionParameter.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/CallExternal.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/Ast.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/visitor/Visitor.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/visitor/PrintVisitor.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/visitor/MultRewriteVisitor.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/Group.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/If.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/Literal.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/LiteralBool.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/LiteralFloat.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/LiteralInt.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/LiteralString.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/LogicalExpr.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/Node.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/Operator.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/Return.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/UnaryExpr.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/VarAssignm.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/VarDecl.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/Variable.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/While.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/optimizer/ConeRewriter.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/utilities/MultiplicativeDepthCalculator.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/Scope.cpp
-        ${ast_optimizer_SOURCE_DIR}/examples/genAstDemo.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/MultDepthVisitor.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/optimizer/ConeRewriter.cpp)
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/MultRewriteVisitor.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/PrintVisitor.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/Visitor.cpp
+        ${ast_optimizer_SOURCE_DIR}/test/AstTestingGenerator.cpp)
 
 set(HEADER_ONLY_SOURCES
+        ${ast_optimizer_SOURCE_DIR}/include/ast/OpSymbEnum.h
         ${ast_optimizer_SOURCE_DIR}/include/utilities/RandNumGen.h
-        ${ast_optimizer_SOURCE_DIR}/include/utilities/Datatypes.h)
+        ${ast_optimizer_SOURCE_DIR}/include/utilities/Datatypes.h
+        ${ast_optimizer_SOURCE_DIR}/include/utilities/DotPrinter.h)
 
 add_executable(ast_demo
         ${ast_optimizer_SOURCE_DIR}/main.cpp

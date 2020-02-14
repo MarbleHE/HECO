@@ -44,8 +44,14 @@ Block::~Block() {
 }
 
 Literal* Block::evaluate(Ast &ast) {
-  for (auto stmt : *getStatements()) {
-    (void) stmt->evaluate(ast);
-  }
+  for (auto stmt : *getStatements()) (void) stmt->evaluate(ast);
   return nullptr;
+}
+
+Node* Block::createClonedNode(bool keepOriginalUniqueNodeId) {
+  auto clonedStatements = new std::vector<AbstractStatement*>();
+  for (auto &statement : *this->getStatements()) {
+    clonedStatements->push_back(statement->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractStatement>());
+  }
+  return new Block(clonedStatements);
 }

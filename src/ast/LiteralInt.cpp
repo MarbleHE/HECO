@@ -4,6 +4,11 @@
 #include <sstream>
 #include "LiteralString.h"
 #include "RandNumGen.h"
+#include "AbstractExpr.h"
+
+bool LiteralInt::supportsDatatype(Datatype &datatype) {
+  return datatype.getType() == TYPES::INT;
+}
 
 LiteralInt::LiteralInt(int value) : value(value) {}
 
@@ -66,5 +71,15 @@ void LiteralInt::setRandomValue(RandLiteralGen &rlg) {
 }
 
 std::string LiteralInt::toString() const {
-    return std::to_string(this->getValue());
+  return std::to_string(this->getValue());
 }
+
+bool LiteralInt::supportsCircuitMode() {
+  return true;
+}
+
+Node* LiteralInt::createClonedNode(bool keepOriginalUniqueNodeId) {
+  return new LiteralInt(this->getValue());
+}
+
+

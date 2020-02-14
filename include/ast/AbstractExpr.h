@@ -22,10 +22,10 @@ protected:
 
     static AbstractExpr *createParam(AbstractExpr *abstractExpr);
 
-public:
-    virtual ~AbstractExpr() = default;
+  static Node *createParam(Node *node);
 
-    [[nodiscard]] std::string toString() const override;
+ public:
+  [[nodiscard]] std::string toString() const override;
 
     [[nodiscard]] json toJson() const override;
 
@@ -41,7 +41,9 @@ public:
 
     virtual bool isEqual(AbstractExpr *other);
 
-    Literal *evaluate(Ast &ast) override;
+  Literal* evaluate(Ast &ast) override;
+
+  AbstractExpr() = default;
 };
 
 std::ostream &operator<<(std::ostream &outs, const AbstractExpr &obj);

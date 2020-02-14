@@ -6,13 +6,17 @@
 #include "Datatypes.h"
 
 class FunctionParameter : public AbstractExpr {
+ private:
+  Node* createClonedNode(bool keepOriginalUniqueNodeId) override;
+
  public:
   FunctionParameter(Datatype* datatype, AbstractExpr* value);
 
-  /// Helper constructor for convenience.
-  /// \param datatype A valid datatype according to TYPES in Datatype.h
+  /// Helper constructor for keeping downwards compatibility with earlier interface.
+  /// \deprecated This constructor should not be used anymore, use the one requiring a Datatype instead.
+  /// \param datatypeEnumString A valid datatype according to TYPES in Datatype.h
   /// \param value The value of the function parameter.
-  FunctionParameter(std::string datatype, AbstractExpr* value);
+  FunctionParameter(std::string datatypeEnumString, AbstractExpr* value);
 
   [[nodiscard]] json toJson() const override;
 
@@ -24,9 +28,15 @@ class FunctionParameter : public AbstractExpr {
 
   void accept(Visitor &v) override;
 
- private:
-  Datatype* datatype;
-  AbstractExpr* value;
+  int getMaxNumberChildren() override;
+
+  bool supportsCircuitMode() override;
+
+  void setAttributes(Datatype* datatype, AbstractExpr* value);
+
+  bool operator==(const FunctionParameter &rhs) const;
+
+  bool operator!=(const FunctionParameter &rhs) const;
 };
 
 /// Defines the JSON representation to be used for vector<FunctionParameter> objects.

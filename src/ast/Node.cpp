@@ -1,39 +1,48 @@
+#include "../include/ast/Node.h"
 #include <sstream>
-#include <iostream>
+#include <Operator.h>
 #include <set>
 #include "ConeRewriter.h"
 #include "AbstractExpr.h"
 #include "Node.h"
 #include "LogicalExpr.h"
+#include <queue>
+#include "Function.h"
 
 int Node::nodeIdCounter = 0;
 
 std::string Node::genUniqueNodeId() {
-    std::stringstream ss;
-    ss << getNodeName();
-    ss << "_";
-    ss << getAndIncrementNodeId();
-    return ss.str();
+  int nodeNo;
+  try {
+    nodeNo = assignedNodeIds.at(this);
+  } catch (std::out_of_range) {
+    throw std::logic_error(
+        "Could not find any reserved ID for node. Node constructor needs to reserve ID for node (see empty constructor).");
+  }
+
+  // clear the node entry as we will save the node ID in the uniqueNodeId field
+  assignedNodeIds.erase(this);
+
+  // build and return the node ID string
+  std::stringstream ss;
+  ss << getNodeName() << "_" << nodeNo;
+  return ss.str();
 }
 
-Node::Node() = default;
+Node::Node() {
+  // save the ID reserved for this node but do not
+  assignedNodeIds[this] = getAndIncrementNodeId();
+}
 
 std::string Node::getUniqueNodeId() {
-  if (uniqueNodeId.empty()) {
-    std::string nodeId = genUniqueNodeId();
-    this->uniqueNodeId = nodeId;
-  }
+  // if there is no ID defined yet, create and assign an ID
+  if (uniqueNodeId.empty()) this->uniqueNodeId = genUniqueNodeId();
+  // otherwise just return the previously generated ID
   return uniqueNodeId;
 }
 
 int Node::getAndIncrementNodeId() {
-  int current = Node::getNodeIdCounter();
-  Node::nodeIdCounter += 1;
-  return current;
-}
-
-int Node::getNodeIdCounter() {
-  return nodeIdCounter;
+  return nodeIdCounter++;
 }
 
 std::string Node::getNodeName() const {
@@ -48,19 +57,93 @@ const std::vector<Node*> &Node::getChildren() const {
   return children;
 }
 
-void Node::addChild(Node* child) {
-  children.push_back(child);
+std::vector<Node*> Node::getChildrenNonNull() const {
+  std::vector<Node*> childrenFiltered;
+  std::copy_if(children.begin(), children.end(), std::back_inserter(childrenFiltered),
+               [](Node* n) { return n != nullptr; });
+  return childrenFiltered;
 }
 
-void Node::addChildren(std::vector<Node*> c) {
-  std::for_each(c.begin(), c.end(), [&](Node* n) {
-    children.push_back(n);
-  });
+std::vector<Node*> Node::getParentsNonNull() const {
+  std::vector<Node*> parentsFiltered;
+  std::copy_if(parents.begin(), parents.end(), std::back_inserter(parentsFiltered),
+               [](Node* n) { return n != nullptr; });
+  return parentsFiltered;
+}
+
+void Node::addChildBilateral(Node* child) {
+  addChild(child, true);
+}
+
+void Node::addChild(Node* child, bool addBackReference) {
+  addChildren({child}, addBackReference);
+}
+
+void Node::addChildren(const std::vector<Node*> &childrenToAdd, bool addBackReference) {
+  // check whether the number of children to be added does not exceed the number of maximum supported children
+  if (childrenToAdd.size() > getMaxNumberChildren()) {
+    throw std::invalid_argument("Node " + getUniqueNodeId() + " of type " + getNodeName() + " does not allow more than "
+                                    + std::to_string(getMaxNumberChildren()) + " children!");
+  }
+
+  // check if circuit mode is supported by current node, otherwise addChildren will lead to unexpected behavior
+  if (!this->supportsCircuitMode()) {
+    throw std::logic_error(
+        "Cannot use addChildren because node does not support circuit mode!");
+  }
+
+  // these actions are to be performed after a node was added to the list of children
+  auto doInsertPostAction = [&](Node* childToAdd) {
+    // if option 'addBackReference' is true, we add a back reference to the child as parent
+    if (addBackReference) childToAdd->addParent(this);
+  };
+
+  if (getChildren().empty()) {  // if the list of children is still empty, we can simply add all nodes in one batch
+    // add children to the vector's end
+    children.insert(children.end(), childrenToAdd.begin(), childrenToAdd.end());
+    std::for_each(children.begin(), children.end(), doInsertPostAction);
+    // if this nodes accepts an infinite number of children, pre-filling the slots does not make any sense -> skip it
+    // fill remaining slots with nullptr values
+    children.insert(children.end(), getMaxNumberChildren() - getChildren().size(), nullptr);
+  } else {  // otherwise we need to add the children one-by-one by looking for free slots
+    int childIdx = 0;
+    // add child in first empty spot
+    for (auto it = getChildren().begin(); it != getChildren().end() && childIdx < childrenToAdd.size(); ++it) {
+      if (*it == nullptr) {
+        auto childToAdd = childrenToAdd.at(childIdx);
+        setChild(it, childToAdd);
+        doInsertPostAction(childToAdd);
+        childIdx++;
+      }
+    }
+    // check if we were able to add all children, otherwise throw an exception
+    if (childIdx != childrenToAdd.size()) {
+      throw std::logic_error("Cannot add one or multiple children to " + this->getUniqueNodeId()
+                                 + " without overwriting an existing one. Consider removing an existing child first.");
+    }
+  }
+}
+
+void Node::setChild(std::__wrap_iter<Node* const*> position, Node* value) {
+  auto newIterator = children.insert(position, value);
+  children.erase(++newIterator);
 }
 
 void Node::removeChild(Node* child) {
   auto it = std::find(children.begin(), children.end(), child);
-  if (it != children.end()) children.erase(it);
+  if (it != children.end()) *it = nullptr; //children.erase(it);
+}
+
+void Node::removeChildBilateral(Node* child) {
+  child->removeParent(this);
+  this->removeChild(child);
+}
+
+void Node::isolateNode() {
+  for (auto &p : getParentsNonNull()) p->removeChild(this);
+  for (auto &c : getChildrenNonNull()) c->removeParent(this);
+  removeChildren();
+  removeParents();
 }
 
 const std::vector<Node*> &Node::getParents() const {
@@ -81,170 +164,178 @@ void Node::removeChildren() {
 }
 
 void Node::removeParents() {
-    parents.clear();
+  parents.clear();
 }
 
-void Node::addParent(Node *parentNode, std::vector<Node *> nodesToAddParentTo) {
-    std::for_each(nodesToAddParentTo.begin(), nodesToAddParentTo.end(), [&](Node *n) {
-        n->addParent(parentNode);
-    });
+void Node::addParentTo(Node* parentNode, std::vector<Node*> nodesToAddParentTo) {
+  std::for_each(nodesToAddParentTo.begin(), nodesToAddParentTo.end(), [&](Node* n) {
+    if (n != nullptr) n->addParent(parentNode);
+  });
 }
 
 void Node::swapChildrenParents() {
-    std::vector<Node *> oldParents = this->parents;
-    this->parents = this->children;
-    this->children = oldParents;
+  std::vector<Node*> oldParents = this->parents;
+  this->parents = this->children;
+  this->children = oldParents;
+  // toggle the isReversed boolean
+  isReversed = !isReversed;
 }
 
-Literal *Node::evaluate(Ast &ast) {
-    return nullptr;
+Literal* Node::evaluate(Ast &ast) {
+  return nullptr;
 }
 
 void Node::accept(Visitor &v) {
-    std::cout << "This shouldn't be executed!" << std::endl;
+  std::cout << "This shouldn't be executed!" << std::endl;
 }
 
 void to_json(json &j, const Node &n) {
-    j = n.toJson();
+  j = n.toJson();
 }
 
 json Node::toJson() const {
-    return json({"type", "Node"});
+  return json({"type", "Node"});
 }
 
 std::string Node::toString() const {
-    return this->toJson().dump();
+  return this->toJson().dump();
 }
 
-std::pair<int, int> getDepthsLR(Node &n) {
-    return std::pair<int, int>(ConeRewriter::getMultDepthL(&n), ConeRewriter::getReverseMultDepthR(&n));
+std::ostream &operator<<(std::ostream &os, const std::vector<Node*> &v) {
+  os << "[";
+  for (int i = 0; i < v.size(); ++i) {
+    os << v[i]->getUniqueNodeId();
+    if (i != v.size() - 1)
+      os << ", ";
+  }
+  os << "]";
+  return os;
 }
 
-std::string Node::getDotFormattedString(bool isReversed,
-                                        const std::string &indentation = "",
-                                        bool showMultDepth = false) {
-    // depending on whether the graph is reversed we are interested in the parents or children
-    auto vec = (isReversed) ? this->getParents() : this->getChildren();
-
-    // -------------------
-    // print node data
-    // e.g., 	Return_1 [label="Return_1\n[l(v): 3, r(v): 0]" shape=oval style=filled fillcolor=white]
-    // -------------------
-    std::stringstream ss;
-    ss << indentation << this->getUniqueNodeId() << " [";
-
-    // only print node details (e.g., operator type for Operator) for tree leaves
-    std::string nodeDetails;
-    if (vec.empty()) {
-        nodeDetails = "\\n" + this->toString();
-    }
-
-    // show multiplicative depth in the tree nodes depending on parameter showMultDepth
-    std::string multDepth;
-    if (showMultDepth) {
-        auto[L, R] = getDepthsLR(*this);
-        multDepth = "\\n[l(v): " + std::to_string(L) + ", r(v): " + std::to_string(R) + "]";
-    }
-
-    // construct the string of node details
-    ss << "label=\"" << this->getUniqueNodeId() << multDepth << nodeDetails << "\" ";
-    std::string shape = (dynamic_cast<AbstractExpr *>(this)) ? "rect" : "oval";
-    std::string fillColor("white");
-    if (auto lexp = dynamic_cast<LogicalExpr *>(this)) {
-        if (lexp->getOp().equals(OpSymb::logicalAnd)) {
-            fillColor = "red";
-        }
-    }
-    ss << "shape=" << shape << " ";
-    ss << "style=filled fillcolor=" << fillColor;
-    ss << "]" << std::endl;
-
-    // only print edges if there are any edges at all
-    if (vec.empty()) goto end;
-
-    // -------------------
-    // print edges
-    // e.g., { LogicalExpr_3, Operator_4, Variable_5 } -> LogicalExpr_2
-    // -------------------
-
-    // if AST is reversed -> consider children
-    if (isReversed) {
-        // build a string like '{child1, child2, ..., childN} ->
-        ss << indentation << "{ ";
-        for (auto ci = vec.begin(); ci != vec.end(); ++ci) {
-            ss << (*ci)->getUniqueNodeId();
-            if ((ci + 1) != vec.end()) ss << ", ";
-        }
-        ss << " } -> " << this->getUniqueNodeId();
-    } else {  // if AST is not reversed --> consider parents
-        // build a string like 'nodeName -> {parent1, parent2, ..., parentN}'
-        ss << indentation << this->getUniqueNodeId();
-        ss << " -> {";
-        for (auto ci = vec.begin(); ci != vec.end(); ++ci) {
-            ss << (*ci)->getUniqueNodeId();
-            if ((ci + 1) != vec.end()) ss << ", ";
-        }
-        ss << "}";
-    }
-    ss << std::endl;
-
-    end:
-    return ss.str();
+Node* Node::getUnderlyingNode() const {
+  return underlyingNode;
 }
 
-std::ostream &operator<<(std::ostream &os, const std::vector<Node *> &v) {
-    os << "[";
-    for (int i = 0; i < v.size(); ++i) {
-        os << v[i]->getUniqueNodeId();
-        if (i != v.size() - 1)
-            os << ", ";
-    }
-    os << "]";
-    return os;
-}
-
-Node *Node::clone() {
-    throw std::logic_error("ERROR: clone() not implemented for node of type " + getNodeName());
-}
-
-Node *Node::getUnderlyingNode() const {
-    return underlyingNode;
-}
-
-void Node::setUnderlyingNode(Node *uNode) {
-    underlyingNode = uNode;
+void Node::setUnderlyingNode(Node* uNode) {
+  underlyingNode = uNode;
 }
 
 void Node::setUniqueNodeId(const std::string &unique_node_id) {
-    uniqueNodeId = unique_node_id;
+  uniqueNodeId = unique_node_id;
 }
 
-void Node::printAncestorsDescendants(Node *n) {
-    return Node::printAncestorsDescendants(std::vector<Node *>({n}));
+std::vector<Node*> Node::getAnc() {
+  // use a set to avoid duplicates as there may be common ancestors between this node and any of the node's parents
+  std::set<Node*> result;
+  std::queue<Node*> processQueue{{this}};
+  while (!processQueue.empty()) {
+    auto curNode = processQueue.front();
+    processQueue.pop();
+    auto nextNodes = curNode->getParents();
+    std::for_each(nextNodes.begin(), nextNodes.end(), [&](Node* node) {
+      result.insert(node);
+      processQueue.push(node);
+    });
+  }
+  return std::vector<Node*>(result.begin(), result.end());
 }
 
-void Node::printAncestorsDescendants(std::vector<Node *> nodes) {
-    std::set<Node *> printedNodes;
-    while (!nodes.empty()) {
-        auto curNode = nodes.back();
-        nodes.pop_back();
-        if (printedNodes.count(curNode) == 0) {
-            std::cout << curNode->getUniqueNodeId() << ":" << std::endl;
-            std::cout << "  children: " << curNode->getChildren() << std::endl;
-            std::cout << "  parents: " << curNode->getParents() << std::endl;
-            printedNodes.emplace(curNode);
-            std::for_each(curNode->getParents().begin(), curNode->getParents().end(),
-                          [&](Node *n) { nodes.push_back(n); });
-            std::for_each(curNode->getChildren().begin(), curNode->getChildren().end(),
-                          [&](Node *n) { nodes.push_back(n); });
-        }
+Node* Node::cloneFlat() {
+  throw std::logic_error("ERROR: cloneFlat() not implemented for node of type " + getNodeName());
+}
+
+Node* Node::cloneRecursiveDeep(bool keepOriginalUniqueNodeId) {
+  // call polymorphic createClonedNode to copy derived class-specific fields
+  Node* clonedNode = this->createClonedNode(keepOriginalUniqueNodeId);
+
+  // perform cloning of fields belonging to Node
+  if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
+  if (this->isReversed) clonedNode->swapChildrenParents();
+  if (this->underlyingNode != nullptr) clonedNode->setUnderlyingNode(this->getUnderlyingNode());
+
+  return clonedNode;
+}
+
+Node* Node::createClonedNode(bool keepOriginalUniqueNodeId) {
+  throw std::logic_error(
+      "ERROR: Cannot execute cloneRecursiveDeep(...) because createClonedNode(...) is not implemented for node of type "
+          + getNodeName());
+}
+
+bool Node::hasParent(Node* n) {
+  return std::any_of(getParents().begin(), getParents().end(), [&n](Node* p) { return (p == n); });
+}
+
+bool Node::hasChild(Node* n) {
+  return std::any_of(getChildren().begin(), getChildren().end(), [&n](Node* p) { return (p == n); });
+}
+
+int Node::countChildrenNonNull() const {
+  return std::count_if(getChildren().begin(), getChildren().end(), [](Node* n) { return n != nullptr; });
+}
+
+int Node::getMaxNumberChildren() {
+  return 0;
+}
+
+bool Node::supportsCircuitMode() {
+  return false;
+}
+
+Node* Node::getChildAtIndex(int idx) const {
+  return getChildAtIndex(idx, false);
+}
+
+Node* Node::getChildAtIndex(int idx, bool isEdgeDirectionAware) const {
+  try {
+    if (isEdgeDirectionAware && isReversed) return parents.at(idx);
+    else return children.at(idx);
+  } catch (std::out_of_range const &e) {
+    return nullptr;
+  }
+}
+
+Node::~Node() = default;
+
+bool Node::hasReversedEdges() const {
+  return isReversed;
+}
+
+std::vector<Node*> Node::rewriteMultiInputGateToBinaryGatesChain(std::vector<Node*> inputNodes,
+                                                                 OpSymb::LogCompOp gateType) {
+  if (inputNodes.empty()) {
+    throw std::invalid_argument("Cannot construct a 0-input logical gate!");
+  }
+
+  // if there is only one input, we need to add the "neutral element" (i.e., the element that does not change the
+  // semantics of the logical expression) depending on the given LogCompOp to inputNodes
+  if (inputNodes.size() == 1) {
+    if (gateType == OpSymb::LogCompOp::logicalXor) {
+      // inputNodes[0] XOR false
+      inputNodes.push_back(new LiteralBool(false));
+    } else if (gateType == OpSymb::LogCompOp::logicalAnd) {
+      // inputNodes[0] AND true
+      inputNodes.push_back(new LiteralBool(true));
+    } else {
+      throw std::runtime_error(
+          "Method rewriteMultiInputGateToBinaryGatesChain currently supports 1-input gates of type logical-XOR "
+          "or logical-AND only.");
     }
-}
+  }
 
-const std::vector<Node *> &Node::getPred() const {
-    return getParents();
-}
+  // vector of resulting binary gates
+  std::vector<Node*> outputNodes;
 
-const std::vector<Node *> &Node::getSucc() const {
-    return getChildren();
+  // handle first "special" gate -> takes two inputs as specified in inputNodes
+  auto it = std::begin(inputNodes);
+  auto recentLexp = new LogicalExpr((*it++)->castTo<AbstractExpr>(), gateType, (*it++)->castTo<AbstractExpr>());
+  outputNodes.push_back(recentLexp);
+
+  // handle all other gates -> are connected with each other
+  for (auto end = std::end(inputNodes); it != end; ++it) {
+    auto newLexp = new LogicalExpr(recentLexp, gateType, (*it)->castTo<AbstractExpr>());
+    outputNodes.push_back(newLexp);
+    recentLexp = newLexp;
+  }
+  return outputNodes;
 }

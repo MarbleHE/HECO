@@ -97,7 +97,7 @@ class Visitor {
 
   virtual void visit(While &elem);
 
-  Scope *curScope;
+  Scope* curScope;
 
   void changeToOuterScope();
 

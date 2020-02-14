@@ -3,18 +3,27 @@
 
 #include <string>
 #include <map>
+#include "../include/ast/Node.h"
 
 enum class TYPES {
   INT, FLOAT, STRING, BOOL
 };
 
-class Datatype {
- public:
+class Datatype : public Node {
+ private:
+  Node* createClonedNode(bool keepOriginalUniqueNodeId) override {
+    return new Datatype(this->getType());
+  }
+
   TYPES val;
   bool isEncrypted = false;
 
+ public:
+
   explicit Datatype(TYPES di) : val(di) {}
+
   explicit Datatype(TYPES di, bool isEncrypted) : val(di), isEncrypted(isEncrypted) {}
+
   explicit Datatype(std::string type) {
     static const std::map<std::string, TYPES> string_to_types = {
         {"int", TYPES::INT},
@@ -22,11 +31,14 @@ class Datatype {
         {"string", TYPES::STRING},
         {"bool", TYPES::BOOL}};
     auto result = string_to_types.find(type);
-    if (result == string_to_types.end()) throw std::invalid_argument("Unsupported datatype given: " + type);
+    if (result == string_to_types.end()) {
+      throw std::invalid_argument(
+          "Unsupported datatype given: " + type + ". See the supported datatypes in Datatypes.h.");
+    }
     val = result->second;
   }
 
-  std::string enum_to_string(const TYPES identifiers) const {
+  static std::string enum_to_string(const TYPES identifiers) {
     static const std::map<TYPES, std::string> types_to_string = {
         {TYPES::INT, "int"},
         {TYPES::FLOAT, "float"},
@@ -43,7 +55,7 @@ class Datatype {
     return val;
   }
 
-  std::string toString() const {
+  std::string toString() const override {
     return enum_to_string(val);
   }
 
@@ -54,6 +66,10 @@ class Datatype {
 
   bool operator!=(const Datatype &rhs) const {
     return !(rhs == *this);
+  }
+
+  TYPES getType() const {
+    return val;
   }
 };
 

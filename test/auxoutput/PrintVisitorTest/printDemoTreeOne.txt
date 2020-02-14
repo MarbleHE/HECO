@@ -10,13 +10,13 @@ Function: (computePrivate)	[global]
 			Operator: (>)
 			LiteralInt: (32)
 		Block:
-			VarAssignm: (k)	[Block_1]
+			VarAssignm: (k)	[Block_18]
 				BinaryExpr:
 					Variable: (x)
 					Operator: (mult)
 					Variable: (a)
 		Block:	[Function_0]
-			VarAssignm: (k)	[Block_2]
+			VarAssignm: (k)	[Block_28]
 				BinaryExpr:
 					Group:
 						BinaryExpr:

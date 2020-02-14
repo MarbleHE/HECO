@@ -8,7 +8,6 @@
 class VarAssignm : public AbstractStatement {
  private:
   std::string identifier;
-  AbstractExpr* value;
 
  public:
   VarAssignm(std::string identifier, AbstractExpr* value);
@@ -32,6 +31,14 @@ class VarAssignm : public AbstractStatement {
   bool isEqual(AbstractStatement* as) override;
 
   Literal* evaluate(Ast &ast) override;
+
+  bool supportsCircuitMode() override;
+
+  int getMaxNumberChildren() override;
+
+  void setAttribute(AbstractExpr* assignmentValue);
+ private:
+  Node* createClonedNode(bool keepOriginalUniqueNodeId) override;
 };
 
 #endif //MASTER_THESIS_CODE_VARASSIGNM_H

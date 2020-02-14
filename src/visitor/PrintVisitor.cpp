@@ -31,103 +31,103 @@ void PrintVisitor::visit(Ast &elem) {
   resetVisitor();
   Visitor::visit(elem);
   // at the end of traversal print the tree if printScreen is true
-  if (printScreen) {
-    std::cout << ss.str() << std::endl;
-  }
+  if (printScreen) std::cout << ss.str() << std::endl;
 }
 
 void PrintVisitor::visit(BinaryExpr &elem) {
-  addOutputStr({elem.getNodeName()});
+  addOutputStr(elem);
   printChildNodesIndented(elem);
 }
 
 void PrintVisitor::visit(Block &elem) {
-  addOutputStr({elem.getNodeName()});
+  addOutputStr(elem);
   printChildNodesIndented(elem);
 }
 
 void PrintVisitor::visit(Call &elem) {
-  addOutputStr({elem.getNodeName()});
+  Node* node = static_cast<Node*>(static_cast<AbstractStatement*>(&elem));
+  addOutputStr(*node);
   printChildNodesIndented(elem);
 }
 
 void PrintVisitor::visit(CallExternal &elem) {
-  addOutputStr({elem.getNodeName(), elem.getFunctionName()});
+  Node* node = static_cast<Node*>(static_cast<AbstractStatement*>(&elem));
+  addOutputStr(*node, {elem.getFunctionName()});
   printChildNodesIndented(elem);
 }
 
 void PrintVisitor::visit(Function &elem) {
-  addOutputStr({elem.getNodeName(), elem.getName()});
+  addOutputStr(elem, {elem.getName()});
   printChildNodesIndented(elem);
 }
 
 void PrintVisitor::visit(FunctionParameter &elem) {
-  addOutputStr({elem.getNodeName(), elem.getDatatype()->toString()});
+  addOutputStr(elem, {elem.getDatatype()->toString()});
   printChildNodesIndented(elem);
 }
 
 void PrintVisitor::visit(Group &elem) {
-  addOutputStr({elem.getNodeName()});
+  addOutputStr(elem);
   // group statements
   printChildNodesIndented(elem);
 }
 
 void PrintVisitor::visit(If &elem) {
-  addOutputStr({elem.getNodeName()});
+  addOutputStr(elem);
   printChildNodesIndented(elem);
 }
 
 void PrintVisitor::visit(LiteralBool &elem) {
-  addOutputStr({elem.getNodeName(), elem.getTextValue()});
+  addOutputStr(elem, {elem.getTextValue()});
 }
 
 void PrintVisitor::visit(LiteralInt &elem) {
-  addOutputStr({elem.getNodeName(), std::to_string(elem.getValue())});
+  addOutputStr(elem, {std::to_string(elem.getValue())});
 }
 
 void PrintVisitor::visit(LiteralString &elem) {
-  addOutputStr({elem.getNodeName(), elem.getValue()});
+  addOutputStr(elem, {elem.getValue()});
 }
 
 void PrintVisitor::visit(LiteralFloat &elem) {
-  addOutputStr({elem.getNodeName(), std::to_string(elem.getValue())});
+  addOutputStr(elem, {std::to_string(elem.getValue())});
 }
 
 void PrintVisitor::visit(LogicalExpr &elem) {
-  addOutputStr({elem.getNodeName()});
+  addOutputStr(elem);
   printChildNodesIndented(elem);
 }
 
 void PrintVisitor::visit(Operator &elem) {
-  addOutputStr({elem.getNodeName(), elem.getOperatorString()});
+  addOutputStr(elem, {elem.getOperatorString()});
 }
 
 void PrintVisitor::visit(Return &elem) {
-  addOutputStr({elem.getNodeName()});
+  addOutputStr(elem);
   printChildNodesIndented(elem);
 }
 
 void PrintVisitor::visit(UnaryExpr &elem) {
-  addOutputStr({elem.getNodeName()});
+  addOutputStr(elem);
   printChildNodesIndented(elem);
 }
 
 void PrintVisitor::visit(VarAssignm &elem) {
-  addOutputStr({elem.getNodeName(), elem.getIdentifier()});
+  addOutputStr(elem, {elem.getIdentifier()});
   printChildNodesIndented(elem);
 }
 
 void PrintVisitor::visit(VarDecl &elem) {
-  addOutputStr({elem.getNodeName(), elem.getDatatype()->toString() + " " + elem.getIdentifier()});
+  addOutputStr(elem, {elem.getDatatype()->toString() + " " + elem.getIdentifier()});
   printChildNodesIndented(elem);
 }
 
 void PrintVisitor::visit(Variable &elem) {
-  addOutputStr({elem.getNodeName(), elem.getIdentifier()});
+  addOutputStr(elem, {elem.getIdentifier()});
 }
 
 void PrintVisitor::visit(While &elem) {
-  addOutputStr({elem.getNodeName()});
+  addOutputStr(elem);
   printChildNodesIndented(elem);
 }
 
@@ -156,19 +156,30 @@ void PrintVisitor::resetLevel() {
   this->level = 0;
 }
 
-void PrintVisitor::addOutputStr(const std::list<std::string> &args) {
-  // TODO(pjattke) refactor elem into addOutputStr to enforce NodeName in output
-  //std::ostringstream tempStream;
+void PrintVisitor::printNodeName(Node &node) {
+  ss << getIndentation() << node.getNodeName() << ":";
+}
+
+void PrintVisitor::addOutputStr(Node &node) {
+  printNodeName(node);
+  printScope();
+}
+
+void PrintVisitor::addOutputStr(Node &node, const std::list<std::string> &args) {
+  printNodeName(node);
   // print AST node type (e.g., FunctionParameter)
-  ss << getIndentation() << args.front() << ":";
-  if (args.size() > 1) ss << " ";
+  ss << " ";
   // print primitive parameters related to AST (e.g., int, string)
-  for (auto it = std::next(args.begin()); it != args.end(); ++it) {
-    ss << "(" << *it << ")";
-  }
+  for (auto &arg : args) ss << "(" << arg << ")";
+  printScope();
+}
+
+void PrintVisitor::printScope() {
   // only print scope where statement belongs to if statement has changed since last print
   if (getLastPrintedScope() == nullptr || curScope != getLastPrintedScope()) {
-    ss << "\t[" << this->curScope->getScopeIdentifier() << "]";
+    ss << "\t[";
+    ss << this->curScope->getScopeIdentifier();
+    ss << "]";
     setLastPrintedScope(curScope);
   }
   ss << std::endl;

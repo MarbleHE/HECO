@@ -1,4 +1,5 @@
 #include <iostream>
+#include "Datatypes.h"
 #include "AbstractExpr.h"
 #include "LiteralFloat.h"
 #include "Visitor.h"
@@ -53,17 +54,29 @@ bool LiteralFloat::operator!=(const LiteralFloat &rhs) const {
 }
 
 void LiteralFloat::addLiteralValue(std::string identifier, std::map<std::string, Literal*> &paramsMap) {
-    paramsMap.emplace(identifier, this);
+  paramsMap.emplace(identifier, this);
 }
 
 void LiteralFloat::setValue(float newValue) {
-    this->value = newValue;
+  this->value = newValue;
 }
 
 void LiteralFloat::setRandomValue(RandLiteralGen &rlg) {
-    setValue(rlg.getRandomFloat());
+  setValue(rlg.getRandomFloat());
 }
 
 std::string LiteralFloat::toString() const {
-    return std::to_string(this->getValue());
+  return std::to_string(this->getValue());
+}
+
+bool LiteralFloat::supportsCircuitMode() {
+  return true;
+}
+
+bool LiteralFloat::supportsDatatype(Datatype &datatype) {
+  return datatype.getType() == TYPES::FLOAT;
+}
+
+Node* LiteralFloat::createClonedNode(bool keepOriginalUniqueNodeId) {
+  return new LiteralFloat(this->getValue());;
 }

@@ -54,9 +54,8 @@ void runInteractiveDemo() {
     int actionNo = 0;
     std::cout << "Please choose what to do with the generated tree: " << std::endl;
     std::cout << "\t1 Print the tree as indented text." << std::endl;
-    std::cout << "\t2 Print the tree as JSON." << std::endl;
-    std::cout << "\t3 Print the tree as pretty-printed JSON." << std::endl;
-    std::cout << "\t4 Perform a simple rewrite operation (A*(B*C)) -> (C*(B*A))." << std::endl;
+    std::cout << "\t2 Print the tree as pretty-printed JSON." << std::endl;
+    std::cout << "\t3 Perform a simple rewrite operation (A*(B*C)) -> (C*(B*A))." << std::endl;
     std::cout << "Your choice [Press 0 to exit]: ";
     std::cin >> actionNo;
 
@@ -71,14 +70,10 @@ void runInteractiveDemo() {
         break;
       }
       case 2: {
-        std::cout << ast.getRootNode() << std::endl;
-        break;
-      }
-      case 3: {
         std::cout << ast.getRootNode()->toJson().dump(2) << std::endl;
         break;
       }
-      case 4: {
+      case 3: {
         MultRewriteVisitor mrv;
         mrv.visit(ast);
         break;
@@ -99,7 +94,7 @@ void generateDemoOne(Ast &ast) {
   func->addStatement(new VarDecl("a", 4));
 
   // int k;
-  func->addStatement(new VarDecl("k", "int", nullptr));
+  func->addStatement(new VarDecl("k", TYPES::INT, nullptr));
 
   // if ( x > 32 ) { k = x * a; } else { k = (x * a) + 42; }
   func->addStatement(new If(
@@ -136,7 +131,7 @@ void generateDemoTwo(Ast &ast) {
 
   // int randInt = rand() % 42;
   func->addStatement(
-      new VarDecl("randInt", "int",
+      new VarDecl("randInt", TYPES::INT,
                   new BinaryExpr(
                       new CallExternal("std::rand"),
                       OpSymb::BinaryOp::modulo,
@@ -144,7 +139,7 @@ void generateDemoTwo(Ast &ast) {
 
   // bool b = encryptedA < 2;
   func->addStatement(
-      new VarDecl("b", "bool",
+      new VarDecl("b", TYPES::BOOL,
                   new LogicalExpr(
                       new Variable("encryptedA"),
                       OpSymb::LogCompOp::smaller,
@@ -183,13 +178,12 @@ void generateDemoTwo(Ast &ast) {
                   new LiteralInt(1)))})));
 
   // String outStr = "Computation finished!";
-  func->addStatement(new VarDecl("outStr", "string", new LiteralString("Computation finished!")));
+  func->addStatement(new VarDecl("outStr", "Computation finished!"));
 
   // printf(outStr);
   func->addStatement(
       new CallExternal("printf",
-                       new std::vector<FunctionParameter>(
-                           {{"string", new Variable("outStr")}})));
+                       {new FunctionParameter("string", new Variable("outStr"))}));
 
   // return sum;
   func->addStatement(
@@ -201,17 +195,17 @@ void generateDemoThree(Ast &ast) {
   Function* func = dynamic_cast<Function*>(ast.setRootNode(new Function("computeMult")));
 
   // int a = 3;
-  func->addStatement(new VarDecl("a", "int", new LiteralInt(3)));
+  func->addStatement(new VarDecl("a", new LiteralInt(3)));
 
   // int b = 7;
-  func->addStatement(new VarDecl("b", "int", new LiteralInt(7)));
+  func->addStatement(new VarDecl("b", new LiteralInt(7)));
 
   // int c = 9;
-  func->addStatement(new VarDecl("c", "int", new LiteralInt(9)));
+  func->addStatement(new VarDecl("c", new LiteralInt(9)));
 
   // int result = a * b;
   func->addStatement(
-      new VarDecl("result", "int",
+      new VarDecl("result", TYPES::INT,
                   new BinaryExpr(
                       new Variable("a"),
                       OpSymb::BinaryOp::multiplication,
@@ -231,17 +225,17 @@ void generateDemoFour(Ast &ast) {
   Function* func = dynamic_cast<Function*>(ast.setRootNode(new Function("computeMult")));
 
   // int a = 3;
-  func->addStatement(new VarDecl("a", "int", new LiteralInt(3)));
+  func->addStatement(new VarDecl("a", new LiteralInt(3)));
 
   // int b = 7;
-  func->addStatement(new VarDecl("b", "int", new LiteralInt(7)));
+  func->addStatement(new VarDecl("b", new LiteralInt(7)));
 
   // int c = 9;
-  func->addStatement(new VarDecl("c", "int", new LiteralInt(9)));
+  func->addStatement(new VarDecl("c", new LiteralInt(9)));
 
   // int result = a * b;
   func->addStatement(
-      new VarDecl("result", "int",
+      new VarDecl("result", TYPES::INT,
                   new BinaryExpr(
                       new Variable("a"),
                       OpSymb::BinaryOp::multiplication,
@@ -256,7 +250,7 @@ void generateDemoFour(Ast &ast) {
               new LiteralInt(4),
               OpSymb::LogCompOp::greater,
               new LiteralInt(3)),
-          new VarDecl("exampleVal", "int", new LiteralInt(3))));
+          new VarDecl("exampleVal", 3)));
 
   // result = result * c;
   func->addStatement(
@@ -269,7 +263,7 @@ void generateDemoFive(Ast &ast) {
   Function* func = dynamic_cast<Function*>(ast.setRootNode(new Function("multiMult")));
 
   // int result = (inA * (inB * inC));
-  func->addStatement(new VarDecl("result", "int",
+  func->addStatement(new VarDecl("result", TYPES::INT,
                                  new BinaryExpr(
                                      new Variable("inA"),
                                      OpSymb::multiplication,
@@ -283,12 +277,12 @@ void generateDemoFive(Ast &ast) {
 }
 
 void generateDemoSix(Ast &ast) {
-  //(Z * (A * (B * C))) --> ((B * C) * (A * Z))
+  //(Z * (A * (B * C))) --demo rewriter--> ((B * C) * (A * Z))
   // int computeMult() {...}
   Function* func = dynamic_cast<Function*>(ast.setRootNode(new Function("multiMult")));
 
   // int result = (inZ * (inA * (inB * inC)));
-  func->addStatement(new VarDecl("result", "int",
+  func->addStatement(new VarDecl("result", TYPES::INT,
                                  new Group(new BinaryExpr(new Variable("inZ"),
                                                           OpSymb::multiplication,
                                                           new Group(new BinaryExpr(
@@ -312,7 +306,7 @@ void generateDemoSeven(Ast &ast) {
 
   // int sum = encryptedA + encryptedB;
   func->addStatement(
-      new VarDecl("sum", "int",
+      new VarDecl("sum", TYPES::INT,
                   new BinaryExpr(
                       new Variable("encryptedA"),
                       OpSymb::BinaryOp::addition,

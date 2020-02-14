@@ -9,76 +9,33 @@
 #include "LiteralString.h"
 #include "LiteralBool.h"
 #include "LiteralInt.h"
-
-class OpSymb {
- public:
-  enum BinaryOp : char {
-    // arithmetic operator
-        addition = 0, subtraction, multiplication, division, modulo,
-  };
-
-  enum LogCompOp : char {
-    // logical operator
-        logicalAnd = 0, logicalOr, logicalXor,
-    // relational operator
-        smaller, smallerEqual, greater, greaterEqual, equal, unequal
-  };
-
-  enum UnaryOp : char {
-    // logical operator
-        negation = 0,
-    // arithmetic operator
-        increment, decrement
-  };
-
-  static std::string getTextRepr(BinaryOp bop) {
-    static const std::string binaryOpStrings[] = {"add", "sub", "mult", "div", "mod"};
-    return binaryOpStrings[bop];
-  }
-
-  static std::string getTextRepr(LogCompOp lcop) {
-    static const std::string logicalOpStrings[] = {"AND", "OR", "XOR", "<", "<=", ">", ">=", "==", "!="};
-    return logicalOpStrings[lcop];
-  }
-
-  static std::string getTextRepr(UnaryOp uop) {
-    static const std::string unaryOpStrings[] = {"!", "++", "--"};
-    return unaryOpStrings[uop];
-  }
-
-  static std::string getTextRepr(std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp> opVar) {
-    switch (opVar.index()) {
-      case 0: return getTextRepr(std::get<0>(opVar));
-      case 1: return getTextRepr(std::get<1>(opVar));
-      case 2: return getTextRepr(std::get<2>(opVar));
-      default: return "";
-    }
-  }
-};
+#include "OpSymbEnum.h"
 
 class Operator : public Node {
  private:
-    std::string operatorString;
-    std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp> operatorSymbol;
+  std::string operatorString;
+  std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp> operatorSymbol;
 
-public:
-    explicit Operator(OpSymb::LogCompOp op);
+ public:
+  explicit Operator(OpSymb::LogCompOp op);
 
-    explicit Operator(OpSymb::BinaryOp op);
+  explicit Operator(OpSymb::BinaryOp op);
 
-    explicit Operator(OpSymb::UnaryOp op);
+  explicit Operator(OpSymb::UnaryOp op);
 
-    explicit Operator(std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp> op);
+  explicit Operator(std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp> op);
 
-    [[nodiscard]] const std::string &getOperatorString() const;
+  [[nodiscard]] const std::string &getOperatorString() const;
 
-    void accept(Visitor &v) override;
+  [[nodiscard]] const std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp> &getOperatorSymbol() const;
 
-    [[nodiscard]] std::string getNodeName() const override;
+  void accept(Visitor &v) override;
 
-    bool isUndefined();
+  [[nodiscard]] std::string getNodeName() const override;
 
-    bool operator==(const Operator &rhs) const;
+  bool isUndefined();
+
+  bool operator==(const Operator &rhs) const;
 
   bool operator!=(const Operator &rhs) const;
 
@@ -101,28 +58,24 @@ public:
   Literal* applyOperator(LiteralInt* lhs, LiteralString* rhs);
   Literal* applyOperator(LiteralString* lhs, LiteralInt* rhs);
   Literal* applyOperator(LiteralInt* rhs);
+  Literal* applyOperator(LiteralBool* rhs);
+  Literal* applyOperator(LiteralString* rhs);
+  Literal* applyOperator(LiteralFloat* lhs, LiteralFloat* rhs);
+  Literal* applyOperator(LiteralFloat* lhs, LiteralInt* rhs);
+  Literal* applyOperator(LiteralInt* lhs, LiteralFloat* rhs);
+  Literal* applyOperator(LiteralFloat* lhs, LiteralBool* rhs);
+  Literal* applyOperator(LiteralBool* lhs, LiteralFloat* rhs);
+  Literal* applyOperator(LiteralFloat* lhs, LiteralString* rhs);
+  Literal* applyOperator(LiteralString* lhs, LiteralFloat* rhs);
+  Literal* applyOperator(LiteralFloat* rhs);
 
-    Literal *applyOperator(LiteralBool *rhs);
+  [[nodiscard]] std::string toString() const override;
 
-    Literal *applyOperator(LiteralString *rhs);
+  bool supportsCircuitMode() override;
 
-    Literal *applyOperator(LiteralFloat *lhs, LiteralFloat *rhs);
+  virtual ~Operator();
 
-    Literal *applyOperator(LiteralFloat *lhs, LiteralInt *rhs);
-
-    Literal *applyOperator(LiteralInt *lhs, LiteralFloat *rhs);
-
-    Literal *applyOperator(LiteralFloat *lhs, LiteralBool *rhs);
-
-    Literal *applyOperator(LiteralBool *lhs, LiteralFloat *rhs);
-
-    Literal *applyOperator(LiteralFloat *lhs, LiteralString *rhs);
-
-    Literal *applyOperator(LiteralString *lhs, LiteralFloat *rhs);
-
-    Literal *applyOperator(LiteralFloat *rhs);
-
-    std::string toString() const override;
+  Node* createClonedNode(bool keepOriginalUniqueNodeId) override;
 };
 
 #endif //MASTER_THESIS_CODE_OPERATOR_H

@@ -10,22 +10,24 @@
 class Function : public AbstractStatement {
  private:
   std::string name;
-  std::vector<FunctionParameter> params;
+  std::vector<FunctionParameter*> params;
   std::vector<AbstractStatement*> body;
+
+  Node* createClonedNode(bool keepOriginalUniqueNodeId) override;
 
  public:
   Function() = default;
 
   [[nodiscard]] const std::string &getName() const;
 
-  [[nodiscard]] const std::vector<FunctionParameter> &getParams() const;
+  [[nodiscard]] const std::vector<FunctionParameter*> &getParams() const;
 
   [[nodiscard]] const std::vector<AbstractStatement*> &getBody() const;
 
   Function(std::string name, std::vector<AbstractStatement*> bodyStatements);
 
-  Function(std::string name, std::vector<FunctionParameter> params,
-           std::vector<AbstractStatement*> body);
+  Function(std::string functionName, std::vector<FunctionParameter*> functionParameters,
+           std::vector<AbstractStatement*> functionStatements);
 
   explicit Function(std::string name);
 
@@ -39,7 +41,7 @@ class Function : public AbstractStatement {
 
   [[nodiscard]] std::string getNodeName() const override;
 
-  void setParams(std::vector<FunctionParameter>* paramsVec);
+  void setParams(std::vector<FunctionParameter*> paramsVec);
 
   Literal* evaluate(Ast &ast) override;
 };

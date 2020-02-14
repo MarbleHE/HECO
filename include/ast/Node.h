@@ -1,10 +1,12 @@
 #ifndef MASTER_THESIS_CODE_NODE_H
 #define MASTER_THESIS_CODE_NODE_H
 
-#include <string>
 #include <vector>
 #include <nlohmann/json.hpp>
 #include "Visitor.h"
+#include <sstream>
+#include "../include/visitor/Visitor.h"
+#include "OpSymbEnum.h"
 
 using json = nlohmann::json;
 
@@ -13,85 +15,180 @@ class Literal;
 class Ast;
 
 class Node {
-private:
-    std::vector<Node *> children{};
+ protected:
+  /// Temporarily stores the reserved node ID until the first call of getUniqueNodeId() at which the reserved ID is
+  /// fetched and the node's ID is assigned (field uniqueNodeId) based on the node's name and this reserved ID.
+  /// This is a workaround because getNodeName() is a virtual method that cannot be called from derived classes and
+  /// their constructor. After retrieving the node ID and assigning it to the uniqueNodeId field, it is deleted from
+  /// this map.
+  std::map<Node*, int> assignedNodeIds{};
 
-    std::vector<Node *> parents{};
+  /// Stores the children of the current node if the node supports the circuit mode (see supportsCircuitMode()).
+  std::vector<Node*> children{};
 
-    static int nodeIdCounter;
+  /// Stores the parent nodes of the current node if the node supports the circuit mode (see supportsCircuitMode()).
+  std::vector<Node*> parents{};
 
-    std::string uniqueNodeId;
+  /// A static ongoing counter that is incremented after creating a new Node object. The counter's value is used to
+  /// build the unique node ID.
+  static int nodeIdCounter;
 
-    /// This attributes is used to link back to the original Node in an overlay circuit.
-    Node *underlyingNode;
+  /// An identifier that is unique among all nodes during runtime.
+  std::string uniqueNodeId;
 
-private:
+  /// This attributes is used to link back to the original Node if this node is part of an overlay circuit representing
+  /// only a subset of certain nodes. Required, for example, by cone rewriting.
+  Node* underlyingNode{};
 
-    std::string genUniqueNodeId();
+  /// Generates a new node ID in the form "<NodeTypeName>_nodeIdCounter++" where <NodeTypeName> is the value obtained by
+  /// getNodeName() and nodeIdCounter an ongoing counter of created Node objects.
+  /// \return An unique node ID to be used as uniqueNodeId for the current node.
+  std::string genUniqueNodeId();
 
-    static int getAndIncrementNodeId();
+  static int getAndIncrementNodeId();
 
-    static int getNodeIdCounter();
+  /// This special variant of getChildAtIndex returns the n-th parent instead of n-th child if isEdgeDirectionAware is
+  /// passed and is true, and the current node has the property isReversed set to True.
+  /// \param idx The position of the child to be retrieved.
+  /// \param isEdgeDirectionAware If the node's status of isReversed should be considered.
+  /// \return A reference to the node at the specified index in the children or parent vector.
+  [[nodiscard]] Node* getChildAtIndex(int idx, bool isEdgeDirectionAware) const;
 
-public:
+ public:
+  Node();
 
-    Node();
+  virtual ~Node();
 
-    Node *getUnderlyingNode() const;
+  [[nodiscard]] Node* getUnderlyingNode() const;
 
-    void setUnderlyingNode(Node *uNode);
+  void setUnderlyingNode(Node* uNode);
 
-    [[nodiscard]] virtual std::string getNodeName() const;
+  [[nodiscard]] virtual std::string getNodeName() const;
 
-    std::string getUniqueNodeId();
+  std::string getUniqueNodeId();
 
-    static void resetNodeIdCounter();
+  /// Resets the static node ID counter that is used to build the unique node ID. This method is required for testing.
+  static void resetNodeIdCounter();
 
-    [[nodiscard]] const std::vector<Node *> &getChildren() const;
+  /// Returns a reference to the vector of parent nodes.
+  /// \return A reference to the vector of this node's parents.
+  [[nodiscard]] const std::vector<Node*> &getParents() const;
 
-    void addChild(Node *child);
+  /// Returns a reference to the vector of children nodes.
+  /// \return A reference to the vector of this node's children.
+  [[nodiscard]] const std::vector<Node*> &getChildren() const;
 
-    [[nodiscard]] const std::vector<Node *> &getParents() const;
+  /// Returns all the ancestor nodes of the current node.
+  /// \return A list of ancestor nodes.
+  std::vector<Node*> getAnc();
 
-    [[nodiscard]] const std::vector<Node *> &getPred() const;
+  // Functions for handling children
+  void addChild(Node* child, bool addBackReference = false);
+  void addChildBilateral(Node* child);
+  void addChildren(const std::vector<Node*> &childrenToAdd, bool addBackReference = false);
+  void setChild(std::__wrap_iter<Node* const*> position, Node* value);
+  void removeChild(Node* child);
+  void removeChildren();
+  [[nodiscard]] int countChildrenNonNull() const;
 
-    [[nodiscard]] const std::vector<Node *> &getSucc() const;
+  /// Returns the child at the given index.
+  /// \param idx The position of the children in the Node::children vector.
+  /// \return The child at the given index of the children vector, or a nullptr if there is no child at this position.
+  [[nodiscard]] Node* getChildAtIndex(int idx) const;
 
-    void removeChild(Node *child);
+  // Functions for handling parents
+  void addParent(Node* n);
+  void removeParent(Node* node);
+  void removeParents();
+  bool hasParent(Node* n);
 
-    void removeChildren();
+  static void addParentTo(Node* parentNode, std::vector<Node*> nodesToAddParentTo);
 
-    void removeParent(Node *node);
+  void swapChildrenParents();
 
-    void removeParents();
+  virtual Literal* evaluate(Ast &ast);
 
-    void addChildren(std::vector<Node *> c);
+  virtual void accept(Visitor &v);
 
-    static void addParent(Node *parentNode, std::vector<Node *> nodesToAddParentTo);
+  [[nodiscard]] virtual json toJson() const;
 
-    void addParent(Node *n);
+  [[nodiscard]] virtual std::string toString() const;
 
-    void swapChildrenParents();
+  friend std::ostream &operator<<(std::ostream &os, const std::vector<Node*> &v);
 
-    virtual Literal *evaluate(Ast &ast);
+  [[nodiscard]] virtual Node* cloneFlat();
 
-    virtual void accept(Visitor &v);
+  void setUniqueNodeId(const std::string &unique_node_id);
 
-    [[nodiscard]] virtual json toJson() const;
+  /// This method returns True iff the class derived from the Node class properly makes use of the child/parent fields
+  /// as it would be expected in a circuit.
+  virtual bool supportsCircuitMode();
 
-    [[nodiscard]] virtual std::string toString() const;
+  /// Indicates the number of children that are allowed for a specific node.
+  /// For example, a binary expression accepts exactly three attributes and hence also exactly three children:
+  /// left operand, right operand, and operator.
+  /// If the node does not implement support for child/parent relationships, getMaxNumberChildren() return 0.
+  /// \return An integer indicating the number of allowed children for a specific node.
+  virtual int getMaxNumberChildren();
 
-    friend std::ostream &operator<<(std::ostream &os, const std::vector<Node *> &v);
+  /// Indicates whether the edges of this node are reversed compared to its initial state.
+  bool isReversed{false};
 
-    std::string getDotFormattedString(bool isReversed, const std::string &indentation, bool showMultDepth);
+  [[nodiscard]] std::vector<Node*> getChildrenNonNull() const;
+  [[nodiscard]] std::vector<Node*> getParentsNonNull() const;
 
-    [[nodiscard]] virtual Node *clone();
+  /// Removes this node from all of its parents and children, and also removes all parents and children from this node.
+  void isolateNode();
 
-    void setUniqueNodeId(const std::string &unique_node_id);
+  /// Removes the node 'child' bilateral, i.e., on both ends of the edge. In other words, removes the node 'child' from
+  /// this node, and this node from the parents list of 'child' node.
+  /// \param child The child to be removed from this node.
+  void removeChildBilateral(Node* child);
 
-    void printAncestorsDescendants(std::vector<Node *> nodes);
+  /// Checks whether the edges of this node are reversed (i.e., node's parents and children are swapped).
+  /// \return True iff the node's edges are reversed.
+  [[nodiscard]] bool hasReversedEdges() const;
 
-    void printAncestorsDescendants(Node *n);
+  /// Transforms a multi-input gate taking N inputs into a sequence of binary gates.
+  ///
+  /// For example, consider a N input logical-AND (&) with inputs y_1 to y_m:
+  ///   <pre> &_{i=1}^{n} y_1, y_2, y_3, ..., y_m. </pre>
+  /// It is transformed by this method into the expression:
+  ///   <pre> ((((y_1 & y_2) & y_3) ...) & y_m), </pre>
+  /// wherein each AND-gate only has two inputs (binary gates).
+
+  /// \param inputNodes The inputs y_1, ..., y_m that are connected to the multi-input gate. It is required that m>=2.
+  /// \param gateType The gate that all inputs are connected to.
+  /// \return A vector of Node objects of type LogicalExpr that represent the chain of LogicalExpr required to represent
+  /// the intended multi-input gate. The last node in inputNodes (i.e., inputNodes.back()) is always the output of this
+  /// chain.
+  static std::vector<Node*> rewriteMultiInputGateToBinaryGatesChain(std::vector<Node*> inputNodes,
+                                                                    OpSymb::LogCompOp gateType);
+
+  /// Casts a node to type T which must be the specific derived class of the node to cast successfully.
+  /// \tparam T The derived class of the node object.
+  /// \return A pointer to the casted object, or a std::logic_error if cast was unsuccessful.
+  template<typename T>
+  T* castTo() {
+    if (auto castedNode = dynamic_cast<T*>(this)) {
+      return castedNode;
+    } else {
+      std::stringstream outputMsg;
+      outputMsg << "Cannot cast object of type Node to given class ";
+      outputMsg << typeid(T).name() << ". ";
+      outputMsg << "Because node (" << this->getUniqueNodeId() << ") is of type ";
+      outputMsg << this->getNodeName() << ".";
+      throw std::logic_error(outputMsg.str());
+    }
+  }
+
+  bool hasChild(Node* n);
+ public:
+  Node* cloneRecursiveDeep(bool keepOriginalUniqueNodeId);
+
+ private:
+  [[nodiscard]] virtual Node* createClonedNode(bool keepOriginalUniqueNodeId);
+
 };
 
 #endif //MASTER_THESIS_CODE_NODE_H

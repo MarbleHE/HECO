@@ -1,4 +1,5 @@
 #include <utility>
+#include "Datatypes.h"
 #include "LiteralString.h"
 #include "RandNumGen.h"
 
@@ -46,13 +47,25 @@ void LiteralString::addLiteralValue(std::string identifier, std::map<std::string
 }
 
 void LiteralString::setValue(const std::string &newValue) {
-    this->value = newValue;
+  this->value = newValue;
 }
 
 void LiteralString::setRandomValue(RandLiteralGen &rlg) {
-    setValue(rlg.getRandomString(RandLiteralGen::stringDefaultMaxLength));
+  setValue(rlg.getRandomString(RandLiteralGen::stringDefaultMaxLength));
 }
 
 std::string LiteralString::toString() const {
-    return this->getValue();
+  return this->getValue();
+}
+
+bool LiteralString::supportsCircuitMode() {
+  return true;
+}
+
+bool LiteralString::supportsDatatype(Datatype &datatype) {
+  return datatype.getType() == TYPES::STRING;
+}
+
+Node* LiteralString::createClonedNode(bool keepOriginalUniqueNodeId) {
+  return new LiteralString(this->getValue());
 }

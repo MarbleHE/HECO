@@ -87,10 +87,8 @@ class RandLiteralGen {
   }
 
   void randomizeValues(const std::map<std::string, Literal*> &vals) {
-    std::map<std::string, Literal*> randomizedInputs;
-    for (auto &[identifier, lit] : vals) {
-      lit->setRandomValue(*this);
-    }
+    // ask every literal to generate a new value using the passed RandNumGen instance by overwriting the existing value
+    for (auto &[identifier, lit] : vals) lit->setRandomValue(*this);
   }
 };
 

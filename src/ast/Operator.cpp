@@ -298,16 +298,29 @@ Literal* Operator::applyOperator(LiteralInt* lhs, LiteralInt* rhs) {
   else if (this->equals(OpSymb::unequal)) return new LiteralBool(lhsVal != rhsVal);
 
   else
-      throw std::logic_error("applyOperator(LiteralInt* lhs, LiteralInt* rhs) failed!");
+    throw std::logic_error("applyOperator(LiteralInt* lhs, LiteralInt* rhs) failed!");
 }
 
 std::string Operator::toString() const {
-    return this->getOperatorString();
+  return this->getOperatorString();
 }
 
 Operator::Operator(std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp> opVar) {
-    this->operatorSymbol = opVar;
-    this->operatorString = OpSymb::getTextRepr(opVar);
+  this->operatorSymbol = opVar;
+  this->operatorString = OpSymb::getTextRepr(opVar);
 }
 
+bool Operator::supportsCircuitMode() {
+  return true;
+}
+
+const std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp> &Operator::getOperatorSymbol() const {
+  return operatorSymbol;
+}
+
+Operator::~Operator() = default;
+
+Node* Operator::createClonedNode(bool keepOriginalUniqueNodeId) {
+  return new Operator(this->getOperatorSymbol());
+}
 
