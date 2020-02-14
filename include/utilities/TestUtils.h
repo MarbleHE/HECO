@@ -5,6 +5,7 @@
 #include <map>
 #include <string>
 #include <iostream>
+#include <bitset>
 #include "Ast.h"
 #include "RandNumGen.h"
 
