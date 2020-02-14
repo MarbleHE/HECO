@@ -124,7 +124,7 @@ void Node::addChildren(const std::vector<Node*> &childrenToAdd, bool addBackRefe
   }
 }
 
-void Node::setChild(std::__wrap_iter<Node* const*> position, Node* value) {
+void Node::setChild(std::vector<Node*>::const_iterator position, Node* value) {
   auto newIterator = children.insert(position, value);
   children.erase(++newIterator);
 }
