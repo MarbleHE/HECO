@@ -49,7 +49,6 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/ast/CallExternal.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/Function.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/FunctionParameter.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/Group.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/If.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/Literal.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/LiteralBool.cpp

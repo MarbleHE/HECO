@@ -8,7 +8,6 @@
 #include "CallExternal.h"
 #include "Function.h"
 #include "FunctionParameter.h"
-#include "Group.h"
 #include "If.h"
 #include "Literal.h"
 #include "LiteralBool.h"
@@ -291,23 +290,6 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_Block) {  /* NOLINT */
 
   // test if all fields belonging to Node class were copied
   assertNodeAttributes(KEEP_ORIGINAL_ID, blockStatement, clonedBlockStatement);
-}
-
-TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_Group) {  /* NOLINT */
-  const bool KEEP_ORIGINAL_ID = false;
-  auto oldValue = new LiteralInt(87656789);
-  auto group = new Group(oldValue);
-  ASSERT_EQ(group->getExpr(), oldValue);
-  auto clonedGroup = dynamic_cast<Group*>(group->cloneRecursiveDeep(KEEP_ORIGINAL_ID));
-
-  // test if changing original also modifies the copy
-  auto newValue = new LiteralInt(222139);
-  group->setAttributes(newValue);
-  ASSERT_EQ(group->getExpr(), newValue);
-  ASSERT_EQ(clonedGroup->getExpr()->castTo<LiteralInt>()->getValue(), oldValue->getValue());
-
-  // test if all fields belonging to Node class were copied
-  assertNodeAttributes(KEEP_ORIGINAL_ID, group, clonedGroup);
 }
 
 TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_LiteralBool) {  /* NOLINT */

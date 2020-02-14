@@ -69,8 +69,6 @@ class Visitor {
 
   virtual void visit(FunctionParameter &elem);
 
-  virtual void visit(Group &elem);
-
   virtual void visit(If &elem);
 
   virtual void visit(LiteralBool &elem);

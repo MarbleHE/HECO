@@ -7,7 +7,6 @@
 #include "LiteralBool.h"
 #include "LogicalExpr.h"
 #include "VarAssignm.h"
-#include "Group.h"
 #include "Block.h"
 #include "Return.h"
 #include "BinaryExpr.h"
@@ -76,10 +75,6 @@ void Visitor::visit(Function &elem) {
 
 void Visitor::visit(FunctionParameter &elem) {
   elem.getValue()->accept(*this);
-}
-
-void Visitor::visit(Group &elem) {
-  elem.getExpr()->accept(*this);
 }
 
 void Visitor::visit(If &elem) {

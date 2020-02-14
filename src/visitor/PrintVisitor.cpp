@@ -15,9 +15,7 @@
 #include "While.h"
 #include "UnaryExpr.h"
 #include "Call.h"
-#include "Group.h"
 #include "PrintVisitor.h"
-#include "../../main.h"
 #include "Scope.h"
 
 template<typename T>
@@ -63,12 +61,6 @@ void PrintVisitor::visit(Function &elem) {
 
 void PrintVisitor::visit(FunctionParameter &elem) {
   addOutputStr(elem, {elem.getDatatype()->toString()});
-  printChildNodesIndented(elem);
-}
-
-void PrintVisitor::visit(Group &elem) {
-  addOutputStr(elem);
-  // group statements
   printChildNodesIndented(elem);
 }
 

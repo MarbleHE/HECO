@@ -66,10 +66,6 @@ void MultRewriteVisitor::visit(FunctionParameter &elem) {
   Visitor::visit(elem);
 }
 
-void MultRewriteVisitor::visit(Group &elem) {
-  Visitor::visit(elem);
-}
-
 void MultRewriteVisitor::visit(If &elem) {
   Visitor::visit(elem);
 }

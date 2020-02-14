@@ -5,7 +5,6 @@
 #include "CallExternal.h"
 #include "Function.h"
 #include "FunctionParameter.h"
-#include "Group.h"
 #include "If.h"
 #include "LiteralBool.h"
 #include "LiteralInt.h"
@@ -164,28 +163,6 @@ TEST(JsonOutputTest, FunctionParameter) { /* NOLINT */
   EXPECT_EQ(fp->toJson(), j);
 }
 
-TEST(JsonOutputTest, Group) { /* NOLINT */
-  auto lintValue = 9883;
-  auto varIdentifier = "totalItems";
-  // (totalItems / 9883)
-  auto gp = new Group(new BinaryExpr(
-      new Variable(varIdentifier),
-      OpSymb::BinaryOp::division,
-      new LiteralInt(lintValue)));
-
-  json j = {{"type", "Group"},
-            {"expr", {{"type", "BinaryExpr"},
-                      {"leftOperand", {
-                          {"type", "Variable"},
-                          {"identifier", varIdentifier}}},
-                      {"operator", OpSymb::getTextRepr(OpSymb::division)},
-                      {"rightOperand", {
-                          {"type", "LiteralInt"},
-                          {"value", lintValue}
-                      }}}}};
-  EXPECT_EQ(gp->toJson(), j);
-}
-
 TEST(JsonOutputTest, LogicalExpr) { /* NOLINT */
   auto varIdentifier = "numIterations";
   auto varIdentifierMax = "maxIterations";
@@ -278,11 +255,10 @@ TEST(JsonOutputTest, Function) { /* NOLINT */
                                new Return(
                                    new BinaryExpr(
                                        new BinaryExpr(
-                                           new Group(
-                                               new BinaryExpr(
-                                                   new Variable("a"),
-                                                   OpSymb::addition,
-                                                   new LiteralInt(221))),
+                                           new BinaryExpr(
+                                               new Variable("a"),
+                                               OpSymb::addition,
+                                               new LiteralInt(221)),
                                            OpSymb::multiplication,
                                            new Variable("b")),
                                        OpSymb::addition,

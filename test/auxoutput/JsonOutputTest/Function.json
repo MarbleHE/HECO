@@ -35,18 +35,15 @@
         "leftOperand": {
           "type": "BinaryExpr",
           "leftOperand": {
-            "type": "Group",
-            "expr": {
-              "type": "BinaryExpr",
-              "leftOperand": {
-                "type": "Variable",
-                "identifier": "a"
-              },
-              "operator": "add",
-              "rightOperand": {
-                "type": "LiteralInt",
-                "value": 221
-              }
+            "type": "BinaryExpr",
+            "leftOperand": {
+              "type": "Variable",
+              "identifier": "a"
+            },
+            "operator": "add",
+            "rightOperand": {
+              "type": "LiteralInt",
+              "value": 221
             }
           },
           "operator": "mult",

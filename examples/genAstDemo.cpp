@@ -6,7 +6,6 @@
 #include "Block.h"
 #include "CallExternal.h"
 #include "Function.h"
-#include "Group.h"
 #include "If.h"
 #include "LiteralBool.h"
 #include "LiteralInt.h"
@@ -111,11 +110,10 @@ void generateDemoOne(Ast &ast) {
       new Block(
           new VarAssignm("k",
                          new BinaryExpr(
-                             new Group(
-                                 new BinaryExpr(
-                                     new Variable("x"),
-                                     OpSymb::BinaryOp::multiplication,
-                                     new Variable("a"))),
+                             new BinaryExpr(
+                                 new Variable("x"),
+                                 OpSymb::BinaryOp::multiplication,
+                                 new Variable("a")),
                              OpSymb::BinaryOp::addition,
                              42)))));
 
@@ -283,15 +281,15 @@ void generateDemoSix(Ast &ast) {
 
   // int result = (inZ * (inA * (inB * inC)));
   func->addStatement(new VarDecl("result", TYPES::INT,
-                                 new Group(new BinaryExpr(new Variable("inZ"),
-                                                          OpSymb::multiplication,
-                                                          new Group(new BinaryExpr(
-                                                              new Variable("inA"),
-                                                              OpSymb::multiplication,
-                                                              new Group(new BinaryExpr(
-                                                                  new Variable("inB"),
-                                                                  OpSymb::multiplication,
-                                                                  new Variable("inC")))))))));
+                                 new BinaryExpr(new Variable("inZ"),
+                                                OpSymb::multiplication,
+                                                new BinaryExpr(
+                                                    new Variable("inA"),
+                                                    OpSymb::multiplication,
+                                                    new BinaryExpr(
+                                                        new Variable("inB"),
+                                                        OpSymb::multiplication,
+                                                        new Variable("inC"))))));
 
 
   // return result;

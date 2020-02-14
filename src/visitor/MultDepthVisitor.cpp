@@ -29,10 +29,6 @@ void MultDepthVisitor::visit(FunctionParameter &elem) {
   Visitor::visit(elem);
 }
 
-void MultDepthVisitor::visit(Group &elem) {
-  Visitor::visit(elem);
-}
-
 void MultDepthVisitor::visit(If &elem) {
   throw std::logic_error("Depth calculations for ASTs with non-circuit nodes (e.g., If) not supported yet!");
   //Visitor::visit(elem);

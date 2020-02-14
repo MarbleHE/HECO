@@ -13,7 +13,6 @@
 #include "If.h"
 #include "VarAssignm.h"
 #include "VarDecl.h"
-#include "Group.h"
 
 class BinaryExprFixture : public ::testing::Test {
  protected:
@@ -278,57 +277,6 @@ TEST_F(FunctionParameterFixture, FunctionParameter_AddChildSuccess) {  /* NOLINT
   EXPECT_EQ(datatype2->getParents().size(), 1);
   EXPECT_EQ(datatype2->getParents().front(), functionParameter);
   EXPECT_TRUE(datatype2->hasParent(functionParameter));
-}
-
-class GroupFixture : public ::testing::Test {
- protected:
-  AbstractExpr* expression;
-  AbstractExpr* expression2;
-
-  GroupFixture() {
-    expression = new BinaryExpr(11, OpSymb::addition, 32);
-    expression2 = new BinaryExpr(21, OpSymb::multiplication, 2.3f);
-  }
-};
-
-TEST_F(GroupFixture, GroupStandardConstructor) {  /* NOLINT */
-  auto* groupStatement = new Group(expression);
-
-  // children
-  ASSERT_EQ(groupStatement->getChildren().size(), 1);
-  ASSERT_EQ(groupStatement->getChildAtIndex(0), expression);
-
-  // parents
-  ASSERT_EQ(groupStatement->getParents().size(), 0);
-  ASSERT_EQ(groupStatement->getChildAtIndex(0)->getParents().size(), 1);
-  ASSERT_TRUE(groupStatement->getChildAtIndex(0)->hasParent(groupStatement));
-}
-
-TEST_F(GroupFixture, GroupAddChildException_NoEmptyChildSpotAvailable) {  /* NOLINT */
-  auto* groupStatement = new Group(expression);
-  EXPECT_THROW(groupStatement->addChild(expression2), std::logic_error);
-}
-
-TEST_F(GroupFixture, GroupAddChildException_TooManyChildrenAdded) {  /* NOLINT */
-  auto* groupStatement = new Group(expression);
-  EXPECT_THROW(groupStatement->addChildren({{expression2, expression}}), std::invalid_argument);
-}
-
-TEST_F(GroupFixture, Group_AddChildSuccess) {  /* NOLINT */
-  auto* groupStatement = new Group(expression);
-  groupStatement->removeChild(expression);
-  groupStatement->addChildBilateral(expression2);
-
-  // children
-  EXPECT_EQ(groupStatement->getChildren().size(), 1);
-  EXPECT_EQ(groupStatement->getExpr(), expression2);
-  EXPECT_EQ(groupStatement->getChildAtIndex(0), expression2);
-
-  // parents
-  EXPECT_EQ(groupStatement->getParents().size(), 0);
-  EXPECT_EQ(expression2->getParents().size(), 1);
-  EXPECT_EQ(expression2->getParents().front(), groupStatement);
-  EXPECT_TRUE(expression2->hasParent(groupStatement));
 }
 
 TEST(ChildParentTests, If) {  /* NOLINT */

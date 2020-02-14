@@ -26,7 +26,6 @@ class MultDepthVisitor : public Visitor {
   void visit(CallExternal &elem) override;
   void visit(Function &elem) override;
   void visit(FunctionParameter &elem) override;
-  void visit(Group &elem) override;
   void visit(If &elem) override;
   void visit(LiteralBool &elem) override;
   void visit(LiteralInt &elem) override;

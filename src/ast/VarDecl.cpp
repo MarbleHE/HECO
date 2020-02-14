@@ -4,7 +4,6 @@
 #include "LiteralBool.h"
 #include "LiteralFloat.h"
 #include "BinaryExpr.h"
-#include "Group.h"
 #include "Ast.h"
 
 json VarDecl::toJson() const {

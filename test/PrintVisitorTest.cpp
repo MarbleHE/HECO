@@ -25,6 +25,8 @@ TEST_F(PrintVisitorTest, printDemoTreeOne) { /* NOLINT */
   std::stringstream buffer;
   buffer << ifs.rdbuf();
 
+  std::cout << pv.getOutput();
+
   EXPECT_EQ(pv.getOutput(), buffer.str());
 }
 

@@ -11,7 +11,6 @@
 #include "Block.h"
 #include "While.h"
 #include "Call.h"
-#include "Group.h"
 #include "LiteralFloat.h"
 
 static std::map<int, std::function<void(Ast &)> > call = {  /* NOLINT */
@@ -489,11 +488,10 @@ void AstTestingGenerator::_genAstPrintVisitorOne(Ast &ast) {
       new Block(
           new VarAssignm("k",
                          new BinaryExpr(
-                             new Group(
-                                 new BinaryExpr(
-                                     new Variable("x"),
-                                     OpSymb::BinaryOp::multiplication,
-                                     new Variable("a"))),
+                             new BinaryExpr(
+                                 new Variable("x"),
+                                 OpSymb::BinaryOp::multiplication,
+                                 new Variable("a")),
                              OpSymb::BinaryOp::addition,
                              42)))));
 

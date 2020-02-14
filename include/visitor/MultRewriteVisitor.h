@@ -30,8 +30,6 @@ class MultRewriteVisitor : public Visitor {
 
   void visit(FunctionParameter &elem) override;
 
-  void visit(Group &elem) override;
-
   void visit(If &elem) override;
 
   void visit(LiteralBool &elem) override;

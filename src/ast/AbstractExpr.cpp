@@ -58,7 +58,7 @@ LiteralFloat* AbstractExpr::createParam(float f) {
   return new LiteralFloat(f);
 }
 
-int AbstractExpr::countByTemplate(AbstractExpr *abstractExpr) {
+int AbstractExpr::countByTemplate(AbstractExpr* abstractExpr) {
   return 0;
 }
 
@@ -66,7 +66,7 @@ std::vector<std::string> AbstractExpr::getVariableIdentifiers() {
   return std::vector<std::string>();
 }
 
-Node *AbstractExpr::createParam(Node *node) {
+Node* AbstractExpr::createParam(Node* node) {
   throw std::runtime_error(
       "Method Node::createParam does not support Node objects. Did you forget to cast the Node object?");
 }

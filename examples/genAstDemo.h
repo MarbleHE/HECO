@@ -84,13 +84,11 @@ void generateDemoFour(Ast &ast);
 ///
 ///  \code{.cpp}
 ///  void computeMult() {
-///      int result = inA * [inB * inC];
+///      int result = inA * (inB * inC);
 ///      return result;
 ///  }
 ///  \endcode
 ///
-/// The brackets denoted by '[' and ']' are not part of a Group object but show the implicit execution order given by
-/// the way how the AST is defined via nesting.
 ///
 /// \param ast The Ast object this tree should be written into.
 void generateDemoFive(Ast &ast);

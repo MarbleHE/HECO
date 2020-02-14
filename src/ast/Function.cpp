@@ -5,11 +5,11 @@
 #include "BinaryExpr.h"
 #include "Return.h"
 
-void Function::addParameter(FunctionParameter *param) {
+void Function::addParameter(FunctionParameter* param) {
   this->params.emplace_back(param);
 }
 
-Function::Function(std::string name, std::vector<AbstractStatement *> pt) : name(std::move(name)), body(std::move(pt)) {
+Function::Function(std::string name, std::vector<AbstractStatement*> pt) : name(std::move(name)), body(std::move(pt)) {
   for (auto &stmt : getBody()) {
     auto previous = *(&stmt - 1);
     auto next = *(&stmt + 1);
