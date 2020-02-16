@@ -25,7 +25,7 @@ class LiteralInt : public Literal {
 
   [[nodiscard]] std::string getNodeName() const override;
 
-  Literal* evaluate(Ast &ast) override;
+  std::vector<Literal*> evaluate(Ast &ast) override;
 
   LiteralInt operator+(LiteralInt const &lint);
 

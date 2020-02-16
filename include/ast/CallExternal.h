@@ -27,7 +27,7 @@ class CallExternal : public AbstractExpr, public AbstractStatement {
 
   [[nodiscard]] std::string getNodeName() const override;
 
-  Literal* evaluate(Ast &ast) override;
+  std::vector<Literal*> evaluate(Ast &ast) override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_CALLEXTERNAL_H

@@ -41,8 +41,6 @@ class AbstractExpr : public Node {
 
   virtual bool isEqual(AbstractExpr* other);
 
-  Literal* evaluate(Ast &ast) override;
-
   AbstractExpr() = default;
 };
 

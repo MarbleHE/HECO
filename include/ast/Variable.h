@@ -33,7 +33,7 @@ class Variable : public AbstractExpr {
 
   bool isEqual(AbstractExpr* other) override;
 
-  Literal* evaluate(Ast &ast) override;
+  std::vector<Literal*> evaluate(Ast &ast) override;
 
   std::vector<std::string> getVariableIdentifiers() override;
 

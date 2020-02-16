@@ -2,6 +2,7 @@
 #define AST_OPTIMIZER_INCLUDE_RETURN_H
 
 #include <string>
+#include <vector>
 #include "AbstractStatement.h"
 #include "AbstractExpr.h"
 
@@ -9,7 +10,9 @@ class Return : public AbstractStatement {
  public:
   Return();
 
-  explicit Return(AbstractExpr* value);
+  explicit Return(AbstractExpr* returnValue);
+
+  explicit Return(std::vector<AbstractExpr*> returnValues);
 
   [[nodiscard]] json toJson() const override;
 
@@ -19,13 +22,13 @@ class Return : public AbstractStatement {
 
   ~Return() override;
 
-  Literal* evaluate(Ast &ast) override;
+  std::vector<Literal*> evaluate(Ast &ast) override;
 
-  [[nodiscard]] AbstractExpr* getReturnExpr() const;
+  [[nodiscard]] std::vector<AbstractExpr*> getReturnExpressions() const;
 
   Node* createClonedNode(bool keepOriginalUniqueNodeId) override;
 
-  void setAttributes(AbstractExpr* returnExpr);
+  void setAttributes(std::vector<AbstractExpr*> returnExpr);
 
  protected:
   int getMaxNumberChildren() override;

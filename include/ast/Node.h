@@ -16,6 +16,9 @@ class Literal;
 class Ast;
 
 class Node {
+ private:
+  [[nodiscard]] virtual Node* createClonedNode(bool keepOriginalUniqueNodeId);
+
  protected:
   /// Temporarily stores the reserved node ID until the first call of getUniqueNodeId() at which the reserved ID is
   /// fetched and the node's ID is assigned (field uniqueNodeId) based on the node's name and this reserved ID.
@@ -46,6 +49,8 @@ class Node {
   /// \return An unique node ID to be used as uniqueNodeId for the current node.
   std::string genUniqueNodeId();
 
+  ///
+  /// \return
   static int getAndIncrementNodeId();
 
   /// This special variant of getChildAtIndex returns the n-th parent instead of n-th child if isEdgeDirectionAware is
@@ -107,7 +112,7 @@ class Node {
 
   void swapChildrenParents();
 
-  virtual Literal* evaluate(Ast &ast);
+  virtual std::vector<Literal*> evaluate(Ast &ast);
 
   virtual void accept(Visitor &v);
 
@@ -186,9 +191,6 @@ class Node {
   bool hasChild(Node* n);
 
   Node* cloneRecursiveDeep(bool keepOriginalUniqueNodeId);
-
- private:
-  [[nodiscard]] virtual Node* createClonedNode(bool keepOriginalUniqueNodeId);
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_NODE_H

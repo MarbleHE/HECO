@@ -96,14 +96,14 @@ bool VarDecl::isEqual(AbstractStatement* as) {
   return false;
 }
 
-Literal* VarDecl::evaluate(Ast &ast) {
+std::vector<Literal*> VarDecl::evaluate(Ast &ast) {
   if (this->getInitializer() != nullptr) {
-    auto value = this->getInitializer()->evaluate(ast);
+    auto value = this->getInitializer()->evaluate(ast).front();
     ast.updateVarValue(this->getIdentifier(), value);
-    return value;
+    return std::vector<Literal*>({value});
   } else {
     ast.updateVarValue(this->getIdentifier(), nullptr);
-    return nullptr;
+    return std::vector<Literal*>();
   }
 }
 

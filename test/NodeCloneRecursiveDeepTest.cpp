@@ -384,14 +384,14 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_Return) {  /* NOLINT */
   const bool KEEP_ORIGINAL_ID = false;
   auto oldValue = new LiteralInt(944782);
   auto returnStatement = new Return(oldValue);
-  ASSERT_EQ(returnStatement->getReturnExpr(), oldValue);
+  ASSERT_EQ(returnStatement->getReturnExpressions().front(), oldValue);
   auto clonedReturn = dynamic_cast<Return*>(returnStatement->cloneRecursiveDeep(KEEP_ORIGINAL_ID));
 
   // test if changing original also modifies the copy
   auto newValue = new LiteralFloat(7768.3331f);
-  returnStatement->setAttributes(newValue);
-  ASSERT_EQ(returnStatement->getReturnExpr(), newValue);
-  ASSERT_EQ(clonedReturn->getReturnExpr()->castTo<LiteralInt>()->getValue(), oldValue->getValue());
+  returnStatement->setAttributes({newValue});
+  ASSERT_EQ(returnStatement->getReturnExpressions().front()->castTo<LiteralFloat>(), newValue);
+  ASSERT_EQ(clonedReturn->getReturnExpressions().front()->castTo<LiteralInt>()->getValue(), oldValue->getValue());
 
   // test if all fields belonging to Node class were copied
   assertNodeAttributes(KEEP_ORIGINAL_ID, returnStatement, clonedReturn);

@@ -34,7 +34,7 @@ std::string CallExternal::getNodeName() const {
   return "CallExternal";
 }
 
-Literal* CallExternal::evaluate(Ast &ast) {
+std::vector<Literal*> CallExternal::evaluate(Ast &ast) {
   throw std::runtime_error(
       "evaluateAst(Ast &ast) not implemented for class CallExternal yet! Consider using Call instead.");
 }

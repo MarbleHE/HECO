@@ -30,7 +30,7 @@ class If : public AbstractStatement {
 
   [[nodiscard]] AbstractStatement* getElseBranch() const;
 
-  Literal* evaluate(Ast &ast) override;
+  std::vector<Literal*> evaluate(Ast &ast) override;
 
  private:
   Node* createClonedNode(bool keepOriginalUniqueNodeId) override;

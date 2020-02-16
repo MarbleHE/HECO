@@ -460,27 +460,22 @@ TEST_F(ReturnStatementFixture, ReturnStatementStandardConstructor) {  /* NOLINT 
 
 TEST_F(ReturnStatementFixture, ReturnStatementEmptyConstructor) {  /* NOLINT */
   Return returnStatement;
-  ASSERT_EQ(returnStatement.getChildren().size(), 1);
+  ASSERT_EQ(returnStatement.getChildren().size(), 0);
   ASSERT_EQ(returnStatement.countChildrenNonNull(), 0);
   ASSERT_EQ(returnStatement.getParents().size(), 0);
 }
 
-TEST_F(ReturnStatementFixture, ReturnStatementAddChildException_NoEmptyChildSpotAvailable) {  /* NOLINT */
+TEST_F(ReturnStatementFixture, ReturnStatementAddSecondChild) {  /* NOLINT */
   auto* returnStatement = new Return(abstractExpr);
-  EXPECT_THROW(returnStatement->addChild(abstractExprOther),
-               std::logic_error);
-}
-
-TEST_F(ReturnStatementFixture, ReturnStatementAddChildException_TooManyChildrenAdded) {  /* NOLINT */
-  auto* returnStatement = new Return(abstractExpr);
-  EXPECT_THROW(returnStatement->addChildren({{abstractExpr, abstractExprOther}}, false),
-               std::invalid_argument);
+  returnStatement->addChild(abstractExprOther);
+  EXPECT_EQ(returnStatement->getChildren().size(), 2);
+  EXPECT_EQ(returnStatement->getChildrenNonNull().size(), 2);
 }
 
 TEST_F(ReturnStatementFixture, ReturnStatementAddChildSuccess) {  /* NOLINT */
   auto* returnStatement = new Return();
   returnStatement->addChildBilateral(abstractExprOther);
-  EXPECT_EQ(returnStatement->getReturnExpr(), abstractExprOther);
+  EXPECT_EQ(returnStatement->getReturnExpressions().front(), abstractExprOther);
   EXPECT_EQ(returnStatement->getChildren().size(), 1);
   EXPECT_EQ(returnStatement->getChildren().front(), abstractExprOther);
   EXPECT_EQ(abstractExprOther->getParents().size(), 1);

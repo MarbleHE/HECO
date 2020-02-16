@@ -78,7 +78,7 @@ void Node::addChild(Node* child, bool addBackReference) {
 
 void Node::addChildren(const std::vector<Node*> &childrenToAdd, bool addBackReference) {
   // check whether the number of children to be added does not exceed the number of maximum supported children
-  if (childrenToAdd.size() > getMaxNumberChildren()) {
+  if (childrenToAdd.size() > getMaxNumberChildren() && getMaxNumberChildren() != -1) {
     throw std::invalid_argument("Node " + getUniqueNodeId() + " of type " + getNodeName() + " does not allow more than "
                                     + std::to_string(getMaxNumberChildren()) + " children!");
   }
@@ -95,13 +95,16 @@ void Node::addChildren(const std::vector<Node*> &childrenToAdd, bool addBackRefe
     if (addBackReference) childToAdd->addParent(this);
   };
 
-  if (getChildren().empty()) {  // if the list of children is still empty, we can simply add all nodes in one batch
+  if (getChildren().empty() || getMaxNumberChildren()
+      == -1) {  // if the list of children is still empty, we can simply add all nodes in one batch
     // add children to the vector's end
     children.insert(children.end(), childrenToAdd.begin(), childrenToAdd.end());
     std::for_each(children.begin(), children.end(), doInsertPostAction);
     // if this nodes accepts an infinite number of children, pre-filling the slots does not make any sense -> skip it
-    // fill remaining slots with nullptr values
-    children.insert(children.end(), getMaxNumberChildren() - getChildren().size(), nullptr);
+    if (getMaxNumberChildren() != -1) {
+      // fill remaining slots with nullptr values
+      children.insert(children.end(), getMaxNumberChildren() - getChildren().size(), nullptr);
+    }
   } else {  // otherwise we need to add the children one-by-one by looking for free slots
     size_t childIdx = 0;
     // add child in first empty spot
@@ -128,7 +131,16 @@ void Node::setChild(std::vector<Node*>::const_iterator position, Node* value) {
 
 void Node::removeChild(Node* child) {
   auto it = std::find(children.begin(), children.end(), child);
-  if (it != children.end()) *it = nullptr; //children.erase(it);
+  if (it != children.end()) {
+    // if the node supports an infinite number of children (getMaxNumberChildren() == -1), we can delete the node from
+    // the children list, otherwise we just overwrite the slot with a nullptr
+    if (this->getMaxNumberChildren() != -1) {
+      *it = nullptr;
+    } else {
+      children.erase(it);
+    }
+  }
+  //children.erase(it);
 }
 
 void Node::removeChildBilateral(Node* child) {
@@ -178,8 +190,8 @@ void Node::swapChildrenParents() {
   isReversed = !isReversed;
 }
 
-Literal* Node::evaluate(Ast &ast) {
-  return nullptr;
+std::vector<Literal*> Node::evaluate(Ast &ast) {
+  return std::vector<Literal*>();
 }
 
 void Node::accept(Visitor &v) {

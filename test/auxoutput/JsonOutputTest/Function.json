@@ -30,34 +30,36 @@
   "body": [
     {
       "type": "Return",
-      "value": {
-        "type": "BinaryExpr",
-        "leftOperand": {
+      "values": [
+        {
           "type": "BinaryExpr",
           "leftOperand": {
             "type": "BinaryExpr",
             "leftOperand": {
-              "type": "Variable",
-              "identifier": "a"
+              "type": "BinaryExpr",
+              "leftOperand": {
+                "type": "Variable",
+                "identifier": "a"
+              },
+              "operator": "add",
+              "rightOperand": {
+                "type": "LiteralInt",
+                "value": 221
+              }
             },
-            "operator": "add",
+            "operator": "mult",
             "rightOperand": {
-              "type": "LiteralInt",
-              "value": 221
+              "type": "Variable",
+              "identifier": "b"
             }
           },
-          "operator": "mult",
+          "operator": "add",
           "rightOperand": {
             "type": "Variable",
-            "identifier": "b"
+            "identifier": "z"
           }
-        },
-        "operator": "add",
-        "rightOperand": {
-          "type": "Variable",
-          "identifier": "z"
         }
-      }
+      ]
     }
   ]
 }

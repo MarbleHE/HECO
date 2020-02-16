@@ -3,9 +3,10 @@
 
 #include <map>
 #include <string>
+#include <iostream>
+#include <set>
 #include "Node.h"
 #include "Visitor.h"
-#include <set>
 
 class Ast {
  private:
@@ -20,6 +21,7 @@ class Ast {
 
  public:
   Ast();
+  ~Ast();
 
   // copy constructors
   Ast(const Ast &otherAst);
@@ -29,8 +31,8 @@ class Ast {
   /// \param rootNode The node to be defined as root for this AST.
   explicit Ast(Node* rootNode);
 
-  ~Ast();
-
+  /// Defines the root node of the AST.
+  /// \param node The node to be defined as root node of this AST.
   Node* setRootNode(Node* node);
 
   [[nodiscard]] Node* getRootNode() const;
@@ -43,9 +45,9 @@ class Ast {
 
   void updateVarValue(const std::string &variableIdentifier, Literal* newValue);
 
-  Literal* evaluateAst(const std::map<std::string, Literal*> &paramValues, bool printResult);
+  std::vector<Literal*> evaluateAst(const std::map<std::string, Literal*> &paramValues, bool printResult = false);
 
-  Literal* evaluateCircuit(const std::map<std::string, Literal*> &paramValues, bool printResult);
+  std::vector<Literal*> evaluateCircuit(const std::map<std::string, Literal*> &paramValues, bool printResult = false);
 
   /// Checks whether the AST (more specifically, all of the AST's edges) are reversed.
   /// \return True iff all edges of the AST are reversed, otherwise false.
@@ -59,15 +61,21 @@ class Ast {
   /// Reverses all edges by switching child and parent nodes of each reachable node within the AST.
   void reverseEdges();
 
-  /// Traverses through the tree in BFS-style and collects all the nodes of the AST.
+  /// Traverses the tree in BFS-style and collects all the nodes of the AST.
+  /// \return A list of all nodes reachable from the AST's root node.
   [[nodiscard]] std::set<Node*> getAllNodes() const;
+
+  /// Traverses the tree in BFS-style and collects all the nodes of the AST for that the predicate returns True.
+  /// \param predicate A function that takes a Node* and returns True if this node should be returned, otherwise False.
+  /// \return A list of all nodes reachable from the AST's root node.
+  std::set<Node*> getAllNodes(const std::function<bool(Node*)> &predicate) const;
 
   /// Deletes a node from the AST.
   /// \param node The node to delete from the AST.
   /// \param deleteSubtreeRecursively Determines whether children should be deleted recursively.
   void deleteNode(Node** node, bool deleteSubtreeRecursively = false);
-  Literal* evaluate(bool printResult);
-  std::set<Node*> getAllNodes(const std::function<bool(Node*)> &predicate) const;
+
+  std::vector<Literal*> evaluate(bool printResult, std::ostream &outputStream = std::cout);
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_H

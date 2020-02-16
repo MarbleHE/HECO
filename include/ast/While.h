@@ -25,7 +25,7 @@ class While : public AbstractStatement {
 
   [[nodiscard]] std::string getNodeName() const override;
 
-  Literal* evaluate(Ast &ast) override;
+  std::vector<Literal*> evaluate(Ast &ast) override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_WHILE_H

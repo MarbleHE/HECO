@@ -13,7 +13,8 @@ std::ostream &operator<<(std::ostream &os, const Literal &literal) {
 
 bool Literal::operator==(const Literal &rhs) const {
   // Literals cannot be equal if they have a different type
-  if (typeid(*this) != typeid(rhs)) return false;
+  if (typeid(*this) != typeid(rhs))
+    return false;
 
   // cast both literals to determine their equivalence
   // note: the dereference op is important here to compare the actual values, not the addresses pointed to

@@ -32,9 +32,9 @@ While::~While() {
   delete body;
 }
 
-Literal* While::evaluate(Ast &ast) {
-  while (*dynamic_cast<LiteralBool*>(getCondition()->evaluate(ast)) == LiteralBool(true)) {
+std::vector<Literal*> While::evaluate(Ast &ast) {
+  while (*dynamic_cast<LiteralBool*>(getCondition()->evaluate(ast).front()) == LiteralBool(true)) {
     getBody()->evaluate(ast);
   }
-  return nullptr;
+  return std::vector<Literal*>();
 }

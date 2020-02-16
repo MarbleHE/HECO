@@ -43,9 +43,10 @@ Block::~Block() {
   delete statements;
 }
 
-Literal* Block::evaluate(Ast &ast) {
+std::vector<Literal*> Block::evaluate(Ast &ast) {
   for (auto stmt : *getStatements()) (void) stmt->evaluate(ast);
-  return nullptr;
+  // a block statement itself does not return anything - its contained statements are just being executed
+  return std::vector<Literal*>();
 }
 
 Node* Block::createClonedNode(bool keepOriginalUniqueNodeId) {

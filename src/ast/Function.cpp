@@ -68,7 +68,7 @@ void Function::setParams(std::vector<FunctionParameter*> paramsVec) {
   this->params = std::move(paramsVec);
 }
 
-Literal* Function::evaluate(Ast &ast) {
+std::vector<Literal*> Function::evaluate(Ast &ast) {
   for (size_t i = 0; i < this->getBody().size(); i++) {
     auto currentStatement = this->getBody().at(i);
     // last statement: check if it is a Return statement
@@ -79,7 +79,7 @@ Literal* Function::evaluate(Ast &ast) {
     }
     (void) currentStatement->evaluate(ast);
   }
-  return nullptr;
+  return std::vector<Literal*>();
 }
 
 Node* Function::createClonedNode(bool keepOriginalUniqueNodeId) {

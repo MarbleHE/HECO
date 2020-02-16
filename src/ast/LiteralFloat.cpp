@@ -27,8 +27,8 @@ std::string LiteralFloat::getNodeName() const {
 
 LiteralFloat::~LiteralFloat() = default;
 
-Literal* LiteralFloat::evaluate(Ast &ast) {
-  return this;
+std::vector<Literal*> LiteralFloat::evaluate(Ast &ast) {
+  return std::vector<Literal*>({this});
 }
 
 LiteralFloat LiteralFloat::operator+(LiteralFloat const &lint) {

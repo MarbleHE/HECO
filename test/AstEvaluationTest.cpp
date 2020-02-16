@@ -21,7 +21,7 @@ TEST(AstEvaluationTests, simpleAstEvaluation1) { /* NOLINT */
       {"length", new LiteralInt(87)},
       {"depth", new LiteralInt(771)}
   };
-  auto result = dynamic_cast<LiteralInt*>(ast.evaluateAst(params, false));
+  auto result = dynamic_cast<LiteralInt*>(ast.evaluateAst(params, false).front());
   ASSERT_EQ(*result, *new LiteralInt(693'129));
 }
 
@@ -33,7 +33,7 @@ TEST(AstEvaluationTests, simpleAstEvaluationIfThenBranch) { /* NOLINT */
       {"inputB", new LiteralInt(7)},
       {"takeIf", new LiteralBool(true)}
   };
-  auto result = dynamic_cast<LiteralInt*>(ast.evaluateAst(params, false));
+  auto result = dynamic_cast<LiteralInt*>(ast.evaluateAst(params, false).front());
   ASSERT_EQ(*result, *new LiteralInt(0));
 }
 
@@ -45,7 +45,7 @@ TEST(AstEvaluationTests, simpleAstEvaluationIfElseBranch) { /* NOLINT */
       {"inputB", new LiteralInt(7)},
       {"takeIf", new LiteralBool(false)}
   };
-  auto result = dynamic_cast<LiteralInt*>(ast.evaluateAst(params, false));
+  auto result = dynamic_cast<LiteralInt*>(ast.evaluateAst(params, false).front());
   ASSERT_EQ(*result, *new LiteralInt(5943));
 }
 
@@ -58,7 +58,7 @@ TEST(AstEvaluationTests, simpleAstEvaluationUnaryLogExpr1) { /* NOLINT */
       {"strong", new LiteralBool(true)},
       {"negate", new LiteralBool(true)}
   };
-  auto result = dynamic_cast<LiteralBool*>(ast.evaluateAst(params, false));
+  auto result = dynamic_cast<LiteralBool*>(ast.evaluateAst(params, false).front());
   ASSERT_EQ(*result, *new LiteralBool(true));
 }
 
@@ -71,7 +71,7 @@ TEST(AstEvaluationTests, simpleAstEvaluationUnaryLogExpr2) { /* NOLINT */
       {"strong", new LiteralBool(true)},
       {"negate", new LiteralBool(true)}
   };
-  auto result = dynamic_cast<LiteralBool*>(ast.evaluateAst(params, false));
+  auto result = dynamic_cast<LiteralBool*>(ast.evaluateAst(params, false).front());
   ASSERT_EQ(*result, *new LiteralBool(false));
 }
 
@@ -84,7 +84,7 @@ TEST(AstEvaluationTests, simpleAstEvaluationUnaryLogExpr3) { /* NOLINT */
       {"strong", new LiteralBool(true)},
       {"negate", new LiteralBool(false)}
   };
-  auto result = dynamic_cast<LiteralBool*>(ast.evaluateAst(params, false));
+  auto result = dynamic_cast<LiteralBool*>(ast.evaluateAst(params, false).front());
   ASSERT_EQ(*result, *new LiteralBool(true));
 }
 
@@ -95,7 +95,7 @@ TEST(AstEvaluationTests, simpleAstEvaluationStringConcat) { /* NOLINT */
       {"strA", new LiteralString("hello ")},
       {"strB", new LiteralString("world!")}
   };
-  auto result = dynamic_cast<LiteralString*>(ast.evaluateAst(params, false));
+  auto result = dynamic_cast<LiteralString*>(ast.evaluateAst(params, false).front());
   ASSERT_EQ(*result, *new LiteralString("hello world!"));
 }
 
@@ -107,7 +107,7 @@ TEST(AstEvaluationTests, complexAstEvaluationWhileNotExecuted) { /* NOLINT */
       {"encryptedB", new LiteralInt(7)},
       {"randInt", new LiteralInt(4)}
   };
-  auto result = dynamic_cast<LiteralInt*>(ast.evaluateAst(params, false));
+  auto result = dynamic_cast<LiteralInt*>(ast.evaluateAst(params, false).front());
   ASSERT_EQ(*result, *new LiteralInt(0));
 }
 
@@ -119,7 +119,7 @@ TEST(AstEvaluationTests, complexAstEvaluationWhileExecutedThreeTimes) { /* NOLIN
       {"encryptedB", new LiteralInt(7)},
       {"randInt", new LiteralInt(3)}
   };
-  auto result = dynamic_cast<LiteralInt*>(ast.evaluateAst(params, false));
+  auto result = dynamic_cast<LiteralInt*>(ast.evaluateAst(params, false).front());
   ASSERT_EQ(*result, *new LiteralInt(21));
 }
 
@@ -127,7 +127,7 @@ TEST(AstEvaluationTests, complexAstEvaluationWithNestedFunctionCall_LiteralParam
   Ast ast;
   AstTestingGenerator::generateAst(12, ast);
   std::map<std::string, Literal*> params;
-  auto result = dynamic_cast<LiteralInt*>(ast.evaluateAst(params, false));
+  auto result = dynamic_cast<LiteralInt*>(ast.evaluateAst(params, false).front());
   ASSERT_EQ(*result, *new LiteralInt(1'056));
 }
 
@@ -135,6 +135,6 @@ TEST(AstEvaluationTests, complexAstEvaluationWithNestedFunctionCall_BexpParamete
   Ast ast;
   AstTestingGenerator::generateAst(13, ast);
   std::map<std::string, Literal*> params;
-  auto result = dynamic_cast<LiteralInt*>(ast.evaluateAst(params, false));
+  auto result = dynamic_cast<LiteralInt*>(ast.evaluateAst(params, false).front());
   ASSERT_EQ(*result, *new LiteralInt(7'168));
 }

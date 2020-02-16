@@ -43,7 +43,7 @@ class Function : public AbstractStatement {
 
   void setParams(std::vector<FunctionParameter*> paramsVec);
 
-  Literal* evaluate(Ast &ast) override;
+  std::vector<Literal*> evaluate(Ast &ast) override;
 };
 
 /// Defines the JSON representation to be used for vector<Function> objects.

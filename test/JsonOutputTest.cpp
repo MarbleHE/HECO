@@ -124,17 +124,17 @@ TEST(JsonOutputTest, Return) { /* NOLINT */
       new LogicalExpr(new Variable("x"), OpSymb::greater, 22));
   json j = {
       {"type", "Return"},
-      {"value", {
-          {"type", "LogicalExpr"},
-          {"leftOperand", {
-              {"type", "Variable"},
-              {"identifier", "x"}
-          }},
-          {"rightOperand", {
-              {"type", "LiteralInt"},
-              {"value", 22}
-          }},
-          {"operator", ">"}}
+      {"values", {{
+                      {"type", "LogicalExpr"},
+                      {"leftOperand", {
+                          {"type", "Variable"},
+                          {"identifier", "x"}
+                      }},
+                      {"rightOperand", {
+                          {"type", "LiteralInt"},
+                          {"value", 22}
+                      }},
+                      {"operator", ">"}}}
       }};
   EXPECT_EQ(ret->toJson(), j);
 }

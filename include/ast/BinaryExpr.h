@@ -1,14 +1,14 @@
 #ifndef AST_OPTIMIZER_INCLUDE_BINARYEXPR_H
 #define AST_OPTIMIZER_INCLUDE_BINARYEXPR_H
 
+#include <string>
+#include <vector>
 #include "Operator.h"
 #include "AbstractExpr.h"
 #include "Literal.h"
 #include "LiteralInt.h"
 #include "LiteralBool.h"
 #include "LiteralString.h"
-#include <string>
-#include <vector>
 
 class BinaryExpr : public AbstractExpr {
  public:
@@ -52,7 +52,7 @@ class BinaryExpr : public AbstractExpr {
 
   bool isEqual(AbstractExpr* other) override;
 
-  Literal* evaluate(Ast &ast) override;
+  std::vector<Literal*> evaluate(Ast &ast) override;
 
   int countByTemplate(AbstractExpr* abstractExpr) override;
 

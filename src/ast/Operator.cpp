@@ -112,6 +112,8 @@ Literal* Operator::applyOperator(Literal* lhs, Literal* rhs) {
     return applyOperator(lhsInt, rhs);
   else if (auto lhsBool = dynamic_cast<LiteralBool*>(lhs))
     return applyOperator(lhsBool, rhs);
+  else if (auto lhsFloat = dynamic_cast<LiteralFloat*>(lhs))
+    return applyOperator(lhsFloat, rhs);
   else
     throw std::logic_error("Could not recognize type of lhs in applyOperator(Literal *lhs, Literal *rhs).");
 }

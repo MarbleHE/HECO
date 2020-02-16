@@ -50,10 +50,6 @@ bool AbstractExpr::isEqual(AbstractExpr* other) {
   return false;
 }
 
-Literal* AbstractExpr::evaluate(Ast &ast) {
-  return nullptr;
-}
-
 LiteralFloat* AbstractExpr::createParam(float f) {
   return new LiteralFloat(f);
 }

@@ -31,7 +31,7 @@ class Call : public AbstractExpr, public AbstractStatement {
 
   [[nodiscard]] Function* getFunc() const;
 
-  Literal* evaluate(Ast &ast) override;
+  std::vector<Literal*> evaluate(Ast &ast) override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_CALL_H

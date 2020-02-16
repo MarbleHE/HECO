@@ -21,8 +21,6 @@ class AbstractStatement : public Node {
   virtual std::string getVarTargetIdentifier();
 
   virtual bool isEqual(AbstractStatement* as);
-
-  Literal* evaluate(Ast &ast) override;
 };
 
 std::ostream &operator<<(std::ostream &outs, const AbstractStatement &obj);

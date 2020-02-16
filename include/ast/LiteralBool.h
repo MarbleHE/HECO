@@ -26,7 +26,7 @@ class LiteralBool : public Literal {
 
   [[nodiscard]] std::string getNodeName() const override;
 
-  Literal* evaluate(Ast &ast) override;
+  std::vector<Literal*> evaluate(Ast &ast) override;
 
   bool operator==(const LiteralBool &rhs) const;
 

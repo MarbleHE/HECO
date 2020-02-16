@@ -30,9 +30,11 @@ std::string LogicalExpr::getNodeName() const {
   return "LogicalExpr";
 }
 
-Literal* LogicalExpr::evaluate(Ast &ast) {
+std::vector<Literal*> LogicalExpr::evaluate(Ast &ast) {
   // we first need to evaluate the left-handside and right-handside as they can consists of nested binary expressions
-  return this->getOp()->applyOperator(this->getLeft()->evaluate(ast), this->getRight()->evaluate(ast));
+  return std::vector<Literal*>(
+      {this->getOp()->applyOperator(this->getLeft()->evaluate(ast).front(),
+                                    this->getRight()->evaluate(ast).front())});
 }
 
 LogicalExpr::LogicalExpr() {

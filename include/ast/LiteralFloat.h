@@ -25,7 +25,7 @@ class LiteralFloat : public Literal {
 
   [[nodiscard]] std::string getNodeName() const override;
 
-  Literal* evaluate(Ast &ast) override;
+  std::vector<Literal*> evaluate(Ast &ast) override;
 
   LiteralFloat operator+(LiteralFloat const &lfloat);
 

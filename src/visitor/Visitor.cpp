@@ -133,7 +133,7 @@ void Visitor::visit(Operator &elem) {}
 
 void Visitor::visit(Return &elem) {
   curScope->addStatement(&elem);
-  elem.getReturnExpr()->accept(*this);
+  for (auto &expr : elem.getReturnExpressions()) expr->accept(*this);
 }
 
 void Visitor::visit(UnaryExpr &elem) {

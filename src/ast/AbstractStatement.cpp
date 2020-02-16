@@ -28,10 +28,6 @@ bool AbstractStatement::isEqual(AbstractStatement* as) {
   return false;
 }
 
-Literal* AbstractStatement::evaluate(Ast &ast) {
-  return nullptr;
-}
-
 std::ostream &operator<<(std::ostream &outs, const AbstractStatement &obj) {
   return outs << obj.toString();
 }

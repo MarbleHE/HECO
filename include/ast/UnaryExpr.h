@@ -21,7 +21,7 @@ class UnaryExpr : public AbstractExpr {
 
   ~UnaryExpr() override;
 
-  Literal* evaluate(Ast &ast) override;
+  std::vector<Literal*> evaluate(Ast &ast) override;
 
   void setAttributes(OpSymb::UnaryOp op, AbstractExpr* expr);
 

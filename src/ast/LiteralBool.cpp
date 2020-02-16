@@ -28,8 +28,8 @@ std::string LiteralBool::getNodeName() const {
 
 LiteralBool::~LiteralBool() = default;
 
-Literal* LiteralBool::evaluate(Ast &ast) {
-  return this;
+std::vector<Literal*> LiteralBool::evaluate(Ast &ast) {
+  return std::vector<Literal*>({this});
 }
 
 void LiteralBool::print(std::ostream &str) const {

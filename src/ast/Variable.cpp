@@ -43,8 +43,8 @@ bool Variable::isEqual(AbstractExpr* other) {
   return false;
 }
 
-Literal* Variable::evaluate(Ast &ast) {
-  return ast.getVarValue(this->getIdentifier());
+std::vector<Literal*> Variable::evaluate(Ast &ast) {
+  return std::vector<Literal*>({ast.getVarValue(this->getIdentifier())});
 }
 
 std::vector<std::string> Variable::getVariableIdentifiers() {

@@ -43,16 +43,17 @@ If::~If() {
   delete elseBranch;
 }
 
-Literal* If::evaluate(Ast &ast) {
-  auto cond = dynamic_cast<LiteralBool*>(getCondition()->evaluate(ast));
+std::vector<Literal*> If::evaluate(Ast &ast) {
+  auto cond = dynamic_cast<LiteralBool*>(getCondition()->evaluate(ast).front());
   if (cond == nullptr)
     throw std::logic_error("Condition in If statement must evaluate to a LiteralBool! Cannot continue.");
-  if (*cond == LiteralBool(true)) {
+  // check which of the branches must be evaluated
+  if (*cond == LiteralBool(true) && thenBranch != nullptr) {
     return thenBranch->evaluate(ast);
   } else if (elseBranch != nullptr) {
     return elseBranch->evaluate(ast);
   }
-  return nullptr;
+  return std::vector<Literal*>();
 }
 
 Node* If::createClonedNode(bool keepOriginalUniqueNodeId) {

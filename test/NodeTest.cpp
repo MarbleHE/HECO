@@ -17,11 +17,13 @@ TEST(NodeTest, rewriteMultiInputGateToBinaryGatesChain_oneInputAND) { /* NOLINT 
   Ast ast(result.back());
 
   // if alpha = false => true AND alpha = false
-  auto resultEval = ast.evaluateCircuit({{"alpha", new LiteralBool(false)}}, false);
+  auto resultEval = ast.evaluateCircuit(
+      {{"alpha", new LiteralBool(false)}}, false).front();
   ASSERT_EQ(*resultEval, LiteralBool(false));
 
   // if alpha = true => true AND alpha = false
-  resultEval = ast.evaluateCircuit({{"alpha", new LiteralBool(true)}}, false);
+  resultEval = ast.evaluateCircuit(
+      {{"alpha", new LiteralBool(true)}}, false).front();
   ASSERT_EQ(*resultEval, LiteralBool(true));
 }
 
@@ -34,18 +36,21 @@ TEST(NodeTest, rewriteMultiInputGateToBinaryGatesChain_oneInputXOR) { /* NOLINT 
   Ast ast(result.back());
 
   // if alpha = false => false XOR alpha = false
-  auto resultEval = ast.evaluateCircuit({{"alpha", new LiteralBool(false)}}, false);
+  auto resultEval = ast.evaluateCircuit(
+      {{"alpha", new LiteralBool(false)}}, false).front();
   ASSERT_EQ(*resultEval, LiteralBool(false));
 
   // if alpha = true => false XOR true = true
-  resultEval = ast.evaluateCircuit({{"alpha", new LiteralBool(true)}}, false);
+  resultEval = ast.evaluateCircuit(
+      {{"alpha", new LiteralBool(true)}}, false).front();
   ASSERT_EQ(*resultEval, LiteralBool(true));
 }
 
 TEST(NodeTest, rewriteMultiInputGateToBinaryGatesChain_oneInputUnsupportedException) { /* NOLINT */
   std::vector<Node*> inputs{new Variable("alpha")};
   OpSymb::LogCompOp gateType = OpSymb::logicalOr;
-  ASSERT_THROW(Node::rewriteMultiInputGateToBinaryGatesChain(inputs, gateType), std::runtime_error);
+  ASSERT_THROW(Node::rewriteMultiInputGateToBinaryGatesChain(inputs, gateType),
+               std::runtime_error);
 }
 
 TEST(NodeTest, rewriteMultiInputGateToBinaryGatesChain_multipleInputs) { /* NOLINT */
@@ -65,7 +70,7 @@ TEST(NodeTest, rewriteMultiInputGateToBinaryGatesChain_multipleInputs) { /* NOLI
        {"beta", new LiteralBool(false)},
        {"gamma", new LiteralBool(false)},
        {"delta", new LiteralBool(false)}},
-      false);
+      false).front();
   ASSERT_EQ(*resultEval, LiteralBool(false));
 
   // if exactly one is true => evaluate to true
@@ -74,7 +79,7 @@ TEST(NodeTest, rewriteMultiInputGateToBinaryGatesChain_multipleInputs) { /* NOLI
        {"beta", new LiteralBool(false)},
        {"gamma", new LiteralBool(true)},
        {"delta", new LiteralBool(false)}},
-      false);
+      false).front();
   ASSERT_EQ(*resultEval, LiteralBool(true));
 
   // if multiple are true => evaluate to false
@@ -83,7 +88,7 @@ TEST(NodeTest, rewriteMultiInputGateToBinaryGatesChain_multipleInputs) { /* NOLI
        {"beta", new LiteralBool(false)},
        {"gamma", new LiteralBool(true)},
        {"delta", new LiteralBool(false)}},
-      false);
+      false).front();
   ASSERT_EQ(*resultEval, LiteralBool(false));
 
   // if all are true => evaluate to false
@@ -92,7 +97,7 @@ TEST(NodeTest, rewriteMultiInputGateToBinaryGatesChain_multipleInputs) { /* NOLI
        {"beta", new LiteralBool(true)},
        {"gamma", new LiteralBool(true)},
        {"delta", new LiteralBool(true)}},
-      false);
+      false).front();
   ASSERT_EQ(*resultEval, LiteralBool(false));
 }
 

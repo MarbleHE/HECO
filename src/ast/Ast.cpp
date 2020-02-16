@@ -18,7 +18,7 @@ Ast::Ast() {
 
 Node* Ast::setRootNode(Node* node) {
   this->rootNode = node;
-  return node;
+  return this->rootNode;
 }
 
 Node* Ast::getRootNode() const {
@@ -33,17 +33,23 @@ Ast::~Ast() {
   delete rootNode;
 }
 
-Literal* Ast::evaluate(bool printResult) {
+std::vector<Literal*> Ast::evaluate(bool printResult, std::ostream &outputStream) {
   // perform evaluation recursively, starting at the root node
-  auto result = getRootNode()->evaluate(*this);
+  auto resultVector = getRootNode()->evaluate(*this);
 
-  // print result if flag is set
-  if (printResult) std::cout << (result == nullptr ? "void" : result->toString()) << std::endl;
+  // print result if flag 'printResult' is set
+  if (printResult) {
+    if (resultVector.empty()) {
+      outputStream << "void" << std::endl;
+    } else {
+      for (auto &resultLiteral : resultVector) outputStream << resultLiteral->toString() << std::endl;
+    }
+  }
 
-  return result;
+  return resultVector;
 }
 
-Literal* Ast::evaluateCircuit(const std::map<std::string, Literal*> &paramValues, bool printResult = false) {
+std::vector<Literal*> Ast::evaluateCircuit(const std::map<std::string, Literal*> &paramValues, bool printResult) {
   // ensure that circuit is not reversed
   if (isReversed()) {
     throw std::invalid_argument(
@@ -72,8 +78,8 @@ Literal* Ast::evaluateCircuit(const std::map<std::string, Literal*> &paramValues
   }
 
   // ensure that the provided number of parameters equals the number of required ones
-//  if (variableValuesForEvaluation.size() != varIdentifiersReqValue.size())
-//    throw std::invalid_argument("AST evaluation requires parameter value for all variables!");
+  if (variableValuesForEvaluation.size() != varIdentifiersReqValue.size())
+    throw std::invalid_argument("AST evaluation requires parameter value for all variables!");
 
   // Make sure that all variables collected previously have a defined value.
   // Note: On contrary to the sanity checks in evaluateAst(...), we cannot check the datatypes as we do not have
@@ -91,7 +97,7 @@ Literal* Ast::evaluateCircuit(const std::map<std::string, Literal*> &paramValues
   return evaluate(printResult);
 }
 
-Literal* Ast::evaluateAst(const std::map<std::string, Literal*> &paramValues, bool printResult = false) {
+std::vector<Literal*> Ast::evaluateAst(const std::map<std::string, Literal*> &paramValues, bool printResult) {
   // store param values into a temporary map
   variableValuesForEvaluation.clear();
   variableValuesForEvaluation = paramValues;

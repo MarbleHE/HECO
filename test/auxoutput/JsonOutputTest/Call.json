@@ -16,18 +16,20 @@
     "body": [
       {
         "type": "Return",
-        "value": {
-          "type": "BinaryExpr",
-          "leftOperand": {
-            "type": "Variable",
-            "identifier": "inputA"
-          },
-          "operator": "mult",
-          "rightOperand": {
-            "type": "LiteralInt",
-            "value": 32
+        "values": [
+          {
+            "type": "BinaryExpr",
+            "leftOperand": {
+              "type": "Variable",
+              "identifier": "inputA"
+            },
+            "operator": "mult",
+            "rightOperand": {
+              "type": "LiteralInt",
+              "value": 32
+            }
           }
-        }
+        ]
       }
     ],
     "params": [

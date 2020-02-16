@@ -83,9 +83,16 @@ struct EvalPrinter {
     }
   }
 
-  void printEvaluationResults(Literal* resultExpected, Literal* resultRewrittenAst) {
+  void printEvaluationResults(const std::vector<Literal*> &resultExpected,
+                              const std::vector<Literal*> &resultRewrittenAst) {
     if (flagPrintEvaluationResult) {
-      std::cout << "(" << *resultExpected << " / " << *resultRewrittenAst << ")" << std::endl;
+      std::cout << "( ";
+      for (auto &result : resultExpected) std::cout << result << ", ";
+      std::cout << "\b\b";
+      std::cout << " / ";
+      for (auto &result : resultRewrittenAst) std::cout << result << ", ";
+      std::cout << "\b\b";
+      std::cout << " )";
     }
   }
 
@@ -109,8 +116,8 @@ static void astOutputComparer(Ast &unmodifiedAst, Ast &rewrittenAst, unsigned in
     // generate new parameter values
     rng.randomizeValues(evalParams);
 
-    // evaluate both ASTs with previously generated params
-    Literal* resultExpected, * resultRewrittenAst;
+    // evaluate both ASTs with previously generated params using the appropriate evaluate function for ASTs or circuits
+    std::vector<Literal*> resultExpected, resultRewrittenAst;
     if (isCircuit) {
       resultExpected = unmodifiedAst.evaluateCircuit(evalParams, false);
       resultRewrittenAst = rewrittenAst.evaluateCircuit(evalParams, false);
@@ -119,15 +126,21 @@ static void astOutputComparer(Ast &unmodifiedAst, Ast &rewrittenAst, unsigned in
       resultRewrittenAst = rewrittenAst.evaluateAst(evalParams, false);
     }
 
+    // result plausability check
+    if (resultExpected.size() != resultRewrittenAst.size())
+      throw std::runtime_error("Number of arguments in expected result and actual result does not match.");
+
     // trigger printing of the current parameter set and the evaluation result
     if (evalPrinter) {
       evalPrinter->printCurrentParameterSet();
       evalPrinter->printEvaluationResults(resultExpected, resultRewrittenAst);
-      evalPrinter->printEndOfEvaluationTestRun();
+      EvalPrinter::printEndOfEvaluationTestRun();
     }
 
     // compare results of original and rewritten AST
-    ASSERT_EQ(*resultExpected, *resultRewrittenAst);
+    for (int idx = 0; idx < resultExpected.size(); ++idx) {
+      ASSERT_EQ(*resultExpected.at(idx), *resultRewrittenAst.at(idx));
+    }
   }
 }
 
@@ -199,15 +212,21 @@ static void circuitOutputComparer(Ast &unmodifiedAst, Ast &rewrittenAst, unsigne
       auto resultExpected = unmodifiedAst.evaluateCircuit(evalParams, false);
       auto resultRewrittenAst = rewrittenAst.evaluateCircuit(evalParams, false);
 
+      // result plausability check
+      if (resultExpected.size() != resultRewrittenAst.size())
+        throw std::runtime_error("Number of arguments in expected result and actual result does not match.");
+
       // trigger printing of the current parameter set and the evaluation result
       if (evalPrinter) {
         evalPrinter->printCurrentParameterSet();
         evalPrinter->printEvaluationResults(resultExpected, resultRewrittenAst);
-        evalPrinter->printEndOfEvaluationTestRun();
+        EvalPrinter::printEndOfEvaluationTestRun();
       }
 
-      // compare results of both ASTs for current param set
-      ASSERT_EQ(*resultExpected, *resultRewrittenAst);
+      // compare results of original and rewritten AST
+      for (int idx = 0; idx < resultExpected.size(); ++idx) {
+        ASSERT_EQ(*resultExpected.at(idx), *resultRewrittenAst.at(idx));
+      }
     }
   }
 }

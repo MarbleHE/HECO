@@ -1,5 +1,3 @@
-
-#include <utility>
 #include "FunctionParameter.h"
 
 void to_json(json &j, const FunctionParameter &funcParam) {

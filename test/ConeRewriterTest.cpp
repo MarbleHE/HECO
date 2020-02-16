@@ -109,9 +109,9 @@ TEST_F(ConeRewriterFixture, simpleStaticConeTest) { /* NOLINT */
   // check evaluation results by verifying that...
   // 1. the circuit in general correctly evaluates by comparison to a trivial implementation
   SetUp(inputValues);
-  ASSERT_EQ(*resultOriginal->castTo<LiteralBool>(), LiteralBool(computeResultForCircuit19()));
+  ASSERT_EQ(*resultOriginal.front()->castTo<LiteralBool>(), LiteralBool(computeResultForCircuit19()));
   // 2. the rewriting does not modify the AST's semantics compared to the original AST (-> logical equivalence)
-  ASSERT_EQ(*resultOriginal->castTo<LiteralBool>(), *resultRewritten->castTo<LiteralBool>());
+  ASSERT_EQ(*resultOriginal.front()->castTo<LiteralBool>(), *resultRewritten.front()->castTo<LiteralBool>());
 }
 
 TEST_F(ConeRewriterFixture, evaluationBasedTestForExtendedCircuit) { /* NOLINT */
