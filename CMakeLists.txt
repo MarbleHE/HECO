@@ -66,6 +66,7 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/ast/While.cpp
         ${ast_optimizer_SOURCE_DIR}/src/optimizer/ConeRewriter.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/MultiplicativeDepthCalculator.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/utilities/NodeUtils.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/Scope.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/MultDepthVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/MultRewriteVisitor.cpp

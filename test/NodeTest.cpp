@@ -1,17 +1,18 @@
 #include "AbstractNode.h"
+#include "NodeUtils.h"
 #include "Variable.h"
 #include "LiteralBool.h"
 #include "gtest/gtest.h"
 
 TEST(NodeTest, rewriteMultiInputGateToBinaryGatesChain_emptyInputs) { /* NOLINT */
   std::vector<AbstractNode*> inputs{};
-  ASSERT_THROW(AbstractNode::rewriteMultiInputGateToBinaryGatesChain(inputs, OpSymb::logicalAnd), std::invalid_argument);
+  ASSERT_THROW(rewriteMultiInputGateToBinaryGatesChain(inputs, OpSymb::logicalAnd), std::invalid_argument);
 }
 
 TEST(NodeTest, rewriteMultiInputGateToBinaryGatesChain_oneInputAND) { /* NOLINT */
   std::vector<AbstractNode*> inputs{new Variable("alpha")};
   OpSymb::LogCompOp gateType = OpSymb::logicalAnd;
-  auto result = AbstractNode::rewriteMultiInputGateToBinaryGatesChain(inputs, gateType);
+  auto result = rewriteMultiInputGateToBinaryGatesChain(inputs, gateType);
 
   // create new AST for evaluation
   Ast ast(result.back());
@@ -30,7 +31,7 @@ TEST(NodeTest, rewriteMultiInputGateToBinaryGatesChain_oneInputAND) { /* NOLINT 
 TEST(NodeTest, rewriteMultiInputGateToBinaryGatesChain_oneInputXOR) { /* NOLINT */
   std::vector<AbstractNode*> inputs{new Variable("alpha")};
   OpSymb::LogCompOp gateType = OpSymb::logicalXor;
-  auto result = AbstractNode::rewriteMultiInputGateToBinaryGatesChain(inputs, gateType);
+  auto result = rewriteMultiInputGateToBinaryGatesChain(inputs, gateType);
 
   // create new AST for evaluation
   Ast ast(result.back());
@@ -49,7 +50,7 @@ TEST(NodeTest, rewriteMultiInputGateToBinaryGatesChain_oneInputXOR) { /* NOLINT 
 TEST(NodeTest, rewriteMultiInputGateToBinaryGatesChain_oneInputUnsupportedException) { /* NOLINT */
   std::vector<AbstractNode*> inputs{new Variable("alpha")};
   OpSymb::LogCompOp gateType = OpSymb::logicalOr;
-  ASSERT_THROW(AbstractNode::rewriteMultiInputGateToBinaryGatesChain(inputs, gateType),
+  ASSERT_THROW(rewriteMultiInputGateToBinaryGatesChain(inputs, gateType),
                std::runtime_error);
 }
 
@@ -59,7 +60,7 @@ TEST(NodeTest, rewriteMultiInputGateToBinaryGatesChain_multipleInputs) { /* NOLI
                             new Variable("gamma"),
                             new Variable("delta")};
   OpSymb::LogCompOp gateType = OpSymb::logicalXor;
-  auto result = AbstractNode::rewriteMultiInputGateToBinaryGatesChain(inputs, gateType);
+  auto result = rewriteMultiInputGateToBinaryGatesChain(inputs, gateType);
 
   // create new AST for evaluation
   Ast ast(result.back());

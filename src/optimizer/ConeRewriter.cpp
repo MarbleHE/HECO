@@ -5,6 +5,7 @@
 #include "LogicalExpr.h"
 #include "Return.h"
 #include "Function.h"
+#include "NodeUtils.h"
 
 ConeRewriter::ConeRewriter(Ast *ast)
     : ast(ast), mdc(MultiplicativeDepthCalculator{*ast}) {
@@ -532,7 +533,7 @@ void ConeRewriter::rewriteCones(Ast &astToRewrite, const std::vector<AbstractNod
       } else if (inputsY1ToYm.size() > 1) {  // otherwise there are inputs y_1, y_2, ..., y_m
         // otherwise build XOR chain of inputs and connect last one as input of u_y
         std::vector<AbstractNode *> yXorChain =
-            AbstractNode::rewriteMultiInputGateToBinaryGatesChain(inputsY1ToYm, OpSymb::logicalXor);
+            rewriteMultiInputGateToBinaryGatesChain(inputsY1ToYm, OpSymb::logicalXor);
         u_y_rightOperand = yXorChain.back()->castTo<AbstractExpr>();
       }
       auto *u_y = new LogicalExpr(a_t->castTo<AbstractExpr>(), OpSymb::logicalAnd, u_y_rightOperand);
@@ -568,7 +569,7 @@ void ConeRewriter::rewriteCones(Ast &astToRewrite, const std::vector<AbstractNod
 
     // convert multi-input XOR into binary XOR nodes
     std::vector<AbstractNode *> xorFinalGate =
-        AbstractNode::rewriteMultiInputGateToBinaryGatesChain(finalXorInputs, OpSymb::logicalXor);
+        rewriteMultiInputGateToBinaryGatesChain(finalXorInputs, OpSymb::logicalXor);
     for (auto &gate : xorFinalGate) { gate->getUniqueNodeId(); }
 
     // remove coneEnd
