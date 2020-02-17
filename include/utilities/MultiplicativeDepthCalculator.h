@@ -6,8 +6,8 @@
 
 class MultiplicativeDepthCalculator {
 private:
-    std::map<std::string, int> multiplicativeDepths{};
-    std::map<std::string, int> multiplicativeDepthsReversed{};
+    std::unordered_map<std::string, int> multiplicativeDepths{};
+    std::unordered_map<std::string, int> multiplicativeDepthsReversed{};
     int maximumMultiplicativeDepth{};
 
 public:

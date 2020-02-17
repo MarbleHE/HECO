@@ -24,7 +24,7 @@ public:
     explicit Datatype(TYPES di, bool isEncrypted) : val(di), isEncrypted(isEncrypted) {}
 
     explicit Datatype(const std::string &type) {
-        static const std::map<std::string, TYPES> string_to_types = {
+        static const std::unordered_map<std::string, TYPES> string_to_types = {
                 {"int",    TYPES::INT},
                 {"float",  TYPES::FLOAT},
                 {"string", TYPES::STRING},

@@ -49,7 +49,8 @@ std::vector<Literal *> Ast::evaluate(bool printResult, std::ostream &outputStrea
   return resultVector;
 }
 
-std::vector<Literal *> Ast::evaluateCircuit(const std::map<std::string, Literal *> &paramValues, bool printResult) {
+std::vector<Literal *>
+Ast::evaluateCircuit(const std::unordered_map<std::string, Literal *> &paramValues, bool printResult) {
   // ensure that circuit is not reversed
   if (isReversed()) {
     throw std::invalid_argument(
@@ -97,7 +98,8 @@ std::vector<Literal *> Ast::evaluateCircuit(const std::map<std::string, Literal 
   return evaluate(printResult);
 }
 
-std::vector<Literal *> Ast::evaluateAst(const std::map<std::string, Literal *> &paramValues, bool printResult) {
+std::vector<Literal *>
+Ast::evaluateAst(const std::unordered_map<std::string, Literal *> &paramValues, bool printResult) {
   // store param values into a temporary map
   variableValuesForEvaluation.clear();
   variableValuesForEvaluation = paramValues;

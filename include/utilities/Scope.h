@@ -9,7 +9,7 @@
 
 class Scope {
 private:
-    std::map<std::string, Scope *> innerScopes;
+    std::unordered_map<std::string, Scope *> innerScopes;
     Scope *outerScope;
     std::string scopeIdentifier;
     std::vector<AbstractStatement *> scopeStatements;

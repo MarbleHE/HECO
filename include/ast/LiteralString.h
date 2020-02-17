@@ -33,7 +33,7 @@ public:
 
     bool operator!=(const LiteralString &rhs) const;
 
-    void addLiteralValue(std::string identifier, std::map<std::string, Literal *> &paramsMap) override;
+    void addLiteralValue(std::string identifier, std::unordered_map<std::string, Literal *> &paramsMap) override;
 
     void setValue(const std::string &newValue);
 

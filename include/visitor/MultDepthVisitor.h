@@ -11,7 +11,7 @@ class MultDepthVisitor : public Visitor {
 private:
     /// depthsPerVariable stores the depth for each variable (std::string is the associated variable identifier) during
     /// the ASTs traversal. At the end of the traversal, the structure contains the maximum depth for each variable.
-    std::map<std::string, int> depthsPerVariable;
+    std::unordered_map<std::string, int> depthsPerVariable;
     /// depthsPerStatement stores the depth for each statement with its corresponding assignment target (std::string)
     /// and its current depth (int). It allows to determine the depth for each statement in the AST.
     std::map<AbstractStatement *, std::pair<std::string, int>> depthsPerStatement;

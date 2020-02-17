@@ -37,7 +37,7 @@ public:
 
     bool supportsDatatype(Datatype &datatype) override;
 
-    void addLiteralValue(std::string identifier, std::map<std::string, Literal *> &paramsMap) override;
+    void addLiteralValue(std::string identifier, std::unordered_map<std::string, Literal *> &paramsMap) override;
 
     void setRandomValue(RandLiteralGen &rlg) override;
 

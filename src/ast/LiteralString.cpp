@@ -42,7 +42,7 @@ bool LiteralString::operator!=(const LiteralString &rhs) const {
   return !(rhs == *this);
 }
 
-void LiteralString::addLiteralValue(std::string identifier, std::map<std::string, Literal *> &paramsMap) {
+void LiteralString::addLiteralValue(std::string identifier, std::unordered_map<std::string, Literal *> &paramsMap) {
   paramsMap.emplace(identifier, this);
 }
 

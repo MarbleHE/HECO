@@ -54,7 +54,7 @@ std::vector<Literal *> Call::evaluate(Ast &ast) {
   // create vector to store parameter values for Function evaluation
   // - std::string stores the variable's identifier
   // - Literal* stores the variable's passed value (as it can be an expression too, we need to evaluate it first)
-  std::map<std::string, Literal *> paramValues;
+  std::unordered_map<std::string, Literal *> paramValues;
 
   for (size_t i = 0; i < this->getFunc()->getParams().size(); i++) {
     // validation: make sure that datatypes in Call and Function are equal

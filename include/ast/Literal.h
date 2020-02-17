@@ -24,7 +24,7 @@ public:
 
     bool operator!=(const Literal &rhs) const;
 
-    virtual void addLiteralValue(std::string identifier, std::map<std::string, Literal *> &paramsMap) = 0;
+    virtual void addLiteralValue(std::string identifier, std::unordered_map<std::string, Literal *> &paramsMap) = 0;
 
     virtual void setRandomValue(RandLiteralGen &rlg) = 0;
 

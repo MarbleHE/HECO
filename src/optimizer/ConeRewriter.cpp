@@ -268,7 +268,7 @@ std::vector<Node *> ConeRewriter::getAndCriticalCircuit(std::vector<Node *> delt
   }), delta.end());
 
   // duplicate critical nodes to create new circuit C_{AND} as we do not want to modify the original circuit
-  std::map<std::string, Node *> cAndMap;
+  std::unordered_map<std::string, Node *> cAndMap;
   std::vector<Node *> cAndResultCkt;
   for (auto &v : delta) {
     // note that cloneFlat() does not copy the links to parents and children

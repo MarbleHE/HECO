@@ -86,7 +86,7 @@ public:
         return new LiteralFloat(getRandomFloat());
     }
 
-    void randomizeValues(const std::map<std::string, Literal *> &vals) {
+    void randomizeValues(const std::unordered_map<std::string, Literal *> &vals) {
         // ask every literal to generate a new value using the passed RandNumGen instance by overwriting the existing value
         for (auto &[identifier, lit] : vals) lit->setRandomValue(*this);
     }

@@ -55,7 +55,7 @@ bool LiteralInt::operator!=(const LiteralInt &rhs) const {
   return !(rhs == *this);
 }
 
-void LiteralInt::addLiteralValue(std::string identifier, std::map<std::string, Literal *> &paramsMap) {
+void LiteralInt::addLiteralValue(std::string identifier, std::unordered_map<std::string, Literal *> &paramsMap) {
   paramsMap.emplace(identifier, this);
 }
 

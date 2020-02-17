@@ -17,7 +17,7 @@ private:
 
     /// This map stores the values passed to evaluateAst or evaluateCircuit for variables in the computation and serves
     /// as lookup table and central storage during the evaluation process.
-    std::map<std::string, Literal *> variableValuesForEvaluation;
+    std::unordered_map<std::string, Literal *> variableValuesForEvaluation;
 
 public:
     Ast();
@@ -47,10 +47,11 @@ public:
 
     void updateVarValue(const std::string &variableIdentifier, Literal *newValue);
 
-    std::vector<Literal *> evaluateAst(const std::map<std::string, Literal *> &paramValues, bool printResult = false);
+    std::vector<Literal *>
+    evaluateAst(const std::unordered_map<std::string, Literal *> &paramValues, bool printResult = false);
 
     std::vector<Literal *>
-    evaluateCircuit(const std::map<std::string, Literal *> &paramValues, bool printResult = false);
+    evaluateCircuit(const std::unordered_map<std::string, Literal *> &paramValues, bool printResult = false);
 
     /// Checks whether the AST (more specifically, all of the AST's edges) are reversed.
     /// \return True iff all edges of the AST are reversed, otherwise false.

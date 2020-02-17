@@ -8,7 +8,7 @@
 
 class ConeRewriterFixture : public ::testing::Test {
  private:
-  std::map<std::string, Literal*>* evaluationParameters;
+  std::unordered_map<std::string, Literal *> *evaluationParameters;
 
  protected:
   ConeRewriterFixture() : evaluationParameters(nullptr) {}
@@ -21,9 +21,9 @@ class ConeRewriterFixture : public ::testing::Test {
 
   void SetUp() override {}
 
-  virtual void SetUp(std::map<std::string, Literal*> &evalParams) {
-    evaluationParameters = &evalParams;
-  }
+    virtual void SetUp(std::unordered_map<std::string, Literal *> &evalParams) {
+      evaluationParameters = &evalParams;
+    }
 
   bool getBoolValue(const std::string &evalParamsKey) {
     try {
@@ -90,17 +90,17 @@ TEST_F(ConeRewriterFixture, simpleStaticConeTest) { /* NOLINT */
   // check if rewritten circuit is logically equivalent to original one
   Ast* originalAst = generateAst(DEMO_CIRCUIT_NO);
 
-  std::map<std::string, Literal*> inputValues =
-      {{std::string("a_1^(1)_left"), new LiteralBool(true)},
+  std::unordered_map<std::string, Literal *> inputValues =
+      {{std::string("a_1^(1)_left"),  new LiteralBool(true)},
        {std::string("a_1^(1)_right"), new LiteralBool(true)},
-       {std::string("a_2^(1)_left"), new LiteralBool(false)},
+       {std::string("a_2^(1)_left"),  new LiteralBool(false)},
        {std::string("a_2^(1)_right"), new LiteralBool(true)},
-       {std::string("a_1^(2)_left"), new LiteralBool(true)},
+       {std::string("a_1^(2)_left"),  new LiteralBool(true)},
        {std::string("a_1^(2)_right"), new LiteralBool(false)},
-       {std::string("a_2^(2)_left"), new LiteralBool(true)},
+       {std::string("a_2^(2)_left"),  new LiteralBool(true)},
        {std::string("a_2^(2)_right"), new LiteralBool(true)},
-       {std::string("y_1"), new LiteralBool(true)},
-       {std::string("a_t"), new LiteralBool(true)}};
+       {std::string("y_1"),           new LiteralBool(true)},
+       {std::string("a_t"),           new LiteralBool(true)}};
 
   // evaluate both ASTs
   auto resultOriginal = originalAst->evaluateCircuit(inputValues, false);
@@ -133,17 +133,17 @@ TEST_F(ConeRewriterFixture, evaluationBasedTestForExtendedCircuit) { /* NOLINT *
 
   // define expected input parameters and some arbitrary input values
   // (values will be overwritten by circuitOutputComparer)
-  std::map<std::string, Literal*> inputValues =
-      {{std::string("a_1^(1)_left"), new LiteralBool(true)},
+  std::unordered_map<std::string, Literal *> inputValues =
+      {{std::string("a_1^(1)_left"),  new LiteralBool(true)},
        {std::string("a_1^(1)_right"), new LiteralBool(true)},
-       {std::string("a_2^(1)_left"), new LiteralBool(false)},
+       {std::string("a_2^(1)_left"),  new LiteralBool(false)},
        {std::string("a_2^(1)_right"), new LiteralBool(true)},
-       {std::string("a_1^(2)_left"), new LiteralBool(true)},
+       {std::string("a_1^(2)_left"),  new LiteralBool(true)},
        {std::string("a_1^(2)_right"), new LiteralBool(false)},
-       {std::string("a_2^(2)_left"), new LiteralBool(true)},
+       {std::string("a_2^(2)_left"),  new LiteralBool(true)},
        {std::string("a_2^(2)_right"), new LiteralBool(true)},
-       {std::string("y_1"), new LiteralBool(true)},
-       {std::string("a_t"), new LiteralBool(true)}};
+       {std::string("y_1"),           new LiteralBool(true)},
+       {std::string("a_t"),           new LiteralBool(true)}};
 
   // perform evaluation-based testing on original and rewritten circuit
   Ast* originalAst = generateAst(DEMO_CIRCUIT_NO);
@@ -170,17 +170,17 @@ TEST_F(ConeRewriterFixture, evaluationBasedTestForExtendedCircuitWithMultipleInp
   // define expected input parameters and some arbitrary input values
   // (values will be overwritten by circuitOutputComparer)
   bool anyBool = false;
-  std::map<std::string, Literal*> inputValues =
-      {{std::string("a_1^(1)_left"), new LiteralBool(anyBool)},
+  std::unordered_map<std::string, Literal *> inputValues =
+      {{std::string("a_1^(1)_left"),  new LiteralBool(anyBool)},
        {std::string("a_1^(1)_right"), new LiteralBool(anyBool)},
-       {std::string("a_2^(1)_left"), new LiteralBool(anyBool)},
+       {std::string("a_2^(1)_left"),  new LiteralBool(anyBool)},
        {std::string("a_2^(1)_right"), new LiteralBool(anyBool)},
-       {std::string("a_1^(2)_left"), new LiteralBool(anyBool)},
+       {std::string("a_1^(2)_left"),  new LiteralBool(anyBool)},
        {std::string("a_1^(2)_right"), new LiteralBool(anyBool)},
-       {std::string("a_2^(2)_left"), new LiteralBool(anyBool)},
+       {std::string("a_2^(2)_left"),  new LiteralBool(anyBool)},
        {std::string("a_2^(2)_right"), new LiteralBool(anyBool)},
-       {std::string("y_1"), new LiteralBool(anyBool)},
-       {std::string("y_2"), new LiteralBool(anyBool)},
+       {std::string("y_1"),           new LiteralBool(anyBool)},
+       {std::string("y_2"),           new LiteralBool(anyBool)},
        {std::string("y_3"), new LiteralBool(anyBool)},
        {std::string("a_t"), new LiteralBool(anyBool)}};
 
@@ -209,17 +209,17 @@ TEST_F(ConeRewriterFixture, evaluationBasedTestForCircuitWithTwoCones) { /* NOLI
   // define expected input parameters and some arbitrary input values
   // (values will be overwritten by circuitOutputComparer)
   bool anyBool = false;
-  std::map<std::string, Literal*> inputValues = {
-      {std::string("a_1^(1)_left"), new LiteralBool(anyBool)},
+  std::unordered_map<std::string, Literal *> inputValues = {
+      {std::string("a_1^(1)_left"),  new LiteralBool(anyBool)},
       {std::string("a_1^(1)_right"), new LiteralBool(anyBool)},
-      {std::string("a_2^(1)_left"), new LiteralBool(anyBool)},
+      {std::string("a_2^(1)_left"),  new LiteralBool(anyBool)},
       {std::string("a_2^(1)_right"), new LiteralBool(anyBool)},
-      {std::string("a_1^(2)_left"), new LiteralBool(anyBool)},
+      {std::string("a_1^(2)_left"),  new LiteralBool(anyBool)},
       {std::string("a_1^(2)_right"), new LiteralBool(anyBool)},
-      {std::string("a_2^(2)_left"), new LiteralBool(anyBool)},
+      {std::string("a_2^(2)_left"),  new LiteralBool(anyBool)},
       {std::string("a_2^(2)_right"), new LiteralBool(anyBool)},
-      {std::string("y_1"), new LiteralBool(anyBool)},
-      {std::string("y_2"), new LiteralBool(anyBool)},
+      {std::string("y_1"),           new LiteralBool(anyBool)},
+      {std::string("y_2"),           new LiteralBool(anyBool)},
       {std::string("y_3"), new LiteralBool(anyBool)},
       {std::string("y_4"), new LiteralBool(anyBool)},
       {std::string("a_t"), new LiteralBool(anyBool)},
