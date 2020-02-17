@@ -93,7 +93,7 @@ void generateDemoOne(Ast &ast) {
   func->addStatement(new VarDecl("a", 4));
 
   // int k;
-  func->addStatement(new VarDecl("k", types::Int, nullptr));
+  func->addStatement(new VarDecl("k", Types::INT, nullptr));
 
   // if ( x > 32 ) { k = x * a; } else { k = (x * a) + 42; }
   func->addStatement(new If(
@@ -129,19 +129,19 @@ void generateDemoTwo(Ast &ast) {
 
   // int randInt = rand() % 42;
   func->addStatement(
-          new VarDecl("randInt", types::Int,
-                      new BinaryExpr(
-                              new CallExternal("std::rand"),
-                              OpSymb::BinaryOp::modulo,
-                              new LiteralInt(42))));
+      new VarDecl("randInt", Types::INT,
+                  new BinaryExpr(
+                      new CallExternal("std::rand"),
+                      OpSymb::BinaryOp::modulo,
+                      new LiteralInt(42))));
 
   // bool b = encryptedA < 2;
   func->addStatement(
-          new VarDecl("b", types::Bool,
-                      new LogicalExpr(
-                              new Variable("encryptedA"),
-                              OpSymb::LogCompOp::smaller,
-                              new LiteralInt(2))));
+      new VarDecl("b", Types::BOOL,
+                  new LogicalExpr(
+                      new Variable("encryptedA"),
+                      OpSymb::LogCompOp::smaller,
+                      new LiteralInt(2))));
 
   // int sum = 0;
   func->addStatement(new VarDecl("sum", 0));
@@ -175,7 +175,7 @@ void generateDemoTwo(Ast &ast) {
                   OpSymb::BinaryOp::subtraction,
                   new LiteralInt(1)))})));
 
-  // String outStr = "Computation finished!";
+  // STRING outStr = "Computation finished!";
   func->addStatement(new VarDecl("outStr", "Computation finished!"));
 
   // printf(outStr);
@@ -203,11 +203,11 @@ void generateDemoThree(Ast &ast) {
 
   // int result = a * b;
   func->addStatement(
-          new VarDecl("result", types::Int,
-                      new BinaryExpr(
-                              new Variable("a"),
-                              OpSymb::BinaryOp::multiplication,
-                              new Variable("b"))));
+      new VarDecl("result", Types::INT,
+                  new BinaryExpr(
+                      new Variable("a"),
+                      OpSymb::BinaryOp::multiplication,
+                      new Variable("b"))));
 
   // result = result * c;
   func->addStatement(
@@ -233,11 +233,11 @@ void generateDemoFour(Ast &ast) {
 
   // int result = a * b;
   func->addStatement(
-          new VarDecl("result", types::Int,
-                      new BinaryExpr(
-                              new Variable("a"),
-                              OpSymb::BinaryOp::multiplication,
-                              new Variable("b"))));
+      new VarDecl("result", Types::INT,
+                  new BinaryExpr(
+                      new Variable("a"),
+                      OpSymb::BinaryOp::multiplication,
+                      new Variable("b"))));
 
   // if (4 > 3) {
   //   int exampleVal = 3
@@ -261,14 +261,14 @@ void generateDemoFive(Ast &ast) {
   Function* func = dynamic_cast<Function*>(ast.setRootNode(new Function("multiMult")));
 
   // int result = (inA * (inB * inC));
-    func->addStatement(new VarDecl("result", types::Int,
-                                   new BinaryExpr(
-                                           new Variable("inA"),
-                                           OpSymb::multiplication,
-                                           new BinaryExpr(
-                                                   new Variable("inB"),
-                                                   OpSymb::multiplication,
-                                                   new Variable("inC")))));
+  func->addStatement(new VarDecl("result", Types::INT,
+                                 new BinaryExpr(
+                                     new Variable("inA"),
+                                     OpSymb::multiplication,
+                                     new BinaryExpr(
+                                         new Variable("inB"),
+                                         OpSymb::multiplication,
+                                         new Variable("inC")))));
 
   // return result;
   func->addStatement(new Return(new Variable("result")));
@@ -280,16 +280,16 @@ void generateDemoSix(Ast &ast) {
   Function* func = dynamic_cast<Function*>(ast.setRootNode(new Function("multiMult")));
 
   // int result = (inZ * (inA * (inB * inC)));
-    func->addStatement(new VarDecl("result", types::Int,
-                                   new BinaryExpr(new Variable("inZ"),
-                                                  OpSymb::multiplication,
-                                                  new BinaryExpr(
-                                                          new Variable("inA"),
-                                                          OpSymb::multiplication,
-                                                          new BinaryExpr(
-                                                                  new Variable("inB"),
-                                                                  OpSymb::multiplication,
-                                                                  new Variable("inC"))))));
+  func->addStatement(new VarDecl("result", Types::INT,
+                                 new BinaryExpr(new Variable("inZ"),
+                                                OpSymb::multiplication,
+                                                new BinaryExpr(
+                                                    new Variable("inA"),
+                                                    OpSymb::multiplication,
+                                                    new BinaryExpr(
+                                                        new Variable("inB"),
+                                                        OpSymb::multiplication,
+                                                        new Variable("inC"))))));
 
 
   // return result;
@@ -304,11 +304,11 @@ void generateDemoSeven(Ast &ast) {
 
   // int sum = encryptedA + encryptedB;
   func->addStatement(
-          new VarDecl("sum", types::Int,
-                      new BinaryExpr(
-                              new Variable("encryptedA"),
-                              OpSymb::BinaryOp::addition,
-                              new Variable("encryptedB"))));
+      new VarDecl("sum", Types::INT,
+                  new BinaryExpr(
+                      new Variable("encryptedA"),
+                      OpSymb::BinaryOp::addition,
+                      new Variable("encryptedB"))));
 
   // return sum;
   func->addStatement(

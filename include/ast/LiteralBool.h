@@ -6,45 +6,45 @@
 #include <map>
 
 class LiteralBool : public Literal {
-private:
-    bool value;
+ private:
+  bool value;
 
-    Node *createClonedNode(bool keepOriginalUniqueNodeId) override;
+  Node *createClonedNode(bool keepOriginalUniqueNodeId) override;
 
-public:
-    explicit LiteralBool(bool value);
+ public:
+  explicit LiteralBool(bool value);
 
-    ~LiteralBool() override;
+  ~LiteralBool() override;
 
-    [[nodiscard]] json toJson() const override;
+  [[nodiscard]] json toJson() const override;
 
-    void accept(Visitor &v) override;
+  void accept(Visitor &v) override;
 
-    [[nodiscard]] bool getValue() const;
+  [[nodiscard]] bool getValue() const;
 
-    [[nodiscard]] std::string getTextValue() const;
+  [[nodiscard]] std::string getTextValue() const;
 
-    [[nodiscard]] std::string getNodeName() const override;
+  [[nodiscard]] std::string getNodeName() const override;
 
-    std::vector<Literal *> evaluate(Ast &ast) override;
+  std::vector<Literal *> evaluate(Ast &ast) override;
 
-    bool operator==(const LiteralBool &rhs) const;
+  bool operator==(const LiteralBool &rhs) const;
 
-    bool operator!=(const LiteralBool &rhs) const;
+  bool operator!=(const LiteralBool &rhs) const;
 
-    void addLiteralValue(std::string identifier, std::unordered_map<std::string, Literal *> &paramsMap) override;
+  void addLiteralValue(std::string identifier, std::unordered_map<std::string, Literal *> &paramsMap) override;
 
-    void setRandomValue(RandLiteralGen &rlg) override;
+  void setRandomValue(RandLiteralGen &rlg) override;
 
-    void setValue(bool newValue);
+  void setValue(bool newValue);
 
-    [[nodiscard]] std::string toString() const override;
+  [[nodiscard]] std::string toString() const override;
 
-    bool supportsDatatype(Datatype &datatype) override;
+  bool supportsDatatype(Datatype &datatype) override;
 
-    void print(std::ostream &str) const override;
+  void print(std::ostream &str) const override;
 
-    bool supportsCircuitMode() override;
+  bool supportsCircuitMode() override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_LITERALBOOL_H

@@ -36,30 +36,30 @@ bool Operator::isUndefined() {
 }
 
 bool Operator::operator==(const Operator &rhs) const {
-  return operatorString == rhs.operatorString;
+  return operatorString==rhs.operatorString;
 }
 
 bool Operator::operator!=(const Operator &rhs) const {
-  return !(rhs == *this);
+  return !(rhs==*this);
 }
 
 bool Operator::equals(std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp> op) const {
-  return this->getOperatorString() == OpSymb::getTextRepr(op);
+  return this->getOperatorString()==OpSymb::getTextRepr(op);
 }
 
 bool Operator::equals(OpSymb::BinaryOp op) const {
   return this->getOperatorString()
-         == OpSymb::getTextRepr(std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp>(op));
+      ==OpSymb::getTextRepr(std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp>(op));
 }
 
 bool Operator::equals(OpSymb::LogCompOp op) const {
   return this->getOperatorString()
-         == OpSymb::getTextRepr(std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp>(op));
+      ==OpSymb::getTextRepr(std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp>(op));
 }
 
 bool Operator::equals(OpSymb::UnaryOp op) const {
   return this->getOperatorString()
-         == OpSymb::getTextRepr(std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp>(op));
+      ==OpSymb::getTextRepr(std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp>(op));
 }
 
 Literal *Operator::applyOperator(Literal *rhs) {
@@ -102,7 +102,7 @@ Literal *Operator::applyOperator(LiteralFloat *) {
 }
 
 // -----------------
-// First call of applyOperator -> both types are unknown
+// First call of applyOperator -> both Types are unknown
 // -----------------
 Literal *Operator::applyOperator(Literal *lhs, Literal *rhs) {
   // determine Literal subtype of lhs
@@ -138,7 +138,7 @@ Literal *Operator::applyOperator(A *lhs, Literal *rhs) {
 }
 
 // -----------------
-// Third call of applyOperator -> both types are is known
+// Third call of applyOperator -> both Types are is known
 // -----------------
 
 Literal *Operator::applyOperator(LiteralFloat *lhs, LiteralFloat *rhs) {
@@ -147,8 +147,8 @@ Literal *Operator::applyOperator(LiteralFloat *lhs, LiteralFloat *rhs) {
 
   if (this->equals(OpSymb::addition)) return new LiteralFloat(lhsVal + rhsVal);
   else if (this->equals(OpSymb::subtraction)) return new LiteralFloat(lhsVal - rhsVal);
-  else if (this->equals(OpSymb::multiplication)) return new LiteralFloat(lhsVal * rhsVal);
-  else if (this->equals(OpSymb::division)) return new LiteralFloat(lhsVal / rhsVal);
+  else if (this->equals(OpSymb::multiplication)) return new LiteralFloat(lhsVal*rhsVal);
+  else if (this->equals(OpSymb::division)) return new LiteralFloat(lhsVal/rhsVal);
   else if (this->equals(OpSymb::modulo)) throw std::logic_error("MOD not supported for (float, float)");
 
   else if (this->equals(OpSymb::logicalAnd)) throw std::logic_error("AND not supported for (float, float)");
@@ -160,8 +160,8 @@ Literal *Operator::applyOperator(LiteralFloat *lhs, LiteralFloat *rhs) {
   else if (this->equals(OpSymb::greater)) return new LiteralBool(lhsVal > rhsVal);
   else if (this->equals(OpSymb::greaterEqual)) return new LiteralBool(lhsVal >= rhsVal);
 
-  else if (this->equals(OpSymb::equal)) return new LiteralBool(lhsVal == rhsVal);
-  else if (this->equals(OpSymb::unequal)) return new LiteralBool(lhsVal != rhsVal);
+  else if (this->equals(OpSymb::equal)) return new LiteralBool(lhsVal==rhsVal);
+  else if (this->equals(OpSymb::unequal)) return new LiteralBool(lhsVal!=rhsVal);
 
   else
     throw std::logic_error("applyOperator(LiteralBool* lhs, LiteralInt* rhs) failed!");
@@ -223,22 +223,22 @@ Literal *Operator::applyOperator(LiteralBool *lhs, LiteralInt *rhs) {
 
   if (this->equals(OpSymb::addition)) return new LiteralInt(lhsVal + rhsVal);
   else if (this->equals(OpSymb::subtraction)) return new LiteralInt(lhsVal - rhsVal);
-  else if (this->equals(OpSymb::multiplication)) return new LiteralInt(lhsVal * rhsVal);
-  else if (this->equals(OpSymb::division)) return new LiteralInt(lhsVal / rhsVal);
-  else if (this->equals(OpSymb::modulo)) return new LiteralInt(lhsVal % rhsVal);
+  else if (this->equals(OpSymb::multiplication)) return new LiteralInt(lhsVal*rhsVal);
+  else if (this->equals(OpSymb::division)) return new LiteralInt(lhsVal/rhsVal);
+  else if (this->equals(OpSymb::modulo)) return new LiteralInt(lhsVal%rhsVal);
 
   else if (this->equals(OpSymb::logicalAnd)) return new LiteralInt(lhsVal && rhsVal);
   else if (this->equals(OpSymb::logicalOr)) return new LiteralInt(lhsVal || rhsVal);
     // see https://stackoverflow.com/a/1596681/3017719
-  else if (this->equals(OpSymb::logicalXor)) return new LiteralInt(!(lhsVal) != !(rhsVal));
+  else if (this->equals(OpSymb::logicalXor)) return new LiteralInt(!(lhsVal)!=!(rhsVal));
 
   else if (this->equals(OpSymb::smaller)) return new LiteralBool(lhsVal < rhsVal);
   else if (this->equals(OpSymb::smallerEqual)) return new LiteralBool(lhsVal <= rhsVal);
   else if (this->equals(OpSymb::greater)) return new LiteralBool(lhsVal > rhsVal);
   else if (this->equals(OpSymb::greaterEqual)) return new LiteralBool(lhsVal >= rhsVal);
 
-  else if (this->equals(OpSymb::equal)) return new LiteralBool(lhsVal == rhsVal);
-  else if (this->equals(OpSymb::unequal)) return new LiteralBool(lhsVal != rhsVal);
+  else if (this->equals(OpSymb::equal)) return new LiteralBool(lhsVal==rhsVal);
+  else if (this->equals(OpSymb::unequal)) return new LiteralBool(lhsVal!=rhsVal);
 
   else
     throw std::logic_error("applyOperator(LiteralBool* lhs, LiteralInt* rhs) failed!");
@@ -250,22 +250,22 @@ Literal *Operator::applyOperator(LiteralInt *lhs, LiteralBool *rhs) {
 
   if (this->equals(OpSymb::addition)) return new LiteralInt(lhsVal + rhsVal);
   else if (this->equals(OpSymb::subtraction)) return new LiteralInt(lhsVal - rhsVal);
-  else if (this->equals(OpSymb::multiplication)) return new LiteralInt(lhsVal * rhsVal);
-  else if (this->equals(OpSymb::division)) return new LiteralInt(lhsVal / rhsVal);
-  else if (this->equals(OpSymb::modulo)) return new LiteralInt(lhsVal % rhsVal);
+  else if (this->equals(OpSymb::multiplication)) return new LiteralInt(lhsVal*rhsVal);
+  else if (this->equals(OpSymb::division)) return new LiteralInt(lhsVal/rhsVal);
+  else if (this->equals(OpSymb::modulo)) return new LiteralInt(lhsVal%rhsVal);
 
   else if (this->equals(OpSymb::logicalAnd)) return new LiteralInt(lhsVal && rhsVal);
   else if (this->equals(OpSymb::logicalOr)) return new LiteralInt(lhsVal || rhsVal);
     // see https://stackoverflow.com/a/1596681/3017719
-  else if (this->equals(OpSymb::logicalXor)) return new LiteralInt(!(lhsVal) != !(rhsVal));
+  else if (this->equals(OpSymb::logicalXor)) return new LiteralInt(!(lhsVal)!=!(rhsVal));
 
   else if (this->equals(OpSymb::smaller)) return new LiteralBool(lhsVal < rhsVal);
   else if (this->equals(OpSymb::smallerEqual)) return new LiteralBool(lhsVal <= rhsVal);
   else if (this->equals(OpSymb::greater)) return new LiteralBool(lhsVal > rhsVal);
   else if (this->equals(OpSymb::greaterEqual)) return new LiteralBool(lhsVal >= rhsVal);
 
-  else if (this->equals(OpSymb::equal)) return new LiteralBool(lhsVal == rhsVal);
-  else if (this->equals(OpSymb::unequal)) return new LiteralBool(lhsVal != rhsVal);
+  else if (this->equals(OpSymb::equal)) return new LiteralBool(lhsVal==rhsVal);
+  else if (this->equals(OpSymb::unequal)) return new LiteralBool(lhsVal!=rhsVal);
 
   else
     throw std::logic_error("applyOperator(LiteralBool* lhs, LiteralInt* rhs) failed!");
@@ -277,20 +277,20 @@ Literal *Operator::applyOperator(LiteralBool *lhs, LiteralBool *rhs) {
 
   if (this->equals(OpSymb::addition)) return new LiteralBool(lhsVal + rhsVal);
   else if (this->equals(OpSymb::subtraction)) return new LiteralBool(lhsVal - rhsVal);
-  else if (this->equals(OpSymb::multiplication)) return new LiteralBool(lhsVal * rhsVal);
-  else if (this->equals(OpSymb::division)) return new LiteralBool(lhsVal / rhsVal);
-  else if (this->equals(OpSymb::modulo)) return new LiteralBool(lhsVal % rhsVal);
+  else if (this->equals(OpSymb::multiplication)) return new LiteralBool(lhsVal*rhsVal);
+  else if (this->equals(OpSymb::division)) return new LiteralBool(lhsVal/rhsVal);
+  else if (this->equals(OpSymb::modulo)) return new LiteralBool(lhsVal%rhsVal);
 
   else if (this->equals(OpSymb::logicalAnd)) return new LiteralBool(lhsVal && rhsVal);
   else if (this->equals(OpSymb::logicalOr)) return new LiteralBool(lhsVal || rhsVal);
-  else if (this->equals(OpSymb::logicalXor) || this->equals(OpSymb::unequal)) return new LiteralBool(lhsVal != rhsVal);
+  else if (this->equals(OpSymb::logicalXor) || this->equals(OpSymb::unequal)) return new LiteralBool(lhsVal!=rhsVal);
 
   else if (this->equals(OpSymb::smaller)) return new LiteralBool(lhsVal < rhsVal);
   else if (this->equals(OpSymb::smallerEqual)) return new LiteralBool(lhsVal <= rhsVal);
   else if (this->equals(OpSymb::greater)) return new LiteralBool(lhsVal > rhsVal);
   else if (this->equals(OpSymb::greaterEqual)) return new LiteralBool(lhsVal >= rhsVal);
 
-  else if (this->equals(OpSymb::equal)) return new LiteralBool(lhsVal == rhsVal);
+  else if (this->equals(OpSymb::equal)) return new LiteralBool(lhsVal==rhsVal);
 
   else
     throw std::logic_error("applyOperator(LiteralBool* lhs, LiteralBool* rhs) failed!");
@@ -302,9 +302,9 @@ Literal *Operator::applyOperator(LiteralInt *lhs, LiteralInt *rhs) {
 
   if (this->equals(OpSymb::addition)) return new LiteralInt(lhsVal + rhsVal);
   else if (this->equals(OpSymb::subtraction)) return new LiteralInt(lhsVal - rhsVal);
-  else if (this->equals(OpSymb::multiplication)) return new LiteralInt(lhsVal * rhsVal);
-  else if (this->equals(OpSymb::division)) return new LiteralInt(lhsVal / rhsVal);
-  else if (this->equals(OpSymb::modulo)) return new LiteralInt(lhsVal % rhsVal);
+  else if (this->equals(OpSymb::multiplication)) return new LiteralInt(lhsVal*rhsVal);
+  else if (this->equals(OpSymb::division)) return new LiteralInt(lhsVal/rhsVal);
+  else if (this->equals(OpSymb::modulo)) return new LiteralInt(lhsVal%rhsVal);
 
   else if (this->equals(OpSymb::logicalAnd)) throw std::logic_error("AND not supported for (int, int)");
   else if (this->equals(OpSymb::logicalOr)) throw std::logic_error("OR not supported for (int, int)");
@@ -315,8 +315,8 @@ Literal *Operator::applyOperator(LiteralInt *lhs, LiteralInt *rhs) {
   else if (this->equals(OpSymb::greater)) return new LiteralBool(lhsVal > rhsVal);
   else if (this->equals(OpSymb::greaterEqual)) return new LiteralBool(lhsVal >= rhsVal);
 
-  else if (this->equals(OpSymb::equal)) return new LiteralBool(lhsVal == rhsVal);
-  else if (this->equals(OpSymb::unequal)) return new LiteralBool(lhsVal != rhsVal);
+  else if (this->equals(OpSymb::equal)) return new LiteralBool(lhsVal==rhsVal);
+  else if (this->equals(OpSymb::unequal)) return new LiteralBool(lhsVal!=rhsVal);
 
   else
     throw std::logic_error("applyOperator(LiteralInt* lhs, LiteralInt* rhs) failed!");

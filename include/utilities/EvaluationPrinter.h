@@ -6,36 +6,36 @@
 #include "Literal.h"
 
 class EvaluationPrinter {
-private:
-    // flags to configure the amount of data to be printed
-    bool flagPrintEachParameterSet{false};
-    bool flagPrintVariableHeaderOnceOnly{true};
-    bool flagPrintEvaluationResult{false};
+ private:
+  // flags to configure the amount of data to be printed
+  bool flagPrintEachParameterSet{false};
+  bool flagPrintVariableHeaderOnceOnly{true};
+  bool flagPrintEvaluationResult{false};
 
-    // the evaluation parameters associated to the test run
-    std::unordered_map<std::string, Literal *> *evaluationParameters;
+  // the evaluation parameters associated to the test run
+  std::unordered_map<std::string, Literal *> *evaluationParameters;
 
-    void ensureEvalParamsAreSet();
+  void ensureEvalParamsAreSet();
 
-public:
-    EvaluationPrinter();
+ public:
+  EvaluationPrinter();
 
-    EvaluationPrinter &setFlagPrintEachParameterSet(bool printEachParameterSet);
+  EvaluationPrinter &setFlagPrintEachParameterSet(bool printEachParameterSet);
 
-    EvaluationPrinter &setFlagPrintVariableHeaderOnceOnly(bool printVariableHeaderOnceOnly);
+  EvaluationPrinter &setFlagPrintVariableHeaderOnceOnly(bool printVariableHeaderOnceOnly);
 
-    EvaluationPrinter &setEvaluationParameters(std::unordered_map<std::string, Literal *> *evalParams);
+  EvaluationPrinter &setEvaluationParameters(std::unordered_map<std::string, Literal *> *evalParams);
 
-    EvaluationPrinter &setFlagPrintEvaluationResult(bool printEvaluationResult);
+  EvaluationPrinter &setFlagPrintEvaluationResult(bool printEvaluationResult);
 
-    void printHeader();
+  void printHeader();
 
-    void printCurrentParameterSet();
+  void printCurrentParameterSet();
 
-    void printEvaluationResults(const std::vector<Literal *> &resultExpected,
-                                const std::vector<Literal *> &resultRewrittenAst);
+  void printEvaluationResults(const std::vector<Literal *> &resultExpected,
+                              const std::vector<Literal *> &resultRewrittenAst);
 
-    static void printEndOfEvaluationTestRun();
+  static void printEndOfEvaluationTestRun();
 };
 
 #endif //AST_OPTIMIZER_EVALUATIONPRINTER_H

@@ -9,9 +9,9 @@
 #include "LiteralString.h"
 
 json Call::toJson() const {
-  json j = {{"type",      getNodeName()},
+  json j = {{"type", getNodeName()},
             {"arguments", this->arguments},
-            {"function",  this->func->toJson()}};
+            {"function", this->func->toJson()}};
   return j;
 }
 
@@ -43,7 +43,7 @@ Function *Call::getFunc() const {
 
 std::vector<Literal *> Call::evaluate(Ast &ast) {
   // validation: make sure that both Call and Function have the same number of arguments
-  if (this->getArguments().size() != this->getFunc()->getParams().size()) {
+  if (this->getArguments().size()!=this->getFunc()->getParams().size()) {
     std::stringstream ss;
     ss << "Number of arguments in Call and its called Function does not match (";
     ss << this->getArguments().size() << " vs. " << this->getFunc()->getParams().size();
@@ -60,7 +60,7 @@ std::vector<Literal *> Call::evaluate(Ast &ast) {
     // validation: make sure that datatypes in Call and Function are equal
     auto datatypeCall = *this->getArguments().at(i)->getDatatype();
     auto datatypeFunc = *this->getFunc()->getParams().at(i)->getDatatype();
-    if (datatypeCall != datatypeFunc)
+    if (datatypeCall!=datatypeFunc)
       throw std::logic_error("Datatype in Call and Function mismatch! Cannot continue."
                              "Note: Vector position (index) of parameters in Call and Function must be equal.");
 
@@ -76,7 +76,7 @@ std::vector<Literal *> Call::evaluate(Ast &ast) {
     // variable value: retrieve the variable's value to be passed to the callee
     Literal *lit = this->getArguments().at(i)->getValue()->evaluate(ast).front();
     // make sure that evaluate returns a Literal
-    if (lit == nullptr) throw std::logic_error("There's something wrong! Evaluate should return a single Literal.");
+    if (lit==nullptr) throw std::logic_error("There's something wrong! Evaluate should return a single Literal.");
 
     // store value of lit in vector paramValues with its variable identifier
     // this is to be used to evaluate the Function called by Call

@@ -24,6 +24,14 @@ endif ()
 # TARGET: testing
 ##############################
 
+include_directories(
+        ${ast_optimizer_SOURCE_DIR}/include/ast
+        ${ast_optimizer_SOURCE_DIR}/include/optimizer
+        ${ast_optimizer_SOURCE_DIR}/include/utilities
+        ${ast_optimizer_SOURCE_DIR}/include/visitor
+        ${ast_optimizer_SOURCE_DIR}/examples
+        ${ast_optimizer_SOURCE_DIR}/test)
+
 set(TEST_FILES
         BinaryExprTest.cpp
         JsonOutputTest.cpp
@@ -39,7 +47,8 @@ set(TEST_FILES
         ConeRewriterTest.cpp
         LiteralTest.cpp
         NodeTest.cpp
-        NodeCloneRecursiveDeepTest.cpp)
+        NodeCloneRecursiveDeepTest.cpp
+        AstSimplificationTests.cpp)
 
 add_executable(testing-all
         ${TEST_FILES})

@@ -26,7 +26,7 @@ class NodeCloneTestFixture : public ::testing::Test {
  protected:
   NodeCloneTestFixture() = default;
 
-  static void assertNodeAttributes(bool keepOriginalUniqueId, Node* original, Node* clone) {
+  static void assertNodeAttributes(bool keepOriginalUniqueId, Node *original, Node *clone) {
     if (keepOriginalUniqueId) {
       ASSERT_EQ(original->getUniqueNodeId(), clone->getUniqueNodeId());
     } else {
@@ -39,7 +39,7 @@ class NodeCloneTestFixture : public ::testing::Test {
 };
 
 TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_BinaryExpr) {  /* NOLINT */
-  const bool KEEP_ORIGINAL_ID = true;
+  const bool keepOriginalId = true;
 
   // create a new binary expression
   auto lhsOperand = new LiteralInt(0);
@@ -47,10 +47,10 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_BinaryExpr) {  /* NOLINT */
   auto rhsOperand = new LiteralInt(987);
   auto binaryExpression = new BinaryExpr(lhsOperand, operatore, rhsOperand);
   // clone the logical expression
-  auto clonedBinaryExprAsNode = binaryExpression->cloneRecursiveDeep(KEEP_ORIGINAL_ID);
+  auto clonedBinaryExprAsNode = binaryExpression->cloneRecursiveDeep(keepOriginalId);
   auto clonedBinaryExprCasted = clonedBinaryExprAsNode->castTo<BinaryExpr>();
   // test if all fields belonging to Node class were copied
-  assertNodeAttributes(KEEP_ORIGINAL_ID, binaryExpression, clonedBinaryExprAsNode);
+  assertNodeAttributes(keepOriginalId, binaryExpression, clonedBinaryExprAsNode);
 
   // make changes to the left operand and check whether clone changes too
   lhsOperand->castTo<LiteralInt>()->setValue(111);
@@ -69,7 +69,7 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_BinaryExpr) {  /* NOLINT */
 }
 
 TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_LogicalExpr) {  /* NOLINT */
-  const bool KEEP_ORIGINAL_ID = false;
+  const bool keepOriginalId = false;
 
   // create a new logical expression
   auto lhsOperand = new LiteralInt(0);
@@ -77,9 +77,9 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_LogicalExpr) {  /* NOLINT */
   auto rhsOperand = new LiteralInt(987);
   auto logicalExpression = new LogicalExpr(lhsOperand, operatore, rhsOperand);
   // clone the logical expression
-  auto clonedLogicalExpression = logicalExpression->cloneRecursiveDeep(KEEP_ORIGINAL_ID);
+  auto clonedLogicalExpression = logicalExpression->cloneRecursiveDeep(keepOriginalId);
   // test if all fields belonging to Node class were copied
-  assertNodeAttributes(KEEP_ORIGINAL_ID, logicalExpression, clonedLogicalExpression);
+  assertNodeAttributes(keepOriginalId, logicalExpression, clonedLogicalExpression);
 
   // make changes to the left operand and check whether clone changes too
   lhsOperand->castTo<LiteralInt>()->setValue(111);
@@ -99,7 +99,7 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_LogicalExpr) {  /* NOLINT */
 }
 
 TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_If) {  /* NOLINT */
-  const bool KEEP_ORIGINAL_ID = true;
+  const bool keepOriginalId = true;
 
   // create new If object
   auto ifStmtCondition = new LogicalExpr(
@@ -116,9 +116,9 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_If) {  /* NOLINT */
   ASSERT_EQ(ifStmt->getElseBranch(), ifStmtElseBranch);
 
   // clone the object
-  If* clonedIfStmt = dynamic_cast<If*>(ifStmt->cloneRecursiveDeep(KEEP_ORIGINAL_ID));
+  If *clonedIfStmt = dynamic_cast<If *>(ifStmt->cloneRecursiveDeep(keepOriginalId));
   // test if all fields belonging to Node class were copied
-  assertNodeAttributes(KEEP_ORIGINAL_ID, ifStmt, clonedIfStmt);
+  assertNodeAttributes(keepOriginalId, ifStmt, clonedIfStmt);
 
   // check if changing the condition in the original also changes the cloned If statement
   ifStmtCondition->setAttributes(new LiteralInt(99),
@@ -151,47 +151,47 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_If) {  /* NOLINT */
 }
 
 TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_Call) {  /* NOLINT */
-    const bool KEEP_ORIGINAL_ID = false;
+  const bool keepOriginalId = false;
 
-    // create new Call object 'call'
-    auto callFunctionParam = new FunctionParameter(new Datatype(types::Int),
-                                                   new Variable("pinCode"));
-    auto callFunction = new Function("determineSecurityLevel");
-    auto call = new Call({callFunctionParam}, callFunction);
-    // verify that all parameters are set
-    ASSERT_EQ(call->getFunc()->getName(), "determineSecurityLevel");
-    ASSERT_EQ(call->getArguments().size(), 1);
-    ASSERT_EQ(call->getArguments().front()->getDatatype()->getType(), types::Int);
-    ASSERT_EQ(call->getArguments().front()->getValue()->castTo<Variable>()->getIdentifier(), "pinCode");
+  // create new Call object 'call'
+  auto callFunctionParam = new FunctionParameter(new Datatype(Types::INT),
+                                                 new Variable("pinCode"));
+  auto callFunction = new Function("determineSecurityLevel");
+  auto call = new Call({callFunctionParam}, callFunction);
+  // verify that all parameters are set
+  ASSERT_EQ(call->getFunc()->getName(), "determineSecurityLevel");
+  ASSERT_EQ(call->getArguments().size(), 1);
+  ASSERT_EQ(call->getArguments().front()->getDatatype()->getType(), Types::INT);
+  ASSERT_EQ(call->getArguments().front()->getValue()->castTo<Variable>()->getIdentifier(), "pinCode");
 
-    // clone the object
-    auto clonedCall = call->AbstractStatement::cloneRecursiveDeep(KEEP_ORIGINAL_ID);
-    // test if all fields belonging to Node class were copied
-    assertNodeAttributes(KEEP_ORIGINAL_ID, call->AbstractStatement::castTo<Node>(), clonedCall);
+  // clone the object
+  auto clonedCall = call->AbstractStatement::cloneRecursiveDeep(keepOriginalId);
+  // test if all fields belonging to Node class were copied
+  assertNodeAttributes(keepOriginalId, call->AbstractStatement::castTo<Node>(), clonedCall);
 
-    // test if changing the original FunctionParameter changes the cloned one too
-    callFunctionParam->setAttributes(new Datatype(types::Float), new Variable("var"));
-    ASSERT_EQ(clonedCall->castTo<Call>()->getArguments().front()->getDatatype()->getType(), types::Int);
-    ASSERT_EQ(clonedCall->castTo<Call>()->getArguments().front()->getValue()->castTo<Variable>()->getIdentifier(),
-              "pinCode");
+  // test if changing the original FunctionParameter changes the cloned one too
+  callFunctionParam->setAttributes(new Datatype(Types::FLOAT), new Variable("var"));
+  ASSERT_EQ(clonedCall->castTo<Call>()->getArguments().front()->getDatatype()->getType(), Types::INT);
+  ASSERT_EQ(clonedCall->castTo<Call>()->getArguments().front()->getValue()->castTo<Variable>()->getIdentifier(),
+            "pinCode");
 
-    // test if changing the original function changes the cloned one too
-    ASSERT_EQ(call->getFunc()->getBody().size(), 0);
-    ASSERT_EQ(clonedCall->castTo<Call>()->getFunc()->getBody().size(), 0);
-    callFunction->addStatement(new VarAssignm("alpha", new LiteralInt(22)));
-    ASSERT_EQ(call->getFunc()->getBody().size(), 1);
-    ASSERT_EQ(clonedCall->castTo<Call>()->getFunc()->getBody().size(), 0);
+  // test if changing the original function changes the cloned one too
+  ASSERT_EQ(call->getFunc()->getBody().size(), 0);
+  ASSERT_EQ(clonedCall->castTo<Call>()->getFunc()->getBody().size(), 0);
+  callFunction->addStatement(new VarAssignm("alpha", new LiteralInt(22)));
+  ASSERT_EQ(call->getFunc()->getBody().size(), 1);
+  ASSERT_EQ(clonedCall->castTo<Call>()->getFunc()->getBody().size(), 0);
 }
 
 TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_Function) {  /* NOLINT */
-  const bool KEEP_ORIGINAL_ID = true;
+  const bool keepOriginalId = true;
 
   // create new Function object functionStmt
   std::string functionName = "computeSecretKeys";
-    std::vector<FunctionParameter *> args;
-    auto *funcParam = new FunctionParameter(new Datatype(types::Int), new Variable("seed"));
+  std::vector<FunctionParameter *> args;
+  auto *funcParam = new FunctionParameter(new Datatype(Types::INT), new Variable("seed"));
   args.push_back(funcParam);
-  std::vector<AbstractStatement*> bodyStatements;
+  std::vector<AbstractStatement *> bodyStatements;
   bodyStatements.push_back(new VarAssignm("alpha", new LiteralInt(22)));
   auto functionStmt = new Function(functionName, args, bodyStatements);
 
@@ -199,92 +199,92 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_Function) {  /* NOLINT */
   ASSERT_EQ(functionStmt->getName(), functionName);
   ASSERT_EQ(functionStmt->getParams().size(), 1);
   auto functionFirstParam = functionStmt->getParams().front();
-    ASSERT_EQ(functionFirstParam, args.front());
-    ASSERT_EQ(functionStmt->getBody(), bodyStatements);
+  ASSERT_EQ(functionFirstParam, args.front());
+  ASSERT_EQ(functionStmt->getBody(), bodyStatements);
 
-    // clone functionStmt as clonedFunctionStmt
-    auto clonedFunctionStmt = dynamic_cast<Function *>(functionStmt->cloneRecursiveDeep(KEEP_ORIGINAL_ID));
-    // test if all fields belonging to Node class were copied
-    assertNodeAttributes(KEEP_ORIGINAL_ID, functionStmt, clonedFunctionStmt);
+  // clone functionStmt as clonedFunctionStmt
+  auto clonedFunctionStmt = dynamic_cast<Function *>(functionStmt->cloneRecursiveDeep(keepOriginalId));
+  // test if all fields belonging to Node class were copied
+  assertNodeAttributes(keepOriginalId, functionStmt, clonedFunctionStmt);
 
-    // test if changing the original FunctionParameter changes the cloned one too
-    auto clonedFunctionFirstParam = clonedFunctionStmt->getParams().front();
-    ASSERT_EQ(clonedFunctionFirstParam->getDatatype()->getType(), types::Int);
-    ASSERT_EQ(clonedFunctionFirstParam->getValue()->castTo<Variable>()->getIdentifier(), "seed");
-    funcParam->setAttributes(new Datatype(types::Float), new Variable("floatThreshold"));
-    ASSERT_EQ(functionFirstParam->getDatatype()->getType(), types::Float);
-    ASSERT_EQ(clonedFunctionFirstParam->getDatatype()->getType(), types::Int);
-    ASSERT_EQ(functionFirstParam->getValue()->castTo<Variable>()->getIdentifier(), "floatThreshold");
-    ASSERT_EQ(clonedFunctionFirstParam->getValue()->castTo<Variable>()->getIdentifier(), "seed");
+  // test if changing the original FunctionParameter changes the cloned one too
+  auto clonedFunctionFirstParam = clonedFunctionStmt->getParams().front();
+  ASSERT_EQ(clonedFunctionFirstParam->getDatatype()->getType(), Types::INT);
+  ASSERT_EQ(clonedFunctionFirstParam->getValue()->castTo<Variable>()->getIdentifier(), "seed");
+  funcParam->setAttributes(new Datatype(Types::FLOAT), new Variable("floatThreshold"));
+  ASSERT_EQ(functionFirstParam->getDatatype()->getType(), Types::FLOAT);
+  ASSERT_EQ(clonedFunctionFirstParam->getDatatype()->getType(), Types::INT);
+  ASSERT_EQ(functionFirstParam->getValue()->castTo<Variable>()->getIdentifier(), "floatThreshold");
+  ASSERT_EQ(clonedFunctionFirstParam->getValue()->castTo<Variable>()->getIdentifier(), "seed");
 
-    // test if adding a new FunctionParameter to the original Function
-    ASSERT_EQ(functionStmt->getParams().size(), 1);
-    ASSERT_EQ(clonedFunctionStmt->getParams().size(), 1);
-    functionStmt->addParameter(
-            new FunctionParameter(new Datatype(types::Int, true),
-                                  new Variable("randomNumber")));
-    ASSERT_EQ(functionStmt->getParams().size(), 2);
+  // test if adding a new FunctionParameter to the original Function
+  ASSERT_EQ(functionStmt->getParams().size(), 1);
+  ASSERT_EQ(clonedFunctionStmt->getParams().size(), 1);
+  functionStmt->addParameter(
+      new FunctionParameter(new Datatype(Types::INT, true),
+                            new Variable("randomNumber")));
+  ASSERT_EQ(functionStmt->getParams().size(), 2);
   ASSERT_EQ(clonedFunctionStmt->getParams().size(), 1);
 }
 
 TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_FunctionParameter) { /* NOLINT */
-    const bool KEEP_ORIGINAL_ID = true;
-    auto varExpr = new Variable("alpha");
-    auto functionParam = new FunctionParameter(new Datatype(types::Int), varExpr);
-    ASSERT_EQ(functionParam->getDatatype()->getType(), types::Int);
-    ASSERT_EQ(functionParam->getValue(), varExpr);
-    auto clonedFunctionParam = dynamic_cast<FunctionParameter *>(functionParam->cloneRecursiveDeep(KEEP_ORIGINAL_ID));
+  const bool keepOriginalId = true;
+  auto varExpr = new Variable("alpha");
+  auto functionParam = new FunctionParameter(new Datatype(Types::INT), varExpr);
+  ASSERT_EQ(functionParam->getDatatype()->getType(), Types::INT);
+  ASSERT_EQ(functionParam->getValue(), varExpr);
+  auto clonedFunctionParam = dynamic_cast<FunctionParameter *>(functionParam->cloneRecursiveDeep(keepOriginalId));
 
-    // Test if changing original also modifies the copy. As there are no methods to change a FunctionParameter object, we
-    // need to use the pointer to change the value pointed to.
-    delete functionParam->getDatatype();
-    *functionParam->getDatatype() = *new Datatype(types::Float);
-    ASSERT_EQ(functionParam->getDatatype()->getType(), types::Float);
-    ASSERT_EQ(clonedFunctionParam->getDatatype()->getType(), types::Int);
-    delete functionParam->getValue();
-    *varExpr = *new Variable("beta");
-    ASSERT_EQ(functionParam->getValue()->castTo<Variable>()->getIdentifier(), "beta");
-    ASSERT_EQ(clonedFunctionParam->getValue()->castTo<Variable>()->getIdentifier(), "alpha");
+  // Test if changing original also modifies the copy. As there are no methods to change a FunctionParameter object, we
+  // need to use the pointer to change the value pointed to.
+  delete functionParam->getDatatype();
+  *functionParam->getDatatype() = *new Datatype(Types::FLOAT);
+  ASSERT_EQ(functionParam->getDatatype()->getType(), Types::FLOAT);
+  ASSERT_EQ(clonedFunctionParam->getDatatype()->getType(), Types::INT);
+  delete functionParam->getValue();
+  *varExpr = *new Variable("beta");
+  ASSERT_EQ(functionParam->getValue()->castTo<Variable>()->getIdentifier(), "beta");
+  ASSERT_EQ(clonedFunctionParam->getValue()->castTo<Variable>()->getIdentifier(), "alpha");
 
-    // test if all fields belonging to Node class were copied
-    assertNodeAttributes(KEEP_ORIGINAL_ID, functionParam, clonedFunctionParam);
+  // test if all fields belonging to Node class were copied
+  assertNodeAttributes(keepOriginalId, functionParam, clonedFunctionParam);
 }
 
 TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_CallExternal) {  /* NOLINT */
-  const bool KEEP_ORIGINAL_ID = false;
-    std::vector<FunctionParameter *> functionParams;
-    auto *fp = new FunctionParameter(new Datatype(types::Int), new Variable("blah"));
+  const bool keepOriginalId = false;
+  std::vector<FunctionParameter *> functionParams;
+  auto *fp = new FunctionParameter(new Datatype(Types::INT), new Variable("blah"));
   functionParams.push_back(fp);
 
   auto callExternal = new CallExternal("randomFunction", functionParams);
   ASSERT_EQ(callExternal->getFunctionName(), "randomFunction");
   ASSERT_EQ(callExternal->getArguments().size(), 1);
   auto clonedCallExternal =
-      dynamic_cast<CallExternal*>(callExternal->AbstractExpr::cloneRecursiveDeep(KEEP_ORIGINAL_ID));
+      dynamic_cast<CallExternal *>(callExternal->AbstractExpr::cloneRecursiveDeep(keepOriginalId));
 
-    // test if all fields belonging to Node class were copied
-    assertNodeAttributes(KEEP_ORIGINAL_ID,
-                         static_cast<AbstractExpr *>(callExternal),
-                         static_cast<AbstractExpr *>(clonedCallExternal));
+  // test if all fields belonging to Node class were copied
+  assertNodeAttributes(keepOriginalId,
+                       static_cast<AbstractExpr *>(callExternal),
+                       static_cast<AbstractExpr *>(clonedCallExternal));
 
-    // test if changing the original FunctionParameter vector also modifies the copy
-    fp->setAttributes(new Datatype(types::Float), new Variable("input"));
-    ASSERT_EQ(callExternal->getArguments().size(), 1);
-    ASSERT_EQ(clonedCallExternal->getArguments().size(), 1);
-    ASSERT_EQ(callExternal->getArguments().front()->getDatatype()->getType(), types::Float);
-    auto clonedCallFirstArgument = clonedCallExternal->getArguments().front();
-    ASSERT_EQ(clonedCallFirstArgument->getDatatype()->getType(), types::Int);
-    ASSERT_EQ(callExternal->getArguments().front()->getValue()->castTo<Variable>()->getIdentifier(), "input");
-    ASSERT_EQ(clonedCallFirstArgument->getValue()->castTo<Variable>()->getIdentifier(), "blah");
+  // test if changing the original FunctionParameter vector also modifies the copy
+  fp->setAttributes(new Datatype(Types::FLOAT), new Variable("input"));
+  ASSERT_EQ(callExternal->getArguments().size(), 1);
+  ASSERT_EQ(clonedCallExternal->getArguments().size(), 1);
+  ASSERT_EQ(callExternal->getArguments().front()->getDatatype()->getType(), Types::FLOAT);
+  auto clonedCallFirstArgument = clonedCallExternal->getArguments().front();
+  ASSERT_EQ(clonedCallFirstArgument->getDatatype()->getType(), Types::INT);
+  ASSERT_EQ(callExternal->getArguments().front()->getValue()->castTo<Variable>()->getIdentifier(), "input");
+  ASSERT_EQ(clonedCallFirstArgument->getValue()->castTo<Variable>()->getIdentifier(), "blah");
 }
 
 TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_Block) {  /* NOLINT */
-  const bool KEEP_ORIGINAL_ID = true;
+  const bool keepOriginalId = true;
   auto firstStatement = new VarAssignm("alpha", new LiteralInt(222));
   auto blockStatement = new Block(firstStatement);
   ASSERT_EQ(blockStatement->getStatements()->size(), 1);
   ASSERT_EQ(blockStatement->getStatements()->front(), firstStatement);
-  auto clonedBlockStatement = dynamic_cast<Block*>(blockStatement->cloneRecursiveDeep(KEEP_ORIGINAL_ID));
+  auto clonedBlockStatement = dynamic_cast<Block *>(blockStatement->cloneRecursiveDeep(keepOriginalId));
 
   // test if changing original also modifies the copy
   firstStatement->setAttribute(new LiteralFloat(2221.844f));
@@ -302,14 +302,14 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_Block) {  /* NOLINT */
   ASSERT_EQ(clonedBlockStatement->getStatements()->size(), 1);
 
   // test if all fields belonging to Node class were copied
-  assertNodeAttributes(KEEP_ORIGINAL_ID, blockStatement, clonedBlockStatement);
+  assertNodeAttributes(keepOriginalId, blockStatement, clonedBlockStatement);
 }
 
 TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_LiteralBool) {  /* NOLINT */
-  const bool KEEP_ORIGINAL_ID = true;
+  const bool keepOriginalId = true;
   auto lint = new LiteralBool(true);
   ASSERT_EQ(lint->getValue(), true);
-  auto clonedNode = dynamic_cast<LiteralBool*>(lint->cloneRecursiveDeep(KEEP_ORIGINAL_ID));
+  auto clonedNode = dynamic_cast<LiteralBool *>(lint->cloneRecursiveDeep(keepOriginalId));
 
   // test if changing original also modifies the copy
   lint->setValue(false);
@@ -317,14 +317,14 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_LiteralBool) {  /* NOLINT */
   ASSERT_EQ(clonedNode->getValue(), true);
 
   // test if all fields belonging to Node class were copied
-  assertNodeAttributes(KEEP_ORIGINAL_ID, lint, clonedNode);
+  assertNodeAttributes(keepOriginalId, lint, clonedNode);
 }
 
 TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_LiteralFloat) {  /* NOLINT */
-  const bool KEEP_ORIGINAL_ID = false;
+  const bool keepOriginalId = false;
   auto literalFloat = new LiteralFloat(4.11f);
   ASSERT_EQ(literalFloat->getValue(), 4.11f);
-  auto clonedLiteral = dynamic_cast<LiteralFloat*>(literalFloat->cloneRecursiveDeep(KEEP_ORIGINAL_ID));
+  auto clonedLiteral = dynamic_cast<LiteralFloat *>(literalFloat->cloneRecursiveDeep(keepOriginalId));
 
   // test if changing original also modifies the copy
   literalFloat->setValue(2.72f);
@@ -332,14 +332,14 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_LiteralFloat) {  /* NOLINT */
   ASSERT_EQ(clonedLiteral->getValue(), 4.11f);
 
   // test if all fields belonging to Node class were copied
-  assertNodeAttributes(KEEP_ORIGINAL_ID, literalFloat, clonedLiteral);
+  assertNodeAttributes(keepOriginalId, literalFloat, clonedLiteral);
 }
 
 TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_LiteralInt) {  /* NOLINT */
-  const bool KEEP_ORIGINAL_ID = true;
+  const bool keepOriginalId = true;
   auto literalInt = new LiteralInt(4421);
   ASSERT_EQ(literalInt->getValue(), 4421);
-  auto clonedLiteral = dynamic_cast<LiteralInt*>(literalInt->cloneRecursiveDeep(KEEP_ORIGINAL_ID));
+  auto clonedLiteral = dynamic_cast<LiteralInt *>(literalInt->cloneRecursiveDeep(keepOriginalId));
 
   // test if changing original also modifies the copy
   literalInt->setValue(1137);
@@ -347,14 +347,14 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_LiteralInt) {  /* NOLINT */
   ASSERT_EQ(clonedLiteral->getValue(), 4421);
 
   // test if all fields belonging to Node class were copied
-  assertNodeAttributes(KEEP_ORIGINAL_ID, literalInt, clonedLiteral);
+  assertNodeAttributes(keepOriginalId, literalInt, clonedLiteral);
 }
 
 TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_LiteralString) {  /* NOLINT */
-  const bool KEEP_ORIGINAL_ID = false;
+  const bool keepOriginalId = false;
   auto literalStr = new LiteralString("alpha");
   ASSERT_EQ(literalStr->getValue(), "alpha");
-  auto clonedLiteral = dynamic_cast<LiteralString*>(literalStr->cloneRecursiveDeep(KEEP_ORIGINAL_ID));
+  auto clonedLiteral = dynamic_cast<LiteralString *>(literalStr->cloneRecursiveDeep(keepOriginalId));
 
   // test if changing original also modifies the copy
   literalStr->setValue("gamma");
@@ -362,17 +362,17 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_LiteralString) {  /* NOLINT */
   ASSERT_EQ(clonedLiteral->getValue(), "alpha");
 
   // test if all fields belonging to Node class were copied
-  assertNodeAttributes(KEEP_ORIGINAL_ID, literalStr, clonedLiteral);
+  assertNodeAttributes(keepOriginalId, literalStr, clonedLiteral);
 }
 
 TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_Operator) {  /* NOLINT */
-  const bool KEEP_ORIGINAL_ID = false;
+  const bool keepOriginalId = false;
   auto operatore = new Operator(OpSymb::LogCompOp::logicalAnd);
   ASSERT_TRUE(operatore->equals(OpSymb::LogCompOp::logicalAnd));
-  auto clonedOp = dynamic_cast<Operator*>(operatore->cloneRecursiveDeep(KEEP_ORIGINAL_ID));
+  auto clonedOp = dynamic_cast<Operator *>(operatore->cloneRecursiveDeep(keepOriginalId));
 
   // test if all fields belonging to Node class were copied
-  assertNodeAttributes(KEEP_ORIGINAL_ID, operatore, clonedOp);
+  assertNodeAttributes(keepOriginalId, operatore, clonedOp);
 
   // test if deleting the original leaves the clone untouched
   // (alternative test because we cannot modify the variable identifier)
@@ -381,11 +381,11 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_Operator) {  /* NOLINT */
 }
 
 TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_Return) {  /* NOLINT */
-  const bool KEEP_ORIGINAL_ID = false;
+  const bool keepOriginalId = false;
   auto oldValue = new LiteralInt(944782);
   auto returnStatement = new Return(oldValue);
   ASSERT_EQ(returnStatement->getReturnExpressions().front(), oldValue);
-  auto clonedReturn = dynamic_cast<Return*>(returnStatement->cloneRecursiveDeep(KEEP_ORIGINAL_ID));
+  auto clonedReturn = dynamic_cast<Return *>(returnStatement->cloneRecursiveDeep(keepOriginalId));
 
   // test if changing original also modifies the copy
   auto newValue = new LiteralFloat(7768.3331f);
@@ -394,14 +394,14 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_Return) {  /* NOLINT */
   ASSERT_EQ(clonedReturn->getReturnExpressions().front()->castTo<LiteralInt>()->getValue(), oldValue->getValue());
 
   // test if all fields belonging to Node class were copied
-  assertNodeAttributes(KEEP_ORIGINAL_ID, returnStatement, clonedReturn);
+  assertNodeAttributes(keepOriginalId, returnStatement, clonedReturn);
 }
 
 TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_UnaryExpr) {  /* NOLINT */
-  const bool KEEP_ORIGINAL_ID = true;
+  const bool keepOriginalId = true;
   auto unaryExpr = new UnaryExpr(OpSymb::negation, new LiteralBool(true));
   ASSERT_TRUE(unaryExpr->getOp()->equals(OpSymb::negation));
-  auto clonedUnaryExpr = dynamic_cast<UnaryExpr*>(unaryExpr->cloneRecursiveDeep(KEEP_ORIGINAL_ID));
+  auto clonedUnaryExpr = dynamic_cast<UnaryExpr *>(unaryExpr->cloneRecursiveDeep(keepOriginalId));
 
   // test if changing original also modifies the copy
   unaryExpr->setAttributes(OpSymb::UnaryOp::decrement, new LiteralInt(22));
@@ -412,16 +412,16 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_UnaryExpr) {  /* NOLINT */
   ASSERT_EQ(clonedUnaryExpr->getRight()->castTo<LiteralBool>()->getValue(), true);
 
   // test if all fields belonging to Node class were copied
-  assertNodeAttributes(KEEP_ORIGINAL_ID, unaryExpr, clonedUnaryExpr);
+  assertNodeAttributes(keepOriginalId, unaryExpr, clonedUnaryExpr);
 }
 
 TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_VarAssignm) {  /* NOLINT */
-  const bool KEEP_ORIGINAL_ID = true;
+  const bool keepOriginalId = true;
   auto oldValue = new LiteralFloat(42.11f);
   auto varAssignment = new VarAssignm("alpha", oldValue);
   ASSERT_EQ(varAssignment->getVarTargetIdentifier(), "alpha");
   ASSERT_EQ(varAssignment->getValue()->castTo<LiteralFloat>()->getValue(), oldValue->getValue());
-  auto clonedVarAssignm = dynamic_cast<VarAssignm*>(varAssignment->cloneRecursiveDeep(KEEP_ORIGINAL_ID));
+  auto clonedVarAssignm = dynamic_cast<VarAssignm *>(varAssignment->cloneRecursiveDeep(keepOriginalId));
 
   // test if changing original also modifies the copy
   auto newValue = new LiteralFloat(111.321f);
@@ -430,40 +430,40 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_VarAssignm) {  /* NOLINT */
   ASSERT_EQ(clonedVarAssignm->getValue()->castTo<LiteralFloat>()->getValue(), oldValue->getValue());
 
   // test if all fields belonging to Node class were copied
-  assertNodeAttributes(KEEP_ORIGINAL_ID, varAssignment, clonedVarAssignm);
+  assertNodeAttributes(keepOriginalId, varAssignment, clonedVarAssignm);
 }
 
 TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_VarDecl) {  /* NOLINT */
-    const bool KEEP_ORIGINAL_ID = true;
-    auto varDecl = new VarDecl("alpha", types::Int, new LiteralInt(2442));
-    ASSERT_EQ(varDecl->getVarTargetIdentifier(), "alpha");
-    ASSERT_EQ(varDecl->getDatatype()->getType(), types::Int);
-    ASSERT_EQ(varDecl->getInitializer()->castTo<LiteralInt>()->getValue(), 2442);
-    auto clonedVarDecl = dynamic_cast<VarDecl *>(varDecl->cloneRecursiveDeep(KEEP_ORIGINAL_ID));
+  const bool keepOriginalId = true;
+  auto varDecl = new VarDecl("alpha", Types::INT, new LiteralInt(2442));
+  ASSERT_EQ(varDecl->getVarTargetIdentifier(), "alpha");
+  ASSERT_EQ(varDecl->getDatatype()->getType(), Types::INT);
+  ASSERT_EQ(varDecl->getInitializer()->castTo<LiteralInt>()->getValue(), 2442);
+  auto clonedVarDecl = dynamic_cast<VarDecl *>(varDecl->cloneRecursiveDeep(keepOriginalId));
 
-    // test if changing original also modifies the copy
-    varDecl->setAttributes("beta",
-                           new Datatype(types::Float),
-                           new LiteralFloat(5.212f));
-    ASSERT_EQ(varDecl->getVarTargetIdentifier(), "beta");
-    ASSERT_EQ(varDecl->getDatatype()->getType(), types::Float);
-    ASSERT_EQ(varDecl->getInitializer()->castTo<LiteralFloat>()->getValue(), 5.212f);
-    ASSERT_EQ(clonedVarDecl->getVarTargetIdentifier(), "alpha");
-    ASSERT_EQ(clonedVarDecl->getDatatype()->getType(), types::Int);
-    ASSERT_EQ(clonedVarDecl->getInitializer()->castTo<LiteralInt>()->getValue(), 2442);
+  // test if changing original also modifies the copy
+  varDecl->setAttributes("beta",
+                         new Datatype(Types::FLOAT),
+                         new LiteralFloat(5.212f));
+  ASSERT_EQ(varDecl->getVarTargetIdentifier(), "beta");
+  ASSERT_EQ(varDecl->getDatatype()->getType(), Types::FLOAT);
+  ASSERT_EQ(varDecl->getInitializer()->castTo<LiteralFloat>()->getValue(), 5.212f);
+  ASSERT_EQ(clonedVarDecl->getVarTargetIdentifier(), "alpha");
+  ASSERT_EQ(clonedVarDecl->getDatatype()->getType(), Types::INT);
+  ASSERT_EQ(clonedVarDecl->getInitializer()->castTo<LiteralInt>()->getValue(), 2442);
 
-    // test if all fields belonging to Node class were copied
-    assertNodeAttributes(KEEP_ORIGINAL_ID, varDecl, clonedVarDecl);
+  // test if all fields belonging to Node class were copied
+  assertNodeAttributes(keepOriginalId, varDecl, clonedVarDecl);
 }
 
 TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_Variable) {  /* NOLINT */
-  const bool KEEP_ORIGINAL_ID = false;
+  const bool keepOriginalId = false;
   auto variable = new Variable("secretX");
   ASSERT_EQ(variable->getIdentifier(), "secretX");
-  auto clonedVar = dynamic_cast<Variable*>(variable->cloneRecursiveDeep(KEEP_ORIGINAL_ID));
+  auto clonedVar = dynamic_cast<Variable *>(variable->cloneRecursiveDeep(keepOriginalId));
 
   // test if all fields belonging to Node class were copied
-  assertNodeAttributes(KEEP_ORIGINAL_ID, variable, clonedVar);
+  assertNodeAttributes(keepOriginalId, variable, clonedVar);
 
   // test if deleting the original leaves the clone untouched
   // (alternative test because we cannot modify the variable identifier)

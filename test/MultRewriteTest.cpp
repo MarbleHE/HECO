@@ -40,17 +40,17 @@ TEST(MultRewriteTest, rewriteSuccessfulSubsequentStatementsMultiplication) { /* 
   // check presence of expected changes
 
   //  int prod = inputC * inputB;
-  auto func = dynamic_cast<Function*>(ast.getRootNode());
+  auto func = dynamic_cast<Function *>(ast.getRootNode());
   auto prodDecl = dynamic_cast<VarDecl *>(func->getBody().at(0));
-    auto expectedProdDecl = new VarDecl("prod", types::Int,
-                                        new BinaryExpr(
-                                                new Variable("inputC"),
-                                                OpSymb::multiplication,
-                                                new Variable("inputB")));
+  auto expectedProdDecl = new VarDecl("prod", Types::INT,
+                                      new BinaryExpr(
+                                          new Variable("inputC"),
+                                          OpSymb::multiplication,
+                                          new Variable("inputB")));
   EXPECT_TRUE(prodDecl->isEqual(expectedProdDecl));
 
   //  prod = prod * inputA;
-  auto prodAssignm = dynamic_cast<VarAssignm*>(func->getBody().at(1));
+  auto prodAssignm = dynamic_cast<VarAssignm *>(func->getBody().at(1));
   auto expectedProdAssignm = new VarAssignm("prod", new BinaryExpr(
       new Variable("prod"),
       OpSymb::multiplication,
@@ -75,16 +75,16 @@ TEST(MultRewriteTest, rewriteSuccessfulSingleStatementMultiplication) { /* NOLIN
   // check presence of expected changes
 
   //  int prod = [inputC * [inputB * inputA]]
-  auto func = dynamic_cast<Function*>(ast.getRootNode());
-    auto prodDecl = dynamic_cast<VarDecl *>(func->getBody().at(0));
-    auto expectedProdDecl = new VarDecl("prod", types::Int,
-                                        new BinaryExpr(
-                                                new Variable("inputC"),
-                                                OpSymb::multiplication,
-                                                new BinaryExpr(
-                                                        new Variable("inputB"),
-                                                        OpSymb::multiplication,
-                                                        new Variable("inputA"))));
+  auto func = dynamic_cast<Function *>(ast.getRootNode());
+  auto prodDecl = dynamic_cast<VarDecl *>(func->getBody().at(0));
+  auto expectedProdDecl = new VarDecl("prod", Types::INT,
+                                      new BinaryExpr(
+                                          new Variable("inputC"),
+                                          OpSymb::multiplication,
+                                          new BinaryExpr(
+                                              new Variable("inputB"),
+                                              OpSymb::multiplication,
+                                              new Variable("inputA"))));
 
   EXPECT_TRUE(prodDecl->isEqual(expectedProdDecl));
 }
@@ -152,21 +152,21 @@ TEST(MultRewriteTest, rewriteNotApplicable) { /* NOLINT */
   EXPECT_EQ(mrv.getNumChanges(), 0);
 
   //  int prod = inputA * inputB;
-  auto func = dynamic_cast<Function*>(ast.getRootNode());
-    auto prodDecl = dynamic_cast<VarDecl *>(func->getBody().at(0));
-    auto expectedProdDecl = new VarDecl("prod", types::Int,
-                                        new BinaryExpr(
-                                                new Variable("inputA"),
-                                                OpSymb::multiplication,
-                                                new Variable("inputB")));
+  auto func = dynamic_cast<Function *>(ast.getRootNode());
+  auto prodDecl = dynamic_cast<VarDecl *>(func->getBody().at(0));
+  auto expectedProdDecl = new VarDecl("prod", Types::INT,
+                                      new BinaryExpr(
+                                          new Variable("inputA"),
+                                          OpSymb::multiplication,
+                                          new Variable("inputB")));
   EXPECT_TRUE(prodDecl->isEqual(expectedProdDecl));
 
   //  int prod2 = prod * inputC;
-  prodDecl = dynamic_cast<VarDecl*>(func->getBody().at(1));
-    expectedProdDecl = new VarDecl("prod2", types::Int, new BinaryExpr(
-            new Variable("prod"),
-            OpSymb::multiplication,
-            new Variable("inputC")));
+  prodDecl = dynamic_cast<VarDecl *>(func->getBody().at(1));
+  expectedProdDecl = new VarDecl("prod2", Types::INT, new BinaryExpr(
+      new Variable("prod"),
+      OpSymb::multiplication,
+      new Variable("inputC")));
   EXPECT_TRUE(prodDecl->isEqual(expectedProdDecl));
 }
 

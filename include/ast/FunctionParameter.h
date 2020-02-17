@@ -6,37 +6,39 @@
 #include "Datatypes.h"
 
 class FunctionParameter : public AbstractExpr {
-private:
-    Node *createClonedNode(bool keepOriginalUniqueNodeId) override;
+ private:
+  Node *createClonedNode(bool keepOriginalUniqueNodeId) override;
 
-public:
-    FunctionParameter(Datatype *datatype, AbstractExpr *value);
+ public:
+  FunctionParameter(Datatype *datatype, AbstractExpr *value);
 
-    /// Helper constructor for keeping downwards compatibility with earlier interface.
-    /// \deprecated This constructor should not be used anymore, use the one requiring a Datatype instead.
-    /// \param datatypeEnumString A valid datatype according to types in Datatype.h
-    /// \param value The value of the function parameter.
-    FunctionParameter(const std::string &datatypeEnumString, AbstractExpr *value);
+  /// Helper constructor for keeping downwards compatibility with earlier interface.
+  /// \deprecated This constructor should not be used anymore, use the one requiring a Datatype instead.
+  /// \param datatypeEnumString A valid datatype according to Types in Datatype.h
+  /// \param value The value of the function parameter.
+  FunctionParameter(const std::string &datatypeEnumString, AbstractExpr *value);
 
-    [[nodiscard]] json toJson() const override;
+  [[nodiscard]] json toJson() const override;
 
-    [[nodiscard]] std::string getNodeName() const override;
+  [[nodiscard]] std::string getNodeName() const override;
 
-    [[nodiscard]] Datatype *getDatatype() const;
+  [[nodiscard]] Datatype *getDatatype() const;
 
-    [[nodiscard]] AbstractExpr *getValue() const;
+  [[nodiscard]] AbstractExpr *getValue() const;
 
-    void accept(Visitor &v) override;
+  std::vector<std::string> getVariableIdentifiers() override;
 
-    int getMaxNumberChildren() override;
+  void accept(Visitor &v) override;
 
-    bool supportsCircuitMode() override;
+  int getMaxNumberChildren() override;
 
-    void setAttributes(Datatype *datatype, AbstractExpr *value);
+  bool supportsCircuitMode() override;
 
-    bool operator==(const FunctionParameter &rhs) const;
+  void setAttributes(Datatype *datatype, AbstractExpr *value);
 
-    bool operator!=(const FunctionParameter &rhs) const;
+  bool operator==(const FunctionParameter &rhs) const;
+
+  bool operator!=(const FunctionParameter &rhs) const;
 };
 
 /// Defines the JSON representation to be used for vector<FunctionParameter> objects.

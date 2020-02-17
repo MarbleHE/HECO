@@ -44,8 +44,8 @@ std::string VarAssignm::getVarTargetIdentifier() {
 
 bool VarAssignm::isEqual(AbstractStatement *as) {
   if (auto otherVarAssignm = dynamic_cast<VarAssignm *>(as)) {
-    return this->getIdentifier() == otherVarAssignm->getIdentifier() &&
-           this->getValue()->isEqual(otherVarAssignm->getValue());
+    return this->getIdentifier()==otherVarAssignm->getIdentifier() &&
+        this->getValue()->isEqual(otherVarAssignm->getValue());
   }
   return false;
 }

@@ -7,7 +7,7 @@ Block::Block() {
 }
 
 json Block::toJson() const {
-  json j = {{"type",       getNodeName()},
+  json j = {{"type", getNodeName()},
             {"statements", *this->statements}};
   return j;
 }

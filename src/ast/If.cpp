@@ -5,8 +5,8 @@ json If::toJson() const {
   json j;
   j["type"] = getNodeName();
   j["condition"] = this->condition->toJson();
-  if (thenBranch != nullptr) j["thenBranch"] = this->thenBranch->toJson();
-  if (elseBranch != nullptr) j["elseBranch"] = this->elseBranch->toJson();
+  if (thenBranch!=nullptr) j["thenBranch"] = this->thenBranch->toJson();
+  if (elseBranch!=nullptr) j["elseBranch"] = this->elseBranch->toJson();
   return j;
 }
 
@@ -45,12 +45,12 @@ If::~If() {
 
 std::vector<Literal *> If::evaluate(Ast &ast) {
   auto cond = dynamic_cast<LiteralBool *>(getCondition()->evaluate(ast).front());
-  if (cond == nullptr)
+  if (cond==nullptr)
     throw std::logic_error("Condition in If statement must evaluate to a LiteralBool! Cannot continue.");
   // check which of the branches must be evaluated
-  if (*cond == LiteralBool(true) && thenBranch != nullptr) {
+  if (*cond==LiteralBool(true) && thenBranch!=nullptr) {
     return thenBranch->evaluate(ast);
-  } else if (elseBranch != nullptr) {
+  } else if (elseBranch!=nullptr) {
     return elseBranch->evaluate(ast);
   }
   return std::vector<Literal *>();

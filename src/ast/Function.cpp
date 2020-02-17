@@ -13,8 +13,8 @@ Function::Function(std::string name, std::vector<AbstractStatement *> pt) : name
   for (auto &stmt : getBody()) {
     auto previous = *(&stmt - 1);
     auto next = *(&stmt + 1);
-    if (previous != nullptr) stmt->addParent(previous);
-    if (next != nullptr) stmt->addChild(next);
+    if (previous!=nullptr) stmt->addParent(previous);
+    if (next!=nullptr) stmt->addChild(next);
   }
 }
 
@@ -44,18 +44,18 @@ const std::vector<AbstractStatement *> &Function::getBody() const {
 
 void to_json(json &j, const Function &func) {
   j = {
-      {"type",   func.getNodeName()},
-      {"name",   func.getName()},
+      {"type", func.getNodeName()},
+      {"name", func.getName()},
       {"params", func.getParams()},
-      {"body",   func.getBody()}};
+      {"body", func.getBody()}};
 }
 
 json Function::toJson() const {
   json j = {
-      {"type",   getNodeName()},
-      {"name",   getName()},
+      {"type", getNodeName()},
+      {"name", getName()},
       {"params", params},
-      {"body",   getBody()}
+      {"body", getBody()}
   };
   return j;
 }
@@ -72,7 +72,7 @@ std::vector<Literal *> Function::evaluate(Ast &ast) {
   for (size_t i = 0; i < this->getBody().size(); i++) {
     auto currentStatement = this->getBody().at(i);
     // last statement: check if it is a Return statement
-    if (i == this->getBody().size() - 1) {
+    if (i==this->getBody().size() - 1) {
       if (auto retStmt = dynamic_cast<Return *>(currentStatement)) {
         return retStmt->evaluate(ast);
       }

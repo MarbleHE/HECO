@@ -17,9 +17,9 @@ TEST(AstEvaluationTests, simpleAstEvaluation1) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(7, ast);
   std::unordered_map<std::string, Literal *> params = {
-      {"width",  new LiteralInt(31)},
+      {"width", new LiteralInt(31)},
       {"length", new LiteralInt(87)},
-      {"depth",  new LiteralInt(771)}
+      {"depth", new LiteralInt(771)}
   };
   auto result = dynamic_cast<LiteralInt *>(ast.evaluateAst(params, false).front());
   ASSERT_EQ(*result, *new LiteralInt(693'129));
@@ -105,7 +105,7 @@ TEST(AstEvaluationTests, complexAstEvaluationWhileNotExecuted) { /* NOLINT */
   std::unordered_map<std::string, Literal *> params = {
       {"encryptedA", new LiteralInt(1)},
       {"encryptedB", new LiteralInt(7)},
-      {"randInt",    new LiteralInt(4)}
+      {"randInt", new LiteralInt(4)}
   };
   auto result = dynamic_cast<LiteralInt *>(ast.evaluateAst(params, false).front());
   ASSERT_EQ(*result, *new LiteralInt(0));
@@ -117,7 +117,7 @@ TEST(AstEvaluationTests, complexAstEvaluationWhileExecutedThreeTimes) { /* NOLIN
   std::unordered_map<std::string, Literal *> params = {
       {"encryptedA", new LiteralInt(1'182)},
       {"encryptedB", new LiteralInt(7)},
-      {"randInt",    new LiteralInt(3)}
+      {"randInt", new LiteralInt(3)}
   };
   auto result = dynamic_cast<LiteralInt *>(ast.evaluateAst(params, false).front());
   ASSERT_EQ(*result, *new LiteralInt(21));

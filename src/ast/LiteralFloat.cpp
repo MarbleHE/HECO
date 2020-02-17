@@ -45,11 +45,11 @@ void LiteralFloat::print(std::ostream &str) const {
 }
 
 bool LiteralFloat::operator==(const LiteralFloat &rhs) const {
-  return value == rhs.value;
+  return value==rhs.value;
 }
 
 bool LiteralFloat::operator!=(const LiteralFloat &rhs) const {
-  return !(rhs == *this);
+  return !(rhs==*this);
 }
 
 void LiteralFloat::addLiteralValue(std::string identifier, std::unordered_map<std::string, Literal *> &paramsMap) {
@@ -73,7 +73,7 @@ bool LiteralFloat::supportsCircuitMode() {
 }
 
 bool LiteralFloat::supportsDatatype(Datatype &datatype) {
-  return datatype.getType() == types::Float;
+  return datatype.getType()==Types::FLOAT;
 }
 
 Node *LiteralFloat::createClonedNode(bool) {

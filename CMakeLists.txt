@@ -74,7 +74,8 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/visitor/Visitor.cpp
         ${ast_optimizer_SOURCE_DIR}/test/AstTestingGenerator.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/EvaluationPrinter.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/utilities/DotPrinter.cpp)
+        ${ast_optimizer_SOURCE_DIR}/src/utilities/DotPrinter.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/SecretTaintingVisitor.cpp)
 
 set(HEADER_ONLY_SOURCES
         ${ast_optimizer_SOURCE_DIR}/include/ast/OpSymbEnum.h

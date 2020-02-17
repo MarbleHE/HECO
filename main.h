@@ -4,7 +4,6 @@
 
 #include <iostream>
 
-
 /// Program's entry point.
 int main();
 

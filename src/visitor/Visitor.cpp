@@ -92,19 +92,19 @@ void Visitor::visit(If &elem) {
   } else {
     // if thenBranch is no Block we need to manually open a new scope here
     Node *thenNode = dynamic_cast<Node *>(elem.getThenBranch());
-    assert(thenNode != nullptr); // this should never happen
+    assert(thenNode!=nullptr); // this should never happen
     changeToInnerScope(thenNode->getUniqueNodeId());
     elem.getThenBranch()->accept(*this);
     changeToOuterScope();
   }
 
-  if (elem.getElseBranch() != nullptr) {
+  if (elem.getElseBranch()!=nullptr) {
     // elseBranch
     if (auto *elseBranch = dynamic_cast<Node *>(elem.getElseBranch())) {
       elem.getElseBranch()->accept(*this);
     } else {
       Node *elseNode = dynamic_cast<Node *>(elem.getElseBranch());
-      assert(elseNode != nullptr);
+      assert(elseNode!=nullptr);
       changeToInnerScope(elseBranch->getUniqueNodeId());
       elem.getElseBranch()->accept(*this);
       changeToOuterScope();
@@ -151,7 +151,7 @@ void Visitor::visit(VarAssignm &elem) {
 void Visitor::visit(VarDecl &elem) {
   curScope->addStatement(&elem);
   // visit initializer
-  if (elem.getInitializer() != nullptr) {
+  if (elem.getInitializer()!=nullptr) {
     elem.getInitializer()->accept(*this);
   }
 }
@@ -171,7 +171,7 @@ void Visitor::visit(While &elem) {
     thenBlock->accept(*this);
   } else {
     Node *block = dynamic_cast<Node *>(elem.getBody());
-    assert(block != nullptr);
+    assert(block!=nullptr);
     changeToInnerScope(block->getUniqueNodeId());
     elem.getBody()->accept(*this);
     changeToOuterScope();

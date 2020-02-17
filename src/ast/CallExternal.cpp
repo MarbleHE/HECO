@@ -5,7 +5,7 @@
 
 json CallExternal::toJson() const {
   json j = {
-      {"type",         getNodeName()},
+      {"type", getNodeName()},
       {"functionName", this->functionName},
   };
   // only include the field 'arguments' in JSON output if it has any value

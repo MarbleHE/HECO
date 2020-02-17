@@ -34,7 +34,7 @@ While::~While() {
 
 std::vector<Literal *> While::evaluate(Ast &ast) {
   while (*dynamic_cast<LiteralBool *>(ensureSingleEvaluationResult(getCondition()->evaluate(ast)))
-         == LiteralBool(true)) {
+      ==LiteralBool(true)) {
     getBody()->evaluate(ast);
   }
   return std::vector<Literal *>();

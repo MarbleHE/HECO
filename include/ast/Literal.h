@@ -12,23 +12,23 @@
 class RandLiteralGen;
 
 class Literal : public AbstractExpr {
-protected:
-    ~Literal() override;
+ protected:
+  ~Literal() override;
 
-    virtual void print(std::ostream &str) const = 0;
+  virtual void print(std::ostream &str) const = 0;
 
-public:
-    friend std::ostream &operator<<(std::ostream &os, const Literal &literal);
+ public:
+  friend std::ostream &operator<<(std::ostream &os, const Literal &literal);
 
-    bool operator==(const Literal &rhs) const;
+  bool operator==(const Literal &rhs) const;
 
-    bool operator!=(const Literal &rhs) const;
+  bool operator!=(const Literal &rhs) const;
 
-    virtual void addLiteralValue(std::string identifier, std::unordered_map<std::string, Literal *> &paramsMap) = 0;
+  virtual void addLiteralValue(std::string identifier, std::unordered_map<std::string, Literal *> &paramsMap) = 0;
 
-    virtual void setRandomValue(RandLiteralGen &rlg) = 0;
+  virtual void setRandomValue(RandLiteralGen &rlg) = 0;
 
-    virtual bool supportsDatatype(Datatype &datatype) = 0;
+  virtual bool supportsDatatype(Datatype &datatype) = 0;
 };
 
 inline std::ostream &operator<<(std::ostream &os, const std::vector<Literal *> &v) {

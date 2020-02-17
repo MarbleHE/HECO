@@ -37,7 +37,7 @@ void generateDemoOne(Ast &ast);
 ///          randInt = randInt -1;
 ///      };
 ///
-///      String outStr = "Computation finished!";
+///      STRING outStr = "Computation finished!";
 ///      printf(outStr);
 ///
 ///      return sum;

@@ -35,11 +35,11 @@ void LiteralString::print(std::ostream &str) const {
 }
 
 bool LiteralString::operator==(const LiteralString &rhs) const {
-  return value == rhs.value;
+  return value==rhs.value;
 }
 
 bool LiteralString::operator!=(const LiteralString &rhs) const {
-  return !(rhs == *this);
+  return !(rhs==*this);
 }
 
 void LiteralString::addLiteralValue(std::string identifier, std::unordered_map<std::string, Literal *> &paramsMap) {
@@ -63,7 +63,7 @@ bool LiteralString::supportsCircuitMode() {
 }
 
 bool LiteralString::supportsDatatype(Datatype &datatype) {
-  return datatype.getType() == types::String;
+  return datatype.getType()==Types::STRING;
 }
 
 Node *LiteralString::createClonedNode(bool) {

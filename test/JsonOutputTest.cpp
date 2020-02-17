@@ -27,7 +27,7 @@
 
 TEST(JsonOutputTest, LiteralInt) { /* NOLINT */
   int val = 2;
-  auto* lint = new LiteralInt(val);
+  auto *lint = new LiteralInt(val);
   json j = {{"type", "LiteralInt"},
             {"value", val}};
   EXPECT_EQ(lint->toJson(), j);
@@ -35,7 +35,7 @@ TEST(JsonOutputTest, LiteralInt) { /* NOLINT */
 
 TEST(JsonOutputTest, LiteralFloat) { /* NOLINT */
   float val = 33.214;
-  auto* lint = new LiteralFloat(val);
+  auto *lint = new LiteralFloat(val);
   json j = {{"type", "LiteralFloat"},
             {"value", val}};
   EXPECT_EQ(lint->toJson(), j);
@@ -43,7 +43,7 @@ TEST(JsonOutputTest, LiteralFloat) { /* NOLINT */
 
 TEST(JsonOutputTest, LiteralBool) { /* NOLINT */
   bool val = true;
-  auto* lbool = new LiteralBool(val);
+  auto *lbool = new LiteralBool(val);
   json j = {{"type", "LiteralBool"},
             {"value", val}};
   EXPECT_EQ(lbool->toJson(), j);
@@ -51,7 +51,7 @@ TEST(JsonOutputTest, LiteralBool) { /* NOLINT */
 
 TEST(JsonOutputTest, LiteralString) { /* NOLINT */
   std::string val = "hello world!";
-  auto* lString = new LiteralString(val);
+  auto *lString = new LiteralString(val);
   json j = {{"type", "LiteralString"},
             {"value", val}};
   EXPECT_EQ(lString->toJson(), j);
@@ -60,9 +60,9 @@ TEST(JsonOutputTest, LiteralString) { /* NOLINT */
 TEST(JsonOutputTest, VarAssignm) { /* NOLINT */
   std::string identifier = "myCustomVar";
   int val = 2;
-  auto* lint = new LiteralInt(val);
+  auto *lint = new LiteralInt(val);
   // myCustomVar = 2;
-  auto* assignm = new VarAssignm(identifier, lint);
+  auto *assignm = new VarAssignm(identifier, lint);
   json j = {{"type", "VarAssignm"},
             {"identifier", identifier},
             {"value", {
@@ -86,7 +86,7 @@ TEST(JsonOutputTest, VarDecl) { /* NOLINT */
   auto datatype = "int";
   int initializer = 3;
   // int numIterations = 3;
-  auto* var = new VarDecl(identifier, initializer);
+  auto *var = new VarDecl(identifier, initializer);
   json j = {{"type", "VarDecl"},
             {"identifier", identifier},
             {"datatype", datatype},
@@ -102,7 +102,7 @@ TEST(JsonOutputTest, BinaryExpr) { /* NOLINT */
   auto lintValue = 22;
   auto varIdentifier = "x";
   // x + 22;
-  auto* bexp = new BinaryExpr(
+  auto *bexp = new BinaryExpr(
       new Variable(varIdentifier),
       OpSymb::BinaryOp::addition,
       new LiteralInt(lintValue));
@@ -167,7 +167,7 @@ TEST(JsonOutputTest, LogicalExpr) { /* NOLINT */
   auto varIdentifier = "numIterations";
   auto varIdentifierMax = "maxIterations";
   // numIterations < maxIterations
-  auto* lexp = new LogicalExpr(
+  auto *lexp = new LogicalExpr(
       new Variable(varIdentifier),
       OpSymb::smaller,
       new Variable(varIdentifierMax));
@@ -195,27 +195,27 @@ TEST(JsonOutputTest, Operator) { /* NOLINT */
 }
 
 TEST(JsonOutputTest, Block) { /* NOLINT */
-  auto bl = new Block(new VarDecl("width", types::Int, new LiteralInt(22)));
-    json j = {{"type",       "Block"},
-              {"statements", {{
-                                      {"type", "VarDecl"},
-                                      {"datatype", "int"},
-                                      {"identifier", "width"},
-                                      {"initializer", {
-                                                              {"type", "LiteralInt"},
-                                                              {"value", 22}}}}}}};
+  auto bl = new Block(new VarDecl("width", Types::INT, new LiteralInt(22)));
+  json j = {{"type", "Block"},
+            {"statements", {{
+                                {"type", "VarDecl"},
+                                {"datatype", "int"},
+                                {"identifier", "width"},
+                                {"initializer", {
+                                    {"type", "LiteralInt"},
+                                    {"value", 22}}}}}}};
   EXPECT_EQ(bl->toJson(), j);
 }
 
 TEST(JsonOutputTest, CallExternal) { /* NOLINT */
-  std::vector<FunctionParameter*> funcParams = {
+  std::vector<FunctionParameter *> funcParams = {
       new FunctionParameter("string", new LiteralString("Hello world!"))};
 
   // printf("Hello world!");
   auto callExt = new CallExternal("printf", funcParams);
 
   // read expected output from hard-coded file
-  std::ifstream f("../../test/auxoutput/JsonOutputTest/CallExternal.json");
+  std::ifstream f("../../test/expected_output_large/JsonOutputTest/CallExternal.json");
   json j = json::parse(f);
 
   EXPECT_EQ(callExt->AbstractStatement::toString(), j.dump());
@@ -236,7 +236,7 @@ TEST(JsonOutputTest, Call) {/* NOLINT */
                    }));
 
   // retrieve expected result
-  std::ifstream f("../../test/auxoutput/JsonOutputTest/Call.json");
+  std::ifstream f("../../test/expected_output_large/JsonOutputTest/Call.json");
   json expected = json::parse(f);
 
   EXPECT_EQ(call->AbstractStatement::toString(), expected.dump());
@@ -265,7 +265,7 @@ TEST(JsonOutputTest, Function) { /* NOLINT */
                                        new Variable("z")))});
 
   // retrieve expected result
-  std::ifstream f("../../test/auxoutput/JsonOutputTest/Function.json");
+  std::ifstream f("../../test/expected_output_large/JsonOutputTest/Function.json");
   json expected = json::parse(f);
 
   EXPECT_EQ(func->toJson(), expected);
@@ -289,7 +289,7 @@ TEST(JsonOutputTest, IfThenOnly) { /* NOLINT */
       new VarAssignm("isValid", new LiteralBool(true)));
 
   // retrieve expected result
-  std::ifstream f("../../test/auxoutput/JsonOutputTest/IfThenOnly.json");
+  std::ifstream f("../../test/expected_output_large/JsonOutputTest/IfThenOnly.json");
   json expected = json::parse(f);
 
   EXPECT_EQ(ifStmt->toJson(), expected);
@@ -316,15 +316,15 @@ TEST(JsonOutputTest, If) { /* NOLINT */
 
   auto thenBranch = new VarAssignm("isValid", new LiteralBool(true));
 
-  std::vector<AbstractStatement*> elseStatement = {
+  std::vector<AbstractStatement *> elseStatement = {
       new VarAssignm("isValid", new LiteralBool(false)),
       new VarAssignm("c", new BinaryExpr(new Variable("a"), OpSymb::subtraction, new Variable("z")))
   };
-  auto* elseBranch = new Block(&elseStatement);
+  auto *elseBranch = new Block(&elseStatement);
   auto ifStmt = new If(condition, thenBranch, elseBranch);
 
   // retrieve expected result
-  std::ifstream f("../../test/auxoutput/JsonOutputTest/If.json");
+  std::ifstream f("../../test/expected_output_large/JsonOutputTest/If.json");
   json expected = json::parse(f);
 
   EXPECT_EQ(ifStmt->toJson(), expected);
@@ -335,7 +335,7 @@ TEST(JsonOutputTest, While) { /* NOLINT */
   //   z = z*i;
   //   i++;
   // }
-  std::vector<AbstractStatement*> blockStatements;
+  std::vector<AbstractStatement *> blockStatements;
   blockStatements.emplace_back(
       new VarAssignm("z",
                      new BinaryExpr(
@@ -350,7 +350,7 @@ TEST(JsonOutputTest, While) { /* NOLINT */
       new Block(&blockStatements));
 
   // retrieve expected result
-  std::ifstream f("../../test/auxoutput/JsonOutputTest/While.json");
+  std::ifstream f("../../test/expected_output_large/JsonOutputTest/While.json");
   json expected = json::parse(f);
 
   EXPECT_EQ(whileStmt->toJson(), expected);

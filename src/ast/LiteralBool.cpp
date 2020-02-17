@@ -28,8 +28,8 @@ std::string LiteralBool::getNodeName() const {
 
 LiteralBool::~LiteralBool() = default;
 
-std::vector<Literal*> LiteralBool::evaluate(Ast &ast) {
-  return std::vector<Literal*>({this});
+std::vector<Literal *> LiteralBool::evaluate(Ast &ast) {
+  return std::vector<Literal *>({this});
 }
 
 void LiteralBool::print(std::ostream &str) const {
@@ -37,14 +37,14 @@ void LiteralBool::print(std::ostream &str) const {
 }
 
 bool LiteralBool::operator==(const LiteralBool &rhs) const {
-  return value == rhs.value;
+  return value==rhs.value;
 }
 
 bool LiteralBool::operator!=(const LiteralBool &rhs) const {
-  return !(rhs == *this);
+  return !(rhs==*this);
 }
 
-void LiteralBool::addLiteralValue(std::string identifier, std::unordered_map<std::string, Literal*> &paramsMap) {
+void LiteralBool::addLiteralValue(std::string identifier, std::unordered_map<std::string, Literal *> &paramsMap) {
   paramsMap.emplace(identifier, this);
 }
 
@@ -65,9 +65,9 @@ bool LiteralBool::supportsCircuitMode() {
 }
 
 bool LiteralBool::supportsDatatype(Datatype &datatype) {
-  return datatype.getType() == types::Bool;
+  return datatype.getType()==Types::BOOL;
 }
 
-Node* LiteralBool::createClonedNode(bool) {
+Node *LiteralBool::createClonedNode(bool) {
   return new LiteralBool(this->getValue());
 }

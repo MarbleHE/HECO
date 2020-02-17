@@ -25,20 +25,20 @@ const std::string &Variable::getIdentifier() const {
 }
 
 bool Variable::contains(Variable *var) {
-  return *this == *var;
+  return *this==*var;
 }
 
 bool Variable::operator==(const Variable &rhs) const {
-  return identifier == rhs.identifier;
+  return identifier==rhs.identifier;
 }
 
 bool Variable::operator!=(const Variable &rhs) const {
-  return !(rhs == *this);
+  return !(rhs==*this);
 }
 
 bool Variable::isEqual(AbstractExpr *other) {
   if (auto otherVar = dynamic_cast<Variable *>(other)) {
-    return this->getIdentifier() == otherVar->getIdentifier();
+    return this->getIdentifier()==otherVar->getIdentifier();
   }
   return false;
 }

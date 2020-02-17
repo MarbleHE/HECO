@@ -7,10 +7,10 @@
 #include "Ast.h"
 
 json VarDecl::toJson() const {
-  json j = {{"type",       getNodeName()},
+  json j = {{"type", getNodeName()},
             {"identifier", identifier},
-            {"datatype",   getDatatype() ? getDatatype()->toString() : ""}};
-  if (getInitializer() != nullptr) {
+            {"datatype", getDatatype() ? getDatatype()->toString() : ""}};
+  if (getInitializer()!=nullptr) {
     j["initializer"] = getInitializer()->toJson();
   }
   return j;
@@ -21,26 +21,26 @@ VarDecl::VarDecl(std::string, void *) {
                               "Use VarDecl(std::string, TYPES, AbstractExpr*) or one of the other constructors.");
 }
 
-VarDecl::VarDecl(std::string name, types datatype, AbstractExpr *initializer) {
-    setAttributes(std::move(name), new Datatype(datatype), initializer);
+VarDecl::VarDecl(std::string name, Types datatype, AbstractExpr *initializer) {
+  setAttributes(std::move(name), new Datatype(datatype), initializer);
 }
 
 VarDecl::VarDecl(std::string name, std::string valueAssignedTo) {
   setAttributes(std::move(name),
-                new Datatype(types::String),
+                new Datatype(Types::STRING),
                 new LiteralString(std::move(valueAssignedTo)));
 }
 
 VarDecl::VarDecl(std::string name, int valueAssignedTo) {
-    setAttributes(std::move(name), new Datatype(types::Int), new LiteralInt(valueAssignedTo));
+  setAttributes(std::move(name), new Datatype(Types::INT), new LiteralInt(valueAssignedTo));
 }
 
 VarDecl::VarDecl(std::string name, float valueAssignedTo) {
-    setAttributes(std::move(name), new Datatype(types::Float), new LiteralFloat(valueAssignedTo));
+  setAttributes(std::move(name), new Datatype(Types::FLOAT), new LiteralFloat(valueAssignedTo));
 }
 
 VarDecl::VarDecl(std::string name, bool valueAssignedTo) {
-    setAttributes(std::move(name), new Datatype(types::Bool), new LiteralBool(valueAssignedTo));
+  setAttributes(std::move(name), new Datatype(Types::BOOL), new LiteralBool(valueAssignedTo));
 }
 
 VarDecl::VarDecl(std::string name, const char *valueAssignedTo)
@@ -89,15 +89,15 @@ std::string VarDecl::getVarTargetIdentifier() {
 
 bool VarDecl::isEqual(AbstractStatement *as) {
   if (auto otherVarDecl = dynamic_cast<VarDecl *>(as)) {
-    return (this->getIdentifier() == otherVarDecl->getIdentifier())
-           && (*this->getDatatype() == *otherVarDecl->getDatatype())
-           && (this->getInitializer()->isEqual(otherVarDecl->getInitializer()));
+    return (this->getIdentifier()==otherVarDecl->getIdentifier())
+        && (*this->getDatatype()==*otherVarDecl->getDatatype())
+        && (this->getInitializer()->isEqual(otherVarDecl->getInitializer()));
   }
   return false;
 }
 
 std::vector<Literal *> VarDecl::evaluate(Ast &ast) {
-  if (this->getInitializer() != nullptr) {
+  if (this->getInitializer()!=nullptr) {
     auto value = this->getInitializer()->evaluate(ast).front();
     ast.updateVarValue(this->getIdentifier(), value);
     return std::vector<Literal *>({value});

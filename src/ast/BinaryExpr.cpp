@@ -44,12 +44,12 @@ std::string BinaryExpr::getNodeName() const {
 }
 
 BinaryExpr *BinaryExpr::contains(BinaryExpr *bexpTemplate, AbstractExpr *excludedSubtree) {
-  if (excludedSubtree != nullptr && this == excludedSubtree) {
+  if (excludedSubtree!=nullptr && this==excludedSubtree) {
     return nullptr;
   } else {
-    bool emptyOrEqualLeft = (!bexpTemplate->getLeft() || bexpTemplate->getLeft() == this->getLeft());
-    bool emptyOrEqualRight = (!bexpTemplate->getRight() || bexpTemplate->getRight() == this->getRight());
-    bool emptyOrEqualOp = (bexpTemplate->getOp()->isUndefined() || *this->getOp() == *bexpTemplate->getOp());
+    bool emptyOrEqualLeft = (!bexpTemplate->getLeft() || bexpTemplate->getLeft()==this->getLeft());
+    bool emptyOrEqualRight = (!bexpTemplate->getRight() || bexpTemplate->getRight()==this->getRight());
+    bool emptyOrEqualOp = (bexpTemplate->getOp()->isUndefined() || *this->getOp()==*bexpTemplate->getOp());
     return (emptyOrEqualLeft && emptyOrEqualRight && emptyOrEqualOp) ? this : nullptr;
   }
 }
@@ -78,7 +78,7 @@ bool BinaryExpr::isEqual(AbstractExpr *other) {
   if (auto otherBexp = dynamic_cast<BinaryExpr *>(other)) {
     auto sameLeft = this->getLeft()->isEqual(otherBexp->getLeft());
     auto sameRight = this->getRight()->isEqual(otherBexp->getRight());
-    auto sameOp = *this->getOp() == *otherBexp->getOp();
+    auto sameOp = *this->getOp()==*otherBexp->getOp();
     return sameLeft && sameRight && sameOp;
   }
   return false;
@@ -96,9 +96,9 @@ int BinaryExpr::countByTemplate(AbstractExpr *abstractExpr) {
   if (auto expr = dynamic_cast<BinaryExpr *>(abstractExpr)) {
     // check if current BinaryExpr fulfills requirements of template abstractExpr
     // also check left and right operands for nested BinaryExps
-    return (this->contains(expr, nullptr) != nullptr ? 1 : 0)
-           + getLeft()->countByTemplate(abstractExpr)
-           + getRight()->countByTemplate(abstractExpr);
+    return (this->contains(expr, nullptr)!=nullptr ? 1 : 0)
+        + getLeft()->countByTemplate(abstractExpr)
+        + getRight()->countByTemplate(abstractExpr);
   }
   return 0;
 }

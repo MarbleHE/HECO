@@ -2,24 +2,24 @@
 
 void to_json(json &j, const FunctionParameter &funcParam) {
   j = {
-      {"type",     funcParam.getNodeName()},
-      {"value",    funcParam.getValue()->toJson()},
+      {"type", funcParam.getNodeName()},
+      {"value", funcParam.getValue()->toJson()},
       {"datatype", funcParam.getDatatype()->toString()}
   };
 }
 
 void to_json(json &j, const FunctionParameter *funcParam) {
   j = {
-      {"type",     funcParam->getNodeName()},
-      {"value",    funcParam->getValue()->toJson()},
+      {"type", funcParam->getNodeName()},
+      {"value", funcParam->getValue()->toJson()},
       {"datatype", funcParam->getDatatype()->toString()}
   };
 }
 
 json FunctionParameter::toJson() const {
   json j = {
-      {"type",     getNodeName()},
-      {"value",    getValue()->toJson()},
+      {"type", getNodeName()},
+      {"value", getValue()->toJson()},
       {"datatype", getDatatype()->toString()}
   };
   return j;
@@ -70,10 +70,13 @@ void FunctionParameter::setAttributes(Datatype *datatype, AbstractExpr *value) {
 }
 
 bool FunctionParameter::operator==(const FunctionParameter &rhs) const {
-  return getValue() == rhs.getValue() && getDatatype()->getType() == rhs.getDatatype()->getType();
+  return getValue()==rhs.getValue() && getDatatype()->getType()==rhs.getDatatype()->getType();
 }
 
 bool FunctionParameter::operator!=(const FunctionParameter &rhs) const {
-  return !(rhs == *this);
+  return !(rhs==*this);
+}
+std::vector<std::string> FunctionParameter::getVariableIdentifiers() {
+  return getValue()->getVariableIdentifiers();
 }
 
