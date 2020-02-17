@@ -9,9 +9,9 @@
 #include "LiteralString.h"
 
 json Call::toJson() const {
-  json j = {{"type", getNodeName()},
+  json j = {{"type",      getNodeName()},
             {"arguments", this->arguments},
-            {"function", this->func->toJson()}};
+            {"function",  this->func->toJson()}};
   return j;
 }
 
@@ -19,7 +19,7 @@ void Call::accept(Visitor &v) {
   v.visit(*this);
 }
 
-const std::vector<FunctionParameter*> &Call::getArguments() const {
+const std::vector<FunctionParameter *> &Call::getArguments() const {
   return arguments;
 }
 
@@ -31,17 +31,17 @@ Call::~Call() {
   delete func;
 }
 
-Call::Call(Function* func) : func(func) {
+Call::Call(Function *func) : func(func) {
 }
 
-Call::Call(std::vector<FunctionParameter*> arguments, Function* func) : func(func), arguments(std::move(arguments)) {
+Call::Call(std::vector<FunctionParameter *> arguments, Function *func) : func(func), arguments(std::move(arguments)) {
 }
 
-Function* Call::getFunc() const {
+Function *Call::getFunc() const {
   return func;
 }
 
-std::vector<Literal*> Call::evaluate(Ast &ast) {
+std::vector<Literal *> Call::evaluate(Ast &ast) {
   // validation: make sure that both Call and Function have the same number of arguments
   if (this->getArguments().size() != this->getFunc()->getParams().size()) {
     std::stringstream ss;
@@ -54,7 +54,7 @@ std::vector<Literal*> Call::evaluate(Ast &ast) {
   // create vector to store parameter values for Function evaluation
   // - std::string stores the variable's identifier
   // - Literal* stores the variable's passed value (as it can be an expression too, we need to evaluate it first)
-  std::map<std::string, Literal*> paramValues;
+  std::map<std::string, Literal *> paramValues;
 
   for (size_t i = 0; i < this->getFunc()->getParams().size(); i++) {
     // validation: make sure that datatypes in Call and Function are equal
@@ -67,14 +67,14 @@ std::vector<Literal*> Call::evaluate(Ast &ast) {
     // variable identifier: retrieve the variable identifier to bind the value to
     auto val = this->getFunc()->getParams().at(i)->getValue();
     std::string varIdentifier;
-    if (auto var = dynamic_cast<Variable*>(val)) {
+    if (auto var = dynamic_cast<Variable *>(val)) {
       varIdentifier = var->getIdentifier();
     } else {
       throw std::logic_error("FunctionParameter in Call must have a Variable type as value.");
     }
 
     // variable value: retrieve the variable's value to be passed to the callee
-    Literal* lit = this->getArguments().at(i)->getValue()->evaluate(ast).front();
+    Literal *lit = this->getArguments().at(i)->getValue()->evaluate(ast).front();
     // make sure that evaluate returns a Literal
     if (lit == nullptr) throw std::logic_error("There's something wrong! Evaluate should return a single Literal.");
 
@@ -88,11 +88,11 @@ std::vector<Literal*> Call::evaluate(Ast &ast) {
   return subAst.evaluateAst(paramValues, false);
 }
 
-Node* Call::createClonedNode(bool keepOriginalUniqueNodeId) {
-  std::vector<FunctionParameter*> clonedArgs;
+Node *Call::createClonedNode(bool keepOriginalUniqueNodeId) {
+  std::vector<FunctionParameter *> clonedArgs;
   for (auto &arg : getArguments()) {
     clonedArgs.push_back(arg->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<FunctionParameter>());
   }
-  return static_cast<AbstractStatement*>(
+  return static_cast<AbstractStatement *>(
       new Call(clonedArgs, this->getFunc()->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<Function>()));
 }

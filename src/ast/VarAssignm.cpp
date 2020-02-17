@@ -10,7 +10,7 @@ json VarAssignm::toJson() const {
   return j;
 }
 
-VarAssignm::VarAssignm(std::string identifier, AbstractExpr* value) : identifier(std::move(identifier)) {
+VarAssignm::VarAssignm(std::string identifier, AbstractExpr *value) : identifier(std::move(identifier)) {
   setAttribute(value);
 }
 
@@ -22,15 +22,15 @@ const std::string &VarAssignm::getIdentifier() const {
   return identifier;
 }
 
-AbstractExpr* VarAssignm::getValue() const {
-  return reinterpret_cast<AbstractExpr*>(getChildAtIndex(0, true));
+AbstractExpr *VarAssignm::getValue() const {
+  return reinterpret_cast<AbstractExpr *>(getChildAtIndex(0, true));
 }
 
 std::string VarAssignm::getNodeName() const {
   return "VarAssignm";
 }
 
-BinaryExpr* VarAssignm::contains(BinaryExpr* bexpTemplate, BinaryExpr* excludedSubtree) {
+BinaryExpr *VarAssignm::contains(BinaryExpr *bexpTemplate, BinaryExpr *excludedSubtree) {
   return this->getValue()->contains(bexpTemplate, excludedSubtree);
 }
 
@@ -42,17 +42,17 @@ std::string VarAssignm::getVarTargetIdentifier() {
   return this->getIdentifier();
 }
 
-bool VarAssignm::isEqual(AbstractStatement* as) {
-  if (auto otherVarAssignm = dynamic_cast<VarAssignm*>(as)) {
+bool VarAssignm::isEqual(AbstractStatement *as) {
+  if (auto otherVarAssignm = dynamic_cast<VarAssignm *>(as)) {
     return this->getIdentifier() == otherVarAssignm->getIdentifier() &&
-        this->getValue()->isEqual(otherVarAssignm->getValue());
+           this->getValue()->isEqual(otherVarAssignm->getValue());
   }
   return false;
 }
 
-std::vector<Literal*> VarAssignm::evaluate(Ast &ast) {
+std::vector<Literal *> VarAssignm::evaluate(Ast &ast) {
   ast.updateVarValue(this->getIdentifier(), this->getValue()->evaluate(ast).front());
-  return std::vector<Literal*>();
+  return std::vector<Literal *>();
 }
 
 bool VarAssignm::supportsCircuitMode() {
@@ -63,13 +63,13 @@ int VarAssignm::getMaxNumberChildren() {
   return 1;
 }
 
-void VarAssignm::setAttribute(AbstractExpr* assignmentValue) {
+void VarAssignm::setAttribute(AbstractExpr *assignmentValue) {
   removeChildren();
   addChildren({assignmentValue}, false);
   addParentTo(this, {assignmentValue});
 }
 
-Node* VarAssignm::createClonedNode(bool keepOriginalUniqueNodeId) {
+Node *VarAssignm::createClonedNode(bool keepOriginalUniqueNodeId) {
   return new VarAssignm(this->getIdentifier(),
                         this->getValue()->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
 }

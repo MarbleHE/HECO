@@ -16,7 +16,7 @@ void AbstractStatement::accept(Visitor &v) {
   std::cout << "This shouldn't be executed!" << std::endl;
 }
 
-BinaryExpr* AbstractStatement::contains(BinaryExpr* bexpTemplate, BinaryExpr* excludedSubtree) {
+BinaryExpr *AbstractStatement::contains(BinaryExpr *bexpTemplate, BinaryExpr *excludedSubtree) {
   return nullptr;
 }
 
@@ -24,7 +24,7 @@ std::string AbstractStatement::getVarTargetIdentifier() {
   return std::string();
 }
 
-bool AbstractStatement::isEqual(AbstractStatement* as) {
+bool AbstractStatement::isEqual(AbstractStatement *as) {
   return false;
 }
 
@@ -36,7 +36,7 @@ void to_json(json &j, const AbstractStatement &absStat) {
   j = absStat.toJson();
 }
 
-void to_json(json &j, const AbstractStatement* absStat) {
+void to_json(json &j, const AbstractStatement *absStat) {
   j = absStat->toJson();
 }
 

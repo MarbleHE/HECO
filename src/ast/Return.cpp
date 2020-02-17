@@ -14,11 +14,11 @@ json Return::toJson() const {
   return j;
 }
 
-Return::Return(AbstractExpr* returnValue) {
+Return::Return(AbstractExpr *returnValue) {
   setAttributes({returnValue});
 }
 
-Return::Return(std::vector<AbstractExpr*> returnValues) {
+Return::Return(std::vector<AbstractExpr *> returnValues) {
   setAttributes(std::move(returnValues));
 }
 
@@ -34,8 +34,8 @@ Return::~Return() {
   for (auto &child : getChildren()) delete child;
 }
 
-std::vector<Literal*> Return::evaluate(Ast &ast) {
-  std::vector<Literal*> result;
+std::vector<Literal *> Return::evaluate(Ast &ast) {
+  std::vector<Literal *> result;
   for (auto &expr : getReturnExpressions()) {
     auto exprEvaluationResult = expr->evaluate(ast);
     result.insert(result.end(), exprEvaluationResult.begin(), exprEvaluationResult.end());
@@ -49,16 +49,16 @@ int Return::getMaxNumberChildren() {
   return -1;
 }
 
-void Return::setAttributes(std::vector<AbstractExpr*> returnExpr) {
+void Return::setAttributes(std::vector<AbstractExpr *> returnExpr) {
   removeChildren();
   // we need to convert vector of AbstractExpr* into vector of Node* prior calling addChildren
-  std::vector<Node*> returnExprAsNodes(returnExpr.begin(), returnExpr.end());
+  std::vector<Node *> returnExprAsNodes(returnExpr.begin(), returnExpr.end());
   addChildren(returnExprAsNodes, false);
   addParentTo(this, returnExprAsNodes);
 }
 
-std::vector<AbstractExpr*> Return::getReturnExpressions() const {
-  std::vector<AbstractExpr*> vec;
+std::vector<AbstractExpr *> Return::getReturnExpressions() const {
+  std::vector<AbstractExpr *> vec;
   for (auto &child : getChildrenNonNull()) vec.push_back(child->castTo<AbstractExpr>());
   return vec;
 }
@@ -67,8 +67,8 @@ bool Return::supportsCircuitMode() {
   return true;
 }
 
-Node* Return::createClonedNode(bool keepOriginalUniqueNodeId) {
-  std::vector<AbstractExpr*> returnValues;
+Node *Return::createClonedNode(bool keepOriginalUniqueNodeId) {
+  std::vector<AbstractExpr *> returnValues;
   for (auto &child : getReturnExpressions())
     returnValues.push_back(child->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
   return new Return(returnValues);

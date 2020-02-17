@@ -12,76 +12,95 @@
 #include "OpSymbEnum.h"
 
 class Operator : public Node {
- private:
-  std::string operatorString;
-  std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp> operatorSymbol;
+private:
+    std::string operatorString;
+    std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp> operatorSymbol;
 
- public:
-  explicit Operator(OpSymb::LogCompOp op);
+public:
+    explicit Operator(OpSymb::LogCompOp op);
 
-  explicit Operator(OpSymb::BinaryOp op);
+    explicit Operator(OpSymb::BinaryOp op);
 
-  explicit Operator(OpSymb::UnaryOp op);
+    explicit Operator(OpSymb::UnaryOp op);
 
-  explicit Operator(std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp> op);
+    explicit Operator(std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp> op);
 
-  [[nodiscard]] const std::string &getOperatorString() const;
+    [[nodiscard]] const std::string &getOperatorString() const;
 
-  [[nodiscard]] const std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp> &getOperatorSymbol() const;
+    [[nodiscard]] const std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp> &getOperatorSymbol() const;
 
-  void accept(Visitor &v) override;
+    void accept(Visitor &v) override;
 
-  [[nodiscard]] std::string getNodeName() const override;
+    [[nodiscard]] std::string getNodeName() const override;
 
-  bool isUndefined();
+    bool isUndefined();
 
-  bool operator==(const Operator &rhs) const;
+    bool operator==(const Operator &rhs) const;
 
-  bool operator!=(const Operator &rhs) const;
+    bool operator!=(const Operator &rhs) const;
 
-  [[nodiscard]] bool equals(std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp> op) const;
+    [[nodiscard]] bool equals(std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp> op) const;
 
-  Literal* applyOperator(Literal* lhs, Literal* rhs);
+    Literal *applyOperator(Literal *lhs, Literal *rhs);
 
-  Literal* applyOperator(Literal* rhs);
+    Literal *applyOperator(Literal *rhs);
 
-  template<typename A>
-  Literal* applyOperator(A* lhs, Literal* rhs);
+    template<typename A>
+    Literal *applyOperator(A *lhs, Literal *rhs);
 
-  Literal* applyOperator(LiteralInt* lhs, LiteralInt* rhs);
-  Literal* applyOperator(LiteralBool* lhs, LiteralBool* rhs);
-  Literal* applyOperator(LiteralInt* lhs, LiteralBool* rhs);
-  Literal* applyOperator(LiteralBool* lhs, LiteralInt* rhs);
-  Literal* applyOperator(LiteralString* lhs, LiteralString* rhs);
-  static Literal* applyOperator(LiteralBool* lhs, LiteralString* rhs);
-  static Literal* applyOperator(LiteralString* lhs, LiteralBool* rhs);
-  static Literal* applyOperator(LiteralInt* lhs, LiteralString* rhs);
-  static Literal* applyOperator(LiteralString* lhs, LiteralInt* rhs);
-  Literal* applyOperator(LiteralInt* rhs);
-  Literal* applyOperator(LiteralBool* rhs);
-  Literal* applyOperator(LiteralString* rhs);
-  Literal* applyOperator(LiteralFloat* lhs, LiteralFloat* rhs);
-  Literal* applyOperator(LiteralFloat* lhs, LiteralInt* rhs);
-  Literal* applyOperator(LiteralInt* lhs, LiteralFloat* rhs);
-  Literal* applyOperator(LiteralFloat* lhs, LiteralBool* rhs);
-  Literal* applyOperator(LiteralBool* lhs, LiteralFloat* rhs);
-  static Literal* applyOperator(LiteralFloat* lhs, LiteralString* rhs);
-  static Literal* applyOperator(LiteralString* lhs, LiteralFloat* rhs);
-  Literal* applyOperator(LiteralFloat* rhs);
+    Literal *applyOperator(LiteralInt *lhs, LiteralInt *rhs);
 
-  [[nodiscard]] std::string toString() const override;
+    Literal *applyOperator(LiteralBool *lhs, LiteralBool *rhs);
 
-  bool supportsCircuitMode() override;
+    Literal *applyOperator(LiteralInt *lhs, LiteralBool *rhs);
 
-  ~Operator() override;
+    Literal *applyOperator(LiteralBool *lhs, LiteralInt *rhs);
 
-  Node* createClonedNode(bool keepOriginalUniqueNodeId) override;
+    Literal *applyOperator(LiteralString *lhs, LiteralString *rhs);
 
-  [[nodiscard]] bool equals(OpSymb::BinaryOp op) const;
+    static Literal *applyOperator(LiteralBool *lhs, LiteralString *rhs);
 
-  [[nodiscard]] bool equals(OpSymb::LogCompOp op) const;
+    static Literal *applyOperator(LiteralString *lhs, LiteralBool *rhs);
 
-  [[nodiscard]] bool equals(OpSymb::UnaryOp op) const;
+    static Literal *applyOperator(LiteralInt *lhs, LiteralString *rhs);
+
+    static Literal *applyOperator(LiteralString *lhs, LiteralInt *rhs);
+
+    Literal *applyOperator(LiteralInt *rhs);
+
+    Literal *applyOperator(LiteralBool *rhs);
+
+    Literal *applyOperator(LiteralString *rhs);
+
+    Literal *applyOperator(LiteralFloat *lhs, LiteralFloat *rhs);
+
+    Literal *applyOperator(LiteralFloat *lhs, LiteralInt *rhs);
+
+    Literal *applyOperator(LiteralInt *lhs, LiteralFloat *rhs);
+
+    Literal *applyOperator(LiteralFloat *lhs, LiteralBool *rhs);
+
+    Literal *applyOperator(LiteralBool *lhs, LiteralFloat *rhs);
+
+    static Literal *applyOperator(LiteralFloat *lhs, LiteralString *rhs);
+
+    static Literal *applyOperator(LiteralString *lhs, LiteralFloat *rhs);
+
+    Literal *applyOperator(LiteralFloat *rhs);
+
+    [[nodiscard]] std::string toString() const override;
+
+    bool supportsCircuitMode() override;
+
+    ~Operator() override;
+
+    Node *createClonedNode(bool keepOriginalUniqueNodeId) override;
+
+    [[nodiscard]] bool equals(OpSymb::BinaryOp op) const;
+
+    [[nodiscard]] bool equals(OpSymb::LogCompOp op) const;
+
+    [[nodiscard]] bool equals(OpSymb::UnaryOp op) const;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_OPERATOR_H

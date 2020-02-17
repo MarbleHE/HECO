@@ -7,33 +7,33 @@
 #include "AbstractExpr.h"
 
 class Return : public AbstractStatement {
- public:
-  Return();
+public:
+    Return();
 
-  explicit Return(AbstractExpr* returnValue);
+    explicit Return(AbstractExpr *returnValue);
 
-  explicit Return(std::vector<AbstractExpr*> returnValues);
+    explicit Return(std::vector<AbstractExpr *> returnValues);
 
-  [[nodiscard]] json toJson() const override;
+    [[nodiscard]] json toJson() const override;
 
-  void accept(Visitor &v) override;
+    void accept(Visitor &v) override;
 
-  [[nodiscard]] std::string getNodeName() const override;
+    [[nodiscard]] std::string getNodeName() const override;
 
-  ~Return() override;
+    ~Return() override;
 
-  std::vector<Literal*> evaluate(Ast &ast) override;
+    std::vector<Literal *> evaluate(Ast &ast) override;
 
-  [[nodiscard]] std::vector<AbstractExpr*> getReturnExpressions() const;
+    [[nodiscard]] std::vector<AbstractExpr *> getReturnExpressions() const;
 
-  Node* createClonedNode(bool keepOriginalUniqueNodeId) override;
+    Node *createClonedNode(bool keepOriginalUniqueNodeId) override;
 
-  void setAttributes(std::vector<AbstractExpr*> returnExpr);
+    void setAttributes(std::vector<AbstractExpr *> returnExpr);
 
- protected:
-  int getMaxNumberChildren() override;
+protected:
+    int getMaxNumberChildren() override;
 
-  bool supportsCircuitMode() override;
+    bool supportsCircuitMode() override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_RETURN_H

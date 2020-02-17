@@ -22,39 +22,39 @@ std::ostream &operator<<(std::ostream &outs, const AbstractExpr &obj) {
   return outs << obj.toString();
 }
 
-LiteralInt* AbstractExpr::createParam(int i) {
+LiteralInt *AbstractExpr::createParam(int i) {
   return new LiteralInt(i);
 }
 
-LiteralBool* AbstractExpr::createParam(bool b) {
+LiteralBool *AbstractExpr::createParam(bool b) {
   return new LiteralBool(b);
 }
 
-LiteralString* AbstractExpr::createParam(const char* str) {
+LiteralString *AbstractExpr::createParam(const char *str) {
   return new LiteralString(str);
 }
 
-AbstractExpr* AbstractExpr::createParam(AbstractExpr* abstractExpr) {
+AbstractExpr *AbstractExpr::createParam(AbstractExpr *abstractExpr) {
   return abstractExpr;
 }
 
-BinaryExpr* AbstractExpr::contains(BinaryExpr* bexpTemplate, AbstractExpr* excludedSubtree) {
+BinaryExpr *AbstractExpr::contains(BinaryExpr *bexpTemplate, AbstractExpr *excludedSubtree) {
   return nullptr;
 }
 
-bool AbstractExpr::contains(Variable* var) {
+bool AbstractExpr::contains(Variable *var) {
   return false;
 }
 
-bool AbstractExpr::isEqual(AbstractExpr* other) {
+bool AbstractExpr::isEqual(AbstractExpr *other) {
   return false;
 }
 
-LiteralFloat* AbstractExpr::createParam(float f) {
+LiteralFloat *AbstractExpr::createParam(float f) {
   return new LiteralFloat(f);
 }
 
-int AbstractExpr::countByTemplate(AbstractExpr* abstractExpr) {
+int AbstractExpr::countByTemplate(AbstractExpr *abstractExpr) {
   return 0;
 }
 
@@ -62,7 +62,7 @@ std::vector<std::string> AbstractExpr::getVariableIdentifiers() {
   return std::vector<std::string>();
 }
 
-Node* AbstractExpr::createParam(Node* node) {
+Node *AbstractExpr::createParam(Node *node) {
   throw std::runtime_error(
       "Method Node::createParam does not support Node objects. Did you forget to cast the Node object?");
 }

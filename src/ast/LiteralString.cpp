@@ -26,8 +26,8 @@ std::string LiteralString::getNodeName() const {
 
 LiteralString::~LiteralString() = default;
 
-std::vector<Literal*> LiteralString::evaluate(Ast &ast) {
-  return std::vector<Literal*>({this});
+std::vector<Literal *> LiteralString::evaluate(Ast &ast) {
+  return std::vector<Literal *>({this});
 }
 
 void LiteralString::print(std::ostream &str) const {
@@ -42,7 +42,7 @@ bool LiteralString::operator!=(const LiteralString &rhs) const {
   return !(rhs == *this);
 }
 
-void LiteralString::addLiteralValue(std::string identifier, std::map<std::string, Literal*> &paramsMap) {
+void LiteralString::addLiteralValue(std::string identifier, std::map<std::string, Literal *> &paramsMap) {
   paramsMap.emplace(identifier, this);
 }
 
@@ -66,6 +66,6 @@ bool LiteralString::supportsDatatype(Datatype &datatype) {
   return datatype.getType() == TYPES::STRING;
 }
 
-Node* LiteralString::createClonedNode(bool) {
+Node *LiteralString::createClonedNode(bool) {
   return new LiteralString(this->getValue());
 }

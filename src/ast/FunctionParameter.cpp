@@ -2,24 +2,24 @@
 
 void to_json(json &j, const FunctionParameter &funcParam) {
   j = {
-      {"type", funcParam.getNodeName()},
-      {"value", funcParam.getValue()->toJson()},
+      {"type",     funcParam.getNodeName()},
+      {"value",    funcParam.getValue()->toJson()},
       {"datatype", funcParam.getDatatype()->toString()}
   };
 }
 
-void to_json(json &j, const FunctionParameter* funcParam) {
+void to_json(json &j, const FunctionParameter *funcParam) {
   j = {
-      {"type", funcParam->getNodeName()},
-      {"value", funcParam->getValue()->toJson()},
+      {"type",     funcParam->getNodeName()},
+      {"value",    funcParam->getValue()->toJson()},
       {"datatype", funcParam->getDatatype()->toString()}
   };
 }
 
 json FunctionParameter::toJson() const {
   json j = {
-      {"type", getNodeName()},
-      {"value", getValue()->toJson()},
+      {"type",     getNodeName()},
+      {"value",    getValue()->toJson()},
       {"datatype", getDatatype()->toString()}
   };
   return j;
@@ -33,23 +33,23 @@ std::string FunctionParameter::getNodeName() const {
   return "FunctionParameter";
 }
 
-AbstractExpr* FunctionParameter::getValue() const {
-  return reinterpret_cast<AbstractExpr* >(getChildAtIndex(1, true));
+AbstractExpr *FunctionParameter::getValue() const {
+  return reinterpret_cast<AbstractExpr * >(getChildAtIndex(1, true));
 }
 
-FunctionParameter::FunctionParameter(Datatype* datatype, AbstractExpr* value) {
+FunctionParameter::FunctionParameter(Datatype *datatype, AbstractExpr *value) {
   setAttributes(datatype, value);
 }
 
-FunctionParameter::FunctionParameter(const std::string &datatypeEnumString, AbstractExpr* value) {
+FunctionParameter::FunctionParameter(const std::string &datatypeEnumString, AbstractExpr *value) {
   setAttributes(new Datatype(datatypeEnumString), value);
 }
 
-Datatype* FunctionParameter::getDatatype() const {
-  return reinterpret_cast<Datatype* >(getChildAtIndex(0, true));
+Datatype *FunctionParameter::getDatatype() const {
+  return reinterpret_cast<Datatype * >(getChildAtIndex(0, true));
 }
 
-Node* FunctionParameter::createClonedNode(bool keepOriginalUniqueNodeId) {
+Node *FunctionParameter::createClonedNode(bool keepOriginalUniqueNodeId) {
   return new FunctionParameter(this->getDatatype()->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<Datatype>(),
                                this->getValue()->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
 }
@@ -62,7 +62,7 @@ bool FunctionParameter::supportsCircuitMode() {
   return true;
 }
 
-void FunctionParameter::setAttributes(Datatype* datatype, AbstractExpr* value) {
+void FunctionParameter::setAttributes(Datatype *datatype, AbstractExpr *value) {
   // update tree structure
   removeChildren();
   addChildren({datatype, value}, false);

@@ -11,7 +11,7 @@ json BinaryExpr::toJson() const {
   return j;
 }
 
-BinaryExpr::BinaryExpr(AbstractExpr* left, OpSymb::BinaryOp op, AbstractExpr* right) {
+BinaryExpr::BinaryExpr(AbstractExpr *left, OpSymb::BinaryOp op, AbstractExpr *right) {
   setAttributes(left, new Operator(op), right);
 }
 
@@ -23,16 +23,16 @@ BinaryExpr::BinaryExpr() {
   setAttributes(nullptr, nullptr, nullptr);
 }
 
-AbstractExpr* BinaryExpr::getLeft() const {
-  return reinterpret_cast<AbstractExpr* >(getChildAtIndex(0, true));
+AbstractExpr *BinaryExpr::getLeft() const {
+  return reinterpret_cast<AbstractExpr * >(getChildAtIndex(0, true));
 }
 
-Operator* BinaryExpr::getOp() const {
-  return reinterpret_cast<Operator*>(getChildAtIndex(1, true));
+Operator *BinaryExpr::getOp() const {
+  return reinterpret_cast<Operator *>(getChildAtIndex(1, true));
 }
 
-AbstractExpr* BinaryExpr::getRight() const {
-  return reinterpret_cast<AbstractExpr* >(getChildAtIndex(2, true));
+AbstractExpr *BinaryExpr::getRight() const {
+  return reinterpret_cast<AbstractExpr * >(getChildAtIndex(2, true));
 }
 
 void BinaryExpr::accept(Visitor &v) {
@@ -43,7 +43,7 @@ std::string BinaryExpr::getNodeName() const {
   return "BinaryExpr";
 }
 
-BinaryExpr* BinaryExpr::contains(BinaryExpr* bexpTemplate, AbstractExpr* excludedSubtree) {
+BinaryExpr *BinaryExpr::contains(BinaryExpr *bexpTemplate, AbstractExpr *excludedSubtree) {
   if (excludedSubtree != nullptr && this == excludedSubtree) {
     return nullptr;
   } else {
@@ -54,14 +54,14 @@ BinaryExpr* BinaryExpr::contains(BinaryExpr* bexpTemplate, AbstractExpr* exclude
   }
 }
 
-void BinaryExpr::setAttributes(AbstractExpr* leftOperand, Operator* operatore, AbstractExpr* rightOperand) {
+void BinaryExpr::setAttributes(AbstractExpr *leftOperand, Operator *operatore, AbstractExpr *rightOperand) {
   // update tree structure
   removeChildren();
   addChildren({leftOperand, operatore, rightOperand}, false);
   Node::addParentTo(this, {leftOperand, operatore, rightOperand});
 }
 
-void BinaryExpr::swapOperandsLeftAWithRightB(BinaryExpr* bexpA, BinaryExpr* bexpB) {
+void BinaryExpr::swapOperandsLeftAWithRightB(BinaryExpr *bexpA, BinaryExpr *bexpB) {
   auto lopA = bexpA->getLeft();
   auto ropB = bexpB->getRight();
   bexpA->setAttributes(ropB, bexpA->getOp(), bexpA->getRight());
@@ -70,12 +70,12 @@ void BinaryExpr::swapOperandsLeftAWithRightB(BinaryExpr* bexpA, BinaryExpr* bexp
 
 BinaryExpr::~BinaryExpr() = default;
 
-bool BinaryExpr::contains(Variable* var) {
+bool BinaryExpr::contains(Variable *var) {
   return (getLeft()->contains(var) || getRight()->contains(var));
 }
 
-bool BinaryExpr::isEqual(AbstractExpr* other) {
-  if (auto otherBexp = dynamic_cast<BinaryExpr*>(other)) {
+bool BinaryExpr::isEqual(AbstractExpr *other) {
+  if (auto otherBexp = dynamic_cast<BinaryExpr *>(other)) {
     auto sameLeft = this->getLeft()->isEqual(otherBexp->getLeft());
     auto sameRight = this->getRight()->isEqual(otherBexp->getRight());
     auto sameOp = *this->getOp() == *otherBexp->getOp();
@@ -84,21 +84,21 @@ bool BinaryExpr::isEqual(AbstractExpr* other) {
   return false;
 }
 
-std::vector<Literal*> BinaryExpr::evaluate(Ast &ast) {
+std::vector<Literal *> BinaryExpr::evaluate(Ast &ast) {
   // we first need to evaluate the left-handside and right-handside as they can consists of nested binary expressions
   return {
       this->getOp()->applyOperator(this->getLeft()->evaluate(ast).front(),
                                    this->getRight()->evaluate(ast).front())};
 }
 
-int BinaryExpr::countByTemplate(AbstractExpr* abstractExpr) {
+int BinaryExpr::countByTemplate(AbstractExpr *abstractExpr) {
   // check if abstractExpr is of type BinaryExpr
-  if (auto expr = dynamic_cast<BinaryExpr*>(abstractExpr)) {
+  if (auto expr = dynamic_cast<BinaryExpr *>(abstractExpr)) {
     // check if current BinaryExpr fulfills requirements of template abstractExpr
     // also check left and right operands for nested BinaryExps
     return (this->contains(expr, nullptr) != nullptr ? 1 : 0)
-        + getLeft()->countByTemplate(abstractExpr)
-        + getRight()->countByTemplate(abstractExpr);
+           + getLeft()->countByTemplate(abstractExpr)
+           + getRight()->countByTemplate(abstractExpr);
   }
   return 0;
 }
@@ -119,7 +119,7 @@ bool BinaryExpr::supportsCircuitMode() {
   return true;
 }
 
-Node* BinaryExpr::createClonedNode(bool keepOriginalUniqueNodeId) {
+Node *BinaryExpr::createClonedNode(bool keepOriginalUniqueNodeId) {
   return new BinaryExpr(this->getLeft()->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
                         this->getOp()->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<Operator>(),
                         this->getRight()->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());

@@ -10,10 +10,10 @@ json If::toJson() const {
   return j;
 }
 
-If::If(AbstractExpr* condition, AbstractStatement* thenBranch, AbstractStatement* elseBranch)
+If::If(AbstractExpr *condition, AbstractStatement *thenBranch, AbstractStatement *elseBranch)
     : condition(condition), thenBranch(thenBranch), elseBranch(elseBranch) {}
 
-If::If(AbstractExpr* condition, AbstractStatement* thenBranch) : condition(condition), thenBranch(thenBranch) {
+If::If(AbstractExpr *condition, AbstractStatement *thenBranch) : condition(condition), thenBranch(thenBranch) {
   elseBranch = nullptr;
 }
 
@@ -25,15 +25,15 @@ std::string If::getNodeName() const {
   return "If";
 }
 
-AbstractExpr* If::getCondition() const {
+AbstractExpr *If::getCondition() const {
   return condition;
 }
 
-AbstractStatement* If::getThenBranch() const {
+AbstractStatement *If::getThenBranch() const {
   return thenBranch;
 }
 
-AbstractStatement* If::getElseBranch() const {
+AbstractStatement *If::getElseBranch() const {
   return elseBranch;
 }
 
@@ -43,8 +43,8 @@ If::~If() {
   delete elseBranch;
 }
 
-std::vector<Literal*> If::evaluate(Ast &ast) {
-  auto cond = dynamic_cast<LiteralBool*>(getCondition()->evaluate(ast).front());
+std::vector<Literal *> If::evaluate(Ast &ast) {
+  auto cond = dynamic_cast<LiteralBool *>(getCondition()->evaluate(ast).front());
   if (cond == nullptr)
     throw std::logic_error("Condition in If statement must evaluate to a LiteralBool! Cannot continue.");
   // check which of the branches must be evaluated
@@ -53,10 +53,10 @@ std::vector<Literal*> If::evaluate(Ast &ast) {
   } else if (elseBranch != nullptr) {
     return elseBranch->evaluate(ast);
   }
-  return std::vector<Literal*>();
+  return std::vector<Literal *>();
 }
 
-Node* If::createClonedNode(bool keepOriginalUniqueNodeId) {
+Node *If::createClonedNode(bool keepOriginalUniqueNodeId) {
   return new If(this->condition->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
                 this->thenBranch->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractStatement>(),
                 this->elseBranch->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractStatement>());

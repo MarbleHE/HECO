@@ -14,25 +14,25 @@ void LogicalExpr::accept(Visitor &v) {
   v.visit(*this);
 }
 
-AbstractExpr* LogicalExpr::getLeft() const {
-  return reinterpret_cast<AbstractExpr* >(getChildAtIndex(0, true));
+AbstractExpr *LogicalExpr::getLeft() const {
+  return reinterpret_cast<AbstractExpr * >(getChildAtIndex(0, true));
 }
 
-Operator* LogicalExpr::getOp() const {
-  return reinterpret_cast<Operator*>(getChildAtIndex(1, true));
+Operator *LogicalExpr::getOp() const {
+  return reinterpret_cast<Operator *>(getChildAtIndex(1, true));
 }
 
-AbstractExpr* LogicalExpr::getRight() const {
-  return reinterpret_cast<AbstractExpr* >(getChildAtIndex(2, true));
+AbstractExpr *LogicalExpr::getRight() const {
+  return reinterpret_cast<AbstractExpr * >(getChildAtIndex(2, true));
 }
 
 std::string LogicalExpr::getNodeName() const {
   return "LogicalExpr";
 }
 
-std::vector<Literal*> LogicalExpr::evaluate(Ast &ast) {
+std::vector<Literal *> LogicalExpr::evaluate(Ast &ast) {
   // we first need to evaluate the left-handside and right-handside as they can consists of nested binary expressions
-  return std::vector<Literal*>(
+  return std::vector<Literal *>(
       {this->getOp()->applyOperator(this->getLeft()->evaluate(ast).front(),
                                     this->getRight()->evaluate(ast).front())});
 }
@@ -53,7 +53,7 @@ std::vector<std::string> LogicalExpr::getVariableIdentifiers() {
   return leftVec;
 }
 
-LogicalExpr* LogicalExpr::contains(LogicalExpr* lexpTemplate, AbstractExpr* excludedSubtree) {
+LogicalExpr *LogicalExpr::contains(LogicalExpr *lexpTemplate, AbstractExpr *excludedSubtree) {
   if (excludedSubtree != nullptr && this == excludedSubtree) {
     return nullptr;
   } else {
@@ -64,20 +64,20 @@ LogicalExpr* LogicalExpr::contains(LogicalExpr* lexpTemplate, AbstractExpr* excl
   }
 }
 
-int LogicalExpr::countByTemplate(AbstractExpr* abstractExpr) {
+int LogicalExpr::countByTemplate(AbstractExpr *abstractExpr) {
   // check if abstractExpr is of type BinaryExpr
-  if (auto expr = dynamic_cast<LogicalExpr*>(abstractExpr)) {
+  if (auto expr = dynamic_cast<LogicalExpr *>(abstractExpr)) {
     // check if current BinaryExpr fulfills requirements of template abstractExpr
     // also check left and right operands for nested BinaryExps
     return (this->contains(expr, nullptr) != nullptr ? 1 : 0)
-        + getLeft()->countByTemplate(abstractExpr)
-        + getRight()->countByTemplate(abstractExpr);
+           + getLeft()->countByTemplate(abstractExpr)
+           + getRight()->countByTemplate(abstractExpr);
   } else {
     return 0;
   }
 }
 
-Node* LogicalExpr::cloneFlat() {
+Node *LogicalExpr::cloneFlat() {
   auto clonedLexp = new LogicalExpr();
   clonedLexp->setUniqueNodeId(this->getUniqueNodeId());
   return clonedLexp;
@@ -87,7 +87,7 @@ int LogicalExpr::getMaxNumberChildren() {
   return 3;
 }
 
-void LogicalExpr::setAttributes(AbstractExpr* leftOperand, Operator* operatore, AbstractExpr* rightOperand) {
+void LogicalExpr::setAttributes(AbstractExpr *leftOperand, Operator *operatore, AbstractExpr *rightOperand) {
   // update tree structure
   removeChildren();
   addChildren({leftOperand, operatore, rightOperand}, false);
@@ -98,7 +98,7 @@ bool LogicalExpr::supportsCircuitMode() {
   return true;
 }
 
-Node* LogicalExpr::createClonedNode(bool keepOriginalUniqueNodeId) {
+Node *LogicalExpr::createClonedNode(bool keepOriginalUniqueNodeId) {
   auto clonedLogicalExpr =
       new LogicalExpr(getLeft()->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
                       getOp()->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<Operator>(),

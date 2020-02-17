@@ -43,13 +43,13 @@ void PrintVisitor::visit(Block &elem) {
 }
 
 void PrintVisitor::visit(Call &elem) {
-  Node* node = static_cast<Node*>(static_cast<AbstractStatement*>(&elem));
+  Node *node = static_cast<Node *>(static_cast<AbstractStatement *>(&elem));
   addOutputStr(*node);
   printChildNodesIndented(elem);
 }
 
 void PrintVisitor::visit(CallExternal &elem) {
-  Node* node = static_cast<Node*>(static_cast<AbstractStatement*>(&elem));
+  Node *node = static_cast<Node *>(static_cast<AbstractStatement *>(&elem));
   addOutputStr(*node, {elem.getFunctionName()});
   printChildNodesIndented(elem);
 }
@@ -177,11 +177,11 @@ void PrintVisitor::printScope() {
   ss << std::endl;
 }
 
-Scope* PrintVisitor::getLastPrintedScope() const {
+Scope *PrintVisitor::getLastPrintedScope() const {
   return lastPrintedScope;
 }
 
-void PrintVisitor::setLastPrintedScope(Scope* scope) {
+void PrintVisitor::setLastPrintedScope(Scope *scope) {
   this->lastPrintedScope = scope;
 }
 

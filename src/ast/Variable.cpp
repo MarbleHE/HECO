@@ -24,7 +24,7 @@ const std::string &Variable::getIdentifier() const {
   return identifier;
 }
 
-bool Variable::contains(Variable* var) {
+bool Variable::contains(Variable *var) {
   return *this == *var;
 }
 
@@ -36,15 +36,15 @@ bool Variable::operator!=(const Variable &rhs) const {
   return !(rhs == *this);
 }
 
-bool Variable::isEqual(AbstractExpr* other) {
-  if (auto otherVar = dynamic_cast<Variable*>(other)) {
+bool Variable::isEqual(AbstractExpr *other) {
+  if (auto otherVar = dynamic_cast<Variable *>(other)) {
     return this->getIdentifier() == otherVar->getIdentifier();
   }
   return false;
 }
 
-std::vector<Literal*> Variable::evaluate(Ast &ast) {
-  return std::vector<Literal*>({ast.getVarValue(this->getIdentifier())});
+std::vector<Literal *> Variable::evaluate(Ast &ast) {
+  return std::vector<Literal *>({ast.getVarValue(this->getIdentifier())});
 }
 
 std::vector<std::string> Variable::getVariableIdentifiers() {
@@ -61,6 +61,6 @@ bool Variable::supportsCircuitMode() {
 
 Variable::~Variable() = default;
 
-Node* Variable::createClonedNode(bool) {
+Node *Variable::createClonedNode(bool) {
   return new Variable(this->identifier);
 }

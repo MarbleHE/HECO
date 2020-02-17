@@ -16,93 +16,93 @@
 static const int CIRCUIT_MAX_TEST_RUNS = 4'096;
 
 struct EvalPrinter {
- private:
-  // flags to configure the amount of data to be printed
-  bool flagPrintEachParameterSet{false};
-  bool flagPrintVariableHeaderOnceOnly{true};
-  bool flagPrintEvaluationResult{false};
+private:
+    // flags to configure the amount of data to be printed
+    bool flagPrintEachParameterSet{false};
+    bool flagPrintVariableHeaderOnceOnly{true};
+    bool flagPrintEvaluationResult{false};
 
-  // the evaluation parameters associated to the test run
-  std::map<std::string, Literal*>* evaluationParameters;
+    // the evaluation parameters associated to the test run
+    std::map<std::string, Literal *> *evaluationParameters;
 
-  void ensureEvalParamsIsSet() {
-    if (evaluationParameters == nullptr) {
-      throw std::logic_error(
-          "EvalPrinter requires calling setEvaluationParameters(...) to have access to the passed parameters.");
+    void ensureEvalParamsIsSet() {
+      if (evaluationParameters == nullptr) {
+        throw std::logic_error(
+            "EvalPrinter requires calling setEvaluationParameters(...) to have access to the passed parameters.");
+      }
     }
-  }
 
- public:
-  EvalPrinter() : evaluationParameters(nullptr) {}
+public:
+    EvalPrinter() : evaluationParameters(nullptr) {}
 
-  EvalPrinter &setFlagPrintEachParameterSet(bool printEachParameterSet) {
-    EvalPrinter::flagPrintEachParameterSet = printEachParameterSet;
-    return *this;
-  }
+    EvalPrinter &setFlagPrintEachParameterSet(bool printEachParameterSet) {
+      EvalPrinter::flagPrintEachParameterSet = printEachParameterSet;
+      return *this;
+    }
 
-  EvalPrinter &setFlagPrintVariableHeaderOnceOnly(bool printVariableHeaderOnceOnly) {
-    EvalPrinter::flagPrintVariableHeaderOnceOnly = printVariableHeaderOnceOnly;
-    return *this;
-  }
+    EvalPrinter &setFlagPrintVariableHeaderOnceOnly(bool printVariableHeaderOnceOnly) {
+      EvalPrinter::flagPrintVariableHeaderOnceOnly = printVariableHeaderOnceOnly;
+      return *this;
+    }
 
-  EvalPrinter &setEvaluationParameters(std::map<std::string, Literal*>* evalParams) {
-    EvalPrinter::evaluationParameters = evalParams;
-    return *this;
-  }
+    EvalPrinter &setEvaluationParameters(std::map<std::string, Literal *> *evalParams) {
+      EvalPrinter::evaluationParameters = evalParams;
+      return *this;
+    }
 
-  EvalPrinter &setFlagPrintEvaluationResult(bool printEvaluationResult) {
-    EvalPrinter::flagPrintEvaluationResult = printEvaluationResult;
-    return *this;
-  }
+    EvalPrinter &setFlagPrintEvaluationResult(bool printEvaluationResult) {
+      EvalPrinter::flagPrintEvaluationResult = printEvaluationResult;
+      return *this;
+    }
 
-  void printHeader() {
-    if (flagPrintEachParameterSet || flagPrintEvaluationResult) {
+    void printHeader() {
+      if (flagPrintEachParameterSet || flagPrintEvaluationResult) {
+        if (flagPrintEachParameterSet) {
+          ensureEvalParamsIsSet();
+          for (auto &[varIdentifier, literal] : *evaluationParameters) std::cout << varIdentifier << ", ";
+          std::cout << "\b\b" << std::endl;
+        }
+        if (flagPrintEvaluationResult) {
+          std::cout << "Evaluation Result (original / rewritten)" << std::endl;
+        }
+        std::cout << std::endl;
+      }
+    }
+
+    void printCurrentParameterSet() {
       if (flagPrintEachParameterSet) {
         ensureEvalParamsIsSet();
-        for (auto &[varIdentifier, literal] : *evaluationParameters) std::cout << varIdentifier << ", ";
-        std::cout << "\b\b" << std::endl;
+        std::stringstream varIdentifiers, varValues;
+        for (auto &[varIdentifier, literal] : *evaluationParameters) {
+          varIdentifiers << varIdentifier << ", ";
+          varValues << *literal << ", ";
+        }
+        varIdentifiers << "\b\b" << std::endl;
+        varValues << "\b\b" << std::endl;
+        std::cout << (!flagPrintVariableHeaderOnceOnly ? varIdentifiers.str() : "") << varValues.str();
       }
+    }
+
+    void printEvaluationResults(const std::vector<Literal *> &resultExpected,
+                                const std::vector<Literal *> &resultRewrittenAst) {
       if (flagPrintEvaluationResult) {
-        std::cout << "Evaluation Result (original / rewritten)" << std::endl;
+        std::cout << "( ";
+        for (auto &result : resultExpected) std::cout << result << ", ";
+        std::cout << "\b\b";
+        std::cout << " / ";
+        for (auto &result : resultRewrittenAst) std::cout << result << ", ";
+        std::cout << "\b\b";
+        std::cout << " )";
       }
+    }
+
+    static void printEndOfEvaluationTestRun() {
       std::cout << std::endl;
     }
-  }
-
-  void printCurrentParameterSet() {
-    if (flagPrintEachParameterSet) {
-      ensureEvalParamsIsSet();
-      std::stringstream varIdentifiers, varValues;
-      for (auto &[varIdentifier, literal] : *evaluationParameters) {
-        varIdentifiers << varIdentifier << ", ";
-        varValues << *literal << ", ";
-      }
-      varIdentifiers << "\b\b" << std::endl;
-      varValues << "\b\b" << std::endl;
-      std::cout << (!flagPrintVariableHeaderOnceOnly ? varIdentifiers.str() : "") << varValues.str();
-    }
-  }
-
-  void printEvaluationResults(const std::vector<Literal*> &resultExpected,
-                              const std::vector<Literal*> &resultRewrittenAst) {
-    if (flagPrintEvaluationResult) {
-      std::cout << "( ";
-      for (auto &result : resultExpected) std::cout << result << ", ";
-      std::cout << "\b\b";
-      std::cout << " / ";
-      for (auto &result : resultRewrittenAst) std::cout << result << ", ";
-      std::cout << "\b\b";
-      std::cout << " )";
-    }
-  }
-
-  static void printEndOfEvaluationTestRun() {
-    std::cout << std::endl;
-  }
 };
 
 static void astOutputComparer(Ast &unmodifiedAst, Ast &rewrittenAst, unsigned int seed, int numTestRuns,
-                              std::map<std::string, Literal*> &evalParams, EvalPrinter* evalPrinter = nullptr) {
+                              std::map<std::string, Literal *> &evalParams, EvalPrinter *evalPrinter = nullptr) {
   // create random number generator with test-specific seed
   RandLiteralGen rng(seed);
 
@@ -117,7 +117,7 @@ static void astOutputComparer(Ast &unmodifiedAst, Ast &rewrittenAst, unsigned in
     rng.randomizeValues(evalParams);
 
     // evaluate both ASTs with previously generated params using the appropriate evaluate function for ASTs or circuits
-    std::vector<Literal*> resultExpected, resultRewrittenAst;
+    std::vector<Literal *> resultExpected, resultRewrittenAst;
     if (isCircuit) {
       resultExpected = unmodifiedAst.evaluateCircuit(evalParams, false);
       resultRewrittenAst = rewrittenAst.evaluateCircuit(evalParams, false);
@@ -146,10 +146,10 @@ static void astOutputComparer(Ast &unmodifiedAst, Ast &rewrittenAst, unsigned in
 
 // circuitOutputComparer with all supported parameters
 static void circuitOutputComparer(Ast &unmodifiedAst, Ast &rewrittenAst, unsigned int seed, int numMaxTestRuns,
-                                  std::map<std::string, Literal*> &evalParams, EvalPrinter* evalPrinter) {
+                                  std::map<std::string, Literal *> &evalParams, EvalPrinter *evalPrinter) {
   // a function that returns True if the given evalParams entry is a LiteralBool
   auto isLiteralBool = [](const auto &mapEntry) {
-    return (dynamic_cast<LiteralBool*>(mapEntry.second) != nullptr);
+      return (dynamic_cast<LiteralBool *>(mapEntry.second) != nullptr);
   };
 
   // Check if we can perform exhaustive testing. We need to fall-back to randomized testing if:
@@ -165,39 +165,39 @@ static void circuitOutputComparer(Ast &unmodifiedAst, Ast &rewrittenAst, unsigne
     /// Its implementation is naive and not very efficient. However, exhaustive testing should anyway only be performed
     /// if the number of circuit inputs is small.
     struct LiteralBoolCombinationsGen {
-     private:
-      std::vector<LiteralBool*> params;
-      std::bitset<CIRCUIT_MAX_TEST_RUNS> nextBitCombination;
+    private:
+        std::vector<LiteralBool *> params;
+        std::bitset<CIRCUIT_MAX_TEST_RUNS> nextBitCombination;
 
-      void updateParams() {
-        // Update all LiteralBools in params based on the current bit states in nextBitCombination.
-        // Iterator 'index' is limited by params.size() because nextBitCombination is larger as its size must be known
-        // at compile-time. A better approach would be to initially update all bits but in further iterations remember
-        // the last modified bit and based on that exit the loop earlier.
-        for (size_t index = 0; index < params.size(); ++index) {
-          bool bitValue = nextBitCombination[index];
-          params.at(index)->setValue(bitValue);
+        void updateParams() {
+          // Update all LiteralBools in params based on the current bit states in nextBitCombination.
+          // Iterator 'index' is limited by params.size() because nextBitCombination is larger as its size must be known
+          // at compile-time. A better approach would be to initially update all bits but in further iterations remember
+          // the last modified bit and based on that exit the loop earlier.
+          for (size_t index = 0; index < params.size(); ++index) {
+            bool bitValue = nextBitCombination[index];
+            params.at(index)->setValue(bitValue);
+          }
         }
-      }
 
-     public:
-      explicit LiteralBoolCombinationsGen(std::map<std::string, Literal*> &evalParams) {
-        nextBitCombination = std::bitset<CIRCUIT_MAX_TEST_RUNS>(0);
-        // convert params into vector of literals
-        for (auto &[varIdentifier, literal] : evalParams) params.push_back(literal->castTo<LiteralBool>());
-      }
-
-      bool hasNextAndUpdate() {
-        // stop if we already built all possible combinations for 2^{params.size()} bits
-        if (static_cast<double>(nextBitCombination.to_ulong()) < pow(2, params.size())) {
-          // modify params map based on combination in nextBitCombination
-          updateParams();
-          // increment nextBitCombination map to represent next value
-          nextBitCombination = nextBitCombination.to_ulong() + 1l;
-          return true;
+    public:
+        explicit LiteralBoolCombinationsGen(std::map<std::string, Literal *> &evalParams) {
+          nextBitCombination = std::bitset<CIRCUIT_MAX_TEST_RUNS>(0);
+          // convert params into vector of literals
+          for (auto &[varIdentifier, literal] : evalParams) params.push_back(literal->castTo<LiteralBool>());
         }
-        return false;
-      }
+
+        bool hasNextAndUpdate() {
+          // stop if we already built all possible combinations for 2^{params.size()} bits
+          if (static_cast<double>(nextBitCombination.to_ulong()) < pow(2, params.size())) {
+            // modify params map based on combination in nextBitCombination
+            updateParams();
+            // increment nextBitCombination map to represent next value
+            nextBitCombination = nextBitCombination.to_ulong() + 1l;
+            return true;
+          }
+          return false;
+        }
     }; // struct LiteralBoolCombinationsGen
 
     // we can perform exhaustive testing: create a new LiteralBoolCombinationsGen instance
@@ -233,13 +233,13 @@ static void circuitOutputComparer(Ast &unmodifiedAst, Ast &rewrittenAst, unsigne
 
 // circuitOutputComparer with EvalPrinter pointer
 static void circuitOutputComparer(Ast &unmodifiedAst, Ast &rewrittenAst, unsigned int seed, int numMaxTestRuns,
-                                  std::map<std::string, Literal*> &evalParams) {
+                                  std::map<std::string, Literal *> &evalParams) {
   return circuitOutputComparer(unmodifiedAst, rewrittenAst, seed, numMaxTestRuns, evalParams, nullptr);
 }
 
 // circuitOutputComparer without numMaxTestRuns
 static void circuitOutputComparer(Ast &unmodifiedAst, Ast &rewrittenAst, unsigned int seed,
-                                  std::map<std::string, Literal*> &evalParams) {
+                                  std::map<std::string, Literal *> &evalParams) {
   return circuitOutputComparer(unmodifiedAst, rewrittenAst, seed, CIRCUIT_MAX_TEST_RUNS, evalParams, nullptr);
 }
 

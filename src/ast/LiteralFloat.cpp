@@ -27,8 +27,8 @@ std::string LiteralFloat::getNodeName() const {
 
 LiteralFloat::~LiteralFloat() = default;
 
-std::vector<Literal*> LiteralFloat::evaluate(Ast &ast) {
-  return std::vector<Literal*>({this});
+std::vector<Literal *> LiteralFloat::evaluate(Ast &ast) {
+  return std::vector<Literal *>({this});
 }
 
 LiteralFloat LiteralFloat::operator+(LiteralFloat const &lint) {
@@ -52,7 +52,7 @@ bool LiteralFloat::operator!=(const LiteralFloat &rhs) const {
   return !(rhs == *this);
 }
 
-void LiteralFloat::addLiteralValue(std::string identifier, std::map<std::string, Literal*> &paramsMap) {
+void LiteralFloat::addLiteralValue(std::string identifier, std::map<std::string, Literal *> &paramsMap) {
   paramsMap.emplace(identifier, this);
 }
 
@@ -76,6 +76,6 @@ bool LiteralFloat::supportsDatatype(Datatype &datatype) {
   return datatype.getType() == TYPES::FLOAT;
 }
 
-Node* LiteralFloat::createClonedNode(bool) {
+Node *LiteralFloat::createClonedNode(bool) {
   return new LiteralFloat(this->getValue());
 }
