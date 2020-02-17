@@ -124,7 +124,7 @@ include/ast     – contains the header files (.h)
 src/ast         – contains the implementation (.cpp)
 ```
 
-For auto-formatting in the CLion IDE, please use the code style definition provided in [doc/clion/codeStyleConfig.xml](doc/clion/codestyle) that is basically CLion's default presets for C/C++. The file can be loaded into the IDE in the CLion preferences (Editor → Code Style → C/C++).
+For auto-formatting in the CLion IDE, please use the code style definition [MarbleHE_CPP_Code_Style.xml](MarbleHE_CPP_Code_Style.xml) that is basically CLion's default presets for C/C++. The file can be loaded into the IDE in the CLion preferences (Editor → Code Style → C/C++).
 
 // TODO Add description on used code inspections (CLion code inspector + cpplint) and provide configuration files
 
