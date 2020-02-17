@@ -4,11 +4,11 @@
 #include <string>
 #include <nlohmann/json.hpp>
 #include "Visitor.h"
-#include "Node.h"
+#include "AbstractNode.h"
 
 using json = nlohmann::json;
 
-class AbstractStatement : public Node {
+class AbstractStatement : public AbstractNode {
 public:
     [[nodiscard]] std::string toString() const override;
 

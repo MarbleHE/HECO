@@ -39,7 +39,7 @@ std::vector<Literal *> CallExternal::evaluate(Ast &ast) {
       "evaluateAst(Ast &ast) not implemented for class CallExternal yet! Consider using Call instead.");
 }
 
-Node *CallExternal::createClonedNode(bool keepOriginalUniqueNodeId) {
+AbstractNode *CallExternal::createClonedNode(bool keepOriginalUniqueNodeId) {
   std::vector<FunctionParameter *> args;
   for (auto &fp : this->getArguments()) {
     args.push_back(fp->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<FunctionParameter>());

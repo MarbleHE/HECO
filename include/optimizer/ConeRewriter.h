@@ -1,7 +1,7 @@
 #ifndef AST_OPTIMIZER_INCLUDE_OPTIMIZER_CONEREWRITER_H_
 #define AST_OPTIMIZER_INCLUDE_OPTIMIZER_CONEREWRITER_H_
 
-#include "Node.h"
+#include "AbstractNode.h"
 #include <vector>
 #include <random>
 #include "Ast.h"
@@ -20,27 +20,27 @@ private:
     // ------------------------------------–
     // Internal (non-universal) helper methods
     // ------------------------------------–
-    void rewriteCones(Ast &astToRewrite, const std::vector<Node *> &coneEndNodes);
+    void rewriteCones(Ast &astToRewrite, const std::vector<AbstractNode *> &coneEndNodes);
 
-    bool isCriticalNode(Node *n);
+    bool isCriticalNode(AbstractNode *n);
 
     int getMaxMultDepth(Ast &ast);
 
-    Node *getBFSLastNonCriticalLeafNode();
+    AbstractNode *getBFSLastNonCriticalLeafNode();
 
-    static void addElements(std::vector<Node *> &result, std::vector<Node *> newElements);
+    static void addElements(std::vector<AbstractNode *> &result, std::vector<AbstractNode *> newElements);
 
-    static void flattenVectors(std::vector<Node *> &resultVector, std::vector<std::vector<Node *>> vectorOfVectors);
+    static void flattenVectors(std::vector<AbstractNode *> &resultVector, std::vector<std::vector<AbstractNode *>> vectorOfVectors);
 
-    static void reverseEdges(const std::vector<Node *> &nodes);
+    static void reverseEdges(const std::vector<AbstractNode *> &nodes);
 
-    std::vector<Node *> computeReducibleCones();
+    std::vector<AbstractNode *> computeReducibleCones();
 
-    static std::vector<Node *> sortTopologically(const std::vector<Node *> &nodes);
+    static std::vector<AbstractNode *> sortTopologically(const std::vector<AbstractNode *> &nodes);
 
-    std::vector<Node *> *getPredecessorOnCriticalPath(Node *v);
+    std::vector<AbstractNode *> *getPredecessorOnCriticalPath(AbstractNode *v);
 
-    int computeMinDepth(Node *v);
+    int computeMinDepth(AbstractNode *v);
 
     // ------------------------------------–
     // Algorithms presented in the paper
@@ -49,9 +49,9 @@ private:
     /// \param v The starting node for the cone construction procedure.
     /// \param minDepth The minimal multiplicative depth to which cone search will be performed.
     /// \return The cone to be rewritten, or an empty set if the cone ending at v cannot be reduced.
-    std::vector<Node *> getReducibleCones(Node *v, int minDepth);
+    std::vector<AbstractNode *> getReducibleCones(AbstractNode *v, int minDepth);
 
-    std::vector<Node *> getReducibleCones();
+    std::vector<AbstractNode *> getReducibleCones();
 
     /// Calls and prints the output of getReducibleCones for each node in the given Ast.
     void getReducibleConesForEveryPossibleStartingNode(Ast &inputAst);
@@ -60,12 +60,12 @@ private:
     Ast &applyMinMultDepthHeuristic();
 
     /// Implements the algorithm that constructs the graph C_{AND} of critical AND nodes [see paragraph 3.2, page 10].
-    static std::vector<Node *> getAndCriticalCircuit(std::vector<Node *> delta);
+    static std::vector<AbstractNode *> getAndCriticalCircuit(std::vector<AbstractNode *> delta);
 
     /// Implements the cone selection algorithm [see Algorithm 3, page 11]
-    static std::vector<Node *> selectCones(std::vector<Node *> cAndCkt);
+    static std::vector<AbstractNode *> selectCones(std::vector<AbstractNode *> cAndCkt);
 
-    std::pair<Node *, Node *> getCriticalAndNonCriticalInput(LogicalExpr *n);
+    std::pair<AbstractNode *, AbstractNode *> getCriticalAndNonCriticalInput(LogicalExpr *n);
 
 public:
     explicit ConeRewriter(Ast *ast);

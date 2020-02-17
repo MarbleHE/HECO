@@ -15,9 +15,9 @@ class Literal;
 
 class Ast;
 
-class Node {
+class AbstractNode {
 private:
-    [[nodiscard]] virtual Node *createClonedNode(bool keepOriginalUniqueNodeId);
+    [[nodiscard]] virtual AbstractNode *createClonedNode(bool keepOriginalUniqueNodeId);
 
 protected:
     /// Temporarily stores the reserved node ID until the first call of getUniqueNodeId() at which the reserved ID is
@@ -25,27 +25,27 @@ protected:
     /// This is a workaround because getNodeName() is a virtual method that cannot be called from derived classes and
     /// their constructor. After retrieving the node ID and assigning it to the uniqueNodeId field, it is deleted from
     /// this map.
-    std::map<Node *, int> assignedNodeIds{};
+    std::map<AbstractNode *, int> assignedNodeIds{};
 
     /// Stores the children of the current node if the node supports the circuit mode (see supportsCircuitMode()).
-    std::vector<Node *> children{};
+    std::vector<AbstractNode *> children{};
 
     /// Stores the parent nodes of the current node if the node supports the circuit mode (see supportsCircuitMode()).
-    std::vector<Node *> parents{};
+    std::vector<AbstractNode *> parents{};
 
-    /// A static ongoing counter that is incremented after creating a new Node object. The counter's value is used to
+    /// A static ongoing counter that is incremented after creating a new AbstractNode object. The counter's value is used to
     /// build the unique node ID.
     static int nodeIdCounter;
 
     /// An identifier that is unique among all nodes during runtime.
     std::string uniqueNodeId;
 
-    /// This attributes is used to link back to the original Node if this node is part of an overlay circuit representing
+    /// This attributes is used to link back to the original AbstractNode if this node is part of an overlay circuit representing
     /// only a subset of certain nodes. Required, for example, by cone rewriting.
-    Node *underlyingNode{};
+    AbstractNode *underlyingNode{};
 
     /// Generates a new node ID in the form "<NodeTypeName>_nodeIdCounter++" where <NodeTypeName> is the value obtained by
-    /// getNodeName() and nodeIdCounter an ongoing counter of created Node objects.
+    /// getNodeName() and nodeIdCounter an ongoing counter of created AbstractNode objects.
     /// \return An unique node ID to be used as uniqueNodeId for the current node.
     std::string genUniqueNodeId();
 
@@ -58,16 +58,16 @@ protected:
     /// \param idx The position of the child to be retrieved.
     /// \param isEdgeDirectionAware If the node's status of isReversed should be considered.
     /// \return A reference to the node at the specified index in the children or parent vector.
-    [[nodiscard]] Node *getChildAtIndex(int idx, bool isEdgeDirectionAware) const;
+    [[nodiscard]] AbstractNode *getChildAtIndex(int idx, bool isEdgeDirectionAware) const;
 
 public:
-    Node();
+    AbstractNode();
 
-    virtual ~Node();
+    virtual ~AbstractNode();
 
-    [[nodiscard]] Node *getUnderlyingNode() const;
+    [[nodiscard]] AbstractNode *getUnderlyingNode() const;
 
-    void setUnderlyingNode(Node *uNode);
+    void setUnderlyingNode(AbstractNode *uNode);
 
     [[nodiscard]] virtual std::string getNodeName() const;
 
@@ -78,46 +78,46 @@ public:
 
     /// Returns a reference to the vector of parent nodes.
     /// \return A reference to the vector of this node's parents.
-    [[nodiscard]] const std::vector<Node *> &getParents() const;
+    [[nodiscard]] const std::vector<AbstractNode *> &getParents() const;
 
     /// Returns a reference to the vector of children nodes.
     /// \return A reference to the vector of this node's children.
-    [[nodiscard]] const std::vector<Node *> &getChildren() const;
+    [[nodiscard]] const std::vector<AbstractNode *> &getChildren() const;
 
     /// Returns all the ancestor nodes of the current node.
     /// \return A list of ancestor nodes.
-    std::vector<Node *> getAnc();
+    std::vector<AbstractNode *> getAnc();
 
     // Functions for handling children
-    void addChild(Node *child, bool addBackReference = false);
+    void addChild(AbstractNode *child, bool addBackReference = false);
 
-    void addChildBilateral(Node *child);
+    void addChildBilateral(AbstractNode *child);
 
-    void addChildren(const std::vector<Node *> &childrenToAdd, bool addBackReference = false);
+    void addChildren(const std::vector<AbstractNode *> &childrenToAdd, bool addBackReference = false);
 
-    void setChild(std::vector<Node *>::const_iterator position, Node *value);
+    void setChild(std::vector<AbstractNode *>::const_iterator position, AbstractNode *value);
 
-    void removeChild(Node *child);
+    void removeChild(AbstractNode *child);
 
     void removeChildren();
 
     [[nodiscard]] int countChildrenNonNull() const;
 
     /// Returns the child at the given index.
-    /// \param idx The position of the children in the Node::children vector.
+    /// \param idx The position of the children in the AbstractNode::children vector.
     /// \return The child at the given index of the children vector, or a nullptr if there is no child at this position.
-    [[nodiscard]] Node *getChildAtIndex(int idx) const;
+    [[nodiscard]] AbstractNode *getChildAtIndex(int idx) const;
 
     // Functions for handling parents
-    void addParent(Node *n);
+    void addParent(AbstractNode *n);
 
-    void removeParent(Node *node);
+    void removeParent(AbstractNode *node);
 
     void removeParents();
 
-    bool hasParent(Node *n);
+    bool hasParent(AbstractNode *n);
 
-    static void addParentTo(Node *parentNode, std::vector<Node *> nodesToAddParentTo);
+    static void addParentTo(AbstractNode *parentNode, std::vector<AbstractNode *> nodesToAddParentTo);
 
     void swapChildrenParents();
 
@@ -129,13 +129,13 @@ public:
 
     [[nodiscard]] virtual std::string toString() const;
 
-    friend std::ostream &operator<<(std::ostream &os, const std::vector<Node *> &v);
+    friend std::ostream &operator<<(std::ostream &os, const std::vector<AbstractNode *> &v);
 
-    [[nodiscard]] virtual Node *cloneFlat();
+    [[nodiscard]] virtual AbstractNode *cloneFlat();
 
     void setUniqueNodeId(const std::string &unique_node_id);
 
-    /// This method returns True iff the class derived from the Node class properly makes use of the child/parent fields
+    /// This method returns True iff the class derived from the AbstractNode class properly makes use of the child/parent fields
     /// as it would be expected in a circuit.
     virtual bool supportsCircuitMode();
 
@@ -149,9 +149,9 @@ public:
     /// Indicates whether the edges of this node are reversed compared to its initial state.
     bool isReversed{false};
 
-    [[nodiscard]] std::vector<Node *> getChildrenNonNull() const;
+    [[nodiscard]] std::vector<AbstractNode *> getChildrenNonNull() const;
 
-    [[nodiscard]] std::vector<Node *> getParentsNonNull() const;
+    [[nodiscard]] std::vector<AbstractNode *> getParentsNonNull() const;
 
     /// Removes this node from all of its parents and children, and also removes all parents and children from this node.
     void isolateNode();
@@ -159,7 +159,7 @@ public:
     /// Removes the node 'child' bilateral, i.e., on both ends of the edge. In other words, removes the node 'child' from
     /// this node, and this node from the parents list of 'child' node.
     /// \param child The child to be removed from this node.
-    void removeChildBilateral(Node *child);
+    void removeChildBilateral(AbstractNode *child);
 
     /// Checks whether the edges of this node are reversed (i.e., node's parents and children are swapped).
     /// \return True iff the node's edges are reversed.
@@ -175,10 +175,10 @@ public:
 
     /// \param inputNodes The inputs y_1, ..., y_m that are connected to the multi-input gate. It is required that m>=2.
     /// \param gateType The gate that all inputs are connected to.
-    /// \return A vector of Node objects of type LogicalExpr that represent the chain of LogicalExpr required to represent
+    /// \return A vector of AbstractNode objects of type LogicalExpr that represent the chain of LogicalExpr required to represent
     /// the intended multi-input gate. The last node in inputNodes (i.e., inputNodes.back()) is always the output of this
     /// chain.
-    static std::vector<Node *> rewriteMultiInputGateToBinaryGatesChain(std::vector<Node *> inputNodes,
+    static std::vector<AbstractNode *> rewriteMultiInputGateToBinaryGatesChain(std::vector<AbstractNode *> inputNodes,
                                                                        OpSymb::LogCompOp gateType);
 
     /// Casts a node to type T which must be the specific derived class of the node to cast successfully.
@@ -190,7 +190,7 @@ public:
         return castedNode;
       } else {
         std::stringstream outputMsg;
-        outputMsg << "Cannot cast object of type Node to given class ";
+        outputMsg << "Cannot cast object of type AbstractNode to given class ";
         outputMsg << typeid(T).name() << ". ";
         outputMsg << "Because node (" << this->getUniqueNodeId() << ") is of type ";
         outputMsg << this->getNodeName() << ".";
@@ -198,9 +198,9 @@ public:
       }
     }
 
-    bool hasChild(Node *n);
+    bool hasChild(AbstractNode *n);
 
-    Node *cloneRecursiveDeep(bool keepOriginalUniqueNodeId);
+    AbstractNode *cloneRecursiveDeep(bool keepOriginalUniqueNodeId);
 
     Literal *ensureSingleEvaluationResult(std::vector<Literal *> evaluationResult);
 };

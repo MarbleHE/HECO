@@ -23,8 +23,8 @@ Ast &ConeRewriter::applyConeRewriting() {
   // Ensure that we have a circuit of supported nodes only
   if (!ast->isValidCircuit()) {
     throw std::invalid_argument(
-        "Cannot perform Cone Rewriting on AST because AST consists of Node types that are not circuit-compatible. "
-        "These nodes do not define the required child/parent relationship of class Node.");
+        "Cannot perform Cone Rewriting on AST because AST consists of AbstractNode types that are not circuit-compatible. "
+        "These nodes do not define the required child/parent relationship of class AbstractNode.");
   }
   return applyMinMultDepthHeuristic();
 }
@@ -37,7 +37,7 @@ Ast &ConeRewriter::applyMinMultDepthHeuristic() {
   Ast *cOut = new Ast(*ast, true);
 
   // compute reducible cones set
-  std::vector<Node *> deltaMin = ConeRewriter::computeReducibleCones();
+  std::vector<AbstractNode *> deltaMin = ConeRewriter::computeReducibleCones();
 
   // repeat rewriting as long as there are any reducible cones.
   // optimizedCkt will contain optimized circuit with all rewritten cones
@@ -64,21 +64,21 @@ Ast &ConeRewriter::applyMinMultDepthHeuristic() {
   return *cOut;
 }
 
-std::vector<Node *> ConeRewriter::computeReducibleCones() {
+std::vector<AbstractNode *> ConeRewriter::computeReducibleCones() {
   // We need to reverse the original tree's edges to be conform to the paper. This, however, is only required to perform
   // cone selection.
   if (!ast->isReversed()) ast->reverseEdges();
 
   // delta: set of all reducible cones
-  std::vector<Node *> delta = getReducibleCones();
+  std::vector<AbstractNode *> delta = getReducibleCones();
 
   // cAndCkt: C^{AND} circuit consisting of critical AND-nodes that are connected if there is a multiplicative depth-2
   // path in between two of those nodes in the initial circuit
   // each cone δ ∈ Δ has an unique terminal AND node in C^{AND}
-  std::vector<Node *> cAndCkt = ConeRewriter::getAndCriticalCircuit(delta);
+  std::vector<AbstractNode *> cAndCkt = ConeRewriter::getAndCriticalCircuit(delta);
 
   // deltaMin: the minimum set of reducible cones
-  std::vector<Node *> deltaMin = ConeRewriter::selectCones(cAndCkt);
+  std::vector<AbstractNode *> deltaMin = ConeRewriter::selectCones(cAndCkt);
 
   // make sure that AST is reversed back if it was reversed at the beginning of this function
   if (ast->isReversed()) ast->reverseEdges();
@@ -86,14 +86,14 @@ std::vector<Node *> ConeRewriter::computeReducibleCones() {
   return deltaMin;
 }
 
-std::vector<Node *> ConeRewriter::getReducibleCones() {
-  Node *startNode = nullptr;
+std::vector<AbstractNode *> ConeRewriter::getReducibleCones() {
+  AbstractNode *startNode = nullptr;
   auto rootNode = ast->getRootNode();
 
-  auto getNthAncestorLogicalExpr = [&](int N) -> Node * {
+  auto getNthAncestorLogicalExpr = [&](int N) -> AbstractNode * {
       // find first LogicalExpr in AST
-      std::pair<Node *, int> candidate(nullptr, 0);
-      std::queue<Node *> q{{rootNode}};
+      std::pair<AbstractNode *, int> candidate(nullptr, 0);
+      std::queue<AbstractNode *> q{{rootNode}};
       while (!q.empty()) {
         auto curNode = q.front();
         q.pop();
@@ -103,7 +103,7 @@ std::vector<Node *> ConeRewriter::getReducibleCones() {
             return candidate.first;
         }
         // add all parent nodes
-        std::for_each(curNode->getParents().begin(), curNode->getParents().end(), [&](Node *n) { q.push(n); });
+        std::for_each(curNode->getParents().begin(), curNode->getParents().end(), [&](AbstractNode *n) { q.push(n); });
       }
       return nullptr;
   };
@@ -118,7 +118,7 @@ std::vector<Node *> ConeRewriter::getReducibleCones() {
   int minDepth = computeMinDepth(startNode);
 
   // v has no non-critical input node p -> return empty set
-  if (minDepth == -1) return std::vector<Node *>();
+  if (minDepth == -1) return std::vector<AbstractNode *>();
 
   return getReducibleCones(startNode, minDepth);
 }
@@ -127,9 +127,9 @@ std::vector<Node *> ConeRewriter::getReducibleCones() {
 // Internal (non-universal) helper methods
 // ------------------------------------–
 
-int ConeRewriter::computeMinDepth(Node *v) {
+int ConeRewriter::computeMinDepth(AbstractNode *v) {
   // find a non-critical input node p of v
-  auto isNoOperatorNode = [](Node *n) { return (dynamic_cast<Operator *>(n) == nullptr); };
+  auto isNoOperatorNode = [](AbstractNode *n) { return (dynamic_cast<Operator *>(n) == nullptr); };
   for (auto &p : v->getParentsNonNull()) {
     // exclude Operator nodes as they do not have any parent and are not modeled as node in the paper
     if (isNoOperatorNode(p) && !isCriticalNode(p)) {
@@ -143,25 +143,25 @@ int ConeRewriter::computeMinDepth(Node *v) {
   return -1;
 }
 
-std::vector<Node *> ConeRewriter::getReducibleCones(Node *v, int minDepth) {
+std::vector<AbstractNode *> ConeRewriter::getReducibleCones(AbstractNode *v, int minDepth) {
   // return empty set if minDepth is reached
-  if (mdc.getMultDepthL(v) == minDepth) return std::vector<Node *>();
+  if (mdc.getMultDepthL(v) == minDepth) return std::vector<AbstractNode *>();
 
   // get predecessor nodes on critical path, i.e., { p ∈ pred(v) | l(p) = l(v) - d(v) }
-  std::vector<Node *> *P = getPredecessorOnCriticalPath(v);
+  std::vector<AbstractNode *> *P = getPredecessorOnCriticalPath(v);
 
   // return v if at least one predecessor of v is non-critical and v is an AND-gate
   auto logicalExp = v->castTo<LogicalExpr>();
   if (P->size() < 2 && logicalExp != nullptr && logicalExp->getOp()->equals(OpSymb::logicalAnd)) {
     // return set consisting of start node v only
-    return std::vector<Node *>{v};
+    return std::vector<AbstractNode *>{v};
   }
 
   // determine reducible input cones
-  std::vector<std::vector<Node *>> deltaR;
-  std::vector<Node *> delta;
+  std::vector<std::vector<AbstractNode *>> deltaR;
+  std::vector<AbstractNode *> delta;
   for (auto &p : *P) {
-    std::vector<Node *> intermedResult = getReducibleCones(p, computeMinDepth(p));
+    std::vector<AbstractNode *> intermedResult = getReducibleCones(p, computeMinDepth(p));
     if (!intermedResult.empty()) deltaR.push_back(intermedResult);
   }
 
@@ -174,7 +174,7 @@ std::vector<Node *> ConeRewriter::getReducibleCones(Node *v, int minDepth) {
       !(logicalExp->getOp()->equals(OpSymb::logicalAnd) || logicalExp->getOp()->equals(OpSymb::logicalXor)) ||
       (logicalExp->getOp()->equals(OpSymb::logicalAnd) && deltaR.empty()) ||
       (logicalExp->getOp()->equals(OpSymb::logicalXor) && deltaR.size() != P->size())) {
-    return std::vector<Node *>();
+    return std::vector<AbstractNode *>();
   }
 
   if (logicalExp->getOp()->equals(OpSymb::logicalAnd)) {
@@ -183,7 +183,7 @@ std::vector<Node *> ConeRewriter::getReducibleCones(Node *v, int minDepth) {
   } else if (logicalExp->getOp()->equals(OpSymb::logicalXor)) {
     // critical cones must be reducible because size of deltaR equals size of P
     // flatten vector deltaR consisting of sets generated each by getReducibleCones
-    std::vector<Node *> flattenedDeltaR;
+    std::vector<AbstractNode *> flattenedDeltaR;
     flattenVectors(flattenedDeltaR, deltaR);
     // add all elements of flattened deltaR to delta
     addElements(delta, flattenedDeltaR);
@@ -195,7 +195,7 @@ std::vector<Node *> ConeRewriter::getReducibleCones(Node *v, int minDepth) {
 }
 
 int ConeRewriter::getMaxMultDepth(Ast &inputAst) {
-  std::queue<Node *> nodesToCheck;
+  std::queue<AbstractNode *> nodesToCheck;
   nodesToCheck.push(inputAst.getRootNode());
   int highestDepth = 0;
   while (!nodesToCheck.empty()) {
@@ -203,29 +203,29 @@ int ConeRewriter::getMaxMultDepth(Ast &inputAst) {
     nodesToCheck.pop();
     highestDepth = std::max(highestDepth, mdc.getMultDepthL(curNode));
     auto vec = inputAst.isReversed() ? curNode->getParents() : curNode->getChildren();
-    std::for_each(vec.begin(), vec.end(), [&](Node *n) {
+    std::for_each(vec.begin(), vec.end(), [&](AbstractNode *n) {
         nodesToCheck.push(n);
     });
   }
   return highestDepth;
 }
 
-void ConeRewriter::addElements(std::vector<Node *> &result, std::vector<Node *> newElements) {
+void ConeRewriter::addElements(std::vector<AbstractNode *> &result, std::vector<AbstractNode *> newElements) {
   result.reserve(result.size() + newElements.size());
   result.insert(result.end(), newElements.begin(), newElements.end());
 }
 
-void ConeRewriter::flattenVectors(std::vector<Node *> &resultVector, std::vector<std::vector<Node *>> vectorOfVectors) {
-  std::set<Node *> res;
-  std::for_each(vectorOfVectors.begin(), vectorOfVectors.end(), [&](std::vector<Node *> rVec) {
+void ConeRewriter::flattenVectors(std::vector<AbstractNode *> &resultVector, std::vector<std::vector<AbstractNode *>> vectorOfVectors) {
+  std::set<AbstractNode *> res;
+  std::for_each(vectorOfVectors.begin(), vectorOfVectors.end(), [&](std::vector<AbstractNode *> rVec) {
       res.insert(rVec.begin(), rVec.end());
   });
   resultVector.assign(res.begin(), res.end());
 }
 
-std::vector<Node *> *ConeRewriter::getPredecessorOnCriticalPath(Node *v) {
+std::vector<AbstractNode *> *ConeRewriter::getPredecessorOnCriticalPath(AbstractNode *v) {
   // P <- { p ∈ pred(v) | l(p) = l(v) - d(v) }
-  auto result = new std::vector<Node *>();
+  auto result = new std::vector<AbstractNode *>();
   int criterion = mdc.getMultDepthL(v) - mdc.depthValue(v);
   for (auto &p : v->getParentsNonNull()) {
     if (mdc.getMultDepthL(p) == criterion) result->push_back(p);
@@ -233,43 +233,43 @@ std::vector<Node *> *ConeRewriter::getPredecessorOnCriticalPath(Node *v) {
   return result;
 }
 
-void ConeRewriter::reverseEdges(const std::vector<Node *> &nodes) {
-  for (Node *n : nodes) n->swapChildrenParents();
+void ConeRewriter::reverseEdges(const std::vector<AbstractNode *> &nodes) {
+  for (AbstractNode *n : nodes) n->swapChildrenParents();
 }
 
 /// Method used for debugging purposes only
 void ConeRewriter::getReducibleConesForEveryPossibleStartingNode(Ast &inputAst) {
-  for (Node *n : inputAst.getRootNode()->getAnc()) {
+  for (AbstractNode *n : inputAst.getRootNode()->getAnc()) {
     int minDepth = computeMinDepth(n);
     if (minDepth == -1) continue;
-    std::vector<Node *> delta = getReducibleCones(n, minDepth);
+    std::vector<AbstractNode *> delta = getReducibleCones(n, minDepth);
 
     // cAndCkt: C^{AND} circuit consisting of critical AND-nodes that are connected if there is a multiplicative depth-2
     // path in between two of those nodes in the initial circuit
     // each cone δ ∈ Δ has an unique terminal AND node in C^{AND}
-    std::vector<Node *> cAndCkt = ConeRewriter::getAndCriticalCircuit(delta);
+    std::vector<AbstractNode *> cAndCkt = ConeRewriter::getAndCriticalCircuit(delta);
 
     // deltaMin: the minimum set of reducible cones
-    std::vector<Node *> deltaMin = ConeRewriter::selectCones(cAndCkt);
+    std::vector<AbstractNode *> deltaMin = ConeRewriter::selectCones(cAndCkt);
   }
 }
 
-bool ConeRewriter::isCriticalNode(Node *n) {
+bool ConeRewriter::isCriticalNode(AbstractNode *n) {
   int l = mdc.getMultDepthL(n);
   int r = mdc.getReverseMultDepthR(n);
   return (mdc.getMaximumMultiplicativeDepth() == l + r);
 }
 
-std::vector<Node *> ConeRewriter::getAndCriticalCircuit(std::vector<Node *> delta) {
+std::vector<AbstractNode *> ConeRewriter::getAndCriticalCircuit(std::vector<AbstractNode *> delta) {
   // remove non-AND nodes from delta (note: delta is passed as copy-by-value) as delta may also include XOR nodes
-  delta.erase(remove_if(delta.begin(), delta.end(), [](Node *d) {
+  delta.erase(remove_if(delta.begin(), delta.end(), [](AbstractNode *d) {
       auto lexp = dynamic_cast<LogicalExpr *>(d);
       return (lexp == nullptr || !lexp->getOp()->equals(OpSymb::logicalAnd));
   }), delta.end());
 
   // duplicate critical nodes to create new circuit C_{AND} as we do not want to modify the original circuit
-  std::unordered_map<std::string, Node *> cAndMap;
-  std::vector<Node *> cAndResultCkt;
+  std::unordered_map<std::string, AbstractNode *> cAndMap;
+  std::vector<AbstractNode *> cAndResultCkt;
   for (auto &v : delta) {
     // note that cloneFlat() does not copy the links to parents and children
     auto clonedNode = v->cloneFlat();
@@ -284,7 +284,7 @@ std::vector<Node *> ConeRewriter::getAndCriticalCircuit(std::vector<Node *> delt
 
   // check if there are depth-2 critical paths in between critical nodes in the original ckt
   for (auto &v : delta) {
-    std::queue<Node *> q{{v}};
+    std::queue<AbstractNode *> q{{v}};
     while (!q.empty()) {
       auto curNode = q.front();
       q.pop();
@@ -294,8 +294,8 @@ std::vector<Node *> ConeRewriter::getAndCriticalCircuit(std::vector<Node *> delt
         if (childLexp != nullptr && childLexp->getOp()->equals(OpSymb::logicalAnd)) {
           // check if this child is a critical node, if yes: connect both nodes
           if (std::find(delta.begin(), delta.end(), childLexp) != delta.end()) {
-            Node *copiedV = cAndMap[v->getUniqueNodeId()];
-            Node *copiedChild = cAndMap[child->getUniqueNodeId()];
+            AbstractNode *copiedV = cAndMap[v->getUniqueNodeId()];
+            AbstractNode *copiedChild = cAndMap[child->getUniqueNodeId()];
             copiedV->addChild(copiedChild);
             copiedChild->addParent(copiedV);
           }
@@ -310,13 +310,13 @@ std::vector<Node *> ConeRewriter::getAndCriticalCircuit(std::vector<Node *> delt
 
 /// This method implements Kahn's algorithm as described at wikipedia,
 /// see https://en.wikipedia.org/wiki/Topological_sorting#CITEREFKahn1962
-std::vector<Node *> ConeRewriter::sortTopologically(const std::vector<Node *> &nodes) {
-  std::vector<Node *> L;
-  std::map<Node *, int> numEdgesDeleted;
+std::vector<AbstractNode *> ConeRewriter::sortTopologically(const std::vector<AbstractNode *> &nodes) {
+  std::vector<AbstractNode *> L;
+  std::map<AbstractNode *, int> numEdgesDeleted;
 
   // S <- nodes without an incoming edge
-  std::vector<Node *> S;
-  std::for_each(nodes.begin(), nodes.end(), [&](Node *n) {
+  std::vector<AbstractNode *> S;
+  std::for_each(nodes.begin(), nodes.end(), [&](AbstractNode *n) {
       if (n->getParents().empty()) S.push_back(n);
   });
 
@@ -332,13 +332,13 @@ std::vector<Node *> ConeRewriter::sortTopologically(const std::vector<Node *> &n
   return L;
 }
 
-std::vector<Node *> ConeRewriter::selectCones(std::vector<Node *> cAndCkt) {
+std::vector<AbstractNode *> ConeRewriter::selectCones(std::vector<AbstractNode *> cAndCkt) {
   /// Helper function that computes the flow of all nodes in the given circuit ckt
-  auto computeFlow = [](std::vector<Node *> &ckt) {
-      std::map<Node *, float> computedFlow;
-      std::map<std::pair<Node *, Node *>, float> edgeFlows;
+  auto computeFlow = [](std::vector<AbstractNode *> &ckt) {
+      std::map<AbstractNode *, float> computedFlow;
+      std::map<std::pair<AbstractNode *, AbstractNode *>, float> edgeFlows;
       auto topologicalOrder = ConeRewriter::sortTopologically(ckt);
-      for (Node *v : topologicalOrder) {
+      for (AbstractNode *v : topologicalOrder) {
         if (v->getParentsNonNull().empty()) {  // if v is input
           // trivial flow of 1
           computedFlow[v] = 1;
@@ -346,7 +346,7 @@ std::vector<Node *> ConeRewriter::selectCones(std::vector<Node *> cAndCkt) {
           // compute flow by accumulating flows of incoming edges (u,v) where u ∈ pred(v)
           auto predecessorsOfV = v->getParentsNonNull();
           float flow = 0.0f;
-          std::for_each(predecessorsOfV.begin(), predecessorsOfV.end(), [&](Node *u) {
+          std::for_each(predecessorsOfV.begin(), predecessorsOfV.end(), [&](AbstractNode *u) {
               flow += edgeFlows[std::pair(u, v)];
           });
           computedFlow[v] = flow;
@@ -361,24 +361,24 @@ std::vector<Node *> ConeRewriter::selectCones(std::vector<Node *> cAndCkt) {
 
   // ----------------------------
 
-  std::vector<Node *> deltaMin;
+  std::vector<AbstractNode *> deltaMin;
   while (!cAndCkt.empty()) {
     // compute all node flows f^{+}(v) in cAndCkt
-    std::map<Node *, float> nodeFlows = computeFlow(cAndCkt);
+    std::map<AbstractNode *, float> nodeFlows = computeFlow(cAndCkt);
 
     // reverse circuit edges and compute all ascending node flows f^{-}(v)
     ConeRewriter::reverseEdges(cAndCkt);
-    std::map<Node *, float> nodeFlowsAscending = computeFlow(cAndCkt);
+    std::map<AbstractNode *, float> nodeFlowsAscending = computeFlow(cAndCkt);
 
     // compute f(v) for all nodes
-    std::map<Node *, float> flows;
+    std::map<AbstractNode *, float> flows;
     for (auto &n : cAndCkt) flows[n] = nodeFlowsAscending[n] * nodeFlows[n];
 
     // find the node with the largest flow u
-    Node *u = std::max_element(
+    AbstractNode *u = std::max_element(
         flows.begin(),
         flows.end(),
-        [](const std::pair<Node *, float> &p1, const std::pair<Node *, float> &p2) {
+        [](const std::pair<AbstractNode *, float> &p1, const std::pair<AbstractNode *, float> &p2) {
             return p1.second < p2.second;
         })->first;
 
@@ -399,9 +399,9 @@ std::vector<Node *> ConeRewriter::selectCones(std::vector<Node *> cAndCkt) {
   return deltaMin;
 }
 
-Node *ConeRewriter::getBFSLastNonCriticalLeafNode() {
-  Node *candidateNode = nullptr;
-  std::queue<Node *> q{{ast->getRootNode()}};
+AbstractNode *ConeRewriter::getBFSLastNonCriticalLeafNode() {
+  AbstractNode *candidateNode = nullptr;
+  std::queue<AbstractNode *> q{{ast->getRootNode()}};
   while (!q.empty()) {
     auto curNode = q.front();
     q.pop();
@@ -416,7 +416,7 @@ Node *ConeRewriter::getBFSLastNonCriticalLeafNode() {
   return candidateNode;
 }
 
-void ConeRewriter::rewriteCones(Ast &astToRewrite, const std::vector<Node *> &coneEndNodes) {
+void ConeRewriter::rewriteCones(Ast &astToRewrite, const std::vector<AbstractNode *> &coneEndNodes) {
   // reverse back the AST that has been reversed previously to facilitate the cone selection algorithms.
   // as we need to, however, modify the graph now, we need the "original" order again to not break anything
   // no need to recompute multiplicative depths after reversing edges as it does not change
@@ -442,8 +442,8 @@ void ConeRewriter::rewriteCones(Ast &astToRewrite, const std::vector<Node *> &co
 
     // -- lower bound: first AND node while following critical path
     // find the ancestors of δ that are LogicalExpr --> start nodes (v_1, ..., v_n) of cone
-    std::vector<Node *> coneStartNodes;
-    std::queue<Node *> q{{coneEnd}};
+    std::vector<AbstractNode *> coneStartNodes;
+    std::queue<AbstractNode *> q{{coneEnd}};
     while (!q.empty()) {
       auto curNode = q.front();
       q.pop();
@@ -461,9 +461,9 @@ void ConeRewriter::rewriteCones(Ast &astToRewrite, const std::vector<Node *> &co
       }
     }
 
-    std::vector<Node *> finalXorInputs;
+    std::vector<AbstractNode *> finalXorInputs;
     // It should not make a difference which of the cone start nodes we take - all of them should have the same parent.
-    Node *xorEndNode = coneStartNodes.front()->getParentsNonNull().front();
+    AbstractNode *xorEndNode = coneStartNodes.front()->getParentsNonNull().front();
     for (auto &startNode : coneStartNodes) assert(startNode->getParentsNonNull().front() == xorEndNode);
 
     // check whether we need to handle non-critical inputs y_1, ..., y_m
@@ -476,12 +476,12 @@ void ConeRewriter::rewriteCones(Ast &astToRewrite, const std::vector<Node *> &co
       }
     } else {
       // collect all non-critical inputs y_1, ..., y_m in between xorStartNode up to xorEndNode
-      std::vector<Node *> inputsY1ToYm;
+      std::vector<AbstractNode *> inputsY1ToYm;
       auto currentNode = xorStartNode;
       while (true) {
         auto *currentNodeAsLogicalExpr = dynamic_cast<LogicalExpr *>(currentNode);
         if (currentNode == nullptr)
-          throw std::logic_error("Node between cone end and cone start node is expected to be a logical expression!");
+          throw std::logic_error("AbstractNode between cone end and cone start node is expected to be a logical expression!");
         auto[critIn, nonCritIn] = getCriticalAndNonCriticalInput(currentNodeAsLogicalExpr);
         currentNode->removeChild(nonCritIn);
         nonCritIn->removeParent(currentNode);
@@ -531,8 +531,8 @@ void ConeRewriter::rewriteCones(Ast &astToRewrite, const std::vector<Node *> &co
         u_y_rightOperand = inputsY1ToYm.front()->castTo<AbstractExpr>();
       } else if (inputsY1ToYm.size() > 1) {  // otherwise there are inputs y_1, y_2, ..., y_m
         // otherwise build XOR chain of inputs and connect last one as input of u_y
-        std::vector<Node *> yXorChain =
-            Node::rewriteMultiInputGateToBinaryGatesChain(inputsY1ToYm, OpSymb::logicalXor);
+        std::vector<AbstractNode *> yXorChain =
+            AbstractNode::rewriteMultiInputGateToBinaryGatesChain(inputsY1ToYm, OpSymb::logicalXor);
         u_y_rightOperand = yXorChain.back()->castTo<AbstractExpr>();
       }
       auto *u_y = new LogicalExpr(a_t->castTo<AbstractExpr>(), OpSymb::logicalAnd, u_y_rightOperand);
@@ -567,8 +567,8 @@ void ConeRewriter::rewriteCones(Ast &astToRewrite, const std::vector<Node *> &co
     }
 
     // convert multi-input XOR into binary XOR nodes
-    std::vector<Node *> xorFinalGate =
-        Node::rewriteMultiInputGateToBinaryGatesChain(finalXorInputs, OpSymb::logicalXor);
+    std::vector<AbstractNode *> xorFinalGate =
+        AbstractNode::rewriteMultiInputGateToBinaryGatesChain(finalXorInputs, OpSymb::logicalXor);
     for (auto &gate : xorFinalGate) { gate->getUniqueNodeId(); }
 
     // remove coneEnd
@@ -581,7 +581,7 @@ void ConeRewriter::rewriteCones(Ast &astToRewrite, const std::vector<Node *> &co
   } //end: for (auto coneEnd : coneEndNodes)
 }
 
-std::pair<Node *, Node *> ConeRewriter::getCriticalAndNonCriticalInput(LogicalExpr *logicalExpr) {
+std::pair<AbstractNode *, AbstractNode *> ConeRewriter::getCriticalAndNonCriticalInput(LogicalExpr *logicalExpr) {
   // check which of the two inputs is critical
   bool leftIsCritical = isCriticalNode(logicalExpr->getLeft());
   bool rightIsCritical = isCriticalNode(logicalExpr->getRight());

@@ -68,6 +68,6 @@ bool LiteralBool::supportsDatatype(Datatype &datatype) {
   return datatype.getType() == TYPES::BOOL;
 }
 
-Node* LiteralBool::createClonedNode(bool) {
+AbstractNode* LiteralBool::createClonedNode(bool) {
   return new LiteralBool(this->getValue());
 }

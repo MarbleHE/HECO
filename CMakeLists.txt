@@ -41,6 +41,7 @@ include_directories(
 set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/examples/genAstDemo.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/AbstractExpr.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/AbstractNode.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/AbstractStatement.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/Ast.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/BinaryExpr.cpp
@@ -56,7 +57,6 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/ast/LiteralInt.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/LiteralString.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/LogicalExpr.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/Node.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/Operator.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/Return.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/UnaryExpr.cpp

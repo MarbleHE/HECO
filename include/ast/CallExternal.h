@@ -10,7 +10,7 @@ private:
     std::string functionName;
     std::vector<FunctionParameter *> arguments;
 
-    Node *createClonedNode(bool keepOriginalUniqueNodeId) override;
+    AbstractNode *createClonedNode(bool keepOriginalUniqueNodeId) override;
 
 public:
     explicit CallExternal(std::string functionName);

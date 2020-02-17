@@ -1,17 +1,17 @@
-#include "Node.h"
+#include "AbstractNode.h"
 #include "Variable.h"
 #include "LiteralBool.h"
 #include "gtest/gtest.h"
 
 TEST(NodeTest, rewriteMultiInputGateToBinaryGatesChain_emptyInputs) { /* NOLINT */
-  std::vector<Node*> inputs{};
-  ASSERT_THROW(Node::rewriteMultiInputGateToBinaryGatesChain(inputs, OpSymb::logicalAnd), std::invalid_argument);
+  std::vector<AbstractNode*> inputs{};
+  ASSERT_THROW(AbstractNode::rewriteMultiInputGateToBinaryGatesChain(inputs, OpSymb::logicalAnd), std::invalid_argument);
 }
 
 TEST(NodeTest, rewriteMultiInputGateToBinaryGatesChain_oneInputAND) { /* NOLINT */
-  std::vector<Node*> inputs{new Variable("alpha")};
+  std::vector<AbstractNode*> inputs{new Variable("alpha")};
   OpSymb::LogCompOp gateType = OpSymb::logicalAnd;
-  auto result = Node::rewriteMultiInputGateToBinaryGatesChain(inputs, gateType);
+  auto result = AbstractNode::rewriteMultiInputGateToBinaryGatesChain(inputs, gateType);
 
   // create new AST for evaluation
   Ast ast(result.back());
@@ -28,9 +28,9 @@ TEST(NodeTest, rewriteMultiInputGateToBinaryGatesChain_oneInputAND) { /* NOLINT 
 }
 
 TEST(NodeTest, rewriteMultiInputGateToBinaryGatesChain_oneInputXOR) { /* NOLINT */
-  std::vector<Node*> inputs{new Variable("alpha")};
+  std::vector<AbstractNode*> inputs{new Variable("alpha")};
   OpSymb::LogCompOp gateType = OpSymb::logicalXor;
-  auto result = Node::rewriteMultiInputGateToBinaryGatesChain(inputs, gateType);
+  auto result = AbstractNode::rewriteMultiInputGateToBinaryGatesChain(inputs, gateType);
 
   // create new AST for evaluation
   Ast ast(result.back());
@@ -47,19 +47,19 @@ TEST(NodeTest, rewriteMultiInputGateToBinaryGatesChain_oneInputXOR) { /* NOLINT 
 }
 
 TEST(NodeTest, rewriteMultiInputGateToBinaryGatesChain_oneInputUnsupportedException) { /* NOLINT */
-  std::vector<Node*> inputs{new Variable("alpha")};
+  std::vector<AbstractNode*> inputs{new Variable("alpha")};
   OpSymb::LogCompOp gateType = OpSymb::logicalOr;
-  ASSERT_THROW(Node::rewriteMultiInputGateToBinaryGatesChain(inputs, gateType),
+  ASSERT_THROW(AbstractNode::rewriteMultiInputGateToBinaryGatesChain(inputs, gateType),
                std::runtime_error);
 }
 
 TEST(NodeTest, rewriteMultiInputGateToBinaryGatesChain_multipleInputs) { /* NOLINT */
-  std::vector<Node*> inputs{new Variable("alpha"),
+  std::vector<AbstractNode*> inputs{new Variable("alpha"),
                             new Variable("beta"),
                             new Variable("gamma"),
                             new Variable("delta")};
   OpSymb::LogCompOp gateType = OpSymb::logicalXor;
-  auto result = Node::rewriteMultiInputGateToBinaryGatesChain(inputs, gateType);
+  auto result = AbstractNode::rewriteMultiInputGateToBinaryGatesChain(inputs, gateType);
 
   // create new AST for evaluation
   Ast ast(result.back());

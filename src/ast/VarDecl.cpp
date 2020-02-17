@@ -52,7 +52,7 @@ void VarDecl::setAttributes(std::string varIdentifier, Datatype *varDatatype, Ab
   // handle attributes that are itself nodes
   removeChildren();
   addChildren({varDatatype, varValue});
-  Node::addParentTo(this, {varDatatype, varValue});
+  AbstractNode::addParentTo(this, {varDatatype, varValue});
 }
 
 void VarDecl::accept(Visitor &v) {
@@ -115,7 +115,7 @@ int VarDecl::getMaxNumberChildren() {
   return 2;
 }
 
-Node *VarDecl::createClonedNode(bool keepOriginalUniqueNodeId) {
+AbstractNode *VarDecl::createClonedNode(bool keepOriginalUniqueNodeId) {
   return new VarDecl(this->getVarTargetIdentifier(),
                      this->getDatatype()->getType(),
                      getInitializer()->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());

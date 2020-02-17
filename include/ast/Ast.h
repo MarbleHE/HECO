@@ -5,7 +5,7 @@
 #include <string>
 #include <iostream>
 #include <set>
-#include "Node.h"
+#include "AbstractNode.h"
 #include "Visitor.h"
 
 class Ast {
@@ -13,7 +13,7 @@ private:
     /// The root node of the AST. All other nodes of the AST must somehow be referenced by the rootNode.
     /// For example, an AST root node can be an object of Function class that references statements (i.e., objects derived
     /// from AbstractStatement) that represent the computations.
-    Node *rootNode;
+    AbstractNode *rootNode;
 
     /// This map stores the values passed to evaluateAst or evaluateCircuit for variables in the computation and serves
     /// as lookup table and central storage during the evaluation process.
@@ -31,13 +31,13 @@ public:
 
     /// Creates a new Abstract Syntax Tree (AST).
     /// \param rootNode The node to be defined as root for this AST.
-    explicit Ast(Node *rootNode);
+    explicit Ast(AbstractNode *rootNode);
 
     /// Defines the root node of the AST.
     /// \param node The node to be defined as root node of this AST.
-    Node *setRootNode(Node *node);
+    AbstractNode *setRootNode(AbstractNode *node);
 
-    [[nodiscard]] Node *getRootNode() const;
+    [[nodiscard]] AbstractNode *getRootNode() const;
 
     virtual void accept(Visitor &v);
 
@@ -67,17 +67,17 @@ public:
 
     /// Traverses the tree in BFS-style and collects all the nodes of the AST.
     /// \return A list of all nodes reachable from the AST's root node.
-    [[nodiscard]] std::set<Node *> getAllNodes() const;
+    [[nodiscard]] std::set<AbstractNode *> getAllNodes() const;
 
     /// Traverses the tree in BFS-style and collects all the nodes of the AST for that the predicate returns True.
-    /// \param predicate A function that takes a Node* and returns True if this node should be returned, otherwise False.
+    /// \param predicate A function that takes a AbstractNode* and returns True if this node should be returned, otherwise False.
     /// \return A list of all nodes reachable from the AST's root node.
-    std::set<Node *> getAllNodes(const std::function<bool(Node *)> &predicate) const;
+    std::set<AbstractNode *> getAllNodes(const std::function<bool(AbstractNode *)> &predicate) const;
 
     /// Deletes a node from the AST.
     /// \param node The node to delete from the AST.
     /// \param deleteSubtreeRecursively Determines whether children should be deleted recursively.
-    void deleteNode(Node **node, bool deleteSubtreeRecursively = false);
+    void deleteNode(AbstractNode **node, bool deleteSubtreeRecursively = false);
 
     std::vector<Literal *> evaluate(bool printResult, std::ostream &outputStream = std::cout);
 };

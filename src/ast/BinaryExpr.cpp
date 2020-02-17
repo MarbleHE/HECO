@@ -58,7 +58,7 @@ void BinaryExpr::setAttributes(AbstractExpr *leftOperand, Operator *operatore, A
   // update tree structure
   removeChildren();
   addChildren({leftOperand, operatore, rightOperand}, false);
-  Node::addParentTo(this, {leftOperand, operatore, rightOperand});
+  AbstractNode::addParentTo(this, {leftOperand, operatore, rightOperand});
 }
 
 void BinaryExpr::swapOperandsLeftAWithRightB(BinaryExpr *bexpA, BinaryExpr *bexpB) {
@@ -119,7 +119,7 @@ bool BinaryExpr::supportsCircuitMode() {
   return true;
 }
 
-Node *BinaryExpr::createClonedNode(bool keepOriginalUniqueNodeId) {
+AbstractNode *BinaryExpr::createClonedNode(bool keepOriginalUniqueNodeId) {
   return new BinaryExpr(this->getLeft()->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
                         this->getOp()->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<Operator>(),
                         this->getRight()->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());

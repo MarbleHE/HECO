@@ -56,7 +56,7 @@ std::vector<Literal *> If::evaluate(Ast &ast) {
   return std::vector<Literal *>();
 }
 
-Node *If::createClonedNode(bool keepOriginalUniqueNodeId) {
+AbstractNode *If::createClonedNode(bool keepOriginalUniqueNodeId) {
   return new If(this->condition->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
                 this->thenBranch->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractStatement>(),
                 this->elseBranch->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractStatement>());

@@ -49,7 +49,7 @@ std::vector<Literal *> Block::evaluate(Ast &ast) {
   return std::vector<Literal *>();
 }
 
-Node *Block::createClonedNode(bool keepOriginalUniqueNodeId) {
+AbstractNode *Block::createClonedNode(bool keepOriginalUniqueNodeId) {
   auto clonedStatements = new std::vector<AbstractStatement *>();
   for (auto &statement : *this->getStatements()) {
     clonedStatements->push_back(statement->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractStatement>());

@@ -62,9 +62,9 @@ std::vector<std::string> AbstractExpr::getVariableIdentifiers() {
   return std::vector<std::string>();
 }
 
-Node *AbstractExpr::createParam(Node *node) {
+AbstractNode *AbstractExpr::createParam(AbstractNode *node) {
   throw std::runtime_error(
-      "Method Node::createParam does not support Node objects. Did you forget to cast the Node object?");
+      "Method AbstractNode::createParam does not support AbstractNode objects. Did you forget to cast the AbstractNode object?");
 }
 
 void to_json(json &j, const AbstractExpr &absExpr) {

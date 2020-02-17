@@ -13,7 +13,7 @@ private:
     std::vector<FunctionParameter *> params;
     std::vector<AbstractStatement *> body;
 
-    Node *createClonedNode(bool keepOriginalUniqueNodeId) override;
+    AbstractNode *createClonedNode(bool keepOriginalUniqueNodeId) override;
 
 public:
     Function() = default;

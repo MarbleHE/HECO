@@ -3,15 +3,15 @@
 
 #include <string>
 #include <map>
-#include "../include/ast/Node.h"
+#include "AbstractNode.h"
 
 enum class TYPES {
     INT, FLOAT, STRING, BOOL
 };
 
-class Datatype : public Node {
+class Datatype : public AbstractNode {
 private:
-    Node *createClonedNode(bool keepOriginalUniqueNodeId) override {
+    AbstractNode *createClonedNode(bool keepOriginalUniqueNodeId) override {
         return new Datatype(this->getType());
     }
 

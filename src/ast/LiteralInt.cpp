@@ -75,7 +75,7 @@ bool LiteralInt::supportsCircuitMode() {
   return true;
 }
 
-Node *LiteralInt::createClonedNode(bool) {
+AbstractNode *LiteralInt::createClonedNode(bool) {
   return new LiteralInt(this->getValue());
 }
 

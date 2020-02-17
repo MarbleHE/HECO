@@ -7,7 +7,7 @@
 
 class FunctionParameter : public AbstractExpr {
 private:
-    Node *createClonedNode(bool keepOriginalUniqueNodeId) override;
+    AbstractNode *createClonedNode(bool keepOriginalUniqueNodeId) override;
 
 public:
     FunctionParameter(Datatype *datatype, AbstractExpr *value);

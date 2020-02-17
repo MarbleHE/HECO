@@ -10,7 +10,7 @@ class Variable : public AbstractExpr {
 private:
     std::string identifier;
 
-    Node *createClonedNode(bool keepOriginalUniqueNodeId) override;
+    AbstractNode *createClonedNode(bool keepOriginalUniqueNodeId) override;
 
 public:
     explicit Variable(std::string identifier);

@@ -9,7 +9,7 @@ class PrintVisitorTest : public ::testing::Test {
   void SetUp() override {
     // this is necessary to ensure that node IDs (static variable) are always the same,
     // independent of which test run at first
-    Node::resetNodeIdCounter();
+    AbstractNode::resetNodeIdCounter();
   }
 };
 

@@ -6,15 +6,15 @@
 #include "LogicalExpr.h"
 #include "Function.h"
 
-int Node::nodeIdCounter = 0;
+int AbstractNode::nodeIdCounter = 0;
 
-std::string Node::genUniqueNodeId() {
+std::string AbstractNode::genUniqueNodeId() {
   int nodeNo;
   try {
     nodeNo = assignedNodeIds.at(this);
   } catch (std::out_of_range &exception) {
     throw std::logic_error("Could not find any reserved ID for node. "
-                           "Node constructor needs to reserve ID for node (see empty constructor).");
+                           "AbstractNode constructor needs to reserve ID for node (see empty constructor).");
   }
 
   // clear the node entry as we will save the node ID in the uniqueNodeId field
@@ -26,60 +26,60 @@ std::string Node::genUniqueNodeId() {
   return ss.str();
 }
 
-Node::Node() {
+AbstractNode::AbstractNode() {
   // save the ID reserved for this node but do not
   assignedNodeIds[this] = getAndIncrementNodeId();
 }
 
-std::string Node::getUniqueNodeId() {
+std::string AbstractNode::getUniqueNodeId() {
   // if there is no ID defined yet, create and assign an ID
   if (uniqueNodeId.empty()) this->uniqueNodeId = genUniqueNodeId();
   // otherwise just return the previously generated ID
   return uniqueNodeId;
 }
 
-int Node::getAndIncrementNodeId() {
+int AbstractNode::getAndIncrementNodeId() {
   return nodeIdCounter++;
 }
 
-std::string Node::getNodeName() const {
-  return "Node";
+std::string AbstractNode::getNodeName() const {
+  return "AbstractNode";
 }
 
-void Node::resetNodeIdCounter() {
-  Node::nodeIdCounter = 0;
+void AbstractNode::resetNodeIdCounter() {
+  AbstractNode::nodeIdCounter = 0;
 }
 
-const std::vector<Node *> &Node::getChildren() const {
+const std::vector<AbstractNode *> &AbstractNode::getChildren() const {
   return children;
 }
 
-std::vector<Node *> Node::getChildrenNonNull() const {
-  std::vector<Node *> childrenFiltered;
+std::vector<AbstractNode *> AbstractNode::getChildrenNonNull() const {
+  std::vector<AbstractNode *> childrenFiltered;
   std::copy_if(children.begin(), children.end(), std::back_inserter(childrenFiltered),
-               [](Node *n) { return n != nullptr; });
+               [](AbstractNode *n) { return n != nullptr; });
   return childrenFiltered;
 }
 
-std::vector<Node *> Node::getParentsNonNull() const {
-  std::vector<Node *> parentsFiltered;
+std::vector<AbstractNode *> AbstractNode::getParentsNonNull() const {
+  std::vector<AbstractNode *> parentsFiltered;
   std::copy_if(parents.begin(), parents.end(), std::back_inserter(parentsFiltered),
-               [](Node *n) { return n != nullptr; });
+               [](AbstractNode *n) { return n != nullptr; });
   return parentsFiltered;
 }
 
-void Node::addChildBilateral(Node *child) {
+void AbstractNode::addChildBilateral(AbstractNode *child) {
   addChild(child, true);
 }
 
-void Node::addChild(Node *child, bool addBackReference) {
+void AbstractNode::addChild(AbstractNode *child, bool addBackReference) {
   addChildren({child}, addBackReference);
 }
 
-void Node::addChildren(const std::vector<Node *> &childrenToAdd, bool addBackReference) {
+void AbstractNode::addChildren(const std::vector<AbstractNode *> &childrenToAdd, bool addBackReference) {
   // check whether the number of children to be added does not exceed the number of maximum supported children
   if (childrenToAdd.size() > getMaxNumberChildren() && getMaxNumberChildren() != -1) {
-    throw std::invalid_argument("Node " + getUniqueNodeId() + " of type " + getNodeName() + " does not allow more than "
+    throw std::invalid_argument("AbstractNode " + getUniqueNodeId() + " of type " + getNodeName() + " does not allow more than "
                                 + std::to_string(getMaxNumberChildren()) + " children!");
   }
 
@@ -90,7 +90,7 @@ void Node::addChildren(const std::vector<Node *> &childrenToAdd, bool addBackRef
   }
 
   // these actions are to be performed after a node was added to the list of children
-  auto doInsertPostAction = [&](Node *childToAdd) {
+  auto doInsertPostAction = [&](AbstractNode *childToAdd) {
       // if option 'addBackReference' is true, we add a back reference to the child as parent
       if (addBackReference) childToAdd->addParent(this);
   };
@@ -125,12 +125,12 @@ void Node::addChildren(const std::vector<Node *> &childrenToAdd, bool addBackRef
   }
 }
 
-void Node::setChild(std::vector<Node *>::const_iterator position, Node *value) {
+void AbstractNode::setChild(std::vector<AbstractNode *>::const_iterator position, AbstractNode *value) {
   auto newIterator = children.insert(position, value);
   children.erase(++newIterator);
 }
 
-void Node::removeChild(Node *child) {
+void AbstractNode::removeChild(AbstractNode *child) {
   auto it = std::find(children.begin(), children.end(), child);
   if (it != children.end()) {
     // if the node supports an infinite number of children (getMaxNumberChildren() == -1), we can delete the node from
@@ -144,74 +144,74 @@ void Node::removeChild(Node *child) {
   //children.erase(it);
 }
 
-void Node::removeChildBilateral(Node *child) {
+void AbstractNode::removeChildBilateral(AbstractNode *child) {
   child->removeParent(this);
   this->removeChild(child);
 }
 
-void Node::isolateNode() {
+void AbstractNode::isolateNode() {
   for (auto &p : getParentsNonNull()) p->removeChild(this);
   for (auto &c : getChildrenNonNull()) c->removeParent(this);
   removeChildren();
   removeParents();
 }
 
-const std::vector<Node *> &Node::getParents() const {
+const std::vector<AbstractNode *> &AbstractNode::getParents() const {
   return parents;
 }
 
-void Node::addParent(Node *n) {
+void AbstractNode::addParent(AbstractNode *n) {
   parents.push_back(n);
 }
 
-void Node::removeParent(Node *parent) {
+void AbstractNode::removeParent(AbstractNode *parent) {
   auto it = std::find(parents.begin(), parents.end(), parent);
   if (it != parents.end()) parents.erase(it);
 }
 
-void Node::removeChildren() {
+void AbstractNode::removeChildren() {
   children.clear();
 }
 
-void Node::removeParents() {
+void AbstractNode::removeParents() {
   parents.clear();
 }
 
-void Node::addParentTo(Node *parentNode, std::vector<Node *> nodesToAddParentTo) {
-  std::for_each(nodesToAddParentTo.begin(), nodesToAddParentTo.end(), [&](Node *n) {
+void AbstractNode::addParentTo(AbstractNode *parentNode, std::vector<AbstractNode *> nodesToAddParentTo) {
+  std::for_each(nodesToAddParentTo.begin(), nodesToAddParentTo.end(), [&](AbstractNode *n) {
       if (n != nullptr) n->addParent(parentNode);
   });
 }
 
-void Node::swapChildrenParents() {
-  std::vector<Node *> oldParents = this->parents;
+void AbstractNode::swapChildrenParents() {
+  std::vector<AbstractNode *> oldParents = this->parents;
   this->parents = this->children;
   this->children = oldParents;
   // toggle the isReversed boolean
   isReversed = !isReversed;
 }
 
-std::vector<Literal *> Node::evaluate(Ast &ast) {
+std::vector<Literal *> AbstractNode::evaluate(Ast &ast) {
   return std::vector<Literal *>();
 }
 
-void Node::accept(Visitor &v) {
+void AbstractNode::accept(Visitor &v) {
   std::cout << "This shouldn't be executed!" << std::endl;
 }
 
-void to_json(json &j, const Node &n) {
+void to_json(json &j, const AbstractNode &n) {
   j = n.toJson();
 }
 
-json Node::toJson() const {
-  return json({"type", "Node"});
+json AbstractNode::toJson() const {
+  return json({"type", "AbstractNode"});
 }
 
-std::string Node::toString() const {
+std::string AbstractNode::toString() const {
   return this->toJson().dump();
 }
 
-std::ostream &operator<<(std::ostream &os, const std::vector<Node *> &v) {
+std::ostream &operator<<(std::ostream &os, const std::vector<AbstractNode *> &v) {
   os << "[";
   for (int i = 0; i < v.size(); ++i) {
     os << v[i]->getUniqueNodeId();
@@ -222,43 +222,43 @@ std::ostream &operator<<(std::ostream &os, const std::vector<Node *> &v) {
   return os;
 }
 
-Node *Node::getUnderlyingNode() const {
+AbstractNode *AbstractNode::getUnderlyingNode() const {
   return underlyingNode;
 }
 
-void Node::setUnderlyingNode(Node *uNode) {
+void AbstractNode::setUnderlyingNode(AbstractNode *uNode) {
   underlyingNode = uNode;
 }
 
-void Node::setUniqueNodeId(const std::string &unique_node_id) {
+void AbstractNode::setUniqueNodeId(const std::string &unique_node_id) {
   uniqueNodeId = unique_node_id;
 }
 
-std::vector<Node *> Node::getAnc() {
+std::vector<AbstractNode *> AbstractNode::getAnc() {
   // use a set to avoid duplicates as there may be common ancestors between this node and any of the node's parents
-  std::set<Node *> result;
-  std::queue<Node *> processQueue{{this}};
+  std::set<AbstractNode *> result;
+  std::queue<AbstractNode *> processQueue{{this}};
   while (!processQueue.empty()) {
     auto curNode = processQueue.front();
     processQueue.pop();
     auto nextNodes = curNode->getParents();
-    std::for_each(nextNodes.begin(), nextNodes.end(), [&](Node *node) {
+    std::for_each(nextNodes.begin(), nextNodes.end(), [&](AbstractNode *node) {
         result.insert(node);
         processQueue.push(node);
     });
   }
-  return std::vector<Node *>(result.begin(), result.end());
+  return std::vector<AbstractNode *>(result.begin(), result.end());
 }
 
-Node *Node::cloneFlat() {
+AbstractNode *AbstractNode::cloneFlat() {
   throw std::logic_error("ERROR: cloneFlat() not implemented for node of type " + getNodeName());
 }
 
-Node *Node::cloneRecursiveDeep(bool keepOriginalUniqueNodeId) {
+AbstractNode *AbstractNode::cloneRecursiveDeep(bool keepOriginalUniqueNodeId) {
   // call polymorphic createClonedNode to copy derived class-specific fields
-  Node *clonedNode = this->createClonedNode(keepOriginalUniqueNodeId);
+  AbstractNode *clonedNode = this->createClonedNode(keepOriginalUniqueNodeId);
 
-  // perform cloning of fields belonging to Node
+  // perform cloning of fields belonging to AbstractNode
   if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
   if (this->isReversed) clonedNode->swapChildrenParents();
   if (this->underlyingNode != nullptr) clonedNode->setUnderlyingNode(this->getUnderlyingNode());
@@ -266,37 +266,37 @@ Node *Node::cloneRecursiveDeep(bool keepOriginalUniqueNodeId) {
   return clonedNode;
 }
 
-Node *Node::createClonedNode(bool) {
+AbstractNode *AbstractNode::createClonedNode(bool) {
   throw std::logic_error(
       "ERROR: Cannot execute cloneRecursiveDeep(...) because createClonedNode(...) is not implemented for node of type "
       + getNodeName());
 }
 
-bool Node::hasParent(Node *n) {
-  return std::any_of(getParents().begin(), getParents().end(), [&n](Node *p) { return (p == n); });
+bool AbstractNode::hasParent(AbstractNode *n) {
+  return std::any_of(getParents().begin(), getParents().end(), [&n](AbstractNode *p) { return (p == n); });
 }
 
-bool Node::hasChild(Node *n) {
-  return std::any_of(getChildren().begin(), getChildren().end(), [&n](Node *p) { return (p == n); });
+bool AbstractNode::hasChild(AbstractNode *n) {
+  return std::any_of(getChildren().begin(), getChildren().end(), [&n](AbstractNode *p) { return (p == n); });
 }
 
-int Node::countChildrenNonNull() const {
-  return std::count_if(getChildren().begin(), getChildren().end(), [](Node *n) { return n != nullptr; });
+int AbstractNode::countChildrenNonNull() const {
+  return std::count_if(getChildren().begin(), getChildren().end(), [](AbstractNode *n) { return n != nullptr; });
 }
 
-int Node::getMaxNumberChildren() {
+int AbstractNode::getMaxNumberChildren() {
   return 0;
 }
 
-bool Node::supportsCircuitMode() {
+bool AbstractNode::supportsCircuitMode() {
   return false;
 }
 
-Node *Node::getChildAtIndex(int idx) const {
+AbstractNode *AbstractNode::getChildAtIndex(int idx) const {
   return getChildAtIndex(idx, false);
 }
 
-Node *Node::getChildAtIndex(int idx, bool isEdgeDirectionAware) const {
+AbstractNode *AbstractNode::getChildAtIndex(int idx, bool isEdgeDirectionAware) const {
   try {
     return (isEdgeDirectionAware && isReversed) ? parents.at(idx) : children.at(idx);
   } catch (std::out_of_range const &e) {
@@ -304,13 +304,13 @@ Node *Node::getChildAtIndex(int idx, bool isEdgeDirectionAware) const {
   }
 }
 
-Node::~Node() = default;
+AbstractNode::~AbstractNode() = default;
 
-bool Node::hasReversedEdges() const {
+bool AbstractNode::hasReversedEdges() const {
   return isReversed;
 }
 
-std::vector<Node *> Node::rewriteMultiInputGateToBinaryGatesChain(std::vector<Node *> inputNodes,
+std::vector<AbstractNode *> AbstractNode::rewriteMultiInputGateToBinaryGatesChain(std::vector<AbstractNode *> inputNodes,
                                                                   OpSymb::LogCompOp gateType) {
   if (inputNodes.empty()) {
     throw std::invalid_argument("Cannot construct a 0-input logical gate!");
@@ -333,7 +333,7 @@ std::vector<Node *> Node::rewriteMultiInputGateToBinaryGatesChain(std::vector<No
   }
 
   // vector of resulting binary gates
-  std::vector<Node *> outputNodes;
+  std::vector<AbstractNode *> outputNodes;
 
   // handle first "special" gate -> takes two inputs as specified in inputNodes
   auto it = std::begin(inputNodes);
@@ -349,7 +349,7 @@ std::vector<Node *> Node::rewriteMultiInputGateToBinaryGatesChain(std::vector<No
   return outputNodes;
 }
 
-Literal *Node::ensureSingleEvaluationResult(std::vector<Literal *> evaluationResult) {
+Literal *AbstractNode::ensureSingleEvaluationResult(std::vector<Literal *> evaluationResult) {
   if (evaluationResult.size() > 1) {
     throw std::logic_error(
         "Unexpected number of returned results (1 vs. " + std::to_string(evaluationResult.size()) + ")");

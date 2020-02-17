@@ -46,7 +46,7 @@ public:
 
     LogicalExpr *contains(LogicalExpr *lexpTemplate, AbstractExpr *excludedSubtree);
 
-    Node *cloneFlat() override;
+    AbstractNode *cloneFlat() override;
 
     void setAttributes(AbstractExpr *leftOperand, Operator *operatore, AbstractExpr *rightOperand);
 
@@ -56,7 +56,7 @@ protected:
     bool supportsCircuitMode() override;
 
 private:
-    Node *createClonedNode(bool keepOriginalUniqueNodeId) override;
+    AbstractNode *createClonedNode(bool keepOriginalUniqueNodeId) override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_LOGICALEXPR_H

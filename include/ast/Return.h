@@ -26,7 +26,7 @@ public:
 
     [[nodiscard]] std::vector<AbstractExpr *> getReturnExpressions() const;
 
-    Node *createClonedNode(bool keepOriginalUniqueNodeId) override;
+    AbstractNode *createClonedNode(bool keepOriginalUniqueNodeId) override;
 
     void setAttributes(std::vector<AbstractExpr *> returnExpr);
 

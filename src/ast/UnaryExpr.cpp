@@ -46,12 +46,12 @@ int UnaryExpr::getMaxNumberChildren() {
 
 void UnaryExpr::setAttributes(OpSymb::UnaryOp op, AbstractExpr *expr) {
   removeChildren();
-  auto nodesToBeAdded = std::vector<Node *>({new Operator(op), expr});
+  auto nodesToBeAdded = std::vector<AbstractNode *>({new Operator(op), expr});
   addChildren(nodesToBeAdded);
-  Node::addParentTo(this, nodesToBeAdded);
+  AbstractNode::addParentTo(this, nodesToBeAdded);
 }
 
-Node *UnaryExpr::createClonedNode(bool keepOriginalUniqueNodeId) {
+AbstractNode *UnaryExpr::createClonedNode(bool keepOriginalUniqueNodeId) {
   try {
     return new UnaryExpr(std::get<OpSymb::UnaryOp>(this->getOp()->getOperatorSymbol()),
                          this->getRight()->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());

@@ -10,18 +10,18 @@
 #include "Return.h"
 #include "LogicalExpr.h"
 
-Ast::Ast(Node *rootNode) : rootNode(rootNode) {}
+Ast::Ast(AbstractNode *rootNode) : rootNode(rootNode) {}
 
 Ast::Ast() {
   rootNode = nullptr;
 }
 
-Node *Ast::setRootNode(Node *node) {
+AbstractNode *Ast::setRootNode(AbstractNode *node) {
   this->rootNode = node;
   return this->rootNode;
 }
 
-Node *Ast::getRootNode() const {
+AbstractNode *Ast::getRootNode() const {
   return rootNode;
 }
 
@@ -63,14 +63,14 @@ Ast::evaluateCircuit(const std::unordered_map<std::string, Literal *> &paramValu
 
   // go through all nodes and collect all identifiers of Variable nodes
   std::set<std::string> varIdentifiersReqValue;
-  auto isVariableNode = [](Node *node) { return dynamic_cast<Variable *>(node) != nullptr; };
+  auto isVariableNode = [](AbstractNode *node) { return dynamic_cast<Variable *>(node) != nullptr; };
   for (auto &node : getAllNodes(isVariableNode)) {
     varIdentifiersReqValue.insert(node->castTo<Variable>()->getIdentifier());
   }
 
   // Remove those variable identifiers from variableIdentifiersRequiringValue that are defined using a VarDecl in
   // the circuit -> those do not need a value.
-  auto isVarDeclNode = [](Node *node) { return dynamic_cast<VarDecl *>(node) != nullptr; };
+  auto isVarDeclNode = [](AbstractNode *node) { return dynamic_cast<VarDecl *>(node) != nullptr; };
   for (auto &node : getAllNodes(isVarDeclNode)) {
     varIdentifiersReqValue.erase(
         std::find(varIdentifiersReqValue.begin(),
@@ -175,8 +175,8 @@ Ast::Ast(const Ast &otherAst, bool keepOriginalUniqueNodeId) : rootNode(nullptr)
 Ast::Ast(const Ast &otherAst) : Ast(otherAst, false) {}
 
 bool Ast::isValidCircuit() {
-  std::set<Node *> allAstNodes = getAllNodes();
-  auto supportCircuitMode = [](Node *n) { return n->supportsCircuitMode(); };
+  std::set<AbstractNode *> allAstNodes = getAllNodes();
+  auto supportCircuitMode = [](AbstractNode *n) { return n->supportsCircuitMode(); };
   return std::all_of(allAstNodes.begin(), allAstNodes.end(), supportCircuitMode);
 }
 
@@ -184,15 +184,15 @@ void Ast::reverseEdges() {
   for (auto &node : getAllNodes()) node->swapChildrenParents();
 }
 
-std::set<Node *> Ast::getAllNodes() const {
+std::set<AbstractNode *> Ast::getAllNodes() const {
   return getAllNodes(nullptr);
 }
 
-std::set<Node *> Ast::getAllNodes(const std::function<bool(Node *)> &predicate) const {
+std::set<AbstractNode *> Ast::getAllNodes(const std::function<bool(AbstractNode *)> &predicate) const {
   // the result set of all nodes in the AST
-  std::set<Node *> allNodes{};
+  std::set<AbstractNode *> allNodes{};
   // the nodes still required to be processed
-  std::queue<Node *> nodesToCheck{{getRootNode()}};
+  std::queue<AbstractNode *> nodesToCheck{{getRootNode()}};
   // continue while there are still unprocessed nodes
   while (!nodesToCheck.empty()) {
     // deque next node to process
@@ -209,8 +209,8 @@ std::set<Node *> Ast::getAllNodes(const std::function<bool(Node *)> &predicate) 
   return allNodes;
 }
 
-void Ast::deleteNode(Node **node, bool deleteSubtreeRecursively) {
-  Node *nodePtr = *node;
+void Ast::deleteNode(AbstractNode **node, bool deleteSubtreeRecursively) {
+  AbstractNode *nodePtr = *node;
   nodePtr->getUniqueNodeId();
 
   // handle the node's children

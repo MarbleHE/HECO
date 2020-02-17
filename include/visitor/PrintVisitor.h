@@ -68,7 +68,7 @@ public:
 
     std::string getIndentation();
 
-    void addOutputStr(Node &node, const std::list<std::string> &args);
+    void addOutputStr(AbstractNode &node, const std::list<std::string> &args);
 
     [[nodiscard]] Scope *getLastPrintedScope() const;
 
@@ -83,9 +83,9 @@ public:
 
     void printScope();
 
-    void addOutputStr(Node &node);
+    void addOutputStr(AbstractNode &node);
 
-    void printNodeName(Node &node);
+    void printNodeName(AbstractNode &node);
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_PRINTVISITOR_H

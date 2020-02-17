@@ -88,7 +88,7 @@ std::vector<Literal *> Call::evaluate(Ast &ast) {
   return subAst.evaluateAst(paramValues, false);
 }
 
-Node *Call::createClonedNode(bool keepOriginalUniqueNodeId) {
+AbstractNode *Call::createClonedNode(bool keepOriginalUniqueNodeId) {
   std::vector<FunctionParameter *> clonedArgs;
   for (auto &arg : getArguments()) {
     clonedArgs.push_back(arg->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<FunctionParameter>());

@@ -77,7 +77,7 @@ int LogicalExpr::countByTemplate(AbstractExpr *abstractExpr) {
   }
 }
 
-Node *LogicalExpr::cloneFlat() {
+AbstractNode *LogicalExpr::cloneFlat() {
   auto clonedLexp = new LogicalExpr();
   clonedLexp->setUniqueNodeId(this->getUniqueNodeId());
   return clonedLexp;
@@ -91,14 +91,14 @@ void LogicalExpr::setAttributes(AbstractExpr *leftOperand, Operator *operatore, 
   // update tree structure
   removeChildren();
   addChildren({leftOperand, operatore, rightOperand}, false);
-  Node::addParentTo(this, {leftOperand, operatore, rightOperand});
+  AbstractNode::addParentTo(this, {leftOperand, operatore, rightOperand});
 }
 
 bool LogicalExpr::supportsCircuitMode() {
   return true;
 }
 
-Node *LogicalExpr::createClonedNode(bool keepOriginalUniqueNodeId) {
+AbstractNode *LogicalExpr::createClonedNode(bool keepOriginalUniqueNodeId) {
   auto clonedLogicalExpr =
       new LogicalExpr(getLeft()->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
                       getOp()->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<Operator>(),

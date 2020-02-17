@@ -10,7 +10,7 @@ class LiteralFloat : public Literal {
 private:
     float value;
 
-    Node *createClonedNode(bool keepOriginalUniqueNodeId) override;
+    AbstractNode *createClonedNode(bool keepOriginalUniqueNodeId) override;
 
 public:
     explicit LiteralFloat(float value);

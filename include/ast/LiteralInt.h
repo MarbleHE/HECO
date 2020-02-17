@@ -10,7 +10,7 @@ class LiteralInt : public Literal {
 private:
     int value;
 
-    Node *createClonedNode(bool keepOriginalUniqueNodeId) override;
+    AbstractNode *createClonedNode(bool keepOriginalUniqueNodeId) override;
 
 public:
     explicit LiteralInt(int value);

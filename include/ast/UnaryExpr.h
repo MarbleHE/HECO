@@ -31,7 +31,7 @@ protected:
     int getMaxNumberChildren() override;
 
 private:
-    Node *createClonedNode(bool keepOriginalUniqueNodeId) override;
+    AbstractNode *createClonedNode(bool keepOriginalUniqueNodeId) override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_UNARYEXPR_H

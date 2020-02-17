@@ -50,7 +50,7 @@ TEST_F(AstTestFixture, deleteNode_deleteRecursiveSubtreeNonEmpty) { /* NOLINT */
     ASSERT_EQ(c->getParentsNonNull().front(), binaryExpr);
 
   // delete node and its subtree and verify deletion success
-  Node* binaryExprPtr = binaryExpr;
+  AbstractNode* binaryExprPtr = binaryExpr;
   ast.deleteNode(&binaryExprPtr, true);
   // verify that BinaryExpr was deleted, also from its parent
   ASSERT_EQ(binaryExprPtr, nullptr);
@@ -97,7 +97,7 @@ TEST_F(AstTestFixture, deleteNode_ChildrenExisting) { /* NOLINT */
     ASSERT_EQ(c->getParentsNonNull().front(), binaryExpr);
 
   // delete node and its subtree and verify deletion success
-  Node* binaryExprPtr = binaryExpr;
+  AbstractNode* binaryExprPtr = binaryExpr;
   // by using the default parameter value for deleteSubtreeRecursively
   EXPECT_THROW(ast.deleteNode(&binaryExprPtr), std::logic_error);
   // by expliciting passing the parameter value for deleteSubtreeRecursively

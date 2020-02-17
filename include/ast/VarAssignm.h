@@ -9,7 +9,7 @@ class VarAssignm : public AbstractStatement {
 private:
     std::string identifier;
 
-    Node *createClonedNode(bool keepOriginalUniqueNodeId) override;
+    AbstractNode *createClonedNode(bool keepOriginalUniqueNodeId) override;
 
 public:
     VarAssignm(std::string identifier, AbstractExpr *value);

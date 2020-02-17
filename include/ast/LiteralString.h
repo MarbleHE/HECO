@@ -9,7 +9,7 @@ class LiteralString : public Literal {
 private:
     std::string value;
 
-    Node *createClonedNode(bool keepOriginalUniqueNodeId) override;
+    AbstractNode *createClonedNode(bool keepOriginalUniqueNodeId) override;
 
 protected:
     void print(std::ostream &str) const override;

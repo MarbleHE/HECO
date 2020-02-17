@@ -12,7 +12,7 @@ private:
     Function *func{nullptr};
     std::vector<FunctionParameter *> arguments;
 
-    Node *createClonedNode(bool keepOriginalUniqueNodeId) override;
+    AbstractNode *createClonedNode(bool keepOriginalUniqueNodeId) override;
 
 public:
     Call(std::vector<FunctionParameter *> arguments, Function *func);

@@ -341,7 +341,7 @@ const std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp> &Operat
 
 Operator::~Operator() = default;
 
-Node *Operator::createClonedNode(bool) {
+AbstractNode *Operator::createClonedNode(bool) {
   return new Operator(this->getOperatorSymbol());
 }
 

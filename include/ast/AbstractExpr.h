@@ -6,11 +6,11 @@
 #include <nlohmann/json.hpp>
 #include "Visitor.h"
 #include "Ast.h"
-#include "Node.h"
+#include "AbstractNode.h"
 
 using json = nlohmann::json;
 
-class AbstractExpr : public Node {
+class AbstractExpr : public AbstractNode {
 protected:
     static LiteralInt *createParam(int i);
 
@@ -22,7 +22,7 @@ protected:
 
     static AbstractExpr *createParam(AbstractExpr *abstractExpr);
 
-    static Node *createParam(Node *node);
+    static AbstractNode *createParam(AbstractNode *node);
 
 public:
     [[nodiscard]] std::string toString() const override;

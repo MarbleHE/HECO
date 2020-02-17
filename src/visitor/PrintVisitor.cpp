@@ -43,13 +43,13 @@ void PrintVisitor::visit(Block &elem) {
 }
 
 void PrintVisitor::visit(Call &elem) {
-  Node *node = static_cast<Node *>(static_cast<AbstractStatement *>(&elem));
+  AbstractNode *node = static_cast<AbstractNode *>(static_cast<AbstractStatement *>(&elem));
   addOutputStr(*node);
   printChildNodesIndented(elem);
 }
 
 void PrintVisitor::visit(CallExternal &elem) {
-  Node *node = static_cast<Node *>(static_cast<AbstractStatement *>(&elem));
+  AbstractNode *node = static_cast<AbstractNode *>(static_cast<AbstractStatement *>(&elem));
   addOutputStr(*node, {elem.getFunctionName()});
   printChildNodesIndented(elem);
 }
@@ -148,16 +148,16 @@ void PrintVisitor::resetLevel() {
   this->level = 0;
 }
 
-void PrintVisitor::printNodeName(Node &node) {
+void PrintVisitor::printNodeName(AbstractNode &node) {
   ss << getIndentation() << node.getNodeName() << ":";
 }
 
-void PrintVisitor::addOutputStr(Node &node) {
+void PrintVisitor::addOutputStr(AbstractNode &node) {
   printNodeName(node);
   printScope();
 }
 
-void PrintVisitor::addOutputStr(Node &node, const std::list<std::string> &args) {
+void PrintVisitor::addOutputStr(AbstractNode &node, const std::list<std::string> &args) {
   printNodeName(node);
   // print AST node type (e.g., FunctionParameter)
   ss << " ";

@@ -5,13 +5,13 @@
 #include <string>
 #include <iostream>
 #include "Visitor.h"
-#include "Node.h"
+#include "AbstractNode.h"
 #include "LiteralString.h"
 #include "LiteralBool.h"
 #include "LiteralInt.h"
 #include "OpSymbEnum.h"
 
-class Operator : public Node {
+class Operator : public AbstractNode {
 private:
     std::string operatorString;
     std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp> operatorSymbol;
@@ -94,7 +94,7 @@ public:
 
     ~Operator() override;
 
-    Node *createClonedNode(bool keepOriginalUniqueNodeId) override;
+    AbstractNode *createClonedNode(bool keepOriginalUniqueNodeId) override;
 
     [[nodiscard]] bool equals(OpSymb::BinaryOp op) const;
 

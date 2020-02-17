@@ -1,4 +1,4 @@
-#include "Node.h"
+#include "AbstractNode.h"
 #include "Operator.h"
 #include "Variable.h"
 #include "BinaryExpr.h"
@@ -13,7 +13,7 @@ class DotPrinterFixture : public ::testing::Test {
   void SetUp() override {
     // This is required, otherwise the node IDs won't match the expected result as they are incremented ongoing but
     // must be reset after each test case.
-    Node::resetNodeIdCounter();
+    AbstractNode::resetNodeIdCounter();
   }
 };
 

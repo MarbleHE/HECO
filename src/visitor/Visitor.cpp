@@ -91,7 +91,7 @@ void Visitor::visit(If &elem) {
     thenBranch->accept(*this);
   } else {
     // if thenBranch is no Block we need to manually open a new scope here
-    Node *thenNode = dynamic_cast<Node *>(elem.getThenBranch());
+    AbstractNode *thenNode = dynamic_cast<AbstractNode *>(elem.getThenBranch());
     assert(thenNode != nullptr); // this should never happen
     changeToInnerScope(thenNode->getUniqueNodeId());
     elem.getThenBranch()->accept(*this);
@@ -100,10 +100,10 @@ void Visitor::visit(If &elem) {
 
   if (elem.getElseBranch() != nullptr) {
     // elseBranch
-    if (auto *elseBranch = dynamic_cast<Node *>(elem.getElseBranch())) {
+    if (auto *elseBranch = dynamic_cast<AbstractNode *>(elem.getElseBranch())) {
       elem.getElseBranch()->accept(*this);
     } else {
-      Node *elseNode = dynamic_cast<Node *>(elem.getElseBranch());
+      AbstractNode *elseNode = dynamic_cast<AbstractNode *>(elem.getElseBranch());
       assert(elseNode != nullptr);
       changeToInnerScope(elseBranch->getUniqueNodeId());
       elem.getElseBranch()->accept(*this);
@@ -170,7 +170,7 @@ void Visitor::visit(While &elem) {
   if (auto *thenBlock = dynamic_cast<Block *>(elem.getBody())) {
     thenBlock->accept(*this);
   } else {
-    Node *block = dynamic_cast<Node *>(elem.getBody());
+    AbstractNode *block = dynamic_cast<AbstractNode *>(elem.getBody());
     assert(block != nullptr);
     changeToInnerScope(block->getUniqueNodeId());
     elem.getBody()->accept(*this);

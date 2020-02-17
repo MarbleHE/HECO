@@ -6,7 +6,7 @@
 #include <queue>
 #include "Operator.h"
 #include "AbstractStatement.h"
-#include "Node.h"
+#include "AbstractNode.h"
 #include "LogicalExpr.h"
 #include "MultiplicativeDepthCalculator.h"
 #include <vector>
@@ -14,7 +14,7 @@
 #include <set>
 #include <utility>
 
-// Dot vertex represents a Node in the DOT graph language
+// Dot vertex represents a AbstractNode in the DOT graph language
 // e.g., Return_1 [label="Return_1\n[l(v): 3, r(v): 0]" shape=oval style=filled fillcolor=white]
 struct DotVertex {
 private:
@@ -27,7 +27,7 @@ private:
     std::string multDepthString;
 
     // a reference to the node this DotVertex represents
-    Node *node{};
+    AbstractNode *node{};
 
     void buildDetailsString() {
         details = "\\n" + node->toString();
@@ -71,7 +71,7 @@ private:
     }
 
 public:
-    DotVertex(Node *node, bool showMultDepth, MultiplicativeDepthCalculator *mdc, bool showDetails) : node(node) {
+    DotVertex(AbstractNode *node, bool showMultDepth, MultiplicativeDepthCalculator *mdc, bool showDetails) : node(node) {
         // show multiplicative depth in the tree nodes depending on parameter showMultDepth
         if (showMultDepth) buildMultDepthsString(*mdc);
         // show extra information if this node is a leaf node
@@ -98,7 +98,7 @@ private:
     std::string lhsArrow;
     std::string rhsArrow;
 
-    static std::string buildCommaSeparatedList(std::vector<Node *> vec) {
+    static std::string buildCommaSeparatedList(std::vector<AbstractNode *> vec) {
         std::stringstream outputStr;
         for (auto ci = vec.begin(); ci != vec.end(); ++ci) {
             outputStr << (*ci)->getUniqueNodeId();
@@ -117,7 +117,7 @@ private:
     }
 
 public:
-    DotEdge(Node *n, bool isReversedEdge) {
+    DotEdge(AbstractNode *n, bool isReversedEdge) {
         if (isReversedEdge) {
             lhsArrow = buildCommaSeparatedList(n->getParentsNonNull());
             rhsArrow = n->getUniqueNodeId();
@@ -176,7 +176,7 @@ public:
         return *this;
     }
 
-    std::string getDotFormattedString(Node *n) {
+    std::string getDotFormattedString(AbstractNode *n) {
         // we cannot print the node as DOT graph if it does not support the circuit mode (child/parent relationship)
         if (!n->supportsCircuitMode())
             throw std::logic_error(
@@ -202,7 +202,7 @@ public:
 
     void printAsDotFormattedGraph(Ast &ast) {
         *outputStream << "digraph D {" << std::endl;
-        std::deque<std::pair<Node *, int>> q;
+        std::deque<std::pair<AbstractNode *, int>> q;
         q.emplace_back(ast.getRootNode(), 1);
         while (!q.empty()) {
             auto curNode = q.front().first;
@@ -215,9 +215,9 @@ public:
         *outputStream << "}" << std::endl;
     }
 
-    void printAllReachableNodes(Node *pNode) {
-        std::set<Node *> printedNodes;
-        std::queue<Node *> q{{pNode}};
+    void printAllReachableNodes(AbstractNode *pNode) {
+        std::set<AbstractNode *> printedNodes;
+        std::queue<AbstractNode *> q{{pNode}};
         while (!q.empty()) {
             auto curNode = q.front();
             q.pop();

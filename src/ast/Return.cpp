@@ -51,8 +51,8 @@ int Return::getMaxNumberChildren() {
 
 void Return::setAttributes(std::vector<AbstractExpr *> returnExpr) {
   removeChildren();
-  // we need to convert vector of AbstractExpr* into vector of Node* prior calling addChildren
-  std::vector<Node *> returnExprAsNodes(returnExpr.begin(), returnExpr.end());
+  // we need to convert vector of AbstractExpr* into vector of AbstractNode* prior calling addChildren
+  std::vector<AbstractNode *> returnExprAsNodes(returnExpr.begin(), returnExpr.end());
   addChildren(returnExprAsNodes, false);
   addParentTo(this, returnExprAsNodes);
 }
@@ -67,7 +67,7 @@ bool Return::supportsCircuitMode() {
   return true;
 }
 
-Node *Return::createClonedNode(bool keepOriginalUniqueNodeId) {
+AbstractNode *Return::createClonedNode(bool keepOriginalUniqueNodeId) {
   std::vector<AbstractExpr *> returnValues;
   for (auto &child : getReturnExpressions())
     returnValues.push_back(child->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());

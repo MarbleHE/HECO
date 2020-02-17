@@ -26,7 +26,7 @@ class NodeCloneTestFixture : public ::testing::Test {
  protected:
   NodeCloneTestFixture() = default;
 
-  static void assertNodeAttributes(bool keepOriginalUniqueId, Node* original, Node* clone) {
+  static void assertNodeAttributes(bool keepOriginalUniqueId, AbstractNode* original, AbstractNode* clone) {
     if (keepOriginalUniqueId) {
       ASSERT_EQ(original->getUniqueNodeId(), clone->getUniqueNodeId());
     } else {
@@ -167,7 +167,7 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_Call) {  /* NOLINT */
   // clone the object
   auto clonedCall = call->AbstractStatement::cloneRecursiveDeep(KEEP_ORIGINAL_ID);
   // test if all fields belonging to Node class were copied
-  assertNodeAttributes(KEEP_ORIGINAL_ID, call->AbstractStatement::castTo<Node>(), clonedCall);
+  assertNodeAttributes(KEEP_ORIGINAL_ID, call->AbstractStatement::castTo<AbstractNode>(), clonedCall);
 
   // test if changing the original FunctionParameter changes the cloned one too
   callFunctionParam->setAttributes(new Datatype(TYPES::FLOAT), new Variable("var"));

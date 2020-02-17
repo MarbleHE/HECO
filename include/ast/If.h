@@ -33,7 +33,7 @@ public:
     std::vector<Literal *> evaluate(Ast &ast) override;
 
 private:
-    Node *createClonedNode(bool keepOriginalUniqueNodeId) override;
+    AbstractNode *createClonedNode(bool keepOriginalUniqueNodeId) override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_IF_H

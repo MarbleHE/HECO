@@ -9,7 +9,7 @@ class Block : public AbstractStatement {
 private:
     std::vector<AbstractStatement *> *statements;
 
-    Node *createClonedNode(bool keepOriginalUniqueNodeId) override;
+    AbstractNode *createClonedNode(bool keepOriginalUniqueNodeId) override;
 
 public:
     Block();

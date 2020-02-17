@@ -49,7 +49,7 @@ Datatype *FunctionParameter::getDatatype() const {
   return reinterpret_cast<Datatype * >(getChildAtIndex(0, true));
 }
 
-Node *FunctionParameter::createClonedNode(bool keepOriginalUniqueNodeId) {
+AbstractNode *FunctionParameter::createClonedNode(bool keepOriginalUniqueNodeId) {
   return new FunctionParameter(this->getDatatype()->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<Datatype>(),
                                this->getValue()->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
 }
@@ -66,7 +66,7 @@ void FunctionParameter::setAttributes(Datatype *datatype, AbstractExpr *value) {
   // update tree structure
   removeChildren();
   addChildren({datatype, value}, false);
-  Node::addParentTo(this, {datatype, value});
+  AbstractNode::addParentTo(this, {datatype, value});
 }
 
 bool FunctionParameter::operator==(const FunctionParameter &rhs) const {

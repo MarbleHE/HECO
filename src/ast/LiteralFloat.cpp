@@ -76,6 +76,6 @@ bool LiteralFloat::supportsDatatype(Datatype &datatype) {
   return datatype.getType() == TYPES::FLOAT;
 }
 
-Node *LiteralFloat::createClonedNode(bool) {
+AbstractNode *LiteralFloat::createClonedNode(bool) {
   return new LiteralFloat(this->getValue());
 }

@@ -9,7 +9,7 @@ class LiteralBool : public Literal {
 private:
     bool value;
 
-    Node *createClonedNode(bool keepOriginalUniqueNodeId) override;
+    AbstractNode *createClonedNode(bool keepOriginalUniqueNodeId) override;
 
 public:
     explicit LiteralBool(bool value);

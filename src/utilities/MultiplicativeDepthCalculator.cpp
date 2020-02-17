@@ -1,9 +1,9 @@
-#include "Node.h"
+#include "AbstractNode.h"
 #include "Operator.h"
 #include "MultiplicativeDepthCalculator.h"
 #include "LogicalExpr.h"
 
-int MultiplicativeDepthCalculator::depthValue(Node *n) {
+int MultiplicativeDepthCalculator::depthValue(AbstractNode *n) {
     if (auto lexp = dynamic_cast<LogicalExpr *>(n)) {
         // the multiplicative depth considers logical AND nodes only
         return (lexp->getOp() != nullptr && lexp->getOp()->equals(OpSymb::logicalAnd));
@@ -11,7 +11,7 @@ int MultiplicativeDepthCalculator::depthValue(Node *n) {
     return 0;
 }
 
-int MultiplicativeDepthCalculator::getMultDepthL(Node *n) {
+int MultiplicativeDepthCalculator::getMultDepthL(AbstractNode *n) {
     // check if we have calculated the multiplicative depth for previously
     if (!multiplicativeDepths.empty()) {
         auto it = multiplicativeDepths.find(n->getUniqueNodeId());
@@ -44,7 +44,7 @@ int MultiplicativeDepthCalculator::getMultDepthL(Node *n) {
     return max;
 }
 
-int MultiplicativeDepthCalculator::getReverseMultDepthR(Node *n) {
+int MultiplicativeDepthCalculator::getReverseMultDepthR(AbstractNode *n) {
     // check if we have calculated the reverse multiplicative depth previously
     if (!multiplicativeDepthsReversed.empty()) {
         auto it = multiplicativeDepthsReversed.find(n->getUniqueNodeId());
