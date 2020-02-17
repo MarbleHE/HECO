@@ -222,14 +222,6 @@ std::ostream &operator<<(std::ostream &os, const std::vector<AbstractNode *> &v)
   return os;
 }
 
-AbstractNode *AbstractNode::getUnderlyingNode() const {
-  return underlyingNode;
-}
-
-void AbstractNode::setUnderlyingNode(AbstractNode *uNode) {
-  underlyingNode = uNode;
-}
-
 void AbstractNode::setUniqueNodeId(const std::string &unique_node_id) {
   uniqueNodeId = unique_node_id;
 }
@@ -261,7 +253,6 @@ AbstractNode *AbstractNode::cloneRecursiveDeep(bool keepOriginalUniqueNodeId) {
   // perform cloning of fields belonging to AbstractNode
   if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
   if (this->isReversed) clonedNode->swapChildrenParents();
-  if (this->underlyingNode != nullptr) clonedNode->setUnderlyingNode(this->getUnderlyingNode());
 
   return clonedNode;
 }

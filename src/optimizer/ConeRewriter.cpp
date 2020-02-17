@@ -275,7 +275,7 @@ std::vector<AbstractNode *> ConeRewriter::getAndCriticalCircuit(std::vector<Abst
     // note that cloneFlat() does not copy the links to parents and children
     auto clonedNode = v->cloneFlat();
     // a back-link to the node in the original circuit
-    clonedNode->setUnderlyingNode(v);
+    underlying_nodes.insert(std::make_pair<std::string,AbstractNode*>(v->getUniqueNodeId(),&*v));
     cAndMap.emplace(v->getUniqueNodeId(), clonedNode);
     cAndResultCkt.push_back(clonedNode);
   }
@@ -426,7 +426,7 @@ void ConeRewriter::rewriteCones(Ast &astToRewrite, const std::vector<AbstractNod
   // Assumption: δ ∈ coneEndNodes represents a cone that ends at node δ
   for (auto coneEnd : coneEndNodes) {
     // we need to get the node in the underlying circuit as C^{AND} only contains a limited subset of nodes
-    coneEnd = coneEnd->getUnderlyingNode();
+    coneEnd = underlying_nodes.find(coneEnd->getUniqueNodeId())->second;
     // determine bounds of the cone
     // -- upper bound: parent node of cone end
     auto rNode = coneEnd->getParentsNonNull().front();

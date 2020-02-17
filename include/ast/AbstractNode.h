@@ -60,13 +60,10 @@ protected:
     [[nodiscard]] AbstractNode *getChildAtIndex(int idx, bool isEdgeDirectionAware) const;
 
 public:
+    /// Default Constructor, defines some default behavior for subclasses related to IDs
     AbstractNode();
 
-    virtual ~AbstractNode();
-
-    [[nodiscard]] AbstractNode *getUnderlyingNode() const;
-
-    void setUnderlyingNode(AbstractNode *uNode);
+    virtual ~AbstractNode()=0;
 
     [[nodiscard]] virtual std::string getNodeName() const;
 

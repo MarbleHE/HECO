@@ -16,6 +16,7 @@ class ConeRewriter {
 private:
     Ast *ast;
     MultiplicativeDepthCalculator mdc;
+    std::unordered_map<std::string, AbstractNode*> underlying_nodes;
 
     // ------------------------------------–
     // Internal (non-universal) helper methods
@@ -60,7 +61,7 @@ private:
     Ast &applyMinMultDepthHeuristic();
 
     /// Implements the algorithm that constructs the graph C_{AND} of critical AND nodes [see paragraph 3.2, page 10].
-    static std::vector<AbstractNode *> getAndCriticalCircuit(std::vector<AbstractNode *> delta);
+    std::vector<AbstractNode *> getAndCriticalCircuit(std::vector<AbstractNode *> delta);
 
     /// Implements the cone selection algorithm [see Algorithm 3, page 11]
     static std::vector<AbstractNode *> selectCones(std::vector<AbstractNode *> cAndCkt);
