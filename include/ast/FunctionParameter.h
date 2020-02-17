@@ -14,7 +14,7 @@ public:
 
     /// Helper constructor for keeping downwards compatibility with earlier interface.
     /// \deprecated This constructor should not be used anymore, use the one requiring a Datatype instead.
-    /// \param datatypeEnumString A valid datatype according to TYPES in Datatype.h
+    /// \param datatypeEnumString A valid datatype according to types in Datatype.h
     /// \param value The value of the function parameter.
     FunctionParameter(const std::string &datatypeEnumString, AbstractExpr *value);
 

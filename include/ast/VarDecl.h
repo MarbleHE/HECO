@@ -11,7 +11,7 @@ private:
     std::string identifier;
 
 public:
-    VarDecl(std::string name, TYPES datatype, AbstractExpr *initializer);
+    VarDecl(std::string name, types datatype, AbstractExpr *initializer);
 
     VarDecl(std::string name, void *abstractExpr);
 

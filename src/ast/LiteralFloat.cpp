@@ -73,7 +73,7 @@ bool LiteralFloat::supportsCircuitMode() {
 }
 
 bool LiteralFloat::supportsDatatype(Datatype &datatype) {
-  return datatype.getType() == TYPES::FLOAT;
+  return datatype.getType() == types::Float;
 }
 
 Node *LiteralFloat::createClonedNode(bool) {

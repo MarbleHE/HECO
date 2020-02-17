@@ -65,7 +65,7 @@ bool LiteralBool::supportsCircuitMode() {
 }
 
 bool LiteralBool::supportsDatatype(Datatype &datatype) {
-  return datatype.getType() == TYPES::BOOL;
+  return datatype.getType() == types::Bool;
 }
 
 Node* LiteralBool::createClonedNode(bool) {

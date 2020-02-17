@@ -4,7 +4,7 @@
 #include "AbstractExpr.h"
 
 bool LiteralInt::supportsDatatype(Datatype &datatype) {
-  return datatype.getType() == TYPES::INT;
+  return datatype.getType() == types::Int;
 }
 
 LiteralInt::LiteralInt(int value) : value(value) {}

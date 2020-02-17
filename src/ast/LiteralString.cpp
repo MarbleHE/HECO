@@ -63,7 +63,7 @@ bool LiteralString::supportsCircuitMode() {
 }
 
 bool LiteralString::supportsDatatype(Datatype &datatype) {
-  return datatype.getType() == TYPES::STRING;
+  return datatype.getType() == types::String;
 }
 
 Node *LiteralString::createClonedNode(bool) {

@@ -21,26 +21,26 @@ VarDecl::VarDecl(std::string, void *) {
                               "Use VarDecl(std::string, TYPES, AbstractExpr*) or one of the other constructors.");
 }
 
-VarDecl::VarDecl(std::string name, TYPES datatype, AbstractExpr *initializer) {
-  setAttributes(std::move(name), new Datatype(datatype), initializer);
+VarDecl::VarDecl(std::string name, types datatype, AbstractExpr *initializer) {
+    setAttributes(std::move(name), new Datatype(datatype), initializer);
 }
 
 VarDecl::VarDecl(std::string name, std::string valueAssignedTo) {
   setAttributes(std::move(name),
-                new Datatype(TYPES::STRING),
+                new Datatype(types::String),
                 new LiteralString(std::move(valueAssignedTo)));
 }
 
 VarDecl::VarDecl(std::string name, int valueAssignedTo) {
-  setAttributes(std::move(name), new Datatype(TYPES::INT), new LiteralInt(valueAssignedTo));
+    setAttributes(std::move(name), new Datatype(types::Int), new LiteralInt(valueAssignedTo));
 }
 
 VarDecl::VarDecl(std::string name, float valueAssignedTo) {
-  setAttributes(std::move(name), new Datatype(TYPES::FLOAT), new LiteralFloat(valueAssignedTo));
+    setAttributes(std::move(name), new Datatype(types::Float), new LiteralFloat(valueAssignedTo));
 }
 
 VarDecl::VarDecl(std::string name, bool valueAssignedTo) {
-  setAttributes(std::move(name), new Datatype(TYPES::BOOL), new LiteralBool(valueAssignedTo));
+    setAttributes(std::move(name), new Datatype(types::Bool), new LiteralBool(valueAssignedTo));
 }
 
 VarDecl::VarDecl(std::string name, const char *valueAssignedTo)

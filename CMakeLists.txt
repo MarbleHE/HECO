@@ -47,6 +47,7 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/ast/Block.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/Call.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/CallExternal.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/Datatypes.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/Function.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/FunctionParameter.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/If.cpp
@@ -71,13 +72,14 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/visitor/MultRewriteVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/PrintVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/Visitor.cpp
-        ${ast_optimizer_SOURCE_DIR}/test/AstTestingGenerator.cpp)
+        ${ast_optimizer_SOURCE_DIR}/test/AstTestingGenerator.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/utilities/EvaluationPrinter.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/utilities/DotPrinter.cpp)
 
 set(HEADER_ONLY_SOURCES
         ${ast_optimizer_SOURCE_DIR}/include/ast/OpSymbEnum.h
         ${ast_optimizer_SOURCE_DIR}/include/utilities/RandNumGen.h
-        ${ast_optimizer_SOURCE_DIR}/include/utilities/Datatypes.h
-        ${ast_optimizer_SOURCE_DIR}/include/utilities/DotPrinter.h)
+        ${ast_optimizer_SOURCE_DIR}/include/utilities/TestUtils.h)
 
 add_executable(ast_demo
         ${ast_optimizer_SOURCE_DIR}/main.cpp

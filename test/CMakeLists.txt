@@ -35,7 +35,11 @@ set(TEST_FILES
         MultDepthVisitorTest.cpp
         ChildParentTest.cpp
         AstClassTest.cpp
-        DotPrinterTest.cpp ConeRewriterTest.cpp LiteralTest.cpp NodeTest.cpp NodeCloneRecursiveDeepTest.cpp)
+        DotPrinterTest.cpp
+        ConeRewriterTest.cpp
+        LiteralTest.cpp
+        NodeTest.cpp
+        NodeCloneRecursiveDeepTest.cpp)
 
 add_executable(testing-all
         ${TEST_FILES})

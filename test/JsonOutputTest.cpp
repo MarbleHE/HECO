@@ -195,15 +195,15 @@ TEST(JsonOutputTest, Operator) { /* NOLINT */
 }
 
 TEST(JsonOutputTest, Block) { /* NOLINT */
-  auto bl = new Block(new VarDecl("width", TYPES::INT, new LiteralInt(22)));
-  json j = {{"type", "Block"},
-            {"statements", {{
-                                {"type", "VarDecl"},
-                                {"datatype", "int"},
-                                {"identifier", "width"},
-                                {"initializer", {
-                                    {"type", "LiteralInt"},
-                                    {"value", 22}}}}}}};
+  auto bl = new Block(new VarDecl("width", types::Int, new LiteralInt(22)));
+    json j = {{"type",       "Block"},
+              {"statements", {{
+                                      {"type", "VarDecl"},
+                                      {"datatype", "int"},
+                                      {"identifier", "width"},
+                                      {"initializer", {
+                                                              {"type", "LiteralInt"},
+                                                              {"value", 22}}}}}}};
   EXPECT_EQ(bl->toJson(), j);
 }
 

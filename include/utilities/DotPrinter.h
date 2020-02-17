@@ -1,22 +1,22 @@
-#ifndef AST_OPTIMIZER_INCLUDE_UTILITIES_DOTPRINTER_H_
-#define AST_OPTIMIZER_INCLUDE_UTILITIES_DOTPRINTER_H_
+#ifndef AST_OPTIMIZER_DOTPRINTER_H
+#define AST_OPTIMIZER_DOTPRINTER_H
 
 #include <string>
 #include <sstream>
 #include <queue>
+#include <vector>
+#include <deque>
+#include <set>
+#include <utility>
 #include "Operator.h"
 #include "AbstractStatement.h"
 #include "Node.h"
 #include "LogicalExpr.h"
 #include "MultiplicativeDepthCalculator.h"
-#include <vector>
-#include <deque>
-#include <set>
-#include <utility>
 
 // Dot vertex represents a Node in the DOT graph language
 // e.g., Return_1 [label="Return_1\n[l(v): 3, r(v): 0]" shape=oval style=filled fillcolor=white]
-struct DotVertex {
+struct dotVertex {
 private:
     // variables with default values
     std::string identifier;
@@ -71,7 +71,7 @@ private:
     }
 
 public:
-    DotVertex(Node *node, bool showMultDepth, MultiplicativeDepthCalculator *mdc, bool showDetails) : node(node) {
+    dotVertex(Node *node, bool showMultDepth, MultiplicativeDepthCalculator *mdc, bool showDetails) : node(node) {
         // show multiplicative depth in the tree nodes depending on parameter showMultDepth
         if (showMultDepth) buildMultDepthsString(*mdc);
         // show extra information if this node is a leaf node
@@ -93,7 +93,7 @@ public:
 
 /// DotEdge represents an edge between Nodes in the DOT graph language
 /// e.g., { LogicalExpr_3, Operator_4, Variable_5 } -> LogicalExpr_2
-struct DotEdge {
+struct dotEdge {
 private:
     std::string lhsArrow;
     std::string rhsArrow;
@@ -117,7 +117,7 @@ private:
     }
 
 public:
-    DotEdge(Node *n, bool isReversedEdge) {
+    dotEdge(Node *n, bool isReversedEdge) {
         if (isReversedEdge) {
             lhsArrow = buildCommaSeparatedList(n->getParentsNonNull());
             rhsArrow = n->getUniqueNodeId();
@@ -149,86 +149,21 @@ protected:
     std::ostream *outputStream{&std::cout};
 
 public:
-    DotPrinter() : mdc(nullptr) {}
+    DotPrinter();
 
-    DotPrinter &setShowMultDepth(bool show_mult_depth) {
-        showMultDepth = show_mult_depth;
-        if (show_mult_depth && mdc == nullptr) {
-            throw std::logic_error(
-                    "Printing the multiplicative depth for nodes requires providing a MultiplicativeDepthCalculator instance "
-                    "using setMultiplicativeDepthsCalculator(...) prior calling setShowMultDepth(true).");
-        }
-        return *this;
-    }
+    DotPrinter &setShowMultDepth(bool show_mult_depth);
 
-    DotPrinter &setIndentationCharacter(const std::string &indentation_character) {
-        indentationCharacter = indentation_character;
-        return *this;
-    }
+    DotPrinter &setIndentationCharacter(const std::string &indentation_character);
 
-    DotPrinter &setOutputStream(std::ostream &stream) {
-        outputStream = &stream;
-        return *this;
-    }
+    DotPrinter &setOutputStream(std::ostream &stream);
 
-    DotPrinter &setMultiplicativeDepthsCalculator(MultiplicativeDepthCalculator &multiplicativeDepthCalculator) {
-        mdc = &multiplicativeDepthCalculator;
-        return *this;
-    }
+    DotPrinter &setMultiplicativeDepthsCalculator(MultiplicativeDepthCalculator &multiplicativeDepthCalculator);
 
-    std::string getDotFormattedString(Node *n) {
-        // we cannot print the node as DOT graph if it does not support the circuit mode (child/parent relationship)
-        if (!n->supportsCircuitMode())
-            throw std::logic_error(
-                    "Cannot execute 'getDotFormattedString(" + n->getUniqueNodeId() +
-                    ") as node is not circuit-compatible!");
+    std::string getDotFormattedString(Node *n);
 
-        std::stringstream finalString;
+    void printAsDotFormattedGraph(Ast &ast);
 
-        // depending on whether the graph is reversed we are interested in the parents or children
-        auto vec = (n->hasReversedEdges() ? n->getParentsNonNull() : n->getChildrenNonNull());
-
-        // vec.empty(): only print node details (e.g., operator type for Operator) for tree leaves
-        finalString << DotVertex(n, this->showMultDepth, this->mdc, vec.empty())
-                .buildVertexString(this->indentationCharacter);
-
-        // only print edges if there are any edges at all
-        if (vec.empty()) return finalString.str();
-
-        // otherwise also generate string for edge and return both
-        finalString << DotEdge(n, n->hasReversedEdges()).buildEdgeString(this->indentationCharacter);
-        return finalString.str();
-    }
-
-    void printAsDotFormattedGraph(Ast &ast) {
-        *outputStream << "digraph D {" << std::endl;
-        std::deque<std::pair<Node *, int>> q;
-        q.emplace_back(ast.getRootNode(), 1);
-        while (!q.empty()) {
-            auto curNode = q.front().first;
-            auto il = q.front().second;
-            q.pop_front();
-            *outputStream << getDotFormattedString(curNode);
-            auto nodes = (ast.isReversed()) ? curNode->getParentsNonNull() : curNode->getChildrenNonNull();
-            for (auto &n : nodes) q.emplace_front(n, il + 1);
-        }
-        *outputStream << "}" << std::endl;
-    }
-
-    void printAllReachableNodes(Node *pNode) {
-        std::set<Node *> printedNodes;
-        std::queue<Node *> q{{pNode}};
-        while (!q.empty()) {
-            auto curNode = q.front();
-            q.pop();
-            if (printedNodes.count(curNode) == 0) {
-                *outputStream << DotPrinter::getDotFormattedString(curNode);
-                for (auto &c : curNode->getChildrenNonNull()) { q.push(c); }
-                for (auto &p : curNode->getParentsNonNull()) { q.push(p); }
-                printedNodes.insert(curNode);
-            }
-        }
-    }
+    void printAllReachableNodes(Node *pNode);
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_UTILITIES_DOTPRINTER_H_
+#endif //AST_OPTIMIZER_DOTPRINTER_H
