@@ -69,7 +69,7 @@ class Node {
 
   void setUnderlyingNode(Node *uNode);
 
-  [[nodiscard]] virtual std::string getNodeName() const;
+  [[nodiscard]] virtual std::string getNodeName() const = 0;
 
   std::string getUniqueNodeId();
 

@@ -38,10 +38,6 @@ int Node::getAndIncrementNodeId() {
   return nodeIdCounter++;
 }
 
-std::string Node::getNodeName() const {
-  return "Node";
-}
-
 void Node::resetNodeIdCounter() {
   Node::nodeIdCounter = 0;
 }
