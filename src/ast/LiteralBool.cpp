@@ -64,6 +64,9 @@ bool LiteralBool::supportsDatatype(Datatype &datatype) {
   return datatype.getType() == TYPES::BOOL;
 }
 
-AbstractNode* LiteralBool::createClonedNode(bool) {
-  return new LiteralBool(this->getValue());
+LiteralBool* LiteralBool::clone(bool keepOriginalUniqueNodeId) {
+  auto clonedNode =  new LiteralBool(this->getValue());
+  if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
+  if (this->isReversed) clonedNode->swapChildrenParents();
+  return clonedNode;
 }

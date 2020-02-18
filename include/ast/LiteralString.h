@@ -9,8 +9,6 @@ class LiteralString : public Literal {
 private:
     std::string value;
 
-    AbstractNode *createClonedNode(bool keepOriginalUniqueNodeId) override;
-
 protected:
     void print(std::ostream &str) const override;
 
@@ -18,6 +16,8 @@ public:
     explicit LiteralString(std::string value);
 
     ~LiteralString() override;
+
+    LiteralString *clone(bool keepOriginalUniqueNodeId) override;
 
     [[nodiscard]] json toJson() const override;
 

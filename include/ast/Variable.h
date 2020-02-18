@@ -10,14 +10,14 @@ class Variable : public AbstractExpr {
 private:
     std::string identifier;
 
-    AbstractNode *createClonedNode(bool keepOriginalUniqueNodeId) override;
-
 public:
     explicit Variable(std::string identifier);
 
     [[nodiscard]] json toJson() const override;
 
     ~Variable() override;
+
+    Variable *clone(bool keepOriginalUniqueNodeId) override;
 
     void accept(Visitor &v) override;
 

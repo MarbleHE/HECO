@@ -43,8 +43,11 @@ If::~If() {
   delete elseBranch;
 }
 
-AbstractNode *If::createClonedNode(bool keepOriginalUniqueNodeId) {
-  return new If(this->condition->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
+If *If::clone(bool keepOriginalUniqueNodeId) {
+  auto clonedNode =  new If(this->condition->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
                 this->thenBranch->clone(keepOriginalUniqueNodeId)->castTo<AbstractStatement>(),
                 this->elseBranch->clone(keepOriginalUniqueNodeId)->castTo<AbstractStatement>());
+  if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
+  if (this->isReversed) clonedNode->swapChildrenParents();
+  return clonedNode;
 }

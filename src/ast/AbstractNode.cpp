@@ -232,27 +232,6 @@ std::vector<AbstractNode *> AbstractNode::getAnc() {
   return std::vector<AbstractNode *>(result.begin(), result.end());
 }
 
-AbstractNode *AbstractNode::cloneFlat() {
-  throw std::logic_error("ERROR: cloneFlat() not implemented for node of type " + getNodeName());
-}
-
-AbstractNode *AbstractNode::clone(bool keepOriginalUniqueNodeId) {
-  // call polymorphic createClonedNode to copy derived class-specific fields
-  AbstractNode *clonedNode = this->createClonedNode(keepOriginalUniqueNodeId);
-
-  // perform cloning of fields belonging to AbstractNode
-  if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
-  if (this->isReversed) clonedNode->swapChildrenParents();
-
-  return clonedNode;
-}
-
-AbstractNode *AbstractNode::createClonedNode(bool) {
-  throw std::logic_error(
-      "ERROR: Cannot execute clone(...) because createClonedNode(...) is not implemented for node of type "
-      + getNodeName());
-}
-
 bool AbstractNode::hasParent(AbstractNode *n) {
   return std::any_of(getParents().begin(), getParents().end(), [&n](AbstractNode *p) { return (p == n); });
 }
@@ -285,4 +264,8 @@ AbstractNode::~AbstractNode() = default;
 
 bool AbstractNode::hasReversedEdges() const {
   return isReversed;
+}
+AbstractNode *AbstractNode::cloneFlat() {
+  //TODO(vianda): Implement cloneFlat
+  throw std::runtime_error("Not implemented");
 }

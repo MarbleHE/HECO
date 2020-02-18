@@ -57,6 +57,9 @@ bool Variable::supportsCircuitMode() {
 
 Variable::~Variable() = default;
 
-AbstractNode *Variable::createClonedNode(bool) {
-  return new Variable(this->identifier);
+Variable *Variable::clone(bool keepOriginalUniqueNodeId) {
+  auto clonedNode =  new Variable(this->identifier);
+  if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
+  if (this->isReversed) clonedNode->swapChildrenParents();
+  return clonedNode;
 }

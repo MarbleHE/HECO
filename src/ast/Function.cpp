@@ -69,7 +69,7 @@ void Function::setParams(std::vector<FunctionParameter *> paramsVec) {
   this->params = std::move(paramsVec);
 }
 
-AbstractNode *Function::createClonedNode(bool keepOriginalUniqueNodeId) {
+Function *Function::clone(bool keepOriginalUniqueNodeId) {
   std::vector<FunctionParameter *> clonedParams;
   for (auto &fp : this->getParams()) {
     clonedParams.push_back(fp->clone(keepOriginalUniqueNodeId)->castTo<FunctionParameter>());
@@ -78,7 +78,10 @@ AbstractNode *Function::createClonedNode(bool keepOriginalUniqueNodeId) {
   for (auto &statement : this->getBody()) {
     clonedBody.push_back(statement->clone(keepOriginalUniqueNodeId)->castTo<AbstractStatement>());
   }
-  return new Function(this->getName(), clonedParams, clonedBody);
+  auto clonedNode =  new Function(this->getName(), clonedParams, clonedBody);
+  if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
+  if (this->isReversed) clonedNode->swapChildrenParents();
+  return clonedNode;
 }
 
 const std::vector<FunctionParameter *> &Function::getParams() const {

@@ -115,6 +115,8 @@ public:
 
     [[nodiscard]] virtual AbstractNode *cloneFlat();
 
+    [[nodiscard]] virtual AbstractNode *clone(bool keepOriginalUniqueNodeId) = 0;
+
     void setUniqueNodeId(const std::string &unique_node_id);
 
     /// This method returns True iff the class derived from the AbstractNode class properly makes use of the child/parent fields
@@ -165,9 +167,7 @@ public:
       }
     }
 
-    AbstractNode *clone(bool keepOriginalUniqueNodeId);
 
-    [[nodiscard]] virtual AbstractNode *createClonedNode(bool keepOriginalUniqueNodeId);
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_NODE_H

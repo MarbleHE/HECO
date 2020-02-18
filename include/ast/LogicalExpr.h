@@ -26,6 +26,8 @@ public:
       setAttributes(AbstractExpr::createParam(left), op, AbstractExpr::createParam(right));
     }
 
+    LogicalExpr *clone(bool keepOriginalUniqueNodeId) override;
+
     [[nodiscard]] AbstractExpr *getLeft() const;
 
     [[nodiscard]] Operator *getOp() const;
@@ -52,9 +54,6 @@ protected:
     int getMaxNumberChildren() override;
 
     bool supportsCircuitMode() override;
-
-private:
-    AbstractNode *createClonedNode(bool keepOriginalUniqueNodeId) override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_LOGICALEXPR_H

@@ -9,6 +9,8 @@ class UnaryExpr : public AbstractExpr {
 public:
     UnaryExpr(OpSymb::UnaryOp op, AbstractExpr *right);
 
+    UnaryExpr *clone(bool keepOriginalUniqueNodeId) override;
+
     [[nodiscard]] json toJson() const override;
 
     void accept(Visitor &v) override;
@@ -28,8 +30,6 @@ protected:
 
     int getMaxNumberChildren() override;
 
-private:
-    AbstractNode *createClonedNode(bool keepOriginalUniqueNodeId) override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_UNARYEXPR_H

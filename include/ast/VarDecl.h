@@ -19,6 +19,8 @@ public:
 
     VarDecl(std::string name, bool value);
 
+    VarDecl *clone(bool keepOriginalUniqueNodeId) override;
+
     /// This is just a helper constructor that allows to call VarDecl("randomString", "aiermkr");
     /// without this constructor the call will wrongly be forwarded to the VarDecl(std::string, bool) constructor.
     /// See https://stackoverflow.com/q/14770252/3017719.
@@ -56,8 +58,6 @@ public:
 
     int getMaxNumberChildren() override;
 
-private:
-    AbstractNode *createClonedNode(bool keepOriginalUniqueNodeId) override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_VARDECL_H

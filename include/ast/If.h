@@ -18,6 +18,8 @@ public:
 
     ~If() override;
 
+    If *clone(bool keepOriginalUniqueNodeId) override;
+
     [[nodiscard]] json toJson() const override;
 
     void accept(Visitor &v) override;
@@ -30,8 +32,6 @@ public:
 
     [[nodiscard]] AbstractStatement *getElseBranch() const;
 
-private:
-    AbstractNode *createClonedNode(bool keepOriginalUniqueNodeId) override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_IF_H

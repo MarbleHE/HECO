@@ -64,7 +64,10 @@ void VarAssignm::setAttribute(AbstractExpr *assignmentValue) {
   addParentTo(this, {assignmentValue});
 }
 
-AbstractNode *VarAssignm::createClonedNode(bool keepOriginalUniqueNodeId) {
-  return new VarAssignm(this->getIdentifier(),
+VarAssignm *VarAssignm::clone(bool keepOriginalUniqueNodeId) {
+  auto clonedNode =  new VarAssignm(this->getIdentifier(),
                         this->getValue()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
+  if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
+  if (this->isReversed) clonedNode->swapChildrenParents();
+  return clonedNode;
 }

@@ -8,13 +8,12 @@
 class LiteralBool : public Literal {
 private:
     bool value;
-
-    AbstractNode *createClonedNode(bool keepOriginalUniqueNodeId) override;
-
 public:
     explicit LiteralBool(bool value);
 
     ~LiteralBool() override;
+
+    LiteralBool *clone(bool keepOriginalUniqueNodeId) override;
 
     [[nodiscard]] json toJson() const override;
 

@@ -91,11 +91,14 @@ bool LogicalExpr::supportsCircuitMode() {
   return true;
 }
 
-AbstractNode *LogicalExpr::createClonedNode(bool keepOriginalUniqueNodeId) {
+LogicalExpr *LogicalExpr::clone(bool keepOriginalUniqueNodeId) {
   auto clonedLogicalExpr =
       new LogicalExpr(getLeft()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
                       getOp()->clone(keepOriginalUniqueNodeId)->castTo<Operator>(),
                       getRight()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
+  return clonedLogicalExpr;
+  if (keepOriginalUniqueNodeId) clonedLogicalExpr->setUniqueNodeId(this->getUniqueNodeId());
+  if (this->isReversed) clonedLogicalExpr->swapChildrenParents();
   return clonedLogicalExpr;
 }
 

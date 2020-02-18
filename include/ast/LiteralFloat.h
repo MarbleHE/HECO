@@ -10,12 +10,12 @@ class LiteralFloat : public Literal {
 private:
     float value;
 
-    AbstractNode *createClonedNode(bool keepOriginalUniqueNodeId) override;
-
 public:
     explicit LiteralFloat(float value);
 
     ~LiteralFloat() override;
+
+    LiteralFloat *clone(bool keepOriginalUniqueNodeId) override;
 
     [[nodiscard]] float getValue() const;
 

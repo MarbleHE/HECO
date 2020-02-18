@@ -3,6 +3,7 @@
 
 #include <string>
 #include <map>
+#include <exception>
 #include "AbstractNode.h"
 
 enum class TYPES {
@@ -11,15 +12,19 @@ enum class TYPES {
 
 class Datatype : public AbstractNode {
 private:
-    AbstractNode *createClonedNode(bool keepOriginalUniqueNodeId) override {
-        return new Datatype(this->getType());
-    }
 
     TYPES val;
     bool isEncrypted = false;
 
 public:
-    explicit Datatype(TYPES di) : val(di) {}
+  //TODO(vianda): Implement cloneFlat for Datatypes
+  AbstractNode *cloneFlat() override {throw std::runtime_error("oops");};
+
+  AbstractNode *clone(bool keepOriginalUniqueNodeId) override {
+    return new Datatype(this->getType());
+  }
+
+  explicit Datatype(TYPES di) : val(di) {}
 
     explicit Datatype(TYPES di, bool isEncrypted) : val(di), isEncrypted(isEncrypted) {}
 

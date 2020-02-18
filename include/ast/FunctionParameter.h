@@ -6,9 +6,6 @@
 #include "Datatypes.h"
 
 class FunctionParameter : public AbstractExpr {
-private:
-    AbstractNode *createClonedNode(bool keepOriginalUniqueNodeId) override;
-
 public:
     FunctionParameter(Datatype *datatype, AbstractExpr *value);
 
@@ -17,6 +14,8 @@ public:
     /// \param datatypeEnumString A valid datatype according to TYPES in Datatype.h
     /// \param value The value of the function parameter.
     FunctionParameter(const std::string &datatypeEnumString, AbstractExpr *value);
+
+    FunctionParameter *clone(bool keepOriginalUniqueNodeId) override;
 
     [[nodiscard]] json toJson() const override;
 

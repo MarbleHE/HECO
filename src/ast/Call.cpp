@@ -41,11 +41,15 @@ Function *Call::getFunc() const {
   return func;
 }
 
-AbstractNode *Call::createClonedNode(bool keepOriginalUniqueNodeId) {
+AbstractNode *Call::clone(bool keepOriginalUniqueNodeId) {
   std::vector<FunctionParameter *> clonedArgs;
   for (auto &arg : getArguments()) {
     clonedArgs.push_back(arg->clone(keepOriginalUniqueNodeId)->castTo<FunctionParameter>());
   }
-  return static_cast<AbstractStatement *>(
+  auto clonedNode =  static_cast<AbstractStatement *>(
       new Call(clonedArgs, this->getFunc()->clone(keepOriginalUniqueNodeId)->castTo<Function>()));
+
+  if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->AbstractExpr::getUniqueNodeId());
+  if (this->AbstractExpr::isReversed) clonedNode->swapChildrenParents();
+  return clonedNode;
 }

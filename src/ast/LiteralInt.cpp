@@ -71,8 +71,11 @@ bool LiteralInt::supportsCircuitMode() {
   return true;
 }
 
-AbstractNode *LiteralInt::createClonedNode(bool) {
-  return new LiteralInt(this->getValue());
+LiteralInt *LiteralInt::clone(bool keepOriginalUniqueNodeId) {
+  auto clonedNode =  new LiteralInt(this->getValue());
+  if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
+  if (this->isReversed) clonedNode->swapChildrenParents();
+  return clonedNode;
 }
 
 

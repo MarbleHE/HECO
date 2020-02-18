@@ -1,5 +1,6 @@
 #include "Block.h"
 #include <iostream>
+#include <exception>
 #include "VarDecl.h"
 #include "AbstractNode.h"
 
@@ -44,10 +45,17 @@ Block::~Block() {
   delete statements;
 }
 
-AbstractNode *Block::createClonedNode(bool keepOriginalUniqueNodeId) {
+Block *Block::clone(bool keepOriginalUniqueNodeId) {
   auto clonedStatements = new std::vector<AbstractStatement *>();
   for (auto &statement : *this->getStatements()) {
     clonedStatements->push_back(statement->clone(keepOriginalUniqueNodeId)->castTo<AbstractStatement>());
   }
-  return new Block(clonedStatements);
+  auto clonedNode =  new Block(clonedStatements);
+  if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
+  if (this->isReversed) clonedNode->swapChildrenParents();
+  return clonedNode;
+}
+AbstractNode *Block::cloneFlat() {
+  //TODO(vianda): Implement cloneFlat in Block
+  throw std::runtime_error("Not implemented");
 }

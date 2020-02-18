@@ -15,7 +15,9 @@ public:
 
     ~While() override;
 
-    [[nodiscard]] json toJson() const override;
+  While *clone(bool keepOriginalUniqueNodeId) override;
+
+  [[nodiscard]] json toJson() const override;
 
     void accept(Visitor &v) override;
 

@@ -10,12 +10,12 @@ private:
     std::string functionName;
     std::vector<FunctionParameter *> arguments;
 
-    AbstractNode *createClonedNode(bool keepOriginalUniqueNodeId) override;
-
 public:
     explicit CallExternal(std::string functionName);
 
     CallExternal(std::string functionName, std::vector<FunctionParameter *> arguments);
+
+    AbstractNode *clone(bool keepOriginalUniqueNodeId) override;
 
     [[nodiscard]] json toJson() const override;
 

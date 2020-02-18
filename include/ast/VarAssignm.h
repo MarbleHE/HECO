@@ -9,12 +9,12 @@ class VarAssignm : public AbstractStatement {
 private:
     std::string identifier;
 
-    AbstractNode *createClonedNode(bool keepOriginalUniqueNodeId) override;
-
 public:
     VarAssignm(std::string identifier, AbstractExpr *value);
 
     ~VarAssignm() override;
+
+    VarAssignm *clone(bool keepOriginalUniqueNodeId) override;
 
     [[nodiscard]] json toJson() const override;
 

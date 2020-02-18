@@ -9,14 +9,16 @@ class Block : public AbstractStatement {
 private:
     std::vector<AbstractStatement *> *statements;
 
-    AbstractNode *createClonedNode(bool keepOriginalUniqueNodeId) override;
-
 public:
     Block();
 
     ~Block() override;
 
-    explicit Block(AbstractStatement *stat);
+  Block *clone(bool keepOriginalUniqueNodeId) override;
+
+  AbstractNode *cloneFlat() override;
+
+  explicit Block(AbstractStatement *stat);
 
     explicit Block(std::vector<AbstractStatement *> *statements);
 

@@ -341,7 +341,10 @@ const std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp> &Operat
 
 Operator::~Operator() = default;
 
-AbstractNode *Operator::createClonedNode(bool) {
-  return new Operator(this->getOperatorSymbol());
+Operator *Operator::clone(bool keepOriginalUniqueNodeId) {
+  auto clonedNode = new Operator(this->getOperatorSymbol());
+  if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
+  if (this->isReversed) clonedNode->swapChildrenParents();
+  return clonedNode;
 }
 

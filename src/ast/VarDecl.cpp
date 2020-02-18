@@ -104,8 +104,11 @@ int VarDecl::getMaxNumberChildren() {
   return 2;
 }
 
-AbstractNode *VarDecl::createClonedNode(bool keepOriginalUniqueNodeId) {
-  return new VarDecl(this->getVarTargetIdentifier(),
+VarDecl *VarDecl::clone(bool keepOriginalUniqueNodeId) {
+  auto clonedNode =  new VarDecl(this->getVarTargetIdentifier(),
                      this->getDatatype()->getType(),
                      getInitializer()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
+  if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
+  if (this->isReversed) clonedNode->swapChildrenParents();
+  return clonedNode;
 }

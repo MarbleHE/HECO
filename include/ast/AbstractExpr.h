@@ -12,9 +12,9 @@ using json = nlohmann::json;
 
 class AbstractExpr : public AbstractNode {
 protected:
-    static LiteralInt *createParam(int i);
+    static LiteralInt *createParam(int i) ;
 
-    static LiteralBool *createParam(bool b);
+    static LiteralBool *createParam(bool b) ;
 
     static LiteralString *createParam(const char *str);
 

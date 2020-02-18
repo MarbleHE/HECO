@@ -22,6 +22,8 @@ public:
 
     explicit BinaryExpr(OpSymb::BinaryOp op);
 
+    BinaryExpr *clone(bool keepOriginalUniqueNodeId) override;
+
     template<typename T1, typename T2>
     BinaryExpr(T1 left, OpSymb::BinaryOp op, T2 right) {
       setAttributes(AbstractExpr::createParam(left), new Operator(op), AbstractExpr::createParam(right));
@@ -63,9 +65,6 @@ public:
     int getMaxNumberChildren() override;
 
     bool supportsCircuitMode() override;
-
-private:
-    AbstractNode *createClonedNode(bool keepOriginalUniqueNodeId) override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_BINARYEXPR_H

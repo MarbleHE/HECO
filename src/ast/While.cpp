@@ -1,3 +1,4 @@
+#include <exception>
 #include "While.h"
 #include "LiteralBool.h"
 
@@ -30,4 +31,8 @@ std::string While::getNodeName() const {
 While::~While() {
   delete condition;
   delete body;
+}
+While *While::clone(bool keepOriginalUniqueNodeId) {
+  //TODO(vianda): Implement clone for While
+  throw std::runtime_error("Not implemented");
 }

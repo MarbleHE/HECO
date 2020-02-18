@@ -94,7 +94,7 @@ public:
 
     ~Operator() override;
 
-    AbstractNode *createClonedNode(bool keepOriginalUniqueNodeId) override;
+    Operator *clone(bool keepOriginalUniqueNodeId) override;
 
     [[nodiscard]] bool equals(OpSymb::BinaryOp op) const;
 

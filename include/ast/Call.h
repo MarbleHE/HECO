@@ -12,14 +12,14 @@ private:
     Function *func{nullptr};
     std::vector<FunctionParameter *> arguments;
 
-    AbstractNode *createClonedNode(bool keepOriginalUniqueNodeId) override;
-
 public:
     Call(std::vector<FunctionParameter *> arguments, Function *func);
 
     explicit Call(Function *func);
 
     ~Call() override;
+
+    AbstractNode *clone(bool keepOriginalUniqueNodeId) override;
 
     [[nodiscard]] json toJson() const override;
 

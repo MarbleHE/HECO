@@ -12,11 +12,10 @@ private:
     std::string name;
     std::vector<FunctionParameter *> params;
     std::vector<AbstractStatement *> body;
-
-    AbstractNode *createClonedNode(bool keepOriginalUniqueNodeId) override;
-
 public:
     Function() = default;
+
+    Function *clone(bool keepOriginalUniqueNodeId) override;
 
     [[nodiscard]] const std::string &getName() const;
 

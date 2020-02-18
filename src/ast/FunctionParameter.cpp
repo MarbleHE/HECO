@@ -49,9 +49,12 @@ Datatype *FunctionParameter::getDatatype() const {
   return reinterpret_cast<Datatype * >(getChildAtIndex(0, true));
 }
 
-AbstractNode *FunctionParameter::createClonedNode(bool keepOriginalUniqueNodeId) {
-  return new FunctionParameter(this->getDatatype()->clone(keepOriginalUniqueNodeId)->castTo<Datatype>(),
+FunctionParameter *FunctionParameter::clone(bool keepOriginalUniqueNodeId) {
+  auto clonedNode =  new FunctionParameter(this->getDatatype()->clone(keepOriginalUniqueNodeId)->castTo<Datatype>(),
                                this->getValue()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
+  if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
+  if (this->isReversed) clonedNode->swapChildrenParents();
+  return clonedNode;
 }
 
 int FunctionParameter::getMaxNumberChildren() {

@@ -58,10 +58,13 @@ bool Return::supportsCircuitMode() {
   return true;
 }
 
-AbstractNode *Return::createClonedNode(bool keepOriginalUniqueNodeId) {
+Return *Return::clone(bool keepOriginalUniqueNodeId) {
   std::vector<AbstractExpr *> returnValues;
   for (auto &child : getReturnExpressions())
     returnValues.push_back(child->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
-  return new Return(returnValues);
+  auto clonedNode = new Return(returnValues);
+  if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
+  if (this->isReversed) clonedNode->swapChildrenParents();
+  return clonedNode;
 }
 

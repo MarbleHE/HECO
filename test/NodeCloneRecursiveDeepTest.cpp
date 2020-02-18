@@ -163,7 +163,7 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_Call) {  /* NOLINT */
   ASSERT_EQ(call->getArguments().front()->getValue()->castTo<Variable>()->getIdentifier(), "pinCode");
 
   // clone the object
-  auto clonedCall = call->AbstractStatement::clone(KEEP_ORIGINAL_ID);
+  auto clonedCall = call->clone(KEEP_ORIGINAL_ID);
   // test if all fields belonging to Node class were copied
   assertNodeAttributes(KEEP_ORIGINAL_ID, call->AbstractStatement::castTo<AbstractNode>(), clonedCall);
 
@@ -258,7 +258,7 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_CallExternal) {  /* NOLINT */
   ASSERT_EQ(callExternal->getFunctionName(), "randomFunction");
   ASSERT_EQ(callExternal->getArguments().size(), 1);
   auto clonedCallExternal =
-      dynamic_cast<CallExternal*>(callExternal->AbstractExpr::clone(KEEP_ORIGINAL_ID));
+      dynamic_cast<CallExternal*>(callExternal->clone(KEEP_ORIGINAL_ID));
 
   // test if all fields belonging to Node class were copied
   assertNodeAttributes(KEEP_ORIGINAL_ID,
