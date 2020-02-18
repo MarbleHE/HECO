@@ -169,8 +169,6 @@ public:
     }
 
     AbstractNode *cloneRecursiveDeep(bool keepOriginalUniqueNodeId);
-
-    Literal *ensureSingleEvaluationResult(std::vector<Literal *> evaluationResult);
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_NODE_H

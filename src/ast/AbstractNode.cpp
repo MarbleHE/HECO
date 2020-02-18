@@ -286,11 +286,3 @@ AbstractNode::~AbstractNode() = default;
 bool AbstractNode::hasReversedEdges() const {
   return isReversed;
 }
-
-Literal *AbstractNode::ensureSingleEvaluationResult(std::vector<Literal *> evaluationResult) {
-  if (evaluationResult.size() > 1) {
-    throw std::logic_error(
-        "Unexpected number of returned results (1 vs. " + std::to_string(evaluationResult.size()) + ")");
-  }
-  return evaluationResult.front();
-}

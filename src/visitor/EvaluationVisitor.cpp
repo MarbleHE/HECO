@@ -195,7 +195,7 @@ void EvaluationVisitor::visit(While &elem) {
   elem.getCondition()->accept(*this);
   auto conds = results.top();
   results.pop();
-  auto cond = *dynamic_cast<LiteralBool *>(elem.ensureSingleEvaluationResult(conds));
+  auto cond = *dynamic_cast<LiteralBool *>(ensureSingleEvaluationResult(conds));
 
   while (cond == LiteralBool(true)) {
     elem.getBody()->accept(*this);
@@ -203,7 +203,7 @@ void EvaluationVisitor::visit(While &elem) {
     elem.getCondition()->accept(*this);
     conds = results.top();
     results.pop();
-    cond = *dynamic_cast<LiteralBool *>(elem.ensureSingleEvaluationResult(conds));
+    cond = *dynamic_cast<LiteralBool *>(ensureSingleEvaluationResult(conds));
   }
 }
 void EvaluationVisitor::visit(Ast &elem) {
@@ -211,4 +211,12 @@ void EvaluationVisitor::visit(Ast &elem) {
 }
 const std::vector<Literal *> &EvaluationVisitor::getResults() {
   return results.top();
+}
+
+Literal *EvaluationVisitor::ensureSingleEvaluationResult(std::vector<Literal *> evaluationResult) {
+  if (evaluationResult.size() > 1) {
+    throw std::logic_error(
+        "Unexpected number of returned results (1 vs. " + std::to_string(evaluationResult.size()) + ")");
+  }
+  return evaluationResult.front();
 }

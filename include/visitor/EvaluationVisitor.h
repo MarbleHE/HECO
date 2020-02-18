@@ -11,6 +11,7 @@ private:
   typedef std::vector<Literal*> result_t;
   std::stack<result_t> results = {};
   Ast& ast;
+  Literal *ensureSingleEvaluationResult(std::vector<Literal *> evaluationResult);
 public:
   explicit EvaluationVisitor(Ast& ast);
   void visit(AbstractNode &elem) override;
