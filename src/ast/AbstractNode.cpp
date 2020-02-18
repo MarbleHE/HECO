@@ -1,10 +1,8 @@
 #include <sstream>
 #include <queue>
 #include <set>
-#include "Operator.h"
-#include "AbstractExpr.h"
-#include "LogicalExpr.h"
-#include "Function.h"
+#include <iostream>
+#include "AbstractNode.h"
 
 int AbstractNode::nodeIdCounter = 0;
 
@@ -66,10 +64,6 @@ std::vector<AbstractNode *> AbstractNode::getParentsNonNull() const {
   std::copy_if(parents.begin(), parents.end(), std::back_inserter(parentsFiltered),
                [](AbstractNode *n) { return n != nullptr; });
   return parentsFiltered;
-}
-
-void AbstractNode::addChildBilateral(AbstractNode *child) {
-  addChild(child, true);
 }
 
 void AbstractNode::addChild(AbstractNode *child, bool addBackReference) {

@@ -77,7 +77,7 @@ TEST_F(BinaryExprFixture, BinaryExprOperatorOnlyConstructor) {  /* NOLINT */
 
 TEST_F(BinaryExprFixture, BinaryExprAddChildException_NoEmptyChildSpotAvailable) {  /* NOLINT */
   auto* binaryExpr = new BinaryExpr(left, opSymb, right);
-  EXPECT_THROW(binaryExpr->addChild(new LiteralInt(3)),
+  EXPECT_THROW(binaryExpr->addChild(new LiteralInt(3), false),
                std::logic_error);
 }
 
@@ -91,7 +91,7 @@ TEST_F(BinaryExprFixture, BinaryExprAddChildSuccess) {  /* NOLINT */
   auto* binaryExpr = new BinaryExpr();
   binaryExpr->setAttributes(nullptr, operatorAdd, right);
   auto newLeft = new LiteralInt(3);
-  binaryExpr->addChildBilateral(newLeft);
+  binaryExpr->addChild(newLeft,true);
 
   // children
   EXPECT_EQ(binaryExpr->getChildren().size(), 3);
@@ -179,7 +179,7 @@ TEST_F(FunctionFixture, FunctionAddStatement) {  /* NOLINT */
 
 TEST_F(FunctionFixture, FunctionNotSupportedInCircuitMode) {  /* NOLINT */
   // Function is not circuit-compatible, i.e., does not support use of child/parent relationship
-  ASSERT_THROW(funcComputeX->addChild(returnStatement), std::logic_error);
+  ASSERT_THROW(funcComputeX->addChild(returnStatement, false), std::logic_error);
   ASSERT_EQ(funcComputeX->getChildren().size(), 0);
   ASSERT_EQ(returnStatement->getParents().size(), 0);
   ASSERT_FALSE(funcComputeX->supportsCircuitMode());
@@ -239,19 +239,19 @@ TEST_F(FunctionParameterFixture, FunctionParameterAddChildExceptionDatatypeConst
 
 TEST_F(FunctionParameterFixture, FunctionParameterAddChildException_NoEmptyChildSpotAvailable) {  /* NOLINT */
   auto* functionParameter = new FunctionParameter(datatype, variableThreshold);
-  EXPECT_THROW(functionParameter->addChild(variableSecret), std::logic_error);
+  EXPECT_THROW(functionParameter->addChild(variableSecret, false), std::logic_error);
 }
 
 TEST_F(FunctionParameterFixture, FunctionParameterAddChildException_TooManyChildrenAdded) {  /* NOLINT */
   auto* functionParameter = new FunctionParameter(datatype, variableThreshold);
-  EXPECT_THROW(functionParameter->addChildren({{datatype, variableSecret, variableThreshold}}), std::invalid_argument);
+  EXPECT_THROW(functionParameter->addChildren({{datatype, variableSecret, variableThreshold}}, false), std::invalid_argument);
 }
 
 TEST_F(FunctionParameterFixture, FunctionParameter_AddChildSuccess) {  /* NOLINT */
   auto* functionParameter = new FunctionParameter(datatype, variableThreshold);
 
   functionParameter->removeChild(variableThreshold);
-  functionParameter->addChildBilateral(variableSecret);
+  functionParameter->addChild(variableSecret,true);
 
   // children
   EXPECT_EQ(functionParameter->getChildren().size(), 2);
@@ -265,7 +265,7 @@ TEST_F(FunctionParameterFixture, FunctionParameter_AddChildSuccess) {  /* NOLINT
   EXPECT_TRUE(variableSecret->hasParent(functionParameter));
 
   functionParameter->removeChild(datatype);
-  functionParameter->addChildBilateral(datatype2);
+  functionParameter->addChild(datatype2,true);
 
   // children
   EXPECT_EQ(functionParameter->getChildren().size(), 2);
@@ -395,7 +395,7 @@ TEST_F(LogicalExprFixture, LogicalExprOperatorOnlyConstructor) {  /* NOLINT */
 
 TEST_F(LogicalExprFixture, LogicalExprAddChildException_NoEmptyChildSpotAvailable) {  /* NOLINT */
   auto* logicalExpr = new LogicalExpr(literalInt, opSymb, literalIntAnother);
-  EXPECT_THROW(logicalExpr->addChild(new LiteralInt(3)),
+  EXPECT_THROW(logicalExpr->addChild(new LiteralInt(3), false),
                std::logic_error);
 }
 
@@ -408,7 +408,7 @@ TEST_F(LogicalExprFixture, LogicalExprAddChildException_TooManyChildrenAdded) { 
 TEST_F(LogicalExprFixture, LogicalExprAddChildSuccess) {  /* NOLINT */
   auto* logicalExpr = new LogicalExpr();
   logicalExpr->setAttributes(nullptr, operatorGreaterEqual, literalBool);
-  logicalExpr->addChildBilateral(literalIntAnother);
+  logicalExpr->addChild(literalIntAnother,true);
 
   // children
   EXPECT_EQ(logicalExpr->getChildren().size(), 3);
@@ -467,14 +467,14 @@ TEST_F(ReturnStatementFixture, ReturnStatementEmptyConstructor) {  /* NOLINT */
 
 TEST_F(ReturnStatementFixture, ReturnStatementAddSecondChild) {  /* NOLINT */
   auto* returnStatement = new Return(abstractExpr);
-  returnStatement->addChild(abstractExprOther);
+  returnStatement->addChild(abstractExprOther, false);
   EXPECT_EQ(returnStatement->getChildren().size(), 2);
   EXPECT_EQ(returnStatement->getChildrenNonNull().size(), 2);
 }
 
 TEST_F(ReturnStatementFixture, ReturnStatementAddChildSuccess) {  /* NOLINT */
   auto* returnStatement = new Return();
-  returnStatement->addChildBilateral(abstractExprOther);
+  returnStatement->addChild(abstractExprOther,true);
   EXPECT_EQ(returnStatement->getReturnExpressions().front(), abstractExprOther);
   EXPECT_EQ(returnStatement->getChildren().size(), 1);
   EXPECT_EQ(returnStatement->getChildren().front(), abstractExprOther);
@@ -510,12 +510,12 @@ TEST_F(UnaryExprFixture, UnaryExprStandardConstructor) {  /* NOLINT */
 
 TEST_F(UnaryExprFixture, UnaryExprAddChildException_NoEmptyChildSpotAvailable) {  /* NOLINT */
   auto* unaryExpr = new UnaryExpr(opSymbNegation, literalBoolTrue);
-  EXPECT_THROW(unaryExpr->addChild(new Operator(OpSymb::decrement)), std::logic_error);
+  EXPECT_THROW(unaryExpr->addChild(new Operator(OpSymb::decrement), false), std::logic_error);
 }
 
 TEST_F(UnaryExprFixture, UnaryExprAddChildException_TooManyChildrenAdded) {  /* NOLINT */
   auto* unaryExpr = new UnaryExpr(opSymbNegation, literalBoolTrue);
-  EXPECT_THROW(unaryExpr->addChildren({new Operator(OpSymb::decrement), new LiteralBool(false)}), std::logic_error);
+  EXPECT_THROW(unaryExpr->addChildren({new Operator(OpSymb::decrement), new LiteralBool(false)}, false), std::logic_error);
 }
 
 TEST_F(UnaryExprFixture, UnaryExprtion_AddChildSuccess) {  /* NOLINT */
@@ -523,7 +523,7 @@ TEST_F(UnaryExprFixture, UnaryExprtion_AddChildSuccess) {  /* NOLINT */
 
   unaryExpr->removeChild(unaryExpr->getOp());
   auto* newOperator = new Operator(OpSymb::decrement);
-  unaryExpr->addChildBilateral(newOperator);
+  unaryExpr->addChild(newOperator,true);
 
   // children
   EXPECT_EQ(unaryExpr->getChildren().size(), 2);
@@ -562,12 +562,12 @@ TEST_F(VarAssignmFixture, VarAssignmStandardConstructor) {  /* NOLINT */
 
 TEST_F(VarAssignmFixture, VarAssignm_NoEmptyChildSpotAvailable) {  /* NOLINT */
   auto varAssignm = new VarAssignm(variableIdentifier, literalInt222);
-  EXPECT_THROW(varAssignm->addChild(new LiteralBool(true)), std::logic_error);
+  EXPECT_THROW(varAssignm->addChild(new LiteralBool(true), false), std::logic_error);
 }
 
 TEST_F(VarAssignmFixture, VarAssignm_TooManyChildrenAdded) {  /* NOLINT */
   auto varAssignm = new VarAssignm(variableIdentifier, literalInt222);
-  EXPECT_THROW(varAssignm->addChildren({new LiteralBool(true), new LiteralInt(5343)}), std::invalid_argument);
+  EXPECT_THROW(varAssignm->addChildren({new LiteralBool(true), new LiteralInt(5343)}, false), std::invalid_argument);
 }
 
 TEST_F(VarAssignmFixture, VarAssignmAddChildSuccess) {  /* NOLINT */
@@ -575,7 +575,7 @@ TEST_F(VarAssignmFixture, VarAssignmAddChildSuccess) {  /* NOLINT */
 
   varAssignm->removeChildren();
   auto newChild = new LiteralBool(false);
-  varAssignm->addChildBilateral(newChild);
+  varAssignm->addChild(newChild,true);
 
   // children
   ASSERT_EQ(varAssignm->getChildren().size(), 1);

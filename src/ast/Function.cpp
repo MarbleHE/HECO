@@ -14,7 +14,8 @@ Function::Function(std::string name, std::vector<AbstractStatement *> pt) : name
     auto previous = *(&stmt - 1);
     auto next = *(&stmt + 1);
     if (previous != nullptr) stmt->addParent(previous);
-    if (next != nullptr) stmt->addChild(next);
+    if (next != nullptr)
+      stmt->addChild(next, false);
   }
 }
 

@@ -85,11 +85,9 @@ public:
     std::vector<AbstractNode *> getAnc();
 
     // Functions for handling children
-    void addChild(AbstractNode *child, bool addBackReference = false);
+    void addChild(AbstractNode *child, bool addBackReference = true);
 
-    void addChildBilateral(AbstractNode *child);
-
-    void addChildren(const std::vector<AbstractNode *> &childrenToAdd, bool addBackReference = false);
+    void addChildren(const std::vector<AbstractNode *> &childrenToAdd, bool addBackReference = true);
 
     void setChild(std::vector<AbstractNode *>::const_iterator position, AbstractNode *value);
 

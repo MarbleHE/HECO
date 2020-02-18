@@ -297,7 +297,7 @@ std::vector<AbstractNode *> ConeRewriter::getAndCriticalCircuit(std::vector<Abst
           if (std::find(delta.begin(), delta.end(), childLexp) != delta.end()) {
             AbstractNode *copiedV = cAndMap[v->getUniqueNodeId()];
             AbstractNode *copiedChild = cAndMap[child->getUniqueNodeId()];
-            copiedV->addChild(copiedChild);
+            copiedV->addChild(copiedChild, false);
             copiedChild->addParent(copiedV);
           }
         } else {  // continue if child is not a LogicalExpr --> node does not influence the mult. depth
@@ -577,7 +577,7 @@ void ConeRewriter::rewriteCones(Ast &astToRewrite, const std::vector<AbstractNod
     assert(coneEnd == nullptr);
 
     // connect final XOR (i.e., last LogicalExpr in the chain of XOR nodes) to cone output
-    rNode->addChild(xorFinalGate.back());
+    rNode->addChild(xorFinalGate.back(), false);
     xorFinalGate.back()->addParent(rNode);
   } //end: for (auto coneEnd : coneEndNodes)
 }
