@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_VISITOR_H
-#define AST_OPTIMIZER_INCLUDE_VISITOR_H
+#ifndef AST_OPTIMIZER_INCLUDE_VISITOR_VISITOR_H_
+#define AST_OPTIMIZER_INCLUDE_VISITOR_VISITOR_H_
 
 #include <string>
 
@@ -17,13 +17,9 @@ class Call;
 
 class CallExternal;
 
-class Class;
-
 class Function;
 
 class FunctionParameter;
-
-class Group;
 
 class If;
 
@@ -108,4 +104,4 @@ class Visitor {
   virtual void visit(Ast &elem);
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_VISITOR_H
+#endif //AST_OPTIMIZER_INCLUDE_VISITOR_VISITOR_H_
