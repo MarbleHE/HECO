@@ -1,5 +1,5 @@
 #include <iostream>
-#include "Datatypes.h"
+#include "Datatype.h"
 #include "AbstractExpr.h"
 #include "LiteralFloat.h"
 #include "RandNumGen.h"
@@ -70,7 +70,7 @@ bool LiteralFloat::supportsCircuitMode() {
 }
 
 bool LiteralFloat::supportsDatatype(Datatype &datatype) {
-  return datatype.getType()==TYPES::FLOAT;
+  return datatype.getType()==Types::FLOAT;
 }
 
 LiteralFloat *LiteralFloat::clone(bool keepOriginalUniqueNodeId) {

@@ -18,7 +18,7 @@ The optimizations this tool aims to support can be divided into the following tw
 The AST to be used as a foundation for FHE optimizations consists of nodes that are derived from either `AbstractExpr` or `AbstractStatement`, depending on whether the operation is an expression or a statement, respectively. Note that `Call` and `CallExternal` are special nodes/operations as they can either be used as an expression (e.g., in an assignment `int z = computeZ();`) or as a statement (e.g., `updateVarZ();`). A UML showing the inheritance hierarchy is given in Fig. 1. 
 
 ![](doc/images/AstOptimizer.png) <br />
-***Figure 1:*** Class hierarchy of the AST classes. 
+***Figure 1:*** Class hierarchy of the AST classes. //TODO: Remove 'Group' from diagram.
 
 Following, the different node types are briefly explained. The examples in brackets show how the commands would look like in "plain" C++.
 
@@ -27,7 +27,6 @@ Following, the different node types are briefly explained. The examples in brack
     - `Call` – a call to an internal function, i.e., its implementation is represented in the AST.
     - `CallExternal` – a call to an external function which is treated as *black box*, i.e., without accessibility to its definition.
     - `FunctionParameter` – describes the parameters that a function accepts. To evaluate an AST, values must be passed for each of the parameter defined by the function's `FunctionParameter` node.
-    - `Group` – represents the brackets `(` and `)`, for example, used in a binary expression (e.g., `4 + (2 * 3)`).
     - `Literal` – base class for all Literals derived from.
     - `LiteralBool` – models a Boolean value.
     - `LiteralInt` – models an integer value.
@@ -118,14 +117,14 @@ Examples showing how to use this library can be found in the directory [examples
 
 ### Code Style
 
-The code is written in C++ and formatted according to the [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html). Classes are divided into implementation and header. For example, the package `ast` is divided into:
+The code is written in C++ and formatted according to the default C/C++ CLion Codestyle. Classes are divided into implementation and header. For example, the package `ast` is divided into:
 
 ```
 include/ast     – contains the header files (.h)
 src/ast         – contains the implementation (.cpp)
 ```
 
-For auto-formatting in the CLion IDE, please use the code style definition provided in [doc/clion/codeStyleConfig.xml](doc/clion/codestyle) that is derived from the presets based on Google's style guide. The file can be loaded in the CLion preferences (Editor → Code Style → C/C++).
+For auto-formatting in the CLion IDE, please use the code style definition [MarbleHE_CPP_Code_Style.xml](MarbleHE_CPP_Code_Style.xml) that is basically CLion's default presets for C/C++. The file can be loaded into the IDE in the CLion preferences (Editor → Code Style → C/C++).
 
 // TODO Add description on used code inspections (CLion code inspector + cpplint) and provide configuration files
 

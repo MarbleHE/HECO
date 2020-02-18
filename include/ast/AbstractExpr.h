@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_ABSTRACTEXPR_H
-#define AST_OPTIMIZER_INCLUDE_ABSTRACTEXPR_H
+#ifndef AST_OPTIMIZER_INCLUDE_AST_ABSTRACTEXPR_H_
+#define AST_OPTIMIZER_INCLUDE_AST_ABSTRACTEXPR_H_
 
 #include <vector>
 #include <string>
@@ -25,8 +25,6 @@ class AbstractExpr : public AbstractNode {
   static AbstractNode *createParam(AbstractNode *node);
 
  public:
-  [[nodiscard]] std::string toString() const override;
-
   [[nodiscard]] json toJson() const override;
 
   void accept(Visitor &v) override;
@@ -46,4 +44,4 @@ class AbstractExpr : public AbstractNode {
 
 std::ostream &operator<<(std::ostream &outs, const AbstractExpr &obj);
 
-#endif //AST_OPTIMIZER_INCLUDE_ABSTRACTEXPR_H
+#endif //AST_OPTIMIZER_INCLUDE_AST_ABSTRACTEXPR_H_

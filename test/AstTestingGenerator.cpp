@@ -14,28 +14,28 @@
 #include "LiteralFloat.h"
 
 static std::map<int, std::function<void(Ast &)> > call = {  /* NOLINT */
-    {0, AstTestingGenerator::_genSuperSimpleAst},
-    {1, AstTestingGenerator::_genAstRewritingOne},
-    {2, AstTestingGenerator::_genAstRewritingTwo},
-    {3, AstTestingGenerator::_genAstRewritingThree},
-    {4, AstTestingGenerator::_genAstRewritingFour},
-    {5, AstTestingGenerator::_genAstRewritingFive},
-    {6, AstTestingGenerator::_genAstRewritingSix},
-    {7, AstTestingGenerator::_genAstEvalOne},
-    {8, AstTestingGenerator::_genAstEvalTwo},
-    {9, AstTestingGenerator::_genAstEvalThree},
-    {10, AstTestingGenerator::_genAstEvalFour},
-    {11, AstTestingGenerator::_genAstEvalFive},
-    {12, AstTestingGenerator::_genAstEvalSix},
-    {13, AstTestingGenerator::_genAstEvalSeven},
-    {14, AstTestingGenerator::_genAstPrintVisitorOne},
-    {15, AstTestingGenerator::_genAstPrintVisitorTwo},
-    {16, AstTestingGenerator::_genAstMultDepthOne},
-    {17, AstTestingGenerator::_genAstMultDepthTwo},
-    {18, AstTestingGenerator::_genAstRewritingSimple},
-    {19, AstTestingGenerator::_genAstRewritingSimpleExtended},
-    {20, AstTestingGenerator::_genAstRewritingMultiInputY},
-    {21, AstTestingGenerator::_genAstRewritingTwoDepth2ConesButSingleVNode}
+    {0, AstTestingGenerator::genSuperSimpleAst},
+    {1, AstTestingGenerator::genAstRewritingOne},
+    {2, AstTestingGenerator::genAstRewritingTwo},
+    {3, AstTestingGenerator::genAstRewritingThree},
+    {4, AstTestingGenerator::genAstRewritingFour},
+    {5, AstTestingGenerator::genAstRewritingFive},
+    {6, AstTestingGenerator::genAstRewritingSix},
+    {7, AstTestingGenerator::genAstEvalOne},
+    {8, AstTestingGenerator::genAstEvalTwo},
+    {9, AstTestingGenerator::genAstEvalThree},
+    {10, AstTestingGenerator::genAstEvalFour},
+    {11, AstTestingGenerator::genAstEvalFive},
+    {12, AstTestingGenerator::genAstEvalSix},
+    {13, AstTestingGenerator::genAstEvalSeven},
+    {14, AstTestingGenerator::genAstPrintVisitorOne},
+    {15, AstTestingGenerator::genAstPrintVisitorTwo},
+    {16, AstTestingGenerator::genAstMultDepthOne},
+    {17, AstTestingGenerator::genAstMultDepthTwo},
+    {18, AstTestingGenerator::genAstRewritingSimple},
+    {19, AstTestingGenerator::genAstRewritingSimpleExtended},
+    {20, AstTestingGenerator::genAstRewritingMultiInputY},
+    {21, AstTestingGenerator::genAstRewritingTwoDepth2ConesButSingleVNode}
 };
 
 void AstTestingGenerator::generateAst(int id, Ast &ast) {
@@ -50,7 +50,7 @@ size_t AstTestingGenerator::getLargestId() {
   return call.size();
 }
 
-void AstTestingGenerator::_genSuperSimpleAst(Ast &ast) {
+void AstTestingGenerator::genSuperSimpleAst(Ast &ast) {
   // float getPiApproximated()
   auto func = new Function("getPiApproximated");
   // return 3.14159265359;
@@ -58,17 +58,17 @@ void AstTestingGenerator::_genSuperSimpleAst(Ast &ast) {
   ast.setRootNode(func);
 }
 
-void AstTestingGenerator::_genAstRewritingOne(Ast &ast) {
+void AstTestingGenerator::genAstRewritingOne(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computePrivate");
   auto funcParams = new std::vector<FunctionParameter *>();
-  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputA")));
-  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputB")));
-  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputC")));
+  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputA")));
+  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputB")));
+  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputC")));
   func->setParams(*funcParams);
 
   // int prod = [inputA * [inputB * inputC]]
-  func->addStatement(new VarDecl("prod", TYPES::INT,
+  func->addStatement(new VarDecl("prod", Types::INT,
                                  new BinaryExpr(
                                      new Variable("inputA"),
                                      OpSymb::multiplication,
@@ -86,17 +86,17 @@ void AstTestingGenerator::_genAstRewritingOne(Ast &ast) {
   ast.setRootNode(func);
 }
 
-void AstTestingGenerator::_genAstRewritingTwo(Ast &ast) {
+void AstTestingGenerator::genAstRewritingTwo(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computePrivate");
   auto funcParams = new std::vector<FunctionParameter *>();
-  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputA")));
-  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputB")));
-  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputC")));
+  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputA")));
+  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputB")));
+  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputC")));
   func->setParams(*funcParams);
 
   // int prod = inputA * inputB;
-  func->addStatement(new VarDecl("prod", TYPES::INT,
+  func->addStatement(new VarDecl("prod", Types::INT,
                                  new BinaryExpr(
                                      new Variable("inputA"),
                                      OpSymb::multiplication,
@@ -118,24 +118,24 @@ void AstTestingGenerator::_genAstRewritingTwo(Ast &ast) {
   ast.setRootNode(func);
 }
 
-void AstTestingGenerator::_genAstRewritingThree(Ast &ast) {
+void AstTestingGenerator::genAstRewritingThree(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computePrivate");
   auto funcParams = new std::vector<FunctionParameter *>();
-  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputA")));
-  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputB")));
-  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputC")));
+  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputA")));
+  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputB")));
+  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputC")));
   func->setParams(*funcParams);
 
   // int prod = inputA * inputB;
-  func->addStatement(new VarDecl("prod", TYPES::INT,
+  func->addStatement(new VarDecl("prod", Types::INT,
                                  new BinaryExpr(
                                      new Variable("inputA"),
                                      OpSymb::multiplication,
                                      new Variable("inputB"))));
 
   // int rInt = rand()
-  func->addStatement(new VarDecl("rInt", TYPES::INT, new CallExternal("std::rand")));
+  func->addStatement(new VarDecl("rInt", Types::INT, new CallExternal("std::rand")));
 
   // prod = prod * inputC
   func->addStatement(
@@ -153,17 +153,17 @@ void AstTestingGenerator::_genAstRewritingThree(Ast &ast) {
   ast.setRootNode(func);
 }
 
-void AstTestingGenerator::_genAstRewritingFour(Ast &ast) {
+void AstTestingGenerator::genAstRewritingFour(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computePrivate");
   auto funcParams = new std::vector<FunctionParameter *>();
-  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputA")));
-  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputB")));
-  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputC")));
+  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputA")));
+  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputB")));
+  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputC")));
   func->setParams(*funcParams);
 
   // int prod = inputA * inputB;
-  func->addStatement(new VarDecl("prod", TYPES::INT,
+  func->addStatement(new VarDecl("prod", Types::INT,
                                  new BinaryExpr(
                                      new Variable("inputA"),
                                      OpSymb::multiplication,
@@ -187,23 +187,23 @@ void AstTestingGenerator::_genAstRewritingFour(Ast &ast) {
   ast.setRootNode(func);
 }
 
-void AstTestingGenerator::_genAstRewritingFive(Ast &ast) {
+void AstTestingGenerator::genAstRewritingFive(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computePrivate");
   auto funcParams = new std::vector<FunctionParameter *>();
-  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputA")));
-  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputB")));
-  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputC")));
+  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputA")));
+  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputB")));
+  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputC")));
   func->setParams(*funcParams);
 
   // int prod = inputA * inputB;
-  func->addStatement(new VarDecl("prod", TYPES::INT,
+  func->addStatement(new VarDecl("prod", Types::INT,
                                  new BinaryExpr(
                                      new Variable("inputA"),
                                      OpSymb::multiplication,
                                      new Variable("inputB"))));
 
-  // prod = prod * inputC
+  // argPow = inputC * inputC
   func->addStatement(
       new VarAssignm("argPow", new BinaryExpr(
           new Variable("inputC"),
@@ -219,24 +219,24 @@ void AstTestingGenerator::_genAstRewritingFive(Ast &ast) {
   ast.setRootNode(func);
 }
 
-void AstTestingGenerator::_genAstRewritingSix(Ast &ast) {
+void AstTestingGenerator::genAstRewritingSix(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computePrivate");
   auto funcParams = new std::vector<FunctionParameter *>();
-  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputA")));
-  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputB")));
-  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputC")));
+  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputA")));
+  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputB")));
+  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputC")));
   func->setParams(*funcParams);
 
   // int prod = inputA * inputB;
-  func->addStatement(new VarDecl("prod", TYPES::INT,
+  func->addStatement(new VarDecl("prod", Types::INT,
                                  new BinaryExpr(
                                      new Variable("inputA"),
                                      OpSymb::multiplication,
                                      new Variable("inputB"))));
 
   // int prod2 = prod * inputC;
-  func->addStatement(new VarDecl("prod2", TYPES::INT,
+  func->addStatement(new VarDecl("prod2", Types::INT,
                                  new BinaryExpr(
                                      new Variable("prod"),
                                      OpSymb::multiplication,
@@ -251,17 +251,17 @@ void AstTestingGenerator::_genAstRewritingSix(Ast &ast) {
   ast.setRootNode(func);
 }
 
-void AstTestingGenerator::_genAstEvalOne(Ast &ast) {
+void AstTestingGenerator::genAstEvalOne(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computeAvg");
   auto funcParams = new std::vector<FunctionParameter *>();
-  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("width")));
-  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("length")));
-  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("depth")));
+  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("width")));
+  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("length")));
+  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("depth")));
   func->setParams(*funcParams);
 
   // int prod = inputA * inputB * inputC
-  func->addStatement(new VarDecl("prod", TYPES::INT,
+  func->addStatement(new VarDecl("prod", Types::INT,
                                  new BinaryExpr(
                                      new Variable("width"),
                                      OpSymb::multiplication,
@@ -279,17 +279,17 @@ void AstTestingGenerator::_genAstEvalOne(Ast &ast) {
   ast.setRootNode(func);
 }
 
-void AstTestingGenerator::_genAstEvalTwo(Ast &ast) {
+void AstTestingGenerator::genAstEvalTwo(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computePrivate");
   auto funcParams = new std::vector<FunctionParameter *>();
-  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputA")));
-  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputB")));
-  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::BOOL), new Variable("takeIf")));
+  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputA")));
+  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputB")));
+  funcParams->push_back(new FunctionParameter(new Datatype(Types::BOOL), new Variable("takeIf")));
   func->setParams(*funcParams);
 
   // int prod = inputA * inputB;
-  func->addStatement(new VarDecl("prod", TYPES::INT,
+  func->addStatement(new VarDecl("prod", Types::INT,
                                  new BinaryExpr(
                                      new Variable("inputA"),
                                      OpSymb::multiplication,
@@ -316,14 +316,14 @@ void AstTestingGenerator::_genAstEvalTwo(Ast &ast) {
   ast.setRootNode(func);
 }
 
-void AstTestingGenerator::_genAstEvalThree(Ast &ast) {
+void AstTestingGenerator::genAstEvalThree(Ast &ast) {
   // bool computeLogical(int inputA, bool strong, bool negate, int inputB)
   auto func = new Function("computePrivate");
   auto funcParams = new std::vector<FunctionParameter *>();
-  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputA")));
-  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::BOOL), new Variable("strong")));
-  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::BOOL), new Variable("negate")));
-  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputB")));
+  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputA")));
+  funcParams->push_back(new FunctionParameter(new Datatype(Types::BOOL), new Variable("strong")));
+  funcParams->push_back(new FunctionParameter(new Datatype(Types::BOOL), new Variable("negate")));
+  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputB")));
   func->setParams(*funcParams);
 
   // if (strong == true) { inputA = inputA * 42; } else { inputA = inputA + 42; }
@@ -353,11 +353,11 @@ void AstTestingGenerator::_genAstEvalThree(Ast &ast) {
   ast.setRootNode(func);
 }
 
-void AstTestingGenerator::_genAstEvalFour(Ast &ast) {
+void AstTestingGenerator::genAstEvalFour(Ast &ast) {
   auto func = new Function("concatString");
   auto funcParams = new std::vector<FunctionParameter *>();
-  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::STRING), new Variable("strA")));
-  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::STRING), new Variable("strB")));
+  funcParams->push_back(new FunctionParameter(new Datatype(Types::STRING), new Variable("strA")));
+  funcParams->push_back(new FunctionParameter(new Datatype(Types::STRING), new Variable("strB")));
   func->setParams(*funcParams);
 
   // return strA + strB
@@ -366,7 +366,7 @@ void AstTestingGenerator::_genAstEvalFour(Ast &ast) {
   ast.setRootNode(func);
 }
 
-void AstTestingGenerator::_genAstEvalFive(Ast &ast) {
+void AstTestingGenerator::genAstEvalFive(Ast &ast) {
   // int determineSuitableX(int encryptedA, int encryptedB) {...}
   Function *func = dynamic_cast<Function *>(ast.setRootNode(new Function("determineSuitableX")));
   func->addParameter(new FunctionParameter("int", new Variable("encryptedA")));
@@ -375,7 +375,7 @@ void AstTestingGenerator::_genAstEvalFive(Ast &ast) {
 
   // bool b = encryptedA < 2;
   func->addStatement(
-      new VarDecl("b", TYPES::BOOL,
+      new VarDecl("b", Types::BOOL,
                   new LogicalExpr(
                       new Variable("encryptedA"),
                       OpSymb::LogCompOp::smaller,
@@ -418,7 +418,7 @@ void AstTestingGenerator::_genAstEvalFive(Ast &ast) {
       new Return(new Variable("sum")));
 }
 
-void AstTestingGenerator::_genAstEvalSix(Ast &ast) {
+void AstTestingGenerator::genAstEvalSix(Ast &ast) {
   // int nestedCall() { ...
   auto *fnc = new Function("nestedCall");
   ast.setRootNode(fnc);
@@ -440,7 +440,7 @@ void AstTestingGenerator::_genAstEvalSix(Ast &ast) {
   fnc->addStatement(new Return(new Variable("result")));
 }
 
-void AstTestingGenerator::_genAstEvalSeven(Ast &ast) {
+void AstTestingGenerator::genAstEvalSeven(Ast &ast) {
   // int nestedCall() { ...
   auto *fnc = new Function("nestedCall");
   ast.setRootNode(fnc);
@@ -462,7 +462,7 @@ void AstTestingGenerator::_genAstEvalSeven(Ast &ast) {
   fnc->addStatement(new Return(new Variable("result")));
 }
 
-void AstTestingGenerator::_genAstPrintVisitorOne(Ast &ast) {
+void AstTestingGenerator::genAstPrintVisitorOne(Ast &ast) {
   // int computePrivate(int x) { ... }
   Function *func = dynamic_cast<Function *>(ast.setRootNode(new Function("computePrivate")));
   func->addParameter(new FunctionParameter("int", new Variable("x")));
@@ -471,7 +471,7 @@ void AstTestingGenerator::_genAstPrintVisitorOne(Ast &ast) {
   func->addStatement(new VarDecl("a", 4));
 
   // int k;
-  func->addStatement(new VarDecl("k", TYPES::INT, nullptr));
+  func->addStatement(new VarDecl("k", Types::INT, nullptr));
 
   // if ( x > 32 ) { k = x * a; } else { k = (x * a) + 42; }
   func->addStatement(new If(
@@ -499,7 +499,7 @@ void AstTestingGenerator::_genAstPrintVisitorOne(Ast &ast) {
   func->addStatement(new Return(new Variable("k")));
 }
 
-void AstTestingGenerator::_genAstPrintVisitorTwo(Ast &ast) {
+void AstTestingGenerator::genAstPrintVisitorTwo(Ast &ast) {
 // int determineSuitableX(int encryptedA, int encryptedB) {...}
   Function *func = dynamic_cast<Function *>(ast.setRootNode(new Function("determineSuitableX")));
   func->addParameter(new FunctionParameter("int", new Variable("encryptedA")));
@@ -507,7 +507,7 @@ void AstTestingGenerator::_genAstPrintVisitorTwo(Ast &ast) {
 
   // int randInt = rand() % 42;
   func->addStatement(
-      new VarDecl("randInt", TYPES::INT,
+      new VarDecl("randInt", Types::INT,
                   new BinaryExpr(
                       new CallExternal("std::rand"),
                       OpSymb::BinaryOp::modulo,
@@ -515,7 +515,7 @@ void AstTestingGenerator::_genAstPrintVisitorTwo(Ast &ast) {
 
   // bool b = encryptedA < 2;
   func->addStatement(
-      new VarDecl("b", TYPES::BOOL,
+      new VarDecl("b", Types::BOOL,
                   new LogicalExpr(
                       new Variable("encryptedA"),
                       OpSymb::LogCompOp::smaller,
@@ -553,7 +553,7 @@ void AstTestingGenerator::_genAstPrintVisitorTwo(Ast &ast) {
                   OpSymb::BinaryOp::subtraction,
                   new LiteralInt(1)))})));
 
-  // String outStr = "Computation finished!";
+  // STRING outStr = "Computation finished!";
   func->addStatement(new VarDecl("outStr", "Computation finished!"));
 
   // printf(outStr);
@@ -566,17 +566,17 @@ void AstTestingGenerator::_genAstPrintVisitorTwo(Ast &ast) {
       new Return(new Variable("sum")));
 }
 
-void AstTestingGenerator::_genAstMultDepthOne(Ast &ast) {
+void AstTestingGenerator::genAstMultDepthOne(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computePrivate");
   auto funcParams = new std::vector<FunctionParameter *>();
-  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputA")));
-  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputB")));
-  funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputC")));
+  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputA")));
+  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputB")));
+  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputC")));
   func->setParams(*funcParams);
 
   // int prod = inputA * inputB;
-  func->addStatement(new VarDecl("prod", TYPES::INT,
+  func->addStatement(new VarDecl("prod", Types::INT,
                                  new BinaryExpr(
                                      new Variable("inputA"),
                                      OpSymb::multiplication,
@@ -598,16 +598,16 @@ void AstTestingGenerator::_genAstMultDepthOne(Ast &ast) {
   ast.setRootNode(func);
 }
 
-void AstTestingGenerator::_genAstMultDepthTwo(Ast &ast) {
+void AstTestingGenerator::genAstMultDepthTwo(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computePrivate");
   auto funcParams = new std::vector<FunctionParameter *>();
   funcParams->push_back(new FunctionParameter(
-      new Datatype(TYPES::INT), new Variable("base")));
+      new Datatype(Types::INT), new Variable("base")));
   funcParams->push_back(new FunctionParameter(
-      new Datatype(TYPES::INT), new Variable("defaultC")));
+      new Datatype(Types::INT), new Variable("defaultC")));
   funcParams->push_back(new FunctionParameter(
-      new Datatype(TYPES::BOOL), new Variable("useBase")));
+      new Datatype(Types::BOOL), new Variable("useBase")));
 
   // int stdA = 512;
   func->addStatement(new VarDecl("stdA", 512));
@@ -615,13 +615,13 @@ void AstTestingGenerator::_genAstMultDepthTwo(Ast &ast) {
   // int stdB = 2 * stdA;
   func->addStatement(
       new VarDecl("stdB",
-                  TYPES::INT,
+                  Types::INT,
                   new BinaryExpr(new LiteralInt(2),
                                  OpSymb::multiplication,
                                  new Variable("stdA"))));
 
   // int prod = [base * stdA] + [base * stdB];
-  func->addStatement(new VarDecl("prod", TYPES::INT,
+  func->addStatement(new VarDecl("prod", Types::INT,
                                  new BinaryExpr(
                                      new BinaryExpr(
                                          new Variable("base"),
@@ -635,7 +635,7 @@ void AstTestingGenerator::_genAstMultDepthTwo(Ast &ast) {
 
   // int condVal = [22 * defaultC] + [base * useBase];
   func->addStatement(
-      new VarDecl("condVal", TYPES::INT,
+      new VarDecl("condVal", Types::INT,
                   new BinaryExpr(
                       new BinaryExpr(
                           new LiteralInt(22),
@@ -663,7 +663,7 @@ void AstTestingGenerator::_genAstMultDepthTwo(Ast &ast) {
   ast.setRootNode(func);
 }
 
-void AstTestingGenerator::_genAstRewritingSimple(Ast &ast) {
+void AstTestingGenerator::genAstRewritingSimple(Ast &ast) {
   // -----------------------------
   // Schematic diagram of the AST
   // -----------------------------
@@ -708,7 +708,7 @@ void AstTestingGenerator::_genAstRewritingSimple(Ast &ast) {
   ast.setRootNode(returnStatement);
 }
 
-void AstTestingGenerator::_genAstRewritingSimpleExtended(Ast &ast) {
+void AstTestingGenerator::genAstRewritingSimpleExtended(Ast &ast) {
   // -----------------------------
   // Schematic diagram of the AST
   // -----------------------------
@@ -771,7 +771,7 @@ void AstTestingGenerator::_genAstRewritingSimpleExtended(Ast &ast) {
   ast.setRootNode(returnStatement);
 }
 
-void AstTestingGenerator::_genAstRewritingMultiInputY(Ast &ast) {
+void AstTestingGenerator::genAstRewritingMultiInputY(Ast &ast) {
   auto *returnStatement = new Return(new LogicalExpr(
       new LogicalExpr(
 
@@ -820,7 +820,7 @@ void AstTestingGenerator::_genAstRewritingMultiInputY(Ast &ast) {
   ast.setRootNode(returnStatement);
 }
 
-void AstTestingGenerator::_genAstRewritingTwoDepth2ConesButSingleVNode(Ast &ast) {
+void AstTestingGenerator::genAstRewritingTwoDepth2ConesButSingleVNode(Ast &ast) {
   AbstractExpr *aCone = new LogicalExpr(  // level 1
       new LogicalExpr(
 

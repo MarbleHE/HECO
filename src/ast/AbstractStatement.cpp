@@ -4,10 +4,6 @@
 #include "Call.h"
 #include "BinaryExpr.h"
 
-std::string AbstractStatement::toString() const {
-  return this->toJson().dump();
-}
-
 json AbstractStatement::toJson() const {
   return json({"type", "AbstractStatement"});
 }

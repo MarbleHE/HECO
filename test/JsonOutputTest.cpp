@@ -195,7 +195,7 @@ TEST(JsonOutputTest, Operator) { /* NOLINT */
 }
 
 TEST(JsonOutputTest, Block) { /* NOLINT */
-  auto bl = new Block(new VarDecl("width", TYPES::INT, new LiteralInt(22)));
+  auto bl = new Block(new VarDecl("width", Types::INT, new LiteralInt(22)));
   json j = {{"type", "Block"},
             {"statements", {{
                                 {"type", "VarDecl"},
@@ -215,7 +215,7 @@ TEST(JsonOutputTest, CallExternal) { /* NOLINT */
   auto callExt = new CallExternal("printf", funcParams);
 
   // read expected output from hard-coded file
-  std::ifstream f("../../test/auxoutput/JsonOutputTest/CallExternal.json");
+  std::ifstream f("../../test/expected_output_large/JsonOutputTest/CallExternal.json");
   json j = json::parse(f);
 
   EXPECT_EQ(callExt->AbstractStatement::toString(), j.dump());
@@ -236,10 +236,9 @@ TEST(JsonOutputTest, Call) {/* NOLINT */
                    }));
 
   // retrieve expected result
-  std::ifstream f("../../test/auxoutput/JsonOutputTest/Call.json");
+  std::ifstream f("../../test/expected_output_large/JsonOutputTest/Call.json");
   json expected = json::parse(f);
 
-  EXPECT_EQ(call->AbstractStatement::toString(), expected.dump());
   EXPECT_EQ(call->AbstractExpr::toString(), expected.dump());
 }
 
@@ -265,7 +264,7 @@ TEST(JsonOutputTest, Function) { /* NOLINT */
                                        new Variable("z")))});
 
   // retrieve expected result
-  std::ifstream f("../../test/auxoutput/JsonOutputTest/Function.json");
+  std::ifstream f("../../test/expected_output_large/JsonOutputTest/Function.json");
   json expected = json::parse(f);
 
   EXPECT_EQ(func->toJson(), expected);
@@ -289,7 +288,7 @@ TEST(JsonOutputTest, IfThenOnly) { /* NOLINT */
       new VarAssignm("isValid", new LiteralBool(true)));
 
   // retrieve expected result
-  std::ifstream f("../../test/auxoutput/JsonOutputTest/IfThenOnly.json");
+  std::ifstream f("../../test/expected_output_large/JsonOutputTest/IfThenOnly.json");
   json expected = json::parse(f);
 
   EXPECT_EQ(ifStmt->toJson(), expected);
@@ -324,7 +323,7 @@ TEST(JsonOutputTest, If) { /* NOLINT */
   auto ifStmt = new If(condition, thenBranch, elseBranch);
 
   // retrieve expected result
-  std::ifstream f("../../test/auxoutput/JsonOutputTest/If.json");
+  std::ifstream f("../../test/expected_output_large/JsonOutputTest/If.json");
   json expected = json::parse(f);
 
   EXPECT_EQ(ifStmt->toJson(), expected);
@@ -350,7 +349,7 @@ TEST(JsonOutputTest, While) { /* NOLINT */
       new Block(&blockStatements));
 
   // retrieve expected result
-  std::ifstream f("../../test/auxoutput/JsonOutputTest/While.json");
+  std::ifstream f("../../test/expected_output_large/JsonOutputTest/While.json");
   json expected = json::parse(f);
 
   EXPECT_EQ(whileStmt->toJson(), expected);

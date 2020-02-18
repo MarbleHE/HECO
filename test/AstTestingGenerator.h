@@ -16,28 +16,28 @@ class AstTestingGenerator {
   static size_t getLargestId();
 
   // Methods to generate sample ASTs to be used for tests.
-  static void _genSuperSimpleAst(Ast &ast);
-  static void _genAstRewritingOne(Ast &ast);
-  static void _genAstRewritingTwo(Ast &ast);
-  static void _genAstRewritingThree(Ast &ast);
-  static void _genAstRewritingFour(Ast &ast);
-  static void _genAstRewritingFive(Ast &ast);
-  static void _genAstRewritingSix(Ast &ast);
-  static void _genAstEvalOne(Ast &ast);
-  static void _genAstEvalTwo(Ast &ast);
-  static void _genAstEvalThree(Ast &ast);
-  static void _genAstEvalFour(Ast &ast);
-  static void _genAstEvalFive(Ast &ast);
-  static void _genAstEvalSix(Ast &ast);
-  static void _genAstEvalSeven(Ast &ast);
-  static void _genAstPrintVisitorOne(Ast &ast);
-  static void _genAstPrintVisitorTwo(Ast &ast);
-  static void _genAstMultDepthOne(Ast &ast);
-  static void _genAstMultDepthTwo(Ast &ast);
-  static void _genAstRewritingSimple(Ast &ast);
-  static void _genAstRewritingSimpleExtended(Ast &ast);
-  static void _genAstRewritingMultiInputY(Ast &ast);
-  static void _genAstRewritingTwoDepth2ConesButSingleVNode(Ast &ast);
+  static void genSuperSimpleAst(Ast &ast);
+  static void genAstRewritingOne(Ast &ast);
+  static void genAstRewritingTwo(Ast &ast);
+  static void genAstRewritingThree(Ast &ast);
+  static void genAstRewritingFour(Ast &ast);
+  static void genAstRewritingFive(Ast &ast);
+  static void genAstRewritingSix(Ast &ast);
+  static void genAstEvalOne(Ast &ast);
+  static void genAstEvalTwo(Ast &ast);
+  static void genAstEvalThree(Ast &ast);
+  static void genAstEvalFour(Ast &ast);
+  static void genAstEvalFive(Ast &ast);
+  static void genAstEvalSix(Ast &ast);
+  static void genAstEvalSeven(Ast &ast);
+  static void genAstPrintVisitorOne(Ast &ast);
+  static void genAstPrintVisitorTwo(Ast &ast);
+  static void genAstMultDepthOne(Ast &ast);
+  static void genAstMultDepthTwo(Ast &ast);
+  static void genAstRewritingSimple(Ast &ast);
+  static void genAstRewritingSimpleExtended(Ast &ast);
+  static void genAstRewritingMultiInputY(Ast &ast);
+  static void genAstRewritingTwoDepth2ConesButSingleVNode(Ast &ast);
 };
 
 #endif //MASTER_THESIS_CODE_ASTTESTINGGENERATOR_H

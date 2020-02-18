@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 #include "AbstractExpr.h"
-#include "Datatypes.h"
+#include "Datatype.h"
 
 class RandLiteralGen;
 

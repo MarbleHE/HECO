@@ -93,7 +93,7 @@ void generateDemoOne(Ast &ast) {
   func->addStatement(new VarDecl("a", 4));
 
   // int k;
-  func->addStatement(new VarDecl("k", TYPES::INT, nullptr));
+  func->addStatement(new VarDecl("k", Types::INT, nullptr));
 
   // if ( x > 32 ) { k = x * a; } else { k = (x * a) + 42; }
   func->addStatement(new If(
@@ -129,7 +129,7 @@ void generateDemoTwo(Ast &ast) {
 
   // int randInt = rand() % 42;
   func->addStatement(
-      new VarDecl("randInt", TYPES::INT,
+      new VarDecl("randInt", Types::INT,
                   new BinaryExpr(
                       new CallExternal("std::rand"),
                       OpSymb::BinaryOp::modulo,
@@ -137,7 +137,7 @@ void generateDemoTwo(Ast &ast) {
 
   // bool b = encryptedA < 2;
   func->addStatement(
-      new VarDecl("b", TYPES::BOOL,
+      new VarDecl("b", Types::BOOL,
                   new LogicalExpr(
                       new Variable("encryptedA"),
                       OpSymb::LogCompOp::smaller,
@@ -175,7 +175,7 @@ void generateDemoTwo(Ast &ast) {
                   OpSymb::BinaryOp::subtraction,
                   new LiteralInt(1)))})));
 
-  // String outStr = "Computation finished!";
+  // STRING outStr = "Computation finished!";
   func->addStatement(new VarDecl("outStr", "Computation finished!"));
 
   // printf(outStr);
@@ -203,7 +203,7 @@ void generateDemoThree(Ast &ast) {
 
   // int result = a * b;
   func->addStatement(
-      new VarDecl("result", TYPES::INT,
+      new VarDecl("result", Types::INT,
                   new BinaryExpr(
                       new Variable("a"),
                       OpSymb::BinaryOp::multiplication,
@@ -233,7 +233,7 @@ void generateDemoFour(Ast &ast) {
 
   // int result = a * b;
   func->addStatement(
-      new VarDecl("result", TYPES::INT,
+      new VarDecl("result", Types::INT,
                   new BinaryExpr(
                       new Variable("a"),
                       OpSymb::BinaryOp::multiplication,
@@ -261,7 +261,7 @@ void generateDemoFive(Ast &ast) {
   Function *func = dynamic_cast<Function *>(ast.setRootNode(new Function("multiMult")));
 
   // int result = (inA * (inB * inC));
-  func->addStatement(new VarDecl("result", TYPES::INT,
+  func->addStatement(new VarDecl("result", Types::INT,
                                  new BinaryExpr(
                                      new Variable("inA"),
                                      OpSymb::multiplication,
@@ -280,7 +280,7 @@ void generateDemoSix(Ast &ast) {
   Function *func = dynamic_cast<Function *>(ast.setRootNode(new Function("multiMult")));
 
   // int result = (inZ * (inA * (inB * inC)));
-  func->addStatement(new VarDecl("result", TYPES::INT,
+  func->addStatement(new VarDecl("result", Types::INT,
                                  new BinaryExpr(new Variable("inZ"),
                                                 OpSymb::multiplication,
                                                 new BinaryExpr(
@@ -304,7 +304,7 @@ void generateDemoSeven(Ast &ast) {
 
   // int sum = encryptedA + encryptedB;
   func->addStatement(
-      new VarDecl("sum", TYPES::INT,
+      new VarDecl("sum", Types::INT,
                   new BinaryExpr(
                       new Variable("encryptedA"),
                       OpSymb::BinaryOp::addition,

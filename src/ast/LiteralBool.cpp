@@ -62,7 +62,7 @@ bool LiteralBool::supportsCircuitMode() {
 }
 
 bool LiteralBool::supportsDatatype(Datatype &datatype) {
-  return datatype.getType()==TYPES::BOOL;
+  return datatype.getType()==Types::BOOL;
 }
 
 LiteralBool *LiteralBool::clone(bool keepOriginalUniqueNodeId) {

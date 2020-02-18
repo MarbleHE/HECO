@@ -1,17 +1,19 @@
 #ifndef AST_OPTIMIZER_INCLUDE_PRINTVISITOR_H
 #define AST_OPTIMIZER_INCLUDE_PRINTVISITOR_H
 
-#include "Visitor.h"
 #include <list>
 #include <sstream>
 #include <string>
+#include "Visitor.h"
+#include "AbstractNode.h"
 
 class PrintVisitor : public Visitor {
- protected:
+ private:
   int level;
   Scope *lastPrintedScope;
   std::stringstream ss;
   bool printScreen;
+  bool showUniqueNodeIds{false};
 
  public:
   PrintVisitor();
@@ -86,6 +88,8 @@ class PrintVisitor : public Visitor {
   void addOutputStr(AbstractNode &node);
 
   void printNodeName(AbstractNode &node);
+  
+  void useUniqueNodeIds(bool value);
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_PRINTVISITOR_H

@@ -4,14 +4,16 @@
 #include <string>
 #include "AbstractStatement.h"
 #include "AbstractExpr.h"
-#include "Datatypes.h"
+#include "Datatype.h"
 
 class VarDecl : public AbstractStatement {
  private:
   std::string identifier;
 
  public:
-  VarDecl(std::string name, TYPES datatype, AbstractExpr *initializer);
+  VarDecl(std::string name, Types datatype, AbstractExpr *initializer);
+
+  VarDecl(std::string name, Datatype *datatype, AbstractExpr *initializer);
 
   VarDecl(std::string name, void *abstractExpr);
 

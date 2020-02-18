@@ -1,5 +1,5 @@
 #include <utility>
-#include "Datatypes.h"
+#include "Datatype.h"
 #include "LiteralString.h"
 #include "RandNumGen.h"
 
@@ -60,7 +60,7 @@ bool LiteralString::supportsCircuitMode() {
 }
 
 bool LiteralString::supportsDatatype(Datatype &datatype) {
-  return datatype.getType()==TYPES::STRING;
+  return datatype.getType()==Types::STRING;
 }
 
 LiteralString *LiteralString::clone(bool keepOriginalUniqueNodeId) {

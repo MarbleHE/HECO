@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_ABSTRACTSTATEMENT_H
-#define AST_OPTIMIZER_INCLUDE_ABSTRACTSTATEMENT_H
+#ifndef AST_OPTIMIZER_INCLUDE_AST_ABSTRACTSTATEMENT_H_
+#define AST_OPTIMIZER_INCLUDE_AST_ABSTRACTSTATEMENT_H_
 
 #include <string>
 #include <nlohmann/json.hpp>
@@ -10,8 +10,6 @@ using json = nlohmann::json;
 
 class AbstractStatement : public AbstractNode {
  public:
-  [[nodiscard]] std::string toString() const override;
-
   [[nodiscard]] json toJson() const override;
 
   void accept(Visitor &v) override;
@@ -30,4 +28,4 @@ void to_json(json &j, const AbstractStatement &absStat);
 
 void to_json(json &j, const AbstractStatement *absStat);
 
-#endif //AST_OPTIMIZER_INCLUDE_ABSTRACTSTATEMENT_H
+#endif //AST_OPTIMIZER_INCLUDE_AST_ABSTRACTSTATEMENT_H_

@@ -102,7 +102,7 @@ AbstractLiteral *Operator::applyOperator(LiteralFloat *) {
 }
 
 // -----------------
-// First call of applyOperator -> both types are unknown
+// First call of applyOperator -> both Types are unknown
 // -----------------
 AbstractLiteral *Operator::applyOperator(AbstractLiteral *lhs, AbstractLiteral *rhs) {
   // determine Literal subtype of lhs
@@ -138,7 +138,7 @@ AbstractLiteral *Operator::applyOperator(A *lhs, AbstractLiteral *rhs) {
 }
 
 // -----------------
-// Third call of applyOperator -> both types are is known
+// Third call of applyOperator -> both Types are is known
 // -----------------
 
 AbstractLiteral *Operator::applyOperator(LiteralFloat *lhs, LiteralFloat *rhs) {

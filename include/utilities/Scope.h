@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_SCOPE_H
-#define AST_OPTIMIZER_INCLUDE_SCOPE_H
+#ifndef AST_OPTIMIZER_SCOPE_H
+#define AST_OPTIMIZER_SCOPE_H
 
 #include <map>
 #include <queue>
@@ -34,4 +34,4 @@ class Scope {
   AbstractStatement *getLastStatement();
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_SCOPE_H
+#endif //AST_OPTIMIZER_SCOPE_H

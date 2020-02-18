@@ -2,7 +2,7 @@
 #include "MultRewriteVisitor.h"
 #include "BinaryExpr.h"
 #include "Block.h"
-#include "../../main.h"
+#include "Variable.h"
 
 void MultRewriteVisitor::visit(Ast &elem) {
   Visitor::visit(elem);

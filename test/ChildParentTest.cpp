@@ -113,9 +113,7 @@ TEST_F(BinaryExprFixture, BinaryExprAddChildSuccess) {  /* NOLINT */
 
 TEST(ChildParentTests, Block) {  /* NOLINT */
   auto *blockStatement =
-      new Block(new Call(
-          {new FunctionParameter("int", new LiteralInt(22))},
-          new Function("computeSecretNumber")));
+      new Block(new VarAssignm("varX", new LiteralInt(22)));
   ASSERT_EQ(blockStatement->getChildren().size(), 1);
   ASSERT_EQ(blockStatement->getParents().size(), 0);
   ASSERT_FALSE(blockStatement->supportsCircuitMode());
@@ -124,20 +122,13 @@ TEST(ChildParentTests, Block) {  /* NOLINT */
 
 TEST(ChildParentTests, Call) {  /* NOLINT */
   auto *func = new Function("computeSecretX");
-  auto *funcParam = new FunctionParameter(new Datatype(TYPES::INT), new LiteralInt(221));
+  auto *funcParam = new FunctionParameter(new Datatype(Types::INT), new LiteralInt(221));
   auto *call = new Call({funcParam}, func);
 
-  // using AbstractExpr
-  ASSERT_EQ(call->AbstractExpr::getChildren().size(), 0);
-  ASSERT_EQ(call->AbstractExpr::getParents().size(), 0);
-  ASSERT_FALSE(call->AbstractExpr::supportsCircuitMode());
-  ASSERT_EQ(call->AbstractExpr::getMaxNumberChildren(), 0);
-
-  // using AbstractStatement
-  ASSERT_EQ(call->AbstractStatement::getChildren().size(), 0);
-  ASSERT_EQ(call->AbstractStatement::getParents().size(), 0);
-  ASSERT_FALSE(call->AbstractStatement::supportsCircuitMode());
-  ASSERT_EQ(call->AbstractStatement::getMaxNumberChildren(), 0);
+  ASSERT_EQ(call->getChildren().size(), 0);
+  ASSERT_EQ(call->getParents().size(), 0);
+  ASSERT_FALSE(call->supportsCircuitMode());
+  ASSERT_EQ(call->getMaxNumberChildren(), 0);
 
   // checking children
   ASSERT_EQ(func->getParents().size(), 0);
@@ -190,16 +181,16 @@ class FunctionParameterFixture : public ::testing::Test {
  protected:
   Datatype *datatype;
   Datatype *datatype2;
-  TYPES datatypeEnum;
+  Types datatypeEnum;
   std::string datatypeAsString;
   AbstractExpr *variableThreshold;
   AbstractExpr *variableSecret;
 
   FunctionParameterFixture() {
-    datatypeEnum = TYPES::INT;
-    datatypeAsString = Datatype::enum_to_string(datatypeEnum);
+    datatypeEnum = Types::INT;
+    datatypeAsString = Datatype::enumToString(datatypeEnum);
     datatype = new Datatype(datatypeEnum);
-    datatype2 = new Datatype(TYPES::FLOAT);
+    datatype2 = new Datatype(Types::FLOAT);
     variableThreshold = new Variable("threshold");
     variableSecret = new Variable("secretNumber");
   }
@@ -597,7 +588,7 @@ class VarDeclFixture : public ::testing::Test {
   std::string stringValue;
   LiteralInt *literalInt;
   std::string variableIdentifier;
-  TYPES datatypeInt;
+  Types datatypeInt;
 
   VarDeclFixture() {
     literalInt = new LiteralInt(integerValue);
@@ -606,7 +597,7 @@ class VarDeclFixture : public ::testing::Test {
     floatValue = 2.42f;
     boolValue = false;
     stringValue = "Determines the maximum allowed value";
-    datatypeInt = TYPES::INT;
+    datatypeInt = Types::INT;
   }
 
   static void checkExpected(VarDecl *varDeclaration, Datatype *expectedDatatype, AbstractExpr *expectedValue) {
@@ -627,7 +618,7 @@ class VarDeclFixture : public ::testing::Test {
 TEST_F(VarDeclFixture, VarDeclStandardConstructor) {  /* NOLINT */
   auto *variableDeclaration = new VarDecl(variableIdentifier, datatypeInt, literalInt);
   ASSERT_EQ(reinterpret_cast<Datatype *>(variableDeclaration->getDatatype())->toString(),
-            Datatype::enum_to_string(datatypeInt));
+            Datatype::enumToString(datatypeInt));
   checkExpected(variableDeclaration, variableDeclaration->getDatatype(), literalInt);
 }
 
@@ -635,7 +626,7 @@ TEST_F(VarDeclFixture, VarDeclIntConstructor) {  /* NOLINT */
   auto *variableDeclaration = new VarDecl(variableIdentifier, integerValue);
   ASSERT_EQ(reinterpret_cast<LiteralInt *>(variableDeclaration->getInitializer())->getValue(), integerValue);
   ASSERT_EQ(reinterpret_cast<Datatype *>(variableDeclaration->getDatatype())->toString(),
-            Datatype::enum_to_string(TYPES::INT));
+            Datatype::enumToString(Types::INT));
   checkExpected(variableDeclaration, variableDeclaration->getDatatype(), variableDeclaration->getInitializer());
 }
 
@@ -643,7 +634,7 @@ TEST_F(VarDeclFixture, VarDeclBoolConstructor) {  /* NOLINT */
   auto *variableDeclaration = new VarDecl(variableIdentifier, boolValue);
   ASSERT_EQ(reinterpret_cast<LiteralBool *>(variableDeclaration->getInitializer())->getValue(), boolValue);
   ASSERT_EQ(reinterpret_cast<Datatype *>(variableDeclaration->getDatatype())->toString(),
-            Datatype::enum_to_string(TYPES::BOOL));
+            Datatype::enumToString(Types::BOOL));
   checkExpected(variableDeclaration, variableDeclaration->getDatatype(), variableDeclaration->getInitializer());
 }
 
@@ -651,7 +642,7 @@ TEST_F(VarDeclFixture, VarDeclFloatConstructor) {  /* NOLINT */
   auto *variableDeclaration = new VarDecl(variableIdentifier, floatValue);
   ASSERT_EQ(reinterpret_cast<LiteralFloat *>(variableDeclaration->getInitializer())->getValue(), floatValue);
   ASSERT_EQ(reinterpret_cast<Datatype *>(variableDeclaration->getDatatype())->toString(),
-            Datatype::enum_to_string(TYPES::FLOAT));
+            Datatype::enumToString(Types::FLOAT));
   checkExpected(variableDeclaration, variableDeclaration->getDatatype(), variableDeclaration->getInitializer());
 }
 
@@ -659,7 +650,7 @@ TEST_F(VarDeclFixture, VarDeclStringConstructor) {  /* NOLINT */
   auto *variableDeclaration = new VarDecl(variableIdentifier, stringValue);
   ASSERT_EQ(reinterpret_cast<LiteralString *>(variableDeclaration->getInitializer())->getValue(), stringValue);
   ASSERT_EQ(reinterpret_cast<Datatype *>(variableDeclaration->getDatatype())->toString(),
-            Datatype::enum_to_string(TYPES::STRING));
+            Datatype::enumToString(Types::STRING));
   checkExpected(variableDeclaration, variableDeclaration->getDatatype(), variableDeclaration->getInitializer());
 }
 

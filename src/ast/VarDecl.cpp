@@ -18,29 +18,33 @@ json VarDecl::toJson() const {
 
 VarDecl::VarDecl(std::string, void *) {
   throw std::invalid_argument("VarDecl(std::string, AbstractExpr*) not accepted as datatype cannot be determined. "
-                              "Use VarDecl(std::string, TYPES, AbstractExpr*) or one of the other constructors.");
+                              "Use VarDecl(std::string, Types, AbstractExpr*) or one of the other constructors.");
 }
 
-VarDecl::VarDecl(std::string name, TYPES datatype, AbstractExpr *initializer) {
+VarDecl::VarDecl(std::string name, Datatype *datatype, AbstractExpr *initializer) {
+  setAttributes(std::move(name), datatype, initializer);
+}
+
+VarDecl::VarDecl(std::string name, Types datatype, AbstractExpr *initializer) {
   setAttributes(std::move(name), new Datatype(datatype), initializer);
 }
 
 VarDecl::VarDecl(std::string name, std::string valueAssignedTo) {
   setAttributes(std::move(name),
-                new Datatype(TYPES::STRING),
+                new Datatype(Types::STRING),
                 new LiteralString(std::move(valueAssignedTo)));
 }
 
 VarDecl::VarDecl(std::string name, int valueAssignedTo) {
-  setAttributes(std::move(name), new Datatype(TYPES::INT), new LiteralInt(valueAssignedTo));
+  setAttributes(std::move(name), new Datatype(Types::INT), new LiteralInt(valueAssignedTo));
 }
 
 VarDecl::VarDecl(std::string name, float valueAssignedTo) {
-  setAttributes(std::move(name), new Datatype(TYPES::FLOAT), new LiteralFloat(valueAssignedTo));
+  setAttributes(std::move(name), new Datatype(Types::FLOAT), new LiteralFloat(valueAssignedTo));
 }
 
 VarDecl::VarDecl(std::string name, bool valueAssignedTo) {
-  setAttributes(std::move(name), new Datatype(TYPES::BOOL), new LiteralBool(valueAssignedTo));
+  setAttributes(std::move(name), new Datatype(Types::BOOL), new LiteralBool(valueAssignedTo));
 }
 
 VarDecl::VarDecl(std::string name, const char *valueAssignedTo)
@@ -68,11 +72,14 @@ const std::string &VarDecl::getIdentifier() const {
 }
 
 Datatype *VarDecl::getDatatype() const {
-  return reinterpret_cast<Datatype *>(getChildAtIndex(0, true));
+  return getChildAtIndex(0, true)->castTo<Datatype>();
 }
 
 AbstractExpr *VarDecl::getInitializer() const {
-  return reinterpret_cast<AbstractExpr *>(getChildAtIndex(1, true));
+  auto initializer = getChildAtIndex(1, true);
+  if (initializer==nullptr)
+    return nullptr;
+  return initializer->castTo<AbstractExpr>();
 }
 
 BinaryExpr *VarDecl::contains(BinaryExpr *bexpTemplate, BinaryExpr *excludedSubtree) {

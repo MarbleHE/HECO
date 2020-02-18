@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_NODE_H
-#define AST_OPTIMIZER_INCLUDE_NODE_H
+#ifndef AST_OPTIMIZER_INCLUDE_AST_NODE_H_
+#define AST_OPTIMIZER_INCLUDE_AST_NODE_H_
 
 #include <vector>
 #include <map>
@@ -17,7 +17,8 @@ class AbstractNode {
   /// This is a workaround because getNodeName() is a virtual method that cannot be called from derived classes and
   /// their constructor. After retrieving the node ID and assigning it to the uniqueNodeId field, it is deleted from
   /// this map.
-  std::map<AbstractNode *, int> assignedNodeIds{};
+
+  int assignedNodeId{-1};
 
   /// Stores the children of the current node.
   std::vector<AbstractNode *> children{};
@@ -54,7 +55,7 @@ class AbstractNode {
   /// Virtual Destructor, force class to be abstract
   virtual ~AbstractNode() = 0;
 
-  [[nodiscard]] virtual std::string getNodeName() const;
+  [[nodiscard]] virtual std::string getNodeName() const = 0;
 
   std::string getUniqueNodeId();
 
@@ -167,4 +168,4 @@ class AbstractNode {
 
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_NODE_H
+#endif //AST_OPTIMIZER_INCLUDE_AST_NODE_H_

@@ -43,7 +43,7 @@ void PrintVisitor::visit(Block &elem) {
 }
 
 void PrintVisitor::visit(Call &elem) {
-  AbstractNode *node = static_cast<AbstractNode *>(static_cast<AbstractStatement *>(&elem));
+  AbstractNode *node = static_cast<AbstractNode*>(static_cast<AbstractExpr *>(&elem));
   addOutputStr(*node);
   printChildNodesIndented(elem);
 }
@@ -149,7 +149,11 @@ void PrintVisitor::resetLevel() {
 }
 
 void PrintVisitor::printNodeName(AbstractNode &node) {
-  ss << getIndentation() << node.getNodeName() << ":";
+  if (showUniqueNodeIds) {
+    ss << getIndentation() << node.getUniqueNodeId() << ":";
+  } else {
+    ss << getIndentation() << node.getNodeName() << ":";
+  }
 }
 
 void PrintVisitor::addOutputStr(AbstractNode &node) {
@@ -198,4 +202,8 @@ void PrintVisitor::resetVisitor() {
   lastPrintedScope = nullptr;
   ss.clear();
   ss.str(std::string());
+}
+
+void PrintVisitor::useUniqueNodeIds(bool value) {
+  this->showUniqueNodeIds = value;
 }

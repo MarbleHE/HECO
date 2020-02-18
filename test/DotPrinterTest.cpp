@@ -80,7 +80,8 @@ TEST_F(DotPrinterFixture, printAsDotFormattedGraphTest_printAstExample1) {  /* N
   dp.printAsDotFormattedGraph(ast);
 
   // read expected output from file
-  std::ifstream ifs("../../test/auxoutput/DotPrinterTest/printAsDotFormattedGraphTest_printAstExample1.txt");
+  std::ifstream
+      ifs("../../test/expected_output_large/DotPrinterTest/printAsDotFormattedGraphTest_printAstExample1.txt");
   std::stringstream buffer;
   buffer << ifs.rdbuf();
 
@@ -100,7 +101,8 @@ TEST_F(DotPrinterFixture, printAsDotFormattedGraphTest_printAstExample2) {  /* N
   dp.printAsDotFormattedGraph(ast);
 
   // read expected output from file
-  std::ifstream ifs("../../test/auxoutput/DotPrinterTest/printAsDotFormattedGraphTest_printAstExample2.txt");
+  std::ifstream
+      ifs("../../test/expected_output_large/DotPrinterTest/printAsDotFormattedGraphTest_printAstExample2.txt");
   std::stringstream buffer;
   buffer << ifs.rdbuf();
 
@@ -121,7 +123,7 @@ TEST_F(DotPrinterFixture, printAllReachableNods_printNodeSet) {  /* NOLINT */
   dp.printAllReachableNodes(ast.getRootNode());
 
   // read expected output from file
-  std::ifstream ifs("../../test/auxoutput/DotPrinterTest/printAllReachableNods_printNodeSet.txt");
+  std::ifstream ifs("../../test/expected_output_large/DotPrinterTest/printAllReachableNods_printNodeSet.txt");
   std::stringstream buffer;
   buffer << ifs.rdbuf();
 

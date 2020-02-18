@@ -42,7 +42,7 @@ TEST(MultRewriteTest, rewriteSuccessfulSubsequentStatementsMultiplication) { /* 
   //  int prod = inputC * inputB;
   auto func = dynamic_cast<Function *>(ast.getRootNode());
   auto prodDecl = dynamic_cast<VarDecl *>(func->getBody().at(0));
-  auto expectedProdDecl = new VarDecl("prod", TYPES::INT,
+  auto expectedProdDecl = new VarDecl("prod", Types::INT,
                                       new BinaryExpr(
                                           new Variable("inputC"),
                                           OpSymb::multiplication,
@@ -77,7 +77,7 @@ TEST(MultRewriteTest, rewriteSuccessfulSingleStatementMultiplication) { /* NOLIN
   //  int prod = [inputC * [inputB * inputA]]
   auto func = dynamic_cast<Function *>(ast.getRootNode());
   auto prodDecl = dynamic_cast<VarDecl *>(func->getBody().at(0));
-  auto expectedProdDecl = new VarDecl("prod", TYPES::INT,
+  auto expectedProdDecl = new VarDecl("prod", Types::INT,
                                       new BinaryExpr(
                                           new Variable("inputC"),
                                           OpSymb::multiplication,
@@ -154,7 +154,7 @@ TEST(MultRewriteTest, rewriteNotApplicable) { /* NOLINT */
   //  int prod = inputA * inputB;
   auto func = dynamic_cast<Function *>(ast.getRootNode());
   auto prodDecl = dynamic_cast<VarDecl *>(func->getBody().at(0));
-  auto expectedProdDecl = new VarDecl("prod", TYPES::INT,
+  auto expectedProdDecl = new VarDecl("prod", Types::INT,
                                       new BinaryExpr(
                                           new Variable("inputA"),
                                           OpSymb::multiplication,
@@ -163,7 +163,7 @@ TEST(MultRewriteTest, rewriteNotApplicable) { /* NOLINT */
 
   //  int prod2 = prod * inputC;
   prodDecl = dynamic_cast<VarDecl *>(func->getBody().at(1));
-  expectedProdDecl = new VarDecl("prod2", TYPES::INT, new BinaryExpr(
+  expectedProdDecl = new VarDecl("prod2", Types::INT, new BinaryExpr(
       new Variable("prod"),
       OpSymb::multiplication,
       new Variable("inputC")));

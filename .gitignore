@@ -2,6 +2,7 @@
 .idea
 cmake-build-debug/
 doc/*
+!doc/clion
 !doc/doxygen
 /test/CMakeFiles/
 *.vpp*
