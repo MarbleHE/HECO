@@ -62,7 +62,7 @@ bool Operator::equals(OpSymb::UnaryOp op) const {
          == OpSymb::getTextRepr(std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp>(op));
 }
 
-Literal *Operator::applyOperator(Literal *rhs) {
+AbstractLiteral *Operator::applyOperator(AbstractLiteral *rhs) {
   // determine Literal subtype of rhs
   if (auto rhsString = dynamic_cast<LiteralString *>(rhs))
     return applyOperator(rhsString);
@@ -74,7 +74,7 @@ Literal *Operator::applyOperator(Literal *rhs) {
     throw std::logic_error("Could not recognize type of lhs in applyOperator(Literal* rhs).");
 }
 
-Literal *Operator::applyOperator(LiteralInt *rhs) {
+AbstractLiteral *Operator::applyOperator(LiteralInt *rhs) {
   int value = rhs->getValue();
   if (this->equals(OpSymb::negation)) return new LiteralInt(-value);
   else if (this->equals(OpSymb::increment)) return new LiteralInt(++value);
@@ -83,7 +83,7 @@ Literal *Operator::applyOperator(LiteralInt *rhs) {
     throw std::logic_error("Could not apply unary operator (" + this->getOperatorString() + ") on (int).");
 }
 
-Literal *Operator::applyOperator(LiteralBool *rhs) {
+AbstractLiteral *Operator::applyOperator(LiteralBool *rhs) {
   bool value = rhs->getValue();
   if (this->equals(OpSymb::negation)) return new LiteralBool(!value);
   else
@@ -91,12 +91,12 @@ Literal *Operator::applyOperator(LiteralBool *rhs) {
         "Could not apply unary operator (" + this->getOperatorString() + ") on (" + this->getNodeName() + ").");
 }
 
-Literal *Operator::applyOperator(LiteralString *) {
+AbstractLiteral *Operator::applyOperator(LiteralString *) {
   throw std::logic_error(
       "Could not apply unary operator (" + this->getOperatorString() + ") on (" + this->getNodeName() + ").");
 }
 
-Literal *Operator::applyOperator(LiteralFloat *) {
+AbstractLiteral *Operator::applyOperator(LiteralFloat *) {
   throw std::logic_error(
       "Could not apply unary operator (" + this->getOperatorString() + ") on (" + this->getNodeName() + ").");
 }
@@ -104,7 +104,7 @@ Literal *Operator::applyOperator(LiteralFloat *) {
 // -----------------
 // First call of applyOperator -> both types are unknown
 // -----------------
-Literal *Operator::applyOperator(Literal *lhs, Literal *rhs) {
+AbstractLiteral *Operator::applyOperator(AbstractLiteral *lhs, AbstractLiteral *rhs) {
   // determine Literal subtype of lhs
   if (auto lhsString = dynamic_cast<LiteralString *>(lhs))
     return applyOperator(lhsString, rhs);
@@ -123,7 +123,7 @@ Literal *Operator::applyOperator(Literal *lhs, Literal *rhs) {
 // -----------------
 
 template<typename A>
-Literal *Operator::applyOperator(A *lhs, Literal *rhs) {
+AbstractLiteral *Operator::applyOperator(A *lhs, AbstractLiteral *rhs) {
   // determine Literal subtype of lhs
   if (auto rhsString = dynamic_cast<LiteralString *>(rhs))
     return applyOperator(lhs, rhsString);
@@ -141,7 +141,7 @@ Literal *Operator::applyOperator(A *lhs, Literal *rhs) {
 // Third call of applyOperator -> both types are is known
 // -----------------
 
-Literal *Operator::applyOperator(LiteralFloat *lhs, LiteralFloat *rhs) {
+AbstractLiteral *Operator::applyOperator(LiteralFloat *lhs, LiteralFloat *rhs) {
   float lhsVal = lhs->getValue();
   float rhsVal = rhs->getValue();
 
@@ -167,57 +167,57 @@ Literal *Operator::applyOperator(LiteralFloat *lhs, LiteralFloat *rhs) {
     throw std::logic_error("applyOperator(LiteralBool* lhs, LiteralInt* rhs) failed!");
 }
 
-Literal *Operator::applyOperator(LiteralFloat *lhs, LiteralInt *rhs) {
+AbstractLiteral *Operator::applyOperator(LiteralFloat *lhs, LiteralInt *rhs) {
   auto rhsFloat = new LiteralFloat(static_cast<float>(rhs->getValue()));
   return applyOperator(lhs, rhsFloat);
 }
 
-Literal *Operator::applyOperator(LiteralInt *lhs, LiteralFloat *rhs) {
+AbstractLiteral *Operator::applyOperator(LiteralInt *lhs, LiteralFloat *rhs) {
   auto lhsFloat = new LiteralFloat(static_cast<float>(lhs->getValue()));
   return applyOperator(lhsFloat, rhs);
 }
 
-Literal *Operator::applyOperator(LiteralFloat *lhs, LiteralBool *rhs) {
+AbstractLiteral *Operator::applyOperator(LiteralFloat *lhs, LiteralBool *rhs) {
   auto rhsFloat = new LiteralFloat(static_cast<float>(rhs->getValue()));
   return applyOperator(lhs, rhsFloat);
 }
 
-Literal *Operator::applyOperator(LiteralBool *lhs, LiteralFloat *rhs) {
+AbstractLiteral *Operator::applyOperator(LiteralBool *lhs, LiteralFloat *rhs) {
   auto lhsFloat = new LiteralFloat(static_cast<float>(lhs->getValue()));
   return applyOperator(lhsFloat, rhs);
 }
 
-Literal *Operator::applyOperator(LiteralFloat *, LiteralString *) {
+AbstractLiteral *Operator::applyOperator(LiteralFloat *, LiteralString *) {
   throw std::invalid_argument("Operators on (float, string) not supported!");
 }
 
-Literal *Operator::applyOperator(LiteralString *, LiteralFloat *) {
+AbstractLiteral *Operator::applyOperator(LiteralString *, LiteralFloat *) {
   throw std::invalid_argument("Operators on (string, float) not supported!");
 }
 
-Literal *Operator::applyOperator(LiteralString *, LiteralInt *) {
+AbstractLiteral *Operator::applyOperator(LiteralString *, LiteralInt *) {
   throw std::invalid_argument("Operators on (string, int) not supported!");
 }
 
-Literal *Operator::applyOperator(LiteralInt *, LiteralString *) {
+AbstractLiteral *Operator::applyOperator(LiteralInt *, LiteralString *) {
   throw std::invalid_argument("Operators on (int, string) not supported!");
 }
 
-Literal *Operator::applyOperator(LiteralString *, LiteralBool *) {
+AbstractLiteral *Operator::applyOperator(LiteralString *, LiteralBool *) {
   throw std::invalid_argument("Operators on (string, bool) not supported!");
 }
 
-Literal *Operator::applyOperator(LiteralBool *, LiteralString *) {
+AbstractLiteral *Operator::applyOperator(LiteralBool *, LiteralString *) {
   throw std::invalid_argument("Operators on (bool, string) not supported!");
 }
 
-Literal *Operator::applyOperator(LiteralString *lhs, LiteralString *rhs) {
+AbstractLiteral *Operator::applyOperator(LiteralString *lhs, LiteralString *rhs) {
   if (this->equals(OpSymb::addition)) return new LiteralString(lhs->getValue() + rhs->getValue());
   else
     throw std::logic_error(getOperatorString() + " not supported for (string, string)");
 }
 
-Literal *Operator::applyOperator(LiteralBool *lhs, LiteralInt *rhs) {
+AbstractLiteral *Operator::applyOperator(LiteralBool *lhs, LiteralInt *rhs) {
   bool lhsVal = lhs->getValue();
   int rhsVal = rhs->getValue();
 
@@ -244,7 +244,7 @@ Literal *Operator::applyOperator(LiteralBool *lhs, LiteralInt *rhs) {
     throw std::logic_error("applyOperator(LiteralBool* lhs, LiteralInt* rhs) failed!");
 }
 
-Literal *Operator::applyOperator(LiteralInt *lhs, LiteralBool *rhs) {
+AbstractLiteral *Operator::applyOperator(LiteralInt *lhs, LiteralBool *rhs) {
   int lhsVal = lhs->getValue();
   bool rhsVal = rhs->getValue();
 
@@ -271,7 +271,7 @@ Literal *Operator::applyOperator(LiteralInt *lhs, LiteralBool *rhs) {
     throw std::logic_error("applyOperator(LiteralBool* lhs, LiteralInt* rhs) failed!");
 }
 
-Literal *Operator::applyOperator(LiteralBool *lhs, LiteralBool *rhs) {
+AbstractLiteral *Operator::applyOperator(LiteralBool *lhs, LiteralBool *rhs) {
   int lhsVal = lhs->getValue();
   int rhsVal = rhs->getValue();
 
@@ -296,7 +296,7 @@ Literal *Operator::applyOperator(LiteralBool *lhs, LiteralBool *rhs) {
     throw std::logic_error("applyOperator(LiteralBool* lhs, LiteralBool* rhs) failed!");
 }
 
-Literal *Operator::applyOperator(LiteralInt *lhs, LiteralInt *rhs) {
+AbstractLiteral *Operator::applyOperator(LiteralInt *lhs, LiteralInt *rhs) {
   int lhsVal = lhs->getValue();
   int rhsVal = rhs->getValue();
 

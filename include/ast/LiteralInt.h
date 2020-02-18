@@ -1,12 +1,12 @@
 #ifndef AST_OPTIMIZER_INCLUDE_LITERALINT_H
 #define AST_OPTIMIZER_INCLUDE_LITERALINT_H
 
-#include "Literal.h"
+#include "AbstractLiteral.h"
 #include <string>
 #include <ostream>
 #include <map>
 
-class LiteralInt : public Literal {
+class LiteralInt : public AbstractLiteral {
 private:
     int value;
 public:
@@ -34,7 +34,7 @@ public:
 
     bool supportsDatatype(Datatype &datatype) override;
 
-    void addLiteralValue(std::string identifier, std::unordered_map<std::string, Literal *> &paramsMap) override;
+    void addLiteralValue(std::string identifier, std::unordered_map<std::string, AbstractLiteral *> &paramsMap) override;
 
     void setRandomValue(RandLiteralGen &rlg) override;
 

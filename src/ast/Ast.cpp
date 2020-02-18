@@ -5,7 +5,7 @@
 #include <set>
 #include <queue>
 #include <EvaluationVisitor.h>
-#include "Literal.h"
+#include "AbstractLiteral.h"
 #include "Variable.h"
 #include "Function.h"
 #include "Return.h"
@@ -34,7 +34,7 @@ Ast::~Ast() {
   delete rootNode;
 }
 
-std::vector<Literal *> Ast::evaluate(bool printResult, std::ostream &outputStream) {
+std::vector<AbstractLiteral *> Ast::evaluate(bool printResult, std::ostream &outputStream) {
   // perform evaluation recursively, starting at the root node
   EvaluationVisitor ev(*this);
   ev.visit(*this);
@@ -52,8 +52,8 @@ std::vector<Literal *> Ast::evaluate(bool printResult, std::ostream &outputStrea
   return resultVector;
 }
 
-std::vector<Literal *>
-Ast::evaluateCircuit(const std::unordered_map<std::string, Literal *> &paramValues, bool printResult) {
+std::vector<AbstractLiteral *>
+Ast::evaluateCircuit(const std::unordered_map<std::string, AbstractLiteral *> &paramValues, bool printResult) {
   // ensure that circuit is not reversed
   if (isReversed()) {
     throw std::invalid_argument(
@@ -101,8 +101,8 @@ Ast::evaluateCircuit(const std::unordered_map<std::string, Literal *> &paramValu
   return evaluate(printResult);
 }
 
-std::vector<Literal *>
-Ast::evaluateAst(const std::unordered_map<std::string, Literal *> &paramValues, bool printResult) {
+std::vector<AbstractLiteral *>
+Ast::evaluateAst(const std::unordered_map<std::string, AbstractLiteral *> &paramValues, bool printResult) {
   // store param values into a temporary map
   variableValuesForEvaluation.clear();
   variableValuesForEvaluation = paramValues;
@@ -145,14 +145,14 @@ bool Ast::hasVarValue(Variable *var) {
   return getVarValue(var->getIdentifier()) != nullptr;
 }
 
-Literal *Ast::getVarValue(const std::string &variableIdentifier) {
+AbstractLiteral *Ast::getVarValue(const std::string &variableIdentifier) {
   auto it = variableValuesForEvaluation.find(variableIdentifier);
   if (it == variableValuesForEvaluation.end())
     throw std::logic_error("Trying to retrieve value for variable not declared yet: " + variableIdentifier);
   return it->second;
 }
 
-void Ast::updateVarValue(const std::string &variableIdentifier, Literal *newValue) {
+void Ast::updateVarValue(const std::string &variableIdentifier, AbstractLiteral *newValue) {
   variableValuesForEvaluation[variableIdentifier] = newValue;
 }
 

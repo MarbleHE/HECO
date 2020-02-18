@@ -29,7 +29,7 @@ class Group;
 
 class If;
 
-class Literal;
+class AbstractLiteral;
 
 class LiteralBool;
 

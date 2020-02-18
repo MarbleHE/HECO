@@ -1,17 +1,17 @@
-#include "Literal.h"
+#include "AbstractLiteral.h"
 #include "LiteralInt.h"
 #include "LiteralString.h"
 #include "LiteralBool.h"
 #include "LiteralFloat.h"
 
-Literal::~Literal() = default;
+AbstractLiteral::~AbstractLiteral() = default;
 
-std::ostream &operator<<(std::ostream &os, const Literal &literal) {
+std::ostream &operator<<(std::ostream &os, const AbstractLiteral &literal) {
   literal.print(os);
   return os;
 }
 
-bool Literal::operator==(const Literal &rhs) const {
+bool AbstractLiteral::operator==(const AbstractLiteral &rhs) const {
   // Literals cannot be equal if they have a different type
   if (typeid(*this) != typeid(rhs))
     return false;
@@ -35,7 +35,7 @@ bool Literal::operator==(const Literal &rhs) const {
   }
 }
 
-bool Literal::operator!=(const Literal &rhs) const {
+bool AbstractLiteral::operator!=(const AbstractLiteral &rhs) const {
   return !(rhs == *this);
 }
 

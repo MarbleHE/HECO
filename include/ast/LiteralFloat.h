@@ -1,12 +1,12 @@
 #ifndef AST_OPTIMIZER_INCLUDE_LITERALFLOAT_H
 #define AST_OPTIMIZER_INCLUDE_LITERALFLOAT_H
 
-#include "Literal.h"
+#include "AbstractLiteral.h"
 #include <string>
 #include <ostream>
 #include <map>
 
-class LiteralFloat : public Literal {
+class LiteralFloat : public AbstractLiteral {
 private:
     float value;
 
@@ -33,7 +33,7 @@ public:
 
     bool operator!=(const LiteralFloat &rhs) const;
 
-    void addLiteralValue(std::string identifier, std::unordered_map<std::string, Literal *> &paramsMap) override;
+    void addLiteralValue(std::string identifier, std::unordered_map<std::string, AbstractLiteral *> &paramsMap) override;
 
     void setRandomValue(RandLiteralGen &rlg) override;
 

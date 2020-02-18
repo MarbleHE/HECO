@@ -8,7 +8,7 @@
 
 class ConeRewriterFixture : public ::testing::Test {
  private:
-  std::unordered_map<std::string, Literal *> *evaluationParameters;
+  std::unordered_map<std::string, AbstractLiteral *> *evaluationParameters;
 
  protected:
   ConeRewriterFixture() : evaluationParameters(nullptr) {}
@@ -21,7 +21,7 @@ class ConeRewriterFixture : public ::testing::Test {
 
   void SetUp() override {}
 
-    virtual void SetUp(std::unordered_map<std::string, Literal *> &evalParams) {
+    virtual void SetUp(std::unordered_map<std::string, AbstractLiteral *> &evalParams) {
       evaluationParameters = &evalParams;
     }
 
@@ -90,7 +90,7 @@ TEST_F(ConeRewriterFixture, simpleStaticConeTest) { /* NOLINT */
   // check if rewritten circuit is logically equivalent to original one
   Ast* originalAst = generateAst(DEMO_CIRCUIT_NO);
 
-  std::unordered_map<std::string, Literal *> inputValues =
+  std::unordered_map<std::string, AbstractLiteral *> inputValues =
       {{std::string("a_1^(1)_left"),  new LiteralBool(true)},
        {std::string("a_1^(1)_right"), new LiteralBool(true)},
        {std::string("a_2^(1)_left"),  new LiteralBool(false)},
@@ -133,7 +133,7 @@ TEST_F(ConeRewriterFixture, evaluationBasedTestForExtendedCircuit) { /* NOLINT *
 
   // define expected input parameters and some arbitrary input values
   // (values will be overwritten by circuitOutputComparer)
-  std::unordered_map<std::string, Literal *> inputValues =
+  std::unordered_map<std::string, AbstractLiteral *> inputValues =
       {{std::string("a_1^(1)_left"),  new LiteralBool(true)},
        {std::string("a_1^(1)_right"), new LiteralBool(true)},
        {std::string("a_2^(1)_left"),  new LiteralBool(false)},
@@ -170,7 +170,7 @@ TEST_F(ConeRewriterFixture, evaluationBasedTestForExtendedCircuitWithMultipleInp
   // define expected input parameters and some arbitrary input values
   // (values will be overwritten by circuitOutputComparer)
   bool anyBool = false;
-  std::unordered_map<std::string, Literal *> inputValues =
+  std::unordered_map<std::string, AbstractLiteral *> inputValues =
       {{std::string("a_1^(1)_left"),  new LiteralBool(anyBool)},
        {std::string("a_1^(1)_right"), new LiteralBool(anyBool)},
        {std::string("a_2^(1)_left"),  new LiteralBool(anyBool)},
@@ -209,7 +209,7 @@ TEST_F(ConeRewriterFixture, evaluationBasedTestForCircuitWithTwoCones) { /* NOLI
   // define expected input parameters and some arbitrary input values
   // (values will be overwritten by circuitOutputComparer)
   bool anyBool = false;
-  std::unordered_map<std::string, Literal *> inputValues = {
+  std::unordered_map<std::string, AbstractLiteral *> inputValues = {
       {std::string("a_1^(1)_left"),  new LiteralBool(anyBool)},
       {std::string("a_1^(1)_right"), new LiteralBool(anyBool)},
       {std::string("a_2^(1)_left"),  new LiteralBool(anyBool)},

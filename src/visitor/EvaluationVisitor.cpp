@@ -23,7 +23,7 @@
 EvaluationVisitor::EvaluationVisitor(Ast &ast) : ast(ast){};
 
 void EvaluationVisitor::visit(AbstractNode &elem) {
-  results.push(std::vector<Literal *>());
+  results.push(std::vector<AbstractLiteral *>());
 }
 void EvaluationVisitor::visit(AbstractExpr &elem) {
   Visitor::visit(elem);
@@ -60,7 +60,7 @@ void EvaluationVisitor::visit(Call &elem) {
   // create vector to store parameter values for Function evaluation
   // - std::string stores the variable's identifier
   // - Literal* stores the variable's passed value (as it can be an expression too, we need to evaluate it first)
-  std::unordered_map<std::string, Literal *> paramValues;
+  std::unordered_map<std::string, AbstractLiteral *> paramValues;
 
   for (size_t i = 0; i < elem.getFunc()->getParams().size(); i++) {
     // validation: make sure that datatypes in Call and Function are equal
@@ -81,7 +81,7 @@ void EvaluationVisitor::visit(Call &elem) {
 
     // variable value: retrieve the variable's value to be passed to the callee
     elem.getArguments().at(i)->getValue()->accept(*this);
-    Literal *lit = results.top().front();
+    AbstractLiteral *lit = results.top().front();
     results.pop();
     // make sure that evaluate returns a Literal
     if (lit == nullptr) throw std::logic_error("There's something wrong! Evaluate should return a single Literal.");
@@ -154,7 +154,7 @@ void EvaluationVisitor::visit(Operator &elem) {
   Visitor::visit(elem);
 }
 void EvaluationVisitor::visit(Return &elem) {
-  std::vector<Literal *> result;
+  std::vector<AbstractLiteral *> result;
   for (auto &expr : elem.getReturnExpressions()) {
     expr->accept(*this);
     auto exprEvaluationResult = results.top();
@@ -209,11 +209,11 @@ void EvaluationVisitor::visit(While &elem) {
 void EvaluationVisitor::visit(Ast &elem) {
   Visitor::visit(elem);
 }
-const std::vector<Literal *> &EvaluationVisitor::getResults() {
+const std::vector<AbstractLiteral *> &EvaluationVisitor::getResults() {
   return results.top();
 }
 
-Literal *EvaluationVisitor::ensureSingleEvaluationResult(std::vector<Literal *> evaluationResult) {
+AbstractLiteral *EvaluationVisitor::ensureSingleEvaluationResult(std::vector<AbstractLiteral *> evaluationResult) {
   if (evaluationResult.size() > 1) {
     throw std::logic_error(
         "Unexpected number of returned results (1 vs. " + std::to_string(evaluationResult.size()) + ")");

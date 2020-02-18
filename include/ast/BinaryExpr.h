@@ -5,7 +5,7 @@
 #include <vector>
 #include "Operator.h"
 #include "AbstractExpr.h"
-#include "Literal.h"
+#include "AbstractLiteral.h"
 #include "LiteralInt.h"
 #include "LiteralBool.h"
 #include "LiteralString.h"

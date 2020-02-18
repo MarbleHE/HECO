@@ -179,7 +179,7 @@ TEST(MultRewriteTest, rewriteSuccessfulSingleStatementMultiplication_EquivTest) 
   MultRewriteVisitor().visit(rewrittenAst);
 
   // create params for eval
-  std::unordered_map<std::string, Literal *> params = {{"inputA", new LiteralInt(12)},
+  std::unordered_map<std::string, AbstractLiteral *> params = {{"inputA", new LiteralInt(12)},
                                                        {"inputB", new LiteralInt(25)},
                                                        {"inputC", new LiteralInt(37)}
   };
@@ -197,7 +197,7 @@ TEST(MultRewriteTest, noRewriteIfStatementInBetween_EquivTest) { /* NOLINT */
   MultRewriteVisitor().visit(rewrittenAst);
 
   // create params for eval
-  std::unordered_map<std::string, Literal *> params = {{"inputA", new LiteralInt(12)},
+  std::unordered_map<std::string, AbstractLiteral *> params = {{"inputA", new LiteralInt(12)},
                                                        {"inputB", new LiteralInt(25)},
                                                        {"inputC", new LiteralInt(37)}
   };
@@ -215,7 +215,7 @@ TEST(MultRewriteTest, noRewriteIfOutOfScope_EquivTest) { /* NOLINT */
   MultRewriteVisitor().visit(rewrittenAst);
 
   // create params for eval
-  std::unordered_map<std::string, Literal *> params = {{"inputA", new LiteralInt(12)},
+  std::unordered_map<std::string, AbstractLiteral *> params = {{"inputA", new LiteralInt(12)},
                                                        {"inputB", new LiteralInt(25)},
                                                        {"inputC", new LiteralInt(37)}
   };
@@ -233,7 +233,7 @@ TEST(MultRewriteTest, noRewriteForIndependentStatements_EquivTest) { /* NOLINT *
   MultRewriteVisitor().visit(rewrittenAst);
 
   // create params for eval
-  std::unordered_map<std::string, Literal *> params = {{"inputA", new LiteralInt(12)},
+  std::unordered_map<std::string, AbstractLiteral *> params = {{"inputA", new LiteralInt(12)},
                                                        {"inputB", new LiteralInt(25)},
                                                        {"inputC", new LiteralInt(37)}
   };
@@ -251,7 +251,7 @@ TEST(MultRewriteTest, rewriteNotApplicable_EquivTest) { /* NOLINT */
   MultRewriteVisitor().visit(rewrittenAst);
 
   // create params for eval
-  std::unordered_map<std::string, Literal *> params = {{"inputA", new LiteralInt(111)},
+  std::unordered_map<std::string, AbstractLiteral *> params = {{"inputA", new LiteralInt(111)},
                                                        {"inputB", new LiteralInt(455)},
                                                        {"inputC", new LiteralInt(3447)}
   };

@@ -1,11 +1,11 @@
 #ifndef AST_OPTIMIZER_INCLUDE_LITERALBOOL_H
 #define AST_OPTIMIZER_INCLUDE_LITERALBOOL_H
 
-#include "Literal.h"
+#include "AbstractLiteral.h"
 #include <string>
 #include <map>
 
-class LiteralBool : public Literal {
+class LiteralBool : public AbstractLiteral {
 private:
     bool value;
 public:
@@ -29,7 +29,7 @@ public:
 
     bool operator!=(const LiteralBool &rhs) const;
 
-    void addLiteralValue(std::string identifier, std::unordered_map<std::string, Literal *> &paramsMap) override;
+    void addLiteralValue(std::string identifier, std::unordered_map<std::string, AbstractLiteral *> &paramsMap) override;
 
     void setRandomValue(RandLiteralGen &rlg) override;
 

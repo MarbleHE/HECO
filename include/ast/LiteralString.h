@@ -2,10 +2,10 @@
 #define AST_OPTIMIZER_INCLUDE_LITERALSTRING_H
 
 #include <string>
-#include "Literal.h"
+#include "AbstractLiteral.h"
 #include <map>
 
-class LiteralString : public Literal {
+class LiteralString : public AbstractLiteral {
 private:
     std::string value;
 
@@ -31,7 +31,7 @@ public:
 
     bool operator!=(const LiteralString &rhs) const;
 
-    void addLiteralValue(std::string identifier, std::unordered_map<std::string, Literal *> &paramsMap) override;
+    void addLiteralValue(std::string identifier, std::unordered_map<std::string, AbstractLiteral *> &paramsMap) override;
 
     void setValue(const std::string &newValue);
 

@@ -41,52 +41,52 @@ public:
 
     [[nodiscard]] bool equals(std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp> op) const;
 
-    Literal *applyOperator(Literal *lhs, Literal *rhs);
+    AbstractLiteral *applyOperator(AbstractLiteral *lhs, AbstractLiteral *rhs);
 
-    Literal *applyOperator(Literal *rhs);
+    AbstractLiteral *applyOperator(AbstractLiteral *rhs);
 
     template<typename A>
-    Literal *applyOperator(A *lhs, Literal *rhs);
+    AbstractLiteral *applyOperator(A *lhs, AbstractLiteral *rhs);
 
-    Literal *applyOperator(LiteralInt *lhs, LiteralInt *rhs);
+    AbstractLiteral *applyOperator(LiteralInt *lhs, LiteralInt *rhs);
 
-    Literal *applyOperator(LiteralBool *lhs, LiteralBool *rhs);
+    AbstractLiteral *applyOperator(LiteralBool *lhs, LiteralBool *rhs);
 
-    Literal *applyOperator(LiteralInt *lhs, LiteralBool *rhs);
+    AbstractLiteral *applyOperator(LiteralInt *lhs, LiteralBool *rhs);
 
-    Literal *applyOperator(LiteralBool *lhs, LiteralInt *rhs);
+    AbstractLiteral *applyOperator(LiteralBool *lhs, LiteralInt *rhs);
 
-    Literal *applyOperator(LiteralString *lhs, LiteralString *rhs);
+    AbstractLiteral *applyOperator(LiteralString *lhs, LiteralString *rhs);
 
-    static Literal *applyOperator(LiteralBool *lhs, LiteralString *rhs);
+    static AbstractLiteral *applyOperator(LiteralBool *lhs, LiteralString *rhs);
 
-    static Literal *applyOperator(LiteralString *lhs, LiteralBool *rhs);
+    static AbstractLiteral *applyOperator(LiteralString *lhs, LiteralBool *rhs);
 
-    static Literal *applyOperator(LiteralInt *lhs, LiteralString *rhs);
+    static AbstractLiteral *applyOperator(LiteralInt *lhs, LiteralString *rhs);
 
-    static Literal *applyOperator(LiteralString *lhs, LiteralInt *rhs);
+    static AbstractLiteral *applyOperator(LiteralString *lhs, LiteralInt *rhs);
 
-    Literal *applyOperator(LiteralInt *rhs);
+    AbstractLiteral *applyOperator(LiteralInt *rhs);
 
-    Literal *applyOperator(LiteralBool *rhs);
+    AbstractLiteral *applyOperator(LiteralBool *rhs);
 
-    Literal *applyOperator(LiteralString *rhs);
+    AbstractLiteral *applyOperator(LiteralString *rhs);
 
-    Literal *applyOperator(LiteralFloat *lhs, LiteralFloat *rhs);
+    AbstractLiteral *applyOperator(LiteralFloat *lhs, LiteralFloat *rhs);
 
-    Literal *applyOperator(LiteralFloat *lhs, LiteralInt *rhs);
+    AbstractLiteral *applyOperator(LiteralFloat *lhs, LiteralInt *rhs);
 
-    Literal *applyOperator(LiteralInt *lhs, LiteralFloat *rhs);
+    AbstractLiteral *applyOperator(LiteralInt *lhs, LiteralFloat *rhs);
 
-    Literal *applyOperator(LiteralFloat *lhs, LiteralBool *rhs);
+    AbstractLiteral *applyOperator(LiteralFloat *lhs, LiteralBool *rhs);
 
-    Literal *applyOperator(LiteralBool *lhs, LiteralFloat *rhs);
+    AbstractLiteral *applyOperator(LiteralBool *lhs, LiteralFloat *rhs);
 
-    static Literal *applyOperator(LiteralFloat *lhs, LiteralString *rhs);
+    static AbstractLiteral *applyOperator(LiteralFloat *lhs, LiteralString *rhs);
 
-    static Literal *applyOperator(LiteralString *lhs, LiteralFloat *rhs);
+    static AbstractLiteral *applyOperator(LiteralString *lhs, LiteralFloat *rhs);
 
-    Literal *applyOperator(LiteralFloat *rhs);
+    AbstractLiteral *applyOperator(LiteralFloat *rhs);
 
     [[nodiscard]] std::string toString() const override;
 

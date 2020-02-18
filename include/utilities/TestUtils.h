@@ -23,7 +23,7 @@ private:
     bool flagPrintEvaluationResult{false};
 
     // the evaluation parameters associated to the test run
-    std::unordered_map<std::string, Literal *> *evaluationParameters;
+    std::unordered_map<std::string, AbstractLiteral *> *evaluationParameters;
 
     void ensureEvalParamsIsSet() {
       if (evaluationParameters == nullptr) {
@@ -45,7 +45,7 @@ public:
       return *this;
     }
 
-    EvalPrinter &setEvaluationParameters(std::unordered_map<std::string, Literal *> *evalParams) {
+    EvalPrinter &setEvaluationParameters(std::unordered_map<std::string, AbstractLiteral *> *evalParams) {
       EvalPrinter::evaluationParameters = evalParams;
       return *this;
     }
@@ -83,8 +83,8 @@ public:
       }
     }
 
-    void printEvaluationResults(const std::vector<Literal *> &resultExpected,
-                                const std::vector<Literal *> &resultRewrittenAst) {
+    void printEvaluationResults(const std::vector<AbstractLiteral *> &resultExpected,
+                                const std::vector<AbstractLiteral *> &resultRewrittenAst) {
       if (flagPrintEvaluationResult) {
         std::cout << "( ";
         for (auto &result : resultExpected) std::cout << result << ", ";
@@ -102,7 +102,7 @@ public:
 };
 
 static void astOutputComparer(Ast &unmodifiedAst, Ast &rewrittenAst, unsigned int seed, int numTestRuns,
-                              std::unordered_map<std::string, Literal *> &evalParams,
+                              std::unordered_map<std::string, AbstractLiteral *> &evalParams,
                               EvalPrinter *evalPrinter = nullptr) {
   // create random number generator with test-specific seed
   RandLiteralGen rng(seed);
@@ -118,7 +118,7 @@ static void astOutputComparer(Ast &unmodifiedAst, Ast &rewrittenAst, unsigned in
     rng.randomizeValues(evalParams);
 
     // evaluate both ASTs with previously generated params using the appropriate evaluate function for ASTs or circuits
-    std::vector<Literal *> resultExpected, resultRewrittenAst;
+    std::vector<AbstractLiteral *> resultExpected, resultRewrittenAst;
     if (isCircuit) {
       resultExpected = unmodifiedAst.evaluateCircuit(evalParams, false);
       resultRewrittenAst = rewrittenAst.evaluateCircuit(evalParams, false);
@@ -147,7 +147,7 @@ static void astOutputComparer(Ast &unmodifiedAst, Ast &rewrittenAst, unsigned in
 
 // circuitOutputComparer with all supported parameters
 static void circuitOutputComparer(Ast &unmodifiedAst, Ast &rewrittenAst, unsigned int seed, int numMaxTestRuns,
-                                  std::unordered_map<std::string, Literal *> &evalParams, EvalPrinter *evalPrinter) {
+                                  std::unordered_map<std::string, AbstractLiteral *> &evalParams, EvalPrinter *evalPrinter) {
   // a function that returns True if the given evalParams entry is a LiteralBool
   auto isLiteralBool = [](const auto &mapEntry) {
       return (dynamic_cast<LiteralBool *>(mapEntry.second) != nullptr);
@@ -182,7 +182,7 @@ static void circuitOutputComparer(Ast &unmodifiedAst, Ast &rewrittenAst, unsigne
         }
 
     public:
-        explicit LiteralBoolCombinationsGen(std::unordered_map<std::string, Literal *> &evalParams) {
+        explicit LiteralBoolCombinationsGen(std::unordered_map<std::string, AbstractLiteral *> &evalParams) {
           nextBitCombination = std::bitset<CIRCUIT_MAX_TEST_RUNS>(0);
           // convert params into vector of literals
           for (auto &[varIdentifier, literal] : evalParams) params.push_back(literal->castTo<LiteralBool>());
@@ -234,13 +234,13 @@ static void circuitOutputComparer(Ast &unmodifiedAst, Ast &rewrittenAst, unsigne
 
 // circuitOutputComparer with EvalPrinter pointer
 static void circuitOutputComparer(Ast &unmodifiedAst, Ast &rewrittenAst, unsigned int seed, int numMaxTestRuns,
-                                  std::unordered_map<std::string, Literal *> &evalParams) {
+                                  std::unordered_map<std::string, AbstractLiteral *> &evalParams) {
   return circuitOutputComparer(unmodifiedAst, rewrittenAst, seed, numMaxTestRuns, evalParams, nullptr);
 }
 
 // circuitOutputComparer without numMaxTestRuns
 static void circuitOutputComparer(Ast &unmodifiedAst, Ast &rewrittenAst, unsigned int seed,
-                                  std::unordered_map<std::string, Literal *> &evalParams) {
+                                  std::unordered_map<std::string, AbstractLiteral *> &evalParams) {
   return circuitOutputComparer(unmodifiedAst, rewrittenAst, seed, CIRCUIT_MAX_TEST_RUNS, evalParams, nullptr);
 }
 

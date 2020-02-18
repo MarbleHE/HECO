@@ -48,7 +48,7 @@ bool LiteralFloat::operator!=(const LiteralFloat &rhs) const {
   return !(rhs == *this);
 }
 
-void LiteralFloat::addLiteralValue(std::string identifier, std::unordered_map<std::string, Literal *> &paramsMap) {
+void LiteralFloat::addLiteralValue(std::string identifier, std::unordered_map<std::string, AbstractLiteral *> &paramsMap) {
   paramsMap.emplace(identifier, this);
 }
 

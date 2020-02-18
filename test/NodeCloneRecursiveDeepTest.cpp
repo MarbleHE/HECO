@@ -8,7 +8,7 @@
 #include "Function.h"
 #include "FunctionParameter.h"
 #include "If.h"
-#include "Literal.h"
+#include "AbstractLiteral.h"
 #include "LiteralBool.h"
 #include "LiteralFloat.h"
 #include "LiteralInt.h"

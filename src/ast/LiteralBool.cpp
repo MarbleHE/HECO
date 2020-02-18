@@ -40,7 +40,7 @@ bool LiteralBool::operator!=(const LiteralBool &rhs) const {
   return !(rhs == *this);
 }
 
-void LiteralBool::addLiteralValue(std::string identifier, std::unordered_map<std::string, Literal*> &paramsMap) {
+void LiteralBool::addLiteralValue(std::string identifier, std::unordered_map<std::string, AbstractLiteral*> &paramsMap) {
   paramsMap.emplace(identifier, this);
 }
 

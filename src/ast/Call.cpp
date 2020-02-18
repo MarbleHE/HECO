@@ -3,7 +3,7 @@
 #include <utility>
 #include "Call.h"
 #include "Function.h"
-#include "Literal.h"
+#include "AbstractLiteral.h"
 #include "LiteralInt.h"
 #include "LiteralBool.h"
 #include "LiteralString.h"

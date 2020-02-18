@@ -16,7 +16,7 @@
 TEST(AstEvaluationTests, simpleAstEvaluation1) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(7, ast);
-  std::unordered_map<std::string, Literal *> params = {
+  std::unordered_map<std::string, AbstractLiteral *> params = {
       {"width",  new LiteralInt(31)},
       {"length", new LiteralInt(87)},
       {"depth",  new LiteralInt(771)}
@@ -28,7 +28,7 @@ TEST(AstEvaluationTests, simpleAstEvaluation1) { /* NOLINT */
 TEST(AstEvaluationTests, simpleAstEvaluationIfThenBranch) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(8, ast);
-  std::unordered_map<std::string, Literal *> params = {
+  std::unordered_map<std::string, AbstractLiteral *> params = {
       {"inputA", new LiteralInt(852)},
       {"inputB", new LiteralInt(7)},
       {"takeIf", new LiteralBool(true)}
@@ -40,7 +40,7 @@ TEST(AstEvaluationTests, simpleAstEvaluationIfThenBranch) { /* NOLINT */
 TEST(AstEvaluationTests, simpleAstEvaluationIfElseBranch) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(8, ast);
-  std::unordered_map<std::string, Literal *> params = {
+  std::unordered_map<std::string, AbstractLiteral *> params = {
       {"inputA", new LiteralInt(852)},
       {"inputB", new LiteralInt(7)},
       {"takeIf", new LiteralBool(false)}
@@ -52,7 +52,7 @@ TEST(AstEvaluationTests, simpleAstEvaluationIfElseBranch) { /* NOLINT */
 TEST(AstEvaluationTests, simpleAstEvaluationUnaryLogExpr1) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(9, ast);
-  std::unordered_map<std::string, Literal *> params = {
+  std::unordered_map<std::string, AbstractLiteral *> params = {
       {"inputA", new LiteralInt(11)},
       {"inputB", new LiteralInt(-500)},
       {"strong", new LiteralBool(true)},
@@ -65,7 +65,7 @@ TEST(AstEvaluationTests, simpleAstEvaluationUnaryLogExpr1) { /* NOLINT */
 TEST(AstEvaluationTests, simpleAstEvaluationUnaryLogExpr2) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(9, ast);
-  std::unordered_map<std::string, Literal *> params = {
+  std::unordered_map<std::string, AbstractLiteral *> params = {
       {"inputA", new LiteralInt(11)},
       {"inputB", new LiteralInt(12)},
       {"strong", new LiteralBool(true)},
@@ -78,7 +78,7 @@ TEST(AstEvaluationTests, simpleAstEvaluationUnaryLogExpr2) { /* NOLINT */
 TEST(AstEvaluationTests, simpleAstEvaluationUnaryLogExpr3) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(9, ast);
-  std::unordered_map<std::string, Literal *> params = {
+  std::unordered_map<std::string, AbstractLiteral *> params = {
       {"inputA", new LiteralInt(11)},
       {"inputB", new LiteralInt(461)},
       {"strong", new LiteralBool(true)},
@@ -91,7 +91,7 @@ TEST(AstEvaluationTests, simpleAstEvaluationUnaryLogExpr3) { /* NOLINT */
 TEST(AstEvaluationTests, simpleAstEvaluationStringConcat) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(10, ast);
-  std::unordered_map<std::string, Literal *> params = {
+  std::unordered_map<std::string, AbstractLiteral *> params = {
       {"strA", new LiteralString("hello ")},
       {"strB", new LiteralString("world!")}
   };
@@ -102,7 +102,7 @@ TEST(AstEvaluationTests, simpleAstEvaluationStringConcat) { /* NOLINT */
 TEST(AstEvaluationTests, complexAstEvaluationWhileNotExecuted) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(11, ast);
-  std::unordered_map<std::string, Literal *> params = {
+  std::unordered_map<std::string, AbstractLiteral *> params = {
       {"encryptedA", new LiteralInt(1)},
       {"encryptedB", new LiteralInt(7)},
       {"randInt",    new LiteralInt(4)}
@@ -114,7 +114,7 @@ TEST(AstEvaluationTests, complexAstEvaluationWhileNotExecuted) { /* NOLINT */
 TEST(AstEvaluationTests, complexAstEvaluationWhileExecutedThreeTimes) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(11, ast);
-  std::unordered_map<std::string, Literal *> params = {
+  std::unordered_map<std::string, AbstractLiteral *> params = {
       {"encryptedA", new LiteralInt(1'182)},
       {"encryptedB", new LiteralInt(7)},
       {"randInt",    new LiteralInt(3)}
@@ -126,7 +126,7 @@ TEST(AstEvaluationTests, complexAstEvaluationWhileExecutedThreeTimes) { /* NOLIN
 TEST(AstEvaluationTests, complexAstEvaluationWithNestedFunctionCall_LiteralParameterValue) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(12, ast);
-  std::unordered_map<std::string, Literal *> params;
+  std::unordered_map<std::string, AbstractLiteral *> params;
   auto result = dynamic_cast<LiteralInt *>(ast.evaluateAst(params, false).front());
   ASSERT_EQ(*result, *new LiteralInt(1'056));
 }
@@ -134,7 +134,7 @@ TEST(AstEvaluationTests, complexAstEvaluationWithNestedFunctionCall_LiteralParam
 TEST(AstEvaluationTests, complexAstEvaluationWithNestedFunctionCall_BexpParameterValue) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(13, ast);
-  std::unordered_map<std::string, Literal *> params;
+  std::unordered_map<std::string, AbstractLiteral *> params;
   auto result = dynamic_cast<LiteralInt *>(ast.evaluateAst(params, false).front());
   ASSERT_EQ(*result, *new LiteralInt(7'168));
 }

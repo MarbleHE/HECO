@@ -8,10 +8,10 @@
 
 class EvaluationVisitor : public Visitor {
 private:
-  typedef std::vector<Literal*> result_t;
+  typedef std::vector<AbstractLiteral*> result_t;
   std::stack<result_t> results = {};
   Ast& ast;
-  Literal *ensureSingleEvaluationResult(std::vector<Literal *> evaluationResult);
+  AbstractLiteral *ensureSingleEvaluationResult(std::vector<AbstractLiteral *> evaluationResult);
 public:
   explicit EvaluationVisitor(Ast& ast);
   void visit(AbstractNode &elem) override;
@@ -37,7 +37,7 @@ public:
   void visit(Variable &elem) override;
   void visit(While &elem) override;
   void visit(Ast &elem) override;
-  const std::vector<Literal*>& getResults();
+  const std::vector<AbstractLiteral*>& getResults();
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_VISITOR_EVALUATIONVISITOR_H
