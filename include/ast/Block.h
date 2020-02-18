@@ -6,13 +6,10 @@
 #include <string>
 
 class Block : public AbstractStatement {
-private:
-    std::vector<AbstractStatement *> *statements;
-
 public:
-    Block();
+  Block() = default;
 
-    ~Block() override;
+  ~Block() override = default;
 
   Block *clone(bool keepOriginalUniqueNodeId) override;
 
@@ -20,15 +17,15 @@ public:
 
   explicit Block(AbstractStatement *stat);
 
-    explicit Block(std::vector<AbstractStatement *> *statements);
+  explicit Block(std::vector<AbstractStatement *> *statements);
 
-    [[nodiscard]] json toJson() const override;
+  [[nodiscard]] json toJson() const override;
 
-    void accept(Visitor &v) override;
+  void accept(Visitor &v) override;
 
-    [[nodiscard]] std::string getNodeName() const override;
+  [[nodiscard]] std::string getNodeName() const override;
 
-    [[nodiscard]] std::vector<AbstractStatement *> *getStatements() const;
+  [[nodiscard]] std::vector<AbstractStatement *> *getStatements() const;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_BLOCK_H

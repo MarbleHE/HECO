@@ -295,7 +295,7 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_Block) {  /* NOLINT */
   ASSERT_EQ(clonedVarAssignm->getValue()->castTo<LiteralInt>()->getValue(), 222);
 
   // delete all statements from original and check whether statements are still in clone
-  delete blockStatement->getStatements();
+  blockStatement->removeChildren();
   ASSERT_EQ(blockStatement->getStatements()->size(), 0);
   ASSERT_EQ(clonedBlockStatement->getStatements()->size(), 1);
 

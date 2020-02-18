@@ -4,20 +4,19 @@
 #include "VarDecl.h"
 #include "AbstractNode.h"
 
-Block::Block() {
-  statements = nullptr;
-}
-
 json Block::toJson() const {
+  std::vector<AbstractStatement*> stmts;
+  stmts.reserve(children.size());
+  for(auto c : children) {
+    stmts.push_back(dynamic_cast<AbstractStatement*>(c));
+  }
   json j = {{"type",       getNodeName()},
-            {"statements", *this->statements}};
+            {"statements", stmts}};
   return j;
 }
 
 Block::Block(AbstractStatement *stat) {
-  auto *vec = new std::vector<AbstractStatement *>;
-  vec->emplace_back(stat);
-  this->statements = vec;
+  children.emplace_back(stat);
 }
 
 Block::Block(std::vector<AbstractStatement *> *statements) {
@@ -26,7 +25,10 @@ Block::Block(std::vector<AbstractStatement *> *statements) {
                            "If this is intended, use the parameter-less constructor instead.";
     throw std::logic_error(errorMsg);
   }
-  this->statements = statements;
+  children.reserve(statements->size());
+  for(auto s : *statements) {
+    children.push_back(s);
+  }
 }
 
 void Block::accept(Visitor &v) {
@@ -38,11 +40,12 @@ std::string Block::getNodeName() const {
 }
 
 std::vector<AbstractStatement *> *Block::getStatements() const {
-  return statements;
-}
-
-Block::~Block() {
-  delete statements;
+  auto stmts = new std::vector<AbstractStatement *>;
+  stmts->reserve(children.size());
+  for(auto c : children) {
+    stmts->emplace_back(dynamic_cast<AbstractStatement*>(c));
+  }
+  return stmts;
 }
 
 Block *Block::clone(bool keepOriginalUniqueNodeId) {

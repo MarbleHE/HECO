@@ -116,7 +116,7 @@ TEST(ChildParentTests, Block) {  /* NOLINT */
       new Block(new Call(
           {new FunctionParameter("int", new LiteralInt(22))},
           new Function("computeSecretNumber")));
-  ASSERT_EQ(blockStatement->getChildren().size(), 0);
+  ASSERT_EQ(blockStatement->getChildren().size(), 1);
   ASSERT_EQ(blockStatement->getParents().size(), 0);
   ASSERT_FALSE(blockStatement->supportsCircuitMode());
   ASSERT_EQ(blockStatement->getMaxNumberChildren(), 0);
