@@ -41,14 +41,15 @@ void LiteralFloat::print(std::ostream &str) const {
 }
 
 bool LiteralFloat::operator==(const LiteralFloat &rhs) const {
-  return value == rhs.value;
+  return value==rhs.value;
 }
 
 bool LiteralFloat::operator!=(const LiteralFloat &rhs) const {
-  return !(rhs == *this);
+  return !(rhs==*this);
 }
 
-void LiteralFloat::addLiteralValue(std::string identifier, std::unordered_map<std::string, AbstractLiteral *> &paramsMap) {
+void LiteralFloat::addLiteralValue(std::string identifier,
+                                   std::unordered_map<std::string, AbstractLiteral *> &paramsMap) {
   paramsMap.emplace(identifier, this);
 }
 
@@ -69,11 +70,11 @@ bool LiteralFloat::supportsCircuitMode() {
 }
 
 bool LiteralFloat::supportsDatatype(Datatype &datatype) {
-  return datatype.getType() == TYPES::FLOAT;
+  return datatype.getType()==TYPES::FLOAT;
 }
 
 LiteralFloat *LiteralFloat::clone(bool keepOriginalUniqueNodeId) {
-  auto clonedNode =  new LiteralFloat(this->getValue());
+  auto clonedNode = new LiteralFloat(this->getValue());
   if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
   if (this->isReversed) clonedNode->swapChildrenParents();
   return clonedNode;

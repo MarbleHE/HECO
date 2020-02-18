@@ -44,8 +44,8 @@ std::string VarAssignm::getVarTargetIdentifier() {
 
 bool VarAssignm::isEqual(AbstractStatement *as) {
   if (auto otherVarAssignm = dynamic_cast<VarAssignm *>(as)) {
-    return this->getIdentifier() == otherVarAssignm->getIdentifier() &&
-           this->getValue()->isEqual(otherVarAssignm->getValue());
+    return this->getIdentifier()==otherVarAssignm->getIdentifier() &&
+        this->getValue()->isEqual(otherVarAssignm->getValue());
   }
   return false;
 }
@@ -65,8 +65,8 @@ void VarAssignm::setAttribute(AbstractExpr *assignmentValue) {
 }
 
 VarAssignm *VarAssignm::clone(bool keepOriginalUniqueNodeId) {
-  auto clonedNode =  new VarAssignm(this->getIdentifier(),
-                        this->getValue()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
+  auto clonedNode = new VarAssignm(this->getIdentifier(),
+                                   this->getValue()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
   if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
   if (this->isReversed) clonedNode->swapChildrenParents();
   return clonedNode;

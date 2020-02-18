@@ -38,7 +38,7 @@ void runInteractiveDemo() {
         {7, generateDemoSeven}
     };
     auto it = call.find(treeNo);
-    if (it == call.end()) {
+    if (it==call.end()) {
       std::cout << "Invalid selection! Please choose another value." << std::endl;
     } else {
       isValid = true;
@@ -86,7 +86,7 @@ void runInteractiveDemo() {
 
 void generateDemoOne(Ast &ast) {
   // int computePrivate(int x) { ... }
-  Function* func = dynamic_cast<Function*>(ast.setRootNode(new Function("computePrivate")));
+  Function *func = dynamic_cast<Function *>(ast.setRootNode(new Function("computePrivate")));
   func->addParameter(new FunctionParameter("int", new Variable("x")));
 
   // int a = 4;
@@ -123,7 +123,7 @@ void generateDemoOne(Ast &ast) {
 
 void generateDemoTwo(Ast &ast) {
   // int determineSuitableX(int encryptedA, int encryptedB) {...}
-  Function* func = dynamic_cast<Function*>(ast.setRootNode(new Function("determineSuitableX")));
+  Function *func = dynamic_cast<Function *>(ast.setRootNode(new Function("determineSuitableX")));
   func->addParameter(new FunctionParameter("int", new Variable("encryptedA")));
   func->addParameter(new FunctionParameter("int", new Variable("encryptedB")));
 
@@ -163,7 +163,7 @@ void generateDemoTwo(Ast &ast) {
               new LiteralBool(true))),
       // { sum = sum + encryptedB; randInt--; };
       new Block(
-          new std::vector<AbstractStatement*>{
+          new std::vector<AbstractStatement *>{
               // sum = sum + encryptedB
               new VarAssignm("sum", new BinaryExpr(
                   new Variable("sum"),
@@ -190,7 +190,7 @@ void generateDemoTwo(Ast &ast) {
 
 void generateDemoThree(Ast &ast) {
   // void computeMult() {...}
-  Function* func = dynamic_cast<Function*>(ast.setRootNode(new Function("computeMult")));
+  Function *func = dynamic_cast<Function *>(ast.setRootNode(new Function("computeMult")));
 
   // int a = 3;
   func->addStatement(new VarDecl("a", 3));
@@ -220,7 +220,7 @@ void generateDemoThree(Ast &ast) {
 
 void generateDemoFour(Ast &ast) {
   // int computeMult() {...}
-  Function* func = dynamic_cast<Function*>(ast.setRootNode(new Function("computeMult")));
+  Function *func = dynamic_cast<Function *>(ast.setRootNode(new Function("computeMult")));
 
   // int a = 3;
   func->addStatement(new VarDecl("a", 3));
@@ -258,7 +258,7 @@ void generateDemoFour(Ast &ast) {
 
 void generateDemoFive(Ast &ast) {
   // int computeMult() {...}
-  Function* func = dynamic_cast<Function*>(ast.setRootNode(new Function("multiMult")));
+  Function *func = dynamic_cast<Function *>(ast.setRootNode(new Function("multiMult")));
 
   // int result = (inA * (inB * inC));
   func->addStatement(new VarDecl("result", TYPES::INT,
@@ -277,7 +277,7 @@ void generateDemoFive(Ast &ast) {
 void generateDemoSix(Ast &ast) {
   //(Z * (A * (B * C))) --demo rewriter--> ((B * C) * (A * Z))
   // int computeMult() {...}
-  Function* func = dynamic_cast<Function*>(ast.setRootNode(new Function("multiMult")));
+  Function *func = dynamic_cast<Function *>(ast.setRootNode(new Function("multiMult")));
 
   // int result = (inZ * (inA * (inB * inC)));
   func->addStatement(new VarDecl("result", TYPES::INT,
@@ -298,7 +298,7 @@ void generateDemoSix(Ast &ast) {
 
 void generateDemoSeven(Ast &ast) {
   // int determineSuitableX(int encryptedA, int encryptedB) {...}
-  Function* func = dynamic_cast<Function*>(ast.setRootNode(new Function("determineSuitableX")));
+  Function *func = dynamic_cast<Function *>(ast.setRootNode(new Function("determineSuitableX")));
   func->addParameter(new FunctionParameter("int", new Variable("encryptedA")));
   func->addParameter(new FunctionParameter("int", new Variable("encryptedB")));
 

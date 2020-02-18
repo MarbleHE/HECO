@@ -20,7 +20,7 @@
 #include "VarAssignm.h"
 #include "While.h"
 
-EvaluationVisitor::EvaluationVisitor(Ast &ast) : ast(ast){};
+EvaluationVisitor::EvaluationVisitor(Ast &ast) : ast(ast) {};
 
 void EvaluationVisitor::visit(AbstractNode &elem) {
   results.push(std::vector<AbstractLiteral *>());
@@ -39,7 +39,7 @@ void EvaluationVisitor::visit(BinaryExpr &elem) {
   elem.getRight()->accept(*this);
   auto r = results.top().front();
   results.pop();
-  results.push({elem.getOp()->applyOperator(l,r)});
+  results.push({elem.getOp()->applyOperator(l, r)});
 }
 void EvaluationVisitor::visit(Block &elem) {
   // a block statement itself does not return anything - its contained statements are just being executed
@@ -49,7 +49,7 @@ void EvaluationVisitor::visit(Block &elem) {
 }
 void EvaluationVisitor::visit(Call &elem) {
   // validation: make sure that both Call and Function have the same number of arguments
-  if (elem.getArguments().size() != elem.getFunc()->getParams().size()) {
+  if (elem.getArguments().size()!=elem.getFunc()->getParams().size()) {
     std::stringstream ss;
     ss << "Number of arguments in Call and its called Function does not match (";
     ss << elem.getArguments().size() << " vs. " << elem.getFunc()->getParams().size();
@@ -66,7 +66,7 @@ void EvaluationVisitor::visit(Call &elem) {
     // validation: make sure that datatypes in Call and Function are equal
     auto datatypeCall = *elem.getArguments().at(i)->getDatatype();
     auto datatypeFunc = *elem.getFunc()->getParams().at(i)->getDatatype();
-    if (datatypeCall != datatypeFunc)
+    if (datatypeCall!=datatypeFunc)
       throw std::logic_error("Datatype in Call and Function mismatch! Cannot continue."
                              "Note: Vector position (index) of parameters in Call and Function must be equal.");
 
@@ -84,7 +84,7 @@ void EvaluationVisitor::visit(Call &elem) {
     AbstractLiteral *lit = results.top().front();
     results.pop();
     // make sure that evaluate returns a Literal
-    if (lit == nullptr) throw std::logic_error("There's something wrong! Evaluate should return a single Literal.");
+    if (lit==nullptr) throw std::logic_error("There's something wrong! Evaluate should return a single Literal.");
 
     // store value of lit in vector paramValues with its variable identifier
     // this is to be used to evaluate the Function called by Call
@@ -104,7 +104,7 @@ void EvaluationVisitor::visit(Function &elem) {
   for (size_t i = 0; i < elem.getBody().size(); i++) {
     auto currentStatement = elem.getBody().at(i);
     // last statement: check if it is a Return statement
-    if (i == elem.getBody().size() - 1) {
+    if (i==elem.getBody().size() - 1) {
       if (auto retStmt = dynamic_cast<Return *>(currentStatement)) {
         retStmt->accept(*this);
       }
@@ -119,12 +119,12 @@ void EvaluationVisitor::visit(If &elem) {
   elem.getCondition()->accept(*this);
   auto cond = dynamic_cast<LiteralBool *>(results.top().front());
   results.pop();
-  if (cond == nullptr)
+  if (cond==nullptr)
     throw std::logic_error("Condition in If statement must evaluate to a LiteralBool! Cannot continue.");
   // check which of the branches must be evaluated
-  if (*cond == LiteralBool(true) && elem.getThenBranch() != nullptr) {
+  if (*cond==LiteralBool(true) && elem.getThenBranch()!=nullptr) {
     elem.getThenBranch()->accept(*this);
-  } else if (elem.getElseBranch() != nullptr) {
+  } else if (elem.getElseBranch()!=nullptr) {
     elem.getElseBranch()->accept(*this);
   }
 }
@@ -148,7 +148,7 @@ void EvaluationVisitor::visit(LogicalExpr &elem) {
   elem.getRight()->accept(*this);
   auto r = results.top().front();
   results.pop();
-  results.push({elem.getOp()->applyOperator(l,r)});
+  results.push({elem.getOp()->applyOperator(l, r)});
 }
 void EvaluationVisitor::visit(Operator &elem) {
   Visitor::visit(elem);
@@ -175,7 +175,7 @@ void EvaluationVisitor::visit(VarAssignm &elem) {
   ast.updateVarValue(elem.getIdentifier(), val);
 }
 void EvaluationVisitor::visit(VarDecl &elem) {
-  if (elem.getInitializer() != nullptr) {
+  if (elem.getInitializer()!=nullptr) {
     elem.getInitializer()->accept(*this);
 
     auto value = results.top().front();
@@ -197,7 +197,7 @@ void EvaluationVisitor::visit(While &elem) {
   results.pop();
   auto cond = *dynamic_cast<LiteralBool *>(ensureSingleEvaluationResult(conds));
 
-  while (cond == LiteralBool(true)) {
+  while (cond==LiteralBool(true)) {
     elem.getBody()->accept(*this);
 
     elem.getCondition()->accept(*this);

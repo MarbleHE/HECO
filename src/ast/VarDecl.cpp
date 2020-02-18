@@ -7,10 +7,10 @@
 #include "Ast.h"
 
 json VarDecl::toJson() const {
-  json j = {{"type",       getNodeName()},
+  json j = {{"type", getNodeName()},
             {"identifier", identifier},
-            {"datatype",   getDatatype() ? getDatatype()->toString() : ""}};
-  if (getInitializer() != nullptr) {
+            {"datatype", getDatatype() ? getDatatype()->toString() : ""}};
+  if (getInitializer()!=nullptr) {
     j["initializer"] = getInitializer()->toJson();
   }
   return j;
@@ -89,9 +89,9 @@ std::string VarDecl::getVarTargetIdentifier() {
 
 bool VarDecl::isEqual(AbstractStatement *as) {
   if (auto otherVarDecl = dynamic_cast<VarDecl *>(as)) {
-    return (this->getIdentifier() == otherVarDecl->getIdentifier())
-           && (*this->getDatatype() == *otherVarDecl->getDatatype())
-           && (this->getInitializer()->isEqual(otherVarDecl->getInitializer()));
+    return (this->getIdentifier()==otherVarDecl->getIdentifier())
+        && (*this->getDatatype()==*otherVarDecl->getDatatype())
+        && (this->getInitializer()->isEqual(otherVarDecl->getInitializer()));
   }
   return false;
 }
@@ -105,9 +105,9 @@ int VarDecl::getMaxNumberChildren() {
 }
 
 VarDecl *VarDecl::clone(bool keepOriginalUniqueNodeId) {
-  auto clonedNode =  new VarDecl(this->getVarTargetIdentifier(),
-                     this->getDatatype()->getType(),
-                     getInitializer()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
+  auto clonedNode = new VarDecl(this->getVarTargetIdentifier(),
+                                this->getDatatype()->getType(),
+                                getInitializer()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
   if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
   if (this->isReversed) clonedNode->swapChildrenParents();
   return clonedNode;

@@ -12,7 +12,7 @@ TEST(MultDepthVisitorTests, SingleStatementMultiplication) { // NOLINT
   // construct AST
   Ast ast;
   // void f() { int abc = 22 * 32; }
-  auto* f = new Function("f");
+  auto *f = new Function("f");
   f->addStatement(new VarDecl("abc", TYPES::INT,
                               new BinaryExpr(
                                   new LiteralInt(22),
@@ -31,7 +31,7 @@ TEST(MultDepthVisitorTests, NestedMultiplication) { // NOLINT
   // construct AST
   Ast ast;
   // void f() { int abc = 22 * (32 * 53); }
-  auto* f = new Function("f");
+  auto *f = new Function("f");
   f->addStatement(new VarDecl("abc",
                               TYPES::INT,
                               new BinaryExpr(
@@ -55,7 +55,7 @@ TEST(MultDepthVisitorTests, MultipleStatementMultiplication) { // NOLINT
   Ast ast;
 
   // void f(int num) { int alpha = 32 * num; int beta = alpha * 123; }
-  auto* f = new Function("f");
+  auto *f = new Function("f");
   ast.setRootNode(f);
   f->addParameter(new FunctionParameter("int", new Variable("num")));
 
@@ -82,7 +82,7 @@ TEST(MultDepthVisitorTests, SingleStatementLogicalAnd) { // NOLINT
   // construct AST
   Ast ast;
   // void f() { int abc = 22 * 32; }
-  auto* f = new Function("f");
+  auto *f = new Function("f");
   f->addStatement(new VarDecl("abc", TYPES::INT,
                               new LogicalExpr(
                                   new LiteralBool(true),
@@ -101,7 +101,7 @@ TEST(MultDepthVisitorTests, NestedStatementLogicalAnd) { // NOLINT
   // construct AST
   Ast ast;
   // void f() { int abc = 22 * (32 * 53); }
-  auto* f = new Function("f");
+  auto *f = new Function("f");
   f->addStatement(new VarDecl("abc",
                               TYPES::BOOL,
                               new LogicalExpr(
@@ -125,7 +125,7 @@ TEST(MultDepthVisitorTests, MultipleStatementsLogicalAnd) { // NOLINT
   Ast ast;
 
   // void f(int num) { int alpha = 32 * num; int beta = alpha * 123; }
-  auto* f = new Function("f");
+  auto *f = new Function("f");
   ast.setRootNode(f);
   f->addParameter(new FunctionParameter("int", new Variable("num")));
 
@@ -150,7 +150,7 @@ TEST(MultDepthVisitorTests, MultipleStatementsLogicalAnd) { // NOLINT
 
 TEST(MultDepthVisitorTests, NoLogicalAndOrMultiplicationPresent) { // NOLINT
   Ast ast;
-  auto* f = new Function("f");
+  auto *f = new Function("f");
   ast.setRootNode(f);
   f->addParameter(new FunctionParameter("int", new Variable("value")));
   f->addStatement(new VarDecl("loss",

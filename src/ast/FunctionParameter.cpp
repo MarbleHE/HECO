@@ -2,24 +2,24 @@
 
 void to_json(json &j, const FunctionParameter &funcParam) {
   j = {
-      {"type",     funcParam.getNodeName()},
-      {"value",    funcParam.getValue()->toJson()},
+      {"type", funcParam.getNodeName()},
+      {"value", funcParam.getValue()->toJson()},
       {"datatype", funcParam.getDatatype()->toString()}
   };
 }
 
 void to_json(json &j, const FunctionParameter *funcParam) {
   j = {
-      {"type",     funcParam->getNodeName()},
-      {"value",    funcParam->getValue()->toJson()},
+      {"type", funcParam->getNodeName()},
+      {"value", funcParam->getValue()->toJson()},
       {"datatype", funcParam->getDatatype()->toString()}
   };
 }
 
 json FunctionParameter::toJson() const {
   json j = {
-      {"type",     getNodeName()},
-      {"value",    getValue()->toJson()},
+      {"type", getNodeName()},
+      {"value", getValue()->toJson()},
       {"datatype", getDatatype()->toString()}
   };
   return j;
@@ -50,8 +50,8 @@ Datatype *FunctionParameter::getDatatype() const {
 }
 
 FunctionParameter *FunctionParameter::clone(bool keepOriginalUniqueNodeId) {
-  auto clonedNode =  new FunctionParameter(this->getDatatype()->clone(keepOriginalUniqueNodeId)->castTo<Datatype>(),
-                               this->getValue()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
+  auto clonedNode = new FunctionParameter(this->getDatatype()->clone(keepOriginalUniqueNodeId)->castTo<Datatype>(),
+                                          this->getValue()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
   if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
   if (this->isReversed) clonedNode->swapChildrenParents();
   return clonedNode;
@@ -73,10 +73,10 @@ void FunctionParameter::setAttributes(Datatype *datatype, AbstractExpr *value) {
 }
 
 bool FunctionParameter::operator==(const FunctionParameter &rhs) const {
-  return getValue() == rhs.getValue() && getDatatype()->getType() == rhs.getDatatype()->getType();
+  return getValue()==rhs.getValue() && getDatatype()->getType()==rhs.getDatatype()->getType();
 }
 
 bool FunctionParameter::operator!=(const FunctionParameter &rhs) const {
-  return !(rhs == *this);
+  return !(rhs==*this);
 }
 

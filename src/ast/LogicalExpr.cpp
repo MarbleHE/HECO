@@ -47,12 +47,12 @@ std::vector<std::string> LogicalExpr::getVariableIdentifiers() {
 }
 
 LogicalExpr *LogicalExpr::contains(LogicalExpr *lexpTemplate, AbstractExpr *excludedSubtree) {
-  if (excludedSubtree != nullptr && this == excludedSubtree) {
+  if (excludedSubtree!=nullptr && this==excludedSubtree) {
     return nullptr;
   } else {
-    bool emptyOrEqualLeft = (!lexpTemplate->getLeft() || lexpTemplate->getLeft() == this->getLeft());
-    bool emptyOrEqualRight = (!lexpTemplate->getRight() || lexpTemplate->getRight() == this->getRight());
-    bool emptyOrEqualOp = (lexpTemplate->getOp()->isUndefined() || *this->getOp() == *lexpTemplate->getOp());
+    bool emptyOrEqualLeft = (!lexpTemplate->getLeft() || lexpTemplate->getLeft()==this->getLeft());
+    bool emptyOrEqualRight = (!lexpTemplate->getRight() || lexpTemplate->getRight()==this->getRight());
+    bool emptyOrEqualOp = (lexpTemplate->getOp()->isUndefined() || *this->getOp()==*lexpTemplate->getOp());
     return (emptyOrEqualLeft && emptyOrEqualRight && emptyOrEqualOp) ? this : nullptr;
   }
 }
@@ -62,9 +62,9 @@ int LogicalExpr::countByTemplate(AbstractExpr *abstractExpr) {
   if (auto expr = dynamic_cast<LogicalExpr *>(abstractExpr)) {
     // check if current BinaryExpr fulfills requirements of template abstractExpr
     // also check left and right operands for nested BinaryExps
-    return (this->contains(expr, nullptr) != nullptr ? 1 : 0)
-           + getLeft()->countByTemplate(abstractExpr)
-           + getRight()->countByTemplate(abstractExpr);
+    return (this->contains(expr, nullptr)!=nullptr ? 1 : 0)
+        + getLeft()->countByTemplate(abstractExpr)
+        + getRight()->countByTemplate(abstractExpr);
   } else {
     return 0;
   }

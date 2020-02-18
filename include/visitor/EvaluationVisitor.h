@@ -5,15 +5,14 @@
 #include <stack>
 #include "Visitor.h"
 
-
 class EvaluationVisitor : public Visitor {
-private:
-  typedef std::vector<AbstractLiteral*> result_t;
+ private:
+  typedef std::vector<AbstractLiteral *> result_t;
   std::stack<result_t> results = {};
-  Ast& ast;
+  Ast &ast;
   AbstractLiteral *ensureSingleEvaluationResult(std::vector<AbstractLiteral *> evaluationResult);
-public:
-  explicit EvaluationVisitor(Ast& ast);
+ public:
+  explicit EvaluationVisitor(Ast &ast);
   void visit(AbstractNode &elem) override;
   void visit(AbstractExpr &elem) override;
   void visit(AbstractStatement &elem) override;
@@ -37,7 +36,7 @@ public:
   void visit(Variable &elem) override;
   void visit(While &elem) override;
   void visit(Ast &elem) override;
-  const std::vector<AbstractLiteral*>& getResults();
+  const std::vector<AbstractLiteral *> &getResults();
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_VISITOR_EVALUATIONVISITOR_H

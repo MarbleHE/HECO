@@ -6,7 +6,7 @@
 #include <string>
 
 class Block : public AbstractStatement {
-public:
+ public:
   Block() = default;
 
   ~Block() override = default;

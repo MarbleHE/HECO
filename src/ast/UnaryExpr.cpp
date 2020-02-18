@@ -49,8 +49,8 @@ void UnaryExpr::setAttributes(OpSymb::UnaryOp op, AbstractExpr *expr) {
 
 UnaryExpr *UnaryExpr::clone(bool keepOriginalUniqueNodeId) {
   try {
-    auto clonedNode =  new UnaryExpr(std::get<OpSymb::UnaryOp>(this->getOp()->getOperatorSymbol()),
-                         this->getRight()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
+    auto clonedNode = new UnaryExpr(std::get<OpSymb::UnaryOp>(this->getOp()->getOperatorSymbol()),
+                                    this->getRight()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
     if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
     if (this->isReversed) clonedNode->swapChildrenParents();
     return clonedNode;

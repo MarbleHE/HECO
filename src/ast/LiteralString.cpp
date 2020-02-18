@@ -31,14 +31,15 @@ void LiteralString::print(std::ostream &str) const {
 }
 
 bool LiteralString::operator==(const LiteralString &rhs) const {
-  return value == rhs.value;
+  return value==rhs.value;
 }
 
 bool LiteralString::operator!=(const LiteralString &rhs) const {
-  return !(rhs == *this);
+  return !(rhs==*this);
 }
 
-void LiteralString::addLiteralValue(std::string identifier, std::unordered_map<std::string, AbstractLiteral *> &paramsMap) {
+void LiteralString::addLiteralValue(std::string identifier,
+                                    std::unordered_map<std::string, AbstractLiteral *> &paramsMap) {
   paramsMap.emplace(identifier, this);
 }
 
@@ -59,11 +60,11 @@ bool LiteralString::supportsCircuitMode() {
 }
 
 bool LiteralString::supportsDatatype(Datatype &datatype) {
-  return datatype.getType() == TYPES::STRING;
+  return datatype.getType()==TYPES::STRING;
 }
 
 LiteralString *LiteralString::clone(bool keepOriginalUniqueNodeId) {
-  auto clonedNode =  new LiteralString(this->getValue());
+  auto clonedNode = new LiteralString(this->getValue());
   if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
   if (this->isReversed) clonedNode->swapChildrenParents();
   return clonedNode;

@@ -18,6 +18,6 @@
 /// the intended multi-input gate. The last node in inputNodes (i.e., inputNodes.back()) is always the output of this
 /// chain.
 std::vector<AbstractNode *> rewriteMultiInputGateToBinaryGatesChain(std::vector<AbstractNode *> inputNodes,
-                                                                           OpSymb::LogCompOp gateType);
+                                                                    OpSymb::LogCompOp gateType);
 
 #endif //AST_OPTIMIZER_INCLUDE_UTILITIES_NODEUTILS_H_

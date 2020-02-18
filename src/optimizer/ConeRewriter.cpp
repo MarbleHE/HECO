@@ -92,25 +92,25 @@ std::vector<AbstractNode *> ConeRewriter::getReducibleCones() {
   auto rootNode = ast->getRootNode();
 
   auto getNthAncestorLogicalExpr = [&](int N) -> AbstractNode * {
-      // find first LogicalExpr in AST
-      std::pair<AbstractNode *, int> candidate(nullptr, 0);
-      std::queue<AbstractNode *> q{{rootNode}};
-      while (!q.empty()) {
-        auto curNode = q.front();
-        q.pop();
-        if (dynamic_cast<LogicalExpr *>(curNode)) {
-          candidate = std::make_pair(curNode, candidate.second + 1);
-          if (candidate.first != nullptr && candidate.second == N)
-            return candidate.first;
-        }
-        // add all parent nodes
-        std::for_each(curNode->getParents().begin(), curNode->getParents().end(), [&](AbstractNode *n) { q.push(n); });
+    // find first LogicalExpr in AST
+    std::pair<AbstractNode *, int> candidate(nullptr, 0);
+    std::queue<AbstractNode *> q{{rootNode}};
+    while (!q.empty()) {
+      auto curNode = q.front();
+      q.pop();
+      if (dynamic_cast<LogicalExpr *>(curNode)) {
+        candidate = std::make_pair(curNode, candidate.second + 1);
+        if (candidate.first!=nullptr && candidate.second==N)
+          return candidate.first;
       }
-      return nullptr;
+      // add all parent nodes
+      std::for_each(curNode->getParents().begin(), curNode->getParents().end(), [&](AbstractNode *n) { q.push(n); });
+    }
+    return nullptr;
   };
 
   // check if v (rootNode) is a LogicalExpr, otherwise find first (N=1) LogicalExpr by its traversing parents
-  if (dynamic_cast<LogicalExpr *>(rootNode) == nullptr) {
+  if (dynamic_cast<LogicalExpr *>(rootNode)==nullptr) {
     startNode = getNthAncestorLogicalExpr(1);
     if (!startNode) throw std::logic_error("AST does not contain any LogicalExpr!");
   }
@@ -119,7 +119,7 @@ std::vector<AbstractNode *> ConeRewriter::getReducibleCones() {
   int minDepth = computeMinDepth(startNode);
 
   // v has no non-critical input node p -> return empty set
-  if (minDepth == -1) return std::vector<AbstractNode *>();
+  if (minDepth==-1) return std::vector<AbstractNode *>();
 
   return getReducibleCones(startNode, minDepth);
 }
@@ -130,7 +130,7 @@ std::vector<AbstractNode *> ConeRewriter::getReducibleCones() {
 
 int ConeRewriter::computeMinDepth(AbstractNode *v) {
   // find a non-critical input node p of v
-  auto isNoOperatorNode = [](AbstractNode *n) { return (dynamic_cast<Operator *>(n) == nullptr); };
+  auto isNoOperatorNode = [](AbstractNode *n) { return (dynamic_cast<Operator *>(n)==nullptr); };
   for (auto &p : v->getParentsNonNull()) {
     // exclude Operator nodes as they do not have any parent and are not modeled as node in the paper
     if (isNoOperatorNode(p) && !isCriticalNode(p)) {
@@ -146,14 +146,14 @@ int ConeRewriter::computeMinDepth(AbstractNode *v) {
 
 std::vector<AbstractNode *> ConeRewriter::getReducibleCones(AbstractNode *v, int minDepth) {
   // return empty set if minDepth is reached
-  if (mdc.getMultDepthL(v) == minDepth) return std::vector<AbstractNode *>();
+  if (mdc.getMultDepthL(v)==minDepth) return std::vector<AbstractNode *>();
 
   // get predecessor nodes on critical path, i.e., { p ∈ pred(v) | l(p) = l(v) - d(v) }
   std::vector<AbstractNode *> *P = getPredecessorOnCriticalPath(v);
 
   // return v if at least one predecessor of v is non-critical and v is an AND-gate
   auto logicalExp = v->castTo<LogicalExpr>();
-  if (P->size() < 2 && logicalExp != nullptr && logicalExp->getOp()->equals(OpSymb::logicalAnd)) {
+  if (P->size() < 2 && logicalExp!=nullptr && logicalExp->getOp()->equals(OpSymb::logicalAnd)) {
     // return set consisting of start node v only
     return std::vector<AbstractNode *>{v};
   }
@@ -171,10 +171,10 @@ std::vector<AbstractNode *> ConeRewriter::getReducibleCones(AbstractNode *v, int
   // b. v is a LogicalExpr but not an AND- or XOR-gate
   // b. v is an AND-gate and deltaR is empty
   // c. v is a XOR-gate and size of deltaR does not equal size of P
-  if (logicalExp == nullptr ||
+  if (logicalExp==nullptr ||
       !(logicalExp->getOp()->equals(OpSymb::logicalAnd) || logicalExp->getOp()->equals(OpSymb::logicalXor)) ||
       (logicalExp->getOp()->equals(OpSymb::logicalAnd) && deltaR.empty()) ||
-      (logicalExp->getOp()->equals(OpSymb::logicalXor) && deltaR.size() != P->size())) {
+      (logicalExp->getOp()->equals(OpSymb::logicalXor) && deltaR.size()!=P->size())) {
     return std::vector<AbstractNode *>();
   }
 
@@ -205,7 +205,7 @@ int ConeRewriter::getMaxMultDepth(Ast &inputAst) {
     highestDepth = std::max(highestDepth, mdc.getMultDepthL(curNode));
     auto vec = inputAst.isReversed() ? curNode->getParents() : curNode->getChildren();
     std::for_each(vec.begin(), vec.end(), [&](AbstractNode *n) {
-        nodesToCheck.push(n);
+      nodesToCheck.push(n);
     });
   }
   return highestDepth;
@@ -216,10 +216,11 @@ void ConeRewriter::addElements(std::vector<AbstractNode *> &result, std::vector<
   result.insert(result.end(), newElements.begin(), newElements.end());
 }
 
-void ConeRewriter::flattenVectors(std::vector<AbstractNode *> &resultVector, std::vector<std::vector<AbstractNode *>> vectorOfVectors) {
+void ConeRewriter::flattenVectors(std::vector<AbstractNode *> &resultVector,
+                                  std::vector<std::vector<AbstractNode *>> vectorOfVectors) {
   std::set<AbstractNode *> res;
   std::for_each(vectorOfVectors.begin(), vectorOfVectors.end(), [&](std::vector<AbstractNode *> rVec) {
-      res.insert(rVec.begin(), rVec.end());
+    res.insert(rVec.begin(), rVec.end());
   });
   resultVector.assign(res.begin(), res.end());
 }
@@ -229,7 +230,7 @@ std::vector<AbstractNode *> *ConeRewriter::getPredecessorOnCriticalPath(Abstract
   auto result = new std::vector<AbstractNode *>();
   int criterion = mdc.getMultDepthL(v) - mdc.depthValue(v);
   for (auto &p : v->getParentsNonNull()) {
-    if (mdc.getMultDepthL(p) == criterion) result->push_back(p);
+    if (mdc.getMultDepthL(p)==criterion) result->push_back(p);
   }
   return result;
 }
@@ -242,7 +243,7 @@ void ConeRewriter::reverseEdges(const std::vector<AbstractNode *> &nodes) {
 void ConeRewriter::getReducibleConesForEveryPossibleStartingNode(Ast &inputAst) {
   for (AbstractNode *n : inputAst.getRootNode()->getAnc()) {
     int minDepth = computeMinDepth(n);
-    if (minDepth == -1) continue;
+    if (minDepth==-1) continue;
     std::vector<AbstractNode *> delta = getReducibleCones(n, minDepth);
 
     // cAndCkt: C^{AND} circuit consisting of critical AND-nodes that are connected if there is a multiplicative depth-2
@@ -258,14 +259,14 @@ void ConeRewriter::getReducibleConesForEveryPossibleStartingNode(Ast &inputAst) 
 bool ConeRewriter::isCriticalNode(AbstractNode *n) {
   int l = mdc.getMultDepthL(n);
   int r = mdc.getReverseMultDepthR(n);
-  return (mdc.getMaximumMultiplicativeDepth() == l + r);
+  return (mdc.getMaximumMultiplicativeDepth()==l + r);
 }
 
 std::vector<AbstractNode *> ConeRewriter::getAndCriticalCircuit(std::vector<AbstractNode *> delta) {
   // remove non-AND nodes from delta (note: delta is passed as copy-by-value) as delta may also include XOR nodes
   delta.erase(remove_if(delta.begin(), delta.end(), [](AbstractNode *d) {
-      auto lexp = dynamic_cast<LogicalExpr *>(d);
-      return (lexp == nullptr || !lexp->getOp()->equals(OpSymb::logicalAnd));
+    auto lexp = dynamic_cast<LogicalExpr *>(d);
+    return (lexp==nullptr || !lexp->getOp()->equals(OpSymb::logicalAnd));
   }), delta.end());
 
   // duplicate critical nodes to create new circuit C_{AND} as we do not want to modify the original circuit
@@ -275,7 +276,7 @@ std::vector<AbstractNode *> ConeRewriter::getAndCriticalCircuit(std::vector<Abst
     // note that cloneFlat() does not copy the links to parents and children
     auto clonedNode = v->cloneFlat();
     // a back-link to the node in the original circuit
-    underlying_nodes.insert(std::make_pair<std::string,AbstractNode*>(v->getUniqueNodeId(),&*v));
+    underlying_nodes.insert(std::make_pair<std::string, AbstractNode *>(v->getUniqueNodeId(), &*v));
     cAndMap.emplace(v->getUniqueNodeId(), clonedNode);
     cAndResultCkt.push_back(clonedNode);
   }
@@ -292,9 +293,9 @@ std::vector<AbstractNode *> ConeRewriter::getAndCriticalCircuit(std::vector<Abst
       for (auto &child : curNode->getChildren()) {
         auto childLexp = dynamic_cast<LogicalExpr *>(child);
         // if the child is a LogicalExpr of type AND-gate
-        if (childLexp != nullptr && childLexp->getOp()->equals(OpSymb::logicalAnd)) {
+        if (childLexp!=nullptr && childLexp->getOp()->equals(OpSymb::logicalAnd)) {
           // check if this child is a critical node, if yes: connect both nodes
-          if (std::find(delta.begin(), delta.end(), childLexp) != delta.end()) {
+          if (std::find(delta.begin(), delta.end(), childLexp)!=delta.end()) {
             AbstractNode *copiedV = cAndMap[v->getUniqueNodeId()];
             AbstractNode *copiedChild = cAndMap[child->getUniqueNodeId()];
             copiedV->addChild(copiedChild, false);
@@ -318,7 +319,7 @@ std::vector<AbstractNode *> ConeRewriter::sortTopologically(const std::vector<Ab
   // S <- nodes without an incoming edge
   std::vector<AbstractNode *> S;
   std::for_each(nodes.begin(), nodes.end(), [&](AbstractNode *n) {
-      if (n->getParents().empty()) S.push_back(n);
+    if (n->getParents().empty()) S.push_back(n);
   });
 
   while (!S.empty()) {
@@ -327,7 +328,7 @@ std::vector<AbstractNode *> ConeRewriter::sortTopologically(const std::vector<Ab
     L.push_back(n);
     for (auto &m : n->getChildrenNonNull()) {
       numEdgesDeleted[m] += 1; // emulates removing edge from the graph
-      if (m->getParents().size() == numEdgesDeleted[m]) S.push_back(m);
+      if (m->getParents().size()==numEdgesDeleted[m]) S.push_back(m);
     }
   }
   return L;
@@ -336,28 +337,28 @@ std::vector<AbstractNode *> ConeRewriter::sortTopologically(const std::vector<Ab
 std::vector<AbstractNode *> ConeRewriter::selectCones(std::vector<AbstractNode *> cAndCkt) {
   /// Helper function that computes the flow of all nodes in the given circuit ckt
   auto computeFlow = [](std::vector<AbstractNode *> &ckt) {
-      std::map<AbstractNode *, float> computedFlow;
-      std::map<std::pair<AbstractNode *, AbstractNode *>, float> edgeFlows;
-      auto topologicalOrder = ConeRewriter::sortTopologically(ckt);
-      for (AbstractNode *v : topologicalOrder) {
-        if (v->getParentsNonNull().empty()) {  // if v is input
-          // trivial flow of 1
-          computedFlow[v] = 1;
-        } else {  // if v is intermediate node
-          // compute flow by accumulating flows of incoming edges (u,v) where u ∈ pred(v)
-          auto predecessorsOfV = v->getParentsNonNull();
-          float flow = 0.0f;
-          std::for_each(predecessorsOfV.begin(), predecessorsOfV.end(), [&](AbstractNode *u) {
-              flow += edgeFlows[std::pair(u, v)];
-          });
-          computedFlow[v] = flow;
-        }
-        // for all successors u: define edge flow
-        for (auto &u : v->getChildrenNonNull()) {
-          edgeFlows[std::make_pair(v, u)] = computedFlow[v] / v->getChildrenNonNull().size();
-        }
+    std::map<AbstractNode *, float> computedFlow;
+    std::map<std::pair<AbstractNode *, AbstractNode *>, float> edgeFlows;
+    auto topologicalOrder = ConeRewriter::sortTopologically(ckt);
+    for (AbstractNode *v : topologicalOrder) {
+      if (v->getParentsNonNull().empty()) {  // if v is input
+        // trivial flow of 1
+        computedFlow[v] = 1;
+      } else {  // if v is intermediate node
+        // compute flow by accumulating flows of incoming edges (u,v) where u ∈ pred(v)
+        auto predecessorsOfV = v->getParentsNonNull();
+        float flow = 0.0f;
+        std::for_each(predecessorsOfV.begin(), predecessorsOfV.end(), [&](AbstractNode *u) {
+          flow += edgeFlows[std::pair(u, v)];
+        });
+        computedFlow[v] = flow;
       }
-      return computedFlow;
+      // for all successors u: define edge flow
+      for (auto &u : v->getChildrenNonNull()) {
+        edgeFlows[std::make_pair(v, u)] = computedFlow[v]/v->getChildrenNonNull().size();
+      }
+    }
+    return computedFlow;
   };
 
   // ----------------------------
@@ -373,14 +374,14 @@ std::vector<AbstractNode *> ConeRewriter::selectCones(std::vector<AbstractNode *
 
     // compute f(v) for all nodes
     std::map<AbstractNode *, float> flows;
-    for (auto &n : cAndCkt) flows[n] = nodeFlowsAscending[n] * nodeFlows[n];
+    for (auto &n : cAndCkt) flows[n] = nodeFlowsAscending[n]*nodeFlows[n];
 
     // find the node with the largest flow u
     AbstractNode *u = std::max_element(
         flows.begin(),
         flows.end(),
         [](const std::pair<AbstractNode *, float> &p1, const std::pair<AbstractNode *, float> &p2) {
-            return p1.second < p2.second;
+          return p1.second < p2.second;
         })->first;
 
     // remove node u
@@ -451,7 +452,7 @@ void ConeRewriter::rewriteCones(Ast &astToRewrite, const std::vector<AbstractNod
       auto curNodeLexp = dynamic_cast<LogicalExpr *>(curNode);
       // if curNode is not the cone end node and a logical-AND expression, we found one of the end nodes
       // in that case we can stop exploring this path any further
-      if (curNode != coneEnd && curNodeLexp != nullptr && curNodeLexp->getOp()->equals(OpSymb::logicalAnd)) {
+      if (curNode!=coneEnd && curNodeLexp!=nullptr && curNodeLexp->getOp()->equals(OpSymb::logicalAnd)) {
         coneStartNodes.push_back(curNode);
       } else {  // otherwise we need to continue search by following the critical path
         // add parent nodes of current nodes -> continue BFS traversal
@@ -465,10 +466,10 @@ void ConeRewriter::rewriteCones(Ast &astToRewrite, const std::vector<AbstractNod
     std::vector<AbstractNode *> finalXorInputs;
     // It should not make a difference which of the cone start nodes we take - all of them should have the same parent.
     AbstractNode *xorEndNode = coneStartNodes.front()->getParentsNonNull().front();
-    for (auto &startNode : coneStartNodes) assert(startNode->getParentsNonNull().front() == xorEndNode);
+    for (auto &startNode : coneStartNodes) assert(startNode->getParentsNonNull().front()==xorEndNode);
 
     // check whether we need to handle non-critical inputs y_1, ..., y_m
-    if (dynamic_cast<LogicalExpr *>(xorEndNode)->getOp()->equals(OpSymb::logicalAnd) && xorEndNode == coneEnd) {
+    if (dynamic_cast<LogicalExpr *>(xorEndNode)->getOp()->equals(OpSymb::logicalAnd) && xorEndNode==coneEnd) {
       // if there are no non-critical inputs y_1, ..., y_m then the cone's end and cone's start are both connected with
       // each other.
       // remove the edge between the start nodes and the end node
@@ -481,22 +482,23 @@ void ConeRewriter::rewriteCones(Ast &astToRewrite, const std::vector<AbstractNod
       auto currentNode = xorStartNode;
       while (true) {
         auto *currentNodeAsLogicalExpr = dynamic_cast<LogicalExpr *>(currentNode);
-        if (currentNode == nullptr)
-          throw std::logic_error("AbstractNode between cone end and cone start node is expected to be a logical expression!");
+        if (currentNode==nullptr)
+          throw std::logic_error(
+              "AbstractNode between cone end and cone start node is expected to be a logical expression!");
         auto[critIn, nonCritIn] = getCriticalAndNonCriticalInput(currentNodeAsLogicalExpr);
         currentNode->removeChild(nonCritIn);
         nonCritIn->removeParent(currentNode);
         inputsY1ToYm.push_back(nonCritIn);
         currentNode = critIn;
         // termination criteria (1): we reached the end of the XOR chain
-        if (currentNode == xorEndNode) {
+        if (currentNode==xorEndNode) {
           auto *xorEndNodeAsLogicalExpr = dynamic_cast<LogicalExpr *>(currentNode);
           // if only one of both is critical, we need to enqueue the non-critical of them.
           // exactly one of both inputs is non-critical
           //   <=> left is critical XOR right is critical
           //   <=> (left is critical) unequal (right is critical)
           if (isCriticalNode(xorEndNodeAsLogicalExpr->getLeft())
-              != isCriticalNode(xorEndNodeAsLogicalExpr->getRight())) {
+              !=isCriticalNode(xorEndNodeAsLogicalExpr->getRight())) {
             // then we need to collect this non-critical input
             auto nonCriticalInput = getCriticalAndNonCriticalInput(xorEndNodeAsLogicalExpr).second;
             inputsY1ToYm.push_back(nonCriticalInput);
@@ -505,7 +507,7 @@ void ConeRewriter::rewriteCones(Ast &astToRewrite, const std::vector<AbstractNod
           break;
         }
         // termination criteria (2): we already reached a cone start node
-        if (std::find(coneStartNodes.begin(), coneStartNodes.end(), currentNode) != coneStartNodes.end()) {
+        if (std::find(coneStartNodes.begin(), coneStartNodes.end(), currentNode)!=coneStartNodes.end()) {
           break;
         }
       }
@@ -513,7 +515,7 @@ void ConeRewriter::rewriteCones(Ast &astToRewrite, const std::vector<AbstractNod
       // XorEndNode: remove incoming edges from nodes v_1, ..., v_n
       for (auto &p : xorEndNode->getChildrenNonNull()) {
         // keep the operator node -> only remove those nodes that are no operators
-        if (dynamic_cast<Operator *>(p) == nullptr) xorEndNode->removeChildBilateral(p);
+        if (dynamic_cast<Operator *>(p)==nullptr) xorEndNode->removeChildBilateral(p);
       }
 
       // XorStartNode: remove incoming edge from xorStartNode to v_t
@@ -527,7 +529,7 @@ void ConeRewriter::rewriteCones(Ast &astToRewrite, const std::vector<AbstractNod
 
       // build new node u_y that is connected to inputs y_1, ..., y_m and a_t
       AbstractExpr *u_y_rightOperand = nullptr;
-      if (inputsY1ToYm.size() == 1) {
+      if (inputsY1ToYm.size()==1) {
         // if y_1 only exists: connect input y_1 directly to u_y -> trivial case
         u_y_rightOperand = inputsY1ToYm.front()->castTo<AbstractExpr>();
       } else if (inputsY1ToYm.size() > 1) {  // otherwise there are inputs y_1, y_2, ..., y_m
@@ -544,7 +546,7 @@ void ConeRewriter::rewriteCones(Ast &astToRewrite, const std::vector<AbstractNod
     for (auto sNode : coneStartNodes) {
       // determine critical input a_1^i and non-critical input a_2^i of v_i
       auto *sNodeAsLogicalExpr = dynamic_cast<LogicalExpr *>(sNode);
-      if (sNodeAsLogicalExpr == nullptr)
+      if (sNodeAsLogicalExpr==nullptr)
         throw std::logic_error("Start node of cone is expected to be of type LogicalExpr!");
       auto[criticalInput, nonCriticalInput] = getCriticalAndNonCriticalInput(sNodeAsLogicalExpr);
 
@@ -574,7 +576,7 @@ void ConeRewriter::rewriteCones(Ast &astToRewrite, const std::vector<AbstractNod
 
     // remove coneEnd
     astToRewrite.deleteNode(&coneEnd, true);
-    assert(coneEnd == nullptr);
+    assert(coneEnd==nullptr);
 
     // connect final XOR (i.e., last LogicalExpr in the chain of XOR nodes) to cone output
     rNode->addChild(xorFinalGate.back(), false);

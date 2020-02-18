@@ -13,8 +13,8 @@ Function::Function(std::string name, std::vector<AbstractStatement *> pt) : name
   for (auto &stmt : getBody()) {
     auto previous = *(&stmt - 1);
     auto next = *(&stmt + 1);
-    if (previous != nullptr) stmt->addParent(previous);
-    if (next != nullptr)
+    if (previous!=nullptr) stmt->addParent(previous);
+    if (next!=nullptr)
       stmt->addChild(next, false);
   }
 }
@@ -45,18 +45,18 @@ const std::vector<AbstractStatement *> &Function::getBody() const {
 
 void to_json(json &j, const Function &func) {
   j = {
-      {"type",   func.getNodeName()},
-      {"name",   func.getName()},
+      {"type", func.getNodeName()},
+      {"name", func.getName()},
       {"params", func.getParams()},
-      {"body",   func.getBody()}};
+      {"body", func.getBody()}};
 }
 
 json Function::toJson() const {
   json j = {
-      {"type",   getNodeName()},
-      {"name",   getName()},
+      {"type", getNodeName()},
+      {"name", getName()},
       {"params", params},
-      {"body",   getBody()}
+      {"body", getBody()}
   };
   return j;
 }
@@ -78,7 +78,7 @@ Function *Function::clone(bool keepOriginalUniqueNodeId) {
   for (auto &statement : this->getBody()) {
     clonedBody.push_back(statement->clone(keepOriginalUniqueNodeId)->castTo<AbstractStatement>());
   }
-  auto clonedNode =  new Function(this->getName(), clonedParams, clonedBody);
+  auto clonedNode = new Function(this->getName(), clonedParams, clonedBody);
   if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
   if (this->isReversed) clonedNode->swapChildrenParents();
   return clonedNode;

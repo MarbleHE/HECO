@@ -41,7 +41,7 @@ static std::map<int, std::function<void(Ast &)> > call = {  /* NOLINT */
 void AstTestingGenerator::generateAst(int id, Ast &ast) {
   // determine the functions this ID is associated to
   auto it = call.find(id);
-  if (it == call.end()) throw std::logic_error("Cannot continue. Invalid id given!");
+  if (it==call.end()) throw std::logic_error("Cannot continue. Invalid id given!");
   // call the function by passing the AST object to be written into
   it->second(ast);
 }
@@ -61,7 +61,7 @@ void AstTestingGenerator::_genSuperSimpleAst(Ast &ast) {
 void AstTestingGenerator::_genAstRewritingOne(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computePrivate");
-  auto funcParams = new std::vector<FunctionParameter*>();
+  auto funcParams = new std::vector<FunctionParameter *>();
   funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputA")));
   funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputB")));
   funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputC")));
@@ -89,7 +89,7 @@ void AstTestingGenerator::_genAstRewritingOne(Ast &ast) {
 void AstTestingGenerator::_genAstRewritingTwo(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computePrivate");
-  auto funcParams = new std::vector<FunctionParameter*>();
+  auto funcParams = new std::vector<FunctionParameter *>();
   funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputA")));
   funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputB")));
   funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputC")));
@@ -121,7 +121,7 @@ void AstTestingGenerator::_genAstRewritingTwo(Ast &ast) {
 void AstTestingGenerator::_genAstRewritingThree(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computePrivate");
-  auto funcParams = new std::vector<FunctionParameter*>();
+  auto funcParams = new std::vector<FunctionParameter *>();
   funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputA")));
   funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputB")));
   funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputC")));
@@ -156,7 +156,7 @@ void AstTestingGenerator::_genAstRewritingThree(Ast &ast) {
 void AstTestingGenerator::_genAstRewritingFour(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computePrivate");
-  auto funcParams = new std::vector<FunctionParameter*>();
+  auto funcParams = new std::vector<FunctionParameter *>();
   funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputA")));
   funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputB")));
   funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputC")));
@@ -190,7 +190,7 @@ void AstTestingGenerator::_genAstRewritingFour(Ast &ast) {
 void AstTestingGenerator::_genAstRewritingFive(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computePrivate");
-  auto funcParams = new std::vector<FunctionParameter*>();
+  auto funcParams = new std::vector<FunctionParameter *>();
   funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputA")));
   funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputB")));
   funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputC")));
@@ -222,7 +222,7 @@ void AstTestingGenerator::_genAstRewritingFive(Ast &ast) {
 void AstTestingGenerator::_genAstRewritingSix(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computePrivate");
-  auto funcParams = new std::vector<FunctionParameter*>();
+  auto funcParams = new std::vector<FunctionParameter *>();
   funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputA")));
   funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputB")));
   funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputC")));
@@ -254,7 +254,7 @@ void AstTestingGenerator::_genAstRewritingSix(Ast &ast) {
 void AstTestingGenerator::_genAstEvalOne(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computeAvg");
-  auto funcParams = new std::vector<FunctionParameter*>();
+  auto funcParams = new std::vector<FunctionParameter *>();
   funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("width")));
   funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("length")));
   funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("depth")));
@@ -282,7 +282,7 @@ void AstTestingGenerator::_genAstEvalOne(Ast &ast) {
 void AstTestingGenerator::_genAstEvalTwo(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computePrivate");
-  auto funcParams = new std::vector<FunctionParameter*>();
+  auto funcParams = new std::vector<FunctionParameter *>();
   funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputA")));
   funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputB")));
   funcParams->push_back(new FunctionParameter(new Datatype(TYPES::BOOL), new Variable("takeIf")));
@@ -319,7 +319,7 @@ void AstTestingGenerator::_genAstEvalTwo(Ast &ast) {
 void AstTestingGenerator::_genAstEvalThree(Ast &ast) {
   // bool computeLogical(int inputA, bool strong, bool negate, int inputB)
   auto func = new Function("computePrivate");
-  auto funcParams = new std::vector<FunctionParameter*>();
+  auto funcParams = new std::vector<FunctionParameter *>();
   funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputA")));
   funcParams->push_back(new FunctionParameter(new Datatype(TYPES::BOOL), new Variable("strong")));
   funcParams->push_back(new FunctionParameter(new Datatype(TYPES::BOOL), new Variable("negate")));
@@ -355,7 +355,7 @@ void AstTestingGenerator::_genAstEvalThree(Ast &ast) {
 
 void AstTestingGenerator::_genAstEvalFour(Ast &ast) {
   auto func = new Function("concatString");
-  auto funcParams = new std::vector<FunctionParameter*>();
+  auto funcParams = new std::vector<FunctionParameter *>();
   funcParams->push_back(new FunctionParameter(new Datatype(TYPES::STRING), new Variable("strA")));
   funcParams->push_back(new FunctionParameter(new Datatype(TYPES::STRING), new Variable("strB")));
   func->setParams(*funcParams);
@@ -368,7 +368,7 @@ void AstTestingGenerator::_genAstEvalFour(Ast &ast) {
 
 void AstTestingGenerator::_genAstEvalFive(Ast &ast) {
   // int determineSuitableX(int encryptedA, int encryptedB) {...}
-  Function* func = dynamic_cast<Function*>(ast.setRootNode(new Function("determineSuitableX")));
+  Function *func = dynamic_cast<Function *>(ast.setRootNode(new Function("determineSuitableX")));
   func->addParameter(new FunctionParameter("int", new Variable("encryptedA")));
   func->addParameter(new FunctionParameter("int", new Variable("encryptedB")));
   func->addParameter(new FunctionParameter("int", new Variable("randInt")));
@@ -401,7 +401,7 @@ void AstTestingGenerator::_genAstEvalFive(Ast &ast) {
               new LiteralBool(true))),
       // body: { sum = sum + encryptedB; randInt--; };
       new Block(
-          new std::vector<AbstractStatement*>{
+          new std::vector<AbstractStatement *>{
               // sum = sum + encryptedB
               new VarAssignm("sum", new BinaryExpr(
                   new Variable("sum"),
@@ -420,7 +420,7 @@ void AstTestingGenerator::_genAstEvalFive(Ast &ast) {
 
 void AstTestingGenerator::_genAstEvalSix(Ast &ast) {
   // int nestedCall() { ...
-  auto* fnc = new Function("nestedCall");
+  auto *fnc = new Function("nestedCall");
   ast.setRootNode(fnc);
 
   // int result = computeSecret(33);
@@ -442,7 +442,7 @@ void AstTestingGenerator::_genAstEvalSix(Ast &ast) {
 
 void AstTestingGenerator::_genAstEvalSeven(Ast &ast) {
   // int nestedCall() { ...
-  auto* fnc = new Function("nestedCall");
+  auto *fnc = new Function("nestedCall");
   ast.setRootNode(fnc);
 
   // int result = computeSecret(33);
@@ -464,7 +464,7 @@ void AstTestingGenerator::_genAstEvalSeven(Ast &ast) {
 
 void AstTestingGenerator::_genAstPrintVisitorOne(Ast &ast) {
   // int computePrivate(int x) { ... }
-  Function* func = dynamic_cast<Function*>(ast.setRootNode(new Function("computePrivate")));
+  Function *func = dynamic_cast<Function *>(ast.setRootNode(new Function("computePrivate")));
   func->addParameter(new FunctionParameter("int", new Variable("x")));
 
   // int a = 4;
@@ -501,7 +501,7 @@ void AstTestingGenerator::_genAstPrintVisitorOne(Ast &ast) {
 
 void AstTestingGenerator::_genAstPrintVisitorTwo(Ast &ast) {
 // int determineSuitableX(int encryptedA, int encryptedB) {...}
-  Function* func = dynamic_cast<Function*>(ast.setRootNode(new Function("determineSuitableX")));
+  Function *func = dynamic_cast<Function *>(ast.setRootNode(new Function("determineSuitableX")));
   func->addParameter(new FunctionParameter("int", new Variable("encryptedA")));
   func->addParameter(new FunctionParameter("int", new Variable("encryptedB")));
 
@@ -541,7 +541,7 @@ void AstTestingGenerator::_genAstPrintVisitorTwo(Ast &ast) {
               new LiteralBool(true))),
       // { sum = sum + encryptedB; randInt--; };
       new Block(
-          new std::vector<AbstractStatement*>{
+          new std::vector<AbstractStatement *>{
               // sum = sum + encryptedB
               new VarAssignm("sum", new BinaryExpr(
                   new Variable("sum"),
@@ -569,7 +569,7 @@ void AstTestingGenerator::_genAstPrintVisitorTwo(Ast &ast) {
 void AstTestingGenerator::_genAstMultDepthOne(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computePrivate");
-  auto funcParams = new std::vector<FunctionParameter*>();
+  auto funcParams = new std::vector<FunctionParameter *>();
   funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputA")));
   funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputB")));
   funcParams->push_back(new FunctionParameter(new Datatype(TYPES::INT), new Variable("inputC")));
@@ -601,7 +601,7 @@ void AstTestingGenerator::_genAstMultDepthOne(Ast &ast) {
 void AstTestingGenerator::_genAstMultDepthTwo(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computePrivate");
-  auto funcParams = new std::vector<FunctionParameter*>();
+  auto funcParams = new std::vector<FunctionParameter *>();
   funcParams->push_back(new FunctionParameter(
       new Datatype(TYPES::INT), new Variable("base")));
   funcParams->push_back(new FunctionParameter(
@@ -689,7 +689,7 @@ void AstTestingGenerator::_genAstRewritingSimple(Ast &ast) {
   //                               ┌─────────┐
   //                               │ return  │
   //                               └─────────┘
-  auto* returnStatement = new Return(new LogicalExpr(
+  auto *returnStatement = new Return(new LogicalExpr(
       new LogicalExpr(
           new LogicalExpr(
               new LogicalExpr(
@@ -740,7 +740,7 @@ void AstTestingGenerator::_genAstRewritingSimpleExtended(Ast &ast) {
   //                                                                          ┌─────────┐
   //                                                                          │ return  │
   //                                                                          └─────────┘
-  auto* returnStatement = new Return(new LogicalExpr(
+  auto *returnStatement = new Return(new LogicalExpr(
       new LogicalExpr(
           new LogicalExpr(
               new LogicalExpr(
@@ -772,7 +772,7 @@ void AstTestingGenerator::_genAstRewritingSimpleExtended(Ast &ast) {
 }
 
 void AstTestingGenerator::_genAstRewritingMultiInputY(Ast &ast) {
-  auto* returnStatement = new Return(new LogicalExpr(
+  auto *returnStatement = new Return(new LogicalExpr(
       new LogicalExpr(
 
           new LogicalExpr(
@@ -821,7 +821,7 @@ void AstTestingGenerator::_genAstRewritingMultiInputY(Ast &ast) {
 }
 
 void AstTestingGenerator::_genAstRewritingTwoDepth2ConesButSingleVNode(Ast &ast) {
-  AbstractExpr* aCone = new LogicalExpr(  // level 1
+  AbstractExpr *aCone = new LogicalExpr(  // level 1
       new LogicalExpr(
 
           new LogicalExpr(  // level 3
@@ -871,7 +871,7 @@ void AstTestingGenerator::_genAstRewritingTwoDepth2ConesButSingleVNode(Ast &ast)
       OpSymb::logicalAnd,
       new Variable("a_t"));  // level 1
 
-  auto* returnStatement = new Return(new LogicalExpr(
+  auto *returnStatement = new Return(new LogicalExpr(
       new LogicalExpr(
 
           new LogicalExpr(

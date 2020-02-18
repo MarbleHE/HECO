@@ -168,7 +168,7 @@ void PrintVisitor::addOutputStr(AbstractNode &node, const std::list<std::string>
 
 void PrintVisitor::printScope() {
   // only print scope where statement belongs to if statement has changed since last print
-  if (getLastPrintedScope() == nullptr || curScope != getLastPrintedScope()) {
+  if (getLastPrintedScope()==nullptr || curScope!=getLastPrintedScope()) {
     ss << "\t[";
     ss << this->curScope->getScopeIdentifier();
     ss << "]";

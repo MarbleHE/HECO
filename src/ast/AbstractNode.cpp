@@ -55,14 +55,14 @@ const std::vector<AbstractNode *> &AbstractNode::getChildren() const {
 std::vector<AbstractNode *> AbstractNode::getChildrenNonNull() const {
   std::vector<AbstractNode *> childrenFiltered;
   std::copy_if(children.begin(), children.end(), std::back_inserter(childrenFiltered),
-               [](AbstractNode *n) { return n != nullptr; });
+               [](AbstractNode *n) { return n!=nullptr; });
   return childrenFiltered;
 }
 
 std::vector<AbstractNode *> AbstractNode::getParentsNonNull() const {
   std::vector<AbstractNode *> parentsFiltered;
   std::copy_if(parents.begin(), parents.end(), std::back_inserter(parentsFiltered),
-               [](AbstractNode *n) { return n != nullptr; });
+               [](AbstractNode *n) { return n!=nullptr; });
   return parentsFiltered;
 }
 
@@ -72,9 +72,10 @@ void AbstractNode::addChild(AbstractNode *child, bool addBackReference) {
 
 void AbstractNode::addChildren(const std::vector<AbstractNode *> &childrenToAdd, bool addBackReference) {
   // check whether the number of children to be added does not exceed the number of maximum supported children
-  if (childrenToAdd.size() > getMaxNumberChildren() && getMaxNumberChildren() != -1) {
-    throw std::invalid_argument("AbstractNode " + getUniqueNodeId() + " of type " + getNodeName() + " does not allow more than "
-                                + std::to_string(getMaxNumberChildren()) + " children!");
+  if (childrenToAdd.size() > getMaxNumberChildren() && getMaxNumberChildren()!=-1) {
+    throw std::invalid_argument(
+        "AbstractNode " + getUniqueNodeId() + " of type " + getNodeName() + " does not allow more than "
+            + std::to_string(getMaxNumberChildren()) + " children!");
   }
 
   // check if circuit mode is supported by current node, otherwise addChildren will lead to unexpected behavior
@@ -85,26 +86,26 @@ void AbstractNode::addChildren(const std::vector<AbstractNode *> &childrenToAdd,
 
   // these actions are to be performed after a node was added to the list of children
   auto doInsertPostAction = [&](AbstractNode *childToAdd) {
-      // if option 'addBackReference' is true, we add a back reference to the child as parent
-      if (addBackReference) childToAdd->addParent(this);
+    // if option 'addBackReference' is true, we add a back reference to the child as parent
+    if (addBackReference) childToAdd->addParent(this);
   };
 
   if (getChildren().empty() || getMaxNumberChildren()
-                               ==
-                               -1) {  // if the list of children is still empty, we can simply add all nodes in one batch
+      ==
+          -1) {  // if the list of children is still empty, we can simply add all nodes in one batch
     // add children to the vector's end
     children.insert(children.end(), childrenToAdd.begin(), childrenToAdd.end());
     std::for_each(children.begin(), children.end(), doInsertPostAction);
     // if this nodes accepts an infinite number of children, pre-filling the slots does not make any sense -> skip it
-    if (getMaxNumberChildren() != -1) {
+    if (getMaxNumberChildren()!=-1) {
       // fill remaining slots with nullptr values
       children.insert(children.end(), getMaxNumberChildren() - getChildren().size(), nullptr);
     }
   } else {  // otherwise we need to add the children one-by-one by looking for free slots
     size_t childIdx = 0;
     // add child in first empty spot
-    for (auto it = getChildren().begin(); it != getChildren().end() && childIdx < childrenToAdd.size(); ++it) {
-      if (*it == nullptr) {
+    for (auto it = getChildren().begin(); it!=getChildren().end() && childIdx < childrenToAdd.size(); ++it) {
+      if (*it==nullptr) {
         auto childToAdd = childrenToAdd.at(childIdx);
         setChild(it, childToAdd);
         doInsertPostAction(childToAdd);
@@ -112,9 +113,9 @@ void AbstractNode::addChildren(const std::vector<AbstractNode *> &childrenToAdd,
       }
     }
     // check if we were able to add all children, otherwise throw an exception
-    if (childIdx != childrenToAdd.size()) {
+    if (childIdx!=childrenToAdd.size()) {
       throw std::logic_error("Cannot add one or multiple children to " + this->getUniqueNodeId()
-                             + " without overwriting an existing one. Consider removing an existing child first.");
+                                 + " without overwriting an existing one. Consider removing an existing child first.");
     }
   }
 }
@@ -126,10 +127,10 @@ void AbstractNode::setChild(std::vector<AbstractNode *>::const_iterator position
 
 void AbstractNode::removeChild(AbstractNode *child) {
   auto it = std::find(children.begin(), children.end(), child);
-  if (it != children.end()) {
+  if (it!=children.end()) {
     // if the node supports an infinite number of children (getMaxNumberChildren() == -1), we can delete the node from
     // the children list, otherwise we just overwrite the slot with a nullptr
-    if (this->getMaxNumberChildren() != -1) {
+    if (this->getMaxNumberChildren()!=-1) {
       *it = nullptr;
     } else {
       children.erase(it);
@@ -160,7 +161,7 @@ void AbstractNode::addParent(AbstractNode *n) {
 
 void AbstractNode::removeParent(AbstractNode *parent) {
   auto it = std::find(parents.begin(), parents.end(), parent);
-  if (it != parents.end()) parents.erase(it);
+  if (it!=parents.end()) parents.erase(it);
 }
 
 void AbstractNode::removeChildren() {
@@ -173,7 +174,7 @@ void AbstractNode::removeParents() {
 
 void AbstractNode::addParentTo(AbstractNode *parentNode, std::vector<AbstractNode *> nodesToAddParentTo) {
   std::for_each(nodesToAddParentTo.begin(), nodesToAddParentTo.end(), [&](AbstractNode *n) {
-      if (n != nullptr) n->addParent(parentNode);
+    if (n!=nullptr) n->addParent(parentNode);
   });
 }
 
@@ -205,7 +206,7 @@ std::ostream &operator<<(std::ostream &os, const std::vector<AbstractNode *> &v)
   os << "[";
   for (int i = 0; i < v.size(); ++i) {
     os << v[i]->getUniqueNodeId();
-    if (i != v.size() - 1)
+    if (i!=v.size() - 1)
       os << ", ";
   }
   os << "]";
@@ -225,19 +226,19 @@ std::vector<AbstractNode *> AbstractNode::getAnc() {
     processQueue.pop();
     auto nextNodes = curNode->getParents();
     std::for_each(nextNodes.begin(), nextNodes.end(), [&](AbstractNode *node) {
-        result.insert(node);
-        processQueue.push(node);
+      result.insert(node);
+      processQueue.push(node);
     });
   }
   return std::vector<AbstractNode *>(result.begin(), result.end());
 }
 
 bool AbstractNode::hasParent(AbstractNode *n) {
-  return std::any_of(getParents().begin(), getParents().end(), [&n](AbstractNode *p) { return (p == n); });
+  return std::any_of(getParents().begin(), getParents().end(), [&n](AbstractNode *p) { return (p==n); });
 }
 
 int AbstractNode::countChildrenNonNull() const {
-  return std::count_if(getChildren().begin(), getChildren().end(), [](AbstractNode *n) { return n != nullptr; });
+  return std::count_if(getChildren().begin(), getChildren().end(), [](AbstractNode *n) { return n!=nullptr; });
 }
 
 int AbstractNode::getMaxNumberChildren() {

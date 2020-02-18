@@ -6,31 +6,31 @@
 #include <string>
 
 class If : public AbstractStatement {
-private:
-    AbstractExpr *condition;
-    AbstractStatement *thenBranch;
-    AbstractStatement *elseBranch;
+ private:
+  AbstractExpr *condition;
+  AbstractStatement *thenBranch;
+  AbstractStatement *elseBranch;
 
-public:
-    If(AbstractExpr *condition, AbstractStatement *thenBranch);
+ public:
+  If(AbstractExpr *condition, AbstractStatement *thenBranch);
 
-    If(AbstractExpr *condition, AbstractStatement *thenBranch, AbstractStatement *elseBranch);
+  If(AbstractExpr *condition, AbstractStatement *thenBranch, AbstractStatement *elseBranch);
 
-    ~If() override;
+  ~If() override;
 
-    If *clone(bool keepOriginalUniqueNodeId) override;
+  If *clone(bool keepOriginalUniqueNodeId) override;
 
-    [[nodiscard]] json toJson() const override;
+  [[nodiscard]] json toJson() const override;
 
-    void accept(Visitor &v) override;
+  void accept(Visitor &v) override;
 
-    [[nodiscard]] std::string getNodeName() const override;
+  [[nodiscard]] std::string getNodeName() const override;
 
-    [[nodiscard]] AbstractExpr *getCondition() const;
+  [[nodiscard]] AbstractExpr *getCondition() const;
 
-    [[nodiscard]] AbstractStatement *getThenBranch() const;
+  [[nodiscard]] AbstractStatement *getThenBranch() const;
 
-    [[nodiscard]] AbstractStatement *getElseBranch() const;
+  [[nodiscard]] AbstractStatement *getElseBranch() const;
 
 };
 

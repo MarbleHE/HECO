@@ -5,8 +5,8 @@ json If::toJson() const {
   json j;
   j["type"] = getNodeName();
   j["condition"] = this->condition->toJson();
-  if (thenBranch != nullptr) j["thenBranch"] = this->thenBranch->toJson();
-  if (elseBranch != nullptr) j["elseBranch"] = this->elseBranch->toJson();
+  if (thenBranch!=nullptr) j["thenBranch"] = this->thenBranch->toJson();
+  if (elseBranch!=nullptr) j["elseBranch"] = this->elseBranch->toJson();
   return j;
 }
 
@@ -44,9 +44,9 @@ If::~If() {
 }
 
 If *If::clone(bool keepOriginalUniqueNodeId) {
-  auto clonedNode =  new If(this->condition->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
-                this->thenBranch->clone(keepOriginalUniqueNodeId)->castTo<AbstractStatement>(),
-                this->elseBranch->clone(keepOriginalUniqueNodeId)->castTo<AbstractStatement>());
+  auto clonedNode = new If(this->condition->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
+                           this->thenBranch->clone(keepOriginalUniqueNodeId)->castTo<AbstractStatement>(),
+                           this->elseBranch->clone(keepOriginalUniqueNodeId)->castTo<AbstractStatement>());
   if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
   if (this->isReversed) clonedNode->swapChildrenParents();
   return clonedNode;

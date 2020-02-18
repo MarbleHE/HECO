@@ -4,7 +4,7 @@
 #include "AbstractExpr.h"
 
 bool LiteralInt::supportsDatatype(Datatype &datatype) {
-  return datatype.getType() == TYPES::INT;
+  return datatype.getType()==TYPES::INT;
 }
 
 LiteralInt::LiteralInt(int value) : value(value) {}
@@ -44,14 +44,15 @@ void LiteralInt::print(std::ostream &str) const {
 }
 
 bool LiteralInt::operator==(const LiteralInt &rhs) const {
-  return value == rhs.value;
+  return value==rhs.value;
 }
 
 bool LiteralInt::operator!=(const LiteralInt &rhs) const {
-  return !(rhs == *this);
+  return !(rhs==*this);
 }
 
-void LiteralInt::addLiteralValue(std::string identifier, std::unordered_map<std::string, AbstractLiteral *> &paramsMap) {
+void LiteralInt::addLiteralValue(std::string identifier,
+                                 std::unordered_map<std::string, AbstractLiteral *> &paramsMap) {
   paramsMap.emplace(identifier, this);
 }
 
@@ -72,7 +73,7 @@ bool LiteralInt::supportsCircuitMode() {
 }
 
 LiteralInt *LiteralInt::clone(bool keepOriginalUniqueNodeId) {
-  auto clonedNode =  new LiteralInt(this->getValue());
+  auto clonedNode = new LiteralInt(this->getValue());
   if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
   if (this->isReversed) clonedNode->swapChildrenParents();
   return clonedNode;

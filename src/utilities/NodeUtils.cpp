@@ -3,18 +3,18 @@
 #include "LogicalExpr.h"
 
 std::vector<AbstractNode *> rewriteMultiInputGateToBinaryGatesChain(std::vector<AbstractNode *> inputNodes,
-                                                                                  OpSymb::LogCompOp gateType) {
+                                                                    OpSymb::LogCompOp gateType) {
   if (inputNodes.empty()) {
     throw std::invalid_argument("Cannot construct a 0-input logical gate!");
   }
 
   // if there is only one input, we need to add the "neutral element" (i.e., the element that does not change the
   // semantics of the logical expression) depending on the given LogCompOp to inputNodes
-  if (inputNodes.size() == 1) {
-    if (gateType == OpSymb::LogCompOp::logicalXor) {
+  if (inputNodes.size()==1) {
+    if (gateType==OpSymb::LogCompOp::logicalXor) {
       // inputNodes[0] XOR false
       inputNodes.push_back(new LiteralBool(false));
-    } else if (gateType == OpSymb::LogCompOp::logicalAnd) {
+    } else if (gateType==OpSymb::LogCompOp::logicalAnd) {
       // inputNodes[0] AND true
       inputNodes.push_back(new LiteralBool(true));
     } else {
@@ -33,7 +33,7 @@ std::vector<AbstractNode *> rewriteMultiInputGateToBinaryGatesChain(std::vector<
   outputNodes.push_back(recentLexp);
 
   // handle all other gates -> are connected with each other
-  for (auto end = std::end(inputNodes); it != end; ++it) {
+  for (auto end = std::end(inputNodes); it!=end; ++it) {
     auto newLexp = new LogicalExpr(recentLexp, gateType, (*it)->castTo<AbstractExpr>());
     outputNodes.push_back(newLexp);
     recentLexp = newLexp;

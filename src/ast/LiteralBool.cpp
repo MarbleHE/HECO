@@ -33,14 +33,15 @@ void LiteralBool::print(std::ostream &str) const {
 }
 
 bool LiteralBool::operator==(const LiteralBool &rhs) const {
-  return value == rhs.value;
+  return value==rhs.value;
 }
 
 bool LiteralBool::operator!=(const LiteralBool &rhs) const {
-  return !(rhs == *this);
+  return !(rhs==*this);
 }
 
-void LiteralBool::addLiteralValue(std::string identifier, std::unordered_map<std::string, AbstractLiteral*> &paramsMap) {
+void LiteralBool::addLiteralValue(std::string identifier,
+                                  std::unordered_map<std::string, AbstractLiteral *> &paramsMap) {
   paramsMap.emplace(identifier, this);
 }
 
@@ -61,11 +62,11 @@ bool LiteralBool::supportsCircuitMode() {
 }
 
 bool LiteralBool::supportsDatatype(Datatype &datatype) {
-  return datatype.getType() == TYPES::BOOL;
+  return datatype.getType()==TYPES::BOOL;
 }
 
-LiteralBool* LiteralBool::clone(bool keepOriginalUniqueNodeId) {
-  auto clonedNode =  new LiteralBool(this->getValue());
+LiteralBool *LiteralBool::clone(bool keepOriginalUniqueNodeId) {
+  auto clonedNode = new LiteralBool(this->getValue());
   if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
   if (this->isReversed) clonedNode->swapChildrenParents();
   return clonedNode;

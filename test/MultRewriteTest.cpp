@@ -40,8 +40,8 @@ TEST(MultRewriteTest, rewriteSuccessfulSubsequentStatementsMultiplication) { /* 
   // check presence of expected changes
 
   //  int prod = inputC * inputB;
-  auto func = dynamic_cast<Function*>(ast.getRootNode());
-  auto prodDecl = dynamic_cast<VarDecl*>(func->getBody().at(0));
+  auto func = dynamic_cast<Function *>(ast.getRootNode());
+  auto prodDecl = dynamic_cast<VarDecl *>(func->getBody().at(0));
   auto expectedProdDecl = new VarDecl("prod", TYPES::INT,
                                       new BinaryExpr(
                                           new Variable("inputC"),
@@ -50,7 +50,7 @@ TEST(MultRewriteTest, rewriteSuccessfulSubsequentStatementsMultiplication) { /* 
   EXPECT_TRUE(prodDecl->isEqual(expectedProdDecl));
 
   //  prod = prod * inputA;
-  auto prodAssignm = dynamic_cast<VarAssignm*>(func->getBody().at(1));
+  auto prodAssignm = dynamic_cast<VarAssignm *>(func->getBody().at(1));
   auto expectedProdAssignm = new VarAssignm("prod", new BinaryExpr(
       new Variable("prod"),
       OpSymb::multiplication,
@@ -75,8 +75,8 @@ TEST(MultRewriteTest, rewriteSuccessfulSingleStatementMultiplication) { /* NOLIN
   // check presence of expected changes
 
   //  int prod = [inputC * [inputB * inputA]]
-  auto func = dynamic_cast<Function*>(ast.getRootNode());
-  auto prodDecl = dynamic_cast<VarDecl*>(func->getBody().at(0));
+  auto func = dynamic_cast<Function *>(ast.getRootNode());
+  auto prodDecl = dynamic_cast<VarDecl *>(func->getBody().at(0));
   auto expectedProdDecl = new VarDecl("prod", TYPES::INT,
                                       new BinaryExpr(
                                           new Variable("inputC"),
@@ -152,8 +152,8 @@ TEST(MultRewriteTest, rewriteNotApplicable) { /* NOLINT */
   EXPECT_EQ(mrv.getNumChanges(), 0);
 
   //  int prod = inputA * inputB;
-  auto func = dynamic_cast<Function*>(ast.getRootNode());
-  auto prodDecl = dynamic_cast<VarDecl*>(func->getBody().at(0));
+  auto func = dynamic_cast<Function *>(ast.getRootNode());
+  auto prodDecl = dynamic_cast<VarDecl *>(func->getBody().at(0));
   auto expectedProdDecl = new VarDecl("prod", TYPES::INT,
                                       new BinaryExpr(
                                           new Variable("inputA"),
@@ -162,7 +162,7 @@ TEST(MultRewriteTest, rewriteNotApplicable) { /* NOLINT */
   EXPECT_TRUE(prodDecl->isEqual(expectedProdDecl));
 
   //  int prod2 = prod * inputC;
-  prodDecl = dynamic_cast<VarDecl*>(func->getBody().at(1));
+  prodDecl = dynamic_cast<VarDecl *>(func->getBody().at(1));
   expectedProdDecl = new VarDecl("prod2", TYPES::INT, new BinaryExpr(
       new Variable("prod"),
       OpSymb::multiplication,
@@ -180,8 +180,8 @@ TEST(MultRewriteTest, rewriteSuccessfulSingleStatementMultiplication_EquivTest) 
 
   // create params for eval
   std::unordered_map<std::string, AbstractLiteral *> params = {{"inputA", new LiteralInt(12)},
-                                                       {"inputB", new LiteralInt(25)},
-                                                       {"inputC", new LiteralInt(37)}
+                                                               {"inputB", new LiteralInt(25)},
+                                                               {"inputC", new LiteralInt(37)}
   };
 
   // run tests
@@ -198,8 +198,8 @@ TEST(MultRewriteTest, noRewriteIfStatementInBetween_EquivTest) { /* NOLINT */
 
   // create params for eval
   std::unordered_map<std::string, AbstractLiteral *> params = {{"inputA", new LiteralInt(12)},
-                                                       {"inputB", new LiteralInt(25)},
-                                                       {"inputC", new LiteralInt(37)}
+                                                               {"inputB", new LiteralInt(25)},
+                                                               {"inputC", new LiteralInt(37)}
   };
 
   // run tests
@@ -216,8 +216,8 @@ TEST(MultRewriteTest, noRewriteIfOutOfScope_EquivTest) { /* NOLINT */
 
   // create params for eval
   std::unordered_map<std::string, AbstractLiteral *> params = {{"inputA", new LiteralInt(12)},
-                                                       {"inputB", new LiteralInt(25)},
-                                                       {"inputC", new LiteralInt(37)}
+                                                               {"inputB", new LiteralInt(25)},
+                                                               {"inputC", new LiteralInt(37)}
   };
 
   // run tests
@@ -234,8 +234,8 @@ TEST(MultRewriteTest, noRewriteForIndependentStatements_EquivTest) { /* NOLINT *
 
   // create params for eval
   std::unordered_map<std::string, AbstractLiteral *> params = {{"inputA", new LiteralInt(12)},
-                                                       {"inputB", new LiteralInt(25)},
-                                                       {"inputC", new LiteralInt(37)}
+                                                               {"inputB", new LiteralInt(25)},
+                                                               {"inputC", new LiteralInt(37)}
   };
 
   // run tests
@@ -252,8 +252,8 @@ TEST(MultRewriteTest, rewriteNotApplicable_EquivTest) { /* NOLINT */
 
   // create params for eval
   std::unordered_map<std::string, AbstractLiteral *> params = {{"inputA", new LiteralInt(111)},
-                                                       {"inputB", new LiteralInt(455)},
-                                                       {"inputC", new LiteralInt(3447)}
+                                                               {"inputB", new LiteralInt(455)},
+                                                               {"inputC", new LiteralInt(3447)}
   };
 
   // run tests

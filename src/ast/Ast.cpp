@@ -66,14 +66,14 @@ Ast::evaluateCircuit(const std::unordered_map<std::string, AbstractLiteral *> &p
 
   // go through all nodes and collect all identifiers of Variable nodes
   std::set<std::string> varIdentifiersReqValue;
-  auto isVariableNode = [](AbstractNode *node) { return dynamic_cast<Variable *>(node) != nullptr; };
+  auto isVariableNode = [](AbstractNode *node) { return dynamic_cast<Variable *>(node)!=nullptr; };
   for (auto &node : getAllNodes(isVariableNode)) {
     varIdentifiersReqValue.insert(node->castTo<Variable>()->getIdentifier());
   }
 
   // Remove those variable identifiers from variableIdentifiersRequiringValue that are defined using a VarDecl in
   // the circuit -> those do not need a value.
-  auto isVarDeclNode = [](AbstractNode *node) { return dynamic_cast<VarDecl *>(node) != nullptr; };
+  auto isVarDeclNode = [](AbstractNode *node) { return dynamic_cast<VarDecl *>(node)!=nullptr; };
   for (auto &node : getAllNodes(isVarDeclNode)) {
     varIdentifiersReqValue.erase(
         std::find(varIdentifiersReqValue.begin(),
@@ -82,7 +82,7 @@ Ast::evaluateCircuit(const std::unordered_map<std::string, AbstractLiteral *> &p
   }
 
   // ensure that the provided number of parameters equals the number of required ones
-  if (variableValuesForEvaluation.size() != varIdentifiersReqValue.size())
+  if (variableValuesForEvaluation.size()!=varIdentifiersReqValue.size())
     throw std::invalid_argument("AST evaluation requires parameter value for all variables!");
 
   // Make sure that all variables collected previously have a defined value.
@@ -90,7 +90,7 @@ Ast::evaluateCircuit(const std::unordered_map<std::string, AbstractLiteral *> &p
   // a FunctionParameter with datatype information as used by Function objects. Therefore, we limit the check to the
   // presence of any value.
   for (auto &var : varIdentifiersReqValue) {
-    if (variableValuesForEvaluation.find(var) == variableValuesForEvaluation.end()) {
+    if (variableValuesForEvaluation.find(var)==variableValuesForEvaluation.end()) {
       std::stringstream ss;
       ss << "No parameter value was given for Variable ";
       ss << var << ".";
@@ -115,7 +115,7 @@ Ast::evaluateAst(const std::unordered_map<std::string, AbstractLiteral *> &param
   }
 
   // ensure that the provided number of parameters equals the number of required ones
-  if (paramValues.size() != func->getParams().size())
+  if (paramValues.size()!=func->getParams().size())
     throw std::invalid_argument("AST evaluation requires parameter value for all parameters!");
 
   // make sure that all parameters specified by the function have a defined value
@@ -142,12 +142,12 @@ Ast::evaluateAst(const std::unordered_map<std::string, AbstractLiteral *> &param
 }
 
 bool Ast::hasVarValue(Variable *var) {
-  return getVarValue(var->getIdentifier()) != nullptr;
+  return getVarValue(var->getIdentifier())!=nullptr;
 }
 
 AbstractLiteral *Ast::getVarValue(const std::string &variableIdentifier) {
   auto it = variableValuesForEvaluation.find(variableIdentifier);
-  if (it == variableValuesForEvaluation.end())
+  if (it==variableValuesForEvaluation.end())
     throw std::logic_error("Trying to retrieve value for variable not declared yet: " + variableIdentifier);
   return it->second;
 }
@@ -162,8 +162,8 @@ bool Ast::isReversed() const {
   for (auto &node : allNodes) { if (node->isReversed) sum++; }
 
   // check that we are in a consistent state, i.e., either all of the nodes have reversed edges or none of them
-  bool allReversed = (sum == allNodes.size());
-  bool noneReversed = (sum == 0);
+  bool allReversed = (sum==allNodes.size());
+  bool noneReversed = (sum==0);
   if (!allReversed && !noneReversed) {
     throw std::runtime_error("Inconsistent state! AST consists of some nodes that have reversed edges.");
   } else {
@@ -202,9 +202,9 @@ std::set<AbstractNode *> Ast::getAllNodes(const std::function<bool(AbstractNode 
     auto curNode = nodesToCheck.front();
     nodesToCheck.pop();
     // skip curNode if its a nullptr
-    if (curNode == nullptr) continue;
+    if (curNode==nullptr) continue;
     // if (no predicate is set) OR (predicate is set AND node fulfills predicate) -> add node to result set
-    if (predicate == nullptr || predicate(curNode)) allNodes.insert(curNode);
+    if (predicate==nullptr || predicate(curNode)) allNodes.insert(curNode);
     // depending on the status of the node, enqueue the next nodes
     auto nextNodesToConsider = curNode->isReversed ? curNode->getParentsNonNull() : curNode->getChildrenNonNull();
     for (auto &c : nextNodesToConsider) nodesToCheck.push(c);
@@ -227,11 +227,11 @@ void Ast::deleteNode(AbstractNode **node, bool deleteSubtreeRecursively) {
     // if deleteSubtreesRecursively is not set but there are children, we cannot continue.
     // probably the user's intention was not to delete the whole subtree.
     throw std::logic_error("Cannot remove node (" + nodePtr->getUniqueNodeId()
-                           + ") because node has children but deleteSubtreeRecursively is not set (false).");
+                               + ") because node has children but deleteSubtreeRecursively is not set (false).");
   }
 
   // remove AST's root node if this node is the AST's root node
-  if (nodePtr == this->getRootNode()) this->setRootNode(nullptr);
+  if (nodePtr==this->getRootNode()) this->setRootNode(nullptr);
 
   // first isolate the node from its parents, then deallocate the heap memory
   nodePtr->isolateNode();

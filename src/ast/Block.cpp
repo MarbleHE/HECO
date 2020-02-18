@@ -5,12 +5,12 @@
 #include "AbstractNode.h"
 
 json Block::toJson() const {
-  std::vector<AbstractStatement*> stmts;
+  std::vector<AbstractStatement *> stmts;
   stmts.reserve(children.size());
-  for(auto c : children) {
-    stmts.push_back(dynamic_cast<AbstractStatement*>(c));
+  for (auto c : children) {
+    stmts.push_back(dynamic_cast<AbstractStatement *>(c));
   }
-  json j = {{"type",       getNodeName()},
+  json j = {{"type", getNodeName()},
             {"statements", stmts}};
   return j;
 }
@@ -26,7 +26,7 @@ Block::Block(std::vector<AbstractStatement *> *statements) {
     throw std::logic_error(errorMsg);
   }
   children.reserve(statements->size());
-  for(auto s : *statements) {
+  for (auto s : *statements) {
     children.push_back(s);
   }
 }
@@ -42,8 +42,8 @@ std::string Block::getNodeName() const {
 std::vector<AbstractStatement *> *Block::getStatements() const {
   auto stmts = new std::vector<AbstractStatement *>;
   stmts->reserve(children.size());
-  for(auto c : children) {
-    stmts->emplace_back(dynamic_cast<AbstractStatement*>(c));
+  for (auto c : children) {
+    stmts->emplace_back(dynamic_cast<AbstractStatement *>(c));
   }
   return stmts;
 }
@@ -53,7 +53,7 @@ Block *Block::clone(bool keepOriginalUniqueNodeId) {
   for (auto &statement : *this->getStatements()) {
     clonedStatements->push_back(statement->clone(keepOriginalUniqueNodeId)->castTo<AbstractStatement>());
   }
-  auto clonedNode =  new Block(clonedStatements);
+  auto clonedNode = new Block(clonedStatements);
   if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
   if (this->isReversed) clonedNode->swapChildrenParents();
   return clonedNode;

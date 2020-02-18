@@ -10,7 +10,6 @@
 #include "../include/ast/LogicalExpr.h"
 #include "../include/ast/Return.h"
 
-
 /// Program's entry point.
 int main();
 

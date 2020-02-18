@@ -6,37 +6,37 @@
 #include "AbstractExpr.h"
 
 class VarAssignm : public AbstractStatement {
-private:
-    std::string identifier;
+ private:
+  std::string identifier;
 
-public:
-    VarAssignm(std::string identifier, AbstractExpr *value);
+ public:
+  VarAssignm(std::string identifier, AbstractExpr *value);
 
-    ~VarAssignm() override;
+  ~VarAssignm() override;
 
-    VarAssignm *clone(bool keepOriginalUniqueNodeId) override;
+  VarAssignm *clone(bool keepOriginalUniqueNodeId) override;
 
-    [[nodiscard]] json toJson() const override;
+  [[nodiscard]] json toJson() const override;
 
-    void accept(Visitor &v) override;
+  void accept(Visitor &v) override;
 
-    [[nodiscard]] const std::string &getIdentifier() const;
+  [[nodiscard]] const std::string &getIdentifier() const;
 
-    [[nodiscard]] AbstractExpr *getValue() const;
+  [[nodiscard]] AbstractExpr *getValue() const;
 
-    [[nodiscard]] std::string getNodeName() const override;
+  [[nodiscard]] std::string getNodeName() const override;
 
-    BinaryExpr *contains(BinaryExpr *bexpTemplate, BinaryExpr *excludedSubtree) override;
+  BinaryExpr *contains(BinaryExpr *bexpTemplate, BinaryExpr *excludedSubtree) override;
 
-    std::string getVarTargetIdentifier() override;
+  std::string getVarTargetIdentifier() override;
 
-    bool isEqual(AbstractStatement *as) override;
+  bool isEqual(AbstractStatement *as) override;
 
-    bool supportsCircuitMode() override;
+  bool supportsCircuitMode() override;
 
-    int getMaxNumberChildren() override;
+  int getMaxNumberChildren() override;
 
-    void setAttribute(AbstractExpr *assignmentValue);
+  void setAttribute(AbstractExpr *assignmentValue);
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_VARASSIGNM_H

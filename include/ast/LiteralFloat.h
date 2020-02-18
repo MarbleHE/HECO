@@ -7,45 +7,45 @@
 #include <map>
 
 class LiteralFloat : public AbstractLiteral {
-private:
-    float value;
+ private:
+  float value;
 
-public:
-    explicit LiteralFloat(float value);
+ public:
+  explicit LiteralFloat(float value);
 
-    ~LiteralFloat() override;
+  ~LiteralFloat() override;
 
-    LiteralFloat *clone(bool keepOriginalUniqueNodeId) override;
+  LiteralFloat *clone(bool keepOriginalUniqueNodeId) override;
 
-    [[nodiscard]] float getValue() const;
+  [[nodiscard]] float getValue() const;
 
-    [[nodiscard]] json toJson() const override;
+  [[nodiscard]] json toJson() const override;
 
-    void accept(Visitor &v) override;
+  void accept(Visitor &v) override;
 
-    [[nodiscard]] std::string getNodeName() const override;
+  [[nodiscard]] std::string getNodeName() const override;
 
-    LiteralFloat operator+(LiteralFloat const &lfloat);
+  LiteralFloat operator+(LiteralFloat const &lfloat);
 
-    friend std::ostream &operator<<(std::ostream &os, const LiteralFloat &an_float);
+  friend std::ostream &operator<<(std::ostream &os, const LiteralFloat &an_float);
 
-    bool operator==(const LiteralFloat &rhs) const;
+  bool operator==(const LiteralFloat &rhs) const;
 
-    bool operator!=(const LiteralFloat &rhs) const;
+  bool operator!=(const LiteralFloat &rhs) const;
 
-    void addLiteralValue(std::string identifier, std::unordered_map<std::string, AbstractLiteral *> &paramsMap) override;
+  void addLiteralValue(std::string identifier, std::unordered_map<std::string, AbstractLiteral *> &paramsMap) override;
 
-    void setRandomValue(RandLiteralGen &rlg) override;
+  void setRandomValue(RandLiteralGen &rlg) override;
 
-    void setValue(float val);
+  void setValue(float val);
 
-    [[nodiscard]] std::string toString() const override;
+  [[nodiscard]] std::string toString() const override;
 
-    bool supportsCircuitMode() override;
+  bool supportsCircuitMode() override;
 
-    bool supportsDatatype(Datatype &datatype) override;
+  bool supportsDatatype(Datatype &datatype) override;
 
-    void print(std::ostream &str) const override;
+  void print(std::ostream &str) const override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_LITERALFLOAT_H

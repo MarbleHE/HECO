@@ -28,21 +28,21 @@ void Visitor::visit(Ast &elem) {
 
 void Visitor::visit(AbstractNode &elem) {
   auto children = elem.getChildren();
-  for(auto &c : children) {
+  for (auto &c : children) {
     c->accept(*this);
   }
 }
 
 void Visitor::visit(AbstractExpr &elem) {
   auto children = elem.getChildren();
-  for(auto &c : children) {
+  for (auto &c : children) {
     c->accept(*this);
   }
 }
 
 void Visitor::visit(AbstractStatement &elem) {
   auto children = elem.getChildren();
-  for(auto &c : children) {
+  for (auto &c : children) {
     c->accept(*this);
   }
 }
@@ -117,19 +117,19 @@ void Visitor::visit(If &elem) {
   } else {
     // if thenBranch is no Block we need to manually open a new scope here
     AbstractNode *thenNode = dynamic_cast<AbstractNode *>(elem.getThenBranch());
-    assert(thenNode != nullptr); // this should never happen
+    assert(thenNode!=nullptr); // this should never happen
     changeToInnerScope(thenNode->getUniqueNodeId());
     elem.getThenBranch()->accept(*this);
     changeToOuterScope();
   }
 
-  if (elem.getElseBranch() != nullptr) {
+  if (elem.getElseBranch()!=nullptr) {
     // elseBranch
     if (auto *elseBranch = dynamic_cast<AbstractNode *>(elem.getElseBranch())) {
       elem.getElseBranch()->accept(*this);
     } else {
       AbstractNode *elseNode = dynamic_cast<AbstractNode *>(elem.getElseBranch());
-      assert(elseNode != nullptr);
+      assert(elseNode!=nullptr);
       changeToInnerScope(elseBranch->getUniqueNodeId());
       elem.getElseBranch()->accept(*this);
       changeToOuterScope();
@@ -176,7 +176,7 @@ void Visitor::visit(VarAssignm &elem) {
 void Visitor::visit(VarDecl &elem) {
   curScope->addStatement(&elem);
   // visit initializer
-  if (elem.getInitializer() != nullptr) {
+  if (elem.getInitializer()!=nullptr) {
     elem.getInitializer()->accept(*this);
   }
 }
@@ -196,7 +196,7 @@ void Visitor::visit(While &elem) {
     thenBlock->accept(*this);
   } else {
     AbstractNode *block = dynamic_cast<AbstractNode *>(elem.getBody());
-    assert(block != nullptr);
+    assert(block!=nullptr);
     changeToInnerScope(block->getUniqueNodeId());
     elem.getBody()->accept(*this);
     changeToOuterScope();

@@ -58,62 +58,62 @@ class While;
 class Scope;
 
 class Visitor {
-public:
-    virtual void visit(AbstractNode & elem);
+ public:
+  virtual void visit(AbstractNode &elem);
 
-    virtual void visit(AbstractExpr & elem);
+  virtual void visit(AbstractExpr &elem);
 
-    virtual void visit(AbstractStatement & elem);
+  virtual void visit(AbstractStatement &elem);
 
-    virtual void visit(BinaryExpr &elem);
+  virtual void visit(BinaryExpr &elem);
 
-    virtual void visit(Block &elem);
+  virtual void visit(Block &elem);
 
-    virtual void visit(Call &elem);
+  virtual void visit(Call &elem);
 
-    virtual void visit(CallExternal &elem);
+  virtual void visit(CallExternal &elem);
 
-    virtual void visit(Function &elem);
+  virtual void visit(Function &elem);
 
-    virtual void visit(FunctionParameter &elem);
+  virtual void visit(FunctionParameter &elem);
 
-    virtual void visit(If &elem);
+  virtual void visit(If &elem);
 
-    virtual void visit(LiteralBool &elem);
+  virtual void visit(LiteralBool &elem);
 
-    virtual void visit(LiteralInt &elem);
+  virtual void visit(LiteralInt &elem);
 
-    virtual void visit(LiteralString &elem);
+  virtual void visit(LiteralString &elem);
 
-    virtual void visit(LiteralFloat &elem);
+  virtual void visit(LiteralFloat &elem);
 
-    virtual void visit(LogicalExpr &elem);
+  virtual void visit(LogicalExpr &elem);
 
-    virtual void visit(Operator &elem);
+  virtual void visit(Operator &elem);
 
-    virtual void visit(Return &elem);
+  virtual void visit(Return &elem);
 
-    virtual void visit(UnaryExpr &elem);
+  virtual void visit(UnaryExpr &elem);
 
-    virtual void visit(VarAssignm &elem);
+  virtual void visit(VarAssignm &elem);
 
-    virtual void visit(VarDecl &elem);
+  virtual void visit(VarDecl &elem);
 
-    virtual void visit(Variable &elem);
+  virtual void visit(Variable &elem);
 
-    virtual void visit(While &elem);
+  virtual void visit(While &elem);
 
-    Scope *curScope;
+  Scope *curScope;
 
-    void changeToOuterScope();
+  void changeToOuterScope();
 
-    void changeToInnerScope(const std::string &nodeId);
+  void changeToInnerScope(const std::string &nodeId);
 
-    Visitor();
+  Visitor();
 
-    /// This and only this method should be used to traverse an AST.
-    /// \param elem A reference to the Abstract Syntax Tree (AST).
-    virtual void visit(Ast &elem);
+  /// This and only this method should be used to traverse an AST.
+  /// \param elem A reference to the Abstract Syntax Tree (AST).
+  virtual void visit(Ast &elem);
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_VISITOR_H

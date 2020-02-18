@@ -9,9 +9,9 @@
 #include "LiteralString.h"
 
 json Call::toJson() const {
-  json j = {{"type",      getNodeName()},
+  json j = {{"type", getNodeName()},
             {"arguments", this->arguments},
-            {"function",  this->func->toJson()}};
+            {"function", this->func->toJson()}};
   return j;
 }
 
@@ -46,7 +46,7 @@ AbstractNode *Call::clone(bool keepOriginalUniqueNodeId) {
   for (auto &arg : getArguments()) {
     clonedArgs.push_back(arg->clone(keepOriginalUniqueNodeId)->castTo<FunctionParameter>());
   }
-  auto clonedNode =  static_cast<AbstractStatement *>(
+  auto clonedNode = static_cast<AbstractStatement *>(
       new Call(clonedArgs, this->getFunc()->clone(keepOriginalUniqueNodeId)->castTo<Function>()));
 
   if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->AbstractExpr::getUniqueNodeId());

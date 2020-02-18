@@ -6,29 +6,29 @@
 #include "Operator.h"
 
 class UnaryExpr : public AbstractExpr {
-public:
-    UnaryExpr(OpSymb::UnaryOp op, AbstractExpr *right);
+ public:
+  UnaryExpr(OpSymb::UnaryOp op, AbstractExpr *right);
 
-    UnaryExpr *clone(bool keepOriginalUniqueNodeId) override;
+  UnaryExpr *clone(bool keepOriginalUniqueNodeId) override;
 
-    [[nodiscard]] json toJson() const override;
+  [[nodiscard]] json toJson() const override;
 
-    void accept(Visitor &v) override;
+  void accept(Visitor &v) override;
 
-    [[nodiscard]] Operator *getOp() const;
+  [[nodiscard]] Operator *getOp() const;
 
-    [[nodiscard]] AbstractExpr *getRight() const;
+  [[nodiscard]] AbstractExpr *getRight() const;
 
-    [[nodiscard]] std::string getNodeName() const override;
+  [[nodiscard]] std::string getNodeName() const override;
 
-    ~UnaryExpr() override;
+  ~UnaryExpr() override;
 
-    void setAttributes(OpSymb::UnaryOp op, AbstractExpr *expr);
+  void setAttributes(OpSymb::UnaryOp op, AbstractExpr *expr);
 
-protected:
-    bool supportsCircuitMode() override;
+ protected:
+  bool supportsCircuitMode() override;
 
-    int getMaxNumberChildren() override;
+  int getMaxNumberChildren() override;
 
 };
 
