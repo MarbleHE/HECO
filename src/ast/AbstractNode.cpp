@@ -257,10 +257,6 @@ bool AbstractNode::hasParent(AbstractNode *n) {
   return std::any_of(getParents().begin(), getParents().end(), [&n](AbstractNode *p) { return (p == n); });
 }
 
-bool AbstractNode::hasChild(AbstractNode *n) {
-  return std::any_of(getChildren().begin(), getChildren().end(), [&n](AbstractNode *p) { return (p == n); });
-}
-
 int AbstractNode::countChildrenNonNull() const {
   return std::count_if(getChildren().begin(), getChildren().end(), [](AbstractNode *n) { return n != nullptr; });
 }

@@ -151,7 +151,6 @@ public:
     [[nodiscard]] bool hasReversedEdges() const;
 
 
-
     /// Casts a node to type T which must be the specific derived class of the node to cast successfully.
     /// \tparam T The derived class of the node object.
     /// \return A pointer to the casted object, or a std::logic_error if cast was unsuccessful.
@@ -168,8 +167,6 @@ public:
         throw std::logic_error(outputMsg.str());
       }
     }
-
-    bool hasChild(AbstractNode *n);
 
     AbstractNode *cloneRecursiveDeep(bool keepOriginalUniqueNodeId);
 
