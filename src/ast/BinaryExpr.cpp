@@ -84,13 +84,6 @@ bool BinaryExpr::isEqual(AbstractExpr *other) {
   return false;
 }
 
-std::vector<Literal *> BinaryExpr::evaluate(Ast &ast) {
-  // we first need to evaluate the left-handside and right-handside as they can consists of nested binary expressions
-  return {
-      this->getOp()->applyOperator(this->getLeft()->evaluate(ast).front(),
-                                   this->getRight()->evaluate(ast).front())};
-}
-
 int BinaryExpr::countByTemplate(AbstractExpr *abstractExpr) {
   // check if abstractExpr is of type BinaryExpr
   if (auto expr = dynamic_cast<BinaryExpr *>(abstractExpr)) {

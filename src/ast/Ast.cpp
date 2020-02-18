@@ -4,6 +4,7 @@
 #include <iostream>
 #include <set>
 #include <queue>
+#include <EvaluationVisitor.h>
 #include "Literal.h"
 #include "Variable.h"
 #include "Function.h"
@@ -35,7 +36,9 @@ Ast::~Ast() {
 
 std::vector<Literal *> Ast::evaluate(bool printResult, std::ostream &outputStream) {
   // perform evaluation recursively, starting at the root node
-  auto resultVector = getRootNode()->evaluate(*this);
+  EvaluationVisitor ev(*this);
+  ev.visit(*this);
+  auto resultVector = ev.getResults();
 
   // print result if flag 'printResult' is set
   if (printResult) {

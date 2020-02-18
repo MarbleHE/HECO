@@ -31,11 +31,3 @@ While::~While() {
   delete condition;
   delete body;
 }
-
-std::vector<Literal *> While::evaluate(Ast &ast) {
-  while (*dynamic_cast<LiteralBool *>(ensureSingleEvaluationResult(getCondition()->evaluate(ast)))
-         == LiteralBool(true)) {
-    getBody()->evaluate(ast);
-  }
-  return std::vector<Literal *>();
-}

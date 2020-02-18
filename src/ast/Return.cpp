@@ -34,15 +34,6 @@ Return::~Return() {
   for (auto &child : getChildren()) delete child;
 }
 
-std::vector<Literal *> Return::evaluate(Ast &ast) {
-  std::vector<Literal *> result;
-  for (auto &expr : getReturnExpressions()) {
-    auto exprEvaluationResult = expr->evaluate(ast);
-    result.insert(result.end(), exprEvaluationResult.begin(), exprEvaluationResult.end());
-  }
-  return result;
-}
-
 Return::Return() = default;
 
 int Return::getMaxNumberChildren() {

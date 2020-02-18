@@ -30,8 +30,6 @@ public:
 
     [[nodiscard]] AbstractStatement *getElseBranch() const;
 
-    std::vector<Literal *> evaluate(Ast &ast) override;
-
 private:
     AbstractNode *createClonedNode(bool keepOriginalUniqueNodeId) override;
 };

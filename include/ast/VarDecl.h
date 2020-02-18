@@ -50,8 +50,6 @@ public:
 
     bool isEqual(AbstractStatement *as) override;
 
-    std::vector<Literal *> evaluate(Ast &ast) override;
-
     void setAttributes(std::string varIdentifier, Datatype *datatype, AbstractExpr *value);
 
     bool supportsCircuitMode() override;

@@ -43,19 +43,6 @@ If::~If() {
   delete elseBranch;
 }
 
-std::vector<Literal *> If::evaluate(Ast &ast) {
-  auto cond = dynamic_cast<LiteralBool *>(getCondition()->evaluate(ast).front());
-  if (cond == nullptr)
-    throw std::logic_error("Condition in If statement must evaluate to a LiteralBool! Cannot continue.");
-  // check which of the branches must be evaluated
-  if (*cond == LiteralBool(true) && thenBranch != nullptr) {
-    return thenBranch->evaluate(ast);
-  } else if (elseBranch != nullptr) {
-    return elseBranch->evaluate(ast);
-  }
-  return std::vector<Literal *>();
-}
-
 AbstractNode *If::createClonedNode(bool keepOriginalUniqueNodeId) {
   return new If(this->condition->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
                 this->thenBranch->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractStatement>(),

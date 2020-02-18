@@ -96,17 +96,6 @@ bool VarDecl::isEqual(AbstractStatement *as) {
   return false;
 }
 
-std::vector<Literal *> VarDecl::evaluate(Ast &ast) {
-  if (this->getInitializer() != nullptr) {
-    auto value = this->getInitializer()->evaluate(ast).front();
-    ast.updateVarValue(this->getIdentifier(), value);
-    return std::vector<Literal *>({value});
-  } else {
-    ast.updateVarValue(this->getIdentifier(), nullptr);
-    return std::vector<Literal *>();
-  }
-}
-
 bool VarDecl::supportsCircuitMode() {
   return true;
 }

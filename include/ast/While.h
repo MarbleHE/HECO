@@ -24,8 +24,6 @@ public:
     [[nodiscard]] AbstractStatement *getBody() const;
 
     [[nodiscard]] std::string getNodeName() const override;
-
-    std::vector<Literal *> evaluate(Ast &ast) override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_WHILE_H

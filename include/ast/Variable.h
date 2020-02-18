@@ -33,8 +33,6 @@ public:
 
     bool isEqual(AbstractExpr *other) override;
 
-    std::vector<Literal *> evaluate(Ast &ast) override;
-
     std::vector<std::string> getVariableIdentifiers() override;
 
     [[nodiscard]] std::string toString() const override;

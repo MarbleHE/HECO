@@ -32,10 +32,6 @@ UnaryExpr::~UnaryExpr() {
   for (auto &child : getChildren()) delete child;
 }
 
-std::vector<Literal *> UnaryExpr::evaluate(Ast &ast) {
-  return std::vector<Literal *>({this->getOp()->applyOperator(this->getRight()->evaluate(ast).front())});
-}
-
 bool UnaryExpr::supportsCircuitMode() {
   return true;
 }

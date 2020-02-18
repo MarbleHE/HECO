@@ -10,10 +10,6 @@
 
 using json = nlohmann::json;
 
-class Literal;
-
-class Ast;
-
 class AbstractNode {
 private:
     [[nodiscard]] virtual AbstractNode *createClonedNode(bool keepOriginalUniqueNodeId);
@@ -26,10 +22,10 @@ protected:
     /// this map.
     std::map<AbstractNode *, int> assignedNodeIds{};
 
-    /// Stores the children of the current node if the node supports the circuit mode (see supportsCircuitMode()).
+    /// Stores the children of the current node.
     std::vector<AbstractNode *> children{};
 
-    /// Stores the parent nodes of the current node if the node supports the circuit mode (see supportsCircuitMode()).
+    /// Stores the parent nodes of the current node.
     std::vector<AbstractNode *> parents{};
 
     /// A static ongoing counter that is incremented after creating a new AbstractNode object. The counter's value is used to
@@ -39,17 +35,13 @@ protected:
     /// An identifier that is unique among all nodes during runtime.
     std::string uniqueNodeId;
 
-    /// This attributes is used to link back to the original AbstractNode if this node is part of an overlay circuit representing
-    /// only a subset of certain nodes. Required, for example, by cone rewriting.
-    AbstractNode *underlyingNode{};
-
     /// Generates a new node ID in the form "<NodeTypeName>_nodeIdCounter++" where <NodeTypeName> is the value obtained by
     /// getNodeName() and nodeIdCounter an ongoing counter of created AbstractNode objects.
     /// \return An unique node ID to be used as uniqueNodeId for the current node.
     std::string genUniqueNodeId();
 
-    ///
-    /// \return
+
+    ///TODO(pjattke): Document getAndIncrementNodeId()
     static int getAndIncrementNodeId();
 
     /// This special variant of getChildAtIndex returns the n-th parent instead of n-th child if isEdgeDirectionAware is
@@ -59,10 +51,11 @@ protected:
     /// \return A reference to the node at the specified index in the children or parent vector.
     [[nodiscard]] AbstractNode *getChildAtIndex(int idx, bool isEdgeDirectionAware) const;
 
-public:
     /// Default Constructor, defines some default behavior for subclasses related to IDs
     AbstractNode();
 
+public:
+    /// Virtual Destructor, force class to be abstract
     virtual ~AbstractNode()=0;
 
     [[nodiscard]] virtual std::string getNodeName() const;
@@ -114,8 +107,6 @@ public:
     static void addParentTo(AbstractNode *parentNode, std::vector<AbstractNode *> nodesToAddParentTo);
 
     void swapChildrenParents();
-
-    virtual std::vector<Literal *> evaluate(Ast &ast);
 
     virtual void accept(Visitor &v);
 

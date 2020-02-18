@@ -26,8 +26,6 @@ public:
 
     [[nodiscard]] std::string getNodeName() const override;
 
-    std::vector<Literal *> evaluate(Ast &ast) override;
-
     bool operator==(const LiteralBool &rhs) const;
 
     bool operator!=(const LiteralBool &rhs) const;

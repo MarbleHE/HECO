@@ -1,6 +1,7 @@
 #include "Block.h"
 #include <iostream>
 #include "VarDecl.h"
+#include "AbstractNode.h"
 
 Block::Block() {
   statements = nullptr;
@@ -41,12 +42,6 @@ std::vector<AbstractStatement *> *Block::getStatements() const {
 
 Block::~Block() {
   delete statements;
-}
-
-std::vector<Literal *> Block::evaluate(Ast &ast) {
-  for (auto stmt : *getStatements()) (void) stmt->evaluate(ast);
-  // a block statement itself does not return anything - its contained statements are just being executed
-  return std::vector<Literal *>();
 }
 
 AbstractNode *Block::createClonedNode(bool keepOriginalUniqueNodeId) {

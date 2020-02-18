@@ -30,8 +30,6 @@ public:
     [[nodiscard]] std::string getNodeName() const override;
 
     [[nodiscard]] Function *getFunc() const;
-
-    std::vector<Literal *> evaluate(Ast &ast) override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_CALL_H

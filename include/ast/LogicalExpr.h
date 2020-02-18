@@ -38,8 +38,6 @@ public:
 
     [[nodiscard]] std::string getNodeName() const override;
 
-    std::vector<Literal *> evaluate(Ast &ast) override;
-
     std::vector<std::string> getVariableIdentifiers() override;
 
     int countByTemplate(AbstractExpr *abstractExpr) override;

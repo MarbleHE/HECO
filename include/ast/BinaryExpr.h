@@ -54,8 +54,6 @@ public:
 
     bool isEqual(AbstractExpr *other) override;
 
-    std::vector<Literal *> evaluate(Ast &ast) override;
-
     int countByTemplate(AbstractExpr *abstractExpr) override;
 
     std::vector<std::string> getVariableIdentifiers() override;

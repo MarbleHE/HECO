@@ -22,8 +22,6 @@ public:
 
     ~Return() override;
 
-    std::vector<Literal *> evaluate(Ast &ast) override;
-
     [[nodiscard]] std::vector<AbstractExpr *> getReturnExpressions() const;
 
     AbstractNode *createClonedNode(bool keepOriginalUniqueNodeId) override;

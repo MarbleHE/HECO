@@ -30,10 +30,6 @@ std::string LiteralInt::getNodeName() const {
 
 LiteralInt::~LiteralInt() = default;
 
-std::vector<Literal *> LiteralInt::evaluate(Ast &ast) {
-  return std::vector<Literal *>({this});
-}
-
 LiteralInt LiteralInt::operator+(LiteralInt const &lint) {
   return LiteralInt(this->getValue() + lint.getValue());
 }

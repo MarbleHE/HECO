@@ -26,10 +26,6 @@ std::string LiteralString::getNodeName() const {
 
 LiteralString::~LiteralString() = default;
 
-std::vector<Literal *> LiteralString::evaluate(Ast &ast) {
-  return std::vector<Literal *>({this});
-}
-
 void LiteralString::print(std::ostream &str) const {
   str << this->getValue();
 }

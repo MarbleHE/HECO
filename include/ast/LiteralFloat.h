@@ -25,8 +25,6 @@ public:
 
     [[nodiscard]] std::string getNodeName() const override;
 
-    std::vector<Literal *> evaluate(Ast &ast) override;
-
     LiteralFloat operator+(LiteralFloat const &lfloat);
 
     friend std::ostream &operator<<(std::ostream &os, const LiteralFloat &an_float);

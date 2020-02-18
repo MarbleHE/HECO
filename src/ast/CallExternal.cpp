@@ -34,11 +34,6 @@ std::string CallExternal::getNodeName() const {
   return "CallExternal";
 }
 
-std::vector<Literal *> CallExternal::evaluate(Ast &ast) {
-  throw std::runtime_error(
-      "evaluateAst(Ast &ast) not implemented for class CallExternal yet! Consider using Call instead.");
-}
-
 AbstractNode *CallExternal::createClonedNode(bool keepOriginalUniqueNodeId) {
   std::vector<FunctionParameter *> args;
   for (auto &fp : this->getArguments()) {

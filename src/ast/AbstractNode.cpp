@@ -185,10 +185,6 @@ void AbstractNode::swapChildrenParents() {
   isReversed = !isReversed;
 }
 
-std::vector<Literal *> AbstractNode::evaluate(Ast &ast) {
-  return std::vector<Literal *>();
-}
-
 void AbstractNode::accept(Visitor &v) {
   std::cout << "This shouldn't be executed!" << std::endl;
 }

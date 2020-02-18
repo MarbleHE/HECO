@@ -3,6 +3,8 @@
 
 #include <string>
 
+class AbstractNode;
+
 class AbstractExpr;
 
 class AbstractStatement;
@@ -57,6 +59,12 @@ class Scope;
 
 class Visitor {
 public:
+    virtual void visit(AbstractNode & elem);
+
+    virtual void visit(AbstractExpr & elem);
+
+    virtual void visit(AbstractStatement & elem);
+
     virtual void visit(BinaryExpr &elem);
 
     virtual void visit(Block &elem);

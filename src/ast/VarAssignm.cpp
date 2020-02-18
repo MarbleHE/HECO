@@ -50,11 +50,6 @@ bool VarAssignm::isEqual(AbstractStatement *as) {
   return false;
 }
 
-std::vector<Literal *> VarAssignm::evaluate(Ast &ast) {
-  ast.updateVarValue(this->getIdentifier(), this->getValue()->evaluate(ast).front());
-  return std::vector<Literal *>();
-}
-
 bool VarAssignm::supportsCircuitMode() {
   return true;
 }

@@ -1,25 +1,50 @@
 #include "Visitor.h"
 #include "Ast.h"
-#include "Function.h"
-#include "Operator.h"
-#include "If.h"
-#include "LiteralInt.h"
-#include "LiteralBool.h"
-#include "LogicalExpr.h"
-#include "VarAssignm.h"
-#include "Block.h"
-#include "Return.h"
+#include "AbstractNode.h"
+#include "AbstractExpr.h"
+#include "AbstractStatement.h"
 #include "BinaryExpr.h"
-#include "CallExternal.h"
-#include "While.h"
-#include "UnaryExpr.h"
+#include "Block.h"
 #include "Call.h"
+#include "CallExternal.h"
+#include "Function.h"
+#include "If.h"
+#include "LiteralBool.h"
+#include "LiteralInt.h"
+#include "LiteralFloat.h"
+#include "LogicalExpr.h"
+#include "Operator.h"
+#include "Return.h"
 #include "Scope.h"
+#include "UnaryExpr.h"
+#include "VarAssignm.h"
+#include "While.h"
 
 void Visitor::visit(Ast &elem) {
   // assumption: AST is always the enclosing object that points to the root
   this->curScope = new Scope("global", nullptr);
   elem.getRootNode()->accept(*this);
+}
+
+void Visitor::visit(AbstractNode &elem) {
+  auto children = elem.getChildren();
+  for(auto &c : children) {
+    c->accept(*this);
+  }
+}
+
+void Visitor::visit(AbstractExpr &elem) {
+  auto children = elem.getChildren();
+  for(auto &c : children) {
+    c->accept(*this);
+  }
+}
+
+void Visitor::visit(AbstractStatement &elem) {
+  auto children = elem.getChildren();
+  for(auto &c : children) {
+    c->accept(*this);
+  }
 }
 
 void Visitor::visit(BinaryExpr &elem) {

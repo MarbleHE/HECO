@@ -69,20 +69,6 @@ void Function::setParams(std::vector<FunctionParameter *> paramsVec) {
   this->params = std::move(paramsVec);
 }
 
-std::vector<Literal *> Function::evaluate(Ast &ast) {
-  for (size_t i = 0; i < this->getBody().size(); i++) {
-    auto currentStatement = this->getBody().at(i);
-    // last statement: check if it is a Return statement
-    if (i == this->getBody().size() - 1) {
-      if (auto retStmt = dynamic_cast<Return *>(currentStatement)) {
-        return retStmt->evaluate(ast);
-      }
-    }
-    (void) currentStatement->evaluate(ast);
-  }
-  return std::vector<Literal *>();
-}
-
 AbstractNode *Function::createClonedNode(bool keepOriginalUniqueNodeId) {
   std::vector<FunctionParameter *> clonedParams;
   for (auto &fp : this->getParams()) {

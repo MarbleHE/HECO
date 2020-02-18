@@ -32,8 +32,6 @@ public:
 
     bool isEqual(AbstractStatement *as) override;
 
-    std::vector<Literal *> evaluate(Ast &ast) override;
-
     bool supportsCircuitMode() override;
 
     int getMaxNumberChildren() override;
