@@ -54,3 +54,6 @@ Types Datatype::getType() const {
 bool Datatype::isEncrypted() const {
   return encrypted;
 }
+void Datatype::setEncrypted(bool encrypted) {
+  Datatype::encrypted = encrypted;
+}

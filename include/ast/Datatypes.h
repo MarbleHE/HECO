@@ -38,6 +38,8 @@ class Datatype : public Node {
   [[nodiscard]] Types getType() const;
 
   [[nodiscard]] bool isEncrypted() const;
+
+  void setEncrypted(bool encrypted);
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_DATATYPES_H_
