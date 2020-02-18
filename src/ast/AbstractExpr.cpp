@@ -6,10 +6,6 @@
 #include "LiteralString.h"
 #include "LiteralFloat.h"
 
-std::string AbstractExpr::toString() const {
-  return this->toJson().dump();
-}
-
 json AbstractExpr::toJson() const {
   return json({"type", "AbstractExpr"});
 }
