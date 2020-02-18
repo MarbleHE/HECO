@@ -13,6 +13,8 @@ class VarDecl : public AbstractStatement {
  public:
   VarDecl(std::string name, Types datatype, AbstractExpr *initializer);
 
+  VarDecl(std::string name, Datatype *datatype, AbstractExpr *initializer);
+
   VarDecl(std::string name, void *abstractExpr);
 
   VarDecl(std::string name, int value);

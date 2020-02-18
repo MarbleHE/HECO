@@ -21,6 +21,10 @@ VarDecl::VarDecl(std::string, void *) {
                               "Use VarDecl(std::string, TYPES, AbstractExpr*) or one of the other constructors.");
 }
 
+VarDecl::VarDecl(std::string name, Datatype *datatype, AbstractExpr *initializer) {
+  setAttributes(std::move(name), datatype, initializer);
+}
+
 VarDecl::VarDecl(std::string name, Types datatype, AbstractExpr *initializer) {
   setAttributes(std::move(name), new Datatype(datatype), initializer);
 }
@@ -68,11 +72,14 @@ const std::string &VarDecl::getIdentifier() const {
 }
 
 Datatype *VarDecl::getDatatype() const {
-  return reinterpret_cast<Datatype *>(getChildAtIndex(0, true));
+  return getChildAtIndex(0, true)->castTo<Datatype>();
 }
 
 AbstractExpr *VarDecl::getInitializer() const {
-  return reinterpret_cast<AbstractExpr *>(getChildAtIndex(1, true));
+  auto initializer = getChildAtIndex(1, true);
+  if (initializer==nullptr)
+    return nullptr;
+  return initializer->castTo<AbstractExpr>();
 }
 
 BinaryExpr *VarDecl::contains(BinaryExpr *bexpTemplate, BinaryExpr *excludedSubtree) {
