@@ -47,7 +47,7 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/ast/Block.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/Call.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/CallExternal.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/Datatypes.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/Datatype.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/Function.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/FunctionParameter.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/If.cpp

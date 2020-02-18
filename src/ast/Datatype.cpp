@@ -1,4 +1,4 @@
-#include "Datatypes.h"
+#include "Datatype.h"
 
 Node *Datatype::createClonedNode(bool keepOriginalUniqueNodeId) {
   return new Datatype(this->getType());
@@ -56,4 +56,8 @@ bool Datatype::isEncrypted() const {
 }
 void Datatype::setEncrypted(bool encrypted) {
   Datatype::encrypted = encrypted;
+}
+
+std::string Datatype::getNodeName() const {
+  return "Datatype";
 }

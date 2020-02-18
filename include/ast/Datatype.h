@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_AST_DATATYPES_H_
-#define AST_OPTIMIZER_INCLUDE_AST_DATATYPES_H_
+#ifndef AST_OPTIMIZER_INCLUDE_AST_DATATYPE_H_
+#define AST_OPTIMIZER_INCLUDE_AST_DATATYPE_H_
 
 #include <string>
 #include <map>
@@ -40,6 +40,8 @@ class Datatype : public Node {
   [[nodiscard]] bool isEncrypted() const;
 
   void setEncrypted(bool encrypted);
+
+  std::string getNodeName() const override;
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_AST_DATATYPES_H_
+#endif //AST_OPTIMIZER_INCLUDE_AST_DATATYPE_H_

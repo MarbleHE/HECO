@@ -3,7 +3,7 @@
 
 #include "Variable.h"
 #include <string>
-#include "Datatypes.h"
+#include "Datatype.h"
 
 class FunctionParameter : public AbstractExpr {
  private:

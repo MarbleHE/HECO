@@ -1,5 +1,5 @@
 #include <iostream>
-#include "Datatypes.h"
+#include "Datatype.h"
 #include "AbstractExpr.h"
 #include "LiteralFloat.h"
 #include "RandNumGen.h"
