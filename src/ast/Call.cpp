@@ -93,6 +93,6 @@ Node *Call::createClonedNode(bool keepOriginalUniqueNodeId) {
   for (auto &arg : getArguments()) {
     clonedArgs.push_back(arg->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<FunctionParameter>());
   }
-  return static_cast<AbstractStatement *>(
+  return static_cast<AbstractExpr *>(
       new Call(clonedArgs, this->getFunc()->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<Function>()));
 }

@@ -239,7 +239,6 @@ TEST(JsonOutputTest, Call) {/* NOLINT */
   std::ifstream f("../../test/expected_output_large/JsonOutputTest/Call.json");
   json expected = json::parse(f);
 
-  EXPECT_EQ(call->AbstractStatement::toString(), expected.dump());
   EXPECT_EQ(call->AbstractExpr::toString(), expected.dump());
 }
 

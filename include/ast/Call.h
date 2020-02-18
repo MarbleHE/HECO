@@ -7,7 +7,7 @@
 #include "FunctionParameter.h"
 #include "AbstractStatement.h"
 
-class Call : public AbstractExpr, public AbstractStatement {
+class Call : public AbstractExpr {
  private:
   Function *func{nullptr};
   std::vector<FunctionParameter *> arguments;

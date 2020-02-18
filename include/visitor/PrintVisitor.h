@@ -1,10 +1,11 @@
 #ifndef AST_OPTIMIZER_INCLUDE_PRINTVISITOR_H
 #define AST_OPTIMIZER_INCLUDE_PRINTVISITOR_H
 
-#include "Visitor.h"
 #include <list>
 #include <sstream>
 #include <string>
+#include "Visitor.h"
+#include "Node.h"
 
 class PrintVisitor : public Visitor {
  protected:

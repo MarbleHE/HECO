@@ -113,9 +113,7 @@ TEST_F(BinaryExprFixture, BinaryExprAddChildSuccess) {  /* NOLINT */
 
 TEST(ChildParentTests, Block) {  /* NOLINT */
   auto *blockStatement =
-      new Block(new Call(
-          {new FunctionParameter("int", new LiteralInt(22))},
-          new Function("computeSecretNumber")));
+      new Block(new VarAssignm("varX", new LiteralInt(22)));
   ASSERT_EQ(blockStatement->getChildren().size(), 0);
   ASSERT_EQ(blockStatement->getParents().size(), 0);
   ASSERT_FALSE(blockStatement->supportsCircuitMode());
