@@ -41,6 +41,7 @@ include_directories(
 set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/examples/genAstDemo.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/AbstractExpr.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/AbstractLiteral.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/AbstractNode.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/AbstractStatement.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/Ast.cpp
@@ -51,7 +52,6 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/ast/Function.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/FunctionParameter.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/If.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/Literal.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/LiteralBool.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/LiteralFloat.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/LiteralInt.cpp
