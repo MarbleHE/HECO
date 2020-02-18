@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_NODE_H
-#define AST_OPTIMIZER_INCLUDE_NODE_H
+#ifndef AST_OPTIMIZER_INCLUDE_AST_NODE_H_
+#define AST_OPTIMIZER_INCLUDE_AST_NODE_H_
 
 #include <vector>
 #include <map>
@@ -25,7 +25,7 @@ class Node {
   /// This is a workaround because getNodeName() is a virtual method that cannot be called from derived classes and
   /// their constructor. After retrieving the node ID and assigning it to the uniqueNodeId field, it is deleted from
   /// this map.
-  std::map<Node *, int> assignedNodeIds{};
+  int assignedNodeId{-1};
 
   /// Stores the children of the current node if the node supports the circuit mode (see supportsCircuitMode()).
   std::vector<Node *> children{};
@@ -211,4 +211,4 @@ class Node {
   Literal *ensureSingleEvaluationResult(std::vector<Literal *> evaluationResult);
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_NODE_H
+#endif //AST_OPTIMIZER_INCLUDE_AST_NODE_H_

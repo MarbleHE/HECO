@@ -1,36 +1,30 @@
+#include "Node.h"
 #include <sstream>
 #include <queue>
 #include <set>
-#include <Node.h>
-
 #include "Operator.h"
 #include "AbstractExpr.h"
 #include "LogicalExpr.h"
 #include "Function.h"
 
+// initialize the static variables
 int Node::nodeIdCounter = 0;
 
 std::string Node::genUniqueNodeId() {
-  int nodeNo;
-  try {
-    nodeNo = assignedNodeIds.at(this);
-  } catch (std::out_of_range &exception) {
+  if (assignedNodeId==-1) {
     throw std::logic_error("Could not find any reserved ID for node. "
                            "Node constructor needs to reserve ID for node (see empty constructor).");
   }
 
-  // clear the node entry as we will save the node ID in the uniqueNodeId field
-  assignedNodeIds.erase(this);
-
   // build and return the node ID string
   std::stringstream ss;
-  ss << getNodeName() << "_" << nodeNo;
+  ss << getNodeName() << "_" << assignedNodeId;
   return ss.str();
 }
 
 Node::Node() {
   // save the ID reserved for this node but do not
-  assignedNodeIds[this] = getAndIncrementNodeId();
+  assignedNodeId = getAndIncrementNodeId();
 }
 
 std::string Node::getUniqueNodeId() {
