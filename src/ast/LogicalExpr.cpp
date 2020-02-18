@@ -93,9 +93,9 @@ bool LogicalExpr::supportsCircuitMode() {
 
 AbstractNode *LogicalExpr::createClonedNode(bool keepOriginalUniqueNodeId) {
   auto clonedLogicalExpr =
-      new LogicalExpr(getLeft()->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
-                      getOp()->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<Operator>(),
-                      getRight()->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
+      new LogicalExpr(getLeft()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
+                      getOp()->clone(keepOriginalUniqueNodeId)->castTo<Operator>(),
+                      getRight()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
   return clonedLogicalExpr;
 }
 

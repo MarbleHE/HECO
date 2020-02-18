@@ -236,7 +236,7 @@ AbstractNode *AbstractNode::cloneFlat() {
   throw std::logic_error("ERROR: cloneFlat() not implemented for node of type " + getNodeName());
 }
 
-AbstractNode *AbstractNode::cloneRecursiveDeep(bool keepOriginalUniqueNodeId) {
+AbstractNode *AbstractNode::clone(bool keepOriginalUniqueNodeId) {
   // call polymorphic createClonedNode to copy derived class-specific fields
   AbstractNode *clonedNode = this->createClonedNode(keepOriginalUniqueNodeId);
 
@@ -249,7 +249,7 @@ AbstractNode *AbstractNode::cloneRecursiveDeep(bool keepOriginalUniqueNodeId) {
 
 AbstractNode *AbstractNode::createClonedNode(bool) {
   throw std::logic_error(
-      "ERROR: Cannot execute cloneRecursiveDeep(...) because createClonedNode(...) is not implemented for node of type "
+      "ERROR: Cannot execute clone(...) because createClonedNode(...) is not implemented for node of type "
       + getNodeName());
 }
 

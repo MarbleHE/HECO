@@ -44,8 +44,8 @@ Function *Call::getFunc() const {
 AbstractNode *Call::createClonedNode(bool keepOriginalUniqueNodeId) {
   std::vector<FunctionParameter *> clonedArgs;
   for (auto &arg : getArguments()) {
-    clonedArgs.push_back(arg->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<FunctionParameter>());
+    clonedArgs.push_back(arg->clone(keepOriginalUniqueNodeId)->castTo<FunctionParameter>());
   }
   return static_cast<AbstractStatement *>(
-      new Call(clonedArgs, this->getFunc()->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<Function>()));
+      new Call(clonedArgs, this->getFunc()->clone(keepOriginalUniqueNodeId)->castTo<Function>()));
 }

@@ -107,5 +107,5 @@ int VarDecl::getMaxNumberChildren() {
 AbstractNode *VarDecl::createClonedNode(bool keepOriginalUniqueNodeId) {
   return new VarDecl(this->getVarTargetIdentifier(),
                      this->getDatatype()->getType(),
-                     getInitializer()->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
+                     getInitializer()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
 }

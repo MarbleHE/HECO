@@ -66,5 +66,5 @@ void VarAssignm::setAttribute(AbstractExpr *assignmentValue) {
 
 AbstractNode *VarAssignm::createClonedNode(bool keepOriginalUniqueNodeId) {
   return new VarAssignm(this->getIdentifier(),
-                        this->getValue()->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
+                        this->getValue()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
 }

@@ -44,7 +44,7 @@ If::~If() {
 }
 
 AbstractNode *If::createClonedNode(bool keepOriginalUniqueNodeId) {
-  return new If(this->condition->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
-                this->thenBranch->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractStatement>(),
-                this->elseBranch->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractStatement>());
+  return new If(this->condition->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
+                this->thenBranch->clone(keepOriginalUniqueNodeId)->castTo<AbstractStatement>(),
+                this->elseBranch->clone(keepOriginalUniqueNodeId)->castTo<AbstractStatement>());
 }

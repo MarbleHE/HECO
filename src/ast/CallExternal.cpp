@@ -37,7 +37,7 @@ std::string CallExternal::getNodeName() const {
 AbstractNode *CallExternal::createClonedNode(bool keepOriginalUniqueNodeId) {
   std::vector<FunctionParameter *> args;
   for (auto &fp : this->getArguments()) {
-    args.push_back(fp->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<FunctionParameter>());
+    args.push_back(fp->clone(keepOriginalUniqueNodeId)->castTo<FunctionParameter>());
   }
   // this is required because CallExternal inherits from both AbstractStatement and AbstractExpr
   // -> ambiguous base class

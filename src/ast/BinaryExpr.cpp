@@ -113,7 +113,7 @@ bool BinaryExpr::supportsCircuitMode() {
 }
 
 AbstractNode *BinaryExpr::createClonedNode(bool keepOriginalUniqueNodeId) {
-  return new BinaryExpr(this->getLeft()->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
-                        this->getOp()->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<Operator>(),
-                        this->getRight()->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
+  return new BinaryExpr(this->getLeft()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
+                        this->getOp()->clone(keepOriginalUniqueNodeId)->castTo<Operator>(),
+                        this->getRight()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
 }

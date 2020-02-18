@@ -11,9 +11,6 @@
 using json = nlohmann::json;
 
 class AbstractNode {
-private:
-    [[nodiscard]] virtual AbstractNode *createClonedNode(bool keepOriginalUniqueNodeId);
-
 protected:
     /// Temporarily stores the reserved node ID until the first call of getUniqueNodeId() at which the reserved ID is
     /// fetched and the node's ID is assigned (field uniqueNodeId) based on the node's name and this reserved ID.
@@ -168,7 +165,9 @@ public:
       }
     }
 
-    AbstractNode *cloneRecursiveDeep(bool keepOriginalUniqueNodeId);
+    AbstractNode *clone(bool keepOriginalUniqueNodeId);
+
+    [[nodiscard]] virtual AbstractNode *createClonedNode(bool keepOriginalUniqueNodeId);
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_NODE_H

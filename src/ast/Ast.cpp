@@ -172,7 +172,7 @@ bool Ast::isReversed() const {
 }
 
 Ast::Ast(const Ast &otherAst, bool keepOriginalUniqueNodeId) : rootNode(nullptr) {
-  this->setRootNode(otherAst.getRootNode()->cloneRecursiveDeep(keepOriginalUniqueNodeId));
+  this->setRootNode(otherAst.getRootNode()->clone(keepOriginalUniqueNodeId));
 }
 
 Ast::Ast(const Ast &otherAst) : Ast(otherAst, false) {}

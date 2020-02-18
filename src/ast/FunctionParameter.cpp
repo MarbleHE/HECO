@@ -50,8 +50,8 @@ Datatype *FunctionParameter::getDatatype() const {
 }
 
 AbstractNode *FunctionParameter::createClonedNode(bool keepOriginalUniqueNodeId) {
-  return new FunctionParameter(this->getDatatype()->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<Datatype>(),
-                               this->getValue()->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
+  return new FunctionParameter(this->getDatatype()->clone(keepOriginalUniqueNodeId)->castTo<Datatype>(),
+                               this->getValue()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
 }
 
 int FunctionParameter::getMaxNumberChildren() {

@@ -61,7 +61,7 @@ bool Return::supportsCircuitMode() {
 AbstractNode *Return::createClonedNode(bool keepOriginalUniqueNodeId) {
   std::vector<AbstractExpr *> returnValues;
   for (auto &child : getReturnExpressions())
-    returnValues.push_back(child->cloneRecursiveDeep(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
+    returnValues.push_back(child->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
   return new Return(returnValues);
 }
 
