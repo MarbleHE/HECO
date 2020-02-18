@@ -149,7 +149,11 @@ void PrintVisitor::resetLevel() {
 }
 
 void PrintVisitor::printNodeName(Node &node) {
-  ss << getIndentation() << node.getNodeName() << ":";
+  if (showUniqueNodeIds) {
+    ss << getIndentation() << node.getUniqueNodeId() << ":";
+  } else {
+    ss << getIndentation() << node.getNodeName() << ":";
+  }
 }
 
 void PrintVisitor::addOutputStr(Node &node) {
@@ -198,4 +202,8 @@ void PrintVisitor::resetVisitor() {
   lastPrintedScope = nullptr;
   ss.clear();
   ss.str(std::string());
+}
+
+void PrintVisitor::useUniqueNodeIds(bool value) {
+  this->showUniqueNodeIds = value;
 }

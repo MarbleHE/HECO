@@ -8,11 +8,12 @@
 #include "Node.h"
 
 class PrintVisitor : public Visitor {
- protected:
+ private:
   int level;
   Scope *lastPrintedScope;
   std::stringstream ss;
   bool printScreen;
+  bool showUniqueNodeIds{false};
 
  public:
   PrintVisitor();
@@ -87,6 +88,7 @@ class PrintVisitor : public Visitor {
   void addOutputStr(Node &node);
 
   void printNodeName(Node &node);
+  void useUniqueNodeIds(bool value);
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_PRINTVISITOR_H
