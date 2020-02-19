@@ -1,4 +1,5 @@
 #include <exception>
+#include <utility>
 #include "EvaluationVisitor.h"
 #include "AbstractNode.h"
 #include "AbstractExpr.h"
@@ -20,7 +21,9 @@
 #include "VarAssignm.h"
 #include "While.h"
 
-EvaluationVisitor::EvaluationVisitor(Ast &ast) : ast(ast) {};
+EvaluationVisitor::EvaluationVisitor(std::unordered_map<std::string, AbstractLiteral *> funcCallParameterValues)
+    : variableValuesForEvaluation(std::move(funcCallParameterValues)) {
+}
 
 void EvaluationVisitor::visit(AbstractNode &elem) {
   results.push(std::vector<AbstractLiteral *>());
@@ -172,7 +175,7 @@ void EvaluationVisitor::visit(VarAssignm &elem) {
   elem.getValue()->accept(*this);
   auto val = results.top().front();
   results.pop();
-  ast.updateVarValue(elem.getIdentifier(), val);
+  updateVarValue(elem.getIdentifier(), val);
 }
 void EvaluationVisitor::visit(VarDecl &elem) {
   if (elem.getInitializer()!=nullptr) {
@@ -181,15 +184,15 @@ void EvaluationVisitor::visit(VarDecl &elem) {
     auto value = results.top().front();
     results.pop();
 
-    ast.updateVarValue(elem.getIdentifier(), value);
+    updateVarValue(elem.getIdentifier(), value);
     results.push({value});
   } else {
-    ast.updateVarValue(elem.getIdentifier(), nullptr);
+    updateVarValue(elem.getIdentifier(), nullptr);
     results.push({});
   }
 }
 void EvaluationVisitor::visit(Variable &elem) {
-  results.push({ast.getVarValue(elem.getIdentifier())});
+  results.push({getVarValue(elem.getIdentifier())});
 }
 void EvaluationVisitor::visit(While &elem) {
   elem.getCondition()->accept(*this);
@@ -210,7 +213,18 @@ void EvaluationVisitor::visit(Ast &elem) {
   Visitor::visit(elem);
 }
 const std::vector<AbstractLiteral *> &EvaluationVisitor::getResults() {
-  return results.top();
+  std::vector<AbstractLiteral *> *resultValues = &results.top();
+  // print result if flag 'printResult' is set
+  if (flagPrintResult) {
+    if (resultValues->empty()) {
+      std::cout << "void" << std::endl;
+    } else {
+      std::stringstream outStr;
+      for (auto &resultLiteral : *resultValues) outStr << resultLiteral->toString() << std::endl;
+      std::cout << outStr.str();
+    }
+  }
+  return *resultValues;
 }
 
 AbstractLiteral *EvaluationVisitor::ensureSingleEvaluationResult(std::vector<AbstractLiteral *> evaluationResult) {
@@ -219,4 +233,23 @@ AbstractLiteral *EvaluationVisitor::ensureSingleEvaluationResult(std::vector<Abs
         "Unexpected number of returned results (1 vs. " + std::to_string(evaluationResult.size()) + ")");
   }
   return evaluationResult.front();
+}
+
+bool EvaluationVisitor::hasVarValue(Variable *var) {
+  return getVarValue(var->getIdentifier())!=nullptr;
+}
+
+AbstractLiteral *EvaluationVisitor::getVarValue(const std::string &variableIdentifier) {
+  auto it = variableValuesForEvaluation.find(variableIdentifier);
+  if (it==variableValuesForEvaluation.end())
+    throw std::logic_error("Trying to retrieve value for variable not declared yet: " + variableIdentifier);
+  return it->second;
+}
+
+void EvaluationVisitor::updateVarValue(const std::string &variableIdentifier, AbstractLiteral *newValue) {
+  // use the bracket [] operator to silently overwrite any existing variable value
+  variableValuesForEvaluation[variableIdentifier] = newValue;
+}
+void EvaluationVisitor::setFlagPrintResult(bool printResult) {
+  EvaluationVisitor::flagPrintResult = printResult;
 }
