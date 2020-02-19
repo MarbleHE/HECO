@@ -34,24 +34,6 @@ Ast::~Ast() {
   delete rootNode;
 }
 
-std::vector<AbstractLiteral *> Ast::evaluate(bool printResult, std::ostream &outputStream) {
-  // perform evaluation recursively, starting at the root node
-  EvaluationVisitor ev(*this);
-  ev.visit(*this);
-  auto resultVector = ev.getResults();
-
-  // print result if flag 'printResult' is set
-  if (printResult) {
-    if (resultVector.empty()) {
-      outputStream << "void" << std::endl;
-    } else {
-      for (auto &resultLiteral : resultVector) outputStream << resultLiteral->toString() << std::endl;
-    }
-  }
-
-  return resultVector;
-}
-
 std::vector<AbstractLiteral *>
 Ast::evaluateCircuit(const std::unordered_map<std::string, AbstractLiteral *> &paramValues, bool printResult) {
   // ensure that circuit is not reversed
@@ -59,10 +41,6 @@ Ast::evaluateCircuit(const std::unordered_map<std::string, AbstractLiteral *> &p
     throw std::invalid_argument(
         "Cannot evaluate reversed circuit. Ensure that all edges of the circuit are reversed, then try again.");
   }
-
-  // store param values into a temporary map
-  variableValuesForEvaluation.clear();
-  variableValuesForEvaluation = paramValues;
 
   // go through all nodes and collect all identifiers of Variable nodes
   std::set<std::string> varIdentifiersReqValue;
@@ -82,7 +60,7 @@ Ast::evaluateCircuit(const std::unordered_map<std::string, AbstractLiteral *> &p
   }
 
   // ensure that the provided number of parameters equals the number of required ones
-  if (variableValuesForEvaluation.size()!=varIdentifiersReqValue.size())
+  if (paramValues.size()!=varIdentifiersReqValue.size())
     throw std::invalid_argument("AST evaluation requires parameter value for all variables!");
 
   // Make sure that all variables collected previously have a defined value.
@@ -90,7 +68,7 @@ Ast::evaluateCircuit(const std::unordered_map<std::string, AbstractLiteral *> &p
   // a FunctionParameter with datatype information as used by Function objects. Therefore, we limit the check to the
   // presence of any value.
   for (auto &var : varIdentifiersReqValue) {
-    if (variableValuesForEvaluation.find(var)==variableValuesForEvaluation.end()) {
+    if (paramValues.find(var)==paramValues.end()) {
       std::stringstream ss;
       ss << "No parameter value was given for Variable ";
       ss << var << ".";
@@ -98,21 +76,31 @@ Ast::evaluateCircuit(const std::unordered_map<std::string, AbstractLiteral *> &p
     }
   }
 
-  return evaluate(printResult);
+  // create a new EvaluationVisitor instance, perform evaluation, return evaluation results
+  EvaluationVisitor ev(paramValues);
+  ev.setFlagPrintResult(printResult);
+  ev.visit(*this);
+  return ev.getResults();
 }
 
 std::vector<AbstractLiteral *>
 Ast::evaluateAst(const std::unordered_map<std::string, AbstractLiteral *> &paramValues, bool printResult) {
-  // store param values into a temporary map
-  variableValuesForEvaluation.clear();
-  variableValuesForEvaluation = paramValues;
-
   // ensure that the root node is a Function
   auto func = dynamic_cast<Function *>(this->getRootNode());
   if (!func) {
     throw std::logic_error(
         "AST evaluation only supported for 'Function' root node! Consider using evaluateCircuit(...) instead.");
   }
+
+  // A helper function that returns the variable's value of paramValues, if the variable exists in the map, otherwise
+  // returns a nullptr.
+  auto getVarValue = [&paramValues](const std::string &variableIdentifier) -> AbstractLiteral * {
+    auto it = paramValues.find(variableIdentifier);
+    return (it==paramValues.end()) ? nullptr : it->second;
+  };
+  // A helper function that returns True if a variable identifier (std::string) exists in the paramValues map, i.e, a
+  // there is a value for the given variable. Otherwise returns False.
+  auto hasVarValue = [&paramValues](Variable *var) -> bool { return paramValues.count(var->getIdentifier()) > 0; };
 
   // ensure that the provided number of parameters equals the number of required ones
   if (paramValues.size()!=func->getParams().size())
@@ -138,22 +126,12 @@ Ast::evaluateAst(const std::unordered_map<std::string, AbstractLiteral *> &param
       }
     }
   }
-  return evaluate(printResult);
-}
 
-bool Ast::hasVarValue(Variable *var) {
-  return getVarValue(var->getIdentifier())!=nullptr;
-}
-
-AbstractLiteral *Ast::getVarValue(const std::string &variableIdentifier) {
-  auto it = variableValuesForEvaluation.find(variableIdentifier);
-  if (it==variableValuesForEvaluation.end())
-    throw std::logic_error("Trying to retrieve value for variable not declared yet: " + variableIdentifier);
-  return it->second;
-}
-
-void Ast::updateVarValue(const std::string &variableIdentifier, AbstractLiteral *newValue) {
-  variableValuesForEvaluation[variableIdentifier] = newValue;
+  // create a new EvaluationVisitor instance, perform evaluation, return evaluation results
+  EvaluationVisitor ev(paramValues);
+  ev.setFlagPrintResult(printResult);
+  ev.visit(*this);
+  return ev.getResults();
 }
 
 bool Ast::isReversed() const {

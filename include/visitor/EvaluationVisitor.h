@@ -1,18 +1,52 @@
-#ifndef AST_OPTIMIZER_INCLUDE_VISITOR_EVALUATIONVISITOR_H
-#define AST_OPTIMIZER_INCLUDE_VISITOR_EVALUATIONVISITOR_H
+#ifndef AST_OPTIMIZER_INCLUDE_VISITOR_EVALUATIONVISITOR_H_
+#define AST_OPTIMIZER_INCLUDE_VISITOR_EVALUATIONVISITOR_H_
 
 #include <vector>
 #include <stack>
 #include "Visitor.h"
+#include <unordered_map>
 
 class EvaluationVisitor : public Visitor {
  private:
   typedef std::vector<AbstractLiteral *> result_t;
+
+  /// Determines whether getResults should also print the results to stdout.
+  bool flagPrintResult{false};
+
+  /// Stores intermediate evaluation results. At the end of the evaluation, results.top() contains the value of the
+  /// return statement.
   std::stack<result_t> results = {};
-  Ast &ast;
+
+  /// Tests whether a given evaluation result only contains a single element. This is used to verify that certain
+  /// expressions only return a single element.
+  /// \param evaluationResult The vector of AbstractLiteral pointers to be tested.
+  /// \return The single AbstractLiteral pointer, otherwise throws an exception.
+  /// \throws std::logic_error if more than one element is in the vector of AbstractLiteral pointers.
   AbstractLiteral *ensureSingleEvaluationResult(std::vector<AbstractLiteral *> evaluationResult);
+
+  /// This map stores the variables values and serves as lookup table and central storage during the evaluation process.
+  /// - std::string: The variable identifier.
+  /// - AbstractLiteral*: The evaluated value of the variable.
+  std::unordered_map<std::string, AbstractLiteral *> variableValuesForEvaluation;
+
+  /// Checks whether variableValuesForEvaluation contains a value for the given Variable var.
+  /// \param var The variable of which the existence of a value should be determined.
+  /// \return True if the variable has a value, otherwise False.
+  bool hasVarValue(Variable *var);
+
+  /// Returns the value in variableValuesForEvaluation for a given variable identifier.
+  /// \param variableIdentifier The identifier of which the value should be determined.
+  /// \return The variable's value.
+  AbstractLiteral *getVarValue(const std::string &variableIdentifier);
+
+  /// Updates the value of the variable identified by a given identifier variableIdentifier, by a new value (newValue).
+  /// \param variableIdentifier The variable to be updated.
+  /// \param newValue The new value to be assigned to the variable.
+  void updateVarValue(const std::string &variableIdentifier, AbstractLiteral *newValue);
+
  public:
-  explicit EvaluationVisitor(Ast &ast);
+  explicit EvaluationVisitor(std::unordered_map<std::string, AbstractLiteral *> funcCallParameterValues);
+
   void visit(AbstractNode &elem) override;
   void visit(AbstractExpr &elem) override;
   void visit(AbstractStatement &elem) override;
@@ -37,6 +71,7 @@ class EvaluationVisitor : public Visitor {
   void visit(While &elem) override;
   void visit(Ast &elem) override;
   const std::vector<AbstractLiteral *> &getResults();
+  void setFlagPrintResult(bool printResult);
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_VISITOR_EVALUATIONVISITOR_H
+#endif //AST_OPTIMIZER_INCLUDE_VISITOR_EVALUATIONVISITOR_H_

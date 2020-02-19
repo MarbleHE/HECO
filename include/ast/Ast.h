@@ -15,18 +15,19 @@ class Ast {
   /// from AbstractStatement) that represent the computations.
   AbstractNode *rootNode;
 
-  /// This map stores the values passed to evaluateAst or evaluateCircuit for variables in the computation and serves
-  /// as lookup table and central storage during the evaluation process.
-  std::unordered_map<std::string, AbstractLiteral *> variableValuesForEvaluation;
-
  public:
   Ast();
 
   ~Ast();
 
-  // copy constructors
+  /// Creates a (deep) copy of the given AST, i.e., including all of the root's children nodes.
+  /// \param otherAst The AST to be copied.
   Ast(const Ast &otherAst);
 
+  /// Similar as Ast(const Ast &otherAst), creates a (deep) copy of the given AST while additionally preserving the
+  /// nodes unique IDs.
+  /// \param otherAst The "original" AST to be copied.
+  /// \param keepOriginalUniqueNodeId A flag indicating whether the node IDs from the original AST should be copied too.
   Ast(const Ast &otherAst, bool keepOriginalUniqueNodeId);
 
   /// Creates a new Abstract Syntax Tree (AST).
@@ -40,12 +41,6 @@ class Ast {
   [[nodiscard]] AbstractNode *getRootNode() const;
 
   virtual void accept(Visitor &v);
-
-  bool hasVarValue(Variable *var);
-
-  AbstractLiteral *getVarValue(const std::string &variableIdentifier);
-
-  void updateVarValue(const std::string &variableIdentifier, AbstractLiteral *newValue);
 
   std::vector<AbstractLiteral *>
   evaluateAst(const std::unordered_map<std::string, AbstractLiteral *> &paramValues, bool printResult = false);
@@ -78,8 +73,6 @@ class Ast {
   /// \param node The node to delete from the AST.
   /// \param deleteSubtreeRecursively Determines whether children should be deleted recursively.
   void deleteNode(AbstractNode **node, bool deleteSubtreeRecursively = false);
-
-  std::vector<AbstractLiteral *> evaluate(bool printResult, std::ostream &outputStream = std::cout);
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_H
