@@ -1,21 +1,24 @@
 Function: (determineSuitableX)	[global]
-	FunctionParameter: (int)	[Function_0]
+	FunctionParameter:	[Function_0]
 		Datatype: (plaintext int)
 		Variable: (encryptedA)
-	FunctionParameter: (int)
+	FunctionParameter:
 		Datatype: (plaintext int)
 		Variable: (encryptedB)
 	VarDecl: (int randInt)
+		Datatype: (plaintext int)
 		BinaryExpr:
 			CallExternal: (std::rand)
 			Operator: (mod)
 			LiteralInt: (42)
 	VarDecl: (bool b)
+		Datatype: (plaintext bool)
 		LogicalExpr:
 			Variable: (encryptedA)
 			Operator: (<)
 			LiteralInt: (2)
 	VarDecl: (int sum)
+		Datatype: (plaintext int)
 		LiteralInt: (0)
 	While:
 		LogicalExpr:
@@ -42,9 +45,10 @@ Function: (determineSuitableX)	[global]
 					Operator: (sub)
 					LiteralInt: (1)
 	VarDecl: (string outStr)	[Function_0]
+		Datatype: (plaintext string)
 		LiteralString: (Computation finished!)
 	CallExternal: (printf)
-		FunctionParameter: (string)
+		FunctionParameter:
 			Datatype: (plaintext string)
 			Variable: (outStr)
 	Return:

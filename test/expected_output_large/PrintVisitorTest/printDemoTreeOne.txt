@@ -1,10 +1,12 @@
 Function: (computePrivate)	[global]
-	FunctionParameter: (int)	[Function_0]
+	FunctionParameter:	[Function_0]
 		Datatype: (plaintext int)
 		Variable: (x)
 	VarDecl: (int a)
+		Datatype: (plaintext int)
 		LiteralInt: (4)
 	VarDecl: (int k)
+		Datatype: (plaintext int)
 	If:
 		LogicalExpr:
 			Variable: (x)

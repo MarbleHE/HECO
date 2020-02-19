@@ -60,7 +60,7 @@ void PrintVisitor::visit(Function &elem) {
 }
 
 void PrintVisitor::visit(FunctionParameter &elem) {
-  addOutputStr(elem, {elem.getDatatype()->toString()});
+  addOutputStr(elem);
   printChildNodesIndented(elem);
 }
 
