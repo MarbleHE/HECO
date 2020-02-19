@@ -241,7 +241,7 @@ void ConeRewriter::reverseEdges(const std::vector<AbstractNode *> &nodes) {
 
 /// Method used for debugging purposes only
 void ConeRewriter::getReducibleConesForEveryPossibleStartingNode(Ast &inputAst) {
-  for (AbstractNode *n : inputAst.getRootNode()->getAnc()) {
+  for (AbstractNode *n : inputAst.getRootNode()->getAncestors()) {
     int minDepth = computeMinDepth(n);
     if (minDepth==-1) continue;
     std::vector<AbstractNode *> delta = getReducibleCones(n, minDepth);

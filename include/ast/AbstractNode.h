@@ -38,7 +38,9 @@ class AbstractNode {
   /// \return An unique node ID to be used as uniqueNodeId for the current node.
   std::string genUniqueNodeId();
 
-  ///TODO(pjattke): Document getAndIncrementNodeId()
+  /// Returns the current ID (integer) and increments the ID by one. The ID is an ongoing counter of created
+  /// AbstractNode objects and is used to build an AbstractNode's unique ID (see getUniqueNodeId()).
+  /// \return The current ID as integer.
   static int getAndIncrementNodeId();
 
   /// This special variant of getChildAtIndex returns the n-th parent instead of n-th child if isEdgeDirectionAware is
@@ -70,9 +72,15 @@ class AbstractNode {
   /// \return A reference to the vector of this node's children.
   [[nodiscard]] const std::vector<AbstractNode *> &getChildren() const;
 
-  /// Returns all the ancestor nodes of the current node.
+  /// Returns all the ancestor nodes of the current node, i.e., the ancestors of this node, the ancestors of the
+  /// ancestors et cetera.
   /// \return A list of ancestor nodes.
-  std::vector<AbstractNode *> getAnc();
+  std::vector<AbstractNode *> getAncestors();
+
+  /// Returns all the descendants nodes of the current node, i.e., the children of the children and the children of
+  /// their children et cetera.
+  /// \return A list of descendant nodes.
+  std::vector<AbstractNode *> getDescendants();
 
   // Functions for handling children
   void addChild(AbstractNode *child, bool addBackReference = true);
@@ -165,7 +173,6 @@ class AbstractNode {
       throw std::logic_error(outputMsg.str());
     }
   }
-
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_NODE_H_

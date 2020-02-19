@@ -207,7 +207,7 @@ void AbstractNode::setUniqueNodeId(const std::string &unique_node_id) {
   uniqueNodeId = unique_node_id;
 }
 
-std::vector<AbstractNode *> AbstractNode::getAnc() {
+std::vector<AbstractNode *> AbstractNode::getAncestors() {
   // use a set to avoid duplicates as there may be common ancestors between this node and any of the node's parents
   std::set<AbstractNode *> result;
   std::queue<AbstractNode *> processQueue{{this}};
@@ -219,6 +219,21 @@ std::vector<AbstractNode *> AbstractNode::getAnc() {
       result.insert(node);
       processQueue.push(node);
     });
+  }
+  return std::vector<AbstractNode *>(result.begin(), result.end());
+}
+
+std::vector<AbstractNode *> AbstractNode::getDescendants() {
+  // use a set to avoid duplicates as there may be common descendants between this node and any of the node's children
+  std::set<AbstractNode *> result;
+  std::queue<AbstractNode *> processQueue{{this}};
+  while (!processQueue.empty()) {
+    auto curNode = processQueue.front();
+    processQueue.pop();
+    for (auto &node : curNode->getChildrenNonNull()) {
+      result.insert(node);
+      processQueue.push(node);
+    }
   }
   return std::vector<AbstractNode *>(result.begin(), result.end());
 }
