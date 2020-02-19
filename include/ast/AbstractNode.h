@@ -61,28 +61,33 @@ class AbstractNode {
 
   std::string getUniqueNodeId();
 
-  /// Resets the static node ID counter that is used to build the unique node ID. This method is required for testing.
+  /// Resets the static node ID counter that is used to build the unique node ID.
+  /// This method is required for testing.
   static void resetNodeIdCounter();
 
-  /// Returns a reference to the vector of parent nodes.
-  /// \return A reference to the vector of this node's parents.
-  [[nodiscard]] const std::vector<AbstractNode *> &getParents() const;
+
+  /** @defgroup parents Methods for handling children
+   *  @{
+   */
+
+  /// Indicates the number of children that are allowed for a specific node.
+  /// For example, a binary expression accepts exactly three attributes and hence also exactly three children:
+  /// left operand, right operand, and operator.
+  /// If the node does not implement support for child/parent relationships, getMaxNumberChildren() return 0.
+  /// \return An integer indicating the number of allowed children for a specific node.
+  virtual int getMaxNumberChildren();
 
   /// Returns a reference to the vector of children nodes.
   /// \return A reference to the vector of this node's children.
   [[nodiscard]] const std::vector<AbstractNode *> &getChildren() const;
 
-  /// Returns all the ancestor nodes of the current node, i.e., the ancestors of this node, the ancestors of the
-  /// ancestors et cetera.
-  /// \return A list of ancestor nodes.
-  std::vector<AbstractNode *> getAncestors();
+  [[nodiscard]] std::vector<AbstractNode *> getChildrenNonNull() const;
 
   /// Returns all the descendants nodes of the current node, i.e., the children of the children and the children of
   /// their children et cetera.
   /// \return A list of descendant nodes.
   std::vector<AbstractNode *> getDescendants();
 
-  // Functions for handling children
   void addChild(AbstractNode *child, bool addBackReference = true);
 
   void addChildren(const std::vector<AbstractNode *> &childrenToAdd, bool addBackReference = true);
@@ -99,8 +104,23 @@ class AbstractNode {
   /// \param idx The position of the children in the AbstractNode::children vector.
   /// \return The child at the given index of the children vector, or a nullptr if there is no child at this position.
   [[nodiscard]] AbstractNode *getChildAtIndex(int idx) const;
+  /** @} */ // End of children group
 
-  // Functions for handling parents
+  /** @defgroup parents Methods for handling Parents
+   *  @{
+   */
+
+  /// Returns a reference to the vector of parent nodes.
+  /// \return A reference to the vector of this node's parents.
+  [[nodiscard]] const std::vector<AbstractNode *> &getParents() const;
+
+  [[nodiscard]] std::vector<AbstractNode *> getParentsNonNull() const;
+
+  /// Returns all the ancestor nodes of the current node, i.e., the ancestors of this node, the ancestors of the
+  /// ancestors et cetera.
+  /// \return A list of ancestor nodes.
+  std::vector<AbstractNode *> getAncestors();
+
   void addParent(AbstractNode *n);
 
   void removeParent(AbstractNode *node);
@@ -112,6 +132,7 @@ class AbstractNode {
   static void addParentTo(AbstractNode *parentNode, std::vector<AbstractNode *> nodesToAddParentTo);
 
   void swapChildrenParents();
+  /** @} */ // End of parents group
 
   /// Part of the visitor pattern.
   /// Must be overriden in derived classes and must call v.visit(node)
@@ -138,19 +159,8 @@ class AbstractNode {
   /// as it would be expected in a circuit.
   virtual bool supportsCircuitMode();
 
-  /// Indicates the number of children that are allowed for a specific node.
-  /// For example, a binary expression accepts exactly three attributes and hence also exactly three children:
-  /// left operand, right operand, and operator.
-  /// If the node does not implement support for child/parent relationships, getMaxNumberChildren() return 0.
-  /// \return An integer indicating the number of allowed children for a specific node.
-  virtual int getMaxNumberChildren();
-
   /// Indicates whether the edges of this node are reversed compared to its initial state.
   bool isReversed{false};
-
-  [[nodiscard]] std::vector<AbstractNode *> getChildrenNonNull() const;
-
-  [[nodiscard]] std::vector<AbstractNode *> getParentsNonNull() const;
 
   /// Removes this node from all of its parents and children, and also removes all parents and children from this node.
   void isolateNode();
