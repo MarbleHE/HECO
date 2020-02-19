@@ -188,17 +188,6 @@ std::string AbstractNode::toString() const {
   return this->toJson().dump();
 }
 
-std::ostream &operator<<(std::ostream &os, const std::vector<AbstractNode *> &v) {
-  os << "[";
-  for (int i = 0; i < v.size(); ++i) {
-    os << v[i]->getUniqueNodeId();
-    if (i!=v.size() - 1)
-      os << ", ";
-  }
-  os << "]";
-  return os;
-}
-
 void AbstractNode::setUniqueNodeId(const std::string &unique_node_id) {
   uniqueNodeId = unique_node_id;
 }

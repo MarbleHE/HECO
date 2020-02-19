@@ -119,11 +119,14 @@ class AbstractNode {
   /// \param v Visitor that offers a visit() method
   virtual void accept(Visitor &v) = 0;
 
+  /// Get the JSON representation of the node
+  /// \return JSON representation of the node
   [[nodiscard]] virtual json toJson() const;
 
+  /// Returns a string representation of the node
+  /// String version of this->toJson()
+  /// \return pretty-printed JSON
   [[nodiscard]] virtual std::string toString() const;
-
-  friend std::ostream &operator<<(std::ostream &os, const std::vector<AbstractNode *> &v);
 
   [[nodiscard]] virtual AbstractNode *cloneFlat();
 
