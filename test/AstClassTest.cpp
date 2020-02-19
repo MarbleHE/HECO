@@ -22,7 +22,7 @@ TEST_F(AstTestFixture, deleteNode_deleteSingleLeafNodeOnly) { /* NOLINT */
   // retrieve the binary expression of interest
   auto func = dynamic_cast<Function *>(ast.getRootNode());
   ASSERT_NE(func, nullptr);
-  auto binaryExpr = dynamic_cast<BinaryExpr *>(func->getBody().at(0)->getChildAtIndex(1)->getChildAtIndex(2));
+  auto binaryExpr = dynamic_cast<BinaryExpr *>(func->getBodyStatements().at(0)->getChildAtIndex(1)->getChildAtIndex(2));
   ASSERT_NE(binaryExpr, nullptr);
 
   // retrieve the deletion target -> variable of the binary expression
@@ -40,7 +40,7 @@ TEST_F(AstTestFixture, deleteNode_deleteRecursiveSubtreeNonEmpty) { /* NOLINT */
   // retrieve the binary expression of interest
   auto func = dynamic_cast<Function *>(ast.getRootNode());
   ASSERT_NE(func, nullptr);
-  auto binaryExprParent = func->getBody().at(0)->getChildAtIndex(1);
+  auto binaryExprParent = func->getBodyStatements().at(0)->getChildAtIndex(1);
   auto binaryExpr = dynamic_cast<BinaryExpr *>(binaryExprParent->getChildAtIndex(2));
   ASSERT_NE(binaryExpr, nullptr);
 
@@ -66,7 +66,7 @@ TEST_F(AstTestFixture, deleteNode_deleteRecursiveSubtreeEmpty) { /* NOLINT */
   // retrieve the binary expression of interest
   auto func = dynamic_cast<Function *>(ast.getRootNode());
   ASSERT_NE(func, nullptr);
-  auto binaryExpr = dynamic_cast<BinaryExpr *>(func->getBody().at(0)->getChildAtIndex(1)->getChildAtIndex(2));
+  auto binaryExpr = dynamic_cast<BinaryExpr *>(func->getBodyStatements().at(0)->getChildAtIndex(1)->getChildAtIndex(2));
   ASSERT_NE(binaryExpr, nullptr);
 
   // retrieve the deletion target -> variable of the binary expression
@@ -87,7 +87,7 @@ TEST_F(AstTestFixture, deleteNode_ChildrenExisting) { /* NOLINT */
   // retrieve the binary expression of interest
   auto func = dynamic_cast<Function *>(ast.getRootNode());
   ASSERT_NE(func, nullptr);
-  auto binaryExprParent = func->getBody().at(0)->getChildAtIndex(1);
+  auto binaryExprParent = func->getBodyStatements().at(0)->getChildAtIndex(1);
   auto binaryExpr = dynamic_cast<BinaryExpr *>(binaryExprParent->getChildAtIndex(2));
   ASSERT_NE(binaryExpr, nullptr);
 
@@ -117,13 +117,11 @@ TEST_F(AstTestFixture, deepCopy) { /* NOLINT */
     Ast copy = ast;
 
     // Delete all nodes in the copy
-    auto nodes = copy.getAllNodes();
-    for (auto x : nodes) {
-      copy.deleteNode(&x);
-      ASSERT_EQ(x, nullptr);
-    }
+    auto rootNode = copy.getRootNode();
+    copy.deleteNode(&rootNode,true);
 
     // Ensure that the copy is empty
+    EXPECT_EQ(copy.getRootNode(), nullptr);
     ASSERT_TRUE(copy.getAllNodes().empty());
 
     // Ensure that original still has all nodes

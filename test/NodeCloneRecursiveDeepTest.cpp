@@ -174,11 +174,11 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_Call) {  /* NOLINT */
             "pinCode");
 
   // test if changing the original function changes the cloned one too
-  ASSERT_EQ(call->getFunc()->getBody().size(), 0);
-  ASSERT_EQ(clonedCall->castTo<Call>()->getFunc()->getBody().size(), 0);
+  ASSERT_EQ(call->getFunc()->getBodyStatements().size(), 0);
+  ASSERT_EQ(clonedCall->castTo<Call>()->getFunc()->getBodyStatements().size(), 0);
   callFunction->addStatement(new VarAssignm("alpha", new LiteralInt(22)));
-  ASSERT_EQ(call->getFunc()->getBody().size(), 1);
-  ASSERT_EQ(clonedCall->castTo<Call>()->getFunc()->getBody().size(), 0);
+  ASSERT_EQ(call->getFunc()->getBodyStatements().size(), 1);
+  ASSERT_EQ(clonedCall->castTo<Call>()->getFunc()->getBodyStatements().size(), 0);
 }
 
 TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_Function) {  /* NOLINT */
@@ -195,10 +195,10 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_Function) {  /* NOLINT */
 
   // verify that all parameters are set
   ASSERT_EQ(functionStmt->getName(), functionName);
-  ASSERT_EQ(functionStmt->getParams().size(), 1);
-  auto functionFirstParam = functionStmt->getParams().front();
+  ASSERT_EQ(functionStmt->getParameters().size(), 1);
+  auto functionFirstParam = functionStmt->getParameters().front();
   ASSERT_EQ(functionFirstParam, args.front());
-  ASSERT_EQ(functionStmt->getBody(), bodyStatements);
+  ASSERT_EQ(functionStmt->getBodyStatements(), bodyStatements);
 
   // clone functionStmt as clonedFunctionStmt
   auto clonedFunctionStmt = dynamic_cast<Function *>(functionStmt->clone(keepOriginalId));
@@ -206,7 +206,7 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_Function) {  /* NOLINT */
   assertNodeAttributes(keepOriginalId, functionStmt, clonedFunctionStmt);
 
   // test if changing the original FunctionParameter changes the cloned one too
-  auto clonedFunctionFirstParam = clonedFunctionStmt->getParams().front();
+  auto clonedFunctionFirstParam = clonedFunctionStmt->getParameters().front();
   ASSERT_EQ(clonedFunctionFirstParam->getDatatype()->getType(), Types::INT);
   ASSERT_EQ(clonedFunctionFirstParam->getValue()->castTo<Variable>()->getIdentifier(), "seed");
   funcParam->setAttributes(new Datatype(Types::FLOAT), new Variable("floatThreshold"));
@@ -216,13 +216,13 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_Function) {  /* NOLINT */
   ASSERT_EQ(clonedFunctionFirstParam->getValue()->castTo<Variable>()->getIdentifier(), "seed");
 
   // test if adding a new FunctionParameter to the original Function
-  ASSERT_EQ(functionStmt->getParams().size(), 1);
-  ASSERT_EQ(clonedFunctionStmt->getParams().size(), 1);
+  ASSERT_EQ(functionStmt->getParameters().size(), 1);
+  ASSERT_EQ(clonedFunctionStmt->getParameters().size(), 1);
   functionStmt->addParameter(
       new FunctionParameter(new Datatype(Types::INT, true),
                             new Variable("randomNumber")));
-  ASSERT_EQ(functionStmt->getParams().size(), 2);
-  ASSERT_EQ(clonedFunctionStmt->getParams().size(), 1);
+  ASSERT_EQ(functionStmt->getParameters().size(), 2);
+  ASSERT_EQ(clonedFunctionStmt->getParameters().size(), 1);
 }
 
 TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_FunctionParameter) { /* NOLINT */

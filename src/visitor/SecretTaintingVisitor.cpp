@@ -45,7 +45,8 @@ void SecretTaintingVisitor::visit(Function &elem) {
   Visitor::visit(elem);
   // if after processing the Function's body, any of the function body's statements are tainted, this Function also will
   // be tainted (this makes sense, e.g., if Function is part of a called sub-function that is referenced by a Call obj.)
-  auto statementsAsNodes = std::vector<AbstractNode *>(elem.getBody().begin(), elem.getBody().end());
+  auto bodyStatements = elem.getBodyStatements();
+  auto statementsAsNodes = std::vector<AbstractNode *>(bodyStatements.begin(), bodyStatements.end());
   if (anyNodesAreTainted(statementsAsNodes)) addTaintedNode(elem.castTo<AbstractNode>());
 }
 

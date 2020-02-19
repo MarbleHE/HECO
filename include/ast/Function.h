@@ -4,29 +4,31 @@
 #include <string>
 #include <vector>
 #include "AbstractStatement.h"
+#include "ParameterList.h"
 #include "FunctionParameter.h"
 #include "VarDecl.h"
 
+/// Function has two children: First, a ParameterList and then a Block with the actual function Body
 class Function : public AbstractStatement {
  private:
   std::string name;
-  std::vector<FunctionParameter *> params;
-  std::vector<AbstractStatement *> body;
  public:
-  Function() = default;
 
   Function *clone(bool keepOriginalUniqueNodeId) override;
 
   [[nodiscard]] const std::string &getName() const;
 
-  [[nodiscard]] const std::vector<FunctionParameter *> &getParams() const;
+  [[nodiscard]] std::vector<FunctionParameter*> getParameters() const;
 
-  [[nodiscard]] const std::vector<AbstractStatement *> &getBody() const;
+  [[nodiscard]] std::vector<AbstractStatement*> getBodyStatements() const;
 
-  Function(std::string name, std::vector<AbstractStatement *> bodyStatements);
+  Function(std::string name, Block *pt);
 
-  Function(std::string functionName, std::vector<FunctionParameter *> functionParameters,
-           std::vector<AbstractStatement *> functionStatements);
+  Function(std::string functionName, ParameterList *functionParameters,
+           Block *functionStatements);
+
+  Function(std::string functionName, std::vector<FunctionParameter*> functionParameters,
+           std::vector<AbstractStatement*> functionStatements);
 
   explicit Function(std::string name);
 
@@ -40,7 +42,13 @@ class Function : public AbstractStatement {
 
   [[nodiscard]] std::string getNodeName() const override;
 
-  void setParams(std::vector<FunctionParameter *> paramsVec);
+  [[nodiscard]] ParameterList* getParameterList() const;
+
+  [[nodiscard]] Block* getBody() const;
+
+  void setParameterList(ParameterList *paramsVec);
+  int getMaxNumberChildren() override;
+  bool supportsCircuitMode() override;
 };
 
 /// Defines the JSON representation to be used for vector<Function> objects.

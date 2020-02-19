@@ -3,32 +3,38 @@
 #include <iostream>
 #include "LiteralInt.h"
 #include "BinaryExpr.h"
+#include "Block.h"
 #include "Return.h"
+#include "AbstractStatement.h"
 
 void Function::addParameter(FunctionParameter *param) {
-  this->params.emplace_back(param);
-}
-
-Function::Function(std::string name, std::vector<AbstractStatement *> pt) : name(std::move(name)), body(std::move(pt)) {
-  for (auto &stmt : getBody()) {
-    auto previous = *(&stmt - 1);
-    auto next = *(&stmt + 1);
-    if (previous!=nullptr) stmt->addParent(previous);
-    if (next!=nullptr)
-      stmt->addChild(next, false);
+  if (children.empty()) {
+    addChild(new ParameterList({param}));
+  } else {
+    dynamic_cast<ParameterList *>(children[0])->addChild(param);
   }
 }
 
-Function::Function(std::string name) : name(std::move(name)) {
+Function::Function(std::string name, Block *pt) : name(std::move(name)) {
+  addChild(new ParameterList());
+  addChild(pt);
 }
 
-Function::Function(std::string functionName, std::vector<FunctionParameter *> functionParameters,
-                   std::vector<AbstractStatement *> functionStatements) : name(std::move(functionName)),
-                                                                          params(std::move(functionParameters)),
-                                                                          body(std::move(functionStatements)) {}
+Function::Function(std::string name) : name(std::move(name)) {
+  addChild(new ParameterList());
+  addChild(new Block());
+}
+
+Function::Function(std::string functionName, ParameterList *functionParameters,
+                   Block *functionStatements) : name(std::move(functionName)) {
+  addChild(functionParameters);
+  addChild(functionStatements);
+
+}
 
 void Function::addStatement(AbstractStatement *statement) {
-  this->body.emplace_back(statement);
+  if (children.size() < 1) addChild(new ParameterList());
+  getBody()->addChild(statement);
 }
 
 const std::string &Function::getName() const {
@@ -39,24 +45,24 @@ void Function::accept(Visitor &v) {
   v.visit(*this);
 }
 
-const std::vector<AbstractStatement *> &Function::getBody() const {
-  return body;
+std::vector<AbstractStatement *> Function::getBodyStatements() const {
+  return *getBody()->getStatements();
 }
 
 void to_json(json &j, const Function &func) {
   j = {
       {"type", func.getNodeName()},
       {"name", func.getName()},
-      {"params", func.getParams()},
-      {"body", func.getBody()}};
+      {"params", func.getParameters()},
+      {"body", func.getBodyStatements()}};
 }
 
 json Function::toJson() const {
   json j = {
       {"type", getNodeName()},
       {"name", getName()},
-      {"params", params},
-      {"body", getBody()}
+      {"params", getParameters()},
+      {"body", getBodyStatements()}
   };
   return j;
 }
@@ -65,25 +71,40 @@ std::string Function::getNodeName() const {
   return "Function";
 }
 
-void Function::setParams(std::vector<FunctionParameter *> paramsVec) {
-  this->params = std::move(paramsVec);
+void Function::setParameterList(ParameterList *paramsVec) {
+  if (!children.empty()) this->removeChild(children[0]);
+  children[0] = paramsVec;
+
 }
 
 Function *Function::clone(bool keepOriginalUniqueNodeId) {
-  std::vector<FunctionParameter *> clonedParams;
-  for (auto &fp : this->getParams()) {
-    clonedParams.push_back(fp->clone(keepOriginalUniqueNodeId)->castTo<FunctionParameter>());
-  }
-  std::vector<AbstractStatement *> clonedBody;
-  for (auto &statement : this->getBody()) {
-    clonedBody.push_back(statement->clone(keepOriginalUniqueNodeId)->castTo<AbstractStatement>());
-  }
+  auto clonedParams = getParameterList() ? getParameterList()->clone(keepOriginalUniqueNodeId) : nullptr;
+  auto clonedBody = getBody() ? getBody()->clone(keepOriginalUniqueNodeId) : nullptr;
   auto clonedNode = new Function(this->getName(), clonedParams, clonedBody);
   if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
   if (this->isReversed) clonedNode->swapChildrenParents();
   return clonedNode;
 }
 
-const std::vector<FunctionParameter *> &Function::getParams() const {
-  return params;
+std::vector<FunctionParameter *> Function::getParameters() const {
+  return children.empty() ? std::vector<FunctionParameter *>() : dynamic_cast<ParameterList *>(children[0])
+      ->getParameters();
+}
+ParameterList *Function::getParameterList() const {
+  return children.empty() ? nullptr : dynamic_cast<ParameterList *>(children[0]);
+}
+Block *Function::getBody() const {
+  return dynamic_cast<Block *>(getChildAtIndex(1));
+}
+Function::Function(std::string functionName,
+                   std::vector<FunctionParameter *> functionParameters,
+                   std::vector<AbstractStatement *> functionStatements) : name(std::move(functionName)) {
+  addChild(new ParameterList(functionParameters));
+  addChild(new Block(&functionStatements));
+}
+int Function::getMaxNumberChildren() {
+  return 2;
+}
+bool Function::supportsCircuitMode() {
+  return true;
 }

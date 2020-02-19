@@ -59,6 +59,7 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/ast/LiteralString.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/LogicalExpr.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/Operator.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/ParameterList.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/Return.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/UnaryExpr.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/VarAssignm.cpp

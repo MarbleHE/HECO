@@ -26,6 +26,9 @@ class Block : public AbstractStatement {
   [[nodiscard]] std::string getNodeName() const override;
 
   [[nodiscard]] std::vector<AbstractStatement *> *getStatements() const;
+
+  int getMaxNumberChildren() override;
+  bool supportsCircuitMode() override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_BLOCK_H

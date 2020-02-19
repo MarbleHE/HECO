@@ -53,7 +53,7 @@ Block *Block::clone(bool keepOriginalUniqueNodeId) {
   for (auto &statement : *this->getStatements()) {
     clonedStatements->push_back(statement->clone(keepOriginalUniqueNodeId)->castTo<AbstractStatement>());
   }
-  auto clonedNode = new Block(clonedStatements);
+  auto clonedNode = clonedStatements->empty() ? new Block() :  new Block(clonedStatements);
   if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
   if (this->isReversed) clonedNode->swapChildrenParents();
   return clonedNode;
@@ -61,4 +61,10 @@ Block *Block::clone(bool keepOriginalUniqueNodeId) {
 AbstractNode *Block::cloneFlat() {
   //TODO(vianda): Implement cloneFlat in Block
   throw std::runtime_error("Not implemented");
+}
+int Block::getMaxNumberChildren() {
+  return -1;
+}
+bool Block::supportsCircuitMode() {
+  return true;
 }

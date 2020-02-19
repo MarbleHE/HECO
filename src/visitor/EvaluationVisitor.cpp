@@ -52,10 +52,10 @@ void EvaluationVisitor::visit(Block &elem) {
 }
 void EvaluationVisitor::visit(Call &elem) {
   // validation: make sure that both Call and Function have the same number of arguments
-  if (elem.getArguments().size()!=elem.getFunc()->getParams().size()) {
+  if (elem.getArguments().size()!=elem.getFunc()->getParameters().size()) {
     std::stringstream ss;
     ss << "Number of arguments in Call and its called Function does not match (";
-    ss << elem.getArguments().size() << " vs. " << elem.getFunc()->getParams().size();
+    ss << elem.getArguments().size() << " vs. " << elem.getFunc()->getParameters().size();
     ss << ").";
     throw std::logic_error(ss.str());
   }
@@ -65,16 +65,16 @@ void EvaluationVisitor::visit(Call &elem) {
   // - Literal* stores the variable's passed value (as it can be an expression too, we need to evaluate it first)
   std::unordered_map<std::string, AbstractLiteral *> paramValues;
 
-  for (size_t i = 0; i < elem.getFunc()->getParams().size(); i++) {
+  for (size_t i = 0; i < elem.getFunc()->getParameters().size(); i++) {
     // validation: make sure that datatypes in Call and Function are equal
     auto datatypeCall = *elem.getArguments().at(i)->getDatatype();
-    auto datatypeFunc = *elem.getFunc()->getParams().at(i)->getDatatype();
+    auto datatypeFunc = *elem.getFunc()->getParameters().at(i)->getDatatype();
     if (datatypeCall!=datatypeFunc)
       throw std::logic_error("Datatype in Call and Function mismatch! Cannot continue."
                              "Note: Vector position (index) of parameters in Call and Function must be equal.");
 
     // variable identifier: retrieve the variable identifier to bind the value to
-    auto val = elem.getFunc()->getParams().at(i)->getValue();
+    auto val = elem.getFunc()->getParameters().at(i)->getValue();
     std::string varIdentifier;
     if (auto var = dynamic_cast<Variable *>(val)) {
       varIdentifier = var->getIdentifier();
@@ -104,10 +104,10 @@ void EvaluationVisitor::visit(CallExternal &elem) {
       "evaluateAst(Ast &ast) not implemented for class CallExternal yet! Consider using Call instead.");
 }
 void EvaluationVisitor::visit(Function &elem) {
-  for (size_t i = 0; i < elem.getBody().size(); i++) {
-    auto currentStatement = elem.getBody().at(i);
+  for (size_t i = 0; i < elem.getBodyStatements().size(); i++) {
+    auto currentStatement = elem.getBodyStatements().at(i);
     // last statement: check if it is a Return statement
-    if (i==elem.getBody().size() - 1) {
+    if (i==elem.getBodyStatements().size() - 1) {
       if (auto retStmt = dynamic_cast<Return *>(currentStatement)) {
         retStmt->accept(*this);
       }

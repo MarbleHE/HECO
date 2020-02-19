@@ -22,6 +22,7 @@ class LiteralString;
 class LiteralFloat;
 class LogicalExpr;
 class Operator;
+class ParameterList;
 class Return;
 class UnaryExpr;
 class VarAssignm;
@@ -65,6 +66,8 @@ class Visitor {
   virtual void visit(LogicalExpr &elem);
 
   virtual void visit(Operator &elem);
+
+  virtual void visit(ParameterList &elem);
 
   virtual void visit(Return &elem);
 

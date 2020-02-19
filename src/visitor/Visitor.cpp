@@ -88,13 +88,9 @@ void Visitor::visit(Function &elem) {
   curScope->addStatement(&elem);
   changeToInnerScope(elem.getUniqueNodeId());
   // visit FunctionParameter
-  for (auto fp : elem.getParams()) {
-    fp->accept(*this);
-  }
+  if (auto fp = elem.getParameterList()) fp->accept(*this);
   // visit Body statements
-  for (auto &stmt : elem.getBody()) {
-    stmt->accept(*this);
-  }
+  if (auto body = elem.getBody()) body->accept(*this);
   changeToOuterScope();
 }
 
@@ -156,6 +152,12 @@ void Visitor::visit(LogicalExpr &elem) {
 }
 
 void Visitor::visit(Operator &elem) {}
+
+void Visitor::visit(ParameterList &elem) {
+  for (auto &fp : elem.getParameters()) {
+    fp->accept(*this);
+  }
+}
 
 void Visitor::visit(Return &elem) {
   curScope->addStatement(&elem);

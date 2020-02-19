@@ -62,7 +62,7 @@ void AbstractNode::addChild(AbstractNode *child, bool addBackReference) {
 
 void AbstractNode::addChildren(const std::vector<AbstractNode *> &childrenToAdd, bool addBackReference) {
   // check whether the number of children to be added does not exceed the number of maximum supported children
-  if (childrenToAdd.size() > getMaxNumberChildren() && getMaxNumberChildren()!=-1) {
+  if (childrenToAdd.size() > getMaxNumberChildren()) {
     throw std::invalid_argument(
         "AbstractNode " + getUniqueNodeId() + " of type " + getNodeName() + " does not allow more than "
             + std::to_string(getMaxNumberChildren()) + " children!");

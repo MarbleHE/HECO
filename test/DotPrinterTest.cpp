@@ -60,11 +60,12 @@ TEST_F(DotPrinterFixture, getDotFormattedStringTest_printReversedBinaryExpressio
   ASSERT_EQ(dp.getDotFormattedString(binaryExpression), expectedStr);
 }
 
-TEST_F(DotPrinterFixture, getDotFormattedStringTest_FunctionNotCircuitCompatibleException) {  /* NOLINT */
+TEST_F(DotPrinterFixture, getDotFormattedStringTest_printFunction) {  /* NOLINT */
   auto function = new Function("abc");
 
   DotPrinter dp;
-  ASSERT_THROW(dp.printAllReachableNodes(function), std::logic_error);
+  //TODO: Add DotPrinter logic for Function
+  EXPECT_TRUE(false);
 }
 
 TEST_F(DotPrinterFixture, printAsDotFormattedGraphTest_printAstExample1) {  /* NOLINT */

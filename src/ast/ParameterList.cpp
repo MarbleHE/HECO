@@ -1,0 +1,44 @@
+#include "ParameterList.h"
+#include "FunctionParameter.h"
+
+std::string ParameterList::getNodeName() const {
+  return "ParameterList";
+}
+
+void ParameterList::accept(Visitor &v) {
+  v.visit(*this);
+}
+
+ParameterList *ParameterList::clone(bool keepOriginalUniqueNodeId) {
+  auto childrenCopy = children;
+  for (auto &c: childrenCopy) {
+    c = c->clone(keepOriginalUniqueNodeId);
+  }
+  auto clonedNode = new ParameterList();
+  clonedNode->addChildren(childrenCopy);
+  if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
+  if (this->isReversed) clonedNode->swapChildrenParents();
+  return clonedNode;
+}
+
+ParameterList::ParameterList(std::vector<FunctionParameter *> parameters) {
+  for(auto &fp : parameters) {
+    addChild(fp);
+  }
+}
+
+std::vector<FunctionParameter *> ParameterList::getParameters() {
+  std::vector<FunctionParameter*> params;
+  params.reserve(children.size());
+  for(auto &n : children) {
+    params.emplace_back(dynamic_cast<FunctionParameter*>(n));
+  }
+  return params;
+}
+
+int ParameterList::getMaxNumberChildren() {
+  return -1;
+}
+bool ParameterList::supportsCircuitMode() {
+  return true;
+}

@@ -116,8 +116,8 @@ TEST(ChildParentTests, Block) {  /* NOLINT */
       new Block(new VarAssignm("varX", new LiteralInt(22)));
   ASSERT_EQ(blockStatement->getChildren().size(), 1);
   ASSERT_EQ(blockStatement->getParents().size(), 0);
-  ASSERT_FALSE(blockStatement->supportsCircuitMode());
-  ASSERT_EQ(blockStatement->getMaxNumberChildren(), 0);
+  ASSERT_TRUE(blockStatement->supportsCircuitMode());
+  ASSERT_EQ(blockStatement->getMaxNumberChildren(), -1);
 }
 
 TEST(ChildParentTests, Call) {  /* NOLINT */
@@ -164,17 +164,16 @@ class FunctionFixture : public ::testing::Test {
 
 TEST_F(FunctionFixture, FunctionAddStatement) {  /* NOLINT */
   funcComputeX->addStatement(returnStatement);
-  ASSERT_EQ(funcComputeX->getChildren().size(), 0);
-  ASSERT_EQ(returnStatement->getParents().size(), 0);
+  ASSERT_EQ(funcComputeX->getChildren().size(), 2);
+  ASSERT_EQ(returnStatement->getParents().size(), 1);
 }
 
-TEST_F(FunctionFixture, FunctionNotSupportedInCircuitMode) {  /* NOLINT */
-  // Function is not circuit-compatible, i.e., does not support use of child/parent relationship
-  ASSERT_THROW(funcComputeX->addChild(returnStatement, false), std::logic_error);
-  ASSERT_EQ(funcComputeX->getChildren().size(), 0);
+TEST_F(FunctionFixture, FunctionSupportedInCircuitMode) {  /* NOLINT */
+  // Function is circuit-compatible, i.e., supports use of child/parent relationship
+  ASSERT_EQ(funcComputeX->getChildren().size(), 2);
   ASSERT_EQ(returnStatement->getParents().size(), 0);
-  ASSERT_FALSE(funcComputeX->supportsCircuitMode());
-  ASSERT_EQ(funcComputeX->getMaxNumberChildren(), 0);
+  ASSERT_TRUE(funcComputeX->supportsCircuitMode());
+  ASSERT_EQ(funcComputeX->getMaxNumberChildren(), 2);
 }
 
 class FunctionParameterFixture : public ::testing::Test {

@@ -103,11 +103,11 @@ Ast::evaluateAst(const std::unordered_map<std::string, AbstractLiteral *> &param
   auto hasVarValue = [&paramValues](Variable *var) -> bool { return paramValues.count(var->getIdentifier()) > 0; };
 
   // ensure that the provided number of parameters equals the number of required ones
-  if (paramValues.size()!=func->getParams().size())
+  if (paramValues.size()!=func->getParameters().size())
     throw std::invalid_argument("AST evaluation requires parameter value for all parameters!");
 
   // make sure that all parameters specified by the function have a defined value
-  for (const auto &fp : func->getParams()) {
+  for (const auto &fp : func->getParameters()) {
     // check if FunctionParameter is a variable (can also be a hard-coded value, e.g., a LiteralInt)
     if (auto var = dynamic_cast<Variable *>(fp->getValue())) {
       // throw an error if variable value for var is not defined

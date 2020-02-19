@@ -41,7 +41,7 @@ TEST(MultRewriteTest, rewriteSuccessfulSubsequentStatementsMultiplication) { /* 
 
   //  int prod = inputC * inputB;
   auto func = dynamic_cast<Function *>(ast.getRootNode());
-  auto prodDecl = dynamic_cast<VarDecl *>(func->getBody().at(0));
+  auto prodDecl = dynamic_cast<VarDecl *>(func->getBodyStatements().at(0));
   auto expectedProdDecl = new VarDecl("prod", Types::INT,
                                       new BinaryExpr(
                                           new Variable("inputC"),
@@ -50,7 +50,7 @@ TEST(MultRewriteTest, rewriteSuccessfulSubsequentStatementsMultiplication) { /* 
   EXPECT_TRUE(prodDecl->isEqual(expectedProdDecl));
 
   //  prod = prod * inputA;
-  auto prodAssignm = dynamic_cast<VarAssignm *>(func->getBody().at(1));
+  auto prodAssignm = dynamic_cast<VarAssignm *>(func->getBodyStatements().at(1));
   auto expectedProdAssignm = new VarAssignm("prod", new BinaryExpr(
       new Variable("prod"),
       OpSymb::multiplication,
@@ -76,7 +76,7 @@ TEST(MultRewriteTest, rewriteSuccessfulSingleStatementMultiplication) { /* NOLIN
 
   //  int prod = [inputC * [inputB * inputA]]
   auto func = dynamic_cast<Function *>(ast.getRootNode());
-  auto prodDecl = dynamic_cast<VarDecl *>(func->getBody().at(0));
+  auto prodDecl = dynamic_cast<VarDecl *>(func->getBodyStatements().at(0));
   auto expectedProdDecl = new VarDecl("prod", Types::INT,
                                       new BinaryExpr(
                                           new Variable("inputC"),
@@ -153,7 +153,7 @@ TEST(MultRewriteTest, rewriteNotApplicable) { /* NOLINT */
 
   //  int prod = inputA * inputB;
   auto func = dynamic_cast<Function *>(ast.getRootNode());
-  auto prodDecl = dynamic_cast<VarDecl *>(func->getBody().at(0));
+  auto prodDecl = dynamic_cast<VarDecl *>(func->getBodyStatements().at(0));
   auto expectedProdDecl = new VarDecl("prod", Types::INT,
                                       new BinaryExpr(
                                           new Variable("inputA"),
@@ -162,7 +162,7 @@ TEST(MultRewriteTest, rewriteNotApplicable) { /* NOLINT */
   EXPECT_TRUE(prodDecl->isEqual(expectedProdDecl));
 
   //  int prod2 = prod * inputC;
-  prodDecl = dynamic_cast<VarDecl *>(func->getBody().at(1));
+  prodDecl = dynamic_cast<VarDecl *>(func->getBodyStatements().at(1));
   expectedProdDecl = new VarDecl("prod2", Types::INT, new BinaryExpr(
       new Variable("prod"),
       OpSymb::multiplication,
