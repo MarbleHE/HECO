@@ -35,7 +35,8 @@ static std::map<int, std::function<void(Ast &)> > call = {  /* NOLINT */
     {18, AstTestingGenerator::genAstRewritingSimple},
     {19, AstTestingGenerator::genAstRewritingSimpleExtended},
     {20, AstTestingGenerator::genAstRewritingMultiInputY},
-    {21, AstTestingGenerator::genAstRewritingTwoDepth2ConesButSingleVNode}
+    {21, AstTestingGenerator::genAstRewritingTwoDepth2ConesButSingleVNode},
+    {22, AstTestingGenerator::genAstForSecretTaintingWithMultipleNonSequentialStatements}
 };
 
 void AstTestingGenerator::generateAst(int id, Ast &ast) {
@@ -62,9 +63,12 @@ void AstTestingGenerator::genAstRewritingOne(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computePrivate");
   auto funcParams = new std::vector<FunctionParameter *>();
-  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputA")));
-  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputB")));
-  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputC")));
+  funcParams->push_back(
+      new FunctionParameter(new Datatype(Types::INT), new Variable("inputA")));
+  funcParams->push_back(
+      new FunctionParameter(new Datatype(Types::INT), new Variable("inputB")));
+  funcParams->push_back(
+      new FunctionParameter(new Datatype(Types::INT), new Variable("inputC")));
   func->setParams(*funcParams);
 
   // int prod = [inputA * [inputB * inputC]]
@@ -90,9 +94,12 @@ void AstTestingGenerator::genAstRewritingTwo(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computePrivate");
   auto funcParams = new std::vector<FunctionParameter *>();
-  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputA")));
-  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputB")));
-  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputC")));
+  funcParams->push_back(
+      new FunctionParameter(new Datatype(Types::INT), new Variable("inputA")));
+  funcParams->push_back(
+      new FunctionParameter(new Datatype(Types::INT), new Variable("inputB")));
+  funcParams->push_back(
+      new FunctionParameter(new Datatype(Types::INT), new Variable("inputC")));
   func->setParams(*funcParams);
 
   // int prod = inputA * inputB;
@@ -122,9 +129,12 @@ void AstTestingGenerator::genAstRewritingThree(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computePrivate");
   auto funcParams = new std::vector<FunctionParameter *>();
-  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputA")));
-  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputB")));
-  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputC")));
+  funcParams->push_back(
+      new FunctionParameter(new Datatype(Types::INT), new Variable("inputA")));
+  funcParams->push_back(
+      new FunctionParameter(new Datatype(Types::INT), new Variable("inputB")));
+  funcParams->push_back(
+      new FunctionParameter(new Datatype(Types::INT), new Variable("inputC")));
   func->setParams(*funcParams);
 
   // int prod = inputA * inputB;
@@ -135,7 +145,8 @@ void AstTestingGenerator::genAstRewritingThree(Ast &ast) {
                                      new Variable("inputB"))));
 
   // int rInt = rand()
-  func->addStatement(new VarDecl("rInt", Types::INT, new CallExternal("std::rand")));
+  func->addStatement(
+      new VarDecl("rInt", Types::INT, new CallExternal("std::rand")));
 
   // prod = prod * inputC
   func->addStatement(
@@ -157,9 +168,12 @@ void AstTestingGenerator::genAstRewritingFour(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computePrivate");
   auto funcParams = new std::vector<FunctionParameter *>();
-  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputA")));
-  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputB")));
-  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputC")));
+  funcParams->push_back(
+      new FunctionParameter(new Datatype(Types::INT), new Variable("inputA")));
+  funcParams->push_back(
+      new FunctionParameter(new Datatype(Types::INT), new Variable("inputB")));
+  funcParams->push_back(
+      new FunctionParameter(new Datatype(Types::INT), new Variable("inputC")));
   func->setParams(*funcParams);
 
   // int prod = inputA * inputB;
@@ -172,7 +186,8 @@ void AstTestingGenerator::genAstRewritingFour(Ast &ast) {
 
   // if (prod > 42) { prod = prod * inputC; }
   func->addStatement(new If(
-      new LogicalExpr(new Variable("prod"), OpSymb::greater, new LiteralInt(42)),
+      new LogicalExpr(
+          new Variable("prod"), OpSymb::greater, new LiteralInt(42)),
       new VarAssignm("prod", new BinaryExpr(
           new Variable("prod"),
           OpSymb::multiplication,
@@ -191,9 +206,12 @@ void AstTestingGenerator::genAstRewritingFive(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computePrivate");
   auto funcParams = new std::vector<FunctionParameter *>();
-  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputA")));
-  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputB")));
-  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputC")));
+  funcParams->push_back(new FunctionParameter(
+      new Datatype(Types::INT), new Variable("inputA")));
+  funcParams->push_back(new FunctionParameter(
+      new Datatype(Types::INT), new Variable("inputB")));
+  funcParams->push_back(new FunctionParameter(
+      new Datatype(Types::INT), new Variable("inputC")));
   func->setParams(*funcParams);
 
   // int prod = inputA * inputB;
@@ -223,9 +241,12 @@ void AstTestingGenerator::genAstRewritingSix(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computePrivate");
   auto funcParams = new std::vector<FunctionParameter *>();
-  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputA")));
-  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputB")));
-  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputC")));
+  funcParams->push_back(new FunctionParameter(
+      new Datatype(Types::INT), new Variable("inputA")));
+  funcParams->push_back(new FunctionParameter(
+      new Datatype(Types::INT), new Variable("inputB")));
+  funcParams->push_back(new FunctionParameter(
+      new Datatype(Types::INT), new Variable("inputC")));
   func->setParams(*funcParams);
 
   // int prod = inputA * inputB;
@@ -255,9 +276,12 @@ void AstTestingGenerator::genAstEvalOne(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computeAvg");
   auto funcParams = new std::vector<FunctionParameter *>();
-  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("width")));
-  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("length")));
-  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("depth")));
+  funcParams->push_back(new FunctionParameter(
+      new Datatype(Types::INT), new Variable("width")));
+  funcParams->push_back(new FunctionParameter(
+      new Datatype(Types::INT), new Variable("length")));
+  funcParams->push_back(new FunctionParameter(
+      new Datatype(Types::INT), new Variable("depth")));
   func->setParams(*funcParams);
 
   // int prod = inputA * inputB * inputC
@@ -283,9 +307,12 @@ void AstTestingGenerator::genAstEvalTwo(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computePrivate");
   auto funcParams = new std::vector<FunctionParameter *>();
-  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputA")));
-  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputB")));
-  funcParams->push_back(new FunctionParameter(new Datatype(Types::BOOL), new Variable("takeIf")));
+  funcParams->push_back(new FunctionParameter(
+      new Datatype(Types::INT), new Variable("inputA")));
+  funcParams->push_back(new FunctionParameter(
+      new Datatype(Types::INT), new Variable("inputB")));
+  funcParams->push_back(new FunctionParameter(
+      new Datatype(Types::BOOL), new Variable("takeIf")));
   func->setParams(*funcParams);
 
   // int prod = inputA * inputB;
@@ -298,7 +325,8 @@ void AstTestingGenerator::genAstEvalTwo(Ast &ast) {
 
   // if (takeIf) { prod = prod % 12; } else { prod = prod - 21; }
   func->addStatement(new If(
-      new LogicalExpr(new Variable("takeIf"), OpSymb::equal, new LiteralBool(true)),
+      new LogicalExpr(
+          new Variable("takeIf"), OpSymb::equal, new LiteralBool(true)),
       new VarAssignm("prod",
                      new BinaryExpr(
                          new Variable("prod"),
@@ -320,15 +348,20 @@ void AstTestingGenerator::genAstEvalThree(Ast &ast) {
   // bool computeLogical(int inputA, bool strong, bool negate, int inputB)
   auto func = new Function("computePrivate");
   auto funcParams = new std::vector<FunctionParameter *>();
-  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputA")));
-  funcParams->push_back(new FunctionParameter(new Datatype(Types::BOOL), new Variable("strong")));
-  funcParams->push_back(new FunctionParameter(new Datatype(Types::BOOL), new Variable("negate")));
-  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputB")));
+  funcParams->push_back(new FunctionParameter(
+      new Datatype(Types::INT), new Variable("inputA")));
+  funcParams->push_back(new FunctionParameter(
+      new Datatype(Types::BOOL), new Variable("strong")));
+  funcParams->push_back(new FunctionParameter(
+      new Datatype(Types::BOOL), new Variable("negate")));
+  funcParams->push_back(new FunctionParameter(
+      new Datatype(Types::INT), new Variable("inputB")));
   func->setParams(*funcParams);
 
   // if (strong == true) { inputA = inputA * 42; } else { inputA = inputA + 42; }
   func->addStatement(new If(
-      new LogicalExpr(new Variable("strong"), OpSymb::equal, new LiteralBool(true)),
+      new LogicalExpr(
+          new Variable("strong"), OpSymb::equal, new LiteralBool(true)),
       new Block(new VarAssignm("inputA",
                                new BinaryExpr(
                                    new Variable("inputA"),
@@ -342,13 +375,16 @@ void AstTestingGenerator::genAstEvalThree(Ast &ast) {
 
   // if (negate) { inputA = -inputA }
   func->addStatement(new If(
-      new LogicalExpr(new Variable("negate"), OpSymb::equal, new LiteralBool(true)),
-      new VarAssignm("inputA", new UnaryExpr(OpSymb::negation, new Variable("inputA")))));
+      new LogicalExpr(
+          new Variable("negate"), OpSymb::equal, new LiteralBool(true)),
+      new VarAssignm(
+          "inputA", new UnaryExpr(OpSymb::negation, new Variable("inputA")))));
 
   // return inputA >= inputB
   func->addStatement(
       new Return(
-          new LogicalExpr(new Variable("inputA"), OpSymb::greaterEqual, new Variable("inputB"))));
+          new LogicalExpr(
+              new Variable("inputA"), OpSymb::greaterEqual, new Variable("inputB"))));
 
   ast.setRootNode(func);
 }
@@ -356,12 +392,18 @@ void AstTestingGenerator::genAstEvalThree(Ast &ast) {
 void AstTestingGenerator::genAstEvalFour(Ast &ast) {
   auto func = new Function("concatString");
   auto funcParams = new std::vector<FunctionParameter *>();
-  funcParams->push_back(new FunctionParameter(new Datatype(Types::STRING), new Variable("strA")));
-  funcParams->push_back(new FunctionParameter(new Datatype(Types::STRING), new Variable("strB")));
+  funcParams->push_back(
+      new FunctionParameter(new Datatype(Types::STRING), new Variable("strA")));
+  funcParams->push_back(
+      new FunctionParameter(new Datatype(Types::STRING), new Variable("strB")));
   func->setParams(*funcParams);
 
   // return strA + strB
-  func->addStatement(new Return(new BinaryExpr(new Variable("strA"), OpSymb::addition, new Variable("strB"))));
+  func->addStatement(
+      new Return(
+          new BinaryExpr(new Variable("strA"),
+                         OpSymb::addition,
+                         new Variable("strB"))));
 
   ast.setRootNode(func);
 }
@@ -369,9 +411,12 @@ void AstTestingGenerator::genAstEvalFour(Ast &ast) {
 void AstTestingGenerator::genAstEvalFive(Ast &ast) {
   // int determineSuitableX(int encryptedA, int encryptedB) {...}
   Function *func = dynamic_cast<Function *>(ast.setRootNode(new Function("determineSuitableX")));
-  func->addParameter(new FunctionParameter("int", new Variable("encryptedA")));
-  func->addParameter(new FunctionParameter("int", new Variable("encryptedB")));
-  func->addParameter(new FunctionParameter("int", new Variable("randInt")));
+  func->addParameter(
+      new FunctionParameter("int", new Variable("encryptedA")));
+  func->addParameter(
+      new FunctionParameter("int", new Variable("encryptedB")));
+  func->addParameter(
+      new FunctionParameter("int", new Variable("randInt")));
 
   // bool b = encryptedA < 2;
   func->addStatement(
@@ -448,7 +493,8 @@ void AstTestingGenerator::genAstEvalSeven(Ast &ast) {
   // int result = computeSecret(33);
   // -> computeSecret(int inputA) { return inputA * 32 }
   fnc->addStatement(new VarAssignm("result", new Call(
-      {new FunctionParameter("int", new BinaryExpr(new LiteralInt(11), OpSymb::addition, new LiteralInt(213)))},
+      {new FunctionParameter("int",
+                             new BinaryExpr(new LiteralInt(11), OpSymb::addition, new LiteralInt(213)))},
       new Function("computeSecret",
                    {new FunctionParameter("int", new Variable("inputA"))},
                    {new Return(
@@ -570,9 +616,12 @@ void AstTestingGenerator::genAstMultDepthOne(Ast &ast) {
   // int computePrivate(int inputA, int inputB, int inputC)
   auto func = new Function("computePrivate");
   auto funcParams = new std::vector<FunctionParameter *>();
-  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputA")));
-  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputB")));
-  funcParams->push_back(new FunctionParameter(new Datatype(Types::INT), new Variable("inputC")));
+  funcParams->push_back(
+      new FunctionParameter(new Datatype(Types::INT), new Variable("inputA")));
+  funcParams->push_back(
+      new FunctionParameter(new Datatype(Types::INT), new Variable("inputB")));
+  funcParams->push_back(
+      new FunctionParameter(new Datatype(Types::INT), new Variable("inputC")));
   func->setParams(*funcParams);
 
   // int prod = inputA * inputB;
@@ -910,4 +959,77 @@ void AstTestingGenerator::genAstRewritingTwoDepth2ConesButSingleVNode(Ast &ast) 
       new Variable("b_t")));
 
   ast.setRootNode(returnStatement);
+}
+
+/// This AST represents the following program:
+/// \code{.cpp}
+///   float computeTotal(int subtotal) {
+///     bool qualifiesForSpecialDiscount = !(subtotal < 1000);
+///     secret_float discount = computeDiscountOnServer(secret_bool qualifiesForSpecialDiscount, secret_float subtotal)
+///     return subtotal*discount;
+///   }
+///
+///   float computeDiscountOnServer(secret_bool qualifiesForSpecialDiscount) {
+///     secret_float discountRate;
+///     { // this Block "{...}"does not make any sense but is valid and used for testing
+///       discountRate = qualifiesForSpecialDiscount * 0.90 + (1-qualifiesForSpecialDiscount) * 0.98;
+///     }
+///     return discountRate;
+///   }
+/// \endcode
+void AstTestingGenerator::genAstForSecretTaintingWithMultipleNonSequentialStatements(Ast &ast) {
+// int determineSuitableX(int encryptedA, int encryptedB) {...}
+  auto funcComputeTotal = dynamic_cast<Function *>(ast.setRootNode(new Function("computeTotal")));
+  funcComputeTotal->addParameter(new FunctionParameter(new Datatype(Types::INT, false), new Variable("subtotal")));
+
+  // bool qualifiesForSpecialDiscount = !(subtotal < 1000);
+  funcComputeTotal->addStatement(
+      new VarDecl("qualifiesForSpecialDiscount",
+                  new Datatype(Types::BOOL, false),
+                  new UnaryExpr(OpSymb::negation,
+                                new LogicalExpr(
+                                    new Variable("subtotal"),
+                                    OpSymb::smaller,
+                                    new LiteralInt(1'000)))));
+
+  // float computeDiscountOnServer(secret_bool qualifiesForSpecialDiscount) {
+  auto funcComputeDiscountOnServer = new Function("computeDiscountOnServer");
+  funcComputeDiscountOnServer->addParameter(new FunctionParameter(
+      new Datatype(Types::BOOL, true),
+      new Variable("qualifiesForSpecialDiscount")));
+
+  //  secret_float discountRate;
+  funcComputeDiscountOnServer->addStatement(
+      new VarDecl("discountRate", new Datatype(Types::FLOAT, true), new LiteralFloat(0.0f)));
+
+  //  { discountRate = qualifiesForSpecialDiscount * 0.90 + (1-qualifiesForSpecialDiscount) * 0.98; }
+  funcComputeDiscountOnServer->addStatement(
+      new Block(new VarAssignm("discountRate",
+                               new BinaryExpr(
+                                   new BinaryExpr(new Variable("qualifiesForSpecialDiscount"),
+                                                  OpSymb::multiplication,
+                                                  new LiteralFloat(0.90)),
+                                   OpSymb::addition,
+                                   new BinaryExpr(
+                                       new BinaryExpr(new LiteralInt(1),
+                                                      OpSymb::subtraction,
+                                                      new Variable("qualifiesForSpecialDiscount")),
+                                       OpSymb::multiplication,
+                                       new LiteralFloat(0.98))))));
+
+  //  return discountRate;
+  funcComputeDiscountOnServer->addStatement(new Return(new Variable("discountRate")));
+
+  // secret_float discount = computeDiscountOnServer(secret_bool qualifiesForSpecialDiscount)
+  funcComputeTotal->addStatement(new VarDecl("discount",
+                                             new Datatype(Types::FLOAT, true),
+                                             new Call({new FunctionParameter(new Datatype(Types::BOOL, true),
+                                                                             new Variable("qualifiesForSpecialDiscount"))},
+                                                      funcComputeDiscountOnServer)));
+
+  // return subtotal*discount;
+  funcComputeTotal->addStatement(
+      new Return(new BinaryExpr(new Variable("subtotal"),
+                                OpSymb::multiplication,
+                                new Variable("discount"))));
 }
