@@ -27,8 +27,6 @@ class AbstractExpr : public AbstractNode {
  public:
   [[nodiscard]] json toJson() const override;
 
-  void accept(Visitor &v) override;
-
   virtual BinaryExpr *contains(BinaryExpr *bexpTemplate, AbstractExpr *excludedSubtree);
 
   virtual int countByTemplate(AbstractExpr *abstractExpr);

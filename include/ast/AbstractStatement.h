@@ -12,8 +12,6 @@ class AbstractStatement : public AbstractNode {
  public:
   [[nodiscard]] json toJson() const override;
 
-  void accept(Visitor &v) override;
-
   virtual BinaryExpr *contains(BinaryExpr *bexpTemplate, BinaryExpr *excludedSubtree);
 
   virtual std::string getVarTargetIdentifier();

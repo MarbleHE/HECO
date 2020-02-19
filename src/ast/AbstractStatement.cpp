@@ -8,10 +8,6 @@ json AbstractStatement::toJson() const {
   return json({"type", "AbstractStatement"});
 }
 
-void AbstractStatement::accept(Visitor &v) {
-  std::cout << "This shouldn't be executed!" << std::endl;
-}
-
 BinaryExpr *AbstractStatement::contains(BinaryExpr *bexpTemplate, BinaryExpr *excludedSubtree) {
   return nullptr;
 }

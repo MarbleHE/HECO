@@ -113,7 +113,11 @@ class AbstractNode {
 
   void swapChildrenParents();
 
-  virtual void accept(Visitor &v);
+  /// Part of the visitor pattern.
+  /// Must be overriden in derived classes and must call v.visit(node)
+  /// This allows the correct overload for the derived class to be called in the visitor
+  /// \param v Visitor that offers a visit() method
+  virtual void accept(Visitor &v) = 0;
 
   [[nodiscard]] virtual json toJson() const;
 

@@ -176,10 +176,6 @@ void AbstractNode::swapChildrenParents() {
   isReversed = !isReversed;
 }
 
-void AbstractNode::accept(Visitor &v) {
-  std::cout << "This shouldn't be executed!" << std::endl;
-}
-
 void to_json(json &j, const AbstractNode &n) {
   j = n.toJson();
 }
