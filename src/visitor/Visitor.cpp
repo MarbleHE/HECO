@@ -176,6 +176,8 @@ void Visitor::visit(VarAssignm &elem) {
 
 void Visitor::visit(VarDecl &elem) {
   curScope->addStatement(&elem);
+  // visit datatype associated to new variable
+  elem.getDatatype()->accept(*this);
   // visit initializer
   if (elem.getInitializer()!=nullptr) {
     elem.getInitializer()->accept(*this);
@@ -196,7 +198,7 @@ void Visitor::visit(While &elem) {
   if (auto *thenBlock = dynamic_cast<Block *>(elem.getBody())) {
     thenBlock->accept(*this);
   } else {
-    AbstractNode *block = dynamic_cast<AbstractNode *>(elem.getBody());
+    auto *block = dynamic_cast<AbstractNode *>(elem.getBody());
     assert(block!=nullptr);
     changeToInnerScope(block->getUniqueNodeId());
     elem.getBody()->accept(*this);
