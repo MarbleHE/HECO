@@ -49,6 +49,10 @@ Datatype *FunctionParameter::getDatatype() const {
   return reinterpret_cast<Datatype * >(getChildAtIndex(0, true));
 }
 
+std::vector<std::string> FunctionParameter::getVariableIdentifiers() {
+  return getValue()->getVariableIdentifiers();
+}
+
 FunctionParameter *FunctionParameter::clone(bool keepOriginalUniqueNodeId) {
   auto clonedNode = new FunctionParameter(this->getDatatype()->clone(keepOriginalUniqueNodeId)->castTo<Datatype>(),
                                           this->getValue()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());

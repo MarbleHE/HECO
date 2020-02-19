@@ -36,6 +36,8 @@ class FunctionParameter : public AbstractExpr {
   bool operator==(const FunctionParameter &rhs) const;
 
   bool operator!=(const FunctionParameter &rhs) const;
+
+  std::vector<std::string> getVariableIdentifiers() override;
 };
 
 /// Defines the JSON representation to be used for vector<FunctionParameter> objects.
