@@ -4,53 +4,30 @@
 #include <string>
 
 class AbstractNode;
-
 class AbstractExpr;
-
 class AbstractStatement;
-
 class Ast;
-
 class BinaryExpr;
-
 class Block;
-
 class Call;
-
 class CallExternal;
-
+class Datatype;
 class Function;
-
 class FunctionParameter;
-
 class If;
-
 class AbstractLiteral;
-
 class LiteralBool;
-
 class LiteralInt;
-
 class LiteralString;
-
 class LiteralFloat;
-
 class LogicalExpr;
-
 class Operator;
-
 class Return;
-
 class UnaryExpr;
-
 class VarAssignm;
-
 class VarDecl;
-
 class Variable;
-
 class While;
-
 class Scope;
 
 class Visitor {
@@ -68,6 +45,8 @@ class Visitor {
   virtual void visit(Call &elem);
 
   virtual void visit(CallExternal &elem);
+
+  virtual void visit(Datatype &elem);
 
   virtual void visit(Function &elem);
 

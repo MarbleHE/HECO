@@ -67,3 +67,6 @@ AbstractNode *Datatype::clone(bool keepOriginalUniqueNodeId) {
 std::string Datatype::getNodeName() const {
   return "Datatype";
 }
+void Datatype::accept(Visitor &v) {
+  v.visit(*this);
+}

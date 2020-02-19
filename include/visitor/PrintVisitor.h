@@ -30,6 +30,8 @@ class PrintVisitor : public Visitor {
 
   void visit(Call &elem) override;
 
+  void visit(Datatype &elem) override;
+
   void visit(CallExternal &elem) override;
 
   void visit(Function &elem) override;

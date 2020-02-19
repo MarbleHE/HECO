@@ -99,6 +99,7 @@ void Visitor::visit(Function &elem) {
 }
 
 void Visitor::visit(FunctionParameter &elem) {
+  elem.getDatatype()->accept(*this);
   elem.getValue()->accept(*this);
 }
 
@@ -216,4 +217,6 @@ void Visitor::changeToInnerScope(const std::string &nodeId) {
 Visitor::Visitor() {
   curScope = nullptr;
 }
+
+void Visitor::visit(Datatype &elem) {}
 

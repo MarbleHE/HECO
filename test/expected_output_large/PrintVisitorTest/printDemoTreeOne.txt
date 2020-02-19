@@ -1,5 +1,6 @@
 Function: (computePrivate)	[global]
 	FunctionParameter: (int)	[Function_0]
+		Datatype: (plaintext int)
 		Variable: (x)
 	VarDecl: (int a)
 		LiteralInt: (4)

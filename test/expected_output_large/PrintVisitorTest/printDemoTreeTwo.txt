@@ -1,7 +1,9 @@
 Function: (determineSuitableX)	[global]
 	FunctionParameter: (int)	[Function_0]
+		Datatype: (plaintext int)
 		Variable: (encryptedA)
 	FunctionParameter: (int)
+		Datatype: (plaintext int)
 		Variable: (encryptedB)
 	VarDecl: (int randInt)
 		BinaryExpr:
@@ -43,6 +45,7 @@ Function: (determineSuitableX)	[global]
 		LiteralString: (Computation finished!)
 	CallExternal: (printf)
 		FunctionParameter: (string)
+			Datatype: (plaintext string)
 			Variable: (outStr)
 	Return:
 		Variable: (sum)

@@ -15,7 +15,8 @@ class Datatype : public AbstractNode {
   bool encrypted{false};
 
  public:
-  std::string getNodeName() const override;
+  [[nodiscard]] std::string getNodeName() const override;
+
   AbstractNode *cloneFlat() override;
 
   AbstractNode *clone(bool keepOriginalUniqueNodeId) override;
@@ -43,6 +44,8 @@ class Datatype : public AbstractNode {
   [[nodiscard]] bool isEncrypted() const;
 
   void setEncrypted(bool encrypted);
+
+  void accept(Visitor &v) override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_INCLUDE_UTILITIES_DATATYPE_H_

@@ -43,7 +43,7 @@ void PrintVisitor::visit(Block &elem) {
 }
 
 void PrintVisitor::visit(Call &elem) {
-  AbstractNode *node = static_cast<AbstractNode*>(static_cast<AbstractExpr *>(&elem));
+  AbstractNode *node = static_cast<AbstractNode *>(static_cast<AbstractExpr *>(&elem));
   addOutputStr(*node);
   printChildNodesIndented(elem);
 }
@@ -206,4 +206,10 @@ void PrintVisitor::resetVisitor() {
 
 void PrintVisitor::useUniqueNodeIds(bool value) {
   this->showUniqueNodeIds = value;
+}
+
+void PrintVisitor::visit(Datatype &elem) {
+  std::string encryption = (elem.isEncrypted() ? "encrypted" : "plaintext");
+  addOutputStr(elem, {encryption + " " + Datatype::enumToString(elem.getType())});
+  Visitor::visit(elem);
 }
