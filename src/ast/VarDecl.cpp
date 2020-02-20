@@ -119,3 +119,7 @@ VarDecl *VarDecl::clone(bool keepOriginalUniqueNodeId) {
   if (this->isReversed) clonedNode->swapChildrenParents();
   return clonedNode;
 }
+
+std::string VarDecl::toString() const {
+  return identifier;
+}

@@ -59,6 +59,7 @@ class VarDecl : public AbstractStatement {
   bool supportsCircuitMode() override;
 
   int getMaxNumberChildren() override;
+  std::string toString() const override;
 
 };
 
