@@ -1,4 +1,5 @@
 #include "DotPrinter.h"
+#include "VarDecl.h"
 
 DotPrinter::DotPrinter() : mdc(nullptr) {}
 
@@ -40,8 +41,10 @@ std::string DotPrinter::getDotFormattedString(AbstractNode *n) {
   // depending on whether the graph is reversed we are interested in the parents or children
   auto vec = (n->hasReversedEdges() ? n->getParentsNonNull() : n->getChildrenNonNull());
 
-  // vec.empty(): only print node details (e.g., operator type for Operator) for tree leaves
-  finalString << dotVertex(n, this->showMultDepth, this->mdc, vec.empty())
+  // define criteria when to print node details
+  auto printNodeDetailsCriterion = (vec.empty()  // if node is a tree leaf
+      || dynamic_cast<VarDecl *>(n)!=nullptr);  // if node is a VarDecl (needed for the variable identifier)
+  finalString << dotVertex(n, this->showMultDepth, this->mdc, printNodeDetailsCriterion)
       .buildVertexString(this->indentationCharacter);
 
   // only print edges if there are any edges at all

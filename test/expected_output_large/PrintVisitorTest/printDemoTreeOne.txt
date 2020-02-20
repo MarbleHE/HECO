@@ -2,30 +2,31 @@ Function: (computePrivate)	[global]
 	FunctionParameter:	[Function_0]
 		Datatype: (plaintext int)
 		Variable: (x)
-	VarDecl: (int a)
-		Datatype: (plaintext int)
-		LiteralInt: (4)
-	VarDecl: (int k)
-		Datatype: (plaintext int)
-	If:
-		LogicalExpr:
-			Variable: (x)
-			Operator: (>)
-			LiteralInt: (32)
-		Block:
-			VarAssignm: (k)	[Block_18]
-				BinaryExpr:
-					Variable: (x)
-					Operator: (mult)
-					Variable: (a)
-		Block:	[Function_0]
-			VarAssignm: (k)	[Block_27]
-				BinaryExpr:
+	Block:
+		VarDecl: (a)	[Block_2]
+			Datatype: (plaintext int)
+			LiteralInt: (4)
+		VarDecl: (k)
+			Datatype: (plaintext int)
+		If:
+			LogicalExpr:
+				Variable: (x)
+				Operator: (>)
+				LiteralInt: (32)
+			Block:
+				VarAssignm: (k)	[Block_20]
 					BinaryExpr:
 						Variable: (x)
 						Operator: (mult)
 						Variable: (a)
-					Operator: (add)
-					LiteralInt: (42)
-	Return:	[Function_0]
-		Variable: (k)
+			Block:	[Block_2]
+				VarAssignm: (k)	[Block_29]
+					BinaryExpr:
+						BinaryExpr:
+							Variable: (x)
+							Operator: (mult)
+							Variable: (a)
+						Operator: (add)
+						LiteralInt: (42)
+		Return:	[Block_2]
+			Variable: (k)

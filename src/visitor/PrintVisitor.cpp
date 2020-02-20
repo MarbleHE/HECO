@@ -110,7 +110,7 @@ void PrintVisitor::visit(VarAssignm &elem) {
 }
 
 void PrintVisitor::visit(VarDecl &elem) {
-  addOutputStr(elem, {elem.getDatatype()->toString() + " " + elem.getIdentifier()});
+  addOutputStr(elem, {elem.getIdentifier()});
   printChildNodesIndented(elem);
 }
 

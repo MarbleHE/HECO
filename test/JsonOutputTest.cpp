@@ -83,7 +83,7 @@ TEST(JsonOutputTest, Variable) { /* NOLINT */
 
 TEST(JsonOutputTest, VarDecl) { /* NOLINT */
   auto identifier = "numIterations";
-  auto datatype = "int";
+  auto datatype = "plaintext int";
   int initializer = 3;
   // int numIterations = 3;
   auto *var = new VarDecl(identifier, initializer);
@@ -155,7 +155,7 @@ TEST(JsonOutputTest, UnaryExpr) { /* NOLINT */
 TEST(JsonOutputTest, FunctionParameter) { /* NOLINT */
   auto fp = new FunctionParameter("int", new Variable("y"));
   json j = {{"type", "FunctionParameter"},
-            {"datatype", "int"},
+            {"datatype", "plaintext int"},
             {"value", {
                 {"type", "Variable"},
                 {"identifier", "y"}
@@ -199,7 +199,7 @@ TEST(JsonOutputTest, Block) { /* NOLINT */
   json j = {{"type", "Block"},
             {"statements", {{
                                 {"type", "VarDecl"},
-                                {"datatype", "int"},
+                                {"datatype", "plaintext int"},
                                 {"identifier", "width"},
                                 {"initializer", {
                                     {"type", "LiteralInt"},

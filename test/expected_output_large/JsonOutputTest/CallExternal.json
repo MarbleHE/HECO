@@ -4,7 +4,7 @@
   "arguments": [
     {
       "type": "FunctionParameter",
-      "datatype": "string",
+      "datatype": "plaintext string",
       "value": {
         "type": "LiteralString",
         "value": "Hello world!"

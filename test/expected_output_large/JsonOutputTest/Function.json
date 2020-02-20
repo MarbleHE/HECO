@@ -4,14 +4,14 @@
   "params": [
     {
       "type": "FunctionParameter",
-      "datatype": "int",
+      "datatype": "plaintext int",
       "value": {
         "type": "Variable",
         "identifier": "a"
       }
     },
     {
-      "datatype": "bool",
+      "datatype": "plaintext bool",
       "type": "FunctionParameter",
       "value": {
         "type": "Variable",
@@ -19,7 +19,7 @@
       }
     },
     {
-      "datatype": "int",
+      "datatype": "plaintext int",
       "type": "FunctionParameter",
       "value": {
         "type": "Variable",

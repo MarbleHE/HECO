@@ -1,30 +1,31 @@
+#include "DotPrinter.h"
 #include "AbstractNode.h"
-#include "Operator.h"
-#include "Variable.h"
+#include "AstTestingGenerator.h"
 #include "BinaryExpr.h"
 #include "Function.h"
-#include "DotPrinter.h"
-#include <fstream>
+#include "Operator.h"
+#include "Variable.h"
 #include "gtest/gtest.h"
-#include "AstTestingGenerator.h"
+#include <fstream>
+#include "Block.h"
 
 class DotPrinterFixture : public ::testing::Test {
  protected:
   void SetUp() override {
-    // This is required, otherwise the node IDs won't match the expected result as they are incremented ongoing but
-    // must be reset after each test case.
+    // This is required, otherwise the node IDs won't match the expected result
+    // as they are incremented ongoing but must be reset after each test case.
     AbstractNode::resetNodeIdCounter();
   }
 };
 
-TEST_F(DotPrinterFixture, getDotFormattedStringTest_printSimpleBinaryExpression) {  /* NOLINT */
+TEST_F(DotPrinterFixture,
+       getDotFormattedStringTest_printSimpleBinaryExpression) { /* NOLINT */
   auto binaryExpression = new BinaryExpr(
-      new Variable("alpha"),
-      OpSymb::multiplication,
-      new LiteralInt(212));
+      new Variable("alpha"), OpSymb::multiplication, new LiteralInt(212));
 
   auto expectedStr =
-      "  BinaryExpr_2 [label=\"BinaryExpr_2\\n[l(v): 0, r(v): 0]\" shape=oval style=filled fillcolor=white]\n"
+      "  BinaryExpr_2 [label=\"BinaryExpr_2\\n[l(v): 0, r(v): 0]\" shape=oval "
+      "style=filled fillcolor=white]\n"
       "  { BinaryExpr_2 } -> { Variable_0, Operator_3, LiteralInt_1 }\n";
 
   Ast ast(binaryExpression);
@@ -37,17 +38,17 @@ TEST_F(DotPrinterFixture, getDotFormattedStringTest_printSimpleBinaryExpression)
   ASSERT_EQ(dp.getDotFormattedString(binaryExpression), expectedStr);
 }
 
-TEST_F(DotPrinterFixture, getDotFormattedStringTest_printReversedBinaryExpression) {  /* NOLINT */
+TEST_F(DotPrinterFixture,
+       getDotFormattedStringTest_printReversedBinaryExpression) { /* NOLINT */
   auto binaryExpression = new BinaryExpr(
-      new Variable("alpha"),
-      OpSymb::multiplication,
-      new LiteralInt(212));
+      new Variable("alpha"), OpSymb::multiplication, new LiteralInt(212));
 
   // reversing the edge should only flip parents with children
   binaryExpression->swapChildrenParents();
 
   auto expectedStr =
-      "\tBinaryExpr_2 [label=\"BinaryExpr_2\\n[l(v): 0, r(v): 0]\" shape=oval style=filled fillcolor=white]\n"
+      "\tBinaryExpr_2 [label=\"BinaryExpr_2\\n[l(v): 0, r(v): 0]\" shape=oval "
+      "style=filled fillcolor=white]\n"
       "\t{ Variable_0, Operator_3, LiteralInt_1 } -> { BinaryExpr_2 }\n";
 
   Ast ast(binaryExpression);
@@ -60,15 +61,35 @@ TEST_F(DotPrinterFixture, getDotFormattedStringTest_printReversedBinaryExpressio
   ASSERT_EQ(dp.getDotFormattedString(binaryExpression), expectedStr);
 }
 
-TEST_F(DotPrinterFixture, getDotFormattedStringTest_printFunction) {  /* NOLINT */
-  auto function = new Function("abc");
+TEST_F(DotPrinterFixture, getDotFormattedStringTest_printFunction) { /* NOLINT */
+  auto functionParameters =
+      new ParameterList({new FunctionParameter(new Datatype(Types::INT),
+                                               new Variable("numberA")),
+                         new FunctionParameter(new Datatype(Types::INT),
+                                               new Variable("numberB"))});
+  auto functionStatements = new Block(new VarDecl("numberC", 152));
+  auto function = new Function("computeAverage", functionParameters, functionStatements);
 
+  // this is needed to enable printing of the multiplicative depth
+  Ast ast(function);
+  MultiplicativeDepthCalculator mdc(ast);
+
+  // create and configure the DotPrinter
   DotPrinter dp;
-  //TODO: Add DotPrinter logic for Function
-  EXPECT_TRUE(false);
+  dp.setIndentationCharacter("\t")
+      .setMultiplicativeDepthsCalculator(mdc)
+      .setShowMultDepth(true);
+
+  auto expectedStr =
+      "\tFunction_11 [label=\"Function_11\\n[l(v): 0, r(v): 0]\" shape=rect style=filled fillcolor=white]\n"
+      "\t{ Function_11 } -> { ParameterList_6, Block_10 }\n";
+
+  // check that Function is printed properly
+  ASSERT_EQ(dp.getDotFormattedString(function), expectedStr);
 }
 
-TEST_F(DotPrinterFixture, printAsDotFormattedGraphTest_printAstExample1) {  /* NOLINT */
+TEST_F(DotPrinterFixture,
+       printAsDotFormattedGraphTest_printCircuitExample1) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(18, ast);
 
@@ -81,15 +102,16 @@ TEST_F(DotPrinterFixture, printAsDotFormattedGraphTest_printAstExample1) {  /* N
   dp.printAsDotFormattedGraph(ast);
 
   // read expected output from file
-  std::ifstream
-      ifs("../../test/expected_output_large/DotPrinterTest/printAsDotFormattedGraphTest_printAstExample1.txt");
+  std::ifstream ifs("../../test/expected_output_large/DotPrinterTest/"
+                    "printAsDotFormattedGraphTest_printCircuitExample1.txt");
   std::stringstream buffer;
   buffer << ifs.rdbuf();
 
   ASSERT_EQ(buffer.str(), outputStream.str());
 }
 
-TEST_F(DotPrinterFixture, printAsDotFormattedGraphTest_printAstExample2) {  /* NOLINT */
+TEST_F(DotPrinterFixture,
+       printAsDotFormattedGraphTest_printCircuitExample2) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(19, ast);
 
@@ -102,29 +124,53 @@ TEST_F(DotPrinterFixture, printAsDotFormattedGraphTest_printAstExample2) {  /* N
   dp.printAsDotFormattedGraph(ast);
 
   // read expected output from file
-  std::ifstream
-      ifs("../../test/expected_output_large/DotPrinterTest/printAsDotFormattedGraphTest_printAstExample2.txt");
+  std::ifstream ifs("../../test/expected_output_large/DotPrinterTest/"
+                    "printAsDotFormattedGraphTest_printCircuitExample2.txt");
   std::stringstream buffer;
   buffer << ifs.rdbuf();
 
   ASSERT_EQ(buffer.str(), outputStream.str());
 }
 
-TEST_F(DotPrinterFixture, printAllReachableNods_printNodeSet) {  /* NOLINT */
+TEST_F(DotPrinterFixture,
+       printAsDotFormattedGraphTest_printAstExample1) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(17, ast);
+
+  MultiplicativeDepthCalculator mdc(ast);
+  std::stringstream outputStream;
+  DotPrinter dp;
+  dp.setMultiplicativeDepthsCalculator(mdc)
+      .setShowMultDepth(true)
+      .setOutputStream(outputStream);
+  dp.printAsDotFormattedGraph(ast);
+
+  std::cout << outputStream.str() << std::endl;
+
+  // read expected output from file
+  std::ifstream ifs("../../test/expected_output_large/DotPrinterTest/"
+                    "printAsDotFormattedGraphTest_printAstExample1.txt");
+  std::stringstream buffer;
+  buffer << ifs.rdbuf();
+
+  ASSERT_EQ(buffer.str(), outputStream.str());
+}
+
+TEST_F(DotPrinterFixture, printAllReachableNods_printNodeSet) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(18, ast);
 
   std::stringstream outputStream;
 
   DotPrinter dp;
-  dp.setIndentationCharacter("\t")
-      .setShowMultDepth(false)
-      .setOutputStream(outputStream);
+  dp.setIndentationCharacter("\t").setShowMultDepth(false).setOutputStream(
+      outputStream);
 
   dp.printAllReachableNodes(ast.getRootNode());
 
   // read expected output from file
-  std::ifstream ifs("../../test/expected_output_large/DotPrinterTest/printAllReachableNods_printNodeSet.txt");
+  std::ifstream ifs("../../test/expected_output_large/DotPrinterTest/"
+                    "printAllReachableNods_printNodeSet.txt");
   std::stringstream buffer;
   buffer << ifs.rdbuf();
 

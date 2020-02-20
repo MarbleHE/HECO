@@ -5,51 +5,52 @@ Function: (determineSuitableX)	[global]
 	FunctionParameter:
 		Datatype: (plaintext int)
 		Variable: (encryptedB)
-	VarDecl: (int randInt)
-		Datatype: (plaintext int)
-		BinaryExpr:
-			CallExternal: (std::rand)
-			Operator: (mod)
-			LiteralInt: (42)
-	VarDecl: (bool b)
-		Datatype: (plaintext bool)
-		LogicalExpr:
-			Variable: (encryptedA)
-			Operator: (<)
-			LiteralInt: (2)
-	VarDecl: (int sum)
-		Datatype: (plaintext int)
-		LiteralInt: (0)
-	While:
-		LogicalExpr:
+	Block:
+		VarDecl: (randInt)	[Block_2]
+			Datatype: (plaintext int)
+			BinaryExpr:
+				CallExternal: (std::rand)
+				Operator: (mod)
+				LiteralInt: (42)
+		VarDecl: (b)
+			Datatype: (plaintext bool)
 			LogicalExpr:
-				Variable: (randInt)
-				Operator: (>)
-				LiteralInt: (0)
-			Operator: (AND)
+				Variable: (encryptedA)
+				Operator: (<)
+				LiteralInt: (2)
+		VarDecl: (sum)
+			Datatype: (plaintext int)
+			LiteralInt: (0)
+		While:
 			LogicalExpr:
-				UnaryExpr:
-					Operator: (!)
-					Variable: (b)
-				Operator: (==)
-				LiteralBool: (true)
-		Block:
-			VarAssignm: (sum)	[Block_45]
-				BinaryExpr:
-					Variable: (sum)
-					Operator: (add)
-					Variable: (encryptedB)
-			VarAssignm: (randInt)
-				BinaryExpr:
+				LogicalExpr:
 					Variable: (randInt)
-					Operator: (sub)
-					LiteralInt: (1)
-	VarDecl: (string outStr)	[Function_0]
-		Datatype: (plaintext string)
-		LiteralString: (Computation finished!)
-	CallExternal: (printf)
-		FunctionParameter:
+					Operator: (>)
+					LiteralInt: (0)
+				Operator: (AND)
+				LogicalExpr:
+					UnaryExpr:
+						Operator: (!)
+						Variable: (b)
+					Operator: (==)
+					LiteralBool: (true)
+			Block:
+				VarAssignm: (sum)	[Block_47]
+					BinaryExpr:
+						Variable: (sum)
+						Operator: (add)
+						Variable: (encryptedB)
+				VarAssignm: (randInt)
+					BinaryExpr:
+						Variable: (randInt)
+						Operator: (sub)
+						LiteralInt: (1)
+		VarDecl: (outStr)	[Block_2]
 			Datatype: (plaintext string)
-			Variable: (outStr)
-	Return:
-		Variable: (sum)
+			LiteralString: (Computation finished!)
+		CallExternal: (printf)
+			FunctionParameter:
+				Datatype: (plaintext string)
+				Variable: (outStr)
+		Return:
+			Variable: (sum)
