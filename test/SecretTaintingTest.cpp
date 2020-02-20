@@ -63,18 +63,22 @@ TEST_F(SecretTaintingFixture, simpleAst_singleStatementTainted) { /* NOLINT */
   ASSERT_FALSE(stv.getSecretTaintingList().empty());
 
   // find unique node ID of return statement: this and all children of Return should be tainted
-  auto taintedRoot = ast.getRootNode()->castTo<Function>()->getBodyStatements().at(1);
+  auto function = ast.getRootNode()->castTo<Function>();
+  auto taintedRoot = function->getBodyStatements().at(1);
   addStatementAndItsDescendantsToExpectedTaintedNodes(taintedRoot);
   // also the FunctionParameter and associated Datatype should be tainted (last Parameter 'inputC' = back)
   addStatementAndItsDescendantsToExpectedTaintedNodes(ast.getRootNode()->castTo<Function>()->getParameters().back());
   // add Function itself
-  expectedTaintedNodeIds.insert(ast.getRootNode()->getUniqueNodeId());
+  expectedTaintedNodeIds.insert(function->getUniqueNodeId());
+  // add Function's Block
+  expectedTaintedNodeIds.insert(function->getBody()->getUniqueNodeId());
 
   // check tainted status
   // - make sure that the number of expected tainted nodes and the actual number of tainted nodes equals
   EXPECT_EQ(stv.getSecretTaintingList().size(), expectedTaintedNodeIds.size());
   // - check for each tainted if its expected to be tainted
-  for (auto &nodeId : stv.getSecretTaintingList()) EXPECT_EQ(expectedTaintedNodeIds.count(nodeId),1);
+  for (auto &nodeId : stv.getSecretTaintingList())
+    EXPECT_EQ(expectedTaintedNodeIds.count(nodeId), 1) << "Node (" << nodeId << ") is not expected to be tainted.";
 }
 
 TEST_F(SecretTaintingFixture, simpleAst_multipleStatementsTainted) { /* NOLINT */
@@ -99,14 +103,16 @@ TEST_F(SecretTaintingFixture, simpleAst_multipleStatementsTainted) { /* NOLINT *
   addStatementAndItsDescendantsToExpectedTaintedNodes(*std::prev(f->getBodyStatements().end(), 2));
   // return prod*3;
   addStatementAndItsDescendantsToExpectedTaintedNodes(*std::prev(f->getBodyStatements().end(), 1));
-  // as all statements are tainted, the function is expected to be tainted too
+  // as any statement within the Function's body is tainted, the Function and its Block is expected to be tainted too
   expectedTaintedNodeIds.insert(f->getUniqueNodeId());
+  expectedTaintedNodeIds.insert(f->getBody()->getUniqueNodeId());
 
   // check tainted status
   // - make sure that the number of expected tainted nodes and the actual number of tainted nodes equals
   EXPECT_EQ(stv.getSecretTaintingList().size(), expectedTaintedNodeIds.size());
   // - check for each tainted if its expected to be tainted
-  for (auto &nodeId : stv.getSecretTaintingList()) EXPECT_EQ(expectedTaintedNodeIds.count(nodeId),1);
+  for (auto &nodeId : stv.getSecretTaintingList())
+    EXPECT_EQ(expectedTaintedNodeIds.count(nodeId), 1) << "Node (" << nodeId << ") is not expected to be tainted.";
 }
 
 TEST_F(SecretTaintingFixture, complexAst_multipleNonSequentialStatementsTainted) { /* NOLINT */
@@ -120,8 +126,9 @@ TEST_F(SecretTaintingFixture, complexAst_multipleNonSequentialStatementsTainted)
 
   // add the statements expected to be tainted to expectedTaintedNodeIds
   auto func = ast.getRootNode()->castTo<Function>();
-  // Function computeTotal
+  // Function computeTotal and its Block
   expectedTaintedNodeIds.insert(func->getUniqueNodeId());
+  expectedTaintedNodeIds.insert(func->getBody()->getUniqueNodeId());
   // VarAssignm secret_float discount = computeDiscountOnServer(...)
   expectedTaintedNodeIds.insert(func->getBodyStatements().at(1)->getUniqueNodeId());
   // Datatype of VarAssignm
@@ -132,9 +139,10 @@ TEST_F(SecretTaintingFixture, complexAst_multipleNonSequentialStatementsTainted)
       func->getBodyStatements().at(1)->castTo<VarDecl>()->getInitializer()->castTo<Call>();
   expectedTaintedNodeIds.insert(callComputeDiscountOnServer->AbstractExpr::getUniqueNodeId());
   addStatementAndItsDescendantsToExpectedTaintedNodes(callComputeDiscountOnServer->getArguments().front());
-  // Function computeDiscountOnServer associated to the Call
+  // Function computeDiscountOnServer associated to the Call and the Function's Block
   auto funcComputeDiscountOnServer = callComputeDiscountOnServer->getFunc();
   expectedTaintedNodeIds.insert(funcComputeDiscountOnServer->getUniqueNodeId());
+  expectedTaintedNodeIds.insert(funcComputeDiscountOnServer->getBody()->getUniqueNodeId());
   // FunctionParameter 'bool qualifiesForSpecialDiscount', its associated Datatype and Variable
   expectedTaintedNodeIds.insert(funcComputeDiscountOnServer->getParameters().front()->getUniqueNodeId());
   addStatementAndItsDescendantsToExpectedTaintedNodes(funcComputeDiscountOnServer->getParameters().front());
@@ -159,7 +167,8 @@ TEST_F(SecretTaintingFixture, complexAst_multipleNonSequentialStatementsTainted)
   // - make sure that the number of expected tainted nodes and the actual number of tainted nodes equals
   EXPECT_EQ(stv.getSecretTaintingList().size(), expectedTaintedNodeIds.size());
   // - check for each tainted if its expected to be tainted
-  for (auto &nodeId : stv.getSecretTaintingList()) EXPECT_EQ(expectedTaintedNodeIds.count(nodeId),1);
+  for (auto &nodeId : stv.getSecretTaintingList())
+    EXPECT_EQ(expectedTaintedNodeIds.count(nodeId), 1) << "Node (" << nodeId << ") is not expected to be tainted.";
 }
 
 TEST_F(SecretTaintingFixture, unsupportedStatement_While) {  /* NOLINT */

@@ -474,12 +474,12 @@ void AstTestingGenerator::genAstEvalSix(Ast &ast) {
       {new FunctionParameter("int", new LiteralInt(33))},
       new Function("computeSecret",
                    new ParameterList({new FunctionParameter("int", new Variable("inputA"))}),
-                   new Block({new Return(
+                   new Block(new Return(
                        new BinaryExpr(
                            new Variable("inputA"),
                            OpSymb::multiplication,
                            new LiteralInt(32)))
-                   })))));
+                   )))));
 
   // return result;
   fnc->addStatement(new Return(new Variable("result")));
@@ -497,12 +497,12 @@ void AstTestingGenerator::genAstEvalSeven(Ast &ast) {
                              new BinaryExpr(new LiteralInt(11), OpSymb::addition, new LiteralInt(213)))},
       new Function("computeSecret",
                    new ParameterList({new FunctionParameter("int", new Variable("inputA"))}),
-                   new Block({new Return(
+                   new Block(new Return(
                        new BinaryExpr(
                            new Variable("inputA"),
                            OpSymb::multiplication,
                            new LiteralInt(32)))
-                   })))));
+                   )))));
 
   // return result;
   fnc->addStatement(new Return(new Variable("result")));
@@ -657,6 +657,7 @@ void AstTestingGenerator::genAstMultDepthTwo(Ast &ast) {
       new Datatype(Types::INT), new Variable("defaultC")));
   funcParams->addChild(new FunctionParameter(
       new Datatype(Types::BOOL), new Variable("useBase")));
+  func->setParameterList(funcParams);
 
   // int stdA = 512;
   func->addStatement(new VarDecl("stdA", 512));
