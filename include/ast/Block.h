@@ -28,7 +28,10 @@ class Block : public AbstractStatement {
   [[nodiscard]] std::vector<AbstractStatement *> *getStatements() const;
 
   int getMaxNumberChildren() override;
+
   bool supportsCircuitMode() override;
+
+  std::string toString() const override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_BLOCK_H

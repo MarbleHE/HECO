@@ -42,3 +42,15 @@ int ParameterList::getMaxNumberChildren() {
 bool ParameterList::supportsCircuitMode() {
   return true;
 }
+
+std::string ParameterList::toString() const {
+  // return an empty string if there are no children
+  if (children.empty()) return "";
+  // otherwise return the concatenated string representation for each of the children
+  std::stringstream ss;
+  for (auto &child : getChildrenNonNull()) {
+    ss << child->toString() << ", ";
+  }
+  ss << "\b\b" << std::endl;
+  return ss.str();
+}
