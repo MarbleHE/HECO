@@ -46,6 +46,7 @@ class Datatype : public AbstractNode {
   void setEncrypted(bool encrypted);
 
   void accept(Visitor &v) override;
+  bool supportsCircuitMode() override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_INCLUDE_UTILITIES_DATATYPE_H_

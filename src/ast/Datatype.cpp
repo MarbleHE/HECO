@@ -32,7 +32,10 @@ Datatype::operator Types() const {
 }
 
 std::string Datatype::toString() const {
-  return enumToString(val);
+  std::stringstream ss;
+  ss << (isEncrypted() ? "encrypted" : "plaintext") << " ";
+  ss << enumToString(val);
+  return ss.str();
 }
 
 bool Datatype::operator==(const Datatype &rhs) const {
@@ -69,4 +72,8 @@ std::string Datatype::getNodeName() const {
 }
 void Datatype::accept(Visitor &v) {
   v.visit(*this);
+}
+
+bool Datatype::supportsCircuitMode() {
+  return true;
 }
