@@ -53,10 +53,12 @@ Ast::evaluateCircuit(const std::unordered_map<std::string, AbstractLiteral *> &p
   // the circuit -> those do not need a value.
   auto isVarDeclNode = [](AbstractNode *node) { return dynamic_cast<VarDecl *>(node)!=nullptr; };
   for (auto &node : getAllNodes(isVarDeclNode)) {
-    varIdentifiersReqValue.erase(
-        std::find(varIdentifiersReqValue.begin(),
-                  varIdentifiersReqValue.end(),
-                  node->castTo<VarDecl>()->getVarTargetIdentifier()));
+    // find the element that does not need a value in varIdentifiersReqValue
+    auto iterator = std::find(varIdentifiersReqValue.begin(),
+                              varIdentifiersReqValue.end(),
+                              node->castTo<VarDecl>()->getVarTargetIdentifier());
+    // if an element was found -> delete it
+    if (iterator!=varIdentifiersReqValue.end()) varIdentifiersReqValue.erase(iterator);
   }
 
   // ensure that the provided number of parameters equals the number of required ones
