@@ -45,6 +45,7 @@ class LiteralInt : public AbstractLiteral {
   void print(std::ostream &str) const override;
 
   bool supportsCircuitMode() override;
+  bool isEqual(AbstractExpr *other) override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_LITERALINT_H

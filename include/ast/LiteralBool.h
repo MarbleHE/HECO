@@ -42,6 +42,7 @@ class LiteralBool : public AbstractLiteral {
   void print(std::ostream &str) const override;
 
   bool supportsCircuitMode() override;
+  bool isEqual(AbstractExpr *other) override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_LITERALBOOL_H

@@ -69,3 +69,8 @@ LiteralString *LiteralString::clone(bool keepOriginalUniqueNodeId) {
   if (this->isReversed) clonedNode->swapChildrenParents();
   return clonedNode;
 }
+
+bool LiteralString::isEqual(AbstractExpr *other) {
+  auto otherLiteralString = dynamic_cast<LiteralString *>(other);
+  return otherLiteralString!=nullptr && this->getValue()==otherLiteralString->getValue();
+}

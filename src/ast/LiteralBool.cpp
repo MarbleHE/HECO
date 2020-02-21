@@ -71,3 +71,8 @@ LiteralBool *LiteralBool::clone(bool keepOriginalUniqueNodeId) {
   if (this->isReversed) clonedNode->swapChildrenParents();
   return clonedNode;
 }
+
+bool LiteralBool::isEqual(AbstractExpr *other) {
+  auto otherLiteralBool = dynamic_cast<LiteralBool *>(other);
+  return otherLiteralBool!=nullptr && this->getValue()==otherLiteralBool->getValue();
+}

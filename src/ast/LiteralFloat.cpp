@@ -79,3 +79,8 @@ LiteralFloat *LiteralFloat::clone(bool keepOriginalUniqueNodeId) {
   if (this->isReversed) clonedNode->swapChildrenParents();
   return clonedNode;
 }
+
+bool LiteralFloat::isEqual(AbstractExpr *other) {
+  auto otherLiteralFloat = dynamic_cast<LiteralFloat *>(other);
+  return otherLiteralFloat!=nullptr && this->getValue()==otherLiteralFloat->getValue();
+}
