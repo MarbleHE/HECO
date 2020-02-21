@@ -20,20 +20,26 @@
 #include "UnaryExpr.h"
 #include "VarAssignm.h"
 #include "While.h"
+#include <functional>
 
 EvaluationVisitor::EvaluationVisitor(std::unordered_map<std::string, AbstractLiteral *> funcCallParameterValues)
     : variableValuesForEvaluation(std::move(funcCallParameterValues)) {
 }
 
+EvaluationVisitor::EvaluationVisitor() {}
+
 void EvaluationVisitor::visit(AbstractNode &elem) {
   results.push(std::vector<AbstractLiteral *>());
 }
+
 void EvaluationVisitor::visit(AbstractExpr &elem) {
   Visitor::visit(elem);
 }
+
 void EvaluationVisitor::visit(AbstractStatement &elem) {
   Visitor::visit(elem);
 }
+
 void EvaluationVisitor::visit(BinaryExpr &elem) {
   // we first need to evaluate the left-handside and right-handside as they can consists of nested binary expressions
   elem.getLeft()->accept(*this);
@@ -44,12 +50,14 @@ void EvaluationVisitor::visit(BinaryExpr &elem) {
   results.pop();
   results.push({elem.getOp()->applyOperator(l, r)});
 }
+
 void EvaluationVisitor::visit(Block &elem) {
   // a block statement itself does not return anything - its contained statements are just being executed
   for (auto &stmt : *elem.getStatements()) {
     stmt->accept(*this);
   }
 }
+
 void EvaluationVisitor::visit(Call &elem) {
   // validation: make sure that both Call and Function have the same number of arguments
   if (elem.getArguments().size()!=elem.getFunc()->getParameters().size()) {
@@ -99,10 +107,12 @@ void EvaluationVisitor::visit(Call &elem) {
 
   results.push(subAst.evaluateAst(paramValues, false));
 }
+
 void EvaluationVisitor::visit(CallExternal &elem) {
   throw std::runtime_error(
       "evaluateAst(Ast &ast) not implemented for class CallExternal yet! Consider using Call instead.");
 }
+
 void EvaluationVisitor::visit(Function &elem) {
   for (size_t i = 0; i < elem.getBodyStatements().size(); i++) {
     auto currentStatement = elem.getBodyStatements().at(i);
@@ -115,9 +125,11 @@ void EvaluationVisitor::visit(Function &elem) {
     currentStatement->accept(*this);
   }
 }
+
 void EvaluationVisitor::visit(FunctionParameter &elem) {
   Visitor::visit(elem);
 }
+
 void EvaluationVisitor::visit(If &elem) {
   elem.getCondition()->accept(*this);
   auto cond = dynamic_cast<LiteralBool *>(results.top().front());
@@ -131,18 +143,23 @@ void EvaluationVisitor::visit(If &elem) {
     elem.getElseBranch()->accept(*this);
   }
 }
+
 void EvaluationVisitor::visit(LiteralBool &elem) {
   results.push({&elem});
 }
+
 void EvaluationVisitor::visit(LiteralInt &elem) {
   results.push({&elem});
 }
+
 void EvaluationVisitor::visit(LiteralString &elem) {
   results.push({&elem});
 }
+
 void EvaluationVisitor::visit(LiteralFloat &elem) {
   results.push({&elem});
 }
+
 void EvaluationVisitor::visit(LogicalExpr &elem) {
   // we first need to evaluate the left-handside and right-handside as they can consists of nested binary expressions
   elem.getLeft()->accept(*this);
@@ -153,9 +170,11 @@ void EvaluationVisitor::visit(LogicalExpr &elem) {
   results.pop();
   results.push({elem.getOp()->applyOperator(l, r)});
 }
+
 void EvaluationVisitor::visit(Operator &elem) {
   Visitor::visit(elem);
 }
+
 void EvaluationVisitor::visit(Return &elem) {
   std::vector<AbstractLiteral *> result;
   for (auto &expr : elem.getReturnExpressions()) {
@@ -166,17 +185,20 @@ void EvaluationVisitor::visit(Return &elem) {
   }
   results.push(result);
 }
+
 void EvaluationVisitor::visit(UnaryExpr &elem) {
   elem.getRight()->accept(*this);
   auto r = results.top().front();
   results.push({elem.getOp()->applyOperator(r)});
 }
+
 void EvaluationVisitor::visit(VarAssignm &elem) {
   elem.getValue()->accept(*this);
   auto val = results.top().front();
   results.pop();
   updateVarValue(elem.getIdentifier(), val);
 }
+
 void EvaluationVisitor::visit(VarDecl &elem) {
   if (elem.getInitializer()!=nullptr) {
     elem.getInitializer()->accept(*this);
@@ -191,9 +213,11 @@ void EvaluationVisitor::visit(VarDecl &elem) {
     results.push({});
   }
 }
+
 void EvaluationVisitor::visit(Variable &elem) {
   results.push({getVarValue(elem.getIdentifier())});
 }
+
 void EvaluationVisitor::visit(While &elem) {
   elem.getCondition()->accept(*this);
   auto conds = results.top();
@@ -209,9 +233,11 @@ void EvaluationVisitor::visit(While &elem) {
     cond = *dynamic_cast<LiteralBool *>(ensureSingleEvaluationResult(conds));
   }
 }
+
 void EvaluationVisitor::visit(Ast &elem) {
   Visitor::visit(elem);
 }
+
 const std::vector<AbstractLiteral *> &EvaluationVisitor::getResults() {
   std::vector<AbstractLiteral *> *resultValues = &results.top();
   // print result if flag 'printResult' is set
@@ -250,6 +276,19 @@ void EvaluationVisitor::updateVarValue(const std::string &variableIdentifier, Ab
   // use the bracket [] operator to silently overwrite any existing variable value
   variableValuesForEvaluation[variableIdentifier] = newValue;
 }
+
+void EvaluationVisitor::updateVarValues(std::unordered_map<std::string, AbstractLiteral *> variableValues) {
+  std::for_each(variableValues.begin(),
+                variableValues.end(),
+                [this](const std::pair<std::string, AbstractLiteral *> &mapEntry) {
+                  this->updateVarValue(mapEntry.first, mapEntry.second);
+                });
+}
+
 void EvaluationVisitor::setFlagPrintResult(bool printResult) {
   EvaluationVisitor::flagPrintResult = printResult;
+}
+
+void EvaluationVisitor::reset() {
+  variableValuesForEvaluation.clear();
 }

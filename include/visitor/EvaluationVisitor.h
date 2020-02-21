@@ -22,7 +22,7 @@ class EvaluationVisitor : public Visitor {
   /// \param evaluationResult The vector of AbstractLiteral pointers to be tested.
   /// \return The single AbstractLiteral pointer, otherwise throws an exception.
   /// \throws std::logic_error if more than one element is in the vector of AbstractLiteral pointers.
-  AbstractLiteral *ensureSingleEvaluationResult(std::vector<AbstractLiteral *> evaluationResult);
+  static AbstractLiteral *ensureSingleEvaluationResult(std::vector<AbstractLiteral *> evaluationResult);
 
   /// This map stores the variables values and serves as lookup table and central storage during the evaluation process.
   /// - std::string: The variable identifier.
@@ -46,6 +46,7 @@ class EvaluationVisitor : public Visitor {
 
  public:
   explicit EvaluationVisitor(std::unordered_map<std::string, AbstractLiteral *> funcCallParameterValues);
+  EvaluationVisitor();
 
   void visit(AbstractNode &elem) override;
   void visit(AbstractExpr &elem) override;
@@ -72,6 +73,8 @@ class EvaluationVisitor : public Visitor {
   void visit(Ast &elem) override;
   const std::vector<AbstractLiteral *> &getResults();
   void setFlagPrintResult(bool printResult);
+  void reset();
+  void updateVarValues(std::unordered_map<std::string, AbstractLiteral *> variableValues);
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_VISITOR_EVALUATIONVISITOR_H_
