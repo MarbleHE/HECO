@@ -20,9 +20,7 @@ class OpSymb {
 
   enum UnaryOp : char {
     // logical operator
-    negation = 0,
-    // arithmetic operator
-    increment, decrement
+    negation = 0
   };
 
   static std::string getTextRepr(BinaryOp bop) {
@@ -36,7 +34,7 @@ class OpSymb {
   }
 
   static std::string getTextRepr(UnaryOp uop) {
-    static const std::string unaryOpStrings[] = {"!", "++", "--"};
+    static const std::string unaryOpStrings[] = {"!"};
     return unaryOpStrings[uop];
   }
 

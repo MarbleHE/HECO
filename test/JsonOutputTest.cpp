@@ -187,8 +187,6 @@ TEST(JsonOutputTest, Operator) { /* NOLINT */
   auto opSub = new Operator(OpSymb::BinaryOp::subtraction);
   EXPECT_EQ(opSub->getOperatorString(), OpSymb::getTextRepr(OpSymb::subtraction));
 
-  auto opDec = new Operator(OpSymb::UnaryOp::decrement);
-  EXPECT_EQ(opDec->getOperatorString(), OpSymb::getTextRepr(OpSymb::decrement));
 
   auto opAnd = new Operator(OpSymb::LogCompOp::logicalAnd);
   EXPECT_EQ(opAnd->getOperatorString(), OpSymb::getTextRepr(OpSymb::logicalAnd));
@@ -332,7 +330,7 @@ TEST(JsonOutputTest, If) { /* NOLINT */
 TEST(JsonOutputTest, While) { /* NOLINT */
   // while (i < 10) {
   //   z = z*i;
-  //   i++;
+  //   !i;
   // }
   std::vector<AbstractStatement *> blockStatements;
   blockStatements.emplace_back(
@@ -342,7 +340,7 @@ TEST(JsonOutputTest, While) { /* NOLINT */
                          OpSymb::multiplication,
                          new Variable("i"))));
   blockStatements.emplace_back(
-      new VarAssignm("i", new UnaryExpr(OpSymb::increment, new Variable("i"))));
+      new VarAssignm("i", new UnaryExpr(OpSymb::negation, new Variable("i"))));
 
   auto whileStmt = new While(
       new LogicalExpr(new Variable("i"), OpSymb::smaller, new LiteralInt(10)),

@@ -77,8 +77,6 @@ AbstractLiteral *Operator::applyOperator(AbstractLiteral *rhs) {
 AbstractLiteral *Operator::applyOperator(LiteralInt *rhs) {
   int value = rhs->getValue();
   if (this->equals(OpSymb::negation)) return new LiteralInt(-value);
-  else if (this->equals(OpSymb::increment)) return new LiteralInt(++value);
-  else if (this->equals(OpSymb::decrement)) return new LiteralInt(--value);
   else
     throw std::logic_error("Could not apply unary operator (" + this->getOperatorString() + ") on (int).");
 }

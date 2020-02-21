@@ -501,12 +501,12 @@ TEST_F(UnaryExprFixture, UnaryExprStandardConstructor) {  /* NOLINT */
 
 TEST_F(UnaryExprFixture, UnaryExprAddChildException_NoEmptyChildSpotAvailable) {  /* NOLINT */
   auto *unaryExpr = new UnaryExpr(opSymbNegation, literalBoolTrue);
-  EXPECT_THROW(unaryExpr->addChild(new Operator(OpSymb::decrement), false), std::logic_error);
+  EXPECT_THROW(unaryExpr->addChild(new Operator(OpSymb::negation), false), std::logic_error);
 }
 
 TEST_F(UnaryExprFixture, UnaryExprAddChildException_TooManyChildrenAdded) {  /* NOLINT */
   auto *unaryExpr = new UnaryExpr(opSymbNegation, literalBoolTrue);
-  EXPECT_THROW(unaryExpr->addChildren({new Operator(OpSymb::decrement), new LiteralBool(false)}, false),
+  EXPECT_THROW(unaryExpr->addChildren({new Operator(OpSymb::negation), new LiteralBool(false)}, false),
                std::logic_error);
 }
 
@@ -514,7 +514,7 @@ TEST_F(UnaryExprFixture, UnaryExprtion_AddChildSuccess) {  /* NOLINT */
   auto *unaryExpr = new UnaryExpr(opSymbNegation, literalBoolTrue);
 
   unaryExpr->removeChild(unaryExpr->getOp());
-  auto *newOperator = new Operator(OpSymb::decrement);
+  auto *newOperator = new Operator(OpSymb::negation);
   unaryExpr->addChild(newOperator, true);
 
   // children

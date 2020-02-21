@@ -402,8 +402,8 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_UnaryExpr) {  /* NOLINT */
   auto clonedUnaryExpr = dynamic_cast<UnaryExpr *>(unaryExpr->clone(keepOriginalId));
 
   // test if changing original also modifies the copy
-  unaryExpr->setAttributes(OpSymb::UnaryOp::decrement, new LiteralInt(22));
-  ASSERT_TRUE(unaryExpr->getOp()->equals(OpSymb::UnaryOp::decrement));
+  unaryExpr->setAttributes(OpSymb::UnaryOp::negation, new LiteralInt(22));
+  ASSERT_TRUE(unaryExpr->getOp()->equals(OpSymb::UnaryOp::negation));
   ASSERT_EQ(unaryExpr->getRight()->castTo<LiteralInt>()->getValue(), 22);
   // check cloned node
   ASSERT_TRUE(clonedUnaryExpr->getOp()->equals(OpSymb::UnaryOp::negation));
