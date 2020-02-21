@@ -34,7 +34,8 @@ Call::~Call() {
 Call::Call(Function *func) : func(func) {
 }
 
-Call::Call(std::vector<FunctionParameter *> arguments, Function *func) : func(func), arguments(std::move(arguments)) {
+Call::Call(std::vector<FunctionParameter *> parameterValuesForCalledFunction, Function *func)
+    : func(func), arguments(std::move(parameterValuesForCalledFunction)) {
 }
 
 Function *Call::getFunc() const {

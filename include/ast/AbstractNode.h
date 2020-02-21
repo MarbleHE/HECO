@@ -7,17 +7,16 @@
 #include <string>
 #include <nlohmann/json.hpp>
 #include "Visitor.h"
+#include <typeinfo>
 
 using json = nlohmann::json;
 
 class AbstractNode {
  protected:
-  /// Temporarily stores the reserved node ID until the first call of getUniqueNodeId() at which the reserved ID is
+  /// Stores the reserved node ID until the first call of getUniqueNodeId() at which the reserved ID is
   /// fetched and the node's ID is assigned (field uniqueNodeId) based on the node's name and this reserved ID.
-  /// This is a workaround because getNodeName() is a virtual method that cannot be called from derived classes and
-  /// their constructor. After retrieving the node ID and assigning it to the uniqueNodeId field, it is deleted from
-  /// this map.
-
+  /// This is a workaround because getNodeName() is a virtual method that cannot be called from derived classes'
+  /// constructor.
   int assignedNodeId{-1};
 
   /// Stores the children of the current node.
@@ -183,10 +182,12 @@ class AbstractNode {
       return castedNode;
     } else {
       std::stringstream outputMsg;
-      outputMsg << "Cannot cast object of type AbstractNode to given class ";
+      outputMsg << "Cannot cast object to given class ";
       outputMsg << typeid(T).name() << ". ";
       outputMsg << "Because node (" << this->getUniqueNodeId() << ") is of type ";
-      outputMsg << this->getNodeName() << ".";
+      // TODO Find a better way to handle this as getNodeName() throws an exception because it is pure virtual.
+      //outputMsg << this->getNodeName() << ".";
+      outputMsg << typeid(this).name() << ".";
       throw std::logic_error(outputMsg.str());
     }
   }

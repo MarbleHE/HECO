@@ -20,7 +20,7 @@ class ParameterList : public AbstractStatement {
 
   bool supportsCircuitMode() override;
 
-  std::string toString() const override;
+  [[nodiscard]] std::string toString() const override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_PARAMETERLIST_H_

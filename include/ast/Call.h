@@ -13,7 +13,7 @@ class Call : public AbstractExpr {
   std::vector<FunctionParameter *> arguments;
 
  public:
-  Call(std::vector<FunctionParameter *> arguments, Function *func);
+  Call(std::vector<FunctionParameter *> parameterValuesForCalledFunction, Function *func);
 
   explicit Call(Function *func);
 
