@@ -70,10 +70,8 @@ bool FunctionParameter::supportsCircuitMode() {
 }
 
 void FunctionParameter::setAttributes(Datatype *datatype, AbstractExpr *value) {
-  // update tree structure
   removeChildren();
-  addChildren({datatype, value}, false);
-  AbstractNode::addParentTo(this, {datatype, value});
+  addChildren({datatype, value}, true);
 }
 
 bool FunctionParameter::operator==(const FunctionParameter &rhs) const {

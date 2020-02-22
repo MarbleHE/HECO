@@ -128,8 +128,6 @@ class AbstractNode {
 
   bool hasParent(AbstractNode *n);
 
-  static void addParentTo(AbstractNode *parentNode, std::vector<AbstractNode *> nodesToAddParentTo);
-
   void swapChildrenParents();
   /** @} */ // End of parents group
 

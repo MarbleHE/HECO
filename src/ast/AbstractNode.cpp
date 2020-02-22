@@ -163,12 +163,6 @@ void AbstractNode::removeParents() {
   parents.clear();
 }
 
-void AbstractNode::addParentTo(AbstractNode *parentNode, std::vector<AbstractNode *> nodesToAddParentTo) {
-  std::for_each(nodesToAddParentTo.begin(), nodesToAddParentTo.end(), [&](AbstractNode *n) {
-    if (n!=nullptr) n->addParent(parentNode);
-  });
-}
-
 void AbstractNode::swapChildrenParents() {
   std::vector<AbstractNode *> oldParents = this->parents;
   this->parents = this->children;

@@ -60,6 +60,5 @@ bool If::supportsCircuitMode() {
 void If::setAttributes(AbstractExpr *condition, AbstractStatement *thenBranch, AbstractStatement *elseBranch) {
   // update tree structure
   removeChildren();
-  addChildren({condition, thenBranch, elseBranch}, false);
-  AbstractNode::addParentTo(this, {condition, thenBranch, elseBranch});
+  addChildren({condition, thenBranch, elseBranch}, true);
 }

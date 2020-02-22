@@ -55,10 +55,8 @@ BinaryExpr *BinaryExpr::contains(BinaryExpr *bexpTemplate, AbstractExpr *exclude
 }
 
 void BinaryExpr::setAttributes(AbstractExpr *leftOperand, Operator *operatore, AbstractExpr *rightOperand) {
-  // update tree structure
   removeChildren();
-  addChildren({leftOperand, operatore, rightOperand}, false);
-  AbstractNode::addParentTo(this, {leftOperand, operatore, rightOperand});
+  addChildren({leftOperand, operatore, rightOperand}, true);
 }
 
 void BinaryExpr::swapOperandsLeftAWithRightB(BinaryExpr *bexpA, BinaryExpr *bexpB) {

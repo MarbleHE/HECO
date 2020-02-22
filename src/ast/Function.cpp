@@ -33,7 +33,7 @@ Function::Function(std::string functionName, ParameterList *functionParameters,
 }
 
 void Function::addStatement(AbstractStatement *statement) {
-  if (children.size() < 1) addChild(new ParameterList());
+  if (children.empty()) addChild(new ParameterList());
   getBody()->addChild(statement);
 }
 

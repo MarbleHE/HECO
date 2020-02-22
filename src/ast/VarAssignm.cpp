@@ -60,8 +60,7 @@ int VarAssignm::getMaxNumberChildren() {
 
 void VarAssignm::setAttribute(AbstractExpr *assignmentValue) {
   removeChildren();
-  addChildren({assignmentValue}, false);
-  addParentTo(this, {assignmentValue});
+  addChildren({assignmentValue}, true);
 }
 
 VarAssignm *VarAssignm::clone(bool keepOriginalUniqueNodeId) {

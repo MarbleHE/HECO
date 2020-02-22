@@ -83,8 +83,7 @@ int LogicalExpr::getMaxNumberChildren() {
 void LogicalExpr::setAttributes(AbstractExpr *leftOperand, Operator *operatore, AbstractExpr *rightOperand) {
   // update tree structure
   removeChildren();
-  addChildren({leftOperand, operatore, rightOperand}, false);
-  AbstractNode::addParentTo(this, {leftOperand, operatore, rightOperand});
+  addChildren({leftOperand, operatore, rightOperand}, true);
 }
 
 bool LogicalExpr::supportsCircuitMode() {

@@ -44,8 +44,7 @@ void Return::setAttributes(std::vector<AbstractExpr *> returnExpr) {
   removeChildren();
   // we need to convert vector of AbstractExpr* into vector of AbstractNode* prior calling addChildren
   std::vector<AbstractNode *> returnExprAsNodes(returnExpr.begin(), returnExpr.end());
-  addChildren(returnExprAsNodes, false);
-  addParentTo(this, returnExprAsNodes);
+  addChildren(returnExprAsNodes, true);
 }
 
 std::vector<AbstractExpr *> Return::getReturnExpressions() const {
