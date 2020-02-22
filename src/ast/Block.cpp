@@ -6,8 +6,8 @@
 
 json Block::toJson() const {
   std::vector<AbstractStatement *> stmts;
-  stmts.reserve(children.size());
-  for (auto c : children) {
+  stmts.reserve(countChildrenNonNull());
+  for (auto c : getChildrenNonNull()) {
     stmts.push_back(dynamic_cast<AbstractStatement *>(c));
   }
   json j = {{"type", getNodeName()},
@@ -16,19 +16,15 @@ json Block::toJson() const {
 }
 
 Block::Block(AbstractStatement *stat) {
-  children.emplace_back(stat);
+  this->addChild(stat);
 }
 
 Block::Block(std::vector<AbstractStatement *> *statements) {
   if (statements->empty()) {
-    std::string errorMsg = "Block statement vector is empty!"
-                           "If this is intended, use the parameter-less constructor instead.";
-    throw std::logic_error(errorMsg);
+    throw std::logic_error("Block statement vector is empty!"
+                           "If this is intended, use the parameter-less constructor instead.");
   }
-  children.reserve(statements->size());
-  for (auto s : *statements) {
-    children.push_back(s);
-  }
+  addChildren(std::vector<AbstractNode *>(statements->begin(), statements->end()), true);
 }
 
 void Block::accept(Visitor &v) {
@@ -41,8 +37,8 @@ std::string Block::getNodeName() const {
 
 std::vector<AbstractStatement *> *Block::getStatements() const {
   auto stmts = new std::vector<AbstractStatement *>;
-  stmts->reserve(children.size());
-  for (auto c : children) {
+  stmts->reserve(countChildrenNonNull());
+  for (auto c : getChildrenNonNull()) {
     stmts->emplace_back(dynamic_cast<AbstractStatement *>(c));
   }
   return stmts;
@@ -70,7 +66,7 @@ bool Block::supportsCircuitMode() {
 }
 std::string Block::toString() const {
   // return an empty string if there are no children
-  if (children.empty()) return "";
+  if (getChildrenNonNull().empty()) return "";
   // otherwise return the concatenated string representation for each of the children
   std::stringstream ss;
   for (auto &child : getChildrenNonNull()) {
