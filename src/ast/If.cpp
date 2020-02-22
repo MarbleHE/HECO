@@ -4,17 +4,18 @@
 json If::toJson() const {
   json j;
   j["type"] = getNodeName();
-  j["condition"] = this->condition->toJson();
-  if (thenBranch!=nullptr) j["thenBranch"] = this->thenBranch->toJson();
-  if (elseBranch!=nullptr) j["elseBranch"] = this->elseBranch->toJson();
+  j["condition"] = getCondition()->toJson();
+  if (getThenBranch()!=nullptr) j["thenBranch"] = getThenBranch()->toJson();
+  if (getElseBranch()!=nullptr) j["elseBranch"] = getElseBranch()->toJson();
   return j;
 }
 
-If::If(AbstractExpr *condition, AbstractStatement *thenBranch, AbstractStatement *elseBranch)
-    : condition(condition), thenBranch(thenBranch), elseBranch(elseBranch) {}
+If::If(AbstractExpr *condition, AbstractStatement *thenBranch, AbstractStatement *elseBranch) {
+  setAttributes(condition, thenBranch, elseBranch);
+}
 
-If::If(AbstractExpr *condition, AbstractStatement *thenBranch) : condition(condition), thenBranch(thenBranch) {
-  elseBranch = nullptr;
+If::If(AbstractExpr *condition, AbstractStatement *thenBranch) {
+  setAttributes(condition, thenBranch, nullptr);
 }
 
 void If::accept(Visitor &v) {
@@ -26,28 +27,39 @@ std::string If::getNodeName() const {
 }
 
 AbstractExpr *If::getCondition() const {
-  return condition;
+  return getChildAtIndex(0)->castTo<AbstractExpr>();
 }
 
 AbstractStatement *If::getThenBranch() const {
-  return thenBranch;
+  return getChildAtIndex(1)->castTo<AbstractStatement>();
 }
 
 AbstractStatement *If::getElseBranch() const {
-  return elseBranch;
+  // make sure that there exists an Else branch
+  if (getChildAtIndex(2)!=nullptr) return getChildAtIndex(2)->castTo<AbstractStatement>();
+  return nullptr;
 }
 
-If::~If() {
-  delete condition;
-  delete thenBranch;
-  delete elseBranch;
-}
+If::~If() = default;
 
 If *If::clone(bool keepOriginalUniqueNodeId) {
-  auto clonedNode = new If(this->condition->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
-                           this->thenBranch->clone(keepOriginalUniqueNodeId)->castTo<AbstractStatement>(),
-                           this->elseBranch->clone(keepOriginalUniqueNodeId)->castTo<AbstractStatement>());
+  auto clonedNode = new If(getCondition()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
+                           getThenBranch()->clone(keepOriginalUniqueNodeId)->castTo<AbstractStatement>(),
+                           getElseBranch()->clone(keepOriginalUniqueNodeId)->castTo<AbstractStatement>());
   if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
   if (this->isReversed) clonedNode->swapChildrenParents();
   return clonedNode;
+}
+int If::getMaxNumberChildren() {
+  return 3;
+}
+bool If::supportsCircuitMode() {
+  return true;
+}
+
+void If::setAttributes(AbstractExpr *condition, AbstractStatement *thenBranch, AbstractStatement *elseBranch) {
+  // update tree structure
+  removeChildren();
+  addChildren({condition, thenBranch, elseBranch}, false);
+  AbstractNode::addParentTo(this, {condition, thenBranch, elseBranch});
 }

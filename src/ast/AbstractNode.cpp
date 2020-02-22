@@ -61,8 +61,10 @@ void AbstractNode::addChild(AbstractNode *child, bool addBackReference) {
 }
 
 void AbstractNode::addChildren(const std::vector<AbstractNode *> &childrenToAdd, bool addBackReference) {
-  // check whether the number of children to be added does not exceed the number of maximum supported children
-  if (childrenToAdd.size() > getMaxNumberChildren()) {
+  auto allowsInfiniteNumberOfChildren = (getMaxNumberChildren()==-1);
+
+  // check whether the number of children to be added does not exceed the number available children spots
+  if (!allowsInfiniteNumberOfChildren && childrenToAdd.size() > (getMaxNumberChildren() - countChildrenNonNull())) {
     throw std::invalid_argument(
         "AbstractNode " + getUniqueNodeId() + " of type " + getNodeName() + " does not allow more than "
             + std::to_string(getMaxNumberChildren()) + " children!");
@@ -80,9 +82,8 @@ void AbstractNode::addChildren(const std::vector<AbstractNode *> &childrenToAdd,
     if (addBackReference) childToAdd->addParent(this);
   };
 
-  if (getChildren().empty() || getMaxNumberChildren()
-      ==
-          -1) {  // if the list of children is still empty, we can simply add all nodes in one batch
+  if (getChildren().empty() || allowsInfiniteNumberOfChildren) {
+    // if the children list is empty, add all nodes in one batch
     // add children to the vector's end
     children.insert(children.end(), childrenToAdd.begin(), childrenToAdd.end());
     std::for_each(children.begin(), children.end(), doInsertPostAction);
@@ -188,8 +189,8 @@ std::string AbstractNode::toString() const {
   return this->toJson().dump();
 }
 
-void AbstractNode::setUniqueNodeId(const std::string &unique_node_id) {
-  uniqueNodeId = unique_node_id;
+void AbstractNode::setUniqueNodeId(const std::string &newUniqueNodeId) {
+  uniqueNodeId = newUniqueNodeId;
 }
 
 std::vector<AbstractNode *> AbstractNode::getAncestors() {

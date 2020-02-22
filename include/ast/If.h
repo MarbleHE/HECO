@@ -1,16 +1,11 @@
-#ifndef AST_OPTIMIZER_INCLUDE_IF_H
-#define AST_OPTIMIZER_INCLUDE_IF_H
+#ifndef AST_OPTIMIZER_INCLUDE_AST_IF_H_
+#define AST_OPTIMIZER_INCLUDE_AST_IF_H_
 
 #include "AbstractStatement.h"
 #include "AbstractExpr.h"
 #include <string>
 
 class If : public AbstractStatement {
- private:
-  AbstractExpr *condition;
-  AbstractStatement *thenBranch;
-  AbstractStatement *elseBranch;
-
  public:
   If(AbstractExpr *condition, AbstractStatement *thenBranch);
 
@@ -32,6 +27,10 @@ class If : public AbstractStatement {
 
   [[nodiscard]] AbstractStatement *getElseBranch() const;
 
+  int getMaxNumberChildren() override;
+
+  bool supportsCircuitMode() override;
+  void setAttributes(AbstractExpr *condition, AbstractStatement *thenBranch, AbstractStatement *elseBranch);
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_IF_H
+#endif //AST_OPTIMIZER_INCLUDE_AST_IF_H_

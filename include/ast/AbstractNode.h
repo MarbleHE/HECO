@@ -152,7 +152,7 @@ class AbstractNode {
 
   [[nodiscard]] virtual AbstractNode *clone(bool keepOriginalUniqueNodeId) = 0;
 
-  void setUniqueNodeId(const std::string &unique_node_id);
+  void setUniqueNodeId(const std::string &newUniqueNodeId);
 
   /// This method returns True iff the class derived from the AbstractNode class properly makes use of the child/parent fields
   /// as it would be expected in a circuit.
@@ -182,12 +182,10 @@ class AbstractNode {
       return castedNode;
     } else {
       std::stringstream outputMsg;
-      outputMsg << "Cannot cast object to given class ";
+      outputMsg << "Cannot cast object of type AbstractNode to given class ";
       outputMsg << typeid(T).name() << ". ";
       outputMsg << "Because node (" << this->getUniqueNodeId() << ") is of type ";
-      // TODO Find a better way to handle this as getNodeName() throws an exception because it is pure virtual.
-      //outputMsg << this->getNodeName() << ".";
-      outputMsg << typeid(this).name() << ".";
+      outputMsg << this->getNodeName() << ".";
       throw std::logic_error(outputMsg.str());
     }
   }
