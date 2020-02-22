@@ -48,6 +48,7 @@ set(TEST_FILES
         LiteralTest.cpp
         NodeTest.cpp
         NodeCloneRecursiveDeepTest.cpp
+        CompileTimeExpressionSimplifierTest.cpp
         SecretTaintingTest.cpp)
 
 add_executable(testing-all
