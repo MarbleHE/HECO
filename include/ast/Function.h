@@ -47,7 +47,9 @@ class Function : public AbstractStatement {
   [[nodiscard]] Block* getBody() const;
 
   void setParameterList(ParameterList *paramsVec);
+
   int getMaxNumberChildren() override;
+
   bool supportsCircuitMode() override;
 };
 

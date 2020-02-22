@@ -194,13 +194,11 @@ std::set<AbstractNode *> Ast::getAllNodes(const std::function<bool(AbstractNode 
 
 void Ast::deleteNode(AbstractNode **node, bool deleteSubtreeRecursively) {
   AbstractNode *nodePtr = *node;
-  nodePtr->getUniqueNodeId();
 
   // handle the node's children
   if (deleteSubtreeRecursively) {
     // if deleteSubtreeRecursively is set, we need to delete all children first
     for (auto &c : nodePtr->getChildrenNonNull()) {
-      c->getUniqueNodeId();
       deleteNode(&c, true);
     }
   } else if (!nodePtr->getChildrenNonNull().empty()) {
