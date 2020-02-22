@@ -120,6 +120,24 @@ TEST(ChildParentTests, Block) {  /* NOLINT */
   ASSERT_EQ(blockStatement->getMaxNumberChildren(), -1);
 }
 
+TEST(ChildParentTests, Block_addAdditionalChild) {  /* NOLINT */
+  auto varDecl = new VarDecl("varX", 22);
+  auto blockStatement = new Block(varDecl);
+  auto varAssignm = new VarAssignm("varX", new LiteralInt(531));
+  blockStatement->addChild(varAssignm);
+
+  ASSERT_TRUE(blockStatement->supportsCircuitMode());
+  ASSERT_EQ(blockStatement->getMaxNumberChildren(), -1);
+
+  ASSERT_EQ(blockStatement->getChildren().size(), 2);
+  ASSERT_EQ(blockStatement->getParents().size(), 0);
+
+  EXPECT_EQ(blockStatement->getChildAtIndex(0)->getParents().size(), 1);
+  EXPECT_EQ(blockStatement->getChildAtIndex(0), varDecl);
+  EXPECT_EQ(blockStatement->getChildAtIndex(1)->getParents().size(), 1);
+  EXPECT_EQ(blockStatement->getChildAtIndex(1), varAssignm);
+}
+
 TEST(ChildParentTests, Call) {  /* NOLINT */
   auto func = new Function("computeSecretX");
   auto funcParam = new FunctionParameter(new Datatype(Types::INT), new LiteralInt(221));

@@ -79,14 +79,14 @@ void AbstractNode::addChildren(const std::vector<AbstractNode *> &childrenToAdd,
   // these actions are to be performed after a node was added to the list of children
   auto doInsertPostAction = [&](AbstractNode *childToAdd) {
     // if option 'addBackReference' is true, we add a back reference to the child as parent
-    if (addBackReference) childToAdd->addParent(this);
+    if (addBackReference && childToAdd!=nullptr) childToAdd->addParent(this);
   };
 
   if (getChildren().empty() || allowsInfiniteNumberOfChildren) {
-    // if the children list is empty, add all nodes in one batch
-    // add children to the vector's end
+    // if the children list is empty or the node type supports an unlimited number of children, then add all nodes in
+    // one batch to the children vector's end
     children.insert(children.end(), childrenToAdd.begin(), childrenToAdd.end());
-    std::for_each(children.begin(), children.end(), doInsertPostAction);
+    std::for_each(childrenToAdd.begin(), childrenToAdd.end(), doInsertPostAction);
     // if this nodes accepts an infinite number of children, pre-filling the slots does not make any sense -> skip it
     if (getMaxNumberChildren()!=-1) {
       // fill remaining slots with nullptr values
