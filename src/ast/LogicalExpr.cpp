@@ -102,3 +102,12 @@ LogicalExpr *LogicalExpr::clone(bool keepOriginalUniqueNodeId) {
   return clonedLogicalExpr;
 }
 
+bool LogicalExpr::isEqual(AbstractExpr *other) {
+  if (auto otherLexp = dynamic_cast<LogicalExpr *>(other)) {
+    auto sameLeft = this->getLeft()->isEqual(otherLexp->getLeft());
+    auto sameRight = this->getRight()->isEqual(otherLexp->getRight());
+    auto sameOp = *this->getOp()==*otherLexp->getOp();
+    return sameLeft && sameRight && sameOp;
+  }
+  return false;
+}

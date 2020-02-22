@@ -49,6 +49,7 @@ class LogicalExpr : public AbstractExpr {
   AbstractNode *cloneFlat() override;
 
   void setAttributes(AbstractExpr *leftOperand, Operator *operatore, AbstractExpr *rightOperand);
+  bool isEqual(AbstractExpr *other) override;
 
  protected:
   int getMaxNumberChildren() override;
