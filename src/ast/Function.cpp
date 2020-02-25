@@ -46,7 +46,7 @@ void Function::accept(Visitor &v) {
 }
 
 std::vector<AbstractStatement *> Function::getBodyStatements() const {
-  return *getBody()->getStatements();
+  return getBody()->getStatements();
 }
 
 void to_json(json &j, const Function &func) {
@@ -99,8 +99,8 @@ Block *Function::getBody() const {
 Function::Function(std::string functionName,
                    std::vector<FunctionParameter *> functionParameters,
                    std::vector<AbstractStatement *> functionStatements) : name(std::move(functionName)) {
-  addChild(new ParameterList(functionParameters));
-  addChild(new Block(&functionStatements));
+  addChild(new ParameterList(std::move(functionParameters)));
+  addChild(new Block(std::move(functionStatements)));
 }
 int Function::getMaxNumberChildren() {
   return 2;

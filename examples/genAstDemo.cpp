@@ -163,7 +163,7 @@ void generateDemoTwo(Ast &ast) {
               new LiteralBool(true))),
       // { sum = sum + encryptedB; randInt--; };
       new Block(
-          new std::vector<AbstractStatement *>{
+          std::vector<AbstractStatement *>{
               // sum = sum + encryptedB
               new VarAssignm("sum", new BinaryExpr(
                   new Variable("sum"),

@@ -317,7 +317,7 @@ TEST(JsonOutputTest, If) { /* NOLINT */
       new VarAssignm("isValid", new LiteralBool(false)),
       new VarAssignm("c", new BinaryExpr(new Variable("a"), OpSymb::subtraction, new Variable("z")))
   };
-  auto *elseBranch = new Block(&elseStatement);
+  auto *elseBranch = new Block(elseStatement);
   auto ifStmt = new If(condition, thenBranch, elseBranch);
 
   // retrieve expected result
@@ -344,7 +344,7 @@ TEST(JsonOutputTest, While) { /* NOLINT */
 
   auto whileStmt = new While(
       new LogicalExpr(new Variable("i"), OpSymb::smaller, new LiteralInt(10)),
-      new Block(&blockStatements));
+      new Block(blockStatements));
 
   // retrieve expected result
   std::ifstream f("../../test/expected_output_large/JsonOutputTest/While.json");

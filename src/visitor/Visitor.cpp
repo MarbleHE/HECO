@@ -56,7 +56,7 @@ void Visitor::visit(BinaryExpr &elem) {
 void Visitor::visit(Block &elem) {
   curScope->addStatement(&elem);
   changeToInnerScope(elem.getUniqueNodeId());
-  for (auto &stat : *elem.getStatements()) {
+  for (auto &stat : elem.getStatements()) {
     stat->accept(*this);
   }
   changeToOuterScope();

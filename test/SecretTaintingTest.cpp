@@ -150,7 +150,7 @@ TEST_F(SecretTaintingFixture, complexAst_multipleNonSequentialStatementsTainted)
   addStatementAndItsDescendantsToExpectedTaintedNodes(funcComputeDiscountOnServer->getBodyStatements().at(0));
   // Block (statement 1 in computeDiscountOnServer)
   expectedTaintedNodeIds.insert(funcComputeDiscountOnServer->getBodyStatements().at(1)->getUniqueNodeId());
-  for (auto statement : *funcComputeDiscountOnServer->getBodyStatements().at(1)->castTo<Block>()->getStatements())
+  for (auto statement : funcComputeDiscountOnServer->getBodyStatements().at(1)->castTo<Block>()->getStatements())
     addStatementAndItsDescendantsToExpectedTaintedNodes(statement);
   // all other statements in computeDiscountOnServer body
   auto bodyStatements = funcComputeDiscountOnServer->getBodyStatements();

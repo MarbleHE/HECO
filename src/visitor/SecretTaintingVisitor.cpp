@@ -36,7 +36,7 @@ void SecretTaintingVisitor::visit(Block &elem) {
   Visitor::visit(elem);
   // if after processing all the Block's children, any of them are tainted, this block also will be tainted
   auto statements = elem.getStatements();
-  auto statementsAsNodes = std::vector<AbstractNode *>(statements->begin(), statements->end());
+  auto statementsAsNodes = std::vector<AbstractNode *>(statements.begin(), statements.end());
   if (anyNodesAreTainted(statementsAsNodes))
     addTaintedNode(elem.castTo<AbstractNode>());
 }

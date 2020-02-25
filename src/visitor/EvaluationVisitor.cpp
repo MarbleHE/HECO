@@ -53,7 +53,7 @@ void EvaluationVisitor::visit(BinaryExpr &elem) {
 
 void EvaluationVisitor::visit(Block &elem) {
   // a block statement itself does not return anything - its contained statements are just being executed
-  for (auto &stmt : *elem.getStatements()) {
+  for (auto &stmt : elem.getStatements()) {
     stmt->accept(*this);
   }
 }

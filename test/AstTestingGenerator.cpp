@@ -446,7 +446,7 @@ void AstTestingGenerator::genAstEvalFive(Ast &ast) {
               new LiteralBool(true))),
       // body: { sum = sum + encryptedB; randInt--; };
       new Block(
-          new std::vector<AbstractStatement *>{
+          std::vector<AbstractStatement *>{
               // sum = sum + encryptedB
               new VarAssignm("sum", new BinaryExpr(
                   new Variable("sum"),
@@ -587,7 +587,7 @@ void AstTestingGenerator::genAstPrintVisitorTwo(Ast &ast) {
               new LiteralBool(true))),
       // { sum = sum + encryptedB; randInt--; };
       new Block(
-          new std::vector<AbstractStatement *>{
+          std::vector<AbstractStatement *>{
               // sum = sum + encryptedB
               new VarAssignm("sum", new BinaryExpr(
                   new Variable("sum"),

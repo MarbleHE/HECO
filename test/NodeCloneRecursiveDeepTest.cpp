@@ -134,17 +134,17 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_If) {  /* NOLINT */
 
   // check if changing the then branch in the original also changes the cloned If statement
   *ifStmtThenBranch = *new Block(new VarAssignm("beta", new LiteralBool(false)));
-  auto ifFirstThenStatement = ifStmt->getThenBranch()->castTo<Block>()->getStatements()->front();
+  auto ifFirstThenStatement = ifStmt->getThenBranch()->castTo<Block>()->getStatements().front();
   ASSERT_EQ(ifFirstThenStatement->castTo<VarAssignm>()->getIdentifier(), "beta");
   auto clonedIfStmtFirstThenStatement =
-      clonedIfStmt->getThenBranch()->castTo<Block>()->getStatements()->front()->castTo<VarAssignm>()->getIdentifier();
+      clonedIfStmt->getThenBranch()->castTo<Block>()->getStatements().front()->castTo<VarAssignm>()->getIdentifier();
   ASSERT_EQ(clonedIfStmtFirstThenStatement, "alpha");
 
   // check if changing the else branch in the original also changes the cloned If statement
   *ifStmtElseBranch = *new Block(new VarAssignm("gamma", new LiteralBool(true)));
-  auto ifFirstStatementElseBranch = ifStmt->getElseBranch()->castTo<Block>()->getStatements()->front();
+  auto ifFirstStatementElseBranch = ifStmt->getElseBranch()->castTo<Block>()->getStatements().front();
   ASSERT_EQ(ifFirstStatementElseBranch->castTo<VarAssignm>()->getIdentifier(), "gamma");
-  auto clonedIfFirstElseStatement = clonedIfStmt->getElseBranch()->castTo<Block>()->getStatements()->front();
+  auto clonedIfFirstElseStatement = clonedIfStmt->getElseBranch()->castTo<Block>()->getStatements().front();
   ASSERT_EQ(clonedIfFirstElseStatement->castTo<VarAssignm>()->getIdentifier(), "alpha");
 }
 
@@ -280,24 +280,24 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_Block) {  /* NOLINT */
   const bool keepOriginalId = true;
   auto firstStatement = new VarAssignm("alpha", new LiteralInt(222));
   auto blockStatement = new Block(firstStatement);
-  ASSERT_EQ(blockStatement->getStatements()->size(), 1);
-  ASSERT_EQ(blockStatement->getStatements()->front(), firstStatement);
+  ASSERT_EQ(blockStatement->getStatements().size(), 1);
+  ASSERT_EQ(blockStatement->getStatements().front(), firstStatement);
   auto clonedBlockStatement = dynamic_cast<Block *>(blockStatement->clone(keepOriginalId));
 
   // test if changing original also modifies the copy
   firstStatement->setAttribute(new LiteralFloat(2221.844f));
-  ASSERT_EQ(blockStatement->getStatements()->size(), 1);
-  ASSERT_EQ(blockStatement->getStatements()->front(), firstStatement);
-  ASSERT_EQ(clonedBlockStatement->getStatements()->size(), 1);
+  ASSERT_EQ(blockStatement->getStatements().size(), 1);
+  ASSERT_EQ(blockStatement->getStatements().front(), firstStatement);
+  ASSERT_EQ(clonedBlockStatement->getStatements().size(), 1);
   // check cloned node
-  auto clonedVarAssignm = clonedBlockStatement->getStatements()->front()->castTo<VarAssignm>();
+  auto clonedVarAssignm = clonedBlockStatement->getStatements().front()->castTo<VarAssignm>();
   ASSERT_EQ(clonedVarAssignm->getVarTargetIdentifier(), "alpha");
   ASSERT_EQ(clonedVarAssignm->getValue()->castTo<LiteralInt>()->getValue(), 222);
 
   // delete all statements from original and check whether statements are still in clone
   blockStatement->removeChildren();
-  ASSERT_EQ(blockStatement->getStatements()->size(), 0);
-  ASSERT_EQ(clonedBlockStatement->getStatements()->size(), 1);
+  ASSERT_EQ(blockStatement->getStatements().size(), 0);
+  ASSERT_EQ(clonedBlockStatement->getStatements().size(), 1);
 
   // test if all fields belonging to Node class were copied
   assertNodeAttributes(keepOriginalId, blockStatement, clonedBlockStatement);
