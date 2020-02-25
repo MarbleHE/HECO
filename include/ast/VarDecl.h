@@ -11,11 +11,13 @@ class VarDecl : public AbstractStatement {
   std::string identifier;
 
  public:
+  VarDecl(std::string name, Datatype *datatype);
+
   VarDecl(std::string name, Types datatype, AbstractExpr *initializer);
 
   VarDecl(std::string name, Datatype *datatype, AbstractExpr *initializer);
 
-  VarDecl(std::string name, void *abstractExpr);
+  VarDecl(const std::string &name, void *abstractExpr);
 
   VarDecl(std::string name, int value);
 
@@ -59,8 +61,8 @@ class VarDecl : public AbstractStatement {
   bool supportsCircuitMode() override;
 
   int getMaxNumberChildren() override;
-  std::string toString() const override;
 
+  [[nodiscard]] std::string toString() const override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_VARDECL_H

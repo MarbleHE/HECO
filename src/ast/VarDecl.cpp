@@ -16,7 +16,7 @@ json VarDecl::toJson() const {
   return j;
 }
 
-VarDecl::VarDecl(std::string, void *) {
+VarDecl::VarDecl(const std::string &, void *) {
   throw std::invalid_argument("VarDecl(std::string, AbstractExpr*) not accepted as datatype cannot be determined. "
                               "Use VarDecl(std::string, Types, AbstractExpr*) or one of the other constructors.");
 }
@@ -37,6 +37,10 @@ VarDecl::VarDecl(std::string name, std::string valueAssignedTo) {
 
 VarDecl::VarDecl(std::string name, int valueAssignedTo) {
   setAttributes(std::move(name), new Datatype(Types::INT), new LiteralInt(valueAssignedTo));
+}
+
+VarDecl::VarDecl(std::string name, Datatype *datatype) {
+  setAttributes(std::move(name), new Datatype(Types::INT), nullptr);
 }
 
 VarDecl::VarDecl(std::string name, float valueAssignedTo) {
