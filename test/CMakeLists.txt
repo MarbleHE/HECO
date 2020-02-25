@@ -7,19 +7,20 @@ include_directories("${PROJECT_SOURCE_DIR}")
 ##############################
 # Download GoogleTest framework
 ##############################
-FetchContent_Declare(
-        googletest
-        GIT_REPOSITORY https://github.com/google/googletest.git
-        GIT_TAG release-1.10.0
-)
+if(NOT AST_OPTIMIZER_SKIP_GTEST_INSTALL)
+    FetchContent_Declare(
+            googletest
+            GIT_REPOSITORY https://github.com/google/googletest.git
+            GIT_TAG release-1.10.0
+    )
 
-FetchContent_GetProperties(googletest)
-if (NOT googletest_POPULATED)
-    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-    FetchContent_Populate(googletest)
-    add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR})
-endif ()
-
+    FetchContent_GetProperties(googletest)
+    if (NOT googletest_POPULATED)
+        set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+        FetchContent_Populate(googletest)
+        add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR})
+    endif ()
+endif()
 ##############################
 # TARGET: testing
 ##############################
