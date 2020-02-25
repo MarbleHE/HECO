@@ -46,6 +46,7 @@ class LiteralInt : public AbstractLiteral {
 
   bool supportsCircuitMode() override;
   bool isEqual(AbstractExpr *other) override;
+  bool isNull() override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_LITERALINT_H

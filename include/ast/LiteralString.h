@@ -44,6 +44,7 @@ class LiteralString : public AbstractLiteral {
   bool supportsDatatype(Datatype &datatype) override;
 
   bool isEqual(AbstractExpr *other) override;
+  bool isNull() override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_LITERALSTRING_H

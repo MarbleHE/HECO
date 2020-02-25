@@ -83,3 +83,7 @@ bool LiteralInt::isEqual(AbstractExpr *other) {
   auto otherLiteralInt = dynamic_cast<LiteralInt *>(other);
   return otherLiteralInt!=nullptr && this->getValue()==otherLiteralInt->getValue();
 }
+
+bool LiteralInt::isNull() {
+  return this->getValue()==0;
+}

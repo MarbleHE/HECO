@@ -84,3 +84,7 @@ bool LiteralFloat::isEqual(AbstractExpr *other) {
   auto otherLiteralFloat = dynamic_cast<LiteralFloat *>(other);
   return otherLiteralFloat!=nullptr && this->getValue()==otherLiteralFloat->getValue();
 }
+
+bool LiteralFloat::isNull() {
+  return this->getValue()==0.0f;
+}

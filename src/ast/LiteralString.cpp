@@ -74,3 +74,7 @@ bool LiteralString::isEqual(AbstractExpr *other) {
   auto otherLiteralString = dynamic_cast<LiteralString *>(other);
   return otherLiteralString!=nullptr && this->getValue()==otherLiteralString->getValue();
 }
+
+bool LiteralString::isNull() {
+  return this->getValue()==std::string("");
+}

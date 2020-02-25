@@ -47,6 +47,7 @@ class LiteralFloat : public AbstractLiteral {
 
   void print(std::ostream &str) const override;
   bool isEqual(AbstractExpr *other) override;
+  bool isNull() override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_LITERALFLOAT_H

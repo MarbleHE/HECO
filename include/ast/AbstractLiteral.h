@@ -30,6 +30,8 @@ class AbstractLiteral : public AbstractExpr {
   virtual void setRandomValue(RandLiteralGen &rlg) = 0;
 
   virtual bool supportsDatatype(Datatype &datatype) = 0;
+
+  virtual bool isNull() = 0;
 };
 
 inline std::ostream &operator<<(std::ostream &os, const std::vector<AbstractLiteral *> &v) {

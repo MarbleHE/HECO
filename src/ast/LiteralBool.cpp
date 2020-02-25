@@ -76,3 +76,7 @@ bool LiteralBool::isEqual(AbstractExpr *other) {
   auto otherLiteralBool = dynamic_cast<LiteralBool *>(other);
   return otherLiteralBool!=nullptr && this->getValue()==otherLiteralBool->getValue();
 }
+
+bool LiteralBool::isNull() {
+  return this->getValue()==false;
+}

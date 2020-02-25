@@ -43,6 +43,7 @@ class LiteralBool : public AbstractLiteral {
 
   bool supportsCircuitMode() override;
   bool isEqual(AbstractExpr *other) override;
+  bool isNull() override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_LITERALBOOL_H
