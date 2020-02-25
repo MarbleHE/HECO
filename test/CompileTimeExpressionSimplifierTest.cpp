@@ -22,7 +22,7 @@ class CompileTimeExpressionSimplifierFixture : public ::testing::Test {
   CompileTimeExpressionSimplifier ctes;
   CompileTimeExpressionSimplifierFixture() = default;
 
-  std::variant<AbstractLiteral *, AbstractExpr *> getVariableValue(const std::string &varIdentifier) {
+  AbstractExpr *getVariableValue(const std::string &varIdentifier) {
     try {
       return ctes.variableValues.at(varIdentifier);
     } catch (std::out_of_range &outOfRangeException) {
@@ -48,7 +48,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, binaryExpr_literalsOnly_fullyEval
 
   // check that 'alpha' is computed correctly
   auto alphaValue = getVariableValue("alpha");
-  EXPECT_EQ(std::get<AbstractLiteral *>(alphaValue)->castTo<LiteralInt>()->getValue(), 242);
+  EXPECT_EQ(alphaValue->castTo<LiteralInt>()->getValue(), 242);
   // check that the statement VarDecl and its children are deleted
   EXPECT_EQ(function->getBody()->getStatements()->size(), 0);
 }
@@ -110,7 +110,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, binaryExpr_variableKnown_fullyEva
 
   // check that 'alpha' is computed correctly
   auto alphaValue = getVariableValue("alpha");
-  EXPECT_EQ(std::get<AbstractLiteral *>(alphaValue)->castTo<LiteralInt>()->getValue(), 1'204);
+  EXPECT_EQ(alphaValue->castTo<LiteralInt>()->getValue(), 1'204);
 
   // check that the statement VarDecl and its children are deleted
   EXPECT_EQ(function->getBody()->getStatements()->size(), 0);
@@ -175,7 +175,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_literalsOnly_fullyEva
 
   // check that 'alpha' is computed correctly
   auto alphaValue = getVariableValue("alpha");
-  EXPECT_EQ(std::get<AbstractLiteral *>(alphaValue)->castTo<LiteralBool>()->getValue(), false);
+  EXPECT_EQ(alphaValue->castTo<LiteralBool>()->getValue(), false);
 
   // check that the statement VarDecl and its children are deleted
   EXPECT_EQ(function->getBody()->getStatements()->size(), 0);
@@ -241,7 +241,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_variableKnown_fullyEv
   // check that 'alpha' is computed correctly
   auto alphaValue = getVariableValue("alpha");
 
-  EXPECT_EQ(std::get<AbstractLiteral *>(alphaValue)->castTo<LiteralBool>()->getValue(), true);
+  EXPECT_EQ(alphaValue->castTo<LiteralBool>()->getValue(), true);
 
   // check that the statement VarDecl and its children are deleted
   EXPECT_EQ(function->getBody()->getStatements()->size(), 0);
@@ -302,7 +302,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, unaryExpr_literalsOnly_fullyEvalu
   // check that 'truthValue' is computed correctly
   auto alphaValue = getVariableValue("truthValue");
 
-  EXPECT_EQ(std::get<AbstractLiteral *>(alphaValue)->castTo<LiteralBool>()->getValue(), true);
+  EXPECT_EQ(alphaValue->castTo<LiteralBool>()->getValue(), true);
 
   // check that the statement VarDecl and its children are deleted
   EXPECT_EQ(function->getBody()->getStatements()->size(), 0);
@@ -330,11 +330,11 @@ TEST_F(CompileTimeExpressionSimplifierFixture, unaryExpr_variableKnown_fullyEval
 
   // check that 'alpha' is computed correctly
   auto alphaValue = getVariableValue("alpha");
-  EXPECT_EQ(std::get<AbstractLiteral *>(alphaValue)->castTo<LiteralBool>()->getValue(), true);
+  EXPECT_EQ(alphaValue->castTo<LiteralBool>()->getValue(), true);
 
   // check that 'beta' is computed correctly
   auto betaValue = getVariableValue("beta");
-  EXPECT_EQ(std::get<AbstractLiteral *>(betaValue)->castTo<LiteralBool>()->getValue(), false);
+  EXPECT_EQ(betaValue->castTo<LiteralBool>()->getValue(), false);
 
   // check that both statements and their children are deleted
   EXPECT_EQ(function->getBody()->getStatements()->size(), 0);
@@ -392,11 +392,11 @@ TEST_F(CompileTimeExpressionSimplifierFixture, varAssignm_variablesKnown_fullyEv
   // check that 'alpha' is stored correctly
   auto alphaValue = getVariableValue("alpha");
 
-  EXPECT_EQ(std::get<AbstractLiteral *>(alphaValue)->castTo<LiteralFloat>()->getValue(), 2.75);
+  EXPECT_EQ(alphaValue->castTo<LiteralFloat>()->getValue(), 2.75);
 
   // check that 'beta' is assigned correctly
   auto betaValue = getVariableValue("beta");
-  EXPECT_EQ(std::get<AbstractLiteral *>(betaValue)->castTo<LiteralFloat>()->getValue(), 2.75);
+  EXPECT_EQ(betaValue->castTo<LiteralFloat>()->getValue(), 2.75);
 
   // check that the statements and their children are deleted
   EXPECT_EQ(function->getBody()->getStatements()->size(), 0);
@@ -421,7 +421,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, varAssignm_previouslyDeclaredNonI
 
   // check that 'alpha' is computed correctly
   auto alphaValue = getVariableValue("alpha");
-  EXPECT_EQ(std::get<AbstractLiteral *>(alphaValue)->castTo<LiteralFloat>()->getValue(), 2.95f);
+  EXPECT_EQ(alphaValue->castTo<LiteralFloat>()->getValue(), 2.95f);
 
   // check that the statement VarDecl and its children are deleted
   EXPECT_EQ(function->getBody()->getStatements()->size(), 0);
@@ -468,7 +468,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, varAssignm_assignmentToParameter)
 
   // check that 'alpha' is computed correctly
   auto alphaValue = getVariableValue("alpha");
-  EXPECT_EQ(std::get<AbstractLiteral *>(alphaValue)->castTo<LiteralFloat>()->getValue(), 42.24f);
+  EXPECT_EQ(alphaValue->castTo<LiteralFloat>()->getValue(), 42.24f);
 
   // check that the statement VarDecl and its children are deleted
   EXPECT_EQ(function->getBody()->getStatements()->size(), 0);
@@ -817,7 +817,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
-       ifStmt_conditionValueIsUnknown_thenBranchOnlyExists_expectedRewriting) {
+       ifStmt_conditionValueIsUnknown_thenBranchOnlyExists_thenBranchEvaluable_expectedRewriting) {
   //  -- input --
   //  int compute(plaintext_it a) {
   //    int b = 22;
@@ -888,41 +888,12 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
 //   - with other type of statements in the If branch (should fail, lookup in ifResolverData only implemented vor VarAssignm yet)
 //   - with additional else branch that modifies other variables
 //   - with additional else branch that modifies same variables
-//   - with two nested If statements
+//   - with nested If statements (two in total)
 
 // TODO(pjattke): write tests for Call including Function, FunctionParameter, and Block
+//  - Call with Function that is expected to be replaced
 
 // TODO(pjattke): write tests for While statement
-
-//TEST_F(CompileTimeExpressionSimplifierFixture, ifStmt_0) { /* NOLINT */
-//  //  -- input --
-//  //  void compute(plaintext_int a) {
-//  //    if (a > 22) {
-//  //      a = a*2;
-//  //    }
-//  //    return a;
-//  //  }
-//  //  -- expected --
-//  //  no change
-//  auto function = new Function("compute");
-//  auto functionParams = new ParameterList()
-//  auto ifStmt = new If(
-//      new LogicalExpr(new Variable("a"), OpSymb::greater, new LiteralInt(22)),
-//      new Block(new VarAssignm("a",
-//                               new BinaryExpr(new Variable("a"), OpSymb::multiplication, new LiteralInt(2)))));
-//  auto returnStatement =
-//      new Return(new Variable("a"));
-//
-//  // connect objects
-//  function->setParameterList({});
-//  function->addStatement(ifStmt);
-//  function->addStatement(returnStatement);
-//  ast.setRootNode(function);
-//  auto numberOfNodesBeforeSimplification = ast.getAllNodes().size();
-//
-//  // check that there is no computed variable
-//  EXPECT_TRUE(ctes.variableValues.empty());
-//  // check that none of the nodes are deleted
-//  EXPECT_EQ(numberOfNodesBeforeSimplification, ast.getAllNodes().size());
-//}
-
+//  - While with unknown loop condition -> cannot be evaluated
+//  - While with known loop condition -> can be evaluated
+//  - While that has a known loop condition but contains a unvaluable

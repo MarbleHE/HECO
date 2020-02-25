@@ -13,11 +13,13 @@ struct IfStatementResolverData {
   explicit IfStatementResolverData(AbstractExpr *condition) {
     factorIsTrue = condition->clone(false)->castTo<AbstractExpr>();;
     factorIsFalse =
-        new BinaryExpr(new LiteralInt(1), OpSymb::subtraction, condition->clone(false)->castTo<AbstractExpr>());
+        new BinaryExpr(new LiteralInt(1),
+                       OpSymb::subtraction,
+                       condition->clone(false)->castTo<AbstractExpr>());
   };
 
   AbstractExpr *generateIfDependentValue(AbstractExpr *trueValue, AbstractExpr *falseValue) {
-    // variableValue = condition*trueValue + (1-b)*falseValue
+    // condition*trueValue + (1-b)*falseValue
     return new BinaryExpr(
         new BinaryExpr(factorIsTrue, OpSymb::multiplication, trueValue),
         OpSymb::addition,
@@ -43,9 +45,9 @@ class CompileTimeExpressionSimplifier : public Visitor {
   std::unordered_map<AbstractNode *, std::vector<AbstractLiteral *>> evaluatedNodes;
 
   /// Stores the latest value of a variable while traversing through the AST.
-  /// * std::string: The variable's identifier.
-  /// * AbstractLiteral*: The variable's value.
-  std::unordered_map<std::string, std::variant<AbstractLiteral *, AbstractExpr *>> variableValues;
+  /// - std::string: The variable's identifier.
+  /// - AbstractLiteral*: The variable's value.
+  std::unordered_map<std::string, AbstractExpr *> variableValues;
 
   /// Contains pointer to those nodes for which full or partial evaluation could be performed and hence can be deleted
   /// at the end of this simplification traversal.

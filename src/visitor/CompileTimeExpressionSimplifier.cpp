@@ -1,4 +1,3 @@
-#include <DotPrinter.h>
 #include "CompileTimeExpressionSimplifier.h"
 #include "BinaryExpr.h"
 #include "LogicalExpr.h"
@@ -56,6 +55,7 @@ void CompileTimeExpressionSimplifier::visit(Ast &elem) {
 
 void CompileTimeExpressionSimplifier::visit(Datatype &elem) {
   Visitor::visit(elem);
+
 }
 
 void CompileTimeExpressionSimplifier::visit(CallExternal &elem) {
@@ -126,18 +126,20 @@ void CompileTimeExpressionSimplifier::visit(VarAssignm &elem) {
     if (resolveIfStatementsActive) {
       // TODO(pjattke): handle the case where this variable had no value before?
       //   E.g., variable was initialized only -> then use "0" as old value.
-      AbstractExpr *newDependentValue;
       auto oldValue = variableValues.at(elem.getVarTargetIdentifier());
-      if (std::holds_alternative<AbstractLiteral *>(oldValue)) {
-        newDependentValue = ifResolverData.top()->generateIfDependentValue(
-            getFirstValue(elem.getValue()),
-            std::get<AbstractLiteral *>(oldValue));
-
-      } else if (std::holds_alternative<AbstractExpr *>(oldValue)) {
-        newDependentValue = ifResolverData.top()->generateIfDependentValue(
-            getFirstValue(elem.getValue()),
-            std::get<AbstractExpr *>(oldValue));
-      }
+      AbstractExpr *newDependentValue = ifResolverData.top()->generateIfDependentValue(
+          getFirstValue(elem.getValue()), oldValue);
+//      AbstractExpr *newDependentValue;
+//      auto oldValue = variableValues.at(elem.getVarTargetIdentifier());
+//      if (std::holds_alternative<AbstractLiteral *>(oldValue)) {
+//        newDependentValue = ifResolverData.top()->generateIfDependentValue(
+//            getFirstValue(elem.getValue()),
+//            std::get<AbstractLiteral *>(oldValue));
+//      } else if (std::holds_alternative<AbstractExpr *>(oldValue)) {
+//        newDependentValue = ifResolverData.top()->generateIfDependentValue(
+//            getFirstValue(elem.getValue()),
+//            std::get<AbstractExpr *>(oldValue));
+//      }
       variableValues[elem.getVarTargetIdentifier()] = newDependentValue;
     } else {
       // update the variable's value in the map (-> without checking if this variable was declared before)
@@ -443,8 +445,8 @@ AbstractLiteral *CompileTimeExpressionSimplifier::getFirstValue(AbstractNode *no
   // if node is a variable -> search the variable's value in the map of known variable values
   auto nodeAsVariable = dynamic_cast<Variable *>(node);
   if (nodeAsVariable!=nullptr && variableValues.count(nodeAsVariable->getIdentifier()) > 0) {
-    if (std::holds_alternative<AbstractLiteral *>(variableValues.at(nodeAsVariable->getIdentifier())))
-      return std::get<AbstractLiteral *>(variableValues.at(nodeAsVariable->getIdentifier()));
+    if (auto varAsAbstractLiteral = dynamic_cast<AbstractLiteral *>(variableValues.at(nodeAsVariable->getIdentifier())))
+      return varAsAbstractLiteral;
   }
 
   // in any other case -> search the given node in the map of already evaluated nodes
@@ -463,15 +465,15 @@ AbstractLiteral *CompileTimeExpressionSimplifier::getFirstValue(AbstractNode *no
 }
 
 AbstractExpr *CompileTimeExpressionSimplifier::getFirstValueOrExpression(AbstractNode *node) {
+  // if there exists a AbstractLiteral value, then return this value (as AbstractExpr)
   auto firstValue = getFirstValue(node);
   if (firstValue!=nullptr) return firstValue;
 
   // if node is a variable -> search the variable's value in the map of known variable values
-  // in addition to getFirstValue(...), we consider the std::variant's AbstractExpr here
+  // in addition to getFirstValue(...), we consider the AbstractExpr here
   auto nodeAsVariable = dynamic_cast<Variable *>(node);
   if (nodeAsVariable!=nullptr && variableValues.count(nodeAsVariable->getIdentifier()) > 0) {
-    if (std::holds_alternative<AbstractExpr *>(variableValues.at(nodeAsVariable->getIdentifier())))
-      return std::get<AbstractExpr *>(variableValues.at(nodeAsVariable->getIdentifier()));
+    return variableValues.at(nodeAsVariable->getIdentifier());
   }
 
   return nullptr;
@@ -495,7 +497,9 @@ void CompileTimeExpressionSimplifier::moveChildIfNotEvaluable(AbstractNode *ifSt
 std::unordered_map<std::string, AbstractLiteral *> CompileTimeExpressionSimplifier::getTransformedVariableMap() {
   std::unordered_map<std::string, AbstractLiteral *> variableMap;
   for (auto &[k, v] : variableValues) {
-    if (std::holds_alternative<AbstractLiteral *>(v)) variableMap[k] = std::get<AbstractLiteral *>(v);
+    if (auto varAsLiteral = dynamic_cast<AbstractLiteral *>(v)) {
+      variableMap[k] = varAsLiteral;
+    }
   }
   return variableMap;
 }
