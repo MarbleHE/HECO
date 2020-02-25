@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_BLOCK_H
-#define AST_OPTIMIZER_INCLUDE_BLOCK_H
+#ifndef AST_OPTIMIZER_INCLUDE_AST_BLOCK_H_
+#define AST_OPTIMIZER_INCLUDE_AST_BLOCK_H_
 
 #include <vector>
 #include "AbstractStatement.h"
@@ -9,7 +9,7 @@ class Block : public AbstractStatement {
  public:
   Block() = default;
 
-  Block(std::vector<AbstractStatement *> statements);
+  explicit Block(std::vector<AbstractStatement *> statements);
 
   ~Block() override = default;
 
@@ -34,4 +34,4 @@ class Block : public AbstractStatement {
   [[nodiscard]] std::string toString() const override;
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_BLOCK_H
+#endif //AST_OPTIMIZER_INCLUDE_AST_BLOCK_H_

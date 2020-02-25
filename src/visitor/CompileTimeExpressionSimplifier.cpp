@@ -105,6 +105,9 @@ void CompileTimeExpressionSimplifier::visit(LiteralFloat &elem) {
 void CompileTimeExpressionSimplifier::visit(VarDecl &elem) {
   Visitor::visit(elem);
   if (elem.getInitializer()==nullptr) { // if this variable was declared but not initialized
+    // then we store the variable's default value in the map
+    variableValues
+        .emplace(elem.getVarTargetIdentifier(), getDefaultVariableInitializationValue(elem.getDatatype()->getType()));
     // mark this statement for deletion as we don't need it anymore (we don't care about the lost type information)
     nodesQueuedForDeletion.push(&elem);
     // mark this statement as evaluated to notify its parent that this can be considered as evaluated
@@ -121,30 +124,15 @@ void CompileTimeExpressionSimplifier::visit(VarDecl &elem) {
 
 void CompileTimeExpressionSimplifier::visit(VarAssignm &elem) {
   Visitor::visit(elem);
-  // if the expression's value is known
-  if (valueIsKnown(elem.getValue())) {
-    if (resolveIfStatementsActive) {
-      // TODO(pjattke): handle the case where this variable had no value before?
-      //   E.g., variable was initialized only -> then use "0" as old value.
-      auto oldValue = variableValues.at(elem.getVarTargetIdentifier());
-      AbstractExpr *newDependentValue = ifResolverData.top()->generateIfDependentValue(
-          getFirstValue(elem.getValue()), oldValue);
-//      AbstractExpr *newDependentValue;
-//      auto oldValue = variableValues.at(elem.getVarTargetIdentifier());
-//      if (std::holds_alternative<AbstractLiteral *>(oldValue)) {
-//        newDependentValue = ifResolverData.top()->generateIfDependentValue(
-//            getFirstValue(elem.getValue()),
-//            std::get<AbstractLiteral *>(oldValue));
-//      } else if (std::holds_alternative<AbstractExpr *>(oldValue)) {
-//        newDependentValue = ifResolverData.top()->generateIfDependentValue(
-//            getFirstValue(elem.getValue()),
-//            std::get<AbstractExpr *>(oldValue));
-//      }
-      variableValues[elem.getVarTargetIdentifier()] = newDependentValue;
+  if (!ifResolverData.empty()) {
+    if (valueIsKnown(elem.getValue())) {
+      ifResolverData.top()->addVariableValue(elem.getIdentifier(), getFirstValue(elem.getValue()));
     } else {
-      // update the variable's value in the map (-> without checking if this variable was declared before)
-      variableValues[elem.getVarTargetIdentifier()] = getFirstValue(elem.getValue());
+      ifResolverData.top()->addVariableValue(elem.getIdentifier(), elem.getValue());
     }
+  } else if (valueIsKnown(elem.getValue())) {
+    // update the variable's value in the map (-> without checking if this variable was declared before)
+    variableValues[elem.getVarTargetIdentifier()] = getFirstValue(elem.getValue());
     // mark this statement for deletion as we don't need it anymore
     nodesQueuedForDeletion.push(&elem);
     // mark this statement as evaluated to notify its parent about a known value
@@ -160,7 +148,7 @@ void CompileTimeExpressionSimplifier::handleBinaryExpressions(AbstractNode &elem
   if (leftValueIsKnown && rightValueIsKnown) {
     // if both operand values are known -> evaluate the expression and store its result
     auto result = evaluateNodeRecursive(&elem, getTransformedVariableMap());
-    storeEvaluatedNode(&elem, result);
+    storeEvaluatedNode(&elem, std::vector<AbstractExpr *>(result.begin(), result.end()));
   } else if (leftValueIsKnown || rightValueIsKnown) {
     // if only one of both is known -> replace its values by the evaluated one
     auto concernedOperand = leftValueIsKnown ? leftOperand : rightOperand;
@@ -187,7 +175,7 @@ void CompileTimeExpressionSimplifier::visit(UnaryExpr &elem) {
   if (operandValueIsKnown) {
     // if operand value is known -> evaluate the expression and store its result
     auto result = evaluateNodeRecursive(&elem, getTransformedVariableMap());
-    storeEvaluatedNode(&elem, result);
+    storeEvaluatedNode(&elem, std::vector<AbstractExpr *>(result.begin(), result.end()));
   }
 }
 
@@ -207,7 +195,7 @@ void CompileTimeExpressionSimplifier::visit(Block &elem) {
 
   // check if there is any statement within this Block that is not marked for deletion
   bool allStatementsInBlockAreMarkedForDeletion = true;
-  for (auto &statement : *elem.getStatements()) {
+  for (auto &statement : elem.getStatements()) {
     if (evaluatedNodes.count(statement)==0) {
       allStatementsInBlockAreMarkedForDeletion = false;
       break;
@@ -226,10 +214,9 @@ void CompileTimeExpressionSimplifier::visit(Block &elem) {
 
 void CompileTimeExpressionSimplifier::visit(Variable &elem) {
   Visitor::visit(elem);
-  // if the variable's value is known yet, mark the node as evaluated
-  // we do not need to do anything else because the variable's value is in the map variableValues
+  // if the variable's value is known yet mark the node as evaluated
   if (valueIsKnown(&elem))
-    storeEvaluatedNode(&elem, nullptr);
+    storeEvaluatedNode(&elem, getFirstValue(&elem));
 }
 
 void CompileTimeExpressionSimplifier::visit(Call &elem) {
@@ -271,7 +258,15 @@ void CompileTimeExpressionSimplifier::visit(Function &elem) {
 
 void CompileTimeExpressionSimplifier::visit(FunctionParameter &elem) {
   Visitor::visit(elem);
-  // The simplifier does not care about the variable's datatype, hence we can mark this node as evaluable (= deletion
+
+  //  auto var = dynamic_cast<Variable *>(elem.getValue());
+//  if (var!=nullptr) {
+//    // Store the initial variable value, that is the value that was passed to the Function.
+//    // For example: computeX(int x) would store ("x", new Variable("x")).
+//    variableValues[var->getIdentifier()] = var;
+//  }
+
+// This simplifier does not care about the variable's datatype, hence we can mark this node as evaluable (= deletion
   // candidate). This mark is only relevant in case that this FunctionParameter is part of a Function referred by a Call
   // statement because Call statements can be replaced by inlining the Function's computation.
   storeEvaluatedNode(&elem, nullptr);
@@ -330,29 +325,61 @@ void CompileTimeExpressionSimplifier::visit(If &elem) {
     // if we don't know the If statement's value -> resolve the If statement
 
     // set resolveIfStatementActive = true; b = [condition], notB = (1-[condition])
-    resolveIfStatementsActive = true;
     ifResolverData.push(new IfStatementResolverData(elem.getCondition()));
 
     // visit the thenBranch
     elem.getThenBranch()->accept(*this);
     // if exists, visit the elseBranch
-    if (elem.getElseBranch()!=nullptr) elem.getElseBranch()->accept(*this);
-    // TODO(pjattke): modify visits to consider resolveIfStatementActive
+    if (elem.getElseBranch()!=nullptr) {
+      ifResolverData.top()->setActiveBranch(false);
+      elem.getElseBranch()->accept(*this);
+    }
+    // TODO(pjattke): modify visits of AST objects to consider resolveIfStatementActive
+
+    //  Generate If-dependent assignment values by using map ifStatementVariableValues
+    //  if either one of the pair's values (first, second) is empty, we need to pass the value's current value instead
+    //  such that the value stays the same
+    //  Consider following example where 22 is the variable's original value that needs to be preserved if not [a>42]:
+    //    int i = 22; if (a > 42) { i = 111; }  --> int i = [a>42]*111 + [1-[a>42]]*22;
+    auto currentIfResolverStruct = ifResolverData.top();
+    for (auto &[varIdentifier, valueThenElse] : currentIfResolverStruct->getIfStatementVariableValues()) {
+      //
+      if (valueThenElse.first==nullptr || valueThenElse.second==nullptr) {
+        // retrieve old value
+        AbstractExpr *oldValue;
+        if (variableValues.count(varIdentifier) > 0) {
+          oldValue = variableValues.at(varIdentifier);
+        } else {
+          oldValue = new Variable(varIdentifier);
+        }
+        // save new value that depends on the If statement's condition
+        if (valueThenElse.first==nullptr) {
+          variableValues[varIdentifier] =
+              ifResolverData.top()->generateIfDependentValue(oldValue, valueThenElse.second);
+        } else if (valueThenElse.second==nullptr)
+          variableValues[varIdentifier] = ifResolverData.top()->generateIfDependentValue(valueThenElse.first, oldValue);
+      } else {
+
+        variableValues[varIdentifier] =
+            ifResolverData.top()->generateIfDependentValue(valueThenElse.first, valueThenElse.second);
+      }
+    }
 
     // set resolveIfStatementActive = false
-    resolveIfStatementsActive = false;
     ifResolverData.pop();
 
+    // TODO
     // move all non-evaluable statements to the If statement's parent node
-    if (elem.getParentsNonNull().size() > 1) {
-      throw std::logic_error("Unexpected number of parents (>1) of If statement!"
-                             "Cannot continue because it is unclear where to move non-evaluable children to.");
-    }
-    AbstractNode *ifStatementParent = elem.getParentsNonNull().front();
-    moveChildIfNotEvaluable(ifStatementParent, elem.getThenBranch());
-    if (elem.getElseBranch()!=nullptr) {
-      moveChildIfNotEvaluable(ifStatementParent, elem.getElseBranch());
-    }
+//    if (elem.getParentsNonNull().size() > 1) {
+//      throw std::logic_error("Unexpected number of parents (>1) of If statement!"
+//                             "Cannot continue because it is unclear where to move non-evaluable children to.");
+//    }
+//    AbstractNode *ifStatementParent = elem.getParentsNonNull().front();
+//    moveChildIfNotEvaluable(ifStatementParent, elem.getThenBranch());
+//    if (elem.getElseBranch()!=nullptr) {
+//      moveChildIfNotEvaluable(ifStatementParent, elem.getElseBranch());
+//    }
+
     // enqueue the If statement for deletion
     nodesQueuedForDeletion.push(&elem);
   }
@@ -412,20 +439,24 @@ bool CompileTimeExpressionSimplifier::valueIsKnown(AbstractNode *abstractExpr) {
   // i.) it is a variable with a known value (in variableValues)
   auto variableValueIsKnown = false;
   if (auto abstractExprAsVariable = dynamic_cast<Variable *>(abstractExpr)) {
-    variableValueIsKnown = variableValues.count(abstractExprAsVariable->getIdentifier()) > 0;
+    // check that the variable has a value
+    return variableValues.count(abstractExprAsVariable->getIdentifier()) > 0;
+//    // and the variable's value is not a symbolic one (i.e., not a Variable itself)
+//    variableValueIsKnown =
+//        valueExists && dynamic_cast<Variable *>(variableValues.at(abstractExprAsVariable->getIdentifier()))==nullptr;
   }
   // ii.) or the node was evaluated before (i.e., its value is in evaluatedNodes)
   return variableValueIsKnown || evaluatedNodes.count(abstractExpr) > 0;
 }
 
 void CompileTimeExpressionSimplifier::storeEvaluatedNode(
-    AbstractNode *node, const std::vector<AbstractLiteral *> &evaluationResult) {
+    AbstractNode *node, const std::vector<AbstractExpr *> &evaluationResult) {
   evaluatedNodes.emplace(node, evaluationResult);
 }
 
 void CompileTimeExpressionSimplifier::storeEvaluatedNode(
-    AbstractNode *node, AbstractLiteral *evaluationResult) {
-  evaluatedNodes.insert(std::make_pair(node, std::vector<AbstractLiteral *>({evaluationResult})));
+    AbstractNode *node, AbstractExpr *evaluationResult) {
+  evaluatedNodes.insert(std::make_pair(node, std::vector<AbstractExpr *>({evaluationResult})));
 }
 
 std::vector<AbstractLiteral *> CompileTimeExpressionSimplifier::evaluateNodeRecursive(
@@ -441,12 +472,13 @@ std::vector<AbstractLiteral *> CompileTimeExpressionSimplifier::evaluateNodeRecu
   return evalVisitor.getResults();
 }
 
-AbstractLiteral *CompileTimeExpressionSimplifier::getFirstValue(AbstractNode *node) {
+AbstractExpr *CompileTimeExpressionSimplifier::getFirstValue(AbstractNode *node) {
   // if node is a variable -> search the variable's value in the map of known variable values
   auto nodeAsVariable = dynamic_cast<Variable *>(node);
   if (nodeAsVariable!=nullptr && variableValues.count(nodeAsVariable->getIdentifier()) > 0) {
-    if (auto varAsAbstractLiteral = dynamic_cast<AbstractLiteral *>(variableValues.at(nodeAsVariable->getIdentifier())))
-      return varAsAbstractLiteral;
+    return variableValues.at(nodeAsVariable->getIdentifier());
+//    if (auto varAsAbstractLiteral = dynamic_cast<AbstractLiteral *>(variableValues.at(nodeAsVariable->getIdentifier())))
+//      return varAsAbstractLiteral;
   }
 
   // in any other case -> search the given node in the map of already evaluated nodes
@@ -502,4 +534,16 @@ std::unordered_map<std::string, AbstractLiteral *> CompileTimeExpressionSimplifi
     }
   }
   return variableMap;
+}
+
+AbstractLiteral *CompileTimeExpressionSimplifier::getDefaultVariableInitializationValue(Types datatype) {
+  switch (datatype) {
+    case Types::BOOL:return new LiteralBool("false");
+    case Types::INT:return new LiteralInt(0);
+    case Types::FLOAT:return new LiteralFloat(0.0f);
+    case Types::STRING:return new LiteralString("");
+    default:
+      throw std::invalid_argument("Cannot determine the default value for the given AbstractLiteral!"
+                                  "Given Literal is not a LiteralBool, LiteralFloat, LiteralInt, or LiteralString.");
+  }
 }

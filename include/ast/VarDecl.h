@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_VARDECL_H
-#define AST_OPTIMIZER_INCLUDE_VARDECL_H
+#ifndef AST_OPTIMIZER_INCLUDE_AST_VARDECL_H_
+#define AST_OPTIMIZER_INCLUDE_AST_VARDECL_H_
 
 #include <string>
 #include "AbstractStatement.h"
@@ -65,4 +65,4 @@ class VarDecl : public AbstractStatement {
   [[nodiscard]] std::string toString() const override;
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_VARDECL_H
+#endif //AST_OPTIMIZER_INCLUDE_AST_VARDECL_H_

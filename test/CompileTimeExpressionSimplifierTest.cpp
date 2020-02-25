@@ -1,4 +1,4 @@
-#include <DotPrinter.h>
+#include "DotPrinter.h"
 #include "CompileTimeExpressionSimplifier.h"
 #include "OpSymbEnum.h"
 #include "Ast.h"
@@ -36,7 +36,10 @@ TEST_F(CompileTimeExpressionSimplifierFixture, binaryExpr_literalsOnly_fullyEval
   //  plaintext_int alpha = 22 * 11;
   // }
   auto function = new Function("compute");
-  auto binaryExpr = new BinaryExpr(new LiteralInt(22), OpSymb::multiplication, new LiteralInt(11));
+  auto binaryExpr = new BinaryExpr(
+      new LiteralInt(22),
+      OpSymb::multiplication,
+      new LiteralInt(11));
   auto varAssignm = new VarDecl("alpha", new Datatype(Types::INT, false), binaryExpr);
 
   // connect objects
@@ -50,7 +53,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, binaryExpr_literalsOnly_fullyEval
   auto alphaValue = getVariableValue("alpha");
   EXPECT_EQ(alphaValue->castTo<LiteralInt>()->getValue(), 242);
   // check that the statement VarDecl and its children are deleted
-  EXPECT_EQ(function->getBody()->getStatements()->size(), 0);
+  EXPECT_EQ(function->getBody()->getStatements().size(), 0);
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, binaryExpr_variableUnknown_rhsOperandEvaluableOnly) { /* NOLINT */
@@ -113,7 +116,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, binaryExpr_variableKnown_fullyEva
   EXPECT_EQ(alphaValue->castTo<LiteralInt>()->getValue(), 1'204);
 
   // check that the statement VarDecl and its children are deleted
-  EXPECT_EQ(function->getBody()->getStatements()->size(), 0);
+  EXPECT_EQ(function->getBody()->getStatements().size(), 0);
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, binaryExpr_variablesUnknown_notAnythingEvaluable) { /* NOLINT */
@@ -178,7 +181,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_literalsOnly_fullyEva
   EXPECT_EQ(alphaValue->castTo<LiteralBool>()->getValue(), false);
 
   // check that the statement VarDecl and its children are deleted
-  EXPECT_EQ(function->getBody()->getStatements()->size(), 0);
+  EXPECT_EQ(function->getBody()->getStatements().size(), 0);
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_variableUnknown_lhsOperandEvaluableOnly) { /* NOLINT */
@@ -244,7 +247,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_variableKnown_fullyEv
   EXPECT_EQ(alphaValue->castTo<LiteralBool>()->getValue(), true);
 
   // check that the statement VarDecl and its children are deleted
-  EXPECT_EQ(function->getBody()->getStatements()->size(), 0);
+  EXPECT_EQ(function->getBody()->getStatements().size(), 0);
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_variablesUnknown_notAnythingEvaluable) { /* NOLINT */
@@ -305,7 +308,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, unaryExpr_literalsOnly_fullyEvalu
   EXPECT_EQ(alphaValue->castTo<LiteralBool>()->getValue(), true);
 
   // check that the statement VarDecl and its children are deleted
-  EXPECT_EQ(function->getBody()->getStatements()->size(), 0);
+  EXPECT_EQ(function->getBody()->getStatements().size(), 0);
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, unaryExpr_variableKnown_fullyEvaluable) { /* NOLINT */
@@ -337,7 +340,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, unaryExpr_variableKnown_fullyEval
   EXPECT_EQ(betaValue->castTo<LiteralBool>()->getValue(), false);
 
   // check that both statements and their children are deleted
-  EXPECT_EQ(function->getBody()->getStatements()->size(), 0);
+  EXPECT_EQ(function->getBody()->getStatements().size(), 0);
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, unaryExpr_variableUnknown_notEvaluable) { /* NOLINT */
@@ -399,7 +402,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, varAssignm_variablesKnown_fullyEv
   EXPECT_EQ(betaValue->castTo<LiteralFloat>()->getValue(), 2.75);
 
   // check that the statements and their children are deleted
-  EXPECT_EQ(function->getBody()->getStatements()->size(), 0);
+  EXPECT_EQ(function->getBody()->getStatements().size(), 0);
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, varAssignm_previouslyDeclaredNonInitializedVariable) { /* NOLINT */
@@ -424,7 +427,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, varAssignm_previouslyDeclaredNonI
   EXPECT_EQ(alphaValue->castTo<LiteralFloat>()->getValue(), 2.95f);
 
   // check that the statement VarDecl and its children are deleted
-  EXPECT_EQ(function->getBody()->getStatements()->size(), 0);
+  EXPECT_EQ(function->getBody()->getStatements().size(), 0);
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, varAssignm_variableDeclarationOnly) { /* NOLINT */
@@ -442,10 +445,10 @@ TEST_F(CompileTimeExpressionSimplifierFixture, varAssignm_variableDeclarationOnl
   ctes.visit(ast);
 
   // check that 'alpha' is computed correctly
-  EXPECT_THROW(getVariableValue("alpha"), std::logic_error);
+  EXPECT_EQ(getVariableValue("alpha")->castTo<LiteralFloat>()->getValue(), 0.0f);
 
   // check that the statement VarDecl and its children are deleted
-  EXPECT_EQ(function->getBody()->getStatements()->size(), 0);
+  EXPECT_EQ(function->getBody()->getStatements().size(), 0);
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, varAssignm_assignmentToParameter) { /* NOLINT */
@@ -471,7 +474,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, varAssignm_assignmentToParameter)
   EXPECT_EQ(alphaValue->castTo<LiteralFloat>()->getValue(), 42.24f);
 
   // check that the statement VarDecl and its children are deleted
-  EXPECT_EQ(function->getBody()->getStatements()->size(), 0);
+  EXPECT_EQ(function->getBody()->getStatements().size(), 0);
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, return_literalOnly_expectedNoChange) { /* NOLINT */
@@ -518,8 +521,8 @@ TEST_F(CompileTimeExpressionSimplifierFixture,  /* NOLINT */
   ctes.visit(ast);
 
   // check that the statement VarDecl and its children are deleted
-  EXPECT_EQ(function->getBody()->getStatements()->size(), 1);
-  ASSERT_EQ(function->getBody()->getStatements()->front(), returnStatement);
+  EXPECT_EQ(function->getBody()->getStatements().size(), 1);
+  ASSERT_EQ(function->getBody()->getStatements().front(), returnStatement);
 
   // check that the variable 'b' in the Return statement was replaced by b's value
   auto firstReturnExpr = returnStatement->getReturnExpressions().front();
@@ -554,8 +557,8 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   ctes.visit(ast);
 
   // check that the statement VarDecl and its children are deleted
-  EXPECT_EQ(function->getBody()->getStatements()->size(), 1);
-  ASSERT_EQ(function->getBody()->getStatements()->front(), returnStatement);
+  EXPECT_EQ(function->getBody()->getStatements().size(), 1);
+  ASSERT_EQ(function->getBody()->getStatements().front(), returnStatement);
 
   // check that the expression b+99 was simplified by its value
   auto firstReturnExpr = returnStatement->getReturnExpressions().front();
@@ -601,6 +604,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, return_multipleReturnValues_expec
   //  return a*7, -5, 21;
   // }
   auto function = new Function("compute");
+  auto functionParam = new ParameterList({new FunctionParameter(new Datatype(Types::INT), new Variable("a"))});
   auto varDecl = new VarDecl("b",
                              new Datatype(Types::INT),
                              new BinaryExpr(
@@ -620,6 +624,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, return_multipleReturnValues_expec
                      new LiteralInt(21)});
 
   // connect objects
+  function->setParameterList(functionParam);
   function->addStatement(varDecl);
   function->addStatement(returnStatement);
   ast.setRootNode(function);
@@ -819,7 +824,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
 TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
        ifStmt_conditionValueIsUnknown_thenBranchOnlyExists_thenBranchEvaluable_expectedRewriting) {
   //  -- input --
-  //  int compute(plaintext_it a) {
+  //  int compute(plaintext_int a) {
   //    int b = 22;
   //    if (a > 20) {
   //      b = 2*b;
@@ -832,7 +837,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   //  }
   auto function = new Function("compute");
   auto functionParameter = new ParameterList({
-                                                 new FunctionParameter(new Datatype(Types::STRING),
+                                                 new FunctionParameter(new Datatype(Types::INT),
                                                                        new Variable("a"))});
   auto varDeclB = new VarDecl("b",
                               new Datatype(Types::INT),
@@ -881,6 +886,198 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
                               new LiteralInt(20))),
           OpSymb::multiplication,
           new LiteralInt(22)));
+  EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedResult));
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
+       ifStmt_conditionValueIsUnknown_thenBranchOnlyExists_expectedRemovalOfElseClauseInResultBecauseVariableBIsNull) {
+  //  -- input --
+  //  int compute(plaintext_int a) {
+  //    plaintext_int b;  // implicit: b=0
+  //    if (a > 20) {
+  //      plaintext_int c = 642;
+  //      b = 2*c-1;
+  //    }
+  //    return b;
+  //  }
+  //  -- expected --
+  //  int compute() {
+  //    return [a>20]*1'283;
+  //  }
+  auto function = new Function("compute");
+  auto functionParameter = new ParameterList({
+                                                 new FunctionParameter(new Datatype(Types::INT),
+                                                                       new Variable("a"))});
+  auto varDeclB = new VarDecl("b", new Datatype(Types::INT));
+  auto ifStmtCondition = new LogicalExpr(new Variable("a"),
+                                         OpSymb::greater,
+                                         new LiteralInt(20));
+  auto thenStatements = std::vector<AbstractStatement *>(
+      {new VarDecl("c", 642),
+       new VarAssignm("b",
+                      new BinaryExpr(
+                          new BinaryExpr(new LiteralInt(2), OpSymb::multiplication, new Variable("c")),
+                          OpSymb::subtraction,
+                          new LiteralInt(1)))});
+  auto thenBranch = new Block(thenStatements);
+  auto ifStmt = new If(ifStmtCondition, thenBranch);
+  auto returnStatement =
+      new Return(new Variable("b"));
+
+  // connect objects
+  function->setParameterList(functionParameter);
+  function->addStatement(varDeclB);
+  function->addStatement(ifStmt);
+  function->addStatement(returnStatement);
+  ast.setRootNode(function);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  // check that there is only one statement left
+  EXPECT_EQ(function->getBodyStatements().size(), 1);
+  // check that the return statement contains exactly one return value
+  EXPECT_EQ(returnStatement->getReturnExpressions().size(), 1);
+  // check that the return value is the expected one
+  auto expectedResult =
+      new BinaryExpr(
+          new LogicalExpr(new Variable("a"),
+                          OpSymb::greater,
+                          new LiteralInt(20)),
+          OpSymb::multiplication,
+          new LiteralInt(1'283));
+  EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedResult));
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
+       ifStmt_conditionValueIsUnknown_thenBranchOnlyExists_varDeclInThenBranch_expectedRewritingOfIfStatement) {
+  //  -- input --
+  //  int compute(plaintext_int a) {
+  //    plaintext_int b = 42;
+  //    if (a > 20) {
+  //      plaintext_int c = 642;
+  //      b = 2*c-1;
+  //    }
+  //    return b;
+  //  }
+  //  -- expected --
+  //  int compute() {
+  //    return [a>20]*1'283+[1-[a>20]]*42;
+  //  }
+  auto function = new Function("compute");
+  auto functionParameter = new ParameterList({
+                                                 new FunctionParameter(new Datatype(Types::INT),
+                                                                       new Variable("a"))});
+  auto varDeclB = new VarDecl("b", new Datatype(Types::INT), new LiteralInt(42));
+  auto ifStmtCondition = new LogicalExpr(new Variable("a"),
+                                         OpSymb::greater,
+                                         new LiteralInt(20));
+  auto thenStatements = std::vector<AbstractStatement *>(
+      {new VarDecl("c", 642),
+       new VarAssignm("b",
+                      new BinaryExpr(
+                          new BinaryExpr(new LiteralInt(2), OpSymb::multiplication, new Variable("c")),
+                          OpSymb::subtraction,
+                          new LiteralInt(1)))});
+  auto thenBranch = new Block(thenStatements);
+  auto ifStmt = new If(ifStmtCondition, thenBranch);
+  auto returnStatement =
+      new Return(new Variable("b"));
+
+  // connect objects
+  function->setParameterList(functionParameter);
+  function->addStatement(varDeclB);
+  function->addStatement(ifStmt);
+  function->addStatement(returnStatement);
+  ast.setRootNode(function);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  // check that there is only one statement left
+  EXPECT_EQ(function->getBodyStatements().size(), 1);
+  // check that the return statement contains exactly one return value
+  EXPECT_EQ(returnStatement->getReturnExpressions().size(), 1);
+  // check that the return value is the expected one
+  auto expectedResult = new BinaryExpr(
+      new BinaryExpr(
+          new LogicalExpr(new Variable("a"),
+                          OpSymb::greater,
+                          new LiteralInt(20)),
+          OpSymb::multiplication,
+          new LiteralInt(1'283)),
+      OpSymb::addition,
+      new BinaryExpr(new BinaryExpr(
+          new LiteralInt(1),
+          OpSymb::subtraction,
+          new LogicalExpr(new Variable("a"),
+                          OpSymb::greater,
+                          new LiteralInt(20))),
+                     OpSymb::multiplication,
+                     new LiteralInt(42)));
+  EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedResult));
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
+       ifStmt_conditionValueIsUnknown_thenAndElseExists_returnValueIsInputVariable_expectedRewritingOfIfStatement) {
+  //  -- input --
+  //  int compute(plaintext_int factor, plaintext_int threshold) {
+  //    if (threshold < 11) {
+  //      b = 2*factor;
+  //    } else {
+  //      b = factor;
+  //    }
+  //    return b;
+  //  }
+  //  -- expected --
+  //  int compute() {
+  //    return [threshold<11]*2*factor + [1-[threshold<11]]*factor;
+  //  }
+  auto function = new Function("compute");
+  auto functionParameter = new ParameterList(
+      {new FunctionParameter(new Datatype(Types::INT), new Variable("factor")),
+       new FunctionParameter(new Datatype(Types::INT), new Variable("threshold"))});
+  auto ifStmtCondition = new LogicalExpr(new Variable("threshold"),
+                                         OpSymb::smaller,
+                                         new LiteralInt(11));
+  auto thenBranch =
+      new VarAssignm("b", new BinaryExpr(new LiteralInt(2), OpSymb::multiplication, new Variable("factor")));
+  auto elseBranch = new VarAssignm("b", new Variable("factor"));
+
+  auto ifStmt = new If(ifStmtCondition, thenBranch, elseBranch);
+  auto returnStatement =
+      new Return(new Variable("b"));
+
+  // connect objects
+  function->setParameterList(functionParameter);
+  function->addStatement(ifStmt);
+  function->addStatement(returnStatement);
+  ast.setRootNode(function);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  // check that there is only one statement left
+  EXPECT_EQ(function->getBodyStatements().size(), 1);
+  // check that the return statement contains exactly one return value
+  EXPECT_EQ(returnStatement->getReturnExpressions().size(), 1);
+  // check that the return value is the expected one
+  auto expectedResult = new BinaryExpr(
+      new BinaryExpr(
+          new LogicalExpr(new Variable("threshold"),
+                          OpSymb::smaller,
+                          new LiteralInt(11)),
+          OpSymb::multiplication,
+          new BinaryExpr(new LiteralInt(2), OpSymb::multiplication, new Variable("factor"))),
+      OpSymb::addition,
+      new BinaryExpr(new BinaryExpr(
+          new LiteralInt(1),
+          OpSymb::subtraction,
+          new LogicalExpr(new Variable("threshold"),
+                          OpSymb::smaller,
+                          new LiteralInt(11))),
+                     OpSymb::multiplication,
+                     new Variable("factor")));
   EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedResult));
 }
 

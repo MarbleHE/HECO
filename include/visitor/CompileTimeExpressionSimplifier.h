@@ -4,22 +4,82 @@
 #include "Visitor.h"
 #include "EvaluationVisitor.h"
 #include "BinaryExpr.h"
+#include "LiteralFloat.h"
 #include <queue>
 
+/// Saves the information that we need to rewrite If statements like
+///   if (condition) { a = 2; } else { a = 4; }
+/// as simple expressions like
+///   a = [condition]*2 + [1-condition]*4;
+/// where condition is a LogicalExpr.
 struct IfStatementResolverData {
   AbstractExpr *factorIsTrue;
   AbstractExpr *factorIsFalse;
 
-  explicit IfStatementResolverData(AbstractExpr *condition) {
-    factorIsTrue = condition->clone(false)->castTo<AbstractExpr>();;
+  // if activeBranch == true: we are visiting statements in the Then-branch
+  // if activeBranch == false: we are visiting statements in the Else-branch
+  bool activeBranch = true;
+
+  /// A map that stores the values of variables that are modified within the Then- or Else-branch of an If statement.
+  /// - std::string is the variable's identifier.
+  /// - std::pair<AbstractExpr*, AbstractExpr*> contains the variable's value if the Then-branch would be executed
+  /// (pair.first) or if the Else-branch would be executed (pair.second).
+  std::unordered_map<std::string, std::pair<AbstractExpr *, AbstractExpr *>> ifStatementVariableValues;
+
+  explicit IfStatementResolverData(AbstractExpr *ifStatementCondition) {
+    // factorIsTrue = ifStatementCondition
+    factorIsTrue = ifStatementCondition->clone(false)->castTo<AbstractExpr>();
+    // factorIsFalse = [1-ifStatementCondition]
     factorIsFalse =
         new BinaryExpr(new LiteralInt(1),
                        OpSymb::subtraction,
-                       condition->clone(false)->castTo<AbstractExpr>());
+                       ifStatementCondition->clone(false)->castTo<AbstractExpr>());
   };
 
+  void addVariableValue(const std::string &variableIdentifier, AbstractExpr *variableValue) {
+    // we need to clone the variableValue here, because the If statement and all of its children will be removed later
+    auto newValue = variableValue->clone(false)->castTo<AbstractExpr>();
+    if (activeBranch) { ifStatementVariableValues[variableIdentifier].first = newValue; }
+    else { ifStatementVariableValues[variableIdentifier].second = newValue; }
+  }
+
+  [[nodiscard]] const std::unordered_map<std::string,
+                                         std::pair<AbstractExpr *,
+                                                   AbstractExpr *>> &getIfStatementVariableValues() const {
+    return ifStatementVariableValues;
+  }
+
+  void setActiveBranch(bool trueIfVisitingThenBranch) {
+    IfStatementResolverData::activeBranch = trueIfVisitingThenBranch;
+  }
+
   AbstractExpr *generateIfDependentValue(AbstractExpr *trueValue, AbstractExpr *falseValue) {
-    // condition*trueValue + (1-b)*falseValue
+    // Build an expression like
+    //   condition*trueValue + (1-b)*falseValue.
+    // We need to handle the case where trueValue or/and falseValue are null because in that case the dependent
+    // statement can be simplified by removing one/both operands of the binary expression.
+    auto trueValueIsNull =
+        dynamic_cast<AbstractLiteral *>(trueValue)!=nullptr && trueValue->castTo<AbstractLiteral>()->isNull();
+    auto falseValueIsNull =
+        dynamic_cast<AbstractLiteral *>(falseValue) && falseValue->castTo<AbstractLiteral>()->isNull();
+    if (trueValueIsNull && falseValueIsNull) {
+      // case: trueValue == 0 && falseValue == 0
+      // return a cloned copy of trueValue because we cannot directly create a new object (e.g., LiteralInt) as we do
+      // not exactly know which subtype of AbstractLiteral trueValue has
+      // return "0" (where 0 is of the respective input type)
+      return trueValue->clone(false)->castTo<AbstractExpr>();
+    } else if (trueValueIsNull) {
+      // case: trueValue == 0 && falseValue != 0 => value is 0 if the condition is True
+      // return (1-b)*falseValue
+      return new BinaryExpr(factorIsFalse, OpSymb::multiplication, falseValue);
+    } else if (falseValueIsNull) {
+      // case: trueValue != 0 && falseValue == 0 => value is 0 if the condition is False
+      // return condition * trueValue
+      return new BinaryExpr(factorIsTrue, OpSymb::multiplication, trueValue);
+    }
+
+    // default case: trueValue != 0 && falseValue != 0 => value is non-zero independent of what condition evaluates to
+    // return condition*trueValue + (1-b)*falseValue.
     return new BinaryExpr(
         new BinaryExpr(factorIsTrue, OpSymb::multiplication, trueValue),
         OpSymb::addition,
@@ -32,21 +92,22 @@ class CompileTimeExpressionSimplifier : public Visitor {
   /// A EvaluationVisitor instance that is used to evaluate parts of the AST in order to simplify them.
   EvaluationVisitor evalVisitor;
 
-  bool resolveIfStatementsActive = false;
   std::stack<IfStatementResolverData *> ifResolverData;
 
  public:
   CompileTimeExpressionSimplifier();
 
   /// Contains all nodes that could be evaluated during the simplification traversal with their associated evaluation
-  /// result. This map serves
+  /// result. This map is needed in addition to variableValues because we need to store the results of partially
+  /// evaluated expressions, e.g., for int result = a+23*6 this map would contain the partial result 23*6=138 for the
+  /// rhs operand that can than be used to simplify the assignment to: result = a+138.
   /// - AbstractNode*: A reference to the evaluated node.
   /// - std::vector<AbstractLiteral*>: The node's evaluation result.
-  std::unordered_map<AbstractNode *, std::vector<AbstractLiteral *>> evaluatedNodes;
+  std::unordered_map<AbstractNode *, std::vector<AbstractExpr *>> evaluatedNodes;
 
   /// Stores the latest value of a variable while traversing through the AST.
   /// - std::string: The variable's identifier.
-  /// - AbstractLiteral*: The variable's value.
+  /// - AbstractExpr*: The variable's value.
   std::unordered_map<std::string, AbstractExpr *> variableValues;
 
   /// Contains pointer to those nodes for which full or partial evaluation could be performed and hence can be deleted
@@ -88,22 +149,28 @@ class CompileTimeExpressionSimplifier : public Visitor {
 
   bool valueIsKnown(AbstractNode *abstractExpr);
 
-  void storeEvaluatedNode(AbstractNode *node, const std::vector<AbstractLiteral *> &evaluationResult);
+  void storeEvaluatedNode(AbstractNode *node, const std::vector<AbstractExpr *> &evaluationResult);
 
-  void storeEvaluatedNode(AbstractNode *node, AbstractLiteral *evaluationResult);
+  void storeEvaluatedNode(AbstractNode *node, AbstractExpr *evaluationResult);
 
-  AbstractLiteral *getFirstValue(AbstractNode *node);
+  AbstractExpr *getFirstValue(AbstractNode *node);
 
   std::vector<AbstractLiteral *> evaluateNodeRecursive(AbstractNode *n,
                                                        std::unordered_map<std::string,
                                                                           AbstractLiteral *> valuesOfVariables);
 
   void handleBinaryExpressions(AbstractNode &expr, AbstractExpr *leftOperand, AbstractExpr *rightOperand);
+
   void visit(ParameterList &elem) override;
+
   void moveChildIfNotEvaluable(AbstractNode *ifStatementsParent,
                                AbstractStatement *branchStatement);
+
   std::unordered_map<std::string, AbstractLiteral *> getTransformedVariableMap();
+
   AbstractExpr *getFirstValueOrExpression(AbstractNode *node);
+
+  static AbstractLiteral *getDefaultVariableInitializationValue(Types datatype);
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_VISITOR_COMPILETIMEEXPRESSIONSIMPLIFIER_H_
