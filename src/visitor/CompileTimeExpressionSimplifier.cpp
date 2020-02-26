@@ -76,6 +76,7 @@ void CompileTimeExpressionSimplifier::visit(CallExternal &elem) {
  *    variableValues. After finishing the simplification traversal, the node VarDecl containing "bool b = true;" and all
  *    of its children, including LiteralBool(true), will be deleted. Hence, looking up any value in variableValues after
  *    the traversal is not possible anymore. However, as this is needed by tests we store a clone here.
+ *    Note: storeEvaluatedNode creates and adds such a cloned node.
  *  @{
  */
 
@@ -97,6 +98,23 @@ void CompileTimeExpressionSimplifier::visit(LiteralString &elem) {
 void CompileTimeExpressionSimplifier::visit(LiteralFloat &elem) {
   storeEvaluatedNode(&elem, &elem);
   Visitor::visit(elem);
+}
+
+void CompileTimeExpressionSimplifier::visit(Variable &elem) {
+  Visitor::visit(elem);
+  if (valueIsKnown(&elem)) {
+    // if the variable's value is known, mark the node as evaluated
+    storeEvaluatedNode(&elem, getFirstValue(&elem));
+  } else if (variableValues.count(elem.getIdentifier()) > 0) {
+    // if we know the variable's symbolic value instead, we can replace this variable node by the AbstractExpr that
+    // defines the variable's value
+    auto variableParent = elem.getParentsNonNull().front();
+    elem.isolateNode();
+    nodesQueuedForDeletion.push(&elem);
+    variableParent->addChild(
+        variableValues.at(elem.getIdentifier())->clone(false)->castTo<AbstractExpr>(),
+        true);
+  }
 }
 
 /** @} */ // End of visit leaves group
@@ -223,21 +241,6 @@ void CompileTimeExpressionSimplifier::visit(Block &elem) {
   if (allStatementsInBlockAreMarkedForDeletion) storeEvaluatedNode(&elem, nullptr);
 }
 
-void CompileTimeExpressionSimplifier::visit(Variable &elem) {
-  Visitor::visit(elem);
-  // if the variable's value is known yet mark the node as evaluated
-  if (valueIsKnown(&elem)) {
-    storeEvaluatedNode(&elem, getFirstValue(&elem));
-  } else if (variableValues.count(elem.getIdentifier()) > 0) {
-    auto variableParent = elem.getParentsNonNull().front();
-    elem.isolateNode();
-    nodesQueuedForDeletion.push(&elem);
-    variableParent->addChild(
-        variableValues.at(elem.getIdentifier())->clone(false)->castTo<AbstractExpr>(),
-        true);
-  }
-}
-
 void CompileTimeExpressionSimplifier::visit(Call &elem) {
   Visitor::visit(elem);
   // TODO(pjattke): implement me!
@@ -355,94 +358,52 @@ void CompileTimeExpressionSimplifier::visit(If &elem) {
   else { // if we don't know the evaluation result of the If statement's condition -> rewrite the If statement
     // create a copy of the variableValues map and evaluatedNodes map
     std::unordered_map<std::string, AbstractExpr *> originalVariableValues(variableValues);
-    std::unordered_map<AbstractNode *, std::vector<AbstractExpr *>> originalEvaluatedNodes(evaluatedNodes);
 
     // visit the thenBranch and store its modifications
     elem.getThenBranch()->accept(*this);
     std::unordered_map<std::string, AbstractExpr *> variableValuesAfterVisitingThen(variableValues);
-    std::unordered_map<AbstractNode *, std::vector<AbstractExpr *>> evalutedNodesAfterVisitingThen(evaluatedNodes);
 
     // check if there is an Else-branch that we need to visit
     if (elem.getElseBranch()!=nullptr) {
       // restore the original maps via copy assignments prior visiting Else-branch
       variableValues = originalVariableValues;
-      evaluatedNodes = originalEvaluatedNodes;
 
       // visit the Else-branch
       elem.getElseBranch()->accept(*this);
     }
 
-    // restore the original maps via copy assignments
-//    variableValues = originalVariableValues;
-//    evaluatedNodes = originalEvaluatedNodes;
-
-    // up to this point (and beyond), the Else-branch's modifications are in variableValues
     // rewrite those entries that were modified in either one or both maps
-    IfStatementResolver isr(elem.getCondition());
+    // note: up to this point (and beyond), the Else-branch's modifications are in variableValues
     for (auto &[variableIdentifier, originalValue] : originalVariableValues) {
-
+      // check if the variable was changed in the Then-branch
       auto thenBranchValue = variableValuesAfterVisitingThen.at(variableIdentifier);
-      auto thenBranchModifiedValue = (thenBranchValue!=originalValue);
-
-      bool elseBranchModifiedValue = false;
+      auto thenBranchModifiedCurrentVariable = (thenBranchValue!=originalValue);
+      // check if the variable was changed in the Else-branch
+      // if there is no Else-branch, elseBranchModifiedCurrentVariable stays False
+      bool elseBranchModifiedCurrentVariable = false;
       AbstractExpr *elseBranchValue = nullptr;
       if (elem.getElseBranch()!=nullptr) {
         elseBranchValue = variableValues.at(variableIdentifier);
-        elseBranchModifiedValue = (elseBranchValue!=originalValue);
+        elseBranchModifiedCurrentVariable = (elseBranchValue!=originalValue);
       }
 
-      if (thenBranchModifiedValue && elseBranchModifiedValue) {
-        originalVariableValues[variableIdentifier] = isr.generateIfDependentValue(thenBranchValue, elseBranchValue);
-      } else if (thenBranchModifiedValue) {
-        originalVariableValues[variableIdentifier] = isr.generateIfDependentValue(thenBranchValue, originalValue);
-      } else if (elseBranchModifiedValue) {
-        originalVariableValues[variableIdentifier] = isr.generateIfDependentValue(originalValue, elseBranchValue);
-      } // otherwise neither one of the two branches modified the variable's value and we can keep it like it is
-
-      // restore the original maps via copy assignments
-      variableValues = originalVariableValues;
-      evaluatedNodes = originalEvaluatedNodes;
+      // determine if an If statement-dependent value needs to be assigned to the variable
+      AbstractExpr *newValue;
+      if (thenBranchModifiedCurrentVariable && elseBranchModifiedCurrentVariable) {
+        newValue = generateIfDependentValue(elem.getCondition(), thenBranchValue, elseBranchValue);
+      } else if (thenBranchModifiedCurrentVariable) {
+        newValue = generateIfDependentValue(elem.getCondition(), thenBranchValue, originalValue);
+      } else if (elseBranchModifiedCurrentVariable) {
+        newValue = generateIfDependentValue(elem.getCondition(), originalValue, elseBranchValue);
+      } else {
+        // otherwise neither one of the two branches modified the variable's value and we can keep it unchanged
+        continue;
+      }
+      // assign the new If statement-dependent value (e.g., myVarIdentifier = condition*32+[1-condition]*11)
+      originalVariableValues[variableIdentifier] = newValue;
     }
-
-
-//    // set resolveIfStatementActive = true; b = [condition], notB = (1-[condition])
-//    ifResolverData.push(new IfStatementResolver(elem.getCondition()));
-//
-//    // visit the thenBranch
-//    elem.getThenBranch()->accept(*this);
-//    // if exists, visit the elseBranch
-//    if (elem.getElseBranch()!=nullptr) {
-//      ifResolverData.top()->setActiveBranch(false);
-//      elem.getElseBranch()->accept(*this);
-//    }
-//    // TODO(pjattke): modify visits of AST objects to consider resolveIfStatementActive
-//
-//    //  Generate If-dependent assignment values by using map ifStatementVariableValues
-//    //  if either one of the pair's values (first, second) is empty, we need to pass the value's current value instead
-//    //  such that the value stays the same
-//    //  Consider following example where 22 is the variable's original value that needs to be preserved if not [a>42]:
-//    //    int i = 22; if (a > 42) { i = 111; }  --> int i = [a>42]*111 + [1-[a>42]]*22;
-//    auto currentIfResolverStruct = ifResolverData.top();
-//    for (auto &[varIdentifier, valueThenElse] : currentIfResolverStruct->getIfStatementVariableValues()) {
-//      //
-//      if (valueThenElse.first==nullptr || valueThenElse.second==nullptr) {
-//        // retrieve old value
-//        AbstractExpr *oldValue =
-//            (variableValues.count(varIdentifier) > 0) ? variableValues.at(varIdentifier) : new Variable(varIdentifier);
-//        // save new value that depends on the If statement's condition
-//        if (valueThenElse.first==nullptr) {
-//          variableValues[varIdentifier] =
-//              ifResolverData.top()->generateIfDependentValue(oldValue, valueThenElse.second);
-//        } else if (valueThenElse.second==nullptr) {
-//          variableValues[varIdentifier] = ifResolverData.top()->generateIfDependentValue(valueThenElse.first, oldValue);
-//        }
-//      } else {
-//        variableValues[varIdentifier] =
-//            ifResolverData.top()->generateIfDependentValue(valueThenElse.first, valueThenElse.second);
-//      }
-//    }
-//    // remove the ifStatementResolverData object
-//    ifResolverData.pop();
+    // restore the original map that contains the merged changes from the visited branches
+    variableValues = originalVariableValues;
 
     // enqueue the If statement and its children for deletion
     nodesQueuedForDeletion.push(&elem);
@@ -475,10 +436,10 @@ void CompileTimeExpressionSimplifier::visit(While &elem) {
 void CompileTimeExpressionSimplifier::visit(Return &elem) {
   Visitor::visit(elem);
 
-  // if there was only one statement and this statement was evaluable, mark this Return node as evaluable
-  // (If this Return is part of a Function that is nested into a Call and this Return is evaluable, then we can replace
+  // If there was only one statement and this statement was evaluable, mark this Return node as evaluable.
+  // If this Return is part of a Function that is nested into a Call and this Return is evaluable, then we can replace
   // the Call by the evaluated value. But only if there is a single return value because our AST cannot represent the
-  // assignment of multiple return values yet.)
+  // assignment of multiple return values yet.
   auto firstReturnExpression = elem.getReturnExpressions().front();
   if (elem.getReturnExpressions().size()==1 && valueIsKnown(firstReturnExpression)) {
     storeEvaluatedNode(&elem, getFirstValue(firstReturnExpression));
@@ -512,7 +473,7 @@ bool CompileTimeExpressionSimplifier::valueIsKnown(AbstractNode *abstractExpr) {
     // check that the variable has a value
     return variableValues.count(abstractExprAsVariable->getIdentifier()) > 0
         // and its value is not symbolic (i.e., contains a variable for which the value is not known)
-        && variableValues.at(abstractExprAsVariable->getIdentifier())->getVariableIdentifiers().size()==0;
+        && variableValues.at(abstractExprAsVariable->getIdentifier())->getVariableIdentifiers().empty();
   }
   // ii.) or the node was evaluated before (i.e., its value is in evaluatedNodes)
   return variableValueIsKnown || evaluatedNodes.count(abstractExpr) > 0;
@@ -603,4 +564,60 @@ AbstractLiteral *CompileTimeExpressionSimplifier::getDefaultVariableInitializati
       throw std::invalid_argument("Unrecognized enum type given: Cannot determine its default value."
                                   "See enum Types for the supported types.");
   }
+}
+AbstractExpr *CompileTimeExpressionSimplifier::generateIfDependentValue(AbstractExpr *condition,
+                                                                        AbstractExpr *trueValue,
+                                                                        AbstractExpr *falseValue) {
+  // We need to handle the case where trueValue or/and falseValue are null because in that case the dependent
+  // statement can be simplified significantly by removing one/both operands of the binary expression.
+
+  // determine whether one or both of the provided expressions (trueValue, falseValue) are null
+  auto exprIsNull = [](AbstractExpr *expr) {
+    if (expr==nullptr) return true;
+    auto castedExpr = dynamic_cast<AbstractLiteral *>(expr);
+    return castedExpr!=nullptr && castedExpr->isNull();
+  };
+  auto trueValueIsNull = exprIsNull(trueValue);
+  auto falseValueIsNull = exprIsNull(falseValue);
+
+  // check whether both values are null
+  if (trueValueIsNull && falseValueIsNull) {
+    // case: trueValue == 0 && falseValue == 0 => expression always equals null, independent of condition's eval result
+    // return a cloned copy of trueValue because we cannot directly create a new object (e.g., LiteralInt) as we do
+    // not exactly know which subtype of AbstractLiteral trueValue has
+    // return "0" (where 0 is of the respective input type)
+    return trueValue->clone(false)->castTo<AbstractExpr>();
+  }
+
+  // check if exactly one of both values are null
+  if (trueValueIsNull) {
+    // factorIsFalse = [1-ifStatementCondition]
+    auto factorIsFalse = new BinaryExpr(new LiteralInt(1),
+                                        OpSymb::subtraction,
+                                        condition->clone(false)->castTo<AbstractExpr>());
+    // case: trueValue == 0 && falseValue != 0 => value is 0 if the condition is True -> return (1-b)*falseValue
+    return new BinaryExpr(factorIsFalse, OpSymb::multiplication, falseValue);
+  } else if (falseValueIsNull) {
+    // factorIsTrue = ifStatementCondition
+    auto factorIsTrue = condition->clone(false)->castTo<AbstractExpr>();
+    // case: trueValue != 0 && falseValue == 0 => value is 0 if the condition is False -> return condition * trueValue
+    return new BinaryExpr(factorIsTrue, OpSymb::multiplication, trueValue);
+  }
+
+  // default case: trueValue != 0 && falseValue != 0 => value is changed in both branches of If statement
+  // -> return condition*trueValue + (1-b)*falseValue.
+  // factorIsTrue = ifStatementCondition
+  auto factorIsTrue = condition->clone(false)->castTo<AbstractExpr>();
+  // factorIsFalse = [1-ifStatementCondition]
+  auto factorIsFalse = new BinaryExpr(new LiteralInt(1),
+                                      OpSymb::subtraction,
+                                      condition->clone(false)->castTo<AbstractExpr>());
+  return new BinaryExpr(
+      new BinaryExpr(factorIsTrue,
+                     OpSymb::multiplication,
+                     trueValue->clone(false)->castTo<AbstractExpr>()),
+      OpSymb::addition,
+      new BinaryExpr(factorIsFalse,
+                     OpSymb::multiplication,
+                     falseValue->clone(false)->castTo<AbstractExpr>()));
 }

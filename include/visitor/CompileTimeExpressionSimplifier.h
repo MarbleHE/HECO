@@ -5,71 +5,11 @@
 #include "EvaluationVisitor.h"
 #include "BinaryExpr.h"
 #include "LiteralFloat.h"
-#include <queue>
-
-/// Saves the information that we need to rewrite If statements like
-///   if (condition) { a = 2; } else { a = 4; }
-/// as simple expressions like
-///   a = [condition]*2 + [1-condition]*4;
-/// where condition is a LogicalExpr.
-struct IfStatementResolver {
-  AbstractExpr *factorIsTrue;
-  AbstractExpr *factorIsFalse;
-
-  explicit IfStatementResolver(AbstractExpr *ifStatementCondition) {
-    // factorIsTrue = ifStatementCondition
-    factorIsTrue = ifStatementCondition->clone(false)->castTo<AbstractExpr>();
-    // factorIsFalse = [1-ifStatementCondition]
-    factorIsFalse =
-        new BinaryExpr(new LiteralInt(1),
-                       OpSymb::subtraction,
-                       ifStatementCondition->clone(false)->castTo<AbstractExpr>());
-  };
-
-  AbstractExpr *generateIfDependentValue(AbstractExpr *trueValue, AbstractExpr *falseValue) {
-    // Build an expression like
-    //   condition*trueValue + (1-b)*falseValue.
-    // We need to handle the case where trueValue or/and falseValue are null because in that case the dependent
-    // statement can be simplified by removing one/both operands of the binary expression.
-    auto trueValueIsNull =
-        dynamic_cast<AbstractLiteral *>(trueValue)!=nullptr && trueValue->castTo<AbstractLiteral>()->isNull();
-    auto falseValueIsNull =
-        dynamic_cast<AbstractLiteral *>(falseValue) && falseValue->castTo<AbstractLiteral>()->isNull();
-    if (trueValueIsNull && falseValueIsNull) {
-      // case: trueValue == 0 && falseValue == 0
-      // return a cloned copy of trueValue because we cannot directly create a new object (e.g., LiteralInt) as we do
-      // not exactly know which subtype of AbstractLiteral trueValue has
-      // return "0" (where 0 is of the respective input type)
-      return trueValue->clone(false)->castTo<AbstractExpr>();
-    } else if (trueValueIsNull) {
-      // case: trueValue == 0 && falseValue != 0 => value is 0 if the condition is True
-      // return (1-b)*falseValue
-      return new BinaryExpr(factorIsFalse, OpSymb::multiplication, falseValue);
-    } else if (falseValueIsNull) {
-      // case: trueValue != 0 && falseValue == 0 => value is 0 if the condition is False
-      // return condition * trueValue
-      return new BinaryExpr(factorIsTrue, OpSymb::multiplication, trueValue);
-    }
-
-    // default case: trueValue != 0 && falseValue != 0 => value is non-zero independent of what condition evaluates to
-    // return condition*trueValue + (1-b)*falseValue.
-    return new BinaryExpr(
-        new BinaryExpr(factorIsTrue,
-                       OpSymb::multiplication,
-                       trueValue->clone(false)->castTo<AbstractExpr>()),
-        OpSymb::addition,
-        new BinaryExpr(factorIsFalse,
-                       OpSymb::multiplication,
-                       falseValue->clone(false)->castTo<AbstractExpr>()));
-  }
-};
 
 class CompileTimeExpressionSimplifier : public Visitor {
  private:
   /// A EvaluationVisitor instance that is used to evaluate parts of the AST in order to simplify them.
   EvaluationVisitor evalVisitor;
-
-  std::stack<IfStatementResolver *> ifResolverData;
 
  public:
   CompileTimeExpressionSimplifier();
@@ -145,6 +85,23 @@ class CompileTimeExpressionSimplifier : public Visitor {
   AbstractExpr *getFirstValueOrExpression(AbstractNode *node);
 
   static AbstractLiteral *getDefaultVariableInitializationValue(Types datatype);
+
+  /// A helper method to transform an If statement into a dependent assignment, for example:
+  ///     if (condition) { x = trueValue; } else { x = falseValue; }
+  /// is converted into
+  ///     x = condition*trueValue + (1-b)*falseValue.
+  /// This method takes the required parts of this expression, the condition, the value that should be assigned in case
+  /// that the condition evaluates to True (trueValue) or to False (falseValue). It then generates and returns the
+  /// following expression: condition*trueValue + (1-b)*falseValue.
+  /// The method also considers the case where trueValue and/or falseValue are null and appropriately removes the
+  /// irrelevant subtree from the resulting expression.
+  /// \param condition The condition the assignment depends on, e.g., the condition of the If statement.
+  /// \param trueValue The value to be used for the case that the condition evaluates to True.
+  /// \param falseValueThe value to be used for the case that the condition evaluates to False.
+  /// \return A binary expression of the form condition*trueValue + (1-b)*falseValue.
+  static AbstractExpr *generateIfDependentValue(AbstractExpr *condition,
+                                                AbstractExpr *trueValue,
+                                                AbstractExpr *falseValue);
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_VISITOR_COMPILETIMEEXPRESSIONSIMPLIFIER_H_
