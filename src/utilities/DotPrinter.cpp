@@ -1,5 +1,6 @@
 #include "DotPrinter.h"
 #include "VarDecl.h"
+#include "VarAssignm.h"
 
 DotPrinter::DotPrinter() : mdc(nullptr) {}
 
@@ -42,8 +43,9 @@ std::string DotPrinter::getDotFormattedString(AbstractNode *n) {
   auto vec = (n->hasReversedEdges() ? n->getParentsNonNull() : n->getChildrenNonNull());
 
   // define criteria when to print node details
-  auto printNodeDetailsCriterion = (vec.empty()  // if node is a tree leaf
-      || dynamic_cast<VarDecl *>(n)!=nullptr);  // if node is a VarDecl (needed for the variable identifier)
+  auto printNodeDetailsCriterion = (vec.empty()    // if node is a tree leaf
+      || dynamic_cast<VarDecl *>(n)!=nullptr       // if node is a VarDecl (needed for the variable identifier)
+      || dynamic_cast<VarAssignm *>(n)!=nullptr);  // if node is a VarAssignm (needed for the variable identifier)
   finalString << dotVertex(n, this->showMultDepth, this->mdc, printNodeDetailsCriterion)
       .buildVertexString(this->indentationCharacter);
 
