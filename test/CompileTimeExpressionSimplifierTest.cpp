@@ -518,6 +518,59 @@ TEST_F(CompileTimeExpressionSimplifierFixture, varAssignm_assignmentToParameter)
   EXPECT_EQ(ctes.evaluatedNodes.size(), 0);
 }
 
+TEST_F(CompileTimeExpressionSimplifierFixture, varAssignm_circularDependency) { /* NOLINT */
+  // intFoo (plaintext_int x, plaintext_int y) {
+  //  x = y+3
+  //  y = x+2
+  //  return x+y
+  // }
+  auto function = new Function("compute");
+  auto functionParamList = new ParameterList(
+      {new FunctionParameter(
+          new Datatype(Types::INT, false), new Variable("x")),
+       new FunctionParameter(
+           new Datatype(Types::INT, false), new Variable("y"))});
+  auto varAssignmX = new VarAssignm("x",
+                                    new BinaryExpr(new Variable("y"), OpSymb::addition, 3));
+  auto varAssignmY = new VarAssignm("y",
+                                    new BinaryExpr(new Variable("x"), OpSymb::addition, 2));
+  auto returnStmt = new Return(
+      new BinaryExpr(new Variable("x"), OpSymb::addition, new Variable("y")));
+
+  // connect objects
+  function->setParameterList(functionParamList);
+  function->addStatement(varAssignmX);
+  function->addStatement(varAssignmY);
+  function->addStatement(returnStmt);
+  ast.setRootNode(function);
+  auto originalNumberOfNodes = ast.getAllNodes().size();
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  // check that the number of nodes decreased
+  EXPECT_TRUE(ast.getAllNodes().size() < originalNumberOfNodes);
+
+  DotPrinter().printAsDotFormattedGraph(ast);
+
+  // check that simplification generated the expected simplified AST
+  auto expectedAst = new BinaryExpr(
+      new BinaryExpr(
+          new Variable("y"),
+          OpSymb::addition,
+          new LiteralInt(3)),
+      OpSymb::addition,
+      new BinaryExpr(
+          new BinaryExpr(new Variable("y"), OpSymb::addition, new LiteralInt(3)),
+          OpSymb::addition,
+          new LiteralInt(2)));
+  EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
+  EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedAst));
+
+  // check that at the end of the evaluation traversal, the evalutedNodes map is empty
+  EXPECT_EQ(ctes.evaluatedNodes.size(), 0);
+}
+
 TEST_F(CompileTimeExpressionSimplifierFixture, return_literalOnly_expectedNoChange) { /* NOLINT */
   // float compute() {
   //  return 42.24;
@@ -1116,8 +1169,11 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   auto ifStmtCondition = new LogicalExpr(new Variable("threshold"),
                                          OpSymb::smaller,
                                          new LiteralInt(11));
-  auto thenBranch =
-      new VarAssignm("b", new BinaryExpr(new LiteralInt(2), OpSymb::multiplication, new Variable("factor")));
+  auto thenBranch = new VarAssignm("b",
+                                   new BinaryExpr(
+                                       new LiteralInt(2),
+                                       OpSymb::multiplication,
+                                       new Variable("factor")));
   auto elseBranch = new VarAssignm("b", new Variable("factor"));
 
   auto ifStmt = new If(ifStmtCondition, thenBranch, elseBranch);
@@ -1156,6 +1212,113 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
                      OpSymb::multiplication,
                      new Variable("factor")));
   EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedResult));
+
+  // check that at the end of the evaluation traversal, the evalutedNodes map is empty
+  EXPECT_EQ(ctes.evaluatedNodes.size(), 0);
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
+       ifStmt_nestedIfStatements_expectedRewritingOfBothIfStatement) {
+  //  -- input --
+  //  int compute(plaintext_int factor, plaintext_int threshold) {
+  //    int b = 99;
+  //    if (threshold > 11) {
+  //        b = b/3;          // b = 33;
+  //      if (factor > 9) {
+  //        b = b*2*factor;   // b = 33*2*factor = 66*factor;
+  //      } else {
+  //        b = b*factor;     // b = 33*factor
+  //      }
+  //    }
+  //    return b;
+  //  }
+  //  -- expected --
+  //  int compute() {
+  //    return [factor>9]*[threshold>11]*66*factor + [1-[factor>9]]*[threshold>11]*33*factor + [1-[threshold>11]]*99;
+  //  }
+  auto function = new Function("compute");
+  auto functionParameter = new ParameterList(
+      {new FunctionParameter(new Datatype(Types::INT), new Variable("factor")),
+       new FunctionParameter(new Datatype(Types::INT), new Variable("threshold"))});
+
+  auto varDeclB = new VarDecl("b", 99);
+
+  auto innerIfStatementCondition = new LogicalExpr(new Variable("factor"), OpSymb::greater, new LiteralInt(9));
+  auto innerIfStatement = new If(innerIfStatementCondition,
+                                 new VarAssignm("b", new BinaryExpr(
+                                     new BinaryExpr(new Variable("b"), OpSymb::multiplication, 2),
+                                     OpSymb::multiplication,
+                                     new Variable("factor"))),
+                                 new VarAssignm("b",
+                                                new BinaryExpr(new Variable("b"),
+                                                               OpSymb::multiplication,
+                                                               new Variable("factor"))));
+
+  auto outerIfStmtThenBlock =
+      new Block({new VarAssignm("b", new BinaryExpr(new Variable("b"), OpSymb::division, new LiteralInt(3))),
+                 innerIfStatement});
+  auto outerIfStatementCondition = new LogicalExpr(new Variable("threshold"), OpSymb::greater, new LiteralInt(11));
+  auto outerIfStmt = new If(outerIfStatementCondition, outerIfStmtThenBlock);
+
+  auto returnStmt = new Return(new Variable("b"));
+
+  // connect objects
+  function->setParameterList(functionParameter);
+  function->addStatement(varDeclB);
+  function->addStatement(outerIfStmt);
+  function->addStatement(returnStmt);
+  ast.setRootNode(function);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  // check that there is only one statement left
+  EXPECT_EQ(function->getBodyStatements().size(), 1);
+  // check that the return statement contains exactly one return value
+  EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
+  // check that the return value equals the expected one
+  // return
+  //    [threshold>11]*[
+  //            [factor>9]*66*factor        // expectedResultLhsTerm
+  //          + [1-[factor>9]]*33*factor]   // expectedResultMiddleTerm
+  //    + [1-[threshold>11]]*99;            // expectedResultRhsTerm
+
+  auto expectedResultLhsTerm = new BinaryExpr(
+      new LogicalExpr(new Variable("factor"), OpSymb::greater, new LiteralInt(9)),
+      OpSymb::multiplication,
+      new BinaryExpr(
+          new LiteralInt(66),
+          OpSymb::multiplication,
+          new Variable("factor")));
+  auto expectedResultMiddleTerm = new BinaryExpr(
+      new BinaryExpr(
+          new LiteralInt(1),
+          OpSymb::subtraction,
+          new LogicalExpr(new Variable("factor"), OpSymb::greater, new LiteralInt(9))),
+      OpSymb::multiplication,
+      new BinaryExpr(
+          new LiteralInt(33),
+          OpSymb::multiplication,
+          new Variable("factor")));
+  auto expectedResultRhsTerm = new BinaryExpr(
+      new BinaryExpr(
+          new LiteralInt(1),
+          OpSymb::subtraction,
+          new LogicalExpr(new Variable("threshold"), OpSymb::greater, new LiteralInt(11))),
+      OpSymb::multiplication,
+      new LiteralInt(99));
+
+  auto expectedResult = new BinaryExpr(
+      new BinaryExpr(
+          new LogicalExpr(new Variable("threshold"), OpSymb::greater, new LiteralInt(11)),
+          OpSymb::multiplication,
+          new BinaryExpr(
+              expectedResultLhsTerm,
+              OpSymb::addition,
+              expectedResultMiddleTerm)),
+      OpSymb::addition,
+      expectedResultRhsTerm);
+  EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedResult));
 
   // check that at the end of the evaluation traversal, the evalutedNodes map is empty
   EXPECT_EQ(ctes.evaluatedNodes.size(), 0);
