@@ -12,21 +12,11 @@
 /// as simple expressions like
 ///   a = [condition]*2 + [1-condition]*4;
 /// where condition is a LogicalExpr.
-struct IfStatementResolverData {
+struct IfStatementResolver {
   AbstractExpr *factorIsTrue;
   AbstractExpr *factorIsFalse;
 
-  // if activeBranch == true: we are visiting statements in the Then-branch
-  // if activeBranch == false: we are visiting statements in the Else-branch
-  bool activeBranch = true;
-
-  /// A map that stores the values of variables that are modified within the Then- or Else-branch of an If statement.
-  /// - std::string is the variable's identifier.
-  /// - std::pair<AbstractExpr*, AbstractExpr*> contains the variable's value if the Then-branch would be executed
-  /// (pair.first) or if the Else-branch would be executed (pair.second).
-  std::unordered_map<std::string, std::pair<AbstractExpr *, AbstractExpr *>> ifStatementVariableValues;
-
-  explicit IfStatementResolverData(AbstractExpr *ifStatementCondition) {
+  explicit IfStatementResolver(AbstractExpr *ifStatementCondition) {
     // factorIsTrue = ifStatementCondition
     factorIsTrue = ifStatementCondition->clone(false)->castTo<AbstractExpr>();
     // factorIsFalse = [1-ifStatementCondition]
@@ -35,23 +25,6 @@ struct IfStatementResolverData {
                        OpSymb::subtraction,
                        ifStatementCondition->clone(false)->castTo<AbstractExpr>());
   };
-
-  void addVariableValue(const std::string &variableIdentifier, AbstractExpr *variableValue) {
-    // we need to clone the variableValue here, because the If statement and all of its children will be removed later
-    auto newValue = variableValue->clone(false)->castTo<AbstractExpr>();
-    if (activeBranch) { ifStatementVariableValues[variableIdentifier].first = newValue; }
-    else { ifStatementVariableValues[variableIdentifier].second = newValue; }
-  }
-
-  [[nodiscard]] const std::unordered_map<std::string,
-                                         std::pair<AbstractExpr *,
-                                                   AbstractExpr *>> &getIfStatementVariableValues() const {
-    return ifStatementVariableValues;
-  }
-
-  void setActiveBranch(bool trueIfVisitingThenBranch) {
-    IfStatementResolverData::activeBranch = trueIfVisitingThenBranch;
-  }
 
   AbstractExpr *generateIfDependentValue(AbstractExpr *trueValue, AbstractExpr *falseValue) {
     // Build an expression like
@@ -81,9 +54,13 @@ struct IfStatementResolverData {
     // default case: trueValue != 0 && falseValue != 0 => value is non-zero independent of what condition evaluates to
     // return condition*trueValue + (1-b)*falseValue.
     return new BinaryExpr(
-        new BinaryExpr(factorIsTrue, OpSymb::multiplication, trueValue),
+        new BinaryExpr(factorIsTrue,
+                       OpSymb::multiplication,
+                       trueValue->clone(false)->castTo<AbstractExpr>()),
         OpSymb::addition,
-        new BinaryExpr(factorIsFalse, OpSymb::multiplication, falseValue));
+        new BinaryExpr(factorIsFalse,
+                       OpSymb::multiplication,
+                       falseValue->clone(false)->castTo<AbstractExpr>()));
   }
 };
 
@@ -92,7 +69,7 @@ class CompileTimeExpressionSimplifier : public Visitor {
   /// A EvaluationVisitor instance that is used to evaluate parts of the AST in order to simplify them.
   EvaluationVisitor evalVisitor;
 
-  std::stack<IfStatementResolverData *> ifResolverData;
+  std::stack<IfStatementResolver *> ifResolverData;
 
  public:
   CompileTimeExpressionSimplifier();
@@ -159,12 +136,9 @@ class CompileTimeExpressionSimplifier : public Visitor {
                                                        std::unordered_map<std::string,
                                                                           AbstractLiteral *> valuesOfVariables);
 
-  void handleBinaryExpressions(AbstractNode &expr, AbstractExpr *leftOperand, AbstractExpr *rightOperand);
+  void handleBinaryExpressions(AbstractNode &binaryExpr, AbstractExpr *leftOperand, AbstractExpr *rightOperand);
 
   void visit(ParameterList &elem) override;
-
-  void moveChildIfNotEvaluable(AbstractNode *ifStatementsParent,
-                               AbstractStatement *branchStatement);
 
   std::unordered_map<std::string, AbstractLiteral *> getTransformedVariableMap();
 
