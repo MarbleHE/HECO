@@ -30,7 +30,7 @@ AbstractExpr *AbstractExpr::createParam(AbstractExpr *abstractExpr) {
   return abstractExpr;
 }
 
-ArithmeticExpr *AbstractExpr::contains(ArithmeticExpr *aexpTemplate, AbstractExpr *excludedSubtree) {
+AbstractBinaryExpr *AbstractExpr::contains(AbstractBinaryExpr *aexpTemplate, AbstractExpr *excludedSubtree) {
   return nullptr;
 }
 
@@ -62,4 +62,5 @@ AbstractNode *AbstractExpr::createParam(AbstractNode *node) {
 void to_json(json &j, const AbstractExpr &absExpr) {
   j = absExpr.toJson();
 }
+
 

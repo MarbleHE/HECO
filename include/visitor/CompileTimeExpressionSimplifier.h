@@ -102,7 +102,6 @@ class CompileTimeExpressionSimplifier : public Visitor {
   static AbstractExpr *generateIfDependentValue(AbstractExpr *condition,
                                                 AbstractExpr *trueValue,
                                                 AbstractExpr *falseValue);
-  void simplifyNestedBinaryExpressions(AbstractExpr *nestedExprRoot);
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_VISITOR_COMPILETIMEEXPRESSIONSIMPLIFIER_H_

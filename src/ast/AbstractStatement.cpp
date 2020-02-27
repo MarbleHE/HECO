@@ -8,7 +8,7 @@ json AbstractStatement::toJson() const {
   return json({"type", "AbstractStatement"});
 }
 
-ArithmeticExpr *AbstractStatement::contains(ArithmeticExpr *aexpTemplate, ArithmeticExpr *excludedSubtree) {
+AbstractBinaryExpr *AbstractStatement::contains(AbstractBinaryExpr *aexpTemplate, ArithmeticExpr *excludedSubtree) {
   return nullptr;
 }
 

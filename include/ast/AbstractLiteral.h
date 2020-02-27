@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_LITERAL_H
-#define AST_OPTIMIZER_INCLUDE_LITERAL_H
+#ifndef AST_OPTIMIZER_INCLUDE_AST_ABSTRACTLITERAL_H_
+#define AST_OPTIMIZER_INCLUDE_AST_ABSTRACTLITERAL_H_
 
 #include <variant>
 #include <ostream>
@@ -41,4 +41,4 @@ inline std::ostream &operator<<(std::ostream &os, const std::vector<AbstractLite
   return os;
 }
 
-#endif //AST_OPTIMIZER_INCLUDE_LITERAL_H
+#endif //AST_OPTIMIZER_INCLUDE_AST_ABSTRACTLITERAL_H_

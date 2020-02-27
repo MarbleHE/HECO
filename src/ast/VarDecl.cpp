@@ -85,7 +85,7 @@ AbstractExpr *VarDecl::getInitializer() const {
   return initializer->castTo<AbstractExpr>();
 }
 
-ArithmeticExpr *VarDecl::contains(ArithmeticExpr *aexpTemplate, ArithmeticExpr *excludedSubtree) {
+AbstractBinaryExpr *VarDecl::contains(AbstractBinaryExpr *aexpTemplate, ArithmeticExpr *excludedSubtree) {
   return this->getInitializer()->contains(aexpTemplate, excludedSubtree);
 }
 

@@ -17,12 +17,11 @@
 /// \return A vector of AbstractNode objects of type LogicalExpr that represent the chain of LogicalExpr required to represent
 /// the intended multi-input gate. The last node in inputNodes (i.e., inputNodes.back()) is always the output of this
 /// chain.
-std::vector<AbstractNode *> rewriteMultiInputGateToBinaryGatesChain(std::vector<AbstractNode *> inputNodes,
-                                                                    OpSymb::LogCompOp gateType);
+std::vector<AbstractNode *> rewriteMultiInputGateToBinaryGatesChain(
+    std::vector<AbstractNode *> inputNodes, OpSymb::LogCompOp gateType);
 
-std::vector<AbstractNode *> rewriteMultiInputBinaryExpressionToBinaryExpressionGatesChain(std::vector<AbstractExpr *> inputs,
-                                                                                          std::variant<OpSymb::ArithmeticOp,
-                                                                                                       OpSymb::LogCompOp,
-                                                                                                       OpSymb::UnaryOp> operatorType);
+std::vector<AbstractNode *> rewriteMultiInputBinaryExpressionToBinaryExpressionGatesChain(
+    std::vector<AbstractExpr *> inputs,
+    std::variant<OpSymb::ArithmeticOp, OpSymb::LogCompOp, OpSymb::UnaryOp> operatorType);
 
 #endif //AST_OPTIMIZER_INCLUDE_UTILITIES_NODEUTILS_H_

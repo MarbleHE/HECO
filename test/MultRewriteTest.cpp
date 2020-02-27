@@ -71,7 +71,6 @@ TEST(MultRewriteTest, rewriteSuccessfulSingleStatementMultiplication) { /* NOLIN
   mrv.visit(ast);
   EXPECT_EQ(mrv.getNumChanges(), 1);
 
-
   // check presence of expected changes
 
   //  int prod = [inputC * [inputB * inputA]]

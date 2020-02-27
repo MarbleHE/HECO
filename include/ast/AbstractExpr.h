@@ -10,6 +10,8 @@
 
 using json = nlohmann::json;
 
+class AbstractBinaryExpr;
+
 class AbstractExpr : public AbstractNode {
  protected:
   static LiteralInt *createParam(int i);
@@ -27,7 +29,7 @@ class AbstractExpr : public AbstractNode {
  public:
   [[nodiscard]] json toJson() const override;
 
-  virtual ArithmeticExpr *contains(ArithmeticExpr *aexpTemplate, AbstractExpr *excludedSubtree);
+  virtual AbstractBinaryExpr *contains(AbstractBinaryExpr *aexpTemplate, AbstractExpr *excludedSubtree);
 
   virtual int countByTemplate(AbstractExpr *abstractExpr);
 

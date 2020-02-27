@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_LOGICALEXPR_H
-#define AST_OPTIMIZER_INCLUDE_LOGICALEXPR_H
+#ifndef AST_OPTIMIZER_INCLUDE_AST_LOGICALEXPR_H_
+#define AST_OPTIMIZER_INCLUDE_AST_LOGICALEXPR_H_
 
 #include "Operator.h"
 #include "AbstractExpr.h"
@@ -7,10 +7,11 @@
 #include "LiteralInt.h"
 #include "LiteralBool.h"
 #include "LiteralString.h"
+#include "AbstractBinaryExpr.h"
 #include <string>
 #include <vector>
 
-class LogicalExpr : public AbstractExpr {
+class LogicalExpr : public AbstractBinaryExpr {
  public:
   LogicalExpr();
 
@@ -28,33 +29,11 @@ class LogicalExpr : public AbstractExpr {
 
   LogicalExpr *clone(bool keepOriginalUniqueNodeId) override;
 
-  [[nodiscard]] AbstractExpr *getLeft() const;
-
-  [[nodiscard]] Operator *getOp() const;
-
-  [[nodiscard]] AbstractExpr *getRight() const;
-
-  [[nodiscard]] json toJson() const override;
-
   void accept(Visitor &v) override;
 
   [[nodiscard]] std::string getNodeName() const override;
 
-  std::vector<std::string> getVariableIdentifiers() override;
-
-  int countByTemplate(AbstractExpr *abstractExpr) override;
-
-  LogicalExpr *contains(LogicalExpr *lexpTemplate, AbstractExpr *excludedSubtree);
-
   AbstractNode *cloneFlat() override;
-
-  void setAttributes(AbstractExpr *leftOperand, Operator *operatore, AbstractExpr *rightOperand);
-  bool isEqual(AbstractExpr *other) override;
-
- protected:
-  int getMaxNumberChildren() override;
-
-  bool supportsCircuitMode() override;
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_LOGICALEXPR_H
+#endif //AST_OPTIMIZER_INCLUDE_AST_LOGICALEXPR_H_

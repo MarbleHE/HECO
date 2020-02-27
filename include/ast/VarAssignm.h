@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_VARASSIGNM_H
-#define AST_OPTIMIZER_INCLUDE_VARASSIGNM_H
+#ifndef AST_OPTIMIZER_INCLUDE_AST_VARASSIGNM_H_
+#define AST_OPTIMIZER_INCLUDE_AST_VARASSIGNM_H_
 
 #include <string>
 #include "AbstractStatement.h"
@@ -26,7 +26,7 @@ class VarAssignm : public AbstractStatement {
 
   [[nodiscard]] std::string getNodeName() const override;
 
-  ArithmeticExpr *contains(ArithmeticExpr *aexpTemplate, ArithmeticExpr *excludedSubtree) override;
+  AbstractBinaryExpr *contains(AbstractBinaryExpr *aexpTemplate, ArithmeticExpr *excludedSubtree) override;
 
   std::string getVarTargetIdentifier() override;
 
@@ -39,4 +39,4 @@ class VarAssignm : public AbstractStatement {
   void setAttribute(AbstractExpr *assignmentValue);
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_VARASSIGNM_H
+#endif //AST_OPTIMIZER_INCLUDE_AST_VARASSIGNM_H_

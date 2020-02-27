@@ -30,7 +30,7 @@ std::string VarAssignm::getNodeName() const {
   return "VarAssignm";
 }
 
-ArithmeticExpr *VarAssignm::contains(ArithmeticExpr *aexpTemplate, ArithmeticExpr *excludedSubtree) {
+AbstractBinaryExpr *VarAssignm::contains(AbstractBinaryExpr *aexpTemplate, ArithmeticExpr *excludedSubtree) {
   return this->getValue()->contains(aexpTemplate, excludedSubtree);
 }
 
