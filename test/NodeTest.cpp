@@ -52,9 +52,9 @@ TEST(NodeTest, rewriteMultiInputGateToBinaryGatesChain_oneInputXOR) { /* NOLINT 
 
 TEST(NodeTest, rewriteMultiInputGateToBinaryGatesChain_oneInputUnsupportedException) { /* NOLINT */
   std::vector<AbstractNode *> inputs{new Variable("alpha")};
-  OpSymb::LogCompOp gateType = OpSymb::logicalOr;
+  OpSymb::LogCompOp gateType = OpSymb::greater;
   ASSERT_THROW(rewriteMultiInputGateToBinaryGatesChain(inputs, gateType),
-               std::runtime_error);
+               std::logic_error);
 }
 
 TEST(NodeTest, rewriteMultiInputGateToBinaryGatesChain_multipleInputs) { /* NOLINT */

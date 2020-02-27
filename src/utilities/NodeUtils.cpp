@@ -12,18 +12,8 @@ std::vector<AbstractNode *> rewriteMultiInputGateToBinaryGatesChain(std::vector<
   // if there is only one input, we need to add the "neutral element" (i.e., the element that does not change the
   // semantics of the logical expression) depending on the given LogCompOp to inputNodes
   if (inputNodes.size()==1) {
-    // TODO(pjattke): Replace this by call to OpSymb::getIdentityElement(...)
-    if (gateType==OpSymb::LogCompOp::logicalXor) {
-      // inputNodes[0] XOR false
-      inputNodes.push_back(new LiteralBool(false));
-    } else if (gateType==OpSymb::LogCompOp::logicalAnd) {
-      // inputNodes[0] AND true
-      inputNodes.push_back(new LiteralBool(true));
-    } else {
-      throw std::runtime_error(
-          "Method rewriteMultiInputGateToBinaryGatesChain currently supports 1-input gates of type logical-XOR "
-          "or logical-AND only.");
-    }
+    inputNodes.push_back(OpSymb::getIdentityElement(
+        std::variant<OpSymb::ArithmeticOp, OpSymb::LogCompOp, OpSymb::UnaryOp>(gateType)));
   }
 
   // vector of resulting binary gates

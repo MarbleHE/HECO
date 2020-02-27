@@ -70,6 +70,7 @@ class OpSymb {
 
     } else if (op.index()==2) {  // op is UnaryOp
       throw std::logic_error("Identity element for unary operator unsupported! Supported for binary operators only.");
+
     } else {
       throw std::logic_error("Unknown operator given, cannot determine identity element!");
     }
