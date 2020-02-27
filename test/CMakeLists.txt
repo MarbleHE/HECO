@@ -33,7 +33,7 @@ include_directories(
         ${ast_optimizer_SOURCE_DIR}/test)
 
 set(TEST_FILES
-        BinaryExprTest.cpp
+        ArithmeticExprTest.cpp
         JsonOutputTest.cpp
         PrintVisitorTest.cpp
         MultRewriteTest.cpp

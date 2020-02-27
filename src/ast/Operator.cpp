@@ -12,15 +12,15 @@ void Operator::accept(Visitor &v) {
 }
 
 Operator::Operator(OpSymb::LogCompOp op) : operatorString(OpSymb::getTextRepr(op)) {
-  operatorSymbol = std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp>(op);
+  operatorSymbol = std::variant<OpSymb::ArithmeticOp, OpSymb::LogCompOp, OpSymb::UnaryOp>(op);
 }
 
-Operator::Operator(OpSymb::BinaryOp op) : operatorString(OpSymb::getTextRepr(op)) {
-  operatorSymbol = std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp>(op);
+Operator::Operator(OpSymb::ArithmeticOp op) : operatorString(OpSymb::getTextRepr(op)) {
+  operatorSymbol = std::variant<OpSymb::ArithmeticOp, OpSymb::LogCompOp, OpSymb::UnaryOp>(op);
 }
 
 Operator::Operator(OpSymb::UnaryOp op) : operatorString(OpSymb::getTextRepr(op)) {
-  operatorSymbol = std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp>(op);
+  operatorSymbol = std::variant<OpSymb::ArithmeticOp, OpSymb::LogCompOp, OpSymb::UnaryOp>(op);
 }
 
 const std::string &Operator::getOperatorString() const {
@@ -43,23 +43,23 @@ bool Operator::operator!=(const Operator &rhs) const {
   return !(rhs==*this);
 }
 
-bool Operator::equals(std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp> op) const {
+bool Operator::equals(std::variant<OpSymb::ArithmeticOp, OpSymb::LogCompOp, OpSymb::UnaryOp> op) const {
   return this->getOperatorString()==OpSymb::getTextRepr(op);
 }
 
-bool Operator::equals(OpSymb::BinaryOp op) const {
+bool Operator::equals(OpSymb::ArithmeticOp op) const {
   return this->getOperatorString()
-      ==OpSymb::getTextRepr(std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp>(op));
+      ==OpSymb::getTextRepr(std::variant<OpSymb::ArithmeticOp, OpSymb::LogCompOp, OpSymb::UnaryOp>(op));
 }
 
 bool Operator::equals(OpSymb::LogCompOp op) const {
   return this->getOperatorString()
-      ==OpSymb::getTextRepr(std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp>(op));
+      ==OpSymb::getTextRepr(std::variant<OpSymb::ArithmeticOp, OpSymb::LogCompOp, OpSymb::UnaryOp>(op));
 }
 
 bool Operator::equals(OpSymb::UnaryOp op) const {
   return this->getOperatorString()
-      ==OpSymb::getTextRepr(std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp>(op));
+      ==OpSymb::getTextRepr(std::variant<OpSymb::ArithmeticOp, OpSymb::LogCompOp, OpSymb::UnaryOp>(op));
 }
 
 AbstractLiteral *Operator::applyOperator(AbstractLiteral *rhs) {
@@ -324,7 +324,7 @@ std::string Operator::toString() const {
   return this->getOperatorString();
 }
 
-Operator::Operator(std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp> opVar) {
+Operator::Operator(std::variant<OpSymb::ArithmeticOp, OpSymb::LogCompOp, OpSymb::UnaryOp> opVar) {
   this->operatorSymbol = opVar;
   this->operatorString = OpSymb::getTextRepr(opVar);
 }
@@ -333,7 +333,7 @@ bool Operator::supportsCircuitMode() {
   return true;
 }
 
-const std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp> &Operator::getOperatorSymbol() const {
+const std::variant<OpSymb::ArithmeticOp, OpSymb::LogCompOp, OpSymb::UnaryOp> &Operator::getOperatorSymbol() const {
   return operatorSymbol;
 }
 

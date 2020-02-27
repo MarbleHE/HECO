@@ -3,7 +3,7 @@
 #include "LiteralInt.h"
 #include "LiteralBool.h"
 #include "LiteralFloat.h"
-#include "BinaryExpr.h"
+#include "ArithmeticExpr.h"
 #include "Ast.h"
 
 json VarDecl::toJson() const {
@@ -85,8 +85,8 @@ AbstractExpr *VarDecl::getInitializer() const {
   return initializer->castTo<AbstractExpr>();
 }
 
-BinaryExpr *VarDecl::contains(BinaryExpr *bexpTemplate, BinaryExpr *excludedSubtree) {
-  return this->getInitializer()->contains(bexpTemplate, excludedSubtree);
+ArithmeticExpr *VarDecl::contains(ArithmeticExpr *aexpTemplate, ArithmeticExpr *excludedSubtree) {
+  return this->getInitializer()->contains(aexpTemplate, excludedSubtree);
 }
 
 VarDecl::~VarDecl() {

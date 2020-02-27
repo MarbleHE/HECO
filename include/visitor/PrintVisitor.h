@@ -24,7 +24,7 @@ class PrintVisitor : public Visitor {
 
   void visit(Ast &elem) override;
 
-  void visit(BinaryExpr &elem) override;
+  void visit(ArithmeticExpr &elem) override;
 
   void visit(Block &elem) override;
 

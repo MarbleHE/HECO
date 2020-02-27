@@ -15,14 +15,14 @@ Function: (computePrivate)	[global]
 				LiteralInt: (32)
 			Block:
 				VarAssignm: (k)	[Block_20]
-					BinaryExpr:
+					ArithmeticExpr:
 						Variable: (x)
 						Operator: (mult)
 						Variable: (a)
 			Block:	[Block_2]
 				VarAssignm: (k)	[Block_29]
-					BinaryExpr:
-						BinaryExpr:
+					ArithmeticExpr:
+						ArithmeticExpr:
 							Variable: (x)
 							Operator: (mult)
 							Variable: (a)

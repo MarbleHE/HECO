@@ -1,6 +1,6 @@
 #include <utility>
 #include "VarAssignm.h"
-#include "BinaryExpr.h"
+#include "ArithmeticExpr.h"
 
 json VarAssignm::toJson() const {
   json j;
@@ -30,8 +30,8 @@ std::string VarAssignm::getNodeName() const {
   return "VarAssignm";
 }
 
-BinaryExpr *VarAssignm::contains(BinaryExpr *bexpTemplate, BinaryExpr *excludedSubtree) {
-  return this->getValue()->contains(bexpTemplate, excludedSubtree);
+ArithmeticExpr *VarAssignm::contains(ArithmeticExpr *aexpTemplate, ArithmeticExpr *excludedSubtree) {
+  return this->getValue()->contains(aexpTemplate, excludedSubtree);
 }
 
 VarAssignm::~VarAssignm() {

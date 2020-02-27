@@ -24,7 +24,7 @@ class MultDepthVisitor : public Visitor {
 
   int getMaxDepth();
 
-  void visit(BinaryExpr &elem) override;
+  void visit(ArithmeticExpr &elem) override;
 
   void visit(Block &elem) override;
 

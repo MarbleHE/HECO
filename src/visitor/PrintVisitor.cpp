@@ -9,7 +9,7 @@
 #include "VarAssignm.h"
 #include "Block.h"
 #include "Return.h"
-#include "BinaryExpr.h"
+#include "ArithmeticExpr.h"
 #include "Ast.h"
 #include "CallExternal.h"
 #include "While.h"
@@ -32,7 +32,7 @@ void PrintVisitor::visit(Ast &elem) {
   if (printScreen) std::cout << ss.str() << std::endl;
 }
 
-void PrintVisitor::visit(BinaryExpr &elem) {
+void PrintVisitor::visit(ArithmeticExpr &elem) {
   addOutputStr(elem);
   printChildNodesIndented(elem);
 }

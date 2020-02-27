@@ -48,7 +48,7 @@ class VarDecl : public AbstractStatement {
 
   [[nodiscard]] AbstractExpr *getInitializer() const;
 
-  BinaryExpr *contains(BinaryExpr *bexpTemplate, BinaryExpr *excludedSubtree) override;
+  ArithmeticExpr *contains(ArithmeticExpr *aexpTemplate, ArithmeticExpr *excludedSubtree) override;
 
   ~VarDecl() override;
 

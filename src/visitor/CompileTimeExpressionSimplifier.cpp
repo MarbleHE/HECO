@@ -1,7 +1,7 @@
 #include <unordered_set>
 #include <DotPrinter.h>
 #include "CompileTimeExpressionSimplifier.h"
-#include "BinaryExpr.h"
+#include "ArithmeticExpr.h"
 #include "LogicalExpr.h"
 #include "LiteralFloat.h"
 #include "VarDecl.h"
@@ -177,29 +177,29 @@ void CompileTimeExpressionSimplifier::visit(VarAssignm &elem) {
   evaluatedNodes.erase(elem.getValue());
 }
 
-void CompileTimeExpressionSimplifier::handleBinaryExpressions(AbstractNode &binaryExpr,
+void CompileTimeExpressionSimplifier::handleBinaryExpressions(AbstractNode &arithmeticExpr,
                                                               AbstractExpr *leftOperand,
                                                               AbstractExpr *rightOperand) {
   auto leftValueIsKnown = valueIsKnown(leftOperand);
   auto rightValueIsKnown = valueIsKnown(rightOperand);
   if (leftValueIsKnown && rightValueIsKnown) {
     // if both operand values are known -> evaluate the expression and store its result
-    auto result = evaluateNodeRecursive(&binaryExpr, getTransformedVariableMap());
-    storeEvaluatedNode(&binaryExpr, std::vector<AbstractExpr *>(result.begin(), result.end()));
+    auto result = evaluateNodeRecursive(&arithmeticExpr, getTransformedVariableMap());
+    storeEvaluatedNode(&arithmeticExpr, std::vector<AbstractExpr *>(result.begin(), result.end()));
   } else if (leftValueIsKnown || rightValueIsKnown) {
     // if only one of both is known -> simplify expression by replacing operand's value by the evaluation result
     auto concernedOperand = leftValueIsKnown ? leftOperand : rightOperand;
     auto newValue = getFirstValue(concernedOperand);
-    binaryExpr.removeChildBilateral(concernedOperand);
-    binaryExpr.addChild(newValue);
+    arithmeticExpr.removeChildBilateral(concernedOperand);
+    arithmeticExpr.addChild(newValue);
   }
   // clean up temporary results from children in evaluatedNodes map
   evaluatedNodes.erase(leftOperand);
   evaluatedNodes.erase(rightOperand);
-  evaluatedNodes.erase(binaryExpr.getChildAtIndex(1)); // operator
+  evaluatedNodes.erase(arithmeticExpr.getChildAtIndex(1)); // operator
 }
 
-void CompileTimeExpressionSimplifier::visit(BinaryExpr &elem) {
+void CompileTimeExpressionSimplifier::visit(ArithmeticExpr &elem) {
   Visitor::visit(elem);
   handleBinaryExpressions(elem, elem.getLeft(), elem.getRight());
 }
@@ -459,6 +459,8 @@ void CompileTimeExpressionSimplifier::visit(Return &elem) {
     // clean up temporary results from children in evaluatedNodes map
     evaluatedNodes.erase(returnExpr);
   }
+
+  //
 }
 
 // =====================
@@ -569,7 +571,7 @@ AbstractExpr *CompileTimeExpressionSimplifier::generateIfDependentValue(Abstract
                                                                         AbstractExpr *trueValue,
                                                                         AbstractExpr *falseValue) {
   // We need to handle the case where trueValue or/and falseValue are null because in that case the dependent
-  // statement can be simplified significantly by removing one/both operands of the binary expression.
+  // statement can be simplified significantly by removing one/both operands of the arithmetic expression.
 
   // determine whether one or both of the provided expressions (trueValue, falseValue) are null
   auto exprIsNull = [](AbstractExpr *expr) {
@@ -592,16 +594,16 @@ AbstractExpr *CompileTimeExpressionSimplifier::generateIfDependentValue(Abstract
   // check if exactly one of both values are null
   if (trueValueIsNull) {
     // factorIsFalse = [1-ifStatementCondition]
-    auto factorIsFalse = new BinaryExpr(new LiteralInt(1),
-                                        OpSymb::subtraction,
-                                        condition->clone(false)->castTo<AbstractExpr>());
+    auto factorIsFalse = new ArithmeticExpr(new LiteralInt(1),
+                                            OpSymb::subtraction,
+                                            condition->clone(false)->castTo<AbstractExpr>());
     // case: trueValue == 0 && falseValue != 0 => value is 0 if the condition is True -> return (1-b)*falseValue
-    return new BinaryExpr(factorIsFalse, OpSymb::multiplication, falseValue);
+    return new ArithmeticExpr(factorIsFalse, OpSymb::multiplication, falseValue);
   } else if (falseValueIsNull) {
     // factorIsTrue = ifStatementCondition
     auto factorIsTrue = condition->clone(false)->castTo<AbstractExpr>();
     // case: trueValue != 0 && falseValue == 0 => value is 0 if the condition is False -> return condition * trueValue
-    return new BinaryExpr(factorIsTrue, OpSymb::multiplication, trueValue);
+    return new ArithmeticExpr(factorIsTrue, OpSymb::multiplication, trueValue);
   }
 
   // default case: trueValue != 0 && falseValue != 0 => value is changed in both branches of If statement
@@ -609,15 +611,15 @@ AbstractExpr *CompileTimeExpressionSimplifier::generateIfDependentValue(Abstract
   // factorIsTrue = ifStatementCondition
   auto factorIsTrue = condition->clone(false)->castTo<AbstractExpr>();
   // factorIsFalse = [1-ifStatementCondition]
-  auto factorIsFalse = new BinaryExpr(new LiteralInt(1),
-                                      OpSymb::subtraction,
-                                      condition->clone(false)->castTo<AbstractExpr>());
-  return new BinaryExpr(
-      new BinaryExpr(factorIsTrue,
-                     OpSymb::multiplication,
-                     trueValue->clone(false)->castTo<AbstractExpr>()),
+  auto factorIsFalse = new ArithmeticExpr(new LiteralInt(1),
+                                          OpSymb::subtraction,
+                                          condition->clone(false)->castTo<AbstractExpr>());
+  return new ArithmeticExpr(
+      new ArithmeticExpr(factorIsTrue,
+                         OpSymb::multiplication,
+                         trueValue->clone(false)->castTo<AbstractExpr>()),
       OpSymb::addition,
-      new BinaryExpr(factorIsFalse,
-                     OpSymb::multiplication,
-                     falseValue->clone(false)->castTo<AbstractExpr>()));
+      new ArithmeticExpr(factorIsFalse,
+                         OpSymb::multiplication,
+                         falseValue->clone(false)->castTo<AbstractExpr>()));
 }

@@ -19,41 +19,41 @@ digraph D {
 	Operator_49 [label="Operator_49\n[l(v): 0, r(v): 1]\n>" shape=oval style=filled fillcolor=white]
 	Variable_46 [label="Variable_46\n[l(v): 0, r(v): 1]\nprod" shape=oval style=filled fillcolor=white]
 	VarDecl_44 [label="VarDecl_44\n[l(v): 0, r(v): 0]\ncondVal" shape=rect style=filled fillcolor=white]
-	{ VarDecl_44 } -> { Datatype_45, BinaryExpr_42 }
-	BinaryExpr_42 [label="BinaryExpr_42\n[l(v): 0, r(v): 0]" shape=oval style=filled fillcolor=white]
-	{ BinaryExpr_42 } -> { BinaryExpr_36, Operator_43, BinaryExpr_40 }
-	BinaryExpr_40 [label="BinaryExpr_40\n[l(v): 0, r(v): 0]" shape=oval style=filled fillcolor=white]
-	{ BinaryExpr_40 } -> { Variable_38, Operator_41, Variable_39 }
+	{ VarDecl_44 } -> { Datatype_45, ArithmeticExpr_42 }
+	ArithmeticExpr_42 [label="ArithmeticExpr_42\n[l(v): 0, r(v): 0]" shape=oval style=filled fillcolor=white]
+	{ ArithmeticExpr_42 } -> { ArithmeticExpr_36, Operator_43, ArithmeticExpr_40 }
+	ArithmeticExpr_40 [label="ArithmeticExpr_40\n[l(v): 0, r(v): 0]" shape=oval style=filled fillcolor=white]
+	{ ArithmeticExpr_40 } -> { Variable_38, Operator_41, Variable_39 }
 	Variable_39 [label="Variable_39\n[l(v): 0, r(v): 0]\nuseBase" shape=oval style=filled fillcolor=white]
 	Operator_41 [label="Operator_41\n[l(v): 0, r(v): 0]\nmult" shape=oval style=filled fillcolor=white]
 	Variable_38 [label="Variable_38\n[l(v): 0, r(v): 0]\nbase" shape=oval style=filled fillcolor=white]
 	Operator_43 [label="Operator_43\n[l(v): 0, r(v): 0]\nadd" shape=oval style=filled fillcolor=white]
-	BinaryExpr_36 [label="BinaryExpr_36\n[l(v): 0, r(v): 0]" shape=oval style=filled fillcolor=white]
-	{ BinaryExpr_36 } -> { LiteralInt_34, Operator_37, Variable_35 }
+	ArithmeticExpr_36 [label="ArithmeticExpr_36\n[l(v): 0, r(v): 0]" shape=oval style=filled fillcolor=white]
+	{ ArithmeticExpr_36 } -> { LiteralInt_34, Operator_37, Variable_35 }
 	Variable_35 [label="Variable_35\n[l(v): 0, r(v): 0]\ndefaultC" shape=oval style=filled fillcolor=white]
 	Operator_37 [label="Operator_37\n[l(v): 0, r(v): 0]\nmult" shape=oval style=filled fillcolor=white]
 	LiteralInt_34 [label="LiteralInt_34\n[l(v): 0, r(v): 0]\n22" shape=oval style=filled fillcolor=white]
 	Datatype_45 [label="Datatype_45\n[l(v): 0, r(v): 0]\nplaintext int" shape=oval style=filled fillcolor=white]
 	VarDecl_32 [label="VarDecl_32\n[l(v): 0, r(v): 0]\nprod" shape=rect style=filled fillcolor=white]
-	{ VarDecl_32 } -> { Datatype_33, BinaryExpr_30 }
-	BinaryExpr_30 [label="BinaryExpr_30\n[l(v): 0, r(v): 0]" shape=oval style=filled fillcolor=white]
-	{ BinaryExpr_30 } -> { BinaryExpr_24, Operator_31, BinaryExpr_28 }
-	BinaryExpr_28 [label="BinaryExpr_28\n[l(v): 0, r(v): 0]" shape=oval style=filled fillcolor=white]
-	{ BinaryExpr_28 } -> { Variable_26, Operator_29, Variable_27 }
+	{ VarDecl_32 } -> { Datatype_33, ArithmeticExpr_30 }
+	ArithmeticExpr_30 [label="ArithmeticExpr_30\n[l(v): 0, r(v): 0]" shape=oval style=filled fillcolor=white]
+	{ ArithmeticExpr_30 } -> { ArithmeticExpr_24, Operator_31, ArithmeticExpr_28 }
+	ArithmeticExpr_28 [label="ArithmeticExpr_28\n[l(v): 0, r(v): 0]" shape=oval style=filled fillcolor=white]
+	{ ArithmeticExpr_28 } -> { Variable_26, Operator_29, Variable_27 }
 	Variable_27 [label="Variable_27\n[l(v): 0, r(v): 0]\nstdB" shape=oval style=filled fillcolor=white]
 	Operator_29 [label="Operator_29\n[l(v): 0, r(v): 0]\nmult" shape=oval style=filled fillcolor=white]
 	Variable_26 [label="Variable_26\n[l(v): 0, r(v): 0]\nbase" shape=oval style=filled fillcolor=white]
 	Operator_31 [label="Operator_31\n[l(v): 0, r(v): 0]\nadd" shape=oval style=filled fillcolor=white]
-	BinaryExpr_24 [label="BinaryExpr_24\n[l(v): 0, r(v): 0]" shape=oval style=filled fillcolor=white]
-	{ BinaryExpr_24 } -> { Variable_22, Operator_25, Variable_23 }
+	ArithmeticExpr_24 [label="ArithmeticExpr_24\n[l(v): 0, r(v): 0]" shape=oval style=filled fillcolor=white]
+	{ ArithmeticExpr_24 } -> { Variable_22, Operator_25, Variable_23 }
 	Variable_23 [label="Variable_23\n[l(v): 0, r(v): 0]\nstdA" shape=oval style=filled fillcolor=white]
 	Operator_25 [label="Operator_25\n[l(v): 0, r(v): 0]\nmult" shape=oval style=filled fillcolor=white]
 	Variable_22 [label="Variable_22\n[l(v): 0, r(v): 0]\nbase" shape=oval style=filled fillcolor=white]
 	Datatype_33 [label="Datatype_33\n[l(v): 0, r(v): 0]\nplaintext int" shape=oval style=filled fillcolor=white]
 	VarDecl_20 [label="VarDecl_20\n[l(v): 0, r(v): 0]\nstdB" shape=rect style=filled fillcolor=white]
-	{ VarDecl_20 } -> { Datatype_21, BinaryExpr_18 }
-	BinaryExpr_18 [label="BinaryExpr_18\n[l(v): 0, r(v): 0]" shape=oval style=filled fillcolor=white]
-	{ BinaryExpr_18 } -> { LiteralInt_16, Operator_19, Variable_17 }
+	{ VarDecl_20 } -> { Datatype_21, ArithmeticExpr_18 }
+	ArithmeticExpr_18 [label="ArithmeticExpr_18\n[l(v): 0, r(v): 0]" shape=oval style=filled fillcolor=white]
+	{ ArithmeticExpr_18 } -> { LiteralInt_16, Operator_19, Variable_17 }
 	Variable_17 [label="Variable_17\n[l(v): 0, r(v): 0]\nstdA" shape=oval style=filled fillcolor=white]
 	Operator_19 [label="Operator_19\n[l(v): 0, r(v): 0]\nmult" shape=oval style=filled fillcolor=white]
 	LiteralInt_16 [label="LiteralInt_16\n[l(v): 0, r(v): 0]\n2" shape=oval style=filled fillcolor=white]

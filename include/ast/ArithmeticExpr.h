@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_BINARYEXPR_H
-#define AST_OPTIMIZER_INCLUDE_BINARYEXPR_H
+#ifndef AST_OPTIMIZER_INCLUDE_ArithmeticExpr_H
+#define AST_OPTIMIZER_INCLUDE_ArithmeticExpr_H
 
 #include <string>
 #include <vector>
@@ -10,31 +10,31 @@
 #include "LiteralBool.h"
 #include "LiteralString.h"
 
-class BinaryExpr : public AbstractExpr {
+class ArithmeticExpr : public AbstractExpr {
  public:
   /// Represents an expression of the form "left op right", e.g., "2 + a" or "53 * 3".
   /// \param left is the left operand of the expression.
   /// \param op is the operator of the expression.
   /// \param right is the right operand of the expression.
-  BinaryExpr(AbstractExpr *left, OpSymb::BinaryOp op, AbstractExpr *right);
+  ArithmeticExpr(AbstractExpr *left, OpSymb::ArithmeticOp op, AbstractExpr *right);
 
-  BinaryExpr();
+  ArithmeticExpr();
 
-  explicit BinaryExpr(OpSymb::BinaryOp op);
+  explicit ArithmeticExpr(OpSymb::ArithmeticOp op);
 
-  BinaryExpr *clone(bool keepOriginalUniqueNodeId) override;
+  ArithmeticExpr *clone(bool keepOriginalUniqueNodeId) override;
 
   template<typename T1, typename T2>
-  BinaryExpr(T1 left, OpSymb::BinaryOp op, T2 right) {
+  ArithmeticExpr(T1 left, OpSymb::ArithmeticOp op, T2 right) {
     setAttributes(AbstractExpr::createParam(left), new Operator(op), AbstractExpr::createParam(right));
   }
 
   template<typename T1, typename T2>
-  BinaryExpr(T1 left, Operator *op, T2 right) {
+  ArithmeticExpr(T1 left, Operator *op, T2 right) {
     setAttributes(AbstractExpr::createParam(left), op, AbstractExpr::createParam(right));
   }
 
-  ~BinaryExpr() override;
+  ~ArithmeticExpr() override;
 
   [[nodiscard]] json toJson() const override;
 
@@ -48,9 +48,9 @@ class BinaryExpr : public AbstractExpr {
 
   [[nodiscard]] std::string getNodeName() const override;
 
-  static void swapOperandsLeftAWithRightB(BinaryExpr *bexpA, BinaryExpr *bexpB);
+  static void swapOperandsLeftAWithRightB(ArithmeticExpr *aexpA, ArithmeticExpr *aexpB);
 
-  BinaryExpr *contains(BinaryExpr *bexpTemplate, AbstractExpr *excludedSubtree) override;
+  ArithmeticExpr *contains(ArithmeticExpr *aexpTemplate, AbstractExpr *excludedSubtree) override;
 
   bool contains(Variable *var) override;
 
@@ -67,4 +67,4 @@ class BinaryExpr : public AbstractExpr {
   bool supportsCircuitMode() override;
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_BINARYEXPR_H
+#endif //AST_OPTIMIZER_INCLUDE_ArithmeticExpr_H

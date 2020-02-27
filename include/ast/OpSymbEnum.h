@@ -6,7 +6,7 @@
 
 class OpSymb {
  public:
-  enum BinaryOp : char {
+  enum ArithmeticOp : char {
     // arithmetic operator
     addition = 0, subtraction, multiplication, division, modulo,
   };
@@ -23,7 +23,7 @@ class OpSymb {
     negation = 0
   };
 
-  static std::string getTextRepr(BinaryOp bop) {
+  static std::string getTextRepr(ArithmeticOp bop) {
     static const std::string binaryOpStrings[] = {"add", "sub", "mult", "div", "mod"};
     return binaryOpStrings[bop];
   }
@@ -38,9 +38,9 @@ class OpSymb {
     return unaryOpStrings[uop];
   }
 
-  static std::string getTextRepr(std::variant<OpSymb::BinaryOp, OpSymb::LogCompOp, OpSymb::UnaryOp> opVar) {
+  static std::string getTextRepr(std::variant<OpSymb::ArithmeticOp, OpSymb::LogCompOp, OpSymb::UnaryOp> opVar) {
     switch (opVar.index()) {
-      case 0:return getTextRepr(std::get<OpSymb::BinaryOp>(opVar));
+      case 0:return getTextRepr(std::get<OpSymb::ArithmeticOp>(opVar));
       case 1:return getTextRepr(std::get<OpSymb::LogCompOp>(opVar));
       case 2:return getTextRepr(std::get<OpSymb::UnaryOp>(opVar));
       default:return "";

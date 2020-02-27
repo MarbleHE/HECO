@@ -5,7 +5,7 @@
 #include "LiteralInt.h"
 #include "LiteralFloat.h"
 #include "Return.h"
-#include "BinaryExpr.h"
+#include "ArithmeticExpr.h"
 #include "VarAssignm.h"
 #include "Function.h"
 #include "VarDecl.h"
@@ -31,16 +31,16 @@ class CompileTimeExpressionSimplifierFixture : public ::testing::Test {
   }
 };
 
-TEST_F(CompileTimeExpressionSimplifierFixture, binaryExpr_literalsOnly_fullyEvaluable) { /* NOLINT */
+TEST_F(CompileTimeExpressionSimplifierFixture, arithmeticExpr_literalsOnly_fullyEvaluable) { /* NOLINT */
   // void compute() {
   //  plaintext_int alpha = 22 * 11;
   // }
   auto function = new Function("compute");
-  auto binaryExpr = new BinaryExpr(
+  auto arithmeticExpr = new ArithmeticExpr(
       new LiteralInt(22),
       OpSymb::multiplication,
       new LiteralInt(11));
-  auto varAssignm = new VarDecl("alpha", new Datatype(Types::INT, false), binaryExpr);
+  auto varAssignm = new VarDecl("alpha", new Datatype(Types::INT, false), arithmeticExpr);
 
   // connect objects
   function->addStatement(varAssignm);
@@ -58,7 +58,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, binaryExpr_literalsOnly_fullyEval
   EXPECT_EQ(ctes.evaluatedNodes.size(), 0);
 }
 
-TEST_F(CompileTimeExpressionSimplifierFixture, binaryExpr_variableUnknown_rhsOperandEvaluableOnly) { /* NOLINT */
+TEST_F(CompileTimeExpressionSimplifierFixture, arithmeticExpr_variableUnknown_rhsOperandEvaluableOnly) { /* NOLINT */
   // void compute(encrypted_int encryptedA) {
   //  plaintext_int alpha = encryptedA * (4*7);
   // }
@@ -66,13 +66,13 @@ TEST_F(CompileTimeExpressionSimplifierFixture, binaryExpr_variableUnknown_rhsOpe
   auto functionParamList = new ParameterList(
       {new FunctionParameter(new Datatype(Types::INT, true),
                              new Variable("encryptedA"))});
-  auto binaryExpr = new BinaryExpr(
+  auto arithmeticExpr = new ArithmeticExpr(
       new Variable("encryptedA"),
       OpSymb::multiplication,
-      new BinaryExpr(new LiteralInt(4),
-                     OpSymb::multiplication,
-                     new LiteralInt(7)));
-  auto varAssignm = new VarDecl("alpha", new Datatype(Types::INT, false), binaryExpr);
+      new ArithmeticExpr(new LiteralInt(4),
+                         OpSymb::multiplication,
+                         new LiteralInt(7)));
+  auto varAssignm = new VarDecl("alpha", new Datatype(Types::INT, false), arithmeticExpr);
 
   // connect objects
   function->setParameterList(functionParamList);
@@ -84,29 +84,29 @@ TEST_F(CompileTimeExpressionSimplifierFixture, binaryExpr_variableUnknown_rhsOpe
 
   // check that there is no computed variable
   EXPECT_TRUE(ctes.variableValues.empty());
-  // check that the rhs operand of binaryExpr is simplified
-  EXPECT_EQ(binaryExpr->getRight()->castTo<LiteralInt>()->getValue(), 28);
+  // check that the rhs operand of arithmeticExpr is simplified
+  EXPECT_EQ(arithmeticExpr->getRight()->castTo<LiteralInt>()->getValue(), 28);
 
   // check that at the end of the evaluation traversal, the evalutedNodes map is empty
   EXPECT_EQ(ctes.evaluatedNodes.size(), 0);
 }
 
-TEST_F(CompileTimeExpressionSimplifierFixture, binaryExpr_variableKnown_fullyEvaluable) { /* NOLINT */
+TEST_F(CompileTimeExpressionSimplifierFixture, arithmeticExpr_variableKnown_fullyEvaluable) { /* NOLINT */
   // void compute() {
   //   plaintext_int parameterA = 43;
   //   plaintext_int alpha = parameterA * (4*7);
   // }
   auto function = new Function("compute");
   auto varDeclParameterA = new VarDecl("parameterA", 43);
-  auto binaryExpr = new BinaryExpr(
+  auto arithmeticExpr = new ArithmeticExpr(
       new Variable("parameterA"),
       OpSymb::multiplication,
-      new BinaryExpr(new LiteralInt(4),
-                     OpSymb::multiplication,
-                     new LiteralInt(7)));
+      new ArithmeticExpr(new LiteralInt(4),
+                         OpSymb::multiplication,
+                         new LiteralInt(7)));
   auto varDeclAlpha = new VarDecl("alpha",
                                   new Datatype(Types::INT, false),
-                                  binaryExpr);
+                                  arithmeticExpr);
 
   // connect objects
   function->addStatement(varDeclParameterA);
@@ -127,7 +127,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, binaryExpr_variableKnown_fullyEva
   EXPECT_EQ(ctes.evaluatedNodes.size(), 0);
 }
 
-TEST_F(CompileTimeExpressionSimplifierFixture, binaryExpr_variablesUnknown_notAnythingEvaluable) { /* NOLINT */
+TEST_F(CompileTimeExpressionSimplifierFixture, arithmeticExpr_variablesUnknown_notAnythingEvaluable) { /* NOLINT */
   // void compute(encrypted_int encryptedA, plaintext_int plaintextB) {
   //  plaintext_int alpha = encryptedA * (4*plaintextB);
   // }
@@ -141,15 +141,15 @@ TEST_F(CompileTimeExpressionSimplifierFixture, binaryExpr_variablesUnknown_notAn
                                     new Variable("plaintextB"))});
   function->setParameterList(new ParameterList(functionParameters));
 
-  auto binaryExpr = new BinaryExpr(
+  auto arithmeticExpr = new ArithmeticExpr(
       new Variable("encryptedA"),
       OpSymb::multiplication,
-      new BinaryExpr(new LiteralInt(4),
-                     OpSymb::multiplication,
-                     new Variable("plaintextB")));
+      new ArithmeticExpr(new LiteralInt(4),
+                         OpSymb::multiplication,
+                         new Variable("plaintextB")));
   auto varDeclAlpha = new VarDecl("alpha",
                                   new Datatype(Types::INT, false),
-                                  binaryExpr);
+                                  arithmeticExpr);
   function->addStatement(varDeclAlpha);
   ast.setRootNode(function);
   auto numberOfNodesBeforeSimplification = ast.getAllNodes().size();
@@ -226,7 +226,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_variableUnknown_lhsOp
 
   // check that there is no computed variable
   EXPECT_TRUE(ctes.variableValues.empty());
-  // check that the lhs operand of binaryExpr is simplified
+  // check that the lhs operand of arithmeticExpr is simplified
   EXPECT_EQ(logicalExpr->getLeft()->castTo<LiteralBool>()->getValue(), true);
 
   // check that at the end of the evaluation traversal, the evalutedNodes map is empty
@@ -518,24 +518,24 @@ TEST_F(CompileTimeExpressionSimplifierFixture, varAssignm_assignmentToParameter)
   EXPECT_EQ(ctes.evaluatedNodes.size(), 0);
 }
 
-TEST_F(CompileTimeExpressionSimplifierFixture, varAssignm_circularDependency) { /* NOLINT */
-  // intFoo (plaintext_int x, plaintext_int y) {
+TEST_F(CompileTimeExpressionSimplifierFixture, varAssignm_symbolicTerms_circularDependency) { /* NOLINT */
+  // int Foo(plaintext_int x, plaintext_int y) {
   //  x = y+3
   //  y = x+2
   //  return x+y
   // }
-  auto function = new Function("compute");
+  auto function = new Function("Foo");
   auto functionParamList = new ParameterList(
       {new FunctionParameter(
           new Datatype(Types::INT, false), new Variable("x")),
        new FunctionParameter(
            new Datatype(Types::INT, false), new Variable("y"))});
   auto varAssignmX = new VarAssignm("x",
-                                    new BinaryExpr(new Variable("y"), OpSymb::addition, 3));
+                                    new ArithmeticExpr(new Variable("y"), OpSymb::addition, 3));
   auto varAssignmY = new VarAssignm("y",
-                                    new BinaryExpr(new Variable("x"), OpSymb::addition, 2));
+                                    new ArithmeticExpr(new Variable("x"), OpSymb::addition, 2));
   auto returnStmt = new Return(
-      new BinaryExpr(new Variable("x"), OpSymb::addition, new Variable("y")));
+      new ArithmeticExpr(new Variable("x"), OpSymb::addition, new Variable("y")));
 
   // connect objects
   function->setParameterList(functionParamList);
@@ -554,14 +554,14 @@ TEST_F(CompileTimeExpressionSimplifierFixture, varAssignm_circularDependency) { 
   DotPrinter().printAsDotFormattedGraph(ast);
 
   // check that simplification generated the expected simplified AST
-  auto expectedAst = new BinaryExpr(
-      new BinaryExpr(
+  auto expectedAst = new ArithmeticExpr(
+      new ArithmeticExpr(
           new Variable("y"),
           OpSymb::addition,
           new LiteralInt(3)),
       OpSymb::addition,
-      new BinaryExpr(
-          new BinaryExpr(new Variable("y"), OpSymb::addition, new LiteralInt(3)),
+      new ArithmeticExpr(
+          new ArithmeticExpr(new Variable("y"), OpSymb::addition, new LiteralInt(3)),
           OpSymb::addition,
           new LiteralInt(2)));
   EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
@@ -632,7 +632,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture,  /* NOLINT */
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
-       return_variableAndBinaryExpressionKnown_expectedLiteralIntReturnValue) {
+       return_variableAndArithmeticExpressionKnown_expectedLiteralIntReturnValue) {
   // int compute() {
   //  int b = 23;
   //  return b + 99;
@@ -644,9 +644,9 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   auto function = new Function("compute");
   auto varDeclB = new VarDecl("b", 23);
   auto returnStatement = new Return(
-      new BinaryExpr(new Variable("b"),
-                     OpSymb::addition,
-                     new LiteralInt(99)));
+      new ArithmeticExpr(new Variable("b"),
+                         OpSymb::addition,
+                         new LiteralInt(99)));
 
   // connect objects
   function->addStatement(varDeclB);
@@ -678,9 +678,9 @@ TEST_F(CompileTimeExpressionSimplifierFixture, return_variableUnknown_expectedNo
   // no change
   auto function = new Function("compute");
   auto returnStatement = new Return(
-      new BinaryExpr(new Variable("b"),
-                     OpSymb::addition,
-                     new LiteralInt(99)));
+      new ArithmeticExpr(new Variable("b"),
+                         OpSymb::addition,
+                         new LiteralInt(99)));
 
   // connect objects
   function->addStatement(returnStatement);
@@ -713,17 +713,17 @@ TEST_F(CompileTimeExpressionSimplifierFixture, return_multipleReturnValues_expec
   auto functionParam = new ParameterList({new FunctionParameter(new Datatype(Types::INT), new Variable("a"))});
   auto varDecl = new VarDecl("b",
                              new Datatype(Types::INT),
-                             new BinaryExpr(
+                             new ArithmeticExpr(
                                  new LiteralInt(3),
                                  OpSymb::addition,
                                  new LiteralInt(4)));
   auto returnStatement =
       new Return({
-                     new BinaryExpr(
+                     new ArithmeticExpr(
                          new Variable("a"),
                          OpSymb::multiplication,
                          new Variable("b")),
-                     new BinaryExpr(
+                     new ArithmeticExpr(
                          new LiteralInt(2),
                          OpSymb::subtraction,
                          new Variable("b")),
@@ -743,7 +743,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, return_multipleReturnValues_expec
 
   // check return expression 1: a*7
   EXPECT_TRUE(returnStatement->getReturnExpressions().at(0)
-                  ->isEqual(new BinaryExpr(new Variable("a"), OpSymb::multiplication, new LiteralInt(7))));
+                  ->isEqual(new ArithmeticExpr(new Variable("a"), OpSymb::multiplication, new LiteralInt(7))));
   // check return expression 2: -5
   EXPECT_TRUE(returnStatement->getReturnExpressions().at(1)->isEqual(new LiteralInt(-5)));
   // check return expression 3: 21
@@ -777,20 +777,20 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
                               new LiteralInt(22));
   auto ifStmt = new If(
       new LogicalExpr(
-          new BinaryExpr(
+          new ArithmeticExpr(
               new Variable("b"),
               OpSymb::addition,
               new LiteralInt(12)),
           OpSymb::greater,
           new LiteralInt(20)),
-      new VarAssignm("a", new BinaryExpr(
+      new VarAssignm("a", new ArithmeticExpr(
           new Variable("a"),
           OpSymb::multiplication,
           new LiteralInt(2))));
   auto returnStatement =
-      new Return(new BinaryExpr(new Variable("a"),
-                                OpSymb::multiplication,
-                                new LiteralInt(32)));
+      new Return(new ArithmeticExpr(new Variable("a"),
+                                    OpSymb::multiplication,
+                                    new LiteralInt(32)));
 
   // connect objects
   function->addStatement(varDeclA);
@@ -839,10 +839,10 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
                               new LiteralInt(22));
 
   auto condition = new LogicalExpr(
-      new BinaryExpr(new Variable("b"), OpSymb::addition, new LiteralInt(12)),
+      new ArithmeticExpr(new Variable("b"), OpSymb::addition, new LiteralInt(12)),
       OpSymb::greater,
       new LiteralInt(20));
-  auto thenBranch = new VarAssignm("a", new BinaryExpr(
+  auto thenBranch = new VarAssignm("a", new ArithmeticExpr(
       new Variable("a"),
       OpSymb::multiplication,
       new LiteralInt(2)));
@@ -850,9 +850,9 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   auto ifStmt = new If(condition, thenBranch, elseBranch);
 
   auto returnStatement =
-      new Return(new BinaryExpr(new Variable("a"),
-                                OpSymb::multiplication,
-                                new LiteralInt(32)));
+      new Return(new ArithmeticExpr(new Variable("a"),
+                                    OpSymb::multiplication,
+                                    new LiteralInt(32)));
 
   // connect objects
   function->addStatement(varDeclA);
@@ -902,10 +902,10 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
                               new LiteralInt(22));
 
   auto condition = new LogicalExpr(
-      new BinaryExpr(new Variable("b"), OpSymb::addition, new LiteralInt(12)),
+      new ArithmeticExpr(new Variable("b"), OpSymb::addition, new LiteralInt(12)),
       OpSymb::smaller,
       new LiteralInt(20));
-  auto thenBranch = new VarAssignm("a", new BinaryExpr(
+  auto thenBranch = new VarAssignm("a", new ArithmeticExpr(
       new Variable("a"),
       OpSymb::multiplication,
       new LiteralInt(2)));
@@ -913,9 +913,9 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   auto ifStmt = new If(condition, thenBranch, elseBranch);
 
   auto returnStatement =
-      new Return(new BinaryExpr(new Variable("a"),
-                                OpSymb::multiplication,
-                                new LiteralInt(32)));
+      new Return(new ArithmeticExpr(new Variable("a"),
+                                    OpSymb::multiplication,
+                                    new LiteralInt(32)));
 
   // connect objects
   function->addStatement(varDeclA);
@@ -965,7 +965,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
                                          new LiteralInt(20));
   auto ifStmt = new If(
       ifStmtCondition,
-      new VarAssignm("b", new BinaryExpr(
+      new VarAssignm("b", new ArithmeticExpr(
           new LiteralInt(2),
           OpSymb::multiplication,
           new Variable("b"))));
@@ -987,16 +987,16 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   // check that the return statement contains exactly one return value
   EXPECT_EQ(returnStatement->getReturnExpressions().size(), 1);
   // check that the return value is the expected one
-  auto expectedResult = new BinaryExpr(
-      new BinaryExpr(
+  auto expectedResult = new ArithmeticExpr(
+      new ArithmeticExpr(
           new LogicalExpr(new Variable("a"),
                           OpSymb::greater,
                           new LiteralInt(20)),
           OpSymb::multiplication,
           new LiteralInt(44)),
       OpSymb::addition,
-      new BinaryExpr(
-          new BinaryExpr(
+      new ArithmeticExpr(
+          new ArithmeticExpr(
               new LiteralInt(1),
               OpSymb::subtraction,
               new LogicalExpr(new Variable("a"),
@@ -1036,8 +1036,8 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   auto thenStatements = std::vector<AbstractStatement *>(
       {new VarDecl("c", 642),
        new VarAssignm("b",
-                      new BinaryExpr(
-                          new BinaryExpr(new LiteralInt(2), OpSymb::multiplication, new Variable("c")),
+                      new ArithmeticExpr(
+                          new ArithmeticExpr(new LiteralInt(2), OpSymb::multiplication, new Variable("c")),
                           OpSymb::subtraction,
                           new LiteralInt(1)))});
   auto thenBranch = new Block(thenStatements);
@@ -1061,7 +1061,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   EXPECT_EQ(returnStatement->getReturnExpressions().size(), 1);
   // check that the return value is the expected one
   auto expectedResult =
-      new BinaryExpr(
+      new ArithmeticExpr(
           new LogicalExpr(new Variable("a"),
                           OpSymb::greater,
                           new LiteralInt(20)),
@@ -1099,8 +1099,8 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   auto thenStatements = std::vector<AbstractStatement *>(
       {new VarDecl("c", 642),
        new VarAssignm("b",
-                      new BinaryExpr(
-                          new BinaryExpr(new LiteralInt(2), OpSymb::multiplication, new Variable("c")),
+                      new ArithmeticExpr(
+                          new ArithmeticExpr(new LiteralInt(2), OpSymb::multiplication, new Variable("c")),
                           OpSymb::subtraction,
                           new LiteralInt(1)))});
   auto thenBranch = new Block(thenStatements);
@@ -1123,22 +1123,22 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   // check that the return statement contains exactly one return value
   EXPECT_EQ(returnStatement->getReturnExpressions().size(), 1);
   // check that the return value is the expected one
-  auto expectedResult = new BinaryExpr(
-      new BinaryExpr(
+  auto expectedResult = new ArithmeticExpr(
+      new ArithmeticExpr(
           new LogicalExpr(new Variable("a"),
                           OpSymb::greater,
                           new LiteralInt(20)),
           OpSymb::multiplication,
           new LiteralInt(1'283)),
       OpSymb::addition,
-      new BinaryExpr(new BinaryExpr(
+      new ArithmeticExpr(new ArithmeticExpr(
           new LiteralInt(1),
           OpSymb::subtraction,
           new LogicalExpr(new Variable("a"),
                           OpSymb::greater,
                           new LiteralInt(20))),
-                     OpSymb::multiplication,
-                     new LiteralInt(42)));
+                         OpSymb::multiplication,
+                         new LiteralInt(42)));
   EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedResult));
 
   // check that at the end of the evaluation traversal, the evalutedNodes map is empty
@@ -1170,7 +1170,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
                                          OpSymb::smaller,
                                          new LiteralInt(11));
   auto thenBranch = new VarAssignm("b",
-                                   new BinaryExpr(
+                                   new ArithmeticExpr(
                                        new LiteralInt(2),
                                        OpSymb::multiplication,
                                        new Variable("factor")));
@@ -1195,22 +1195,22 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   // check that the return statement contains exactly one return value
   EXPECT_EQ(returnStatement->getReturnExpressions().size(), 1);
   // check that the return value is the expected one
-  auto expectedResult = new BinaryExpr(
-      new BinaryExpr(
+  auto expectedResult = new ArithmeticExpr(
+      new ArithmeticExpr(
           new LogicalExpr(new Variable("threshold"),
                           OpSymb::smaller,
                           new LiteralInt(11)),
           OpSymb::multiplication,
-          new BinaryExpr(new LiteralInt(2), OpSymb::multiplication, new Variable("factor"))),
+          new ArithmeticExpr(new LiteralInt(2), OpSymb::multiplication, new Variable("factor"))),
       OpSymb::addition,
-      new BinaryExpr(new BinaryExpr(
+      new ArithmeticExpr(new ArithmeticExpr(
           new LiteralInt(1),
           OpSymb::subtraction,
           new LogicalExpr(new Variable("threshold"),
                           OpSymb::smaller,
                           new LiteralInt(11))),
-                     OpSymb::multiplication,
-                     new Variable("factor")));
+                         OpSymb::multiplication,
+                         new Variable("factor")));
   EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedResult));
 
   // check that at the end of the evaluation traversal, the evalutedNodes map is empty
@@ -1245,17 +1245,17 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
 
   auto innerIfStatementCondition = new LogicalExpr(new Variable("factor"), OpSymb::greater, new LiteralInt(9));
   auto innerIfStatement = new If(innerIfStatementCondition,
-                                 new VarAssignm("b", new BinaryExpr(
-                                     new BinaryExpr(new Variable("b"), OpSymb::multiplication, 2),
+                                 new VarAssignm("b", new ArithmeticExpr(
+                                     new ArithmeticExpr(new Variable("b"), OpSymb::multiplication, 2),
                                      OpSymb::multiplication,
                                      new Variable("factor"))),
                                  new VarAssignm("b",
-                                                new BinaryExpr(new Variable("b"),
-                                                               OpSymb::multiplication,
-                                                               new Variable("factor"))));
+                                                new ArithmeticExpr(new Variable("b"),
+                                                                   OpSymb::multiplication,
+                                                                   new Variable("factor"))));
 
   auto outerIfStmtThenBlock =
-      new Block({new VarAssignm("b", new BinaryExpr(new Variable("b"), OpSymb::division, new LiteralInt(3))),
+      new Block({new VarAssignm("b", new ArithmeticExpr(new Variable("b"), OpSymb::division, new LiteralInt(3))),
                  innerIfStatement});
   auto outerIfStatementCondition = new LogicalExpr(new Variable("threshold"), OpSymb::greater, new LiteralInt(11));
   auto outerIfStmt = new If(outerIfStatementCondition, outerIfStmtThenBlock);
@@ -1283,36 +1283,36 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   //          + [1-[factor>9]]*33*factor]   // expectedResultMiddleTerm
   //    + [1-[threshold>11]]*99;            // expectedResultRhsTerm
 
-  auto expectedResultLhsTerm = new BinaryExpr(
+  auto expectedResultLhsTerm = new ArithmeticExpr(
       new LogicalExpr(new Variable("factor"), OpSymb::greater, new LiteralInt(9)),
       OpSymb::multiplication,
-      new BinaryExpr(
+      new ArithmeticExpr(
           new LiteralInt(66),
           OpSymb::multiplication,
           new Variable("factor")));
-  auto expectedResultMiddleTerm = new BinaryExpr(
-      new BinaryExpr(
+  auto expectedResultMiddleTerm = new ArithmeticExpr(
+      new ArithmeticExpr(
           new LiteralInt(1),
           OpSymb::subtraction,
           new LogicalExpr(new Variable("factor"), OpSymb::greater, new LiteralInt(9))),
       OpSymb::multiplication,
-      new BinaryExpr(
+      new ArithmeticExpr(
           new LiteralInt(33),
           OpSymb::multiplication,
           new Variable("factor")));
-  auto expectedResultRhsTerm = new BinaryExpr(
-      new BinaryExpr(
+  auto expectedResultRhsTerm = new ArithmeticExpr(
+      new ArithmeticExpr(
           new LiteralInt(1),
           OpSymb::subtraction,
           new LogicalExpr(new Variable("threshold"), OpSymb::greater, new LiteralInt(11))),
       OpSymb::multiplication,
       new LiteralInt(99));
 
-  auto expectedResult = new BinaryExpr(
-      new BinaryExpr(
+  auto expectedResult = new ArithmeticExpr(
+      new ArithmeticExpr(
           new LogicalExpr(new Variable("threshold"), OpSymb::greater, new LiteralInt(11)),
           OpSymb::multiplication,
-          new BinaryExpr(
+          new ArithmeticExpr(
               expectedResultLhsTerm,
               OpSymb::addition,
               expectedResultMiddleTerm)),
@@ -1323,3 +1323,90 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   // check that at the end of the evaluation traversal, the evalutedNodes map is empty
   EXPECT_EQ(ctes.evaluatedNodes.size(), 0);
 }
+
+TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_partiallyEvaluableOnly) { /* NOLINT */
+  //  -- input --
+  // int f(plaintext_int x) {
+  //  int y = 42;
+  //  x = x+29
+  //  return x+y
+  // }
+  //  -- expected --
+  // int f(plaintext_int x) {
+  //  return x+71;
+  // }
+  auto function = new Function("compute");
+  auto functionParamList = new ParameterList(
+      {new FunctionParameter(
+          new Datatype(Types::INT, false), new Variable("x"))});
+  auto varDeclY = new VarDecl("y", 42);
+  auto varAssignmX = new VarAssignm("x", new ArithmeticExpr(new Variable("x"), OpSymb::addition, new LiteralInt(29)));
+  auto returnStmt = new Return(
+      new ArithmeticExpr(new Variable("x"), OpSymb::addition, new Variable("y")));
+
+  // connect objects
+  function->setParameterList(functionParamList);
+  function->addStatement(varDeclY);
+  function->addStatement(varAssignmX);
+  function->addStatement(returnStmt);
+  ast.setRootNode(function);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  // TODO implement handling of evalu
+
+  DotPrinter().printAsDotFormattedGraph(ast);
+
+  // check that simplification generated the expected simplified AST
+  auto expectedAst = new ArithmeticExpr(
+      new ArithmeticExpr(
+          new Variable("y"),
+          OpSymb::addition,
+          new LiteralInt(3)),
+      OpSymb::addition,
+      new ArithmeticExpr(
+          new ArithmeticExpr(new Variable("y"), OpSymb::addition, new LiteralInt(3)),
+          OpSymb::addition,
+          new LiteralInt(2)));
+  EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
+  EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedAst));
+
+  // check that at the end of the evaluation traversal, the evalutedNodes map is empty
+  EXPECT_EQ(ctes.evaluatedNodes.size(), 0);
+}
+
+
+
+
+
+// TODO(pjattke): implement tests for symbolic terms
+
+// TODO(pjattke): write test for If statement like ifStmt_conditionValueIsUnknown_thenBranchOnlyExists_expectedRewriting
+//   - with additional else branch where variables in then and else branch only partially overlap
+
+// TODO(pjattke): write tests for Call including Function, FunctionParameter, and Block
+//  - Call with Function that is expected to be replaced
+//  - implementation details
+//    - inline Call only if it can be evaluated at compile-time and returns a Literal (e.g., sqrt(5))
+//    - add a few ASTs to test this!
+
+// TODO(pjattke): write tests for While statement
+//  - implementation details
+//    - if condition is always False -> delete the loop
+//    - if condition is always True -> throw an error
+//    - if condition contains encrypted variables -> throw an error
+//    - otherwise: unroll loop
+//  - While with unknown loop condition -> cannot be evaluated
+//  - While with known loop condition -> can be evaluated
+//  - While that has a known loop condition but contains a non-evaluable statements
+
+// TODO(pjattke): write a Statistics visitors that collects:
+//  - total number of AND/XOR gates
+//    - number of multiplications (i.e., AND gates) per level
+//  - multiplicative depth (use existing MultiplicativeDepthCalculator)
+
+// TODO(pjattke): Think about an example where current optimizer returns a worse AST than the original one, considering
+//  the constraints of FHE (e.g., multiplicative depth)
+
+// TODO(pjattke): Play with SEAL as preparatory step for next tasks - work through tutorial examples!

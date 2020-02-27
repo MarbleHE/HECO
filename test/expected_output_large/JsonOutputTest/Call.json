@@ -18,7 +18,7 @@
         "type": "Return",
         "values": [
           {
-            "type": "BinaryExpr",
+            "type": "ArithmeticExpr",
             "leftOperand": {
               "type": "Variable",
               "identifier": "inputA"

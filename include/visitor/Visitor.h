@@ -7,7 +7,7 @@ class AbstractNode;
 class AbstractExpr;
 class AbstractStatement;
 class Ast;
-class BinaryExpr;
+class ArithmeticExpr;
 class Block;
 class Call;
 class CallExternal;
@@ -39,7 +39,7 @@ class Visitor {
 
   virtual void visit(AbstractStatement &elem);
 
-  virtual void visit(BinaryExpr &elem);
+  virtual void visit(ArithmeticExpr &elem);
 
   virtual void visit(Block &elem);
 

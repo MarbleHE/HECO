@@ -12,7 +12,7 @@ class AbstractStatement : public AbstractNode {
  public:
   [[nodiscard]] json toJson() const override;
 
-  virtual BinaryExpr *contains(BinaryExpr *bexpTemplate, BinaryExpr *excludedSubtree);
+  virtual ArithmeticExpr *contains(ArithmeticExpr *aexpTemplate, ArithmeticExpr *excludedSubtree);
 
   virtual std::string getVarTargetIdentifier();
 

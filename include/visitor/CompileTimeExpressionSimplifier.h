@@ -3,7 +3,7 @@
 
 #include "Visitor.h"
 #include "EvaluationVisitor.h"
-#include "BinaryExpr.h"
+#include "ArithmeticExpr.h"
 #include "LiteralFloat.h"
 
 class CompileTimeExpressionSimplifier : public Visitor {
@@ -29,8 +29,8 @@ class CompileTimeExpressionSimplifier : public Visitor {
 
   /// Contains pointer to those nodes for which full or partial evaluation could be performed and hence can be deleted
   /// at the end of this simplification traversal.
-  /// For example, the expression BinaryExpr(LiteralInt(12), OpSymb::add, LiteralInt(42)) will be evaluated to 12+42=54.
-  /// The node BinaryExpr (and all of its children) will be deleted and replaced by a new node LiteralInt(54).
+  /// For example, the expression ArithmeticExpr(LiteralInt(12), OpSymb::add, LiteralInt(42)) will be evaluated to 12+42=54.
+  /// The node ArithmeticExpr (and all of its children) will be deleted and replaced by a new node LiteralInt(54).
   std::queue<AbstractNode *> nodesQueuedForDeletion;
 
   /** @defgroup visit Methods implementing the logic of the visitor for each node type.
@@ -40,7 +40,7 @@ class CompileTimeExpressionSimplifier : public Visitor {
   void visit(AbstractNode &elem) override;
   void visit(AbstractExpr &elem) override;
   void visit(AbstractStatement &elem) override;
-  void visit(BinaryExpr &elem) override;
+  void visit(ArithmeticExpr &elem) override;
   void visit(Block &elem) override;
   void visit(Call &elem) override;
   void visit(CallExternal &elem) override;
@@ -76,7 +76,7 @@ class CompileTimeExpressionSimplifier : public Visitor {
                                                        std::unordered_map<std::string,
                                                                           AbstractLiteral *> valuesOfVariables);
 
-  void handleBinaryExpressions(AbstractNode &binaryExpr, AbstractExpr *leftOperand, AbstractExpr *rightOperand);
+  void handleBinaryExpressions(AbstractNode &arithmeticExpr, AbstractExpr *leftOperand, AbstractExpr *rightOperand);
 
   void visit(ParameterList &elem) override;
 
@@ -98,7 +98,7 @@ class CompileTimeExpressionSimplifier : public Visitor {
   /// \param condition The condition the assignment depends on, e.g., the condition of the If statement.
   /// \param trueValue The value to be used for the case that the condition evaluates to True.
   /// \param falseValueThe value to be used for the case that the condition evaluates to False.
-  /// \return A binary expression of the form condition*trueValue + (1-b)*falseValue.
+  /// \return A arithmetic expression of the form condition*trueValue + (1-b)*falseValue.
   static AbstractExpr *generateIfDependentValue(AbstractExpr *condition,
                                                 AbstractExpr *trueValue,
                                                 AbstractExpr *falseValue);

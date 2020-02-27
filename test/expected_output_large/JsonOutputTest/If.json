@@ -43,7 +43,7 @@
         "type": "VarAssignm",
         "identifier": "c",
         "value": {
-          "type": "BinaryExpr",
+          "type": "ArithmeticExpr",
           "leftOperand": {
             "type": "Variable",
             "identifier": "a"

@@ -2,13 +2,13 @@
 #include "AbstractStatement.h"
 #include "Block.h"
 #include "Call.h"
-#include "BinaryExpr.h"
+#include "ArithmeticExpr.h"
 
 json AbstractStatement::toJson() const {
   return json({"type", "AbstractStatement"});
 }
 
-BinaryExpr *AbstractStatement::contains(BinaryExpr *bexpTemplate, BinaryExpr *excludedSubtree) {
+ArithmeticExpr *AbstractStatement::contains(ArithmeticExpr *aexpTemplate, ArithmeticExpr *excludedSubtree) {
   return nullptr;
 }
 

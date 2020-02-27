@@ -51,7 +51,7 @@ class EvaluationVisitor : public Visitor {
   void visit(AbstractNode &elem) override;
   void visit(AbstractExpr &elem) override;
   void visit(AbstractStatement &elem) override;
-  void visit(BinaryExpr &elem) override;
+  void visit(ArithmeticExpr &elem) override;
   void visit(Block &elem) override;
   void visit(Call &elem) override;
   void visit(CallExternal &elem) override;

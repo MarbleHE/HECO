@@ -70,7 +70,7 @@ class AbstractNode {
    */
 
   /// Indicates the number of children that are allowed for a specific node.
-  /// For example, a binary expression accepts exactly three attributes and hence also exactly three children:
+  /// For example, a arithmetic expression accepts exactly three attributes and hence also exactly three children:
   /// left operand, right operand, and operator.
   /// If the node does not implement support for child/parent relationships, getMaxNumberChildren() return 0.
   /// \return An integer indicating the number of allowed children for a specific node.

@@ -2,7 +2,7 @@
 #include "FunctionParameter.h"
 #include "VarAssignm.h"
 #include "VarDecl.h"
-#include "BinaryExpr.h"
+#include "ArithmeticExpr.h"
 #include "Return.h"
 #include "Block.h"
 #include "Variable.h"
@@ -110,7 +110,7 @@ void SecretTaintingVisitor::visit(VarDecl &elem) {
 // EXPRESSIONS
 // ==========================
 
-void SecretTaintingVisitor::visit(BinaryExpr &elem) {
+void SecretTaintingVisitor::visit(ArithmeticExpr &elem) {
   Visitor::visit(elem);
 }
 

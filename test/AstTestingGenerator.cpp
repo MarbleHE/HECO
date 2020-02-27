@@ -1,6 +1,6 @@
 #include "AstTestingGenerator.h"
 #include "Operator.h"
-#include "BinaryExpr.h"
+#include "ArithmeticExpr.h"
 #include "UnaryExpr.h"
 #include "VarAssignm.h"
 #include "Return.h"
@@ -73,16 +73,16 @@ void AstTestingGenerator::genAstRewritingOne(Ast &ast) {
 
   // int prod = [inputA * [inputB * inputC]]
   func->addStatement(new VarDecl("prod", Types::INT,
-                                 new BinaryExpr(
+                                 new ArithmeticExpr(
                                      new Variable("inputA"),
                                      OpSymb::multiplication,
-                                     new BinaryExpr(
+                                     new ArithmeticExpr(
                                          new Variable("inputB"),
                                          OpSymb::multiplication,
                                          new Variable("inputC")))));
 
   // return prod / 3;
-  func->addStatement(new Return(new BinaryExpr(
+  func->addStatement(new Return(new ArithmeticExpr(
       new Variable("prod"),
       OpSymb::division,
       new LiteralInt(3))));
@@ -104,20 +104,20 @@ void AstTestingGenerator::genAstRewritingTwo(Ast &ast) {
 
   // int prod = inputA * inputB;
   func->addStatement(new VarDecl("prod", Types::INT,
-                                 new BinaryExpr(
+                                 new ArithmeticExpr(
                                      new Variable("inputA"),
                                      OpSymb::multiplication,
                                      new Variable("inputB"))));
 
   // prod = prod * inputC
   func->addStatement(
-      new VarAssignm("prod", new BinaryExpr(
+      new VarAssignm("prod", new ArithmeticExpr(
           new Variable("prod"),
           OpSymb::multiplication,
           new Variable("inputC"))));
 
   // return prod / 3;
-  func->addStatement(new Return(new BinaryExpr(
+  func->addStatement(new Return(new ArithmeticExpr(
       new Variable("prod"),
       OpSymb::division,
       new LiteralInt(3))));
@@ -139,7 +139,7 @@ void AstTestingGenerator::genAstRewritingThree(Ast &ast) {
 
   // int prod = inputA * inputB;
   func->addStatement(new VarDecl("prod", Types::INT,
-                                 new BinaryExpr(
+                                 new ArithmeticExpr(
                                      new Variable("inputA"),
                                      OpSymb::multiplication,
                                      new Variable("inputB"))));
@@ -150,13 +150,13 @@ void AstTestingGenerator::genAstRewritingThree(Ast &ast) {
 
   // prod = prod * inputC
   func->addStatement(
-      new VarAssignm("prod", new BinaryExpr(
+      new VarAssignm("prod", new ArithmeticExpr(
           new Variable("prod"),
           OpSymb::multiplication,
           new Variable("inputC"))));
 
   // return prod / 3;
-  func->addStatement(new Return(new BinaryExpr(
+  func->addStatement(new Return(new ArithmeticExpr(
       new Variable("prod"),
       OpSymb::division,
       new LiteralInt(3))));
@@ -178,7 +178,7 @@ void AstTestingGenerator::genAstRewritingFour(Ast &ast) {
 
   // int prod = inputA * inputB;
   func->addStatement(new VarDecl("prod", Types::INT,
-                                 new BinaryExpr(
+                                 new ArithmeticExpr(
                                      new Variable("inputA"),
                                      OpSymb::multiplication,
                                      new Variable("inputB"))));
@@ -188,13 +188,13 @@ void AstTestingGenerator::genAstRewritingFour(Ast &ast) {
   func->addStatement(new If(
       new LogicalExpr(
           new Variable("prod"), OpSymb::greater, new LiteralInt(42)),
-      new VarAssignm("prod", new BinaryExpr(
+      new VarAssignm("prod", new ArithmeticExpr(
           new Variable("prod"),
           OpSymb::multiplication,
           new Variable("inputC")))));
 
   // return prod / 3;
-  func->addStatement(new Return(new BinaryExpr(
+  func->addStatement(new Return(new ArithmeticExpr(
       new Variable("prod"),
       OpSymb::division,
       new LiteralInt(3))));
@@ -216,20 +216,20 @@ void AstTestingGenerator::genAstRewritingFive(Ast &ast) {
 
   // int prod = inputA * inputB;
   func->addStatement(new VarDecl("prod", Types::INT,
-                                 new BinaryExpr(
+                                 new ArithmeticExpr(
                                      new Variable("inputA"),
                                      OpSymb::multiplication,
                                      new Variable("inputB"))));
 
   // argPow = inputC * inputC
   func->addStatement(
-      new VarAssignm("argPow", new BinaryExpr(
+      new VarAssignm("argPow", new ArithmeticExpr(
           new Variable("inputC"),
           OpSymb::multiplication,
           new Variable("inputC"))));
 
   // return prod / 3;
-  func->addStatement(new Return(new BinaryExpr(
+  func->addStatement(new Return(new ArithmeticExpr(
       new Variable("prod"),
       OpSymb::division,
       new LiteralInt(3))));
@@ -251,20 +251,20 @@ void AstTestingGenerator::genAstRewritingSix(Ast &ast) {
 
   // int prod = inputA * inputB;
   func->addStatement(new VarDecl("prod", Types::INT,
-                                 new BinaryExpr(
+                                 new ArithmeticExpr(
                                      new Variable("inputA"),
                                      OpSymb::multiplication,
                                      new Variable("inputB"))));
 
   // int prod2 = prod * inputC;
   func->addStatement(new VarDecl("prod2", Types::INT,
-                                 new BinaryExpr(
+                                 new ArithmeticExpr(
                                      new Variable("prod"),
                                      OpSymb::multiplication,
                                      new Variable("inputC"))));
 
   // return prod / 3;
-  func->addStatement(new Return(new BinaryExpr(
+  func->addStatement(new Return(new ArithmeticExpr(
       new Variable("prod"),
       OpSymb::division,
       new LiteralInt(3))));
@@ -286,16 +286,16 @@ void AstTestingGenerator::genAstEvalOne(Ast &ast) {
 
   // int prod = inputA * inputB * inputC
   func->addStatement(new VarDecl("prod", Types::INT,
-                                 new BinaryExpr(
+                                 new ArithmeticExpr(
                                      new Variable("width"),
                                      OpSymb::multiplication,
-                                     new BinaryExpr(
+                                     new ArithmeticExpr(
                                          new Variable("length"),
                                          OpSymb::multiplication,
                                          new Variable("depth")))));
 
   // return prod / 3;
-  func->addStatement(new Return(new BinaryExpr(
+  func->addStatement(new Return(new ArithmeticExpr(
       new Variable("prod"),
       OpSymb::division,
       new LiteralInt(3))));
@@ -317,7 +317,7 @@ void AstTestingGenerator::genAstEvalTwo(Ast &ast) {
 
   // int prod = inputA * inputB;
   func->addStatement(new VarDecl("prod", Types::INT,
-                                 new BinaryExpr(
+                                 new ArithmeticExpr(
                                      new Variable("inputA"),
                                      OpSymb::multiplication,
                                      new Variable("inputB"))));
@@ -328,12 +328,12 @@ void AstTestingGenerator::genAstEvalTwo(Ast &ast) {
       new LogicalExpr(
           new Variable("takeIf"), OpSymb::equal, new LiteralBool(true)),
       new VarAssignm("prod",
-                     new BinaryExpr(
+                     new ArithmeticExpr(
                          new Variable("prod"),
                          OpSymb::modulo,
                          new LiteralInt(12))),
       new VarAssignm("prod",
-                     new BinaryExpr(
+                     new ArithmeticExpr(
                          new Variable("prod"),
                          OpSymb::subtraction,
                          new LiteralInt(21)))));
@@ -363,12 +363,12 @@ void AstTestingGenerator::genAstEvalThree(Ast &ast) {
       new LogicalExpr(
           new Variable("strong"), OpSymb::equal, new LiteralBool(true)),
       new Block(new VarAssignm("inputA",
-                               new BinaryExpr(
+                               new ArithmeticExpr(
                                    new Variable("inputA"),
                                    OpSymb::multiplication,
                                    new LiteralInt(42)))),
       new Block(new VarAssignm("inputA",
-                               new BinaryExpr(
+                               new ArithmeticExpr(
                                    new Variable("inputA"),
                                    OpSymb::addition,
                                    new LiteralInt(42))))));
@@ -401,9 +401,9 @@ void AstTestingGenerator::genAstEvalFour(Ast &ast) {
   // return strA + strB
   func->addStatement(
       new Return(
-          new BinaryExpr(new Variable("strA"),
-                         OpSymb::addition,
-                         new Variable("strB"))));
+          new ArithmeticExpr(new Variable("strA"),
+                             OpSymb::addition,
+                             new Variable("strB"))));
 
   ast.setRootNode(func);
 }
@@ -448,14 +448,14 @@ void AstTestingGenerator::genAstEvalFive(Ast &ast) {
       new Block(
           std::vector<AbstractStatement *>{
               // sum = sum + encryptedB
-              new VarAssignm("sum", new BinaryExpr(
+              new VarAssignm("sum", new ArithmeticExpr(
                   new Variable("sum"),
-                  OpSymb::BinaryOp::addition,
+                  OpSymb::ArithmeticOp::addition,
                   new Variable("encryptedB"))),
               // randInt = randInt-1;
-              new VarAssignm("randInt", new BinaryExpr(
+              new VarAssignm("randInt", new ArithmeticExpr(
                   new Variable("randInt"),
-                  OpSymb::BinaryOp::subtraction,
+                  OpSymb::ArithmeticOp::subtraction,
                   new LiteralInt(1)))})));
 
   // return sum;
@@ -475,7 +475,7 @@ void AstTestingGenerator::genAstEvalSix(Ast &ast) {
       new Function("computeSecret",
                    new ParameterList({new FunctionParameter("int", new Variable("inputA"))}),
                    new Block(new Return(
-                       new BinaryExpr(
+                       new ArithmeticExpr(
                            new Variable("inputA"),
                            OpSymb::multiplication,
                            new LiteralInt(32)))
@@ -494,11 +494,11 @@ void AstTestingGenerator::genAstEvalSeven(Ast &ast) {
   // -> computeSecret(int inputA) { return inputA * 32 }
   fnc->addStatement(new VarAssignm("result", new Call(
       {new FunctionParameter("int",
-                             new BinaryExpr(new LiteralInt(11), OpSymb::addition, new LiteralInt(213)))},
+                             new ArithmeticExpr(new LiteralInt(11), OpSymb::addition, new LiteralInt(213)))},
       new Function("computeSecret",
                    new ParameterList({new FunctionParameter("int", new Variable("inputA"))}),
                    new Block(new Return(
-                       new BinaryExpr(
+                       new ArithmeticExpr(
                            new Variable("inputA"),
                            OpSymb::multiplication,
                            new LiteralInt(32)))
@@ -526,19 +526,19 @@ void AstTestingGenerator::genAstPrintVisitorOne(Ast &ast) {
       // { k = x * a}
       new Block(
           new VarAssignm("k",
-                         new BinaryExpr(
+                         new ArithmeticExpr(
                              new Variable("x"),
-                             OpSymb::BinaryOp::multiplication,
+                             OpSymb::ArithmeticOp::multiplication,
                              new Variable("a")))),
       // else { k = (x * a) + 42; }
       new Block(
           new VarAssignm("k",
-                         new BinaryExpr(
-                             new BinaryExpr(
+                         new ArithmeticExpr(
+                             new ArithmeticExpr(
                                  new Variable("x"),
-                                 OpSymb::BinaryOp::multiplication,
+                                 OpSymb::ArithmeticOp::multiplication,
                                  new Variable("a")),
-                             OpSymb::BinaryOp::addition,
+                             OpSymb::ArithmeticOp::addition,
                              42)))));
 
   // return k
@@ -554,9 +554,9 @@ void AstTestingGenerator::genAstPrintVisitorTwo(Ast &ast) {
   // int randInt = rand() % 42;
   func->addStatement(
       new VarDecl("randInt", Types::INT,
-                  new BinaryExpr(
+                  new ArithmeticExpr(
                       new CallExternal("std::rand"),
-                      OpSymb::BinaryOp::modulo,
+                      OpSymb::ArithmeticOp::modulo,
                       new LiteralInt(42))));
 
   // bool b = encryptedA < 2;
@@ -589,14 +589,14 @@ void AstTestingGenerator::genAstPrintVisitorTwo(Ast &ast) {
       new Block(
           std::vector<AbstractStatement *>{
               // sum = sum + encryptedB
-              new VarAssignm("sum", new BinaryExpr(
+              new VarAssignm("sum", new ArithmeticExpr(
                   new Variable("sum"),
-                  OpSymb::BinaryOp::addition,
+                  OpSymb::ArithmeticOp::addition,
                   new Variable("encryptedB"))),
               // randInt = randInt-1;
-              new VarAssignm("randInt", new BinaryExpr(
+              new VarAssignm("randInt", new ArithmeticExpr(
                   new Variable("randInt"),
-                  OpSymb::BinaryOp::subtraction,
+                  OpSymb::ArithmeticOp::subtraction,
                   new LiteralInt(1)))})));
 
   // STRING outStr = "Computation finished!";
@@ -626,20 +626,20 @@ void AstTestingGenerator::genAstMultDepthOne(Ast &ast) {
 
   // int prod = inputA * inputB;
   func->addStatement(new VarDecl("prod", Types::INT,
-                                 new BinaryExpr(
+                                 new ArithmeticExpr(
                                      new Variable("inputA"),
                                      OpSymb::multiplication,
                                      new Variable("inputB"))));
 
   // prod = prod * inputC
   func->addStatement(
-      new VarAssignm("prod", new BinaryExpr(
+      new VarAssignm("prod", new ArithmeticExpr(
           new Variable("prod"),
           OpSymb::multiplication,
           new Variable("inputC"))));
 
   // return prod * 3;
-  func->addStatement(new Return(new BinaryExpr(
+  func->addStatement(new Return(new ArithmeticExpr(
       new Variable("prod"),
       OpSymb::multiplication,
       new LiteralInt(3))));
@@ -666,19 +666,19 @@ void AstTestingGenerator::genAstMultDepthTwo(Ast &ast) {
   func->addStatement(
       new VarDecl("stdB",
                   Types::INT,
-                  new BinaryExpr(new LiteralInt(2),
-                                 OpSymb::multiplication,
-                                 new Variable("stdA"))));
+                  new ArithmeticExpr(new LiteralInt(2),
+                                     OpSymb::multiplication,
+                                     new Variable("stdA"))));
 
   // int prod = [base * stdA] + [base * stdB];
   func->addStatement(new VarDecl("prod", Types::INT,
-                                 new BinaryExpr(
-                                     new BinaryExpr(
+                                 new ArithmeticExpr(
+                                     new ArithmeticExpr(
                                          new Variable("base"),
                                          OpSymb::multiplication,
                                          new Variable("stdA")),
                                      OpSymb::addition,
-                                     new BinaryExpr(
+                                     new ArithmeticExpr(
                                          new Variable("base"),
                                          OpSymb::multiplication,
                                          new Variable("stdB")))));
@@ -686,13 +686,13 @@ void AstTestingGenerator::genAstMultDepthTwo(Ast &ast) {
   // int condVal = [22 * defaultC] + [base * useBase];
   func->addStatement(
       new VarDecl("condVal", Types::INT,
-                  new BinaryExpr(
-                      new BinaryExpr(
+                  new ArithmeticExpr(
+                      new ArithmeticExpr(
                           new LiteralInt(22),
                           OpSymb::multiplication,
                           new Variable("defaultC")),
                       OpSymb::addition,
-                      new BinaryExpr(
+                      new ArithmeticExpr(
                           new Variable("base"),
                           OpSymb::multiplication,
                           new Variable("useBase")))));
@@ -1006,15 +1006,15 @@ void AstTestingGenerator::genAstForSecretTaintingWithMultipleNonSequentialStatem
   //  { discountRate = qualifiesForSpecialDiscount * 0.90 + (1-qualifiesForSpecialDiscount) * 0.98; }
   funcComputeDiscountOnServer->addStatement(
       new Block(new VarAssignm("discountRate",
-                               new BinaryExpr(
-                                   new BinaryExpr(new Variable("qualifiesForSpecialDiscount"),
-                                                  OpSymb::multiplication,
-                                                  new LiteralFloat(0.90)),
+                               new ArithmeticExpr(
+                                   new ArithmeticExpr(new Variable("qualifiesForSpecialDiscount"),
+                                                      OpSymb::multiplication,
+                                                      new LiteralFloat(0.90)),
                                    OpSymb::addition,
-                                   new BinaryExpr(
-                                       new BinaryExpr(new LiteralInt(1),
-                                                      OpSymb::subtraction,
-                                                      new Variable("qualifiesForSpecialDiscount")),
+                                   new ArithmeticExpr(
+                                       new ArithmeticExpr(new LiteralInt(1),
+                                                          OpSymb::subtraction,
+                                                          new Variable("qualifiesForSpecialDiscount")),
                                        OpSymb::multiplication,
                                        new LiteralFloat(0.98))))));
 
@@ -1030,7 +1030,7 @@ void AstTestingGenerator::genAstForSecretTaintingWithMultipleNonSequentialStatem
 
   // return subtotal*discount;
   funcComputeTotal->addStatement(
-      new Return(new BinaryExpr(new Variable("subtotal"),
-                                OpSymb::multiplication,
-                                new Variable("discount"))));
+      new Return(new ArithmeticExpr(new Variable("subtotal"),
+                                    OpSymb::multiplication,
+                                    new Variable("discount"))));
 }

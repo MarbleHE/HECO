@@ -30,7 +30,7 @@ AbstractExpr *AbstractExpr::createParam(AbstractExpr *abstractExpr) {
   return abstractExpr;
 }
 
-BinaryExpr *AbstractExpr::contains(BinaryExpr *bexpTemplate, AbstractExpr *excludedSubtree) {
+ArithmeticExpr *AbstractExpr::contains(ArithmeticExpr *aexpTemplate, AbstractExpr *excludedSubtree) {
   return nullptr;
 }
 

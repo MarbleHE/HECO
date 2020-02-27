@@ -58,10 +58,10 @@ LogicalExpr *LogicalExpr::contains(LogicalExpr *lexpTemplate, AbstractExpr *excl
 }
 
 int LogicalExpr::countByTemplate(AbstractExpr *abstractExpr) {
-  // check if abstractExpr is of type BinaryExpr
+  // check if abstractExpr is of type ArithmeticExpr
   if (auto expr = dynamic_cast<LogicalExpr *>(abstractExpr)) {
-    // check if current BinaryExpr fulfills requirements of template abstractExpr
-    // also check left and right operands for nested BinaryExps
+    // check if current ArithmeticExpr fulfills requirements of template abstractExpr
+    // also check left and right operands for nested arithmetic expressions
     return (this->contains(expr, nullptr)!=nullptr ? 1 : 0)
         + getLeft()->countByTemplate(abstractExpr)
         + getRight()->countByTemplate(abstractExpr);

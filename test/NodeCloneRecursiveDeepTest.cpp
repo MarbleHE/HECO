@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include "AbstractExpr.h"
 #include "AbstractStatement.h"
-#include "BinaryExpr.h"
+#include "ArithmeticExpr.h"
 #include "Block.h"
 #include "Call.h"
 #include "CallExternal.h"
@@ -36,34 +36,34 @@ class NodeCloneTestFixture : public ::testing::Test {
   }
 };
 
-TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_BinaryExpr) {  /* NOLINT */
+TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_ArithmeticExpr) {  /* NOLINT */
   const bool keepOriginalId = true;
 
-  // create a new binary expression
+  // create a new arithmetic expression
   auto lhsOperand = new LiteralInt(0);
   auto operatore = new Operator(OpSymb::addition);
   auto rhsOperand = new LiteralInt(987);
-  auto binaryExpression = new BinaryExpr(lhsOperand, operatore, rhsOperand);
+  auto arithmeticExpression = new ArithmeticExpr(lhsOperand, operatore, rhsOperand);
   // clone the logical expression
-  auto clonedBinaryExprAsNode = binaryExpression->clone(keepOriginalId);
-  auto clonedBinaryExprCasted = clonedBinaryExprAsNode->castTo<BinaryExpr>();
+  auto clonedArithmeticExprAsNode = arithmeticExpression->clone(keepOriginalId);
+  auto clonedArithmeticExprCasted = clonedArithmeticExprAsNode->castTo<ArithmeticExpr>();
   // test if all fields belonging to Node class were copied
-  assertNodeAttributes(keepOriginalId, binaryExpression, clonedBinaryExprAsNode);
+  assertNodeAttributes(keepOriginalId, arithmeticExpression, clonedArithmeticExprAsNode);
 
   // make changes to the left operand and check whether clone changes too
   lhsOperand->castTo<LiteralInt>()->setValue(111);
-  ASSERT_EQ(binaryExpression->getLeft()->castTo<LiteralInt>()->getValue(), 111);
-  ASSERT_EQ(clonedBinaryExprCasted->getLeft()->castTo<LiteralInt>()->getValue(), 0);
+  ASSERT_EQ(arithmeticExpression->getLeft()->castTo<LiteralInt>()->getValue(), 111);
+  ASSERT_EQ(clonedArithmeticExprCasted->getLeft()->castTo<LiteralInt>()->getValue(), 0);
 
   // make changes to the right operand and check whether clone changes too
   rhsOperand->castTo<LiteralInt>()->setValue(42);
-  ASSERT_EQ(binaryExpression->getRight()->castTo<LiteralInt>()->getValue(), 42);
-  ASSERT_EQ(clonedBinaryExprCasted->getRight()->castTo<LiteralInt>()->getValue(), 987);
+  ASSERT_EQ(arithmeticExpression->getRight()->castTo<LiteralInt>()->getValue(), 42);
+  ASSERT_EQ(clonedArithmeticExprCasted->getRight()->castTo<LiteralInt>()->getValue(), 987);
 
   // make changes to the operator and check whether clone changes too
   *operatore = *new Operator(OpSymb::multiplication);
-  ASSERT_TRUE(binaryExpression->getOp()->castTo<Operator>()->equals(OpSymb::multiplication));
-  ASSERT_TRUE(clonedBinaryExprCasted->getOp()->equals(OpSymb::addition));
+  ASSERT_TRUE(arithmeticExpression->getOp()->castTo<Operator>()->equals(OpSymb::multiplication));
+  ASSERT_TRUE(clonedArithmeticExprCasted->getOp()->equals(OpSymb::addition));
 }
 
 TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_LogicalExpr) {  /* NOLINT */

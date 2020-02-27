@@ -1,5 +1,5 @@
 #include <fstream>
-#include "BinaryExpr.h"
+#include "ArithmeticExpr.h"
 #include "Block.h"
 #include "Call.h"
 #include "CallExternal.h"
@@ -98,15 +98,15 @@ TEST(JsonOutputTest, VarDecl) { /* NOLINT */
   EXPECT_EQ(var->toJson(), j);
 }
 
-TEST(JsonOutputTest, BinaryExpr) { /* NOLINT */
+TEST(JsonOutputTest, ArithmeticExpr) { /* NOLINT */
   auto lintValue = 22;
   auto varIdentifier = "x";
   // x + 22;
-  auto *bexp = new BinaryExpr(
+  auto *aexp = new ArithmeticExpr(
       new Variable(varIdentifier),
-      OpSymb::BinaryOp::addition,
+      OpSymb::ArithmeticOp::addition,
       new LiteralInt(lintValue));
-  json j = {{"type", "BinaryExpr"},
+  json j = {{"type", "ArithmeticExpr"},
             {"leftOperand", {
                 {"type", "Variable"},
                 {"identifier", varIdentifier}}},
@@ -115,7 +115,7 @@ TEST(JsonOutputTest, BinaryExpr) { /* NOLINT */
                 {"type", "LiteralInt"},
                 {"value", lintValue}
             }}};
-  EXPECT_EQ(bexp->toJson(), j);
+  EXPECT_EQ(aexp->toJson(), j);
 }
 
 TEST(JsonOutputTest, Return) { /* NOLINT */
@@ -184,7 +184,7 @@ TEST(JsonOutputTest, LogicalExpr) { /* NOLINT */
 }
 
 TEST(JsonOutputTest, Operator) { /* NOLINT */
-  auto opSub = new Operator(OpSymb::BinaryOp::subtraction);
+  auto opSub = new Operator(OpSymb::ArithmeticOp::subtraction);
   EXPECT_EQ(opSub->getOperatorString(), OpSymb::getTextRepr(OpSymb::subtraction));
 
 
@@ -227,7 +227,7 @@ TEST(JsonOutputTest, Call) {/* NOLINT */
       new Function("computeSecret",
                    {new FunctionParameter("int", new Variable("inputA"))},
                    {new Return(
-                       new BinaryExpr(
+                       new ArithmeticExpr(
                            new Variable("inputA"),
                            OpSymb::multiplication,
                            new LiteralInt(32)))
@@ -250,9 +250,9 @@ TEST(JsonOutputTest, Function) { /* NOLINT */
       new FunctionParameter("int", new Variable("z"))
   }, {
                                new Return(
-                                   new BinaryExpr(
-                                       new BinaryExpr(
-                                           new BinaryExpr(
+                                   new ArithmeticExpr(
+                                       new ArithmeticExpr(
+                                           new ArithmeticExpr(
                                                new Variable("a"),
                                                OpSymb::addition,
                                                new LiteralInt(221)),
@@ -315,7 +315,7 @@ TEST(JsonOutputTest, If) { /* NOLINT */
 
   std::vector<AbstractStatement *> elseStatement = {
       new VarAssignm("isValid", new LiteralBool(false)),
-      new VarAssignm("c", new BinaryExpr(new Variable("a"), OpSymb::subtraction, new Variable("z")))
+      new VarAssignm("c", new ArithmeticExpr(new Variable("a"), OpSymb::subtraction, new Variable("z")))
   };
   auto *elseBranch = new Block(elseStatement);
   auto ifStmt = new If(condition, thenBranch, elseBranch);
@@ -335,7 +335,7 @@ TEST(JsonOutputTest, While) { /* NOLINT */
   std::vector<AbstractStatement *> blockStatements;
   blockStatements.emplace_back(
       new VarAssignm("z",
-                     new BinaryExpr(
+                     new ArithmeticExpr(
                          new Variable("z"),
                          OpSymb::multiplication,
                          new Variable("i"))));

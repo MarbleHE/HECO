@@ -6,7 +6,7 @@
 #include "TestUtils.h"
 #include "AstTestingGenerator.h"
 #include "Function.h"
-#include "BinaryExpr.h"
+#include "ArithmeticExpr.h"
 #include "VarAssignm.h"
 
 /// Check to ensure that the AST testing generator works as expected.
@@ -43,7 +43,7 @@ TEST(MultRewriteTest, rewriteSuccessfulSubsequentStatementsMultiplication) { /* 
   auto func = dynamic_cast<Function *>(ast.getRootNode());
   auto prodDecl = dynamic_cast<VarDecl *>(func->getBodyStatements().at(0));
   auto expectedProdDecl = new VarDecl("prod", Types::INT,
-                                      new BinaryExpr(
+                                      new ArithmeticExpr(
                                           new Variable("inputC"),
                                           OpSymb::multiplication,
                                           new Variable("inputB")));
@@ -51,7 +51,7 @@ TEST(MultRewriteTest, rewriteSuccessfulSubsequentStatementsMultiplication) { /* 
 
   //  prod = prod * inputA;
   auto prodAssignm = dynamic_cast<VarAssignm *>(func->getBodyStatements().at(1));
-  auto expectedProdAssignm = new VarAssignm("prod", new BinaryExpr(
+  auto expectedProdAssignm = new VarAssignm("prod", new ArithmeticExpr(
       new Variable("prod"),
       OpSymb::multiplication,
       new Variable("inputA")));
@@ -78,10 +78,10 @@ TEST(MultRewriteTest, rewriteSuccessfulSingleStatementMultiplication) { /* NOLIN
   auto func = dynamic_cast<Function *>(ast.getRootNode());
   auto prodDecl = dynamic_cast<VarDecl *>(func->getBodyStatements().at(0));
   auto expectedProdDecl = new VarDecl("prod", Types::INT,
-                                      new BinaryExpr(
+                                      new ArithmeticExpr(
                                           new Variable("inputC"),
                                           OpSymb::multiplication,
-                                          new BinaryExpr(
+                                          new ArithmeticExpr(
                                               new Variable("inputB"),
                                               OpSymb::multiplication,
                                               new Variable("inputA"))));
@@ -155,7 +155,7 @@ TEST(MultRewriteTest, rewriteNotApplicable) { /* NOLINT */
   auto func = dynamic_cast<Function *>(ast.getRootNode());
   auto prodDecl = dynamic_cast<VarDecl *>(func->getBodyStatements().at(0));
   auto expectedProdDecl = new VarDecl("prod", Types::INT,
-                                      new BinaryExpr(
+                                      new ArithmeticExpr(
                                           new Variable("inputA"),
                                           OpSymb::multiplication,
                                           new Variable("inputB")));
@@ -163,7 +163,7 @@ TEST(MultRewriteTest, rewriteNotApplicable) { /* NOLINT */
 
   //  int prod2 = prod * inputC;
   prodDecl = dynamic_cast<VarDecl *>(func->getBodyStatements().at(1));
-  expectedProdDecl = new VarDecl("prod2", Types::INT, new BinaryExpr(
+  expectedProdDecl = new VarDecl("prod2", Types::INT, new ArithmeticExpr(
       new Variable("prod"),
       OpSymb::multiplication,
       new Variable("inputC")));
