@@ -1,6 +1,8 @@
 #include "AbstractNode.h"
 #include "Operator.h"
 #include "MultiplicativeDepthCalculator.h"
+
+#include <utility>
 #include "LogicalExpr.h"
 
 int MultiplicativeDepthCalculator::depthValue(AbstractNode *n) {
@@ -11,8 +13,16 @@ int MultiplicativeDepthCalculator::depthValue(AbstractNode *n) {
   return 0;
 }
 
+int MultiplicativeDepthCalculator::getInitialDepthOrNull(const std::string &nodeId) {
+  try {
+    return initialMultiplicativeDepths.at(nodeId);
+  } catch (std::out_of_range &exception) {
+    return 0;
+  }
+}
+
 int MultiplicativeDepthCalculator::getMultDepthL(AbstractNode *n) {
-  // check if we have calculated the multiplicative depth for previously
+  // check if we have calculated the multiplicative depth previously
   if (!multiplicativeDepths.empty()) {
     auto it = multiplicativeDepths.find(n->getUniqueNodeId());
     if (it!=multiplicativeDepths.end())
@@ -26,7 +36,7 @@ int MultiplicativeDepthCalculator::getMultDepthL(AbstractNode *n) {
   // trivial case: v is a leaf node, i.e., does not have any parent node
   // |pred(v)| = 0 => multiplicative depth = 0
   if (nextNodesToConsider.empty()) {
-    multiplicativeDepths[n->getUniqueNodeId()] = 0;
+    multiplicativeDepths[n->getUniqueNodeId()] = 0 + getInitialDepthOrNull(n->getUniqueNodeId());
     return 0;
   }
 
@@ -37,7 +47,7 @@ int MultiplicativeDepthCalculator::getMultDepthL(AbstractNode *n) {
     // compute the multiplicative depth of parent u
     uDepth = getMultDepthL(u);
     // store the computed depth
-    multiplicativeDepths[u->getUniqueNodeId()] = uDepth;
+    multiplicativeDepths[u->getUniqueNodeId()] = uDepth + getInitialDepthOrNull(u->getUniqueNodeId());
     max = std::max(uDepth + depthValue(n), max);
   }
 
@@ -100,3 +110,11 @@ int MultiplicativeDepthCalculator::getMaximumMultiplicativeDepth() {
 MultiplicativeDepthCalculator::MultiplicativeDepthCalculator(Ast &ast) {
   precomputeMultDepths(ast);
 }
+
+MultiplicativeDepthCalculator::MultiplicativeDepthCalculator(Ast &ast,
+                                                             std::unordered_map<std::string, int> initialDepths)
+    : initialMultiplicativeDepths(std::move(initialDepths)) {
+  precomputeMultDepths(ast);
+}
+
+

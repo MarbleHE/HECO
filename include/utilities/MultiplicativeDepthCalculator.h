@@ -1,17 +1,25 @@
-#ifndef AST_OPTIMIZER_MULTIPLICATIVEDEPTHCALCULATOR_H
-#define AST_OPTIMIZER_MULTIPLICATIVEDEPTHCALCULATOR_H
+#ifndef AST_OPTIMIZER_INCLUDE_UTILITIES_MULTIPLICATIVEDEPTHCALCULATOR_H_
+#define AST_OPTIMIZER_INCLUDE_UTILITIES_MULTIPLICATIVEDEPTHCALCULATOR_H_
 
-#include <map>
+#include <unordered_map>
 #include <string>
+#include "Ast.h"
 
 class MultiplicativeDepthCalculator {
  private:
+  // A map of the computed multiplicative depths.
   std::unordered_map<std::string, int> multiplicativeDepths{};
+  // A map of the computed reverse multiplicative depths.
   std::unordered_map<std::string, int> multiplicativeDepthsReversed{};
+  // The maximum multiplicative depth, determined using the computed values in multiplicativeDepths.
   int maximumMultiplicativeDepth{};
+  // A map of the initial multiplicative depths.
+  std::unordered_map<std::string, int> initialMultiplicativeDepths{};
 
  public:
   explicit MultiplicativeDepthCalculator(Ast &ast);
+
+  MultiplicativeDepthCalculator(Ast &ast, std::unordered_map<std::string, int> initialDepths);
 
   /// Calculates the multiplicative depth based on the definition given in
   /// [Aubry, P. et al.: Faster Homomorphic Encryption Is Not Enough: Improved Heuristic for Multiplicative Depth
@@ -33,6 +41,8 @@ class MultiplicativeDepthCalculator {
   void precomputeMultDepths(Ast &ast);
 
   int getMaximumMultiplicativeDepth();
+
+  int getInitialDepthOrNull(const std::string &uniqueNodeId);
 };
 
-#endif //AST_OPTIMIZER_MULTIPLICATIVEDEPTHCALCULATOR_H
+#endif //AST_OPTIMIZER_INCLUDE_UTILITIES_MULTIPLICATIVEDEPTHCALCULATOR_H_
