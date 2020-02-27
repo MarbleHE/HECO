@@ -20,8 +20,10 @@
 std::vector<AbstractNode *> rewriteMultiInputGateToBinaryGatesChain(
     std::vector<AbstractNode *> inputNodes, OpSymb::LogCompOp gateType);
 
-std::vector<AbstractNode *> rewriteMultiInputBinaryExpressionToBinaryExpressionGatesChain(
-    std::vector<AbstractExpr *> inputs,
-    std::variant<OpSymb::ArithmeticOp, OpSymb::LogCompOp, OpSymb::UnaryOp> operatorType);
+AbstractNode *createMultDepthBalancedTreeFromInputs(std::vector<AbstractExpr *> inputs,
+                                                    std::variant<OpSymb::ArithmeticOp,
+                                                                 OpSymb::LogCompOp,
+                                                                 OpSymb::UnaryOp> operatorType,
+                                                    std::unordered_map<std::string, int> multiplicativeDepths);
 
 #endif //AST_OPTIMIZER_INCLUDE_UTILITIES_NODEUTILS_H_

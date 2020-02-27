@@ -518,7 +518,8 @@ TEST_F(CompileTimeExpressionSimplifierFixture, varAssignm_assignmentToParameter)
   EXPECT_EQ(ctes.evaluatedNodes.size(), 0);
 }
 
-TEST_F(CompileTimeExpressionSimplifierFixture, varAssignm_symbolicTerms_circularDependency) { /* NOLINT */
+TEST_F(CompileTimeExpressionSimplifierFixture,
+       varAssignm_symbolicTerms_circularDependency__EXPECTED_FAIL) { /* NOLINT */
   //  -- input --
   // int Foo(plaintext_int x, plaintext_int y) {
   //  x = y+3
@@ -1324,7 +1325,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   EXPECT_EQ(ctes.evaluatedNodes.size(), 0);
 }
 
-TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_partiallyEvaluableOnly) { /* NOLINT */
+TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_partiallyEvaluableOnly__EXPECTED_FAIL) { /* NOLINT */
   //  -- input --
   // int f(plaintext_int x) {
   //  int y = 42;
