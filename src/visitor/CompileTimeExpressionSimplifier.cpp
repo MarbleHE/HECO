@@ -1,5 +1,6 @@
 #include <unordered_set>
 #include <DotPrinter.h>
+#include <NodeUtils.h>
 #include "CompileTimeExpressionSimplifier.h"
 #include "ArithmeticExpr.h"
 #include "LogicalExpr.h"
@@ -199,12 +200,115 @@ void CompileTimeExpressionSimplifier::handleBinaryExpressions(AbstractNode &arit
   evaluatedNodes.erase(arithmeticExpr.getChildAtIndex(1)); // operator
 }
 
+void CompileTimeExpressionSimplifier::simplifyNestedBinaryExpressions(AbstractExpr *nestedExprRoot) {
+  // check if this is a nested binary expression at all
+  bool containsNestedExpression = false;
+  for (auto &expr : nestedExprRoot->getChildrenNonNull()) {
+    if (dynamic_cast<ArithmeticExpr *>(expr) || dynamic_cast<LogicalExpr *>(expr)) {
+      containsNestedExpression = true;
+      break;
+    }
+  }
+  // stop doing anything in this method if this is not a nested binary expression
+  if (!containsNestedExpression) return;
+
+  // create a function that determines the operator of a binary expression (as we'll need it later again)
+  auto getOperatorSymbolOfBinaryExpression = [](AbstractNode *node) {
+    if (auto rootAsArithmeticExpr = dynamic_cast<ArithmeticExpr *>(node))
+      return rootAsArithmeticExpr->getOp()->getOperatorSymbol();
+    else if (auto rootAsLogicalExpr = dynamic_cast<LogicalExpr *>(node))
+      return rootAsLogicalExpr->getOp()->getOperatorSymbol();
+    else
+      throw std::logic_error("getOperatorSymbolOfBinaryExpression expects an Arithmetic or Logical Expression!");
+  };
+  // memorize the current operator
+  std::variant<OpSymb::ArithmeticOp, OpSymb::LogCompOp, OpSymb::UnaryOp> currentOperator =
+      getOperatorSymbolOfBinaryExpression(nestedExprRoot);
+
+  // enqueue the starting node
+  std::queue<AbstractNode *> nodesInBinaryExpressionsWithSameOperator;
+  std::queue<AbstractNode *> nodesInBinaryExpressionsWithOtherOperator({nestedExprRoot});
+
+  // create a vector for all literals and all symbols
+  std::vector<AbstractExpr *> literalsWithSameOperator;
+  std::vector<AbstractExpr *> variablesWithSameOperator;
+
+  // TODO only consider commutative operators:
+  //  addition, subtraction, multiplication, AND, OR, XOR
+
+  // TODO consider the case where literalsWithSameOperator has only 0 or 1 element -> not simplifiable
+
+  while (!nodesInBinaryExpressionsWithOtherOperator.empty()) {
+    auto firstNodeOfOperatorToBeProcessedNext = nodesInBinaryExpressionsWithOtherOperator.front();
+
+    // clean up
+    currentOperator = getOperatorSymbolOfBinaryExpression(firstNodeOfOperatorToBeProcessedNext);
+    literalsWithSameOperator.clear();
+    variablesWithSameOperator.clear();
+
+    nodesInBinaryExpressionsWithOtherOperator.pop();
+    nodesInBinaryExpressionsWithSameOperator.push(firstNodeOfOperatorToBeProcessedNext);
+
+    // traverse the whole tree
+    while (!nodesInBinaryExpressionsWithSameOperator.empty()) {
+      auto curNode = nodesInBinaryExpressionsWithSameOperator.front();
+      nodesInBinaryExpressionsWithSameOperator.pop();
+      // check the type of all of the current node's children
+      if (auto childAsLiteral = dynamic_cast<AbstractLiteral *>(curNode)) {  // child is a Literal -> memorize it
+        literalsWithSameOperator.push_back(childAsLiteral);
+      } else if (auto childAsVariable = dynamic_cast<Variable *>(curNode)) {  // child is a Variable -> memorize it
+        variablesWithSameOperator.push_back(childAsVariable);
+      } else if (dynamic_cast<ArithmeticExpr *>(curNode)
+          || dynamic_cast<LogicalExpr *>(curNode)) {  // child is arithmetic or logical expr.
+        // if this nested expression has the same operator -> continue
+        if (getOperatorSymbolOfBinaryExpression(curNode)==currentOperator) {
+          // enqueue all of the expression's children
+          for (auto &childOfSubexpression : curNode->getChildrenNonNull())
+            nodesInBinaryExpressionsWithSameOperator.push(childOfSubexpression);
+        } else {  // otherwise simplify up to this part of the tree and continue with new operator
+          // this is important because in an expression like (a + (7 + (12 * (4 + b)))) we don't want to mix up or
+          // change the order of addition and multiplication
+          nodesInBinaryExpressionsWithOtherOperator.push(curNode);
+        }
+      }
+
+    } //end: nodesInBinaryExpressionsWithSameOperator
+
+    // now we have processed all nodes of the current operator symbol
+    // check if simplifying is possible at all, i.e., nested expressions contain more than two literals that can be
+    // combined
+    if (literalsWithSameOperator.size() >= 2) {
+      // create subtree of literals only and evaluate it
+      auto rewrittenSubtree =
+          rewriteMultiInputBinaryExpressionToBinaryExpressionGatesChain(literalsWithSameOperator, currentOperator);
+      auto result =
+          evaluateNodeRecursive(rewrittenSubtree.back(),
+                                std::unordered_map<std::string, AbstractLiteral *>()).front();
+
+      // append the evaluation result (AbstractLiteral) to the map of variables
+      variablesWithSameOperator.push_back(result);
+
+      // create a chained binary expression with all variables and the literal
+      auto exprChain =
+          rewriteMultiInputBinaryExpressionToBinaryExpressionGatesChain(variablesWithSameOperator, currentOperator);
+
+      if (nodesInBinaryExpressionsWithOtherOperator.empty())
+        *nestedExprRoot = *exprChain.back()->castTo<AbstractExpr>();
+      else
+        throw std::logic_error("Not Implemented Exception: Merging of simplified subtrees missing yet!");
+
+    }
+  } //end: nodesInBinaryExpressionsWithOtherOperator
+}
+
 void CompileTimeExpressionSimplifier::visit(ArithmeticExpr &elem) {
+  // continue traversal: visiting the expression's operands and operator
   Visitor::visit(elem);
   handleBinaryExpressions(elem, elem.getLeft(), elem.getRight());
 }
 
 void CompileTimeExpressionSimplifier::visit(LogicalExpr &elem) {
+  // continue traversal: visiting the expression's operands and operator
   Visitor::visit(elem);
   handleBinaryExpressions(elem, elem.getLeft(), elem.getRight());
 }
@@ -456,11 +560,10 @@ void CompileTimeExpressionSimplifier::visit(Return &elem) {
       // mark this statement for deletion as we don't need it anymore
       nodesQueuedForDeletion.push(returnExpr);
     }
+    simplifyNestedBinaryExpressions(returnExpr);
     // clean up temporary results from children in evaluatedNodes map
     evaluatedNodes.erase(returnExpr);
   }
-
-  //
 }
 
 // =====================

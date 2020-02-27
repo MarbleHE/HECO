@@ -519,10 +519,15 @@ TEST_F(CompileTimeExpressionSimplifierFixture, varAssignm_assignmentToParameter)
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, varAssignm_symbolicTerms_circularDependency) { /* NOLINT */
+  //  -- input --
   // int Foo(plaintext_int x, plaintext_int y) {
   //  x = y+3
   //  y = x+2
   //  return x+y
+  // }
+  //  -- expected --
+  // int Foo(plaintext_int x, plaintext_int y) {
+  //  return y+y+8
   // }
   auto function = new Function("Foo");
   auto functionParamList = new ParameterList(
@@ -551,19 +556,14 @@ TEST_F(CompileTimeExpressionSimplifierFixture, varAssignm_symbolicTerms_circular
   // check that the number of nodes decreased
   EXPECT_TRUE(ast.getAllNodes().size() < originalNumberOfNodes);
 
-  DotPrinter().printAsDotFormattedGraph(ast);
-
   // check that simplification generated the expected simplified AST
   auto expectedAst = new ArithmeticExpr(
       new ArithmeticExpr(
           new Variable("y"),
           OpSymb::addition,
-          new LiteralInt(3)),
+          new Variable("y")),
       OpSymb::addition,
-      new ArithmeticExpr(
-          new ArithmeticExpr(new Variable("y"), OpSymb::addition, new LiteralInt(3)),
-          OpSymb::addition,
-          new LiteralInt(2)));
+      new LiteralInt(8));
   EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
   EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedAst));
 
@@ -1354,59 +1354,15 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_partiallyEvaluableO
   // perform the compile-time expression simplification
   ctes.visit(ast);
 
-  // TODO implement handling of evalu
-
-  DotPrinter().printAsDotFormattedGraph(ast);
-
   // check that simplification generated the expected simplified AST
-  auto expectedAst = new ArithmeticExpr(
-      new ArithmeticExpr(
-          new Variable("y"),
-          OpSymb::addition,
-          new LiteralInt(3)),
+  auto expectedReturnVal = new ArithmeticExpr(
+      new Variable("x"),
       OpSymb::addition,
-      new ArithmeticExpr(
-          new ArithmeticExpr(new Variable("y"), OpSymb::addition, new LiteralInt(3)),
-          OpSymb::addition,
-          new LiteralInt(2)));
+      new LiteralInt(71));
   EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
-  EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedAst));
+  EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
 
   // check that at the end of the evaluation traversal, the evalutedNodes map is empty
   EXPECT_EQ(ctes.evaluatedNodes.size(), 0);
 }
 
-
-
-
-
-// TODO(pjattke): implement tests for symbolic terms
-
-// TODO(pjattke): write test for If statement like ifStmt_conditionValueIsUnknown_thenBranchOnlyExists_expectedRewriting
-//   - with additional else branch where variables in then and else branch only partially overlap
-
-// TODO(pjattke): write tests for Call including Function, FunctionParameter, and Block
-//  - Call with Function that is expected to be replaced
-//  - implementation details
-//    - inline Call only if it can be evaluated at compile-time and returns a Literal (e.g., sqrt(5))
-//    - add a few ASTs to test this!
-
-// TODO(pjattke): write tests for While statement
-//  - implementation details
-//    - if condition is always False -> delete the loop
-//    - if condition is always True -> throw an error
-//    - if condition contains encrypted variables -> throw an error
-//    - otherwise: unroll loop
-//  - While with unknown loop condition -> cannot be evaluated
-//  - While with known loop condition -> can be evaluated
-//  - While that has a known loop condition but contains a non-evaluable statements
-
-// TODO(pjattke): write a Statistics visitors that collects:
-//  - total number of AND/XOR gates
-//    - number of multiplications (i.e., AND gates) per level
-//  - multiplicative depth (use existing MultiplicativeDepthCalculator)
-
-// TODO(pjattke): Think about an example where current optimizer returns a worse AST than the original one, considering
-//  the constraints of FHE (e.g., multiplicative depth)
-
-// TODO(pjattke): Play with SEAL as preparatory step for next tasks - work through tutorial examples!
