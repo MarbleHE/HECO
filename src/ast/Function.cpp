@@ -74,7 +74,6 @@ std::string Function::getNodeName() const {
 void Function::setParameterList(ParameterList *paramsVec) {
   if (!children.empty()) this->removeChild(children[0]);
   children[0] = paramsVec;
-
 }
 
 Function *Function::clone(bool keepOriginalUniqueNodeId) {

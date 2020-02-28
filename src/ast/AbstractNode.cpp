@@ -127,7 +127,6 @@ void AbstractNode::removeChild(AbstractNode *child) {
       children.erase(it);
     }
   }
-  //children.erase(it);
 }
 
 void AbstractNode::removeChildBilateral(AbstractNode *child) {
@@ -251,7 +250,17 @@ AbstractNode::~AbstractNode() = default;
 bool AbstractNode::hasReversedEdges() const {
   return isReversed;
 }
+
 AbstractNode *AbstractNode::cloneFlat() {
   //TODO(vianda): Implement cloneFlat
   throw std::runtime_error("Not implemented");
+}
+
+void AbstractNode::replaceChild(AbstractNode *originalChild, AbstractNode *newChildToBeAdded) {
+  // remove edge: "currentNode -> originalChild" and add edge: "currentNode -> newChildToBeAdded"
+  std::replace(children.begin(), children.end(), originalChild, newChildToBeAdded);
+  // remove edge: originalChild -> currentNode
+  originalChild->removeParent(this);
+  // add edge: newChildToBeAdded -> currentNode
+  newChildToBeAdded->addParent(this);
 }

@@ -97,6 +97,8 @@ class AbstractNode {
 
   void removeChildren();
 
+  void replaceChild(AbstractNode *originalChild, AbstractNode *newChildToBeAdded);
+
   [[nodiscard]] int countChildrenNonNull() const;
 
   /// Returns the child at the given index.
