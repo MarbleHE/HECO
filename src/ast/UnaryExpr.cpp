@@ -58,3 +58,12 @@ UnaryExpr *UnaryExpr::clone(bool keepOriginalUniqueNodeId) {
         "Failed to clone UnaryExpr - unexpected Operator encountered! Expected operator of Enum OpSymb::UnaryOp.");
   }
 }
+
+bool UnaryExpr::isEqual(AbstractExpr *other) {
+  if (auto otherAsUExp = dynamic_cast<UnaryExpr *>(other)) {
+    auto sameOperator = this->getOp()->equals(otherAsUExp->getOp()->getOperatorSymbol());
+    auto sameValue = this->getRight()->isEqual(otherAsUExp->getRight());
+    return sameOperator && sameValue;
+  }
+  return false;
+}

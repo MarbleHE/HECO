@@ -24,6 +24,7 @@ class UnaryExpr : public AbstractExpr {
   ~UnaryExpr() override;
 
   void setAttributes(OpSymb::UnaryOp op, AbstractExpr *expr);
+  bool isEqual(AbstractExpr *other) override;
 
  protected:
   bool supportsCircuitMode() override;
