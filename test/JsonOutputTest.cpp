@@ -89,7 +89,11 @@ TEST(JsonOutputTest, VarDecl) { /* NOLINT */
   auto *var = new VarDecl(identifier, initializer);
   json j = {{"type", "VarDecl"},
             {"identifier", identifier},
-            {"datatype", datatype},
+            {"datatype", {
+                {"type", "Datatype"},
+                {"specifier", "int"},
+                {"encrypted", false}
+            }},
             {"initializer", {
                 {"type", "LiteralInt"},
                 {"value", initializer}}
@@ -155,7 +159,11 @@ TEST(JsonOutputTest, UnaryExpr) { /* NOLINT */
 TEST(JsonOutputTest, FunctionParameter) { /* NOLINT */
   auto fp = new FunctionParameter("int", new Variable("y"));
   json j = {{"type", "FunctionParameter"},
-            {"datatype", "plaintext int"},
+            {"datatype", {
+                {"type", "Datatype"},
+                {"specifier", "int"},
+                {"encrypted", false}
+            }},
             {"value", {
                 {"type", "Variable"},
                 {"identifier", "y"}
@@ -196,7 +204,11 @@ TEST(JsonOutputTest, Block) { /* NOLINT */
   json j = {{"type", "Block"},
             {"statements", {{
                                 {"type", "VarDecl"},
-                                {"datatype", "plaintext int"},
+                                {"datatype", {
+                                    {"type", "Datatype"},
+                                    {"specifier", "int"},
+                                    {"encrypted", false}
+                                }},
                                 {"identifier", "width"},
                                 {"initializer", {
                                     {"type", "LiteralInt"},
@@ -215,8 +227,7 @@ TEST(JsonOutputTest, CallExternal) { /* NOLINT */
   std::ifstream f("../../test/expected_output_large/JsonOutputTest/CallExternal.json");
   json j = json::parse(f);
 
-  EXPECT_EQ(callExt->AbstractStatement::toString(), j.dump());
-  EXPECT_EQ(callExt->AbstractExpr::toString(), j.dump());
+  EXPECT_EQ(callExt->toJson().dump(), j.dump());
 }
 
 TEST(JsonOutputTest, Call) {/* NOLINT */
@@ -236,7 +247,7 @@ TEST(JsonOutputTest, Call) {/* NOLINT */
   std::ifstream f("../../test/expected_output_large/JsonOutputTest/Call.json");
   json expected = json::parse(f);
 
-  EXPECT_EQ(call->AbstractExpr::toString(), expected.dump());
+  EXPECT_EQ(call->toJson().dump(), expected.dump());
 }
 
 TEST(JsonOutputTest, Function) { /* NOLINT */

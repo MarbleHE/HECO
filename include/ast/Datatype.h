@@ -33,7 +33,7 @@ class Datatype : public AbstractNode {
 
   explicit operator Types() const;
 
-  [[nodiscard]] std::string toString() const override;
+  [[nodiscard]] std::string toString(bool printChildren) const override;
 
   bool operator==(const Datatype &rhs) const;
 
@@ -46,7 +46,10 @@ class Datatype : public AbstractNode {
   void setEncrypted(bool encrypted);
 
   void accept(Visitor &v) override;
+
   bool supportsCircuitMode() override;
+
+  [[nodiscard]] json toJson() const override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_INCLUDE_UTILITIES_DATATYPE_H_

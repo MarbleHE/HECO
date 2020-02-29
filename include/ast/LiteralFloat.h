@@ -39,7 +39,7 @@ class LiteralFloat : public AbstractLiteral {
 
   void setValue(float val);
 
-  [[nodiscard]] std::string toString() const override;
+  [[nodiscard]] std::string toString(bool printChildren) const override;
 
   bool supportsCircuitMode() override;
 

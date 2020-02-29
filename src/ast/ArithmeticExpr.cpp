@@ -32,3 +32,6 @@ ArithmeticExpr *ArithmeticExpr::clone(bool keepOriginalUniqueNodeId) {
   if (this->isReversed) clonedNode->swapChildrenParents();
   return clonedNode;
 }
+std::string ArithmeticExpr::toString(bool printChildren) const {
+  return AbstractNode::generateOutputString(printChildren, {});
+}

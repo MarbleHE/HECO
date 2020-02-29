@@ -31,7 +31,7 @@ class Block : public AbstractStatement {
 
   bool supportsCircuitMode() override;
 
-  [[nodiscard]] std::string toString() const override;
+  [[nodiscard]] std::string toString(bool printChildren) const override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_BLOCK_H_

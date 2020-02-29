@@ -34,8 +34,7 @@ std::string DotPrinter::getDotFormattedString(AbstractNode *n) {
   // we cannot print the node as DOT graph if it does not support the circuit mode (child/parent relationship)
   if (!n->supportsCircuitMode())
     throw std::logic_error(
-        "Cannot execute 'getDotFormattedString(" + n->getUniqueNodeId() +
-            ") as node is not circuit-compatible!");
+        "Cannot execute 'getDotFormattedString(" + n->getUniqueNodeId() + ") as node is not circuit-compatible!");
 
   std::stringstream finalString;
 

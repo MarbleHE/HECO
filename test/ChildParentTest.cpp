@@ -705,40 +705,40 @@ class VarDeclFixture : public ::testing::Test {
 
 TEST_F(VarDeclFixture, VarDeclStandardConstructor) {  /* NOLINT */
   auto variableDeclaration = new VarDecl(variableIdentifier, datatypeInt, literalInt);
-  ASSERT_EQ(reinterpret_cast<Datatype *>(variableDeclaration->getDatatype())->toString(),
-            Datatype(datatypeInt).toString());
+  ASSERT_EQ(reinterpret_cast<Datatype *>(variableDeclaration->getDatatype())->toString(false),
+            Datatype(datatypeInt).toString(false));
   checkExpected(variableDeclaration, variableDeclaration->getDatatype(), literalInt);
 }
 
 TEST_F(VarDeclFixture, VarDeclIntConstructor) {  /* NOLINT */
   auto variableDeclaration = new VarDecl(variableIdentifier, integerValue);
   ASSERT_EQ(reinterpret_cast<LiteralInt *>(variableDeclaration->getInitializer())->getValue(), integerValue);
-  ASSERT_EQ(reinterpret_cast<Datatype *>(variableDeclaration->getDatatype())->toString(),
-            Datatype(Types::INT).toString());
+  ASSERT_EQ(reinterpret_cast<Datatype *>(variableDeclaration->getDatatype())->toString(false),
+            Datatype(Types::INT).toString(false));
   checkExpected(variableDeclaration, variableDeclaration->getDatatype(), variableDeclaration->getInitializer());
 }
 
 TEST_F(VarDeclFixture, VarDeclBoolConstructor) {  /* NOLINT */
   auto variableDeclaration = new VarDecl(variableIdentifier, boolValue);
   ASSERT_EQ(reinterpret_cast<LiteralBool *>(variableDeclaration->getInitializer())->getValue(), boolValue);
-  ASSERT_EQ(reinterpret_cast<Datatype *>(variableDeclaration->getDatatype())->toString(),
-            Datatype(Types::BOOL).toString());
+  ASSERT_EQ(reinterpret_cast<Datatype *>(variableDeclaration->getDatatype())->toString(false),
+            Datatype(Types::BOOL).toString(false));
   checkExpected(variableDeclaration, variableDeclaration->getDatatype(), variableDeclaration->getInitializer());
 }
 
 TEST_F(VarDeclFixture, VarDeclFloatConstructor) {  /* NOLINT */
   auto variableDeclaration = new VarDecl(variableIdentifier, floatValue);
   ASSERT_EQ(reinterpret_cast<LiteralFloat *>(variableDeclaration->getInitializer())->getValue(), floatValue);
-  ASSERT_EQ(reinterpret_cast<Datatype *>(variableDeclaration->getDatatype())->toString(),
-            Datatype(Types::FLOAT).toString());
+  ASSERT_EQ(reinterpret_cast<Datatype *>(variableDeclaration->getDatatype())->toString(false),
+            Datatype(Types::FLOAT).toString(false));
   checkExpected(variableDeclaration, variableDeclaration->getDatatype(), variableDeclaration->getInitializer());
 }
 
 TEST_F(VarDeclFixture, VarDeclStringConstructor) {  /* NOLINT */
   auto variableDeclaration = new VarDecl(variableIdentifier, stringValue);
   ASSERT_EQ(reinterpret_cast<LiteralString *>(variableDeclaration->getInitializer())->getValue(), stringValue);
-  ASSERT_EQ(reinterpret_cast<Datatype *>(variableDeclaration->getDatatype())->toString(),
-            Datatype(Types::STRING).toString());
+  ASSERT_EQ(reinterpret_cast<Datatype *>(variableDeclaration->getDatatype())->toString(false),
+            Datatype(Types::STRING).toString(false));
   checkExpected(variableDeclaration, variableDeclaration->getDatatype(), variableDeclaration->getInitializer());
 }
 

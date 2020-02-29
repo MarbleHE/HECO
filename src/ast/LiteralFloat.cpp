@@ -61,8 +61,9 @@ void LiteralFloat::setRandomValue(RandLiteralGen &rlg) {
   setValue(rlg.getRandomFloat());
 }
 
-std::string LiteralFloat::toString() const {
-  return std::to_string(this->getValue());
+std::string LiteralFloat::toString(bool printChildren) const {
+  return AbstractNode::generateOutputString(printChildren, {std::to_string(this->getValue())});
+
 }
 
 bool LiteralFloat::supportsCircuitMode() {

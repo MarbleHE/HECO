@@ -97,7 +97,6 @@ class AbstractNode {
 
   void removeChildren();
 
-
   void replaceChild(AbstractNode *originalChild, AbstractNode *newChildToBeAdded);
 
   [[nodiscard]] int countChildrenNonNull() const;
@@ -137,19 +136,19 @@ class AbstractNode {
   /** @} */ // End of parents group
 
   /// Part of the visitor pattern.
-  /// Must be overriden in derived classes and must call v.visit(node)
-  /// This allows the correct overload for the derived class to be called in the visitor
+  /// Must be overriden in derived classes and must call v.visit(node).
+  /// This allows the correct overload for the derived class to be called in the visitor.
   /// \param v Visitor that offers a visit() method
   virtual void accept(Visitor &v) = 0;
 
-  /// Get the JSON representation of the node
+  /// Get the JSON representation of the node including all of its children.
   /// \return JSON representation of the node
   [[nodiscard]] virtual json toJson() const;
 
-  /// Returns a string representation of the node
-  /// String version of this->toJson()
-  /// \return pretty-printed JSON
-  [[nodiscard]] virtual std::string toString() const;
+  /// Returns a string representation of the node, if printChildren is True then calls toString for its children too.
+  /// Hence, toString(false) is equivalent to printing a node's attributes only.
+  /// \return A textual representation of the node.
+  [[nodiscard]] virtual std::string toString(bool printChildren) const;
 
   [[nodiscard]] virtual AbstractNode *cloneFlat();
 
@@ -192,6 +191,7 @@ class AbstractNode {
       throw std::logic_error(outputMsg.str());
     }
   }
+  std::string generateOutputString(bool printChildren, std::vector<std::string> attributes) const;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_NODE_H_

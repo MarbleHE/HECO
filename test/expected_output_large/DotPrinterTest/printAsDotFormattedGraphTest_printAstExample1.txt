@@ -33,7 +33,7 @@ digraph D {
 	Variable_35 [label="Variable_35\n[l(v): 0, r(v): 0]\ndefaultC" shape=oval style=filled fillcolor=white]
 	Operator_37 [label="Operator_37\n[l(v): 0, r(v): 0]\nmult" shape=oval style=filled fillcolor=white]
 	LiteralInt_34 [label="LiteralInt_34\n[l(v): 0, r(v): 0]\n22" shape=oval style=filled fillcolor=white]
-	Datatype_45 [label="Datatype_45\n[l(v): 0, r(v): 0]\nplaintext int" shape=oval style=filled fillcolor=white]
+	Datatype_45 [label="Datatype_45\n[l(v): 0, r(v): 0]\nplaintext, int" shape=oval style=filled fillcolor=white]
 	VarDecl_32 [label="VarDecl_32\n[l(v): 0, r(v): 0]\nprod" shape=rect style=filled fillcolor=white]
 	{ VarDecl_32 } -> { Datatype_33, ArithmeticExpr_30 }
 	ArithmeticExpr_30 [label="ArithmeticExpr_30\n[l(v): 0, r(v): 0]" shape=oval style=filled fillcolor=white]
@@ -49,7 +49,7 @@ digraph D {
 	Variable_23 [label="Variable_23\n[l(v): 0, r(v): 0]\nstdA" shape=oval style=filled fillcolor=white]
 	Operator_25 [label="Operator_25\n[l(v): 0, r(v): 0]\nmult" shape=oval style=filled fillcolor=white]
 	Variable_22 [label="Variable_22\n[l(v): 0, r(v): 0]\nbase" shape=oval style=filled fillcolor=white]
-	Datatype_33 [label="Datatype_33\n[l(v): 0, r(v): 0]\nplaintext int" shape=oval style=filled fillcolor=white]
+	Datatype_33 [label="Datatype_33\n[l(v): 0, r(v): 0]\nplaintext, int" shape=oval style=filled fillcolor=white]
 	VarDecl_20 [label="VarDecl_20\n[l(v): 0, r(v): 0]\nstdB" shape=rect style=filled fillcolor=white]
 	{ VarDecl_20 } -> { Datatype_21, ArithmeticExpr_18 }
 	ArithmeticExpr_18 [label="ArithmeticExpr_18\n[l(v): 0, r(v): 0]" shape=oval style=filled fillcolor=white]
@@ -57,23 +57,23 @@ digraph D {
 	Variable_17 [label="Variable_17\n[l(v): 0, r(v): 0]\nstdA" shape=oval style=filled fillcolor=white]
 	Operator_19 [label="Operator_19\n[l(v): 0, r(v): 0]\nmult" shape=oval style=filled fillcolor=white]
 	LiteralInt_16 [label="LiteralInt_16\n[l(v): 0, r(v): 0]\n2" shape=oval style=filled fillcolor=white]
-	Datatype_21 [label="Datatype_21\n[l(v): 0, r(v): 0]\nplaintext int" shape=oval style=filled fillcolor=white]
+	Datatype_21 [label="Datatype_21\n[l(v): 0, r(v): 0]\nplaintext, int" shape=oval style=filled fillcolor=white]
 	VarDecl_13 [label="VarDecl_13\n[l(v): 0, r(v): 0]\nstdA" shape=rect style=filled fillcolor=white]
 	{ VarDecl_13 } -> { Datatype_14, LiteralInt_15 }
 	LiteralInt_15 [label="LiteralInt_15\n[l(v): 0, r(v): 0]\n512" shape=oval style=filled fillcolor=white]
-	Datatype_14 [label="Datatype_14\n[l(v): 0, r(v): 0]\nplaintext int" shape=oval style=filled fillcolor=white]
+	Datatype_14 [label="Datatype_14\n[l(v): 0, r(v): 0]\nplaintext, int" shape=oval style=filled fillcolor=white]
 	ParameterList_3 [label="ParameterList_3\n[l(v): 0, r(v): 0]" shape=rect style=filled fillcolor=white]
 	{ ParameterList_3 } -> { FunctionParameter_6, FunctionParameter_9, FunctionParameter_12 }
 	FunctionParameter_12 [label="FunctionParameter_12\n[l(v): 0, r(v): 0]" shape=oval style=filled fillcolor=white]
 	{ FunctionParameter_12 } -> { Datatype_10, Variable_11 }
 	Variable_11 [label="Variable_11\n[l(v): 0, r(v): 0]\nuseBase" shape=oval style=filled fillcolor=white]
-	Datatype_10 [label="Datatype_10\n[l(v): 0, r(v): 0]\nplaintext bool" shape=oval style=filled fillcolor=white]
+	Datatype_10 [label="Datatype_10\n[l(v): 0, r(v): 0]\nplaintext, bool" shape=oval style=filled fillcolor=white]
 	FunctionParameter_9 [label="FunctionParameter_9\n[l(v): 0, r(v): 0]" shape=oval style=filled fillcolor=white]
 	{ FunctionParameter_9 } -> { Datatype_7, Variable_8 }
 	Variable_8 [label="Variable_8\n[l(v): 0, r(v): 0]\ndefaultC" shape=oval style=filled fillcolor=white]
-	Datatype_7 [label="Datatype_7\n[l(v): 0, r(v): 0]\nplaintext int" shape=oval style=filled fillcolor=white]
+	Datatype_7 [label="Datatype_7\n[l(v): 0, r(v): 0]\nplaintext, int" shape=oval style=filled fillcolor=white]
 	FunctionParameter_6 [label="FunctionParameter_6\n[l(v): 0, r(v): 0]" shape=oval style=filled fillcolor=white]
 	{ FunctionParameter_6 } -> { Datatype_4, Variable_5 }
 	Variable_5 [label="Variable_5\n[l(v): 0, r(v): 0]\nbase" shape=oval style=filled fillcolor=white]
-	Datatype_4 [label="Datatype_4\n[l(v): 0, r(v): 0]\nplaintext int" shape=oval style=filled fillcolor=white]
+	Datatype_4 [label="Datatype_4\n[l(v): 0, r(v): 0]\nplaintext, int" shape=oval style=filled fillcolor=white]
 }

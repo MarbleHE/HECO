@@ -37,13 +37,14 @@ class LiteralString : public AbstractLiteral {
 
   void setRandomValue(RandLiteralGen &rlg) override;
 
-  [[nodiscard]] std::string toString() const override;
+  [[nodiscard]] std::string toString(bool printChildren) const override;
 
   bool supportsCircuitMode() override;
 
   bool supportsDatatype(Datatype &datatype) override;
 
   bool isEqual(AbstractExpr *other) override;
+
   bool isNull() override;
 };
 

@@ -67,3 +67,6 @@ bool UnaryExpr::isEqual(AbstractExpr *other) {
   }
   return false;
 }
+std::string UnaryExpr::toString(bool printChildren) const {
+  return AbstractNode::generateOutputString(printChildren, {});
+}

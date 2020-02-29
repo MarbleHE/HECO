@@ -11,7 +11,7 @@ json AbstractExpr::toJson() const {
 }
 
 std::ostream &operator<<(std::ostream &outs, const AbstractExpr &obj) {
-  return outs << obj.toString();
+  return outs << obj.toString(false);
 }
 
 LiteralInt *AbstractExpr::createParam(int i) {

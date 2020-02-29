@@ -62,3 +62,6 @@ void If::setAttributes(AbstractExpr *condition, AbstractStatement *thenBranch, A
   removeChildren();
   addChildren({condition, thenBranch, elseBranch}, true);
 }
+std::string If::toString(bool printChildren) const {
+  return AbstractNode::generateOutputString(printChildren, {});
+}

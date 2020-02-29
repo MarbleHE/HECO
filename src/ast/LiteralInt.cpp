@@ -64,8 +64,8 @@ void LiteralInt::setRandomValue(RandLiteralGen &rlg) {
   setValue(rlg.getRandomInt());
 }
 
-std::string LiteralInt::toString() const {
-  return std::to_string(this->getValue());
+std::string LiteralInt::toString(bool printChildren) const {
+  return AbstractNode::generateOutputString(printChildren, {std::to_string(this->getValue())});
 }
 
 bool LiteralInt::supportsCircuitMode() {

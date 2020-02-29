@@ -37,6 +37,8 @@ class VarAssignm : public AbstractStatement {
   int getMaxNumberChildren() override;
 
   void setAttribute(AbstractExpr *assignmentValue);
+
+  std::string toString(bool printChildren) const override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_VARASSIGNM_H_

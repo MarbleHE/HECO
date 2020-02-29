@@ -8,6 +8,7 @@
 #include <deque>
 #include <set>
 #include <utility>
+#include <regex>
 #include "Operator.h"
 #include "AbstractStatement.h"
 #include "AbstractNode.h"
@@ -30,7 +31,18 @@ struct dotVertex {
   AbstractNode *node{};
 
   void buildDetailsString() {
-    details = "\\n" + node->toString();
+    std::string str = node->toString(false);
+    // extract attributes using regex from node's toString representation
+    // regex basically matches everything in parenthesis '(...') where the parenthesis start '('  is preceded by a blank
+    // and ends with a ')' or '):'
+    std::regex r(R"(\s\((.+)\):?)");
+    std::smatch m;
+    std::regex_search(str, m, r);
+    if (m.size()==2) {
+      details = "\\n" + std::string(m[1]); // use first capture group of match
+    } else {
+      details = "";
+    }
   }
 
   std::string getDetails() {

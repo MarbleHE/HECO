@@ -24,13 +24,15 @@ class UnaryExpr : public AbstractExpr {
   ~UnaryExpr() override;
 
   void setAttributes(UnaryOp op, AbstractExpr *expr);
+
+  [[nodiscard]] std::string toString(bool printChildren) const override;
+
   bool isEqual(AbstractExpr *other) override;
 
  protected:
   bool supportsCircuitMode() override;
 
   int getMaxNumberChildren() override;
-
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_UNARYEXPR_H

@@ -62,7 +62,7 @@ class VarDecl : public AbstractStatement {
 
   int getMaxNumberChildren() override;
 
-  [[nodiscard]] std::string toString() const override;
+  [[nodiscard]] std::string toString(bool printChildren) const override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_VARDECL_H_

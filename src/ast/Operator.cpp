@@ -321,8 +321,8 @@ AbstractLiteral *Operator::applyOperator(LiteralInt *lhs, LiteralInt *rhs) {
     throw std::logic_error("applyOperator(LiteralInt* lhs, LiteralInt* rhs) failed!");
 }
 
-std::string Operator::toString() const {
-  return this->getOperatorString();
+std::string Operator::toString(bool printChildren) const {
+  return AbstractNode::generateOutputString(printChildren, {this->getOperatorString()});
 }
 
 Operator::Operator(OpSymbolVariant opVar) {

@@ -70,3 +70,7 @@ VarAssignm *VarAssignm::clone(bool keepOriginalUniqueNodeId) {
   if (this->isReversed) clonedNode->swapChildrenParents();
   return clonedNode;
 }
+
+std::string VarAssignm::toString(bool printChildren) const {
+  return AbstractNode::generateOutputString(printChildren, {this->identifier});
+}

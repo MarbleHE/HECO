@@ -34,6 +34,8 @@ class LogicalExpr : public AbstractBinaryExpr {
   [[nodiscard]] std::string getNodeName() const override;
 
   AbstractNode *cloneFlat() override;
+
+  [[nodiscard]] std::string toString(bool printChildren) const override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_LOGICALEXPR_H_

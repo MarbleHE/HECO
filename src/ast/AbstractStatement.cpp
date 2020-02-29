@@ -21,7 +21,7 @@ bool AbstractStatement::isEqual(AbstractStatement *as) {
 }
 
 std::ostream &operator<<(std::ostream &outs, const AbstractStatement &obj) {
-  return outs << obj.toString();
+  return outs << obj.toString(false);
 }
 
 void to_json(json &j, const AbstractStatement &absStat) {

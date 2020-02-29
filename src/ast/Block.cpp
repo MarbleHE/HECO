@@ -64,14 +64,6 @@ int Block::getMaxNumberChildren() {
 bool Block::supportsCircuitMode() {
   return true;
 }
-std::string Block::toString() const {
-  // return an empty string if there are no children
-  if (getChildrenNonNull().empty()) return "";
-  // otherwise return the concatenated string representation for each of the children
-  std::stringstream ss;
-  for (auto &child : getChildrenNonNull()) {
-    ss << child->toString() << ", ";
-  }
-  ss << "\b\b" << std::endl;
-  return ss.str();
+std::string Block::toString(bool printChildren) const {
+  return AbstractNode::generateOutputString(printChildren, {});
 }

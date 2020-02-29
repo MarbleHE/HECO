@@ -246,7 +246,7 @@ const std::vector<AbstractLiteral *> &EvaluationVisitor::getResults() {
       std::cout << "void" << std::endl;
     } else {
       std::stringstream outStr;
-      for (auto &resultLiteral : *resultValues) outStr << resultLiteral->toString() << std::endl;
+      for (auto &resultLiteral : *resultValues) outStr << resultLiteral->toString(false) << std::endl;
       std::cout << outStr.str();
     }
   }

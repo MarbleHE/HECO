@@ -32,6 +32,8 @@ class If : public AbstractStatement {
   bool supportsCircuitMode() override;
 
   void setAttributes(AbstractExpr *condition, AbstractStatement *thenBranch, AbstractStatement *elseBranch);
+
+  [[nodiscard]] std::string toString(bool printChildren) const override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_IF_H_

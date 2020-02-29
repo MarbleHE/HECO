@@ -3,7 +3,11 @@
   "arguments": [
     {
       "type": "FunctionParameter",
-      "datatype": "plaintext int",
+      "datatype": {
+        "type": "Datatype",
+        "specifier": "int",
+        "encrypted": false
+      },
       "value": {
         "type": "LiteralInt",
         "value": 33
@@ -35,7 +39,11 @@
     "params": [
       {
         "type": "FunctionParameter",
-        "datatype": "plaintext int",
+        "datatype": {
+          "type": "Datatype",
+          "specifier": "int",
+          "encrypted": false
+        },
         "value": {
           "type": "Variable",
           "identifier": "inputA"

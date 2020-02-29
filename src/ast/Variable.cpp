@@ -47,8 +47,8 @@ std::vector<std::string> Variable::getVariableIdentifiers() {
   return {{this->getIdentifier()}};
 }
 
-std::string Variable::toString() const {
-  return this->getIdentifier();
+std::string Variable::toString(bool printChildren) const {
+  return AbstractNode::generateOutputString(printChildren, {this->getIdentifier()});
 }
 
 bool Variable::supportsCircuitMode() {

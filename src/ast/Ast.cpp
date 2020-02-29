@@ -123,7 +123,7 @@ Ast::evaluateAst(const std::unordered_map<std::string, AbstractLiteral *> &param
         ss << "Variable " << var->getIdentifier() << " ";
         ss << "(value: " << *getVarValue(var->getIdentifier()) << ")";
         ss << " is not of type ";
-        ss << fp->getDatatype()->toString() << ".";
+        ss << fp->getDatatype()->toString(false) << ".";
         throw std::invalid_argument(ss.str());
       }
     }

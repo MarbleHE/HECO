@@ -5,12 +5,10 @@
 json Return::toJson() const {
   json j;
   j["type"] = getNodeName();
-
   // build the string of result values
   json array = json::array();
   for (auto &expr : getReturnExpressions()) array.push_back(expr->toJson());
   j["values"] = array;
-
   return j;
 }
 
@@ -65,5 +63,8 @@ Return *Return::clone(bool keepOriginalUniqueNodeId) {
   if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
   if (this->isReversed) clonedNode->swapChildrenParents();
   return clonedNode;
+}
+std::string Return::toString(bool printChildren) const {
+  return AbstractNode::generateOutputString(printChildren, {});
 }
 

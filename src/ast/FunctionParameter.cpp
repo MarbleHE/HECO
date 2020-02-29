@@ -4,7 +4,7 @@ void to_json(json &j, const FunctionParameter &funcParam) {
   j = {
       {"type", funcParam.getNodeName()},
       {"value", funcParam.getValue()->toJson()},
-      {"datatype", funcParam.getDatatype()->toString()}
+      {"datatype", funcParam.getDatatype()->toJson()}
   };
 }
 
@@ -12,7 +12,7 @@ void to_json(json &j, const FunctionParameter *funcParam) {
   j = {
       {"type", funcParam->getNodeName()},
       {"value", funcParam->getValue()->toJson()},
-      {"datatype", funcParam->getDatatype()->toString()}
+      {"datatype", funcParam->getDatatype()->toJson()}
   };
 }
 
@@ -20,7 +20,7 @@ json FunctionParameter::toJson() const {
   json j = {
       {"type", getNodeName()},
       {"value", getValue()->toJson()},
-      {"datatype", getDatatype()->toString()}
+      {"datatype", getDatatype()->toJson()}
   };
   return j;
 }
@@ -80,5 +80,8 @@ bool FunctionParameter::operator==(const FunctionParameter &rhs) const {
 
 bool FunctionParameter::operator!=(const FunctionParameter &rhs) const {
   return !(rhs==*this);
+}
+std::string FunctionParameter::toString(bool printChildren) const {
+  return AbstractNode::generateOutputString(printChildren, {});
 }
 

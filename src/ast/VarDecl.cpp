@@ -9,7 +9,7 @@
 json VarDecl::toJson() const {
   json j = {{"type", getNodeName()},
             {"identifier", identifier},
-            {"datatype", getDatatype() ? getDatatype()->toString() : ""}};
+            {"datatype", getDatatype() ? getDatatype()->toJson() : ""}};
   if (getInitializer()!=nullptr) {
     j["initializer"] = getInitializer()->toJson();
   }
@@ -123,6 +123,6 @@ VarDecl *VarDecl::clone(bool keepOriginalUniqueNodeId) {
   return clonedNode;
 }
 
-std::string VarDecl::toString() const {
-  return identifier;
+std::string VarDecl::toString(bool printChildren) const {
+  return AbstractNode::generateOutputString(printChildren, {identifier});
 }

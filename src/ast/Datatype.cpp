@@ -14,6 +14,14 @@ Datatype::Datatype(const std::string &type) {
   val = result->second;
 }
 
+json Datatype::toJson() const {
+  json j = {{"type", getNodeName()},
+            {"encrypted", isEncrypted()},
+            {"specifier", enumToString(val)}
+  };
+  return j;
+}
+
 std::string Datatype::enumToString(const Types identifiers) {
   static const std::map<Types, std::string> types_to_string = {
       {Types::INT, "int"},
@@ -31,11 +39,9 @@ Datatype::operator Types() const {
   return val;
 }
 
-std::string Datatype::toString() const {
-  std::stringstream ss;
-  ss << (isEncrypted() ? "encrypted" : "plaintext") << " ";
-  ss << enumToString(val);
-  return ss.str();
+std::string Datatype::toString(bool printChildren) const {
+  return AbstractNode::generateOutputString(printChildren,
+                                            {(isEncrypted() ? "encrypted" : "plaintext"), enumToString(val)});
 }
 
 bool Datatype::operator==(const Datatype &rhs) const {

@@ -53,8 +53,8 @@ void LiteralBool::setRandomValue(RandLiteralGen &rlg) {
   setValue(rlg.getRandomBool());
 }
 
-std::string LiteralBool::toString() const {
-  return this->getTextValue();
+std::string LiteralBool::toString(bool printChildren) const {
+  return AbstractNode::generateOutputString(printChildren, {this->getTextValue()});
 }
 
 bool LiteralBool::supportsCircuitMode() {

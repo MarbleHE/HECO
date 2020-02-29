@@ -51,8 +51,8 @@ void LiteralString::setRandomValue(RandLiteralGen &rlg) {
   setValue(rlg.getRandomString(RandLiteralGen::stringDefaultMaxLength));
 }
 
-std::string LiteralString::toString() const {
-  return this->getValue();
+std::string LiteralString::toString(bool printChildren) const {
+  return AbstractNode::generateOutputString(printChildren, {this->getValue()});
 }
 
 bool LiteralString::supportsCircuitMode() {

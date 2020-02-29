@@ -40,12 +40,14 @@ class LiteralInt : public AbstractLiteral {
 
   void setValue(int newValue);
 
-  [[nodiscard]] std::string toString() const override;
+  [[nodiscard]] std::string toString(bool printChildren) const override;
 
   void print(std::ostream &str) const override;
 
   bool supportsCircuitMode() override;
+
   bool isEqual(AbstractExpr *other) override;
+
   bool isNull() override;
 };
 

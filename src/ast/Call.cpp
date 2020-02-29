@@ -54,3 +54,4 @@ AbstractNode *Call::clone(bool keepOriginalUniqueNodeId) {
   if (this->AbstractExpr::isReversed) clonedNode->swapChildrenParents();
   return clonedNode;
 }
+

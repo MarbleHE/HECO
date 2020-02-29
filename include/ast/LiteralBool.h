@@ -35,14 +35,16 @@ class LiteralBool : public AbstractLiteral {
 
   void setValue(bool newValue);
 
-  [[nodiscard]] std::string toString() const override;
+  [[nodiscard]] std::string toString(bool printChildren) const override;
 
   bool supportsDatatype(Datatype &datatype) override;
 
   void print(std::ostream &str) const override;
 
   bool supportsCircuitMode() override;
+
   bool isEqual(AbstractExpr *other) override;
+
   bool isNull() override;
 };
 

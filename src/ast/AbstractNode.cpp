@@ -178,8 +178,30 @@ json AbstractNode::toJson() const {
   return json({"type", "AbstractNode"});
 }
 
-std::string AbstractNode::toString() const {
-  return this->toJson().dump();
+std::string AbstractNode::generateOutputString(bool printChildren, std::vector<std::string> attributes) const {
+  std::string indentationCharacter("\t");
+  std::stringstream ss;
+  // -- example output --
+  // Function (computeX):
+  //   ParameterList:
+  //     FunctionParameter:
+  //       Datatype (int, plaintext)
+  //       Variable (x)
+  ss << getNodeName();
+  if (!attributes.empty()) {
+    ss << " (";
+    for (auto it = attributes.begin(); it!=attributes.end(); ++it) {
+      ss << *it;
+      if ((it + 1)!=attributes.end()) ss << ", ";
+    }
+    ss << ")";
+  }
+  if (printChildren && countChildrenNonNull() > 0) ss << ":";
+  ss << std::endl;
+  if (printChildren) {
+    for (auto &child : getChildrenNonNull()) ss << indentationCharacter << child->toString(printChildren);
+  }
+  return ss.str();
 }
 
 void AbstractNode::setUniqueNodeId(const std::string &newUniqueNodeId) {
@@ -273,4 +295,8 @@ void AbstractNode::removeFromParents(bool removeParentBackreference) {
       p->removeChild(this);
     }
   }
+}
+
+std::string AbstractNode::toString(bool printChildren) const {
+  throw std::runtime_error("toString not implemented for class " + getNodeName() + ".");
 }

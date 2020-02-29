@@ -4,14 +4,22 @@
   "params": [
     {
       "type": "FunctionParameter",
-      "datatype": "plaintext int",
+      "datatype": {
+        "type": "Datatype",
+        "specifier": "int",
+        "encrypted": false
+      },
       "value": {
         "type": "Variable",
         "identifier": "a"
       }
     },
     {
-      "datatype": "plaintext bool",
+      "datatype": {
+        "type": "Datatype",
+        "specifier": "bool",
+        "encrypted": false
+      },
       "type": "FunctionParameter",
       "value": {
         "type": "Variable",
@@ -19,7 +27,11 @@
       }
     },
     {
-      "datatype": "plaintext int",
+      "datatype": {
+        "type": "Datatype",
+        "specifier": "int",
+        "encrypted": false
+      },
       "type": "FunctionParameter",
       "value": {
         "type": "Variable",
