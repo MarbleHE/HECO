@@ -47,12 +47,6 @@ AbstractNode *createMultDepthBalancedTreeFromInputs(std::vector<AbstractExpr *> 
     throw std::invalid_argument("Cannot rewrite a 0-input binary expression!");
   }
 
-  // if there is only one input, we need to add the "neutral element" (i.e., the element that does not change the
-  // semantics of the expression) depending on the given operator
-  if (inputs.size()==1) {
-    inputs.push_back(OpSymb::getIdentityElement(operatorType));
-  }
-
   // sort the inputs based on the calculated depths in increasing order (we want to connect inputs that already have a
   // large multiplicative depth to be placed as high as possible in the tree to not increase depth much more)
   auto getMultiplicativeDepth = [&multiplicativeDepths](AbstractExpr *aexp) -> int {
@@ -94,4 +88,12 @@ AbstractNode *createMultDepthBalancedTreeFromInputs(std::vector<AbstractExpr *> 
 
   // inputs now contains only one AbstractExpr: this is the root of the newly created tree
   return inputs.front();
+}
+
+AbstractNode *createMultDepthBalancedTreeFromInputs(std::vector<AbstractExpr *> inputs,
+                                                    std::variant<OpSymb::ArithmeticOp,
+                                                                 OpSymb::LogCompOp,
+                                                                 OpSymb::UnaryOp> operatorType) {
+  return createMultDepthBalancedTreeFromInputs(inputs, operatorType,
+                                               std::unordered_map<std::string, int>());
 }

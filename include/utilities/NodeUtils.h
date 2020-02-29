@@ -26,4 +26,9 @@ AbstractNode *createMultDepthBalancedTreeFromInputs(std::vector<AbstractExpr *> 
                                                                  OpSymb::UnaryOp> operatorType,
                                                     std::unordered_map<std::string, int> multiplicativeDepths);
 
+AbstractNode *createMultDepthBalancedTreeFromInputs(std::vector<AbstractExpr *> inputs,
+                                                    std::variant<OpSymb::ArithmeticOp,
+                                                                 OpSymb::LogCompOp,
+                                                                 OpSymb::UnaryOp> operatorType);
+
 #endif //AST_OPTIMIZER_INCLUDE_UTILITIES_NODEUTILS_H_
