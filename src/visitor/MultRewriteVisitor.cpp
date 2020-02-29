@@ -10,11 +10,11 @@ void MultRewriteVisitor::visit(Ast &elem) {
 
 void MultRewriteVisitor::visit(ArithmeticExpr &elem) {
   // If current ArithmeticExpr is a multiplication
-  if (elem.getOp()->equals(OpSymb::ArithmeticOp::multiplication)) {
+  if (elem.getOp()->equals(ArithmeticOp::multiplication)) {
     // A. For case "int result = (A * (B * C))" where multiple ArithmeticExpr are in the same statement
     if (auto lStat = curScope->getLastStatement()) {
       // If the statement contains another (higher tree level) ArithmeticExpr (exclude subtree of cur. ArithmeticExpr) ...
-      if (auto lastStat = lStat->contains(new ArithmeticExpr(OpSymb::multiplication), &elem)) {
+      if (auto lastStat = lStat->contains(new ArithmeticExpr(ArithmeticOp::multiplication), &elem)) {
         // ... then swap previousAexpLeftOp with currentAexpRightOp
         ArithmeticExpr::swapOperandsLeftAWithRightB(lastStat, &elem);
         numChanges++;
@@ -26,7 +26,7 @@ void MultRewriteVisitor::visit(ArithmeticExpr &elem) {
     // (-> Check penultimate statement b/c the statement this ArithmeticExpr elem belongs to was already added to curScope)
     if (auto puStat = curScope->getNthLastStatement(2)) {
       // If previous statement in scope contains a ArithmeticExpr multiplication...
-      if (auto lastStat = puStat->contains(new ArithmeticExpr(OpSymb::multiplication), nullptr)) {
+      if (auto lastStat = puStat->contains(new ArithmeticExpr(ArithmeticOp::multiplication), nullptr)) {
         // Retrieve variable identifier from last statement (VarDecl or VarAssignm)
         std::string puVarTargetIdentifier = puStat->getVarTargetIdentifier();
         std::string curAexpTargetIdentifier = curScope->getLastStatement()->getVarTargetIdentifier();

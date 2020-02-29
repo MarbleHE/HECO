@@ -75,16 +75,16 @@ void AstTestingGenerator::genAstRewritingOne(Ast &ast) {
   func->addStatement(new VarDecl("prod", Types::INT,
                                  new ArithmeticExpr(
                                      new Variable("inputA"),
-                                     OpSymb::multiplication,
+                                     ArithmeticOp::multiplication,
                                      new ArithmeticExpr(
                                          new Variable("inputB"),
-                                         OpSymb::multiplication,
+                                         ArithmeticOp::multiplication,
                                          new Variable("inputC")))));
 
   // return prod / 3;
   func->addStatement(new Return(new ArithmeticExpr(
       new Variable("prod"),
-      OpSymb::division,
+      ArithmeticOp::division,
       new LiteralInt(3))));
 
   ast.setRootNode(func);
@@ -106,20 +106,20 @@ void AstTestingGenerator::genAstRewritingTwo(Ast &ast) {
   func->addStatement(new VarDecl("prod", Types::INT,
                                  new ArithmeticExpr(
                                      new Variable("inputA"),
-                                     OpSymb::multiplication,
+                                     ArithmeticOp::multiplication,
                                      new Variable("inputB"))));
 
   // prod = prod * inputC
   func->addStatement(
       new VarAssignm("prod", new ArithmeticExpr(
           new Variable("prod"),
-          OpSymb::multiplication,
+          ArithmeticOp::multiplication,
           new Variable("inputC"))));
 
   // return prod / 3;
   func->addStatement(new Return(new ArithmeticExpr(
       new Variable("prod"),
-      OpSymb::division,
+      ArithmeticOp::division,
       new LiteralInt(3))));
 
   ast.setRootNode(func);
@@ -141,7 +141,7 @@ void AstTestingGenerator::genAstRewritingThree(Ast &ast) {
   func->addStatement(new VarDecl("prod", Types::INT,
                                  new ArithmeticExpr(
                                      new Variable("inputA"),
-                                     OpSymb::multiplication,
+                                     ArithmeticOp::multiplication,
                                      new Variable("inputB"))));
 
   // int rInt = rand()
@@ -152,13 +152,13 @@ void AstTestingGenerator::genAstRewritingThree(Ast &ast) {
   func->addStatement(
       new VarAssignm("prod", new ArithmeticExpr(
           new Variable("prod"),
-          OpSymb::multiplication,
+          ArithmeticOp::multiplication,
           new Variable("inputC"))));
 
   // return prod / 3;
   func->addStatement(new Return(new ArithmeticExpr(
       new Variable("prod"),
-      OpSymb::division,
+      ArithmeticOp::division,
       new LiteralInt(3))));
 
   ast.setRootNode(func);
@@ -180,23 +180,23 @@ void AstTestingGenerator::genAstRewritingFour(Ast &ast) {
   func->addStatement(new VarDecl("prod", Types::INT,
                                  new ArithmeticExpr(
                                      new Variable("inputA"),
-                                     OpSymb::multiplication,
+                                     ArithmeticOp::multiplication,
                                      new Variable("inputB"))));
 
 
   // if (prod > 42) { prod = prod * inputC; }
   func->addStatement(new If(
       new LogicalExpr(
-          new Variable("prod"), OpSymb::greater, new LiteralInt(42)),
+          new Variable("prod"), LogCompOp::greater, new LiteralInt(42)),
       new VarAssignm("prod", new ArithmeticExpr(
           new Variable("prod"),
-          OpSymb::multiplication,
+          ArithmeticOp::multiplication,
           new Variable("inputC")))));
 
   // return prod / 3;
   func->addStatement(new Return(new ArithmeticExpr(
       new Variable("prod"),
-      OpSymb::division,
+      ArithmeticOp::division,
       new LiteralInt(3))));
 
   ast.setRootNode(func);
@@ -218,20 +218,20 @@ void AstTestingGenerator::genAstRewritingFive(Ast &ast) {
   func->addStatement(new VarDecl("prod", Types::INT,
                                  new ArithmeticExpr(
                                      new Variable("inputA"),
-                                     OpSymb::multiplication,
+                                     ArithmeticOp::multiplication,
                                      new Variable("inputB"))));
 
   // argPow = inputC * inputC
   func->addStatement(
       new VarAssignm("argPow", new ArithmeticExpr(
           new Variable("inputC"),
-          OpSymb::multiplication,
+          ArithmeticOp::multiplication,
           new Variable("inputC"))));
 
   // return prod / 3;
   func->addStatement(new Return(new ArithmeticExpr(
       new Variable("prod"),
-      OpSymb::division,
+      ArithmeticOp::division,
       new LiteralInt(3))));
 
   ast.setRootNode(func);
@@ -253,20 +253,20 @@ void AstTestingGenerator::genAstRewritingSix(Ast &ast) {
   func->addStatement(new VarDecl("prod", Types::INT,
                                  new ArithmeticExpr(
                                      new Variable("inputA"),
-                                     OpSymb::multiplication,
+                                     ArithmeticOp::multiplication,
                                      new Variable("inputB"))));
 
   // int prod2 = prod * inputC;
   func->addStatement(new VarDecl("prod2", Types::INT,
                                  new ArithmeticExpr(
                                      new Variable("prod"),
-                                     OpSymb::multiplication,
+                                     ArithmeticOp::multiplication,
                                      new Variable("inputC"))));
 
   // return prod / 3;
   func->addStatement(new Return(new ArithmeticExpr(
       new Variable("prod"),
-      OpSymb::division,
+      ArithmeticOp::division,
       new LiteralInt(3))));
 
   ast.setRootNode(func);
@@ -288,16 +288,16 @@ void AstTestingGenerator::genAstEvalOne(Ast &ast) {
   func->addStatement(new VarDecl("prod", Types::INT,
                                  new ArithmeticExpr(
                                      new Variable("width"),
-                                     OpSymb::multiplication,
+                                     ArithmeticOp::multiplication,
                                      new ArithmeticExpr(
                                          new Variable("length"),
-                                         OpSymb::multiplication,
+                                         ArithmeticOp::multiplication,
                                          new Variable("depth")))));
 
   // return prod / 3;
   func->addStatement(new Return(new ArithmeticExpr(
       new Variable("prod"),
-      OpSymb::division,
+      ArithmeticOp::division,
       new LiteralInt(3))));
 
   ast.setRootNode(func);
@@ -319,23 +319,23 @@ void AstTestingGenerator::genAstEvalTwo(Ast &ast) {
   func->addStatement(new VarDecl("prod", Types::INT,
                                  new ArithmeticExpr(
                                      new Variable("inputA"),
-                                     OpSymb::multiplication,
+                                     ArithmeticOp::multiplication,
                                      new Variable("inputB"))));
 
 
   // if (takeIf) { prod = prod % 12; } else { prod = prod - 21; }
   func->addStatement(new If(
       new LogicalExpr(
-          new Variable("takeIf"), OpSymb::equal, new LiteralBool(true)),
+          new Variable("takeIf"), LogCompOp::equal, new LiteralBool(true)),
       new VarAssignm("prod",
                      new ArithmeticExpr(
                          new Variable("prod"),
-                         OpSymb::modulo,
+                         ArithmeticOp::modulo,
                          new LiteralInt(12))),
       new VarAssignm("prod",
                      new ArithmeticExpr(
                          new Variable("prod"),
-                         OpSymb::subtraction,
+                         ArithmeticOp::subtraction,
                          new LiteralInt(21)))));
 
   // return prod;
@@ -361,30 +361,30 @@ void AstTestingGenerator::genAstEvalThree(Ast &ast) {
   // if (strong == true) { inputA = inputA * 42; } else { inputA = inputA + 42; }
   func->addStatement(new If(
       new LogicalExpr(
-          new Variable("strong"), OpSymb::equal, new LiteralBool(true)),
+          new Variable("strong"), LogCompOp::equal, new LiteralBool(true)),
       new Block(new VarAssignm("inputA",
                                new ArithmeticExpr(
                                    new Variable("inputA"),
-                                   OpSymb::multiplication,
+                                   ArithmeticOp::multiplication,
                                    new LiteralInt(42)))),
       new Block(new VarAssignm("inputA",
                                new ArithmeticExpr(
                                    new Variable("inputA"),
-                                   OpSymb::addition,
+                                   ArithmeticOp::addition,
                                    new LiteralInt(42))))));
 
   // if (negate) { inputA = -inputA }
   func->addStatement(new If(
       new LogicalExpr(
-          new Variable("negate"), OpSymb::equal, new LiteralBool(true)),
+          new Variable("negate"), LogCompOp::equal, new LiteralBool(true)),
       new VarAssignm(
-          "inputA", new UnaryExpr(OpSymb::negation, new Variable("inputA")))));
+          "inputA", new UnaryExpr(UnaryOp::negation, new Variable("inputA")))));
 
   // return inputA >= inputB
   func->addStatement(
       new Return(
           new LogicalExpr(
-              new Variable("inputA"), OpSymb::greaterEqual, new Variable("inputB"))));
+              new Variable("inputA"), LogCompOp::greaterEqual, new Variable("inputB"))));
 
   ast.setRootNode(func);
 }
@@ -402,7 +402,7 @@ void AstTestingGenerator::genAstEvalFour(Ast &ast) {
   func->addStatement(
       new Return(
           new ArithmeticExpr(new Variable("strA"),
-                             OpSymb::addition,
+                             ArithmeticOp::addition,
                              new Variable("strB"))));
 
   ast.setRootNode(func);
@@ -423,7 +423,7 @@ void AstTestingGenerator::genAstEvalFive(Ast &ast) {
       new VarDecl("b", Types::BOOL,
                   new LogicalExpr(
                       new Variable("encryptedA"),
-                      OpSymb::LogCompOp::smaller,
+                      LogCompOp::smaller,
                       new LiteralInt(2))));
 
   // int sum = 0;
@@ -436,13 +436,13 @@ void AstTestingGenerator::genAstEvalFive(Ast &ast) {
           // randInt > 0
           new LogicalExpr(
               new Variable("randInt"),
-              OpSymb::LogCompOp::greater,
+              LogCompOp::greater,
               new LiteralInt(0)),
-          OpSymb::LogCompOp::logicalAnd,
+          LogCompOp::logicalAnd,
           // !b == true
           new LogicalExpr(
-              new UnaryExpr(OpSymb::UnaryOp::negation, new Variable("b")),
-              OpSymb::LogCompOp::equal,
+              new UnaryExpr(UnaryOp::negation, new Variable("b")),
+              LogCompOp::equal,
               new LiteralBool(true))),
       // body: { sum = sum + encryptedB; randInt--; };
       new Block(
@@ -450,12 +450,12 @@ void AstTestingGenerator::genAstEvalFive(Ast &ast) {
               // sum = sum + encryptedB
               new VarAssignm("sum", new ArithmeticExpr(
                   new Variable("sum"),
-                  OpSymb::ArithmeticOp::addition,
+                  ArithmeticOp::addition,
                   new Variable("encryptedB"))),
               // randInt = randInt-1;
               new VarAssignm("randInt", new ArithmeticExpr(
                   new Variable("randInt"),
-                  OpSymb::ArithmeticOp::subtraction,
+                  ArithmeticOp::subtraction,
                   new LiteralInt(1)))})));
 
   // return sum;
@@ -477,7 +477,7 @@ void AstTestingGenerator::genAstEvalSix(Ast &ast) {
                    new Block(new Return(
                        new ArithmeticExpr(
                            new Variable("inputA"),
-                           OpSymb::multiplication,
+                           ArithmeticOp::multiplication,
                            new LiteralInt(32)))
                    )))));
 
@@ -494,13 +494,13 @@ void AstTestingGenerator::genAstEvalSeven(Ast &ast) {
   // -> computeSecret(int inputA) { return inputA * 32 }
   fnc->addStatement(new VarAssignm("result", new Call(
       {new FunctionParameter("int",
-                             new ArithmeticExpr(new LiteralInt(11), OpSymb::addition, new LiteralInt(213)))},
+                             new ArithmeticExpr(new LiteralInt(11), ArithmeticOp::addition, new LiteralInt(213)))},
       new Function("computeSecret",
                    new ParameterList({new FunctionParameter("int", new Variable("inputA"))}),
                    new Block(new Return(
                        new ArithmeticExpr(
                            new Variable("inputA"),
-                           OpSymb::multiplication,
+                           ArithmeticOp::multiplication,
                            new LiteralInt(32)))
                    )))));
 
@@ -522,13 +522,13 @@ void AstTestingGenerator::genAstPrintVisitorOne(Ast &ast) {
   // if ( x > 32 ) { k = x * a; } else { k = (x * a) + 42; }
   func->addStatement(new If(
       // if (x > 32)
-      new LogicalExpr(new Variable("x"), OpSymb::LogCompOp::greater, 32),
+      new LogicalExpr(new Variable("x"), LogCompOp::greater, 32),
       // { k = x * a}
       new Block(
           new VarAssignm("k",
                          new ArithmeticExpr(
                              new Variable("x"),
-                             OpSymb::ArithmeticOp::multiplication,
+                             ArithmeticOp::multiplication,
                              new Variable("a")))),
       // else { k = (x * a) + 42; }
       new Block(
@@ -536,9 +536,9 @@ void AstTestingGenerator::genAstPrintVisitorOne(Ast &ast) {
                          new ArithmeticExpr(
                              new ArithmeticExpr(
                                  new Variable("x"),
-                                 OpSymb::ArithmeticOp::multiplication,
+                                 ArithmeticOp::multiplication,
                                  new Variable("a")),
-                             OpSymb::ArithmeticOp::addition,
+                             ArithmeticOp::addition,
                              42)))));
 
   // return k
@@ -556,7 +556,7 @@ void AstTestingGenerator::genAstPrintVisitorTwo(Ast &ast) {
       new VarDecl("randInt", Types::INT,
                   new ArithmeticExpr(
                       new CallExternal("std::rand"),
-                      OpSymb::ArithmeticOp::modulo,
+                      ArithmeticOp::modulo,
                       new LiteralInt(42))));
 
   // bool b = encryptedA < 2;
@@ -564,7 +564,7 @@ void AstTestingGenerator::genAstPrintVisitorTwo(Ast &ast) {
       new VarDecl("b", Types::BOOL,
                   new LogicalExpr(
                       new Variable("encryptedA"),
-                      OpSymb::LogCompOp::smaller,
+                      LogCompOp::smaller,
                       new LiteralInt(2))));
 
   // int sum = 0;
@@ -577,13 +577,13 @@ void AstTestingGenerator::genAstPrintVisitorTwo(Ast &ast) {
           // randInt > 0
           new LogicalExpr(
               new Variable("randInt"),
-              OpSymb::LogCompOp::greater,
+              LogCompOp::greater,
               new LiteralInt(0)),
-          OpSymb::LogCompOp::logicalAnd,
+          LogCompOp::logicalAnd,
           // !b == true
           new LogicalExpr(
-              new UnaryExpr(OpSymb::UnaryOp::negation, new Variable("b")),
-              OpSymb::LogCompOp::equal,
+              new UnaryExpr(UnaryOp::negation, new Variable("b")),
+              LogCompOp::equal,
               new LiteralBool(true))),
       // { sum = sum + encryptedB; randInt--; };
       new Block(
@@ -591,12 +591,12 @@ void AstTestingGenerator::genAstPrintVisitorTwo(Ast &ast) {
               // sum = sum + encryptedB
               new VarAssignm("sum", new ArithmeticExpr(
                   new Variable("sum"),
-                  OpSymb::ArithmeticOp::addition,
+                  ArithmeticOp::addition,
                   new Variable("encryptedB"))),
               // randInt = randInt-1;
               new VarAssignm("randInt", new ArithmeticExpr(
                   new Variable("randInt"),
-                  OpSymb::ArithmeticOp::subtraction,
+                  ArithmeticOp::subtraction,
                   new LiteralInt(1)))})));
 
   // STRING outStr = "Computation finished!";
@@ -628,20 +628,20 @@ void AstTestingGenerator::genAstMultDepthOne(Ast &ast) {
   func->addStatement(new VarDecl("prod", Types::INT,
                                  new ArithmeticExpr(
                                      new Variable("inputA"),
-                                     OpSymb::multiplication,
+                                     ArithmeticOp::multiplication,
                                      new Variable("inputB"))));
 
   // prod = prod * inputC
   func->addStatement(
       new VarAssignm("prod", new ArithmeticExpr(
           new Variable("prod"),
-          OpSymb::multiplication,
+          ArithmeticOp::multiplication,
           new Variable("inputC"))));
 
   // return prod * 3;
   func->addStatement(new Return(new ArithmeticExpr(
       new Variable("prod"),
-      OpSymb::multiplication,
+      ArithmeticOp::multiplication,
       new LiteralInt(3))));
 
   ast.setRootNode(func);
@@ -667,7 +667,7 @@ void AstTestingGenerator::genAstMultDepthTwo(Ast &ast) {
       new VarDecl("stdB",
                   Types::INT,
                   new ArithmeticExpr(new LiteralInt(2),
-                                     OpSymb::multiplication,
+                                     ArithmeticOp::multiplication,
                                      new Variable("stdA"))));
 
   // int prod = [base * stdA] + [base * stdB];
@@ -675,12 +675,12 @@ void AstTestingGenerator::genAstMultDepthTwo(Ast &ast) {
                                  new ArithmeticExpr(
                                      new ArithmeticExpr(
                                          new Variable("base"),
-                                         OpSymb::multiplication,
+                                         ArithmeticOp::multiplication,
                                          new Variable("stdA")),
-                                     OpSymb::addition,
+                                     ArithmeticOp::addition,
                                      new ArithmeticExpr(
                                          new Variable("base"),
-                                         OpSymb::multiplication,
+                                         ArithmeticOp::multiplication,
                                          new Variable("stdB")))));
 
   // int condVal = [22 * defaultC] + [base * useBase];
@@ -689,12 +689,12 @@ void AstTestingGenerator::genAstMultDepthTwo(Ast &ast) {
                   new ArithmeticExpr(
                       new ArithmeticExpr(
                           new LiteralInt(22),
-                          OpSymb::multiplication,
+                          ArithmeticOp::multiplication,
                           new Variable("defaultC")),
-                      OpSymb::addition,
+                      ArithmeticOp::addition,
                       new ArithmeticExpr(
                           new Variable("base"),
-                          OpSymb::multiplication,
+                          ArithmeticOp::multiplication,
                           new Variable("useBase")))));
 
   // return [prod > 1024] && [condVal >= 112];
@@ -702,12 +702,12 @@ void AstTestingGenerator::genAstMultDepthTwo(Ast &ast) {
       new LogicalExpr(
           new LogicalExpr(
               new Variable("prod"),
-              OpSymb::greater,
+              LogCompOp::greater,
               new LiteralInt(1024)),
-          OpSymb::logicalAnd,
+          LogCompOp::logicalAnd,
           new LogicalExpr(
               new Variable("condVal"),
-              OpSymb::greaterEqual,
+              LogCompOp::greaterEqual,
               new LiteralInt(112)))));
 
   ast.setRootNode(func);
@@ -744,16 +744,16 @@ void AstTestingGenerator::genAstRewritingSimple(Ast &ast) {
           new LogicalExpr(
               new LogicalExpr(
                   new Variable("a_1^(1)"),
-                  OpSymb::logicalAnd,
+                  LogCompOp::logicalAnd,
                   new Variable("a_2^(1)")),
-              OpSymb::logicalXor,
+              LogCompOp::logicalXor,
               new LogicalExpr(
                   new Variable("a_1^(2)"),
-                  OpSymb::logicalAnd,
+                  LogCompOp::logicalAnd,
                   new Variable("a_2^(2)"))),
-          OpSymb::logicalXor,
+          LogCompOp::logicalXor,
           new Variable("y_1")),
-      OpSymb::logicalAnd,
+      LogCompOp::logicalAnd,
       new Variable("a_t")));
   ast.setRootNode(returnStatement);
 }
@@ -796,27 +796,27 @@ void AstTestingGenerator::genAstRewritingSimpleExtended(Ast &ast) {
               new LogicalExpr(
                   new LogicalExpr(
                       new Variable("a_1^(1)_left"),
-                      OpSymb::logicalAnd,
+                      LogCompOp::logicalAnd,
                       new Variable("a_1^(1)_right")),
-                  OpSymb::logicalAnd,
+                  LogCompOp::logicalAnd,
                   new LogicalExpr(
                       new Variable("a_2^(1)_left"),
-                      OpSymb::logicalXor,
+                      LogCompOp::logicalXor,
                       new Variable("a_2^(1)_right"))),
-              OpSymb::logicalXor,
+              LogCompOp::logicalXor,
               new LogicalExpr(
                   new LogicalExpr(
                       new Variable("a_1^(2)_left"),
-                      OpSymb::logicalAnd,
+                      LogCompOp::logicalAnd,
                       new Variable("a_1^(2)_right")),
-                  OpSymb::logicalAnd,
+                  LogCompOp::logicalAnd,
                   new LogicalExpr(
                       new Variable("a_2^(2)_left"),
-                      OpSymb::logicalXor,
+                      LogCompOp::logicalXor,
                       new Variable("a_2^(2)_right")))),
-          OpSymb::logicalXor,
+          LogCompOp::logicalXor,
           new Variable("y_1")),
-      OpSymb::logicalAnd,
+      LogCompOp::logicalAnd,
       new Variable("a_t")));
   ast.setRootNode(returnStatement);
 }
@@ -834,37 +834,37 @@ void AstTestingGenerator::genAstRewritingMultiInputY(Ast &ast) {
                       new LogicalExpr(
                           new LogicalExpr(
                               new Variable("a_1^(1)_left"),
-                              OpSymb::logicalAnd,
+                              LogCompOp::logicalAnd,
                               new Variable("a_1^(1)_right")),
-                          OpSymb::logicalAnd,
+                          LogCompOp::logicalAnd,
                           new LogicalExpr(
                               new Variable("a_2^(1)_left"),
-                              OpSymb::logicalXor,
+                              LogCompOp::logicalXor,
                               new Variable("a_2^(1)_right"))),
 
-                      OpSymb::logicalXor,
+                      LogCompOp::logicalXor,
 
                       new LogicalExpr(
                           new LogicalExpr(
                               new Variable("a_1^(2)_left"),
-                              OpSymb::logicalAnd,
+                              LogCompOp::logicalAnd,
                               new Variable("a_1^(2)_right")),
-                          OpSymb::logicalAnd,
+                          LogCompOp::logicalAnd,
                           new LogicalExpr(
                               new Variable("a_2^(2)_left"),
-                              OpSymb::logicalXor,
+                              LogCompOp::logicalXor,
                               new Variable("a_2^(2)_right")))),
 
-                  OpSymb::logicalXor,
+                  LogCompOp::logicalXor,
                   new Variable("y_1")),
 
-              OpSymb::logicalXor,
+              LogCompOp::logicalXor,
               new Variable("y_2")),
 
-          OpSymb::logicalXor,
+          LogCompOp::logicalXor,
           new Variable("y_3")),
 
-      OpSymb::logicalAnd,
+      LogCompOp::logicalAnd,
       new Variable("a_t")));
 
   ast.setRootNode(returnStatement);
@@ -885,40 +885,40 @@ void AstTestingGenerator::genAstRewritingTwoDepth2ConesButSingleVNode(Ast &ast) 
                           new LogicalExpr(
                               new LogicalExpr(
                                   new Variable("a_1^(1)_left"),
-                                  OpSymb::logicalAnd,
+                                  LogCompOp::logicalAnd,
                                   new Variable("a_1^(1)_right")),
-                              OpSymb::logicalAnd,
+                              LogCompOp::logicalAnd,
                               new LogicalExpr(
                                   new Variable("a_2^(1)_left"),
-                                  OpSymb::logicalXor,
+                                  LogCompOp::logicalXor,
                                   new Variable("a_2^(1)_right"))),
 
-                          OpSymb::logicalXor,
+                          LogCompOp::logicalXor,
 
                           new LogicalExpr(
                               new LogicalExpr(
                                   new Variable("a_1^(2)_left"),
-                                  OpSymb::logicalAnd,
+                                  LogCompOp::logicalAnd,
                                   new Variable("a_1^(2)_right")),
-                              OpSymb::logicalAnd,
+                              LogCompOp::logicalAnd,
                               new LogicalExpr(
                                   new Variable("a_2^(2)_left"),
-                                  OpSymb::logicalXor,
+                                  LogCompOp::logicalXor,
                                   new Variable("a_2^(2)_right")))),
 
-                      OpSymb::logicalXor,
+                      LogCompOp::logicalXor,
                       new Variable("y_1")),    // level 5
 
-                  OpSymb::logicalXor,
+                  LogCompOp::logicalXor,
                   new Variable("y_2")),
 
-              OpSymb::logicalXor,
+              LogCompOp::logicalXor,
               new Variable("y_3")),  // level 3
 
-          OpSymb::logicalXor,
+          LogCompOp::logicalXor,
           new Variable("y_4")),
 
-      OpSymb::logicalAnd,
+      LogCompOp::logicalAnd,
       new Variable("a_t"));  // level 1
 
   auto *returnStatement = new Return(new LogicalExpr(
@@ -934,29 +934,29 @@ void AstTestingGenerator::genAstRewritingTwoDepth2ConesButSingleVNode(Ast &ast) 
                           new LogicalExpr(
                               new LogicalExpr(
                                   new Variable("b_1^(1)_left"),
-                                  OpSymb::logicalXor,
+                                  LogCompOp::logicalXor,
                                   aCone),                 // <-- insertion point of cone 'aCone' from previous stmt
-                              OpSymb::logicalAnd,
+                              LogCompOp::logicalAnd,
                               new Variable("b_1^(1)_right")),
-                          OpSymb::logicalAnd,
+                          LogCompOp::logicalAnd,
                           new LogicalExpr(
                               new Variable("b_2^(1)_left"),
-                              OpSymb::logicalXor,
+                              LogCompOp::logicalXor,
                               new Variable("b_2^(1)_right"))),
 
-                      OpSymb::logicalXor,
+                      LogCompOp::logicalXor,
                       new Variable("z_1")),
 
-                  OpSymb::logicalXor,
+                  LogCompOp::logicalXor,
                   new Variable("z_2")),
 
-              OpSymb::logicalXor,
+              LogCompOp::logicalXor,
               new Variable("z_3")),
 
-          OpSymb::logicalXor,
+          LogCompOp::logicalXor,
           new Variable("z_4")),
 
-      OpSymb::logicalAnd,
+      LogCompOp::logicalAnd,
       new Variable("b_t")));
 
   ast.setRootNode(returnStatement);
@@ -987,10 +987,10 @@ void AstTestingGenerator::genAstForSecretTaintingWithMultipleNonSequentialStatem
   funcComputeTotal->addStatement(
       new VarDecl("qualifiesForSpecialDiscount",
                   new Datatype(Types::BOOL, false),
-                  new UnaryExpr(OpSymb::negation,
+                  new UnaryExpr(UnaryOp::negation,
                                 new LogicalExpr(
                                     new Variable("subtotal"),
-                                    OpSymb::smaller,
+                                    LogCompOp::smaller,
                                     new LiteralInt(1'000)))));
 
   // float computeDiscountOnServer(secret_bool qualifiesForSpecialDiscount) {
@@ -1008,14 +1008,14 @@ void AstTestingGenerator::genAstForSecretTaintingWithMultipleNonSequentialStatem
       new Block(new VarAssignm("discountRate",
                                new ArithmeticExpr(
                                    new ArithmeticExpr(new Variable("qualifiesForSpecialDiscount"),
-                                                      OpSymb::multiplication,
+                                                      ArithmeticOp::multiplication,
                                                       new LiteralFloat(0.90)),
-                                   OpSymb::addition,
+                                   ArithmeticOp::addition,
                                    new ArithmeticExpr(
                                        new ArithmeticExpr(new LiteralInt(1),
-                                                          OpSymb::subtraction,
+                                                          ArithmeticOp::subtraction,
                                                           new Variable("qualifiesForSpecialDiscount")),
-                                       OpSymb::multiplication,
+                                       ArithmeticOp::multiplication,
                                        new LiteralFloat(0.98))))));
 
   //  return discountRate;
@@ -1031,6 +1031,6 @@ void AstTestingGenerator::genAstForSecretTaintingWithMultipleNonSequentialStatem
   // return subtotal*discount;
   funcComputeTotal->addStatement(
       new Return(new ArithmeticExpr(new Variable("subtotal"),
-                                    OpSymb::multiplication,
+                                    ArithmeticOp::multiplication,
                                     new Variable("discount"))));
 }

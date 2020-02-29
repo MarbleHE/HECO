@@ -17,16 +17,16 @@ class ArithmeticExpr : public AbstractBinaryExpr {
   /// \param left is the left operand of the expression.
   /// \param op is the operator of the expression.
   /// \param right is the right operand of the expression.
-  ArithmeticExpr(AbstractExpr *left, OpSymb::ArithmeticOp op, AbstractExpr *right);
+  ArithmeticExpr(AbstractExpr *left, ArithmeticOp op, AbstractExpr *right);
 
   ArithmeticExpr();
 
-  explicit ArithmeticExpr(OpSymb::ArithmeticOp op);
+  explicit ArithmeticExpr(ArithmeticOp op);
 
   ArithmeticExpr *clone(bool keepOriginalUniqueNodeId) override;
 
   template<typename T1, typename T2>
-  ArithmeticExpr(T1 left, OpSymb::ArithmeticOp op, T2 right) {
+  ArithmeticExpr(T1 left, ArithmeticOp op, T2 right) {
     setAttributes(AbstractExpr::createParam(left), new Operator(op), AbstractExpr::createParam(right));
   }
 

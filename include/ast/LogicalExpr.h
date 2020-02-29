@@ -15,10 +15,10 @@ class LogicalExpr : public AbstractBinaryExpr {
  public:
   LogicalExpr();
 
-  explicit LogicalExpr(OpSymb::LogCompOp op);
+  explicit LogicalExpr(LogCompOp op);
 
   template<typename T1, typename T2>
-  LogicalExpr(T1 left, OpSymb::LogCompOp op, T2 right) {
+  LogicalExpr(T1 left, LogCompOp op, T2 right) {
     setAttributes(AbstractExpr::createParam(left), new Operator(op), AbstractExpr::createParam(right));
   }
 

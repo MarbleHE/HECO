@@ -13,7 +13,7 @@ LogicalExpr::LogicalExpr() {
   setAttributes(nullptr, nullptr, nullptr);
 }
 
-LogicalExpr::LogicalExpr(OpSymb::LogCompOp op) {
+LogicalExpr::LogicalExpr(LogCompOp op) {
   setAttributes(nullptr, new Operator(op), nullptr);
 }
 

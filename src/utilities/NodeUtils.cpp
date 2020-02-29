@@ -5,7 +5,7 @@
 #include "ArithmeticExpr.h"
 
 std::vector<AbstractNode *> rewriteMultiInputGateToBinaryGatesChain(std::vector<AbstractNode *> inputNodes,
-                                                                    OpSymb::LogCompOp gateType) {
+                                                                    LogCompOp gateType) {
   if (inputNodes.empty()) {
     throw std::invalid_argument("Cannot construct a 0-input logical gate!");
   }
@@ -14,7 +14,7 @@ std::vector<AbstractNode *> rewriteMultiInputGateToBinaryGatesChain(std::vector<
   // semantics of the logical expression) depending on the given LogCompOp to inputNodes
   if (inputNodes.size()==1) {
     inputNodes.push_back(OpSymb::getIdentityElement(
-        std::variant<OpSymb::ArithmeticOp, OpSymb::LogCompOp, OpSymb::UnaryOp>(gateType)));
+        OpSymbolVariant(gateType)));
   }
 
   // vector of resulting binary gates
@@ -35,9 +35,7 @@ std::vector<AbstractNode *> rewriteMultiInputGateToBinaryGatesChain(std::vector<
 }
 
 AbstractNode *createMultDepthBalancedTreeFromInputs(std::vector<AbstractExpr *> inputs,
-                                                    std::variant<OpSymb::ArithmeticOp,
-                                                                 OpSymb::LogCompOp,
-                                                                 OpSymb::UnaryOp> operatorType,
+                                                    OpSymbolVariant operatorType,
                                                     std::unordered_map<std::string,
                                                                        int> multiplicativeDepths) {
   // TODO(anyone): This tree is balanced w.r.t. the multiplicative depth but does not take any FHE-specific properties
@@ -59,10 +57,10 @@ AbstractNode *createMultDepthBalancedTreeFromInputs(std::vector<AbstractExpr *> 
 
   // a helper utility to create a new expression
   auto createNewExpr = [&operatorType](AbstractExpr *lhsOperand, AbstractExpr *rhsOperand) -> AbstractExpr * {
-    if (std::holds_alternative<OpSymb::ArithmeticOp>(operatorType)) {
-      return new ArithmeticExpr(lhsOperand, std::get<OpSymb::ArithmeticOp>(operatorType), rhsOperand);
-    } else if (std::holds_alternative<OpSymb::LogCompOp>(operatorType)) {
-      return new LogicalExpr(lhsOperand, std::get<OpSymb::LogCompOp>(operatorType), rhsOperand);
+    if (std::holds_alternative<ArithmeticOp>(operatorType)) {
+      return new ArithmeticExpr(lhsOperand, std::get<ArithmeticOp>(operatorType), rhsOperand);
+    } else if (std::holds_alternative<LogCompOp>(operatorType)) {
+      return new LogicalExpr(lhsOperand, std::get<LogCompOp>(operatorType), rhsOperand);
     } else {
       throw std::logic_error("Unsupported operator encountered in NodeUtils::createMultDepthBalancedTreeFromInputs.");
     }
@@ -91,9 +89,9 @@ AbstractNode *createMultDepthBalancedTreeFromInputs(std::vector<AbstractExpr *> 
 }
 
 AbstractNode *createMultDepthBalancedTreeFromInputs(std::vector<AbstractExpr *> inputs,
-                                                    std::variant<OpSymb::ArithmeticOp,
-                                                                 OpSymb::LogCompOp,
-                                                                 OpSymb::UnaryOp> operatorType) {
+                                                    std::variant<ArithmeticOp,
+                                                                 LogCompOp,
+                                                                 UnaryOp> operatorType) {
   return createMultDepthBalancedTreeFromInputs(inputs, operatorType,
                                                std::unordered_map<std::string, int>());
 }

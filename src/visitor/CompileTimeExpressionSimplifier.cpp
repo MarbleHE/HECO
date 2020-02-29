@@ -361,7 +361,7 @@ void CompileTimeExpressionSimplifier::visit(If &elem) {
       nodesQueuedForDeletion.push_back(elem.getThenBranch());
       // negate the condition and delete the conditions stored value (is now invalid)
       auto condition = elem.getCondition();
-      auto newCondition = new UnaryExpr(OpSymb::negation, condition);
+      auto newCondition = new UnaryExpr(UnaryOp::negation, condition);
       evaluatedNodes.erase(condition);
       // replace the If statement's Then branch by the Else branch
       elem.removeChildBilateral(elem.getThenBranch());
@@ -623,15 +623,15 @@ AbstractExpr *CompileTimeExpressionSimplifier::generateIfDependentValue(Abstract
   if (trueValueIsNull) {
     // factorIsFalse = [1-ifStatementCondition]
     auto factorIsFalse = new ArithmeticExpr(new LiteralInt(1),
-                                            OpSymb::subtraction,
+                                            ArithmeticOp::subtraction,
                                             condition->clone(false)->castTo<AbstractExpr>());
     // case: trueValue == 0 && falseValue != 0 => value is 0 if the condition is True -> return (1-b)*falseValue
-    return new ArithmeticExpr(factorIsFalse, OpSymb::multiplication, falseValue);
+    return new ArithmeticExpr(factorIsFalse, ArithmeticOp::multiplication, falseValue);
   } else if (falseValueIsNull) {
     // factorIsTrue = ifStatementCondition
     auto factorIsTrue = condition->clone(false)->castTo<AbstractExpr>();
     // case: trueValue != 0 && falseValue == 0 => value is 0 if the condition is False -> return condition * trueValue
-    return new ArithmeticExpr(factorIsTrue, OpSymb::multiplication, trueValue);
+    return new ArithmeticExpr(factorIsTrue, ArithmeticOp::multiplication, trueValue);
   }
 
   // default case: trueValue != 0 && falseValue != 0 => value is changed in both branches of If statement
@@ -640,15 +640,15 @@ AbstractExpr *CompileTimeExpressionSimplifier::generateIfDependentValue(Abstract
   auto factorIsTrue = condition->clone(false)->castTo<AbstractExpr>();
   // factorIsFalse = [1-ifStatementCondition]
   auto factorIsFalse = new ArithmeticExpr(new LiteralInt(1),
-                                          OpSymb::subtraction,
+                                          ArithmeticOp::subtraction,
                                           condition->clone(false)->castTo<AbstractExpr>());
   return new ArithmeticExpr(
       new ArithmeticExpr(factorIsTrue,
-                         OpSymb::multiplication,
+                         ArithmeticOp::multiplication,
                          trueValue->clone(false)->castTo<AbstractExpr>()),
-      OpSymb::addition,
+      ArithmeticOp::addition,
       new ArithmeticExpr(factorIsFalse,
-                         OpSymb::multiplication,
+                         ArithmeticOp::multiplication,
                          falseValue->clone(false)->castTo<AbstractExpr>()));
 }
 

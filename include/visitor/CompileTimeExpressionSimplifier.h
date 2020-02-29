@@ -8,10 +8,9 @@
 #include "LiteralFloat.h"
 #include "Variable.h"
 
-typedef std::variant<OpSymb::ArithmeticOp, OpSymb::LogCompOp, OpSymb::UnaryOp> OpSymbolVariant;
 
 struct BinaryExpressionAcc {
-  std::variant<OpSymb::ArithmeticOp, OpSymb::LogCompOp, OpSymb::UnaryOp> operatorSymbol;
+  OpSymbolVariant operatorSymbol;
   std::vector<AbstractExpr *> operands;
   AbstractExpr *lastVisitedSubtree;
   unsigned long numberOfReducedNodes = 0;
@@ -30,19 +29,19 @@ struct BinaryExpressionAcc {
     return numberOfReducedNodes > 0;
   }
 
-  static bool isSupportedOperator(std::variant<OpSymb::ArithmeticOp, OpSymb::LogCompOp, OpSymb::UnaryOp> opSymbol) {
+  static bool isSupportedOperator(OpSymbolVariant opSymbol) {
     // all commutative operators
-    static const std::vector<OpSymb::LogCompOp> arithmeticOps =
-        {OpSymb::logicalAnd, OpSymb::logicalOr, OpSymb::logicalXor};
-    static const std::vector<OpSymb::ArithmeticOp> logicalOps =
-        {OpSymb::addition, OpSymb::multiplication};
+    static const std::vector<LogCompOp> arithmeticOps =
+        {LogCompOp::logicalAnd, LogCompOp::logicalOr, LogCompOp::logicalXor};
+    static const std::vector<ArithmeticOp> logicalOps =
+        {ArithmeticOp::addition, ArithmeticOp::multiplication};
 
     // accumulator approach only works for commutative operators
-    if (std::holds_alternative<OpSymb::ArithmeticOp>(opSymbol)) {
-      return std::find(arithmeticOps.begin(), arithmeticOps.end(), std::get<OpSymb::ArithmeticOp>(opSymbol))
+    if (std::holds_alternative<ArithmeticOp>(opSymbol)) {
+      return std::find(arithmeticOps.begin(), arithmeticOps.end(), std::get<ArithmeticOp>(opSymbol))
           !=arithmeticOps.end();
-    } else if (std::holds_alternative<OpSymb::LogCompOp>(opSymbol)) {
-      return std::find(logicalOps.begin(), logicalOps.end(), std::get<OpSymb::LogCompOp>(opSymbol))
+    } else if (std::holds_alternative<LogCompOp>(opSymbol)) {
+      return std::find(logicalOps.begin(), logicalOps.end(), std::get<LogCompOp>(opSymbol))
           !=logicalOps.end();
     }
     return false;
@@ -90,7 +89,7 @@ struct BinaryExpressionAcc {
     evaluateLiterals();
   }
 
-  void removeOperandsAndSetNewSymbol(std::variant<OpSymb::ArithmeticOp, OpSymb::LogCompOp, OpSymb::UnaryOp> newSymbol) {
+  void removeOperandsAndSetNewSymbol(OpSymbolVariant newSymbol) {
     operands.clear();
     setOperator(newSymbol);
   }
@@ -99,13 +98,11 @@ struct BinaryExpressionAcc {
     return !operands.empty();
   }
 
-  void setOperator(std::variant<OpSymb::ArithmeticOp, OpSymb::LogCompOp, OpSymb::UnaryOp> newOperatorSymbol) {
+  void setOperator(OpSymbolVariant newOperatorSymbol) {
     operatorSymbol = newOperatorSymbol;
   }
 
-  [[nodiscard]] const std::variant<OpSymb::ArithmeticOp,
-                                   OpSymb::LogCompOp,
-                                   OpSymb::UnaryOp> &getOperatorSymbol() const {
+  [[nodiscard]] const OpSymbolVariant &getOperatorSymbol() const {
     return operatorSymbol;
   }
 

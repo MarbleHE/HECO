@@ -8,7 +8,7 @@ json UnaryExpr::toJson() const {
   return j;
 }
 
-UnaryExpr::UnaryExpr(OpSymb::UnaryOp op, AbstractExpr *right) {
+UnaryExpr::UnaryExpr(UnaryOp op, AbstractExpr *right) {
   setAttributes(op, right);
 }
 
@@ -40,7 +40,7 @@ int UnaryExpr::getMaxNumberChildren() {
   return 2;
 }
 
-void UnaryExpr::setAttributes(OpSymb::UnaryOp op, AbstractExpr *expr) {
+void UnaryExpr::setAttributes(UnaryOp op, AbstractExpr *expr) {
   removeChildren();
   auto nodesToBeAdded = std::vector<AbstractNode *>({new Operator(op), expr});
   addChildren(nodesToBeAdded, true);
@@ -48,14 +48,14 @@ void UnaryExpr::setAttributes(OpSymb::UnaryOp op, AbstractExpr *expr) {
 
 UnaryExpr *UnaryExpr::clone(bool keepOriginalUniqueNodeId) {
   try {
-    auto clonedNode = new UnaryExpr(std::get<OpSymb::UnaryOp>(this->getOp()->getOperatorSymbol()),
+    auto clonedNode = new UnaryExpr(std::get<UnaryOp>(this->getOp()->getOperatorSymbol()),
                                     this->getRight()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
     if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
     if (this->isReversed) clonedNode->swapChildrenParents();
     return clonedNode;
   } catch (std::bad_variant_access &exc) {
     throw std::runtime_error(
-        "Failed to clone UnaryExpr - unexpected Operator encountered! Expected operator of Enum OpSymb::UnaryOp.");
+        "Failed to clone UnaryExpr - unexpected Operator encountered! Expected operator of Enum UnaryOp.");
   }
 }
 

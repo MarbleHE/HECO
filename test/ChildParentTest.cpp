@@ -20,7 +20,7 @@ class ArithmeticExprFixture : public ::testing::Test {
   LiteralInt *otherLeft;
   LiteralFloat *right;
   LiteralFloat *otherRight;
-  OpSymb::ArithmeticOp opSymb;
+  ArithmeticOp opSymb;
   Operator *operatorAdd;
 
   ArithmeticExprFixture() {
@@ -28,7 +28,7 @@ class ArithmeticExprFixture : public ::testing::Test {
     otherLeft = new LiteralInt(42);
     right = new LiteralFloat(2.0);
     otherRight = new LiteralFloat(22.4);
-    opSymb = OpSymb::addition;
+    opSymb = ArithmeticOp::addition;
     operatorAdd = new Operator(opSymb);
   }
 };
@@ -293,7 +293,7 @@ class IfStmtFixture : public ::testing::Test {
   AbstractExpr *condition;
   AbstractStatement *thenBranch, *elseBranch;
   IfStmtFixture() {
-    condition = new LogicalExpr(new LiteralInt(33), OpSymb::greater, new CallExternal("computeX"));
+    condition = new LogicalExpr(new LiteralInt(33), LogCompOp::greater, new CallExternal("computeX"));
     thenBranch = new Block(new VarAssignm("a", new LiteralInt(22)));
     elseBranch = new Block(new VarAssignm("a", new LiteralInt(175)));
   }
@@ -419,14 +419,14 @@ class LogicalExprFixture : public ::testing::Test {
   LiteralInt *literalInt;
   LiteralInt *literalIntAnother;
   LiteralBool *literalBool;
-  OpSymb::LogCompOp opSymb;
+  LogCompOp opSymb;
   Operator *operatorGreaterEqual;
 
   LogicalExprFixture() {
     literalInt = new LiteralInt(24);
     literalIntAnother = new LiteralInt(6245);
     literalBool = new LiteralBool(true);
-    opSymb = OpSymb::greaterEqual;
+    opSymb = LogCompOp::greaterEqual;
     operatorGreaterEqual = new Operator(opSymb);
   }
 };
@@ -509,7 +509,7 @@ TEST_F(LogicalExprFixture, LogicalExprAddChildSuccess) {  /* NOLINT */
 }
 
 TEST(ChildParentTests, OperatorHasNoChildrenOrParents) {  /* NOLINT */
-  Operator op(OpSymb::greaterEqual);
+  Operator op(LogCompOp::greaterEqual);
   ASSERT_TRUE(op.getChildren().empty());
   ASSERT_TRUE(op.getParents().empty());
 }
@@ -564,11 +564,11 @@ TEST_F(ReturnStatementFixture, ReturnStatementAddChildSuccess) {  /* NOLINT */
 
 class UnaryExprFixture : public ::testing::Test {
  protected:
-  OpSymb::UnaryOp opSymbNegation;
+  UnaryOp opSymbNegation;
   LiteralBool *literalBoolTrue;
 
   UnaryExprFixture() {
-    opSymbNegation = OpSymb::negation;
+    opSymbNegation = UnaryOp::negation;
     new Operator(opSymbNegation);
     literalBoolTrue = new LiteralBool(true);
   }
@@ -590,12 +590,12 @@ TEST_F(UnaryExprFixture, UnaryExprStandardConstructor) {  /* NOLINT */
 
 TEST_F(UnaryExprFixture, UnaryExprAddChildException_NoEmptyChildSpotAvailable) {  /* NOLINT */
   auto unaryExpr = new UnaryExpr(opSymbNegation, literalBoolTrue);
-  EXPECT_THROW(unaryExpr->addChild(new Operator(OpSymb::negation), false), std::logic_error);
+  EXPECT_THROW(unaryExpr->addChild(new Operator(UnaryOp::negation), false), std::logic_error);
 }
 
 TEST_F(UnaryExprFixture, UnaryExprAddChildException_TooManyChildrenAdded) {  /* NOLINT */
   auto unaryExpr = new UnaryExpr(opSymbNegation, literalBoolTrue);
-  EXPECT_THROW(unaryExpr->addChildren({new Operator(OpSymb::negation), new LiteralBool(false)}, false),
+  EXPECT_THROW(unaryExpr->addChildren({new Operator(UnaryOp::negation), new LiteralBool(false)}, false),
                std::logic_error);
 }
 
@@ -603,7 +603,7 @@ TEST_F(UnaryExprFixture, UnaryExprtion_AddChildSuccess) {  /* NOLINT */
   auto unaryExpr = new UnaryExpr(opSymbNegation, literalBoolTrue);
 
   unaryExpr->removeChild(unaryExpr->getOp());
-  auto newOperator = new Operator(OpSymb::negation);
+  auto newOperator = new Operator(UnaryOp::negation);
   unaryExpr->addChild(newOperator, true);
 
   // children
@@ -750,7 +750,7 @@ TEST(ChildParentTests, Variable) {  /* NOLINT */
 
 TEST(ChildParentTests, While) {  /* NOLINT */
   auto whileStatement =
-      new While(new LogicalExpr(new LiteralInt(32), OpSymb::greaterEqual, new Variable("a")), new Block());
+      new While(new LogicalExpr(new LiteralInt(32), LogCompOp::greaterEqual, new Variable("a")), new Block());
   ASSERT_EQ(whileStatement->getChildren().size(), 0);
   ASSERT_EQ(whileStatement->getParents().size(), 0);
   ASSERT_FALSE(whileStatement->supportsCircuitMode());

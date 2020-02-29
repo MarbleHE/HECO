@@ -44,7 +44,7 @@ struct dotVertex {
   std::string getFillColor() {
     auto lexp = dynamic_cast<LogicalExpr *>(node);
     if (lexp==nullptr) return fillColor;
-    return (lexp->getOp()!=nullptr && lexp->getOp()->equals(OpSymb::logicalAnd)) ? "red" : fillColor;
+    return (lexp->getOp()!=nullptr && lexp->getOp()->equals(LogCompOp::logicalAnd)) ? "red" : fillColor;
   }
 
   std::string getShape() {

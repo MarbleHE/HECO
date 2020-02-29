@@ -7,7 +7,7 @@
 
 class UnaryExpr : public AbstractExpr {
  public:
-  UnaryExpr(OpSymb::UnaryOp op, AbstractExpr *right);
+  UnaryExpr(UnaryOp op, AbstractExpr *right);
 
   UnaryExpr *clone(bool keepOriginalUniqueNodeId) override;
 
@@ -23,7 +23,7 @@ class UnaryExpr : public AbstractExpr {
 
   ~UnaryExpr() override;
 
-  void setAttributes(OpSymb::UnaryOp op, AbstractExpr *expr);
+  void setAttributes(UnaryOp op, AbstractExpr *expr);
   bool isEqual(AbstractExpr *other) override;
 
  protected:

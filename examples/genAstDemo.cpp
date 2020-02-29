@@ -98,13 +98,13 @@ void generateDemoOne(Ast &ast) {
   // if ( x > 32 ) { k = x * a; } else { k = (x * a) + 42; }
   func->addStatement(new If(
       // if (x > 32)
-      new LogicalExpr(new Variable("x"), OpSymb::LogCompOp::greater, 32),
+      new LogicalExpr(new Variable("x"), LogCompOp::greater, 32),
       // { k = x * a}
       new Block(
           new VarAssignm("k",
                          new ArithmeticExpr(
                              new Variable("x"),
-                             OpSymb::ArithmeticOp::multiplication,
+                             ArithmeticOp::multiplication,
                              new Variable("a")))),
       // else { k = (x * a) + 42; }
       new Block(
@@ -112,9 +112,9 @@ void generateDemoOne(Ast &ast) {
                          new ArithmeticExpr(
                              new ArithmeticExpr(
                                  new Variable("x"),
-                                 OpSymb::ArithmeticOp::multiplication,
+                                 ArithmeticOp::multiplication,
                                  new Variable("a")),
-                             OpSymb::ArithmeticOp::addition,
+                             ArithmeticOp::addition,
                              42)))));
 
   // return k
@@ -132,7 +132,7 @@ void generateDemoTwo(Ast &ast) {
       new VarDecl("randInt", Types::INT,
                   new ArithmeticExpr(
                       new CallExternal("std::rand"),
-                      OpSymb::ArithmeticOp::modulo,
+                      ArithmeticOp::modulo,
                       new LiteralInt(42))));
 
   // bool b = encryptedA < 2;
@@ -140,7 +140,7 @@ void generateDemoTwo(Ast &ast) {
       new VarDecl("b", Types::BOOL,
                   new LogicalExpr(
                       new Variable("encryptedA"),
-                      OpSymb::LogCompOp::smaller,
+                      LogCompOp::smaller,
                       new LiteralInt(2))));
 
   // int sum = 0;
@@ -153,13 +153,13 @@ void generateDemoTwo(Ast &ast) {
           // randInt > 0
           new LogicalExpr(
               new Variable("randInt"),
-              OpSymb::LogCompOp::greater,
+              LogCompOp::greater,
               new LiteralInt(0)),
-          OpSymb::LogCompOp::logicalAnd,
+          LogCompOp::logicalAnd,
           // !b == true
           new LogicalExpr(
-              new UnaryExpr(OpSymb::UnaryOp::negation, new Variable("b")),
-              OpSymb::LogCompOp::equal,
+              new UnaryExpr(UnaryOp::negation, new Variable("b")),
+              LogCompOp::equal,
               new LiteralBool(true))),
       // { sum = sum + encryptedB; randInt--; };
       new Block(
@@ -167,12 +167,12 @@ void generateDemoTwo(Ast &ast) {
               // sum = sum + encryptedB
               new VarAssignm("sum", new ArithmeticExpr(
                   new Variable("sum"),
-                  OpSymb::ArithmeticOp::addition,
+                  ArithmeticOp::addition,
                   new Variable("encryptedB"))),
               // randInt = randInt-1;
               new VarAssignm("randInt", new ArithmeticExpr(
                   new Variable("randInt"),
-                  OpSymb::ArithmeticOp::subtraction,
+                  ArithmeticOp::subtraction,
                   new LiteralInt(1)))})));
 
   // STRING outStr = "Computation finished!";
@@ -206,7 +206,7 @@ void generateDemoThree(Ast &ast) {
       new VarDecl("result", Types::INT,
                   new ArithmeticExpr(
                       new Variable("a"),
-                      OpSymb::ArithmeticOp::multiplication,
+                      ArithmeticOp::multiplication,
                       new Variable("b"))));
 
   // result = result * c;
@@ -214,7 +214,7 @@ void generateDemoThree(Ast &ast) {
       new VarAssignm("result",
                      new ArithmeticExpr(
                          new Variable("result"),
-                         OpSymb::ArithmeticOp::multiplication,
+                         ArithmeticOp::multiplication,
                          new Variable("c"))));
 }
 
@@ -236,7 +236,7 @@ void generateDemoFour(Ast &ast) {
       new VarDecl("result", Types::INT,
                   new ArithmeticExpr(
                       new Variable("a"),
-                      OpSymb::ArithmeticOp::multiplication,
+                      ArithmeticOp::multiplication,
                       new Variable("b"))));
 
   // if (4 > 3) {
@@ -246,7 +246,7 @@ void generateDemoFour(Ast &ast) {
       new If(
           new LogicalExpr(
               new LiteralInt(4),
-              OpSymb::LogCompOp::greater,
+              LogCompOp::greater,
               new LiteralInt(3)),
           new VarDecl("exampleVal", 3)));
 
@@ -254,7 +254,7 @@ void generateDemoFour(Ast &ast) {
   func->addStatement(
       new VarAssignm("result",
                      new ArithmeticExpr(new Variable("result"),
-                                        OpSymb::ArithmeticOp::multiplication,
+                                        ArithmeticOp::multiplication,
                                         new Variable("c"))));
 }
 
@@ -266,10 +266,10 @@ void generateDemoFive(Ast &ast) {
   func->addStatement(new VarDecl("result", Types::INT,
                                  new ArithmeticExpr(
                                      new Variable("inA"),
-                                     OpSymb::multiplication,
+                                     ArithmeticOp::multiplication,
                                      new ArithmeticExpr(
                                          new Variable("inB"),
-                                         OpSymb::multiplication,
+                                         ArithmeticOp::multiplication,
                                          new Variable("inC")))));
 
   // return result;
@@ -284,13 +284,13 @@ void generateDemoSix(Ast &ast) {
   // int result = (inZ * (inA * (inB * inC)));
   func->addStatement(new VarDecl("result", Types::INT,
                                  new ArithmeticExpr(new Variable("inZ"),
-                                                    OpSymb::multiplication,
+                                                    ArithmeticOp::multiplication,
                                                     new ArithmeticExpr(
                                                         new Variable("inA"),
-                                                        OpSymb::multiplication,
+                                                        ArithmeticOp::multiplication,
                                                         new ArithmeticExpr(
                                                             new Variable("inB"),
-                                                            OpSymb::multiplication,
+                                                            ArithmeticOp::multiplication,
                                                             new Variable("inC"))))));
 
 
@@ -309,7 +309,7 @@ void generateDemoSeven(Ast &ast) {
       new VarDecl("sum", Types::INT,
                   new ArithmeticExpr(
                       new Variable("encryptedA"),
-                      OpSymb::ArithmeticOp::addition,
+                      ArithmeticOp::addition,
                       new Variable("encryptedB"))));
 
   // return sum;

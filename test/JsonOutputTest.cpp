@@ -104,13 +104,13 @@ TEST(JsonOutputTest, ArithmeticExpr) { /* NOLINT */
   // x + 22;
   auto *aexp = new ArithmeticExpr(
       new Variable(varIdentifier),
-      OpSymb::ArithmeticOp::addition,
+      ArithmeticOp::addition,
       new LiteralInt(lintValue));
   json j = {{"type", "ArithmeticExpr"},
             {"leftOperand", {
                 {"type", "Variable"},
                 {"identifier", varIdentifier}}},
-            {"operator", OpSymb::getTextRepr(OpSymb::addition)},
+            {"operator", OpSymb::getTextRepr(ArithmeticOp::addition)},
             {"rightOperand", {
                 {"type", "LiteralInt"},
                 {"value", lintValue}
@@ -121,7 +121,7 @@ TEST(JsonOutputTest, ArithmeticExpr) { /* NOLINT */
 TEST(JsonOutputTest, Return) { /* NOLINT */
   // Return x > 22;
   auto ret = new Return(
-      new LogicalExpr(new Variable("x"), OpSymb::greater, 22));
+      new LogicalExpr(new Variable("x"), LogCompOp::greater, 22));
   json j = {
       {"type", "Return"},
       {"values", {{
@@ -142,9 +142,9 @@ TEST(JsonOutputTest, Return) { /* NOLINT */
 TEST(JsonOutputTest, UnaryExpr) { /* NOLINT */
   auto varIdentifier = "x";
   // !x
-  auto unaryExp = new UnaryExpr(OpSymb::UnaryOp::negation, new Variable(varIdentifier));
+  auto unaryExp = new UnaryExpr(UnaryOp::negation, new Variable(varIdentifier));
   json j = {{"type", "UnaryExpr"},
-            {"operator", OpSymb::getTextRepr(OpSymb::negation)},
+            {"operator", OpSymb::getTextRepr(UnaryOp::negation)},
             {"rightOperand", {
                 {"type", "Variable"},
                 {"identifier", varIdentifier}}
@@ -169,13 +169,13 @@ TEST(JsonOutputTest, LogicalExpr) { /* NOLINT */
   // numIterations < maxIterations
   auto *lexp = new LogicalExpr(
       new Variable(varIdentifier),
-      OpSymb::smaller,
+      LogCompOp::smaller,
       new Variable(varIdentifierMax));
   json j = {{"type", "LogicalExpr"},
             {"leftOperand", {
                 {"type", "Variable"},
                 {"identifier", varIdentifier}}},
-            {"operator", OpSymb::getTextRepr(OpSymb::smaller)},
+            {"operator", OpSymb::getTextRepr(LogCompOp::smaller)},
             {"rightOperand", {
                 {"type", "Variable"},
                 {"identifier", varIdentifierMax}
@@ -184,12 +184,11 @@ TEST(JsonOutputTest, LogicalExpr) { /* NOLINT */
 }
 
 TEST(JsonOutputTest, Operator) { /* NOLINT */
-  auto opSub = new Operator(OpSymb::ArithmeticOp::subtraction);
-  EXPECT_EQ(opSub->getOperatorString(), OpSymb::getTextRepr(OpSymb::subtraction));
+  auto opSub = new Operator(ArithmeticOp::subtraction);
+  EXPECT_EQ(opSub->getOperatorString(), OpSymb::getTextRepr(ArithmeticOp::subtraction));
 
-
-  auto opAnd = new Operator(OpSymb::LogCompOp::logicalAnd);
-  EXPECT_EQ(opAnd->getOperatorString(), OpSymb::getTextRepr(OpSymb::logicalAnd));
+  auto opAnd = new Operator(LogCompOp::logicalAnd);
+  EXPECT_EQ(opAnd->getOperatorString(), OpSymb::getTextRepr(LogCompOp::logicalAnd));
 }
 
 TEST(JsonOutputTest, Block) { /* NOLINT */
@@ -229,7 +228,7 @@ TEST(JsonOutputTest, Call) {/* NOLINT */
                    {new Return(
                        new ArithmeticExpr(
                            new Variable("inputA"),
-                           OpSymb::multiplication,
+                           ArithmeticOp::multiplication,
                            new LiteralInt(32)))
                    }));
 
@@ -254,11 +253,11 @@ TEST(JsonOutputTest, Function) { /* NOLINT */
                                        new ArithmeticExpr(
                                            new ArithmeticExpr(
                                                new Variable("a"),
-                                               OpSymb::addition,
+                                               ArithmeticOp::addition,
                                                new LiteralInt(221)),
-                                           OpSymb::multiplication,
+                                           ArithmeticOp::multiplication,
                                            new Variable("b")),
-                                       OpSymb::addition,
+                                       ArithmeticOp::addition,
                                        new Variable("z")))});
 
   // retrieve expected result
@@ -276,12 +275,12 @@ TEST(JsonOutputTest, IfThenOnly) { /* NOLINT */
       new LogicalExpr(
           new LogicalExpr(
               new Variable("b"),
-              OpSymb::equal,
+              LogCompOp::equal,
               new LiteralBool(true)),
-          OpSymb::logicalAnd,
+          LogCompOp::logicalAnd,
           new LogicalExpr(
               new Variable("z"),
-              OpSymb::greaterEqual,
+              LogCompOp::greaterEqual,
               new LiteralInt(17))),
       new VarAssignm("isValid", new LiteralBool(true)));
 
@@ -303,19 +302,19 @@ TEST(JsonOutputTest, If) { /* NOLINT */
   auto condition = new LogicalExpr(
       new LogicalExpr(
           new Variable("b"),
-          OpSymb::equal,
+          LogCompOp::equal,
           new LiteralBool(true)),
-      OpSymb::logicalAnd,
+      LogCompOp::logicalAnd,
       new LogicalExpr(
           new Variable("z"),
-          OpSymb::greaterEqual,
+          LogCompOp::greaterEqual,
           new LiteralInt(17)));
 
   auto thenBranch = new VarAssignm("isValid", new LiteralBool(true));
 
   std::vector<AbstractStatement *> elseStatement = {
       new VarAssignm("isValid", new LiteralBool(false)),
-      new VarAssignm("c", new ArithmeticExpr(new Variable("a"), OpSymb::subtraction, new Variable("z")))
+      new VarAssignm("c", new ArithmeticExpr(new Variable("a"), ArithmeticOp::subtraction, new Variable("z")))
   };
   auto *elseBranch = new Block(elseStatement);
   auto ifStmt = new If(condition, thenBranch, elseBranch);
@@ -337,13 +336,13 @@ TEST(JsonOutputTest, While) { /* NOLINT */
       new VarAssignm("z",
                      new ArithmeticExpr(
                          new Variable("z"),
-                         OpSymb::multiplication,
+                         ArithmeticOp::multiplication,
                          new Variable("i"))));
   blockStatements.emplace_back(
-      new VarAssignm("i", new UnaryExpr(OpSymb::negation, new Variable("i"))));
+      new VarAssignm("i", new UnaryExpr(UnaryOp::negation, new Variable("i"))));
 
   auto whileStmt = new While(
-      new LogicalExpr(new Variable("i"), OpSymb::smaller, new LiteralInt(10)),
+      new LogicalExpr(new Variable("i"), LogCompOp::smaller, new LiteralInt(10)),
       new Block(blockStatements));
 
   // retrieve expected result

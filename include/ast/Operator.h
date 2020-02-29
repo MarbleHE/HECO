@@ -14,20 +14,20 @@
 class Operator : public AbstractNode {
  private:
   std::string operatorString;
-  std::variant<OpSymb::ArithmeticOp, OpSymb::LogCompOp, OpSymb::UnaryOp> operatorSymbol;
+  OpSymbolVariant operatorSymbol;
 
  public:
-  explicit Operator(OpSymb::LogCompOp op);
+  explicit Operator(LogCompOp op);
 
-  explicit Operator(OpSymb::ArithmeticOp op);
+  explicit Operator(ArithmeticOp op);
 
-  explicit Operator(OpSymb::UnaryOp op);
+  explicit Operator(UnaryOp op);
 
-  explicit Operator(std::variant<OpSymb::ArithmeticOp, OpSymb::LogCompOp, OpSymb::UnaryOp> op);
+  explicit Operator(OpSymbolVariant op);
 
   [[nodiscard]] const std::string &getOperatorString() const;
 
-  [[nodiscard]] const std::variant<OpSymb::ArithmeticOp, OpSymb::LogCompOp, OpSymb::UnaryOp> &getOperatorSymbol() const;
+  [[nodiscard]] const OpSymbolVariant &getOperatorSymbol() const;
 
   void accept(Visitor &v) override;
 
@@ -39,7 +39,7 @@ class Operator : public AbstractNode {
 
   bool operator!=(const Operator &rhs) const;
 
-  [[nodiscard]] bool equals(std::variant<OpSymb::ArithmeticOp, OpSymb::LogCompOp, OpSymb::UnaryOp> op) const;
+  [[nodiscard]] bool equals(OpSymbolVariant op) const;
 
   AbstractLiteral *applyOperator(AbstractLiteral *lhs, AbstractLiteral *rhs);
 
@@ -96,11 +96,11 @@ class Operator : public AbstractNode {
 
   Operator *clone(bool keepOriginalUniqueNodeId) override;
 
-  [[nodiscard]] bool equals(OpSymb::ArithmeticOp op) const;
+  [[nodiscard]] bool equals(ArithmeticOp op) const;
 
-  [[nodiscard]] bool equals(OpSymb::LogCompOp op) const;
+  [[nodiscard]] bool equals(LogCompOp op) const;
 
-  [[nodiscard]] bool equals(OpSymb::UnaryOp op) const;
+  [[nodiscard]] bool equals(UnaryOp op) const;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_OPERATOR_H

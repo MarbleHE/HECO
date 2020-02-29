@@ -45,7 +45,7 @@ TEST(MultRewriteTest, rewriteSuccessfulSubsequentStatementsMultiplication) { /* 
   auto expectedProdDecl = new VarDecl("prod", Types::INT,
                                       new ArithmeticExpr(
                                           new Variable("inputC"),
-                                          OpSymb::multiplication,
+                                          ArithmeticOp::multiplication,
                                           new Variable("inputB")));
   EXPECT_TRUE(prodDecl->isEqual(expectedProdDecl));
 
@@ -53,7 +53,7 @@ TEST(MultRewriteTest, rewriteSuccessfulSubsequentStatementsMultiplication) { /* 
   auto prodAssignm = dynamic_cast<VarAssignm *>(func->getBodyStatements().at(1));
   auto expectedProdAssignm = new VarAssignm("prod", new ArithmeticExpr(
       new Variable("prod"),
-      OpSymb::multiplication,
+      ArithmeticOp::multiplication,
       new Variable("inputA")));
   EXPECT_TRUE(prodAssignm->isEqual(expectedProdAssignm));
 }
@@ -79,10 +79,10 @@ TEST(MultRewriteTest, rewriteSuccessfulSingleStatementMultiplication) { /* NOLIN
   auto expectedProdDecl = new VarDecl("prod", Types::INT,
                                       new ArithmeticExpr(
                                           new Variable("inputC"),
-                                          OpSymb::multiplication,
+                                          ArithmeticOp::multiplication,
                                           new ArithmeticExpr(
                                               new Variable("inputB"),
-                                              OpSymb::multiplication,
+                                              ArithmeticOp::multiplication,
                                               new Variable("inputA"))));
 
   EXPECT_TRUE(prodDecl->isEqual(expectedProdDecl));
@@ -156,7 +156,7 @@ TEST(MultRewriteTest, rewriteNotApplicable) { /* NOLINT */
   auto expectedProdDecl = new VarDecl("prod", Types::INT,
                                       new ArithmeticExpr(
                                           new Variable("inputA"),
-                                          OpSymb::multiplication,
+                                          ArithmeticOp::multiplication,
                                           new Variable("inputB")));
   EXPECT_TRUE(prodDecl->isEqual(expectedProdDecl));
 
@@ -164,7 +164,7 @@ TEST(MultRewriteTest, rewriteNotApplicable) { /* NOLINT */
   prodDecl = dynamic_cast<VarDecl *>(func->getBodyStatements().at(1));
   expectedProdDecl = new VarDecl("prod2", Types::INT, new ArithmeticExpr(
       new Variable("prod"),
-      OpSymb::multiplication,
+      ArithmeticOp::multiplication,
       new Variable("inputC")));
   EXPECT_TRUE(prodDecl->isEqual(expectedProdDecl));
 }
