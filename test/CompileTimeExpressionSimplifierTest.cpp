@@ -82,10 +82,11 @@ TEST_F(CompileTimeExpressionSimplifierFixture, arithmeticExpr_variableUnknown_rh
   // perform the compile-time expression simplification
   ctes.visit(ast);
 
-  // check that there is no computed variable
-  EXPECT_TRUE(ctes.variableValues.empty());
+  // check that value of alpha  variable
+  EXPECT_EQ(ctes.variableValues.size(), 1);
   // check that the rhs operand of arithmeticExpr is simplified
-  EXPECT_EQ(arithmeticExpr->getRight()->castTo<LiteralInt>()->getValue(), 28);
+  auto expected = new ArithmeticExpr(new Variable("encryptedA"), OpSymb::multiplication, new LiteralInt(28));
+  EXPECT_TRUE(getVariableValue("alpha")->isEqual(expected));
 
   // check that at the end of the evaluation traversal, the evalutedNodes map is empty
   EXPECT_EQ(ctes.evaluatedNodes.size(), 0);
@@ -158,10 +159,17 @@ TEST_F(CompileTimeExpressionSimplifierFixture, arithmeticExpr_variablesUnknown_n
   ctes.visit(ast);
 
   // check that 'alpha' is computed correctly
-  EXPECT_THROW(getVariableValue("alpha"), std::logic_error);
+  auto expected = new ArithmeticExpr(
+      new Variable("encryptedA"),
+      OpSymb::multiplication,
+      new ArithmeticExpr(new LiteralInt(4),
+                         OpSymb::multiplication,
+                         new Variable("plaintextB")));
+  EXPECT_TRUE(getVariableValue("alpha")->isEqual(expected));
 
-  // check that none of the nodes are deleted
-  EXPECT_EQ(numberOfNodesBeforeSimplification, ast.getAllNodes().size());
+  // check that 9 nodes were deleted and the function's body is empty
+  EXPECT_EQ(numberOfNodesBeforeSimplification - 9, ast.getAllNodes().size());
+  EXPECT_EQ(function->getBodyStatements().size(), 0);
 
   // check that at the end of the evaluation traversal, the evalutedNodes map is empty
   EXPECT_EQ(ctes.evaluatedNodes.size(), 0);
@@ -224,10 +232,11 @@ TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_variableUnknown_lhsOp
   // perform the compile-time expression simplification
   ctes.visit(ast);
 
-  // check that there is no computed variable
-  EXPECT_TRUE(ctes.variableValues.empty());
-  // check that the lhs operand of arithmeticExpr is simplified
-  EXPECT_EQ(logicalExpr->getLeft()->castTo<LiteralBool>()->getValue(), true);
+  // check that alpha's lhs operand is computed
+  auto expected = new LogicalExpr(true, OpSymb::logicalOr, new Variable("encryptedA"));
+  EXPECT_TRUE(getVariableValue("alpha")->isEqual(expected));
+  // check that the variable declaration statement is deleted
+  EXPECT_EQ(function->getBodyStatements().size(), 0);
 
   // check that at the end of the evaluation traversal, the evalutedNodes map is empty
   EXPECT_EQ(ctes.evaluatedNodes.size(), 0);
@@ -298,11 +307,17 @@ TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_variablesUnknown_notA
   // perform the compile-time expression simplification
   ctes.visit(ast);
 
-  // check that 'alpha' is computed correctly
-  EXPECT_THROW(getVariableValue("alpha"), std::logic_error);
+  // check that 'alpha' is computed correctly (could not be computed but is saved)
+  auto expected = new LogicalExpr(
+      new Variable("encryptedA"),
+      OpSymb::logicalAnd,
+      new LogicalExpr(new LiteralBool(true),
+                      OpSymb::logicalXor,
+                      new Variable("encryptedB")));
+  EXPECT_TRUE(getVariableValue("alpha")->isEqual(expected));
 
-  // check that none of the nodes are deleted
-  EXPECT_EQ(numberOfNodesBeforeSimplification, ast.getAllNodes().size());
+  // check that nodes are deleted
+  EXPECT_EQ(numberOfNodesBeforeSimplification - 9, ast.getAllNodes().size());
 
   // check that at the end of the evaluation traversal, the evalutedNodes map is empty
   EXPECT_EQ(ctes.evaluatedNodes.size(), 0);
@@ -327,7 +342,6 @@ TEST_F(CompileTimeExpressionSimplifierFixture, unaryExpr_literalsOnly_fullyEvalu
 
   // check that 'truthValue' is computed correctly
   auto alphaValue = getVariableValue("truthValue");
-
   EXPECT_EQ(alphaValue->castTo<LiteralBool>()->getValue(), true);
 
   // check that the statement VarDecl and its children are deleted
@@ -386,15 +400,15 @@ TEST_F(CompileTimeExpressionSimplifierFixture, unaryExpr_variableUnknown_notEval
   function->setParameterList(functionParamList);
   function->addStatement(varDeclAlpha);
   ast.setRootNode(function);
-  auto numberOfNodesBeforeSimplification = ast.getAllNodes().size();
 
   // perform the compile-time expression simplification
   ctes.visit(ast);
 
-  // check that there is no computed variable
-  EXPECT_TRUE(ctes.variableValues.empty());
-  // check that none of the nodes are deleted
-  EXPECT_EQ(numberOfNodesBeforeSimplification, ast.getAllNodes().size());
+  // check that beta was computed
+  EXPECT_EQ(ctes.variableValues.size(), 1);
+  EXPECT_TRUE(getVariableValue("beta")->isEqual(new UnaryExpr(OpSymb::negation, new Variable("paramA"))));
+  // check that statements is deleted
+  EXPECT_EQ(function->getBodyStatements().size(), 0);
 
   // check that at the end of the evaluation traversal, the evalutedNodes map is empty
   EXPECT_EQ(ctes.evaluatedNodes.size(), 0);
@@ -423,7 +437,6 @@ TEST_F(CompileTimeExpressionSimplifierFixture, varAssignm_variablesKnown_fullyEv
 
   // check that 'alpha' is stored correctly
   auto alphaValue = getVariableValue("alpha");
-
   EXPECT_EQ(alphaValue->castTo<LiteralFloat>()->getValue(), 2.75);
 
   // check that 'beta' is assigned correctly
@@ -519,7 +532,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, varAssignm_assignmentToParameter)
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture,
-       varAssignm_symbolicTerms_circularDependency__EXPECTED_FAIL) { /* NOLINT */
+       varAssignm_symbolicTerms_circularDependency) { /* NOLINT */
   //  -- input --
   // int Foo(plaintext_int x, plaintext_int y) {
   //  x = y+3
@@ -554,17 +567,19 @@ TEST_F(CompileTimeExpressionSimplifierFixture,
   // perform the compile-time expression simplification
   ctes.visit(ast);
 
+  DotPrinter().printAsDotFormattedGraph(ast);
+
   // check that the number of nodes decreased
   EXPECT_TRUE(ast.getAllNodes().size() < originalNumberOfNodes);
 
   // check that simplification generated the expected simplified AST
   auto expectedAst = new ArithmeticExpr(
       new ArithmeticExpr(
-          new Variable("y"),
+          new LiteralInt(8),
           OpSymb::addition,
           new Variable("y")),
       OpSymb::addition,
-      new LiteralInt(8));
+      new Variable("y"));
   EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
   EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedAst));
 
@@ -802,6 +817,8 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
 
   // perform the compile-time expression simplification
   ctes.visit(ast);
+
+  DotPrinter().printAsDotFormattedGraph(ast);
 
   // check that there is only one statement left
   EXPECT_EQ(function->getBodyStatements().size(), 1);
@@ -1325,7 +1342,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   EXPECT_EQ(ctes.evaluatedNodes.size(), 0);
 }
 
-TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_partiallyEvaluableOnly__EXPECTED_FAIL) { /* NOLINT */
+TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_partiallyEvaluableOnly) { /* NOLINT */
   //  -- input --
   // int f(plaintext_int x) {
   //  int y = 42;
@@ -1357,9 +1374,9 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_partiallyEvaluableO
 
   // check that simplification generated the expected simplified AST
   auto expectedReturnVal = new ArithmeticExpr(
-      new Variable("x"),
+      new LiteralInt(71),
       OpSymb::addition,
-      new LiteralInt(71));
+      new Variable("x"));
   EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
   EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
 

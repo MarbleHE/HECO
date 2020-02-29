@@ -1,10 +1,115 @@
 #ifndef AST_OPTIMIZER_INCLUDE_VISITOR_COMPILETIMEEXPRESSIONSIMPLIFIER_H_
 #define AST_OPTIMIZER_INCLUDE_VISITOR_COMPILETIMEEXPRESSIONSIMPLIFIER_H_
 
+#include <NodeUtils.h>
 #include "Visitor.h"
 #include "EvaluationVisitor.h"
 #include "ArithmeticExpr.h"
 #include "LiteralFloat.h"
+#include "Variable.h"
+
+typedef std::variant<OpSymb::ArithmeticOp, OpSymb::LogCompOp, OpSymb::UnaryOp> OpSymbolVariant;
+
+struct BinaryExpressionAcc {
+  std::variant<OpSymb::ArithmeticOp, OpSymb::LogCompOp, OpSymb::UnaryOp> operatorSymbol;
+  std::vector<AbstractExpr *> operands;
+  AbstractExpr *lastVisitedSubtree;
+  unsigned long numberOfReducedNodes = 0;
+
+  void setLastVisitedSubtree(AbstractExpr *node) {
+    lastVisitedSubtree = node;
+  }
+
+  void clear() {
+    operands.clear();
+    lastVisitedSubtree = nullptr;
+    numberOfReducedNodes = 0;
+  }
+
+  bool subtreeIsSimplified() {
+    return numberOfReducedNodes > 0;
+  }
+
+  static bool isSupportedOperator(std::variant<OpSymb::ArithmeticOp, OpSymb::LogCompOp, OpSymb::UnaryOp> opSymbol) {
+    // all commutative operators
+    static const std::vector<OpSymb::LogCompOp> arithmeticOps =
+        {OpSymb::logicalAnd, OpSymb::logicalOr, OpSymb::logicalXor};
+    static const std::vector<OpSymb::ArithmeticOp> logicalOps =
+        {OpSymb::addition, OpSymb::multiplication};
+
+    // accumulator approach only works for commutative operators
+    if (std::holds_alternative<OpSymb::ArithmeticOp>(opSymbol)) {
+      return std::find(arithmeticOps.begin(), arithmeticOps.end(), std::get<OpSymb::ArithmeticOp>(opSymbol))
+          !=arithmeticOps.end();
+    } else if (std::holds_alternative<OpSymb::LogCompOp>(opSymbol)) {
+      return std::find(logicalOps.begin(), logicalOps.end(), std::get<OpSymb::LogCompOp>(opSymbol))
+          !=logicalOps.end();
+    }
+    return false;
+  }
+
+  AbstractNode *getSimplifiedSubtree() {
+    return createMultDepthBalancedTreeFromInputs(operands, operatorSymbol);
+  }
+
+  void evaluateLiterals() {
+    auto isLiteral = [](AbstractExpr *expr) { return dynamic_cast<AbstractLiteral *>(expr)!=nullptr; };
+    if (std::count_if(operands.begin(), operands.end(), isLiteral) > 1) {
+      // update numberOfReducedNodes
+      numberOfReducedNodes = numberOfReducedNodes + (operands.size() - 1);
+
+      // Credits to T.C. from stackoverflow.com (https://stackoverflow.com/a/32155973/3017719)
+      // partition: all elements that should not be moved come before
+      std::vector<AbstractExpr *> extractedLiterals;
+      auto p = std::stable_partition(operands.begin(), operands.end(),
+                                     [&](const auto &x) { return !isLiteral(x); });
+      // range insert with move
+      extractedLiterals.insert(extractedLiterals.end(), std::make_move_iterator(p),
+                               std::make_move_iterator(operands.end()));
+      // erase the moved-from elements
+      operands.erase(p, operands.end());
+
+      // build tree consisting of literals only and evaluate it
+      auto treeRoot = createMultDepthBalancedTreeFromInputs(extractedLiterals, operatorSymbol);
+      EvaluationVisitor ev;
+      treeRoot->accept(ev);
+
+      // add the evaluation result as new literal
+      operands.push_back(ev.getResults().front());
+    }
+  }
+
+  void addOperands(std::vector<AbstractExpr *> operandsToBeAdded) {
+    // we are traversing from leaf to root, hence don't add any binary expressions as they by itself already added
+    // their operands to BinaryExpressionAcc
+    auto it = std::remove_if(operandsToBeAdded.begin(), operandsToBeAdded.end(), [&](AbstractExpr *ae) {
+      return dynamic_cast<AbstractBinaryExpr *>(ae)!=nullptr;
+    });
+    //
+    operands.insert(operands.end(), operandsToBeAdded.begin(), it);
+    evaluateLiterals();
+  }
+
+  void removeOperandsAndSetNewSymbol(std::variant<OpSymb::ArithmeticOp, OpSymb::LogCompOp, OpSymb::UnaryOp> newSymbol) {
+    operands.clear();
+    setOperator(newSymbol);
+  }
+
+  bool containsOperands() {
+    return !operands.empty();
+  }
+
+  void setOperator(std::variant<OpSymb::ArithmeticOp, OpSymb::LogCompOp, OpSymb::UnaryOp> newOperatorSymbol) {
+    operatorSymbol = newOperatorSymbol;
+  }
+
+  [[nodiscard]] const std::variant<OpSymb::ArithmeticOp,
+                                   OpSymb::LogCompOp,
+                                   OpSymb::UnaryOp> &getOperatorSymbol() const {
+    return operatorSymbol;
+  }
+
+};
 
 class CompileTimeExpressionSimplifier : public Visitor {
  private:
@@ -31,7 +136,9 @@ class CompileTimeExpressionSimplifier : public Visitor {
   /// at the end of this simplification traversal.
   /// For example, the expression ArithmeticExpr(LiteralInt(12), OpSymb::add, LiteralInt(42)) will be evaluated to 12+42=54.
   /// The node ArithmeticExpr (and all of its children) will be deleted and replaced by a new node LiteralInt(54).
-  std::queue<AbstractNode *> nodesQueuedForDeletion;
+  std::deque<AbstractNode *> nodesQueuedForDeletion;
+
+  BinaryExpressionAcc binaryExpressionAccumulator;
 
   /** @defgroup visit Methods implementing the logic of the visitor for each node type.
   *  @{
@@ -76,7 +183,9 @@ class CompileTimeExpressionSimplifier : public Visitor {
                                                        std::unordered_map<std::string,
                                                                           AbstractLiteral *> valuesOfVariables);
 
-  void handleBinaryExpressions(AbstractNode &arithmeticExpr, AbstractExpr *leftOperand, AbstractExpr *rightOperand);
+  void handleBinaryExpressions(AbstractBinaryExpr &arithmeticExpr,
+                               AbstractExpr *leftOperand,
+                               AbstractExpr *rightOperand);
 
   void visit(ParameterList &elem) override;
 
@@ -102,6 +211,10 @@ class CompileTimeExpressionSimplifier : public Visitor {
   static AbstractExpr *generateIfDependentValue(AbstractExpr *condition,
                                                 AbstractExpr *trueValue,
                                                 AbstractExpr *falseValue);
+
+  void cleanUpAfterStatementVisited(AbstractNode *stat, bool enqueueStatementForDeletion = false);
+  void addVariableValue(const std::string &variableIdentifier, AbstractExpr *valueAnyLiteralOrAbstractExpr);
+  bool isQueuedForDeletion(const AbstractNode *node);
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_VISITOR_COMPILETIMEEXPRESSIONSIMPLIFIER_H_
