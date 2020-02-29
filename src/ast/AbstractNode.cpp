@@ -79,7 +79,7 @@ void AbstractNode::addChildren(const std::vector<AbstractNode *> &childrenToAdd,
   // these actions are to be performed after a node was added to the list of children
   auto doInsertPostAction = [&](AbstractNode *childToAdd) {
     // if option 'addBackReference' is true, we add a back reference to the child as parent
-    if (addBackReference && childToAdd!=nullptr) childToAdd->addParent(this);
+    if (addBackReference && childToAdd!=nullptr) childToAdd->addParent(this, false);
   };
 
   if (getChildren().empty() || allowsInfiniteNumberOfChildren) {
@@ -98,7 +98,9 @@ void AbstractNode::addChildren(const std::vector<AbstractNode *> &childrenToAdd,
     for (auto it = getChildren().begin(); it!=getChildren().end() && childIdx < childrenToAdd.size(); ++it) {
       if (*it==nullptr) {
         auto childToAdd = childrenToAdd.at(childIdx);
-        setChild(it, childToAdd);
+        auto newIterator = children.insert(it, childToAdd);  // insert the new child
+        // erase the nullptr that was at that position before and now moved to the next spot
+        children.erase(++newIterator);
         doInsertPostAction(childToAdd);
         childIdx++;
       }
@@ -111,14 +113,12 @@ void AbstractNode::addChildren(const std::vector<AbstractNode *> &childrenToAdd,
   }
 }
 
-void AbstractNode::setChild(std::vector<AbstractNode *>::const_iterator position, AbstractNode *value) {
-  auto newIterator = children.insert(position, value);
-  children.erase(++newIterator);
-}
-
-void AbstractNode::removeChild(AbstractNode *child) {
+void AbstractNode::removeChild(AbstractNode *child, bool removeBackreference) {
   auto it = std::find(children.begin(), children.end(), child);
   if (it!=children.end()) {
+    if (removeBackreference) {
+      (*it)->removeParent(this, false);
+    }
     // if the node supports an infinite number of children (getMaxNumberChildren() == -1), we can delete the node from
     // the children list, otherwise we just overwrite the slot with a nullptr
     if (this->getMaxNumberChildren()!=-1) {
@@ -129,14 +129,9 @@ void AbstractNode::removeChild(AbstractNode *child) {
   }
 }
 
-void AbstractNode::removeChildBilateral(AbstractNode *child) {
-  child->removeParent(this);
-  this->removeChild(child);
-}
-
 void AbstractNode::isolateNode() {
-  for (auto &p : getParentsNonNull()) p->removeChild(this);
-  for (auto &c : getChildrenNonNull()) c->removeParent(this);
+  for (auto &p : getParentsNonNull()) p->removeChild(this, false);
+  for (auto &c : getChildrenNonNull()) c->removeParent(this, false);
   removeChildren();
   removeParents();
 }
@@ -145,13 +140,23 @@ const std::vector<AbstractNode *> &AbstractNode::getParents() const {
   return parents;
 }
 
-void AbstractNode::addParent(AbstractNode *n) {
+void AbstractNode::addParent(AbstractNode *n, bool addBackreference) {
   parents.push_back(n);
+  if (addBackreference) {
+    for (auto &p : getParentsNonNull()) {
+      p->addChild(this, false);
+    }
+  }
 }
 
-void AbstractNode::removeParent(AbstractNode *parent) {
-  auto it = std::find(parents.begin(), parents.end(), parent);
-  if (it!=parents.end()) parents.erase(it);
+void AbstractNode::removeParent(AbstractNode *node, bool removeBackreference) {
+  auto it = std::find(parents.begin(), parents.end(), node);
+  if (it!=parents.end()) {
+    if (removeBackreference) {
+      (*it)->removeChild(this, false);
+    }
+    parents.erase(it);
+  }
 }
 
 void AbstractNode::removeChildren() {
@@ -282,18 +287,14 @@ void AbstractNode::replaceChild(AbstractNode *originalChild, AbstractNode *newCh
   // remove edge: "currentNode -> originalChild" and add edge: "currentNode -> newChildToBeAdded"
   std::replace(children.begin(), children.end(), originalChild, newChildToBeAdded);
   // remove edge: originalChild -> currentNode
-  originalChild->removeParent(this);
+  originalChild->removeParent(this, false);
   // add edge: newChildToBeAdded -> currentNode
-  newChildToBeAdded->addParent(this);
+  newChildToBeAdded->addParent(this, false);
 }
 
 void AbstractNode::removeFromParents(bool removeParentBackreference) {
   for (auto &p : getParentsNonNull()) {
-    if (removeParentBackreference) {
-      p->removeChildBilateral(this);
-    } else {
-      p->removeChild(this);
-    }
+    p->removeChild(this, removeParentBackreference);
   }
 }
 

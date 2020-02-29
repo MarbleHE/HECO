@@ -299,7 +299,7 @@ std::vector<AbstractNode *> ConeRewriter::getAndCriticalCircuit(std::vector<Abst
             AbstractNode *copiedV = cAndMap[v->getUniqueNodeId()];
             AbstractNode *copiedChild = cAndMap[child->getUniqueNodeId()];
             copiedV->addChild(copiedChild, false);
-            copiedChild->addParent(copiedV);
+            copiedChild->addParent(copiedV, false);
           }
         } else {  // continue if child is not a LogicalExpr --> node does not influence the mult. depth
           q.push(child);
@@ -386,10 +386,10 @@ std::vector<AbstractNode *> ConeRewriter::selectCones(std::vector<AbstractNode *
 
     // remove node u
     // - remove any edges pointing to node u as child
-    for (auto &p : u->getParentsNonNull()) p->removeChild(u);
+    for (auto &p : u->getParentsNonNull()) p->removeChild(u, false);
 
     // - remove any edges pointing to node u as parent
-    for (auto &p : u->getChildrenNonNull()) p->removeParent(u);
+    for (auto &p : u->getChildrenNonNull()) p->removeParent(u, false);
 
     // - remove node u from cAndCkt
     cAndCkt.erase(std::remove(cAndCkt.begin(), cAndCkt.end(), u), cAndCkt.end());
@@ -439,8 +439,8 @@ void ConeRewriter::rewriteCones(Ast &astToRewrite, const std::vector<AbstractNod
     auto *coneEndAsLogicalExpr = coneEnd->castTo<LogicalExpr>();
     auto[xorStartNode, a_t] = getCriticalAndNonCriticalInput(coneEndAsLogicalExpr);
     // we "cut-off" parent edge between coneEnd and a_t in order to reconnect a_t later (but we keep a_t's children!)
-    a_t->removeParent(coneEnd);
-    coneEnd->removeChild(a_t);
+    a_t->removeParent(coneEnd, false);
+    coneEnd->removeChild(a_t, false);
 
     // -- lower bound: first AND node while following critical path
     // find the ancestors of δ that are LogicalExpr --> start nodes (v_1, ..., v_n) of cone
@@ -474,7 +474,7 @@ void ConeRewriter::rewriteCones(Ast &astToRewrite, const std::vector<AbstractNod
       // each other.
       // remove the edge between the start nodes and the end node
       for (auto &node : coneStartNodes) {
-        coneEnd->removeChildBilateral(node);
+        coneEnd->removeChild(node, true);
       }
     } else {
       // collect all non-critical inputs y_1, ..., y_m in between xorStartNode up to xorEndNode
@@ -486,8 +486,8 @@ void ConeRewriter::rewriteCones(Ast &astToRewrite, const std::vector<AbstractNod
           throw std::logic_error(
               "AbstractNode between cone end and cone start node is expected to be a logical expression!");
         auto[critIn, nonCritIn] = getCriticalAndNonCriticalInput(currentNodeAsLogicalExpr);
-        currentNode->removeChild(nonCritIn);
-        nonCritIn->removeParent(currentNode);
+        currentNode->removeChild(nonCritIn, false);
+        nonCritIn->removeParent(currentNode, false);
         inputsY1ToYm.push_back(nonCritIn);
         currentNode = critIn;
         // termination criteria (1): we reached the end of the XOR chain
@@ -515,12 +515,12 @@ void ConeRewriter::rewriteCones(Ast &astToRewrite, const std::vector<AbstractNod
       // XorEndNode: remove incoming edges from nodes v_1, ..., v_n
       for (auto &p : xorEndNode->getChildrenNonNull()) {
         // keep the operator node -> only remove those nodes that are no operators
-        if (dynamic_cast<Operator *>(p)==nullptr) xorEndNode->removeChildBilateral(p);
+        if (dynamic_cast<Operator *>(p)==nullptr) xorEndNode->removeChild(p, true);
       }
 
       // XorStartNode: remove incoming edge from xorStartNode to v_t
       for (auto &c : xorStartNode->getParentsNonNull()) {
-        c->removeChildBilateral(xorStartNode);
+        c->removeChild(xorStartNode, true);
       }
 
       // check that at least one y_i is present
@@ -551,11 +551,11 @@ void ConeRewriter::rewriteCones(Ast &astToRewrite, const std::vector<AbstractNod
       auto[criticalInput, nonCriticalInput] = getCriticalAndNonCriticalInput(sNodeAsLogicalExpr);
 
       // remove critical input of v_i
-      criticalInput->removeParent(sNode);
-      sNode->removeChild(criticalInput);
+      criticalInput->removeParent(sNode, false);
+      sNode->removeChild(criticalInput, false);
 
       // remove all outgoing edges of v_i
-      sNode->removeChildBilateral(criticalInput);
+      sNode->removeChild(criticalInput, true);
 
       // add non-critical input of v_t (coneEnd) named a_t as input to v_i
       auto originalOperator = sNodeAsLogicalExpr->getOp();
@@ -580,7 +580,7 @@ void ConeRewriter::rewriteCones(Ast &astToRewrite, const std::vector<AbstractNod
 
     // connect final XOR (i.e., last LogicalExpr in the chain of XOR nodes) to cone output
     rNode->addChild(xorFinalGate.back(), false);
-    xorFinalGate.back()->addParent(rNode);
+    xorFinalGate.back()->addParent(rNode, false);
   } //end: for (auto coneEnd : coneEndNodes)
 }
 

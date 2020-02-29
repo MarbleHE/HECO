@@ -259,7 +259,7 @@ TEST_F(FunctionParameterFixture, FunctionParameterAddChildException_TooManyChild
 TEST_F(FunctionParameterFixture, FunctionParameter_AddChildSuccess) {  /* NOLINT */
   auto functionParameter = new FunctionParameter(datatype, variableThreshold);
 
-  functionParameter->removeChild(variableThreshold);
+  functionParameter->removeChild(variableThreshold, false);
   functionParameter->addChild(variableSecret, true);
 
   // children
@@ -273,7 +273,7 @@ TEST_F(FunctionParameterFixture, FunctionParameter_AddChildSuccess) {  /* NOLINT
   EXPECT_EQ(variableSecret->getParents().front(), functionParameter);
   EXPECT_TRUE(variableSecret->hasParent(functionParameter));
 
-  functionParameter->removeChild(datatype);
+  functionParameter->removeChild(datatype, false);
   functionParameter->addChild(datatype2, true);
 
   // children
@@ -602,7 +602,7 @@ TEST_F(UnaryExprFixture, UnaryExprAddChildException_TooManyChildrenAdded) {  /* 
 TEST_F(UnaryExprFixture, UnaryExprtion_AddChildSuccess) {  /* NOLINT */
   auto unaryExpr = new UnaryExpr(opSymbNegation, literalBoolTrue);
 
-  unaryExpr->removeChild(unaryExpr->getOp());
+  unaryExpr->removeChild(unaryExpr->getOp(), false);
   auto newOperator = new Operator(UnaryOp::negation);
   unaryExpr->addChild(newOperator, true);
 

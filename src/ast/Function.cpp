@@ -72,7 +72,7 @@ std::string Function::getNodeName() const {
 }
 
 void Function::setParameterList(ParameterList *paramsVec) {
-  if (!children.empty()) this->removeChild(children[0]);
+  if (!children.empty()) this->removeChild(children[0], false);
   children[0] = paramsVec;
 }
 

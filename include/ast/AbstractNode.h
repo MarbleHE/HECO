@@ -91,9 +91,7 @@ class AbstractNode {
 
   void addChildren(const std::vector<AbstractNode *> &childrenToAdd, bool addBackReference = true);
 
-  void setChild(std::vector<AbstractNode *>::const_iterator position, AbstractNode *value);
-
-  void removeChild(AbstractNode *child);
+  void removeChild(AbstractNode *child, bool removeBackreference);
 
   void removeChildren();
 
@@ -122,9 +120,9 @@ class AbstractNode {
   /// \return A list of ancestor nodes.
   std::vector<AbstractNode *> getAncestors();
 
-  void addParent(AbstractNode *n);
+  void addParent(AbstractNode *n, bool addBackreference = true);
 
-  void removeParent(AbstractNode *node);
+  void removeParent(AbstractNode *node, bool removeBackreference = true);
 
   void removeFromParents(bool removeParentBackreference = true);
 
@@ -166,11 +164,6 @@ class AbstractNode {
   /// Removes this node from all of its parents and children, and also removes all parents and children from this node.
   void isolateNode();
 
-  /// Removes the node 'child' bilateral, i.e., on both ends of the edge. In other words, removes the node 'child' from
-  /// this node, and this node from the parents list of 'child' node.
-  /// \param child The child to be removed from this node.
-  void removeChildBilateral(AbstractNode *child);
-
   /// Checks whether the edges of this node are reversed (i.e., node's parents and children are swapped).
   /// \return True iff the node's edges are reversed.
   [[nodiscard]] bool hasReversedEdges() const;
@@ -191,7 +184,8 @@ class AbstractNode {
       throw std::logic_error(outputMsg.str());
     }
   }
-  std::string generateOutputString(bool printChildren, std::vector<std::string> attributes) const;
+
+  [[nodiscard]] std::string generateOutputString(bool printChildren, std::vector<std::string> attributes) const;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_NODE_H_

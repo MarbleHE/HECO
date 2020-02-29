@@ -354,7 +354,7 @@ void CompileTimeExpressionSimplifier::visit(If &elem) {
       if (elem.getElseBranch()!=nullptr) {
         nodesQueuedForDeletion.push_back(elem.getElseBranch());
         // we also unlink it from the If statement such that it will not be visited
-        elem.removeChildBilateral(elem.getElseBranch());
+        elem.removeChild(elem.getElseBranch(), true);
       }
     } else {  // the Else-branch is always executed
       // recursively remove the Then-branch (always exists)
@@ -364,7 +364,7 @@ void CompileTimeExpressionSimplifier::visit(If &elem) {
       auto newCondition = new UnaryExpr(UnaryOp::negation, condition);
       evaluatedNodes.erase(condition);
       // replace the If statement's Then branch by the Else branch
-      elem.removeChildBilateral(elem.getThenBranch());
+      elem.removeChild(elem.getThenBranch(), true);
       elem.setAttributes(newCondition, elem.getElseBranch(), nullptr);
     }
 
