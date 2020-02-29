@@ -264,3 +264,13 @@ void AbstractNode::replaceChild(AbstractNode *originalChild, AbstractNode *newCh
   // add edge: newChildToBeAdded -> currentNode
   newChildToBeAdded->addParent(this);
 }
+
+void AbstractNode::removeFromParents(bool removeParentBackreference) {
+  for (auto &p : getParentsNonNull()) {
+    if (removeParentBackreference) {
+      p->removeChildBilateral(this);
+    } else {
+      p->removeChild(this);
+    }
+  }
+}

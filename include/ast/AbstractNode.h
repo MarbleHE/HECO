@@ -97,6 +97,7 @@ class AbstractNode {
 
   void removeChildren();
 
+
   void replaceChild(AbstractNode *originalChild, AbstractNode *newChildToBeAdded);
 
   [[nodiscard]] int countChildrenNonNull() const;
@@ -125,6 +126,8 @@ class AbstractNode {
   void addParent(AbstractNode *n);
 
   void removeParent(AbstractNode *node);
+
+  void removeFromParents(bool removeParentBackreference = true);
 
   void removeParents();
 
