@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_INCLUDE_VISITOR_MULTDEPTHVISITOR_H_
-#define AST_OPTIMIZER_INCLUDE_INCLUDE_VISITOR_MULTDEPTHVISITOR_H_
+#ifndef AST_OPTIMIZER_INCLUDE_VISITOR_MULTDEPTHVISITOR_H_
+#define AST_OPTIMIZER_INCLUDE_VISITOR_MULTDEPTHVISITOR_H_
 
 #include <map>
 #include <string>
@@ -70,4 +70,4 @@ class MultDepthVisitor : public Visitor {
   void updateDepthStructures(AbstractStatement *stmt, const std::string &varIdentifier, int depth);
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_INCLUDE_VISITOR_MULTDEPTHVISITOR_H_
+#endif //AST_OPTIMIZER_INCLUDE_VISITOR_MULTDEPTHVISITOR_H_
