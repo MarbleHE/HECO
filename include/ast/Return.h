@@ -18,7 +18,7 @@ class Return : public AbstractStatement {
 
   void accept(Visitor &v) override;
 
-  [[nodiscard]] std::string getNodeName() const override;
+  [[nodiscard]] std::string getNodeType() const override;
 
   ~Return() override;
 

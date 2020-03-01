@@ -5,7 +5,7 @@
 
 json CallExternal::toJson() const {
   json j = {
-      {"type", getNodeName()},
+      {"type", getNodeType()},
       {"functionName", this->functionName},
   };
   // only include the field 'arguments' in JSON output if it has any value
@@ -30,7 +30,7 @@ const std::string &CallExternal::getFunctionName() const {
   return functionName;
 }
 
-std::string CallExternal::getNodeName() const {
+std::string CallExternal::getNodeType() const {
   return "CallExternal";
 }
 

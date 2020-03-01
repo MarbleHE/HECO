@@ -25,7 +25,7 @@ class While : public AbstractStatement {
 
   [[nodiscard]] AbstractStatement *getBody() const;
 
-  [[nodiscard]] std::string getNodeName() const override;
+  [[nodiscard]] std::string getNodeType() const override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_WHILE_H

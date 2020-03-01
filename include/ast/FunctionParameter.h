@@ -19,7 +19,7 @@ class FunctionParameter : public AbstractExpr {
 
   [[nodiscard]] json toJson() const override;
 
-  [[nodiscard]] std::string getNodeName() const override;
+  [[nodiscard]] std::string getNodeType() const override;
 
   [[nodiscard]] Datatype *getDatatype() const;
 

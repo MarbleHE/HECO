@@ -15,7 +15,7 @@ Datatype::Datatype(const std::string &type) {
 }
 
 json Datatype::toJson() const {
-  json j = {{"type", getNodeName()},
+  json j = {{"type", getNodeType()},
             {"encrypted", isEncrypted()},
             {"specifier", enumToString(val)}
   };
@@ -73,7 +73,7 @@ AbstractNode *Datatype::cloneFlat() {
 AbstractNode *Datatype::clone(bool keepOriginalUniqueNodeId) {
   return new Datatype(this->getType());
 }
-std::string Datatype::getNodeName() const {
+std::string Datatype::getNodeType() const {
   return "Datatype";
 }
 void Datatype::accept(Visitor &v) {

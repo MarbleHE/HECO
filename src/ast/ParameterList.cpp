@@ -1,7 +1,7 @@
 #include "ParameterList.h"
 #include "FunctionParameter.h"
 
-std::string ParameterList::getNodeName() const {
+std::string ParameterList::getNodeType() const {
   return "ParameterList";
 }
 

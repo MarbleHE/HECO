@@ -5,7 +5,7 @@ void LogicalExpr::accept(Visitor &v) {
   v.visit(*this);
 }
 
-std::string LogicalExpr::getNodeName() const {
+std::string LogicalExpr::getNodeType() const {
   return "LogicalExpr";
 }
 

@@ -98,8 +98,8 @@ void MultDepthVisitor::analyzeMultiplicativeDepth(const std::string &varIdentifi
                                                   AbstractStatement *stmt,
                                                   AbstractExpr *initializer) {
   // if VarDecl contains ArithmeticExpr or contains LogicalExpr
-  std::string initializerNodeType = initializer->getNodeName();
-  if (initializerNodeType==ArithmeticExpr().getNodeName() || initializerNodeType==LogicalExpr().getNodeName()) {
+  std::string initializerNodeType = initializer->getNodeType();
+  if (initializerNodeType==ArithmeticExpr().getNodeType() || initializerNodeType==LogicalExpr().getNodeType()) {
     // count the number of logicalAnd and multiplication operations in the initializer (=: numMults)
     int numMults = initializer->countByTemplate(new ArithmeticExpr(ArithmeticOp::multiplication))
         + initializer->countByTemplate(new LogicalExpr(LogCompOp::logicalAnd));

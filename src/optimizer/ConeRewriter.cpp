@@ -430,7 +430,7 @@ void ConeRewriter::rewriteCones(Ast &astToRewrite, const std::vector<AbstractNod
     coneEnd = underlying_nodes.find(coneEnd->getUniqueNodeId())->second;
     // determine bounds of the cone
     // -- upper bound: parent node of cone end
-    auto rNode = coneEnd->getParentsNonNull().front();
+    auto rNode = coneEnd->getOnlyParent();
 
     // U_y, the multi-input XOR, is represented as multiple XOR nodes in our tree:
     // coneEndNodes [v_1, ..., v_n] --> xorN --> xorN-1 ---> xorN-2 ---> ... ---> xor1 --> sNode v_t.
@@ -465,8 +465,8 @@ void ConeRewriter::rewriteCones(Ast &astToRewrite, const std::vector<AbstractNod
 
     std::vector<AbstractNode *> finalXorInputs;
     // It should not make a difference which of the cone start nodes we take - all of them should have the same parent.
-    AbstractNode *xorEndNode = coneStartNodes.front()->getParentsNonNull().front();
-    for (auto &startNode : coneStartNodes) assert(startNode->getParentsNonNull().front()==xorEndNode);
+    AbstractNode *xorEndNode = coneStartNodes.front()->getOnlyParent();
+    for (auto &startNode : coneStartNodes) assert(startNode->getOnlyParent()==xorEndNode);
 
     // check whether we need to handle non-critical inputs y_1, ..., y_m
     if (dynamic_cast<LogicalExpr *>(xorEndNode)->getOp()->equals(LogCompOp::logicalAnd) && xorEndNode==coneEnd) {

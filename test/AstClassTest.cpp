@@ -48,7 +48,7 @@ TEST_F(AstTestFixture, deleteNode_deleteRecursiveSubtreeNonEmpty) { /* NOLINT */
   // save and check node's children
   const auto &arithmeticExprChildren = arithmeticExpr->getChildren();
   for (auto &c : arithmeticExprChildren)
-    ASSERT_EQ(c->getParentsNonNull().front(), arithmeticExpr);
+    ASSERT_EQ(c->getOnlyParent(), arithmeticExpr);
 
   // delete node and its subtree and verify deletion success
   AbstractNode *arithmeticExprPtr = arithmeticExpr;
@@ -96,7 +96,7 @@ TEST_F(AstTestFixture, deleteNode_ChildrenExisting) { /* NOLINT */
   // save and check node's children
   int arithmeticExprNumChildren = arithmeticExpr->countChildrenNonNull();
   for (auto &c : arithmeticExpr->getChildrenNonNull())
-    ASSERT_EQ(c->getParentsNonNull().front(), arithmeticExpr);
+    ASSERT_EQ(c->getOnlyParent(), arithmeticExpr);
 
   // delete node and its subtree and verify deletion success
   AbstractNode *arithmeticExprPtr = arithmeticExpr;

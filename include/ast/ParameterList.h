@@ -8,7 +8,7 @@ class ParameterList : public AbstractStatement {
 
   explicit ParameterList(std::vector<FunctionParameter*> parameters);
 
-  [[nodiscard]] std::string getNodeName() const override;
+  [[nodiscard]] std::string getNodeType() const override;
 
   void accept(Visitor &v) override;
 

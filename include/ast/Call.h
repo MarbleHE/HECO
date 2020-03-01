@@ -27,7 +27,7 @@ class Call : public AbstractExpr {
 
   [[nodiscard]] const std::vector<FunctionParameter *> &getArguments() const;
 
-  [[nodiscard]] std::string getNodeName() const override;
+  [[nodiscard]] std::string getNodeType() const override;
 
   [[nodiscard]] Function *getFunc() const;
 };

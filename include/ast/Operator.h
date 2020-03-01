@@ -31,7 +31,7 @@ class Operator : public AbstractNode {
 
   void accept(Visitor &v) override;
 
-  [[nodiscard]] std::string getNodeName() const override;
+  [[nodiscard]] std::string getNodeType() const override;
 
   bool isUndefined();
 

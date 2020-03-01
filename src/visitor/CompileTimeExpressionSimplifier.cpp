@@ -94,7 +94,7 @@ void CompileTimeExpressionSimplifier::visit(Variable &elem) {
   if (variableValues.count(elem.getIdentifier()) > 0) {
     // if we know the variable's value (i.e., its value is either any subtype of AbstractLiteral or a AbstractExpr if
     // this is a symbolic value that defines on other variables), we can replace this variable node
-    auto variableParent = elem.getParentsNonNull().front();
+    auto variableParent = elem.getOnlyParent();
     auto newValue = variableValues.at(elem.getIdentifier())->clone(false)->castTo<AbstractExpr>();
     variableParent->replaceChild(&elem, newValue);
 
@@ -178,7 +178,7 @@ void CompileTimeExpressionSimplifier::handleBinaryExpressions(AbstractBinaryExpr
       throw std::logic_error("Unexpected: Node (" + arithmeticExpr.getUniqueNodeId() + ") has more than one parent.");
     if (result.size() > 1)
       throw std::logic_error("Unexpected: Evaluation result contains more than one value.");
-    arithmeticExpr.getParentsNonNull().front()->replaceChild(&arithmeticExpr, result.front());
+    arithmeticExpr.getOnlyParent()->replaceChild(&arithmeticExpr, result.front());
     nodesQueuedForDeletion.push_back(&arithmeticExpr);
   } else {
     // update accumulator
@@ -215,7 +215,7 @@ void CompileTimeExpressionSimplifier::handleBinaryExpressions(AbstractBinaryExpr
     if (binaryExpressionAccumulator.containsOperands() && noneOfTheParentsIsABinaryExpr(arithmeticExpr)
         && binaryExpressionAccumulator.subtreeIsSimplified()) {
       auto treeRoot = binaryExpressionAccumulator.getSimplifiedSubtree();
-      arithmeticExpr.getParentsNonNull().front()->replaceChild(arithmeticExpr.castTo<AbstractNode>(), treeRoot);
+      arithmeticExpr.getOnlyParent()->replaceChild(arithmeticExpr.castTo<AbstractNode>(), treeRoot);
     }
   }
 }
@@ -246,7 +246,7 @@ void CompileTimeExpressionSimplifier::visit(UnaryExpr &elem) {
   if (dynamic_cast<AbstractLiteral *>(elem.getRight())) {
     // if operand value is known -> evaluate the expression and store its result
     auto result = evaluateNodeRecursive(&elem, getTransformedVariableMap());
-    auto parent = elem.getParentsNonNull().front();
+    auto parent = elem.getOnlyParent();
     parent->replaceChild(&elem, result.front());
     nodesQueuedForDeletion.push_back(&elem);
   }

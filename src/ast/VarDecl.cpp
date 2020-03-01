@@ -7,7 +7,7 @@
 #include "Ast.h"
 
 json VarDecl::toJson() const {
-  json j = {{"type", getNodeName()},
+  json j = {{"type", getNodeType()},
             {"identifier", identifier},
             {"datatype", getDatatype() ? getDatatype()->toJson() : ""}};
   if (getInitializer()!=nullptr) {
@@ -66,7 +66,7 @@ void VarDecl::accept(Visitor &v) {
   v.visit(*this);
 }
 
-std::string VarDecl::getNodeName() const {
+std::string VarDecl::getNodeType() const {
   return "VarDecl";
 }
 

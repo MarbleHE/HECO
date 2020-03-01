@@ -2,7 +2,7 @@
 
 void to_json(json &j, const FunctionParameter &funcParam) {
   j = {
-      {"type", funcParam.getNodeName()},
+      {"type", funcParam.getNodeType()},
       {"value", funcParam.getValue()->toJson()},
       {"datatype", funcParam.getDatatype()->toJson()}
   };
@@ -10,7 +10,7 @@ void to_json(json &j, const FunctionParameter &funcParam) {
 
 void to_json(json &j, const FunctionParameter *funcParam) {
   j = {
-      {"type", funcParam->getNodeName()},
+      {"type", funcParam->getNodeType()},
       {"value", funcParam->getValue()->toJson()},
       {"datatype", funcParam->getDatatype()->toJson()}
   };
@@ -18,7 +18,7 @@ void to_json(json &j, const FunctionParameter *funcParam) {
 
 json FunctionParameter::toJson() const {
   json j = {
-      {"type", getNodeName()},
+      {"type", getNodeType()},
       {"value", getValue()->toJson()},
       {"datatype", getDatatype()->toJson()}
   };
@@ -29,7 +29,7 @@ void FunctionParameter::accept(Visitor &v) {
   v.visit(*this);
 }
 
-std::string FunctionParameter::getNodeName() const {
+std::string FunctionParameter::getNodeType() const {
   return "FunctionParameter";
 }
 

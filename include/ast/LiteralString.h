@@ -25,7 +25,7 @@ class LiteralString : public AbstractLiteral {
 
   void accept(Visitor &v) override;
 
-  [[nodiscard]] std::string getNodeName() const override;
+  [[nodiscard]] std::string getNodeType() const override;
 
   bool operator==(const LiteralString &rhs) const;
 

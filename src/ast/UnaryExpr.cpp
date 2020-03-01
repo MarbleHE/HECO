@@ -2,7 +2,7 @@
 
 json UnaryExpr::toJson() const {
   json j;
-  j["type"] = getNodeName();
+  j["type"] = getNodeType();
   j["operator"] = getOp() ? getOp()->getOperatorString() : "";
   j["rightOperand"] = getRight() ? getRight()->toJson() : "";
   return j;
@@ -24,7 +24,7 @@ AbstractExpr *UnaryExpr::getRight() const {
   return reinterpret_cast<AbstractExpr *>(getChildAtIndex(1, true));
 }
 
-std::string UnaryExpr::getNodeName() const {
+std::string UnaryExpr::getNodeType() const {
   return "UnaryExpr";
 }
 

@@ -4,7 +4,7 @@
 
 json VarAssignm::toJson() const {
   json j;
-  j["type"] = getNodeName();
+  j["type"] = getNodeType();
   j["identifier"] = this->identifier;
   j["value"] = getValue() ? getValue()->toJson() : "";
   return j;
@@ -26,7 +26,7 @@ AbstractExpr *VarAssignm::getValue() const {
   return reinterpret_cast<AbstractExpr *>(getChildAtIndex(0, true));
 }
 
-std::string VarAssignm::getNodeName() const {
+std::string VarAssignm::getNodeType() const {
   return "VarAssignm";
 }
 

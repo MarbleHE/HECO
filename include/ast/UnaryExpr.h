@@ -19,7 +19,7 @@ class UnaryExpr : public AbstractExpr {
 
   [[nodiscard]] AbstractExpr *getRight() const;
 
-  [[nodiscard]] std::string getNodeName() const override;
+  [[nodiscard]] std::string getNodeType() const override;
 
   ~UnaryExpr() override;
 

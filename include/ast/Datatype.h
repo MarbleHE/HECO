@@ -15,7 +15,7 @@ class Datatype : public AbstractNode {
   bool encrypted{false};
 
  public:
-  [[nodiscard]] std::string getNodeName() const override;
+  [[nodiscard]] std::string getNodeType() const override;
 
   AbstractNode *cloneFlat() override;
 

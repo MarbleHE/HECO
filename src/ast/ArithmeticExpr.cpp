@@ -18,7 +18,7 @@ void ArithmeticExpr::accept(Visitor &v) {
   v.visit(*this);
 }
 
-std::string ArithmeticExpr::getNodeName() const {
+std::string ArithmeticExpr::getNodeType() const {
   return "ArithmeticExpr";
 }
 

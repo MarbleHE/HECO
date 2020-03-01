@@ -10,7 +10,7 @@ json Block::toJson() const {
   for (auto c : getChildrenNonNull()) {
     stmts.push_back(dynamic_cast<AbstractStatement *>(c));
   }
-  json j = {{"type", getNodeName()},
+  json j = {{"type", getNodeType()},
             {"statements", stmts}};
   return j;
 }
@@ -31,7 +31,7 @@ void Block::accept(Visitor &v) {
   v.visit(*this);
 }
 
-std::string Block::getNodeName() const {
+std::string Block::getNodeType() const {
   return "Block";
 }
 

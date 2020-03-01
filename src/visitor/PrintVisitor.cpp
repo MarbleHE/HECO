@@ -152,7 +152,7 @@ void PrintVisitor::printNodeName(AbstractNode &node) {
   if (showUniqueNodeIds) {
     ss << getIndentation() << node.getUniqueNodeId() << ":";
   } else {
-    ss << getIndentation() << node.getNodeName() << ":";
+    ss << getIndentation() << node.getNodeType() << ":";
   }
 }
 

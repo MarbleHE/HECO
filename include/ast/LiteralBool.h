@@ -23,7 +23,7 @@ class LiteralBool : public AbstractLiteral {
 
   [[nodiscard]] std::string getTextValue() const;
 
-  [[nodiscard]] std::string getNodeName() const override;
+  [[nodiscard]] std::string getNodeType() const override;
 
   bool operator==(const LiteralBool &rhs) const;
 

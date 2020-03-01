@@ -25,7 +25,7 @@ class CallExternal : public AbstractExpr, public AbstractStatement {
 
   [[nodiscard]] const std::vector<FunctionParameter *> &getArguments() const;
 
-  [[nodiscard]] std::string getNodeName() const override;
+  [[nodiscard]] std::string getNodeType() const override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_CALLEXTERNAL_H

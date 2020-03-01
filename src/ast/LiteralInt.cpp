@@ -11,7 +11,7 @@ LiteralInt::LiteralInt(int value) : value(value) {}
 
 json LiteralInt::toJson() const {
   json j;
-  j["type"] = getNodeName();
+  j["type"] = getNodeType();
   j["value"] = this->value;
   return j;
 }
@@ -24,7 +24,7 @@ void LiteralInt::accept(Visitor &v) {
   v.visit(*this);
 }
 
-std::string LiteralInt::getNodeName() const {
+std::string LiteralInt::getNodeType() const {
   return "LiteralInt";
 }
 

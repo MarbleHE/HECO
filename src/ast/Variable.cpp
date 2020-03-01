@@ -7,7 +7,7 @@ Variable::Variable(std::string identifier) : identifier(std::move(identifier)) {
 
 json Variable::toJson() const {
   json j;
-  j["type"] = getNodeName();
+  j["type"] = getNodeType();
   j["identifier"] = this->identifier;
   return j;
 }
@@ -16,7 +16,7 @@ void Variable::accept(Visitor &v) {
   v.visit(*this);
 }
 
-std::string Variable::getNodeName() const {
+std::string Variable::getNodeType() const {
   return "Variable";
 }
 

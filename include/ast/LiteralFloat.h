@@ -23,7 +23,7 @@ class LiteralFloat : public AbstractLiteral {
 
   void accept(Visitor &v) override;
 
-  [[nodiscard]] std::string getNodeName() const override;
+  [[nodiscard]] std::string getNodeType() const override;
 
   LiteralFloat operator+(LiteralFloat const &lfloat);
 

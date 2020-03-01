@@ -27,7 +27,7 @@ const std::string &Operator::getOperatorString() const {
   return operatorString;
 }
 
-std::string Operator::getNodeName() const {
+std::string Operator::getNodeType() const {
   return "Operator";
 }
 
@@ -86,17 +86,17 @@ AbstractLiteral *Operator::applyOperator(LiteralBool *rhs) {
   if (this->equals(UnaryOp::negation)) return new LiteralBool(!value);
   else
     throw std::logic_error(
-        "Could not apply unary operator (" + this->getOperatorString() + ") on (" + this->getNodeName() + ").");
+        "Could not apply unary operator (" + this->getOperatorString() + ") on (" + this->getNodeType() + ").");
 }
 
 AbstractLiteral *Operator::applyOperator(LiteralString *) {
   throw std::logic_error(
-      "Could not apply unary operator (" + this->getOperatorString() + ") on (" + this->getNodeName() + ").");
+      "Could not apply unary operator (" + this->getOperatorString() + ") on (" + this->getNodeType() + ").");
 }
 
 AbstractLiteral *Operator::applyOperator(LiteralFloat *) {
   throw std::logic_error(
-      "Could not apply unary operator (" + this->getOperatorString() + ") on (" + this->getNodeName() + ").");
+      "Could not apply unary operator (" + this->getOperatorString() + ") on (" + this->getNodeType() + ").");
 }
 
 // -----------------

@@ -6,7 +6,7 @@
 
 int AbstractNode::nodeIdCounter = 0;
 
-std::string AbstractNode::genUniqueNodeId() {
+std::string AbstractNode::generateUniqueNodeId() {
   if (assignedNodeId==-1) {
     throw std::logic_error("Could not find any reserved ID for node. "
                            "Node constructor needs to reserve ID for node (see empty constructor).");
@@ -14,7 +14,7 @@ std::string AbstractNode::genUniqueNodeId() {
 
   // build and return the node ID string
   std::stringstream ss;
-  ss << getNodeName() << "_" << assignedNodeId;
+  ss << getNodeType() << "_" << assignedNodeId;
   return ss.str();
 }
 
@@ -25,7 +25,7 @@ AbstractNode::AbstractNode() {
 
 std::string AbstractNode::getUniqueNodeId() {
   // if there is no ID defined yet, create and assign an ID
-  if (uniqueNodeId.empty()) this->uniqueNodeId = genUniqueNodeId();
+  if (uniqueNodeId.empty()) this->uniqueNodeId = generateUniqueNodeId();
   // otherwise just return the previously generated ID
   return uniqueNodeId;
 }
@@ -66,7 +66,7 @@ void AbstractNode::addChildren(const std::vector<AbstractNode *> &childrenToAdd,
   // check whether the number of children to be added does not exceed the number available children spots
   if (!allowsInfiniteNumberOfChildren && childrenToAdd.size() > (getMaxNumberChildren() - countChildrenNonNull())) {
     throw std::invalid_argument(
-        "AbstractNode " + getUniqueNodeId() + " of type " + getNodeName() + " does not allow more than "
+        "AbstractNode " + getUniqueNodeId() + " of type " + getNodeType() + " does not allow more than "
             + std::to_string(getMaxNumberChildren()) + " children!");
   }
 
@@ -140,8 +140,8 @@ const std::vector<AbstractNode *> &AbstractNode::getParents() const {
   return parents;
 }
 
-void AbstractNode::addParent(AbstractNode *n, bool addBackreference) {
-  parents.push_back(n);
+void AbstractNode::addParent(AbstractNode *parentToAdd, bool addBackreference) {
+  parents.push_back(parentToAdd);
   if (addBackreference) {
     for (auto &p : getParentsNonNull()) {
       p->addChild(this, false);
@@ -149,8 +149,8 @@ void AbstractNode::addParent(AbstractNode *n, bool addBackreference) {
   }
 }
 
-void AbstractNode::removeParent(AbstractNode *node, bool removeBackreference) {
-  auto it = std::find(parents.begin(), parents.end(), node);
+void AbstractNode::removeParent(AbstractNode *parentToBeRemoved, bool removeBackreference) {
+  auto it = std::find(parents.begin(), parents.end(), parentToBeRemoved);
   if (it!=parents.end()) {
     if (removeBackreference) {
       (*it)->removeChild(this, false);
@@ -192,7 +192,7 @@ std::string AbstractNode::generateOutputString(bool printChildren, std::vector<s
   //     FunctionParameter:
   //       Datatype (int, plaintext)
   //       Variable (x)
-  ss << getNodeName();
+  ss << getNodeType();
   if (!attributes.empty()) {
     ss << " (";
     for (auto it = attributes.begin(); it!=attributes.end(); ++it) {
@@ -244,8 +244,10 @@ std::vector<AbstractNode *> AbstractNode::getDescendants() {
   return std::vector<AbstractNode *>(result.begin(), result.end());
 }
 
-bool AbstractNode::hasParent(AbstractNode *n) {
-  return std::any_of(getParents().begin(), getParents().end(), [&n](AbstractNode *p) { return (p==n); });
+bool AbstractNode::hasParent(AbstractNode *parentNode) {
+  return std::any_of(getParents().begin(),
+                     getParents().end(),
+                     [&parentNode](AbstractNode *p) { return (p==parentNode); });
 }
 
 int AbstractNode::countChildrenNonNull() const {
@@ -299,5 +301,13 @@ void AbstractNode::removeFromParents(bool removeParentBackreference) {
 }
 
 std::string AbstractNode::toString(bool printChildren) const {
-  throw std::runtime_error("toString not implemented for class " + getNodeName() + ".");
+  throw std::runtime_error("toString not implemented for class " + getNodeType() + ".");
+}
+
+AbstractNode *AbstractNode::getOnlyParent() {
+  auto parentsVector = getParentsNonNull();
+  if (parentsVector.size() > 1) {
+    throw std::logic_error("AbstractNode::getOnlyParent() failed because node has more than one parent!");
+  }
+  return this->getParentsNonNull().front();
 }

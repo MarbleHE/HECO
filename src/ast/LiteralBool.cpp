@@ -5,7 +5,7 @@ LiteralBool::LiteralBool(bool value) : value(value) {}
 
 json LiteralBool::toJson() const {
   json j;
-  j["type"] = getNodeName();
+  j["type"] = getNodeType();
   j["value"] = this->value;
   return j;
 }
@@ -22,7 +22,7 @@ std::string LiteralBool::getTextValue() const {
   return getValue() ? "true" : "false";
 }
 
-std::string LiteralBool::getNodeName() const {
+std::string LiteralBool::getNodeType() const {
   return "LiteralBool";
 }
 

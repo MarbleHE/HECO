@@ -31,7 +31,7 @@ class LogicalExpr : public AbstractBinaryExpr {
 
   void accept(Visitor &v) override;
 
-  [[nodiscard]] std::string getNodeName() const override;
+  [[nodiscard]] std::string getNodeType() const override;
 
   AbstractNode *cloneFlat() override;
 

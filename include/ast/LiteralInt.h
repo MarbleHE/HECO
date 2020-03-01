@@ -22,7 +22,7 @@ class LiteralInt : public AbstractLiteral {
 
   void accept(Visitor &v) override;
 
-  [[nodiscard]] std::string getNodeName() const override;
+  [[nodiscard]] std::string getNodeType() const override;
 
   LiteralInt operator+(LiteralInt const &lint);
 

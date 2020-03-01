@@ -51,7 +51,7 @@ std::vector<AbstractStatement *> Function::getBodyStatements() const {
 
 void to_json(json &j, const Function &func) {
   j = {
-      {"type", func.getNodeName()},
+      {"type", func.getNodeType()},
       {"name", func.getName()},
       {"params", func.getParameters()},
       {"body", func.getBodyStatements()}};
@@ -59,7 +59,7 @@ void to_json(json &j, const Function &func) {
 
 json Function::toJson() const {
   json j = {
-      {"type", getNodeName()},
+      {"type", getNodeType()},
       {"name", getName()},
       {"params", getParameters()},
       {"body", getBodyStatements()}
@@ -67,7 +67,7 @@ json Function::toJson() const {
   return j;
 }
 
-std::string Function::getNodeName() const {
+std::string Function::getNodeType() const {
   return "Function";
 }
 

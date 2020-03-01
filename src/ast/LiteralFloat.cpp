@@ -8,7 +8,7 @@ LiteralFloat::LiteralFloat(float value) : value(value) {}
 
 json LiteralFloat::toJson() const {
   json j;
-  j["type"] = getNodeName();
+  j["type"] = getNodeType();
   j["value"] = this->value;
   return j;
 }
@@ -21,7 +21,7 @@ void LiteralFloat::accept(Visitor &v) {
   v.visit(*this);
 }
 
-std::string LiteralFloat::getNodeName() const {
+std::string LiteralFloat::getNodeType() const {
   return "LiteralFloat";
 }
 

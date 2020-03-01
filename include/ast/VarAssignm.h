@@ -24,7 +24,7 @@ class VarAssignm : public AbstractStatement {
 
   [[nodiscard]] AbstractExpr *getValue() const;
 
-  [[nodiscard]] std::string getNodeName() const override;
+  [[nodiscard]] std::string getNodeType() const override;
 
   AbstractBinaryExpr *contains(AbstractBinaryExpr *aexpTemplate, ArithmeticExpr *excludedSubtree) override;
 

@@ -26,7 +26,7 @@ int AbstractBinaryExpr::getMaxNumberChildren() {
 
 json AbstractBinaryExpr::toJson() const {
   json j;
-  j["type"] = getNodeName();
+  j["type"] = getNodeType();
   j["leftOperand"] = getLeft() ? getLeft()->toJson() : "";
   j["operator"] = getOp() ? getOp()->getOperatorString() : "";
   j["rightOperand"] = getRight() ? getRight()->toJson() : "";
