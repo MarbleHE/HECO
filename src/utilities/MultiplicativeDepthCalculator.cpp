@@ -4,6 +4,7 @@
 
 #include <utility>
 #include "LogicalExpr.h"
+#include "Variable.h"
 
 int MultiplicativeDepthCalculator::depthValue(AbstractNode *n) {
   if (auto lexp = dynamic_cast<LogicalExpr *>(n)) {
@@ -13,12 +14,12 @@ int MultiplicativeDepthCalculator::depthValue(AbstractNode *n) {
   return 0;
 }
 
-int MultiplicativeDepthCalculator::getInitialDepthOrNull(const std::string &nodeId) {
-  try {
-    return initialMultiplicativeDepths.at(nodeId);
-  } catch (std::out_of_range &exception) {
-    return 0;
+DepthMapEntry MultiplicativeDepthCalculator::getInitialDepthOrNull(AbstractNode *node) {
+  auto nodeAsVar = dynamic_cast<Variable *>(node);
+  if (nodeAsVar!=nullptr && initialMultiplicativeDepths.count(nodeAsVar->getIdentifier()) > 0) {
+    return initialMultiplicativeDepths.at(nodeAsVar->getIdentifier());
   }
+  return DepthMapEntry(0, 0);
 }
 
 int MultiplicativeDepthCalculator::getMultDepthL(AbstractNode *n) {
@@ -36,7 +37,7 @@ int MultiplicativeDepthCalculator::getMultDepthL(AbstractNode *n) {
   // trivial case: v is a leaf node, i.e., does not have any parent node
   // |pred(v)| = 0 => multiplicative depth = 0
   if (nextNodesToConsider.empty()) {
-    multiplicativeDepths[n->getUniqueNodeId()] = 0 + getInitialDepthOrNull(n->getUniqueNodeId());
+    multiplicativeDepths[n->getUniqueNodeId()] = 0 + getInitialDepthOrNull(n).multiplicativeDepth;
     return 0;
   }
 
@@ -47,7 +48,7 @@ int MultiplicativeDepthCalculator::getMultDepthL(AbstractNode *n) {
     // compute the multiplicative depth of parent u
     uDepth = getMultDepthL(u);
     // store the computed depth
-    multiplicativeDepths[u->getUniqueNodeId()] = uDepth + getInitialDepthOrNull(u->getUniqueNodeId());
+    multiplicativeDepths[u->getUniqueNodeId()] = uDepth + getInitialDepthOrNull(n).multiplicativeDepth;
     max = std::max(uDepth + depthValue(n), max);
   }
 
@@ -67,7 +68,7 @@ int MultiplicativeDepthCalculator::getReverseMultDepthR(AbstractNode *n) {
 
   // we need to compute the reverse multiplicative depth
   if (nextNodesToConsider.empty()) {
-    multiplicativeDepthsReversed[n->getUniqueNodeId()] = 0;
+    multiplicativeDepthsReversed[n->getUniqueNodeId()] = 0 + getInitialDepthOrNull(n).reverseMultiplicativeDepth;
     return 0;
   }
 
@@ -78,7 +79,7 @@ int MultiplicativeDepthCalculator::getReverseMultDepthR(AbstractNode *n) {
     // compute the multiplicative depth of parent u
     uDepthR = getReverseMultDepthR(u);
     // store the computed depth
-    multiplicativeDepthsReversed[u->getUniqueNodeId()] = uDepthR;
+    multiplicativeDepthsReversed[u->getUniqueNodeId()] = uDepthR + getInitialDepthOrNull(n).reverseMultiplicativeDepth;
     max = std::max(uDepthR + depthValue(u), max);
   }
 
@@ -112,9 +113,11 @@ MultiplicativeDepthCalculator::MultiplicativeDepthCalculator(Ast &ast) {
 }
 
 MultiplicativeDepthCalculator::MultiplicativeDepthCalculator(Ast &ast,
-                                                             std::unordered_map<std::string, int> initialDepths)
+                                                             std::unordered_map<std::string,
+                                                                                DepthMapEntry> initialDepths)
     : initialMultiplicativeDepths(std::move(initialDepths)) {
   precomputeMultDepths(ast);
 }
 
-
+DepthMapEntry::DepthMapEntry(int multiplicativeDepth, int reverseMultiplicativeDepth) : multiplicativeDepth(
+    multiplicativeDepth), reverseMultiplicativeDepth(reverseMultiplicativeDepth) {}
