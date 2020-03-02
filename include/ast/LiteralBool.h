@@ -23,7 +23,7 @@ class LiteralBool : public AbstractLiteral {
 
   [[nodiscard]] std::string getTextValue() const;
 
-  [[nodiscard]] std::string getNodeName() const override;
+  [[nodiscard]] std::string getNodeType() const override;
 
   bool operator==(const LiteralBool &rhs) const;
 
@@ -35,14 +35,17 @@ class LiteralBool : public AbstractLiteral {
 
   void setValue(bool newValue);
 
-  [[nodiscard]] std::string toString() const override;
+  [[nodiscard]] std::string toString(bool printChildren) const override;
 
   bool supportsDatatype(Datatype &datatype) override;
 
   void print(std::ostream &str) const override;
 
   bool supportsCircuitMode() override;
+
   bool isEqual(AbstractExpr *other) override;
+
+  bool isNull() override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_LITERALBOOL_H

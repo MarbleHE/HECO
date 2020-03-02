@@ -34,7 +34,7 @@ include_directories(
         ${ast_optimizer_SOURCE_DIR}/test)
 
 set(TEST_FILES
-        BinaryExprTest.cpp
+        ArithmeticExprTest.cpp
         JsonOutputTest.cpp
         PrintVisitorTest.cpp
         MultRewriteTest.cpp
@@ -49,7 +49,9 @@ set(TEST_FILES
         LiteralTest.cpp
         NodeTest.cpp
         NodeCloneRecursiveDeepTest.cpp
-        SecretTaintingTest.cpp)
+        CompileTimeExpressionSimplifierTest.cpp
+        SecretTaintingTest.cpp
+        NodeUtilsTest.cpp)
 
 add_executable(testing-all
         ${TEST_FILES})

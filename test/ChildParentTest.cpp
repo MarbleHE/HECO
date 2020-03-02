@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "BinaryExpr.h"
+#include "ArithmeticExpr.h"
 #include "Variable.h"
 #include "Return.h"
 #include "Function.h"
@@ -14,101 +14,101 @@
 #include "VarAssignm.h"
 #include "VarDecl.h"
 
-class BinaryExprFixture : public ::testing::Test {
+class ArithmeticExprFixture : public ::testing::Test {
  protected:
   LiteralInt *left;
   LiteralInt *otherLeft;
   LiteralFloat *right;
   LiteralFloat *otherRight;
-  OpSymb::BinaryOp opSymb;
+  ArithmeticOp opSymb;
   Operator *operatorAdd;
 
-  BinaryExprFixture() {
+  ArithmeticExprFixture() {
     left = new LiteralInt(3);
     otherLeft = new LiteralInt(42);
     right = new LiteralFloat(2.0);
     otherRight = new LiteralFloat(22.4);
-    opSymb = OpSymb::addition;
+    opSymb = ArithmeticOp::addition;
     operatorAdd = new Operator(opSymb);
   }
 };
 
-TEST_F(BinaryExprFixture, BinaryExprStandardConstructor) {  /* NOLINT */
-  auto binaryExpr = new BinaryExpr(left, opSymb, right);
+TEST_F(ArithmeticExprFixture, ArithmeticExprStandardConstructor) {  /* NOLINT */
+  auto arithmeticExpr = new ArithmeticExpr(left, opSymb, right);
 
   // children
-  ASSERT_EQ(binaryExpr->getChildren().size(), 3);
-  ASSERT_EQ(binaryExpr->getChildAtIndex(0), left);
-  ASSERT_TRUE(reinterpret_cast<Operator *>(binaryExpr->getChildAtIndex(1))->equals(opSymb));
-  ASSERT_EQ(binaryExpr->getChildAtIndex(2), right);
+  ASSERT_EQ(arithmeticExpr->getChildren().size(), 3);
+  ASSERT_EQ(arithmeticExpr->getChildAtIndex(0), left);
+  ASSERT_TRUE(reinterpret_cast<Operator *>(arithmeticExpr->getChildAtIndex(1))->equals(opSymb));
+  ASSERT_EQ(arithmeticExpr->getChildAtIndex(2), right);
 
   // parents
-  ASSERT_EQ(binaryExpr->getParents().size(), 0);
-  ASSERT_EQ(binaryExpr->getChildAtIndex(0)->getParents().size(), 1);
-  ASSERT_TRUE(binaryExpr->getChildAtIndex(0)->hasParent(binaryExpr));
-  ASSERT_EQ(binaryExpr->getChildAtIndex(1)->getParents().size(), 1);
-  ASSERT_TRUE(binaryExpr->getChildAtIndex(1)->hasParent(binaryExpr));
-  ASSERT_EQ(binaryExpr->getChildAtIndex(2)->getParents().size(), 1);
-  ASSERT_TRUE(binaryExpr->getChildAtIndex(2)->hasParent(binaryExpr));
+  ASSERT_EQ(arithmeticExpr->getParents().size(), 0);
+  ASSERT_EQ(arithmeticExpr->getChildAtIndex(0)->getParents().size(), 1);
+  ASSERT_TRUE(arithmeticExpr->getChildAtIndex(0)->hasParent(arithmeticExpr));
+  ASSERT_EQ(arithmeticExpr->getChildAtIndex(1)->getParents().size(), 1);
+  ASSERT_TRUE(arithmeticExpr->getChildAtIndex(1)->hasParent(arithmeticExpr));
+  ASSERT_EQ(arithmeticExpr->getChildAtIndex(2)->getParents().size(), 1);
+  ASSERT_TRUE(arithmeticExpr->getChildAtIndex(2)->hasParent(arithmeticExpr));
 }
 
-TEST_F(BinaryExprFixture, BinaryExprEmptyConstructor) {  /* NOLINT */
-  BinaryExpr binaryExpr;
-  ASSERT_EQ(binaryExpr.getChildren().size(), 3);
-  ASSERT_EQ(binaryExpr.countChildrenNonNull(), 0);
-  ASSERT_EQ(binaryExpr.getParents().size(), 0);
+TEST_F(ArithmeticExprFixture, ArithmeticExprEmptyConstructor) {  /* NOLINT */
+  ArithmeticExpr arithmeticExpr;
+  ASSERT_EQ(arithmeticExpr.getChildren().size(), 3);
+  ASSERT_EQ(arithmeticExpr.countChildrenNonNull(), 0);
+  ASSERT_EQ(arithmeticExpr.getParents().size(), 0);
 }
 
-TEST_F(BinaryExprFixture, BinaryExprOperatorOnlyConstructor) {  /* NOLINT */
-  auto binaryExpr = new BinaryExpr(opSymb);
+TEST_F(ArithmeticExprFixture, ArithmeticExprOperatorOnlyConstructor) {  /* NOLINT */
+  auto arithmeticExpr = new ArithmeticExpr(opSymb);
 
   // children
-  ASSERT_EQ(binaryExpr->getChildren().size(), 3);
-  ASSERT_EQ(binaryExpr->countChildrenNonNull(), 1);
-  ASSERT_EQ(binaryExpr->getChildAtIndex(0), nullptr);
-  ASSERT_TRUE(reinterpret_cast<Operator *>(binaryExpr->getChildAtIndex(1))->equals(opSymb));
-  ASSERT_EQ(binaryExpr->getChildAtIndex(2), nullptr);
+  ASSERT_EQ(arithmeticExpr->getChildren().size(), 3);
+  ASSERT_EQ(arithmeticExpr->countChildrenNonNull(), 1);
+  ASSERT_EQ(arithmeticExpr->getChildAtIndex(0), nullptr);
+  ASSERT_TRUE(reinterpret_cast<Operator *>(arithmeticExpr->getChildAtIndex(1))->equals(opSymb));
+  ASSERT_EQ(arithmeticExpr->getChildAtIndex(2), nullptr);
 
   // parents
-  ASSERT_EQ(binaryExpr->getParents().size(), 0);
-  ASSERT_EQ(binaryExpr->getChildAtIndex(1)->getParents().size(), 1);
-  ASSERT_TRUE(binaryExpr->getChildAtIndex(1)->hasParent(binaryExpr));
+  ASSERT_EQ(arithmeticExpr->getParents().size(), 0);
+  ASSERT_EQ(arithmeticExpr->getChildAtIndex(1)->getParents().size(), 1);
+  ASSERT_TRUE(arithmeticExpr->getChildAtIndex(1)->hasParent(arithmeticExpr));
 }
 
-TEST_F(BinaryExprFixture, BinaryExprAddChildException_NoEmptyChildSpotAvailable) {  /* NOLINT */
-  auto binaryExpr = new BinaryExpr(left, opSymb, right);
-  EXPECT_THROW(binaryExpr->addChild(new LiteralInt(3), false),
+TEST_F(ArithmeticExprFixture, ArithmeticExprAddChildException_NoEmptyChildSpotAvailable) {  /* NOLINT */
+  auto arithmeticExpr = new ArithmeticExpr(left, opSymb, right);
+  EXPECT_THROW(arithmeticExpr->addChild(new LiteralInt(3), false),
                std::logic_error);
 }
 
-TEST_F(BinaryExprFixture, BinaryExprAddChildException_TooManyChildrenAdded) {  /* NOLINT */
-  auto binaryExpr = new BinaryExpr(left, opSymb, right);
-  EXPECT_THROW(binaryExpr->addChildren({{left, otherLeft, new Operator(opSymb), right}}, false),
+TEST_F(ArithmeticExprFixture, ArithmeticExprAddChildException_TooManyChildrenAdded) {  /* NOLINT */
+  auto arithmeticExpr = new ArithmeticExpr(left, opSymb, right);
+  EXPECT_THROW(arithmeticExpr->addChildren({{left, otherLeft, new Operator(opSymb), right}}, false),
                std::invalid_argument);
 }
 
-TEST_F(BinaryExprFixture, BinaryExprAddChildSuccess) {  /* NOLINT */
-  auto binaryExpr = new BinaryExpr();
-  binaryExpr->setAttributes(nullptr, operatorAdd, right);
+TEST_F(ArithmeticExprFixture, ArithmeticExprAddChildSuccess) {  /* NOLINT */
+  auto arithmeticExpr = new ArithmeticExpr();
+  arithmeticExpr->setAttributes(nullptr, operatorAdd, right);
   auto newLeft = new LiteralInt(3);
-  binaryExpr->addChild(newLeft, true);
+  arithmeticExpr->addChild(newLeft, true);
 
   // children
-  EXPECT_EQ(binaryExpr->getChildren().size(), 3);
-  EXPECT_EQ(binaryExpr->getLeft(), newLeft);
-  EXPECT_EQ(binaryExpr->getChildAtIndex(0), newLeft);
-  EXPECT_EQ(binaryExpr->getOp(), operatorAdd);
-  EXPECT_TRUE(reinterpret_cast<Operator *>(binaryExpr->getChildAtIndex(1))->equals(opSymb));
-  EXPECT_EQ(binaryExpr->getRight(), right);
-  EXPECT_EQ(binaryExpr->getChildAtIndex(2), right);
+  EXPECT_EQ(arithmeticExpr->getChildren().size(), 3);
+  EXPECT_EQ(arithmeticExpr->getLeft(), newLeft);
+  EXPECT_EQ(arithmeticExpr->getChildAtIndex(0), newLeft);
+  EXPECT_EQ(arithmeticExpr->getOp(), operatorAdd);
+  EXPECT_TRUE(reinterpret_cast<Operator *>(arithmeticExpr->getChildAtIndex(1))->equals(opSymb));
+  EXPECT_EQ(arithmeticExpr->getRight(), right);
+  EXPECT_EQ(arithmeticExpr->getChildAtIndex(2), right);
 
   // parents
   EXPECT_EQ(newLeft->getParents().size(), 1);
-  EXPECT_EQ(newLeft->getParents().front(), binaryExpr);
+  EXPECT_EQ(newLeft->getParents().front(), arithmeticExpr);
   EXPECT_EQ(operatorAdd->getParents().size(), 1);
-  EXPECT_EQ(operatorAdd->getParents().front(), binaryExpr);
+  EXPECT_EQ(operatorAdd->getParents().front(), arithmeticExpr);
   EXPECT_EQ(right->getParents().size(), 1);
-  EXPECT_EQ(right->getParents().front(), binaryExpr);
+  EXPECT_EQ(right->getParents().front(), arithmeticExpr);
 }
 
 TEST(ChildParentTests, Block) {  /* NOLINT */
@@ -259,7 +259,7 @@ TEST_F(FunctionParameterFixture, FunctionParameterAddChildException_TooManyChild
 TEST_F(FunctionParameterFixture, FunctionParameter_AddChildSuccess) {  /* NOLINT */
   auto functionParameter = new FunctionParameter(datatype, variableThreshold);
 
-  functionParameter->removeChild(variableThreshold);
+  functionParameter->removeChild(variableThreshold, false);
   functionParameter->addChild(variableSecret, true);
 
   // children
@@ -273,7 +273,7 @@ TEST_F(FunctionParameterFixture, FunctionParameter_AddChildSuccess) {  /* NOLINT
   EXPECT_EQ(variableSecret->getParents().front(), functionParameter);
   EXPECT_TRUE(variableSecret->hasParent(functionParameter));
 
-  functionParameter->removeChild(datatype);
+  functionParameter->removeChild(datatype, false);
   functionParameter->addChild(datatype2, true);
 
   // children
@@ -293,7 +293,7 @@ class IfStmtFixture : public ::testing::Test {
   AbstractExpr *condition;
   AbstractStatement *thenBranch, *elseBranch;
   IfStmtFixture() {
-    condition = new LogicalExpr(new LiteralInt(33), OpSymb::greater, new CallExternal("computeX"));
+    condition = new LogicalExpr(new LiteralInt(33), LogCompOp::greater, new CallExternal("computeX"));
     thenBranch = new Block(new VarAssignm("a", new LiteralInt(22)));
     elseBranch = new Block(new VarAssignm("a", new LiteralInt(175)));
   }
@@ -419,14 +419,14 @@ class LogicalExprFixture : public ::testing::Test {
   LiteralInt *literalInt;
   LiteralInt *literalIntAnother;
   LiteralBool *literalBool;
-  OpSymb::LogCompOp opSymb;
+  LogCompOp opSymb;
   Operator *operatorGreaterEqual;
 
   LogicalExprFixture() {
     literalInt = new LiteralInt(24);
     literalIntAnother = new LiteralInt(6245);
     literalBool = new LiteralBool(true);
-    opSymb = OpSymb::greaterEqual;
+    opSymb = LogCompOp::greaterEqual;
     operatorGreaterEqual = new Operator(opSymb);
   }
 };
@@ -451,7 +451,7 @@ TEST_F(LogicalExprFixture, LogicalExprStandardConstructor) {  /* NOLINT */
 }
 
 TEST_F(LogicalExprFixture, LogicalExprEmptyConstructor) {  /* NOLINT */
-  BinaryExpr logicalExpr;
+  ArithmeticExpr logicalExpr;
   ASSERT_EQ(logicalExpr.getChildren().size(), 3);
   ASSERT_EQ(logicalExpr.countChildrenNonNull(), 0);
   ASSERT_EQ(logicalExpr.getParents().size(), 0);
@@ -509,7 +509,7 @@ TEST_F(LogicalExprFixture, LogicalExprAddChildSuccess) {  /* NOLINT */
 }
 
 TEST(ChildParentTests, OperatorHasNoChildrenOrParents) {  /* NOLINT */
-  Operator op(OpSymb::greaterEqual);
+  Operator op(LogCompOp::greaterEqual);
   ASSERT_TRUE(op.getChildren().empty());
   ASSERT_TRUE(op.getParents().empty());
 }
@@ -564,11 +564,11 @@ TEST_F(ReturnStatementFixture, ReturnStatementAddChildSuccess) {  /* NOLINT */
 
 class UnaryExprFixture : public ::testing::Test {
  protected:
-  OpSymb::UnaryOp opSymbNegation;
+  UnaryOp opSymbNegation;
   LiteralBool *literalBoolTrue;
 
   UnaryExprFixture() {
-    opSymbNegation = OpSymb::negation;
+    opSymbNegation = UnaryOp::negation;
     new Operator(opSymbNegation);
     literalBoolTrue = new LiteralBool(true);
   }
@@ -590,20 +590,20 @@ TEST_F(UnaryExprFixture, UnaryExprStandardConstructor) {  /* NOLINT */
 
 TEST_F(UnaryExprFixture, UnaryExprAddChildException_NoEmptyChildSpotAvailable) {  /* NOLINT */
   auto unaryExpr = new UnaryExpr(opSymbNegation, literalBoolTrue);
-  EXPECT_THROW(unaryExpr->addChild(new Operator(OpSymb::negation), false), std::logic_error);
+  EXPECT_THROW(unaryExpr->addChild(new Operator(UnaryOp::negation), false), std::logic_error);
 }
 
 TEST_F(UnaryExprFixture, UnaryExprAddChildException_TooManyChildrenAdded) {  /* NOLINT */
   auto unaryExpr = new UnaryExpr(opSymbNegation, literalBoolTrue);
-  EXPECT_THROW(unaryExpr->addChildren({new Operator(OpSymb::negation), new LiteralBool(false)}, false),
+  EXPECT_THROW(unaryExpr->addChildren({new Operator(UnaryOp::negation), new LiteralBool(false)}, false),
                std::logic_error);
 }
 
 TEST_F(UnaryExprFixture, UnaryExprtion_AddChildSuccess) {  /* NOLINT */
   auto unaryExpr = new UnaryExpr(opSymbNegation, literalBoolTrue);
 
-  unaryExpr->removeChild(unaryExpr->getOp());
-  auto newOperator = new Operator(OpSymb::negation);
+  unaryExpr->removeChild(unaryExpr->getOp(), false);
+  auto newOperator = new Operator(UnaryOp::negation);
   unaryExpr->addChild(newOperator, true);
 
   // children
@@ -705,40 +705,40 @@ class VarDeclFixture : public ::testing::Test {
 
 TEST_F(VarDeclFixture, VarDeclStandardConstructor) {  /* NOLINT */
   auto variableDeclaration = new VarDecl(variableIdentifier, datatypeInt, literalInt);
-  ASSERT_EQ(reinterpret_cast<Datatype *>(variableDeclaration->getDatatype())->toString(),
-            Datatype(datatypeInt).toString());
+  ASSERT_EQ(reinterpret_cast<Datatype *>(variableDeclaration->getDatatype())->toString(false),
+            Datatype(datatypeInt).toString(false));
   checkExpected(variableDeclaration, variableDeclaration->getDatatype(), literalInt);
 }
 
 TEST_F(VarDeclFixture, VarDeclIntConstructor) {  /* NOLINT */
   auto variableDeclaration = new VarDecl(variableIdentifier, integerValue);
   ASSERT_EQ(reinterpret_cast<LiteralInt *>(variableDeclaration->getInitializer())->getValue(), integerValue);
-  ASSERT_EQ(reinterpret_cast<Datatype *>(variableDeclaration->getDatatype())->toString(),
-            Datatype(Types::INT).toString());
+  ASSERT_EQ(reinterpret_cast<Datatype *>(variableDeclaration->getDatatype())->toString(false),
+            Datatype(Types::INT).toString(false));
   checkExpected(variableDeclaration, variableDeclaration->getDatatype(), variableDeclaration->getInitializer());
 }
 
 TEST_F(VarDeclFixture, VarDeclBoolConstructor) {  /* NOLINT */
   auto variableDeclaration = new VarDecl(variableIdentifier, boolValue);
   ASSERT_EQ(reinterpret_cast<LiteralBool *>(variableDeclaration->getInitializer())->getValue(), boolValue);
-  ASSERT_EQ(reinterpret_cast<Datatype *>(variableDeclaration->getDatatype())->toString(),
-            Datatype(Types::BOOL).toString());
+  ASSERT_EQ(reinterpret_cast<Datatype *>(variableDeclaration->getDatatype())->toString(false),
+            Datatype(Types::BOOL).toString(false));
   checkExpected(variableDeclaration, variableDeclaration->getDatatype(), variableDeclaration->getInitializer());
 }
 
 TEST_F(VarDeclFixture, VarDeclFloatConstructor) {  /* NOLINT */
   auto variableDeclaration = new VarDecl(variableIdentifier, floatValue);
   ASSERT_EQ(reinterpret_cast<LiteralFloat *>(variableDeclaration->getInitializer())->getValue(), floatValue);
-  ASSERT_EQ(reinterpret_cast<Datatype *>(variableDeclaration->getDatatype())->toString(),
-            Datatype(Types::FLOAT).toString());
+  ASSERT_EQ(reinterpret_cast<Datatype *>(variableDeclaration->getDatatype())->toString(false),
+            Datatype(Types::FLOAT).toString(false));
   checkExpected(variableDeclaration, variableDeclaration->getDatatype(), variableDeclaration->getInitializer());
 }
 
 TEST_F(VarDeclFixture, VarDeclStringConstructor) {  /* NOLINT */
   auto variableDeclaration = new VarDecl(variableIdentifier, stringValue);
   ASSERT_EQ(reinterpret_cast<LiteralString *>(variableDeclaration->getInitializer())->getValue(), stringValue);
-  ASSERT_EQ(reinterpret_cast<Datatype *>(variableDeclaration->getDatatype())->toString(),
-            Datatype(Types::STRING).toString());
+  ASSERT_EQ(reinterpret_cast<Datatype *>(variableDeclaration->getDatatype())->toString(false),
+            Datatype(Types::STRING).toString(false));
   checkExpected(variableDeclaration, variableDeclaration->getDatatype(), variableDeclaration->getInitializer());
 }
 
@@ -750,7 +750,7 @@ TEST(ChildParentTests, Variable) {  /* NOLINT */
 
 TEST(ChildParentTests, While) {  /* NOLINT */
   auto whileStatement =
-      new While(new LogicalExpr(new LiteralInt(32), OpSymb::greaterEqual, new Variable("a")), new Block());
+      new While(new LogicalExpr(new LiteralInt(32), LogCompOp::greaterEqual, new Variable("a")), new Block());
   ASSERT_EQ(whileStatement->getChildren().size(), 0);
   ASSERT_EQ(whileStatement->getParents().size(), 0);
   ASSERT_FALSE(whileStatement->supportsCircuitMode());

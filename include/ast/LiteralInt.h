@@ -22,7 +22,7 @@ class LiteralInt : public AbstractLiteral {
 
   void accept(Visitor &v) override;
 
-  [[nodiscard]] std::string getNodeName() const override;
+  [[nodiscard]] std::string getNodeType() const override;
 
   LiteralInt operator+(LiteralInt const &lint);
 
@@ -40,12 +40,15 @@ class LiteralInt : public AbstractLiteral {
 
   void setValue(int newValue);
 
-  [[nodiscard]] std::string toString() const override;
+  [[nodiscard]] std::string toString(bool printChildren) const override;
 
   void print(std::ostream &str) const override;
 
   bool supportsCircuitMode() override;
+
   bool isEqual(AbstractExpr *other) override;
+
+  bool isNull() override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_LITERALINT_H

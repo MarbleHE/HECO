@@ -23,7 +23,7 @@ class LiteralFloat : public AbstractLiteral {
 
   void accept(Visitor &v) override;
 
-  [[nodiscard]] std::string getNodeName() const override;
+  [[nodiscard]] std::string getNodeType() const override;
 
   LiteralFloat operator+(LiteralFloat const &lfloat);
 
@@ -39,7 +39,7 @@ class LiteralFloat : public AbstractLiteral {
 
   void setValue(float val);
 
-  [[nodiscard]] std::string toString() const override;
+  [[nodiscard]] std::string toString(bool printChildren) const override;
 
   bool supportsCircuitMode() override;
 
@@ -47,6 +47,7 @@ class LiteralFloat : public AbstractLiteral {
 
   void print(std::ostream &str) const override;
   bool isEqual(AbstractExpr *other) override;
+  bool isNull() override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_LITERALFLOAT_H

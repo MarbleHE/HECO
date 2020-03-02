@@ -2,7 +2,7 @@
 #include "gtest/gtest.h"
 #include "AstTestingGenerator.h"
 #include "Function.h"
-#include "BinaryExpr.h"
+#include "ArithmeticExpr.h"
 
 class AstTestFixture : public ::testing::Test {
  protected:
@@ -19,64 +19,66 @@ class AstTestFixture : public ::testing::Test {
 };
 
 TEST_F(AstTestFixture, deleteNode_deleteSingleLeafNodeOnly) { /* NOLINT */
-  // retrieve the binary expression of interest
+  // retrieve the arithmetic expression of interest
   auto func = dynamic_cast<Function *>(ast.getRootNode());
   ASSERT_NE(func, nullptr);
-  auto binaryExpr = dynamic_cast<BinaryExpr *>(func->getBodyStatements().at(0)->getChildAtIndex(1)->getChildAtIndex(2));
-  ASSERT_NE(binaryExpr, nullptr);
+  auto arithmeticExpr =
+      dynamic_cast<ArithmeticExpr *>(func->getBodyStatements().at(0)->getChildAtIndex(1)->getChildAtIndex(2));
+  ASSERT_NE(arithmeticExpr, nullptr);
 
-  // retrieve the deletion target -> variable of the binary expression
-  auto variable = binaryExpr->getChildAtIndex(0);
+  // retrieve the deletion target -> variable of the arithmetic expression
+  auto variable = arithmeticExpr->getChildAtIndex(0);
   ASSERT_NE(variable, nullptr);
-  ASSERT_EQ(variable->getParents().front(), binaryExpr);
+  ASSERT_EQ(variable->getParents().front(), arithmeticExpr);
 
   // delete node and verify deletion success
   ast.deleteNode(&variable);
-  ASSERT_EQ(binaryExpr->getChildAtIndex(0), nullptr);
+  ASSERT_EQ(arithmeticExpr->getChildAtIndex(0), nullptr);
   ASSERT_EQ(variable, nullptr);
 }
 
 TEST_F(AstTestFixture, deleteNode_deleteRecursiveSubtreeNonEmpty) { /* NOLINT */
-  // retrieve the binary expression of interest
+  // retrieve the arithmetic expression of interest
   auto func = dynamic_cast<Function *>(ast.getRootNode());
   ASSERT_NE(func, nullptr);
-  auto binaryExprParent = func->getBodyStatements().at(0)->getChildAtIndex(1);
-  auto binaryExpr = dynamic_cast<BinaryExpr *>(binaryExprParent->getChildAtIndex(2));
-  ASSERT_NE(binaryExpr, nullptr);
+  auto arithmeticExprParent = func->getBodyStatements().at(0)->getChildAtIndex(1);
+  auto arithmeticExpr = dynamic_cast<ArithmeticExpr *>(arithmeticExprParent->getChildAtIndex(2));
+  ASSERT_NE(arithmeticExpr, nullptr);
 
   // save and check node's children
-  const auto &binaryExprChildren = binaryExpr->getChildren();
-  for (auto &c : binaryExprChildren)
-    ASSERT_EQ(c->getParentsNonNull().front(), binaryExpr);
+  const auto &arithmeticExprChildren = arithmeticExpr->getChildren();
+  for (auto &c : arithmeticExprChildren)
+    ASSERT_EQ(c->getOnlyParent(), arithmeticExpr);
 
   // delete node and its subtree and verify deletion success
-  AbstractNode *binaryExprPtr = binaryExpr;
-  ast.deleteNode(&binaryExprPtr, true);
-  // verify that BinaryExpr was deleted, also from its parent
-  ASSERT_EQ(binaryExprPtr, nullptr);
-  ASSERT_EQ(binaryExprParent->getChildAtIndex(2), nullptr);
+  AbstractNode *arithmeticExprPtr = arithmeticExpr;
+  ast.deleteNode(&arithmeticExprPtr, true);
+  // verify that ArithmeticExpr was deleted, also from its parent
+  ASSERT_EQ(arithmeticExprPtr, nullptr);
+  ASSERT_EQ(arithmeticExprParent->getChildAtIndex(2), nullptr);
   // verify that children are deleted
-  ASSERT_TRUE(binaryExprChildren.empty());
+  ASSERT_TRUE(arithmeticExprChildren.empty());
 }
 
 TEST_F(AstTestFixture, deleteNode_deleteRecursiveSubtreeEmpty) { /* NOLINT */
   // The same test as deleteNode_deleteSingleLeafNodeOnly but now we use the 'deleteSubtreeRecursively' flag
   // this should not change anything though if there are no children present
 
-  // retrieve the binary expression of interest
+  // retrieve the arithmetic expression of interest
   auto func = dynamic_cast<Function *>(ast.getRootNode());
   ASSERT_NE(func, nullptr);
-  auto binaryExpr = dynamic_cast<BinaryExpr *>(func->getBodyStatements().at(0)->getChildAtIndex(1)->getChildAtIndex(2));
-  ASSERT_NE(binaryExpr, nullptr);
+  auto arithmeticExpr =
+      dynamic_cast<ArithmeticExpr *>(func->getBodyStatements().at(0)->getChildAtIndex(1)->getChildAtIndex(2));
+  ASSERT_NE(arithmeticExpr, nullptr);
 
-  // retrieve the deletion target -> variable of the binary expression
-  auto variable = binaryExpr->getChildAtIndex(0);
+  // retrieve the deletion target -> variable of the arithmetic expression
+  auto variable = arithmeticExpr->getChildAtIndex(0);
   ASSERT_NE(variable, nullptr);
-  ASSERT_EQ(variable->getParents().front(), binaryExpr);
+  ASSERT_EQ(variable->getParents().front(), arithmeticExpr);
 
   // delete node and verify deletion success
   ast.deleteNode(&variable, true);
-  ASSERT_EQ(binaryExpr->getChildAtIndex(0), nullptr);
+  ASSERT_EQ(arithmeticExpr->getChildAtIndex(0), nullptr);
   ASSERT_EQ(variable, nullptr);
 }
 
@@ -84,30 +86,30 @@ TEST_F(AstTestFixture, deleteNode_ChildrenExisting) { /* NOLINT */
   // The same test as deleteNode_deleteRecursiveSubtreeNonEmpty but now we simulate forgetting the use of the
   // 'deleteSubtreeRecursively' flag which should throw an exception
 
-  // retrieve the binary expression of interest
+  // retrieve the arithmetic expression of interest
   auto func = dynamic_cast<Function *>(ast.getRootNode());
   ASSERT_NE(func, nullptr);
-  auto binaryExprParent = func->getBodyStatements().at(0)->getChildAtIndex(1);
-  auto binaryExpr = dynamic_cast<BinaryExpr *>(binaryExprParent->getChildAtIndex(2));
-  ASSERT_NE(binaryExpr, nullptr);
+  auto arithmeticExprParent = func->getBodyStatements().at(0)->getChildAtIndex(1);
+  auto arithmeticExpr = dynamic_cast<ArithmeticExpr *>(arithmeticExprParent->getChildAtIndex(2));
+  ASSERT_NE(arithmeticExpr, nullptr);
 
   // save and check node's children
-  int binaryExprNumChildren = binaryExpr->countChildrenNonNull();
-  for (auto &c : binaryExpr->getChildrenNonNull())
-    ASSERT_EQ(c->getParentsNonNull().front(), binaryExpr);
+  int arithmeticExprNumChildren = arithmeticExpr->countChildrenNonNull();
+  for (auto &c : arithmeticExpr->getChildrenNonNull())
+    ASSERT_EQ(c->getOnlyParent(), arithmeticExpr);
 
   // delete node and its subtree and verify deletion success
-  AbstractNode *binaryExprPtr = binaryExpr;
+  AbstractNode *arithmeticExprPtr = arithmeticExpr;
   // by using the default parameter value for deleteSubtreeRecursively
-  EXPECT_THROW(ast.deleteNode(&binaryExprPtr), std::logic_error);
+  EXPECT_THROW(ast.deleteNode(&arithmeticExprPtr), std::logic_error);
   // by expliciting passing the parameter value for deleteSubtreeRecursively
-  EXPECT_THROW(ast.deleteNode(&binaryExprPtr, false), std::logic_error);
+  EXPECT_THROW(ast.deleteNode(&arithmeticExprPtr, false), std::logic_error);
 
-  // verify that BinaryExpr was not deleted, also from its parent
-  ASSERT_NE(binaryExprPtr, nullptr);
-  ASSERT_EQ(binaryExprParent->getChildAtIndex(2), binaryExpr);
+  // verify that ArithmeticExpr was not deleted, also from its parent
+  ASSERT_NE(arithmeticExprPtr, nullptr);
+  ASSERT_EQ(arithmeticExprParent->getChildAtIndex(2), arithmeticExpr);
   // verify that children are deleted
-  ASSERT_EQ(binaryExpr->countChildrenNonNull(), binaryExprNumChildren);
+  ASSERT_EQ(arithmeticExpr->countChildrenNonNull(), arithmeticExprNumChildren);
 }
 
 TEST_F(AstTestFixture, deepCopy) { /* NOLINT */

@@ -1,5 +1,5 @@
 #include <fstream>
-#include "BinaryExpr.h"
+#include "ArithmeticExpr.h"
 #include "Block.h"
 #include "Call.h"
 #include "CallExternal.h"
@@ -89,7 +89,11 @@ TEST(JsonOutputTest, VarDecl) { /* NOLINT */
   auto *var = new VarDecl(identifier, initializer);
   json j = {{"type", "VarDecl"},
             {"identifier", identifier},
-            {"datatype", datatype},
+            {"datatype", {
+                {"type", "Datatype"},
+                {"specifier", "int"},
+                {"encrypted", false}
+            }},
             {"initializer", {
                 {"type", "LiteralInt"},
                 {"value", initializer}}
@@ -98,30 +102,30 @@ TEST(JsonOutputTest, VarDecl) { /* NOLINT */
   EXPECT_EQ(var->toJson(), j);
 }
 
-TEST(JsonOutputTest, BinaryExpr) { /* NOLINT */
+TEST(JsonOutputTest, ArithmeticExpr) { /* NOLINT */
   auto lintValue = 22;
   auto varIdentifier = "x";
   // x + 22;
-  auto *bexp = new BinaryExpr(
+  auto *aexp = new ArithmeticExpr(
       new Variable(varIdentifier),
-      OpSymb::BinaryOp::addition,
+      ArithmeticOp::addition,
       new LiteralInt(lintValue));
-  json j = {{"type", "BinaryExpr"},
+  json j = {{"type", "ArithmeticExpr"},
             {"leftOperand", {
                 {"type", "Variable"},
                 {"identifier", varIdentifier}}},
-            {"operator", OpSymb::getTextRepr(OpSymb::addition)},
+            {"operator", OpSymb::getTextRepr(ArithmeticOp::addition)},
             {"rightOperand", {
                 {"type", "LiteralInt"},
                 {"value", lintValue}
             }}};
-  EXPECT_EQ(bexp->toJson(), j);
+  EXPECT_EQ(aexp->toJson(), j);
 }
 
 TEST(JsonOutputTest, Return) { /* NOLINT */
   // Return x > 22;
   auto ret = new Return(
-      new LogicalExpr(new Variable("x"), OpSymb::greater, 22));
+      new LogicalExpr(new Variable("x"), LogCompOp::greater, 22));
   json j = {
       {"type", "Return"},
       {"values", {{
@@ -142,9 +146,9 @@ TEST(JsonOutputTest, Return) { /* NOLINT */
 TEST(JsonOutputTest, UnaryExpr) { /* NOLINT */
   auto varIdentifier = "x";
   // !x
-  auto unaryExp = new UnaryExpr(OpSymb::UnaryOp::negation, new Variable(varIdentifier));
+  auto unaryExp = new UnaryExpr(UnaryOp::negation, new Variable(varIdentifier));
   json j = {{"type", "UnaryExpr"},
-            {"operator", OpSymb::getTextRepr(OpSymb::negation)},
+            {"operator", OpSymb::getTextRepr(UnaryOp::negation)},
             {"rightOperand", {
                 {"type", "Variable"},
                 {"identifier", varIdentifier}}
@@ -155,7 +159,11 @@ TEST(JsonOutputTest, UnaryExpr) { /* NOLINT */
 TEST(JsonOutputTest, FunctionParameter) { /* NOLINT */
   auto fp = new FunctionParameter("int", new Variable("y"));
   json j = {{"type", "FunctionParameter"},
-            {"datatype", "plaintext int"},
+            {"datatype", {
+                {"type", "Datatype"},
+                {"specifier", "int"},
+                {"encrypted", false}
+            }},
             {"value", {
                 {"type", "Variable"},
                 {"identifier", "y"}
@@ -169,13 +177,13 @@ TEST(JsonOutputTest, LogicalExpr) { /* NOLINT */
   // numIterations < maxIterations
   auto *lexp = new LogicalExpr(
       new Variable(varIdentifier),
-      OpSymb::smaller,
+      LogCompOp::smaller,
       new Variable(varIdentifierMax));
   json j = {{"type", "LogicalExpr"},
             {"leftOperand", {
                 {"type", "Variable"},
                 {"identifier", varIdentifier}}},
-            {"operator", OpSymb::getTextRepr(OpSymb::smaller)},
+            {"operator", OpSymb::getTextRepr(LogCompOp::smaller)},
             {"rightOperand", {
                 {"type", "Variable"},
                 {"identifier", varIdentifierMax}
@@ -184,12 +192,11 @@ TEST(JsonOutputTest, LogicalExpr) { /* NOLINT */
 }
 
 TEST(JsonOutputTest, Operator) { /* NOLINT */
-  auto opSub = new Operator(OpSymb::BinaryOp::subtraction);
-  EXPECT_EQ(opSub->getOperatorString(), OpSymb::getTextRepr(OpSymb::subtraction));
+  auto opSub = new Operator(ArithmeticOp::subtraction);
+  EXPECT_EQ(opSub->getOperatorString(), OpSymb::getTextRepr(ArithmeticOp::subtraction));
 
-
-  auto opAnd = new Operator(OpSymb::LogCompOp::logicalAnd);
-  EXPECT_EQ(opAnd->getOperatorString(), OpSymb::getTextRepr(OpSymb::logicalAnd));
+  auto opAnd = new Operator(LogCompOp::logicalAnd);
+  EXPECT_EQ(opAnd->getOperatorString(), OpSymb::getTextRepr(LogCompOp::logicalAnd));
 }
 
 TEST(JsonOutputTest, Block) { /* NOLINT */
@@ -197,7 +204,11 @@ TEST(JsonOutputTest, Block) { /* NOLINT */
   json j = {{"type", "Block"},
             {"statements", {{
                                 {"type", "VarDecl"},
-                                {"datatype", "plaintext int"},
+                                {"datatype", {
+                                    {"type", "Datatype"},
+                                    {"specifier", "int"},
+                                    {"encrypted", false}
+                                }},
                                 {"identifier", "width"},
                                 {"initializer", {
                                     {"type", "LiteralInt"},
@@ -216,8 +227,7 @@ TEST(JsonOutputTest, CallExternal) { /* NOLINT */
   std::ifstream f("../../test/expected_output_large/JsonOutputTest/CallExternal.json");
   json j = json::parse(f);
 
-  EXPECT_EQ(callExt->AbstractStatement::toString(), j.dump());
-  EXPECT_EQ(callExt->AbstractExpr::toString(), j.dump());
+  EXPECT_EQ(callExt->toJson().dump(), j.dump());
 }
 
 TEST(JsonOutputTest, Call) {/* NOLINT */
@@ -227,9 +237,9 @@ TEST(JsonOutputTest, Call) {/* NOLINT */
       new Function("computeSecret",
                    {new FunctionParameter("int", new Variable("inputA"))},
                    {new Return(
-                       new BinaryExpr(
+                       new ArithmeticExpr(
                            new Variable("inputA"),
-                           OpSymb::multiplication,
+                           ArithmeticOp::multiplication,
                            new LiteralInt(32)))
                    }));
 
@@ -237,7 +247,7 @@ TEST(JsonOutputTest, Call) {/* NOLINT */
   std::ifstream f("../../test/expected_output_large/JsonOutputTest/Call.json");
   json expected = json::parse(f);
 
-  EXPECT_EQ(call->AbstractExpr::toString(), expected.dump());
+  EXPECT_EQ(call->toJson().dump(), expected.dump());
 }
 
 TEST(JsonOutputTest, Function) { /* NOLINT */
@@ -250,15 +260,15 @@ TEST(JsonOutputTest, Function) { /* NOLINT */
       new FunctionParameter("int", new Variable("z"))
   }, {
                                new Return(
-                                   new BinaryExpr(
-                                       new BinaryExpr(
-                                           new BinaryExpr(
+                                   new ArithmeticExpr(
+                                       new ArithmeticExpr(
+                                           new ArithmeticExpr(
                                                new Variable("a"),
-                                               OpSymb::addition,
+                                               ArithmeticOp::addition,
                                                new LiteralInt(221)),
-                                           OpSymb::multiplication,
+                                           ArithmeticOp::multiplication,
                                            new Variable("b")),
-                                       OpSymb::addition,
+                                       ArithmeticOp::addition,
                                        new Variable("z")))});
 
   // retrieve expected result
@@ -276,12 +286,12 @@ TEST(JsonOutputTest, IfThenOnly) { /* NOLINT */
       new LogicalExpr(
           new LogicalExpr(
               new Variable("b"),
-              OpSymb::equal,
+              LogCompOp::equal,
               new LiteralBool(true)),
-          OpSymb::logicalAnd,
+          LogCompOp::logicalAnd,
           new LogicalExpr(
               new Variable("z"),
-              OpSymb::greaterEqual,
+              LogCompOp::greaterEqual,
               new LiteralInt(17))),
       new VarAssignm("isValid", new LiteralBool(true)));
 
@@ -303,21 +313,21 @@ TEST(JsonOutputTest, If) { /* NOLINT */
   auto condition = new LogicalExpr(
       new LogicalExpr(
           new Variable("b"),
-          OpSymb::equal,
+          LogCompOp::equal,
           new LiteralBool(true)),
-      OpSymb::logicalAnd,
+      LogCompOp::logicalAnd,
       new LogicalExpr(
           new Variable("z"),
-          OpSymb::greaterEqual,
+          LogCompOp::greaterEqual,
           new LiteralInt(17)));
 
   auto thenBranch = new VarAssignm("isValid", new LiteralBool(true));
 
   std::vector<AbstractStatement *> elseStatement = {
       new VarAssignm("isValid", new LiteralBool(false)),
-      new VarAssignm("c", new BinaryExpr(new Variable("a"), OpSymb::subtraction, new Variable("z")))
+      new VarAssignm("c", new ArithmeticExpr(new Variable("a"), ArithmeticOp::subtraction, new Variable("z")))
   };
-  auto *elseBranch = new Block(&elseStatement);
+  auto *elseBranch = new Block(elseStatement);
   auto ifStmt = new If(condition, thenBranch, elseBranch);
 
   // retrieve expected result
@@ -335,16 +345,16 @@ TEST(JsonOutputTest, While) { /* NOLINT */
   std::vector<AbstractStatement *> blockStatements;
   blockStatements.emplace_back(
       new VarAssignm("z",
-                     new BinaryExpr(
+                     new ArithmeticExpr(
                          new Variable("z"),
-                         OpSymb::multiplication,
+                         ArithmeticOp::multiplication,
                          new Variable("i"))));
   blockStatements.emplace_back(
-      new VarAssignm("i", new UnaryExpr(OpSymb::negation, new Variable("i"))));
+      new VarAssignm("i", new UnaryExpr(UnaryOp::negation, new Variable("i"))));
 
   auto whileStmt = new While(
-      new LogicalExpr(new Variable("i"), OpSymb::smaller, new LiteralInt(10)),
-      new Block(&blockStatements));
+      new LogicalExpr(new Variable("i"), LogCompOp::smaller, new LiteralInt(10)),
+      new Block(blockStatements));
 
   // retrieve expected result
   std::ifstream f("../../test/expected_output_large/JsonOutputTest/While.json");

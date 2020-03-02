@@ -5,6 +5,7 @@
 #include <nlohmann/json.hpp>
 #include "Visitor.h"
 #include "AbstractNode.h"
+#include "AbstractBinaryExpr.h"
 
 using json = nlohmann::json;
 
@@ -12,7 +13,7 @@ class AbstractStatement : public AbstractNode {
  public:
   [[nodiscard]] json toJson() const override;
 
-  virtual BinaryExpr *contains(BinaryExpr *bexpTemplate, BinaryExpr *excludedSubtree);
+  virtual AbstractBinaryExpr *contains(AbstractBinaryExpr *aexpTemplate, ArithmeticExpr *excludedSubtree);
 
   virtual std::string getVarTargetIdentifier();
 

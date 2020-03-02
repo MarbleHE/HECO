@@ -4,7 +4,11 @@
   "arguments": [
     {
       "type": "FunctionParameter",
-      "datatype": "plaintext string",
+      "datatype": {
+        "type": "Datatype",
+        "specifier": "string",
+        "encrypted": false
+      },
       "value": {
         "type": "LiteralString",
         "value": "Hello world!"

@@ -3,7 +3,7 @@
 #include "AbstractNode.h"
 #include "AbstractExpr.h"
 #include "AbstractStatement.h"
-#include "BinaryExpr.h"
+#include "ArithmeticExpr.h"
 #include "Block.h"
 #include "Call.h"
 #include "CallExternal.h"
@@ -47,7 +47,7 @@ void Visitor::visit(AbstractStatement &elem) {
   }
 }
 
-void Visitor::visit(BinaryExpr &elem) {
+void Visitor::visit(ArithmeticExpr &elem) {
   elem.getLeft()->accept(*this);
   elem.getOp()->accept(*this);
   elem.getRight()->accept(*this);
@@ -56,7 +56,7 @@ void Visitor::visit(BinaryExpr &elem) {
 void Visitor::visit(Block &elem) {
   curScope->addStatement(&elem);
   changeToInnerScope(elem.getUniqueNodeId());
-  for (auto &stat : *elem.getStatements()) {
+  for (auto &stat : elem.getStatements()) {
     stat->accept(*this);
   }
   changeToOuterScope();

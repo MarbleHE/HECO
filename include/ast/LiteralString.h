@@ -25,7 +25,7 @@ class LiteralString : public AbstractLiteral {
 
   void accept(Visitor &v) override;
 
-  [[nodiscard]] std::string getNodeName() const override;
+  [[nodiscard]] std::string getNodeType() const override;
 
   bool operator==(const LiteralString &rhs) const;
 
@@ -37,13 +37,15 @@ class LiteralString : public AbstractLiteral {
 
   void setRandomValue(RandLiteralGen &rlg) override;
 
-  [[nodiscard]] std::string toString() const override;
+  [[nodiscard]] std::string toString(bool printChildren) const override;
 
   bool supportsCircuitMode() override;
 
   bool supportsDatatype(Datatype &datatype) override;
 
   bool isEqual(AbstractExpr *other) override;
+
+  bool isNull() override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_LITERALSTRING_H

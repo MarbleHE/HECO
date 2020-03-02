@@ -40,7 +40,7 @@ class Function : public AbstractStatement {
 
   void accept(Visitor &v) override;
 
-  [[nodiscard]] std::string getNodeName() const override;
+  [[nodiscard]] std::string getNodeType() const override;
 
   [[nodiscard]] ParameterList* getParameterList() const;
 
@@ -51,6 +51,7 @@ class Function : public AbstractStatement {
   int getMaxNumberChildren() override;
 
   bool supportsCircuitMode() override;
+  std::string toString(bool printChildren) const override;
 };
 
 /// Defines the JSON representation to be used for vector<Function> objects.

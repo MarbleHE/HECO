@@ -11,7 +11,7 @@ LiteralInt::LiteralInt(int value) : value(value) {}
 
 json LiteralInt::toJson() const {
   json j;
-  j["type"] = getNodeName();
+  j["type"] = getNodeType();
   j["value"] = this->value;
   return j;
 }
@@ -24,7 +24,7 @@ void LiteralInt::accept(Visitor &v) {
   v.visit(*this);
 }
 
-std::string LiteralInt::getNodeName() const {
+std::string LiteralInt::getNodeType() const {
   return "LiteralInt";
 }
 
@@ -64,8 +64,8 @@ void LiteralInt::setRandomValue(RandLiteralGen &rlg) {
   setValue(rlg.getRandomInt());
 }
 
-std::string LiteralInt::toString() const {
-  return std::to_string(this->getValue());
+std::string LiteralInt::toString(bool printChildren) const {
+  return AbstractNode::generateOutputString(printChildren, {std::to_string(this->getValue())});
 }
 
 bool LiteralInt::supportsCircuitMode() {
@@ -82,4 +82,8 @@ LiteralInt *LiteralInt::clone(bool keepOriginalUniqueNodeId) {
 bool LiteralInt::isEqual(AbstractExpr *other) {
   auto otherLiteralInt = dynamic_cast<LiteralInt *>(other);
   return otherLiteralInt!=nullptr && this->getValue()==otherLiteralInt->getValue();
+}
+
+bool LiteralInt::isNull() {
+  return this->getValue()==0;
 }

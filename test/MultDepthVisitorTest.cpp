@@ -3,7 +3,7 @@
 #include "MultDepthVisitor.h"
 #include "Operator.h"
 #include "Function.h"
-#include "BinaryExpr.h"
+#include "ArithmeticExpr.h"
 #include "LogicalExpr.h"
 #include "VarAssignm.h"
 #include "AstTestingGenerator.h"
@@ -14,9 +14,9 @@ TEST(MultDepthVisitorTests, SingleStatementMultiplication) { // NOLINT
   // void f() { int abc = 22 * 32; }
   auto *f = new Function("f");
   f->addStatement(new VarDecl("abc", Types::INT,
-                              new BinaryExpr(
+                              new ArithmeticExpr(
                                   new LiteralInt(22),
-                                  OpSymb::multiplication,
+                                  ArithmeticOp::multiplication,
                                   new LiteralInt(32))));
   ast.setRootNode(f);
 
@@ -34,12 +34,12 @@ TEST(MultDepthVisitorTests, NestedMultiplication) { // NOLINT
   auto *f = new Function("f");
   f->addStatement(new VarDecl("abc",
                               Types::INT,
-                              new BinaryExpr(
+                              new ArithmeticExpr(
                                   new LiteralInt(22),
-                                  OpSymb::multiplication,
-                                  new BinaryExpr(
+                                  ArithmeticOp::multiplication,
+                                  new ArithmeticExpr(
                                       new LiteralInt(32),
-                                      OpSymb::multiplication,
+                                      ArithmeticOp::multiplication,
                                       new LiteralInt(53)))));
   ast.setRootNode(f);
 
@@ -59,16 +59,16 @@ TEST(MultDepthVisitorTests, MultipleStatementMultiplication) { // NOLINT
   ast.setRootNode(f);
   f->addParameter(new FunctionParameter("int", new Variable("num")));
 
-  f->addStatement(new VarDecl("alpha", Types::INT, new BinaryExpr(
+  f->addStatement(new VarDecl("alpha", Types::INT, new ArithmeticExpr(
       new LiteralInt(32),
-      OpSymb::multiplication,
+      ArithmeticOp::multiplication,
       new Variable("num"))));
 
   f->addStatement(new VarDecl("beta",
                               Types::INT,
-                              new BinaryExpr(
+                              new ArithmeticExpr(
                                   new Variable("alpha"),
-                                  OpSymb::multiplication,
+                                  ArithmeticOp::multiplication,
                                   new LiteralInt(123))));
 
   // calculate multiplicative depth
@@ -86,7 +86,7 @@ TEST(MultDepthVisitorTests, SingleStatementLogicalAnd) { // NOLINT
   f->addStatement(new VarDecl("abc", Types::INT,
                               new LogicalExpr(
                                   new LiteralBool(true),
-                                  OpSymb::logicalAnd,
+                                  LogCompOp::logicalAnd,
                                   new LiteralBool(false))));
   ast.setRootNode(f);
 
@@ -106,10 +106,10 @@ TEST(MultDepthVisitorTests, NestedStatementLogicalAnd) { // NOLINT
                               Types::BOOL,
                               new LogicalExpr(
                                   new LiteralBool(false),
-                                  OpSymb::logicalAnd,
+                                  LogCompOp::logicalAnd,
                                   new LogicalExpr(
                                       new LiteralBool(true),
-                                      OpSymb::logicalAnd,
+                                      LogCompOp::logicalAnd,
                                       new LiteralBool(false)))));
   ast.setRootNode(f);
 
@@ -132,13 +132,13 @@ TEST(MultDepthVisitorTests, MultipleStatementsLogicalAnd) { // NOLINT
   f->addStatement(new VarDecl("alpha", Types::BOOL,
                               new LogicalExpr(
                                   new LiteralBool(true),
-                                  OpSymb::logicalAnd,
+                                  LogCompOp::logicalAnd,
                                   new LiteralBool(false))));
 
   f->addStatement(new VarDecl("beta", Types::BOOL,
                               new LogicalExpr(
                                   new Variable("alpha"),
-                                  OpSymb::logicalAnd,
+                                  LogCompOp::logicalAnd,
                                   new LiteralBool(true))));
 
   // calculate multiplicative depth
@@ -157,10 +157,10 @@ TEST(MultDepthVisitorTests, NoLogicalAndOrMultiplicationPresent) { // NOLINT
                               Types::BOOL,
                               new LogicalExpr(
                                   new Variable("value"),
-                                  OpSymb::smaller,
-                                  new BinaryExpr(
+                                  LogCompOp::smaller,
+                                  new ArithmeticExpr(
                                       new Variable("value"),
-                                      OpSymb::addition,
+                                      ArithmeticOp::addition,
                                       new LiteralInt(1234)))));
   // calculate multiplicative depth
   MultDepthVisitor mdv;
@@ -178,7 +178,7 @@ TEST(MultDepthVisitorTests, LogicalAndInReturnStatement) { // NOLINT
   EXPECT_EQ(mdv.getMaxDepth(), 3);
 }
 
-TEST(MultDepthVisitorTests, BinaryExprInReturnStatement) { // NOLINT
+TEST(MultDepthVisitorTests, ArithmeticExprInReturnStatement) { // NOLINT
   Ast ast;
   AstTestingGenerator::generateAst(17, ast);
 

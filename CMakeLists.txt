@@ -28,7 +28,7 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/nlohmann-json-src
 
 ##############################
 # TARGET: ast_optimizer
-##############################
+##############################æ
 
 include_directories(
         ${ast_optimizer_SOURCE_DIR}/include/ast
@@ -45,7 +45,7 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/ast/AbstractNode.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/AbstractStatement.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/Ast.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/BinaryExpr.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/ArithmeticExpr.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/Block.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/Call.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/CallExternal.cpp
@@ -78,7 +78,9 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/visitor/Visitor.cpp
         ${ast_optimizer_SOURCE_DIR}/test/AstTestingGenerator.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/EvaluationPrinter.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/utilities/DotPrinter.cpp)
+        ${ast_optimizer_SOURCE_DIR}/src/utilities/DotPrinter.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/CompileTimeExpressionSimplifier.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/AbstractBinaryExpr.cpp)
 
 set(HEADER_ONLY_SOURCES
         ${ast_optimizer_SOURCE_DIR}/include/ast/OpSymbEnum.h

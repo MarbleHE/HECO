@@ -8,7 +8,7 @@ LiteralFloat::LiteralFloat(float value) : value(value) {}
 
 json LiteralFloat::toJson() const {
   json j;
-  j["type"] = getNodeName();
+  j["type"] = getNodeType();
   j["value"] = this->value;
   return j;
 }
@@ -21,7 +21,7 @@ void LiteralFloat::accept(Visitor &v) {
   v.visit(*this);
 }
 
-std::string LiteralFloat::getNodeName() const {
+std::string LiteralFloat::getNodeType() const {
   return "LiteralFloat";
 }
 
@@ -61,8 +61,9 @@ void LiteralFloat::setRandomValue(RandLiteralGen &rlg) {
   setValue(rlg.getRandomFloat());
 }
 
-std::string LiteralFloat::toString() const {
-  return std::to_string(this->getValue());
+std::string LiteralFloat::toString(bool printChildren) const {
+  return AbstractNode::generateOutputString(printChildren, {std::to_string(this->getValue())});
+
 }
 
 bool LiteralFloat::supportsCircuitMode() {
@@ -83,4 +84,8 @@ LiteralFloat *LiteralFloat::clone(bool keepOriginalUniqueNodeId) {
 bool LiteralFloat::isEqual(AbstractExpr *other) {
   auto otherLiteralFloat = dynamic_cast<LiteralFloat *>(other);
   return otherLiteralFloat!=nullptr && this->getValue()==otherLiteralFloat->getValue();
+}
+
+bool LiteralFloat::isNull() {
+  return this->getValue()==0.0f;
 }

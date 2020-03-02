@@ -8,7 +8,7 @@ class ParameterList : public AbstractStatement {
 
   explicit ParameterList(std::vector<FunctionParameter*> parameters);
 
-  [[nodiscard]] std::string getNodeName() const override;
+  [[nodiscard]] std::string getNodeType() const override;
 
   void accept(Visitor &v) override;
 
@@ -20,7 +20,7 @@ class ParameterList : public AbstractStatement {
 
   bool supportsCircuitMode() override;
 
-  [[nodiscard]] std::string toString() const override;
+  [[nodiscard]] std::string toString(bool printChildren) const override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_PARAMETERLIST_H_

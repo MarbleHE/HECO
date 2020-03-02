@@ -11,7 +11,7 @@ json AbstractExpr::toJson() const {
 }
 
 std::ostream &operator<<(std::ostream &outs, const AbstractExpr &obj) {
-  return outs << obj.toString();
+  return outs << obj.toString(false);
 }
 
 LiteralInt *AbstractExpr::createParam(int i) {
@@ -30,7 +30,7 @@ AbstractExpr *AbstractExpr::createParam(AbstractExpr *abstractExpr) {
   return abstractExpr;
 }
 
-BinaryExpr *AbstractExpr::contains(BinaryExpr *bexpTemplate, AbstractExpr *excludedSubtree) {
+AbstractBinaryExpr *AbstractExpr::contains(AbstractBinaryExpr *aexpTemplate, AbstractExpr *excludedSubtree) {
   return nullptr;
 }
 
@@ -62,4 +62,5 @@ AbstractNode *AbstractExpr::createParam(AbstractNode *node) {
 void to_json(json &j, const AbstractExpr &absExpr) {
   j = absExpr.toJson();
 }
+
 

@@ -2,7 +2,7 @@
 #include "Call.h"
 #include <iostream>
 #include "Ast.h"
-#include "BinaryExpr.h"
+#include "ArithmeticExpr.h"
 #include "Block.h"
 #include "CallExternal.h"
 #include "Function.h"
@@ -98,23 +98,23 @@ void generateDemoOne(Ast &ast) {
   // if ( x > 32 ) { k = x * a; } else { k = (x * a) + 42; }
   func->addStatement(new If(
       // if (x > 32)
-      new LogicalExpr(new Variable("x"), OpSymb::LogCompOp::greater, 32),
+      new LogicalExpr(new Variable("x"), LogCompOp::greater, 32),
       // { k = x * a}
       new Block(
           new VarAssignm("k",
-                         new BinaryExpr(
+                         new ArithmeticExpr(
                              new Variable("x"),
-                             OpSymb::BinaryOp::multiplication,
+                             ArithmeticOp::multiplication,
                              new Variable("a")))),
       // else { k = (x * a) + 42; }
       new Block(
           new VarAssignm("k",
-                         new BinaryExpr(
-                             new BinaryExpr(
+                         new ArithmeticExpr(
+                             new ArithmeticExpr(
                                  new Variable("x"),
-                                 OpSymb::BinaryOp::multiplication,
+                                 ArithmeticOp::multiplication,
                                  new Variable("a")),
-                             OpSymb::BinaryOp::addition,
+                             ArithmeticOp::addition,
                              42)))));
 
   // return k
@@ -130,9 +130,9 @@ void generateDemoTwo(Ast &ast) {
   // int randInt = rand() % 42;
   func->addStatement(
       new VarDecl("randInt", Types::INT,
-                  new BinaryExpr(
+                  new ArithmeticExpr(
                       new CallExternal("std::rand"),
-                      OpSymb::BinaryOp::modulo,
+                      ArithmeticOp::modulo,
                       new LiteralInt(42))));
 
   // bool b = encryptedA < 2;
@@ -140,7 +140,7 @@ void generateDemoTwo(Ast &ast) {
       new VarDecl("b", Types::BOOL,
                   new LogicalExpr(
                       new Variable("encryptedA"),
-                      OpSymb::LogCompOp::smaller,
+                      LogCompOp::smaller,
                       new LiteralInt(2))));
 
   // int sum = 0;
@@ -153,26 +153,26 @@ void generateDemoTwo(Ast &ast) {
           // randInt > 0
           new LogicalExpr(
               new Variable("randInt"),
-              OpSymb::LogCompOp::greater,
+              LogCompOp::greater,
               new LiteralInt(0)),
-          OpSymb::LogCompOp::logicalAnd,
+          LogCompOp::logicalAnd,
           // !b == true
           new LogicalExpr(
-              new UnaryExpr(OpSymb::UnaryOp::negation, new Variable("b")),
-              OpSymb::LogCompOp::equal,
+              new UnaryExpr(UnaryOp::negation, new Variable("b")),
+              LogCompOp::equal,
               new LiteralBool(true))),
       // { sum = sum + encryptedB; randInt--; };
       new Block(
-          new std::vector<AbstractStatement *>{
+          std::vector<AbstractStatement *>{
               // sum = sum + encryptedB
-              new VarAssignm("sum", new BinaryExpr(
+              new VarAssignm("sum", new ArithmeticExpr(
                   new Variable("sum"),
-                  OpSymb::BinaryOp::addition,
+                  ArithmeticOp::addition,
                   new Variable("encryptedB"))),
               // randInt = randInt-1;
-              new VarAssignm("randInt", new BinaryExpr(
+              new VarAssignm("randInt", new ArithmeticExpr(
                   new Variable("randInt"),
-                  OpSymb::BinaryOp::subtraction,
+                  ArithmeticOp::subtraction,
                   new LiteralInt(1)))})));
 
   // STRING outStr = "Computation finished!";
@@ -204,17 +204,17 @@ void generateDemoThree(Ast &ast) {
   // int result = a * b;
   func->addStatement(
       new VarDecl("result", Types::INT,
-                  new BinaryExpr(
+                  new ArithmeticExpr(
                       new Variable("a"),
-                      OpSymb::BinaryOp::multiplication,
+                      ArithmeticOp::multiplication,
                       new Variable("b"))));
 
   // result = result * c;
   func->addStatement(
       new VarAssignm("result",
-                     new BinaryExpr(
+                     new ArithmeticExpr(
                          new Variable("result"),
-                         OpSymb::BinaryOp::multiplication,
+                         ArithmeticOp::multiplication,
                          new Variable("c"))));
 }
 
@@ -234,9 +234,9 @@ void generateDemoFour(Ast &ast) {
   // int result = a * b;
   func->addStatement(
       new VarDecl("result", Types::INT,
-                  new BinaryExpr(
+                  new ArithmeticExpr(
                       new Variable("a"),
-                      OpSymb::BinaryOp::multiplication,
+                      ArithmeticOp::multiplication,
                       new Variable("b"))));
 
   // if (4 > 3) {
@@ -246,14 +246,16 @@ void generateDemoFour(Ast &ast) {
       new If(
           new LogicalExpr(
               new LiteralInt(4),
-              OpSymb::LogCompOp::greater,
+              LogCompOp::greater,
               new LiteralInt(3)),
           new VarDecl("exampleVal", 3)));
 
   // result = result * c;
   func->addStatement(
       new VarAssignm("result",
-                     new BinaryExpr(new Variable("result"), OpSymb::BinaryOp::multiplication, new Variable("c"))));
+                     new ArithmeticExpr(new Variable("result"),
+                                        ArithmeticOp::multiplication,
+                                        new Variable("c"))));
 }
 
 void generateDemoFive(Ast &ast) {
@@ -262,12 +264,12 @@ void generateDemoFive(Ast &ast) {
 
   // int result = (inA * (inB * inC));
   func->addStatement(new VarDecl("result", Types::INT,
-                                 new BinaryExpr(
+                                 new ArithmeticExpr(
                                      new Variable("inA"),
-                                     OpSymb::multiplication,
-                                     new BinaryExpr(
+                                     ArithmeticOp::multiplication,
+                                     new ArithmeticExpr(
                                          new Variable("inB"),
-                                         OpSymb::multiplication,
+                                         ArithmeticOp::multiplication,
                                          new Variable("inC")))));
 
   // return result;
@@ -281,15 +283,15 @@ void generateDemoSix(Ast &ast) {
 
   // int result = (inZ * (inA * (inB * inC)));
   func->addStatement(new VarDecl("result", Types::INT,
-                                 new BinaryExpr(new Variable("inZ"),
-                                                OpSymb::multiplication,
-                                                new BinaryExpr(
-                                                    new Variable("inA"),
-                                                    OpSymb::multiplication,
-                                                    new BinaryExpr(
-                                                        new Variable("inB"),
-                                                        OpSymb::multiplication,
-                                                        new Variable("inC"))))));
+                                 new ArithmeticExpr(new Variable("inZ"),
+                                                    ArithmeticOp::multiplication,
+                                                    new ArithmeticExpr(
+                                                        new Variable("inA"),
+                                                        ArithmeticOp::multiplication,
+                                                        new ArithmeticExpr(
+                                                            new Variable("inB"),
+                                                            ArithmeticOp::multiplication,
+                                                            new Variable("inC"))))));
 
 
   // return result;
@@ -305,9 +307,9 @@ void generateDemoSeven(Ast &ast) {
   // int sum = encryptedA + encryptedB;
   func->addStatement(
       new VarDecl("sum", Types::INT,
-                  new BinaryExpr(
+                  new ArithmeticExpr(
                       new Variable("encryptedA"),
-                      OpSymb::BinaryOp::addition,
+                      ArithmeticOp::addition,
                       new Variable("encryptedB"))));
 
   // return sum;

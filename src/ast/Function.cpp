@@ -2,7 +2,7 @@
 #include <utility>
 #include <iostream>
 #include "LiteralInt.h"
-#include "BinaryExpr.h"
+#include "ArithmeticExpr.h"
 #include "Block.h"
 #include "Return.h"
 #include "AbstractStatement.h"
@@ -46,12 +46,12 @@ void Function::accept(Visitor &v) {
 }
 
 std::vector<AbstractStatement *> Function::getBodyStatements() const {
-  return *getBody()->getStatements();
+  return getBody()->getStatements();
 }
 
 void to_json(json &j, const Function &func) {
   j = {
-      {"type", func.getNodeName()},
+      {"type", func.getNodeType()},
       {"name", func.getName()},
       {"params", func.getParameters()},
       {"body", func.getBodyStatements()}};
@@ -59,7 +59,7 @@ void to_json(json &j, const Function &func) {
 
 json Function::toJson() const {
   json j = {
-      {"type", getNodeName()},
+      {"type", getNodeType()},
       {"name", getName()},
       {"params", getParameters()},
       {"body", getBodyStatements()}
@@ -67,14 +67,13 @@ json Function::toJson() const {
   return j;
 }
 
-std::string Function::getNodeName() const {
+std::string Function::getNodeType() const {
   return "Function";
 }
 
 void Function::setParameterList(ParameterList *paramsVec) {
-  if (!children.empty()) this->removeChild(children[0]);
+  if (!children.empty()) this->removeChild(children[0], false);
   children[0] = paramsVec;
-
 }
 
 Function *Function::clone(bool keepOriginalUniqueNodeId) {
@@ -99,12 +98,16 @@ Block *Function::getBody() const {
 Function::Function(std::string functionName,
                    std::vector<FunctionParameter *> functionParameters,
                    std::vector<AbstractStatement *> functionStatements) : name(std::move(functionName)) {
-  addChild(new ParameterList(functionParameters));
-  addChild(new Block(&functionStatements));
+  addChild(new ParameterList(std::move(functionParameters)));
+  addChild(new Block(std::move(functionStatements)));
 }
 int Function::getMaxNumberChildren() {
   return 2;
 }
 bool Function::supportsCircuitMode() {
   return true;
+}
+
+std::string Function::toString(bool printChildren) const {
+  return AbstractNode::generateOutputString(printChildren, {getName()});
 }

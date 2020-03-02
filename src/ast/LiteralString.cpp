@@ -7,7 +7,7 @@ LiteralString::LiteralString(std::string value) : value(std::move(value)) {}
 
 json LiteralString::toJson() const {
   json j;
-  j["type"] = getNodeName();
+  j["type"] = getNodeType();
   j["value"] = this->value;
   return j;
 }
@@ -20,7 +20,7 @@ const std::string &LiteralString::getValue() const {
   return value;
 }
 
-std::string LiteralString::getNodeName() const {
+std::string LiteralString::getNodeType() const {
   return "LiteralString";
 }
 
@@ -51,8 +51,8 @@ void LiteralString::setRandomValue(RandLiteralGen &rlg) {
   setValue(rlg.getRandomString(RandLiteralGen::stringDefaultMaxLength));
 }
 
-std::string LiteralString::toString() const {
-  return this->getValue();
+std::string LiteralString::toString(bool printChildren) const {
+  return AbstractNode::generateOutputString(printChildren, {this->getValue()});
 }
 
 bool LiteralString::supportsCircuitMode() {
@@ -73,4 +73,8 @@ LiteralString *LiteralString::clone(bool keepOriginalUniqueNodeId) {
 bool LiteralString::isEqual(AbstractExpr *other) {
   auto otherLiteralString = dynamic_cast<LiteralString *>(other);
   return otherLiteralString!=nullptr && this->getValue()==otherLiteralString->getValue();
+}
+
+bool LiteralString::isNull() {
+  return this->getValue()==std::string("");
 }

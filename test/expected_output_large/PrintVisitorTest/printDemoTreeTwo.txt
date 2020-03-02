@@ -8,7 +8,7 @@ Function: (determineSuitableX)	[global]
 	Block:
 		VarDecl: (randInt)	[Block_2]
 			Datatype: (plaintext int)
-			BinaryExpr:
+			ArithmeticExpr:
 				CallExternal: (std::rand)
 				Operator: (mod)
 				LiteralInt: (42)
@@ -36,12 +36,12 @@ Function: (determineSuitableX)	[global]
 					LiteralBool: (true)
 			Block:
 				VarAssignm: (sum)	[Block_47]
-					BinaryExpr:
+					ArithmeticExpr:
 						Variable: (sum)
 						Operator: (add)
 						Variable: (encryptedB)
 				VarAssignm: (randInt)
-					BinaryExpr:
+					ArithmeticExpr:
 						Variable: (randInt)
 						Operator: (sub)
 						LiteralInt: (1)

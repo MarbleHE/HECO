@@ -7,7 +7,7 @@ Variable::Variable(std::string identifier) : identifier(std::move(identifier)) {
 
 json Variable::toJson() const {
   json j;
-  j["type"] = getNodeName();
+  j["type"] = getNodeType();
   j["identifier"] = this->identifier;
   return j;
 }
@@ -16,7 +16,7 @@ void Variable::accept(Visitor &v) {
   v.visit(*this);
 }
 
-std::string Variable::getNodeName() const {
+std::string Variable::getNodeType() const {
   return "Variable";
 }
 
@@ -47,8 +47,8 @@ std::vector<std::string> Variable::getVariableIdentifiers() {
   return {{this->getIdentifier()}};
 }
 
-std::string Variable::toString() const {
-  return this->getIdentifier();
+std::string Variable::toString(bool printChildren) const {
+  return AbstractNode::generateOutputString(printChildren, {this->getIdentifier()});
 }
 
 bool Variable::supportsCircuitMode() {

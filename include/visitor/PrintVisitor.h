@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_PRINTVISITOR_H
-#define AST_OPTIMIZER_INCLUDE_PRINTVISITOR_H
+#ifndef AST_OPTIMIZER_INCLUDE_VISITOR_PRINTVISITOR_H_
+#define AST_OPTIMIZER_INCLUDE_VISITOR_PRINTVISITOR_H_
 
 #include <list>
 #include <sstream>
@@ -24,7 +24,7 @@ class PrintVisitor : public Visitor {
 
   void visit(Ast &elem) override;
 
-  void visit(BinaryExpr &elem) override;
+  void visit(ArithmeticExpr &elem) override;
 
   void visit(Block &elem) override;
 
@@ -94,4 +94,4 @@ class PrintVisitor : public Visitor {
   void useUniqueNodeIds(bool value);
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_PRINTVISITOR_H
+#endif //AST_OPTIMIZER_INCLUDE_VISITOR_PRINTVISITOR_H_

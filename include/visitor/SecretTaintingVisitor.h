@@ -10,7 +10,7 @@
 /// The SecretTaintingVisitor traverses through a given AST and marks all Nodes as "tainted" that in some way deal
 /// with an encrypted variable.
 /// For example, if [a,b] are encrypted variables and "int result = a + 2;" is a statement, then the VarAssignm
-/// object, the BinaryExpr object and both of the literals would be marked as tainted.
+/// object, the ArithmeticExpr object and both of the literals would be marked as tainted.
 class SecretTaintingVisitor : public Visitor {
  protected:
   /// The list of tainted Nodes.
@@ -24,7 +24,7 @@ class SecretTaintingVisitor : public Visitor {
   /// \return A list consisting of the node's name (first) and True if the node is tainted, otherwise False (second).
   [[nodiscard]] const std::set<std::string> &getSecretTaintingList() const;
 
-  void visit(BinaryExpr &elem) override;
+  void visit(ArithmeticExpr &elem) override;
   void visit(Block &elem) override;
   void visit(Call &elem) override;
   void visit(CallExternal &elem) override;

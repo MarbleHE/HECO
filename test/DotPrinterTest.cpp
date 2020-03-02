@@ -1,7 +1,7 @@
 #include "DotPrinter.h"
 #include "AbstractNode.h"
 #include "AstTestingGenerator.h"
-#include "BinaryExpr.h"
+#include "ArithmeticExpr.h"
 #include "Function.h"
 #include "Operator.h"
 #include "Variable.h"
@@ -19,46 +19,46 @@ class DotPrinterFixture : public ::testing::Test {
 };
 
 TEST_F(DotPrinterFixture,
-       getDotFormattedStringTest_printSimpleBinaryExpression) { /* NOLINT */
-  auto binaryExpression = new BinaryExpr(
-      new Variable("alpha"), OpSymb::multiplication, new LiteralInt(212));
+       getDotFormattedStringTest_printSimpleArithmeticExpression) { /* NOLINT */
+  auto arithmeticExpression = new ArithmeticExpr(
+      new Variable("alpha"), ArithmeticOp::multiplication, new LiteralInt(212));
 
   auto expectedStr =
-      "  BinaryExpr_2 [label=\"BinaryExpr_2\\n[l(v): 0, r(v): 0]\" shape=oval "
+      "  ArithmeticExpr_2 [label=\"ArithmeticExpr_2\\n[l(v): 0, r(v): 0]\" shape=oval "
       "style=filled fillcolor=white]\n"
-      "  { BinaryExpr_2 } -> { Variable_0, Operator_3, LiteralInt_1 }\n";
+      "  { ArithmeticExpr_2 } -> { Variable_0, Operator_3, LiteralInt_1 }\n";
 
-  Ast ast(binaryExpression);
+  Ast ast(arithmeticExpression);
   MultiplicativeDepthCalculator mdc(ast);
   DotPrinter dp;
   dp.setIndentationCharacter("  ")
       .setMultiplicativeDepthsCalculator(mdc)
       .setShowMultDepth(true);
 
-  ASSERT_EQ(dp.getDotFormattedString(binaryExpression), expectedStr);
+  ASSERT_EQ(dp.getDotFormattedString(arithmeticExpression), expectedStr);
 }
 
 TEST_F(DotPrinterFixture,
-       getDotFormattedStringTest_printReversedBinaryExpression) { /* NOLINT */
-  auto binaryExpression = new BinaryExpr(
-      new Variable("alpha"), OpSymb::multiplication, new LiteralInt(212));
+       getDotFormattedStringTest_printReversedArithmeticExpression) { /* NOLINT */
+  auto arithmeticExpression = new ArithmeticExpr(
+      new Variable("alpha"), ArithmeticOp::multiplication, new LiteralInt(212));
 
   // reversing the edge should only flip parents with children
-  binaryExpression->swapChildrenParents();
+  arithmeticExpression->swapChildrenParents();
 
   auto expectedStr =
-      "\tBinaryExpr_2 [label=\"BinaryExpr_2\\n[l(v): 0, r(v): 0]\" shape=oval "
+      "\tArithmeticExpr_2 [label=\"ArithmeticExpr_2\\n[l(v): 0, r(v): 0]\" shape=oval "
       "style=filled fillcolor=white]\n"
-      "\t{ Variable_0, Operator_3, LiteralInt_1 } -> { BinaryExpr_2 }\n";
+      "\t{ Variable_0, Operator_3, LiteralInt_1 } -> { ArithmeticExpr_2 }\n";
 
-  Ast ast(binaryExpression);
+  Ast ast(arithmeticExpression);
   MultiplicativeDepthCalculator mdc(ast);
   DotPrinter dp;
   dp.setIndentationCharacter("\t")
       .setMultiplicativeDepthsCalculator(mdc)
       .setShowMultDepth(true);
 
-  ASSERT_EQ(dp.getDotFormattedString(binaryExpression), expectedStr);
+  ASSERT_EQ(dp.getDotFormattedString(arithmeticExpression), expectedStr);
 }
 
 TEST_F(DotPrinterFixture, getDotFormattedStringTest_printFunction) { /* NOLINT */
@@ -144,6 +144,8 @@ TEST_F(DotPrinterFixture,
       .setShowMultDepth(true)
       .setOutputStream(outputStream);
   dp.printAsDotFormattedGraph(ast);
+
+  std::cout << outputStream.str() << std::endl;
 
   // read expected output from file
   std::ifstream ifs("../../test/expected_output_large/DotPrinterTest/"

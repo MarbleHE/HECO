@@ -1,11 +1,11 @@
 #include "MultDepthVisitor.h"
 #include "LogicalExpr.h"
-#include "BinaryExpr.h"
+#include "ArithmeticExpr.h"
 #include "VarAssignm.h"
 #include "VarDecl.h"
 #include "Return.h"
 
-void MultDepthVisitor::visit(BinaryExpr &elem) {
+void MultDepthVisitor::visit(ArithmeticExpr &elem) {
   Visitor::visit(elem);
 }
 
@@ -97,12 +97,12 @@ void MultDepthVisitor::visit(Ast &elem) {
 void MultDepthVisitor::analyzeMultiplicativeDepth(const std::string &varIdentifier,
                                                   AbstractStatement *stmt,
                                                   AbstractExpr *initializer) {
-  // if VarDecl contains BinaryExpr or contains LogicalExpr
-  std::string initializerNodeType = initializer->getNodeName();
-  if (initializerNodeType==BinaryExpr().getNodeName() || initializerNodeType==LogicalExpr().getNodeName()) {
+  // if VarDecl contains ArithmeticExpr or contains LogicalExpr
+  std::string initializerNodeType = initializer->getNodeType();
+  if (initializerNodeType==ArithmeticExpr().getNodeType() || initializerNodeType==LogicalExpr().getNodeType()) {
     // count the number of logicalAnd and multiplication operations in the initializer (=: numMults)
-    int numMults = initializer->countByTemplate(new BinaryExpr(OpSymb::multiplication))
-        + initializer->countByTemplate(new LogicalExpr(OpSymb::logicalAnd));
+    int numMults = initializer->countByTemplate(new ArithmeticExpr(ArithmeticOp::multiplication))
+        + initializer->countByTemplate(new LogicalExpr(LogCompOp::logicalAnd));
     // determine the maximum depth of the variables contained in the initializer (=: maxDepth)
     const std::vector<std::string> &variablesList = initializer->getVariableIdentifiers();
     if (variablesList.empty()) {

@@ -2,7 +2,7 @@
 #include "FunctionParameter.h"
 #include "VarAssignm.h"
 #include "VarDecl.h"
-#include "BinaryExpr.h"
+#include "ArithmeticExpr.h"
 #include "Return.h"
 #include "Block.h"
 #include "Variable.h"
@@ -36,7 +36,7 @@ void SecretTaintingVisitor::visit(Block &elem) {
   Visitor::visit(elem);
   // if after processing all the Block's children, any of them are tainted, this block also will be tainted
   auto statements = elem.getStatements();
-  auto statementsAsNodes = std::vector<AbstractNode *>(statements->begin(), statements->end());
+  auto statementsAsNodes = std::vector<AbstractNode *>(statements.begin(), statements.end());
   if (anyNodesAreTainted(statementsAsNodes))
     addTaintedNode(elem.castTo<AbstractNode>());
 }
@@ -110,7 +110,7 @@ void SecretTaintingVisitor::visit(VarDecl &elem) {
 // EXPRESSIONS
 // ==========================
 
-void SecretTaintingVisitor::visit(BinaryExpr &elem) {
+void SecretTaintingVisitor::visit(ArithmeticExpr &elem) {
   Visitor::visit(elem);
 }
 

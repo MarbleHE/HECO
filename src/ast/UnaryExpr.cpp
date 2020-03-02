@@ -2,13 +2,13 @@
 
 json UnaryExpr::toJson() const {
   json j;
-  j["type"] = getNodeName();
+  j["type"] = getNodeType();
   j["operator"] = getOp() ? getOp()->getOperatorString() : "";
   j["rightOperand"] = getRight() ? getRight()->toJson() : "";
   return j;
 }
 
-UnaryExpr::UnaryExpr(OpSymb::UnaryOp op, AbstractExpr *right) {
+UnaryExpr::UnaryExpr(UnaryOp op, AbstractExpr *right) {
   setAttributes(op, right);
 }
 
@@ -24,7 +24,7 @@ AbstractExpr *UnaryExpr::getRight() const {
   return reinterpret_cast<AbstractExpr *>(getChildAtIndex(1, true));
 }
 
-std::string UnaryExpr::getNodeName() const {
+std::string UnaryExpr::getNodeType() const {
   return "UnaryExpr";
 }
 
@@ -40,7 +40,7 @@ int UnaryExpr::getMaxNumberChildren() {
   return 2;
 }
 
-void UnaryExpr::setAttributes(OpSymb::UnaryOp op, AbstractExpr *expr) {
+void UnaryExpr::setAttributes(UnaryOp op, AbstractExpr *expr) {
   removeChildren();
   auto nodesToBeAdded = std::vector<AbstractNode *>({new Operator(op), expr});
   addChildren(nodesToBeAdded, true);
@@ -48,13 +48,25 @@ void UnaryExpr::setAttributes(OpSymb::UnaryOp op, AbstractExpr *expr) {
 
 UnaryExpr *UnaryExpr::clone(bool keepOriginalUniqueNodeId) {
   try {
-    auto clonedNode = new UnaryExpr(std::get<OpSymb::UnaryOp>(this->getOp()->getOperatorSymbol()),
+    auto clonedNode = new UnaryExpr(std::get<UnaryOp>(this->getOp()->getOperatorSymbol()),
                                     this->getRight()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
     if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
     if (this->isReversed) clonedNode->swapChildrenParents();
     return clonedNode;
   } catch (std::bad_variant_access &exc) {
     throw std::runtime_error(
-        "Failed to clone UnaryExpr - unexpected Operator encountered! Expected operator of Enum OpSymb::UnaryOp.");
+        "Failed to clone UnaryExpr - unexpected Operator encountered! Expected operator of Enum UnaryOp.");
   }
+}
+
+bool UnaryExpr::isEqual(AbstractExpr *other) {
+  if (auto otherAsUExp = dynamic_cast<UnaryExpr *>(other)) {
+    auto sameOperator = this->getOp()->equals(otherAsUExp->getOp()->getOperatorSymbol());
+    auto sameValue = this->getRight()->isEqual(otherAsUExp->getRight());
+    return sameOperator && sameValue;
+  }
+  return false;
+}
+std::string UnaryExpr::toString(bool printChildren) const {
+  return AbstractNode::generateOutputString(printChildren, {});
 }

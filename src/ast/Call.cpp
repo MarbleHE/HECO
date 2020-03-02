@@ -9,7 +9,7 @@
 #include "LiteralString.h"
 
 json Call::toJson() const {
-  json j = {{"type", getNodeName()},
+  json j = {{"type", getNodeType()},
             {"arguments", this->arguments},
             {"function", this->func->toJson()}};
   return j;
@@ -23,7 +23,7 @@ const std::vector<FunctionParameter *> &Call::getArguments() const {
   return arguments;
 }
 
-std::string Call::getNodeName() const {
+std::string Call::getNodeType() const {
   return "Call";
 }
 
@@ -54,3 +54,4 @@ AbstractNode *Call::clone(bool keepOriginalUniqueNodeId) {
   if (this->AbstractExpr::isReversed) clonedNode->swapChildrenParents();
   return clonedNode;
 }
+

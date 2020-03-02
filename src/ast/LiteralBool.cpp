@@ -5,7 +5,7 @@ LiteralBool::LiteralBool(bool value) : value(value) {}
 
 json LiteralBool::toJson() const {
   json j;
-  j["type"] = getNodeName();
+  j["type"] = getNodeType();
   j["value"] = this->value;
   return j;
 }
@@ -22,7 +22,7 @@ std::string LiteralBool::getTextValue() const {
   return getValue() ? "true" : "false";
 }
 
-std::string LiteralBool::getNodeName() const {
+std::string LiteralBool::getNodeType() const {
   return "LiteralBool";
 }
 
@@ -53,8 +53,8 @@ void LiteralBool::setRandomValue(RandLiteralGen &rlg) {
   setValue(rlg.getRandomBool());
 }
 
-std::string LiteralBool::toString() const {
-  return this->getTextValue();
+std::string LiteralBool::toString(bool printChildren) const {
+  return AbstractNode::generateOutputString(printChildren, {this->getTextValue()});
 }
 
 bool LiteralBool::supportsCircuitMode() {
@@ -75,4 +75,8 @@ LiteralBool *LiteralBool::clone(bool keepOriginalUniqueNodeId) {
 bool LiteralBool::isEqual(AbstractExpr *other) {
   auto otherLiteralBool = dynamic_cast<LiteralBool *>(other);
   return otherLiteralBool!=nullptr && this->getValue()==otherLiteralBool->getValue();
+}
+
+bool LiteralBool::isNull() {
+  return this->getValue()==false;
 }

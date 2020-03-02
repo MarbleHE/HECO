@@ -3,20 +3,20 @@
 #include "LiteralInt.h"
 #include "LiteralBool.h"
 #include "LiteralFloat.h"
-#include "BinaryExpr.h"
+#include "ArithmeticExpr.h"
 #include "Ast.h"
 
 json VarDecl::toJson() const {
-  json j = {{"type", getNodeName()},
+  json j = {{"type", getNodeType()},
             {"identifier", identifier},
-            {"datatype", getDatatype() ? getDatatype()->toString() : ""}};
+            {"datatype", getDatatype() ? getDatatype()->toJson() : ""}};
   if (getInitializer()!=nullptr) {
     j["initializer"] = getInitializer()->toJson();
   }
   return j;
 }
 
-VarDecl::VarDecl(std::string, void *) {
+VarDecl::VarDecl(const std::string &, void *) {
   throw std::invalid_argument("VarDecl(std::string, AbstractExpr*) not accepted as datatype cannot be determined. "
                               "Use VarDecl(std::string, Types, AbstractExpr*) or one of the other constructors.");
 }
@@ -37,6 +37,10 @@ VarDecl::VarDecl(std::string name, std::string valueAssignedTo) {
 
 VarDecl::VarDecl(std::string name, int valueAssignedTo) {
   setAttributes(std::move(name), new Datatype(Types::INT), new LiteralInt(valueAssignedTo));
+}
+
+VarDecl::VarDecl(std::string name, Datatype *datatype) {
+  setAttributes(std::move(name), new Datatype(Types::INT), nullptr);
 }
 
 VarDecl::VarDecl(std::string name, float valueAssignedTo) {
@@ -62,7 +66,7 @@ void VarDecl::accept(Visitor &v) {
   v.visit(*this);
 }
 
-std::string VarDecl::getNodeName() const {
+std::string VarDecl::getNodeType() const {
   return "VarDecl";
 }
 
@@ -81,8 +85,8 @@ AbstractExpr *VarDecl::getInitializer() const {
   return initializer->castTo<AbstractExpr>();
 }
 
-BinaryExpr *VarDecl::contains(BinaryExpr *bexpTemplate, BinaryExpr *excludedSubtree) {
-  return this->getInitializer()->contains(bexpTemplate, excludedSubtree);
+AbstractBinaryExpr *VarDecl::contains(AbstractBinaryExpr *aexpTemplate, ArithmeticExpr *excludedSubtree) {
+  return this->getInitializer()->contains(aexpTemplate, excludedSubtree);
 }
 
 VarDecl::~VarDecl() {
@@ -119,6 +123,6 @@ VarDecl *VarDecl::clone(bool keepOriginalUniqueNodeId) {
   return clonedNode;
 }
 
-std::string VarDecl::toString() const {
-  return identifier;
+std::string VarDecl::toString(bool printChildren) const {
+  return AbstractNode::generateOutputString(printChildren, {identifier});
 }

@@ -4,7 +4,7 @@
 #include "AbstractNode.h"
 #include "AbstractExpr.h"
 #include "AbstractStatement.h"
-#include "BinaryExpr.h"
+#include "ArithmeticExpr.h"
 #include "Block.h"
 #include "Call.h"
 #include "CallExternal.h"
@@ -40,8 +40,8 @@ void EvaluationVisitor::visit(AbstractStatement &elem) {
   Visitor::visit(elem);
 }
 
-void EvaluationVisitor::visit(BinaryExpr &elem) {
-  // we first need to evaluate the left-handside and right-handside as they can consists of nested binary expressions
+void EvaluationVisitor::visit(ArithmeticExpr &elem) {
+  // we first need to evaluate the left-handside and right-handside as they can consists of nested arithmetic expressions
   elem.getLeft()->accept(*this);
   auto l = results.top().front();
   results.pop();
@@ -53,7 +53,7 @@ void EvaluationVisitor::visit(BinaryExpr &elem) {
 
 void EvaluationVisitor::visit(Block &elem) {
   // a block statement itself does not return anything - its contained statements are just being executed
-  for (auto &stmt : *elem.getStatements()) {
+  for (auto &stmt : elem.getStatements()) {
     stmt->accept(*this);
   }
 }
@@ -161,7 +161,7 @@ void EvaluationVisitor::visit(LiteralFloat &elem) {
 }
 
 void EvaluationVisitor::visit(LogicalExpr &elem) {
-  // we first need to evaluate the left-handside and right-handside as they can consists of nested binary expressions
+  // we first need to evaluate the left-handside and right-handside as they can consists of nested arithmetic expressions
   elem.getLeft()->accept(*this);
   auto l = results.top().front();
   results.pop();
@@ -246,7 +246,7 @@ const std::vector<AbstractLiteral *> &EvaluationVisitor::getResults() {
       std::cout << "void" << std::endl;
     } else {
       std::stringstream outStr;
-      for (auto &resultLiteral : *resultValues) outStr << resultLiteral->toString() << std::endl;
+      for (auto &resultLiteral : *resultValues) outStr << resultLiteral->toString(false) << std::endl;
       std::cout << outStr.str();
     }
   }

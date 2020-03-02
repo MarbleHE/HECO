@@ -7,7 +7,7 @@
 
 class UnaryExpr : public AbstractExpr {
  public:
-  UnaryExpr(OpSymb::UnaryOp op, AbstractExpr *right);
+  UnaryExpr(UnaryOp op, AbstractExpr *right);
 
   UnaryExpr *clone(bool keepOriginalUniqueNodeId) override;
 
@@ -19,17 +19,20 @@ class UnaryExpr : public AbstractExpr {
 
   [[nodiscard]] AbstractExpr *getRight() const;
 
-  [[nodiscard]] std::string getNodeName() const override;
+  [[nodiscard]] std::string getNodeType() const override;
 
   ~UnaryExpr() override;
 
-  void setAttributes(OpSymb::UnaryOp op, AbstractExpr *expr);
+  void setAttributes(UnaryOp op, AbstractExpr *expr);
+
+  [[nodiscard]] std::string toString(bool printChildren) const override;
+
+  bool isEqual(AbstractExpr *other) override;
 
  protected:
   bool supportsCircuitMode() override;
 
   int getMaxNumberChildren() override;
-
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_UNARYEXPR_H

@@ -18,7 +18,7 @@ class Return : public AbstractStatement {
 
   void accept(Visitor &v) override;
 
-  [[nodiscard]] std::string getNodeName() const override;
+  [[nodiscard]] std::string getNodeType() const override;
 
   ~Return() override;
 
@@ -27,6 +27,8 @@ class Return : public AbstractStatement {
   Return *clone(bool keepOriginalUniqueNodeId) override;
 
   void setAttributes(std::vector<AbstractExpr *> returnExpr);
+
+  [[nodiscard]] std::string toString(bool printChildren) const override;
 
  protected:
   int getMaxNumberChildren() override;

@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_VARDECL_H
-#define AST_OPTIMIZER_INCLUDE_VARDECL_H
+#ifndef AST_OPTIMIZER_INCLUDE_AST_VARDECL_H_
+#define AST_OPTIMIZER_INCLUDE_AST_VARDECL_H_
 
 #include <string>
 #include "AbstractStatement.h"
@@ -11,11 +11,13 @@ class VarDecl : public AbstractStatement {
   std::string identifier;
 
  public:
+  VarDecl(std::string name, Datatype *datatype);
+
   VarDecl(std::string name, Types datatype, AbstractExpr *initializer);
 
   VarDecl(std::string name, Datatype *datatype, AbstractExpr *initializer);
 
-  VarDecl(std::string name, void *abstractExpr);
+  VarDecl(const std::string &name, void *abstractExpr);
 
   VarDecl(std::string name, int value);
 
@@ -38,7 +40,7 @@ class VarDecl : public AbstractStatement {
 
   void accept(Visitor &v) override;
 
-  [[nodiscard]] std::string getNodeName() const override;
+  [[nodiscard]] std::string getNodeType() const override;
 
   [[nodiscard]] const std::string &getIdentifier() const;
 
@@ -46,7 +48,7 @@ class VarDecl : public AbstractStatement {
 
   [[nodiscard]] AbstractExpr *getInitializer() const;
 
-  BinaryExpr *contains(BinaryExpr *bexpTemplate, BinaryExpr *excludedSubtree) override;
+  AbstractBinaryExpr *contains(AbstractBinaryExpr *aexpTemplate, ArithmeticExpr *excludedSubtree) override;
 
   ~VarDecl() override;
 
@@ -59,8 +61,8 @@ class VarDecl : public AbstractStatement {
   bool supportsCircuitMode() override;
 
   int getMaxNumberChildren() override;
-  std::string toString() const override;
 
+  [[nodiscard]] std::string toString(bool printChildren) const override;
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_VARDECL_H
+#endif //AST_OPTIMIZER_INCLUDE_AST_VARDECL_H_

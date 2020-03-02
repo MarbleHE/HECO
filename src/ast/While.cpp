@@ -6,7 +6,7 @@ While::While(AbstractExpr *condition, AbstractStatement *body) : condition(condi
 
 json While::toJson() const {
   json j;
-  j["type"] = getNodeName();
+  j["type"] = getNodeType();
   j["condition"] = condition->toJson();
   j["body"] = body->toJson();
   return j;
@@ -24,7 +24,7 @@ AbstractStatement *While::getBody() const {
   return body;
 }
 
-std::string While::getNodeName() const {
+std::string While::getNodeType() const {
   return "While";
 }
 

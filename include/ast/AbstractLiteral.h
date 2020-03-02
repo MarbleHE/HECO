@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_LITERAL_H
-#define AST_OPTIMIZER_INCLUDE_LITERAL_H
+#ifndef AST_OPTIMIZER_INCLUDE_AST_ABSTRACTLITERAL_H_
+#define AST_OPTIMIZER_INCLUDE_AST_ABSTRACTLITERAL_H_
 
 #include <variant>
 #include <ostream>
@@ -30,6 +30,8 @@ class AbstractLiteral : public AbstractExpr {
   virtual void setRandomValue(RandLiteralGen &rlg) = 0;
 
   virtual bool supportsDatatype(Datatype &datatype) = 0;
+
+  virtual bool isNull() = 0;
 };
 
 inline std::ostream &operator<<(std::ostream &os, const std::vector<AbstractLiteral *> &v) {
@@ -39,4 +41,4 @@ inline std::ostream &operator<<(std::ostream &os, const std::vector<AbstractLite
   return os;
 }
 
-#endif //AST_OPTIMIZER_INCLUDE_LITERAL_H
+#endif //AST_OPTIMIZER_INCLUDE_AST_ABSTRACTLITERAL_H_

@@ -7,7 +7,7 @@
 #include "LiteralString.h"
 #include "FunctionParameter.h"
 #include "Variable.h"
-#include "BinaryExpr.h"
+#include "ArithmeticExpr.h"
 #include "Return.h"
 #include "Function.h"
 #include "Call.h"
@@ -131,7 +131,7 @@ TEST(AstEvaluationTests, complexAstEvaluationWithNestedFunctionCall_LiteralParam
   ASSERT_EQ(*result, *new LiteralInt(1'056));
 }
 
-TEST(AstEvaluationTests, complexAstEvaluationWithNestedFunctionCall_BexpParameterValue) { /* NOLINT */
+TEST(AstEvaluationTests, complexAstEvaluationWithNestedFunctionCall_AexpParameterValue) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(13, ast);
   std::unordered_map<std::string, AbstractLiteral *> params;

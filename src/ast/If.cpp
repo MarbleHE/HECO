@@ -3,7 +3,7 @@
 
 json If::toJson() const {
   json j;
-  j["type"] = getNodeName();
+  j["type"] = getNodeType();
   j["condition"] = getCondition()->toJson();
   if (getThenBranch()!=nullptr) j["thenBranch"] = getThenBranch()->toJson();
   if (getElseBranch()!=nullptr) j["elseBranch"] = getElseBranch()->toJson();
@@ -22,7 +22,7 @@ void If::accept(Visitor &v) {
   v.visit(*this);
 }
 
-std::string If::getNodeName() const {
+std::string If::getNodeType() const {
   return "If";
 }
 
@@ -61,4 +61,7 @@ void If::setAttributes(AbstractExpr *condition, AbstractStatement *thenBranch, A
   // update tree structure
   removeChildren();
   addChildren({condition, thenBranch, elseBranch}, true);
+}
+std::string If::toString(bool printChildren) const {
+  return AbstractNode::generateOutputString(printChildren, {});
 }

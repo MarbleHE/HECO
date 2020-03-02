@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_VARASSIGNM_H
-#define AST_OPTIMIZER_INCLUDE_VARASSIGNM_H
+#ifndef AST_OPTIMIZER_INCLUDE_AST_VARASSIGNM_H_
+#define AST_OPTIMIZER_INCLUDE_AST_VARASSIGNM_H_
 
 #include <string>
 #include "AbstractStatement.h"
@@ -24,9 +24,9 @@ class VarAssignm : public AbstractStatement {
 
   [[nodiscard]] AbstractExpr *getValue() const;
 
-  [[nodiscard]] std::string getNodeName() const override;
+  [[nodiscard]] std::string getNodeType() const override;
 
-  BinaryExpr *contains(BinaryExpr *bexpTemplate, BinaryExpr *excludedSubtree) override;
+  AbstractBinaryExpr *contains(AbstractBinaryExpr *aexpTemplate, ArithmeticExpr *excludedSubtree) override;
 
   std::string getVarTargetIdentifier() override;
 
@@ -37,6 +37,8 @@ class VarAssignm : public AbstractStatement {
   int getMaxNumberChildren() override;
 
   void setAttribute(AbstractExpr *assignmentValue);
+
+  std::string toString(bool printChildren) const override;
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_VARASSIGNM_H
+#endif //AST_OPTIMIZER_INCLUDE_AST_VARASSIGNM_H_

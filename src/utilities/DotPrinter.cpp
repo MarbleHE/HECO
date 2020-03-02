@@ -1,5 +1,6 @@
 #include "DotPrinter.h"
 #include "VarDecl.h"
+#include "VarAssignm.h"
 
 DotPrinter::DotPrinter() : mdc(nullptr) {}
 
@@ -33,8 +34,7 @@ std::string DotPrinter::getDotFormattedString(AbstractNode *n) {
   // we cannot print the node as DOT graph if it does not support the circuit mode (child/parent relationship)
   if (!n->supportsCircuitMode())
     throw std::logic_error(
-        "Cannot execute 'getDotFormattedString(" + n->getUniqueNodeId() +
-            ") as node is not circuit-compatible!");
+        "Cannot execute 'getDotFormattedString(" + n->getUniqueNodeId() + ") as node is not circuit-compatible!");
 
   std::stringstream finalString;
 
@@ -42,8 +42,9 @@ std::string DotPrinter::getDotFormattedString(AbstractNode *n) {
   auto vec = (n->hasReversedEdges() ? n->getParentsNonNull() : n->getChildrenNonNull());
 
   // define criteria when to print node details
-  auto printNodeDetailsCriterion = (vec.empty()  // if node is a tree leaf
-      || dynamic_cast<VarDecl *>(n)!=nullptr);  // if node is a VarDecl (needed for the variable identifier)
+  auto printNodeDetailsCriterion = (vec.empty()    // if node is a tree leaf
+      || dynamic_cast<VarDecl *>(n)!=nullptr       // if node is a VarDecl (needed for the variable identifier)
+      || dynamic_cast<VarAssignm *>(n)!=nullptr);  // if node is a VarAssignm (needed for the variable identifier)
   finalString << dotVertex(n, this->showMultDepth, this->mdc, printNodeDetailsCriterion)
       .buildVertexString(this->indentationCharacter);
 
