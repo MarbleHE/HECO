@@ -1,4 +1,8 @@
 #include "Datatype.h"
+#include "LiteralFloat.h"
+#include "LiteralInt.h"
+#include "LiteralBool.h"
+#include "LiteralString.h"
 
 Datatype::Datatype(const std::string &type) {
   static const std::unordered_map<std::string, Types> string_to_types = {
@@ -61,8 +65,8 @@ bool Datatype::isEncrypted() const {
   return encrypted;
 }
 
-void Datatype::setEncrypted(bool encrypted) {
-  Datatype::encrypted = encrypted;
+void Datatype::setEncrypted(bool isEncrypted) {
+  Datatype::encrypted = isEncrypted;
 }
 
 AbstractNode *Datatype::cloneFlat() {
@@ -73,13 +77,27 @@ AbstractNode *Datatype::cloneFlat() {
 AbstractNode *Datatype::clone(bool keepOriginalUniqueNodeId) {
   return new Datatype(this->getType());
 }
+
 std::string Datatype::getNodeType() const {
   return "Datatype";
 }
+
 void Datatype::accept(Visitor &v) {
   v.visit(*this);
 }
 
 bool Datatype::supportsCircuitMode() {
   return true;
+}
+
+AbstractLiteral *Datatype::getDefaultVariableInitializationValue(Types datatype) {
+  switch (datatype) {
+    case Types::BOOL:return new LiteralBool("false");
+    case Types::INT:return new LiteralInt(0);
+    case Types::FLOAT:return new LiteralFloat(0.0f);
+    case Types::STRING:return new LiteralString("");
+    default:
+      throw std::invalid_argument("Unrecognized enum type given: Cannot determine its default value."
+                                  "See enum Types for the supported types.");
+  }
 }
