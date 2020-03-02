@@ -1384,7 +1384,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_partiallyEvaluableO
   // int f(plaintext_int x) {
   //  return x+71;
   // }
-  auto function = new Function("compute");
+  auto function = new Function("f");
   auto functionParamList = new ParameterList(
       {new FunctionParameter(
           new Datatype(Types::INT, false), new Variable("x"))});
@@ -1416,3 +1416,47 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_partiallyEvaluableO
   EXPECT_EQ(ctes.removableNodes.size(), 0);
 }
 
+TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_unsupportedNestedOperator) { /* NOLINT */
+  //  -- input --
+  // int f(plaintext_int a) {
+  //  return 9 + (34 + (22 / (a / (11 * 42))));
+  // }
+  //  -- expected --
+  // int f(plaintext_int x) {
+  //  return 43 + (22 / (a / 462));
+  // }
+  auto function = new Function("f");
+  auto functionParamList = new ParameterList(
+      {new FunctionParameter(
+          new Datatype(Types::INT, false), new Variable("a"))});
+  auto returnStmt = new Return(
+      new ArithmeticExpr(new LiteralInt(9), addition,
+                         new ArithmeticExpr(new LiteralInt(34), addition,
+                                            new ArithmeticExpr(new LiteralInt(22), division,
+                                                               new ArithmeticExpr(new Variable("a"), division,
+                                                                                  new ArithmeticExpr(new LiteralInt(11),
+                                                                                                     multiplication,
+                                                                                                     42))))));
+  // connect objects
+  function->setParameterList(functionParamList);
+  function->addStatement(returnStmt);
+  ast.setRootNode(function);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  DotPrinter().printAsDotFormattedGraph(ast);
+
+
+  // check that simplification generated the expected simplified AST
+  auto expectedReturnVal = new ArithmeticExpr(
+      new ArithmeticExpr(new LiteralInt(22), division,
+                         new ArithmeticExpr(new Variable("a"), division, new LiteralInt(462))),
+      ArithmeticOp::addition,
+      new LiteralInt(43));
+  EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
+  EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
+
+  // check that at the end of the evaluation traversal, the removableNodes map is empty
+  EXPECT_EQ(ctes.removableNodes.size(), 0);
+}

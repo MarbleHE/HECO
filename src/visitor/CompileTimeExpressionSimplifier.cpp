@@ -71,7 +71,7 @@ void CompileTimeExpressionSimplifier::visit(CallExternal &elem) {
 }
 
 // =====================
-// AST objects that are trivially evaluable (AST leaf nodes)
+// AST objects that are leaf nodes and cannot be simplified
 // =====================
 
 void CompileTimeExpressionSimplifier::visit(LiteralBool &elem) {
@@ -90,15 +90,19 @@ void CompileTimeExpressionSimplifier::visit(LiteralFloat &elem) {
   Visitor::visit(elem);
 }
 
+
+// =====================
+// Simplifiable Statements
+// =====================
+
 void CompileTimeExpressionSimplifier::visit(Variable &elem) {
   Visitor::visit(elem);
   if (variableValues.count(elem.getIdentifier()) > 0) {
-    // if we know the variable's value (i.e., its value is either any subtype of AbstractLiteral or a AbstractExpr if
-    // this is a symbolic value that defines on other variables), we can replace this variable node
+    // if we know the variable's value (i.e., its value is either any subtype of AbstractLiteral or an AbstractExpr if
+    // this is a symbolic value that defines on other variables), we can replace this variable node by its value
     auto variableParent = elem.getOnlyParent();
     auto newValue = variableValues.at(elem.getIdentifier())->clone(false)->castTo<AbstractExpr>();
     variableParent->replaceChild(&elem, newValue);
-
     // if this newValue is an AbstractBinaryExpr by itself, enqueue its operands
     if (auto bexp = dynamic_cast<AbstractBinaryExpr *>(newValue)) {
       binaryExpressionAccumulator.addOperands({bexp->getLeft(), bexp->getRight()});
@@ -107,16 +111,10 @@ void CompileTimeExpressionSimplifier::visit(Variable &elem) {
   }
 }
 
-/** @} */ // End of visit leaves group
-
-
-// =====================
-// Simplifiable Statements
-// =====================
-
 void CompileTimeExpressionSimplifier::visit(VarDecl &elem) {
   Visitor::visit(elem);
 
+  // determine the variable's value
   AbstractExpr *variableValue;
   if (elem.getInitializer()==nullptr) {
     variableValue = Datatype::getDefaultVariableInitializationValue(elem.getDatatype()->getType());
@@ -127,9 +125,8 @@ void CompileTimeExpressionSimplifier::visit(VarDecl &elem) {
   addVariableValue(elem.getVarTargetIdentifier(), variableValue);
   // clean up temporary results from children in removableNodes map
   removableNodes.erase(elem.getInitializer());
-  // mark this statement as evaluated to notify its parent that this can be considered as evaluated
+  // mark this statement as removable as it is deleted
   markNodeAsRemovable(&elem);
-
   cleanUpAfterStatementVisited(&elem, true);
 }
 
@@ -139,6 +136,7 @@ void CompileTimeExpressionSimplifier::visit(VarAssignm &elem) {
   addVariableValue(elem.getVarTargetIdentifier(), elem.getValue());
   // clean up temporary results from children in removableNodes map
   removableNodes.erase(elem.getValue());
+  markNodeAsRemovable(&elem);
   cleanUpAfterStatementVisited(&elem, true);
 }
 
@@ -159,22 +157,32 @@ void CompileTimeExpressionSimplifier::handleBinaryExpression(AbstractBinaryExpr 
     nodesQueuedForDeletion.push_back(&arithmeticExpr);
   } else {
     // update accumulator
-    // - check if the operator changed
     auto currentOperator = arithmeticExpr.getOp();
-    if (!binaryExpressionAccumulator.containsOperands()) {  // this is the first binary expression in this subtree
-      binaryExpressionAccumulator.removeOperandsAndSetNewSymbol(currentOperator->getOperatorSymbol());
-    } else if (!currentOperator->equals(binaryExpressionAccumulator.getOperatorSymbol())) {  // operator changed
-      // check if we could simplify anything, if yes: replace current subtree by simplified one
-      if (binaryExpressionAccumulator.subtreeIsSimplified()) {
-        arithmeticExpr.replaceChild(binaryExpressionAccumulator.lastVisitedSubtree,
+
+    // check if we need to reset the binaryExpressionAccumulator:
+    // this is the case if either we are visiting the first binary expression in this statement or the operator of the
+    // accumulated binary expressions does not match the one of this binary expression (we cannot accumulate more)
+    auto isFirstBinaryExprInSubtree = !binaryExpressionAccumulator.containsOperands();
+    auto operatorChangedSinceLastAccumulation =
+        !currentOperator->equals(binaryExpressionAccumulator.getOperatorSymbol());
+    if (operatorChangedSinceLastAccumulation || isFirstBinaryExprInSubtree) {
+      // if the operator changed and we could simplify the accumulated values, we need to replace the subtree starting
+      // at node lastVisitedBinaryExp with the simplified subtree
+      if (operatorChangedSinceLastAccumulation && binaryExpressionAccumulator.subtreeIsSimplified()) {
+        arithmeticExpr.replaceChild(binaryExpressionAccumulator.lastVisitedBinaryExp,
                                     binaryExpressionAccumulator.getSimplifiedSubtree());
       }
-      // if operator is non-commutative-> return from function as operator is unsupported
-      if (!BinaryExpressionAcc::isSupportedOperator(currentOperator->getOperatorSymbol())) return;
-      // if this is a supported operator, remember the operator's symbol and continue
+      // if operator is non-commutative -> return from function as operator is unsupported
+      if (!BinaryExpressionAcc::isSupportedOperator(currentOperator->getOperatorSymbol())) {
+        return;
+      }
+      // if this is a supported operator, remember the operator's symbol
       binaryExpressionAccumulator.removeOperandsAndSetNewSymbol(currentOperator->getOperatorSymbol());
+      // remember this first binary expression as we may need to re-attach its children later
+      binaryExpressionAccumulator.setFirstVisitedSubtree(&arithmeticExpr);
     }
-    // if this is part of a nested binary expression, one of both operands will be a BinaryExpr itself - as its operands
+
+    // if this is part of a nested binary expression, one of both operands will be a BinaryExpr itself: as its operands
     // were already added when visiting this BinaryExpr, do not add it again
     binaryExpressionAccumulator.addOperands({lhsOperand, rhsOperand});
     binaryExpressionAccumulator.setLastVisitedSubtree(&arithmeticExpr);
@@ -190,7 +198,7 @@ void CompileTimeExpressionSimplifier::handleBinaryExpression(AbstractBinaryExpr 
     // We can consider the subtree as simplified if the number of leaf nodes (AbstractLiterals or Variables) decreased.
     // Only replace current subtree by simplified one if all of:
     //   i. there are any accumulated values (should always be the case if binary expressions were handled properly)
-    //   ii. there are no more binary expressions following in a higher level of the tree
+    //   ii. there are no more binary expressions following, i.e., in a higher level of the tree
     //   iii. the accumulation was useful, i.e., reduced the total number of leaf nodes
     if (binaryExpressionAccumulator.containsOperands()
         && noneOfTheParentsIsABinaryExpr(&arithmeticExpr)
@@ -251,7 +259,7 @@ void CompileTimeExpressionSimplifier::visit(Block &elem) {
     // clean up temporary results from children in removableNodes map
     removableNodes.erase(statement);
   }
-  // if all statements of this Block are marked for deletion, we can mark the Block as evaluable
+  // if all statements of this Block are marked for deletion, we can mark the Block as removable
   // -> let the Block's parent decide whether to keep this empty Block or not
   if (allStatementsInBlockAreMarkedForDeletion) markNodeAsRemovable(&elem);
 
@@ -263,12 +271,15 @@ void CompileTimeExpressionSimplifier::visit(Call &elem) {
   // TODO(pjattke): implement me!
   //  We can replace the call node by the result of the inner function's return value.
   //  For example:
+  //
   //    int computeX(int input) {
   //      ...
   //      int z = computeZ(seed);   -->  int computeZ(int seed) { int v = genRandomNum(seed); return v + 32; }
   //      ...
   //    }
+  //
   //  is converted into:
+  //
   //    int computeX(int input) {
   //      ...
   //      int z = genRandomNum(seed) + 32;
@@ -278,15 +289,14 @@ void CompileTimeExpressionSimplifier::visit(Call &elem) {
 
 void CompileTimeExpressionSimplifier::visit(ParameterList &elem) {
   Visitor::visit(elem);
-  // if all of the FunctionParameter children are marked as evaluable, mark this node as evaluable too
-  auto parameters = elem.getParameters();
-  bool allFunctionParametersAreEvaluable = true;
+  // if all of the FunctionParameter children are marked as removable, mark this node as removable too
+  bool allFunctionParametersAreRemovable = true;
   for (auto &fp : elem.getParameters()) {
-    if (!valueIsKnown(fp)) allFunctionParametersAreEvaluable = false;
+    if (!valueIsKnown(fp)) allFunctionParametersAreRemovable = false;
     // clean up temporary results from children in removableNodes map
     removableNodes.erase(fp);
   }
-  if (allFunctionParametersAreEvaluable) {
+  if (allFunctionParametersAreRemovable) {
     markNodeAsRemovable(&elem);
   }
   cleanUpAfterStatementVisited(&elem, false);
@@ -294,24 +304,23 @@ void CompileTimeExpressionSimplifier::visit(ParameterList &elem) {
 
 void CompileTimeExpressionSimplifier::visit(Function &elem) {
   Visitor::visit(elem);
-  // This node is marked as evaluable if both the ParameterList (implies all of the FunctionParameters) and the Block
-  // (implies all of the statements) are evaluable. This mark is only relevant in case that this Function is referred
-  // by a Call statement because Call statements can be replaced by inlining the Function's computation.
+  // This node is marked as removable if both the ParameterList (implies all of the FunctionParameters) and the Block
+  // (implies all of the statements) are removable. This mark is only relevant in case that this Function is included
+  // in a Call statement because Call statements can be replaced by inlining the Function's computation.
   if (valueIsKnown(elem.getParameterList()) && valueIsKnown(elem.getBody())) {
     markNodeAsRemovable(&elem);
   }
   // clean up temporary results from children in removableNodes map
   removableNodes.erase(elem.getParameterList());
   removableNodes.erase(elem.getBody());
-
   cleanUpAfterStatementVisited(&elem, false);
 }
 
 void CompileTimeExpressionSimplifier::visit(FunctionParameter &elem) {
   Visitor::visit(elem);
 
-  // This simplifier does not care about the variable's datatype, hence we can mark this node as evaluable (= deletion
-  // candidate). This mark is only relevant in case that this FunctionParameter is part of a Function referred by a Call
+  // This simplifier does not care about the variable's datatype, hence we can mark this node as removable. This mark is
+  // only relevant in case that this FunctionParameter is part of a Function that is included into a Call
   // statement because Call statements can be replaced by inlining the Function's computation.
   markNodeAsRemovable(&elem);
 }
@@ -400,7 +409,11 @@ void CompileTimeExpressionSimplifier::visit(If &elem) {
         elseBranchModifiedCurrentVariable = (elseBranchValue!=originalValue);
       }
 
-      // determine if an If statement-dependent value needs to be assigned to the variable
+      // Determine if an If statement-dependent value needs to be assigned to the variable.
+      // The following approach only rewrites those variables that were modified in the Then-branch, the Else-branch, or
+      // both branches. It does, however, drop new variables (i.e., variable declarations) that happened in one of the
+      // branches. Those variables are anyway out of scope when leaving the branch, so there's no need to store their
+      // value in variableValues map.
       AbstractExpr *newValue;
       if (thenBranchModifiedCurrentVariable && elseBranchModifiedCurrentVariable) {
         newValue = generateIfDependentValue(elem.getCondition(), thenBranchValue, elseBranchValue);
@@ -458,6 +471,8 @@ void CompileTimeExpressionSimplifier::visit(Return &elem) {
     // clean up temporary results from children in removableNodes map
     removableNodes.erase(returnExpr);
   }
+  // marking this node as removable is only useful for the case that this Return belongs to a nested Function that can
+  // be replaced by inlining the return expressions into the position where the function is called
   if (allValuesAreKnown) markNodeAsRemovable(&elem);
   cleanUpAfterStatementVisited(&elem, false);
 }
@@ -476,10 +491,10 @@ bool CompileTimeExpressionSimplifier::valueIsKnown(AbstractNode *node) {
   if (auto abstractExprAsVariable = dynamic_cast<Variable *>(node)) {
     // check that the variable has a value
     return variableValues.count(abstractExprAsVariable->getIdentifier()) > 0
-        // and its value is not symbolic (i.e., contains a variable for which the value is not known)
+        // and its value is not symbolic (i.e., contains no variables for which the value is unknown)
         && variableValues.at(abstractExprAsVariable->getIdentifier())->getVariableIdentifiers().empty();
   }
-  // ii.) or the node was evaluated before (i.e., its value is in removableNodes)
+  // ii.) or the node is removable (i.e., its value is in removableNodes)
   return variableValueIsKnown || removableNodes.count(node) > 0;
 }
 
@@ -596,11 +611,11 @@ void CompileTimeExpressionSimplifier::cleanUpAfterStatementVisited(AbstractNode 
 void CompileTimeExpressionSimplifier::addVariableValue(const std::string &variableIdentifier,
                                                        AbstractExpr *valueAnyLiteralOrAbstractExpr) {
   valueAnyLiteralOrAbstractExpr->removeFromParents();
-  variableValues[variableIdentifier] = valueAnyLiteralOrAbstractExpr;
+  variableValues[variableIdentifier] = valueAnyLiteralOrAbstractExpr->clone(false)
+      ->castTo<AbstractExpr>();
 }
 
 bool CompileTimeExpressionSimplifier::isQueuedForDeletion(const AbstractNode *node) {
-
   return std::find(nodesQueuedForDeletion.begin(), nodesQueuedForDeletion.end(), node)
       !=nodesQueuedForDeletion.end();
 }

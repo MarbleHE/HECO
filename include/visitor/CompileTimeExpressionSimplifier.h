@@ -33,23 +33,38 @@ struct BinaryExpressionAcc {
 
   /// The last visited binary expression. This information is needed to know where to attach to the newly created
   /// subtree of simplified binary expressions.
-  AbstractExpr *lastVisitedSubtree;
+  AbstractExpr *lastVisitedBinaryExp;
+
+  /// The first visited binary expression for which operands were collected. This information is needed when generating
+  /// the simplified subtree consisting of the collected operands. If the firstVisitedBinaryExp had any binary
+  /// expressions, then these will be attached to the simplified subtree.
+  AbstractExpr *firstVisitedBinaryExp;
 
   /// The number of operands that could be reduced. This information is used to determine whether the
   /// BinaryExpressionAcc could simplify the binary expressions at all.
   unsigned long numberOfReducedNodes = 0;
 
-  /// Sets a new value to lastVisitedSubtree that indicates the last binary expression handled by the
-  /// BinaryExpressionAcc. This information is needed to know where to attach the simplified subtree to.
+  /// Sets a new value to lastVisitedBinaryExp that indicates the last binary expression handled by the
+  /// BinaryExpressionAcc. This information is needed to know where to attach the simplified subtree to in case that
+  /// the operator changes.
   /// \param binaryExprNode The last handled binary expression node.
   void setLastVisitedSubtree(AbstractExpr *binaryExprNode) {
-    lastVisitedSubtree = binaryExprNode;
+    lastVisitedBinaryExp = binaryExprNode;
+  }
+
+  /// Sets a new value to firstVisitedBinaryExp that indicates the first binary expression for which operands were
+  /// aggregated by the BinaryExpressionAcc. This information is needed when generating the simplified subtree
+  /// consisting of the collected operands. If the firstVisitedBinaryExp had any binary expressions, then these will be
+  /// attached to the simplified subtree.
+  /// \param binaryExprNode The first binary expression for which operands were collected.
+  void setFirstVisitedSubtree(AbstractExpr *binaryExprNode) {
+    firstVisitedBinaryExp = binaryExprNode;
   }
 
   /// Clears all the information collected so far in this BinaryExpressionAcc.
   void reset() {
     operands.clear();
-    lastVisitedSubtree = nullptr;
+    lastVisitedBinaryExp = nullptr;
     numberOfReducedNodes = 0;
   }
 
@@ -70,11 +85,11 @@ struct BinaryExpressionAcc {
     static const std::vector<ArithmeticOp> logicalOps =
         {ArithmeticOp::addition, ArithmeticOp::multiplication};
 
-    // accumulator approach only works for commutative operators
-    if (std::holds_alternative<ArithmeticOp>(opSymbol)) {
+    // accumulator approach works for commutative operators only
+    if (std::holds_alternative<ArithmeticOp>(opSymbol)) {  // arithmetic operators
       return std::find(arithmeticOps.begin(), arithmeticOps.end(), std::get<ArithmeticOp>(opSymbol))
           !=arithmeticOps.end();
-    } else if (std::holds_alternative<LogCompOp>(opSymbol)) {
+    } else if (std::holds_alternative<LogCompOp>(opSymbol)) {  // logical operators
       return std::find(logicalOps.begin(), logicalOps.end(), std::get<LogCompOp>(opSymbol))
           !=logicalOps.end();
     }
@@ -85,6 +100,13 @@ struct BinaryExpressionAcc {
   /// tree that can be used to simplify the respective subtree of the AST.
   /// \return A multiplicative depth-balanced tree representing the simplified expression.
   AbstractNode *getSimplifiedSubtree() {
+    // check if the node where we started collecting operands (i.e., "lower bound" of simplified tree segment) that has
+    // a child that we need to attach to the simplified segment
+    for (auto &c : firstVisitedBinaryExp->getChildrenNonNull()) {
+      if (dynamic_cast<AbstractBinaryExpr *>(c)!=nullptr) {
+        operands.push_back(c->castTo<AbstractExpr>());
+      }
+    }
     return createMultDepthBalancedTreeFromInputs(operands, operatorSymbol);
   }
 
