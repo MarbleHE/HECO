@@ -1422,7 +1422,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_unsupportedNestedOp
   //  return 9 + (34 + (22 / (a / (11 * 42))));
   // }
   //  -- expected --
-  // int f(plaintext_int x) {
+  // int f(plaintext_int a) {
   //  return 43 + (22 / (a / 462));
   // }
   auto function = new Function("f");
@@ -1437,6 +1437,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_unsupportedNestedOp
                                                                                   new ArithmeticExpr(new LiteralInt(11),
                                                                                                      multiplication,
                                                                                                      42))))));
+
   // connect objects
   function->setParameterList(functionParamList);
   function->addStatement(returnStmt);
@@ -1445,15 +1446,106 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_unsupportedNestedOp
   // perform the compile-time expression simplification
   ctes.visit(ast);
 
-  DotPrinter().printAsDotFormattedGraph(ast);
-
-
   // check that simplification generated the expected simplified AST
   auto expectedReturnVal = new ArithmeticExpr(
       new ArithmeticExpr(new LiteralInt(22), division,
                          new ArithmeticExpr(new Variable("a"), division, new LiteralInt(462))),
       ArithmeticOp::addition,
       new LiteralInt(43));
+  EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
+  EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
+
+  // check that at the end of the evaluation traversal, the removableNodes map is empty
+  EXPECT_EQ(ctes.removableNodes.size(), 0);
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_nestedOperatorsSimplifiableOnOneSideOnly) { /* NOLINT */
+  //  -- input --
+  // int f(plaintext_int a) {
+  //  return (4 + (3 + 8) - (a / (2 * 4))
+  // }
+  //  -- expected --
+  // int f(plaintext_int a) {
+  //  return 15 - (a / 8)
+  // }
+  auto function = new Function("f");
+  auto functionParamList = new ParameterList(
+      {new FunctionParameter(
+          new Datatype(Types::INT, false), new Variable("a"))});
+  auto returnStmt = new Return(
+      new ArithmeticExpr(
+          new ArithmeticExpr(new LiteralInt(4), addition,
+                             new ArithmeticExpr(new LiteralInt(3), addition, new LiteralInt(8))),
+          subtraction,
+          new ArithmeticExpr(new Variable("a"), division,
+                             new ArithmeticExpr(new LiteralInt(2), multiplication, new LiteralInt(4)))));
+
+  // connect objects
+  function->setParameterList(functionParamList);
+  function->addStatement(returnStmt);
+  ast.setRootNode(function);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  // check that simplification generated the expected simplified AST
+  auto expectedReturnVal = new ArithmeticExpr(new LiteralInt(15),
+                                              subtraction,
+                                              new ArithmeticExpr(new Variable("a"), division, new LiteralInt(8)));
+  EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
+  EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
+
+  // check that at the end of the evaluation traversal, the removableNodes map is empty
+  EXPECT_EQ(ctes.removableNodes.size(), 0);
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_nestedLogicalOperators) { /* NOLINT */
+  //  -- input --
+  // int f(encrypted_bool a, plaintext_bool b, encrypted_bool c) {
+  //  return (a ^ (b ^ false)) && ((true || false) || true)
+  // }
+  //  -- expected --
+  // int f(plaintext_int a) {
+  //  return (a ^ (b ^ false)) && true;
+  // }
+  // NOTE: Rewriting of 'anything && true' to 'anything' is not implemented yet.
+  auto function = new Function("f");
+  auto functionParamList = new ParameterList(
+      {
+          new FunctionParameter(new Datatype(Types::BOOL, true), new Variable("a")),
+          new FunctionParameter(new Datatype(Types::BOOL, false), new Variable("b")),
+          new FunctionParameter(new Datatype(Types::BOOL, true), new Variable("c"))
+      });
+  auto returnStmt = new Return(
+      new LogicalExpr(new LogicalExpr(new Variable("a"), logicalXor,
+                                      new LogicalExpr(
+                                          new Variable("b"),
+                                          logicalXor,
+                                          new LiteralBool(false))),
+                      logicalAnd,
+                      new LogicalExpr(new LogicalExpr(
+                          new LiteralBool(true),
+                          logicalOr,
+                          new LiteralBool(false)),
+                                      logicalOr,
+                                      new LiteralBool(true))));
+
+  // connect objects
+  function->setParameterList(functionParamList);
+  function->addStatement(returnStmt);
+  ast.setRootNode(function);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  // check that simplification generated the expected simplified AST
+  auto expectedReturnVal = new LogicalExpr(
+      new LogicalExpr(
+          new Variable("a"),
+          logicalXor,
+          new LogicalExpr(new Variable("b"), logicalXor, new LiteralBool(false))),
+      logicalAnd,
+      new LiteralBool(true));
   EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
   EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
 

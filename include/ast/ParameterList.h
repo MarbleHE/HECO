@@ -1,5 +1,6 @@
 #ifndef AST_OPTIMIZER_INCLUDE_AST_PARAMETERLIST_H_
 #define AST_OPTIMIZER_INCLUDE_AST_PARAMETERLIST_H_
+
 #include "AbstractStatement.h"
 
 class ParameterList : public AbstractStatement {
