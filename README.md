@@ -226,7 +226,7 @@ This codebase was checked against the default C/C++ inspections provided in CLio
 
 Further, the static code checker [cpplint](https://github.com/cpplint/cpplint) is used that provides more advanced checks. It can be integrated into CLion using the [CLion-cpplint](https://plugins.jetbrains.com/plugin/7871-clion-cpplint) plugin. To ensure consistency, pleasure use the following settings (to be provided in the plugin's options at Preferences -> cpplint option):
 ```
---linelength=120 --filter=-legal/copyright,-build/header_guard,-whitespace/comments,-runtime/references
+--linelength=120 --filter=-legal/copyright,-build/header_guard,-whitespace/comments,-runtime/references,-whitespace/operators
 ```
 
 #### Documentation
