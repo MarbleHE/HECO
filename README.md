@@ -3,6 +3,21 @@
 This repository hosts an optimizer for Fully Homomorphic Encryption (FHE) working on an AST-like (Abstract Syntax Tree) representation of a program.
 In future, this optimization component will be integrated into the [Marble](https://github.com/MarbleHE/Marble) FHE compiler [1].
 
+- [FHE Code Optimizer](#fhe-code-optimizer)
+  - [Repository's Structure](#repositorys-structure)
+  - [Optimizations](#optimizations)
+      - [Compile-Time Expression Simplifier](#compile-time-expression-simplifier)
+      - [Cone-Rewriting](#cone-rewriting)
+      - [CKKS Scheme-Specific Optimizations](#ckks-scheme-specific-optimizations)
+  - [AST Representation](#ast-representation)
+  - [Getting Started](#getting-started)
+  - [Extending the Library](#extending-the-library)
+    - [Code Style](#code-style)
+    - [Inspections](#inspections)
+    - [Documentation](#documentation)
+    - [Testing](#testing)
+  - [References](#references)
+
 ## Repository's Structure
 
 The repository is organized as follow:
@@ -229,7 +244,7 @@ Further, the static code checker [cpplint](https://github.com/cpplint/cpplint) i
 --linelength=120 --filter=-legal/copyright,-build/header_guard,-whitespace/comments,-runtime/references,-whitespace/operators
 ```
 
-#### Documentation
+### Documentation
 
 [Doxygen](http://www.doxygen.nl/manual/index.html) comments are used to create a documentation of this library. 
 The documentation can be generated using the supplied configuration `doxygen.conf` as described following:
@@ -249,7 +264,7 @@ The tests can be found in the [`test`](test) directory and are named according t
 
 It is required to submit tests for newly added features to ensure correctness and avoid breaking the feature by future changes (regression test). Any PRs without tests will not be considered to be integrated.
 
-### References
+## References
 [1] 1.Viand, A., Shafagh, H.: [Marble: Making Fully Homomorphic Encryption Accessible to All.](http://www.vs.inf.ethz.ch/publ/papers/vianda_marble_2018.pdf) In: Proceedings of the 6th workshop on encrypted computing & applied homomorphic cryptography. pp. 49–60 (2018).
 
 [2] 1.Aubry, P. et al.: [Faster Homomorphic Encryption Is Not Enough: Improved Heuristic for Multiplicative Depth Minimization of Boolean Circuits.](https://eprint.iacr.org/2019/963.pdf) (2019).
