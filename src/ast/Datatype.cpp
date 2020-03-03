@@ -70,8 +70,9 @@ void Datatype::setEncrypted(bool isEncrypted) {
 }
 
 AbstractNode *Datatype::cloneFlat() {
-  //TODO(vianda): Implement cloneFlat for Datatypes
-  throw std::runtime_error("oops");
+  auto datatype = new Datatype(this->getType(), isEncrypted());
+  datatype->setUniqueNodeId(this->getUniqueNodeId());
+  return datatype;
 }
 
 AbstractNode *Datatype::clone(bool keepOriginalUniqueNodeId) {

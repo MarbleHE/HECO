@@ -56,8 +56,9 @@ Block *Block::clone(bool keepOriginalUniqueNodeId) {
 }
 
 AbstractNode *Block::cloneFlat() {
-  //TODO(vianda): Implement cloneFlat in Block
-  throw std::runtime_error("Not implemented");
+  auto block = new Block();
+  block->setUniqueNodeId(this->getUniqueNodeId());
+  return block;
 }
 
 int Block::getMaxNumberChildren() {
