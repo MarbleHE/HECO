@@ -10,8 +10,8 @@
 
 json Call::toJson() const {
   json j = {{"type", getNodeType()},
-            {"arguments", this->arguments},
-            {"function", this->func->toJson()}};
+            {"arguments", getArguments()},
+            {"function", getFunc()->toJson()}};
   return j;
 }
 
@@ -19,27 +19,24 @@ void Call::accept(Visitor &v) {
   v.visit(*this);
 }
 
-const std::vector<FunctionParameter *> &Call::getArguments() const {
-  return arguments;
-}
-
 std::string Call::getNodeType() const {
   return "Call";
 }
 
-Call::~Call() {
-  delete func;
+Call::Call(Function *func) {
+  setAttributes({}, func);
 }
 
-Call::Call(Function *func) : func(func) {
-}
-
-Call::Call(std::vector<FunctionParameter *> parameterValuesForCalledFunction, Function *func)
-    : func(func), arguments(std::move(parameterValuesForCalledFunction)) {
+Call::Call(std::vector<FunctionParameter *> parameterValuesForCalledFunction, Function *func) {
+  setAttributes(std::move(parameterValuesForCalledFunction), func);
 }
 
 Function *Call::getFunc() const {
-  return func;
+  return reinterpret_cast<Function *>(getChildAtIndex(1));
+}
+
+std::vector<FunctionParameter *> Call::getArguments() const {
+  return reinterpret_cast<ParameterList *>(getChildAtIndex(0))->getParameters();
 }
 
 AbstractNode *Call::clone(bool keepOriginalUniqueNodeId) {
@@ -55,3 +52,19 @@ AbstractNode *Call::clone(bool keepOriginalUniqueNodeId) {
   return clonedNode;
 }
 
+void Call::setAttributes(std::vector<FunctionParameter *> functionCallParameters, Function *functionToBeCalled) {
+  removeChildren();
+  addChildren({new ParameterList(std::move(functionCallParameters)), functionToBeCalled});
+}
+
+int Call::getMaxNumberChildren() {
+  return 2;
+}
+
+bool Call::supportsCircuitMode() {
+  return true;
+}
+
+ParameterList *Call::getParameterList() const {
+  return reinterpret_cast<ParameterList *>(getChildAtIndex(0));
+}

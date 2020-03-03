@@ -19,7 +19,6 @@ class ArithmeticExprFixture : public ::testing::Test {
   LiteralInt *left;
   LiteralInt *otherLeft;
   LiteralFloat *right;
-  LiteralFloat *otherRight;
   ArithmeticOp opSymb;
   Operator *operatorAdd;
 
@@ -27,7 +26,6 @@ class ArithmeticExprFixture : public ::testing::Test {
     left = new LiteralInt(3);
     otherLeft = new LiteralInt(42);
     right = new LiteralFloat(2.0);
-    otherRight = new LiteralFloat(22.4);
     opSymb = ArithmeticOp::addition;
     operatorAdd = new Operator(opSymb);
   }
@@ -138,19 +136,72 @@ TEST(ChildParentTests, Block_addAdditionalChild) {  /* NOLINT */
   EXPECT_EQ(blockStatement->getChildAtIndex(1), varAssignm);
 }
 
-TEST(ChildParentTests, Call) {  /* NOLINT */
+TEST(ChildParentTests, CallStandardConstructor) {  /* NOLINT */
   auto func = new Function("computeSecretX");
   auto funcParam = new FunctionParameter(new Datatype(Types::INT), new LiteralInt(221));
   auto call = new Call({funcParam}, func);
 
-  ASSERT_EQ(call->getChildren().size(), 0);
-  ASSERT_EQ(call->getParents().size(), 0);
-  ASSERT_FALSE(call->supportsCircuitMode());
-  ASSERT_EQ(call->getMaxNumberChildren(), 0);
+  ASSERT_TRUE(call->supportsCircuitMode());
+  ASSERT_EQ(call->getMaxNumberChildren(), 2);
 
-  // checking children
-  ASSERT_EQ(func->getParents().size(), 0);
-  ASSERT_EQ(funcParam->getParents().size(), 0);
+  // children
+  ASSERT_EQ(call->getChildren().size(), 2);
+  ASSERT_TRUE(dynamic_cast<ParameterList *>(call->getChildAtIndex(0))!=nullptr);
+  ASSERT_EQ(call->getChildAtIndex(1), func);
+
+  // parents
+  ASSERT_EQ(call->getParents().size(), 0);
+  ASSERT_EQ(call->getChildAtIndex(0)->getParents().size(), 1);
+  ASSERT_TRUE(call->getChildAtIndex(0)->hasParent(call));
+  ASSERT_EQ(call->getChildAtIndex(1)->getParents().size(), 1);
+  ASSERT_TRUE(call->getChildAtIndex(1)->hasParent(call));
+}
+
+TEST(ChildParentTests, CallArgumentlessConstructor) {  /* NOLINT */
+  auto func = new Function("computeSecretX");
+  auto call = new Call(func);
+
+  ASSERT_TRUE(call->supportsCircuitMode());
+  ASSERT_EQ(call->getMaxNumberChildren(), 2);
+
+  // children
+  ASSERT_EQ(call->getChildren().size(), 2);
+  ASSERT_TRUE(dynamic_cast<ParameterList *>(call->getChildAtIndex(0))!=nullptr);
+  ASSERT_EQ(call->getChildAtIndex(1), func);
+
+  // parents
+  ASSERT_EQ(call->getParents().size(), 0);
+  ASSERT_EQ(call->getChildAtIndex(1)->getParents().size(), 1);
+  ASSERT_TRUE(call->getChildAtIndex(1)->hasParent(call));
+}
+
+TEST(ChildParentTests, CallAddChildException_NoEmptyChildSpotAvailable) {  /* NOLINT */
+  auto func = new Function("computeSecretX");
+  auto arithmeticExpr = new Call(func);
+  EXPECT_THROW(arithmeticExpr->addChild(new Function("y")), std::logic_error);
+}
+
+TEST(ChildParentTests, CallAddChildSuccess) {  /* NOLINT */
+  auto func = new Function("computeSecretX");
+  auto funcParam = new FunctionParameter(new Datatype(Types::INT), new LiteralInt(221));
+  auto call = new Call({funcParam}, func);
+  auto newChild = new FunctionParameter(new Datatype(Types::INT, true), new Variable("seed"));
+  call->getChildAtIndex(0)->addChild(newChild);
+
+  // children
+  EXPECT_EQ(call->getChildren().size(), 2);
+  EXPECT_TRUE(dynamic_cast<ParameterList *>(call->getChildAtIndex(0))!=nullptr);
+  EXPECT_EQ(call->getChildAtIndex(0)->getChildAtIndex(0), funcParam);
+  EXPECT_EQ(call->getChildAtIndex(0)->getChildAtIndex(1), newChild);
+  EXPECT_EQ(call->getChildAtIndex(1), func);
+
+  // parents
+  EXPECT_EQ(call->getParents().size(), 0);
+  EXPECT_EQ(func->getOnlyParent(), call);
+  auto paramList = call->getChildAtIndex(0);
+  EXPECT_EQ(paramList->getOnlyParent(), call);
+  EXPECT_EQ(paramList->getChildAtIndex(0)->getOnlyParent(), paramList);
+  EXPECT_EQ(paramList->getChildAtIndex(1)->getOnlyParent(), paramList);
 }
 
 TEST(ChildParentTests, CallExternal) {  /* NOLINT */

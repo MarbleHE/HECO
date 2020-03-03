@@ -44,6 +44,8 @@ class SecretTaintingVisitor : public Visitor {
   void visit(Variable &elem) override;
   void visit(While &elem) override;
   void visit(Ast &elem) override;
+  void visit(Datatype &elem) override;
+  void visit(ParameterList &elem) override;
 
   bool nodeIsTainted(AbstractNode &node) const;
   void addTaintedNodes(std::vector<AbstractNode *> nodesToAdd);
@@ -66,7 +68,6 @@ class SecretTaintingVisitor : public Visitor {
       return std::find(taintedVariables.begin(), taintedVariables.end(), identifier)!=taintedVariables.end();
     });
   }
-  void visit(Datatype &elem) override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_VISITOR_SECRETTAINTINGVISITOR_H_

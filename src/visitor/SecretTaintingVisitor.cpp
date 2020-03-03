@@ -134,6 +134,16 @@ void SecretTaintingVisitor::visit(FunctionParameter &elem) {
   Visitor::visit(elem);
 }
 
+void SecretTaintingVisitor::visit(ParameterList &elem) {
+  Visitor::visit(elem);
+  auto params = elem.getParameters();
+  if (std::any_of(params.begin(),
+                  params.end(),
+                  [&](AbstractNode *node) { return nodeIsTainted(*node); })) {
+    addTaintedNode(&elem);
+  }
+}
+
 void SecretTaintingVisitor::visit(LiteralBool &elem) {
   Visitor::visit(elem);
 }
