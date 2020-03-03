@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <string>
 #include "AbstractLiteral.h"
+#include <vector>
 
 class EvaluationPrinter {
  private:

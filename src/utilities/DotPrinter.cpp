@@ -45,14 +45,14 @@ std::string DotPrinter::getDotFormattedString(AbstractNode *n) {
   auto printNodeDetailsCriterion = (vec.empty()    // if node is a tree leaf
       || dynamic_cast<VarDecl *>(n)!=nullptr       // if node is a VarDecl (needed for the variable identifier)
       || dynamic_cast<VarAssignm *>(n)!=nullptr);  // if node is a VarAssignm (needed for the variable identifier)
-  finalString << dotVertex(n, this->showMultDepth, this->mdc, printNodeDetailsCriterion)
+  finalString << DotVertex(n, this->showMultDepth, this->mdc, printNodeDetailsCriterion)
       .buildVertexString(this->indentationCharacter);
 
   // only print edges if there are any edges at all
   if (vec.empty()) return finalString.str();
 
   // otherwise also generate string for edge and return both
-  finalString << dotEdge(n, n->hasReversedEdges()).buildEdgeString(this->indentationCharacter);
+  finalString << DotEdge(n, n->hasReversedEdges()).buildEdgeString(this->indentationCharacter);
   return finalString.str();
 }
 
