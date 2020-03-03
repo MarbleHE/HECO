@@ -223,7 +223,53 @@ void CompileTimeExpressionSimplifier::visit(ArithmeticExpr &elem) {
 void CompileTimeExpressionSimplifier::visit(LogicalExpr &elem) {
   // continue traversal: visiting the expression's operands and operator
   Visitor::visit(elem);
-  handleBinaryExpression(elem);
+
+  // Apply Boolean simplification rules, for example:
+  //   a.) <anything> AND true  ==  <anything>
+  //   b)  <anything> OR true  ==  true
+  // We only need to consider the case where exactly one of the two operands is a LiteralBool because the case of two
+  // known Boolean values is already handled by handleBinaryExpression. Also, if none of the operands is a literal, we
+  // cannot perform any simplifications.
+  auto lhs = dynamic_cast<LiteralBool *>(elem.getLeft());
+  auto lhsIsBool = lhs!=nullptr;
+  auto rhs = dynamic_cast<LiteralBool *>(elem.getRight());
+  auto rhsIsBool = rhs!=nullptr;
+
+  if ((lhsIsBool && !rhsIsBool) || (rhsIsBool && !lhsIsBool)) {  // if one of the operands is a Boolean
+    auto determineBooleanNonBooleanOperand =
+        [](LiteralBool *lhs, AbstractExpr *lhsAlt, LiteralBool *rhs, AbstractExpr *rhsAlt)
+            -> std::pair<LiteralBool *, AbstractExpr *> {
+          return (lhs!=nullptr) ? std::make_pair(lhs, rhsAlt) : std::make_pair(rhs, lhsAlt);
+        };
+    auto[booleanOperand, nonBooleanOperand] = determineBooleanNonBooleanOperand(
+        lhs, elem.getLeft(), rhs, elem.getRight());
+
+    // <anything> AND true  ==  <anything>
+    // <anything> OR false  ==  <anything>
+    // <anything> XOR false  ==  <anything>
+    if ((elem.getOp()->equals(logicalAnd) && booleanOperand->getValue())
+        || (elem.getOp()->equals(logicalOr) && !booleanOperand->getValue())
+        || (elem.getOp()->equals(logicalXor) && !booleanOperand->getValue())) {
+      nonBooleanOperand->removeFromParents();
+      elem.getOnlyParent()->replaceChild(&elem, nonBooleanOperand);
+      nodesQueuedForDeletion.push_back(&elem);
+    } else if (elem.getOp()->equals(logicalAnd) && !booleanOperand->getValue()) {  // <anything> AND false  ==  false
+      elem.getOnlyParent()->replaceChild(&elem, new LiteralBool(false));
+      nodesQueuedForDeletion.push_back(nonBooleanOperand);
+    } else if (elem.getOp()->equals(logicalOr) && booleanOperand->getValue()) {   // <anything> OR true  ==  true
+      elem.getOnlyParent()->replaceChild(&elem, new LiteralBool(true));
+      nodesQueuedForDeletion.push_back(nonBooleanOperand);
+    } else if (elem.getOp()->equals(logicalXor)
+        && booleanOperand->getValue()) {  // <anything> XOR true  ==  NOT <anything>
+      nonBooleanOperand->removeFromParents();
+      auto uexp = new UnaryExpr(negation, nonBooleanOperand);
+      elem.getOnlyParent()->replaceChild(&elem, uexp);
+      nodesQueuedForDeletion.push_back(&elem);
+    }
+  } else {
+    // handles the case where both operands are known or neither one and tries to simplify nested logical expressions
+    handleBinaryExpression(elem);
+  }
   // clean up temporary results from children in removableNodes map
   removableNodes.erase(elem.getLeft());
   removableNodes.erase(elem.getRight());

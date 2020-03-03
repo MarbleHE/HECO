@@ -212,9 +212,12 @@ TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_literalsOnly_fullyEva
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_variableUnknown_lhsOperandEvaluableOnly) { /* NOLINT */
+  //  -- input --
   // void compute(encrypted_bool encryptedA) {
   //  plaintext_bool alpha = (true ^ false) || encryptedA;
   // }
+  //  -- expected --
+  // variableValues['alpha'] = true
   auto function = new Function("compute");
   auto functionParamList = new ParameterList(
       {new FunctionParameter(new Datatype(Types::BOOL, true),
@@ -238,7 +241,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_variableUnknown_lhsOp
   ctes.visit(ast);
 
   // check that alpha's lhs operand is computed
-  auto expected = new LogicalExpr(true, LogCompOp::logicalOr, new Variable("encryptedA"));
+  auto expected = new LiteralBool(true);
   EXPECT_TRUE(getVariableValue("alpha")->isEqual(expected));
   // check that the variable declaration statement is deleted
   EXPECT_EQ(function->getBodyStatements().size(), 0);
@@ -284,9 +287,12 @@ TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_variableKnown_fullyEv
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_variablesUnknown_notAnythingEvaluable) { /* NOLINT */
+  //  -- input --
   // void compute(encrypted_bool encryptedA, plaintext_bool paramB) {
   //  plaintext_bool alpha = encryptedA && (true ^ encryptedB);
   // }
+  //  -- expected --
+  // variableValues['alpha'] = encryptedA && !encryptedB
   auto function = new Function("compute");
   auto functionParameters = std::vector<FunctionParameter *>(
       {new FunctionParameter(new Datatype(Types::BOOL, true),
@@ -315,9 +321,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_variablesUnknown_notA
   auto expected = new LogicalExpr(
       new Variable("encryptedA"),
       LogCompOp::logicalAnd,
-      new LogicalExpr(new LiteralBool(true),
-                      LogCompOp::logicalXor,
-                      new Variable("encryptedB")));
+      new UnaryExpr(negation, new Variable("encryptedB")));
   EXPECT_TRUE(getVariableValue("alpha")->isEqual(expected));
 
   // check that 9 nodes are deleted
@@ -1499,16 +1503,15 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_nestedOperatorsSimp
   EXPECT_EQ(ctes.removableNodes.size(), 0);
 }
 
-TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_nestedLogicalOperators) { /* NOLINT */
+TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_nestedLogicalOperators__EXPECTED_FAIL) { /* NOLINT */
   //  -- input --
   // int f(encrypted_bool a, plaintext_bool b, encrypted_bool c) {
   //  return (a ^ (b ^ false)) && ((true || false) || true)
   // }
   //  -- expected --
   // int f(plaintext_int a) {
-  //  return (a ^ (b ^ false)) && true;
+  //  return a ^ b;
   // }
-  // NOTE: Rewriting of 'anything && true' to 'anything' is not implemented yet.
   auto function = new Function("f");
   auto functionParamList = new ParameterList(
       {
@@ -1539,16 +1542,238 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_nestedLogicalOperat
   ctes.visit(ast);
 
   // check that simplification generated the expected simplified AST
-  auto expectedReturnVal = new LogicalExpr(
-      new LogicalExpr(
-          new Variable("a"),
-          logicalXor,
-          new LogicalExpr(new Variable("b"), logicalXor, new LiteralBool(false))),
-      logicalAnd,
-      new LiteralBool(true));
+  auto expectedReturnVal = new LogicalExpr(new Variable("a"), logicalXor, new Variable("b"));
   EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
   EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
 
   // check that at the end of the evaluation traversal, the removableNodes map is empty
   EXPECT_EQ(ctes.removableNodes.size(), 0);
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_logicalAndSimplification_ANDtrue) { /* NOLINT */
+  //  -- input --
+  // int f(encrypted_bool a, plaintext_bool b) {
+  //  return a && (true && b);
+  // }
+  //  -- expected --
+  // int f(plaintext_int a) {
+  //  return a && b;
+  // }
+  auto function = new Function("f");
+  auto functionParamList = new ParameterList(
+      {
+          new FunctionParameter(new Datatype(Types::BOOL, true), new Variable("a")),
+          new FunctionParameter(new Datatype(Types::BOOL, false), new Variable("b"))
+      });
+  auto returnStmt = new Return(
+      new LogicalExpr(
+          new Variable("a"),
+          logicalAnd,
+          new LogicalExpr(
+              new LiteralBool(true),
+              logicalAnd,
+              new Variable("b"))));
+
+  // connect objects
+  function->setParameterList(functionParamList);
+  function->addStatement(returnStmt);
+  ast.setRootNode(function);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  // check that simplification generated the expected simplified AST
+  auto expectedReturnVal = new LogicalExpr(new Variable("a"), logicalAnd, new Variable("b"));
+  EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
+  EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_logicalAndSimplification_ANDfalse) { /* NOLINT */
+  //  -- input --
+  // int f(encrypted_bool a, plaintext_bool b) {
+  //  return a && (false && b);
+  // }
+  //  -- expected --
+  // int f(plaintext_int a) {
+  //  return false;
+  // }
+  auto function = new Function("f");
+  auto functionParamList = new ParameterList(
+      {
+          new FunctionParameter(new Datatype(Types::BOOL, true), new Variable("a")),
+          new FunctionParameter(new Datatype(Types::BOOL, false), new Variable("b"))
+      });
+  auto returnStmt = new Return(
+      new LogicalExpr(
+          new Variable("a"),
+          logicalAnd,
+          new LogicalExpr(
+              new LiteralBool(false),
+              logicalAnd,
+              new Variable("b"))));
+
+  // connect objects
+  function->setParameterList(functionParamList);
+  function->addStatement(returnStmt);
+  ast.setRootNode(function);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  // check that simplification generated the expected simplified AST
+  auto expectedReturnVal = new LiteralBool(false);
+  EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
+  EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_logicalAndSimplification_ORfalse) { /* NOLINT */
+  //  -- input --
+  // int f(encrypted_bool a, plaintext_bool b) {
+  //  return a || (b || false);
+  // }
+  //  -- expected --
+  // int f(plaintext_int a) {
+  //  return a || b;
+  // }
+  auto function = new Function("f");
+  auto functionParamList = new ParameterList(
+      {
+          new FunctionParameter(new Datatype(Types::BOOL, true), new Variable("a")),
+          new FunctionParameter(new Datatype(Types::BOOL, false), new Variable("b"))
+      });
+  auto returnStmt = new Return(
+      new LogicalExpr(
+          new Variable("a"),
+          logicalOr,
+          new LogicalExpr(
+              new Variable("b"),
+              logicalOr,
+              new LiteralBool(false))));
+
+  // connect objects
+  function->setParameterList(functionParamList);
+  function->addStatement(returnStmt);
+  ast.setRootNode(function);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  // check that simplification generated the expected simplified AST
+  auto expectedReturnVal = new LogicalExpr(new Variable("a"), logicalOr, new Variable("b"));
+  EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
+  EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_logicalAndSimplification_ORtrue) { /* NOLINT */
+  //  -- input --
+  // int f(encrypted_bool a, plaintext_bool b) {
+  //  return a || (b || true);
+  // }
+  //  -- expected --
+  // int f(plaintext_int a) {
+  //  return true;
+  // }
+  auto function = new Function("f");
+  auto functionParamList = new ParameterList(
+      {
+          new FunctionParameter(new Datatype(Types::BOOL, true), new Variable("a")),
+          new FunctionParameter(new Datatype(Types::BOOL, false), new Variable("b"))
+      });
+  auto returnStmt = new Return(
+      new LogicalExpr(
+          new Variable("a"),
+          logicalOr,
+          new LogicalExpr(
+              new Variable("b"),
+              logicalOr,
+              new LiteralBool(true))));
+
+  // connect objects
+  function->setParameterList(functionParamList);
+  function->addStatement(returnStmt);
+  ast.setRootNode(function);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  // check that simplification generated the expected simplified AST
+  auto expectedReturnVal = new LiteralBool(true);
+  EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
+  EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_logicalAndSimplification_XORtrue) {
+  //  -- input --
+  // int f(encrypted_bool a, plaintext_bool b) {
+  //  return a ^ (b ^ true);
+  // }
+  //  -- expected --
+  // int f(plaintext_int a) {
+  //  return a ^ !b;
+  // }
+  auto function = new Function("f");
+  auto functionParamList = new ParameterList(
+      {
+          new FunctionParameter(new Datatype(Types::BOOL, true), new Variable("a")),
+          new FunctionParameter(new Datatype(Types::BOOL, false), new Variable("b"))
+      });
+  auto returnStmt = new Return(
+      new LogicalExpr(
+          new Variable("a"),
+          logicalXor,
+          new LogicalExpr(
+              new Variable("b"),
+              logicalXor,
+              new LiteralBool(true))));
+
+  // connect objects
+  function->setParameterList(functionParamList);
+  function->addStatement(returnStmt);
+  ast.setRootNode(function);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  // check that simplification generated the expected simplified AST
+  auto expectedReturnVal = new LogicalExpr(new Variable("a"), logicalXor, new UnaryExpr(negation, new Variable("b")));
+  EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
+  EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_logicalAndSimplification_XORfalse) {
+  //  -- input --
+  // int f(encrypted_bool a, plaintext_bool b) {
+  //  return a ^ (b ^ false);
+  // }
+  //  -- expected --
+  // int f(plaintext_int a) {
+  //  return a ^ b;
+  // }
+  auto function = new Function("f");
+  auto functionParamList = new ParameterList(
+      {
+          new FunctionParameter(new Datatype(Types::BOOL, true), new Variable("a")),
+          new FunctionParameter(new Datatype(Types::BOOL, false), new Variable("b"))
+      });
+  auto returnStmt = new Return(
+      new LogicalExpr(
+          new Variable("a"),
+          logicalXor,
+          new LogicalExpr(
+              new Variable("b"),
+              logicalXor,
+              new LiteralBool(false))));
+
+  // connect objects
+  function->setParameterList(functionParamList);
+  function->addStatement(returnStmt);
+  ast.setRootNode(function);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  // check that simplification generated the expected simplified AST
+  auto expectedReturnVal = new LogicalExpr(new Variable("a"), logicalXor, new Variable("b"));
+  EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
+  EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
 }
