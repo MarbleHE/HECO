@@ -15,3 +15,6 @@ jobs:
         run: cmake --build build
       - name: test
         run: cd build && ctest
+      - name: action-gtest
+        uses: CyberZHG/github-action-gtest@0.0.1
+        args: "-d test -e testing-all"
