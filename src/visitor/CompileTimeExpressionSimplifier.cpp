@@ -16,6 +16,7 @@
 #include "ParameterList.h"
 #include "CallExternal.h"
 #include "While.h"
+#include "Call.h"
 
 CompileTimeExpressionSimplifier::CompileTimeExpressionSimplifier() {
   evalVisitor = EvaluationVisitor();
@@ -314,24 +315,54 @@ void CompileTimeExpressionSimplifier::visit(Block &elem) {
 }
 
 void CompileTimeExpressionSimplifier::visit(Call &elem) {
+  Return *returnStmt = (elem.getFunc()!=nullptr) ? dynamic_cast<Return *>(elem.getFunc()->getBodyStatements().back())
+                                                 : nullptr;
+  if (returnStmt!=nullptr) {
+    // only perform inlining if...
+    // there is a Return in the called function
+    auto returnStatementDescendants = returnStmt->getDescendants();
+    if (// the Return statement does not have more than 20 descendant nodes ("threshold")
+        returnStatementDescendants.size() <= 20
+            // their is exactly one return value (because assignment of multiple values cannot be expressed yet
+            && returnStmt->getReturnExpressions().size()==1) {
+      // TODO remove?
+      // extract the return statement by detaching it from its parent
+//      returnStmt->removeFromParents();
+      // replace variables values of Call with those in called function
+      auto parameterValues = elem.getParameterList()->getParameters();
+      auto expectedFunctionParameters = elem.getFunc()->getParameterList()->getParameters();
+      if (parameterValues.size()!=expectedFunctionParameters.size()) {
+        throw std::invalid_argument("Number of given and expected parameters in Call does not match!");
+      }
+      // generate a map consisting of "variableIdentifier : variableValue" entries where variableIdentifier is the name
+      // of the variable within the called function and variableValue the value (literal or variable) that is passed as
+      // value for that identifier as part of the function call
+      std::unordered_map<std::string, AbstractExpr *> varReplacementMap;
+      for (int i = 0; i < parameterValues.size(); ++i) {
+        auto variable = expectedFunctionParameters[i]->getValue()->castTo<Variable>();
+        auto entry = std::make_pair(variable->getIdentifier(), parameterValues[i]->getValue());
+        varReplacementMap.insert(entry);
+      }
+      for (auto &node : returnStatementDescendants) {
+        // if the current node is a Variable node and it is a function parameter -> replace it
+        auto nodeAsVariable = dynamic_cast<Variable *>(node);
+        if (nodeAsVariable!=nullptr && varReplacementMap.count(nodeAsVariable->getIdentifier()) > 0) {
+          node->getOnlyParent()->replaceChild(node,
+                                              varReplacementMap.at(nodeAsVariable->getIdentifier())->clone(false));
+        }
+      }
+
+      // remove return expression from its parent (return statement) and replace Call by extracted return statement
+      auto parentNode = elem.getOnlyParent();
+      auto returnExpr = returnStmt->getReturnExpressions().front();
+      returnExpr->removeFromParents(true);
+      parentNode->replaceChild(&elem, returnExpr);
+
+      // revisit subtree as new simplification opportunities may exist now
+      parentNode->accept(*this);
+    }
+  }
   Visitor::visit(elem);
-  // TODO(pjattke): implement me!
-  //  We can replace the call node by the result of the inner function's return value.
-  //  For example:
-  //
-  //    int computeX(int input) {
-  //      ...
-  //      int z = computeZ(seed);   -->  int computeZ(int seed) { int v = genRandomNum(seed); return v + 32; }
-  //      ...
-  //    }
-  //
-  //  is converted into:
-  //
-  //    int computeX(int input) {
-  //      ...
-  //      int z = genRandomNum(seed) + 32;
-  //      ...
-  //    }
 }
 
 void CompileTimeExpressionSimplifier::visit(ParameterList &elem) {

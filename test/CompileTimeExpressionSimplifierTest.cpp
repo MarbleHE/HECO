@@ -1825,9 +1825,66 @@ TEST_F(CompileTimeExpressionSimplifierFixture, WhileLoop_compileTimeKnownExpress
   // perform the compile-time expression simplification
   ctes.visit(ast);
 
-  DotPrinter().printAsDotFormattedGraph(ast);
-
   // check that simplification generated the expected simplified AST
   EXPECT_EQ(function->getBodyStatements().size(), 1);
   EXPECT_TRUE(function->getBodyStatements().front()->isEqual(new Return(new Variable("a"))));
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, Call_inliningExpected) { /* NOLINT */
+  //  -- input --
+  // int f() {
+  //  return computeX(a);       --> int computeX(plaintext_int x) { return x + 111; }
+  // }
+  //  -- expected --
+  // int f() {
+  //  return a + 111;
+  // }
+  auto function = new Function("f");
+  auto funcComputeX =
+      new Function("computeX",
+                   new ParameterList({new FunctionParameter(new Datatype(Types::INT, false), new Variable("x"))}),
+                   new Block(new Return(new ArithmeticExpr(new Variable("x"), addition, new LiteralInt(111)))));
+  auto callStmt = new Call(
+      {new FunctionParameter(new Datatype(Types::INT, false), new Variable("a"))}, funcComputeX);
+
+  auto returnStatement = new Return(callStmt);
+
+  function->addStatement(returnStatement);
+  ast.setRootNode(function);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  auto expectedReturnExpr = new ArithmeticExpr(new Variable("a"), addition, new LiteralInt(111));
+  EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedReturnExpr));
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, Call_inliningExpected2) { /* NOLINT */
+  //  -- input --
+  // int f() {
+  //  return computeX(232);       --> int computeX(plaintext_int x) { return x + 111; }
+  // }
+  //  -- expected --
+  // int f() {
+  //  return 343;
+  // }
+  auto function = new Function("f");
+  auto funcComputeX =
+      new Function("computeX",
+                   new ParameterList({new FunctionParameter(new Datatype(Types::INT, false), new Variable("x"))}),
+                   new Block(new Return(new ArithmeticExpr(new Variable("x"), addition, new LiteralInt(111)))));
+  auto callStmt = new Call(
+      {new FunctionParameter(
+          new Datatype(Types::INT, false), new LiteralInt(232))}, funcComputeX);
+
+  auto returnStatement = new Return(callStmt);
+
+  function->addStatement(returnStatement);
+  ast.setRootNode(function);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  auto expectedReturnExpr = new LiteralInt(343);
+  EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedReturnExpr));
 }
