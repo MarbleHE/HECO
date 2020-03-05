@@ -265,6 +265,6 @@ The tests can be found in the [`test`](test) directory and are named according t
 It is required to submit tests for newly added features to ensure correctness and avoid breaking the feature by future changes (regression test). Any PRs without tests will not be considered to be integrated.
 
 ## References
-[1] 1.Viand, A., Shafagh, H.: [Marble: Making Fully Homomorphic Encryption Accessible to All.](http://www.vs.inf.ethz.ch/publ/papers/vianda_marble_2018.pdf) In: Proceedings of the 6th workshop on encrypted computing & applied homomorphic cryptography. pp. 49–60 (2018).
+[1] Viand, A., Shafagh, H.: [Marble: Making Fully Homomorphic Encryption Accessible to All.](http://www.vs.inf.ethz.ch/publ/papers/vianda_marble_2018.pdf) In: Proceedings of the 6th workshop on encrypted computing & applied homomorphic cryptography. pp. 49–60 (2018).
 
-[2] 1.Aubry, P. et al.: [Faster Homomorphic Encryption Is Not Enough: Improved Heuristic for Multiplicative Depth Minimization of Boolean Circuits.](https://eprint.iacr.org/2019/963.pdf) (2019).
+[2] Aubry, P. et al.: [Faster Homomorphic Encryption Is Not Enough: Improved Heuristic for Multiplicative Depth Minimization of Boolean Circuits.](https://eprint.iacr.org/2019/963.pdf) (2019).
