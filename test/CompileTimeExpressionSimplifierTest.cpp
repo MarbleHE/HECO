@@ -15,6 +15,7 @@
 #include "UnaryExpr.h"
 #include "Call.h"
 #include "If.h"
+#include "While.h"
 
 class CompileTimeExpressionSimplifierFixture : public ::testing::Test {
  protected:
@@ -1776,4 +1777,57 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_logicalAndSimplific
   auto expectedReturnVal = new LogicalExpr(new Variable("a"), logicalXor, new Variable("b"));
   EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
   EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, WhileLoop_compileTimeKnownExpression_removalExpected) { /* NOLINT */
+  //  -- input --
+  // int f(plaintext_int a) {
+  //  int i = 2;
+  //  while (i > 10) {
+  //    a = a * a;
+  //    i = i-1;
+  //  }
+  //  return a;
+  // }
+  //  -- expected --
+  // int f(plaintext_int a) {
+  //  return a;
+  // }
+  auto function = new Function("f");
+  auto functionParamList = new ParameterList(
+      {new FunctionParameter(new Datatype(Types::INT, true), new Variable("i"))});
+  function->setParameterList(functionParamList);
+
+  function->addStatement(new VarDecl("i", 2));
+
+  auto whileBody =
+      new Block({
+                    new VarAssignm("a",
+                                   new ArithmeticExpr(
+                                       new Variable("a"),
+                                       multiplication,
+                                       new Variable("a"))),
+                    new VarAssignm("i",
+                                   new ArithmeticExpr(
+                                       new Variable("i"),
+                                       subtraction,
+                                       new LiteralInt(1)))});
+  function->addStatement(new While(new LogicalExpr(
+      new Variable("i"),
+      greater,
+      new LiteralInt(10)), whileBody));
+
+  auto *returnStatement = new Return(new Variable("a"));
+  function->addStatement(returnStatement);
+
+  ast.setRootNode(function);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  DotPrinter().printAsDotFormattedGraph(ast);
+
+  // check that simplification generated the expected simplified AST
+  EXPECT_EQ(function->getBodyStatements().size(), 1);
+  EXPECT_TRUE(function->getBodyStatements().front()->isEqual(new Return(new Variable("a"))));
 }

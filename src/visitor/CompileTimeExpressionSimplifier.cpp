@@ -15,6 +15,7 @@
 #include "FunctionParameter.h"
 #include "ParameterList.h"
 #include "CallExternal.h"
+#include "While.h"
 
 CompileTimeExpressionSimplifier::CompileTimeExpressionSimplifier() {
   evalVisitor = EvaluationVisitor();
@@ -489,22 +490,20 @@ void CompileTimeExpressionSimplifier::visit(If &elem) {
 }
 
 void CompileTimeExpressionSimplifier::visit(While &elem) {
+  // visit the condition only
+  elem.getCondition()->accept(*this);
+
+  // check if we know the While condition's truth value at compile time
+  auto conditionValue = dynamic_cast<LiteralBool *>(elem.getCondition());
+  if (conditionValue!=nullptr && !conditionValue->getValue()) {
+    // While is never executed: remove While-loop including contained statements
+    cleanUpAfterStatementVisited(reinterpret_cast<AbstractNode *>(&elem), true);
+    return;
+  }
+
+  // visit body (and condition again, but that's acceptable)
   Visitor::visit(elem);
-  // TODO(pjattke): implement me!
-  // if bound of While-loop can be determined at compile-time -> unroll it by evaluating While statement
-  // For example:
-  //   ...
-  //   int a = 12;
-  //   int sum = 0;
-  //   while (a > 0) {
-  //     sum = sum - 2;
-  //     a = a-1;
-  //   }
-  //   ...
-  //  -- expected --
-  //   ...
-  //     sum = -24;
-  //   ...
+
   cleanUpAfterStatementVisited(reinterpret_cast<AbstractNode *>(&elem), false);
 }
 
