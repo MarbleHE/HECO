@@ -39,7 +39,7 @@ bool AbstractExpr::contains(Variable *var) {
 }
 
 bool AbstractExpr::isEqual(AbstractExpr *other) {
-  throw std::logic_error("isEqual not implemented for given AbstractExpr subclass.");
+  throw std::runtime_error("Unimplemented AbstractExpr::isEqual.");
 }
 
 LiteralFloat *AbstractExpr::createParam(float f) {

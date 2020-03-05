@@ -800,13 +800,34 @@ TEST(ChildParentTests, Variable) {  /* NOLINT */
   ASSERT_TRUE(variable.getParents().empty());
 }
 
-TEST(ChildParentTests, While) {  /* NOLINT */
-  auto whileStatement =
-      new While(new LogicalExpr(new LiteralInt(32), LogCompOp::greaterEqual, new Variable("a")), new Block());
-  ASSERT_EQ(whileStatement->getChildren().size(), 0);
-  ASSERT_EQ(whileStatement->getParents().size(), 0);
-  ASSERT_FALSE(whileStatement->supportsCircuitMode());
-  ASSERT_EQ(whileStatement->getMaxNumberChildren(), 0);
+class WhileStmtFixture : public ::testing::Test {
+ protected:
+  AbstractExpr *whileCondition;
+  AbstractStatement *whileBlock;
+
+ public:
+  WhileStmtFixture() {
+    whileCondition = new LogicalExpr(new LiteralInt(32), greaterEqual, new Variable("a"));
+    whileBlock = new Block();
+  }
+};
+
+TEST_F(WhileStmtFixture, WhileStandardConstructor) {
+  auto whileStmt = new While(whileCondition, whileBlock);
+
+  EXPECT_EQ(whileStmt->getMaxNumberChildren(), 2);
+  EXPECT_EQ(whileStmt->supportsCircuitMode(), true);
+
+  // children
+  EXPECT_EQ(whileStmt->countChildrenNonNull(), 2);
+  EXPECT_EQ(whileStmt->getChildAtIndex(0), whileCondition);
+  EXPECT_EQ(whileStmt->getChildAtIndex(1), whileBlock);
+
+  // parents
+  EXPECT_EQ(whileCondition->getParentsNonNull().size(), 1);
+  EXPECT_TRUE(whileCondition->hasParent(whileStmt));
+  EXPECT_EQ(whileBlock->getParentsNonNull().size(), 1);
+  EXPECT_TRUE(whileBlock->hasParent(whileStmt));
 }
 
 class ForLoopFixture : public ::testing::Test {

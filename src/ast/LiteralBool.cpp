@@ -78,5 +78,6 @@ bool LiteralBool::isEqual(AbstractExpr *other) {
 }
 
 bool LiteralBool::isNull() {
-  return this->getValue()==false;
+  return !this->getValue();
 }
+
