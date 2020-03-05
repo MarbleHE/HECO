@@ -1,0 +1,36 @@
+Function: (powBase2)	[global]
+	ParameterList:	[Function_0]
+		FunctionParameter:
+			Datatype: (plaintext int)
+			Variable: (inputA)
+	Block:
+		VarDecl: (sum)	[Block_2]
+			Datatype: (plaintext int)
+			LiteralInt: (0)
+		VarDecl: (base)
+			Datatype: (plaintext int)
+			LiteralInt: (2)
+		For:
+			VarDecl: (i)
+				Datatype: (plaintext int)
+				LiteralInt: (0)
+			LogicalExpr:
+				Variable: (i)
+				Operator: (<)
+				LiteralInt: (3)
+			VarAssignm: (i)
+				ArithmeticExpr:
+					Variable: (i)
+					Operator: (add)
+					LiteralInt: (1)
+			Block:	[Block_33]
+				VarAssignm: (sum)	[Block_33]
+					ArithmeticExpr:
+						Variable: (sum)
+						Operator: (add)
+						ArithmeticExpr:
+							Variable: (base)
+							Operator: (mult)
+							Variable: (i)
+		Return:	[Block_2]
+			Variable: (sum)

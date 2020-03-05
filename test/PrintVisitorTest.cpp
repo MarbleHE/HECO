@@ -41,3 +41,16 @@ TEST_F(PrintVisitorTest, printDemoTreeTwo) { /* NOLINT */
   EXPECT_EQ(pv.getOutput(), buffer.str());
 }
 
+TEST_F(PrintVisitorTest, printAstIncludingIfStatement) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(23, ast);
+  PrintVisitor pv(false);
+  pv.visit(ast);
+
+  // read expected output file
+  std::ifstream ifs("../../test/expected_output_large/PrintVisitorTest/printAstIncludingForStatement.txt");
+  std::stringstream buffer;
+  buffer << ifs.rdbuf();
+
+  EXPECT_EQ(pv.getOutput(), buffer.str());
+}

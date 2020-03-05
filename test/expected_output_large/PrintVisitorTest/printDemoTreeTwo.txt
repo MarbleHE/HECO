@@ -1,10 +1,11 @@
 Function: (determineSuitableX)	[global]
-	FunctionParameter:	[Function_0]
-		Datatype: (plaintext int)
-		Variable: (encryptedA)
-	FunctionParameter:
-		Datatype: (plaintext int)
-		Variable: (encryptedB)
+	ParameterList:	[Function_0]
+		FunctionParameter:
+			Datatype: (plaintext int)
+			Variable: (encryptedA)
+		FunctionParameter:
+			Datatype: (plaintext int)
+			Variable: (encryptedB)
 	Block:
 		VarDecl: (randInt)	[Block_2]
 			Datatype: (plaintext int)

@@ -9,9 +9,9 @@ void For::accept(Visitor &v) {
   v.visit(*this);
 }
 
-For::For(AbstractExpr *initializer,
+For::For(AbstractStatement *initializer,
          LogicalExpr *condition,
-         AbstractExpr *update,
+         AbstractStatement *update,
          AbstractStatement *statementToBeExecuted) {
   setAttributes(initializer, condition, update, statementToBeExecuted);
 }
@@ -32,9 +32,9 @@ AbstractStatement *For::getStatementToBeExecuted() const {
   return reinterpret_cast<AbstractStatement *>(getChildAtIndex(3));
 }
 
-void For::setAttributes(AbstractExpr *initializer,
+void For::setAttributes(AbstractStatement *initializer,
                         LogicalExpr *condition,
-                        AbstractExpr *update,
+                        AbstractStatement *update,
                         AbstractStatement *statementToBeExecuted) {
   removeChildren();
   addChildren({initializer, condition, update, statementToBeExecuted}, true);
@@ -45,9 +45,9 @@ int For::getMaxNumberChildren() {
 }
 
 AbstractNode *For::clone(bool keepOriginalUniqueNodeId) {
-  return new For(getInitializer()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
+  return new For(getInitializer()->clone(keepOriginalUniqueNodeId)->castTo<AbstractStatement>(),
                  getCondition()->clone(keepOriginalUniqueNodeId)->castTo<LogicalExpr>(),
-                 getUpdateStatement()->clone(false)->castTo<AbstractExpr>(),
+                 getUpdateStatement()->clone(false)->castTo<AbstractStatement>(),
                  getStatementToBeExecuted()->clone(false)->castTo<AbstractStatement>());
 }
 

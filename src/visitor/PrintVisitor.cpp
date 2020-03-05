@@ -17,6 +17,7 @@
 #include "Call.h"
 #include "PrintVisitor.h"
 #include "Scope.h"
+#include "For.h"
 
 template<typename T>
 void PrintVisitor::printChildNodesIndented(T &elem) {
@@ -122,6 +123,17 @@ void PrintVisitor::visit(While &elem) {
   addOutputStr(elem);
   printChildNodesIndented(elem);
 }
+
+void PrintVisitor::visit(For &elem) {
+  addOutputStr(elem);
+  printChildNodesIndented(elem);
+}
+
+void PrintVisitor::visit(ParameterList &elem) {
+  addOutputStr(elem);
+  printChildNodesIndented(elem);
+}
+
 
 // ------------–------
 // Constructor & Utility functions

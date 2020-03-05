@@ -508,6 +508,11 @@ void CompileTimeExpressionSimplifier::visit(While &elem) {
   cleanUpAfterStatementVisited(reinterpret_cast<AbstractNode *>(&elem), false);
 }
 
+void CompileTimeExpressionSimplifier::visit(For &elem) {
+  Visitor::visit(elem);
+  cleanUpAfterStatementVisited(reinterpret_cast<AbstractNode *>(&elem), false);
+}
+
 void CompileTimeExpressionSimplifier::visit(Return &elem) {
   Visitor::visit(elem);
   // simplify return expression: replace each evaluated expression by its evaluation result
@@ -665,3 +670,4 @@ bool CompileTimeExpressionSimplifier::isQueuedForDeletion(const AbstractNode *no
   return std::find(nodesQueuedForDeletion.begin(), nodesQueuedForDeletion.end(), node)
       !=nodesQueuedForDeletion.end();
 }
+

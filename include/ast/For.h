@@ -6,9 +6,9 @@
 
 class For : public AbstractStatement {
  public:
-  For(AbstractExpr *initializer,
+  For(AbstractStatement *initializer,
       LogicalExpr *condition,
-      AbstractExpr *update,
+      AbstractStatement *update,
       AbstractStatement *statementToBeExecuted);
 
   [[nodiscard]] std::string getNodeType() const override;
@@ -17,9 +17,9 @@ class For : public AbstractStatement {
 
   AbstractNode *clone(bool keepOriginalUniqueNodeId) override;
 
-  void setAttributes(AbstractExpr *initializer,
+  void setAttributes(AbstractStatement *initializer,
                      LogicalExpr *condition,
-                     AbstractExpr *update,
+                     AbstractStatement *update,
                      AbstractStatement *statementToBeExecuted);
 
   [[nodiscard]] AbstractExpr *getInitializer() const;

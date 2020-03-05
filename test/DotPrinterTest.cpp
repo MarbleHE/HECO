@@ -176,3 +176,27 @@ TEST_F(DotPrinterFixture, printAllReachableNods_printNodeSet) { /* NOLINT */
 
   ASSERT_EQ(buffer.str(), outputStream.str());
 }
+
+TEST_F(DotPrinterFixture,
+       printAsDotFormattedGraphTest_printAstIncludingIfStatement_withoutMultDepth) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(23, ast);
+
+  MultiplicativeDepthCalculator mdc(ast);
+  std::stringstream outputStream;
+  DotPrinter dp;
+  dp.setMultiplicativeDepthsCalculator(mdc)
+      .setShowMultDepth(false)
+      .setOutputStream(outputStream);
+  dp.printAsDotFormattedGraph(ast);
+
+  std::cout << outputStream.str() << std::endl;
+
+  // read expected output from file
+  std::ifstream ifs("../../test/expected_output_large/DotPrinterTest/"
+                    "printAsDotFormattedGraphTest_printAstIncludingForStatement_withoutMultDepth.txt");
+  std::stringstream buffer;
+  buffer << ifs.rdbuf();
+
+  ASSERT_EQ(buffer.str(), outputStream.str());
+}

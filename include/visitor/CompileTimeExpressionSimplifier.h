@@ -217,6 +217,7 @@ class CompileTimeExpressionSimplifier : public Visitor {
   void visit(Datatype &elem) override;
   void visit(Function &elem) override;
   void visit(FunctionParameter &elem) override;
+  void visit(For &elem) override;
   void visit(If &elem) override;
   void visit(LiteralBool &elem) override;
   void visit(LiteralFloat &elem) override;
