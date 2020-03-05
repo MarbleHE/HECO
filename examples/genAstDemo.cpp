@@ -178,10 +178,10 @@ void generateDemoTwo(Ast &ast) {
   // STRING outStr = "Computation finished!";
   func->addStatement(new VarDecl("outStr", "Computation finished!"));
 
-  // printf(outStr);
-  func->addStatement(
-      new CallExternal("printf",
-                       {new FunctionParameter("string", new Variable("outStr"))}));
+  // int _ = printf(outStr);
+  func->addStatement(new VarDecl("_", Types::INT,
+                                 new CallExternal("printf",
+                                                  {new FunctionParameter("string", new Variable("outStr"))})));
 
   // return sum;
   func->addStatement(

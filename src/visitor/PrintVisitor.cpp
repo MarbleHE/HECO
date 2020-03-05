@@ -44,14 +44,13 @@ void PrintVisitor::visit(Block &elem) {
 }
 
 void PrintVisitor::visit(Call &elem) {
-  AbstractNode *node = static_cast<AbstractNode *>(static_cast<AbstractExpr *>(&elem));
+  auto *node = static_cast<AbstractNode *>(static_cast<AbstractExpr *>(&elem));
   addOutputStr(*node);
   printChildNodesIndented(elem);
 }
 
 void PrintVisitor::visit(CallExternal &elem) {
-  AbstractNode *node = static_cast<AbstractNode *>(static_cast<AbstractStatement *>(&elem));
-  addOutputStr(*node, {elem.getFunctionName()});
+  addOutputStr(elem, {elem.getFunctionName()});
   printChildNodesIndented(elem);
 }
 

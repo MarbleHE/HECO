@@ -36,7 +36,7 @@ Function: (determineSuitableX)	[global]
 					Operator: (==)
 					LiteralBool: (true)
 			Block:
-				VarAssignm: (sum)	[Block_47]
+				VarAssignm: (sum)	[Block_46]
 					ArithmeticExpr:
 						Variable: (sum)
 						Operator: (add)
@@ -49,9 +49,11 @@ Function: (determineSuitableX)	[global]
 		VarDecl: (outStr)	[Block_2]
 			Datatype: (plaintext string)
 			LiteralString: (Computation finished!)
-		CallExternal: (printf)
-			FunctionParameter:
-				Datatype: (plaintext string)
-				Variable: (outStr)
+		VarDecl: (_)
+			Datatype: (plaintext int)
+			CallExternal: (printf)
+				FunctionParameter:
+					Datatype: (plaintext string)
+					Variable: (outStr)
 		Return:
 			Variable: (sum)

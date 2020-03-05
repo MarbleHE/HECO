@@ -13,9 +13,8 @@ TEST(NodeTest, testUniqueNodeId_Call) {
 }
 
 TEST(NodeTest, testUniqueNodeId_CallExternal__UnfixedTest) {
-  // TODO: Find a solution on how to handle double inheritance of CallExternal and associated base class Node object
   auto callExtNode = new CallExternal("genSecretKeys");
-  ASSERT_EQ(callExtNode->AbstractExpr::getUniqueNodeId(), callExtNode->AbstractStatement::getUniqueNodeId());
+  ASSERT_EQ(callExtNode->AbstractExpr::getUniqueNodeId(), callExtNode->getUniqueNodeId());
 }
 
 

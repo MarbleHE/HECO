@@ -76,7 +76,6 @@ void Visitor::visit(Call &elem) {
 }
 
 void Visitor::visit(CallExternal &elem) {
-  curScope->addStatement(&elem);
   // arguments for calling function
   if (!elem.getArguments().empty()) {
     for (auto &fp : elem.getArguments()) {
