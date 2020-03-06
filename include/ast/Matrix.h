@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 #include <utility>
-#include <iostream>/**/
+#include <iostream>
 #include <sstream>
 #include <nlohmann/json.hpp>
 
@@ -30,6 +30,7 @@ struct Dimension {
   }
 
   bool isValidAccess(int row, int column) {
+    // note that indices row/column start by 0
     return row < numRows && column < numColumns;
   }
 
@@ -38,14 +39,14 @@ struct Dimension {
   }
 };
 
-template<class T>
+template<typename T>
 class Matrix {
  public:
   // a matrix of row vectors
   std::vector<std::vector<T>> values;
   Dimension dim;
 
-  explicit Matrix(std::vector<std::vector<T>> inputMatrix)
+  Matrix(std::vector<std::vector<T>> inputMatrix)  /* NOLINT intentionally not explicit */
       : values(std::move(inputMatrix)), dim(Dimension(values.size(), values.at(0).size())) {
     int elementsPerRow = values.at(0).size();
     for (auto const &rowVector : values) {
@@ -76,7 +77,7 @@ class Matrix {
     return !(rhs==*this);
   }
 
-  json toJson() const {
+  [[nodiscard]] json toJson() const {
     // return the scalar value if this is a (1,1) scalar matrix
     if (isScalar()) return getScalarValue();
     // if this is a matrix, return an array of arrays like [ [a00, b01, c02], [d10, e11, f12] ]
@@ -87,7 +88,7 @@ class Matrix {
     return arrayOfArrays;
   }
 
-  T &operator()(int row, int column) {
+  typename std::vector<T>::reference operator()(int row, int column) {
     if (!dim.isValidAccess(row, column)) {
       std::stringstream ss;
       ss << "Cannot access " << Dimension(row, column) << " because vector has dimensions " << getDimensions() << ".";
@@ -96,8 +97,16 @@ class Matrix {
     return values[row][column];
   }
 
+  T getElement(int row, int column) {
+    return values[row][column];
+  }
+
   Dimension getDimensions() {
     return dim;
+  }
+
+  void setValues(const std::vector<std::vector<int>> &newValues) {
+    values = newValues;
   }
 };
 

@@ -95,3 +95,121 @@ TEST(MatrixTest, accessMatrixElement_invalidIndexExceptionOnScalar) {  /* NOLINT
   EXPECT_EQ(scalar(0, 0), value);
   EXPECT_EQ(scalar.getScalarValue(), value);
 }
+
+TEST(MatrixTest, modifyMatrix_modifyValues) {
+  Matrix<int> m({{5, 2, 1}, {3, 1, 1}, {1, 1, 0}});
+
+  // modify value at (0,2)
+  EXPECT_EQ(m(0, 2), 1);
+  m(0, 2) = 9;
+  EXPECT_EQ(m(0, 2), 9);
+
+  // modify value at (2,2)
+  EXPECT_EQ(m(2, 2), 0);
+  m(2, 2) = 4224;
+  EXPECT_EQ(m(2, 2), 4224);
+}
+
+TEST(MatrixTest, modifyMatrixAsPointer_modifyValuesInt) {
+  auto *mx = new Matrix<int>({{5, 2, 1}, {3, 1, 1}, {1, 1, 0}});
+  Matrix<int> &m = *mx;
+
+  // modify value at (0,2)
+  EXPECT_EQ(m(0, 2), 1);
+  m(0, 2) = 9;
+  EXPECT_EQ(m(0, 2), 9);
+
+  // modify value at (2,2)
+  EXPECT_EQ(m(2, 2), 0);
+  m(2, 2) = 4224;
+  EXPECT_EQ(m(2, 2), 4224);
+}
+
+TEST(MatrixTest, modifyMatrixAsPointer_modifyValuesFloat) {
+  auto *mx = new Matrix<float>({{5.23f, 2.0f, 1.11f}, {3.0f, 1.221f, 1.9f}, {1.0f, 1.0f, 0.0f}});
+  Matrix<float> &m = *mx;
+
+  // modify value at (0,2)
+  EXPECT_EQ(m(0, 2), 1.11f);
+  m(0, 2) = 9.23f;
+  EXPECT_EQ(m(0, 2), 9.23f);
+
+  // modify value at (2,2)
+  EXPECT_EQ(m(2, 2), 0.0f);
+  m(2, 2) = 4224.333f;
+  EXPECT_EQ(m(2, 2), 4224.333f);
+}
+
+TEST(MatrixTest, modifyMatrixAsPointer_modifyValuesBoolean) {
+  auto *mx = new Matrix<bool>({{true, true, false}, {false, false, false}, {true, false, true}});
+  Matrix<bool> &m = *mx;
+
+  // modify value at (0,2)
+  EXPECT_EQ(m(0, 0), true);
+  m(0, 0) = false;
+  EXPECT_EQ(m(0, 0), false);
+
+  // modify value at (2,2)
+  EXPECT_EQ(m(2, 2), true);
+  m(2, 2) = false;
+  EXPECT_EQ(m(2, 2), false);
+}
+
+TEST(MatrixTest, modifyMatrix_modifyWholeMatrixUsingAssignmentOp) {
+  Matrix<int> m({{5, 2, 1}, {3, 1, 1}, {1, 1, 0}});
+
+  // check values using getter
+  EXPECT_EQ(m(0, 0), 5);
+  EXPECT_EQ(m(0, 1), 2);
+  EXPECT_EQ(m(0, 2), 1);
+  EXPECT_EQ(m(1, 0), 3);
+  EXPECT_EQ(m(1, 1), 1);
+  EXPECT_EQ(m(1, 2), 1);
+  EXPECT_EQ(m(2, 0), 1);
+  EXPECT_EQ(m(2, 1), 1);
+  EXPECT_EQ(m(2, 2), 0);
+
+  // overwrite whole matrix
+  m = std::vector<std::vector<int>>({{0, 2, 1}, {1, 1, 1}, {90, 1, 34}});
+
+  // check values using getter
+  EXPECT_EQ(m(0, 0), 0);
+  EXPECT_EQ(m(0, 1), 2);
+  EXPECT_EQ(m(0, 2), 1);
+  EXPECT_EQ(m(1, 0), 1);
+  EXPECT_EQ(m(1, 1), 1);
+  EXPECT_EQ(m(1, 2), 1);
+  EXPECT_EQ(m(2, 0), 90);
+  EXPECT_EQ(m(2, 1), 1);
+  EXPECT_EQ(m(2, 2), 34);
+}
+
+TEST(MatrixTest, modifyMatrix_modifyWholeMatrixUsingDedicatedFunction) {
+  Matrix<int> m({{5, 2, 1}, {3, 1, 1}, {1, 1, 0}});
+
+  // check values using getter
+  EXPECT_EQ(m(0, 0), 5);
+  EXPECT_EQ(m(0, 1), 2);
+  EXPECT_EQ(m(0, 2), 1);
+  EXPECT_EQ(m(1, 0), 3);
+  EXPECT_EQ(m(1, 1), 1);
+  EXPECT_EQ(m(1, 2), 1);
+  EXPECT_EQ(m(2, 0), 1);
+  EXPECT_EQ(m(2, 1), 1);
+  EXPECT_EQ(m(2, 2), 0);
+
+  // overwrite whole matrix
+  m.setValues({{0, 2, 1}, {1, 1, 1}, {90, 1, 34}});
+
+  // check values using getter
+  EXPECT_EQ(m(0, 0), 0);
+  EXPECT_EQ(m(0, 1), 2);
+  EXPECT_EQ(m(0, 2), 1);
+  EXPECT_EQ(m(1, 0), 1);
+  EXPECT_EQ(m(1, 1), 1);
+  EXPECT_EQ(m(1, 2), 1);
+  EXPECT_EQ(m(2, 0), 90);
+  EXPECT_EQ(m(2, 1), 1);
+  EXPECT_EQ(m(2, 2), 34);
+}
+
