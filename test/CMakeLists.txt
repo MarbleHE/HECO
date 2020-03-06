@@ -50,7 +50,8 @@ set(TEST_FILES
         NodeCloneRecursiveDeepTest.cpp
         CompileTimeExpressionSimplifierTest.cpp
         SecretTaintingTest.cpp
-        NodeUtilsTest.cpp)
+        NodeUtilsTest.cpp
+        MatrixTest.cpp)
 
 add_executable(testing-all
         ${TEST_FILES})
