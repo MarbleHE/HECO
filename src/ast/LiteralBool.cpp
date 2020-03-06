@@ -1,12 +1,16 @@
 #include "LiteralBool.h"
 #include "RandNumGen.h"
 
-LiteralBool::LiteralBool(bool value) : value(value) {}
+LiteralBool::LiteralBool(bool value) : matrix(new Matrix(value)) {
+
+}
+
+LiteralBool::LiteralBool(Matrix<bool> *inputMatrix) : matrix(inputMatrix) {}
 
 json LiteralBool::toJson() const {
   json j;
   j["type"] = getNodeType();
-  j["value"] = this->value;
+  j["value"] = (matrix->isScalar() ? json(matrix->getScalarValue()) : matrix->toJson());
   return j;
 }
 
@@ -15,7 +19,11 @@ void LiteralBool::accept(Visitor &v) {
 }
 
 bool LiteralBool::getValue() const {
-  return value;
+  return matrix->getScalarValue();
+}
+
+Matrix<bool> *LiteralBool::getMatrix() {
+  return matrix;
 }
 
 std::string LiteralBool::getTextValue() const {
@@ -33,7 +41,7 @@ void LiteralBool::print(std::ostream &str) const {
 }
 
 bool LiteralBool::operator==(const LiteralBool &rhs) const {
-  return value==rhs.value;
+  return *matrix==*rhs.matrix;
 }
 
 bool LiteralBool::operator!=(const LiteralBool &rhs) const {
@@ -46,7 +54,8 @@ void LiteralBool::addLiteralValue(std::string identifier,
 }
 
 void LiteralBool::setValue(bool newValue) {
-  this->value = newValue;
+  delete matrix;
+  this->matrix = new Matrix(newValue);
 }
 
 void LiteralBool::setRandomValue(RandLiteralGen &rlg) {
