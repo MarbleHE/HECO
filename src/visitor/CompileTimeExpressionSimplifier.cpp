@@ -69,7 +69,7 @@ void CompileTimeExpressionSimplifier::visit(Datatype &elem) {
 
 void CompileTimeExpressionSimplifier::visit(CallExternal &elem) {
   Visitor::visit(elem);
-  cleanUpAfterStatementVisited(elem.AbstractStatement::castTo<AbstractStatement>(), false);
+  cleanUpAfterStatementVisited(elem.AbstractExpr::castTo<AbstractExpr>(), false);
 }
 
 // =====================
