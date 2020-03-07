@@ -23,6 +23,7 @@ enum UnaryOp : char {
   negation = 0
 };
 
+// generate a typedef for this std::variant to ensure that always the same Enums order is used
 typedef std::variant<ArithmeticOp, LogCompOp, UnaryOp> OpSymbolVariant;
 
 class OpSymb {

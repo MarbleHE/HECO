@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_FUNCTION_H
-#define AST_OPTIMIZER_INCLUDE_FUNCTION_H
+#ifndef AST_OPTIMIZER_INCLUDE_AST_FUNCTION_H_
+#define AST_OPTIMIZER_INCLUDE_AST_FUNCTION_H_
 
 #include <string>
 #include <vector>
@@ -12,8 +12,8 @@
 class Function : public AbstractStatement {
  private:
   std::string name;
- public:
 
+ public:
   Function *clone(bool keepOriginalUniqueNodeId) override;
 
   [[nodiscard]] const std::string &getName() const;
@@ -42,19 +42,20 @@ class Function : public AbstractStatement {
 
   [[nodiscard]] std::string getNodeType() const override;
 
-  [[nodiscard]] ParameterList* getParameterList() const;
+  [[nodiscard]] ParameterList *getParameterList() const;
 
-  [[nodiscard]] Block* getBody() const;
+  [[nodiscard]] Block *getBody() const;
 
   void setParameterList(ParameterList *paramsVec);
 
   int getMaxNumberChildren() override;
 
   bool supportsCircuitMode() override;
-  std::string toString(bool printChildren) const override;
+
+  [[nodiscard]] std::string toString(bool printChildren) const override;
 };
 
 /// Defines the JSON representation to be used for vector<Function> objects.
 void to_json(json &j, const Function &func);
 
-#endif //AST_OPTIMIZER_INCLUDE_FUNCTION_H
+#endif //AST_OPTIMIZER_INCLUDE_AST_FUNCTION_H_

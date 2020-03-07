@@ -11,24 +11,21 @@ void Function::addParameter(FunctionParameter *param) {
   if (children.empty()) {
     addChild(new ParameterList({param}));
   } else {
-    dynamic_cast<ParameterList *>(children[0])->addChild(param);
+    dynamic_cast<ParameterList *>(getChildAtIndex(0))->addChild(param);
   }
 }
 
 Function::Function(std::string name, Block *pt) : name(std::move(name)) {
-  addChild(new ParameterList());
-  addChild(pt);
+  addChildren({new ParameterList(), pt});
 }
 
 Function::Function(std::string name) : name(std::move(name)) {
-  addChild(new ParameterList());
-  addChild(new Block());
+  addChildren({new ParameterList(), new Block()});
 }
 
 Function::Function(std::string functionName, ParameterList *functionParameters,
                    Block *functionStatements) : name(std::move(functionName)) {
-  addChild(functionParameters);
-  addChild(functionStatements);
+  addChildren({functionParameters, functionStatements});
 
 }
 
@@ -72,8 +69,8 @@ std::string Function::getNodeType() const {
 }
 
 void Function::setParameterList(ParameterList *paramsVec) {
-  if (!children.empty()) this->removeChild(children[0], false);
-  children[0] = paramsVec;
+  if (!children.empty()) this->removeChild(getChildAtIndex(0), false);
+  addChild(paramsVec);
 }
 
 Function *Function::clone(bool keepOriginalUniqueNodeId) {
@@ -86,24 +83,29 @@ Function *Function::clone(bool keepOriginalUniqueNodeId) {
 }
 
 std::vector<FunctionParameter *> Function::getParameters() const {
-  return children.empty() ? std::vector<FunctionParameter *>() : dynamic_cast<ParameterList *>(children[0])
-      ->getParameters();
+  return children.empty() ? std::vector<FunctionParameter *>()
+                          : reinterpret_cast<ParameterList *>(getChildAtIndex(0))->getParameters();
 }
+
 ParameterList *Function::getParameterList() const {
-  return children.empty() ? nullptr : dynamic_cast<ParameterList *>(children[0]);
+  return reinterpret_cast<ParameterList *>(getChildAtIndex(0));
 }
+
 Block *Function::getBody() const {
-  return dynamic_cast<Block *>(getChildAtIndex(1));
+  return reinterpret_cast<Block *>(getChildAtIndex(1));
 }
+
 Function::Function(std::string functionName,
                    std::vector<FunctionParameter *> functionParameters,
                    std::vector<AbstractStatement *> functionStatements) : name(std::move(functionName)) {
-  addChild(new ParameterList(std::move(functionParameters)));
-  addChild(new Block(std::move(functionStatements)));
+  addChildren({new ParameterList(std::move(functionParameters)),
+               new Block(std::move(functionStatements))});
 }
+
 int Function::getMaxNumberChildren() {
   return 2;
 }
+
 bool Function::supportsCircuitMode() {
   return true;
 }

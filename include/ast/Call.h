@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_CALL_H
-#define AST_OPTIMIZER_INCLUDE_CALL_H
+#ifndef AST_OPTIMIZER_INCLUDE_AST_CALL_H_
+#define AST_OPTIMIZER_INCLUDE_AST_CALL_H_
 
 #include <string>
 #include <vector>
@@ -8,16 +8,10 @@
 #include "AbstractStatement.h"
 
 class Call : public AbstractExpr {
- private:
-  Function *func{nullptr};
-  std::vector<FunctionParameter *> arguments;
-
  public:
   Call(std::vector<FunctionParameter *> parameterValuesForCalledFunction, Function *func);
 
   explicit Call(Function *func);
-
-  ~Call() override;
 
   AbstractNode *clone(bool keepOriginalUniqueNodeId) override;
 
@@ -25,11 +19,19 @@ class Call : public AbstractExpr {
 
   void accept(Visitor &v) override;
 
-  [[nodiscard]] const std::vector<FunctionParameter *> &getArguments() const;
+  [[nodiscard]] std::vector<FunctionParameter *> getArguments() const;
+
+  [[nodiscard]] ParameterList *getParameterList() const;
 
   [[nodiscard]] std::string getNodeType() const override;
 
   [[nodiscard]] Function *getFunc() const;
+
+  void setAttributes(std::vector<FunctionParameter *> functionCallParameters, Function *functionToBeCalled);
+
+  int getMaxNumberChildren() override;
+
+  bool supportsCircuitMode() override;
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_CALL_H
+#endif //AST_OPTIMIZER_INCLUDE_AST_CALL_H_

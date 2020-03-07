@@ -13,7 +13,7 @@
 /// Defines the default number of test runs to be performed, if not passed as parameter to astOutputComparer.
 /// Decides whether exhaustive testing (i.e., comparing all possible inputs) will be used or not.
 /// 2^12 = 4,096
-static const int CIRCUIT_MAX_TEST_RUNS = 4'096;
+static const int circuitMaxTestRuns = 4'096;
 
 struct EvalPrinter {
  private:
@@ -172,7 +172,7 @@ static void circuitOutputComparer(Ast &unmodifiedAst,
     struct LiteralBoolCombinationsGen {
      private:
       std::vector<LiteralBool *> params;
-      std::bitset<CIRCUIT_MAX_TEST_RUNS> nextBitCombination;
+      std::bitset<circuitMaxTestRuns> nextBitCombination;
 
       void updateParams() {
         // Update all LiteralBools in params based on the current bit states in nextBitCombination.
@@ -187,7 +187,7 @@ static void circuitOutputComparer(Ast &unmodifiedAst,
 
      public:
       explicit LiteralBoolCombinationsGen(std::unordered_map<std::string, AbstractLiteral *> &evalParams) {
-        nextBitCombination = std::bitset<CIRCUIT_MAX_TEST_RUNS>(0);
+        nextBitCombination = std::bitset<circuitMaxTestRuns>(0);
         // convert params into vector of literals
         for (auto &[varIdentifier, literal] : evalParams) params.push_back(literal->castTo<LiteralBool>());
       }
@@ -245,7 +245,7 @@ static void circuitOutputComparer(Ast &unmodifiedAst, Ast &rewrittenAst, unsigne
 // circuitOutputComparer without numMaxTestRuns
 static void circuitOutputComparer(Ast &unmodifiedAst, Ast &rewrittenAst, unsigned int seed,
                                   std::unordered_map<std::string, AbstractLiteral *> &evalParams) {
-  return circuitOutputComparer(unmodifiedAst, rewrittenAst, seed, CIRCUIT_MAX_TEST_RUNS, evalParams, nullptr);
+  return circuitOutputComparer(unmodifiedAst, rewrittenAst, seed, circuitMaxTestRuns, evalParams, nullptr);
 }
 
 #endif //AST_OPTIMIZER_INCLUDE_UTILITIES_TESTUTILS_H_

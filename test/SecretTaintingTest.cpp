@@ -1,5 +1,6 @@
 #include <regex>
 #include <PrintVisitor.h>
+#include <DotPrinter.h>
 #include "SecretTaintingVisitor.h"
 #include "Ast.h"
 #include "gtest/gtest.h"
@@ -70,6 +71,8 @@ TEST_F(SecretTaintingFixture, simpleAst_singleStatementTainted) { /* NOLINT */
   addStatementAndItsDescendantsToExpectedTaintedNodes(ast.getRootNode()->castTo<Function>()->getParameters().back());
   // add Function itself
   expectedTaintedNodeIds.insert(function->getUniqueNodeId());
+  // add Function's ParameterList
+  expectedTaintedNodeIds.insert(function->getParameterList()->getUniqueNodeId());
   // add Function's Block
   expectedTaintedNodeIds.insert(function->getBody()->getUniqueNodeId());
 
@@ -97,6 +100,8 @@ TEST_F(SecretTaintingFixture, simpleAst_multipleStatementsTainted) { /* NOLINT *
   auto f = ast.getRootNode()->castTo<Function>();
   // FunctionParameter 'inputA', its associated Datatype and Variable objects
   addStatementAndItsDescendantsToExpectedTaintedNodes(f->getParameters().front());
+  // ParameterList
+  expectedTaintedNodeIds.insert(f->getParameterList()->getUniqueNodeId());
   // int prod = inputA * inputB;
   addStatementAndItsDescendantsToExpectedTaintedNodes(*std::prev(f->getBodyStatements().end(), 3));
   // prod = prod * inputC;
@@ -118,6 +123,8 @@ TEST_F(SecretTaintingFixture, simpleAst_multipleStatementsTainted) { /* NOLINT *
 TEST_F(SecretTaintingFixture, complexAst_multipleNonSequentialStatementsTainted) { /* NOLINT */
   generateAst(22);
 
+  DotPrinter().printAsDotFormattedGraph(ast);
+
   // perform tainting
   SecretTaintingVisitor stv;
   stv.visit(ast);
@@ -133,17 +140,19 @@ TEST_F(SecretTaintingFixture, complexAst_multipleNonSequentialStatementsTainted)
   expectedTaintedNodeIds.insert(func->getBodyStatements().at(1)->getUniqueNodeId());
   // Datatype of VarAssignm
   expectedTaintedNodeIds.insert(func->getBodyStatements().at(1)->castTo<VarDecl>()->getDatatype()->getUniqueNodeId());
-  // Call computeDiscountOnServer, it's associated FunctionParameter (parameter values for the called function)
-  // and Datatype
+  // Call computeDiscountOnServer, it's associated ParameterList, FunctionParameter (parameter values for the called
+  // function) and Datatype
   auto callComputeDiscountOnServer =
       func->getBodyStatements().at(1)->castTo<VarDecl>()->getInitializer()->castTo<Call>();
   expectedTaintedNodeIds.insert(callComputeDiscountOnServer->AbstractExpr::getUniqueNodeId());
   addStatementAndItsDescendantsToExpectedTaintedNodes(callComputeDiscountOnServer->getArguments().front());
+  expectedTaintedNodeIds.insert(callComputeDiscountOnServer->getParameterList()->getUniqueNodeId());
   // Function computeDiscountOnServer associated to the Call and the Function's Block
   auto funcComputeDiscountOnServer = callComputeDiscountOnServer->getFunc();
   expectedTaintedNodeIds.insert(funcComputeDiscountOnServer->getUniqueNodeId());
   expectedTaintedNodeIds.insert(funcComputeDiscountOnServer->getBody()->getUniqueNodeId());
-  // FunctionParameter 'bool qualifiesForSpecialDiscount', its associated Datatype and Variable
+  // FunctionParameter 'bool qualifiesForSpecialDiscount', its associated ParameterList, Datatype and Variable
+  expectedTaintedNodeIds.insert(funcComputeDiscountOnServer->getParameterList()->getUniqueNodeId());
   expectedTaintedNodeIds.insert(funcComputeDiscountOnServer->getParameters().front()->getUniqueNodeId());
   addStatementAndItsDescendantsToExpectedTaintedNodes(funcComputeDiscountOnServer->getParameters().front());
   // VarDecl (statement 0 in computeDiscountOnServer)
@@ -168,7 +177,8 @@ TEST_F(SecretTaintingFixture, complexAst_multipleNonSequentialStatementsTainted)
   EXPECT_EQ(stv.getSecretTaintingList().size(), expectedTaintedNodeIds.size());
   // - check for each tainted if its expected to be tainted
   for (auto &nodeId : stv.getSecretTaintingList())
-    EXPECT_EQ(expectedTaintedNodeIds.count(nodeId), 1) << "Node (" << nodeId << ") is not expected to be tainted.";
+    EXPECT_EQ(expectedTaintedNodeIds.count(nodeId), 1)
+              << "Node (" << nodeId << ") is tainted but not expected to be tainted.";
 }
 
 TEST_F(SecretTaintingFixture, unsupportedStatement_While) {  /* NOLINT */

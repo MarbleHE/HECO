@@ -10,6 +10,7 @@
 #include "Function.h"
 #include "If.h"
 #include "LiteralBool.h"
+#include "For.h"
 #include "LiteralInt.h"
 #include "LiteralFloat.h"
 #include "LogicalExpr.h"
@@ -75,7 +76,6 @@ void Visitor::visit(Call &elem) {
 }
 
 void Visitor::visit(CallExternal &elem) {
-  curScope->addStatement(&elem);
   // arguments for calling function
   if (!elem.getArguments().empty()) {
     for (auto &fp : elem.getArguments()) {
@@ -151,6 +151,24 @@ void Visitor::visit(LogicalExpr &elem) {
   elem.getRight()->accept(*this);
 }
 
+void Visitor::visit(For &elem) {
+  // a for-statement
+  // e.g., for (int i = 0; i < N; i++) { cout << i << endl; }
+
+  // initializer
+  elem.getInitializer()->accept(*this);
+  // condition
+  elem.getCondition()->accept(*this);
+  // update
+  elem.getUpdateStatement()->accept(*this);
+
+  changeToInnerScope(elem.getStatementToBeExecuted()->getUniqueNodeId());
+  // body of for-statement: independent of whether this statement is in a Block or not, it is always in a separate
+  // scope
+  elem.getStatementToBeExecuted()->accept(*this);
+  changeToOuterScope();
+}
+
 void Visitor::visit(Operator &elem) {}
 
 void Visitor::visit(ParameterList &elem) {
@@ -222,5 +240,7 @@ Visitor::Visitor() {
   curScope = nullptr;
 }
 
-void Visitor::visit(Datatype &elem) {}
+void Visitor::visit(Datatype &elem) {
+
+}
 

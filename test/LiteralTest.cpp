@@ -58,3 +58,28 @@ TEST(LiteralTest, compareLiterals_int_int_sameValue) { /* NOLINT */
   AbstractLiteral *intTwo = new LiteralInt(87482323);
   ASSERT_TRUE(*intOne==*intTwo);
 }
+
+TEST(LiteralTest, literalBoolMatrix) { /* NOLINT */
+  auto pMatrix = new Matrix<bool>({{true, false, false}, {false, false, true}, {true, true, true}});
+  auto litBool = new LiteralBool(pMatrix);
+
+  // check that this is not a scalar: getValue() must not work
+  EXPECT_THROW(litBool->getValue(), std::logic_error);
+  // check that the matrix was stored properly
+  EXPECT_EQ(litBool->getMatrix(), pMatrix);
+
+  auto matrix = litBool->getMatrix();
+  auto matrixRef = *matrix;
+  // compare element at (0,0)
+  EXPECT_EQ(matrix->getElement(0, 0), true);
+  EXPECT_EQ(matrixRef(0, 0), true);
+  // compare element at (1,0)
+  EXPECT_EQ(matrix->getElement(1, 0), false);
+  EXPECT_EQ(matrixRef(1, 0), false);
+  // compare element at (2,1)
+  EXPECT_EQ(matrix->getElement(2, 1), true);
+  EXPECT_EQ(matrixRef(2, 1), true);
+
+  matrixRef(0, 0) = false;
+  EXPECT_EQ(matrixRef(0, 0), false);
+}

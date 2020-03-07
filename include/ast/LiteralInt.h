@@ -1,15 +1,19 @@
-#ifndef AST_OPTIMIZER_INCLUDE_LITERALINT_H
-#define AST_OPTIMIZER_INCLUDE_LITERALINT_H
+#ifndef AST_OPTIMIZER_INCLUDE_AST_LITERALINT_H_
+#define AST_OPTIMIZER_INCLUDE_AST_LITERALINT_H_
 
-#include "AbstractLiteral.h"
 #include <string>
 #include <ostream>
 #include <map>
+#include "AbstractLiteral.h"
+#include "Matrix.h"
 
 class LiteralInt : public AbstractLiteral {
  private:
-  int value;
+  Matrix<int> *matrix;
+
  public:
+  explicit LiteralInt(Matrix<int> *inputMatrix);
+
   explicit LiteralInt(int value);
 
   LiteralInt *clone(bool keepOriginalUniqueNodeId) override;
@@ -23,10 +27,6 @@ class LiteralInt : public AbstractLiteral {
   void accept(Visitor &v) override;
 
   [[nodiscard]] std::string getNodeType() const override;
-
-  LiteralInt operator+(LiteralInt const &lint);
-
-  friend std::ostream &operator<<(std::ostream &os, const LiteralInt &an_int);
 
   bool operator==(const LiteralInt &rhs) const;
 
@@ -49,6 +49,8 @@ class LiteralInt : public AbstractLiteral {
   bool isEqual(AbstractExpr *other) override;
 
   bool isNull() override;
+
+  [[nodiscard]] Matrix<int> *getMatrix() const;
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_LITERALINT_H
+#endif //AST_OPTIMIZER_INCLUDE_AST_LITERALINT_H_

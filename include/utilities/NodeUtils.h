@@ -3,6 +3,7 @@
 
 #include "AbstractNode.h"
 #include "OpSymbEnum.h"
+#include <vector>
 
 /// Transforms a multi-input gate taking N inputs into a sequence of binary gates.
 ///

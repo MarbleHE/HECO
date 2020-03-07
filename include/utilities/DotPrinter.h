@@ -17,7 +17,7 @@
 
 // Dot vertex represents an AbstractNode in the DOT graph language
 // e.g., Return_1 [label="Return_1\n[l(v): 3, r(v): 0]" shape=oval style=filled fillcolor=white]
-struct dotVertex {
+struct DotVertex {
  private:
   // variables with default values
   std::string identifier;
@@ -27,7 +27,7 @@ struct dotVertex {
   std::string details;
   std::string multDepthString;
 
-  // a reference to the node this dotVertex represents
+  // a reference to the node this DotVertex represents
   AbstractNode *node{};
 
   void buildDetailsString() {
@@ -83,7 +83,7 @@ struct dotVertex {
   }
 
  public:
-  dotVertex(AbstractNode *node, bool showMultDepth, MultiplicativeDepthCalculator *mdc, bool showDetails) : node(node) {
+  DotVertex(AbstractNode *node, bool showMultDepth, MultiplicativeDepthCalculator *mdc, bool showDetails) : node(node) {
     // show multiplicative depth in the tree nodes depending on parameter showMultDepth
     if (showMultDepth) buildMultDepthsString(*mdc);
     // show extra information if this node is a leaf node
@@ -103,9 +103,9 @@ struct dotVertex {
   }
 };
 
-/// dotEdge represents an edge between Nodes in the DOT graph language
+/// DotEdge represents an edge between Nodes in the DOT graph language
 /// e.g., { LogicalExpr_3, Operator_4, Variable_5 } -> LogicalExpr_2
-struct dotEdge {
+struct DotEdge {
  private:
   std::string lhsArrow;
   std::string rhsArrow;
@@ -129,7 +129,7 @@ struct dotEdge {
   }
 
  public:
-  dotEdge(AbstractNode *n, bool isReversedEdge) {
+  DotEdge(AbstractNode *n, bool isReversedEdge) {
     if (isReversedEdge) {
       lhsArrow = buildCommaSeparatedList(n->getParentsNonNull());
       rhsArrow = n->getUniqueNodeId();
@@ -154,28 +154,28 @@ struct dotEdge {
 
 /// Utilities to print the AST in DOT language as used by graphviz, see https://www.graphviz.org/doc/info/lang.html.
 class DotPrinter {
-protected:
-    MultiplicativeDepthCalculator *mdc;
-    bool showMultDepth{false};
-    std::string indentationCharacter{'\t'};
-    std::ostream *outputStream{&std::cout};
+ protected:
+  MultiplicativeDepthCalculator *mdc;
+  bool showMultDepth{false};
+  std::string indentationCharacter{'\t'};
+  std::ostream *outputStream{&std::cout};
 
-public:
-    DotPrinter();
+ public:
+  DotPrinter();
 
-    DotPrinter &setShowMultDepth(bool show_mult_depth);
+  DotPrinter &setShowMultDepth(bool show_mult_depth);
 
-    DotPrinter &setIndentationCharacter(const std::string &indentation_character);
+  DotPrinter &setIndentationCharacter(const std::string &indentation_character);
 
-    DotPrinter &setOutputStream(std::ostream &stream);
+  DotPrinter &setOutputStream(std::ostream &stream);
 
-    DotPrinter &setMultiplicativeDepthsCalculator(MultiplicativeDepthCalculator &multiplicativeDepthCalculator);
+  DotPrinter &setMultiplicativeDepthsCalculator(MultiplicativeDepthCalculator &multiplicativeDepthCalculator);
 
-    std::string getDotFormattedString(AbstractNode *n);
+  std::string getDotFormattedString(AbstractNode *n);
 
-    void printAsDotFormattedGraph(Ast &ast);
+  void printAsDotFormattedGraph(Ast &ast);
 
-    void printAllReachableNodes(AbstractNode *pNode);
+  void printAllReachableNodes(AbstractNode *pNode);
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_UTILITIES_DOTPRINTER_H_

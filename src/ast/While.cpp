@@ -2,13 +2,15 @@
 #include "While.h"
 #include "LiteralBool.h"
 
-While::While(AbstractExpr *condition, AbstractStatement *body) : condition(condition), body(body) {}
+While::While(AbstractExpr *condition, AbstractStatement *body) {
+  setAttributes(condition, body);
+}
 
 json While::toJson() const {
   json j;
   j["type"] = getNodeType();
-  j["condition"] = condition->toJson();
-  j["body"] = body->toJson();
+  j["condition"] = getCondition()->toJson();
+  j["body"] = getBody()->toJson();
   return j;
 }
 
@@ -17,22 +19,33 @@ void While::accept(Visitor &v) {
 }
 
 AbstractExpr *While::getCondition() const {
-  return condition;
+  return reinterpret_cast<AbstractExpr *>(getChildAtIndex(0));
 }
 
 AbstractStatement *While::getBody() const {
-  return body;
+  return reinterpret_cast<AbstractStatement *>(getChildAtIndex(1));
 }
 
 std::string While::getNodeType() const {
   return "While";
 }
 
-While::~While() {
-  delete condition;
-  delete body;
-}
 While *While::clone(bool keepOriginalUniqueNodeId) {
-  //TODO(vianda): Implement clone for While
-  throw std::runtime_error("Not implemented");
+  auto clonedWhile = new While(getCondition()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
+                               getBody()->clone(false)->castTo<AbstractStatement>());
+  if (keepOriginalUniqueNodeId) clonedWhile->setUniqueNodeId(this->getUniqueNodeId());
+  return clonedWhile;
+}
+
+void While::setAttributes(AbstractExpr *loopCondition, AbstractStatement *loopBody) {
+  removeChildren();
+  addChildren({loopCondition, loopBody}, true);
+}
+
+int While::getMaxNumberChildren() {
+  return 2;
+}
+
+bool While::supportsCircuitMode() {
+  return true;
 }

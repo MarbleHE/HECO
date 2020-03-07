@@ -1,11 +1,12 @@
-#ifndef AST_OPTIMIZER_SCOPE_H
-#define AST_OPTIMIZER_SCOPE_H
+#ifndef AST_OPTIMIZER_INCLUDE_UTILITIES_SCOPE_H_
+#define AST_OPTIMIZER_INCLUDE_UTILITIES_SCOPE_H_
 
 #include <map>
 #include <queue>
 #include <vector>
 #include <string>
 #include "AbstractStatement.h"
+#include <unordered_map>
 
 class Scope {
  private:
@@ -34,4 +35,4 @@ class Scope {
   AbstractStatement *getLastStatement();
 };
 
-#endif //AST_OPTIMIZER_SCOPE_H
+#endif //AST_OPTIMIZER_INCLUDE_UTILITIES_SCOPE_H_

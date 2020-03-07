@@ -17,6 +17,7 @@
 #include "Call.h"
 #include "PrintVisitor.h"
 #include "Scope.h"
+#include "For.h"
 
 template<typename T>
 void PrintVisitor::printChildNodesIndented(T &elem) {
@@ -43,14 +44,13 @@ void PrintVisitor::visit(Block &elem) {
 }
 
 void PrintVisitor::visit(Call &elem) {
-  AbstractNode *node = static_cast<AbstractNode *>(static_cast<AbstractExpr *>(&elem));
+  auto *node = static_cast<AbstractNode *>(static_cast<AbstractExpr *>(&elem));
   addOutputStr(*node);
   printChildNodesIndented(elem);
 }
 
 void PrintVisitor::visit(CallExternal &elem) {
-  AbstractNode *node = static_cast<AbstractNode *>(static_cast<AbstractStatement *>(&elem));
-  addOutputStr(*node, {elem.getFunctionName()});
+  addOutputStr(elem, {elem.getFunctionName()});
   printChildNodesIndented(elem);
 }
 
@@ -70,7 +70,7 @@ void PrintVisitor::visit(If &elem) {
 }
 
 void PrintVisitor::visit(LiteralBool &elem) {
-  addOutputStr(elem, {elem.getTextValue()});
+  addOutputStr(elem, {elem.getMatrix()->toString()});
 }
 
 void PrintVisitor::visit(LiteralInt &elem) {
@@ -122,6 +122,17 @@ void PrintVisitor::visit(While &elem) {
   addOutputStr(elem);
   printChildNodesIndented(elem);
 }
+
+void PrintVisitor::visit(For &elem) {
+  addOutputStr(elem);
+  printChildNodesIndented(elem);
+}
+
+void PrintVisitor::visit(ParameterList &elem) {
+  addOutputStr(elem);
+  printChildNodesIndented(elem);
+}
+
 
 // ------------–------
 // Constructor & Utility functions

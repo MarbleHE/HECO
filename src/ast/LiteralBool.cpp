@@ -1,12 +1,14 @@
 #include "LiteralBool.h"
 #include "RandNumGen.h"
 
-LiteralBool::LiteralBool(bool value) : value(value) {}
+LiteralBool::LiteralBool(bool value) : matrix(new Matrix(value)) {}
+
+LiteralBool::LiteralBool(Matrix<bool> *inputMatrix) : matrix(inputMatrix) {}
 
 json LiteralBool::toJson() const {
   json j;
   j["type"] = getNodeType();
-  j["value"] = this->value;
+  j["value"] = matrix->toJson();
   return j;
 }
 
@@ -15,11 +17,11 @@ void LiteralBool::accept(Visitor &v) {
 }
 
 bool LiteralBool::getValue() const {
-  return value;
+  return matrix->getScalarValue();
 }
 
-std::string LiteralBool::getTextValue() const {
-  return getValue() ? "true" : "false";
+Matrix<bool> *LiteralBool::getMatrix() const {
+  return matrix;
 }
 
 std::string LiteralBool::getNodeType() const {
@@ -29,11 +31,11 @@ std::string LiteralBool::getNodeType() const {
 LiteralBool::~LiteralBool() = default;
 
 void LiteralBool::print(std::ostream &str) const {
-  str << this->getTextValue();
+  str << matrix->toString();
 }
 
 bool LiteralBool::operator==(const LiteralBool &rhs) const {
-  return value==rhs.value;
+  return *matrix==*rhs.matrix;
 }
 
 bool LiteralBool::operator!=(const LiteralBool &rhs) const {
@@ -46,7 +48,7 @@ void LiteralBool::addLiteralValue(std::string identifier,
 }
 
 void LiteralBool::setValue(bool newValue) {
-  this->value = newValue;
+  this->matrix->setValues({{newValue}});
 }
 
 void LiteralBool::setRandomValue(RandLiteralGen &rlg) {
@@ -54,7 +56,7 @@ void LiteralBool::setRandomValue(RandLiteralGen &rlg) {
 }
 
 std::string LiteralBool::toString(bool printChildren) const {
-  return AbstractNode::generateOutputString(printChildren, {this->getTextValue()});
+  return AbstractNode::generateOutputString(printChildren, {matrix->toString()});
 }
 
 bool LiteralBool::supportsCircuitMode() {
@@ -66,7 +68,7 @@ bool LiteralBool::supportsDatatype(Datatype &datatype) {
 }
 
 LiteralBool *LiteralBool::clone(bool keepOriginalUniqueNodeId) {
-  auto clonedNode = new LiteralBool(this->getValue());
+  auto clonedNode = new LiteralBool(matrix->clone());
   if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
   if (this->isReversed) clonedNode->swapChildrenParents();
   return clonedNode;
@@ -74,9 +76,10 @@ LiteralBool *LiteralBool::clone(bool keepOriginalUniqueNodeId) {
 
 bool LiteralBool::isEqual(AbstractExpr *other) {
   auto otherLiteralBool = dynamic_cast<LiteralBool *>(other);
-  return otherLiteralBool!=nullptr && this->getValue()==otherLiteralBool->getValue();
+  return otherLiteralBool!=nullptr && *this==*otherLiteralBool;
 }
 
 bool LiteralBool::isNull() {
-  return this->getValue()==false;
+  return matrix->allValuesEqual(false);
 }
+

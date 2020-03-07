@@ -64,7 +64,22 @@ Return *Return::clone(bool keepOriginalUniqueNodeId) {
   if (this->isReversed) clonedNode->swapChildrenParents();
   return clonedNode;
 }
+
 std::string Return::toString(bool printChildren) const {
   return AbstractNode::generateOutputString(printChildren, {});
 }
 
+bool Return::isEqual(AbstractStatement *as) {
+  if (auto asAsReturn = dynamic_cast<Return *>(as)) {
+    auto thisRetExp = this->getReturnExpressions();
+    auto otherRetExp = asAsReturn->getReturnExpressions();
+    // check equality of every returned value
+    bool sameReturnValues = std::equal(thisRetExp.begin(), thisRetExp.end(),
+                                       otherRetExp.begin(), otherRetExp.end(),
+                                       [](AbstractExpr *first, AbstractExpr *second) {
+                                         return first->isEqual(second);
+                                       });
+    return sameReturnValues;
+  }
+  return false;
+}

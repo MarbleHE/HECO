@@ -17,7 +17,7 @@ std::string AbstractStatement::getVarTargetIdentifier() {
 }
 
 bool AbstractStatement::isEqual(AbstractStatement *as) {
-  return false;
+  throw std::runtime_error("Unimplemented AbstractStatement::isEqual.");
 }
 
 std::ostream &operator<<(std::ostream &outs, const AbstractStatement &obj) {

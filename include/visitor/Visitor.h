@@ -13,6 +13,7 @@ class Call;
 class CallExternal;
 class Datatype;
 class Function;
+class For;
 class FunctionParameter;
 class If;
 class AbstractLiteral;
@@ -48,6 +49,8 @@ class Visitor {
   virtual void visit(CallExternal &elem);
 
   virtual void visit(Datatype &elem);
+
+  virtual void visit(For &elem);
 
   virtual void visit(Function &elem);
 

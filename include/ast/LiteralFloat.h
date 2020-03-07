@@ -1,17 +1,21 @@
-#ifndef AST_OPTIMIZER_INCLUDE_LITERALFLOAT_H
-#define AST_OPTIMIZER_INCLUDE_LITERALFLOAT_H
+#ifndef AST_OPTIMIZER_INCLUDE_AST_LITERALFLOAT_H_
+#define AST_OPTIMIZER_INCLUDE_AST_LITERALFLOAT_H_
 
 #include "AbstractLiteral.h"
 #include <string>
 #include <ostream>
 #include <map>
+#include <unordered_map>
+#include "Matrix.h"
 
 class LiteralFloat : public AbstractLiteral {
  private:
-  float value;
+  Matrix<float> *matrix;
 
  public:
   explicit LiteralFloat(float value);
+
+  explicit LiteralFloat(Matrix<float> *inputMatrix);
 
   ~LiteralFloat() override;
 
@@ -24,10 +28,6 @@ class LiteralFloat : public AbstractLiteral {
   void accept(Visitor &v) override;
 
   [[nodiscard]] std::string getNodeType() const override;
-
-  LiteralFloat operator+(LiteralFloat const &lfloat);
-
-  friend std::ostream &operator<<(std::ostream &os, const LiteralFloat &an_float);
 
   bool operator==(const LiteralFloat &rhs) const;
 
@@ -46,8 +46,12 @@ class LiteralFloat : public AbstractLiteral {
   bool supportsDatatype(Datatype &datatype) override;
 
   void print(std::ostream &str) const override;
+
   bool isEqual(AbstractExpr *other) override;
+
   bool isNull() override;
+
+  [[nodiscard]] Matrix<float> *getMatrix() const;
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_LITERALFLOAT_H
+#endif //AST_OPTIMIZER_INCLUDE_AST_LITERALFLOAT_H_

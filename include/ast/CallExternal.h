@@ -1,11 +1,11 @@
-#ifndef AST_OPTIMIZER_INCLUDE_CALLEXTERNAL_H
-#define AST_OPTIMIZER_INCLUDE_CALLEXTERNAL_H
+#ifndef AST_OPTIMIZER_INCLUDE_AST_CALLEXTERNAL_H_
+#define AST_OPTIMIZER_INCLUDE_AST_CALLEXTERNAL_H_
 
 #include "AbstractStatement.h"
 #include <vector>
 #include <string>
 
-class CallExternal : public AbstractExpr, public AbstractStatement {
+class CallExternal : public AbstractExpr {
  private:
   std::string functionName;
   std::vector<FunctionParameter *> arguments;
@@ -28,4 +28,4 @@ class CallExternal : public AbstractExpr, public AbstractStatement {
   [[nodiscard]] std::string getNodeType() const override;
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_CALLEXTERNAL_H
+#endif //AST_OPTIMIZER_INCLUDE_AST_CALLEXTERNAL_H_

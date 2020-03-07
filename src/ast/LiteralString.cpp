@@ -3,12 +3,14 @@
 #include "LiteralString.h"
 #include "RandNumGen.h"
 
-LiteralString::LiteralString(std::string value) : value(std::move(value)) {}
+LiteralString::LiteralString(Matrix<std::string> *inputMatrix) : matrix(inputMatrix) {}
+
+LiteralString::LiteralString(std::string value) : matrix(new Matrix(value)) {}
 
 json LiteralString::toJson() const {
   json j;
   j["type"] = getNodeType();
-  j["value"] = this->value;
+  j["value"] = matrix->toJson();
   return j;
 }
 
@@ -16,8 +18,8 @@ void LiteralString::accept(Visitor &v) {
   v.visit(*this);
 }
 
-const std::string &LiteralString::getValue() const {
-  return value;
+std::string LiteralString::getValue() const {
+  return matrix->getScalarValue();
 }
 
 std::string LiteralString::getNodeType() const {
@@ -31,7 +33,7 @@ void LiteralString::print(std::ostream &str) const {
 }
 
 bool LiteralString::operator==(const LiteralString &rhs) const {
-  return value==rhs.value;
+  return *matrix==*rhs.getMatrix();
 }
 
 bool LiteralString::operator!=(const LiteralString &rhs) const {
@@ -44,7 +46,7 @@ void LiteralString::addLiteralValue(std::string identifier,
 }
 
 void LiteralString::setValue(const std::string &newValue) {
-  this->value = newValue;
+  matrix->setValues({{newValue}});
 }
 
 void LiteralString::setRandomValue(RandLiteralGen &rlg) {
@@ -52,7 +54,7 @@ void LiteralString::setRandomValue(RandLiteralGen &rlg) {
 }
 
 std::string LiteralString::toString(bool printChildren) const {
-  return AbstractNode::generateOutputString(printChildren, {this->getValue()});
+  return AbstractNode::generateOutputString(printChildren, {matrix->toString()});
 }
 
 bool LiteralString::supportsCircuitMode() {
@@ -64,7 +66,7 @@ bool LiteralString::supportsDatatype(Datatype &datatype) {
 }
 
 LiteralString *LiteralString::clone(bool keepOriginalUniqueNodeId) {
-  auto clonedNode = new LiteralString(this->getValue());
+  auto clonedNode = new LiteralString(matrix->clone());
   if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
   if (this->isReversed) clonedNode->swapChildrenParents();
   return clonedNode;
@@ -72,9 +74,13 @@ LiteralString *LiteralString::clone(bool keepOriginalUniqueNodeId) {
 
 bool LiteralString::isEqual(AbstractExpr *other) {
   auto otherLiteralString = dynamic_cast<LiteralString *>(other);
-  return otherLiteralString!=nullptr && this->getValue()==otherLiteralString->getValue();
+  return otherLiteralString!=nullptr && *this==*otherLiteralString;
 }
 
 bool LiteralString::isNull() {
-  return this->getValue()==std::string("");
+  return matrix->allValuesEqual("");
+}
+
+Matrix<std::string> *LiteralString::getMatrix() const {
+  return matrix;
 }

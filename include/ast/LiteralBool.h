@@ -1,15 +1,20 @@
-#ifndef AST_OPTIMIZER_INCLUDE_LITERALBOOL_H
-#define AST_OPTIMIZER_INCLUDE_LITERALBOOL_H
+#ifndef AST_OPTIMIZER_INCLUDE_AST_LITERALBOOL_H_
+#define AST_OPTIMIZER_INCLUDE_AST_LITERALBOOL_H_
 
 #include "AbstractLiteral.h"
+#include "Matrix.h"
 #include <string>
 #include <map>
+#include <unordered_map>
 
 class LiteralBool : public AbstractLiteral {
  private:
-  bool value;
+  Matrix<bool> *matrix;
+
  public:
   explicit LiteralBool(bool value);
+
+  explicit LiteralBool(Matrix<bool> *inputMatrix);
 
   ~LiteralBool() override;
 
@@ -19,9 +24,7 @@ class LiteralBool : public AbstractLiteral {
 
   void accept(Visitor &v) override;
 
-  [[nodiscard]] bool getValue() const;
-
-  [[nodiscard]] std::string getTextValue() const;
+  bool getValue() const; /* NOLINT intentionally allow discarding value */
 
   [[nodiscard]] std::string getNodeType() const override;
 
@@ -46,6 +49,8 @@ class LiteralBool : public AbstractLiteral {
   bool isEqual(AbstractExpr *other) override;
 
   bool isNull() override;
+
+  [[nodiscard]] Matrix<bool> *getMatrix() const;
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_LITERALBOOL_H
+#endif //AST_OPTIMIZER_INCLUDE_AST_LITERALBOOL_H_

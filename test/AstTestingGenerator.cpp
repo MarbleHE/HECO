@@ -11,6 +11,7 @@
 #include "Block.h"
 #include "While.h"
 #include "Call.h"
+#include "For.h"
 #include "LiteralFloat.h"
 
 static std::map<int, std::function<void(Ast &)> > call = {  /* NOLINT */
@@ -36,7 +37,8 @@ static std::map<int, std::function<void(Ast &)> > call = {  /* NOLINT */
     {19, AstTestingGenerator::genAstRewritingSimpleExtended},
     {20, AstTestingGenerator::genAstRewritingMultiInputY},
     {21, AstTestingGenerator::genAstRewritingTwoDepth2ConesButSingleVNode},
-    {22, AstTestingGenerator::genAstForSecretTaintingWithMultipleNonSequentialStatements}
+    {22, AstTestingGenerator::genAstForSecretTaintingWithMultipleNonSequentialStatements},
+    {23, AstTestingGenerator::genAstIncludingForStatement}
 };
 
 void AstTestingGenerator::generateAst(int id, Ast &ast) {
@@ -602,10 +604,10 @@ void AstTestingGenerator::genAstPrintVisitorTwo(Ast &ast) {
   // STRING outStr = "Computation finished!";
   func->addStatement(new VarDecl("outStr", "Computation finished!"));
 
-  // printf(outStr);
-  func->addStatement(
-      new CallExternal("printf", {
-          new FunctionParameter("string", new Variable("outStr"))}));
+  // int _ = printf(outStr);
+  func->addStatement(new VarDecl("_", Types::INT,
+                                 new CallExternal("printf", {
+                                     new FunctionParameter("string", new Variable("outStr"))})));
 
   // return sum;
   func->addStatement(
@@ -1033,4 +1035,52 @@ void AstTestingGenerator::genAstForSecretTaintingWithMultipleNonSequentialStatem
       new Return(new ArithmeticExpr(new Variable("subtotal"),
                                     ArithmeticOp::multiplication,
                                     new Variable("discount"))));
+}
+
+void AstTestingGenerator::genAstIncludingForStatement(Ast &ast) {
+//    int sum = 0;
+//    int base = 2;
+//    for (int i = 0; i < 3; i=i+1) {
+//      sum = sum + base * i;
+//    }
+//    return sum
+
+  // int powBase2()
+  auto func = new Function("powBase2");
+  auto funcParams = new ParameterList();
+  funcParams->addChild(
+      new FunctionParameter(new Datatype(Types::INT), new Variable("inputA")));
+  func->setParameterList(funcParams);
+
+  // int sum = 0;
+  func->addStatement(new VarDecl("sum", Types::INT, new LiteralInt(0)));
+  // int base = 2;
+  func->addStatement(new VarDecl("base", Types::INT, new LiteralInt(2)));
+
+  // int = 0;
+  auto forInitializer = new VarDecl("i", Types::INT, new LiteralInt(0));
+  // i < 3
+  auto forCondition = new LogicalExpr(new Variable("i"), smaller, new LiteralInt(3));
+  // i = i+1
+  auto forUpdate = new VarAssignm("i", new ArithmeticExpr(new Variable("i"), addition, new LiteralInt(1)));
+  // sum = sum + base * i;
+  auto forBody = new Block(
+      new VarAssignm("sum",
+                     new ArithmeticExpr(
+                         new Variable("sum"),
+                         addition,
+                         new ArithmeticExpr(
+                             new Variable("base"),
+                             multiplication,
+                             new Variable("i")))));
+
+  func->addStatement(new For(forInitializer,
+                             forCondition,
+                             forUpdate,
+                             forBody));
+
+  // return sum;
+  func->addStatement(new Return(new Variable("sum")));
+
+  ast.setRootNode(func);
 }

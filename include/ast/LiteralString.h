@@ -1,27 +1,29 @@
-#ifndef AST_OPTIMIZER_INCLUDE_LITERALSTRING_H
-#define AST_OPTIMIZER_INCLUDE_LITERALSTRING_H
+#ifndef AST_OPTIMIZER_INCLUDE_AST_LITERALSTRING_H_
+#define AST_OPTIMIZER_INCLUDE_AST_LITERALSTRING_H_
 
 #include <string>
-#include "AbstractLiteral.h"
 #include <map>
+#include "AbstractLiteral.h"
+#include "Matrix.h"
 
 class LiteralString : public AbstractLiteral {
  private:
-  std::string value;
-
- protected:
-  void print(std::ostream &str) const override;
+  Matrix<std::string> *matrix;
 
  public:
+  explicit LiteralString(Matrix<std::string> *inputMatrix);
+
   explicit LiteralString(std::string value);
 
   ~LiteralString() override;
+
+  void print(std::ostream &str) const override;
 
   LiteralString *clone(bool keepOriginalUniqueNodeId) override;
 
   [[nodiscard]] json toJson() const override;
 
-  [[nodiscard]] const std::string &getValue() const;
+  [[nodiscard]] std::string getValue() const;
 
   void accept(Visitor &v) override;
 
@@ -46,6 +48,8 @@ class LiteralString : public AbstractLiteral {
   bool isEqual(AbstractExpr *other) override;
 
   bool isNull() override;
+
+  [[nodiscard]] Matrix<std::string> *getMatrix() const;
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_LITERALSTRING_H
+#endif //AST_OPTIMIZER_INCLUDE_AST_LITERALSTRING_H_

@@ -54,16 +54,43 @@ Block *Block::clone(bool keepOriginalUniqueNodeId) {
   if (this->isReversed) clonedNode->swapChildrenParents();
   return clonedNode;
 }
+
 AbstractNode *Block::cloneFlat() {
-  //TODO(vianda): Implement cloneFlat in Block
-  throw std::runtime_error("Not implemented");
+  auto block = new Block();
+  block->setUniqueNodeId(this->getUniqueNodeId());
+  return block;
 }
+
 int Block::getMaxNumberChildren() {
   return -1;
 }
+
 bool Block::supportsCircuitMode() {
   return true;
 }
+
 std::string Block::toString(bool printChildren) const {
   return AbstractNode::generateOutputString(printChildren, {});
+}
+
+bool Block::isEqual(AbstractStatement *otherBlockStatement) {
+  if (auto otherAsBlock = dynamic_cast<Block *>(otherBlockStatement)) {
+    auto thisStatements = getStatements();
+    auto otherStatements = otherAsBlock->getStatements();
+
+    auto thisStatIt = thisStatements.begin();
+    auto otherStatIt = otherStatements.begin();
+
+    // compare statement-per-statement
+    for (; thisStatIt!=thisStatements.end(); ++thisStatIt) {
+      // break up if any pair of two compared statements do not match
+      if (!(*thisStatIt)->isEqual(*otherStatIt)) return false;
+      otherStatIt++;
+    }
+
+    // make sure that both blocks reached their end (otherwise one could have more than the other one but still be
+    // recognized as being equal)
+    return (thisStatIt==thisStatements.end()) && (otherStatIt==otherStatements.end());
+  }
+  return false;
 }

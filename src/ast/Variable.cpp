@@ -1,14 +1,15 @@
+#include "Variable.h"
 #include <utility>
-
-#include "../../include/ast/Variable.h"
 #include "Ast.h"
 
-Variable::Variable(std::string identifier) : identifier(std::move(identifier)) {}
+Variable::Variable(Matrix<std::string> *inputMatrix) : matrix(inputMatrix) {}
+
+Variable::Variable(std::string identifier) : matrix(new Matrix(std::move(identifier))) {}
 
 json Variable::toJson() const {
   json j;
   j["type"] = getNodeType();
-  j["identifier"] = this->identifier;
+  j["identifier"] = matrix->toJson();
   return j;
 }
 
@@ -20,8 +21,8 @@ std::string Variable::getNodeType() const {
   return "Variable";
 }
 
-const std::string &Variable::getIdentifier() const {
-  return identifier;
+std::string Variable::getIdentifier() const {
+  return matrix->getScalarValue();
 }
 
 bool Variable::contains(Variable *var) {
@@ -29,7 +30,7 @@ bool Variable::contains(Variable *var) {
 }
 
 bool Variable::operator==(const Variable &rhs) const {
-  return identifier==rhs.identifier;
+  return *matrix==*rhs.getMatrix();
 }
 
 bool Variable::operator!=(const Variable &rhs) const {
@@ -38,17 +39,17 @@ bool Variable::operator!=(const Variable &rhs) const {
 
 bool Variable::isEqual(AbstractExpr *other) {
   if (auto otherVar = dynamic_cast<Variable *>(other)) {
-    return this->getIdentifier()==otherVar->getIdentifier();
+    return *this==*otherVar;
   }
   return false;
 }
 
 std::vector<std::string> Variable::getVariableIdentifiers() {
-  return {{this->getIdentifier()}};
+  return matrix->getValuesAsVector();
 }
 
 std::string Variable::toString(bool printChildren) const {
-  return AbstractNode::generateOutputString(printChildren, {this->getIdentifier()});
+  return AbstractNode::generateOutputString(printChildren, {matrix->toString()});
 }
 
 bool Variable::supportsCircuitMode() {
@@ -58,8 +59,12 @@ bool Variable::supportsCircuitMode() {
 Variable::~Variable() = default;
 
 Variable *Variable::clone(bool keepOriginalUniqueNodeId) {
-  auto clonedNode = new Variable(this->identifier);
+  auto clonedNode = new Variable(matrix->clone());
   if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
   if (this->isReversed) clonedNode->swapChildrenParents();
   return clonedNode;
+}
+
+Matrix<std::string> *Variable::getMatrix() const {
+  return matrix;
 }

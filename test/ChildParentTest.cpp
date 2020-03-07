@@ -13,13 +13,13 @@
 #include "If.h"
 #include "VarAssignm.h"
 #include "VarDecl.h"
+#include "For.h"
 
 class ArithmeticExprFixture : public ::testing::Test {
  protected:
   LiteralInt *left;
   LiteralInt *otherLeft;
   LiteralFloat *right;
-  LiteralFloat *otherRight;
   ArithmeticOp opSymb;
   Operator *operatorAdd;
 
@@ -27,7 +27,6 @@ class ArithmeticExprFixture : public ::testing::Test {
     left = new LiteralInt(3);
     otherLeft = new LiteralInt(42);
     right = new LiteralFloat(2.0);
-    otherRight = new LiteralFloat(22.4);
     opSymb = ArithmeticOp::addition;
     operatorAdd = new Operator(opSymb);
   }
@@ -138,19 +137,72 @@ TEST(ChildParentTests, Block_addAdditionalChild) {  /* NOLINT */
   EXPECT_EQ(blockStatement->getChildAtIndex(1), varAssignm);
 }
 
-TEST(ChildParentTests, Call) {  /* NOLINT */
+TEST(ChildParentTests, CallStandardConstructor) {  /* NOLINT */
   auto func = new Function("computeSecretX");
   auto funcParam = new FunctionParameter(new Datatype(Types::INT), new LiteralInt(221));
   auto call = new Call({funcParam}, func);
 
-  ASSERT_EQ(call->getChildren().size(), 0);
-  ASSERT_EQ(call->getParents().size(), 0);
-  ASSERT_FALSE(call->supportsCircuitMode());
-  ASSERT_EQ(call->getMaxNumberChildren(), 0);
+  ASSERT_TRUE(call->supportsCircuitMode());
+  ASSERT_EQ(call->getMaxNumberChildren(), 2);
 
-  // checking children
-  ASSERT_EQ(func->getParents().size(), 0);
-  ASSERT_EQ(funcParam->getParents().size(), 0);
+  // children
+  ASSERT_EQ(call->getChildren().size(), 2);
+  ASSERT_TRUE(dynamic_cast<ParameterList *>(call->getChildAtIndex(0))!=nullptr);
+  ASSERT_EQ(call->getChildAtIndex(1), func);
+
+  // parents
+  ASSERT_EQ(call->getParents().size(), 0);
+  ASSERT_EQ(call->getChildAtIndex(0)->getParents().size(), 1);
+  ASSERT_TRUE(call->getChildAtIndex(0)->hasParent(call));
+  ASSERT_EQ(call->getChildAtIndex(1)->getParents().size(), 1);
+  ASSERT_TRUE(call->getChildAtIndex(1)->hasParent(call));
+}
+
+TEST(ChildParentTests, CallArgumentlessConstructor) {  /* NOLINT */
+  auto func = new Function("computeSecretX");
+  auto call = new Call(func);
+
+  ASSERT_TRUE(call->supportsCircuitMode());
+  ASSERT_EQ(call->getMaxNumberChildren(), 2);
+
+  // children
+  ASSERT_EQ(call->getChildren().size(), 2);
+  ASSERT_TRUE(dynamic_cast<ParameterList *>(call->getChildAtIndex(0))!=nullptr);
+  ASSERT_EQ(call->getChildAtIndex(1), func);
+
+  // parents
+  ASSERT_EQ(call->getParents().size(), 0);
+  ASSERT_EQ(call->getChildAtIndex(1)->getParents().size(), 1);
+  ASSERT_TRUE(call->getChildAtIndex(1)->hasParent(call));
+}
+
+TEST(ChildParentTests, CallAddChildException_NoEmptyChildSpotAvailable) {  /* NOLINT */
+  auto func = new Function("computeSecretX");
+  auto arithmeticExpr = new Call(func);
+  EXPECT_THROW(arithmeticExpr->addChild(new Function("y")), std::logic_error);
+}
+
+TEST(ChildParentTests, CallAddChildSuccess) {  /* NOLINT */
+  auto func = new Function("computeSecretX");
+  auto funcParam = new FunctionParameter(new Datatype(Types::INT), new LiteralInt(221));
+  auto call = new Call({funcParam}, func);
+  auto newChild = new FunctionParameter(new Datatype(Types::INT, true), new Variable("seed"));
+  call->getChildAtIndex(0)->addChild(newChild);
+
+  // children
+  EXPECT_EQ(call->getChildren().size(), 2);
+  EXPECT_TRUE(dynamic_cast<ParameterList *>(call->getChildAtIndex(0))!=nullptr);
+  EXPECT_EQ(call->getChildAtIndex(0)->getChildAtIndex(0), funcParam);
+  EXPECT_EQ(call->getChildAtIndex(0)->getChildAtIndex(1), newChild);
+  EXPECT_EQ(call->getChildAtIndex(1), func);
+
+  // parents
+  EXPECT_EQ(call->getParents().size(), 0);
+  EXPECT_EQ(func->getOnlyParent(), call);
+  auto paramList = call->getChildAtIndex(0);
+  EXPECT_EQ(paramList->getOnlyParent(), call);
+  EXPECT_EQ(paramList->getChildAtIndex(0)->getOnlyParent(), paramList);
+  EXPECT_EQ(paramList->getChildAtIndex(1)->getOnlyParent(), paramList);
 }
 
 TEST(ChildParentTests, CallExternal) {  /* NOLINT */
@@ -748,11 +800,101 @@ TEST(ChildParentTests, Variable) {  /* NOLINT */
   ASSERT_TRUE(variable.getParents().empty());
 }
 
-TEST(ChildParentTests, While) {  /* NOLINT */
-  auto whileStatement =
-      new While(new LogicalExpr(new LiteralInt(32), LogCompOp::greaterEqual, new Variable("a")), new Block());
-  ASSERT_EQ(whileStatement->getChildren().size(), 0);
-  ASSERT_EQ(whileStatement->getParents().size(), 0);
-  ASSERT_FALSE(whileStatement->supportsCircuitMode());
-  ASSERT_EQ(whileStatement->getMaxNumberChildren(), 0);
+class WhileStmtFixture : public ::testing::Test {
+ protected:
+  AbstractExpr *whileCondition;
+  AbstractStatement *whileBlock;
+
+ public:
+  WhileStmtFixture() {
+    whileCondition = new LogicalExpr(new LiteralInt(32), greaterEqual, new Variable("a"));
+    whileBlock = new Block();
+  }
+};
+
+TEST_F(WhileStmtFixture, WhileStandardConstructor) {
+  auto whileStmt = new While(whileCondition, whileBlock);
+
+  EXPECT_EQ(whileStmt->getMaxNumberChildren(), 2);
+  EXPECT_EQ(whileStmt->supportsCircuitMode(), true);
+
+  // children
+  EXPECT_EQ(whileStmt->countChildrenNonNull(), 2);
+  EXPECT_EQ(whileStmt->getChildAtIndex(0), whileCondition);
+  EXPECT_EQ(whileStmt->getChildAtIndex(1), whileBlock);
+
+  // parents
+  EXPECT_EQ(whileCondition->getParentsNonNull().size(), 1);
+  EXPECT_TRUE(whileCondition->hasParent(whileStmt));
+  EXPECT_EQ(whileBlock->getParentsNonNull().size(), 1);
+  EXPECT_TRUE(whileBlock->hasParent(whileStmt));
+}
+
+class ForLoopFixture : public ::testing::Test {
+ protected:
+  AbstractStatement *forInitializer;
+  AbstractStatement *forUpdate;
+  AbstractStatement *forBody;
+  LogicalExpr *forCondition;
+
+ public:
+  ForLoopFixture() {
+    // int = 0;
+    forInitializer = new VarDecl("i", Types::INT, new LiteralInt(0));
+    // i < 3
+    forCondition = new LogicalExpr(new Variable("i"), smaller, new LiteralInt(3));
+    // i = i+1
+    forUpdate = new VarAssignm("i", new ArithmeticExpr(new Variable("i"), addition, new LiteralInt(1)));
+    // sum = sum + base * i;
+    forBody = new Block(
+        new VarAssignm("sum",
+                       new ArithmeticExpr(
+                           new Variable("sum"),
+                           addition,
+                           new ArithmeticExpr(
+                               new Variable("base"),
+                               multiplication,
+                               new Variable("i")))));
+  }
+};
+
+TEST_F(ForLoopFixture, ForStmtStandardConstructor) {
+  auto forStmt = new For(forInitializer, forCondition, forUpdate, forBody);
+
+  // children
+  EXPECT_EQ(forStmt->getChildren().size(), 4);
+  EXPECT_EQ(forStmt->getChildAtIndex(0), forInitializer);
+  EXPECT_EQ(forStmt->getChildAtIndex(1), forCondition);
+  EXPECT_EQ(forStmt->getChildAtIndex(2), forUpdate);
+  EXPECT_EQ(forStmt->getChildAtIndex(3), forBody);
+
+  // parents
+  EXPECT_EQ(forStmt->getParents().size(), 0);
+  EXPECT_EQ(forStmt->getChildAtIndex(0)->getParentsNonNull().size(), 1);
+  EXPECT_TRUE(forStmt->getChildAtIndex(0)->hasParent(forStmt));
+  EXPECT_EQ(forStmt->getChildAtIndex(1)->getParentsNonNull().size(), 1);
+  EXPECT_TRUE(forStmt->getChildAtIndex(1)->hasParent(forStmt));
+  EXPECT_EQ(forStmt->getChildAtIndex(2)->getParentsNonNull().size(), 1);
+  EXPECT_TRUE(forStmt->getChildAtIndex(2)->hasParent(forStmt));
+  EXPECT_EQ(forStmt->getChildAtIndex(3)->getParentsNonNull().size(), 1);
+  EXPECT_TRUE(forStmt->getChildAtIndex(3)->hasParent(forStmt));
+}
+
+TEST_F(ForLoopFixture, ForStmt_NoEmptyChildSpotAvailable) {
+  auto forStmt = new For(forInitializer, forCondition, forUpdate, forBody);
+  EXPECT_THROW(forStmt->addChild(new VarAssignm("a", new LiteralInt(1))), std::logic_error);
+}
+
+TEST_F(ForLoopFixture, ForStmtAddChildSuccess) {
+  auto forStmt = new For(forInitializer, forCondition, forUpdate, forBody);
+  forStmt->removeChild(forBody);
+
+  EXPECT_EQ(forBody->getParentsNonNull().size(), 0);
+  EXPECT_EQ(forStmt->getChildrenNonNull().size(), 3);
+
+  auto newChild = new VarAssignm("x", new ArithmeticExpr(new Variable("x"), multiplication, new LiteralInt(2)));
+  forStmt->addChild(newChild);
+  EXPECT_EQ(forStmt->getChildAtIndex(3), newChild);
+  EXPECT_EQ(newChild->getParentsNonNull().size(), 1);
+  EXPECT_TRUE(newChild->hasParent(forStmt));
 }

@@ -1,7 +1,8 @@
 Function: (computePrivate)	[global]
-	FunctionParameter:	[Function_0]
-		Datatype: (plaintext int)
-		Variable: (x)
+	ParameterList:	[Function_0]
+		FunctionParameter:
+			Datatype: (plaintext int)
+			Variable: (x)
 	Block:
 		VarDecl: (a)	[Block_2]
 			Datatype: (plaintext int)

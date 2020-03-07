@@ -17,6 +17,7 @@
 #include "VarDecl.h"
 #include "Variable.h"
 #include "While.h"
+#include "For.h"
 
 #include "gtest/gtest.h"
 
@@ -362,3 +363,38 @@ TEST(JsonOutputTest, While) { /* NOLINT */
 
   EXPECT_EQ(whileStmt->toJson(), expected);
 }
+
+TEST(JsonOutputTest, For) { /* NOLINT */
+  // for (int v = 42; v > 0; v = v-1) {
+  //   a = (a+b)/2;
+  // }
+  // int = 0;
+  auto forInitializer = new VarDecl("v", Types::INT, new LiteralInt(42));
+  // v > 0
+  auto forCondition = new LogicalExpr(new Variable("v"), greater, new LiteralInt(0));
+  // v = v-1
+  auto forUpdate = new VarAssignm("v",
+                                  new ArithmeticExpr(
+                                      new Variable("v"),
+                                      subtraction,
+                                      new LiteralInt(1)));
+  // sum = sum + base * i;
+  auto forBody = new Block(
+      new VarAssignm("a",
+                     new ArithmeticExpr(
+                         new ArithmeticExpr(
+                             new Variable("a"),
+                             addition,
+                             new Variable("b")),
+                         division,
+                         new LiteralInt(2))));
+
+  auto forStmt = new For(forInitializer, forCondition, forUpdate, forBody);
+
+  // retrieve expected result
+  std::ifstream f("../../test/expected_output_large/JsonOutputTest/For.json");
+  json expected = json::parse(f);
+
+  EXPECT_EQ(forStmt->toJson(), expected);
+}
+

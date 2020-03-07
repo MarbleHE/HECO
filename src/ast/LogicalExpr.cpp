@@ -30,6 +30,7 @@ LogicalExpr *LogicalExpr::clone(bool keepOriginalUniqueNodeId) {
                       getRight()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
   return clonedLogicalExpr;
 }
+
 std::string LogicalExpr::toString(bool printChildren) const {
   return AbstractNode::generateOutputString(printChildren, {});
 }

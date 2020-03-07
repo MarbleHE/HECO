@@ -1,16 +1,19 @@
-#ifndef AST_OPTIMIZER_INCLUDE_VARIABLE_H
-#define AST_OPTIMIZER_INCLUDE_VARIABLE_H
+#ifndef AST_OPTIMIZER_INCLUDE_AST_VARIABLE_H_
+#define AST_OPTIMIZER_INCLUDE_AST_VARIABLE_H_
 
-#include <string>
-#include "AbstractExpr.h"
-#include <vector>
 #include <map>
+#include <string>
+#include <vector>
+#include "AbstractExpr.h"
+#include "Matrix.h"
 
 class Variable : public AbstractExpr {
  private:
-  std::string identifier;
+  Matrix<std::string> *matrix;
 
  public:
+  explicit Variable(Matrix<std::string> *inputMatrix);
+
   explicit Variable(std::string identifier);
 
   [[nodiscard]] json toJson() const override;
@@ -23,7 +26,7 @@ class Variable : public AbstractExpr {
 
   [[nodiscard]] std::string getNodeType() const override;
 
-  [[nodiscard]] const std::string &getIdentifier() const;
+  [[nodiscard]] std::string getIdentifier() const;
 
   bool operator==(const Variable &rhs) const;
 
@@ -38,6 +41,8 @@ class Variable : public AbstractExpr {
   [[nodiscard]] std::string toString(bool printChildren) const override;
 
   bool supportsCircuitMode() override;
+
+  [[nodiscard]] Matrix<std::string> *getMatrix() const;
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_VARIABLE_H
+#endif //AST_OPTIMIZER_INCLUDE_AST_VARIABLE_H_
