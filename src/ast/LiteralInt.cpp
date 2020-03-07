@@ -33,7 +33,7 @@ std::string LiteralInt::getNodeType() const {
 LiteralInt::~LiteralInt() = default;
 
 void LiteralInt::print(std::ostream &str) const {
-  str << getMatrix()->toString();
+  str << matrix->toString();
 }
 
 bool LiteralInt::operator==(const LiteralInt &rhs) const {

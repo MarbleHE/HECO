@@ -12,8 +12,8 @@ class LiteralInt : public AbstractLiteral {
   Matrix<int> *matrix;
 
  public:
-  LiteralInt(Matrix<int> *inputMatrix);
-  
+  explicit LiteralInt(Matrix<int> *inputMatrix);
+
   explicit LiteralInt(int value);
 
   LiteralInt *clone(bool keepOriginalUniqueNodeId) override;

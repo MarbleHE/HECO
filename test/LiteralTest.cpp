@@ -59,7 +59,7 @@ TEST(LiteralTest, compareLiterals_int_int_sameValue) { /* NOLINT */
   ASSERT_TRUE(*intOne==*intTwo);
 }
 
-TEST(LiteralTest, literalBoolMatrix) {
+TEST(LiteralTest, literalBoolMatrix) { /* NOLINT */
   auto pMatrix = new Matrix<bool>({{true, false, false}, {false, false, true}, {true, true, true}});
   auto litBool = new LiteralBool(pMatrix);
 

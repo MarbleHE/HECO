@@ -4,17 +4,19 @@
 #include "LiteralFloat.h"
 #include "RandNumGen.h"
 
-LiteralFloat::LiteralFloat(float value) : value(value) {}
+LiteralFloat::LiteralFloat(float value) : matrix(new Matrix(value)) {}
+
+LiteralFloat::LiteralFloat(Matrix<float> *inputMatrix) : matrix(inputMatrix) {}
 
 json LiteralFloat::toJson() const {
   json j;
   j["type"] = getNodeType();
-  j["value"] = this->value;
+  j["value"] = matrix->toJson();
   return j;
 }
 
 float LiteralFloat::getValue() const {
-  return value;
+  return matrix->getScalarValue();
 }
 
 void LiteralFloat::accept(Visitor &v) {
@@ -27,21 +29,12 @@ std::string LiteralFloat::getNodeType() const {
 
 LiteralFloat::~LiteralFloat() = default;
 
-LiteralFloat LiteralFloat::operator+(LiteralFloat const &lint) {
-  return LiteralFloat(this->getValue() + lint.getValue());
-}
-
-std::ostream &operator<<(std::ostream &os, const LiteralFloat &an_int) {
-  os << an_int.getValue();
-  return os;
-}
-
 void LiteralFloat::print(std::ostream &str) const {
-  str << this->value;
+  str << matrix->toString();
 }
 
 bool LiteralFloat::operator==(const LiteralFloat &rhs) const {
-  return value==rhs.value;
+  return *matrix==*rhs.getMatrix();
 }
 
 bool LiteralFloat::operator!=(const LiteralFloat &rhs) const {
@@ -54,7 +47,7 @@ void LiteralFloat::addLiteralValue(std::string identifier,
 }
 
 void LiteralFloat::setValue(float newValue) {
-  this->value = newValue;
+  matrix->setValues({{newValue}});
 }
 
 void LiteralFloat::setRandomValue(RandLiteralGen &rlg) {
@@ -62,7 +55,7 @@ void LiteralFloat::setRandomValue(RandLiteralGen &rlg) {
 }
 
 std::string LiteralFloat::toString(bool printChildren) const {
-  return AbstractNode::generateOutputString(printChildren, {std::to_string(this->getValue())});
+  return AbstractNode::generateOutputString(printChildren, {matrix->toString()});
 
 }
 
@@ -83,9 +76,13 @@ LiteralFloat *LiteralFloat::clone(bool keepOriginalUniqueNodeId) {
 
 bool LiteralFloat::isEqual(AbstractExpr *other) {
   auto otherLiteralFloat = dynamic_cast<LiteralFloat *>(other);
-  return otherLiteralFloat!=nullptr && this->getValue()==otherLiteralFloat->getValue();
+  return otherLiteralFloat!=nullptr && *this->matrix==*otherLiteralFloat->getMatrix();
 }
 
 bool LiteralFloat::isNull() {
-  return this->getValue()==0.0f;
+  return matrix->allValuesEqual(0.0f);
+}
+
+Matrix<float> *LiteralFloat::getMatrix() const {
+  return matrix;
 }
