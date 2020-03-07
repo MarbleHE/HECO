@@ -74,7 +74,7 @@ LiteralInt *LiteralInt::clone(bool keepOriginalUniqueNodeId) {
 
 bool LiteralInt::isEqual(AbstractExpr *other) {
   auto otherLiteralInt = dynamic_cast<LiteralInt *>(other);
-  return otherLiteralInt!=nullptr && *this->getMatrix()==*otherLiteralInt->getMatrix();
+  return otherLiteralInt!=nullptr && *this==*otherLiteralInt;
 }
 
 bool LiteralInt::isNull() {

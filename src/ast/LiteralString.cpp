@@ -74,7 +74,7 @@ LiteralString *LiteralString::clone(bool keepOriginalUniqueNodeId) {
 
 bool LiteralString::isEqual(AbstractExpr *other) {
   auto otherLiteralString = dynamic_cast<LiteralString *>(other);
-  return otherLiteralString!=nullptr && *this->getMatrix()==*otherLiteralString->getMatrix();
+  return otherLiteralString!=nullptr && *this==*otherLiteralString;
 }
 
 bool LiteralString::isNull() {

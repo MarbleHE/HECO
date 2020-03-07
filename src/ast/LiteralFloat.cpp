@@ -76,7 +76,7 @@ LiteralFloat *LiteralFloat::clone(bool keepOriginalUniqueNodeId) {
 
 bool LiteralFloat::isEqual(AbstractExpr *other) {
   auto otherLiteralFloat = dynamic_cast<LiteralFloat *>(other);
-  return otherLiteralFloat!=nullptr && *this->matrix==*otherLiteralFloat->getMatrix();
+  return otherLiteralFloat!=nullptr && *this==*otherLiteralFloat;
 }
 
 bool LiteralFloat::isNull() {

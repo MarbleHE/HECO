@@ -76,7 +76,7 @@ LiteralBool *LiteralBool::clone(bool keepOriginalUniqueNodeId) {
 
 bool LiteralBool::isEqual(AbstractExpr *other) {
   auto otherLiteralBool = dynamic_cast<LiteralBool *>(other);
-  return otherLiteralBool!=nullptr && *this->getMatrix()==*otherLiteralBool->getMatrix();
+  return otherLiteralBool!=nullptr && *this==*otherLiteralBool;
 }
 
 bool LiteralBool::isNull() {
