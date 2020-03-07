@@ -79,7 +79,7 @@ class Matrix {
 
   [[nodiscard]] json toJson() const {
     // return the scalar value if this is a (1,1) scalar matrix
-    if (isScalar()) return getScalarValue();
+    if (isScalar()) return json(getScalarValue());
     // if this is a matrix, return an array of arrays like [ [a00, b01, c02], [d10, e11, f12] ]
     json arrayOfArrays = json::array();
     for (int i = 0; i < values.size(); ++i) {
@@ -134,6 +134,15 @@ class Matrix {
     }
     outputStr << "]" << std::endl;
     return outputStr.str();
+  }
+
+  bool allValuesEqual(T valueToBeComparedWith) {
+    for (int i = 0; i < values.size(); ++i) {
+      for (int j = 0; j < values[i].size(); ++j) {
+        if (values[i][j]!=valueToBeComparedWith) return false;
+      }
+    }
+    return true;
   }
 };
 

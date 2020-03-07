@@ -8,7 +8,7 @@ LiteralBool::LiteralBool(Matrix<bool> *inputMatrix) : matrix(inputMatrix) {}
 json LiteralBool::toJson() const {
   json j;
   j["type"] = getNodeType();
-  j["value"] = (matrix->isScalar() ? json(matrix->getScalarValue()) : matrix->toJson());
+  j["value"] = matrix->toJson();
   return j;
 }
 
@@ -20,7 +20,7 @@ bool LiteralBool::getValue() const {
   return matrix->getScalarValue();
 }
 
-Matrix<bool> *LiteralBool::getMatrix() {
+Matrix<bool> *LiteralBool::getMatrix() const {
   return matrix;
 }
 
@@ -76,10 +76,10 @@ LiteralBool *LiteralBool::clone(bool keepOriginalUniqueNodeId) {
 
 bool LiteralBool::isEqual(AbstractExpr *other) {
   auto otherLiteralBool = dynamic_cast<LiteralBool *>(other);
-  return otherLiteralBool!=nullptr && this->getValue()==otherLiteralBool->getValue();
+  return otherLiteralBool!=nullptr && *this->getMatrix()==*otherLiteralBool->getMatrix();
 }
 
 bool LiteralBool::isNull() {
-  return !this->getValue();
+  return matrix->allValuesEqual(false);
 }
 
