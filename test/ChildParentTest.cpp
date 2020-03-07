@@ -213,12 +213,6 @@ TEST(ChildParentTests, CallExternal) {  /* NOLINT */
   ASSERT_EQ(callExternal->AbstractExpr::getParents().size(), 0);
   ASSERT_FALSE(callExternal->AbstractExpr::supportsCircuitMode());
   ASSERT_EQ(callExternal->AbstractExpr::getMaxNumberChildren(), 0);
-
-  // using AbstractStatement
-  ASSERT_EQ(callExternal->AbstractStatement::getChildren().size(), 0);
-  ASSERT_EQ(callExternal->AbstractStatement::getParents().size(), 0);
-  ASSERT_FALSE(callExternal->AbstractStatement::supportsCircuitMode());
-  ASSERT_EQ(callExternal->AbstractStatement::getMaxNumberChildren(), 0);
 }
 
 class FunctionFixture : public ::testing::Test {
