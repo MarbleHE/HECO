@@ -1,7 +1,7 @@
+#include "LiteralFloat.h"
 #include <iostream>
 #include "Datatype.h"
 #include "AbstractExpr.h"
-#include "LiteralFloat.h"
 #include "RandNumGen.h"
 
 LiteralFloat::LiteralFloat(float value) : matrix(new Matrix(value)) {}
@@ -68,7 +68,7 @@ bool LiteralFloat::supportsDatatype(Datatype &datatype) {
 }
 
 LiteralFloat *LiteralFloat::clone(bool keepOriginalUniqueNodeId) {
-  auto clonedNode = new LiteralFloat(this->getValue());
+  auto clonedNode = new LiteralFloat(matrix->clone());
   if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
   if (this->isReversed) clonedNode->swapChildrenParents();
   return clonedNode;

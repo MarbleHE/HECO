@@ -1,5 +1,5 @@
-#include <iostream>
 #include "LiteralInt.h"
+#include <iostream>
 #include "RandNumGen.h"
 #include "AbstractExpr.h"
 
@@ -66,7 +66,7 @@ bool LiteralInt::supportsCircuitMode() {
 }
 
 LiteralInt *LiteralInt::clone(bool keepOriginalUniqueNodeId) {
-  auto clonedNode = new LiteralInt(this->getValue());
+  auto clonedNode = new LiteralInt(matrix->clone());
   if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
   if (this->isReversed) clonedNode->swapChildrenParents();
   return clonedNode;
