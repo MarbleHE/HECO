@@ -7,6 +7,7 @@
 #include <iostream>
 #include <sstream>
 #include <nlohmann/json.hpp>
+#include "IMatrix.h"
 
 using json = nlohmann::json;
 
@@ -33,13 +34,26 @@ struct Dimension {
     return row < numRows && column < numColumns;
   }
 
-  [[nodiscard]] bool hasDimension(int row, int column) const {
-    return (*this)==Dimension(row, column);
+  [[nodiscard]] bool hasDimension(int rows, int columns) const {
+    if (rows==-1 && columns > 0) {
+      // compare column-width only
+      return numColumns==columns;
+    } else if (rows > 0 && columns==-1) {
+      // compare row-height only
+      return numRows==rows;
+    } else {
+      return (*this)==Dimension(rows, columns);
+    }
+  }
+
+  void updateDimension(int numberOfRows, int numberOfColumns) {
+    numRows = numberOfRows;
+    numColumns = numberOfColumns;
   }
 };
 
 template<typename T>
-class Matrix {
+class Matrix : public IMatrix {
  public:
   // a matrix of row vectors
   std::vector<std::vector<T>> values;
@@ -159,8 +173,18 @@ class Matrix {
 
   Matrix<T> *clone() {
     // call the Matrix's copy constructor
-    auto *clonedMatrix = new Matrix<T>(*this);
-    return clonedMatrix;
+    return new Matrix<T>(*this);
+  }
+
+  void transpose_inplace() {
+    std::vector<std::vector<T>> transposedVec(values[0].size(), std::vector<T>());
+    for (int i = 0; i < values.size(); ++i) {
+      for (int j = 0; j < values[i].size(); ++j) {
+        transposedVec[j].push_back(values[i][j]);
+      }
+    }
+    dim.updateDimension(values[0].size(), values.size());
+    values = transposedVec;
   }
 };
 

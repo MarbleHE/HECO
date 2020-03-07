@@ -259,3 +259,33 @@ TEST(MatrixTest, VariableIdentifiers) {  /* NOLINT */
   EXPECT_EQ(varIdentifiersMap.count("gama"), 0);
   EXPECT_EQ(varIdentifiersMap.count("delta"), 1);
 }
+
+TEST(MatrixTest, transposeMatrixFromColumnVecToRowVec) {  /* NOLINT */
+  // elements in (0,0), (1,0), (2,0) -> all elements in one column vector
+  Matrix<int> m({{1}, {4}, {9}});
+  EXPECT_TRUE(m.getDimensions().hasDimension(3, 1));
+  EXPECT_EQ(m(0, 0), 1);
+  EXPECT_EQ(m(1, 0), 4);
+  EXPECT_EQ(m(2, 0), 9);
+  m.transpose_inplace();
+  // elements in (0,0), (0,1), (0,2) -> all elements in one row vector
+  EXPECT_TRUE(m.getDimensions().hasDimension(1, 3));
+  EXPECT_EQ(m(0, 0), 1);
+  EXPECT_EQ(m(0, 1), 4);
+  EXPECT_EQ(m(0, 2), 9);
+}
+
+TEST(MatrixTest, transposeMatrixFromRowVecToColumnVec) {  /* NOLINT */
+  // elements in (0,0), (0,1), (0,2) -> all elements in one row vector
+  Matrix<int> m({{1, 4, 9}});
+  EXPECT_TRUE(m.getDimensions().hasDimension(1, 3));
+  EXPECT_EQ(m(0, 0), 1);
+  EXPECT_EQ(m(0, 1), 4);
+  EXPECT_EQ(m(0, 2), 9);
+  m.transpose_inplace();
+  // elements in (0,0), (1,0), (2,0) -> all elements in one column vector
+  EXPECT_TRUE(m.getDimensions().hasDimension(3, 1));
+  EXPECT_EQ(m(0, 0), 1);
+  EXPECT_EQ(m(1, 0), 4);
+  EXPECT_EQ(m(2, 0), 9);
+}
