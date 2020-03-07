@@ -7,17 +7,19 @@ bool LiteralInt::supportsDatatype(Datatype &datatype) {
   return datatype.getType()==Types::INT;
 }
 
-LiteralInt::LiteralInt(int value) : value(value) {}
+LiteralInt::LiteralInt(int value) : matrix(new Matrix(value)) {}
+
+LiteralInt::LiteralInt(Matrix<int> *inputMatrix) : matrix(inputMatrix) {}
 
 json LiteralInt::toJson() const {
   json j;
   j["type"] = getNodeType();
-  j["value"] = this->value;
+  j["value"] = matrix->toJson();
   return j;
 }
 
 int LiteralInt::getValue() const {
-  return value;
+  return matrix->getScalarValue();
 }
 
 void LiteralInt::accept(Visitor &v) {
@@ -30,21 +32,12 @@ std::string LiteralInt::getNodeType() const {
 
 LiteralInt::~LiteralInt() = default;
 
-LiteralInt LiteralInt::operator+(LiteralInt const &lint) {
-  return LiteralInt(this->getValue() + lint.getValue());
-}
-
-std::ostream &operator<<(std::ostream &os, const LiteralInt &an_int) {
-  os << an_int.getValue();
-  return os;
-}
-
 void LiteralInt::print(std::ostream &str) const {
-  str << this->value;
+  str << getMatrix()->toString();
 }
 
 bool LiteralInt::operator==(const LiteralInt &rhs) const {
-  return value==rhs.value;
+  return *matrix==*rhs.getMatrix();
 }
 
 bool LiteralInt::operator!=(const LiteralInt &rhs) const {
@@ -57,7 +50,7 @@ void LiteralInt::addLiteralValue(std::string identifier,
 }
 
 void LiteralInt::setValue(int newValue) {
-  this->value = newValue;
+  matrix->setValues({{newValue}});
 }
 
 void LiteralInt::setRandomValue(RandLiteralGen &rlg) {
@@ -65,7 +58,7 @@ void LiteralInt::setRandomValue(RandLiteralGen &rlg) {
 }
 
 std::string LiteralInt::toString(bool printChildren) const {
-  return AbstractNode::generateOutputString(printChildren, {std::to_string(this->getValue())});
+  return AbstractNode::generateOutputString(printChildren, {matrix->toString()});
 }
 
 bool LiteralInt::supportsCircuitMode() {
@@ -81,9 +74,13 @@ LiteralInt *LiteralInt::clone(bool keepOriginalUniqueNodeId) {
 
 bool LiteralInt::isEqual(AbstractExpr *other) {
   auto otherLiteralInt = dynamic_cast<LiteralInt *>(other);
-  return otherLiteralInt!=nullptr && this->getValue()==otherLiteralInt->getValue();
+  return otherLiteralInt!=nullptr && *this->getMatrix()==*otherLiteralInt->getMatrix();
 }
 
 bool LiteralInt::isNull() {
-  return this->getValue()==0;
+  return matrix->allValuesEqual(0);
+}
+
+Matrix<int> *LiteralInt::getMatrix() const {
+  return matrix;
 }
