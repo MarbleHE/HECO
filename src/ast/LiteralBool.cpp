@@ -1,9 +1,7 @@
 #include "LiteralBool.h"
 #include "RandNumGen.h"
 
-LiteralBool::LiteralBool(bool value) : matrix(new Matrix(value)) {
-
-}
+LiteralBool::LiteralBool(bool value) : matrix(new Matrix(value)) {}
 
 LiteralBool::LiteralBool(Matrix<bool> *inputMatrix) : matrix(inputMatrix) {}
 
@@ -26,10 +24,6 @@ Matrix<bool> *LiteralBool::getMatrix() {
   return matrix;
 }
 
-std::string LiteralBool::getTextValue() const {
-  return getValue() ? "true" : "false";
-}
-
 std::string LiteralBool::getNodeType() const {
   return "LiteralBool";
 }
@@ -37,7 +31,7 @@ std::string LiteralBool::getNodeType() const {
 LiteralBool::~LiteralBool() = default;
 
 void LiteralBool::print(std::ostream &str) const {
-  str << this->getTextValue();
+  str << matrix->toString();
 }
 
 bool LiteralBool::operator==(const LiteralBool &rhs) const {
@@ -54,8 +48,7 @@ void LiteralBool::addLiteralValue(std::string identifier,
 }
 
 void LiteralBool::setValue(bool newValue) {
-  delete matrix;
-  this->matrix = new Matrix(newValue);
+  this->matrix->setValues({{newValue}});
 }
 
 void LiteralBool::setRandomValue(RandLiteralGen &rlg) {
@@ -63,7 +56,7 @@ void LiteralBool::setRandomValue(RandLiteralGen &rlg) {
 }
 
 std::string LiteralBool::toString(bool printChildren) const {
-  return AbstractNode::generateOutputString(printChildren, {this->getTextValue()});
+  return AbstractNode::generateOutputString(printChildren, {matrix->toString()});
 }
 
 bool LiteralBool::supportsCircuitMode() {

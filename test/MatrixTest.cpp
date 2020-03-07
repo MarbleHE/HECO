@@ -96,7 +96,7 @@ TEST(MatrixTest, accessMatrixElement_invalidIndexExceptionOnScalar) {  /* NOLINT
   EXPECT_EQ(scalar.getScalarValue(), value);
 }
 
-TEST(MatrixTest, modifyMatrix_modifyValues) {
+TEST(MatrixTest, modifyMatrix_modifyValues) {  /* NOLINT */
   Matrix<int> m({{5, 2, 1}, {3, 1, 1}, {1, 1, 0}});
 
   // modify value at (0,2)
@@ -110,7 +110,7 @@ TEST(MatrixTest, modifyMatrix_modifyValues) {
   EXPECT_EQ(m(2, 2), 4224);
 }
 
-TEST(MatrixTest, modifyMatrixAsPointer_modifyValuesInt) {
+TEST(MatrixTest, modifyMatrixAsPointer_modifyValuesInt) {  /* NOLINT */
   auto *mx = new Matrix<int>({{5, 2, 1}, {3, 1, 1}, {1, 1, 0}});
   Matrix<int> &m = *mx;
 
@@ -125,7 +125,7 @@ TEST(MatrixTest, modifyMatrixAsPointer_modifyValuesInt) {
   EXPECT_EQ(m(2, 2), 4224);
 }
 
-TEST(MatrixTest, modifyMatrixAsPointer_modifyValuesFloat) {
+TEST(MatrixTest, modifyMatrixAsPointer_modifyValuesFloat) {  /* NOLINT */
   auto *mx = new Matrix<float>({{5.23f, 2.0f, 1.11f}, {3.0f, 1.221f, 1.9f}, {1.0f, 1.0f, 0.0f}});
   Matrix<float> &m = *mx;
 
@@ -140,7 +140,7 @@ TEST(MatrixTest, modifyMatrixAsPointer_modifyValuesFloat) {
   EXPECT_EQ(m(2, 2), 4224.333f);
 }
 
-TEST(MatrixTest, modifyMatrixAsPointer_modifyValuesBoolean) {
+TEST(MatrixTest, modifyMatrixAsPointer_modifyValuesBoolean) {  /* NOLINT */
   auto *mx = new Matrix<bool>({{true, true, false}, {false, false, false}, {true, false, true}});
   Matrix<bool> &m = *mx;
 
@@ -155,7 +155,7 @@ TEST(MatrixTest, modifyMatrixAsPointer_modifyValuesBoolean) {
   EXPECT_EQ(m(2, 2), false);
 }
 
-TEST(MatrixTest, modifyMatrix_modifyWholeMatrixUsingAssignmentOp) {
+TEST(MatrixTest, modifyMatrix_modifyWholeMatrixUsingAssignmentOp) {  /* NOLINT */
   Matrix<int> m({{5, 2, 1}, {3, 1, 1}, {1, 1, 0}});
 
   // check values using getter
@@ -184,7 +184,7 @@ TEST(MatrixTest, modifyMatrix_modifyWholeMatrixUsingAssignmentOp) {
   EXPECT_EQ(m(2, 2), 34);
 }
 
-TEST(MatrixTest, modifyMatrix_modifyWholeMatrixUsingDedicatedFunction) {
+TEST(MatrixTest, modifyMatrix_modifyWholeMatrixUsingDedicatedFunction) {  /* NOLINT */
   Matrix<int> m({{5, 2, 1}, {3, 1, 1}, {1, 1, 0}});
 
   // check values using getter
@@ -213,3 +213,12 @@ TEST(MatrixTest, modifyMatrix_modifyWholeMatrixUsingDedicatedFunction) {
   EXPECT_EQ(m(2, 2), 34);
 }
 
+TEST(MatrixTest, toStringTestMatrix) {  /* NOLINT */
+  Matrix<int> m({{5, 2, 1}, {3, 1, 1}, {1, 1, 0}});
+  EXPECT_EQ(m.toString(), std::string("[5 2 1; 3 1 1; 1 1 0]\n"));
+}
+
+TEST(MatrixTest, toStringTestScalar) {  /* NOLINT */
+  Matrix<int> m(52'147);
+  EXPECT_EQ(m.toString(), std::string("52147"));
+}

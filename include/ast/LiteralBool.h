@@ -26,8 +26,6 @@ class LiteralBool : public AbstractLiteral {
 
   bool getValue() const; /* NOLINT intentionally allow discarding value */
 
-  [[nodiscard]] std::string getTextValue() const;
-
   [[nodiscard]] std::string getNodeType() const override;
 
   bool operator==(const LiteralBool &rhs) const;

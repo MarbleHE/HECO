@@ -70,7 +70,7 @@ void PrintVisitor::visit(If &elem) {
 }
 
 void PrintVisitor::visit(LiteralBool &elem) {
-  addOutputStr(elem, {elem.getTextValue()});
+  addOutputStr(elem, {elem.getMatrix()->toString()});
 }
 
 void PrintVisitor::visit(LiteralInt &elem) {
