@@ -222,3 +222,23 @@ TEST(MatrixTest, toStringTestScalar) {  /* NOLINT */
   Matrix<int> m(52'147);
   EXPECT_EQ(m.toString(), std::string("52147"));
 }
+
+TEST(MatrixTest, cloneMatrix) {
+  Matrix<int> m({{1, 0}, {3, 3}});
+  Matrix<int> clonedM = m;
+
+  // check that the clone has the same dimension and values
+  EXPECT_EQ(m.getDimensions(), clonedM.getDimensions());
+  EXPECT_EQ(clonedM(0, 0), 1);
+  EXPECT_EQ(clonedM(0, 1), 0);
+  EXPECT_EQ(clonedM(1, 0), 3);
+  EXPECT_EQ(clonedM(1, 1), 3);
+
+  // check that it's a real clone, i.e., changing the original matrix does not change the clone
+  m(0, 0) = 425;
+  EXPECT_EQ(m(0, 0), 425);
+  EXPECT_EQ(clonedM(0, 0), 1);
+  m(1, 1) = 32;
+  EXPECT_EQ(m(1, 1), 32);
+  EXPECT_EQ(clonedM(1, 1), 3);
+}

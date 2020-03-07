@@ -11,10 +11,9 @@
 using json = nlohmann::json;
 
 struct Dimension {
- private:
+ public:
   int numRows, numColumns;
 
- public:
   Dimension(int numberOfRows, int numberOfColumns) : numRows(numberOfRows), numColumns(numberOfColumns) {}
 
   bool operator==(const Dimension &rhs) const {
@@ -60,6 +59,10 @@ class Matrix {
     values = {{scalarValue}};
   }
 
+  Matrix(Matrix<T> &other) : dim(Dimension(other.getDimensions().numRows, other.getDimensions().numColumns)) {
+    values = other.values;
+  }
+
   [[nodiscard]] bool isScalar() const {
     return dim.hasDimension(1, 1);
   }
@@ -103,7 +106,7 @@ class Matrix {
     return values[row][column];
   }
 
-  Dimension getDimensions() {
+  Dimension &getDimensions() {
     return dim;
   }
 
@@ -121,7 +124,7 @@ class Matrix {
       outputStr << getScalarValue();
       return outputStr.str();
     }
-    // use the MATLAB format of matrices, e.g., for a 3x3 matrix: [2 2 33; 3 1 1; 3 11 9]
+    // use MATLAB' matrice style for matrices, e.g., for a 3x3 matrix: [2 2 33; 3 1 1; 3 11 9]
     const std::string elementDelimiter = " ";
     const std::string rowDelimiter = "; ";
     outputStr << "[";
@@ -144,6 +147,13 @@ class Matrix {
     }
     return true;
   }
+
+  Matrix<T> *clone() {
+    // call the Matrix's copy constructor
+    auto *clonedMatrix = new Matrix<T>(*this);
+    return clonedMatrix;
+  }
+
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_MATRIX_H_
