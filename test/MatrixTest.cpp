@@ -1,3 +1,4 @@
+#include <Variable.h>
 #include "Matrix.h"
 #include "gtest/gtest.h"
 
@@ -223,7 +224,7 @@ TEST(MatrixTest, toStringTestScalar) {  /* NOLINT */
   EXPECT_EQ(m.toString(), std::string("52147"));
 }
 
-TEST(MatrixTest, cloneMatrix) {
+TEST(MatrixTest, cloneMatrix) {  /* NOLINT */
   Matrix<int> m({{1, 0}, {3, 3}});
   Matrix<int> clonedM = m;
 
@@ -241,4 +242,20 @@ TEST(MatrixTest, cloneMatrix) {
   m(1, 1) = 32;
   EXPECT_EQ(m(1, 1), 32);
   EXPECT_EQ(clonedM(1, 1), 3);
+}
+
+TEST(MatrixTest, VariableIdentifiers) {  /* NOLINT */
+  Matrix<std::string> variableIdentifiers({{"alpha"}, {"beta"}, {"gamma"}, {"delta"}});
+  auto var = new Variable(&variableIdentifiers);
+
+  // retrieve the variable identifiers
+  std::vector<std::string> varIdentifiers = var->getVariableIdentifiers();
+  // create a set to enable avg. O(1) lookups
+  std::set<std::string> varIdentifiersMap(varIdentifiers.begin(), varIdentifiers.end());
+  EXPECT_EQ(varIdentifiersMap.count("alpha"), 1);
+  EXPECT_EQ(varIdentifiersMap.count("alphabet"), 0);
+  EXPECT_EQ(varIdentifiersMap.count("beta"), 1);
+  EXPECT_EQ(varIdentifiersMap.count("gamma"), 1);
+  EXPECT_EQ(varIdentifiersMap.count("gama"), 0);
+  EXPECT_EQ(varIdentifiersMap.count("delta"), 1);
 }

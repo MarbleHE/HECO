@@ -114,6 +114,15 @@ class Matrix {
     values = newValues;
   }
 
+  std::vector<T> getValuesAsVector() {
+    //
+    std::vector<T> resultVec;
+    for (auto &vec : values) {
+      resultVec.insert(resultVec.end(), vec.begin(), vec.end());
+    }
+    return resultVec;
+  }
+
   std::string toString() {
     std::stringstream outputStr;
     // print boolean values as text (true, false) by default, otherwise the output (0,1) cannot be distinguished from
@@ -153,7 +162,6 @@ class Matrix {
     auto *clonedMatrix = new Matrix<T>(*this);
     return clonedMatrix;
   }
-
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_MATRIX_H_
