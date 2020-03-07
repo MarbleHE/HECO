@@ -11,5 +11,7 @@ jobs:
         run: mkdir build && cd build && cmake -DCMAKE_CXX_FLAGS="-Werror" ..
       - name: build
         run: cmake --build build
+      - name: test
+        run: cd build && ctest
     #  - name: test
-    #    run: cd build && cd test && TODO: run testing-all target
+    #    run: cd build && cd test && ctest

@@ -64,9 +64,10 @@ elseif ("${CMAKE_C_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang" OR "${CMAKE_CXX_COMP
     set(CMAKE_CXX_FLAGS "-fprofile-instr-generate -fcoverage-mapping")
 endif ()
 
-gtest_discover_tests(testing-all)
-
 target_link_libraries(testing-all gtest ast_lib nlohmann_json::nlohmann_json gtest_main)
 
 # make sure that ast_lib is built before the testing-all target
 add_dependencies(testing-all ast_lib)
+
+
+gtest_discover_tests(testing-all)
