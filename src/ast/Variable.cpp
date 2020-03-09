@@ -2,14 +2,12 @@
 #include <utility>
 #include "Ast.h"
 
-Variable::Variable(Matrix<std::string> *inputMatrix) : matrix(inputMatrix) {}
-
-Variable::Variable(std::string identifier) : matrix(new Matrix(std::move(identifier))) {}
+Variable::Variable(std::string variableIdentifier) : identifier(std::move(variableIdentifier)) {}
 
 json Variable::toJson() const {
   json j;
   j["type"] = getNodeType();
-  j["identifier"] = matrix->toJson();
+  j["identifier"] = getIdentifier();
   return j;
 }
 
@@ -22,7 +20,7 @@ std::string Variable::getNodeType() const {
 }
 
 std::string Variable::getIdentifier() const {
-  return matrix->getScalarValue();
+  return identifier;
 }
 
 bool Variable::contains(Variable *var) {
@@ -30,7 +28,7 @@ bool Variable::contains(Variable *var) {
 }
 
 bool Variable::operator==(const Variable &rhs) const {
-  return *matrix==*rhs.getMatrix();
+  return identifier==rhs.getIdentifier();
 }
 
 bool Variable::operator!=(const Variable &rhs) const {
@@ -45,11 +43,11 @@ bool Variable::isEqual(AbstractExpr *other) {
 }
 
 std::vector<std::string> Variable::getVariableIdentifiers() {
-  return matrix->getValuesAsVector();
+  return {getIdentifier()};
 }
 
 std::string Variable::toString(bool printChildren) const {
-  return AbstractNode::generateOutputString(printChildren, {matrix->toString()});
+  return AbstractNode::generateOutputString(printChildren, {getIdentifier()});
 }
 
 bool Variable::supportsCircuitMode() {
@@ -59,12 +57,8 @@ bool Variable::supportsCircuitMode() {
 Variable::~Variable() = default;
 
 Variable *Variable::clone(bool keepOriginalUniqueNodeId) {
-  auto clonedNode = new Variable(matrix->clone());
+  auto clonedNode = new Variable(getIdentifier());
   if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
   if (this->isReversed) clonedNode->swapChildrenParents();
   return clonedNode;
-}
-
-Matrix<std::string> *Variable::getMatrix() const {
-  return matrix;
 }

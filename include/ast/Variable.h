@@ -9,11 +9,9 @@
 
 class Variable : public AbstractExpr {
  private:
-  Matrix<std::string> *matrix;
+  std::string identifier;
 
  public:
-  explicit Variable(Matrix<std::string> *inputMatrix);
-
   explicit Variable(std::string identifier);
 
   [[nodiscard]] json toJson() const override;
@@ -41,8 +39,6 @@ class Variable : public AbstractExpr {
   [[nodiscard]] std::string toString(bool printChildren) const override;
 
   bool supportsCircuitMode() override;
-
-  [[nodiscard]] Matrix<std::string> *getMatrix() const;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_VARIABLE_H_
