@@ -55,6 +55,7 @@ class EvaluationVisitor : public Visitor {
   void visit(Block &elem) override;
   void visit(Call &elem) override;
   void visit(CallExternal &elem) override;
+  void visit(For &elem) override;
   void visit(Function &elem) override;
   void visit(FunctionParameter &elem) override;
   void visit(If &elem) override;

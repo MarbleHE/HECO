@@ -219,18 +219,34 @@ void EvaluationVisitor::visit(Variable &elem) {
 }
 
 void EvaluationVisitor::visit(While &elem) {
-  elem.getCondition()->accept(*this);
-  auto conds = results.top();
-  results.pop();
-  auto cond = *dynamic_cast<LiteralBool *>(ensureSingleEvaluationResult(conds));
-
-  while (cond==LiteralBool(true)) {
-    elem.getBody()->accept(*this);
-
+  auto conditionIsTrue = [&]() -> bool {
+    // visit the condition's expression
     elem.getCondition()->accept(*this);
-    conds = results.top();
+    // get the expression's evaluation result
+    auto cond = *dynamic_cast<LiteralBool *>(ensureSingleEvaluationResult(results.top()));
     results.pop();
-    cond = *dynamic_cast<LiteralBool *>(ensureSingleEvaluationResult(conds));
+    return cond==LiteralBool(true);
+  };
+
+  // if and as long as the condition is true, repeat the following
+  while (conditionIsTrue()) {
+    // execute the While-loop's body
+    elem.getBody()->accept(*this);
+  }
+}
+
+void EvaluationVisitor::visit(For &elem) {
+  auto checkCondition = [&]() -> bool {
+    // visit the condition's expression
+    elem.getCondition()->accept(*this);
+    // get the expression's evaluation result
+    auto cond = *dynamic_cast<LiteralBool *>(ensureSingleEvaluationResult(results.top()));
+    results.pop();
+    return cond==LiteralBool(true);
+  };
+
+  for (elem.getInitializer()->accept(*this); checkCondition(); elem.getUpdateStatement()->accept(*this)) {
+    elem.getStatementToBeExecuted()->accept(*this);
   }
 }
 
