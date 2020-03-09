@@ -41,6 +41,7 @@ class AstTestingGenerator {
   static void genAstForSecretTaintingWithMultipleNonSequentialStatements(Ast &ast);
   static void genAstIncludingForStatement(Ast &ast);
   static void genAstUsingRotation(Ast &ast);
+  static void genAstRotateAndSum(Ast &ast);
 };
 
 #endif //MASTER_THESIS_CODE_ASTTESTINGGENERATOR_H

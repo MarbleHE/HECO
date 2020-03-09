@@ -45,7 +45,8 @@ static std::map<int, std::function<void(Ast &)> > call = {  /* NOLINT */
     {21, AstTestingGenerator::genAstRewritingTwoDepth2ConesButSingleVNode},
     {22, AstTestingGenerator::genAstForSecretTaintingWithMultipleNonSequentialStatements},
     {23, AstTestingGenerator::genAstIncludingForStatement},
-    {24, AstTestingGenerator::genAstUsingRotation}
+    {24, AstTestingGenerator::genAstUsingRotation},
+    {25, AstTestingGenerator::genAstRotateAndSum}
 };
 
 void AstTestingGenerator::generateAst(int id, Ast &ast) {
@@ -1111,15 +1112,35 @@ void AstTestingGenerator::genAstUsingRotation(Ast &ast) {
   ast.setRootNode(func);
 }
 
-// TODO(pjattke): Implement vector operations to pass this test
-//void AstTestingGenerator::genAstSumAndRotate(Ast &ast) {
-//    sumNTimes2(int inputA) {
-//      int sumVec = {{1, 7, 3}};   // [1 7 3]
-//      int sum = sumVec;
-//      sumVec.rotate(1);    // [3 1 7]
-//      sum = sum + sumVec;
-//      sumVec.rotate(1);   // [7 3 1]
-//      sum = sum + sumVec; // [11 11 11]
-//      return sum;
-//    }
-//}
+void AstTestingGenerator::genAstRotateAndSum(Ast &ast) {
+  // rotateAndSum(int inputA) {
+  //   int sumVec = {{1, 7, 3}};             // [1 7 3]
+  //   int sum = sumVec + sumVec.rotate(1);  // [1 7 3] + [3 1 7]
+  //   sum = sum + sumVec.rotate(2);         // ([1 7 3] + [3 1 7]) + [7 1 3]
+  //   return sum;                           // [11 9 13]
+  // }
+  auto func = new Function("rotateAndSum");
+
+  // int sumVec = {{1, 7, 3}};
+  func->addStatement(new VarDecl("sumVec", Types::INT,
+                                 new LiteralInt(new Matrix<int>({{1, 7, 3}}))));
+
+  // int sum = sumVec + sumVec.rotate(1);
+  func->addStatement(new VarDecl("sum",
+                                 Types::INT,
+                                 new ArithmeticExpr(new Variable("sumVec"),
+                                                    addition,
+                                                    new Rotate(new Variable("sumVec"), 1))));
+
+  // sum = sum + sumVec.rotate(2);
+  func->addStatement(new VarAssignm("sum",
+                                    new ArithmeticExpr(new Variable("sum"),
+                                                       addition,
+                                                       new Rotate(new Variable("sumVec"), 2))));
+
+
+  // return sum;
+  func->addStatement(new Return(new Variable("sum")));
+
+  ast.setRootNode(func);
+}
