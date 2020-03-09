@@ -33,7 +33,7 @@ struct Dimension {
     return row < numRows && column < numColumns;
   }
 
-  [[nodiscard]] bool hasDimension(int rows, int columns) const {
+  [[nodiscard]] bool equals(int rows, int columns) const {
     if (rows==-1 && columns > 0) {
       // ignore rows (-1), compare columns only
       return numColumns==columns;
@@ -45,7 +45,7 @@ struct Dimension {
     }
   }
 
-  void updateDimension(int numberOfRows, int numberOfColumns) {
+  void update(int numberOfRows, int numberOfColumns) {
     numRows = numberOfRows;
     numColumns = numberOfColumns;
   }
@@ -54,7 +54,9 @@ struct Dimension {
 /// A helper class that allows to define all Matrix<T> specializations using a unified interface.
 class CMatrix {
  public:
-  virtual void rotate(int rotationFactor) = 0;
+//  virtual void rotate(int rotationFactor) = 0;
+
+  virtual CMatrix *rotate(int rotationFactor, bool inPlace) = 0;
 
   virtual Dimension &getDimensions() = 0;
 
@@ -101,7 +103,7 @@ class Matrix : public CMatrix {
   }
 
   [[nodiscard]] bool isScalar() const override {
-    return dim.hasDimension(1, 1);
+    return dim.equals(1, 1);
   }
 
   T getScalarValue() const {
@@ -199,33 +201,50 @@ class Matrix : public CMatrix {
     // call the Matrix's copy constructor
     return new Matrix<T>(*this);
   }
+//
+//  void transpose() {
+//    std::vector<std::vector<T>> transposedVec(values[0].size(), std::vector<T>());
+//    // this is inefficient -> requires O(n^2) runtime
+//    for (int i = 0; i < values.size(); ++i) {
+//      for (int j = 0; j < values[i].size(); ++j) {
+//        transposedVec[j].push_back(values[i][j]);
+//      }
+//    }
+//    dim.updateDimension(values[0].size(), values.size());
+//    values = transposedVec;
+//  }
 
-  void transpose() {
-    std::vector<std::vector<T>> transposedVec(values[0].size(), std::vector<T>());
+
+  Matrix<T> *transpose(bool inPlace) {
+    Matrix<T> *matrixToTranspose = inPlace ? this : new Matrix<T>(*this);
+    std::vector<std::vector<T>> transposedVec(matrixToTranspose->values[0].size(), std::vector<T>());
     // this is inefficient -> requires O(n^2) runtime
-    for (int i = 0; i < values.size(); ++i) {
-      for (int j = 0; j < values[i].size(); ++j) {
-        transposedVec[j].push_back(values[i][j]);
+    for (int i = 0; i < matrixToTranspose->values.size(); ++i) {
+      for (int j = 0; j < matrixToTranspose->values[i].size(); ++j) {
+        transposedVec[j].push_back(matrixToTranspose->values[i][j]);
       }
     }
-    dim.updateDimension(values[0].size(), values.size());
-    values = transposedVec;
+    matrixToTranspose->getDimensions().update(matrixToTranspose->values[0].size(), matrixToTranspose->values.size());
+    matrixToTranspose->values = transposedVec;
+    return matrixToTranspose;
   }
 
-  void rotate(int rotationFactor) override {
-    if (getDimensions().hasDimension(1, -1)) {  // a row vector
-      auto &vec = values[0];
+  Matrix<T> *rotate(int rotationFactor, bool inPlace) override {
+    Matrix<T> *matrixToRotate = inPlace ? this : new Matrix<T>(*this);
+    if (matrixToRotate->getDimensions().equals(1, -1)) {  // a row vector
+      auto &vec = matrixToRotate->values[0];
       std::rotate(vec.begin(), computeRotationTarget(vec.begin(), vec.size(), rotationFactor), vec.end());
-    } else if (getDimensions().hasDimension(-1, 1)) {  // a column vector
+    } else if (getDimensions().equals(-1, 1)) {  // a column vector
       // Transpose the vector, rotate it, transpose it again. This is needed because std::rotate requires all elements
       // in a single vector. As our matrix is represented using row vectors, we need to transform column->row vector.
-      transpose();
-      auto &vec = values[0];
+      matrixToRotate->transpose(true);
+      auto &vec = matrixToRotate->values[0];
       std::rotate(vec.begin(), computeRotationTarget(vec.begin(), vec.size(), rotationFactor), vec.end());
-      transpose();
+      matrixToRotate->transpose(true);
     } else {
       throw std::invalid_argument("Rotation only supported for 1-dimensional vectors.");
     }
+    return matrixToRotate;
   }
 };
 

@@ -191,14 +191,14 @@ void EvaluationVisitor::visit(UnaryExpr &elem) {
 void EvaluationVisitor::visit(Rotate &elem) {
   auto ae = elem.getOperand();
   if (auto operandAsAl = dynamic_cast<AbstractLiteral *>(ae)) {
-    operandAsAl->getMatrix()->rotate(elem.getRotationFactor());
+    operandAsAl->getMatrix()->rotate(elem.getRotationFactor(), true);
     results.push({operandAsAl});
   } else if (auto var = dynamic_cast<Variable *>(ae)) {
     auto value = getVarValue(var->getIdentifier());
     if (value==nullptr) {
       throw std::logic_error("Cannot perform rotation as Variable's value is unknown.");
     }
-    value->getMatrix()->rotate(elem.getRotationFactor());
+    value->getMatrix()->rotate(elem.getRotationFactor(), true);
     results.push({value});
   }
 }

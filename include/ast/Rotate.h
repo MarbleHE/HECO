@@ -82,7 +82,7 @@ class Rotate : public AbstractExpr {
     auto expressionToRotate = getOperand();
     if (auto literal = dynamic_cast<AbstractLiteral *>(expressionToRotate)) {
       dim = &(literal->getMatrix()->getDimensions());
-      return dim->hasDimension(1, -1) || dim->hasDimension(-1, 1);
+      return dim->equals(1, -1) || dim->equals(-1, 1);
     }
     return false;
   }

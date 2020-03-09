@@ -244,41 +244,57 @@ TEST(MatrixTest, cloneMatrix) {  /* NOLINT */
   EXPECT_EQ(clonedM(1, 1), 3);
 }
 
-TEST(MatrixTest, transposeMatrixFromColumnVecToRowVec) {  /* NOLINT */
+TEST(MatrixTest, transposeMatrixFromColumnVecToRowVecInPlace) {  /* NOLINT */
   // elements in (0,0), (1,0), (2,0) -> all elements in one column vector
   Matrix<int> m({{1}, {4}, {9}});
-  EXPECT_TRUE(m.getDimensions().hasDimension(3, 1));
+  EXPECT_TRUE(m.getDimensions().equals(3, 1));
   EXPECT_EQ(m(0, 0), 1);
   EXPECT_EQ(m(1, 0), 4);
   EXPECT_EQ(m(2, 0), 9);
-  m.transpose();
+  m.transpose(true);
   // elements in (0,0), (0,1), (0,2) -> all elements in one row vector
-  EXPECT_TRUE(m.getDimensions().hasDimension(1, 3));
+  EXPECT_TRUE(m.getDimensions().equals(1, 3));
   EXPECT_EQ(m(0, 0), 1);
   EXPECT_EQ(m(0, 1), 4);
   EXPECT_EQ(m(0, 2), 9);
 }
 
-TEST(MatrixTest, transposeMatrixFromRowVecToColumnVec) {  /* NOLINT */
+TEST(MatrixTest, transposeMatrixFromRowVecToColumnVecInPlace) {  /* NOLINT */
   // elements in (0,0), (0,1), (0,2) -> all elements in one row vector
   Matrix<int> m({{1, 4, 9}});
-  EXPECT_TRUE(m.getDimensions().hasDimension(1, 3));
+  EXPECT_TRUE(m.getDimensions().equals(1, 3));
   EXPECT_EQ(m(0, 0), 1);
   EXPECT_EQ(m(0, 1), 4);
   EXPECT_EQ(m(0, 2), 9);
-  m.transpose();
+  m.transpose(true);
   // elements in (0,0), (1,0), (2,0) -> all elements in one column vector
-  EXPECT_TRUE(m.getDimensions().hasDimension(3, 1));
+  EXPECT_TRUE(m.getDimensions().equals(3, 1));
   EXPECT_EQ(m(0, 0), 1);
   EXPECT_EQ(m(1, 0), 4);
   EXPECT_EQ(m(2, 0), 9);
 }
 
-TEST(MatrixTest, rotateRowVector) {  /* NOLINT */
+TEST(MatrixTest, transposeMatrixFromRowVecToColumnVecCopy) {  /* NOLINT */
+  // elements in (0,0), (0,1), (0,2) -> all elements in one row vector
+  Matrix<int> m({{1, 4, 9}});
+  auto transposedM = *m.transpose(false);
+  // elements in (0,0), (1,0), (2,0) -> all elements in one column vector
+  EXPECT_TRUE(transposedM.getDimensions().equals(3, 1));
+  EXPECT_EQ(transposedM(0, 0), 1);
+  EXPECT_EQ(transposedM(1, 0), 4);
+  EXPECT_EQ(transposedM(2, 0), 9);
+  // check that the original matrix did not change
+  EXPECT_TRUE(m.getDimensions().equals(1, 3));
+  EXPECT_EQ(m(0, 0), 1);
+  EXPECT_EQ(m(0, 1), 4);
+  EXPECT_EQ(m(0, 2), 9);
+}
+
+TEST(MatrixTest, rotateRowVectorInPlace) {  /* NOLINT */
   Matrix<int> m({{1, 2, 3, 4, 5}});
-  EXPECT_TRUE(m.getDimensions().hasDimension(1, 5));
-  m.rotate(-2);
-  EXPECT_TRUE(m.getDimensions().hasDimension(1, 5));
+  EXPECT_TRUE(m.getDimensions().equals(1, 5));
+  m.rotate(-2, true);
+  EXPECT_TRUE(m.getDimensions().equals(1, 5));
   // [1 2 3 4 5] --rotate(-2)--> [3 4 5 1 2]
   EXPECT_EQ(m(0, 0), 3);
   EXPECT_EQ(m(0, 1), 4);
@@ -287,11 +303,33 @@ TEST(MatrixTest, rotateRowVector) {  /* NOLINT */
   EXPECT_EQ(m(0, 4), 2);
 }
 
-TEST(MatrixTest, rotateColumnVector) {  /* NOLINT */
+TEST(MatrixTest, rotateRowVectorCopy) {  /* NOLINT */
+  Matrix<int> m({{1, 2, 3, 4, 5}});
+  EXPECT_TRUE(m.getDimensions().equals(1, 5));
+
+  // rotate and check that rotation has expected effect
+  auto rotatedM = *m.rotate(-2, false);
+  EXPECT_TRUE(rotatedM.getDimensions().equals(1, 5));
+  // [1 2 3 4 5] --rotate(-2)--> [3 4 5 1 2]
+  EXPECT_EQ(rotatedM(0, 0), 3);
+  EXPECT_EQ(rotatedM(0, 1), 4);
+  EXPECT_EQ(rotatedM(0, 2), 5);
+  EXPECT_EQ(rotatedM(0, 3), 1);
+  EXPECT_EQ(rotatedM(0, 4), 2);
+
+  // check that the original matrix did not change as inPlace=false was passed to rotate
+  EXPECT_EQ(m(0, 0), 1);
+  EXPECT_EQ(m(0, 1), 2);
+  EXPECT_EQ(m(0, 2), 3);
+  EXPECT_EQ(m(0, 3), 4);
+  EXPECT_EQ(m(0, 4), 5);
+}
+
+TEST(MatrixTest, rotateColumnVectorInPlace) {  /* NOLINT */
   Matrix<int> m({{9}, {4}, {3}, {8}, {7}});
-  EXPECT_TRUE(m.getDimensions().hasDimension(5, 1));
-  m.rotate(2);
-  EXPECT_TRUE(m.getDimensions().hasDimension(5, 1));
+  EXPECT_TRUE(m.getDimensions().equals(5, 1));
+  m.rotate(2, true);
+  EXPECT_TRUE(m.getDimensions().equals(5, 1));
   // [9; 4; 3; 8; 7] --rotate(2)--> [8; 7; 9; 4; 3]
   EXPECT_EQ(m(0, 0), 8);
   EXPECT_EQ(m(1, 0), 7);
@@ -302,6 +340,6 @@ TEST(MatrixTest, rotateColumnVector) {  /* NOLINT */
 
 TEST(MatrixTest, rotateMatrix_expectedException) {  /* NOLINT */
   Matrix<int> m({{9, 4, 2}, {3, 2, 1}, {1, 1, 0}});
-  EXPECT_THROW(m.rotate(3), std::invalid_argument);
+  EXPECT_THROW(m.rotate(3, true), std::invalid_argument);
 }
 
