@@ -136,7 +136,7 @@ AbstractLiteral *Operator::applyOperator(A *lhs, AbstractLiteral *rhs) {
 }
 
 // -----------------
-// Third call of applyOperator -> both Types are is known
+// Third call of applyOperator -> both Types are known
 // -----------------
 
 AbstractLiteral *Operator::applyOperator(LiteralFloat *lhs, LiteralFloat *rhs) {

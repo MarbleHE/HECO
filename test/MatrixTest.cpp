@@ -379,3 +379,43 @@ TEST(MatrixTest, rotateMatrix_expectedException) {  /* NOLINT */
   EXPECT_THROW(m.rotate(3, true), std::invalid_argument);
 }
 
+TEST(MatrixTest, applyOperatorComponentwise) {  /* NOLINT */
+  Matrix<int> A({{3, 2, 1}, {4, 4, 1}, {9, 4, 3}});
+  Matrix<int> B({{7, 8, 9}, {1, 1, 4}, {6, 11, 3}});
+
+  auto addition = [](int a, int b) { return a + b; };
+  auto result = Matrix<int>::applyOperatorComponentwise(&A, &B, addition);
+  auto expectedMatrix = Matrix<int>({{10, 10, 10}, {5, 5, 5}, {15, 15, 6}});
+  EXPECT_EQ(*result, expectedMatrix);
+
+  auto subtraction = [](int a, int b) { return a - b; };
+  result = Matrix<int>::applyOperatorComponentwise(&A, &B, subtraction);
+  expectedMatrix = Matrix<int>({{-4, -6, -8}, {3, 3, -3}, {3, -7, 0}});
+  EXPECT_EQ(*result, expectedMatrix);
+}
+
+TEST(MatrixTest, applyScalarProduct) {  /* NOLINT */
+  Matrix<int> A({{3, 2, 1}, {4, 4, 1}, {9, 4, 3}});
+  Matrix<int> scalar(1);
+  auto addition = [](int a, int b) { return a + b; };
+
+  // scalar product where lhs operand is matrix and rhs operand is scalar
+  auto result = Matrix<int>::applyOperatorComponentwise(&A, &scalar, addition);
+  auto expectedMatrix = Matrix<int>({{4, 3, 2}, {5, 5, 2}, {10, 5, 4}});
+  EXPECT_EQ(*result, expectedMatrix);
+  // scalar product where lhs operand is scalar and rhs operand is matrix
+  result = Matrix<int>::applyOperatorComponentwise(&scalar, &A, addition);
+  EXPECT_EQ(*result, expectedMatrix);
+}
+
+TEST(MatrixTest, applyMatrixMultiplication) {  /* NOLINT */
+  // 4x2 matrix
+  Matrix<int> A({{2, 3}, {4, 5}, {8, 6}, {1, 5}});
+  // 2x3 matrix
+  Matrix<int> B({{0, 1, 1}, {4, 5, 7}});
+
+  auto result = Matrix<int>::applyMatrixMultiplication(A, B);
+  // 4x3 matrix
+  auto expectedMatrix = Matrix<int>({{12, 17, 23}, {20, 29, 39}, {24, 38, 50}, {20, 26, 36}});
+  EXPECT_EQ(*result, expectedMatrix);
+}

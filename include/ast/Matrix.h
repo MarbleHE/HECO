@@ -178,7 +178,6 @@ class Matrix : public CMatrix {
   }
 
   bool allValuesEqual(T valueToBeComparedWith) {
-    // this is inefficient -> requires O(n^2) runtime
     for (int i = 0; i < values.size(); ++i) {
       for (int j = 0; j < values[i].size(); ++j) {
         if (values[i][j]!=valueToBeComparedWith) return false;
@@ -195,7 +194,6 @@ class Matrix : public CMatrix {
   Matrix<T> *transpose(bool inPlace) {
     Matrix<T> *matrixToTranspose = inPlace ? this : new Matrix<T>(*this);
     std::vector<std::vector<T>> transposedVec(matrixToTranspose->values[0].size(), std::vector<T>());
-    // this is inefficient -> requires O(n^2) runtime
     for (int i = 0; i < matrixToTranspose->values.size(); ++i) {
       for (int j = 0; j < matrixToTranspose->values[i].size(); ++j) {
         transposedVec[j].push_back(matrixToTranspose->values[i][j]);
@@ -222,6 +220,67 @@ class Matrix : public CMatrix {
       throw std::invalid_argument("Rotation only supported for 1-dimensional vectors.");
     }
     return matrixToRotate;
+  }
+
+  void expandAndFillMatrix(Dimension &targetDimension, T scalarValue) {
+    values = std::vector<std::vector<T>>(targetDimension.numRows,
+                                         std::vector<T>(targetDimension.numColumns, scalarValue));
+    getDimensions().update(targetDimension.numRows, targetDimension.numColumns);
+  }
+
+  static Matrix<T> *applyOperatorComponentwise(Matrix<T> *A, Matrix<T> *B, std::function<T(T, T)> f) {
+    // check that A and B have valid dimensions:
+    // - if A and B have same dimensions -> apply f componentwise
+    // - if either A or B is a scalar -> apply scalar on each component of matrix/vector
+    bool isScalarA = A->getDimensions().equals(1, 1);
+    bool isScalarB = B->getDimensions().equals(1, 1);
+    if (A->getDimensions()!=B->getDimensions() && !(isScalarA ^ isScalarB)) {
+      throw std::logic_error("Matrices A and B must have the same dimensions to apply an operator componentwise, or "
+                             "either one of A and B must be a scalar to apply the scalar product.");
+    } else if (isScalarA) {
+      A->expandAndFillMatrix(B->getDimensions(), A->getScalarValue());
+    } else if (isScalarB) {
+      B->expandAndFillMatrix(A->getDimensions(), B->getScalarValue());
+    }
+
+    // compute new matrix by applying function f componentwise, e.g., f(a11, b11), f(a12, b12), ..., f(aNM, bNM)
+    std::vector<std::vector<T>> result;
+    for (int i = 0; i < A->values.size(); ++i) {
+      result.push_back(std::vector<T>());
+      for (int j = 0; j < A->values[0].size(); ++j) {
+        result[i].push_back(f((*A)(i, j), (*B)(i, j)));
+      }
+    }
+    return new Matrix<T>(result);
+  }
+
+  static Matrix<T> *applyMatrixMultiplication(Matrix<T> &A, Matrix<T> &B) {
+    // check that #column of A equals #rows of B
+    if (!A.getDimensions().equals(-1, B.getDimensions().numRows)) {
+      std::stringstream ss;
+      ss << "A has dimensions " << A.getDimensions() << " and B has dimensions " << B.getDimensions() << ". ";
+      ss << "To apply matrix multiplication, #columns of A must be equal to the #rows of B." << std::endl;
+      throw std::logic_error(ss.str());
+    }
+
+    // define result matrix having dimension (#rowsA, #columnsB)
+    std::vector<std::vector<T>> result(A.getDimensions().numRows,
+                                       std::vector<T>(B.getDimensions().numColumns));
+
+    // A has dim (M,N), B has dim (N,P)
+    int dimM = A.getDimensions().numRows;
+    int dimN = A.getDimensions().numColumns;
+    int dimP = B.getDimensions().numColumns;
+    T sum = 0;
+    // Very inefficient! Replace it, for example, by Strassen's multiplication algorithm.
+    for (int k = 0; k < dimN; ++k) {
+      for (int i = 0; i < dimM; ++i) {
+        for (int j = 0; j < dimP; ++j) {
+          result[i][j] += A(i, k)*B(k, j);
+        }
+      }
+    }
+    return new Matrix<T>(result);
   }
 };
 
