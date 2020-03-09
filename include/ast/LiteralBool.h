@@ -1,11 +1,11 @@
 #ifndef AST_OPTIMIZER_INCLUDE_AST_LITERALBOOL_H_
 #define AST_OPTIMIZER_INCLUDE_AST_LITERALBOOL_H_
 
-#include "AbstractLiteral.h"
-#include "Matrix.h"
 #include <string>
 #include <map>
 #include <unordered_map>
+#include "AbstractLiteral.h"
+#include "Matrix.h"
 
 class LiteralBool : public AbstractLiteral {
  private:

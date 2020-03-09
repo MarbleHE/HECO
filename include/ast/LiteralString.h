@@ -49,7 +49,7 @@ class LiteralString : public AbstractLiteral {
 
   bool isNull() override;
 
-  AbstractMatrix *getMatrix() const override;
+  [[nodiscard]] AbstractMatrix *getMatrix() const override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_LITERALSTRING_H_

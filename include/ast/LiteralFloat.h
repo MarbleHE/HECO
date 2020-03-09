@@ -1,11 +1,11 @@
 #ifndef AST_OPTIMIZER_INCLUDE_AST_LITERALFLOAT_H_
 #define AST_OPTIMIZER_INCLUDE_AST_LITERALFLOAT_H_
 
-#include "AbstractLiteral.h"
 #include <string>
 #include <ostream>
 #include <map>
 #include <unordered_map>
+#include "AbstractLiteral.h"
 #include "Matrix.h"
 
 class LiteralFloat : public AbstractLiteral {

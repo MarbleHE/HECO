@@ -8,9 +8,9 @@
 #include <vector>
 #include "AbstractExpr.h"
 #include "Datatype.h"
-#include "Matrix.h"
 
 class RandLiteralGen;
+class AbstractMatrix;
 
 class AbstractLiteral : public AbstractExpr {
  protected:
