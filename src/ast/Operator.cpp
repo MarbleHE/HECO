@@ -103,7 +103,13 @@ AbstractLiteral *Operator::applyOperator(LiteralFloat *) {
 // First call of applyOperator -> both Types are unknown
 // -----------------
 AbstractLiteral *Operator::applyOperator(AbstractLiteral *lhs, AbstractLiteral *rhs) {
-  // determine Literal subtype of lhs
+  // check if at least one of the operands is a matrix (i.e., non-scalar), in this case delegate applying the operator
+  // to the Matrix class
+  if (!lhs->getMatrix()->isScalar() || !lhs->getMatrix()->isScalar()) {
+    applyMatrixOperator(lhs, rhs, *this);
+  }
+
+  // determine Literal subtype of lhs to continue evaluation chain
   if (auto lhsString = dynamic_cast<LiteralString *>(lhs))
     return applyOperator(lhsString, rhs);
   else if (auto lhsInt = dynamic_cast<LiteralInt *>(lhs))
@@ -114,6 +120,29 @@ AbstractLiteral *Operator::applyOperator(AbstractLiteral *lhs, AbstractLiteral *
     return applyOperator(lhsFloat, rhs);
   else
     throw std::logic_error("Could not recognize type of lhs in applyOperator(Literal *lhs, Literal *rhs).");
+}
+
+AbstractLiteral *Operator::applyMatrixOperator(AbstractLiteral *lhs, AbstractLiteral *rhs, Operator &op) {
+  // TODO(pjattke): test method!
+  if (typeid(lhs)!=typeid(rhs)) {
+    throw std::runtime_error("Operations involving matrices currently only supported for same-type matrices/scalars.");
+  }
+
+  if ( // one is matrix, other is scalar
+      (lhs->getMatrix()->isScalar() ^ rhs->getMatrix()->isScalar())
+          // or both are matrices and the operator is not a multiplication
+          || (!lhs->getMatrix()->isScalar() && !rhs->getMatrix()->isScalar() && !op.equals(multiplication))) {
+    // execute the operator componentwise
+    return lhs->getMatrix()->applyOperatorComponentwise(rhs->getMatrix(), this);
+  } else if (
+    // both operands are matrices and the operator is a multiplication
+      !lhs->getMatrix()->isScalar() && !rhs->getMatrix()->isScalar() && op.equals(multiplication)) {
+    // use the matrix-matrix multiplication
+    return lhs->getMatrix()->applyMatrixMultiplication(rhs->getMatrix());
+  } else {
+    throw std::runtime_error("Cannot handle operator (" + operatorString + ") on given operands ("
+                                 + lhs->toString(false) + ", " + rhs->toString(false) + ").");
+  }
 }
 
 // -----------------

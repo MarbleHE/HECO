@@ -2,7 +2,7 @@
 #define AST_OPTIMIZER_INCLUDE_AST_LITERALSTRING_H_
 
 #include <string>
-#include <map>
+#include <unordered_map>
 #include "AbstractLiteral.h"
 #include "Matrix.h"
 

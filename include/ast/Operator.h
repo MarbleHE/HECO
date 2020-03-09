@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_OPERATOR_H
-#define AST_OPTIMIZER_INCLUDE_OPERATOR_H
+#ifndef AST_OPTIMIZER_INCLUDE_AST_OPERATOR_H_
+#define AST_OPTIMIZER_INCLUDE_AST_OPERATOR_H_
 
 #include <variant>
 #include <string>
@@ -101,6 +101,7 @@ class Operator : public AbstractNode {
   [[nodiscard]] bool equals(LogCompOp op) const;
 
   [[nodiscard]] bool equals(UnaryOp op) const;
+  AbstractLiteral *applyMatrixOperator(AbstractLiteral *lhs, AbstractLiteral *rhs, Operator &op);
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_OPERATOR_H
+#endif //AST_OPTIMIZER_INCLUDE_AST_OPERATOR_H_

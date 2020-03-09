@@ -64,6 +64,10 @@ class AbstractMatrix {
   [[nodiscard]] virtual bool isScalar() const = 0;
 
   [[nodiscard]] virtual json toJson() const = 0;
+
+  virtual AbstractLiteral *applyOperatorComponentwise(AbstractMatrix *rhsOperand, Operator *op) = 0;
+
+  virtual AbstractLiteral *applyMatrixMultiplication(AbstractMatrix *rhsOperand) = 0;
 };
 
 template<typename T>
@@ -281,6 +285,18 @@ class Matrix : public AbstractMatrix {
       }
     }
     return new Matrix<T>(result);
+  }
+
+  AbstractLiteral *applyOperatorComponentwise(AbstractMatrix *rhsOperand, Operator *op) override {
+    // TODO(pjattke): create operatorFunc
+
+
+//    applyOperatorComponentwise(this, rhsOperand, operatorFunc);
+  }
+
+  AbstractLiteral *applyMatrixMultiplication(AbstractMatrix *rhsOperand) override {
+    // TODO(pjattke): uncomment and fix
+//    return applyMatrixMultiplication(this, rhsOperand);
   }
 };
 
