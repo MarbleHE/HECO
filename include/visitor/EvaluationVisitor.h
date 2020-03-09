@@ -5,6 +5,7 @@
 #include <stack>
 #include "Visitor.h"
 #include <unordered_map>
+#include <string>
 
 class EvaluationVisitor : public Visitor {
  private:
@@ -48,10 +49,11 @@ class EvaluationVisitor : public Visitor {
   explicit EvaluationVisitor(std::unordered_map<std::string, AbstractLiteral *> funcCallParameterValues);
   EvaluationVisitor();
 
-  void visit(AbstractNode &elem) override;
   void visit(AbstractExpr &elem) override;
+  void visit(AbstractNode &elem) override;
   void visit(AbstractStatement &elem) override;
   void visit(ArithmeticExpr &elem) override;
+  void visit(Ast &elem) override;
   void visit(Block &elem) override;
   void visit(Call &elem) override;
   void visit(CallExternal &elem) override;
@@ -60,9 +62,9 @@ class EvaluationVisitor : public Visitor {
   void visit(FunctionParameter &elem) override;
   void visit(If &elem) override;
   void visit(LiteralBool &elem) override;
+  void visit(LiteralFloat &elem) override;
   void visit(LiteralInt &elem) override;
   void visit(LiteralString &elem) override;
-  void visit(LiteralFloat &elem) override;
   void visit(LogicalExpr &elem) override;
   void visit(Operator &elem) override;
   void visit(Return &elem) override;
@@ -71,7 +73,7 @@ class EvaluationVisitor : public Visitor {
   void visit(VarDecl &elem) override;
   void visit(Variable &elem) override;
   void visit(While &elem) override;
-  void visit(Ast &elem) override;
+
   const std::vector<AbstractLiteral *> &getResults();
   void setFlagPrintResult(bool printResult);
   void reset();

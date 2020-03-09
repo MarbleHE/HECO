@@ -21,6 +21,8 @@
 #include "VarAssignm.h"
 #include "While.h"
 #include <functional>
+#include "Rotate.h"
+#include "For.h"
 
 EvaluationVisitor::EvaluationVisitor(std::unordered_map<std::string, AbstractLiteral *> funcCallParameterValues)
     : variableValuesForEvaluation(std::move(funcCallParameterValues)) {
@@ -114,15 +116,9 @@ void EvaluationVisitor::visit(CallExternal &elem) {
 }
 
 void EvaluationVisitor::visit(Function &elem) {
+  // visit all statements of the Function's body in order of execution
   for (size_t i = 0; i < elem.getBodyStatements().size(); i++) {
-    auto currentStatement = elem.getBodyStatements().at(i);
-    // last statement: check if it is a Return statement
-    if (i==elem.getBodyStatements().size() - 1) {
-      if (auto retStmt = dynamic_cast<Return *>(currentStatement)) {
-        retStmt->accept(*this);
-      }
-    }
-    currentStatement->accept(*this);
+    elem.getBodyStatements().at(i)->accept(*this);
   }
 }
 
