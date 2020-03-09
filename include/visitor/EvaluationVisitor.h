@@ -68,6 +68,7 @@ class EvaluationVisitor : public Visitor {
   void visit(LogicalExpr &elem) override;
   void visit(Operator &elem) override;
   void visit(Return &elem) override;
+  void visit(Rotate &elem) override;
   void visit(UnaryExpr &elem) override;
   void visit(VarAssignm &elem) override;
   void visit(VarDecl &elem) override;

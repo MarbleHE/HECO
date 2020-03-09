@@ -138,3 +138,21 @@ TEST(AstEvaluationTests, complexAstEvaluationWithNestedFunctionCall_AexpParamete
   auto result = dynamic_cast<LiteralInt *>(ast.evaluateAst(params, false).front());
   ASSERT_EQ(*result, *new LiteralInt(7'168));
 }
+
+TEST(AstEvaluationTests, astIncludingForLoop) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(23, ast);
+  std::unordered_map<std::string, AbstractLiteral *> params({{"inputA", new LiteralInt(5)}});
+  auto result = dynamic_cast<LiteralInt *>(ast.evaluateAst(params, false).front());
+  ASSERT_EQ(*result, *new LiteralInt(30));
+}
+
+TEST(AstEvaluationTests, astLiteralRotation) {
+  Ast ast;
+  AstTestingGenerator::generateAst(24, ast);
+  auto result = dynamic_cast<LiteralInt *>(ast.evaluateAst({}, false).front());
+  auto m = *dynamic_cast<Matrix<int> *>(result->getMatrix());
+  EXPECT_EQ(m(0, 0), 3);
+  EXPECT_EQ(m(0, 1), 1);
+  EXPECT_EQ(m(0, 2), 7);
+}
