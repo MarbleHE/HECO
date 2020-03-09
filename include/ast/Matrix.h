@@ -41,6 +41,7 @@ struct Dimension {
       // ignore columns (-1), compare rows only
       return numRows==rows;
     } else {
+      // compare number of rows and columns using equality operator
       return (*this)==Dimension(rows, columns);
     }
   }
@@ -54,8 +55,6 @@ struct Dimension {
 /// A helper class that allows to define all Matrix<T> specializations using a unified interface.
 class CMatrix {
  public:
-//  virtual void rotate(int rotationFactor) = 0;
-
   virtual CMatrix *rotate(int rotationFactor, bool inPlace) = 0;
 
   virtual Dimension &getDimensions() = 0;
@@ -153,15 +152,6 @@ class Matrix : public CMatrix {
     values = newValues;
   }
 
-  std::vector<T> getValuesAsVector() {
-    // returns all matrix values as single one-dimensional vector
-    std::vector<T> resultVec;
-    for (auto &vec : values) {
-      resultVec.insert(resultVec.end(), vec.begin(), vec.end());
-    }
-    return resultVec;
-  }
-
   std::string toString() override {
     std::stringstream outputStr;
     // print boolean values as text (true, false) by default, otherwise the output (0,1) cannot be distinguished from
@@ -201,19 +191,6 @@ class Matrix : public CMatrix {
     // call the Matrix's copy constructor
     return new Matrix<T>(*this);
   }
-//
-//  void transpose() {
-//    std::vector<std::vector<T>> transposedVec(values[0].size(), std::vector<T>());
-//    // this is inefficient -> requires O(n^2) runtime
-//    for (int i = 0; i < values.size(); ++i) {
-//      for (int j = 0; j < values[i].size(); ++j) {
-//        transposedVec[j].push_back(values[i][j]);
-//      }
-//    }
-//    dim.updateDimension(values[0].size(), values.size());
-//    values = transposedVec;
-//  }
-
 
   Matrix<T> *transpose(bool inPlace) {
     Matrix<T> *matrixToTranspose = inPlace ? this : new Matrix<T>(*this);
@@ -234,7 +211,7 @@ class Matrix : public CMatrix {
     if (matrixToRotate->getDimensions().equals(1, -1)) {  // a row vector
       auto &vec = matrixToRotate->values[0];
       std::rotate(vec.begin(), computeRotationTarget(vec.begin(), vec.size(), rotationFactor), vec.end());
-    } else if (getDimensions().equals(-1, 1)) {  // a column vector
+    } else if (matrixToRotate->getDimensions().equals(-1, 1)) {  // a column vector
       // Transpose the vector, rotate it, transpose it again. This is needed because std::rotate requires all elements
       // in a single vector. As our matrix is represented using row vectors, we need to transform column->row vector.
       matrixToRotate->transpose(true);

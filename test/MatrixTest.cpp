@@ -259,6 +259,22 @@ TEST(MatrixTest, transposeMatrixFromColumnVecToRowVecInPlace) {  /* NOLINT */
   EXPECT_EQ(m(0, 2), 9);
 }
 
+TEST(MatrixTest, transposeMatrixFromColumnVecToRowVecCopy) {  /* NOLINT */
+  // elements in (0,0), (1,0), (2,0) -> all elements in one column vector
+  Matrix<int> m({{1}, {4}, {9}});
+  auto transposedM = *m.transpose(false);
+  // elements in (0,0), (0,1), (0,2) -> all elements in one row vector
+  EXPECT_TRUE(transposedM.getDimensions().equals(1, 3));
+  EXPECT_EQ(transposedM(0, 0), 1);
+  EXPECT_EQ(transposedM(0, 1), 4);
+  EXPECT_EQ(transposedM(0, 2), 9);
+  // check that the original matrix did not change
+  EXPECT_TRUE(m.getDimensions().equals(3, 1));
+  EXPECT_EQ(m(0, 0), 1);
+  EXPECT_EQ(m(1, 0), 4);
+  EXPECT_EQ(m(2, 0), 9);
+}
+
 TEST(MatrixTest, transposeMatrixFromRowVecToColumnVecInPlace) {  /* NOLINT */
   // elements in (0,0), (0,1), (0,2) -> all elements in one row vector
   Matrix<int> m({{1, 4, 9}});
@@ -336,6 +352,26 @@ TEST(MatrixTest, rotateColumnVectorInPlace) {  /* NOLINT */
   EXPECT_EQ(m(2, 0), 9);
   EXPECT_EQ(m(3, 0), 4);
   EXPECT_EQ(m(4, 0), 3);
+}
+
+TEST(MatrixTest, rotateColumnVectorCopy) {  /* NOLINT */
+  Matrix<int> m({{9}, {4}, {3}, {8}, {7}});
+  EXPECT_TRUE(m.getDimensions().equals(5, 1));
+  auto rotatedM = *m.rotate(2, false);
+  // dimension should not change
+  EXPECT_TRUE(m.getDimensions().equals(5, 1));
+  // [9; 4; 3; 8; 7] --rotate(2)--> [8; 7; 9; 4; 3]
+  EXPECT_EQ(rotatedM(0, 0), 8);
+  EXPECT_EQ(rotatedM(1, 0), 7);
+  EXPECT_EQ(rotatedM(2, 0), 9);
+  EXPECT_EQ(rotatedM(3, 0), 4);
+  EXPECT_EQ(rotatedM(4, 0), 3);
+  // check that the original matrix did not change
+  EXPECT_EQ(m(0, 0), 9);
+  EXPECT_EQ(m(1, 0), 4);
+  EXPECT_EQ(m(2, 0), 3);
+  EXPECT_EQ(m(3, 0), 8);
+  EXPECT_EQ(m(4, 0), 7);
 }
 
 TEST(MatrixTest, rotateMatrix_expectedException) {  /* NOLINT */
