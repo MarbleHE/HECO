@@ -80,6 +80,6 @@ bool LiteralInt::isEqual(AbstractExpr *other) {
 bool LiteralInt::isNull() {
   return matrix->allValuesEqual(0);
 }
-CMatrix *LiteralInt::getMatrix() const {
+AbstractMatrix *LiteralInt::getMatrix() const {
   return matrix;
 }

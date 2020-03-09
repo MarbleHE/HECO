@@ -34,7 +34,7 @@ class AbstractLiteral : public AbstractExpr {
 
   virtual bool isNull() = 0;
 
-  virtual CMatrix *getMatrix() const = 0;
+  virtual AbstractMatrix *getMatrix() const = 0;
 };
 
 inline std::ostream &operator<<(std::ostream &os, const std::vector<AbstractLiteral *> &v) {

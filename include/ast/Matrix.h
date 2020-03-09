@@ -53,9 +53,9 @@ struct Dimension {
 };
 
 /// A helper class that allows to define all Matrix<T> specializations using a unified interface.
-class CMatrix {
+class AbstractMatrix {
  public:
-  virtual CMatrix *rotate(int rotationFactor, bool inPlace) = 0;
+  virtual AbstractMatrix *rotate(int rotationFactor, bool inPlace) = 0;
 
   virtual Dimension &getDimensions() = 0;
 
@@ -67,7 +67,7 @@ class CMatrix {
 };
 
 template<typename T>
-class Matrix : public CMatrix {
+class Matrix : public AbstractMatrix {
  private:
   template<typename Iterator>
   Iterator computeRotationTarget(Iterator itBegin, size_t vectorSize, int rotationFactor) {
@@ -272,7 +272,7 @@ class Matrix : public CMatrix {
     int dimN = A.getDimensions().numColumns;
     int dimP = B.getDimensions().numColumns;
     T sum = 0;
-    // Very inefficient! Replace it, for example, by Strassen's multiplication algorithm.
+    // Very inefficient: O(n^3)! Replace it, for example, by Strassen's multiplication algorithm.
     for (int k = 0; k < dimN; ++k) {
       for (int i = 0; i < dimM; ++i) {
         for (int j = 0; j < dimP; ++j) {

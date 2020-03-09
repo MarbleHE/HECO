@@ -81,6 +81,6 @@ bool LiteralString::isNull() {
   return matrix->allValuesEqual("");
 }
 
-CMatrix *LiteralString::getMatrix() const {
+AbstractMatrix *LiteralString::getMatrix() const {
   return matrix;
 }

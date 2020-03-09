@@ -80,6 +80,6 @@ bool LiteralBool::isNull() {
   return matrix->allValuesEqual(false);
 }
 
-CMatrix *LiteralBool::getMatrix() const {
+AbstractMatrix *LiteralBool::getMatrix() const {
   return matrix;
 }

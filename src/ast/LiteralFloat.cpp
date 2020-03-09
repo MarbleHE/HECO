@@ -82,6 +82,6 @@ bool LiteralFloat::isEqual(AbstractExpr *other) {
 bool LiteralFloat::isNull() {
   return matrix->allValuesEqual(0.0f);
 }
-CMatrix *LiteralFloat::getMatrix() const {
+AbstractMatrix *LiteralFloat::getMatrix() const {
   return matrix;
 }

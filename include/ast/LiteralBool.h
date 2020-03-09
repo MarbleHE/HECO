@@ -50,7 +50,7 @@ class LiteralBool : public AbstractLiteral {
 
   bool isNull() override;
 
-  CMatrix *getMatrix() const override;
+  AbstractMatrix *getMatrix() const override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_LITERALBOOL_H_
