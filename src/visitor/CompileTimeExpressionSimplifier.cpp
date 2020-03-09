@@ -17,6 +17,7 @@
 #include "CallExternal.h"
 #include "While.h"
 #include "Call.h"
+#include "Rotate.h"
 
 CompileTimeExpressionSimplifier::CompileTimeExpressionSimplifier() {
   evalVisitor = EvaluationVisitor();
@@ -39,6 +40,29 @@ void CompileTimeExpressionSimplifier::visit(AbstractStatement &elem) {
 }
 
 void CompileTimeExpressionSimplifier::visit(Operator &elem) {
+  Visitor::visit(elem);
+}
+
+void CompileTimeExpressionSimplifier::visit(Rotate &elem) {
+  // if the Rotate's operand is known at compile-time, we can execute the rotation and replace this node by the
+  // rotation's result (i.e., rotated operand)
+  if (valueIsKnown(elem.getOperand())) {
+    auto val = getFirstValue(elem.getOperand());
+    // we need a AbstractLiteral to be able to perform the rotation
+    if (auto valAsAbstractLiteral = dynamic_cast<AbstractLiteral *>(val)) {
+      // clone the AbstractLiteral (including its value)
+      auto clonedVal = valAsAbstractLiteral->clone(false)->castTo<AbstractLiteral>();
+      // perform rotation on the cloned literal
+      clonedVal->getMatrix()->rotate(elem.getRotationFactor(), true);
+      // replace this Rotate node by a new node containing the rotated operand
+      elem.getOnlyParent()->replaceChild(&elem, clonedVal);
+      nodesQueuedForDeletion.push_back(&elem);
+    }
+  }
+  // TODO add execution and statement removal
+  // TODO add test
+  // TODO commit all changes
+  // TODO rebase on master branch
   Visitor::visit(elem);
 }
 

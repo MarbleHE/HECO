@@ -16,6 +16,8 @@
 #include "Call.h"
 #include "If.h"
 #include "While.h"
+#include "AstTestingGenerator.h"
+#include "Matrix.h"
 
 class CompileTimeExpressionSimplifierFixture : public ::testing::Test {
  protected:
@@ -1886,5 +1888,26 @@ TEST_F(CompileTimeExpressionSimplifierFixture, Call_inliningExpected2) { /* NOLI
   ctes.visit(ast);
 
   auto expectedReturnExpr = new LiteralInt(343);
+  EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedReturnExpr));
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, Rotate_executionExpected) {
+  //  -- input --
+  // rotateVec(int inputA) {
+  //   int sumVec = {{1, 7, 3}};   // [1 7 3]
+  //   return sumVec.rotate(1);    // [3 1 7]
+  // }
+  //  -- expected --
+  // rotateVec(int inputA) {
+  //   return LiteralInt{{3, 1, 7}};
+  // }
+  Ast ast;
+  AstTestingGenerator::generateAst(24, ast);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  auto expectedReturnExpr = new LiteralInt(new Matrix<int>({{3, 1, 7}}));
+  auto returnStatement = ast.getRootNode()->castTo<Function>()->getBodyStatements().back()->castTo<Return>();
   EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedReturnExpr));
 }

@@ -308,6 +308,7 @@ class CompileTimeExpressionSimplifier : public Visitor {
   /// \param node The node to be checked for deletion.
   /// \return True if this node is enqueued for deletion, otherwise False.
   bool isQueuedForDeletion(const AbstractNode *node);
+  void visit(Rotate &elem) override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_VISITOR_COMPILETIMEEXPRESSIONSIMPLIFIER_H_
