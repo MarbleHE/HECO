@@ -186,6 +186,22 @@ class Matrix : public IMatrix {
     dim.updateDimension(values[0].size(), values.size());
     values = transposedVec;
   }
+
+  void rotate(int rotationFactor) override {
+    if (getDimensions().hasDimension(1, -1)) {  // a row vector
+      auto &vec = values[0];
+      std::rotate(vec.begin(), computeRotationTarget(vec.begin(), vec.size(), rotationFactor), vec.end());
+    } else if (getDimensions().hasDimension(-1, 1)) {  // a column vector
+      // Transpose the vector, rotate it, transpose it again. This is needed because std::rotate requires all elements
+      // in a single vector. As our matrix is represented using row vectors, we need to transform column->row vector.
+      transpose();
+      auto &vec = values[0];
+      std::rotate(vec.begin(), computeRotationTarget(vec.begin(), vec.size(), rotationFactor), vec.end());
+      transpose();
+    } else {
+      throw std::invalid_argument("Rotation only supported for 1-dimensional vectors.");
+    }
+  }
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_MATRIX_H_

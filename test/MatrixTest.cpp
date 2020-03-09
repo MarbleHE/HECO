@@ -216,7 +216,7 @@ TEST(MatrixTest, modifyMatrix_modifyWholeMatrixUsingDedicatedFunction) {  /* NOL
 
 TEST(MatrixTest, toStringTestMatrix) {  /* NOLINT */
   Matrix<int> m({{5, 2, 1}, {3, 1, 1}, {1, 1, 0}});
-  EXPECT_EQ(m.toString(), std::string("[5 2 1; 3 1 1; 1 1 0]\n"));
+  EXPECT_EQ(m.toString(), std::string("[5 2 1; 3 1 1; 1 1 0]"));
 }
 
 TEST(MatrixTest, toStringTestScalar) {  /* NOLINT */
@@ -244,22 +244,6 @@ TEST(MatrixTest, cloneMatrix) {  /* NOLINT */
   EXPECT_EQ(clonedM(1, 1), 3);
 }
 
-TEST(MatrixTest, VariableIdentifiers) {  /* NOLINT */
-  Matrix<std::string> variableIdentifiers({{"alpha"}, {"beta"}, {"gamma"}, {"delta"}});
-  auto var = new Variable(&variableIdentifiers);
-
-  // retrieve the variable identifiers
-  std::vector<std::string> varIdentifiers = var->getVariableIdentifiers();
-  // create a set to enable avg. O(1) lookups
-  std::set<std::string> varIdentifiersMap(varIdentifiers.begin(), varIdentifiers.end());
-  EXPECT_EQ(varIdentifiersMap.count("alpha"), 1);
-  EXPECT_EQ(varIdentifiersMap.count("alphabet"), 0);
-  EXPECT_EQ(varIdentifiersMap.count("beta"), 1);
-  EXPECT_EQ(varIdentifiersMap.count("gamma"), 1);
-  EXPECT_EQ(varIdentifiersMap.count("gama"), 0);
-  EXPECT_EQ(varIdentifiersMap.count("delta"), 1);
-}
-
 TEST(MatrixTest, transposeMatrixFromColumnVecToRowVec) {  /* NOLINT */
   // elements in (0,0), (1,0), (2,0) -> all elements in one column vector
   Matrix<int> m({{1}, {4}, {9}});
@@ -267,7 +251,7 @@ TEST(MatrixTest, transposeMatrixFromColumnVecToRowVec) {  /* NOLINT */
   EXPECT_EQ(m(0, 0), 1);
   EXPECT_EQ(m(1, 0), 4);
   EXPECT_EQ(m(2, 0), 9);
-  m.transpose_inplace();
+  m.transpose();
   // elements in (0,0), (0,1), (0,2) -> all elements in one row vector
   EXPECT_TRUE(m.getDimensions().hasDimension(1, 3));
   EXPECT_EQ(m(0, 0), 1);
@@ -282,10 +266,42 @@ TEST(MatrixTest, transposeMatrixFromRowVecToColumnVec) {  /* NOLINT */
   EXPECT_EQ(m(0, 0), 1);
   EXPECT_EQ(m(0, 1), 4);
   EXPECT_EQ(m(0, 2), 9);
-  m.transpose_inplace();
+  m.transpose();
   // elements in (0,0), (1,0), (2,0) -> all elements in one column vector
   EXPECT_TRUE(m.getDimensions().hasDimension(3, 1));
   EXPECT_EQ(m(0, 0), 1);
   EXPECT_EQ(m(1, 0), 4);
   EXPECT_EQ(m(2, 0), 9);
 }
+
+TEST(MatrixTest, rotateRowVector) {  /* NOLINT */
+  Matrix<int> m({{1, 2, 3, 4, 5}});
+  EXPECT_TRUE(m.getDimensions().hasDimension(1, 5));
+  m.rotate(-2);
+  EXPECT_TRUE(m.getDimensions().hasDimension(1, 5));
+  // [1 2 3 4 5] --rotate(-2)--> [3 4 5 1 2]
+  EXPECT_EQ(m(0, 0), 3);
+  EXPECT_EQ(m(0, 1), 4);
+  EXPECT_EQ(m(0, 2), 5);
+  EXPECT_EQ(m(0, 3), 1);
+  EXPECT_EQ(m(0, 4), 2);
+}
+
+TEST(MatrixTest, rotateColumnVector) {  /* NOLINT */
+  Matrix<int> m({{9}, {4}, {3}, {8}, {7}});
+  EXPECT_TRUE(m.getDimensions().hasDimension(5, 1));
+  m.rotate(2);
+  EXPECT_TRUE(m.getDimensions().hasDimension(5, 1));
+  // [9; 4; 3; 8; 7] --rotate(2)--> [8; 7; 9; 4; 3]
+  EXPECT_EQ(m(0, 0), 8);
+  EXPECT_EQ(m(1, 0), 7);
+  EXPECT_EQ(m(2, 0), 9);
+  EXPECT_EQ(m(3, 0), 4);
+  EXPECT_EQ(m(4, 0), 3);
+}
+
+TEST(MatrixTest, rotateMatrix_expectedException) {  /* NOLINT */
+  Matrix<int> m({{9, 4, 2}, {3, 2, 1}, {1, 1, 0}});
+  EXPECT_THROW(m.rotate(3), std::invalid_argument);
+}
+

@@ -8,6 +8,7 @@
 #include <vector>
 #include "AbstractExpr.h"
 #include "Datatype.h"
+#include "Matrix.h"
 
 class RandLiteralGen;
 
@@ -32,6 +33,8 @@ class AbstractLiteral : public AbstractExpr {
   virtual bool supportsDatatype(Datatype &datatype) = 0;
 
   virtual bool isNull() = 0;
+
+  virtual CMatrix *getMatrix() const = 0;
 };
 
 inline std::ostream &operator<<(std::ostream &os, const std::vector<AbstractLiteral *> &v) {
