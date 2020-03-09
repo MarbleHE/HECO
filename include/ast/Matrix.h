@@ -10,6 +10,7 @@
 #include "AbstractMatrix.h"
 #include "Dimension.h"
 
+
 using json = nlohmann::json;
 
 template<typename T>
@@ -226,8 +227,10 @@ class Matrix : public AbstractMatrix {
   }
 
   AbstractLiteral *applyOperatorComponentwise(AbstractMatrix *rhsOperand, Operator *op) {
-    // TODO(pjattke): create operatorFunc
-
+    // TODO(pjattke): create operatorFunc based on the given operator but including Operator here breaks everything...
+//    if (op->equals(ArithmeticOp::addition)) {
+//
+//    }
 
 //    applyOperatorComponentwise(this, rhsOperand, operatorFunc);
   }

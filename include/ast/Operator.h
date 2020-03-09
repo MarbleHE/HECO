@@ -101,6 +101,7 @@ class Operator : public AbstractNode {
   [[nodiscard]] bool equals(LogCompOp op) const;
 
   [[nodiscard]] bool equals(UnaryOp op) const;
+
   AbstractLiteral *applyMatrixOperator(AbstractLiteral *lhs, AbstractLiteral *rhs, Operator &op);
 };
 

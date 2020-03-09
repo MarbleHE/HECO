@@ -86,7 +86,9 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/visitor/CompileTimeExpressionSimplifier.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/AbstractBinaryExpr.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/For.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/Rotate.cpp)
+        ${ast_optimizer_SOURCE_DIR}/src/ast/Rotate.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/AbstractMatrix.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/Dimension.cpp)
 
 set(HEADER_ONLY_SOURCES
         ${ast_optimizer_SOURCE_DIR}/include/ast/OpSymbEnum.h
