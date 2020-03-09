@@ -50,7 +50,7 @@ class LiteralInt : public AbstractLiteral {
 
   bool isNull() override;
 
-  [[nodiscard]] Matrix<int> *getMatrix() const;
+  CMatrix *getMatrix() const override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_LITERALINT_H_

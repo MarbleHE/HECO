@@ -33,7 +33,7 @@ void LiteralString::print(std::ostream &str) const {
 }
 
 bool LiteralString::operator==(const LiteralString &rhs) const {
-  return *matrix==*rhs.getMatrix();
+  return *matrix==*dynamic_cast<Matrix<std::string> *>(rhs.getMatrix());
 }
 
 bool LiteralString::operator!=(const LiteralString &rhs) const {
@@ -81,6 +81,6 @@ bool LiteralString::isNull() {
   return matrix->allValuesEqual("");
 }
 
-Matrix<std::string> *LiteralString::getMatrix() const {
+CMatrix *LiteralString::getMatrix() const {
   return matrix;
 }

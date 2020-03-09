@@ -37,7 +37,7 @@ void LiteralInt::print(std::ostream &str) const {
 }
 
 bool LiteralInt::operator==(const LiteralInt &rhs) const {
-  return *matrix==*rhs.getMatrix();
+  return *matrix==*dynamic_cast<Matrix<int> *>(rhs.getMatrix());
 }
 
 bool LiteralInt::operator!=(const LiteralInt &rhs) const {
@@ -80,7 +80,6 @@ bool LiteralInt::isEqual(AbstractExpr *other) {
 bool LiteralInt::isNull() {
   return matrix->allValuesEqual(0);
 }
-
-Matrix<int> *LiteralInt::getMatrix() const {
+CMatrix *LiteralInt::getMatrix() const {
   return matrix;
 }

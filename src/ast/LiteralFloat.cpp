@@ -34,7 +34,7 @@ void LiteralFloat::print(std::ostream &str) const {
 }
 
 bool LiteralFloat::operator==(const LiteralFloat &rhs) const {
-  return *matrix==*rhs.getMatrix();
+  return *matrix==*dynamic_cast<Matrix<float> *>(rhs.getMatrix());
 }
 
 bool LiteralFloat::operator!=(const LiteralFloat &rhs) const {
@@ -82,7 +82,6 @@ bool LiteralFloat::isEqual(AbstractExpr *other) {
 bool LiteralFloat::isNull() {
   return matrix->allValuesEqual(0.0f);
 }
-
-Matrix<float> *LiteralFloat::getMatrix() const {
+CMatrix *LiteralFloat::getMatrix() const {
   return matrix;
 }

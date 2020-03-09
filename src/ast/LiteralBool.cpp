@@ -20,10 +20,6 @@ bool LiteralBool::getValue() const {
   return matrix->getScalarValue();
 }
 
-Matrix<bool> *LiteralBool::getMatrix() const {
-  return matrix;
-}
-
 std::string LiteralBool::getNodeType() const {
   return "LiteralBool";
 }
@@ -35,6 +31,7 @@ void LiteralBool::print(std::ostream &str) const {
 }
 
 bool LiteralBool::operator==(const LiteralBool &rhs) const {
+  // TODO check if this actually works
   return *matrix==*rhs.matrix;
 }
 
@@ -83,3 +80,6 @@ bool LiteralBool::isNull() {
   return matrix->allValuesEqual(false);
 }
 
+CMatrix *LiteralBool::getMatrix() const {
+  return matrix;
+}

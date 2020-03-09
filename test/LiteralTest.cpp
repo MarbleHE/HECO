@@ -68,7 +68,7 @@ TEST(LiteralTest, literalBoolMatrix) { /* NOLINT */
   // check that the matrix was stored properly
   EXPECT_EQ(litBool->getMatrix(), pMatrix);
 
-  auto matrix = litBool->getMatrix();
+  auto matrix = dynamic_cast<Matrix<bool> *>(litBool->getMatrix());
   auto matrixRef = *matrix;
   // compare element at (0,0)
   EXPECT_EQ(matrix->getElement(0, 0), true);
