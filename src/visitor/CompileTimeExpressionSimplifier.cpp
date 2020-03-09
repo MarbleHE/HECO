@@ -44,6 +44,7 @@ void CompileTimeExpressionSimplifier::visit(Operator &elem) {
 }
 
 void CompileTimeExpressionSimplifier::visit(Rotate &elem) {
+  Visitor::visit(elem);
   // if the Rotate's operand is known at compile-time, we can execute the rotation and replace this node by the
   // rotation's result (i.e., rotated operand)
   if (valueIsKnown(elem.getOperand())) {
@@ -59,11 +60,6 @@ void CompileTimeExpressionSimplifier::visit(Rotate &elem) {
       nodesQueuedForDeletion.push_back(&elem);
     }
   }
-  // TODO add execution and statement removal
-  // TODO add test
-  // TODO commit all changes
-  // TODO rebase on master branch
-  Visitor::visit(elem);
 }
 
 void CompileTimeExpressionSimplifier::visit(Ast &elem) {
@@ -349,9 +345,6 @@ void CompileTimeExpressionSimplifier::visit(Call &elem) {
         returnStatementDescendants.size() <= 20
             // their is exactly one return value (because assignment of multiple values cannot be expressed yet
             && returnStmt->getReturnExpressions().size()==1) {
-      // TODO remove?
-      // extract the return statement by detaching it from its parent
-//      returnStmt->removeFromParents();
       // replace variables values of Call with those in called function
       auto parameterValues = elem.getParameterList()->getParameters();
       auto expectedFunctionParameters = elem.getFunc()->getParameterList()->getParameters();
