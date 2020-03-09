@@ -156,3 +156,11 @@ TEST(AstEvaluationTests, astLiteralRotation) {
   EXPECT_EQ(m(0, 1), 1);
   EXPECT_EQ(m(0, 2), 7);
 }
+
+TEST(AstEvaluationTests, astRotateAndSumVector) {
+  Ast ast;
+  AstTestingGenerator::generateAst(25, ast);
+  auto result = dynamic_cast<LiteralInt *>(ast.evaluateAst({}, false).front());
+  auto m = *dynamic_cast<Matrix<int> *>(result->getMatrix());
+  EXPECT_EQ(m.values, std::vector<std::vector<int>>({{11, 9, 13}}));
+}
