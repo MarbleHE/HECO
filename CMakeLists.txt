@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.14)
 set(CMAKE_CXX_STANDARD 17)
 project(ast_optimizer)
 
+# disable optimizations for BUILD_TYPE=Debug to improve compilation speed
+#SET(CMAKE_CXX_FLAGS_DEBUG "-O0")
+#SET(CMAKE_C_FLAGS_DEBUG "-O0")
+
 ##############################
 # Download nlohmann-json
 ##############################
@@ -81,7 +85,8 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/utilities/DotPrinter.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/CompileTimeExpressionSimplifier.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/AbstractBinaryExpr.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/For.cpp)
+        ${ast_optimizer_SOURCE_DIR}/src/ast/For.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/Rotate.cpp)
 
 set(HEADER_ONLY_SOURCES
         ${ast_optimizer_SOURCE_DIR}/include/ast/OpSymbEnum.h

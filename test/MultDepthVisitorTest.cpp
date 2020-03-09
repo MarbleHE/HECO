@@ -197,24 +197,3 @@ TEST(MultDepthVisitorTests, CallExternalNotSupported) { // NOLINT
 
   EXPECT_THROW(mdv.visit(ast), std::logic_error);
 }
-
-TEST(MultDepthVisitorTests, IfNotSupported) { // NOLINT
-  Ast ast;
-  AstTestingGenerator::generateAst(4, ast);
-
-  // calculate multiplicative depth
-  MultDepthVisitor mdv;
-
-  EXPECT_THROW(mdv.visit(ast), std::logic_error);
-}
-
-TEST(MultDepthVisitorTests, WhileNotSupported) { // NOLINT
-  Ast ast;
-  AstTestingGenerator::generateAst(11, ast);
-
-  // calculate multiplicative depth
-  MultDepthVisitor mdv;
-
-  EXPECT_THROW(mdv.visit(ast), std::logic_error);
-}
-

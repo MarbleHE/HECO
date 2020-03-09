@@ -46,6 +46,8 @@ class SecretTaintingVisitor : public Visitor {
   void visit(Ast &elem) override;
   void visit(Datatype &elem) override;
   void visit(ParameterList &elem) override;
+  void visit(For &elem) override;
+  void visit(Rotate &elem) override;
 
   bool nodeIsTainted(AbstractNode &node) const;
   void addTaintedNodes(std::vector<AbstractNode *> nodesToAdd);

@@ -1,0 +1,9 @@
+Function: (rotateVec)	[global]
+	ParameterList:	[Function_0]
+	Block:
+		VarDecl: (sumVec)	[Block_2]
+			Datatype: (plaintext int)
+			LiteralInt: ([1 7 3])
+		Return:
+			Rotate:
+				Variable: (sumVec)

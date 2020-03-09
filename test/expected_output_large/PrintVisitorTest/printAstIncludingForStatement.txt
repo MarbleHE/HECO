@@ -1,4 +1,4 @@
-Function: (powBase2)	[global]
+Function: (sumNTimes2)	[global]
 	ParameterList:	[Function_0]
 		FunctionParameter:
 			Datatype: (plaintext int)
@@ -16,8 +16,8 @@ Function: (powBase2)	[global]
 				LiteralInt: (0)
 			LogicalExpr:
 				Variable: (i)
-				Operator: (<)
-				LiteralInt: (3)
+				Operator: (<=)
+				Variable: (inputA)
 			VarAssignm: (i)
 				ArithmeticExpr:
 					Variable: (i)

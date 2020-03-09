@@ -13,6 +13,12 @@
 #include "Call.h"
 #include "For.h"
 #include "LiteralFloat.h"
+#include "Rotate.h"
+
+// == ATTENTION ======================================
+// These ASTs are used in tests. Any changes to them will break tests. Consider creating new ASTs by copying and
+// modifying existing ones instead.
+// ===================================================
 
 static std::map<int, std::function<void(Ast &)> > call = {  /* NOLINT */
     {0, AstTestingGenerator::genSuperSimpleAst},
@@ -38,7 +44,8 @@ static std::map<int, std::function<void(Ast &)> > call = {  /* NOLINT */
     {20, AstTestingGenerator::genAstRewritingMultiInputY},
     {21, AstTestingGenerator::genAstRewritingTwoDepth2ConesButSingleVNode},
     {22, AstTestingGenerator::genAstForSecretTaintingWithMultipleNonSequentialStatements},
-    {23, AstTestingGenerator::genAstIncludingForStatement}
+    {23, AstTestingGenerator::genAstIncludingForStatement},
+    {24, AstTestingGenerator::genAstUsingRotation}
 };
 
 void AstTestingGenerator::generateAst(int id, Ast &ast) {
@@ -1038,15 +1045,17 @@ void AstTestingGenerator::genAstForSecretTaintingWithMultipleNonSequentialStatem
 }
 
 void AstTestingGenerator::genAstIncludingForStatement(Ast &ast) {
-//    int sum = 0;
-//    int base = 2;
-//    for (int i = 0; i < 3; i=i+1) {
-//      sum = sum + base * i;
+//    sumNTimes2(int inputA) {
+//      int sum = 0;
+//      int base = 2;
+//      for (int i = 0; i <= inputA; i=i+1) {
+//        sum = sum + base * i;
+//      }
+//      return sum;  // 2*0 + 2*1 + ... + 2*inputA
 //    }
-//    return sum
 
   // int powBase2()
-  auto func = new Function("powBase2");
+  auto func = new Function("sumNTimes2");
   auto funcParams = new ParameterList();
   funcParams->addChild(
       new FunctionParameter(new Datatype(Types::INT), new Variable("inputA")));
@@ -1059,8 +1068,8 @@ void AstTestingGenerator::genAstIncludingForStatement(Ast &ast) {
 
   // int = 0;
   auto forInitializer = new VarDecl("i", Types::INT, new LiteralInt(0));
-  // i < 3
-  auto forCondition = new LogicalExpr(new Variable("i"), smaller, new LiteralInt(3));
+  // i <= inputA
+  auto forCondition = new LogicalExpr(new Variable("i"), smallerEqual, new Variable("inputA"));
   // i = i+1
   auto forUpdate = new VarAssignm("i", new ArithmeticExpr(new Variable("i"), addition, new LiteralInt(1)));
   // sum = sum + base * i;
@@ -1084,3 +1093,33 @@ void AstTestingGenerator::genAstIncludingForStatement(Ast &ast) {
 
   ast.setRootNode(func);
 }
+
+void AstTestingGenerator::genAstUsingRotation(Ast &ast) {
+  // rotateVec(int inputA) {
+  //   int sumVec = {{1, 7, 3}};   // [1 7 3]
+  //   return sumVec.rotate(1);    // [3 1 7]
+  // }
+  auto func = new Function("rotateVec");
+
+  // int sumVec = {{1, 7, 3}};
+  func->addStatement(new VarDecl("sumVec", Types::INT,
+                                 new LiteralInt(new Matrix<int>({{1, 7, 3}}))));
+  // return sumVec.rotate(1);
+  func->addStatement(new Return(
+      new Rotate(new Variable("sumVec"), 1)));
+
+  ast.setRootNode(func);
+}
+
+// TODO(pjattke): Implement vector operations to pass this test
+//void AstTestingGenerator::genAstSumAndRotate(Ast &ast) {
+//    sumNTimes2(int inputA) {
+//      int sumVec = {{1, 7, 3}};   // [1 7 3]
+//      int sum = sumVec;
+//      sumVec.rotate(1);    // [3 1 7]
+//      sum = sum + sumVec;
+//      sumVec.rotate(1);   // [7 3 1]
+//      sum = sum + sumVec; // [11 11 11]
+//      return sum;
+//    }
+//}

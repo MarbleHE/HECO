@@ -92,8 +92,12 @@ class PrintVisitor : public Visitor {
   void printNodeName(AbstractNode &node);
 
   void useUniqueNodeIds(bool value);
+
   void visit(For &elem) override;
+
   void visit(ParameterList &elem) override;
+
+  void visit(Rotate &elem) override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_VISITOR_PRINTVISITOR_H_

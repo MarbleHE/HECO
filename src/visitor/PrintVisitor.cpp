@@ -18,6 +18,7 @@
 #include "PrintVisitor.h"
 #include "Scope.h"
 #include "For.h"
+#include "Rotate.h"
 
 template<typename T>
 void PrintVisitor::printChildNodesIndented(T &elem) {
@@ -74,15 +75,15 @@ void PrintVisitor::visit(LiteralBool &elem) {
 }
 
 void PrintVisitor::visit(LiteralInt &elem) {
-  addOutputStr(elem, {std::to_string(elem.getValue())});
+  addOutputStr(elem, {elem.getMatrix()->toString()});
 }
 
 void PrintVisitor::visit(LiteralString &elem) {
-  addOutputStr(elem, {elem.getValue()});
+  addOutputStr(elem, {elem.getMatrix()->toString()});
 }
 
 void PrintVisitor::visit(LiteralFloat &elem) {
-  addOutputStr(elem, {std::to_string(elem.getValue())});
+  addOutputStr(elem, {elem.getMatrix()->toString()});
 }
 
 void PrintVisitor::visit(LogicalExpr &elem) {
@@ -129,6 +130,11 @@ void PrintVisitor::visit(For &elem) {
 }
 
 void PrintVisitor::visit(ParameterList &elem) {
+  addOutputStr(elem);
+  printChildNodesIndented(elem);
+}
+
+void PrintVisitor::visit(Rotate &elem) {
   addOutputStr(elem);
   printChildNodesIndented(elem);
 }

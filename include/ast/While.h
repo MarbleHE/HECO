@@ -22,7 +22,9 @@ class While : public AbstractStatement {
   [[nodiscard]] std::string getNodeType() const override;
 
   void setAttributes(AbstractExpr *loopCondition, AbstractStatement *loopBody);
+
   int getMaxNumberChildren() override;
+
   bool supportsCircuitMode() override;
 };
 

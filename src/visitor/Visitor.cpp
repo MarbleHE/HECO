@@ -20,6 +20,7 @@
 #include "UnaryExpr.h"
 #include "VarAssignm.h"
 #include "While.h"
+#include "Rotate.h"
 
 void Visitor::visit(Ast &elem) {
   // assumption: AST is always the enclosing object that points to the root
@@ -180,6 +181,10 @@ void Visitor::visit(ParameterList &elem) {
 void Visitor::visit(Return &elem) {
   curScope->addStatement(&elem);
   for (auto &expr : elem.getReturnExpressions()) expr->accept(*this);
+}
+
+void Visitor::visit(Rotate &elem) {
+  elem.getOperand()->accept(*this);
 }
 
 void Visitor::visit(UnaryExpr &elem) {

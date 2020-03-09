@@ -32,6 +32,8 @@ class MultDepthVisitor : public Visitor {
 
   void visit(CallExternal &elem) override;
 
+  void visit(For &elem) override;
+
   void visit(Function &elem) override;
 
   void visit(FunctionParameter &elem) override;
@@ -51,6 +53,8 @@ class MultDepthVisitor : public Visitor {
   void visit(Operator &elem) override;
 
   void visit(Return &elem) override;
+
+  void visit(Rotate &elem) override;
 
   void visit(UnaryExpr &elem) override;
 

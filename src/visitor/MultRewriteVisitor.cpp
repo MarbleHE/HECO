@@ -66,6 +66,13 @@ void MultRewriteVisitor::visit(FunctionParameter &elem) {
   Visitor::visit(elem);
 }
 
+void MultRewriteVisitor::visit(For &elem) {
+  Visitor::visit(elem);
+}
+void MultRewriteVisitor::visit(Rotate &elem) {
+  Visitor::visit(elem);
+}
+
 void MultRewriteVisitor::visit(If &elem) {
   Visitor::visit(elem);
 }

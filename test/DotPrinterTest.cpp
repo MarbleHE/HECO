@@ -190,8 +190,6 @@ TEST_F(DotPrinterFixture,
       .setOutputStream(outputStream);
   dp.printAsDotFormattedGraph(ast);
 
-  std::cout << outputStream.str() << std::endl;
-
   // read expected output from file
   std::ifstream ifs("../../test/expected_output_large/DotPrinterTest/"
                     "printAsDotFormattedGraphTest_printAstIncludingForStatement_withoutMultDepth.txt");

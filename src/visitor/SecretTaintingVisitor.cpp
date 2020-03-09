@@ -95,7 +95,7 @@ void SecretTaintingVisitor::visit(VarDecl &elem) {
   if (elem.getDatatype()->isEncrypted()) {
     taintedVariables.insert(elem.getVarTargetIdentifier());
     taintedNodes.insert(elem.getUniqueNodeId());
-    addTaintedNodes(elem.getDescendants()); // TODO check why Node_ is enqueue here
+    addTaintedNodes(elem.getDescendants());
   }
   // this does not consider Call nodes
   checkAndAddTaintedChildren(static_cast<AbstractStatement *>(&elem), elem.getInitializer()->getVariableIdentifiers());
@@ -182,7 +182,13 @@ void SecretTaintingVisitor::visit(Variable &elem) {
   Visitor::visit(elem);
 }
 
+void SecretTaintingVisitor::visit(For &elem) {
+  Visitor::visit(elem);
+}
 
+void SecretTaintingVisitor::visit(Rotate &elem) {
+  Visitor::visit(elem);
+}
 
 // ==========================
 // HELPER METHODS

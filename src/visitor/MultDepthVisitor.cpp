@@ -21,6 +21,10 @@ void MultDepthVisitor::visit(CallExternal &elem) {
   throw std::logic_error("Depth calculations for ASTs CallExternal nodes not supported yet!");
 }
 
+void MultDepthVisitor::visit(For &elem) {
+  Visitor::visit(elem);
+}
+
 void MultDepthVisitor::visit(Function &elem) {
   Visitor::visit(elem);
 }
@@ -30,8 +34,7 @@ void MultDepthVisitor::visit(FunctionParameter &elem) {
 }
 
 void MultDepthVisitor::visit(If &elem) {
-  throw std::logic_error("Depth calculations for ASTs with non-circuit nodes (e.g., If) not supported yet!");
-  //Visitor::visit(elem);
+  Visitor::visit(elem);
 }
 
 void MultDepthVisitor::visit(LiteralBool &elem) {
@@ -67,6 +70,10 @@ void MultDepthVisitor::visit(Return &elem) {
   Visitor::visit(elem);
 }
 
+void MultDepthVisitor::visit(Rotate &elem) {
+  Visitor::visit(elem);
+}
+
 void MultDepthVisitor::visit(UnaryExpr &elem) {
   Visitor::visit(elem);
 }
@@ -86,7 +93,7 @@ void MultDepthVisitor::visit(Variable &elem) {
 }
 
 void MultDepthVisitor::visit(While &elem) {
-  throw std::logic_error("Depth calculations for ASTs with non-circuit nodes (e.g., While) not supported yet!");
+  Visitor::visit(elem);
 }
 
 void MultDepthVisitor::visit(Ast &elem) {

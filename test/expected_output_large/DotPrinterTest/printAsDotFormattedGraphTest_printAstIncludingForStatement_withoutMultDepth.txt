@@ -29,9 +29,9 @@ digraph D {
 	Operator_23 [label="Operator_23\nadd" shape=oval style=filled fillcolor=white]
 	Variable_20 [label="Variable_20\ni" shape=oval style=filled fillcolor=white]
 	LogicalExpr_18 [label="LogicalExpr_18" shape=oval style=filled fillcolor=white]
-	{ LogicalExpr_18 } -> { Variable_16, Operator_19, LiteralInt_17 }
-	LiteralInt_17 [label="LiteralInt_17\n3" shape=oval style=filled fillcolor=white]
-	Operator_19 [label="Operator_19\n<" shape=oval style=filled fillcolor=white]
+	{ LogicalExpr_18 } -> { Variable_16, Operator_19, Variable_17 }
+	Variable_17 [label="Variable_17\ninputA" shape=oval style=filled fillcolor=white]
+	Operator_19 [label="Operator_19\n<=" shape=oval style=filled fillcolor=white]
 	Variable_16 [label="Variable_16\ni" shape=oval style=filled fillcolor=white]
 	VarDecl_14 [label="VarDecl_14\ni" shape=rect style=filled fillcolor=white]
 	{ VarDecl_14 } -> { Datatype_15, LiteralInt_13 }
