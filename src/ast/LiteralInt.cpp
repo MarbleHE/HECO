@@ -81,6 +81,11 @@ bool LiteralInt::isEqual(AbstractExpr *other) {
 bool LiteralInt::isNull() {
   return matrix->allValuesEqual(0);
 }
+
 AbstractMatrix *LiteralInt::getMatrix() const {
   return matrix;
+}
+
+void LiteralInt::setMatrix(AbstractMatrix *newValue) {
+  this->matrix = dynamic_cast<Matrix<int> *>(newValue);
 }

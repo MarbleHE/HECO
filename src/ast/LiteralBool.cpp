@@ -84,3 +84,7 @@ bool LiteralBool::isNull() {
 AbstractMatrix *LiteralBool::getMatrix() const {
   return matrix;
 }
+
+void LiteralBool::setMatrix(AbstractMatrix *newValue) {
+  this->matrix = dynamic_cast<Matrix<bool> *>(newValue);
+}

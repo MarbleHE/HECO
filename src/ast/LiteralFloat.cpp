@@ -83,6 +83,11 @@ bool LiteralFloat::isEqual(AbstractExpr *other) {
 bool LiteralFloat::isNull() {
   return matrix->allValuesEqual(0.0f);
 }
+
 AbstractMatrix *LiteralFloat::getMatrix() const {
   return matrix;
+}
+
+void LiteralFloat::setMatrix(AbstractMatrix *newValue) {
+  this->matrix = dynamic_cast<Matrix<float> *>(newValue);
 }

@@ -85,3 +85,7 @@ bool LiteralString::isNull() {
 AbstractMatrix *LiteralString::getMatrix() const {
   return matrix;
 }
+
+void LiteralString::setMatrix(AbstractMatrix *newValue) {
+  this->matrix = dynamic_cast<Matrix<std::string> *>(newValue);
+}

@@ -55,6 +55,8 @@ class LiteralFloat : public AbstractLiteral {
   bool isNull() override;
 
   AbstractMatrix *getMatrix() const override;
+
+  void setMatrix(AbstractMatrix *newValue) override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_LITERALFLOAT_H_
