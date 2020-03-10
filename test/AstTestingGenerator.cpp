@@ -1116,8 +1116,8 @@ void AstTestingGenerator::genAstRotateAndSum(Ast &ast) {
   // rotateAndSum(int inputA) {
   //   int sumVec = {{1, 7, 3}};             // [1 7 3]
   //   int sum = sumVec + sumVec.rotate(1);  // [1 7 3] + [3 1 7]
-  //   sum = sum + sumVec.rotate(2);         // ([1 7 3] + [3 1 7]) + [7 1 3]
-  //   return sum;                           // [11 9 13]
+  //   sum = sum + sumVec.rotate(2);         // ([1 7 3] + [3 1 7]) + [7 3 1]
+  //   return sum;                           // [11 11 11]
   // }
   auto func = new Function("rotateAndSum");
 

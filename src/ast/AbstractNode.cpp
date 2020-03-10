@@ -281,8 +281,7 @@ bool AbstractNode::hasReversedEdges() const {
 }
 
 AbstractNode *AbstractNode::cloneFlat() {
-  //TODO(vianda): Implement cloneFlat
-  throw std::runtime_error("Not implemented");
+  throw std::runtime_error("Cannot clone an AbstractNode. Use the overridden cloneFlat instead.");
 }
 
 void AbstractNode::replaceChild(AbstractNode *originalChild, AbstractNode *newChildToBeAdded) {
