@@ -8,6 +8,9 @@ class Dimension;
 class AbstractLiteral;
 class Operator;
 
+template<typename T>
+class Matrix;
+
 using json = nlohmann::json;
 
 /// A helper class that allows to access and use all Matrix<T> specializations using a unified interface.
@@ -23,9 +26,9 @@ class AbstractMatrix {
 
   [[nodiscard]] virtual json toJson() const = 0;
 
-  virtual AbstractLiteral *applyOperatorComponentwise(AbstractMatrix *rhsOperand, Operator *op) = 0;
+  virtual AbstractMatrix *applyBinaryOperator(AbstractMatrix *rhsOperand, Operator *os) = 0;
 
-  virtual AbstractLiteral *applyMatrixMultiplication(AbstractMatrix *rhsOperand) = 0;
+  virtual AbstractMatrix *applyUnaryOperator(Operator *os) = 0;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_ABSTRACTMATRIX_H_

@@ -102,7 +102,6 @@ class Operator : public AbstractNode {
 
   [[nodiscard]] bool equals(UnaryOp op) const;
 
-  AbstractLiteral *applyMatrixOperator(AbstractLiteral *lhs, AbstractLiteral *rhs, Operator &op);
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPERATOR_H_

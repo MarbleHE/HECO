@@ -63,7 +63,46 @@ bool Operator::equals(UnaryOp op) const {
       ==OpSymb::getTextRepr(OpSymbolVariant(op));
 }
 
+std::string Operator::toString(bool printChildren) const {
+  return AbstractNode::generateOutputString(printChildren, {this->getOperatorString()});
+}
+
+Operator::Operator(OpSymbolVariant opVar) {
+  this->operatorSymbol = opVar;
+  this->operatorString = OpSymb::getTextRepr(opVar);
+}
+
+bool Operator::supportsCircuitMode() {
+  return true;
+}
+
+const OpSymbolVariant &Operator::getOperatorSymbol() const {
+  return operatorSymbol;
+}
+
+Operator::~Operator() = default;
+
+Operator *Operator::clone(bool keepOriginalUniqueNodeId) {
+  auto clonedNode = new Operator(this->getOperatorSymbol());
+  if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
+  if (this->isReversed) clonedNode->swapChildrenParents();
+  return clonedNode;
+}
+
+// ===============================================================
+// Methods for handling unary operator evaluation
+// ===============================================================
+
 AbstractLiteral *Operator::applyOperator(AbstractLiteral *rhs) {
+  // unary operator on matrix
+  if (!rhs->getMatrix()->isScalar()) {
+    // clone the existing literal as the result will be of the same type
+    auto resultType = rhs->clone(false)->castTo<AbstractLiteral>();
+    // store the evaluation result in the new literal
+    resultType->setMatrix(rhs->getMatrix()->applyUnaryOperator(this));
+    return resultType;
+  }
+
   // determine Literal subtype of rhs
   if (auto rhsString = dynamic_cast<LiteralString *>(rhs))
     return applyOperator(rhsString);
@@ -100,50 +139,36 @@ AbstractLiteral *Operator::applyOperator(LiteralFloat *) {
       "Could not apply unary operator (" + this->getOperatorString() + ") on (" + this->getNodeType() + ").");
 }
 
+// ===============================================================
+// Methods for handling binary operator evaluation
+// ===============================================================
+
 // -----------------
 // First call of applyOperator -> both Types are unknown
 // -----------------
 AbstractLiteral *Operator::applyOperator(AbstractLiteral *lhs, AbstractLiteral *rhs) {
-  // check if at least one of the operands is a matrix (i.e., non-scalar), in this case delegate applying the operator
-  // to the Matrix class
-  if (!lhs->getMatrix()->isScalar() || !lhs->getMatrix()->isScalar()) {
-    applyMatrixOperator(lhs, rhs, *this);
+  // if at least one of the operands is a matrix (i.e., non-scalar) -> let Matrix class handle it
+  if (!lhs->getMatrix()->isScalar() || !rhs->getMatrix()->isScalar()) {
+    // check that type of both operands is the same, in that case also the template type T will be the same
+    if (typeid(*lhs)!=typeid(*rhs)) {
+      throw std::runtime_error(
+          "Operations involving matrices currently only supported for same-type matrices/scalars.");
+    }
+    // clone the existing literal as the result will be of the same type
+    auto resultType = lhs->clone(false)->castTo<AbstractLiteral>();
+    // store the evaluation result in the new literal
+    // NOTE: applyBinaryOperator cannot handle binary expression with operands of different types yet.
+    resultType->setMatrix(lhs->getMatrix()->applyBinaryOperator(rhs->getMatrix(), this));
+    return resultType;
   }
 
   // determine Literal subtype of lhs to continue evaluation chain
-  if (auto lhsString = dynamic_cast<LiteralString *>(lhs))
-    return applyOperator(lhsString, rhs);
-  else if (auto lhsInt = dynamic_cast<LiteralInt *>(lhs))
-    return applyOperator(lhsInt, rhs);
-  else if (auto lhsBool = dynamic_cast<LiteralBool *>(lhs))
-    return applyOperator(lhsBool, rhs);
-  else if (auto lhsFloat = dynamic_cast<LiteralFloat *>(lhs))
-    return applyOperator(lhsFloat, rhs);
+  if (auto lhsString = dynamic_cast<LiteralString *>(lhs)) return applyOperator(lhsString, rhs);
+  else if (auto lhsInt = dynamic_cast<LiteralInt *>(lhs)) return applyOperator(lhsInt, rhs);
+  else if (auto lhsBool = dynamic_cast<LiteralBool *>(lhs)) return applyOperator(lhsBool, rhs);
+  else if (auto lhsFloat = dynamic_cast<LiteralFloat *>(lhs)) return applyOperator(lhsFloat, rhs);
   else
     throw std::logic_error("Could not recognize type of lhs in applyOperator(Literal *lhs, Literal *rhs).");
-}
-
-AbstractLiteral *Operator::applyMatrixOperator(AbstractLiteral *lhs, AbstractLiteral *rhs, Operator &op) {
-  // TODO(pjattke): test method!
-  if (typeid(lhs)!=typeid(rhs)) {
-    throw std::runtime_error("Operations involving matrices currently only supported for same-type matrices/scalars.");
-  }
-
-  if ( // one is matrix, other is scalar
-      (lhs->getMatrix()->isScalar() ^ rhs->getMatrix()->isScalar())
-          // or both are matrices and the operator is not a multiplication
-          || (!lhs->getMatrix()->isScalar() && !rhs->getMatrix()->isScalar() && !op.equals(multiplication))) {
-    // execute the operator componentwise
-    return lhs->getMatrix()->applyOperatorComponentwise(rhs->getMatrix(), this);
-  } else if (
-    // both operands are matrices and the operator is a multiplication
-      !lhs->getMatrix()->isScalar() && !rhs->getMatrix()->isScalar() && op.equals(multiplication)) {
-    // use the matrix-matrix multiplication
-    return lhs->getMatrix()->applyMatrixMultiplication(rhs->getMatrix());
-  } else {
-    throw std::runtime_error("Cannot handle operator (" + operatorString + ") on given operands ("
-                                 + lhs->toString(false) + ", " + rhs->toString(false) + ").");
-  }
 }
 
 // -----------------
@@ -349,31 +374,5 @@ AbstractLiteral *Operator::applyOperator(LiteralInt *lhs, LiteralInt *rhs) {
 
   else
     throw std::logic_error("applyOperator(LiteralInt* lhs, LiteralInt* rhs) failed!");
-}
-
-std::string Operator::toString(bool printChildren) const {
-  return AbstractNode::generateOutputString(printChildren, {this->getOperatorString()});
-}
-
-Operator::Operator(OpSymbolVariant opVar) {
-  this->operatorSymbol = opVar;
-  this->operatorString = OpSymb::getTextRepr(opVar);
-}
-
-bool Operator::supportsCircuitMode() {
-  return true;
-}
-
-const OpSymbolVariant &Operator::getOperatorSymbol() const {
-  return operatorSymbol;
-}
-
-Operator::~Operator() = default;
-
-Operator *Operator::clone(bool keepOriginalUniqueNodeId) {
-  auto clonedNode = new Operator(this->getOperatorSymbol());
-  if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
-  if (this->isReversed) clonedNode->swapChildrenParents();
-  return clonedNode;
 }
 
