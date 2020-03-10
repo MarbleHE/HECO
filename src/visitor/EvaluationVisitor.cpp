@@ -42,7 +42,7 @@ void EvaluationVisitor::visit(AbstractStatement &elem) {
 }
 
 void EvaluationVisitor::visit(ArithmeticExpr &elem) {
-  // we first need to evaluate the left-handside and right-handside as they can consists of nested arithmetic expressions
+  // we first need to evaluate the left- and right-handside as they can consists of nested arithmetic expressions
   elem.getLeft()->accept(*this);
   auto l = results.top().front();
   results.pop();
@@ -183,22 +183,24 @@ void EvaluationVisitor::visit(Return &elem) {
 
 void EvaluationVisitor::visit(UnaryExpr &elem) {
   elem.getRight()->accept(*this);
-  auto r = results.top().front();
-  results.push({elem.getOp()->applyOperator(r)});
+  results.push({elem.getOp()->applyOperator(results.top().front())});
 }
 
 void EvaluationVisitor::visit(Rotate &elem) {
   auto ae = elem.getOperand();
   if (auto operandAsAl = dynamic_cast<AbstractLiteral *>(ae)) {
+    // rotate the Literal in-place
     operandAsAl->getMatrix()->rotate(elem.getRotationFactor(), true);
     results.push({operandAsAl});
   } else if (auto var = dynamic_cast<Variable *>(ae)) {
+    // get the variable's value
     auto value = getVarValue(var->getIdentifier());
-    if (value==nullptr) {
-      throw std::logic_error("Cannot perform rotation as Variable's value is unknown.");
-    }
-    value->getMatrix()->rotate(elem.getRotationFactor(), true);
-    results.push({value});
+    if (value==nullptr) throw std::logic_error("Cannot perform rotation as Variable's value is unknown.");
+    // clone the value (i.e., an instance of AbstractLiteral) because rotate only returns an AbstractMatrix
+    auto clonedValue = value->clone(false)->castTo<AbstractLiteral>();
+    // rotate the cloned value in-place
+    clonedValue->getMatrix()->rotate(elem.getRotationFactor(), true);
+    results.push({clonedValue});
   }
 }
 
@@ -212,10 +214,10 @@ void EvaluationVisitor::visit(VarAssignm &elem) {
 void EvaluationVisitor::visit(VarDecl &elem) {
   if (elem.getInitializer()!=nullptr) {
     elem.getInitializer()->accept(*this);
-
+    // get the variable declaration's evaluated value
     auto value = results.top().front();
     results.pop();
-
+    // save the variable's value
     updateVarValue(elem.getIdentifier(), value);
     results.push({value});
   } else {
