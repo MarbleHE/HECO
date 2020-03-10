@@ -88,13 +88,13 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/ast/For.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/Rotate.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/AbstractMatrix.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/Dimension.cpp)
+        ${ast_optimizer_SOURCE_DIR}/src/ast/Dimension.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/Matrix.cpp)
 
 set(HEADER_ONLY_SOURCES
         ${ast_optimizer_SOURCE_DIR}/include/ast/OpSymbEnum.h
         ${ast_optimizer_SOURCE_DIR}/include/utilities/RandNumGen.h
-        ${ast_optimizer_SOURCE_DIR}/include/utilities/TestUtils.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast/Matrix.h)
+        ${ast_optimizer_SOURCE_DIR}/include/utilities/TestUtils.h)
 
 add_executable(ast_demo
         ${ast_optimizer_SOURCE_DIR}/main.cpp
