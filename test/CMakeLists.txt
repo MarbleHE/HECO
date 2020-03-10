@@ -39,7 +39,8 @@ set(TEST_FILES
         PrintVisitorTest.cpp
         MultRewriteTest.cpp
         AstTestingGenerator.cpp
-        AstTestingGenerator.h AstEvaluationTest.cpp
+        AstTestingGenerator.h
+        EvaluationVisitorTest.cpp
         ${ast_optimizer_SOURCE_DIR}/include/utilities/TestUtils.h
         MultDepthVisitorTest.cpp
         ChildParentTest.cpp
