@@ -1,6 +1,11 @@
 #include <Variable.h>
+#include <type_traits>
 #include "Matrix.h"
 #include "gtest/gtest.h"
+#include "LiteralFloat.h"
+#include "LiteralBool.h"
+#include "LiteralInt.h"
+#include "LiteralString.h"
 
 TEST(MatrixTest, createMatrix_expectedInvalidMatrixDimensionsException) {  /* NOLINT */
   EXPECT_THROW(Matrix<int>({{3, 3, 2}, {2, 3}}), std::invalid_argument);
@@ -384,12 +389,12 @@ TEST(MatrixTest, applyOperatorComponentwise) {  /* NOLINT */
   Matrix<int> B({{7, 8, 9}, {1, 1, 4}, {6, 11, 3}});
 
   auto addition = [](int a, int b) { return a + b; };
-  auto result = Matrix<int>::applyOperatorComponentwise(&A, &B, addition);
+  auto result = applyComponentwise<int>(&A, &B, addition);
   auto expectedMatrix = Matrix<int>({{10, 10, 10}, {5, 5, 5}, {15, 15, 6}});
   EXPECT_EQ(*result, expectedMatrix);
 
   auto subtraction = [](int a, int b) { return a - b; };
-  result = Matrix<int>::applyOperatorComponentwise(&A, &B, subtraction);
+  result = applyComponentwise<int>(&A, &B, subtraction);
   expectedMatrix = Matrix<int>({{-4, -6, -8}, {3, 3, -3}, {3, -7, 0}});
   EXPECT_EQ(*result, expectedMatrix);
 }
@@ -400,11 +405,11 @@ TEST(MatrixTest, applyScalarProduct) {  /* NOLINT */
   auto addition = [](int a, int b) { return a + b; };
 
   // scalar product where lhs operand is matrix and rhs operand is scalar
-  auto result = Matrix<int>::applyOperatorComponentwise(&A, &scalar, addition);
+  auto result = applyComponentwise<int>(&A, &scalar, addition);
   auto expectedMatrix = Matrix<int>({{4, 3, 2}, {5, 5, 2}, {10, 5, 4}});
   EXPECT_EQ(*result, expectedMatrix);
   // scalar product where lhs operand is scalar and rhs operand is matrix
-  result = Matrix<int>::applyOperatorComponentwise(&scalar, &A, addition);
+  result = applyComponentwise<int>(&scalar, &A, addition);
   EXPECT_EQ(*result, expectedMatrix);
 }
 
@@ -414,8 +419,54 @@ TEST(MatrixTest, applyMatrixMultiplication) {  /* NOLINT */
   // 2x3 matrix
   Matrix<int> B({{0, 1, 1}, {4, 5, 7}});
 
-  auto result = Matrix<int>::applyMatrixMultiplication(A, B);
+  auto result = applyMatrixMultiplication(&A, &B);
   // 4x3 matrix
   auto expectedMatrix = Matrix<int>({{12, 17, 23}, {20, 29, 39}, {24, 38, 50}, {20, 26, 36}});
   EXPECT_EQ(*result, expectedMatrix);
+}
+
+class MatrixOperationFixture : public ::testing::Test {
+ protected:
+  AbstractLiteral *intScalar;
+  AbstractLiteral *intMatrix1;
+  AbstractLiteral *intMatrix2;
+  AbstractLiteral *boolScalar;
+  AbstractLiteral *boolMatrix1;
+  AbstractLiteral *boolMatrix2;
+  AbstractLiteral *floatScalar;
+  AbstractLiteral *floatMatrix1;
+  AbstractLiteral *floatMatrix2;
+  AbstractLiteral *stringScalar;
+  AbstractLiteral *stringMatrix1;
+  AbstractLiteral *stringMatrix2;
+
+  // TODO(pjattke): Write some more tests.
+
+ public:
+  MatrixOperationFixture() {
+    intScalar = new LiteralInt(42);
+    intMatrix1 = new LiteralInt(new Matrix<int>(
+        {{1, 2, 52}, {3, 4, 1}}));
+//    intMatrix2 = new LiteralInt(new Matrix<int>({{}}));
+//    boolScalar = new LiteralBool(false);
+    boolMatrix1 = new LiteralBool(new Matrix<bool>({{true, false, false}, {false, true, false}, {false, false, true}}));
+//    boolMatrix2 = new LiteralBool(new Matrix<bool>({{}}));
+//    floatScalar = new LiteralFloat(83.11139f);
+//    floatMatrix1 = new LiteralFloat(new Matrix<float>({{}}));
+//    floatMatrix2 = new LiteralFloat(new Matrix<float>({{}}));
+//    stringScalar = new LiteralString("Fully Homomorphic Encryption Acceleration Engine");
+//    stringMatrix1 = new LiteralString(new Matrix<std::string>({{}}));
+//    stringMatrix2 = new LiteralString(new Matrix<std::string>({{}}));
+  }
+};
+
+TEST_F(MatrixOperationFixture, matrix_scalar_add) {
+  auto result = Operator(ArithmeticOp::multiplication).applyOperator(intScalar, intMatrix1)->getMatrix();
+  EXPECT_EQ(*dynamic_cast<Matrix<int> *>(result), *new Matrix<int>({{42, 84, 2'184}, {126, 168, 42}}));
+}
+
+TEST_F(MatrixOperationFixture, matrix_negate) {
+  auto result = Operator(UnaryOp::negation).applyOperator(boolMatrix1)->getMatrix();
+  EXPECT_EQ(*dynamic_cast<Matrix<bool> *>(result),
+            *new Matrix<bool>({{false, true, true}, {true, false, true}, {true, true, false}}));
 }
