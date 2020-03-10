@@ -6,7 +6,10 @@
 #include <map>
 #include <unordered_map>
 #include "AbstractLiteral.h"
-#include "Matrix.h"
+
+template<typename T>
+class Matrix;
+class AbstractMatrix;
 
 class LiteralFloat : public AbstractLiteral {
  private:

@@ -4,6 +4,7 @@
 #include "LiteralFloat.h"
 #include "LiteralString.h"
 #include "gtest/gtest.h"
+#include "Matrix.h"
 
 TEST(LiteralTest, compareLiterals_literalsOfDifferentTypeAreAlwaysUnequal) { /* NOLINT */
   AbstractLiteral *boolFalse = new LiteralBool(false);

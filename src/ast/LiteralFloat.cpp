@@ -3,6 +3,7 @@
 #include "Datatype.h"
 #include "AbstractExpr.h"
 #include "RandNumGen.h"
+#include "Matrix.h"
 
 LiteralFloat::LiteralFloat(float value) : matrix(new Matrix(value)) {}
 

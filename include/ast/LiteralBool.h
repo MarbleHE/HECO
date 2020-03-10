@@ -5,7 +5,10 @@
 #include <map>
 #include <unordered_map>
 #include "AbstractLiteral.h"
-#include "Matrix.h"
+
+template<typename T>
+class Matrix;
+class AbstractMatrix;
 
 class LiteralBool : public AbstractLiteral {
  private:

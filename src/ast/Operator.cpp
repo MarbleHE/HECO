@@ -6,6 +6,7 @@
 #include "LiteralString.h"
 #include "LiteralBool.h"
 #include "LiteralFloat.h"
+#include "Matrix.h"
 
 void Operator::accept(Visitor &v) {
   v.visit(*this);

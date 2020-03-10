@@ -5,7 +5,10 @@
 #include <ostream>
 #include <map>
 #include "AbstractLiteral.h"
-#include "Matrix.h"
+
+template<typename T>
+class Matrix;
+class AbstractMatrix;
 
 class LiteralInt : public AbstractLiteral {
  private:

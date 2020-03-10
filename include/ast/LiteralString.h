@@ -4,7 +4,10 @@
 #include <string>
 #include <unordered_map>
 #include "AbstractLiteral.h"
-#include "Matrix.h"
+
+template<typename T>
+class Matrix;
+class AbstractMatrix;
 
 class LiteralString : public AbstractLiteral {
  private:

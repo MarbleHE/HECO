@@ -2,6 +2,7 @@
 #include <iostream>
 #include "RandNumGen.h"
 #include "AbstractExpr.h"
+#include "Matrix.h"
 
 bool LiteralInt::supportsDatatype(Datatype &datatype) {
   return datatype.getType()==Types::INT;

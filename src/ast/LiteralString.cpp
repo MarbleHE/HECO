@@ -2,6 +2,7 @@
 #include "Datatype.h"
 #include "LiteralString.h"
 #include "RandNumGen.h"
+#include "Matrix.h"
 
 LiteralString::LiteralString(Matrix<std::string> *inputMatrix) : matrix(inputMatrix) {}
 

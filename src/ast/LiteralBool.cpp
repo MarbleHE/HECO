@@ -1,5 +1,6 @@
 #include "LiteralBool.h"
 #include "RandNumGen.h"
+#include "Matrix.h"
 
 LiteralBool::LiteralBool(bool value) : matrix(new Matrix(value)) {}
 
