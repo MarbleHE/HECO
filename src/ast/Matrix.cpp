@@ -119,7 +119,7 @@ AbstractMatrix *Matrix<bool>::applyBinaryOperatorComponentwise(Matrix<bool> *rhs
   } else if (os->equals(LogCompOp::LOGICAL_OR)) {
     operatorFunction = [](bool a, bool b) -> bool { return a || b; };
   } else if (os->equals(LogCompOp::LOGICAL_XOR)) {
-    operatorFunction = [](int a, int b) -> int { return a ^ b; };
+    operatorFunction = [](bool a, bool b) -> int { return a ^ b; };
   } else if (os->equals(LogCompOp::EQUAL)) {
     operatorFunction = [](bool a, bool b) -> bool { return a==b; };    // ==== Comparison Operators ====================
   } else if (os->equals(LogCompOp::UNEQUAL)) {
