@@ -1,15 +1,17 @@
 ```
-      ________  ________   ______          __        ____        __  _           _                           
-     / ____/ / / / ____/  / ____/___  ____/ /__     / __ \____  / /_(_)___ ___  (_)___  ___  _____           
-    / /_  / /_/ / __/    / /   / __ \/ __  / _ \   / / / / __ \/ __/ / __ `__ \/ /_  / / _ \/ ___/           
-   / __/ / __  / /___   / /___/ /_/ / /_/ /  __/  / /_/ / /_/ / /_/ / / / / / / / / /_/  __/ /               
-  /_/   /_/ /_/_____/   \____/\____/\__,_/\___/   \____/ .___/\__/_/_/ /_/ /_/_/ /___/\___/_/                
-                                                      /_/                                                    
+      ________  ________   ______          __        ____        __  _           _                 
+     / ____/ / / / ____/  / ____/___  ____/ /__     / __ \____  / /_(_)___ ___  (_)___  ___  _____ 
+    / /_  / /_/ / __/    / /   / __ \/ __  / _ \   / / / / __ \/ __/ / __ `__ \/ /_  / / _ \/ ___/ 
+   / __/ / __  / /___   / /___/ /_/ / /_/ /  __/  / /_/ / /_/ / /_/ / / / / / / / / /_/  __/ /     
+  /_/   /_/ /_/_____/   \____/\____/\__,_/\___/   \____/ .___/\__/_/_/ /_/ /_/_/ /___/\___/_/      
+                                                      /_/                                          
 ```
-[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)]()
-![](https://github.com/MarbleHE/AST-Optimizer/workflows/build_run_tests/badge.svg?branch=operator-extensions)
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](#)
+[![CI/CD](https://github.com/MarbleHE/AST-Optimizer/workflows/build_run_tests/badge.svg?branch=operator-extensions)](https://github.com/MarbleHE/AST-Optimizer/actions)
 [![Documentation](https://img.shields.io/badge/docs-doxygen-blue.svg)](http://marblehe.github.io/AST-Optimizer)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+// TODO Make the documentation available as described on [this blogpost](https://goseeky.wordpress.com/2017/07/22/documentation-101-doxygen-with-github-pages/).
 
 This repository hosts an optimizer for Fully Homomorphic Encryption (FHE) working on an AST-like (Abstract Syntax Tree) representation of a program.
 In future, this optimization component will be integrated into the [Marble](https://github.com/MarbleHE/Marble) FHE compiler [1].
