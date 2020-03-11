@@ -70,6 +70,8 @@ class SecretTaintingVisitor : public Visitor {
       return std::find(taintedVariables.begin(), taintedVariables.end(), identifier)!=taintedVariables.end();
     });
   }
+
+  void visit(Transpose &elem) override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_VISITOR_SECRETTAINTINGVISITOR_H_

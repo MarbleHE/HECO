@@ -190,6 +190,10 @@ void SecretTaintingVisitor::visit(Rotate &elem) {
   Visitor::visit(elem);
 }
 
+void SecretTaintingVisitor::visit(Transpose &elem) {
+  Visitor::visit(elem);
+}
+
 // ==========================
 // HELPER METHODS
 // ==========================
