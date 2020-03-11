@@ -22,8 +22,8 @@ void MultRewriteVisitor::visit(ArithmeticExpr &elem) {
     }
 
     // B. For case { int tmp = B*C; tmp = tmp*A; } where both BinaryExp are in separate statements.
-    // If there is a last statement (i.e., this is not the first statement of the scope).
-    // (-> Check penultimate statement b/c the statement this ArithmeticExpr elem belongs to was already added to curScope)
+    // If there is a last statement (i.e., this is not the first statement of the scope). Check penultimate statement
+    // because the statement this ArithmeticExpr elem belongs to was already added to curScope.
     if (auto puStat = curScope->getNthLastStatement(2)) {
       // If previous statement in scope contains a ArithmeticExpr multiplication...
       if (auto lastStat = puStat->contains(new ArithmeticExpr(ArithmeticOp::MULTIPLICATION), nullptr)) {
@@ -46,85 +46,6 @@ void MultRewriteVisitor::visit(ArithmeticExpr &elem) {
   Visitor::visit(elem);
 }
 
-void MultRewriteVisitor::visit(Block &elem) {
-  Visitor::visit(elem);
-}
-
-void MultRewriteVisitor::visit(Call &elem) {
-  Visitor::visit(elem);
-}
-
-void MultRewriteVisitor::visit(CallExternal &elem) {
-  Visitor::visit(elem);
-}
-
-void MultRewriteVisitor::visit(Function &elem) {
-  Visitor::visit(elem);
-}
-
-void MultRewriteVisitor::visit(FunctionParameter &elem) {
-  Visitor::visit(elem);
-}
-
-void MultRewriteVisitor::visit(For &elem) {
-  Visitor::visit(elem);
-}
-void MultRewriteVisitor::visit(Rotate &elem) {
-  Visitor::visit(elem);
-}
-
-void MultRewriteVisitor::visit(If &elem) {
-  Visitor::visit(elem);
-}
-
-void MultRewriteVisitor::visit(LiteralBool &elem) {
-  Visitor::visit(elem);
-}
-
-void MultRewriteVisitor::visit(LiteralInt &elem) {
-  Visitor::visit(elem);
-}
-
-void MultRewriteVisitor::visit(LiteralFloat &elem) {
-  Visitor::visit(elem);
-}
-
-void MultRewriteVisitor::visit(LiteralString &elem) {
-  Visitor::visit(elem);
-}
-
-void MultRewriteVisitor::visit(LogicalExpr &elem) {
-  Visitor::visit(elem);
-}
-
-void MultRewriteVisitor::visit(Operator &elem) {
-  Visitor::visit(elem);
-}
-
-void MultRewriteVisitor::visit(Return &elem) {
-  Visitor::visit(elem);
-}
-
-void MultRewriteVisitor::visit(UnaryExpr &elem) {
-  Visitor::visit(elem);
-}
-
-void MultRewriteVisitor::visit(VarAssignm &elem) {
-  Visitor::visit(elem);
-}
-
-void MultRewriteVisitor::visit(VarDecl &elem) {
-  Visitor::visit(elem);
-}
-
-void MultRewriteVisitor::visit(Variable &elem) {
-  Visitor::visit(elem);
-}
-
-void MultRewriteVisitor::visit(While &elem) {
-  Visitor::visit(elem);
-}
-
 int MultRewriteVisitor::getNumChanges() const {
   return numChanges;
 }
@@ -132,5 +53,4 @@ int MultRewriteVisitor::getNumChanges() const {
 bool MultRewriteVisitor::changedAst() const {
   return numChanges!=0;
 }
-
 
