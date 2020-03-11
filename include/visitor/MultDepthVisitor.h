@@ -72,6 +72,12 @@ class MultDepthVisitor : public Visitor {
   analyzeMultiplicativeDepth(const std::string &varIdentifier, AbstractStatement *stmt, AbstractExpr *initializer);
 
   void updateDepthStructures(AbstractStatement *stmt, const std::string &varIdentifier, int depth);
+
+  void visit(Datatype &elem) override;
+
+  void visit(ParameterList &elem) override;
+
+  void visit(Transpose &elem) override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_VISITOR_MULTDEPTHVISITOR_H_
