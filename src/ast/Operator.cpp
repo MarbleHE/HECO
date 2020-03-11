@@ -99,7 +99,7 @@ AbstractLiteral *Operator::applyOperator(AbstractLiteral *rhs) {
     // clone the existing literal as the result will be of the same type
     auto resultType = rhs->clone(false)->castTo<AbstractLiteral>();
     // store the evaluation result in the new literal
-    resultType->setMatrix(rhs->getMatrix()->applyUnaryOperator(this));
+    resultType->setMatrix(rhs->getMatrix()->applyUnaryOperatorComponentwise(this));
     return resultType;
   }
 

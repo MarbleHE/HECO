@@ -426,47 +426,166 @@ TEST(MatrixTest, applyMatrixMultiplication) {  /* NOLINT */
 }
 
 class MatrixOperationFixture : public ::testing::Test {
- protected:
-  AbstractLiteral *intScalar;
-  AbstractLiteral *intMatrix1;
-  AbstractLiteral *intMatrix2;
-  AbstractLiteral *boolScalar;
-  AbstractLiteral *boolMatrix1;
-  AbstractLiteral *boolMatrix2;
-  AbstractLiteral *floatScalar;
-  AbstractLiteral *floatMatrix1;
-  AbstractLiteral *floatMatrix2;
-  AbstractLiteral *stringScalar;
-  AbstractLiteral *stringMatrix1;
-  AbstractLiteral *stringMatrix2;
+//  ╔═══════════════════════════════════════════════════════════════╗
+//  ║ Tested Combinations (non-exhaustive testing)                  ║
+//  ╚═══════════════════════════════════════════════════════════════╝
+//                             ┌────────────────────────────────────┐
+//                             │ Matrix-Matrix       Matrix-Scalar  │
+//  ┌──────────────────────────┼────────────────────────────────────┤
+//  │ ADDITION                 │ int                 -              │
+//  │ SUBTRACTION              │ int                 -              │
+//  │ MULTIPLICATION           │ float               int            │
+//  │ DIVISION                 │ -                   int            │
+//  │ MODULO                   │ -                   int            │
+//  ├──────────────────────────┼────────────────────────────────────┤
+//  │ LOGICAL_AND              │ bool                bool           │
+//  │ LOGICAL_OR               │ bool                bool           │
+//  │ LOGICAL_XOR              │ bool                bool           │
+//  ├──────────────────────────┼────────────────────────────────────┤
+//  │ SMALLER                  │ -                   float          │
+//  │ SMALLER_EQUAL            │ -                   float          │
+//  │ GREATER                  │ -                   float          │
+//  │ GREATER_EQUAL            │ -                   float          │
+//  │ EQUAL                    │ int                 -              │
+//  │ UNEQUAL                  │ int                 -              │
+//  └──────────────────────────┴────────────────────────────────────┘
+//  ┌───────────────────────────────────────────────────────────────┐
+//  │ Sign "-" indicates an untested combination.                   │
+//  └───────────────────────────────────────────────────────────────┘
 
-  // TODO(pjattke): Write some more tests.
+ protected:
+  AbstractLiteral *intScalar1, *intScalar2, *intMatrix1, *intMatrix2, *intMatrix3, *boolScalar, *boolMatrix1,
+      *boolMatrix2, *floatScalar1, *floatScalar2, *floatMatrix1, *floatMatrix2;
 
  public:
-  MatrixOperationFixture() {
-    intScalar = new LiteralInt(42);
-    intMatrix1 = new LiteralInt(new Matrix<int>(
-        {{1, 2, 52}, {3, 4, 1}}));
-//    intMatrix2 = new LiteralInt(new Matrix<int>({{}}));
-//    boolScalar = new LiteralBool(false);
-    boolMatrix1 = new LiteralBool(new Matrix<bool>({{true, false, false}, {false, true, false}, {false, false, true}}));
-//    boolMatrix2 = new LiteralBool(new Matrix<bool>({{}}));
-//    floatScalar = new LiteralFloat(83.11139f);
-//    floatMatrix1 = new LiteralFloat(new Matrix<float>({{}}));
-//    floatMatrix2 = new LiteralFloat(new Matrix<float>({{}}));
-//    stringScalar = new LiteralString("Fully Homomorphic Encryption Acceleration Engine");
-//    stringMatrix1 = new LiteralString(new Matrix<std::string>({{}}));
-//    stringMatrix2 = new LiteralString(new Matrix<std::string>({{}}));
+  MatrixOperationFixture() { /* NOLINT */
+    intScalar1 = new LiteralInt(42);
+    intScalar2 = new LiteralInt(2);
+    intMatrix1 = new LiteralInt(new Matrix<int>({{1, 2, 52}, {3, 4, 1}}));
+    intMatrix2 = new LiteralInt(new Matrix<int>({{3, 2, 1}, {3, 4, 3}}));
+    intMatrix3 = new LiteralInt(new Matrix<int>({{3, 9, 1}, {3, 4, 1}}));
+    boolScalar = new LiteralBool(false);
+    boolMatrix1 = new LiteralBool(new Matrix<bool>(
+        {{true, false, false}, {false, true, false}, {false, false, true}}));
+    boolMatrix2 = new LiteralBool(new Matrix<bool>(
+        {{false, false, true}, {true, true, false}, {true, true, true}}));
+    floatScalar1 = new LiteralFloat(2.22f);
+    floatScalar2 = new LiteralFloat(2.5f);
+    floatMatrix1 = new LiteralFloat(new Matrix<float>({{1.32f, 3.11f, 2.22f}, {2.55f, 2.1f, 6.2f}}));
+    floatMatrix2 = new LiteralFloat(new Matrix<float>({{0.0f, 1.0f}, {3.5f, 2.5f}, {7.43f, 2.1f}}));
   }
 };
 
-TEST_F(MatrixOperationFixture, matrix_scalar_add) {
-  auto result = Operator(ArithmeticOp::multiplication).applyOperator(intScalar, intMatrix1)->getMatrix();
+TEST_F(MatrixOperationFixture, matrix_scalar_mult) {  /* NOLINT */
+  auto result = Operator(ArithmeticOp::MULTIPLICATION).applyOperator(intScalar1, intMatrix1)->getMatrix();
   EXPECT_EQ(*dynamic_cast<Matrix<int> *>(result), *new Matrix<int>({{42, 84, 2'184}, {126, 168, 42}}));
 }
 
-TEST_F(MatrixOperationFixture, matrix_negate) {
-  auto result = Operator(UnaryOp::negation).applyOperator(boolMatrix1)->getMatrix();
+TEST_F(MatrixOperationFixture, matrix_scalar_div) {  /* NOLINT */
+  auto result = Operator(ArithmeticOp::DIVISION).applyOperator(intMatrix1, intScalar2)->getMatrix();
+  EXPECT_EQ(*dynamic_cast<Matrix<int> *>(result), *new Matrix<int>({{0, 1, 26}, {1, 2, 0}}));
+}
+
+TEST_F(MatrixOperationFixture, matrix_scalar_mod) {  /* NOLINT */
+  auto result = Operator(ArithmeticOp::MODULO).applyOperator(intMatrix1, intScalar2)->getMatrix();
+  EXPECT_EQ(*dynamic_cast<Matrix<int> *>(result), *new Matrix<int>({{1, 0, 0}, {1, 0, 1}}));
+}
+
+TEST_F(MatrixOperationFixture, matrix_matrix_sub) {  /* NOLINT */
+  auto result = Operator(ArithmeticOp::SUBTRACTION).applyOperator(intMatrix1, intMatrix2)->getMatrix();
+  EXPECT_EQ(*dynamic_cast<Matrix<int> *>(result), *new Matrix<int>({{-2, 0, 51}, {0, 0, -2}}));
+}
+
+TEST_F(MatrixOperationFixture, matrix_matrix_int) {  /* NOLINT */
+  auto result = Operator(ArithmeticOp::ADDITION).applyOperator(intMatrix1, intMatrix2)->getMatrix();
+  EXPECT_EQ(*dynamic_cast<Matrix<int> *>(result), *new Matrix<int>({{4, 4, 53}, {6, 8, 4}}));
+}
+
+TEST_F(MatrixOperationFixture, matrix_matrix_mult) {  /* NOLINT */
+  auto result = Operator(ArithmeticOp::MULTIPLICATION).applyOperator(floatMatrix1, floatMatrix2)->getMatrix();
+  EXPECT_EQ(*dynamic_cast<Matrix<float> *>(result),
+            *new Matrix<float>({{27.3796005, 13.756999}, {53.4159966, 20.8199997}}));
+}
+
+TEST_F(MatrixOperationFixture, matrix_bool_negate) {  /* NOLINT */
+  auto result = Operator(UnaryOp::NEGATION).applyOperator(boolMatrix1)->getMatrix();
   EXPECT_EQ(*dynamic_cast<Matrix<bool> *>(result),
             *new Matrix<bool>({{false, true, true}, {true, false, true}, {true, true, false}}));
+}
+
+TEST_F(MatrixOperationFixture, matrix_int_negate) {  /* NOLINT */
+  auto result = Operator(UnaryOp::NEGATION).applyOperator(intMatrix1)->getMatrix();
+  EXPECT_EQ(*dynamic_cast<Matrix<int> *>(result), *new Matrix<int>({{-1, -2, -52}, {-3, -4, -1}}));
+}
+
+TEST_F(MatrixOperationFixture, matrix_matrix_logicalAnd) {  /* NOLINT */
+  auto result = Operator(LogCompOp::LOGICAL_AND).applyOperator(boolMatrix1, boolMatrix2)->getMatrix();
+  EXPECT_EQ(*dynamic_cast<Matrix<bool> *>(result),
+            *new Matrix<bool>({{false, false, false}, {false, true, false}, {false, false, true}}));
+}
+
+TEST_F(MatrixOperationFixture, matrix_matrix_logicalOr) {  /* NOLINT */
+  auto result = Operator(LogCompOp::LOGICAL_OR).applyOperator(boolMatrix1, boolMatrix2)->getMatrix();
+  EXPECT_EQ(*dynamic_cast<Matrix<bool> *>(result),
+            *new Matrix<bool>({{true, false, true}, {true, true, false}, {true, true, true}}));
+}
+
+TEST_F(MatrixOperationFixture, matrix_matrix_logicalXor) {  /* NOLINT */
+  auto result = Operator(LogCompOp::LOGICAL_XOR).applyOperator(boolMatrix1, boolMatrix2)->getMatrix();
+  EXPECT_EQ(*dynamic_cast<Matrix<bool> *>(result),
+            *new Matrix<bool>({{true, false, true}, {true, false, false}, {true, true, false}}));
+}
+
+TEST_F(MatrixOperationFixture, matrix_scalar_logicalAnd) {  /* NOLINT */
+  auto result = Operator(LogCompOp::LOGICAL_AND).applyOperator(boolScalar, boolMatrix2)->getMatrix();
+  EXPECT_EQ(*dynamic_cast<Matrix<bool> *>(result),
+            *new Matrix<bool>({{false, false, false}, {false, false, false}, {false, false, false}}));
+}
+
+TEST_F(MatrixOperationFixture, matrix_scalar_logicalOr) {  /* NOLINT */
+  auto result = Operator(LogCompOp::LOGICAL_OR).applyOperator(boolScalar, boolMatrix2)->getMatrix();
+  EXPECT_EQ(*dynamic_cast<Matrix<bool> *>(result),
+            *new Matrix<bool>({{false, false, true}, {true, true, false}, {true, true, true}}));
+}
+
+TEST_F(MatrixOperationFixture, matrix_scalar_logicalXor) {  /* NOLINT */
+  auto result = Operator(LogCompOp::LOGICAL_XOR).applyOperator(boolScalar, boolMatrix2)->getMatrix();
+  EXPECT_EQ(*dynamic_cast<Matrix<bool> *>(result),
+            *new Matrix<bool>({{false, false, true}, {true, true, false}, {true, true, true}}));
+}
+
+TEST_F(MatrixOperationFixture, matrix_scalar_smaller) {  /* NOLINT */
+  auto result = Operator(LogCompOp::SMALLER).applyOperator(floatMatrix2, floatScalar2)->getMatrix();
+  EXPECT_EQ(*dynamic_cast<Matrix<float> *>(result),
+            *new Matrix<float>({{1.0f, 1.0f}, {0.0f, 0.0f}, {0.0f, 1.0f}}));
+}
+
+TEST_F(MatrixOperationFixture, matrix_scalar_smallerEqual) {  /* NOLINT */
+  auto result = Operator(LogCompOp::SMALLER_EQUAL).applyOperator(floatMatrix2, floatScalar2)->getMatrix();
+  EXPECT_EQ(*dynamic_cast<Matrix<float> *>(result),
+            *new Matrix<float>({{1.0f, 1.0f}, {0.0f, 1.0f}, {0.0f, 1.0f}}));
+}
+
+TEST_F(MatrixOperationFixture, matrix_scalar_greater) {  /* NOLINT */
+  auto result = Operator(LogCompOp::GREATER).applyOperator(floatMatrix1, floatScalar1)->getMatrix();
+  EXPECT_EQ(*dynamic_cast<Matrix<float> *>(result),
+            *new Matrix<float>({{0.0f, 1.0f, 0.0f}, {1.0f, 0.0f, 1.0f}}));
+}
+
+TEST_F(MatrixOperationFixture, matrix_scalar_greaterEqual) {  /* NOLINT */
+  auto result = Operator(LogCompOp::GREATER_EQUAL).applyOperator(floatMatrix1, floatScalar1)->getMatrix();
+  EXPECT_EQ(*dynamic_cast<Matrix<float> *>(result),
+            *new Matrix<float>({{0.0f, 1.0f, 1.0f}, {1.0f, 0.0f, 1.0f}}));
+}
+
+TEST_F(MatrixOperationFixture, matrix_matrix_equal) {  /* NOLINT */
+  auto result = Operator(LogCompOp::EQUAL).applyOperator(intMatrix2, intMatrix3)->getMatrix();
+  EXPECT_EQ(*dynamic_cast<Matrix<int> *>(result),
+            *new Matrix<int>({{1, 0, 1}, {1, 1, 0}}));
+}
+
+TEST_F(MatrixOperationFixture, matrix_matrix_unequal) {  /* NOLINT */
+  auto result = Operator(LogCompOp::UNEQUAL).applyOperator(intMatrix2, intMatrix3)->getMatrix();
+  EXPECT_EQ(*dynamic_cast<Matrix<int> *>(result),
+            *new Matrix<int>({{0, 1, 0}, {0, 0, 1}}));
 }

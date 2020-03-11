@@ -116,17 +116,6 @@ class Matrix : public AbstractMatrix {
     return (rotationFactor > 0) ? (itBegin + vectorSize - rotationFactor) : (itBegin - rotationFactor);
   }
 
-  /// Overwrites the current matrix values by the given scalarValue such that the matrix finally has the dimension
-  /// specified by targetDimension and consists of same-value elements.
-  /// For example, given targetDimension=(2,4) and scalarValue=7 would result in the matrix [7 7 7 7; 7 7 7 7].
-  /// \param targetDimension The dimension this matrix should be expanded to.
-  /// \param scalarValue The scalar value this matrix should be filled with.
-  void expandAndFillMatrix(Dimension &targetDimension, T scalarValue) {
-    values = std::vector<std::vector<T>>(targetDimension.numRows,
-                                         std::vector<T>(targetDimension.numColumns, scalarValue));
-    getDimensions().update(targetDimension.numRows, targetDimension.numColumns);
-  }
-
  public:
   /// a matrix of row vectors
   std::vector<std::vector<T>> values;
@@ -314,6 +303,17 @@ class Matrix : public AbstractMatrix {
       throw std::invalid_argument("Rotation only supported for 1-dimensional vectors.");
     }
     return matrixToRotate;
+  }
+
+  /// Overwrites the current matrix values by the given scalarValue such that the matrix finally has the dimension
+  /// specified by targetDimension and consists of same-value elements.
+  /// For example, given targetDimension=(2,4) and scalarValue=7 would result in the matrix [7 7 7 7; 7 7 7 7].
+  /// \param targetDimension The dimension this matrix should be expanded to.
+  /// \param scalarValue The scalar value this matrix should be filled with.
+  void expandAndFillMatrix(Dimension &targetDimension, T scalarValue) {
+    values = std::vector<std::vector<T>>(targetDimension.numRows,
+                                         std::vector<T>(targetDimension.numColumns, scalarValue));
+    getDimensions().update(targetDimension.numRows, targetDimension.numColumns);
   }
 
   /// Clones the current matrix.
