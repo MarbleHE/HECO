@@ -19,6 +19,7 @@
 #include "Scope.h"
 #include "For.h"
 #include "Rotate.h"
+#include "Transpose.h"
 
 template<typename T>
 void PrintVisitor::printChildNodesIndented(T &elem) {
@@ -139,6 +140,10 @@ void PrintVisitor::visit(Rotate &elem) {
   printChildNodesIndented(elem);
 }
 
+void PrintVisitor::visit(Transpose &elem) {
+  addOutputStr(elem);
+  printChildNodesIndented(elem);
+}
 
 // ------------–------
 // Constructor & Utility functions

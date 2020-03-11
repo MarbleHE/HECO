@@ -98,6 +98,8 @@ class PrintVisitor : public Visitor {
   void visit(ParameterList &elem) override;
 
   void visit(Rotate &elem) override;
+
+  void visit(Transpose &elem) override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_VISITOR_PRINTVISITOR_H_
