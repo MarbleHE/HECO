@@ -1,22 +1,32 @@
-# FHE Code Optimizer
+```
+      ________  ________   ______          __        ____        __  _           _                           
+     / ____/ / / / ____/  / ____/___  ____/ /__     / __ \____  / /_(_)___ ___  (_)___  ___  _____           
+    / /_  / /_/ / __/    / /   / __ \/ __  / _ \   / / / / __ \/ __/ / __ `__ \/ /_  / / _ \/ ___/           
+   / __/ / __  / /___   / /___/ /_/ / /_/ /  __/  / /_/ / /_/ / /_/ / / / / / / / / /_/  __/ /               
+  /_/   /_/ /_/_____/   \____/\____/\__,_/\___/   \____/ .___/\__/_/_/ /_/ /_/_/ /___/\___/_/                
+                                                      /_/                                                    
+```
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)]()
+![](https://github.com/MarbleHE/AST-Optimizer/workflows/build_run_tests/badge.svg?branch=operator-extensions)
+[![Documentation](https://img.shields.io/badge/docs-doxygen-blue.svg)](http://marblehe.github.io/AST-Optimizer)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 This repository hosts an optimizer for Fully Homomorphic Encryption (FHE) working on an AST-like (Abstract Syntax Tree) representation of a program.
 In future, this optimization component will be integrated into the [Marble](https://github.com/MarbleHE/Marble) FHE compiler [1].
 
-- [FHE Code Optimizer](#fhe-code-optimizer)
-  - [Repository's Structure](#repositorys-structure)
-  - [Optimizations](#optimizations)
-      - [Compile-Time Expression Simplifier](#compile-time-expression-simplifier)
-      - [Cone-Rewriting](#cone-rewriting)
-      - [CKKS Scheme-Specific Optimizations](#ckks-scheme-specific-optimizations)
-  - [AST Representation](#ast-representation)
-  - [Getting Started](#getting-started)
-  - [Extending the Library](#extending-the-library)
-    - [Code Style](#code-style)
-    - [Inspections](#inspections)
-    - [Documentation](#documentation)
-    - [Testing](#testing)
-  - [References](#references)
+- [Repository's Structure](#repositorys-structure)
+- [Optimizations](#optimizations)
+    - [Compile-Time Expression Simplifier](#compile-time-expression-simplifier)
+    - [Cone-Rewriting](#cone-rewriting)
+    - [CKKS Scheme-Specific Optimizations](#ckks-scheme-specific-optimizations)
+- [AST Representation](#ast-representation)
+- [Getting Started](#getting-started)
+- [Extending the Library](#extending-the-library)
+  - [Code Style](#code-style)
+  - [Inspections](#inspections)
+  - [Documentation](#documentation)
+  - [Testing](#testing)
+- [References](#references)
 
 ## Repository's Structure
 

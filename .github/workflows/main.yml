@@ -1,4 +1,4 @@
-name: C/C++ CI
+name: build_run_tests
 
 on: [push]
 
@@ -13,5 +13,3 @@ jobs:
         run: cmake --build build
       - name: test
         run: cd build && ctest
-    #  - name: test
-    #    run: cd build && cd test && ctest
