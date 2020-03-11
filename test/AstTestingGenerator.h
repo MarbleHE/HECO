@@ -32,16 +32,28 @@ class AstTestingGenerator {
   static void genAstEvalSeven(Ast &ast);
   static void genAstPrintVisitorOne(Ast &ast);
   static void genAstPrintVisitorTwo(Ast &ast);
+
   static void genAstMultDepthOne(Ast &ast);
+
   static void genAstMultDepthTwo(Ast &ast);
+
   static void genAstRewritingSimple(Ast &ast);
+
   static void genAstRewritingSimpleExtended(Ast &ast);
+
   static void genAstRewritingMultiInputY(Ast &ast);
+
   static void genAstRewritingTwoDepth2ConesButSingleVNode(Ast &ast);
+
   static void genAstForSecretTaintingWithMultipleNonSequentialStatements(Ast &ast);
+
   static void genAstIncludingForStatement(Ast &ast);
+
   static void genAstUsingRotation(Ast &ast);
+
   static void genAstRotateAndSum(Ast &ast);
+
+  static void genAstTranspose(Ast &ast);
 };
 
 #endif //MASTER_THESIS_CODE_ASTTESTINGGENERATOR_H

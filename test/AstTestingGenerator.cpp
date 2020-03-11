@@ -14,6 +14,7 @@
 #include "For.h"
 #include "LiteralFloat.h"
 #include "Rotate.h"
+#include "Transpose.h"
 
 // == ATTENTION ======================================
 // These ASTs are used in tests. Any changes to them will break tests. Consider creating new ASTs by copying and
@@ -46,7 +47,8 @@ static std::map<int, std::function<void(Ast &)> > call = {  /* NOLINT */
     {22, AstTestingGenerator::genAstForSecretTaintingWithMultipleNonSequentialStatements},
     {23, AstTestingGenerator::genAstIncludingForStatement},
     {24, AstTestingGenerator::genAstUsingRotation},
-    {25, AstTestingGenerator::genAstRotateAndSum}
+    {25, AstTestingGenerator::genAstRotateAndSum},
+    {26, AstTestingGenerator::genAstTranspose}
 };
 
 void AstTestingGenerator::generateAst(int id, Ast &ast) {
@@ -1141,6 +1143,18 @@ void AstTestingGenerator::genAstRotateAndSum(Ast &ast) {
 
   // return sum;
   func->addStatement(new Return(new Variable("sum")));
+
+  ast.setRootNode(func);
+}
+
+void AstTestingGenerator::genAstTranspose(Ast &ast) {
+  // LiteralInt transposeMatrix()
+  auto func = new Function("transposeMatrix");
+
+  // return [11 2 3; 4 2 3; 2 1 3].transpose();
+  func->addStatement(new Return(
+      new Transpose(
+          new LiteralInt(new Matrix<int>({{11, 2, 3}, {4, 2, 3}, {2, 1, 3}})))));
 
   ast.setRootNode(func);
 }
