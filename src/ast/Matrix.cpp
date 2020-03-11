@@ -6,7 +6,7 @@ void throwUnknownOperatorException() {
 }
 
 template<typename T>
-AbstractMatrix *Matrix<T>::applyBinaryOperatorComponentwise(Matrix<T> *rhsOperand, Operator *os) {
+AbstractMatrix *Matrix<T>::applyBinaryOperatorComponentwise(Matrix<T> *rhsOperand, Operator *op) {
   throw std::runtime_error("applyOperatorComponentwise is unimplemented for type T: " + std::string(typeid(T).name()));
 }
 
