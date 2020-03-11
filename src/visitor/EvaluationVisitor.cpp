@@ -188,7 +188,7 @@ void EvaluationVisitor::visit(UnaryExpr &elem) {
 }
 
 void EvaluationVisitor::visit(Rotate &elem) {
-  // visit the operand
+  // visit the operand: we need to evaluate it as it can be an expression itself, e.g., rotate([1; 2; 3]+[1;9;2], 2)
   elem.getOperand()->accept(*this);
   // visit the rotation factor: we need to evaluate it as it can be an expression itself, e.g., rotate(vec, y+1)
   elem.getRotationFactor()->accept(*this);
@@ -196,7 +196,7 @@ void EvaluationVisitor::visit(Rotate &elem) {
   // the rotation factor is unknown
   auto rotationFactor = dynamic_cast<LiteralInt *>(results.top().front());
   results.pop();
-  auto operand = dynamic_cast<AbstractLiteral *>(results.top().front());
+  auto operand = results.top().front();
   results.pop();
   if (rotationFactor==nullptr || operand==nullptr) return;
 
@@ -207,21 +207,13 @@ void EvaluationVisitor::visit(Rotate &elem) {
 }
 
 void EvaluationVisitor::visit(Transpose &elem) {
-  auto ae = elem.getOperand();
-  if (auto operandAsAl = dynamic_cast<AbstractLiteral *>(ae)) {
-    // rotate the Literal in-place
-    operandAsAl->getMatrix()->transpose(true);
-    results.push({operandAsAl});
-  } else if (auto var = dynamic_cast<Variable *>(ae)) {
-    // get the variable's value
-    auto value = getVarValue(var->getIdentifier());
-    if (value==nullptr) throw std::logic_error("Cannot perform rotation as Variable's value is unknown.");
-    // clone the value (i.e., an instance of AbstractLiteral) because rotate only returns an AbstractMatrix
-    auto clonedValue = value->clone(false)->castTo<AbstractLiteral>();
-    // rotate the cloned value in-place
-    clonedValue->getMatrix()->transpose(true);
-    results.push({clonedValue});
-  }
+  // visit the operand: we need to evaluate it as it can be an expression itself, e.g., transpose([1,2,3]+[2,3,1])
+  elem.getOperand()->accept(*this);
+  auto operand = results.top().front()->clone(false)->castTo<AbstractLiteral>();
+  results.pop();
+  // rotate the cloned Literal in-place
+  operand->getMatrix()->transpose(true);
+  results.push({operand});
 }
 
 void EvaluationVisitor::visit(VarAssignm &elem) {
