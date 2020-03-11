@@ -18,6 +18,7 @@
 #include "While.h"
 #include "Call.h"
 #include "Rotate.h"
+#include "Transpose.h"
 
 CompileTimeExpressionSimplifier::CompileTimeExpressionSimplifier() {
   evalVisitor = EvaluationVisitor();
@@ -55,6 +56,25 @@ void CompileTimeExpressionSimplifier::visit(Rotate &elem) {
       auto clonedVal = valAsAbstractLiteral->clone(false)->castTo<AbstractLiteral>();
       // perform rotation on the cloned literal
       clonedVal->getMatrix()->rotate(elem.getRotationFactor(), true);
+      // replace this Rotate node by a new node containing the rotated operand
+      elem.getOnlyParent()->replaceChild(&elem, clonedVal);
+      nodesQueuedForDeletion.push_back(&elem);
+    }
+  }
+}
+
+void CompileTimeExpressionSimplifier::visit(Transpose &elem) {
+  Visitor::visit(elem);
+  // if the Transpose' operand is known at compile-time, we can execute the transpose cmd and replace this node by the
+  // transpose result (i.e., transposed operand)
+  if (valueIsKnown(elem.getOperand())) {
+    auto val = getFirstValue(elem.getOperand());
+    // we need a AbstractLiteral to be able to perform the rotation
+    if (auto valAsAbstractLiteral = dynamic_cast<AbstractLiteral *>(val)) {
+      // clone the AbstractLiteral (including its value)
+      auto clonedVal = valAsAbstractLiteral->clone(false)->castTo<AbstractLiteral>();
+      // perform transpose on the cloned literal
+      clonedVal->getMatrix()->transpose(true);
       // replace this Rotate node by a new node containing the rotated operand
       elem.getOnlyParent()->replaceChild(&elem, clonedVal);
       nodesQueuedForDeletion.push_back(&elem);

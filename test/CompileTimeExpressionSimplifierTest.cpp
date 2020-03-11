@@ -23,6 +23,7 @@ class CompileTimeExpressionSimplifierFixture : public ::testing::Test {
  protected:
   Ast ast;
   CompileTimeExpressionSimplifier ctes;
+
   CompileTimeExpressionSimplifierFixture() = default;
 
   AbstractExpr *getVariableValue(const std::string &varIdentifier) {
@@ -1891,7 +1892,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, Call_inliningExpected2) { /* NOLI
   EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedReturnExpr));
 }
 
-TEST_F(CompileTimeExpressionSimplifierFixture, Rotate_executionExpected) {
+TEST_F(CompileTimeExpressionSimplifierFixture, Rotate_executionExpected) { /* NOLINT */
   //  -- input --
   // rotateVec(int inputA) {
   //   int sumVec = {{1, 7, 3}};   // [1 7 3]
@@ -1911,3 +1912,24 @@ TEST_F(CompileTimeExpressionSimplifierFixture, Rotate_executionExpected) {
   auto returnStatement = ast.getRootNode()->castTo<Function>()->getBodyStatements().back()->castTo<Return>();
   EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedReturnExpr));
 }
+
+TEST_F(CompileTimeExpressionSimplifierFixture, transpose) { /* NOLINT */
+  //  -- input --
+  // transposeMatrix() {
+  //   return [11 2 3; 4 2 3; 2 1 3].transpose();
+  // }
+  //  -- expected --
+  // transposeMatrix() {
+  //   return [11 4 2; 2 2 1; 3 3 3];
+  // }
+  Ast ast;
+  AstTestingGenerator::generateAst(26, ast);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  auto expectedReturnExpr = new LiteralInt(new Matrix<int>({{11, 4, 2}, {2, 2, 1}, {3, 3, 3}}));
+  auto returnStatement = ast.getRootNode()->castTo<Function>()->getBodyStatements().back()->castTo<Return>();
+  EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedReturnExpr));
+}
+
