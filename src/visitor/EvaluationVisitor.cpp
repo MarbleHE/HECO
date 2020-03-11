@@ -22,12 +22,13 @@
 #include <functional>
 #include "Rotate.h"
 #include "For.h"
+#include "Transpose.h"
 
 EvaluationVisitor::EvaluationVisitor(std::unordered_map<std::string, AbstractLiteral *> funcCallParameterValues)
     : variableValuesForEvaluation(std::move(funcCallParameterValues)) {
 }
 
-EvaluationVisitor::EvaluationVisitor() {}
+EvaluationVisitor::EvaluationVisitor() = default;
 
 void EvaluationVisitor::visit(AbstractNode &elem) {
   results.push(std::vector<AbstractLiteral *>());
@@ -200,6 +201,24 @@ void EvaluationVisitor::visit(Rotate &elem) {
     auto clonedValue = value->clone(false)->castTo<AbstractLiteral>();
     // rotate the cloned value in-place
     clonedValue->getMatrix()->rotate(elem.getRotationFactor(), true);
+    results.push({clonedValue});
+  }
+}
+
+void EvaluationVisitor::visit(Transpose &elem) {
+  auto ae = elem.getOperand();
+  if (auto operandAsAl = dynamic_cast<AbstractLiteral *>(ae)) {
+    // rotate the Literal in-place
+    operandAsAl->getMatrix()->transpose(true);
+    results.push({operandAsAl});
+  } else if (auto var = dynamic_cast<Variable *>(ae)) {
+    // get the variable's value
+    auto value = getVarValue(var->getIdentifier());
+    if (value==nullptr) throw std::logic_error("Cannot perform rotation as Variable's value is unknown.");
+    // clone the value (i.e., an instance of AbstractLiteral) because rotate only returns an AbstractMatrix
+    auto clonedValue = value->clone(false)->castTo<AbstractLiteral>();
+    // rotate the cloned value in-place
+    clonedValue->getMatrix()->transpose(true);
     results.push({clonedValue});
   }
 }

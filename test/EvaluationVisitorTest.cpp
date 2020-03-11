@@ -147,7 +147,7 @@ TEST(AstEvaluationTests, astIncludingForLoop) { /* NOLINT */
   ASSERT_EQ(*result, *new LiteralInt(30));
 }
 
-TEST(AstEvaluationTests, astLiteralRotation) {
+TEST(AstEvaluationTests, astLiteralRotation) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(24, ast);
   auto result = dynamic_cast<LiteralInt *>(ast.evaluateAst({}, false).front());
@@ -157,10 +157,18 @@ TEST(AstEvaluationTests, astLiteralRotation) {
   EXPECT_EQ(m(0, 2), 7);
 }
 
-TEST(AstEvaluationTests, astRotateAndSumVector) {
+TEST(AstEvaluationTests, astRotateAndSumVector) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(25, ast);
   auto result = dynamic_cast<LiteralInt *>(ast.evaluateAst({}, false).front());
   auto m = *dynamic_cast<Matrix<int> *>(result->getMatrix());
   EXPECT_EQ(m.values, std::vector<std::vector<int>>({{11, 11, 11}}));
+}
+
+TEST(AstEvaluationTests, astTransposeMatrix) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(26, ast);
+  auto result = dynamic_cast<LiteralInt *>(ast.evaluateAst({}, false).front());
+  auto m = *dynamic_cast<Matrix<int> *>(result->getMatrix());
+  EXPECT_EQ(m.values, std::vector<std::vector<int>>({{11, 4, 2}, {2, 2, 1}, {3, 3, 3}}));
 }
