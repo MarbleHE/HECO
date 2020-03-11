@@ -32,6 +32,7 @@ class Variable;
 class While;
 class Scope;
 class Rotate;
+class Transpose;
 
 class Visitor {
  public:
@@ -76,6 +77,8 @@ class Visitor {
   virtual void visit(Return &elem);
 
   virtual void visit(Rotate &elem);
+
+  virtual void visit(Transpose &elem);
 
   virtual void visit(UnaryExpr &elem);
 

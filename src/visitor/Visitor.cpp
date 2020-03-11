@@ -21,6 +21,7 @@
 #include "VarAssignm.h"
 #include "While.h"
 #include "Rotate.h"
+#include "Transpose.h"
 
 void Visitor::visit(Ast &elem) {
   // assumption: AST is always the enclosing object that points to the root
@@ -184,6 +185,10 @@ void Visitor::visit(Return &elem) {
 }
 
 void Visitor::visit(Rotate &elem) {
+  elem.getOperand()->accept(*this);
+}
+
+void Visitor::visit(Transpose &elem) {
   elem.getOperand()->accept(*this);
 }
 
