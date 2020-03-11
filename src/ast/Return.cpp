@@ -60,8 +60,7 @@ Return *Return::clone(bool keepOriginalUniqueNodeId) {
   for (auto &child : getReturnExpressions())
     returnValues.push_back(child->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
   auto clonedNode = new Return(returnValues);
-  if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
-  if (this->isReversed) clonedNode->swapChildrenParents();
+  clonedNode->updateClone(keepOriginalUniqueNodeId, this);
   return clonedNode;
 }
 

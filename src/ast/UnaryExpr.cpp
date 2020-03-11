@@ -50,8 +50,7 @@ UnaryExpr *UnaryExpr::clone(bool keepOriginalUniqueNodeId) {
   try {
     auto clonedNode = new UnaryExpr(std::get<UnaryOp>(this->getOp()->getOperatorSymbol()),
                                     this->getRight()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
-    if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
-    if (this->isReversed) clonedNode->swapChildrenParents();
+    clonedNode->updateClone(keepOriginalUniqueNodeId, this);
     return clonedNode;
   } catch (std::bad_variant_access &exc) {
     throw std::runtime_error(

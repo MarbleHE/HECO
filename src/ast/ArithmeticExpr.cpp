@@ -28,8 +28,7 @@ ArithmeticExpr *ArithmeticExpr::clone(bool keepOriginalUniqueNodeId) {
   auto clonedNode = new ArithmeticExpr(this->getLeft()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
                                        this->getOp()->clone(keepOriginalUniqueNodeId)->castTo<Operator>(),
                                        this->getRight()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
-  if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
-  if (this->isReversed) clonedNode->swapChildrenParents();
+  clonedNode->updateClone(keepOriginalUniqueNodeId, this);
   return clonedNode;
 }
 std::string ArithmeticExpr::toString(bool printChildren) const {

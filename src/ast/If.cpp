@@ -46,8 +46,7 @@ If *If::clone(bool keepOriginalUniqueNodeId) {
   auto clonedNode = new If(getCondition()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
                            getThenBranch()->clone(keepOriginalUniqueNodeId)->castTo<AbstractStatement>(),
                            getElseBranch()->clone(keepOriginalUniqueNodeId)->castTo<AbstractStatement>());
-  if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
-  if (this->isReversed) clonedNode->swapChildrenParents();
+  clonedNode->updateClone(keepOriginalUniqueNodeId, this);
   return clonedNode;
 }
 int If::getMaxNumberChildren() {

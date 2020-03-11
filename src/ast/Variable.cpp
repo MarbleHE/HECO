@@ -58,7 +58,6 @@ Variable::~Variable() = default;
 
 Variable *Variable::clone(bool keepOriginalUniqueNodeId) {
   auto clonedNode = new Variable(getIdentifier());
-  if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
-  if (this->isReversed) clonedNode->swapChildrenParents();
+  clonedNode->updateClone(keepOriginalUniqueNodeId, this);
   return clonedNode;
 }

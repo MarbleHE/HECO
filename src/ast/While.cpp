@@ -33,7 +33,7 @@ std::string While::getNodeType() const {
 While *While::clone(bool keepOriginalUniqueNodeId) {
   auto clonedWhile = new While(getCondition()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
                                getBody()->clone(false)->castTo<AbstractStatement>());
-  if (keepOriginalUniqueNodeId) clonedWhile->setUniqueNodeId(this->getUniqueNodeId());
+  clonedWhile->updateClone(keepOriginalUniqueNodeId, this);
   return clonedWhile;
 }
 

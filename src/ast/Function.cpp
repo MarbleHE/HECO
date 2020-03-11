@@ -77,8 +77,7 @@ Function *Function::clone(bool keepOriginalUniqueNodeId) {
   auto clonedParams = getParameterList() ? getParameterList()->clone(keepOriginalUniqueNodeId) : nullptr;
   auto clonedBody = getBody() ? getBody()->clone(keepOriginalUniqueNodeId) : nullptr;
   auto clonedNode = new Function(this->getName(), clonedParams, clonedBody);
-  if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
-  if (this->isReversed) clonedNode->swapChildrenParents();
+  clonedNode->updateClone(keepOriginalUniqueNodeId, this);
   return clonedNode;
 }
 

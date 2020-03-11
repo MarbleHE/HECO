@@ -84,8 +84,7 @@ Operator::~Operator() = default;
 
 Operator *Operator::clone(bool keepOriginalUniqueNodeId) {
   auto clonedNode = new Operator(this->getOperatorSymbol());
-  if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
-  if (this->isReversed) clonedNode->swapChildrenParents();
+  clonedNode->updateClone(keepOriginalUniqueNodeId, this);
   return clonedNode;
 }
 

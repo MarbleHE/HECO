@@ -67,8 +67,7 @@ bool LiteralBool::supportsDatatype(Datatype &datatype) {
 
 LiteralBool *LiteralBool::clone(bool keepOriginalUniqueNodeId) {
   auto clonedNode = new LiteralBool(matrix->clone());
-  if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
-  if (this->isReversed) clonedNode->swapChildrenParents();
+  clonedNode->updateClone(keepOriginalUniqueNodeId, this);
   return clonedNode;
 }
 

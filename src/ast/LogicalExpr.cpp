@@ -28,6 +28,7 @@ LogicalExpr *LogicalExpr::clone(bool keepOriginalUniqueNodeId) {
       new LogicalExpr(getLeft()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
                       getOp()->clone(keepOriginalUniqueNodeId)->castTo<Operator>(),
                       getRight()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
+  clonedLogicalExpr->updateClone(keepOriginalUniqueNodeId, this);
   return clonedLogicalExpr;
 }
 

@@ -56,8 +56,7 @@ std::vector<std::string> FunctionParameter::getVariableIdentifiers() {
 FunctionParameter *FunctionParameter::clone(bool keepOriginalUniqueNodeId) {
   auto clonedNode = new FunctionParameter(this->getDatatype()->clone(keepOriginalUniqueNodeId)->castTo<Datatype>(),
                                           this->getValue()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
-  if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
-  if (this->isReversed) clonedNode->swapChildrenParents();
+  clonedNode->updateClone(keepOriginalUniqueNodeId, this);
   return clonedNode;
 }
 

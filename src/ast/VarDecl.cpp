@@ -118,8 +118,7 @@ VarDecl *VarDecl::clone(bool keepOriginalUniqueNodeId) {
   auto clonedNode = new VarDecl(this->getVarTargetIdentifier(),
                                 this->getDatatype()->getType(),
                                 getInitializer()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
-  if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
-  if (this->isReversed) clonedNode->swapChildrenParents();
+  clonedNode->updateClone(keepOriginalUniqueNodeId, this);
   return clonedNode;
 }
 

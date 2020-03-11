@@ -16,22 +16,21 @@ ParameterList *ParameterList::clone(bool keepOriginalUniqueNodeId) {
   }
   auto clonedNode = new ParameterList();
   clonedNode->addChildren(childrenCopy);
-  if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
-  if (this->isReversed) clonedNode->swapChildrenParents();
+  clonedNode->updateClone(keepOriginalUniqueNodeId, this);
   return clonedNode;
 }
 
 ParameterList::ParameterList(std::vector<FunctionParameter *> parameters) {
-  for(auto &fp : parameters) {
+  for (auto &fp : parameters) {
     addChild(fp);
   }
 }
 
 std::vector<FunctionParameter *> ParameterList::getParameters() {
-  std::vector<FunctionParameter*> params;
+  std::vector<FunctionParameter *> params;
   params.reserve(children.size());
-  for(auto &n : children) {
-    params.emplace_back(dynamic_cast<FunctionParameter*>(n));
+  for (auto &n : children) {
+    params.emplace_back(dynamic_cast<FunctionParameter *>(n));
   }
   return params;
 }
@@ -39,6 +38,7 @@ std::vector<FunctionParameter *> ParameterList::getParameters() {
 int ParameterList::getMaxNumberChildren() {
   return -1;
 }
+
 bool ParameterList::supportsCircuitMode() {
   return true;
 }

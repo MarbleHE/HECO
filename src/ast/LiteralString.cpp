@@ -68,8 +68,7 @@ bool LiteralString::supportsDatatype(Datatype &datatype) {
 
 LiteralString *LiteralString::clone(bool keepOriginalUniqueNodeId) {
   auto clonedNode = new LiteralString(matrix->clone());
-  if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
-  if (this->isReversed) clonedNode->swapChildrenParents();
+  clonedNode->updateClone(keepOriginalUniqueNodeId, this);
   return clonedNode;
 }
 

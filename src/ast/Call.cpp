@@ -47,8 +47,7 @@ AbstractNode *Call::clone(bool keepOriginalUniqueNodeId) {
   auto clonedNode = static_cast<AbstractExpr *>(
       new Call(clonedArgs, this->getFunc()->clone(keepOriginalUniqueNodeId)->castTo<Function>()));
 
-  if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->AbstractExpr::getUniqueNodeId());
-  if (this->AbstractExpr::isReversed) clonedNode->swapChildrenParents();
+  clonedNode->updateClone(keepOriginalUniqueNodeId, this);
   return clonedNode;
 }
 

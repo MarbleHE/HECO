@@ -39,7 +39,8 @@ AbstractNode *CallExternal::clone(bool keepOriginalUniqueNodeId) {
   for (auto &fp : this->getArguments()) {
     args.push_back(fp->clone(keepOriginalUniqueNodeId)->castTo<FunctionParameter>());
   }
-  return new CallExternal("abc", args);
+  auto clonedCallExt = new CallExternal(getFunctionName(), args);
+  return clonedCallExt;
 }
 
 const std::vector<FunctionParameter *> &CallExternal::getArguments() const {

@@ -59,7 +59,7 @@ class Rotate : public AbstractExpr {
     v.visit(*this);
   }
 
-  AbstractNode *clone(bool keepOriginalUniqueNodeId) override {
+  Rotate *clone(bool keepOriginalUniqueNodeId) override {
     return new Rotate(this->getChildAtIndex(0)->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
                       getRotationFactor());
   }

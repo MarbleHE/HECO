@@ -50,8 +50,7 @@ Block *Block::clone(bool keepOriginalUniqueNodeId) {
     clonedStatements.push_back(statement->clone(keepOriginalUniqueNodeId)->castTo<AbstractStatement>());
   }
   auto clonedNode = clonedStatements.empty() ? new Block() : new Block(clonedStatements);
-  if (keepOriginalUniqueNodeId) clonedNode->setUniqueNodeId(this->getUniqueNodeId());
-  if (this->isReversed) clonedNode->swapChildrenParents();
+  clonedNode->updateClone(keepOriginalUniqueNodeId, this);
   return clonedNode;
 }
 

@@ -76,7 +76,9 @@ AbstractNode *Datatype::cloneFlat() {
 }
 
 AbstractNode *Datatype::clone(bool keepOriginalUniqueNodeId) {
-  return new Datatype(this->getType());
+  auto clonedNode = new Datatype(this->getType());
+  clonedNode->updateClone(keepOriginalUniqueNodeId, this);
+  return clonedNode;
 }
 
 std::string Datatype::getNodeType() const {
