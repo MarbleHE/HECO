@@ -21,7 +21,7 @@ class DotPrinterFixture : public ::testing::Test {
 TEST_F(DotPrinterFixture,
        getDotFormattedStringTest_printSimpleArithmeticExpression) { /* NOLINT */
   auto arithmeticExpression = new ArithmeticExpr(
-      new Variable("alpha"), ArithmeticOp::multiplication, new LiteralInt(212));
+      new Variable("alpha"), ArithmeticOp::MULTIPLICATION, new LiteralInt(212));
 
   auto expectedStr =
       "  ArithmeticExpr_2 [label=\"ArithmeticExpr_2\\n[l(v): 0, r(v): 0]\" shape=oval "
@@ -41,7 +41,7 @@ TEST_F(DotPrinterFixture,
 TEST_F(DotPrinterFixture,
        getDotFormattedStringTest_printReversedArithmeticExpression) { /* NOLINT */
   auto arithmeticExpression = new ArithmeticExpr(
-      new Variable("alpha"), ArithmeticOp::multiplication, new LiteralInt(212));
+      new Variable("alpha"), ArithmeticOp::MULTIPLICATION, new LiteralInt(212));
 
   // reversing the edge should only flip parents with children
   arithmeticExpression->swapChildrenParents();

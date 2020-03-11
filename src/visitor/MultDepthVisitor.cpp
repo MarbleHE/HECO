@@ -108,8 +108,8 @@ void MultDepthVisitor::analyzeMultiplicativeDepth(const std::string &varIdentifi
   std::string initializerNodeType = initializer->getNodeType();
   if (initializerNodeType==ArithmeticExpr().getNodeType() || initializerNodeType==LogicalExpr().getNodeType()) {
     // count the number of logicalAnd and multiplication operations in the initializer (=: numMults)
-    int numMults = initializer->countByTemplate(new ArithmeticExpr(ArithmeticOp::multiplication))
-        + initializer->countByTemplate(new LogicalExpr(LogCompOp::logicalAnd));
+    int numMults = initializer->countByTemplate(new ArithmeticExpr(ArithmeticOp::MULTIPLICATION))
+        + initializer->countByTemplate(new LogicalExpr(LogCompOp::LOGICAL_AND));
     // determine the maximum depth of the variables contained in the initializer (=: maxDepth)
     const std::vector<std::string> &variablesList = initializer->getVariableIdentifiers();
     if (variablesList.empty()) {

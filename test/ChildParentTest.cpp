@@ -27,7 +27,7 @@ class ArithmeticExprFixture : public ::testing::Test {
     left = new LiteralInt(3);
     otherLeft = new LiteralInt(42);
     right = new LiteralFloat(2.0);
-    opSymb = ArithmeticOp::addition;
+    opSymb = ArithmeticOp::ADDITION;
     operatorAdd = new Operator(opSymb);
   }
 };
@@ -339,7 +339,7 @@ class IfStmtFixture : public ::testing::Test {
   AbstractExpr *condition;
   AbstractStatement *thenBranch, *elseBranch;
   IfStmtFixture() {
-    condition = new LogicalExpr(new LiteralInt(33), LogCompOp::greater, new CallExternal("computeX"));
+    condition = new LogicalExpr(new LiteralInt(33), LogCompOp::GREATER, new CallExternal("computeX"));
     thenBranch = new Block(new VarAssignm("a", new LiteralInt(22)));
     elseBranch = new Block(new VarAssignm("a", new LiteralInt(175)));
   }
@@ -472,7 +472,7 @@ class LogicalExprFixture : public ::testing::Test {
     literalInt = new LiteralInt(24);
     literalIntAnother = new LiteralInt(6245);
     literalBool = new LiteralBool(true);
-    opSymb = LogCompOp::greaterEqual;
+    opSymb = LogCompOp::GREATER_EQUAL;
     operatorGreaterEqual = new Operator(opSymb);
   }
 };
@@ -555,7 +555,7 @@ TEST_F(LogicalExprFixture, LogicalExprAddChildSuccess) {  /* NOLINT */
 }
 
 TEST(ChildParentTests, OperatorHasNoChildrenOrParents) {  /* NOLINT */
-  Operator op(LogCompOp::greaterEqual);
+  Operator op(LogCompOp::GREATER_EQUAL);
   ASSERT_TRUE(op.getChildren().empty());
   ASSERT_TRUE(op.getParents().empty());
 }
@@ -614,7 +614,7 @@ class UnaryExprFixture : public ::testing::Test {
   LiteralBool *literalBoolTrue;
 
   UnaryExprFixture() {
-    opSymbNegation = UnaryOp::negation;
+    opSymbNegation = UnaryOp::NEGATION;
     new Operator(opSymbNegation);
     literalBoolTrue = new LiteralBool(true);
   }
@@ -636,12 +636,12 @@ TEST_F(UnaryExprFixture, UnaryExprStandardConstructor) {  /* NOLINT */
 
 TEST_F(UnaryExprFixture, UnaryExprAddChildException_NoEmptyChildSpotAvailable) {  /* NOLINT */
   auto unaryExpr = new UnaryExpr(opSymbNegation, literalBoolTrue);
-  EXPECT_THROW(unaryExpr->addChild(new Operator(UnaryOp::negation), false), std::logic_error);
+  EXPECT_THROW(unaryExpr->addChild(new Operator(UnaryOp::NEGATION), false), std::logic_error);
 }
 
 TEST_F(UnaryExprFixture, UnaryExprAddChildException_TooManyChildrenAdded) {  /* NOLINT */
   auto unaryExpr = new UnaryExpr(opSymbNegation, literalBoolTrue);
-  EXPECT_THROW(unaryExpr->addChildren({new Operator(UnaryOp::negation), new LiteralBool(false)}, false),
+  EXPECT_THROW(unaryExpr->addChildren({new Operator(UnaryOp::NEGATION), new LiteralBool(false)}, false),
                std::logic_error);
 }
 
@@ -649,7 +649,7 @@ TEST_F(UnaryExprFixture, UnaryExprtion_AddChildSuccess) {  /* NOLINT */
   auto unaryExpr = new UnaryExpr(opSymbNegation, literalBoolTrue);
 
   unaryExpr->removeChild(unaryExpr->getOp(), false);
-  auto newOperator = new Operator(UnaryOp::negation);
+  auto newOperator = new Operator(UnaryOp::NEGATION);
   unaryExpr->addChild(newOperator, true);
 
   // children
@@ -801,7 +801,7 @@ class WhileStmtFixture : public ::testing::Test {
 
  public:
   WhileStmtFixture() {
-    whileCondition = new LogicalExpr(new LiteralInt(32), greaterEqual, new Variable("a"));
+    whileCondition = new LogicalExpr(new LiteralInt(32), GREATER_EQUAL, new Variable("a"));
     whileBlock = new Block();
   }
 };
@@ -836,18 +836,18 @@ class ForLoopFixture : public ::testing::Test {
     // int = 0;
     forInitializer = new VarDecl("i", Types::INT, new LiteralInt(0));
     // i < 3
-    forCondition = new LogicalExpr(new Variable("i"), smaller, new LiteralInt(3));
+    forCondition = new LogicalExpr(new Variable("i"), SMALLER, new LiteralInt(3));
     // i = i+1
-    forUpdate = new VarAssignm("i", new ArithmeticExpr(new Variable("i"), addition, new LiteralInt(1)));
+    forUpdate = new VarAssignm("i", new ArithmeticExpr(new Variable("i"), ADDITION, new LiteralInt(1)));
     // sum = sum + base * i;
     forBody = new Block(
         new VarAssignm("sum",
                        new ArithmeticExpr(
                            new Variable("sum"),
-                           addition,
+                           ADDITION,
                            new ArithmeticExpr(
                                new Variable("base"),
-                               multiplication,
+                               MULTIPLICATION,
                                new Variable("i")))));
   }
 };
@@ -886,7 +886,7 @@ TEST_F(ForLoopFixture, ForStmtAddChildSuccess) {
   EXPECT_EQ(forBody->getParentsNonNull().size(), 0);
   EXPECT_EQ(forStmt->getChildrenNonNull().size(), 3);
 
-  auto newChild = new VarAssignm("x", new ArithmeticExpr(new Variable("x"), multiplication, new LiteralInt(2)));
+  auto newChild = new VarAssignm("x", new ArithmeticExpr(new Variable("x"), MULTIPLICATION, new LiteralInt(2)));
   forStmt->addChild(newChild);
   EXPECT_EQ(forStmt->getChildAtIndex(3), newChild);
   EXPECT_EQ(newChild->getParentsNonNull().size(), 1);

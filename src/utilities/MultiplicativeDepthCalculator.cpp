@@ -9,7 +9,7 @@
 int MultiplicativeDepthCalculator::depthValue(AbstractNode *n) {
   if (auto lexp = dynamic_cast<LogicalExpr *>(n)) {
     // the multiplicative depth considers logical AND nodes only
-    return (lexp->getOp()!=nullptr && lexp->getOp()->equals(LogCompOp::logicalAnd));
+    return (lexp->getOp()!=nullptr && lexp->getOp()->equals(LogCompOp::LOGICAL_AND));
   }
   return 0;
 }

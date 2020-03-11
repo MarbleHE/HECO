@@ -41,7 +41,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, arithmeticExpr_literalsOnly_fully
   auto function = new Function("compute");
   auto arithmeticExpr = new ArithmeticExpr(
       new LiteralInt(22),
-      ArithmeticOp::multiplication,
+      ArithmeticOp::MULTIPLICATION,
       new LiteralInt(11));
   auto varAssignm = new VarDecl("alpha",
                                 new Datatype(Types::INT, false),
@@ -73,9 +73,9 @@ TEST_F(CompileTimeExpressionSimplifierFixture, arithmeticExpr_variableUnknown_rh
                              new Variable("encryptedA"))});
   auto arithmeticExpr = new ArithmeticExpr(
       new Variable("encryptedA"),
-      ArithmeticOp::multiplication,
+      ArithmeticOp::MULTIPLICATION,
       new ArithmeticExpr(new LiteralInt(4),
-                         ArithmeticOp::multiplication,
+                         ArithmeticOp::MULTIPLICATION,
                          new LiteralInt(7)));
   auto varAssignm = new VarDecl("alpha", new Datatype(Types::INT, false), arithmeticExpr);
 
@@ -91,7 +91,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, arithmeticExpr_variableUnknown_rh
   EXPECT_EQ(ctes.variableValues.size(), 1);
   // check that the rhs operand of arithmeticExpr is simplified
   auto expected = new ArithmeticExpr(new Variable("encryptedA"),
-                                     ArithmeticOp::multiplication,
+                                     ArithmeticOp::MULTIPLICATION,
                                      new LiteralInt(28));
   EXPECT_TRUE(getVariableValue("alpha")->isEqual(expected));
   EXPECT_EQ(function->getBodyStatements().size(), 0);
@@ -109,9 +109,9 @@ TEST_F(CompileTimeExpressionSimplifierFixture, arithmeticExpr_variableKnown_full
   auto varDeclParameterA = new VarDecl("parameterA", 43);
   auto arithmeticExpr = new ArithmeticExpr(
       new Variable("parameterA"),
-      ArithmeticOp::multiplication,
+      ArithmeticOp::MULTIPLICATION,
       new ArithmeticExpr(new LiteralInt(4),
-                         ArithmeticOp::multiplication,
+                         ArithmeticOp::MULTIPLICATION,
                          new LiteralInt(7)));
   auto varDeclAlpha = new VarDecl("alpha",
                                   new Datatype(Types::INT, false),
@@ -152,9 +152,9 @@ TEST_F(CompileTimeExpressionSimplifierFixture, arithmeticExpr_variablesUnknown_n
 
   auto arithmeticExpr = new ArithmeticExpr(
       new Variable("encryptedA"),
-      ArithmeticOp::multiplication,
+      ArithmeticOp::MULTIPLICATION,
       new ArithmeticExpr(new LiteralInt(4),
-                         ArithmeticOp::multiplication,
+                         ArithmeticOp::MULTIPLICATION,
                          new Variable("plaintextB")));
   auto varDeclAlpha = new VarDecl("alpha",
                                   new Datatype(Types::INT, false),
@@ -169,9 +169,9 @@ TEST_F(CompileTimeExpressionSimplifierFixture, arithmeticExpr_variablesUnknown_n
   // check that 'alpha' is computed correctly
   auto expected = new ArithmeticExpr(
       new Variable("encryptedA"),
-      ArithmeticOp::multiplication,
+      ArithmeticOp::MULTIPLICATION,
       new ArithmeticExpr(new LiteralInt(4),
-                         ArithmeticOp::multiplication,
+                         ArithmeticOp::MULTIPLICATION,
                          new Variable("plaintextB")));
   EXPECT_TRUE(getVariableValue("alpha")->isEqual(expected));
 
@@ -190,7 +190,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_literalsOnly_fullyEva
   auto function = new Function("compute");
   auto logicalExpr = new LogicalExpr(
       new LiteralBool(true),
-      LogCompOp::logicalAnd,
+      LogCompOp::LOGICAL_AND,
       new LiteralBool(false));
   auto varAssignm = new VarDecl("alpha",
                                 new Datatype(Types::BOOL, false),
@@ -227,9 +227,9 @@ TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_variableUnknown_lhsOp
                              new Variable("encryptedA"))});
   auto logicalExpr = new LogicalExpr(
       new LogicalExpr(new LiteralBool(true),
-                      LogCompOp::logicalXor,
+                      LogCompOp::LOGICAL_XOR,
                       new LiteralBool(false)),
-      LogCompOp::logicalOr,
+      LogCompOp::LOGICAL_OR,
       new Variable("encryptedA"));
   auto varAssignm = new VarDecl("alpha",
                                 new Datatype(Types::BOOL, false),
@@ -262,9 +262,9 @@ TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_variableKnown_fullyEv
   auto varDeclParameterA = new VarDecl("parameterA", true);
   auto logicalExpr = new LogicalExpr(
       new Variable("parameterA"),
-      LogCompOp::logicalOr,
+      LogCompOp::LOGICAL_OR,
       new LogicalExpr(new LiteralBool(false),
-                      LogCompOp::logicalAnd,
+                      LogCompOp::LOGICAL_AND,
                       new LiteralBool(true)));
   auto varDeclAlpha = new VarDecl("alpha",
                                   new Datatype(Types::BOOL, false),
@@ -306,9 +306,9 @@ TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_variablesUnknown_notA
 
   auto logicalExpr = new LogicalExpr(
       new Variable("encryptedA"),
-      LogCompOp::logicalAnd,
+      LogCompOp::LOGICAL_AND,
       new LogicalExpr(new LiteralBool(true),
-                      LogCompOp::logicalXor,
+                      LogCompOp::LOGICAL_XOR,
                       new Variable("encryptedB")));
   auto varDeclAlpha = new VarDecl("alpha",
                                   new Datatype(Types::BOOL, false),
@@ -323,8 +323,8 @@ TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_variablesUnknown_notA
   // check that 'alpha' is computed correctly (could not be computed but is saved)
   auto expected = new LogicalExpr(
       new Variable("encryptedA"),
-      LogCompOp::logicalAnd,
-      new UnaryExpr(negation, new Variable("encryptedB")));
+      LogCompOp::LOGICAL_AND,
+      new UnaryExpr(NEGATION, new Variable("encryptedB")));
   EXPECT_TRUE(getVariableValue("alpha")->isEqual(expected));
 
   // check that 9 nodes are deleted
@@ -339,7 +339,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, unaryExpr_literalsOnly_fullyEvalu
   //  plaintext_bool truthValue = !false;
   // }
   auto function = new Function("compute");
-  auto unaryExpr = new UnaryExpr(UnaryOp::negation, new LiteralBool(false));
+  auto unaryExpr = new UnaryExpr(UnaryOp::NEGATION, new LiteralBool(false));
   auto varAssignm = new VarDecl("truthValue",
                                 new Datatype(Types::BOOL, false),
                                 unaryExpr);
@@ -369,7 +369,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, unaryExpr_variableKnown_fullyEval
   // }
   auto function = new Function("compute");
   auto varDeclParameterA = new VarDecl("alpha", true);
-  auto unaryExpr = new UnaryExpr(UnaryOp::negation, new Variable("alpha"));
+  auto unaryExpr = new UnaryExpr(UnaryOp::NEGATION, new Variable("alpha"));
   auto varDeclAlpha = new VarDecl("beta",
                                   new Datatype(Types::BOOL, false),
                                   unaryExpr);
@@ -402,7 +402,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, unaryExpr_variableUnknown_notEval
   auto functionParamList = new ParameterList(
       {new FunctionParameter(new Datatype(Types::BOOL, false),
                              new Variable("paramA"))});
-  auto unaryExpr = new UnaryExpr(UnaryOp::negation, new Variable("paramA"));
+  auto unaryExpr = new UnaryExpr(UnaryOp::NEGATION, new Variable("paramA"));
   auto varDeclAlpha = new VarDecl("beta",
                                   new Datatype(Types::BOOL, false),
                                   unaryExpr);
@@ -417,7 +417,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, unaryExpr_variableUnknown_notEval
 
   // check that beta was computed
   EXPECT_EQ(ctes.variableValues.size(), 1);
-  EXPECT_TRUE(getVariableValue("beta")->isEqual(new UnaryExpr(UnaryOp::negation, new Variable("paramA"))));
+  EXPECT_TRUE(getVariableValue("beta")->isEqual(new UnaryExpr(UnaryOp::NEGATION, new Variable("paramA"))));
   // check that statements is deleted
   EXPECT_EQ(function->getBodyStatements().size(), 0);
 
@@ -564,17 +564,17 @@ TEST_F(CompileTimeExpressionSimplifierFixture,  /* NOLINT */
   auto varAssignmX = new VarAssignm("x",
                                     new ArithmeticExpr(
                                         new Variable("y"),
-                                        ArithmeticOp::addition,
+                                        ArithmeticOp::ADDITION,
                                         3));
   auto varAssignmY = new VarAssignm("y",
                                     new ArithmeticExpr(
                                         new Variable("x"),
-                                        ArithmeticOp::addition,
+                                        ArithmeticOp::ADDITION,
                                         2));
   auto returnStmt = new Return(
       new ArithmeticExpr(
           new Variable("x"),
-          ArithmeticOp::addition,
+          ArithmeticOp::ADDITION,
           new Variable("y")));
 
   // connect objects
@@ -595,9 +595,9 @@ TEST_F(CompileTimeExpressionSimplifierFixture,  /* NOLINT */
   auto expectedAst = new ArithmeticExpr(
       new ArithmeticExpr(
           new LiteralInt(8),
-          ArithmeticOp::addition,
+          ArithmeticOp::ADDITION,
           new Variable("y")),
-      ArithmeticOp::addition,
+      ArithmeticOp::ADDITION,
       new Variable("y"));
   EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
   EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedAst));
@@ -680,7 +680,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   auto varDeclB = new VarDecl("b", 23);
   auto returnStatement = new Return(
       new ArithmeticExpr(new Variable("b"),
-                         ArithmeticOp::addition,
+                         ArithmeticOp::ADDITION,
                          new LiteralInt(99)));
 
   // connect objects
@@ -714,7 +714,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, return_variableUnknown_expectedNo
   auto function = new Function("compute");
   auto returnStatement = new Return(
       new ArithmeticExpr(new Variable("b"),
-                         ArithmeticOp::addition,
+                         ArithmeticOp::ADDITION,
                          new LiteralInt(99)));
 
   // connect objects
@@ -751,17 +751,17 @@ TEST_F(CompileTimeExpressionSimplifierFixture, return_multipleReturnValues_expec
                              new Datatype(Types::INT),
                              new ArithmeticExpr(
                                  new LiteralInt(3),
-                                 ArithmeticOp::addition,
+                                 ArithmeticOp::ADDITION,
                                  new LiteralInt(4)));
   auto returnStatement =
       new Return({
                      new ArithmeticExpr(
                          new Variable("a"),
-                         ArithmeticOp::multiplication,
+                         ArithmeticOp::MULTIPLICATION,
                          new Variable("b")),
                      new ArithmeticExpr(
                          new LiteralInt(2),
-                         ArithmeticOp::subtraction,
+                         ArithmeticOp::SUBTRACTION,
                          new Variable("b")),
                      new LiteralInt(21)});
 
@@ -779,7 +779,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, return_multipleReturnValues_expec
 
   // check return expression 1: a*7
   EXPECT_TRUE(returnStatement->getReturnExpressions().at(0)
-                  ->isEqual(new ArithmeticExpr(new Variable("a"), ArithmeticOp::multiplication, new LiteralInt(7))));
+                  ->isEqual(new ArithmeticExpr(new Variable("a"), ArithmeticOp::MULTIPLICATION, new LiteralInt(7))));
   // check return expression 2: -5
   EXPECT_TRUE(returnStatement->getReturnExpressions().at(1)->isEqual(new LiteralInt(-5)));
   // check return expression 3: 21
@@ -815,17 +815,17 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
       new LogicalExpr(
           new ArithmeticExpr(
               new Variable("b"),
-              ArithmeticOp::addition,
+              ArithmeticOp::ADDITION,
               new LiteralInt(12)),
-          LogCompOp::greater,
+          LogCompOp::GREATER,
           new LiteralInt(20)),
       new VarAssignm("a", new ArithmeticExpr(
           new Variable("a"),
-          ArithmeticOp::multiplication,
+          ArithmeticOp::MULTIPLICATION,
           new LiteralInt(2))));
   auto returnStatement =
       new Return(new ArithmeticExpr(new Variable("a"),
-                                    ArithmeticOp::multiplication,
+                                    ArithmeticOp::MULTIPLICATION,
                                     new LiteralInt(32)));
 
   // connect objects
@@ -875,19 +875,19 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
                               new LiteralInt(22));
 
   auto condition = new LogicalExpr(
-      new ArithmeticExpr(new Variable("b"), ArithmeticOp::addition, new LiteralInt(12)),
-      LogCompOp::greater,
+      new ArithmeticExpr(new Variable("b"), ArithmeticOp::ADDITION, new LiteralInt(12)),
+      LogCompOp::GREATER,
       new LiteralInt(20));
   auto thenBranch = new VarAssignm("a", new ArithmeticExpr(
       new Variable("a"),
-      ArithmeticOp::multiplication,
+      ArithmeticOp::MULTIPLICATION,
       new LiteralInt(2)));
   auto elseBranch = new VarAssignm("a", new LiteralInt(1));
   auto ifStmt = new If(condition, thenBranch, elseBranch);
 
   auto returnStatement =
       new Return(new ArithmeticExpr(new Variable("a"),
-                                    ArithmeticOp::multiplication,
+                                    ArithmeticOp::MULTIPLICATION,
                                     new LiteralInt(32)));
 
   // connect objects
@@ -938,19 +938,19 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
                               new LiteralInt(22));
 
   auto condition = new LogicalExpr(
-      new ArithmeticExpr(new Variable("b"), ArithmeticOp::addition, new LiteralInt(12)),
-      LogCompOp::smaller,
+      new ArithmeticExpr(new Variable("b"), ArithmeticOp::ADDITION, new LiteralInt(12)),
+      LogCompOp::SMALLER,
       new LiteralInt(20));
   auto thenBranch = new VarAssignm("a", new ArithmeticExpr(
       new Variable("a"),
-      ArithmeticOp::multiplication,
+      ArithmeticOp::MULTIPLICATION,
       new LiteralInt(2)));
   auto elseBranch = new VarAssignm("a", new LiteralInt(1));
   auto ifStmt = new If(condition, thenBranch, elseBranch);
 
   auto returnStatement =
       new Return(new ArithmeticExpr(new Variable("a"),
-                                    ArithmeticOp::multiplication,
+                                    ArithmeticOp::MULTIPLICATION,
                                     new LiteralInt(32)));
 
   // connect objects
@@ -999,13 +999,13 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
                               new Datatype(Types::INT),
                               new LiteralInt(22));
   auto ifStmtCondition = new LogicalExpr(new Variable("a"),
-                                         LogCompOp::greater,
+                                         LogCompOp::GREATER,
                                          new LiteralInt(20));
   auto ifStmt = new If(
       ifStmtCondition,
       new VarAssignm("b", new ArithmeticExpr(
           new LiteralInt(2),
-          ArithmeticOp::multiplication,
+          ArithmeticOp::MULTIPLICATION,
           new Variable("b"))));
   auto returnStatement =
       new Return(new Variable("b"));
@@ -1028,19 +1028,19 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   auto expectedResult = new ArithmeticExpr(
       new ArithmeticExpr(
           new LogicalExpr(new Variable("a"),
-                          LogCompOp::greater,
+                          LogCompOp::GREATER,
                           new LiteralInt(20)),
-          ArithmeticOp::multiplication,
+          ArithmeticOp::MULTIPLICATION,
           new LiteralInt(44)),
-      ArithmeticOp::addition,
+      ArithmeticOp::ADDITION,
       new ArithmeticExpr(
           new ArithmeticExpr(
               new LiteralInt(1),
-              ArithmeticOp::subtraction,
+              ArithmeticOp::SUBTRACTION,
               new LogicalExpr(new Variable("a"),
-                              LogCompOp::greater,
+                              LogCompOp::GREATER,
                               new LiteralInt(20))),
-          ArithmeticOp::multiplication,
+          ArithmeticOp::MULTIPLICATION,
           new LiteralInt(22)));
   EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedResult));
   // check that 'b' was memorized correctly
@@ -1071,7 +1071,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
                                                                        new Variable("a"))});
   auto varDeclB = new VarDecl("b", new Datatype(Types::INT));
   auto ifStmtCondition = new LogicalExpr(new Variable("a"),
-                                         LogCompOp::greater,
+                                         LogCompOp::GREATER,
                                          new LiteralInt(20));
   auto thenStatements = std::vector<AbstractStatement *>(
       {new VarDecl("c", 642),
@@ -1079,9 +1079,9 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
                       new ArithmeticExpr(
                           new ArithmeticExpr(
                               new LiteralInt(2),
-                              ArithmeticOp::multiplication,
+                              ArithmeticOp::MULTIPLICATION,
                               new Variable("c")),
-                          ArithmeticOp::subtraction,
+                          ArithmeticOp::SUBTRACTION,
                           new LiteralInt(1)))});
   auto thenBranch = new Block(thenStatements);
   auto ifStmt = new If(ifStmtCondition, thenBranch);
@@ -1106,9 +1106,9 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   auto expectedResult =
       new ArithmeticExpr(
           new LogicalExpr(new Variable("a"),
-                          LogCompOp::greater,
+                          LogCompOp::GREATER,
                           new LiteralInt(20)),
-          ArithmeticOp::multiplication,
+          ArithmeticOp::MULTIPLICATION,
           new LiteralInt(1'283));
   EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedResult));
   // check that variable values were memorized correctly
@@ -1141,7 +1141,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
                                                                        new Variable("a"))});
   auto varDeclB = new VarDecl("b", new Datatype(Types::INT), new LiteralInt(42));
   auto ifStmtCondition = new LogicalExpr(new Variable("a"),
-                                         LogCompOp::greater,
+                                         LogCompOp::GREATER,
                                          new LiteralInt(20));
   auto thenStatements = std::vector<AbstractStatement *>(
       {new VarDecl("c", 642),
@@ -1149,9 +1149,9 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
                       new ArithmeticExpr(
                           new ArithmeticExpr(
                               new LiteralInt(2),
-                              ArithmeticOp::multiplication,
+                              ArithmeticOp::MULTIPLICATION,
                               new Variable("c")),
-                          ArithmeticOp::subtraction,
+                          ArithmeticOp::SUBTRACTION,
                           new LiteralInt(1)))});
   auto thenBranch = new Block(thenStatements);
   auto ifStmt = new If(ifStmtCondition, thenBranch);
@@ -1176,18 +1176,18 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   auto expectedResult = new ArithmeticExpr(
       new ArithmeticExpr(
           new LogicalExpr(new Variable("a"),
-                          LogCompOp::greater,
+                          LogCompOp::GREATER,
                           new LiteralInt(20)),
-          ArithmeticOp::multiplication,
+          ArithmeticOp::MULTIPLICATION,
           new LiteralInt(1'283)),
-      ArithmeticOp::addition,
+      ArithmeticOp::ADDITION,
       new ArithmeticExpr(new ArithmeticExpr(
           new LiteralInt(1),
-          ArithmeticOp::subtraction,
+          ArithmeticOp::SUBTRACTION,
           new LogicalExpr(new Variable("a"),
-                          LogCompOp::greater,
+                          LogCompOp::GREATER,
                           new LiteralInt(20))),
-                         ArithmeticOp::multiplication,
+                         ArithmeticOp::MULTIPLICATION,
                          new LiteralInt(42)));
   EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedResult));
   // check that 'b' was memorized correctly
@@ -1219,12 +1219,12 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
        new FunctionParameter(new Datatype(Types::INT), new Variable("threshold"))});
   auto varDecl = new VarDecl("b", new Datatype(Types::INT));
   auto ifStmtCondition = new LogicalExpr(new Variable("threshold"),
-                                         LogCompOp::smaller,
+                                         LogCompOp::SMALLER,
                                          new LiteralInt(11));
   auto thenBranch = new VarAssignm("b",
                                    new ArithmeticExpr(
                                        new LiteralInt(2),
-                                       ArithmeticOp::multiplication,
+                                       ArithmeticOp::MULTIPLICATION,
                                        new Variable("factor")));
   auto elseBranch = new VarAssignm("b", new Variable("factor"));
 
@@ -1250,18 +1250,18 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   auto expectedResult = new ArithmeticExpr(
       new ArithmeticExpr(
           new LogicalExpr(new Variable("threshold"),
-                          LogCompOp::smaller,
+                          LogCompOp::SMALLER,
                           new LiteralInt(11)),
-          ArithmeticOp::multiplication,
-          new ArithmeticExpr(new LiteralInt(2), ArithmeticOp::multiplication, new Variable("factor"))),
-      ArithmeticOp::addition,
+          ArithmeticOp::MULTIPLICATION,
+          new ArithmeticExpr(new LiteralInt(2), ArithmeticOp::MULTIPLICATION, new Variable("factor"))),
+      ArithmeticOp::ADDITION,
       new ArithmeticExpr(new ArithmeticExpr(
           new LiteralInt(1),
-          ArithmeticOp::subtraction,
+          ArithmeticOp::SUBTRACTION,
           new LogicalExpr(new Variable("threshold"),
-                          LogCompOp::smaller,
+                          LogCompOp::SMALLER,
                           new LiteralInt(11))),
-                         ArithmeticOp::multiplication,
+                         ArithmeticOp::MULTIPLICATION,
                          new Variable("factor")));
   EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedResult));
   // check that 'b' was memorized correctly
@@ -1297,21 +1297,21 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
 
   auto varDeclB = new VarDecl("b", 99);
 
-  auto innerIfStatementCondition = new LogicalExpr(new Variable("factor"), LogCompOp::greater, new LiteralInt(9));
+  auto innerIfStatementCondition = new LogicalExpr(new Variable("factor"), LogCompOp::GREATER, new LiteralInt(9));
   auto innerIfStatement = new If(innerIfStatementCondition,
                                  new VarAssignm("b", new ArithmeticExpr(
-                                     new ArithmeticExpr(new Variable("b"), ArithmeticOp::multiplication, 2),
-                                     ArithmeticOp::multiplication,
+                                     new ArithmeticExpr(new Variable("b"), ArithmeticOp::MULTIPLICATION, 2),
+                                     ArithmeticOp::MULTIPLICATION,
                                      new Variable("factor"))),
                                  new VarAssignm("b",
                                                 new ArithmeticExpr(new Variable("b"),
-                                                                   ArithmeticOp::multiplication,
+                                                                   ArithmeticOp::MULTIPLICATION,
                                                                    new Variable("factor"))));
 
   auto outerIfStmtThenBlock =
-      new Block({new VarAssignm("b", new ArithmeticExpr(new Variable("b"), ArithmeticOp::division, new LiteralInt(3))),
+      new Block({new VarAssignm("b", new ArithmeticExpr(new Variable("b"), ArithmeticOp::DIVISION, new LiteralInt(3))),
                  innerIfStatement});
-  auto outerIfStatementCondition = new LogicalExpr(new Variable("threshold"), LogCompOp::greater, new LiteralInt(11));
+  auto outerIfStatementCondition = new LogicalExpr(new Variable("threshold"), LogCompOp::GREATER, new LiteralInt(11));
   auto outerIfStmt = new If(outerIfStatementCondition, outerIfStmtThenBlock);
 
   auto returnStmt = new Return(new Variable("b"));
@@ -1338,39 +1338,39 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   //    + [1-[threshold>11]]*99;            // expectedResultRhsTerm
 
   auto expectedResultLhsTerm = new ArithmeticExpr(
-      new LogicalExpr(new Variable("factor"), LogCompOp::greater, new LiteralInt(9)),
-      ArithmeticOp::multiplication,
+      new LogicalExpr(new Variable("factor"), LogCompOp::GREATER, new LiteralInt(9)),
+      ArithmeticOp::MULTIPLICATION,
       new ArithmeticExpr(
           new LiteralInt(66),
-          ArithmeticOp::multiplication,
+          ArithmeticOp::MULTIPLICATION,
           new Variable("factor")));
   auto expectedResultMiddleTerm = new ArithmeticExpr(
       new ArithmeticExpr(
           new LiteralInt(1),
-          ArithmeticOp::subtraction,
-          new LogicalExpr(new Variable("factor"), LogCompOp::greater, new LiteralInt(9))),
-      ArithmeticOp::multiplication,
+          ArithmeticOp::SUBTRACTION,
+          new LogicalExpr(new Variable("factor"), LogCompOp::GREATER, new LiteralInt(9))),
+      ArithmeticOp::MULTIPLICATION,
       new ArithmeticExpr(
           new LiteralInt(33),
-          ArithmeticOp::multiplication,
+          ArithmeticOp::MULTIPLICATION,
           new Variable("factor")));
   auto expectedResultRhsTerm = new ArithmeticExpr(
       new ArithmeticExpr(
           new LiteralInt(1),
-          ArithmeticOp::subtraction,
-          new LogicalExpr(new Variable("threshold"), LogCompOp::greater, new LiteralInt(11))),
-      ArithmeticOp::multiplication,
+          ArithmeticOp::SUBTRACTION,
+          new LogicalExpr(new Variable("threshold"), LogCompOp::GREATER, new LiteralInt(11))),
+      ArithmeticOp::MULTIPLICATION,
       new LiteralInt(99));
 
   auto expectedResult = new ArithmeticExpr(
       new ArithmeticExpr(
-          new LogicalExpr(new Variable("threshold"), LogCompOp::greater, new LiteralInt(11)),
-          ArithmeticOp::multiplication,
+          new LogicalExpr(new Variable("threshold"), LogCompOp::GREATER, new LiteralInt(11)),
+          ArithmeticOp::MULTIPLICATION,
           new ArithmeticExpr(
               expectedResultLhsTerm,
-              ArithmeticOp::addition,
+              ArithmeticOp::ADDITION,
               expectedResultMiddleTerm)),
-      ArithmeticOp::addition,
+      ArithmeticOp::ADDITION,
       expectedResultRhsTerm);
   EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedResult));
   // check that 'b' was memorized correctly
@@ -1397,9 +1397,9 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_partiallyEvaluableO
           new Datatype(Types::INT, false), new Variable("x"))});
   auto varDeclY = new VarDecl("y", 42);
   auto varAssignmX =
-      new VarAssignm("x", new ArithmeticExpr(new Variable("x"), ArithmeticOp::addition, new LiteralInt(29)));
+      new VarAssignm("x", new ArithmeticExpr(new Variable("x"), ArithmeticOp::ADDITION, new LiteralInt(29)));
   auto returnStmt = new Return(
-      new ArithmeticExpr(new Variable("x"), ArithmeticOp::addition, new Variable("y")));
+      new ArithmeticExpr(new Variable("x"), ArithmeticOp::ADDITION, new Variable("y")));
 
   // connect objects
   function->setParameterList(functionParamList);
@@ -1414,7 +1414,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_partiallyEvaluableO
   // check that simplification generated the expected simplified AST
   auto expectedReturnVal = new ArithmeticExpr(
       new LiteralInt(71),
-      ArithmeticOp::addition,
+      ArithmeticOp::ADDITION,
       new Variable("x"));
   EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
   EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
@@ -1437,12 +1437,12 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_unsupportedNestedOp
       {new FunctionParameter(
           new Datatype(Types::INT, false), new Variable("a"))});
   auto returnStmt = new Return(
-      new ArithmeticExpr(new LiteralInt(9), addition,
-                         new ArithmeticExpr(new LiteralInt(34), addition,
-                                            new ArithmeticExpr(new LiteralInt(22), division,
-                                                               new ArithmeticExpr(new Variable("a"), division,
+      new ArithmeticExpr(new LiteralInt(9), ADDITION,
+                         new ArithmeticExpr(new LiteralInt(34), ADDITION,
+                                            new ArithmeticExpr(new LiteralInt(22), DIVISION,
+                                                               new ArithmeticExpr(new Variable("a"), DIVISION,
                                                                                   new ArithmeticExpr(new LiteralInt(11),
-                                                                                                     multiplication,
+                                                                                                     MULTIPLICATION,
                                                                                                      42))))));
 
   // connect objects
@@ -1455,9 +1455,9 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_unsupportedNestedOp
 
   // check that simplification generated the expected simplified AST
   auto expectedReturnVal = new ArithmeticExpr(
-      new ArithmeticExpr(new LiteralInt(22), division,
-                         new ArithmeticExpr(new Variable("a"), division, new LiteralInt(462))),
-      ArithmeticOp::addition,
+      new ArithmeticExpr(new LiteralInt(22), DIVISION,
+                         new ArithmeticExpr(new Variable("a"), DIVISION, new LiteralInt(462))),
+      ArithmeticOp::ADDITION,
       new LiteralInt(43));
   EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
   EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
@@ -1481,11 +1481,11 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_nestedOperatorsSimp
           new Datatype(Types::INT, false), new Variable("a"))});
   auto returnStmt = new Return(
       new ArithmeticExpr(
-          new ArithmeticExpr(new LiteralInt(4), addition,
-                             new ArithmeticExpr(new LiteralInt(3), addition, new LiteralInt(8))),
-          subtraction,
-          new ArithmeticExpr(new Variable("a"), division,
-                             new ArithmeticExpr(new LiteralInt(2), multiplication, new LiteralInt(4)))));
+          new ArithmeticExpr(new LiteralInt(4), ADDITION,
+                             new ArithmeticExpr(new LiteralInt(3), ADDITION, new LiteralInt(8))),
+          SUBTRACTION,
+          new ArithmeticExpr(new Variable("a"), DIVISION,
+                             new ArithmeticExpr(new LiteralInt(2), MULTIPLICATION, new LiteralInt(4)))));
 
   // connect objects
   function->setParameterList(functionParamList);
@@ -1497,8 +1497,8 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_nestedOperatorsSimp
 
   // check that simplification generated the expected simplified AST
   auto expectedReturnVal = new ArithmeticExpr(new LiteralInt(15),
-                                              subtraction,
-                                              new ArithmeticExpr(new Variable("a"), division, new LiteralInt(8)));
+                                              SUBTRACTION,
+                                              new ArithmeticExpr(new Variable("a"), DIVISION, new LiteralInt(8)));
   EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
   EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
 
@@ -1523,17 +1523,17 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_nestedLogicalOperat
           new FunctionParameter(new Datatype(Types::BOOL, true), new Variable("c"))
       });
   auto returnStmt = new Return(
-      new LogicalExpr(new LogicalExpr(new Variable("a"), logicalXor,
+      new LogicalExpr(new LogicalExpr(new Variable("a"), LOGICAL_XOR,
                                       new LogicalExpr(
                                           new Variable("b"),
-                                          logicalXor,
+                                          LOGICAL_XOR,
                                           new LiteralBool(false))),
-                      logicalAnd,
+                      LOGICAL_AND,
                       new LogicalExpr(new LogicalExpr(
                           new LiteralBool(true),
-                          logicalOr,
+                          LOGICAL_OR,
                           new LiteralBool(false)),
-                                      logicalOr,
+                                      LOGICAL_OR,
                                       new LiteralBool(true))));
 
   // connect objects
@@ -1545,7 +1545,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_nestedLogicalOperat
   ctes.visit(ast);
 
   // check that simplification generated the expected simplified AST
-  auto expectedReturnVal = new LogicalExpr(new Variable("a"), logicalXor, new Variable("b"));
+  auto expectedReturnVal = new LogicalExpr(new Variable("a"), LOGICAL_XOR, new Variable("b"));
   EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
   EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
 
@@ -1571,10 +1571,10 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_logicalAndSimplific
   auto returnStmt = new Return(
       new LogicalExpr(
           new Variable("a"),
-          logicalAnd,
+          LOGICAL_AND,
           new LogicalExpr(
               new LiteralBool(true),
-              logicalAnd,
+              LOGICAL_AND,
               new Variable("b"))));
 
   // connect objects
@@ -1586,7 +1586,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_logicalAndSimplific
   ctes.visit(ast);
 
   // check that simplification generated the expected simplified AST
-  auto expectedReturnVal = new LogicalExpr(new Variable("a"), logicalAnd, new Variable("b"));
+  auto expectedReturnVal = new LogicalExpr(new Variable("a"), LOGICAL_AND, new Variable("b"));
   EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
   EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
 }
@@ -1609,10 +1609,10 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_logicalAndSimplific
   auto returnStmt = new Return(
       new LogicalExpr(
           new Variable("a"),
-          logicalAnd,
+          LOGICAL_AND,
           new LogicalExpr(
               new LiteralBool(false),
-              logicalAnd,
+              LOGICAL_AND,
               new Variable("b"))));
 
   // connect objects
@@ -1647,10 +1647,10 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_logicalAndSimplific
   auto returnStmt = new Return(
       new LogicalExpr(
           new Variable("a"),
-          logicalOr,
+          LOGICAL_OR,
           new LogicalExpr(
               new Variable("b"),
-              logicalOr,
+              LOGICAL_OR,
               new LiteralBool(false))));
 
   // connect objects
@@ -1662,7 +1662,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_logicalAndSimplific
   ctes.visit(ast);
 
   // check that simplification generated the expected simplified AST
-  auto expectedReturnVal = new LogicalExpr(new Variable("a"), logicalOr, new Variable("b"));
+  auto expectedReturnVal = new LogicalExpr(new Variable("a"), LOGICAL_OR, new Variable("b"));
   EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
   EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
 }
@@ -1685,10 +1685,10 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_logicalAndSimplific
   auto returnStmt = new Return(
       new LogicalExpr(
           new Variable("a"),
-          logicalOr,
+          LOGICAL_OR,
           new LogicalExpr(
               new Variable("b"),
-              logicalOr,
+              LOGICAL_OR,
               new LiteralBool(true))));
 
   // connect objects
@@ -1723,10 +1723,10 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_logicalAndSimplific
   auto returnStmt = new Return(
       new LogicalExpr(
           new Variable("a"),
-          logicalXor,
+          LOGICAL_XOR,
           new LogicalExpr(
               new Variable("b"),
-              logicalXor,
+              LOGICAL_XOR,
               new LiteralBool(true))));
 
   // connect objects
@@ -1738,7 +1738,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_logicalAndSimplific
   ctes.visit(ast);
 
   // check that simplification generated the expected simplified AST
-  auto expectedReturnVal = new LogicalExpr(new Variable("a"), logicalXor, new UnaryExpr(negation, new Variable("b")));
+  auto expectedReturnVal = new LogicalExpr(new Variable("a"), LOGICAL_XOR, new UnaryExpr(NEGATION, new Variable("b")));
   EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
   EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
 }
@@ -1761,10 +1761,10 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_logicalAndSimplific
   auto returnStmt = new Return(
       new LogicalExpr(
           new Variable("a"),
-          logicalXor,
+          LOGICAL_XOR,
           new LogicalExpr(
               new Variable("b"),
-              logicalXor,
+              LOGICAL_XOR,
               new LiteralBool(false))));
 
   // connect objects
@@ -1776,7 +1776,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_logicalAndSimplific
   ctes.visit(ast);
 
   // check that simplification generated the expected simplified AST
-  auto expectedReturnVal = new LogicalExpr(new Variable("a"), logicalXor, new Variable("b"));
+  auto expectedReturnVal = new LogicalExpr(new Variable("a"), LOGICAL_XOR, new Variable("b"));
   EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
   EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
 }
@@ -1807,16 +1807,16 @@ TEST_F(CompileTimeExpressionSimplifierFixture, WhileLoop_compileTimeKnownExpress
                     new VarAssignm("a",
                                    new ArithmeticExpr(
                                        new Variable("a"),
-                                       multiplication,
+                                       MULTIPLICATION,
                                        new Variable("a"))),
                     new VarAssignm("i",
                                    new ArithmeticExpr(
                                        new Variable("i"),
-                                       subtraction,
+                                       SUBTRACTION,
                                        new LiteralInt(1)))});
   function->addStatement(new While(new LogicalExpr(
       new Variable("i"),
-      greater,
+      GREATER,
       new LiteralInt(10)), whileBody));
 
   auto *returnStatement = new Return(new Variable("a"));
@@ -1845,7 +1845,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, Call_inliningExpected) { /* NOLIN
   auto funcComputeX =
       new Function("computeX",
                    new ParameterList({new FunctionParameter(new Datatype(Types::INT, false), new Variable("x"))}),
-                   new Block(new Return(new ArithmeticExpr(new Variable("x"), addition, new LiteralInt(111)))));
+                   new Block(new Return(new ArithmeticExpr(new Variable("x"), ADDITION, new LiteralInt(111)))));
   auto callStmt = new Call(
       {new FunctionParameter(new Datatype(Types::INT, false), new Variable("a"))}, funcComputeX);
 
@@ -1857,7 +1857,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, Call_inliningExpected) { /* NOLIN
   // perform the compile-time expression simplification
   ctes.visit(ast);
 
-  auto expectedReturnExpr = new ArithmeticExpr(new Variable("a"), addition, new LiteralInt(111));
+  auto expectedReturnExpr = new ArithmeticExpr(new Variable("a"), ADDITION, new LiteralInt(111));
   EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedReturnExpr));
 }
 
@@ -1874,7 +1874,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, Call_inliningExpected2) { /* NOLI
   auto funcComputeX =
       new Function("computeX",
                    new ParameterList({new FunctionParameter(new Datatype(Types::INT, false), new Variable("x"))}),
-                   new Block(new Return(new ArithmeticExpr(new Variable("x"), addition, new LiteralInt(111)))));
+                   new Block(new Return(new ArithmeticExpr(new Variable("x"), ADDITION, new LiteralInt(111)))));
   auto callStmt = new Call(
       {new FunctionParameter(
           new Datatype(Types::INT, false), new LiteralInt(232))}, funcComputeX);

@@ -41,7 +41,7 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_ArithmeticExpr) {  /* NOLINT */
 
   // create a new arithmetic expression
   auto lhsOperand = new LiteralInt(0);
-  auto operatore = new Operator(ArithmeticOp::addition);
+  auto operatore = new Operator(ArithmeticOp::ADDITION);
   auto rhsOperand = new LiteralInt(987);
   auto arithmeticExpression = new ArithmeticExpr(lhsOperand, operatore, rhsOperand);
   // clone the logical expression
@@ -61,9 +61,9 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_ArithmeticExpr) {  /* NOLINT */
   ASSERT_EQ(clonedArithmeticExprCasted->getRight()->castTo<LiteralInt>()->getValue(), 987);
 
   // make changes to the operator and check whether clone changes too
-  *operatore = *new Operator(ArithmeticOp::multiplication);
-  ASSERT_TRUE(arithmeticExpression->getOp()->castTo<Operator>()->equals(ArithmeticOp::multiplication));
-  ASSERT_TRUE(clonedArithmeticExprCasted->getOp()->equals(ArithmeticOp::addition));
+  *operatore = *new Operator(ArithmeticOp::MULTIPLICATION);
+  ASSERT_TRUE(arithmeticExpression->getOp()->castTo<Operator>()->equals(ArithmeticOp::MULTIPLICATION));
+  ASSERT_TRUE(clonedArithmeticExprCasted->getOp()->equals(ArithmeticOp::ADDITION));
 }
 
 TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_LogicalExpr) {  /* NOLINT */
@@ -71,7 +71,7 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_LogicalExpr) {  /* NOLINT */
 
   // create a new logical expression
   auto lhsOperand = new LiteralInt(0);
-  auto operatore = new Operator(LogCompOp::greater);
+  auto operatore = new Operator(LogCompOp::GREATER);
   auto rhsOperand = new LiteralInt(987);
   auto logicalExpression = new LogicalExpr(lhsOperand, operatore, rhsOperand);
   // clone the logical expression
@@ -91,9 +91,9 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_LogicalExpr) {  /* NOLINT */
   ASSERT_EQ(clonedLogicalExpr->getRight()->castTo<LiteralInt>()->getValue(), 987);
 
   // make changes to the operator and check whether clone changes too
-  *operatore = *new Operator(LogCompOp::smaller);
-  ASSERT_TRUE(logicalExpression->getOp()->castTo<Operator>()->equals(LogCompOp::smaller));
-  ASSERT_TRUE(clonedLogicalExpr->getOp()->equals(LogCompOp::greater));
+  *operatore = *new Operator(LogCompOp::SMALLER);
+  ASSERT_TRUE(logicalExpression->getOp()->castTo<Operator>()->equals(LogCompOp::SMALLER));
+  ASSERT_TRUE(clonedLogicalExpr->getOp()->equals(LogCompOp::GREATER));
 }
 
 TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_If) {  /* NOLINT */
@@ -102,7 +102,7 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_If) {  /* NOLINT */
   // create new If object
   auto ifStmtCondition = new LogicalExpr(
       new LiteralInt(12),
-      LogCompOp::greater,
+      LogCompOp::GREATER,
       new LiteralInt(43));
   auto ifStmtThenBranch = new Block(new VarAssignm("alpha", new LiteralBool(true)));
   auto ifStmtElseBranch = new Block(new VarAssignm("alpha", new LiteralBool(false)));
@@ -120,16 +120,16 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_If) {  /* NOLINT */
 
   // check if changing the condition in the original also changes the cloned If statement
   ifStmtCondition->setAttributes(new LiteralInt(99),
-                                 new Operator(LogCompOp::smaller),
+                                 new Operator(LogCompOp::SMALLER),
                                  new LiteralInt(1));
   // check if changes were applied to the original one
   ASSERT_EQ(ifStmt->getCondition()->castTo<LogicalExpr>()->getLeft()->castTo<LiteralInt>()->getValue(), 99);
-  ASSERT_TRUE(ifStmt->getCondition()->castTo<LogicalExpr>()->getOp()->equals(LogCompOp::smaller));
+  ASSERT_TRUE(ifStmt->getCondition()->castTo<LogicalExpr>()->getOp()->equals(LogCompOp::SMALLER));
   ASSERT_EQ(ifStmt->getCondition()->castTo<LogicalExpr>()->getRight()->castTo<LiteralInt>()->getValue(), 1);
   // check if changes were applied to the cloned one
   auto clonedIfCondition = clonedIfStmt->getCondition()->castTo<LogicalExpr>();
   ASSERT_EQ(clonedIfCondition->getLeft()->castTo<LiteralInt>()->getValue(), 12);
-  ASSERT_TRUE(clonedIfCondition->getOp()->equals(LogCompOp::greater));
+  ASSERT_TRUE(clonedIfCondition->getOp()->equals(LogCompOp::GREATER));
   ASSERT_EQ(clonedIfCondition->getRight()->castTo<LiteralInt>()->getValue(), 43);
 
   // check if changing the then branch in the original also changes the cloned If statement
@@ -365,8 +365,8 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_LiteralString) {  /* NOLINT */
 
 TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_Operator) {  /* NOLINT */
   const bool keepOriginalId = false;
-  auto operatore = new Operator(LogCompOp::logicalAnd);
-  ASSERT_TRUE(operatore->equals(LogCompOp::logicalAnd));
+  auto operatore = new Operator(LogCompOp::LOGICAL_AND);
+  ASSERT_TRUE(operatore->equals(LogCompOp::LOGICAL_AND));
   auto clonedOp = dynamic_cast<Operator *>(operatore->clone(keepOriginalId));
 
   // test if all fields belonging to Node class were copied
@@ -397,16 +397,16 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_Return) {  /* NOLINT */
 
 TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_UnaryExpr) {  /* NOLINT */
   const bool keepOriginalId = true;
-  auto unaryExpr = new UnaryExpr(UnaryOp::negation, new LiteralBool(true));
-  ASSERT_TRUE(unaryExpr->getOp()->equals(UnaryOp::negation));
+  auto unaryExpr = new UnaryExpr(UnaryOp::NEGATION, new LiteralBool(true));
+  ASSERT_TRUE(unaryExpr->getOp()->equals(UnaryOp::NEGATION));
   auto clonedUnaryExpr = dynamic_cast<UnaryExpr *>(unaryExpr->clone(keepOriginalId));
 
   // test if changing original also modifies the copy
-  unaryExpr->setAttributes(UnaryOp::negation, new LiteralInt(22));
-  ASSERT_TRUE(unaryExpr->getOp()->equals(UnaryOp::negation));
+  unaryExpr->setAttributes(UnaryOp::NEGATION, new LiteralInt(22));
+  ASSERT_TRUE(unaryExpr->getOp()->equals(UnaryOp::NEGATION));
   ASSERT_EQ(unaryExpr->getRight()->castTo<LiteralInt>()->getValue(), 22);
   // check cloned node
-  ASSERT_TRUE(clonedUnaryExpr->getOp()->equals(UnaryOp::negation));
+  ASSERT_TRUE(clonedUnaryExpr->getOp()->equals(UnaryOp::NEGATION));
   ASSERT_EQ(clonedUnaryExpr->getRight()->castTo<LiteralBool>()->getValue(), true);
 
   // test if all fields belonging to Node class were copied

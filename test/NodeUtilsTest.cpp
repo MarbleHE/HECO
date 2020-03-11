@@ -8,12 +8,12 @@
 
 TEST(NodeUtilsTest, rewriteMultiInputGateToBinaryGatesChain_emptyInputs) { /* NOLINT */
   std::vector<AbstractNode *> inputs{};
-  ASSERT_THROW(rewriteMultiInputGateToBinaryGatesChain(inputs, LogCompOp::logicalAnd), std::invalid_argument);
+  ASSERT_THROW(rewriteMultiInputGateToBinaryGatesChain(inputs, LogCompOp::LOGICAL_AND), std::invalid_argument);
 }
 
 TEST(NodeUtilsTest, rewriteMultiInputGateToBinaryGatesChain_oneInputAND) { /* NOLINT */
   std::vector<AbstractNode *> inputs{new Variable("alpha")};
-  LogCompOp gateType = LogCompOp::logicalAnd;
+  LogCompOp gateType = LogCompOp::LOGICAL_AND;
   auto result = rewriteMultiInputGateToBinaryGatesChain(inputs, gateType);
 
 // create new AST for evaluation
@@ -32,7 +32,7 @@ TEST(NodeUtilsTest, rewriteMultiInputGateToBinaryGatesChain_oneInputAND) { /* NO
 
 TEST(NodeUtilsTest, rewriteMultiInputGateToBinaryGatesChain_oneInputXOR) { /* NOLINT */
   std::vector<AbstractNode *> inputs{new Variable("alpha")};
-  LogCompOp gateType = LogCompOp::logicalXor;
+  LogCompOp gateType = LogCompOp::LOGICAL_XOR;
   auto result = rewriteMultiInputGateToBinaryGatesChain(inputs, gateType);
 
 // create new AST for evaluation
@@ -51,7 +51,7 @@ TEST(NodeUtilsTest, rewriteMultiInputGateToBinaryGatesChain_oneInputXOR) { /* NO
 
 TEST(NodeUtilsTest, rewriteMultiInputGateToBinaryGatesChain_oneInputUnsupportedException) { /* NOLINT */
   std::vector<AbstractNode *> inputs{new Variable("alpha")};
-  LogCompOp gateType = LogCompOp::greater;
+  LogCompOp gateType = LogCompOp::GREATER;
   ASSERT_THROW(rewriteMultiInputGateToBinaryGatesChain(inputs, gateType),
                std::logic_error);
 }
@@ -61,7 +61,7 @@ TEST(NodeUtilsTest, rewriteMultiInputGateToBinaryGatesChain_multipleInputs) { /*
                                      new Variable("beta"),
                                      new Variable("gamma"),
                                      new Variable("delta")};
-  LogCompOp gateType = LogCompOp::logicalXor;
+  LogCompOp gateType = LogCompOp::LOGICAL_XOR;
   auto result = rewriteMultiInputGateToBinaryGatesChain(inputs, gateType);
 
 // create new AST for evaluation
@@ -118,7 +118,7 @@ TEST(NodeUtilsTest, createMultDepthBalancedTreeFromInputs_simpleTestArithmetical
   multiplicativeDepths[variableY->getUniqueNodeId()] = 2;
 
   // create the multiplicative depth-balanced tree
-  auto opSymbol = ArithmeticOp::multiplication;
+  auto opSymbol = ArithmeticOp::MULTIPLICATION;
   auto generatedAst = createMultDepthBalancedTreeFromInputs(
       {literalInt5, literalInt9, variableX, variableY, literalInt21}, opSymbol, multiplicativeDepths);
 
@@ -151,7 +151,7 @@ TEST(NodeUtilsTest, createMultDepthBalancedTreeFromInputs_complexTest) {  /* NOL
   multiplicativeDepths[variableZ->getUniqueNodeId()] = 12;
 
   // create the multiplicative depth-balanced tree (intentionally, insert in random order)
-  auto opSymbol = ArithmeticOp::addition;
+  auto opSymbol = ArithmeticOp::ADDITION;
   auto generatedAst = createMultDepthBalancedTreeFromInputs(
       {variableZ, literalInt5, variableY, literalInt9, variableW, variableX},
       opSymbol,
@@ -182,7 +182,7 @@ TEST(NodeUtilsTest, createMultDepthBalancedTreeFromInputs_simpleTestLogicalExpr)
   AbstractExpr *variableY = new Variable("y");
   multiplicativeDepths[variableY->getUniqueNodeId()] = 2;
 
-  auto const opSymb(LogCompOp::logicalAnd);
+  auto const opSymb(LogCompOp::LOGICAL_AND);
 
   // create the multiplicative depth-balanced tree
   auto generatedAst = createMultDepthBalancedTreeFromInputs(

@@ -16,7 +16,7 @@ TEST(MultDepthVisitorTests, SingleStatementMultiplication) { // NOLINT
   f->addStatement(new VarDecl("abc", Types::INT,
                               new ArithmeticExpr(
                                   new LiteralInt(22),
-                                  ArithmeticOp::multiplication,
+                                  ArithmeticOp::MULTIPLICATION,
                                   new LiteralInt(32))));
   ast.setRootNode(f);
 
@@ -36,10 +36,10 @@ TEST(MultDepthVisitorTests, NestedMultiplication) { // NOLINT
                               Types::INT,
                               new ArithmeticExpr(
                                   new LiteralInt(22),
-                                  ArithmeticOp::multiplication,
+                                  ArithmeticOp::MULTIPLICATION,
                                   new ArithmeticExpr(
                                       new LiteralInt(32),
-                                      ArithmeticOp::multiplication,
+                                      ArithmeticOp::MULTIPLICATION,
                                       new LiteralInt(53)))));
   ast.setRootNode(f);
 
@@ -61,14 +61,14 @@ TEST(MultDepthVisitorTests, MultipleStatementMultiplication) { // NOLINT
 
   f->addStatement(new VarDecl("alpha", Types::INT, new ArithmeticExpr(
       new LiteralInt(32),
-      ArithmeticOp::multiplication,
+      ArithmeticOp::MULTIPLICATION,
       new Variable("num"))));
 
   f->addStatement(new VarDecl("beta",
                               Types::INT,
                               new ArithmeticExpr(
                                   new Variable("alpha"),
-                                  ArithmeticOp::multiplication,
+                                  ArithmeticOp::MULTIPLICATION,
                                   new LiteralInt(123))));
 
   // calculate multiplicative depth
@@ -86,7 +86,7 @@ TEST(MultDepthVisitorTests, SingleStatementLogicalAnd) { // NOLINT
   f->addStatement(new VarDecl("abc", Types::INT,
                               new LogicalExpr(
                                   new LiteralBool(true),
-                                  LogCompOp::logicalAnd,
+                                  LogCompOp::LOGICAL_AND,
                                   new LiteralBool(false))));
   ast.setRootNode(f);
 
@@ -106,10 +106,10 @@ TEST(MultDepthVisitorTests, NestedStatementLogicalAnd) { // NOLINT
                               Types::BOOL,
                               new LogicalExpr(
                                   new LiteralBool(false),
-                                  LogCompOp::logicalAnd,
+                                  LogCompOp::LOGICAL_AND,
                                   new LogicalExpr(
                                       new LiteralBool(true),
-                                      LogCompOp::logicalAnd,
+                                      LogCompOp::LOGICAL_AND,
                                       new LiteralBool(false)))));
   ast.setRootNode(f);
 
@@ -132,13 +132,13 @@ TEST(MultDepthVisitorTests, MultipleStatementsLogicalAnd) { // NOLINT
   f->addStatement(new VarDecl("alpha", Types::BOOL,
                               new LogicalExpr(
                                   new LiteralBool(true),
-                                  LogCompOp::logicalAnd,
+                                  LogCompOp::LOGICAL_AND,
                                   new LiteralBool(false))));
 
   f->addStatement(new VarDecl("beta", Types::BOOL,
                               new LogicalExpr(
                                   new Variable("alpha"),
-                                  LogCompOp::logicalAnd,
+                                  LogCompOp::LOGICAL_AND,
                                   new LiteralBool(true))));
 
   // calculate multiplicative depth
@@ -157,10 +157,10 @@ TEST(MultDepthVisitorTests, NoLogicalAndOrMultiplicationPresent) { // NOLINT
                               Types::BOOL,
                               new LogicalExpr(
                                   new Variable("value"),
-                                  LogCompOp::smaller,
+                                  LogCompOp::SMALLER,
                                   new ArithmeticExpr(
                                       new Variable("value"),
-                                      ArithmeticOp::addition,
+                                      ArithmeticOp::ADDITION,
                                       new LiteralInt(1234)))));
   // calculate multiplicative depth
   MultDepthVisitor mdv;

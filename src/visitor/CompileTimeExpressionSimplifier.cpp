@@ -269,22 +269,22 @@ void CompileTimeExpressionSimplifier::visit(LogicalExpr &elem) {
     // <anything> AND true  ==  <anything>
     // <anything> OR false  ==  <anything>
     // <anything> XOR false  ==  <anything>
-    if ((elem.getOp()->equals(logicalAnd) && booleanOperand->getValue())
-        || (elem.getOp()->equals(logicalOr) && !booleanOperand->getValue())
-        || (elem.getOp()->equals(logicalXor) && !booleanOperand->getValue())) {
+    if ((elem.getOp()->equals(LOGICAL_AND) && booleanOperand->getValue())
+        || (elem.getOp()->equals(LOGICAL_OR) && !booleanOperand->getValue())
+        || (elem.getOp()->equals(LOGICAL_XOR) && !booleanOperand->getValue())) {
       nonBooleanOperand->removeFromParents();
       elem.getOnlyParent()->replaceChild(&elem, nonBooleanOperand);
       nodesQueuedForDeletion.push_back(&elem);
-    } else if (elem.getOp()->equals(logicalAnd) && !booleanOperand->getValue()) {  // <anything> AND false  ==  false
+    } else if (elem.getOp()->equals(LOGICAL_AND) && !booleanOperand->getValue()) {  // <anything> AND false  ==  false
       elem.getOnlyParent()->replaceChild(&elem, new LiteralBool(false));
       nodesQueuedForDeletion.push_back(nonBooleanOperand);
-    } else if (elem.getOp()->equals(logicalOr) && booleanOperand->getValue()) {   // <anything> OR true  ==  true
+    } else if (elem.getOp()->equals(LOGICAL_OR) && booleanOperand->getValue()) {   // <anything> OR true  ==  true
       elem.getOnlyParent()->replaceChild(&elem, new LiteralBool(true));
       nodesQueuedForDeletion.push_back(nonBooleanOperand);
-    } else if (elem.getOp()->equals(logicalXor)
+    } else if (elem.getOp()->equals(LOGICAL_XOR)
         && booleanOperand->getValue()) {  // <anything> XOR true  ==  NOT <anything>
       nonBooleanOperand->removeFromParents();
-      auto uexp = new UnaryExpr(negation, nonBooleanOperand);
+      auto uexp = new UnaryExpr(NEGATION, nonBooleanOperand);
       elem.getOnlyParent()->replaceChild(&elem, uexp);
       nodesQueuedForDeletion.push_back(&elem);
     }
@@ -447,7 +447,7 @@ void CompileTimeExpressionSimplifier::visit(If &elem) {
       nodesQueuedForDeletion.push_back(elem.getThenBranch());
       // negate the condition and delete the conditions stored value (is now invalid)
       auto condition = elem.getCondition();
-      auto newCondition = new UnaryExpr(UnaryOp::negation, condition);
+      auto newCondition = new UnaryExpr(UnaryOp::NEGATION, condition);
       removableNodes.erase(condition);
       // replace the If statement's Then branch by the Else branch
       elem.removeChild(elem.getThenBranch(), true);
@@ -665,17 +665,17 @@ AbstractExpr *CompileTimeExpressionSimplifier::generateIfDependentValue(Abstract
   if (trueValueIsNull) {
     // factorIsFalse = [1-ifStatementCondition]
     auto factorIsFalse = new ArithmeticExpr(new LiteralInt(1),
-                                            ArithmeticOp::subtraction,
+                                            ArithmeticOp::SUBTRACTION,
                                             condition->clone(false)->castTo<AbstractExpr>());
     // case: trueValue == 0 && falseValue != 0 => value is 0 if the condition is True
     // -> return (1-b)*falseValue
-    return new ArithmeticExpr(factorIsFalse, ArithmeticOp::multiplication, falseValue);
+    return new ArithmeticExpr(factorIsFalse, ArithmeticOp::MULTIPLICATION, falseValue);
   } else if (falseValueIsNull) {
     // factorIsTrue = ifStatementCondition
     auto factorIsTrue = condition->clone(false)->castTo<AbstractExpr>();
     // case: trueValue != 0 && falseValue == 0 => value is 0 if the condition is False
     // -> return condition * trueValue
-    return new ArithmeticExpr(factorIsTrue, ArithmeticOp::multiplication, trueValue);
+    return new ArithmeticExpr(factorIsTrue, ArithmeticOp::MULTIPLICATION, trueValue);
   }
 
   // default case: trueValue != 0 && falseValue != 0 => value is changed in both branches of If statement
@@ -684,15 +684,15 @@ AbstractExpr *CompileTimeExpressionSimplifier::generateIfDependentValue(Abstract
   auto factorIsTrue = condition->clone(false)->castTo<AbstractExpr>();
   // factorIsFalse = [1-ifStatementCondition]
   auto factorIsFalse = new ArithmeticExpr(new LiteralInt(1),
-                                          ArithmeticOp::subtraction,
+                                          ArithmeticOp::SUBTRACTION,
                                           condition->clone(false)->castTo<AbstractExpr>());
   return new ArithmeticExpr(
       new ArithmeticExpr(factorIsTrue,
-                         ArithmeticOp::multiplication,
+                         ArithmeticOp::MULTIPLICATION,
                          trueValue->clone(false)->castTo<AbstractExpr>()),
-      ArithmeticOp::addition,
+      ArithmeticOp::ADDITION,
       new ArithmeticExpr(factorIsFalse,
-                         ArithmeticOp::multiplication,
+                         ArithmeticOp::MULTIPLICATION,
                          falseValue->clone(false)->castTo<AbstractExpr>()));
 }
 

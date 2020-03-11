@@ -7,7 +7,7 @@
 int main() {
 //  runInteractiveDemo();
 
-  auto arithmeticExp = new ArithmeticExpr(new Variable("x"), addition, new LiteralInt(22));
+  auto arithmeticExp = new ArithmeticExpr(new Variable("x"), ADDITION, new LiteralInt(22));
   std::cout << arithmeticExp->toString(true) << std::endl;
   return 0;
 }

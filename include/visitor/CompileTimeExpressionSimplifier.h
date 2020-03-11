@@ -81,9 +81,9 @@ struct BinaryExpressionAcc {
   static bool isSupportedOperator(OpSymbolVariant opSymbol) {
     // all commutative operators
     static const std::vector<LogCompOp> arithmeticOps =
-        {LogCompOp::logicalAnd, LogCompOp::logicalOr, LogCompOp::logicalXor};
+        {LogCompOp::LOGICAL_AND, LogCompOp::LOGICAL_OR, LogCompOp::LOGICAL_XOR};
     static const std::vector<ArithmeticOp> logicalOps =
-        {ArithmeticOp::addition, ArithmeticOp::multiplication};
+        {ArithmeticOp::ADDITION, ArithmeticOp::MULTIPLICATION};
 
     // accumulator approach works for commutative operators only
     if (std::holds_alternative<ArithmeticOp>(opSymbol)) {  // arithmetic operators

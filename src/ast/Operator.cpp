@@ -116,14 +116,14 @@ AbstractLiteral *Operator::applyOperator(AbstractLiteral *rhs) {
 
 AbstractLiteral *Operator::applyOperator(LiteralInt *rhs) {
   int value = rhs->getValue();
-  if (this->equals(UnaryOp::negation)) return new LiteralInt(-value);
+  if (this->equals(UnaryOp::NEGATION)) return new LiteralInt(-value);
   else
     throw std::logic_error("Could not apply unary operator (" + this->getOperatorString() + ") on (int).");
 }
 
 AbstractLiteral *Operator::applyOperator(LiteralBool *rhs) {
   bool value = rhs->getValue();
-  if (this->equals(UnaryOp::negation)) return new LiteralBool(!value);
+  if (this->equals(UnaryOp::NEGATION)) return new LiteralBool(!value);
   else
     throw std::logic_error(
         "Could not apply unary operator (" + this->getOperatorString() + ") on (" + this->getNodeType() + ").");
@@ -198,23 +198,23 @@ AbstractLiteral *Operator::applyOperator(LiteralFloat *lhs, LiteralFloat *rhs) {
   float lhsVal = lhs->getValue();
   float rhsVal = rhs->getValue();
 
-  if (this->equals(ArithmeticOp::addition)) return new LiteralFloat(lhsVal + rhsVal);
-  else if (this->equals(ArithmeticOp::subtraction)) return new LiteralFloat(lhsVal - rhsVal);
-  else if (this->equals(ArithmeticOp::multiplication)) return new LiteralFloat(lhsVal*rhsVal);
-  else if (this->equals(ArithmeticOp::division)) return new LiteralFloat(lhsVal/rhsVal);
-  else if (this->equals(ArithmeticOp::modulo)) throw std::logic_error("MOD not supported for (float, float)");
+  if (this->equals(ArithmeticOp::ADDITION)) return new LiteralFloat(lhsVal + rhsVal);
+  else if (this->equals(ArithmeticOp::SUBTRACTION)) return new LiteralFloat(lhsVal - rhsVal);
+  else if (this->equals(ArithmeticOp::MULTIPLICATION)) return new LiteralFloat(lhsVal*rhsVal);
+  else if (this->equals(ArithmeticOp::DIVISION)) return new LiteralFloat(lhsVal/rhsVal);
+  else if (this->equals(ArithmeticOp::MODULO)) throw std::logic_error("MOD not supported for (float, float)");
 
-  else if (this->equals(LogCompOp::logicalAnd)) throw std::logic_error("AND not supported for (float, float)");
-  else if (this->equals(LogCompOp::logicalOr)) throw std::logic_error("OR not supported for (float, float)");
-  else if (this->equals(LogCompOp::logicalXor)) throw std::logic_error("XOR not supported for (float, float)");
+  else if (this->equals(LogCompOp::LOGICAL_AND)) throw std::logic_error("AND not supported for (float, float)");
+  else if (this->equals(LogCompOp::LOGICAL_OR)) throw std::logic_error("OR not supported for (float, float)");
+  else if (this->equals(LogCompOp::LOGICAL_XOR)) throw std::logic_error("XOR not supported for (float, float)");
 
-  else if (this->equals(LogCompOp::smaller)) return new LiteralBool(lhsVal < rhsVal);
-  else if (this->equals(LogCompOp::smallerEqual)) return new LiteralBool(lhsVal <= rhsVal);
-  else if (this->equals(LogCompOp::greater)) return new LiteralBool(lhsVal > rhsVal);
-  else if (this->equals(LogCompOp::greaterEqual)) return new LiteralBool(lhsVal >= rhsVal);
+  else if (this->equals(LogCompOp::SMALLER)) return new LiteralBool(lhsVal < rhsVal);
+  else if (this->equals(LogCompOp::SMALLER_EQUAL)) return new LiteralBool(lhsVal <= rhsVal);
+  else if (this->equals(LogCompOp::GREATER)) return new LiteralBool(lhsVal > rhsVal);
+  else if (this->equals(LogCompOp::GREATER_EQUAL)) return new LiteralBool(lhsVal >= rhsVal);
 
-  else if (this->equals(LogCompOp::equal)) return new LiteralBool(lhsVal==rhsVal);
-  else if (this->equals(LogCompOp::unequal)) return new LiteralBool(lhsVal!=rhsVal);
+  else if (this->equals(LogCompOp::EQUAL)) return new LiteralBool(lhsVal==rhsVal);
+  else if (this->equals(LogCompOp::UNEQUAL)) return new LiteralBool(lhsVal!=rhsVal);
 
   else
     throw std::logic_error("applyOperator(LiteralBool* lhs, LiteralInt* rhs) failed!");
@@ -265,7 +265,7 @@ AbstractLiteral *Operator::applyOperator(LiteralBool *, LiteralString *) {
 }
 
 AbstractLiteral *Operator::applyOperator(LiteralString *lhs, LiteralString *rhs) {
-  if (this->equals(ArithmeticOp::addition)) return new LiteralString(lhs->getValue() + rhs->getValue());
+  if (this->equals(ArithmeticOp::ADDITION)) return new LiteralString(lhs->getValue() + rhs->getValue());
   else
     throw std::logic_error(getOperatorString() + " not supported for (string, string)");
 }
@@ -274,24 +274,24 @@ AbstractLiteral *Operator::applyOperator(LiteralBool *lhs, LiteralInt *rhs) {
   bool lhsVal = lhs->getValue();
   int rhsVal = rhs->getValue();
 
-  if (this->equals(ArithmeticOp::addition)) return new LiteralInt(lhsVal + rhsVal);
-  else if (this->equals(ArithmeticOp::subtraction)) return new LiteralInt(lhsVal - rhsVal);
-  else if (this->equals(ArithmeticOp::multiplication)) return new LiteralInt(lhsVal*rhsVal);
-  else if (this->equals(ArithmeticOp::division)) return new LiteralInt(lhsVal/rhsVal);
-  else if (this->equals(ArithmeticOp::modulo)) return new LiteralInt(lhsVal%rhsVal);
+  if (this->equals(ArithmeticOp::ADDITION)) return new LiteralInt(lhsVal + rhsVal);
+  else if (this->equals(ArithmeticOp::SUBTRACTION)) return new LiteralInt(lhsVal - rhsVal);
+  else if (this->equals(ArithmeticOp::MULTIPLICATION)) return new LiteralInt(lhsVal*rhsVal);
+  else if (this->equals(ArithmeticOp::DIVISION)) return new LiteralInt(lhsVal/rhsVal);
+  else if (this->equals(ArithmeticOp::MODULO)) return new LiteralInt(lhsVal%rhsVal);
 
-  else if (this->equals(LogCompOp::logicalAnd)) return new LiteralInt(lhsVal && rhsVal);
-  else if (this->equals(LogCompOp::logicalOr)) return new LiteralInt(lhsVal || rhsVal);
+  else if (this->equals(LogCompOp::LOGICAL_AND)) return new LiteralInt(lhsVal && rhsVal);
+  else if (this->equals(LogCompOp::LOGICAL_OR)) return new LiteralInt(lhsVal || rhsVal);
     // see https://stackoverflow.com/a/1596681/3017719
-  else if (this->equals(LogCompOp::logicalXor)) return new LiteralInt(!(lhsVal)!=!(rhsVal));
+  else if (this->equals(LogCompOp::LOGICAL_XOR)) return new LiteralInt(!(lhsVal)!=!(rhsVal));
 
-  else if (this->equals(LogCompOp::smaller)) return new LiteralBool(lhsVal < rhsVal);
-  else if (this->equals(LogCompOp::smallerEqual)) return new LiteralBool(lhsVal <= rhsVal);
-  else if (this->equals(LogCompOp::greater)) return new LiteralBool(lhsVal > rhsVal);
-  else if (this->equals(LogCompOp::greaterEqual)) return new LiteralBool(lhsVal >= rhsVal);
+  else if (this->equals(LogCompOp::SMALLER)) return new LiteralBool(lhsVal < rhsVal);
+  else if (this->equals(LogCompOp::SMALLER_EQUAL)) return new LiteralBool(lhsVal <= rhsVal);
+  else if (this->equals(LogCompOp::GREATER)) return new LiteralBool(lhsVal > rhsVal);
+  else if (this->equals(LogCompOp::GREATER_EQUAL)) return new LiteralBool(lhsVal >= rhsVal);
 
-  else if (this->equals(LogCompOp::equal)) return new LiteralBool(lhsVal==rhsVal);
-  else if (this->equals(LogCompOp::unequal)) return new LiteralBool(lhsVal!=rhsVal);
+  else if (this->equals(LogCompOp::EQUAL)) return new LiteralBool(lhsVal==rhsVal);
+  else if (this->equals(LogCompOp::UNEQUAL)) return new LiteralBool(lhsVal!=rhsVal);
 
   else
     throw std::logic_error("applyOperator(LiteralBool* lhs, LiteralInt* rhs) failed!");
@@ -301,24 +301,24 @@ AbstractLiteral *Operator::applyOperator(LiteralInt *lhs, LiteralBool *rhs) {
   int lhsVal = lhs->getValue();
   bool rhsVal = rhs->getValue();
 
-  if (this->equals(ArithmeticOp::addition)) return new LiteralInt(lhsVal + rhsVal);
-  else if (this->equals(ArithmeticOp::subtraction)) return new LiteralInt(lhsVal - rhsVal);
-  else if (this->equals(ArithmeticOp::multiplication)) return new LiteralInt(lhsVal*rhsVal);
-  else if (this->equals(ArithmeticOp::division)) return new LiteralInt(lhsVal/rhsVal);
-  else if (this->equals(ArithmeticOp::modulo)) return new LiteralInt(lhsVal%rhsVal);
+  if (this->equals(ArithmeticOp::ADDITION)) return new LiteralInt(lhsVal + rhsVal);
+  else if (this->equals(ArithmeticOp::SUBTRACTION)) return new LiteralInt(lhsVal - rhsVal);
+  else if (this->equals(ArithmeticOp::MULTIPLICATION)) return new LiteralInt(lhsVal*rhsVal);
+  else if (this->equals(ArithmeticOp::DIVISION)) return new LiteralInt(lhsVal/rhsVal);
+  else if (this->equals(ArithmeticOp::MODULO)) return new LiteralInt(lhsVal%rhsVal);
 
-  else if (this->equals(LogCompOp::logicalAnd)) return new LiteralInt(lhsVal && rhsVal);
-  else if (this->equals(LogCompOp::logicalOr)) return new LiteralInt(lhsVal || rhsVal);
+  else if (this->equals(LogCompOp::LOGICAL_AND)) return new LiteralInt(lhsVal && rhsVal);
+  else if (this->equals(LogCompOp::LOGICAL_OR)) return new LiteralInt(lhsVal || rhsVal);
     // see https://stackoverflow.com/a/1596681/3017719
-  else if (this->equals(LogCompOp::logicalXor)) return new LiteralInt(!(lhsVal)!=!(rhsVal));
+  else if (this->equals(LogCompOp::LOGICAL_XOR)) return new LiteralInt(!(lhsVal)!=!(rhsVal));
 
-  else if (this->equals(LogCompOp::smaller)) return new LiteralBool(lhsVal < rhsVal);
-  else if (this->equals(LogCompOp::smallerEqual)) return new LiteralBool(lhsVal <= rhsVal);
-  else if (this->equals(LogCompOp::greater)) return new LiteralBool(lhsVal > rhsVal);
-  else if (this->equals(LogCompOp::greaterEqual)) return new LiteralBool(lhsVal >= rhsVal);
+  else if (this->equals(LogCompOp::SMALLER)) return new LiteralBool(lhsVal < rhsVal);
+  else if (this->equals(LogCompOp::SMALLER_EQUAL)) return new LiteralBool(lhsVal <= rhsVal);
+  else if (this->equals(LogCompOp::GREATER)) return new LiteralBool(lhsVal > rhsVal);
+  else if (this->equals(LogCompOp::GREATER_EQUAL)) return new LiteralBool(lhsVal >= rhsVal);
 
-  else if (this->equals(LogCompOp::equal)) return new LiteralBool(lhsVal==rhsVal);
-  else if (this->equals(LogCompOp::unequal)) return new LiteralBool(lhsVal!=rhsVal);
+  else if (this->equals(LogCompOp::EQUAL)) return new LiteralBool(lhsVal==rhsVal);
+  else if (this->equals(LogCompOp::UNEQUAL)) return new LiteralBool(lhsVal!=rhsVal);
 
   else
     throw std::logic_error("applyOperator(LiteralBool* lhs, LiteralInt* rhs) failed!");
@@ -328,23 +328,23 @@ AbstractLiteral *Operator::applyOperator(LiteralBool *lhs, LiteralBool *rhs) {
   int lhsVal = lhs->getValue();
   int rhsVal = rhs->getValue();
 
-  if (this->equals(ArithmeticOp::addition)) return new LiteralBool(lhsVal + rhsVal);
-  else if (this->equals(ArithmeticOp::subtraction)) return new LiteralBool(lhsVal - rhsVal);
-  else if (this->equals(ArithmeticOp::multiplication)) return new LiteralBool(lhsVal*rhsVal);
-  else if (this->equals(ArithmeticOp::division)) return new LiteralBool(lhsVal/rhsVal);
-  else if (this->equals(ArithmeticOp::modulo)) return new LiteralBool(lhsVal%rhsVal);
+  if (this->equals(ArithmeticOp::ADDITION)) return new LiteralBool(lhsVal + rhsVal);
+  else if (this->equals(ArithmeticOp::SUBTRACTION)) return new LiteralBool(lhsVal - rhsVal);
+  else if (this->equals(ArithmeticOp::MULTIPLICATION)) return new LiteralBool(lhsVal*rhsVal);
+  else if (this->equals(ArithmeticOp::DIVISION)) return new LiteralBool(lhsVal/rhsVal);
+  else if (this->equals(ArithmeticOp::MODULO)) return new LiteralBool(lhsVal%rhsVal);
 
-  else if (this->equals(LogCompOp::logicalAnd)) return new LiteralBool(lhsVal && rhsVal);
-  else if (this->equals(LogCompOp::logicalOr)) return new LiteralBool(lhsVal || rhsVal);
-  else if (this->equals(LogCompOp::logicalXor) || this->equals(LogCompOp::unequal))
+  else if (this->equals(LogCompOp::LOGICAL_AND)) return new LiteralBool(lhsVal && rhsVal);
+  else if (this->equals(LogCompOp::LOGICAL_OR)) return new LiteralBool(lhsVal || rhsVal);
+  else if (this->equals(LogCompOp::LOGICAL_XOR) || this->equals(LogCompOp::UNEQUAL))
     return new LiteralBool(lhsVal!=rhsVal);
 
-  else if (this->equals(LogCompOp::smaller)) return new LiteralBool(lhsVal < rhsVal);
-  else if (this->equals(LogCompOp::smallerEqual)) return new LiteralBool(lhsVal <= rhsVal);
-  else if (this->equals(LogCompOp::greater)) return new LiteralBool(lhsVal > rhsVal);
-  else if (this->equals(LogCompOp::greaterEqual)) return new LiteralBool(lhsVal >= rhsVal);
+  else if (this->equals(LogCompOp::SMALLER)) return new LiteralBool(lhsVal < rhsVal);
+  else if (this->equals(LogCompOp::SMALLER_EQUAL)) return new LiteralBool(lhsVal <= rhsVal);
+  else if (this->equals(LogCompOp::GREATER)) return new LiteralBool(lhsVal > rhsVal);
+  else if (this->equals(LogCompOp::GREATER_EQUAL)) return new LiteralBool(lhsVal >= rhsVal);
 
-  else if (this->equals(LogCompOp::equal)) return new LiteralBool(lhsVal==rhsVal);
+  else if (this->equals(LogCompOp::EQUAL)) return new LiteralBool(lhsVal==rhsVal);
 
   else
     throw std::logic_error("applyOperator(LiteralBool* lhs, LiteralBool* rhs) failed!");
@@ -354,23 +354,23 @@ AbstractLiteral *Operator::applyOperator(LiteralInt *lhs, LiteralInt *rhs) {
   int lhsVal = lhs->getValue();
   int rhsVal = rhs->getValue();
 
-  if (this->equals(ArithmeticOp::addition)) return new LiteralInt(lhsVal + rhsVal);
-  else if (this->equals(ArithmeticOp::subtraction)) return new LiteralInt(lhsVal - rhsVal);
-  else if (this->equals(ArithmeticOp::multiplication)) return new LiteralInt(lhsVal*rhsVal);
-  else if (this->equals(ArithmeticOp::division)) return new LiteralInt(lhsVal/rhsVal);
-  else if (this->equals(ArithmeticOp::modulo)) return new LiteralInt(lhsVal%rhsVal);
+  if (this->equals(ArithmeticOp::ADDITION)) return new LiteralInt(lhsVal + rhsVal);
+  else if (this->equals(ArithmeticOp::SUBTRACTION)) return new LiteralInt(lhsVal - rhsVal);
+  else if (this->equals(ArithmeticOp::MULTIPLICATION)) return new LiteralInt(lhsVal*rhsVal);
+  else if (this->equals(ArithmeticOp::DIVISION)) return new LiteralInt(lhsVal/rhsVal);
+  else if (this->equals(ArithmeticOp::MODULO)) return new LiteralInt(lhsVal%rhsVal);
 
-  else if (this->equals(LogCompOp::logicalAnd)) throw std::logic_error("AND not supported for (int, int)");
-  else if (this->equals(LogCompOp::logicalOr)) throw std::logic_error("OR not supported for (int, int)");
-  else if (this->equals(LogCompOp::logicalXor)) throw std::logic_error("XOR not supported for (int, int)");
+  else if (this->equals(LogCompOp::LOGICAL_AND)) throw std::logic_error("AND not supported for (int, int)");
+  else if (this->equals(LogCompOp::LOGICAL_OR)) throw std::logic_error("OR not supported for (int, int)");
+  else if (this->equals(LogCompOp::LOGICAL_XOR)) throw std::logic_error("XOR not supported for (int, int)");
 
-  else if (this->equals(LogCompOp::smaller)) return new LiteralBool(lhsVal < rhsVal);
-  else if (this->equals(LogCompOp::smallerEqual)) return new LiteralBool(lhsVal <= rhsVal);
-  else if (this->equals(LogCompOp::greater)) return new LiteralBool(lhsVal > rhsVal);
-  else if (this->equals(LogCompOp::greaterEqual)) return new LiteralBool(lhsVal >= rhsVal);
+  else if (this->equals(LogCompOp::SMALLER)) return new LiteralBool(lhsVal < rhsVal);
+  else if (this->equals(LogCompOp::SMALLER_EQUAL)) return new LiteralBool(lhsVal <= rhsVal);
+  else if (this->equals(LogCompOp::GREATER)) return new LiteralBool(lhsVal > rhsVal);
+  else if (this->equals(LogCompOp::GREATER_EQUAL)) return new LiteralBool(lhsVal >= rhsVal);
 
-  else if (this->equals(LogCompOp::equal)) return new LiteralBool(lhsVal==rhsVal);
-  else if (this->equals(LogCompOp::unequal)) return new LiteralBool(lhsVal!=rhsVal);
+  else if (this->equals(LogCompOp::EQUAL)) return new LiteralBool(lhsVal==rhsVal);
+  else if (this->equals(LogCompOp::UNEQUAL)) return new LiteralBool(lhsVal!=rhsVal);
 
   else
     throw std::logic_error("applyOperator(LiteralInt* lhs, LiteralInt* rhs) failed!");

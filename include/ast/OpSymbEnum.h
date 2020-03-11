@@ -3,24 +3,25 @@
 
 #include <variant>
 #include <string>
+#include <vector>
 #include "LiteralInt.h"
 #include "LiteralBool.h"
 
 enum ArithmeticOp : char {
   // arithmetic operator
-  addition = 0, subtraction, multiplication, division, modulo,
+  ADDITION = 0, SUBTRACTION, MULTIPLICATION, DIVISION, MODULO,
 };
 
 enum LogCompOp : char {
   // logical operator
-  logicalAnd = 0, logicalOr, logicalXor,
+  LOGICAL_AND = 0, LOGICAL_OR, LOGICAL_XOR,
   // relational operator
-  smaller, smallerEqual, greater, greaterEqual, equal, unequal
+  SMALLER, SMALLER_EQUAL, GREATER, GREATER_EQUAL, EQUAL, UNEQUAL
 };
 
 enum UnaryOp : char {
   // logical operator
-  negation = 0
+  NEGATION = 0
 };
 
 // generate a typedef for this std::variant to ensure that always the same Enums order is used
