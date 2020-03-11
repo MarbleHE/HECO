@@ -1,31 +1,37 @@
 #include "Rotate.h"
 
-Rotate::Rotate(AbstractExpr *vector, int rotationFactor) : rotationFactor(rotationFactor) {
-  setAttributes(vector);
+Rotate::Rotate(AbstractExpr *vector, AbstractExpr *rotationFactor) {
+  setAttributes(vector, rotationFactor);
 }
 
-int Rotate::getRotationFactor() const {
-  return rotationFactor;
+Rotate::Rotate(AbstractExpr *vector, int rotationFactor) {
+  setAttributes(vector, new LiteralInt(rotationFactor));
+}
+
+Rotate::Rotate() = default;
+
+AbstractExpr *Rotate::getRotationFactor() const {
+  return reinterpret_cast<AbstractExpr *>(getChildAtIndex(1));
 }
 
 int Rotate::getMaxNumberChildren() {
-  return 1;
+  return 2;
 }
 
 json Rotate::toJson() const {
   json j;
   j["type"] = getNodeType();
   j["operand"] = getOperand()->toJson();
-  j["rotationFactor"] = getRotationFactor();
+  j["rotationFactor"] = getRotationFactor()->toJson();
   return j;
 }
 
 std::string Rotate::toString(bool printChildren) const {
-  return AbstractNode::generateOutputString(printChildren, {std::to_string(getRotationFactor())});
+  return AbstractNode::generateOutputString(printChildren, {});
 }
 
 AbstractNode *Rotate::cloneFlat() {
-  return new Rotate(nullptr, this->getRotationFactor());
+  return new Rotate();
 }
 
 bool Rotate::supportsCircuitMode() {
@@ -45,11 +51,11 @@ void Rotate::accept(Visitor &v) {
 }
 
 Rotate *Rotate::clone(bool keepOriginalUniqueNodeId) {
-  return new Rotate(this->getChildAtIndex(0)->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
-                    getRotationFactor());
+  return new Rotate(getOperand()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
+                    getRotationFactor()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
 }
 
-void Rotate::setAttributes(AbstractExpr *pExpr) {
+void Rotate::setAttributes(AbstractExpr *pExpr, AbstractExpr *rotationFactor) {
   // Rotation requires either an AbstractLiteral that is a 1-dimensional row or column vector, or a Variable in which
   // case it is not possible at compile-time to determine whether the variable satisfies the former requirement. Must
   // be checked while evaluating the AST.
@@ -59,7 +65,7 @@ void Rotate::setAttributes(AbstractExpr *pExpr) {
     throw std::logic_error("Rotate is supported for AbstractLiterals and Variables only.");
   }
   removeChildren();
-  addChildren({pExpr}, true);
+  addChildren({pExpr, rotationFactor}, true);
 }
 
 bool Rotate::isOneDimensionalVector() {

@@ -48,14 +48,14 @@ void CompileTimeExpressionSimplifier::visit(Rotate &elem) {
   Visitor::visit(elem);
   // if the Rotate's operand is known at compile-time, we can execute the rotation and replace this node by the
   // rotation's result (i.e., rotated operand)
-  if (valueIsKnown(elem.getOperand())) {
+  if (valueIsKnown(elem.getOperand()) && valueIsKnown(elem.getRotationFactor())) {
     auto val = getFirstValue(elem.getOperand());
     // we need a AbstractLiteral to be able to perform the rotation
     if (auto valAsAbstractLiteral = dynamic_cast<AbstractLiteral *>(val)) {
       // clone the AbstractLiteral (including its value)
       auto clonedVal = valAsAbstractLiteral->clone(false)->castTo<AbstractLiteral>();
       // perform rotation on the cloned literal
-      clonedVal->getMatrix()->rotate(elem.getRotationFactor(), true);
+      clonedVal->getMatrix()->rotate(getFirstValue(elem.getRotationFactor())->castTo<LiteralInt>()->getValue(), true);
       // replace this Rotate node by a new node containing the rotated operand
       elem.getOnlyParent()->replaceChild(&elem, clonedVal);
       nodesQueuedForDeletion.push_back(&elem);

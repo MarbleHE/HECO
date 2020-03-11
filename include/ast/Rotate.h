@@ -11,13 +11,14 @@
 #include "Variable.h"
 
 class Rotate : public AbstractExpr {
- protected:
-  int rotationFactor;
-
  public:
+  Rotate();
+
+  Rotate(AbstractExpr *vector, AbstractExpr *rotationFactor);
+
   Rotate(AbstractExpr *vector, int rotationFactor);
 
-  [[nodiscard]] int getRotationFactor() const;
+  [[nodiscard]] AbstractExpr *getRotationFactor() const;
 
   int getMaxNumberChildren() override;
 
@@ -37,7 +38,7 @@ class Rotate : public AbstractExpr {
 
   Rotate *clone(bool keepOriginalUniqueNodeId) override;
 
-  void setAttributes(AbstractExpr *pExpr);
+  void setAttributes(AbstractExpr *pExpr, AbstractExpr *rotationFactor);
 
   bool isOneDimensionalVector();
 };

@@ -188,21 +188,22 @@ void EvaluationVisitor::visit(UnaryExpr &elem) {
 }
 
 void EvaluationVisitor::visit(Rotate &elem) {
-  auto ae = elem.getOperand();
-  if (auto operandAsAl = dynamic_cast<AbstractLiteral *>(ae)) {
-    // rotate the Literal in-place
-    operandAsAl->getMatrix()->rotate(elem.getRotationFactor(), true);
-    results.push({operandAsAl});
-  } else if (auto var = dynamic_cast<Variable *>(ae)) {
-    // get the variable's value
-    auto value = getVarValue(var->getIdentifier());
-    if (value==nullptr) throw std::logic_error("Cannot perform rotation as Variable's value is unknown.");
-    // clone the value (i.e., an instance of AbstractLiteral) because rotate only returns an AbstractMatrix
-    auto clonedValue = value->clone(false)->castTo<AbstractLiteral>();
-    // rotate the cloned value in-place
-    clonedValue->getMatrix()->rotate(elem.getRotationFactor(), true);
-    results.push({clonedValue});
-  }
+  // visit the operand
+  elem.getOperand()->accept(*this);
+  // visit the rotation factor: we need to evaluate it as it can be an expression itself, e.g., rotate(vec, y+1)
+  elem.getRotationFactor()->accept(*this);
+  // check whether the rotation factor is known, otherwise we can stop right here because we cannot perform rotation if
+  // the rotation factor is unknown
+  auto rotationFactor = dynamic_cast<LiteralInt *>(results.top().front());
+  results.pop();
+  auto operand = dynamic_cast<AbstractLiteral *>(results.top().front());
+  results.pop();
+  if (rotationFactor==nullptr || operand==nullptr) return;
+
+  // rotate the Literal in-place by using a copy of the operand
+  auto clonedOperand = operand->clone(false)->castTo<AbstractLiteral>();
+  clonedOperand->getMatrix()->rotate(rotationFactor->getValue(), true);
+  results.push({clonedOperand});
 }
 
 void EvaluationVisitor::visit(Transpose &elem) {
