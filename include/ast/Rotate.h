@@ -15,77 +15,31 @@ class Rotate : public AbstractExpr {
   int rotationFactor;
 
  public:
-  Rotate(AbstractExpr *vector, int rotationFactor) : rotationFactor(rotationFactor) {
-    setAttributes(vector);
-  }
+  Rotate(AbstractExpr *vector, int rotationFactor);
 
-  [[nodiscard]] int getRotationFactor() const {
-    return rotationFactor;
-  }
+  [[nodiscard]] int getRotationFactor() const;
 
-  int getMaxNumberChildren() override {
-    return 1;
-  }
+  int getMaxNumberChildren() override;
 
-  [[nodiscard]] json toJson() const override {
-    json j;
-    j["type"] = getNodeType();
-    j["operand"] = getOperand()->toJson();
-    j["rotationFactor"] = getRotationFactor();
-    return j;
-  }
+  [[nodiscard]] json toJson() const override;
 
-  [[nodiscard]] std::string toString(bool printChildren) const override {
-    return AbstractNode::generateOutputString(printChildren, {std::to_string(getRotationFactor())});
-  }
+  [[nodiscard]] std::string toString(bool printChildren) const override;
 
-  AbstractNode *cloneFlat() override {
-    return new Rotate(nullptr, this->getRotationFactor());
-  }
+  AbstractNode *cloneFlat() override;
 
-  bool supportsCircuitMode() override {
-    return true;
-  }
+  bool supportsCircuitMode() override;
 
-  [[nodiscard]] AbstractExpr *getOperand() const {
-    return reinterpret_cast<AbstractExpr *>(getChildAtIndex(0));
-  }
+  [[nodiscard]] AbstractExpr *getOperand() const;
 
-  [[nodiscard]] std::string getNodeType() const override {
-    return std::string("Rotate");
-  }
+  [[nodiscard]] std::string getNodeType() const override;
 
-  void accept(Visitor &v) override {
-    v.visit(*this);
-  }
+  void accept(Visitor &v) override;
 
-  Rotate *clone(bool keepOriginalUniqueNodeId) override {
-    return new Rotate(this->getChildAtIndex(0)->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
-                      getRotationFactor());
-  }
+  Rotate *clone(bool keepOriginalUniqueNodeId) override;
 
-  void setAttributes(AbstractExpr *pExpr) {
-    // Rotation requires either an AbstractLiteral that is a 1-dimensional row or column vector, or a Variable in which
-    // case it is not possible at compile-time to determine whether the variable satisfies the former requirement. Must
-    // be checked while evaluating the AST.
-    if (dynamic_cast<AbstractLiteral *>(pExpr)!=nullptr && !isOneDimensionalVector()) {
-      throw std::logic_error("Rotate requires a 1-dimensional row or column vector.");
-    } else if (dynamic_cast<Variable *>(pExpr)==nullptr) {
-      throw std::logic_error("Rotate is supported for AbstractLiterals and Variables only.");
-    }
-    removeChildren();
-    addChildren({pExpr}, true);
-  }
+  void setAttributes(AbstractExpr *pExpr);
 
-  bool isOneDimensionalVector() {
-    Dimension *dim;
-    auto expressionToRotate = getOperand();
-    if (auto literal = dynamic_cast<AbstractLiteral *>(expressionToRotate)) {
-      dim = &(literal->getMatrix()->getDimensions());
-      return dim->equals(1, -1) || dim->equals(-1, 1);
-    }
-    return false;
-  }
+  bool isOneDimensionalVector();
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_ROTATE_H_
