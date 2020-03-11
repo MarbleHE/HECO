@@ -113,5 +113,6 @@ target_link_libraries(ast_demo PRIVATE nlohmann_json::nlohmann_json)
 add_library(ast_lib ${SOURCE_FILES})
 target_link_libraries(ast_lib PUBLIC nlohmann_json::nlohmann_json)
 
+enable_testing()
 add_subdirectory(test)
 

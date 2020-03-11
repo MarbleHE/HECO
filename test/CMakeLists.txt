@@ -67,8 +67,8 @@ endif ()
 
 target_link_libraries(testing-all gtest ast_lib nlohmann_json::nlohmann_json gtest_main)
 
+# create ctest targets
+gtest_discover_tests(testing-all TEST_PREFIX gtest:)
+
 # make sure that ast_lib is built before the testing-all target
 add_dependencies(testing-all ast_lib)
-
-
-gtest_discover_tests(testing-all)
