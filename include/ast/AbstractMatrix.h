@@ -18,6 +18,8 @@ class AbstractMatrix {
  public:
   virtual AbstractMatrix *rotate(int rotationFactor, bool inPlace) = 0;
 
+  virtual AbstractMatrix *transpose(bool inPlace) = 0;
+
   virtual Dimension &getDimensions() = 0;
 
   virtual std::string toString() = 0;

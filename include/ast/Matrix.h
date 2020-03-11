@@ -266,7 +266,7 @@ class Matrix : public AbstractMatrix {
   ///        inPlace is False, keeps the current matrix untouched and returns instead a transposed copy.
   /// \return The transposed matrix that is either the transposed current matrix (inPlace=True) or a transposed copy of
   ///         the current matrix (inPlace=False).
-  Matrix<T> *transpose(bool inPlace) {
+  Matrix<T> *transpose(bool inPlace) override {
     Matrix<T> *matrixToTranspose = inPlace ? this : new Matrix<T>(*this);
     std::vector<std::vector<T>> transposedVec(matrixToTranspose->values[0].size(), std::vector<T>());
     for (int i = 0; i < matrixToTranspose->values.size(); ++i) {
