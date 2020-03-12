@@ -184,3 +184,33 @@ AbstractMatrix *Matrix<bool>::applyUnaryOperatorComponentwise(Operator *os) {
   return reinterpret_cast<AbstractMatrix *>(
       ::applyOnEachElement(dynamic_cast<Matrix<bool> *>(this), operatorFunction));
 }
+
+template<typename T>
+AbstractLiteral *Matrix<T>::getElementAt(int row, int column) {
+  throw std::logic_error(
+      "Value in matrix is of unknown type. Cannot determine associated AbstractLiteral subtype.");
+}
+
+template<>
+AbstractLiteral *Matrix<int>::getElementAt(int row, int column) {
+  checkMatrixIndexAccess(row, column);
+  return new LiteralInt(values[row][column]);
+}
+
+template<>
+AbstractLiteral *Matrix<float>::getElementAt(int row, int column) {
+  checkMatrixIndexAccess(row, column);
+  return new LiteralFloat(values[row][column]);
+}
+
+template<>
+AbstractLiteral *Matrix<std::string>::getElementAt(int row, int column) {
+  checkMatrixIndexAccess(row, column);
+  return new LiteralString(values[row][column]);
+}
+
+template<>
+AbstractLiteral *Matrix<bool>::getElementAt(int row, int column) {
+  checkMatrixIndexAccess(row, column);
+  return new LiteralBool(values[row][column]);
+}

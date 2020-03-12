@@ -10,6 +10,7 @@
 #include "AbstractMatrix.h"
 #include "Dimension.h"
 #include "Operator.h"
+#include "LiteralFloat.h"
 
 using json = nlohmann::json;
 
@@ -185,6 +186,18 @@ class Matrix : public AbstractMatrix {
     return arrayOfArrays;
   }
 
+  ///
+  /// \param rowIndex
+  /// \param columnIndex
+  void checkMatrixIndexAccess(int rowIndex, int columnIndex) {
+    if (!dim.isValidAccess(rowIndex, columnIndex)) {
+      std::stringstream ss;
+      ss << "Invalid matrix indices: Cannot access " << Dimension(rowIndex, columnIndex) << " ";
+      ss << "because matrix has dimensions " << getDimensions() << ".";
+      throw std::invalid_argument(ss.str());
+    }
+  }
+
   /// Returns a reference to the element at index specified by the given (row, column) pair.
   /// \param row The row number of the element to be returned a reference to.
   /// \param column The column number of the element to be returned a reference to.
@@ -192,21 +205,15 @@ class Matrix : public AbstractMatrix {
   // Returning std::vector<T>::reference is required here.
   // Credits to Mike Seymour from stackoverflow.com (https://stackoverflow.com/a/25770060/3017719).
   typename std::vector<T>::reference operator()(int row, int column) {
-    if (!dim.isValidAccess(row, column)) {
-      std::stringstream ss;
-      ss << "Cannot access " << Dimension(row, column) << " because vector has dimensions " << getDimensions() << ".";
-      throw std::invalid_argument(ss.str());
-    }
+    checkMatrixIndexAccess(row, column);
     return values[row][column];
   }
 
-  /// Returns a copy of the element at index specified by the given (row, column) pair.
+  /// Returns an AbstractLiteral containing the value of the element at index specified by the given (row, column) pair.
   /// \param row The row number of the element to be returned as a copy.
   /// \param column The column number of the element to be returned as a copy.
-  /// \return A copy of the element at position (row, column).
-  T getElement(int row, int column) {
-    return values[row][column];
-  }
+  /// \return An AbstractLiteral pointer containing the value of the element at position (row, column).
+  AbstractLiteral *getElementAt(int row, int column) override;
 
   /// Returns the dimension object that indicates the matrix dimensions.
   /// \return A reference to the dimension object associated to this matrix.

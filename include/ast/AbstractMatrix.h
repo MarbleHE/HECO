@@ -31,6 +31,8 @@ class AbstractMatrix {
   virtual AbstractMatrix *applyBinaryOperator(AbstractMatrix *rhsOperand, Operator *os) = 0;
 
   virtual AbstractMatrix *applyUnaryOperatorComponentwise(Operator *os) = 0;
+
+  virtual AbstractLiteral *getElementAt(int row, int column) = 0;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_ABSTRACTMATRIX_H_
