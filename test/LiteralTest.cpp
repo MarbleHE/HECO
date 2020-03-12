@@ -72,13 +72,13 @@ TEST(LiteralTest, literalBoolMatrix) { /* NOLINT */
   auto matrix = dynamic_cast<Matrix<bool> *>(litBool->getMatrix());
   auto matrixRef = *matrix;
   // compare element at (0,0)
-  EXPECT_EQ(matrix->getElement(0, 0), true);
+  EXPECT_EQ(matrix->getElementAt(0, 0)->castTo<LiteralBool>()->getValue(), true);
   EXPECT_EQ(matrixRef(0, 0), true);
   // compare element at (1,0)
-  EXPECT_EQ(matrix->getElement(1, 0), false);
+  EXPECT_EQ(matrix->getElementAt(1, 0)->castTo<LiteralBool>()->getValue(), false);
   EXPECT_EQ(matrixRef(1, 0), false);
   // compare element at (2,1)
-  EXPECT_EQ(matrix->getElement(2, 1), true);
+  EXPECT_EQ(matrix->getElementAt(2, 1)->castTo<LiteralBool>()->getValue(), true);
   EXPECT_EQ(matrixRef(2, 1), true);
 
   matrixRef(0, 0) = false;
