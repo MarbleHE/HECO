@@ -430,9 +430,9 @@ class MatrixOperationFixture : public ::testing::Test {
 //  ║ Tested Combinations (non-exhaustive testing)                  ║
 //  ╚═══════════════════════════════════════════════════════════════╝
 //                             ┌────────────────────────────────────┐
-//                             │ Matrix-Matrix       Matrix-Scalar  │
+//   Operator \ Combination    │ Matrix-Matrix       Matrix-Scalar  │
 //  ┌──────────────────────────┼────────────────────────────────────┤
-//  │ ADDITION                 │ int                 -              │
+//  │ ADDITION                 │ int                 string         │
 //  │ SUBTRACTION              │ int                 -              │
 //  │ MULTIPLICATION           │ float               int            │
 //  │ DIVISION                 │ -                   int            │
@@ -450,12 +450,12 @@ class MatrixOperationFixture : public ::testing::Test {
 //  │ UNEQUAL                  │ int                 -              │
 //  └──────────────────────────┴────────────────────────────────────┘
 //  ┌───────────────────────────────────────────────────────────────┐
-//  │ Sign "-" indicates an untested combination.                   │
+//  │ Sign "-" indicates an yet untested combination.               │
 //  └───────────────────────────────────────────────────────────────┘
 
  protected:
   AbstractLiteral *intScalar1, *intScalar2, *intMatrix1, *intMatrix2, *intMatrix3, *boolScalar, *boolMatrix1,
-      *boolMatrix2, *floatScalar1, *floatScalar2, *floatMatrix1, *floatMatrix2;
+      *boolMatrix2, *floatScalar1, *floatScalar2, *floatMatrix1, *floatMatrix2, *stringMatrix, *stringScalar;
 
  public:
   MatrixOperationFixture() { /* NOLINT */
@@ -473,6 +473,8 @@ class MatrixOperationFixture : public ::testing::Test {
     floatScalar2 = new LiteralFloat(2.5f);
     floatMatrix1 = new LiteralFloat(new Matrix<float>({{1.32f, 3.11f, 2.22f}, {2.55f, 2.1f, 6.2f}}));
     floatMatrix2 = new LiteralFloat(new Matrix<float>({{0.0f, 1.0f}, {3.5f, 2.5f}, {7.43f, 2.1f}}));
+    stringScalar = new LiteralString("zh");
+    stringMatrix = new LiteralString(new Matrix<std::string>({{"a", "b", "c"}, {"d", "e", "f"}, {"g", "h", "i"}}));
   }
 };
 
@@ -588,4 +590,10 @@ TEST_F(MatrixOperationFixture, matrix_matrix_unequal) {  /* NOLINT */
   auto result = Operator(LogCompOp::UNEQUAL).applyOperator(intMatrix2, intMatrix3)->getMatrix();
   EXPECT_EQ(*dynamic_cast<Matrix<int> *>(result),
             *new Matrix<int>({{0, 1, 0}, {0, 0, 1}}));
+}
+
+TEST_F(MatrixOperationFixture, matrix_scalar_add) {  /* NOLINT */
+  auto result = Operator(ArithmeticOp::ADDITION).applyOperator(stringMatrix, stringScalar)->getMatrix();
+  EXPECT_EQ(*dynamic_cast<Matrix<std::string> *>(result),
+            *new Matrix<std::string>({{"azh", "bzh", "czh"}, {"dzh", "ezh", "fzh"}, {"gzh", "hzh", "izh"}}));
 }
