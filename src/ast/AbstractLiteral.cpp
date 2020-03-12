@@ -13,23 +13,18 @@ std::ostream &operator<<(std::ostream &os, const AbstractLiteral &literal) {
 
 bool AbstractLiteral::operator==(const AbstractLiteral &rhs) const {
   // Literals cannot be equal if they have a different type
-  if (typeid(*this)!=typeid(rhs))
-    return false;
+  if (typeid(*this)!=typeid(rhs)) return false;
 
-  // cast both literals to determine their equivalence
+  // cast both literals to check their equivalence
   // note: the dereference op is important here to compare the actual values, not the addresses pointed to
   if (auto thisInt = dynamic_cast<const LiteralInt *>(this)) {
-    return *dynamic_cast<const LiteralInt *>(&rhs)==*thisInt;
-
+    return *thisInt==*dynamic_cast<const LiteralInt *>(&rhs);
   } else if (auto thisStr = dynamic_cast<const LiteralString *>(this)) {
-    return *dynamic_cast<const LiteralString *>(&rhs)==*thisStr;
-
+    return *thisStr==*dynamic_cast<const LiteralString *>(&rhs);
   } else if (auto thisBool = dynamic_cast<const LiteralBool *>(this)) {
-    return *dynamic_cast<const LiteralBool *>(&rhs)==*thisBool;
-
+    return *thisBool==*dynamic_cast<const LiteralBool *>(&rhs);
   } else if (auto thisFloat = dynamic_cast<const LiteralFloat *>(this)) {
-    return *dynamic_cast<const LiteralFloat *>(&rhs)==*thisFloat;
-
+    return *thisFloat==*dynamic_cast<const LiteralFloat *>(&rhs);
   } else {
     throw std::logic_error("Unexpected Literal type encountered!");
   }
@@ -38,4 +33,3 @@ bool AbstractLiteral::operator==(const AbstractLiteral &rhs) const {
 bool AbstractLiteral::operator!=(const AbstractLiteral &rhs) const {
   return !(rhs==*this);
 }
-
