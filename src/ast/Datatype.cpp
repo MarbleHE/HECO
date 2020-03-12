@@ -13,7 +13,7 @@ Datatype::Datatype(const std::string &type) {
   auto result = string_to_types.find(type);
   if (result==string_to_types.end()) {
     throw std::invalid_argument(
-        "Unsupported datatype given: " + type + ". See the supported datatypes in Datatypes.h.");
+        "Unsupported datatype given: " + type + ". See the supported datatypes in Datatype.h.");
   }
   val = result->second;
 }

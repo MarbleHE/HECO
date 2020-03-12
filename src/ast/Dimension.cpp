@@ -33,6 +33,7 @@ void Dimension::update(int numberOfRows, int numberOfColumns) {
 }
 
 bool Dimension::isValidAccess(int row, int column) {
-  // note that indices row/column start by 0
+  // note that row/column indices start by 0, that is a dim (M, N) matrix has row indices 0, ..., M-1 and column indices
+  // 0, ..., N-1
   return row < numRows && column < numColumns;
 }
