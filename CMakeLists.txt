@@ -90,7 +90,8 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/ast/AbstractMatrix.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/Dimension.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/Matrix.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/Transpose.cpp)
+        ${ast_optimizer_SOURCE_DIR}/src/ast/Transpose.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/GetMatrixElement.cpp)
 
 set(HEADER_ONLY_SOURCES
         ${ast_optimizer_SOURCE_DIR}/include/ast/OpSymbEnum.h

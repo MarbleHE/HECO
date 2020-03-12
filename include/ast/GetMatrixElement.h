@@ -1,0 +1,45 @@
+#ifndef AST_OPTIMIZER_INCLUDE_AST_GETMATRIXELEMENT_H_
+#define AST_OPTIMIZER_INCLUDE_AST_GETMATRIXELEMENT_H_
+
+#include "AbstractExpr.h"
+#include <vector>
+#include <string>
+
+class GetMatrixElement : public AbstractExpr {
+ public:
+  GetMatrixElement();
+
+  GetMatrixElement(AbstractExpr *mustEvaluateToAbstractLiteral, AbstractExpr *rowIndex, AbstractExpr *columnIndex);
+
+  [[nodiscard]] std::string getNodeType() const override;
+
+  void accept(Visitor &v) override;
+
+  AbstractNode *clone(bool keepOriginalUniqueNodeId) override;
+
+  [[nodiscard]] json toJson() const override;
+
+  std::vector<std::string> getVariableIdentifiers() override;
+
+  bool contains(Variable *var) override;
+
+  bool isEqual(AbstractExpr *other) override;
+
+  int getMaxNumberChildren() override;
+
+  [[nodiscard]] std::string toString(bool printChildren) const override;
+
+  AbstractNode *cloneFlat() override;
+
+  bool supportsCircuitMode() override;
+
+  [[nodiscard]] AbstractExpr *getOperand() const;
+
+  [[nodiscard]] AbstractExpr *getRowIndex() const;
+
+  [[nodiscard]] AbstractExpr *getColumnIndex() const;
+
+  void setAttributes(AbstractExpr *elementContainingMatrix, AbstractExpr *rowIndex, AbstractExpr *columnIndex);
+};
+
+#endif //AST_OPTIMIZER_INCLUDE_AST_GETMATRIXELEMENT_H_
