@@ -2,6 +2,8 @@
 #include "RandNumGen.h"
 #include "Matrix.h"
 
+LiteralBool::LiteralBool(Matrix<AbstractExpr *> *am) : matrix(am) {}
+
 LiteralBool::LiteralBool(bool value) : matrix(new Matrix(value)) {}
 
 LiteralBool::LiteralBool(Matrix<bool> *inputMatrix) : matrix(inputMatrix) {}
@@ -18,7 +20,7 @@ void LiteralBool::accept(Visitor &v) {
 }
 
 bool LiteralBool::getValue() const {
-  return matrix->getScalarValue();
+  return (*dynamic_cast<Matrix<bool> *>(matrix)).getScalarValue();
 }
 
 std::string LiteralBool::getNodeType() const {
@@ -32,8 +34,7 @@ void LiteralBool::print(std::ostream &str) const {
 }
 
 bool LiteralBool::operator==(const LiteralBool &rhs) const {
-  // TODO check if this actually works
-  return *matrix==*rhs.matrix;
+  return *matrix==*rhs.getMatrix();
 }
 
 bool LiteralBool::operator!=(const LiteralBool &rhs) const {
@@ -46,7 +47,7 @@ void LiteralBool::addLiteralValue(std::string identifier,
 }
 
 void LiteralBool::setValue(bool newValue) {
-  this->matrix->setValues({{newValue}});
+  dynamic_cast<Matrix<bool> *>(matrix)->setValues({{newValue}});
 }
 
 void LiteralBool::setRandomValue(RandLiteralGen &rlg) {
@@ -66,7 +67,7 @@ bool LiteralBool::supportsDatatype(Datatype &datatype) {
 }
 
 LiteralBool *LiteralBool::clone(bool keepOriginalUniqueNodeId) {
-  auto clonedNode = new LiteralBool(matrix->clone());
+  auto clonedNode = new LiteralBool(dynamic_cast<Matrix<bool> *>(matrix)->clone());
   clonedNode->updateClone(keepOriginalUniqueNodeId, this);
   return clonedNode;
 }
@@ -77,7 +78,8 @@ bool LiteralBool::isEqual(AbstractExpr *other) {
 }
 
 bool LiteralBool::isNull() {
-  return matrix->allValuesEqual(false);
+  auto castedMatrix = dynamic_cast<Matrix<bool> *>(matrix);
+  return castedMatrix!=nullptr && castedMatrix->allValuesEqual(false);
 }
 
 AbstractMatrix *LiteralBool::getMatrix() const {

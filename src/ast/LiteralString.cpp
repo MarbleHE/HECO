@@ -4,6 +4,8 @@
 #include "RandNumGen.h"
 #include "Matrix.h"
 
+LiteralString::LiteralString(Matrix<AbstractExpr *> *am) : matrix(am) {}
+
 LiteralString::LiteralString(Matrix<std::string> *inputMatrix) : matrix(inputMatrix) {}
 
 LiteralString::LiteralString(std::string value) : matrix(new Matrix(value)) {}
@@ -20,7 +22,7 @@ void LiteralString::accept(Visitor &v) {
 }
 
 std::string LiteralString::getValue() const {
-  return matrix->getScalarValue();
+  return (*dynamic_cast<Matrix<std::string> *>(matrix)).getScalarValue();
 }
 
 std::string LiteralString::getNodeType() const {
@@ -47,7 +49,7 @@ void LiteralString::addLiteralValue(std::string identifier,
 }
 
 void LiteralString::setValue(const std::string &newValue) {
-  matrix->setValues({{newValue}});
+  dynamic_cast<Matrix<std::string> *>(matrix)->setValues({{newValue}});
 }
 
 void LiteralString::setRandomValue(RandLiteralGen &rlg) {
@@ -67,7 +69,7 @@ bool LiteralString::supportsDatatype(Datatype &datatype) {
 }
 
 LiteralString *LiteralString::clone(bool keepOriginalUniqueNodeId) {
-  auto clonedNode = new LiteralString(matrix->clone());
+  auto clonedNode = new LiteralString(dynamic_cast<Matrix<std::string> *>(matrix)->clone());
   clonedNode->updateClone(keepOriginalUniqueNodeId, this);
   return clonedNode;
 }
@@ -78,7 +80,8 @@ bool LiteralString::isEqual(AbstractExpr *other) {
 }
 
 bool LiteralString::isNull() {
-  return matrix->allValuesEqual("");
+  auto castedMatrix = dynamic_cast<Matrix<std::string> *>(matrix);
+  return castedMatrix!=nullptr && castedMatrix->allValuesEqual(std::string(""));
 }
 
 AbstractMatrix *LiteralString::getMatrix() const {

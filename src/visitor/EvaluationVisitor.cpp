@@ -19,7 +19,7 @@
 #include "UnaryExpr.h"
 #include "VarAssignm.h"
 #include "While.h"
-#include <functional>
+#include "GetMatrixElement.h"
 #include "Rotate.h"
 #include "For.h"
 #include "Transpose.h"
@@ -45,10 +45,10 @@ void EvaluationVisitor::visit(AbstractStatement &elem) {
 void EvaluationVisitor::visit(ArithmeticExpr &elem) {
   // we first need to evaluate the left- and right-handside as they can consists of nested arithmetic expressions
   elem.getLeft()->accept(*this);
-  auto l = results.top().front();
+  auto l = getOnlyEvaluationResult(results.top());
   results.pop();
   elem.getRight()->accept(*this);
-  auto r = results.top().front();
+  auto r = getOnlyEvaluationResult(results.top());
   results.pop();
   results.push({elem.getOp()->applyOperator(l, r)});
 }
@@ -94,7 +94,7 @@ void EvaluationVisitor::visit(Call &elem) {
 
     // variable value: retrieve the variable's value to be passed to the callee
     elem.getArguments().at(i)->getValue()->accept(*this);
-    AbstractLiteral *lit = results.top().front();
+    AbstractLiteral *lit = getOnlyEvaluationResult(results.top());
     results.pop();
     // make sure that evaluate returns a Literal
     if (lit==nullptr) throw std::logic_error("There's something wrong! Evaluate should return a single Literal.");
@@ -128,7 +128,7 @@ void EvaluationVisitor::visit(FunctionParameter &elem) {
 
 void EvaluationVisitor::visit(If &elem) {
   elem.getCondition()->accept(*this);
-  auto cond = dynamic_cast<LiteralBool *>(results.top().front());
+  auto cond = dynamic_cast<LiteralBool *>(getOnlyEvaluationResult(results.top()));
   results.pop();
   if (cond==nullptr)
     throw std::logic_error("Condition in If statement must evaluate to a LiteralBool! Cannot continue.");
@@ -140,29 +140,66 @@ void EvaluationVisitor::visit(If &elem) {
   }
 }
 
+template<typename T, class LiteralClass>
+Matrix<T> *EvaluationVisitor::evaluateAbstractExprMatrix(EvaluationVisitor &ev, AbstractMatrix &mx) {
+  auto mxDim = mx.getDimensions();
+  std::vector<std::vector<T>> evaluatedValues(mxDim.numRows, std::vector<T>(mxDim.numColumns));
+  for (int i = 0; i < mxDim.numRows; ++i) {
+    for (int j = 0; j < mxDim.numColumns; ++j) {
+      mx.getElementAt(i, j)->accept(ev);
+      auto result = getOnlyEvaluationResult(results.top());
+      results.pop();
+      evaluatedValues[i][j] = result->castTo<LiteralClass>()->getValue();
+    }
+  }
+  return new Matrix<T>({evaluatedValues});
+}
+
 void EvaluationVisitor::visit(LiteralBool &elem) {
-  results.push({&elem});
+  if (dynamic_cast<Matrix<bool> *>(elem.getMatrix())) {  // if this is a scalar, i.e, Matrix<bool> of single element
+    results.push({&elem});
+  } else {  // otherwise, this must be a Matrix<AbstractExpr*> -> we need to evaluate each expression
+    Matrix<bool> *evaluatedExpressions = evaluateAbstractExprMatrix<bool, LiteralBool>(*this, *elem.getMatrix());
+    results.push({new LiteralBool(evaluatedExpressions)});
+  }
 }
 
 void EvaluationVisitor::visit(LiteralInt &elem) {
-  results.push({&elem});
+  if (dynamic_cast<Matrix<int> *>(elem.getMatrix())) {  // if this is a scalar, i.e, Matrix<int> of single element
+    results.push({&elem});
+  } else {  // otherwise, this must be a Matrix<AbstractExpr*> -> we need to evaluate each expression
+    Matrix<int> *evaluatedExpressions = evaluateAbstractExprMatrix<int, LiteralInt>(*this, *elem.getMatrix());
+    results.push({new LiteralInt(evaluatedExpressions)});
+  }
 }
 
 void EvaluationVisitor::visit(LiteralString &elem) {
-  results.push({&elem});
+  // if this is a scalar, i.e, Matrix<std::string> of single element
+  if (dynamic_cast<Matrix<std::string> *>(elem.getMatrix())) {
+    results.push({&elem});
+  } else {  // otherwise, this must be a Matrix<AbstractExpr*> -> we need to evaluate each expression
+    Matrix<std::string>
+        *evaluatedExpressions = evaluateAbstractExprMatrix<std::string, LiteralString>(*this, *elem.getMatrix());
+    results.push({new LiteralString(evaluatedExpressions)});
+  }
 }
 
 void EvaluationVisitor::visit(LiteralFloat &elem) {
-  results.push({&elem});
+  if (dynamic_cast<Matrix<float> *>(elem.getMatrix())) {  // if this is a scalar, i.e, Matrix<float> of single element
+    results.push({&elem});
+  } else {  // otherwise, this must be a Matrix<AbstractExpr*> -> we need to evaluate each expression
+    Matrix<float> *evaluatedExpressions = evaluateAbstractExprMatrix<float, LiteralFloat>(*this, *elem.getMatrix());
+    results.push({new LiteralFloat(evaluatedExpressions)});
+  }
 }
 
 void EvaluationVisitor::visit(LogicalExpr &elem) {
-  // we first need to evaluate the left-handside and right-handside as they can consists of nested arithmetic expressions
+  // we first need to evaluate the left and right hand-side as they can consist of nested expressions
   elem.getLeft()->accept(*this);
-  auto l = results.top().front();
+  auto l = getOnlyEvaluationResult(results.top());
   results.pop();
   elem.getRight()->accept(*this);
-  auto r = results.top().front();
+  auto r = getOnlyEvaluationResult(results.top());
   results.pop();
   results.push({elem.getOp()->applyOperator(l, r)});
 }
@@ -184,7 +221,7 @@ void EvaluationVisitor::visit(Return &elem) {
 
 void EvaluationVisitor::visit(UnaryExpr &elem) {
   elem.getRight()->accept(*this);
-  results.push({elem.getOp()->applyOperator(results.top().front())});
+  results.push({elem.getOp()->applyOperator(getOnlyEvaluationResult(results.top()))});
 }
 
 void EvaluationVisitor::visit(Rotate &elem) {
@@ -194,9 +231,9 @@ void EvaluationVisitor::visit(Rotate &elem) {
   elem.getRotationFactor()->accept(*this);
   // check whether the rotation factor is known, otherwise we can stop right here because we cannot perform rotation if
   // the rotation factor is unknown
-  auto rotationFactor = dynamic_cast<LiteralInt *>(results.top().front());
+  auto rotationFactor = dynamic_cast<LiteralInt *>(getOnlyEvaluationResult(results.top()));
   results.pop();
-  auto operand = results.top().front();
+  auto operand = getOnlyEvaluationResult(results.top());
   results.pop();
   if (rotationFactor==nullptr || operand==nullptr) return;
 
@@ -209,7 +246,7 @@ void EvaluationVisitor::visit(Rotate &elem) {
 void EvaluationVisitor::visit(Transpose &elem) {
   // visit the operand: we need to evaluate it as it can be an expression itself, e.g., transpose([1,2,3]+[2,3,1])
   elem.getOperand()->accept(*this);
-  auto operand = results.top().front()->clone(false)->castTo<AbstractLiteral>();
+  auto operand = getOnlyEvaluationResult(results.top())->clone(false)->castTo<AbstractLiteral>();
   results.pop();
   // rotate the cloned Literal in-place
   operand->getMatrix()->transpose(true);
@@ -218,7 +255,7 @@ void EvaluationVisitor::visit(Transpose &elem) {
 
 void EvaluationVisitor::visit(VarAssignm &elem) {
   elem.getValue()->accept(*this);
-  auto val = results.top().front();
+  auto val = getOnlyEvaluationResult(results.top());
   results.pop();
   updateVarValue(elem.getIdentifier(), val);
 }
@@ -227,7 +264,7 @@ void EvaluationVisitor::visit(VarDecl &elem) {
   if (elem.getInitializer()!=nullptr) {
     elem.getInitializer()->accept(*this);
     // get the variable declaration's evaluated value
-    auto value = results.top().front();
+    auto value = getOnlyEvaluationResult(results.top());
     results.pop();
     // save the variable's value
     updateVarValue(elem.getIdentifier(), value);
@@ -247,7 +284,7 @@ void EvaluationVisitor::visit(While &elem) {
     // visit the condition's expression
     elem.getCondition()->accept(*this);
     // get the expression's evaluation result
-    auto cond = *dynamic_cast<LiteralBool *>(ensureSingleEvaluationResult(results.top()));
+    auto cond = *dynamic_cast<LiteralBool *>(getOnlyEvaluationResult(results.top()));
     results.pop();
     return cond==LiteralBool(true);
   };
@@ -264,7 +301,7 @@ void EvaluationVisitor::visit(For &elem) {
     // visit the condition's expression
     elem.getCondition()->accept(*this);
     // get the expression's evaluation result
-    auto cond = *dynamic_cast<LiteralBool *>(ensureSingleEvaluationResult(results.top()));
+    auto cond = *dynamic_cast<LiteralBool *>(getOnlyEvaluationResult(results.top()));
     results.pop();
     return cond==LiteralBool(true);
   };
@@ -274,35 +311,49 @@ void EvaluationVisitor::visit(For &elem) {
   }
 }
 
+void EvaluationVisitor::visit(GetMatrixElement &elem) {
+  // operand
+  elem.getOperand()->accept(*this);
+  auto operand = dynamic_cast<AbstractLiteral *>(getOnlyEvaluationResult(results.top()));
+  results.pop();
+  // row index
+  elem.getRowIndex()->accept(*this);
+  auto rowIdx = dynamic_cast<LiteralInt *>(getOnlyEvaluationResult(results.top()));
+  results.pop();
+  // column index
+  elem.getColumnIndex()->accept(*this);
+  auto columnIdx = dynamic_cast<LiteralInt *>(getOnlyEvaluationResult(results.top()));
+  results.pop();
+  // retrieve and store the specified element
+  results.push(
+      {operand->getMatrix()->getElementAt(rowIdx->getValue(), columnIdx->getValue())
+           ->castTo<AbstractLiteral>()});
+}
+
 void EvaluationVisitor::visit(Ast &elem) {
   Visitor::visit(elem);
 }
 
 const std::vector<AbstractLiteral *> &EvaluationVisitor::getResults() {
   std::vector<AbstractLiteral *> *resultValues = &results.top();
+  if (!flagPrintResult) return *resultValues;
   // print result if flag 'printResult' is set
-  if (flagPrintResult) {
-    if (resultValues->empty()) {
-      std::cout << "void" << std::endl;
-    } else {
-      std::stringstream outStr;
-      for (auto &resultLiteral : *resultValues) outStr << resultLiteral->toString(false) << std::endl;
-      std::cout << outStr.str();
-    }
+  if (resultValues->empty()) {
+    std::cout << "void" << std::endl;
+  } else {
+    std::stringstream outStr;
+    for (auto &resultLiteral : *resultValues) outStr << resultLiteral->toString(false) << std::endl;
+    std::cout << outStr.str();
   }
   return *resultValues;
 }
 
-AbstractLiteral *EvaluationVisitor::ensureSingleEvaluationResult(std::vector<AbstractLiteral *> evaluationResult) {
+AbstractLiteral *EvaluationVisitor::getOnlyEvaluationResult(std::vector<AbstractLiteral *> evaluationResult) {
   if (evaluationResult.size() > 1) {
-    throw std::logic_error(
-        "Unexpected number of returned results (1 vs. " + std::to_string(evaluationResult.size()) + ")");
+    throw std::logic_error("Unexpected number of results returned (1 vs. "
+                               + std::to_string(evaluationResult.size()) + ").");
   }
   return evaluationResult.front();
-}
-
-bool EvaluationVisitor::hasVarValue(Variable *var) {
-  return getVarValue(var->getIdentifier())!=nullptr;
 }
 
 AbstractLiteral *EvaluationVisitor::getVarValue(const std::string &variableIdentifier) {

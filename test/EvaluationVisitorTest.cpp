@@ -13,7 +13,7 @@
 #include "Call.h"
 #include "VarAssignm.h"
 
-TEST(AstEvaluationTests, simpleAstEvaluation1) { /* NOLINT */
+TEST(EvaluationVisitorTests, simpleAstEvaluation1) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(7, ast);
   std::unordered_map<std::string, AbstractLiteral *> params = {
@@ -25,7 +25,7 @@ TEST(AstEvaluationTests, simpleAstEvaluation1) { /* NOLINT */
   ASSERT_EQ(*result, *new LiteralInt(693'129));
 }
 
-TEST(AstEvaluationTests, simpleAstEvaluationIfThenBranch) { /* NOLINT */
+TEST(EvaluationVisitorTests, simpleAstEvaluationIfThenBranch) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(8, ast);
   std::unordered_map<std::string, AbstractLiteral *> params = {
@@ -37,7 +37,7 @@ TEST(AstEvaluationTests, simpleAstEvaluationIfThenBranch) { /* NOLINT */
   ASSERT_EQ(*result, *new LiteralInt(0));
 }
 
-TEST(AstEvaluationTests, simpleAstEvaluationIfElseBranch) { /* NOLINT */
+TEST(EvaluationVisitorTests, simpleAstEvaluationIfElseBranch) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(8, ast);
   std::unordered_map<std::string, AbstractLiteral *> params = {
@@ -49,7 +49,7 @@ TEST(AstEvaluationTests, simpleAstEvaluationIfElseBranch) { /* NOLINT */
   ASSERT_EQ(*result, *new LiteralInt(5943));
 }
 
-TEST(AstEvaluationTests, simpleAstEvaluationUnaryLogExpr1) { /* NOLINT */
+TEST(EvaluationVisitorTests, simpleAstEvaluationUnaryLogExpr1) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(9, ast);
   std::unordered_map<std::string, AbstractLiteral *> params = {
@@ -62,7 +62,7 @@ TEST(AstEvaluationTests, simpleAstEvaluationUnaryLogExpr1) { /* NOLINT */
   ASSERT_EQ(*result, *new LiteralBool(true));
 }
 
-TEST(AstEvaluationTests, simpleAstEvaluationUnaryLogExpr2) { /* NOLINT */
+TEST(EvaluationVisitorTests, simpleAstEvaluationUnaryLogExpr2) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(9, ast);
   std::unordered_map<std::string, AbstractLiteral *> params = {
@@ -75,7 +75,7 @@ TEST(AstEvaluationTests, simpleAstEvaluationUnaryLogExpr2) { /* NOLINT */
   ASSERT_EQ(*result, *new LiteralBool(false));
 }
 
-TEST(AstEvaluationTests, simpleAstEvaluationUnaryLogExpr3) { /* NOLINT */
+TEST(EvaluationVisitorTests, simpleAstEvaluationUnaryLogExpr3) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(9, ast);
   std::unordered_map<std::string, AbstractLiteral *> params = {
@@ -88,7 +88,7 @@ TEST(AstEvaluationTests, simpleAstEvaluationUnaryLogExpr3) { /* NOLINT */
   ASSERT_EQ(*result, *new LiteralBool(true));
 }
 
-TEST(AstEvaluationTests, simpleAstEvaluationStringConcat) { /* NOLINT */
+TEST(EvaluationVisitorTests, simpleAstEvaluationStringConcat) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(10, ast);
   std::unordered_map<std::string, AbstractLiteral *> params = {
@@ -99,7 +99,7 @@ TEST(AstEvaluationTests, simpleAstEvaluationStringConcat) { /* NOLINT */
   ASSERT_EQ(*result, *new LiteralString("hello world!"));
 }
 
-TEST(AstEvaluationTests, complexAstEvaluationWhileNotExecuted) { /* NOLINT */
+TEST(EvaluationVisitorTests, complexAstEvaluationWhileNotExecuted) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(11, ast);
   std::unordered_map<std::string, AbstractLiteral *> params = {
@@ -111,7 +111,7 @@ TEST(AstEvaluationTests, complexAstEvaluationWhileNotExecuted) { /* NOLINT */
   ASSERT_EQ(*result, *new LiteralInt(0));
 }
 
-TEST(AstEvaluationTests, complexAstEvaluationWhileExecutedThreeTimes) { /* NOLINT */
+TEST(EvaluationVisitorTests, complexAstEvaluationWhileExecutedThreeTimes) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(11, ast);
   std::unordered_map<std::string, AbstractLiteral *> params = {
@@ -123,7 +123,7 @@ TEST(AstEvaluationTests, complexAstEvaluationWhileExecutedThreeTimes) { /* NOLIN
   ASSERT_EQ(*result, *new LiteralInt(21));
 }
 
-TEST(AstEvaluationTests, complexAstEvaluationWithNestedFunctionCall_LiteralParameterValue) { /* NOLINT */
+TEST(EvaluationVisitorTests, complexAstEvaluationWithNestedFunctionCall_LiteralParameterValue) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(12, ast);
   std::unordered_map<std::string, AbstractLiteral *> params;
@@ -131,7 +131,7 @@ TEST(AstEvaluationTests, complexAstEvaluationWithNestedFunctionCall_LiteralParam
   ASSERT_EQ(*result, *new LiteralInt(1'056));
 }
 
-TEST(AstEvaluationTests, complexAstEvaluationWithNestedFunctionCall_AexpParameterValue) { /* NOLINT */
+TEST(EvaluationVisitorTests, complexAstEvaluationWithNestedFunctionCall_AexpParameterValue) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(13, ast);
   std::unordered_map<std::string, AbstractLiteral *> params;
@@ -139,7 +139,7 @@ TEST(AstEvaluationTests, complexAstEvaluationWithNestedFunctionCall_AexpParamete
   ASSERT_EQ(*result, *new LiteralInt(7'168));
 }
 
-TEST(AstEvaluationTests, astIncludingForLoop) { /* NOLINT */
+TEST(EvaluationVisitorTests, astIncludingForLoop) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(23, ast);
   std::unordered_map<std::string, AbstractLiteral *> params({{"inputA", new LiteralInt(5)}});
@@ -147,7 +147,7 @@ TEST(AstEvaluationTests, astIncludingForLoop) { /* NOLINT */
   ASSERT_EQ(*result, *new LiteralInt(30));
 }
 
-TEST(AstEvaluationTests, astLiteralRotation) { /* NOLINT */
+TEST(EvaluationVisitorTests, astLiteralRotation) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(24, ast);
   auto result = dynamic_cast<LiteralInt *>(ast.evaluateAst({}, false).front());
@@ -157,7 +157,7 @@ TEST(AstEvaluationTests, astLiteralRotation) { /* NOLINT */
   EXPECT_EQ(m(0, 2), 7);
 }
 
-TEST(AstEvaluationTests, astRotateAndSumVector) { /* NOLINT */
+TEST(EvaluationVisitorTests, astRotateAndSumVector) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(25, ast);
   auto result = dynamic_cast<LiteralInt *>(ast.evaluateAst({}, false).front());
@@ -165,10 +165,67 @@ TEST(AstEvaluationTests, astRotateAndSumVector) { /* NOLINT */
   EXPECT_EQ(m.values, std::vector<std::vector<int>>({{11, 11, 11}}));
 }
 
-TEST(AstEvaluationTests, astTransposeMatrix) { /* NOLINT */
+TEST(EvaluationVisitorTests, astTransposeMatrix) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(26, ast);
   auto result = dynamic_cast<LiteralInt *>(ast.evaluateAst({}, false).front());
   auto m = *dynamic_cast<Matrix<int> *>(result->getMatrix());
   EXPECT_EQ(m.values, std::vector<std::vector<int>>({{11, 4, 2}, {2, 2, 1}, {3, 3, 3}}));
 }
+
+TEST(EvaluationVisitorTests, astGetSingleMatrixElement) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(27, ast);
+  auto result = dynamic_cast<LiteralInt *>(ast.evaluateAst({}, false).front());
+  auto m = *dynamic_cast<Matrix<int> *>(result->getMatrix());
+  EXPECT_EQ(m.values, std::vector<std::vector<int>>({{27}}));
+}
+
+TEST(EvaluationVisitorTests, astCombineMatrices_LiteralInt) { /* NOLINT */
+  //  -- input --
+  // extractArbitraryMatrixElements {
+  //   int M = [ 14 27 32 ];
+  //   int B = [ 19 21 38 ];
+  //   return [ M[0][1];      // ret0
+  //            B[0][0];      // ret1
+  //            B[0][2] ];    // ret2
+  // }
+  //  -- expected --
+  //  result: [14 19 38];
+  Ast ast;
+  AstTestingGenerator::generateAst(28, ast);
+  auto result = dynamic_cast<LiteralInt *>(ast.evaluateAst({}, false).front());
+  auto m = *dynamic_cast<Matrix<int> *>(result->getMatrix());
+  EXPECT_EQ(m.values, std::vector<std::vector<int>>({{27, 19, 38}}));
+}
+
+TEST(EvaluationVisitorTests, astCombineMatrices_LiteralFloat) { /* NOLINT */
+  //  -- expected --
+  //  result: [1.4 1.9 3.8];
+  Ast ast;
+  AstTestingGenerator::generateAst(29, ast);
+  auto result = dynamic_cast<LiteralFloat *>(ast.evaluateAst({}, false).front());
+  auto m = *dynamic_cast<Matrix<float> *>(result->getMatrix());
+  EXPECT_EQ(m.values, std::vector<std::vector<float>>({{2.7f, 1.9f, 3.8f}}));
+}
+
+TEST(EvaluationVisitorTests, astCombineMatrices_LiteralBool) { /* NOLINT */
+  //  -- expected --
+  //  result: [true false true];
+  Ast ast;
+  AstTestingGenerator::generateAst(30, ast);
+  auto result = dynamic_cast<LiteralBool *>(ast.evaluateAst({}, false).front());
+  auto m = *dynamic_cast<Matrix<bool> *>(result->getMatrix());
+  EXPECT_EQ(m.values, std::vector<std::vector<bool>>({{true, false, true}}));
+}
+
+TEST(EvaluationVisitorTests, astCombineMatrices_LiteralString) { /* NOLINT */
+  //  -- expected --
+  //  result: ["alpha" "beta" "gamma"];
+  Ast ast;
+  AstTestingGenerator::generateAst(31, ast);
+  auto result = dynamic_cast<LiteralString *>(ast.evaluateAst({}, false).front());
+  auto m = *dynamic_cast<Matrix<std::string> *>(result->getMatrix());
+  EXPECT_EQ(m.values, std::vector<std::vector<std::string>>({{"alpha", "beta", "gamma"}}));
+}
+

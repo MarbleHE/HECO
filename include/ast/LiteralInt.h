@@ -12,16 +12,20 @@ class AbstractMatrix;
 
 class LiteralInt : public AbstractLiteral {
  private:
-  Matrix<int> *matrix;
+  /// Stores the values of this LiteralInt. Is usually a Matrix<int> but can also be a Matrix<AbstractExpr*> in the case
+  /// that this matrix contains unevaluated expression, e.g., GetMatrixElement.
+  AbstractMatrix *matrix;
 
  public:
+  explicit LiteralInt(Matrix<AbstractExpr *> *am);
+
   explicit LiteralInt(Matrix<int> *inputMatrix);
 
   explicit LiteralInt(int value);
 
-  LiteralInt *clone(bool keepOriginalUniqueNodeId) override;
-
   ~LiteralInt() override;
+
+  LiteralInt *clone(bool keepOriginalUniqueNodeId) override;
 
   [[nodiscard]] int getValue() const;
 
@@ -53,7 +57,7 @@ class LiteralInt : public AbstractLiteral {
 
   bool isNull() override;
 
-  AbstractMatrix *getMatrix() const override;
+  [[nodiscard]] AbstractMatrix *getMatrix() const override;
 
   void setMatrix(AbstractMatrix *newValue) override;
 };

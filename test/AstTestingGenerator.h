@@ -1,5 +1,5 @@
-#ifndef MASTER_THESIS_CODE_ASTTESTINGGENERATOR_H
-#define MASTER_THESIS_CODE_ASTTESTINGGENERATOR_H
+#ifndef AST_OPTIMIZER_TEST_ASTTESTINGGENERATOR_H_
+#define AST_OPTIMIZER_TEST_ASTTESTINGGENERATOR_H_
 
 #include "Ast.h"
 
@@ -15,22 +15,39 @@ class AstTestingGenerator {
   /// \return An integer specifying the largest ID supported by generateAst.
   static size_t getLargestId();
 
-  // Methods to generate sample ASTs to be used for tests.
+  /** @defgroup astGenerators Methods for generating sample ASTs to be used within tests.
+  *  @{
+  */
   static void genSuperSimpleAst(Ast &ast);
+
   static void genAstRewritingOne(Ast &ast);
+
   static void genAstRewritingTwo(Ast &ast);
+
   static void genAstRewritingThree(Ast &ast);
+
   static void genAstRewritingFour(Ast &ast);
+
   static void genAstRewritingFive(Ast &ast);
+
   static void genAstRewritingSix(Ast &ast);
+
   static void genAstEvalOne(Ast &ast);
+
   static void genAstEvalTwo(Ast &ast);
+
   static void genAstEvalThree(Ast &ast);
+
   static void genAstEvalFour(Ast &ast);
+
   static void genAstEvalFive(Ast &ast);
+
   static void genAstEvalSix(Ast &ast);
+
   static void genAstEvalSeven(Ast &ast);
+
   static void genAstPrintVisitorOne(Ast &ast);
+
   static void genAstPrintVisitorTwo(Ast &ast);
 
   static void genAstMultDepthOne(Ast &ast);
@@ -54,6 +71,16 @@ class AstTestingGenerator {
   static void genAstRotateAndSum(Ast &ast);
 
   static void genAstTranspose(Ast &ast);
+
+  static void genAstUsingMatrixElements(Ast &ast);
+
+  static void genAstCombineMatricesInt(Ast &ast);
+
+  static void genAstCombineMatricesFloat(Ast &ast);
+  /** @} */ // End of astGenerators group
+  static void genAstCombineMatricesBool(Ast &ast);
+
+  static void genAstCombineMatricesString(Ast &ast);
 };
 
-#endif //MASTER_THESIS_CODE_ASTTESTINGGENERATOR_H
+#endif //AST_OPTIMIZER_TEST_ASTTESTINGGENERATOR_H_

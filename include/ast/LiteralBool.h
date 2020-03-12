@@ -12,9 +12,11 @@ class AbstractMatrix;
 
 class LiteralBool : public AbstractLiteral {
  private:
-  Matrix<bool> *matrix;
+  AbstractMatrix *matrix;
 
  public:
+  explicit LiteralBool(Matrix<AbstractExpr *> *am);
+
   explicit LiteralBool(bool value);
 
   explicit LiteralBool(Matrix<bool> *inputMatrix);

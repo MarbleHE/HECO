@@ -13,9 +13,11 @@ class AbstractMatrix;
 
 class LiteralFloat : public AbstractLiteral {
  private:
-  Matrix<float> *matrix;
+  AbstractMatrix *matrix;
 
  public:
+  explicit LiteralFloat(Matrix<AbstractExpr *> *am);
+
   explicit LiteralFloat(float value);
 
   explicit LiteralFloat(Matrix<float> *inputMatrix);

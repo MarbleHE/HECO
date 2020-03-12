@@ -8,6 +8,8 @@ bool LiteralInt::supportsDatatype(Datatype &datatype) {
   return datatype.getType()==Types::INT;
 }
 
+LiteralInt::LiteralInt(Matrix<AbstractExpr *> *am) : matrix(am) {}
+
 LiteralInt::LiteralInt(int value) : matrix(new Matrix(value)) {}
 
 LiteralInt::LiteralInt(Matrix<int> *inputMatrix) : matrix(inputMatrix) {}
@@ -20,7 +22,7 @@ json LiteralInt::toJson() const {
 }
 
 int LiteralInt::getValue() const {
-  return matrix->getScalarValue();
+  return (*dynamic_cast<Matrix<int> *>(matrix)).getScalarValue();
 }
 
 void LiteralInt::accept(Visitor &v) {
@@ -38,7 +40,7 @@ void LiteralInt::print(std::ostream &str) const {
 }
 
 bool LiteralInt::operator==(const LiteralInt &rhs) const {
-  return *matrix==*dynamic_cast<Matrix<int> *>(rhs.getMatrix());
+  return *matrix==*rhs.getMatrix();
 }
 
 bool LiteralInt::operator!=(const LiteralInt &rhs) const {
@@ -51,7 +53,7 @@ void LiteralInt::addLiteralValue(std::string identifier,
 }
 
 void LiteralInt::setValue(int newValue) {
-  matrix->setValues({{newValue}});
+  dynamic_cast<Matrix<int> *>(matrix)->setValues({{newValue}});
 }
 
 void LiteralInt::setRandomValue(RandLiteralGen &rlg) {
@@ -67,7 +69,7 @@ bool LiteralInt::supportsCircuitMode() {
 }
 
 LiteralInt *LiteralInt::clone(bool keepOriginalUniqueNodeId) {
-  auto clonedNode = new LiteralInt(matrix->clone());
+  auto clonedNode = new LiteralInt(dynamic_cast<Matrix<int> *>(matrix)->clone());
   clonedNode->updateClone(keepOriginalUniqueNodeId, this);
   return clonedNode;
 }
@@ -78,7 +80,8 @@ bool LiteralInt::isEqual(AbstractExpr *other) {
 }
 
 bool LiteralInt::isNull() {
-  return matrix->allValuesEqual(0);
+  auto castedMatrix = dynamic_cast<Matrix<int> *>(matrix);
+  return castedMatrix!=nullptr && castedMatrix->allValuesEqual(0);
 }
 
 AbstractMatrix *LiteralInt::getMatrix() const {
@@ -86,5 +89,5 @@ AbstractMatrix *LiteralInt::getMatrix() const {
 }
 
 void LiteralInt::setMatrix(AbstractMatrix *newValue) {
-  this->matrix = dynamic_cast<Matrix<int> *>(newValue);
+  this->matrix = newValue;
 }

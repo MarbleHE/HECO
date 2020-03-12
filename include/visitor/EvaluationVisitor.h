@@ -6,6 +6,8 @@
 #include "Visitor.h"
 #include <unordered_map>
 #include <string>
+#include <GetMatrixElement.h>
+#include <Matrix.h>
 
 class EvaluationVisitor : public Visitor {
  private:
@@ -23,17 +25,12 @@ class EvaluationVisitor : public Visitor {
   /// \param evaluationResult The vector of AbstractLiteral pointers to be tested.
   /// \return The single AbstractLiteral pointer, otherwise throws an exception.
   /// \throws std::logic_error if more than one element is in the vector of AbstractLiteral pointers.
-  static AbstractLiteral *ensureSingleEvaluationResult(std::vector<AbstractLiteral *> evaluationResult);
+  static AbstractLiteral *getOnlyEvaluationResult(std::vector<AbstractLiteral *> evaluationResult);
 
   /// This map stores the variables values and serves as lookup table and central storage during the evaluation process.
   /// - std::string: The variable identifier.
   /// - AbstractLiteral*: The evaluated value of the variable.
   std::unordered_map<std::string, AbstractLiteral *> variableValuesForEvaluation;
-
-  /// Checks whether variableValuesForEvaluation contains a value for the given Variable var.
-  /// \param var The variable of which the existence of a value should be determined.
-  /// \return True if the variable has a value, otherwise False.
-  bool hasVarValue(Variable *var);
 
   /// Returns the value in variableValuesForEvaluation for a given variable identifier.
   /// \param variableIdentifier The identifier of which the value should be determined.
@@ -68,20 +65,33 @@ class EvaluationVisitor : public Visitor {
   void visit(LogicalExpr &elem) override;
   void visit(Operator &elem) override;
   void visit(Return &elem) override;
+
   void visit(Rotate &elem) override;
+
+  void visit(GetMatrixElement &elem) override;
 
   void visit(Transpose &elem) override;
 
   void visit(UnaryExpr &elem) override;
+
   void visit(VarAssignm &elem) override;
+
   void visit(VarDecl &elem) override;
+
   void visit(Variable &elem) override;
+
   void visit(While &elem) override;
 
   const std::vector<AbstractLiteral *> &getResults();
+
   void setFlagPrintResult(bool printResult);
+
   void reset();
+
   void updateVarValues(std::unordered_map<std::string, AbstractLiteral *> variableValues);
+
+  template<typename T, typename U>
+  Matrix<T> *evaluateAbstractExprMatrix(EvaluationVisitor &ev, AbstractMatrix &mx);
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_VISITOR_EVALUATIONVISITOR_H_

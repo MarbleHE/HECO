@@ -1,3 +1,4 @@
+#include <GetMatrixElement.h>
 #include "AstTestingGenerator.h"
 #include "Operator.h"
 #include "ArithmeticExpr.h"
@@ -48,7 +49,12 @@ static std::map<int, std::function<void(Ast &)> > call = {  /* NOLINT */
     {23, AstTestingGenerator::genAstIncludingForStatement},
     {24, AstTestingGenerator::genAstUsingRotation},
     {25, AstTestingGenerator::genAstRotateAndSum},
-    {26, AstTestingGenerator::genAstTranspose}
+    {26, AstTestingGenerator::genAstTranspose},
+    {27, AstTestingGenerator::genAstUsingMatrixElements},
+    {28, AstTestingGenerator::genAstCombineMatricesInt},
+    {29, AstTestingGenerator::genAstCombineMatricesFloat},
+    {30, AstTestingGenerator::genAstCombineMatricesBool},
+    {31, AstTestingGenerator::genAstCombineMatricesString}
 };
 
 void AstTestingGenerator::generateAst(int id, Ast &ast) {
@@ -490,8 +496,7 @@ void AstTestingGenerator::genAstEvalSix(Ast &ast) {
                        new ArithmeticExpr(
                            new Variable("inputA"),
                            ArithmeticOp::MULTIPLICATION,
-                           new LiteralInt(32)))
-                   )))));
+                           new LiteralInt(32))))))));
 
   // return result;
   fnc->addStatement(new Return(new Variable("result")));
@@ -505,16 +510,20 @@ void AstTestingGenerator::genAstEvalSeven(Ast &ast) {
   // int result = computeSecret(33);
   // -> computeSecret(int inputA) { return inputA * 32 }
   fnc->addStatement(new VarAssignm("result", new Call(
-      {new FunctionParameter("int",
-                             new ArithmeticExpr(new LiteralInt(11), ArithmeticOp::ADDITION, new LiteralInt(213)))},
+      {
+          new FunctionParameter("int",
+                                new ArithmeticExpr(
+                                    new LiteralInt(11),
+                                    ArithmeticOp::ADDITION,
+                                    new LiteralInt(213)))},
       new Function("computeSecret",
-                   new ParameterList({new FunctionParameter("int", new Variable("inputA"))}),
+                   new ParameterList(
+                       {new FunctionParameter("int", new Variable("inputA"))}),
                    new Block(new Return(
                        new ArithmeticExpr(
                            new Variable("inputA"),
                            ArithmeticOp::MULTIPLICATION,
-                           new LiteralInt(32)))
-                   )))));
+                           new LiteralInt(32))))))));
 
   // return result;
   fnc->addStatement(new Return(new Variable("result")));
@@ -774,20 +783,20 @@ void AstTestingGenerator::genAstRewritingSimpleExtended(Ast &ast) {
   // -----------------------------
   // Schematic diagram of the AST
   // -----------------------------
-  // ┌────────────┐    ┌─────────────┐ ┌────────────┐     ┌─────────────┐     ┌────────────┐    ┌─────────────┐ ┌────────────┐     ┌─────────────┐
-  // │a_1^(1)_left│    │a_1^(1)_right│ │a_1^(2)_left│     │a_1^(2)_right│     │a_1^(2)_left│    │a_1^(2)_right│ │a_2^(2)_left│     │a_2^(2)_right│
-  // └────────────┘    └─────────────┘ └────────────┘     └─────────────┘     └────────────┘    └─────────────┘ └────────────┘     └─────────────┘
-  //       ▲                 ▲               ▲                  ▲                   ▲                 ▲               ▲                  ▲
-  //       │       .─.       │               │        .─.       │                   │       .─.       │               │        .─.       │
-  //       └──────( & )──────┘               └───────( + )──────┘                   └──────( & )──────┘               └───────( + )──────┘
-  //               `─'                                `─'                                   `─'                                `─'
-  //                ▲                                  ▲                                     ▲                                  ▲
-  //                │               .─.                │                                     │                .─.               │
-  //                └──────────────( & )───────────────┘                                     └───────────────( & )──────────────┘
-  //                                `─'                                                                       `─'
-  //                                 ▲                                                                         ▲
-  //                                 │                              .─.                                        │
-  //                                 └─────────────────────────────( + )───────────────────────────────────────┘
+  // ┌────────────┐    ┌─────────────┐ ┌────────────┐     ┌─────────────┐  ┌────────────┐    ┌─────────────┐ ┌────────────┐     ┌─────────────┐
+  // │a_1^(1)_left│    │a_1^(1)_right│ │a_1^(2)_left│     │a_1^(2)_right│  │a_1^(2)_left│    │a_1^(2)_right│ │a_2^(2)_left│     │a_2^(2)_right│
+  // └────────────┘    └─────────────┘ └────────────┘     └─────────────┘  └────────────┘    └─────────────┘ └────────────┘     └─────────────┘
+  //       ▲                 ▲               ▲                  ▲                ▲                 ▲               ▲                  ▲
+  //       │       .─.       │               │        .─.       │                │       .─.       │               │        .─.       │
+  //       └──────( & )──────┘               └───────( + )──────┘                └──────( & )──────┘               └───────( + )──────┘
+  //               `─'                                `─'                                `─'                                `─'
+  //                ▲                                  ▲                                  ▲                                  ▲
+  //                │               .─.                │                                  │                .─.               │
+  //                └──────────────( & )───────────────┘                                  └───────────────( & )──────────────┘
+  //                                `─'                                                                    `─'
+  //                                 ▲                                                                      ▲
+  //                                 │                              .─.                                     │
+  //                                 └─────────────────────────────( + )────────────────────────────────────┘
   //                                                                `─'
   //                                                                 ▲
   //                                                                 │     .─.     ┌───────┐
@@ -1034,11 +1043,13 @@ void AstTestingGenerator::genAstForSecretTaintingWithMultipleNonSequentialStatem
   funcComputeDiscountOnServer->addStatement(new Return(new Variable("discountRate")));
 
   // secret_float discount = computeDiscountOnServer(secret_bool qualifiesForSpecialDiscount)
-  funcComputeTotal->addStatement(new VarDecl("discount",
-                                             new Datatype(Types::FLOAT, true),
-                                             new Call({new FunctionParameter(new Datatype(Types::BOOL, true),
-                                                                             new Variable("qualifiesForSpecialDiscount"))},
-                                                      funcComputeDiscountOnServer)));
+  funcComputeTotal->addStatement(
+      new VarDecl("discount",
+                  new Datatype(Types::FLOAT, true),
+                  new Call({
+                               new FunctionParameter(new Datatype(Types::BOOL, true),
+                                                     new Variable("qualifiesForSpecialDiscount"))},
+                           funcComputeDiscountOnServer)));
 
   // return subtotal*discount;
   funcComputeTotal->addStatement(
@@ -1158,3 +1169,142 @@ void AstTestingGenerator::genAstTranspose(Ast &ast) {
 
   ast.setRootNode(func);
 }
+
+void AstTestingGenerator::genAstUsingMatrixElements(Ast &ast) {
+  // extractArbitraryMatrixElements {
+  //   int M = [[14 27 32]];
+  //   int N = [[19 21 38]];
+  //   return M[0][1];      // ret0
+  // }
+  auto func = new Function("extractArbitraryMatrixElements");
+
+  // int M = [[14 27 32]];
+  func->addStatement(new VarDecl("M", new Datatype(Types::INT),
+                                 new LiteralInt(new Matrix<int>({{14, 27, 32}}))));
+
+  // int N = [[19 21 38]];
+  func->addStatement(new VarDecl("N", new Datatype(Types::INT),
+                                 new LiteralInt(new Matrix<int>({{19, 21, 38}}))));
+
+  // return M[0][1];
+  auto ret0 = new GetMatrixElement(
+      new Variable("M"), new LiteralInt(0), new LiteralInt(1));
+  func->addStatement(new Return(ret0));
+
+  ast.setRootNode(func);
+}
+
+void AstTestingGenerator::genAstCombineMatricesInt(Ast &ast) {
+  // extractArbitraryMatrixElements {
+  //   int M = [ 14 27 32 ];
+  //   int B = [ 19 21 38 ];
+  //   return [ M[0][1];      // ret0
+  //            B[0][0];      // ret1
+  //            B[0][2] ];    // ret2
+  // }
+  auto func = new Function("extractArbitraryMatrixElements");
+
+  // int M = [[14 27 32]];
+  func->addStatement(new VarDecl("M", new Datatype(Types::INT),
+                                 new LiteralInt(new Matrix<int>({{14, 27, 32}}))));
+
+  // int B = [[19 21 38]];
+  func->addStatement(new VarDecl("B", new Datatype(Types::INT),
+                                 new LiteralInt(new Matrix<int>({{19, 21, 38}}))));
+
+  // return [ M[0][1]; B[0][0]; B[0][2] ];
+  auto ret0 = new GetMatrixElement(
+      new Variable("M"),
+      new LiteralInt(0),
+      new LiteralInt(1));
+  auto ret1 = new GetMatrixElement(
+      new Variable("B"),
+      new LiteralInt(0),
+      new LiteralInt(0));
+  auto ret2 = new GetMatrixElement(
+      new Variable("B"),
+      new LiteralInt(0),
+      new LiteralInt(2));
+  auto pMatrix = new Matrix<AbstractExpr *>({{ret0, ret1, ret2}});
+  func->addStatement(new Return(new LiteralInt(pMatrix)));
+  ast.setRootNode(func);
+}
+
+void AstTestingGenerator::genAstCombineMatricesFloat(Ast &ast) {
+  // extractArbitraryMatrixElements {
+  //   int M = [ 1.4 2.7 3.2 ];
+  //   int B = [ 1.9 2.1 3.8 ];
+  //   return [ M[0][1];      // ret0: 2.7
+  //            B[0][0];      // ret1: 1.9
+  //            B[0][2] ];    // ret2: 3.8
+  // }
+  auto func = new Function("extractArbitraryMatrixElements");
+  func->addStatement(
+      new VarDecl("M", new Datatype(Types::FLOAT),
+                  new LiteralFloat(new Matrix<float>({{1.4f, 2.7f, 3.2f}}))));
+  func->addStatement(
+      new VarDecl("B", new Datatype(Types::FLOAT),
+                  new LiteralFloat(new Matrix<float>({{1.9f, 2.1f, 3.8f}}))));
+  auto ret0 = new GetMatrixElement(new Variable("M"), 0, 1);
+  auto ret1 = new GetMatrixElement(new Variable("B"), 0, 0);
+  auto ret2 = new GetMatrixElement(new Variable("B"), 0, 2);
+  auto pMatrix = new Matrix<AbstractExpr *>({{ret0, ret1, ret2}});
+  func->addStatement(new Return(new LiteralFloat(pMatrix)));
+  ast.setRootNode(func);
+}
+
+void AstTestingGenerator::genAstCombineMatricesBool(Ast &ast) {
+  // extractArbitraryMatrixElements {
+  //   int M = [ true true false ];
+  //   int B = [ false true true ];
+  //   return [ M[0][1];      // ret0: true
+  //            B[0][0];      // ret1: false
+  //            B[0][2] ];    // ret2: true
+  // }
+  auto func = new Function("extractArbitraryMatrixElements");
+  func->addStatement(
+      new VarDecl("M", new Datatype(Types::BOOL),
+                  new LiteralBool(new Matrix<bool>({{true, true, false}}))));
+  func->addStatement(
+      new VarDecl("B", new Datatype(Types::BOOL),
+                  new LiteralBool(new Matrix<bool>({{false, true, true}}))));
+  auto ret0 = new GetMatrixElement(new Variable("M"), 0, 1);
+  auto ret1 = new GetMatrixElement(new Variable("B"), 0, 0);
+  auto ret2 = new GetMatrixElement(new Variable("B"), 0, 2);
+  auto pMatrix = new Matrix<AbstractExpr *>({{ret0, ret1, ret2}});
+  func->addStatement(new Return(new LiteralBool(pMatrix)));
+  ast.setRootNode(func);
+}
+
+void AstTestingGenerator::genAstCombineMatricesString(Ast &ast) {
+  // extractArbitraryMatrixElements {
+  //   int M = [ "epsilon" "alpha" "delta" ];
+  //   int B = [ "beta" "zetta" "gamma" ];
+  //   return [ M[0][1];      // ret0: "alpha"
+  //            B[0][0];      // ret1: "beta"
+  //            B[0][2] ];    // ret2: "gamma"
+  // }
+  auto func = new Function("extractArbitraryMatrixElements");
+  func->addStatement(
+      new VarDecl("M", new Datatype(Types::STRING),
+                  new LiteralString(new Matrix<std::string>({{"epsilon", "alpha", "delta"}}))));
+  func->addStatement(
+      new VarDecl("B", new Datatype(Types::STRING),
+                  new LiteralString(new Matrix<std::string>({{"beta", "zetta", "gamma"}}))));
+  auto ret0 = new GetMatrixElement(new Variable("M"), 0, 1);
+  auto ret1 = new GetMatrixElement(new Variable("B"), 0, 0);
+  auto ret2 = new GetMatrixElement(new Variable("B"), 0, 2);
+  auto pMatrix = new Matrix<AbstractExpr *>({{ret0, ret1, ret2}});
+  func->addStatement(new Return(new LiteralString(pMatrix)));
+  ast.setRootNode(func);
+}
+
+//void AstTestingGenerator::genAstUsingMatrixElements(Ast &ast) {
+//  // computeCrossProduct {
+//  //   int M = [[14 27 32]];
+//  //   int N = [[19 21 38]];
+//  //   return [ M[0][1]*N[0][2] - M[0][2]*N[0][1];      // ret0
+//  //            M[0][2]*N[0][0] - M[0][0]*N[0][2];      // ret1
+//  //            M[0][0]*N[0][1] - M[0][1]*N[0][0] ];    // ret2
+//  // }
+//}

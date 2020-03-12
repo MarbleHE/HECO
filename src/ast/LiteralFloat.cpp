@@ -5,6 +5,8 @@
 #include "RandNumGen.h"
 #include "Matrix.h"
 
+LiteralFloat::LiteralFloat(Matrix<AbstractExpr *> *am) : matrix(am) {}
+
 LiteralFloat::LiteralFloat(float value) : matrix(new Matrix(value)) {}
 
 LiteralFloat::LiteralFloat(Matrix<float> *inputMatrix) : matrix(inputMatrix) {}
@@ -17,7 +19,7 @@ json LiteralFloat::toJson() const {
 }
 
 float LiteralFloat::getValue() const {
-  return matrix->getScalarValue();
+  return (*dynamic_cast<Matrix<float> *>(matrix)).getScalarValue();
 }
 
 void LiteralFloat::accept(Visitor &v) {
@@ -35,7 +37,7 @@ void LiteralFloat::print(std::ostream &str) const {
 }
 
 bool LiteralFloat::operator==(const LiteralFloat &rhs) const {
-  return *matrix==*dynamic_cast<Matrix<float> *>(rhs.getMatrix());
+  return *matrix==*rhs.getMatrix();
 }
 
 bool LiteralFloat::operator!=(const LiteralFloat &rhs) const {
@@ -48,7 +50,7 @@ void LiteralFloat::addLiteralValue(std::string identifier,
 }
 
 void LiteralFloat::setValue(float newValue) {
-  matrix->setValues({{newValue}});
+  dynamic_cast<Matrix<float> *>(matrix)->setValues({{newValue}});
 }
 
 void LiteralFloat::setRandomValue(RandLiteralGen &rlg) {
@@ -57,7 +59,6 @@ void LiteralFloat::setRandomValue(RandLiteralGen &rlg) {
 
 std::string LiteralFloat::toString(bool printChildren) const {
   return AbstractNode::generateOutputString(printChildren, {matrix->toString()});
-
 }
 
 bool LiteralFloat::supportsCircuitMode() {
@@ -69,7 +70,7 @@ bool LiteralFloat::supportsDatatype(Datatype &datatype) {
 }
 
 LiteralFloat *LiteralFloat::clone(bool keepOriginalUniqueNodeId) {
-  auto clonedNode = new LiteralFloat(matrix->clone());
+  auto clonedNode = new LiteralFloat(dynamic_cast<Matrix<float> *>(matrix)->clone());
   clonedNode->updateClone(keepOriginalUniqueNodeId, this);
   return clonedNode;
 }
@@ -80,7 +81,8 @@ bool LiteralFloat::isEqual(AbstractExpr *other) {
 }
 
 bool LiteralFloat::isNull() {
-  return matrix->allValuesEqual(0.0f);
+  auto castedMatrix = dynamic_cast<Matrix<float> *>(matrix);
+  return castedMatrix!=nullptr && castedMatrix->allValuesEqual(0.0f);
 }
 
 AbstractMatrix *LiteralFloat::getMatrix() const {
@@ -88,5 +90,5 @@ AbstractMatrix *LiteralFloat::getMatrix() const {
 }
 
 void LiteralFloat::setMatrix(AbstractMatrix *newValue) {
-  this->matrix = dynamic_cast<Matrix<float> *>(newValue);
+  this->matrix = newValue;
 }

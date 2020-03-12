@@ -11,9 +11,11 @@ class AbstractMatrix;
 
 class LiteralString : public AbstractLiteral {
  private:
-  Matrix<std::string> *matrix;
+  AbstractMatrix *matrix;
 
  public:
+  explicit LiteralString(Matrix<AbstractExpr *> *am);
+
   explicit LiteralString(Matrix<std::string> *inputMatrix);
 
   explicit LiteralString(std::string value);
