@@ -33,6 +33,7 @@ class While;
 class Scope;
 class Rotate;
 class Transpose;
+class GetMatrixElement;
 
 class Visitor {
  public:
@@ -89,6 +90,8 @@ class Visitor {
   virtual void visit(Variable &elem);
 
   virtual void visit(While &elem);
+
+  virtual void visit(GetMatrixElement &elem);
 
   Scope *curScope;
 

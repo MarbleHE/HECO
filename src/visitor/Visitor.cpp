@@ -22,6 +22,7 @@
 #include "While.h"
 #include "Rotate.h"
 #include "Transpose.h"
+#include "GetMatrixElement.h"
 
 void Visitor::visit(Ast &elem) {
   // assumption: AST is always the enclosing object that points to the root
@@ -251,6 +252,14 @@ Visitor::Visitor() {
 }
 
 void Visitor::visit(Datatype &elem) {
-
+  // no children to visit here
 }
 
+void Visitor::visit(GetMatrixElement &elem) {
+  // operand
+  elem.getOperand()->accept(*this);
+  // row index
+  elem.getRowIndex()->accept(*this);
+  // column index
+  elem.getColumnIndex()->accept(*this);
+}
