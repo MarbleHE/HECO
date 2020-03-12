@@ -1,6 +1,25 @@
 #include "GetMatrixElement.h"
 #include "Variable.h"
 
+GetMatrixElement::GetMatrixElement(AbstractExpr *mustEvaluateToAbstractLiteral,
+                                   int rowIndex,
+                                   int columnIndex) {
+  setAttributes(mustEvaluateToAbstractLiteral, new LiteralInt(rowIndex), new LiteralInt(columnIndex));
+}
+
+GetMatrixElement::GetMatrixElement(AbstractExpr *mustEvaluateToAbstractLiteral,
+                                   AbstractExpr *rowIndex,
+                                   AbstractExpr *columnIndex) {
+  setAttributes(mustEvaluateToAbstractLiteral, rowIndex, columnIndex);
+}
+
+void GetMatrixElement::setAttributes(AbstractExpr *elementContainingMatrix,
+                                     AbstractExpr *rowIndex,
+                                     AbstractExpr *columnIndex) {
+  removeChildren();
+  addChildren({elementContainingMatrix, rowIndex, columnIndex}, true);
+}
+
 std::string GetMatrixElement::getNodeType() const {
   return std::string("GetMatrixElement");
 }
@@ -10,7 +29,10 @@ void GetMatrixElement::accept(Visitor &v) {
 }
 
 AbstractNode *GetMatrixElement::clone(bool keepOriginalUniqueNodeId) {
-  auto clonedNode = new GetMatrixElement();
+  auto clonedNode = new GetMatrixElement(
+      getOperand()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
+      getRowIndex()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
+      getColumnIndex()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
   clonedNode->updateClone(keepOriginalUniqueNodeId, this);
   return clonedNode;
 }
@@ -70,26 +92,9 @@ std::string GetMatrixElement::toString(bool printChildren) const {
 }
 
 AbstractNode *GetMatrixElement::cloneFlat() {
-  return new GetMatrixElement();
+  return new GetMatrixElement(nullptr, nullptr, nullptr);
 }
 
 bool GetMatrixElement::supportsCircuitMode() {
   return true;
-}
-
-GetMatrixElement::GetMatrixElement() {
-  setAttributes(nullptr, nullptr, nullptr);
-}
-
-GetMatrixElement::GetMatrixElement(AbstractExpr *mustEvaluateToAbstractLiteral,
-                                   AbstractExpr *rowIndex,
-                                   AbstractExpr *columnIndex) {
-  setAttributes(mustEvaluateToAbstractLiteral, rowIndex, columnIndex);
-}
-
-void GetMatrixElement::setAttributes(AbstractExpr *elementContainingMatrix,
-                                     AbstractExpr *rowIndex,
-                                     AbstractExpr *columnIndex) {
-  removeChildren();
-  addChildren({elementContainingMatrix, rowIndex, columnIndex}, true);
 }
