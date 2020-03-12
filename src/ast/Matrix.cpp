@@ -6,7 +6,7 @@ void throwUnknownOperatorException() {
 }
 
 template<typename T>
-AbstractMatrix *Matrix<T>::applyBinaryOperatorComponentwise(Matrix<T> *rhsOperand, Operator *op) {
+AbstractMatrix *Matrix<T>::applyBinaryOperatorComponentwise(Matrix<T> *, Operator *) {
   throw std::runtime_error("applyOperatorComponentwise is unimplemented for type T: " + std::string(typeid(T).name()));
 }
 
@@ -33,12 +33,10 @@ AbstractMatrix *Matrix<int>::applyBinaryOperatorComponentwise(Matrix<int> *rhsOp
     }
   } else if (os->equals(ArithmeticOp::MODULO)) { // only for integers
     operatorFunction = [](int a, int b) -> int { return a%b; };
-  } else if (os->equals(LogCompOp::LOGICAL_AND)) {        // ==== Logical Operators ================================
+  } else if (os->equals(LogCompOp::LOGICAL_AND)) {        // ==== Logical Operators ===============================
     operatorFunction = [](int a, int b) -> int { return a && b; };
   } else if (os->equals(LogCompOp::LOGICAL_OR)) {
     operatorFunction = [](int a, int b) -> int { return a || b; };
-  } else if (os->equals(LogCompOp::LOGICAL_XOR)) {
-    operatorFunction = [](int a, int b) -> int { return a ^ b; };
   } else if (os->equals(LogCompOp::SMALLER)) {           // ==== Comparison Operators =============================
     operatorFunction = [](int a, int b) -> int { return a < b; };
   } else if (os->equals(LogCompOp::SMALLER_EQUAL)) {
@@ -79,10 +77,6 @@ AbstractMatrix *Matrix<float>::applyBinaryOperatorComponentwise(Matrix<float> *r
       return reinterpret_cast<AbstractMatrix *>(::applyMatrixMultiplication(
           dynamic_cast<Matrix<float> *>(this), dynamic_cast<Matrix<float> *>(rhsOperand)));
     }
-  } else if (os->equals(LogCompOp::LOGICAL_AND)) {        // ==== Logical Operators ================================
-    operatorFunction = [](float a, float b) -> float { return a && b; };
-  } else if (os->equals(LogCompOp::LOGICAL_OR)) {
-    operatorFunction = [](float a, float b) -> float { return a || b; };
   } else if (os->equals(LogCompOp::SMALLER)) {           // ==== Comparison Operators =============================
     operatorFunction = [](float a, float b) -> float { return a < b; };
   } else if (os->equals(LogCompOp::SMALLER_EQUAL)) {
@@ -114,7 +108,7 @@ AbstractMatrix *Matrix<bool>::applyBinaryOperatorComponentwise(Matrix<bool> *rhs
     // For scalar multiplication: one is vector, other is scalar.
     // If both operands are matrices, then applyMatrixMultiplication should have been called instead.
     operatorFunction = [](bool a, bool b) -> bool { return a*b; };
-  } else if (os->equals(LogCompOp::LOGICAL_AND)) {        // ==== Logical Operators ================================
+  } else if (os->equals(LogCompOp::LOGICAL_AND)) {        // ==== Logical Operators ===============================
     operatorFunction = [](bool a, bool b) -> bool { return a && b; };
   } else if (os->equals(LogCompOp::LOGICAL_OR)) {
     operatorFunction = [](bool a, bool b) -> bool { return a || b; };
@@ -136,7 +130,7 @@ template<>
 AbstractMatrix *Matrix<std::string>::applyBinaryOperatorComponentwise(Matrix<std::string> *rhsOperand, Operator *os) {
   std::function<std::string(std::string, std::string)> operatorFunction;
   if (os->equals(ArithmeticOp::ADDITION)) {
-    operatorFunction = [](std::string a, std::string b) -> std::string { return a + b; };
+    operatorFunction = [](const std::string &a, const std::string &b) -> std::string { return a + b; };
   } else {
     throwUnknownOperatorException();
   }
@@ -145,7 +139,7 @@ AbstractMatrix *Matrix<std::string>::applyBinaryOperatorComponentwise(Matrix<std
 }
 
 template<typename T>
-AbstractMatrix *Matrix<T>::applyUnaryOperatorComponentwise(Operator *os) {
+AbstractMatrix *Matrix<T>::applyUnaryOperatorComponentwise(Operator *) {
   throw std::runtime_error("applyUnaryOpComponentwise is unimplemented for type T: " + std::string(typeid(T).name()));
 }
 

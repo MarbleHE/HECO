@@ -14,6 +14,18 @@
 
 using json = nlohmann::json;
 
+/// Compute new matrix by applying binary function f component-wise on both matrices.
+/// For example, for matrices A,B with each dim (M, N), the resulting matrix would look like:
+///     / f(a_00, b_00)  f(a_01, b_01)  ...  f(a_0N, b_0N) \
+///     | f(a_10, b_10)      ...        ...      ...       |
+///     |       ...          ...        ...      ...       |
+///     \ f(a_M0, b_M0)      ...        ...  f(a_MN, b_MN) /
+/// \tparam T The type of the matrix elements.
+/// \param A The matrix whose elements are used as the left hand-side operand.
+/// \param B The matrix whose elements are used as the right hand-side operand.
+/// \param f The binary function f : (T,T) -> T to be applied componentwise on the elements of A, B.
+/// \return A new Matrix<T> where each component is computed by taking elements of A and B of the same position
+///         and applying the binary function f on them, i.e., f(a_{ij}, b_{i,j}).
 template<typename T>
 static Matrix<T> *applyComponentwise(Matrix<T> *A, Matrix<T> *B, std::function<T(T, T)> f) {
   // check that A and B have valid dimensions:
@@ -31,13 +43,6 @@ static Matrix<T> *applyComponentwise(Matrix<T> *A, Matrix<T> *B, std::function<T
     // expand B to be a (#rowsA, #columnsA)-matrix filled with the value of the scalar B
     B->expandAndFillMatrix(A->getDimensions(), B->getScalarValue());
   }
-
-  // Compute new matrix by applying binary function f componentwise on both matrices.
-  // For example, for matrices A,B with each dim (M, N), the resulting matrix would look like:
-  //    f(a_00, b_00)  f(a_01, b_01)  ...  f(a_0N, b_0N)
-  //    f(a_10, b_10)      ...        ...      ...
-  //         ...
-  //    f(a_M0, b_M0)      ...        ...  f(a_MN, b_MN)
   std::vector<std::vector<T>> result;
   for (int i = 0; i < A->values.size(); ++i) {
     result.push_back(std::vector<T>());
@@ -48,23 +53,38 @@ static Matrix<T> *applyComponentwise(Matrix<T> *A, Matrix<T> *B, std::function<T
   return new Matrix<T>(result);
 }
 
+/// Applies a unary function f: T -> T on each element of a matrix. Compute new matrix by applying unary function f on
+/// each element of matrixA, e.g., for (M, N)-matrix matrixA:
+///     /  f(a_00)    f(a_01)    ...    f(a_0N)  \
+///     |  f(a_10)      ...      ...      ...    |
+///     |   ...         ...      ...      ...    |
+///     \  f(a_M0)      ...      ...    f(a_MN)  /
+/// \tparam T The type of the matrix elements.
+/// \param matrixA The matrix on whose elements f should be applied to.
+/// \param f The function f: T -> T to be applied on each element of matrixA.
+/// \return A new matrix resulting from applying f on each element.
 template<typename T>
-static Matrix<T> *applyOnEachElement(Matrix<T> *A, std::function<T(T)> f) {
-  // Compute new matrix by applying unary function f on each element of A, e.g., for (M, N)-matrix A:
-  //    f(a_00)    f(a_01)    ...    f(a_0N)
-  //    f(a_10)      ...      ...      ...
-  //     ...
-  //    f(a_M0)      ...      ...    f(a_MN)
+static Matrix<T> *applyOnEachElement(Matrix<T> *matrixA, std::function<T(T)> f) {
   std::vector<std::vector<T>> result;
-  for (int i = 0; i < A->values.size(); ++i) {
+  for (int i = 0; i < matrixA->values.size(); ++i) {
     result.push_back(std::vector<T>());
-    for (int j = 0; j < A->values[0].size(); ++j) {
-      result[i].push_back(f((*A)(i, j)));
+    for (int j = 0; j < matrixA->values[0].size(); ++j) {
+      result[i].push_back(f((*matrixA)(i, j)));
     }
   }
   return new Matrix<T>(result);
 }
 
+/// For matrices A with dim (M,N) and B with dim (N,P) the following algorithm computes C with dim (M,P) where
+///   c_ij = sum_{k=1}^{n} a_ik * b_kj.
+/// This is basically the summation over multiplying each element in the row-vector from A with each element in
+/// the column-vector from B. See, for example, Wikipedia for more details and images:
+///   https://en.wikipedia.org/wiki/Matrix_multiplication.
+/// Note that the matrix multiplication is not commutative, i.e., AxB != BxA.
+/// \tparam T The type of the Matrix elements.
+/// \param matrixA The left hand-side operand of the matrix multiplication.
+/// \param matrixB The right hand-side operand of the matrix multiplication.
+/// \return A matrix of same type with the values as defined by the matrix multiplication.
 template<typename T>
 static Matrix<T> *applyMatrixMultiplication(Matrix<T> *matrixA, Matrix<T> *matrixB) {
   // check that #column of matrixA equals #rows of matrixB
@@ -87,9 +107,6 @@ static Matrix<T> *applyMatrixMultiplication(Matrix<T> *matrixA, Matrix<T> *matri
   int dimP = matrixB->getDimensions().numColumns;
   T sum = 0;
   // Very inefficient: O(n^3)! Replace it, for example, by Strassen's multiplication algorithm.
-  // For matrices A with dim (M,N) and B with dim (N,P) the following algorithm computes C with dim (M,P) where
-  //  c_ij = sum_{k=1}^{n} a_ik * b_kj.
-  // See, for example, Wikipedia for details: https://en.wikipedia.org/wiki/Matrix_multiplication.
   for (int k = 0; k < dimN; ++k) {
     for (int i = 0; i < dimM; ++i) {
       for (int j = 0; j < dimP; ++j) {
@@ -100,6 +117,8 @@ static Matrix<T> *applyMatrixMultiplication(Matrix<T> *matrixA, Matrix<T> *matri
   return new Matrix<T>(result);
 }
 
+/// A template-based Matrix class that stores elements of type T.
+/// \tparam T The type of the matrix elements.
 template<typename T>
 class Matrix : public AbstractMatrix {
  private:
@@ -118,10 +137,10 @@ class Matrix : public AbstractMatrix {
   }
 
  public:
-  /// a matrix of row vectors
+  /// A matrix defined by row vectors.
   std::vector<std::vector<T>> values;
 
-  /// the dimension of the matrix
+  /// The dimension of the matrix associated to this instance.
   Dimension dim;
 
   /// Creates a new matrix with the elements provided in inputMatrix.
@@ -173,18 +192,7 @@ class Matrix : public AbstractMatrix {
 
   /// Creates a JSON representation of this matrix.
   /// \return The JSON representation of this matrix.
-  [[nodiscard]] json toJson() const override {
-    // Return the scalar value if this is a (1,1) scalar matrix
-    if (isScalar()) return json(getScalarValue());
-    // If this is a matrix of dimension (M,N), return an array of arrays like
-    //   [ [a00, a01, a02], [a10, a11, a12], ..., [aN0, aN1, ..., aMM] ],
-    // where each inner array represents a matrix row.
-    json arrayOfArrays = json::array();
-    for (int i = 0; i < values.size(); ++i) {
-      arrayOfArrays.push_back(json(values[i]));
-    }
-    return arrayOfArrays;
-  }
+  [[nodiscard]] json toJson() const override;
 
   ///
   /// \param rowIndex
