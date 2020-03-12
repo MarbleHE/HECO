@@ -7,13 +7,15 @@
 class Dimension;
 class AbstractLiteral;
 class Operator;
+class AbstractExpr;
 
 template<typename T>
 class Matrix;
 
 using json = nlohmann::json;
 
-/// A helper class that allows to access and use all Matrix<T> specializations using a unified interface.
+/// A helper class that allows to access and use all Matrix<T> instances using a unified interface, without
+/// needing exact knowledge about the specific template type T.
 class AbstractMatrix {
  public:
   virtual AbstractMatrix *rotate(int rotationFactor, bool inPlace) = 0;
@@ -32,7 +34,11 @@ class AbstractMatrix {
 
   virtual AbstractMatrix *applyUnaryOperatorComponentwise(Operator *os) = 0;
 
-  virtual AbstractLiteral *getElementAt(int row, int column) = 0;
+  virtual AbstractExpr *getElementAt(int row, int column) = 0;
+
+  bool operator==(const AbstractMatrix &rhs) const;
+
+  bool operator!=(const AbstractMatrix &rhs) const;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_ABSTRACTMATRIX_H_
