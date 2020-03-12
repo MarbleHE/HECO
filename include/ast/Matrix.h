@@ -217,11 +217,12 @@ class Matrix : public AbstractMatrix {
     return values[row][column];
   }
 
-  /// Returns an AbstractLiteral containing the value of the element at index specified by the given (row, column) pair.
-  /// \param row The row number of the element to be returned as a copy.
-  /// \param column The column number of the element to be returned as a copy.
-  /// \return An AbstractLiteral pointer containing the value of the element at position (row, column).
-  AbstractLiteral *getElementAt(int row, int column) override;
+  /// Returns an AbstractExpr containing the value of the element at index specified by the given (row, column) pair.
+  /// The value is an AbstractExpr pointer because matrix elements can be defined using expressions.
+  /// \param row The row number of the element to be returned as a pointer.
+  /// \param column The column number of the element to be returned as a pointer.
+  /// \return An AbstractExpr pointer pointing to the value of the element at position (row, column).
+  AbstractExpr *getElementAt(int row, int column) override;
 
   /// Returns the dimension object that indicates the matrix dimensions.
   /// \return A reference to the dimension object associated to this matrix.

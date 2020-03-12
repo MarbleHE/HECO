@@ -180,31 +180,75 @@ AbstractMatrix *Matrix<bool>::applyUnaryOperatorComponentwise(Operator *os) {
 }
 
 template<typename T>
-AbstractLiteral *Matrix<T>::getElementAt(int row, int column) {
+AbstractExpr *Matrix<T>::getElementAt(int, int) {
   throw std::logic_error(
       "Value in matrix is of unknown type. Cannot determine associated AbstractLiteral subtype.");
 }
 
 template<>
-AbstractLiteral *Matrix<int>::getElementAt(int row, int column) {
+AbstractExpr *Matrix<int>::getElementAt(int row, int column) {
   checkMatrixIndexAccess(row, column);
   return new LiteralInt(values[row][column]);
 }
 
 template<>
-AbstractLiteral *Matrix<float>::getElementAt(int row, int column) {
+AbstractExpr *Matrix<float>::getElementAt(int row, int column) {
   checkMatrixIndexAccess(row, column);
   return new LiteralFloat(values[row][column]);
 }
 
 template<>
-AbstractLiteral *Matrix<std::string>::getElementAt(int row, int column) {
+AbstractExpr *Matrix<std::string>::getElementAt(int row, int column) {
   checkMatrixIndexAccess(row, column);
   return new LiteralString(values[row][column]);
 }
 
 template<>
-AbstractLiteral *Matrix<bool>::getElementAt(int row, int column) {
+AbstractExpr *Matrix<bool>::getElementAt(int row, int column) {
   checkMatrixIndexAccess(row, column);
   return new LiteralBool(values[row][column]);
+}
+
+template<>
+AbstractExpr *Matrix<AbstractExpr *>::getElementAt(int row, int column) {
+  checkMatrixIndexAccess(row, column);
+  return values[row][column];
+}
+
+template<>
+Matrix<AbstractExpr *>::Matrix(std::vector<std::vector<AbstractExpr *>> inputMatrix)  /* NOLINT intentionally not explicit */
+    : values(std::move(inputMatrix)), dim(Dimension(values.size(), values.at(0).size())) {
+  int elementsPerRow = values.at(0).size();
+  for (auto const &rowVector : values) {
+    if (rowVector.size()!=elementsPerRow) {
+      throw std::invalid_argument("Vector rows must all have the same number of elements!");
+    }
+  }
+}
+
+template<typename T>
+json Matrix<T>::toJson() const {
+  // Return the scalar value if this is a (1,1) scalar matrix
+  if (isScalar()) return json(getScalarValue());
+  // If this is a matrix of dimension (M,N), return an array of arrays like
+  //   [ [a00, a01, a02], [a10, a11, a12], ..., [aN0, aN1, ..., aMM] ],
+  // where each inner array represents a matrix row.
+  json arrayOfArrays = json::array();
+  for (int i = 0; i < values.size(); ++i) {
+    arrayOfArrays.push_back(json(values[i]));
+  }
+  return arrayOfArrays;
+}
+
+template<>
+[[nodiscard]] json Matrix<AbstractExpr *>::toJson() const {
+  json jsonOutput = json::array();
+  for (const auto &matrixRow : values) {
+    json jsonMatrixRow = json::array();
+    for (auto matrixElement : matrixRow) {
+      jsonMatrixRow.push_back(matrixElement->toJson());
+    }
+    jsonOutput.push_back(jsonMatrixRow);
+  }
+  return jsonOutput;
 }
