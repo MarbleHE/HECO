@@ -187,31 +187,31 @@ AbstractExpr *Matrix<T>::getElementAt(int, int) {
 
 template<>
 AbstractExpr *Matrix<int>::getElementAt(int row, int column) {
-  checkMatrixIndexAccess(row, column);
+  boundCheckMatrixAccess(row, column);
   return new LiteralInt(values[row][column]);
 }
 
 template<>
 AbstractExpr *Matrix<float>::getElementAt(int row, int column) {
-  checkMatrixIndexAccess(row, column);
+  boundCheckMatrixAccess(row, column);
   return new LiteralFloat(values[row][column]);
 }
 
 template<>
 AbstractExpr *Matrix<std::string>::getElementAt(int row, int column) {
-  checkMatrixIndexAccess(row, column);
+  boundCheckMatrixAccess(row, column);
   return new LiteralString(values[row][column]);
 }
 
 template<>
 AbstractExpr *Matrix<bool>::getElementAt(int row, int column) {
-  checkMatrixIndexAccess(row, column);
+  boundCheckMatrixAccess(row, column);
   return new LiteralBool(values[row][column]);
 }
 
 template<>
 AbstractExpr *Matrix<AbstractExpr *>::getElementAt(int row, int column) {
-  checkMatrixIndexAccess(row, column);
+  boundCheckMatrixAccess(row, column);
   return values[row][column];
 }
 
@@ -220,11 +220,11 @@ Matrix<AbstractExpr *>::Matrix(std::vector<std::vector<AbstractExpr *>> inputMat
     : values(std::move(inputMatrix)), dim(Dimension(values.size(), values.at(0).size())) {
   int elementsPerRow = values.at(0).size();
   std::vector<AbstractNode *> childrenToBeAdded;
-  for (int i = 0; i < values.size(); ++i) {
-    if (values[i].size()!=elementsPerRow)
+  for (auto &matrixRows : values) {
+    if (matrixRows.size()!=elementsPerRow)
       throw std::invalid_argument("Vector rows must all have the same number of elements!");
-    for (int j = 0; j < values[i].size(); ++j) {
-      childrenToBeAdded.push_back(values[i][j]);
+    for (auto &element : matrixRows) {
+      childrenToBeAdded.push_back(element);
     }
   }
   removeChildren();
@@ -274,7 +274,7 @@ void Matrix<T>::accept(Visitor &v) {
 }
 
 template<typename T>
-AbstractNode *Matrix<T>::clone(bool keepOriginalUniqueNodeId) {
+AbstractNode *Matrix<T>::clone(bool) {
   // it's sufficient to call the copy constructor that creates a copy of all primitives (int, float, etc.)
   return new Matrix<T>(*this);
 }
@@ -293,6 +293,7 @@ AbstractNode *Matrix<AbstractExpr *>::clone(bool keepOriginalUniqueNodeId) {
 
 template<>
 void Matrix<AbstractExpr *>::addElementToStringStream(AbstractExpr *elem, std::stringstream &s) {
+  // Although wrongly indicated by CLion, this method is actually used, see Matrix<T>::toString().
   s << *elem;
 }
 
@@ -307,7 +308,7 @@ bool Matrix<T>::supportsCircuitMode() {
 }
 
 template<typename T>
-void Matrix<T>::setElementAt(int row, int column, AbstractExpr *element) {
+void Matrix<T>::setElementAt(int, int, AbstractExpr *) {
   throw std::runtime_error("setElementAt is unimplemented for type T: " + std::string(typeid(T).name()));
 }
 

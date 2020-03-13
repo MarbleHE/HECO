@@ -73,14 +73,8 @@ class AbstractMatrix : public AbstractNode {
   /// \return An AbstractExpr pointer pointing to the value of the element at position (row, column).
   virtual AbstractExpr *getElementAt(int row, int column) = 0;
 
-  ///
-  /// \param row
-  /// \param column
-  /// \param ae
-  virtual void setElementAt(int row, int column, AbstractExpr *ae) = 0;
-
-  ///
-  /// \return
+  /// Returns True if this AbstractMatrix is of template type AbstractExpr*, i.e., a Matrix<AbstractExpr*>.
+  /// \return True if this is a Matrix<AbstractExpr*>, otherwise False.
   virtual bool containsAbstractExprs() = 0;
 
   bool operator==(const AbstractMatrix &rhs) const;

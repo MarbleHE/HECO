@@ -96,10 +96,9 @@ static Matrix<T> *applyMatrixMultiplication(Matrix<T> *matrixA, Matrix<T> *matri
     ss << "To apply matrix multiplication, #columns of matrixA must be equal to the #rows of matrixB." << std::endl;
     throw std::logic_error(ss.str());
   }
-
   // define result matrix having dimension (#rowsA, #columnsB)
-  std::vector<std::vector<T>> result(matrixA->getDimensions().numRows,
-                                     std::vector<T>(matrixB->getDimensions().numColumns));
+  std::vector<std::vector<T>> result(
+      matrixA->getDimensions().numRows, std::vector<T>(matrixB->getDimensions().numColumns));
 
   // matrixA has dim (M,N), matrixB has dim (N,P)
   int dimM = matrixA->getDimensions().numRows;
@@ -167,10 +166,6 @@ class Matrix : public AbstractMatrix {
     values = other.values;
   }
 
-  [[nodiscard]] bool isScalar() const override {
-    return dim.equals(1, 1);
-  }
-
   /// Returns the only element of the (scalar) matrix if this matrix consists of a single element only, otherwise throws
   /// an exception to notify the user that this is not a scalar.
   /// \throws std::logic_error if this matrix has more than one value.
@@ -180,20 +175,10 @@ class Matrix : public AbstractMatrix {
     throw std::logic_error("getScalarValue() not allowed on non-scalars!");
   }
 
-  bool operator==(const Matrix &rhs) const {
-    return values==rhs.values && dim==rhs.dim;
-  }
-
-  bool operator!=(const Matrix &rhs) const {
-    return !(rhs==*this);
-  }
-
-  [[nodiscard]] json toJson() const override;
-
-  ///
-  /// \param rowIndex
-  /// \param columnIndex
-  void checkMatrixIndexAccess(int rowIndex, int columnIndex) {
+  /// Verifies that this matrix access is valid, i.e., matrix indices are within valid bounds.
+  /// \param rowIndex The row index of the element to be accessed.
+  /// \param columnIndex The column index of the element to be accessed.
+  void boundCheckMatrixAccess(int rowIndex, int columnIndex) {
     if (!dim.isValidAccess(rowIndex, columnIndex)) {
       std::stringstream ss;
       ss << "Invalid matrix indices: Cannot access " << Dimension(rowIndex, columnIndex) << " ";
@@ -203,24 +188,14 @@ class Matrix : public AbstractMatrix {
   }
 
   /// Returns a reference to the element at index specified by the given (row, column) pair.
+  /// Note: Returning std::vector<T>::reference is required here. Credits to Mike Seymour from stackoverflow.com
+  /// (https://stackoverflow.com/a/25770060/3017719) for pointing this out.
   /// \param row The row number of the element to be returned a reference to.
   /// \param column The column number of the element to be returned a reference to.
   /// \return A reference to the element at position (row, column).
-  // Returning std::vector<T>::reference is required here.
-  // Credits to Mike Seymour from stackoverflow.com (https://stackoverflow.com/a/25770060/3017719).
   typename std::vector<T>::reference operator()(int row, int column) {
-    checkMatrixIndexAccess(row, column);
+    boundCheckMatrixAccess(row, column);
     return values[row][column];
-  }
-
-  AbstractExpr *getElementAt(int row, int column) override;
-
-  void setElementAt(int row, int column, AbstractExpr *element) override;
-
-  void replaceChild(AbstractNode *originalChild, AbstractNode *newChildToBeAdded) override;
-
-  Dimension &getDimensions() override {
-    return dim;
   }
 
   /// Overwrites the matrix's values by the new values given.
@@ -229,9 +204,56 @@ class Matrix : public AbstractMatrix {
     values = newValues;
   }
 
-  void addElementToStringStream(T elem, std::stringstream &s);
+  /// Takes a value and compares all elements of the matrix with that value. Returns True if all of the elements match
+  /// the given value, otherwise returns False.
+  /// \param valueToBeComparedWith The value that all elements of this matrix are compared with.
+  /// \return True if all values equal the given value (valueToBeComparedWith), otherwise False.
+  bool allValuesEqual(T valueToBeComparedWith) {
+    for (int i = 0; i < values.size(); ++i) {
+      for (int j = 0; j < values[i].size(); ++j) {
+        if (values[i][j]!=valueToBeComparedWith) return false;
+      }
+    }
+    return true;
+  }
 
-  bool containsAbstractExprs() override;
+  /// Overwrites the current matrix values by the given scalarValue such that the matrix finally has the dimension
+  /// specified by targetDimension and consists of same-value elements.
+  /// For example, given targetDimension=(2,4) and scalarValue=7 would result in the matrix [7 7 7 7; 7 7 7 7].
+  /// \param targetDimension The dimension this matrix should be expanded to.
+  /// \param scalarValue The scalar value this matrix should be filled with.
+  void expandAndFillMatrix(Dimension &targetDimension, T scalarValue) {
+    values = std::vector<std::vector<T>>(targetDimension.numRows,
+                                         std::vector<T>(targetDimension.numColumns, scalarValue));
+    getDimensions().update(targetDimension.numRows, targetDimension.numColumns);
+  }
+
+  /// Clones the current matrix.
+  /// \return A clone of the current matrix.
+  Matrix<T> *clone() {
+    // call the Matrix's copy constructor
+    return new Matrix<T>(*this);
+  }
+
+  /// Takes two Matrix<T> objects (where T is of same type!) and applies the operator op componentwise to them.
+  /// \param rhsOperand The operand on the right hand-side. The current matrix is the left hand-side operand.
+  /// \param op THe operator to be aplied on the two given matrices.
+  /// \return AbstractMatrix resulting from applying the operator op on the two matrices.
+  AbstractMatrix *applyBinaryOperatorComponentwise(Matrix<T> *rhsOperand, Operator *op);
+
+  AbstractMatrix *applyBinaryOperator(AbstractMatrix *rhsOperand, Operator *op) override {
+    return applyBinaryOperatorComponentwise(dynamic_cast<Matrix<T> *>(rhsOperand), op);
+  }
+
+  [[nodiscard]] bool isScalar() const override {
+    // requirements that must all be fulfilled such that a value is considered as a scalar:
+    // - it is a single element, i.e., it has dimension (1,1)
+    // - it is a literal (e.g., float, int, bool) or a std::string
+    // - it is NOT a pointer
+    return dim.equals(1, 1) && (std::is_literal_type_v<T> || std::is_same_v<T, std::string>) && !std::is_pointer_v<T>;
+  }
+
+  AbstractMatrix *applyUnaryOperatorComponentwise(Operator *os) override;
 
   std::string toString() override {
     std::stringstream outputStr;
@@ -256,19 +278,6 @@ class Matrix : public AbstractMatrix {
     }
     outputStr << "]";
     return outputStr.str();
-  }
-
-  /// Takes a value and compares all elements of the matrix with that value. Returns True if all of the elements match
-  /// the given value, otherwise returns False.
-  /// \param valueToBeComparedWith The value that all elements of this matrix are compared with.
-  /// \return True if all values equal the given value (valueToBeComparedWith), otherwise False.
-  bool allValuesEqual(T valueToBeComparedWith) {
-    for (int i = 0; i < values.size(); ++i) {
-      for (int j = 0; j < values[i].size(); ++j) {
-        if (values[i][j]!=valueToBeComparedWith) return false;
-      }
-    }
-    return true;
   }
 
   Matrix<T> *transpose(bool inPlace) override {
@@ -302,35 +311,9 @@ class Matrix : public AbstractMatrix {
     return matrixToRotate;
   }
 
-  /// Overwrites the current matrix values by the given scalarValue such that the matrix finally has the dimension
-  /// specified by targetDimension and consists of same-value elements.
-  /// For example, given targetDimension=(2,4) and scalarValue=7 would result in the matrix [7 7 7 7; 7 7 7 7].
-  /// \param targetDimension The dimension this matrix should be expanded to.
-  /// \param scalarValue The scalar value this matrix should be filled with.
-  void expandAndFillMatrix(Dimension &targetDimension, T scalarValue) {
-    values = std::vector<std::vector<T>>(targetDimension.numRows,
-                                         std::vector<T>(targetDimension.numColumns, scalarValue));
-    getDimensions().update(targetDimension.numRows, targetDimension.numColumns);
-  }
+  void addElementToStringStream(T elem, std::stringstream &s);
 
-  /// Clones the current matrix.
-  /// \return A clone of the current matrix.
-  Matrix<T> *clone() {
-    // call the Matrix's copy constructor
-    return new Matrix<T>(*this);
-  }
-
-  AbstractMatrix *applyBinaryOperator(AbstractMatrix *rhsOperand, Operator *op) override {
-    return applyBinaryOperatorComponentwise(dynamic_cast<Matrix<T> *>(rhsOperand), op);
-  }
-
-  /// Takes two Matrix<T> objects (where T is of same type!) and applies the operator op componentwise to them.
-  /// \param rhsOperand The operand on the right hand-side. The current matrix is the left hand-side operand.
-  /// \param op THe operator to be aplied on the two given matrices.
-  /// \return AbstractMatrix resulting from applying the operator op on the two matrices.
-  AbstractMatrix *applyBinaryOperatorComponentwise(Matrix<T> *rhsOperand, Operator *op);
-
-  AbstractMatrix *applyUnaryOperatorComponentwise(Operator *os) override;
+  bool containsAbstractExprs() override;
 
   [[nodiscard]] std::string getNodeType() const override;
 
@@ -341,6 +324,26 @@ class Matrix : public AbstractMatrix {
   int getMaxNumberChildren() override;
 
   bool supportsCircuitMode() override;
+
+  bool operator==(const Matrix &rhs) const {
+    return values==rhs.values && dim==rhs.dim;
+  }
+
+  bool operator!=(const Matrix &rhs) const {
+    return !(rhs==*this);
+  }
+
+  [[nodiscard]] json toJson() const override;
+
+  AbstractExpr *getElementAt(int row, int column) override;
+
+  void setElementAt(int row, int column, AbstractExpr *element);
+
+  void replaceChild(AbstractNode *originalChild, AbstractNode *newChildToBeAdded) override;
+
+  Dimension &getDimensions() override {
+    return dim;
+  }
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_MATRIX_H_

@@ -8,7 +8,6 @@
 
 class GetMatrixElement : public AbstractExpr {
  public:
-
   GetMatrixElement(AbstractExpr *mustEvaluateToAbstractLiteral, AbstractExpr *rowIndex, AbstractExpr *columnIndex);
 
   GetMatrixElement(AbstractExpr *mustEvaluateToAbstractLiteral, int rowIndex, int columnIndex);
