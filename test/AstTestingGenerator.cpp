@@ -54,7 +54,8 @@ static std::map<int, std::function<void(Ast &)> > call = {  /* NOLINT */
     {28, AstTestingGenerator::genAstCombineMatricesInt},
     {29, AstTestingGenerator::genAstCombineMatricesFloat},
     {30, AstTestingGenerator::genAstCombineMatricesBool},
-    {31, AstTestingGenerator::genAstCombineMatricesString}
+    {31, AstTestingGenerator::genAstCombineMatricesString},
+    {32, AstTestingGenerator::genAstCrossProduct}
 };
 
 void AstTestingGenerator::generateAst(int id, Ast &ast) {
@@ -1299,12 +1300,34 @@ void AstTestingGenerator::genAstCombineMatricesString(Ast &ast) {
   ast.setRootNode(func);
 }
 
-//void AstTestingGenerator::genAstUsingMatrixElements(Ast &ast) {
-//  // computeCrossProduct {
-//  //   int M = [[14 27 32]];
-//  //   int N = [[19 21 38]];
-//  //   return [ M[0][1]*N[0][2] - M[0][2]*N[0][1];      // ret0
-//  //            M[0][2]*N[0][0] - M[0][0]*N[0][2];      // ret1
-//  //            M[0][0]*N[0][1] - M[0][1]*N[0][0] ];    // ret2
-//  // }
-//}
+void AstTestingGenerator::genAstCrossProduct(Ast &ast) {
+  // computeCrossProduct {
+  //   int M = [[14 27 32]];
+  //   int B = [[19 21 38]];
+  //   return [ M[0][1]*B[0][2] - M[0][2]*B[0][1];      // ret0
+  //            M[0][2]*B[0][0] - M[0][0]*B[0][2];      // ret1
+  //            M[0][0]*B[0][1] - M[0][1]*B[0][0] ];    // ret2
+  // }
+  auto func = new Function("computeCrossProduct");
+  func->addStatement(new VarDecl("M", new Datatype(Types::INT), new LiteralInt(new Matrix<int>({{14, 27, 32}}))));
+  func->addStatement(new VarDecl("B", new Datatype(Types::INT), new LiteralInt(new Matrix<int>({{19, 21, 38}}))));
+  auto M = [](int row, int column) { return new GetMatrixElement(new Variable("M"), row, column); };
+  auto B = [](int row, int column) { return new GetMatrixElement(new Variable("B"), row, column); };
+  auto pMatrix = new Matrix<AbstractExpr *>(
+      {   // first row vector
+          {new ArithmeticExpr(
+              new ArithmeticExpr(M(0, 1), ArithmeticOp::MULTIPLICATION, B(0, 2)),
+              ArithmeticOp::SUBTRACTION,
+              new ArithmeticExpr(M(0, 2), ArithmeticOp::MULTIPLICATION, B(0, 1))),
+           new ArithmeticExpr(
+               new ArithmeticExpr(M(0, 2), ArithmeticOp::MULTIPLICATION, B(0, 0)),
+               ArithmeticOp::SUBTRACTION,
+               new ArithmeticExpr(M(0, 0), ArithmeticOp::MULTIPLICATION, B(0, 2))),
+           new ArithmeticExpr(
+               new ArithmeticExpr(M(0, 0), ArithmeticOp::MULTIPLICATION, B(0, 1)),
+               ArithmeticOp::SUBTRACTION,
+               new ArithmeticExpr(M(0, 1), ArithmeticOp::MULTIPLICATION, B(0, 0)))}
+      });
+  func->addStatement(new Return(new LiteralInt(pMatrix)));
+  ast.setRootNode(func);
+}

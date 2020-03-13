@@ -81,6 +81,8 @@ class AstTestingGenerator {
   static void genAstCombineMatricesBool(Ast &ast);
 
   static void genAstCombineMatricesString(Ast &ast);
+
+  static void genAstCrossProduct(Ast &ast);
 };
 
 #endif //AST_OPTIMIZER_TEST_ASTTESTINGGENERATOR_H_

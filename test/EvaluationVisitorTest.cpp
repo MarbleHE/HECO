@@ -229,3 +229,11 @@ TEST(EvaluationVisitorTests, astCombineMatrices_LiteralString) { /* NOLINT */
   EXPECT_EQ(m.values, std::vector<std::vector<std::string>>({{"alpha", "beta", "gamma"}}));
 }
 
+TEST(EvaluationVisitorTests, astCrossProduct) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(32, ast);
+  auto result = dynamic_cast<LiteralInt *>(ast.evaluateAst({}, false).front());
+  auto m = *dynamic_cast<Matrix<int> *>(result->getMatrix());
+  EXPECT_EQ(m.values, std::vector<std::vector<int>>({{354, 76, -219}}));
+}
+
