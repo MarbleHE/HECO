@@ -275,8 +275,20 @@ void Matrix<T>::accept(Visitor &v) {
 
 template<typename T>
 AbstractNode *Matrix<T>::clone(bool keepOriginalUniqueNodeId) {
-  // TODO(pjattke): implement me!
-//  return clone()
+  // it's sufficient to call the copy constructor that creates a copy of all primitives (int, float, etc.)
+  return new Matrix<T>(*this);
+}
+
+template<>
+AbstractNode *Matrix<AbstractExpr *>::clone(bool keepOriginalUniqueNodeId) {
+  std::vector<std::vector<AbstractExpr *>> clonedMatrix(dim.numRows, std::vector<AbstractExpr *>(dim.numColumns));
+  // we need to clone each AbstractExpr contained in this matrix
+  for (int i = 0; i < values.size(); ++i) {
+    for (int j = 0; j < values[i].size(); ++j) {
+      clonedMatrix[i][j] = values[i][j]->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>();
+    }
+  }
+  return new Matrix<AbstractExpr *>(clonedMatrix);
 }
 
 template<>
