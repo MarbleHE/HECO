@@ -18,15 +18,13 @@ class DotPrinterFixture : public ::testing::Test {
   }
 };
 
-TEST_F(DotPrinterFixture,
-       getDotFormattedStringTest_printSimpleArithmeticExpression) { /* NOLINT */
+TEST_F(DotPrinterFixture, getDotFormattedStringTest_printSimpleArithmeticExpression) { /* NOLINT */
   auto arithmeticExpression = new ArithmeticExpr(
       new Variable("alpha"), ArithmeticOp::MULTIPLICATION, new LiteralInt(212));
 
   auto expectedStr =
-      "  ArithmeticExpr_2 [label=\"ArithmeticExpr_2\\n[l(v): 0, r(v): 0]\" shape=oval "
-      "style=filled fillcolor=white]\n"
-      "  { ArithmeticExpr_2 } -> { Variable_0, Operator_3, LiteralInt_1 }\n";
+      "  ArithmeticExpr_3 [label=\"ArithmeticExpr_3\\n[l(v): 0, r(v): 0]\" shape=oval style=filled fillcolor=white]\n"
+      "  { ArithmeticExpr_3 } -> { Variable_0, Operator_4, LiteralInt_1 }\n";
 
   Ast ast(arithmeticExpression);
   MultiplicativeDepthCalculator mdc(ast);
@@ -38,8 +36,7 @@ TEST_F(DotPrinterFixture,
   ASSERT_EQ(dp.getDotFormattedString(arithmeticExpression), expectedStr);
 }
 
-TEST_F(DotPrinterFixture,
-       getDotFormattedStringTest_printReversedArithmeticExpression) { /* NOLINT */
+TEST_F(DotPrinterFixture, getDotFormattedStringTest_printReversedArithmeticExpression) { /* NOLINT */
   auto arithmeticExpression = new ArithmeticExpr(
       new Variable("alpha"), ArithmeticOp::MULTIPLICATION, new LiteralInt(212));
 
@@ -47,9 +44,8 @@ TEST_F(DotPrinterFixture,
   arithmeticExpression->swapChildrenParents();
 
   auto expectedStr =
-      "\tArithmeticExpr_2 [label=\"ArithmeticExpr_2\\n[l(v): 0, r(v): 0]\" shape=oval "
-      "style=filled fillcolor=white]\n"
-      "\t{ Variable_0, Operator_3, LiteralInt_1 } -> { ArithmeticExpr_2 }\n";
+      "\tArithmeticExpr_3 [label=\"ArithmeticExpr_3\\n[l(v): 0, r(v): 0]\" shape=oval style=filled fillcolor=white]\n"
+      "\t{ Variable_0, Operator_4, LiteralInt_1 } -> { ArithmeticExpr_3 }\n";
 
   Ast ast(arithmeticExpression);
   MultiplicativeDepthCalculator mdc(ast);
@@ -81,15 +77,14 @@ TEST_F(DotPrinterFixture, getDotFormattedStringTest_printFunction) { /* NOLINT *
       .setShowMultDepth(true);
 
   auto expectedStr =
-      "\tFunction_11 [label=\"Function_11\\n[l(v): 0, r(v): 0]\" shape=rect style=filled fillcolor=white]\n"
-      "\t{ Function_11 } -> { ParameterList_6, Block_10 }\n";
+      "\tFunction_12 [label=\"Function_12\\n[l(v): 0, r(v): 0]\" shape=rect style=filled fillcolor=white]\n"
+      "\t{ Function_12 } -> { ParameterList_6, Block_11 }\n";
 
   // check that Function is printed properly
   ASSERT_EQ(dp.getDotFormattedString(function), expectedStr);
 }
 
-TEST_F(DotPrinterFixture,
-       printAsDotFormattedGraphTest_printCircuitExample1) { /* NOLINT */
+TEST_F(DotPrinterFixture, printAsDotFormattedGraphTest_printCircuitExample1) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(18, ast);
 
@@ -110,8 +105,7 @@ TEST_F(DotPrinterFixture,
   ASSERT_EQ(buffer.str(), outputStream.str());
 }
 
-TEST_F(DotPrinterFixture,
-       printAsDotFormattedGraphTest_printCircuitExample2) { /* NOLINT */
+TEST_F(DotPrinterFixture, printAsDotFormattedGraphTest_printCircuitExample2) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(19, ast);
 
@@ -132,8 +126,7 @@ TEST_F(DotPrinterFixture,
   ASSERT_EQ(buffer.str(), outputStream.str());
 }
 
-TEST_F(DotPrinterFixture,
-       printAsDotFormattedGraphTest_printAstExample1) { /* NOLINT */
+TEST_F(DotPrinterFixture, printAsDotFormattedGraphTest_printAstExample1) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(17, ast);
 
@@ -175,8 +168,7 @@ TEST_F(DotPrinterFixture, printAllReachableNods_printNodeSet) { /* NOLINT */
   ASSERT_EQ(buffer.str(), outputStream.str());
 }
 
-TEST_F(DotPrinterFixture,
-       printAsDotFormattedGraphTest_printAstIncludingIfStatement_withoutMultDepth) { /* NOLINT */
+TEST_F(DotPrinterFixture, printAsDotFormattedGraphTest_printAstIncludingIfStatement_withoutMultDepth) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(23, ast);
 
