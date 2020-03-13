@@ -1,4 +1,5 @@
 #include "Visitor.h"
+#include "PrintVisitor.h"
 #include "Ast.h"
 #include "AbstractNode.h"
 #include "AbstractExpr.h"
@@ -137,13 +138,37 @@ void Visitor::visit(If &elem) {
   }
 }
 
-void Visitor::visit(LiteralBool &elem) {}
+void Visitor::visit(LiteralBool &elem) {
+  // If this is not a matrix containing primitives, like Matrix<int>, Matrix<float>, etc. then this must be a
+  // Matrix<AbstractExpr*> which requires visiting its elements.
+  if (dynamic_cast<Matrix<AbstractExpr *> *>(elem.getMatrix())!=nullptr) {
+    elem.getMatrix()->accept(*this);
+  }
+}
 
-void Visitor::visit(LiteralInt &elem) {}
+void Visitor::visit(LiteralInt &elem) {
+  // If this is not a matrix containing primitives, like Matrix<int>, Matrix<float>, etc. then this must be a
+  // Matrix<AbstractExpr*> which requires visiting its elements.
+  if (dynamic_cast<Matrix<AbstractExpr *> *>(elem.getMatrix())!=nullptr) {
+    elem.getMatrix()->accept(*this);
+  }
+}
 
-void Visitor::visit(LiteralString &elem) {}
+void Visitor::visit(LiteralString &elem) {
+  // If this is not a matrix containing primitives, like Matrix<int>, Matrix<float>, etc. then this should be a
+  // Matrix<AbstractExpr*> which requires visiting its elements.
+  if (dynamic_cast<Matrix<AbstractExpr *> *>(elem.getMatrix())!=nullptr) {
+    elem.getMatrix()->accept(*this);
+  }
+}
 
-void Visitor::visit(LiteralFloat &elem) {}
+void Visitor::visit(LiteralFloat &elem) {
+  // If this is not a matrix containing primitives, like Matrix<int>, Matrix<float>, etc. then this should be a
+  // Matrix<AbstractExpr*> which requires visiting its elements.
+  if (dynamic_cast<Matrix<AbstractExpr *> *>(elem.getMatrix())!=nullptr) {
+    elem.getMatrix()->accept(*this);
+  }
+}
 
 void Visitor::visit(LogicalExpr &elem) {
   // left
@@ -166,8 +191,7 @@ void Visitor::visit(For &elem) {
   elem.getUpdateStatement()->accept(*this);
 
   changeToInnerScope(elem.getStatementToBeExecuted()->getUniqueNodeId());
-  // body of for-statement: independent of whether this statement is in a Block or not, it is always in a separate
-  // scope
+  // For statement body is always in a separate scope (even without a separate block "{...}")
   elem.getStatementToBeExecuted()->accept(*this);
   changeToOuterScope();
 }
@@ -182,7 +206,9 @@ void Visitor::visit(ParameterList &elem) {
 
 void Visitor::visit(Return &elem) {
   curScope->addStatement(&elem);
-  for (auto &expr : elem.getReturnExpressions()) expr->accept(*this);
+  for (auto &expr : elem.getReturnExpressions()) {
+    expr->accept(*this);
+  }
 }
 
 void Visitor::visit(Rotate &elem) {
@@ -262,4 +288,19 @@ void Visitor::visit(GetMatrixElement &elem) {
   elem.getRowIndex()->accept(*this);
   // column index
   elem.getColumnIndex()->accept(*this);
+}
+
+void Visitor::visit(AbstractMatrix &elem) {
+  // If this is a Matrix<AbstractExpr*>, we need to call accept(Visitor) on each of its elements.
+  if (dynamic_cast<Matrix < AbstractExpr* > * > (&elem)) {
+    for (int i = 0; i < elem.getDimensions().numRows; ++i) {
+      for (int j = 0; j < elem.getDimensions().numColumns; ++j) {
+        if (auto pv = dynamic_cast<PrintVisitor *>(this)) {
+          // save the index of this current matrix element in the PrintVisitor (used for string output)
+          pv->nextMatrixIndexToBePrinted = std::make_pair(i, j);
+        }
+        elem.getElementAt(i, j)->accept(*this);
+      }
+    }
+  }
 }
