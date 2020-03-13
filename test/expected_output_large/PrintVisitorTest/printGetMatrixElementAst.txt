@@ -1,0 +1,23 @@
+Function: (extractArbitraryMatrixElements)	[global]
+	ParameterList:	[Function_0]
+	Block:
+		VarDecl: (M)	[Block_2]
+			Datatype: (plaintext string)
+			LiteralString: ([epsilon alpha delta])
+		VarDecl: (B)
+			Datatype: (plaintext string)
+			LiteralString: ([beta zetta gamma])
+		Return:
+			LiteralString:
+(0,0)			GetMatrixElement:
+					Variable: (M)
+					LiteralInt: (0)
+					LiteralInt: (1)
+(0,1)			GetMatrixElement:
+					Variable: (B)
+					LiteralInt: (0)
+					LiteralInt: (0)
+(0,2)			GetMatrixElement:
+					Variable: (B)
+					LiteralInt: (0)
+					LiteralInt: (2)

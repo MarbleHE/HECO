@@ -82,3 +82,31 @@ TEST_F(PrintVisitorTest, printRotationAst) { /* NOLINT */
 
   EXPECT_EQ(pv.getOutput(), buffer.str());
 }
+
+TEST_F(PrintVisitorTest, printGetMatrixElementAst) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(31, ast);
+  PrintVisitor pv(false);
+  pv.visit(ast);
+
+  // read expected output file
+  std::ifstream ifs("../../test/expected_output_large/PrintVisitorTest/printGetMatrixElementAst.txt");
+  std::stringstream buffer;
+  buffer << ifs.rdbuf();
+
+  EXPECT_EQ(pv.getOutput(), buffer.str());
+}
+
+TEST_F(PrintVisitorTest, printSimpleMatrix) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(33, ast);
+  PrintVisitor pv(false);
+  pv.visit(ast);
+
+  // read expected output file
+  std::ifstream ifs("../../test/expected_output_large/PrintVisitorTest/printSimpleMatrix.txt");
+  std::stringstream buffer;
+  buffer << ifs.rdbuf();
+
+  EXPECT_EQ(pv.getOutput(), buffer.str());
+}

@@ -23,8 +23,8 @@ Function: (sumNTimes2)	[global]
 					Variable: (i)
 					Operator: (add)
 					LiteralInt: (1)
-			Block:	[Block_33]
-				VarAssignm: (sum)	[Block_33]
+			Block:	[Block_37]
+				VarAssignm: (sum)	[Block_37]
 					ArithmeticExpr:
 						Variable: (sum)
 						Operator: (add)

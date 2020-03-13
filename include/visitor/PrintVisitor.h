@@ -4,6 +4,7 @@
 #include <list>
 #include <sstream>
 #include <string>
+#include <utility>
 #include "Visitor.h"
 #include "AbstractNode.h"
 
@@ -16,6 +17,8 @@ class PrintVisitor : public Visitor {
   bool showUniqueNodeIds{false};
 
  public:
+  std::pair<int, int> nextMatrixIndexToBePrinted{0, 0};
+
   PrintVisitor();
 
   explicit PrintVisitor(bool printScreen);
@@ -100,6 +103,10 @@ class PrintVisitor : public Visitor {
   void visit(Rotate &elem) override;
 
   void visit(Transpose &elem) override;
+
+  void visit(GetMatrixElement &elem) override;
+
+  void printMatrixIndex();
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_VISITOR_PRINTVISITOR_H_

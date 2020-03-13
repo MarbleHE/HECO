@@ -20,6 +20,7 @@
 #include "For.h"
 #include "Rotate.h"
 #include "Transpose.h"
+#include "GetMatrixElement.h"
 
 template<typename T>
 void PrintVisitor::printChildNodesIndented(T &elem) {
@@ -71,20 +72,48 @@ void PrintVisitor::visit(If &elem) {
   printChildNodesIndented(elem);
 }
 
+void PrintVisitor::visit(GetMatrixElement &elem) {
+  printMatrixIndex();
+  this->decrementLevel();
+  addOutputStr(elem);
+  this->incrementLevel();
+  printChildNodesIndented(elem);
+}
+
 void PrintVisitor::visit(LiteralBool &elem) {
-  addOutputStr(elem, {elem.getMatrix()->toString()});
+  if (elem.getMatrix()->containsAbstractExprs()) {
+    addOutputStr(elem);
+    printChildNodesIndented(elem);
+  } else {
+    addOutputStr(elem, {elem.getMatrix()->toString()});
+  }
 }
 
 void PrintVisitor::visit(LiteralInt &elem) {
-  addOutputStr(elem, {elem.getMatrix()->toString()});
+  if (elem.getMatrix()->containsAbstractExprs()) {
+    addOutputStr(elem);
+    printChildNodesIndented(elem);
+  } else {
+    addOutputStr(elem, {elem.getMatrix()->toString()});
+  }
 }
 
 void PrintVisitor::visit(LiteralString &elem) {
-  addOutputStr(elem, {elem.getMatrix()->toString()});
+  if (elem.getMatrix()->containsAbstractExprs()) {
+    addOutputStr(elem);
+    printChildNodesIndented(elem);
+  } else {
+    addOutputStr(elem, {elem.getMatrix()->toString()});
+  }
 }
 
 void PrintVisitor::visit(LiteralFloat &elem) {
-  addOutputStr(elem, {elem.getMatrix()->toString()});
+  if (elem.getMatrix()->containsAbstractExprs()) {
+    addOutputStr(elem);
+    printChildNodesIndented(elem);
+  } else {
+    addOutputStr(elem, {elem.getMatrix()->toString()});
+  }
 }
 
 void PrintVisitor::visit(LogicalExpr &elem) {
@@ -234,4 +263,8 @@ void PrintVisitor::visit(Datatype &elem) {
   std::string encryption = (elem.isEncrypted() ? "encrypted" : "plaintext");
   addOutputStr(elem, {encryption + " " + Datatype::enumToString(elem.getType())});
   Visitor::visit(elem);
+}
+
+void PrintVisitor::printMatrixIndex() {
+  ss << "(" << nextMatrixIndexToBePrinted.first << "," << nextMatrixIndexToBePrinted.second << ")";
 }
