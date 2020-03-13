@@ -78,6 +78,8 @@ class MultDepthVisitor : public Visitor {
   void visit(ParameterList &elem) override;
 
   void visit(Transpose &elem) override;
+
+  void visit(GetMatrixElement &elem) override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_VISITOR_MULTDEPTHVISITOR_H_

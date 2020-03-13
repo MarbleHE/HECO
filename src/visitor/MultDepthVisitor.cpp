@@ -108,6 +108,10 @@ void MultDepthVisitor::visit(Transpose &elem) {
   Visitor::visit(elem);
 }
 
+void MultDepthVisitor::visit(GetMatrixElement &elem) {
+  Visitor::visit(elem);
+}
+
 void MultDepthVisitor::visit(Ast &elem) {
   Visitor::visit(elem);
   if (verbose) std::cout << "Call now function getMaxDepth() to retrieve the calculated depth" << std::endl;
