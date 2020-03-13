@@ -72,6 +72,8 @@ class SecretTaintingVisitor : public Visitor {
   }
 
   void visit(Transpose &elem) override;
+
+  void visit(GetMatrixElement &elem) override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_VISITOR_SECRETTAINTINGVISITOR_H_

@@ -123,8 +123,6 @@ TEST_F(SecretTaintingFixture, simpleAst_multipleStatementsTainted) { /* NOLINT *
 TEST_F(SecretTaintingFixture, complexAst_multipleNonSequentialStatementsTainted) { /* NOLINT */
   generateAst(22);
 
-  DotPrinter().printAsDotFormattedGraph(ast);
-
   // perform tainting
   SecretTaintingVisitor stv;
   stv.visit(ast);
@@ -207,4 +205,3 @@ TEST_F(SecretTaintingFixture, unsupportedStatement_CallExternal) {  /* NOLINT */
   SecretTaintingVisitor stv;
   ASSERT_THROW(stv.visit(ast), std::invalid_argument);
 }
-

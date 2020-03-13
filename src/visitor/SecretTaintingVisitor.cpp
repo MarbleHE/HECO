@@ -193,6 +193,10 @@ void SecretTaintingVisitor::visit(Transpose &elem) {
   Visitor::visit(elem);
 }
 
+void SecretTaintingVisitor::visit(GetMatrixElement &elem) {
+  Visitor::visit(elem);
+}
+
 // ==========================
 // HELPER METHODS
 // ==========================
