@@ -112,7 +112,7 @@ class AbstractNode {
   /// parent of both nodes. This method preserves the order of the children.
   /// \param originalChild The node's child to be removed.
   /// \param newChildToBeAdded The node to be added at the same position as the original child was.
-  void replaceChild(AbstractNode *originalChild, AbstractNode *newChildToBeAdded);
+  virtual void replaceChild(AbstractNode *originalChild, AbstractNode *newChildToBeAdded);
 
   /// Returns the number of children nodes that are not null (nullptr).
   /// \return An integer indicating the number of non-nullptr children nodes.
@@ -139,6 +139,8 @@ class AbstractNode {
   /// \return A reference to the vector of this node's parents.
   [[nodiscard]] const std::vector<AbstractNode *> &getParents() const;
 
+  /// Returns a vector of pointers to parent nodes but without those parents that are nullptr.
+  /// \return A vector of non-nullptr parent nodes.
   [[nodiscard]] std::vector<AbstractNode *> getParentsNonNull() const;
 
   /// Returns all the ancestor nodes of the current node, i.e., the ancestors of this node, the ancestors of the

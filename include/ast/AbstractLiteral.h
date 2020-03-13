@@ -34,7 +34,7 @@ class AbstractLiteral : public AbstractExpr {
 
   virtual bool isNull() = 0;
 
-  virtual AbstractMatrix *getMatrix() const = 0;
+  [[nodiscard]] virtual AbstractMatrix *getMatrix() const = 0;
 
   virtual void setMatrix(AbstractMatrix *newValue) = 0;
 };

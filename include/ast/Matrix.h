@@ -249,7 +249,6 @@ class Matrix : public AbstractMatrix {
     outputStr << "[";
     for (int i = 0; i < values.size(); ++i) {
       for (int j = 0; j < values[i].size(); ++j) {
-//        outputStr << values[i][j];
         addElementToStringStream(values[i][j], outputStr);
         if (j!=values[i].size() - 1) outputStr << elementDelimiter;
       }

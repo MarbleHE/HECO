@@ -79,7 +79,6 @@ void SecretTaintingVisitor::visit(Return &elem) {
 
 void SecretTaintingVisitor::visit(While &elem) {
   throw std::invalid_argument("ASTs containing While objects are not supported by the SecretTaintingVisitor!");
-//  Visitor::visit(elem);
 }
 
 void SecretTaintingVisitor::visit(VarAssignm &elem) {

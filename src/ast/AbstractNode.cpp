@@ -311,7 +311,6 @@ AbstractNode *AbstractNode::getOnlyParent() {
   return this->getParentsNonNull().front();
 }
 
-
 void AbstractNode::updateClone(bool keepOriginalUniqueNodeId, AbstractNode *originalNode) {
   if (keepOriginalUniqueNodeId) setUniqueNodeId(originalNode->getUniqueNodeId());
   if (originalNode->isReversed) swapChildrenParents();
