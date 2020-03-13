@@ -219,11 +219,16 @@ template<>
 Matrix<AbstractExpr *>::Matrix(std::vector<std::vector<AbstractExpr *>> inputMatrix)  /* NOLINT intentionally not explicit */
     : values(std::move(inputMatrix)), dim(Dimension(values.size(), values.at(0).size())) {
   int elementsPerRow = values.at(0).size();
-  for (auto const &rowVector : values) {
-    if (rowVector.size()!=elementsPerRow) {
+  std::vector<AbstractNode *> childrenToBeAdded;
+  for (int i = 0; i < values.size(); ++i) {
+    if (values[i].size()!=elementsPerRow)
       throw std::invalid_argument("Vector rows must all have the same number of elements!");
+    for (int j = 0; j < values[i].size(); ++j) {
+      childrenToBeAdded.push_back(values[i][j]);
     }
   }
+  removeChildren();
+  addChildren(childrenToBeAdded, true);
 }
 
 template<typename T>
@@ -251,4 +256,106 @@ template<>
     jsonOutput.push_back(jsonMatrixRow);
   }
   return jsonOutput;
+}
+
+template<typename T>
+void Matrix<T>::addElementToStringStream(T elem, std::stringstream &s) {
+  s << elem;
+}
+
+template<typename T>
+std::string Matrix<T>::getNodeType() const {
+  return std::string("Matrix<" + std::string(typeid(T).name()) + ">");
+}
+
+template<typename T>
+void Matrix<T>::accept(Visitor &v) {
+  v.visit(*this);
+}
+
+template<typename T>
+AbstractNode *Matrix<T>::clone(bool keepOriginalUniqueNodeId) {
+  // TODO(pjattke): implement me!
+//  return clone()
+}
+
+template<>
+void Matrix<AbstractExpr *>::addElementToStringStream(AbstractExpr *elem, std::stringstream &s) {
+  s << *elem;
+}
+
+template<typename T>
+int Matrix<T>::getMaxNumberChildren() {
+  return -1;
+}
+
+template<typename T>
+bool Matrix<T>::supportsCircuitMode() {
+  return true;
+}
+
+template<typename T>
+void Matrix<T>::setElementAt(int row, int column, AbstractExpr *element) {
+  throw std::runtime_error("setElementAt is unimplemented for type T: " + std::string(typeid(T).name()));
+}
+
+template<>
+void Matrix<AbstractExpr *>::setElementAt(int row, int column, AbstractExpr *element) {
+  values[row][column] = element;
+}
+
+template<>
+void Matrix<int>::setElementAt(int row, int column, AbstractExpr *element) {
+  if (auto elementAsLiteral = dynamic_cast<LiteralInt *>(element)) {
+    values[row][column] = elementAsLiteral->getValue();
+  } else { throw std::runtime_error("Unexpected element given that cannot be added to Matrix<T>."); }
+}
+
+template<>
+void Matrix<float>::setElementAt(int row, int column, AbstractExpr *element) {
+  if (auto elementAsLiteral = dynamic_cast<LiteralFloat *>(element)) {
+    values[row][column] = elementAsLiteral->getValue();
+  } else { throw std::runtime_error("Unexpected element given that cannot be added to Matrix<T>."); }
+}
+
+template<>
+void Matrix<bool>::setElementAt(int row, int column, AbstractExpr *element) {
+  if (auto elementAsLiteral = dynamic_cast<LiteralBool *>(element)) {
+    values[row][column] = elementAsLiteral->getValue();
+  } else { throw std::runtime_error("Unexpected element given that cannot be added to Matrix<T>."); }
+}
+
+template<>
+void Matrix<std::string>::setElementAt(int row, int column, AbstractExpr *element) {
+  if (auto elementAsLiteral = dynamic_cast<LiteralString *>(element)) {
+    values[row][column] = elementAsLiteral->getValue();
+  } else { throw std::runtime_error("Unexpected element given that cannot be added to Matrix<T>."); }
+}
+
+template<typename T>
+void Matrix<T>::replaceChild(AbstractNode *originalChild, AbstractNode *newChildToBeAdded) {
+  AbstractNode::replaceChild(originalChild, newChildToBeAdded);
+}
+
+template<>
+void Matrix<AbstractExpr *>::replaceChild(AbstractNode *originalChild, AbstractNode *newChildToBeAdded) {
+  for (int i = 0; i < values.size(); ++i) {
+    for (int j = 0; j < values[i].size(); ++j) {
+      if (values[i][j]==originalChild) {
+        setElementAt(i, j, dynamic_cast<AbstractExpr *>(newChildToBeAdded));
+        break;
+      }
+    }
+  }
+  AbstractNode::replaceChild(originalChild, newChildToBeAdded);
+}
+
+template<typename T>
+bool Matrix<T>::containsAbstractExprs() {
+  return false;
+}
+
+template<>
+bool Matrix<AbstractExpr *>::containsAbstractExprs() {
+  return true;
 }
