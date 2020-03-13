@@ -55,7 +55,8 @@ static std::map<int, std::function<void(Ast &)> > call = {  /* NOLINT */
     {29, AstTestingGenerator::genAstCombineMatricesFloat},
     {30, AstTestingGenerator::genAstCombineMatricesBool},
     {31, AstTestingGenerator::genAstCombineMatricesString},
-    {32, AstTestingGenerator::genAstCrossProduct}
+    {32, AstTestingGenerator::genAstCrossProduct},
+    {33, AstTestingGenerator::genSimpleMatrix}
 };
 
 void AstTestingGenerator::generateAst(int id, Ast &ast) {
@@ -1329,5 +1330,17 @@ void AstTestingGenerator::genAstCrossProduct(Ast &ast) {
                new ArithmeticExpr(M(0, 1), ArithmeticOp::MULTIPLICATION, B(0, 0)))}
       });
   func->addStatement(new Return(new LiteralInt(pMatrix)));
+  ast.setRootNode(func);
+}
+
+void AstTestingGenerator::genSimpleMatrix(Ast &ast) {
+  // generateMatrix {
+  //   int M = [14 27 32; 34 3 23; 1 1 3];
+  //   return M;
+  // }
+  auto func = new Function("computeCrossProduct");
+  func->addStatement(new VarDecl("M", new Datatype(Types::INT), new LiteralInt(
+      new Matrix<int>({{14, 27, 32}, {34, 3, 23}, {1, 1, 3}}))));
+  func->addStatement(new Return(new Variable("M")));
   ast.setRootNode(func);
 }
