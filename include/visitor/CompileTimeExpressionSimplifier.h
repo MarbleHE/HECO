@@ -207,32 +207,62 @@ class CompileTimeExpressionSimplifier : public Visitor {
   */
 
   void visit(AbstractExpr &elem) override;
+
   void visit(AbstractNode &elem) override;
+
   void visit(AbstractStatement &elem) override;
+
   void visit(ArithmeticExpr &elem) override;
+
   void visit(Ast &elem) override;
+
   void visit(Block &elem) override;
+
   void visit(Call &elem) override;
+
   void visit(CallExternal &elem) override;
+
   void visit(Datatype &elem) override;
+
   void visit(Function &elem) override;
+
   void visit(FunctionParameter &elem) override;
+
   void visit(For &elem) override;
+
+  void visit(GetMatrixElement &elem) override;
+
   void visit(If &elem) override;
+
   void visit(LiteralBool &elem) override;
+
   void visit(LiteralFloat &elem) override;
+
   void visit(LiteralInt &elem) override;
+
   void visit(LiteralString &elem) override;
+
   void visit(LogicalExpr &elem) override;
+
   void visit(Operator &elem) override;
+
   void visit(ParameterList &elem) override;
+
   void visit(Return &elem) override;
+
   void visit(UnaryExpr &elem) override;
+
   void visit(VarAssignm &elem) override;
+
   void visit(VarDecl &elem) override;
+
   void visit(Variable &elem) override;
+
   void visit(While &elem) override;
 
+  void visit(Rotate &elem) override;
+
+  void visit(Transpose &elem) override;
   /** @} */ // End of visit group
 
   /// Checks whether there is a known value for this node. A value can either be an AbstractLiteral or an AbstractExpr
@@ -308,10 +338,6 @@ class CompileTimeExpressionSimplifier : public Visitor {
   /// \param node The node to be checked for deletion.
   /// \return True if this node is enqueued for deletion, otherwise False.
   bool isQueuedForDeletion(const AbstractNode *node);
-
-  void visit(Rotate &elem) override;
-
-  void visit(Transpose &elem) override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_VISITOR_COMPILETIMEEXPRESSIONSIMPLIFIER_H_

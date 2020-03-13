@@ -325,9 +325,8 @@ void EvaluationVisitor::visit(GetMatrixElement &elem) {
   auto columnIdx = dynamic_cast<LiteralInt *>(getOnlyEvaluationResult(results.top()));
   results.pop();
   // retrieve and store the specified element
-  results.push(
-      {operand->getMatrix()->getElementAt(rowIdx->getValue(), columnIdx->getValue())
-           ->castTo<AbstractLiteral>()});
+  auto matrixElement = operand->getMatrix()->getElementAt(rowIdx->getValue(), columnIdx->getValue());
+  results.push({matrixElement->castTo<AbstractLiteral>()});
 }
 
 void EvaluationVisitor::visit(Ast &elem) {
