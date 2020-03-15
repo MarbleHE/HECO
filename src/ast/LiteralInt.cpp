@@ -4,21 +4,23 @@
 #include "AbstractExpr.h"
 #include "Matrix.h"
 
-bool LiteralInt::supportsDatatype(Datatype &datatype) {
-  return datatype.getType()==Types::INT;
-}
+LiteralInt::LiteralInt(Matrix<AbstractExpr *> *am) : AbstractLiteral(am) {}
 
-LiteralInt::LiteralInt(Matrix<AbstractExpr *> *am) : matrix(am) {}
+LiteralInt::LiteralInt(AbstractMatrix *am) : AbstractLiteral(am) {}
 
-LiteralInt::LiteralInt(int value) : matrix(new Matrix(value)) {}
+LiteralInt::LiteralInt(int value) : AbstractLiteral(new Matrix(value)) {}
 
-LiteralInt::LiteralInt(Matrix<int> *inputMatrix) : matrix(inputMatrix) {}
+LiteralInt::LiteralInt(Matrix<int> *inputMatrix) : AbstractLiteral(inputMatrix) {}
 
 json LiteralInt::toJson() const {
   json j;
   j["type"] = getNodeType();
   j["value"] = matrix->toJson();
   return j;
+}
+
+bool LiteralInt::supportsDatatype(Datatype &datatype) {
+  return datatype.getType()==Types::INT;
 }
 
 int LiteralInt::getValue() const {

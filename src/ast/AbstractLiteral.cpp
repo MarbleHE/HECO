@@ -33,3 +33,5 @@ bool AbstractLiteral::operator==(const AbstractLiteral &rhs) const {
 bool AbstractLiteral::operator!=(const AbstractLiteral &rhs) const {
   return !(rhs==*this);
 }
+
+AbstractLiteral::AbstractLiteral(AbstractMatrix *matrix) : matrix(matrix) {}

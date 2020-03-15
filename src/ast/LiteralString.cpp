@@ -4,11 +4,13 @@
 #include "RandNumGen.h"
 #include "Matrix.h"
 
-LiteralString::LiteralString(Matrix<AbstractExpr *> *am) : matrix(am) {}
+LiteralString::LiteralString(Matrix<AbstractExpr *> *am) : AbstractLiteral(am) {}
 
-LiteralString::LiteralString(Matrix<std::string> *inputMatrix) : matrix(inputMatrix) {}
+LiteralString::LiteralString(AbstractMatrix *pMatrix) : AbstractLiteral(pMatrix) {}
 
-LiteralString::LiteralString(std::string value) : matrix(new Matrix(value)) {}
+LiteralString::LiteralString(Matrix<std::string> *inputMatrix) : AbstractLiteral(inputMatrix) {}
+
+LiteralString::LiteralString(std::string value) : AbstractLiteral(new Matrix(std::move(value))) {}
 
 json LiteralString::toJson() const {
   json j;

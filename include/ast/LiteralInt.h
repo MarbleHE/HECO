@@ -11,12 +11,9 @@ class Matrix;
 class AbstractMatrix;
 
 class LiteralInt : public AbstractLiteral {
- private:
-  /// Stores the values of this LiteralInt. Is usually a Matrix<int> but can also be a Matrix<AbstractExpr*> in the case
-  /// that this matrix contains unevaluated expression, e.g., GetMatrixElement.
-  AbstractMatrix *matrix;
-
  public:
+  explicit LiteralInt(AbstractMatrix *am);
+
   explicit LiteralInt(Matrix<AbstractExpr *> *am);
 
   explicit LiteralInt(Matrix<int> *inputMatrix);

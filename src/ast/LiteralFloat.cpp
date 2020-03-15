@@ -5,11 +5,13 @@
 #include "RandNumGen.h"
 #include "Matrix.h"
 
-LiteralFloat::LiteralFloat(Matrix<AbstractExpr *> *am) : matrix(am) {}
+LiteralFloat::LiteralFloat(Matrix<AbstractExpr *> *am) : AbstractLiteral(am) {}
 
-LiteralFloat::LiteralFloat(float value) : matrix(new Matrix(value)) {}
+LiteralFloat::LiteralFloat(AbstractMatrix *am) : AbstractLiteral(am) {}
 
-LiteralFloat::LiteralFloat(Matrix<float> *inputMatrix) : matrix(inputMatrix) {}
+LiteralFloat::LiteralFloat(float value) : AbstractLiteral(new Matrix(value)) {}
+
+LiteralFloat::LiteralFloat(Matrix<float> *inputMatrix) : AbstractLiteral(inputMatrix) {}
 
 json LiteralFloat::toJson() const {
   json j;

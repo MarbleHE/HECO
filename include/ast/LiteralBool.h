@@ -11,10 +11,9 @@ class Matrix;
 class AbstractMatrix;
 
 class LiteralBool : public AbstractLiteral {
- private:
-  AbstractMatrix *matrix;
-
  public:
+  explicit LiteralBool(AbstractMatrix *am);
+
   explicit LiteralBool(Matrix<AbstractExpr *> *am);
 
   explicit LiteralBool(bool value);
@@ -55,7 +54,7 @@ class LiteralBool : public AbstractLiteral {
 
   bool isNull() override;
 
-  AbstractMatrix *getMatrix() const override;
+  [[nodiscard]] AbstractMatrix *getMatrix() const override;
 
   void setMatrix(AbstractMatrix *newValue) override;
 };

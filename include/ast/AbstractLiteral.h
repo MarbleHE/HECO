@@ -14,6 +14,12 @@ class AbstractMatrix;
 
 class AbstractLiteral : public AbstractExpr {
  protected:
+  /// Stores the values of this Literal subtype. For example, for LiteralInt It can be a Matrix<int> but can also be a
+  /// Matrix<AbstractExpr*> in the case that this matrix contains unevaluated expression, e.g., GetMatrixElement.
+  AbstractMatrix *matrix;
+
+  explicit AbstractLiteral(AbstractMatrix *matrix);
+
   ~AbstractLiteral() override;
 
   virtual void print(std::ostream &str) const = 0;

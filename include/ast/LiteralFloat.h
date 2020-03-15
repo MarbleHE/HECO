@@ -12,10 +12,9 @@ class Matrix;
 class AbstractMatrix;
 
 class LiteralFloat : public AbstractLiteral {
- private:
-  AbstractMatrix *matrix;
-
  public:
+  explicit LiteralFloat(AbstractMatrix *am);
+
   explicit LiteralFloat(Matrix<AbstractExpr *> *am);
 
   explicit LiteralFloat(float value);
@@ -56,7 +55,7 @@ class LiteralFloat : public AbstractLiteral {
 
   bool isNull() override;
 
-  AbstractMatrix *getMatrix() const override;
+  [[nodiscard]] AbstractMatrix *getMatrix() const override;
 
   void setMatrix(AbstractMatrix *newValue) override;
 };
