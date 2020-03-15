@@ -6,12 +6,14 @@
   /_/   /_/ /_/_____/   \____/\____/\__,_/\___/   \____/ .___/\__/_/_/ /_/ /_/_/ /___/\___/_/      
                                                       /_/                                          
 ```
+[![Language](https://img.shields.io/badge/language-C++-blue.svg)](https://isocpp.org/)
+[![Standard11/14/17](https://img.shields.io/badge/C%2B%2B-11%2F14%2F17-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B#Standardization)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](#)
 [![CI/CD](https://github.com/MarbleHE/AST-Optimizer/workflows/build_run_tests/badge.svg?branch=operator-extensions)](https://github.com/MarbleHE/AST-Optimizer/actions)
 [![Documentation](https://img.shields.io/badge/docs-doxygen-blue.svg)](http://marblehe.github.io/AST-Optimizer)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-// TODO Make the documentation available as described on [this blogpost](https://goseeky.wordpress.com/2017/07/22/documentation-101-doxygen-with-github-pages/).
+// TODO Make the doxygen docs available as described in [this blogpost](https://goseeky.wordpress.com/2017/07/22/documentation-101-doxygen-with-github-pages/).
 
 This repository hosts an optimizer for Fully Homomorphic Encryption (FHE) working on an AST-like (Abstract Syntax Tree) representation of a program.
 In future, this optimization component will be integrated into the [Marble](https://github.com/MarbleHE/Marble) FHE compiler [1].
