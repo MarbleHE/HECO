@@ -24,8 +24,8 @@ digraph D {
 	VarAssignm_28 [label="VarAssignm_28\ni" shape=rect style=filled fillcolor=white]
 	{ VarAssignm_28 } -> { ArithmeticExpr_26 }
 	ArithmeticExpr_26 [label="ArithmeticExpr_26" shape=oval style=filled fillcolor=white]
-	{ ArithmeticExpr_26 } -> { Variable_23, Operator_27, LiteralInt_24 }
-	LiteralInt_24 [label="LiteralInt_24\n1" shape=oval style=filled fillcolor=white]
+	{ ArithmeticExpr_26 } -> { Variable_23, Operator_27, LiteralInt_25 }
+	LiteralInt_25 [label="LiteralInt_25\n1" shape=oval style=filled fillcolor=white]
 	Operator_27 [label="Operator_27\nadd" shape=oval style=filled fillcolor=white]
 	Variable_23 [label="Variable_23\ni" shape=oval style=filled fillcolor=white]
 	LogicalExpr_21 [label="LogicalExpr_21" shape=oval style=filled fillcolor=white]
@@ -34,16 +34,16 @@ digraph D {
 	Operator_22 [label="Operator_22\n<=" shape=oval style=filled fillcolor=white]
 	Variable_19 [label="Variable_19\ni" shape=oval style=filled fillcolor=white]
 	VarDecl_17 [label="VarDecl_17\ni" shape=rect style=filled fillcolor=white]
-	{ VarDecl_17 } -> { Datatype_18, LiteralInt_15 }
-	LiteralInt_15 [label="LiteralInt_15\n0" shape=oval style=filled fillcolor=white]
+	{ VarDecl_17 } -> { Datatype_18, LiteralInt_16 }
+	LiteralInt_16 [label="LiteralInt_16\n0" shape=oval style=filled fillcolor=white]
 	Datatype_18 [label="Datatype_18\nplaintext, int" shape=oval style=filled fillcolor=white]
 	VarDecl_13 [label="VarDecl_13\nbase" shape=rect style=filled fillcolor=white]
-	{ VarDecl_13 } -> { Datatype_14, LiteralInt_11 }
-	LiteralInt_11 [label="LiteralInt_11\n2" shape=oval style=filled fillcolor=white]
+	{ VarDecl_13 } -> { Datatype_14, LiteralInt_12 }
+	LiteralInt_12 [label="LiteralInt_12\n2" shape=oval style=filled fillcolor=white]
 	Datatype_14 [label="Datatype_14\nplaintext, int" shape=oval style=filled fillcolor=white]
 	VarDecl_9 [label="VarDecl_9\nsum" shape=rect style=filled fillcolor=white]
-	{ VarDecl_9 } -> { Datatype_10, LiteralInt_7 }
-	LiteralInt_7 [label="LiteralInt_7\n0" shape=oval style=filled fillcolor=white]
+	{ VarDecl_9 } -> { Datatype_10, LiteralInt_8 }
+	LiteralInt_8 [label="LiteralInt_8\n0" shape=oval style=filled fillcolor=white]
 	Datatype_10 [label="Datatype_10\nplaintext, int" shape=oval style=filled fillcolor=white]
 	ParameterList_3 [label="ParameterList_3" shape=rect style=filled fillcolor=white]
 	{ ParameterList_3 } -> { FunctionParameter_6 }

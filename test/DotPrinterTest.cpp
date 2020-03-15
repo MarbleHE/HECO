@@ -24,7 +24,7 @@ TEST_F(DotPrinterFixture, getDotFormattedStringTest_printSimpleArithmeticExpress
 
   auto expectedStr =
       "  ArithmeticExpr_3 [label=\"ArithmeticExpr_3\\n[l(v): 0, r(v): 0]\" shape=oval style=filled fillcolor=white]\n"
-      "  { ArithmeticExpr_3 } -> { Variable_0, Operator_4, LiteralInt_1 }\n";
+      "  { ArithmeticExpr_3 } -> { Variable_0, Operator_4, LiteralInt_2 }\n";
 
   Ast ast(arithmeticExpression);
   MultiplicativeDepthCalculator mdc(ast);
@@ -45,7 +45,7 @@ TEST_F(DotPrinterFixture, getDotFormattedStringTest_printReversedArithmeticExpre
 
   auto expectedStr =
       "\tArithmeticExpr_3 [label=\"ArithmeticExpr_3\\n[l(v): 0, r(v): 0]\" shape=oval style=filled fillcolor=white]\n"
-      "\t{ Variable_0, Operator_4, LiteralInt_1 } -> { ArithmeticExpr_3 }\n";
+      "\t{ Variable_0, Operator_4, LiteralInt_2 } -> { ArithmeticExpr_3 }\n";
 
   Ast ast(arithmeticExpression);
   MultiplicativeDepthCalculator mdc(ast);
