@@ -1706,7 +1706,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_logicalAndSimplific
   EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
 }
 
-TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_logicalAndSimplification_XORtrue) {
+TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_logicalAndSimplification_XORtrue) { /* NOLINT */
   //  -- input --
   // int f(encrypted_bool a, plaintext_bool b) {
   //  return a ^ (b ^ true);
@@ -1744,7 +1744,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_logicalAndSimplific
   EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
 }
 
-TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_logicalAndSimplification_XORfalse) {
+TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_logicalAndSimplification_XORfalse) { /* NOLINT */
   //  -- input --
   // int f(encrypted_bool a, plaintext_bool b) {
   //  return a ^ (b ^ false);
@@ -1932,4 +1932,53 @@ TEST_F(CompileTimeExpressionSimplifierFixture, transpose) { /* NOLINT */
   auto returnStatement = ast.getRootNode()->castTo<Function>()->getBodyStatements().back()->castTo<Return>();
   EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedReturnExpr));
 }
+
+TEST_F(CompileTimeExpressionSimplifierFixture, getMatrixElementSimpleBool) { /* NOLINT */
+  // -- input –-
+  // extractArbitraryMatrixElements() {
+  //   int M = [ true true false ];
+  //   int B = [ false true true ];
+  //   return [ M[0][1];      // true
+  //            B[0][0];      // false
+  //            B[0][2] ];    // true
+  // }
+  // -- expected –-
+  // extractArbitraryMatrixElements {
+  //   return [ true; false; true ];
+  // }
+  Ast ast;
+  AstTestingGenerator::generateAst(30, ast);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  auto expectedReturnExpr = new LiteralBool(new Matrix<bool>({{true, false, true}}));
+  auto returnStatement = ast.getRootNode()->castTo<Function>()->getBodyStatements().back()->castTo<Return>();
+  EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedReturnExpr));
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, partiallySimplifiableMatrix) { /* NOLINT */
+  // -- input –-
+  // extractArbitraryMatrixElements(plaintext_bool y {
+  //   int M = [ true y false ];
+  //   return [ M[0][1];      // y
+  //            M[0][0];      // true
+  //            M[0][2] ];    // false
+  // }
+  // -- expected –-
+  // extractArbitraryMatrixElements {
+  //   return [ y; LiteralBool(true); LiteralBool(false) ];
+  // }
+  Ast ast;
+  AstTestingGenerator::generateAst(34, ast);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  auto mx = new Matrix<AbstractExpr *>({{new Variable("y"), new LiteralBool(true), new LiteralBool(false)}});
+  auto expectedReturnExpr = new LiteralBool(mx);
+  auto returnStatement = ast.getRootNode()->castTo<Function>()->getBodyStatements().back()->castTo<Return>();
+  EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedReturnExpr));
+}
+
 

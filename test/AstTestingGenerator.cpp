@@ -56,7 +56,8 @@ static std::map<int, std::function<void(Ast &)> > call = {  /* NOLINT */
     {30, AstTestingGenerator::genAstCombineMatricesBool},
     {31, AstTestingGenerator::genAstCombineMatricesString},
     {32, AstTestingGenerator::genAstCrossProduct},
-    {33, AstTestingGenerator::genSimpleMatrix}
+    {33, AstTestingGenerator::genSimpleMatrix},
+    {34, AstTestingGenerator::genAstFlipMatrixElements}
 };
 
 void AstTestingGenerator::generateAst(int id, Ast &ast) {
@@ -1342,5 +1343,27 @@ void AstTestingGenerator::genSimpleMatrix(Ast &ast) {
   func->addStatement(new VarDecl("M", new Datatype(Types::INT), new LiteralInt(
       new Matrix<int>({{14, 27, 32}, {34, 3, 23}, {1, 1, 3}}))));
   func->addStatement(new Return(new Variable("M")));
+  ast.setRootNode(func);
+}
+
+void AstTestingGenerator::genAstFlipMatrixElements(Ast &ast) {
+  // flipMatrixElements {
+  //   int M = [ true y false ];
+  //   return [ M[0][1];      // y
+  //            M[0][0];      // LiteralBool(true)
+  //            M[0][2] ];    // LiteralBool(false)
+  // }
+  auto func = new Function("extractArbitraryMatrixElements");
+
+  auto decl = new VarDecl("M", new Datatype(Types::BOOL),
+                          new LiteralBool(
+                              new Matrix<AbstractExpr *>({{new LiteralBool(true), new Variable("y"),
+                                                           new LiteralBool(false)}})));
+  func->addStatement(decl);
+  auto ret0 = new GetMatrixElement(new Variable("M"), 0, 1);
+  auto ret1 = new GetMatrixElement(new Variable("M"), 0, 0);
+  auto ret2 = new GetMatrixElement(new Variable("M"), 0, 2);
+  auto pMatrix = new Matrix<AbstractExpr *>({{ret0, ret1, ret2}});
+  func->addStatement(new Return(new LiteralBool(pMatrix)));
   ast.setRootNode(func);
 }

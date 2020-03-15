@@ -86,6 +86,7 @@ class AstTestingGenerator {
 
   static void genSimpleMatrix(Ast &ast);
   /** @} */ // End of astGenerators group
+  static void genAstFlipMatrixElements(Ast &ast);
 };
 
 #endif //AST_OPTIMIZER_TEST_ASTTESTINGGENERATOR_H_
