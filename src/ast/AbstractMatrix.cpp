@@ -15,6 +15,8 @@ bool AbstractMatrix::operator==(const AbstractMatrix &rhs) const {
     return *thisAsBool==*dynamic_cast<const Matrix<bool> *>(&rhs);
   } else if (auto thisAsString = dynamic_cast<const Matrix<std::string> *>(this)) {  // Matrix<std::string>
     return *thisAsString==*dynamic_cast<const Matrix<std::string> *>(&rhs);
+  } else if (auto thisAsAbstractExpr = dynamic_cast<const Matrix<AbstractExpr *> *>(this)) {  // Matrix<AbstractExpr*>
+    return *thisAsAbstractExpr==*dynamic_cast<const Matrix<AbstractExpr *> *>(&rhs);
   } else {
     throw std::logic_error("Could not determine type T of AbstractMatrix (e.g., Matrix<int>). Aborting.");
   }
