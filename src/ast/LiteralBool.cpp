@@ -70,7 +70,7 @@ bool LiteralBool::supportsDatatype(Datatype &datatype) {
 }
 
 LiteralBool *LiteralBool::clone(bool keepOriginalUniqueNodeId) {
-  auto clonedNode = new LiteralBool(dynamic_cast<Matrix<bool> *>(matrix)->clone());
+  auto clonedNode = new LiteralBool(matrix->clone(keepOriginalUniqueNodeId));
   clonedNode->updateClone(keepOriginalUniqueNodeId, this);
   return clonedNode;
 }

@@ -228,13 +228,6 @@ class Matrix : public AbstractMatrix {
     getDimensions().update(targetDimension.numRows, targetDimension.numColumns);
   }
 
-  /// Clones the current matrix.
-  /// \return A clone of the current matrix.
-  Matrix<T> *clone() {
-    // call the Matrix's copy constructor
-    return new Matrix<T>(*this);
-  }
-
   /// Takes two Matrix<T> objects (where T is of same type!) and applies the operator op componentwise to them.
   /// \param rhsOperand The operand on the right hand-side. The current matrix is the left hand-side operand.
   /// \param op THe operator to be aplied on the two given matrices.
@@ -319,8 +312,6 @@ class Matrix : public AbstractMatrix {
 
   void accept(Visitor &v) override;
 
-  AbstractNode *clone(bool keepOriginalUniqueNodeId) override;
-
   int getMaxNumberChildren() override;
 
   bool supportsCircuitMode() override;
@@ -344,6 +335,8 @@ class Matrix : public AbstractMatrix {
   Dimension &getDimensions() override {
     return dim;
   }
+
+  Matrix<T> *clone(bool keepOriginalUniqueNodeId) override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_MATRIX_H_

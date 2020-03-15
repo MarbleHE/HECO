@@ -1,16 +1,54 @@
 #include "Matrix.h"
 
+template<typename T>
+std::string Matrix<T>::getNodeType() const {
+  return std::string("Matrix<" + std::string(typeid(T).name()) + ">");
+}
+
+template<typename T>
+void Matrix<T>::accept(Visitor &v) {
+  v.visit(*this);
+}
+
+template<typename T>
+int Matrix<T>::getMaxNumberChildren() {
+  return -1;
+}
+
+template<typename T>
+bool Matrix<T>::supportsCircuitMode() {
+  return true;
+}
+
 void throwUnknownOperatorException() {
   throw std::runtime_error("Unknown or unsupported operator/operands combination encountered! "
                            "Cannot determine correct Matrix operation.");
 }
+
+template<>
+bool Matrix<AbstractExpr *>::operator==(const Matrix &rhs) const {
+  if (dim!=rhs.dim) return false;
+
+  for (int i = 0; i < values.size(); ++i) {
+    for (int j = 0; j < values[i].size(); ++j) {
+      if (!values[i][j]->isEqual(rhs.values[i][j])) return false;
+    }
+  }
+  return true;
+}
+
+// ===== applyBinaryOperatorComponentwise ==========
+// - Matrix<T>
+// - Matrix<int>
+// - Matrix<float>
+// - Matrix<bool>
+// - Matrix<std::string>
 
 template<typename T>
 AbstractMatrix *Matrix<T>::applyBinaryOperatorComponentwise(Matrix<T> *, Operator *) {
   throw std::runtime_error("applyOperatorComponentwise is unimplemented for type T: " + std::string(typeid(T).name()));
 }
 
-// template specialization for integers
 template<>
 AbstractMatrix *Matrix<int>::applyBinaryOperatorComponentwise(Matrix<int> *rhsOperand, Operator *os) {
   std::function<int(int, int)> operatorFunction;
@@ -56,7 +94,6 @@ AbstractMatrix *Matrix<int>::applyBinaryOperatorComponentwise(Matrix<int> *rhsOp
       dynamic_cast<Matrix<int> *>(this), dynamic_cast<Matrix<int> *>(rhsOperand), operatorFunction));
 }
 
-// template specialization for floats
 template<>
 AbstractMatrix *Matrix<float>::applyBinaryOperatorComponentwise(Matrix<float> *rhsOperand, Operator *os) {
   std::function<float(float, float)> operatorFunction;
@@ -96,7 +133,6 @@ AbstractMatrix *Matrix<float>::applyBinaryOperatorComponentwise(Matrix<float> *r
       dynamic_cast<Matrix<float> *>(this), dynamic_cast<Matrix<float> *>(rhsOperand), operatorFunction));
 }
 
-// template specialization for booleans
 template<>
 AbstractMatrix *Matrix<bool>::applyBinaryOperatorComponentwise(Matrix<bool> *rhsOperand, Operator *os) {
   std::function<bool(bool, bool)> operatorFunction;
@@ -125,7 +161,6 @@ AbstractMatrix *Matrix<bool>::applyBinaryOperatorComponentwise(Matrix<bool> *rhs
       dynamic_cast<Matrix<bool> *>(this), dynamic_cast<Matrix<bool> *>(rhsOperand), operatorFunction));
 }
 
-// template specialization for strings
 template<>
 AbstractMatrix *Matrix<std::string>::applyBinaryOperatorComponentwise(Matrix<std::string> *rhsOperand, Operator *os) {
   std::function<std::string(std::string, std::string)> operatorFunction;
@@ -137,6 +172,12 @@ AbstractMatrix *Matrix<std::string>::applyBinaryOperatorComponentwise(Matrix<std
   return reinterpret_cast<AbstractMatrix *>(::applyComponentwise(
       dynamic_cast<Matrix<std::string> *>(this), dynamic_cast<Matrix<std::string> *>(rhsOperand), operatorFunction));
 }
+
+// ===== applyUnaryOperatorComponentwise ==========
+// - Matrix<T>
+// - Matrix<int>
+// - Matrix<float>
+// - Matrix<bool>
 
 template<typename T>
 AbstractMatrix *Matrix<T>::applyUnaryOperatorComponentwise(Operator *) {
@@ -179,10 +220,18 @@ AbstractMatrix *Matrix<bool>::applyUnaryOperatorComponentwise(Operator *os) {
       ::applyOnEachElement(dynamic_cast<Matrix<bool> *>(this), operatorFunction));
 }
 
+// ===== getElementAt ==========
+// - Matrix<T>
+// - Matrix<int>
+// - Matrix<float>
+// - Matrix<bool>
+// - Matrix<std::string>
+// - Matrix<AbstractExpr*>
+
 template<typename T>
 AbstractExpr *Matrix<T>::getElementAt(int, int) {
   throw std::logic_error(
-      "Value in matrix is of unknown type. Cannot determine associated AbstractLiteral subtype.");
+      "getElementAt failed: Value in matrix is of unknown type. Cannot determine associated AbstractLiteral subtype.");
 }
 
 template<>
@@ -198,15 +247,15 @@ AbstractExpr *Matrix<float>::getElementAt(int row, int column) {
 }
 
 template<>
-AbstractExpr *Matrix<std::string>::getElementAt(int row, int column) {
-  boundCheckMatrixAccess(row, column);
-  return new LiteralString(values[row][column]);
-}
-
-template<>
 AbstractExpr *Matrix<bool>::getElementAt(int row, int column) {
   boundCheckMatrixAccess(row, column);
   return new LiteralBool(values[row][column]);
+}
+
+template<>
+AbstractExpr *Matrix<std::string>::getElementAt(int row, int column) {
+  boundCheckMatrixAccess(row, column);
+  return new LiteralString(values[row][column]);
 }
 
 template<>
@@ -214,6 +263,9 @@ AbstractExpr *Matrix<AbstractExpr *>::getElementAt(int row, int column) {
   boundCheckMatrixAccess(row, column);
   return values[row][column];
 }
+
+// ===== Matrix Constructor (additional constructor) ==========
+// - Matrix<AbstractExpr*>
 
 template<>
 Matrix<AbstractExpr *>::Matrix(std::vector<std::vector<AbstractExpr *>> inputMatrix)  /* NOLINT intentionally not explicit */
@@ -230,6 +282,10 @@ Matrix<AbstractExpr *>::Matrix(std::vector<std::vector<AbstractExpr *>> inputMat
   removeChildren();
   addChildren(childrenToBeAdded, true);
 }
+
+// ===== toJson ==========
+// - Matrix<T>
+// - Matrix<AbstractExpr*>
 
 template<typename T>
 json Matrix<T>::toJson() const {
@@ -258,29 +314,18 @@ template<>
   return jsonOutput;
 }
 
-template<typename T>
-void Matrix<T>::addElementToStringStream(T elem, std::stringstream &s) {
-  s << elem;
-}
+// ===== clone ==========
+// - Matrix<T>
+// - Matrix<AbstractExpr*>
 
 template<typename T>
-std::string Matrix<T>::getNodeType() const {
-  return std::string("Matrix<" + std::string(typeid(T).name()) + ">");
-}
-
-template<typename T>
-void Matrix<T>::accept(Visitor &v) {
-  v.visit(*this);
-}
-
-template<typename T>
-AbstractNode *Matrix<T>::clone(bool) {
+Matrix<T> *Matrix<T>::clone(bool keepOriginalUniqueNodeId) {
   // it's sufficient to call the copy constructor that creates a copy of all primitives (int, float, etc.)
   return new Matrix<T>(*this);
 }
 
 template<>
-AbstractNode *Matrix<AbstractExpr *>::clone(bool keepOriginalUniqueNodeId) {
+Matrix<AbstractExpr *> *Matrix<AbstractExpr *>::clone(bool keepOriginalUniqueNodeId) {
   std::vector<std::vector<AbstractExpr *>> clonedMatrix(dim.numRows, std::vector<AbstractExpr *>(dim.numColumns));
   // we need to clone each AbstractExpr contained in this matrix
   for (int i = 0; i < values.size(); ++i) {
@@ -291,6 +336,10 @@ AbstractNode *Matrix<AbstractExpr *>::clone(bool keepOriginalUniqueNodeId) {
   return new Matrix<AbstractExpr *>(clonedMatrix);
 }
 
+// ===== addElementToStringStream ==========
+// - Matrix<T>
+// - Matrix<AbstractExpr*>
+
 template<>
 void Matrix<AbstractExpr *>::addElementToStringStream(AbstractExpr *elem, std::stringstream &s) {
   // Although wrongly indicated by CLion, this method is actually used, see Matrix<T>::toString().
@@ -298,14 +347,17 @@ void Matrix<AbstractExpr *>::addElementToStringStream(AbstractExpr *elem, std::s
 }
 
 template<typename T>
-int Matrix<T>::getMaxNumberChildren() {
-  return -1;
+void Matrix<T>::addElementToStringStream(T elem, std::stringstream &s) {
+  s << elem;
 }
 
-template<typename T>
-bool Matrix<T>::supportsCircuitMode() {
-  return true;
-}
+// ===== setElementAt  ==========
+// - Matrix<T>
+// - Matrix<AbstractExpr*>
+// - Matrix<int>
+// - Matrix<float>
+// - Matrix<bool>
+// - Matrix<std::string>
 
 template<typename T>
 void Matrix<T>::setElementAt(int, int, AbstractExpr *) {
@@ -345,8 +397,13 @@ void Matrix<std::string>::setElementAt(int row, int column, AbstractExpr *elemen
   } else { throw std::runtime_error("Unexpected element given that cannot be added to Matrix<T>."); }
 }
 
+// ===== replaceChild ==========
+// - Matrix<T>
+// - Matrix<AbstractExpr*>
+
 template<typename T>
 void Matrix<T>::replaceChild(AbstractNode *originalChild, AbstractNode *newChildToBeAdded) {
+  // values T are primitives (e.g., int, float, bool, strings) and
   AbstractNode::replaceChild(originalChild, newChildToBeAdded);
 }
 
@@ -362,6 +419,10 @@ void Matrix<AbstractExpr *>::replaceChild(AbstractNode *originalChild, AbstractN
   }
   AbstractNode::replaceChild(originalChild, newChildToBeAdded);
 }
+
+// ===== containsAbstractExprs ==========
+// - Matrix<T>
+// - Matrix<AbstractExpr*>
 
 template<typename T>
 bool Matrix<T>::containsAbstractExprs() {

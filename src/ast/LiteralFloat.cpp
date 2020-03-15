@@ -72,7 +72,7 @@ bool LiteralFloat::supportsDatatype(Datatype &datatype) {
 }
 
 LiteralFloat *LiteralFloat::clone(bool keepOriginalUniqueNodeId) {
-  auto clonedNode = new LiteralFloat(dynamic_cast<Matrix<float> *>(matrix)->clone());
+  auto clonedNode = new LiteralFloat(matrix->clone(keepOriginalUniqueNodeId));
   clonedNode->updateClone(keepOriginalUniqueNodeId, this);
   return clonedNode;
 }

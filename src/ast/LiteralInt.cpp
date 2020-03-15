@@ -71,7 +71,7 @@ bool LiteralInt::supportsCircuitMode() {
 }
 
 LiteralInt *LiteralInt::clone(bool keepOriginalUniqueNodeId) {
-  auto clonedNode = new LiteralInt(dynamic_cast<Matrix<int> *>(matrix)->clone());
+  auto clonedNode = new LiteralInt(matrix->clone(keepOriginalUniqueNodeId));
   clonedNode->updateClone(keepOriginalUniqueNodeId, this);
   return clonedNode;
 }

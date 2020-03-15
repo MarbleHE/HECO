@@ -71,7 +71,7 @@ bool LiteralString::supportsDatatype(Datatype &datatype) {
 }
 
 LiteralString *LiteralString::clone(bool keepOriginalUniqueNodeId) {
-  auto clonedNode = new LiteralString(dynamic_cast<Matrix<std::string> *>(matrix)->clone());
+  auto clonedNode = new LiteralString(matrix->clone(keepOriginalUniqueNodeId));
   clonedNode->updateClone(keepOriginalUniqueNodeId, this);
   return clonedNode;
 }
