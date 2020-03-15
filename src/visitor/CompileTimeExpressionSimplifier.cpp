@@ -82,6 +82,22 @@ void CompileTimeExpressionSimplifier::visit(Transpose &elem) {
   }
 }
 
+void CompileTimeExpressionSimplifier::visit(GetMatrixElement &elem) {
+  Visitor::visit(elem);
+  // if this is an expression like "matrix[a][b]" where the operand (matrix) as well as both indices (a,b) are known
+  if (valueIsKnown(elem.getOperand()) && valueIsKnown(elem.getRowIndex()) && valueIsKnown(elem.getColumnIndex())) {
+    // get the row index
+    int rowIndex = getFirstValue(elem.getRowIndex())->castTo<LiteralInt>()->getValue();
+    // get the column index
+    int columnIndex = getFirstValue(elem.getColumnIndex())->castTo<LiteralInt>()->getValue();
+    // get the element at position (row, column)
+    auto matrix = dynamic_cast<AbstractLiteral *>(getFirstValue(elem.getOperand()))->getMatrix();
+    auto retrievedElement = matrix->getElementAt(rowIndex, columnIndex);
+    // replace this GetMatrixElement referred by the parent node
+    elem.getOnlyParent()->replaceChild(&elem, retrievedElement);
+  }
+}
+
 void CompileTimeExpressionSimplifier::visit(Ast &elem) {
   Visitor::visit(elem);
   // Delete all noted queued for deletion after finishing the simplification traversal.
@@ -113,29 +129,48 @@ void CompileTimeExpressionSimplifier::visit(CallExternal &elem) {
 }
 
 // =====================
-// AST objects that are leaf nodes and cannot be simplified
+// Simplifiable Statements
 // =====================
+
+template<typename T, typename U>
+void simplifyAbstractExprMatrix(U &elem) {
+  if (auto mx = dynamic_cast<Matrix<AbstractExpr *> *>(elem.getMatrix())) {
+    auto mxDim = mx->getDimensions();
+    std::vector<std::vector<T>> simplifiedVec(mxDim.numRows, std::vector<T>(mxDim.numColumns));
+    for (int i = 0; i < mxDim.numRows; ++i) {
+      for (int j = 0; j < mxDim.numColumns; ++j) {
+        auto curElement = mx->getElementAt(i, j);
+        if (auto elemAsBool = dynamic_cast<U *>(curElement)) {
+          simplifiedVec[i][j] = elemAsBool->getValue();
+        } else { // we cannot simplify this matrix as element (i,j) is of type non-T but Matrix<T> can only hold T vals
+          return;
+        }
+      }
+    }
+    auto parent = elem.getOnlyParent();
+    parent->replaceChild(&elem, new U(new Matrix<T>(simplifiedVec)));
+  }
+}
 
 void CompileTimeExpressionSimplifier::visit(LiteralBool &elem) {
   Visitor::visit(elem);
+  simplifyAbstractExprMatrix<bool, LiteralBool>(elem);
 }
 
 void CompileTimeExpressionSimplifier::visit(LiteralInt &elem) {
   Visitor::visit(elem);
+  simplifyAbstractExprMatrix<int, LiteralInt>(elem);
 }
 
 void CompileTimeExpressionSimplifier::visit(LiteralString &elem) {
   Visitor::visit(elem);
+  simplifyAbstractExprMatrix<std::string, LiteralString>(elem);
 }
 
 void CompileTimeExpressionSimplifier::visit(LiteralFloat &elem) {
   Visitor::visit(elem);
+  simplifyAbstractExprMatrix<float, LiteralFloat>(elem);
 }
-
-
-// =====================
-// Simplifiable Statements
-// =====================
 
 void CompileTimeExpressionSimplifier::visit(Variable &elem) {
   Visitor::visit(elem);
@@ -155,18 +190,18 @@ void CompileTimeExpressionSimplifier::visit(Variable &elem) {
 
 void CompileTimeExpressionSimplifier::visit(VarDecl &elem) {
   Visitor::visit(elem);
-
   // determine the variable's value
   AbstractExpr *variableValue;
-  if (elem.getInitializer()==nullptr) {
+  auto variableInitializer = elem.getInitializer();
+  if (variableInitializer==nullptr) {
     variableValue = Datatype::getDefaultVariableInitializationValue(elem.getDatatype()->getType());
   } else {
-    variableValue = elem.getInitializer();
+    variableValue = variableInitializer;
   }
   // store the variable's value
   addVariableValue(elem.getVarTargetIdentifier(), variableValue);
   // clean up temporary results from children in removableNodes map
-  removableNodes.erase(elem.getInitializer());
+  removableNodes.erase(variableInitializer);
   // mark this statement as removable as it is deleted
   markNodeAsRemovable(&elem);
   cleanUpAfterStatementVisited(&elem, true);
@@ -634,14 +669,16 @@ std::vector<AbstractLiteral *> CompileTimeExpressionSimplifier::evaluateNodeRecu
 }
 
 AbstractExpr *CompileTimeExpressionSimplifier::getFirstValue(AbstractNode *node) {
-  // if node is a Literal -> return node itself
+  // if node is a Literal: return the node itself
   if (auto nodeAsLiteral = dynamic_cast<AbstractLiteral *>(node)) {
     return nodeAsLiteral;
   }
-  // if node is a variable -> search the variable's value in the map of known variable values
+  // if node is a variable: search the variable's value in the map of known variable values
   auto nodeAsVariable = dynamic_cast<Variable *>(node);
   if (nodeAsVariable!=nullptr && variableValues.count(nodeAsVariable->getIdentifier()) > 0) {
-    return variableValues.at(nodeAsVariable->getIdentifier());
+    // return a clone of te variable's value
+    AbstractNode *pNode = variableValues.at(nodeAsVariable->getIdentifier())->clone(false);
+    return dynamic_cast<AbstractExpr *>(pNode);
   }
   // in any other case: throw an error
   throw std::invalid_argument("Cannot determine value for node " + node->getUniqueNodeId() + ".");
@@ -718,10 +755,9 @@ AbstractExpr *CompileTimeExpressionSimplifier::generateIfDependentValue(Abstract
 
 void CompileTimeExpressionSimplifier::cleanUpAfterStatementVisited(AbstractNode *statement,
                                                                    bool enqueueStatementForDeletion) {
-  if (enqueueStatementForDeletion) {
-    // mark this statement for deletion as we don't need it anymore
-    nodesQueuedForDeletion.push_back(statement);
-  }
+  // mark this statement for deletion as we don't need it anymore
+  if (enqueueStatementForDeletion) nodesQueuedForDeletion.push_back(statement);
+
   // free the accumulator of binary expressions
   binaryExpressionAccumulator.reset();
 }
@@ -729,8 +765,7 @@ void CompileTimeExpressionSimplifier::cleanUpAfterStatementVisited(AbstractNode 
 void CompileTimeExpressionSimplifier::addVariableValue(const std::string &variableIdentifier,
                                                        AbstractExpr *valueAnyLiteralOrAbstractExpr) {
   valueAnyLiteralOrAbstractExpr->removeFromParents();
-  variableValues[variableIdentifier] = valueAnyLiteralOrAbstractExpr->clone(false)
-      ->castTo<AbstractExpr>();
+  variableValues[variableIdentifier] = valueAnyLiteralOrAbstractExpr;
 }
 
 bool CompileTimeExpressionSimplifier::isQueuedForDeletion(const AbstractNode *node) {

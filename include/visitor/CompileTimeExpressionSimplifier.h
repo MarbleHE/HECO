@@ -2,6 +2,10 @@
 #define AST_OPTIMIZER_INCLUDE_VISITOR_COMPILETIMEEXPRESSIONSIMPLIFIER_H_
 
 #include <unordered_set>
+#include <unordered_map>
+#include <string>
+#include <vector>
+#include <deque>
 #include "NodeUtils.h"
 #include "Visitor.h"
 #include "EvaluationVisitor.h"
@@ -42,7 +46,7 @@ struct BinaryExpressionAcc {
 
   /// The number of operands that could be reduced. This information is used to determine whether the
   /// BinaryExpressionAcc could simplify the binary expressions at all.
-  unsigned long numberOfReducedNodes = 0;
+  int numberOfReducedNodes = 0;
 
   /// Sets a new value to lastVisitedBinaryExp that indicates the last binary expression handled by the
   /// BinaryExpressionAcc. This information is needed to know where to attach the simplified subtree to in case that
@@ -195,7 +199,9 @@ class CompileTimeExpressionSimplifier : public Visitor {
 
   /// Contains pointer to those nodes for which full or partial evaluation could be performed and hence can be deleted
   /// at the end of this simplification traversal.
-  /// For example, the expression ArithmeticExpr(LiteralInt(12), OpSymb::add, LiteralInt(42)) will be evaluated to 12+42=54.
+  /// For example, the arithmetic expression represented by
+  ///   ArithmeticExpr( LiteralInt(12), OpSymb::add, LiteralInt(42) )
+  /// will be evaluated to 12+42=54.
   /// The node ArithmeticExpr (and all of its children) will be deleted and replaced by a new node LiteralInt(54).
   std::deque<AbstractNode *> nodesQueuedForDeletion;
 
@@ -339,5 +345,16 @@ class CompileTimeExpressionSimplifier : public Visitor {
   /// \return True if this node is enqueued for deletion, otherwise False.
   bool isQueuedForDeletion(const AbstractNode *node);
 };
+
+/// Takes a Literal (e.g., LiteralInt) and checks whether its values are defined using a Matrix<AbstractExpr*>. In
+/// this case, checks if the value (e.g., of type int) is known of each element such that Matrix<AbstractExpr*> can
+/// be replaced by a Matrix<T> (e.g., Matrix<int>) where T is the Literal's associated primitive type (e.g., int).
+/// If the matrix could be simplified, the current Literal is replaced by a new Literal of type U containing the
+/// simplified matrix.
+/// \tparam T The type of the elements of the respective AbstractLiteral subtype, e.g., int, float.
+/// \tparam U The AbstractLiteral subtype, e.g., LiteralInt, LiteralFloat.
+/// \param elem The AbstractLiteral subtype that should be simplified.
+template<typename T, typename U>
+void simplifyAbstractExprMatrix(U &elem);
 
 #endif //AST_OPTIMIZER_INCLUDE_VISITOR_COMPILETIMEEXPRESSIONSIMPLIFIER_H_
