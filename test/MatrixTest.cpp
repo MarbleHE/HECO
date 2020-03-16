@@ -1,5 +1,4 @@
-#include <Variable.h>
-#include <type_traits>
+#include "Variable.h"
 #include "Matrix.h"
 #include "gtest/gtest.h"
 #include "LiteralFloat.h"
@@ -7,11 +6,15 @@
 #include "LiteralInt.h"
 #include "LiteralString.h"
 
-TEST(MatrixTest, createMatrix_expectedInvalidMatrixDimensionsException) {  /* NOLINT */
+class MatrixTestFixture : public ::testing::Test {
+
+};
+
+TEST_F(MatrixTestFixture, createMatrix_expectedInvalidMatrixDimensionsException) {  /* NOLINT */
   EXPECT_THROW(Matrix<int>({{3, 3, 2}, {2, 3}}), std::invalid_argument);
 }
 
-TEST(MatrixTest, createMatrix_expectedValidMatrix) {  /* NOLINT */
+TEST_F(MatrixTestFixture, createMatrix_expectedValidMatrix) {  /* NOLINT */
   Matrix<int> m({{1, 2, 3}, {6, 3, 2}, {52, 11, 95}});
 
   EXPECT_FALSE(m.isScalar());
@@ -41,7 +44,7 @@ TEST(MatrixTest, createMatrix_expectedValidMatrix) {  /* NOLINT */
   EXPECT_EQ(m(2, 2), 95);
 }
 
-TEST(MatrixTest, createScalar_expectedScalarValue) {  /* NOLINT */
+TEST_F(MatrixTestFixture, createScalar_expectedScalarValue) {  /* NOLINT */
   Matrix<int> m(2);
 
   EXPECT_TRUE(m.isScalar());
@@ -50,36 +53,36 @@ TEST(MatrixTest, createScalar_expectedScalarValue) {  /* NOLINT */
   EXPECT_EQ(m.getScalarValue(), 2);
 }
 
-TEST(MatrixTest, compareMatrices_expectedEquality) {  /* NOLINT */
+TEST_F(MatrixTestFixture, compareMatrices_expectedEquality) {  /* NOLINT */
   Matrix<int> m1({{1, 2, 1}, {3, 1, 1}});
   Matrix<int> m2({{1, 2, 1}, {3, 1, 1}});
   EXPECT_TRUE(m1==m2);
 }
 
-TEST(MatrixTest, compareMatrices_expectedInequalityDueToDifferentValues) {  /* NOLINT */
+TEST_F(MatrixTestFixture, compareMatrices_expectedInequalityDueToDifferentValues) {  /* NOLINT */
   Matrix<float> m1({{1.2f, 2.76f, 1.0f}, {3.5f, 1.0f, 1.0f}});
   Matrix<float> m2({{10.0f, 9.0f, 1.0f}, {3.6f, 1.0f, 0.0f}});
   EXPECT_TRUE(m1!=m2);
 }
 
-TEST(MatrixTest, compareMatrices_expectedInequalityDueToDifferentDims) {  /* NOLINT */
+TEST_F(MatrixTestFixture, compareMatrices_expectedInequalityDueToDifferentDims) {  /* NOLINT */
   Matrix<int> m1({{1, 2, 1}, {3, 1, 1}});
   Matrix<int> m2({{1, 2, 1}, {3, 1, 1}, {4, 3, 1}});
   EXPECT_TRUE(m1!=m2);
 }
 
-TEST(MatrixTest, jsonRepresentation_scalar) {  /* NOLINT */
+TEST_F(MatrixTestFixture, jsonRepresentation_scalar) {  /* NOLINT */
   Matrix<int> m(453492);
   EXPECT_EQ(m.toJson(), json(453492));
 }
 
-TEST(MatrixTest, jsonRepresentation_booleanMatrix) {  /* NOLINT */
+TEST_F(MatrixTestFixture, jsonRepresentation_booleanMatrix) {  /* NOLINT */
   Matrix<bool> m({{true, false, false}, {false, true, false}, {false, false, true}});
   auto expected = json::array({{true, false, false}, {false, true, false}, {false, false, true}});
   EXPECT_EQ(m.toJson(), expected);
 }
 
-TEST(MatrixTest, accessMatrixElement_invalidIndexExceptionOnMatrix) {  /* NOLINT */
+TEST_F(MatrixTestFixture, accessMatrixElement_invalidIndexExceptionOnMatrix) {  /* NOLINT */
   Matrix<int> m({{1, 2, 1}, {3, 1, 1}});
   // first row
   EXPECT_NO_THROW(m(0, 0));
@@ -95,14 +98,14 @@ TEST(MatrixTest, accessMatrixElement_invalidIndexExceptionOnMatrix) {  /* NOLINT
   EXPECT_THROW(m(2, 0), std::invalid_argument);
 }
 
-TEST(MatrixTest, accessMatrixElement_invalidIndexExceptionOnScalar) {  /* NOLINT */
+TEST_F(MatrixTestFixture, accessMatrixElement_invalidIndexExceptionOnScalar) {  /* NOLINT */
   auto value = 2.948811f;
   Matrix<float> scalar(value);
   EXPECT_EQ(scalar(0, 0), value);
   EXPECT_EQ(scalar.getScalarValue(), value);
 }
 
-TEST(MatrixTest, modifyMatrix_modifyValues) {  /* NOLINT */
+TEST_F(MatrixTestFixture, modifyMatrix_modifyValues) {  /* NOLINT */
   Matrix<int> m({{5, 2, 1}, {3, 1, 1}, {1, 1, 0}});
 
   // modify value at (0,2)
@@ -116,7 +119,7 @@ TEST(MatrixTest, modifyMatrix_modifyValues) {  /* NOLINT */
   EXPECT_EQ(m(2, 2), 4224);
 }
 
-TEST(MatrixTest, modifyMatrixAsPointer_modifyValuesInt) {  /* NOLINT */
+TEST_F(MatrixTestFixture, modifyMatrixAsPointer_modifyValuesInt) {  /* NOLINT */
   auto *mx = new Matrix<int>({{5, 2, 1}, {3, 1, 1}, {1, 1, 0}});
   Matrix<int> &m = *mx;
 
@@ -131,7 +134,7 @@ TEST(MatrixTest, modifyMatrixAsPointer_modifyValuesInt) {  /* NOLINT */
   EXPECT_EQ(m(2, 2), 4224);
 }
 
-TEST(MatrixTest, modifyMatrixAsPointer_modifyValuesFloat) {  /* NOLINT */
+TEST_F(MatrixTestFixture, modifyMatrixAsPointer_modifyValuesFloat) {  /* NOLINT */
   auto *mx = new Matrix<float>({{5.23f, 2.0f, 1.11f}, {3.0f, 1.221f, 1.9f}, {1.0f, 1.0f, 0.0f}});
   Matrix<float> &m = *mx;
 
@@ -146,7 +149,7 @@ TEST(MatrixTest, modifyMatrixAsPointer_modifyValuesFloat) {  /* NOLINT */
   EXPECT_EQ(m(2, 2), 4224.333f);
 }
 
-TEST(MatrixTest, modifyMatrixAsPointer_modifyValuesBoolean) {  /* NOLINT */
+TEST_F(MatrixTestFixture, modifyMatrixAsPointer_modifyValuesBoolean) {  /* NOLINT */
   auto *mx = new Matrix<bool>({{true, true, false}, {false, false, false}, {true, false, true}});
   Matrix<bool> &m = *mx;
 
@@ -161,7 +164,7 @@ TEST(MatrixTest, modifyMatrixAsPointer_modifyValuesBoolean) {  /* NOLINT */
   EXPECT_EQ(m(2, 2), false);
 }
 
-TEST(MatrixTest, modifyMatrix_modifyWholeMatrixUsingAssignmentOp) {  /* NOLINT */
+TEST_F(MatrixTestFixture, modifyMatrix_modifyWholeMatrixUsingAssignmentOp) {  /* NOLINT */
   Matrix<int> m({{5, 2, 1}, {3, 1, 1}, {1, 1, 0}});
 
   // check values using getter
@@ -190,7 +193,7 @@ TEST(MatrixTest, modifyMatrix_modifyWholeMatrixUsingAssignmentOp) {  /* NOLINT *
   EXPECT_EQ(m(2, 2), 34);
 }
 
-TEST(MatrixTest, modifyMatrix_modifyWholeMatrixUsingDedicatedFunction) {  /* NOLINT */
+TEST_F(MatrixTestFixture, modifyMatrix_modifyWholeMatrixUsingDedicatedFunction) {  /* NOLINT */
   Matrix<int> m({{5, 2, 1}, {3, 1, 1}, {1, 1, 0}});
 
   // check values using getter
@@ -219,17 +222,17 @@ TEST(MatrixTest, modifyMatrix_modifyWholeMatrixUsingDedicatedFunction) {  /* NOL
   EXPECT_EQ(m(2, 2), 34);
 }
 
-TEST(MatrixTest, toStringTestMatrix) {  /* NOLINT */
+TEST_F(MatrixTestFixture, toStringTestMatrix) {  /* NOLINT */
   Matrix<int> m({{5, 2, 1}, {3, 1, 1}, {1, 1, 0}});
   EXPECT_EQ(m.toString(), std::string("[5 2 1; 3 1 1; 1 1 0]"));
 }
 
-TEST(MatrixTest, toStringTestScalar) {  /* NOLINT */
+TEST_F(MatrixTestFixture, toStringTestScalar) {  /* NOLINT */
   Matrix<int> m(52'147);
   EXPECT_EQ(m.toString(), std::string("52147"));
 }
 
-TEST(MatrixTest, cloneMatrix) {  /* NOLINT */
+TEST_F(MatrixTestFixture, cloneMatrix) {  /* NOLINT */
   Matrix<int> m({{1, 0}, {3, 3}});
   Matrix<int> clonedM = m;
 
@@ -249,7 +252,7 @@ TEST(MatrixTest, cloneMatrix) {  /* NOLINT */
   EXPECT_EQ(clonedM(1, 1), 3);
 }
 
-TEST(MatrixTest, transposeMatrixFromColumnVecToRowVecInPlace) {  /* NOLINT */
+TEST_F(MatrixTestFixture, transposeMatrixFromColumnVecToRowVecInPlace) {  /* NOLINT */
   // elements in (0,0), (1,0), (2,0) -> all elements in one column vector
   Matrix<int> m({{1}, {4}, {9}});
   EXPECT_TRUE(m.getDimensions().equals(3, 1));
@@ -264,7 +267,7 @@ TEST(MatrixTest, transposeMatrixFromColumnVecToRowVecInPlace) {  /* NOLINT */
   EXPECT_EQ(m(0, 2), 9);
 }
 
-TEST(MatrixTest, transposeMatrixFromColumnVecToRowVecCopy) {  /* NOLINT */
+TEST_F(MatrixTestFixture, transposeMatrixFromColumnVecToRowVecCopy) {  /* NOLINT */
   // elements in (0,0), (1,0), (2,0) -> all elements in one column vector
   Matrix<int> m({{1}, {4}, {9}});
   auto transposedM = *m.transpose(false);
@@ -280,7 +283,7 @@ TEST(MatrixTest, transposeMatrixFromColumnVecToRowVecCopy) {  /* NOLINT */
   EXPECT_EQ(m(2, 0), 9);
 }
 
-TEST(MatrixTest, transposeMatrixFromRowVecToColumnVecInPlace) {  /* NOLINT */
+TEST_F(MatrixTestFixture, transposeMatrixFromRowVecToColumnVecInPlace) {  /* NOLINT */
   // elements in (0,0), (0,1), (0,2) -> all elements in one row vector
   Matrix<int> m({{1, 4, 9}});
   EXPECT_TRUE(m.getDimensions().equals(1, 3));
@@ -295,7 +298,7 @@ TEST(MatrixTest, transposeMatrixFromRowVecToColumnVecInPlace) {  /* NOLINT */
   EXPECT_EQ(m(2, 0), 9);
 }
 
-TEST(MatrixTest, transposeMatrixFromRowVecToColumnVecCopy) {  /* NOLINT */
+TEST_F(MatrixTestFixture, transposeMatrixFromRowVecToColumnVecCopy) {  /* NOLINT */
   // elements in (0,0), (0,1), (0,2) -> all elements in one row vector
   Matrix<int> m({{1, 4, 9}});
   auto transposedM = *m.transpose(false);
@@ -311,7 +314,7 @@ TEST(MatrixTest, transposeMatrixFromRowVecToColumnVecCopy) {  /* NOLINT */
   EXPECT_EQ(m(0, 2), 9);
 }
 
-TEST(MatrixTest, rotateRowVectorInPlace) {  /* NOLINT */
+TEST_F(MatrixTestFixture, rotateRowVectorInPlace) {  /* NOLINT */
   Matrix<int> m({{1, 2, 3, 4, 5}});
   EXPECT_TRUE(m.getDimensions().equals(1, 5));
   m.rotate(-2, true);
@@ -324,7 +327,7 @@ TEST(MatrixTest, rotateRowVectorInPlace) {  /* NOLINT */
   EXPECT_EQ(m(0, 4), 2);
 }
 
-TEST(MatrixTest, rotateRowVectorCopy) {  /* NOLINT */
+TEST_F(MatrixTestFixture, rotateRowVectorCopy) {  /* NOLINT */
   Matrix<int> m({{1, 2, 3, 4, 5}});
   EXPECT_TRUE(m.getDimensions().equals(1, 5));
 
@@ -346,7 +349,7 @@ TEST(MatrixTest, rotateRowVectorCopy) {  /* NOLINT */
   EXPECT_EQ(m(0, 4), 5);
 }
 
-TEST(MatrixTest, rotateColumnVectorInPlace) {  /* NOLINT */
+TEST_F(MatrixTestFixture, rotateColumnVectorInPlace) {  /* NOLINT */
   Matrix<int> m({{9}, {4}, {3}, {8}, {7}});
   EXPECT_TRUE(m.getDimensions().equals(5, 1));
   m.rotate(2, true);
@@ -359,7 +362,7 @@ TEST(MatrixTest, rotateColumnVectorInPlace) {  /* NOLINT */
   EXPECT_EQ(m(4, 0), 3);
 }
 
-TEST(MatrixTest, rotateColumnVectorCopy) {  /* NOLINT */
+TEST_F(MatrixTestFixture, rotateColumnVectorCopy) {  /* NOLINT */
   Matrix<int> m({{9}, {4}, {3}, {8}, {7}});
   EXPECT_TRUE(m.getDimensions().equals(5, 1));
   auto rotatedM = *m.rotate(2, false);
@@ -379,12 +382,12 @@ TEST(MatrixTest, rotateColumnVectorCopy) {  /* NOLINT */
   EXPECT_EQ(m(4, 0), 7);
 }
 
-TEST(MatrixTest, rotateMatrix_expectedException) {  /* NOLINT */
+TEST_F(MatrixTestFixture, rotateMatrix_expectedException) {  /* NOLINT */
   Matrix<int> m({{9, 4, 2}, {3, 2, 1}, {1, 1, 0}});
   EXPECT_THROW(m.rotate(3, true), std::invalid_argument);
 }
 
-TEST(MatrixTest, applyOperatorComponentwise) {  /* NOLINT */
+TEST_F(MatrixTestFixture, applyOperatorComponentwise) {  /* NOLINT */
   Matrix<int> A({{3, 2, 1}, {4, 4, 1}, {9, 4, 3}});
   Matrix<int> B({{7, 8, 9}, {1, 1, 4}, {6, 11, 3}});
 
@@ -399,7 +402,7 @@ TEST(MatrixTest, applyOperatorComponentwise) {  /* NOLINT */
   EXPECT_EQ(*result, expectedMatrix);
 }
 
-TEST(MatrixTest, applyScalarProduct) {  /* NOLINT */
+TEST_F(MatrixTestFixture, applyScalarProduct) {  /* NOLINT */
   Matrix<int> A({{3, 2, 1}, {4, 4, 1}, {9, 4, 3}});
   Matrix<int> scalar(1);
   auto addition = [](int a, int b) { return a + b; };
@@ -413,7 +416,7 @@ TEST(MatrixTest, applyScalarProduct) {  /* NOLINT */
   EXPECT_EQ(*result, expectedMatrix);
 }
 
-TEST(MatrixTest, applyMatrixMultiplication) {  /* NOLINT */
+TEST_F(MatrixTestFixture, applyMatrixMultiplication) {  /* NOLINT */
   // 4x2 matrix
   Matrix<int> A({{2, 3}, {4, 5}, {8, 6}, {1, 5}});
   // 2x3 matrix
@@ -423,6 +426,33 @@ TEST(MatrixTest, applyMatrixMultiplication) {  /* NOLINT */
   // 4x3 matrix
   auto expectedMatrix = Matrix<int>({{12, 17, 23}, {20, 29, 39}, {24, 38, 50}, {20, 26, 36}});
   EXPECT_EQ(*result, expectedMatrix);
+}
+
+TEST_F(MatrixTestFixture, detectMalformedNestedMatrix) {  /* NOLINT */
+  // Test to check whether detection of matrix elements with dimension != (1,1) works.
+  // The following would create a matrix like:
+  //  [true false [x y]]
+  auto nestedExpr = new LiteralBool(new Matrix<AbstractExpr *>({{new Variable("x"), new Variable("y")}}));
+  EXPECT_THROW(Matrix<AbstractExpr *> abstractExprM({{new LiteralBool(true), new LiteralBool(false), nestedExpr}}),
+               std::logic_error);
+}
+
+TEST_F(MatrixTestFixture, detectMalformedDimension_AbstractExprMatrix) {  /* NOLINT */
+  EXPECT_THROW(Matrix<AbstractExpr *> abstractExprM(
+                   {
+                     { new LiteralBool(true), new LiteralBool(false), new LiteralBool(true) },
+                     { new LiteralBool(false), new LiteralBool(true) }
+                   }),
+               std::logic_error);
+}
+
+TEST_F(MatrixTestFixture, detectMalformedDimension_intMatrix) {  /* NOLINT */
+  EXPECT_THROW(Matrix<int> intM(
+                   {
+                     { 34, 33, 1 },
+                     { 34, 322, 455, 44 }
+                   }),
+               std::logic_error);
 }
 
 class MatrixOperationFixture : public ::testing::Test {

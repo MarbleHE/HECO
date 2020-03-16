@@ -270,12 +270,22 @@ AbstractExpr *Matrix<AbstractExpr *>::getElementAt(int row, int column) {
 template<>
 Matrix<AbstractExpr *>::Matrix(std::vector<std::vector<AbstractExpr *>> inputMatrix)  /* NOLINT intentionally not explicit */
     : values(std::move(inputMatrix)), dim(Dimension(values.size(), values.at(0).size())) {
+  // In a Matrix<AbstractExpr*> it is needed that we use the parent-child relationship by attaching each of the matrix
+  // elements as a child to the Matrix object. This is needed, for example, in the CompileTimeExpressionSimplifier where
+  // we replace nodes that can be evaluated at compile-time (e.g., variables by their known value).
   int elementsPerRow = values.at(0).size();
   std::vector<AbstractNode *> childrenToBeAdded;
   for (auto &matrixRows : values) {
-    if (matrixRows.size()!=elementsPerRow)
+    // check that matrix has the same number of elements in each row
+    if (matrixRows.size()!=elementsPerRow) {
       throw std::invalid_argument("Vector rows must all have the same number of elements!");
+    }
     for (auto &element : matrixRows) {
+      // check that matrix elements are all one-dimensional
+      auto lit = dynamic_cast<AbstractLiteral *>(element);
+      if (lit!=nullptr && !lit->getMatrix()->getDimensions().equals(1, 1)) {
+        throw std::logic_error("Cannot create a matrix where elements are not one-dimensional!");
+      }
       childrenToBeAdded.push_back(element);
     }
   }
