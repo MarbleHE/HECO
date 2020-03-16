@@ -53,7 +53,8 @@ set(TEST_FILES
         CompileTimeExpressionSimplifierTest.cpp
         SecretTaintingTest.cpp
         NodeUtilsTest.cpp
-        MatrixTest.cpp)
+        MatrixTest.cpp
+        ControlFlowGraphVisitorTest.cpp)
 
 add_executable(testing-all
         ${TEST_FILES})
