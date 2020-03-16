@@ -19,7 +19,8 @@ std::string AbstractNode::generateUniqueNodeId() {
 }
 
 AbstractNode::AbstractNode() {
-  // save the ID reserved for this node but do not
+  // save the ID reserved for this node but do not build the unique node ID yet as this virtual method must not be
+  // called within the constructor
   assignedNodeId = getAndIncrementNodeId();
 }
 

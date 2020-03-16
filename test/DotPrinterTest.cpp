@@ -127,6 +127,7 @@ TEST_F(DotPrinterFixture, printAsDotFormattedGraphTest_printCircuitExample2) { /
 }
 
 TEST_F(DotPrinterFixture, printAsDotFormattedGraphTest_printAstExample1) { /* NOLINT */
+  // This test fails on Ubuntu because the Node IDs differ from those when running this test on macOS.
   Ast ast;
   AstTestingGenerator::generateAst(17, ast);
 
