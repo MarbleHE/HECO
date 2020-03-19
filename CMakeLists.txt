@@ -92,7 +92,9 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/ast/Matrix.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/Transpose.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/GetMatrixElement.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/visitor/ControlFlowGraphVisitor.cpp)
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/ControlFlowGraphVisitor.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/utilities/GraphNode.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/utilities/NodeRelationship.cpp)
 
 set(HEADER_ONLY_SOURCES
         ${ast_optimizer_SOURCE_DIR}/include/ast/OpSymbEnum.h
