@@ -61,8 +61,6 @@ void Rotate::setAttributes(AbstractExpr *pExpr, AbstractExpr *rotationFactor) {
   // be checked while evaluating the AST.
   if (dynamic_cast<AbstractLiteral *>(pExpr)!=nullptr && !isOneDimensionalVector()) {
     throw std::logic_error("Rotate requires a 1-dimensional row or column vector.");
-  } else if (dynamic_cast<Variable *>(pExpr)==nullptr) {
-    throw std::logic_error("Rotate is supported for AbstractLiterals and Variables only.");
   }
   removeChildren();
   addChildren({pExpr, rotationFactor}, true);
