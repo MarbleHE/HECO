@@ -22,6 +22,15 @@ const std::set<std::pair<std::string, AccessType>> &GraphNode::getAccessedVariab
   return accessedVariables;
 }
 
+std::set<std::pair<std::string, AccessType>> GraphNode::getVariables(AccessType accessType) const {
+  std::set<std::pair<std::string, AccessType>> writtenVars;
+  std::copy_if(accessedVariables.begin(), accessedVariables.end(), std::inserter(writtenVars, writtenVars.begin()),
+               [accessType](const std::pair<std::string, AccessType> &p) {
+                 return p.second==accessType;
+               });
+  return writtenVars;
+}
+
 AbstractNode *GraphNode::getRefToOriginalNode() const {
   return refToOriginalNode;
 }
@@ -39,3 +48,4 @@ NodeRelationship *GraphNode::getRelationship(RelationshipType rel) const {
 void GraphNode::setAccessedVariables(std::set<std::pair<std::string, AccessType>> set) {
   accessedVariables = std::move(set);
 }
+
