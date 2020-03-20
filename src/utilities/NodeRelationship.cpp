@@ -105,3 +105,35 @@ const std::vector<GraphNode *> &NodeRelationship::getChildren() const {
 const std::vector<GraphNode *> &NodeRelationship::getParents() const {
   return parents;
 }
+
+std::unordered_set<GraphNode *> NodeRelationship::getAllReachableNodes() const {
+  // a set to recognize already visited nodes, this is needed because our CFG potentially contains cycles
+  std::unordered_set<GraphNode *> processedNodes;
+
+  std::stack<GraphNode *> nextNodeToVisit({this->refToGraphNode});
+  while (!nextNodeToVisit.empty()) {
+    auto curNode = nextNodeToVisit.top();
+    nextNodeToVisit.pop();
+    // if this node was processed before - do not process it again, otherwise we'll end up in an infinite loop
+    if (processedNodes.count(curNode) > 0) {
+      continue;
+    } else {
+      processedNodes.insert(curNode);
+    }
+    // enqueue children of current node (in reverse order to perform BFS from lhs to rhs)
+    auto curNodeChildren = curNode->getControlFlowGraph()->getChildren();
+    for (auto it = curNodeChildren.rbegin(); it!=curNodeChildren.rend(); ++it) {
+      nextNodeToVisit.push(*it);
+    }
+  }
+
+  return processedNodes;
+}
+
+bool NodeRelationship::hasChild(GraphNode *pNode) {
+  return std::any_of(children.begin(), children.end(), [&pNode](GraphNode *c) { return c==pNode; });
+}
+
+bool NodeRelationship::hasParent(GraphNode *pNode) {
+  return std::any_of(parents.begin(), parents.end(), [&pNode](GraphNode *c) { return c==pNode; });
+}

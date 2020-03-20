@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <iostream>
+#include <unordered_set>
 
 enum class RelationshipType { CTRL_FLOW_GRAPH, DATA_FLOW_GRAPH };
 
@@ -45,6 +46,12 @@ class NodeRelationship {
   /// \param rootNodeOther The root node of the second graph.
   /// \return True if both graphes have the same structure, otherwise False.
   bool areEqualGraphs(GraphNode *rootNodeOther) const;
+
+  [[nodiscard]] std::unordered_set<GraphNode *> getAllReachableNodes() const;
+
+  bool hasChild(GraphNode *pNode);
+
+  bool hasParent(GraphNode *pNode);
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_UTILITIES_NODERELATIONSHIP_H_
