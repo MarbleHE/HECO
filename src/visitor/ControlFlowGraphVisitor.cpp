@@ -1,5 +1,7 @@
+#include <GraphNode.h>
 #include "ControlFlowGraphVisitor.h"
 #include "AbstractNode.h"
+#include "ArithmeticExpr.h"
 #include "AbstractStatement.h"
 #include "Block.h"
 #include "For.h"
@@ -9,6 +11,7 @@
 #include "VarAssignm.h"
 #include "VarDecl.h"
 #include "While.h"
+#include "LogicalExpr.h"
 
 void ControlFlowGraphVisitor::visit(Ast &elem) {
   Visitor::visit(elem);
@@ -18,84 +21,91 @@ void ControlFlowGraphVisitor::visit(Ast &elem) {
 // The Control Flow Graph consists of edges between statements only.
 
 void ControlFlowGraphVisitor::visit(Block &elem) {
-  appendStatementToGraph(elem);
+  auto gNode = appendStatementToGraph(elem);
   Visitor::visit(elem);
+  postActionsStatementVisited(gNode);
 }
 
 // Control flow graph for a For statement:
 //
-//          For statement
-//               │
-//               ▼
-//  ┌──── For initializer
-//  │
-//  │
-//  │  For body statement 1 ◀─┐
-//  │            │            │
-//  │            ▼            │
-//  │           ...           │
-//  │            │            │
-//  │            ▼            │
-//  │  For body statement N   │
-//  │            │            │
-//  │            ▼            │
-//  │  For update statement   │
-//  │            │            │
-//  │            │            │
-//  │            ▼            │
-//  │    [check condition]    │ condition
-//  └─▶   (no statement)    ──┘   =True
-//               │
-//               │ condition
-//               │   =False
-//               │
-//               ▼
-//      Statement following
-//         For statement
+//            For statement
+//                 │
+//                 ▼
+//    ┌──── For initializer
+//    │
+//    │
+//    │  For body statement 1 ◀─┐
+//    │            │            │
+//    │            ▼            │
+//    │           ...           │
+//    │            │            │
+//    │            ▼            │
+//    │  For body statement N   │
+//    │            │            │
+//    │            ▼            │
+//    │  For update statement   │
+//    │            │            │
+//    │            │            │
+//    │            ▼            │ condition
+//    └───▶ For condition*  ────┘   =True
+//                 │
+//                 │ condition
+//                 │   =False
+//                 │
+//                 ▼
+//        Statement following
+//           For statement
 //
-// Note that the For condition is not a statement but an expression, therefore this is not a node in the CFG and is
-// passed over instead. For example, the For initializer is connected directly with the first statement in the For
-// statement's body.
+// (*) Although it's not officially a AbstractStatement in the AST class hierarchy, the condition is treated following
+//     as a statement to have it included in the CFG/DFG.
+//
 void ControlFlowGraphVisitor::visit(For &elem) {
-  appendStatementToGraph(elem);
+  auto gNode = appendStatementToGraph(elem);
 
   // initializer (e.g., int i = 0;)
   elem.getInitializer()->accept(*this);
   auto lastStatementInInitializer = lastCreatedNodes;
 
-  // body (For (int i = 0; ... ) { body statements})
+  // condition (e.g., i <= N)
+  handleExpressionsAsStatements = true;
+  elem.getCondition()->accept(*this);
+  auto lastStatementCondition = lastCreatedNodes;
+  handleExpressionsAsStatements = false;
+
+  // body (For (int i = 0; ... ) { body statements })
   elem.getStatementToBeExecuted()->accept(*this);
 
   // update statement (e.g., i=i+1;)
   elem.getUpdateStatement()->accept(*this);
   auto lastStatementInUpdate = lastCreatedNodes;
 
-  // create an edge from update statement to first statement in for-loop's body
-  auto firstBodyStatement = lastStatementInInitializer.front()->children.front();
+  // create an edge from update statement to first statement in for-loop's condition
+  auto firstConditionStatement = lastStatementInInitializer.front()->getControlFlowGraph()->getChildren().front();
   for (auto &updateStmt : lastStatementInUpdate) {
-    updateStmt->addChild(firstBodyStatement);
+    updateStmt->getControlFlowGraph()->addChild(firstConditionStatement);
   }
 
-  // Update the lastCreatedNodes as the next statement must be attached to the For statement node as well as to the
-  // update statement. If the For-loop is not executed once, then the next statement to be executed is the one following
-  // the For statement (after the For statement's body), otherwise the For loop is executed as long as the condition is
-  // True such we need an edge from the update statement to the statement after the For statement.
-  lastCreatedNodes.clear();
-  lastCreatedNodes.insert(lastCreatedNodes.end(), lastStatementInInitializer.begin(), lastStatementInInitializer.end());
-  lastCreatedNodes.insert(lastCreatedNodes.end(), lastStatementInUpdate.begin(), lastStatementInUpdate.end());
+  // restore the last created nodes in the condition as those need to be connected to the next statement
+  lastCreatedNodes = lastStatementCondition;
+
+  postActionsStatementVisited(gNode);
 }
 
 void ControlFlowGraphVisitor::visit(Function &elem) {
-  appendStatementToGraph(elem);
+  auto gNode = appendStatementToGraph(elem);
   Visitor::visit(elem);
+  postActionsStatementVisited(gNode);
 }
 
 // Control flow graph for an If statement:
 //
 //                        If statement
 //                             │
-//             condition=True  │ condition=False
-//            ┌────────────────┴─────────────────┐
+//                             ▼
+//                        If condition*
+//                             │
+//            condition=True   ▼  condition=False
+//            ┌──────────────────────────────────┐
 //            │                                  │
 //            ▼                                  ▼
 //      Then branch                        Else branch
@@ -110,18 +120,27 @@ void ControlFlowGraphVisitor::visit(Function &elem) {
 //            │                                  │
 //            └─────▶   Next statement    ◀──────┘
 //
+// (*) Although it's not officially a AbstractStatement in the AST class hierarchy, the condition is treated following
+//     as a statement to have it included in the CFG/DFG.
+//
 void ControlFlowGraphVisitor::visit(If &elem) {
-  auto ifStmtNode = appendStatementToGraph(elem);
+  auto gNode = appendStatementToGraph(elem);
 
-  // connect the If statement with the first statement in the Then branch
+  // connect the If statement with the If statement's condition
+  handleExpressionsAsStatements = true;
+  elem.getCondition()->accept(*this);
+  handleExpressionsAsStatements = false;
+  auto lastStatementCondition = lastCreatedNodes;
+
+  // connect the If condition with the Then-branch
   elem.getThenBranch()->accept(*this);
   auto lastStatementThenBranch = lastCreatedNodes;
-  lastCreatedNodes.clear();
-  lastCreatedNodes.push_back(ifStmtNode);
 
   // if existing, visit the Else branch
   std::vector<GraphNode *> lastStatementElseBranch;
   if (elem.getElseBranch()!=nullptr) {
+    lastCreatedNodes.clear();
+    lastCreatedNodes = lastStatementCondition;
     elem.getElseBranch()->accept(*this);
     lastStatementElseBranch = lastCreatedNodes;
   }
@@ -130,46 +149,94 @@ void ControlFlowGraphVisitor::visit(If &elem) {
   lastCreatedNodes.clear();
   lastCreatedNodes.insert(lastCreatedNodes.end(), lastStatementThenBranch.begin(), lastStatementThenBranch.end());
   lastCreatedNodes.insert(lastCreatedNodes.end(), lastStatementElseBranch.begin(), lastStatementElseBranch.end());
+
+  postActionsStatementVisited(gNode);
 }
 
 void ControlFlowGraphVisitor::visit(ParameterList &elem) {
+  auto gNode = appendStatementToGraph(elem);
+  auto defaultAccessModeBackup = defaultAccessMode;
+  defaultAccessMode = AccessType::WRITE;
+  // visit FunctionParameter
   Visitor::visit(elem);
+  defaultAccessMode = defaultAccessModeBackup;
+  postActionsStatementVisited(gNode);
 }
 
 void ControlFlowGraphVisitor::visit(Return &elem) {
-  appendStatementToGraph(elem);
+  auto gNode = appendStatementToGraph(elem);
   Visitor::visit(elem);
+  postActionsStatementVisited(gNode);
 }
 
 void ControlFlowGraphVisitor::visit(VarAssignm &elem) {
-  appendStatementToGraph(elem);
+  auto gNode = appendStatementToGraph(elem);
+  markVariableAccess(elem.getVarTargetIdentifier(), AccessType::WRITE);
   Visitor::visit(elem);
+  postActionsStatementVisited(gNode);
 }
 
 void ControlFlowGraphVisitor::visit(VarDecl &elem) {
-  appendStatementToGraph(elem);
+  auto gNode = appendStatementToGraph(elem);
+  markVariableAccess(elem.getVarTargetIdentifier(), AccessType::WRITE);
   Visitor::visit(elem);
+  postActionsStatementVisited(gNode);
 }
 
+// Control flow graph for a While statement:
+//
+//         While Statement
+//                │
+//                ▼
+//    ┌──  While Condition*  ◀─┐
+//    │           │            │
+//    │           ▼            │
+//    │      While Body        │
+//    │     Statement 1        │
+//    │           │            │
+//    │           │            │
+//    │           ▼            │
+//    │          ...           │
+//    │           │            │
+//    │           │            │
+//    │           ▼            │
+//    │      While Body        │
+//    │     Statement N   ─────┘
+//    │
+//    └───▶ Next Statement
+//
+// (*) Although it's not officially a AbstractStatement in the AST class hierarchy, the condition is treated following
+//     as a statement to have it included in the CFG/DFG.
+//
 void ControlFlowGraphVisitor::visit(While &elem) {
-  auto whileGraphNode = appendStatementToGraph(elem);
-  auto lastStatementWhile = lastCreatedNodes;
+  auto gNode = appendStatementToGraph(elem);
+
+  handleExpressionsAsStatements = true;
+  elem.getCondition()->accept(*this);
+  handleExpressionsAsStatements = false;
+  auto conditionStmt = lastCreatedNodes;
+
   elem.getBody()->accept(*this);
 
   // add this While statement as child for each node in lastCreatedNodes
   for (auto &c : lastCreatedNodes) {
-    c->addChild(whileGraphNode);
+    c->getControlFlowGraph()->addChild(conditionStmt.back());
   }
 
-  // restore lastCreatedNodes such that statement following While is connected with While statement instead of the last
-  // statement in the While's body
-  lastCreatedNodes = lastStatementWhile;
+  lastCreatedNodes = conditionStmt;
+  postActionsStatementVisited(gNode);
 }
 
 // === Expressions ===================================
 
 void ControlFlowGraphVisitor::visit(ArithmeticExpr &elem) {
-  Visitor::visit(elem);
+  if (handleExpressionsAsStatements) {
+    auto gNode = appendStatementToGraph(elem);
+    Visitor::visit(elem);
+    postActionsStatementVisited(gNode);
+  } else {
+    Visitor::visit(elem);
+  }
 }
 
 void ControlFlowGraphVisitor::visit(Call &elem) {
@@ -205,7 +272,14 @@ void ControlFlowGraphVisitor::visit(LiteralFloat &elem) {
 }
 
 void ControlFlowGraphVisitor::visit(LogicalExpr &elem) {
-  Visitor::visit(elem);
+  if (handleExpressionsAsStatements) {
+    auto gNode = appendStatementToGraph(elem);
+    handleExpressionsAsStatements = false;
+    Visitor::visit(elem);
+    postActionsStatementVisited(gNode);
+  } else {
+    Visitor::visit(elem);
+  }
 }
 
 void ControlFlowGraphVisitor::visit(Operator &elem) {
@@ -225,6 +299,7 @@ void ControlFlowGraphVisitor::visit(UnaryExpr &elem) {
 }
 
 void ControlFlowGraphVisitor::visit(Variable &elem) {
+  markVariableAccess({elem});
   Visitor::visit(elem);
 }
 
@@ -234,14 +309,14 @@ void ControlFlowGraphVisitor::visit(GetMatrixElement &elem) {
 
 // ===================================================
 
-GraphNode *ControlFlowGraphVisitor::appendStatementToGraph(AbstractStatement &abstractStmt,
-                                                           std::vector<GraphNode *> parentNodes) {
-  auto node = new GraphNode(abstractStmt.castTo<AbstractNode>());
+GraphNode *ControlFlowGraphVisitor::appendStatementToCfg(AbstractNode &abstractStmt,
+                                                         const std::vector<GraphNode *> &parentNodes) {
+  auto node = new GraphNode(&abstractStmt);
   if (parentNodes.empty()) {
     rootNode = node;
   }
   for (auto &p : parentNodes) {
-    p->addChild(node);
+    p->getControlFlowGraph()->addChild(node);
   }
 
   lastCreatedNodes.clear();
@@ -250,13 +325,26 @@ GraphNode *ControlFlowGraphVisitor::appendStatementToGraph(AbstractStatement &ab
   return node;
 }
 
-GraphNode *ControlFlowGraphVisitor::appendStatementToGraph(AbstractStatement &abstractStmt) {
-  return appendStatementToGraph(abstractStmt, lastCreatedNodes);
+GraphNode *ControlFlowGraphVisitor::appendStatementToGraph(AbstractNode &abstractStmt) {
+  return appendStatementToCfg(abstractStmt, lastCreatedNodes);
 }
 
 GraphNode *ControlFlowGraphVisitor::getRootNode() const {
   return rootNode;
 }
 
+void ControlFlowGraphVisitor::postActionsStatementVisited(GraphNode *gNode) {
+  if (gNode!=nullptr) {
+    gNode->setAccessedVariables(std::move(varAccess));
+  } else {
+    varAccess.clear();
+  }
+}
 
+void ControlFlowGraphVisitor::markVariableAccess(const std::string &variableIdentifier, AccessType accessMode) {
+  varAccess.insert(std::make_pair(variableIdentifier, accessMode));
+}
 
+void ControlFlowGraphVisitor::markVariableAccess(Variable &var) {
+  markVariableAccess(var.getIdentifier(), defaultAccessMode);
+}
