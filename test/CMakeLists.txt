@@ -7,7 +7,7 @@ include_directories("${PROJECT_SOURCE_DIR}")
 ##############################
 # Download GoogleTest framework
 ##############################
-if(NOT AST_OPTIMIZER_SKIP_GTEST_INSTALL)
+if (NOT AST_OPTIMIZER_SKIP_GTEST_INSTALL)
     FetchContent_Declare(
             googletest
             GIT_REPOSITORY https://github.com/google/googletest.git
@@ -20,7 +20,8 @@ if(NOT AST_OPTIMIZER_SKIP_GTEST_INSTALL)
         FetchContent_Populate(googletest)
         add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR})
     endif ()
-endif()
+endif ()
+
 ##############################
 # TARGET: testing
 ##############################

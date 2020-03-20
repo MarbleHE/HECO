@@ -1071,7 +1071,7 @@ void AstTestingGenerator::genAstIncludingForStatement(Ast &ast) {
 //      return sum;  // 2*0 + 2*1 + ... + 2*inputA
 //    }
 
-  // int powBase2()
+  // int sumNTimes2()
   auto func = new Function("sumNTimes2");
   auto funcParams = new ParameterList();
   funcParams->addChild(

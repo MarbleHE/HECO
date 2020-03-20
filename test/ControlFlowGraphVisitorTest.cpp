@@ -85,7 +85,7 @@ TEST_F(FlowGraphVisitorFixture, controlFlowGraphIncludingIfStatement) { /* NOLIN
   auto varAssignm44 = new GraphNode(relType, {logicalExpr39});
   auto return50 = new GraphNode(relType, {varAssignm44});
 
-  EXPECT_TRUE(function0->getControlFlowGraph()->areEqualGraphs(fgv.getRootNode()));
+  EXPECT_TRUE(function0->getControlFlowGraph()->areEqualGraphs(fgv.getRootNodeCfg()));
 }
 
 TEST_F(FlowGraphVisitorFixture, traverseAndPrintNodeTest) { /* NOLINT */
@@ -96,7 +96,7 @@ TEST_F(FlowGraphVisitorFixture, traverseAndPrintNodeTest) { /* NOLINT */
   fgv.visit(ast);
 
   std::stringstream generatedOutput;
-  fgv.getRootNode()->getControlFlowGraph()->traverseAndPrintNodes(generatedOutput);
+  fgv.getRootNodeCfg()->getControlFlowGraph()->traverseAndPrintNodes(generatedOutput);
 
   std::string expectedOutput = "(1) Function_0\n"
                                "(1) \tParameterList_3\n"
@@ -138,7 +138,7 @@ TEST_F(FlowGraphVisitorFixture, controlFlowGraphIncludingWhileStatement) { /* NO
   logicalExpr35->getControlFlowGraph()->addParent(varAssignm47);
   auto return51 = new GraphNode(relType, {logicalExpr35});
 
-  EXPECT_TRUE(function0->getControlFlowGraph()->areEqualGraphs(fgv.getRootNode()));
+  EXPECT_TRUE(function0->getControlFlowGraph()->areEqualGraphs(fgv.getRootNodeCfg()));
 }
 
 // Commented output of traverseAndPrintNodes:
@@ -179,7 +179,7 @@ TEST_F(FlowGraphVisitorFixture, controlFlowGraphIncludingForStatement) { /* NOLI
   logicalExpr21->getControlFlowGraph()->addParent(varAssignm28);
   auto return40 = new GraphNode(relType, {logicalExpr21});
 
-  EXPECT_TRUE(function0->getControlFlowGraph()->areEqualGraphs(fgv.getRootNode()));
+  EXPECT_TRUE(function0->getControlFlowGraph()->areEqualGraphs(fgv.getRootNodeCfg()));
 }
 
 TEST_F(FlowGraphVisitorFixture, dataflowGraph_detectedVariableReadWrites) { /* NOLINT */
@@ -190,7 +190,7 @@ TEST_F(FlowGraphVisitorFixture, dataflowGraph_detectedVariableReadWrites) { /* N
   fgv.visit(ast);
 
   // [Function] sumNTimes2
-  auto cfgRootNode = fgv.getRootNode();
+  auto cfgRootNode = fgv.getRootNodeCfg();
   EXPECT_TRUE(checkReadWrites({}, {}, cfgRootNode));
 
   // [ParameterList] (int inputA)

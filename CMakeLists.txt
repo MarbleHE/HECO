@@ -2,10 +2,6 @@ cmake_minimum_required(VERSION 3.14)
 set(CMAKE_CXX_STANDARD 17)
 project(ast_optimizer)
 
-# disable optimizations for BUILD_TYPE=Debug to improve compilation speed
-#SET(CMAKE_CXX_FLAGS_DEBUG "-O0")
-#SET(CMAKE_C_FLAGS_DEBUG "-O0")
-
 ##############################
 # Download nlohmann-json
 ##############################
