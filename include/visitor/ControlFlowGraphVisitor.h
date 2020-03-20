@@ -14,8 +14,8 @@
 // forward declarations
 struct GraphNode;
 
-///
-enum class AccessType { READ, WRITE };
+/// An enum class to describe how a variable was accessed. Supported values are READ and WRITE.
+enum class AccessType { READ = 0, WRITE = 1 };
 
 /// This class constructs the Control Flow Graph (CFG) that represents the program's control flow. Note that the
 /// condition of the AST objects "For", "If", "While" are considered as statements too, although our AST treats them as

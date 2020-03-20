@@ -1,5 +1,7 @@
-#include <GraphNode.h>
 #include "ControlFlowGraphVisitor.h"
+#include <queue>
+#include <tuple>
+#include "GraphNode.h"
 #include "AbstractNode.h"
 #include "ArithmeticExpr.h"
 #include "AbstractStatement.h"
@@ -21,7 +23,7 @@ void ControlFlowGraphVisitor::visit(Ast &elem) {
 // The Control Flow Graph consists of edges between statements only.
 
 void ControlFlowGraphVisitor::visit(Block &elem) {
-  auto gNode = appendStatementToGraph(elem);
+  auto gNode = appendStatementToCfg(elem);
   Visitor::visit(elem);
   postActionsStatementVisited(gNode);
 }
@@ -60,7 +62,7 @@ void ControlFlowGraphVisitor::visit(Block &elem) {
 //     as a statement to have it included in the CFG/DFG.
 //
 void ControlFlowGraphVisitor::visit(For &elem) {
-  auto gNode = appendStatementToGraph(elem);
+  auto gNode = appendStatementToCfg(elem);
 
   // initializer (e.g., int i = 0;)
   elem.getInitializer()->accept(*this);
@@ -92,7 +94,7 @@ void ControlFlowGraphVisitor::visit(For &elem) {
 }
 
 void ControlFlowGraphVisitor::visit(Function &elem) {
-  auto gNode = appendStatementToGraph(elem);
+  auto gNode = appendStatementToCfg(elem);
   Visitor::visit(elem);
   postActionsStatementVisited(gNode);
 }
@@ -124,7 +126,7 @@ void ControlFlowGraphVisitor::visit(Function &elem) {
 //     as a statement to have it included in the CFG/DFG.
 //
 void ControlFlowGraphVisitor::visit(If &elem) {
-  auto gNode = appendStatementToGraph(elem);
+  auto gNode = appendStatementToCfg(elem);
 
   // connect the If statement with the If statement's condition
   handleExpressionsAsStatements = true;
@@ -154,7 +156,7 @@ void ControlFlowGraphVisitor::visit(If &elem) {
 }
 
 void ControlFlowGraphVisitor::visit(ParameterList &elem) {
-  auto gNode = appendStatementToGraph(elem);
+  auto gNode = appendStatementToCfg(elem);
   auto defaultAccessModeBackup = defaultAccessMode;
   defaultAccessMode = AccessType::WRITE;
   // visit FunctionParameter
@@ -164,20 +166,20 @@ void ControlFlowGraphVisitor::visit(ParameterList &elem) {
 }
 
 void ControlFlowGraphVisitor::visit(Return &elem) {
-  auto gNode = appendStatementToGraph(elem);
+  auto gNode = appendStatementToCfg(elem);
   Visitor::visit(elem);
   postActionsStatementVisited(gNode);
 }
 
 void ControlFlowGraphVisitor::visit(VarAssignm &elem) {
-  auto gNode = appendStatementToGraph(elem);
+  auto gNode = appendStatementToCfg(elem);
   markVariableAccess(elem.getVarTargetIdentifier(), AccessType::WRITE);
   Visitor::visit(elem);
   postActionsStatementVisited(gNode);
 }
 
 void ControlFlowGraphVisitor::visit(VarDecl &elem) {
-  auto gNode = appendStatementToGraph(elem);
+  auto gNode = appendStatementToCfg(elem);
   markVariableAccess(elem.getVarTargetIdentifier(), AccessType::WRITE);
   Visitor::visit(elem);
   postActionsStatementVisited(gNode);
@@ -209,7 +211,7 @@ void ControlFlowGraphVisitor::visit(VarDecl &elem) {
 //     as a statement to have it included in the CFG/DFG.
 //
 void ControlFlowGraphVisitor::visit(While &elem) {
-  auto gNode = appendStatementToGraph(elem);
+  auto gNode = appendStatementToCfg(elem);
 
   handleExpressionsAsStatements = true;
   elem.getCondition()->accept(*this);
@@ -231,7 +233,7 @@ void ControlFlowGraphVisitor::visit(While &elem) {
 
 void ControlFlowGraphVisitor::visit(ArithmeticExpr &elem) {
   if (handleExpressionsAsStatements) {
-    auto gNode = appendStatementToGraph(elem);
+    auto gNode = appendStatementToCfg(elem);
     Visitor::visit(elem);
     postActionsStatementVisited(gNode);
   } else {
@@ -273,7 +275,7 @@ void ControlFlowGraphVisitor::visit(LiteralFloat &elem) {
 
 void ControlFlowGraphVisitor::visit(LogicalExpr &elem) {
   if (handleExpressionsAsStatements) {
-    auto gNode = appendStatementToGraph(elem);
+    auto gNode = appendStatementToCfg(elem);
     handleExpressionsAsStatements = false;
     Visitor::visit(elem);
     postActionsStatementVisited(gNode);
@@ -325,11 +327,11 @@ GraphNode *ControlFlowGraphVisitor::appendStatementToCfg(AbstractNode &abstractS
   return node;
 }
 
-GraphNode *ControlFlowGraphVisitor::appendStatementToGraph(AbstractNode &abstractStmt) {
-  return appendStatementToCfg(abstractStmt, lastCreatedNodes);
+GraphNode *ControlFlowGraphVisitor::appendStatementToCfg(AbstractNode &node) {
+  return appendStatementToCfg(node, lastCreatedNodes);
 }
 
-GraphNode *ControlFlowGraphVisitor::getRootNode() const {
+GraphNode *ControlFlowGraphVisitor::getRootNodeCfg() const {
   return rootNode;
 }
 
