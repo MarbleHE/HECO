@@ -145,13 +145,17 @@ void ControlFlowGraphVisitor::visit(If &elem) {
     lastCreatedNodes = lastStatementCondition;
     elem.getElseBranch()->accept(*this);
     lastStatementElseBranch = lastCreatedNodes;
+
+    // add last statement of both branches (then, else)
+    lastCreatedNodes.clear();
+    lastCreatedNodes.insert(lastCreatedNodes.end(), lastStatementThenBranch.begin(), lastStatementThenBranch.end());
+    lastCreatedNodes.insert(lastCreatedNodes.end(), lastStatementElseBranch.begin(), lastStatementElseBranch.end());
+  } else {
+    // add the if statement's condition (if condition is False) and the last statement in the if statement's body
+    lastCreatedNodes.clear();
+    lastCreatedNodes.insert(lastCreatedNodes.end(), lastStatementCondition.begin(), lastStatementCondition.end());
+    lastCreatedNodes.insert(lastCreatedNodes.end(), lastStatementThenBranch.begin(), lastStatementThenBranch.end());
   }
-
-  // add last statement of both branches (then, else)
-  lastCreatedNodes.clear();
-  lastCreatedNodes.insert(lastCreatedNodes.end(), lastStatementThenBranch.begin(), lastStatementThenBranch.end());
-  lastCreatedNodes.insert(lastCreatedNodes.end(), lastStatementElseBranch.begin(), lastStatementElseBranch.end());
-
   postActionsStatementVisited(gNode);
 }
 
