@@ -63,18 +63,53 @@ TEST_F(SecretTaintingFixture, simpleAst_singleStatementTainted) { /* NOLINT */
   // make sure that the visitor collected anything
   ASSERT_FALSE(stv.getSecretTaintingList().empty());
 
-  // find unique node ID of return statement: this and all children of Return should be tainted
+  //  Function_0: (computePrivate) [global]      // tainted
+  //    ParameterList_3: [Function_0]            // tainted
+  //        FunctionParameter_6:
+  //            Datatype_4: (plaintext int)
+  //            Variable_5: (inputA)
+  //        FunctionParameter_9:
+  //            Datatype_7: (plaintext int)
+  //            Variable_8: (inputB)
+  //        FunctionParameter_12:                // tainted
+  //            Datatype_10: (encrypted int)     // tainted
+  //            Variable_11: (inputC)            // tainted
+  //    Block_2:                                 // tainted
+  //        VarDecl_17: (prod) [Block_2]
+  //            Datatype_18: (plaintext int)
+  //            ArithmeticExpr_15:
+  //                Variable_13: (inputA)
+  //                Operator_16: (mult)
+  //                Variable_14: (inputB)
+  //        VarAssignm_23: (argPow)              // tainted
+  //            ArithmeticExpr_21:               // tainted
+  //                Variable_19: (inputC)        // tainted
+  //                Operator_22: (mult)          // tainted
+  //                Variable_20: (inputC)        // tainted
+  //        Return_29:
+  //            ArithmeticExpr_27:
+  //                Variable_24: (prod)
+  //                Operator_28: (div)
+  //                LiteralInt_26: (3)
+
+  // check that exactly 11 nodes are tainted
+  EXPECT_EQ(stv.getSecretTaintingList().size(), 11);
+
+  // Function_0
   auto function = ast.getRootNode()->castTo<Function>();
-  auto taintedRoot = function->getBodyStatements().at(1);
-  addStatementAndItsDescendantsToExpectedTaintedNodes(taintedRoot);
-  // also the FunctionParameter and associated Datatype should be tainted (last Parameter 'inputC' = back)
-  addStatementAndItsDescendantsToExpectedTaintedNodes(ast.getRootNode()->castTo<Function>()->getParameters().back());
-  // add Function itself
   expectedTaintedNodeIds.insert(function->getUniqueNodeId());
-  // add Function's ParameterList
+
+  // ParameterList_3
   expectedTaintedNodeIds.insert(function->getParameterList()->getUniqueNodeId());
-  // add Function's Block
+
+  // FunctionParameter_12 and its descendants
+  addStatementAndItsDescendantsToExpectedTaintedNodes(ast.getRootNode()->castTo<Function>()->getParameters().back());
+
+  // Block_2
   expectedTaintedNodeIds.insert(function->getBody()->getUniqueNodeId());
+
+  // VarAssignm_23 and its descendants
+  addStatementAndItsDescendantsToExpectedTaintedNodes(function->getBodyStatements().at(1));
 
   // check tainted status
   // - make sure that the number of expected tainted nodes and the actual number of tainted nodes equals
@@ -95,22 +130,49 @@ TEST_F(SecretTaintingFixture, simpleAst_multipleStatementsTainted) { /* NOLINT *
   stv.visit(ast);
   // make sure that the visitor collected anything
   ASSERT_FALSE(stv.getSecretTaintingList().empty());
+  EXPECT_EQ(stv.getSecretTaintingList().size(), 22);
 
-  // find the unique node IDs of the last three statements - those are the statements expected to be tainted
-  auto f = ast.getRootNode()->castTo<Function>();
-  // FunctionParameter 'inputA', its associated Datatype and Variable objects
-  addStatementAndItsDescendantsToExpectedTaintedNodes(f->getParameters().front());
-  // ParameterList
-  expectedTaintedNodeIds.insert(f->getParameterList()->getUniqueNodeId());
-  // int prod = inputA * inputB;
-  addStatementAndItsDescendantsToExpectedTaintedNodes(*std::prev(f->getBodyStatements().end(), 3));
-  // prod = prod * inputC;
-  addStatementAndItsDescendantsToExpectedTaintedNodes(*std::prev(f->getBodyStatements().end(), 2));
-  // return prod*3;
-  addStatementAndItsDescendantsToExpectedTaintedNodes(*std::prev(f->getBodyStatements().end(), 1));
-  // as any statement within the Function's body is tainted, the Function and its Block is expected to be tainted too
-  expectedTaintedNodeIds.insert(f->getUniqueNodeId());
-  expectedTaintedNodeIds.insert(f->getBody()->getUniqueNodeId());
+  // Function_0: (computePrivate) [global]        // tainted
+  //     ParameterList_3: [Function_0]            // tainted
+  //         FunctionParameter_6:                 // tainted
+  //             Datatype_4: (encrypted int)      // tainted
+  //             Variable_5: (inputA)             // tainted
+  //         FunctionParameter_9:
+  //             Datatype_7: (plaintext int)
+  //             Variable_8: (inputB)
+  //         FunctionParameter_12:
+  //             Datatype_10: (plaintext int)
+  //             Variable_11: (inputC)
+  //     Block_2:                                 // tainted
+  //         VarDecl_17: (prod) [Block_2]         // tainted
+  //             Datatype_18: (plaintext int)     // tainted
+  //             ArithmeticExpr_15:               // tainted
+  //                 Variable_13: (inputA)        // tainted
+  //                 Operator_16: (mult)          // tainted
+  //                 Variable_14: (inputB)        // tainted
+  //         VarAssignm_23: (prod)                // tainted
+  //             ArithmeticExpr_21:               // tainted
+  //                 Variable_19: (prod)          // tainted
+  //                 Operator_22: (mult)          // tainted
+  //                 Variable_20: (inputC)        // tainted
+  //         Return_29:                           // tainted
+  //             ArithmeticExpr_27:               // tainted
+  //                 Variable_24: (prod)          // tainted
+  //                 Operator_28: (mult)          // tainted
+  //                 LiteralInt_26: (3)           // tainted
+
+  auto function = ast.getRootNode()->castTo<Function>();
+  // Function_0
+  expectedTaintedNodeIds.insert(function->getUniqueNodeId());
+
+  // ParameterList_3
+  expectedTaintedNodeIds.insert(function->getParameterList()->getUniqueNodeId());
+
+  // FunctionParameter_6 and its descendants
+  addStatementAndItsDescendantsToExpectedTaintedNodes(function->getParameters().front());
+
+  // Block_2 and its descendants
+  addStatementAndItsDescendantsToExpectedTaintedNodes(function->getBody());
 
   // check tainted status
   // - make sure that the number of expected tainted nodes and the actual number of tainted nodes equals
@@ -128,46 +190,72 @@ TEST_F(SecretTaintingFixture, complexAst_multipleNonSequentialStatementsTainted)
   stv.visit(ast);
   // make sure that the visitor collected anything
   ASSERT_FALSE(stv.getSecretTaintingList().empty());
+  EXPECT_EQ(stv.getSecretTaintingList().size(), 40);
 
-  // add the statements expected to be tainted to expectedTaintedNodeIds
+  //  Function_0: (computeTotal) [global]                                                      // tainted
+  //      ParameterList_1: [Function_0]
+  //          FunctionParameter_5:
+  //              Datatype_3: (plaintext int)
+  //              Variable_4: (subtotal)
+  //      Block_2:                                                                             // tainted
+  //          VarDecl_14: (qualifiesForSpecialDiscount) [Block_2]
+  //              Datatype_6: (plaintext bool)
+  //              UnaryExpr_12:
+  //                  Operator_13: (!)
+  //                  LogicalExpr_10:
+  //                      Variable_7: (subtotal)
+  //                      Operator_11: (<)
+  //                      LiteralInt_9: (1000)
+  //          VarDecl_51: (discount)                                                           // tainted
+  //              Datatype_45: (encrypted float)                                               // tainted
+  //              Call_49:                                                                     // tainted
+  //                  FunctionParameter_48: [Block_2]                                          // tainted
+  //                      Datatype_46: (encrypted bool)                                        // tainted
+  //                      Variable_47: (qualifiesForSpecialDiscount)                           // tainted
+  //                  Function_15: (computeDiscountOnServer) [Call_49]                         // tainted
+  //                      ParameterList_16: [Function_15]                                      // tainted
+  //                          FunctionParameter_20:                                            // tainted
+  //                              Datatype_18: (encrypted bool)                                // tainted
+  //                              Variable_19: (qualifiesForSpecialDiscount)                   // tainted
+  //                      Block_17:                                                            // tainted
+  //                          VarDecl_24: (discountRate) [Block_17]                            // tainted
+  //                              Datatype_21: (encrypted float)                               // tainted
+  //                              LiteralFloat_23: (0)                                         // tainted
+  //                          Block_42:                                                        // tainted
+  //                              VarAssignm_41: (discountRate) [Block_42]                     // tainted
+  //                                  ArithmeticExpr_39:                                       // tainted
+  //                                      ArithmeticExpr_28:                                   // tainted
+  //                                          Variable_25: (qualifiesForSpecialDiscount)       // tainted
+  //                                          Operator_29: (mult)                              // tainted
+  //                                          LiteralFloat_27: (0.9)                           // tainted
+  //                                      Operator_40: (add)                                   // tainted
+  //                                      ArithmeticExpr_37:                                   // tainted
+  //                                          ArithmeticExpr_33:                               // tainted
+  //                                              LiteralInt_31: (1)                           // tainted
+  //                                              Operator_34: (sub)                           // tainted
+  //                                              Variable_32: (qualifiesForSpecialDiscount)   // tainted
+  //                                          Operator_38: (mult)                              // tainted
+  //                                          LiteralFloat_36: (0.98)                          // tainted
+  //                          Return_44: [Block_17]                                            // tainted
+  //                              Variable_43: (discountRate)                                  // tainted
+  //          Return_56:                                                                       // tainted
+  //              ArithmeticExpr_54:                                                           // tainted
+  //                  Variable_52: (subtotal)                                                  // tainted
+  //                  Operator_55: (mult)                                                      // tainted
+  //                  Variable_53: (discount)                                                  // tainted
+
   auto func = ast.getRootNode()->castTo<Function>();
-  // Function computeTotal and its Block
+
+  // Function_0
   expectedTaintedNodeIds.insert(func->getUniqueNodeId());
+
+  // Block_2
   expectedTaintedNodeIds.insert(func->getBody()->getUniqueNodeId());
-  // VarAssignm secret_float discount = computeDiscountOnServer(...)
-  expectedTaintedNodeIds.insert(func->getBodyStatements().at(1)->getUniqueNodeId());
-  // Datatype of VarAssignm
-  expectedTaintedNodeIds.insert(func->getBodyStatements().at(1)->castTo<VarDecl>()->getDatatype()->getUniqueNodeId());
-  // Call computeDiscountOnServer, it's associated ParameterList, FunctionParameter (parameter values for the called
-  // function) and Datatype
-  auto callComputeDiscountOnServer =
-      func->getBodyStatements().at(1)->castTo<VarDecl>()->getInitializer()->castTo<Call>();
-  expectedTaintedNodeIds.insert(callComputeDiscountOnServer->AbstractExpr::getUniqueNodeId());
-  addStatementAndItsDescendantsToExpectedTaintedNodes(callComputeDiscountOnServer->getArguments().front());
-  expectedTaintedNodeIds.insert(callComputeDiscountOnServer->getParameterList()->getUniqueNodeId());
-  // Function computeDiscountOnServer associated to the Call and the Function's Block
-  auto funcComputeDiscountOnServer = callComputeDiscountOnServer->getFunc();
-  expectedTaintedNodeIds.insert(funcComputeDiscountOnServer->getUniqueNodeId());
-  expectedTaintedNodeIds.insert(funcComputeDiscountOnServer->getBody()->getUniqueNodeId());
-  // FunctionParameter 'bool qualifiesForSpecialDiscount', its associated ParameterList, Datatype and Variable
-  expectedTaintedNodeIds.insert(funcComputeDiscountOnServer->getParameterList()->getUniqueNodeId());
-  expectedTaintedNodeIds.insert(funcComputeDiscountOnServer->getParameters().front()->getUniqueNodeId());
-  addStatementAndItsDescendantsToExpectedTaintedNodes(funcComputeDiscountOnServer->getParameters().front());
-  // VarDecl (statement 0 in computeDiscountOnServer)
-  addStatementAndItsDescendantsToExpectedTaintedNodes(funcComputeDiscountOnServer->getBodyStatements().at(0));
-  // Block (statement 1 in computeDiscountOnServer)
-  expectedTaintedNodeIds.insert(funcComputeDiscountOnServer->getBodyStatements().at(1)->getUniqueNodeId());
-  for (auto statement : funcComputeDiscountOnServer->getBodyStatements().at(1)->castTo<Block>()->getStatements())
-    addStatementAndItsDescendantsToExpectedTaintedNodes(statement);
-  // all other statements in computeDiscountOnServer body
-  auto bodyStatements = funcComputeDiscountOnServer->getBodyStatements();
-  auto cdosIterator = bodyStatements.begin();
-  // advance the iterator by 2 as we already handled statement 0 (VarDecl) and statement 1 (Block)
-  std::advance(cdosIterator, 2);
-  for (; cdosIterator!=bodyStatements.end(); ++cdosIterator) {
-    addStatementAndItsDescendantsToExpectedTaintedNodes(*cdosIterator);
-  }
-  // return subtotal*discount;
+
+  // VarDecl_51 and its descendants
+  addStatementAndItsDescendantsToExpectedTaintedNodes(func->getBodyStatements().at(1));
+
+  // Return_56 and its descendants
   addStatementAndItsDescendantsToExpectedTaintedNodes(func->getBodyStatements().at(2));
 
   // check tainted status
