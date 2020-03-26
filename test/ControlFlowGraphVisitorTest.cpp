@@ -121,7 +121,7 @@ TEST_F(FlowGraphVisitorFixture, controlFlowGraphIncludingIfStatement) { /* NOLIN
   auto if45 = new GraphNode(relType, {varAssignm26, varAssignm33});
   auto logicalExpr39 = new GraphNode(relType, {if45});
   auto varAssignm44 = new GraphNode(relType, {logicalExpr39});
-  auto return50 = new GraphNode(relType, {varAssignm44});   /* NOLINT ignore_unused */
+  auto return50 = new GraphNode(relType, {varAssignm44, logicalExpr39});   /* NOLINT ignore_unused */
 
   // check that the CFG's structure is correct
   EXPECT_TRUE(function0->getControlFlowGraph()->areEqualGraphs(fgv.getRootNodeCfg()));
@@ -139,6 +139,8 @@ TEST_F(FlowGraphVisitorFixture, traverseAndPrintNodeTest) { /* NOLINT */
   ControlFlowGraphVisitor fgv;
   fgv.visit(ast);
 
+  fgv.getRootNodeCfg()->getControlFlowGraph()->traverseAndPrintNodes();
+
   std::stringstream generatedOutput;
   fgv.getRootNodeCfg()->getControlFlowGraph()->traverseAndPrintNodes(generatedOutput);
 
@@ -150,9 +152,10 @@ TEST_F(FlowGraphVisitorFixture, traverseAndPrintNodeTest) { /* NOLINT */
                                "(1) \t\t\t\t\tBlock_27\n"
                                "(1) \t\t\t\t\t\tVarAssignm_26\n"
                                "(1) \t\t\t\t\t\t\tIf_45\n"
-                               "(1) \t\t\t\t\t\t\t\tLogicalExpr_39\n"
+                               "(2) \t\t\t\t\t\t\t\tLogicalExpr_39\n"
                                "(1) \t\t\t\t\t\t\t\t\tVarAssignm_44\n"
                                "(0) \t\t\t\t\t\t\t\t\t\tReturn_50\n"
+                               "(0) \t\t\t\t\t\t\t\t\tReturn_50\n"
                                "(1) \t\t\t\t\tBlock_34\n"
                                "(1) \t\t\t\t\t\tVarAssignm_33\n"
                                "(1) \t\t\t\t\t\t\tIf_45\n"
