@@ -277,12 +277,61 @@ TEST_F(SecretTaintingFixture, unsupportedStatement_While) {  /* NOLINT */
 }
 
 TEST_F(SecretTaintingFixture, unsupportedStatement_If) {  /* NOLINT */
-  // id=4 generates an AST containing an unsupported If statement
-  generateAst(4);
+  generateAst(36);
 
   // perform tainting
   SecretTaintingVisitor stv;
-  ASSERT_THROW(stv.visit(ast), std::invalid_argument);
+  stv.visit(ast);
+  EXPECT_EQ(stv.getSecretTaintingList().size(), 9);
+
+  // Function_0: (simpleIfConditionalAssignment) [global]  // tainted
+  //     ParameterList_1: [Function_0]                     // tainted
+  //         FunctionParameter_5:                          // tainted
+  //             Datatype_3: (encrypted int)               // tainted
+  //             Variable_4: (cond)                        // tainted
+  //     Block_2:                                          // tainted
+  //         VarDecl_6: (a) [Block_2]
+  //             Datatype_7: (plaintext int)
+  //             LiteralInt_9: (1)
+  //         If_21:                                         // tainted
+  //             LogicalExpr_13:                            // tainted
+  //                 Variable_10: (cond)                    // tainted
+  //                 Operator_14: (>)
+  //                 LiteralInt_12: (11)
+  //             VarAssignm_17: (a) [VarAssignm_17]
+  //                 LiteralInt_16: (83)
+  //             VarAssignm_20: (a) [Block_2]
+  //                 LiteralInt_19: (11)
+  //         Return_23:
+  //             Variable_22: (a)
+
+  auto function = ast.getRootNode()->castTo<Function>();
+  // Function_0
+  expectedTaintedNodeIds.insert(function->getUniqueNodeId());
+
+  // ParameterList_1 and its descendants
+  addStatementAndItsDescendantsToExpectedTaintedNodes(function->getParameterList());
+
+  // Block_2
+  expectedTaintedNodeIds.insert(function->getBody()->getUniqueNodeId());
+
+  // If_21
+  expectedTaintedNodeIds.insert(function->getBody()->getChildAtIndex(1)->getUniqueNodeId());
+
+  // LogicalExpr_13
+  expectedTaintedNodeIds.insert(function->getBody()->getChildAtIndex(1)->getChildAtIndex(0)->getUniqueNodeId());
+
+  // Variable_10
+  expectedTaintedNodeIds
+      .insert(function->getBody()->getChildAtIndex(1)->getChildAtIndex(0)->getChildAtIndex(0)->getUniqueNodeId());
+
+  // check tainted status
+  // - make sure that the number of expected tainted nodes and the actual number of tainted nodes equals
+  EXPECT_EQ(stv.getSecretTaintingList().size(), expectedTaintedNodeIds.size());
+  // - check for each tainted if its expected to be tainted
+  for (auto &nodeId : stv.getSecretTaintingList())
+    EXPECT_EQ(expectedTaintedNodeIds.count(nodeId), 1)
+              << "Node (" << nodeId << ") is tainted but not expected to be tainted.";
 }
 
 TEST_F(SecretTaintingFixture, unsupportedStatement_CallExternal) {  /* NOLINT */

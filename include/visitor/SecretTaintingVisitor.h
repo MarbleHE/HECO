@@ -25,34 +25,61 @@ class SecretTaintingVisitor : public Visitor {
   [[nodiscard]] const std::set<std::string> &getSecretTaintingList() const;
 
   void visit(ArithmeticExpr &elem) override;
+
   void visit(Block &elem) override;
+
   void visit(Call &elem) override;
+
   void visit(CallExternal &elem) override;
+
   void visit(Function &elem) override;
+
   void visit(FunctionParameter &elem) override;
+
   void visit(If &elem) override;
+
   void visit(LiteralBool &elem) override;
+
   void visit(LiteralInt &elem) override;
+
   void visit(LiteralString &elem) override;
+
   void visit(LiteralFloat &elem) override;
+
   void visit(LogicalExpr &elem) override;
+
   void visit(Operator &elem) override;
+
   void visit(Return &elem) override;
+
   void visit(UnaryExpr &elem) override;
+
   void visit(VarAssignm &elem) override;
+
   void visit(VarDecl &elem) override;
+
   void visit(Variable &elem) override;
+
   void visit(While &elem) override;
+
   void visit(Ast &elem) override;
+
   void visit(Datatype &elem) override;
+
   void visit(ParameterList &elem) override;
+
   void visit(For &elem) override;
+
   void visit(Rotate &elem) override;
 
   bool nodeIsTainted(AbstractNode &node) const;
+
   void addTaintedNodes(std::vector<AbstractNode *> nodesToAdd);
+
   void addTaintedNode(AbstractNode *node);
+
   [[nodiscard]] bool anyNodesAreTainted(std::vector<AbstractNode *> nodes) const;
+
   void checkAndAddTaintedChildren(AbstractStatement *n, std::vector<std::string> varIdentifiersInRhs);
 
   template<class RandomAccessIterator>
@@ -70,10 +97,6 @@ class SecretTaintingVisitor : public Visitor {
       return std::find(taintedVariables.begin(), taintedVariables.end(), identifier)!=taintedVariables.end();
     });
   }
-
-  void visit(Transpose &elem) override;
-
-  void visit(GetMatrixElement &elem) override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_VISITOR_SECRETTAINTINGVISITOR_H_
