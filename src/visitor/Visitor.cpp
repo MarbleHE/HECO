@@ -54,7 +54,7 @@ void Visitor::visit(AbstractStatement &elem) {
 
 void Visitor::visit(ArithmeticExpr &elem) {
   elem.getLeft()->accept(*this);
-  elem.getOp()->accept(*this);
+  elem.getOperator()->accept(*this);
   elem.getRight()->accept(*this);
 }
 
@@ -174,7 +174,7 @@ void Visitor::visit(LogicalExpr &elem) {
   // left
   elem.getLeft()->accept(*this);
   // operator
-  elem.getOp()->accept(*this);
+  elem.getOperator()->accept(*this);
   // right
   elem.getRight()->accept(*this);
 }

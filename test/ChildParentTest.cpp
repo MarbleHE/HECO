@@ -14,6 +14,7 @@
 #include "VarAssignm.h"
 #include "VarDecl.h"
 #include "For.h"
+#include "OperatorExpr.h"
 
 class ArithmeticExprFixture : public ::testing::Test {
  protected:
@@ -96,7 +97,7 @@ TEST_F(ArithmeticExprFixture, ArithmeticExprAddChildSuccess) {  /* NOLINT */
   EXPECT_EQ(arithmeticExpr->getChildren().size(), 3);
   EXPECT_EQ(arithmeticExpr->getLeft(), newLeft);
   EXPECT_EQ(arithmeticExpr->getChildAtIndex(0), newLeft);
-  EXPECT_EQ(arithmeticExpr->getOp(), operatorAdd);
+  EXPECT_EQ(arithmeticExpr->getOperator(), operatorAdd);
   EXPECT_TRUE(reinterpret_cast<Operator *>(arithmeticExpr->getChildAtIndex(1))->equals(opSymb));
   EXPECT_EQ(arithmeticExpr->getRight(), right);
   EXPECT_EQ(arithmeticExpr->getChildAtIndex(2), right);
@@ -540,7 +541,7 @@ TEST_F(LogicalExprFixture, LogicalExprAddChildSuccess) {  /* NOLINT */
   EXPECT_EQ(logicalExpr->getChildren().size(), 3);
   EXPECT_EQ(logicalExpr->getLeft(), literalIntAnother);
   EXPECT_EQ(logicalExpr->getChildAtIndex(0), literalIntAnother);
-  EXPECT_EQ(logicalExpr->getOp(), operatorGreaterEqual);
+  EXPECT_EQ(logicalExpr->getOperator(), operatorGreaterEqual);
   EXPECT_TRUE(reinterpret_cast<Operator *>(logicalExpr->getChildAtIndex(1))->equals(opSymb));
   EXPECT_EQ(logicalExpr->getRight(), literalBool);
   EXPECT_EQ(logicalExpr->getChildAtIndex(2), literalBool);
@@ -806,7 +807,7 @@ class WhileStmtFixture : public ::testing::Test {
   }
 };
 
-TEST_F(WhileStmtFixture, WhileStandardConstructor) {
+TEST_F(WhileStmtFixture, WhileStandardConstructor) {  /* NOLINT */
   auto whileStmt = new While(whileCondition, whileBlock);
 
   EXPECT_EQ(whileStmt->getMaxNumberChildren(), 2);
@@ -852,7 +853,7 @@ class ForLoopFixture : public ::testing::Test {
   }
 };
 
-TEST_F(ForLoopFixture, ForStmtStandardConstructor) {
+TEST_F(ForLoopFixture, ForStmtStandardConstructor) {  /* NOLINT */
   auto forStmt = new For(forInitializer, forCondition, forUpdate, forBody);
 
   // children
@@ -874,12 +875,12 @@ TEST_F(ForLoopFixture, ForStmtStandardConstructor) {
   EXPECT_TRUE(forStmt->getChildAtIndex(3)->hasParent(forStmt));
 }
 
-TEST_F(ForLoopFixture, ForStmt_NoEmptyChildSpotAvailable) {
+TEST_F(ForLoopFixture, ForStmt_NoEmptyChildSpotAvailable) {  /* NOLINT */
   auto forStmt = new For(forInitializer, forCondition, forUpdate, forBody);
   EXPECT_THROW(forStmt->addChild(new VarAssignm("a", new LiteralInt(1))), std::logic_error);
 }
 
-TEST_F(ForLoopFixture, ForStmtAddChildSuccess) {
+TEST_F(ForLoopFixture, ForStmtAddChildSuccess) {  /* NOLINT */
   auto forStmt = new For(forInitializer, forCondition, forUpdate, forBody);
   forStmt->removeChild(forBody);
 

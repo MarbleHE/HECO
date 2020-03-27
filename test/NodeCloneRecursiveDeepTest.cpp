@@ -62,8 +62,8 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_ArithmeticExpr) {  /* NOLINT */
 
   // make changes to the operator and check whether clone changes too
   *operatore = *new Operator(ArithmeticOp::MULTIPLICATION);
-  ASSERT_TRUE(arithmeticExpression->getOp()->castTo<Operator>()->equals(ArithmeticOp::MULTIPLICATION));
-  ASSERT_TRUE(clonedArithmeticExprCasted->getOp()->equals(ArithmeticOp::ADDITION));
+  ASSERT_TRUE(arithmeticExpression->getOperator()->castTo<Operator>()->equals(ArithmeticOp::MULTIPLICATION));
+  ASSERT_TRUE(clonedArithmeticExprCasted->getOperator()->equals(ArithmeticOp::ADDITION));
 }
 
 TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_LogicalExpr) {  /* NOLINT */
@@ -92,8 +92,8 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_LogicalExpr) {  /* NOLINT */
 
   // make changes to the operator and check whether clone changes too
   *operatore = *new Operator(LogCompOp::SMALLER);
-  ASSERT_TRUE(logicalExpression->getOp()->castTo<Operator>()->equals(LogCompOp::SMALLER));
-  ASSERT_TRUE(clonedLogicalExpr->getOp()->equals(LogCompOp::GREATER));
+  ASSERT_TRUE(logicalExpression->getOperator()->castTo<Operator>()->equals(LogCompOp::SMALLER));
+  ASSERT_TRUE(clonedLogicalExpr->getOperator()->equals(LogCompOp::GREATER));
 }
 
 TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_If) {  /* NOLINT */
@@ -124,12 +124,12 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_If) {  /* NOLINT */
                                  new LiteralInt(1));
   // check if changes were applied to the original one
   ASSERT_EQ(ifStmt->getCondition()->castTo<LogicalExpr>()->getLeft()->castTo<LiteralInt>()->getValue(), 99);
-  ASSERT_TRUE(ifStmt->getCondition()->castTo<LogicalExpr>()->getOp()->equals(LogCompOp::SMALLER));
+  ASSERT_TRUE(ifStmt->getCondition()->castTo<LogicalExpr>()->getOperator()->equals(LogCompOp::SMALLER));
   ASSERT_EQ(ifStmt->getCondition()->castTo<LogicalExpr>()->getRight()->castTo<LiteralInt>()->getValue(), 1);
   // check if changes were applied to the cloned one
   auto clonedIfCondition = clonedIfStmt->getCondition()->castTo<LogicalExpr>();
   ASSERT_EQ(clonedIfCondition->getLeft()->castTo<LiteralInt>()->getValue(), 12);
-  ASSERT_TRUE(clonedIfCondition->getOp()->equals(LogCompOp::GREATER));
+  ASSERT_TRUE(clonedIfCondition->getOperator()->equals(LogCompOp::GREATER));
   ASSERT_EQ(clonedIfCondition->getRight()->castTo<LiteralInt>()->getValue(), 43);
 
   // check if changing the then branch in the original also changes the cloned If statement

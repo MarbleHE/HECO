@@ -50,7 +50,7 @@ void EvaluationVisitor::visit(ArithmeticExpr &elem) {
   elem.getRight()->accept(*this);
   auto r = getOnlyEvaluationResult(results.top());
   results.pop();
-  results.push({elem.getOp()->applyOperator(l, r)});
+  results.push({elem.getOperator()->applyOperator(l, r)});
 }
 
 void EvaluationVisitor::visit(Block &elem) {
@@ -201,7 +201,7 @@ void EvaluationVisitor::visit(LogicalExpr &elem) {
   elem.getRight()->accept(*this);
   auto r = getOnlyEvaluationResult(results.top());
   results.pop();
-  results.push({elem.getOp()->applyOperator(l, r)});
+  results.push({elem.getOperator()->applyOperator(l, r)});
 }
 
 void EvaluationVisitor::visit(Operator &elem) {

@@ -26,7 +26,7 @@ ArithmeticExpr::~ArithmeticExpr() = default;
 
 ArithmeticExpr *ArithmeticExpr::clone(bool keepOriginalUniqueNodeId) {
   auto clonedNode = new ArithmeticExpr(this->getLeft()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
-                                       this->getOp()->clone(keepOriginalUniqueNodeId)->castTo<Operator>(),
+                                       this->getOperator()->clone(keepOriginalUniqueNodeId)->castTo<Operator>(),
                                        this->getRight()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
   clonedNode->updateClone(keepOriginalUniqueNodeId, this);
   return clonedNode;

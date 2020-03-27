@@ -10,7 +10,7 @@ void MultRewriteVisitor::visit(Ast &elem) {
 
 void MultRewriteVisitor::visit(ArithmeticExpr &elem) {
   // If current ArithmeticExpr is a multiplication
-  if (elem.getOp()->equals(ArithmeticOp::MULTIPLICATION)) {
+  if (elem.getOperator()->equals(ArithmeticOp::MULTIPLICATION)) {
     // A. For case "int result = (A * (B * C))" where multiple ArithmeticExpr are in the same statement
     if (auto lStat = curScope->getLastStatement()) {
       // If the statement contains another (higher tree level) ArithmeticExpr (exclude subtree of cur. ArithmeticExpr) ...

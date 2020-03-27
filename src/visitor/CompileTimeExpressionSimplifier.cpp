@@ -19,6 +19,7 @@
 #include "Call.h"
 #include "Rotate.h"
 #include "Transpose.h"
+#include "OperatorExpr.h"
 
 CompileTimeExpressionSimplifier::CompileTimeExpressionSimplifier() {
   evalVisitor = EvaluationVisitor();
@@ -234,7 +235,7 @@ void CompileTimeExpressionSimplifier::handleBinaryExpression(AbstractBinaryExpr 
     nodesQueuedForDeletion.push_back(&arithmeticExpr);
   } else {
     // update accumulator
-    auto currentOperator = arithmeticExpr.getOp();
+    auto currentOperator = arithmeticExpr.getOperator();
 
     // check if we need to reset the binaryExpressionAccumulator:
     // this is the case if either we are visiting the first binary expression in this statement or the operator of the
@@ -294,7 +295,7 @@ void CompileTimeExpressionSimplifier::visit(ArithmeticExpr &elem) {
   // clean up temporary results from children in removableNodes map
   removableNodes.erase(elem.getLeft());
   removableNodes.erase(elem.getRight());
-  removableNodes.erase(elem.getOp());
+  removableNodes.erase(elem.getOperator());
 }
 
 void CompileTimeExpressionSimplifier::visit(LogicalExpr &elem) {
@@ -324,20 +325,23 @@ void CompileTimeExpressionSimplifier::visit(LogicalExpr &elem) {
     // <anything> AND true  ==  <anything>
     // <anything> OR false  ==  <anything>
     // <anything> XOR false  ==  <anything>
-    if ((elem.getOp()->equals(LOGICAL_AND) && booleanOperand->getValue())
-        || (elem.getOp()->equals(LOGICAL_OR) && !booleanOperand->getValue())
-        || (elem.getOp()->equals(LOGICAL_XOR) && !booleanOperand->getValue())) {
+    if ((elem.getOperator()->equals(LOGICAL_AND) && booleanOperand->getValue())
+        || (elem.getOperator()->equals(LOGICAL_OR) && !booleanOperand->getValue())
+        || (elem.getOperator()->equals(LOGICAL_XOR) && !booleanOperand->getValue())) {
       nonBooleanOperand->removeFromParents();
       elem.getOnlyParent()->replaceChild(&elem, nonBooleanOperand);
       nodesQueuedForDeletion.push_back(&elem);
-    } else if (elem.getOp()->equals(LOGICAL_AND) && !booleanOperand->getValue()) {  // <anything> AND false  ==  false
+    } else if (elem.getOperator()->equals(LOGICAL_AND) && !booleanOperand->getValue()) {
+      // <anything> AND false  ==  false
       elem.getOnlyParent()->replaceChild(&elem, new LiteralBool(false));
       nodesQueuedForDeletion.push_back(nonBooleanOperand);
-    } else if (elem.getOp()->equals(LOGICAL_OR) && booleanOperand->getValue()) {   // <anything> OR true  ==  true
+    } else if (elem.getOperator()->equals(LOGICAL_OR) && booleanOperand->getValue()) {
+      // <anything> OR true  ==  true
       elem.getOnlyParent()->replaceChild(&elem, new LiteralBool(true));
       nodesQueuedForDeletion.push_back(nonBooleanOperand);
-    } else if (elem.getOp()->equals(LOGICAL_XOR)
-        && booleanOperand->getValue()) {  // <anything> XOR true  ==  NOT <anything>
+    } else if (elem.getOperator()->equals(LOGICAL_XOR)
+        && booleanOperand->getValue()) {
+      // <anything> XOR true  ==  NOT <anything>
       nonBooleanOperand->removeFromParents();
       auto uexp = new UnaryExpr(NEGATION, nonBooleanOperand);
       elem.getOnlyParent()->replaceChild(&elem, uexp);
@@ -350,7 +354,7 @@ void CompileTimeExpressionSimplifier::visit(LogicalExpr &elem) {
   // clean up temporary results from children in removableNodes map
   removableNodes.erase(elem.getLeft());
   removableNodes.erase(elem.getRight());
-  removableNodes.erase(elem.getOp());
+  removableNodes.erase(elem.getOperator());
 }
 
 void CompileTimeExpressionSimplifier::visit(UnaryExpr &elem) {

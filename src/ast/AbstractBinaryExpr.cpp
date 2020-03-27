@@ -12,7 +12,7 @@ AbstractExpr *AbstractBinaryExpr::getLeft() const {
   return reinterpret_cast<AbstractExpr * >(getChildAtIndex(0, true));
 }
 
-Operator *AbstractBinaryExpr::getOp() const {
+Operator *AbstractBinaryExpr::getOperator() const {
   return reinterpret_cast<Operator *>(getChildAtIndex(1, true));
 }
 
@@ -28,7 +28,7 @@ json AbstractBinaryExpr::toJson() const {
   json j;
   j["type"] = getNodeType();
   j["leftOperand"] = getLeft() ? getLeft()->toJson() : "";
-  j["operator"] = getOp() ? getOp()->getOperatorString() : "";
+  j["operator"] = getOperator() ? getOperator()->getOperatorString() : "";
   j["rightOperand"] = getRight() ? getRight()->toJson() : "";
   return j;
 }
@@ -45,7 +45,7 @@ bool AbstractBinaryExpr::isEqual(AbstractExpr *other) {
   if (auto otherLexp = dynamic_cast<AbstractBinaryExpr *>(other)) {
     auto sameLeft = this->getLeft()->isEqual(otherLexp->getLeft());
     auto sameRight = this->getRight()->isEqual(otherLexp->getRight());
-    auto sameOp = *this->getOp()==*otherLexp->getOp();
+    auto sameOp = *this->getOperator()==*otherLexp->getOperator();
     return sameLeft && sameRight && sameOp;
   }
   return false;
@@ -77,7 +77,8 @@ AbstractBinaryExpr *AbstractBinaryExpr::contains(AbstractBinaryExpr *aexpTemplat
   } else {
     bool emptyOrEqualLeft = (!aexpTemplate->getLeft() || aexpTemplate->getLeft()==this->getLeft());
     bool emptyOrEqualRight = (!aexpTemplate->getRight() || aexpTemplate->getRight()==this->getRight());
-    bool emptyOrEqualOp = (aexpTemplate->getOp()->isUndefined() || *this->getOp()==*aexpTemplate->getOp());
+    bool emptyOrEqualOp =
+        (aexpTemplate->getOperator()->isUndefined() || *this->getOperator()==*aexpTemplate->getOperator());
     return (emptyOrEqualLeft && emptyOrEqualRight && emptyOrEqualOp) ? this : nullptr;
   }
 }
@@ -85,6 +86,6 @@ AbstractBinaryExpr *AbstractBinaryExpr::contains(AbstractBinaryExpr *aexpTemplat
 void AbstractBinaryExpr::swapOperandsLeftAWithRightB(AbstractBinaryExpr *aexpA, AbstractBinaryExpr *aexpB) {
   auto lopA = aexpA->getLeft();
   auto ropB = aexpB->getRight();
-  aexpA->setAttributes(ropB, aexpA->getOp(), aexpA->getRight());
-  aexpB->setAttributes(aexpB->getLeft(), aexpB->getOp(), lopA);
+  aexpA->setAttributes(ropB, aexpA->getOperator(), aexpA->getRight());
+  aexpB->setAttributes(aexpB->getLeft(), aexpB->getOperator(), lopA);
 }

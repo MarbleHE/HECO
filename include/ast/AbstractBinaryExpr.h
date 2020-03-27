@@ -9,7 +9,7 @@ class AbstractBinaryExpr : public AbstractExpr {
 
   [[nodiscard]] AbstractExpr *getLeft() const;
 
-  [[nodiscard]] Operator *getOp() const;
+  [[nodiscard]] Operator *getOperator() const;
 
   [[nodiscard]] AbstractExpr *getRight() const;
 

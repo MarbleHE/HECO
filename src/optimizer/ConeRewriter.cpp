@@ -153,7 +153,7 @@ std::vector<AbstractNode *> ConeRewriter::getReducibleCones(AbstractNode *v, int
 
   // return v if at least one predecessor of v is non-critical and v is an AND-gate
   auto logicalExp = v->castTo<LogicalExpr>();
-  if (P->size() < 2 && logicalExp!=nullptr && logicalExp->getOp()->equals(LogCompOp::LOGICAL_AND)) {
+  if (P->size() < 2 && logicalExp!=nullptr && logicalExp->getOperator()->equals(LogCompOp::LOGICAL_AND)) {
     // return set consisting of start node v only
     return std::vector<AbstractNode *>{v};
   }
@@ -172,16 +172,17 @@ std::vector<AbstractNode *> ConeRewriter::getReducibleCones(AbstractNode *v, int
   // b. v is an AND-gate and deltaR is empty
   // c. v is a XOR-gate and size of deltaR does not equal size of P
   if (logicalExp==nullptr ||
-      !(logicalExp->getOp()->equals(LogCompOp::LOGICAL_AND) || logicalExp->getOp()->equals(LogCompOp::LOGICAL_XOR)) ||
-      (logicalExp->getOp()->equals(LogCompOp::LOGICAL_AND) && deltaR.empty()) ||
-      (logicalExp->getOp()->equals(LogCompOp::LOGICAL_XOR) && deltaR.size()!=P->size())) {
+      !(logicalExp->getOperator()->equals(LogCompOp::LOGICAL_AND)
+          || logicalExp->getOperator()->equals(LogCompOp::LOGICAL_XOR)) ||
+      (logicalExp->getOperator()->equals(LogCompOp::LOGICAL_AND) && deltaR.empty()) ||
+      (logicalExp->getOperator()->equals(LogCompOp::LOGICAL_XOR) && deltaR.size()!=P->size())) {
     return std::vector<AbstractNode *>();
   }
 
-  if (logicalExp->getOp()->equals(LogCompOp::LOGICAL_AND)) {
+  if (logicalExp->getOperator()->equals(LogCompOp::LOGICAL_AND)) {
     // both cones must be reducible because deltaR is non-empty -> pick a random one, and assign to delta
     delta = *select_randomly(deltaR.begin(), deltaR.end());
-  } else if (logicalExp->getOp()->equals(LogCompOp::LOGICAL_XOR)) {
+  } else if (logicalExp->getOperator()->equals(LogCompOp::LOGICAL_XOR)) {
     // critical cones must be reducible because size of deltaR equals size of P
     // flatten vector deltaR consisting of sets generated each by getReducibleCones
     std::vector<AbstractNode *> flattenedDeltaR;
@@ -266,7 +267,7 @@ std::vector<AbstractNode *> ConeRewriter::getAndCriticalCircuit(std::vector<Abst
   // remove non-AND nodes from delta (note: delta is passed as copy-by-value) as delta may also include XOR nodes
   delta.erase(remove_if(delta.begin(), delta.end(), [](AbstractNode *d) {
     auto lexp = dynamic_cast<LogicalExpr *>(d);
-    return (lexp==nullptr || !lexp->getOp()->equals(LogCompOp::LOGICAL_AND));
+    return (lexp==nullptr || !lexp->getOperator()->equals(LogCompOp::LOGICAL_AND));
   }), delta.end());
 
   // duplicate critical nodes to create new circuit C_{AND} as we do not want to modify the original circuit
@@ -293,7 +294,7 @@ std::vector<AbstractNode *> ConeRewriter::getAndCriticalCircuit(std::vector<Abst
       for (auto &child : curNode->getChildren()) {
         auto childLexp = dynamic_cast<LogicalExpr *>(child);
         // if the child is a LogicalExpr of type AND-gate
-        if (childLexp!=nullptr && childLexp->getOp()->equals(LogCompOp::LOGICAL_AND)) {
+        if (childLexp!=nullptr && childLexp->getOperator()->equals(LogCompOp::LOGICAL_AND)) {
           // check if this child is a critical node, if yes: connect both nodes
           if (std::find(delta.begin(), delta.end(), childLexp)!=delta.end()) {
             AbstractNode *copiedV = cAndMap[v->getUniqueNodeId()];
@@ -452,7 +453,7 @@ void ConeRewriter::rewriteCones(Ast &astToRewrite, const std::vector<AbstractNod
       auto curNodeLexp = dynamic_cast<LogicalExpr *>(curNode);
       // if curNode is not the cone end node and a logical-AND expression, we found one of the end nodes
       // in that case we can stop exploring this path any further
-      if (curNode!=coneEnd && curNodeLexp!=nullptr && curNodeLexp->getOp()->equals(LogCompOp::LOGICAL_AND)) {
+      if (curNode!=coneEnd && curNodeLexp!=nullptr && curNodeLexp->getOperator()->equals(LogCompOp::LOGICAL_AND)) {
         coneStartNodes.push_back(curNode);
       } else {  // otherwise we need to continue search by following the critical path
         // add parent nodes of current nodes -> continue BFS traversal
@@ -469,7 +470,7 @@ void ConeRewriter::rewriteCones(Ast &astToRewrite, const std::vector<AbstractNod
     for (auto &startNode : coneStartNodes) assert(startNode->getOnlyParent()==xorEndNode);
 
     // check whether we need to handle non-critical inputs y_1, ..., y_m
-    if (dynamic_cast<LogicalExpr *>(xorEndNode)->getOp()->equals(LogCompOp::LOGICAL_AND) && xorEndNode==coneEnd) {
+    if (dynamic_cast<LogicalExpr *>(xorEndNode)->getOperator()->equals(LogCompOp::LOGICAL_AND) && xorEndNode==coneEnd) {
       // if there are no non-critical inputs y_1, ..., y_m then the cone's end and cone's start are both connected with
       // each other.
       // remove the edge between the start nodes and the end node
@@ -558,7 +559,7 @@ void ConeRewriter::rewriteCones(Ast &astToRewrite, const std::vector<AbstractNod
       sNode->removeChild(criticalInput, true);
 
       // add non-critical input of v_t (coneEnd) named a_t as input to v_i
-      auto originalOperator = sNodeAsLogicalExpr->getOp();
+      auto originalOperator = sNodeAsLogicalExpr->getOperator();
       sNodeAsLogicalExpr->setAttributes(dynamic_cast<AbstractExpr *>(nonCriticalInput),
                                         originalOperator,
                                         dynamic_cast<AbstractExpr *>(a_t));
