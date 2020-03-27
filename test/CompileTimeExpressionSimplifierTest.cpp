@@ -17,6 +17,7 @@
 #include "If.h"
 #include "While.h"
 #include "AstTestingGenerator.h"
+#include "OperatorExpr.h"
 #include "Matrix.h"
 
 class CompileTimeExpressionSimplifierFixture : public ::testing::Test {
@@ -1981,4 +1982,145 @@ TEST_F(CompileTimeExpressionSimplifierFixture, partiallySimplifiableMatrix) { /*
   EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedReturnExpr));
 }
 
+TEST_F(CompileTimeExpressionSimplifierFixture, operatorExpr_fullyEvaluable) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(35, ast);
 
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  auto expectedReturnExpr = new LiteralInt(77);
+  auto returnStatement = ast.getRootNode()->castTo<Function>()->getBodyStatements().back()->castTo<Return>();
+
+  EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedReturnExpr));
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, operatorExpr_partiallyEvaluable) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(37, ast);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  auto expectedReturnExpr = new OperatorExpr(new Operator(MULTIPLICATION), {new Variable("a"), new LiteralInt(1054)});
+  auto returnStatement = ast.getRootNode()->castTo<Function>()->getBodyStatements().back()->castTo<Return>();
+
+  EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedReturnExpr));
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, operatorExpr_logicalAndFalse) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(38, ast);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  auto expectedReturnExpr = new LiteralBool(false);
+  auto returnStatement = ast.getRootNode()->castTo<Function>()->getBodyStatements().back()->castTo<Return>();
+
+  EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedReturnExpr));
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, operatorExpr_logicalAndTrue_oneRemainingOperand) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(39, ast);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  auto expectedReturnExpr = new OperatorExpr(new Operator(LOGICAL_AND), {new Variable("a"), new LiteralBool(true)});
+  auto returnStatement = ast.getRootNode()->castTo<Function>()->getBodyStatements().back()->castTo<Return>();
+
+  EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedReturnExpr));
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, operatorExpr_logicalAndTrue_twoRemainingOperand) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(40, ast);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  auto expectedReturnExpr = new OperatorExpr(new Operator(LOGICAL_AND), {new Variable("b"), new Variable("a")});
+  auto returnStatement = ast.getRootNode()->castTo<Function>()->getBodyStatements().back()->castTo<Return>();
+
+  EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedReturnExpr));
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, operatorExpr_logicalOrTrue) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(41, ast);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  auto expectedReturnExpr = new LiteralBool(true);
+  auto returnStatement = ast.getRootNode()->castTo<Function>()->getBodyStatements().back()->castTo<Return>();
+
+  EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedReturnExpr));
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, operatorExpr_logicalOrFalse_oneRemainingOperand) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(42, ast);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  auto expectedReturnExpr = new OperatorExpr(new Operator(LOGICAL_OR), {new Variable("a"), new LiteralBool(false)});
+  auto returnStatement = ast.getRootNode()->castTo<Function>()->getBodyStatements().back()->castTo<Return>();
+
+  EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedReturnExpr));
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, operatorExpr_logicalOrFalse_twoRemainingOperand) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(43, ast);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  auto expectedReturnExpr = new OperatorExpr(new Operator(LOGICAL_OR), {new Variable("b"), new Variable("a")});
+  auto returnStatement = ast.getRootNode()->castTo<Function>()->getBodyStatements().back()->castTo<Return>();
+
+  EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedReturnExpr));
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, operatorExpr_logicalXorTrue) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(44, ast);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  auto expectedReturnExpr = new OperatorExpr(new Operator(LOGICAL_XOR), {new Variable("a"), new LiteralBool(true)});
+  auto returnStatement = ast.getRootNode()->castTo<Function>()->getBodyStatements().back()->castTo<Return>();
+
+  EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedReturnExpr));
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, operatorExpr_logicalXorFalse_oneRemainingOperand) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(45, ast);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  auto expectedReturnExpr = new OperatorExpr(new Operator(LOGICAL_XOR), {new Variable("a"), new LiteralBool(false)});
+  auto returnStatement = ast.getRootNode()->castTo<Function>()->getBodyStatements().back()->castTo<Return>();
+
+  EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedReturnExpr));
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, operatorExpr_logicalXorFalse_twoRemainingOperand) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(46, ast);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  auto expectedReturnExpr = new OperatorExpr(new Operator(LOGICAL_XOR), {new Variable("a"), new Variable("b")});
+  auto returnStatement = ast.getRootNode()->castTo<Function>()->getBodyStatements().back()->castTo<Return>();
+
+  EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedReturnExpr));
+}

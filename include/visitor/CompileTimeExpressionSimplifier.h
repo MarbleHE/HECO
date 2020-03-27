@@ -252,6 +252,8 @@ class CompileTimeExpressionSimplifier : public Visitor {
 
   void visit(Operator &elem) override;
 
+  void visit(OperatorExpr &elem) override;
+
   void visit(ParameterList &elem) override;
 
   void visit(Return &elem) override;
