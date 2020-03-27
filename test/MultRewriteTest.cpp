@@ -259,3 +259,9 @@ TEST(MultRewriteTest, rewriteNotApplicable_EquivTest) { /* NOLINT */
   astOutputComparer(unmodifiedAst, rewrittenAst, 87237482, 30, params);
 }
 
+TEST(MultRewriteTest, operatorExpr_visitorNotSupported) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(44, ast);
+  EXPECT_THROW(MultRewriteVisitor().visit(ast), std::runtime_error);
+}
+

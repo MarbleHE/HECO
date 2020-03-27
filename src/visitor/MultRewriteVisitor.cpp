@@ -1,6 +1,7 @@
 #include <iostream>
 #include "MultRewriteVisitor.h"
 #include "ArithmeticExpr.h"
+#include "OperatorExpr.h"
 #include "Block.h"
 #include "Variable.h"
 
@@ -46,6 +47,10 @@ void MultRewriteVisitor::visit(ArithmeticExpr &elem) {
   Visitor::visit(elem);
 }
 
+void MultRewriteVisitor::visit(OperatorExpr &elem) {
+  throw std::runtime_error("Unimplemented: OperatorExpr not supported by MultRewriteVisitor!");
+}
+
 int MultRewriteVisitor::getNumChanges() const {
   return numChanges;
 }
@@ -53,4 +58,3 @@ int MultRewriteVisitor::getNumChanges() const {
 bool MultRewriteVisitor::changedAst() const {
   return numChanges!=0;
 }
-
