@@ -85,6 +85,8 @@ class EvaluationVisitor : public Visitor {
 
   void visit(Return &elem) override;
 
+  void visit(OperatorExpr &elem) override;
+
   void visit(Rotate &elem) override;
 
   void visit(GetMatrixElement &elem) override;
