@@ -72,6 +72,12 @@ class SecretTaintingVisitor : public Visitor {
 
   void visit(Rotate &elem) override;
 
+  void visit(Transpose &elem) override;
+
+  void visit(GetMatrixElement &elem) override;
+
+  void visit(OperatorExpr &elem) override;
+
   bool nodeIsTainted(AbstractNode &node) const;
 
   void addTaintedNodes(std::vector<AbstractNode *> nodesToAdd);

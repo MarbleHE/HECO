@@ -113,6 +113,13 @@ void SecretTaintingVisitor::visit(ArithmeticExpr &elem) {
   }
 }
 
+void SecretTaintingVisitor::visit(OperatorExpr &elem) {
+  Visitor::visit(elem);
+  if (anyNodesAreTainted(elem.getChildren())) {
+    addTaintedNode(&elem);
+  }
+}
+
 void SecretTaintingVisitor::visit(FunctionParameter &elem) {
   // if this FunctionParameter refers to an encrypted variable -> all of its variable identifiers are tainted
   if (elem.getDatatype()->isEncrypted()) {
