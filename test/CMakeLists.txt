@@ -55,7 +55,8 @@ set(TEST_FILES
         SecretTaintingTest.cpp
         NodeUtilsTest.cpp
         MatrixTest.cpp
-        ControlFlowGraphVisitorTest.cpp)
+        ControlFlowGraphVisitorTest.cpp
+        OperatorExprTest.cpp)
 
 add_executable(testing-all
         ${TEST_FILES})

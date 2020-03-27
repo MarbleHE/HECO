@@ -46,6 +46,7 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/ast/AbstractStatement.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/Ast.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/ArithmeticExpr.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/OperatorExpr.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/Block.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/Call.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/CallExternal.cpp
