@@ -68,8 +68,7 @@ class MultDepthVisitor : public Visitor {
 
   void visit(Ast &elem) override;
 
-  void
-  analyzeMultiplicativeDepth(const std::string &varIdentifier, AbstractStatement *stmt, AbstractExpr *initializer);
+  void analyzeMultiplicativeDepth(const std::string &varIdentifier, AbstractStatement *stmt, AbstractExpr *initializer);
 
   void updateDepthStructures(AbstractStatement *stmt, const std::string &varIdentifier, int depth);
 
@@ -80,6 +79,8 @@ class MultDepthVisitor : public Visitor {
   void visit(Transpose &elem) override;
 
   void visit(GetMatrixElement &elem) override;
+
+  void visit(OperatorExpr &elem) override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_VISITOR_MULTDEPTHVISITOR_H_

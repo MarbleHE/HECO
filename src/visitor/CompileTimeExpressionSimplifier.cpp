@@ -19,6 +19,7 @@
 #include "Call.h"
 #include "Rotate.h"
 #include "Transpose.h"
+#include "OperatorExpr.h"
 
 CompileTimeExpressionSimplifier::CompileTimeExpressionSimplifier() {
   evalVisitor = EvaluationVisitor();
@@ -234,9 +235,9 @@ void CompileTimeExpressionSimplifier::handleBinaryExpression(AbstractBinaryExpr 
     nodesQueuedForDeletion.push_back(&arithmeticExpr);
   } else {
     // update accumulator
-    auto currentOperator = arithmeticExpr.getOp();
+    auto currentOperator = arithmeticExpr.getOperator();
 
-    // check if we need to reset the binaryExpressionAccumulator:
+    // check if we need to reset the binaryExpressionAccumulator:§
     // this is the case if either we are visiting the first binary expression in this statement or the operator of the
     // accumulated binary expressions does not match the one of this binary expression (we cannot accumulate more)
     auto isFirstBinaryExprInSubtree = !binaryExpressionAccumulator.containsOperands();
@@ -294,7 +295,7 @@ void CompileTimeExpressionSimplifier::visit(ArithmeticExpr &elem) {
   // clean up temporary results from children in removableNodes map
   removableNodes.erase(elem.getLeft());
   removableNodes.erase(elem.getRight());
-  removableNodes.erase(elem.getOp());
+  removableNodes.erase(elem.getOperator());
 }
 
 void CompileTimeExpressionSimplifier::visit(LogicalExpr &elem) {
@@ -324,20 +325,23 @@ void CompileTimeExpressionSimplifier::visit(LogicalExpr &elem) {
     // <anything> AND true  ==  <anything>
     // <anything> OR false  ==  <anything>
     // <anything> XOR false  ==  <anything>
-    if ((elem.getOp()->equals(LOGICAL_AND) && booleanOperand->getValue())
-        || (elem.getOp()->equals(LOGICAL_OR) && !booleanOperand->getValue())
-        || (elem.getOp()->equals(LOGICAL_XOR) && !booleanOperand->getValue())) {
+    if ((elem.getOperator()->equals(LOGICAL_AND) && booleanOperand->getValue())
+        || (elem.getOperator()->equals(LOGICAL_OR) && !booleanOperand->getValue())
+        || (elem.getOperator()->equals(LOGICAL_XOR) && !booleanOperand->getValue())) {
       nonBooleanOperand->removeFromParents();
       elem.getOnlyParent()->replaceChild(&elem, nonBooleanOperand);
       nodesQueuedForDeletion.push_back(&elem);
-    } else if (elem.getOp()->equals(LOGICAL_AND) && !booleanOperand->getValue()) {  // <anything> AND false  ==  false
+    } else if (elem.getOperator()->equals(LOGICAL_AND) && !booleanOperand->getValue()) {
+      // <anything> AND false  ==  false
       elem.getOnlyParent()->replaceChild(&elem, new LiteralBool(false));
       nodesQueuedForDeletion.push_back(nonBooleanOperand);
-    } else if (elem.getOp()->equals(LOGICAL_OR) && booleanOperand->getValue()) {   // <anything> OR true  ==  true
+    } else if (elem.getOperator()->equals(LOGICAL_OR) && booleanOperand->getValue()) {
+      // <anything> OR true  ==  true
       elem.getOnlyParent()->replaceChild(&elem, new LiteralBool(true));
       nodesQueuedForDeletion.push_back(nonBooleanOperand);
-    } else if (elem.getOp()->equals(LOGICAL_XOR)
-        && booleanOperand->getValue()) {  // <anything> XOR true  ==  NOT <anything>
+    } else if (elem.getOperator()->equals(LOGICAL_XOR)
+        && booleanOperand->getValue()) {
+      // <anything> XOR true  ==  NOT <anything>
       nonBooleanOperand->removeFromParents();
       auto uexp = new UnaryExpr(NEGATION, nonBooleanOperand);
       elem.getOnlyParent()->replaceChild(&elem, uexp);
@@ -350,7 +354,7 @@ void CompileTimeExpressionSimplifier::visit(LogicalExpr &elem) {
   // clean up temporary results from children in removableNodes map
   removableNodes.erase(elem.getLeft());
   removableNodes.erase(elem.getRight());
-  removableNodes.erase(elem.getOp());
+  removableNodes.erase(elem.getOperator());
 }
 
 void CompileTimeExpressionSimplifier::visit(UnaryExpr &elem) {
@@ -366,6 +370,61 @@ void CompileTimeExpressionSimplifier::visit(UnaryExpr &elem) {
   // clean up temporary results from children in removableNodes map
   removableNodes.erase(elem.getRight());
   removableNodes.erase(elem.getOp());
+}
+
+void CompileTimeExpressionSimplifier::visit(OperatorExpr &elem) {
+  // collect known operands and remove from AST
+  std::vector<AbstractLiteral *> knownOperands;
+  for (auto &c : elem.getOperands()) {
+    if (!valueIsKnown(c)) continue;
+    auto value = getFirstValue(c);
+    if (auto valueAsAbstractLiteral = dynamic_cast<AbstractLiteral *>(value)) {
+      knownOperands.push_back(valueAsAbstractLiteral);
+      elem.removeChild(c);
+    }
+  }
+
+  // evaluate the operator on the known operands: result is a single AbstractLiteral
+  auto evalResult = elem.getOperator()->applyOperator(knownOperands);
+
+  if (elem.getOperands().size()==0) {
+    // if there are no other (unknown) operands left, attach the evaluation result to the OperatorExpr's parent
+    elem.getOnlyParent()->replaceChild(&elem, evalResult);
+    nodesQueuedForDeletion.push_back(&elem);
+  } else if (elem.isArithmeticExpr()) {
+    elem.addOperand(evalResult);
+  } else if (elem.isLogicalExpr()) {  // LogicalExpr implies that return value is a Bool
+    LogCompOp elemOperator = std::get<LogCompOp>(elem.getOperator()->getOperatorSymbol());
+    if (elemOperator==LOGICAL_AND) {
+      // if the evalResult is false: replace the whole expression by false as <anything> AND false is always false
+      // if the evalResult is true:
+      // - if #remainingOperands<2: append partial evaluation result
+      // - else: do nothing as expression's value only depends on remaining operands
+      if (evalResult->isEqual(new LiteralBool(false))) {
+        elem.getOnlyParent()->replaceChild(&elem, evalResult);
+      } else if (evalResult->isEqual(new LiteralBool(true)) && elem.getOperands().size() < 2) {
+        elem.addOperand(evalResult);
+      }
+    } else if (elemOperator==LOGICAL_OR) {
+      // if the evalResult is true: replace whole expression by true as <anything> OR true is always true
+      // if the evalResult is false:
+      // - if #remainingOperands<2: append evalResult such that there are at least two operands
+      // - else: do nothing as expression's value only depends on remaining operands
+      if (evalResult->isEqual(new LiteralBool(true))) {
+        elem.getOnlyParent()->replaceChild(&elem, evalResult);
+      } else if (evalResult->isEqual(new LiteralBool(false)) && elem.getOperands().size() < 2) {
+        elem.addOperand(evalResult);
+      }
+    } else if (elemOperator==LOGICAL_XOR
+        && (evalResult->isEqual(new LiteralBool(true))
+            || (evalResult->isEqual(new LiteralBool(false)) && elem.getOperands().size() < 2))) {
+      // if the evalResult is true: add it to the remaining operands because it influences the result
+      // if the evalResult is false:
+      // - if #remainingOperands<2: append it to the remaining operands such that there are at least two operands
+      // - else: do nothing as expression's value only depends on remaining operands
+      elem.addOperand(evalResult);
+    }
+  }
 }
 
 void CompileTimeExpressionSimplifier::visit(Block &elem) {

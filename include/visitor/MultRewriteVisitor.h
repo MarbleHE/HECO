@@ -19,6 +19,8 @@ class MultRewriteVisitor : public Visitor {
   void visit(ArithmeticExpr &elem) override;
 
   void visit(Ast &elem) override;
+
+  void visit(OperatorExpr &elem) override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_VISITOR_MULTREWRITEVISITOR_H_

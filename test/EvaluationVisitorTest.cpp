@@ -237,3 +237,19 @@ TEST(EvaluationVisitorTests, astCrossProduct) { /* NOLINT */
   EXPECT_EQ(m.values, std::vector<std::vector<int>>({{354, 76, -219}}));
 }
 
+TEST(EvaluationVisitorTests, astOperatorExprSimple) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(37, ast);
+  std::unordered_map<std::string, AbstractLiteral *> params = {
+      {"a", new LiteralInt(63)}
+  };
+  auto result = dynamic_cast<LiteralInt *>(ast.evaluateAst(params, false).front());
+  ASSERT_EQ(*result, *new LiteralInt(66'402));
+}
+
+TEST(EvaluationVisitorTests, astOperatorNestedOperands) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(47, ast);
+  auto result = dynamic_cast<LiteralBool *>(ast.evaluateAst({}, false).front());
+  ASSERT_EQ(*result, *new LiteralBool(false));
+}

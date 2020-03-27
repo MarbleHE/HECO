@@ -8,24 +8,12 @@
 #include "Variable.h"
 #include "LogicalExpr.h"
 #include "Function.h"
+#include "OperatorExpr.h"
 #include "Call.h"
+#include "If.h"
 
 void SecretTaintingVisitor::visit(Ast &elem) {
   Visitor::visit(elem);
-}
-
-void SecretTaintingVisitor::visit(Call &elem) {
-  Visitor::visit(elem);
-  // after visiting the Call's referenced Function, check if the Function node was tainted
-  // if the Function was tainted -> taint the Call node too
-  if (elem.getFunc()!=nullptr && nodeIsTainted(*elem.getFunc())) {
-    addTaintedNode(elem.AbstractExpr::castTo<AbstractNode>());
-  }
-}
-
-void SecretTaintingVisitor::visit(CallExternal &elem) {
-  throw std::invalid_argument("ASTs containing CallExternal objects are not supported by the SecretTaintingVisitor!");
-  //  Visitor::visit(elem);
 }
 
 // ==========================
@@ -51,8 +39,11 @@ void SecretTaintingVisitor::visit(Function &elem) {
 }
 
 void SecretTaintingVisitor::visit(If &elem) {
-  throw std::invalid_argument("ASTs containing If statements are not supported by the SecretTaintingVisitor!");
-  //  Visitor::visit(elem);
+//  throw std::invalid_argument("ASTs containing If statements are not supported by the SecretTaintingVisitor!");
+  Visitor::visit(elem);
+  if (anyNodesAreTainted(elem.getChildren())) {
+    addTaintedNode(&elem);
+  }
 }
 
 void SecretTaintingVisitor::visit(Return &elem) {
@@ -65,8 +56,7 @@ void SecretTaintingVisitor::visit(Return &elem) {
     std::copy(vars.begin(), vars.end(), std::inserter(returnValueVariables, returnValueVariables.end()));
   }
   // update tainted status
-  if (nodeIsTainted(elem)
-      || anyVariableIdentifierIsTainted(returnValueVariables.begin(), returnValueVariables.end())) {
+  if (nodeIsTainted(elem) || anyVariableIdentifierIsTainted(returnValueVariables.begin(), returnValueVariables.end())) {
     // mark current node as tainted (as taintedNodes is a set, adding it again does not change anything)
     taintedNodes.insert(elem.getUniqueNodeId());
     // mark all of its descendants as tainted
@@ -109,8 +99,25 @@ void SecretTaintingVisitor::visit(VarDecl &elem) {
 // EXPRESSIONS
 // ==========================
 
+void SecretTaintingVisitor::visit(LogicalExpr &elem) {
+  Visitor::visit(elem);
+  if (anyNodesAreTainted(elem.getChildren())) {
+    addTaintedNode(&elem);
+  }
+}
+
 void SecretTaintingVisitor::visit(ArithmeticExpr &elem) {
   Visitor::visit(elem);
+  if (anyNodesAreTainted(elem.getChildren())) {
+    addTaintedNode(&elem);
+  }
+}
+
+void SecretTaintingVisitor::visit(OperatorExpr &elem) {
+  Visitor::visit(elem);
+  if (anyNodesAreTainted(elem.getChildren())) {
+    addTaintedNode(&elem);
+  }
 }
 
 void SecretTaintingVisitor::visit(FunctionParameter &elem) {
@@ -143,6 +150,20 @@ void SecretTaintingVisitor::visit(ParameterList &elem) {
   }
 }
 
+void SecretTaintingVisitor::visit(Call &elem) {
+  Visitor::visit(elem);
+  // after visiting the Call's referenced Function, check if the Function node was tainted
+  // if the Function was tainted -> taint the Call node too
+  if (elem.getFunc()!=nullptr && nodeIsTainted(*elem.getFunc())) {
+    addTaintedNode(elem.AbstractExpr::castTo<AbstractNode>());
+  }
+}
+
+void SecretTaintingVisitor::visit(CallExternal &elem) {
+  throw std::invalid_argument("ASTs containing CallExternal objects are not supported by the SecretTaintingVisitor!");
+  //  Visitor::visit(elem);
+}
+
 void SecretTaintingVisitor::visit(LiteralBool &elem) {
   Visitor::visit(elem);
 }
@@ -156,10 +177,6 @@ void SecretTaintingVisitor::visit(LiteralString &elem) {
 }
 
 void SecretTaintingVisitor::visit(LiteralFloat &elem) {
-  Visitor::visit(elem);
-}
-
-void SecretTaintingVisitor::visit(LogicalExpr &elem) {
   Visitor::visit(elem);
 }
 
@@ -177,8 +194,9 @@ void SecretTaintingVisitor::visit(Datatype &elem) {
 }
 
 void SecretTaintingVisitor::visit(Variable &elem) {
-  if (nodeIsTainted(elem)) taintedVariables.insert(elem.getIdentifier());
-  Visitor::visit(elem);
+  if (taintedVariables.count(elem.getIdentifier()) > 0) {
+    addTaintedNode(&elem);
+  }
 }
 
 void SecretTaintingVisitor::visit(For &elem) {

@@ -23,6 +23,7 @@
 #include "Rotate.h"
 #include "For.h"
 #include "Transpose.h"
+#include "OperatorExpr.h"
 
 EvaluationVisitor::EvaluationVisitor(std::unordered_map<std::string, AbstractLiteral *> funcCallParameterValues)
     : variableValuesForEvaluation(std::move(funcCallParameterValues)) {
@@ -50,7 +51,19 @@ void EvaluationVisitor::visit(ArithmeticExpr &elem) {
   elem.getRight()->accept(*this);
   auto r = getOnlyEvaluationResult(results.top());
   results.pop();
-  results.push({elem.getOp()->applyOperator(l, r)});
+  results.push({elem.getOperator()->applyOperator(l, r)});
+}
+
+void EvaluationVisitor::visit(OperatorExpr &elem) {
+  std::vector<AbstractLiteral *> evaluatedOperand;
+  // evaluate each of the operands as they can consist of nested expressions (instead of AbstractLiterals)
+  for (auto &operand : elem.getOperands()) {
+    operand->accept(*this);
+    evaluatedOperand.push_back(getOnlyEvaluationResult(results.top()));
+    results.pop();
+  }
+  // apply the operator and push the result on the results stack
+  results.push({elem.getOperator()->applyOperator(evaluatedOperand)});
 }
 
 void EvaluationVisitor::visit(Block &elem) {
@@ -201,7 +214,7 @@ void EvaluationVisitor::visit(LogicalExpr &elem) {
   elem.getRight()->accept(*this);
   auto r = getOnlyEvaluationResult(results.top());
   results.pop();
-  results.push({elem.getOp()->applyOperator(l, r)});
+  results.push({elem.getOperator()->applyOperator(l, r)});
 }
 
 void EvaluationVisitor::visit(Operator &elem) {

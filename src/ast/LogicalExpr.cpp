@@ -26,7 +26,7 @@ AbstractNode *LogicalExpr::cloneFlat() {
 LogicalExpr *LogicalExpr::clone(bool keepOriginalUniqueNodeId) {
   auto clonedLogicalExpr =
       new LogicalExpr(getLeft()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
-                      getOp()->clone(keepOriginalUniqueNodeId)->castTo<Operator>(),
+                      getOperator()->clone(keepOriginalUniqueNodeId)->castTo<Operator>(),
                       getRight()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
   clonedLogicalExpr->updateClone(keepOriginalUniqueNodeId, this);
   return clonedLogicalExpr;

@@ -87,6 +87,32 @@ class AstTestingGenerator {
   static void genSimpleMatrix(Ast &ast);
   /** @} */ // End of astGenerators group
   static void genAstFlipMatrixElements(Ast &ast);
+
+  static void genAstOperatorExpr_fullyEvaluable(Ast &ast);
+
+  static void genAstIncludingIfStatement(Ast &ast);
+
+  static void genAstOperatorExpr_partiallyEvaluable(Ast &ast);
+
+  static void genAstOperatorExpr_logicalAndFalse(Ast &ast);
+
+  static void genAstOperatorExpr_logicalAndTrue_oneRemainingOperand(Ast &ast);
+
+  static void genAstOperatorExpr_logicalAndTrue_twoRemainingOperands(Ast &ast);
+
+  static void genAstOperatorExpr_logicalOrTrue(Ast &ast);
+
+  static void genAstOperatorExpr_logicalOrFalse_oneRemainingOperand(Ast &ast);
+
+  static void genAstOperatorExpr_logicalOrFalse_twoRemainingOperands(Ast &ast);
+
+  static void genAstOperatorExpr_logicalXorTrue(Ast &ast);
+
+  static void genAstOperatorExpr_logicalXorFalse_oneRemainingOperand(Ast &ast);
+
+  static void genAstOperatorExpr_logicalXorFalse_twoRemainingOperands(Ast &ast);
+
+  static void genAstNestedOperatorExpr(Ast &ast);
 };
 
 #endif //AST_OPTIMIZER_TEST_ASTTESTINGGENERATOR_H_

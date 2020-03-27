@@ -1,6 +1,7 @@
 #ifndef AST_OPTIMIZER_INCLUDE_AST_OPERATOR_H_
 #define AST_OPTIMIZER_INCLUDE_AST_OPERATOR_H_
 
+#include <utility>
 #include <variant>
 #include <string>
 #include <iostream>
@@ -10,6 +11,7 @@
 #include "LiteralBool.h"
 #include "LiteralInt.h"
 #include "OpSymbEnum.h"
+#include "LiteralFloat.h"
 
 class Operator : public AbstractNode {
  private:
@@ -102,6 +104,50 @@ class Operator : public AbstractNode {
 
   [[nodiscard]] bool equals(UnaryOp op) const;
 
+  [[nodiscard]] bool isArithmeticOp() const;
+
+  [[nodiscard]] bool isLogCompOp() const;
+
+  [[nodiscard]] bool isUnaryOp() const;
+
+  // Can be replaced by faster std::reduce in case that function is associative and commutative
+  template<typename R, typename T>
+  R acc(std::function<R(T, T)> func, std::vector<T> operands) {
+    auto it = operands.begin();
+    // result = operands[0] ⊕ operands[1]
+    R result = func(*it, *(++it));
+    // result = ((((result ⊕ operands[2]) ⊕ operands[3]) ⊕ ...) ⊕ operands[N])
+    for (++it; it!=operands.end(); ++it) result = func(result, *it);
+    return result;
+  }
+
+  template<typename T>
+  bool appPairwise(std::function<bool(T, T)> func, std::vector<T> operands) {
+    auto it = operands.begin();
+    // result = operands[0] ⊕ operands[1]
+    bool result = func(*it, *(++it));
+    // result = ((result && (operands[1] ⊕ operands[2])) && (operands[2] ⊕ operands[3])) ...
+    for (; it!=operands.end(); ++it) result = result && func(*it, *(++it));
+    return result;
+  }
+
+  template<typename abstractType, typename primitiveType>
+  std::vector<primitiveType> convert(std::vector<AbstractLiteral *> operands) {
+    std::vector<primitiveType> vec;
+    std::transform(operands.begin(), operands.end(), std::back_inserter(vec),
+                   [](AbstractLiteral *lit) { return lit->castTo<abstractType>()->getValue(); });
+    return vec;
+  }
+
+  AbstractLiteral *applyOperator(std::vector<AbstractLiteral *> operands);
+
+  AbstractLiteral *applyOperator(std::vector<int> operands);
+
+  AbstractLiteral *applyOperator(std::vector<float> operands);
+
+  AbstractLiteral *applyOperator(std::vector<bool> operands);
+
+  AbstractLiteral *applyOperator(std::vector<std::string> operands);
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPERATOR_H_

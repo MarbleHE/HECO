@@ -16,7 +16,7 @@ TEST(ArithmeticExprTest, aexp3Add11) { /* NOLINT */
   auto *b = new ArithmeticExpr(valLhs, ArithmeticOp::ADDITION, valRhs);
   EXPECT_EQ(getLiteralIntValue(b->getLeft()), valLhs);
   EXPECT_EQ(getLiteralIntValue(b->getRight()), valRhs);
-  EXPECT_EQ(b->getOp()->getOperatorString(), "add");
+  EXPECT_EQ(b->getOperator()->getOperatorString(), "add");
 }
 
 TEST(ArithmeticExprTest, aexp2Mult9Add3) { /* NOLINT */
@@ -25,12 +25,12 @@ TEST(ArithmeticExprTest, aexp2Mult9Add3) { /* NOLINT */
                                new ArithmeticExpr(valMid, ArithmeticOp::ADDITION, valRight));
   // lhs: outer Aexp
   EXPECT_EQ(getLiteralIntValue(b->getLeft()), valLeft);
-  EXPECT_EQ(b->getOp()->getOperatorString(), OpSymb::getTextRepr(ArithmeticOp::MULTIPLICATION));
+  EXPECT_EQ(b->getOperator()->getOperatorString(), OpSymb::getTextRepr(ArithmeticOp::MULTIPLICATION));
 
   // rhs: inner Aexp
   auto *r = dynamic_cast<ArithmeticExpr *>(b->getRight());
   EXPECT_EQ(getLiteralIntValue(r->getLeft()), valMid);
   EXPECT_EQ(getLiteralIntValue(r->getRight()), valRight);
-  EXPECT_EQ(r->getOp()->getOperatorString(), OpSymb::getTextRepr(ArithmeticOp::ADDITION));
+  EXPECT_EQ(r->getOperator()->getOperatorString(), OpSymb::getTextRepr(ArithmeticOp::ADDITION));
 }
 

@@ -9,6 +9,10 @@ void MultDepthVisitor::visit(ArithmeticExpr &elem) {
   Visitor::visit(elem);
 }
 
+void MultDepthVisitor::visit(OperatorExpr &elem) {
+  Visitor::visit(elem);
+}
+
 void MultDepthVisitor::visit(Block &elem) {
   Visitor::visit(elem);
 }
@@ -63,9 +67,7 @@ void MultDepthVisitor::visit(Operator &elem) {
 
 void MultDepthVisitor::visit(Return &elem) {
   for (uint i = 0; i < elem.getReturnExpressions().size(); i++) {
-    analyzeMultiplicativeDepth("<ReturnValue" + std::to_string(i) + ">",
-                               &elem,
-                               elem.getReturnExpressions().at(i));
+    analyzeMultiplicativeDepth("<ReturnValue" + std::to_string(i) + ">", &elem, elem.getReturnExpressions().at(i));
   }
   Visitor::visit(elem);
 }

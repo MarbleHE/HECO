@@ -35,6 +35,7 @@ class Rotate;
 class Transpose;
 class GetMatrixElement;
 class AbstractMatrix;
+class OperatorExpr;
 
 class Visitor {
  public:
@@ -95,6 +96,8 @@ class Visitor {
   virtual void visit(GetMatrixElement &elem);
 
   virtual void visit(AbstractMatrix &elem);
+
+  virtual void visit(OperatorExpr &elem);
 
   Scope *curScope;
 

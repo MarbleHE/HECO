@@ -1,6 +1,7 @@
 #include <iostream>
 #include "MultRewriteVisitor.h"
 #include "ArithmeticExpr.h"
+#include "OperatorExpr.h"
 #include "Block.h"
 #include "Variable.h"
 
@@ -10,10 +11,10 @@ void MultRewriteVisitor::visit(Ast &elem) {
 
 void MultRewriteVisitor::visit(ArithmeticExpr &elem) {
   // If current ArithmeticExpr is a multiplication
-  if (elem.getOp()->equals(ArithmeticOp::MULTIPLICATION)) {
+  if (elem.getOperator()->equals(ArithmeticOp::MULTIPLICATION)) {
     // A. For case "int result = (A * (B * C))" where multiple ArithmeticExpr are in the same statement
     if (auto lStat = curScope->getLastStatement()) {
-      // If the statement contains another (higher tree level) ArithmeticExpr (exclude subtree of cur. ArithmeticExpr) ...
+      // If statement contains another (higher tree level) ArithmeticExpr (exclude subtree of cur. ArithmeticExpr) ...
       if (auto lastStat = lStat->contains(new ArithmeticExpr(ArithmeticOp::MULTIPLICATION), &elem)) {
         // ... then swap previousAexpLeftOp with currentAexpRightOp
         ArithmeticExpr::swapOperandsLeftAWithRightB(lastStat, &elem);
@@ -46,6 +47,10 @@ void MultRewriteVisitor::visit(ArithmeticExpr &elem) {
   Visitor::visit(elem);
 }
 
+void MultRewriteVisitor::visit(OperatorExpr &elem) {
+  throw std::runtime_error("Unimplemented: OperatorExpr not supported by MultRewriteVisitor!");
+}
+
 int MultRewriteVisitor::getNumChanges() const {
   return numChanges;
 }
@@ -53,4 +58,3 @@ int MultRewriteVisitor::getNumChanges() const {
 bool MultRewriteVisitor::changedAst() const {
   return numChanges!=0;
 }
-

@@ -24,6 +24,7 @@
 #include "Rotate.h"
 #include "Transpose.h"
 #include "GetMatrixElement.h"
+#include "OperatorExpr.h"
 
 void Visitor::visit(Ast &elem) {
   // assumption: AST is always the enclosing object that points to the root
@@ -54,7 +55,7 @@ void Visitor::visit(AbstractStatement &elem) {
 
 void Visitor::visit(ArithmeticExpr &elem) {
   elem.getLeft()->accept(*this);
-  elem.getOp()->accept(*this);
+  elem.getOperator()->accept(*this);
   elem.getRight()->accept(*this);
 }
 
@@ -174,7 +175,7 @@ void Visitor::visit(LogicalExpr &elem) {
   // left
   elem.getLeft()->accept(*this);
   // operator
-  elem.getOp()->accept(*this);
+  elem.getOperator()->accept(*this);
   // right
   elem.getRight()->accept(*this);
 }
@@ -292,9 +293,10 @@ void Visitor::visit(GetMatrixElement &elem) {
 
 void Visitor::visit(AbstractMatrix &elem) {
   // If this is a Matrix<AbstractExpr*>, we need to call accept(Visitor) on each of its elements.
-  if (dynamic_cast<Matrix < AbstractExpr* > * > (&elem)) {
+  if (dynamic_cast<Matrix<AbstractExpr *> * > (&elem)) {
     for (int i = 0; i < elem.getDimensions().numRows; ++i) {
       for (int j = 0; j < elem.getDimensions().numColumns; ++j) {
+        // special action required for PrintVisitor only
         if (auto pv = dynamic_cast<PrintVisitor *>(this)) {
           // save the index of this current matrix element in the PrintVisitor (used for string output)
           pv->nextMatrixIndexToBePrinted = std::make_pair(i, j);
@@ -303,4 +305,11 @@ void Visitor::visit(AbstractMatrix &elem) {
       }
     }
   }
+}
+
+void Visitor::visit(OperatorExpr &elem) {
+  // visit operator
+  elem.getOperator()->accept(*this);
+  // visit all operands
+  for (auto &child : elem.getOperands()) child->accept(*this);
 }

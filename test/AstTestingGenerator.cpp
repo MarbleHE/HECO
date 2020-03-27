@@ -1,4 +1,5 @@
 #include <GetMatrixElement.h>
+#include <PrintVisitor.h>
 #include "AstTestingGenerator.h"
 #include "Operator.h"
 #include "ArithmeticExpr.h"
@@ -16,6 +17,7 @@
 #include "LiteralFloat.h"
 #include "Rotate.h"
 #include "Transpose.h"
+#include "OperatorExpr.h"
 
 // == ATTENTION ======================================
 // These ASTs are used in tests. Any changes to them will break tests. Consider creating new ASTs by copying and
@@ -57,7 +59,20 @@ static std::map<int, std::function<void(Ast &)> > call = {  /* NOLINT */
     {31, AstTestingGenerator::genAstCombineMatricesString},
     {32, AstTestingGenerator::genAstCrossProduct},
     {33, AstTestingGenerator::genSimpleMatrix},
-    {34, AstTestingGenerator::genAstFlipMatrixElements}
+    {34, AstTestingGenerator::genAstFlipMatrixElements},
+    {35, AstTestingGenerator::genAstOperatorExpr_fullyEvaluable},
+    {36, AstTestingGenerator::genAstIncludingIfStatement},
+    {37, AstTestingGenerator::genAstOperatorExpr_partiallyEvaluable},
+    {38, AstTestingGenerator::genAstOperatorExpr_logicalAndFalse},
+    {39, AstTestingGenerator::genAstOperatorExpr_logicalAndTrue_oneRemainingOperand},
+    {40, AstTestingGenerator::genAstOperatorExpr_logicalAndTrue_twoRemainingOperands},
+    {41, AstTestingGenerator::genAstOperatorExpr_logicalOrTrue},
+    {42, AstTestingGenerator::genAstOperatorExpr_logicalOrFalse_oneRemainingOperand},
+    {43, AstTestingGenerator::genAstOperatorExpr_logicalOrFalse_twoRemainingOperands},
+    {44, AstTestingGenerator::genAstOperatorExpr_logicalXorTrue},
+    {45, AstTestingGenerator::genAstOperatorExpr_logicalXorFalse_oneRemainingOperand},
+    {46, AstTestingGenerator::genAstOperatorExpr_logicalXorFalse_twoRemainingOperands},
+    {47, AstTestingGenerator::genAstNestedOperatorExpr}
 };
 
 void AstTestingGenerator::generateAst(int id, Ast &ast) {
@@ -1071,7 +1086,7 @@ void AstTestingGenerator::genAstIncludingForStatement(Ast &ast) {
 //      return sum;  // 2*0 + 2*1 + ... + 2*inputA
 //    }
 
-  // int powBase2()
+  // int sumNTimes2()
   auto func = new Function("sumNTimes2");
   auto funcParams = new ParameterList();
   funcParams->addChild(
@@ -1365,5 +1380,156 @@ void AstTestingGenerator::genAstFlipMatrixElements(Ast &ast) {
   auto ret2 = new GetMatrixElement(new Variable("M"), 0, 2);
   auto pMatrix = new Matrix<AbstractExpr *>({{ret0, ret1, ret2}});
   func->addStatement(new Return(new LiteralBool(pMatrix)));
+  ast.setRootNode(func);
+}
+
+void AstTestingGenerator::genAstOperatorExpr_fullyEvaluable(Ast &ast) {
+  // int addNums()
+  auto func = new Function("addNums");
+  // return 34 + 31 + 11 + 1;
+  auto operatorExp = new OperatorExpr(new Operator(ADDITION),
+                                      {new LiteralInt(34), new LiteralInt(31), new LiteralInt(11), new LiteralInt(1)});
+  func->addStatement(new Return(operatorExp));
+  ast.setRootNode(func);
+}
+
+void AstTestingGenerator::genAstOperatorExpr_partiallyEvaluable(Ast &ast) {
+  auto func = new Function("addNums");
+  func->addParameter(new FunctionParameter(new Datatype(Types::INT, false), new Variable("a")));
+  auto operatorExp = new OperatorExpr(new Operator(MULTIPLICATION),
+                                      {new LiteralInt(34), new LiteralInt(31), new Variable("a"), new LiteralInt(1)});
+  func->addStatement(new Return(operatorExp));
+  ast.setRootNode(func);
+}
+
+void AstTestingGenerator::genAstOperatorExpr_logicalAndFalse(Ast &ast) {
+  auto func = new Function("addNums");
+  func->addParameter(new FunctionParameter(new Datatype(Types::BOOL, false), new Variable("a")));
+  auto operatorExp = new OperatorExpr(new Operator(LOGICAL_AND),
+                                      {new LiteralBool(true), new LiteralBool(true), new Variable("a"),
+                                       new LiteralBool(false)});
+  func->addStatement(new Return(operatorExp));
+  ast.setRootNode(func);
+}
+
+void AstTestingGenerator::genAstOperatorExpr_logicalAndTrue_oneRemainingOperand(Ast &ast) {
+  auto func = new Function("addNums");
+  func->addParameter(new FunctionParameter(new Datatype(Types::BOOL, false), new Variable("a")));
+  auto operatorExp = new OperatorExpr(new Operator(LOGICAL_AND),
+                                      {new LiteralBool(true), new LiteralBool(true), new Variable("a"),
+                                       new LiteralBool(true)});
+  func->addStatement(new Return(operatorExp));
+  ast.setRootNode(func);
+}
+
+void AstTestingGenerator::genAstOperatorExpr_logicalAndTrue_twoRemainingOperands(Ast &ast) {
+  auto func = new Function("addNums");
+  func->addParameter(new FunctionParameter(new Datatype(Types::BOOL, false), new Variable("a")));
+  func->addParameter(new FunctionParameter(new Datatype(Types::BOOL, false), new Variable("b")));
+  auto operatorExp = new OperatorExpr(new Operator(LOGICAL_AND),
+                                      {new LiteralBool(true), new Variable("b"), new Variable("a"),
+                                       new LiteralBool(true)});
+  func->addStatement(new Return(operatorExp));
+  ast.setRootNode(func);
+}
+
+void AstTestingGenerator::genAstOperatorExpr_logicalOrTrue(Ast &ast) {
+  auto func = new Function("addNums");
+  func->addParameter(new FunctionParameter(new Datatype(Types::BOOL, false), new Variable("a")));
+  auto operatorExp = new OperatorExpr(new Operator(LOGICAL_OR),
+                                      {new LiteralBool(true), new LiteralBool(false), new Variable("a"),
+                                       new LiteralBool(false)});
+  func->addStatement(new Return(operatorExp));
+  ast.setRootNode(func);
+}
+
+void AstTestingGenerator::genAstOperatorExpr_logicalOrFalse_oneRemainingOperand(Ast &ast) {
+  auto func = new Function("addNums");
+  func->addParameter(new FunctionParameter(new Datatype(Types::BOOL, false), new Variable("a")));
+  auto operatorExp = new OperatorExpr(new Operator(LOGICAL_OR),
+                                      {new LiteralBool(false), new LiteralBool(false), new LiteralBool(false),
+                                       new Variable("a")});
+  func->addStatement(new Return(operatorExp));
+  ast.setRootNode(func);
+}
+
+void AstTestingGenerator::genAstOperatorExpr_logicalOrFalse_twoRemainingOperands(Ast &ast) {
+  auto func = new Function("addNums");
+  func->addParameter(new FunctionParameter(new Datatype(Types::BOOL, false), new Variable("a")));
+  func->addParameter(new FunctionParameter(new Datatype(Types::BOOL, false), new Variable("b")));
+  auto operatorExp = new OperatorExpr(new Operator(LOGICAL_OR),
+                                      {new LiteralBool(false), new Variable("b"), new LiteralBool(false),
+                                       new Variable("a")});
+  func->addStatement(new Return(operatorExp));
+  ast.setRootNode(func);
+}
+
+void AstTestingGenerator::genAstOperatorExpr_logicalXorTrue(Ast &ast) {
+  auto func = new Function("addNums");
+  func->addParameter(new FunctionParameter(new Datatype(Types::BOOL, false), new Variable("a")));
+  auto operatorExp = new OperatorExpr(new Operator(LOGICAL_XOR),
+                                      {new LiteralBool(false), new LiteralBool(true), new Variable("a"),
+                                       new LiteralBool(false)});
+  func->addStatement(new Return(operatorExp));
+  ast.setRootNode(func);
+}
+
+void AstTestingGenerator::genAstOperatorExpr_logicalXorFalse_oneRemainingOperand(Ast &ast) {
+  auto func = new Function("addNums");
+  func->addParameter(new FunctionParameter(new Datatype(Types::BOOL, false), new Variable("a")));
+  auto operatorExp = new OperatorExpr(new Operator(LOGICAL_XOR),
+                                      {new LiteralBool(false), new LiteralBool(false), new Variable("a"),
+                                       new LiteralBool(false)});
+  func->addStatement(new Return(operatorExp));
+  ast.setRootNode(func);
+}
+
+void AstTestingGenerator::genAstOperatorExpr_logicalXorFalse_twoRemainingOperands(Ast &ast) {
+  auto func = new Function("addNums");
+  func->addParameter(new FunctionParameter(new Datatype(Types::BOOL, false), new Variable("a")));
+  func->addParameter(new FunctionParameter(new Datatype(Types::BOOL, false), new Variable("b")));
+  auto operatorExp = new OperatorExpr(new Operator(LOGICAL_XOR),
+                                      {new LiteralBool(false), new LiteralBool(false), new Variable("a"),
+                                       new Variable("b")});
+  func->addStatement(new Return(operatorExp));
+  ast.setRootNode(func);
+}
+
+void AstTestingGenerator::genAstIncludingIfStatement(Ast &ast) {
+  // source code:
+  // int simpleIfConditionalAssignment(encrypted_int cond) {
+  //    int a = 1;
+  //    if (cond > 11) {
+  //      a = 83;
+  //    } else {
+  //      a = 11;
+  //    }
+  //    return a;
+  // }
+  auto func = new Function("simpleIfConditionalAssignment");
+  func->addParameter(new FunctionParameter(new Datatype(Types::INT, true), new Variable("cond")));
+  func->addStatement(new VarDecl("a", 1));
+  func->addStatement(new If(new LogicalExpr(new Variable("cond"), GREATER, new LiteralInt(11)),
+                            new VarAssignm("a", new LiteralInt(83)),
+                            new VarAssignm("a", new LiteralInt(11))));
+  func->addStatement(new Return(new Variable("a")));
+  ast.setRootNode(func);
+}
+
+void AstTestingGenerator::genAstNestedOperatorExpr(Ast &ast) {
+  auto func = new Function("addNums");
+  // bool x = true;
+  func->addStatement(new VarDecl("x", true));
+  // true XOR false = true
+  auto nestedA = new OperatorExpr(new Operator(LOGICAL_XOR), {new LiteralBool(true), new LiteralBool(false)});
+  // true AND false = false
+  auto nestedB = new OperatorExpr(new Operator(LOGICAL_AND), {new LiteralBool(true), new LiteralBool(false)});
+  // false OR false OR true = true
+  auto nestedC =
+      new OperatorExpr(new Operator(LOGICAL_OR), {new LiteralBool(false), new LiteralBool(false), new Variable("x")});
+  // false AND true AND false AND true AND true = false
+  auto operatorExp = new OperatorExpr(new Operator(LOGICAL_AND),
+                                      {new LiteralBool(false), nestedC, nestedB, new LiteralBool(true), nestedA});
+  func->addStatement(new Return(operatorExp));
   ast.setRootNode(func);
 }
