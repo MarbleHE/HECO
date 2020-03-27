@@ -893,3 +893,43 @@ TEST_F(ForLoopFixture, ForStmtAddChildSuccess) {  /* NOLINT */
   EXPECT_EQ(newChild->getParentsNonNull().size(), 1);
   EXPECT_TRUE(newChild->hasParent(forStmt));
 }
+
+TEST(OperatorExpr, OperatorExprStandardConstructor) {  /* NOLINT */
+  auto opAddition = new Operator(ADDITION);
+  auto literalTwo = new LiteralInt(2);
+  auto literal444 = new LiteralInt(444);
+  auto literalOne = new LiteralInt(1);
+  auto opExpr = new OperatorExpr(opAddition, {literalTwo, literal444, literalOne});
+
+  // children
+  EXPECT_EQ(opExpr->getChildren().size(), 4);
+  EXPECT_EQ(opExpr->getChildAtIndex(0), opAddition);
+  EXPECT_EQ(opExpr->getChildAtIndex(1), literalTwo);
+  EXPECT_EQ(opExpr->getChildAtIndex(2), literal444);
+  EXPECT_EQ(opExpr->getChildAtIndex(3), literalOne);
+
+  // parents
+  EXPECT_EQ(opExpr->getParents().size(), 0);
+  EXPECT_EQ(opExpr->getChildAtIndex(0)->getParentsNonNull().size(), 1);
+  EXPECT_TRUE(opExpr->getChildAtIndex(0)->hasParent(opExpr));
+  EXPECT_EQ(opExpr->getChildAtIndex(1)->getParentsNonNull().size(), 1);
+  EXPECT_TRUE(opExpr->getChildAtIndex(1)->hasParent(opExpr));
+  EXPECT_EQ(opExpr->getChildAtIndex(2)->getParentsNonNull().size(), 1);
+  EXPECT_TRUE(opExpr->getChildAtIndex(2)->hasParent(opExpr));
+  EXPECT_EQ(opExpr->getChildAtIndex(3)->getParentsNonNull().size(), 1);
+  EXPECT_TRUE(opExpr->getChildAtIndex(3)->hasParent(opExpr));
+}
+
+TEST(OperatorExpr, OperatorExprSingleArgConstructor) {  /* NOLINT */
+  auto opSubtraction = new Operator(SUBTRACTION);
+  auto opExpr = new OperatorExpr(opSubtraction);
+
+  // children
+  EXPECT_EQ(opExpr->getChildren().size(), 1);
+  EXPECT_EQ(opExpr->getChildAtIndex(0), opSubtraction);
+
+  // parents
+  EXPECT_EQ(opExpr->getParents().size(), 0);
+  EXPECT_EQ(opExpr->getChildAtIndex(0)->getParentsNonNull().size(), 1);
+  EXPECT_TRUE(opExpr->getChildAtIndex(0)->hasParent(opExpr));
+}
