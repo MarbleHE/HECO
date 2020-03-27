@@ -375,3 +375,188 @@ AbstractLiteral *Operator::applyOperator(LiteralInt *lhs, LiteralInt *rhs) {
     throw std::logic_error("applyOperator(LiteralInt* lhs, LiteralInt* rhs) failed!");
 }
 
+bool Operator::isArithmeticOp() const {
+  return getOperatorSymbol().index()==0;
+}
+
+bool Operator::isLogCompOp() const {
+  return getOperatorSymbol().index()==1;
+}
+
+bool Operator::isUnaryOp() const {
+  return getOperatorSymbol().index()==2;
+}
+
+AbstractLiteral *Operator::applyOperator(std::vector<int> operands) {
+  if (isArithmeticOp()) {
+    // ensure that there are at least 2 operands
+    switch (std::get<ArithmeticOp>(getOperatorSymbol())) {
+      case ADDITION:return new LiteralInt(acc<int, int>([](int a, int b) { return a + b; }, operands));
+      case SUBTRACTION:return new LiteralInt(acc<int, int>([](int a, int b) { return a - b; }, operands));
+      case MULTIPLICATION:return new LiteralInt(acc<int, int>([](int a, int b) { return a*b; }, operands));
+      case DIVISION:return new LiteralInt(acc<int, int>([](int a, int b) { return a/b; }, operands));
+      case MODULO:return new LiteralInt(acc<int, int>([](int a, int b) { return a%b; }, operands));
+      default:throw std::logic_error("Invalid arithmetic operator!");
+    }
+  } else if (isLogCompOp()) {
+    // ensure that there are at least 2 operands
+    switch (std::get<LogCompOp>(getOperatorSymbol())) {
+      case LOGICAL_AND:
+      case LOGICAL_OR:
+      case LOGICAL_XOR:throw std::logic_error("");
+      case SMALLER:return new LiteralBool(appPairwise<int>([](int a, int b) { return a < b; }, operands));
+      case SMALLER_EQUAL:return new LiteralBool(appPairwise<int>([](int a, int b) { return a <= b; }, operands));
+      case GREATER:return new LiteralBool(appPairwise<int>([](int a, int b) { return a > b; }, operands));
+      case GREATER_EQUAL:return new LiteralBool(appPairwise<int>([](int a, int b) { return a >= b; }, operands));
+      case EQUAL:return new LiteralBool(appPairwise<int>([](int a, int b) { return a==b; }, operands));
+      case UNEQUAL:return new LiteralBool(appPairwise<int>([](int a, int b) { return a!=b; }, operands));
+      default:throw std::logic_error("Invalid logical/comparison operator!");
+    }
+  } else if (isUnaryOp()) {
+    // throw an error if more than one operand is given because we cannot return multiple values yet
+    if (operands.size()!=1) throw std::logic_error("Unary operator only supported for single operand.");
+    switch (std::get<UnaryOp>(getOperatorSymbol())) {
+      case NEGATION:return new LiteralInt(-operands.at(0));
+      default:throw std::logic_error("Invalid unary operator!");
+    }
+  }
+  throw std::logic_error("Unknown operator to be applied on std::vector<int> operands encountered.");
+}
+
+AbstractLiteral *Operator::applyOperator(std::vector<float> operands) {
+  if (isArithmeticOp()) {
+    // ensure that there are at least 2 operands
+    switch (std::get<ArithmeticOp>(getOperatorSymbol())) {
+      case ADDITION:return new LiteralInt(acc<float, float>([](float a, float b) { return a + b; }, operands));
+      case SUBTRACTION:return new LiteralInt(acc<float, float>([](float a, float b) { return a - b; }, operands));
+      case MULTIPLICATION:return new LiteralInt(acc<float, float>([](float a, float b) { return a*b; }, operands));
+      case DIVISION:return new LiteralInt(acc<float, float>([](float a, float b) { return a/b; }, operands));
+      case MODULO:
+      default:throw std::logic_error("Invalid arithmetic operator!");
+    }
+  } else if (isLogCompOp()) {
+    // ensure that there are at least 2 operands
+    switch (std::get<LogCompOp>(getOperatorSymbol())) {
+      case LOGICAL_AND:
+      case LOGICAL_OR:
+      case LOGICAL_XOR:throw std::logic_error("");
+      case SMALLER:return new LiteralBool(appPairwise<float>([](float a, float b) { return a < b; }, operands));
+      case SMALLER_EQUAL:return new LiteralBool(appPairwise<float>([](float a, float b) { return a <= b; }, operands));
+      case GREATER:return new LiteralBool(appPairwise<float>([](float a, float b) { return a > b; }, operands));
+      case GREATER_EQUAL:return new LiteralBool(appPairwise<float>([](float a, float b) { return a >= b; }, operands));
+      case EQUAL:return new LiteralBool(appPairwise<float>([](float a, float b) { return a==b; }, operands));
+      case UNEQUAL:return new LiteralBool(appPairwise<float>([](float a, float b) { return a!=b; }, operands));
+      default:throw std::logic_error("Invalid logical/comparison operator!");
+    }
+  } else if (isUnaryOp()) {
+    // throw an error if more than one operand is given because we cannot return multiple values yet
+    if (operands.size()!=1) throw std::logic_error("Unary operator only supported for single operand.");
+    switch (std::get<UnaryOp>(getOperatorSymbol())) {
+      case NEGATION:return new LiteralInt(-operands.at(0));
+      default:throw std::logic_error("Invalid unary operator!");
+    }
+  }
+  throw std::logic_error("Unknown operator to be applied on std::vector<float> operands encountered.");
+}
+
+AbstractLiteral *Operator::applyOperator(std::vector<bool> operands) {
+  if (isArithmeticOp()) {
+    // ensure that there are at least 2 operands
+    switch (std::get<ArithmeticOp>(getOperatorSymbol())) {
+      case ADDITION:return new LiteralInt(acc<bool, bool>([](bool a, bool b) { return a + b; }, operands));
+      case SUBTRACTION:return new LiteralInt(acc<bool, bool>([](bool a, bool b) { return a - b; }, operands));
+      case MULTIPLICATION:return new LiteralInt(acc<bool, bool>([](bool a, bool b) { return a*b; }, operands));
+      case DIVISION:return new LiteralInt(acc<bool, bool>([](bool a, bool b) { return a/b; }, operands));
+      case MODULO:return new LiteralInt(acc<bool, bool>([](bool a, bool b) { return a%b; }, operands));
+      default:throw std::logic_error("Invalid arithmetic operator!");
+    }
+  } else if (isLogCompOp()) {
+    // ensure that there are at least 2 operands
+    switch (std::get<LogCompOp>(getOperatorSymbol())) {
+      case LOGICAL_AND:return new LiteralBool(acc<bool, bool>([](bool a, bool b) { return a && b; }, operands));
+      case LOGICAL_OR:return new LiteralBool(acc<bool, bool>([](bool a, bool b) { return a || b; }, operands));
+      case LOGICAL_XOR:
+        // see https://stackoverflow.com/a/1596681/3017719
+        return new LiteralBool(acc<bool, bool>([](bool a, bool b) { return !a!=!b; }, operands));
+      case SMALLER:return new LiteralBool(appPairwise<bool>([](bool a, bool b) { return a < b; }, operands));
+      case SMALLER_EQUAL:return new LiteralBool(appPairwise<bool>([](bool a, bool b) { return a <= b; }, operands));
+      case GREATER:return new LiteralBool(appPairwise<bool>([](bool a, bool b) { return a > b; }, operands));
+      case GREATER_EQUAL:return new LiteralBool(appPairwise<bool>([](bool a, bool b) { return a >= b; }, operands));
+      case EQUAL:return new LiteralBool(appPairwise<bool>([](bool a, bool b) { return a==b; }, operands));
+      case UNEQUAL:return new LiteralBool(appPairwise<bool>([](bool a, bool b) { return a!=b; }, operands));
+      default:throw std::logic_error("Invalid logical/comparison operator!");
+    }
+  } else if (isUnaryOp()) {
+    // throw an error if more than one operand is given because we cannot return multiple values yet
+    if (operands.size()!=1) throw std::logic_error("Unary operator only supported for single operand.");
+    switch (std::get<UnaryOp>(getOperatorSymbol())) {
+      case NEGATION:return new LiteralInt(-operands.at(0));
+      default:throw std::logic_error("Invalid unary operator!");
+    }
+  }
+  throw std::logic_error("Unknown operator to be applied on std::vector<bool> operands encountered.");
+}
+
+AbstractLiteral *Operator::applyOperator(std::vector<std::string> operands) {
+  if (isArithmeticOp()) {
+    // ensure that there are at least 2 operands
+    switch (std::get<ArithmeticOp>(getOperatorSymbol())) {
+      case ADDITION:
+        return new LiteralString(acc<std::string, std::string>(
+            [](std::string a, std::string b) { return a + b; }, operands));
+      case SUBTRACTION:
+      case MULTIPLICATION:
+      case DIVISION:
+      case MODULO:
+      default:throw std::logic_error("Invalid arithmetic operator!");
+    }
+  } else if (isLogCompOp()) {
+    // ensure that there are at least 2 operands
+    switch (std::get<LogCompOp>(getOperatorSymbol())) {
+      case SMALLER:
+        return new LiteralBool(appPairwise<std::string>([](std::string a, std::string b) { return a < b; },
+                                                        operands));
+      case SMALLER_EQUAL:
+        return new LiteralBool(appPairwise<std::string>([](std::string a, std::string b) {
+          return a <= b;
+        }, operands));
+      case GREATER:
+        return new LiteralBool(appPairwise<std::string>([](std::string a, std::string b) { return a > b; },
+                                                        operands));
+      case GREATER_EQUAL:
+        return new LiteralBool(appPairwise<std::string>([](std::string a, std::string b) {
+          return a >= b;
+        }, operands));
+      case EQUAL:
+        return new LiteralBool(appPairwise<std::string>([](std::string a, std::string b) { return a==b; },
+                                                        operands));
+      case UNEQUAL:
+        return new LiteralBool(appPairwise<std::string>([](std::string a, std::string b) { return a!=b; },
+                                                        operands));
+      case LOGICAL_AND:
+      case LOGICAL_OR:
+      case LOGICAL_XOR:
+      default:throw std::logic_error("Invalid logical/comparison operator!");
+    }
+  } else if (isUnaryOp()) {
+    // throw an error if more than one operand is given because we cannot return multiple values yet
+    if (operands.size()!=1) throw std::logic_error("Unary operator not supported on LiteralStrings.");
+  }
+  throw std::logic_error("Unknown operator to be applied on std::vector<bool> operands encountered.");
+}
+
+AbstractLiteral *Operator::applyOperator(std::vector<AbstractLiteral *> operands) {
+  // assumption/requirement: all elements in operands have same type
+  if (dynamic_cast<LiteralInt *>(operands.at(0))) {
+    return applyOperator(convert<LiteralInt, int>(operands));
+  } else if (dynamic_cast<LiteralFloat *>(operands.at(0))) {
+    return applyOperator(convert<LiteralFloat, float>(operands));
+  } else if (dynamic_cast<LiteralBool *>(operands.at(0))) {
+    return applyOperator(convert<LiteralBool, bool>(operands));
+  } else if (dynamic_cast<LiteralString *>(operands.at(0))) {
+    return applyOperator(convert<LiteralString, std::string>(operands));
+  } else {
+    throw std::logic_error("Operator::apply failed because AbstractLiterals are of unknown type.");
+  }
+}
+
