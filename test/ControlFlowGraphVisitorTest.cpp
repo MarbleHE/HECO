@@ -139,8 +139,6 @@ TEST_F(FlowGraphVisitorFixture, traverseAndPrintNodeTest) { /* NOLINT */
   ControlFlowGraphVisitor fgv;
   fgv.visit(ast);
 
-  fgv.getRootNodeCfg()->getControlFlowGraph()->traverseAndPrintNodes();
-
   std::stringstream generatedOutput;
   fgv.getRootNodeCfg()->getControlFlowGraph()->traverseAndPrintNodes(generatedOutput);
 

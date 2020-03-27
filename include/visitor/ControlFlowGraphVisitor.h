@@ -135,6 +135,7 @@ class ControlFlowGraphVisitor : public Visitor {
 
   void visit(Ast &elem) override;
   /** @} */ // End of visit group
+
   void buildDataFlowGraph();
 };
 

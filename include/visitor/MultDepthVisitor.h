@@ -68,8 +68,7 @@ class MultDepthVisitor : public Visitor {
 
   void visit(Ast &elem) override;
 
-  void
-  analyzeMultiplicativeDepth(const std::string &varIdentifier, AbstractStatement *stmt, AbstractExpr *initializer);
+  void analyzeMultiplicativeDepth(const std::string &varIdentifier, AbstractStatement *stmt, AbstractExpr *initializer);
 
   void updateDepthStructures(AbstractStatement *stmt, const std::string &varIdentifier, int depth);
 
