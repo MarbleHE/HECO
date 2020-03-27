@@ -137,6 +137,10 @@ class ControlFlowGraphVisitor : public Visitor {
   /** @} */ // End of visit group
 
   void buildDataFlowGraph();
+
+  void visit(OperatorExpr &elem) override;
+
+  void handleOperatorExpr(AbstractExpr &ae);
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_VISITOR_CONTROLFLOWGRAPHVISITOR_H_

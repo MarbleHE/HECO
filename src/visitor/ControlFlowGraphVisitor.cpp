@@ -14,6 +14,7 @@
 #include "VarDecl.h"
 #include "While.h"
 #include "LogicalExpr.h"
+#include "OperatorExpr.h"
 
 void ControlFlowGraphVisitor::visit(Ast &elem) {
   Visitor::visit(elem);
@@ -235,14 +236,27 @@ void ControlFlowGraphVisitor::visit(While &elem) {
 
 // === Expressions ===================================
 
-void ControlFlowGraphVisitor::visit(ArithmeticExpr &elem) {
+void ControlFlowGraphVisitor::handleOperatorExpr(AbstractExpr &ae) {
   if (handleExpressionsAsStatements) {
-    auto gNode = appendStatementToCfg(elem);
-    Visitor::visit(elem);
+    auto gNode = appendStatementToCfg(ae);
+    handleExpressionsAsStatements = false;
+    Visitor::visit(ae);
     postActionsStatementVisited(gNode);
   } else {
-    Visitor::visit(elem);
+    Visitor::visit(ae);
   }
+}
+
+void ControlFlowGraphVisitor::visit(ArithmeticExpr &elem) {
+  handleOperatorExpr(elem);
+}
+
+void ControlFlowGraphVisitor::visit(LogicalExpr &elem) {
+  handleOperatorExpr(elem);
+}
+
+void ControlFlowGraphVisitor::visit(OperatorExpr &elem) {
+  handleOperatorExpr(elem);
 }
 
 void ControlFlowGraphVisitor::visit(Call &elem) {
@@ -275,17 +289,6 @@ void ControlFlowGraphVisitor::visit(LiteralString &elem) {
 
 void ControlFlowGraphVisitor::visit(LiteralFloat &elem) {
   Visitor::visit(elem);
-}
-
-void ControlFlowGraphVisitor::visit(LogicalExpr &elem) {
-  if (handleExpressionsAsStatements) {
-    auto gNode = appendStatementToCfg(elem);
-    handleExpressionsAsStatements = false;
-    Visitor::visit(elem);
-    postActionsStatementVisited(gNode);
-  } else {
-    Visitor::visit(elem);
-  }
 }
 
 void ControlFlowGraphVisitor::visit(Operator &elem) {
