@@ -21,6 +21,7 @@
 #include "Rotate.h"
 #include "Transpose.h"
 #include "GetMatrixElement.h"
+#include "OperatorExpr.h"
 
 template<typename T>
 void PrintVisitor::printChildNodesIndented(T &elem) {
@@ -170,6 +171,11 @@ void PrintVisitor::visit(Rotate &elem) {
 }
 
 void PrintVisitor::visit(Transpose &elem) {
+  addOutputStr(elem);
+  printChildNodesIndented(elem);
+}
+
+void PrintVisitor::visit(OperatorExpr &elem) {
   addOutputStr(elem);
   printChildNodesIndented(elem);
 }
