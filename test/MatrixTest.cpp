@@ -5,6 +5,8 @@
 #include "LiteralBool.h"
 #include "LiteralInt.h"
 #include "LiteralString.h"
+#include "ArithmeticExpr.h"
+#include "Rotate.h"
 
 class MatrixTestFixture : public ::testing::Test {
 
@@ -385,6 +387,20 @@ TEST_F(MatrixTestFixture, rotateColumnVectorCopy) {  /* NOLINT */
 TEST_F(MatrixTestFixture, rotateMatrix_expectedException) {  /* NOLINT */
   Matrix<int> m({{9, 4, 2}, {3, 2, 1}, {1, 1, 0}});
   EXPECT_THROW(m.rotate(3, true), std::invalid_argument);
+}
+
+TEST_F(MatrixTestFixture, rotateMatrixIncludingArithmeticExpr_expectedNoDimensionCheck) {  /* NOLINT */
+  EXPECT_NO_THROW(new Rotate(
+      new ArithmeticExpr(new Variable("a"), ArithmeticOp::ADDITION, new Variable("b")),
+      new LiteralInt(5)));
+}
+
+TEST_F(MatrixTestFixture, rotateMatrixIncludingAbstractExpr_expectedNoDimensionCheck) {  /* NOLINT */
+  EXPECT_NO_THROW(new Rotate(
+      new LiteralInt(
+          new Matrix<AbstractExpr *>(
+              {{new ArithmeticExpr(new Variable("a"), ArithmeticOp::ADDITION, new Variable("b"))}})),
+      new LiteralInt(5)));
 }
 
 TEST_F(MatrixTestFixture, applyOperatorComponentwise) {  /* NOLINT */
