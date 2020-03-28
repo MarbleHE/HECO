@@ -56,21 +56,21 @@ Rotate *Rotate::clone(bool keepOriginalUniqueNodeId) {
 }
 
 void Rotate::setAttributes(AbstractExpr *pExpr, AbstractExpr *rotationFactor) {
-  // Rotation requires an AbstractLiteral that is a 1-dimensional row or column vector. If the operand pExpr is an
-  // AbstractExpr, we cannot determine its dimension. In this case it is not possible at compile-time to determine
-  // whether the variable satisfies the former requirement -> must be checked while evaluating the AST.
+  // Rotation requires either an AbstractLiteral that is a 1-dimensional row or column vector, or a Variable in which
+  // case it is not possible at compile-time to determine whether the variable satisfies the former requirement. Must
+  // be checked while evaluating the AST.
   auto pExprAsLiteral = dynamic_cast<AbstractLiteral *>(pExpr);
-  if (pExprAsLiteral!=nullptr && !pExprAsLiteral->getMatrix()->containsAbstractExprs() && !isOneDimensionalVector()) {
+  if (pExprAsLiteral!=nullptr && !pExprAsLiteral->getMatrix()->containsAbstractExprs()
+      && !isOneDimensionalVector(pExpr)) {
     throw std::logic_error("Rotate requires a 1-dimensional row or column vector.");
   }
   removeChildren();
   addChildren({pExpr, rotationFactor}, true);
 }
 
-bool Rotate::isOneDimensionalVector() {
+bool Rotate::isOneDimensionalVector(AbstractExpr *operand) {
   Dimension *dim;
-  auto expressionToRotate = getOperand();
-  if (auto literal = dynamic_cast<AbstractLiteral *>(expressionToRotate)) {
+  if (auto literal = dynamic_cast<AbstractLiteral *>(operand)) {
     dim = &(literal->getMatrix()->getDimensions());
     return dim->equals(1, -1) || dim->equals(-1, 1);
   }

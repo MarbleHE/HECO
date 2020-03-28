@@ -11,6 +11,7 @@
 #include "Return.h"
 #include "Function.h"
 #include "Call.h"
+#include "Rotate.h"
 #include "VarAssignm.h"
 
 TEST(EvaluationVisitorTests, simpleAstEvaluation1) { /* NOLINT */
@@ -252,4 +253,42 @@ TEST(EvaluationVisitorTests, astOperatorNestedOperands) { /* NOLINT */
   AstTestingGenerator::generateAst(47, ast);
   auto result = dynamic_cast<LiteralBool *>(ast.evaluateAst({}, false).front());
   ASSERT_EQ(*result, *new LiteralBool(false));
+}
+
+TEST(EvaluationVisitorTests, complexRotationExample) {  /* NOLINT */
+  // rotate([1; 2; 3; 4], 2) + [1; 2; 3; 4]
+  // = [3; 4; 1; 2]          + [1; 2; 3; 4]
+  // = [4; 6; 4; 6]
+  auto vec2 = new LiteralInt(new Matrix<int>({{1}, {2}, {3}, {4}}));
+  auto vec2RotationFactor = new LiteralInt(2);
+  auto rotateVec2 = new Rotate(vec2, vec2RotationFactor);
+  auto vec1 = new LiteralInt(new Matrix<int>({{1}, {2}, {3}, {4}}));
+  auto addVec1Vec2 = new ArithmeticExpr(vec1, ADDITION, rotateVec2);
+
+  // rotate(rotate([1; 2; 3; 4], 2) + [1; 2; 3; 4], 1)
+  // = rotate([3; 4; 1; 2]          + [1; 2; 3; 4], 1)
+  // = rotate([4; 6; 4; 6], 1)
+  // = [6; 4; 6; 4]
+  auto vec4 = new LiteralInt(new Matrix<int>({{1}, {2}, {3}, {4}}));
+  auto vec4RotationFactor = new LiteralInt(2);
+  auto rotateVec4 = new Rotate(vec4, vec4RotationFactor);
+  auto vec3 = new LiteralInt(new Matrix<int>({{1}, {2}, {3}, {4}}));
+  auto addVec3Vec4 = new ArithmeticExpr(vec3, ADDITION, rotateVec4);
+  auto vec3AddedVec4RotationFactor = new LiteralInt(1);
+  auto rotateVec3AddedVec4 = new Rotate(addVec3Vec4, vec3AddedVec4RotationFactor);
+
+  // [4; 6; 4; 6] + [6; 4; 6; 4]; = [10; 10; 10; 10]
+  auto finalResult = new ArithmeticExpr(addVec1Vec2, ADDITION, rotateVec3AddedVec4);
+
+  // return [4; 6; 4; 6] + [6; 4; 6; 4];
+  auto ret = new Return(finalResult);
+
+  // create function signature and append the Return statement to the function's body
+  auto function = new Function("rotateAddMatrices");
+  function->addStatement(ret);
+  Ast ast;
+  ast.setRootNode(function);
+
+  auto result = dynamic_cast<LiteralInt *>(ast.evaluateAst({}, false).front());
+  EXPECT_EQ(*result, LiteralInt(new Matrix<int>({{10}, {10}, {10}, {10}})));
 }
