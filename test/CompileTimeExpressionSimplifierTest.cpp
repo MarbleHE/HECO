@@ -1,3 +1,4 @@
+#include <PrintVisitor.h>
 #include "DotPrinter.h"
 #include "CompileTimeExpressionSimplifier.h"
 #include "OpSymbEnum.h"
@@ -594,13 +595,9 @@ TEST_F(CompileTimeExpressionSimplifierFixture,  /* NOLINT */
   EXPECT_TRUE(ast.getAllNodes().size() < originalNumberOfNodes);
 
   // check that simplification generated the expected simplified AST
-  auto expectedAst = new ArithmeticExpr(
-      new ArithmeticExpr(
-          new LiteralInt(8),
-          ArithmeticOp::ADDITION,
-          new Variable("y")),
-      ArithmeticOp::ADDITION,
-      new Variable("y"));
+  auto expectedAst = new OperatorExpr(
+      new Operator(ADDITION),
+      {new Variable("y"), new Variable("y"), new LiteralInt(8)});
   EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
   EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedAst));
 
@@ -1414,10 +1411,60 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_partiallyEvaluableO
   ctes.visit(ast);
 
   // check that simplification generated the expected simplified AST
-  auto expectedReturnVal = new ArithmeticExpr(
-      new LiteralInt(71),
-      ArithmeticOp::ADDITION,
-      new Variable("x"));
+  auto expectedReturnVal = new OperatorExpr(new Operator(ADDITION), {new Variable("x"), new LiteralInt(71)});
+  EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
+  EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
+
+  // check that at the end of the evaluation traversal, the removableNodes map is empty
+  EXPECT_EQ(ctes.removableNodes.size(), 0);
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_includingOperatorExprs) { /* NOLINT */
+  //  -- input --
+  // int f(plaintext_int x, plaintext_int a) {
+  //  int y = 42+34+x+a;  // 76+x+a
+  //  int x = 11+29;  // 40
+  //  return x+y
+  // }
+  //  -- expected --
+  // int f(plaintext_int x) {
+  //  return 116+x+a;
+  // }
+  auto function = new Function("f");
+  auto functionParamList = new ParameterList(
+      {
+          new FunctionParameter(new Datatype(Types::INT, false), new Variable("x")),
+          new FunctionParameter(new Datatype(Types::INT, false), new Variable("a"))
+      });
+
+  auto varDeclY = new VarDecl("y",
+                              new Datatype(Types::INT),
+                              new ArithmeticExpr(new LiteralInt(42), ArithmeticOp::ADDITION,
+                                                 new ArithmeticExpr(new LiteralInt(34), ArithmeticOp::ADDITION,
+                                                                    new ArithmeticExpr(new Variable("x"),
+                                                                                       ArithmeticOp::ADDITION,
+                                                                                       new Variable("a")))));
+
+  auto varDeclV =
+      new VarDecl("x",
+                  new Datatype(Types::INT),
+                  new ArithmeticExpr(new LiteralInt(11), ArithmeticOp::ADDITION, new LiteralInt(29)));
+  auto returnStmt = new Return(
+      new ArithmeticExpr(new Variable("x"), ArithmeticOp::ADDITION, new Variable("y")));
+
+  // connect objects
+  function->setParameterList(functionParamList);
+  function->addStatement(varDeclY);
+  function->addStatement(varDeclV);
+  function->addStatement(returnStmt);
+  ast.setRootNode(function);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  // check that simplification generated the expected simplified AST
+  auto expectedReturnVal =
+      new OperatorExpr(new Operator(ADDITION), {new Variable("a"), new Variable("x"), new LiteralInt(116)});
   EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
   EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
 
@@ -1455,12 +1502,17 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_unsupportedNestedOp
   // perform the compile-time expression simplification
   ctes.visit(ast);
 
+  PrintVisitor pv;
+  pv.visit(ast);
+
   // check that simplification generated the expected simplified AST
-  auto expectedReturnVal = new ArithmeticExpr(
-      new ArithmeticExpr(new LiteralInt(22), DIVISION,
-                         new ArithmeticExpr(new Variable("a"), DIVISION, new LiteralInt(462))),
-      ArithmeticOp::ADDITION,
-      new LiteralInt(43));
+  // (22 / (a / 462)) + 43;
+  auto expectedReturnVal = new OperatorExpr(new Operator(ADDITION),
+                                            {new LiteralInt(43),
+                                             new ArithmeticExpr(new LiteralInt(22), DIVISION,
+                                                                new ArithmeticExpr(new Variable("a"),
+                                                                                   DIVISION,
+                                                                                   new LiteralInt(462)))});
   EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
   EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
 

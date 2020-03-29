@@ -181,15 +181,16 @@ void CompileTimeExpressionSimplifier::visit(Variable &elem) {
     auto variableParent = elem.getOnlyParent();
     auto newValue = variableValues.at(elem.getIdentifier())->clone(false)->castTo<AbstractExpr>();
     variableParent->replaceChild(&elem, newValue);
-    // if this newValue is an AbstractBinaryExpr by itself, enqueue its operands
+    // if this newValue is an AbstractBinaryExpr by itself, enqueue its operands (leaf nodes)
     if (auto bexp = dynamic_cast<AbstractBinaryExpr *>(newValue)) {
-      binaryExpressionAccumulator.addOperands({bexp->getLeft(), bexp->getRight()});
+      binaryExpressionAccumulator.addAllOperandsOfSubtree(bexp);
       binaryExpressionAccumulator.setLastVisitedSubtree(bexp);
     }
   }
 }
 
 void CompileTimeExpressionSimplifier::visit(VarDecl &elem) {
+  binaryExpressionAccumulator.isVisitingVariableDeclarationOrAssignment = true;
   Visitor::visit(elem);
   // determine the variable's value
   AbstractExpr *variableValue;
@@ -209,6 +210,7 @@ void CompileTimeExpressionSimplifier::visit(VarDecl &elem) {
 }
 
 void CompileTimeExpressionSimplifier::visit(VarAssignm &elem) {
+  binaryExpressionAccumulator.isVisitingVariableDeclarationOrAssignment = true;
   Visitor::visit(elem);
   // store the variable's value
   addVariableValue(elem.getVarTargetIdentifier(), elem.getValue());
@@ -229,60 +231,70 @@ void CompileTimeExpressionSimplifier::handleBinaryExpression(AbstractBinaryExpr 
   if (leftValueIsKnown && rightValueIsKnown) {
     // if both operand values are known -> evaluate the expression and store its result
     auto result = evaluateNodeRecursive(&arithmeticExpr, getTransformedVariableMap());
-    if (result.size() > 1)
-      throw std::logic_error("Unexpected: Evaluation result contains more than one value.");
+    if (result.size() > 1) throw std::logic_error("Unexpected: Evaluation result contains more than one value.");
     arithmeticExpr.getOnlyParent()->replaceChild(&arithmeticExpr, result.front());
     nodesQueuedForDeletion.push_back(&arithmeticExpr);
-  } else {
-    // update accumulator
-    auto currentOperator = arithmeticExpr.getOperator();
+    // stop execution here as there's nothing to collect in the binaryExpressionAccumulator
+    return;
+  }
+  // update accumulator
+  auto currentOperator = arithmeticExpr.getOperator();
 
-    // check if we need to reset the binaryExpressionAccumulator:§
-    // this is the case if either we are visiting the first binary expression in this statement or the operator of the
-    // accumulated binary expressions does not match the one of this binary expression (we cannot accumulate more)
-    auto isFirstBinaryExprInSubtree = !binaryExpressionAccumulator.containsOperands();
-    auto operatorChangedSinceLastAccumulation =
-        !currentOperator->equals(binaryExpressionAccumulator.getOperatorSymbol());
-    if (operatorChangedSinceLastAccumulation || isFirstBinaryExprInSubtree) {
-      // if the operator changed and we could simplify the accumulated values, we need to replace the subtree starting
-      // at node lastVisitedBinaryExp with the simplified subtree
-      if (operatorChangedSinceLastAccumulation && binaryExpressionAccumulator.subtreeIsSimplified()) {
-        arithmeticExpr.replaceChild(binaryExpressionAccumulator.lastVisitedBinaryExp,
-                                    binaryExpressionAccumulator.getSimplifiedSubtree());
-      }
-      // if operator is non-commutative -> return from function as operator is unsupported
-      if (!BinaryExpressionAcc::isSupportedOperator(currentOperator->getOperatorSymbol())) {
-        return;
-      }
-      // if this is a supported operator, remember the operator's symbol
-      binaryExpressionAccumulator.removeOperandsAndSetNewSymbol(currentOperator->getOperatorSymbol());
-      // remember this first binary expression as we may need to re-attach its children later
-      binaryExpressionAccumulator.setFirstVisitedSubtree(&arithmeticExpr);
+  // check if we need to reset the binaryExpressionAccumulator:
+  // this is the case if either we are visiting the first binary expression in this statement or the operator of the
+  // accumulated binary expressions does not match the one of this binary expression (we cannot accumulate more)
+  auto isFirstBinaryExprInSubtree = !binaryExpressionAccumulator.containsOperands();
+  auto operatorChangedSinceLastAccumulation =
+      !currentOperator->equals(binaryExpressionAccumulator.getOperatorSymbol());
+  if (operatorChangedSinceLastAccumulation || isFirstBinaryExprInSubtree) {
+    // if the operator changed and we could simplify the accumulated values, we need to replace the subtree starting
+    // at node lastVisitedBinaryExp with the simplified subtree
+    if (operatorChangedSinceLastAccumulation && binaryExpressionAccumulator.subtreeIsSimplified()) {
+      arithmeticExpr.replaceChild(binaryExpressionAccumulator.lastVisitedBinaryExp,
+                                  binaryExpressionAccumulator.getSimplifiedSubtree());
     }
+    // if operator is non-associative and non-commutative -> return from function as operator is unsupported
+    if (!BinaryExpressionAcc::isSupportedOperator(currentOperator->getOperatorSymbol())) {
+      return;
+    }
+    // if this is a supported operator, remember the operator's symbol
+    binaryExpressionAccumulator.removeOperandsAndSetNewSymbol(currentOperator->getOperatorSymbol());
+    // remember this first binary expression as we may need to re-attach its children later
+    binaryExpressionAccumulator.setFirstVisitedSubtree(&arithmeticExpr);
+  }
 
-    // if this is part of a nested binary expression, one of both operands will be a BinaryExpr itself: as its operands
-    // were already added when visiting this BinaryExpr, do not add it again
-    binaryExpressionAccumulator.addOperands({lhsOperand, rhsOperand});
-    binaryExpressionAccumulator.setLastVisitedSubtree(&arithmeticExpr);
+  // if this is part of a nested binary expression, one of both operands will be a BinaryExpr itself: as its operands
+  // were already added when visiting this BinaryExpr, do not add it again
+  binaryExpressionAccumulator.addOperands({lhsOperand, rhsOperand});
+  binaryExpressionAccumulator.setLastVisitedSubtree(&arithmeticExpr);
 
-    // if we have collected something in binaryExpressionAccumulator and none of the parents is another BinaryExpr,
-    // we need to decide whether it makes sense so replace the subtree (if expression could be simplified) or not
-    auto noneOfTheParentsIsABinaryExpr = [](AbstractExpr *expr) {
-      for (auto &p : expr->getParentsNonNull()) {
-        if (dynamic_cast<AbstractBinaryExpr *>(p)) return false;
+  // if we have collected something in binaryExpressionAccumulator and none of the parents is another BinaryExpr,
+  // we need to decide whether it makes sense so replace the subtree (if expression could be simplified) or not
+  auto noneOfTheParentsIsABinaryExpr = [](AbstractExpr *expr) {
+    for (auto &p : expr->getParentsNonNull()) {
+      if (dynamic_cast<AbstractBinaryExpr *>(p)) return false;
+    }
+    return true;
+  };
+  // We can consider the subtree as simplified if the number of leaf nodes (AbstractLiterals or Variables) decreased.
+  // Only replace current subtree by simplified one if all of:
+  //   i. there are any accumulated values (should always be the case if binary expressions were handled properly)
+  //   ii. there are no more binary expressions following, i.e., in a higher level of the tree
+  //   iii. the accumulation was useful, i.e., reduced the total number of leaf nodes
+  if (binaryExpressionAccumulator.containsOperands()
+      && noneOfTheParentsIsABinaryExpr(&arithmeticExpr)
+      && binaryExpressionAccumulator.subtreeIsSimplified()) {
+    // if the parent is a OperatorExpr of the same operator, we can simply append the operands to it
+    auto parentAsOperatorExpr = dynamic_cast<OperatorExpr *>(arithmeticExpr.getOnlyParent());
+    if (parentAsOperatorExpr!=nullptr
+        && parentAsOperatorExpr->getOperator()->equals(binaryExpressionAccumulator.operatorSymbol)) {
+      for (auto &accumulatedOperand : binaryExpressionAccumulator.operands) {
+        parentAsOperatorExpr->addOperand(accumulatedOperand);
       }
-      return true;
-    };
-    // We can consider the subtree as simplified if the number of leaf nodes (AbstractLiterals or Variables) decreased.
-    // Only replace current subtree by simplified one if all of:
-    //   i. there are any accumulated values (should always be the case if binary expressions were handled properly)
-    //   ii. there are no more binary expressions following, i.e., in a higher level of the tree
-    //   iii. the accumulation was useful, i.e., reduced the total number of leaf nodes
-    if (binaryExpressionAccumulator.containsOperands()
-        && noneOfTheParentsIsABinaryExpr(&arithmeticExpr)
-        && binaryExpressionAccumulator.subtreeIsSimplified()) {
+    } else {
+      // ...otherwise we need to generate a new expression consisting of the operands collected so far
       auto treeRoot = binaryExpressionAccumulator.getSimplifiedSubtree();
-      // replace the current arithmetic expression by the one generated out of the accumulated (and simplified) operands
+      // replace the current arithmetic expression by the one generated out of the accumulated & simplified operands
       arithmeticExpr.getOnlyParent()->replaceChild(arithmeticExpr.castTo<AbstractNode>(), treeRoot);
     }
   }
@@ -373,7 +385,7 @@ void CompileTimeExpressionSimplifier::visit(UnaryExpr &elem) {
 }
 
 void CompileTimeExpressionSimplifier::visit(OperatorExpr &elem) {
-  // collect known operands and remove from AST
+  // collect known operands from current OperatorExpr and remove them from the AST
   std::vector<AbstractLiteral *> knownOperands;
   for (auto &c : elem.getOperands()) {
     if (!valueIsKnown(c)) continue;
