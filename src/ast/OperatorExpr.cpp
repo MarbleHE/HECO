@@ -27,11 +27,11 @@ std::string OperatorExpr::toString(bool printChildren) const {
 }
 
 OperatorExpr *OperatorExpr::clone(bool keepOriginalUniqueNodeId) {
-  // clone operator
+  // clone operator (child0)
   auto clonedOperator = getOperator()->clone(keepOriginalUniqueNodeId);
-  // clone all operands
+  // clone all operands (child1...childN)
   std::vector<AbstractExpr *> clonedAes;
-  std::transform(children.begin(), children.end(), std::back_inserter(clonedAes),
+  std::transform(++children.begin(), children.end(), std::back_inserter(clonedAes),
                  [keepOriginalUniqueNodeId](AbstractNode *node) -> AbstractExpr * {
                    return node->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>();
                  });
