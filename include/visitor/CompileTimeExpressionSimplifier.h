@@ -242,11 +242,6 @@ class CompileTimeExpressionSimplifier : public Visitor {
   /// This is not to be confused with evaluation of expressions where yet unknown expressions are computed.
   bool replaceVariablesByValues{true};
 
-  // TODO go through all overridden visit methods and make sure that this flag is considered
-  bool evaluateExpressions{true};
-
-  bool doBinaryExpressionAccumulation{true};
-
   /** @defgroup visit Methods implementing the logic of the visitor for each node type.
   *  @{
   */
