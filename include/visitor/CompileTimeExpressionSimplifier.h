@@ -27,7 +27,6 @@
 /// BinaryExpressionAcc could simplify the subtree using subtreeIsSimplified(). If yes, the simplified subtree can be
 /// generated using getSimplifiedSubtree().
 struct BinaryExpressionAcc {
-
   /// The operator of the accumulated operands.
   OpSymbolVariant operatorSymbol;
 
@@ -36,6 +35,8 @@ struct BinaryExpressionAcc {
   /// ArithmeticExpr or LogicalExpr, instead of OperatorExpr. This is needed to ensure that replaced variables in other
   /// statements will be considered by BinaryExpressionAcc (otherwise they will not be simplified).
   bool isVisitingVariableDeclarationOrAssignment{false};
+
+  bool alwaysGenerateSimplifiedSubtreeOfOperatorExpr{false};
 
   /// The operands collected in this subtree (nested binary expressions). This represents the operands of the simplified
   /// tree as after adding any operand, the literals collected so far are combined using the operator specified by the
@@ -83,7 +84,7 @@ struct BinaryExpressionAcc {
   /// Checks whether the accumulation could reduce/simplify any sub-expressions.
   /// \return True if the operands accumulated so far could be simplified by evaluating them, otherwise False.
   bool subtreeIsSimplified() {
-    return numberOfReducedNodes > 0;
+    return numberOfReducedNodes > 0 || alwaysGenerateSimplifiedSubtreeOfOperatorExpr;
   }
 
   /// Checks whether a given operator (opSymbol) is suitable for binary expression accumulation as this approach only
@@ -112,6 +113,10 @@ struct BinaryExpressionAcc {
   /// tree that can be used to simplify the respective subtree of the AST.
   /// \return A multiplicative depth-balanced tree representing the simplified expression.
   AbstractNode *getSimplifiedSubtree() {
+    // as we know if getSimplifiedSubtree is called that all operands will be placed in the tree, we can (and must)
+    // detach the operands from their parent node
+    for (auto &op : operands) op->removeFromParents();
+
     // check if the node where we started collecting operands (i.e., "lower bound" of simplified tree segment) that has
     // a child that we need to attach to the simplified segment
     for (auto &c : firstVisitedBinaryExp->getChildrenNonNull()) {
@@ -119,7 +124,8 @@ struct BinaryExpressionAcc {
         operands.push_back(c->castTo<AbstractExpr>());
       }
     }
-    if (isVisitingVariableDeclarationOrAssignment) {
+
+    if (isVisitingVariableDeclarationOrAssignment && !alwaysGenerateSimplifiedSubtreeOfOperatorExpr) {
       return createMultDepthBalancedTreeFromInputs(operands, operatorSymbol);
     } else {
       return new OperatorExpr(new Operator(operatorSymbol), operands);
@@ -230,6 +236,16 @@ class CompileTimeExpressionSimplifier : public Visitor {
 
   /// An instance to the BinaryExpressionAcc that is needed to simplify nested binary expressions.
   BinaryExpressionAcc binaryExpressionAccumulator;
+
+  /// A flag that indicates whether variables should be replaced by their known value. The value can be a concrete
+  /// value (i.e., subtype of AbstractLiteral) or a symbolic value containing unknown variables (e.g., x = y+4).
+  /// This is not to be confused with evaluation of expressions where yet unknown expressions are computed.
+  bool replaceVariablesByValues{true};
+
+  // TODO go through all overridden visit methods and make sure that this flag is considered
+  bool evaluateExpressions{true};
+
+  bool doBinaryExpressionAccumulation{true};
 
   /** @defgroup visit Methods implementing the logic of the visitor for each node type.
   *  @{
@@ -369,6 +385,13 @@ class CompileTimeExpressionSimplifier : public Visitor {
   /// \param node The node to be checked for deletion.
   /// \return True if this node is enqueued for deletion, otherwise False.
   bool isQueuedForDeletion(const AbstractNode *node);
+
+  /// A validation function that verifies that the AST subtree rooted in rootNode is well-formed. This includes the
+  /// conditions:
+  /// - all edges are non-reversed
+  ///  - all nodes have exactly one parent
+  ///  - all children u of a node v have parent v
+  static void validateAst(AbstractNode *rootNode);
 };
 
 /// Takes a Literal (e.g., LiteralInt) and checks whether its values are defined using a Matrix<AbstractExpr*>. In

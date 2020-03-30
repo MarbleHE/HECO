@@ -1,3 +1,5 @@
+#include <typeinfo>
+#include "PrintVisitor.h"
 #include "CompileTimeExpressionSimplifier.h"
 #include "DotPrinter.h"
 #include "NodeUtils.h"
@@ -13,6 +15,7 @@
 #include "If.h"
 #include "Function.h"
 #include "FunctionParameter.h"
+#include "For.h"
 #include "ParameterList.h"
 #include "CallExternal.h"
 #include "While.h"
@@ -86,7 +89,8 @@ void CompileTimeExpressionSimplifier::visit(Transpose &elem) {
 void CompileTimeExpressionSimplifier::visit(GetMatrixElement &elem) {
   Visitor::visit(elem);
   // if this is an expression like "matrix[a][b]" where the operand (matrix) as well as both indices (a,b) are known
-  if (valueIsKnown(elem.getOperand()) && valueIsKnown(elem.getRowIndex()) && valueIsKnown(elem.getColumnIndex())) {
+  if (evaluateExpressions &&
+      valueIsKnown(elem.getOperand()) && valueIsKnown(elem.getRowIndex()) && valueIsKnown(elem.getColumnIndex())) {
     // get the row index
     int rowIndex = getFirstValue(elem.getRowIndex())->castTo<LiteralInt>()->getValue();
     // get the column index
@@ -94,7 +98,7 @@ void CompileTimeExpressionSimplifier::visit(GetMatrixElement &elem) {
     // get the element at position (row, column)
     auto matrix = dynamic_cast<AbstractLiteral *>(getFirstValue(elem.getOperand()))->getMatrix();
     auto retrievedElement = matrix->getElementAt(rowIndex, columnIndex);
-    // replace this GetMatrixElement referred by the parent node
+    // replace this GetMatrixElement referred by the parent node by the retrieved element
     elem.getOnlyParent()->replaceChild(&elem, retrievedElement);
   }
 }
@@ -116,7 +120,7 @@ void CompileTimeExpressionSimplifier::visit(Ast &elem) {
     nodesAlreadyDeleted.insert(nodeToBeDeleted);
     elem.deleteNode(&nodeToBeDeleted, true);
   }
-  // clean up temporary results from children in removableNodes map
+  // clean up removableNodes result from children that indicates whether a child node can safely be deleted
   removableNodes.erase(elem.getRootNode());
 }
 
@@ -175,16 +179,23 @@ void CompileTimeExpressionSimplifier::visit(LiteralFloat &elem) {
 
 void CompileTimeExpressionSimplifier::visit(Variable &elem) {
   Visitor::visit(elem);
-  if (variableValues.count(elem.getIdentifier()) > 0) {
+  if (variableValues.count(elem.getIdentifier()) > 0 && replaceVariablesByValues) {
     // if we know the variable's value (i.e., its value is either any subtype of AbstractLiteral or an AbstractExpr if
     // this is a symbolic value that defines on other variables), we can replace this variable node by its value
-    auto variableParent = elem.getOnlyParent();
+    auto variableParent = elem.getOnlyParent();  // TODO replace newValue by getFirstValue(&elem)
     auto newValue = variableValues.at(elem.getIdentifier())->clone(false)->castTo<AbstractExpr>();
     variableParent->replaceChild(&elem, newValue);
-    // if this newValue is an AbstractBinaryExpr by itself, enqueue its operands (leaf nodes)
+    // if this newValue is an AbstractBinaryExpr by itself
     if (auto bexp = dynamic_cast<AbstractBinaryExpr *>(newValue)) {
-      binaryExpressionAccumulator.addAllOperandsOfSubtree(bexp);
-      binaryExpressionAccumulator.setLastVisitedSubtree(bexp);
+      // Visit replaced subtree to consider its operands by binary expression accumulation. It is important to set
+      // before replaceVariablesByValues=false, otherwise we potentially end up in an infinite recursion.
+      // We can safely set replaceVariablesByValues=false as the variable replaced by this subtree is already the "best
+      // possible" symbolic representation of each variable.
+      replaceVariablesByValues = false;
+      bexp->accept(*this);
+      replaceVariablesByValues = true;
+      //binaryExpressionAccumulator.addAllOperandsOfSubtree(bexp);
+      //binaryExpressionAccumulator.setLastVisitedSubtree(bexp);
     }
   }
 }
@@ -202,7 +213,7 @@ void CompileTimeExpressionSimplifier::visit(VarDecl &elem) {
   }
   // store the variable's value
   addVariableValue(elem.getVarTargetIdentifier(), variableValue);
-  // clean up temporary results from children in removableNodes map
+  // clean up removableNodes result from children that indicates whether a child node can safely be deleted
   removableNodes.erase(variableInitializer);
   // mark this statement as removable as it is deleted
   markNodeAsRemovable(&elem);
@@ -214,13 +225,15 @@ void CompileTimeExpressionSimplifier::visit(VarAssignm &elem) {
   Visitor::visit(elem);
   // store the variable's value
   addVariableValue(elem.getVarTargetIdentifier(), elem.getValue());
-  // clean up temporary results from children in removableNodes map
+  // clean up removableNodes result from children that indicates whether a child node can safely be deleted
   removableNodes.erase(elem.getValue());
   markNodeAsRemovable(&elem);
   cleanUpAfterStatementVisited(&elem, true);
 }
 
 void CompileTimeExpressionSimplifier::handleBinaryExpression(AbstractBinaryExpr &arithmeticExpr) {
+  if (!doBinaryExpressionAccumulation) return;
+
   // left-hand side operand
   auto lhsOperand = arithmeticExpr.getLeft();
   auto leftValueIsKnown = valueIsKnown(lhsOperand);
@@ -304,7 +317,7 @@ void CompileTimeExpressionSimplifier::visit(ArithmeticExpr &elem) {
   // continue traversal: visiting the expression's operands and operator
   Visitor::visit(elem);
   handleBinaryExpression(elem);
-  // clean up temporary results from children in removableNodes map
+  // clean up removableNodes result from children that indicates whether a child node can safely be deleted
   removableNodes.erase(elem.getLeft());
   removableNodes.erase(elem.getRight());
   removableNodes.erase(elem.getOperator());
@@ -363,7 +376,7 @@ void CompileTimeExpressionSimplifier::visit(LogicalExpr &elem) {
     // handles the case where both operands are known or neither one and tries to simplify nested logical expressions
     handleBinaryExpression(elem);
   }
-  // clean up temporary results from children in removableNodes map
+  // clean up removableNodes result from children that indicates whether a child node can safely be deleted
   removableNodes.erase(elem.getLeft());
   removableNodes.erase(elem.getRight());
   removableNodes.erase(elem.getOperator());
@@ -379,7 +392,7 @@ void CompileTimeExpressionSimplifier::visit(UnaryExpr &elem) {
     parent->replaceChild(&elem, result.front());
     nodesQueuedForDeletion.push_back(&elem);
   }
-  // clean up temporary results from children in removableNodes map
+  // clean up removableNodes result from children that indicates whether a child node can safely be deleted
   removableNodes.erase(elem.getRight());
   removableNodes.erase(elem.getOp());
 }
@@ -450,7 +463,7 @@ void CompileTimeExpressionSimplifier::visit(Block &elem) {
     if (removableNodes.count(statement)==0) {
       allStatementsInBlockAreMarkedForDeletion = false;
     }
-    // clean up temporary results from children in removableNodes map
+    // clean up removableNodes result from children that indicates whether a child node can safely be deleted
     removableNodes.erase(statement);
   }
   // if all statements of this Block are marked for deletion, we can mark the Block as removable
@@ -514,7 +527,7 @@ void CompileTimeExpressionSimplifier::visit(ParameterList &elem) {
   bool allFunctionParametersAreRemovable = true;
   for (auto &fp : elem.getParameters()) {
     if (!valueIsKnown(fp)) allFunctionParametersAreRemovable = false;
-    // clean up temporary results from children in removableNodes map
+    // clean up removableNodes result from children that indicates whether a child node can safely be deleted
     removableNodes.erase(fp);
   }
   if (allFunctionParametersAreRemovable) {
@@ -531,7 +544,7 @@ void CompileTimeExpressionSimplifier::visit(Function &elem) {
   if (valueIsKnown(elem.getParameterList()) && valueIsKnown(elem.getBody())) {
     markNodeAsRemovable(&elem);
   }
-  // clean up temporary results from children in removableNodes map
+  // clean up removableNodes result from children that indicates whether a child node can safely be deleted
   removableNodes.erase(elem.getParameterList());
   removableNodes.erase(elem.getBody());
   cleanUpAfterStatementVisited(&elem, false);
@@ -655,7 +668,7 @@ void CompileTimeExpressionSimplifier::visit(If &elem) {
     // enqueue the If statement and its children for deletion
     nodesQueuedForDeletion.push_back(&elem);
   }
-  // clean up temporary results from children in removableNodes map
+  // clean up removableNodes result from children that indicates whether a child node can safely be deleted
   removableNodes.erase(elem.getCondition());
   removableNodes.erase(elem.getThenBranch());
   removableNodes.erase(elem.getElseBranch());
@@ -682,7 +695,221 @@ void CompileTimeExpressionSimplifier::visit(While &elem) {
 }
 
 void CompileTimeExpressionSimplifier::visit(For &elem) {
-  Visitor::visit(elem);
+  // save a copy of all variables and their values
+  std::unordered_map<std::string, AbstractExpr *> variableValuesBackup = variableValues;
+
+  // save a copy of all nodes marked for deletion
+  // we'll use that copy later to "undo" marking nodes for deletion as we don't want to delete any nodes within that For
+  auto nodesQueuedForDeletionCopy = nodesQueuedForDeletion;
+
+  // visit the intializer
+  auto initializerCopy = elem.getInitializer()->clone(true);
+  elem.getInitializer()->accept(*this);
+  // visit the condition, before clone the condition as visiting it will perform inlining and variables will be replaced
+  // by values but we need to revisit and reevaluate the statement after executing the update statement
+  auto conditionCopy = elem.getCondition()->clone(true);
+  elem.getCondition()->accept(*this);
+  // now we're able to determine whether the bounds are compile-time known
+
+  auto variableValuesAfterVisitingInitializerAndConditionOnce = variableValues;
+
+  // conditions that must be satisfied (and assumptions made) for loop unrolling
+  // (using castTo following because dynamic_cast somehow doesn't work here...):
+  // 1. For-loop's bounds are compile-time known
+  bool boundsAreCompileTimeKnown = valueIsKnown(elem.getCondition());
+  // 2. For-loop's initializer contains a single variable declaration (VarDecl)
+  bool initializerContainsVarDecl = true;
+  try { elem.getInitializer()->castTo<VarDecl>(); } catch (std::exception &e) { initializerContainsVarDecl = false; }
+  // 3. For-loop's update statement contains a single variable assignment (VarAssignm)
+  bool updaterContainsVarAssignm = true;
+  try { elem.getUpdateStatement()->castTo<VarAssignm>(); } catch (std::exception &e) {
+    updaterContainsVarAssignm = false;
+  }
+
+  // if the For-loop's bounds are compile-time known
+  if (boundsAreCompileTimeKnown && initializerContainsVarDecl && updaterContainsVarAssignm) {
+    // a vector containing maps of (variableIdentifier, variableValue) values; a map for each iteration as the loop
+    // might multiple iteration variables (e.g., nested in a Block)
+    std::vector<std::unordered_map<std::string, AbstractExpr *>> loopVariableValues;
+    std::vector<AbstractExpr *> updateExpressions;
+
+    // a helper function to evaluate the for loop's condition
+    auto conditionIsTrue = [&]() {
+      auto evaluatedCond = evaluateNodeRecursive(conditionCopy->castTo<AbstractNode>(), getTransformedVariableMap());
+      return *evaluatedCond.front()==LiteralBool(true);
+    };
+
+    // create a backup (clone) of the original, non-inlined update statement
+    auto updateStmtCopy = elem.getUpdateStatement()->clone(true);
+
+    // Save all loop iteration variables with their respective value by comparing the map with the backup made before
+    // visiting the loop's initializer. This is required to determine how often this loop will run and to determine the
+    // loop variable values as long as the condition evaluates to True.
+    while (conditionIsTrue()) {
+      // a map of (variableIdentifier, variableValue) pairs for the current loop iteration
+      std::unordered_map<std::string, AbstractExpr *> changedVariables;
+
+      // find all changed variables
+      for (auto &[varIdentifier, expr] : variableValues) {
+        // a variable is changed if it either was added (i.e., declaration of a new variable) or its value was changed
+        if (variableValuesBackup.count(varIdentifier)==0
+            || (variableValuesBackup.count(varIdentifier) > 0 && variableValuesBackup.at(varIdentifier)!=expr)) {
+          changedVariables.emplace(varIdentifier, expr);
+        }
+      }
+      // store all modified variables: those are the loop iteration variables
+      loopVariableValues.push_back(changedVariables);
+
+      // visit the loop's update statement, we do this on a copy because visiting it will perform inlining (replace
+      // variables by their value)
+      updateStmtCopy->clone(false)->accept(*this);
+    } // end of while
+
+    // remove iteration variables from map, otherwise visiting the update statement will perform inlining
+    for (auto &[varIdentifier, unused] : loopVariableValues.at(0)) variableValues.erase(varIdentifier);
+
+    // a vector of symbolic loop iteration variables, e.g., i, i+1, i+2
+    std::vector<AbstractExpr *> symbolicLoopIterationVars;
+
+    // determine the loop's iteration variable (e.g., i)
+    // assumption: initializer contains a single variable declaration statement
+    auto loopIterationVariableIdentifier = initializerCopy->castTo<VarDecl>()->getVarTargetIdentifier();
+    symbolicLoopIterationVars.push_back(new Variable(loopIterationVariableIdentifier));
+
+    // generate symbolic iteration variables (e.g., i, i+1, i+2)
+    for (int i = 0; i < loopVariableValues.size(); ++i) {
+      auto tempClonedUpdateStmt = updateStmtCopy->clone(false);
+      // visit the  update statement
+      tempClonedUpdateStmt->accept(*this);
+      // assumption: for-update contains exactly one variable assignment
+      // do not add the last loop iteration variable as this is the one that does not satisfy the loop condition anymore
+      if (i < loopVariableValues.size() - 1) {
+        auto symbolicExpr = tempClonedUpdateStmt->castTo<VarAssignm>()->getValue();
+        symbolicExpr->removeFromParents();
+        symbolicLoopIterationVars.push_back(symbolicExpr);
+      }
+    }
+
+    // a helper function that replaces all variables identified by the given loopVariableIdentifier by the expression
+    // given as replacementTarget in the tree rooted in node subtreeRoot
+    auto replaceVariables =
+        [](AbstractNode *subtreeRoot, std::string loopVariableIdentifier, AbstractExpr *replacementTarget) {
+          for (auto &n : subtreeRoot->getDescendants()) {
+            auto variable = dynamic_cast<Variable *>(n);
+            // only replace a node if it is a variable and the variable identifier matches the given one
+            if (variable!=nullptr && variable->getIdentifier()==loopVariableIdentifier) {
+              variable->getOnlyParent()->replaceChild(variable, replacementTarget);
+            }
+          }
+        };
+
+    // compute parameters for partial loop unrolling, e.g.,
+    //  - newNumIterations = #iterations / 128
+    //  - remainingIterationsCleanupLoop = #iterations % 128
+    const int NUM_CIPHERTEXT_SLOTS = 3;
+    int numNewIterations = loopVariableValues.size()/NUM_CIPHERTEXT_SLOTS;
+    int numRemainingIterations = loopVariableValues.size()%NUM_CIPHERTEXT_SLOTS;
+
+    // the new for-loop body containing the unrolled statements
+    Block *unrolledForLoopBody = new Block();
+    // generate the unrolled loop statements by performing for each statement in the original's loop body:
+    // duplicate the statement, replace all iteration variables, append the statement to the new (unrolled) loop body
+    for (int i = 0; i < NUM_CIPHERTEXT_SLOTS; i++) {
+      // for each statement in the for-loop's body
+      for (auto &stmt : elem.getStatementToBeExecuted()->castTo<Block>()->getStatements()) {
+        // clone the body statements
+        auto clonedStmt = stmt->clone(false);
+        // replace the iteration variable by the one of the symbolicLoopIterationVars map
+        replaceVariables(clonedStmt, loopIterationVariableIdentifier, symbolicLoopIterationVars.at(i));
+        // append the statement to the unrolledForLoop Body
+        unrolledForLoopBody->addChild(clonedStmt);
+      }
+    }
+    // replace the for loop's body by the unrolled statements
+    auto forLoopBody = elem.getStatementToBeExecuted();
+    elem.replaceChild(elem.getStatementToBeExecuted(), unrolledForLoopBody);
+
+    // make sure that the generated AST is valid
+    CompileTimeExpressionSimplifier::validateAst(&elem);
+
+    // for each variable: find the statement that last assigned the variable's value
+    std::unordered_map<std::string, AbstractStatement *> lastAssignedVarValue;
+    for (auto &stmt : elem.getStatementToBeExecuted()->getChildren()) {
+      if (auto stmtAsVarAssignm = dynamic_cast<VarAssignm *>(stmt)) {
+        lastAssignedVarValue[stmtAsVarAssignm->getVarTargetIdentifier()] = stmtAsVarAssignm;
+      } else if (auto stmtAsVarDecl = dynamic_cast<VarDecl *>(stmt)) {
+        lastAssignedVarValue[stmtAsVarDecl->getVarTargetIdentifier()] = stmtAsVarDecl;
+      }
+    }
+
+    // pass 1: visit the for-loop's body to do inlining
+    // erase the loop iteration variable (e.g., i) such that it is not replaced by its value
+    variableValuesAfterVisitingInitializerAndConditionOnce.erase(loopIterationVariableIdentifier);
+    variableValues = variableValuesAfterVisitingInitializerAndConditionOnce;
+    nodesQueuedForDeletion = nodesQueuedForDeletionCopy;
+    evaluateExpressions = false;
+    doBinaryExpressionAccumulation = false;
+    elem.getStatementToBeExecuted()->accept(*this);
+    auto nodesQueuedForDeletionAfterFirstPass = nodesQueuedForDeletion;
+    // pass 2: visit the for-loop's body to aggregate arithmetic/logical exprs into OperatorExprs
+    // we need a second pass over the loop's body statements to aggregate remaining arithmetic/logical expressions into
+    // OperatorExprs, this cannot be done in one step because if we force transformation of arithmetic/logical exprs
+    // into OperatorExprs using alwaysGenerateSimplifiedSubtreeOfOperatorExpr, inlining would be performed using these
+    // but afterward we could not simplify the "last statement in the loop" because binaryExpressionAccumulator does not
+    // support OperatorExprs.
+
+    goto skip;
+    // TODO make OperatorExprs work with binaryExpressionAcc (at least for the ops supported by binaryExpressionAcc)
+    variableValues = variableValuesAfterVisitingInitializerAndConditionOnce;
+    nodesQueuedForDeletion = nodesQueuedForDeletionCopy;
+    binaryExpressionAccumulator.alwaysGenerateSimplifiedSubtreeOfOperatorExpr = true;
+    doBinaryExpressionAccumulation = true;
+    elem.getStatementToBeExecuted()->accept(*this);
+    skip:
+    evaluateExpressions = true;
+    doBinaryExpressionAccumulation = true;
+    nodesQueuedForDeletion = nodesQueuedForDeletionAfterFirstPass;
+
+    // TODO remove all variables from variableValues that were modified in the loop (e.g., sum)
+
+    // remove statements that last assigned a variable's value from the nodesQueuedForDeletion vector
+    // TODO what about variables declared within the loop's scope?
+    for (auto &[varIdentifier, stmt] : lastAssignedVarValue) {
+      // this is very inefficient!
+      auto it = std::find(nodesQueuedForDeletion.begin(), nodesQueuedForDeletion.end(), stmt);
+      if (it!=nodesQueuedForDeletion.end()) nodesQueuedForDeletion.erase(it);
+    }
+
+    // save the changed nodesQueuedForDeletion as our updated copy
+    nodesQueuedForDeletionCopy = nodesQueuedForDeletion;
+
+    // update the for loop's update statement (e.g., i=i+1 -> i=i+3)
+    // assumption: update statement consists of single variable assignment only
+    auto updateStmt = elem.getUpdateStatement()->castTo<VarAssignm>();
+    updateStmt->replaceChild(updateStmt->getValue(), symbolicLoopIterationVars.at(NUM_CIPHERTEXT_SLOTS));
+
+    // handle remaining iterations (cleanup loop) if remainingIterationsCleanupLoop != 0:
+    // place statements in a separate loop for the remaining iterations
+    if (numRemainingIterations!=0) {
+      // build the new initializer expression, e.g., int i=6;
+      auto initExpr = loopVariableValues.at(numNewIterations*NUM_CIPHERTEXT_SLOTS).at(loopIterationVariableIdentifier);
+      auto clonedInitializer = elem.getInitializer()->clone(false)->castTo<VarDecl>();
+      clonedInitializer->setAttributes(clonedInitializer->getIdentifier(), clonedInitializer->getDatatype(), initExpr);
+      // the loop's condition (remains same), e.g., i < 7
+      auto condition = conditionCopy;
+      // the loop's update statement (remains same), e.g., i=i+1;
+      auto updateStatement = updateStmtCopy->clone(false)->castTo<AbstractStatement>();
+      // the loop's body statements (nested in a block; remains same)
+      auto body = forLoopBody->clone(false)->castTo<AbstractStatement>();
+      // attach the newly generated For "cleanup" loop to the function's body
+      elem.getOnlyParent()->addChild(new For(clonedInitializer, condition, updateStatement, body));
+    }
+  } // end of: if (valueIsKnown(elem.getCondition))
+
+  // restore the nodes that were queued for deletion before visiting this For handler; this is needed because otherwise
+  // parts of the loop (e.g., VarDecl in initializer) will be deleted at the end of this visitor traversal
+  nodesQueuedForDeletion = nodesQueuedForDeletionCopy;
+
   cleanUpAfterStatementVisited(reinterpret_cast<AbstractNode *>(&elem), false);
 }
 
@@ -692,7 +919,7 @@ void CompileTimeExpressionSimplifier::visit(Return &elem) {
   bool allValuesAreKnown = true;
   for (auto &returnExpr : elem.getReturnExpressions()) {
     if (!valueIsKnown(returnExpr)) allValuesAreKnown = false;
-    // clean up temporary results from children in removableNodes map
+    // clean up removableNodes result from children that indicates whether a child node can safely be deleted
     removableNodes.erase(returnExpr);
   }
   // marking this node as removable is only useful for the case that this Return belongs to a nested Function that can
@@ -835,8 +1062,9 @@ void CompileTimeExpressionSimplifier::cleanUpAfterStatementVisited(AbstractNode 
 
 void CompileTimeExpressionSimplifier::addVariableValue(const std::string &variableIdentifier,
                                                        AbstractExpr *valueAnyLiteralOrAbstractExpr) {
-  valueAnyLiteralOrAbstractExpr->removeFromParents();
-  variableValues[variableIdentifier] = valueAnyLiteralOrAbstractExpr;
+  auto clonedVariableValue = valueAnyLiteralOrAbstractExpr->clone(false);
+  clonedVariableValue->removeFromParents();
+  variableValues[variableIdentifier] = clonedVariableValue->castTo<AbstractExpr>();
 }
 
 bool CompileTimeExpressionSimplifier::isQueuedForDeletion(const AbstractNode *node) {
@@ -844,3 +1072,27 @@ bool CompileTimeExpressionSimplifier::isQueuedForDeletion(const AbstractNode *no
       !=nodesQueuedForDeletion.end();
 }
 
+void CompileTimeExpressionSimplifier::validateAst(AbstractNode *rootNode) {
+  // a helper utility
+  auto printWarningMsg = [](AbstractNode *node, std::string message) {
+    std::cout << "[WARN] Node (" << node->getUniqueNodeId() << "): " << message;
+  };
+  // an AST can be considered as CTES-valid if all of the following holds:
+  // - all edges are non-reversed
+  // - all nodes have exactly one parent
+  // - all children u of a node v have parent v
+  std::deque<AbstractNode *> nodesToProcessNext{rootNode};
+  while (!nodesToProcessNext.empty()) {
+    // get next node
+    auto curNode = nodesToProcessNext.front();
+    nodesToProcessNext.pop_front();
+    //
+    if (curNode->isReversed) printWarningMsg(curNode, "Node is reversed");
+    // visit all of the node's children
+    for (auto &c : curNode->getChildren()) {
+      if (c->getParentsNonNull().size()!=1) printWarningMsg(c, "Node has unexpected number of parents.");
+      if (!c->hasParent(curNode)) printWarningMsg(c, "Node does not have expected parent backreference");
+      nodesToProcessNext.push_back(c);
+    }
+  }
+}

@@ -20,6 +20,7 @@
 #include "AstTestingGenerator.h"
 #include "OperatorExpr.h"
 #include "Matrix.h"
+#include "For.h"
 
 class CompileTimeExpressionSimplifierFixture : public ::testing::Test {
  protected:
@@ -2175,4 +2176,108 @@ TEST_F(CompileTimeExpressionSimplifierFixture, operatorExpr_logicalXorFalse_twoR
   auto returnStatement = ast.getRootNode()->castTo<Function>()->getBodyStatements().back()->castTo<Return>();
 
   EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedReturnExpr));
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, forLoopUnrolling) { /* NOLINT */
+  // -- input --
+  // int sumVectorElements() {
+  //    Matrix<int> M = [54; 32; 63; 38; 13; 20];
+  //    int sum = 0;
+  //    for (int i = 0; i < 6; i++) {
+  //      sum = sum + M[i];
+  //    }
+  //    return sum;
+  // }
+  // -- expected --
+  // int sumVectorElements() {
+  //    ...
+  //    for (int i = 0; i < 2; i++) {
+  //      sum = sum + M[i];
+  //      sum = sum + M[i+1];
+  //      sum = sum + M[i+2];
+  //    }
+  //    ...
+  // }
+  // int sumVectorElements() {
+  //    ...
+  //    for (int i = 0; i < 2; i++) {
+  //      sum = sum + M[i] + M[i+1] + M[i+2];
+  //    }
+  //    ...
+  // }
+
+  //
+  // step 1:
+  // int sumVectorElements() {
+  //    sum = sum + M[0];
+  //    sum = sum + M[1];
+  //    sum = sum + M[2];
+  //    sum = sum + M[3];
+  //    sum = sum + M[4];
+  //    sum = sum + M[5];
+  //    return sum;
+  // }
+  // step 2:
+  // int sumVectorElements() {
+  //    return sum + M[0] + M[1] + M[2] + M[3] + M[4] + M[5];
+  // }
+  auto func = new Function("sumVectorElements");
+
+  func->addStatement(new VarDecl("M",
+                                 Types::INT,
+                                 new LiteralInt(new Matrix<int>({{54}, {32}, {63}, {38}, {13}, {20}}))));
+
+  func->addStatement(new VarDecl("sum", 0));
+
+  auto forLoopInitializer = new VarDecl("i", 0);
+  auto forLoopCondition = new LogicalExpr(new Variable("i"), SMALLER, new LiteralInt(6));
+  auto forLoopUpdater = new VarAssignm("i", new ArithmeticExpr(new Variable("i"), ADDITION, new LiteralInt(1)));
+  auto forLoopBody = new VarAssignm("sum",
+                                    new ArithmeticExpr(
+                                        new Variable("sum"),
+                                        ADDITION,
+                                        new GetMatrixElement(new Variable("M"), new Variable("i"), new LiteralInt(0))));
+  auto forLoop = new For(forLoopInitializer, forLoopCondition, forLoopUpdater, forLoopBody);
+  func->addStatement(forLoop);
+
+  func->addStatement(new Return(new Variable("sum")));
+
+  Ast ast;
+  ast.setRootNode(func);
+
+  ctes.visit(ast);
+
+  PrintVisitor pv;
+  pv.visit(ast);
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, forLoopUnrollingWithCleanupLoop) { /* NOLINT */
+  auto func = new Function("sumVectorElements");
+
+  func->addStatement(new VarDecl("M",
+                                 Types::INT,
+                                 new LiteralInt(new Matrix<int>({{54}, {32}, {63}, {38}, {13}, {20}, {37}}))));
+
+  func->addStatement(new VarDecl("sum", 0));
+
+  auto forLoopInitializer = new VarDecl("i", 0);
+  auto forLoopCondition = new LogicalExpr(new Variable("i"), SMALLER, new LiteralInt(7));
+  auto forLoopUpdater = new VarAssignm("i", new ArithmeticExpr(new Variable("i"), ADDITION, new LiteralInt(1)));
+  auto forLoopBody = new VarAssignm("sum",
+                                    new ArithmeticExpr(
+                                        new Variable("sum"),
+                                        ADDITION,
+                                        new GetMatrixElement(new Variable("M"), new Variable("i"), new LiteralInt(0))));
+  auto forLoop = new For(forLoopInitializer, forLoopCondition, forLoopUpdater, forLoopBody);
+  func->addStatement(forLoop);
+
+  func->addStatement(new Return(new Variable("sum")));
+
+  Ast ast;
+  ast.setRootNode(func);
+
+  ctes.visit(ast);
+
+  PrintVisitor pv;
+  pv.visit(ast);
 }
