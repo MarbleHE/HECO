@@ -1,5 +1,6 @@
 #include "For.h"
 #include "LogicalExpr.h"
+#include "Block.h"
 
 std::string For::getNodeType() const {
   return "For";
@@ -37,6 +38,9 @@ void For::setAttributes(AbstractStatement *initializer,
                         AbstractStatement *update,
                         AbstractStatement *statementToBeExecuted) {
   removeChildren();
+  if (dynamic_cast<Block *>(statementToBeExecuted)==nullptr) {
+    statementToBeExecuted = new Block(statementToBeExecuted);
+  }
   addChildren({initializer, condition, update, statementToBeExecuted}, true);
 }
 
