@@ -142,6 +142,9 @@ const std::vector<AbstractNode *> &AbstractNode::getParents() const {
 }
 
 void AbstractNode::addParent(AbstractNode *parentToAdd, bool addBackreference) {
+  if (parents.size() > 1 && !isReversed) {
+    throw std::logic_error("Node cannot have more than one parent!");
+  }
   parents.push_back(parentToAdd);
   if (addBackreference) {
     for (auto &p : getParentsNonNull()) {
