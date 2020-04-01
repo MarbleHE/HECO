@@ -80,6 +80,8 @@ class ControlFlowGraphVisitor : public Visitor {
   /// \invariant lastCreatedNodes is always empty after calling this method.
   void postActionsStatementVisited(GraphNode *gNode);
 
+  std::vector<std::string> getLastVariableWrites();
+
   /** @defgroup visit Methods for handling visits of AbstractNode subclasses
    *  @{
    */

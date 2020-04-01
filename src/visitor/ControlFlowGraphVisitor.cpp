@@ -403,7 +403,7 @@ void ControlFlowGraphVisitor::buildDataFlowGraph() {
     }
 
     // add writes to variables happening in curNode to varLastWritten
-    for (auto &[varIdentifier, ignored] : curNode->getVariables(AccessType::WRITE)) {
+    for (auto &varIdentifier : curNode->getVariables(AccessType::WRITE)) {
       // store the variable writes of this node (curNode)
       if (varLastWritten.count(varIdentifier) > 0) {
         // if this is not a join point, we need to remove the existing information before adding the new one
@@ -460,11 +460,11 @@ void ControlFlowGraphVisitor::buildDataFlowGraph() {
   // for each node that was visited in the CFG
   for (auto &v : processedNodes) {
     // retrieve all variables that were read
-    for (auto &[varIdentifierRead, ignored1] : v->getVariables(AccessType::READ)) {
+    for (auto &varIdentifierRead : v->getVariables(AccessType::READ)) {
       // SPECIAL CASE: node has a WRITE to the same variable (=> READ + WRITE, e.g., i = i + 1), in that case it does
       // not make sense to add a self-edge, but in case that the node is within a loop, its parent node will have the
       // same information about the last write
-      if (v->getVariables(AccessType::WRITE).count(std::make_pair(varIdentifierRead, AccessType::WRITE)) > 0) {
+      if (v->getVariables(AccessType::WRITE).count(varIdentifierRead) > 0) {
         // iterate over all parents of node v
         for (auto &parentNode : v->getControlFlowGraph()->getParents()) {
           // if the parent knows where the last write for the given variable identifier happened lastly
@@ -481,4 +481,16 @@ void ControlFlowGraphVisitor::buildDataFlowGraph() {
       }
     }
   }
+}
+
+std::vector<std::string> ControlFlowGraphVisitor::getLastVariableWrites() {
+  std::vector<std::string> writtenVariables;
+  if (lastCreatedNodes.empty()) {
+    throw std::logic_error("Cannot get last written variables as there are no existing GraphNode objects."
+                           "Did you visit a statement before?");
+  } else {
+    auto v = lastCreatedNodes.back()->getVariables(AccessType::WRITE);
+    writtenVariables.insert(writtenVariables.end(), v.begin(), v.end());
+  }
+  return writtenVariables;
 }
