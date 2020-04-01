@@ -60,7 +60,7 @@ void Visitor::visit(ArithmeticExpr &elem) {
 }
 
 void Visitor::visit(Block &elem) {
-  curScope->addStatement(&elem);
+  addStatementToScope(elem);
   changeToInnerScope(elem.getUniqueNodeId());
   for (auto &stat : elem.getStatements()) {
     stat->accept(*this);
@@ -69,7 +69,6 @@ void Visitor::visit(Block &elem) {
 }
 
 void Visitor::visit(Call &elem) {
-  //curScope->addStatement(&elem);
   changeToInnerScope(elem.AbstractExpr::getUniqueNodeId());
   // callee
   elem.getFunc()->accept(*this);
@@ -90,7 +89,7 @@ void Visitor::visit(CallExternal &elem) {
 }
 
 void Visitor::visit(Function &elem) {
-  curScope->addStatement(&elem);
+  addStatementToScope(elem);
   changeToInnerScope(elem.getUniqueNodeId());
   // visit FunctionParameter
   if (auto fp = elem.getParameterList()) fp->accept(*this);
@@ -105,7 +104,7 @@ void Visitor::visit(FunctionParameter &elem) {
 }
 
 void Visitor::visit(If &elem) {
-  curScope->addStatement(&elem);
+  addStatementToScope(elem);
 
   // condition
   elem.getCondition()->accept(*this);
@@ -206,7 +205,7 @@ void Visitor::visit(ParameterList &elem) {
 }
 
 void Visitor::visit(Return &elem) {
-  curScope->addStatement(&elem);
+  addStatementToScope(elem);
   for (auto &expr : elem.getReturnExpressions()) {
     expr->accept(*this);
   }
@@ -228,12 +227,12 @@ void Visitor::visit(UnaryExpr &elem) {
 }
 
 void Visitor::visit(VarAssignm &elem) {
-  curScope->addStatement(&elem);
+  addStatementToScope(elem);
   elem.getValue()->accept(*this);
 }
 
 void Visitor::visit(VarDecl &elem) {
-  curScope->addStatement(&elem);
+  addStatementToScope(elem);
   // visit datatype associated to new variable
   elem.getDatatype()->accept(*this);
   // visit initializer
@@ -245,7 +244,7 @@ void Visitor::visit(VarDecl &elem) {
 void Visitor::visit(Variable &elem) {}
 
 void Visitor::visit(While &elem) {
-  curScope->addStatement(&elem);
+  addStatementToScope(elem);
 
   // condition
   elem.getCondition()->accept(*this);
@@ -265,11 +264,13 @@ void Visitor::visit(While &elem) {
 }
 
 void Visitor::changeToOuterScope() {
+  if (ignoreScope) return;
   auto temp = curScope->getOuterScope();
   this->curScope = temp;
 }
 
 void Visitor::changeToInnerScope(const std::string &nodeId) {
+  if (ignoreScope) return;
   auto temp = curScope->getOrCreateInnerScope(nodeId);
   this->curScope = temp;
 }
@@ -312,4 +313,16 @@ void Visitor::visit(OperatorExpr &elem) {
   elem.getOperator()->accept(*this);
   // visit all operands
   for (auto &child : elem.getOperands()) child->accept(*this);
+}
+
+void Visitor::addStatementToScope(AbstractStatement &stat) {
+  if (ignoreScope) return;
+  if (curScope==nullptr) {
+    throw std::logic_error("[Visitor] Cannot add statement to scope as Scope is not created yet (nullptr).");
+  }
+  curScope->addStatement(&stat);
+}
+
+void Visitor::setIgnoreScope(bool ignScope) {
+  Visitor::ignoreScope = ignScope;
 }

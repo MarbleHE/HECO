@@ -38,6 +38,9 @@ class AbstractMatrix;
 class OperatorExpr;
 
 class Visitor {
+ private:
+  bool ignoreScope{false};
+
  public:
   virtual void visit(AbstractNode &elem);
 
@@ -101,6 +104,8 @@ class Visitor {
 
   Scope *curScope;
 
+  void setIgnoreScope(bool ignScope);
+
   void changeToOuterScope();
 
   void changeToInnerScope(const std::string &nodeId);
@@ -110,6 +115,8 @@ class Visitor {
   /// This and only this method should be used to traverse an AST.
   /// \param elem A reference to the Abstract Syntax Tree (AST).
   virtual void visit(Ast &elem);
+
+  void addStatementToScope(AbstractStatement &stat);
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_VISITOR_VISITOR_H_
