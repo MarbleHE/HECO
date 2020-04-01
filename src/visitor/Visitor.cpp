@@ -185,11 +185,11 @@ void Visitor::visit(For &elem) {
   // e.g., for (int i = 0; i < N; i++) { cout << i << endl; }
 
   // initializer
-  elem.getInitializer()->accept(*this);
+  if (elem.getInitializer()!=nullptr) elem.getInitializer()->accept(*this);
   // condition
-  elem.getCondition()->accept(*this);
+  if (elem.getCondition()!=nullptr) elem.getCondition()->accept(*this);
   // update
-  elem.getUpdateStatement()->accept(*this);
+  if (elem.getUpdateStatement()!=nullptr) elem.getUpdateStatement()->accept(*this);
 
   changeToInnerScope(elem.getStatementToBeExecuted()->getUniqueNodeId());
   // For statement body is always in a separate scope (even without a separate block "{...}")
