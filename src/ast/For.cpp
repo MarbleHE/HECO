@@ -77,9 +77,12 @@ json For::toJson() const {
 
 bool For::isEqual(AbstractStatement *other) {
   if (auto otherFor = dynamic_cast<For *>(other)) {
-    auto sameInitializer = getInitializer()->isEqual(otherFor->getInitializer());
-    auto sameCondition = getCondition()->isEqual(otherFor->getCondition());
-    auto sameUpdateStmt = getUpdateStatement()->isEqual(otherFor->getUpdateStatement());
+    auto sameInitializer = (getInitializer()==nullptr && otherFor->getInitializer()==nullptr)
+        || getInitializer()->isEqual(otherFor->getInitializer());
+    auto sameCondition = (getCondition()==nullptr && otherFor->getCondition()==nullptr)
+        || getCondition()->isEqual(otherFor->getCondition());
+    auto sameUpdateStmt = (getUpdateStatement()==nullptr && otherFor->getUpdateStatement()==nullptr)
+        || getUpdateStatement()->isEqual(otherFor->getUpdateStatement());
     auto sameBody = getStatementToBeExecuted()->isEqual(otherFor->getStatementToBeExecuted());
     return sameInitializer && sameCondition && sameUpdateStmt && sameBody;
   }
