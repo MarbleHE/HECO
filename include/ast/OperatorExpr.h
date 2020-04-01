@@ -33,7 +33,7 @@ class OperatorExpr : public AbstractExpr {
 
   void addOperand(AbstractExpr *operand);
 
-  void setAttributes(Operator *op, std::vector<AbstractExpr *> abstractExpr);
+  void setAttributes(Operator *newOperator, std::vector<AbstractExpr *> newOperands);
 
   [[nodiscard]] bool isLogicalExpr() const;
 
