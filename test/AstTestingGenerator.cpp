@@ -72,7 +72,8 @@ static std::map<int, std::function<void(Ast &)> > call = {  /* NOLINT */
     {44, AstTestingGenerator::genAstOperatorExpr_logicalXorTrue},
     {45, AstTestingGenerator::genAstOperatorExpr_logicalXorFalse_oneRemainingOperand},
     {46, AstTestingGenerator::genAstOperatorExpr_logicalXorFalse_twoRemainingOperands},
-    {47, AstTestingGenerator::genAstNestedOperatorExpr}
+    {47, AstTestingGenerator::genAstNestedOperatorExpr},
+    {48, AstTestingGenerator::genAstSimpleForLoopUnrolling}
 };
 
 void AstTestingGenerator::generateAst(int id, Ast &ast) {
@@ -1531,5 +1532,39 @@ void AstTestingGenerator::genAstNestedOperatorExpr(Ast &ast) {
   auto operatorExp = new OperatorExpr(new Operator(LOGICAL_AND),
                                       {new LiteralBool(false), nestedC, nestedB, new LiteralBool(true), nestedA});
   func->addStatement(new Return(operatorExp));
+  ast.setRootNode(func);
+}
+
+void AstTestingGenerator::genAstSimpleForLoopUnrolling(Ast &ast) {
+  // -- input --
+  // int sumVectorElements() {
+  //    Matrix<int> M = [54; 32; 63; 38; 13; 20];
+  //    int sum = 0;
+  //    for (int i = 0; i < 6; i++) {
+  //      sum = sum + M[i];
+  //    }
+  //    return sum;
+  // }
+  auto func = new Function("sumVectorElements");
+
+  func->addStatement(new VarDecl("M",
+                                 Types::INT,
+                                 new LiteralInt(new Matrix<int>({{54}, {32}, {63}, {38}, {13}, {20}}))));
+
+  func->addStatement(new VarDecl("sum", 0));
+
+  auto forLoopInitializer = new VarDecl("i", 0);
+  auto forLoopCondition = new LogicalExpr(new Variable("i"), SMALLER, new LiteralInt(6));
+  auto forLoopUpdater = new VarAssignm("i", new ArithmeticExpr(new Variable("i"), ADDITION, new LiteralInt(1)));
+  auto forLoopBody = new VarAssignm("sum",
+                                    new ArithmeticExpr(
+                                        new Variable("sum"),
+                                        ADDITION,
+                                        new GetMatrixElement(new Variable("M"), new Variable("i"), new LiteralInt(0))));
+  auto forLoop = new For(forLoopInitializer, forLoopCondition, forLoopUpdater, forLoopBody);
+  func->addStatement(forLoop);
+
+  func->addStatement(new Return(new Variable("sum")));
+
   ast.setRootNode(func);
 }

@@ -85,7 +85,7 @@ class AstTestingGenerator {
   static void genAstCrossProduct(Ast &ast);
 
   static void genSimpleMatrix(Ast &ast);
-  /** @} */ // End of astGenerators group
+
   static void genAstFlipMatrixElements(Ast &ast);
 
   static void genAstOperatorExpr_fullyEvaluable(Ast &ast);
@@ -113,6 +113,9 @@ class AstTestingGenerator {
   static void genAstOperatorExpr_logicalXorFalse_twoRemainingOperands(Ast &ast);
 
   static void genAstNestedOperatorExpr(Ast &ast);
+
+  static void genAstSimpleForLoopUnrolling(Ast &ast);
+  /** @} */ // End of astGenerators group
 };
 
 #endif //AST_OPTIMIZER_TEST_ASTTESTINGGENERATOR_H_
