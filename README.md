@@ -7,13 +7,14 @@
                                                       /_/                                          
 ```
 [![Language](https://img.shields.io/badge/language-C++-blue.svg)](https://isocpp.org/)
-[![Standard11/14/17](https://img.shields.io/badge/C%2B%2B-11%2F14%2F17-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B#Standardization)
+[![CPP_Standard](https://img.shields.io/badge/c%2B%2B-98/11/14/17-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B#Standardization)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](#)
 [![CI/CD](https://github.com/MarbleHE/AST-Optimizer/workflows/build_run_tests/badge.svg?branch=operator-extensions)](https://github.com/MarbleHE/AST-Optimizer/actions)
 [![Documentation](https://img.shields.io/badge/docs-doxygen-blue.svg)](http://marblehe.github.io/AST-Optimizer)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/dwyl/esta/issues)
 
-// TODO Make the doxygen docs available as described in [this blogpost](https://goseeky.wordpress.com/2017/07/22/documentation-101-doxygen-with-github-pages/).
+// TODO Make the doxygen docs available as described in [this blogpost](https://goseeky.wordpress.com/2017/07/22/documentation-101-doxygen-with-github-pages/). Requires owner permissions of repository to make Github pages available.
 
 This repository hosts an optimizer for Fully Homomorphic Encryption (FHE) working on an AST-like (Abstract Syntax Tree) representation of a program.
 In future, this optimization component will be integrated into the [Marble](https://github.com/MarbleHE/Marble) FHE compiler [1].
@@ -165,9 +166,9 @@ Following, the different node types are briefly explained. The examples in brack
     - `Block` – a code block `{...}`, e.g., the then-clause of an if statement.
     - `Function` – a function definition.
     - `If` – an if-conditional statement including both a then-branch and an else-branch  (e.g., `if (condition) { ... } else { ... }`), or either only a then-branch.
-    - `Return` – a return statement of a method (e.g., `return ).
+    - `Return` – a return statement of a method (e.g., `return` ).
     - `VarAssignm` – the assignment of a variable.
-    - `VarDecl` – a variable declaration (e.g., `Z)
+    - `VarDecl` – a variable declaration (e.g., `Z`)
     - `While` – a while-loop (e.g., `while (condition) {...}`).
     - `CallExternal` –  *see above.*
     - `Return` – a return statement of a method, i.e., the output of a computation.
@@ -279,6 +280,7 @@ The tests can be found in the [`test`](test) directory and are named according t
 It is required to submit tests for newly added features to ensure correctness and avoid breaking the feature by future changes (regression test). Any PRs without tests will not be considered to be integrated.
 
 ## References
+
 [1] Viand, A., Shafagh, H.: [Marble: Making Fully Homomorphic Encryption Accessible to All.](http://www.vs.inf.ethz.ch/publ/papers/vianda_marble_2018.pdf) In: Proceedings of the 6th workshop on encrypted computing & applied homomorphic cryptography. pp. 49–60 (2018).
 
 [2] Aubry, P. et al.: [Faster Homomorphic Encryption Is Not Enough: Improved Heuristic for Multiplicative Depth Minimization of Boolean Circuits.](https://eprint.iacr.org/2019/963.pdf) (2019).
