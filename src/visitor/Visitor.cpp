@@ -222,7 +222,7 @@ void Visitor::visit(Transpose &elem) {
 
 void Visitor::visit(UnaryExpr &elem) {
   // operator
-  elem.getOp()->accept(*this);
+  elem.getOperator()->accept(*this);
   // rhs operand
   elem.getRight()->accept(*this);
 }

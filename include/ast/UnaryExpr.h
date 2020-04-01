@@ -15,7 +15,7 @@ class UnaryExpr : public AbstractExpr {
 
   void accept(Visitor &v) override;
 
-  [[nodiscard]] Operator *getOp() const;
+  [[nodiscard]] Operator *getOperator() const;
 
   [[nodiscard]] AbstractExpr *getRight() const;
 

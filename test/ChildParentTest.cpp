@@ -649,13 +649,13 @@ TEST_F(UnaryExprFixture, UnaryExprAddChildException_TooManyChildrenAdded) {  /* 
 TEST_F(UnaryExprFixture, UnaryExprtion_AddChildSuccess) {  /* NOLINT */
   auto unaryExpr = new UnaryExpr(opSymbNegation, literalBoolTrue);
 
-  unaryExpr->removeChild(unaryExpr->getOp(), false);
+  unaryExpr->removeChild(unaryExpr->getOperator(), false);
   auto newOperator = new Operator(UnaryOp::NEGATION);
   unaryExpr->addChild(newOperator, true);
 
   // children
   EXPECT_EQ(unaryExpr->getChildren().size(), 2);
-  EXPECT_EQ(*unaryExpr->getOp(), *newOperator);
+  EXPECT_EQ(*unaryExpr->getOperator(), *newOperator);
   EXPECT_TRUE(reinterpret_cast<Operator *>(unaryExpr->getChildAtIndex(0))->equals(newOperator->getOperatorSymbol()));
 
   // parents

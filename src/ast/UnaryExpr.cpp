@@ -3,7 +3,7 @@
 json UnaryExpr::toJson() const {
   json j;
   j["type"] = getNodeType();
-  j["operator"] = getOp() ? getOp()->getOperatorString() : "";
+  j["operator"] = getOperator() ? getOperator()->getOperatorString() : "";
   j["rightOperand"] = getRight() ? getRight()->toJson() : "";
   return j;
 }
@@ -16,7 +16,7 @@ void UnaryExpr::accept(Visitor &v) {
   v.visit(*this);
 }
 
-Operator *UnaryExpr::getOp() const {
+Operator *UnaryExpr::getOperator() const {
   return reinterpret_cast<Operator *>(getChildAtIndex(0, true));
 }
 
@@ -48,7 +48,7 @@ void UnaryExpr::setAttributes(UnaryOp op, AbstractExpr *expr) {
 
 UnaryExpr *UnaryExpr::clone(bool keepOriginalUniqueNodeId) {
   try {
-    auto clonedNode = new UnaryExpr(std::get<UnaryOp>(this->getOp()->getOperatorSymbol()),
+    auto clonedNode = new UnaryExpr(std::get<UnaryOp>(this->getOperator()->getOperatorSymbol()),
                                     this->getRight()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
     clonedNode->updateClone(keepOriginalUniqueNodeId, this);
     return clonedNode;
@@ -60,7 +60,7 @@ UnaryExpr *UnaryExpr::clone(bool keepOriginalUniqueNodeId) {
 
 bool UnaryExpr::isEqual(AbstractExpr *other) {
   if (auto otherAsUExp = dynamic_cast<UnaryExpr *>(other)) {
-    auto sameOperator = this->getOp()->equals(otherAsUExp->getOp()->getOperatorSymbol());
+    auto sameOperator = this->getOperator()->equals(otherAsUExp->getOperator()->getOperatorSymbol());
     auto sameValue = this->getRight()->isEqual(otherAsUExp->getRight());
     return sameOperator && sameValue;
   }

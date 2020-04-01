@@ -234,7 +234,7 @@ void EvaluationVisitor::visit(Return &elem) {
 
 void EvaluationVisitor::visit(UnaryExpr &elem) {
   elem.getRight()->accept(*this);
-  results.push({elem.getOp()->applyOperator(getOnlyEvaluationResult(results.top()))});
+  results.push({elem.getOperator()->applyOperator(getOnlyEvaluationResult(results.top()))});
 }
 
 void EvaluationVisitor::visit(Rotate &elem) {
