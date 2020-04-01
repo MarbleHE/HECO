@@ -5,6 +5,8 @@
 #include <variant>
 #include <string>
 #include <iostream>
+#include <algorithm>
+#include <vector>
 #include "Visitor.h"
 #include "AbstractNode.h"
 #include "LiteralString.h"
@@ -110,7 +112,6 @@ class Operator : public AbstractNode {
 
   [[nodiscard]] bool isUnaryOp() const;
 
-  // Can be replaced by faster std::reduce in case that function is associative and commutative
   template<typename R, typename T>
   R acc(std::function<R(T, T)> func, std::vector<T> operands) {
     auto it = operands.begin();
@@ -126,8 +127,10 @@ class Operator : public AbstractNode {
     auto it = operands.begin();
     // result = operands[0] ⊕ operands[1]
     bool result = func(*it, *(++it));
-    // result = ((result && (operands[1] ⊕ operands[2])) && (operands[2] ⊕ operands[3])) ...
-    for (; it!=operands.end(); ++it) result = result && func(*it, *(++it));
+    if (operands.size() > 2) {
+      // result = ((result && (operands[1] ⊕ operands[2])) && (operands[2] ⊕ operands[3])) ...
+      for (; it!=operands.end() - 1; ++it) result = result && func(*it, *(it + 1));
+    }
     return result;
   }
 
@@ -148,6 +151,17 @@ class Operator : public AbstractNode {
   AbstractLiteral *applyOperator(std::vector<bool> operands);
 
   AbstractLiteral *applyOperator(std::vector<std::string> operands);
+
+  [[nodiscard]] bool isCommutative();
+
+  [[nodiscard]] bool isLeftAssociative();
+
+  /// An operator is considered as non-partial evaluable if its not possible to apply the operator only on a few
+  /// operands and then store the intermediate result to continue evaluation after more operands are known.
+  /// For example, 7 + a + 21 + 9 is partially evaluable to a + 37.
+  /// But the expression 32 < 193 < a < 12 would partially evaluate 32 < 193 = true and then lead to true < a < 12 which
+  /// is obviously not correct. Because of that we require that all operands are known for these kind of operators.
+  [[nodiscard]] bool supportsPartialEvaluation();
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPERATOR_H_

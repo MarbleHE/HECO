@@ -1,5 +1,6 @@
 #include <variant>
 #include <typeindex>
+#include <unordered_set>
 #include <iostream>
 #include "Operator.h"
 #include "LiteralInt.h"
@@ -34,6 +35,56 @@ std::string Operator::getNodeType() const {
 
 bool Operator::isUndefined() {
   return operatorString.empty();
+}
+
+bool Operator::isCommutative() {
+  // all commutative operators
+  static const std::unordered_set<LogCompOp> logicalOps =
+      {LogCompOp::LOGICAL_AND, LogCompOp::LOGICAL_OR, LogCompOp::LOGICAL_XOR};
+  static const std::unordered_set<ArithmeticOp> arithmeticOps =
+      {ArithmeticOp::ADDITION, ArithmeticOp::MULTIPLICATION};
+
+  auto opSymb = getOperatorSymbol();
+  if (std::holds_alternative<ArithmeticOp>(opSymb)) {  // arithmetic operators
+    return arithmeticOps.count(std::get<ArithmeticOp>(opSymb)) > 0;
+  } else if (std::holds_alternative<LogCompOp>(opSymb)) {  // logical operators
+    return logicalOps.count(std::get<LogCompOp>(opSymb)) > 0;
+  }
+  return false;
+}
+
+bool Operator::isLeftAssociative() {
+  // all left-associative operators
+  static const std::unordered_set<LogCompOp> logicalOps =
+      {GREATER, GREATER_EQUAL, SMALLER, SMALLER_EQUAL, EQUAL, UNEQUAL};
+  static const std::unordered_set<ArithmeticOp> arithmeticOps =
+      {ArithmeticOp::DIVISION, ArithmeticOp::SUBTRACTION};
+
+  auto opSymb = getOperatorSymbol();
+  if (std::holds_alternative<ArithmeticOp>(opSymb)) {  // arithmetic operators
+    return arithmeticOps.count(std::get<ArithmeticOp>(opSymb)) > 0;
+  } else if (std::holds_alternative<LogCompOp>(opSymb)) {  // logical operators
+    return logicalOps.count(std::get<LogCompOp>(opSymb)) > 0;
+  }
+  return false;
+}
+
+bool Operator::supportsPartialEvaluation() {
+  // all logical operators without relational operators (<, <=, >, >=, !=, ==)
+  static const std::unordered_set<LogCompOp> logicalOps =
+      {LogCompOp::LOGICAL_AND, LogCompOp::LOGICAL_OR, LogCompOp::LOGICAL_XOR};
+  // all arithmetic operators
+  static const std::unordered_set<ArithmeticOp> arithmeticOps =
+      {ArithmeticOp::ADDITION, ArithmeticOp::SUBTRACTION, ArithmeticOp::MULTIPLICATION, ArithmeticOp::DIVISION,
+       ArithmeticOp::MODULO};
+
+  auto opSymb = getOperatorSymbol();
+  if (std::holds_alternative<ArithmeticOp>(opSymb)) {  // arithmetic operators
+    return arithmeticOps.count(std::get<ArithmeticOp>(opSymb)) > 0;
+  } else if (std::holds_alternative<LogCompOp>(opSymb)) {  // logical operators
+    return logicalOps.count(std::get<LogCompOp>(opSymb)) > 0;
+  }
+  return false;
 }
 
 bool Operator::operator==(const Operator &rhs) const {
@@ -559,4 +610,3 @@ AbstractLiteral *Operator::applyOperator(std::vector<AbstractLiteral *> operands
     throw std::logic_error("Operator::apply failed because AbstractLiterals are of unknown type.");
   }
 }
-
