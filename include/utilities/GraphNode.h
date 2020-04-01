@@ -37,7 +37,7 @@ class GraphNode {
 
   void setAccessedVariables(std::set<std::pair<std::string, AccessType>> set);
 
-  [[nodiscard]] std::set<std::pair<std::string, AccessType>> getVariables(AccessType accessType) const;
+  [[nodiscard]] std::set<std::string> getVariables(AccessType accessTypeFilter) const;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_UTILITIES_GRAPHNODE_H_
