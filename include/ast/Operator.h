@@ -117,8 +117,10 @@ class Operator : public AbstractNode {
     auto it = operands.begin();
     // result = operands[0] ⊕ operands[1]
     R result = func(*it, *(++it));
-    // result = ((((result ⊕ operands[2]) ⊕ operands[3]) ⊕ ...) ⊕ operands[N])
-    for (++it; it!=operands.end(); ++it) result = func(result, *it);
+    if (operands.size() > 2) {
+      // result = ((((result ⊕ operands[2]) ⊕ operands[3]) ⊕ ...) ⊕ operands[N])
+      for (++it; it!=operands.end(); ++it) result = func(result, *it);
+    }
     return result;
   }
 
