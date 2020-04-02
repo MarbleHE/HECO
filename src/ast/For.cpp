@@ -1,5 +1,5 @@
 #include "For.h"
-#include "LogicalExpr.h"
+#include "AbstractExpr.h"
 #include "Block.h"
 
 std::string For::getNodeType() const {
@@ -11,7 +11,7 @@ void For::accept(Visitor &v) {
 }
 
 For::For(AbstractStatement *initializer,
-         LogicalExpr *condition,
+         AbstractExpr *condition,
          AbstractStatement *update,
          AbstractStatement *statementToBeExecuted) {
   setAttributes(initializer, condition, update, statementToBeExecuted);
@@ -21,8 +21,8 @@ AbstractExpr *For::getInitializer() const {
   return reinterpret_cast<AbstractExpr *>(getChildAtIndex(0));
 }
 
-LogicalExpr *For::getCondition() const {
-  return reinterpret_cast<LogicalExpr *>(getChildAtIndex(1));
+AbstractExpr *For::getCondition() const {
+  return reinterpret_cast<AbstractExpr *>(getChildAtIndex(1));
 }
 
 AbstractExpr *For::getUpdateStatement() const {
@@ -34,7 +34,7 @@ AbstractStatement *For::getStatementToBeExecuted() const {
 }
 
 void For::setAttributes(AbstractStatement *initializer,
-                        LogicalExpr *condition,
+                        AbstractExpr *condition,
                         AbstractStatement *update,
                         AbstractStatement *statementToBeExecuted) {
   removeChildren();
@@ -50,7 +50,7 @@ int For::getMaxNumberChildren() {
 
 AbstractNode *For::clone(bool keepOriginalUniqueNodeId) {
   auto clonedNode = new For(getInitializer()->clone(keepOriginalUniqueNodeId)->castTo<AbstractStatement>(),
-                            getCondition()->clone(keepOriginalUniqueNodeId)->castTo<LogicalExpr>(),
+                            getCondition()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
                             getUpdateStatement()->clone(false)->castTo<AbstractStatement>(),
                             getStatementToBeExecuted()->clone(false)->castTo<AbstractStatement>());
   clonedNode->updateClone(keepOriginalUniqueNodeId, this);
