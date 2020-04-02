@@ -49,10 +49,21 @@ int For::getMaxNumberChildren() {
 }
 
 AbstractNode *For::clone(bool keepOriginalUniqueNodeId) {
-  auto clonedNode = new For(getInitializer()->clone(keepOriginalUniqueNodeId)->castTo<AbstractStatement>(),
-                            getCondition()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
-                            getUpdateStatement()->clone(false)->castTo<AbstractStatement>(),
-                            getStatementToBeExecuted()->clone(false)->castTo<AbstractStatement>());
+
+  auto clonedInitializer = (getInitializer()==nullptr)
+                           ? nullptr
+                           : getInitializer()->clone(keepOriginalUniqueNodeId)->castTo<AbstractStatement>();
+  auto clonedCondition = (getCondition()==nullptr)
+                         ? nullptr
+                         : getCondition()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>();
+  auto clonedUpdater = (getUpdateStatement()==nullptr)
+                       ? nullptr
+                       : getUpdateStatement()->clone(false)->castTo<AbstractStatement>();
+  auto clonedBody = (getStatementToBeExecuted()==nullptr)
+                    ? nullptr
+                    : getStatementToBeExecuted()->clone(keepOriginalUniqueNodeId)->castTo<AbstractStatement>();
+
+  auto clonedNode = new For(clonedInitializer, clonedCondition, clonedUpdater, clonedBody);
   clonedNode->updateClone(keepOriginalUniqueNodeId, this);
   return clonedNode;
 }
