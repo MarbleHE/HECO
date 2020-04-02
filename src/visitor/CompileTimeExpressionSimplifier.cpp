@@ -1,3 +1,4 @@
+#include <ControlFlowGraphVisitor.h>
 #include "PrintVisitor.h"
 #include "CompileTimeExpressionSimplifier.h"
 #include "DotPrinter.h"
@@ -620,37 +621,73 @@ void CompileTimeExpressionSimplifier::visit(While &elem) {
   cleanUpAfterStatementVisited(reinterpret_cast<AbstractNode *>(&elem), false);
 }
 
+std::unordered_set<std::string> CompileTimeExpressionSimplifier::removeVarsWrittenInStatementsFromVarValuesMap(
+    Block &blockStmt) {
+  // Erase any variable from variableValues that is writtenin the loop's body such that it is not replaced by any value
+  // while visiting the body's statements. This includes the iteration variable as we moved the update statement into
+  // the loop's body.
+  // - create a new instance of the ControlFlowGraphVisitor
+  ControlFlowGraphVisitor cfgv;
+  // this is important as we're not using the AST as entry point, thus the scope logic won't work properly
+  cfgv.setIgnoreScope(true);
+  // - a set of variables that are written by the body's statements
+  std::unordered_set<std::string> writtenVars;
+  // - for each statement in the For-loop's body, collect all written variables
+  for (auto &bodyStatement: blockStmt.getStatements()) {
+    bodyStatement->accept(cfgv);
+    auto writtenVarsInStatement = cfgv.getLastVariableWrites();
+    writtenVars.insert(writtenVarsInStatement.begin(), writtenVarsInStatement.end());
+  }
+  // - remove all variables from the current variablesValues that are written in the For-loop's body
+  for (auto &varIdentifier : writtenVars) variableValues.erase(varIdentifier);
+
+  return writtenVars;
+}
+
 void CompileTimeExpressionSimplifier::visit(For &elem) {
   //TODO: IF compile time known & short enough, do full "symbolic eval/unroll" -> no for loop left
 
   // create a new Block statemeny: necessary for cleanup loop and to avoid overriding user-defined variables that expect
   // the initalizer to be within the for-loop's scope only
-  auto block = new Block();
+  auto blockEmbeddingLoops = new Block(); // ISSUE
 
-  // move initializer from For loop into newly added block
+  // move initializer from For-loop into newly added block
   auto forLoopInitializer = elem.getInitializer();
   forLoopInitializer->removeFromParents();
-  block->addChild(forLoopInitializer);
+  blockEmbeddingLoops->addChild(forLoopInitializer);
 
   // wrap this For loop into the new block statement
-  elem.getOnlyParent()->replaceChild(&elem, block);
-  block->addChild(&elem);
+  elem.getOnlyParent()->replaceChild(&elem, blockEmbeddingLoops);
+  blockEmbeddingLoops->addChild(&elem);
 
-  // save a copy of all variables and their values
+  // create copies to allow reverting changes made by visiting nodes
+  // - a copy of known variables with their values
   std::unordered_map<std::string, AbstractExpr *> variableValuesBackup = variableValues;
-
-  // save a copy of all nodes marked for deletion
+  // - a copy of all nodes marked for deletion
   auto nodesQueuedForDeletionCopy = nodesQueuedForDeletion;
+  // - copies of the For-loop's condition, update statement, and body (required for cleanup loop)
+  auto cleanupForLoop = elem.clone(false)->castTo<For>();
+  auto ignrd =
+      removeVarsWrittenInStatementsFromVarValuesMap(*cleanupForLoop->getStatementToBeExecuted()->castTo<Block>());
+  cleanupForLoop->getCondition()->accept(*this);
+  cleanupForLoop->getStatementToBeExecuted()->accept(*this);
+  cleanupForLoop->getUpdateStatement()->accept(*this);
+  // we need to use the for-loop's getter again because visiting the children may lead to replacement of nodes, e.g.,
+  // ArithmeticExpr -> OperatorExpr
+  auto forLoopCopyCondition = cleanupForLoop->getCondition();
+  auto forLoopCopyBody = cleanupForLoop->getStatementToBeExecuted();
+  auto forLoopCopyUpdateStmt = cleanupForLoop->getUpdateStatement();
+  variableValues = variableValuesBackup;
+  nodesQueuedForDeletion = nodesQueuedForDeletionCopy;
 
   // visit the intializer
-  auto initializerCopy = forLoopInitializer->clone(false);
   forLoopInitializer->accept(*this);
   auto variableValuesAfterVisitingInitializer = variableValues;
   // determine the loop variables, i.e., variables changed in the initializer statement
   auto loopVariablesMap = getChangedVariables(variableValuesBackup);
 
   // the new for-loop body containing the unrolled statements
-  Block *unrolledForLoopBody = new Block();
+  auto unrolledForLoopBody = new Block();
   // generate the unrolled loop statements by performing for each statement in the original's loop body:
   // duplicate the statement, replace all iteration variables, append the statement to the new (unrolled) loop body
   const int NUM_CIPHERTEXT_SLOTS = 3;
@@ -665,26 +702,41 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
     unrolledForLoopBody->addChild(elem.getUpdateStatement()->clone(false));
   }
   // replace the for loop's body by the unrolled statements
-  auto forLoopBody = elem.getStatementToBeExecuted();
   elem.replaceChild(elem.getStatementToBeExecuted(), unrolledForLoopBody);
 
   // delete update statement from loop since it's now incorporated into the body but keep a copy since we need it
   // for the cleanup loop
-  auto forLoopUpdateStmt = elem.getUpdateStatement();
   elem.getUpdateStatement()->removeFromParents();
 
-  // create a copy of variableValues(before deleting loop variables)
-  auto variableValuesBackupBeforeInlining = variableValues;
-
-  // erase the loop iteration variable (e.g., i) such that it cannot be replaced by its value anymore
-  for (auto &[varIdentifier, unused] : loopVariablesMap) variableValues.erase(varIdentifier);
+  // Erase any variable from variableValues that is writtenin the loop's body such that it is not replaced by any value
+  // while visiting the body's statements. This includes the iteration variable as we moved the update statement into
+  // the loop's body.
+  auto writtenVars = removeVarsWrittenInStatementsFromVarValuesMap(*elem.getStatementToBeExecuted()->castTo<Block>());
 
   // restore the copy, otherwise the initializer visited after creating this copy would be marked for deletion
   nodesQueuedForDeletion = nodesQueuedForDeletionCopy;
 
+  // make sure that variable declarations of variables written in the for-loop's are not marked for deletion because
+  // they must be declared before using them
+  for (auto it = nodesQueuedForDeletion.begin(); it!=nodesQueuedForDeletion.end();) {
+    if (auto nodeAsVarDecl = dynamic_cast<VarDecl *>(*it)) {
+      if (writtenVars.count(nodeAsVarDecl->getVarTargetIdentifier()) > 0) {
+        it = nodesQueuedForDeletion.erase(it);
+      } else {
+        ++it;
+      }
+    }
+  }
+
   // visit the for-loop's body to do inlining
   auto variableValuesBeforeVisitingLoopBody = variableValues;
   elem.getStatementToBeExecuted()->accept(*this);
+
+  // visit the condition to replace loop iteration variables by the symbolic value of the variable that is last written
+  // in the body, for example: i < 6 => i+3 < 6
+  auto nodesQueuedForDeletionBeforeVisitingCondition = nodesQueuedForDeletion;
+  elem.getCondition()->accept(*this);
+  nodesQueuedForDeletion = nodesQueuedForDeletionBeforeVisitingCondition;
 
   // TODO: Future work:  Make this entire thing flexible with regard to num_slots_in_ctxt, i.e., allow changing how long
   //  unrolled loops are. Idea: generate all loops (see below cleanup loop ideas) starting from ludacriously large
@@ -709,22 +761,11 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
   //  When to cut off? -> empirical decision?
 
   // handle remaining iterations using a "cleanup loop": place statements in a separate loop for remaining iterations
-  // TODO: Make this work for dynamic bound
-  // TODO: add a new for loop with no initalizer condition = original condition; update = orignal update
-//    if (numRemainingIterations!=0) {
-//      // build the new initializer expression, e.g., int i=6;
-//      auto initExpr = loopVariableValues.at(numNewIterations*NUM_CIPHERTEXT_SLOTS).at(loopIterationVariableIdentifier);
-//      auto clonedInitializer = elem.getInitializer()->clone(false)->castTo<VarDecl>();
-//      clonedInitializer->setAttributes(clonedInitializer->getIdentifier(), clonedInitializer->getDatatype(), initExpr);
-//      // the loop's condition (remains same), e.g., i < 7
-//      auto condition = conditionCopy;
-//      // the loop's update statement (remains same), e.g., i=i+1;
-//      auto updateStatement = updateStmtCopy->clone(false)->castTo<AbstractStatement>();
-//      // the loop's body statements (nested in a block; remains same)
-//      auto body = forLoopBody->clone(false)->castTo<AbstractStatement>();
-//      // attach the newly generated For "cleanup" loop to the function's body
-//      elem.getOnlyParent()->addChild(new For(clonedInitializer, condition, updateStatement, body));
-//    }
+  // and attach the generated cleanup loop to the newly added Block
+  // the cleanup loop consists of:
+  // - initializer: reused from the unrolled loop as the loop variable is declared out of the first for-loop
+  // - condition, update statement, body statements: remain the same as for the original loop
+  blockEmbeddingLoops->addChild(cleanupForLoop);
 
   cleanUpAfterStatementVisited(reinterpret_cast<AbstractNode *>(&elem), false);
 }
@@ -883,9 +924,11 @@ bool CompileTimeExpressionSimplifier::isQueuedForDeletion(const AbstractNode *no
 std::unordered_map<std::string, AbstractExpr *>
 CompileTimeExpressionSimplifier::getChangedVariables(
     std::unordered_map<std::string, AbstractExpr *> variableValuesBeforeVisitingNode) {
-  //
+  // the result list of changed variables with their respective value
   std::unordered_map<std::string, AbstractExpr *> changedVariables;
-  //
+  // Loop through all variables in the current variableValues and check for each if it changed.
+  // It is important that we loop through variableValues instead of variableValuesBeforeVisitingNode because there may
+  // be newly declared variables.
   for (auto &[varIdentifier, expr] : variableValues) {
     // a variable is changed if it either was added (i.e., declaration of a new variable) or its value was changed
     if (variableValuesBeforeVisitingNode.count(varIdentifier)==0

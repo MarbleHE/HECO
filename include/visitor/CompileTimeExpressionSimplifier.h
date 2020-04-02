@@ -197,6 +197,8 @@ class CompileTimeExpressionSimplifier : public Visitor {
   /// where <anything> denotes an arbitrary logical expression of the same logical operator.
   /// \param elem The OperatorExpr that should be simplified using Boolean laws.
   static void simplifyLogicalExpr(OperatorExpr &elem);
+
+  std::unordered_set<std::string> removeVarsWrittenInStatementsFromVarValuesMap(Block &blockStmt);
 };
 
 /// Takes a Literal (e.g., LiteralInt) and checks whether its values are defined using a Matrix<AbstractExpr*>. In
