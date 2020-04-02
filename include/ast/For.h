@@ -22,11 +22,11 @@ class For : public AbstractStatement {
                      AbstractStatement *update,
                      AbstractStatement *statementToBeExecuted);
 
-  [[nodiscard]] AbstractExpr *getInitializer() const;
+  [[nodiscard]] AbstractStatement *getInitializer() const;
 
   [[nodiscard]] AbstractExpr *getCondition() const;
 
-  [[nodiscard]] AbstractExpr *getUpdateStatement() const;
+  [[nodiscard]] AbstractStatement *getUpdateStatement() const;
 
   [[nodiscard]] AbstractStatement *getStatementToBeExecuted() const;
 

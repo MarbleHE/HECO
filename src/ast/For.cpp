@@ -17,16 +17,16 @@ For::For(AbstractStatement *initializer,
   setAttributes(initializer, condition, update, statementToBeExecuted);
 }
 
-AbstractExpr *For::getInitializer() const {
-  return reinterpret_cast<AbstractExpr *>(getChildAtIndex(0));
+AbstractStatement *For::getInitializer() const {
+  return reinterpret_cast<AbstractStatement *>(getChildAtIndex(0));
 }
 
 AbstractExpr *For::getCondition() const {
   return reinterpret_cast<AbstractExpr *>(getChildAtIndex(1));
 }
 
-AbstractExpr *For::getUpdateStatement() const {
-  return reinterpret_cast<AbstractExpr *>(getChildAtIndex(2));
+AbstractStatement *For::getUpdateStatement() const {
+  return reinterpret_cast<AbstractStatement *>(getChildAtIndex(2));
 }
 
 AbstractStatement *For::getStatementToBeExecuted() const {
