@@ -1,11 +1,14 @@
 #ifndef AST_OPTIMIZER_INCLUDE_VISITOR_COMPILETIMEEXPRESSIONSIMPLIFIER_H_
 #define AST_OPTIMIZER_INCLUDE_VISITOR_COMPILETIMEEXPRESSIONSIMPLIFIER_H_
 
-#include <unordered_set>
-#include <unordered_map>
 #include <string>
 #include <vector>
 #include <deque>
+#include <unordered_map>
+#include <unordered_set>
+#include <map>
+#include <set>
+#include <utility>
 #include "NodeUtils.h"
 #include "Visitor.h"
 #include "EvaluationVisitor.h"
@@ -28,10 +31,10 @@ class CompileTimeExpressionSimplifier : public Visitor {
   /// - AbstractNode*: A reference to the removable node.
   std::unordered_set<AbstractNode *> removableNodes;
 
-  /// Stores the latest value of a variable while traversing through the AST.
-  /// - std::string: The variable's identifier.
-  /// - AbstractExpr*: The variable's value.
-  std::unordered_map<std::string, AbstractExpr *> variableValues;
+  /// Stores the latest value of a variable while traversing through the AST. Entries in this map consist of a key
+  /// (pair) that is made of a variable identifier (first) and the scope where the variable was declared in (second).
+  /// The entry of the variableValues map is the current value of the associated variable.
+  std::map<std::pair<std::string, Scope *>, AbstractExpr *> variableValues;
 
   /// Contains pointer to those nodes for which full or partial evaluation could be performed and hence can be deleted
   /// at the end of this simplification traversal.
@@ -167,10 +170,18 @@ class CompileTimeExpressionSimplifier : public Visitor {
   /// (default).
   void cleanUpAfterStatementVisited(AbstractNode *statement, bool enqueueStatementForDeletion = false);
 
-  /// Adds a new (variable identifier, variable value) pair to the map of variable values.
+  /// This method sets the value (valueAnyLiteralOrAbstractExpr) of a variable named as given by the
+  /// variableIdentifier parameter. If declareVariable=True, it assumes that this call is not declared yet and uses the
+  /// current scope as the variable's declaration scope. Otherwise it keeps the scope of the already existing entry
+  /// in the variableValues map and only changes he variable's value.
   /// \param variableIdentifier The variable identifier ("name" of the variable).
   /// \param valueAnyLiteralOrAbstractExpr The variable's value. This can be any kind of AbstractLiteral or
-  void addVariableValue(const std::string &variableIdentifier, AbstractExpr *valueAnyLiteralOrAbstractExpr);
+  /// AbstractExpr.
+  /// \param declareVariable If True, assumes that this is a non-declared variable and takes the current scope as the
+  /// variable's declaration scope. Otherwise searches in variableValues for the declaration that is closest to the
+  /// current scope (curScope class attribute).
+  void setVariableValue(const std::string &variableIdentifier, AbstractExpr *valueAnyLiteralOrAbstractExpr,
+                        bool declareVariable = false);
 
   /// Checks whether the given node is queued for deletion. Deletion will be carried out at the end of the traversal.
   /// \param node The node to be checked for deletion.
@@ -182,8 +193,8 @@ class CompileTimeExpressionSimplifier : public Visitor {
   /// variables whose value changed.
   /// \param variableValuesBeforeVisitingNode A copy of the variable values map.
   /// \return The changes between the map variableValuesBeforeVisitingNode and the current variableValues map.
-  std::unordered_map<std::string, AbstractExpr *> getChangedVariables(
-      std::unordered_map<std::string, AbstractExpr *> variableValuesBeforeVisitingNode);
+  std::map<std::pair<std::string, Scope *>, AbstractExpr *> getChangedVariables(
+      std::map<std::pair<std::string, Scope *>, AbstractExpr *> variableValuesBeforeVisitingNode);
 
   /// Takes an OperatorExpr consisting of a logical operator (i.e., AND, XOR, OR) and applies the Boolean laws to
   /// simplify the expression. For example, the expression <anything> AND False always evaluates to False, hence we can
@@ -198,7 +209,25 @@ class CompileTimeExpressionSimplifier : public Visitor {
   /// \param elem The OperatorExpr that should be simplified using Boolean laws.
   static void simplifyLogicalExpr(OperatorExpr &elem);
 
-  std::unordered_set<std::string> removeVarsWrittenInStatementsFromVarValuesMap(Block &blockStmt);
+  /// Removes all variables from variableValues that are written in any statement of the given block (blockStmt).
+  /// \param blockStmt The Block consisting of the statements that are analyzed for variable writes.
+  /// \return A list of pairs consisting of (variable identifier, variable declaration scope) of those variables that
+  /// are identified to be written to within in the block's statements.
+  std::set<std::pair<std::string, Scope *>> removeVarsWrittenInStatementsFromVarValuesMap(Block &blockStmt);
+
+  /// Returns the current value of the variable identified by the given variableName. If there are multiple
+  /// declarations within different scopes, returns the declaration that is closest to curScope.
+  /// \param variableName The variable identifiers whose value should be retrieved.
+  /// \return An AbstractExpr pointer of the variable's current value.
+  AbstractExpr *getVariableValueDeclaredInThisOrOuterScope(std::string variableName);
+
+  /// Returns an iterator to the variable entry in variableValues that has the given variable identifier
+  /// (variableName) and is closest from the current scope (curScope).
+  /// \param variableName The variable identifiers whose variableValues entry should be retrieved.
+  /// \return An iterator to the variableValues entry pointing to the variable whose declaratin is closest to the
+  /// current scope.
+  std::map<std::pair<std::string, Scope *>, AbstractExpr *>::iterator
+  getVariableEntryDeclaredInThisOrOuterScope(std::string variableName);
 };
 
 /// Takes a Literal (e.g., LiteralInt) and checks whether its values are defined using a Matrix<AbstractExpr*>. In

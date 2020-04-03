@@ -23,6 +23,7 @@
 #include "Rotate.h"
 #include "Transpose.h"
 #include "OperatorExpr.h"
+#include "Scope.h"
 
 CompileTimeExpressionSimplifier::CompileTimeExpressionSimplifier() {
   evalVisitor = EvaluationVisitor();
@@ -103,6 +104,9 @@ void CompileTimeExpressionSimplifier::visit(GetMatrixElement &elem) {
 }
 
 void CompileTimeExpressionSimplifier::visit(Ast &elem) {
+  // clean up the variableValues map from any possible previous run
+  variableValues.clear();
+
   Visitor::visit(elem);
   // Delete all noted queued for deletion after finishing the simplification traversal.
   // It's important that we perform deletion in a FIFO-style because otherwise it can happen that we delete an enclosing
@@ -175,7 +179,7 @@ void CompileTimeExpressionSimplifier::visit(LiteralFloat &elem) {
 
 void CompileTimeExpressionSimplifier::visit(Variable &elem) {
   Visitor::visit(elem);
-  if (variableValues.count(elem.getIdentifier()) > 0 && replaceVariablesByValues) {
+  if (getVariableValueDeclaredInThisOrOuterScope(elem.getIdentifier())!=nullptr && replaceVariablesByValues) {
     // if we know the variable's value (i.e., its value is either any subtype of AbstractLiteral or an AbstractExpr if
     // this is a symbolic value that defines on other variables), we can replace this variable node by its value
     auto variableParent = elem.getOnlyParent();
@@ -195,7 +199,7 @@ void CompileTimeExpressionSimplifier::visit(VarDecl &elem) {
     variableValue = variableInitializer;
   }
   // store the variable's value
-  addVariableValue(elem.getVarTargetIdentifier(), variableValue);
+  setVariableValue(elem.getVarTargetIdentifier(), variableValue, true);
   // clean up removableNodes result from children that indicates whether a child node can safely be deleted
   removableNodes.erase(variableInitializer);
   // mark this statement as removable as it is deleted
@@ -206,7 +210,7 @@ void CompileTimeExpressionSimplifier::visit(VarDecl &elem) {
 void CompileTimeExpressionSimplifier::visit(VarAssignm &elem) {
   Visitor::visit(elem);
   // store the variable's value
-  addVariableValue(elem.getVarTargetIdentifier(), elem.getValue());
+  setVariableValue(elem.getVarTargetIdentifier(), elem.getValue());
   // clean up removableNodes result from children that indicates whether a child node can safely be deleted
   removableNodes.erase(elem.getValue());
   markNodeAsRemovable(&elem);
@@ -479,6 +483,11 @@ void CompileTimeExpressionSimplifier::visit(Function &elem) {
 void CompileTimeExpressionSimplifier::visit(FunctionParameter &elem) {
   Visitor::visit(elem);
 
+  // a FunctionParameter is a kind of variable declaration but instead of a concrete value we need to use a 'nullptr'
+  if (auto valueAsVar = dynamic_cast<Variable *>(elem.getValue())) {
+    setVariableValue(valueAsVar->getIdentifier(), nullptr, true);
+  }
+
   // This simplifier does not care about the variable's datatype, hence we can mark this node as removable. This mark is
   // only relevant in case that this FunctionParameter is part of a Function that is included into a Call
   // statement because Call statements can be replaced by inlining the Function's computation.
@@ -541,11 +550,11 @@ void CompileTimeExpressionSimplifier::visit(If &elem) {
     // ================
   else { // if we don't know the evaluation result of the If statement's condition -> rewrite the If statement
     // create a copy of the variableValues map and removableNodes map
-    std::unordered_map<std::string, AbstractExpr *> originalVariableValues(variableValues);
+    auto originalVariableValues = variableValues;
 
     // visit the thenBranch and store its modifications
     elem.getThenBranch()->accept(*this);
-    std::unordered_map<std::string, AbstractExpr *> variableValuesAfterVisitingThen(variableValues);
+    auto variableValuesAfterVisitingThen = variableValues;
 
     // check if there is an Else-branch that we need to visit
     if (elem.getElseBranch()!=nullptr) {
@@ -621,9 +630,11 @@ void CompileTimeExpressionSimplifier::visit(While &elem) {
   cleanUpAfterStatementVisited(reinterpret_cast<AbstractNode *>(&elem), false);
 }
 
-std::unordered_set<std::string> CompileTimeExpressionSimplifier::removeVarsWrittenInStatementsFromVarValuesMap(
-    Block &blockStmt) {
-  // Erase any variable from variableValues that is writtenin the loop's body such that it is not replaced by any value
+std::set<std::pair<std::string, Scope *>>
+CompileTimeExpressionSimplifier::removeVarsWrittenInStatementsFromVarValuesMap(Block &blockStmt) {
+  // Erase any variable from variableValues that is written in any of the block's statementsthe loop's body such that it
+  // is not
+  // replaced by any value
   // while visiting the body's statements. This includes the iteration variable as we moved the update statement into
   // the loop's body.
   // - create a new instance of the ControlFlowGraphVisitor
@@ -631,15 +642,20 @@ std::unordered_set<std::string> CompileTimeExpressionSimplifier::removeVarsWritt
   // this is important as we're not using the AST as entry point, thus the scope logic won't work properly
   cfgv.setIgnoreScope(true);
   // - a set of variables that are written by the body's statements
-  std::unordered_set<std::string> writtenVars;
+  std::set<std::pair<std::string, Scope *>> writtenVars;
   // - for each statement in the For-loop's body, collect all written variables
   for (auto &bodyStatement: blockStmt.getStatements()) {
     bodyStatement->accept(cfgv);
     auto writtenVarsInStatement = cfgv.getLastVariableWrites();
-    writtenVars.insert(writtenVarsInStatement.begin(), writtenVarsInStatement.end());
+    // determine the scope for each of the variables
+    for (auto &varIdentifier : writtenVarsInStatement) {
+      auto scope = getVariableEntryDeclaredInThisOrOuterScope(varIdentifier)->first.second;
+      writtenVars.insert(std::pair(varIdentifier, scope));
+    }
+//    writtenVars.insert(writtenVarsInStatement.begin(), writtenVarsInStatement.end());
   }
-  // - remove all variables from the current variablesValues that are written in the For-loop's body
-  for (auto &varIdentifier : writtenVars) variableValues.erase(varIdentifier);
+  // - remove all variables from the current variablesValues that are written in the given Block
+  for (auto &varIdentifierScopePair : writtenVars) variableValues.erase(varIdentifierScopePair);
 
   return writtenVars;
 }
@@ -649,7 +665,7 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
 
   // create a new Block statemeny: necessary for cleanup loop and to avoid overriding user-defined variables that expect
   // the initalizer to be within the for-loop's scope only
-  auto blockEmbeddingLoops = new Block(); // ISSUE
+  auto blockEmbeddingLoops = new Block();
 
   // move initializer from For-loop into newly added block
   auto forLoopInitializer = elem.getInitializer();
@@ -662,7 +678,7 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
 
   // create copies to allow reverting changes made by visiting nodes
   // - a copy of known variables with their values
-  std::unordered_map<std::string, AbstractExpr *> variableValuesBackup = variableValues;
+  auto variableValuesBackup = variableValues;
   // - a copy of all nodes marked for deletion
   auto nodesQueuedForDeletionCopy = nodesQueuedForDeletion;
   // - copies of the For-loop's condition, update statement, and body (required for cleanup loop)
@@ -672,11 +688,6 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
   cleanupForLoop->getCondition()->accept(*this);
   cleanupForLoop->getStatementToBeExecuted()->accept(*this);
   cleanupForLoop->getUpdateStatement()->accept(*this);
-  // we need to use the for-loop's getter again because visiting the children may lead to replacement of nodes, e.g.,
-  // ArithmeticExpr -> OperatorExpr
-  auto forLoopCopyCondition = cleanupForLoop->getCondition();
-  auto forLoopCopyBody = cleanupForLoop->getStatementToBeExecuted();
-  auto forLoopCopyUpdateStmt = cleanupForLoop->getUpdateStatement();
   variableValues = variableValuesBackup;
   nodesQueuedForDeletion = nodesQueuedForDeletionCopy;
 
@@ -708,25 +719,29 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
   // for the cleanup loop
   elem.getUpdateStatement()->removeFromParents();
 
-  // Erase any variable from variableValues that is writtenin the loop's body such that it is not replaced by any value
-  // while visiting the body's statements. This includes the iteration variable as we moved the update statement into
-  // the loop's body.
+  // Erase any variable from variableValues that is written in the loop's body such that it is not replaced by any
+  // known value while visiting the body's statements. This includes the iteration variable as we moved the update
+  // statement into the loop's body.
   auto writtenVars = removeVarsWrittenInStatementsFromVarValuesMap(*elem.getStatementToBeExecuted()->castTo<Block>());
 
   // restore the copy, otherwise the initializer visited after creating this copy would be marked for deletion
   nodesQueuedForDeletion = nodesQueuedForDeletionCopy;
 
+  // TODO(pjattke): Implement an emitVarAssignment function that checks whether there is a variable declaration
+  //  statement for the variable to be emitted. If there exists none, it generates a variable declaration and remembers
+  //  it. Then it generates and returns a variable assignment.
   // make sure that variable declarations of variables written in the for-loop's are not marked for deletion because
   // they must be declared before using them
-  for (auto it = nodesQueuedForDeletion.begin(); it!=nodesQueuedForDeletion.end();) {
-    if (auto nodeAsVarDecl = dynamic_cast<VarDecl *>(*it)) {
-      if (writtenVars.count(nodeAsVarDecl->getVarTargetIdentifier()) > 0) {
-        it = nodesQueuedForDeletion.erase(it);
-      } else {
-        ++it;
-      }
-    }
-  }
+//  for (auto it = nodesQueuedForDeletion.begin(); it!=nodesQueuedForDeletion.end();) {
+//    if (auto nodeAsVarDecl = dynamic_cast<VarDecl *>(*it)) {
+//
+//      if (writtenVars.count(nodeAsVarDecl->getVarTargetIdentifier()) > 0) {
+//        it = nodesQueuedForDeletion.erase(it);
+//      } else {
+//        ++it;
+//      }
+//    }
+//  }
 
   // visit the for-loop's body to do inlining
   auto variableValuesBeforeVisitingLoopBody = variableValues;
@@ -742,18 +757,19 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
   //  unrolled loops are. Idea: generate all loops (see below cleanup loop ideas) starting from ludacriously large
   //  number, later disable/delete the ones that are larger than actually selected cipheretxt size determined from
   //  parameters?
-  //  ISSUE: Parameters might depend on loop length? <-- This is a general issue (no loop bound => no bounded depth)
+
+  // ISSUE: Scheme parameters might depend on loop length? This is a general issue (no loop bound => no bounded depth)
 
   // find all variables that were changed in the for-loop's body - even iteration vars (important for condition!) - and
   // emit them, i.e, create a new variable assignment for the variable
   auto bodyChangedVariables = getChangedVariables(variableValuesBeforeVisitingLoopBody);
-  for (auto &[varIdentifier, varExpr] : bodyChangedVariables) {
+  for (auto &[varIdentifierScopePair, varExpr] : bodyChangedVariables) {
     // create a new (only one!) statement for each variable changed in the body, this implicitly is the statement
     // with the "highest possible degree" of inlining for this variable
-    elem.getStatementToBeExecuted()->castTo<Block>()->addChild(new VarAssignm(varIdentifier, varExpr));
+    elem.getStatementToBeExecuted()->castTo<Block>()->addChild(new VarAssignm(varIdentifierScopePair.first, varExpr));
     // remove all the variables that were changed within the body from variableValues as inlining them in any statement
     // after/outside the loop does not make any sense
-    variableValues.erase(varIdentifier);
+    variableValues.erase(varIdentifierScopePair);
   }
 
   // TODO: Future work (maybe): for large enough num_..., e.g. 128 or 256, it might make sense to have a binary series
@@ -789,6 +805,45 @@ void CompileTimeExpressionSimplifier::visit(Return &elem) {
 // Helper methods
 // =====================
 
+AbstractExpr *CompileTimeExpressionSimplifier::getVariableValueDeclaredInThisOrOuterScope(std::string variableName) {
+  auto resultIt = getVariableEntryDeclaredInThisOrOuterScope(variableName);
+  return (resultIt==variableValues.end()) ? nullptr : resultIt->second;
+}
+
+std::map<std::pair<std::string, Scope *>, AbstractExpr *>::iterator
+CompileTimeExpressionSimplifier::getVariableEntryDeclaredInThisOrOuterScope(std::string variableName) {
+  // variables to store the iterator to the declaration that is closest in terms of scopes and the distance between the
+  // current scope and the scope of the declaration (e.g., distance is zero iff. both are in the same scope)
+  std::map<std::pair<std::string, Scope *>, AbstractExpr *>::iterator closestDeclarationIterator;
+  int closestDeclarationDistance = INT_MAX;
+
+  // go through all variables declared yet
+  for (auto it = variableValues.begin(); it!=variableValues.end(); ++it) {
+    // if the variable's identifier ("name") does not match, continue iterating
+    if ((*it).first.first!=variableName) continue;
+    // check if this variable declaration is valid in the current scope: start from curScope and go the scope hierarchy
+    // upwards until the current scope matches the scope of the declaration -> declaration is valid in current scope
+    auto scope = curScope;
+    int scopeDistance = 0;
+    while (scope!=nullptr) {
+      // check if the current scope and the scope of the declaration are the same
+      if (scope==(*it).first.second) {
+        // check if this found variable declaration has a lower scope distance
+        if (scopeDistance < closestDeclarationDistance) {
+          closestDeclarationDistance = scopeDistance;
+          closestDeclarationIterator = it;
+        }
+      }
+      // go to the next "higher" scope and increment the scope distance
+      scope = scope->getOuterScope();
+      scopeDistance++;
+    }
+  }
+  // if the bestIteratorDistance has still its default value (INT_MAX), return the variableValue's end iterator,
+  // otherwise return the variableValues entry (iterator) that is closest to the current scope
+  return (closestDeclarationDistance==INT_MAX) ? variableValues.end() : closestDeclarationIterator;
+}
+
 bool CompileTimeExpressionSimplifier::valueIsKnown(AbstractNode *node) {
   // A value is considered as known if...
   // i.) it is a Literal
@@ -798,9 +853,10 @@ bool CompileTimeExpressionSimplifier::valueIsKnown(AbstractNode *node) {
   auto variableValueIsKnown = false;
   if (auto abstractExprAsVariable = dynamic_cast<Variable *>(node)) {
     // check that the variable has a value
-    return variableValues.count(abstractExprAsVariable->getIdentifier()) > 0
+    auto var = getVariableValueDeclaredInThisOrOuterScope(abstractExprAsVariable->getIdentifier());
+    return var!=nullptr
         // and its value is not symbolic (i.e., contains no variables for which the value is unknown)
-        && variableValues.at(abstractExprAsVariable->getIdentifier())->getVariableIdentifiers().empty();
+        && var->getVariableIdentifiers().empty();
   }
   // ii.) or the node is removable (i.e., its value is in removableNodes)
   return variableValueIsKnown || removableNodes.count(node) > 0;
@@ -830,20 +886,24 @@ AbstractExpr *CompileTimeExpressionSimplifier::getFirstValue(AbstractNode *node)
   }
   // if node is a variable: search the variable's value in the map of known variable values
   auto nodeAsVariable = dynamic_cast<Variable *>(node);
-  if (nodeAsVariable!=nullptr && variableValues.count(nodeAsVariable->getIdentifier()) > 0) {
-    // return a clone of te variable's value
-    AbstractNode *pNode = variableValues.at(nodeAsVariable->getIdentifier())->clone(false);
-    return dynamic_cast<AbstractExpr *>(pNode);
+  if (nodeAsVariable!=nullptr) {
+    auto val = getVariableValueDeclaredInThisOrOuterScope(nodeAsVariable->getIdentifier());
+    if (val!=nullptr) {
+      // return a clone of the variable's value
+      auto pNode = val->clone(false);
+      return dynamic_cast<AbstractExpr *>(pNode);
+    }
   }
   // in any other case: throw an error
-  throw std::invalid_argument("Cannot determine value for node " + node->getUniqueNodeId() + ".");
+  throw std::invalid_argument("Cannot determine value for node " + node->getUniqueNodeId() + "."
+                                                                                             "Use method valueIsKnown before invoking this method.");
 }
 
 std::unordered_map<std::string, AbstractLiteral *> CompileTimeExpressionSimplifier::getTransformedVariableMap() {
   std::unordered_map<std::string, AbstractLiteral *> variableMap;
   for (auto &[k, v] : variableValues) {
     if (auto varAsLiteral = dynamic_cast<AbstractLiteral *>(v)) {
-      variableMap[k] = varAsLiteral;
+      variableMap[k.first] = varAsLiteral;
     }
   }
   return variableMap;
@@ -909,11 +969,31 @@ void CompileTimeExpressionSimplifier::cleanUpAfterStatementVisited(
   if (enqueueStatementForDeletion) nodesQueuedForDeletion.push_back(statement);
 }
 
-void CompileTimeExpressionSimplifier::addVariableValue(const std::string &variableIdentifier,
-                                                       AbstractExpr *valueAnyLiteralOrAbstractExpr) {
-  auto clonedVariableValue = valueAnyLiteralOrAbstractExpr->clone(false);
-  clonedVariableValue->removeFromParents();
-  variableValues[variableIdentifier] = clonedVariableValue->castTo<AbstractExpr>();
+void CompileTimeExpressionSimplifier::setVariableValue(const std::string &variableIdentifier,
+                                                       AbstractExpr *valueAnyLiteralOrAbstractExpr,
+                                                       bool declareVariable) {
+  AbstractExpr *valueToStore = nullptr;
+  if (valueAnyLiteralOrAbstractExpr!=nullptr) {
+    // clone the given value and detach it from its parent
+    valueToStore = valueAnyLiteralOrAbstractExpr->clone(false)->castTo<AbstractExpr>();
+    valueToStore->removeFromParents();
+  }
+
+  // determine the scope in that this variable is declared
+  Scope *varDeclScope;
+  if (declareVariable==true) {
+    // if this is a new declaration, take the current scope
+    varDeclScope = curScope;
+  } else {
+    // find the scope this variable was declared in
+    varDeclScope = getVariableEntryDeclaredInThisOrOuterScope(variableIdentifier)->first.second;
+    // if no scope was found, this must be a new variable declaration within th
+    if (varDeclScope==nullptr)
+      throw std::runtime_error("Cannot define value of variable that has not been declared yet!");
+  }
+
+  // save the variable's value in the variableValues map
+  variableValues.insert_or_assign(std::pair(variableIdentifier, varDeclScope), valueToStore);
 }
 
 bool CompileTimeExpressionSimplifier::isQueuedForDeletion(const AbstractNode *node) {
@@ -921,20 +1001,19 @@ bool CompileTimeExpressionSimplifier::isQueuedForDeletion(const AbstractNode *no
       !=nodesQueuedForDeletion.end();
 }
 
-std::unordered_map<std::string, AbstractExpr *>
-CompileTimeExpressionSimplifier::getChangedVariables(
-    std::unordered_map<std::string, AbstractExpr *> variableValuesBeforeVisitingNode) {
+std::map<std::pair<std::string, Scope *>, AbstractExpr *> CompileTimeExpressionSimplifier::getChangedVariables(
+    std::map<std::pair<std::string, Scope *>, AbstractExpr *> variableValuesBeforeVisitingNode) {
   // the result list of changed variables with their respective value
-  std::unordered_map<std::string, AbstractExpr *> changedVariables;
+  decltype(variableValuesBeforeVisitingNode) changedVariables;
   // Loop through all variables in the current variableValues and check for each if it changed.
   // It is important that we loop through variableValues instead of variableValuesBeforeVisitingNode because there may
   // be newly declared variables.
-  for (auto &[varIdentifier, expr] : variableValues) {
+  for (auto &[varIdentifierScope, varValue] : variableValues) {
     // a variable is changed if it either was added (i.e., declaration of a new variable) or its value was changed
-    if (variableValuesBeforeVisitingNode.count(varIdentifier)==0
-        || (variableValuesBeforeVisitingNode.count(varIdentifier) > 0
-            && !variableValuesBeforeVisitingNode.at(varIdentifier)->isEqual(expr))) {
-      changedVariables.emplace(varIdentifier, expr);
+    if (variableValuesBeforeVisitingNode.count(varIdentifierScope)==0
+        || (variableValuesBeforeVisitingNode.count(varIdentifierScope) > 0
+            && !variableValuesBeforeVisitingNode.at(varIdentifierScope)->isEqual(varValue))) {
+      changedVariables.emplace(varIdentifierScope, varValue);
     }
   }
   return changedVariables;

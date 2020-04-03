@@ -27,14 +27,20 @@ class CompileTimeExpressionSimplifierFixture : public ::testing::Test {
   Ast ast;
   CompileTimeExpressionSimplifier ctes;
 
+ protected:
+  virtual void SetUp() {
+    ctes = CompileTimeExpressionSimplifier();
+  }
+
   CompileTimeExpressionSimplifierFixture() = default;
 
-  AbstractExpr *getVariableValue(const std::string &varIdentifier) {
-    try {
-      return ctes.variableValues.at(varIdentifier);
-    } catch (std::out_of_range &outOfRangeException) {
-      throw std::logic_error("Variable identifier '" + varIdentifier + "' not found!");
+  AbstractExpr *getVariableValueByUniqueName(const std::string &varIdentifier) {
+    // NOTE: This method does not work if there are multiple variables with the same variable identifier but in
+    // different scopes. In that case the method always returns the value of the variable in the outermost scope.
+    for (auto &[varIdentifierScope, varValue] : ctes.variableValues) {
+      if (varIdentifierScope.first==varIdentifier) return varValue;
     }
+    throw std::logic_error("Variable identifier '" + varIdentifier + "' not found!");
   }
 };
 
@@ -59,7 +65,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, arithmeticExpr_literalsOnly_fully
   ctes.visit(ast);
 
   // check that 'alpha' is computed correctly
-  auto alphaValue = getVariableValue("alpha");
+  auto alphaValue = getVariableValueByUniqueName("alpha");
   EXPECT_EQ(alphaValue->castTo<LiteralInt>()->getValue(), 242);
   // check that the statement VarDecl and its children are deleted
   EXPECT_EQ(function->getBody()->getStatements().size(), 0);
@@ -91,13 +97,13 @@ TEST_F(CompileTimeExpressionSimplifierFixture, arithmeticExpr_variableUnknown_rh
   // perform the compile-time expression simplification
   ctes.visit(ast);
 
-  // check that value of alpha  variable
-  EXPECT_EQ(ctes.variableValues.size(), 1);
+  // variableValues is expected to contain: [encryptedA, alpha][
+  EXPECT_EQ(ctes.variableValues.size(), 2);
   // check that the rhs operand of arithmeticExpr is simplified
   auto expected = new OperatorExpr(new Operator(ArithmeticOp::MULTIPLICATION),
                                    {new Variable("encryptedA"),
                                     new LiteralInt(28)});
-  EXPECT_TRUE(getVariableValue("alpha")->isEqual(expected));
+  EXPECT_TRUE(getVariableValueByUniqueName("alpha")->isEqual(expected));
   EXPECT_EQ(function->getBodyStatements().size(), 0);
 
   // check that at the end of the evaluation traversal, the removableNodes map is empty
@@ -130,7 +136,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, arithmeticExpr_variableKnown_full
   ctes.visit(ast);
 
   // check that 'alpha' is computed correctly
-  auto alphaValue = getVariableValue("alpha");
+  auto alphaValue = getVariableValueByUniqueName("alpha");
   EXPECT_EQ(alphaValue->castTo<LiteralInt>()->getValue(), 1'204);
 
   // check that the statement VarDecl and its children are deleted
@@ -178,7 +184,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, arithmeticExpr_variablesUnknown_n
           new Variable("plaintextB"),
           new LiteralInt(4)
       });
-  EXPECT_TRUE(getVariableValue("alpha")->isEqual(expected));
+  EXPECT_TRUE(getVariableValueByUniqueName("alpha")->isEqual(expected));
 
   // check that 9 nodes were deleted and the function's body is empty
   EXPECT_EQ(numberOfNodesBeforeSimplification - 9, ast.getAllNodes().size());
@@ -209,7 +215,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_literalsOnly_fullyEva
   ctes.visit(ast);
 
   // check that 'alpha' is computed correctly
-  auto alphaValue = getVariableValue("alpha");
+  auto alphaValue = getVariableValueByUniqueName("alpha");
   EXPECT_EQ(alphaValue->castTo<LiteralBool>()->getValue(), false);
 
   // check that the statement VarDecl and its children are deleted
@@ -250,7 +256,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_variableUnknown_lhsOp
 
   // check that alpha's lhs operand is computed
   auto expected = new LiteralBool(true);
-  EXPECT_TRUE(getVariableValue("alpha")->isEqual(expected));
+  EXPECT_TRUE(getVariableValueByUniqueName("alpha")->isEqual(expected));
   // check that the variable declaration statement is deleted
   EXPECT_EQ(function->getBodyStatements().size(), 0);
 
@@ -284,7 +290,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_variableKnown_fullyEv
   ctes.visit(ast);
 
   // check that 'alpha' is computed correctly
-  auto alphaValue = getVariableValue("alpha");
+  auto alphaValue = getVariableValueByUniqueName("alpha");
   EXPECT_EQ(alphaValue->castTo<LiteralBool>()->getValue(), true);
 
   // check that the statement VarDecl and its children are deleted
@@ -333,7 +339,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_variablesUnknown_notA
            new Operator(LOGICAL_XOR),
            {new Variable("encryptedB"), new LiteralBool(true)})
       });
-  EXPECT_TRUE(getVariableValue("alpha")->isEqual(expected));
+  EXPECT_TRUE(getVariableValueByUniqueName("alpha")->isEqual(expected));
 
   // check that 9 nodes are deleted
   EXPECT_EQ(numberOfNodesBeforeSimplification - 9, ast.getAllNodes().size());
@@ -360,7 +366,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, unaryExpr_literalsOnly_fullyEvalu
   ctes.visit(ast);
 
   // check that 'truthValue' is computed correctly
-  auto alphaValue = getVariableValue("truthValue");
+  auto alphaValue = getVariableValueByUniqueName("truthValue");
   EXPECT_EQ(alphaValue->castTo<LiteralBool>()->getValue(), true);
 
   // check that the statement VarDecl and its children are deleted
@@ -391,11 +397,11 @@ TEST_F(CompileTimeExpressionSimplifierFixture, unaryExpr_variableKnown_fullyEval
   ctes.visit(ast);
 
   // check that 'alpha' is stored correctly
-  auto alphaValue = getVariableValue("alpha");
+  auto alphaValue = getVariableValueByUniqueName("alpha");
   EXPECT_EQ(alphaValue->castTo<LiteralBool>()->getValue(), true);
 
   // check that 'beta' is computed correctly
-  auto betaValue = getVariableValue("beta");
+  auto betaValue = getVariableValueByUniqueName("beta");
   EXPECT_EQ(betaValue->castTo<LiteralBool>()->getValue(), false);
 
   // check that both statements and their children are deleted
@@ -423,9 +429,9 @@ TEST_F(CompileTimeExpressionSimplifierFixture, unaryExpr_variableUnknown_notEval
   // perform the compile-time expression simplification
   ctes.visit(ast);
 
-  // check that beta was computed
-  EXPECT_EQ(ctes.variableValues.size(), 1);
-  EXPECT_TRUE(getVariableValue("beta")
+  // variableValues is expected to contain: [paramA, beta]
+  EXPECT_EQ(ctes.variableValues.size(), 2);
+  EXPECT_TRUE(getVariableValueByUniqueName("beta")
                   ->isEqual(new OperatorExpr(new Operator(UnaryOp::NEGATION), {new Variable("paramA")})));
   // check that statements is deleted
   EXPECT_EQ(function->getBodyStatements().size(), 0);
@@ -456,11 +462,11 @@ TEST_F(CompileTimeExpressionSimplifierFixture, varAssignm_variablesKnown_fullyEv
   ctes.visit(ast);
 
   // check that 'alpha' is stored correctly
-  auto alphaValue = getVariableValue("alpha");
+  auto alphaValue = getVariableValueByUniqueName("alpha");
   EXPECT_EQ(alphaValue->castTo<LiteralFloat>()->getValue(), 2.75);
 
   // check that 'beta' is assigned correctly
-  auto betaValue = getVariableValue("beta");
+  auto betaValue = getVariableValueByUniqueName("beta");
   EXPECT_EQ(betaValue->castTo<LiteralFloat>()->getValue(), 2.75);
 
   // check that the statements and their children are deleted
@@ -488,7 +494,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, varAssignm_previouslyDeclaredNonI
   ctes.visit(ast);
 
   // check that 'alpha' is computed correctly
-  auto alphaValue = getVariableValue("alpha");
+  auto alphaValue = getVariableValueByUniqueName("alpha");
   EXPECT_EQ(alphaValue->castTo<LiteralFloat>()->getValue(), 2.95f);
 
   // check that the statement VarDecl and its children are deleted
@@ -514,7 +520,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture,  /* NOLINT */
   ctes.visit(ast);
 
   // check that 'alpha' has correct initial value
-  EXPECT_EQ(getVariableValue("alpha")->castTo<LiteralFloat>()->getValue(), 0.0f);
+  EXPECT_EQ(getVariableValueByUniqueName("alpha")->castTo<LiteralFloat>()->getValue(), 0.0f);
 
   // check that the statement VarDecl and its children are deleted
   EXPECT_EQ(function->getBody()->getStatements().size(), 0);
@@ -542,7 +548,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, varAssignm_assignmentToParameter)
   ctes.visit(ast);
 
   // check that 'alpha' is computed correctly
-  auto alphaValue = getVariableValue("alpha");
+  auto alphaValue = getVariableValueByUniqueName("alpha");
   EXPECT_EQ(alphaValue->castTo<LiteralFloat>()->getValue(), 42.24f);
 
   // check that the statement VarDecl and its children are deleted
@@ -734,7 +740,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, return_variableUnknown_expectedNo
   EXPECT_EQ(numberOfNodesBeforeSimplification, ast.getAllNodes().size());
 
   // check that 'b' remains unknown
-  EXPECT_THROW(getVariableValue("b"), std::logic_error);
+  EXPECT_THROW(getVariableValueByUniqueName("b"), std::logic_error);
 
   // check that at the end of the evaluation traversal, the removableNodes map is empty
   EXPECT_EQ(ctes.removableNodes.size(), 0);
@@ -970,7 +976,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   ctes.visit(ast);
 
   // check that 'a' was memorized correctly
-  EXPECT_EQ(getVariableValue("a")->castTo<LiteralInt>()->getValue(), 1);
+  EXPECT_EQ(getVariableValueByUniqueName("a")->castTo<LiteralInt>()->getValue(), 1);
   // check that there is only one statement left
   EXPECT_EQ(function->getBodyStatements().size(), 1);
   EXPECT_EQ(function->getBodyStatements().front(), returnStatement);
@@ -1047,7 +1053,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
             new LiteralInt(22)})});
   EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedResult));
   // check that 'b' was memorized correctly
-  EXPECT_TRUE(getVariableValue("b")->isEqual(expectedResult));
+  EXPECT_TRUE(getVariableValueByUniqueName("b")->isEqual(expectedResult));
 
   // check that at the end of the evaluation traversal, the removableNodes map is empty
   EXPECT_EQ(ctes.removableNodes.size(), 0);
@@ -1114,9 +1120,9 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
            new LiteralInt(1'283)});
   EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedResult));
   // check that variable values were memorized correctly
-  EXPECT_TRUE(getVariableValue("b")->isEqual(expectedResult));
+  EXPECT_TRUE(getVariableValueByUniqueName("b")->isEqual(expectedResult));
   // variable 'c' is not expected to be memorized because it's declared in the Then-branch only
-  EXPECT_THROW(getVariableValue("c"), std::logic_error);
+  EXPECT_THROW(getVariableValueByUniqueName("c"), std::logic_error);
 
   // check that at the end of the evaluation traversal, the removableNodes map is empty
   EXPECT_EQ(ctes.removableNodes.size(), 0);
@@ -1189,7 +1195,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
                                                             new LiteralInt(42)})});
   EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedResult));
   // check that 'b' was memorized correctly
-  EXPECT_TRUE(getVariableValue("b")->isEqual(expectedResult));
+  EXPECT_TRUE(getVariableValueByUniqueName("b")->isEqual(expectedResult));
 
   // check that at the end of the evaluation traversal, the removableNodes map is empty
   EXPECT_EQ(ctes.removableNodes.size(), 0);
@@ -1260,7 +1266,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
                          new Variable("factor")})});
   EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedResult));
   // check that 'b' was memorized correctly
-  EXPECT_TRUE(getVariableValue("b")->isEqual(expectedResult));
+  EXPECT_TRUE(getVariableValueByUniqueName("b")->isEqual(expectedResult));
 
   // check that at the end of the evaluation traversal, the removableNodes map is empty
   EXPECT_EQ(ctes.removableNodes.size(), 0);
@@ -1366,7 +1372,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
        expectedResultRhsTerm});
   EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedResult));
   // check that 'b' was memorized correctly
-  EXPECT_TRUE(getVariableValue("b")->isEqual(expectedResult));
+  EXPECT_TRUE(getVariableValueByUniqueName("b")->isEqual(expectedResult));
 
   // check that at the end of the evaluation traversal, the removableNodes map is empty
   EXPECT_EQ(ctes.removableNodes.size(), 0);
@@ -1438,17 +1444,16 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_includingOperatorEx
                                                                                        ArithmeticOp::ADDITION,
                                                                                        new Variable("a")))));
 
-  auto varDeclV =
-      new VarDecl("x",
-                  new Datatype(Types::INT),
-                  new ArithmeticExpr(new LiteralInt(11), ArithmeticOp::ADDITION, new LiteralInt(29)));
+  auto varAssignmX =
+      new VarAssignm("x",
+                     new ArithmeticExpr(new LiteralInt(11), ArithmeticOp::ADDITION, new LiteralInt(29)));
   auto returnStmt = new Return(
       new ArithmeticExpr(new Variable("x"), ArithmeticOp::ADDITION, new Variable("y")));
 
   // connect objects
   function->setParameterList(functionParamList);
   function->addStatement(varDeclY);
-  function->addStatement(varDeclV);
+  function->addStatement(varAssignmX);
   function->addStatement(returnStmt);
   ast.setRootNode(function);
 
@@ -1840,7 +1845,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, WhileLoop_compileTimeKnownExpress
   // }
   auto function = new Function("f");
   auto functionParamList = new ParameterList(
-      {new FunctionParameter(new Datatype(Types::INT, true), new Variable("i"))});
+      {new FunctionParameter(new Datatype(Types::INT, true), new Variable("a"))});
   function->setParameterList(functionParamList);
 
   function->addStatement(new VarDecl("i", 2));
