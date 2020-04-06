@@ -1,10 +1,10 @@
 #include "ControlFlowGraphVisitor.h"
 #include <queue>
 #include <tuple>
+#include <algorithm>
 #include "GraphNode.h"
 #include "AbstractNode.h"
 #include "ArithmeticExpr.h"
-#include "AbstractStatement.h"
 #include "Block.h"
 #include "For.h"
 #include "Function.h"
@@ -483,14 +483,27 @@ void ControlFlowGraphVisitor::buildDataFlowGraph() {
   }
 }
 
-std::vector<std::string> ControlFlowGraphVisitor::getLastVariableWrites() {
-  std::vector<std::string> writtenVariables;
+std::vector<std::string> ControlFlowGraphVisitor::getLastVariablesReadAndWrite() {
   if (lastCreatedNodes.empty()) {
-    throw std::logic_error("Cannot get last written variables as there are no existing GraphNode objects."
-                           "Did you visit a statement before?");
+    throw std::logic_error("Cannot get any variables that were read and written as there are no existing GraphNodes."
+                           "Did you visit a statement before by passing this ControlFlowGraphVisitor instace?");
   } else {
-    auto v = lastCreatedNodes.back()->getVariables(AccessType::WRITE);
-    writtenVariables.insert(writtenVariables.end(), v.begin(), v.end());
+    std::set<std::string> written;
+    std::set<std::string> read;
+    // go through all created GraphNodes (one for each statement) an collect all variable reads and writes
+    // (we need to visit all statements because there might be nested statements e.g., For-loop's body)
+    for (auto &n : lastCreatedNodes) {
+      auto w = lastCreatedNodes.back()->getVariables(AccessType::WRITE);
+      written.insert(w.begin(), w.end());
+      auto r = lastCreatedNodes.back()->getVariables(AccessType::READ);
+      read.insert(r.begin(), r.end());
+    }
+    std::vector<std::string> variablesReadAndWritten;
+    // determine the variables that were read and written (must be both!)
+    // no need for prior sorting as set is already sorted
+    std::set_intersection(written.begin(), written.end(), read.begin(), read.end(),
+                          std::back_inserter(variablesReadAndWritten));
+    return variablesReadAndWritten;
   }
-  return writtenVariables;
 }
+

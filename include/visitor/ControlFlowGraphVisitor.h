@@ -80,7 +80,10 @@ class ControlFlowGraphVisitor : public Visitor {
   /// \invariant lastCreatedNodes is always empty after calling this method.
   void postActionsStatementVisited(GraphNode *gNode);
 
-  std::vector<std::string> getLastVariableWrites();
+  /// Returns all variables that are read and written among all GraphNodes. This makes sense if the
+  /// ControlFlowGraphVisitor is only called on a subtree (e.g., For-loop's body Block statement) of the whole AST.
+  /// \return All variables that are read and written.
+  std::vector<std::string> getLastVariablesReadAndWrite();
 
   /** @defgroup visit Methods for handling visits of AbstractNode subclasses
    *  @{
