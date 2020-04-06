@@ -101,7 +101,9 @@ bool VarDecl::isEqual(AbstractStatement *as) {
   if (auto otherVarDecl = dynamic_cast<VarDecl *>(as)) {
     return (this->getIdentifier()==otherVarDecl->getIdentifier())
         && (*this->getDatatype()==*otherVarDecl->getDatatype())
-        && (this->getInitializer()->isEqual(otherVarDecl->getInitializer()));
+        && ((this->getInitializer()==nullptr && otherVarDecl->getInitializer()==nullptr)
+            || ((this->getInitializer()!=nullptr && otherVarDecl->getInitializer()!=nullptr)
+                && this->getInitializer()->isEqual(otherVarDecl->getInitializer())));
   }
   return false;
 }
