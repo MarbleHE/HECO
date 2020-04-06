@@ -38,7 +38,7 @@ class CompileTimeExpressionSimplifierFixture : public ::testing::Test {
     // NOTE: This method does not work if there are multiple variables with the same variable identifier but in
     // different scopes. In that case the method always returns the value of the variable in the outermost scope.
     for (auto &[varIdentifierScope, varValue] : ctes.variableValues) {
-      if (varIdentifierScope.first==varIdentifier) return varValue;
+      if (varIdentifierScope.first==varIdentifier) return varValue->value;
     }
     throw std::logic_error("Variable identifier '" + varIdentifier + "' not found!");
   }
@@ -1553,7 +1553,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_nestedOperatorsSimp
   EXPECT_EQ(ctes.removableNodes.size(), 0);
 }
 
-TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_nestedLogicalOperators__EXPECTED_FAIL) { /* NOLINT */
+TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_nestedLogicalOperators) { /* NOLINT */
   //  -- input --
   // int f(encrypted_bool a, plaintext_bool b, encrypted_bool c) {
   //  return (a ^ (b ^ false)) && ((true || false) || true)
@@ -2215,13 +2215,10 @@ TEST_F(CompileTimeExpressionSimplifierFixture, forLoopUnrolling) { /* NOLINT */
   // perform the compile-time expression simplification
   ctes.visit(ast);
 
-  PrintVisitor pv;
-  pv.visit(ast);
-
   // build expected AST
   auto func = new Function("sumVectorElements");
-  // int sum = 0;
-  func->addStatement(new VarDecl("sum", 0));
+  // int sum;
+  func->addStatement(new VarDecl("sum", new Datatype(Types::INT, false), nullptr));
 
   // unrolled loop and cleanup loop are embedded into new Block
   // { ...
