@@ -61,7 +61,8 @@ void AbstractNode::addChild(AbstractNode *child, bool addBackReference) {
   addChildren({child}, addBackReference);
 }
 
-void AbstractNode::addChildren(const std::vector<AbstractNode *> &childrenToAdd, bool addBackReference) {
+void AbstractNode::addChildren(const std::vector<AbstractNode *> &childrenToAdd, bool addBackReference,
+                               bool prependChildren) {
   auto allowsInfiniteNumberOfChildren = (getMaxNumberChildren()==-1);
 
   // check whether the number of children to be added does not exceed the number available children spots
@@ -86,7 +87,8 @@ void AbstractNode::addChildren(const std::vector<AbstractNode *> &childrenToAdd,
   if (getChildren().empty() || allowsInfiniteNumberOfChildren) {
     // if the children list is empty or the node type supports an unlimited number of children, then add all nodes in
     // one batch to the children vector's end
-    children.insert(children.end(), childrenToAdd.begin(), childrenToAdd.end());
+    auto startIterator = prependChildren ? children.begin() : children.end();
+    children.insert(startIterator, childrenToAdd.begin(), childrenToAdd.end());
     std::for_each(childrenToAdd.begin(), childrenToAdd.end(), doInsertPostAction);
     // if this nodes accepts an infinite number of children, pre-filling the slots does not make any sense -> skip it
     if (getMaxNumberChildren()!=-1) {
