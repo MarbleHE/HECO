@@ -2203,10 +2203,11 @@ TEST_F(CompileTimeExpressionSimplifierFixture, forLoopUnrolling) { /* NOLINT */
   // -- expected --
   // int sumVectorElements() {
   //    int i = 0;
-  //    for (; i < 6;) {
+  //    for (; i < 6 && i+1 < 6 && i+2 < 6;) {
   //      sum = sum + M[i] + M[i+1] + M[i+2];
   //      i = i+3;
   //    }
+  //
   //    return sum;
   // }
   Ast ast;
@@ -2226,11 +2227,21 @@ TEST_F(CompileTimeExpressionSimplifierFixture, forLoopUnrolling) { /* NOLINT */
   func->addStatement(newBlock);
   // int i = 0;
   newBlock->addChild(new VarDecl("i", 0));
-  // for (; i+3 < 6; )  // unrolled loop
+  // for (; i+1 < 6 && i+2 < 6 && i+3 < 6; )  // unrolled loop
   auto unrolledLoopInitializer = nullptr;
-  auto unrolledLoopCondition = new OperatorExpr(
-      new Operator(SMALLER),
-      {new OperatorExpr(new Operator(ADDITION), {new Variable("i"), new LiteralInt(3)}), new LiteralInt(6)});
+  auto unrolledLoopCondition =
+      new OperatorExpr(
+          new Operator(LOGICAL_AND),
+          {
+              new OperatorExpr(new Operator(SMALLER), {new Variable("i"), new LiteralInt(6)}),
+              new OperatorExpr(new Operator(SMALLER), {
+                  new OperatorExpr(new Operator(ADDITION),
+                                   {new Variable("i"), new LiteralInt(1)}),
+                  new LiteralInt(6)}),
+              new OperatorExpr(new Operator(SMALLER), {
+                  new OperatorExpr(new Operator(ADDITION), {new Variable("i"), new LiteralInt(2)}), new LiteralInt(6)})
+          });
+
   auto unrolledLoopUpdater = nullptr;
   auto createVariableM = []() -> LiteralInt * {
     return new LiteralInt(new Matrix<int>({{54}, {32}, {63}, {38}, {13}, {20}}));

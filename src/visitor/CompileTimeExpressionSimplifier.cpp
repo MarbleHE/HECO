@@ -706,15 +706,25 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
 
   // the new for-loop body containing the unrolled statements
   auto unrolledForLoopBody = new Block();
-  // generate the unrolled loop statements by performing for each statement in the original's loop body:
-  // duplicate the statement, replace all iteration variables, append the statement to the new (unrolled) loop body
+  // Generate the unrolled loop statements that consists of:
+  //   <all statements of the body with symbolic loop variable for iteration 1>
+  //   <update statement>
+  //   <loop condition>   <- this will be moved out of the body into the For-loop's condition field afterwards
+  //   ... repeat NUM_CIPHERTEXT_SLOTS times ...
   const int NUM_CIPHERTEXT_SLOTS = 3;
+  std::vector<Return *> tempReturnStmts;
   for (int i = 0; i < NUM_CIPHERTEXT_SLOTS; i++) {
     // for each statement in the for-loop's body
     for (auto &stmt : elem.getStatementToBeExecuted()->castTo<Block>()->getStatements()) {
       // clone the body statement and append the statement to the unrolledForLoop Body
       unrolledForLoopBody->addChild(stmt->clone(false));
     }
+    // temporarily add the condition such that the variables are replaced (e.g., i < 6 -> i+1 < 6 -> i+2 < 6)
+    // we use a Return statement here as it does not write anything into the variableValues map
+    auto retStmt = new Return(elem.getCondition()->clone(false)->castTo<AbstractExpr>());
+    tempReturnStmts.push_back(retStmt);
+    unrolledForLoopBody->addChild(retStmt);
+
     // add a copy of the update statement, visiting the body then automatically handles the iteration variable in the
     // cloned loop body statements - no need to manually adapt them
     unrolledForLoopBody->addChild(elem.getUpdateStatement()->clone(false));
@@ -749,11 +759,19 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
   auto variableValuesBeforeVisitingLoopBody = getClonedVariableValuesMap();
   elem.getStatementToBeExecuted()->accept(*this);
 
-  // visit the condition to replace loop iteration variables by the symbolic value of the variable that is last written
-  // in the body, for example: i < 6 => i+3 < 6
-  auto nodesQueuedForDeletionBeforeVisitingCondition = nodesQueuedForDeletion;
-  elem.getCondition()->accept(*this);
-  nodesQueuedForDeletion = nodesQueuedForDeletionBeforeVisitingCondition;
+  // Move the expressions of the temporarily added Return statements into the For-loop's condition by combining all
+  // conditions using a logical-AND. Then remove all temporarily added Return statements.
+  std::vector<AbstractExpr *> newConds;
+  for (auto rStmt : tempReturnStmts) {
+    rStmt->removeFromParents(true);
+    auto expr = rStmt->getReturnExpressions().front();
+    expr->removeFromParents(true);
+    newConds.push_back(expr);
+    nodesQueuedForDeletion.push_back(rStmt);
+  }
+  auto originalCondition = elem.getCondition();
+  elem.replaceChild(originalCondition, new OperatorExpr(new Operator(LOGICAL_AND), newConds));
+  nodesQueuedForDeletion.push_back(originalCondition);
 
   // TODO: Future work:  Make this entire thing flexible with regard to num_slots_in_ctxt, i.e., allow changing how long
   //  unrolled loops are. Idea: generate all loops (see below cleanup loop ideas) starting from ludacriously large
@@ -1001,9 +1019,10 @@ void CompileTimeExpressionSimplifier::setVariableValue(const std::string &variab
 
   // find the scope this variable was declared in
   auto iterator = getVariableEntryDeclaredInThisOrOuterScope(variableIdentifier);
-  // if no scope was found, this must be a new variable that has been forgotten to add or it was removed afterward
+  // If no scope could be found, this variable cannot be saved. As For-loop unrolling currently makes use of the fact
+  // that unknown variables are not replaced, we should not throw any exception here. Maybe the For-loop's case can
+  // also be handled by using the replaceVariableByValues flag?
   if (iterator==variableValues.end()) return;
-//    throw std::runtime_error("Cannot store a value of a variable that has not been declared yet!");
 
   Scope *varDeclScope = iterator->first.second;
 
