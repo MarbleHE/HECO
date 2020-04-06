@@ -12,12 +12,12 @@ class Scope {
  private:
   std::unordered_map<std::string, Scope *> innerScopes;
   std::string scopeIdentifier;
-  AbstractStatement *scopeOpener;
+  AbstractNode *scopeOpener;
   Scope *outerScope;
   std::vector<AbstractStatement *> scopeStatements;
 
  public:
-  Scope(std::string scopeIdentifier, AbstractStatement *scopeOpener, Scope *outerScope);
+  Scope(std::string scopeIdentifier, AbstractNode *scopeOpener, Scope *outerScope);
 
   [[nodiscard]] Scope *getOuterScope() const;
 
@@ -25,9 +25,9 @@ class Scope {
 
   [[nodiscard]] const std::vector<AbstractStatement *> &getScopeStatements() const;
 
-  [[nodiscard]] AbstractStatement *getScopeOpener() const;
+  [[nodiscard]] AbstractNode *getScopeOpener() const;
 
-  Scope *getOrCreateInnerScope(const std::string &identifier, AbstractStatement *statement);
+  Scope *getOrCreateInnerScope(const std::string &identifier, AbstractNode *statement);
 
   Scope *findInnerScope(const std::string &identifier);
 

@@ -28,7 +28,7 @@
 
 void Visitor::visit(Ast &elem) {
   // assumption: AST is always the enclosing object that points to the root
-  this->curScope = new Scope("global", elem.getRootNode()->castTo<Function>(), nullptr);
+  this->curScope = new Scope("global", elem.getRootNode(), nullptr);
   elem.getRootNode()->accept(*this);
 }
 

@@ -2,7 +2,7 @@
 #include <utility>
 #include "VarDecl.h"
 
-Scope::Scope(std::string scopeIdentifier, AbstractStatement *scopeOpener, Scope *outerScope)
+Scope::Scope(std::string scopeIdentifier, AbstractNode *scopeOpener, Scope *outerScope)
     : scopeIdentifier(std::move(scopeIdentifier)), scopeOpener(scopeOpener), outerScope(outerScope) {
 
 }
@@ -25,7 +25,7 @@ Scope *Scope::findInnerScope(const std::string &identifier) {
   }
 }
 
-Scope *Scope::getOrCreateInnerScope(const std::string &identifier, AbstractStatement *statement) {
+Scope *Scope::getOrCreateInnerScope(const std::string &identifier, AbstractNode *statement) {
   Scope *sc = findInnerScope(identifier);
   if (sc!=nullptr) {
     // return existing scope
@@ -60,7 +60,7 @@ const std::vector<AbstractStatement *> &Scope::getScopeStatements() const {
   return scopeStatements;
 }
 
-AbstractStatement *Scope::getScopeOpener() const {
+AbstractNode *Scope::getScopeOpener() const {
   return scopeOpener;
 }
 
