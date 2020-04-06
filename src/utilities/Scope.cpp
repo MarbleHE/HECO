@@ -2,9 +2,11 @@
 #include <utility>
 #include "VarDecl.h"
 
-Scope::Scope(std::string scopeIdentifier, Scope *outerScope) :
-    scopeIdentifier(std::move(scopeIdentifier)), outerScope(outerScope) {
+Scope::Scope(std::string scopeIdentifier, AbstractStatement *scopeOpener, Scope *outerScope)
+    : scopeIdentifier(std::move(scopeIdentifier)), scopeOpener(scopeOpener), outerScope(outerScope) {
+
 }
+
 
 Scope *Scope::getOuterScope() const {
   return outerScope;
@@ -23,14 +25,14 @@ Scope *Scope::findInnerScope(const std::string &identifier) {
   }
 }
 
-Scope *Scope::getOrCreateInnerScope(const std::string &identifier) {
+Scope *Scope::getOrCreateInnerScope(const std::string &identifier, AbstractStatement *statement) {
   Scope *sc = findInnerScope(identifier);
   if (sc!=nullptr) {
     // return existing scope
     return sc;
   } else {
     // create and return new scope
-    auto *newScope = new Scope(identifier, this);
+    auto *newScope = new Scope(identifier, statement, this);
     this->innerScopes.insert({identifier, newScope});
     return newScope;
   }
@@ -57,3 +59,8 @@ AbstractStatement *Scope::getLastStatement() {
 const std::vector<AbstractStatement *> &Scope::getScopeStatements() const {
   return scopeStatements;
 }
+
+AbstractStatement *Scope::getScopeOpener() const {
+  return scopeOpener;
+}
+

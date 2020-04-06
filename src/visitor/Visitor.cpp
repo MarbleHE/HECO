@@ -28,7 +28,7 @@
 
 void Visitor::visit(Ast &elem) {
   // assumption: AST is always the enclosing object that points to the root
-  this->curScope = new Scope("global", nullptr);
+  this->curScope = new Scope("global", elem.getRootNode()->castTo<Function>(), nullptr);
   elem.getRootNode()->accept(*this);
 }
 
@@ -61,7 +61,7 @@ void Visitor::visit(ArithmeticExpr &elem) {
 
 void Visitor::visit(Block &elem) {
   addStatementToScope(elem);
-  changeToInnerScope(elem.getUniqueNodeId());
+  changeToInnerScope(elem.getUniqueNodeId(), &elem);
   for (auto &stat : elem.getStatements()) {
     stat->accept(*this);
   }
@@ -69,7 +69,6 @@ void Visitor::visit(Block &elem) {
 }
 
 void Visitor::visit(Call &elem) {
-  changeToInnerScope(elem.AbstractExpr::getUniqueNodeId());
   // callee
   elem.getFunc()->accept(*this);
   changeToOuterScope();
@@ -90,7 +89,7 @@ void Visitor::visit(CallExternal &elem) {
 
 void Visitor::visit(Function &elem) {
   addStatementToScope(elem);
-  changeToInnerScope(elem.getUniqueNodeId());
+  changeToInnerScope(elem.getUniqueNodeId(), &elem);
   // visit FunctionParameter
   if (auto fp = elem.getParameterList()) fp->accept(*this);
   // visit Body statements
@@ -119,7 +118,7 @@ void Visitor::visit(If &elem) {
     // if thenBranch is no Block we need to manually open a new scope here
     auto thenNode = dynamic_cast<AbstractNode *>(elem.getThenBranch());
     assert(thenNode!=nullptr); // this should never happen
-    changeToInnerScope(thenNode->getUniqueNodeId());
+    changeToInnerScope(thenNode->getUniqueNodeId(), &elem);
     elem.getThenBranch()->accept(*this);
     changeToOuterScope();
   }
@@ -131,7 +130,7 @@ void Visitor::visit(If &elem) {
     } else {
       auto elseNode = dynamic_cast<AbstractNode *>(elem.getElseBranch());
       assert(elseNode!=nullptr);
-      changeToInnerScope(elseBranch->getUniqueNodeId());
+      changeToInnerScope(elseBranch->getUniqueNodeId(), &elem);
       elem.getElseBranch()->accept(*this);
       changeToOuterScope();
     }
@@ -190,7 +189,7 @@ void Visitor::visit(For &elem) {
   // update
   if (elem.getUpdateStatement()!=nullptr) elem.getUpdateStatement()->accept(*this);
 
-  changeToInnerScope(elem.getStatementToBeExecuted()->getUniqueNodeId());
+  changeToInnerScope(elem.getStatementToBeExecuted()->getUniqueNodeId(), &elem);
   // For statement body is always in a separate scope (even without a separate block "{...}")
   elem.getStatementToBeExecuted()->accept(*this);
   changeToOuterScope();
@@ -257,7 +256,7 @@ void Visitor::visit(While &elem) {
   } else {
     auto *block = dynamic_cast<AbstractNode *>(elem.getBody());
     assert(block!=nullptr);
-    changeToInnerScope(block->getUniqueNodeId());
+    changeToInnerScope(block->getUniqueNodeId(), &elem);
     elem.getBody()->accept(*this);
     changeToOuterScope();
   }
@@ -269,9 +268,9 @@ void Visitor::changeToOuterScope() {
   this->curScope = temp;
 }
 
-void Visitor::changeToInnerScope(const std::string &nodeId) {
+void Visitor::changeToInnerScope(const std::string &nodeId, AbstractStatement *statement) {
   if (ignoreScope) return;
-  auto temp = curScope->getOrCreateInnerScope(nodeId);
+  auto temp = curScope->getOrCreateInnerScope(nodeId, statement);
   this->curScope = temp;
 }
 

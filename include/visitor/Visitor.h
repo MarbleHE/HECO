@@ -108,7 +108,7 @@ class Visitor {
 
   void changeToOuterScope();
 
-  void changeToInnerScope(const std::string &nodeId);
+  void changeToInnerScope(const std::string &nodeId, AbstractStatement *statement);
 
   Visitor();
 
