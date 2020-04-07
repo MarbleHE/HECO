@@ -501,6 +501,10 @@ void CompileTimeExpressionSimplifier::visit(If &elem) {
   // evaluable at runtime (or not) and its result.
   elem.getCondition()->accept(*this);
 
+  // TODO: Rewriting should only happen if the condition is runtime-known and secret, i.e., if the condition is
+  //  public and runtime-known the If-statement should NOT be rewritten. This check requires information from the
+  //  ControlFlowGraphVisitor that yet does not support variable-scoping.
+
   // ================
   // Case 1: Condition's evaluation result is KNOWN at compile-time
   // -> we can delete the branch that is not executed and move or remove contained statements prior deleting the whole
@@ -546,7 +550,7 @@ void CompileTimeExpressionSimplifier::visit(If &elem) {
     }
   }
     // ================
-    // Case 2: Condition's evaluation result is UNKNOWN at compile-time
+    // Case 2: Condition's evaluation result is UNKNOWN at compile-time (i.e., known at runtime)
     // -> rewrite variables values that are modified in either one or both of the If statement's branches such that the
     //    variable's value depends on the If statement's condition evaluation result.
     // ================
