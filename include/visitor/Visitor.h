@@ -38,7 +38,7 @@ class AbstractMatrix;
 class OperatorExpr;
 
 class Visitor {
- private:
+ protected:
   bool ignoreScope{false};
 
  public:

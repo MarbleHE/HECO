@@ -215,7 +215,8 @@ void PrintVisitor::printNodeName(AbstractNode &node) {
 
 void PrintVisitor::addOutputStr(AbstractNode &node) {
   printNodeName(node);
-  printScope();
+  if (!ignoreScope) printScope();
+  ss << std::endl;
 }
 
 void PrintVisitor::addOutputStr(AbstractNode &node, const std::list<std::string> &args) {
@@ -224,7 +225,8 @@ void PrintVisitor::addOutputStr(AbstractNode &node, const std::list<std::string>
   ss << " ";
   // print primitive parameters related to AST (e.g., int, string)
   for (auto &arg : args) ss << "(" << arg << ")";
-  printScope();
+  if (!ignoreScope) printScope();
+  ss << std::endl;
 }
 
 void PrintVisitor::printScope() {
@@ -235,7 +237,6 @@ void PrintVisitor::printScope() {
     ss << "]";
     setLastPrintedScope(curScope);
   }
-  ss << std::endl;
 }
 
 Scope *PrintVisitor::getLastPrintedScope() const {
