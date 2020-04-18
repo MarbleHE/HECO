@@ -202,6 +202,13 @@ class Matrix : public AbstractMatrix {
   /// \param newValues The values to be used to overwrite the matrix's existing values.
   void setValues(const std::vector<std::vector<T>> &newValues) {
     values = newValues;
+    int elementsPerRow = values.at(0).size();
+    for (auto const &rowVector : values) {
+      if (rowVector.size()!=elementsPerRow) {
+        throw std::invalid_argument("Vector rows must all have the same number of elements!");
+      }
+    }
+    dim.update(newValues.size(), elementsPerRow);
   }
 
   /// Takes a value and compares all elements of the matrix with that value. Returns True if all of the elements match
