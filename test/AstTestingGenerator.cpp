@@ -73,7 +73,8 @@ static std::map<int, std::function<void(Ast &)> > call = {  /* NOLINT */
     {45, AstTestingGenerator::genAstOperatorExpr_logicalXorFalse_oneRemainingOperand},
     {46, AstTestingGenerator::genAstOperatorExpr_logicalXorFalse_twoRemainingOperands},
     {47, AstTestingGenerator::genAstNestedOperatorExpr},
-    {48, AstTestingGenerator::genAstSimpleForLoopUnrolling}
+    {48, AstTestingGenerator::genAstSimpleForLoopUnrolling},
+    {49, AstTestingGenerator::genAstNestedForLoopUnrolling}
 };
 
 void AstTestingGenerator::generateAst(int id, Ast &ast) {
@@ -1536,7 +1537,7 @@ void AstTestingGenerator::genAstNestedOperatorExpr(Ast &ast) {
 }
 
 void AstTestingGenerator::genAstSimpleForLoopUnrolling(Ast &ast) {
-  // -- input --
+  // -- source code --
   // int sumVectorElements() {
   //    Matrix<int> M = [54; 32; 63; 38; 13; 20];
   //    int sum = 0;
@@ -1565,6 +1566,84 @@ void AstTestingGenerator::genAstSimpleForLoopUnrolling(Ast &ast) {
   func->addStatement(forLoop);
 
   func->addStatement(new Return(new Variable("sum")));
+
+  ast.setRootNode(func);
+}
+
+void AstTestingGenerator::genAstNestedForLoopUnrolling(Ast &ast) {
+  // -- source code --
+  //  VecInt2D runLaplacianSharpeningAlgorithm(VecInt2D_encrypted img, int x, int y) {
+  //     VecIn2D img2(img.size());
+  //     int value = 0;
+  //     for (int j = -1; j < 2; ++j) {
+  //        for (int i = -1; i < 2; ++i) {
+  //           value = value + weightMatrix[k*(i+1)+j+1] * img[k*(x+i)+y+j];
+  //        }
+  //     }
+  //     img2[x][y] = img[x][y] - (value/2);
+  //     return img2;
+  //  }
+
+  auto func = new Function("runLaplacianSharpeningAlgorithm");
+  func->getParameters().push_back(new FunctionParameter(new Datatype(Types::INT, true), new Variable("img")));
+  func->getParameters().push_back(new FunctionParameter(new Datatype(Types::INT, false), new Variable("x")));
+  func->getParameters().push_back(new FunctionParameter(new Datatype(Types::INT, false), new Variable("y")));
+
+  // std::vector<int> img2;
+  func->addStatement(new VarDecl("img2", new Datatype(Types::INT), nullptr));
+
+  // int value = 0;
+  func->addStatement(new VarDecl("value", 0));
+
+  // std::vector<int> weightMatrix = {1, 1, 1, 1, -8, 1, 1, 1, 1};  –- row-wise concatenation of the original matrix
+  func->addStatement(new VarDecl("weightMatrix", new Datatype(Types::INT),
+                                 new LiteralInt(new Matrix<int>({{1, 1, 1, 1, -8, 1, 1, 1, 1}}))));
+
+  // value = value + weightMatrix[k1*(i+1)+j+1] * img[k2*(x+i)+y+j];  -- innermost loop body
+  // k1 = 3 as weightMatrix has three rows
+  auto wmTerm = new GetMatrixElement(new Variable("weightMatrix"),
+                                     new LiteralInt(0),
+                                     new ArithmeticExpr(
+                                         new ArithmeticExpr(new LiteralInt(3),
+                                                            MULTIPLICATION,
+                                                            new ArithmeticExpr(
+                                                                new Variable("i"), ADDITION, new LiteralInt(1))),
+                                         ADDITION,
+                                         new ArithmeticExpr(new Variable("j"), ADDITION, new LiteralInt(1))));
+  // TODO We assume k = 4, i.e., img is a 4x4 image but it needs to be replaced by a run-time lookup.
+  auto imgTerm = new GetMatrixElement(new Variable("img"),
+                                      new LiteralInt(0),
+                                      new ArithmeticExpr(
+                                          new ArithmeticExpr(new LiteralInt(4),
+                                                             MULTIPLICATION,
+                                                             new ArithmeticExpr(
+                                                                 new Variable("x"), ADDITION, new Variable("i"))),
+                                          ADDITION,
+                                          new ArithmeticExpr(new Variable("y"), ADDITION, new Variable("j"))));
+  auto innerBody = new Block(new VarAssignm("value",
+                                            new ArithmeticExpr(new Variable("value"),
+                                                               ADDITION,
+                                                               new ArithmeticExpr(wmTerm, MULTIPLICATION, imgTerm))));
+
+  // for (int i = -1; i < 2; ++i)  -- inner loop
+  auto innerLoop = new For(new VarDecl("i", -1),
+                           new LogicalExpr(new Variable("i"), SMALLER, new LiteralInt(2)),
+                           new VarAssignm("i", new ArithmeticExpr(new Variable("i"), ADDITION, new LiteralInt(1))),
+                           innerBody);
+
+  // for (int j = -1; j < 2; ++j)  -- outer loop
+  func->addStatement(new For(new VarDecl("j", -1),
+                             new LogicalExpr(new Variable("j"), SMALLER, new LiteralInt(2)),
+                             new VarAssignm("j", new ArithmeticExpr(new Variable("j"), ADDITION, new LiteralInt(1))),
+                             innerLoop));
+
+  // img2[x][y] = img[x][y] - (value/2);
+  // TODO Modeling this requires some changes:
+  //  - allow assignment to matrix elements (i.e., adapt VarAssignm)
+  //  - initialize img2 with the correct size (requires knowledge of img's size at runtime)
+
+  // return img2;
+  func->addStatement(new Return(new Variable("img2")));
 
   ast.setRootNode(func);
 }

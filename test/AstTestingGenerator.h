@@ -115,6 +115,8 @@ class AstTestingGenerator {
   static void genAstNestedOperatorExpr(Ast &ast);
 
   static void genAstSimpleForLoopUnrolling(Ast &ast);
+
+  static void genAstNestedForLoopUnrolling(Ast &ast);
   /** @} */ // End of astGenerators group
 };
 
