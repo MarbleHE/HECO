@@ -264,6 +264,10 @@ class CompileTimeExpressionSimplifier : public Visitor {
   /// VariableValue objects pointed to needs to be copied.
   /// \return A copy of the VariableValues map.
   VariableValuesMapType getClonedVariableValuesMap();
+
+  int determineNumLoopIterations(For &elem);
+
+  void enqueueNodeForDeletion(AbstractNode *node);
 };
 
 /// Takes a Literal (e.g., LiteralInt) and checks whether its values are defined using a Matrix<AbstractExpr*>. In

@@ -63,7 +63,7 @@ void CompileTimeExpressionSimplifier::visit(Rotate &elem) {
       clonedVal->getMatrix()->rotate(getFirstValue(elem.getRotationFactor())->castTo<LiteralInt>()->getValue(), true);
       // replace this Rotate node by a new node containing the rotated operand
       elem.getOnlyParent()->replaceChild(&elem, clonedVal);
-      nodesQueuedForDeletion.push_back(&elem);
+      enqueueNodeForDeletion(&elem);
     }
   }
 }
@@ -82,7 +82,7 @@ void CompileTimeExpressionSimplifier::visit(Transpose &elem) {
       clonedVal->getMatrix()->transpose(true);
       // replace this Rotate node by a new node containing the rotated operand
       elem.getOnlyParent()->replaceChild(&elem, clonedVal);
-      nodesQueuedForDeletion.push_back(&elem);
+      enqueueNodeForDeletion(&elem);
     }
   }
 }
@@ -180,7 +180,7 @@ void CompileTimeExpressionSimplifier::visit(LiteralFloat &elem) {
 
 void CompileTimeExpressionSimplifier::visit(Variable &elem) {
   Visitor::visit(elem);
-  // TODO: Introduce a depth threshold (#nodes) to stop inlining if a variable reached a certain depth.
+  // TODO: Introduce a depth threshold (#nodes) to stop inlining if a variable's symbolic value reached a certain depth.
   if (getVariableValueDeclaredInThisOrOuterScope(elem.getIdentifier())!=nullptr && replaceVariablesByValues) {
     // if we know the variable's value (i.e., its value is either any subtype of AbstractLiteral or an AbstractExpr if
     // this is a symbolic value that defines on other variables), we can replace this variable node by its value
@@ -220,41 +220,45 @@ void CompileTimeExpressionSimplifier::visit(VarAssignm &elem) {
 }
 
 void CompileTimeExpressionSimplifier::visit(ArithmeticExpr &elem) {
-  Visitor::visit(elem);
-  // clean up removableNodes result from children that indicates whether a child node can safely be deleted
-  removableNodes.erase(elem.getLeft());
-  removableNodes.erase(elem.getRight());
-  removableNodes.erase(elem.getOperator());
-
   // transform this ArithmeticExpr into an OperatorExpr
-  auto op = elem.getOperator();
-  op->removeFromParents();
-  std::vector<AbstractExpr *> operands{elem.getLeft(), elem.getRight()};
-  elem.getLeft()->removeFromParents();
-  elem.getRight()->removeFromParents();
-  auto operatorExpr = new OperatorExpr(op, operands);
-  elem.getOnlyParent()->replaceChild(&elem, operatorExpr);
-  nodesQueuedForDeletion.push_back(&elem);
-  operatorExpr->accept(*this);
+  if (!elem.getParentsNonNull().empty()) {
+    auto op = elem.getOperator();
+    op->removeFromParents();
+    std::vector<AbstractExpr *> operands{elem.getLeft(), elem.getRight()};
+    elem.getLeft()->removeFromParents();
+    elem.getRight()->removeFromParents();
+    auto operatorExpr = new OperatorExpr(op, operands);
+    elem.getOnlyParent()->replaceChild(&elem, operatorExpr);
+    enqueueNodeForDeletion(&elem);
+    operatorExpr->accept(*this);
+  } else {
+    Visitor::visit(elem);
+    // clean up removableNodes result from children that indicates whether a child node can safely be deleted
+    removableNodes.erase(elem.getLeft());
+    removableNodes.erase(elem.getRight());
+    removableNodes.erase(elem.getOperator());
+  }
 }
 
 void CompileTimeExpressionSimplifier::visit(LogicalExpr &elem) {
-  Visitor::visit(elem);
-  // clean up removableNodes result from children that indicates whether a child node can safely be deleted
-  removableNodes.erase(elem.getLeft());
-  removableNodes.erase(elem.getRight());
-  removableNodes.erase(elem.getOperator());
-
   // transform this LogicalExpr into an OperatorExpr
-  auto op = elem.getOperator();
-  op->removeFromParents();
-  std::vector<AbstractExpr *> operands{elem.getLeft(), elem.getRight()};
-  elem.getLeft()->removeFromParents();
-  elem.getRight()->removeFromParents();
-  auto operatorExpr = new OperatorExpr(op, operands);
-  elem.getOnlyParent()->replaceChild(&elem, operatorExpr);
-  nodesQueuedForDeletion.push_back(&elem);
-  operatorExpr->accept(*this);
+  if (!elem.getParentsNonNull().empty()) {
+    auto op = elem.getOperator();
+    op->removeFromParents();
+    std::vector<AbstractExpr *> operands{elem.getLeft(), elem.getRight()};
+    elem.getLeft()->removeFromParents();
+    elem.getRight()->removeFromParents();
+    auto operatorExpr = new OperatorExpr(op, operands);
+    elem.getOnlyParent()->replaceChild(&elem, operatorExpr);
+    enqueueNodeForDeletion(&elem);
+    operatorExpr->accept(*this);
+  } else {
+    Visitor::visit(elem);
+    // clean up removableNodes result from children that indicates whether a child node can safely be deleted
+    removableNodes.erase(elem.getLeft());
+    removableNodes.erase(elem.getRight());
+    removableNodes.erase(elem.getOperator());
+  }
 }
 
 void CompileTimeExpressionSimplifier::visit(UnaryExpr &elem) {
@@ -269,7 +273,7 @@ void CompileTimeExpressionSimplifier::visit(UnaryExpr &elem) {
     auto result = evaluateNodeRecursive(&elem, getTransformedVariableMap());
     // replace this UnaryExpr by the evaluation's result
     elem.getOnlyParent()->replaceChild(&elem, result.front());
-  } else {
+  } else if (!elem.getParentsNonNull().empty()) {
     // if this UnaryExpr cannot be evaluated, replace the UnaryExpr by an OperatorExpr
     auto op = elem.getOperator();
     op->removeFromParents();
@@ -278,10 +282,12 @@ void CompileTimeExpressionSimplifier::visit(UnaryExpr &elem) {
     auto operatorExpr = new OperatorExpr(op, operands);
     elem.getOnlyParent()->replaceChild(&elem, operatorExpr);
   }
-  nodesQueuedForDeletion.push_back(&elem);
+  enqueueNodeForDeletion(&elem);
 }
 
 void CompileTimeExpressionSimplifier::visit(OperatorExpr &elem) {
+  Visitor::visit(elem);  // TODO check if this makes sense
+
   // Check if any of the operands is itself an OperatorExpr with the same symbol such that its operands can be merged
   // into this OperatorExpr. As we do not consider the operator's commutativity, we need to take care of the operands'
   // order while merging. For example:
@@ -296,6 +302,7 @@ void CompileTimeExpressionSimplifier::visit(OperatorExpr &elem) {
   //       └───┴───┴───┘
   std::vector<AbstractExpr *> newOperands;
   auto operatorAndOperands = elem.getChildren();
+  // start by operatorAndOperands.begin() + 1 to skip the first child (operator)
   for (auto it = operatorAndOperands.begin() + 1; it!=operatorAndOperands.end(); ++it) {
     auto operandAsOperatorExpr = dynamic_cast<OperatorExpr *>(*it);
     // check if this operand is an OperatorExpr of the same symbol
@@ -309,7 +316,7 @@ void CompileTimeExpressionSimplifier::visit(OperatorExpr &elem) {
         newOperands.push_back(operand->castTo<AbstractExpr>());
       }
       // mark the obsolete OperatorExpr child for deletion
-      nodesQueuedForDeletion.push_back(*it);
+      enqueueNodeForDeletion(*it);
     } else {
       // if this operand is not an OperatorExpr, we also need to remove it from this OperatorExpr because re-adding it
       // as operand would otherwise lead to having two times the same parent
@@ -518,13 +525,13 @@ void CompileTimeExpressionSimplifier::visit(If &elem) {
     if (thenAlwaysExecuted) { // the Then-branch is always executed
       // recursively remove the Else-branch (sanity-check, may not necessarily exist)
       if (elem.getElseBranch()!=nullptr) {
-        nodesQueuedForDeletion.push_back(elem.getElseBranch());
+        enqueueNodeForDeletion(elem.getElseBranch());
         // we also unlink it from the If statement such that it will not be visited
         elem.removeChild(elem.getElseBranch(), true);
       }
     } else {  // the Else-branch is always executed
       // recursively remove the Then-branch (always exists)
-      nodesQueuedForDeletion.push_back(elem.getThenBranch());
+      enqueueNodeForDeletion(elem.getThenBranch());
       // negate the condition and delete the conditions stored value (is now invalid)
       auto condition = elem.getCondition();
       condition->removeFromParents();
@@ -546,7 +553,7 @@ void CompileTimeExpressionSimplifier::visit(If &elem) {
                 // the Else-branch is always executed but it is empty after simplification  (thus queued for deletion)
             || (!thenAlwaysExecuted && isQueuedForDeletion(elem.getElseBranch()))) {
       // enqueue the If statement and its children for deletion
-      nodesQueuedForDeletion.push_back(&elem);
+      enqueueNodeForDeletion(&elem);
     }
   }
     // ================
@@ -608,7 +615,7 @@ void CompileTimeExpressionSimplifier::visit(If &elem) {
     variableValues = originalVariableValues;
 
     // enqueue the If statement and its children for deletion
-    nodesQueuedForDeletion.push_back(&elem);
+    enqueueNodeForDeletion(&elem);
   }
   // clean up removableNodes result from children that indicates whether a child node can safely be deleted
   removableNodes.erase(elem.getCondition());
@@ -650,178 +657,333 @@ CompileTimeExpressionSimplifier::removeVarsWrittenAndReadFromVariableValues(Bloc
     auto varsWrittenAndRead = cfgv.getLastVariablesReadAndWrite();
     // determine the scope for each of the variables
     for (auto &varIdentifier : varsWrittenAndRead) {
-      auto scope = getVariableEntryDeclaredInThisOrOuterScope(varIdentifier)->first.second;
-      writtenVars.insert(std::pair(varIdentifier, scope));
+      auto varValuesIterator = getVariableEntryDeclaredInThisOrOuterScope(varIdentifier);
+      // check if we found the respective variable in the variableValues, otherwise there is no need to add it to
+      // writtenVars and to remove its value in variableValues
+      if (varValuesIterator!=variableValues.end()) {
+        auto scope = varValuesIterator->first.second;
+        writtenVars.insert(std::pair(varIdentifier, scope));
+      }
     }
   }
   // remove all variables from the current variablesValues that are written in the given Block
   // instead of erasing them, we just set the value to nullptr to keep information such as the scope and datatype
-  for (auto &varIdentifierScopePair : writtenVars) variableValues.at(varIdentifierScopePair)->setValue(nullptr);
+  for (auto &varIdentifierScopePair : writtenVars) {
+    variableValues.at(varIdentifierScopePair)->setValue(nullptr);
+  }
   return writtenVars;
 }
 
+int CompileTimeExpressionSimplifier::determineNumLoopIterations(For &elem) {
+  // make a backup of global data structures to allow reverting state
+  auto bakNodesQueuedForDeletion = nodesQueuedForDeletion;
+  auto bakVariableValues = getClonedVariableValuesMap();
+
+  // run initializer
+  elem.getInitializer()->accept(*this);
+
+  // check if values of all variables in the condition are known
+  bool allVariableHaveKnownValue = true;
+  auto variableIdentifiers = elem.getCondition()->getVariableIdentifiers();
+  for (auto &var : variableIdentifiers) {
+    auto value = getVariableValueDeclaredInThisOrOuterScope(var);
+    if (value==nullptr || value==nullptr) {
+      allVariableHaveKnownValue = false;
+      break; // no need to continue checking other variables
+    }
+  }
+
+  std::vector<AbstractNode *> deleteNodes;
+  int numSimulatedIterations = 0;
+  if (allVariableHaveKnownValue) {
+    auto conditionEvaluatesTrue = [&]() -> bool {
+      auto result = evaluateNodeRecursive(elem.getCondition(), getTransformedVariableMap());
+      auto evalResult = result.empty() ? nullptr : result.back();
+      if (evalResult==nullptr)
+        throw std::runtime_error("Unexpected: Could not evaluate For-loops condition although "
+                                 "all variable have known values. Cannot continue.");
+      return evalResult->isEqual(new LiteralBool(true));
+    };
+    auto executeUpdateStmt = [&]() {
+      auto clonedUpdateStmt = elem.getUpdateStatement()->clone(false);
+      clonedUpdateStmt->accept(*this);
+      deleteNodes.push_back(clonedUpdateStmt);
+    };
+    while (conditionEvaluatesTrue()) {
+      numSimulatedIterations++;
+      executeUpdateStmt();
+    }
+  } else {
+    // -1 indicates an error, i.e., loop could not be simulated – must be handled by caller properly
+    numSimulatedIterations = -1;
+  }
+
+  // restore global data structures using backup
+  nodesQueuedForDeletion = bakNodesQueuedForDeletion;
+  nodesQueuedForDeletion.insert(nodesQueuedForDeletion.end(), deleteNodes.begin(), deleteNodes.end());
+  variableValues = bakVariableValues;
+
+  // return counter value
+  return numSimulatedIterations;
+}
+
 void CompileTimeExpressionSimplifier::visit(For &elem) {
+  // Check if there is another loop in this loop's body, and if yes, visit that loop first.
+  // Note: It is not needed to find the innermost loop as this automatically happens thanks to recursion.
+  auto variableValuesBeforeVisitingNestedLoop = getClonedVariableValuesMap();
+  for (auto &node : elem.getStatementToBeExecuted()->castTo<Block>()->getStatements()) {
+    if (auto nestedLoop = dynamic_cast<For *>(node)) nestedLoop->accept(*this);
+  }
+  variableValues = variableValuesBeforeVisitingNestedLoop;
+
   // TODO: If condition depends on (reads) a secret variable: throw an exception as this is extremely slow.
-  //  Cannot be checked yet as SecretTaintingVisitor cannot handle variable scopes yet.
-
-  // TODO: If For-loop's condition is compile-time known & short enough, do full "symbolic eval/unroll"
-  //  -> no For loop is left afterwards
-
-  // create a new Block statemeny: necessary for cleanup loop and to avoid overriding user-defined variables that expect
-  // the initalizer to be within the for-loop's scope only
-  auto blockEmbeddingLoops = new Block();
-
-  // move initializer from For-loop into newly added block
-  auto forLoopInitializer = elem.getInitializer();
-  forLoopInitializer->removeFromParents();
-  blockEmbeddingLoops->addChild(forLoopInitializer);
-
-  // wrap this For loop into the new block statement
-  elem.getOnlyParent()->replaceChild(&elem, blockEmbeddingLoops);
-  blockEmbeddingLoops->addChild(&elem);
-
-  // create copies to allow reverting changes made by visiting nodes
-  // - a copy of known variables with their values
-  auto variableValuesBackup = getClonedVariableValuesMap();
-  // - a copy of all nodes marked for deletion
-  auto nodesQueuedForDeletionCopy = nodesQueuedForDeletion;
-  // - a copy of the whole For-loop including initializer, condition, update stmt, body (required for cleanup loop)
-  auto cleanupForLoop = elem.clone(false)->castTo<For>();
-  auto ignrd =
-      removeVarsWrittenAndReadFromVariableValues(*cleanupForLoop->getStatementToBeExecuted()->castTo<Block>());
-  // visit the condiiton, body, and update statement to make required replacements (e.g., Arithmetic/LogicalExpr ->
-  // OperatorExpr)
-  cleanupForLoop->getCondition()->accept(*this);
-  cleanupForLoop->getStatementToBeExecuted()->accept(*this);
-  cleanupForLoop->getUpdateStatement()->accept(*this);
-  // undo changes made by visiting the condition, body, and update statement: we need them for the cleanup loop and
-  // do not want them to be deleted
-  variableValues = variableValuesBackup;
-  nodesQueuedForDeletion = nodesQueuedForDeletionCopy;
-
-  // visit the intializer
-  forLoopInitializer->accept(*this);
-  auto variableValuesAfterVisitingInitializer = getClonedVariableValuesMap();
-  // determine the loop variables, i.e., variables changed in the initializer statement
-  auto loopVariablesMap = getChangedVariables(variableValuesBackup);
-  // add the loop variables to the emittedVariableDeclarations map as we don't want to emit another declaration
-  // statement for it
-  for (auto &[k, ignored] : loopVariablesMap) emittedVariableDeclarations.insert(k);
-
-  // the new for-loop body containing the unrolled statements
-  auto unrolledForLoopBody = new Block();
-  // Generate the unrolled loop statements that consists of:
-  //   <all statements of the body with symbolic loop variable for iteration 1>
-  //   <update statement>
-  //   <loop condition>   <- this will be moved out of the body into the For-loop's condition field afterwards
-  //   ... repeat NUM_CIPHERTEXT_SLOTS times ...
-  const int NUM_CIPHERTEXT_SLOTS = 3;
-  std::vector<Return *> tempReturnStmts;
-  for (int i = 0; i < NUM_CIPHERTEXT_SLOTS; i++) {
-    // for each statement in the for-loop's body
-    for (auto &stmt : elem.getStatementToBeExecuted()->castTo<Block>()->getStatements()) {
-      // clone the body statement and append the statement to the unrolledForLoop Body
-      unrolledForLoopBody->addChild(stmt->clone(false));
-    }
-    // temporarily add the condition such that the variables are replaced (e.g., i < 6 -> i+1 < 6 -> i+2 < 6)
-    // we use a Return statement here as it does not write anything into the variableValues map
-    auto retStmt = new Return(elem.getCondition()->clone(false)->castTo<AbstractExpr>());
-    tempReturnStmts.push_back(retStmt);
-    unrolledForLoopBody->addChild(retStmt);
-
-    // add a copy of the update statement, visiting the body then automatically handles the iteration variable in the
-    // cloned loop body statements - no need to manually adapt them
-    unrolledForLoopBody->addChild(elem.getUpdateStatement()->clone(false));
-  }
-  // replace the for loop's body by the unrolled statements
-  elem.replaceChild(elem.getStatementToBeExecuted(), unrolledForLoopBody);
-
-  // delete update statement from loop since it's now incorporated into the body but keep a copy since we need it
-  // for the cleanup loop
-  elem.getUpdateStatement()->removeFromParents();
-
-  // Erase any variable from variableValues that is written in the loop's body such that it is not replaced by any
-  // known value while visiting the body's statements. This includes the iteration variable as we moved the update
-  // statement into the loop's body.
-  auto readAndWrittenVars =
-      removeVarsWrittenAndReadFromVariableValues(*elem.getStatementToBeExecuted()->castTo<Block>());
-
-  // Emit an assignment statement immediately before the loop for each variable that is read and written in the loop.
-  // This is required because the added variable declaration for each emitted variable assignment in the loop's body
-  // does not take the variable's latest value into account.
-  std::vector<AbstractNode *> varAssignments;
-  for (auto it = readAndWrittenVars.begin(); it!=readAndWrittenVars.end(); ++it) {
-    auto varIterator = variableValues.find(*it);
-    auto varAssignm = emitVariableAssignment(varIterator);
-    if (varAssignm!=nullptr) varAssignments.push_back(varAssignm);
+  //  Cannot be checked yet as SecretTaintingVisitor does not support variable scopes yet.
+  if (false) {
+    throw std::runtime_error("For-loops containing secret variables are not supported because they cannot efficiently "
+                             "be unrolled or optimized in any other way. Aborting.");
   }
 
-  // restore the copy, otherwise the initializer visited after creating this copy would be marked for deletion
-  nodesQueuedForDeletion = nodesQueuedForDeletionCopy;
+  // TODO: If For-loop's condition is compile-time known & short enough, do full "symbolic eval/unroll", i.e., no
+  //  For-loop is left afterwards; otherwise just partially unroll the loop to enable batching of multiple loop
+  //  iterations
+  // UNROLL_ITERATIONS_THRESHOLD determines up to which number of iterations a loop is fully unrolled
+  const int UNROLL_ITERATIONS_THRESHOLD = 512;
+  int numIterations = determineNumLoopIterations(elem);
 
-  // visit the for-loop's body to do inlining
-  auto variableValuesBeforeVisitingLoopBody = getClonedVariableValuesMap();
-  elem.getStatementToBeExecuted()->accept(*this);
+  bool abort{false};
+  if (abort) return;
 
-  // Move the expressions of the temporarily added Return statements into the For-loop's condition by combining all
-  // conditions using a logical-AND. Then remove all temporarily added Return statements.
-  std::vector<AbstractExpr *> newConds;
-  for (auto rStmt : tempReturnStmts) {
-    rStmt->removeFromParents(true);
-    auto expr = rStmt->getReturnExpressions().front();
-    expr->removeFromParents(true);
-    newConds.push_back(expr);
-    nodesQueuedForDeletion.push_back(rStmt);
-  }
-  auto originalCondition = elem.getCondition();
-  elem.replaceChild(originalCondition, new OperatorExpr(new Operator(LOGICAL_AND), newConds));
-  nodesQueuedForDeletion.push_back(originalCondition);
+  if (numIterations!=-1 && numIterations < UNROLL_ITERATIONS_THRESHOLD) { // do symbolic full unrolling
 
-  // TODO: Future work:  Make this entire thing flexible with regard to num_slots_in_ctxt, i.e., allow changing how long
-  //  unrolled loops are. Idea: generate all loops (see below cleanup loop ideas) starting from ludacriously large
-  //  number, later disable/delete the ones that are larger than actually selected cipheretxt size determined from
-  //  parameters?
-  // ISSUE: Scheme parameters might depend on loop length? This is a general issue (no loop bound => no bounded depth)
+    // create a new Block statemeny: necessary to avoid overriding user-defined variables that expect the initalizer
+    // to be within the for-loop's scope only
+    auto unrolledStatementsBlock = new Block();
 
-  // find all variables that were changed in the for-loop's body - even iteration vars (important for condition!) - and
-  // emit them, i.e, create a new variable assignment for each variable
-  // TODO: Do not emit any variable assignments in the for-loop's body if a variable's maximum depth is reached as this
-  //  leads to wrong results. This must be considered when introducing the cut-off for "deep variables".
-  auto bodyChangedVariables = getChangedVariables(variableValuesBeforeVisitingLoopBody);
-  std::list<AbstractNode *> emittedVarAssignms;
-  for (auto it = bodyChangedVariables.begin(); it!=bodyChangedVariables.end(); ++it) {
-    // Create exactly one statement for each variable that is changed in the loop's body. This implicitly is the
-    // statement with the "highest possible degree" of inlining for this variable. Make sure that we emit the loop
-    // variables AFTER the body statements.
-    auto emittedVarAssignm = emitVariableAssignment(it);
-    if (emittedVarAssignm!=nullptr) {
-      if (loopVariablesMap.count(it->first) > 0) {
-        // if this is a loop variable - add the statement at the *end* of the body
-        emittedVarAssignms.push_back(emittedVarAssignm);
-      } else {
-        // if this is not a loop variable - add the statement at the *beginning* of the body
-        emittedVarAssignms.push_front(emittedVarAssignm);
+    // create copies to allow reverting any changes made by visiting nodes
+    auto variableValuesBackup = getClonedVariableValuesMap();
+    auto nodesQueuedForDeletionBackup = nodesQueuedForDeletion;
+
+    // move initializer from For-loop into newly added block
+    unrolledStatementsBlock->addChild(elem.getInitializer()->removeFromParents(true));
+    // visit the initializer to determine the loop variables
+    unrolledStatementsBlock->accept(*this);
+    auto loopVariablesMap = getChangedVariables(variableValuesBackup);
+    variableValues = variableValuesBackup;
+
+    while (numIterations > 0) {
+      // for each statement in the for-loop's body
+      std::vector<AbstractStatement *> stmtsToVisit = elem.getStatementToBeExecuted()->castTo<Block>()->getStatements();
+      for (auto it = stmtsToVisit.begin(); it!=stmtsToVisit.end(); ++it) {
+        // if this is a block that was created by unrolling a nested loop, we need to consider its containing statements
+        if (auto stmtAsBlock = dynamic_cast<Block *>(*it)) {
+          auto blockStmts = stmtAsBlock->getStatements();
+          it = stmtsToVisit.insert(it + 1, blockStmts.begin(), blockStmts.end());
+        }
+        // clone the body statement and append the statement to the unrolledForLoop Body
+        unrolledStatementsBlock->addChild((*it)->clone(false));
       }
+      // add a copy of the update statement, visiting the body then automatically handles the iteration variable in the
+      // cloned loop body statements (i.e., no need to manually adapt them)
+      unrolledStatementsBlock->addChild(elem.getUpdateStatement()->clone(false));
+
+      numIterations--;
     }
-    // Remove all the variables that were changed within the body from variableValues as inlining them in any statement
-    // after/outside the loop does not make any sense. We need to keep the variable and only remove the value by
-    // setting it to nullptr, otherwise we'll lose information.
-    (*it).second->value = nullptr;
-  }
-  // append the emitted loop body statements
-  elem.getStatementToBeExecuted()->castTo<Block>()->addChildren(
-      std::vector<AbstractNode *>(emittedVarAssignms.begin(), emittedVarAssignms.end()), true, false);
 
-  // TODO: Future work (maybe): for large enough num_..., e.g. 128 or 256, it might make sense to have a binary series
-  //  of cleanup loops, e.g., if 127 iterations are left, go to 64-unrolled loop, 32-unrolled loop, etc.
-  //  When to cut off? -> empirical decision?
+    // remove all variables that are read and written in the body (see ELSE branch)
+    removeVarsWrittenAndReadFromVariableValues(*unrolledStatementsBlock);
 
-  // Handle remaining iterations using a "cleanup loop": place statements in a separate loop for remaining iterations
-  // and attach the generated cleanup loop to the newly added Block. The cleanup loop consists of:
-  // - initializer: reused from the unrolled loop as the loop variable is declared out of the first for-loop thus
-  // still accessible by the cleanup loop.
-  // - condition, update statement, body statements: remain the same as in the original For loop.
-  blockEmbeddingLoops->addChild(cleanupForLoop);
+    // visit the unrolled statements to perform variable substitution
+    auto variableValuesBeforeVisitingUnrolledBody = getClonedVariableValuesMap();
+    auto nodesQueuedForDeletionBeforeVisitingUnrolledBody = nodesQueuedForDeletion;
+    unrolledStatementsBlock->accept(*this);
+    // find the nodes that were newly marked for deletion and detach them from their parents because otherwise they will
+    // unnecessarily be considered while unrolling any possibly existing outer loop
+    auto curNode = nodesQueuedForDeletion.back();
+    nodesQueuedForDeletion.pop_back();
+    while (curNode!=nodesQueuedForDeletionBackup.back()) {
+      curNode->removeFromParents();
+      curNode = nodesQueuedForDeletion.back();
+      nodesQueuedForDeletion.pop_back();
+    }
+
+    // after visiting the block statements, the statements (VarDecl and VarAssignm) are marked for deletion hence we
+    // need to emit new statements for every changed variable except the loop iteration variable
+    for (auto &[varIdentiferScope, varValue] : getChangedVariables(variableValuesBeforeVisitingUnrolledBody)) {
+      auto varIterator = variableValues.find(varIdentiferScope);
+
+      // if this is a loop variable: skip iteration because due to full unrolling we do not need it anymore as it is
+      // already substituted by its value in the statements using it
+      if (loopVariablesMap.count(varIdentiferScope) > 0) continue;
+      // otherwise emit and add a variable assignment to the unrolled body
+      unrolledStatementsBlock->addChild(emitVariableAssignment(varIterator));
+    }
+
+    variableValues = variableValuesBackup;
+
+
+
+
+    // replace the For-loop's body by the unrolled statements
+    elem.getOnlyParent()->replaceChild(&elem, unrolledStatementsBlock);
+
+  } else { // do partial unrolling w.r.t. ciphertext slots and add a cleanup loop for handling remaining iterations
+    // create a new Block statemeny: necessary for cleanup loop and to avoid overriding user-defined variables that expect
+    // the initalizer to be within the for-loop's scope only
+    auto blockEmbeddingLoops = new Block();
+
+    // move initializer from For-loop into newly added block
+    auto forLoopInitializer = elem.getInitializer();
+    forLoopInitializer->removeFromParents();
+    blockEmbeddingLoops->addChild(forLoopInitializer);
+
+    // wrap this For loop into the new block statement
+    elem.getOnlyParent()->replaceChild(&elem, blockEmbeddingLoops);
+    blockEmbeddingLoops->addChild(&elem);
+
+    // create copies to allow reverting changes made by visiting nodes
+    // - a copy of known variables with their values
+    auto variableValuesBackup = getClonedVariableValuesMap();
+    // - a copy of all nodes marked for deletion
+    auto nodesQueuedForDeletionCopy = nodesQueuedForDeletion;
+    // - a copy of the whole For-loop including initializer, condition, update stmt, body (required for cleanup loop)
+    auto cleanupForLoop = elem.clone(false)->castTo<For>();
+    auto ignrd =
+        removeVarsWrittenAndReadFromVariableValues(*cleanupForLoop->getStatementToBeExecuted()->castTo<Block>());
+    // visit the condiiton, body, and update statement to make required replacements (e.g., Arithmetic/LogicalExpr ->
+    // OperatorExpr)
+    cleanupForLoop->getCondition()->accept(*this);
+    cleanupForLoop->getStatementToBeExecuted()->accept(*this);
+    cleanupForLoop->getUpdateStatement()->accept(*this);
+    // undo changes made by visiting the condition, body, and update statement: we need them for the cleanup loop and
+    // do not want them to be deleted
+    variableValues = variableValuesBackup;
+    nodesQueuedForDeletion = nodesQueuedForDeletionCopy;
+
+    // visit the intializer
+    forLoopInitializer->accept(*this);
+    auto variableValuesAfterVisitingInitializer = getClonedVariableValuesMap();
+    // determine the loop variables, i.e., variables changed in the initializer statement
+    auto loopVariablesMap = getChangedVariables(variableValuesBackup);
+    // add the loop variables to the emittedVariableDeclarations map as we don't want to emit another declaration
+    // statement for it
+    for (auto &[k, ignored] : loopVariablesMap) emittedVariableDeclarations.insert(k);
+
+    // the new for-loop body containing the unrolled statements
+    auto unrolledForLoopBody = new Block();
+    // Generate the unrolled loop statements that consists of:
+    //   <all statements of the body with symbolic loop variable for iteration 1>
+    //   <update statement>
+    //   <loop condition>   <- this will be moved out of the body into the For-loop's condition field afterwards
+    //   ... repeat NUM_CIPHERTEXT_SLOTS times ...
+    const int NUM_CIPHERTEXT_SLOTS = 3;
+    std::vector<Return *> tempReturnStmts;
+    for (int i = 0; i < NUM_CIPHERTEXT_SLOTS; i++) {
+      // for each statement in the for-loop's body
+      for (auto &stmt : elem.getStatementToBeExecuted()->castTo<Block>()->getStatements()) {
+        // clone the body statement and append the statement to the unrolledForLoop Body
+        unrolledForLoopBody->addChild(stmt->clone(false));
+      }
+      // temporarily add the condition such that the variables are replaced (e.g., i < 6 -> i+1 < 6 -> i+2 < 6 -> ...)
+      // we use a Return statement here as it does not write anything into the variableValues map
+      auto retStmt = new Return(elem.getCondition()->clone(false)->castTo<AbstractExpr>());
+      tempReturnStmts.push_back(retStmt);
+      unrolledForLoopBody->addChild(retStmt);
+
+      // add a copy of the update statement, visiting the body then automatically handles the iteration variable in the
+      // cloned loop body statements - no need to manually adapt them
+      unrolledForLoopBody->addChild(elem.getUpdateStatement()->clone(false));
+    }
+    // replace the for loop's body by the unrolled statements
+    elem.replaceChild(elem.getStatementToBeExecuted(), unrolledForLoopBody);
+
+    // delete update statement from loop since it's now incorporated into the body but keep a copy since we need it
+    // for the cleanup loop
+    elem.getUpdateStatement()->removeFromParents();
+
+    // Erase any variable from variableValues that is written in the loop's body such that it is not replaced by any
+    // known value while visiting the body's statements. This includes the iteration variable as we moved the update
+    // statement into the loop's body.
+    auto readAndWrittenVars =
+        removeVarsWrittenAndReadFromVariableValues(*elem.getStatementToBeExecuted()->castTo<Block>());
+
+    // Emit an assignment statement immediately before the loop for each variable that is read and written in the loop.
+    // This is required because the added variable declaration for each emitted variable assignment in the loop's body
+    // does not take the variable's latest value into account.
+    std::vector<AbstractNode *> varAssignments;
+    for (auto it = readAndWrittenVars.begin(); it!=readAndWrittenVars.end(); ++it) {
+      auto varIterator = variableValues.find(*it);
+      auto varAssignm = emitVariableAssignment(varIterator);
+      if (varAssignm!=nullptr) varAssignments.push_back(varAssignm);
+    }
+
+    // restore the copy, otherwise the initializer visited after creating this copy would be marked for deletion
+    nodesQueuedForDeletion = nodesQueuedForDeletionCopy;
+
+    // visit the for-loop's body to do inlining
+    auto variableValuesBeforeVisitingLoopBody = getClonedVariableValuesMap();
+    elem.getStatementToBeExecuted()->accept(*this);
+
+    // Move the expressions of the temporarily added Return statements into the For-loop's condition by combining all
+    // conditions using a logical-AND. Then remove all temporarily added Return statements.
+    std::vector<AbstractExpr *> newConds;
+    for (auto rStmt : tempReturnStmts) {
+      rStmt->removeFromParents(true);
+      auto expr = rStmt->getReturnExpressions().front();
+      expr->removeFromParents(true);
+      newConds.push_back(expr);
+      enqueueNodeForDeletion(rStmt);
+    }
+    auto originalCondition = elem.getCondition();
+    elem.replaceChild(originalCondition, new OperatorExpr(new Operator(LOGICAL_AND), newConds));
+    enqueueNodeForDeletion(originalCondition);
+
+    // TODO: Future work:  Make this entire thing flexible with regard to num_slots_in_ctxt, i.e., allow changing how long
+    //  unrolled loops are. Idea: generate all loops (see below cleanup loop ideas) starting from ludacriously large
+    //  number, later disable/delete the ones that are larger than actually selected cipheretxt size determined from
+    //  parameters?
+    // ISSUE: Scheme parameters might depend on loop length? This is a general issue (no loop bound => no bounded depth)
+
+    // find all variables that were changed in the for-loop's body - even iteration vars (important for condition!) - and
+    // emit them, i.e, create a new variable assignment for each variable
+    // TODO: Do not emit any variable assignments in the for-loop's body if a variable's maximum depth is reached as this
+    //  leads to wrong results. This must be considered when introducing the cut-off for "deep variables".
+    auto bodyChangedVariables = getChangedVariables(variableValuesBeforeVisitingLoopBody);
+    std::list<AbstractNode *> emittedVarAssignms;
+    for (auto it = bodyChangedVariables.begin(); it!=bodyChangedVariables.end(); ++it) {
+      // Create exactly one statement for each variable that is changed in the loop's body. This implicitly is the
+      // statement with the "highest possible degree" of inlining for this variable. Make sure that we emit the loop
+      // variables AFTER the body statements.
+      auto emittedVarAssignm = emitVariableAssignment(it);
+      if (emittedVarAssignm!=nullptr) {
+        if (loopVariablesMap.count(it->first) > 0) {
+          // if this is a loop variable - add the statement at the *end* of the body
+          emittedVarAssignms.push_back(emittedVarAssignm);
+        } else {
+          // if this is not a loop variable - add the statement at the *beginning* of the body
+          emittedVarAssignms.push_front(emittedVarAssignm);
+        }
+      }
+      // Remove all the variables that were changed within the body from variableValues as inlining them in any statement
+      // after/outside the loop does not make any sense. We need to keep the variable and only remove the value by
+      // setting it to nullptr, otherwise we'll lose information.
+      (*it).second->value = nullptr;
+    }
+    // append the emitted loop body statements
+    elem.getStatementToBeExecuted()->castTo<Block>()->addChildren(
+        std::vector<AbstractNode *>(emittedVarAssignms.begin(), emittedVarAssignms.end()), true, false);
+
+    // TODO: Future work (maybe): for large enough num_..., e.g. 128 or 256, it might make sense to have a binary series
+    //  of cleanup loops, e.g., if 127 iterations are left, go to 64-unrolled loop, 32-unrolled loop, etc.
+    //  When to cut off? -> empirical decision?
+
+    // Handle remaining iterations using a "cleanup loop": place statements in a separate loop for remaining iterations
+    // and attach the generated cleanup loop to the newly added Block. The cleanup loop consists of:
+    // - initializer: reused from the unrolled loop as the loop variable is declared out of the first for-loop thus
+    // still accessible by the cleanup loop.
+    // - condition, update statement, body statements: remain the same as in the original For loop.
+    blockEmbeddingLoops->addChild(cleanupForLoop);
+
+  } // end of full unroll check: if (numIterations!=-1 && numIterations < UNROLL_ITERATIONS_THRESHOLD)
 
   cleanUpAfterStatementVisited(reinterpret_cast<AbstractNode *>(&elem), false);
 }
@@ -1009,7 +1171,7 @@ AbstractExpr *CompileTimeExpressionSimplifier::generateIfDependentValue(
 void CompileTimeExpressionSimplifier::cleanUpAfterStatementVisited(
     AbstractNode *statement, bool enqueueStatementForDeletion) {
   // mark this statement for deletion as we don't need it anymore
-  if (enqueueStatementForDeletion) nodesQueuedForDeletion.push_back(statement);
+  if (enqueueStatementForDeletion) enqueueNodeForDeletion(statement);
 }
 
 void CompileTimeExpressionSimplifier::setVariableValue(const std::string &variableIdentifier,
@@ -1104,4 +1266,9 @@ VariableValuesMapType CompileTimeExpressionSimplifier::getClonedVariableValuesMa
   // call the object's copy constructor for each VariableValue
   for (auto &[k, v] : variableValues) clonedMap[k] = new VariableValue(*v);
   return clonedMap;
+}
+
+void CompileTimeExpressionSimplifier::enqueueNodeForDeletion(AbstractNode *node) {
+//  node->removeFromParents();
+  nodesQueuedForDeletion.push_back(node);
 }
