@@ -100,7 +100,12 @@ void OperatorExpr::setAttributes(Operator *newOperator, std::vector<AbstractExpr
       // within the expression
       for (auto &c : newOperands) {
         auto valueAsAbstractLiteral = dynamic_cast<AbstractLiteral *>(c);
-        if (valueAsAbstractLiteral!=nullptr && !valueAsAbstractLiteral->getMatrix()->containsAbstractExprs()) {
+        if (valueAsAbstractLiteral!=nullptr
+            && valueAsAbstractLiteral->isEqual(OpSymb::getIdentityElement(getOperator()->getOperatorSymbol()))) {
+          // if this literal is the operator's identity element (e.g., 0 for ADDITION), drop this element by not
+          // adding it to the new OperatorExpr's operands
+          continue;
+        } else if (valueAsAbstractLiteral!=nullptr && !valueAsAbstractLiteral->getMatrix()->containsAbstractExprs()) {
           // if this is an AbstractLiteral not containing AbstractExprs (but primitive values such as int, float),
           // then we can use that AbstractLiteral for applying the operator on it
           tempAggregator.push_back(valueAsAbstractLiteral);
@@ -212,4 +217,18 @@ AbstractExpr *OperatorExpr::getLeft() const {
     throw std::logic_error("OperatorExpr::getLeft() only supported for expressions with two operands!");
   }
   return reinterpret_cast<AbstractExpr *>(getChildAtIndex(1));
+}
+
+void OperatorExpr::replaceChild(AbstractNode *originalChild, AbstractNode *newChildToBeAdded) {
+  // use the standard routine to replace the given child
+  AbstractNode::replaceChild(originalChild, newChildToBeAdded);
+  auto operands = getOperands();
+  if (operands.size() > 1) {
+    // apply the operand aggregation mechanism again as replacing a child may have generated new aggregation
+    // opportunities (e.g., if variable is now a Literal value)
+    auto op = getOperator();
+    op->removeFromParents();
+    for (auto &operand : operands) operand->removeFromParents(true);
+    setAttributes(op, operands);
+  }
 }
