@@ -164,7 +164,7 @@ class AbstractNode {
   /// Removes this node from its parent's children list. If removeParentBackreference is True, then also removes the
   /// parents from this node's parent list.
   /// \param removeParentBackreference Indicates whether to update this node's parents list too.
-  void removeFromParents(bool removeParentBackreference = true);
+  AbstractNode *removeFromParents(bool removeParentBackreference = true);
 
   /// Removes all parents from this node. Note: Does not update the parent's children.
   void removeParents();

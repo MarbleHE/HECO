@@ -296,10 +296,11 @@ void AbstractNode::replaceChild(AbstractNode *originalChild, AbstractNode *newCh
   newChildToBeAdded->addParent(this, false);
 }
 
-void AbstractNode::removeFromParents(bool removeParentBackreference) {
+AbstractNode *AbstractNode::removeFromParents(bool removeParentBackreference) {
   for (auto &p : getParentsNonNull()) {
     p->removeChild(this, removeParentBackreference);
   }
+  return this;
 }
 
 std::string AbstractNode::toString(bool printChildren) const {
