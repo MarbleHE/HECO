@@ -24,6 +24,7 @@
 #include "For.h"
 #include "Transpose.h"
 #include "OperatorExpr.h"
+#include "MatrixAssignm.h"
 
 EvaluationVisitor::EvaluationVisitor(std::unordered_map<std::string, AbstractLiteral *> funcCallParameterValues)
     : variableValuesForEvaluation(std::move(funcCallParameterValues)) {
@@ -264,6 +265,34 @@ void EvaluationVisitor::visit(Transpose &elem) {
   // rotate the cloned Literal in-place
   operand->getMatrix()->transpose(true);
   results.push({operand});
+}
+
+void EvaluationVisitor::visit(MatrixAssignm &elem) {
+  // Skip visiting the MatrixAssignm's referred MatrixElementRef object because its visit method is implemented to
+  // retrieve an element of a matrix (e.g., to use as an rvalue in an expression) but that is not a reference so we
+  // cannot simply assign to it.
+  //elem.getAssignmTarget()->accept(*this);
+
+  // evaluate the assigned value (rvalue) as it might be an expression (e.g., M[0][3] = 43+12)
+  elem.getValue()->accept(*this);
+  auto val = getOnlyEvaluationResult(results.top());
+
+  auto matrixRef = elem.getAssignmTarget();
+  // operand
+  matrixRef->getOperand()->accept(*this);
+  auto operand = dynamic_cast<AbstractLiteral *>(getOnlyEvaluationResult(results.top()));
+  results.pop();
+  // row index
+  matrixRef->getRowIndex()->accept(*this);
+  auto rowIdx = dynamic_cast<LiteralInt *>(getOnlyEvaluationResult(results.top()));
+  results.pop();
+  // column index
+  matrixRef->getColumnIndex()->accept(*this);
+  auto columnIdx = dynamic_cast<LiteralInt *>(getOnlyEvaluationResult(results.top()));
+  results.pop();
+
+  // set value val of respective matrix element
+  operand->getMatrix()->setElementAt(rowIdx->getValue(), columnIdx->getValue(), val);
 }
 
 void EvaluationVisitor::visit(VarAssignm &elem) {

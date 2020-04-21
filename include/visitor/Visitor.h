@@ -36,6 +36,7 @@ class Transpose;
 class MatrixElementRef;
 class AbstractMatrix;
 class OperatorExpr;
+class MatrixAssignm;
 
 class Visitor {
  protected:
@@ -101,6 +102,8 @@ class Visitor {
   virtual void visit(AbstractMatrix &elem);
 
   virtual void visit(OperatorExpr &elem);
+
+  virtual void visit(MatrixAssignm &elem);
 
   Scope *curScope;
 

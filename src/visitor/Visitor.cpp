@@ -25,6 +25,7 @@
 #include "Transpose.h"
 #include "MatrixElementRef.h"
 #include "OperatorExpr.h"
+#include "MatrixAssignm.h"
 
 void Visitor::visit(Ast &elem) {
   // assumption: AST is always the enclosing object that points to the root
@@ -227,6 +228,12 @@ void Visitor::visit(UnaryExpr &elem) {
 
 void Visitor::visit(VarAssignm &elem) {
   addStatementToScope(elem);
+  elem.getValue()->accept(*this);
+}
+
+void Visitor::visit(MatrixAssignm &elem) {
+  addStatementToScope(elem);
+  elem.getAssignmTarget()->accept(*this);
   elem.getValue()->accept(*this);
 }
 

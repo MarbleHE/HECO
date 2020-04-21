@@ -15,6 +15,7 @@
 #include "While.h"
 #include "LogicalExpr.h"
 #include "OperatorExpr.h"
+#include "MatrixAssignm.h"
 
 void ControlFlowGraphVisitor::visit(Ast &elem) {
   Visitor::visit(elem);
@@ -179,6 +180,21 @@ void ControlFlowGraphVisitor::visit(Return &elem) {
 void ControlFlowGraphVisitor::visit(VarAssignm &elem) {
   auto gNode = appendStatementToCfg(elem);
   markVariableAccess(elem.getVarTargetIdentifier(), AccessType::WRITE);
+  Visitor::visit(elem);
+  postActionsStatementVisited(gNode);
+}
+
+void ControlFlowGraphVisitor::visit(MatrixAssignm &elem) {
+  auto gNode = appendStatementToCfg(elem);
+  // TODO Make the varAccess structure more flexible to allow storing MatrixElementRef and Variable objects, instead
+  //  of std::string objects only. Also consider extending varAccess' key to use a (std::string, Scope*) pair to
+  //  uniquely identify a variable.
+  // This temporary workaround uses a string representation of the assignment target, for example,
+  //    Variable (M) [LiteralInt (32)][LiteralInt (1)]
+  // to refer to the element at (32,1) of matrix M. This does not work well because there might exist different index
+  // expressions pointing to the same element (e.g., M[a][b] == M[b][d] if a==b and b==d), hence we cannot easily
+  // distinguish matrix accesses.
+  markVariableAccess(elem.getAssignmTargetString(), AccessType::WRITE);
   Visitor::visit(elem);
   postActionsStatementVisited(gNode);
 }

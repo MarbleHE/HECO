@@ -12,6 +12,8 @@
 #include "Function.h"
 #include "Call.h"
 #include "VarAssignm.h"
+#include "MatrixAssignm.h"
+#include "MatrixElementRef.h"
 
 TEST(EvaluationVisitorTests, simpleAstEvaluation1) { /* NOLINT */
   Ast ast;
@@ -252,4 +254,20 @@ TEST(EvaluationVisitorTests, astOperatorNestedOperands) { /* NOLINT */
   AstTestingGenerator::generateAst(47, ast);
   auto result = dynamic_cast<LiteralBool *>(ast.evaluateAst({}, false).front());
   ASSERT_EQ(*result, *new LiteralBool(false));
+}
+
+TEST(EvaluationVisitorTests, astMatrixAssignmentFromLiteralInt) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(50, ast);
+
+  auto result = dynamic_cast<LiteralInt *>(ast.evaluateAst({}, false).front());
+  ASSERT_EQ(*result, *new LiteralInt(new Matrix<int>({{11, 27, 32}})));
+}
+
+TEST(EvaluationVisitorTests, astMatrixPermutation) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(51, ast);
+
+  auto result = dynamic_cast<LiteralInt *>(ast.evaluateAst({}, false).front());
+  ASSERT_EQ(*result, *new LiteralInt(new Matrix<int>({{32, 27, 14}})));
 }

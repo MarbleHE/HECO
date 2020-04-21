@@ -139,11 +139,14 @@ class ControlFlowGraphVisitor : public Visitor {
   void visit(MatrixElementRef &elem) override;
 
   void visit(Ast &elem) override;
+
+  void visit(MatrixAssignm &elem) override;
+
+  void visit(OperatorExpr &elem) override;
+
   /** @} */ // End of visit group
 
   void buildDataFlowGraph();
-
-  void visit(OperatorExpr &elem) override;
 
   void handleOperatorExpr(AbstractExpr &ae);
 };

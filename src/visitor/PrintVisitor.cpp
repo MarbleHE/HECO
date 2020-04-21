@@ -22,6 +22,7 @@
 #include "Transpose.h"
 #include "MatrixElementRef.h"
 #include "OperatorExpr.h"
+#include "MatrixAssignm.h"
 
 template<typename T>
 void PrintVisitor::printChildNodesIndented(T &elem) {
@@ -138,6 +139,11 @@ void PrintVisitor::visit(UnaryExpr &elem) {
 
 void PrintVisitor::visit(VarAssignm &elem) {
   addOutputStr(elem, {elem.getIdentifier()});
+  printChildNodesIndented(elem);
+}
+
+void PrintVisitor::visit(MatrixAssignm &elem) {
+  addOutputStr(elem);
   printChildNodesIndented(elem);
 }
 

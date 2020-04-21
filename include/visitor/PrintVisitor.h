@@ -109,6 +109,8 @@ class PrintVisitor : public Visitor {
   void printMatrixIndex();
 
   void visit(OperatorExpr &elem) override;
+
+  void visit(MatrixAssignm &elem) override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_VISITOR_PRINTVISITOR_H_
