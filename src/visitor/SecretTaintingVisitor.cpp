@@ -73,7 +73,8 @@ void SecretTaintingVisitor::visit(While &elem) {
 
 void SecretTaintingVisitor::visit(VarAssignm &elem) {
   // TODO: Overwriting a secret variable by a public value on all execution paths makes the variable become public.
-  //  Use the ControlFlowGraphVisitor to determine the execution paths.
+  //  Use the ControlFlowGraphVisitor to determine the execution paths and the generated DataFlowGraph to analyze if
+  //  a variable is written in all of these paths and if the written value is public.
   checkAndAddTaintedChildren(static_cast<AbstractStatement *>(&elem), elem.getValue()->getVariableIdentifiers());
   Visitor::visit(elem);
   // after visiting the initializer, check if it is tainted - this is needed for Call nodes

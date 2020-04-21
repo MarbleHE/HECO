@@ -368,6 +368,9 @@ void CompileTimeExpressionSimplifier::simplifyLogicalExpr(OperatorExpr &elem) {
   auto knownOperand = knownOperands.at(0);
   LogCompOp logicalOperator = std::get<LogCompOp>(elem.getOperator()->getOperatorSymbol());
 
+  // In case that the expression can be simplified, resulting in a single-element expression (e.g., AND false) then it
+  // is the caller's responsibility to accordingly replace this OperatorExpr by the only operand.
+
   if (logicalOperator==LOGICAL_AND) {
     // - knownOperand == false: replace the whole expression by False as <anything> AND False is always False
     // - knownOperand == true: remove True from the expression as <anything> AND True only depends on <anything>
@@ -743,9 +746,9 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
                              "be unrolled or optimized in any other way. Aborting.");
   }
 
-  // TODO: If For-loop's condition is compile-time known & short enough, do full "symbolic eval/unroll", i.e., no
-  //  For-loop is left afterwards; otherwise just partially unroll the loop to enable batching of multiple loop
-  //  iterations
+  // If s For-loop's condition is compile-time known & short enough, do full "symbolic eval/unroll", i.e., no
+  // For-loop is left afterwards; otherwise just partially unroll the loop to enable batching by executing
+  // computations of multiple loop iterations simultaneously.
   // UNROLL_ITERATIONS_THRESHOLD determines up to which number of iterations a loop is fully unrolled
   const int UNROLL_ITERATIONS_THRESHOLD = 512;
   int numIterations = determineNumLoopIterations(elem);

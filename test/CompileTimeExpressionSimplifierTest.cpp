@@ -2190,7 +2190,9 @@ TEST_F(CompileTimeExpressionSimplifierFixture, nestedOperatorExprsTest) { /* NOL
       new OperatorExpr(new Operator(DIVISION), {new LiteralInt(27), new Variable("a"), new LiteralInt(4)})));
 }
 
-TEST_F(CompileTimeExpressionSimplifierFixture, forLoopUnrolling) { /* NOLINT */
+TEST_F(CompileTimeExpressionSimplifierFixture, partialforLoopUnrolling_EXPECTED_FAIL) { /* NOLINT */
+  // TODO Fix this test by making the bounds dynamic (i.e., not known at compile-time) such that partial loop
+  //  unrolling can be applied to.
   // -- input --
   // int sumVectorElements() {
   //    Matrix<int> M = [54; 32; 63; 38; 13; 20];

@@ -123,8 +123,8 @@ void ControlFlowGraphVisitor::visit(Function &elem) {
 //            │                                  │
 //            └─────▶   Next statement    ◀──────┘
 //
-// (*) Although it's not officially a AbstractStatement in the AST class hierarchy, the condition is treated following
-//     as a statement to have it included in the CFG/DFG.
+// (*) Although it is not officially an AbstractStatement in the AST class hierarchy, the condition is treated following
+//     like a statement to have it included in the CFG/DFG.
 //
 void ControlFlowGraphVisitor::visit(If &elem) {
   auto gNode = appendStatementToCfg(elem);
@@ -212,8 +212,8 @@ void ControlFlowGraphVisitor::visit(VarDecl &elem) {
 //    │
 //    └───▶ Next Statement
 //
-// (*) Although it's not officially a AbstractStatement in the AST class hierarchy, the condition is treated following
-//     as a statement to have it included in the CFG/DFG.
+// (*) Although it is not officially an AbstractStatement in the AST class hierarchy, the condition is treated following
+//     like a statement to have it included in the CFG/DFG.
 //
 void ControlFlowGraphVisitor::visit(While &elem) {
   auto gNode = appendStatementToCfg(elem);

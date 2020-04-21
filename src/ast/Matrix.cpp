@@ -230,8 +230,8 @@ AbstractMatrix *Matrix<bool>::applyUnaryOperatorComponentwise(Operator *os) {
 
 template<typename T>
 AbstractExpr *Matrix<T>::getElementAt(int, int) {
-  throw std::logic_error(
-      "getElementAt failed: Value in matrix is of unknown type. Cannot determine associated AbstractLiteral subtype.");
+  throw std::logic_error("getElementAt failed: Value in matrix is of unknown type. "
+                         "Cannot determine associated AbstractLiteral subtype.");
 }
 
 template<>
@@ -383,28 +383,28 @@ template<>
 void Matrix<int>::setElementAt(int row, int column, AbstractExpr *element) {
   if (auto elementAsLiteral = dynamic_cast<LiteralInt *>(element)) {
     values[row][column] = elementAsLiteral->getValue();
-  } else { throw std::runtime_error("Unexpected element given that cannot be added to Matrix<T>."); }
+  } else { throw std::runtime_error("Unexpected element given that cannot be added to Matrix<int>."); }
 }
 
 template<>
 void Matrix<float>::setElementAt(int row, int column, AbstractExpr *element) {
   if (auto elementAsLiteral = dynamic_cast<LiteralFloat *>(element)) {
     values[row][column] = elementAsLiteral->getValue();
-  } else { throw std::runtime_error("Unexpected element given that cannot be added to Matrix<T>."); }
+  } else { throw std::runtime_error("Unexpected element given that cannot be added to Matrix<float>."); }
 }
 
 template<>
 void Matrix<bool>::setElementAt(int row, int column, AbstractExpr *element) {
   if (auto elementAsLiteral = dynamic_cast<LiteralBool *>(element)) {
     values[row][column] = elementAsLiteral->getValue();
-  } else { throw std::runtime_error("Unexpected element given that cannot be added to Matrix<T>."); }
+  } else { throw std::runtime_error("Unexpected element given that cannot be added to Matrix<bool>."); }
 }
 
 template<>
 void Matrix<std::string>::setElementAt(int row, int column, AbstractExpr *element) {
   if (auto elementAsLiteral = dynamic_cast<LiteralString *>(element)) {
     values[row][column] = elementAsLiteral->getValue();
-  } else { throw std::runtime_error("Unexpected element given that cannot be added to Matrix<T>."); }
+  } else { throw std::runtime_error("Unexpected element given that cannot be added to Matrix<std::string>."); }
 }
 
 // ===== replaceChild ==========
