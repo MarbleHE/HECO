@@ -375,7 +375,7 @@ void CompileTimeExpressionSimplifier::simplifyLogicalExpr(OperatorExpr &elem) {
     // - knownOperand == false: replace the whole expression by False as <anything> AND False is always False
     // - knownOperand == true: remove True from the expression as <anything> AND True only depends on <anything>
     if (knownOperand->isEqual(new LiteralBool(false))) {
-      elem.getOnlyParent()->replaceChild(&elem, knownOperand);
+      elem.setAttributes(elem.getOperator(), {knownOperand});
     } else if (knownOperand->isEqual(new LiteralBool(true))) {
       elem.removeChild(knownOperand);
     }
@@ -383,7 +383,7 @@ void CompileTimeExpressionSimplifier::simplifyLogicalExpr(OperatorExpr &elem) {
     // - knownOperand == true: replace whole expression by True as <anything> OR True is always True
     // - knownOperand == false: remove False from the expression as <anything> OR False only depends on <anything>
     if (knownOperand->isEqual(new LiteralBool(true))) {
-      elem.getOnlyParent()->replaceChild(&elem, knownOperand);
+      elem.setAttributes(elem.getOperator(), {knownOperand});
     } else if (knownOperand->isEqual(new LiteralBool(false))) {
       elem.removeChild(knownOperand);
     }
@@ -752,9 +752,6 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
   // UNROLL_ITERATIONS_THRESHOLD determines up to which number of iterations a loop is fully unrolled
   const int UNROLL_ITERATIONS_THRESHOLD = 512;
   int numIterations = determineNumLoopIterations(elem);
-
-  bool abort{false};
-  if (abort) return;
 
   if (numIterations!=-1 && numIterations < UNROLL_ITERATIONS_THRESHOLD) { // do symbolic full unrolling
 
