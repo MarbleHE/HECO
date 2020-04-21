@@ -335,7 +335,7 @@ class Matrix : public AbstractMatrix {
 
   AbstractExpr *getElementAt(int row, int column) override;
 
-  void setElementAt(int row, int column, AbstractExpr *element);
+  void setElementAt(int row, int column, AbstractExpr *element) override;
 
   void replaceChild(AbstractNode *originalChild, AbstractNode *newChildToBeAdded) override;
 

@@ -73,6 +73,12 @@ class AbstractMatrix : public AbstractNode {
   /// \return An AbstractExpr pointer pointing to the value of the element at position (row, column).
   virtual AbstractExpr *getElementAt(int row, int column) = 0;
 
+  /// Sets a new value to the matrix element at the position indicated by (row, column) parameters.
+  /// \param row The row index of the element where the given value should be written to.
+  /// \param column The column index of the element where the given value should be written to.
+  /// \param value The value to write to the given matrix position.
+  virtual void setElementAt(int row, int column, AbstractExpr *value) = 0;
+
   /// Returns True if this AbstractMatrix is of template type AbstractExpr*, i.e., a Matrix<AbstractExpr*>.
   /// \return True if this is a Matrix<AbstractExpr*>, otherwise False.
   virtual bool containsAbstractExprs() = 0;
