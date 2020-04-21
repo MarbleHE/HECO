@@ -18,6 +18,7 @@
 #include "Rotate.h"
 #include "Transpose.h"
 #include "OperatorExpr.h"
+#include "MatrixAssignm.h"
 
 // == ATTENTION ======================================
 // These ASTs are used in tests. Any changes to them will break tests. Consider creating new ASTs by copying and
@@ -74,7 +75,9 @@ static std::map<int, std::function<void(Ast &)> > call = {  /* NOLINT */
     {46, AstTestingGenerator::genAstOperatorExpr_logicalXorFalse_twoRemainingOperands},
     {47, AstTestingGenerator::genAstNestedOperatorExpr},
     {48, AstTestingGenerator::genAstSimpleForLoopUnrolling},
-    {49, AstTestingGenerator::genAstNestedForLoopUnrolling}
+    {49, AstTestingGenerator::genAstNestedForLoopUnrolling},
+    {50, AstTestingGenerator::genAstMatrixAssignment},
+    {51, AstTestingGenerator::genAstMatrixPermutation}
 };
 
 void AstTestingGenerator::generateAst(int id, Ast &ast) {
@@ -1644,6 +1647,46 @@ void AstTestingGenerator::genAstNestedForLoopUnrolling(Ast &ast) {
 
   // return img2;
   func->addStatement(new Return(new Variable("img2")));
+
+  ast.setRootNode(func);
+}
+
+void AstTestingGenerator::genAstMatrixAssignment(Ast &ast) {
+  // int permuteMatrixElements() {
+  //    int M = [ 14 27 32 ];
+  //    M[0][0] = 11;
+  //    return M;             // expected: M = [ 11 27 32];
+  // }
+  auto func = new Function("permuteMatrixElements");
+  func->addStatement(new VarDecl("M", new Datatype(Types::INT), new LiteralInt(new Matrix<int>({{14, 27, 32}}))));
+  func->addStatement(new MatrixAssignm(new MatrixElementRef(new Variable("M"), 0, 0), new LiteralInt(11)));
+  func->addStatement(new Return(new Variable("M")));
+
+  ast.setRootNode(func);
+}
+
+void AstTestingGenerator::genAstMatrixPermutation(Ast &ast) {
+  // int permuteMatrixElements() {
+  //    int M = [ 14 27 32 ];
+  //    int element00 = M[0][0];  // 14
+  //    M[0][0] = M[0][2];        // 14 -> 32
+  //    M[0][2] = element00;      // 32 -> 14
+  //    return M;                 // expected: M = [ 32 27 14 ];
+  // }
+  auto func = new Function("permuteMatrixElements");
+  // int M = [ 14 27 32 ];
+  func->addStatement(new VarDecl("M", new Datatype(Types::INT), new LiteralInt(new Matrix<int>({{14, 27, 32}}))));
+  // int element00 = M[0][0];
+  func->addStatement(new VarDecl("element00",
+                                 new Datatype(Types::INT),
+                                 new MatrixElementRef(new Variable("M"), 0, 0)));
+  // M[0][0] = M[0][2];
+  func->addStatement(new MatrixAssignm(new MatrixElementRef(new Variable("M"), 0, 0),
+                                       new MatrixElementRef(new Variable("M"), 0, 2)));
+  // M[0][2] = var;
+  func->addStatement(new MatrixAssignm(new MatrixElementRef(new Variable("M"), 0, 2), new Variable("element00")));
+  // return M;
+  func->addStatement(new Return(new Variable("M")));
 
   ast.setRootNode(func);
 }

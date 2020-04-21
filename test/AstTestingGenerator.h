@@ -117,6 +117,10 @@ class AstTestingGenerator {
   static void genAstSimpleForLoopUnrolling(Ast &ast);
 
   static void genAstNestedForLoopUnrolling(Ast &ast);
+
+  static void genAstMatrixAssignment(Ast &ast);
+
+  static void genAstMatrixPermutation(Ast &ast);
   /** @} */ // End of astGenerators group
 };
 
