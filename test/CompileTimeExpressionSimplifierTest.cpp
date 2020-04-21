@@ -2246,8 +2246,8 @@ TEST_F(CompileTimeExpressionSimplifierFixture, forLoopUnrolling) { /* NOLINT */
   auto createVariableM = []() -> LiteralInt * {
     return new LiteralInt(new Matrix<int>({{54}, {32}, {63}, {38}, {13}, {20}}));
   };
-  auto genGetMatrixElement = [&createVariableM](int rowIdx) -> GetMatrixElement * {
-    return new GetMatrixElement(createVariableM(),
+  auto genGetMatrixElement = [&createVariableM](int rowIdx) -> MatrixElementRef * {
+    return new MatrixElementRef(createVariableM(),
                                 new OperatorExpr(new Operator(ADDITION),
                                                  {new Variable("i"), new LiteralInt(rowIdx)}), new LiteralInt(0));
   };
@@ -2260,7 +2260,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, forLoopUnrolling) { /* NOLINT */
                       new OperatorExpr(new Operator(ADDITION),
                                        {new Variable("sum"),
                                            // M[i]
-                                        new GetMatrixElement(createVariableM(), new Variable("i"), new LiteralInt(0)),
+                                        new MatrixElementRef(createVariableM(), new Variable("i"), new LiteralInt(0)),
                                            // M[i+1]
                                         genGetMatrixElement(1),
                                            // M[i+2]
@@ -2280,7 +2280,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, forLoopUnrolling) { /* NOLINT */
       new VarAssignm("sum", new OperatorExpr(
           new Operator(ADDITION),
           {new Variable("sum"),
-           new GetMatrixElement(createVariableM(), new Variable("i"), new LiteralInt(0))})));
+           new MatrixElementRef(createVariableM(), new Variable("i"), new LiteralInt(0))})));
   auto child = new For(cleanupLoopInitializer,
                        cleanupLoopCondition->castTo<AbstractExpr>(),
                        cleanupLoopUpdater->castTo<AbstractStatement>(),

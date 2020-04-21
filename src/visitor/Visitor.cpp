@@ -23,7 +23,7 @@
 #include "While.h"
 #include "Rotate.h"
 #include "Transpose.h"
-#include "GetMatrixElement.h"
+#include "MatrixElementRef.h"
 #include "OperatorExpr.h"
 
 void Visitor::visit(Ast &elem) {
@@ -282,7 +282,7 @@ void Visitor::visit(Datatype &elem) {
   // no children to visit here
 }
 
-void Visitor::visit(GetMatrixElement &elem) {
+void Visitor::visit(MatrixElementRef &elem) {
   // operand
   elem.getOperand()->accept(*this);
   // row index

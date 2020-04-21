@@ -213,7 +213,7 @@ void SecretTaintingVisitor::visit(Transpose &elem) {
   Visitor::visit(elem);
 }
 
-void SecretTaintingVisitor::visit(GetMatrixElement &elem) {
+void SecretTaintingVisitor::visit(MatrixElementRef &elem) {
   Visitor::visit(elem);
 }
 

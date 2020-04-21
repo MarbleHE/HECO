@@ -20,7 +20,7 @@
 #include "For.h"
 #include "Rotate.h"
 #include "Transpose.h"
-#include "GetMatrixElement.h"
+#include "MatrixElementRef.h"
 #include "OperatorExpr.h"
 
 template<typename T>
@@ -73,7 +73,7 @@ void PrintVisitor::visit(If &elem) {
   printChildNodesIndented(elem);
 }
 
-void PrintVisitor::visit(GetMatrixElement &elem) {
+void PrintVisitor::visit(MatrixElementRef &elem) {
   printMatrixIndex();
   this->decrementLevel();
   addOutputStr(elem);

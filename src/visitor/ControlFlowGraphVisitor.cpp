@@ -312,7 +312,7 @@ void ControlFlowGraphVisitor::visit(Variable &elem) {
   Visitor::visit(elem);
 }
 
-void ControlFlowGraphVisitor::visit(GetMatrixElement &elem) {
+void ControlFlowGraphVisitor::visit(MatrixElementRef &elem) {
   Visitor::visit(elem);
 }
 

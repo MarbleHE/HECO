@@ -89,7 +89,7 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/ast/Dimension.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/Matrix.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/Transpose.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/GetMatrixElement.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/MatrixElementRef.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/ControlFlowGraphVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/GraphNode.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/NodeRelationship.cpp

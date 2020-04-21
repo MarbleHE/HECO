@@ -19,7 +19,7 @@
 #include "UnaryExpr.h"
 #include "VarAssignm.h"
 #include "While.h"
-#include "GetMatrixElement.h"
+#include "MatrixElementRef.h"
 #include "Rotate.h"
 #include "For.h"
 #include "Transpose.h"
@@ -324,7 +324,7 @@ void EvaluationVisitor::visit(For &elem) {
   }
 }
 
-void EvaluationVisitor::visit(GetMatrixElement &elem) {
+void EvaluationVisitor::visit(MatrixElementRef &elem) {
   // operand
   elem.getOperand()->accept(*this);
   auto operand = dynamic_cast<AbstractLiteral *>(getOnlyEvaluationResult(results.top()));

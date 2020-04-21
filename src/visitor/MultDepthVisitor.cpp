@@ -110,7 +110,7 @@ void MultDepthVisitor::visit(Transpose &elem) {
   Visitor::visit(elem);
 }
 
-void MultDepthVisitor::visit(GetMatrixElement &elem) {
+void MultDepthVisitor::visit(MatrixElementRef &elem) {
   Visitor::visit(elem);
 }
 

@@ -136,7 +136,7 @@ class ControlFlowGraphVisitor : public Visitor {
 
   void visit(While &elem) override;
 
-  void visit(GetMatrixElement &elem) override;
+  void visit(MatrixElementRef &elem) override;
 
   void visit(Ast &elem) override;
   /** @} */ // End of visit group

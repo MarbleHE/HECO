@@ -33,7 +33,7 @@ class While;
 class Scope;
 class Rotate;
 class Transpose;
-class GetMatrixElement;
+class MatrixElementRef;
 class AbstractMatrix;
 class OperatorExpr;
 
@@ -96,7 +96,7 @@ class Visitor {
 
   virtual void visit(While &elem);
 
-  virtual void visit(GetMatrixElement &elem);
+  virtual void visit(MatrixElementRef &elem);
 
   virtual void visit(AbstractMatrix &elem);
 

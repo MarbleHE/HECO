@@ -1,4 +1,4 @@
-#include <GetMatrixElement.h>
+#include <MatrixElementRef.h>
 #include <PrintVisitor.h>
 #include "AstTestingGenerator.h"
 #include "Operator.h"
@@ -1207,7 +1207,7 @@ void AstTestingGenerator::genAstUsingMatrixElements(Ast &ast) {
                                  new LiteralInt(new Matrix<int>({{19, 21, 38}}))));
 
   // return M[0][1];
-  auto ret0 = new GetMatrixElement(
+  auto ret0 = new MatrixElementRef(
       new Variable("M"), new LiteralInt(0), new LiteralInt(1));
   func->addStatement(new Return(ret0));
 
@@ -1233,15 +1233,15 @@ void AstTestingGenerator::genAstCombineMatricesInt(Ast &ast) {
                                  new LiteralInt(new Matrix<int>({{19, 21, 38}}))));
 
   // return [ M[0][1]; B[0][0]; B[0][2] ];
-  auto ret0 = new GetMatrixElement(
+  auto ret0 = new MatrixElementRef(
       new Variable("M"),
       new LiteralInt(0),
       new LiteralInt(1));
-  auto ret1 = new GetMatrixElement(
+  auto ret1 = new MatrixElementRef(
       new Variable("B"),
       new LiteralInt(0),
       new LiteralInt(0));
-  auto ret2 = new GetMatrixElement(
+  auto ret2 = new MatrixElementRef(
       new Variable("B"),
       new LiteralInt(0),
       new LiteralInt(2));
@@ -1265,9 +1265,9 @@ void AstTestingGenerator::genAstCombineMatricesFloat(Ast &ast) {
   func->addStatement(
       new VarDecl("B", new Datatype(Types::FLOAT),
                   new LiteralFloat(new Matrix<float>({{1.9f, 2.1f, 3.8f}}))));
-  auto ret0 = new GetMatrixElement(new Variable("M"), 0, 1);
-  auto ret1 = new GetMatrixElement(new Variable("B"), 0, 0);
-  auto ret2 = new GetMatrixElement(new Variable("B"), 0, 2);
+  auto ret0 = new MatrixElementRef(new Variable("M"), 0, 1);
+  auto ret1 = new MatrixElementRef(new Variable("B"), 0, 0);
+  auto ret2 = new MatrixElementRef(new Variable("B"), 0, 2);
   auto pMatrix = new Matrix<AbstractExpr *>({{ret0, ret1, ret2}});
   func->addStatement(new Return(new LiteralFloat(pMatrix)));
   ast.setRootNode(func);
@@ -1288,9 +1288,9 @@ void AstTestingGenerator::genAstCombineMatricesBool(Ast &ast) {
   func->addStatement(
       new VarDecl("B", new Datatype(Types::BOOL),
                   new LiteralBool(new Matrix<bool>({{false, true, true}}))));
-  auto ret0 = new GetMatrixElement(new Variable("M"), 0, 1);
-  auto ret1 = new GetMatrixElement(new Variable("B"), 0, 0);
-  auto ret2 = new GetMatrixElement(new Variable("B"), 0, 2);
+  auto ret0 = new MatrixElementRef(new Variable("M"), 0, 1);
+  auto ret1 = new MatrixElementRef(new Variable("B"), 0, 0);
+  auto ret2 = new MatrixElementRef(new Variable("B"), 0, 2);
   auto pMatrix = new Matrix<AbstractExpr *>({{ret0, ret1, ret2}});
   func->addStatement(new Return(new LiteralBool(pMatrix)));
   ast.setRootNode(func);
@@ -1311,9 +1311,9 @@ void AstTestingGenerator::genAstCombineMatricesString(Ast &ast) {
   func->addStatement(
       new VarDecl("B", new Datatype(Types::STRING),
                   new LiteralString(new Matrix<std::string>({{"beta", "zetta", "gamma"}}))));
-  auto ret0 = new GetMatrixElement(new Variable("M"), 0, 1);
-  auto ret1 = new GetMatrixElement(new Variable("B"), 0, 0);
-  auto ret2 = new GetMatrixElement(new Variable("B"), 0, 2);
+  auto ret0 = new MatrixElementRef(new Variable("M"), 0, 1);
+  auto ret1 = new MatrixElementRef(new Variable("B"), 0, 0);
+  auto ret2 = new MatrixElementRef(new Variable("B"), 0, 2);
   auto pMatrix = new Matrix<AbstractExpr *>({{ret0, ret1, ret2}});
   func->addStatement(new Return(new LiteralString(pMatrix)));
   ast.setRootNode(func);
@@ -1330,8 +1330,8 @@ void AstTestingGenerator::genAstCrossProduct(Ast &ast) {
   auto func = new Function("computeCrossProduct");
   func->addStatement(new VarDecl("M", new Datatype(Types::INT), new LiteralInt(new Matrix<int>({{14, 27, 32}}))));
   func->addStatement(new VarDecl("B", new Datatype(Types::INT), new LiteralInt(new Matrix<int>({{19, 21, 38}}))));
-  auto M = [](int row, int column) { return new GetMatrixElement(new Variable("M"), row, column); };
-  auto B = [](int row, int column) { return new GetMatrixElement(new Variable("B"), row, column); };
+  auto M = [](int row, int column) { return new MatrixElementRef(new Variable("M"), row, column); };
+  auto B = [](int row, int column) { return new MatrixElementRef(new Variable("B"), row, column); };
   auto pMatrix = new Matrix<AbstractExpr *>(
       {   // first row vector
           {new ArithmeticExpr(
@@ -1377,9 +1377,9 @@ void AstTestingGenerator::genAstFlipMatrixElements(Ast &ast) {
                               new Matrix<AbstractExpr *>({{new LiteralBool(true), new Variable("y"),
                                                            new LiteralBool(false)}})));
   func->addStatement(decl);
-  auto ret0 = new GetMatrixElement(new Variable("M"), 0, 1);
-  auto ret1 = new GetMatrixElement(new Variable("M"), 0, 0);
-  auto ret2 = new GetMatrixElement(new Variable("M"), 0, 2);
+  auto ret0 = new MatrixElementRef(new Variable("M"), 0, 1);
+  auto ret1 = new MatrixElementRef(new Variable("M"), 0, 0);
+  auto ret2 = new MatrixElementRef(new Variable("M"), 0, 2);
   auto pMatrix = new Matrix<AbstractExpr *>({{ret0, ret1, ret2}});
   func->addStatement(new Return(new LiteralBool(pMatrix)));
   ast.setRootNode(func);
@@ -1561,7 +1561,7 @@ void AstTestingGenerator::genAstSimpleForLoopUnrolling(Ast &ast) {
                                     new ArithmeticExpr(
                                         new Variable("sum"),
                                         ADDITION,
-                                        new GetMatrixElement(new Variable("M"), new Variable("i"), new LiteralInt(0))));
+                                        new MatrixElementRef(new Variable("M"), new Variable("i"), new LiteralInt(0))));
   auto forLoop = new For(forLoopInitializer, forLoopCondition, forLoopUpdater, forLoopBody);
   func->addStatement(forLoop);
 
@@ -1601,7 +1601,7 @@ void AstTestingGenerator::genAstNestedForLoopUnrolling(Ast &ast) {
 
   // value = value + weightMatrix[k1*(i+1)+j+1] * img[k2*(x+i)+y+j];  -- innermost loop body
   // k1 = 3 as weightMatrix has three rows
-  auto wmTerm = new GetMatrixElement(new Variable("weightMatrix"),
+  auto wmTerm = new MatrixElementRef(new Variable("weightMatrix"),
                                      new LiteralInt(0),
                                      new ArithmeticExpr(
                                          new ArithmeticExpr(new LiteralInt(3),
@@ -1611,7 +1611,7 @@ void AstTestingGenerator::genAstNestedForLoopUnrolling(Ast &ast) {
                                          ADDITION,
                                          new ArithmeticExpr(new Variable("j"), ADDITION, new LiteralInt(1))));
   // TODO We assume k = 4, i.e., img is a 4x4 image but it needs to be replaced by a run-time lookup.
-  auto imgTerm = new GetMatrixElement(new Variable("img"),
+  auto imgTerm = new MatrixElementRef(new Variable("img"),
                                       new LiteralInt(0),
                                       new ArithmeticExpr(
                                           new ArithmeticExpr(new LiteralInt(4),

@@ -6,7 +6,7 @@
 #include "Visitor.h"
 #include <unordered_map>
 #include <string>
-#include <GetMatrixElement.h>
+#include <MatrixElementRef.h>
 #include <Matrix.h>
 
 class EvaluationVisitor : public Visitor {
@@ -89,7 +89,9 @@ class EvaluationVisitor : public Visitor {
 
   void visit(Rotate &elem) override;
 
-  void visit(GetMatrixElement &elem) override;
+  void visit(MatrixElementRef &elem) override;
+
+  void visit(MatrixAssignm &elem) override;
 
   void visit(Transpose &elem) override;
 

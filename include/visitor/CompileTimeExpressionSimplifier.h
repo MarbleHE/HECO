@@ -99,7 +99,7 @@ class CompileTimeExpressionSimplifier : public Visitor {
 
   void visit(For &elem) override;
 
-  void visit(GetMatrixElement &elem) override;
+  void visit(MatrixElementRef &elem) override;
 
   void visit(If &elem) override;
 

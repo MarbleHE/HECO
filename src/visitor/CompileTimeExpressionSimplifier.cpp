@@ -87,7 +87,7 @@ void CompileTimeExpressionSimplifier::visit(Transpose &elem) {
   }
 }
 
-void CompileTimeExpressionSimplifier::visit(GetMatrixElement &elem) {
+void CompileTimeExpressionSimplifier::visit(MatrixElementRef &elem) {
   Visitor::visit(elem);
   // if this is an expression like "matrix[a][b]" where the operand (matrix) as well as both indices (a,b) are known
   if (valueIsKnown(elem.getOperand()) && valueIsKnown(elem.getRowIndex()) && valueIsKnown(elem.getColumnIndex())) {
@@ -98,7 +98,7 @@ void CompileTimeExpressionSimplifier::visit(GetMatrixElement &elem) {
     // get the element at position (row, column)
     auto matrix = dynamic_cast<AbstractLiteral *>(getFirstValue(elem.getOperand()))->getMatrix();
     auto retrievedElement = matrix->getElementAt(rowIndex, columnIndex);
-    // replace this GetMatrixElement referred by the parent node by the retrieved element
+    // replace this MatrixElementRef referred by the parent node by the retrieved element
     elem.getOnlyParent()->replaceChild(&elem, retrievedElement);
   }
 }

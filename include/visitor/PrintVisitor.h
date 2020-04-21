@@ -104,7 +104,7 @@ class PrintVisitor : public Visitor {
 
   void visit(Transpose &elem) override;
 
-  void visit(GetMatrixElement &elem) override;
+  void visit(MatrixElementRef &elem) override;
 
   void printMatrixIndex();
 
