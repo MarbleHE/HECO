@@ -121,7 +121,12 @@ class AstTestingGenerator {
   static void genAstMatrixAssignment(Ast &ast);
 
   static void genAstMatrixPermutation(Ast &ast);
+
+  static void genAstGetMatrixSizeOfKnownMatrix(Ast &ast);
   /** @} */ // End of astGenerators group
+  static void genAstGetMatrixSizeOfAbstractMatrix(Ast &ast);
+
+  static void genAstGetMatrixSizeOfUnknownMatrix(Ast &ast);
 };
 
 #endif //AST_OPTIMIZER_TEST_ASTTESTINGGENERATOR_H_

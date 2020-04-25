@@ -1690,3 +1690,79 @@ void AstTestingGenerator::genAstMatrixPermutation(Ast &ast) {
 
   ast.setRootNode(func);
 }
+
+void AstTestingGenerator::genAstGetMatrixSizeOfKnownMatrix(Ast &ast) {
+  // -- input --
+  //  int returnLastVectorElement() {
+  //    Matrix<int> v = [ 3 1 4 5 44 ];
+  //    int numElements = m.size();
+  //    return M[numElements-1];  // 44
+  //  }
+  auto function = new Function("returnLastVectorElement");
+  // Matrix<int> M = [ 3 1 4 5 44 ];
+  function->addStatement(
+      new VarDecl("v", new Datatype(Types::INT), new LiteralInt(new Matrix<int>({{3, 1, 4, 5, 44}}))));
+  // int numElements = m.size();
+  // as v is a vector (single row) we are interested in the dimension 1 (#columns = #elements)
+  function->addStatement(new VarDecl("lastIdx", new Datatype(Types::INT),
+                                     new GetMatrixSize(new Variable("v"), new LiteralInt(1))));
+  // return M[0][numElements-1];  // 44
+  function->addStatement(new Return(
+      new MatrixElementRef(new Variable("v"),
+                           new LiteralInt(0),
+                           new ArithmeticExpr(new Variable("lastIdx"), SUBTRACTION, new LiteralInt(1)))));
+
+  ast.setRootNode(function);
+}
+
+void AstTestingGenerator::genAstGetMatrixSizeOfAbstractMatrix(Ast &ast) {
+  // -- input --
+  // Matrix<int> getNumElementsPerDimension(int factor) {
+  //   int val = 567;
+  //   Matrix<int> M = [ 3*factor 1*factor val*factor 5*factor 19 ];
+  //   return [m.dimSize(0) m.dimSize(1) m.dimSize(2)];    // expected: [1, 5, 0] as it is a 1x5 matrix/vector
+  // }
+
+  // Matrix<int> getNumElementsPerDimension(int factor)
+  auto function = new Function("getNumElementsPerDimension");
+  function->addParameter(new FunctionParameter(new Datatype(Types::INT), new Variable("factor")));
+
+  // int val = 567;
+  function->addStatement(new VarDecl("val", new Datatype(Types::INT), new LiteralInt(567)));
+
+  // Matrix<int> M = [ 3*factor 1*factor val*factor 5*factor 19 ];
+  auto timesFactor = [](AbstractExpr *ae) -> AbstractExpr * {
+    return new ArithmeticExpr(ae, MULTIPLICATION, new Variable("factor"));
+  };
+  function->addStatement(new VarDecl("v", new Datatype(Types::INT),
+                                     new LiteralInt(new Matrix<AbstractExpr *>({{timesFactor(new LiteralInt(3)),
+                                                                                 timesFactor(new LiteralInt(1)),
+                                                                                 timesFactor(new Variable("val")),
+                                                                                 timesFactor(new LiteralInt(5)),
+                                                                                 new LiteralInt(19)}}))));
+
+  // return [m.dimSize(0), m.dimSize(1), m.dimSize(2)] // expected: [1 5 0] as it is a 1x5 matrix/vector
+  function->addStatement(new Return(
+      new LiteralInt(new Matrix<AbstractExpr *>({{new GetMatrixSize(new Variable("v"), new LiteralInt(0)),
+                                                  new GetMatrixSize(new Variable("v"), new LiteralInt(1)),
+                                                  new GetMatrixSize(new Variable("v"), new LiteralInt(2))}}))));
+
+  ast.setRootNode(function);
+}
+
+void AstTestingGenerator::genAstGetMatrixSizeOfUnknownMatrix(Ast &ast) {
+  // -- input --
+  // int getNumElementsNthDimension(Matrix<int> inputMatrix, int dimension) {
+  //   return inputMatrix.dimSize(dimension);  // UNKNOWN at compile-time, not (0,0)!
+  // }
+
+  // int getNumElementsNthDimension(Matrix<int> inputMatrix, int dimension)
+  auto function = new Function("getNumElementsFirstDimension");
+  function->addParameter(new FunctionParameter(new Datatype(Types::INT), new Variable("inputMatrix")));
+  function->addParameter(new FunctionParameter(new Datatype(Types::INT), new Variable("dimension")));
+
+  // return inputMatrix.dimSize(dimension);
+  function->addStatement(new Return(new GetMatrixSize(new Variable("inputMatrix"), new Variable("dimension"))));
+
+  ast.setRootNode(function);
+}
