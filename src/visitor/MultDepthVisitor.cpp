@@ -114,6 +114,10 @@ void MultDepthVisitor::visit(ParameterList &elem) {
   Visitor::visit(elem);
 }
 
+void MultDepthVisitor::visit(GetMatrixSize &elem) {
+  Visitor::visit(elem);
+}
+
 void MultDepthVisitor::visit(Transpose &elem) {
   Visitor::visit(elem);
 }
