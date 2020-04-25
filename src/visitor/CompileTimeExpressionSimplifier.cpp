@@ -961,12 +961,6 @@ AbstractNode *CompileTimeExpressionSimplifier::doFullLoopUnrolling(For &elem, in
   // after visiting the block statements, the statements (VarDecl and VarAssignm) are marked for deletion hence we
   // need to emit new statements for every changed variable except the loop iteration variable
   for (auto &[varIdentiferScope, varValue] : getChangedVariables(variableValuesBeforeVisitingUnrolledBody)) {
-//      // if this a variable that was declared in the visited scope, we must delete its value as it is substituted now
-//      // and not valid outside of the temporarily created block
-//      if (variableValuesBeforeVisitingUnrolledBody.count(varIdentiferScope) == 0) {
-//        setVariableValue(varIdentiferScope.first, nullptr);
-//      }
-
     auto varIterator = variableValues.find(varIdentiferScope);
 
     // if this is a loop variable: skip iteration because due to full unrolling we do not need it anymore as it is
