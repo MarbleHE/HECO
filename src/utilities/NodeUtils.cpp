@@ -13,7 +13,7 @@ std::vector<AbstractNode *> rewriteMultiInputGateToBinaryGatesChain(std::vector<
   // if there is only one input, we need to add the "neutral element" (i.e., the element that does not change the
   // semantics of the logical expression) depending on the given LogCompOp to inputNodes
   if (inputNodes.size()==1) {
-    inputNodes.push_back(OpSymb::getIdentityElement(
+    inputNodes.push_back(OpSymb::getNeutralElement(
         OpSymbolVariant(gateType)));
   }
 
