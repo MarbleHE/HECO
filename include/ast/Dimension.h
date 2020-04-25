@@ -20,6 +20,8 @@ class Dimension {
   [[nodiscard]] bool equals(int rows, int columns) const;
 
   void update(int numberOfRows, int numberOfColumns);
+
+  int getNthDimensionSize(int n);
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_DIMENSION_H_

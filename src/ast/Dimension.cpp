@@ -37,3 +37,11 @@ bool Dimension::isValidAccess(int row, int column) {
   // 0, ..., N-1
   return row < numRows && column < numColumns;
 }
+
+int Dimension::getNthDimensionSize(int n) {
+  switch (n) {
+    case 0:return numRows;
+    case 1:return numColumns;
+    default:return 0;
+  }
+}
