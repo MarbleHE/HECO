@@ -67,6 +67,8 @@ class PrintVisitor : public Visitor {
 
   void visit(While &elem) override;
 
+  void visit(GetMatrixSize &elem) override;
+
   void incrementLevel();
 
   void decrementLevel();

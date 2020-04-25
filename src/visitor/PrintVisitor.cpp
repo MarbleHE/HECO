@@ -23,6 +23,7 @@
 #include "MatrixElementRef.h"
 #include "OperatorExpr.h"
 #include "MatrixAssignm.h"
+#include "GetMatrixSize.h"
 
 template<typename T>
 void PrintVisitor::printChildNodesIndented(T &elem) {
@@ -119,6 +120,11 @@ void PrintVisitor::visit(LiteralFloat &elem) {
 }
 
 void PrintVisitor::visit(LogicalExpr &elem) {
+  addOutputStr(elem);
+  printChildNodesIndented(elem);
+}
+
+void PrintVisitor::visit(GetMatrixSize &elem) {
   addOutputStr(elem);
   printChildNodesIndented(elem);
 }
