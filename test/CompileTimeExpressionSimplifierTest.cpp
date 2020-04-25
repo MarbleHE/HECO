@@ -2298,3 +2298,52 @@ TEST_F(CompileTimeExpressionSimplifierFixture, partialforLoopUnrolling_EXPECTED_
 
   EXPECT_TRUE(simplifiedAst->isEqual(func->getBody()));
 }
+
+TEST_F(CompileTimeExpressionSimplifierFixture, getMatrixSizeOfKnownMatrix) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(52, ast);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  auto expectedFunction = new Function("returnLastVectorElement");
+  expectedFunction->addStatement(new Return(new LiteralInt(44)));
+
+  // get the body of the AST on that the CompileTimeExpressionSimplifier was applied on
+  auto simplifiedAst = ast.getRootNode()->castTo<Function>()->getBody();
+  EXPECT_TRUE(simplifiedAst->isEqual(expectedFunction->getBody()));
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, getMatrixSizeOfAbstractMatrix) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(53, ast);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  auto expectedFunction = new Function("getNumElementsPerDimension");
+  expectedFunction->addParameter(new FunctionParameter(new Datatype(Types::INT), new Variable("factor")));
+  expectedFunction->addStatement(new Return(new LiteralInt(new Matrix<int>({{1, 5, 0}}))));
+
+  // get the body of the AST on that the CompileTimeExpressionSimplifier was applied on
+  auto simplifiedAst = ast.getRootNode()->castTo<Function>()->getBody();
+  EXPECT_TRUE(simplifiedAst->isEqual(expectedFunction->getBody()));
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, getMatrixSizeOfUnknownMatrix) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(54, ast);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  auto expectedFunction = new Function("getNumElementsPerDimension");
+  expectedFunction->addParameter(new FunctionParameter(new Datatype(Types::INT), new Variable("inputMatrix")));
+  expectedFunction->addParameter(new FunctionParameter(new Datatype(Types::INT), new Variable("dimension")));
+  expectedFunction
+      ->addStatement(new Return(new GetMatrixSize(new Variable("inputMatrix"), new Variable("dimension"))));
+
+  // get the body of the AST on that the CompileTimeExpressionSimplifier was applied on
+  auto simplifiedAst = ast.getRootNode()->castTo<Function>()->getBody();
+  EXPECT_TRUE(simplifiedAst->isEqual(expectedFunction->getBody()));
+}
