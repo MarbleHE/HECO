@@ -96,10 +96,11 @@ class AbstractNode {
   /// list of parent nodes for each of the added children.
   /// \param childrenToAdd A vector of nodes to be added as children to this node.
   /// \param addBackReference If True, then adds this node as parent to each of the child nodes.
-  /// \param prependChildren If True, then adds the children at the beginning of the children vector (prepend),
   /// otherwise adds the new children at the end of the children vector (append).
-  void addChildren(const std::vector<AbstractNode *> &childrenToAdd, bool addBackReference = true,
-                   bool prependChildren = false);
+  void addChildren(const std::vector<AbstractNode *> &childrenToAdd, bool addBackReference = true);
+
+  void addChildren(const std::vector<AbstractNode *> &childrenToAdd, bool addBackReference,
+                   std::vector<AbstractNode *>::const_iterator insertPosition);
 
   /// Removes the given child from the list of children. If getMaxNumberChildren() returns -1 (i.e., this node supports
   /// an inifinite number of children, then the respective child is simply deleted. In any other case, the child node is
