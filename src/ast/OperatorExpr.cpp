@@ -101,8 +101,8 @@ void OperatorExpr::setAttributes(Operator *newOperator, std::vector<AbstractExpr
       for (auto &c : newOperands) {
         auto valueAsAbstractLiteral = dynamic_cast<AbstractLiteral *>(c);
         if (valueAsAbstractLiteral!=nullptr
-            && valueAsAbstractLiteral->isEqual(OpSymb::getIdentityElement(getOperator()->getOperatorSymbol()))) {
-          // if this literal is the operator's identity element (e.g., 0 for ADDITION), drop this element by not
+            && valueAsAbstractLiteral->isEqual(OpSymb::getNeutralElement(getOperator()->getOperatorSymbol()))) {
+          // if this literal is the operator's neutral element (e.g., 0 for ADDITION), drop this element by not
           // adding it to the new OperatorExpr's operands
           continue;
         } else if (valueAsAbstractLiteral!=nullptr && !valueAsAbstractLiteral->getMatrix()->containsAbstractExprs()) {
