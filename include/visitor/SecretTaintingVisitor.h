@@ -78,6 +78,8 @@ class SecretTaintingVisitor : public Visitor {
 
   void visit(OperatorExpr &elem) override;
 
+  void visit(GetMatrixSize &elem) override;
+
   bool nodeIsTainted(AbstractNode &node) const;
 
   void addTaintedNodes(std::vector<AbstractNode *> nodesToAdd);

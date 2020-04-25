@@ -11,6 +11,7 @@
 #include "OperatorExpr.h"
 #include "Call.h"
 #include "If.h"
+#include "GetMatrixSize.h"
 
 void SecretTaintingVisitor::visit(Ast &elem) {
   Visitor::visit(elem);
@@ -117,6 +118,13 @@ void SecretTaintingVisitor::visit(ArithmeticExpr &elem) {
 }
 
 void SecretTaintingVisitor::visit(OperatorExpr &elem) {
+  Visitor::visit(elem);
+  if (anyNodesAreTainted(elem.getChildren())) {
+    addTaintedNode(&elem);
+  }
+}
+
+void SecretTaintingVisitor::visit(GetMatrixSize &elem) {
   Visitor::visit(elem);
   if (anyNodesAreTainted(elem.getChildren())) {
     addTaintedNode(&elem);
@@ -260,3 +268,4 @@ void SecretTaintingVisitor::checkAndAddTaintedChildren(AbstractStatement *n,
     for (auto &node : n->getDescendants()) taintedNodes.insert(node->getUniqueNodeId());
   }
 }
+
