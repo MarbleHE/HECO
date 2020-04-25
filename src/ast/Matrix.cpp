@@ -376,35 +376,48 @@ void Matrix<T>::setElementAt(int, int, AbstractExpr *) {
 
 template<>
 void Matrix<AbstractExpr *>::setElementAt(int row, int column, AbstractExpr *element) {
+  checkBoundsAndResizeMatrix(row, column);
   values[row][column] = element;
 }
 
 template<>
 void Matrix<int>::setElementAt(int row, int column, AbstractExpr *element) {
   if (auto elementAsLiteral = dynamic_cast<LiteralInt *>(element)) {
+    checkBoundsAndResizeMatrix(row, column);
     values[row][column] = elementAsLiteral->getValue();
-  } else { throw std::runtime_error("Unexpected element given that cannot be added to Matrix<int>."); }
+  } else {
+    throw std::runtime_error("Unexpected element given that cannot be added to Matrix<int>.");
+  }
 }
 
 template<>
 void Matrix<float>::setElementAt(int row, int column, AbstractExpr *element) {
   if (auto elementAsLiteral = dynamic_cast<LiteralFloat *>(element)) {
+    checkBoundsAndResizeMatrix(row, column);
     values[row][column] = elementAsLiteral->getValue();
-  } else { throw std::runtime_error("Unexpected element given that cannot be added to Matrix<float>."); }
+  } else {
+    throw std::runtime_error("Unexpected element given that cannot be added to Matrix<float>.");
+  }
 }
 
 template<>
 void Matrix<bool>::setElementAt(int row, int column, AbstractExpr *element) {
   if (auto elementAsLiteral = dynamic_cast<LiteralBool *>(element)) {
+    checkBoundsAndResizeMatrix(row, column);
     values[row][column] = elementAsLiteral->getValue();
-  } else { throw std::runtime_error("Unexpected element given that cannot be added to Matrix<bool>."); }
+  } else {
+    throw std::runtime_error("Unexpected element given that cannot be added to Matrix<bool>.");
+  }
 }
 
 template<>
 void Matrix<std::string>::setElementAt(int row, int column, AbstractExpr *element) {
   if (auto elementAsLiteral = dynamic_cast<LiteralString *>(element)) {
+    checkBoundsAndResizeMatrix(row, column);
     values[row][column] = elementAsLiteral->getValue();
-  } else { throw std::runtime_error("Unexpected element given that cannot be added to Matrix<std::string>."); }
+  } else {
+    throw std::runtime_error("Unexpected element given that cannot be added to Matrix<std::string>.");
+  }
 }
 
 // ===== replaceChild ==========

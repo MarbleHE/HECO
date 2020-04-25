@@ -187,6 +187,14 @@ class Matrix : public AbstractMatrix {
     }
   }
 
+  void checkBoundsAndResizeMatrix(int rowIdx, int colIdx) {
+    // Resize the outer vector by adding new vectors that have the same size as the already existing ones.
+    // Note: The new size must be rowIdx+1 because a vector is 0-indexed.
+    if (rowIdx > values.size() - 1) { values.resize(rowIdx + 1, std::vector<T>(values.at(0).size())); }
+    // Resize the inner vectors -- all of them, to ensure that all rows have the same #elements.
+    if (colIdx > values.at(rowIdx).size() - 1) { for (auto &rw : values) rw.resize(colIdx + 1); }
+  }
+
   /// Returns a reference to the element at index specified by the given (row, column) pair.
   /// Note: Returning std::vector<T>::reference is required here. Credits to Mike Seymour from stackoverflow.com
   /// (https://stackoverflow.com/a/25770060/3017719) for pointing this out.
