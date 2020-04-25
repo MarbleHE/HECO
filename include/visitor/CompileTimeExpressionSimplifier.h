@@ -17,11 +17,14 @@
 #include "Variable.h"
 #include "OperatorExpr.h"
 
+/**
+ * A helper struct to store the value of a variable and its associated datatype in the variableValues map.
+ */
 struct VariableValue {
   Datatype *datatype;
   AbstractExpr *value;
 
-  VariableValue(Datatype *dtype, AbstractExpr *varValue) : datatype(dtype), value(varValue) {};
+  VariableValue(Datatype *dtype, AbstractExpr *varValue) : datatype(dtype), value(varValue) {}
 
   // copy constructor
   VariableValue(const VariableValue &vv) {
@@ -36,12 +39,38 @@ struct VariableValue {
 
 typedef std::map<std::pair<std::string, Scope *>, VariableValue *> VariableValuesMapType;
 
+/**
+ * A helper struct that is used by emittedVariableDeclarations and helps to keep track of the relationship between a
+ * variable (given as pair of identifier an scope), the associated (emitted) variable declaration statement, and a
+ * reference to all emitted variable assignments that depend on this variable declaration. This allows to determine
+ * at the end of the traversal if the emitted VarAssignm was meanwhile deleted and we do not need the VarDecl anymore.
+ */
+struct EmittedVariableData {
+  AbstractNode *varDeclStatement;
+  std::unordered_set<AbstractNode *> emittedVarAssignms;
+ public:
+  explicit EmittedVariableData(AbstractNode *varDeclStatement) : varDeclStatement(varDeclStatement) {}
+
+  void addVarAssignm(AbstractNode *varAssignm) { emittedVarAssignms.insert(varAssignm); }
+
+  void removeVarAssignm(AbstractNode *varAssignm) { emittedVarAssignms.erase(varAssignm); }
+
+  bool hasNoVarAssignms() { return !emittedVarAssignms.empty(); }
+
+  AbstractNode *getVarDeclStatement() { return varDeclStatement; }
+};
+
 class CompileTimeExpressionSimplifier : public Visitor {
  private:
   /// A EvaluationVisitor instance that is used to evaluate parts of the AST in order to simplify them.
   EvaluationVisitor evalVisitor;
 
-  std::set<std::pair<std::string, Scope *>> emittedVariableDeclarations;
+  /// Keeps track of all emitted variable declarations and maps each to an associated EmittedVariableData pointer.
+  std::map<std::pair<std::string, Scope *>, EmittedVariableData *> emittedVariableDeclarations;
+
+  /// Maps emitted VarAssignms to their corresponding VarDecl statement in emittedVariableDeclarations.
+  std::map<AbstractNode *,
+           std::map<std::pair<std::string, Scope *>, EmittedVariableData *>::iterator> emittedVariableAssignms;
 
  public:
   CompileTimeExpressionSimplifier();
@@ -101,6 +130,8 @@ class CompileTimeExpressionSimplifier : public Visitor {
 
   void visit(MatrixElementRef &elem) override;
 
+  void visit(GetMatrixSize &elem) override;
+
   void visit(If &elem) override;
 
   void visit(LiteralBool &elem) override;
@@ -133,25 +164,32 @@ class CompileTimeExpressionSimplifier : public Visitor {
 
   void visit(Rotate &elem) override;
 
+  void visit(MatrixAssignm &elem) override;
+
   void visit(Transpose &elem) override;
   /** @} */ // End of visit group
 
-  /// Checks whether there is a known value for this node. A value can either be an AbstractLiteral or an AbstractExpr
-  /// with unknown variables (e.g., function parameters).
-  /// \param node The node for which the existence of a value should be determined.
+  /// Checks whether the given node has a known value. A value is considered as known if
+  ///  - the node itself is any subtype of an AbstractLiteral this includes matrices of a concrete type (e.g.,
+  ///    LiteralInt containing Matrix<int>) but not matrices containing AbstractExprs,
+  ///  - the node is a Variable and the referred value is known
+  ///  - or the node's value is not relevant anymore as it is marked for deletion.
+  /// \param node The node for which the presence of a value should be determined.
   /// \return True if the node's value is known, otherwise False.
-  bool valueIsKnown(AbstractNode *node);
+  bool hasKnownValue(AbstractNode *node);
 
   /// Marks a node as a candidate for deletion. The node's first ancestor that is a statement has to decide whether its
   /// children that are marked to be removed can be deleted or not.
   /// \param node The node for which the evaluation result should be stored.
   void markNodeAsRemovable(AbstractNode *node);
 
-  /// Returns the (first) known value of a node, i.e., the first element of the result vector. If a node has multiple
-  /// values (e.g., Return statements), this method will return an exception.
-  /// \param node The node for which the first value should be retrieved.
-  /// \return The node's value.
-  AbstractExpr *getFirstValue(AbstractNode *node);
+  /// Returns the value of the given node that is either the node itself if the node is an subtype of AbstractLiteral
+  /// or the known value (AbstractExpr) stored previously in the variableValues map.
+  /// \param node The node for which the value should be retrieved.
+  /// \throws std::invalid_argument exception if the node does not have a known value. Must be checked before using the
+  ///         hasKnownValue method.
+  /// \return The node's value as AbstractExpr.
+  AbstractExpr *getKnownValue(AbstractNode *node);
 
   /// Evaluates a subtree, i.e., a node and all of its children by using the EvaluationVisitor.
   /// \param node The subtree's root node to be evaluated.
@@ -265,9 +303,50 @@ class CompileTimeExpressionSimplifier : public Visitor {
   /// \return A copy of the VariableValues map.
   VariableValuesMapType getClonedVariableValuesMap();
 
+  /// A helper method that simulates the execution of the given For-loop to determine the number of iterations the
+  /// loop would be executed. If variable values involved in the loop's condition are unknown, the method returns -1.
+  /// Global data structures (e.g., variableValues or nodesQueuedForDeletion) are restored to their state before
+  /// calling this method.
+  /// \param elem The For-loop for that the number of loop iterations should be determined.
+  /// \return The number of iterations or -1 if not all variables required to simulate the loop's execution are known.
   int determineNumLoopIterations(For &elem);
 
+  /// Marks the given node for deletion. The node will be deleted after all nodes of the AST have been visited.
+  /// \param node The node to be marked for deletion.
   void enqueueNodeForDeletion(AbstractNode *node);
+
+  /// Sets a new value matrixElementValue to the position indicated by (row, column) in matrix referred by
+  /// variableIdentifier.
+  /// \param variableIdentifier A reference to a matrix, i.e., any subtype of an AbstractLiteral.
+  /// \param row The row index where the new value should be written to.
+  /// \param column The column index where the new value should be written to.
+  /// \param matrixElementValue The matrix value that should be written to the index given as (row, column).
+  void setMatrixVariableValue(const std::string &variableIdentifier,
+                              int row,
+                              int column,
+                              AbstractExpr *matrixElementValue);
+
+  /// A wrapper method that is visited when a For-loop is found. This method in turn calls itself on the next "deeper"
+  /// nested loop before continuing to fully or partially unrolling the loop.
+  /// The first call to this method is invoked by the For-loop's visit method, any deeper nested calls directly call
+  /// this handleForLoopUnrolling method. This allows to determine when processing the outermost For-loop is finished
+  /// such that expressions can be revisited and deleted if required.
+  /// \param elem The For-loop to be unrolled.
+  /// \return A pointer to the node if the given For-loop was replaced in the children vector of the For-loop's parent.
+  AbstractNode *handleForLoopUnrolling(For &elem);
+
+  /// Handles the full loop unrolling. This requires that the exact number of loop iterations is known.
+  /// \param elem The For-loop to be unrolled.
+  /// \param numLoopIterations The number of iterations this For-loop would have been executed.
+  /// \return A pointer to the new node if the given For-loop was replaced in the children vector of the For-loop's
+  /// parent.
+  AbstractNode *doFullLoopUnrolling(For &elem, int numLoopIterations);
+
+  /// Handles the partial loop unrolling to enable batching of the loop's body statements.
+  /// \param elem The For-loop to be unrolled.
+  /// \return A pointer to the new node if the given For-loop was replaced in the children vector of the For-loop's
+  /// parent.
+  AbstractNode *doPartialLoopUnrolling(For &elem);
 };
 
 /// Takes a Literal (e.g., LiteralInt) and checks whether its values are defined using a Matrix<AbstractExpr*>. In
