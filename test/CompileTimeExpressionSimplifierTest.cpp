@@ -21,6 +21,8 @@
 #include "OperatorExpr.h"
 #include "Matrix.h"
 #include "For.h"
+#include "GetMatrixSize.h"
+#include "MatrixAssignm.h"
 
 class CompileTimeExpressionSimplifierFixture : public ::testing::Test {
  protected:
@@ -2190,38 +2192,48 @@ TEST_F(CompileTimeExpressionSimplifierFixture, nestedOperatorExprsTest) { /* NOL
       new OperatorExpr(new Operator(DIVISION), {new LiteralInt(27), new Variable("a"), new LiteralInt(4)})));
 }
 
-TEST_F(CompileTimeExpressionSimplifierFixture, partialforLoopUnrolling_EXPECTED_FAIL) { /* NOLINT */
-  // TODO Fix this test by making the bounds dynamic (i.e., not known at compile-time) such that partial loop
-  //  unrolling can be applied to.
+TEST_F(CompileTimeExpressionSimplifierFixture, partialforLoopUnrolling) { /* NOLINT */
   // -- input --
-  // int sumVectorElements() {
+  // int sumVectorElements(int numIterations) {
   //    Matrix<int> M = [54; 32; 63; 38; 13; 20];
   //    int sum = 0;
-  //    for (int i = 0; i < 6; i++) {
+  //    for (int i = 0; i < numIterations; i++) {
   //      sum = sum + M[i];
   //    }
   //    return sum;
   // }
   // -- expected --
-  // int sumVectorElements() {
-  //    int i = 0;
-  //    for (; i < 6 && i+1 < 6 && i+2 < 6;) {
-  //      sum = sum + M[i] + M[i+1] + M[i+2];
-  //      i = i+3;
+  // int sumVectorElements(int numIterations) {
+  //    Matrix<int> M = [54; 32; 63; 38; 13; 20];
+  //    int sum;
+  //    int i;
+  //    {
+  //      int i = 0;
+  //      for (; i < numIterations && i+1 < numIterations && i+2 < numIterations;) {
+  //        sum = sum + M[i] + M[i+1] + M[i+2];
+  //        i = i+3;
+  //      }
+  //      for (; i < numIterations; i++) {
+  //        sum = sum + M[i];
+  //      }
   //    }
-  //
   //    return sum;
   // }
   Ast ast;
   AstTestingGenerator::generateAst(48, ast);
+
+  // TODO Why is 'i' declared twice, once in the function's scope and once in the newly added block?
 
   // perform the compile-time expression simplification
   ctes.visit(ast);
 
   // build expected AST
   auto func = new Function("sumVectorElements");
+  func->addParameter(new FunctionParameter(new Datatype(Types::INT), new Variable("numIterations")));
+
   // int sum;
   func->addStatement(new VarDecl("sum", new Datatype(Types::INT, false), nullptr));
+  func->addStatement(new VarDecl("i", new Datatype(Types::INT, false), nullptr));
 
   // unrolled loop and cleanup loop are embedded into new Block
   // { ...
@@ -2229,19 +2241,20 @@ TEST_F(CompileTimeExpressionSimplifierFixture, partialforLoopUnrolling_EXPECTED_
   func->addStatement(newBlock);
   // int i = 0;
   newBlock->addChild(new VarDecl("i", 0));
-  // for (; i+1 < 6 && i+2 < 6 && i+3 < 6; )  // unrolled loop
+  // for (; i+1 < numIterations && i+2 < numIterations && i+3 < numIterations; )  // unrolled loop
   auto unrolledLoopInitializer = nullptr;
   auto unrolledLoopCondition =
       new OperatorExpr(
           new Operator(LOGICAL_AND),
           {
-              new OperatorExpr(new Operator(SMALLER), {new Variable("i"), new LiteralInt(6)}),
+              new OperatorExpr(new Operator(SMALLER), {new Variable("i"), new Variable("numIterations")}),
               new OperatorExpr(new Operator(SMALLER), {
                   new OperatorExpr(new Operator(ADDITION),
                                    {new Variable("i"), new LiteralInt(1)}),
-                  new LiteralInt(6)}),
+                  new Variable("numIterations")}),
               new OperatorExpr(new Operator(SMALLER), {
-                  new OperatorExpr(new Operator(ADDITION), {new Variable("i"), new LiteralInt(2)}), new LiteralInt(6)})
+                  new OperatorExpr(new Operator(ADDITION), {new Variable("i"), new LiteralInt(2)}), new Variable
+                      ("numIterations")})
           });
 
   auto unrolledLoopUpdater = nullptr;
@@ -2273,9 +2286,10 @@ TEST_F(CompileTimeExpressionSimplifierFixture, partialforLoopUnrolling_EXPECTED_
       new For(unrolledLoopInitializer, unrolledLoopCondition, unrolledLoopUpdater, unrolledLoopBodyStatements);
   newBlock->addChild(forLoop);
 
-  // for (; i < 6; i=i+1)  // cleanup loop
+  // for (; i < numIterations; i=i+1)  // cleanup loop
   auto cleanupLoopInitializer = nullptr;
-  auto cleanupLoopCondition = new OperatorExpr(new Operator(SMALLER), {new Variable("i"), new LiteralInt(6)});
+  auto cleanupLoopCondition = new OperatorExpr(new Operator(SMALLER), {new Variable("i"), new Variable
+      ("numIterations")});
   auto cleanupLoopUpdater =
       new VarAssignm("i", new OperatorExpr(new Operator(ADDITION), {new Variable("i"), new LiteralInt(1)}));
   auto cleanupLoopBodyStatements = new Block(
@@ -2297,6 +2311,114 @@ TEST_F(CompileTimeExpressionSimplifierFixture, partialforLoopUnrolling_EXPECTED_
   auto simplifiedAst = ast.getRootNode()->castTo<Function>()->getBody();
 
   EXPECT_TRUE(simplifiedAst->isEqual(func->getBody()));
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, fullForLoopUnrolling) { /* NOLINT */
+  // -- input --
+  //  VecInt2D runLaplacianSharpeningAlgorithm(Vector<int> img, int imgSize, int x, int y) {
+  //     Matrix<int> weightMatrix = [1 1 1; 1 -8 1; 1 1 1];
+  //     Vector<int> img2;
+  //     int value = 0;
+  //     for (int j = -1; j < 2; ++j) {
+  //        for (int i = -1; i < 2; ++i) {
+  //           value = value + weightMatrix[i+1][j+1] * img[imgSize*(x+i)+y+j];
+  //        }
+  //     }
+  //     img2[imgSize*x+y] = img[imgSize*x+y] - (value/2);
+  //     return img2;
+  //  }
+  // -- expected --
+  // VecInt2D runLaplacianSharpeningAlgorithm(Vector<int> img, int imgSize, int x, int y) {
+  //   img2[imgSize*x+y] = img[imgSize*x+y]
+  //      - (  img[imgSize*(x-1)+y-1] + img[imgSize*(x+0)+y-1]        + img[imgSize*(x+1)+y-1]
+  //         + img[imgSize*(x-1)+y+0] + img[imgSize*(x+0)+y+0] * (-8) + img[imgSize*(x+1)+y+0]
+  //         + img[imgSize*(x-1)+y+1] + img[imgSize*(x+0)+y+1]        + img[imgSize*(x+1)+y+1]  * 1  ) / 2;
+  //   return img2;
+  // }
+  Ast ast;
+  AstTestingGenerator::generateAst(49, ast);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  // VecInt2D runLaplacianSharpeningAlgorithm(Vector<int> img, int imgSize, int x, int y) {
+  auto expectedFunction = new Function("runLaplacianSharpeningAlgorithm");
+  expectedFunction->addParameter(new FunctionParameter(new Datatype(Types::INT, true), new Variable("img")));
+  expectedFunction->addParameter(new FunctionParameter(new Datatype(Types::INT, false), new Variable("imgSize")));
+  expectedFunction->addParameter(new FunctionParameter(new Datatype(Types::INT, false), new Variable("x")));
+  expectedFunction->addParameter(new FunctionParameter(new Datatype(Types::INT, false), new Variable("y")));
+
+  // a helper to generate img[imgSize*(x-i)+y+j] terms
+  auto createImgIdx = [](int i, int j) -> AbstractExpr * {
+
+    auto buildTermI = [](int i) -> AbstractExpr * {
+      if (i==0) {
+        return new Variable("x");
+      } else {
+        return new OperatorExpr(new Operator(ADDITION), {new Variable("x"), new LiteralInt(i)});
+      }
+    };
+
+    auto buildTermJ = [&](int j) -> AbstractExpr * {
+      if (j==0) {
+        return new OperatorExpr(new Operator(ADDITION),
+                                {new OperatorExpr(new Operator(MULTIPLICATION),
+                                                  {new Variable("imgSize"),
+                                                   buildTermI(i)}),
+                                 new Variable("y")});
+      } else {
+        return new OperatorExpr(new Operator(ADDITION),
+                                {new OperatorExpr(new Operator(MULTIPLICATION),
+                                                  {new Variable("imgSize"),
+                                                   buildTermI(i)}),
+                                 new Variable("y"),
+                                 new LiteralInt(j)});
+      }
+    };
+    return new MatrixElementRef(new Variable("img"), new LiteralInt(0), buildTermJ(j));
+  };
+
+  // img[imgSize*(x-1)+y-1]  * 1 + ... + img[imgSize*(x+1)+y+1]  * 1;
+  auto varValue =
+      new OperatorExpr(
+          new Operator(ADDITION),
+          {createImgIdx(-1, -1),
+           createImgIdx(0, -1),
+           createImgIdx(1, -1),
+           createImgIdx(-1, 0),
+           new OperatorExpr(new Operator(MULTIPLICATION), {createImgIdx(0, 0), new LiteralInt(-8)}),
+           createImgIdx(1, 0),
+           createImgIdx(-1, 1),
+           createImgIdx(0, 1),
+           createImgIdx(1, 1)});
+
+  // img2[imgSize*x+y] = img[imgSize*x+y] - (value/2);
+  expectedFunction->addStatement(
+      new MatrixAssignm(new MatrixElementRef(new Variable("img2"),
+                                             new LiteralInt(0),
+                                             new OperatorExpr(
+                                                 new Operator(ADDITION),
+                                                 {new OperatorExpr(new Operator(MULTIPLICATION),
+                                                                   {new Variable("imgSize"), new Variable("x")}),
+                                                  new Variable("y")})),
+                        new OperatorExpr(
+                            new Operator(SUBTRACTION),
+                            {new MatrixElementRef(
+                                new Variable("img"),
+                                new LiteralInt(0),
+                                new OperatorExpr(
+                                    new Operator(ADDITION),
+                                    {new OperatorExpr(new Operator(MULTIPLICATION),
+                                                      {new Variable("imgSize"), new Variable("x")}),
+                                     new Variable("y")})),
+                             new OperatorExpr(new Operator(DIVISION), {varValue, new LiteralInt(2)})})));
+
+  // return img2;
+  expectedFunction->addStatement(new Return(new Variable("img2")));
+
+  // get the body of the AST on that the CompileTimeExpressionSimplifier was applied on
+  auto simplifiedAst = ast.getRootNode()->castTo<Function>()->getBody();
+  EXPECT_TRUE(simplifiedAst->isEqual(expectedFunction->getBody()));
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, getMatrixSizeOfKnownMatrix) { /* NOLINT */
@@ -2347,3 +2469,4 @@ TEST_F(CompileTimeExpressionSimplifierFixture, getMatrixSizeOfUnknownMatrix) { /
   auto simplifiedAst = ast.getRootNode()->castTo<Function>()->getBody();
   EXPECT_TRUE(simplifiedAst->isEqual(expectedFunction->getBody()));
 }
+
