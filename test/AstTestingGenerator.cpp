@@ -19,6 +19,7 @@
 #include "Transpose.h"
 #include "OperatorExpr.h"
 #include "MatrixAssignm.h"
+#include "GetMatrixSize.h"
 
 // == ATTENTION ======================================
 // These ASTs are used in tests. Any changes to them will break tests. Consider creating new ASTs by copying and
@@ -77,7 +78,10 @@ static std::map<int, std::function<void(Ast &)> > call = {  /* NOLINT */
     {48, AstTestingGenerator::genAstSimpleForLoopUnrolling},
     {49, AstTestingGenerator::genAstNestedForLoopUnrolling},
     {50, AstTestingGenerator::genAstMatrixAssignment},
-    {51, AstTestingGenerator::genAstMatrixPermutation}
+    {51, AstTestingGenerator::genAstMatrixPermutation},
+    {52, AstTestingGenerator::genAstGetMatrixSizeOfKnownMatrix},
+    {53, AstTestingGenerator::genAstGetMatrixSizeOfAbstractMatrix},
+    {54, AstTestingGenerator::genAstGetMatrixSizeOfUnknownMatrix}
 };
 
 void AstTestingGenerator::generateAst(int id, Ast &ast) {
@@ -1541,15 +1545,16 @@ void AstTestingGenerator::genAstNestedOperatorExpr(Ast &ast) {
 
 void AstTestingGenerator::genAstSimpleForLoopUnrolling(Ast &ast) {
   // -- source code --
-  // int sumVectorElements() {
+  // int sumVectorElements(int numIterations) {
   //    Matrix<int> M = [54; 32; 63; 38; 13; 20];
   //    int sum = 0;
-  //    for (int i = 0; i < 6; i++) {
+  //    for (int i = 0; i < numIterations; i++) {
   //      sum = sum + M[i];
   //    }
   //    return sum;
   // }
   auto func = new Function("sumVectorElements");
+  func->addParameter(new FunctionParameter(new Datatype(Types::INT), new Variable("numIterations")));
 
   func->addStatement(new VarDecl("M",
                                  Types::INT,
@@ -1558,7 +1563,7 @@ void AstTestingGenerator::genAstSimpleForLoopUnrolling(Ast &ast) {
   func->addStatement(new VarDecl("sum", 0));
 
   auto forLoopInitializer = new VarDecl("i", 0);
-  auto forLoopCondition = new LogicalExpr(new Variable("i"), SMALLER, new LiteralInt(6));
+  auto forLoopCondition = new LogicalExpr(new Variable("i"), SMALLER, new Variable("numIterations"));
   auto forLoopUpdater = new VarAssignm("i", new ArithmeticExpr(new Variable("i"), ADDITION, new LiteralInt(1)));
   auto forLoopBody = new VarAssignm("sum",
                                     new ArithmeticExpr(
@@ -1575,22 +1580,28 @@ void AstTestingGenerator::genAstSimpleForLoopUnrolling(Ast &ast) {
 
 void AstTestingGenerator::genAstNestedForLoopUnrolling(Ast &ast) {
   // -- source code --
-  //  VecInt2D runLaplacianSharpeningAlgorithm(VecInt2D_encrypted img, int x, int y) {
-  //     VecIn2D img2(img.size());
+  // /// \param img A quadratic image given as vector consisting of concatenated rows.
+  // /// \param imgSize The image's size, i.e., img has dimension (imgSize, imgSize).
+  // /// \param x The x-position of the pixel to compute.
+  // /// \param y The y-position of the pixel to compute.
+  //  VecInt2D runLaplacianSharpeningAlgorithm(Vector<int> img, int imgSize, int x, int y) {
+  //     Matrix<int> weightMatrix = [1 1 1; 1 -8 1; 1 1 1];
+  //     Vector<int> img2;
   //     int value = 0;
   //     for (int j = -1; j < 2; ++j) {
   //        for (int i = -1; i < 2; ++i) {
-  //           value = value + weightMatrix[k*(i+1)+j+1] * img[k*(x+i)+y+j];
+  //           value = value + weightMatrix[i+1][j+1] * img[imgSize*(x+i)+y+j];
   //        }
   //     }
-  //     img2[x][y] = img[x][y] - (value/2);
+  //     img2[imgSize*x+y] = img[imgSize*x+y] - (value/2);
   //     return img2;
   //  }
 
   auto func = new Function("runLaplacianSharpeningAlgorithm");
-  func->getParameters().push_back(new FunctionParameter(new Datatype(Types::INT, true), new Variable("img")));
-  func->getParameters().push_back(new FunctionParameter(new Datatype(Types::INT, false), new Variable("x")));
-  func->getParameters().push_back(new FunctionParameter(new Datatype(Types::INT, false), new Variable("y")));
+  func->addParameter(new FunctionParameter(new Datatype(Types::INT, true), new Variable("img")));
+  func->addParameter(new FunctionParameter(new Datatype(Types::INT, false), new Variable("imgSize")));
+  func->addParameter(new FunctionParameter(new Datatype(Types::INT, false), new Variable("x")));
+  func->addParameter(new FunctionParameter(new Datatype(Types::INT, false), new Variable("y")));
 
   // std::vector<int> img2;
   func->addStatement(new VarDecl("img2", new Datatype(Types::INT), nullptr));
@@ -1598,26 +1609,20 @@ void AstTestingGenerator::genAstNestedForLoopUnrolling(Ast &ast) {
   // int value = 0;
   func->addStatement(new VarDecl("value", 0));
 
-  // std::vector<int> weightMatrix = {1, 1, 1, 1, -8, 1, 1, 1, 1};  –- row-wise concatenation of the original matrix
+  // Matrix<int> weightMatrix = [1 1 1; 1 -8 1; 1 1 1];  –- row-wise concatenation of the original matrix
   func->addStatement(new VarDecl("weightMatrix", new Datatype(Types::INT),
-                                 new LiteralInt(new Matrix<int>({{1, 1, 1, 1, -8, 1, 1, 1, 1}}))));
+                                 new LiteralInt(new Matrix<int>({{1, 1, 1},
+                                                                 {1, -8, 1},
+                                                                 {1, 1, 1}}))));
 
-  // value = value + weightMatrix[k1*(i+1)+j+1] * img[k2*(x+i)+y+j];  -- innermost loop body
-  // k1 = 3 as weightMatrix has three rows
+  // value = value + weightMatrix[i+1][j+1] * img[imgSize*(x+i)+y+j]; -- innermost loop body
   auto wmTerm = new MatrixElementRef(new Variable("weightMatrix"),
-                                     new LiteralInt(0),
-                                     new ArithmeticExpr(
-                                         new ArithmeticExpr(new LiteralInt(3),
-                                                            MULTIPLICATION,
-                                                            new ArithmeticExpr(
-                                                                new Variable("i"), ADDITION, new LiteralInt(1))),
-                                         ADDITION,
-                                         new ArithmeticExpr(new Variable("j"), ADDITION, new LiteralInt(1))));
-  // TODO We assume k = 4, i.e., img is a 4x4 image but it needs to be replaced by a run-time lookup.
+                                     new ArithmeticExpr(new Variable("i"), ADDITION, new LiteralInt(1)),
+                                     new ArithmeticExpr(new Variable("j"), ADDITION, new LiteralInt(1)));
   auto imgTerm = new MatrixElementRef(new Variable("img"),
-                                      new LiteralInt(0),
+                                      new LiteralInt(0),  // as img is a single row vector
                                       new ArithmeticExpr(
-                                          new ArithmeticExpr(new LiteralInt(4),
+                                          new ArithmeticExpr(new Variable("imgSize"),
                                                              MULTIPLICATION,
                                                              new ArithmeticExpr(
                                                                  new Variable("x"), ADDITION, new Variable("i"))),
@@ -1640,10 +1645,29 @@ void AstTestingGenerator::genAstNestedForLoopUnrolling(Ast &ast) {
                              new VarAssignm("j", new ArithmeticExpr(new Variable("j"), ADDITION, new LiteralInt(1))),
                              innerLoop));
 
-  // img2[x][y] = img[x][y] - (value/2);
-  // TODO Modeling this requires some changes:
-  //  - allow assignment to matrix elements (i.e., adapt VarAssignm)
-  //  - initialize img2 with the correct size (requires knowledge of img's size at runtime)
+  // img2[imgSize*x+y] = img[imgSize*x+y] - (value/2);
+  func->addStatement(
+      new MatrixAssignm(new MatrixElementRef(new Variable("img2"),
+                                             new LiteralInt(0),
+                                             new ArithmeticExpr(
+                                                 new ArithmeticExpr(
+                                                     new Variable("imgSize"),
+                                                     MULTIPLICATION,
+                                                     new Variable("x")),
+                                                 ADDITION,
+                                                 new Variable("y"))),
+                        new ArithmeticExpr(
+                            new MatrixElementRef(new Variable("img"),
+                                                 new LiteralInt(0),
+                                                 new ArithmeticExpr(
+                                                     new ArithmeticExpr(
+                                                         new Variable("imgSize"),
+                                                         MULTIPLICATION,
+                                                         new Variable("x")),
+                                                     ADDITION,
+                                                     new Variable("y"))),
+                            SUBTRACTION,
+                            new ArithmeticExpr(new Variable("value"), DIVISION, new LiteralInt(2)))));
 
   // return img2;
   func->addStatement(new Return(new Variable("img2")));
