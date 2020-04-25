@@ -105,6 +105,8 @@ class EvaluationVisitor : public Visitor {
 
   void visit(While &elem) override;
 
+  void visit(GetMatrixSize &elem) override;
+
   const std::vector<AbstractLiteral *> &getResults();
 
   void setFlagPrintResult(bool printResult);

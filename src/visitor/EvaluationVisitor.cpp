@@ -25,6 +25,7 @@
 #include "Transpose.h"
 #include "OperatorExpr.h"
 #include "MatrixAssignm.h"
+#include "GetMatrixSize.h"
 
 EvaluationVisitor::EvaluationVisitor(std::unordered_map<std::string, AbstractLiteral *> funcCallParameterValues)
     : variableValuesForEvaluation(std::move(funcCallParameterValues)) {
@@ -236,6 +237,26 @@ void EvaluationVisitor::visit(Return &elem) {
 void EvaluationVisitor::visit(UnaryExpr &elem) {
   elem.getRight()->accept(*this);
   results.push({elem.getOperator()->applyOperator(getOnlyEvaluationResult(results.top()))});
+}
+
+void EvaluationVisitor::visit(GetMatrixSize &elem) {
+  // evaluate the matrix operand
+  elem.getMatrixOperand()->accept(*this);
+  auto matrix = getOnlyEvaluationResult(results.top());
+  results.pop();
+
+  elem.getDimensionParameter()->accept(*this);
+  auto evalResult = getOnlyEvaluationResult(results.top());
+  results.pop();
+  // the dimension parameter of GetMatrixSize must evaluate to a LiteralInt
+  auto dimAsLiteralInt = dynamic_cast<LiteralInt *>(evalResult);
+  if (dimAsLiteralInt==nullptr)
+    throw std::invalid_argument("GetMatrixSize requires a LiteralInt as 'requestedDimension' parameter.");
+  int dim = dimAsLiteralInt->getValue();
+
+  // execute the operation, i.e., retrieve the requested dimension
+  auto mx = matrix->castTo<AbstractLiteral>()->getMatrix()->getDimensions().getNthDimensionSize(dim);
+  results.push({new LiteralInt(mx)});
 }
 
 void EvaluationVisitor::visit(Rotate &elem) {
