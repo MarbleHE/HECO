@@ -144,6 +144,7 @@ class ControlFlowGraphVisitor : public Visitor {
 
   void visit(OperatorExpr &elem) override;
 
+  void visit(GetMatrixSize &elem) override;
   /** @} */ // End of visit group
 
   void buildDataFlowGraph();

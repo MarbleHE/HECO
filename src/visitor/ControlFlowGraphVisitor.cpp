@@ -332,6 +332,10 @@ void ControlFlowGraphVisitor::visit(MatrixElementRef &elem) {
   Visitor::visit(elem);
 }
 
+void ControlFlowGraphVisitor::visit(GetMatrixSize &elem) {
+  Visitor::visit(elem);
+}
+
 // ===================================================
 
 GraphNode *ControlFlowGraphVisitor::appendStatementToCfg(AbstractNode &abstractStmt,
