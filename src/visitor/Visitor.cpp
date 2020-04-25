@@ -26,6 +26,7 @@
 #include "MatrixElementRef.h"
 #include "OperatorExpr.h"
 #include "MatrixAssignm.h"
+#include "GetMatrixSize.h"
 
 void Visitor::visit(Ast &elem) {
   // assumption: AST is always the enclosing object that points to the root
@@ -245,6 +246,11 @@ void Visitor::visit(VarDecl &elem) {
   if (elem.getInitializer()!=nullptr) {
     elem.getInitializer()->accept(*this);
   }
+}
+
+void Visitor::visit(GetMatrixSize &elem) {
+  elem.getMatrixOperand()->accept(*this);
+  elem.getDimensionParameter()->accept(*this);
 }
 
 void Visitor::visit(Variable &elem) {}

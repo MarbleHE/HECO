@@ -37,6 +37,7 @@ class MatrixElementRef;
 class AbstractMatrix;
 class OperatorExpr;
 class MatrixAssignm;
+class GetMatrixSize;
 
 class Visitor {
  protected:
@@ -104,6 +105,8 @@ class Visitor {
   virtual void visit(OperatorExpr &elem);
 
   virtual void visit(MatrixAssignm &elem);
+
+  virtual void visit(GetMatrixSize &elem);
 
   Scope *curScope;
 
