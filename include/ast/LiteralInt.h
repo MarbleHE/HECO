@@ -20,6 +20,8 @@ class LiteralInt : public AbstractLiteral {
 
   explicit LiteralInt(int value);
 
+  LiteralInt();
+
   ~LiteralInt() override;
 
   LiteralInt *clone(bool keepOriginalUniqueNodeId) override;

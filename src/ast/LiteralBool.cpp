@@ -2,12 +2,13 @@
 #include "RandNumGen.h"
 #include "Matrix.h"
 
-LiteralBool::LiteralBool(Matrix<AbstractExpr *> *am) : AbstractLiteral(am) {
-}
+LiteralBool::LiteralBool(Matrix<AbstractExpr *> *am) : AbstractLiteral(am) {}
 
 LiteralBool::LiteralBool(AbstractMatrix *am) : AbstractLiteral(am) {}
 
 LiteralBool::LiteralBool(bool value) : AbstractLiteral(new Matrix(value)) {}
+
+LiteralBool::LiteralBool() : AbstractLiteral(new Matrix<bool>()) {}
 
 LiteralBool::LiteralBool(Matrix<bool> *inputMatrix) : AbstractLiteral(inputMatrix) {}
 

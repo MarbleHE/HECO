@@ -142,8 +142,11 @@ class Matrix : public AbstractMatrix {
   /// The dimension of the matrix associated to this instance.
   Dimension dim;
 
+  /// Creates a new empty matrix.
+  Matrix() : values(std::vector<std::vector<T>>()), dim(Dimension(0, 0)) {}
+
   /// Creates a new matrix with the elements provided in inputMatrix.
-  /// \param inputMatrix
+  /// \param inputMatrix The elements of the matrix to create.
   Matrix(std::vector<std::vector<T>> inputMatrix)  /* NOLINT intentionally not explicit */
       : values(std::move(inputMatrix)), dim(Dimension(values.size(), values.at(0).size())) {
     int elementsPerRow = values.at(0).size();

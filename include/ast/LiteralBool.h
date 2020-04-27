@@ -18,6 +18,8 @@ class LiteralBool : public AbstractLiteral {
 
   explicit LiteralBool(bool value);
 
+  LiteralBool();
+
   explicit LiteralBool(Matrix<bool> *inputMatrix);
 
   ~LiteralBool() override;

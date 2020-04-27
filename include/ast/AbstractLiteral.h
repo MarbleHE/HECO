@@ -43,6 +43,12 @@ class AbstractLiteral : public AbstractExpr {
   [[nodiscard]] virtual AbstractMatrix *getMatrix() const = 0;
 
   virtual void setMatrix(AbstractMatrix *newValue) = 0;
+
+  /// Creates a new and valueless literal matching the given datatype. For example, Types::INT would create a new
+  /// LiteralInt and Types::BOOL a new LiteralBool.
+  /// \param dt A pointer to a Datatype object.
+  /// \return The created AbstractLiteral subtype instance.
+  static AbstractLiteral *createLiteralBasedOnDatatype(Datatype *dt);
 };
 
 inline std::ostream &operator<<(std::ostream &os, const std::vector<AbstractLiteral *> &v) {

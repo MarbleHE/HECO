@@ -34,4 +34,18 @@ bool AbstractLiteral::operator!=(const AbstractLiteral &rhs) const {
   return !(rhs==*this);
 }
 
+AbstractLiteral *AbstractLiteral::createLiteralBasedOnDatatype(Datatype *dt) {
+  if (dt->getType()==Types::INT) {
+    return new LiteralInt();
+  } else if (dt->getType()==Types::BOOL) {
+    return new LiteralBool();
+  } else if (dt->getType()==Types::FLOAT) {
+    return new LiteralFloat();
+  } else if (dt->getType()==Types::STRING) {
+    return new LiteralString();
+  } else {
+    throw std::runtime_error("AbstractLiteral::createLiteralBasedOnDatatype failed because given Datatype is unknown.");
+  }
+}
+
 AbstractLiteral::AbstractLiteral(AbstractMatrix *matrix) : matrix(matrix) {}
