@@ -259,7 +259,6 @@ TEST(EvaluationVisitorTests, astOperatorNestedOperands) { /* NOLINT */
 TEST(EvaluationVisitorTests, astMatrixAssignmentFromLiteralInt) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(50, ast);
-
   auto result = dynamic_cast<LiteralInt *>(ast.evaluateAst({}, false).front());
   ASSERT_EQ(*result, *new LiteralInt(new Matrix<int>({{11, 27, 32}})));
 }
@@ -267,7 +266,75 @@ TEST(EvaluationVisitorTests, astMatrixAssignmentFromLiteralInt) { /* NOLINT */
 TEST(EvaluationVisitorTests, astMatrixPermutation) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(51, ast);
-
   auto result = dynamic_cast<LiteralInt *>(ast.evaluateAst({}, false).front());
   ASSERT_EQ(*result, *new LiteralInt(new Matrix<int>({{32, 27, 14}})));
 }
+
+TEST(EvaluationVisitorTest, astGetMatrixSizeKnownMatrix) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(52, ast);
+  auto result = dynamic_cast<LiteralInt *>(ast.evaluateAst({}, false).front());
+  ASSERT_EQ(*result, *new LiteralInt(new Matrix<int>({{44}})));
+}
+
+TEST(EvaluationVisitorTest, astGetMatrixSizeAbstractMatrix) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(53, ast);
+  std::unordered_map<std::string, AbstractLiteral *> params = {
+      {"factor", new LiteralInt(42)}
+  };
+  auto result = dynamic_cast<LiteralInt *>(ast.evaluateAst(params, false).front());
+  ASSERT_EQ(*result, *new LiteralInt(new Matrix<int>({{1, 5, 0}})));
+}
+
+TEST(EvaluationVisitorTest, astGetMatrixSizeUnknownMatrix) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(54, ast);
+  std::unordered_map<std::string, AbstractLiteral *> params = {
+      {"inputMatrix", new LiteralInt(new Matrix<int>({{33, 111, 3, 994}}))},
+      {"dimension", new LiteralInt(1)}
+  };
+  auto result = dynamic_cast<LiteralInt *>(ast.evaluateAst(params, false).front());
+  ASSERT_EQ(*result, *new LiteralInt(4));
+}
+
+TEST(EvaluationVisitorTest, astMatrixAssignmAndGetMatrixSize__EXPECTED_FAIL) { /* NOLINT */
+  // TODO (pjattke): Implement assignment to whole matrix row to make this test work.
+  EXPECT_TRUE(false);
+  Ast ast;
+  AstTestingGenerator::generateAst(55, ast);
+  auto result = dynamic_cast<LiteralInt *>(ast.evaluateAst({}, false).front());
+  ASSERT_EQ(*result, *new LiteralInt(new Matrix<int>({{0, 0, 0}, {1, 2, 3}, {2, 4, 6}})));
+}
+
+TEST(EvaluationVisitorTest, astMatrixAssignmentKnownThenUnknown) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(56, ast);
+  std::unordered_map<std::string, AbstractLiteral *> params = {
+      {"k", new LiteralInt(2)},
+      {"a", new LiteralInt(19)}
+  };
+  auto result = dynamic_cast<LiteralInt *>(ast.evaluateAst(params, false).front());
+  auto expectedResult = new LiteralInt(new Matrix<int>({{40}, {0}, {4}}));
+  ASSERT_EQ(*result, *expectedResult);
+}
+
+TEST(EvaluationVisitorTest, astMatrixAssignmentUnknownThenKnown) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(57, ast);
+  std::unordered_map<std::string, AbstractLiteral *> params = {
+      {"k", new LiteralInt(5)}
+  };
+  auto result = dynamic_cast<LiteralInt *>(ast.evaluateAst(params, false).front());
+  auto expectedResult = new LiteralInt(new Matrix<int>({{21, 0, 0, 0, 0, 4}}));
+  ASSERT_EQ(*result, *expectedResult);
+}
+
+TEST(EvaluationVisitorTest, astFullAssignmentToMatrix) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(58, ast);
+  auto result = dynamic_cast<LiteralInt *>(ast.evaluateAst({}, false).front());
+  auto expectedResult = new LiteralInt(new Matrix<int>({{11, 1, 1}, {3, 2, 2}}));
+  ASSERT_EQ(*result, *expectedResult);
+}
+
