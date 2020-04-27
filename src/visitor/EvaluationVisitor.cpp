@@ -303,13 +303,23 @@ void EvaluationVisitor::visit(MatrixAssignm &elem) {
   matrixRef->getRowIndex()->accept(*this);
   auto rowIdx = dynamic_cast<LiteralInt *>(getOnlyEvaluationResult(results.top()));
   results.pop();
-  // column index
-  matrixRef->getColumnIndex()->accept(*this);
-  auto columnIdx = dynamic_cast<LiteralInt *>(getOnlyEvaluationResult(results.top()));
-  results.pop();
 
-  // set value val of respective matrix element
-  operand->getMatrix()->setElementAt(rowIdx->getValue(), columnIdx->getValue(), val);
+  if (matrixRef->getColumnIndex()!=nullptr) {
+    // column index
+    matrixRef->getColumnIndex()->accept(*this);
+    auto columnIdx = dynamic_cast<LiteralInt *>(getOnlyEvaluationResult(results.top()));
+    results.pop();
+//    std::cout << "MatrixAssignm[" << rowIdx->getValue() << "][" << columnIdx->getValue() << "]" << std::endl;
+    // set value val of respective matrix element
+    if (auto mx = dynamic_cast<Variable *>(matrixRef->getOperand())) {
+      variableValuesForEvaluation[mx->getIdentifier()]->getMatrix()
+          ->setElementAt(rowIdx->getValue(), columnIdx->getValue(), val);
+    }
+  } else {
+//    std::cout << "MatrixAssignm[" << rowIdx->getValue() << "]" << std::endl;
+    throw std::runtime_error("Appending row to matrix unsupported yet. Aborting.");
+    // TODO (pjattke): Implement appending row to matrix if only a row index is given.
+  }
 }
 
 void EvaluationVisitor::visit(VarAssignm &elem) {
