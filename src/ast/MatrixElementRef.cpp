@@ -20,6 +20,14 @@ void MatrixElementRef::setAttributes(AbstractExpr *elementContainingMatrix,
   addChildren({elementContainingMatrix, rowIndex, columnIndex}, true);
 }
 
+MatrixElementRef::MatrixElementRef(AbstractExpr *mustEvaluateToAbstractLiteral, AbstractExpr *rowIndex) {
+  setAttributes(mustEvaluateToAbstractLiteral, rowIndex, nullptr);
+}
+
+MatrixElementRef::MatrixElementRef(AbstractExpr *mustEvaluateToAbstractLiteral, int rowIndex) {
+  setAttributes(mustEvaluateToAbstractLiteral, new LiteralInt(rowIndex), nullptr);
+}
+
 std::string MatrixElementRef::getNodeType() const {
   return std::string("MatrixElementRef");
 }
@@ -32,6 +40,7 @@ AbstractNode *MatrixElementRef::clone(bool keepOriginalUniqueNodeId) {
   auto clonedNode = new MatrixElementRef(
       getOperand()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
       getRowIndex()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
+      getColumnIndex()==nullptr ? nullptr :
       getColumnIndex()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
   clonedNode->updateClone(keepOriginalUniqueNodeId, this);
   return clonedNode;

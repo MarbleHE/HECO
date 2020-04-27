@@ -10,7 +10,11 @@ class MatrixElementRef : public AbstractExpr {
  public:
   MatrixElementRef(AbstractExpr *mustEvaluateToAbstractLiteral, AbstractExpr *rowIndex, AbstractExpr *columnIndex);
 
+  MatrixElementRef(AbstractExpr *mustEvaluateToAbstractLiteral, AbstractExpr *rowIndex);
+
   MatrixElementRef(AbstractExpr *mustEvaluateToAbstractLiteral, int rowIndex, int columnIndex);
+
+  MatrixElementRef(AbstractExpr *mustEvaluateToAbstractLiteral, int rowIndex);
 
   [[nodiscard]] std::string getNodeType() const override;
 
