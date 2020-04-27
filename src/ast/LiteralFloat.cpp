@@ -11,7 +11,7 @@ LiteralFloat::LiteralFloat(AbstractMatrix *am) : AbstractLiteral(am) {}
 
 LiteralFloat::LiteralFloat(float value) : AbstractLiteral(new Matrix(value)) {}
 
-LiteralFloat::LiteralFloat() : AbstractLiteral(new Matrix<float>()) {}
+LiteralFloat::LiteralFloat() : AbstractLiteral(new Matrix<AbstractExpr *>()) {}
 
 LiteralFloat::LiteralFloat(Matrix<float> *inputMatrix) : AbstractLiteral(inputMatrix) {}
 

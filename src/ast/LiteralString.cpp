@@ -12,7 +12,7 @@ LiteralString::LiteralString(Matrix<std::string> *inputMatrix) : AbstractLiteral
 
 LiteralString::LiteralString(std::string value) : AbstractLiteral(new Matrix(std::move(value))) {}
 
-LiteralString::LiteralString() : AbstractLiteral(new Matrix<std::string>()) {}
+LiteralString::LiteralString() : AbstractLiteral(new Matrix<AbstractExpr *>()) {}
 
 json LiteralString::toJson() const {
   json j;

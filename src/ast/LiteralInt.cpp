@@ -10,7 +10,7 @@ LiteralInt::LiteralInt(AbstractMatrix *am) : AbstractLiteral(am) {}
 
 LiteralInt::LiteralInt(int value) : AbstractLiteral(new Matrix(value)) {}
 
-LiteralInt::LiteralInt() : AbstractLiteral(new Matrix<int>()) {}
+LiteralInt::LiteralInt() : AbstractLiteral(new Matrix<AbstractExpr *>()) {}
 
 LiteralInt::LiteralInt(Matrix<int> *inputMatrix) : AbstractLiteral(inputMatrix) {}
 
