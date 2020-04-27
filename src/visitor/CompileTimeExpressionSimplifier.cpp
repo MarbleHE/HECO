@@ -1427,6 +1427,15 @@ void CompileTimeExpressionSimplifier::visit(AbstractMatrix &elem) {
   Visitor::visit(elem);
 }
 
+void CompileTimeExpressionSimplifier::emitVariableDeclaration(VariableValuesMapType::iterator variableToEmit) {
+  auto parent = variableToEmit->first.second->getScopeOpener();
+  auto children = parent->getChildren();
+  auto newVarDecl = new VarDecl(variableToEmit->first.first, variableToEmit->second->datatype);
+  // passing position in children vector is req. to prepend the new VarAssignm (i.e., as new first child of parent)
+  parent->addChildren({newVarDecl}, true, parent->getChildren().begin());
+  emittedVariableDeclarations.emplace(variableToEmit->first, new EmittedVariableData(newVarDecl));
+}
+
 VarAssignm *CompileTimeExpressionSimplifier::emitVariableAssignment(VariableValuesMapType::iterator variableToEmit) {
   // if the variable has no value, there's no need to create a variable assignment
   if (variableToEmit->second->value==nullptr) return nullptr;
@@ -1436,12 +1445,7 @@ VarAssignm *CompileTimeExpressionSimplifier::emitVariableAssignment(VariableValu
     // if there exists no declaration statement for this variable yet, add a variable declaration statement (without
     // initialization) at the beginning of the scope by prepending a VarDecl statement to the parent of the last
     // statement in the scope - this should generally be a Block statement
-    auto parent = variableToEmit->first.second->getScopeOpener();
-    auto children = parent->getChildren();
-    auto newVarDecl = new VarDecl(variableToEmit->first.first, variableToEmit->second->datatype);
-    // passing position in children vector is req. to prepend the new VarAssignm (i.e., as new first child of parent)
-    parent->addChildren({newVarDecl}, true, parent->getChildren().begin());
-    emittedVariableDeclarations.emplace(variableToEmit->first, new EmittedVariableData(newVarDecl));
+    emitVariableDeclaration(variableToEmit);
   }
   auto newVarAssignm = new VarAssignm(variableToEmit->first.first,
                                       variableToEmit->second->value->clone(false)->castTo<AbstractExpr>());

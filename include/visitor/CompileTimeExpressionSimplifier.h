@@ -298,6 +298,15 @@ class CompileTimeExpressionSimplifier : public Visitor {
   /// \return A variable assignment statement for the given variable (variableToEmit).
   VarAssignm *emitVariableAssignment(VariableValuesMapType::iterator variableToEmit);
 
+  /// Creates a new VarDecl statements of the variable that the given iterator (variableToEmit) is pointing to.
+  /// The variable declaration is emitted as the first statement in the scope where the variable was initially
+  /// declared. The generated declaration statement is added to the emittedVariableDeclarations map to keep track of
+  /// it. On contrary to emitVariableAssignment, this method automatically adds the statement to the AST instead of
+  /// returning the generated statement.
+  /// \param variableToEmit The variable to be emitted, i.e., for that a variable declaration statement should be
+  /// generated.
+  void emitVariableDeclaration(std::map<std::pair<std::string, Scope *>, VariableValue *>::iterator variableToEmit);
+
   /// Creates a clone of the variableValues map. As the map consists of VariableValue pointers, each of the
   /// VariableValue objects pointed to needs to be copied.
   /// \return A copy of the VariableValues map.
