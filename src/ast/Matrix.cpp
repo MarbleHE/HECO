@@ -269,11 +269,11 @@ AbstractExpr *Matrix<AbstractExpr *>::getElementAt(int row, int column) {
 
 template<>
 Matrix<AbstractExpr *>::Matrix(std::vector<std::vector<AbstractExpr *>> inputMatrix)  /* NOLINT intentionally not explicit */
-    : values(std::move(inputMatrix)), dim(Dimension(values.size(), values.at(0).size())) {
+    : values(std::move(inputMatrix)), dim(Dimension(values.size(), values.size()==0 ? 0 : values.at(0).size())) {
   // In a Matrix<AbstractExpr*> it is needed that we use the parent-child relationship by attaching each of the matrix
   // elements as a child to the Matrix object. This is needed, for example, in the CompileTimeExpressionSimplifier where
   // we replace nodes that can be evaluated at compile-time (e.g., variables by their known value).
-  int elementsPerRow = values.at(0).size();
+  int elementsPerRow = values.size()==0 ? 0 : values.at(0).size();
   std::vector<AbstractNode *> childrenToBeAdded;
   for (auto &matrixRows : values) {
     // check that matrix has the same number of elements in each row
