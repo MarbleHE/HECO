@@ -270,14 +270,14 @@ TEST(EvaluationVisitorTests, astMatrixPermutation) { /* NOLINT */
   ASSERT_EQ(*result, *new LiteralInt(new Matrix<int>({{32, 27, 14}})));
 }
 
-TEST(EvaluationVisitorTest, astGetMatrixSizeKnownMatrix) { /* NOLINT */
+TEST(EvaluationVisitorTests, astGetMatrixSizeKnownMatrix) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(52, ast);
   auto result = dynamic_cast<LiteralInt *>(ast.evaluateAst({}, false).front());
   ASSERT_EQ(*result, *new LiteralInt(new Matrix<int>({{44}})));
 }
 
-TEST(EvaluationVisitorTest, astGetMatrixSizeAbstractMatrix) { /* NOLINT */
+TEST(EvaluationVisitorTests, astGetMatrixSizeAbstractMatrix) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(53, ast);
   std::unordered_map<std::string, AbstractLiteral *> params = {
@@ -287,7 +287,7 @@ TEST(EvaluationVisitorTest, astGetMatrixSizeAbstractMatrix) { /* NOLINT */
   ASSERT_EQ(*result, *new LiteralInt(new Matrix<int>({{1, 5, 0}})));
 }
 
-TEST(EvaluationVisitorTest, astGetMatrixSizeUnknownMatrix) { /* NOLINT */
+TEST(EvaluationVisitorTests, astGetMatrixSizeUnknownMatrix) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(54, ast);
   std::unordered_map<std::string, AbstractLiteral *> params = {
@@ -298,16 +298,15 @@ TEST(EvaluationVisitorTest, astGetMatrixSizeUnknownMatrix) { /* NOLINT */
   ASSERT_EQ(*result, *new LiteralInt(4));
 }
 
-TEST(EvaluationVisitorTest, astMatrixAssignmAndGetMatrixSize__EXPECTED_FAIL) { /* NOLINT */
+TEST(EvaluationVisitorTests, astMatrixAssignmAndGetMatrixSize__EXPECTED_FAIL) { /* NOLINT */
   // TODO (pjattke): Implement assignment to whole matrix row to make this test work.
-  EXPECT_TRUE(false);
   Ast ast;
   AstTestingGenerator::generateAst(55, ast);
   auto result = dynamic_cast<LiteralInt *>(ast.evaluateAst({}, false).front());
   ASSERT_EQ(*result, *new LiteralInt(new Matrix<int>({{0, 0, 0}, {1, 2, 3}, {2, 4, 6}})));
 }
 
-TEST(EvaluationVisitorTest, astMatrixAssignmentKnownThenUnknown) { /* NOLINT */
+TEST(EvaluationVisitorTests, astMatrixAssignmentKnownThenUnknown) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(56, ast);
   std::unordered_map<std::string, AbstractLiteral *> params = {
@@ -319,7 +318,7 @@ TEST(EvaluationVisitorTest, astMatrixAssignmentKnownThenUnknown) { /* NOLINT */
   ASSERT_EQ(*result, *expectedResult);
 }
 
-TEST(EvaluationVisitorTest, astMatrixAssignmentUnknownThenKnown) { /* NOLINT */
+TEST(EvaluationVisitorTests, astMatrixAssignmentUnknownThenKnown) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(57, ast);
   std::unordered_map<std::string, AbstractLiteral *> params = {
@@ -330,7 +329,7 @@ TEST(EvaluationVisitorTest, astMatrixAssignmentUnknownThenKnown) { /* NOLINT */
   ASSERT_EQ(*result, *expectedResult);
 }
 
-TEST(EvaluationVisitorTest, astFullAssignmentToMatrix) { /* NOLINT */
+TEST(EvaluationVisitorTests, astFullAssignmentToMatrix) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(58, ast);
   auto result = dynamic_cast<LiteralInt *>(ast.evaluateAst({}, false).front());
