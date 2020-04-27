@@ -81,7 +81,11 @@ static std::map<int, std::function<void(Ast &)> > call = {  /* NOLINT */
     {51, AstTestingGenerator::genAstMatrixPermutation},
     {52, AstTestingGenerator::genAstGetMatrixSizeOfKnownMatrix},
     {53, AstTestingGenerator::genAstGetMatrixSizeOfAbstractMatrix},
-    {54, AstTestingGenerator::genAstGetMatrixSizeOfUnknownMatrix}
+    {54, AstTestingGenerator::genAstGetMatrixSizeOfUnknownMatrix},
+    {55, AstTestingGenerator::genAstMatrixAssignmAndGetMatrixSize},
+    {56, AstTestingGenerator::genAstMatrixAssignmentKnownThenUnknown},
+    {57, AstTestingGenerator::genAstMatrixAssignmentUnknownThenKnown},
+    {58, AstTestingGenerator::genAstFullAssignmentToMatrix}
 };
 
 void AstTestingGenerator::generateAst(int id, Ast &ast) {
@@ -1740,7 +1744,6 @@ void AstTestingGenerator::genAstGetMatrixSizeOfKnownMatrix(Ast &ast) {
 }
 
 void AstTestingGenerator::genAstGetMatrixSizeOfAbstractMatrix(Ast &ast) {
-  // -- input --
   // Matrix<int> getNumElementsPerDimension(int factor) {
   //   int val = 567;
   //   Matrix<int> M = [ 3*factor 1*factor val*factor 5*factor 19 ];
@@ -1775,7 +1778,6 @@ void AstTestingGenerator::genAstGetMatrixSizeOfAbstractMatrix(Ast &ast) {
 }
 
 void AstTestingGenerator::genAstGetMatrixSizeOfUnknownMatrix(Ast &ast) {
-  // -- input --
   // int getNumElementsNthDimension(Matrix<int> inputMatrix, int dimension) {
   //   return inputMatrix.dimSize(dimension);  // UNKNOWN at compile-time, not (0,0)!
   // }
@@ -1789,4 +1791,110 @@ void AstTestingGenerator::genAstGetMatrixSizeOfUnknownMatrix(Ast &ast) {
   function->addStatement(new Return(new GetMatrixSize(new Variable("inputMatrix"), new Variable("dimension"))));
 
   ast.setRootNode(function);
+}
+
+void AstTestingGenerator::genAstMatrixAssignmAndGetMatrixSize(Ast &ast) {
+  // TODO use AST in tests
+  // Matrix<int> extendMatrixAddingElements() {
+  //   Matrix<int> m;   // size: 0x0
+  //   for (int i = 0; i < 3; ++i) {
+  //     Vector<int> t;
+  //     for (int j = 0; j < 3; ++j) {
+  //       t[t.size()+1] = i*j;
+  //     }
+  //     m[m.size()+1] = t;
+  //   }
+  //   return m;  // m = [0 0 0; 1 2 3; 2 4 6], size: 3x3
+  // }
+  auto func = new Function("extendMatrixAddingElements");
+  func->addStatement(new VarDecl("m", new Datatype(Types::INT, false)));
+
+  // inner loop body
+  auto innermostStatements = new Block(
+      new MatrixAssignm(
+          new MatrixElementRef(new Variable("t"),
+                               new LiteralInt(0),
+                               new ArithmeticExpr(new GetMatrixSize(new Variable("t"), new LiteralInt(1)),
+                                                  ADDITION,
+                                                  new LiteralInt(1))),
+          new ArithmeticExpr(new Variable("i"), MULTIPLICATION, new Variable("j"))));
+
+  // inner loop
+  auto innerLoop = new For(new VarDecl("j", 0),
+                           new LogicalExpr(new Variable("j"), SMALLER, new LiteralInt(3)),
+                           new VarAssignm("j", new ArithmeticExpr(new Variable("j"), ADDITION, new LiteralInt(1))),
+                           innermostStatements);
+
+  // outer loop body
+  auto outerLoopBody = new Block({
+                                     new VarDecl("t", new Datatype(Types::INT)),
+                                     innerLoop
+                                 });
+
+
+  // outer loop
+  func->addStatement(new For(new VarDecl("i", 0),
+                             new LogicalExpr(new Variable("i"), SMALLER, new LiteralInt(3)),
+                             new VarAssignm("i", new ArithmeticExpr(new Variable("i"), ADDITION, new LiteralInt(1))),
+                             outerLoopBody));
+
+  func->addStatement(new Return(new Variable("m")));
+  ast.setRootNode(func);
+}
+
+void AstTestingGenerator::genAstMatrixAssignmentKnownThenUnknown(Ast &ast) {
+  // TODO use AST in tests
+  // void computeMatrix(int k, int a) {
+  //   Matrix<int> M;
+  //   M[k][0] = 4;
+  //   M[0][0] = 21 + a;
+  //   return M;
+  // }
+  auto func = new Function("computeMatrix");
+  func->addParameter(new FunctionParameter(new Datatype(Types::INT, false), new Variable("k")));
+  func->addParameter(new FunctionParameter(new Datatype(Types::INT, false), new Variable("a")));
+  func->addStatement(new VarDecl("M", new Datatype(Types::INT, false)));
+  func->addStatement(new MatrixAssignm(new MatrixElementRef(new Variable("M"), new Variable("k"), new LiteralInt(0)),
+                                       new LiteralInt(4)));
+  func->addStatement(new MatrixAssignm(new MatrixElementRef(new Variable("M"), 0, 0),
+                                       new ArithmeticExpr(new LiteralInt(21), ADDITION, new Variable("a"))));
+  func->addStatement(new Return(new Variable("M")));
+  ast.setRootNode(func);
+}
+
+void AstTestingGenerator::genAstMatrixAssignmentUnknownThenKnown(Ast &ast) {
+  // TODO use AST in tests
+  // void computeMatrix(int k) {
+  //   Matrix<int> M;
+  //   M[0][0] = 21;
+  //   M[0][k] = 4;
+  //   return M;
+  // }
+  auto func = new Function("computeMatrix");
+  func->addParameter(new FunctionParameter(new Datatype(Types::INT, false), new Variable("k")));
+  func->addStatement(new VarDecl("M", new Datatype(Types::INT, false)));
+  func->addStatement(new MatrixAssignm(new MatrixElementRef(new Variable("M"), 0, 0), new LiteralInt(21)));
+  func->addStatement(new MatrixAssignm(new MatrixElementRef(new Variable("M"), new LiteralInt(0), new Variable("k")),
+                                       new LiteralInt(4)));
+  func->addStatement(new Return(new Variable("M")));
+  ast.setRootNode(func);
+}
+
+void AstTestingGenerator::genAstFullAssignmentToMatrix(Ast &ast) {
+  // TODO use AST in tests
+  // void computeMatrix(int k) {
+  //   Matrix<int> M = [31 84 21; 3 3 0]
+  //   M[0][0] = 11;
+  //   M = [M[0][0] 1 1; M[1][0] 2 2];
+  //   return M;
+  auto func = new Function("computeMatrix");
+  func->addStatement(new VarDecl("M", new Datatype(Types::INT),
+                                 new LiteralInt(new Matrix<int>({{31, 84, 21}, {3, 3, 0}}))));
+  func->addStatement(new MatrixAssignm(new MatrixElementRef(new Variable("M"), 0, 0), new LiteralInt(11)));
+  func->addStatement(new VarAssignm("M", new LiteralInt(
+      new Matrix<AbstractExpr *>(
+          {{new MatrixElementRef(new Variable("M"), 0, 0), new LiteralInt(1), new LiteralInt(1)},
+           {new MatrixElementRef(new Variable("M"), 1, 0), new LiteralInt(2), new LiteralInt(2)}}))));
+  func->addStatement(new Return(new Variable("M")));
+  ast.setRootNode(func);
 }

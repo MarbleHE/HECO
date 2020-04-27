@@ -15,7 +15,7 @@ class AstTestingGenerator {
   /// \return An integer specifying the largest ID supported by generateAst.
   static size_t getLargestId();
 
-  /** @defgroup astGenerators Methods for generating sample ASTs to be used within tests.
+  /** @defgroup astGenerators Methods that generate sample ASTs (e.g., for testing).
   *  @{
   */
   static void genSuperSimpleAst(Ast &ast);
@@ -123,10 +123,19 @@ class AstTestingGenerator {
   static void genAstMatrixPermutation(Ast &ast);
 
   static void genAstGetMatrixSizeOfKnownMatrix(Ast &ast);
-  /** @} */ // End of astGenerators group
+
   static void genAstGetMatrixSizeOfAbstractMatrix(Ast &ast);
 
   static void genAstGetMatrixSizeOfUnknownMatrix(Ast &ast);
+
+  static void genAstMatrixAssignmAndGetMatrixSize(Ast &ast);
+
+  static void genAstMatrixAssignmentKnownThenUnknown(Ast &ast);
+
+  static void genAstMatrixAssignmentUnknownThenKnown(Ast &ast);
+
+  static void genAstFullAssignmentToMatrix(Ast &ast);
+  /** @} */ // End of astGenerators group
 };
 
 #endif //AST_OPTIMIZER_TEST_ASTTESTINGGENERATOR_H_
