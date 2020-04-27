@@ -1794,17 +1794,17 @@ void AstTestingGenerator::genAstGetMatrixSizeOfUnknownMatrix(Ast &ast) {
 }
 
 void AstTestingGenerator::genAstMatrixAssignmAndGetMatrixSize(Ast &ast) {
-  // TODO use AST in tests
+  // TODO implement functionalities to support this program
   // Matrix<int> extendMatrixAddingElements() {
   //   Matrix<int> m;   // size: 0x0
   //   for (int i = 0; i < 3; ++i) {
   //     Vector<int> t;
   //     for (int j = 0; j < 3; ++j) {
-  //       t[t.size()+1] = i*j;
+  //       t[0][t.dimSize(1)] = i*j;
   //     }
-  //     m[m.size()+1] = t;
+  //     m[m.dimSize(0)] = t;
   //   }
-  //   return m;  // m = [0 0 0; 1 2 3; 2 4 6], size: 3x3
+  //   return m;  // m = [0*0 0*1 0*2; 1*0 1*1 1*2; 2*0 2*1 2*2] = [0 0 0; 0 1 2; 0 2 4], size: 3x3
   // }
   auto func = new Function("extendMatrixAddingElements");
   func->addStatement(new VarDecl("m", new Datatype(Types::INT, false)));
@@ -1814,9 +1814,7 @@ void AstTestingGenerator::genAstMatrixAssignmAndGetMatrixSize(Ast &ast) {
       new MatrixAssignm(
           new MatrixElementRef(new Variable("t"),
                                new LiteralInt(0),
-                               new ArithmeticExpr(new GetMatrixSize(new Variable("t"), new LiteralInt(1)),
-                                                  ADDITION,
-                                                  new LiteralInt(1))),
+                               new GetMatrixSize(new Variable("t"), new LiteralInt(1))),
           new ArithmeticExpr(new Variable("i"), MULTIPLICATION, new Variable("j"))));
 
   // inner loop
@@ -1828,7 +1826,11 @@ void AstTestingGenerator::genAstMatrixAssignmAndGetMatrixSize(Ast &ast) {
   // outer loop body
   auto outerLoopBody = new Block({
                                      new VarDecl("t", new Datatype(Types::INT)),
-                                     innerLoop
+                                     innerLoop,
+                                     new MatrixAssignm(
+                                         new MatrixElementRef(new Variable("m"),
+                                                              new GetMatrixSize(new Variable("m"), new LiteralInt(0))),
+                                         new Variable("t"))
                                  });
 
 
@@ -1882,7 +1884,7 @@ void AstTestingGenerator::genAstMatrixAssignmentUnknownThenKnown(Ast &ast) {
 
 void AstTestingGenerator::genAstFullAssignmentToMatrix(Ast &ast) {
   // TODO use AST in tests
-  // void computeMatrix(int k) {
+  // void computeMatrix() {
   //   Matrix<int> M = [31 84 21; 3 3 0]
   //   M[0][0] = 11;
   //   M = [M[0][0] 1 1; M[1][0] 2 2];
