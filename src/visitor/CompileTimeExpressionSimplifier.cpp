@@ -138,17 +138,23 @@ void CompileTimeExpressionSimplifier::visit(MatrixAssignm &elem) {
     enqueueNodeForDeletion = true;
   } else { // matrix/indices are not known or there was a previous assignment that could not be executed
     auto var = getVariableEntryDeclaredInThisOrOuterScope(operandAsVariable->getIdentifier());
-    auto typesDefaultValue = Datatype::getDefaultVariableInitializationValue(var->second->datatype->getType());
-    // With that we handle the case where this assignment refers to a declared but uninitialized matrix
-    // in that case, the VarDecl implictly assigned the variable's default initialization value but that's wrong for
-    // matrices.
-    if (hasDefaultInitializationValue(operandAsVariable)) {
-      // Check if the variable currently has its default initialization value in variableValues -> delete it as it is
-      // not a literal but a matrix (otherwise it would not have been used in a MatrixAssignm statement)
+    if (var->second==nullptr) {
+      // The Matrix already has the UNKNOWN value (nullptr) assigned, i.e., a MatrixAssignm was visited before that
+      // could not be executed as there were unknown indices involved.
+      // -> Do nothing as we cannot execute or simplify that MatrixAssignm.
+    } else if (var->second->value->castTo<AbstractLiteral>()->getMatrix()->getDimensions().equals(0, 0)) {
+      // The variable's value is EMPTY (default-initialized literal without any value), i.e., this is the first
+      // MatrixAssignm that could not be executed because there is an unknown index involved.
+      // -> Remove the variable's value in variableValues map to prevent execution of any future MatrixAssignms.
+      // emit a variable declaration statement if there's none present yet
+      if (emittedVariableDeclarations.count(var->first)==0) emitVariableDeclaration(var);
+      // and then mark the value as UNKNOWN
       variableValues[var->first] = nullptr;
-    } else if (getVariableValueDeclaredInThisOrOuterScope(operandAsVariable->getIdentifier())!=nullptr) {
-      // if the matrix's value is not the type's default init value and is not nullptr, then emit a VarAssignm
-      // statement of the current value
+    } else {
+      // The variable's value is set, i.e., a previous MatrixAssignm was executed by CTES. As we now encountered a
+      // MatrixAssignm that cannot be executed due to unknown indices, we need to undo the removal of any previous
+      // MatrixAssignms that we executed. This is done by emitting the matrix's current value as a VarAssignm.
+      // Afterwards, we set the matrix's value to UNKNOWN (nullptr) to prevent execution of any future MatrixAssignms.
       auto varAssignm = emitVariableAssignment(
           getVariableEntryDeclaredInThisOrOuterScope(operandAsVariable->getIdentifier()));
 
@@ -309,7 +315,7 @@ void CompileTimeExpressionSimplifier::visit(VarDecl &elem) {
   AbstractExpr *variableValue;
   auto variableInitializer = elem.getInitializer();
   if (variableInitializer==nullptr) {
-    variableValue = Datatype::getDefaultVariableInitializationValue(elem.getDatatype()->getType());
+    variableValue = AbstractLiteral::createLiteralBasedOnDatatype(elem.getDatatype());
   } else {
     variableValue = variableInitializer;
   }
