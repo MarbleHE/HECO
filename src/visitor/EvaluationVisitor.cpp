@@ -299,10 +299,6 @@ void EvaluationVisitor::visit(MatrixAssignm &elem) {
   auto val = getOnlyEvaluationResult(results.top());
 
   auto matrixRef = elem.getAssignmTarget();
-  // operand
-  matrixRef->getOperand()->accept(*this);
-  auto operand = dynamic_cast<AbstractLiteral *>(getOnlyEvaluationResult(results.top()));
-  results.pop();
   // row index
   matrixRef->getRowIndex()->accept(*this);
   auto rowIdx = dynamic_cast<LiteralInt *>(getOnlyEvaluationResult(results.top()));
@@ -333,7 +329,7 @@ void EvaluationVisitor::visit(VarDecl &elem) {
     updateVarValue(elem.getIdentifier(), value);
     results.push({value});
   } else {
-    updateVarValue(elem.getIdentifier(), nullptr);
+    updateVarValue(elem.getIdentifier(), AbstractLiteral::createLiteralBasedOnDatatype(elem.getDatatype()));
     results.push({});
   }
 }
