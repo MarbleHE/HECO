@@ -191,11 +191,22 @@ class Matrix : public AbstractMatrix {
   }
 
   void checkBoundsAndResizeMatrix(int rowIdx, int colIdx) {
+    if (rowIdx < 0 || colIdx < 0) {
+      throw std::runtime_error("Matrix access with index < 0 is invalid! "
+                               "Given indices (row, col): " + std::to_string(rowIdx) + ", " + std::to_string(colIdx));
+    }
+
     // Resize the outer vector by adding new vectors that have the same size as the already existing ones.
     // Note: The new size must be rowIdx+1 because a vector is 0-indexed.
-    if (rowIdx > values.size() - 1) { values.resize(rowIdx + 1, std::vector<T>(values.at(0).size())); }
+    if (rowIdx + 1 > values.size()) {
+      if (values.empty()) {  // <==> values.size() == 0
+        values.resize(rowIdx + 1);
+      } else {
+        values.resize(rowIdx + 1, std::vector<T>(values.at(0).size()));
+      }
+    }
     // Resize the inner vectors -- all of them, to ensure that all rows have the same #elements.
-    if (colIdx > values.at(rowIdx).size() - 1) { for (auto &rw : values) rw.resize(colIdx + 1); }
+    if (colIdx + 1 > values.at(rowIdx).size()) { for (auto &rw : values) rw.resize(colIdx + 1); }
   }
 
   /// Returns a reference to the element at index specified by the given (row, column) pair.
