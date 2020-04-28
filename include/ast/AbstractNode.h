@@ -96,11 +96,27 @@ class AbstractNode {
   /// list of parent nodes for each of the added children.
   /// \param childrenToAdd A vector of nodes to be added as children to this node.
   /// \param addBackReference If True, then adds this node as parent to each of the child nodes.
-  /// otherwise adds the new children at the end of the children vector (append).
   void addChildren(const std::vector<AbstractNode *> &childrenToAdd, bool addBackReference = true);
 
+  /// Adds multiple children to the node's list of children at the position (or more precisely, before) indicated by
+  /// the passed insertPosition iterator of the children vector. If addBackReference is True then also updates the
+  /// child's list of parent nodes for each of the added children.
+  /// \param childrenToAdd A vector of nodes to be added as children to this node.
+  /// \param addBackReference If True, then adds this node as parent to each of the child nodes.
+  /// \param insertPosition The position before which the new nodes should be added to.
   void addChildren(const std::vector<AbstractNode *> &childrenToAdd, bool addBackReference,
                    std::vector<AbstractNode *>::const_iterator insertPosition);
+
+  /// Adds multiple children to the node's list of children at the position (or more precisely, before) indicated by
+  /// the passed node  of the children vector. If addBackReference is True then also updates the
+  /// child's list of parent nodes for each of the added children.
+  /// \param childrenToAdd A vector of nodes to be added as children to this node.
+  /// \param addBackReference If True, then adds this node as parent to each of the child nodes.
+  /// \param insertBeforeNode The node (must be a children of this node) that is used to determine the insert
+  /// position of the children to be added.
+  /// \throws std::runtime_error if the given node (insertBeforeNode) could not be found.
+  void addChildren(const std::vector<AbstractNode *> &childrenToAdd, bool addBackReference,
+                   AbstractNode *insertBeforeNode);
 
   /// Removes the given child from the list of children. If getMaxNumberChildren() returns -1 (i.e., this node supports
   /// an inifinite number of children, then the respective child is simply deleted. In any other case, the child node is

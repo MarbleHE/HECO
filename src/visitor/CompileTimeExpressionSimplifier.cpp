@@ -159,12 +159,7 @@ void CompileTimeExpressionSimplifier::visit(MatrixAssignm &elem) {
           getVariableEntryDeclaredInThisOrOuterScope(operandAsVariable->getIdentifier()));
 
       // and attach the assignment statement immediately before this MatrixAssignm
-      auto parentsChildren = elem.getOnlyParent()->getChildren();
-      auto it = std::find(parentsChildren.begin(), parentsChildren.end(), &elem);
-      if (it==parentsChildren.end())
-        throw std::logic_error("visit(MatrixAssignm &) failed: Could not determine position of node in parent's node "
-                               "children vector. This is required to attach the gen. VarAssignm statement though.");
-      elem.getOnlyParent()->addChildren({varAssignm}, true, it);
+      elem.getOnlyParent()->addChildren({varAssignm}, true, &elem);
 
       // and remove the value in variableValues map to avoid saving any further assignments
       variableValues[var->first] = nullptr;
@@ -1453,6 +1448,7 @@ VarAssignm *CompileTimeExpressionSimplifier::emitVariableAssignment(VariableValu
     // statement in the scope - this should generally be a Block statement
     emitVariableDeclaration(variableToEmit);
   }
+
   auto newVarAssignm = new VarAssignm(variableToEmit->first.first,
                                       variableToEmit->second->value->clone(false)->castTo<AbstractExpr>());
   // add a reference in the list of the associated VarDecl

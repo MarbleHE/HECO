@@ -60,6 +60,16 @@ void AbstractNode::addChild(AbstractNode *child, bool addBackReference) {
   addChildren({child}, addBackReference);
 }
 
+void AbstractNode::addChildren(const std::vector<AbstractNode *> &childrenToAdd, bool addBackReference, AbstractNode *
+insertBeforeNode) {
+  auto it = std::find(children.begin(), children.end(), insertBeforeNode);
+  if (it==children.end()) {
+    throw std::runtime_error("addChildren failed: Could not find node given as parameter insertBeforeNode "
+                             "that is required to determine insert position.");
+  }
+  addChildren(childrenToAdd, addBackReference, it);
+}
+
 void AbstractNode::addChildren(const std::vector<AbstractNode *> &childrenToAdd, bool addBackReference,
                                std::vector<AbstractNode *>::const_iterator insertPosition) {
   auto allowsInfiniteNumberOfChildren = (getMaxNumberChildren()==-1);
