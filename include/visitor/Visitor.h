@@ -33,11 +33,16 @@ class While;
 class Scope;
 class Rotate;
 class Transpose;
-class GetMatrixElement;
+class MatrixElementRef;
 class AbstractMatrix;
 class OperatorExpr;
+class MatrixAssignm;
+class GetMatrixSize;
 
 class Visitor {
+ protected:
+  bool ignoreScope{false};
+
  public:
   virtual void visit(AbstractNode &elem);
 
@@ -93,23 +98,31 @@ class Visitor {
 
   virtual void visit(While &elem);
 
-  virtual void visit(GetMatrixElement &elem);
+  virtual void visit(MatrixElementRef &elem);
 
   virtual void visit(AbstractMatrix &elem);
 
   virtual void visit(OperatorExpr &elem);
 
+  virtual void visit(MatrixAssignm &elem);
+
+  virtual void visit(GetMatrixSize &elem);
+
   Scope *curScope;
+
+  void setIgnoreScope(bool ignScope);
 
   void changeToOuterScope();
 
-  void changeToInnerScope(const std::string &nodeId);
+  void changeToInnerScope(const std::string &nodeId, AbstractStatement *statement);
 
   Visitor();
 
   /// This and only this method should be used to traverse an AST.
   /// \param elem A reference to the Abstract Syntax Tree (AST).
   virtual void visit(Ast &elem);
+
+  void addStatementToScope(AbstractStatement &stat);
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_VISITOR_VISITOR_H_

@@ -33,7 +33,7 @@ class OperatorExpr : public AbstractExpr {
 
   void addOperand(AbstractExpr *operand);
 
-  void setAttributes(Operator *op, std::vector<AbstractExpr *> abstractExpr);
+  void setAttributes(Operator *newOperator, std::vector<AbstractExpr *> newOperands);
 
   [[nodiscard]] bool isLogicalExpr() const;
 
@@ -50,6 +50,8 @@ class OperatorExpr : public AbstractExpr {
   OperatorExpr(AbstractExpr *lhsOperand, Operator *op, AbstractExpr *rhsOperand);
 
   bool isEqual(AbstractExpr *other) override;
+
+  void replaceChild(AbstractNode *originalChild, AbstractNode *newChildToBeAdded) override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPERATOREXPR_H_

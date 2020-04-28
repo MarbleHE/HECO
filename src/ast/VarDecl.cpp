@@ -101,7 +101,9 @@ bool VarDecl::isEqual(AbstractStatement *as) {
   if (auto otherVarDecl = dynamic_cast<VarDecl *>(as)) {
     return (this->getIdentifier()==otherVarDecl->getIdentifier())
         && (*this->getDatatype()==*otherVarDecl->getDatatype())
-        && (this->getInitializer()->isEqual(otherVarDecl->getInitializer()));
+        && ((this->getInitializer()==nullptr && otherVarDecl->getInitializer()==nullptr)
+            || ((this->getInitializer()!=nullptr && otherVarDecl->getInitializer()!=nullptr)
+                && this->getInitializer()->isEqual(otherVarDecl->getInitializer())));
   }
   return false;
 }
@@ -117,7 +119,9 @@ int VarDecl::getMaxNumberChildren() {
 VarDecl *VarDecl::clone(bool keepOriginalUniqueNodeId) {
   auto clonedNode = new VarDecl(this->getVarTargetIdentifier(),
                                 this->getDatatype()->getType(),
-                                getInitializer()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
+                                getInitializer()!=nullptr
+                                ? getInitializer()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>()
+                                : nullptr);
   clonedNode->updateClone(keepOriginalUniqueNodeId, this);
   return clonedNode;
 }

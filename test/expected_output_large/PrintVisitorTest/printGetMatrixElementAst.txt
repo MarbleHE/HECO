@@ -9,15 +9,15 @@ Function: (extractArbitraryMatrixElements)	[global]
 			LiteralString: ([beta zetta gamma])
 		Return:
 			LiteralString:
-(0,0)			GetMatrixElement:
+(0,0)			MatrixElementRef:
 					Variable: (M)
 					LiteralInt: (0)
 					LiteralInt: (1)
-(0,1)			GetMatrixElement:
+(0,1)			MatrixElementRef:
 					Variable: (B)
 					LiteralInt: (0)
 					LiteralInt: (0)
-(0,2)			GetMatrixElement:
+(0,2)			MatrixElementRef:
 					Variable: (B)
 					LiteralInt: (0)
 					LiteralInt: (2)

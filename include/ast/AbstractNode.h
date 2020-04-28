@@ -98,6 +98,26 @@ class AbstractNode {
   /// \param addBackReference If True, then adds this node as parent to each of the child nodes.
   void addChildren(const std::vector<AbstractNode *> &childrenToAdd, bool addBackReference = true);
 
+  /// Adds multiple children to the node's list of children at the position (or more precisely, before) indicated by
+  /// the passed insertPosition iterator of the children vector. If addBackReference is True then also updates the
+  /// child's list of parent nodes for each of the added children.
+  /// \param childrenToAdd A vector of nodes to be added as children to this node.
+  /// \param addBackReference If True, then adds this node as parent to each of the child nodes.
+  /// \param insertPosition The position before which the new nodes should be added to.
+  void addChildren(const std::vector<AbstractNode *> &childrenToAdd, bool addBackReference,
+                   std::vector<AbstractNode *>::const_iterator insertPosition);
+
+  /// Adds multiple children to the node's list of children at the position (or more precisely, before) indicated by
+  /// the passed node  of the children vector. If addBackReference is True then also updates the
+  /// child's list of parent nodes for each of the added children.
+  /// \param childrenToAdd A vector of nodes to be added as children to this node.
+  /// \param addBackReference If True, then adds this node as parent to each of the child nodes.
+  /// \param insertBeforeNode The node (must be a children of this node) that is used to determine the insert
+  /// position of the children to be added.
+  /// \throws std::runtime_error if the given node (insertBeforeNode) could not be found.
+  void addChildren(const std::vector<AbstractNode *> &childrenToAdd, bool addBackReference,
+                   AbstractNode *insertBeforeNode);
+
   /// Removes the given child from the list of children. If getMaxNumberChildren() returns -1 (i.e., this node supports
   /// an inifinite number of children, then the respective child is simply deleted. In any other case, the child node is
   /// overwritten by -1 such that the order of other children is preserved.
@@ -108,11 +128,21 @@ class AbstractNode {
   /// Removes all children from this node. Note: Does not update the child's parent.
   void removeChildren();
 
-  /// Replaces a given child (originalChild) of this node by a new node (newChildToBeAdded) and updates the child and
-  /// parent of both nodes. This method preserves the order of the children.
-  /// \param originalChild The node's child to be removed.
-  /// \param newChildToBeAdded The node to be added at the same position as the original child was.
-  virtual void replaceChild(AbstractNode *originalChild, AbstractNode *newChildToBeAdded);
+  /// Replaces a given child (originalChild) of this node by a new node (newChild) and updates the child and
+  /// parent references of both nodes. This method preserves the order of the children.
+  /// \param originalChild The node to be replaced by newChild.
+  /// \param newChild The node to be added at the same position as the original child was.
+  virtual void replaceChild(AbstractNode *originalChild, AbstractNode *newChild);
+
+  /// Replaces a given child (originalChild) of this node by one or multiple new nodes (newChildren) and updates the
+  /// child and parent references of all affected nodes. This method preserves the order of the children when
+  /// inserting the nodes. For example:
+  ///     replaceChildren(C, [X, V, W]) on node with children = [a b C d e f]
+  /// results in
+  ///     children = [a b X V W d e f].
+  /// \param originalChild The node to be replaced by newChildren.
+  /// \param newChildren The children to be added at the originalChild's current position.
+  void replaceChildren(AbstractNode *originalChild, std::vector<AbstractNode *> newChildren);
 
   /// Returns the number of children nodes that are not null (nullptr).
   /// \return An integer indicating the number of non-nullptr children nodes.
@@ -161,7 +191,7 @@ class AbstractNode {
   /// Removes this node from its parent's children list. If removeParentBackreference is True, then also removes the
   /// parents from this node's parent list.
   /// \param removeParentBackreference Indicates whether to update this node's parents list too.
-  void removeFromParents(bool removeParentBackreference = true);
+  AbstractNode *removeFromParents(bool removeParentBackreference = true);
 
   /// Removes all parents from this node. Note: Does not update the parent's children.
   void removeParents();

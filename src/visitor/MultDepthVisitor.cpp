@@ -4,6 +4,7 @@
 #include "VarAssignm.h"
 #include "VarDecl.h"
 #include "Return.h"
+#include "MatrixAssignm.h"
 
 void MultDepthVisitor::visit(ArithmeticExpr &elem) {
   Visitor::visit(elem);
@@ -90,6 +91,13 @@ void MultDepthVisitor::visit(VarDecl &elem) {
   Visitor::visit(elem);
 }
 
+void MultDepthVisitor::visit(MatrixAssignm &elem) {
+  // TODO Update the depthsPerVariable structure to allow storing a MatrixElementRef instead of strings only. Then
+  //  update the analyzeMultiplicativeDepth's input parameters accordingly.
+  analyzeMultiplicativeDepth(elem.getAssignmTargetString(), &elem, elem.getValue());
+  Visitor::visit(elem);
+}
+
 void MultDepthVisitor::visit(Variable &elem) {
   Visitor::visit(elem);
 }
@@ -106,11 +114,15 @@ void MultDepthVisitor::visit(ParameterList &elem) {
   Visitor::visit(elem);
 }
 
+void MultDepthVisitor::visit(GetMatrixSize &elem) {
+  Visitor::visit(elem);
+}
+
 void MultDepthVisitor::visit(Transpose &elem) {
   Visitor::visit(elem);
 }
 
-void MultDepthVisitor::visit(GetMatrixElement &elem) {
+void MultDepthVisitor::visit(MatrixElementRef &elem) {
   Visitor::visit(elem);
 }
 

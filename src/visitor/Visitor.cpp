@@ -23,12 +23,14 @@
 #include "While.h"
 #include "Rotate.h"
 #include "Transpose.h"
-#include "GetMatrixElement.h"
+#include "MatrixElementRef.h"
 #include "OperatorExpr.h"
+#include "MatrixAssignm.h"
+#include "GetMatrixSize.h"
 
 void Visitor::visit(Ast &elem) {
   // assumption: AST is always the enclosing object that points to the root
-  this->curScope = new Scope("global", nullptr);
+  this->curScope = new Scope("global", elem.getRootNode(), nullptr);
   elem.getRootNode()->accept(*this);
 }
 
@@ -60,8 +62,8 @@ void Visitor::visit(ArithmeticExpr &elem) {
 }
 
 void Visitor::visit(Block &elem) {
-  curScope->addStatement(&elem);
-  changeToInnerScope(elem.getUniqueNodeId());
+  addStatementToScope(elem);
+  changeToInnerScope(elem.getUniqueNodeId(), &elem);
   for (auto &stat : elem.getStatements()) {
     stat->accept(*this);
   }
@@ -69,8 +71,6 @@ void Visitor::visit(Block &elem) {
 }
 
 void Visitor::visit(Call &elem) {
-  //curScope->addStatement(&elem);
-  changeToInnerScope(elem.AbstractExpr::getUniqueNodeId());
   // callee
   elem.getFunc()->accept(*this);
   changeToOuterScope();
@@ -90,8 +90,8 @@ void Visitor::visit(CallExternal &elem) {
 }
 
 void Visitor::visit(Function &elem) {
-  curScope->addStatement(&elem);
-  changeToInnerScope(elem.getUniqueNodeId());
+  addStatementToScope(elem);
+  changeToInnerScope(elem.getUniqueNodeId(), &elem);
   // visit FunctionParameter
   if (auto fp = elem.getParameterList()) fp->accept(*this);
   // visit Body statements
@@ -105,7 +105,7 @@ void Visitor::visit(FunctionParameter &elem) {
 }
 
 void Visitor::visit(If &elem) {
-  curScope->addStatement(&elem);
+  addStatementToScope(elem);
 
   // condition
   elem.getCondition()->accept(*this);
@@ -120,7 +120,7 @@ void Visitor::visit(If &elem) {
     // if thenBranch is no Block we need to manually open a new scope here
     auto thenNode = dynamic_cast<AbstractNode *>(elem.getThenBranch());
     assert(thenNode!=nullptr); // this should never happen
-    changeToInnerScope(thenNode->getUniqueNodeId());
+    changeToInnerScope(thenNode->getUniqueNodeId(), &elem);
     elem.getThenBranch()->accept(*this);
     changeToOuterScope();
   }
@@ -132,7 +132,7 @@ void Visitor::visit(If &elem) {
     } else {
       auto elseNode = dynamic_cast<AbstractNode *>(elem.getElseBranch());
       assert(elseNode!=nullptr);
-      changeToInnerScope(elseBranch->getUniqueNodeId());
+      changeToInnerScope(elseBranch->getUniqueNodeId(), &elem);
       elem.getElseBranch()->accept(*this);
       changeToOuterScope();
     }
@@ -185,13 +185,13 @@ void Visitor::visit(For &elem) {
   // e.g., for (int i = 0; i < N; i++) { cout << i << endl; }
 
   // initializer
-  elem.getInitializer()->accept(*this);
+  if (elem.getInitializer()!=nullptr) elem.getInitializer()->accept(*this);
   // condition
-  elem.getCondition()->accept(*this);
+  if (elem.getCondition()!=nullptr) elem.getCondition()->accept(*this);
   // update
-  elem.getUpdateStatement()->accept(*this);
+  if (elem.getUpdateStatement()!=nullptr) elem.getUpdateStatement()->accept(*this);
 
-  changeToInnerScope(elem.getStatementToBeExecuted()->getUniqueNodeId());
+  changeToInnerScope(elem.getStatementToBeExecuted()->getUniqueNodeId(), &elem);
   // For statement body is always in a separate scope (even without a separate block "{...}")
   elem.getStatementToBeExecuted()->accept(*this);
   changeToOuterScope();
@@ -206,7 +206,7 @@ void Visitor::visit(ParameterList &elem) {
 }
 
 void Visitor::visit(Return &elem) {
-  curScope->addStatement(&elem);
+  addStatementToScope(elem);
   for (auto &expr : elem.getReturnExpressions()) {
     expr->accept(*this);
   }
@@ -222,18 +222,24 @@ void Visitor::visit(Transpose &elem) {
 
 void Visitor::visit(UnaryExpr &elem) {
   // operator
-  elem.getOp()->accept(*this);
+  elem.getOperator()->accept(*this);
   // rhs operand
   elem.getRight()->accept(*this);
 }
 
 void Visitor::visit(VarAssignm &elem) {
-  curScope->addStatement(&elem);
+  addStatementToScope(elem);
+  elem.getValue()->accept(*this);
+}
+
+void Visitor::visit(MatrixAssignm &elem) {
+  addStatementToScope(elem);
+  elem.getAssignmTarget()->accept(*this);
   elem.getValue()->accept(*this);
 }
 
 void Visitor::visit(VarDecl &elem) {
-  curScope->addStatement(&elem);
+  addStatementToScope(elem);
   // visit datatype associated to new variable
   elem.getDatatype()->accept(*this);
   // visit initializer
@@ -242,10 +248,15 @@ void Visitor::visit(VarDecl &elem) {
   }
 }
 
+void Visitor::visit(GetMatrixSize &elem) {
+  elem.getMatrixOperand()->accept(*this);
+  elem.getDimensionParameter()->accept(*this);
+}
+
 void Visitor::visit(Variable &elem) {}
 
 void Visitor::visit(While &elem) {
-  curScope->addStatement(&elem);
+  addStatementToScope(elem);
 
   // condition
   elem.getCondition()->accept(*this);
@@ -258,19 +269,21 @@ void Visitor::visit(While &elem) {
   } else {
     auto *block = dynamic_cast<AbstractNode *>(elem.getBody());
     assert(block!=nullptr);
-    changeToInnerScope(block->getUniqueNodeId());
+    changeToInnerScope(block->getUniqueNodeId(), &elem);
     elem.getBody()->accept(*this);
     changeToOuterScope();
   }
 }
 
 void Visitor::changeToOuterScope() {
+  if (ignoreScope) return;
   auto temp = curScope->getOuterScope();
   this->curScope = temp;
 }
 
-void Visitor::changeToInnerScope(const std::string &nodeId) {
-  auto temp = curScope->getOrCreateInnerScope(nodeId);
+void Visitor::changeToInnerScope(const std::string &nodeId, AbstractStatement *statement) {
+  if (ignoreScope) return;
+  auto temp = curScope->getOrCreateInnerScope(nodeId, statement);
   this->curScope = temp;
 }
 
@@ -282,7 +295,7 @@ void Visitor::visit(Datatype &elem) {
   // no children to visit here
 }
 
-void Visitor::visit(GetMatrixElement &elem) {
+void Visitor::visit(MatrixElementRef &elem) {
   // operand
   elem.getOperand()->accept(*this);
   // row index
@@ -312,4 +325,16 @@ void Visitor::visit(OperatorExpr &elem) {
   elem.getOperator()->accept(*this);
   // visit all operands
   for (auto &child : elem.getOperands()) child->accept(*this);
+}
+
+void Visitor::addStatementToScope(AbstractStatement &stat) {
+  if (ignoreScope) return;
+  if (curScope==nullptr) {
+    throw std::logic_error("[Visitor] Cannot add statement to scope as Scope is not created yet (nullptr).");
+  }
+  curScope->addStatement(&stat);
+}
+
+void Visitor::setIgnoreScope(bool ignScope) {
+  Visitor::ignoreScope = ignScope;
 }

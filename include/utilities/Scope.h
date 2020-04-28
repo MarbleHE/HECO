@@ -11,12 +11,13 @@
 class Scope {
  private:
   std::unordered_map<std::string, Scope *> innerScopes;
-  Scope *outerScope;
   std::string scopeIdentifier;
+  AbstractNode *scopeOpener;
+  Scope *outerScope;
   std::vector<AbstractStatement *> scopeStatements;
 
  public:
-  Scope(std::string scopeIdentifier, Scope *outerScope);
+  Scope(std::string scopeIdentifier, AbstractNode *scopeOpener, Scope *outerScope);
 
   [[nodiscard]] Scope *getOuterScope() const;
 
@@ -24,12 +25,18 @@ class Scope {
 
   [[nodiscard]] const std::vector<AbstractStatement *> &getScopeStatements() const;
 
-  Scope *getOrCreateInnerScope(const std::string &identifier);
+  [[nodiscard]] AbstractNode *getScopeOpener() const;
+
+  Scope *getOrCreateInnerScope(const std::string &identifier, AbstractNode *statement);
 
   Scope *findInnerScope(const std::string &identifier);
 
   void addStatement(AbstractStatement *absStatement);
 
+  /// Returns the nth last element of the scope statements.
+  /// For example, n=1 prints the last element and n=2 the penultimate element.
+  /// \param n The position of the element counted from back of the vector.
+  /// \return The AbstractStatement at the n-th last position.
   AbstractStatement *getNthLastStatement(int n);
 
   AbstractStatement *getLastStatement();

@@ -19,6 +19,8 @@ class LiteralFloat : public AbstractLiteral {
 
   explicit LiteralFloat(float value);
 
+  LiteralFloat();
+
   explicit LiteralFloat(Matrix<float> *inputMatrix);
 
   ~LiteralFloat() override;

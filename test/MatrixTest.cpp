@@ -20,7 +20,6 @@ TEST_F(MatrixTestFixture, createMatrix_expectedValidMatrix) {  /* NOLINT */
   Matrix<int> m({{1, 2, 3}, {6, 3, 2}, {52, 11, 95}});
 
   EXPECT_FALSE(m.isScalar());
-//  EXPECT_EQ(m.getDimensions(), std::pair(3, 3));
   EXPECT_EQ(m.getDimensions(), Dimension(3, 3));
 
   // check values using direct access
@@ -46,11 +45,27 @@ TEST_F(MatrixTestFixture, createMatrix_expectedValidMatrix) {  /* NOLINT */
   EXPECT_EQ(m(2, 2), 95);
 }
 
+TEST_F(MatrixTestFixture, setMatrixValues_expectedCorrectDimensions) {  /* NOLINT */
+  Matrix<int> m({{1, 2, 3}, {6, 3, 2}, {52, 11, 95}});
+  EXPECT_EQ(m.getDimensions(), Dimension(3, 3));
+
+  m.setValues({{1, 2}, {2, 3}, {2, 1}});
+  EXPECT_EQ(m.getDimensions(), Dimension(3, 2));
+}
+
+TEST_F(MatrixTestFixture, setInvalidMatrixValues_expectedException) {  /* NOLINT */
+  Matrix<int> m({{1, 2, 3}, {6, 3, 2}, {52, 11, 9}});
+  EXPECT_THROW(m.setValues({{1, 2}, {2}, {2, 1}, {3, 1}}), std::invalid_argument);
+}
+
+TEST_F(MatrixTestFixture, createInvalidMatrix_expectedException) {  /* NOLINT */
+  EXPECT_THROW(Matrix<int> m({{1, 2, 3}, {6, 3, 2}, {52, 11}}), std::invalid_argument);
+}
+
 TEST_F(MatrixTestFixture, createScalar_expectedScalarValue) {  /* NOLINT */
   Matrix<int> m(2);
 
   EXPECT_TRUE(m.isScalar());
-//  EXPECT_EQ(m.getDimensions(), std::pair(1, 1));
   EXPECT_EQ(m.getDimensions(), Dimension(1, 1));
   EXPECT_EQ(m.getScalarValue(), 2);
 }

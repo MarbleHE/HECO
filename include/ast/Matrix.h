@@ -142,8 +142,11 @@ class Matrix : public AbstractMatrix {
   /// The dimension of the matrix associated to this instance.
   Dimension dim;
 
+  /// Creates a new empty matrix.
+  Matrix() : values(std::vector<std::vector<T>>()), dim(Dimension(0, 0)) {}
+
   /// Creates a new matrix with the elements provided in inputMatrix.
-  /// \param inputMatrix
+  /// \param inputMatrix The elements of the matrix to create.
   Matrix(std::vector<std::vector<T>> inputMatrix)  /* NOLINT intentionally not explicit */
       : values(std::move(inputMatrix)), dim(Dimension(values.size(), values.at(0).size())) {
     int elementsPerRow = values.at(0).size();
@@ -187,6 +190,25 @@ class Matrix : public AbstractMatrix {
     }
   }
 
+  void checkBoundsAndResizeMatrix(int rowIdx, int colIdx) {
+    if (rowIdx < 0 || colIdx < 0) {
+      throw std::runtime_error("Matrix access with index < 0 is invalid! "
+                               "Given indices (row, col): " + std::to_string(rowIdx) + ", " + std::to_string(colIdx));
+    }
+
+    // Resize the outer vector by adding new vectors that have the same size as the already existing ones.
+    // Note: The new size must be rowIdx+1 because a vector is 0-indexed.
+    if (rowIdx + 1 > values.size()) {
+      if (values.empty()) {  // <==> values.size() == 0
+        values.resize(rowIdx + 1);
+      } else {
+        values.resize(rowIdx + 1, std::vector<T>(values.at(0).size()));
+      }
+    }
+    // Resize the inner vectors -- all of them, to ensure that all rows have the same #elements.
+    if (colIdx + 1 > values.at(rowIdx).size()) { for (auto &rw : values) rw.resize(colIdx + 1); }
+  }
+
   /// Returns a reference to the element at index specified by the given (row, column) pair.
   /// Note: Returning std::vector<T>::reference is required here. Credits to Mike Seymour from stackoverflow.com
   /// (https://stackoverflow.com/a/25770060/3017719) for pointing this out.
@@ -202,6 +224,13 @@ class Matrix : public AbstractMatrix {
   /// \param newValues The values to be used to overwrite the matrix's existing values.
   void setValues(const std::vector<std::vector<T>> &newValues) {
     values = newValues;
+    int elementsPerRow = values.at(0).size();
+    for (auto const &rowVector : values) {
+      if (rowVector.size()!=elementsPerRow) {
+        throw std::invalid_argument("Vector rows must all have the same number of elements!");
+      }
+    }
+    dim.update(newValues.size(), elementsPerRow);
   }
 
   /// Takes a value and compares all elements of the matrix with that value. Returns True if all of the elements match
@@ -328,7 +357,7 @@ class Matrix : public AbstractMatrix {
 
   AbstractExpr *getElementAt(int row, int column) override;
 
-  void setElementAt(int row, int column, AbstractExpr *element);
+  void setElementAt(int row, int column, AbstractExpr *element) override;
 
   void replaceChild(AbstractNode *originalChild, AbstractNode *newChildToBeAdded) override;
 

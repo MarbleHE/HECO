@@ -20,8 +20,10 @@
 #include "For.h"
 #include "Rotate.h"
 #include "Transpose.h"
-#include "GetMatrixElement.h"
+#include "MatrixElementRef.h"
 #include "OperatorExpr.h"
+#include "MatrixAssignm.h"
+#include "GetMatrixSize.h"
 
 template<typename T>
 void PrintVisitor::printChildNodesIndented(T &elem) {
@@ -73,7 +75,7 @@ void PrintVisitor::visit(If &elem) {
   printChildNodesIndented(elem);
 }
 
-void PrintVisitor::visit(GetMatrixElement &elem) {
+void PrintVisitor::visit(MatrixElementRef &elem) {
   printMatrixIndex();
   this->decrementLevel();
   addOutputStr(elem);
@@ -122,6 +124,11 @@ void PrintVisitor::visit(LogicalExpr &elem) {
   printChildNodesIndented(elem);
 }
 
+void PrintVisitor::visit(GetMatrixSize &elem) {
+  addOutputStr(elem);
+  printChildNodesIndented(elem);
+}
+
 void PrintVisitor::visit(Operator &elem) {
   addOutputStr(elem, {elem.getOperatorString()});
 }
@@ -138,6 +145,11 @@ void PrintVisitor::visit(UnaryExpr &elem) {
 
 void PrintVisitor::visit(VarAssignm &elem) {
   addOutputStr(elem, {elem.getIdentifier()});
+  printChildNodesIndented(elem);
+}
+
+void PrintVisitor::visit(MatrixAssignm &elem) {
+  addOutputStr(elem);
   printChildNodesIndented(elem);
 }
 
@@ -215,7 +227,8 @@ void PrintVisitor::printNodeName(AbstractNode &node) {
 
 void PrintVisitor::addOutputStr(AbstractNode &node) {
   printNodeName(node);
-  printScope();
+  if (!ignoreScope) printScope();
+  ss << std::endl;
 }
 
 void PrintVisitor::addOutputStr(AbstractNode &node, const std::list<std::string> &args) {
@@ -224,7 +237,8 @@ void PrintVisitor::addOutputStr(AbstractNode &node, const std::list<std::string>
   ss << " ";
   // print primitive parameters related to AST (e.g., int, string)
   for (auto &arg : args) ss << "(" << arg << ")";
-  printScope();
+  if (!ignoreScope) printScope();
+  ss << std::endl;
 }
 
 void PrintVisitor::printScope() {
@@ -235,7 +249,6 @@ void PrintVisitor::printScope() {
     ss << "]";
     setLastPrintedScope(curScope);
   }
-  ss << std::endl;
 }
 
 Scope *PrintVisitor::getLastPrintedScope() const {

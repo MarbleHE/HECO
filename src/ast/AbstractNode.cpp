@@ -1,7 +1,6 @@
 #include <sstream>
 #include <queue>
 #include <set>
-#include <iostream>
 #include "AbstractNode.h"
 
 int AbstractNode::nodeIdCounter = 0;
@@ -61,20 +60,37 @@ void AbstractNode::addChild(AbstractNode *child, bool addBackReference) {
   addChildren({child}, addBackReference);
 }
 
-void AbstractNode::addChildren(const std::vector<AbstractNode *> &childrenToAdd, bool addBackReference) {
+void AbstractNode::addChildren(const std::vector<AbstractNode *> &childrenToAdd, bool addBackReference, AbstractNode *
+insertBeforeNode) {
+  auto it = std::find(children.begin(), children.end(), insertBeforeNode);
+  if (it==children.end()) {
+    throw std::runtime_error("addChildren failed: Could not find node given as parameter insertBeforeNode "
+                             "that is required to determine insert position.");
+  }
+  addChildren(childrenToAdd, addBackReference, it);
+}
+
+void AbstractNode::addChildren(const std::vector<AbstractNode *> &childrenToAdd, bool addBackReference,
+                               std::vector<AbstractNode *>::const_iterator insertPosition) {
   auto allowsInfiniteNumberOfChildren = (getMaxNumberChildren()==-1);
 
   // check whether the number of children to be added does not exceed the number available children spots
   if (!allowsInfiniteNumberOfChildren && childrenToAdd.size() > (getMaxNumberChildren() - countChildrenNonNull())) {
-    throw std::invalid_argument(
-        "AbstractNode " + getUniqueNodeId() + " of type " + getNodeType() + " does not allow more than "
-            + std::to_string(getMaxNumberChildren()) + " children!");
+    std::stringstream errMsg;
+    errMsg << "AbstractNode " << getUniqueNodeId() << " of type " << getNodeType() << " does not allow more than ";
+    errMsg << std::to_string(getMaxNumberChildren()) << " children!";
+    throw std::invalid_argument(errMsg.str());
+  }
+
+  // check if prependChildren is supported
+  if (!allowsInfiniteNumberOfChildren && insertPosition!=children.end()) {
+    throw std::runtime_error("addChildren failed: Cannot add node at specific position as node only supports a limited "
+                             "number of children -> must add child in next free child spot.");
   }
 
   // check if circuit mode is supported by current node, otherwise addChildren will lead to unexpected behavior
   if (!this->supportsCircuitMode()) {
-    throw std::logic_error(
-        "Cannot use addChildren because node does not support circuit mode!");
+    throw std::logic_error("Cannot use addChildren because node does not support circuit mode!");
   }
 
   // these actions are to be performed after a node was added to the list of children
@@ -86,7 +102,7 @@ void AbstractNode::addChildren(const std::vector<AbstractNode *> &childrenToAdd,
   if (getChildren().empty() || allowsInfiniteNumberOfChildren) {
     // if the children list is empty or the node type supports an unlimited number of children, then add all nodes in
     // one batch to the children vector's end
-    children.insert(children.end(), childrenToAdd.begin(), childrenToAdd.end());
+    children.insert(insertPosition, childrenToAdd.begin(), childrenToAdd.end());
     std::for_each(childrenToAdd.begin(), childrenToAdd.end(), doInsertPostAction);
     // if this nodes accepts an infinite number of children, pre-filling the slots does not make any sense -> skip it
     if (getMaxNumberChildren()!=-1) {
@@ -112,6 +128,10 @@ void AbstractNode::addChildren(const std::vector<AbstractNode *> &childrenToAdd,
                                  + " without overwriting an existing one. Consider removing an existing child first.");
     }
   }
+}
+
+void AbstractNode::addChildren(const std::vector<AbstractNode *> &childrenToAdd, bool addBackReference) {
+  addChildren(childrenToAdd, addBackReference, children.end());
 }
 
 void AbstractNode::removeChild(AbstractNode *child, bool removeBackreference) {
@@ -285,22 +305,39 @@ AbstractNode *AbstractNode::cloneFlat() {
   throw std::runtime_error("Cannot clone an AbstractNode. Use the overridden cloneFlat instead.");
 }
 
-void AbstractNode::replaceChild(AbstractNode *originalChild, AbstractNode *newChildToBeAdded) {
-  // remove edge: "currentNode -> originalChild" and add edge: "currentNode -> newChildToBeAdded"
-  std::replace(children.begin(), children.end(), originalChild, newChildToBeAdded);
-  // remove edge: originalChild -> currentNode
-  originalChild->removeParent(this, false);
-  // add edge: newChildToBeAdded -> currentNode
-  newChildToBeAdded->addParent(this, false);
+void AbstractNode::replaceChild(AbstractNode *originalChild, AbstractNode *newChild) {
+  replaceChildren(originalChild, {newChild});
 }
 
-void AbstractNode::removeFromParents(bool removeParentBackreference) {
-  for (auto &p : getParentsNonNull()) {
-    p->removeChild(this, removeParentBackreference);
+void AbstractNode::replaceChildren(AbstractNode *originalChild, std::vector<AbstractNode *> newChildren) {
+  // find the node to be replaced in the children vector (pos points to its position)
+  auto pos = std::find(children.begin(), children.end(), originalChild);
+  if (pos==children.end()) {
+    throw std::runtime_error("Could not execute AbstractNode::replaceChildren because the node to be replaced could "
+                             "not be found in the children vector!");
+  }
+  // if the given node was found, remove it from the children vector using erase
+  auto posAfterErasedNode = children.erase(pos);
+  // insert all new children at the position where the deleted node was before
+  children.insert(posAfterErasedNode, newChildren.begin(), newChildren.end());
+
+  // remove edge: originalChild -> currentNode
+  originalChild->removeParent(this, false);
+  // add edges: newChildToBeAdded -> currentNode but before detach any existing parents from this child node
+  for (auto &child : newChildren) {
+    child->removeFromParents();
+    child->addParent(this, false);
   }
 }
 
-std::string AbstractNode::toString(bool printChildren) const {
+AbstractNode *AbstractNode::removeFromParents(bool removeParentBackreference) {
+  for (auto &p : getParentsNonNull()) {
+    p->removeChild(this, removeParentBackreference);
+  }
+  return this;
+}
+
+std::string AbstractNode::toString(bool) const {
   throw std::runtime_error("toString not implemented for class " + getNodeType() + ".");
 }
 

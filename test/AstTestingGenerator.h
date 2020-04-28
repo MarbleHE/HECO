@@ -15,7 +15,7 @@ class AstTestingGenerator {
   /// \return An integer specifying the largest ID supported by generateAst.
   static size_t getLargestId();
 
-  /** @defgroup astGenerators Methods for generating sample ASTs to be used within tests.
+  /** @defgroup astGenerators Methods that generate sample ASTs (e.g., for testing).
   *  @{
   */
   static void genSuperSimpleAst(Ast &ast);
@@ -85,7 +85,7 @@ class AstTestingGenerator {
   static void genAstCrossProduct(Ast &ast);
 
   static void genSimpleMatrix(Ast &ast);
-  /** @} */ // End of astGenerators group
+
   static void genAstFlipMatrixElements(Ast &ast);
 
   static void genAstOperatorExpr_fullyEvaluable(Ast &ast);
@@ -113,6 +113,29 @@ class AstTestingGenerator {
   static void genAstOperatorExpr_logicalXorFalse_twoRemainingOperands(Ast &ast);
 
   static void genAstNestedOperatorExpr(Ast &ast);
+
+  static void genAstSimpleForLoopUnrolling(Ast &ast);
+
+  static void genAstNestedForLoopUnrolling(Ast &ast);
+
+  static void genAstMatrixAssignment(Ast &ast);
+
+  static void genAstMatrixPermutation(Ast &ast);
+
+  static void genAstGetMatrixSizeOfKnownMatrix(Ast &ast);
+
+  static void genAstGetMatrixSizeOfAbstractMatrix(Ast &ast);
+
+  static void genAstGetMatrixSizeOfUnknownMatrix(Ast &ast);
+
+  static void genAstMatrixAssignmAndGetMatrixSize(Ast &ast);
+
+  static void genAstMatrixAssignmUnknownThenKnown(Ast &ast);
+
+  static void genAstMatrixAssignmentKnownThenUnknown(Ast &ast);
+
+  static void genAstFullAssignmentToMatrix(Ast &ast);
+  /** @} */ // End of astGenerators group
 };
 
 #endif //AST_OPTIMIZER_TEST_ASTTESTINGGENERATOR_H_

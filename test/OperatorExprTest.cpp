@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include "Operator.h"
 #include "OperatorExpr.h"
+#include "Variable.h"
 
 class OperatorExprFixture : public ::testing::Test {
  protected:
@@ -28,8 +29,7 @@ TEST_F(OperatorExprFixture, defaultConstructor) {  /* NOLINT */
 
   // check operands
   auto operands = oe1.getOperands();
-  EXPECT_TRUE(operands.at(0)->isEqual(literalTwo));
-  EXPECT_TRUE(operands.at(1)->isEqual(literalThree));
+  EXPECT_TRUE(operands.at(0)->isEqual(new LiteralInt(5)));
 }
 
 TEST_F(OperatorExprFixture, singleArgumentConstructor) {  /* NOLINT */
@@ -53,23 +53,20 @@ TEST_F(OperatorExprFixture, toStringRepresentation) {  /* NOLINT */
   // print as string including children
   auto expectedStr = "OperatorExpr:\n"
                      "\tOperator (add)\n"
-                     "\tLiteralInt (2)\n"
-                     "\tLiteralInt (3)\n"
-                     "\tLiteralInt (332)\n"
-                     "\tLiteralInt (11)\n";
+                     "\tLiteralInt (348)\n";
   EXPECT_EQ(oe1.toString(true), expectedStr);
 }
 
 TEST_F(OperatorExprFixture, setOperatorTest) {  /* NOLINT */
   // create operator expression
   OperatorExpr oe1(opAddition, {literalTwo, literalThree, new LiteralInt(332), new LiteralInt(11)});
-  EXPECT_EQ(oe1.countChildrenNonNull(), 5);
+  EXPECT_EQ(oe1.countChildrenNonNull(), 2); // opAddition and result of aggregation
 
   // change operator
   oe1.setOperator(opMultiplication);
 
   // check if change was successful
-  EXPECT_EQ(oe1.countChildrenNonNull(), 5);
+  EXPECT_EQ(oe1.countChildrenNonNull(), 2);
   EXPECT_TRUE(oe1.getOperator()->equals(opMultiplication->getOperatorSymbol()));
 }
 
@@ -170,4 +167,30 @@ TEST_F(OperatorExprFixture, operatorTypeTest_unaryExprs) {  /* NOLINT */
   EXPECT_TRUE(oeNegation.isUnaryExpr());
   EXPECT_FALSE(oeNegation.isLogicalExpr());
   EXPECT_FALSE(oeNegation.isArithmeticExpr());
+}
+
+TEST_F(OperatorExprFixture, aggregatableOperatorAddition) {    /* NOLINT */
+  OperatorExpr opExpr(new Operator(ADDITION), {new LiteralInt(0), new LiteralInt(9)});
+  EXPECT_TRUE(opExpr.isEqual(new OperatorExpr(new Operator(ADDITION), {new LiteralInt(9)})));
+}
+
+TEST_F(OperatorExprFixture, partiallyAggregatableOperatorAddition) {    /* NOLINT */
+  OperatorExpr opExpr(new Operator(ADDITION), {new LiteralInt(1), new Variable("x"), new LiteralInt(8)});
+  EXPECT_TRUE(opExpr.isEqual(new OperatorExpr(new Operator(ADDITION), {new Variable("x"), new LiteralInt(9)})));
+}
+
+TEST_F(OperatorExprFixture, leftAssociativeOperatorDivision) {    /* NOLINT */
+  OperatorExpr opExpr(new Operator(DIVISION),
+                      {new LiteralInt(10), new LiteralInt(2), new Variable("x"), new LiteralInt(5)});
+  EXPECT_TRUE(opExpr.isEqual(new OperatorExpr(new Operator(DIVISION),
+                                              {new LiteralInt(5), new Variable("x"), new LiteralInt(5)})));
+}
+
+TEST_F(OperatorExprFixture, leftAssociateOperatorRequiringAllKnownOperands) {    /* NOLINT */
+  OperatorExpr
+      opExpr(new Operator(SMALLER), {new LiteralInt(1), new LiteralInt(3), new Variable("a"), new LiteralInt(2)});
+  auto expectedOperatorExpr =
+      new OperatorExpr(new Operator(SMALLER),
+                       {new LiteralInt(1), new LiteralInt(3), new Variable("a"), new LiteralInt(2)});
+  EXPECT_TRUE(opExpr.isEqual(expectedOperatorExpr));
 }

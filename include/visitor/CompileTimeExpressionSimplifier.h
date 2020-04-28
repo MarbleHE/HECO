@@ -1,187 +1,76 @@
 #ifndef AST_OPTIMIZER_INCLUDE_VISITOR_COMPILETIMEEXPRESSIONSIMPLIFIER_H_
 #define AST_OPTIMIZER_INCLUDE_VISITOR_COMPILETIMEEXPRESSIONSIMPLIFIER_H_
 
-#include <unordered_set>
-#include <unordered_map>
 #include <string>
 #include <vector>
 #include <deque>
+#include <unordered_map>
+#include <unordered_set>
+#include <map>
+#include <set>
+#include <utility>
 #include "NodeUtils.h"
 #include "Visitor.h"
 #include "EvaluationVisitor.h"
 #include "ArithmeticExpr.h"
 #include "LiteralFloat.h"
 #include "Variable.h"
+#include "OperatorExpr.h"
 
-/// This struct handles the accumulation of binary expression operands in order to simplify them.
-/// For example the nested arithmetic expression
-///     a + (23 - (11 + (21 + b)))
-/// can be simplified to
-///     a + (33 + b).
-/// This accumulation considers commutative operators (e.g., addition, multiplication, logical-AND/-OR-XOR) only.
-/// For that simplification, all operands, i.e., variables and literals of binary expressions with the same operator are
-/// accumulated in the operands vector by adding them using addOperands(...). The operator is applied automatically on
-/// the literals after adding a new operand such that there is always at the most one literal in the operands vector.
-/// After encountering the first binary expression with another operator, it must be checked whether the
-/// BinaryExpressionAcc could simplify the subtree using subtreeIsSimplified(). If yes, the simplified subtree can be
-/// generated using getSimplifiedSubtree().
-struct BinaryExpressionAcc {
+/**
+ * A helper struct to store the value of a variable and its associated datatype in the variableValues map.
+ */
+struct VariableValue {
+  Datatype *datatype;
+  AbstractExpr *value;
 
-  /// The operator of the accumulated operands.
-  OpSymbolVariant operatorSymbol;
+  VariableValue(Datatype *dtype, AbstractExpr *varValue) : datatype(dtype), value(varValue) {}
 
-  /// The operands collected in this subtree (nested binary expressions). This represents the operands of the simplified
-  /// tree as after adding any operand, the literals collected so far are combined using the operator specified by the
-  /// current operatorSymbol.
-  std::vector<AbstractExpr *> operands;
-
-  /// The last visited binary expression. This information is needed to know where to attach to the newly created
-  /// subtree of simplified binary expressions.
-  AbstractExpr *lastVisitedBinaryExp;
-
-  /// The first visited binary expression for which operands were collected. This information is needed when generating
-  /// the simplified subtree consisting of the collected operands. If the firstVisitedBinaryExp had any binary
-  /// expressions, then these will be attached to the simplified subtree.
-  AbstractExpr *firstVisitedBinaryExp;
-
-  /// The number of operands that could be reduced. This information is used to determine whether the
-  /// BinaryExpressionAcc could simplify the binary expressions at all.
-  int numberOfReducedNodes = 0;
-
-  /// Sets a new value to lastVisitedBinaryExp that indicates the last binary expression handled by the
-  /// BinaryExpressionAcc. This information is needed to know where to attach the simplified subtree to in case that
-  /// the operator changes.
-  /// \param binaryExprNode The last handled binary expression node.
-  void setLastVisitedSubtree(AbstractExpr *binaryExprNode) {
-    lastVisitedBinaryExp = binaryExprNode;
+  // copy constructor
+  VariableValue(const VariableValue &vv) {
+    datatype = vv.datatype->clone(false)->castTo<Datatype>();
+    value = (vv.value!=nullptr) ? vv.value->clone(false)->castTo<AbstractExpr>() : nullptr;
   }
 
-  /// Sets a new value to firstVisitedBinaryExp that indicates the first binary expression for which operands were
-  /// aggregated by the BinaryExpressionAcc. This information is needed when generating the simplified subtree
-  /// consisting of the collected operands. If the firstVisitedBinaryExp had any binary expressions, then these will be
-  /// attached to the simplified subtree.
-  /// \param binaryExprNode The first binary expression for which operands were collected.
-  void setFirstVisitedSubtree(AbstractExpr *binaryExprNode) {
-    firstVisitedBinaryExp = binaryExprNode;
+  void setValue(AbstractExpr *val) {
+    VariableValue::value = val;
   }
+};
 
-  /// Clears all the information collected so far in this BinaryExpressionAcc.
-  void reset() {
-    operands.clear();
-    lastVisitedBinaryExp = nullptr;
-    numberOfReducedNodes = 0;
-  }
+typedef std::map<std::pair<std::string, Scope *>, VariableValue *> VariableValuesMapType;
 
-  /// Checks whether the accumulation could reduce/simplify any sub-expressions.
-  /// \return True if the operands accumulated so far could be simplified by evaluating them, otherwise False.
-  bool subtreeIsSimplified() {
-    return numberOfReducedNodes > 0;
-  }
+/**
+ * A helper struct that is used by emittedVariableDeclarations and helps to keep track of the relationship between a
+ * variable (given as pair of identifier an scope), the associated (emitted) variable declaration statement, and a
+ * reference to all emitted variable assignments that depend on this variable declaration. This allows to determine
+ * at the end of the traversal if the emitted VarAssignm was meanwhile deleted and we do not need the VarDecl anymore.
+ */
+struct EmittedVariableData {
+  AbstractNode *varDeclStatement;
+  std::unordered_set<AbstractNode *> emittedVarAssignms;
+ public:
+  explicit EmittedVariableData(AbstractNode *varDeclStatement) : varDeclStatement(varDeclStatement) {}
 
-  /// Checks whether a given operator (opSymbol) is suitable for binary expression accumulation as this approach only
-  /// works for commutative operators.
-  /// \param opSymbol The operator symbol to be checked for suitability for binary expression accumulation.
-  /// \return True if this operator supports binary expression accumulation, otherwise False.
-  static bool isSupportedOperator(OpSymbolVariant opSymbol) {
-    // all commutative operators
-    static const std::vector<LogCompOp> arithmeticOps =
-        {LogCompOp::LOGICAL_AND, LogCompOp::LOGICAL_OR, LogCompOp::LOGICAL_XOR};
-    static const std::vector<ArithmeticOp> logicalOps =
-        {ArithmeticOp::ADDITION, ArithmeticOp::MULTIPLICATION};
+  void addVarAssignm(AbstractNode *varAssignm) { emittedVarAssignms.insert(varAssignm); }
 
-    // accumulator approach works for commutative operators only
-    if (std::holds_alternative<ArithmeticOp>(opSymbol)) {  // arithmetic operators
-      return std::find(arithmeticOps.begin(), arithmeticOps.end(), std::get<ArithmeticOp>(opSymbol))
-          !=arithmeticOps.end();
-    } else if (std::holds_alternative<LogCompOp>(opSymbol)) {  // logical operators
-      return std::find(logicalOps.begin(), logicalOps.end(), std::get<LogCompOp>(opSymbol))
-          !=logicalOps.end();
-    }
-    return false;
-  }
+  void removeVarAssignm(AbstractNode *varAssignm) { emittedVarAssignms.erase(varAssignm); }
 
-  /// Takes the operands collected so far, including the simplified ones, and creates a multiplicative depth-balanced
-  /// tree that can be used to simplify the respective subtree of the AST.
-  /// \return A multiplicative depth-balanced tree representing the simplified expression.
-  AbstractNode *getSimplifiedSubtree() {
-    // check if the node where we started collecting operands (i.e., "lower bound" of simplified tree segment) that has
-    // a child that we need to attach to the simplified segment
-    for (auto &c : firstVisitedBinaryExp->getChildrenNonNull()) {
-      if (dynamic_cast<AbstractBinaryExpr *>(c)!=nullptr) {
-        operands.push_back(c->castTo<AbstractExpr>());
-      }
-    }
-    return createMultDepthBalancedTreeFromInputs(operands, operatorSymbol);
-  }
+  bool hasNoVarAssignms() { return !emittedVarAssignms.empty(); }
 
-  /// Extracts all AbstractLiterals of the operands vector, combines them using the current operator (see
-  /// operatorSymbol), and applies the operator to the operands. Adds the result back to the operands vector.
-  /// Also keeps track of the number of operands that could be removed using this partial evaluation approach.
-  void evaluateLiterals() {
-    auto isLiteral = [](AbstractExpr *expr) { return dynamic_cast<AbstractLiteral *>(expr)!=nullptr; };
-    if (std::count_if(operands.begin(), operands.end(), isLiteral) > 1) {
-      // update numberOfReducedNodes
-      numberOfReducedNodes = numberOfReducedNodes + (operands.size() - 1);
-
-      // Credits to T.C. from stackoverflow.com (https://stackoverflow.com/a/32155973/3017719)
-      // partition: all elements that should not be moved come before
-      std::vector<AbstractExpr *> extractedLiterals;
-      auto p = std::stable_partition(operands.begin(), operands.end(),
-                                     [&](const auto &x) { return !isLiteral(x); });
-      // range insert with move
-      extractedLiterals.insert(extractedLiterals.end(), std::make_move_iterator(p),
-                               std::make_move_iterator(operands.end()));
-      // erase the moved-from elements
-      operands.erase(p, operands.end());
-
-      // build tree consisting of literals only and evaluate it
-      auto treeRoot = createMultDepthBalancedTreeFromInputs(extractedLiterals, operatorSymbol);
-      EvaluationVisitor ev;
-      treeRoot->accept(ev);
-
-      // add the evaluation result as new literal
-      operands.push_back(ev.getResults().front());
-    }
-  }
-
-  /// Adds new operands to the vector of collected operands and triggers evaluation of AbstractLiterals (see method
-  /// evaluateLiterals(...)).
-  /// \param operandsToBeAdded The operands to be added to the operands vector.
-  void addOperands(std::vector<AbstractExpr *> operandsToBeAdded) {
-    // we are traversing from leaf to root, hence don't add any binary expressions as they by itself already added
-    // their operands to BinaryExpressionAcc
-    auto it = std::remove_if(operandsToBeAdded.begin(), operandsToBeAdded.end(), [&](AbstractExpr *ae) {
-      return dynamic_cast<AbstractBinaryExpr *>(ae)!=nullptr;
-    });
-    // insert all remaining operands (of type Variable or AbstractLiteral)
-    operands.insert(operands.end(), operandsToBeAdded.begin(), it);
-    evaluateLiterals();
-  }
-
-  /// Removes all collected operands and replaces the operator symbol by the given one (newSymbol).
-  /// \param newSymbol The new operator symbol to be set.
-  void removeOperandsAndSetNewSymbol(OpSymbolVariant newSymbol) {
-    operands.clear();
-    operatorSymbol = newSymbol;
-  }
-
-  /// Checks if there are any collected operands.
-  /// \return True if any operands were collected so far.
-  bool containsOperands() {
-    return !operands.empty();
-  }
-
-  /// Get the operator symbol of the collected operands.
-  /// \return The operator symbol as OpSymbolVariant.
-  [[nodiscard]] const OpSymbolVariant &getOperatorSymbol() const {
-    return operatorSymbol;
-  }
+  AbstractNode *getVarDeclStatement() { return varDeclStatement; }
 };
 
 class CompileTimeExpressionSimplifier : public Visitor {
  private:
   /// A EvaluationVisitor instance that is used to evaluate parts of the AST in order to simplify them.
   EvaluationVisitor evalVisitor;
+
+  /// Keeps track of all emitted variable declarations and maps each to an associated EmittedVariableData pointer.
+  std::map<std::pair<std::string, Scope *>, EmittedVariableData *> emittedVariableDeclarations;
+
+  /// Maps emitted VarAssignms to their corresponding VarDecl statement in emittedVariableDeclarations.
+  std::map<AbstractNode *,
+           std::map<std::pair<std::string, Scope *>, EmittedVariableData *>::iterator> emittedVariableAssignms;
 
  public:
   CompileTimeExpressionSimplifier();
@@ -192,10 +81,10 @@ class CompileTimeExpressionSimplifier : public Visitor {
   /// - AbstractNode*: A reference to the removable node.
   std::unordered_set<AbstractNode *> removableNodes;
 
-  /// Stores the latest value of a variable while traversing through the AST.
-  /// - std::string: The variable's identifier.
-  /// - AbstractExpr*: The variable's value.
-  std::unordered_map<std::string, AbstractExpr *> variableValues;
+  /// Stores the latest value of a variable while traversing through the AST. Entries in this map consist of a key
+  /// (pair) that is made of a variable identifier (first) and the scope where the variable was declared in (second).
+  /// The entry of the variableValues map is the current value of the associated variable.
+  VariableValuesMapType variableValues;
 
   /// Contains pointer to those nodes for which full or partial evaluation could be performed and hence can be deleted
   /// at the end of this simplification traversal.
@@ -205,13 +94,14 @@ class CompileTimeExpressionSimplifier : public Visitor {
   /// The node ArithmeticExpr (and all of its children) will be deleted and replaced by a new node LiteralInt(54).
   std::deque<AbstractNode *> nodesQueuedForDeletion;
 
-  /// An instance to the BinaryExpressionAcc that is needed to simplify nested binary expressions.
-  BinaryExpressionAcc binaryExpressionAccumulator;
+  /// A flag that indicates whether variables should be replaced by their known value. The value can be a concrete
+  /// value (i.e., subtype of AbstractLiteral) or a symbolic value containing unknown variables (e.g., x = y+4).
+  /// This is not to be confused with evaluation of expressions where yet unknown expressions are computed.
+  bool replaceVariablesByValues{true};
 
   /** @defgroup visit Methods implementing the logic of the visitor for each node type.
   *  @{
   */
-
   void visit(AbstractExpr &elem) override;
 
   void visit(AbstractNode &elem) override;
@@ -219,6 +109,8 @@ class CompileTimeExpressionSimplifier : public Visitor {
   void visit(AbstractStatement &elem) override;
 
   void visit(ArithmeticExpr &elem) override;
+
+  void visit(AbstractMatrix &elem) override;
 
   void visit(Ast &elem) override;
 
@@ -236,7 +128,9 @@ class CompileTimeExpressionSimplifier : public Visitor {
 
   void visit(For &elem) override;
 
-  void visit(GetMatrixElement &elem) override;
+  void visit(MatrixElementRef &elem) override;
+
+  void visit(GetMatrixSize &elem) override;
 
   void visit(If &elem) override;
 
@@ -270,41 +164,40 @@ class CompileTimeExpressionSimplifier : public Visitor {
 
   void visit(Rotate &elem) override;
 
+  void visit(MatrixAssignm &elem) override;
+
   void visit(Transpose &elem) override;
   /** @} */ // End of visit group
 
-  /// Checks whether there is a known value for this node. A value can either be an AbstractLiteral or an AbstractExpr
-  /// with unknown variables (e.g., function parameters).
-  /// \param node The node for which the existence of a value should be determined.
+  /// Checks whether the given node has a known value. A value is considered as known if
+  ///  - the node itself is any subtype of an AbstractLiteral this includes matrices of a concrete type (e.g.,
+  ///    LiteralInt containing Matrix<int>) but not matrices containing AbstractExprs,
+  ///  - the node is a Variable and the referred value is known
+  ///  - or the node's value is not relevant anymore as it is marked for deletion.
+  /// \param node The node for which the presence of a value should be determined.
   /// \return True if the node's value is known, otherwise False.
-  bool valueIsKnown(AbstractNode *node);
+  bool hasKnownValue(AbstractNode *node);
 
   /// Marks a node as a candidate for deletion. The node's first ancestor that is a statement has to decide whether its
   /// children that are marked to be removed can be deleted or not.
   /// \param node The node for which the evaluation result should be stored.
   void markNodeAsRemovable(AbstractNode *node);
 
-  /// Returns the (first) known value of a node, i.e., the first element of the result vector. If a node has multiple
-  /// values (e.g., Return statements), this method will return an exception.
-  /// \param node The node for which the first value should be retrieved.
-  /// \return The node's value.
-  AbstractExpr *getFirstValue(AbstractNode *node);
+  /// Returns the value of the given node that is either the node itself if the node is an subtype of AbstractLiteral
+  /// or the known value (AbstractExpr) stored previously in the variableValues map.
+  /// \param node The node for which the value should be retrieved.
+  /// \throws std::invalid_argument exception if the node does not have a known value. Must be checked before using the
+  ///         hasKnownValue method.
+  /// \return The node's value as AbstractExpr.
+  AbstractExpr *getKnownValue(AbstractNode *node);
 
   /// Evaluates a subtree, i.e., a node and all of its children by using the EvaluationVisitor.
   /// \param node The subtree's root node to be evaluated.
   /// \param valuesOfVariables The variable values required to evaluate this subtree.
   /// \return The evaluation's result as a vector of AbstractLiteral pointers. If the subtree does not include a Return
   ///         statement, then the result vector should always have one element only.
-  std::vector<AbstractLiteral *> evaluateNodeRecursive(AbstractNode *node,
-                                                       std::unordered_map<std::string,
-                                                                          AbstractLiteral *> valuesOfVariables);
-
-  /// This method generalizes the handling of binary expressions, i.e., ArithmeticExpr and LogicalExpr for simplifying
-  /// them. If both operand values are known, then the method evaluates them. Otherwise, if the binary expression's
-  /// operand is supported for accumulation, the operands are aggregated to possibly simplify them (this only works if
-  /// this binary expression is a nested one and there are multiple literals on which the operator can be applied on).
-  /// \param arithmeticExpr The arithmetic expression visited.
-  void handleBinaryExpression(AbstractBinaryExpr &arithmeticExpr);
+  std::vector<AbstractLiteral *> evaluateNodeRecursive(
+      AbstractNode *node, std::unordered_map<std::string, AbstractLiteral *> valuesOfVariables);
 
   /// Takes the variableValues map and creates a new map containing a copy of all AbstractLiteral values. This map
   /// can then be passed to the EvaluationVisitor to evaluate a given subtree. The original variableValues map, however,
@@ -324,10 +217,9 @@ class CompileTimeExpressionSimplifier : public Visitor {
   /// \param condition The condition the assignment depends on, e.g., the condition of the If statement.
   /// \param trueValue The value to be used for the case that the condition evaluates to True.
   /// \param falseValue The value to be used for the case that the condition evaluates to False.
-  /// \return A arithmetic expression of the form condition*trueValue + (1-b)*falseValue.
-  static AbstractExpr *generateIfDependentValue(AbstractExpr *condition,
-                                                AbstractExpr *trueValue,
-                                                AbstractExpr *falseValue);
+  /// \return An arithmetic expression of the form condition*trueValue + (1-b)*falseValue.
+  static AbstractExpr *generateIfDependentValue(
+      AbstractExpr *condition, AbstractExpr *trueValue, AbstractExpr *falseValue);
 
   /// This method must be called at the end of the visit(...) of each statement. The method makes sure that the binary
   /// expression accumulator is reset and if specified by enqueueStatementForDeletion=True, also marks the given
@@ -337,15 +229,133 @@ class CompileTimeExpressionSimplifier : public Visitor {
   /// (default).
   void cleanUpAfterStatementVisited(AbstractNode *statement, bool enqueueStatementForDeletion = false);
 
-  /// Adds a new (variable identifier, variable value) pair to the map of variable values.
+  /// Saves information about a declared variable. Must include the variable's identifier, the variable's datatype, and
+  /// optionally also an initializer (or nullptr otherwise). The method assumes that it is called from the variable's
+  /// declaration scope, hence saves Visitor::curScope as the variable's declaration scope.
+  /// \param varIdentifier The identifier of the declared variable.
+  /// \param dType The variable's datatype.
+  /// \param value The variable's value, i.e., initializer.
+  void addDeclaredVariable(std::string varIdentifier, Datatype *dType, AbstractExpr *value);
+
+  /// This method sets the value (valueAnyLiteralOrAbstractExpr) of a variable named as given by the
+  /// variableIdentifier parameter. It keeps the scope of the already existing entry in the variableValues map and
+  /// only changes the variable's value. The suitable entry for the given variable identifier is determined starting by
+  /// the current scope (Visitor::curScope) and then visiting the outer scope, the next outer scope, et cetera.
   /// \param variableIdentifier The variable identifier ("name" of the variable).
   /// \param valueAnyLiteralOrAbstractExpr The variable's value. This can be any kind of AbstractLiteral or
-  void addVariableValue(const std::string &variableIdentifier, AbstractExpr *valueAnyLiteralOrAbstractExpr);
+  /// AbstractExpr.
+  void setVariableValue(const std::string &variableIdentifier, AbstractExpr *valueAnyLiteralOrAbstractExpr);
 
   /// Checks whether the given node is queued for deletion. Deletion will be carried out at the end of the traversal.
   /// \param node The node to be checked for deletion.
   /// \return True if this node is enqueued for deletion, otherwise False.
   bool isQueuedForDeletion(const AbstractNode *node);
+
+  /// A helper method that takes a copy of the variableValues map that was created before visiting a node and determines
+  /// the changes made by visiting the node. The changes recognized are newly declared variables (added variables) and
+  /// variables whose value changed.
+  /// \param variableValuesBeforeVisitingNode A copy of the variable values map.
+  /// \return The changes between the map variableValuesBeforeVisitingNode and the current variableValues map.
+  VariableValuesMapType getChangedVariables(VariableValuesMapType variableValuesBeforeVisitingNode);
+
+  /// Takes an OperatorExpr consisting of a logical operator (i.e., AND, XOR, OR) and applies the Boolean laws to
+  /// simplify the expression. For example, the expression <anything> AND False always evaluates to False, hence we can
+  /// replace this OperatorExpr by the boolean value (LiteralBool) False. Other considered rules include:
+  ///   * <anything> AND False ⟹ False
+  ///   * <anything> AND True  ⟹ <anything>
+  ///   * <anything> OR True   ⟹ True
+  ///   * <anything> OR False  ⟹ <anything>
+  ///   * <anything> XOR False ⟹ <anything>
+  ///   * <anything> XOR True  ⟹ !<anything>  [not implemented yet]
+  /// where <anything> denotes an arbitrary logical expression of the same logical operator.
+  /// \param elem The OperatorExpr that should be simplified using Boolean laws.
+  static void simplifyLogicalExpr(OperatorExpr &elem);
+
+  /// Removes all variables from variableValues that are written in any statement of the given block (blockStmt).
+  /// \param blockStmt The Block consisting of the statements that are analyzed for variable writes.
+  /// \return A list of pairs consisting of (variable identifier, variable declaration scope) of those variables that
+  /// are identified to be written to within in the block's statements.
+  std::set<std::pair<std::string, Scope *>> removeVarsWrittenAndReadFromVariableValues(Block &blockStmt);
+
+  /// Returns the current value of the variable identified by the given variableName. If there are multiple
+  /// declarations within different scopes, returns the declaration that is closest to curScope.
+  /// \param variableName The variable identifiers whose value should be retrieved.
+  /// \return An AbstractExpr pointer of the variable's current value.
+  AbstractExpr *getVariableValueDeclaredInThisOrOuterScope(std::string variableName);
+
+  /// Returns an iterator to the variable entry in variableValues that has the given variable identifier
+  /// (variableName) and is closest from the current scope (curScope).
+  /// \param variableName The variable identifiers whose variableValues entry should be retrieved.
+  /// \return An iterator to the variableValues entry pointing to the variable whose declaratin is closest to the
+  /// current scope.
+  VariableValuesMapType::iterator getVariableEntryDeclaredInThisOrOuterScope(std::string variableName);
+
+  /// Creates a new VarAssignm statement of the variable that the given iterator (variableToEmit) is pointing to.
+  /// The method ensures that there exists a variable declaration statement (VarDecl) in the scope where this
+  /// variable was originally declared.
+  /// \param variableToEmit The variable to be emitted, i.e., for that a variable assignment statement should be
+  /// generated.
+  /// \return A variable assignment statement for the given variable (variableToEmit).
+  VarAssignm *emitVariableAssignment(VariableValuesMapType::iterator variableToEmit);
+
+  /// Creates a new VarDecl statements of the variable that the given iterator (variableToEmit) is pointing to.
+  /// The variable declaration is emitted as the first statement in the scope where the variable was initially
+  /// declared. The generated declaration statement is added to the emittedVariableDeclarations map to keep track of
+  /// it. On contrary to emitVariableAssignment, this method automatically adds the statement to the AST instead of
+  /// returning the generated statement.
+  /// \param variableToEmit The variable to be emitted, i.e., for that a variable declaration statement should be
+  /// generated.
+  void emitVariableDeclaration(std::map<std::pair<std::string, Scope *>, VariableValue *>::iterator variableToEmit);
+
+  /// Creates a clone of the variableValues map. As the map consists of VariableValue pointers, each of the
+  /// VariableValue objects pointed to needs to be copied.
+  /// \return A copy of the VariableValues map.
+  VariableValuesMapType getClonedVariableValuesMap();
+
+  /// A helper method that simulates the execution of the given For-loop to determine the number of iterations the
+  /// loop would be executed. If variable values involved in the loop's condition are unknown, the method returns -1.
+  /// Global data structures (e.g., variableValues or nodesQueuedForDeletion) are restored to their state before
+  /// calling this method.
+  /// \param elem The For-loop for that the number of loop iterations should be determined.
+  /// \return The number of iterations or -1 if not all variables required to simulate the loop's execution are known.
+  int determineNumLoopIterations(For &elem);
+
+  /// Marks the given node for deletion. The node will be deleted after all nodes of the AST have been visited.
+  /// \param node The node to be marked for deletion.
+  void enqueueNodeForDeletion(AbstractNode *node);
+
+  /// Sets a new value matrixElementValue to the position indicated by (row, column) in matrix referred by
+  /// variableIdentifier.
+  /// \param variableIdentifier A reference to a matrix, i.e., any subtype of an AbstractLiteral.
+  /// \param row The row index where the new value should be written to.
+  /// \param column The column index where the new value should be written to.
+  /// \param matrixElementValue The matrix value that should be written to the index given as (row, column).
+  void setMatrixVariableValue(const std::string &variableIdentifier,
+                              int row,
+                              int column,
+                              AbstractExpr *matrixElementValue);
+
+  /// A wrapper method that is visited when a For-loop is found. This method in turn calls itself on the next "deeper"
+  /// nested loop before continuing to fully or partially unrolling the loop.
+  /// The first call to this method is invoked by the For-loop's visit method, any deeper nested calls directly call
+  /// this handleForLoopUnrolling method. This allows to determine when processing the outermost For-loop is finished
+  /// such that expressions can be revisited and deleted if required.
+  /// \param elem The For-loop to be unrolled.
+  /// \return A pointer to the node if the given For-loop was replaced in the children vector of the For-loop's parent.
+  AbstractNode *handleForLoopUnrolling(For &elem);
+
+  /// Handles the full loop unrolling. This requires that the exact number of loop iterations is known.
+  /// \param elem The For-loop to be unrolled.
+  /// \param numLoopIterations The number of iterations this For-loop would have been executed.
+  /// \return A pointer to the new node if the given For-loop was replaced in the children vector of the For-loop's
+  /// parent.
+  AbstractNode *doFullLoopUnrolling(For &elem, int numLoopIterations);
+
+  /// Handles the partial loop unrolling to enable batching of the loop's body statements.
+  /// \param elem The For-loop to be unrolled.
+  /// \return A pointer to the new node if the given For-loop was replaced in the children vector of the For-loop's
+  /// parent.
+  AbstractNode *doPartialLoopUnrolling(For &elem);
 };
 
 /// Takes a Literal (e.g., LiteralInt) and checks whether its values are defined using a Matrix<AbstractExpr*>. In

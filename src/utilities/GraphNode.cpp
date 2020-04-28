@@ -22,13 +22,12 @@ const std::set<std::pair<std::string, AccessType>> &GraphNode::getAccessedVariab
   return accessedVariables;
 }
 
-std::set<std::pair<std::string, AccessType>> GraphNode::getVariables(AccessType accessType) const {
-  std::set<std::pair<std::string, AccessType>> writtenVars;
-  std::copy_if(accessedVariables.begin(), accessedVariables.end(), std::inserter(writtenVars, writtenVars.begin()),
-               [accessType](const std::pair<std::string, AccessType> &p) {
-                 return p.second==accessType;
-               });
-  return writtenVars;
+std::set<std::string> GraphNode::getVariables(AccessType accessTypeFilter) const {
+  std::set<std::string> filteredVariables;
+  for (auto &[varIdentifier, acType] : accessedVariables) {
+    if (acType==accessTypeFilter) filteredVariables.insert(varIdentifier);
+  }
+  return filteredVariables;
 }
 
 AbstractNode *GraphNode::getRefToOriginalNode() const {

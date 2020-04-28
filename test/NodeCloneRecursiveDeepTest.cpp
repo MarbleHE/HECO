@@ -398,15 +398,15 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_Return) {  /* NOLINT */
 TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_UnaryExpr) {  /* NOLINT */
   const bool keepOriginalId = true;
   auto unaryExpr = new UnaryExpr(UnaryOp::NEGATION, new LiteralBool(true));
-  ASSERT_TRUE(unaryExpr->getOp()->equals(UnaryOp::NEGATION));
+  ASSERT_TRUE(unaryExpr->getOperator()->equals(UnaryOp::NEGATION));
   auto clonedUnaryExpr = dynamic_cast<UnaryExpr *>(unaryExpr->clone(keepOriginalId));
 
   // test if changing original also modifies the copy
   unaryExpr->setAttributes(UnaryOp::NEGATION, new LiteralInt(22));
-  ASSERT_TRUE(unaryExpr->getOp()->equals(UnaryOp::NEGATION));
+  ASSERT_TRUE(unaryExpr->getOperator()->equals(UnaryOp::NEGATION));
   ASSERT_EQ(unaryExpr->getRight()->castTo<LiteralInt>()->getValue(), 22);
   // check cloned node
-  ASSERT_TRUE(clonedUnaryExpr->getOp()->equals(UnaryOp::NEGATION));
+  ASSERT_TRUE(clonedUnaryExpr->getOperator()->equals(UnaryOp::NEGATION));
   ASSERT_EQ(clonedUnaryExpr->getRight()->castTo<LiteralBool>()->getValue(), true);
 
   // test if all fields belonging to Node class were copied

@@ -31,7 +31,12 @@ bool Matrix<AbstractExpr *>::operator==(const Matrix &rhs) const {
 
   for (int i = 0; i < values.size(); ++i) {
     for (int j = 0; j < values[i].size(); ++j) {
-      if (!values[i][j]->isEqual(rhs.values[i][j])) return false;
+      if (values[i][j]==nullptr && rhs.values[i][j]==nullptr) continue;
+      if ((values[i][j]==nullptr && rhs.values[i][j]!=nullptr)
+          || (values[i][j]!=nullptr && rhs.values[i][j]==nullptr)
+          || (!values[i][j]->isEqual(rhs.values[i][j]))) {
+        return false;
+      }
     }
   }
   return true;
@@ -230,8 +235,8 @@ AbstractMatrix *Matrix<bool>::applyUnaryOperatorComponentwise(Operator *os) {
 
 template<typename T>
 AbstractExpr *Matrix<T>::getElementAt(int, int) {
-  throw std::logic_error(
-      "getElementAt failed: Value in matrix is of unknown type. Cannot determine associated AbstractLiteral subtype.");
+  throw std::logic_error("getElementAt failed: Value in matrix is of unknown type. "
+                         "Cannot determine associated AbstractLiteral subtype.");
 }
 
 template<>
@@ -269,11 +274,11 @@ AbstractExpr *Matrix<AbstractExpr *>::getElementAt(int row, int column) {
 
 template<>
 Matrix<AbstractExpr *>::Matrix(std::vector<std::vector<AbstractExpr *>> inputMatrix)  /* NOLINT intentionally not explicit */
-    : values(std::move(inputMatrix)), dim(Dimension(values.size(), values.at(0).size())) {
+    : values(std::move(inputMatrix)), dim(Dimension(values.size(), values.size()==0 ? 0 : values.at(0).size())) {
   // In a Matrix<AbstractExpr*> it is needed that we use the parent-child relationship by attaching each of the matrix
   // elements as a child to the Matrix object. This is needed, for example, in the CompileTimeExpressionSimplifier where
   // we replace nodes that can be evaluated at compile-time (e.g., variables by their known value).
-  int elementsPerRow = values.at(0).size();
+  int elementsPerRow = values.size()==0 ? 0 : values.at(0).size();
   std::vector<AbstractNode *> childrenToBeAdded;
   for (auto &matrixRows : values) {
     // check that matrix has the same number of elements in each row
@@ -376,35 +381,53 @@ void Matrix<T>::setElementAt(int, int, AbstractExpr *) {
 
 template<>
 void Matrix<AbstractExpr *>::setElementAt(int row, int column, AbstractExpr *element) {
+  checkBoundsAndResizeMatrix(row, column);
   values[row][column] = element;
+  getDimensions().update(values.size(), values.at(0).size());
 }
 
 template<>
 void Matrix<int>::setElementAt(int row, int column, AbstractExpr *element) {
   if (auto elementAsLiteral = dynamic_cast<LiteralInt *>(element)) {
+    checkBoundsAndResizeMatrix(row, column);
     values[row][column] = elementAsLiteral->getValue();
-  } else { throw std::runtime_error("Unexpected element given that cannot be added to Matrix<T>."); }
+    getDimensions().update(values.size(), values.at(0).size());
+  } else {
+    throw std::runtime_error("Unexpected element given that cannot be added to Matrix<int>.");
+  }
 }
 
 template<>
 void Matrix<float>::setElementAt(int row, int column, AbstractExpr *element) {
   if (auto elementAsLiteral = dynamic_cast<LiteralFloat *>(element)) {
+    checkBoundsAndResizeMatrix(row, column);
     values[row][column] = elementAsLiteral->getValue();
-  } else { throw std::runtime_error("Unexpected element given that cannot be added to Matrix<T>."); }
+    getDimensions().update(values.size(), values.at(0).size());
+  } else {
+    throw std::runtime_error("Unexpected element given that cannot be added to Matrix<float>.");
+  }
 }
 
 template<>
 void Matrix<bool>::setElementAt(int row, int column, AbstractExpr *element) {
   if (auto elementAsLiteral = dynamic_cast<LiteralBool *>(element)) {
+    checkBoundsAndResizeMatrix(row, column);
     values[row][column] = elementAsLiteral->getValue();
-  } else { throw std::runtime_error("Unexpected element given that cannot be added to Matrix<T>."); }
+    getDimensions().update(values.size(), values.at(0).size());
+  } else {
+    throw std::runtime_error("Unexpected element given that cannot be added to Matrix<bool>.");
+  }
 }
 
 template<>
 void Matrix<std::string>::setElementAt(int row, int column, AbstractExpr *element) {
   if (auto elementAsLiteral = dynamic_cast<LiteralString *>(element)) {
+    checkBoundsAndResizeMatrix(row, column);
     values[row][column] = elementAsLiteral->getValue();
-  } else { throw std::runtime_error("Unexpected element given that cannot be added to Matrix<T>."); }
+    getDimensions().update(values.size(), values.at(0).size());
+  } else {
+    throw std::runtime_error("Unexpected element given that cannot be added to Matrix<std::string>.");
+  }
 }
 
 // ===== replaceChild ==========

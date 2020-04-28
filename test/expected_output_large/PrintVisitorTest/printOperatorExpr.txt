@@ -4,7 +4,4 @@ Function: (addNums)	[global]
 		Return:	[Block_2]
 			OperatorExpr:
 				Operator: (add)
-				LiteralInt: (34)
-				LiteralInt: (31)
-				LiteralInt: (11)
-				LiteralInt: (1)
+				LiteralInt: (77)

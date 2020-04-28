@@ -124,7 +124,7 @@ TEST(MultRewriteTest, noRewriteIfOutOfScope) { /* NOLINT */
 /// Case where multiplications do happen subsequent but variable from first statement is not involved in second
 /// statement:
 ///     int prod = inputA * inputB;
-///     argPow2 = inputC * inputC;
+///     argPow   = inputC * inputC;
 /// [Expected] No rewriting is performed.
 TEST(MultRewriteTest, noRewriteForIndependentStatements) { /* NOLINT */
   Ast ast;

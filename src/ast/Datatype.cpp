@@ -92,15 +92,3 @@ void Datatype::accept(Visitor &v) {
 bool Datatype::supportsCircuitMode() {
   return true;
 }
-
-AbstractLiteral *Datatype::getDefaultVariableInitializationValue(Types datatype) {
-  switch (datatype) {
-    case Types::BOOL:return new LiteralBool("false");
-    case Types::INT:return new LiteralInt(0);
-    case Types::FLOAT:return new LiteralFloat(0.0f);
-    case Types::STRING:return new LiteralString("");
-    default:
-      throw std::invalid_argument("Unrecognized enum type given: Cannot determine its default value."
-                                  "See enum Types for the supported types.");
-  }
-}

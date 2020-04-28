@@ -19,6 +19,8 @@ class LiteralString : public AbstractLiteral {
 
   explicit LiteralString(std::string value);
 
+  LiteralString();
+
   ~LiteralString() override;
 
   void print(std::ostream &str) const override;

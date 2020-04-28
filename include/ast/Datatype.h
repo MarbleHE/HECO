@@ -51,13 +51,6 @@ class Datatype : public AbstractNode {
 
   [[nodiscard]] json toJson() const override;
 
-  /// Returns the default variable initialization value based on the given datatype. For example, integers (int) by
-  /// default are initialized by 0. This method is needed because our VarDecl object allows to leave out the initializer
-  /// in which case the variable's value is undefined. For certain actions, e.g., compile-time expression
-  /// simplification we need to know the variable's initial value.
-  /// \param datatype The datatype for which the default initialization value should be determined.
-  /// \return The default value to which an uninitialized (declared only) variable is initialized to.
-  static AbstractLiteral *getDefaultVariableInitializationValue(Types datatype);
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_INCLUDE_UTILITIES_DATATYPE_H_

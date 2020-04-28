@@ -35,6 +35,7 @@ include_directories(
         ${ast_optimizer_SOURCE_DIR}/include/optimizer
         ${ast_optimizer_SOURCE_DIR}/include/utilities
         ${ast_optimizer_SOURCE_DIR}/include/visitor
+        ${ast_optimizer_SOURCE_DIR}/include/evaluation
         ${ast_optimizer_SOURCE_DIR}/examples
         ${ast_optimizer_SOURCE_DIR}/test)
 
@@ -88,10 +89,13 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/ast/Dimension.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/Matrix.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/Transpose.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/GetMatrixElement.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/MatrixElementRef.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/ControlFlowGraphVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/GraphNode.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/utilities/NodeRelationship.cpp)
+        ${ast_optimizer_SOURCE_DIR}/src/utilities/NodeRelationship.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/evaluation/EvaluationAlgorithms.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/MatrixAssignm.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/GetMatrixSize.cpp)
 
 set(HEADER_ONLY_SOURCES
         ${ast_optimizer_SOURCE_DIR}/include/ast/OpSymbEnum.h

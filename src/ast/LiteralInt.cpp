@@ -10,6 +10,8 @@ LiteralInt::LiteralInt(AbstractMatrix *am) : AbstractLiteral(am) {}
 
 LiteralInt::LiteralInt(int value) : AbstractLiteral(new Matrix(value)) {}
 
+LiteralInt::LiteralInt() : AbstractLiteral(new Matrix<AbstractExpr *>()) {}
+
 LiteralInt::LiteralInt(Matrix<int> *inputMatrix) : AbstractLiteral(inputMatrix) {}
 
 json LiteralInt::toJson() const {
@@ -93,3 +95,4 @@ AbstractMatrix *LiteralInt::getMatrix() const {
 void LiteralInt::setMatrix(AbstractMatrix *newValue) {
   this->matrix = newValue;
 }
+

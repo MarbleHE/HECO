@@ -1,3 +1,4 @@
+#include <PrintVisitor.h>
 #include "DotPrinter.h"
 #include "CompileTimeExpressionSimplifier.h"
 #include "OpSymbEnum.h"
@@ -19,20 +20,29 @@
 #include "AstTestingGenerator.h"
 #include "OperatorExpr.h"
 #include "Matrix.h"
+#include "For.h"
+#include "GetMatrixSize.h"
+#include "MatrixAssignm.h"
 
 class CompileTimeExpressionSimplifierFixture : public ::testing::Test {
  protected:
   Ast ast;
   CompileTimeExpressionSimplifier ctes;
 
+ protected:
+  virtual void SetUp() {
+    ctes = CompileTimeExpressionSimplifier();
+  }
+
   CompileTimeExpressionSimplifierFixture() = default;
 
-  AbstractExpr *getVariableValue(const std::string &varIdentifier) {
-    try {
-      return ctes.variableValues.at(varIdentifier);
-    } catch (std::out_of_range &outOfRangeException) {
-      throw std::logic_error("Variable identifier '" + varIdentifier + "' not found!");
+  AbstractExpr *getVariableValueByUniqueName(const std::string &varIdentifier) {
+    // NOTE: This method does not work if there are multiple variables with the same variable identifier but in
+    // different scopes. In that case the method always returns the value of the variable in the outermost scope.
+    for (auto &[varIdentifierScope, varValue] : ctes.variableValues) {
+      if (varIdentifierScope.first==varIdentifier) return varValue->value;
     }
+    throw std::logic_error("Variable identifier '" + varIdentifier + "' not found!");
   }
 };
 
@@ -57,7 +67,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, arithmeticExpr_literalsOnly_fully
   ctes.visit(ast);
 
   // check that 'alpha' is computed correctly
-  auto alphaValue = getVariableValue("alpha");
+  auto alphaValue = getVariableValueByUniqueName("alpha");
   EXPECT_EQ(alphaValue->castTo<LiteralInt>()->getValue(), 242);
   // check that the statement VarDecl and its children are deleted
   EXPECT_EQ(function->getBody()->getStatements().size(), 0);
@@ -89,13 +99,13 @@ TEST_F(CompileTimeExpressionSimplifierFixture, arithmeticExpr_variableUnknown_rh
   // perform the compile-time expression simplification
   ctes.visit(ast);
 
-  // check that value of alpha  variable
-  EXPECT_EQ(ctes.variableValues.size(), 1);
+  // variableValues is expected to contain: [encryptedA, alpha][
+  EXPECT_EQ(ctes.variableValues.size(), 2);
   // check that the rhs operand of arithmeticExpr is simplified
-  auto expected = new ArithmeticExpr(new Variable("encryptedA"),
-                                     ArithmeticOp::MULTIPLICATION,
-                                     new LiteralInt(28));
-  EXPECT_TRUE(getVariableValue("alpha")->isEqual(expected));
+  auto expected = new OperatorExpr(new Operator(ArithmeticOp::MULTIPLICATION),
+                                   {new Variable("encryptedA"),
+                                    new LiteralInt(28)});
+  EXPECT_TRUE(getVariableValueByUniqueName("alpha")->isEqual(expected));
   EXPECT_EQ(function->getBodyStatements().size(), 0);
 
   // check that at the end of the evaluation traversal, the removableNodes map is empty
@@ -128,7 +138,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, arithmeticExpr_variableKnown_full
   ctes.visit(ast);
 
   // check that 'alpha' is computed correctly
-  auto alphaValue = getVariableValue("alpha");
+  auto alphaValue = getVariableValueByUniqueName("alpha");
   EXPECT_EQ(alphaValue->castTo<LiteralInt>()->getValue(), 1'204);
 
   // check that the statement VarDecl and its children are deleted
@@ -169,13 +179,14 @@ TEST_F(CompileTimeExpressionSimplifierFixture, arithmeticExpr_variablesUnknown_n
   ctes.visit(ast);
 
   // check that 'alpha' is computed correctly
-  auto expected = new ArithmeticExpr(
-      new Variable("encryptedA"),
-      ArithmeticOp::MULTIPLICATION,
-      new ArithmeticExpr(new LiteralInt(4),
-                         ArithmeticOp::MULTIPLICATION,
-                         new Variable("plaintextB")));
-  EXPECT_TRUE(getVariableValue("alpha")->isEqual(expected));
+  auto expected = new OperatorExpr(
+      new Operator(ArithmeticOp::MULTIPLICATION),
+      {
+          new Variable("encryptedA"),
+          new Variable("plaintextB"),
+          new LiteralInt(4)
+      });
+  EXPECT_TRUE(getVariableValueByUniqueName("alpha")->isEqual(expected));
 
   // check that 9 nodes were deleted and the function's body is empty
   EXPECT_EQ(numberOfNodesBeforeSimplification - 9, ast.getAllNodes().size());
@@ -206,7 +217,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_literalsOnly_fullyEva
   ctes.visit(ast);
 
   // check that 'alpha' is computed correctly
-  auto alphaValue = getVariableValue("alpha");
+  auto alphaValue = getVariableValueByUniqueName("alpha");
   EXPECT_EQ(alphaValue->castTo<LiteralBool>()->getValue(), false);
 
   // check that the statement VarDecl and its children are deleted
@@ -247,7 +258,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_variableUnknown_lhsOp
 
   // check that alpha's lhs operand is computed
   auto expected = new LiteralBool(true);
-  EXPECT_TRUE(getVariableValue("alpha")->isEqual(expected));
+  EXPECT_TRUE(getVariableValueByUniqueName("alpha")->isEqual(expected));
   // check that the variable declaration statement is deleted
   EXPECT_EQ(function->getBodyStatements().size(), 0);
 
@@ -281,7 +292,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_variableKnown_fullyEv
   ctes.visit(ast);
 
   // check that 'alpha' is computed correctly
-  auto alphaValue = getVariableValue("alpha");
+  auto alphaValue = getVariableValueByUniqueName("alpha");
   EXPECT_EQ(alphaValue->castTo<LiteralBool>()->getValue(), true);
 
   // check that the statement VarDecl and its children are deleted
@@ -297,7 +308,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_variablesUnknown_notA
   //  plaintext_bool alpha = encryptedA && (true ^ encryptedB);
   // }
   //  -- expected --
-  // variableValues['alpha'] = encryptedA && !encryptedB
+  // variableValues['alpha'] = encryptedA && (true ^ encryptedB)
   auto function = new Function("compute");
   auto functionParameters = std::vector<FunctionParameter *>(
       {new FunctionParameter(new Datatype(Types::BOOL, true),
@@ -323,11 +334,14 @@ TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_variablesUnknown_notA
   ctes.visit(ast);
 
   // check that 'alpha' is computed correctly (could not be computed but is saved)
-  auto expected = new LogicalExpr(
-      new Variable("encryptedA"),
-      LogCompOp::LOGICAL_AND,
-      new UnaryExpr(NEGATION, new Variable("encryptedB")));
-  EXPECT_TRUE(getVariableValue("alpha")->isEqual(expected));
+  auto expected = new OperatorExpr(
+      new Operator(LogCompOp::LOGICAL_AND),
+      {new Variable("encryptedA"),
+       new OperatorExpr(
+           new Operator(LOGICAL_XOR),
+           {new Variable("encryptedB"), new LiteralBool(true)})
+      });
+  EXPECT_TRUE(getVariableValueByUniqueName("alpha")->isEqual(expected));
 
   // check that 9 nodes are deleted
   EXPECT_EQ(numberOfNodesBeforeSimplification - 9, ast.getAllNodes().size());
@@ -354,7 +368,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, unaryExpr_literalsOnly_fullyEvalu
   ctes.visit(ast);
 
   // check that 'truthValue' is computed correctly
-  auto alphaValue = getVariableValue("truthValue");
+  auto alphaValue = getVariableValueByUniqueName("truthValue");
   EXPECT_EQ(alphaValue->castTo<LiteralBool>()->getValue(), true);
 
   // check that the statement VarDecl and its children are deleted
@@ -385,11 +399,11 @@ TEST_F(CompileTimeExpressionSimplifierFixture, unaryExpr_variableKnown_fullyEval
   ctes.visit(ast);
 
   // check that 'alpha' is stored correctly
-  auto alphaValue = getVariableValue("alpha");
+  auto alphaValue = getVariableValueByUniqueName("alpha");
   EXPECT_EQ(alphaValue->castTo<LiteralBool>()->getValue(), true);
 
   // check that 'beta' is computed correctly
-  auto betaValue = getVariableValue("beta");
+  auto betaValue = getVariableValueByUniqueName("beta");
   EXPECT_EQ(betaValue->castTo<LiteralBool>()->getValue(), false);
 
   // check that both statements and their children are deleted
@@ -417,9 +431,10 @@ TEST_F(CompileTimeExpressionSimplifierFixture, unaryExpr_variableUnknown_notEval
   // perform the compile-time expression simplification
   ctes.visit(ast);
 
-  // check that beta was computed
-  EXPECT_EQ(ctes.variableValues.size(), 1);
-  EXPECT_TRUE(getVariableValue("beta")->isEqual(new UnaryExpr(UnaryOp::NEGATION, new Variable("paramA"))));
+  // variableValues is expected to contain: [paramA, beta]
+  EXPECT_EQ(ctes.variableValues.size(), 2);
+  EXPECT_TRUE(getVariableValueByUniqueName("beta")
+                  ->isEqual(new OperatorExpr(new Operator(UnaryOp::NEGATION), {new Variable("paramA")})));
   // check that statements is deleted
   EXPECT_EQ(function->getBodyStatements().size(), 0);
 
@@ -449,11 +464,11 @@ TEST_F(CompileTimeExpressionSimplifierFixture, varAssignm_variablesKnown_fullyEv
   ctes.visit(ast);
 
   // check that 'alpha' is stored correctly
-  auto alphaValue = getVariableValue("alpha");
+  auto alphaValue = getVariableValueByUniqueName("alpha");
   EXPECT_EQ(alphaValue->castTo<LiteralFloat>()->getValue(), 2.75);
 
   // check that 'beta' is assigned correctly
-  auto betaValue = getVariableValue("beta");
+  auto betaValue = getVariableValueByUniqueName("beta");
   EXPECT_EQ(betaValue->castTo<LiteralFloat>()->getValue(), 2.75);
 
   // check that the statements and their children are deleted
@@ -481,33 +496,8 @@ TEST_F(CompileTimeExpressionSimplifierFixture, varAssignm_previouslyDeclaredNonI
   ctes.visit(ast);
 
   // check that 'alpha' is computed correctly
-  auto alphaValue = getVariableValue("alpha");
+  auto alphaValue = getVariableValueByUniqueName("alpha");
   EXPECT_EQ(alphaValue->castTo<LiteralFloat>()->getValue(), 2.95f);
-
-  // check that the statement VarDecl and its children are deleted
-  EXPECT_EQ(function->getBody()->getStatements().size(), 0);
-
-  // check that at the end of the evaluation traversal, the removableNodes map is empty
-  EXPECT_EQ(ctes.removableNodes.size(), 0);
-}
-
-TEST_F(CompileTimeExpressionSimplifierFixture,  /* NOLINT */
-       varAssignm_variableDeclarationOnly_correctInitialFloatValueExpected) {
-  // void compute() {
-  //  plaintext_float alpha;
-  // }
-  auto function = new Function("compute");
-  auto varDeclAlpha = new VarDecl("alpha", Types::FLOAT, nullptr);
-
-  // connect objects
-  function->addStatement(varDeclAlpha);
-  ast.setRootNode(function);
-
-  // perform the compile-time expression simplification
-  ctes.visit(ast);
-
-  // check that 'alpha' has correct initial value
-  EXPECT_EQ(getVariableValue("alpha")->castTo<LiteralFloat>()->getValue(), 0.0f);
 
   // check that the statement VarDecl and its children are deleted
   EXPECT_EQ(function->getBody()->getStatements().size(), 0);
@@ -535,7 +525,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, varAssignm_assignmentToParameter)
   ctes.visit(ast);
 
   // check that 'alpha' is computed correctly
-  auto alphaValue = getVariableValue("alpha");
+  auto alphaValue = getVariableValueByUniqueName("alpha");
   EXPECT_EQ(alphaValue->castTo<LiteralFloat>()->getValue(), 42.24f);
 
   // check that the statement VarDecl and its children are deleted
@@ -594,13 +584,9 @@ TEST_F(CompileTimeExpressionSimplifierFixture,  /* NOLINT */
   EXPECT_TRUE(ast.getAllNodes().size() < originalNumberOfNodes);
 
   // check that simplification generated the expected simplified AST
-  auto expectedAst = new ArithmeticExpr(
-      new ArithmeticExpr(
-          new LiteralInt(8),
-          ArithmeticOp::ADDITION,
-          new Variable("y")),
-      ArithmeticOp::ADDITION,
-      new Variable("y"));
+  auto expectedAst = new OperatorExpr(
+      new Operator(ADDITION),
+      {new Variable("y"), new Variable("y"), new LiteralInt(8)});
   EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
   EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedAst));
 
@@ -731,7 +717,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, return_variableUnknown_expectedNo
   EXPECT_EQ(numberOfNodesBeforeSimplification, ast.getAllNodes().size());
 
   // check that 'b' remains unknown
-  EXPECT_THROW(getVariableValue("b"), std::logic_error);
+  EXPECT_THROW(getVariableValueByUniqueName("b"), std::logic_error);
 
   // check that at the end of the evaluation traversal, the removableNodes map is empty
   EXPECT_EQ(ctes.removableNodes.size(), 0);
@@ -781,7 +767,8 @@ TEST_F(CompileTimeExpressionSimplifierFixture, return_multipleReturnValues_expec
 
   // check return expression 1: a*7
   EXPECT_TRUE(returnStatement->getReturnExpressions().at(0)
-                  ->isEqual(new ArithmeticExpr(new Variable("a"), ArithmeticOp::MULTIPLICATION, new LiteralInt(7))));
+                  ->isEqual(new OperatorExpr(new Operator(ArithmeticOp::MULTIPLICATION),
+                                             {new Variable("a"), new LiteralInt(7)})));
   // check return expression 2: -5
   EXPECT_TRUE(returnStatement->getReturnExpressions().at(1)->isEqual(new LiteralInt(-5)));
   // check return expression 3: 21
@@ -966,7 +953,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   ctes.visit(ast);
 
   // check that 'a' was memorized correctly
-  EXPECT_EQ(getVariableValue("a")->castTo<LiteralInt>()->getValue(), 1);
+  EXPECT_EQ(getVariableValueByUniqueName("a")->castTo<LiteralInt>()->getValue(), 1);
   // check that there is only one statement left
   EXPECT_EQ(function->getBodyStatements().size(), 1);
   EXPECT_EQ(function->getBodyStatements().front(), returnStatement);
@@ -1027,26 +1014,23 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   // check that the return statement contains exactly one return value
   EXPECT_EQ(returnStatement->getReturnExpressions().size(), 1);
   // check that the return value is the expected one
-  auto expectedResult = new ArithmeticExpr(
-      new ArithmeticExpr(
-          new LogicalExpr(new Variable("a"),
-                          LogCompOp::GREATER,
-                          new LiteralInt(20)),
-          ArithmeticOp::MULTIPLICATION,
-          new LiteralInt(44)),
-      ArithmeticOp::ADDITION,
-      new ArithmeticExpr(
-          new ArithmeticExpr(
-              new LiteralInt(1),
-              ArithmeticOp::SUBTRACTION,
-              new LogicalExpr(new Variable("a"),
-                              LogCompOp::GREATER,
-                              new LiteralInt(20))),
-          ArithmeticOp::MULTIPLICATION,
-          new LiteralInt(22)));
+  auto expectedResult = new OperatorExpr(
+      new Operator(ArithmeticOp::ADDITION),
+      {new OperatorExpr(
+          new Operator(ArithmeticOp::MULTIPLICATION),
+          {new OperatorExpr(new Operator(LogCompOp::GREATER),
+                            {new Variable("a"), new LiteralInt(20)}),
+           new LiteralInt(44)}),
+       new OperatorExpr(
+           new Operator(ArithmeticOp::MULTIPLICATION),
+           {new OperatorExpr(
+               new Operator(ArithmeticOp::SUBTRACTION),
+               {new LiteralInt(1),
+                new OperatorExpr(new Operator(LogCompOp::GREATER), {new Variable("a"), new LiteralInt(20)})}),
+            new LiteralInt(22)})});
   EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedResult));
   // check that 'b' was memorized correctly
-  EXPECT_TRUE(getVariableValue("b")->isEqual(expectedResult));
+  EXPECT_TRUE(getVariableValueByUniqueName("b")->isEqual(expectedResult));
 
   // check that at the end of the evaluation traversal, the removableNodes map is empty
   EXPECT_EQ(ctes.removableNodes.size(), 0);
@@ -1056,7 +1040,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
        ifStmt_conditionValueIsUnknown_thenBranchOnlyExists_expectedRemovalOfElseClauseInResultBecauseVariableBIsNull) {
   //  -- input --
   //  int compute(plaintext_int a) {
-  //    plaintext_int b;  // implicit: b=0
+  //    plaintext_int b = 0;
   //    if (a > 20) {
   //      plaintext_int c = 642;
   //      b = 2*c-1;
@@ -1071,7 +1055,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   auto functionParameter = new ParameterList({
                                                  new FunctionParameter(new Datatype(Types::INT),
                                                                        new Variable("a"))});
-  auto varDeclB = new VarDecl("b", new Datatype(Types::INT));
+  auto varDeclB = new VarDecl("b", new Datatype(Types::INT), new LiteralInt(0));
   auto ifStmtCondition = new LogicalExpr(new Variable("a"),
                                          LogCompOp::GREATER,
                                          new LiteralInt(20));
@@ -1106,17 +1090,16 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   EXPECT_EQ(returnStatement->getReturnExpressions().size(), 1);
   // check that the return value is the expected one
   auto expectedResult =
-      new ArithmeticExpr(
-          new LogicalExpr(new Variable("a"),
-                          LogCompOp::GREATER,
-                          new LiteralInt(20)),
-          ArithmeticOp::MULTIPLICATION,
-          new LiteralInt(1'283));
+      new OperatorExpr(
+          new Operator(ArithmeticOp::MULTIPLICATION),
+          {new OperatorExpr(
+              new Operator(LogCompOp::GREATER), {new Variable("a"), new LiteralInt(20)}),
+           new LiteralInt(1'283)});
   EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedResult));
   // check that variable values were memorized correctly
-  EXPECT_TRUE(getVariableValue("b")->isEqual(expectedResult));
+  EXPECT_TRUE(getVariableValueByUniqueName("b")->isEqual(expectedResult));
   // variable 'c' is not expected to be memorized because it's declared in the Then-branch only
-  EXPECT_THROW(getVariableValue("c"), std::logic_error);
+  EXPECT_THROW(getVariableValueByUniqueName("c"), std::logic_error);
 
   // check that at the end of the evaluation traversal, the removableNodes map is empty
   EXPECT_EQ(ctes.removableNodes.size(), 0);
@@ -1175,25 +1158,21 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   // check that the return statement contains exactly one return value
   EXPECT_EQ(returnStatement->getReturnExpressions().size(), 1);
   // check that the return value is the expected one
-  auto expectedResult = new ArithmeticExpr(
-      new ArithmeticExpr(
-          new LogicalExpr(new Variable("a"),
-                          LogCompOp::GREATER,
-                          new LiteralInt(20)),
-          ArithmeticOp::MULTIPLICATION,
-          new LiteralInt(1'283)),
-      ArithmeticOp::ADDITION,
-      new ArithmeticExpr(new ArithmeticExpr(
-          new LiteralInt(1),
-          ArithmeticOp::SUBTRACTION,
-          new LogicalExpr(new Variable("a"),
-                          LogCompOp::GREATER,
-                          new LiteralInt(20))),
-                         ArithmeticOp::MULTIPLICATION,
-                         new LiteralInt(42)));
+  auto expectedResult = new OperatorExpr(new Operator(ArithmeticOp::ADDITION),
+                                         {new OperatorExpr(new Operator(ArithmeticOp::MULTIPLICATION),
+                                                           {new OperatorExpr(new Operator(LogCompOp::GREATER),
+                                                                             {new Variable("a"), new LiteralInt(20)}),
+                                                            new LiteralInt(1'283)}),
+                                          new OperatorExpr(new Operator(ArithmeticOp::MULTIPLICATION),
+                                                           {new OperatorExpr(new Operator(ArithmeticOp::SUBTRACTION),
+                                                                             {new LiteralInt(1),
+                                                                              new OperatorExpr(new Operator(LogCompOp::GREATER),
+                                                                                               {new Variable("a"),
+                                                                                                new LiteralInt(20)})}),
+                                                            new LiteralInt(42)})});
   EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedResult));
   // check that 'b' was memorized correctly
-  EXPECT_TRUE(getVariableValue("b")->isEqual(expectedResult));
+  EXPECT_TRUE(getVariableValueByUniqueName("b")->isEqual(expectedResult));
 
   // check that at the end of the evaluation traversal, the removableNodes map is empty
   EXPECT_EQ(ctes.removableNodes.size(), 0);
@@ -1249,25 +1228,22 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   // check that the return statement contains exactly one return value
   EXPECT_EQ(returnStatement->getReturnExpressions().size(), 1);
   // check that the return value is the expected one
-  auto expectedResult = new ArithmeticExpr(
-      new ArithmeticExpr(
-          new LogicalExpr(new Variable("threshold"),
-                          LogCompOp::SMALLER,
-                          new LiteralInt(11)),
-          ArithmeticOp::MULTIPLICATION,
-          new ArithmeticExpr(new LiteralInt(2), ArithmeticOp::MULTIPLICATION, new Variable("factor"))),
-      ArithmeticOp::ADDITION,
-      new ArithmeticExpr(new ArithmeticExpr(
-          new LiteralInt(1),
-          ArithmeticOp::SUBTRACTION,
-          new LogicalExpr(new Variable("threshold"),
-                          LogCompOp::SMALLER,
-                          new LiteralInt(11))),
-                         ArithmeticOp::MULTIPLICATION,
-                         new Variable("factor")));
+  auto expectedResult = new OperatorExpr(
+      new Operator(ArithmeticOp::ADDITION),
+      {new OperatorExpr(
+          new Operator(ArithmeticOp::MULTIPLICATION),
+          {new OperatorExpr(new Operator(LogCompOp::SMALLER), {new Variable("threshold"), new LiteralInt(11)}),
+           new OperatorExpr(new Operator(ArithmeticOp::MULTIPLICATION), {new LiteralInt(2), new Variable("factor")})}),
+       new OperatorExpr(new Operator(ArithmeticOp::MULTIPLICATION),
+                        {new OperatorExpr(new Operator(ArithmeticOp::SUBTRACTION),
+                                          {new LiteralInt(1),
+                                           new OperatorExpr(
+                                               new Operator(LogCompOp::SMALLER),
+                                               {new Variable("threshold"), new LiteralInt(11)})}),
+                         new Variable("factor")})});
   EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedResult));
   // check that 'b' was memorized correctly
-  EXPECT_TRUE(getVariableValue("b")->isEqual(expectedResult));
+  EXPECT_TRUE(getVariableValueByUniqueName("b")->isEqual(expectedResult));
 
   // check that at the end of the evaluation traversal, the removableNodes map is empty
   EXPECT_EQ(ctes.removableNodes.size(), 0);
@@ -1339,44 +1315,41 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   //          + [1-[factor>9]]*33*factor]   // expectedResultMiddleTerm
   //    + [1-[threshold>11]]*99;            // expectedResultRhsTerm
 
-  auto expectedResultLhsTerm = new ArithmeticExpr(
-      new LogicalExpr(new Variable("factor"), LogCompOp::GREATER, new LiteralInt(9)),
-      ArithmeticOp::MULTIPLICATION,
-      new ArithmeticExpr(
-          new LiteralInt(66),
-          ArithmeticOp::MULTIPLICATION,
-          new Variable("factor")));
-  auto expectedResultMiddleTerm = new ArithmeticExpr(
-      new ArithmeticExpr(
-          new LiteralInt(1),
-          ArithmeticOp::SUBTRACTION,
-          new LogicalExpr(new Variable("factor"), LogCompOp::GREATER, new LiteralInt(9))),
-      ArithmeticOp::MULTIPLICATION,
-      new ArithmeticExpr(
-          new LiteralInt(33),
-          ArithmeticOp::MULTIPLICATION,
-          new Variable("factor")));
-  auto expectedResultRhsTerm = new ArithmeticExpr(
-      new ArithmeticExpr(
-          new LiteralInt(1),
-          ArithmeticOp::SUBTRACTION,
-          new LogicalExpr(new Variable("threshold"), LogCompOp::GREATER, new LiteralInt(11))),
-      ArithmeticOp::MULTIPLICATION,
-      new LiteralInt(99));
+  auto expectedResultLhsTerm = new OperatorExpr(
+      new Operator(ArithmeticOp::MULTIPLICATION),
+      {new OperatorExpr(new Operator(LogCompOp::GREATER), {new Variable("factor"), new LiteralInt(9)}),
+       new OperatorExpr(
+           new Operator(ArithmeticOp::MULTIPLICATION),
+           {new LiteralInt(66),
+            new Variable("factor")})});
+  auto expectedResultMiddleTerm = new OperatorExpr(
+      new Operator(ArithmeticOp::MULTIPLICATION),
+      {new OperatorExpr(
+          new Operator(ArithmeticOp::SUBTRACTION),
+          {new LiteralInt(1),
+           new OperatorExpr(new Operator(LogCompOp::GREATER), {new Variable("factor"), new LiteralInt(9)})}),
+       new OperatorExpr(
+           new Operator(ArithmeticOp::MULTIPLICATION),
+           {new LiteralInt(33),
+            new Variable("factor")})});
+  auto expectedResultRhsTerm = new OperatorExpr(
+      new Operator(ArithmeticOp::MULTIPLICATION),
+      {new OperatorExpr(
+          new Operator(ArithmeticOp::SUBTRACTION),
+          {new LiteralInt(1),
+           new OperatorExpr(new Operator(LogCompOp::GREATER), {new Variable("threshold"), new LiteralInt(11)})}),
+       new LiteralInt(99)});
 
-  auto expectedResult = new ArithmeticExpr(
-      new ArithmeticExpr(
-          new LogicalExpr(new Variable("threshold"), LogCompOp::GREATER, new LiteralInt(11)),
-          ArithmeticOp::MULTIPLICATION,
-          new ArithmeticExpr(
-              expectedResultLhsTerm,
-              ArithmeticOp::ADDITION,
-              expectedResultMiddleTerm)),
-      ArithmeticOp::ADDITION,
-      expectedResultRhsTerm);
+  auto expectedResult = new OperatorExpr(
+      new Operator(ArithmeticOp::ADDITION),
+      {new OperatorExpr(
+          new Operator(ArithmeticOp::MULTIPLICATION),
+          {new OperatorExpr(new Variable("threshold"), new Operator(LogCompOp::GREATER), new LiteralInt(11)),
+           new OperatorExpr(new Operator(ArithmeticOp::ADDITION), {expectedResultLhsTerm, expectedResultMiddleTerm})}),
+       expectedResultRhsTerm});
   EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedResult));
   // check that 'b' was memorized correctly
-  EXPECT_TRUE(getVariableValue("b")->isEqual(expectedResult));
+  EXPECT_TRUE(getVariableValueByUniqueName("b")->isEqual(expectedResult));
 
   // check that at the end of the evaluation traversal, the removableNodes map is empty
   EXPECT_EQ(ctes.removableNodes.size(), 0);
@@ -1414,10 +1387,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_partiallyEvaluableO
   ctes.visit(ast);
 
   // check that simplification generated the expected simplified AST
-  auto expectedReturnVal = new ArithmeticExpr(
-      new LiteralInt(71),
-      ArithmeticOp::ADDITION,
-      new Variable("x"));
+  auto expectedReturnVal = new OperatorExpr(new Operator(ADDITION), {new Variable("x"), new LiteralInt(71)});
   EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
   EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
 
@@ -1425,7 +1395,59 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_partiallyEvaluableO
   EXPECT_EQ(ctes.removableNodes.size(), 0);
 }
 
-TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_unsupportedNestedOperator) { /* NOLINT */
+TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_includingOperatorExprs) { /* NOLINT */
+  //  -- input --
+  // int f(plaintext_int x, plaintext_int a) {
+  //  int y = 42+34+x+a;  // 76+x+a
+  //  int x = 11+29;  // 40
+  //  return x+y
+  // }
+  //  -- expected --
+  // int f(plaintext_int x) {
+  //  return 116+x+a;
+  // }
+  auto function = new Function("f");
+  auto functionParamList = new ParameterList(
+      {
+          new FunctionParameter(new Datatype(Types::INT, false), new Variable("x")),
+          new FunctionParameter(new Datatype(Types::INT, false), new Variable("a"))
+      });
+
+  auto varDeclY = new VarDecl("y",
+                              new Datatype(Types::INT),
+                              new ArithmeticExpr(new LiteralInt(42), ArithmeticOp::ADDITION,
+                                                 new ArithmeticExpr(new LiteralInt(34), ArithmeticOp::ADDITION,
+                                                                    new ArithmeticExpr(new Variable("x"),
+                                                                                       ArithmeticOp::ADDITION,
+                                                                                       new Variable("a")))));
+
+  auto varAssignmX =
+      new VarAssignm("x",
+                     new ArithmeticExpr(new LiteralInt(11), ArithmeticOp::ADDITION, new LiteralInt(29)));
+  auto returnStmt = new Return(
+      new ArithmeticExpr(new Variable("x"), ArithmeticOp::ADDITION, new Variable("y")));
+
+  // connect objects
+  function->setParameterList(functionParamList);
+  function->addStatement(varDeclY);
+  function->addStatement(varAssignmX);
+  function->addStatement(returnStmt);
+  ast.setRootNode(function);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  // check that simplification generated the expected simplified AST
+  auto expectedReturnVal =
+      new OperatorExpr(new Operator(ADDITION), {new Variable("x"), new Variable("a"), new LiteralInt(116)});
+  EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
+  EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
+
+  // check that at the end of the evaluation traversal, the removableNodes map is empty
+  EXPECT_EQ(ctes.removableNodes.size(), 0);
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_nestedDivisionOperator) { /* NOLINT */
   //  -- input --
   // int f(plaintext_int a) {
   //  return 9 + (34 + (22 / (a / (11 * 42))));
@@ -1456,11 +1478,10 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_unsupportedNestedOp
   ctes.visit(ast);
 
   // check that simplification generated the expected simplified AST
-  auto expectedReturnVal = new ArithmeticExpr(
-      new ArithmeticExpr(new LiteralInt(22), DIVISION,
-                         new ArithmeticExpr(new Variable("a"), DIVISION, new LiteralInt(462))),
-      ArithmeticOp::ADDITION,
-      new LiteralInt(43));
+  auto expectedReturnVal = new OperatorExpr(
+      new Operator(ADDITION), {new LiteralInt(43),
+                               new OperatorExpr(new Operator(DIVISION),
+                                                {new LiteralInt(22), new Variable("a"), new LiteralInt(462)})});
   EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
   EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
 
@@ -1498,9 +1519,10 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_nestedOperatorsSimp
   ctes.visit(ast);
 
   // check that simplification generated the expected simplified AST
-  auto expectedReturnVal = new ArithmeticExpr(new LiteralInt(15),
-                                              SUBTRACTION,
-                                              new ArithmeticExpr(new Variable("a"), DIVISION, new LiteralInt(8)));
+  auto expectedReturnVal = new OperatorExpr(new Operator(SUBTRACTION),
+                                            {new LiteralInt(15),
+                                             new OperatorExpr(new Operator(DIVISION),
+                                                              {new Variable("a"), new LiteralInt(8)})});
   EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
   EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
 
@@ -1508,7 +1530,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_nestedOperatorsSimp
   EXPECT_EQ(ctes.removableNodes.size(), 0);
 }
 
-TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_nestedLogicalOperators__EXPECTED_FAIL) { /* NOLINT */
+TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_nestedLogicalOperators) { /* NOLINT */
   //  -- input --
   // int f(encrypted_bool a, plaintext_bool b, encrypted_bool c) {
   //  return (a ^ (b ^ false)) && ((true || false) || true)
@@ -1547,7 +1569,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_nestedLogicalOperat
   ctes.visit(ast);
 
   // check that simplification generated the expected simplified AST
-  auto expectedReturnVal = new LogicalExpr(new Variable("a"), LOGICAL_XOR, new Variable("b"));
+  auto expectedReturnVal = new OperatorExpr(new Operator(LOGICAL_XOR), {new Variable("a"), new Variable("b")});
   EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
   EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
 
@@ -1588,7 +1610,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_logicalAndSimplific
   ctes.visit(ast);
 
   // check that simplification generated the expected simplified AST
-  auto expectedReturnVal = new LogicalExpr(new Variable("a"), LOGICAL_AND, new Variable("b"));
+  auto expectedReturnVal = new OperatorExpr(new Operator(LOGICAL_AND), {new Variable("a"), new Variable("b")});
   EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
   EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
 }
@@ -1664,7 +1686,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_logicalAndSimplific
   ctes.visit(ast);
 
   // check that simplification generated the expected simplified AST
-  auto expectedReturnVal = new LogicalExpr(new Variable("a"), LOGICAL_OR, new Variable("b"));
+  auto expectedReturnVal = new OperatorExpr(new Operator(LOGICAL_OR), {new Variable("a"), new Variable("b")});
   EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
   EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
 }
@@ -1740,7 +1762,8 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_logicalAndSimplific
   ctes.visit(ast);
 
   // check that simplification generated the expected simplified AST
-  auto expectedReturnVal = new LogicalExpr(new Variable("a"), LOGICAL_XOR, new UnaryExpr(NEGATION, new Variable("b")));
+  auto expectedReturnVal = new OperatorExpr(new Operator(LOGICAL_XOR),
+                                            {new Variable("a"), new Variable("b"), new LiteralBool(true)});
   EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
   EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
 }
@@ -1778,7 +1801,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_logicalAndSimplific
   ctes.visit(ast);
 
   // check that simplification generated the expected simplified AST
-  auto expectedReturnVal = new LogicalExpr(new Variable("a"), LOGICAL_XOR, new Variable("b"));
+  auto expectedReturnVal = new OperatorExpr(new Operator(LOGICAL_XOR), {new Variable("a"), new Variable("b")});
   EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
   EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
 }
@@ -1799,7 +1822,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, WhileLoop_compileTimeKnownExpress
   // }
   auto function = new Function("f");
   auto functionParamList = new ParameterList(
-      {new FunctionParameter(new Datatype(Types::INT, true), new Variable("i"))});
+      {new FunctionParameter(new Datatype(Types::INT, true), new Variable("a"))});
   function->setParameterList(functionParamList);
 
   function->addStatement(new VarDecl("i", 2));
@@ -1859,7 +1882,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, Call_inliningExpected) { /* NOLIN
   // perform the compile-time expression simplification
   ctes.visit(ast);
 
-  auto expectedReturnExpr = new ArithmeticExpr(new Variable("a"), ADDITION, new LiteralInt(111));
+  auto expectedReturnExpr = new OperatorExpr(new Operator(ADDITION), {new Variable("a"), new LiteralInt(111)});
   EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedReturnExpr));
 }
 
@@ -2028,7 +2051,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, operatorExpr_logicalAndTrue_oneRe
   // perform the compile-time expression simplification
   ctes.visit(ast);
 
-  auto expectedReturnExpr = new OperatorExpr(new Operator(LOGICAL_AND), {new Variable("a"), new LiteralBool(true)});
+  auto expectedReturnExpr = new Variable("a");
   auto returnStatement = ast.getRootNode()->castTo<Function>()->getBodyStatements().back()->castTo<Return>();
 
   EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedReturnExpr));
@@ -2067,7 +2090,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, operatorExpr_logicalOrFalse_oneRe
   // perform the compile-time expression simplification
   ctes.visit(ast);
 
-  auto expectedReturnExpr = new OperatorExpr(new Operator(LOGICAL_OR), {new Variable("a"), new LiteralBool(false)});
+  auto expectedReturnExpr = new Variable("a");
   auto returnStatement = ast.getRootNode()->castTo<Function>()->getBodyStatements().back()->castTo<Return>();
 
   EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedReturnExpr));
@@ -2106,7 +2129,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, operatorExpr_logicalXorFalse_oneR
   // perform the compile-time expression simplification
   ctes.visit(ast);
 
-  auto expectedReturnExpr = new OperatorExpr(new Operator(LOGICAL_XOR), {new Variable("a"), new LiteralBool(false)});
+  auto expectedReturnExpr = new Variable("a");
   auto returnStatement = ast.getRootNode()->castTo<Function>()->getBodyStatements().back()->castTo<Return>();
 
   EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedReturnExpr));
@@ -2123,4 +2146,384 @@ TEST_F(CompileTimeExpressionSimplifierFixture, operatorExpr_logicalXorFalse_twoR
   auto returnStatement = ast.getRootNode()->castTo<Function>()->getBodyStatements().back()->castTo<Return>();
 
   EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedReturnExpr));
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, nestedOperatorExprsTest) { /* NOLINT */
+  auto func = new Function("sumVectorElements");
+  // (27 / a / 12 / 3 / 1) or in prefix notation: (/ 27 (/ a 12) 3 1)
+  auto opExpr0 = new OperatorExpr(new Operator(DIVISION), {new Variable("a"), new LiteralInt(12)});
+  auto opExpr1 =
+      new OperatorExpr(new Operator(DIVISION), {new LiteralInt(27), opExpr0, new LiteralInt(3), new LiteralInt(1)});
+  auto ret = new Return(opExpr1);
+  func->addStatement(ret);
+
+  Ast ast;
+  ast.setRootNode(func);
+  ctes.visit(ast);
+
+  // expected result: (/ 27 a 4)
+  auto returnStatement = ast.getRootNode()->castTo<Function>()->getBodyStatements().back()->castTo<Return>();
+  EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(
+      new OperatorExpr(new Operator(DIVISION), {new LiteralInt(27), new Variable("a"), new LiteralInt(4)})));
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, partialforLoopUnrolling) { /* NOLINT */
+  // -- input --
+  // int sumVectorElements(int numIterations) {
+  //    Matrix<int> M = [54; 32; 63; 38; 13; 20];
+  //    int sum = 0;
+  //    for (int i = 0; i < numIterations; i++) {
+  //      sum = sum + M[i];
+  //    }
+  //    return sum;
+  // }
+  // -- expected --
+  // int sumVectorElements(int numIterations) {
+  //    Matrix<int> M = [54; 32; 63; 38; 13; 20];
+  //    int sum;
+  //    int i;
+  //    {
+  //      int i = 0;
+  //      for (; i < numIterations && i+1 < numIterations && i+2 < numIterations;) {
+  //        sum = sum + M[i] + M[i+1] + M[i+2];
+  //        i = i+3;
+  //      }
+  //      for (; i < numIterations; i++) {
+  //        sum = sum + M[i];
+  //      }
+  //    }
+  //    return sum;
+  // }
+  Ast ast;
+  AstTestingGenerator::generateAst(48, ast);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  // build expected AST
+  auto func = new Function("sumVectorElements");
+  func->addParameter(new FunctionParameter(new Datatype(Types::INT), new Variable("numIterations")));
+
+  // int sum;
+  func->addStatement(new VarDecl("sum", new Datatype(Types::INT, false)));
+  func->addStatement(new VarDecl("i", new Datatype(Types::INT, false)));
+
+  // unrolled loop and cleanup loop are embedded into new Block
+  // { ...
+  auto newBlock = new Block();
+  func->addStatement(newBlock);
+  // int i = 0;
+//  newBlock->addChild(new VarDecl("i", new Datatype(Types::INT)));
+  // for (; i+1 < numIterations && i+2 < numIterations && i+3 < numIterations; )  // unrolled loop
+  auto unrolledLoopInitializer = nullptr;
+  auto unrolledLoopCondition =
+      new OperatorExpr(
+          new Operator(LOGICAL_AND),
+          {
+              new OperatorExpr(new Operator(SMALLER), {new Variable("i"), new Variable("numIterations")}),
+              new OperatorExpr(new Operator(SMALLER), {
+                  new OperatorExpr(new Operator(ADDITION),
+                                   {new Variable("i"), new LiteralInt(1)}),
+                  new Variable("numIterations")}),
+              new OperatorExpr(new Operator(SMALLER), {
+                  new OperatorExpr(new Operator(ADDITION), {new Variable("i"), new LiteralInt(2)}), new Variable
+                      ("numIterations")})
+          });
+
+  auto unrolledLoopUpdater = nullptr;
+  auto createVariableM = []() -> LiteralInt * {
+    return new LiteralInt(new Matrix<int>({{54}, {32}, {63}, {38}, {13}, {20}}));
+  };
+  auto genGetMatrixElement = [&createVariableM](int rowIdx) -> MatrixElementRef * {
+    return new MatrixElementRef(createVariableM(),
+                                new OperatorExpr(new Operator(ADDITION),
+                                                 {new Variable("i"), new LiteralInt(rowIdx)}), new LiteralInt(0));
+  };
+  // {
+  //    sum = M[i] + M[i+1] + M[i+2];
+  //    i = i + 3;
+  // }
+  auto unrolledLoopBodyStatements = new Block(
+      {new VarAssignm("sum",
+                      new OperatorExpr(new Operator(ADDITION),
+                                       {new Variable("sum"),
+                                           // M[i]
+                                        new MatrixElementRef(createVariableM(), new Variable("i"), new LiteralInt(0)),
+                                           // M[i+1]
+                                        genGetMatrixElement(1),
+                                           // M[i+2]
+                                        genGetMatrixElement(2)})),
+       new VarAssignm("i", new OperatorExpr(new Operator(ADDITION), {new Variable("i"), new LiteralInt(3)}))
+      });
+  auto forLoop =
+      new For(unrolledLoopInitializer, unrolledLoopCondition, unrolledLoopUpdater, unrolledLoopBodyStatements);
+  newBlock->addChild(forLoop);
+
+  // for (; i < numIterations; i=i+1)  // cleanup loop
+  auto cleanupLoopInitializer = nullptr;
+  auto cleanupLoopCondition = new OperatorExpr(new Operator(SMALLER), {new Variable("i"), new Variable
+      ("numIterations")});
+  auto cleanupLoopUpdater =
+      new VarAssignm("i", new OperatorExpr(new Operator(ADDITION), {new Variable("i"), new LiteralInt(1)}));
+  auto cleanupLoopBodyStatements = new Block(
+      new VarAssignm("sum", new OperatorExpr(
+          new Operator(ADDITION),
+          {new Variable("sum"),
+           new MatrixElementRef(createVariableM(), new Variable("i"), new LiteralInt(0))})));
+  auto child = new For(cleanupLoopInitializer,
+                       cleanupLoopCondition->castTo<AbstractExpr>(),
+                       cleanupLoopUpdater->castTo<AbstractStatement>(),
+                       cleanupLoopBodyStatements);
+  newBlock->addChild(child);
+  // ...}  // end of the new block
+
+  // Return sum;
+  func->addStatement(new Return(new Variable("sum")));
+
+  // get the body of the AST on that the CompileTimeExpressionSimplifier was applied on
+  auto simplifiedAst = ast.getRootNode()->castTo<Function>()->getBody();
+
+  EXPECT_TRUE(simplifiedAst->isEqual(func->getBody()));
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, fullForLoopUnrolling) { /* NOLINT */
+  // -- input --
+  //  VecInt2D runLaplacianSharpeningAlgorithm(Vector<int> img, int imgSize, int x, int y) {
+  //     Matrix<int> weightMatrix = [1 1 1; 1 -8 1; 1 1 1];
+  //     Vector<int> img2;
+  //     int value = 0;
+  //     for (int j = -1; j < 2; ++j) {
+  //        for (int i = -1; i < 2; ++i) {
+  //           value = value + weightMatrix[i+1][j+1] * img[imgSize*(x+i)+y+j];
+  //        }
+  //     }
+  //     img2[imgSize*x+y] = img[imgSize*x+y] - (value/2);
+  //     return img2;
+  //  }
+  // -- expected --
+  // VecInt2D runLaplacianSharpeningAlgorithm(Vector<int> img, int imgSize, int x, int y) {
+  //   img2[imgSize*x+y] = img[imgSize*x+y]
+  //      - (  img[imgSize*(x-1)+y-1] + img[imgSize*(x+0)+y-1]        + img[imgSize*(x+1)+y-1]
+  //         + img[imgSize*(x-1)+y+0] + img[imgSize*(x+0)+y+0] * (-8) + img[imgSize*(x+1)+y+0]
+  //         + img[imgSize*(x-1)+y+1] + img[imgSize*(x+0)+y+1]        + img[imgSize*(x+1)+y+1]  * 1  ) / 2;
+  //   return img2;
+  // }
+  Ast ast;
+  AstTestingGenerator::generateAst(49, ast);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  // VecInt2D runLaplacianSharpeningAlgorithm(Vector<int> img, int imgSize, int x, int y) {
+  auto expectedFunction = new Function("runLaplacianSharpeningAlgorithm");
+  expectedFunction->addParameter(new FunctionParameter(new Datatype(Types::INT, true), new Variable("img")));
+  expectedFunction->addParameter(new FunctionParameter(new Datatype(Types::INT, false), new Variable("imgSize")));
+  expectedFunction->addParameter(new FunctionParameter(new Datatype(Types::INT, false), new Variable("x")));
+  expectedFunction->addParameter(new FunctionParameter(new Datatype(Types::INT, false), new Variable("y")));
+
+  expectedFunction->addStatement(new VarDecl("img2", new Datatype(Types::INT)));
+
+  // a helper to generate img[imgSize*(x-i)+y+j] terms
+  auto createImgIdx = [](int i, int j) -> AbstractExpr * {
+
+    auto buildTermI = [](int i) -> AbstractExpr * {
+      if (i==0) {
+        return new Variable("x");
+      } else {
+        return new OperatorExpr(new Operator(ADDITION), {new Variable("x"), new LiteralInt(i)});
+      }
+    };
+
+    auto buildTermJ = [&](int j) -> AbstractExpr * {
+      if (j==0) {
+        return new OperatorExpr(new Operator(ADDITION),
+                                {new OperatorExpr(new Operator(MULTIPLICATION),
+                                                  {new Variable("imgSize"),
+                                                   buildTermI(i)}),
+                                 new Variable("y")});
+      } else {
+        return new OperatorExpr(new Operator(ADDITION),
+                                {new OperatorExpr(new Operator(MULTIPLICATION),
+                                                  {new Variable("imgSize"),
+                                                   buildTermI(i)}),
+                                 new Variable("y"),
+                                 new LiteralInt(j)});
+      }
+    };
+    return new MatrixElementRef(new Variable("img"), new LiteralInt(0), buildTermJ(j));
+  };
+
+  // img[imgSize*(x-1)+y-1]  * 1 + ... + img[imgSize*(x+1)+y+1]  * 1;
+  auto varValue =
+      new OperatorExpr(
+          new Operator(ADDITION),
+          {createImgIdx(-1, -1),
+           createImgIdx(0, -1),
+           createImgIdx(1, -1),
+           createImgIdx(-1, 0),
+           new OperatorExpr(new Operator(MULTIPLICATION), {createImgIdx(0, 0), new LiteralInt(-8)}),
+           createImgIdx(1, 0),
+           createImgIdx(-1, 1),
+           createImgIdx(0, 1),
+           createImgIdx(1, 1)});
+
+  // img2[imgSize*x+y] = img[imgSize*x+y] - (value/2);
+  expectedFunction->addStatement(
+      new MatrixAssignm(new MatrixElementRef(new Variable("img2"),
+                                             new LiteralInt(0),
+                                             new OperatorExpr(
+                                                 new Operator(ADDITION),
+                                                 {new OperatorExpr(new Operator(MULTIPLICATION),
+                                                                   {new Variable("imgSize"), new Variable("x")}),
+                                                  new Variable("y")})),
+                        new OperatorExpr(
+                            new Operator(SUBTRACTION),
+                            {new MatrixElementRef(
+                                new Variable("img"),
+                                new LiteralInt(0),
+                                new OperatorExpr(
+                                    new Operator(ADDITION),
+                                    {new OperatorExpr(new Operator(MULTIPLICATION),
+                                                      {new Variable("imgSize"), new Variable("x")}),
+                                     new Variable("y")})),
+                             new OperatorExpr(new Operator(DIVISION), {varValue, new LiteralInt(2)})})));
+
+  // return img2;
+  expectedFunction->addStatement(new Return(new Variable("img2")));
+
+  // get the body of the AST on that the CompileTimeExpressionSimplifier was applied on
+  auto simplifiedAst = ast.getRootNode()->castTo<Function>()->getBody();
+  EXPECT_TRUE(simplifiedAst->isEqual(expectedFunction->getBody()));
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, getMatrixSizeOfKnownMatrix) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(52, ast);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  auto expectedFunction = new Function("returnLastVectorElement");
+  expectedFunction->addStatement(new Return(new LiteralInt(44)));
+
+  // get the body of the AST on that the CompileTimeExpressionSimplifier was applied on
+  auto simplifiedAst = ast.getRootNode()->castTo<Function>()->getBody();
+  EXPECT_TRUE(simplifiedAst->isEqual(expectedFunction->getBody()));
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, getMatrixSizeOfAbstractMatrix) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(53, ast);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  auto expectedFunction = new Function("getNumElementsPerDimension");
+  expectedFunction->addParameter(new FunctionParameter(new Datatype(Types::INT), new Variable("factor")));
+  expectedFunction->addStatement(new Return(new LiteralInt(new Matrix<int>({{1, 5, 0}}))));
+
+  // get the body of the AST on that the CompileTimeExpressionSimplifier was applied on
+  auto simplifiedAst = ast.getRootNode()->castTo<Function>()->getBody();
+  EXPECT_TRUE(simplifiedAst->isEqual(expectedFunction->getBody()));
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, getMatrixSizeOfUnknownMatrix) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(54, ast);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  auto expectedFunction = new Function("getNumElementsPerDimension");
+  expectedFunction->addParameter(new FunctionParameter(new Datatype(Types::INT), new Variable("inputMatrix")));
+  expectedFunction->addParameter(new FunctionParameter(new Datatype(Types::INT), new Variable("dimension")));
+  expectedFunction
+      ->addStatement(new Return(new GetMatrixSize(new Variable("inputMatrix"), new Variable("dimension"))));
+
+  // get the body of the AST on that the CompileTimeExpressionSimplifier was applied on
+  auto simplifiedAst = ast.getRootNode()->castTo<Function>()->getBody();
+  EXPECT_TRUE(simplifiedAst->isEqual(expectedFunction->getBody()));
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, nestedFullLoopUnrolling_matrixAssignmAndGetMatrixSize__EXPECTED_FAIL) {
+  /* NOLINT */
+  // TODO implement row assignment
+  // TODO make sure that body of outer loop is visited before entering the inner loop, otherwise 't' will be undefined
+  ASSERT_TRUE(false);
+  Ast ast;
+  AstTestingGenerator::generateAst(55, ast);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  PrintVisitor pv;
+  pv.visit(ast);
+
+  auto expectedFunction = new Function("getNumElementsPerDimension");
+  // TODO specify expected AST, i.e., after applying CTES
+
+  // get the body of the AST on that the CompileTimeExpressionSimplifier was applied on
+  auto simplifiedAst = ast.getRootNode()->castTo<Function>()->getBody();
+  EXPECT_TRUE(simplifiedAst->isEqual(expectedFunction->getBody()));
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, matrixAssignmentUnknownThenKnown) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(56, ast);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  auto expectedFunc = new Function("computeMatrix");
+  expectedFunc->addParameter(new FunctionParameter(new Datatype(Types::INT, false), new Variable("k")));
+  expectedFunc->addParameter(new FunctionParameter(new Datatype(Types::INT, false), new Variable("a")));
+  expectedFunc->addStatement(new VarDecl("M", new Datatype(Types::INT, false)));
+  expectedFunc->addStatement(new MatrixAssignm(
+      new MatrixElementRef(new Variable("M"), new Variable("k"), new LiteralInt(0)), new LiteralInt(4)));
+  expectedFunc->addStatement(new MatrixAssignm(new MatrixElementRef(new Variable("M"), 0, 0),
+                                               new OperatorExpr(new Operator(ADDITION),
+                                                                {new Variable("a"), new LiteralInt(21)})));
+  expectedFunc->addStatement(new Return(new Variable("M")));
+
+  // get the body of the AST on that the CompileTimeExpressionSimplifier was applied on
+  auto simplifiedAst = ast.getRootNode()->castTo<Function>()->getBody();
+  EXPECT_TRUE(simplifiedAst->isEqual(expectedFunc->getBody()));
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, matrixAssignmentKnownThenUnknown) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(57, ast);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  auto expectedFunc = new Function("computeMatrix");
+  expectedFunc->addParameter(new FunctionParameter(new Datatype(Types::INT, false), new Variable("k")));
+  expectedFunc->addStatement(new VarDecl("M", new Datatype(Types::INT, false)));
+  // This assignment may look weird but is expected because matrix M lacks an initialization and as such is
+  // default-initialized as Matrix<AbstractExpr*>, hence we need to store integers as LiteralInts
+  expectedFunc->addStatement(new VarAssignm("M",
+                                            new LiteralInt(new Matrix<AbstractExpr *>({{new LiteralInt((21))}}))));
+  expectedFunc->addStatement(new MatrixAssignm(
+      new MatrixElementRef(new Variable("M"), new LiteralInt(0), new Variable("k")), new LiteralInt(4)));
+  expectedFunc->addStatement(new Return(new Variable("M")));
+
+  // get the body of the AST on that the CompileTimeExpressionSimplifier was applied on
+  auto simplifiedAst = ast.getRootNode()->castTo<Function>()->getBody();
+  EXPECT_TRUE(simplifiedAst->isEqual(expectedFunc->getBody()));
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, fullAssignmentToMatrix) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(58, ast);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  auto expectedFunc = new Function("computeMatrix");
+  expectedFunc->addStatement(new Return(new LiteralInt(new Matrix<int>({{11, 1, 1}, {3, 2, 2}}))));
+
+  // get the body of the AST on that the CompileTimeExpressionSimplifier was applied on
+  auto simplifiedAst = ast.getRootNode()->castTo<Function>()->getBody();
+  EXPECT_TRUE(simplifiedAst->isEqual(expectedFunc->getBody()));
 }

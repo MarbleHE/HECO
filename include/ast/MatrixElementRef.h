@@ -1,16 +1,20 @@
-#ifndef AST_OPTIMIZER_INCLUDE_AST_GETMATRIXELEMENT_H_
-#define AST_OPTIMIZER_INCLUDE_AST_GETMATRIXELEMENT_H_
+#ifndef AST_OPTIMIZER_INCLUDE_AST_MATRIXELEMENTREF_H_
+#define AST_OPTIMIZER_INCLUDE_AST_MATRIXELEMENTREF_H_
 
 #include "AbstractLiteral.h"
 #include <vector>
 #include <string>
 #include <unordered_map>
 
-class GetMatrixElement : public AbstractExpr {
+class MatrixElementRef : public AbstractExpr {
  public:
-  GetMatrixElement(AbstractExpr *mustEvaluateToAbstractLiteral, AbstractExpr *rowIndex, AbstractExpr *columnIndex);
+  MatrixElementRef(AbstractExpr *mustEvaluateToAbstractLiteral, AbstractExpr *rowIndex, AbstractExpr *columnIndex);
 
-  GetMatrixElement(AbstractExpr *mustEvaluateToAbstractLiteral, int rowIndex, int columnIndex);
+  MatrixElementRef(AbstractExpr *mustEvaluateToAbstractLiteral, AbstractExpr *rowIndex);
+
+  MatrixElementRef(AbstractExpr *mustEvaluateToAbstractLiteral, int rowIndex, int columnIndex);
+
+  MatrixElementRef(AbstractExpr *mustEvaluateToAbstractLiteral, int rowIndex);
 
   [[nodiscard]] std::string getNodeType() const override;
 
@@ -43,4 +47,4 @@ class GetMatrixElement : public AbstractExpr {
   void setAttributes(AbstractExpr *elementContainingMatrix, AbstractExpr *rowIndex, AbstractExpr *columnIndex);
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_AST_GETMATRIXELEMENT_H_
+#endif //AST_OPTIMIZER_INCLUDE_AST_MATRIXELEMENTREF_H_

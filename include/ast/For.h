@@ -7,7 +7,7 @@
 class For : public AbstractStatement {
  public:
   For(AbstractStatement *initializer,
-      LogicalExpr *condition,
+      AbstractExpr *condition,
       AbstractStatement *update,
       AbstractStatement *statementToBeExecuted);
 
@@ -18,15 +18,15 @@ class For : public AbstractStatement {
   AbstractNode *clone(bool keepOriginalUniqueNodeId) override;
 
   void setAttributes(AbstractStatement *initializer,
-                     LogicalExpr *condition,
+                     AbstractExpr *condition,
                      AbstractStatement *update,
                      AbstractStatement *statementToBeExecuted);
 
-  [[nodiscard]] AbstractExpr *getInitializer() const;
+  [[nodiscard]] AbstractStatement *getInitializer() const;
 
-  [[nodiscard]] LogicalExpr *getCondition() const;
+  [[nodiscard]] AbstractExpr *getCondition() const;
 
-  [[nodiscard]] AbstractExpr *getUpdateStatement() const;
+  [[nodiscard]] AbstractStatement *getUpdateStatement() const;
 
   [[nodiscard]] AbstractStatement *getStatementToBeExecuted() const;
 

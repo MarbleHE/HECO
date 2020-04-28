@@ -1,10 +1,10 @@
 #include "ControlFlowGraphVisitor.h"
 #include <queue>
 #include <tuple>
+#include <algorithm>
 #include "GraphNode.h"
 #include "AbstractNode.h"
 #include "ArithmeticExpr.h"
-#include "AbstractStatement.h"
 #include "Block.h"
 #include "For.h"
 #include "Function.h"
@@ -15,6 +15,7 @@
 #include "While.h"
 #include "LogicalExpr.h"
 #include "OperatorExpr.h"
+#include "MatrixAssignm.h"
 
 void ControlFlowGraphVisitor::visit(Ast &elem) {
   Visitor::visit(elem);
@@ -123,8 +124,8 @@ void ControlFlowGraphVisitor::visit(Function &elem) {
 //            │                                  │
 //            └─────▶   Next statement    ◀──────┘
 //
-// (*) Although it's not officially a AbstractStatement in the AST class hierarchy, the condition is treated following
-//     as a statement to have it included in the CFG/DFG.
+// (*) Although it is not officially an AbstractStatement in the AST class hierarchy, the condition is treated following
+//     like a statement to have it included in the CFG/DFG.
 //
 void ControlFlowGraphVisitor::visit(If &elem) {
   auto gNode = appendStatementToCfg(elem);
@@ -183,6 +184,21 @@ void ControlFlowGraphVisitor::visit(VarAssignm &elem) {
   postActionsStatementVisited(gNode);
 }
 
+void ControlFlowGraphVisitor::visit(MatrixAssignm &elem) {
+  auto gNode = appendStatementToCfg(elem);
+  // TODO Make the varAccess structure more flexible to allow storing MatrixElementRef and Variable objects, instead
+  //  of std::string objects only. Also consider extending varAccess' key to use a (std::string, Scope*) pair to
+  //  uniquely identify a variable.
+  // This temporary workaround uses a string representation of the assignment target, for example,
+  //    Variable (M) [LiteralInt (32)][LiteralInt (1)]
+  // to refer to the element at (32,1) of matrix M. This does not work well because there might exist different index
+  // expressions pointing to the same element (e.g., M[a][b] == M[b][d] if a==b and b==d), hence we cannot easily
+  // distinguish matrix accesses.
+  markVariableAccess(elem.getAssignmTargetString(), AccessType::WRITE);
+  Visitor::visit(elem);
+  postActionsStatementVisited(gNode);
+}
+
 void ControlFlowGraphVisitor::visit(VarDecl &elem) {
   auto gNode = appendStatementToCfg(elem);
   markVariableAccess(elem.getVarTargetIdentifier(), AccessType::WRITE);
@@ -212,8 +228,8 @@ void ControlFlowGraphVisitor::visit(VarDecl &elem) {
 //    │
 //    └───▶ Next Statement
 //
-// (*) Although it's not officially a AbstractStatement in the AST class hierarchy, the condition is treated following
-//     as a statement to have it included in the CFG/DFG.
+// (*) Although it is not officially an AbstractStatement in the AST class hierarchy, the condition is treated following
+//     like a statement to have it included in the CFG/DFG.
 //
 void ControlFlowGraphVisitor::visit(While &elem) {
   auto gNode = appendStatementToCfg(elem);
@@ -312,7 +328,11 @@ void ControlFlowGraphVisitor::visit(Variable &elem) {
   Visitor::visit(elem);
 }
 
-void ControlFlowGraphVisitor::visit(GetMatrixElement &elem) {
+void ControlFlowGraphVisitor::visit(MatrixElementRef &elem) {
+  Visitor::visit(elem);
+}
+
+void ControlFlowGraphVisitor::visit(GetMatrixSize &elem) {
   Visitor::visit(elem);
 }
 
@@ -403,7 +423,7 @@ void ControlFlowGraphVisitor::buildDataFlowGraph() {
     }
 
     // add writes to variables happening in curNode to varLastWritten
-    for (auto &[varIdentifier, ignored] : curNode->getVariables(AccessType::WRITE)) {
+    for (auto &varIdentifier : curNode->getVariables(AccessType::WRITE)) {
       // store the variable writes of this node (curNode)
       if (varLastWritten.count(varIdentifier) > 0) {
         // if this is not a join point, we need to remove the existing information before adding the new one
@@ -460,11 +480,11 @@ void ControlFlowGraphVisitor::buildDataFlowGraph() {
   // for each node that was visited in the CFG
   for (auto &v : processedNodes) {
     // retrieve all variables that were read
-    for (auto &[varIdentifierRead, ignored1] : v->getVariables(AccessType::READ)) {
+    for (auto &varIdentifierRead : v->getVariables(AccessType::READ)) {
       // SPECIAL CASE: node has a WRITE to the same variable (=> READ + WRITE, e.g., i = i + 1), in that case it does
       // not make sense to add a self-edge, but in case that the node is within a loop, its parent node will have the
       // same information about the last write
-      if (v->getVariables(AccessType::WRITE).count(std::make_pair(varIdentifierRead, AccessType::WRITE)) > 0) {
+      if (v->getVariables(AccessType::WRITE).count(varIdentifierRead) > 0) {
         // iterate over all parents of node v
         for (auto &parentNode : v->getControlFlowGraph()->getParents()) {
           // if the parent knows where the last write for the given variable identifier happened lastly
@@ -482,3 +502,28 @@ void ControlFlowGraphVisitor::buildDataFlowGraph() {
     }
   }
 }
+
+std::vector<std::string> ControlFlowGraphVisitor::getLastVariablesReadAndWrite() {
+  if (lastCreatedNodes.empty()) {
+    throw std::logic_error("Cannot get any variables that were read and written as there are no existing GraphNodes."
+                           "Did you visit a statement before by passing this ControlFlowGraphVisitor instace?");
+  } else {
+    std::set<std::string> written;
+    std::set<std::string> read;
+    // go through all created GraphNodes (one for each statement) an collect all variable reads and writes
+    // (we need to visit all statements because there might be nested statements e.g., For-loop's body)
+    for (auto &n : lastCreatedNodes) {
+      auto w = lastCreatedNodes.back()->getVariables(AccessType::WRITE);
+      written.insert(w.begin(), w.end());
+      auto r = lastCreatedNodes.back()->getVariables(AccessType::READ);
+      read.insert(r.begin(), r.end());
+    }
+    std::vector<std::string> variablesReadAndWritten;
+    // determine the variables that were read and written (must be both!)
+    // no need for prior sorting as set is already sorted
+    std::set_intersection(written.begin(), written.end(), read.begin(), read.end(),
+                          std::back_inserter(variablesReadAndWritten));
+    return variablesReadAndWritten;
+  }
+}
+

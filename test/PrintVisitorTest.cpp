@@ -124,3 +124,31 @@ TEST_F(PrintVisitorTest, printOperatorExpr) { /* NOLINT */
 
   EXPECT_EQ(pv.getOutput(), buffer.str());
 }
+
+TEST_F(PrintVisitorTest, printMatrixAssignm) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(50, ast);
+  PrintVisitor pv(false);
+  pv.visit(ast);
+
+  // read expected output file
+  std::ifstream ifs("../../test/expected_output_large/PrintVisitorTest/printMatrixAssignm.txt");
+  std::stringstream buffer;
+  buffer << ifs.rdbuf();
+
+  EXPECT_EQ(pv.getOutput(), buffer.str());
+}
+
+TEST_F(PrintVisitorTest, printMatrixPermutation) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(51, ast);
+  PrintVisitor pv(false);
+  pv.visit(ast);
+
+  // read expected output file
+  std::ifstream ifs("../../test/expected_output_large/PrintVisitorTest/printMatrixPermutation.txt");
+  std::stringstream buffer;
+  buffer << ifs.rdbuf();
+
+  EXPECT_EQ(pv.getOutput(), buffer.str());
+}

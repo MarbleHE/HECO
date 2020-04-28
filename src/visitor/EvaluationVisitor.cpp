@@ -19,11 +19,13 @@
 #include "UnaryExpr.h"
 #include "VarAssignm.h"
 #include "While.h"
-#include "GetMatrixElement.h"
+#include "MatrixElementRef.h"
 #include "Rotate.h"
 #include "For.h"
 #include "Transpose.h"
 #include "OperatorExpr.h"
+#include "MatrixAssignm.h"
+#include "GetMatrixSize.h"
 
 EvaluationVisitor::EvaluationVisitor(std::unordered_map<std::string, AbstractLiteral *> funcCallParameterValues)
     : variableValuesForEvaluation(std::move(funcCallParameterValues)) {
@@ -234,7 +236,27 @@ void EvaluationVisitor::visit(Return &elem) {
 
 void EvaluationVisitor::visit(UnaryExpr &elem) {
   elem.getRight()->accept(*this);
-  results.push({elem.getOp()->applyOperator(getOnlyEvaluationResult(results.top()))});
+  results.push({elem.getOperator()->applyOperator(getOnlyEvaluationResult(results.top()))});
+}
+
+void EvaluationVisitor::visit(GetMatrixSize &elem) {
+  // evaluate the matrix operand
+  elem.getMatrixOperand()->accept(*this);
+  auto matrix = getOnlyEvaluationResult(results.top());
+  results.pop();
+
+  elem.getDimensionParameter()->accept(*this);
+  auto evalResult = getOnlyEvaluationResult(results.top());
+  results.pop();
+  // the dimension parameter of GetMatrixSize must evaluate to a LiteralInt
+  auto dimAsLiteralInt = dynamic_cast<LiteralInt *>(evalResult);
+  if (dimAsLiteralInt==nullptr)
+    throw std::invalid_argument("GetMatrixSize requires a LiteralInt as 'requestedDimension' parameter.");
+  int dim = dimAsLiteralInt->getValue();
+
+  // execute the operation, i.e., retrieve the requested dimension
+  auto mx = matrix->castTo<AbstractLiteral>()->getMatrix()->getDimensions().getNthDimensionSize(dim);
+  results.push({new LiteralInt(mx)});
 }
 
 void EvaluationVisitor::visit(Rotate &elem) {
@@ -266,6 +288,40 @@ void EvaluationVisitor::visit(Transpose &elem) {
   results.push({operand});
 }
 
+void EvaluationVisitor::visit(MatrixAssignm &elem) {
+  // Skip visiting the MatrixAssignm's referred MatrixElementRef object because its visit method is implemented to
+  // retrieve an element of a matrix (e.g., to use as an rvalue in an expression) but that is not a reference so we
+  // cannot simply assign to it.
+  //elem.getAssignmTarget()->accept(*this);
+
+  // evaluate the assigned value (rvalue) as it might be an expression (e.g., M[0][3] = 43+12)
+  elem.getValue()->accept(*this);
+  auto val = getOnlyEvaluationResult(results.top());
+
+  auto matrixRef = elem.getAssignmTarget();
+  // row index
+  matrixRef->getRowIndex()->accept(*this);
+  auto rowIdx = dynamic_cast<LiteralInt *>(getOnlyEvaluationResult(results.top()));
+  results.pop();
+
+  if (matrixRef->getColumnIndex()!=nullptr) {
+    // column index
+    matrixRef->getColumnIndex()->accept(*this);
+    auto columnIdx = dynamic_cast<LiteralInt *>(getOnlyEvaluationResult(results.top()));
+    results.pop();
+//    std::cout << "MatrixAssignm[" << rowIdx->getValue() << "][" << columnIdx->getValue() << "]" << std::endl;
+    // set value val of respective matrix element
+    if (auto mx = dynamic_cast<Variable *>(matrixRef->getOperand())) {
+      variableValuesForEvaluation[mx->getIdentifier()]->getMatrix()
+          ->setElementAt(rowIdx->getValue(), columnIdx->getValue(), val);
+    }
+  } else {
+//    std::cout << "MatrixAssignm[" << rowIdx->getValue() << "]" << std::endl;
+    throw std::runtime_error("Appending row to matrix unsupported yet. Aborting.");
+    // TODO (pjattke): Implement appending row to matrix if only a row index is given.
+  }
+}
+
 void EvaluationVisitor::visit(VarAssignm &elem) {
   elem.getValue()->accept(*this);
   auto val = getOnlyEvaluationResult(results.top());
@@ -283,7 +339,7 @@ void EvaluationVisitor::visit(VarDecl &elem) {
     updateVarValue(elem.getIdentifier(), value);
     results.push({value});
   } else {
-    updateVarValue(elem.getIdentifier(), nullptr);
+    updateVarValue(elem.getIdentifier(), AbstractLiteral::createLiteralBasedOnDatatype(elem.getDatatype()));
     results.push({});
   }
 }
@@ -324,7 +380,7 @@ void EvaluationVisitor::visit(For &elem) {
   }
 }
 
-void EvaluationVisitor::visit(GetMatrixElement &elem) {
+void EvaluationVisitor::visit(MatrixElementRef &elem) {
   // operand
   elem.getOperand()->accept(*this);
   auto operand = dynamic_cast<AbstractLiteral *>(getOnlyEvaluationResult(results.top()));

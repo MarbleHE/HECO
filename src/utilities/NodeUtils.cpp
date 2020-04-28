@@ -13,7 +13,7 @@ std::vector<AbstractNode *> rewriteMultiInputGateToBinaryGatesChain(std::vector<
   // if there is only one input, we need to add the "neutral element" (i.e., the element that does not change the
   // semantics of the logical expression) depending on the given LogCompOp to inputNodes
   if (inputNodes.size()==1) {
-    inputNodes.push_back(OpSymb::getIdentityElement(
+    inputNodes.push_back(OpSymb::getNeutralElement(
         OpSymbolVariant(gateType)));
   }
 
@@ -38,7 +38,7 @@ AbstractNode *createMultDepthBalancedTreeFromInputs(std::vector<AbstractExpr *> 
                                                     OpSymbolVariant operatorType,
                                                     std::unordered_map<std::string,
                                                                        int> multiplicativeDepths) {
-  // TODO(anyone): This tree is balanced w.r.t. the multiplicative depth but does not take any FHE-specific properties
+  // Note: This tree is balanced w.r.t. the multiplicative depth but does not take any FHE-specific properties
   //  e.g. scale of a ciphertext into account yet.
 
   if (inputs.empty()) {

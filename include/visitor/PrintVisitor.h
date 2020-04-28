@@ -67,6 +67,8 @@ class PrintVisitor : public Visitor {
 
   void visit(While &elem) override;
 
+  void visit(GetMatrixSize &elem) override;
+
   void incrementLevel();
 
   void decrementLevel();
@@ -104,11 +106,13 @@ class PrintVisitor : public Visitor {
 
   void visit(Transpose &elem) override;
 
-  void visit(GetMatrixElement &elem) override;
+  void visit(MatrixElementRef &elem) override;
 
   void printMatrixIndex();
 
   void visit(OperatorExpr &elem) override;
+
+  void visit(MatrixAssignm &elem) override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_VISITOR_PRINTVISITOR_H_
