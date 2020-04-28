@@ -8,10 +8,6 @@ jobs:
     steps:
       - name: update apt-get sources
         run: sudo apt-get update
-      - name: remove old gcc symlink
-        run: sudo update-alternatives --remove-all gcc
-      - name: remove old g++ symlink
-        run: sudo update-alternatives --remove-all g++
       - name: install gcc-9
         run: sudo apt-get install -y gcc-9 g++-9 build-essential
       - uses: actions/checkout@v1
