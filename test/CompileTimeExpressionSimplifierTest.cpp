@@ -2470,3 +2470,85 @@ TEST_F(CompileTimeExpressionSimplifierFixture, getMatrixSizeOfUnknownMatrix) { /
   EXPECT_TRUE(simplifiedAst->isEqual(expectedFunction->getBody()));
 }
 
+TEST_F(CompileTimeExpressionSimplifierFixture, nestedFullLoopUnrolling_matrixAssignmAndGetMatrixSize__EXPECTED_FAIL) {
+  /* NOLINT */
+  // TODO implement row assignment
+  // TODO make sure that body of outer loop is visited before entering the inner loop, otherwise 't' will be undefined
+  ASSERT_TRUE(false);
+  Ast ast;
+  AstTestingGenerator::generateAst(55, ast);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  PrintVisitor pv;
+  pv.visit(ast);
+
+  auto expectedFunction = new Function("getNumElementsPerDimension");
+  // TODO specify expected AST, i.e., after applying CTES
+
+  // get the body of the AST on that the CompileTimeExpressionSimplifier was applied on
+  auto simplifiedAst = ast.getRootNode()->castTo<Function>()->getBody();
+  EXPECT_TRUE(simplifiedAst->isEqual(expectedFunction->getBody()));
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, matrixAssignmentUnknownThenKnown) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(56, ast);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  auto expectedFunc = new Function("computeMatrix");
+  expectedFunc->addParameter(new FunctionParameter(new Datatype(Types::INT, false), new Variable("k")));
+  expectedFunc->addParameter(new FunctionParameter(new Datatype(Types::INT, false), new Variable("a")));
+  expectedFunc->addStatement(new VarDecl("M", new Datatype(Types::INT, false)));
+  expectedFunc->addStatement(new MatrixAssignm(
+      new MatrixElementRef(new Variable("M"), new Variable("k"), new LiteralInt(0)), new LiteralInt(4)));
+  expectedFunc->addStatement(new MatrixAssignm(new MatrixElementRef(new Variable("M"), 0, 0),
+                                               new OperatorExpr(new Operator(ADDITION),
+                                                                {new Variable("a"), new LiteralInt(21)})));
+  expectedFunc->addStatement(new Return(new Variable("M")));
+
+  // get the body of the AST on that the CompileTimeExpressionSimplifier was applied on
+  auto simplifiedAst = ast.getRootNode()->castTo<Function>()->getBody();
+  EXPECT_TRUE(simplifiedAst->isEqual(expectedFunc->getBody()));
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, matrixAssignmentKnownThenUnknown) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(57, ast);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  auto expectedFunc = new Function("computeMatrix");
+  expectedFunc->addParameter(new FunctionParameter(new Datatype(Types::INT, false), new Variable("k")));
+  expectedFunc->addStatement(new VarDecl("M", new Datatype(Types::INT, false)));
+  // This assignment may look weird but is expected because matrix M lacks an initialization and as such is
+  // default-initialized as Matrix<AbstractExpr*>, hence we need to store integers as LiteralInts
+  expectedFunc->addStatement(new VarAssignm("M",
+                                            new LiteralInt(new Matrix<AbstractExpr *>({{new LiteralInt((21))}}))));
+  expectedFunc->addStatement(new MatrixAssignm(
+      new MatrixElementRef(new Variable("M"), new LiteralInt(0), new Variable("k")), new LiteralInt(4)));
+  expectedFunc->addStatement(new Return(new Variable("M")));
+
+  // get the body of the AST on that the CompileTimeExpressionSimplifier was applied on
+  auto simplifiedAst = ast.getRootNode()->castTo<Function>()->getBody();
+  EXPECT_TRUE(simplifiedAst->isEqual(expectedFunc->getBody()));
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, fullAssignmentToMatrix) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(58, ast);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  auto expectedFunc = new Function("computeMatrix");
+  expectedFunc->addStatement(new Return(new LiteralInt(new Matrix<int>({{11, 1, 1}, {3, 2, 2}}))));
+
+  // get the body of the AST on that the CompileTimeExpressionSimplifier was applied on
+  auto simplifiedAst = ast.getRootNode()->castTo<Function>()->getBody();
+  EXPECT_TRUE(simplifiedAst->isEqual(expectedFunc->getBody()));
+}
