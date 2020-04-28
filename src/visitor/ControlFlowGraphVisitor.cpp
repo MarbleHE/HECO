@@ -1,21 +1,21 @@
-#include "ControlFlowGraphVisitor.h"
 #include <queue>
 #include <tuple>
 #include <algorithm>
-#include "GraphNode.h"
-#include "AbstractNode.h"
-#include "ArithmeticExpr.h"
-#include "Block.h"
-#include "For.h"
-#include "Function.h"
-#include "If.h"
-#include "Return.h"
-#include "VarAssignm.h"
-#include "VarDecl.h"
-#include "While.h"
-#include "LogicalExpr.h"
-#include "OperatorExpr.h"
-#include "MatrixAssignm.h"
+#include "ast_opt/visitor/ControlFlowGraphVisitor.h"
+#include "ast_opt/utilities/GraphNode.h"
+#include "ast_opt/ast/AbstractNode.h"
+#include "ast_opt/ast/ArithmeticExpr.h"
+#include "ast_opt/ast/Block.h"
+#include "ast_opt/ast/For.h"
+#include "ast_opt/ast/Function.h"
+#include "ast_opt/ast/If.h"
+#include "ast_opt/ast/Return.h"
+#include "ast_opt/ast/VarAssignm.h"
+#include "ast_opt/ast/VarDecl.h"
+#include "ast_opt/ast/While.h"
+#include "ast_opt/ast/LogicalExpr.h"
+#include "ast_opt/ast/OperatorExpr.h"
+#include "ast_opt/ast/MatrixAssignm.h"
 
 void ControlFlowGraphVisitor::visit(Ast &elem) {
   Visitor::visit(elem);

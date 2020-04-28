@@ -3,9 +3,9 @@
 
 #include <unordered_map>
 #include <vector>
-#include <AbstractNode.h>
 #include <set>
-#include "Visitor.h"
+#include "ast_opt/ast/AbstractNode.h"
+#include "ast_opt/visitor/Visitor.h"
 
 /// The SecretTaintingVisitor traverses through a given AST and marks all Nodes as "tainted" that in some way deal
 /// with an encrypted variable.

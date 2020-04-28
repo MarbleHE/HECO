@@ -1,13 +1,13 @@
-#include "DotPrinter.h"
-#include "AbstractNode.h"
-#include "AstTestingGenerator.h"
-#include "ArithmeticExpr.h"
-#include "Function.h"
-#include "Operator.h"
-#include "Variable.h"
-#include "gtest/gtest.h"
 #include <fstream>
-#include "Block.h"
+#include "AstTestingGenerator.h"
+#include "ast_opt/utilities/DotPrinter.h"
+#include "ast_opt/ast/AbstractNode.h"
+#include "ast_opt/ast/ArithmeticExpr.h"
+#include "ast_opt/ast/Function.h"
+#include "ast_opt/ast/Operator.h"
+#include "ast_opt/ast/Variable.h"
+#include "ast_opt/ast/Block.h"
+#include "gtest/gtest.h"
 
 class DotPrinterFixture : public ::testing::Test {
  protected:

@@ -4,9 +4,9 @@
 #include <set>
 #include <string>
 #include <utility>
-#include "AbstractNode.h"
-#include "NodeRelationship.h"
-#include "ControlFlowGraphVisitor.h"
+#include "ast_opt/ast/AbstractNode.h"
+#include "ast_opt/utilities/NodeRelationship.h"
+#include "ast_opt/visitor/ControlFlowGraphVisitor.h"
 
 class GraphNode {
  private:

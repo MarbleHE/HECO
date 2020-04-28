@@ -1,7 +1,7 @@
-#include "AbstractBinaryExpr.h"
-#include "Operator.h"
-#include "ArithmeticExpr.h"
-#include "LogicalExpr.h"
+#include "ast_opt/ast/AbstractBinaryExpr.h"
+#include "ast_opt/ast/Operator.h"
+#include "ast_opt/ast/ArithmeticExpr.h"
+#include "ast_opt/ast/LogicalExpr.h"
 
 void AbstractBinaryExpr::setAttributes(AbstractExpr *leftOperand, Operator *operatore, AbstractExpr *rightOperand) {
   removeChildren();

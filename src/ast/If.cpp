@@ -1,5 +1,5 @@
-#include "If.h"
-#include "LiteralBool.h"
+#include "ast_opt/ast/If.h"
+#include "ast_opt/ast/LiteralBool.h"
 
 json If::toJson() const {
   json j;

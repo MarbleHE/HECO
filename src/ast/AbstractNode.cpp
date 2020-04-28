@@ -1,7 +1,7 @@
 #include <sstream>
 #include <queue>
 #include <set>
-#include "AbstractNode.h"
+#include "ast_opt/ast/AbstractNode.h"
 
 int AbstractNode::nodeIdCounter = 0;
 

@@ -1,8 +1,8 @@
-#include "Block.h"
 #include <iostream>
 #include <exception>
-#include "VarDecl.h"
-#include "AbstractNode.h"
+#include "ast_opt/ast/AbstractNode.h"
+#include "ast_opt/ast/Block.h"
+#include "ast_opt/ast/VarDecl.h"
 
 json Block::toJson() const {
   std::vector<AbstractStatement *> stmts;

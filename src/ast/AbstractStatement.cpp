@@ -1,8 +1,8 @@
 #include <iostream>
-#include "AbstractStatement.h"
-#include "Block.h"
-#include "Call.h"
-#include "ArithmeticExpr.h"
+#include "ast_opt/ast/AbstractStatement.h"
+#include "ast_opt/ast/Block.h"
+#include "ast_opt/ast/Call.h"
+#include "ast_opt/ast/ArithmeticExpr.h"
 
 json AbstractStatement::toJson() const {
   return json({"type", "AbstractStatement"});

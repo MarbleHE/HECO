@@ -2,12 +2,12 @@
 #include <typeindex>
 #include <unordered_set>
 #include <iostream>
-#include "Operator.h"
-#include "LiteralInt.h"
-#include "LiteralString.h"
-#include "LiteralBool.h"
-#include "LiteralFloat.h"
-#include "Matrix.h"
+#include "ast_opt/ast/Operator.h"
+#include "ast_opt/ast/LiteralInt.h"
+#include "ast_opt/ast/LiteralString.h"
+#include "ast_opt/ast/LiteralBool.h"
+#include "ast_opt/ast/LiteralFloat.h"
+#include "ast_opt/ast/Matrix.h"
 
 void Operator::accept(Visitor &v) {
   v.visit(*this);

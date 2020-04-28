@@ -1,10 +1,10 @@
-#include "MultDepthVisitor.h"
-#include "LogicalExpr.h"
-#include "ArithmeticExpr.h"
-#include "VarAssignm.h"
-#include "VarDecl.h"
-#include "Return.h"
-#include "MatrixAssignm.h"
+#include "ast_opt/visitor/MultDepthVisitor.h"
+#include "ast_opt/ast/LogicalExpr.h"
+#include "ast_opt/ast/ArithmeticExpr.h"
+#include "ast_opt/ast/VarAssignm.h"
+#include "ast_opt/ast/VarDecl.h"
+#include "ast_opt/ast/Return.h"
+#include "ast_opt/ast/MatrixAssignm.h"
 
 void MultDepthVisitor::visit(ArithmeticExpr &elem) {
   Visitor::visit(elem);

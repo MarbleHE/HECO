@@ -1,15 +1,14 @@
-#include "Ast.h"
-
 #include <variant>
 #include <iostream>
 #include <set>
 #include <queue>
-#include <EvaluationVisitor.h>
-#include "AbstractLiteral.h"
-#include "Variable.h"
-#include "Function.h"
-#include "Return.h"
-#include "LogicalExpr.h"
+#include "ast_opt/visitor/EvaluationVisitor.h"
+#include "ast_opt/ast/Ast.h"
+#include "ast_opt/ast/AbstractLiteral.h"
+#include "ast_opt/ast/Variable.h"
+#include "ast_opt/ast/Function.h"
+#include "ast_opt/ast/Return.h"
+#include "ast_opt/ast/LogicalExpr.h"
 
 Ast::Ast(AbstractNode *rootNode) : rootNode(rootNode) {}
 

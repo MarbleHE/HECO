@@ -3,9 +3,9 @@
 
 #include <map>
 #include <string>
-#include "AbstractNode.h"
-#include "Visitor.h"
 #include <utility>
+#include "ast_opt/ast/AbstractNode.h"
+#include "ast_opt/visitor/Visitor.h"
 
 class MultDepthVisitor : public Visitor {
  private:

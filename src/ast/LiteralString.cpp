@@ -1,8 +1,8 @@
 #include <utility>
-#include "Datatype.h"
-#include "LiteralString.h"
-#include "RandNumGen.h"
-#include "Matrix.h"
+#include "ast_opt/ast/Datatype.h"
+#include "ast_opt/ast/LiteralString.h"
+#include "ast_opt/ast/Matrix.h"
+#include "ast_opt/utilities/RandNumGen.h"
 
 LiteralString::LiteralString(Matrix<AbstractExpr *> *am) : AbstractLiteral(am) {}
 

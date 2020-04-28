@@ -1,12 +1,12 @@
 #include <typeindex>
 #include <sstream>
 #include <utility>
-#include "Call.h"
-#include "Function.h"
-#include "AbstractLiteral.h"
-#include "LiteralInt.h"
-#include "LiteralBool.h"
-#include "LiteralString.h"
+#include "ast_opt/ast/Call.h"
+#include "ast_opt/ast/Function.h"
+#include "ast_opt/ast/AbstractLiteral.h"
+#include "ast_opt/ast/LiteralInt.h"
+#include "ast_opt/ast/LiteralBool.h"
+#include "ast_opt/ast/LiteralString.h"
 
 json Call::toJson() const {
   json j = {{"type", getNodeType()},

@@ -1,6 +1,6 @@
 #include <exception>
-#include "While.h"
-#include "LiteralBool.h"
+#include "ast_opt/ast/While.h"
+#include "ast_opt/ast/LiteralBool.h"
 
 While::While(AbstractExpr *condition, AbstractStatement *body) {
   setAttributes(condition, body);

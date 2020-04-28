@@ -1,6 +1,6 @@
-#include "NodeRelationship.h"
 #include <unordered_set>
-#include "GraphNode.h"
+#include "ast_opt/utilities/NodeRelationship.h"
+#include "ast_opt/utilities/GraphNode.h"
 
 NodeRelationship::NodeRelationship(RelationshipType relationship, GraphNode *gNode)
     : rship(relationship), refToGraphNode(gNode) {}

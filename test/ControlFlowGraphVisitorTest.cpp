@@ -1,7 +1,7 @@
-#include "ControlFlowGraphVisitor.h"
-#include "gtest/gtest.h"
 #include "AstTestingGenerator.h"
-#include "GraphNode.h"
+#include "ast_opt/visitor/ControlFlowGraphVisitor.h"
+#include "ast_opt/ast/GraphNode.h"
+#include "gtest/gtest.h"
 
 class FlowGraphVisitorFixture : public ::testing::Test {
  protected:

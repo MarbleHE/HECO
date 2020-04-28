@@ -1,7 +1,7 @@
-#include <gtest/gtest.h>
-#include "Operator.h"
-#include "OperatorExpr.h"
-#include "Variable.h"
+#include "gtest/gtest.h"
+#include "ast_opt/ast/Operator.h"
+#include "ast_opt/ast/OperatorExpr.h"
+#include "ast_opt/ast/Variable.h"
 
 class OperatorExprFixture : public ::testing::Test {
  protected:

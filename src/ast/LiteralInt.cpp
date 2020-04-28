@@ -1,8 +1,8 @@
-#include "LiteralInt.h"
 #include <iostream>
-#include "RandNumGen.h"
-#include "AbstractExpr.h"
-#include "Matrix.h"
+#include "ast_opt/utilities/RandNumGen.h"
+#include "ast_opt/ast/LiteralInt.h"
+#include "ast_opt/ast/AbstractExpr.h"
+#include "ast_opt/ast/Matrix.h"
 
 LiteralInt::LiteralInt(Matrix<AbstractExpr *> *am) : AbstractLiteral(am) {}
 

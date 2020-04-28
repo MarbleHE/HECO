@@ -1,8 +1,8 @@
-#include "AbstractLiteral.h"
-#include "LiteralInt.h"
-#include "LiteralString.h"
-#include "LiteralBool.h"
-#include "LiteralFloat.h"
+#include "ast_opt/ast/AbstractLiteral.h"
+#include "ast_opt/ast/LiteralInt.h"
+#include "ast_opt/ast/LiteralString.h"
+#include "ast_opt/ast/LiteralBool.h"
+#include "ast_opt/ast/LiteralFloat.h"
 
 AbstractLiteral::~AbstractLiteral() = default;
 

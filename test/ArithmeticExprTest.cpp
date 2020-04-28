@@ -1,5 +1,5 @@
-#include "LiteralInt.h"
-#include "ArithmeticExpr.h"
+#include "ast_opt/ast/LiteralInt.h"
+#include "ast_opt/ast/ArithmeticExpr.h"
 #include "gtest/gtest.h"
 
 int getLiteralIntValue(AbstractExpr *aaexpr) {

@@ -1,6 +1,6 @@
 #include <utility>
-#include "VarAssignm.h"
-#include "ArithmeticExpr.h"
+#include "ast_opt/ast/VarAssignm.h"
+#include "ast_opt/ast/ArithmeticExpr.h"
 
 json VarAssignm::toJson() const {
   json j;

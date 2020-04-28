@@ -1,7 +1,7 @@
 #include <utility>
 #include <vector>
-#include "FunctionParameter.h"
-#include "CallExternal.h"
+#include "ast_opt/ast/FunctionParameter.h"
+#include "ast_opt/ast/CallExternal.h"
 
 json CallExternal::toJson() const {
   json j = {

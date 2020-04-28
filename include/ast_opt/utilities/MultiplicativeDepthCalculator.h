@@ -3,7 +3,7 @@
 
 #include <unordered_map>
 #include <string>
-#include "Ast.h"
+#include "ast_opt/ast/Ast.h"
 
 struct DepthMapEntry {
   int multiplicativeDepth;

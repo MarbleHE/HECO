@@ -1,7 +1,7 @@
 #ifndef MASTER_THESIS_CODE_GENASTDEMO_H
 #define MASTER_THESIS_CODE_GENASTDEMO_H
 
-#include "Ast.h"
+#include "ast_opt/ast/Ast.h"
 
 /// Provides a REPL-based environment to showcase the different actions that this tool supports.
 void runInteractiveDemo();

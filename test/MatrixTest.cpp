@@ -1,12 +1,12 @@
-#include "Variable.h"
-#include "Matrix.h"
 #include "gtest/gtest.h"
-#include "LiteralFloat.h"
-#include "LiteralBool.h"
-#include "LiteralInt.h"
-#include "LiteralString.h"
-#include "ArithmeticExpr.h"
-#include "Rotate.h"
+#include "ast_opt/ast/Variable.h"
+#include "ast_opt/ast/Matrix.h"
+#include "ast_opt/ast/LiteralFloat.h"
+#include "ast_opt/ast/LiteralBool.h"
+#include "ast_opt/ast/LiteralInt.h"
+#include "ast_opt/ast/LiteralString.h"
+#include "ast_opt/ast/ArithmeticExpr.h"
+#include "ast_opt/ast/Rotate.h"
 
 class MatrixTestFixture : public ::testing::Test {
 

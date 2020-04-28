@@ -7,12 +7,12 @@
 #include <string>
 #include <random>
 #include <utility>
-#include "AbstractStatement.h"
-#include "LiteralInt.h"
-#include "LiteralBool.h"
-#include "LiteralString.h"
-#include "LiteralFloat.h"
 #include <unordered_map>
+#include "ast_opt/ast/AbstractStatement.h"
+#include "ast_opt/ast/LiteralInt.h"
+#include "ast_opt/ast/LiteralBool.h"
+#include "ast_opt/ast/LiteralString.h"
+#include "ast_opt/ast/LiteralFloat.h"
 
 class RandLiteralGen {
  private:

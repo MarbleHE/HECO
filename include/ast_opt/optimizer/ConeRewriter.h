@@ -1,13 +1,13 @@
 #ifndef AST_OPTIMIZER_INCLUDE_OPTIMIZER_CONEREWRITER_H_
 #define AST_OPTIMIZER_INCLUDE_OPTIMIZER_CONEREWRITER_H_
 
-#include "AbstractNode.h"
 #include <vector>
 #include <random>
-#include "Ast.h"
 #include <utility>
-#include "Operator.h"
-#include "MultiplicativeDepthCalculator.h"
+#include "ast_opt/ast/AbstractNode.h"
+#include "ast_opt/ast/Ast.h"
+#include "ast_opt/ast/Operator.h"
+#include "ast_opt/utilities/MultiplicativeDepthCalculator.h"
 
 /// This class implements the Cone Rewriting method described in
 /// [Aubry, P. et al.: Faster Homomorphic Encryption Is Not Enough: Improved Heuristic for Multiplicative Depth

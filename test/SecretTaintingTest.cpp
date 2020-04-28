@@ -1,14 +1,14 @@
 #include <regex>
-#include <PrintVisitor.h>
-#include <DotPrinter.h>
-#include "SecretTaintingVisitor.h"
-#include "Ast.h"
-#include "gtest/gtest.h"
+#include "ast_opt/visitor/PrintVisitor.h"
+#include "ast_opt/visitor/SecretTaintingVisitor.h"
+#include "ast_opt/utilities/DotPrinter.h"
+#include "ast_opt/ast/Ast.h"
+#include "ast_opt/ast/Function.h"
+#include "ast_opt/ast/Call.h"
+#include "ast_opt/ast/Block.h"
+#include "ast_opt/ast/VarAssignm.h"
 #include "AstTestingGenerator.h"
-#include "Function.h"
-#include "Call.h"
-#include "Block.h"
-#include "VarAssignm.h"
+#include "gtest/gtest.h"
 
 class SecretTaintingFixture : public ::testing::Test {
  protected:

@@ -1,8 +1,8 @@
-#include "Datatype.h"
-#include "LiteralFloat.h"
-#include "LiteralInt.h"
-#include "LiteralBool.h"
-#include "LiteralString.h"
+#include "ast_opt/ast/Datatype.h"
+#include "ast_opt/ast/LiteralFloat.h"
+#include "ast_opt/ast/LiteralInt.h"
+#include "ast_opt/ast/LiteralBool.h"
+#include "ast_opt/ast/LiteralString.h"
 
 Datatype::Datatype(const std::string &type) {
   static const std::unordered_map<std::string, Types> string_to_types = {

@@ -1,6 +1,6 @@
-#include "GetMatrixSize.h"
-#include "AbstractExpr.h"
-#include "LiteralInt.h"
+#include "ast_opt/ast/GetMatrixSize.h"
+#include "ast_opt/ast/AbstractExpr.h"
+#include "ast_opt/ast/LiteralInt.h"
 
 json GetMatrixSize::toJson() const {
   json j;

@@ -7,8 +7,8 @@
 #include <vector>
 #include <bitset>
 #include "gtest/gtest.h"
-#include "Ast.h"
-#include "RandNumGen.h"
+#include "ast_opt/ast/Ast.h"
+#include "ast_opt/utilities/RandNumGen.h"
 
 /// Defines the default number of test runs to be performed, if not passed as parameter to astOutputComparer.
 /// Decides whether exhaustive testing (i.e., comparing all possible inputs) will be used or not.

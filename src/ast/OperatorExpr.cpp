@@ -1,7 +1,7 @@
-#include "OperatorExpr.h"
 #include <utility>
-#include "Operator.h"
-#include "AbstractMatrix.h"
+#include "ast_opt/ast/OperatorExpr.h"
+#include "ast_opt/ast/Operator.h"
+#include "ast_opt/ast/AbstractMatrix.h"
 
 int OperatorExpr::getMaxNumberChildren() {
   return -1;

@@ -1,8 +1,8 @@
-#include "MultiplicativeDepthCalculator.h"
-#include "NodeUtils.h"
-#include "LiteralBool.h"
-#include "LogicalExpr.h"
-#include "ArithmeticExpr.h"
+#include "ast_opt/utilities/MultiplicativeDepthCalculator.h"
+#include "ast_opt/utilities/NodeUtils.h"
+#include "ast_opt/ast/LiteralBool.h"
+#include "ast_opt/ast/LogicalExpr.h"
+#include "ast_opt/ast/ArithmeticExpr.h"
 
 std::vector<AbstractNode *> rewriteMultiInputGateToBinaryGatesChain(std::vector<AbstractNode *> inputNodes,
                                                                     LogCompOp gateType) {

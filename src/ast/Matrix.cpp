@@ -1,4 +1,4 @@
-#include "Matrix.h"
+#include "ast_opt/ast/Matrix.h"
 
 template<typename T>
 std::string Matrix<T>::getNodeType() const {

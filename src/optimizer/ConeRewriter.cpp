@@ -1,11 +1,11 @@
 #include <set>
 #include <queue>
 #include <utility>
-#include "ConeRewriter.h"
-#include "LogicalExpr.h"
-#include "Return.h"
-#include "Function.h"
-#include "NodeUtils.h"
+#include "ast_opt/optimizer/ConeRewriter.h"
+#include "ast_opt/ast/LogicalExpr.h"
+#include "ast_opt/ast/Return.h"
+#include "ast_opt/ast/Function.h"
+#include "ast_opt/utilities/NodeUtils.h"
 
 ConeRewriter::ConeRewriter(Ast *ast)
     : ast(ast), mdc(MultiplicativeDepthCalculator{*ast}) {
