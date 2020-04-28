@@ -1,9 +1,9 @@
 #include <iostream>
-#include "MultRewriteVisitor.h"
-#include "ArithmeticExpr.h"
-#include "OperatorExpr.h"
-#include "Block.h"
-#include "Variable.h"
+#include "ast_opt/visitor/MultRewriteVisitor.h"
+#include "ast_opt/ast/ArithmeticExpr.h"
+#include "ast_opt/ast/OperatorExpr.h"
+#include "ast_opt/ast/Block.h"
+#include "ast_opt/ast/Variable.h"
 
 void MultRewriteVisitor::visit(Ast &elem) {
   Visitor::visit(elem);

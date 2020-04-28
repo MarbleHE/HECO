@@ -1,6 +1,6 @@
 #include <vector>
-#include "ArithmeticExpr.h"
-#include "Variable.h"
+#include "ast_opt/ast/ArithmeticExpr.h"
+#include "ast_opt/ast/Variable.h"
 
 ArithmeticExpr::ArithmeticExpr(AbstractExpr *left, ArithmeticOp op, AbstractExpr *right) {
   setAttributes(left, new Operator(op), right);

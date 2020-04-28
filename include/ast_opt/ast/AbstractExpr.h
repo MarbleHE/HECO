@@ -4,9 +4,9 @@
 #include <vector>
 #include <string>
 #include <nlohmann/json.hpp>
-#include "Visitor.h"
-#include "Ast.h"
-#include "AbstractNode.h"
+#include "ast_opt/visitor/Visitor.h"
+#include "ast_opt/ast/Ast.h"
+#include "ast_opt/ast/AbstractNode.h"
 
 using json = nlohmann::json;
 

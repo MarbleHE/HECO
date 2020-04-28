@@ -1,5 +1,5 @@
-#include "MatrixElementRef.h"
-#include "Variable.h"
+#include "ast_opt/ast/MatrixElementRef.h"
+#include "ast_opt/ast/Variable.h"
 
 MatrixElementRef::MatrixElementRef(AbstractExpr *mustEvaluateToAbstractLiteral,
                                    int rowIndex,

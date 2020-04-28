@@ -1,6 +1,6 @@
-#include "Scope.h"
 #include <utility>
-#include "VarDecl.h"
+#include "ast_opt/utilities/Scope.h"
+#include "ast_opt/ast/VarDecl.h"
 
 Scope::Scope(std::string scopeIdentifier, AbstractNode *scopeOpener, Scope *outerScope)
     : scopeIdentifier(std::move(scopeIdentifier)), scopeOpener(scopeOpener), outerScope(outerScope) {

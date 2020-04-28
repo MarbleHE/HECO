@@ -1,8 +1,8 @@
-#include "Ast.h"
-#include "PrintVisitor.h"
 #include <fstream>
-#include "gtest/gtest.h"
 #include "AstTestingGenerator.h"
+#include "ast_opt/visitor/PrintVisitor.h"
+#include "ast_opt/ast/Ast.h"
+#include "gtest/gtest.h"
 
 class PrintVisitorTest : public ::testing::Test {
  protected:

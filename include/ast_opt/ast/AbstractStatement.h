@@ -3,9 +3,9 @@
 
 #include <string>
 #include <nlohmann/json.hpp>
-#include "Visitor.h"
-#include "AbstractNode.h"
-#include "AbstractBinaryExpr.h"
+#include "ast_opt/visitor/Visitor.h"
+#include "ast_opt/ast/AbstractNode.h"
+#include "ast_opt/ast/AbstractBinaryExpr.h"
 
 using json = nlohmann::json;
 

@@ -1,11 +1,11 @@
-#include "Function.h"
 #include <utility>
 #include <iostream>
-#include "LiteralInt.h"
-#include "ArithmeticExpr.h"
-#include "Block.h"
-#include "Return.h"
-#include "AbstractStatement.h"
+#include "ast_opt/ast/Function.h"
+#include "ast_opt/ast/LiteralInt.h"
+#include "ast_opt/ast/ArithmeticExpr.h"
+#include "ast_opt/ast/Block.h"
+#include "ast_opt/ast/Return.h"
+#include "ast_opt/ast/AbstractStatement.h"
 
 void Function::addParameter(FunctionParameter *param) {
   if (children.empty()) {

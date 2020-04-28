@@ -1,10 +1,10 @@
-#include "Ast.h"
-#include "ConeRewriter.h"
-#include "TestUtils.h"
-#include "DotPrinter.h"
-#include "gtest/gtest.h"
 #include "AstTestingGenerator.h"
-#include "../include/ast/Variable.h"
+#include "ast_opt/ast/Ast.h"
+#include "ast_opt/optimizer/ConeRewriter.h"
+#include "ast_opt/utilities/TestUtils.h"
+#include "ast_opt/utilities/DotPrinter.h"
+#include "ast_opt/ast/Variable.h"
+#include "gtest/gtest.h"
 
 class ConeRewriterFixture : public ::testing::Test {
  private:

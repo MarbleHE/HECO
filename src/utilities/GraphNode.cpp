@@ -1,4 +1,4 @@
-#include "GraphNode.h"
+#include "ast_opt/utilities/GraphNode.h"
 
 GraphNode::GraphNode(RelationshipType relType, std::initializer_list<GraphNode *> parentsToBeAdded) {
   for (auto &c : parentsToBeAdded) {

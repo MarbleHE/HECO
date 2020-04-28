@@ -9,11 +9,11 @@
 #include <set>
 #include <utility>
 #include <regex>
-#include "Operator.h"
-#include "AbstractStatement.h"
-#include "AbstractNode.h"
-#include "LogicalExpr.h"
-#include "MultiplicativeDepthCalculator.h"
+#include "ast_opt/ast/Operator.h"
+#include "ast_opt/ast/AbstractStatement.h"
+#include "ast_opt/ast/AbstractNode.h"
+#include "ast_opt/ast/LogicalExpr.h"
+#include "ast_opt/utilities/MultiplicativeDepthCalculator.h"
 
 // Dot vertex represents an AbstractNode in the DOT graph language
 // e.g., Return_1 [label="Return_1\n[l(v): 3, r(v): 0]" shape=oval style=filled fillcolor=white]

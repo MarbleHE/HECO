@@ -1,13 +1,13 @@
-#include <gtest/gtest.h>
-#include "Ast.h"
-#include "MultRewriteVisitor.h"
-#include "PrintVisitor.h"
-#include "Operator.h"
-#include "TestUtils.h"
+#include "gtest/gtest.h"
+#include "ast_opt/visitor/MultRewriteVisitor.h"
+#include "ast_opt/visitor/PrintVisitor.h"
+#include "ast_opt/ast/Ast.h"
+#include "ast_opt/utilities/TestUtils.h"
+#include "ast_opt/ast/Operator.h"
+#include "ast_opt/ast/Function.h"
+#include "ast_opt/ast/ArithmeticExpr.h"
+#include "ast_opt/ast/VarAssignm.h"
 #include "AstTestingGenerator.h"
-#include "Function.h"
-#include "ArithmeticExpr.h"
-#include "VarAssignm.h"
 
 /// Check to ensure that the AST testing generator works as expected.
 TEST(MultRewriteTest, astTestingGeneratorTest) { /* NOLINT */

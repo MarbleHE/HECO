@@ -30,15 +30,6 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/nlohmann-json-src
 # TARGET: ast_optimizer
 ##############################æ
 
-include_directories(
-        ${ast_optimizer_SOURCE_DIR}/include/ast
-        ${ast_optimizer_SOURCE_DIR}/include/optimizer
-        ${ast_optimizer_SOURCE_DIR}/include/utilities
-        ${ast_optimizer_SOURCE_DIR}/include/visitor
-        ${ast_optimizer_SOURCE_DIR}/include/evaluation
-        ${ast_optimizer_SOURCE_DIR}/examples
-        ${ast_optimizer_SOURCE_DIR}/test)
-
 set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/examples/genAstDemo.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/AbstractExpr.cpp
@@ -98,9 +89,9 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/ast/GetMatrixSize.cpp)
 
 set(HEADER_ONLY_SOURCES
-        ${ast_optimizer_SOURCE_DIR}/include/ast/OpSymbEnum.h
-        ${ast_optimizer_SOURCE_DIR}/include/utilities/RandNumGen.h
-        ${ast_optimizer_SOURCE_DIR}/include/utilities/TestUtils.h)
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/OpSymbEnum.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/RandNumGen.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/TestUtils.h)
 
 add_executable(ast_demo
         ${ast_optimizer_SOURCE_DIR}/main.cpp
@@ -108,6 +99,7 @@ add_executable(ast_demo
         ${HEADER_ONLY_SOURCES})
 
 target_link_libraries(ast_demo PRIVATE nlohmann_json::nlohmann_json)
+target_include_directories(ast_demo PRIVATE ${ast_optimizer_SOURCE_DIR}/include/)
 
 ##############################
 # TARGET: ast_lib
@@ -117,6 +109,9 @@ target_link_libraries(ast_demo PRIVATE nlohmann_json::nlohmann_json)
 # build a library out of the code to be used by the tests
 add_library(ast_lib ${SOURCE_FILES})
 target_link_libraries(ast_lib PUBLIC nlohmann_json::nlohmann_json)
+target_include_directories(ast_lib PUBLIC
+        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>)
 
 enable_testing()
 add_subdirectory(test)

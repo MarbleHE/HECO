@@ -1,4 +1,4 @@
-#include "Transpose.h"
+#include "ast_opt/ast/Transpose.h"
 
 std::string Transpose::getNodeType() const {
   return std::string("Transpose");

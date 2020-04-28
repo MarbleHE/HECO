@@ -25,15 +25,6 @@ endif ()
 ##############################
 # TARGET: testing
 ##############################
-
-include_directories(
-        ${ast_optimizer_SOURCE_DIR}/include/ast
-        ${ast_optimizer_SOURCE_DIR}/include/optimizer
-        ${ast_optimizer_SOURCE_DIR}/include/utilities
-        ${ast_optimizer_SOURCE_DIR}/include/visitor
-        ${ast_optimizer_SOURCE_DIR}/examples
-        ${ast_optimizer_SOURCE_DIR}/test)
-
 set(TEST_FILES
         ArithmeticExprTest.cpp
         JsonOutputTest.cpp
@@ -42,7 +33,7 @@ set(TEST_FILES
         AstTestingGenerator.cpp
         AstTestingGenerator.h
         EvaluationVisitorTest.cpp
-        ${ast_optimizer_SOURCE_DIR}/include/utilities/TestUtils.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/TestUtils.h
         MultDepthVisitorTest.cpp
         ChildParentTest.cpp
         AstClassTest.cpp
@@ -68,7 +59,8 @@ elseif ("${CMAKE_C_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang" OR "${CMAKE_CXX_COMP
     set(CMAKE_CXX_FLAGS "-fprofile-instr-generate -fcoverage-mapping")
 endif ()
 
-target_link_libraries(testing-all gtest ast_lib nlohmann_json::nlohmann_json gtest_main)
+target_link_libraries(testing-all PRIVATE gtest ast_lib nlohmann_json::nlohmann_json gtest_main)
+target_include_directories(testing-all PRIVATE ${ast_optimizer_SOURCE_DIR}/include/)
 
 # create ctest targets
 gtest_discover_tests(testing-all TEST_PREFIX gtest:)

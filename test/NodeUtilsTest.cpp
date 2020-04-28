@@ -1,10 +1,10 @@
-#include <gtest/gtest.h>
-#include <DotPrinter.h>
-#include "AbstractNode.h"
-#include "OpSymbEnum.h"
-#include "Variable.h"
-#include "NodeUtils.h"
-#include "ArithmeticExpr.h"
+#include "gtest/gtest.h"
+#include "ast_opt/utilities/DotPrinter.h"
+#include "ast_opt/utilities/NodeUtils.h"
+#include "ast_opt/ast/AbstractNode.h"
+#include "ast_opt/ast/OpSymbEnum.h"
+#include "ast_opt/ast/Variable.h"
+#include "ast_opt/ast/ArithmeticExpr.h"
 
 TEST(NodeUtilsTest, rewriteMultiInputGateToBinaryGatesChain_emptyInputs) { /* NOLINT */
   std::vector<AbstractNode *> inputs{};

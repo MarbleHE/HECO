@@ -6,7 +6,7 @@
 #include <iostream>
 #include <set>
 #include "AbstractNode.h"
-#include "Visitor.h"
+#include "ast_opt/visitor/Visitor.h"
 
 class Ast {
  private:

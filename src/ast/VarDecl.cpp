@@ -1,10 +1,10 @@
-#include "VarDecl.h"
 #include <utility>
-#include "LiteralInt.h"
-#include "LiteralBool.h"
-#include "LiteralFloat.h"
-#include "ArithmeticExpr.h"
-#include "Ast.h"
+#include "ast_opt/ast/VarDecl.h"
+#include "ast_opt/ast/LiteralInt.h"
+#include "ast_opt/ast/LiteralBool.h"
+#include "ast_opt/ast/LiteralFloat.h"
+#include "ast_opt/ast/ArithmeticExpr.h"
+#include "ast_opt/ast/Ast.h"
 
 json VarDecl::toJson() const {
   json j = {{"type", getNodeType()},

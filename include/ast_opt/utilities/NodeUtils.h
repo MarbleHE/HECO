@@ -1,9 +1,9 @@
 #ifndef AST_OPTIMIZER_INCLUDE_UTILITIES_NODEUTILS_H_
 #define AST_OPTIMIZER_INCLUDE_UTILITIES_NODEUTILS_H_
 
-#include "AbstractNode.h"
-#include "OpSymbEnum.h"
 #include <vector>
+#include "ast_opt/ast/AbstractNode.h"
+#include "ast_opt/ast/OpSymbEnum.h"
 
 /// Transforms a multi-input gate taking N inputs into a sequence of binary gates.
 ///

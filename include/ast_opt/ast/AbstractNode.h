@@ -7,7 +7,7 @@
 #include <string>
 #include <typeinfo>
 #include <nlohmann/json.hpp>
-#include "Visitor.h"
+#include "ast_opt/visitor/Visitor.h"
 
 using json = nlohmann::json;
 

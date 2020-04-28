@@ -1,8 +1,8 @@
-#include "Ast.h"
-#include "gtest/gtest.h"
 #include "AstTestingGenerator.h"
-#include "Function.h"
-#include "ArithmeticExpr.h"
+#include "ast_opt/ast/Ast.h"
+#include "ast_opt/ast/Function.h"
+#include "ast_opt/ast/ArithmeticExpr.h"
+#include "gtest/gtest.h"
 
 class AstTestFixture : public ::testing::Test {
  protected:

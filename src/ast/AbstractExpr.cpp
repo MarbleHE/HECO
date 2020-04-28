@@ -1,10 +1,10 @@
 #include <iostream>
-#include "Variable.h"
-#include "AbstractExpr.h"
-#include "LiteralInt.h"
-#include "LiteralBool.h"
-#include "LiteralString.h"
-#include "LiteralFloat.h"
+#include "ast_opt/ast/Variable.h"
+#include "ast_opt/ast/AbstractExpr.h"
+#include "ast_opt/ast/LiteralInt.h"
+#include "ast_opt/ast/LiteralBool.h"
+#include "ast_opt/ast/LiteralString.h"
+#include "ast_opt/ast/LiteralFloat.h"
 
 json AbstractExpr::toJson() const {
   return json({"type", "AbstractExpr"});

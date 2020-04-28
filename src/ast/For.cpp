@@ -1,6 +1,6 @@
-#include "For.h"
-#include "AbstractExpr.h"
-#include "Block.h"
+#include "ast_opt/ast/For.h"
+#include "ast_opt/ast/AbstractExpr.h"
+#include "ast_opt/ast/Block.h"
 
 std::string For::getNodeType() const {
   return "For";

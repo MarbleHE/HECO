@@ -1,9 +1,9 @@
-#include "LiteralFloat.h"
 #include <iostream>
-#include "Datatype.h"
-#include "AbstractExpr.h"
-#include "RandNumGen.h"
-#include "Matrix.h"
+#include "ast_opt/ast/LiteralFloat.h"
+#include "ast_opt/ast/Datatype.h"
+#include "ast_opt/ast/AbstractExpr.h"
+#include "ast_opt/ast/Matrix.h"
+#include "ast_opt/utilities/RandNumGen.h"
 
 LiteralFloat::LiteralFloat(Matrix<AbstractExpr *> *am) : AbstractLiteral(am) {}
 

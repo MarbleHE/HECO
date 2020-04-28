@@ -1,5 +1,5 @@
-#include "LogicalExpr.h"
-#include "Variable.h"
+#include "ast_opt/ast/LogicalExpr.h"
+#include "ast_opt/ast/Variable.h"
 
 void LogicalExpr::accept(Visitor &v) {
   v.visit(*this);

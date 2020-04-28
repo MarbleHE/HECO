@@ -1,10 +1,9 @@
-#include "AbstractNode.h"
-#include "Operator.h"
-#include "MultiplicativeDepthCalculator.h"
-
 #include <utility>
-#include "LogicalExpr.h"
-#include "Variable.h"
+#include "ast_opt/ast/AbstractNode.h"
+#include "ast_opt/ast/Operator.h"
+#include "ast_opt/utilities/MultiplicativeDepthCalculator.h"
+#include "ast_opt/ast/LogicalExpr.h"
+#include "ast_opt/ast/Variable.h"
 
 int MultiplicativeDepthCalculator::depthValue(AbstractNode *n) {
   if (auto lexp = dynamic_cast<LogicalExpr *>(n)) {

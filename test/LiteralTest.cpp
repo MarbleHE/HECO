@@ -1,10 +1,10 @@
-#include "AbstractLiteral.h"
-#include "LiteralBool.h"
-#include "LiteralInt.h"
-#include "LiteralFloat.h"
-#include "LiteralString.h"
+#include "ast_opt/ast/AbstractLiteral.h"
+#include "ast_opt/ast/LiteralBool.h"
+#include "ast_opt/ast/LiteralInt.h"
+#include "ast_opt/ast/LiteralFloat.h"
+#include "ast_opt/ast/LiteralString.h"
+#include "ast_opt/ast/Matrix.h"
 #include "gtest/gtest.h"
-#include "Matrix.h"
 
 TEST(LiteralTest, compareLiterals_literalsOfDifferentTypeAreAlwaysUnequal) { /* NOLINT */
   AbstractLiteral *boolFalse = new LiteralBool(false);

@@ -5,8 +5,8 @@
 #include <sstream>
 #include <string>
 #include <utility>
-#include "Visitor.h"
-#include "AbstractNode.h"
+#include "ast_opt/visitor/Visitor.h"
+#include "ast_opt/ast/AbstractNode.h"
 
 class PrintVisitor : public Visitor {
  private:

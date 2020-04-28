@@ -1,6 +1,6 @@
-#include "DotPrinter.h"
-#include "VarDecl.h"
-#include "VarAssignm.h"
+#include "ast_opt/utilities/DotPrinter.h"
+#include "ast_opt/ast/VarDecl.h"
+#include "ast_opt/ast/VarAssignm.h"
 
 DotPrinter::DotPrinter() : mdc(nullptr) {}
 

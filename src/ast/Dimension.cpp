@@ -1,4 +1,4 @@
-#include "Dimension.h"
+#include "ast_opt/ast/Dimension.h"
 
 Dimension::Dimension(int numberOfRows, int numberOfColumns) : numRows(numberOfRows), numColumns(numberOfColumns) {}
 

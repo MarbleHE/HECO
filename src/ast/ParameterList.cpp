@@ -1,5 +1,5 @@
-#include "ParameterList.h"
-#include "FunctionParameter.h"
+#include "ast_opt/ast/ParameterList.h"
+#include "ast_opt/ast/FunctionParameter.h"
 
 std::string ParameterList::getNodeType() const {
   return "ParameterList";

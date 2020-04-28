@@ -3,11 +3,11 @@
 
 #include <vector>
 #include <stack>
-#include "Visitor.h"
 #include <unordered_map>
 #include <string>
-#include <MatrixElementRef.h>
-#include <Matrix.h>
+#include "Visitor.h"
+#include "ast_opt/ast/MatrixElementRef.h"
+#include "ast_opt/ast/Matrix.h"
 
 class EvaluationVisitor : public Visitor {
  private:

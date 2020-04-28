@@ -1,7 +1,7 @@
-#include <OpSymbEnum.h>
-#include "genAstDemo.h"
 #include "main.h"
-#include "EvaluationAlgorithms.h"
+#include "examples/genAstDemo.h"
+#include "ast_opt/ast/OpSymbEnum.h"
+#include "ast_opt/evaluation/EvaluationAlgorithms.h"
 
 int main() {
   // test linear regression

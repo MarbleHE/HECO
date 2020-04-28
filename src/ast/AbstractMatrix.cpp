@@ -1,5 +1,5 @@
-#include "AbstractMatrix.h"
-#include "Matrix.h"
+#include "ast_opt/ast/AbstractMatrix.h"
+#include "ast_opt/ast/Matrix.h"
 
 bool AbstractMatrix::operator==(const AbstractMatrix &rhs) const {
   // Matrices cannot be equal if they have a different type

@@ -1,6 +1,6 @@
-#include "LiteralBool.h"
-#include "RandNumGen.h"
-#include "Matrix.h"
+#include "ast_opt/utilities/RandNumGen.h"
+#include "ast_opt/ast/LiteralBool.h"
+#include "ast_opt/ast/Matrix.h"
 
 LiteralBool::LiteralBool(Matrix<AbstractExpr *> *am) : AbstractLiteral(am) {}
 

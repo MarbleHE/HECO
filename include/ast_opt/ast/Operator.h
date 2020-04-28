@@ -7,13 +7,13 @@
 #include <iostream>
 #include <algorithm>
 #include <vector>
-#include "Visitor.h"
-#include "AbstractNode.h"
-#include "LiteralString.h"
-#include "LiteralBool.h"
-#include "LiteralInt.h"
-#include "OpSymbEnum.h"
-#include "LiteralFloat.h"
+#include "ast_opt/visitor/Visitor.h"
+#include "ast_opt/ast/AbstractNode.h"
+#include "ast_opt/ast/LiteralString.h"
+#include "ast_opt/ast/LiteralBool.h"
+#include "ast_opt/ast/LiteralInt.h"
+#include "ast_opt/ast/OpSymbEnum.h"
+#include "ast_opt/ast/LiteralFloat.h"
 
 class Operator : public AbstractNode {
  private:

@@ -1,4 +1,4 @@
-#include "FunctionParameter.h"
+#include "ast_opt/ast/FunctionParameter.h"
 
 void to_json(json &j, const FunctionParameter &funcParam) {
   j = {

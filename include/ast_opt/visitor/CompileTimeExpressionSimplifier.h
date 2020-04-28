@@ -9,13 +9,13 @@
 #include <map>
 #include <set>
 #include <utility>
-#include "NodeUtils.h"
-#include "Visitor.h"
-#include "EvaluationVisitor.h"
-#include "ArithmeticExpr.h"
-#include "LiteralFloat.h"
-#include "Variable.h"
-#include "OperatorExpr.h"
+#include "ast_opt/utilities/NodeUtils.h"
+#include "ast_opt/visitor/Visitor.h"
+#include "ast_opt/visitor/EvaluationVisitor.h"
+#include "ast_opt/ast/ArithmeticExpr.h"
+#include "ast_opt/ast/LiteralFloat.h"
+#include "ast_opt/ast/Variable.h"
+#include "ast_opt/ast/OperatorExpr.h"
 
 /**
  * A helper struct to store the value of a variable and its associated datatype in the variableValues map.
