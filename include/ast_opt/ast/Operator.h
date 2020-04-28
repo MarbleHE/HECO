@@ -116,7 +116,8 @@ class Operator : public AbstractNode {
   R acc(std::function<R(T, T)> func, std::vector<T> operands) {
     auto it = operands.begin();
     // result = operands[0] ⊕ operands[1]
-    R result = func(*it, *(++it));
+    R result = func(*it, *(it + 1));
+    it = it + 1;
     if (operands.size() > 2) {
       // result = ((((result ⊕ operands[2]) ⊕ operands[3]) ⊕ ...) ⊕ operands[N])
       for (++it; it!=operands.end(); ++it) result = func(result, *it);
@@ -128,7 +129,8 @@ class Operator : public AbstractNode {
   bool appPairwise(std::function<bool(T, T)> func, std::vector<T> operands) {
     auto it = operands.begin();
     // result = operands[0] ⊕ operands[1]
-    bool result = func(*it, *(++it));
+    bool result = func(*it, *(it + 1));
+    it = it + 1;
     if (operands.size() > 2) {
       // result = ((result && (operands[1] ⊕ operands[2])) && (operands[2] ⊕ operands[3])) ...
       for (; it!=operands.end() - 1; ++it) result = result && func(*it, *(it + 1));
