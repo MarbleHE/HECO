@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   build-ubuntu:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04-gcc-9
     steps:
       - uses: actions/checkout@v1
       - name: configure
