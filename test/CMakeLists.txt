@@ -60,7 +60,7 @@ elseif ("${CMAKE_C_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang" OR "${CMAKE_CXX_COMP
 endif ()
 
 target_link_libraries(testing-all PRIVATE gtest ast_lib nlohmann_json::nlohmann_json gtest_main)
-include_directories(testing-all PRIVATE ${ast_optimizer_SOURCE_DIR}/include/)
+target_include_directories(testing-all PRIVATE ${ast_optimizer_SOURCE_DIR}/include/)
 
 # create ctest targets
 gtest_discover_tests(testing-all TEST_PREFIX gtest:)

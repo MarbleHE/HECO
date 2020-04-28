@@ -1,6 +1,6 @@
 #include "AstTestingGenerator.h"
 #include "ast_opt/visitor/ControlFlowGraphVisitor.h"
-#include "ast_opt/ast/GraphNode.h"
+#include "ast_opt/utilities/GraphNode.h"
 #include "gtest/gtest.h"
 
 class FlowGraphVisitorFixture : public ::testing::Test {
