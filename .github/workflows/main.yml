@@ -16,7 +16,7 @@ jobs:
         run: sudo apt-get install -y gcc-9 g++-9 build-essential
       - uses: actions/checkout@v1
       - name: configure
-        run: mkdir build && cd build && cmake -DCMAKE_CXX_FLAGS="-Werror" ..
+        run: mkdir build && cd build && cmake -DCMAKE_CXX_FLAGS="-Werror" -DCMAKE_CXX_COMPILER=g++-9 -DCMAKE_C_COMPILER=gcc-9 ..
       - name: build
         run: cmake --build build
       - name: test
