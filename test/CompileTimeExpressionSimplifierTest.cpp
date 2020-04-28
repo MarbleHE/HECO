@@ -2197,8 +2197,6 @@ TEST_F(CompileTimeExpressionSimplifierFixture, partialforLoopUnrolling) { /* NOL
   Ast ast;
   AstTestingGenerator::generateAst(48, ast);
 
-  // TODO Why is 'i' declared twice, once in the function's scope and once in the newly added block?
-
   // perform the compile-time expression simplification
   ctes.visit(ast);
 
@@ -2207,15 +2205,15 @@ TEST_F(CompileTimeExpressionSimplifierFixture, partialforLoopUnrolling) { /* NOL
   func->addParameter(new FunctionParameter(new Datatype(Types::INT), new Variable("numIterations")));
 
   // int sum;
-  func->addStatement(new VarDecl("sum", new Datatype(Types::INT, false), nullptr));
-  func->addStatement(new VarDecl("i", new Datatype(Types::INT, false), nullptr));
+  func->addStatement(new VarDecl("sum", new Datatype(Types::INT, false)));
+  func->addStatement(new VarDecl("i", new Datatype(Types::INT, false)));
 
   // unrolled loop and cleanup loop are embedded into new Block
   // { ...
   auto newBlock = new Block();
   func->addStatement(newBlock);
   // int i = 0;
-  newBlock->addChild(new VarDecl("i", 0));
+//  newBlock->addChild(new VarDecl("i", new Datatype(Types::INT)));
   // for (; i+1 < numIterations && i+2 < numIterations && i+3 < numIterations; )  // unrolled loop
   auto unrolledLoopInitializer = nullptr;
   auto unrolledLoopCondition =

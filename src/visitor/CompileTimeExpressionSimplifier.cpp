@@ -994,7 +994,7 @@ AbstractNode *CompileTimeExpressionSimplifier::doPartialLoopUnrolling(For &elem)
   forLoopInitializer->removeFromParents();
   blockEmbeddingLoops->addChild(forLoopInitializer);
 
-  // wrap this For loop into the new block statement
+  // replace this For-loop in its parent node by the new block and move the For-loop into the block
   elem.getOnlyParent()->replaceChild(&elem, blockEmbeddingLoops);
   blockEmbeddingLoops->addChild(&elem);
 
@@ -1007,7 +1007,7 @@ AbstractNode *CompileTimeExpressionSimplifier::doPartialLoopUnrolling(For &elem)
   auto cleanupForLoop = elem.clone(false)->castTo<For>();
   auto ignrd =
       removeVarsWrittenAndReadFromVariableValues(*cleanupForLoop->getStatementToBeExecuted()->castTo<Block>());
-  // visit the condiiton, body, and update statement to make required replacements (e.g., Arithmetic/LogicalExpr ->
+  // visit the condiiton, body, and update statement to make required replacements (e.g., Arithmetic/LogicalExpr to
   // OperatorExpr)
   cleanupForLoop->getCondition()->accept(*this);
   cleanupForLoop->getStatementToBeExecuted()->accept(*this);
@@ -1019,6 +1019,10 @@ AbstractNode *CompileTimeExpressionSimplifier::doPartialLoopUnrolling(For &elem)
 
   // visit the intializer
   forLoopInitializer->accept(*this);
+
+  // update the nodesQueuedForDeletion as the initializer's VarDecl will be emitted later by calling
+  // emitVariableAssignments
+  nodesQueuedForDeletionCopy = nodesQueuedForDeletion;
   auto variableValuesAfterVisitingInitializer = getClonedVariableValuesMap();
   // determine the loop variables, i.e., variables changed in the initializer statement
   auto loopVariablesMap = getChangedVariables(variableValuesBackup);
