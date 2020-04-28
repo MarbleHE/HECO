@@ -1,0 +1,76 @@
+\hypertarget{class_abstract_expr}{}\doxysection{Abstract\+Expr Class Reference}
+\label{class_abstract_expr}\index{AbstractExpr@{AbstractExpr}}
+Inheritance diagram for Abstract\+Expr\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=12.000000cm]{class_abstract_expr}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+json \mbox{\hyperlink{class_abstract_expr_ac1957d8bda1e29b35b822ec0b05c5027}{to\+Json}} () const override
+\item 
+\mbox{\Hypertarget{class_abstract_expr_abeb98864371b1e1e3cdedc4f009b188d}\label{class_abstract_expr_abeb98864371b1e1e3cdedc4f009b188d}} 
+virtual \mbox{\hyperlink{class_abstract_binary_expr}{Abstract\+Binary\+Expr}} $\ast$ {\bfseries contains} (\mbox{\hyperlink{class_abstract_binary_expr}{Abstract\+Binary\+Expr}} $\ast$aexp\+Template, \mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$excluded\+Subtree)
+\item 
+\mbox{\Hypertarget{class_abstract_expr_aecf4ad1f481203fd798d5020d60abcb4}\label{class_abstract_expr_aecf4ad1f481203fd798d5020d60abcb4}} 
+virtual int {\bfseries count\+By\+Template} (\mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$abstract\+Expr)
+\item 
+\mbox{\Hypertarget{class_abstract_expr_ae20e9c66db0b24ddac67f99c88a500aa}\label{class_abstract_expr_ae20e9c66db0b24ddac67f99c88a500aa}} 
+virtual std\+::vector$<$ std\+::string $>$ {\bfseries get\+Variable\+Identifiers} ()
+\item 
+\mbox{\Hypertarget{class_abstract_expr_a9aa9e4a44068cd7c8c578716ff7a7727}\label{class_abstract_expr_a9aa9e4a44068cd7c8c578716ff7a7727}} 
+virtual bool {\bfseries contains} (\mbox{\hyperlink{class_variable}{Variable}} $\ast$var)
+\item 
+\mbox{\Hypertarget{class_abstract_expr_a8fb0e631d882f56b7c26bed7b0be2e3d}\label{class_abstract_expr_a8fb0e631d882f56b7c26bed7b0be2e3d}} 
+virtual bool {\bfseries is\+Equal} (\mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$other)
+\end{DoxyCompactItemize}
+\doxysubsection*{Static Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_abstract_expr_a9fb8ba19a0c0101373dac78437768901}\label{class_abstract_expr_a9fb8ba19a0c0101373dac78437768901}} 
+static \mbox{\hyperlink{class_literal_int}{Literal\+Int}} $\ast$ {\bfseries create\+Param} (int i)
+\item 
+\mbox{\Hypertarget{class_abstract_expr_a9f1e8a4fd8f82d9f9d8a3355cc20b61f}\label{class_abstract_expr_a9f1e8a4fd8f82d9f9d8a3355cc20b61f}} 
+static \mbox{\hyperlink{class_literal_bool}{Literal\+Bool}} $\ast$ {\bfseries create\+Param} (bool b)
+\item 
+\mbox{\Hypertarget{class_abstract_expr_a584241aa37b386049ec0ac4df0369672}\label{class_abstract_expr_a584241aa37b386049ec0ac4df0369672}} 
+static \mbox{\hyperlink{class_literal_string}{Literal\+String}} $\ast$ {\bfseries create\+Param} (const char $\ast$str)
+\item 
+\mbox{\Hypertarget{class_abstract_expr_af20b4692b35ddf664700ce86cdb38f17}\label{class_abstract_expr_af20b4692b35ddf664700ce86cdb38f17}} 
+static \mbox{\hyperlink{class_literal_float}{Literal\+Float}} $\ast$ {\bfseries create\+Param} (float f)
+\item 
+\mbox{\Hypertarget{class_abstract_expr_aa54f0be087bc1d04f83fc2e19ad11b5f}\label{class_abstract_expr_aa54f0be087bc1d04f83fc2e19ad11b5f}} 
+static \mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$ {\bfseries create\+Param} (\mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$abstract\+Expr)
+\item 
+\mbox{\Hypertarget{class_abstract_expr_ac402fc3e939b78925f8b344a162895a6}\label{class_abstract_expr_ac402fc3e939b78925f8b344a162895a6}} 
+static \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$ {\bfseries create\+Param} (\mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$node)
+\end{DoxyCompactItemize}
+\doxysubsection*{Additional Inherited Members}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_abstract_expr_ac1957d8bda1e29b35b822ec0b05c5027}\label{class_abstract_expr_ac1957d8bda1e29b35b822ec0b05c5027}} 
+\index{AbstractExpr@{AbstractExpr}!toJson@{toJson}}
+\index{toJson@{toJson}!AbstractExpr@{AbstractExpr}}
+\doxysubsubsection{\texorpdfstring{toJson()}{toJson()}}
+{\footnotesize\ttfamily json Abstract\+Expr\+::to\+Json (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Get the J\+S\+ON representation of the node including all of its children. \begin{DoxyReturn}{Returns}
+J\+S\+ON representation of the node 
+\end{DoxyReturn}
+
+
+Reimplemented from \mbox{\hyperlink{class_abstract_node_a0ee4c4915b6f76415aa2187535359899}{Abstract\+Node}}.
+
+
+
+Reimplemented in \mbox{\hyperlink{class_literal_float_a59246dcdc2291cc5a79f51133efcd84a}{Literal\+Float}}, \mbox{\hyperlink{class_literal_int_a0a72ff976a6747d9a32735493c25c36a}{Literal\+Int}}, \mbox{\hyperlink{class_literal_string_a215987e5d1874f1d3de818885ff5b149}{Literal\+String}}, \mbox{\hyperlink{class_literal_bool_a1f09331096aa475a6d92870e33280d15}{Literal\+Bool}}, \mbox{\hyperlink{class_get_matrix_size_a674073531ae6bc4c772da6386e6e5c72}{Get\+Matrix\+Size}}, \mbox{\hyperlink{class_matrix_element_ref_a336ce656eb1f92cb11c1429066c9e331}{Matrix\+Element\+Ref}}, \mbox{\hyperlink{class_rotate_a0e65e2d7c7b367b1519101c994a502e5}{Rotate}}, \mbox{\hyperlink{class_call_external_a29480977d4043815acd01bbbe6aa9688}{Call\+External}}, \mbox{\hyperlink{class_function_parameter_a142f3e7fed261ce9b4717486c12ac61d}{Function\+Parameter}}, \mbox{\hyperlink{class_transpose_a50e8ff05ff7ee447c4ffb910d191c6c4}{Transpose}}, \mbox{\hyperlink{class_call_a1b1a81d3dcc202fb3db99eceb10ef3c6}{Call}}, \mbox{\hyperlink{class_variable_ad2de73d36aa8d372c3f0458ad717260c}{Variable}}, and \mbox{\hyperlink{class_unary_expr_a6469f7794fb2db18817e511e786f4517}{Unary\+Expr}}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/ast/Abstract\+Expr.\+h\item 
+src/ast/Abstract\+Expr.\+cpp\end{DoxyCompactItemize}

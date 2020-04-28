@@ -1,0 +1,93 @@
+\hypertarget{class_abstract_literal}{}\doxysection{Abstract\+Literal Class Reference}
+\label{class_abstract_literal}\index{AbstractLiteral@{AbstractLiteral}}
+Inheritance diagram for Abstract\+Literal\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=4.000000cm]{class_abstract_literal}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_abstract_literal_adb730f93902177cc65e73b3b556b2740}\label{class_abstract_literal_adb730f93902177cc65e73b3b556b2740}} 
+bool {\bfseries operator==} (const \mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} \&rhs) const
+\item 
+\mbox{\Hypertarget{class_abstract_literal_a91c66b9b3df8de0bce1396dc2ff0f00d}\label{class_abstract_literal_a91c66b9b3df8de0bce1396dc2ff0f00d}} 
+bool {\bfseries operator!=} (const \mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} \&rhs) const
+\item 
+\mbox{\Hypertarget{class_abstract_literal_ae09b742cfe078e5e3e7ca1c29ec71c06}\label{class_abstract_literal_ae09b742cfe078e5e3e7ca1c29ec71c06}} 
+virtual void {\bfseries add\+Literal\+Value} (std\+::string identifier, std\+::unordered\+\_\+map$<$ std\+::string, \mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} $\ast$ $>$ \&params\+Map)=0
+\item 
+\mbox{\Hypertarget{class_abstract_literal_a099eb03289a30a7e016b972cedf7b45b}\label{class_abstract_literal_a099eb03289a30a7e016b972cedf7b45b}} 
+virtual void {\bfseries set\+Random\+Value} (\mbox{\hyperlink{class_rand_literal_gen}{Rand\+Literal\+Gen}} \&rlg)=0
+\item 
+\mbox{\Hypertarget{class_abstract_literal_a02a283feca9e7b6486470d40d517b04f}\label{class_abstract_literal_a02a283feca9e7b6486470d40d517b04f}} 
+virtual bool {\bfseries supports\+Datatype} (\mbox{\hyperlink{class_datatype}{Datatype}} \&datatype)=0
+\item 
+\mbox{\Hypertarget{class_abstract_literal_a85a45781646c455d99edf388e31477b4}\label{class_abstract_literal_a85a45781646c455d99edf388e31477b4}} 
+virtual bool {\bfseries is\+Null} ()=0
+\item 
+\mbox{\Hypertarget{class_abstract_literal_a103f4602afb38ac6507ddab49401b5ec}\label{class_abstract_literal_a103f4602afb38ac6507ddab49401b5ec}} 
+virtual \mbox{\hyperlink{class_abstract_matrix}{Abstract\+Matrix}} $\ast$ {\bfseries get\+Matrix} () const =0
+\item 
+\mbox{\Hypertarget{class_abstract_literal_a6457095e21bda80445868f0d4c47f614}\label{class_abstract_literal_a6457095e21bda80445868f0d4c47f614}} 
+virtual void {\bfseries set\+Matrix} (\mbox{\hyperlink{class_abstract_matrix}{Abstract\+Matrix}} $\ast$new\+Value)=0
+\end{DoxyCompactItemize}
+\doxysubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} $\ast$ \mbox{\hyperlink{class_abstract_literal_a09809e43e238f91b3f6bbbc73140a588}{create\+Literal\+Based\+On\+Datatype}} (\mbox{\hyperlink{class_datatype}{Datatype}} $\ast$dt)
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_abstract_literal_a2c2d3d6fccba2adef252183683fd8d6e}\label{class_abstract_literal_a2c2d3d6fccba2adef252183683fd8d6e}} 
+{\bfseries Abstract\+Literal} (\mbox{\hyperlink{class_abstract_matrix}{Abstract\+Matrix}} $\ast$\mbox{\hyperlink{class_abstract_literal_a45b54fa49459d1fd2803a74cea855731}{matrix}})
+\item 
+\mbox{\Hypertarget{class_abstract_literal_ad0cac4e131499594294287f090e2e979}\label{class_abstract_literal_ad0cac4e131499594294287f090e2e979}} 
+virtual void {\bfseries print} (std\+::ostream \&str) const =0
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{class_abstract_matrix}{Abstract\+Matrix}} $\ast$ \mbox{\hyperlink{class_abstract_literal_a45b54fa49459d1fd2803a74cea855731}{matrix}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Friends}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_abstract_literal_a35b3862ec49cef06f166b84a852b932d}\label{class_abstract_literal_a35b3862ec49cef06f166b84a852b932d}} 
+std\+::ostream \& {\bfseries operator$<$$<$} (std\+::ostream \&os, const \mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} \&literal)
+\end{DoxyCompactItemize}
+\doxysubsection*{Additional Inherited Members}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_abstract_literal_a09809e43e238f91b3f6bbbc73140a588}\label{class_abstract_literal_a09809e43e238f91b3f6bbbc73140a588}} 
+\index{AbstractLiteral@{AbstractLiteral}!createLiteralBasedOnDatatype@{createLiteralBasedOnDatatype}}
+\index{createLiteralBasedOnDatatype@{createLiteralBasedOnDatatype}!AbstractLiteral@{AbstractLiteral}}
+\doxysubsubsection{\texorpdfstring{createLiteralBasedOnDatatype()}{createLiteralBasedOnDatatype()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} $\ast$ Abstract\+Literal\+::create\+Literal\+Based\+On\+Datatype (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_datatype}{Datatype}} $\ast$}]{dt }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+Creates a new and valueless literal matching the given datatype. \mbox{\hyperlink{class_for}{For}} example, Types\+::\+I\+NT would create a new \mbox{\hyperlink{class_literal_int}{Literal\+Int}} and Types\+::\+B\+O\+OL a new \mbox{\hyperlink{class_literal_bool}{Literal\+Bool}}. 
+\begin{DoxyParams}{Parameters}
+{\em dt} & A pointer to a \mbox{\hyperlink{class_datatype}{Datatype}} object. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The created \mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} subtype instance. 
+\end{DoxyReturn}
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{class_abstract_literal_a45b54fa49459d1fd2803a74cea855731}\label{class_abstract_literal_a45b54fa49459d1fd2803a74cea855731}} 
+\index{AbstractLiteral@{AbstractLiteral}!matrix@{matrix}}
+\index{matrix@{matrix}!AbstractLiteral@{AbstractLiteral}}
+\doxysubsubsection{\texorpdfstring{matrix}{matrix}}
+{\footnotesize\ttfamily \mbox{\hyperlink{class_abstract_matrix}{Abstract\+Matrix}}$\ast$ Abstract\+Literal\+::matrix\hspace{0.3cm}{\ttfamily [protected]}}
+
+Stores the values of this Literal subtype. \mbox{\hyperlink{class_for}{For}} example, for \mbox{\hyperlink{class_literal_int}{Literal\+Int}} It can be a Matrix$<$int$>$ but can also be a Matrix$<$\+Abstract\+Expr$\ast$$>$ in the case that this matrix contains unevaluated expression, e.\+g., \mbox{\hyperlink{class_matrix_element_ref}{Matrix\+Element\+Ref}}. 
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/ast/Abstract\+Literal.\+h\item 
+src/ast/Abstract\+Literal.\+cpp\end{DoxyCompactItemize}

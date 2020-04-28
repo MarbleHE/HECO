@@ -1,0 +1,22 @@
+var searchData=
+[
+  ['randliteralgen_132',['RandLiteralGen',['../class_rand_literal_gen.html',1,'']]],
+  ['removablenodes_133',['removableNodes',['../class_compile_time_expression_simplifier.html#ac742ab530e2090d4154ea717efcfee1b',1,'CompileTimeExpressionSimplifier']]],
+  ['removechild_134',['removeChild',['../group__parents.html#ga5bbb1dbb67989121ad80e9a31d013832',1,'AbstractNode']]],
+  ['removechildren_135',['removeChildren',['../group__parents.html#ga38e132143550927544b1f66c5fc1b822',1,'AbstractNode']]],
+  ['removefromparents_136',['removeFromParents',['../group__parents.html#ga50bfef862849ba2a11873ee120364e09',1,'AbstractNode']]],
+  ['removeparent_137',['removeParent',['../group__parents.html#gafda8df2202074840856b30041648319d',1,'AbstractNode']]],
+  ['removeparents_138',['removeParents',['../group__parents.html#ga51f1af895f45e9031069ec361ceb6499',1,'AbstractNode']]],
+  ['removevarswrittenandreadfromvariablevalues_139',['removeVarsWrittenAndReadFromVariableValues',['../class_compile_time_expression_simplifier.html#a7ca5d9e165382fd86bd831360078ad57',1,'CompileTimeExpressionSimplifier']]],
+  ['replacechild_140',['replaceChild',['../group__parents.html#ga0701ca5077f4c8e72bb23f47847cd32f',1,'AbstractNode::replaceChild()'],['../class_matrix.html#a477ed2fcc4b7915061f916d12393e01e',1,'Matrix::replaceChild()'],['../class_operator_expr.html#a762db37a274570b76006bb3fd5edfaee',1,'OperatorExpr::replaceChild()'],['../class_matrix.html#a171d7f0eb34c6643f6248095dd9c244a',1,'Matrix::replaceChild()']]],
+  ['replacechildren_141',['replaceChildren',['../group__parents.html#gae0c88c4188fe630a98fae969655cba5f',1,'AbstractNode']]],
+  ['replacevariablesbyvalues_142',['replaceVariablesByValues',['../class_compile_time_expression_simplifier.html#a2cb269763a2f078201f628f8aa36055f',1,'CompileTimeExpressionSimplifier']]],
+  ['resetnodeidcounter_143',['resetNodeIdCounter',['../class_abstract_node.html#af0df7a9545812739bb59d122a51ba99c',1,'AbstractNode']]],
+  ['return_144',['Return',['../class_return.html',1,'']]],
+  ['reverseedges_145',['reverseEdges',['../class_ast.html#af804ef1601108ac47577715b9212e295',1,'Ast']]],
+  ['rotate_146',['Rotate',['../class_rotate.html',1,'Rotate'],['../class_abstract_matrix.html#a56c9f220ae027726578c13414ea41be5',1,'AbstractMatrix::rotate()'],['../class_matrix.html#a4d151645a8e447adaa054bcd90f1f815',1,'Matrix::rotate()']]],
+  ['runlaplaciansharpeningalgorithm_147',['runLaplacianSharpeningAlgorithm',['../class_evaluation_algorithms.html#ac62f39daf7384071682983435f31913a',1,'EvaluationAlgorithms']]],
+  ['runlinearregression_148',['runLinearRegression',['../class_evaluation_algorithms.html#a979dfdf42fe3719f2a1925963221f64e',1,'EvaluationAlgorithms']]],
+  ['runpolynomialregression_149',['runPolynomialRegression',['../class_evaluation_algorithms.html#abed74ef4ae0a0761fed6924d07606af0',1,'EvaluationAlgorithms']]],
+  ['runsobelfilter_150',['runSobelFilter',['../class_evaluation_algorithms.html#a485101e07a2f76bb5f1fb3b8c8bd521c',1,'EvaluationAlgorithms']]]
+];

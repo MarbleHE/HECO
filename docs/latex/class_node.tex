@@ -1,0 +1,340 @@
+\hypertarget{class_node}{}\doxysection{Node Class Reference}
+\label{class_node}\index{Node@{Node}}
+Inheritance diagram for Node\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=10.582677cm]{class_node}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_node_af37017f17ff67ed9868f57c0098521b2}\label{class_node_af37017f17ff67ed9868f57c0098521b2}} 
+\mbox{\hyperlink{class_node}{Node}} $\ast$ {\bfseries get\+Underlying\+Node} () const
+\item 
+\mbox{\Hypertarget{class_node_a072c98885c080c84b62c7b9640210e73}\label{class_node_a072c98885c080c84b62c7b9640210e73}} 
+void {\bfseries set\+Underlying\+Node} (\mbox{\hyperlink{class_node}{Node}} $\ast$u\+Node)
+\item 
+\mbox{\Hypertarget{class_node_a48756c73b129a6c52438983da47b7669}\label{class_node_a48756c73b129a6c52438983da47b7669}} 
+virtual std\+::string {\bfseries get\+Node\+Name} () const
+\item 
+\mbox{\Hypertarget{class_node_a147e0e4f74ebe4ff316c18df838915b8}\label{class_node_a147e0e4f74ebe4ff316c18df838915b8}} 
+std\+::string {\bfseries get\+Unique\+Node\+Id} ()
+\item 
+const std\+::vector$<$ \mbox{\hyperlink{class_node}{Node}} $\ast$ $>$ \& \mbox{\hyperlink{class_node_a596c9c8fb551ba50209fa5bd7c42c0ee}{get\+Parents}} () const
+\item 
+const std\+::vector$<$ \mbox{\hyperlink{class_node}{Node}} $\ast$ $>$ \& \mbox{\hyperlink{class_node_a6a75b973ae30456682d0c564333b0b90}{get\+Children}} () const
+\item 
+std\+::vector$<$ \mbox{\hyperlink{class_node}{Node}} $\ast$ $>$ \mbox{\hyperlink{class_node_ac261064c91f494c6f73d691f9e2d25e7}{get\+Anc}} ()
+\item 
+\mbox{\Hypertarget{class_node_a14ff4c51822f0cf74218aa1335a9f2d3}\label{class_node_a14ff4c51822f0cf74218aa1335a9f2d3}} 
+void {\bfseries add\+Child} (\mbox{\hyperlink{class_node}{Node}} $\ast$child, bool add\+Back\+Reference=false)
+\item 
+\mbox{\Hypertarget{class_node_a3b5503acddb4b8a58c68a5e5b8c9d161}\label{class_node_a3b5503acddb4b8a58c68a5e5b8c9d161}} 
+void {\bfseries add\+Child\+Bilateral} (\mbox{\hyperlink{class_node}{Node}} $\ast$child)
+\item 
+\mbox{\Hypertarget{class_node_adaf6e432302d212da49b91764ce20137}\label{class_node_adaf6e432302d212da49b91764ce20137}} 
+void {\bfseries add\+Children} (const std\+::vector$<$ \mbox{\hyperlink{class_node}{Node}} $\ast$ $>$ \&children\+To\+Add, bool add\+Back\+Reference=false)
+\item 
+\mbox{\Hypertarget{class_node_a24ed388f8afc878746f059a46922144e}\label{class_node_a24ed388f8afc878746f059a46922144e}} 
+void {\bfseries set\+Child} (std\+::\+\_\+\+\_\+wrap\+\_\+iter$<$ \mbox{\hyperlink{class_node}{Node}} $\ast$const $\ast$ $>$ position, \mbox{\hyperlink{class_node}{Node}} $\ast$value)
+\item 
+\mbox{\Hypertarget{class_node_adb62722d840bfd6a0393ec87d15c9c7a}\label{class_node_adb62722d840bfd6a0393ec87d15c9c7a}} 
+void {\bfseries remove\+Child} (\mbox{\hyperlink{class_node}{Node}} $\ast$child)
+\item 
+\mbox{\Hypertarget{class_node_a84a93270c5dd688ac1994c3191347ca3}\label{class_node_a84a93270c5dd688ac1994c3191347ca3}} 
+void {\bfseries remove\+Children} ()
+\item 
+\mbox{\Hypertarget{class_node_a9b7cdf34fbc34eef3922914f0fc7e017}\label{class_node_a9b7cdf34fbc34eef3922914f0fc7e017}} 
+int {\bfseries count\+Children\+Non\+Null} () const
+\item 
+\mbox{\hyperlink{class_node}{Node}} $\ast$ \mbox{\hyperlink{class_node_af5dc8db44a31d48e0bf24f9f96e13c9c}{get\+Child\+At\+Index}} (int idx) const
+\item 
+\mbox{\Hypertarget{class_node_a7f59135fd7ae34aab4131978f500dc3a}\label{class_node_a7f59135fd7ae34aab4131978f500dc3a}} 
+void {\bfseries add\+Parent} (\mbox{\hyperlink{class_node}{Node}} $\ast$n)
+\item 
+\mbox{\Hypertarget{class_node_a206ea8373ff279a1e99e141bc8207ef0}\label{class_node_a206ea8373ff279a1e99e141bc8207ef0}} 
+void {\bfseries remove\+Parent} (\mbox{\hyperlink{class_node}{Node}} $\ast$node)
+\item 
+\mbox{\Hypertarget{class_node_ac9068e8941762a55e7b316cae34cef60}\label{class_node_ac9068e8941762a55e7b316cae34cef60}} 
+void {\bfseries remove\+Parents} ()
+\item 
+\mbox{\Hypertarget{class_node_af32f1fb34ba8587bfe300fd2584a5ebc}\label{class_node_af32f1fb34ba8587bfe300fd2584a5ebc}} 
+bool {\bfseries has\+Parent} (\mbox{\hyperlink{class_node}{Node}} $\ast$n)
+\item 
+\mbox{\Hypertarget{class_node_aae82c7ae1024cea38cbc4ff7ebc93cbe}\label{class_node_aae82c7ae1024cea38cbc4ff7ebc93cbe}} 
+void {\bfseries swap\+Children\+Parents} ()
+\item 
+\mbox{\Hypertarget{class_node_a6d787659007689b268ac18420dc87233}\label{class_node_a6d787659007689b268ac18420dc87233}} 
+virtual \mbox{\hyperlink{class_literal}{Literal}} $\ast$ {\bfseries evaluate} (\mbox{\hyperlink{class_ast}{Ast}} \&ast)
+\item 
+\mbox{\Hypertarget{class_node_ae7c6573824f58ce5b114d9a687bcba22}\label{class_node_ae7c6573824f58ce5b114d9a687bcba22}} 
+virtual void {\bfseries accept} (\mbox{\hyperlink{class_visitor}{Visitor}} \&v)
+\item 
+\mbox{\Hypertarget{class_node_a6e83e82c3b519bcbfa03f9173a5cbeca}\label{class_node_a6e83e82c3b519bcbfa03f9173a5cbeca}} 
+virtual json {\bfseries to\+Json} () const
+\item 
+\mbox{\Hypertarget{class_node_a3a5d17c95876fa6030ddabbdb1cb88d6}\label{class_node_a3a5d17c95876fa6030ddabbdb1cb88d6}} 
+virtual std\+::string {\bfseries to\+String} () const
+\item 
+\mbox{\Hypertarget{class_node_a42ed6f16410bcaddbf865d62311e232a}\label{class_node_a42ed6f16410bcaddbf865d62311e232a}} 
+virtual \mbox{\hyperlink{class_node}{Node}} $\ast$ {\bfseries clone\+Flat} ()
+\item 
+\mbox{\Hypertarget{class_node_ad188f2807f817b359c6d005df9d9966c}\label{class_node_ad188f2807f817b359c6d005df9d9966c}} 
+void {\bfseries set\+Unique\+Node\+Id} (const std\+::string \&unique\+\_\+node\+\_\+id)
+\item 
+virtual bool \mbox{\hyperlink{class_node_ab15a5ca0153ea9b2d5335f385a8f0459}{supports\+Circuit\+Mode}} ()
+\item 
+virtual int \mbox{\hyperlink{class_node_a706b15cc2face736613d4f8c1e93fd97}{get\+Max\+Number\+Children}} ()
+\item 
+\mbox{\Hypertarget{class_node_aa8f9f90f1136ec3a25b04d34e0fc42d2}\label{class_node_aa8f9f90f1136ec3a25b04d34e0fc42d2}} 
+std\+::vector$<$ \mbox{\hyperlink{class_node}{Node}} $\ast$ $>$ {\bfseries get\+Children\+Non\+Null} () const
+\item 
+\mbox{\Hypertarget{class_node_af6b909b56c99c59c755591a23f53550b}\label{class_node_af6b909b56c99c59c755591a23f53550b}} 
+std\+::vector$<$ \mbox{\hyperlink{class_node}{Node}} $\ast$ $>$ {\bfseries get\+Parents\+Non\+Null} () const
+\item 
+\mbox{\Hypertarget{class_node_a915a0f80219afb49385ae24fe79cd7fc}\label{class_node_a915a0f80219afb49385ae24fe79cd7fc}} 
+void \mbox{\hyperlink{class_node_a915a0f80219afb49385ae24fe79cd7fc}{isolate\+Node}} ()
+\begin{DoxyCompactList}\small\item\em Removes this node from all of its parents and children, and also removes all parents and children from this node. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{class_node_abd0ab5e10fc832e073ba828609ec1b2c}{remove\+Child\+Bilateral}} (\mbox{\hyperlink{class_node}{Node}} $\ast$child)
+\item 
+bool \mbox{\hyperlink{class_node_ae40bc7914cb3b4e3479d72eb94747f2f}{has\+Reversed\+Edges}} () const
+\item 
+{\footnotesize template$<$typename T $>$ }\\T $\ast$ \mbox{\hyperlink{class_node_a7a7f76dae03330eed9cee0711a87a788}{cast\+To}} ()
+\item 
+\mbox{\Hypertarget{class_node_aec61c9f40f5eb715c837489eb615e1d5}\label{class_node_aec61c9f40f5eb715c837489eb615e1d5}} 
+\mbox{\hyperlink{class_node}{Node}} $\ast$ {\bfseries clone\+Recursive\+Deep} (bool keep\+Original\+Unique\+Node\+Id)
+\end{DoxyCompactItemize}
+\doxysubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_node_a148a31a01a39e917060085f2530aa4d5}\label{class_node_a148a31a01a39e917060085f2530aa4d5}} 
+static void \mbox{\hyperlink{class_node_a148a31a01a39e917060085f2530aa4d5}{reset\+Node\+Id\+Counter}} ()
+\begin{DoxyCompactList}\small\item\em Resets the static node ID counter that is used to build the unique node ID. This method is required for testing. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_node_a261187706894024e401bc13ea8835a3b}\label{class_node_a261187706894024e401bc13ea8835a3b}} 
+static void {\bfseries add\+Parent\+To} (\mbox{\hyperlink{class_node}{Node}} $\ast$parent\+Node, std\+::vector$<$ \mbox{\hyperlink{class_node}{Node}} $\ast$ $>$ nodes\+To\+Add\+Parent\+To)
+\item 
+static std\+::vector$<$ \mbox{\hyperlink{class_node}{Node}} $\ast$ $>$ \mbox{\hyperlink{class_node_adef0e0d268d39a6ebd29abe8eb5ee278}{rewrite\+Multi\+Input\+Gate\+To\+Binary\+Gates\+Chain}} (std\+::vector$<$ \mbox{\hyperlink{class_node}{Node}} $\ast$ $>$ input\+Nodes, Op\+Symb\+::\+Log\+Comp\+Op gate\+Type)
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_node_aa62c3268cb3d0e0df8423bb8aa0dafc4}\label{class_node_aa62c3268cb3d0e0df8423bb8aa0dafc4}} 
+bool \mbox{\hyperlink{class_node_aa62c3268cb3d0e0df8423bb8aa0dafc4}{is\+Reversed}} \{false\}
+\begin{DoxyCompactList}\small\item\em Indicates whether the edges of this node are reversed compared to its initial state. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+std\+::string \mbox{\hyperlink{class_node_a494fe9db2013a710b3b7b585ba1dddd6}{gen\+Unique\+Node\+Id}} ()
+\item 
+\mbox{\hyperlink{class_node}{Node}} $\ast$ \mbox{\hyperlink{class_node_af378ac676bebb0ecaca0788d3a116bb7}{get\+Child\+At\+Index}} (int idx, bool is\+Edge\+Direction\+Aware) const
+\end{DoxyCompactItemize}
+\doxysubsection*{Static Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_node_a4b9443bb852d983b9e748d62f32b11d5}\label{class_node_a4b9443bb852d983b9e748d62f32b11d5}} 
+static int {\bfseries get\+And\+Increment\+Node\+Id} ()
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+std\+::map$<$ \mbox{\hyperlink{class_node}{Node}} $\ast$, int $>$ \mbox{\hyperlink{class_node_ab26142aa4ec71081d2738b276b7dc6cc}{assigned\+Node\+Ids}} \{\}
+\item 
+\mbox{\Hypertarget{class_node_a49baf1d613dc14f1e1e4aad883dde6fe}\label{class_node_a49baf1d613dc14f1e1e4aad883dde6fe}} 
+std\+::vector$<$ \mbox{\hyperlink{class_node}{Node}} $\ast$ $>$ \mbox{\hyperlink{class_node_a49baf1d613dc14f1e1e4aad883dde6fe}{children}} \{\}
+\begin{DoxyCompactList}\small\item\em Stores the children of the current node if the node supports the circuit mode (see \mbox{\hyperlink{class_node_ab15a5ca0153ea9b2d5335f385a8f0459}{supports\+Circuit\+Mode()}}). \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_node_a9af08e8a412746b16628ce140f14427c}\label{class_node_a9af08e8a412746b16628ce140f14427c}} 
+std\+::vector$<$ \mbox{\hyperlink{class_node}{Node}} $\ast$ $>$ \mbox{\hyperlink{class_node_a9af08e8a412746b16628ce140f14427c}{parents}} \{\}
+\begin{DoxyCompactList}\small\item\em Stores the parent nodes of the current node if the node supports the circuit mode (see \mbox{\hyperlink{class_node_ab15a5ca0153ea9b2d5335f385a8f0459}{supports\+Circuit\+Mode()}}). \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_node_af23c91c590724c11103f4785ec3be050}\label{class_node_af23c91c590724c11103f4785ec3be050}} 
+std\+::string \mbox{\hyperlink{class_node_af23c91c590724c11103f4785ec3be050}{unique\+Node\+Id}}
+\begin{DoxyCompactList}\small\item\em An identifier that is unique among all nodes during runtime. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{class_node}{Node}} $\ast$ \mbox{\hyperlink{class_node_af4a5f2853ef75d1c930e0b3b57d81a83}{underlying\+Node}} \{\}
+\end{DoxyCompactItemize}
+\doxysubsection*{Static Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+static int \mbox{\hyperlink{class_node_ae2e7a4dbb11514cf815ccc93c07b94fb}{node\+Id\+Counter}} = 0
+\end{DoxyCompactItemize}
+\doxysubsection*{Friends}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_node_aa5b03f282ae38dd5216060460b6d198c}\label{class_node_aa5b03f282ae38dd5216060460b6d198c}} 
+std\+::ostream \& {\bfseries operator$<$$<$} (std\+::ostream \&os, const std\+::vector$<$ \mbox{\hyperlink{class_node}{Node}} $\ast$ $>$ \&v)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_node_a7a7f76dae03330eed9cee0711a87a788}\label{class_node_a7a7f76dae03330eed9cee0711a87a788}} 
+\index{Node@{Node}!castTo@{castTo}}
+\index{castTo@{castTo}!Node@{Node}}
+\doxysubsubsection{\texorpdfstring{castTo()}{castTo()}}
+{\footnotesize\ttfamily template$<$typename T $>$ \\
+T$\ast$ Node\+::cast\+To (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Casts a node to type T which must be the specific derived class of the node to cast successfully. 
+\begin{DoxyTemplParams}{Template Parameters}
+{\em T} & The derived class of the node object. \\
+\hline
+\end{DoxyTemplParams}
+\begin{DoxyReturn}{Returns}
+A pointer to the casted object, or a std\+::logic\+\_\+error if cast was unsuccessful. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_node_a494fe9db2013a710b3b7b585ba1dddd6}\label{class_node_a494fe9db2013a710b3b7b585ba1dddd6}} 
+\index{Node@{Node}!genUniqueNodeId@{genUniqueNodeId}}
+\index{genUniqueNodeId@{genUniqueNodeId}!Node@{Node}}
+\doxysubsubsection{\texorpdfstring{genUniqueNodeId()}{genUniqueNodeId()}}
+{\footnotesize\ttfamily std\+::string Node\+::gen\+Unique\+Node\+Id (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+Generates a new node ID in the form \char`\"{}$<$\+Node\+Type\+Name$>$\+\_\+node\+Id\+Counter++\char`\"{} where $<$\+Node\+Type\+Name$>$ is the value obtained by get\+Node\+Name() and node\+Id\+Counter an ongoing counter of created \mbox{\hyperlink{class_node}{Node}} objects. \begin{DoxyReturn}{Returns}
+An unique node ID to be used as unique\+Node\+Id for the current node. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_node_ac261064c91f494c6f73d691f9e2d25e7}\label{class_node_ac261064c91f494c6f73d691f9e2d25e7}} 
+\index{Node@{Node}!getAnc@{getAnc}}
+\index{getAnc@{getAnc}!Node@{Node}}
+\doxysubsubsection{\texorpdfstring{getAnc()}{getAnc()}}
+{\footnotesize\ttfamily std\+::vector$<$ \mbox{\hyperlink{class_node}{Node}} $\ast$ $>$ Node\+::get\+Anc (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Returns all the ancestor nodes of the current node. \begin{DoxyReturn}{Returns}
+A list of ancestor nodes. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_node_af5dc8db44a31d48e0bf24f9f96e13c9c}\label{class_node_af5dc8db44a31d48e0bf24f9f96e13c9c}} 
+\index{Node@{Node}!getChildAtIndex@{getChildAtIndex}}
+\index{getChildAtIndex@{getChildAtIndex}!Node@{Node}}
+\doxysubsubsection{\texorpdfstring{getChildAtIndex()}{getChildAtIndex()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily \mbox{\hyperlink{class_node}{Node}} $\ast$ Node\+::get\+Child\+At\+Index (\begin{DoxyParamCaption}\item[{int}]{idx }\end{DoxyParamCaption}) const}
+
+Returns the child at the given index. 
+\begin{DoxyParams}{Parameters}
+{\em idx} & The position of the children in the \mbox{\hyperlink{class_node_a49baf1d613dc14f1e1e4aad883dde6fe}{Node\+::children}} vector. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The child at the given index of the children vector, or a nullptr if there is no child at this position. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_node_af378ac676bebb0ecaca0788d3a116bb7}\label{class_node_af378ac676bebb0ecaca0788d3a116bb7}} 
+\index{Node@{Node}!getChildAtIndex@{getChildAtIndex}}
+\index{getChildAtIndex@{getChildAtIndex}!Node@{Node}}
+\doxysubsubsection{\texorpdfstring{getChildAtIndex()}{getChildAtIndex()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily \mbox{\hyperlink{class_node}{Node}} $\ast$ Node\+::get\+Child\+At\+Index (\begin{DoxyParamCaption}\item[{int}]{idx,  }\item[{bool}]{is\+Edge\+Direction\+Aware }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [protected]}}
+
+This special variant of get\+Child\+At\+Index returns the n-\/th parent instead of n-\/th child if is\+Edge\+Direction\+Aware is passed and is true, and the current node has the property is\+Reversed set to True. 
+\begin{DoxyParams}{Parameters}
+{\em idx} & The position of the child to be retrieved. \\
+\hline
+{\em is\+Edge\+Direction\+Aware} & \mbox{\hyperlink{class_if}{If}} the node\textquotesingle{}s status of is\+Reversed should be considered. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A reference to the node at the specified index in the children or parent vector. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_node_a6a75b973ae30456682d0c564333b0b90}\label{class_node_a6a75b973ae30456682d0c564333b0b90}} 
+\index{Node@{Node}!getChildren@{getChildren}}
+\index{getChildren@{getChildren}!Node@{Node}}
+\doxysubsubsection{\texorpdfstring{getChildren()}{getChildren()}}
+{\footnotesize\ttfamily const std\+::vector$<$ \mbox{\hyperlink{class_node}{Node}} $\ast$ $>$ \& Node\+::get\+Children (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Returns a reference to the vector of children nodes. \begin{DoxyReturn}{Returns}
+A reference to the vector of this node\textquotesingle{}s children. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_node_a706b15cc2face736613d4f8c1e93fd97}\label{class_node_a706b15cc2face736613d4f8c1e93fd97}} 
+\index{Node@{Node}!getMaxNumberChildren@{getMaxNumberChildren}}
+\index{getMaxNumberChildren@{getMaxNumberChildren}!Node@{Node}}
+\doxysubsubsection{\texorpdfstring{getMaxNumberChildren()}{getMaxNumberChildren()}}
+{\footnotesize\ttfamily int Node\+::get\+Max\+Number\+Children (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+Indicates the number of children that are allowed for a specific node. For example, a binary expression accepts exactly three attributes and hence also exactly three children\+: left operand, right operand, and operator. \mbox{\hyperlink{class_if}{If}} the node does not implement support for child/parent relationships, \mbox{\hyperlink{class_node_a706b15cc2face736613d4f8c1e93fd97}{get\+Max\+Number\+Children()}} return 0. \begin{DoxyReturn}{Returns}
+An integer indicating the number of allowed children for a specific node. 
+\end{DoxyReturn}
+
+
+Reimplemented in \mbox{\hyperlink{class_binary_expr_a3f3dadbfd4459282d6cd1b2be4cfb308}{Binary\+Expr}}, \mbox{\hyperlink{class_var_decl_a85b3beede024be269e838dd59d7048c4}{Var\+Decl}}, \mbox{\hyperlink{class_logical_expr_a49c330bb1934a065c7e7816a77503229}{Logical\+Expr}}, \mbox{\hyperlink{class_var_assignm_a0b277c03e0c6ea841f518196df932979}{Var\+Assignm}}, \mbox{\hyperlink{class_function_parameter_a771297240b13c61c8301a74ff6020e53}{Function\+Parameter}}, \mbox{\hyperlink{class_return_a9909ac70f65299e43fd539f7421946ea}{Return}}, \mbox{\hyperlink{class_unary_expr_afd8eca2716eea050d27fa88aaf1b3c28}{Unary\+Expr}}, and \mbox{\hyperlink{class_group_afa963efd065a8263fd3a6da029cc4ea2}{Group}}.
+
+\mbox{\Hypertarget{class_node_a596c9c8fb551ba50209fa5bd7c42c0ee}\label{class_node_a596c9c8fb551ba50209fa5bd7c42c0ee}} 
+\index{Node@{Node}!getParents@{getParents}}
+\index{getParents@{getParents}!Node@{Node}}
+\doxysubsubsection{\texorpdfstring{getParents()}{getParents()}}
+{\footnotesize\ttfamily const std\+::vector$<$ \mbox{\hyperlink{class_node}{Node}} $\ast$ $>$ \& Node\+::get\+Parents (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Returns a reference to the vector of parent nodes. \begin{DoxyReturn}{Returns}
+A reference to the vector of this node\textquotesingle{}s parents. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_node_ae40bc7914cb3b4e3479d72eb94747f2f}\label{class_node_ae40bc7914cb3b4e3479d72eb94747f2f}} 
+\index{Node@{Node}!hasReversedEdges@{hasReversedEdges}}
+\index{hasReversedEdges@{hasReversedEdges}!Node@{Node}}
+\doxysubsubsection{\texorpdfstring{hasReversedEdges()}{hasReversedEdges()}}
+{\footnotesize\ttfamily bool Node\+::has\+Reversed\+Edges (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Checks whether the edges of this node are reversed (i.\+e., node\textquotesingle{}s parents and children are swapped). \begin{DoxyReturn}{Returns}
+True iff the node\textquotesingle{}s edges are reversed. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_node_abd0ab5e10fc832e073ba828609ec1b2c}\label{class_node_abd0ab5e10fc832e073ba828609ec1b2c}} 
+\index{Node@{Node}!removeChildBilateral@{removeChildBilateral}}
+\index{removeChildBilateral@{removeChildBilateral}!Node@{Node}}
+\doxysubsubsection{\texorpdfstring{removeChildBilateral()}{removeChildBilateral()}}
+{\footnotesize\ttfamily void Node\+::remove\+Child\+Bilateral (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_node}{Node}} $\ast$}]{child }\end{DoxyParamCaption})}
+
+Removes the node \textquotesingle{}child\textquotesingle{} bilateral, i.\+e., on both ends of the edge. In other words, removes the node \textquotesingle{}child\textquotesingle{} from this node, and this node from the parents list of \textquotesingle{}child\textquotesingle{} node. 
+\begin{DoxyParams}{Parameters}
+{\em child} & The child to be removed from this node. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{class_node_adef0e0d268d39a6ebd29abe8eb5ee278}\label{class_node_adef0e0d268d39a6ebd29abe8eb5ee278}} 
+\index{Node@{Node}!rewriteMultiInputGateToBinaryGatesChain@{rewriteMultiInputGateToBinaryGatesChain}}
+\index{rewriteMultiInputGateToBinaryGatesChain@{rewriteMultiInputGateToBinaryGatesChain}!Node@{Node}}
+\doxysubsubsection{\texorpdfstring{rewriteMultiInputGateToBinaryGatesChain()}{rewriteMultiInputGateToBinaryGatesChain()}}
+{\footnotesize\ttfamily std\+::vector$<$ \mbox{\hyperlink{class_node}{Node}} $\ast$ $>$ Node\+::rewrite\+Multi\+Input\+Gate\+To\+Binary\+Gates\+Chain (\begin{DoxyParamCaption}\item[{std\+::vector$<$ \mbox{\hyperlink{class_node}{Node}} $\ast$ $>$}]{input\+Nodes,  }\item[{Op\+Symb\+::\+Log\+Comp\+Op}]{gate\+Type }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+Transforms a multi-\/input gate taking N inputs into a sequence of binary gates.
+
+For example, consider a N input logical-\/\+A\+ND (\&) with inputs y\+\_\+1 to y\+\_\+m\+: 
+\begin{DoxyPre} \&\_\{i=1\}^\{n\} y\_1, y\_2, y\_3, ..., y\_m. \end{DoxyPre}
+ It is transformed by this method into the expression\+: 
+\begin{DoxyPre} ((((y\_1 \& y\_2) \& y\_3) ...) \& y\_m), \end{DoxyPre}
+ wherein each A\+N\+D-\/gate only has two inputs (binary gates). 
+\begin{DoxyParams}{Parameters}
+{\em input\+Nodes} & The inputs y\+\_\+1, ..., y\+\_\+m that are connected to the multi-\/input gate. It is required that m$>$=2. \\
+\hline
+{\em gate\+Type} & The gate that all inputs are connected to. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A vector of \mbox{\hyperlink{class_node}{Node}} objects of type \mbox{\hyperlink{class_logical_expr}{Logical\+Expr}} that represent the chain of \mbox{\hyperlink{class_logical_expr}{Logical\+Expr}} required to represent the intended multi-\/input gate. The last node in input\+Nodes (i.\+e., input\+Nodes.\+back()) is always the output of this chain. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_node_ab15a5ca0153ea9b2d5335f385a8f0459}\label{class_node_ab15a5ca0153ea9b2d5335f385a8f0459}} 
+\index{Node@{Node}!supportsCircuitMode@{supportsCircuitMode}}
+\index{supportsCircuitMode@{supportsCircuitMode}!Node@{Node}}
+\doxysubsubsection{\texorpdfstring{supportsCircuitMode()}{supportsCircuitMode()}}
+{\footnotesize\ttfamily bool Node\+::supports\+Circuit\+Mode (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+This method returns True iff the class derived from the \mbox{\hyperlink{class_node}{Node}} class properly makes use of the child/parent fields as it would be expected in a circuit. 
+
+Reimplemented in \mbox{\hyperlink{class_operator_aead298af5c61f58d0d5e15740ad3ded0}{Operator}}, \mbox{\hyperlink{class_binary_expr_a1e88eadced6d5b737b4188435e69724b}{Binary\+Expr}}, \mbox{\hyperlink{class_logical_expr_a2a56c5007a80b4a85745ac3d5bb2b197}{Logical\+Expr}}, \mbox{\hyperlink{class_var_decl_adcc8c11c783bd96e671dc2964b6efcdb}{Var\+Decl}}, \mbox{\hyperlink{class_literal_int_a933cfa1c13fec1fd7ccb8069bd74e872}{Literal\+Int}}, \mbox{\hyperlink{class_literal_bool_aa4ddaa4e1e10d884db83b88d6ea8003f}{Literal\+Bool}}, \mbox{\hyperlink{class_literal_float_a35eced8d53a78e3900252d8f0581d25f}{Literal\+Float}}, \mbox{\hyperlink{class_literal_string_af7943135197a8f23a317b0aed4e29484}{Literal\+String}}, \mbox{\hyperlink{class_variable_a8e6652c2d761143e7e1257a4453de141}{Variable}}, \mbox{\hyperlink{class_var_assignm_ab9ef7e475cd00557e19e21f2eea1011c}{Var\+Assignm}}, \mbox{\hyperlink{class_function_parameter_af31c38bc762221a5a1f7baea138a7e0d}{Function\+Parameter}}, \mbox{\hyperlink{class_return_a398c1aa6b27d886f4b5a18036da7ef27}{Return}}, \mbox{\hyperlink{class_unary_expr_a11038714885c438c11ae0f12636fcc66}{Unary\+Expr}}, and \mbox{\hyperlink{class_group_ad613b910df2e9ba8bbd7d6750a6f4fb4}{Group}}.
+
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{class_node_ab26142aa4ec71081d2738b276b7dc6cc}\label{class_node_ab26142aa4ec71081d2738b276b7dc6cc}} 
+\index{Node@{Node}!assignedNodeIds@{assignedNodeIds}}
+\index{assignedNodeIds@{assignedNodeIds}!Node@{Node}}
+\doxysubsubsection{\texorpdfstring{assignedNodeIds}{assignedNodeIds}}
+{\footnotesize\ttfamily std\+::map$<$\mbox{\hyperlink{class_node}{Node}}$\ast$, int$>$ Node\+::assigned\+Node\+Ids \{\}\hspace{0.3cm}{\ttfamily [protected]}}
+
+Temporarily stores the reserved node ID until the first call of get\+Unique\+Node\+Id() at which the reserved ID is fetched and the node\textquotesingle{}s ID is assigned (field unique\+Node\+Id) based on the node\textquotesingle{}s name and this reserved ID. This is a workaround because get\+Node\+Name() is a virtual method that cannot be called from derived classes and their constructor. After retrieving the node ID and assigning it to the unique\+Node\+Id field, it is deleted from this map. \mbox{\Hypertarget{class_node_ae2e7a4dbb11514cf815ccc93c07b94fb}\label{class_node_ae2e7a4dbb11514cf815ccc93c07b94fb}} 
+\index{Node@{Node}!nodeIdCounter@{nodeIdCounter}}
+\index{nodeIdCounter@{nodeIdCounter}!Node@{Node}}
+\doxysubsubsection{\texorpdfstring{nodeIdCounter}{nodeIdCounter}}
+{\footnotesize\ttfamily int Node\+::node\+Id\+Counter = 0\hspace{0.3cm}{\ttfamily [static]}, {\ttfamily [protected]}}
+
+A static ongoing counter that is incremented after creating a new \mbox{\hyperlink{class_node}{Node}} object. The counter\textquotesingle{}s value is used to build the unique node ID. \mbox{\Hypertarget{class_node_af4a5f2853ef75d1c930e0b3b57d81a83}\label{class_node_af4a5f2853ef75d1c930e0b3b57d81a83}} 
+\index{Node@{Node}!underlyingNode@{underlyingNode}}
+\index{underlyingNode@{underlyingNode}!Node@{Node}}
+\doxysubsubsection{\texorpdfstring{underlyingNode}{underlyingNode}}
+{\footnotesize\ttfamily \mbox{\hyperlink{class_node}{Node}}$\ast$ Node\+::underlying\+Node \{\}\hspace{0.3cm}{\ttfamily [protected]}}
+
+This attributes is used to link back to the original \mbox{\hyperlink{class_node}{Node}} if this node is part of an overlay circuit representing only a subset of certain nodes. Required, for example, by cone rewriting. 
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/\+Users/patrick/git/master\+\_\+thesis\+\_\+code/include/ast/Node.\+h\item 
+/\+Users/patrick/git/master\+\_\+thesis\+\_\+code/src/ast/Node.\+cpp\end{DoxyCompactItemize}

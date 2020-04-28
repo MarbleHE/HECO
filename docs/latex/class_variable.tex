@@ -1,0 +1,136 @@
+\hypertarget{class_variable}{}\doxysection{Variable Class Reference}
+\label{class_variable}\index{Variable@{Variable}}
+Inheritance diagram for Variable\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{class_variable}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_variable_a34e30906e60ecb6f7f9ebaa889d93920}\label{class_variable_a34e30906e60ecb6f7f9ebaa889d93920}} 
+{\bfseries Variable} (std\+::string identifier)
+\item 
+json \mbox{\hyperlink{class_variable_ad2de73d36aa8d372c3f0458ad717260c}{to\+Json}} () const override
+\item 
+\mbox{\hyperlink{class_variable}{Variable}} $\ast$ \mbox{\hyperlink{class_variable_a513ef74c9829ae07671deea65e19e213}{clone}} (bool keep\+Original\+Unique\+Node\+Id) override
+\item 
+void \mbox{\hyperlink{class_variable_acdb137025f39f81b4d2195c72806d5a9}{accept}} (\mbox{\hyperlink{class_visitor}{Visitor}} \&v) override
+\item 
+std\+::string \mbox{\hyperlink{class_variable_a0ca604c78fc4cb70ea4dd94a07c9a6a0}{get\+Node\+Type}} () const override
+\item 
+\mbox{\Hypertarget{class_variable_a7bae52f1b2fabdfef92dc86a4184234f}\label{class_variable_a7bae52f1b2fabdfef92dc86a4184234f}} 
+std\+::string {\bfseries get\+Identifier} () const
+\item 
+\mbox{\Hypertarget{class_variable_a81fdc7333ed1310adbe90df0522eed63}\label{class_variable_a81fdc7333ed1310adbe90df0522eed63}} 
+bool {\bfseries operator==} (const \mbox{\hyperlink{class_variable}{Variable}} \&rhs) const
+\item 
+\mbox{\Hypertarget{class_variable_a49305bfc9b12da30a098f7b60a2a3b33}\label{class_variable_a49305bfc9b12da30a098f7b60a2a3b33}} 
+bool {\bfseries operator!=} (const \mbox{\hyperlink{class_variable}{Variable}} \&rhs) const
+\item 
+\mbox{\Hypertarget{class_variable_a3d95bddd746786cd77901e1f675e2dd0}\label{class_variable_a3d95bddd746786cd77901e1f675e2dd0}} 
+bool {\bfseries contains} (\mbox{\hyperlink{class_variable}{Variable}} $\ast$var) override
+\item 
+\mbox{\Hypertarget{class_variable_a3268feae310ab247aca384541112bc39}\label{class_variable_a3268feae310ab247aca384541112bc39}} 
+bool {\bfseries is\+Equal} (\mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$other) override
+\item 
+\mbox{\Hypertarget{class_variable_acfe8808c41f9ac034d9712de14187577}\label{class_variable_acfe8808c41f9ac034d9712de14187577}} 
+std\+::vector$<$ std\+::string $>$ {\bfseries get\+Variable\+Identifiers} () override
+\item 
+std\+::string \mbox{\hyperlink{class_variable_ab214930aad392d3d3c73e4ba325ee85e}{to\+String}} (bool print\+Children) const override
+\item 
+bool \mbox{\hyperlink{class_variable_a8e6652c2d761143e7e1257a4453de141}{supports\+Circuit\+Mode}} () override
+\end{DoxyCompactItemize}
+\doxysubsection*{Additional Inherited Members}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_variable_acdb137025f39f81b4d2195c72806d5a9}\label{class_variable_acdb137025f39f81b4d2195c72806d5a9}} 
+\index{Variable@{Variable}!accept@{accept}}
+\index{accept@{accept}!Variable@{Variable}}
+\doxysubsubsection{\texorpdfstring{accept()}{accept()}}
+{\footnotesize\ttfamily void Variable\+::accept (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_visitor}{Visitor}} \&}]{v }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Part of the visitor pattern. Must be overridden in derived classes and must call v.\+visit(node). This allows the correct overload for the derived class to be called in the visitor. 
+\begin{DoxyParams}{Parameters}
+{\em v} & \mbox{\hyperlink{class_visitor}{Visitor}} that offers a visit() method \\
+\hline
+\end{DoxyParams}
+
+
+Implements \mbox{\hyperlink{class_abstract_node_a890a24af49cedda13f23cbe41931dee5}{Abstract\+Node}}.
+
+\mbox{\Hypertarget{class_variable_a513ef74c9829ae07671deea65e19e213}\label{class_variable_a513ef74c9829ae07671deea65e19e213}} 
+\index{Variable@{Variable}!clone@{clone}}
+\index{clone@{clone}!Variable@{Variable}}
+\doxysubsubsection{\texorpdfstring{clone()}{clone()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{class_variable}{Variable}} $\ast$ Variable\+::clone (\begin{DoxyParamCaption}\item[{bool}]{keep\+Original\+Unique\+Node\+Id }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Clones a node recursively, i.\+e., by including all of its children. 
+\begin{DoxyParams}{Parameters}
+{\em keep\+Original\+Unique\+Node\+Id} & Specifies whether to keep all of the unique node I\+Ds of the original nodes. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A clone of the node including clones of all of its children. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{class_abstract_node_ab7f13808b586865a27e2635995be5056}{Abstract\+Node}}.
+
+\mbox{\Hypertarget{class_variable_a0ca604c78fc4cb70ea4dd94a07c9a6a0}\label{class_variable_a0ca604c78fc4cb70ea4dd94a07c9a6a0}} 
+\index{Variable@{Variable}!getNodeType@{getNodeType}}
+\index{getNodeType@{getNodeType}!Variable@{Variable}}
+\doxysubsubsection{\texorpdfstring{getNodeType()}{getNodeType()}}
+{\footnotesize\ttfamily std\+::string Variable\+::get\+Node\+Type (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Returns the node\textquotesingle{}s type, which is the name of the object in the A\+ST. This method must be overridden by all classes that inherit from \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} by their respective name (e.\+g., Arithmetic\+Exp, \mbox{\hyperlink{class_function}{Function}}, \mbox{\hyperlink{class_variable}{Variable}}). \begin{DoxyReturn}{Returns}
+The name of the node type. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{class_abstract_node_a8cc40127801e7777c8094f17a3b1efcb}{Abstract\+Node}}.
+
+\mbox{\Hypertarget{class_variable_a8e6652c2d761143e7e1257a4453de141}\label{class_variable_a8e6652c2d761143e7e1257a4453de141}} 
+\index{Variable@{Variable}!supportsCircuitMode@{supportsCircuitMode}}
+\index{supportsCircuitMode@{supportsCircuitMode}!Variable@{Variable}}
+\doxysubsubsection{\texorpdfstring{supportsCircuitMode()}{supportsCircuitMode()}}
+{\footnotesize\ttfamily bool Variable\+::supports\+Circuit\+Mode (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+This method returns True iff the class derived from the \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} class properly makes use of the child/parent fields as it would be expected in a circuit. 
+
+Reimplemented from \mbox{\hyperlink{class_abstract_node_a76f2290759cb522619af77c630b6eba9}{Abstract\+Node}}.
+
+\mbox{\Hypertarget{class_variable_ad2de73d36aa8d372c3f0458ad717260c}\label{class_variable_ad2de73d36aa8d372c3f0458ad717260c}} 
+\index{Variable@{Variable}!toJson@{toJson}}
+\index{toJson@{toJson}!Variable@{Variable}}
+\doxysubsubsection{\texorpdfstring{toJson()}{toJson()}}
+{\footnotesize\ttfamily json Variable\+::to\+Json (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Get the J\+S\+ON representation of the node including all of its children. \begin{DoxyReturn}{Returns}
+J\+S\+ON representation of the node 
+\end{DoxyReturn}
+
+
+Reimplemented from \mbox{\hyperlink{class_abstract_expr_ac1957d8bda1e29b35b822ec0b05c5027}{Abstract\+Expr}}.
+
+\mbox{\Hypertarget{class_variable_ab214930aad392d3d3c73e4ba325ee85e}\label{class_variable_ab214930aad392d3d3c73e4ba325ee85e}} 
+\index{Variable@{Variable}!toString@{toString}}
+\index{toString@{toString}!Variable@{Variable}}
+\doxysubsubsection{\texorpdfstring{toString()}{toString()}}
+{\footnotesize\ttfamily std\+::string Variable\+::to\+String (\begin{DoxyParamCaption}\item[{bool}]{print\+Children }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Returns a string representation of the node, if print\+Children is True then calls to\+String for its children too. Hence, to\+String(false) is equivalent to printing a node\textquotesingle{}s attributes only. \begin{DoxyReturn}{Returns}
+A textual representation of the node. 
+\end{DoxyReturn}
+
+
+Reimplemented from \mbox{\hyperlink{class_abstract_node_aee58b60a470f2e494e0db1808c87b13d}{Abstract\+Node}}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/ast/Variable.\+h\item 
+src/ast/Variable.\+cpp\end{DoxyCompactItemize}

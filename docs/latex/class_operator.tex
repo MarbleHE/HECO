@@ -1,0 +1,258 @@
+\hypertarget{class_operator}{}\doxysection{Operator Class Reference}
+\label{class_operator}\index{Operator@{Operator}}
+Inheritance diagram for Operator\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_operator}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_operator_a51490e832ae9af3488c464b000ed5337}\label{class_operator_a51490e832ae9af3488c464b000ed5337}} 
+{\bfseries Operator} (Log\+Comp\+Op op)
+\item 
+\mbox{\Hypertarget{class_operator_a3f54db79333a4c8d4a7937f75bcf895f}\label{class_operator_a3f54db79333a4c8d4a7937f75bcf895f}} 
+{\bfseries Operator} (Arithmetic\+Op op)
+\item 
+\mbox{\Hypertarget{class_operator_a4cdcb137607bdf40630157525104cd2e}\label{class_operator_a4cdcb137607bdf40630157525104cd2e}} 
+{\bfseries Operator} (Unary\+Op op)
+\item 
+\mbox{\Hypertarget{class_operator_ac847b57a5dcec5245fcb1497a6551876}\label{class_operator_ac847b57a5dcec5245fcb1497a6551876}} 
+{\bfseries Operator} (Op\+Symbol\+Variant op)
+\item 
+\mbox{\Hypertarget{class_operator_a98f425ec8fd44a88111c641ba817188d}\label{class_operator_a98f425ec8fd44a88111c641ba817188d}} 
+const std\+::string \& {\bfseries get\+Operator\+String} () const
+\item 
+\mbox{\Hypertarget{class_operator_a421c835defcc037a5ea7ea8b29e49f4d}\label{class_operator_a421c835defcc037a5ea7ea8b29e49f4d}} 
+const Op\+Symbol\+Variant \& {\bfseries get\+Operator\+Symbol} () const
+\item 
+void \mbox{\hyperlink{class_operator_a01c33b27ef4a52e9b50899f45b3a67d8}{accept}} (\mbox{\hyperlink{class_visitor}{Visitor}} \&v) override
+\item 
+std\+::string \mbox{\hyperlink{class_operator_af484b0fafd9c53fdd42ce0d29d882719}{get\+Node\+Type}} () const override
+\item 
+\mbox{\Hypertarget{class_operator_a7a848224508305506a3745c79980e457}\label{class_operator_a7a848224508305506a3745c79980e457}} 
+bool {\bfseries is\+Undefined} ()
+\item 
+\mbox{\Hypertarget{class_operator_aa937f8f789d8fd580c051c5017f353a6}\label{class_operator_aa937f8f789d8fd580c051c5017f353a6}} 
+bool {\bfseries operator==} (const \mbox{\hyperlink{class_operator}{Operator}} \&rhs) const
+\item 
+\mbox{\Hypertarget{class_operator_ae62a340a177216fca15fd991a46eeff9}\label{class_operator_ae62a340a177216fca15fd991a46eeff9}} 
+bool {\bfseries operator!=} (const \mbox{\hyperlink{class_operator}{Operator}} \&rhs) const
+\item 
+\mbox{\Hypertarget{class_operator_a24f0d1137faf71e0540d4bcc645e9e0b}\label{class_operator_a24f0d1137faf71e0540d4bcc645e9e0b}} 
+bool {\bfseries equals} (Op\+Symbol\+Variant op) const
+\item 
+\mbox{\Hypertarget{class_operator_a5f6a4ce8221874afc26dd6b3d3580afd}\label{class_operator_a5f6a4ce8221874afc26dd6b3d3580afd}} 
+\mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} $\ast$ {\bfseries apply\+Operator} (\mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} $\ast$lhs, \mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} $\ast$rhs)
+\item 
+\mbox{\Hypertarget{class_operator_a522139263a2a557035fe57beeeb573e0}\label{class_operator_a522139263a2a557035fe57beeeb573e0}} 
+\mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} $\ast$ {\bfseries apply\+Operator} (\mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} $\ast$rhs)
+\item 
+\mbox{\Hypertarget{class_operator_aa8452536815e1943a35fa054d07889ca}\label{class_operator_aa8452536815e1943a35fa054d07889ca}} 
+{\footnotesize template$<$typename A $>$ }\\\mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} $\ast$ {\bfseries apply\+Operator} (A $\ast$lhs, \mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} $\ast$rhs)
+\item 
+\mbox{\Hypertarget{class_operator_a896c69c0ab6b83f2d6cb286c471fc6b3}\label{class_operator_a896c69c0ab6b83f2d6cb286c471fc6b3}} 
+\mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} $\ast$ {\bfseries apply\+Operator} (\mbox{\hyperlink{class_literal_int}{Literal\+Int}} $\ast$lhs, \mbox{\hyperlink{class_literal_int}{Literal\+Int}} $\ast$rhs)
+\item 
+\mbox{\Hypertarget{class_operator_ab248af4d9879fa6017fb5ac08fcadc4b}\label{class_operator_ab248af4d9879fa6017fb5ac08fcadc4b}} 
+\mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} $\ast$ {\bfseries apply\+Operator} (\mbox{\hyperlink{class_literal_bool}{Literal\+Bool}} $\ast$lhs, \mbox{\hyperlink{class_literal_bool}{Literal\+Bool}} $\ast$rhs)
+\item 
+\mbox{\Hypertarget{class_operator_a2f5b48ccfd3bfc208ceaf2f35cf8f503}\label{class_operator_a2f5b48ccfd3bfc208ceaf2f35cf8f503}} 
+\mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} $\ast$ {\bfseries apply\+Operator} (\mbox{\hyperlink{class_literal_int}{Literal\+Int}} $\ast$lhs, \mbox{\hyperlink{class_literal_bool}{Literal\+Bool}} $\ast$rhs)
+\item 
+\mbox{\Hypertarget{class_operator_a20ccc15196fdb4b200512c997605c8a2}\label{class_operator_a20ccc15196fdb4b200512c997605c8a2}} 
+\mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} $\ast$ {\bfseries apply\+Operator} (\mbox{\hyperlink{class_literal_bool}{Literal\+Bool}} $\ast$lhs, \mbox{\hyperlink{class_literal_int}{Literal\+Int}} $\ast$rhs)
+\item 
+\mbox{\Hypertarget{class_operator_aac37087ca79c48b31fd2e3b6d8ef1152}\label{class_operator_aac37087ca79c48b31fd2e3b6d8ef1152}} 
+\mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} $\ast$ {\bfseries apply\+Operator} (\mbox{\hyperlink{class_literal_string}{Literal\+String}} $\ast$lhs, \mbox{\hyperlink{class_literal_string}{Literal\+String}} $\ast$rhs)
+\item 
+\mbox{\Hypertarget{class_operator_a22277fe4e6718f1e28b1fdc426292201}\label{class_operator_a22277fe4e6718f1e28b1fdc426292201}} 
+\mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} $\ast$ {\bfseries apply\+Operator} (\mbox{\hyperlink{class_literal_int}{Literal\+Int}} $\ast$rhs)
+\item 
+\mbox{\Hypertarget{class_operator_aa745d11110f6c539a423300e49f530cf}\label{class_operator_aa745d11110f6c539a423300e49f530cf}} 
+\mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} $\ast$ {\bfseries apply\+Operator} (\mbox{\hyperlink{class_literal_bool}{Literal\+Bool}} $\ast$rhs)
+\item 
+\mbox{\Hypertarget{class_operator_a3cff7c591e5b8e9c2a56380b88425c41}\label{class_operator_a3cff7c591e5b8e9c2a56380b88425c41}} 
+\mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} $\ast$ {\bfseries apply\+Operator} (\mbox{\hyperlink{class_literal_string}{Literal\+String}} $\ast$rhs)
+\item 
+\mbox{\Hypertarget{class_operator_a1efee119672aaedbd762bcc20ef948e7}\label{class_operator_a1efee119672aaedbd762bcc20ef948e7}} 
+\mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} $\ast$ {\bfseries apply\+Operator} (\mbox{\hyperlink{class_literal_float}{Literal\+Float}} $\ast$lhs, \mbox{\hyperlink{class_literal_float}{Literal\+Float}} $\ast$rhs)
+\item 
+\mbox{\Hypertarget{class_operator_a55cadee6bf4922e24d238a8ee09dadeb}\label{class_operator_a55cadee6bf4922e24d238a8ee09dadeb}} 
+\mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} $\ast$ {\bfseries apply\+Operator} (\mbox{\hyperlink{class_literal_float}{Literal\+Float}} $\ast$lhs, \mbox{\hyperlink{class_literal_int}{Literal\+Int}} $\ast$rhs)
+\item 
+\mbox{\Hypertarget{class_operator_adfde6379794f498282362b6d9f9b486f}\label{class_operator_adfde6379794f498282362b6d9f9b486f}} 
+\mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} $\ast$ {\bfseries apply\+Operator} (\mbox{\hyperlink{class_literal_int}{Literal\+Int}} $\ast$lhs, \mbox{\hyperlink{class_literal_float}{Literal\+Float}} $\ast$rhs)
+\item 
+\mbox{\Hypertarget{class_operator_a7073330bc59ae23d131260cd53dd88df}\label{class_operator_a7073330bc59ae23d131260cd53dd88df}} 
+\mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} $\ast$ {\bfseries apply\+Operator} (\mbox{\hyperlink{class_literal_float}{Literal\+Float}} $\ast$lhs, \mbox{\hyperlink{class_literal_bool}{Literal\+Bool}} $\ast$rhs)
+\item 
+\mbox{\Hypertarget{class_operator_a41b63eec00dd0ddaddfff671d96ec331}\label{class_operator_a41b63eec00dd0ddaddfff671d96ec331}} 
+\mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} $\ast$ {\bfseries apply\+Operator} (\mbox{\hyperlink{class_literal_bool}{Literal\+Bool}} $\ast$lhs, \mbox{\hyperlink{class_literal_float}{Literal\+Float}} $\ast$rhs)
+\item 
+\mbox{\Hypertarget{class_operator_a2a4b2693f33ffa0b2dd81dabadff48ae}\label{class_operator_a2a4b2693f33ffa0b2dd81dabadff48ae}} 
+\mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} $\ast$ {\bfseries apply\+Operator} (\mbox{\hyperlink{class_literal_float}{Literal\+Float}} $\ast$rhs)
+\item 
+std\+::string \mbox{\hyperlink{class_operator_a74ac2d3c1f1fe6c0f7562f993c643f72}{to\+String}} (bool print\+Children) const override
+\item 
+bool \mbox{\hyperlink{class_operator_aead298af5c61f58d0d5e15740ad3ded0}{supports\+Circuit\+Mode}} () override
+\item 
+\mbox{\hyperlink{class_operator}{Operator}} $\ast$ \mbox{\hyperlink{class_operator_aa2a10cc2f4df91bc5b5e86dcdf32339a}{clone}} (bool keep\+Original\+Unique\+Node\+Id) override
+\item 
+\mbox{\Hypertarget{class_operator_a6e1712ec59396bc379e59d7baee05dc4}\label{class_operator_a6e1712ec59396bc379e59d7baee05dc4}} 
+bool {\bfseries equals} (Arithmetic\+Op op) const
+\item 
+\mbox{\Hypertarget{class_operator_a83403189ec3ed64f2fbd425f2e2ebf50}\label{class_operator_a83403189ec3ed64f2fbd425f2e2ebf50}} 
+bool {\bfseries equals} (Log\+Comp\+Op op) const
+\item 
+\mbox{\Hypertarget{class_operator_ae0ca967761d061422199a5bcbef04e27}\label{class_operator_ae0ca967761d061422199a5bcbef04e27}} 
+bool {\bfseries equals} (Unary\+Op op) const
+\item 
+\mbox{\Hypertarget{class_operator_a469eebdb36a3002f6346fae3b089d1a3}\label{class_operator_a469eebdb36a3002f6346fae3b089d1a3}} 
+bool {\bfseries is\+Arithmetic\+Op} () const
+\item 
+\mbox{\Hypertarget{class_operator_a349afeeb41ad5d5602ee3f8e8d4497fd}\label{class_operator_a349afeeb41ad5d5602ee3f8e8d4497fd}} 
+bool {\bfseries is\+Log\+Comp\+Op} () const
+\item 
+\mbox{\Hypertarget{class_operator_a13148aa9502dea214d7803cc0b274de8}\label{class_operator_a13148aa9502dea214d7803cc0b274de8}} 
+bool {\bfseries is\+Unary\+Op} () const
+\item 
+\mbox{\Hypertarget{class_operator_a38982e46aaed878d9acc3f98c7f63cb1}\label{class_operator_a38982e46aaed878d9acc3f98c7f63cb1}} 
+{\footnotesize template$<$typename R , typename T $>$ }\\R {\bfseries acc} (std\+::function$<$ R(T, T)$>$ func, std\+::vector$<$ T $>$ operands)
+\item 
+\mbox{\Hypertarget{class_operator_aae7c19fe5b81bf7ff73c9b0a269311be}\label{class_operator_aae7c19fe5b81bf7ff73c9b0a269311be}} 
+{\footnotesize template$<$typename T $>$ }\\bool {\bfseries app\+Pairwise} (std\+::function$<$ bool(T, T)$>$ func, std\+::vector$<$ T $>$ operands)
+\item 
+\mbox{\Hypertarget{class_operator_ae8969298ea5f91ea05b840d574008e6b}\label{class_operator_ae8969298ea5f91ea05b840d574008e6b}} 
+{\footnotesize template$<$typename abstract\+Type , typename primitive\+Type $>$ }\\std\+::vector$<$ primitive\+Type $>$ {\bfseries convert} (std\+::vector$<$ \mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} $\ast$ $>$ operands)
+\item 
+\mbox{\Hypertarget{class_operator_af98abb5455aa671ab42e701e79b12b9b}\label{class_operator_af98abb5455aa671ab42e701e79b12b9b}} 
+\mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} $\ast$ {\bfseries apply\+Operator} (std\+::vector$<$ \mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} $\ast$ $>$ operands)
+\item 
+\mbox{\Hypertarget{class_operator_acff5646d40ed1fb5715e5f4f95a6309d}\label{class_operator_acff5646d40ed1fb5715e5f4f95a6309d}} 
+\mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} $\ast$ {\bfseries apply\+Operator} (std\+::vector$<$ int $>$ operands)
+\item 
+\mbox{\Hypertarget{class_operator_a0b99e1fb04cfed962ae68c905b7b69b9}\label{class_operator_a0b99e1fb04cfed962ae68c905b7b69b9}} 
+\mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} $\ast$ {\bfseries apply\+Operator} (std\+::vector$<$ float $>$ operands)
+\item 
+\mbox{\Hypertarget{class_operator_ad5bbc62165ca8b18cbee690c1daf035e}\label{class_operator_ad5bbc62165ca8b18cbee690c1daf035e}} 
+\mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} $\ast$ {\bfseries apply\+Operator} (std\+::vector$<$ bool $>$ operands)
+\item 
+\mbox{\Hypertarget{class_operator_a8f186b815c7fe8fea5d0d43408a489d9}\label{class_operator_a8f186b815c7fe8fea5d0d43408a489d9}} 
+\mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} $\ast$ {\bfseries apply\+Operator} (std\+::vector$<$ std\+::string $>$ operands)
+\item 
+\mbox{\Hypertarget{class_operator_a389d56462fa0d4d00266de016993b4fb}\label{class_operator_a389d56462fa0d4d00266de016993b4fb}} 
+bool {\bfseries is\+Commutative} ()
+\item 
+\mbox{\Hypertarget{class_operator_a4e411a1bd88621c95ca24b2fe6009573}\label{class_operator_a4e411a1bd88621c95ca24b2fe6009573}} 
+bool {\bfseries is\+Left\+Associative} ()
+\item 
+bool \mbox{\hyperlink{class_operator_a6a2d043efc4a9901defe35c72f68fa22}{supports\+Partial\+Evaluation}} ()
+\end{DoxyCompactItemize}
+\doxysubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_operator_abefc5db3f22ae4c94f15b1ddac7f6eb5}\label{class_operator_abefc5db3f22ae4c94f15b1ddac7f6eb5}} 
+static \mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} $\ast$ {\bfseries apply\+Operator} (\mbox{\hyperlink{class_literal_bool}{Literal\+Bool}} $\ast$lhs, \mbox{\hyperlink{class_literal_string}{Literal\+String}} $\ast$rhs)
+\item 
+\mbox{\Hypertarget{class_operator_a50c79bd5af12c1dca783e8c0e6808d08}\label{class_operator_a50c79bd5af12c1dca783e8c0e6808d08}} 
+static \mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} $\ast$ {\bfseries apply\+Operator} (\mbox{\hyperlink{class_literal_string}{Literal\+String}} $\ast$lhs, \mbox{\hyperlink{class_literal_bool}{Literal\+Bool}} $\ast$rhs)
+\item 
+\mbox{\Hypertarget{class_operator_a357daf931b53124334ea28798dafeed7}\label{class_operator_a357daf931b53124334ea28798dafeed7}} 
+static \mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} $\ast$ {\bfseries apply\+Operator} (\mbox{\hyperlink{class_literal_int}{Literal\+Int}} $\ast$lhs, \mbox{\hyperlink{class_literal_string}{Literal\+String}} $\ast$rhs)
+\item 
+\mbox{\Hypertarget{class_operator_a219fdc16c6a8a65367cd5fbb543e3ea3}\label{class_operator_a219fdc16c6a8a65367cd5fbb543e3ea3}} 
+static \mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} $\ast$ {\bfseries apply\+Operator} (\mbox{\hyperlink{class_literal_string}{Literal\+String}} $\ast$lhs, \mbox{\hyperlink{class_literal_int}{Literal\+Int}} $\ast$rhs)
+\item 
+\mbox{\Hypertarget{class_operator_a45544db51c6b52a8e565e8c7d35c4e12}\label{class_operator_a45544db51c6b52a8e565e8c7d35c4e12}} 
+static \mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} $\ast$ {\bfseries apply\+Operator} (\mbox{\hyperlink{class_literal_float}{Literal\+Float}} $\ast$lhs, \mbox{\hyperlink{class_literal_string}{Literal\+String}} $\ast$rhs)
+\item 
+\mbox{\Hypertarget{class_operator_ae6ae400b39e612336d0eee921b853334}\label{class_operator_ae6ae400b39e612336d0eee921b853334}} 
+static \mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} $\ast$ {\bfseries apply\+Operator} (\mbox{\hyperlink{class_literal_string}{Literal\+String}} $\ast$lhs, \mbox{\hyperlink{class_literal_float}{Literal\+Float}} $\ast$rhs)
+\end{DoxyCompactItemize}
+\doxysubsection*{Additional Inherited Members}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_operator_a01c33b27ef4a52e9b50899f45b3a67d8}\label{class_operator_a01c33b27ef4a52e9b50899f45b3a67d8}} 
+\index{Operator@{Operator}!accept@{accept}}
+\index{accept@{accept}!Operator@{Operator}}
+\doxysubsubsection{\texorpdfstring{accept()}{accept()}}
+{\footnotesize\ttfamily void Operator\+::accept (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_visitor}{Visitor}} \&}]{v }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Part of the visitor pattern. Must be overridden in derived classes and must call v.\+visit(node). This allows the correct overload for the derived class to be called in the visitor. 
+\begin{DoxyParams}{Parameters}
+{\em v} & \mbox{\hyperlink{class_visitor}{Visitor}} that offers a visit() method \\
+\hline
+\end{DoxyParams}
+
+
+Implements \mbox{\hyperlink{class_abstract_node_a890a24af49cedda13f23cbe41931dee5}{Abstract\+Node}}.
+
+\mbox{\Hypertarget{class_operator_aa2a10cc2f4df91bc5b5e86dcdf32339a}\label{class_operator_aa2a10cc2f4df91bc5b5e86dcdf32339a}} 
+\index{Operator@{Operator}!clone@{clone}}
+\index{clone@{clone}!Operator@{Operator}}
+\doxysubsubsection{\texorpdfstring{clone()}{clone()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{class_operator}{Operator}} $\ast$ Operator\+::clone (\begin{DoxyParamCaption}\item[{bool}]{keep\+Original\+Unique\+Node\+Id }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Clones a node recursively, i.\+e., by including all of its children. 
+\begin{DoxyParams}{Parameters}
+{\em keep\+Original\+Unique\+Node\+Id} & Specifies whether to keep all of the unique node I\+Ds of the original nodes. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A clone of the node including clones of all of its children. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{class_abstract_node_ab7f13808b586865a27e2635995be5056}{Abstract\+Node}}.
+
+\mbox{\Hypertarget{class_operator_af484b0fafd9c53fdd42ce0d29d882719}\label{class_operator_af484b0fafd9c53fdd42ce0d29d882719}} 
+\index{Operator@{Operator}!getNodeType@{getNodeType}}
+\index{getNodeType@{getNodeType}!Operator@{Operator}}
+\doxysubsubsection{\texorpdfstring{getNodeType()}{getNodeType()}}
+{\footnotesize\ttfamily std\+::string Operator\+::get\+Node\+Type (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Returns the node\textquotesingle{}s type, which is the name of the object in the A\+ST. This method must be overridden by all classes that inherit from \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} by their respective name (e.\+g., Arithmetic\+Exp, \mbox{\hyperlink{class_function}{Function}}, \mbox{\hyperlink{class_variable}{Variable}}). \begin{DoxyReturn}{Returns}
+The name of the node type. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{class_abstract_node_a8cc40127801e7777c8094f17a3b1efcb}{Abstract\+Node}}.
+
+\mbox{\Hypertarget{class_operator_aead298af5c61f58d0d5e15740ad3ded0}\label{class_operator_aead298af5c61f58d0d5e15740ad3ded0}} 
+\index{Operator@{Operator}!supportsCircuitMode@{supportsCircuitMode}}
+\index{supportsCircuitMode@{supportsCircuitMode}!Operator@{Operator}}
+\doxysubsubsection{\texorpdfstring{supportsCircuitMode()}{supportsCircuitMode()}}
+{\footnotesize\ttfamily bool Operator\+::supports\+Circuit\+Mode (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+This method returns True iff the class derived from the \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} class properly makes use of the child/parent fields as it would be expected in a circuit. 
+
+Reimplemented from \mbox{\hyperlink{class_abstract_node_a76f2290759cb522619af77c630b6eba9}{Abstract\+Node}}.
+
+\mbox{\Hypertarget{class_operator_a6a2d043efc4a9901defe35c72f68fa22}\label{class_operator_a6a2d043efc4a9901defe35c72f68fa22}} 
+\index{Operator@{Operator}!supportsPartialEvaluation@{supportsPartialEvaluation}}
+\index{supportsPartialEvaluation@{supportsPartialEvaluation}!Operator@{Operator}}
+\doxysubsubsection{\texorpdfstring{supportsPartialEvaluation()}{supportsPartialEvaluation()}}
+{\footnotesize\ttfamily bool Operator\+::supports\+Partial\+Evaluation (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+An operator is considered as non-\/partial evaluable if its not possible to apply the operator only on a few operands and then store the intermediate result to continue evaluation after more operands are known. \mbox{\hyperlink{class_for}{For}} example, 7 + a + 21 + 9 is partially evaluable to a + 37. But the expression 32 $<$ 193 $<$ a $<$ 12 would partially evaluate 32 $<$ 193 = true and then lead to true $<$ a $<$ 12 which is obviously not correct. Because of that we require that all operands are known for these kind of operators. \mbox{\Hypertarget{class_operator_a74ac2d3c1f1fe6c0f7562f993c643f72}\label{class_operator_a74ac2d3c1f1fe6c0f7562f993c643f72}} 
+\index{Operator@{Operator}!toString@{toString}}
+\index{toString@{toString}!Operator@{Operator}}
+\doxysubsubsection{\texorpdfstring{toString()}{toString()}}
+{\footnotesize\ttfamily std\+::string Operator\+::to\+String (\begin{DoxyParamCaption}\item[{bool}]{print\+Children }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Returns a string representation of the node, if print\+Children is True then calls to\+String for its children too. Hence, to\+String(false) is equivalent to printing a node\textquotesingle{}s attributes only. \begin{DoxyReturn}{Returns}
+A textual representation of the node. 
+\end{DoxyReturn}
+
+
+Reimplemented from \mbox{\hyperlink{class_abstract_node_aee58b60a470f2e494e0db1808c87b13d}{Abstract\+Node}}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/ast/Operator.\+h\item 
+src/ast/Operator.\+cpp\end{DoxyCompactItemize}

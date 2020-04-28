@@ -1,0 +1,163 @@
+\hypertarget{class_literal_string}{}\doxysection{Literal\+String Class Reference}
+\label{class_literal_string}\index{LiteralString@{LiteralString}}
+Inheritance diagram for Literal\+String\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=4.000000cm]{class_literal_string}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_literal_string_a52d9dac6d1c6200d2f50daa5d87314ec}\label{class_literal_string_a52d9dac6d1c6200d2f50daa5d87314ec}} 
+{\bfseries Literal\+String} (\mbox{\hyperlink{class_abstract_matrix}{Abstract\+Matrix}} $\ast$p\+Matrix)
+\item 
+\mbox{\Hypertarget{class_literal_string_a1eaaa3e7f7b98411804980317107f74f}\label{class_literal_string_a1eaaa3e7f7b98411804980317107f74f}} 
+{\bfseries Literal\+String} (\mbox{\hyperlink{class_matrix}{Matrix}}$<$ \mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$ $>$ $\ast$am)
+\item 
+\mbox{\Hypertarget{class_literal_string_ad2e07d7790ccbb0b86339f06b76c4359}\label{class_literal_string_ad2e07d7790ccbb0b86339f06b76c4359}} 
+{\bfseries Literal\+String} (\mbox{\hyperlink{class_matrix}{Matrix}}$<$ std\+::string $>$ $\ast$input\+Matrix)
+\item 
+\mbox{\Hypertarget{class_literal_string_a5f5124d39e89451fc895725f28141df9}\label{class_literal_string_a5f5124d39e89451fc895725f28141df9}} 
+{\bfseries Literal\+String} (std\+::string value)
+\item 
+\mbox{\Hypertarget{class_literal_string_a616284947472c712807ad57b531e6a12}\label{class_literal_string_a616284947472c712807ad57b531e6a12}} 
+void {\bfseries print} (std\+::ostream \&str) const override
+\item 
+\mbox{\hyperlink{class_literal_string}{Literal\+String}} $\ast$ \mbox{\hyperlink{class_literal_string_aada7eb6ee1c8351f428230b584fbd63f}{clone}} (bool keep\+Original\+Unique\+Node\+Id) override
+\item 
+json \mbox{\hyperlink{class_literal_string_a215987e5d1874f1d3de818885ff5b149}{to\+Json}} () const override
+\item 
+\mbox{\Hypertarget{class_literal_string_a727f401f2cd3aa0836baf304b36d6d79}\label{class_literal_string_a727f401f2cd3aa0836baf304b36d6d79}} 
+std\+::string {\bfseries get\+Value} () const
+\item 
+void \mbox{\hyperlink{class_literal_string_a163fa2029352132b4ddb036e13489cdf}{accept}} (\mbox{\hyperlink{class_visitor}{Visitor}} \&v) override
+\item 
+std\+::string \mbox{\hyperlink{class_literal_string_a3b0ac84bf4d0a27703056118f318b15e}{get\+Node\+Type}} () const override
+\item 
+\mbox{\Hypertarget{class_literal_string_a52f9da31a7dca6e9414a7721d4466746}\label{class_literal_string_a52f9da31a7dca6e9414a7721d4466746}} 
+bool {\bfseries operator==} (const \mbox{\hyperlink{class_literal_string}{Literal\+String}} \&rhs) const
+\item 
+\mbox{\Hypertarget{class_literal_string_a9ce045103682efd0b18a572e43a79e0c}\label{class_literal_string_a9ce045103682efd0b18a572e43a79e0c}} 
+bool {\bfseries operator!=} (const \mbox{\hyperlink{class_literal_string}{Literal\+String}} \&rhs) const
+\item 
+\mbox{\Hypertarget{class_literal_string_adaedd6e830efd921ab8897695c74a9b4}\label{class_literal_string_adaedd6e830efd921ab8897695c74a9b4}} 
+void {\bfseries add\+Literal\+Value} (std\+::string identifier, std\+::unordered\+\_\+map$<$ std\+::string, \mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} $\ast$ $>$ \&params\+Map) override
+\item 
+\mbox{\Hypertarget{class_literal_string_a8580291d10f6cc7e80466aa7d957a1a3}\label{class_literal_string_a8580291d10f6cc7e80466aa7d957a1a3}} 
+void {\bfseries set\+Value} (const std\+::string \&new\+Value)
+\item 
+\mbox{\Hypertarget{class_literal_string_a67b6a85a0aa5af51160400b26ed0b7ef}\label{class_literal_string_a67b6a85a0aa5af51160400b26ed0b7ef}} 
+void {\bfseries set\+Random\+Value} (\mbox{\hyperlink{class_rand_literal_gen}{Rand\+Literal\+Gen}} \&rlg) override
+\item 
+std\+::string \mbox{\hyperlink{class_literal_string_a11b734827885bdba66e0e33c34944a73}{to\+String}} (bool print\+Children) const override
+\item 
+bool \mbox{\hyperlink{class_literal_string_af7943135197a8f23a317b0aed4e29484}{supports\+Circuit\+Mode}} () override
+\item 
+\mbox{\Hypertarget{class_literal_string_a0db165b52237ca8c1b6bc1c9fcba495c}\label{class_literal_string_a0db165b52237ca8c1b6bc1c9fcba495c}} 
+bool {\bfseries supports\+Datatype} (\mbox{\hyperlink{class_datatype}{Datatype}} \&datatype) override
+\item 
+\mbox{\Hypertarget{class_literal_string_aaedfd23b1acef5700c5fa550a6dc851d}\label{class_literal_string_aaedfd23b1acef5700c5fa550a6dc851d}} 
+bool {\bfseries is\+Equal} (\mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$other) override
+\item 
+\mbox{\Hypertarget{class_literal_string_a6db7dfea207a9b1658c1a15cf9fac9a8}\label{class_literal_string_a6db7dfea207a9b1658c1a15cf9fac9a8}} 
+bool {\bfseries is\+Null} () override
+\item 
+\mbox{\Hypertarget{class_literal_string_a5b4c0b495e4a6071ba7ec3a300146c12}\label{class_literal_string_a5b4c0b495e4a6071ba7ec3a300146c12}} 
+\mbox{\hyperlink{class_abstract_matrix}{Abstract\+Matrix}} $\ast$ {\bfseries get\+Matrix} () const override
+\item 
+\mbox{\Hypertarget{class_literal_string_af820351f51bd25841ae96508839e52fe}\label{class_literal_string_af820351f51bd25841ae96508839e52fe}} 
+void {\bfseries set\+Matrix} (\mbox{\hyperlink{class_abstract_matrix}{Abstract\+Matrix}} $\ast$new\+Value) override
+\end{DoxyCompactItemize}
+\doxysubsection*{Additional Inherited Members}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_literal_string_a163fa2029352132b4ddb036e13489cdf}\label{class_literal_string_a163fa2029352132b4ddb036e13489cdf}} 
+\index{LiteralString@{LiteralString}!accept@{accept}}
+\index{accept@{accept}!LiteralString@{LiteralString}}
+\doxysubsubsection{\texorpdfstring{accept()}{accept()}}
+{\footnotesize\ttfamily void Literal\+String\+::accept (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_visitor}{Visitor}} \&}]{v }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Part of the visitor pattern. Must be overridden in derived classes and must call v.\+visit(node). This allows the correct overload for the derived class to be called in the visitor. 
+\begin{DoxyParams}{Parameters}
+{\em v} & \mbox{\hyperlink{class_visitor}{Visitor}} that offers a visit() method \\
+\hline
+\end{DoxyParams}
+
+
+Implements \mbox{\hyperlink{class_abstract_node_a890a24af49cedda13f23cbe41931dee5}{Abstract\+Node}}.
+
+\mbox{\Hypertarget{class_literal_string_aada7eb6ee1c8351f428230b584fbd63f}\label{class_literal_string_aada7eb6ee1c8351f428230b584fbd63f}} 
+\index{LiteralString@{LiteralString}!clone@{clone}}
+\index{clone@{clone}!LiteralString@{LiteralString}}
+\doxysubsubsection{\texorpdfstring{clone()}{clone()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{class_literal_string}{Literal\+String}} $\ast$ Literal\+String\+::clone (\begin{DoxyParamCaption}\item[{bool}]{keep\+Original\+Unique\+Node\+Id }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Clones a node recursively, i.\+e., by including all of its children. 
+\begin{DoxyParams}{Parameters}
+{\em keep\+Original\+Unique\+Node\+Id} & Specifies whether to keep all of the unique node I\+Ds of the original nodes. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A clone of the node including clones of all of its children. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{class_abstract_node_ab7f13808b586865a27e2635995be5056}{Abstract\+Node}}.
+
+\mbox{\Hypertarget{class_literal_string_a3b0ac84bf4d0a27703056118f318b15e}\label{class_literal_string_a3b0ac84bf4d0a27703056118f318b15e}} 
+\index{LiteralString@{LiteralString}!getNodeType@{getNodeType}}
+\index{getNodeType@{getNodeType}!LiteralString@{LiteralString}}
+\doxysubsubsection{\texorpdfstring{getNodeType()}{getNodeType()}}
+{\footnotesize\ttfamily std\+::string Literal\+String\+::get\+Node\+Type (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Returns the node\textquotesingle{}s type, which is the name of the object in the A\+ST. This method must be overridden by all classes that inherit from \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} by their respective name (e.\+g., Arithmetic\+Exp, \mbox{\hyperlink{class_function}{Function}}, \mbox{\hyperlink{class_variable}{Variable}}). \begin{DoxyReturn}{Returns}
+The name of the node type. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{class_abstract_node_a8cc40127801e7777c8094f17a3b1efcb}{Abstract\+Node}}.
+
+\mbox{\Hypertarget{class_literal_string_af7943135197a8f23a317b0aed4e29484}\label{class_literal_string_af7943135197a8f23a317b0aed4e29484}} 
+\index{LiteralString@{LiteralString}!supportsCircuitMode@{supportsCircuitMode}}
+\index{supportsCircuitMode@{supportsCircuitMode}!LiteralString@{LiteralString}}
+\doxysubsubsection{\texorpdfstring{supportsCircuitMode()}{supportsCircuitMode()}}
+{\footnotesize\ttfamily bool Literal\+String\+::supports\+Circuit\+Mode (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+This method returns True iff the class derived from the \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} class properly makes use of the child/parent fields as it would be expected in a circuit. 
+
+Reimplemented from \mbox{\hyperlink{class_abstract_node_a76f2290759cb522619af77c630b6eba9}{Abstract\+Node}}.
+
+\mbox{\Hypertarget{class_literal_string_a215987e5d1874f1d3de818885ff5b149}\label{class_literal_string_a215987e5d1874f1d3de818885ff5b149}} 
+\index{LiteralString@{LiteralString}!toJson@{toJson}}
+\index{toJson@{toJson}!LiteralString@{LiteralString}}
+\doxysubsubsection{\texorpdfstring{toJson()}{toJson()}}
+{\footnotesize\ttfamily json Literal\+String\+::to\+Json (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Get the J\+S\+ON representation of the node including all of its children. \begin{DoxyReturn}{Returns}
+J\+S\+ON representation of the node 
+\end{DoxyReturn}
+
+
+Reimplemented from \mbox{\hyperlink{class_abstract_expr_ac1957d8bda1e29b35b822ec0b05c5027}{Abstract\+Expr}}.
+
+\mbox{\Hypertarget{class_literal_string_a11b734827885bdba66e0e33c34944a73}\label{class_literal_string_a11b734827885bdba66e0e33c34944a73}} 
+\index{LiteralString@{LiteralString}!toString@{toString}}
+\index{toString@{toString}!LiteralString@{LiteralString}}
+\doxysubsubsection{\texorpdfstring{toString()}{toString()}}
+{\footnotesize\ttfamily std\+::string Literal\+String\+::to\+String (\begin{DoxyParamCaption}\item[{bool}]{print\+Children }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Returns a string representation of the node, if print\+Children is True then calls to\+String for its children too. Hence, to\+String(false) is equivalent to printing a node\textquotesingle{}s attributes only. \begin{DoxyReturn}{Returns}
+A textual representation of the node. 
+\end{DoxyReturn}
+
+
+Reimplemented from \mbox{\hyperlink{class_abstract_node_aee58b60a470f2e494e0db1808c87b13d}{Abstract\+Node}}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/ast/Literal\+String.\+h\item 
+src/ast/Literal\+String.\+cpp\end{DoxyCompactItemize}

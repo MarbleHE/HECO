@@ -1,0 +1,121 @@
+\hypertarget{class_parameter_list}{}\doxysection{Parameter\+List Class Reference}
+\label{class_parameter_list}\index{ParameterList@{ParameterList}}
+Inheritance diagram for Parameter\+List\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{class_parameter_list}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_parameter_list_a3b69192011d1265cf9cd1ac67944b590}\label{class_parameter_list_a3b69192011d1265cf9cd1ac67944b590}} 
+{\bfseries Parameter\+List} (std\+::vector$<$ \mbox{\hyperlink{class_function_parameter}{Function\+Parameter}} $\ast$ $>$ parameters)
+\item 
+std\+::string \mbox{\hyperlink{class_parameter_list_aa20ebf072891d797392a2723b3275333}{get\+Node\+Type}} () const override
+\item 
+void \mbox{\hyperlink{class_parameter_list_a4e41c20b45889ac06308409077747bf7}{accept}} (\mbox{\hyperlink{class_visitor}{Visitor}} \&v) override
+\item 
+\mbox{\hyperlink{class_parameter_list}{Parameter\+List}} $\ast$ \mbox{\hyperlink{class_parameter_list_a3e263333a1f6be874dbb34b52743a32a}{clone}} (bool keep\+Original\+Unique\+Node\+Id) override
+\item 
+\mbox{\Hypertarget{class_parameter_list_a7d899a214cac9af071901af9dec8d0fb}\label{class_parameter_list_a7d899a214cac9af071901af9dec8d0fb}} 
+std\+::vector$<$ \mbox{\hyperlink{class_function_parameter}{Function\+Parameter}} $\ast$ $>$ {\bfseries get\+Parameters} ()
+\item 
+int \mbox{\hyperlink{class_parameter_list_af22158ec28263ca2e62054d49ff41d29}{get\+Max\+Number\+Children}} () override
+\item 
+bool \mbox{\hyperlink{class_parameter_list_ad8739af533a7a3750d93ba4e7a461bfc}{supports\+Circuit\+Mode}} () override
+\item 
+std\+::string \mbox{\hyperlink{class_parameter_list_ac7d757105ce57060b3c7e2c028e8ee9e}{to\+String}} (bool print\+Children) const override
+\end{DoxyCompactItemize}
+\doxysubsection*{Additional Inherited Members}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_parameter_list_a4e41c20b45889ac06308409077747bf7}\label{class_parameter_list_a4e41c20b45889ac06308409077747bf7}} 
+\index{ParameterList@{ParameterList}!accept@{accept}}
+\index{accept@{accept}!ParameterList@{ParameterList}}
+\doxysubsubsection{\texorpdfstring{accept()}{accept()}}
+{\footnotesize\ttfamily void Parameter\+List\+::accept (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_visitor}{Visitor}} \&}]{v }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Part of the visitor pattern. Must be overridden in derived classes and must call v.\+visit(node). This allows the correct overload for the derived class to be called in the visitor. 
+\begin{DoxyParams}{Parameters}
+{\em v} & \mbox{\hyperlink{class_visitor}{Visitor}} that offers a visit() method \\
+\hline
+\end{DoxyParams}
+
+
+Implements \mbox{\hyperlink{class_abstract_node_a890a24af49cedda13f23cbe41931dee5}{Abstract\+Node}}.
+
+\mbox{\Hypertarget{class_parameter_list_a3e263333a1f6be874dbb34b52743a32a}\label{class_parameter_list_a3e263333a1f6be874dbb34b52743a32a}} 
+\index{ParameterList@{ParameterList}!clone@{clone}}
+\index{clone@{clone}!ParameterList@{ParameterList}}
+\doxysubsubsection{\texorpdfstring{clone()}{clone()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{class_parameter_list}{Parameter\+List}} $\ast$ Parameter\+List\+::clone (\begin{DoxyParamCaption}\item[{bool}]{keep\+Original\+Unique\+Node\+Id }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Clones a node recursively, i.\+e., by including all of its children. 
+\begin{DoxyParams}{Parameters}
+{\em keep\+Original\+Unique\+Node\+Id} & Specifies whether to keep all of the unique node I\+Ds of the original nodes. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A clone of the node including clones of all of its children. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{class_abstract_node_ab7f13808b586865a27e2635995be5056}{Abstract\+Node}}.
+
+\mbox{\Hypertarget{class_parameter_list_af22158ec28263ca2e62054d49ff41d29}\label{class_parameter_list_af22158ec28263ca2e62054d49ff41d29}} 
+\index{ParameterList@{ParameterList}!getMaxNumberChildren@{getMaxNumberChildren}}
+\index{getMaxNumberChildren@{getMaxNumberChildren}!ParameterList@{ParameterList}}
+\doxysubsubsection{\texorpdfstring{getMaxNumberChildren()}{getMaxNumberChildren()}}
+{\footnotesize\ttfamily int Parameter\+List\+::get\+Max\+Number\+Children (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Indicates the number of children that are allowed for a specific node. \mbox{\hyperlink{class_for}{For}} example, a arithmetic expression accepts exactly three attributes and hence also exactly three children\+: left operand, right operand, and operator. \mbox{\hyperlink{class_if}{If}} the node does not implement support for child/parent relationships, \mbox{\hyperlink{class_parameter_list_af22158ec28263ca2e62054d49ff41d29}{get\+Max\+Number\+Children()}} return 0. \begin{DoxyReturn}{Returns}
+An integer indicating the number of allowed children for a specific node. 
+\end{DoxyReturn}
+
+
+Reimplemented from \mbox{\hyperlink{group__parents_ga680a94e1a61857e94177a79e5d8588ab}{Abstract\+Node}}.
+
+\mbox{\Hypertarget{class_parameter_list_aa20ebf072891d797392a2723b3275333}\label{class_parameter_list_aa20ebf072891d797392a2723b3275333}} 
+\index{ParameterList@{ParameterList}!getNodeType@{getNodeType}}
+\index{getNodeType@{getNodeType}!ParameterList@{ParameterList}}
+\doxysubsubsection{\texorpdfstring{getNodeType()}{getNodeType()}}
+{\footnotesize\ttfamily std\+::string Parameter\+List\+::get\+Node\+Type (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Returns the node\textquotesingle{}s type, which is the name of the object in the A\+ST. This method must be overridden by all classes that inherit from \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} by their respective name (e.\+g., Arithmetic\+Exp, \mbox{\hyperlink{class_function}{Function}}, \mbox{\hyperlink{class_variable}{Variable}}). \begin{DoxyReturn}{Returns}
+The name of the node type. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{class_abstract_node_a8cc40127801e7777c8094f17a3b1efcb}{Abstract\+Node}}.
+
+\mbox{\Hypertarget{class_parameter_list_ad8739af533a7a3750d93ba4e7a461bfc}\label{class_parameter_list_ad8739af533a7a3750d93ba4e7a461bfc}} 
+\index{ParameterList@{ParameterList}!supportsCircuitMode@{supportsCircuitMode}}
+\index{supportsCircuitMode@{supportsCircuitMode}!ParameterList@{ParameterList}}
+\doxysubsubsection{\texorpdfstring{supportsCircuitMode()}{supportsCircuitMode()}}
+{\footnotesize\ttfamily bool Parameter\+List\+::supports\+Circuit\+Mode (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+This method returns True iff the class derived from the \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} class properly makes use of the child/parent fields as it would be expected in a circuit. 
+
+Reimplemented from \mbox{\hyperlink{class_abstract_node_a76f2290759cb522619af77c630b6eba9}{Abstract\+Node}}.
+
+\mbox{\Hypertarget{class_parameter_list_ac7d757105ce57060b3c7e2c028e8ee9e}\label{class_parameter_list_ac7d757105ce57060b3c7e2c028e8ee9e}} 
+\index{ParameterList@{ParameterList}!toString@{toString}}
+\index{toString@{toString}!ParameterList@{ParameterList}}
+\doxysubsubsection{\texorpdfstring{toString()}{toString()}}
+{\footnotesize\ttfamily std\+::string Parameter\+List\+::to\+String (\begin{DoxyParamCaption}\item[{bool}]{print\+Children }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Returns a string representation of the node, if print\+Children is True then calls to\+String for its children too. Hence, to\+String(false) is equivalent to printing a node\textquotesingle{}s attributes only. \begin{DoxyReturn}{Returns}
+A textual representation of the node. 
+\end{DoxyReturn}
+
+
+Reimplemented from \mbox{\hyperlink{class_abstract_node_aee58b60a470f2e494e0db1808c87b13d}{Abstract\+Node}}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/ast/Parameter\+List.\+h\item 
+src/ast/Parameter\+List.\+cpp\end{DoxyCompactItemize}

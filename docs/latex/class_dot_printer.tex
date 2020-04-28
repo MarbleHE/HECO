@@ -1,0 +1,59 @@
+\hypertarget{class_dot_printer}{}\doxysection{Dot\+Printer Class Reference}
+\label{class_dot_printer}\index{DotPrinter@{DotPrinter}}
+
+
+Utilities to print the A\+ST in D\+OT language as used by graphviz, see \href{https://www.graphviz.org/doc/info/lang.html}{\texttt{ https\+://www.\+graphviz.\+org/doc/info/lang.\+html}}.  
+
+
+
+
+{\ttfamily \#include $<$Dot\+Printer.\+h$>$}
+
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_dot_printer_ae866ec68d425977f75e7308998dbb242}\label{class_dot_printer_ae866ec68d425977f75e7308998dbb242}} 
+\mbox{\hyperlink{class_dot_printer}{Dot\+Printer}} \& {\bfseries set\+Show\+Mult\+Depth} (bool show\+\_\+mult\+\_\+depth)
+\item 
+\mbox{\Hypertarget{class_dot_printer_a809a08ff7703c58f1c62f10b6fa37f12}\label{class_dot_printer_a809a08ff7703c58f1c62f10b6fa37f12}} 
+\mbox{\hyperlink{class_dot_printer}{Dot\+Printer}} \& {\bfseries set\+Indentation\+Character} (const std\+::string \&indentation\+\_\+character)
+\item 
+\mbox{\Hypertarget{class_dot_printer_aa82707367447fbbd16bdcb2da9a2bdba}\label{class_dot_printer_aa82707367447fbbd16bdcb2da9a2bdba}} 
+\mbox{\hyperlink{class_dot_printer}{Dot\+Printer}} \& {\bfseries set\+Output\+Stream} (std\+::ostream \&stream)
+\item 
+\mbox{\Hypertarget{class_dot_printer_a86e3f305704317d430873de673389a3a}\label{class_dot_printer_a86e3f305704317d430873de673389a3a}} 
+\mbox{\hyperlink{class_dot_printer}{Dot\+Printer}} \& {\bfseries set\+Multiplicative\+Depths\+Calculator} (\mbox{\hyperlink{class_multiplicative_depth_calculator}{Multiplicative\+Depth\+Calculator}} \&multiplicative\+Depth\+Calculator)
+\item 
+\mbox{\Hypertarget{class_dot_printer_a728bde05afa1cf6ec1b5476f65d48a74}\label{class_dot_printer_a728bde05afa1cf6ec1b5476f65d48a74}} 
+std\+::string {\bfseries get\+Dot\+Formatted\+String} (\mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$n)
+\item 
+\mbox{\Hypertarget{class_dot_printer_ac505351cfe9e8bdb5a411ff72ac5a3a0}\label{class_dot_printer_ac505351cfe9e8bdb5a411ff72ac5a3a0}} 
+void {\bfseries print\+As\+Dot\+Formatted\+Graph} (\mbox{\hyperlink{class_ast}{Ast}} \&ast)
+\item 
+\mbox{\Hypertarget{class_dot_printer_adfab8581513a42de12cceca713cee3d9}\label{class_dot_printer_adfab8581513a42de12cceca713cee3d9}} 
+void {\bfseries print\+All\+Reachable\+Nodes} (\mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$p\+Node)
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_dot_printer_ae21033d795418bd9e312ad1c9e584584}\label{class_dot_printer_ae21033d795418bd9e312ad1c9e584584}} 
+\mbox{\hyperlink{class_multiplicative_depth_calculator}{Multiplicative\+Depth\+Calculator}} $\ast$ {\bfseries mdc}
+\item 
+\mbox{\Hypertarget{class_dot_printer_a26d5859bb8f18ab7ff0912e9a2a10a04}\label{class_dot_printer_a26d5859bb8f18ab7ff0912e9a2a10a04}} 
+bool {\bfseries show\+Mult\+Depth} \{false\}
+\item 
+\mbox{\Hypertarget{class_dot_printer_a2ff579f8ac65f0f4989ca77106977c03}\label{class_dot_printer_a2ff579f8ac65f0f4989ca77106977c03}} 
+std\+::string {\bfseries indentation\+Character} \{\textquotesingle{}\textbackslash{}t\textquotesingle{}\}
+\item 
+\mbox{\Hypertarget{class_dot_printer_a10c95754560aff287dc538a2350ed133}\label{class_dot_printer_a10c95754560aff287dc538a2350ed133}} 
+std\+::ostream $\ast$ {\bfseries output\+Stream} \{\&std\+::cout\}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Utilities to print the A\+ST in D\+OT language as used by graphviz, see \href{https://www.graphviz.org/doc/info/lang.html}{\texttt{ https\+://www.\+graphviz.\+org/doc/info/lang.\+html}}. 
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/utilities/Dot\+Printer.\+h\item 
+src/utilities/Dot\+Printer.\+cpp\end{DoxyCompactItemize}

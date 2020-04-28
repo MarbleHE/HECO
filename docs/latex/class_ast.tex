@@ -1,0 +1,150 @@
+\hypertarget{class_ast}{}\doxysection{Ast Class Reference}
+\label{class_ast}\index{Ast@{Ast}}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{class_ast_ab34a587804ef34001629881afee5b6d6}{Ast}} (const \mbox{\hyperlink{class_ast}{Ast}} \&other\+Ast)
+\item 
+\mbox{\hyperlink{class_ast_a6a3ee323ba296526db74ea11b68a4450}{Ast}} (const \mbox{\hyperlink{class_ast}{Ast}} \&other\+Ast, bool keep\+Original\+Unique\+Node\+Id)
+\item 
+\mbox{\hyperlink{class_ast_a2d7c25f9bff59f8ab0750b879c633e92}{Ast}} (\mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$root\+Node)
+\item 
+\mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$ \mbox{\hyperlink{class_ast_aead2d947a4f3dd50f417e1077709d13d}{set\+Root\+Node}} (\mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$node)
+\item 
+\mbox{\Hypertarget{class_ast_a0060e46a1d6b86de6bb812e1679ff750}\label{class_ast_a0060e46a1d6b86de6bb812e1679ff750}} 
+\mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$ {\bfseries get\+Root\+Node} () const
+\item 
+\mbox{\Hypertarget{class_ast_ac729bdcfa250f8ca26b5a150e03490e2}\label{class_ast_ac729bdcfa250f8ca26b5a150e03490e2}} 
+virtual void {\bfseries accept} (\mbox{\hyperlink{class_visitor}{Visitor}} \&v)
+\item 
+\mbox{\Hypertarget{class_ast_a0d31c58900508cbaa3be875f8ad0c186}\label{class_ast_a0d31c58900508cbaa3be875f8ad0c186}} 
+std\+::vector$<$ \mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} $\ast$ $>$ {\bfseries evaluate\+Ast} (const std\+::unordered\+\_\+map$<$ std\+::string, \mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} $\ast$ $>$ \&param\+Values, bool print\+Result=false)
+\item 
+\mbox{\Hypertarget{class_ast_a2cbcba0c8a450c2a0716888af0c33177}\label{class_ast_a2cbcba0c8a450c2a0716888af0c33177}} 
+std\+::vector$<$ \mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} $\ast$ $>$ {\bfseries evaluate\+Circuit} (const std\+::unordered\+\_\+map$<$ std\+::string, \mbox{\hyperlink{class_abstract_literal}{Abstract\+Literal}} $\ast$ $>$ \&param\+Values, bool print\+Result=false)
+\item 
+bool \mbox{\hyperlink{class_ast_a7ed65b2b2174accfa00dfc276eb079ac}{is\+Reversed}} () const
+\item 
+bool \mbox{\hyperlink{class_ast_a98bcb72e85f6c3a2c737622b33f1f16c}{is\+Valid\+Circuit}} ()
+\item 
+\mbox{\Hypertarget{class_ast_af804ef1601108ac47577715b9212e295}\label{class_ast_af804ef1601108ac47577715b9212e295}} 
+void \mbox{\hyperlink{class_ast_af804ef1601108ac47577715b9212e295}{reverse\+Edges}} ()
+\begin{DoxyCompactList}\small\item\em Reverses all edges by switching child and parent nodes of each reachable node within the A\+ST. \end{DoxyCompactList}\item 
+std\+::set$<$ \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$ $>$ \mbox{\hyperlink{class_ast_a28420b9eff9a2a795805c39c6324a0ea}{get\+All\+Nodes}} () const
+\item 
+std\+::set$<$ \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$ $>$ \mbox{\hyperlink{class_ast_a15ff3f974bdc036ef3d447a76b1f003e}{get\+All\+Nodes}} (const std\+::function$<$ bool(\mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$)$>$ \&predicate) const
+\item 
+void \mbox{\hyperlink{class_ast_a94d8d08b92f97fcdca7193b02f6a852d}{delete\+Node}} (\mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$$\ast$node, bool delete\+Subtree\+Recursively=false)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{class_ast_ab34a587804ef34001629881afee5b6d6}\label{class_ast_ab34a587804ef34001629881afee5b6d6}} 
+\index{Ast@{Ast}!Ast@{Ast}}
+\index{Ast@{Ast}!Ast@{Ast}}
+\doxysubsubsection{\texorpdfstring{Ast()}{Ast()}\hspace{0.1cm}{\footnotesize\ttfamily [1/3]}}
+{\footnotesize\ttfamily Ast\+::\+Ast (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{class_ast}{Ast}} \&}]{other\+Ast }\end{DoxyParamCaption})}
+
+Creates a (deep) copy of the given A\+ST, i.\+e., including all of the root\textquotesingle{}s children nodes. 
+\begin{DoxyParams}{Parameters}
+{\em other\+Ast} & The A\+ST to be copied. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{class_ast_a6a3ee323ba296526db74ea11b68a4450}\label{class_ast_a6a3ee323ba296526db74ea11b68a4450}} 
+\index{Ast@{Ast}!Ast@{Ast}}
+\index{Ast@{Ast}!Ast@{Ast}}
+\doxysubsubsection{\texorpdfstring{Ast()}{Ast()}\hspace{0.1cm}{\footnotesize\ttfamily [2/3]}}
+{\footnotesize\ttfamily Ast\+::\+Ast (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{class_ast}{Ast}} \&}]{other\+Ast,  }\item[{bool}]{keep\+Original\+Unique\+Node\+Id }\end{DoxyParamCaption})}
+
+Similar as \mbox{\hyperlink{class_ast_ab34a587804ef34001629881afee5b6d6}{Ast(const Ast \&other\+Ast)}}, creates a (deep) copy of the given A\+ST while additionally preserving the nodes unique I\+Ds. 
+\begin{DoxyParams}{Parameters}
+{\em other\+Ast} & The \char`\"{}original\char`\"{} A\+ST to be copied. \\
+\hline
+{\em keep\+Original\+Unique\+Node\+Id} & A flag indicating whether the node I\+Ds from the original A\+ST should be copied too. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{class_ast_a2d7c25f9bff59f8ab0750b879c633e92}\label{class_ast_a2d7c25f9bff59f8ab0750b879c633e92}} 
+\index{Ast@{Ast}!Ast@{Ast}}
+\index{Ast@{Ast}!Ast@{Ast}}
+\doxysubsubsection{\texorpdfstring{Ast()}{Ast()}\hspace{0.1cm}{\footnotesize\ttfamily [3/3]}}
+{\footnotesize\ttfamily Ast\+::\+Ast (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$}]{root\+Node }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [explicit]}}
+
+Creates a new Abstract Syntax Tree (A\+ST). 
+\begin{DoxyParams}{Parameters}
+{\em root\+Node} & The node to be defined as root for this A\+ST. \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_ast_a94d8d08b92f97fcdca7193b02f6a852d}\label{class_ast_a94d8d08b92f97fcdca7193b02f6a852d}} 
+\index{Ast@{Ast}!deleteNode@{deleteNode}}
+\index{deleteNode@{deleteNode}!Ast@{Ast}}
+\doxysubsubsection{\texorpdfstring{deleteNode()}{deleteNode()}}
+{\footnotesize\ttfamily void Ast\+::delete\+Node (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$$\ast$}]{node,  }\item[{bool}]{delete\+Subtree\+Recursively = {\ttfamily false} }\end{DoxyParamCaption})}
+
+Deletes a node from the A\+ST. 
+\begin{DoxyParams}{Parameters}
+{\em node} & The node to delete from the A\+ST. \\
+\hline
+{\em delete\+Subtree\+Recursively} & Determines whether children should be deleted recursively. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{class_ast_a28420b9eff9a2a795805c39c6324a0ea}\label{class_ast_a28420b9eff9a2a795805c39c6324a0ea}} 
+\index{Ast@{Ast}!getAllNodes@{getAllNodes}}
+\index{getAllNodes@{getAllNodes}!Ast@{Ast}}
+\doxysubsubsection{\texorpdfstring{getAllNodes()}{getAllNodes()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily std\+::set$<$ \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$ $>$ Ast\+::get\+All\+Nodes (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Traverses the tree in B\+F\+S-\/style and collects all the nodes of the A\+ST. \begin{DoxyReturn}{Returns}
+A list of all nodes reachable from the A\+ST\textquotesingle{}s root node. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_ast_a15ff3f974bdc036ef3d447a76b1f003e}\label{class_ast_a15ff3f974bdc036ef3d447a76b1f003e}} 
+\index{Ast@{Ast}!getAllNodes@{getAllNodes}}
+\index{getAllNodes@{getAllNodes}!Ast@{Ast}}
+\doxysubsubsection{\texorpdfstring{getAllNodes()}{getAllNodes()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily std\+::set$<$ \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$ $>$ Ast\+::get\+All\+Nodes (\begin{DoxyParamCaption}\item[{const std\+::function$<$ bool(\mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$)$>$ \&}]{predicate }\end{DoxyParamCaption}) const}
+
+Traverses the tree in B\+F\+S-\/style and collects all the nodes of the A\+ST for that the predicate returns True. 
+\begin{DoxyParams}{Parameters}
+{\em predicate} & A function that takes a Abstract\+Node$\ast$ and returns True if this node should be returned, otherwise False. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A list of all nodes reachable from the A\+ST\textquotesingle{}s root node. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_ast_a7ed65b2b2174accfa00dfc276eb079ac}\label{class_ast_a7ed65b2b2174accfa00dfc276eb079ac}} 
+\index{Ast@{Ast}!isReversed@{isReversed}}
+\index{isReversed@{isReversed}!Ast@{Ast}}
+\doxysubsubsection{\texorpdfstring{isReversed()}{isReversed()}}
+{\footnotesize\ttfamily bool Ast\+::is\+Reversed (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Checks whether the A\+ST (more specifically, all of the A\+ST\textquotesingle{}s edges) are reversed. \begin{DoxyReturn}{Returns}
+True iff all edges of the A\+ST are reversed, otherwise false. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_ast_a98bcb72e85f6c3a2c737622b33f1f16c}\label{class_ast_a98bcb72e85f6c3a2c737622b33f1f16c}} 
+\index{Ast@{Ast}!isValidCircuit@{isValidCircuit}}
+\index{isValidCircuit@{isValidCircuit}!Ast@{Ast}}
+\doxysubsubsection{\texorpdfstring{isValidCircuit()}{isValidCircuit()}}
+{\footnotesize\ttfamily bool Ast\+::is\+Valid\+Circuit (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Checks whether the current A\+ST consists of nodes that are circuit-\/compatible, i.\+e., that define the child/parent nodes and can be looked at as a circuit. \begin{DoxyReturn}{Returns}
+True iff the current A\+ST consists of circuit-\/compatible nodes only. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_ast_aead2d947a4f3dd50f417e1077709d13d}\label{class_ast_aead2d947a4f3dd50f417e1077709d13d}} 
+\index{Ast@{Ast}!setRootNode@{setRootNode}}
+\index{setRootNode@{setRootNode}!Ast@{Ast}}
+\doxysubsubsection{\texorpdfstring{setRootNode()}{setRootNode()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$ Ast\+::set\+Root\+Node (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$}]{node }\end{DoxyParamCaption})}
+
+Defines the root node of the A\+ST. 
+\begin{DoxyParams}{Parameters}
+{\em node} & The node to be defined as root node of this A\+ST. \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/ast/Ast.\+h\item 
+src/ast/Ast.\+cpp\end{DoxyCompactItemize}

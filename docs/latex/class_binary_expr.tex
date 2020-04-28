@@ -1,0 +1,122 @@
+\hypertarget{class_binary_expr}{}\doxysection{Binary\+Expr Class Reference}
+\label{class_binary_expr}\index{BinaryExpr@{BinaryExpr}}
+Inheritance diagram for Binary\+Expr\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{class_binary_expr}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{class_binary_expr_a6c3e13fb7e607c58bb941b393b32a10c}{Binary\+Expr}} (\mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$left, Op\+Symb\+::\+Binary\+Op op, \mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$right)
+\item 
+\mbox{\Hypertarget{class_binary_expr_a82d3d721879e41d9401174631e3cb2d5}\label{class_binary_expr_a82d3d721879e41d9401174631e3cb2d5}} 
+{\bfseries Binary\+Expr} (Op\+Symb\+::\+Binary\+Op op)
+\item 
+\mbox{\Hypertarget{class_binary_expr_acc0b6ad7d7d023d10a4ed79f52da837f}\label{class_binary_expr_acc0b6ad7d7d023d10a4ed79f52da837f}} 
+{\footnotesize template$<$typename T1 , typename T2 $>$ }\\{\bfseries Binary\+Expr} (T1 left, Op\+Symb\+::\+Binary\+Op op, T2 right)
+\item 
+\mbox{\Hypertarget{class_binary_expr_a98998a0f45a782f4994b0adedd0efce3}\label{class_binary_expr_a98998a0f45a782f4994b0adedd0efce3}} 
+{\footnotesize template$<$typename T1 , typename T2 $>$ }\\{\bfseries Binary\+Expr} (T1 left, \mbox{\hyperlink{class_operator}{Operator}} $\ast$op, T2 right)
+\item 
+\mbox{\Hypertarget{class_binary_expr_a1606d121b7fb93562f333996d05ddf40}\label{class_binary_expr_a1606d121b7fb93562f333996d05ddf40}} 
+json {\bfseries to\+Json} () const override
+\item 
+\mbox{\Hypertarget{class_binary_expr_a5ffccc4b03840f7ff9702d90c9077d92}\label{class_binary_expr_a5ffccc4b03840f7ff9702d90c9077d92}} 
+\mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$ {\bfseries get\+Left} () const
+\item 
+\mbox{\Hypertarget{class_binary_expr_a4ea9c585a9c3fd172070efad741d7072}\label{class_binary_expr_a4ea9c585a9c3fd172070efad741d7072}} 
+\mbox{\hyperlink{class_operator}{Operator}} $\ast$ {\bfseries get\+Op} () const
+\item 
+\mbox{\Hypertarget{class_binary_expr_a0b1f1b065024e08f8f7bdb766249bbcf}\label{class_binary_expr_a0b1f1b065024e08f8f7bdb766249bbcf}} 
+\mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$ {\bfseries get\+Right} () const
+\item 
+\mbox{\Hypertarget{class_binary_expr_aac05c82843d99acbc17479fcf4f379ef}\label{class_binary_expr_aac05c82843d99acbc17479fcf4f379ef}} 
+void {\bfseries accept} (\mbox{\hyperlink{class_visitor}{Visitor}} \&v) override
+\item 
+\mbox{\Hypertarget{class_binary_expr_aa79d5a341d2e0fc0faec8571b8848d64}\label{class_binary_expr_aa79d5a341d2e0fc0faec8571b8848d64}} 
+std\+::string {\bfseries get\+Node\+Name} () const override
+\item 
+\mbox{\Hypertarget{class_binary_expr_a7c3b5cd00b23faa9b148a7cc80ada6e0}\label{class_binary_expr_a7c3b5cd00b23faa9b148a7cc80ada6e0}} 
+\mbox{\hyperlink{class_binary_expr}{Binary\+Expr}} $\ast$ {\bfseries contains} (\mbox{\hyperlink{class_binary_expr}{Binary\+Expr}} $\ast$bexp\+Template, \mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$excluded\+Subtree) override
+\item 
+\mbox{\Hypertarget{class_binary_expr_a8d445118d56e9603ce19034256c56d72}\label{class_binary_expr_a8d445118d56e9603ce19034256c56d72}} 
+bool {\bfseries contains} (\mbox{\hyperlink{class_variable}{Variable}} $\ast$var) override
+\item 
+\mbox{\Hypertarget{class_binary_expr_a8dbbce08f769c80969e17f91d94c14e4}\label{class_binary_expr_a8dbbce08f769c80969e17f91d94c14e4}} 
+bool {\bfseries is\+Equal} (\mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$other) override
+\item 
+\mbox{\Hypertarget{class_binary_expr_a5f602601795e27520f21aa10d81c6491}\label{class_binary_expr_a5f602601795e27520f21aa10d81c6491}} 
+\mbox{\hyperlink{class_literal}{Literal}} $\ast$ {\bfseries evaluate} (\mbox{\hyperlink{class_ast}{Ast}} \&ast) override
+\item 
+\mbox{\Hypertarget{class_binary_expr_a95740a7b7b4e7e84309d157b73a3f4a9}\label{class_binary_expr_a95740a7b7b4e7e84309d157b73a3f4a9}} 
+int {\bfseries count\+By\+Template} (\mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$abstract\+Expr) override
+\item 
+\mbox{\Hypertarget{class_binary_expr_ad7360a19aa468a661f40d0b2982dedf3}\label{class_binary_expr_ad7360a19aa468a661f40d0b2982dedf3}} 
+std\+::vector$<$ std\+::string $>$ {\bfseries get\+Variable\+Identifiers} () override
+\item 
+\mbox{\Hypertarget{class_binary_expr_a4d65ee28d88ca1afe14d29bd786e9bf1}\label{class_binary_expr_a4d65ee28d88ca1afe14d29bd786e9bf1}} 
+void {\bfseries set\+Attributes} (\mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$left\+Operand, \mbox{\hyperlink{class_operator}{Operator}} $\ast$operatore, \mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$right\+Operand)
+\item 
+int \mbox{\hyperlink{class_binary_expr_a3f3dadbfd4459282d6cd1b2be4cfb308}{get\+Max\+Number\+Children}} () override
+\item 
+bool \mbox{\hyperlink{class_binary_expr_a1e88eadced6d5b737b4188435e69724b}{supports\+Circuit\+Mode}} () override
+\end{DoxyCompactItemize}
+\doxysubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_binary_expr_a410b701f610119a496521ae427e96d26}\label{class_binary_expr_a410b701f610119a496521ae427e96d26}} 
+static void {\bfseries swap\+Operands\+Left\+A\+With\+RightB} (\mbox{\hyperlink{class_binary_expr}{Binary\+Expr}} $\ast$bexpA, \mbox{\hyperlink{class_binary_expr}{Binary\+Expr}} $\ast$bexpB)
+\end{DoxyCompactItemize}
+\doxysubsection*{Additional Inherited Members}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{class_binary_expr_a6c3e13fb7e607c58bb941b393b32a10c}\label{class_binary_expr_a6c3e13fb7e607c58bb941b393b32a10c}} 
+\index{BinaryExpr@{BinaryExpr}!BinaryExpr@{BinaryExpr}}
+\index{BinaryExpr@{BinaryExpr}!BinaryExpr@{BinaryExpr}}
+\doxysubsubsection{\texorpdfstring{BinaryExpr()}{BinaryExpr()}}
+{\footnotesize\ttfamily Binary\+Expr\+::\+Binary\+Expr (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$}]{left,  }\item[{Op\+Symb\+::\+Binary\+Op}]{op,  }\item[{\mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$}]{right }\end{DoxyParamCaption})}
+
+Represents an expression of the form \char`\"{}left op right\char`\"{}, e.\+g., \char`\"{}2 + a\char`\"{} or \char`\"{}53 $\ast$ 3\char`\"{}. 
+\begin{DoxyParams}{Parameters}
+{\em left} & is the left operand of the expression. \\
+\hline
+{\em op} & is the operator of the expression. \\
+\hline
+{\em right} & is the right operand of the expression. \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_binary_expr_a3f3dadbfd4459282d6cd1b2be4cfb308}\label{class_binary_expr_a3f3dadbfd4459282d6cd1b2be4cfb308}} 
+\index{BinaryExpr@{BinaryExpr}!getMaxNumberChildren@{getMaxNumberChildren}}
+\index{getMaxNumberChildren@{getMaxNumberChildren}!BinaryExpr@{BinaryExpr}}
+\doxysubsubsection{\texorpdfstring{getMaxNumberChildren()}{getMaxNumberChildren()}}
+{\footnotesize\ttfamily int Binary\+Expr\+::get\+Max\+Number\+Children (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Indicates the number of children that are allowed for a specific node. For example, a binary expression accepts exactly three attributes and hence also exactly three children\+: left operand, right operand, and operator. \mbox{\hyperlink{class_if}{If}} the node does not implement support for child/parent relationships, \mbox{\hyperlink{class_binary_expr_a3f3dadbfd4459282d6cd1b2be4cfb308}{get\+Max\+Number\+Children()}} return 0. \begin{DoxyReturn}{Returns}
+An integer indicating the number of allowed children for a specific node. 
+\end{DoxyReturn}
+
+
+Reimplemented from \mbox{\hyperlink{class_node_a706b15cc2face736613d4f8c1e93fd97}{Node}}.
+
+\mbox{\Hypertarget{class_binary_expr_a1e88eadced6d5b737b4188435e69724b}\label{class_binary_expr_a1e88eadced6d5b737b4188435e69724b}} 
+\index{BinaryExpr@{BinaryExpr}!supportsCircuitMode@{supportsCircuitMode}}
+\index{supportsCircuitMode@{supportsCircuitMode}!BinaryExpr@{BinaryExpr}}
+\doxysubsubsection{\texorpdfstring{supportsCircuitMode()}{supportsCircuitMode()}}
+{\footnotesize\ttfamily bool Binary\+Expr\+::supports\+Circuit\+Mode (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+This method returns True iff the class derived from the \mbox{\hyperlink{class_node}{Node}} class properly makes use of the child/parent fields as it would be expected in a circuit. 
+
+Reimplemented from \mbox{\hyperlink{class_node_ab15a5ca0153ea9b2d5335f385a8f0459}{Node}}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+/\+Users/patrick/git/master\+\_\+thesis\+\_\+code/include/ast/Binary\+Expr.\+h\item 
+/\+Users/patrick/git/master\+\_\+thesis\+\_\+code/src/ast/Binary\+Expr.\+cpp\end{DoxyCompactItemize}

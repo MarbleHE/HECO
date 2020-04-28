@@ -1,0 +1,73 @@
+\hypertarget{class_node_relationship}{}\doxysection{Node\+Relationship Class Reference}
+\label{class_node_relationship}\index{NodeRelationship@{NodeRelationship}}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_node_relationship_a186757a8a6ab483c56d4d3449262fbad}\label{class_node_relationship_a186757a8a6ab483c56d4d3449262fbad}} 
+{\bfseries Node\+Relationship} (Relationship\+Type relationship, \mbox{\hyperlink{class_graph_node}{Graph\+Node}} $\ast$g\+Node)
+\item 
+\mbox{\Hypertarget{class_node_relationship_a89b69998538bd1a2181e0d1f02b158e2}\label{class_node_relationship_a89b69998538bd1a2181e0d1f02b158e2}} 
+void {\bfseries add\+Child} (\mbox{\hyperlink{class_graph_node}{Graph\+Node}} $\ast$child, bool add\+Backreference=true)
+\item 
+\mbox{\Hypertarget{class_node_relationship_a17ae1ab5b2b602ab8e3ef630f70f2e5d}\label{class_node_relationship_a17ae1ab5b2b602ab8e3ef630f70f2e5d}} 
+void {\bfseries add\+Parent} (\mbox{\hyperlink{class_graph_node}{Graph\+Node}} $\ast$parent, bool add\+Backreference=true)
+\item 
+\mbox{\Hypertarget{class_node_relationship_a4e12f2a5c754f1f5a1725fd519e7c256}\label{class_node_relationship_a4e12f2a5c754f1f5a1725fd519e7c256}} 
+const std\+::vector$<$ \mbox{\hyperlink{class_graph_node}{Graph\+Node}} $\ast$ $>$ \& {\bfseries get\+Children} () const
+\item 
+\mbox{\Hypertarget{class_node_relationship_a248c68be7dcbf8e76ce75d6e34dd1ca4}\label{class_node_relationship_a248c68be7dcbf8e76ce75d6e34dd1ca4}} 
+const std\+::vector$<$ \mbox{\hyperlink{class_graph_node}{Graph\+Node}} $\ast$ $>$ \& {\bfseries get\+Parents} () const
+\item 
+\mbox{\Hypertarget{class_node_relationship_adbf61b46fb6928c30cdccb47cb3a3649}\label{class_node_relationship_adbf61b46fb6928c30cdccb47cb3a3649}} 
+\mbox{\hyperlink{class_graph_node}{Graph\+Node}} $\ast$ {\bfseries get\+Only\+Child} () const
+\item 
+\mbox{\Hypertarget{class_node_relationship_a5d30cca2735a9741185d25efaff236f1}\label{class_node_relationship_a5d30cca2735a9741185d25efaff236f1}} 
+\mbox{\hyperlink{class_graph_node}{Graph\+Node}} $\ast$ {\bfseries get\+Child\+At\+Index} (int idx) const
+\item 
+void \mbox{\hyperlink{class_node_relationship_ae59eaabee8e6713bea817356c51e445b}{traverse\+And\+Print\+Nodes}} (std\+::ostream \&output\+Stream=std\+::cout) const
+\item 
+bool \mbox{\hyperlink{class_node_relationship_a9c7917ca6272c23d288ec3b0d15df125}{are\+Equal\+Graphs}} (\mbox{\hyperlink{class_graph_node}{Graph\+Node}} $\ast$root\+Node\+Other) const
+\item 
+\mbox{\Hypertarget{class_node_relationship_afda59a66306c4d65aa0ae2c76fa1d89c}\label{class_node_relationship_afda59a66306c4d65aa0ae2c76fa1d89c}} 
+std\+::unordered\+\_\+set$<$ \mbox{\hyperlink{class_graph_node}{Graph\+Node}} $\ast$ $>$ {\bfseries get\+All\+Reachable\+Nodes} () const
+\item 
+\mbox{\Hypertarget{class_node_relationship_afe6fc537331de0187197fe3ad84969bb}\label{class_node_relationship_afe6fc537331de0187197fe3ad84969bb}} 
+bool {\bfseries has\+Child} (\mbox{\hyperlink{class_graph_node}{Graph\+Node}} $\ast$p\+Node)
+\item 
+\mbox{\Hypertarget{class_node_relationship_ae9a44d304b773f9f90e739a3d508d9f1}\label{class_node_relationship_ae9a44d304b773f9f90e739a3d508d9f1}} 
+bool {\bfseries has\+Parent} (\mbox{\hyperlink{class_graph_node}{Graph\+Node}} $\ast$p\+Node)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_node_relationship_a9c7917ca6272c23d288ec3b0d15df125}\label{class_node_relationship_a9c7917ca6272c23d288ec3b0d15df125}} 
+\index{NodeRelationship@{NodeRelationship}!areEqualGraphs@{areEqualGraphs}}
+\index{areEqualGraphs@{areEqualGraphs}!NodeRelationship@{NodeRelationship}}
+\doxysubsubsection{\texorpdfstring{areEqualGraphs()}{areEqualGraphs()}}
+{\footnotesize\ttfamily bool Node\+Relationship\+::are\+Equal\+Graphs (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_graph_node}{Graph\+Node}} $\ast$}]{root\+Node\+Other }\end{DoxyParamCaption}) const}
+
+Compares two graphs given by their respective root node. The node on that this method is called is treated as the first root node, the second root node needs to be passed as root\+Node\+Other. Note\+: This method does not compare the ref\+To\+Original\+Node but instead only traverses both graphs and compares the number of children and parent nodes (structure-\/based comparison). 
+\begin{DoxyParams}{Parameters}
+{\em root\+Node\+Other} & The root node of the second graph. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+True if both graphes have the same structure, otherwise False. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_node_relationship_ae59eaabee8e6713bea817356c51e445b}\label{class_node_relationship_ae59eaabee8e6713bea817356c51e445b}} 
+\index{NodeRelationship@{NodeRelationship}!traverseAndPrintNodes@{traverseAndPrintNodes}}
+\index{traverseAndPrintNodes@{traverseAndPrintNodes}!NodeRelationship@{NodeRelationship}}
+\doxysubsubsection{\texorpdfstring{traverseAndPrintNodes()}{traverseAndPrintNodes()}}
+{\footnotesize\ttfamily void Node\+Relationship\+::traverse\+And\+Print\+Nodes (\begin{DoxyParamCaption}\item[{std\+::ostream \&}]{output\+Stream = {\ttfamily std\+:\+:cout} }\end{DoxyParamCaption}) const}
+
+Traverses all nodes reachable from the current nodes (descendants) in a depth-\/first search style and prints the node\textquotesingle{}s unique node ID. 
+\begin{DoxyParams}{Parameters}
+{\em output\+Stream} & The stream where to send the output string to. \\
+\hline
+\end{DoxyParams}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/utilities/Node\+Relationship.\+h\item 
+src/utilities/Node\+Relationship.\+cpp\end{DoxyCompactItemize}

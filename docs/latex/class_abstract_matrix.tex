@@ -1,0 +1,264 @@
+\hypertarget{class_abstract_matrix}{}\doxysection{Abstract\+Matrix Class Reference}
+\label{class_abstract_matrix}\index{AbstractMatrix@{AbstractMatrix}}
+
+
+{\ttfamily \#include $<$Abstract\+Matrix.\+h$>$}
+
+Inheritance diagram for Abstract\+Matrix\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{class_abstract_matrix}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual \mbox{\hyperlink{class_abstract_matrix}{Abstract\+Matrix}} $\ast$ \mbox{\hyperlink{class_abstract_matrix_a56c9f220ae027726578c13414ea41be5}{rotate}} (int rotation\+Factor, bool in\+Place)=0
+\item 
+virtual \mbox{\hyperlink{class_abstract_matrix}{Abstract\+Matrix}} $\ast$ \mbox{\hyperlink{class_abstract_matrix_abdf3d038dae75921ad19a75e69f1702d}{transpose}} (bool in\+Place)=0
+\item 
+virtual \mbox{\hyperlink{class_dimension}{Dimension}} \& \mbox{\hyperlink{class_abstract_matrix_ae9bc96cc8164f3c07bc05811ecaf06c6}{get\+Dimensions}} ()=0
+\item 
+virtual std\+::string \mbox{\hyperlink{class_abstract_matrix_a7a76eed44ffad82c096cfcfd87c7ef91}{to\+String}} ()=0
+\item 
+virtual bool \mbox{\hyperlink{class_abstract_matrix_a7e28da42335bf4ec099561d8e134cfb0}{is\+Scalar}} () const =0
+\item 
+json \mbox{\hyperlink{class_abstract_matrix_a951b47fa76fbbf7854d6476144c348da}{to\+Json}} () const override=0
+\item 
+virtual \mbox{\hyperlink{class_abstract_matrix}{Abstract\+Matrix}} $\ast$ \mbox{\hyperlink{class_abstract_matrix_ad019e20d03547eef559d2be79994b311}{apply\+Binary\+Operator}} (\mbox{\hyperlink{class_abstract_matrix}{Abstract\+Matrix}} $\ast$rhs\+Operand, \mbox{\hyperlink{class_operator}{Operator}} $\ast$os)=0
+\item 
+virtual \mbox{\hyperlink{class_abstract_matrix}{Abstract\+Matrix}} $\ast$ \mbox{\hyperlink{class_abstract_matrix_a95f3806e457ffebfc1cbff6c30ba8277}{apply\+Unary\+Operator\+Componentwise}} (\mbox{\hyperlink{class_operator}{Operator}} $\ast$os)=0
+\item 
+virtual \mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$ \mbox{\hyperlink{class_abstract_matrix_aca07ee2edc81ab885a669921661bd41e}{get\+Element\+At}} (int row, int column)=0
+\item 
+virtual void \mbox{\hyperlink{class_abstract_matrix_a70257bab0ed405da3f7fec33619c1515}{set\+Element\+At}} (int row, int column, \mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$value)=0
+\item 
+virtual bool \mbox{\hyperlink{class_abstract_matrix_ad0d91ebb353d35e3db0f9f90d34dd9c6}{contains\+Abstract\+Exprs}} ()=0
+\item 
+\mbox{\Hypertarget{class_abstract_matrix_af7e697db07d8686422ed02b67454aa37}\label{class_abstract_matrix_af7e697db07d8686422ed02b67454aa37}} 
+bool {\bfseries operator==} (const \mbox{\hyperlink{class_abstract_matrix}{Abstract\+Matrix}} \&rhs) const
+\item 
+\mbox{\Hypertarget{class_abstract_matrix_a73d5716723a749cc62295afa54ba203d}\label{class_abstract_matrix_a73d5716723a749cc62295afa54ba203d}} 
+bool {\bfseries operator!=} (const \mbox{\hyperlink{class_abstract_matrix}{Abstract\+Matrix}} \&rhs) const
+\item 
+\mbox{\hyperlink{class_abstract_matrix}{Abstract\+Matrix}} $\ast$ \mbox{\hyperlink{class_abstract_matrix_ab0233364480213fd88222bbe664505f6}{clone}} (bool keep\+Original\+Unique\+Node\+Id) override=0
+\end{DoxyCompactItemize}
+\doxysubsection*{Additional Inherited Members}
+
+
+\doxysubsection{Detailed Description}
+A helper class that allows to access and use all Matrix$<$\+T$>$ instances using a unified interface, without needing exact knowledge about the specific template type T. 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_abstract_matrix_ad019e20d03547eef559d2be79994b311}\label{class_abstract_matrix_ad019e20d03547eef559d2be79994b311}} 
+\index{AbstractMatrix@{AbstractMatrix}!applyBinaryOperator@{applyBinaryOperator}}
+\index{applyBinaryOperator@{applyBinaryOperator}!AbstractMatrix@{AbstractMatrix}}
+\doxysubsubsection{\texorpdfstring{applyBinaryOperator()}{applyBinaryOperator()}}
+{\footnotesize\ttfamily virtual \mbox{\hyperlink{class_abstract_matrix}{Abstract\+Matrix}}$\ast$ Abstract\+Matrix\+::apply\+Binary\+Operator (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_abstract_matrix}{Abstract\+Matrix}} $\ast$}]{rhs\+Operand,  }\item[{\mbox{\hyperlink{class_operator}{Operator}} $\ast$}]{os }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+A helper method that is defined in \mbox{\hyperlink{class_abstract_matrix}{Abstract\+Matrix}} and overridden here. It casts the first parameter (\mbox{\hyperlink{class_abstract_matrix}{Abstract\+Matrix}}) to Matrix$<$\+T$>$ where T is the template type (e.\+g., int, float). This is needed to call the suitable apply\+Binary\+Operator\+Componentwise method that handles the binary operator application. 
+\begin{DoxyParams}{Parameters}
+{\em rhs\+Operand} & The operand on the right hand-\/side. The current matrix is the left hand-\/side operand. \\
+\hline
+{\em op} & The operator to be applied on the two given matrices. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The \mbox{\hyperlink{class_abstract_matrix}{Abstract\+Matrix}} resulting from applying the operator op on the two matrices. 
+\end{DoxyReturn}
+
+
+Implemented in \mbox{\hyperlink{class_matrix_a1e361e9f266413b7cb0d79d5fbbf29e1}{Matrix$<$ T $>$}}.
+
+\mbox{\Hypertarget{class_abstract_matrix_a95f3806e457ffebfc1cbff6c30ba8277}\label{class_abstract_matrix_a95f3806e457ffebfc1cbff6c30ba8277}} 
+\index{AbstractMatrix@{AbstractMatrix}!applyUnaryOperatorComponentwise@{applyUnaryOperatorComponentwise}}
+\index{applyUnaryOperatorComponentwise@{applyUnaryOperatorComponentwise}!AbstractMatrix@{AbstractMatrix}}
+\doxysubsubsection{\texorpdfstring{applyUnaryOperatorComponentwise()}{applyUnaryOperatorComponentwise()}}
+{\footnotesize\ttfamily virtual \mbox{\hyperlink{class_abstract_matrix}{Abstract\+Matrix}}$\ast$ Abstract\+Matrix\+::apply\+Unary\+Operator\+Componentwise (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_operator}{Operator}} $\ast$}]{os }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+Applies the unary operator specified by the given \mbox{\hyperlink{class_operator}{Operator}} os to every element of the matrix. 
+\begin{DoxyParams}{Parameters}
+{\em os} & The operator to be applied to every element of the matrix. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A new matrix where the \mbox{\hyperlink{class_operator}{Operator}} as was applied to every element. 
+\end{DoxyReturn}
+
+
+Implemented in \mbox{\hyperlink{class_matrix_a300b59036abc9f5a7d5aa014d533bbeb}{Matrix$<$ T $>$}}, \mbox{\hyperlink{class_matrix_a5ce1cb3d8f1b5a04b0e3de8ae3bf1092}{Matrix$<$ T $>$}}, \mbox{\hyperlink{class_matrix_aae1c5e6e688ce624e3aaf21ca39d52e9}{Matrix$<$ T $>$}}, and \mbox{\hyperlink{class_matrix_a43dc6611295b1c934ea7a54e72727599}{Matrix$<$ T $>$}}.
+
+\mbox{\Hypertarget{class_abstract_matrix_ab0233364480213fd88222bbe664505f6}\label{class_abstract_matrix_ab0233364480213fd88222bbe664505f6}} 
+\index{AbstractMatrix@{AbstractMatrix}!clone@{clone}}
+\index{clone@{clone}!AbstractMatrix@{AbstractMatrix}}
+\doxysubsubsection{\texorpdfstring{clone()}{clone()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{class_abstract_matrix}{Abstract\+Matrix}}$\ast$ Abstract\+Matrix\+::clone (\begin{DoxyParamCaption}\item[{bool}]{keep\+Original\+Unique\+Node\+Id }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [pure virtual]}}
+
+Clones a node recursively, i.\+e., by including all of its children. 
+\begin{DoxyParams}{Parameters}
+{\em keep\+Original\+Unique\+Node\+Id} & Specifies whether to keep all of the unique node I\+Ds of the original nodes. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A clone of the node including clones of all of its children. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{class_abstract_node_ab7f13808b586865a27e2635995be5056}{Abstract\+Node}}.
+
+
+
+Implemented in \mbox{\hyperlink{class_matrix_a3741150186f463585ef6bbe6dc178d06}{Matrix$<$ T $>$}}, and \mbox{\hyperlink{class_matrix_a32b557782a90d3936e800a32b1d471e6}{Matrix$<$ T $>$}}.
+
+\mbox{\Hypertarget{class_abstract_matrix_ad0d91ebb353d35e3db0f9f90d34dd9c6}\label{class_abstract_matrix_ad0d91ebb353d35e3db0f9f90d34dd9c6}} 
+\index{AbstractMatrix@{AbstractMatrix}!containsAbstractExprs@{containsAbstractExprs}}
+\index{containsAbstractExprs@{containsAbstractExprs}!AbstractMatrix@{AbstractMatrix}}
+\doxysubsubsection{\texorpdfstring{containsAbstractExprs()}{containsAbstractExprs()}}
+{\footnotesize\ttfamily virtual bool Abstract\+Matrix\+::contains\+Abstract\+Exprs (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+Returns True if this \mbox{\hyperlink{class_abstract_matrix}{Abstract\+Matrix}} is of template type Abstract\+Expr$\ast$, i.\+e., a Matrix$<$\+Abstract\+Expr$\ast$$>$. \begin{DoxyReturn}{Returns}
+True if this is a Matrix$<$\+Abstract\+Expr$\ast$$>$, otherwise False. 
+\end{DoxyReturn}
+
+
+Implemented in \mbox{\hyperlink{class_matrix_a4d50ac7ff98b063cfac9e672ad9b7dad}{Matrix$<$ T $>$}}, and \mbox{\hyperlink{class_matrix_ad08c59bd8831645a47a5ed6bbad6079b}{Matrix$<$ T $>$}}.
+
+\mbox{\Hypertarget{class_abstract_matrix_ae9bc96cc8164f3c07bc05811ecaf06c6}\label{class_abstract_matrix_ae9bc96cc8164f3c07bc05811ecaf06c6}} 
+\index{AbstractMatrix@{AbstractMatrix}!getDimensions@{getDimensions}}
+\index{getDimensions@{getDimensions}!AbstractMatrix@{AbstractMatrix}}
+\doxysubsubsection{\texorpdfstring{getDimensions()}{getDimensions()}}
+{\footnotesize\ttfamily virtual \mbox{\hyperlink{class_dimension}{Dimension}}\& Abstract\+Matrix\+::get\+Dimensions (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+Returns the dimension object that indicates the matrix dimensions. \begin{DoxyReturn}{Returns}
+A reference to the dimension object associated to this matrix. 
+\end{DoxyReturn}
+
+
+Implemented in \mbox{\hyperlink{class_matrix_a7292acd5bc04cb97fac8ff571a6300cd}{Matrix$<$ T $>$}}.
+
+\mbox{\Hypertarget{class_abstract_matrix_aca07ee2edc81ab885a669921661bd41e}\label{class_abstract_matrix_aca07ee2edc81ab885a669921661bd41e}} 
+\index{AbstractMatrix@{AbstractMatrix}!getElementAt@{getElementAt}}
+\index{getElementAt@{getElementAt}!AbstractMatrix@{AbstractMatrix}}
+\doxysubsubsection{\texorpdfstring{getElementAt()}{getElementAt()}}
+{\footnotesize\ttfamily virtual \mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}}$\ast$ Abstract\+Matrix\+::get\+Element\+At (\begin{DoxyParamCaption}\item[{int}]{row,  }\item[{int}]{column }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+Returns an \mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} containing the value of the element at index specified by the given (row, column) pair. The value is an \mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} pointer because matrix elements can be defined using expressions. 
+\begin{DoxyParams}{Parameters}
+{\em row} & The row number of the element to be returned as a pointer. \\
+\hline
+{\em column} & The column number of the element to be returned as a pointer. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+An \mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} pointer pointing to the value of the element at position (row, column). 
+\end{DoxyReturn}
+
+
+Implemented in \mbox{\hyperlink{class_matrix_aefcb931e41b985f1fe80b41d7360833e}{Matrix$<$ T $>$}}, \mbox{\hyperlink{class_matrix_acaf1b6443e676fd826cb2a2f1b5c5453}{Matrix$<$ T $>$}}, \mbox{\hyperlink{class_matrix_a32ebe015a1fdcf87a97e31a3b3a26155}{Matrix$<$ T $>$}}, \mbox{\hyperlink{class_matrix_a19e2ec6e324d8bc631baeb3bc4b094bf}{Matrix$<$ T $>$}}, \mbox{\hyperlink{class_matrix_a5ddfffc8b1907c0bf6ba20adb11f7296}{Matrix$<$ T $>$}}, and \mbox{\hyperlink{class_matrix_a7f46e037d3a17126a96382e6626687bf}{Matrix$<$ T $>$}}.
+
+\mbox{\Hypertarget{class_abstract_matrix_a7e28da42335bf4ec099561d8e134cfb0}\label{class_abstract_matrix_a7e28da42335bf4ec099561d8e134cfb0}} 
+\index{AbstractMatrix@{AbstractMatrix}!isScalar@{isScalar}}
+\index{isScalar@{isScalar}!AbstractMatrix@{AbstractMatrix}}
+\doxysubsubsection{\texorpdfstring{isScalar()}{isScalar()}}
+{\footnotesize\ttfamily virtual bool Abstract\+Matrix\+::is\+Scalar (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+Checks whether this matrix is a scalar, i.\+e., has dimension (1,1). \begin{DoxyReturn}{Returns}
+True if this matrix is a scalar, otherwise False. 
+\end{DoxyReturn}
+
+
+Implemented in \mbox{\hyperlink{class_matrix_ad1fc06d1f1d29dde1220a05b848ce68a}{Matrix$<$ T $>$}}.
+
+\mbox{\Hypertarget{class_abstract_matrix_a56c9f220ae027726578c13414ea41be5}\label{class_abstract_matrix_a56c9f220ae027726578c13414ea41be5}} 
+\index{AbstractMatrix@{AbstractMatrix}!rotate@{rotate}}
+\index{rotate@{rotate}!AbstractMatrix@{AbstractMatrix}}
+\doxysubsubsection{\texorpdfstring{rotate()}{rotate()}}
+{\footnotesize\ttfamily virtual \mbox{\hyperlink{class_abstract_matrix}{Abstract\+Matrix}}$\ast$ Abstract\+Matrix\+::rotate (\begin{DoxyParamCaption}\item[{int}]{rotation\+Factor,  }\item[{bool}]{in\+Place }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+Rotates a matrix by a given rotation\+Factor. 
+\begin{DoxyParams}{Parameters}
+{\em rotation\+Factor} & Determines the number of rotations and its direction. \mbox{\hyperlink{class_if}{If}} rotation\+Factor is positive ($>$0), then the elements are rotated to the right, otherwise (rotation\+Factor$<$0) the elements are rotated to the left. \\
+\hline
+{\em in\+Place} & \mbox{\hyperlink{class_if}{If}} True, then modifies the current matrix and returns the modified matrix. In case that in\+Place is False, keeps the current matrix untouched and returns instead a transposed copy. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The rotated matrix that is either the rotated current matrix (in\+Place=True) or a rotated copy of the current matrix (in\+Place=False). 
+\end{DoxyReturn}
+
+
+Implemented in \mbox{\hyperlink{class_matrix_a4d151645a8e447adaa054bcd90f1f815}{Matrix$<$ T $>$}}.
+
+\mbox{\Hypertarget{class_abstract_matrix_a70257bab0ed405da3f7fec33619c1515}\label{class_abstract_matrix_a70257bab0ed405da3f7fec33619c1515}} 
+\index{AbstractMatrix@{AbstractMatrix}!setElementAt@{setElementAt}}
+\index{setElementAt@{setElementAt}!AbstractMatrix@{AbstractMatrix}}
+\doxysubsubsection{\texorpdfstring{setElementAt()}{setElementAt()}}
+{\footnotesize\ttfamily virtual void Abstract\+Matrix\+::set\+Element\+At (\begin{DoxyParamCaption}\item[{int}]{row,  }\item[{int}]{column,  }\item[{\mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$}]{value }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+Sets a new value to the matrix element at the position indicated by (row, column) parameters. 
+\begin{DoxyParams}{Parameters}
+{\em row} & The row index of the element where the given value should be written to. \\
+\hline
+{\em column} & The column index of the element where the given value should be written to. \\
+\hline
+{\em value} & The value to write to the given matrix position. \\
+\hline
+\end{DoxyParams}
+
+
+Implemented in \mbox{\hyperlink{class_matrix_a06ee549533a4e3640ca0fa86956b5398}{Matrix$<$ T $>$}}, \mbox{\hyperlink{class_matrix_aaa308b4764faae008bc3cd69164b19c1}{Matrix$<$ T $>$}}, \mbox{\hyperlink{class_matrix_a36cd9641927b35f825ef24d53d1b7039}{Matrix$<$ T $>$}}, \mbox{\hyperlink{class_matrix_af21c39c65cdf7e35d298f0db4fe3e237}{Matrix$<$ T $>$}}, \mbox{\hyperlink{class_matrix_a0774f0366fe3cf97d74b0a8a63993407}{Matrix$<$ T $>$}}, and \mbox{\hyperlink{class_matrix_a5e0e1457a4e75765f560c2216785ed64}{Matrix$<$ T $>$}}.
+
+\mbox{\Hypertarget{class_abstract_matrix_a951b47fa76fbbf7854d6476144c348da}\label{class_abstract_matrix_a951b47fa76fbbf7854d6476144c348da}} 
+\index{AbstractMatrix@{AbstractMatrix}!toJson@{toJson}}
+\index{toJson@{toJson}!AbstractMatrix@{AbstractMatrix}}
+\doxysubsubsection{\texorpdfstring{toJson()}{toJson()}}
+{\footnotesize\ttfamily json Abstract\+Matrix\+::to\+Json (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [pure virtual]}}
+
+Creates a J\+S\+ON representation of this matrix. \begin{DoxyReturn}{Returns}
+The J\+S\+ON representation of this matrix. 
+\end{DoxyReturn}
+
+
+Reimplemented from \mbox{\hyperlink{class_abstract_node_a0ee4c4915b6f76415aa2187535359899}{Abstract\+Node}}.
+
+
+
+Implemented in \mbox{\hyperlink{class_matrix_a90298e7f3b73138b6fc29cefb43524d5}{Matrix$<$ T $>$}}, and \mbox{\hyperlink{class_matrix_a9c2e653926b1d5e04bac5c838724c70f}{Matrix$<$ T $>$}}.
+
+\mbox{\Hypertarget{class_abstract_matrix_a7a76eed44ffad82c096cfcfd87c7ef91}\label{class_abstract_matrix_a7a76eed44ffad82c096cfcfd87c7ef91}} 
+\index{AbstractMatrix@{AbstractMatrix}!toString@{toString}}
+\index{toString@{toString}!AbstractMatrix@{AbstractMatrix}}
+\doxysubsubsection{\texorpdfstring{toString()}{toString()}}
+{\footnotesize\ttfamily virtual std\+::string Abstract\+Matrix\+::to\+String (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+Creates a string representation of this matrix using the matrix text representation by M\+A\+T\+L\+AB. \mbox{\hyperlink{class_for}{For}} example, a 3x2 matrix would look like \mbox{[}2 3; 2 332; 43 3\mbox{]} where the semicolon (;) serves as row delimiter. \begin{DoxyReturn}{Returns}
+A string representation of this matrix. 
+\end{DoxyReturn}
+
+
+Implemented in \mbox{\hyperlink{class_matrix_aff71d8832b86b4f3f04ec353da06b1a8}{Matrix$<$ T $>$}}.
+
+\mbox{\Hypertarget{class_abstract_matrix_abdf3d038dae75921ad19a75e69f1702d}\label{class_abstract_matrix_abdf3d038dae75921ad19a75e69f1702d}} 
+\index{AbstractMatrix@{AbstractMatrix}!transpose@{transpose}}
+\index{transpose@{transpose}!AbstractMatrix@{AbstractMatrix}}
+\doxysubsubsection{\texorpdfstring{transpose()}{transpose()}}
+{\footnotesize\ttfamily virtual \mbox{\hyperlink{class_abstract_matrix}{Abstract\+Matrix}}$\ast$ Abstract\+Matrix\+::transpose (\begin{DoxyParamCaption}\item[{bool}]{in\+Place }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+Transposes a matrix, i.\+e., moves every element a\+\_\+ij to a\+\_\+ji. 
+\begin{DoxyParams}{Parameters}
+{\em in\+Place} & \mbox{\hyperlink{class_if}{If}} True, then modifies the current matrix and returns the modified matrix. In case that in\+Place is False, keeps the current matrix untouched and returns instead a transposed copy. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The transposed matrix that is either the transposed current matrix (in\+Place=True) or a transposed copy of the current matrix (in\+Place=False). 
+\end{DoxyReturn}
+
+
+Implemented in \mbox{\hyperlink{class_matrix_a662076fed877f8b64e0a365855dc5dc1}{Matrix$<$ T $>$}}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/ast/Abstract\+Matrix.\+h\item 
+src/ast/Abstract\+Matrix.\+cpp\end{DoxyCompactItemize}

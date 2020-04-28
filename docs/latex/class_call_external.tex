@@ -1,0 +1,100 @@
+\hypertarget{class_call_external}{}\doxysection{Call\+External Class Reference}
+\label{class_call_external}\index{CallExternal@{CallExternal}}
+Inheritance diagram for Call\+External\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{class_call_external}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_call_external_a32bd15f438a65e212b129589dd63fa54}\label{class_call_external_a32bd15f438a65e212b129589dd63fa54}} 
+{\bfseries Call\+External} (std\+::string function\+Name)
+\item 
+\mbox{\Hypertarget{class_call_external_a72ecaebc6d950b1e4832ab44f1b8a936}\label{class_call_external_a72ecaebc6d950b1e4832ab44f1b8a936}} 
+{\bfseries Call\+External} (std\+::string function\+Name, std\+::vector$<$ \mbox{\hyperlink{class_function_parameter}{Function\+Parameter}} $\ast$ $>$ arguments)
+\item 
+\mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$ \mbox{\hyperlink{class_call_external_acbc9c298b704c9c3fe7a6cbbd8678ef8}{clone}} (bool keep\+Original\+Unique\+Node\+Id) override
+\item 
+json \mbox{\hyperlink{class_call_external_a29480977d4043815acd01bbbe6aa9688}{to\+Json}} () const override
+\item 
+void \mbox{\hyperlink{class_call_external_a920f6f3e704148495d7136b125727d97}{accept}} (\mbox{\hyperlink{class_visitor}{Visitor}} \&v) override
+\item 
+\mbox{\Hypertarget{class_call_external_a8a5826670c6a8a6146ec4d06de3782aa}\label{class_call_external_a8a5826670c6a8a6146ec4d06de3782aa}} 
+const std\+::string \& {\bfseries get\+Function\+Name} () const
+\item 
+\mbox{\Hypertarget{class_call_external_aed08cec1c710440aeeb9ffb178c36d61}\label{class_call_external_aed08cec1c710440aeeb9ffb178c36d61}} 
+const std\+::vector$<$ \mbox{\hyperlink{class_function_parameter}{Function\+Parameter}} $\ast$ $>$ \& {\bfseries get\+Arguments} () const
+\item 
+std\+::string \mbox{\hyperlink{class_call_external_aaa86d30b577ae5daa404e5ce3d0b6118}{get\+Node\+Type}} () const override
+\end{DoxyCompactItemize}
+\doxysubsection*{Additional Inherited Members}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_call_external_a920f6f3e704148495d7136b125727d97}\label{class_call_external_a920f6f3e704148495d7136b125727d97}} 
+\index{CallExternal@{CallExternal}!accept@{accept}}
+\index{accept@{accept}!CallExternal@{CallExternal}}
+\doxysubsubsection{\texorpdfstring{accept()}{accept()}}
+{\footnotesize\ttfamily void Call\+External\+::accept (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_visitor}{Visitor}} \&}]{v }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Part of the visitor pattern. Must be overridden in derived classes and must call v.\+visit(node). This allows the correct overload for the derived class to be called in the visitor. 
+\begin{DoxyParams}{Parameters}
+{\em v} & \mbox{\hyperlink{class_visitor}{Visitor}} that offers a visit() method \\
+\hline
+\end{DoxyParams}
+
+
+Implements \mbox{\hyperlink{class_abstract_node_a890a24af49cedda13f23cbe41931dee5}{Abstract\+Node}}.
+
+\mbox{\Hypertarget{class_call_external_acbc9c298b704c9c3fe7a6cbbd8678ef8}\label{class_call_external_acbc9c298b704c9c3fe7a6cbbd8678ef8}} 
+\index{CallExternal@{CallExternal}!clone@{clone}}
+\index{clone@{clone}!CallExternal@{CallExternal}}
+\doxysubsubsection{\texorpdfstring{clone()}{clone()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$ Call\+External\+::clone (\begin{DoxyParamCaption}\item[{bool}]{keep\+Original\+Unique\+Node\+Id }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Clones a node recursively, i.\+e., by including all of its children. 
+\begin{DoxyParams}{Parameters}
+{\em keep\+Original\+Unique\+Node\+Id} & Specifies whether to keep all of the unique node I\+Ds of the original nodes. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A clone of the node including clones of all of its children. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{class_abstract_node_ab7f13808b586865a27e2635995be5056}{Abstract\+Node}}.
+
+\mbox{\Hypertarget{class_call_external_aaa86d30b577ae5daa404e5ce3d0b6118}\label{class_call_external_aaa86d30b577ae5daa404e5ce3d0b6118}} 
+\index{CallExternal@{CallExternal}!getNodeType@{getNodeType}}
+\index{getNodeType@{getNodeType}!CallExternal@{CallExternal}}
+\doxysubsubsection{\texorpdfstring{getNodeType()}{getNodeType()}}
+{\footnotesize\ttfamily std\+::string Call\+External\+::get\+Node\+Type (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Returns the node\textquotesingle{}s type, which is the name of the object in the A\+ST. This method must be overridden by all classes that inherit from \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} by their respective name (e.\+g., Arithmetic\+Exp, \mbox{\hyperlink{class_function}{Function}}, \mbox{\hyperlink{class_variable}{Variable}}). \begin{DoxyReturn}{Returns}
+The name of the node type. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{class_abstract_node_a8cc40127801e7777c8094f17a3b1efcb}{Abstract\+Node}}.
+
+\mbox{\Hypertarget{class_call_external_a29480977d4043815acd01bbbe6aa9688}\label{class_call_external_a29480977d4043815acd01bbbe6aa9688}} 
+\index{CallExternal@{CallExternal}!toJson@{toJson}}
+\index{toJson@{toJson}!CallExternal@{CallExternal}}
+\doxysubsubsection{\texorpdfstring{toJson()}{toJson()}}
+{\footnotesize\ttfamily json Call\+External\+::to\+Json (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Get the J\+S\+ON representation of the node including all of its children. \begin{DoxyReturn}{Returns}
+J\+S\+ON representation of the node 
+\end{DoxyReturn}
+
+
+Reimplemented from \mbox{\hyperlink{class_abstract_expr_ac1957d8bda1e29b35b822ec0b05c5027}{Abstract\+Expr}}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/ast/Call\+External.\+h\item 
+src/ast/Call\+External.\+cpp\end{DoxyCompactItemize}

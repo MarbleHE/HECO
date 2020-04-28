@@ -1,0 +1,38 @@
+\hypertarget{class_graph_node}{}\doxysection{Graph\+Node Class Reference}
+\label{class_graph_node}\index{GraphNode@{GraphNode}}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_graph_node_a7189ad56e70336a78240e1bb8ef0b599}\label{class_graph_node_a7189ad56e70336a78240e1bb8ef0b599}} 
+{\bfseries Graph\+Node} (Relationship\+Type rel\+Type, std\+::initializer\+\_\+list$<$ \mbox{\hyperlink{class_graph_node}{Graph\+Node}} $\ast$ $>$ parents\+To\+Be\+Added)
+\item 
+\mbox{\Hypertarget{class_graph_node_a11b169ecbdb2be56a3acf0ee0f4b2580}\label{class_graph_node_a11b169ecbdb2be56a3acf0ee0f4b2580}} 
+{\bfseries Graph\+Node} (\mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$original\+Node)
+\item 
+\mbox{\Hypertarget{class_graph_node_ae7b9ba48706fa92d44b680e4a975d579}\label{class_graph_node_ae7b9ba48706fa92d44b680e4a975d579}} 
+\mbox{\hyperlink{class_node_relationship}{Node\+Relationship}} $\ast$ {\bfseries get\+Control\+Flow\+Graph} () const
+\item 
+\mbox{\Hypertarget{class_graph_node_af15342959f8c13eccc0c987778fca769}\label{class_graph_node_af15342959f8c13eccc0c987778fca769}} 
+\mbox{\hyperlink{class_node_relationship}{Node\+Relationship}} $\ast$ {\bfseries get\+Data\+Flow\+Graph} () const
+\item 
+\mbox{\Hypertarget{class_graph_node_a81b866ed1ef1950eb29c597737e23da8}\label{class_graph_node_a81b866ed1ef1950eb29c597737e23da8}} 
+\mbox{\hyperlink{class_node_relationship}{Node\+Relationship}} $\ast$ {\bfseries get\+Relationship} (Relationship\+Type rel) const
+\item 
+\mbox{\Hypertarget{class_graph_node_ab6aa8be27dba02e80bf8ce8d46d099d5}\label{class_graph_node_ab6aa8be27dba02e80bf8ce8d46d099d5}} 
+const std\+::set$<$ std\+::pair$<$ std\+::string, Access\+Type $>$ $>$ \& {\bfseries get\+Accessed\+Variables} () const
+\item 
+\mbox{\Hypertarget{class_graph_node_aa93d68a979e50897b2a3859299f66258}\label{class_graph_node_aa93d68a979e50897b2a3859299f66258}} 
+\mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$ {\bfseries get\+Ref\+To\+Original\+Node} () const
+\item 
+\mbox{\Hypertarget{class_graph_node_a45b17a8753f601d5c65ebe8dd418c189}\label{class_graph_node_a45b17a8753f601d5c65ebe8dd418c189}} 
+void {\bfseries set\+Accessed\+Variables} (std\+::set$<$ std\+::pair$<$ std\+::string, Access\+Type $>$$>$ set)
+\item 
+\mbox{\Hypertarget{class_graph_node_a500c3231001b6545b64e87186e209d2b}\label{class_graph_node_a500c3231001b6545b64e87186e209d2b}} 
+std\+::set$<$ std\+::string $>$ {\bfseries get\+Variables} (Access\+Type access\+Type\+Filter) const
+\end{DoxyCompactItemize}
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/utilities/Graph\+Node.\+h\item 
+src/utilities/Graph\+Node.\+cpp\end{DoxyCompactItemize}

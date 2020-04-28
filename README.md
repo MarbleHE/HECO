@@ -12,9 +12,7 @@
 [![CI/CD](https://github.com/MarbleHE/AST-Optimizer/workflows/build_run_tests/badge.svg?branch=operator-extensions)](https://github.com/MarbleHE/AST-Optimizer/actions)
 [![Documentation](https://img.shields.io/badge/docs-doxygen-blue.svg)](http://marblehe.github.io/AST-Optimizer)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/dwyl/esta/issues)
-
-// TODO Make the doxygen docs available as described in [this blogpost](https://goseeky.wordpress.com/2017/07/22/documentation-101-doxygen-with-github-pages/). Requires owner permissions of repository to make Github pages available.
+[![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/MarbleHE/AST-Optimizer/issues)
 
 This repository hosts an optimizer for Fully Homomorphic Encryption (FHE) working on an AST-like (Abstract Syntax Tree) representation of a program.
 In future, this optimization component will be integrated into the [Marble](https://github.com/MarbleHE/Marble) FHE compiler [1].
@@ -72,7 +70,7 @@ can be rewritten as
 x = (condition)*5 + (1-condition)*21;
 ```
 without using any If statement.
-Furthermore, the simplifier evaluates parts of the computation that are known at compile time (e.g., arithmetic expressions), after having inlined the variable values. 
+Furthermore, the simplifier evaluates parts of the computation that are known at compile time, e.g., arithmetic or logical expressions. 
 
 #### Cone-Rewriting
 
@@ -265,8 +263,7 @@ Further, the static code checker [cpplint](https://github.com/cpplint/cpplint) i
 The documentation can be generated using the supplied configuration `doxygen.conf` as described following:
 
 ```bash
-cd doc/doxygen
-doxygen doxygen.conf
+doxygen Doxyfile
 ```
 
 ### Testing

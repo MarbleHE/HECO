@@ -1,0 +1,193 @@
+\hypertarget{class_var_decl}{}\doxysection{Var\+Decl Class Reference}
+\label{class_var_decl}\index{VarDecl@{VarDecl}}
+Inheritance diagram for Var\+Decl\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{class_var_decl}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_var_decl_af856f91f50cf14aa0a29ded217ab380f}\label{class_var_decl_af856f91f50cf14aa0a29ded217ab380f}} 
+{\bfseries Var\+Decl} (std\+::string name, \mbox{\hyperlink{class_datatype}{Datatype}} $\ast$datatype)
+\item 
+\mbox{\Hypertarget{class_var_decl_a713d9b00ceaf78512c24550418d3804e}\label{class_var_decl_a713d9b00ceaf78512c24550418d3804e}} 
+{\bfseries Var\+Decl} (std\+::string name, Types datatype, \mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$initializer)
+\item 
+\mbox{\Hypertarget{class_var_decl_a42404e913d7fe177074a36e1093e7c00}\label{class_var_decl_a42404e913d7fe177074a36e1093e7c00}} 
+{\bfseries Var\+Decl} (std\+::string name, \mbox{\hyperlink{class_datatype}{Datatype}} $\ast$datatype, \mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$initializer)
+\item 
+\mbox{\Hypertarget{class_var_decl_a6ccff9576c82f7e493d82e68ab0dd7d9}\label{class_var_decl_a6ccff9576c82f7e493d82e68ab0dd7d9}} 
+{\bfseries Var\+Decl} (const std\+::string \&name, void $\ast$abstract\+Expr)
+\item 
+\mbox{\Hypertarget{class_var_decl_a10b2e12ec16638d381e0da35ba57ada7}\label{class_var_decl_a10b2e12ec16638d381e0da35ba57ada7}} 
+{\bfseries Var\+Decl} (std\+::string name, int value)
+\item 
+\mbox{\Hypertarget{class_var_decl_a86f2bd7aea3f4700418116107a8fcbc2}\label{class_var_decl_a86f2bd7aea3f4700418116107a8fcbc2}} 
+{\bfseries Var\+Decl} (std\+::string name, bool value)
+\item 
+\mbox{\hyperlink{class_var_decl}{Var\+Decl}} $\ast$ \mbox{\hyperlink{class_var_decl_a97a3b21c31ee3a938cd77860efad47e4}{clone}} (bool keep\+Original\+Unique\+Node\+Id) override
+\item 
+\mbox{\hyperlink{class_var_decl_ad5729a9a23e4e937a7e96969223df9de}{Var\+Decl}} (std\+::string name, const char $\ast$value\+Assigned\+To)
+\item 
+\mbox{\Hypertarget{class_var_decl_ad11afb6de38e265ef6d0f8f20f068294}\label{class_var_decl_ad11afb6de38e265ef6d0f8f20f068294}} 
+{\bfseries Var\+Decl} (std\+::string name, float value)
+\item 
+\mbox{\Hypertarget{class_var_decl_a249af47746bc497590642b9d0ec2efe4}\label{class_var_decl_a249af47746bc497590642b9d0ec2efe4}} 
+{\bfseries Var\+Decl} (std\+::string name, std\+::string value)
+\item 
+json \mbox{\hyperlink{class_var_decl_acab217ec9794a1d18443617472cab88d}{to\+Json}} () const override
+\item 
+void \mbox{\hyperlink{class_var_decl_a5d117b06478d4fce83ee722662f32424}{accept}} (\mbox{\hyperlink{class_visitor}{Visitor}} \&v) override
+\item 
+std\+::string \mbox{\hyperlink{class_var_decl_ab972180732b4454c2a32671ea02b8068}{get\+Node\+Type}} () const override
+\item 
+\mbox{\Hypertarget{class_var_decl_ac1875c49db7070b8369a168e4fe8bde9}\label{class_var_decl_ac1875c49db7070b8369a168e4fe8bde9}} 
+const std\+::string \& {\bfseries get\+Identifier} () const
+\item 
+\mbox{\Hypertarget{class_var_decl_a76c1c6b98b9beb513c462919e122f89f}\label{class_var_decl_a76c1c6b98b9beb513c462919e122f89f}} 
+\mbox{\hyperlink{class_datatype}{Datatype}} $\ast$ {\bfseries get\+Datatype} () const
+\item 
+\mbox{\Hypertarget{class_var_decl_a58149e5284aff4c604951d7330787a58}\label{class_var_decl_a58149e5284aff4c604951d7330787a58}} 
+\mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$ {\bfseries get\+Initializer} () const
+\item 
+\mbox{\Hypertarget{class_var_decl_af73d1107ff23910a205c7ec63d31ba95}\label{class_var_decl_af73d1107ff23910a205c7ec63d31ba95}} 
+\mbox{\hyperlink{class_abstract_binary_expr}{Abstract\+Binary\+Expr}} $\ast$ {\bfseries contains} (\mbox{\hyperlink{class_abstract_binary_expr}{Abstract\+Binary\+Expr}} $\ast$aexp\+Template, \mbox{\hyperlink{class_arithmetic_expr}{Arithmetic\+Expr}} $\ast$excluded\+Subtree) override
+\item 
+\mbox{\Hypertarget{class_var_decl_a6015d865d963482286b42c7b85e79bdb}\label{class_var_decl_a6015d865d963482286b42c7b85e79bdb}} 
+std\+::string {\bfseries get\+Var\+Target\+Identifier} () override
+\item 
+\mbox{\Hypertarget{class_var_decl_a36a37142bc221deb3f311c5722f6f817}\label{class_var_decl_a36a37142bc221deb3f311c5722f6f817}} 
+bool {\bfseries is\+Equal} (\mbox{\hyperlink{class_abstract_statement}{Abstract\+Statement}} $\ast$as) override
+\item 
+\mbox{\Hypertarget{class_var_decl_a9b84771b939c79c12a5f0be3bf1d6ba8}\label{class_var_decl_a9b84771b939c79c12a5f0be3bf1d6ba8}} 
+void {\bfseries set\+Attributes} (std\+::string var\+Identifier, \mbox{\hyperlink{class_datatype}{Datatype}} $\ast$datatype, \mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$value)
+\item 
+bool \mbox{\hyperlink{class_var_decl_adcc8c11c783bd96e671dc2964b6efcdb}{supports\+Circuit\+Mode}} () override
+\item 
+int \mbox{\hyperlink{class_var_decl_a85b3beede024be269e838dd59d7048c4}{get\+Max\+Number\+Children}} () override
+\item 
+std\+::string \mbox{\hyperlink{class_var_decl_a42ea504f3b66ae2db062f00a34ac0ed3}{to\+String}} (bool print\+Children) const override
+\end{DoxyCompactItemize}
+\doxysubsection*{Additional Inherited Members}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{class_var_decl_ad5729a9a23e4e937a7e96969223df9de}\label{class_var_decl_ad5729a9a23e4e937a7e96969223df9de}} 
+\index{VarDecl@{VarDecl}!VarDecl@{VarDecl}}
+\index{VarDecl@{VarDecl}!VarDecl@{VarDecl}}
+\doxysubsubsection{\texorpdfstring{VarDecl()}{VarDecl()}}
+{\footnotesize\ttfamily Var\+Decl\+::\+Var\+Decl (\begin{DoxyParamCaption}\item[{std\+::string}]{name,  }\item[{const char $\ast$}]{value\+Assigned\+To }\end{DoxyParamCaption})}
+
+This is just a helper constructor that allows to call \mbox{\hyperlink{class_var_decl}{Var\+Decl}}(\char`\"{}random\+String\char`\"{}, \char`\"{}aiermkr\char`\"{}); without this constructor the call will wrongly be forwarded to the \mbox{\hyperlink{class_var_decl}{Var\+Decl(std\+::string, bool)}} constructor. See \href{https://stackoverflow.com/q/14770252/3017719}{\texttt{ https\+://stackoverflow.\+com/q/14770252/3017719}}. 
+\begin{DoxyParams}{Parameters}
+{\em name} & The variable\textquotesingle{}s identifier. \\
+\hline
+{\em value\+Assigned\+To} & The value assigned to the variable. \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_var_decl_a5d117b06478d4fce83ee722662f32424}\label{class_var_decl_a5d117b06478d4fce83ee722662f32424}} 
+\index{VarDecl@{VarDecl}!accept@{accept}}
+\index{accept@{accept}!VarDecl@{VarDecl}}
+\doxysubsubsection{\texorpdfstring{accept()}{accept()}}
+{\footnotesize\ttfamily void Var\+Decl\+::accept (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_visitor}{Visitor}} \&}]{v }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Part of the visitor pattern. Must be overridden in derived classes and must call v.\+visit(node). This allows the correct overload for the derived class to be called in the visitor. 
+\begin{DoxyParams}{Parameters}
+{\em v} & \mbox{\hyperlink{class_visitor}{Visitor}} that offers a visit() method \\
+\hline
+\end{DoxyParams}
+
+
+Implements \mbox{\hyperlink{class_abstract_node_a890a24af49cedda13f23cbe41931dee5}{Abstract\+Node}}.
+
+\mbox{\Hypertarget{class_var_decl_a97a3b21c31ee3a938cd77860efad47e4}\label{class_var_decl_a97a3b21c31ee3a938cd77860efad47e4}} 
+\index{VarDecl@{VarDecl}!clone@{clone}}
+\index{clone@{clone}!VarDecl@{VarDecl}}
+\doxysubsubsection{\texorpdfstring{clone()}{clone()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{class_var_decl}{Var\+Decl}} $\ast$ Var\+Decl\+::clone (\begin{DoxyParamCaption}\item[{bool}]{keep\+Original\+Unique\+Node\+Id }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Clones a node recursively, i.\+e., by including all of its children. 
+\begin{DoxyParams}{Parameters}
+{\em keep\+Original\+Unique\+Node\+Id} & Specifies whether to keep all of the unique node I\+Ds of the original nodes. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A clone of the node including clones of all of its children. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{class_abstract_node_ab7f13808b586865a27e2635995be5056}{Abstract\+Node}}.
+
+\mbox{\Hypertarget{class_var_decl_a85b3beede024be269e838dd59d7048c4}\label{class_var_decl_a85b3beede024be269e838dd59d7048c4}} 
+\index{VarDecl@{VarDecl}!getMaxNumberChildren@{getMaxNumberChildren}}
+\index{getMaxNumberChildren@{getMaxNumberChildren}!VarDecl@{VarDecl}}
+\doxysubsubsection{\texorpdfstring{getMaxNumberChildren()}{getMaxNumberChildren()}}
+{\footnotesize\ttfamily int Var\+Decl\+::get\+Max\+Number\+Children (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Indicates the number of children that are allowed for a specific node. \mbox{\hyperlink{class_for}{For}} example, a arithmetic expression accepts exactly three attributes and hence also exactly three children\+: left operand, right operand, and operator. \mbox{\hyperlink{class_if}{If}} the node does not implement support for child/parent relationships, \mbox{\hyperlink{class_var_decl_a85b3beede024be269e838dd59d7048c4}{get\+Max\+Number\+Children()}} return 0. \begin{DoxyReturn}{Returns}
+An integer indicating the number of allowed children for a specific node. 
+\end{DoxyReturn}
+
+
+Reimplemented from \mbox{\hyperlink{group__parents_ga680a94e1a61857e94177a79e5d8588ab}{Abstract\+Node}}.
+
+\mbox{\Hypertarget{class_var_decl_ab972180732b4454c2a32671ea02b8068}\label{class_var_decl_ab972180732b4454c2a32671ea02b8068}} 
+\index{VarDecl@{VarDecl}!getNodeType@{getNodeType}}
+\index{getNodeType@{getNodeType}!VarDecl@{VarDecl}}
+\doxysubsubsection{\texorpdfstring{getNodeType()}{getNodeType()}}
+{\footnotesize\ttfamily std\+::string Var\+Decl\+::get\+Node\+Type (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Returns the node\textquotesingle{}s type, which is the name of the object in the A\+ST. This method must be overridden by all classes that inherit from \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} by their respective name (e.\+g., Arithmetic\+Exp, \mbox{\hyperlink{class_function}{Function}}, \mbox{\hyperlink{class_variable}{Variable}}). \begin{DoxyReturn}{Returns}
+The name of the node type. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{class_abstract_node_a8cc40127801e7777c8094f17a3b1efcb}{Abstract\+Node}}.
+
+\mbox{\Hypertarget{class_var_decl_adcc8c11c783bd96e671dc2964b6efcdb}\label{class_var_decl_adcc8c11c783bd96e671dc2964b6efcdb}} 
+\index{VarDecl@{VarDecl}!supportsCircuitMode@{supportsCircuitMode}}
+\index{supportsCircuitMode@{supportsCircuitMode}!VarDecl@{VarDecl}}
+\doxysubsubsection{\texorpdfstring{supportsCircuitMode()}{supportsCircuitMode()}}
+{\footnotesize\ttfamily bool Var\+Decl\+::supports\+Circuit\+Mode (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+This method returns True iff the class derived from the \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} class properly makes use of the child/parent fields as it would be expected in a circuit. 
+
+Reimplemented from \mbox{\hyperlink{class_abstract_node_a76f2290759cb522619af77c630b6eba9}{Abstract\+Node}}.
+
+\mbox{\Hypertarget{class_var_decl_acab217ec9794a1d18443617472cab88d}\label{class_var_decl_acab217ec9794a1d18443617472cab88d}} 
+\index{VarDecl@{VarDecl}!toJson@{toJson}}
+\index{toJson@{toJson}!VarDecl@{VarDecl}}
+\doxysubsubsection{\texorpdfstring{toJson()}{toJson()}}
+{\footnotesize\ttfamily json Var\+Decl\+::to\+Json (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Get the J\+S\+ON representation of the node including all of its children. \begin{DoxyReturn}{Returns}
+J\+S\+ON representation of the node 
+\end{DoxyReturn}
+
+
+Reimplemented from \mbox{\hyperlink{class_abstract_statement_a9ec419479db2dfefcd70042f94974949}{Abstract\+Statement}}.
+
+\mbox{\Hypertarget{class_var_decl_a42ea504f3b66ae2db062f00a34ac0ed3}\label{class_var_decl_a42ea504f3b66ae2db062f00a34ac0ed3}} 
+\index{VarDecl@{VarDecl}!toString@{toString}}
+\index{toString@{toString}!VarDecl@{VarDecl}}
+\doxysubsubsection{\texorpdfstring{toString()}{toString()}}
+{\footnotesize\ttfamily std\+::string Var\+Decl\+::to\+String (\begin{DoxyParamCaption}\item[{bool}]{print\+Children }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Returns a string representation of the node, if print\+Children is True then calls to\+String for its children too. Hence, to\+String(false) is equivalent to printing a node\textquotesingle{}s attributes only. \begin{DoxyReturn}{Returns}
+A textual representation of the node. 
+\end{DoxyReturn}
+
+
+Reimplemented from \mbox{\hyperlink{class_abstract_node_aee58b60a470f2e494e0db1808c87b13d}{Abstract\+Node}}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/ast/Var\+Decl.\+h\item 
+src/ast/Var\+Decl.\+cpp\end{DoxyCompactItemize}

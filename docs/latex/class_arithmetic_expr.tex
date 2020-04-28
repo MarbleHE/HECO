@@ -1,0 +1,117 @@
+\hypertarget{class_arithmetic_expr}{}\doxysection{Arithmetic\+Expr Class Reference}
+\label{class_arithmetic_expr}\index{ArithmeticExpr@{ArithmeticExpr}}
+Inheritance diagram for Arithmetic\+Expr\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=4.000000cm]{class_arithmetic_expr}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{class_arithmetic_expr_a60450ffb9aed1db85e8e6f81429723eb}{Arithmetic\+Expr}} (\mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$left, Arithmetic\+Op op, \mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$right)
+\item 
+\mbox{\Hypertarget{class_arithmetic_expr_ad238a41848e090adc2979d3f561f8164}\label{class_arithmetic_expr_ad238a41848e090adc2979d3f561f8164}} 
+{\bfseries Arithmetic\+Expr} (Arithmetic\+Op op)
+\item 
+\mbox{\hyperlink{class_arithmetic_expr}{Arithmetic\+Expr}} $\ast$ \mbox{\hyperlink{class_arithmetic_expr_a86db8c56a0699f83c6550a6490379d40}{clone}} (bool keep\+Original\+Unique\+Node\+Id) override
+\item 
+\mbox{\Hypertarget{class_arithmetic_expr_ae4b752b8ff8037bc0cf0906e6e0d02ef}\label{class_arithmetic_expr_ae4b752b8ff8037bc0cf0906e6e0d02ef}} 
+{\footnotesize template$<$typename T1 , typename T2 $>$ }\\{\bfseries Arithmetic\+Expr} (T1 left, Arithmetic\+Op op, T2 right)
+\item 
+\mbox{\Hypertarget{class_arithmetic_expr_ae2ceff8d63b2835450179d00d5b2584e}\label{class_arithmetic_expr_ae2ceff8d63b2835450179d00d5b2584e}} 
+{\footnotesize template$<$typename T1 , typename T2 $>$ }\\{\bfseries Arithmetic\+Expr} (T1 left, \mbox{\hyperlink{class_operator}{Operator}} $\ast$op, T2 right)
+\item 
+void \mbox{\hyperlink{class_arithmetic_expr_afd297dc671f35b49d27436b0ee9858b4}{accept}} (\mbox{\hyperlink{class_visitor}{Visitor}} \&v) override
+\item 
+std\+::string \mbox{\hyperlink{class_arithmetic_expr_acce01879a087609d4565a051d753d810}{get\+Node\+Type}} () const override
+\item 
+std\+::string \mbox{\hyperlink{class_arithmetic_expr_abf4e507de6c63f951de09791522f69a4}{to\+String}} (bool print\+Children) const override
+\end{DoxyCompactItemize}
+\doxysubsection*{Additional Inherited Members}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{class_arithmetic_expr_a60450ffb9aed1db85e8e6f81429723eb}\label{class_arithmetic_expr_a60450ffb9aed1db85e8e6f81429723eb}} 
+\index{ArithmeticExpr@{ArithmeticExpr}!ArithmeticExpr@{ArithmeticExpr}}
+\index{ArithmeticExpr@{ArithmeticExpr}!ArithmeticExpr@{ArithmeticExpr}}
+\doxysubsubsection{\texorpdfstring{ArithmeticExpr()}{ArithmeticExpr()}}
+{\footnotesize\ttfamily Arithmetic\+Expr\+::\+Arithmetic\+Expr (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$}]{left,  }\item[{Arithmetic\+Op}]{op,  }\item[{\mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$}]{right }\end{DoxyParamCaption})}
+
+Represents an expression of the form \char`\"{}left op right\char`\"{}, e.\+g., \char`\"{}2 + a\char`\"{} or \char`\"{}53 $\ast$ 3\char`\"{}. 
+\begin{DoxyParams}{Parameters}
+{\em left} & is the left operand of the expression. \\
+\hline
+{\em op} & is the operator of the expression. \\
+\hline
+{\em right} & is the right operand of the expression. \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_arithmetic_expr_afd297dc671f35b49d27436b0ee9858b4}\label{class_arithmetic_expr_afd297dc671f35b49d27436b0ee9858b4}} 
+\index{ArithmeticExpr@{ArithmeticExpr}!accept@{accept}}
+\index{accept@{accept}!ArithmeticExpr@{ArithmeticExpr}}
+\doxysubsubsection{\texorpdfstring{accept()}{accept()}}
+{\footnotesize\ttfamily void Arithmetic\+Expr\+::accept (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_visitor}{Visitor}} \&}]{v }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Part of the visitor pattern. Must be overridden in derived classes and must call v.\+visit(node). This allows the correct overload for the derived class to be called in the visitor. 
+\begin{DoxyParams}{Parameters}
+{\em v} & \mbox{\hyperlink{class_visitor}{Visitor}} that offers a visit() method \\
+\hline
+\end{DoxyParams}
+
+
+Implements \mbox{\hyperlink{class_abstract_node_a890a24af49cedda13f23cbe41931dee5}{Abstract\+Node}}.
+
+\mbox{\Hypertarget{class_arithmetic_expr_a86db8c56a0699f83c6550a6490379d40}\label{class_arithmetic_expr_a86db8c56a0699f83c6550a6490379d40}} 
+\index{ArithmeticExpr@{ArithmeticExpr}!clone@{clone}}
+\index{clone@{clone}!ArithmeticExpr@{ArithmeticExpr}}
+\doxysubsubsection{\texorpdfstring{clone()}{clone()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{class_arithmetic_expr}{Arithmetic\+Expr}} $\ast$ Arithmetic\+Expr\+::clone (\begin{DoxyParamCaption}\item[{bool}]{keep\+Original\+Unique\+Node\+Id }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Clones a node recursively, i.\+e., by including all of its children. 
+\begin{DoxyParams}{Parameters}
+{\em keep\+Original\+Unique\+Node\+Id} & Specifies whether to keep all of the unique node I\+Ds of the original nodes. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A clone of the node including clones of all of its children. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{class_abstract_node_ab7f13808b586865a27e2635995be5056}{Abstract\+Node}}.
+
+\mbox{\Hypertarget{class_arithmetic_expr_acce01879a087609d4565a051d753d810}\label{class_arithmetic_expr_acce01879a087609d4565a051d753d810}} 
+\index{ArithmeticExpr@{ArithmeticExpr}!getNodeType@{getNodeType}}
+\index{getNodeType@{getNodeType}!ArithmeticExpr@{ArithmeticExpr}}
+\doxysubsubsection{\texorpdfstring{getNodeType()}{getNodeType()}}
+{\footnotesize\ttfamily std\+::string Arithmetic\+Expr\+::get\+Node\+Type (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Returns the node\textquotesingle{}s type, which is the name of the object in the A\+ST. This method must be overridden by all classes that inherit from \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} by their respective name (e.\+g., Arithmetic\+Exp, \mbox{\hyperlink{class_function}{Function}}, \mbox{\hyperlink{class_variable}{Variable}}). \begin{DoxyReturn}{Returns}
+The name of the node type. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{class_abstract_node_a8cc40127801e7777c8094f17a3b1efcb}{Abstract\+Node}}.
+
+\mbox{\Hypertarget{class_arithmetic_expr_abf4e507de6c63f951de09791522f69a4}\label{class_arithmetic_expr_abf4e507de6c63f951de09791522f69a4}} 
+\index{ArithmeticExpr@{ArithmeticExpr}!toString@{toString}}
+\index{toString@{toString}!ArithmeticExpr@{ArithmeticExpr}}
+\doxysubsubsection{\texorpdfstring{toString()}{toString()}}
+{\footnotesize\ttfamily std\+::string Arithmetic\+Expr\+::to\+String (\begin{DoxyParamCaption}\item[{bool}]{print\+Children }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Returns a string representation of the node, if print\+Children is True then calls to\+String for its children too. Hence, to\+String(false) is equivalent to printing a node\textquotesingle{}s attributes only. \begin{DoxyReturn}{Returns}
+A textual representation of the node. 
+\end{DoxyReturn}
+
+
+Reimplemented from \mbox{\hyperlink{class_abstract_node_aee58b60a470f2e494e0db1808c87b13d}{Abstract\+Node}}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/ast/Arithmetic\+Expr.\+h\item 
+src/ast/Arithmetic\+Expr.\+cpp\end{DoxyCompactItemize}

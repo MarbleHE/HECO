@@ -1,0 +1,133 @@
+\hypertarget{class_call}{}\doxysection{Call Class Reference}
+\label{class_call}\index{Call@{Call}}
+Inheritance diagram for Call\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{class_call}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_call_a08142abdebaea01af30da19b62f46300}\label{class_call_a08142abdebaea01af30da19b62f46300}} 
+{\bfseries Call} (std\+::vector$<$ \mbox{\hyperlink{class_function_parameter}{Function\+Parameter}} $\ast$ $>$ parameter\+Values\+For\+Called\+Function, \mbox{\hyperlink{class_function}{Function}} $\ast$func)
+\item 
+\mbox{\Hypertarget{class_call_ab3396811a4a8ece25324ff076d97431c}\label{class_call_ab3396811a4a8ece25324ff076d97431c}} 
+{\bfseries Call} (\mbox{\hyperlink{class_function}{Function}} $\ast$func)
+\item 
+\mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$ \mbox{\hyperlink{class_call_ab12b25280f537a8783e385f5a7cd8d6e}{clone}} (bool keep\+Original\+Unique\+Node\+Id) override
+\item 
+json \mbox{\hyperlink{class_call_a1b1a81d3dcc202fb3db99eceb10ef3c6}{to\+Json}} () const override
+\item 
+void \mbox{\hyperlink{class_call_adee679186d21d26000947b1ebd3eac8a}{accept}} (\mbox{\hyperlink{class_visitor}{Visitor}} \&v) override
+\item 
+\mbox{\Hypertarget{class_call_a440f9b5b0d89338b02b682bc1f665671}\label{class_call_a440f9b5b0d89338b02b682bc1f665671}} 
+std\+::vector$<$ \mbox{\hyperlink{class_function_parameter}{Function\+Parameter}} $\ast$ $>$ {\bfseries get\+Arguments} () const
+\item 
+\mbox{\Hypertarget{class_call_a38472d4748a1d2ee8ab75ee4b792bae9}\label{class_call_a38472d4748a1d2ee8ab75ee4b792bae9}} 
+\mbox{\hyperlink{class_parameter_list}{Parameter\+List}} $\ast$ {\bfseries get\+Parameter\+List} () const
+\item 
+std\+::string \mbox{\hyperlink{class_call_a952035228f533511f97fccfcfac86bde}{get\+Node\+Type}} () const override
+\item 
+\mbox{\Hypertarget{class_call_a47f6aae352b98fb1ff513ca6d7e23381}\label{class_call_a47f6aae352b98fb1ff513ca6d7e23381}} 
+\mbox{\hyperlink{class_function}{Function}} $\ast$ {\bfseries get\+Func} () const
+\item 
+\mbox{\Hypertarget{class_call_a2729e32116396137d90b893d2144b854}\label{class_call_a2729e32116396137d90b893d2144b854}} 
+void {\bfseries set\+Attributes} (std\+::vector$<$ \mbox{\hyperlink{class_function_parameter}{Function\+Parameter}} $\ast$ $>$ function\+Call\+Parameters, \mbox{\hyperlink{class_function}{Function}} $\ast$function\+To\+Be\+Called)
+\item 
+int \mbox{\hyperlink{class_call_af1208c8bce54b77e6cd96f0c670fb006}{get\+Max\+Number\+Children}} () override
+\item 
+bool \mbox{\hyperlink{class_call_aa6229befb6eefbd8d21e822570417e9b}{supports\+Circuit\+Mode}} () override
+\end{DoxyCompactItemize}
+\doxysubsection*{Additional Inherited Members}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_call_adee679186d21d26000947b1ebd3eac8a}\label{class_call_adee679186d21d26000947b1ebd3eac8a}} 
+\index{Call@{Call}!accept@{accept}}
+\index{accept@{accept}!Call@{Call}}
+\doxysubsubsection{\texorpdfstring{accept()}{accept()}}
+{\footnotesize\ttfamily void Call\+::accept (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_visitor}{Visitor}} \&}]{v }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Part of the visitor pattern. Must be overridden in derived classes and must call v.\+visit(node). This allows the correct overload for the derived class to be called in the visitor. 
+\begin{DoxyParams}{Parameters}
+{\em v} & \mbox{\hyperlink{class_visitor}{Visitor}} that offers a visit() method \\
+\hline
+\end{DoxyParams}
+
+
+Implements \mbox{\hyperlink{class_abstract_node_a890a24af49cedda13f23cbe41931dee5}{Abstract\+Node}}.
+
+\mbox{\Hypertarget{class_call_ab12b25280f537a8783e385f5a7cd8d6e}\label{class_call_ab12b25280f537a8783e385f5a7cd8d6e}} 
+\index{Call@{Call}!clone@{clone}}
+\index{clone@{clone}!Call@{Call}}
+\doxysubsubsection{\texorpdfstring{clone()}{clone()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$ Call\+::clone (\begin{DoxyParamCaption}\item[{bool}]{keep\+Original\+Unique\+Node\+Id }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Clones a node recursively, i.\+e., by including all of its children. 
+\begin{DoxyParams}{Parameters}
+{\em keep\+Original\+Unique\+Node\+Id} & Specifies whether to keep all of the unique node I\+Ds of the original nodes. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A clone of the node including clones of all of its children. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{class_abstract_node_ab7f13808b586865a27e2635995be5056}{Abstract\+Node}}.
+
+\mbox{\Hypertarget{class_call_af1208c8bce54b77e6cd96f0c670fb006}\label{class_call_af1208c8bce54b77e6cd96f0c670fb006}} 
+\index{Call@{Call}!getMaxNumberChildren@{getMaxNumberChildren}}
+\index{getMaxNumberChildren@{getMaxNumberChildren}!Call@{Call}}
+\doxysubsubsection{\texorpdfstring{getMaxNumberChildren()}{getMaxNumberChildren()}}
+{\footnotesize\ttfamily int Call\+::get\+Max\+Number\+Children (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Indicates the number of children that are allowed for a specific node. \mbox{\hyperlink{class_for}{For}} example, a arithmetic expression accepts exactly three attributes and hence also exactly three children\+: left operand, right operand, and operator. \mbox{\hyperlink{class_if}{If}} the node does not implement support for child/parent relationships, \mbox{\hyperlink{class_call_af1208c8bce54b77e6cd96f0c670fb006}{get\+Max\+Number\+Children()}} return 0. \begin{DoxyReturn}{Returns}
+An integer indicating the number of allowed children for a specific node. 
+\end{DoxyReturn}
+
+
+Reimplemented from \mbox{\hyperlink{group__parents_ga680a94e1a61857e94177a79e5d8588ab}{Abstract\+Node}}.
+
+\mbox{\Hypertarget{class_call_a952035228f533511f97fccfcfac86bde}\label{class_call_a952035228f533511f97fccfcfac86bde}} 
+\index{Call@{Call}!getNodeType@{getNodeType}}
+\index{getNodeType@{getNodeType}!Call@{Call}}
+\doxysubsubsection{\texorpdfstring{getNodeType()}{getNodeType()}}
+{\footnotesize\ttfamily std\+::string Call\+::get\+Node\+Type (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Returns the node\textquotesingle{}s type, which is the name of the object in the A\+ST. This method must be overridden by all classes that inherit from \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} by their respective name (e.\+g., Arithmetic\+Exp, \mbox{\hyperlink{class_function}{Function}}, \mbox{\hyperlink{class_variable}{Variable}}). \begin{DoxyReturn}{Returns}
+The name of the node type. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{class_abstract_node_a8cc40127801e7777c8094f17a3b1efcb}{Abstract\+Node}}.
+
+\mbox{\Hypertarget{class_call_aa6229befb6eefbd8d21e822570417e9b}\label{class_call_aa6229befb6eefbd8d21e822570417e9b}} 
+\index{Call@{Call}!supportsCircuitMode@{supportsCircuitMode}}
+\index{supportsCircuitMode@{supportsCircuitMode}!Call@{Call}}
+\doxysubsubsection{\texorpdfstring{supportsCircuitMode()}{supportsCircuitMode()}}
+{\footnotesize\ttfamily bool Call\+::supports\+Circuit\+Mode (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+This method returns True iff the class derived from the \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} class properly makes use of the child/parent fields as it would be expected in a circuit. 
+
+Reimplemented from \mbox{\hyperlink{class_abstract_node_a76f2290759cb522619af77c630b6eba9}{Abstract\+Node}}.
+
+\mbox{\Hypertarget{class_call_a1b1a81d3dcc202fb3db99eceb10ef3c6}\label{class_call_a1b1a81d3dcc202fb3db99eceb10ef3c6}} 
+\index{Call@{Call}!toJson@{toJson}}
+\index{toJson@{toJson}!Call@{Call}}
+\doxysubsubsection{\texorpdfstring{toJson()}{toJson()}}
+{\footnotesize\ttfamily json Call\+::to\+Json (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Get the J\+S\+ON representation of the node including all of its children. \begin{DoxyReturn}{Returns}
+J\+S\+ON representation of the node 
+\end{DoxyReturn}
+
+
+Reimplemented from \mbox{\hyperlink{class_abstract_expr_ac1957d8bda1e29b35b822ec0b05c5027}{Abstract\+Expr}}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/ast/Call.\+h\item 
+src/ast/Call.\+cpp\end{DoxyCompactItemize}

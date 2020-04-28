@@ -1,0 +1,148 @@
+\hypertarget{class_return}{}\doxysection{Return Class Reference}
+\label{class_return}\index{Return@{Return}}
+Inheritance diagram for Return\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{class_return}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_return_a10edccb6a7878f7ab996ec3a3fca158d}\label{class_return_a10edccb6a7878f7ab996ec3a3fca158d}} 
+{\bfseries Return} (\mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$return\+Value)
+\item 
+\mbox{\Hypertarget{class_return_a7f5e9c9513577586aa68d1bd55bb4472}\label{class_return_a7f5e9c9513577586aa68d1bd55bb4472}} 
+{\bfseries Return} (std\+::vector$<$ \mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$ $>$ return\+Values)
+\item 
+json \mbox{\hyperlink{class_return_a89eb5ab24aaa10a8ff4c9aba68fc1abb}{to\+Json}} () const override
+\item 
+void \mbox{\hyperlink{class_return_a6cee60731a0300cb00952b545dff0317}{accept}} (\mbox{\hyperlink{class_visitor}{Visitor}} \&v) override
+\item 
+std\+::string \mbox{\hyperlink{class_return_a7b756560b61c5d7d53f4e18f3b3e7ce4}{get\+Node\+Type}} () const override
+\item 
+\mbox{\Hypertarget{class_return_a0d64ee309cbc58420a3a66ff38fba644}\label{class_return_a0d64ee309cbc58420a3a66ff38fba644}} 
+std\+::vector$<$ \mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$ $>$ {\bfseries get\+Return\+Expressions} () const
+\item 
+\mbox{\hyperlink{class_return}{Return}} $\ast$ \mbox{\hyperlink{class_return_a9ee16d778fe2682624e3569225d3258d}{clone}} (bool keep\+Original\+Unique\+Node\+Id) override
+\item 
+\mbox{\Hypertarget{class_return_ab2ef9d08b8e01c6b9b1d235abd4de331}\label{class_return_ab2ef9d08b8e01c6b9b1d235abd4de331}} 
+void {\bfseries set\+Attributes} (std\+::vector$<$ \mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$ $>$ return\+Expr)
+\item 
+std\+::string \mbox{\hyperlink{class_return_a992860dd4e2e7ff4b4aa7f250ce663e7}{to\+String}} (bool print\+Children) const override
+\item 
+\mbox{\Hypertarget{class_return_ad17422185c2d6fbb93f2a288a011868d}\label{class_return_ad17422185c2d6fbb93f2a288a011868d}} 
+bool {\bfseries is\+Equal} (\mbox{\hyperlink{class_abstract_statement}{Abstract\+Statement}} $\ast$as) override
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+int \mbox{\hyperlink{class_return_a9909ac70f65299e43fd539f7421946ea}{get\+Max\+Number\+Children}} () override
+\item 
+bool \mbox{\hyperlink{class_return_a398c1aa6b27d886f4b5a18036da7ef27}{supports\+Circuit\+Mode}} () override
+\end{DoxyCompactItemize}
+\doxysubsection*{Additional Inherited Members}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_return_a6cee60731a0300cb00952b545dff0317}\label{class_return_a6cee60731a0300cb00952b545dff0317}} 
+\index{Return@{Return}!accept@{accept}}
+\index{accept@{accept}!Return@{Return}}
+\doxysubsubsection{\texorpdfstring{accept()}{accept()}}
+{\footnotesize\ttfamily void Return\+::accept (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_visitor}{Visitor}} \&}]{v }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Part of the visitor pattern. Must be overridden in derived classes and must call v.\+visit(node). This allows the correct overload for the derived class to be called in the visitor. 
+\begin{DoxyParams}{Parameters}
+{\em v} & \mbox{\hyperlink{class_visitor}{Visitor}} that offers a visit() method \\
+\hline
+\end{DoxyParams}
+
+
+Implements \mbox{\hyperlink{class_abstract_node_a890a24af49cedda13f23cbe41931dee5}{Abstract\+Node}}.
+
+\mbox{\Hypertarget{class_return_a9ee16d778fe2682624e3569225d3258d}\label{class_return_a9ee16d778fe2682624e3569225d3258d}} 
+\index{Return@{Return}!clone@{clone}}
+\index{clone@{clone}!Return@{Return}}
+\doxysubsubsection{\texorpdfstring{clone()}{clone()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{class_return}{Return}} $\ast$ Return\+::clone (\begin{DoxyParamCaption}\item[{bool}]{keep\+Original\+Unique\+Node\+Id }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Clones a node recursively, i.\+e., by including all of its children. 
+\begin{DoxyParams}{Parameters}
+{\em keep\+Original\+Unique\+Node\+Id} & Specifies whether to keep all of the unique node I\+Ds of the original nodes. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A clone of the node including clones of all of its children. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{class_abstract_node_ab7f13808b586865a27e2635995be5056}{Abstract\+Node}}.
+
+\mbox{\Hypertarget{class_return_a9909ac70f65299e43fd539f7421946ea}\label{class_return_a9909ac70f65299e43fd539f7421946ea}} 
+\index{Return@{Return}!getMaxNumberChildren@{getMaxNumberChildren}}
+\index{getMaxNumberChildren@{getMaxNumberChildren}!Return@{Return}}
+\doxysubsubsection{\texorpdfstring{getMaxNumberChildren()}{getMaxNumberChildren()}}
+{\footnotesize\ttfamily int Return\+::get\+Max\+Number\+Children (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [protected]}, {\ttfamily [virtual]}}
+
+Indicates the number of children that are allowed for a specific node. \mbox{\hyperlink{class_for}{For}} example, a arithmetic expression accepts exactly three attributes and hence also exactly three children\+: left operand, right operand, and operator. \mbox{\hyperlink{class_if}{If}} the node does not implement support for child/parent relationships, \mbox{\hyperlink{class_return_a9909ac70f65299e43fd539f7421946ea}{get\+Max\+Number\+Children()}} return 0. \begin{DoxyReturn}{Returns}
+An integer indicating the number of allowed children for a specific node. 
+\end{DoxyReturn}
+
+
+Reimplemented from \mbox{\hyperlink{group__parents_ga680a94e1a61857e94177a79e5d8588ab}{Abstract\+Node}}.
+
+\mbox{\Hypertarget{class_return_a7b756560b61c5d7d53f4e18f3b3e7ce4}\label{class_return_a7b756560b61c5d7d53f4e18f3b3e7ce4}} 
+\index{Return@{Return}!getNodeType@{getNodeType}}
+\index{getNodeType@{getNodeType}!Return@{Return}}
+\doxysubsubsection{\texorpdfstring{getNodeType()}{getNodeType()}}
+{\footnotesize\ttfamily std\+::string Return\+::get\+Node\+Type (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Returns the node\textquotesingle{}s type, which is the name of the object in the A\+ST. This method must be overridden by all classes that inherit from \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} by their respective name (e.\+g., Arithmetic\+Exp, \mbox{\hyperlink{class_function}{Function}}, \mbox{\hyperlink{class_variable}{Variable}}). \begin{DoxyReturn}{Returns}
+The name of the node type. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{class_abstract_node_a8cc40127801e7777c8094f17a3b1efcb}{Abstract\+Node}}.
+
+\mbox{\Hypertarget{class_return_a398c1aa6b27d886f4b5a18036da7ef27}\label{class_return_a398c1aa6b27d886f4b5a18036da7ef27}} 
+\index{Return@{Return}!supportsCircuitMode@{supportsCircuitMode}}
+\index{supportsCircuitMode@{supportsCircuitMode}!Return@{Return}}
+\doxysubsubsection{\texorpdfstring{supportsCircuitMode()}{supportsCircuitMode()}}
+{\footnotesize\ttfamily bool Return\+::supports\+Circuit\+Mode (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [protected]}, {\ttfamily [virtual]}}
+
+This method returns True iff the class derived from the \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} class properly makes use of the child/parent fields as it would be expected in a circuit. 
+
+Reimplemented from \mbox{\hyperlink{class_abstract_node_a76f2290759cb522619af77c630b6eba9}{Abstract\+Node}}.
+
+\mbox{\Hypertarget{class_return_a89eb5ab24aaa10a8ff4c9aba68fc1abb}\label{class_return_a89eb5ab24aaa10a8ff4c9aba68fc1abb}} 
+\index{Return@{Return}!toJson@{toJson}}
+\index{toJson@{toJson}!Return@{Return}}
+\doxysubsubsection{\texorpdfstring{toJson()}{toJson()}}
+{\footnotesize\ttfamily json Return\+::to\+Json (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Get the J\+S\+ON representation of the node including all of its children. \begin{DoxyReturn}{Returns}
+J\+S\+ON representation of the node 
+\end{DoxyReturn}
+
+
+Reimplemented from \mbox{\hyperlink{class_abstract_statement_a9ec419479db2dfefcd70042f94974949}{Abstract\+Statement}}.
+
+\mbox{\Hypertarget{class_return_a992860dd4e2e7ff4b4aa7f250ce663e7}\label{class_return_a992860dd4e2e7ff4b4aa7f250ce663e7}} 
+\index{Return@{Return}!toString@{toString}}
+\index{toString@{toString}!Return@{Return}}
+\doxysubsubsection{\texorpdfstring{toString()}{toString()}}
+{\footnotesize\ttfamily std\+::string Return\+::to\+String (\begin{DoxyParamCaption}\item[{bool}]{print\+Children }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Returns a string representation of the node, if print\+Children is True then calls to\+String for its children too. Hence, to\+String(false) is equivalent to printing a node\textquotesingle{}s attributes only. \begin{DoxyReturn}{Returns}
+A textual representation of the node. 
+\end{DoxyReturn}
+
+
+Reimplemented from \mbox{\hyperlink{class_abstract_node_aee58b60a470f2e494e0db1808c87b13d}{Abstract\+Node}}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/ast/Return.\+h\item 
+src/ast/Return.\+cpp\end{DoxyCompactItemize}

@@ -1,0 +1,358 @@
+\hypertarget{class_abstract_node}{}\doxysection{Abstract\+Node Class Reference}
+\label{class_abstract_node}\index{AbstractNode@{AbstractNode}}
+Inheritance diagram for Abstract\+Node\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=10.051283cm]{class_abstract_node}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_abstract_node_a3e4c9b9841c8b860e450b8eb089f9b85}\label{class_abstract_node_a3e4c9b9841c8b860e450b8eb089f9b85}} 
+virtual \mbox{\hyperlink{class_abstract_node_a3e4c9b9841c8b860e450b8eb089f9b85}{$\sim$\+Abstract\+Node}} ()=0
+\begin{DoxyCompactList}\small\item\em Virtual Destructor, force class to be abstract. \end{DoxyCompactList}\item 
+virtual std\+::string \mbox{\hyperlink{class_abstract_node_a8cc40127801e7777c8094f17a3b1efcb}{get\+Node\+Type}} () const =0
+\item 
+std\+::string \mbox{\hyperlink{class_abstract_node_a8c5441e6f42332beaa1291139986f800}{get\+Unique\+Node\+Id}} ()
+\item 
+virtual int \mbox{\hyperlink{group__parents_ga680a94e1a61857e94177a79e5d8588ab}{get\+Max\+Number\+Children}} ()
+\item 
+const std\+::vector$<$ \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$ $>$ \& \mbox{\hyperlink{group__parents_ga86ad6064145b23d0db6cda7a254d1816}{get\+Children}} () const
+\item 
+std\+::vector$<$ \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$ $>$ \mbox{\hyperlink{group__parents_ga067cfe2f95324c36cfe3c8ad49d910c3}{get\+Children\+Non\+Null}} () const
+\item 
+std\+::vector$<$ \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$ $>$ \mbox{\hyperlink{group__parents_ga3a0fc647d80e0a0638dc5212475ff1d1}{get\+Descendants}} ()
+\item 
+void \mbox{\hyperlink{group__parents_gaee3455077d7c2f5fe876736bc530ef14}{add\+Child}} (\mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$child, bool add\+Back\+Reference=true)
+\item 
+void \mbox{\hyperlink{group__parents_ga823a5670ee7b3b8d31bc8b89f912ae17}{add\+Children}} (const std\+::vector$<$ \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$ $>$ \&children\+To\+Add, bool add\+Back\+Reference=true)
+\item 
+void \mbox{\hyperlink{group__parents_ga11f2ad9e5498aa36ec2fe2ea233916e1}{add\+Children}} (const std\+::vector$<$ \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$ $>$ \&children\+To\+Add, bool add\+Back\+Reference, std\+::vector$<$ \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$ $>$\+::const\+\_\+iterator insert\+Position)
+\item 
+void \mbox{\hyperlink{group__parents_ga4417c5c9ab73b36f0131bbb8a77e9a1a}{add\+Children}} (const std\+::vector$<$ \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$ $>$ \&children\+To\+Add, bool add\+Back\+Reference, \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$insert\+Before\+Node)
+\item 
+void \mbox{\hyperlink{group__parents_ga5bbb1dbb67989121ad80e9a31d013832}{remove\+Child}} (\mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$child, bool remove\+Backreference=true)
+\item 
+void \mbox{\hyperlink{group__parents_ga38e132143550927544b1f66c5fc1b822}{remove\+Children}} ()
+\begin{DoxyCompactList}\small\item\em Removes all children from this node. Note\+: Does not update the child\textquotesingle{}s parent. \end{DoxyCompactList}\item 
+virtual void \mbox{\hyperlink{group__parents_ga0701ca5077f4c8e72bb23f47847cd32f}{replace\+Child}} (\mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$original\+Child, \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$new\+Child)
+\item 
+void \mbox{\hyperlink{group__parents_gae0c88c4188fe630a98fae969655cba5f}{replace\+Children}} (\mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$original\+Child, std\+::vector$<$ \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$ $>$ new\+Children)
+\item 
+int \mbox{\hyperlink{group__parents_gae9f882f7d81802944993122b2b0284a5}{count\+Children\+Non\+Null}} () const
+\item 
+\mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$ \mbox{\hyperlink{group__parents_gacc240879d8ea5f8a17f2c6ad75d3a9dd}{get\+Child\+At\+Index}} (int idx) const
+\item 
+\mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$ \mbox{\hyperlink{group__parents_gac253d38475ffb2b9314cf2b7f1a4f9e4}{get\+Child\+At\+Index}} (int idx, bool is\+Edge\+Direction\+Aware) const
+\item 
+const std\+::vector$<$ \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$ $>$ \& \mbox{\hyperlink{group__parents_gaae475feb918ba7baa8ab48b08c3e0c45}{get\+Parents}} () const
+\item 
+std\+::vector$<$ \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$ $>$ \mbox{\hyperlink{group__parents_ga1b1b017cb18e69edb9e3fb4a83065ca9}{get\+Parents\+Non\+Null}} () const
+\item 
+std\+::vector$<$ \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$ $>$ \mbox{\hyperlink{group__parents_gab9ae438cb3ceceb4cb76105e44f5c7e4}{get\+Ancestors}} ()
+\item 
+void \mbox{\hyperlink{group__parents_ga84feb2d0b8fe0cd9ec70039a6147cc05}{add\+Parent}} (\mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$parent\+To\+Add, bool add\+Backreference=true)
+\item 
+void \mbox{\hyperlink{group__parents_gafda8df2202074840856b30041648319d}{remove\+Parent}} (\mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$parent\+To\+Be\+Removed, bool remove\+Backreference=true)
+\item 
+\mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$ \mbox{\hyperlink{group__parents_ga50bfef862849ba2a11873ee120364e09}{remove\+From\+Parents}} (bool remove\+Parent\+Backreference=true)
+\item 
+void \mbox{\hyperlink{group__parents_ga51f1af895f45e9031069ec361ceb6499}{remove\+Parents}} ()
+\begin{DoxyCompactList}\small\item\em Removes all parents from this node. Note\+: Does not update the parent\textquotesingle{}s children. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{group__parents_gac58926eb9237736d0a3593bd96375754}{has\+Parent}} (\mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$parent\+Node)
+\item 
+\mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$ \mbox{\hyperlink{group__parents_ga3d7d6aa6042b9935b178696c95840906}{get\+Only\+Parent}} ()
+\item 
+void \mbox{\hyperlink{class_abstract_node_a2479945fea5f323f14ac1a5f8615aad6}{swap\+Children\+Parents}} ()
+\item 
+virtual void \mbox{\hyperlink{class_abstract_node_a890a24af49cedda13f23cbe41931dee5}{accept}} (\mbox{\hyperlink{class_visitor}{Visitor}} \&v)=0
+\item 
+virtual json \mbox{\hyperlink{class_abstract_node_a0ee4c4915b6f76415aa2187535359899}{to\+Json}} () const
+\item 
+virtual std\+::string \mbox{\hyperlink{class_abstract_node_aee58b60a470f2e494e0db1808c87b13d}{to\+String}} (bool print\+Children) const
+\item 
+virtual \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$ \mbox{\hyperlink{class_abstract_node_a267513a1115e86df8966caf998e71e0e}{clone\+Flat}} ()
+\item 
+virtual \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$ \mbox{\hyperlink{class_abstract_node_ab7f13808b586865a27e2635995be5056}{clone}} (bool keep\+Original\+Unique\+Node\+Id)=0
+\item 
+void \mbox{\hyperlink{class_abstract_node_a6eeef4bb93c1788d6ebce8ab634d9045}{update\+Clone}} (bool keep\+Original\+Unique\+Node\+Id, \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$original\+Node)
+\item 
+void \mbox{\hyperlink{class_abstract_node_aad720dd5baeb746174fc08c8500cd2eb}{set\+Unique\+Node\+Id}} (const std\+::string \&new\+Unique\+Node\+Id)
+\item 
+virtual bool \mbox{\hyperlink{class_abstract_node_a76f2290759cb522619af77c630b6eba9}{supports\+Circuit\+Mode}} ()
+\item 
+\mbox{\Hypertarget{class_abstract_node_ab80a79af24ef63bb4602cd7abbb31dec}\label{class_abstract_node_ab80a79af24ef63bb4602cd7abbb31dec}} 
+void \mbox{\hyperlink{class_abstract_node_ab80a79af24ef63bb4602cd7abbb31dec}{isolate\+Node}} ()
+\begin{DoxyCompactList}\small\item\em Removes this node from all of its parents and children, and also removes all parents and children from this node. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{class_abstract_node_a3905c64474339cfcf742f982633364e9}{has\+Reversed\+Edges}} () const
+\item 
+{\footnotesize template$<$typename T $>$ }\\T $\ast$ \mbox{\hyperlink{class_abstract_node_aef1fab41e507f447fb47009a2bbfb403}{cast\+To}} ()
+\item 
+std\+::string \mbox{\hyperlink{class_abstract_node_a3f200a84bf9e925ca39a6866a4d43588}{generate\+Output\+String}} (bool print\+Children, std\+::vector$<$ std\+::string $>$ attributes) const
+\end{DoxyCompactItemize}
+\doxysubsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static void \mbox{\hyperlink{class_abstract_node_af0df7a9545812739bb59d122a51ba99c}{reset\+Node\+Id\+Counter}} ()
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_abstract_node_a39c2f65b954b0ab15e8e30da84f68926}\label{class_abstract_node_a39c2f65b954b0ab15e8e30da84f68926}} 
+bool \mbox{\hyperlink{class_abstract_node_a39c2f65b954b0ab15e8e30da84f68926}{is\+Reversed}} \{false\}
+\begin{DoxyCompactList}\small\item\em Indicates whether the edges of this node are reversed compared to its initial state. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+std\+::string \mbox{\hyperlink{class_abstract_node_a53eabf948b80068841182ec9987db78b}{generate\+Unique\+Node\+Id}} ()
+\item 
+\mbox{\Hypertarget{class_abstract_node_a7b59e2377b8841ec1762bbca9ba88d2d}\label{class_abstract_node_a7b59e2377b8841ec1762bbca9ba88d2d}} 
+\mbox{\hyperlink{class_abstract_node_a7b59e2377b8841ec1762bbca9ba88d2d}{Abstract\+Node}} ()
+\begin{DoxyCompactList}\small\item\em Default Constructor, defines some default behavior for subclasses related to I\+Ds. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Static Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static int \mbox{\hyperlink{class_abstract_node_ad585516679d3c13dea9dbe86afbf6e6b}{get\+And\+Increment\+Node\+Id}} ()
+\end{DoxyCompactItemize}
+\doxysubsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+int \mbox{\hyperlink{class_abstract_node_a864ad3a5c7ab4da0651ea1369965fe00}{assigned\+Node\+Id}} \{-\/1\}
+\item 
+\mbox{\Hypertarget{class_abstract_node_a71a667554f9ca17ad0d56cbe5b22cc7f}\label{class_abstract_node_a71a667554f9ca17ad0d56cbe5b22cc7f}} 
+std\+::vector$<$ \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$ $>$ \mbox{\hyperlink{class_abstract_node_a71a667554f9ca17ad0d56cbe5b22cc7f}{children}} \{\}
+\begin{DoxyCompactList}\small\item\em Stores the children nodes of the current node. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_abstract_node_a0e34201f74ae8d2bd11ad016f82628f3}\label{class_abstract_node_a0e34201f74ae8d2bd11ad016f82628f3}} 
+std\+::vector$<$ \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$ $>$ \mbox{\hyperlink{class_abstract_node_a0e34201f74ae8d2bd11ad016f82628f3}{parents}} \{\}
+\begin{DoxyCompactList}\small\item\em Stores the parent nodes of the current node. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{class_abstract_node_aa1fde5c0e258f4603159f3dff359df0a}\label{class_abstract_node_aa1fde5c0e258f4603159f3dff359df0a}} 
+std\+::string \mbox{\hyperlink{class_abstract_node_aa1fde5c0e258f4603159f3dff359df0a}{unique\+Node\+Id}}
+\begin{DoxyCompactList}\small\item\em An identifier that is unique among all nodes during runtime. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Static Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+static int \mbox{\hyperlink{class_abstract_node_ab3d626a24e6c737b61d4cd0aa0b36a43}{node\+Id\+Counter}} = 0
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_abstract_node_a890a24af49cedda13f23cbe41931dee5}\label{class_abstract_node_a890a24af49cedda13f23cbe41931dee5}} 
+\index{AbstractNode@{AbstractNode}!accept@{accept}}
+\index{accept@{accept}!AbstractNode@{AbstractNode}}
+\doxysubsubsection{\texorpdfstring{accept()}{accept()}}
+{\footnotesize\ttfamily virtual void Abstract\+Node\+::accept (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_visitor}{Visitor}} \&}]{v }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+Part of the visitor pattern. Must be overridden in derived classes and must call v.\+visit(node). This allows the correct overload for the derived class to be called in the visitor. 
+\begin{DoxyParams}{Parameters}
+{\em v} & \mbox{\hyperlink{class_visitor}{Visitor}} that offers a visit() method \\
+\hline
+\end{DoxyParams}
+
+
+Implemented in \mbox{\hyperlink{class_matrix_a505d5e321442b5412f911d08d4da04e6}{Matrix$<$ T $>$}}, \mbox{\hyperlink{class_datatype_aee110fa5c75961288fd4fb25658874a9}{Datatype}}, \mbox{\hyperlink{class_function_ad2f04201ce066c1cb7cfd8e782e7f67a}{Function}}, \mbox{\hyperlink{class_var_decl_a5d117b06478d4fce83ee722662f32424}{Var\+Decl}}, \mbox{\hyperlink{class_arithmetic_expr_afd297dc671f35b49d27436b0ee9858b4}{Arithmetic\+Expr}}, \mbox{\hyperlink{class_rotate_a6a5d7b2ba2d4ff9eb03e43d880646b4c}{Rotate}}, \mbox{\hyperlink{class_operator_a01c33b27ef4a52e9b50899f45b3a67d8}{Operator}}, \mbox{\hyperlink{class_literal_float_a8f8ad9f304b29732ed6a03e157b39ef2}{Literal\+Float}}, \mbox{\hyperlink{class_literal_string_a163fa2029352132b4ddb036e13489cdf}{Literal\+String}}, \mbox{\hyperlink{class_get_matrix_size_aea0294fb646d1fc01933f8c8963a9a9e}{Get\+Matrix\+Size}}, \mbox{\hyperlink{class_literal_int_a4558b32f0f264ac5574132d443924e85}{Literal\+Int}}, \mbox{\hyperlink{class_logical_expr_af73df795e7fd09592ffd3f445bf21e68}{Logical\+Expr}}, \mbox{\hyperlink{class_literal_bool_afbb7178420daa4bdb73de244866c87bb}{Literal\+Bool}}, \mbox{\hyperlink{class_function_parameter_af2e9096c284fb3d91edb47b4f364cd9d}{Function\+Parameter}}, \mbox{\hyperlink{class_block_a5529de52915f1f62751189bc1849b8d8}{Block}}, \mbox{\hyperlink{class_variable_acdb137025f39f81b4d2195c72806d5a9}{Variable}}, \mbox{\hyperlink{class_call_external_a920f6f3e704148495d7136b125727d97}{Call\+External}}, \mbox{\hyperlink{class_matrix_element_ref_ac96fb0313a201accec759f4e29145cb4}{Matrix\+Element\+Ref}}, \mbox{\hyperlink{class_var_assignm_aa341fc030b102c1c0715e7ef906a64dc}{Var\+Assignm}}, \mbox{\hyperlink{class_call_adee679186d21d26000947b1ebd3eac8a}{Call}}, \mbox{\hyperlink{class_if_a6b7190a509558cec2b9fa030018ca038}{If}}, \mbox{\hyperlink{class_matrix_assignm_adfebf64023cc310a7fcb04658890b33f}{Matrix\+Assignm}}, \mbox{\hyperlink{class_return_a6cee60731a0300cb00952b545dff0317}{Return}}, \mbox{\hyperlink{class_operator_expr_af75840471b304c2f5aefe00b2a3caefb}{Operator\+Expr}}, \mbox{\hyperlink{class_for_a242bf6ba17a4d7ef7d5a1e07f15b4bb4}{For}}, \mbox{\hyperlink{class_transpose_a7e898b45b72a513d865a7733ba892999}{Transpose}}, \mbox{\hyperlink{class_unary_expr_a4686e69b40cb79c1cb9a083aef30b25a}{Unary\+Expr}}, \mbox{\hyperlink{class_while_a5206c7e1b28237f33c6fd210d7fd9017}{While}}, and \mbox{\hyperlink{class_parameter_list_a4e41c20b45889ac06308409077747bf7}{Parameter\+List}}.
+
+\mbox{\Hypertarget{class_abstract_node_aef1fab41e507f447fb47009a2bbfb403}\label{class_abstract_node_aef1fab41e507f447fb47009a2bbfb403}} 
+\index{AbstractNode@{AbstractNode}!castTo@{castTo}}
+\index{castTo@{castTo}!AbstractNode@{AbstractNode}}
+\doxysubsubsection{\texorpdfstring{castTo()}{castTo()}}
+{\footnotesize\ttfamily template$<$typename T $>$ \\
+T$\ast$ Abstract\+Node\+::cast\+To (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+Casts a node to type T which must be the specific derived class of the node to cast successfully. 
+\begin{DoxyTemplParams}{Template Parameters}
+{\em T} & The derived class of the node object. \\
+\hline
+\end{DoxyTemplParams}
+\begin{DoxyReturn}{Returns}
+A pointer to the casted object, or a std\+::logic\+\_\+error if cast was unsuccessful. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_abstract_node_ab7f13808b586865a27e2635995be5056}\label{class_abstract_node_ab7f13808b586865a27e2635995be5056}} 
+\index{AbstractNode@{AbstractNode}!clone@{clone}}
+\index{clone@{clone}!AbstractNode@{AbstractNode}}
+\doxysubsubsection{\texorpdfstring{clone()}{clone()}}
+{\footnotesize\ttfamily virtual \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}}$\ast$ Abstract\+Node\+::clone (\begin{DoxyParamCaption}\item[{bool}]{keep\+Original\+Unique\+Node\+Id }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+Clones a node recursively, i.\+e., by including all of its children. 
+\begin{DoxyParams}{Parameters}
+{\em keep\+Original\+Unique\+Node\+Id} & Specifies whether to keep all of the unique node I\+Ds of the original nodes. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A clone of the node including clones of all of its children. 
+\end{DoxyReturn}
+
+
+Implemented in \mbox{\hyperlink{class_abstract_matrix_ab0233364480213fd88222bbe664505f6}{Abstract\+Matrix}}, \mbox{\hyperlink{class_matrix_a3741150186f463585ef6bbe6dc178d06}{Matrix$<$ T $>$}}, \mbox{\hyperlink{class_operator_aa2a10cc2f4df91bc5b5e86dcdf32339a}{Operator}}, \mbox{\hyperlink{class_rotate_a5abbbe7ffec7e2d35352b972c3e3ae33}{Rotate}}, \mbox{\hyperlink{class_get_matrix_size_a47a0a008a1db279bffa262f36bea27c9}{Get\+Matrix\+Size}}, \mbox{\hyperlink{class_logical_expr_a5e9d652657c8f2c75ab7e87fd0b8e30a}{Logical\+Expr}}, \mbox{\hyperlink{class_literal_float_ab672122ac5d09db99e51b6a6cd6f8c68}{Literal\+Float}}, \mbox{\hyperlink{class_literal_string_aada7eb6ee1c8351f428230b584fbd63f}{Literal\+String}}, \mbox{\hyperlink{class_literal_bool_a9147febcb58dc100e227caf55f9cc93c}{Literal\+Bool}}, \mbox{\hyperlink{class_literal_int_ab616cea25f71aea05400283aa7a8a8e1}{Literal\+Int}}, \mbox{\hyperlink{class_return_a9ee16d778fe2682624e3569225d3258d}{Return}}, \mbox{\hyperlink{class_arithmetic_expr_a86db8c56a0699f83c6550a6490379d40}{Arithmetic\+Expr}}, \mbox{\hyperlink{class_var_decl_a97a3b21c31ee3a938cd77860efad47e4}{Var\+Decl}}, \mbox{\hyperlink{class_matrix_assignm_a7d156088099dbac8ffe7c9be557581a1}{Matrix\+Assignm}}, \mbox{\hyperlink{class_matrix_element_ref_aef61dda66b411fb7eb3021f4cd4a71a9}{Matrix\+Element\+Ref}}, \mbox{\hyperlink{class_datatype_a064cead1bca53534dd2a6ff4e63224db}{Datatype}}, \mbox{\hyperlink{class_variable_a513ef74c9829ae07671deea65e19e213}{Variable}}, \mbox{\hyperlink{class_call_external_acbc9c298b704c9c3fe7a6cbbd8678ef8}{Call\+External}}, \mbox{\hyperlink{class_for_a9df10b4656f25290c00033755f507a25}{For}}, \mbox{\hyperlink{class_function_parameter_a8f4689709e8f19a441da091a0cee72a4}{Function\+Parameter}}, \mbox{\hyperlink{class_transpose_a8325bb4823d808078645850ce94ecd35}{Transpose}}, \mbox{\hyperlink{class_function_a496b1999a8d36974c2f3b0330bc1d864}{Function}}, \mbox{\hyperlink{class_var_assignm_a25df11e98d9b65ce544a65f622bf32ff}{Var\+Assignm}}, \mbox{\hyperlink{class_block_a397d47dac4688ee58bac781384ce7751}{Block}}, \mbox{\hyperlink{class_call_ab12b25280f537a8783e385f5a7cd8d6e}{Call}}, \mbox{\hyperlink{class_if_aee0736d948c99f51e52ee2c4760cd6e7}{If}}, \mbox{\hyperlink{class_operator_expr_a167d2ed639a23ac9b6ea76a18b8b3514}{Operator\+Expr}}, \mbox{\hyperlink{class_parameter_list_a3e263333a1f6be874dbb34b52743a32a}{Parameter\+List}}, \mbox{\hyperlink{class_unary_expr_ab7da0e8e91e4db4227973cb888c10ca8}{Unary\+Expr}}, \mbox{\hyperlink{class_while_a4450f80c086cfd5e4c9b0bcdaeb249c5}{While}}, and \mbox{\hyperlink{class_matrix_a32b557782a90d3936e800a32b1d471e6}{Matrix$<$ T $>$}}.
+
+\mbox{\Hypertarget{class_abstract_node_a267513a1115e86df8966caf998e71e0e}\label{class_abstract_node_a267513a1115e86df8966caf998e71e0e}} 
+\index{AbstractNode@{AbstractNode}!cloneFlat@{cloneFlat}}
+\index{cloneFlat@{cloneFlat}!AbstractNode@{AbstractNode}}
+\doxysubsubsection{\texorpdfstring{cloneFlat()}{cloneFlat()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$ Abstract\+Node\+::clone\+Flat (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+Creates a flat copy of the node without including any parents or children. \begin{DoxyReturn}{Returns}
+A flat copy of this node. 
+\end{DoxyReturn}
+
+
+Reimplemented in \mbox{\hyperlink{class_matrix_element_ref_a473e4dd6b0ff7f2657b1cc3fb79e376c}{Matrix\+Element\+Ref}}, \mbox{\hyperlink{class_logical_expr_a3f2bef38e0450c0e42171eec6d891de0}{Logical\+Expr}}, \mbox{\hyperlink{class_transpose_a334fe5d63a8c508d8ee258fdead5dea7}{Transpose}}, \mbox{\hyperlink{class_rotate_aa59a2aa6d51d963df3a1693ac73a687f}{Rotate}}, \mbox{\hyperlink{class_datatype_a96155ca202dcc91889df8b42b1e61365}{Datatype}}, and \mbox{\hyperlink{class_block_a9a7c663e3a1c2e3796dfacc45758964c}{Block}}.
+
+\mbox{\Hypertarget{class_abstract_node_a3f200a84bf9e925ca39a6866a4d43588}\label{class_abstract_node_a3f200a84bf9e925ca39a6866a4d43588}} 
+\index{AbstractNode@{AbstractNode}!generateOutputString@{generateOutputString}}
+\index{generateOutputString@{generateOutputString}!AbstractNode@{AbstractNode}}
+\doxysubsubsection{\texorpdfstring{generateOutputString()}{generateOutputString()}}
+{\footnotesize\ttfamily std\+::string Abstract\+Node\+::generate\+Output\+String (\begin{DoxyParamCaption}\item[{bool}]{print\+Children,  }\item[{std\+::vector$<$ std\+::string $>$}]{attributes }\end{DoxyParamCaption}) const}
+
+Generates an output string to be used by the \mbox{\hyperlink{class_abstract_node_aee58b60a470f2e494e0db1808c87b13d}{to\+String()}} method. 
+\begin{DoxyParams}{Parameters}
+{\em print\+Children} & Specifies whether to print details of this node only (False) or also its children (True). \\
+\hline
+{\em attributes} & The node\textquotesingle{}s attributes to be printed (fields in the node\textquotesingle{}s class). \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A string representation of the node. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_abstract_node_a53eabf948b80068841182ec9987db78b}\label{class_abstract_node_a53eabf948b80068841182ec9987db78b}} 
+\index{AbstractNode@{AbstractNode}!generateUniqueNodeId@{generateUniqueNodeId}}
+\index{generateUniqueNodeId@{generateUniqueNodeId}!AbstractNode@{AbstractNode}}
+\doxysubsubsection{\texorpdfstring{generateUniqueNodeId()}{generateUniqueNodeId()}}
+{\footnotesize\ttfamily std\+::string Abstract\+Node\+::generate\+Unique\+Node\+Id (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+Generates a new node ID in the form \char`\"{}$<$\+Node\+Type\+Name$>$\+\_\+node\+Id\+Counter\char`\"{} where $<$\+Node\+Type\+Name$>$ is the value obtained by \mbox{\hyperlink{class_abstract_node_a8cc40127801e7777c8094f17a3b1efcb}{get\+Node\+Type()}} and node\+Id\+Counter an ongoing counter of created \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} objects. \begin{DoxyReturn}{Returns}
+An unique node ID to be used as unique\+Node\+Id for the current node. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_abstract_node_ad585516679d3c13dea9dbe86afbf6e6b}\label{class_abstract_node_ad585516679d3c13dea9dbe86afbf6e6b}} 
+\index{AbstractNode@{AbstractNode}!getAndIncrementNodeId@{getAndIncrementNodeId}}
+\index{getAndIncrementNodeId@{getAndIncrementNodeId}!AbstractNode@{AbstractNode}}
+\doxysubsubsection{\texorpdfstring{getAndIncrementNodeId()}{getAndIncrementNodeId()}}
+{\footnotesize\ttfamily int Abstract\+Node\+::get\+And\+Increment\+Node\+Id (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}, {\ttfamily [protected]}}
+
+Returns the current ID (integer) and increments the ID by one. The ID is an ongoing counter of created \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} objects and is used to build an \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}}\textquotesingle{}s unique ID (see \mbox{\hyperlink{class_abstract_node_a8c5441e6f42332beaa1291139986f800}{get\+Unique\+Node\+Id()}}). \begin{DoxyReturn}{Returns}
+The current ID as integer. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_abstract_node_a8cc40127801e7777c8094f17a3b1efcb}\label{class_abstract_node_a8cc40127801e7777c8094f17a3b1efcb}} 
+\index{AbstractNode@{AbstractNode}!getNodeType@{getNodeType}}
+\index{getNodeType@{getNodeType}!AbstractNode@{AbstractNode}}
+\doxysubsubsection{\texorpdfstring{getNodeType()}{getNodeType()}}
+{\footnotesize\ttfamily virtual std\+::string Abstract\+Node\+::get\+Node\+Type (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [pure virtual]}}
+
+Returns the node\textquotesingle{}s type, which is the name of the object in the A\+ST. This method must be overridden by all classes that inherit from \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} by their respective name (e.\+g., Arithmetic\+Exp, \mbox{\hyperlink{class_function}{Function}}, \mbox{\hyperlink{class_variable}{Variable}}). \begin{DoxyReturn}{Returns}
+The name of the node type. 
+\end{DoxyReturn}
+
+
+Implemented in \mbox{\hyperlink{class_matrix_a3b0cb9df1fe3fccc0ac01fa4bcff664e}{Matrix$<$ T $>$}}, \mbox{\hyperlink{class_function_a20b5ce420405c44241fc130ce2aaaf5a}{Function}}, \mbox{\hyperlink{class_var_decl_ab972180732b4454c2a32671ea02b8068}{Var\+Decl}}, \mbox{\hyperlink{class_arithmetic_expr_acce01879a087609d4565a051d753d810}{Arithmetic\+Expr}}, \mbox{\hyperlink{class_operator_af484b0fafd9c53fdd42ce0d29d882719}{Operator}}, \mbox{\hyperlink{class_literal_float_a0d8f9296eaa5ab54dab0d96ed45ec5e9}{Literal\+Float}}, \mbox{\hyperlink{class_literal_string_a3b0ac84bf4d0a27703056118f318b15e}{Literal\+String}}, \mbox{\hyperlink{class_literal_bool_aefd23aa0f2fe77b8ff95af479f37c458}{Literal\+Bool}}, \mbox{\hyperlink{class_literal_int_a93f3ac81e32a462e9610e5742702e83d}{Literal\+Int}}, \mbox{\hyperlink{class_rotate_aa9ad0956f8ccf42d3fe7090b0fcd21bf}{Rotate}}, \mbox{\hyperlink{class_logical_expr_a923a42bb3cb6dce80865efbde7b06b28}{Logical\+Expr}}, \mbox{\hyperlink{class_get_matrix_size_a8433bf55f4f65961fddbebfaf381ef7c}{Get\+Matrix\+Size}}, \mbox{\hyperlink{class_call_external_aaa86d30b577ae5daa404e5ce3d0b6118}{Call\+External}}, \mbox{\hyperlink{class_var_assignm_a794b118aaaeae19f8d3d0e24aaea8d60}{Var\+Assignm}}, \mbox{\hyperlink{class_block_a0c4c888e1fda4a10ed73c1549ad8d6ed}{Block}}, \mbox{\hyperlink{class_call_a952035228f533511f97fccfcfac86bde}{Call}}, \mbox{\hyperlink{class_variable_a0ca604c78fc4cb70ea4dd94a07c9a6a0}{Variable}}, \mbox{\hyperlink{class_function_parameter_ab4d4e1a21f566ebac16556ce1cb661ff}{Function\+Parameter}}, \mbox{\hyperlink{class_if_ab89f37630b8e717e97cd7405a4e3ab55}{If}}, \mbox{\hyperlink{class_unary_expr_affa2c2e7793d8ef8559abb72ab94db55}{Unary\+Expr}}, \mbox{\hyperlink{class_while_ad5e769ff017d252704b5627a3c6e97ff}{While}}, \mbox{\hyperlink{class_return_a7b756560b61c5d7d53f4e18f3b3e7ce4}{Return}}, \mbox{\hyperlink{class_operator_expr_afd089099466a37a0ba04afca1ef8b46a}{Operator\+Expr}}, \mbox{\hyperlink{class_matrix_element_ref_a1d9db738389c8b6b8909c642f63bb70d}{Matrix\+Element\+Ref}}, \mbox{\hyperlink{class_datatype_ab165c4733bd9852190931b6c24ff3135}{Datatype}}, \mbox{\hyperlink{class_matrix_assignm_ab0fc7e38657f84b29a650faa44557a37}{Matrix\+Assignm}}, \mbox{\hyperlink{class_for_a30fa9a5a99952989e54e16cd702f1283}{For}}, \mbox{\hyperlink{class_transpose_afab79262535b6cf8e9936a8021991239}{Transpose}}, and \mbox{\hyperlink{class_parameter_list_aa20ebf072891d797392a2723b3275333}{Parameter\+List}}.
+
+\mbox{\Hypertarget{class_abstract_node_a8c5441e6f42332beaa1291139986f800}\label{class_abstract_node_a8c5441e6f42332beaa1291139986f800}} 
+\index{AbstractNode@{AbstractNode}!getUniqueNodeId@{getUniqueNodeId}}
+\index{getUniqueNodeId@{getUniqueNodeId}!AbstractNode@{AbstractNode}}
+\doxysubsubsection{\texorpdfstring{getUniqueNodeId()}{getUniqueNodeId()}}
+{\footnotesize\ttfamily std\+::string Abstract\+Node\+::get\+Unique\+Node\+Id (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Returns a node\textquotesingle{}s unique ID, or generates it by calling \mbox{\hyperlink{class_abstract_node_a53eabf948b80068841182ec9987db78b}{generate\+Unique\+Node\+Id()}} if the name was not defined yet. \begin{DoxyReturn}{Returns}
+The node\textquotesingle{}s name consisting of the node type and an ongoing number (e.\+g., Function\+\_\+1). 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_abstract_node_a3905c64474339cfcf742f982633364e9}\label{class_abstract_node_a3905c64474339cfcf742f982633364e9}} 
+\index{AbstractNode@{AbstractNode}!hasReversedEdges@{hasReversedEdges}}
+\index{hasReversedEdges@{hasReversedEdges}!AbstractNode@{AbstractNode}}
+\doxysubsubsection{\texorpdfstring{hasReversedEdges()}{hasReversedEdges()}}
+{\footnotesize\ttfamily bool Abstract\+Node\+::has\+Reversed\+Edges (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const}
+
+Checks whether the edges of this node are reversed (i.\+e., node\textquotesingle{}s parents and children are swapped). \begin{DoxyReturn}{Returns}
+True iff the node\textquotesingle{}s edges are reversed. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{class_abstract_node_af0df7a9545812739bb59d122a51ba99c}\label{class_abstract_node_af0df7a9545812739bb59d122a51ba99c}} 
+\index{AbstractNode@{AbstractNode}!resetNodeIdCounter@{resetNodeIdCounter}}
+\index{resetNodeIdCounter@{resetNodeIdCounter}!AbstractNode@{AbstractNode}}
+\doxysubsubsection{\texorpdfstring{resetNodeIdCounter()}{resetNodeIdCounter()}}
+{\footnotesize\ttfamily void Abstract\+Node\+::reset\+Node\+Id\+Counter (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+Resets the static node ID counter that is used to build the unique node ID. This method is required for testing. \mbox{\Hypertarget{class_abstract_node_aad720dd5baeb746174fc08c8500cd2eb}\label{class_abstract_node_aad720dd5baeb746174fc08c8500cd2eb}} 
+\index{AbstractNode@{AbstractNode}!setUniqueNodeId@{setUniqueNodeId}}
+\index{setUniqueNodeId@{setUniqueNodeId}!AbstractNode@{AbstractNode}}
+\doxysubsubsection{\texorpdfstring{setUniqueNodeId()}{setUniqueNodeId()}}
+{\footnotesize\ttfamily void Abstract\+Node\+::set\+Unique\+Node\+Id (\begin{DoxyParamCaption}\item[{const std\+::string \&}]{new\+Unique\+Node\+Id }\end{DoxyParamCaption})}
+
+Sets the unique\+Node\+Id attribute. This attribute should be auto-\/generated by \mbox{\hyperlink{class_abstract_node_a53eabf948b80068841182ec9987db78b}{generate\+Unique\+Node\+Id()}}. 
+\begin{DoxyParams}{Parameters}
+{\em new\+Unique\+Node\+Id} & The new unique node\textquotesingle{}s identifier. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{class_abstract_node_a76f2290759cb522619af77c630b6eba9}\label{class_abstract_node_a76f2290759cb522619af77c630b6eba9}} 
+\index{AbstractNode@{AbstractNode}!supportsCircuitMode@{supportsCircuitMode}}
+\index{supportsCircuitMode@{supportsCircuitMode}!AbstractNode@{AbstractNode}}
+\doxysubsubsection{\texorpdfstring{supportsCircuitMode()}{supportsCircuitMode()}}
+{\footnotesize\ttfamily bool Abstract\+Node\+::supports\+Circuit\+Mode (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+This method returns True iff the class derived from the \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} class properly makes use of the child/parent fields as it would be expected in a circuit. 
+
+Reimplemented in \mbox{\hyperlink{class_matrix_a0f5917a0bdd141b306673104a93bdec2}{Matrix$<$ T $>$}}, \mbox{\hyperlink{class_operator_aead298af5c61f58d0d5e15740ad3ded0}{Operator}}, \mbox{\hyperlink{class_var_decl_adcc8c11c783bd96e671dc2964b6efcdb}{Var\+Decl}}, \mbox{\hyperlink{class_function_ab52f1f00cd8910e6909e3ee8638295b1}{Function}}, \mbox{\hyperlink{class_literal_bool_aa4ddaa4e1e10d884db83b88d6ea8003f}{Literal\+Bool}}, \mbox{\hyperlink{class_literal_int_a933cfa1c13fec1fd7ccb8069bd74e872}{Literal\+Int}}, \mbox{\hyperlink{class_datatype_a8f44424fb88fa15d859bfce21dda79b7}{Datatype}}, \mbox{\hyperlink{class_literal_float_a35eced8d53a78e3900252d8f0581d25f}{Literal\+Float}}, \mbox{\hyperlink{class_literal_string_af7943135197a8f23a317b0aed4e29484}{Literal\+String}}, \mbox{\hyperlink{class_variable_a8e6652c2d761143e7e1257a4453de141}{Variable}}, \mbox{\hyperlink{class_get_matrix_size_aa040fd5eab5d44fdf5f4f4e7c8b68201}{Get\+Matrix\+Size}}, \mbox{\hyperlink{class_matrix_element_ref_ab66143ebf27d337e9f05eca645012813}{Matrix\+Element\+Ref}}, \mbox{\hyperlink{class_for_ab03893b429564e0d60af629286426bbc}{For}}, \mbox{\hyperlink{class_return_a398c1aa6b27d886f4b5a18036da7ef27}{Return}}, \mbox{\hyperlink{class_var_assignm_ab9ef7e475cd00557e19e21f2eea1011c}{Var\+Assignm}}, \mbox{\hyperlink{class_call_aa6229befb6eefbd8d21e822570417e9b}{Call}}, \mbox{\hyperlink{class_transpose_aa4d2979b5c763808af9b39e61c058a04}{Transpose}}, \mbox{\hyperlink{class_unary_expr_a11038714885c438c11ae0f12636fcc66}{Unary\+Expr}}, \mbox{\hyperlink{class_block_a1d418c6c69e78d5aca2cd125ae5a3b43}{Block}}, \mbox{\hyperlink{class_function_parameter_af31c38bc762221a5a1f7baea138a7e0d}{Function\+Parameter}}, \mbox{\hyperlink{class_if_a39631269a6877aee80eec6e89312f9bd}{If}}, \mbox{\hyperlink{class_rotate_add019d896fc9d22baf6054fcdb35b14e}{Rotate}}, \mbox{\hyperlink{class_while_ab416b063b2aadcae8a40a3f44131d81d}{While}}, \mbox{\hyperlink{class_operator_expr_ae71d874f2823162f7432cf979cea8f60}{Operator\+Expr}}, \mbox{\hyperlink{class_matrix_assignm_a62bb1be891af4760493b0996e27d7dce}{Matrix\+Assignm}}, \mbox{\hyperlink{class_abstract_binary_expr_a5d17aeb275587b0fd92d457a3454acdb}{Abstract\+Binary\+Expr}}, and \mbox{\hyperlink{class_parameter_list_ad8739af533a7a3750d93ba4e7a461bfc}{Parameter\+List}}.
+
+\mbox{\Hypertarget{class_abstract_node_a2479945fea5f323f14ac1a5f8615aad6}\label{class_abstract_node_a2479945fea5f323f14ac1a5f8615aad6}} 
+\index{AbstractNode@{AbstractNode}!swapChildrenParents@{swapChildrenParents}}
+\index{swapChildrenParents@{swapChildrenParents}!AbstractNode@{AbstractNode}}
+\doxysubsubsection{\texorpdfstring{swapChildrenParents()}{swapChildrenParents()}}
+{\footnotesize\ttfamily void Abstract\+Node\+::swap\+Children\+Parents (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+Swaps the children and parents vectors which corresponds to flipping the edges of this node. Note\+: This should never be performed on individual nodes only but instead on the whole A\+ST, see method \mbox{\hyperlink{class_ast_af804ef1601108ac47577715b9212e295}{Ast\+::reverse\+Edges()}}. Keep in mind that most methods are not aware of this swapped relationship and do not work. Use $\ast$get\+Child\+At\+Index(int idx, bool is\+Edge\+Direction\+Aware) by specifying is\+Edge\+Direction\+Aware=true to get a specific child. \mbox{\Hypertarget{class_abstract_node_a0ee4c4915b6f76415aa2187535359899}\label{class_abstract_node_a0ee4c4915b6f76415aa2187535359899}} 
+\index{AbstractNode@{AbstractNode}!toJson@{toJson}}
+\index{toJson@{toJson}!AbstractNode@{AbstractNode}}
+\doxysubsubsection{\texorpdfstring{toJson()}{toJson()}}
+{\footnotesize\ttfamily json Abstract\+Node\+::to\+Json (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [virtual]}}
+
+Get the J\+S\+ON representation of the node including all of its children. \begin{DoxyReturn}{Returns}
+J\+S\+ON representation of the node 
+\end{DoxyReturn}
+
+
+Reimplemented in \mbox{\hyperlink{class_abstract_matrix_a951b47fa76fbbf7854d6476144c348da}{Abstract\+Matrix}}, \mbox{\hyperlink{class_matrix_a90298e7f3b73138b6fc29cefb43524d5}{Matrix$<$ T $>$}}, \mbox{\hyperlink{class_datatype_a5f35d4e99b310e9bac46fcc03f7e3982}{Datatype}}, \mbox{\hyperlink{class_for_adaaf55403e32fa675817302dede735a7}{For}}, \mbox{\hyperlink{class_function_a0abba29af8d918c9dc310b999ad929ed}{Function}}, \mbox{\hyperlink{class_var_decl_acab217ec9794a1d18443617472cab88d}{Var\+Decl}}, \mbox{\hyperlink{class_literal_float_a59246dcdc2291cc5a79f51133efcd84a}{Literal\+Float}}, \mbox{\hyperlink{class_literal_int_a0a72ff976a6747d9a32735493c25c36a}{Literal\+Int}}, \mbox{\hyperlink{class_abstract_expr_ac1957d8bda1e29b35b822ec0b05c5027}{Abstract\+Expr}}, \mbox{\hyperlink{class_literal_string_a215987e5d1874f1d3de818885ff5b149}{Literal\+String}}, \mbox{\hyperlink{class_literal_bool_a1f09331096aa475a6d92870e33280d15}{Literal\+Bool}}, \mbox{\hyperlink{class_matrix_assignm_ae9400d961f74bb991538ad65a7d7527a}{Matrix\+Assignm}}, \mbox{\hyperlink{class_get_matrix_size_a674073531ae6bc4c772da6386e6e5c72}{Get\+Matrix\+Size}}, \mbox{\hyperlink{class_matrix_element_ref_a336ce656eb1f92cb11c1429066c9e331}{Matrix\+Element\+Ref}}, \mbox{\hyperlink{class_rotate_a0e65e2d7c7b367b1519101c994a502e5}{Rotate}}, \mbox{\hyperlink{class_block_a424cf07d24308a8f37dedb1d67076059}{Block}}, \mbox{\hyperlink{class_call_external_a29480977d4043815acd01bbbe6aa9688}{Call\+External}}, \mbox{\hyperlink{class_function_parameter_a142f3e7fed261ce9b4717486c12ac61d}{Function\+Parameter}}, \mbox{\hyperlink{class_transpose_a50e8ff05ff7ee447c4ffb910d191c6c4}{Transpose}}, \mbox{\hyperlink{class_var_assignm_a1acd73b8bf7c8640b75066f6dba3f2f8}{Var\+Assignm}}, \mbox{\hyperlink{class_abstract_binary_expr_a37df209d914bb3104689caf8e3e93cdf}{Abstract\+Binary\+Expr}}, \mbox{\hyperlink{class_call_a1b1a81d3dcc202fb3db99eceb10ef3c6}{Call}}, \mbox{\hyperlink{class_if_a1db56ab3b121d15c5bd11083006efa33}{If}}, \mbox{\hyperlink{class_return_a89eb5ab24aaa10a8ff4c9aba68fc1abb}{Return}}, \mbox{\hyperlink{class_variable_ad2de73d36aa8d372c3f0458ad717260c}{Variable}}, \mbox{\hyperlink{class_abstract_statement_a9ec419479db2dfefcd70042f94974949}{Abstract\+Statement}}, \mbox{\hyperlink{class_unary_expr_a6469f7794fb2db18817e511e786f4517}{Unary\+Expr}}, \mbox{\hyperlink{class_while_ae2cc03fb2b18993573ff4b3b0c0442fb}{While}}, and \mbox{\hyperlink{class_matrix_a9c2e653926b1d5e04bac5c838724c70f}{Matrix$<$ T $>$}}.
+
+\mbox{\Hypertarget{class_abstract_node_aee58b60a470f2e494e0db1808c87b13d}\label{class_abstract_node_aee58b60a470f2e494e0db1808c87b13d}} 
+\index{AbstractNode@{AbstractNode}!toString@{toString}}
+\index{toString@{toString}!AbstractNode@{AbstractNode}}
+\doxysubsubsection{\texorpdfstring{toString()}{toString()}}
+{\footnotesize\ttfamily std\+::string Abstract\+Node\+::to\+String (\begin{DoxyParamCaption}\item[{bool}]{print\+Children }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [virtual]}}
+
+Returns a string representation of the node, if print\+Children is True then calls to\+String for its children too. Hence, to\+String(false) is equivalent to printing a node\textquotesingle{}s attributes only. \begin{DoxyReturn}{Returns}
+A textual representation of the node. 
+\end{DoxyReturn}
+
+
+Reimplemented in \mbox{\hyperlink{class_operator_a74ac2d3c1f1fe6c0f7562f993c643f72}{Operator}}, \mbox{\hyperlink{class_var_decl_a42ea504f3b66ae2db062f00a34ac0ed3}{Var\+Decl}}, \mbox{\hyperlink{class_function_a3859937a4088b24c1d74cf978c322258}{Function}}, \mbox{\hyperlink{class_literal_int_a9e63664ada0aae614b102e77184a7367}{Literal\+Int}}, \mbox{\hyperlink{class_literal_float_a306d4f78a9a6e3fb4bd96ed80ad71b3d}{Literal\+Float}}, \mbox{\hyperlink{class_literal_string_a11b734827885bdba66e0e33c34944a73}{Literal\+String}}, \mbox{\hyperlink{class_literal_bool_a29b5893e791907dbc842a9def7be047f}{Literal\+Bool}}, \mbox{\hyperlink{class_arithmetic_expr_abf4e507de6c63f951de09791522f69a4}{Arithmetic\+Expr}}, \mbox{\hyperlink{class_function_parameter_a3f9b0368be2fb20f4c7fa22cc3405608}{Function\+Parameter}}, \mbox{\hyperlink{class_var_assignm_a650129d8d9e4108d087a82f5ebd8d5b3}{Var\+Assignm}}, \mbox{\hyperlink{class_variable_ab214930aad392d3d3c73e4ba325ee85e}{Variable}}, \mbox{\hyperlink{class_logical_expr_ae14a23462d6891753a82d196cbfa7e54}{Logical\+Expr}}, \mbox{\hyperlink{class_datatype_afb612b24f8d8e4fa23210e4f3784f53e}{Datatype}}, \mbox{\hyperlink{class_if_a4a74847a522cb1857fb4e0d2961332d6}{If}}, \mbox{\hyperlink{class_for_a32cfa5cded4c0ba91e24b8607a85705b}{For}}, \mbox{\hyperlink{class_get_matrix_size_a42db7c23f0766d24119969233d7455a7}{Get\+Matrix\+Size}}, \mbox{\hyperlink{class_matrix_element_ref_a78252162bcb1f77089bfbe2d5c875f25}{Matrix\+Element\+Ref}}, \mbox{\hyperlink{class_block_ad4ff57dba6103f81e120470c81025ddf}{Block}}, \mbox{\hyperlink{class_return_a992860dd4e2e7ff4b4aa7f250ce663e7}{Return}}, \mbox{\hyperlink{class_transpose_a78261ff7341c7e20403394946fef4f1d}{Transpose}}, \mbox{\hyperlink{class_unary_expr_a48903d55435a5c489c45d9dbcf84a10b}{Unary\+Expr}}, \mbox{\hyperlink{class_rotate_a580de20c68b39d4d6cfd6c0bd373839b}{Rotate}}, \mbox{\hyperlink{class_parameter_list_ac7d757105ce57060b3c7e2c028e8ee9e}{Parameter\+List}}, \mbox{\hyperlink{class_operator_expr_a1cb51241e205a0683ac79ffd6b1a3138}{Operator\+Expr}}, and \mbox{\hyperlink{class_matrix_assignm_a69191bd7e431a12ef96b2fd2b752833d}{Matrix\+Assignm}}.
+
+\mbox{\Hypertarget{class_abstract_node_a6eeef4bb93c1788d6ebce8ab634d9045}\label{class_abstract_node_a6eeef4bb93c1788d6ebce8ab634d9045}} 
+\index{AbstractNode@{AbstractNode}!updateClone@{updateClone}}
+\index{updateClone@{updateClone}!AbstractNode@{AbstractNode}}
+\doxysubsubsection{\texorpdfstring{updateClone()}{updateClone()}}
+{\footnotesize\ttfamily void Abstract\+Node\+::update\+Clone (\begin{DoxyParamCaption}\item[{bool}]{keep\+Original\+Unique\+Node\+Id,  }\item[{\mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$}]{original\+Node }\end{DoxyParamCaption})}
+
+Method that updates a cloned node. Must be called within each derived \mbox{\hyperlink{class_abstract_node_ab7f13808b586865a27e2635995be5056}{clone()}} method. 
+\begin{DoxyParams}{Parameters}
+{\em keep\+Original\+Unique\+Node\+Id} & Determines whether to replace the cloned node\textquotesingle{}s unique node ID by the ID of the original node. \\
+\hline
+{\em original\+Node} & The node of which the cloned node is based on. \\
+\hline
+\end{DoxyParams}
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{class_abstract_node_a864ad3a5c7ab4da0651ea1369965fe00}\label{class_abstract_node_a864ad3a5c7ab4da0651ea1369965fe00}} 
+\index{AbstractNode@{AbstractNode}!assignedNodeId@{assignedNodeId}}
+\index{assignedNodeId@{assignedNodeId}!AbstractNode@{AbstractNode}}
+\doxysubsubsection{\texorpdfstring{assignedNodeId}{assignedNodeId}}
+{\footnotesize\ttfamily int Abstract\+Node\+::assigned\+Node\+Id \{-\/1\}\hspace{0.3cm}{\ttfamily [protected]}}
+
+Stores the reserved node ID until the first call of \mbox{\hyperlink{class_abstract_node_a8c5441e6f42332beaa1291139986f800}{get\+Unique\+Node\+Id()}} at which the reserved ID is fetched and the node\textquotesingle{}s ID is assigned (field unique\+Node\+Id) based on the node\textquotesingle{}s name and this reserved ID. This is a workaround because \mbox{\hyperlink{class_abstract_node_a8cc40127801e7777c8094f17a3b1efcb}{get\+Node\+Type()}} is a virtual method that cannot be called from derived classes\textquotesingle{} constructor. \mbox{\Hypertarget{class_abstract_node_ab3d626a24e6c737b61d4cd0aa0b36a43}\label{class_abstract_node_ab3d626a24e6c737b61d4cd0aa0b36a43}} 
+\index{AbstractNode@{AbstractNode}!nodeIdCounter@{nodeIdCounter}}
+\index{nodeIdCounter@{nodeIdCounter}!AbstractNode@{AbstractNode}}
+\doxysubsubsection{\texorpdfstring{nodeIdCounter}{nodeIdCounter}}
+{\footnotesize\ttfamily int Abstract\+Node\+::node\+Id\+Counter = 0\hspace{0.3cm}{\ttfamily [static]}, {\ttfamily [protected]}}
+
+A static ongoing counter that is incremented after creating a new \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} object. The counter\textquotesingle{}s value is used to build the unique node ID. 
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/ast/Abstract\+Node.\+h\item 
+src/ast/Abstract\+Node.\+cpp\end{DoxyCompactItemize}

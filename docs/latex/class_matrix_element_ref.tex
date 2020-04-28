@@ -1,0 +1,178 @@
+\hypertarget{class_matrix_element_ref}{}\doxysection{Matrix\+Element\+Ref Class Reference}
+\label{class_matrix_element_ref}\index{MatrixElementRef@{MatrixElementRef}}
+Inheritance diagram for Matrix\+Element\+Ref\+:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{class_matrix_element_ref}
+\end{center}
+\end{figure}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{class_matrix_element_ref_a6d52561d9b0993d3f0ffcec9ccb80ec8}\label{class_matrix_element_ref_a6d52561d9b0993d3f0ffcec9ccb80ec8}} 
+{\bfseries Matrix\+Element\+Ref} (\mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$must\+Evaluate\+To\+Abstract\+Literal, \mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$row\+Index, \mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$column\+Index)
+\item 
+\mbox{\Hypertarget{class_matrix_element_ref_af3220dc6d3842634356138eaadee88f0}\label{class_matrix_element_ref_af3220dc6d3842634356138eaadee88f0}} 
+{\bfseries Matrix\+Element\+Ref} (\mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$must\+Evaluate\+To\+Abstract\+Literal, \mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$row\+Index)
+\item 
+\mbox{\Hypertarget{class_matrix_element_ref_a9be4929dc8686f6c29276669c3e63e57}\label{class_matrix_element_ref_a9be4929dc8686f6c29276669c3e63e57}} 
+{\bfseries Matrix\+Element\+Ref} (\mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$must\+Evaluate\+To\+Abstract\+Literal, int row\+Index, int column\+Index)
+\item 
+\mbox{\Hypertarget{class_matrix_element_ref_ae483750c490281dc04042c5167d579cb}\label{class_matrix_element_ref_ae483750c490281dc04042c5167d579cb}} 
+{\bfseries Matrix\+Element\+Ref} (\mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$must\+Evaluate\+To\+Abstract\+Literal, int row\+Index)
+\item 
+std\+::string \mbox{\hyperlink{class_matrix_element_ref_a1d9db738389c8b6b8909c642f63bb70d}{get\+Node\+Type}} () const override
+\item 
+void \mbox{\hyperlink{class_matrix_element_ref_ac96fb0313a201accec759f4e29145cb4}{accept}} (\mbox{\hyperlink{class_visitor}{Visitor}} \&v) override
+\item 
+\mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$ \mbox{\hyperlink{class_matrix_element_ref_aef61dda66b411fb7eb3021f4cd4a71a9}{clone}} (bool keep\+Original\+Unique\+Node\+Id) override
+\item 
+json \mbox{\hyperlink{class_matrix_element_ref_a336ce656eb1f92cb11c1429066c9e331}{to\+Json}} () const override
+\item 
+\mbox{\Hypertarget{class_matrix_element_ref_a44538d23c0d039188f286687167a2a38}\label{class_matrix_element_ref_a44538d23c0d039188f286687167a2a38}} 
+std\+::vector$<$ std\+::string $>$ {\bfseries get\+Variable\+Identifiers} () override
+\item 
+\mbox{\Hypertarget{class_matrix_element_ref_a5cb75d9011499a829d64aceaf671fea7}\label{class_matrix_element_ref_a5cb75d9011499a829d64aceaf671fea7}} 
+bool {\bfseries contains} (\mbox{\hyperlink{class_variable}{Variable}} $\ast$var) override
+\item 
+\mbox{\Hypertarget{class_matrix_element_ref_a50d27671e4d63e10a4c9a4abb1383231}\label{class_matrix_element_ref_a50d27671e4d63e10a4c9a4abb1383231}} 
+bool {\bfseries is\+Equal} (\mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$other) override
+\item 
+int \mbox{\hyperlink{class_matrix_element_ref_aa2299ff8c6829be40ce038e4d365b0c1}{get\+Max\+Number\+Children}} () override
+\item 
+std\+::string \mbox{\hyperlink{class_matrix_element_ref_a78252162bcb1f77089bfbe2d5c875f25}{to\+String}} (bool print\+Children) const override
+\item 
+\mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$ \mbox{\hyperlink{class_matrix_element_ref_a473e4dd6b0ff7f2657b1cc3fb79e376c}{clone\+Flat}} () override
+\item 
+bool \mbox{\hyperlink{class_matrix_element_ref_ab66143ebf27d337e9f05eca645012813}{supports\+Circuit\+Mode}} () override
+\item 
+\mbox{\Hypertarget{class_matrix_element_ref_af92a8a5746d8144c611aa580681b469b}\label{class_matrix_element_ref_af92a8a5746d8144c611aa580681b469b}} 
+\mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$ {\bfseries get\+Operand} () const
+\item 
+\mbox{\Hypertarget{class_matrix_element_ref_a5328a92f86d01f6bb99f9f71509e0c83}\label{class_matrix_element_ref_a5328a92f86d01f6bb99f9f71509e0c83}} 
+\mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$ {\bfseries get\+Row\+Index} () const
+\item 
+\mbox{\Hypertarget{class_matrix_element_ref_a449a5e07468869b5f58b61c4cbfad202}\label{class_matrix_element_ref_a449a5e07468869b5f58b61c4cbfad202}} 
+\mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$ {\bfseries get\+Column\+Index} () const
+\item 
+\mbox{\Hypertarget{class_matrix_element_ref_a8218de876154c57ce5740d4fbe3c2af9}\label{class_matrix_element_ref_a8218de876154c57ce5740d4fbe3c2af9}} 
+void {\bfseries set\+Attributes} (\mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$element\+Containing\+Matrix, \mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$row\+Index, \mbox{\hyperlink{class_abstract_expr}{Abstract\+Expr}} $\ast$column\+Index)
+\end{DoxyCompactItemize}
+\doxysubsection*{Additional Inherited Members}
+
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{class_matrix_element_ref_ac96fb0313a201accec759f4e29145cb4}\label{class_matrix_element_ref_ac96fb0313a201accec759f4e29145cb4}} 
+\index{MatrixElementRef@{MatrixElementRef}!accept@{accept}}
+\index{accept@{accept}!MatrixElementRef@{MatrixElementRef}}
+\doxysubsubsection{\texorpdfstring{accept()}{accept()}}
+{\footnotesize\ttfamily void Matrix\+Element\+Ref\+::accept (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{class_visitor}{Visitor}} \&}]{v }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Part of the visitor pattern. Must be overridden in derived classes and must call v.\+visit(node). This allows the correct overload for the derived class to be called in the visitor. 
+\begin{DoxyParams}{Parameters}
+{\em v} & \mbox{\hyperlink{class_visitor}{Visitor}} that offers a visit() method \\
+\hline
+\end{DoxyParams}
+
+
+Implements \mbox{\hyperlink{class_abstract_node_a890a24af49cedda13f23cbe41931dee5}{Abstract\+Node}}.
+
+\mbox{\Hypertarget{class_matrix_element_ref_aef61dda66b411fb7eb3021f4cd4a71a9}\label{class_matrix_element_ref_aef61dda66b411fb7eb3021f4cd4a71a9}} 
+\index{MatrixElementRef@{MatrixElementRef}!clone@{clone}}
+\index{clone@{clone}!MatrixElementRef@{MatrixElementRef}}
+\doxysubsubsection{\texorpdfstring{clone()}{clone()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$ Matrix\+Element\+Ref\+::clone (\begin{DoxyParamCaption}\item[{bool}]{keep\+Original\+Unique\+Node\+Id }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Clones a node recursively, i.\+e., by including all of its children. 
+\begin{DoxyParams}{Parameters}
+{\em keep\+Original\+Unique\+Node\+Id} & Specifies whether to keep all of the unique node I\+Ds of the original nodes. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+A clone of the node including clones of all of its children. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{class_abstract_node_ab7f13808b586865a27e2635995be5056}{Abstract\+Node}}.
+
+\mbox{\Hypertarget{class_matrix_element_ref_a473e4dd6b0ff7f2657b1cc3fb79e376c}\label{class_matrix_element_ref_a473e4dd6b0ff7f2657b1cc3fb79e376c}} 
+\index{MatrixElementRef@{MatrixElementRef}!cloneFlat@{cloneFlat}}
+\index{cloneFlat@{cloneFlat}!MatrixElementRef@{MatrixElementRef}}
+\doxysubsubsection{\texorpdfstring{cloneFlat()}{cloneFlat()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} $\ast$ Matrix\+Element\+Ref\+::clone\+Flat (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Creates a flat copy of the node without including any parents or children. \begin{DoxyReturn}{Returns}
+A flat copy of this node. 
+\end{DoxyReturn}
+
+
+Reimplemented from \mbox{\hyperlink{class_abstract_node_a267513a1115e86df8966caf998e71e0e}{Abstract\+Node}}.
+
+\mbox{\Hypertarget{class_matrix_element_ref_aa2299ff8c6829be40ce038e4d365b0c1}\label{class_matrix_element_ref_aa2299ff8c6829be40ce038e4d365b0c1}} 
+\index{MatrixElementRef@{MatrixElementRef}!getMaxNumberChildren@{getMaxNumberChildren}}
+\index{getMaxNumberChildren@{getMaxNumberChildren}!MatrixElementRef@{MatrixElementRef}}
+\doxysubsubsection{\texorpdfstring{getMaxNumberChildren()}{getMaxNumberChildren()}}
+{\footnotesize\ttfamily int Matrix\+Element\+Ref\+::get\+Max\+Number\+Children (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Indicates the number of children that are allowed for a specific node. \mbox{\hyperlink{class_for}{For}} example, a arithmetic expression accepts exactly three attributes and hence also exactly three children\+: left operand, right operand, and operator. \mbox{\hyperlink{class_if}{If}} the node does not implement support for child/parent relationships, \mbox{\hyperlink{class_matrix_element_ref_aa2299ff8c6829be40ce038e4d365b0c1}{get\+Max\+Number\+Children()}} return 0. \begin{DoxyReturn}{Returns}
+An integer indicating the number of allowed children for a specific node. 
+\end{DoxyReturn}
+
+
+Reimplemented from \mbox{\hyperlink{group__parents_ga680a94e1a61857e94177a79e5d8588ab}{Abstract\+Node}}.
+
+\mbox{\Hypertarget{class_matrix_element_ref_a1d9db738389c8b6b8909c642f63bb70d}\label{class_matrix_element_ref_a1d9db738389c8b6b8909c642f63bb70d}} 
+\index{MatrixElementRef@{MatrixElementRef}!getNodeType@{getNodeType}}
+\index{getNodeType@{getNodeType}!MatrixElementRef@{MatrixElementRef}}
+\doxysubsubsection{\texorpdfstring{getNodeType()}{getNodeType()}}
+{\footnotesize\ttfamily std\+::string Matrix\+Element\+Ref\+::get\+Node\+Type (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Returns the node\textquotesingle{}s type, which is the name of the object in the A\+ST. This method must be overridden by all classes that inherit from \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} by their respective name (e.\+g., Arithmetic\+Exp, \mbox{\hyperlink{class_function}{Function}}, \mbox{\hyperlink{class_variable}{Variable}}). \begin{DoxyReturn}{Returns}
+The name of the node type. 
+\end{DoxyReturn}
+
+
+Implements \mbox{\hyperlink{class_abstract_node_a8cc40127801e7777c8094f17a3b1efcb}{Abstract\+Node}}.
+
+\mbox{\Hypertarget{class_matrix_element_ref_ab66143ebf27d337e9f05eca645012813}\label{class_matrix_element_ref_ab66143ebf27d337e9f05eca645012813}} 
+\index{MatrixElementRef@{MatrixElementRef}!supportsCircuitMode@{supportsCircuitMode}}
+\index{supportsCircuitMode@{supportsCircuitMode}!MatrixElementRef@{MatrixElementRef}}
+\doxysubsubsection{\texorpdfstring{supportsCircuitMode()}{supportsCircuitMode()}}
+{\footnotesize\ttfamily bool Matrix\+Element\+Ref\+::supports\+Circuit\+Mode (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+This method returns True iff the class derived from the \mbox{\hyperlink{class_abstract_node}{Abstract\+Node}} class properly makes use of the child/parent fields as it would be expected in a circuit. 
+
+Reimplemented from \mbox{\hyperlink{class_abstract_node_a76f2290759cb522619af77c630b6eba9}{Abstract\+Node}}.
+
+\mbox{\Hypertarget{class_matrix_element_ref_a336ce656eb1f92cb11c1429066c9e331}\label{class_matrix_element_ref_a336ce656eb1f92cb11c1429066c9e331}} 
+\index{MatrixElementRef@{MatrixElementRef}!toJson@{toJson}}
+\index{toJson@{toJson}!MatrixElementRef@{MatrixElementRef}}
+\doxysubsubsection{\texorpdfstring{toJson()}{toJson()}}
+{\footnotesize\ttfamily json Matrix\+Element\+Ref\+::to\+Json (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Get the J\+S\+ON representation of the node including all of its children. \begin{DoxyReturn}{Returns}
+J\+S\+ON representation of the node 
+\end{DoxyReturn}
+
+
+Reimplemented from \mbox{\hyperlink{class_abstract_expr_ac1957d8bda1e29b35b822ec0b05c5027}{Abstract\+Expr}}.
+
+\mbox{\Hypertarget{class_matrix_element_ref_a78252162bcb1f77089bfbe2d5c875f25}\label{class_matrix_element_ref_a78252162bcb1f77089bfbe2d5c875f25}} 
+\index{MatrixElementRef@{MatrixElementRef}!toString@{toString}}
+\index{toString@{toString}!MatrixElementRef@{MatrixElementRef}}
+\doxysubsubsection{\texorpdfstring{toString()}{toString()}}
+{\footnotesize\ttfamily std\+::string Matrix\+Element\+Ref\+::to\+String (\begin{DoxyParamCaption}\item[{bool}]{print\+Children }\end{DoxyParamCaption}) const\hspace{0.3cm}{\ttfamily [override]}, {\ttfamily [virtual]}}
+
+Returns a string representation of the node, if print\+Children is True then calls to\+String for its children too. Hence, to\+String(false) is equivalent to printing a node\textquotesingle{}s attributes only. \begin{DoxyReturn}{Returns}
+A textual representation of the node. 
+\end{DoxyReturn}
+
+
+Reimplemented from \mbox{\hyperlink{class_abstract_node_aee58b60a470f2e494e0db1808c87b13d}{Abstract\+Node}}.
+
+
+
+The documentation for this class was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/ast/Matrix\+Element\+Ref.\+h\item 
+src/ast/Matrix\+Element\+Ref.\+cpp\end{DoxyCompactItemize}
