@@ -506,31 +506,6 @@ TEST_F(CompileTimeExpressionSimplifierFixture, varAssignm_previouslyDeclaredNonI
   EXPECT_EQ(ctes.removableNodes.size(), 0);
 }
 
-TEST_F(CompileTimeExpressionSimplifierFixture,  /* NOLINT */
-       varAssignm_variableDeclarationOnly_correctInitialFloatValueExpected) {
-  // void compute() {
-  //  plaintext_float alpha;
-  // }
-  auto function = new Function("compute");
-  auto varDeclAlpha = new VarDecl("alpha", Types::FLOAT, nullptr);
-
-  // connect objects
-  function->addStatement(varDeclAlpha);
-  ast.setRootNode(function);
-
-  // perform the compile-time expression simplification
-  ctes.visit(ast);
-
-  // check that 'alpha' has correct initial value
-  EXPECT_EQ(getVariableValueByUniqueName("alpha")->castTo<LiteralFloat>()->getValue(), 0.0f);
-
-  // check that the statement VarDecl and its children are deleted
-  EXPECT_EQ(function->getBody()->getStatements().size(), 0);
-
-  // check that at the end of the evaluation traversal, the removableNodes map is empty
-  EXPECT_EQ(ctes.removableNodes.size(), 0);
-}
-
 TEST_F(CompileTimeExpressionSimplifierFixture, varAssignm_assignmentToParameter) { /* NOLINT */
   // void compute(plaintext_float alpha) {
   //  alpha = 42.24;
@@ -1065,7 +1040,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
        ifStmt_conditionValueIsUnknown_thenBranchOnlyExists_expectedRemovalOfElseClauseInResultBecauseVariableBIsNull) {
   //  -- input --
   //  int compute(plaintext_int a) {
-  //    plaintext_int b;  // implicit: b=0
+  //    plaintext_int b = 0;
   //    if (a > 20) {
   //      plaintext_int c = 642;
   //      b = 2*c-1;
@@ -1080,7 +1055,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   auto functionParameter = new ParameterList({
                                                  new FunctionParameter(new Datatype(Types::INT),
                                                                        new Variable("a"))});
-  auto varDeclB = new VarDecl("b", new Datatype(Types::INT));
+  auto varDeclB = new VarDecl("b", new Datatype(Types::INT), new LiteralInt(0));
   auto ifStmtCondition = new LogicalExpr(new Variable("a"),
                                          LogCompOp::GREATER,
                                          new LiteralInt(20));
@@ -2347,6 +2322,8 @@ TEST_F(CompileTimeExpressionSimplifierFixture, fullForLoopUnrolling) { /* NOLINT
   expectedFunction->addParameter(new FunctionParameter(new Datatype(Types::INT, false), new Variable("imgSize")));
   expectedFunction->addParameter(new FunctionParameter(new Datatype(Types::INT, false), new Variable("x")));
   expectedFunction->addParameter(new FunctionParameter(new Datatype(Types::INT, false), new Variable("y")));
+
+  expectedFunction->addStatement(new VarDecl("img2", new Datatype(Types::INT)));
 
   // a helper to generate img[imgSize*(x-i)+y+j] terms
   auto createImgIdx = [](int i, int j) -> AbstractExpr * {
