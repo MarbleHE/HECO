@@ -109,20 +109,22 @@ void CompileTimeExpressionSimplifier::visit(MatrixAssignm &elem) {
     throw std::logic_error("MatrixAssignm's operand must be a Variable!");
   }
 
-  // check if the given variable was declared-only and not initialized, i.e., the variable has its default
-  // initialization value in variableValues
-  auto hasDefaultInitializationValue = [&](Variable *var) -> bool {
-    auto varEntry = getVariableEntryDeclaredInThisOrOuterScope(var->getIdentifier());
-    auto typesDefaultValue = Datatype::getDefaultVariableInitializationValue(varEntry->second->datatype->getType());
-    return varEntry->second->value->isEqual(typesDefaultValue);
+  // check if the given variable was declared-only and not initialized, i.e., the variable refers to a literal that
+  // has dimension (0,0)
+  auto isNullDimensionLiteral = [&](Variable *var) -> bool {
+    auto varEntry = getVariableEntryDeclaredInThisOrOuterScope(operandAsVariable->getIdentifier());
+    if (varEntry==variableValues.end()) return false;
+    auto literal = dynamic_cast<AbstractLiteral *>(varEntry->second->value);
+    if (literal==nullptr) return false;
+    return literal->getMatrix()->getDimensions().equals(0, 0);
   };
 
   if (hasKnownValue(elem.getAssignmTarget()->getRowIndex())
       && hasKnownValue(elem.getAssignmTarget()->getColumnIndex())
       && hasKnownValue(elem.getAssignmTarget()->getOperand())
-          // Matrix must have either the default initialization value or anything != nullptr, otherwise there was a
+          // Matrix must either have dimension (0,0) or a value of anything != nullptr, otherwise there was a
           // previous MatrixAssignm that could not be executed, hence it does not make sense to store this assigned value.
-      && (hasDefaultInitializationValue(operandAsVariable) || getKnownValue(operandAsVariable)!=nullptr)) {
+      && (isNullDimensionLiteral(operandAsVariable) || getKnownValue(operandAsVariable)!=nullptr)) {
     // if both indices are literals and we know the referred matrix (i.e., is not an input parameter), we can
     // execute the assignment and mark this node for deletion afterwards
     auto rowIdx = getKnownValue(elem.getAssignmTarget()->getRowIndex())->castTo<LiteralInt>()->getValue();
