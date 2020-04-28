@@ -83,8 +83,8 @@ static std::map<int, std::function<void(Ast &)> > call = {  /* NOLINT */
     {53, AstTestingGenerator::genAstGetMatrixSizeOfAbstractMatrix},
     {54, AstTestingGenerator::genAstGetMatrixSizeOfUnknownMatrix},
     {55, AstTestingGenerator::genAstMatrixAssignmAndGetMatrixSize},
-    {56, AstTestingGenerator::genAstMatrixAssignmentKnownThenUnknown},
-    {57, AstTestingGenerator::genAstMatrixAssignmentUnknownThenKnown},
+    {56, AstTestingGenerator::genAstMatrixAssignmUnknownThenKnown},
+    {57, AstTestingGenerator::genAstMatrixAssignmentKnownThenUnknown},
     {58, AstTestingGenerator::genAstFullAssignmentToMatrix}
 };
 
@@ -1844,8 +1844,7 @@ void AstTestingGenerator::genAstMatrixAssignmAndGetMatrixSize(Ast &ast) {
   ast.setRootNode(func);
 }
 
-void AstTestingGenerator::genAstMatrixAssignmentKnownThenUnknown(Ast &ast) {
-  // TODO use AST in tests
+void AstTestingGenerator::genAstMatrixAssignmUnknownThenKnown(Ast &ast) {
   // void computeMatrix(int k, int a) {
   //   Matrix<int> M;
   //   M[k][0] = 4;
@@ -1864,8 +1863,7 @@ void AstTestingGenerator::genAstMatrixAssignmentKnownThenUnknown(Ast &ast) {
   ast.setRootNode(func);
 }
 
-void AstTestingGenerator::genAstMatrixAssignmentUnknownThenKnown(Ast &ast) {
-  // TODO use AST in tests
+void AstTestingGenerator::genAstMatrixAssignmentKnownThenUnknown(Ast &ast) {
   // void computeMatrix(int k) {
   //   Matrix<int> M;
   //   M[0][0] = 21;
@@ -1883,7 +1881,6 @@ void AstTestingGenerator::genAstMatrixAssignmentUnknownThenKnown(Ast &ast) {
 }
 
 void AstTestingGenerator::genAstFullAssignmentToMatrix(Ast &ast) {
-  // TODO use AST in tests
   // void computeMatrix() {
   //   Matrix<int> M = [31 84 21; 3 3 0]
   //   M[0][0] = 11;
