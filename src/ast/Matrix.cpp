@@ -31,7 +31,12 @@ bool Matrix<AbstractExpr *>::operator==(const Matrix &rhs) const {
 
   for (int i = 0; i < values.size(); ++i) {
     for (int j = 0; j < values[i].size(); ++j) {
-      if (!values[i][j]->isEqual(rhs.values[i][j])) return false;
+      if (values[i][j]==nullptr && rhs.values[i][j]==nullptr) continue;
+      if ((values[i][j]==nullptr && rhs.values[i][j]!=nullptr)
+          || (values[i][j]!=nullptr && rhs.values[i][j]==nullptr)
+          || (!values[i][j]->isEqual(rhs.values[i][j]))) {
+        return false;
+      }
     }
   }
   return true;

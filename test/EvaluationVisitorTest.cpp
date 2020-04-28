@@ -1,3 +1,4 @@
+#include <PrintVisitor.h>
 #include "Ast.h"
 #include "Operator.h"
 #include "gtest/gtest.h"
@@ -306,7 +307,7 @@ TEST(EvaluationVisitorTests, astMatrixAssignmAndGetMatrixSize__EXPECTED_FAIL) { 
   ASSERT_EQ(*result, *new LiteralInt(new Matrix<int>({{0, 0, 0}, {1, 2, 3}, {2, 4, 6}})));
 }
 
-TEST(EvaluationVisitorTests, astMatrixAssignmentKnownThenUnknown) { /* NOLINT */
+TEST(EvaluationVisitorTests, astMatrixAssignmentUnknownThenKnown) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(56, ast);
   std::unordered_map<std::string, AbstractLiteral *> params = {
@@ -314,18 +315,25 @@ TEST(EvaluationVisitorTests, astMatrixAssignmentKnownThenUnknown) { /* NOLINT */
       {"a", new LiteralInt(19)}
   };
   auto result = dynamic_cast<LiteralInt *>(ast.evaluateAst(params, false).front());
-  auto expectedResult = new LiteralInt(new Matrix<int>({{40}, {0}, {4}}));
+  auto expectedResult = new LiteralInt(new Matrix<AbstractExpr *>({{new LiteralInt(40)},
+                                                                   {nullptr},
+                                                                   {new LiteralInt(4)}}));
   ASSERT_EQ(*result, *expectedResult);
 }
 
-TEST(EvaluationVisitorTests, astMatrixAssignmentUnknownThenKnown) { /* NOLINT */
+TEST(EvaluationVisitorTests, astMatrixAssignmentKnownThenUnknown) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(57, ast);
   std::unordered_map<std::string, AbstractLiteral *> params = {
       {"k", new LiteralInt(5)}
   };
   auto result = dynamic_cast<LiteralInt *>(ast.evaluateAst(params, false).front());
-  auto expectedResult = new LiteralInt(new Matrix<int>({{21, 0, 0, 0, 0, 4}}));
+  auto expectedResult = new LiteralInt(new Matrix<AbstractExpr *>({{new LiteralInt(21),
+                                                                    nullptr,
+                                                                    nullptr,
+                                                                    nullptr,
+                                                                    nullptr,
+                                                                    new LiteralInt(4)}}));
   ASSERT_EQ(*result, *expectedResult);
 }
 
