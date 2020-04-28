@@ -38,7 +38,7 @@ AbstractNode *createMultDepthBalancedTreeFromInputs(std::vector<AbstractExpr *> 
                                                     OpSymbolVariant operatorType,
                                                     std::unordered_map<std::string,
                                                                        int> multiplicativeDepths) {
-  // TODO(anyone): This tree is balanced w.r.t. the multiplicative depth but does not take any FHE-specific properties
+  // Note: This tree is balanced w.r.t. the multiplicative depth but does not take any FHE-specific properties
   //  e.g. scale of a ciphertext into account yet.
 
   if (inputs.empty()) {

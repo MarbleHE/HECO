@@ -41,8 +41,7 @@ std::string MatrixAssignm::getAssignmTargetString() const {
   ss << getAssignmTarget()->getOperand()->toString(true);
   ss << "[";
   ss << getAssignmTarget()->getRowIndex()->toString(true);
-  ss << "]";
-  ss << "[";
+  ss << "]" << "[";
   ss << getAssignmTarget()->getColumnIndex()->toString(true);
   ss << "]";
   std::string res(ss.str());
