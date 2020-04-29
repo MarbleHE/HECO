@@ -333,6 +333,22 @@ class Matrix : public AbstractMatrix {
     return matrixToRotate;
   }
 
+  std::vector<T> getNthRowVector(int rowIdx) {
+    if (rowIdx < 0 || rowIdx >= getDimensions().numRows) {
+      throw std::invalid_argument("getNthRowVector failed: Invalid row index given!");
+    }
+    return values.at(rowIdx);
+  }
+
+  std::vector<T> getNthColumnVector(int colIdx) {
+    if (colIdx < 0 || colIdx >= getDimensions().numColumns) {
+      throw std::invalid_argument("getNthColumnVector failed: Invalid column index given!");
+    }
+    std::vector<T> result;
+    for (auto i = 0; i < values.size(); ++i) result.push_back(values.at(i).at(colIdx));
+    return result;
+  }
+
   void addElementToStringStream(T elem, std::stringstream &s);
 
   bool containsAbstractExprs() override;
@@ -358,6 +374,59 @@ class Matrix : public AbstractMatrix {
   AbstractExpr *getElementAt(int row, int column) override;
 
   void setElementAt(int row, int column, AbstractExpr *element) override;
+
+  void appendVectorAt(int idx, Matrix<T> *mx) {
+    // determine if given matrix mx is a row or column vector
+    bool isRowVector = mx->getDimensions().equals(1, -1);
+    bool isColumnVector = mx->getDimensions().equals(-1, 1);
+
+    if (!isRowVector && !isColumnVector) {
+      throw std::runtime_error("Cannot executed appendVectorAt as given matrix is neither a row vector (single row) nor"
+                               " a column vector (single column). Aborting!");
+    }
+
+    // If mx has dimension (1,1) then mx is a single value, i.e., we can treat it is a row vector to save the costs
+    // involved in matrix transposition.
+    if (isRowVector && isColumnVector) isColumnVector = false;
+
+    // by transposing the matrix we can apply the same logic to a column vector, afterwards we transpose the
+    // resulting matrix (this) back to its original form
+    if (isColumnVector) {
+      mx->transpose(true);
+      transpose(true);
+    }
+
+    // if this matrix already contains rows, we require that the matrix to be appended has the same number of row
+    // elements (= number of columns)
+    if (!values.empty() && values.at(0).size()!=mx->getDimensions().getNthDimensionSize(1)) {
+      std::stringstream ss;
+      ss << "Dimension mismatch! Cannot execute appendVectorAt(" << idx << ") because ";
+      ss << "given matrix has dimensions " << getDimensions() << " ";
+      ss << "but vector to be appended has dimensions " << mx->getDimensions() << ".";
+      throw std::runtime_error(ss.str());
+    }
+
+    // add the new row
+    if (values.size()==idx) {
+      // append by pushing new row at the end
+      values.push_back(mx->getNthRowVector(0));
+    } else if (values.size() < idx) {
+      // resize by adding vectors of the same size as existing ones
+      if (!values.empty()) values.resize(idx, std::vector<int>(values.at(0).size())); else values.resize(idx);
+      // add row by pushing it at the end
+      values.push_back(mx->getNthRowVector(0));
+    } else {
+      // overwrite existing row
+      values.at(idx) = mx->getNthRowVector(0);
+    }
+
+    // transpose this matrix back as we transposed the given matrix mx previously to avoid reimplmenting the append
+    // logic for column vectors
+    if (isColumnVector) transpose(true);
+
+    // update the dimensions of this matrix
+    getDimensions().update(values.size(), values.at(0).size());
+  }
 
   void replaceChild(AbstractNode *originalChild, AbstractNode *newChildToBeAdded) override;
 
