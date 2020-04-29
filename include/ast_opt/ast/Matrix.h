@@ -375,7 +375,7 @@ class Matrix : public AbstractMatrix {
 
   void setElementAt(int row, int column, AbstractExpr *element) override;
 
-  void appendVectorAt(int idx, Matrix<T> *mx) {
+  void appendVectorAt(int idx, AbstractMatrix *mx) override {
     // determine if given matrix mx is a row or column vector
     bool isRowVector = mx->getDimensions().equals(1, -1);
     bool isColumnVector = mx->getDimensions().equals(-1, 1);
@@ -406,18 +406,24 @@ class Matrix : public AbstractMatrix {
       throw std::runtime_error(ss.str());
     }
 
+    // cast the matrix to enable accessing methods that are not exposed to AbstractMatrix (e.g., getNthRowVector)
+    auto castedMx = dynamic_cast<Matrix<T> *>(mx);
+    if (castedMx==nullptr) {
+      throw std::runtime_error("Cast AbstractMatrix to Matrix<T> failed! Cannot execute appendVectorAt.");
+    }
+
     // add the new row
     if (values.size()==idx) {
       // append by pushing new row at the end
-      values.push_back(mx->getNthRowVector(0));
+      values.push_back(castedMx->getNthRowVector(0));
     } else if (values.size() < idx) {
       // resize by adding vectors of the same size as existing ones
       if (!values.empty()) values.resize(idx, std::vector<int>(values.at(0).size())); else values.resize(idx);
       // add row by pushing it at the end
-      values.push_back(mx->getNthRowVector(0));
+      values.push_back(castedMx->getNthRowVector(0));
     } else {
       // overwrite existing row
-      values.at(idx) = mx->getNthRowVector(0);
+      values.at(idx) = castedMx->getNthRowVector(0);
     }
 
     // transpose this matrix back as we transposed the given matrix mx previously to avoid reimplmenting the append

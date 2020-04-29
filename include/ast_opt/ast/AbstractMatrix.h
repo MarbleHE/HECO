@@ -83,6 +83,24 @@ class AbstractMatrix : public AbstractNode {
   /// \return True if this is a Matrix<AbstractExpr*>, otherwise False.
   virtual bool containsAbstractExprs() = 0;
 
+  /// Appends a row or column to the current matrix, depending on the structure of the given matrix mx. Note that our
+  /// model does not have a dedicated class for vectors, thus we require that either a row vector (i.e., single row)
+  /// or a column vector (i.e., single column) is given. The row/column vector must have the same dimension as this
+  /// matrix, otherwise an exception will be thrown.
+  /// The row/column is appended to the position indicated by the given idx parameter, this is realized as follow:
+  /// - If the matrix has exactly idx-1 rows/columns, the given row/column is simply appended.
+  /// - If the matrix has less than idx-1 rows/columns, the matrix is resized by filling up empty elements by
+  ///   the underlying type's default value (e.g., 0 for integer) and then the given row/column is appended.
+  /// - If the matrix has more than idx-1 rows/columns, the row/column indicated at index idx is overwritten.
+  /// \param idx Indicates the position (index) in the matrix at which the given row/column vector should be
+  /// appended to. For example 3 denotes the third row or column.
+  /// \param mx A vector, i.e., (1,x)- or (x,1)-matrix containing the elements to append. If this a row vector, the
+  /// given idx will be interpreted as row index where this new row should be added. If this a column vector, the
+  /// given idx will be interpreted as column index where this new column should be added.
+  /// \throws std::runtime_exception Throws a std::runtime_exception if mx is either a row nor a column vector, or if
+  /// the number of elements in mx and this matrix do not match.
+  virtual void appendVectorAt(int idx, AbstractMatrix *mx) = 0;
+
   bool operator==(const AbstractMatrix &rhs) const;
 
   bool operator!=(const AbstractMatrix &rhs) const;
