@@ -301,24 +301,30 @@ void EvaluationVisitor::visit(MatrixAssignm &elem) {
   auto matrixRef = elem.getAssignmTarget();
   // row index
   matrixRef->getRowIndex()->accept(*this);
-  auto rowIdx = dynamic_cast<LiteralInt *>(getOnlyEvaluationResult(results.top()));
+  auto rowIdx = getOnlyEvaluationResult(results.top())->castTo<LiteralInt>()->getValue();
   results.pop();
 
+  auto mx = dynamic_cast<Variable *>(matrixRef->getOperand());
+  if (mx==nullptr) {
+    throw std::runtime_error("Invalid syntax: Operand of MatrixAssignm is not a Variable.");
+  }
+
   if (matrixRef->getColumnIndex()!=nullptr) {
+    // If both row and column index are given, this MatrixAssignm assigns a single element to the matrix.
     // column index
     matrixRef->getColumnIndex()->accept(*this);
-    auto columnIdx = dynamic_cast<LiteralInt *>(getOnlyEvaluationResult(results.top()));
+    auto colIdx = getOnlyEvaluationResult(results.top())->castTo<LiteralInt>()->getValue();
     results.pop();
-//    std::cout << "MatrixAssignm[" << rowIdx->getValue() << "][" << columnIdx->getValue() << "]" << std::endl;
     // set value val of respective matrix element
-    if (auto mx = dynamic_cast<Variable *>(matrixRef->getOperand())) {
-      variableValuesForEvaluation[mx->getIdentifier()]->getMatrix()
-          ->setElementAt(rowIdx->getValue(), columnIdx->getValue(), val);
-    }
+    variableValuesForEvaluation[mx->getIdentifier()]->getMatrix()->setElementAt(rowIdx, colIdx, val);
   } else {
-//    std::cout << "MatrixAssignm[" << rowIdx->getValue() << "]" << std::endl;
-    throw std::runtime_error("Appending row to matrix unsupported yet. Aborting.");
-    // TODO (pjattke): Implement appending row to matrix if only a row index is given.
+    // If only a single index is given, this MatrixAssignm refers to a vector in its value attribute and appends
+    // (or overwrites) a matrix row/column.
+    // value (vector to append)
+    elem.getValue()->accept(*this);
+    auto vec = getOnlyEvaluationResult(results.top())->castTo<AbstractLiteral>();
+    auto t = dynamic_cast<Matrix<AbstractExpr *> *>(vec->getMatrix());
+    variableValuesForEvaluation[mx->getIdentifier()]->getMatrix()->appendVectorAt(rowIdx, vec->getMatrix());
   }
 }
 

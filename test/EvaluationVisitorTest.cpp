@@ -338,12 +338,14 @@ TEST(EvaluationVisitorTests, astGetMatrixSizeUnknownMatrix) { /* NOLINT */
   ASSERT_EQ(*result, *new LiteralInt(4));
 }
 
-TEST(EvaluationVisitorTests, astMatrixAssignmAndGetMatrixSize__EXPECTED_FAIL) { /* NOLINT */
-  // TODO (pjattke): Implement assignment to whole matrix row to make this test work.
+TEST(EvaluationVisitorTests, astMatrixAssignmAndGetMatrixSize) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(55, ast);
   auto result = dynamic_cast<LiteralInt *>(ast.evaluateAst({}, false).front());
-  ASSERT_EQ(*result, *new LiteralInt(new Matrix<int>({{0, 0, 0}, {1, 2, 3}, {2, 4, 6}})));
+  ASSERT_EQ(*result, *new LiteralInt(new Matrix<AbstractExpr *>(
+      {{new LiteralInt(0), new LiteralInt(0), new LiteralInt(0)},
+       {new LiteralInt(0), new LiteralInt(1), new LiteralInt(2)},
+       {new LiteralInt(0), new LiteralInt(2), new LiteralInt(4)}})));
 }
 
 TEST(EvaluationVisitorTests, astMatrixAssignmentUnknownThenKnown) { /* NOLINT */
