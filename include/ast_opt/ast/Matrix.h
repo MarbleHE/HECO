@@ -417,8 +417,12 @@ class Matrix : public AbstractMatrix {
       // append by pushing new row at the end
       values.push_back(castedMx->getNthRowVector(0));
     } else if (values.size() < idx) {
-      // resize by adding vectors of the same size as existing ones
-      if (!values.empty()) values.resize(idx, std::vector<int>(values.at(0).size())); else values.resize(idx);
+      // resize by adding vectors of the same size as the existing ones
+      if (!values.empty()) {
+        values.resize(idx, std::vector<T>(values.at(0).size()));
+      } else {
+        values.resize(idx);
+      }
       // add row by pushing it at the end
       values.push_back(castedMx->getNthRowVector(0));
     } else {
