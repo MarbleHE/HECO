@@ -486,6 +486,119 @@ TEST_F(MatrixTestFixture, detectMalformedDimension_intMatrix) {  /* NOLINT */
                std::logic_error);
 }
 
+TEST_F(MatrixTestFixture, testRowRetrieval) {  /* NOLINT */
+  Matrix<int> A({{3, 2, 1}, {4, 0, 1}, {9, 7, 3}});
+  EXPECT_THROW(A.getNthRowVector(-3), std::invalid_argument);
+  EXPECT_THROW(A.getNthRowVector(-1), std::invalid_argument);
+  EXPECT_EQ(A.getNthRowVector(0), std::vector<int>({3, 2, 1}));
+  EXPECT_EQ(A.getNthRowVector(1), std::vector<int>({4, 0, 1}));
+  EXPECT_EQ(A.getNthRowVector(2), std::vector<int>({9, 7, 3}));
+  EXPECT_THROW(A.getNthRowVector(3), std::invalid_argument);
+  EXPECT_THROW(A.getNthRowVector(34), std::invalid_argument);
+}
+
+TEST_F(MatrixTestFixture, testRowRetrievalEmptyMatrix) {  /* NOLINT */
+  Matrix<int> A;
+  EXPECT_THROW(A.getNthRowVector(-1), std::invalid_argument);
+  EXPECT_THROW(A.getNthRowVector(0), std::invalid_argument);
+}
+
+TEST_F(MatrixTestFixture, testRowRetrievalSingleElement) {  /* NOLINT */
+  Matrix<int> A({{3}});
+  EXPECT_EQ(A.getNthRowVector(0), std::vector<int>({3}));
+}
+
+TEST_F(MatrixTestFixture, testColumnRetrieval) {  /* NOLINT */
+  Matrix<int> A({{3, 2, 1}, {4, 0, 1}, {9, 7, 3}});
+  EXPECT_THROW(A.getNthColumnVector(-1), std::invalid_argument);
+  EXPECT_EQ(A.getNthColumnVector(0), std::vector<int>({3, 4, 9}));
+  EXPECT_EQ(A.getNthColumnVector(1), std::vector<int>({2, 0, 7}));
+  EXPECT_EQ(A.getNthColumnVector(2), std::vector<int>({1, 1, 3}));
+  EXPECT_THROW(A.getNthColumnVector(3), std::invalid_argument);
+  EXPECT_THROW(A.getNthColumnVector(11), std::invalid_argument);
+}
+
+TEST_F(MatrixTestFixture, testColumnRetrievalEmptyMatrix) {  /* NOLINT */
+  Matrix<int> A;
+  EXPECT_THROW(A.getNthColumnVector(-1), std::invalid_argument);
+  EXPECT_THROW(A.getNthColumnVector(0), std::invalid_argument);
+}
+
+TEST_F(MatrixTestFixture, testColumnRetrievalSingleElement) {  /* NOLINT */
+  Matrix<int> A({{3}});
+  EXPECT_EQ(A.getNthColumnVector(0), std::vector<int>({3}));
+}
+
+TEST_F(MatrixTestFixture, testAppendVectorAt_rowVec_appendToEmptyMatrix) {  /* NOLINT */
+  Matrix<int> A;
+  A.appendVectorAt(0, new Matrix<int>({{1, 3, 3}}));
+  EXPECT_EQ(A, Matrix<int>({{1, 3, 3}}));
+}
+
+TEST_F(MatrixTestFixture, testAppendVectorAt_rowVec_appendByReplacingExisting) {  /* NOLINT */
+  Matrix<int> A({{7, 5, 3, 2}, {4, 2, 1, 5}});
+  A.appendVectorAt(1, new Matrix<int>({{5, 3, 2, 9}}));
+  EXPECT_EQ(A, Matrix<int>({{7, 5, 3, 2}, {5, 3, 2, 9}}));
+}
+
+TEST_F(MatrixTestFixture, testAppendVectorAt_rowVec_appendByExtendingExisting) {  /* NOLINT */
+  Matrix<int> A({{7, 5, 3, 2}, {4, 2, 1, 5}});
+  A.appendVectorAt(2, new Matrix<int>({{5, 3, 2, 9}}));
+  EXPECT_EQ(A, Matrix<int>({{7, 5, 3, 2}, {4, 2, 1, 5}, {5, 3, 2, 9}}));
+}
+
+TEST_F(MatrixTestFixture, testAppendVectorAt_rowVec_appendIncludingResize) {  /* NOLINT */
+  Matrix<int> A({{7, 5, 3, 2}, {4, 2, 1, 5}});
+  A.appendVectorAt(4, new Matrix<int>({{5, 3, 2, 9}}));
+  EXPECT_EQ(A, Matrix<int>({{7, 5, 3, 2}, {4, 2, 1, 5}, {0, 0, 0, 0}, {0, 0, 0, 0}, {5, 3, 2, 9}}));
+}
+
+TEST_F(MatrixTestFixture, testAppendVectorAt_emptyVec) {  /* NOLINT */
+  Matrix<int> A;
+  A.appendVectorAt(2, new Matrix<int>({{}}));
+  EXPECT_EQ(A, Matrix<int>({{}, {}, {}}));
+}
+
+TEST_F(MatrixTestFixture, testAppendVectorAt_columnVec_appendToEmptyMatrix) {  /* NOLINT */
+  Matrix<int> A;
+  A.appendVectorAt(0, new Matrix<int>({{1}, {3}, {4}}));
+  EXPECT_EQ(A, Matrix<int>({{1}, {3}, {4}}));
+}
+
+TEST_F(MatrixTestFixture, testAppendVectorAt_columnVec_appendByReplacingExisting) {  /* NOLINT */
+  Matrix<int> A({{7, 4}, {5, 2}, {3, 1}, {2, 5}});
+  A.appendVectorAt(1, new Matrix<int>({{5}, {3}, {2}, {9}}));
+  EXPECT_EQ(A, Matrix<int>({{7, 5}, {5, 3}, {3, 2}, {2, 9}}));
+}
+
+TEST_F(MatrixTestFixture, testAppendVectorAt_columnVec_appendByExtendingExisting) {  /* NOLINT */
+  Matrix<int> A({{7, 4}, {5, 2}, {3, 1}, {2, 5}});
+  A.appendVectorAt(2, new Matrix<int>({{9}, {0}, {3}, {7}}));
+  EXPECT_EQ(A, Matrix<int>({{7, 4, 9}, {5, 2, 0}, {3, 1, 3}, {2, 5, 7}}));
+}
+
+TEST_F(MatrixTestFixture, testAppendVectorAt_columnVec_appendIncludingResize) {  /* NOLINT */
+  Matrix<int> A({{7, 4}, {5, 2}, {3, 1}, {2, 5}});
+  A.appendVectorAt(4, new Matrix<int>({{7}, {4}, {3}, {2}}));
+  EXPECT_EQ(A, Matrix<int>({{7, 4, 0, 0, 7}, {5, 2, 0, 0, 4}, {3, 1, 0, 0, 3}, {2, 5, 0, 0, 2}}));
+}
+
+TEST_F(MatrixTestFixture, testAppendVectorAt_scalar) {  /* NOLINT */
+  Matrix<int> A({{7}, {5}, {3}, {2}});
+  A.appendVectorAt(2, new Matrix<int>({{5}}));
+  EXPECT_EQ(A, Matrix<int>({{7}, {5}, {5}, {2}}));
+}
+
+TEST_F(MatrixTestFixture, testAppendVectorAt_notRowOrColumnVec_expectedException) {  /* NOLINT */
+  Matrix<int> A;
+  EXPECT_THROW(A.appendVectorAt(3, new Matrix<int>({{14, 31, 3}, {3, 1, 3}})), std::runtime_error);
+}
+
+TEST_F(MatrixTestFixture, testAppendVectorAt_dimensionMismatch_expectedException) {  /* NOLINT */
+  Matrix<int> A({{7, 5, 3, 2}, {4, 2, 1, 5}});
+  EXPECT_THROW(A.appendVectorAt(3, new Matrix<int>({{14, 31, 2, 9, 1}})), std::runtime_error);
+}
+
 class MatrixOperationFixture : public ::testing::Test {
 //  ╔═══════════════════════════════════════════════════════════════╗
 //  ║ Tested Combinations (non-exhaustive testing)                  ║
@@ -658,3 +771,4 @@ TEST_F(MatrixOperationFixture, matrix_scalar_add) {  /* NOLINT */
   EXPECT_EQ(*dynamic_cast<Matrix<std::string> *>(result),
             *new Matrix<std::string>({{"azh", "bzh", "czh"}, {"dzh", "ezh", "fzh"}, {"gzh", "hzh", "izh"}}));
 }
+
