@@ -223,16 +223,21 @@ void CompileTimeExpressionSimplifier::visit(Ast &elem) {
   variableValues.clear();
 
   Visitor::visit(elem);
-  // Delete all noted queued for deletion after finishing the simplification traversal.
-  // It's important that we perform deletion in a FIFO-style because otherwise it can happen that we delete an enclosing
-  // statement after trying to delete its child that is still in nodesQueuedForDeletion. However, the child is already
-  // non-existent as we performed deletion recursively on the enclosing statement including its whole subtree.
-  std::set<AbstractNode *> nodesAlreadyDeleted;
 
+  // add all emitted VarDecls to nodesQueuedForDeletion that are not required anymore, i.e, there are no emitted
+  // VarAssignms that depend on them
+  for (auto &[identifierScope, varData] : emittedVariableDeclarations) {
+    if (varData->hasNoVarAssignms()) nodesQueuedForDeletion.push_back(varData->getVarDeclStatement());
+  }
+
+  // Delete all noted queued for deletion after finishing the simplification traversal.
+  std::set<std::string> nodesAlreadyDeleted;
   while (!nodesQueuedForDeletion.empty()) {
     auto nodeToBeDeleted = nodesQueuedForDeletion.front();
-
-    // if nodeToBeDeleted is a VarAssignm, we need to check if this was a emitted VarAssignm
+    nodesQueuedForDeletion.pop_front();
+    if (nodesAlreadyDeleted.count(nodeToBeDeleted->getUniqueNodeId()) > 0) continue;
+    // if nodeToBeDeleted is a VarAssignm, we need to check if this was a emitted VarAssignm and accordingly update
+    // the emittedVariableDeclarations map
     auto nodeAsVarAssignm = dynamic_cast<VarAssignm *>(nodeToBeDeleted);
     if (nodeAsVarAssignm!=nullptr && emittedVariableAssignms.count(nodeAsVarAssignm) > 0) {
       // update the emittedVariableAssignms by deleting the current node (nodeToBeDeleted)
@@ -246,8 +251,7 @@ void CompileTimeExpressionSimplifier::visit(Ast &elem) {
         emittedVariableAssignms.erase(nodeAsVarAssignm);
       }
     }
-
-    nodesQueuedForDeletion.pop_front();
+    nodesAlreadyDeleted.insert(nodeToBeDeleted->getUniqueNodeId());
     elem.deleteNode(&nodeToBeDeleted, true);
   }
 
