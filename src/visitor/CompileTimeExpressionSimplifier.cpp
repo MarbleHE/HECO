@@ -272,45 +272,20 @@ void CompileTimeExpressionSimplifier::visit(CallExternal &elem) {
 // Simplifiable Statements
 // =====================
 
-template<typename T, typename U>
-void simplifyAbstractExprMatrix(U &elem) {
-  if (auto mx = dynamic_cast<Matrix<AbstractExpr *> *>(elem.getMatrix())) {
-    auto mxDim = mx->getDimensions();
-    std::vector<std::vector<T>> simplifiedVec(mxDim.numRows, std::vector<T>(mxDim.numColumns));
-    for (int i = 0; i < mxDim.numRows; ++i) {
-      for (int j = 0; j < mxDim.numColumns; ++j) {
-        auto curElement = mx->getElementAt(i, j);
-        if (auto elemAsBool = dynamic_cast<U *>(curElement)) {
-          simplifiedVec[i][j] = elemAsBool->getValue();
-        } else {
-          // we cannot simplify this matrix as element (i,j) is of type non-T but Matrix<T> can only hold T vals
-          return;
-        }
-      }
-    }
-    auto parent = elem.getOnlyParent();
-    parent->replaceChild(&elem, new U(new Matrix<T>(simplifiedVec)));
-  }
-}
-
 void CompileTimeExpressionSimplifier::visit(LiteralBool &elem) {
   Visitor::visit(elem);
-//  simplifyAbstractExprMatrix<bool, LiteralBool>(elem);
 }
 
 void CompileTimeExpressionSimplifier::visit(LiteralInt &elem) {
   Visitor::visit(elem);
-//  simplifyAbstractExprMatrix<int, LiteralInt>(elem);
 }
 
 void CompileTimeExpressionSimplifier::visit(LiteralString &elem) {
   Visitor::visit(elem);
-//  simplifyAbstractExprMatrix<std::string, LiteralString>(elem);
 }
 
 void CompileTimeExpressionSimplifier::visit(LiteralFloat &elem) {
   Visitor::visit(elem);
-//  simplifyAbstractExprMatrix<float, LiteralFloat>(elem);
 }
 
 void CompileTimeExpressionSimplifier::visit(Variable &elem) {
