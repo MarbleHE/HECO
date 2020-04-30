@@ -325,8 +325,10 @@ class CompileTimeExpressionSimplifier : public Visitor {
   void enqueueNodeForDeletion(AbstractNode *node);
 
   /// Sets a new value matrixElementValue to the position indicated by (row, column) in matrix referred by
-  /// variableIdentifier.
-  /// \param variableIdentifier A reference to a matrix, i.e., any subtype of an AbstractLiteral.
+  /// variableIdentifier. This implements variable assignments of the form M[rowIdx][colIdx] = value; where value is
+  /// a single element (AbstractExpr or primitive, e.g., int).
+  /// \param variableIdentifier A variable identifier that must refer to a matrix, i.e., any subtype of an
+  /// AbstractLiteral.
   /// \param row The row index where the new value should be written to.
   /// \param column The column index where the new value should be written to.
   /// \param matrixElementValue The matrix value that should be written to the index given as (row, column).
@@ -334,6 +336,16 @@ class CompileTimeExpressionSimplifier : public Visitor {
                               int row,
                               int column,
                               AbstractExpr *matrixElementValue);
+
+  /// Appends a row/column to a matrix or overwrites an existing row/column. This implements variable assignments of
+  /// the form M[idx] = vec; where vec is either a row vector, e.g., [4 2 1] or a column vector, e.g., [4; 2; 1].
+  /// \param variableIdentifier A variable identifier that must refer to a matrix, i.e., any subtype of an
+  /// AbstractLiteral.
+  /// \param posIndex The index where the row/column should be appended to. If matrixRowOrColumn is a row vector,
+  /// this index is considered as row index. Otherwise, if matrixRowOrColumn is a column vector, this index is
+  /// considered as column index.
+  /// \param matrixRowOrColumn An AbstractLiteral consisting of a (1,x) or (x,1) matrix.
+  void appendVectorToMatrix(const std::string &variableIdentifier, int posIndex, AbstractExpr *matrixRowOrColumn);
 
   /// A wrapper method that is visited when a For-loop is found. This method in turn calls itself on the next "deeper"
   /// nested loop before continuing to fully or partially unrolling the loop.

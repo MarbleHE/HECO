@@ -277,22 +277,22 @@ void simplifyAbstractExprMatrix(U &elem) {
 
 void CompileTimeExpressionSimplifier::visit(LiteralBool &elem) {
   Visitor::visit(elem);
-  simplifyAbstractExprMatrix<bool, LiteralBool>(elem);
+//  simplifyAbstractExprMatrix<bool, LiteralBool>(elem);
 }
 
 void CompileTimeExpressionSimplifier::visit(LiteralInt &elem) {
   Visitor::visit(elem);
-  simplifyAbstractExprMatrix<int, LiteralInt>(elem);
+//  simplifyAbstractExprMatrix<int, LiteralInt>(elem);
 }
 
 void CompileTimeExpressionSimplifier::visit(LiteralString &elem) {
   Visitor::visit(elem);
-  simplifyAbstractExprMatrix<std::string, LiteralString>(elem);
+//  simplifyAbstractExprMatrix<std::string, LiteralString>(elem);
 }
 
 void CompileTimeExpressionSimplifier::visit(LiteralFloat &elem) {
   Visitor::visit(elem);
-  simplifyAbstractExprMatrix<float, LiteralFloat>(elem);
+//  simplifyAbstractExprMatrix<float, LiteralFloat>(elem);
 }
 
 void CompileTimeExpressionSimplifier::visit(Variable &elem) {
@@ -1344,6 +1344,42 @@ void CompileTimeExpressionSimplifier::setVariableValue(const std::string &variab
   // save the variable's value in the variableValues map
   auto key = std::pair(variableIdentifier, varDeclScope);
   variableValues.at(key)->value = valueToStore;
+}
+
+void CompileTimeExpressionSimplifier::appendVectorToMatrix(const std::string &variableIdentifier, int posIndex,
+                                                           AbstractExpr *matrixRowOrColumn) {
+  AbstractMatrix *vec = nullptr;
+  auto vectorToAdd = dynamic_cast<AbstractLiteral *>(matrixRowOrColumn);
+  if (vectorToAdd!=nullptr) {
+    auto pMatrix = vectorToAdd->getMatrix();
+    vec = pMatrix->clone(false);
+  } else {
+
+  }
+
+  auto iterator = getVariableEntryDeclaredInThisOrOuterScope(variableIdentifier);
+  if (iterator->second->value==nullptr) {
+    std::stringstream errorMsg;
+    errorMsg << "appendVectorToMatrix failed: ";
+    errorMsg << "Could not find entry in variableValues for variable identifier " << iterator->first.first << " ";
+    errorMsg << "by starting search from scope " << iterator->first.second->getScopeIdentifier() << ".";
+    throw std::runtime_error(errorMsg.str());
+  }
+
+  // on contrary to simple scalars, we do not need to replace the variable in the variableValues map, instead we
+  // need to retrieve the associated matrix and set the element at the specified (row, column)
+  auto literal = dynamic_cast<AbstractLiteral *>(iterator->second->value);
+  if (literal==nullptr) {
+    std::stringstream errorMsg;
+    errorMsg << "appendVectorToMatrix failed: " << "Current value of matrix " << iterator->first.first << " ";
+    errorMsg << "in variableValues is nullptr. ";
+    errorMsg << "This should never happen and indicates that an earlier visited MatrixAssignm could not be executed.";
+    errorMsg << "Because of that any subsequent MatrixAssignms should not be executed too.";
+    throw std::runtime_error(errorMsg.str());
+  }
+
+  // store the value at the given position - matrix must handle indices and make sure that matrix is large enough
+  literal->getMatrix()->appendVectorAt(posIndex, vec);
 }
 
 void CompileTimeExpressionSimplifier::setMatrixVariableValue(const std::string &variableIdentifier, int row, int column,
