@@ -163,8 +163,14 @@ void CompileTimeExpressionSimplifier::visit(MatrixAssignm &elem) {
       // The variable's value is EMPTY (default-initialized literal without any value), i.e., this is the first
       // MatrixAssignm that could not be executed because there is an unknown index involved.
       // -> Remove the variable's value in variableValues map to prevent execution of any future MatrixAssignms.
-      // emit a variable declaration statement if there's none present yet
-      if (emittedVariableDeclarations.count(var->first)==0) emitVariableDeclaration(var);
+      // emit a variable declaration statement if there's none present yet because it was marked for deletion after
+      // it has been visited
+      if (emittedVariableDeclarations.count(var->first)==0) {
+        emitVariableDeclaration(var);
+        // add this MatrixAssignm as dependency to the emitted variable declaration otherwise it will wrongly be
+        // classified as obsolete and deleted after finishing the AST traversal
+        emittedVariableDeclarations.at(var->first)->addVarAssignm(&elem);
+      }
       // and then mark the value as UNKNOWN
       variableValues[var->first] = nullptr;
     } else {
@@ -227,7 +233,7 @@ void CompileTimeExpressionSimplifier::visit(Ast &elem) {
   // add all emitted VarDecls to nodesQueuedForDeletion that are not required anymore, i.e, there are no emitted
   // VarAssignms that depend on them
   for (auto &[identifierScope, varData] : emittedVariableDeclarations) {
-    if (varData->hasNoVarAssignms()) nodesQueuedForDeletion.push_back(varData->getVarDeclStatement());
+    if (varData->hasNoReferringAssignments())nodesQueuedForDeletion.push_back(varData->getVarDeclStatement());
   }
 
   // Delete all noted queued for deletion after finishing the simplification traversal.
@@ -246,7 +252,7 @@ void CompileTimeExpressionSimplifier::visit(Ast &elem) {
       ref->second->removeVarAssignm(nodeAsVarAssignm);
       // if the associated VarDecl does not have any other depending VarAssignms requiring it, we can delete that
       // VarDecl too as we do not need it anymore
-      if (ref->second->hasNoVarAssignms()) {
+      if (ref->second->hasNoReferringAssignments()) {
         nodesQueuedForDeletion.push_back(ref->second->getVarDeclStatement());
         emittedVariableAssignms.erase(nodeAsVarAssignm);
       }

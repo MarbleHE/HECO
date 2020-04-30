@@ -46,16 +46,23 @@ typedef std::map<std::pair<std::string, Scope *>, VariableValue *> VariableValue
  * at the end of the traversal if the emitted VarAssignm was meanwhile deleted and we do not need the VarDecl anymore.
  */
 struct EmittedVariableData {
+  /// the emitted variable declaration statement
   AbstractNode *varDeclStatement;
+  /// the emitted variable assignment statements that require this declaration
   std::unordered_set<AbstractNode *> emittedVarAssignms;
+  /// other nodes (e.g., MatrixAssignm) that depend on this variable declaration
+  std::unordered_set<AbstractNode *> dependentAssignms;
+
  public:
   explicit EmittedVariableData(AbstractNode *varDeclStatement) : varDeclStatement(varDeclStatement) {}
 
   void addVarAssignm(AbstractNode *varAssignm) { emittedVarAssignms.insert(varAssignm); }
 
+  void addDependentAssignm(AbstractNode *assignm) { dependentAssignms.insert(assignm); }
+
   void removeVarAssignm(AbstractNode *varAssignm) { emittedVarAssignms.erase(varAssignm); }
 
-  bool hasNoVarAssignms() { return !emittedVarAssignms.empty(); }
+  bool hasNoReferringAssignments() { return emittedVarAssignms.empty() && dependentAssignms.empty(); }
 
   AbstractNode *getVarDeclStatement() { return varDeclStatement; }
 };
