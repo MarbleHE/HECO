@@ -2325,7 +2325,6 @@ TEST_F(CompileTimeExpressionSimplifierFixture, fullForLoopUnrolling) { /* NOLINT
 
   // a helper to generate img[imgSize*(x-i)+y+j] terms
   auto createImgIdx = [](int i, int j) -> AbstractExpr * {
-
     auto buildTermI = [](int i) -> AbstractExpr * {
       if (i==0) {
         return new Variable("x");
@@ -2461,6 +2460,24 @@ TEST_F(CompileTimeExpressionSimplifierFixture, nestedFullLoopUnrolling_matrixAss
 
   auto expectedFunction = new Function("getNumElementsPerDimension");
   // TODO specify expected AST, i.e., after applying CTES
+
+  // get the body of the AST on that the CompileTimeExpressionSimplifier was applied on
+  auto simplifiedAst = ast.getRootNode()->castTo<Function>()->getBody();
+  EXPECT_TRUE(simplifiedAst->isEqual(expectedFunction->getBody()));
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, matrixAssignmIncludingPushBack) { /* NOLINT */
+  Ast ast;
+  AstTestingGenerator::generateAst(59, ast);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  auto expectedFunction = new Function("extendMatrixAddingElements");
+  expectedFunction->addStatement(
+      new Return(new LiteralInt(new Matrix<AbstractExpr *>({{new LiteralInt(0),
+                                                             new LiteralInt(1),
+                                                             new LiteralInt(4)}}))));
 
   // get the body of the AST on that the CompileTimeExpressionSimplifier was applied on
   auto simplifiedAst = ast.getRootNode()->castTo<Function>()->getBody();

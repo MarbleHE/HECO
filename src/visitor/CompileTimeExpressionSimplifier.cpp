@@ -97,15 +97,18 @@ void CompileTimeExpressionSimplifier::visit(MatrixAssignm &elem) {
 //  Visitor::visit(elem);
 
   // visit the row and column index
-  elem.getAssignmTarget()->getRowIndex()->accept(*this);
-  elem.getAssignmTarget()->getColumnIndex()->accept(*this);
+  auto assignmTarget = elem.getAssignmTarget();
+  assignmTarget->getRowIndex()->accept(*this);
+  if (assignmTarget->getColumnIndex()!=nullptr) {
+    assignmTarget->getColumnIndex()->accept(*this);
+  }
   elem.getValue()->accept(*this);
 
   // flag to mark whether to delete this MatrixAssignm node after it has been visited
   bool enqueueNodeForDeletion = false;
 
   // get operand (matrix) where assignment is targeted to
-  auto operandAsVariable = dynamic_cast<Variable *>(elem.getAssignmTarget()->getOperand());
+  auto operandAsVariable = dynamic_cast<Variable *>(assignmTarget->getOperand());
   if (operandAsVariable==nullptr) {
     throw std::logic_error("MatrixAssignm's operand must be a Variable!");
   }
@@ -120,21 +123,32 @@ void CompileTimeExpressionSimplifier::visit(MatrixAssignm &elem) {
     return literal->getMatrix()->getDimensions().equals(0, 0);
   };
 
-  if (hasKnownValue(elem.getAssignmTarget()->getRowIndex())
-      && hasKnownValue(elem.getAssignmTarget()->getColumnIndex())
-      && hasKnownValue(elem.getAssignmTarget()->getOperand())
-          // Matrix must either have dimension (0,0) or a value of anything != nullptr, otherwise there was a
-          // previous MatrixAssignm that could not be executed, hence it does not make sense to store this assigned value.
+  bool isExecutableMatrixElementAssignment = hasKnownValue(assignmTarget->getRowIndex())
+      && hasKnownValue(assignmTarget->getColumnIndex())
+      && hasKnownValue(assignmTarget->getOperand());
+  bool isExecutableMatrixRowColumnAssignment = hasKnownValue(assignmTarget->getRowIndex())
+      && assignmTarget->getColumnIndex()==nullptr
+      && hasKnownValue(assignmTarget->getOperand());
+
+  if ((isExecutableMatrixElementAssignment || isExecutableMatrixRowColumnAssignment)
+      // Matrix must either have dimension (0,0) or a value of anything != nullptr, otherwise there was a
+      // previous MatrixAssignm that could not be executed, hence it does not make sense to store this assigned value.
       && (isNullDimensionLiteral(operandAsVariable) || getKnownValue(operandAsVariable)!=nullptr)) {
+
     // if both indices are literals and we know the referred matrix (i.e., is not an input parameter), we can
     // execute the assignment and mark this node for deletion afterwards
-    auto rowIdx = getKnownValue(elem.getAssignmTarget()->getRowIndex())->castTo<LiteralInt>()->getValue();
-    auto colIdx = getKnownValue(elem.getAssignmTarget()->getColumnIndex())->castTo<LiteralInt>()->getValue();
-    setMatrixVariableValue(operandAsVariable->getIdentifier(), rowIdx, colIdx, elem.getValue());
+    auto rowIdx = getKnownValue(assignmTarget->getRowIndex())->castTo<LiteralInt>()->getValue();
+
+    if (isExecutableMatrixElementAssignment) {
+      auto colIdx = getKnownValue(assignmTarget->getColumnIndex())->castTo<LiteralInt>()->getValue();
+      setMatrixVariableValue(operandAsVariable->getIdentifier(), rowIdx, colIdx, elem.getValue());
+    } else if (isExecutableMatrixRowColumnAssignment) {
+      appendVectorToMatrix(operandAsVariable->getIdentifier(), rowIdx, elem.getValue());
+    }
 
     // clean up removableNodes result from children that indicates whether a child node can safely be deleted
-    removableNodes.erase(elem.getAssignmTarget()->getRowIndex());
-    removableNodes.erase(elem.getAssignmTarget()->getColumnIndex());
+    removableNodes.erase(assignmTarget->getRowIndex());
+    removableNodes.erase(assignmTarget->getColumnIndex());
 
     // this MatrixAssignm has been executed and is not needed anymore
     markNodeAsRemovable(&elem);
@@ -1401,7 +1415,7 @@ void CompileTimeExpressionSimplifier::setMatrixVariableValue(const std::string &
   }
 
   // on contrary to simple scalars, we do not need to replace the variable in the variableValues map, instead we
-  // need to retrieve the associatd matrix and set the element at the specified (row, column)
+  // need to retrieve the associated matrix and set the element at the specified (row, column)
   auto literal = dynamic_cast<AbstractLiteral *>(iterator->second->value);
   if (literal==nullptr) {
     std::stringstream errorMsg;
@@ -1409,9 +1423,10 @@ void CompileTimeExpressionSimplifier::setMatrixVariableValue(const std::string &
     errorMsg << "Current value of matrix " << iterator->first.first << " ";
     errorMsg << "in variableValues is nullptr. ";
     errorMsg << "This should never happen and indicates that an earlier visited MatrixAssignm could not be executed.";
-    errorMsg << "Because of that any future-visited MatrixAssignms should not be executed too.";
+    errorMsg << "Because of that any subsequent MatrixAssignms should not be executed too.";
     throw std::runtime_error(errorMsg.str());
   }
+
   // store the value at the given position - matrix must handle indices and make sure that matrix is large enough
   literal->getMatrix()->setElementAt(row, column, valueToStore);
 }
