@@ -242,21 +242,6 @@ void CompileTimeExpressionSimplifier::visit(Ast &elem) {
     auto nodeToBeDeleted = nodesQueuedForDeletion.front();
     nodesQueuedForDeletion.pop_front();
     if (nodesAlreadyDeleted.count(nodeToBeDeleted->getUniqueNodeId()) > 0) continue;
-    // if nodeToBeDeleted is a VarAssignm, we need to check if this was a emitted VarAssignm and accordingly update
-    // the emittedVariableDeclarations map
-    auto nodeAsVarAssignm = dynamic_cast<VarAssignm *>(nodeToBeDeleted);
-    if (nodeAsVarAssignm!=nullptr && emittedVariableAssignms.count(nodeAsVarAssignm) > 0) {
-      // update the emittedVariableAssignms by deleting the current node (nodeToBeDeleted)
-      auto ref = emittedVariableAssignms.at(nodeAsVarAssignm);
-      emittedVariableAssignms.erase(emittedVariableAssignms.find(nodeAsVarAssignm));
-      ref->second->removeVarAssignm(nodeAsVarAssignm);
-      // if the associated VarDecl does not have any other depending VarAssignms requiring it, we can delete that
-      // VarDecl too as we do not need it anymore
-      if (ref->second->hasNoReferringAssignments()) {
-        nodesQueuedForDeletion.push_back(ref->second->getVarDeclStatement());
-        emittedVariableAssignms.erase(nodeAsVarAssignm);
-      }
-    }
     nodesAlreadyDeleted.insert(nodeToBeDeleted->getUniqueNodeId());
     elem.deleteNode(&nodeToBeDeleted, true);
   }
@@ -979,6 +964,12 @@ AbstractNode *CompileTimeExpressionSimplifier::doFullLoopUnrolling(For &elem, in
   // replace the For-loop's body by the unrolled statements
   auto blockStatements = unrolledStatementsBlock->getStatements();
   std::vector<AbstractNode *> statements(blockStatements.begin(), blockStatements.end());
+  // Mark each statement in the block for deletion as it could be that the statement was emitted before, for example,
+  // if this For-loop contained another For-loop, and we must make sure to update the emittedVariableDeclarations
+  // structure such that now obsolete declaration will be deleted from the AST.
+  for (auto &stmt : elem.getStatementToBeExecuted()->castTo<Block>()->getStatements()) {
+    markNodeAsRemovable(stmt);
+  }
   elem.getOnlyParent()->replaceChildren(&elem, statements);
 
   return blockStatements.front();
@@ -1215,6 +1206,11 @@ bool CompileTimeExpressionSimplifier::hasKnownValue(AbstractNode *node) {
 
 void CompileTimeExpressionSimplifier::markNodeAsRemovable(AbstractNode *node) {
   removableNodes.insert(node);
+  // if this node is a previously emitted variable assignment, we need to remove the dependency to its assoc. VarDecl
+  if (emittedVariableAssignms.count(node) > 0) {
+    emittedVariableAssignms.at(node)->second->removeVarAssignm(node);
+    emittedVariableAssignms.erase(node);
+  }
 }
 
 std::vector<AbstractLiteral *> CompileTimeExpressionSimplifier::evaluateNodeRecursive(
