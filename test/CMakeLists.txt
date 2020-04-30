@@ -7,20 +7,19 @@ include_directories("${PROJECT_SOURCE_DIR}")
 ##############################
 # Download GoogleTest framework
 ##############################
-if (NOT AST_OPTIMIZER_SKIP_GTEST_INSTALL)
-    FetchContent_Declare(
-            googletest
-            GIT_REPOSITORY https://github.com/google/googletest.git
-            GIT_TAG release-1.10.0
-    )
+FetchContent_Declare(
+        googletest
+        GIT_REPOSITORY https://github.com/google/googletest.git
+        GIT_TAG release-1.10.0
+)
 
-    FetchContent_GetProperties(googletest)
-    if (NOT googletest_POPULATED)
-        set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-        FetchContent_Populate(googletest)
-        add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR})
-    endif ()
+FetchContent_GetProperties(googletest)
+if (NOT googletest_POPULATED)
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    FetchContent_Populate(googletest)
+    add_subdirectory(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR})
 endif ()
+
 
 ##############################
 # TARGET: testing
@@ -59,11 +58,11 @@ elseif ("${CMAKE_C_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang" OR "${CMAKE_CXX_COMP
     set(CMAKE_CXX_FLAGS "-fprofile-instr-generate -fcoverage-mapping")
 endif ()
 
-target_link_libraries(testing-all PRIVATE gtest ast_lib nlohmann_json::nlohmann_json gtest_main)
+target_link_libraries(testing-all PRIVATE gtest ast_opt gtest_main)
 target_include_directories(testing-all PRIVATE ${ast_optimizer_SOURCE_DIR}/include/)
 
 # create ctest targets
 gtest_discover_tests(testing-all TEST_PREFIX gtest:)
 
 # make sure that ast_lib is built before the testing-all target
-add_dependencies(testing-all ast_lib)
+add_dependencies(testing-all ast_opt)

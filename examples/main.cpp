@@ -1,5 +1,5 @@
 #include "main.h"
-#include "examples/genAstDemo.h"
+#include "genAstDemo.h"
 #include "ast_opt/ast/OpSymbEnum.h"
 #include "ast_opt/evaluation/EvaluationAlgorithms.h"
 
