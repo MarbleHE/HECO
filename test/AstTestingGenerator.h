@@ -135,6 +135,9 @@ class AstTestingGenerator {
   static void genAstMatrixAssignmentKnownThenUnknown(Ast &ast);
 
   static void genAstFullAssignmentToMatrix(Ast &ast);
+
+  static void genAstMatrixAssignmIncludingPushBack(Ast &ast);
+
   /** @} */ // End of astGenerators group
 };
 

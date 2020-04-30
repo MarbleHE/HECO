@@ -85,7 +85,8 @@ static std::map<int, std::function<void(Ast &)> > call = {  /* NOLINT */
     {55, AstTestingGenerator::genAstMatrixAssignmAndGetMatrixSize},
     {56, AstTestingGenerator::genAstMatrixAssignmUnknownThenKnown},
     {57, AstTestingGenerator::genAstMatrixAssignmentKnownThenUnknown},
-    {58, AstTestingGenerator::genAstFullAssignmentToMatrix}
+    {58, AstTestingGenerator::genAstFullAssignmentToMatrix},
+    {59, AstTestingGenerator::genAstMatrixAssignmIncludingPushBack}
 };
 
 void AstTestingGenerator::generateAst(int id, Ast &ast) {
@@ -1794,7 +1795,6 @@ void AstTestingGenerator::genAstGetMatrixSizeOfUnknownMatrix(Ast &ast) {
 }
 
 void AstTestingGenerator::genAstMatrixAssignmAndGetMatrixSize(Ast &ast) {
-  // TODO implement functionalities to support this program
   // Matrix<int> extendMatrixAddingElements() {
   //   Matrix<int> m;   // size: 0x0
   //   for (int i = 0; i < 3; ++i) {
@@ -1840,6 +1840,45 @@ void AstTestingGenerator::genAstMatrixAssignmAndGetMatrixSize(Ast &ast) {
                              new VarAssignm("i", new ArithmeticExpr(new Variable("i"), ADDITION, new LiteralInt(1))),
                              outerLoopBody));
 
+  func->addStatement(new Return(new Variable("m")));
+  ast.setRootNode(func);
+}
+
+void AstTestingGenerator::genAstMatrixAssignmIncludingPushBack(Ast &ast) {
+  // Matrix<int> extendMatrixAddingElements() {
+  //  Matrix<int> m;   // size: 0x0
+  //  Vector<int> t;
+  //  for (int i = 0; i < 3; ++i) {
+  //    t[0][t.dimSize(1)] = i*i;
+  //  }
+  //  m[m.dimSize(0)] = t;
+  //  return m;  // m = [0*0 1*1 2*2] = [0 1 4], size: 1x3
+  //}
+  auto func = new Function("extendMatrixAddingElements");
+  func->addStatement(new VarDecl("m", new Datatype(Types::INT, false)));
+  func->addStatement(new VarDecl("t", new Datatype(Types::INT, false)));
+
+  // loop body: t[0][t.dimSize(1)] = i*i;
+  auto loopBody = new Block(
+      new MatrixAssignm(
+          new MatrixElementRef(new Variable("t"),
+                               new LiteralInt(0),
+                               new GetMatrixSize(new Variable("t"), new LiteralInt(1))),
+          new ArithmeticExpr(new Variable("i"), MULTIPLICATION, new Variable("i"))));
+
+  // loop: for (int i = 0; i < 3; ++i) { ... }
+  func->addStatement(new For(new VarDecl("i", 0),
+                             new LogicalExpr(new Variable("i"), SMALLER, new LiteralInt(3)),
+                             new VarAssignm("i", new ArithmeticExpr(new Variable("i"), ADDITION, new LiteralInt(1))),
+                             loopBody));
+
+  // m[m.dimSize(0)] = t;
+  func->addStatement(new MatrixAssignm(
+      new MatrixElementRef(new Variable("m"),
+                           new GetMatrixSize(new Variable("m"), new LiteralInt(0))),
+      new Variable("t")));
+
+  // return m;
   func->addStatement(new Return(new Variable("m")));
   ast.setRootNode(func);
 }
