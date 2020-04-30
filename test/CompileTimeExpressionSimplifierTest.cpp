@@ -2420,7 +2420,8 @@ TEST_F(CompileTimeExpressionSimplifierFixture, getMatrixSizeOfAbstractMatrix) { 
 
   auto expectedFunction = new Function("getNumElementsPerDimension");
   expectedFunction->addParameter(new FunctionParameter(new Datatype(Types::INT), new Variable("factor")));
-  expectedFunction->addStatement(new Return(new LiteralInt(new Matrix<int>({{1, 5, 0}}))));
+  expectedFunction->addStatement(new Return(
+      new LiteralInt(new Matrix<AbstractExpr *>({{new LiteralInt(1), new LiteralInt(5), new LiteralInt(0)}}))));
 
   // get the body of the AST on that the CompileTimeExpressionSimplifier was applied on
   auto simplifiedAst = ast.getRootNode()->castTo<Function>()->getBody();
