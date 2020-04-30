@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.14)
-set(CMAKE_CXX_STANDARD 17)
 project(ast_optimizer
         VERSION 0.1
         DESCRIPTION "Optimizer for Fully Homomorphic Encryption (FHE) working on an AST-like (Abstract Syntax Tree) representation of a program"
@@ -11,35 +10,13 @@ project(ast_optimizer
 
 find_package(nlohmann_json QUIET)
 if(NOT nlohmann_json_FOUND)
-    # exclude the tests from the build
-    set(JSON_BuildTests OFF CACHE INTERNAL "")
-    # ensure installation is on
-    set(JSON_INSTALL ON CACHE INTERNAL "")
-
-    configure_file(libs/nlohmann-json.in nlohmann-json-download/CMakeLists.txt)
-    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-            RESULT_VARIABLE result
-            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/nlohmann-json-download)
-    if (result)
-        message(FATAL_ERROR "CMake step for nlohmann-json failed: ${result}")
-    endif ()
-    execute_process(COMMAND ${CMAKE_COMMAND} --build .
-            RESULT_VARIABLE result
-            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/nlohmann-json-download)
-    if (result)
-        message(FATAL_ERROR "Build step for nlohmann failed: ${result}")
-    endif ()
-
-    #install package
-    execute_process(COMMAND ${CMAKE_COMMAND} --install .
-            RESULT_VARIABLE result
-            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/nlohmann-json-download)
-    if (result)
-        message(FATAL_ERROR "Install step for nlohmann failed: ${result}")
-    endif ()
-
-    # try again
-    find_package(nlohmann_json REQUIRED)
+    message("Downloading nlohmann_json")
+    include(FetchContent)
+    FetchContent_Declare(
+            nlohmann_json
+            GIT_REPOSITORY    https://github.com/nlohmann/json.git
+            GIT_TAG           v3.7.3)
+    FetchContent_MakeAvailable(nlohmann_json)
 endif()
 
 ##############################
@@ -110,7 +87,7 @@ set(HEADER_ONLY_SOURCES
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/RandNumGen.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/TestUtils.h)
 
-#TODO: Go through this list and determine which headers aren't atually public
+#TODO: Go through this list and determine which headers aren't actually public
 set(PUBLIC_HEADERS
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractBinaryExpr.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractExpr.h
@@ -172,13 +149,14 @@ set(PUBLIC_HEADERS
 
 
 # build a library out of the code to be used by the tests
-add_library(ast_opt ${SOURCE_FILES})
+add_library(ast_opt ${SOURCE_FILES} ${HEADER_ONLY_SOURCES})
 add_library(ast_opt::ast_opt ALIAS ast_opt)
 target_link_libraries(ast_opt PUBLIC nlohmann_json::nlohmann_json)
 target_include_directories(ast_opt PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>)
 set_target_properties(ast_opt PROPERTIES PUBLIC_HEADER ${PUBLIC_HEADERS})
+target_compile_features(ast_opt PUBLIC cxx_std_17)
 
 ####################################################################################
 ## ast_opt installation
@@ -197,8 +175,7 @@ write_basic_package_version_file(
 configure_file(ast_optConfig.cmake.in ast_optConfig.cmake @ONLY)
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/ast_optConfig.cmake"
         "${CMAKE_CURRENT_BINARY_DIR}/ast_optConfigVersion.cmake"
-        DESTINATION lib/cmake/ast_opt
-        )
+        DESTINATION lib/cmake/ast_opt)
 
 install(TARGETS ast_opt
         EXPORT  ast_optTargets
@@ -229,11 +206,14 @@ add_executable(ast_demo
 
 target_link_libraries(ast_demo PRIVATE ast_opt)
 
-##############################
-# Testing
-##############################
-enable_testing()
-add_subdirectory(test)
+####################################################################################
+# TESTING
+#
+# only if this is the root project
+####################################################################################
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+    add_subdirectory(test)
+endif()
 
 
 
