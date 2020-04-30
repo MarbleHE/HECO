@@ -1976,7 +1976,8 @@ TEST_F(CompileTimeExpressionSimplifierFixture, getMatrixElementSimpleBool) { /* 
   // perform the compile-time expression simplification
   ctes.visit(ast);
 
-  auto expectedReturnExpr = new LiteralBool(new Matrix<bool>({{true, false, true}}));
+  auto expectedReturnExpr = new LiteralBool(
+      new Matrix<AbstractExpr *>({{new LiteralBool(true), new LiteralBool(false), new LiteralBool(true)}}));
   auto returnStatement = ast.getRootNode()->castTo<Function>()->getBodyStatements().back()->castTo<Return>();
   EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedReturnExpr));
 }
@@ -2538,7 +2539,9 @@ TEST_F(CompileTimeExpressionSimplifierFixture, fullAssignmentToMatrix) { /* NOLI
   ctes.visit(ast);
 
   auto expectedFunc = new Function("computeMatrix");
-  expectedFunc->addStatement(new Return(new LiteralInt(new Matrix<int>({{11, 1, 1}, {3, 2, 2}}))));
+  expectedFunc->addStatement(new Return(new LiteralInt(
+      new Matrix<AbstractExpr *>({{new LiteralInt(11), new LiteralInt(1), new LiteralInt(1)},
+                                  {new LiteralInt(3), new LiteralInt(2), new LiteralInt(2)}}))));
 
   // get the body of the AST on that the CompileTimeExpressionSimplifier was applied on
   auto simplifiedAst = ast.getRootNode()->castTo<Function>()->getBody();

@@ -145,6 +145,8 @@ The AST to be used as a foundation for FHE optimizations consists of nodes that 
 ```
 ***Figure 1:*** Class hierarchy of the AST classes.
 
+<!-- TODO (pjattke): Replace by diagram generated using draw.io and add source file to repo -->
+
 Following, the different node types are briefly explained. The examples in brackets show how the commands would look like in "plain" C++.
 
 - Classes derived from `AbstractExpr`
