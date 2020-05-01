@@ -275,6 +275,10 @@ class Matrix : public AbstractMatrix {
     return dim.equals(1, 1) && (std::is_literal_type_v<T> || std::is_same_v<T, std::string>) && !std::is_pointer_v<T>;
   }
 
+  [[nodiscard]] bool isEmpty() const override {
+    return dim.equals(0, 0);
+  }
+
   AbstractMatrix *applyUnaryOperatorComponentwise(Operator *os) override;
 
   std::string toString() override {

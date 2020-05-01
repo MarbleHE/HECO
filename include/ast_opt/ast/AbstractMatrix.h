@@ -49,6 +49,10 @@ class AbstractMatrix : public AbstractNode {
   /// \return True if this matrix is a scalar, otherwise False.
   [[nodiscard]] virtual bool isScalar() const = 0;
 
+  /// Checks whether this matrix is empty, i.e., has dimension (0,0).
+  /// \return True if this matrix is empty, otherwise False.
+  [[nodiscard]] virtual bool isEmpty() const = 0;
+
   /// Creates a JSON representation of this matrix.
   /// \return The JSON representation of this matrix.
   [[nodiscard]] json toJson() const override = 0;
