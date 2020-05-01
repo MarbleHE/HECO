@@ -2,6 +2,7 @@
 #define AST_OPTIMIZER_INCLUDE_VISITOR_VISITOR_H_
 
 #include <string>
+#include <unordered_map>
 
 class AbstractNode;
 class AbstractExpr;
@@ -42,6 +43,7 @@ class GetMatrixSize;
 class Visitor {
  protected:
   bool ignoreScope{false};
+  std::unordered_map<AbstractStatement *, Scope *> stmtToScopeMapper;
 
  public:
   virtual void visit(AbstractNode &elem);

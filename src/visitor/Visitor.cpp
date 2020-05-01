@@ -284,6 +284,7 @@ void Visitor::changeToOuterScope() {
 void Visitor::changeToInnerScope(const std::string &nodeId, AbstractStatement *statement) {
   if (ignoreScope) return;
   auto temp = curScope->getOrCreateInnerScope(nodeId, statement);
+  stmtToScopeMapper.insert(std::pair(statement, temp));
   this->curScope = temp;
 }
 
@@ -301,7 +302,7 @@ void Visitor::visit(MatrixElementRef &elem) {
   // row index
   elem.getRowIndex()->accept(*this);
   // column index
-  elem.getColumnIndex()->accept(*this);
+  if (elem.getColumnIndex()!=nullptr) elem.getColumnIndex()->accept(*this);
 }
 
 void Visitor::visit(AbstractMatrix &elem) {
