@@ -2303,10 +2303,11 @@ TEST_F(CompileTimeExpressionSimplifierFixture, fullForLoopUnrolling) { /* NOLINT
   //  }
   // -- expected --
   // VecInt2D runLaplacianSharpeningAlgorithm(Vector<int> img, int imgSize, int x, int y) {
+  //   Matrix<int> img2;
   //   img2[imgSize*x+y] = img[imgSize*x+y]
-  //      - (  img[imgSize*(x-1)+y-1] + img[imgSize*(x+0)+y-1]        + img[imgSize*(x+1)+y-1]
-  //         + img[imgSize*(x-1)+y+0] + img[imgSize*(x+0)+y+0] * (-8) + img[imgSize*(x+1)+y+0]
-  //         + img[imgSize*(x-1)+y+1] + img[imgSize*(x+0)+y+1]        + img[imgSize*(x+1)+y+1]  * 1  ) / 2;
+  //      - (  img[imgSize*(x-1)+y-1] + img[imgSize*x+y-1]        + img[imgSize*(x+1)+y-1]
+  //         + img[imgSize*(x-1)+y]   + img[imgSize*x+y] * (-8)   + img[imgSize*(x+1)+y]
+  //         + img[imgSize*(x-1)+y+1] + img[imgSize*x+y+1]        + img[imgSize*(x+1)+y+1]  ) / 2;
   //   return img2;
   // }
   Ast ast;

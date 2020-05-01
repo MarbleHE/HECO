@@ -1824,6 +1824,7 @@ void AstTestingGenerator::genAstMatrixAssignmAndGetMatrixSize(Ast &ast) {
                            innermostStatements);
 
   // outer loop body
+  // TODO why is m[m.dimSize(0)] = t; deleted?
   auto outerLoopBody = new Block({
                                      new VarDecl("t", new Datatype(Types::INT)),
                                      innerLoop,

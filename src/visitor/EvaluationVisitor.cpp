@@ -319,11 +319,9 @@ void EvaluationVisitor::visit(MatrixAssignm &elem) {
     variableValuesForEvaluation[mx->getIdentifier()]->getMatrix()->setElementAt(rowIdx, colIdx, val);
   } else {
     // If only a single index is given, this MatrixAssignm refers to a vector in its value attribute and appends
-    // (or overwrites) a matrix row/column.
-    // value (vector to append)
+    // (or overwrites) the matrix row/column given as value.
     elem.getValue()->accept(*this);
     auto vec = getOnlyEvaluationResult(results.top())->castTo<AbstractLiteral>();
-    auto t = dynamic_cast<Matrix<AbstractExpr *> *>(vec->getMatrix());
     variableValuesForEvaluation[mx->getIdentifier()]->getMatrix()->appendVectorAt(rowIdx, vec->getMatrix());
   }
 }
