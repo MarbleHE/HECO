@@ -79,6 +79,34 @@ class CompileTimeExpressionSimplifier : public Visitor {
   std::map<AbstractNode *,
            std::map<std::pair<std::string, Scope *>, EmittedVariableData *>::iterator> emittedVariableAssignms;
 
+  /// A counter that keeps track of the nesting level while visiting For-loops. The first value indicates the
+  /// depth of the currently visiting loop body. The second value the depth of the deepest loop. For example:
+  ///   ...
+  ///   for (...) {     // currentLoopDepth_maxLoopDepth = (1,1)
+  ///      ...
+  ///      for (...) {   // currentLoopDepth_maxLoopDepth = (2,2)
+  ///         ...
+  ///      }             // currentLoopDepth_maxLoopDepth = (1,2)
+  ///   }                // currentLoopDepth_maxLoopDepth = (0,0)
+  ///   ...
+  std::pair<int, int> currentLoopDepth_maxLoopDepth = {std::pair(0, 0)};
+
+  /// Indicates whether the deepest nested loop was visited and we are now on the back path of recursion.
+  bool onBackwardPassInForLoop() {
+    return currentLoopDepth_maxLoopDepth.first < currentLoopDepth_maxLoopDepth.second;
+  }
+
+  /// A flag that indicates that we are currently visiting statements that are generated as part of loop unrolling.
+  /// This flag has various implications, for example, if statements are visited and if Variables are substituted by
+  /// their known value. See its usages in the source file for more details.
+  bool visitingUnrolledLoopStatements{false};
+
+  /// A method to be called immediately after entering the For-loop's visit method.
+  void enteredForLoop();
+
+  /// A method to be called before leaving the For-loop's visit method.
+  void leftForLoop();
+
  public:
   CompileTimeExpressionSimplifier();
 
@@ -95,16 +123,10 @@ class CompileTimeExpressionSimplifier : public Visitor {
 
   /// Contains pointer to those nodes for which full or partial evaluation could be performed and hence can be deleted
   /// at the end of this simplification traversal.
-  /// For example, the arithmetic expression represented by
-  ///   ArithmeticExpr( LiteralInt(12), OpSymb::add, LiteralInt(42) )
-  /// will be evaluated to 12+42=54.
-  /// The node ArithmeticExpr (and all of its children) will be deleted and replaced by a new node LiteralInt(54).
+  /// For example, the arithmetic expression represented by ArithmeticExpr( LiteralInt(12), OpSymb::add, LiteralInt(42))
+  /// will be evaluated to 12+42=54. The node ArithmeticExpr (and all of its children) will be deleted and replaced
+  /// by a new node LiteralInt(54).
   std::deque<AbstractNode *> nodesQueuedForDeletion;
-
-  /// A flag that indicates whether variables should be replaced by their known value. The value can be a concrete
-  /// value (i.e., subtype of AbstractLiteral) or a symbolic value containing unknown variables (e.g., x = y+4).
-  /// This is not to be confused with evaluation of expressions where yet unknown expressions are computed.
-  bool replaceVariablesByValues{true};
 
   /** @defgroup visit Methods implementing the logic of the visitor for each node type.
   *  @{
@@ -353,15 +375,6 @@ class CompileTimeExpressionSimplifier : public Visitor {
   /// considered as column index.
   /// \param matrixRowOrColumn An AbstractLiteral consisting of a (1,x) or (x,1) matrix.
   void appendVectorToMatrix(const std::string &variableIdentifier, int posIndex, AbstractExpr *matrixRowOrColumn);
-
-  /// A wrapper method that is visited when a For-loop is found. This method in turn calls itself on the next "deeper"
-  /// nested loop before continuing to fully or partially unrolling the loop.
-  /// The first call to this method is invoked by the For-loop's visit method, any deeper nested calls directly call
-  /// this handleForLoopUnrolling method. This allows to determine when processing the outermost For-loop is finished
-  /// such that expressions can be revisited and deleted if required.
-  /// \param elem The For-loop to be unrolled.
-  /// \return A pointer to the node if the given For-loop was replaced in the children vector of the For-loop's parent.
-  AbstractNode *handleForLoopUnrolling(For &elem);
 
   /// Handles the full loop unrolling. This requires that the exact number of loop iterations is known.
   /// \param elem The For-loop to be unrolled.

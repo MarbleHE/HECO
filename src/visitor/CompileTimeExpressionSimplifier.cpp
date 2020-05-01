@@ -282,7 +282,8 @@ void CompileTimeExpressionSimplifier::visit(LiteralFloat &elem) {
 void CompileTimeExpressionSimplifier::visit(Variable &elem) {
   Visitor::visit(elem);
   // TODO: Introduce a depth threshold (#nodes) to stop inlining if a variable's symbolic value reached a certain depth.
-  if (getVariableValueDeclaredInThisOrOuterScope(elem.getIdentifier())!=nullptr && replaceVariablesByValues) {
+  if (getVariableValueDeclaredInThisOrOuterScope(elem.getIdentifier())!=nullptr
+      && (!onBackwardPassInForLoop() || visitingUnrolledLoopStatements)) {
     // if we know the variable's value (i.e., its value is either any subtype of AbstractLiteral or an AbstractExpr if
     // this is a symbolic value that defines on other variables), we can replace this variable node by its value
     auto variableParent = elem.getOnlyParent();
@@ -501,10 +502,19 @@ void CompileTimeExpressionSimplifier::simplifyLogicalExpr(OperatorExpr &elem) {
 }
 
 void CompileTimeExpressionSimplifier::visit(Block &elem) {
-  Visitor::visit(elem);
+  auto nodesForDeletionBeforeVisit = nodesQueuedForDeletion;
+
+  // inlined Visitor::visit(elem) because we need to change it for proper loop unrolling
+  addStatementToScope(elem);
+  changeToInnerScope(elem.getUniqueNodeId(), &elem);
+  for (auto &stat : elem.getStatements()) {
+    if (onBackwardPassInForLoop() && !visitingUnrolledLoopStatements) continue;
+    stat->accept(*this);
+  }
+  changeToOuterScope();
+
   // If all Block's statements are marked for deletion, mark it as evaluated to notify its parent.
   // The parent is then responsible to decide whether it makes sense to delete this Block or not.
-
   // check if there is any statement within this Block that is not marked for deletion
   bool allStatementsInBlockAreMarkedForDeletion = true;
   for (auto &statement : elem.getStatements()) {
@@ -517,6 +527,17 @@ void CompileTimeExpressionSimplifier::visit(Block &elem) {
   // if all statements of this Block are marked for deletion, we can mark the Block as removable
   // -> let the Block's parent decide whether to keep this empty Block or not
   if (allStatementsInBlockAreMarkedForDeletion) markNodeAsRemovable(&elem);
+
+  // detach all nodes marked for deletion; required to enable unrolling of a possible outer loop
+  if (onBackwardPassInForLoop() || visitingUnrolledLoopStatements) {
+    int lowIdx = nodesForDeletionBeforeVisit.size();
+    int maxIdx = nodesQueuedForDeletion.size() - 1;
+    while (lowIdx <= maxIdx) {
+      auto curNode = nodesQueuedForDeletion.at(lowIdx);
+      if (curNode->getParents().size() > 0) curNode->removeFromParents();
+      ++lowIdx;
+    }
+  }
 
   cleanUpAfterStatementVisited(&elem, false);
 }
@@ -591,6 +612,11 @@ void CompileTimeExpressionSimplifier::visit(Function &elem) {
   // in a Call statement because Call statements can be replaced by inlining the Function's computation.
   if (hasKnownValue(elem.getParameterList()) && hasKnownValue(elem.getBody())) {
     markNodeAsRemovable(&elem);
+  }
+
+  // mark all body statement that are removable for deletion
+  for (auto &stat : elem.getBodyStatements()) {
+    if (removableNodes.count(stat) > 0) enqueueNodeForDeletion(stat);
   }
 
   // clean up removableNodes result from children that indicates whether a child node can safely be deleted
@@ -756,6 +782,10 @@ void CompileTimeExpressionSimplifier::visit(While &elem) {
 
 std::set<std::pair<std::string, Scope *>>
 CompileTimeExpressionSimplifier::removeVarsWrittenAndReadFromVariableValues(Block &blockStmt) {
+  // we need to update the scope because calling getVariableEntryDeclaredInThisOrOuterScope uses the current's scope
+  // to search for the variable entry in variableValues
+  auto oldScope = curScope;
+  if (stmtToScopeMapper.count(&blockStmt) > 0) curScope = stmtToScopeMapper.at(&blockStmt);
   // Erase any variable from variableValues that is written AND read in any of the block's statements from the loop's
   // body such that they are not replaced by any value while visiting the body's statements.
   ControlFlowGraphVisitor cfgv;
@@ -782,6 +812,7 @@ CompileTimeExpressionSimplifier::removeVarsWrittenAndReadFromVariableValues(Bloc
   for (auto &varIdentifierScopePair : writtenVars) {
     variableValues.at(varIdentifierScopePair)->setValue(nullptr);
   }
+  curScope = oldScope;
   return writtenVars;
 }
 
@@ -840,29 +871,22 @@ int CompileTimeExpressionSimplifier::determineNumLoopIterations(For &elem) {
 }
 
 void CompileTimeExpressionSimplifier::visit(For &elem) {
-  auto varValuesBackup = getClonedVariableValuesMap();
-  auto newNode = handleForLoopUnrolling(elem);
-  // After unrolling the outermost loop is finished, visit the loop's body (again) to enable removal of unneeded
-  // statements and store latest variable values - this is only required if full loop unrolling was performed. In
-  // that case the new node should not be a Block statement. We use that to distinguish between full and partial
-  // unrolling.
-  if (newNode!=nullptr && dynamic_cast<Block *>(newNode)==nullptr) {
-    // Performing the loop unrolling may involve adding temporary variables in the variableValues map. Although they
-    // are only valid in the loop's scope, we do not need them as they are substituted. As we are visiting the unrolled
-    // statements afterwards next, we must discard these temporary variables by restoring a previously made copy.
-    variableValues = varValuesBackup;
-    newNode->accept(*this);
-  }
-}
+  enteredForLoop();
+  auto maxDepthBeforeVisitingChildren = currentLoopDepth_maxLoopDepth.second;
 
-AbstractNode *CompileTimeExpressionSimplifier::handleForLoopUnrolling(For &elem) {
+  auto varValuesBackup = getClonedVariableValuesMap();
+
   // Check if there is another loop in this loop's body, and if yes, visit that loop first.
   // Note: It is not needed to find the innermost loop as this automatically happens thanks to recursion.
-  // TODO: This does not work with deeper-nested For-loops, for example, a For-loop that is nested in the Then-branch
-  //  of an If-statement.
   auto variableValuesBeforeVisitingNestedLoop = getClonedVariableValuesMap();
-  for (auto &node : elem.getStatementToBeExecuted()->castTo<Block>()->getStatements()) {
-    if (auto nestedLoop = dynamic_cast<For *>(node)) handleForLoopUnrolling(*nestedLoop);
+  auto clonedBody = elem.getStatementToBeExecuted()->clone(false);
+
+  elem.getStatementToBeExecuted()->accept(*this);
+
+  // if this is the innermost For-loop, then visiting the loop's body was 'harmful' and we need to restore the
+  // original body
+  if (maxDepthBeforeVisitingChildren==currentLoopDepth_maxLoopDepth.second) {
+    elem.replaceChildren(elem.getStatementToBeExecuted(), {clonedBody});
   }
   variableValues = variableValuesBeforeVisitingNestedLoop;
 
@@ -879,18 +903,38 @@ AbstractNode *CompileTimeExpressionSimplifier::handleForLoopUnrolling(For &elem)
   // computations of multiple loop iterations simultaneously.
   // UNROLL_ITERATIONS_THRESHOLD determines up to which number of iterations a loop is fully unrolled
   const int UNROLL_ITERATIONS_THRESHOLD = 512;
+  visitingUnrolledLoopStatements = true;
   int numIterations = determineNumLoopIterations(elem);
+  visitingUnrolledLoopStatements = false;
   // if loop unrolling replaced the For node by a new one, then newNode points to that node, otherwise it is nullptr
   AbstractNode *newNode;
   if (numIterations!=-1 && numIterations < UNROLL_ITERATIONS_THRESHOLD) {
     // do full loop unrolling
     newNode = doFullLoopUnrolling(elem, numIterations);
+    // After unrolling the outermost loop is finished, visit the loop's body (again) to remove unneeded statements and
+    // store the latest variable values; this is only required if full loop unrolling was performed. In that case, the
+    // new node must NOT be a Block statement. We use that fact to distinguish between full and partial unrolling.
+    if (newNode!=nullptr && currentLoopDepth_maxLoopDepth.first==1) {
+      // Performing the loop unrolling may involve adding temporary variables in the variableValues map. Although they
+      // are only valid in the loop's scope, we do not need them as they are substituted. As we are visiting the unrolled
+      // statements afterwards, we must discard these temporary variables by restoring a previously made copy.
+      variableValues = varValuesBackup;
+      visitingUnrolledLoopStatements = true;
+      newNode->accept(*this);
+      if (removableNodes.count(newNode) > 0) enqueueNodeForDeletion(newNode);
+      visitingUnrolledLoopStatements = false;
+    } else if (auto newNodeAsBlock = dynamic_cast<Block *>(newNode)) {
+      auto blockStatement = newNodeAsBlock->getStatements();
+      newNode->getOnlyParent()->replaceChildren(newNode, std::vector<AbstractNode *>(blockStatement.begin(),
+                                                                                     blockStatement.end()));
+    }
   } else {
     // do partial unrolling w.r.t. ciphertext slots and add a cleanup loop for handling remaining iterations
     newNode = doPartialLoopUnrolling(elem);
   } // end of full unroll check: if (numIterations!=-1 && numIterations < UNROLL_ITERATIONS_THRESHOLD)
   cleanUpAfterStatementVisited(reinterpret_cast<AbstractNode *>(&elem), false);
-  return newNode;
+
+  leftForLoop();
 }
 
 AbstractNode *CompileTimeExpressionSimplifier::doFullLoopUnrolling(For &elem, int numLoopIterations) {
@@ -905,9 +949,10 @@ AbstractNode *CompileTimeExpressionSimplifier::doFullLoopUnrolling(For &elem, in
   // move initializer from For-loop into newly added block
   unrolledStatementsBlock->addChild(elem.getInitializer()->removeFromParents(true));
   // visit the initializer to determine the loop variables
+  visitingUnrolledLoopStatements = true;
   unrolledStatementsBlock->accept(*this);
+  visitingUnrolledLoopStatements = false;
   auto loopVariablesMap = getChangedVariables(variableValuesBackup);
-  variableValues = variableValuesBackup;
 
   while (numLoopIterations > 0) {
     // for each statement in the for-loop's body
@@ -931,11 +976,17 @@ AbstractNode *CompileTimeExpressionSimplifier::doFullLoopUnrolling(For &elem, in
 
   // remove all variables that are read and written in the body (see ELSE branch)
   removeVarsWrittenAndReadFromVariableValues(*unrolledStatementsBlock);
+  // restore the value of the loop variable otherwise its value will not be substituted
+  for (auto &loopVar : loopVariablesMap) {
+    variableValues.at(loopVar.first)->setValue(loopVar.second->value);
+  }
 
   // visit the unrolled statements to perform variable substitution and store the most recent variable values
   auto variableValuesBeforeVisitingUnrolledBody = getClonedVariableValuesMap();
   auto nodesQueuedForDeletionBeforeVisitingUnrolledBody = nodesQueuedForDeletion;
+  visitingUnrolledLoopStatements = true;
   unrolledStatementsBlock->accept(*this);
+  visitingUnrolledLoopStatements = false;
   // find the nodes that were newly marked for deletion and detach them from their parents because otherwise they will
   // unnecessarily be considered while unrolling any possibly existing outer loop
   auto curNode = nodesQueuedForDeletion.back();
@@ -967,12 +1018,13 @@ AbstractNode *CompileTimeExpressionSimplifier::doFullLoopUnrolling(For &elem, in
   // Mark each statement in the block for deletion as it could be that the statement was emitted before, for example,
   // if this For-loop contained another For-loop, and we must make sure to update the emittedVariableDeclarations
   // structure such that now obsolete declaration will be deleted from the AST.
-  for (auto &stmt : elem.getStatementToBeExecuted()->castTo<Block>()->getStatements()) {
-    markNodeAsRemovable(stmt);
-  }
-  elem.getOnlyParent()->replaceChildren(&elem, statements);
+  // We must directly delete the node (instead of calling markNodeAsRemovable) because in the next step this For loop
+  // will be replaced hence it cannot enqueue the statements for deletion anymore.
+  for (auto &stmt : elem.getStatementToBeExecuted()->castTo<Block>()->getStatements()) enqueueNodeForDeletion(stmt);
 
-  return blockStatements.front();
+  elem.getOnlyParent()->replaceChild(&elem, unrolledStatementsBlock);
+
+  return unrolledStatementsBlock;
 }
 
 AbstractNode *CompileTimeExpressionSimplifier::doPartialLoopUnrolling(For &elem) {
@@ -1056,12 +1108,17 @@ AbstractNode *CompileTimeExpressionSimplifier::doPartialLoopUnrolling(For &elem)
   auto readAndWrittenVars =
       removeVarsWrittenAndReadFromVariableValues(*elem.getStatementToBeExecuted()->castTo<Block>());
 
+  variableValuesBackup = getClonedVariableValuesMap();
+
   // restore the copy, otherwise the initializer visited after creating this copy would be marked for deletion
   nodesQueuedForDeletion = nodesQueuedForDeletionCopy;
 
   // visit the for-loop's body to do inlining
   auto variableValuesBeforeVisitingLoopBody = getClonedVariableValuesMap();
+  visitingUnrolledLoopStatements = true;
   elem.getStatementToBeExecuted()->accept(*this);
+  visitingUnrolledLoopStatements = false;
+
 
   // Move the expressions of the temporarily added Return statements into the For-loop's condition by combining all
   // conditions using a logical-AND. Then remove all temporarily added Return statements.
@@ -1122,6 +1179,8 @@ AbstractNode *CompileTimeExpressionSimplifier::doPartialLoopUnrolling(For &elem)
   // still accessible by the cleanup loop.
   // - condition, update statement, body statements: remain the same as in the original For loop.
   blockEmbeddingLoops->addChild(cleanupForLoop);
+
+  variableValues = variableValuesBackup;
 
   return blockEmbeddingLoops;
 }
@@ -1206,11 +1265,6 @@ bool CompileTimeExpressionSimplifier::hasKnownValue(AbstractNode *node) {
 
 void CompileTimeExpressionSimplifier::markNodeAsRemovable(AbstractNode *node) {
   removableNodes.insert(node);
-  // if this node is a previously emitted variable assignment, we need to remove the dependency to its assoc. VarDecl
-  if (emittedVariableAssignms.count(node) > 0) {
-    emittedVariableAssignms.at(node)->second->removeVarAssignm(node);
-    emittedVariableAssignms.erase(node);
-  }
 }
 
 std::vector<AbstractLiteral *> CompileTimeExpressionSimplifier::evaluateNodeRecursive(
@@ -1315,7 +1369,8 @@ AbstractExpr *CompileTimeExpressionSimplifier::generateIfDependentValue(
 void CompileTimeExpressionSimplifier::cleanUpAfterStatementVisited(
     AbstractNode *statement, bool enqueueStatementForDeletion) {
   // mark this statement for deletion as we don't need it anymore
-  if (enqueueStatementForDeletion) enqueueNodeForDeletion(statement);
+  if (enqueueStatementForDeletion && (!onBackwardPassInForLoop() || visitingUnrolledLoopStatements))
+    enqueueNodeForDeletion(statement);
 }
 
 void CompileTimeExpressionSimplifier::setVariableValue(const std::string &variableIdentifier,
@@ -1457,7 +1512,9 @@ VariableValuesMapType CompileTimeExpressionSimplifier::getChangedVariables(
     if (newDeclaredVariable
         || (existingVariable
             && (anyOfTwoIsNullptr(varIdentifierScope, varValue) || valueIsUnequal(varIdentifierScope, varValue)))) {
-      changedVariables.emplace(varIdentifierScope, varValue);
+      changedVariables.emplace(varIdentifierScope,
+                               new VariableValue(varValue->datatype->clone(false)->castTo<Datatype>(),
+                                                 varValue->value->clone(false)->castTo<AbstractExpr>()));
     }
   }
   return changedVariables;
@@ -1507,4 +1564,24 @@ VariableValuesMapType CompileTimeExpressionSimplifier::getClonedVariableValuesMa
 void CompileTimeExpressionSimplifier::enqueueNodeForDeletion(AbstractNode *node) {
 //  node->removeFromParents();
   nodesQueuedForDeletion.push_back(node);
+  // if this node is a previously emitted variable assignment, we need to remove the dependency to its assoc. VarDecl
+  if (emittedVariableAssignms.count(node) > 0) {
+    emittedVariableAssignms.at(node)->second->removeVarAssignm(node);
+    emittedVariableAssignms.erase(node);
+  }
+}
+
+void CompileTimeExpressionSimplifier::leftForLoop() {
+  if (currentLoopDepth_maxLoopDepth.first==1) {
+    // if the outermost loop is left, reset the loop depth tracking counter
+    currentLoopDepth_maxLoopDepth = std::pair(0, 0);
+  } else {
+    // if we ascended back to a higher level we only decrement the current depth level counter
+    --currentLoopDepth_maxLoopDepth.first;
+  }
+}
+
+void CompileTimeExpressionSimplifier::enteredForLoop() {
+  ++currentLoopDepth_maxLoopDepth.first;
+  ++currentLoopDepth_maxLoopDepth.second;
 }
