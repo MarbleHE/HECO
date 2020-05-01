@@ -2447,22 +2447,18 @@ TEST_F(CompileTimeExpressionSimplifierFixture, getMatrixSizeOfUnknownMatrix) { /
   EXPECT_TRUE(simplifiedAst->isEqual(expectedFunction->getBody()));
 }
 
-TEST_F(CompileTimeExpressionSimplifierFixture, nestedFullLoopUnrolling_matrixAssignmAndGetMatrixSize__EXPECTED_FAIL) {
-  /* NOLINT */
-  // TODO implement row assignment
-  // TODO make sure that body of outer loop is visited before entering the inner loop, otherwise 't' will be undefined
-  ASSERT_TRUE(false);
+TEST_F(CompileTimeExpressionSimplifierFixture, nestedFullLoopUnrolling_matrixAssignmAndGetMatrixSize) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(55, ast);
 
   // perform the compile-time expression simplification
   ctes.visit(ast);
 
-  PrintVisitor pv;
-  pv.visit(ast);
-
-  auto expectedFunction = new Function("getNumElementsPerDimension");
-  // TODO specify expected AST, i.e., after applying CTES
+  auto expectedFunction = new Function("extendMatrixAddingElements");
+  expectedFunction->addStatement(new Return(new LiteralInt(
+      new Matrix<AbstractExpr *>({{new LiteralInt(0), new LiteralInt(0), new LiteralInt(0)},
+                                  {new LiteralInt(0), new LiteralInt(1), new LiteralInt(2)},
+                                  {new LiteralInt(0), new LiteralInt(2), new LiteralInt(4)}}))));
 
   // get the body of the AST on that the CompileTimeExpressionSimplifier was applied on
   auto simplifiedAst = ast.getRootNode()->castTo<Function>()->getBody();
