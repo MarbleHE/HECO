@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_AST_ARITHMETICEXPR_H_
-#define AST_OPTIMIZER_INCLUDE_AST_ARITHMETICEXPR_H_
+#ifndef AST_OPTIMIZER_INCLUDE_AST_OPT_AST_ARITHMETICEXPR_H_
+#define AST_OPTIMIZER_INCLUDE_AST_OPT_AST_ARITHMETICEXPR_H_
 
 #include <string>
 #include <vector>
@@ -44,4 +44,4 @@ class ArithmeticExpr : public AbstractBinaryExpr {
   [[nodiscard]] std::string toString(bool printChildren) const override;
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_AST_ARITHMETICEXPR_H_
+#endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_ARITHMETICEXPR_H_

@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_UNARYEXPR_H
-#define AST_OPTIMIZER_INCLUDE_UNARYEXPR_H
+#ifndef AST_OPTIMIZER_INCLUDE_AST_OPT_AST_UNARYEXPR_H_
+#define AST_OPTIMIZER_INCLUDE_AST_OPT_AST_UNARYEXPR_H_
 
 #include <string>
 #include "AbstractExpr.h"
@@ -35,4 +35,4 @@ class UnaryExpr : public AbstractExpr {
   int getMaxNumberChildren() override;
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_UNARYEXPR_H
+#endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_UNARYEXPR_H_

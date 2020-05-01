@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_AST_VARASSIGNM_H_
-#define AST_OPTIMIZER_INCLUDE_AST_VARASSIGNM_H_
+#ifndef AST_OPTIMIZER_INCLUDE_AST_OPT_AST_VARASSIGNM_H_
+#define AST_OPTIMIZER_INCLUDE_AST_OPT_AST_VARASSIGNM_H_
 
 #include <string>
 #include "AbstractStatement.h"
@@ -41,4 +41,4 @@ class VarAssignm : public AbstractStatement {
   [[nodiscard]] std::string toString(bool printChildren) const override;
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_AST_VARASSIGNM_H_
+#endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_VARASSIGNM_H_

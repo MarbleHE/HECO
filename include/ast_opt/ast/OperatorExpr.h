@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_AST_OPERATOREXPR_H_
-#define AST_OPTIMIZER_INCLUDE_AST_OPERATOREXPR_H_
+#ifndef AST_OPTIMIZER_INCLUDE_AST_OPT_AST_OPERATOREXPR_H_
+#define AST_OPTIMIZER_INCLUDE_AST_OPT_AST_OPERATOREXPR_H_
 
 #include "AbstractExpr.h"
 #include <string>
@@ -54,4 +54,4 @@ class OperatorExpr : public AbstractExpr {
   void replaceChild(AbstractNode *originalChild, AbstractNode *newChildToBeAdded) override;
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_AST_OPERATOREXPR_H_
+#endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_OPERATOREXPR_H_

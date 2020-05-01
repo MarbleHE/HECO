@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_VISITOR_VISITOR_H_
-#define AST_OPTIMIZER_INCLUDE_VISITOR_VISITOR_H_
+#ifndef AST_OPTIMIZER_INCLUDE_AST_OPT_VISITOR_VISITOR_H_
+#define AST_OPTIMIZER_INCLUDE_AST_OPT_VISITOR_VISITOR_H_
 
 #include <string>
 #include <unordered_map>
@@ -127,4 +127,4 @@ class Visitor {
   void addStatementToScope(AbstractStatement &stat);
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_VISITOR_VISITOR_H_
+#endif //AST_OPTIMIZER_INCLUDE_AST_OPT_VISITOR_VISITOR_H_

@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_UTILITIES_GRAPHNODE_H_
-#define AST_OPTIMIZER_INCLUDE_UTILITIES_GRAPHNODE_H_
+#ifndef AST_OPTIMIZER_INCLUDE_AST_OPT_UTILITIES_GRAPHNODE_H_
+#define AST_OPTIMIZER_INCLUDE_AST_OPT_UTILITIES_GRAPHNODE_H_
 
 #include <set>
 #include <string>
@@ -40,4 +40,4 @@ class GraphNode {
   [[nodiscard]] std::set<std::string> getVariables(AccessType accessTypeFilter) const;
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_UTILITIES_GRAPHNODE_H_
+#endif //AST_OPTIMIZER_INCLUDE_AST_OPT_UTILITIES_GRAPHNODE_H_

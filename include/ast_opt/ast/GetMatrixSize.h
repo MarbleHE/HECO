@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_AST_GETMATRIXSIZE_H_
-#define AST_OPTIMIZER_INCLUDE_AST_GETMATRIXSIZE_H_
+#ifndef AST_OPTIMIZER_INCLUDE_AST_OPT_AST_GETMATRIXSIZE_H_
+#define AST_OPTIMIZER_INCLUDE_AST_OPT_AST_GETMATRIXSIZE_H_
 
 #include "AbstractExpr.h"
 #include <string>
@@ -43,4 +43,4 @@ class GetMatrixSize : public AbstractExpr {
   [[nodiscard]] AbstractExpr *getDimensionParameter() const;
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_AST_GETMATRIXSIZE_H_
+#endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_GETMATRIXSIZE_H_

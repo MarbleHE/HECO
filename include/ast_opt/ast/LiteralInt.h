@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_AST_LITERALINT_H_
-#define AST_OPTIMIZER_INCLUDE_AST_LITERALINT_H_
+#ifndef AST_OPTIMIZER_INCLUDE_AST_OPT_AST_LITERALINT_H_
+#define AST_OPTIMIZER_INCLUDE_AST_OPT_AST_LITERALINT_H_
 
 #include <string>
 #include <ostream>
@@ -61,4 +61,4 @@ class LiteralInt : public AbstractLiteral {
   void setMatrix(AbstractMatrix *newValue) override;
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_AST_LITERALINT_H_
+#endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_LITERALINT_H_

@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_AST_ABSTRACTSTATEMENT_H_
-#define AST_OPTIMIZER_INCLUDE_AST_ABSTRACTSTATEMENT_H_
+#ifndef AST_OPTIMIZER_INCLUDE_AST_OPT_AST_ABSTRACTSTATEMENT_H_
+#define AST_OPTIMIZER_INCLUDE_AST_OPT_AST_ABSTRACTSTATEMENT_H_
 
 #include <string>
 #include <nlohmann/json.hpp>
@@ -27,4 +27,4 @@ void to_json(json &j, const AbstractStatement &absStat);
 
 void to_json(json &j, const AbstractStatement *absStat);
 
-#endif //AST_OPTIMIZER_INCLUDE_AST_ABSTRACTSTATEMENT_H_
+#endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_ABSTRACTSTATEMENT_H_

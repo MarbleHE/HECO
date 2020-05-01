@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_AST_LITERALFLOAT_H_
-#define AST_OPTIMIZER_INCLUDE_AST_LITERALFLOAT_H_
+#ifndef AST_OPTIMIZER_INCLUDE_AST_OPT_AST_LITERALFLOAT_H_
+#define AST_OPTIMIZER_INCLUDE_AST_OPT_AST_LITERALFLOAT_H_
 
 #include <string>
 #include <ostream>
@@ -62,4 +62,4 @@ class LiteralFloat : public AbstractLiteral {
   void setMatrix(AbstractMatrix *newValue) override;
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_AST_LITERALFLOAT_H_
+#endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_LITERALFLOAT_H_

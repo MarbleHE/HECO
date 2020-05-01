@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_AST_WHILE_H_
-#define AST_OPTIMIZER_INCLUDE_AST_WHILE_H_
+#ifndef AST_OPTIMIZER_INCLUDE_AST_OPT_AST_WHILE_H_
+#define AST_OPTIMIZER_INCLUDE_AST_OPT_AST_WHILE_H_
 
 #include "AbstractStatement.h"
 #include "AbstractExpr.h"
@@ -28,4 +28,4 @@ class While : public AbstractStatement {
   bool supportsCircuitMode() override;
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_AST_WHILE_H_
+#endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_WHILE_H_

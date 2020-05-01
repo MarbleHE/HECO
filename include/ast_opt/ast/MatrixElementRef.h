@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_AST_MATRIXELEMENTREF_H_
-#define AST_OPTIMIZER_INCLUDE_AST_MATRIXELEMENTREF_H_
+#ifndef AST_OPTIMIZER_INCLUDE_AST_OPT_AST_MATRIXELEMENTREF_H_
+#define AST_OPTIMIZER_INCLUDE_AST_OPT_AST_MATRIXELEMENTREF_H_
 
 #include "AbstractLiteral.h"
 #include <vector>
@@ -47,4 +47,4 @@ class MatrixElementRef : public AbstractExpr {
   void setAttributes(AbstractExpr *elementContainingMatrix, AbstractExpr *rowIndex, AbstractExpr *columnIndex);
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_AST_MATRIXELEMENTREF_H_
+#endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_MATRIXELEMENTREF_H_

@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_AST_ABSTRACTMATRIX_H_
-#define AST_OPTIMIZER_INCLUDE_AST_ABSTRACTMATRIX_H_
+#ifndef AST_OPTIMIZER_INCLUDE_AST_OPT_AST_ABSTRACTMATRIX_H_
+#define AST_OPTIMIZER_INCLUDE_AST_OPT_AST_ABSTRACTMATRIX_H_
 
 #include <string>
 #include <nlohmann/json.hpp>
@@ -108,4 +108,4 @@ class AbstractMatrix : public AbstractNode {
   AbstractMatrix *clone(bool keepOriginalUniqueNodeId) override = 0;
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_AST_ABSTRACTMATRIX_H_
+#endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_ABSTRACTMATRIX_H_

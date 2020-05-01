@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_AST_MATRIXASSIGNM_H_
-#define AST_OPTIMIZER_INCLUDE_AST_MATRIXASSIGNM_H_
+#ifndef AST_OPTIMIZER_INCLUDE_AST_OPT_AST_MATRIXASSIGNM_H_
+#define AST_OPTIMIZER_INCLUDE_AST_OPT_AST_MATRIXASSIGNM_H_
 
 #include "AbstractStatement.h"
 #include <string>
@@ -37,4 +37,4 @@ class MatrixAssignm : public AbstractStatement {
   [[nodiscard]] std::string getAssignmTargetString() const;
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_AST_MATRIXASSIGNM_H_
+#endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_MATRIXASSIGNM_H_

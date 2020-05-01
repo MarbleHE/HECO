@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_AST_FOR_H_
-#define AST_OPTIMIZER_INCLUDE_AST_FOR_H_
+#ifndef AST_OPTIMIZER_INCLUDE_AST_OPT_AST_FOR_H_
+#define AST_OPTIMIZER_INCLUDE_AST_OPT_AST_FOR_H_
 
 #include "AbstractStatement.h"
 #include <string>
@@ -41,4 +41,4 @@ class For : public AbstractStatement {
   bool isEqual(AbstractStatement *other) override;
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_AST_FOR_H_
+#endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_FOR_H_

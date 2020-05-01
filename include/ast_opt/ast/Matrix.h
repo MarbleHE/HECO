@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_AST_MATRIX_H_
-#define AST_OPTIMIZER_INCLUDE_AST_MATRIX_H_
+#ifndef AST_OPTIMIZER_INCLUDE_AST_OPT_AST_MATRIX_H_
+#define AST_OPTIMIZER_INCLUDE_AST_OPT_AST_MATRIX_H_
 
 #include <vector>
 #include <string>
@@ -447,4 +447,4 @@ class Matrix : public AbstractMatrix {
   Matrix<T> *clone(bool keepOriginalUniqueNodeId) override;
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_AST_MATRIX_H_
+#endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_MATRIX_H_

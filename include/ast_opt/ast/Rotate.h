@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_AST_ROTATE_H_
-#define AST_OPTIMIZER_INCLUDE_AST_ROTATE_H_
+#ifndef AST_OPTIMIZER_INCLUDE_AST_OPT_AST_ROTATE_H_
+#define AST_OPTIMIZER_INCLUDE_AST_OPT_AST_ROTATE_H_
 
 #include <string>
 #include "AbstractExpr.h"
@@ -43,4 +43,4 @@ class Rotate : public AbstractExpr {
   static bool isOneDimensionalVector(AbstractExpr *operand);
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_AST_ROTATE_H_
+#endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_ROTATE_H_

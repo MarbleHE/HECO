@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_AST_CALL_H_
-#define AST_OPTIMIZER_INCLUDE_AST_CALL_H_
+#ifndef AST_OPTIMIZER_INCLUDE_AST_OPT_AST_CALL_H_
+#define AST_OPTIMIZER_INCLUDE_AST_OPT_AST_CALL_H_
 
 #include <string>
 #include <vector>
@@ -34,4 +34,4 @@ class Call : public AbstractExpr {
   bool supportsCircuitMode() override;
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_AST_CALL_H_
+#endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_CALL_H_

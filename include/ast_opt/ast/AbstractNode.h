@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_AST_ABSTRACTNODE_H_
-#define AST_OPTIMIZER_INCLUDE_AST_ABSTRACTNODE_H_
+#ifndef AST_OPTIMIZER_INCLUDE_AST_OPT_AST_ABSTRACTNODE_H_
+#define AST_OPTIMIZER_INCLUDE_AST_OPT_AST_ABSTRACTNODE_H_
 
 #include <vector>
 #include <map>
@@ -287,4 +287,4 @@ class AbstractNode {
   [[nodiscard]] std::string generateOutputString(bool printChildren, std::vector<std::string> attributes) const;
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_AST_ABSTRACTNODE_H_
+#endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_ABSTRACTNODE_H_

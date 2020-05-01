@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_UTILITIES_TESTUTILS_H_
-#define AST_OPTIMIZER_INCLUDE_UTILITIES_TESTUTILS_H_
+#ifndef AST_OPTIMIZER_INCLUDE_AST_OPT_UTILITIES_TESTUTILS_H_
+#define AST_OPTIMIZER_INCLUDE_AST_OPT_UTILITIES_TESTUTILS_H_
 
 #include <map>
 #include <string>
@@ -248,4 +248,4 @@ static void circuitOutputComparer(Ast &unmodifiedAst, Ast &rewrittenAst, unsigne
   return circuitOutputComparer(unmodifiedAst, rewrittenAst, seed, circuitMaxTestRuns, evalParams, nullptr);
 }
 
-#endif //AST_OPTIMIZER_INCLUDE_UTILITIES_TESTUTILS_H_
+#endif //AST_OPTIMIZER_INCLUDE_AST_OPT_UTILITIES_TESTUTILS_H_

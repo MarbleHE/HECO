@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_AST_BLOCK_H_
-#define AST_OPTIMIZER_INCLUDE_AST_BLOCK_H_
+#ifndef AST_OPTIMIZER_INCLUDE_AST_OPT_AST_BLOCK_H_
+#define AST_OPTIMIZER_INCLUDE_AST_OPT_AST_BLOCK_H_
 
 #include <vector>
 #include "AbstractStatement.h"
@@ -36,4 +36,4 @@ class Block : public AbstractStatement {
   bool isEqual(AbstractStatement *otherBlockStatement) override;
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_AST_BLOCK_H_
+#endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_BLOCK_H_

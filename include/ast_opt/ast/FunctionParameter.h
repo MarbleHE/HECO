@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_FUNCTIONPARAMETER_H
-#define AST_OPTIMIZER_INCLUDE_FUNCTIONPARAMETER_H
+#ifndef AST_OPTIMIZER_INCLUDE_AST_OPT_AST_FUNCTIONPARAMETER_H_
+#define AST_OPTIMIZER_INCLUDE_AST_OPT_AST_FUNCTIONPARAMETER_H_
 
 #include "Variable.h"
 #include <string>
@@ -48,4 +48,4 @@ void to_json(json &j, const FunctionParameter &funcParam);
 /// Defines the JSON representation to be used for vector<FunctionParameter *> objects.
 void to_json(json &j, const FunctionParameter *funcParam);
 
-#endif //AST_OPTIMIZER_INCLUDE_FUNCTIONPARAMETER_H
+#endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_FUNCTIONPARAMETER_H_

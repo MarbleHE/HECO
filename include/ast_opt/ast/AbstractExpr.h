@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_AST_ABSTRACTEXPR_H_
-#define AST_OPTIMIZER_INCLUDE_AST_ABSTRACTEXPR_H_
+#ifndef AST_OPTIMIZER_INCLUDE_AST_OPT_AST_ABSTRACTEXPR_H_
+#define AST_OPTIMIZER_INCLUDE_AST_OPT_AST_ABSTRACTEXPR_H_
 
 #include <vector>
 #include <string>
@@ -44,4 +44,4 @@ class AbstractExpr : public AbstractNode {
 
 std::ostream &operator<<(std::ostream &outs, const AbstractExpr &obj);
 
-#endif //AST_OPTIMIZER_INCLUDE_AST_ABSTRACTEXPR_H_
+#endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_ABSTRACTEXPR_H_

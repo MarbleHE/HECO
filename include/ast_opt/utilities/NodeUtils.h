@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_UTILITIES_NODEUTILS_H_
-#define AST_OPTIMIZER_INCLUDE_UTILITIES_NODEUTILS_H_
+#ifndef AST_OPTIMIZER_INCLUDE_AST_OPT_UTILITIES_NODEUTILS_H_
+#define AST_OPTIMIZER_INCLUDE_AST_OPT_UTILITIES_NODEUTILS_H_
 
 #include <vector>
 #include "ast_opt/ast/AbstractNode.h"
@@ -30,4 +30,4 @@ AbstractNode *createMultDepthBalancedTreeFromInputs(std::vector<AbstractExpr *> 
                                                                  LogCompOp,
                                                                  UnaryOp> operatorType);
 
-#endif //AST_OPTIMIZER_INCLUDE_UTILITIES_NODEUTILS_H_
+#endif //AST_OPTIMIZER_INCLUDE_AST_OPT_UTILITIES_NODEUTILS_H_

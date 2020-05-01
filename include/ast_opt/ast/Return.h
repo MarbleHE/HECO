@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_RETURN_H
-#define AST_OPTIMIZER_INCLUDE_RETURN_H
+#ifndef AST_OPTIMIZER_INCLUDE_AST_OPT_AST_RETURN_H_
+#define AST_OPTIMIZER_INCLUDE_AST_OPT_AST_RETURN_H_
 
 #include <string>
 #include <vector>
@@ -37,4 +37,4 @@ class Return : public AbstractStatement {
   bool supportsCircuitMode() override;
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_RETURN_H
+#endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_RETURN_H_

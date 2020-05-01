@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_AST_IF_H_
-#define AST_OPTIMIZER_INCLUDE_AST_IF_H_
+#ifndef AST_OPTIMIZER_INCLUDE_AST_OPT_AST_IF_H_
+#define AST_OPTIMIZER_INCLUDE_AST_OPT_AST_IF_H_
 
 #include "AbstractStatement.h"
 #include "AbstractExpr.h"
@@ -36,4 +36,4 @@ class If : public AbstractStatement {
   [[nodiscard]] std::string toString(bool printChildren) const override;
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_AST_IF_H_
+#endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_IF_H_

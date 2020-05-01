@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_AST_VARIABLE_H_
-#define AST_OPTIMIZER_INCLUDE_AST_VARIABLE_H_
+#ifndef AST_OPTIMIZER_INCLUDE_AST_OPT_AST_VARIABLE_H_
+#define AST_OPTIMIZER_INCLUDE_AST_OPT_AST_VARIABLE_H_
 
 #include <map>
 #include <string>
@@ -41,4 +41,4 @@ class Variable : public AbstractExpr {
   bool supportsCircuitMode() override;
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_AST_VARIABLE_H_
+#endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_VARIABLE_H_

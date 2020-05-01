@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_AST_CALLEXTERNAL_H_
-#define AST_OPTIMIZER_INCLUDE_AST_CALLEXTERNAL_H_
+#ifndef AST_OPTIMIZER_INCLUDE_AST_OPT_AST_CALLEXTERNAL_H_
+#define AST_OPTIMIZER_INCLUDE_AST_OPT_AST_CALLEXTERNAL_H_
 
 #include "AbstractStatement.h"
 #include <vector>
@@ -28,4 +28,4 @@ class CallExternal : public AbstractExpr {
   [[nodiscard]] std::string getNodeType() const override;
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_AST_CALLEXTERNAL_H_
+#endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_CALLEXTERNAL_H_

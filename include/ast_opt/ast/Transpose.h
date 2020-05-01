@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_AST_TRANSPOSE_H_
-#define AST_OPTIMIZER_INCLUDE_AST_TRANSPOSE_H_
+#ifndef AST_OPTIMIZER_INCLUDE_AST_OPT_AST_TRANSPOSE_H_
+#define AST_OPTIMIZER_INCLUDE_AST_OPT_AST_TRANSPOSE_H_
 
 #include "AbstractExpr.h"
 #include <vector>
@@ -36,4 +36,4 @@ class Transpose : public AbstractExpr {
   [[nodiscard]] AbstractExpr *getOperand() const;
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_AST_TRANSPOSE_H_
+#endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_TRANSPOSE_H_

@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_AST_LITERALSTRING_H_
-#define AST_OPTIMIZER_INCLUDE_AST_LITERALSTRING_H_
+#ifndef AST_OPTIMIZER_INCLUDE_AST_OPT_AST_LITERALSTRING_H_
+#define AST_OPTIMIZER_INCLUDE_AST_OPT_AST_LITERALSTRING_H_
 
 #include <string>
 #include <unordered_map>
@@ -60,4 +60,4 @@ class LiteralString : public AbstractLiteral {
   void setMatrix(AbstractMatrix *newValue) override;
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_AST_LITERALSTRING_H_
+#endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_LITERALSTRING_H_

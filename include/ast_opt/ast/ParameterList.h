@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_AST_PARAMETERLIST_H_
-#define AST_OPTIMIZER_INCLUDE_AST_PARAMETERLIST_H_
+#ifndef AST_OPTIMIZER_INCLUDE_AST_OPT_AST_PARAMETERLIST_H_
+#define AST_OPTIMIZER_INCLUDE_AST_OPT_AST_PARAMETERLIST_H_
 
 #include "AbstractStatement.h"
 
@@ -24,4 +24,4 @@ class ParameterList : public AbstractStatement {
   [[nodiscard]] std::string toString(bool printChildren) const override;
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_AST_PARAMETERLIST_H_
+#endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_PARAMETERLIST_H_

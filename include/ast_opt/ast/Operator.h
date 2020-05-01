@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_AST_OPERATOR_H_
-#define AST_OPTIMIZER_INCLUDE_AST_OPERATOR_H_
+#ifndef AST_OPTIMIZER_INCLUDE_AST_OPT_AST_OPERATOR_H_
+#define AST_OPTIMIZER_INCLUDE_AST_OPT_AST_OPERATOR_H_
 
 #include <utility>
 #include <variant>
@@ -168,4 +168,4 @@ class Operator : public AbstractNode {
   [[nodiscard]] bool supportsPartialEvaluation();
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_AST_OPERATOR_H_
+#endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_OPERATOR_H_
