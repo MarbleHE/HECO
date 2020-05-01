@@ -81,7 +81,7 @@ bool Block::isEqual(AbstractStatement *otherBlockStatement) {
     auto otherStatIt = otherStatements.begin();
 
     // compare statement-per-statement
-    for (; thisStatIt!=thisStatements.end(); ++thisStatIt) {
+    for (; thisStatIt!=thisStatements.end() && otherStatIt!=otherStatements.end(); ++thisStatIt) {
       // break up if any pair of two compared statements do not match
       if (!(*thisStatIt)->isEqual(*otherStatIt)) return false;
       otherStatIt++;
