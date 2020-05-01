@@ -38,12 +38,12 @@ std::string MatrixAssignm::getAssignmTargetString() const {
   // Build a string in the format <matrixIdentifier>[<rowIndexExpr>][<columnIndexExpr>].
   // Unfortunately, toString also includes a node's name such that we get a string like
   // "Variable (M)[LiteralInt (32)][LiteralInt (1)]" where the compacter "M[32][1]" would be desired instead.
-  ss << getAssignmTarget()->getOperand()->toString(true);
-  ss << "[";
-  ss << getAssignmTarget()->getRowIndex()->toString(true);
-  ss << "]" << "[";
-  ss << getAssignmTarget()->getColumnIndex()->toString(true);
-  ss << "]";
+  auto assignmTarget = getAssignmTarget();
+  ss << assignmTarget->getOperand()->toString(true);
+  ss << "[" << assignmTarget->getRowIndex()->toString(true) << "]";
+  if (assignmTarget->getColumnIndex()!=nullptr) {
+    ss << "[" << assignmTarget->getColumnIndex()->toString(true) << "]";
+  }
   std::string res(ss.str());
   // remove any new line characters
   res.erase(std::remove_if(res.begin(), res.end(), [](char c) { return c=='\n'; }), res.end());
