@@ -31,7 +31,6 @@ class CompileTimeExpressionSimplifierFixture : public ::testing::Test {
 
  protected:
   virtual void SetUp() {
-    ctes = CompileTimeExpressionSimplifier();
   }
 
   CompileTimeExpressionSimplifierFixture() = default;
@@ -2544,4 +2543,143 @@ TEST_F(CompileTimeExpressionSimplifierFixture, fullAssignmentToMatrix) { /* NOLI
   // get the body of the AST on that the CompileTimeExpressionSimplifier was applied on
   auto simplifiedAst = ast.getRootNode()->castTo<Function>()->getBody();
   EXPECT_TRUE(simplifiedAst->isEqual(expectedFunc->getBody()));
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, fourNestedLoopsLaplacianSharpeningFilter) { /* NOLINT */
+  // -- input --
+  // VecInt2D runLaplacianSharpeningAlgorithm(Vector<int> img, int imgSize) {
+  //     Vector<int> img2;
+  //     Matrix<int> weightMatrix = [1 1 1; 1 -8 1; 1 1 1];
+  //     for (int x = 1; x < imgSize - 1; ++x) {
+  //         for (int y = 1; y < imgSize - 1; ++y) {
+  //             int value = 0;
+  //             for (int j = -1; j < 2; ++j) {
+  //                 for (int i = -1; i < 2; ++i) {
+  //                     value = value + weightMatrix[i+1][j+1] * img[imgSize*(x+i)+y+j];
+  //                 }
+  //             }
+  //             img2[imgSize*x+y] = img[imgSize*x+y] - (value/2);
+  //         }
+  //     }
+  //     return img2;
+  // }
+  // -- expected --
+  // VecInt2D runLaplacianSharpeningAlgorithm(Vector<int> img, int imgSize, int x, int y) {
+  //     Matrix<int> img2;
+  //     for (int x = 1; x < imgSize - 1; ++x) {
+  //         for (int y = 1; y < imgSize - 1; ++y) {
+  //            img2[imgSize*x+y] = img[imgSize*x+y] - (
+  //                    + img[imgSize*(x-1)+y-1] + img[imgSize*x+y-1]        + img[imgSize*(x+1)+y-1]
+  //                    + img[imgSize*(x-1)+y]   + img[imgSize*x+y] * (-8)   + img[imgSize*(x+1)+y]
+  //                    + img[imgSize*(x-1)+y+1] + img[imgSize*x+y+1]        + img[imgSize*(x+1)+y+1] ) / 2;
+  //         }
+  //     }
+  //     return img2;
+  // }
+  Ast ast;
+  AstTestingGenerator::generateAst(60, ast);
+
+  // run CTES and limit the number of unrolled loops to 2 (the two innermost loops are unrolled only)
+  CompileTimeExpressionSimplifier ctes((CtesConfiguration(2)));
+  ctes.visit(ast);
+
+  // VecInt2D runLaplacianSharpeningAlgorithm(Vector<int> img, int imgSize, int x, int y) {
+  auto expectedFunction = new Function("runLaplacianSharpeningAlgorithm");
+  expectedFunction->addParameter(new FunctionParameter(new Datatype(Types::INT, true), new Variable("img")));
+  expectedFunction->addParameter(new FunctionParameter(new Datatype(Types::INT, false), new Variable("imgSize")));
+
+  expectedFunction->addStatement(new VarDecl("img2", new Datatype(Types::INT)));
+
+  // a helper to generate img[imgSize*(x-i)+y+j] terms
+  auto createImgIdx = [](int i, int j) -> AbstractExpr * {
+    auto buildTermI = [](int i) -> AbstractExpr * {
+      if (i==0) {
+        return new Variable("x");
+      } else {
+        return new OperatorExpr(new Operator(ADDITION), {new Variable("x"), new LiteralInt(i)});
+      }
+    };
+
+    auto buildTermJ = [&](int j) -> AbstractExpr * {
+      if (j==0) {
+        return new OperatorExpr(new Operator(ADDITION),
+                                {new OperatorExpr(new Operator(MULTIPLICATION),
+                                                  {new Variable("imgSize"),
+                                                   buildTermI(i)}),
+                                 new Variable("y")});
+      } else {
+        return new OperatorExpr(new Operator(ADDITION),
+                                {new OperatorExpr(new Operator(MULTIPLICATION),
+                                                  {new Variable("imgSize"),
+                                                   buildTermI(i)}),
+                                 new Variable("y"),
+                                 new LiteralInt(j)});
+      }
+    };
+    return new MatrixElementRef(new Variable("img"), new LiteralInt(0), buildTermJ(j));
+  };
+
+  // img[imgSize*(x-1)+y-1]  * 1 + ... + img[imgSize*(x+1)+y+1]  * 1;
+  auto varValue =
+      new OperatorExpr(
+          new Operator(ADDITION),
+          {createImgIdx(-1, -1),
+           createImgIdx(0, -1),
+           createImgIdx(1, -1),
+           createImgIdx(-1, 0),
+           new OperatorExpr(new Operator(MULTIPLICATION), {createImgIdx(0, 0), new LiteralInt(-8)}),
+           createImgIdx(1, 0),
+           createImgIdx(-1, 1),
+           createImgIdx(0, 1),
+           createImgIdx(1, 1)});
+
+  // img2[imgSize*x+y] = img[imgSize*x+y] - (value/2);
+  auto secondLoopBody = new Block(
+      new MatrixAssignm(new MatrixElementRef(new Variable("img2"),
+                                             new LiteralInt(0),
+                                             new OperatorExpr(
+                                                 new Operator(ADDITION),
+                                                 {new OperatorExpr(new Operator(MULTIPLICATION),
+                                                                   {new Variable("imgSize"), new Variable("x")}),
+                                                  new Variable("y")})),
+                        new OperatorExpr(
+                            new Operator(SUBTRACTION),
+                            {new MatrixElementRef(
+                                new Variable("img"),
+                                new LiteralInt(0),
+                                new OperatorExpr(
+                                    new Operator(ADDITION),
+                                    {new OperatorExpr(new Operator(MULTIPLICATION),
+                                                      {new Variable("imgSize"), new Variable("x")}),
+                                     new Variable("y")})),
+                             new OperatorExpr(new Operator(DIVISION), {varValue, new LiteralInt(2)})})));
+
+  // for (int y = 1; y < imgSize - 1; ++y)  -- 2nd level loop
+  auto firstLoopBody = new Block(new For(new VarDecl("y", 1),
+                                         new LogicalExpr(new Variable("y"),
+                                                         SMALLER,
+                                                         new ArithmeticExpr(new Variable("imgSize"), SUBTRACTION, 1)),
+                                         new VarAssignm("y",
+                                                        new ArithmeticExpr(new Variable("y"),
+                                                                           ADDITION,
+                                                                           new LiteralInt(1))),
+                                         secondLoopBody));
+
+  // for (int x = 1; x < imgSize - 1; ++x)  -- 1st level loop
+  expectedFunction->addStatement(new For(new VarDecl("x", 1),
+                                         new LogicalExpr(new Variable("x"),
+                                                         SMALLER,
+                                                         new ArithmeticExpr(new Variable("imgSize"), SUBTRACTION, 1)),
+                                         new VarAssignm("x",
+                                                        new ArithmeticExpr(new Variable("x"),
+                                                                           ADDITION,
+                                                                           new LiteralInt(1))),
+                                         firstLoopBody));
+
+  // return img2;
+  expectedFunction->addStatement(new Return(new Variable("img2")));
+
+  // get the body of the AST on that the CompileTimeExpressionSimplifier was applied on
+  auto simplifiedAst = ast.getRootNode()->castTo<Function>()->getBody();
+  EXPECT_TRUE(simplifiedAst->isEqual(expectedFunction->getBody()));
 }
