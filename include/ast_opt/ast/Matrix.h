@@ -303,6 +303,7 @@ class Matrix : public AbstractMatrix {
   }
 
   Matrix<T> *transpose(bool inPlace) override {
+    if (getDimensions().equals(0, 0)) return inPlace ? this : new Matrix<T>();
     Matrix<T> *matrixToTranspose = inPlace ? this : new Matrix<T>(*this);
     std::vector<std::vector<T>> transposedVec(matrixToTranspose->values[0].size(), std::vector<T>());
     for (int i = 0; i < matrixToTranspose->values.size(); ++i) {
@@ -429,13 +430,12 @@ class Matrix : public AbstractMatrix {
       // overwrite existing row
       values.at(idx) = castedMx->getNthRowVector(0);
     }
+    // update the dimensions of this matrix
+    getDimensions().update(values.size(), values.at(0).size());
 
     // transpose this matrix back as we transposed the given matrix mx previously to avoid reimplmenting the append
     // logic for column vectors
     if (isColumnVector) transpose(true);
-
-    // update the dimensions of this matrix
-    getDimensions().update(values.size(), values.at(0).size());
   }
 
   void replaceChild(AbstractNode *originalChild, AbstractNode *newChildToBeAdded) override;
