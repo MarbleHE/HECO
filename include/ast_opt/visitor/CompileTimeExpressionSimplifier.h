@@ -67,8 +67,52 @@ struct EmittedVariableData {
   AbstractNode *getVarDeclStatement() { return varDeclStatement; }
 };
 
+/**
+ * A struct containing all configuration parameters that can be passed to the CompileTimeExpressionSimplifier.
+ */
+struct CtesConfiguration {
+  CtesConfiguration() = default;
+
+  explicit CtesConfiguration(int maxNumLoopUnrollings) : maxNumLoopUnrollings(maxNumLoopUnrollings) {}
+
+  /// A counter that indicates how many loops have been fully or partially unrolled so far.
+  int numUnrolledLoopsCounter = 0;
+
+  /// Indicates the total number of allowed loop unrolling operations. If the maximum is reached, any further For-loops
+  /// are simplified but not fully or partially unrolled.
+  const int maxNumLoopUnrollings = -1;
+
+  /// Specifies up to which number of iterations a loop is fully unrolled.
+  const int fullyUnrollLoopMaxNumIterations = 512;
+
+  /// Specifies the number of ciphertext slots that partial loop unrolling optimizes for.
+  const int partiallyUnrollLoopNumCipherslots = 3;
+
+  /// Determines whether the number of total allowed loop unrollings is already exhausted.
+  /// \return True if the maxNumLoopUnrollings is not reached yet or if there is no limitation in the number of total
+  /// loop unrollings. Otherwise returns False.
+  bool isUnrollLoopAllowed() {
+    return allowsInfiniteLoopUnrollings() || (numUnrolledLoopsCounter < maxNumLoopUnrollings);
+  }
+
+  /// Updates the counter of unrolled loops. Method must be invoked immediately after a partial or full loop unrolling
+  /// operation is performed.
+  void incrementNumLoopUnrollingsCounter() {
+    numUnrolledLoopsCounter = numUnrolledLoopsCounter + 1;
+  }
+
+  /// Determines whether there is any limitation in the number of loop unrolling operations.
+  /// \return True if there is no restriction w.r.t. number of loop unrollings.
+  bool allowsInfiniteLoopUnrollings() {
+    return maxNumLoopUnrollings==-1;
+  }
+};
+
 class CompileTimeExpressionSimplifier : public Visitor {
  private:
+  /// A CompileTimeExpressionSimplifier configuration object containing configuration parameters.
+  CtesConfiguration ctes;
+
   /// A EvaluationVisitor instance that is used to evaluate parts of the AST in order to simplify them.
   EvaluationVisitor evalVisitor;
 
@@ -109,6 +153,8 @@ class CompileTimeExpressionSimplifier : public Visitor {
 
  public:
   CompileTimeExpressionSimplifier();
+
+  CompileTimeExpressionSimplifier(CtesConfiguration cfg);
 
   /// Contains all nodes that can potentially be removed. The decision of a node's removal is to be made by its parent
   /// statement. If this decision is made (i.e., at the end of processing the statement), the node must be deleted from

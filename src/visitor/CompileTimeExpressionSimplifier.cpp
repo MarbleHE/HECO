@@ -28,7 +28,11 @@
 #include "ast_opt/ast/GetMatrixSize.h"
 #include "ast_opt/ast/MatrixAssignm.h"
 
-CompileTimeExpressionSimplifier::CompileTimeExpressionSimplifier() {
+CompileTimeExpressionSimplifier::CompileTimeExpressionSimplifier() : ctes(CtesConfiguration()) {
+  evalVisitor = EvaluationVisitor();
+}
+
+CompileTimeExpressionSimplifier::CompileTimeExpressionSimplifier(CtesConfiguration cfg) : ctes(cfg) {
   evalVisitor = EvaluationVisitor();
 }
 
@@ -282,8 +286,12 @@ void CompileTimeExpressionSimplifier::visit(LiteralFloat &elem) {
 void CompileTimeExpressionSimplifier::visit(Variable &elem) {
   Visitor::visit(elem);
   // TODO: Introduce a depth threshold (#nodes) to stop inlining if a variable's symbolic value reached a certain depth.
-  if (getVariableValueDeclaredInThisOrOuterScope(elem.getIdentifier())!=nullptr
-      && (!onBackwardPassInForLoop() || visitingUnrolledLoopStatements)) {
+  auto varValue = getVariableValueDeclaredInThisOrOuterScope(elem.getIdentifier());
+  auto vvAsLiteral = dynamic_cast<AbstractLiteral *>(varValue);
+  if (varValue!=nullptr
+      // if varValue is an AbstractLiteral then its value must not be an empty matrix (i.e., have dim (0,0))
+      && (!(vvAsLiteral!=nullptr) || !vvAsLiteral->getMatrix()->isEmpty())
+      && (!(onBackwardPassInForLoop() && ctes.isUnrollLoopAllowed()) || visitingUnrolledLoopStatements)) {
     // if we know the variable's value (i.e., its value is either any subtype of AbstractLiteral or an AbstractExpr if
     // this is a symbolic value that defines on other variables), we can replace this variable node by its value
     auto variableParent = elem.getOnlyParent();
@@ -508,7 +516,7 @@ void CompileTimeExpressionSimplifier::visit(Block &elem) {
   addStatementToScope(elem);
   changeToInnerScope(elem.getUniqueNodeId(), &elem);
   for (auto &stat : elem.getStatements()) {
-    if (onBackwardPassInForLoop() && !visitingUnrolledLoopStatements) continue;
+    if (onBackwardPassInForLoop() && ctes.isUnrollLoopAllowed() && !visitingUnrolledLoopStatements) continue;
     stat->accept(*this);
   }
   changeToOuterScope();
@@ -901,37 +909,44 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
   // If s For-loop's condition is compile-time known & short enough, do full "symbolic eval/unroll", i.e., no
   // For-loop is left afterwards; otherwise just partially unroll the loop to enable batching by executing
   // computations of multiple loop iterations simultaneously.
-  // UNROLL_ITERATIONS_THRESHOLD determines up to which number of iterations a loop is fully unrolled
-  const int UNROLL_ITERATIONS_THRESHOLD = 512;
   visitingUnrolledLoopStatements = true;
   int numIterations = determineNumLoopIterations(elem);
   visitingUnrolledLoopStatements = false;
   // if loop unrolling replaced the For node by a new one, then newNode points to that node, otherwise it is nullptr
   AbstractNode *newNode;
-  if (numIterations!=-1 && numIterations < UNROLL_ITERATIONS_THRESHOLD) {
-    // do full loop unrolling
-    newNode = doFullLoopUnrolling(elem, numIterations);
-    // After unrolling the outermost loop is finished, visit the loop's body (again) to remove unneeded statements and
-    // store the latest variable values; this is only required if full loop unrolling was performed. In that case, the
-    // new node must NOT be a Block statement. We use that fact to distinguish between full and partial unrolling.
-    if (newNode!=nullptr && currentLoopDepth_maxLoopDepth.first==1) {
-      // Performing the loop unrolling may involve adding temporary variables in the variableValues map. Although they
-      // are only valid in the loop's scope, we do not need them as they are substituted. As we are visiting the unrolled
-      // statements afterwards, we must discard these temporary variables by restoring a previously made copy.
-      variableValues = varValuesBackup;
-      visitingUnrolledLoopStatements = true;
-      newNode->accept(*this);
-      if (removableNodes.count(newNode) > 0) enqueueNodeForDeletion(newNode);
-      visitingUnrolledLoopStatements = false;
-    } else if (auto newNodeAsBlock = dynamic_cast<Block *>(newNode)) {
-      auto blockStatement = newNodeAsBlock->getStatements();
-      newNode->getOnlyParent()->replaceChildren(newNode, std::vector<AbstractNode *>(blockStatement.begin(),
-                                                                                     blockStatement.end()));
+  if (ctes.isUnrollLoopAllowed()) {
+    if (numIterations!=-1 && numIterations < ctes.fullyUnrollLoopMaxNumIterations) {
+      // do full loop unrolling
+      newNode = doFullLoopUnrolling(elem, numIterations);
+      ctes.incrementNumLoopUnrollingsCounter();
+      // After unrolling the outermost loop is finished, visit the loop's body (again) to remove unneeded statements and
+      // store the latest variable values; this is only required if full loop unrolling was performed. In that case, the
+      // new node must NOT be a Block statement. We use that fact to distinguish between full and partial unrolling.
+      if (newNode!=nullptr
+          && ((ctes.allowsInfiniteLoopUnrollings() && currentLoopDepth_maxLoopDepth.first==1)
+              || (!ctes.allowsInfiniteLoopUnrollings()
+                  && currentLoopDepth_maxLoopDepth.first - 1
+                      ==(currentLoopDepth_maxLoopDepth.second - ctes.maxNumLoopUnrollings)))) {
+        // Performing the loop unrolling may involve adding temporary variables in the variableValues map. Although they
+        // are only valid in the loop's scope, we do not need them as they are substituted. As we are visiting the unrolled
+        // statements afterwards, we must discard these temporary variables by restoring a previously made copy.
+        variableValues = varValuesBackup;
+        visitingUnrolledLoopStatements = true;
+        newNode->accept(*this);
+        if (removableNodes.count(newNode) > 0) enqueueNodeForDeletion(newNode);
+        visitingUnrolledLoopStatements = false;
+      } else if (auto newNodeAsBlock = dynamic_cast<Block *>(newNode)) {
+        auto blockStatement = newNodeAsBlock->getStatements();
+        newNode->getOnlyParent()->replaceChildren(newNode,
+                                                  std::vector<AbstractNode *>(blockStatement.begin(),
+                                                                              blockStatement.end()));
+      }
+    } else {
+      // do partial unrolling w.r.t. #ciphertext slots and add a cleanup loop for handling remaining iterations
+      newNode = doPartialLoopUnrolling(elem);
+      ctes.incrementNumLoopUnrollingsCounter();
     }
-  } else {
-    // do partial unrolling w.r.t. ciphertext slots and add a cleanup loop for handling remaining iterations
-    newNode = doPartialLoopUnrolling(elem);
-  } // end of full unroll check: if (numIterations!=-1 && numIterations < UNROLL_ITERATIONS_THRESHOLD)
+  }
   cleanUpAfterStatementVisited(reinterpret_cast<AbstractNode *>(&elem), false);
 
   leftForLoop();
@@ -1077,9 +1092,8 @@ AbstractNode *CompileTimeExpressionSimplifier::doPartialLoopUnrolling(For &elem)
   //   <update statement>
   //   <loop condition>   <- this will be moved out of the body into the For-loop's condition field afterwards
   //   ... repeat NUM_CIPHERTEXT_SLOTS times ...
-  const int NUM_CIPHERTEXT_SLOTS = 3;
   std::vector<Return *> tempReturnStmts;
-  for (int i = 0; i < NUM_CIPHERTEXT_SLOTS; i++) {
+  for (int i = 0; i < ctes.partiallyUnrollLoopNumCipherslots; i++) {
     // for each statement in the for-loop's body
     for (auto &stmt : elem.getStatementToBeExecuted()->castTo<Block>()->getStatements()) {
       // clone the body statement and append the statement to the unrolledForLoop Body
