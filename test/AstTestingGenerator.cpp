@@ -76,7 +76,7 @@ static std::map<int, std::function<void(Ast &)> > call = {  /* NOLINT */
     {46, AstTestingGenerator::genAstOperatorExpr_logicalXorFalse_twoRemainingOperands},
     {47, AstTestingGenerator::genAstNestedOperatorExpr},
     {48, AstTestingGenerator::genAstSimpleForLoopUnrolling},
-    {49, AstTestingGenerator::genAstNestedForLoopUnrolling},
+    {49, AstTestingGenerator::genAstNestedLoopUnrollingLaplacianSharpeningFilterInnerLoops},
     {50, AstTestingGenerator::genAstMatrixAssignment},
     {51, AstTestingGenerator::genAstMatrixPermutation},
     {52, AstTestingGenerator::genAstGetMatrixSizeOfKnownMatrix},
@@ -86,7 +86,8 @@ static std::map<int, std::function<void(Ast &)> > call = {  /* NOLINT */
     {56, AstTestingGenerator::genAstMatrixAssignmUnknownThenKnown},
     {57, AstTestingGenerator::genAstMatrixAssignmentKnownThenUnknown},
     {58, AstTestingGenerator::genAstFullAssignmentToMatrix},
-    {59, AstTestingGenerator::genAstMatrixAssignmIncludingPushBack}
+    {59, AstTestingGenerator::genAstMatrixAssignmIncludingPushBack},
+    {60, AstTestingGenerator::genAstNestedLoopUnrollingLaplacianSharpeningFilterAllLoops}
 };
 
 void AstTestingGenerator::generateAst(int id, Ast &ast) {
@@ -1583,7 +1584,7 @@ void AstTestingGenerator::genAstSimpleForLoopUnrolling(Ast &ast) {
   ast.setRootNode(func);
 }
 
-void AstTestingGenerator::genAstNestedForLoopUnrolling(Ast &ast) {
+void AstTestingGenerator::genAstNestedLoopUnrollingLaplacianSharpeningFilterInnerLoops(Ast &ast) {
   // -- source code --
   // /// \param img A quadratic image given as vector consisting of concatenated rows.
   // /// \param imgSize The image's size, i.e., img has dimension (imgSize, imgSize).
@@ -1935,5 +1936,131 @@ void AstTestingGenerator::genAstFullAssignmentToMatrix(Ast &ast) {
           {{new MatrixElementRef(new Variable("M"), 0, 0), new LiteralInt(1), new LiteralInt(1)},
            {new MatrixElementRef(new Variable("M"), 1, 0), new LiteralInt(2), new LiteralInt(2)}}))));
   func->addStatement(new Return(new Variable("M")));
+  ast.setRootNode(func);
+}
+
+void AstTestingGenerator::genAstNestedLoopUnrollingLaplacianSharpeningFilterAllLoops(Ast &ast) {
+  // -- source code --
+  // /// \param img A quadratic image given as row vector (single row matrix) consisting of concatenated rows.
+  // /// \param imgSize The image's size. Assumes that img is quadratic, i.e., img has dimension (imgSize, imgSize).
+  // VecInt2D runLaplacianSharpeningAlgorithm(Vector<int> img, int imgSize) {
+  //     Vector<int> img2;
+  //     Matrix<int> weightMatrix = [1 1 1; 1 -8 1; 1 1 1];
+  //     for (int x = 1; x < imgSize - 1; ++x) {
+  //         for (int y = 1; y < imgSize - 1; ++y) {
+  //
+  //             int value = 0;
+  //             for (int j = -1; j < 2; ++j) {
+  //                 for (int i = -1; i < 2; ++i) {
+  //                     value = value + weightMatrix[i+1][j+1] * img[imgSize*(x+i)+y+j];
+  //                 }
+  //             }
+  //             img2[imgSize*x+y] = img[imgSize*x+y] - (value/2);
+  //
+  //         }
+  //     }
+  //     return img2;
+  // }
+  auto func = new Function("runLaplacianSharpeningAlgorithm");
+  func->addParameter(new FunctionParameter(new Datatype(Types::INT, true), new Variable("img")));
+  func->addParameter(new FunctionParameter(new Datatype(Types::INT, false), new Variable("imgSize")));
+
+  // std::vector<int> img2;
+  func->addStatement(new VarDecl("img2", new Datatype(Types::INT), nullptr));
+
+  // Matrix<int> weightMatrix = [1 1 1; 1 -8 1; 1 1 1];  –- row-wise concatenation of the original matrix
+  func->addStatement(new VarDecl("weightMatrix", new Datatype(Types::INT),
+                                 new LiteralInt(new Matrix<int>({{1, 1, 1},
+                                                                 {1, -8, 1},
+                                                                 {1, 1, 1}}))));
+
+  // value = value + weightMatrix[i+1][j+1] * img[imgSize*(x+i)+y+j]; -- innermost loop body
+  auto wmTerm = new MatrixElementRef(new Variable("weightMatrix"),
+                                     new ArithmeticExpr(new Variable("i"), ADDITION, new LiteralInt(1)),
+                                     new ArithmeticExpr(new Variable("j"), ADDITION, new LiteralInt(1)));
+  auto imgTerm = new MatrixElementRef(new Variable("img"),
+                                      new LiteralInt(0),  // as img is a single row vector
+                                      new ArithmeticExpr(
+                                          new ArithmeticExpr(new Variable("imgSize"),
+                                                             MULTIPLICATION,
+                                                             new ArithmeticExpr(
+                                                                 new Variable("x"), ADDITION, new Variable("i"))),
+                                          ADDITION,
+                                          new ArithmeticExpr(new Variable("y"), ADDITION, new Variable("j"))));
+
+  auto fourthLoopBody = new Block(new VarAssignm("value",
+                                                 new ArithmeticExpr(new Variable("value"),
+                                                                    ADDITION,
+                                                                    new ArithmeticExpr(wmTerm,
+                                                                                       MULTIPLICATION,
+                                                                                       imgTerm))));
+  // for (int i = -1; i < 2; ++i)  -- 4th level loop
+  auto thirdLoopBody = new Block(new For(new VarDecl("i", -1),
+                                         new LogicalExpr(new Variable("i"), SMALLER, new LiteralInt(2)),
+                                         new VarAssignm("i",
+                                                        new ArithmeticExpr(new Variable("i"),
+                                                                           ADDITION,
+                                                                           new LiteralInt(1))),
+                                         fourthLoopBody));
+
+  // includes the 3rd level loop
+  auto secondLoopBody = new Block({
+                                      // int value = 0;
+                                      new VarDecl("value", 0),
+                                      // for (int j = -1; j < 2; ++j) {...}  -- 3rd level loop
+                                      new For(new VarDecl("j", -1),
+                                              new LogicalExpr(new Variable("j"), SMALLER, new LiteralInt(2)),
+                                              new VarAssignm("j",
+                                                             new ArithmeticExpr(new Variable("j"),
+                                                                                ADDITION,
+                                                                                new LiteralInt(1))),
+                                              thirdLoopBody),
+                                      // img2[imgSize*x+y] = img[imgSize*x+y] - (value/2);
+                                      new MatrixAssignm(new MatrixElementRef(new Variable("img2"),
+                                                                             new LiteralInt(0),
+                                                                             new ArithmeticExpr(
+                                                                                 new ArithmeticExpr(
+                                                                                     new Variable("imgSize"),
+                                                                                     MULTIPLICATION,
+                                                                                     new Variable("x")),
+                                                                                 ADDITION,
+                                                                                 new Variable("y"))),
+                                                        new ArithmeticExpr(
+                                                            new MatrixElementRef(new Variable("img"),
+                                                                                 new LiteralInt(0),
+                                                                                 new ArithmeticExpr(
+                                                                                     new ArithmeticExpr(
+                                                                                         new Variable("imgSize"),
+                                                                                         MULTIPLICATION,
+                                                                                         new Variable("x")),
+                                                                                     ADDITION,
+                                                                                     new Variable("y"))),
+                                                            SUBTRACTION,
+                                                            new ArithmeticExpr(new Variable("value"),
+                                                                               DIVISION,
+                                                                               new LiteralInt(2))))});
+
+  // for (int y = 1; y < imgSize - 1; ++y)  -- 2nd level loop
+  auto firstLoopBody = new Block(new For(new VarDecl("y", 1),
+                                         new LogicalExpr(new Variable("y"),
+                                                         SMALLER,
+                                                         new ArithmeticExpr(new Variable("imgSize"), SUBTRACTION, 1)),
+                                         new VarAssignm("y",
+                                                        new ArithmeticExpr(new Variable("y"),
+                                                                           ADDITION,
+                                                                           new LiteralInt(1))),
+                                         secondLoopBody));
+
+  // for (int x = 1; x < imgSize - 1; ++x)  -- 1st level loop
+  func->addStatement(new For(new VarDecl("x", 1),
+                             new LogicalExpr(new Variable("x"),
+                                             SMALLER,
+                                             new ArithmeticExpr(new Variable("imgSize"), SUBTRACTION, 1)),
+                             new VarAssignm("x", new ArithmeticExpr(new Variable("x"), ADDITION, new LiteralInt(1))),
+                             firstLoopBody));
+
+  // return img2;
+  func->addStatement(new Return(new Variable("img2")));
+
   ast.setRootNode(func);
 }

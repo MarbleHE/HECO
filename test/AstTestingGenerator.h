@@ -116,7 +116,7 @@ class AstTestingGenerator {
 
   static void genAstSimpleForLoopUnrolling(Ast &ast);
 
-  static void genAstNestedForLoopUnrolling(Ast &ast);
+  static void genAstNestedLoopUnrollingLaplacianSharpeningFilterInnerLoops(Ast &ast);
 
   static void genAstMatrixAssignment(Ast &ast);
 
@@ -138,6 +138,7 @@ class AstTestingGenerator {
 
   static void genAstMatrixAssignmIncludingPushBack(Ast &ast);
 
+  static void genAstNestedLoopUnrollingLaplacianSharpeningFilterAllLoops(Ast &ast);
   /** @} */ // End of astGenerators group
 };
 
