@@ -113,32 +113,25 @@ class Operator : public AbstractNode {
 
   [[nodiscard]] bool isUnaryOp() const;
 
-  template<typename R, typename T>
-  R acc(std::function<R(T, T)> func, std::vector<T> operands) {
-    auto it = operands.begin();
-    // result = operands[0] ⊕ operands[1]  ;
-    if (operands.size() > 2) {
-    R result = func(*it, *(it + 1));
-    it = it + 1;
+  template<class BinaryOperation, class T>
+  T accumulate(BinaryOperation op, std::vector<T> operands) {
+    if (operands.empty()) throw std::out_of_range("acc requires at least one operand!");
 
-      // result = ((((result ⊕ operands[2]) ⊕ operands[3]) ⊕ ...) ⊕ operands[N])
-      for (++it; it!=operands.end(); ++it) result = func(result, *it);
-      return result;
-    } else {
-      //TODO: This template cannot handle vectors with length 0 or 1
-      throw std::invalid_argument("acc must be called on vector with length >= 2");
+    auto it = operands.begin();
+    T result = *it;
+    for (++it; it!=operands.end(); ++it) {
+      result = op(result, *it);
     }
+    return result;
   }
 
-  template<typename T>
-  bool appPairwise(std::function<bool(T, T)> func, std::vector<T> operands) {
-    auto it = operands.begin();
-    // result = operands[0] ⊕ operands[1]
-    bool result = func(*it, *(it + 1));
-    it = it + 1;
-    if (operands.size() > 2) {
-      // result = ((result && (operands[1] ⊕ operands[2])) && (operands[2] ⊕ operands[3])) ...
-      for (; it!=operands.end() - 1; ++it) result = result && func(*it, *(it + 1));
+  template<class BinaryOperation, class T>
+  bool applyPairwise(BinaryOperation op, std::vector<T> operands) {
+    if (operands.size() < 2) throw std::out_of_range("appPairwise requires at least two operands!");
+
+    bool result = true;
+    for (auto it = operands.begin(); it!=operands.end() - 1; ++it) {
+      result = result && op(*it, *(it + 1));
     }
     return result;
   }
