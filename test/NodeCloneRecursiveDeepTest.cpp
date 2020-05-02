@@ -233,14 +233,10 @@ TEST_F(NodeCloneTestFixture, cloneRecursiveDeep_FunctionParameter) { /* NOLINT *
   ASSERT_EQ(functionParam->getValue(), varExpr);
   auto clonedFunctionParam = dynamic_cast<FunctionParameter *>(functionParam->clone(keepOriginalId));
 
-  // Test if changing original also modifies the copy. As there are no methods to change a FunctionParameter object, we
-  // need to use the pointer to change the value pointed to.
-  delete functionParam->getDatatype();
-  *functionParam->getDatatype() = *new Datatype(Types::FLOAT);
+  // Test if changing original also modifies the copy.
+  functionParam->setAttributes(new Datatype(Types::FLOAT),new Variable("beta"));
   ASSERT_EQ(functionParam->getDatatype()->getType(), Types::FLOAT);
   ASSERT_EQ(clonedFunctionParam->getDatatype()->getType(), Types::INT);
-  delete functionParam->getValue();
-  *varExpr = *new Variable("beta");
   ASSERT_EQ(functionParam->getValue()->castTo<Variable>()->getIdentifier(), "beta");
   ASSERT_EQ(clonedFunctionParam->getValue()->castTo<Variable>()->getIdentifier(), "alpha");
 
