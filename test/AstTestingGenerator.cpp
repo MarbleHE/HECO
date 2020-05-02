@@ -714,7 +714,7 @@ void AstTestingGenerator::genAstMultDepthTwo(Ast &ast) {
   func->setParameterList(funcParams);
 
   // int stdA = 512;
-  func->addStatement(new VarDecl("stdA", 512));
+  func->addStatement(new VarDecl("stdA", new Datatype(Types::INT), new LiteralInt(512)));
 
   // int stdB = 2 * stdA;
   func->addStatement(
@@ -1198,7 +1198,9 @@ void AstTestingGenerator::genAstTranspose(Ast &ast) {
   // return [11 2 3; 4 2 3; 2 1 3].transpose();
   func->addStatement(new Return(
       new Transpose(
-          new LiteralInt(new Matrix<int>({{11, 2, 3}, {4, 2, 3}, {2, 1, 3}})))));
+          new LiteralInt(new Matrix<int>({{11, 2, 3},
+                                          {4, 2, 3},
+                                          {2, 1, 3}})))));
 
   ast.setRootNode(func);
 }
@@ -1371,7 +1373,9 @@ void AstTestingGenerator::genSimpleMatrix(Ast &ast) {
   // }
   auto func = new Function("computeCrossProduct");
   func->addStatement(new VarDecl("M", new Datatype(Types::INT), new LiteralInt(
-      new Matrix<int>({{14, 27, 32}, {34, 3, 23}, {1, 1, 3}}))));
+      new Matrix<int>({{14, 27, 32},
+                       {34, 3, 23},
+                       {1, 1, 3}}))));
   func->addStatement(new Return(new Variable("M")));
   ast.setRootNode(func);
 }
@@ -1403,7 +1407,8 @@ void AstTestingGenerator::genAstOperatorExpr_fullyEvaluable(Ast &ast) {
   auto func = new Function("addNums");
   // return 34 + 31 + 11 + 1;
   auto operatorExp = new OperatorExpr(new Operator(ADDITION),
-                                      {new LiteralInt(34), new LiteralInt(31), new LiteralInt(11), new LiteralInt(1)});
+                                      {new LiteralInt(34), new LiteralInt(31), new LiteralInt(11),
+                                       new LiteralInt(1)});
   func->addStatement(new Return(operatorExp));
   ast.setRootNode(func);
 }
@@ -1541,7 +1546,8 @@ void AstTestingGenerator::genAstNestedOperatorExpr(Ast &ast) {
   auto nestedB = new OperatorExpr(new Operator(LOGICAL_AND), {new LiteralBool(true), new LiteralBool(false)});
   // false OR false OR true = true
   auto nestedC =
-      new OperatorExpr(new Operator(LOGICAL_OR), {new LiteralBool(false), new LiteralBool(false), new Variable("x")});
+      new OperatorExpr(new Operator(LOGICAL_OR),
+                       {new LiteralBool(false), new LiteralBool(false), new Variable("x")});
   // false AND true AND false AND true AND true = false
   auto operatorExp = new OperatorExpr(new Operator(LOGICAL_AND),
                                       {new LiteralBool(false), nestedC, nestedB, new LiteralBool(true), nestedA});
@@ -1564,7 +1570,12 @@ void AstTestingGenerator::genAstSimpleForLoopUnrolling(Ast &ast) {
 
   func->addStatement(new VarDecl("M",
                                  Types::INT,
-                                 new LiteralInt(new Matrix<int>({{54}, {32}, {63}, {38}, {13}, {20}}))));
+                                 new LiteralInt(new Matrix<int>({{54},
+                                                                 {32},
+                                                                 {63},
+                                                                 {38},
+                                                                 {13},
+                                                                 {20}}))));
 
   func->addStatement(new VarDecl("sum", 0));
 
@@ -1575,7 +1586,8 @@ void AstTestingGenerator::genAstSimpleForLoopUnrolling(Ast &ast) {
                                     new ArithmeticExpr(
                                         new Variable("sum"),
                                         ADDITION,
-                                        new MatrixElementRef(new Variable("M"), new Variable("i"), new LiteralInt(0))));
+                                        new MatrixElementRef(new Variable("M"), new Variable("i"),
+                                                             new LiteralInt(0))));
   auto forLoop = new For(forLoopInitializer, forLoopCondition, forLoopUpdater, forLoopBody);
   func->addStatement(forLoop);
 
@@ -1631,7 +1643,8 @@ void AstTestingGenerator::genAstNestedLoopUnrollingLaplacianSharpeningFilterInne
                                           new ArithmeticExpr(new Variable("imgSize"),
                                                              MULTIPLICATION,
                                                              new ArithmeticExpr(
-                                                                 new Variable("x"), ADDITION, new Variable("i"))),
+                                                                 new Variable("x"), ADDITION,
+                                                                 new Variable("i"))),
                                           ADDITION,
                                           new ArithmeticExpr(new Variable("y"), ADDITION, new Variable("j"))));
   auto innerBody = new Block(new VarAssignm("value",
@@ -1765,16 +1778,20 @@ void AstTestingGenerator::genAstGetMatrixSizeOfAbstractMatrix(Ast &ast) {
   };
   function->addStatement(new VarDecl("v", new Datatype(Types::INT),
                                      new LiteralInt(new Matrix<AbstractExpr *>({{timesFactor(new LiteralInt(3)),
-                                                                                 timesFactor(new LiteralInt(1)),
-                                                                                 timesFactor(new Variable("val")),
-                                                                                 timesFactor(new LiteralInt(5)),
+                                                                                 timesFactor(
+                                                                                     new LiteralInt(1)),
+                                                                                 timesFactor(
+                                                                                     new Variable("val")),
+                                                                                 timesFactor(
+                                                                                     new LiteralInt(5)),
                                                                                  new LiteralInt(19)}}))));
 
   // return [m.dimSize(0), m.dimSize(1), m.dimSize(2)] // expected: [1 5 0] as it is a 1x5 matrix/vector
   function->addStatement(new Return(
       new LiteralInt(new Matrix<AbstractExpr *>({{new GetMatrixSize(new Variable("v"), new LiteralInt(0)),
                                                   new GetMatrixSize(new Variable("v"), new LiteralInt(1)),
-                                                  new GetMatrixSize(new Variable("v"), new LiteralInt(2))}}))));
+                                                  new GetMatrixSize(new Variable("v"),
+                                                                    new LiteralInt(2))}}))));
 
   ast.setRootNode(function);
 }
@@ -1831,7 +1848,8 @@ void AstTestingGenerator::genAstMatrixAssignmAndGetMatrixSize(Ast &ast) {
                                      innerLoop,
                                      new MatrixAssignm(
                                          new MatrixElementRef(new Variable("m"),
-                                                              new GetMatrixSize(new Variable("m"), new LiteralInt(0))),
+                                                              new GetMatrixSize(new Variable("m"),
+                                                                                new LiteralInt(0))),
                                          new Variable("t"))
                                  });
 
@@ -1929,7 +1947,8 @@ void AstTestingGenerator::genAstFullAssignmentToMatrix(Ast &ast) {
   //   return M;
   auto func = new Function("computeMatrix");
   func->addStatement(new VarDecl("M", new Datatype(Types::INT),
-                                 new LiteralInt(new Matrix<int>({{31, 84, 21}, {3, 3, 0}}))));
+                                 new LiteralInt(new Matrix<int>({{31, 84, 21},
+                                                                 {3, 3, 0}}))));
   func->addStatement(new MatrixAssignm(new MatrixElementRef(new Variable("M"), 0, 0), new LiteralInt(11)));
   func->addStatement(new VarAssignm("M", new LiteralInt(
       new Matrix<AbstractExpr *>(
@@ -1984,7 +2003,8 @@ void AstTestingGenerator::genAstNestedLoopUnrollingLaplacianSharpeningFilterAllL
                                           new ArithmeticExpr(new Variable("imgSize"),
                                                              MULTIPLICATION,
                                                              new ArithmeticExpr(
-                                                                 new Variable("x"), ADDITION, new Variable("i"))),
+                                                                 new Variable("x"), ADDITION,
+                                                                 new Variable("i"))),
                                           ADDITION,
                                           new ArithmeticExpr(new Variable("y"), ADDITION, new Variable("j"))));
 
@@ -2020,7 +2040,8 @@ void AstTestingGenerator::genAstNestedLoopUnrollingLaplacianSharpeningFilterAllL
                                                                              new LiteralInt(0),
                                                                              new ArithmeticExpr(
                                                                                  new ArithmeticExpr(
-                                                                                     new Variable("imgSize"),
+                                                                                     new Variable(
+                                                                                         "imgSize"),
                                                                                      MULTIPLICATION,
                                                                                      new Variable("x")),
                                                                                  ADDITION,
@@ -2030,9 +2051,11 @@ void AstTestingGenerator::genAstNestedLoopUnrollingLaplacianSharpeningFilterAllL
                                                                                  new LiteralInt(0),
                                                                                  new ArithmeticExpr(
                                                                                      new ArithmeticExpr(
-                                                                                         new Variable("imgSize"),
+                                                                                         new Variable(
+                                                                                             "imgSize"),
                                                                                          MULTIPLICATION,
-                                                                                         new Variable("x")),
+                                                                                         new Variable(
+                                                                                             "x")),
                                                                                      ADDITION,
                                                                                      new Variable("y"))),
                                                             SUBTRACTION,

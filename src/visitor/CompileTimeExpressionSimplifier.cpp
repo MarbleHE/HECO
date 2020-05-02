@@ -237,17 +237,15 @@ void CompileTimeExpressionSimplifier::visit(Ast &elem) {
   // add all emitted VarDecls to nodesQueuedForDeletion that are not required anymore, i.e, there are no emitted
   // VarAssignms that depend on them
   for (auto &[identifierScope, varData] : emittedVariableDeclarations) {
-    if (varData->hasNoReferringAssignments())nodesQueuedForDeletion.push_back(varData->getVarDeclStatement());
+    if (varData->hasNoReferringAssignments()) {
+      nodesQueuedForDeletion.push_back(varData->getVarDeclStatement());
+    }
   }
 
   // Delete all noted queued for deletion after finishing the simplification traversal.
-  std::set<std::string> nodesAlreadyDeleted;
-  while (!nodesQueuedForDeletion.empty()) {
-    auto nodeToBeDeleted = nodesQueuedForDeletion.front();
-    nodesQueuedForDeletion.pop_front();
-    if (nodesAlreadyDeleted.count(nodeToBeDeleted->getUniqueNodeId()) > 0) continue;
-    nodesAlreadyDeleted.insert(nodeToBeDeleted->getUniqueNodeId());
-    elem.deleteNode(&nodeToBeDeleted, true);
+  std::set<AbstractNode *> nodesToDelete(nodesQueuedForDeletion.begin(), nodesQueuedForDeletion.end());
+  for (auto node : nodesToDelete) {
+    elem.deleteNode(&node, true);
   }
 
   // clean up removableNodes result from children that indicates whether a child node can safely be deleted

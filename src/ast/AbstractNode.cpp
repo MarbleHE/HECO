@@ -44,6 +44,7 @@ const std::vector<AbstractNode *> &AbstractNode::getChildren() const {
 
 std::vector<AbstractNode *> AbstractNode::getChildrenNonNull() const {
   std::vector<AbstractNode *> childrenFiltered;
+  if (children.empty()) return childrenFiltered;
   std::copy_if(children.begin(), children.end(), std::back_inserter(childrenFiltered),
                [](AbstractNode *n) { return n!=nullptr; });
   return childrenFiltered;

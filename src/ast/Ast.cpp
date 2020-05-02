@@ -113,12 +113,14 @@ Ast::evaluateAst(const std::unordered_map<std::string, AbstractLiteral *> &param
     if (auto var = dynamic_cast<Variable *>(fp->getValue())) {
       // throw an error if variable value for var is not defined
       if (!hasVarValue(var)) {
-        throw std::invalid_argument("AST evaluation requires parameter value for parameter " + var->getIdentifier());
+        throw std::invalid_argument(
+            "AST evaluation requires parameter value for parameter " + var->getIdentifier());
       }
       // throw an error if type of given parameter value and type of expected value do not match
       if (!getVarValue(var->getIdentifier())->supportsDatatype(*fp->getDatatype())) {
         std::stringstream ss;
-        ss << "AST evaluation cannot proceed because datatype of given parameter and expected datatype differs:\n";
+        ss
+            << "AST evaluation cannot proceed because datatype of given parameter and expected datatype differs:\n";
         ss << "Variable " << var->getIdentifier() << " ";
         ss << "(value: " << *getVarValue(var->getIdentifier()) << ")";
         ss << " is not of type ";
@@ -198,7 +200,7 @@ void Ast::deleteNode(AbstractNode **node, bool deleteSubtreeRecursively) {
   if (deleteSubtreeRecursively) {
     // if deleteSubtreeRecursively is set, we need to delete all children first
     for (auto &c : nodePtr->getChildrenNonNull()) {
-      deleteNode(&c, true);
+      deleteNode(&c, deleteSubtreeRecursively);
     }
   } else if (!nodePtr->getChildrenNonNull().empty()) {
     // if deleteSubtreesRecursively is not set but there are children, we cannot continue.
