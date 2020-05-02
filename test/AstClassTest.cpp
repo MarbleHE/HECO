@@ -56,8 +56,7 @@ TEST_F(AstTestFixture, deleteNode_deleteRecursiveSubtreeNonEmpty) { /* NOLINT */
   // verify that ArithmeticExpr was deleted, also from its parent
   ASSERT_EQ(arithmeticExprPtr, nullptr);
   ASSERT_EQ(arithmeticExprParent->getChildAtIndex(2), nullptr);
-  // verify that children are deleted
-  ASSERT_EQ(arithmeticExpr->countChildrenNonNull(), 0);
+  //TODO: verify that children are deleted
 }
 
 TEST_F(AstTestFixture, deleteNode_deleteRecursiveSubtreeEmpty) { /* NOLINT */
