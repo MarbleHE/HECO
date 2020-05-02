@@ -243,10 +243,13 @@ void CompileTimeExpressionSimplifier::visit(Ast &elem) {
   }
 
   // Delete all noted queued for deletion after finishing the simplification traversal.
+  // use a set to remove any duplicate nodes (should actually not be present)
   std::set<AbstractNode *> nodesToDelete(nodesQueuedForDeletion.begin(), nodesQueuedForDeletion.end());
-  for (auto node : nodesToDelete) {
-    elem.deleteNode(&node, true);
-  }
+  // isolate all nodes from their parent and children: this must be done for all nodes before starting to delete
+  // because otherwise it might happen that we try to access nodes that have already been deleted
+  for (auto &n : nodesToDelete) { n->isolateNode(); }
+  // now delete the nodes sequentially
+  for (auto node : nodesToDelete) { elem.deleteNode(&node, true); }
 
   // clean up removableNodes result from children that indicates whether a child node can safely be deleted
   removableNodes.erase(elem.getRootNode());
@@ -1574,7 +1577,9 @@ VariableValuesMapType CompileTimeExpressionSimplifier::getClonedVariableValuesMa
 }
 
 void CompileTimeExpressionSimplifier::enqueueNodeForDeletion(AbstractNode *node) {
-//  node->removeFromParents();
+  for (auto &n : node->getDescendants()) {
+    nodesQueuedForDeletion.push_back(n);
+  }
   nodesQueuedForDeletion.push_back(node);
   // if this node is a previously emitted variable assignment, we need to remove the dependency to its assoc. VarDecl
   if (emittedVariableAssignms.count(node) > 0) {

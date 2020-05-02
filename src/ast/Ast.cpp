@@ -213,7 +213,7 @@ void Ast::deleteNode(AbstractNode **node, bool deleteSubtreeRecursively) {
   if (nodePtr==this->getRootNode()) this->setRootNode(nullptr);
 
   // first isolate the node from its parents, then deallocate the heap memory
-  nodePtr->isolateNode();
+  nodePtr->removeFromParents();
   delete nodePtr;
 
   // "clear" the passed pointer to avoid the further use of this deleted node
