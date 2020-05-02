@@ -148,8 +148,8 @@ class Matrix : public AbstractMatrix {
   /// Creates a new matrix with the elements provided in inputMatrix.
   /// \param inputMatrix The elements of the matrix to create.
   Matrix(std::vector<std::vector<T>> inputMatrix)  /* NOLINT intentionally not explicit */
-      : values(std::move(inputMatrix)), dim(Dimension(values.size(), values.at(0).size())) {
-    int elementsPerRow = values.at(0).size();
+      : values(std::move(inputMatrix)), dim(values.size(), values.empty() ? 0 : values.at(0).size()) {
+    int elementsPerRow = values.empty() ? 0 : values.at(0).size();
     for (auto const &rowVector : values) {
       if (rowVector.size()!=elementsPerRow) {
         throw std::invalid_argument("Vector rows must all have the same number of elements!");
@@ -224,7 +224,7 @@ class Matrix : public AbstractMatrix {
   /// \param newValues The values to be used to overwrite the matrix's existing values.
   void setValues(const std::vector<std::vector<T>> &newValues) {
     values = newValues;
-    int elementsPerRow = values.at(0).size();
+    int elementsPerRow = values.empty()?0:values.at(0).size();
     for (auto const &rowVector : values) {
       if (rowVector.size()!=elementsPerRow) {
         throw std::invalid_argument("Vector rows must all have the same number of elements!");
@@ -435,7 +435,7 @@ class Matrix : public AbstractMatrix {
       values.at(idx) = castedMx->getNthRowVector(0);
     }
     // update the dimensions of this matrix
-    getDimensions().update(values.size(), values.at(0).size());
+    getDimensions().update(values.size(), values.empty()?0:values.at(0).size());
 
     // transpose this matrix back as we transposed the given matrix mx previously to avoid reimplmenting the append
     // logic for column vectors
