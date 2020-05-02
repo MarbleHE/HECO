@@ -57,7 +57,7 @@ TEST_F(AstTestFixture, deleteNode_deleteRecursiveSubtreeNonEmpty) { /* NOLINT */
   ASSERT_EQ(arithmeticExprPtr, nullptr);
   ASSERT_EQ(arithmeticExprParent->getChildAtIndex(2), nullptr);
   // verify that children are deleted
-  ASSERT_TRUE(arithmeticExprChildren.empty());
+  ASSERT_EQ(arithmeticExpr->countChildrenNonNull(), 0);
 }
 
 TEST_F(AstTestFixture, deleteNode_deleteRecursiveSubtreeEmpty) { /* NOLINT */
