@@ -12,6 +12,7 @@ find_package(nlohmann_json QUIET)
 if(NOT nlohmann_json_FOUND)
     message("Downloading nlohmann_json")
     include(FetchContent)
+    set(JSON_BuildTests OFF CACHE INTERNAL "")
     FetchContent_Declare(
             nlohmann_json
             GIT_REPOSITORY    https://github.com/nlohmann/json.git
