@@ -29,10 +29,6 @@ class CompileTimeExpressionSimplifierFixture : public ::testing::Test {
   Ast ast;
   CompileTimeExpressionSimplifier ctes;
 
- protected:
-  virtual void SetUp() {
-  }
-
   CompileTimeExpressionSimplifierFixture() = default;
 
   AbstractExpr *getVariableValueByUniqueName(const std::string &varIdentifier) {
