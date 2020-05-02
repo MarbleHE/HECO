@@ -9,7 +9,7 @@
 [![Language](https://img.shields.io/badge/language-C++-blue.svg)](https://isocpp.org/)
 [![CPP_Standard](https://img.shields.io/badge/c%2B%2B-98/11/14/17-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B#Standardization)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](#)
-[![CI/CD](https://github.com/MarbleHE/AST-Optimizer/workflows/build_run_tests/badge.svg?branch=operator-extensions)](https://github.com/MarbleHE/AST-Optimizer/actions)
+[![CI/CD](https://github.com/MarbleHE/AST-Optimizer/workflows/build_run_tests/badge.svg)](https://github.com/MarbleHE/AST-Optimizer/actions)
 [![Documentation](https://img.shields.io/badge/docs-doxygen-blue.svg)](http://marblehe.github.io/AST-Optimizer)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/MarbleHE/AST-Optimizer/issues)
