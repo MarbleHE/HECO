@@ -7,6 +7,7 @@
 #include <iostream>
 #include <algorithm>
 #include <vector>
+#include <exception>
 #include "ast_opt/visitor/Visitor.h"
 #include "ast_opt/ast/AbstractNode.h"
 #include "ast_opt/ast/LiteralString.h"
@@ -115,14 +116,18 @@ class Operator : public AbstractNode {
   template<typename R, typename T>
   R acc(std::function<R(T, T)> func, std::vector<T> operands) {
     auto it = operands.begin();
-    // result = operands[0] ⊕ operands[1]
+    // result = operands[0] ⊕ operands[1]  ;
+    if (operands.size() > 2) {
     R result = func(*it, *(it + 1));
     it = it + 1;
-    if (operands.size() > 2) {
+
       // result = ((((result ⊕ operands[2]) ⊕ operands[3]) ⊕ ...) ⊕ operands[N])
       for (++it; it!=operands.end(); ++it) result = func(result, *it);
+      return result;
+    } else {
+      //TODO: This template cannot handle vectors with length 0 or 1
+      throw std::invalid_argument("acc must be called on vector with length >= 2");
     }
-    return result;
   }
 
   template<typename T>
