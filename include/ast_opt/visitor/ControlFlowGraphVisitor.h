@@ -12,7 +12,7 @@
 #include "Visitor.h"
 
 // forward declarations
-struct GraphNode;
+class GraphNode;
 
 /// An enum class to describe how a variable was accessed. Supported values are READ and WRITE.
 enum class AccessType { READ = 0, WRITE = 1 };
