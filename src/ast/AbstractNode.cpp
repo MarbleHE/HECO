@@ -345,6 +345,8 @@ AbstractNode *AbstractNode::getOnlyParent() {
   auto parentsVector = getParentsNonNull();
   if (parentsVector.size() > 1) {
     throw std::logic_error("AbstractNode::getOnlyParent() failed because node has more than one parent!");
+  } else if (parentsVector.empty()) {
+    throw std::logic_error("AbstractNode::getOnlyParent() failed because node does not have a parent");
   }
   return this->getParentsNonNull().front();
 }
