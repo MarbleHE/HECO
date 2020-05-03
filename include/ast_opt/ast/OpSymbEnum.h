@@ -7,19 +7,19 @@
 #include "LiteralInt.h"
 #include "LiteralBool.h"
 
-enum ArithmeticOp : char {
+enum ArithmeticOp : unsigned char {
   // arithmetic operator
   ADDITION = 0, SUBTRACTION, MULTIPLICATION, DIVISION, MODULO,
 };
 
-enum LogCompOp : char {
+enum LogCompOp : unsigned char {
   // logical operator
   LOGICAL_AND = 0, LOGICAL_OR, LOGICAL_XOR,
   // relational operator
   SMALLER, SMALLER_EQUAL, GREATER, GREATER_EQUAL, EQUAL, UNEQUAL
 };
 
-enum UnaryOp : char {
+enum UnaryOp : unsigned char {
   // logical operator
   NEGATION = 0
 };
