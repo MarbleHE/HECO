@@ -45,15 +45,7 @@ class Matrix : public AbstractMatrix {
 
   /// Creates a new matrix with the elements provided in inputMatrix.
   /// \param inputMatrix The elements of the matrix to create.
-  Matrix(std::vector<std::vector<T>> inputMatrix)  /* NOLINT intentionally not explicit */
-      : values(std::move(inputMatrix)), dim(values.size(), values.empty() ? 0 : values.at(0).size()) {
-    int elementsPerRow = values.empty() ? 0 : values.at(0).size();
-    for (auto const &rowVector : values) {
-      if (rowVector.size()!=elementsPerRow) {
-        throw std::invalid_argument("Vector rows must all have the same number of elements!");
-      }
-    }
-  }
+  Matrix(std::vector<std::vector<T>> inputMatrix)  /* NOLINT intentionally not explicit */;
 
   /// Creates a new (1,1)-matrix consisting of a single value.
   /// \param scalarValue The value to be used to create this new one-element "scalar" matrix.
@@ -159,10 +151,7 @@ class Matrix : public AbstractMatrix {
   /// \param rhsOperand The operand on the right hand-side. The current matrix is the left hand-side operand.
   /// \param op THe operator to be aplied on the two given matrices.
   /// \return AbstractMatrix resulting from applying the operator op on the two matrices.
-  AbstractMatrix *applyBinaryOperatorComponentwise(Matrix<T> *rhsOperand, Operator *op) {
-    throw std::runtime_error(
-        "applyOperatorComponentwise is unimplemented for type T: " + std::string(typeid(T).name()));
-  }
+  AbstractMatrix *applyBinaryOperatorComponentwise(Matrix<T> *rhsOperand, Operator *op);
 
   AbstractMatrix *applyBinaryOperator(AbstractMatrix *rhsOperand, Operator *op) override {
     return applyBinaryOperatorComponentwise(dynamic_cast<Matrix<T> *>(rhsOperand), op);
@@ -282,9 +271,7 @@ class Matrix : public AbstractMatrix {
     return true;
   }
 
-  bool operator==(const Matrix &rhs) const {
-    return values==rhs.values && dim==rhs.dim;
-  }
+  bool operator==(const Matrix &rhs) const;
 
   bool operator!=(const Matrix &rhs) const {
     return !(rhs==*this);
@@ -481,6 +468,32 @@ static Matrix<T> *applyMatrixMultiplication(Matrix<T> *matrixA, Matrix<T> *matri
     }
   }
   return new Matrix<T>(result);
+}
+
+// Because of a bug in the Microsoft Visual C++ Compiler (MSVC),
+// code for template specialisations is not properly emitted if the functions are defined inside the class body
+// and the specialized version isn't ODR-used in the same translation unit
+// Therefore, these following functions are all defined outside the class:
+
+template<class T>
+Matrix<T>::Matrix(std::vector<std::vector<T>> inputMatrix)  /* NOLINT intentionally not explicit */
+    : values(std::move(inputMatrix)), dim(values.size(), values.empty() ? 0 : values.at(0).size()) {
+  int elementsPerRow = values.empty() ? 0 : values.at(0).size();
+  for (auto const &rowVector : values) {
+    if (rowVector.size()!=elementsPerRow) {
+      throw std::invalid_argument("Vector rows must all have the same number of elements!");
+    }
+  }
+}
+
+template<class T>
+AbstractMatrix *Matrix<T>::applyBinaryOperatorComponentwise(Matrix<T> *rhsOperand, Operator *op) {
+  throw std::runtime_error(
+      "applyOperatorComponentwise is unimplemented for type T: " + std::string(typeid(T).name()));
+}
+template<class T>
+bool Matrix<T>::operator==(const Matrix &rhs) const {
+  return values==rhs.values && dim==rhs.dim;
 }
 
 // declarations of specific specialisations

@@ -142,7 +142,7 @@ AbstractMatrix *Matrix<bool>::applyBinaryOperatorComponentwise(Matrix<bool> *rhs
 
 template<>
 AbstractMatrix *Matrix<std::string>::applyBinaryOperatorComponentwise(Matrix<std::string> *rhsOperand, Operator *os) {
-  std::function<std::string(std::string, std::string)> operatorFunction;
+  std::function < std::string(std::string, std::string) > operatorFunction;
   if (os->equals(ArithmeticOp::ADDITION)) {
     operatorFunction = [](const std::string &a, const std::string &b) -> std::string { return a + b; };
   } else {
