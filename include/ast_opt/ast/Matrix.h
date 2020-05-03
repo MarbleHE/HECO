@@ -122,7 +122,7 @@ class Matrix : public AbstractMatrix {
   /// \param newValues The values to be used to overwrite the matrix's existing values.
   void setValues(const std::vector<std::vector<T>> &newValues) {
     values = newValues;
-    int elementsPerRow = values.empty()?0:values.at(0).size();
+    int elementsPerRow = values.empty() ? 0 : values.at(0).size();
     for (auto const &rowVector : values) {
       if (rowVector.size()!=elementsPerRow) {
         throw std::invalid_argument("Vector rows must all have the same number of elements!");
@@ -136,8 +136,8 @@ class Matrix : public AbstractMatrix {
   /// \param valueToBeComparedWith The value that all elements of this matrix are compared with.
   /// \return True if all values equal the given value (valueToBeComparedWith), otherwise False.
   bool allValuesEqual(T valueToBeComparedWith) {
-    for (int i = 0; i < values.size(); ++i) {
-      for (int j = 0; j < values[i].size(); ++j) {
+    for (size_t i = 0; i < values.size(); ++i) {
+      for (size_t j = 0; j < values[i].size(); ++j) {
         if (values[i][j]!=valueToBeComparedWith) return false;
       }
     }
@@ -159,7 +159,10 @@ class Matrix : public AbstractMatrix {
   /// \param rhsOperand The operand on the right hand-side. The current matrix is the left hand-side operand.
   /// \param op THe operator to be aplied on the two given matrices.
   /// \return AbstractMatrix resulting from applying the operator op on the two matrices.
-  AbstractMatrix *applyBinaryOperatorComponentwise(Matrix<T> *rhsOperand, Operator *op);
+  AbstractMatrix *applyBinaryOperatorComponentwise(Matrix<T> *rhsOperand, Operator *op) {
+    throw std::runtime_error(
+        "applyOperatorComponentwise is unimplemented for type T: " + std::string(typeid(T).name()));
+  }
 
   AbstractMatrix *applyBinaryOperator(AbstractMatrix *rhsOperand, Operator *op) override {
     return applyBinaryOperatorComponentwise(dynamic_cast<Matrix<T> *>(rhsOperand), op);
@@ -170,6 +173,7 @@ class Matrix : public AbstractMatrix {
     // - it is a single element, i.e., it has dimension (1,1)
     // - it is a literal (e.g., float, int, bool) or a std::string
     // - it is NOT a pointer
+    //throw std::runtime_error("TODO: IMPLEMENT WITH TEMPLATE SPECIALIZATION");
     return dim.equals(1, 1) && (std::is_literal_type_v<T> || std::is_same_v<T, std::string>) && !std::is_pointer_v<T>;
   }
 
@@ -177,7 +181,9 @@ class Matrix : public AbstractMatrix {
     return dim.equals(0, 0);
   }
 
-  AbstractMatrix *applyUnaryOperatorComponentwise(Operator *os) override;
+  AbstractMatrix *applyUnaryOperatorComponentwise(Operator *os) override {
+    throw std::runtime_error("applyUnaryOpComponentwise is unimplemented for type T: " + std::string(typeid(T).name()));
+  }
 
   std::string toString() override {
     std::stringstream outputStr;
@@ -193,8 +199,8 @@ class Matrix : public AbstractMatrix {
     const std::string elementDelimiter = " ";
     const std::string rowDelimiter = "; ";
     outputStr << "[";
-    for (int i = 0; i < values.size(); ++i) {
-      for (int j = 0; j < values[i].size(); ++j) {
+    for (size_t i = 0; i < values.size(); ++i) {
+      for (size_t j = 0; j < values[i].size(); ++j) {
         addElementToStringStream(values[i][j], outputStr);
         if (j!=values[i].size() - 1) outputStr << elementDelimiter;
       }
@@ -208,8 +214,8 @@ class Matrix : public AbstractMatrix {
     if (getDimensions().equals(0, 0)) return inPlace ? this : new Matrix<T>();
     Matrix<T> *matrixToTranspose = inPlace ? this : new Matrix<T>(*this);
     std::vector<std::vector<T>> transposedVec(matrixToTranspose->values[0].size(), std::vector<T>());
-    for (int i = 0; i < matrixToTranspose->values.size(); ++i) {
-      for (int j = 0; j < matrixToTranspose->values[i].size(); ++j) {
+    for (size_t i = 0; i < matrixToTranspose->values.size(); ++i) {
+      for (size_t j = 0; j < matrixToTranspose->values[i].size(); ++j) {
         transposedVec[j].push_back(matrixToTranspose->values[i][j]);
       }
     }
@@ -248,21 +254,33 @@ class Matrix : public AbstractMatrix {
       throw std::invalid_argument("getNthColumnVector failed: Invalid column index given!");
     }
     std::vector<T> result;
-    for (auto i = 0; i < values.size(); ++i) result.push_back(values.at(i).at(colIdx));
+    for (size_t i = 0; i < values.size(); ++i) result.push_back(values.at(i).at(colIdx));
     return result;
   }
 
-  void addElementToStringStream(T elem, std::stringstream &s);
+  void addElementToStringStream(T elem, std::stringstream &s) {
+    s << elem;
+  }
 
-  bool containsAbstractExprs() override;
+  bool containsAbstractExprs() override {
+    return false;
+  }
 
-  [[nodiscard]] std::string getNodeType() const override;
+  [[nodiscard]] std::string getNodeType() const override {
+    return std::string("Matrix<" + std::string(typeid(T).name()) + ">");
+  }
 
-  void accept(Visitor &v) override;
+  void accept(Visitor &v) override {
+    v.visit(*this);
+  }
 
-  int getMaxNumberChildren() override;
+  int getMaxNumberChildren() override {
+    return -1;
+  }
 
-  bool supportsCircuitMode() override;
+  bool supportsCircuitMode() override {
+    return true;
+  }
 
   bool operator==(const Matrix &rhs) const {
     return values==rhs.values && dim==rhs.dim;
@@ -272,11 +290,18 @@ class Matrix : public AbstractMatrix {
     return !(rhs==*this);
   }
 
-  [[nodiscard]] json toJson() const override;
+  [[nodiscard]] json toJson() const override {
+    throw std::runtime_error("toJson is unimplemented for type T: " + std::string(typeid(T).name()));
+  }
 
-  AbstractExpr *getElementAt(int row, int column) override;
+  AbstractExpr *getElementAt(int row, int column) {
+    throw std::logic_error("getElementAt failed: Value in matrix is of unknown type. "
+                           "Cannot determine associated AbstractLiteral subtype.");
+  }
 
-  void setElementAt(int row, int column, AbstractExpr *element) override;
+  void setElementAt(int row, int column, AbstractExpr *element) override {
+    throw std::runtime_error("setElementAt is unimplemented for type T: " + std::string(typeid(T).name()));
+  }
 
   void appendVectorAt(int idx, AbstractMatrix *mx) override {
     // determine if given matrix mx is a row or column vector
@@ -333,20 +358,27 @@ class Matrix : public AbstractMatrix {
       values.at(idx) = castedMx->getNthRowVector(0);
     }
     // update the dimensions of this matrix
-    getDimensions().update(values.size(), values.empty()?0:values.at(0).size());
+    getDimensions().update(values.size(), values.empty() ? 0 : values.at(0).size());
 
     // transpose this matrix back as we transposed the given matrix mx previously to avoid reimplmenting the append
     // logic for column vectors
     if (isColumnVector) transpose(true);
   }
 
-  void replaceChild(AbstractNode *originalChild, AbstractNode *newChildToBeAdded) override;
+  void replaceChild(AbstractNode *originalChild, AbstractNode *newChildToBeAdded) override {
+    // values T are primitives (e.g., int, float, bool, strings) and
+    AbstractNode::replaceChild(originalChild, newChildToBeAdded);
+  }
 
   Dimension &getDimensions() override {
     return dim;
   }
 
-  Matrix<T> *clone(bool keepOriginalUniqueNodeId) override;
+  Matrix<T> *clone(bool keepOriginalUniqueNodeId) override {
+    // it's sufficient to call the copy constructor that creates a copy of all primitives (int, float, etc.)
+    return new Matrix<T>(*this);
+  }
+
 };
 
 /// Compute new matrix by applying binary function f component-wise on both matrices.
@@ -379,9 +411,9 @@ static Matrix<T> *applyComponentwise(Matrix<T> *A, Matrix<T> *B, std::function<T
     B->expandAndFillMatrix(A->getDimensions(), B->getScalarValue());
   }
   std::vector<std::vector<T>> result;
-  for (int i = 0; i < A->values.size(); ++i) {
+  for (size_t i = 0; i < A->values.size(); ++i) {
     result.push_back(std::vector<T>());
-    for (int j = 0; j < A->values[0].size(); ++j) {
+    for (size_t j = 0; j < A->values[0].size(); ++j) {
       result[i].push_back(f((*A)(i, j), (*B)(i, j)));
     }
   }
@@ -401,9 +433,9 @@ static Matrix<T> *applyComponentwise(Matrix<T> *A, Matrix<T> *B, std::function<T
 template<typename T>
 static Matrix<T> *applyOnEachElement(Matrix<T> *matrixA, std::function<T(T)> f) {
   std::vector<std::vector<T>> result;
-  for (int i = 0; i < matrixA->values.size(); ++i) {
+  for (size_t i = 0; i < matrixA->values.size(); ++i) {
     result.push_back(std::vector<T>());
-    for (int j = 0; j < matrixA->values[0].size(); ++j) {
+    for (size_t j = 0; j < matrixA->values[0].size(); ++j) {
       result[i].push_back(f((*matrixA)(i, j)));
     }
   }
@@ -450,5 +482,94 @@ static Matrix<T> *applyMatrixMultiplication(Matrix<T> *matrixA, Matrix<T> *matri
   }
   return new Matrix<T>(result);
 }
+
+// declarations of specific specialisations
+
+template<>
+bool Matrix<AbstractExpr *>::operator==(const Matrix &rhs) const;
+
+template<>
+AbstractMatrix *Matrix<int>::applyBinaryOperatorComponentwise(Matrix<int> *rhsOperand, Operator *os);
+
+template<>
+AbstractMatrix *Matrix<float>::applyBinaryOperatorComponentwise(Matrix<float> *rhsOperand, Operator *os);
+
+template<>
+AbstractMatrix *Matrix<bool>::applyBinaryOperatorComponentwise(Matrix<bool> *rhsOperand, Operator *os);
+
+template<>
+AbstractMatrix *Matrix<std::string>::applyBinaryOperatorComponentwise(Matrix<std::string> *rhsOperand, Operator *os);
+
+template<>
+AbstractMatrix *Matrix<int>::applyUnaryOperatorComponentwise(Operator *os);
+
+template<>
+AbstractMatrix *Matrix<float>::applyUnaryOperatorComponentwise(Operator *os);
+
+template<>
+AbstractMatrix *Matrix<bool>::applyUnaryOperatorComponentwise(Operator *os);
+
+template<>
+AbstractExpr *Matrix<int>::getElementAt(int row, int column);
+
+template<>
+AbstractExpr *Matrix<float>::getElementAt(int row, int column);
+
+template<>
+AbstractExpr *Matrix<bool>::getElementAt(int row, int column);
+
+template<>
+AbstractExpr *Matrix<std::string>::getElementAt(int row, int column);
+
+template<>
+AbstractExpr *Matrix<AbstractExpr *>::getElementAt(int row, int column);
+
+template<>
+Matrix<AbstractExpr *>::Matrix(std::vector<std::vector<AbstractExpr *>> inputMatrix);
+
+template<>
+[[nodiscard]] json Matrix<AbstractExpr *>::toJson() const;
+
+template<>
+json Matrix<bool>::toJson() const;
+
+template<>
+json Matrix<int>::toJson() const;
+
+template<>
+json Matrix<float>::toJson() const;
+
+template<>
+json Matrix<double>::toJson() const;
+
+template<>
+json Matrix<std::string>::toJson() const;
+
+template<>
+Matrix<AbstractExpr *> *Matrix<AbstractExpr *>::clone(bool keepOriginalUniqueNodeId);
+
+template<>
+void Matrix<AbstractExpr *>::addElementToStringStream(AbstractExpr *elem, std::stringstream &s);
+
+template<>
+void Matrix<AbstractExpr *>::setElementAt(int row, int column, AbstractExpr *element);
+
+template<>
+void Matrix<int>::setElementAt(int row, int column, AbstractExpr *element);
+
+template<>
+void Matrix<float>::setElementAt(int row, int column, AbstractExpr *element);
+
+template<>
+void Matrix<bool>::setElementAt(int row, int column, AbstractExpr *element);
+
+template<>
+void Matrix<std::string>::setElementAt(int row, int column, AbstractExpr *element);
+
+template<>
+void Matrix<AbstractExpr *>::replaceChild(AbstractNode *originalChild, AbstractNode *newChildToBeAdded);
+
+template<>
+bool Matrix<AbstractExpr *>::containsAbstractExprs();
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_MATRIX_H_
