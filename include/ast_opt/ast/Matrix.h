@@ -294,7 +294,7 @@ class Matrix : public AbstractMatrix {
     throw std::runtime_error("toJson is unimplemented for type T: " + std::string(typeid(T).name()));
   }
 
-  AbstractExpr *getElementAt(int row, int column) {
+  AbstractExpr *getElementAt(int row, int column) override {
     throw std::logic_error("getElementAt failed: Value in matrix is of unknown type. "
                            "Cannot determine associated AbstractLiteral subtype.");
   }
