@@ -157,14 +157,7 @@ class Matrix : public AbstractMatrix {
     return applyBinaryOperatorComponentwise(dynamic_cast<Matrix<T> *>(rhsOperand), op);
   }
 
-  [[nodiscard]] bool isScalar() const override {
-    // requirements that must all be fulfilled such that a value is considered as a scalar:
-    // - it is a single element, i.e., it has dimension (1,1)
-    // - it is a literal (e.g., float, int, bool) or a std::string
-    // - it is NOT a pointer
-    //throw std::runtime_error("TODO: IMPLEMENT WITH TEMPLATE SPECIALIZATION");
-    return dim.equals(1, 1) && (std::is_literal_type_v<T> || std::is_same_v<T, std::string>) && !std::is_pointer_v<T>;
-  }
+  [[nodiscard]] bool isScalar() const override;
 
   [[nodiscard]] bool isEmpty() const override {
     return dim.equals(0, 0);
@@ -475,7 +468,7 @@ static Matrix<T> *applyMatrixMultiplication(Matrix<T> *matrixA, Matrix<T> *matri
 // and the specialized version isn't ODR-used in the same translation unit
 // Therefore, these following functions are all defined outside the class:
 
-template<class T>
+template<typename T>
 Matrix<T>::Matrix(std::vector<std::vector<T>> inputMatrix)  /* NOLINT intentionally not explicit */
     : values(std::move(inputMatrix)), dim(values.size(), values.empty() ? 0 : values.at(0).size()) {
   int elementsPerRow = values.empty() ? 0 : values.at(0).size();
@@ -486,17 +479,37 @@ Matrix<T>::Matrix(std::vector<std::vector<T>> inputMatrix)  /* NOLINT intentiona
   }
 }
 
-template<class T>
+template<typename T>
 AbstractMatrix *Matrix<T>::applyBinaryOperatorComponentwise(Matrix<T> *rhsOperand, Operator *op) {
   throw std::runtime_error(
       "applyOperatorComponentwise is unimplemented for type T: " + std::string(typeid(T).name()));
 }
-template<class T>
+template<typename T>
 bool Matrix<T>::operator==(const Matrix &rhs) const {
   return values==rhs.values && dim==rhs.dim;
 }
 
+template<typename T>
+bool Matrix<T>::isScalar() const {
+  return false;
+}
+
 // declarations of specific specialisations
+
+template<>
+bool Matrix<bool>::isScalar() const;
+
+template<>
+bool Matrix<int>::isScalar() const;
+
+template<>
+bool Matrix<float>::isScalar() const;
+
+template<>
+bool Matrix<double>::isScalar() const;
+
+template<>
+bool Matrix<std::string>::isScalar() const;
 
 template<>
 bool Matrix<AbstractExpr *>::operator==(const Matrix &rhs) const;
@@ -527,6 +540,9 @@ AbstractExpr *Matrix<int>::getElementAt(int row, int column);
 
 template<>
 AbstractExpr *Matrix<float>::getElementAt(int row, int column);
+
+template<>
+AbstractExpr *Matrix<double>::getElementAt(int row, int column);
 
 template<>
 AbstractExpr *Matrix<bool>::getElementAt(int row, int column);
