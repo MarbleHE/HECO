@@ -14,108 +14,6 @@
 
 using json = nlohmann::json;
 
-/// Compute new matrix by applying binary function f component-wise on both matrices.
-/// For example, for matrices A,B with each dim (M, N), the resulting matrix would look like:
-///     / f(a_00, b_00)  f(a_01, b_01)  ...  f(a_0N, b_0N) \
-///     | f(a_10, b_10)      ...        ...      ...       |
-///     |       ...          ...        ...      ...       |
-///     \ f(a_M0, b_M0)      ...        ...  f(a_MN, b_MN) /
-/// \tparam T The type of the matrix elements.
-/// \param A The matrix whose elements are used as the left hand-side operand.
-/// \param B The matrix whose elements are used as the right hand-side operand.
-/// \param f The binary function f : (T,T) -> T to be applied componentwise on the elements of A, B.
-/// \return A new Matrix<T> where each component is computed by taking elements of A and B of the same position
-///         and applying the binary function f on them, i.e., f(a_{ij}, b_{i,j}).
-template<typename T>
-static Matrix<T> *applyComponentwise(Matrix<T> *A, Matrix<T> *B, std::function<T(T, T)> f) {
-  // check that A and B have valid dimensions:
-  // - if A and B have same dimensions -> apply f componentwise
-  // - if either A or B is a scalar -> apply scalar on each component of matrix/vector
-  bool isScalarA = A->isScalar();
-  bool isScalarB = B->isScalar();
-  if (A->getDimensions()!=B->getDimensions() && !(isScalarA ^ isScalarB)) {
-    throw std::logic_error("Matrices A and B must have the same dimensions to apply an operator componentwise, or "
-                           "either one of A and B must be a scalar to apply the scalar product.");
-  } else if (isScalarA && !isScalarB) {
-    // expand A to be a (#rowsB, #columnsB)-matrix filled with the value of the scalar A
-    A->expandAndFillMatrix(B->getDimensions(), A->getScalarValue());
-  } else if (isScalarB && !isScalarA) {
-    // expand B to be a (#rowsA, #columnsA)-matrix filled with the value of the scalar B
-    B->expandAndFillMatrix(A->getDimensions(), B->getScalarValue());
-  }
-  std::vector<std::vector<T>> result;
-  for (int i = 0; i < A->values.size(); ++i) {
-    result.push_back(std::vector<T>());
-    for (int j = 0; j < A->values[0].size(); ++j) {
-      result[i].push_back(f((*A)(i, j), (*B)(i, j)));
-    }
-  }
-  return new Matrix<T>(result);
-}
-
-/// Applies a unary function f: T -> T on each element of a matrix. Compute new matrix by applying unary function f on
-/// each element of matrixA, e.g., for (M, N)-matrix matrixA:
-///     /  f(a_00)    f(a_01)    ...    f(a_0N)  \
-///     |  f(a_10)      ...      ...      ...    |
-///     |   ...         ...      ...      ...    |
-///     \  f(a_M0)      ...      ...    f(a_MN)  /
-/// \tparam T The type of the matrix elements.
-/// \param matrixA The matrix on whose elements f should be applied to.
-/// \param f The function f: T -> T to be applied on each element of matrixA.
-/// \return A new matrix resulting from applying f on each element.
-template<typename T>
-static Matrix<T> *applyOnEachElement(Matrix<T> *matrixA, std::function<T(T)> f) {
-  std::vector<std::vector<T>> result;
-  for (int i = 0; i < matrixA->values.size(); ++i) {
-    result.push_back(std::vector<T>());
-    for (int j = 0; j < matrixA->values[0].size(); ++j) {
-      result[i].push_back(f((*matrixA)(i, j)));
-    }
-  }
-  return new Matrix<T>(result);
-}
-
-/// For matrices A with dim (M,N) and B with dim (N,P) the following algorithm computes C with dim (M,P) where
-///   c_ij = sum_{k=1}^{n} a_ik * b_kj.
-/// This is basically the summation over multiplying each element in the row-vector from A with each element in
-/// the column-vector from B. See, for example, Wikipedia for more details and images:
-///   https://en.wikipedia.org/wiki/Matrix_multiplication.
-/// Note that the matrix multiplication is not commutative, i.e., AxB != BxA.
-/// \tparam T The type of the Matrix elements.
-/// \param matrixA The left hand-side operand of the matrix multiplication.
-/// \param matrixB The right hand-side operand of the matrix multiplication.
-/// \return A matrix of same type with the values as defined by the matrix multiplication.
-template<typename T>
-static Matrix<T> *applyMatrixMultiplication(Matrix<T> *matrixA, Matrix<T> *matrixB) {
-  // check that #column of matrixA equals #rows of matrixB
-  if (!matrixA->getDimensions().equals(-1, matrixB->getDimensions().numRows)) {
-    std::stringstream ss;
-    ss << "Dimension mismatch: ";
-    ss << "matrixA has dimensions " << matrixA->getDimensions() << " and matrixB has dimensions "
-       << matrixB->getDimensions() << ". ";
-    ss << "To apply matrix multiplication, #columns of matrixA must be equal to the #rows of matrixB." << std::endl;
-    throw std::logic_error(ss.str());
-  }
-  // define result matrix having dimension (#rowsA, #columnsB)
-  std::vector<std::vector<T>> result(
-      matrixA->getDimensions().numRows, std::vector<T>(matrixB->getDimensions().numColumns));
-
-  // matrixA has dim (M,N), matrixB has dim (N,P)
-  int dimM = matrixA->getDimensions().numRows;
-  int dimN = matrixA->getDimensions().numColumns;
-  int dimP = matrixB->getDimensions().numColumns;
-  T sum = 0;
-  // Very inefficient: O(n^3)! Replace it, for example, by Strassen's multiplication algorithm.
-  for (int k = 0; k < dimN; ++k) {
-    for (int i = 0; i < dimM; ++i) {
-      for (int j = 0; j < dimP; ++j) {
-        result[i][j] += (*matrixA)(i, k)*(*matrixB)(k, j);
-      }
-    }
-  }
-  return new Matrix<T>(result);
-}
-
 /// A template-based Matrix class that stores elements of type T.
 /// \tparam T The type of the matrix elements.
 template<typename T>
@@ -450,5 +348,107 @@ class Matrix : public AbstractMatrix {
 
   Matrix<T> *clone(bool keepOriginalUniqueNodeId) override;
 };
+
+/// Compute new matrix by applying binary function f component-wise on both matrices.
+/// For example, for matrices A,B with each dim (M, N), the resulting matrix would look like:
+///     / f(a_00, b_00)  f(a_01, b_01)  ...  f(a_0N, b_0N) \
+///     | f(a_10, b_10)      ...        ...      ...       |
+///     |       ...          ...        ...      ...       |
+///     \ f(a_M0, b_M0)      ...        ...  f(a_MN, b_MN) /
+/// \tparam T The type of the matrix elements.
+/// \param A The matrix whose elements are used as the left hand-side operand.
+/// \param B The matrix whose elements are used as the right hand-side operand.
+/// \param f The binary function f : (T,T) -> T to be applied componentwise on the elements of A, B.
+/// \return A new Matrix<T> where each component is computed by taking elements of A and B of the same position
+///         and applying the binary function f on them, i.e., f(a_{ij}, b_{i,j}).
+template<typename T>
+static Matrix<T> *applyComponentwise(Matrix<T> *A, Matrix<T> *B, std::function<T(T, T)> f) {
+  // check that A and B have valid dimensions:
+  // - if A and B have same dimensions -> apply f componentwise
+  // - if either A or B is a scalar -> apply scalar on each component of matrix/vector
+  bool isScalarA = A->isScalar();
+  bool isScalarB = B->isScalar();
+  if (A->getDimensions()!=B->getDimensions() && !(isScalarA ^ isScalarB)) {
+    throw std::logic_error("Matrices A and B must have the same dimensions to apply an operator componentwise, or "
+                           "either one of A and B must be a scalar to apply the scalar product.");
+  } else if (isScalarA && !isScalarB) {
+    // expand A to be a (#rowsB, #columnsB)-matrix filled with the value of the scalar A
+    A->expandAndFillMatrix(B->getDimensions(), A->getScalarValue());
+  } else if (isScalarB && !isScalarA) {
+    // expand B to be a (#rowsA, #columnsA)-matrix filled with the value of the scalar B
+    B->expandAndFillMatrix(A->getDimensions(), B->getScalarValue());
+  }
+  std::vector<std::vector<T>> result;
+  for (int i = 0; i < A->values.size(); ++i) {
+    result.push_back(std::vector<T>());
+    for (int j = 0; j < A->values[0].size(); ++j) {
+      result[i].push_back(f((*A)(i, j), (*B)(i, j)));
+    }
+  }
+  return new Matrix<T>(result);
+}
+
+/// Applies a unary function f: T -> T on each element of a matrix. Compute new matrix by applying unary function f on
+/// each element of matrixA, e.g., for (M, N)-matrix matrixA:
+///     /  f(a_00)    f(a_01)    ...    f(a_0N)  \
+///     |  f(a_10)      ...      ...      ...    |
+///     |   ...         ...      ...      ...    |
+///     \  f(a_M0)      ...      ...    f(a_MN)  /
+/// \tparam T The type of the matrix elements.
+/// \param matrixA The matrix on whose elements f should be applied to.
+/// \param f The function f: T -> T to be applied on each element of matrixA.
+/// \return A new matrix resulting from applying f on each element.
+template<typename T>
+static Matrix<T> *applyOnEachElement(Matrix<T> *matrixA, std::function<T(T)> f) {
+  std::vector<std::vector<T>> result;
+  for (int i = 0; i < matrixA->values.size(); ++i) {
+    result.push_back(std::vector<T>());
+    for (int j = 0; j < matrixA->values[0].size(); ++j) {
+      result[i].push_back(f((*matrixA)(i, j)));
+    }
+  }
+  return new Matrix<T>(result);
+}
+
+/// For matrices A with dim (M,N) and B with dim (N,P) the following algorithm computes C with dim (M,P) where
+///   c_ij = sum_{k=1}^{n} a_ik * b_kj.
+/// This is basically the summation over multiplying each element in the row-vector from A with each element in
+/// the column-vector from B. See, for example, Wikipedia for more details and images:
+///   https://en.wikipedia.org/wiki/Matrix_multiplication.
+/// Note that the matrix multiplication is not commutative, i.e., AxB != BxA.
+/// \tparam T The type of the Matrix elements.
+/// \param matrixA The left hand-side operand of the matrix multiplication.
+/// \param matrixB The right hand-side operand of the matrix multiplication.
+/// \return A matrix of same type with the values as defined by the matrix multiplication.
+template<typename T>
+static Matrix<T> *applyMatrixMultiplication(Matrix<T> *matrixA, Matrix<T> *matrixB) {
+  // check that #column of matrixA equals #rows of matrixB
+  if (!matrixA->getDimensions().equals(-1, matrixB->getDimensions().numRows)) {
+    std::stringstream ss;
+    ss << "Dimension mismatch: ";
+    ss << "matrixA has dimensions " << matrixA->getDimensions() << " and matrixB has dimensions "
+       << matrixB->getDimensions() << ". ";
+    ss << "To apply matrix multiplication, #columns of matrixA must be equal to the #rows of matrixB." << std::endl;
+    throw std::logic_error(ss.str());
+  }
+  // define result matrix having dimension (#rowsA, #columnsB)
+  std::vector<std::vector<T>> result(
+      matrixA->getDimensions().numRows, std::vector<T>(matrixB->getDimensions().numColumns));
+
+  // matrixA has dim (M,N), matrixB has dim (N,P)
+  int dimM = matrixA->getDimensions().numRows;
+  int dimN = matrixA->getDimensions().numColumns;
+  int dimP = matrixB->getDimensions().numColumns;
+  T sum = 0;
+  // Very inefficient: O(n^3)! Replace it, for example, by Strassen's multiplication algorithm.
+  for (int k = 0; k < dimN; ++k) {
+    for (int i = 0; i < dimM; ++i) {
+      for (int j = 0; j < dimP; ++j) {
+        result[i][j] += (*matrixA)(i, k)*(*matrixB)(k, j);
+      }
+    }
+  }
+  return new Matrix<T>(result);
+}
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_MATRIX_H_
