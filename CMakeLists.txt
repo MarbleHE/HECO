@@ -1,8 +1,22 @@
 cmake_minimum_required(VERSION 3.14)
+cmake_policy(SET CMP0091 NEW) # Required for selecting MSVC runtime library
 project(ast_optimizer
         VERSION 0.1
         DESCRIPTION "Optimizer for Fully Homomorphic Encryption (FHE) working on an AST-like (Abstract Syntax Tree) representation of a program"
         LANGUAGES CXX)
+
+if (MSVC)
+    message("Using MSVC")
+
+    # Force static MSVC runtime library on Windows
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+
+    # Switch MSVC into multi threaded mode
+    add_compile_options(/MP)
+
+    # Force MSVC to use slightly less broken template rules
+    add_compile_options(/permissive-)
+endif()
 
 ##############################
 # Download and install nlohmann-json if required

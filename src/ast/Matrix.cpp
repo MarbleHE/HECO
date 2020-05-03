@@ -142,7 +142,7 @@ AbstractMatrix *Matrix<bool>::applyBinaryOperatorComponentwise(Matrix<bool> *rhs
 
 template<>
 AbstractMatrix *Matrix<std::string>::applyBinaryOperatorComponentwise(Matrix<std::string> *rhsOperand, Operator *os) {
-  std::function<std::string(std::string, std::string)> operatorFunction;
+  std::function < std::string(std::string, std::string) > operatorFunction;
   if (os->equals(ArithmeticOp::ADDITION)) {
     operatorFunction = [](const std::string &a, const std::string &b) -> std::string { return a + b; };
   } else {
@@ -193,10 +193,43 @@ AbstractMatrix *Matrix<bool>::applyUnaryOperatorComponentwise(Operator *os) {
       ::applyOnEachElement(dynamic_cast<Matrix<bool> *>(this), operatorFunction));
 }
 
+// ===== isScalar ==========
+// - Matrix<bool>
+// - Matrix<int>
+// - Matrix<float>
+// - Matrix<double>
+// - Matrix<std::string>
+template<>
+bool Matrix<bool>::isScalar() const {
+  return dim.equals(1,1);
+}
+
+template<>
+bool Matrix<int>::isScalar() const {
+  return dim.equals(1,1);
+}
+
+template<>
+bool Matrix<float>::isScalar() const {
+  return dim.equals(1,1);
+}
+
+template<>
+bool Matrix<double>::isScalar() const {
+  return dim.equals(1,1);
+}
+
+template<>
+bool Matrix<std::string>::isScalar() const {
+  return dim.equals(1,1);
+}
+
+
 // ===== getElementAt ==========
 // - Matrix<int>
 // - Matrix<float>
 // - Matrix<bool>
+// - Matrix<double>
 // - Matrix<std::string>
 // - Matrix<AbstractExpr*>
 
@@ -216,6 +249,12 @@ template<>
 AbstractExpr *Matrix<bool>::getElementAt(int row, int column) {
   boundCheckMatrixAccess(row, column);
   return new LiteralBool(values[row][column]);
+}
+
+template<>
+AbstractExpr *Matrix<double>::getElementAt(int row, int column) {
+  boundCheckMatrixAccess(row, column);
+  return new LiteralFloat(values[row][column]);
 }
 
 template<>
