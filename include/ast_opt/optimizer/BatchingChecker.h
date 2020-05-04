@@ -3,10 +3,20 @@
 
 #include <ast_opt/ast/AbstractNode.h>
 #include <queue>
-class BatchingChecker {
+#include <vector>
 
- public:
-  static void determineBatchability(AbstractNode *startNode);
+// TODO: add comments
+
+class BatchingChecker {
+  static AbstractNode *getLargestBatchableSubtree(AbstractExpr *expr);
+
+  static bool isTransparentNode(AbstractNode *node);
+
+  static bool isBatchingCompatible(AbstractNode *baseNode, AbstractNode *curNode);
+
+  static bool isBatchableSubtree(AbstractNode *subtreeRoot);
+
+  static std::vector<AbstractNode *> getChildren(AbstractNode *node);
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_OPTIMIZER_BATCHINGCHECKER_H_

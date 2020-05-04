@@ -1,157 +1,122 @@
+#include "ast_opt/optimizer/BatchingChecker.h"
 #include <iostream>
 #include <string>
 #include <utility>
 #include <unordered_set>
-#include "ast_opt/optimizer/BatchingChecker.h"
 #include "ast_opt/ast/MatrixElementRef.h"
 #include "ast_opt/ast/MatrixAssignm.h"
 #include "ast_opt/ast/Function.h"
 #include "ast_opt/ast/Block.h"
 #include "ast_opt/ast/OperatorExpr.h"
 
-/*
- * Idea for batching "non-symmetric" subtreees:
- *  - Do traversal in BFS style
- *  - Collect information about a level in the AST
- *  - Before continuing with the next level, determine whether it is necessary to extend the AST to enable batchability
- *    - do not always expand an OperatorExpr, only if expanding this level is worthwhile, i.e., expansion enables
- *    batchability with enough parallel operation (e.g., at least 3 operations)
- */
-
-// TODO take expression as input
-// TODO add recursion that asks next expression for batchability
-//  - stop if is batchable subtree -> no need to continue because
-void BatchingChecker::determineBatchability(AbstractNode *startNode) {
-  struct QueueEntry {
-    AbstractNode *node;
-    int treeLevel;
-
-    QueueEntry(AbstractNode *pNode, int i) : node(pNode), treeLevel(i) {};
-  };
-
-  struct OperationInfo {
-    OperatorExpr *oe;
-
-    explicit OperationInfo(OperatorExpr *oe) : oe(oe) {};
-  };
-
-  struct OperandInfo {
-    int treeLevel;
-    std::string variableIdentifier;
-
-    OperandInfo(int treeLevel, std::string variableIdentifier)
-        : treeLevel(treeLevel), variableIdentifier(std::move(variableIdentifier)) {}
-  };
-
-  // for enhanced readability
-  typedef int DepthLevel;
-
-  // Data structures for collecting relevant batching information.
-  // information about operations
-  std::map<DepthLevel, std::vector<OperationInfo>> batchingCandidates;
-  // information about operands
-  std::vector<OperandInfo> operands;
-  // the number of nodes per tree level
-  std::map<DepthLevel, int> numNodesPerLevel;
-
-  // queue for traversal
-  std::queue<QueueEntry> bfsTraversalQ;
-  bfsTraversalQ.emplace(startNode, 0);
-
-  while (!bfsTraversalQ.empty()) {
-    auto &[curNode, curLevel] = bfsTraversalQ.front();
-    bfsTraversalQ.pop();
-
-    // count the number of nodes in each level
-    numNodesPerLevel[curLevel]++;
-//    std::cout << curLevel << "\t" << curNode->getUniqueNodeId() << " " << std::endl;
-
-    // only multiplications are worth for being batched
-    auto curAsOpExpr = dynamic_cast<OperatorExpr *>(curNode);
-    if (curAsOpExpr!=nullptr && curAsOpExpr->getOperator()->equals(MULTIPLICATION)) {
-      batchingCandidates[curLevel].emplace_back(curAsOpExpr);
-    }
-
-    // logic to decide which nodes to enqueue for processing next
-    if (auto curNodeAsFunc = dynamic_cast<Function *>(curNode)) {
-      bfsTraversalQ.emplace(curNodeAsFunc->getBody(), curLevel + 1);
-    } else if (auto curNodeAsMA = dynamic_cast<MatrixAssignm *>(curNode)) {
-      // enqueue the MatrixAssignm's value field only
-      bfsTraversalQ.emplace(curNodeAsMA->getValue(), curLevel + 1);
-    } else if (auto curNodeAsMxElRf = dynamic_cast<MatrixElementRef *>(curNode)) {
-      // check and store referenced variable
-      if (auto targetVar = dynamic_cast<Variable *>(curNodeAsMxElRf->getOperand())) {
-        operands.emplace_back(curLevel, targetVar->getIdentifier());
-      }
+AbstractNode *BatchingChecker::getLargestBatchableSubtree(AbstractExpr *expr) {
+  std::queue<AbstractNode *> processingQ({expr});
+  // find the largest possible isBatchable subtree
+  while (!processingQ.empty()) {
+    auto curNode = processingQ.front();
+    processingQ.pop();
+    if (isBatchableSubtree(curNode)) {
+      // returns the largest batchable subtree that was found
+      return curNode;
     } else {
-      // by default, enqueue all children of current node
-      for (auto &n : curNode->getChildrenNonNull()) {
-        bfsTraversalQ.emplace(n, curLevel + 1);
-      }
+      // enqueue all children (as expr is an AbstractExpr, all of its children must be AbstractExprs too)
+      for (auto c : curNode->getChildrenNonNull()) processingQ.push(c);
     }
-  } // end: while
+  }
+  // nullptr = no batchable subtree found
+  return nullptr;
+}
 
-  // do checks that require knowledge of all operands that are involved in a batching operation
-  for (auto it = batchingCandidates.begin(); it!=batchingCandidates.end();) {
-    if (it->second.size() < 3) {
-      // find all batching candidates that have at least three parallel operations otherwise the batching overhead is
-      // larger than the actual advantage of using batching => remove unsuitable candidate
-      it = batchingCandidates.erase(it);
+bool BatchingChecker::isTransparentNode(AbstractNode *node) {
+  // a node is considered as transparent if it is an OperatorExpr because it can be batched by expanding any other
+  // expression using the neutral element e.g., a and b*2 –- can be batched as a*1 and b*2
+  return dynamic_cast<OperatorExpr *>(node)!=nullptr;
+}
+
+std::vector<AbstractNode *> BatchingChecker::getChildren(AbstractNode *node) {
+  if (isTransparentNode(node)) {
+    // no deeper check required as we allow (for the sake of simplicity) only max. 1 level deep transparent node
+    // children of childrens because we "skip" the transparent node
+    std::vector<AbstractNode *> children;
+    for (auto child : node->getChildrenNonNull()) {
+      auto grandChildren = child->getChildrenNonNull();
+      children.insert(children.end(), grandChildren.begin(), grandChildren.end());
+    }
+    return children;
+  } else {
+    return node->getChildrenNonNull();
+  }
+}
+
+bool BatchingChecker::isBatchingCompatible(AbstractNode *baseNode, AbstractNode *curNode) {
+  if (baseNode->getNodeType()!=curNode->getNodeType()) {
+    if (isTransparentNode(baseNode)==isTransparentNode(curNode)) {
+      // not compatible because baseNode.type != curNode.type
+      return false;
+    } else if (isTransparentNode(baseNode)) {
+      // is compatible
+      return true;
     } else {
-      // check structure of OperatorExpr's operands:
-      // 1) number of operands
-      int maxNumOperands = 0;
-      OperationInfo *elemWithMaxOperands;
-      for (auto &elem : it->second) {
-        if (elem.oe->getOperands().size() > maxNumOperands) {
-          maxNumOperands = elem.oe->getOperands().size();
-          elemWithMaxOperands = &elem;
-        }
-      }
-
-      // 2) check type of operands
-      auto operandsOfExprWithMaxOperandsAsVec = elemWithMaxOperands->oe->getOperands();
-      std::unordered_set<AbstractExpr *> operandsOfExprWithMaxOperands(operandsOfExprWithMaxOperandsAsVec.begin(),
-                                                                       operandsOfExprWithMaxOperandsAsVec.end());
-      // Literals of same type, Variables, or MatrixElementRefs of same variable
-      std::vector<std::vector<OperationInfo>::iterator> operandsReqExpansion;
-      for (auto operandIt = it->second.begin(); operandIt!=it->second.end(); ++operandIt) {
-        if ((*operandIt).oe->getOperands().size() < maxNumOperands) {
-          // check if there are any operands that require expansion
-          operandsReqExpansion.push_back(operandIt);
-        } else {
-          // check if type of existing operands match
-          // TODO sort both
-          auto curOperandsAsVec = operandIt->oe->getOperands();
-          std::unordered_set<AbstractExpr *> curOperands(curOperandsAsVec.begin(), curOperandsAsVec.end());
-          for (auto &op :curOperands) {
-            auto result = operandsOfExprWithMaxOperands.find(op);  // FIXME does not make sense for pointers
-            if (result!=operandsOfExprWithMaxOperands.end()) {
-              // compare types
-
-            } else {
-              // stop after the first mismatch - it does not make sense to continue comparing because expansion can
-              // only add additional operands but we cannot change the type of existing operands
-              break;
-            }
-          }
-          // if at the end, there are any unmatched types, exclude operation from batching
-//          if (!curOperands.empty()) {
-//            std::cout << "Removing operation from batchingCandidates due to unsuitable expression structure.";
-//            operandIt = it->second.erase(operandIt);
-//          }
-        }
-      }
-
-      if (!operandsReqExpansion.empty()) {
-        // TODO (pjattke): expand operands that are enqueued in operandsReqExpansion by correct required type.
-        throw std::runtime_error("Expansion of operands currently not supported!");
-      }
-
-      ++it;
+      return isBatchingCompatible(curNode, baseNode);
     }
-  } // end: for (auto it = batchingCandidates.begin(); it!=batchingCandidates.end();)
+  } else {  // baseNode.type == curNode.type
+    // type-specific checks
+    if (auto baseNodeAsMatrixElementRef = dynamic_cast<MatrixElementRef *>(baseNode)) {
+      auto baseNodeVar = dynamic_cast<Variable *>(baseNodeAsMatrixElementRef->getOperand());
+      // as baseNode's type equals curNode's type, we know that curNodeAsMatrixElementRef != nullptr
+      auto curNodeAsMatrixElementRef = dynamic_cast<MatrixElementRef *>(curNode);
+      auto curNodeVar = dynamic_cast<Variable *>(curNodeAsMatrixElementRef->getOperand());
+      return baseNodeVar!=nullptr && curNodeVar!=nullptr
+          // refer to same variable
+          && baseNodeVar->getIdentifier()==curNodeVar->getIdentifier();
+    } else if (auto baseNodeAsOperatorExpr = dynamic_cast<OperatorExpr *>(baseNode)) {
+      auto curNodeAsOperatorExpr = dynamic_cast<OperatorExpr *>(curNode);
+      // same operator
+      return baseNodeAsOperatorExpr->getOperator()==curNodeAsOperatorExpr->getOperator()
+          // same number of operands
+          && baseNodeAsOperatorExpr->getOperands().size()==curNodeAsOperatorExpr->getOperands().size();
+    } else {
+      // handles all types that do not require any special handling, e.g., LiteralInt, Variable
+      // (it is sufficient for batching compatibility that baseNode and curNode have the same type
+      // in that case)
+      return true;
+    }
+  }
+}
 
-  std::cout << "Reached end of BatchingChecker::determineBatchability." << std::endl;
-//  return batchingCandidates;
+bool BatchingChecker::isBatchableSubtree(AbstractNode *subtreeRoot) {
+  std::queue<AbstractNode *> qReading({subtreeRoot});
+  std::queue<AbstractNode *> qWriting({subtreeRoot});
+  std::vector<AbstractNode *> nodesInCurrentLevel;
+
+  while (!qReading.empty()) {
+    auto curNode = qReading.front();
+    qReading.pop();
+
+    // compare nodes
+    AbstractNode *baseNode = nodesInCurrentLevel.front();
+    for (auto nodeIt = std::next(nodesInCurrentLevel.begin()); nodeIt!=nodesInCurrentLevel.end(); ++nodeIt) {
+      // check batching compatibility
+      if (!isBatchingCompatible(baseNode, subtreeRoot)) {
+        // if we detected a batching-incompatibility, we can abort testing further
+        return false;
+      }
+
+      // enqueue children
+      auto children = getChildren(subtreeRoot);
+      for (auto child : children) { qWriting.push(child); }
+
+      if (qReading.empty()) {
+        // move elements from one to another queue or assign and create new queue for qWriting
+        // important: qWriting must be empty afterwards
+        qReading = qWriting;
+        assert(qWriting.empty());
+      }
+
+    } // end: while
+
+    // if we processed all nodes and did not abort in between due to failed batching compatibility, the node rooted
+    // at subtreeRoot is considered as batchable
+    return qReading.empty() && qWriting.empty();
+  }
 }
