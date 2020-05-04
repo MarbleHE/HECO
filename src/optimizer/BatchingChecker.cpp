@@ -15,12 +15,16 @@ AbstractNode *BatchingChecker::getLargestBatchableSubtree(AbstractExpr *expr) {
   while (!processingQ.empty()) {
     auto curNode = processingQ.front();
     processingQ.pop();
+    std::cout << "curNode: " << curNode->getUniqueNodeId() << " | " << curNode->getChildrenNonNull().size()
+              << std::endl;
     if (isBatchableSubtree(curNode)) {
       // returns the largest batchable subtree that was found
       return curNode;
     } else {
-      // enqueue all children (as expr is an AbstractExpr, all of its children must be AbstractExprs too)
-      for (auto c : curNode->getChildrenNonNull()) processingQ.push(c);
+      // enqueue all OperatorExprs as any other will not be a batchable subtree
+      for (auto c : curNode->getChildrenNonNull()) {
+        if (dynamic_cast<OperatorExpr *>(c)) processingQ.push(c);
+      }
     }
   }
   // nullptr = no batchable subtree found
@@ -38,26 +42,30 @@ std::vector<AbstractNode *> BatchingChecker::getChildren(AbstractNode *node) {
     // no deeper check required as we allow (for the sake of simplicity) only max. 1 level deep transparent node
     // children of childrens because we "skip" the transparent node
     std::vector<AbstractNode *> children;
-    for (auto child : node->getChildrenNonNull()) {
+    int numGrandChildren;
+    for (auto child : node->castTo<OperatorExpr>()->getOperands()) {
       auto grandChildren = child->getChildrenNonNull();
+      numGrandChildren = grandChildren.size();
       children.insert(children.end(), grandChildren.begin(), grandChildren.end());
     }
     return children;
+  } else if (auto nodeAsMatrixElemRef = dynamic_cast<MatrixElementRef *>(node)) {
+    // do not enqueue anything further as we do not consider the MatrixElementRef's indices
+    return {};
   } else {
-    return node->getChildrenNonNull();
+    auto children = node->getChildrenNonNull();
+    return children;
   }
 }
 
 bool BatchingChecker::isBatchingCompatible(AbstractNode *baseNode, AbstractNode *curNode) {
   if (baseNode->getNodeType()!=curNode->getNodeType()) {
-    if (isTransparentNode(baseNode)==isTransparentNode(curNode)) {
-      // not compatible because baseNode.type != curNode.type
+    if (!isTransparentNode(baseNode) && !isTransparentNode(curNode)) {
+      // not compatible because nodes are of different type and we allow max. 1 transparent node per level
       return false;
-    } else if (isTransparentNode(baseNode)) {
-      // is compatible
-      return true;
     } else {
-      return isBatchingCompatible(curNode, baseNode);
+      // exactly one is transparent: due to baseNode.type != curNode.type both cannot be transparent at the same time
+      return isTransparentNode(baseNode) || isTransparentNode(curNode);
     }
   } else {  // baseNode.type == curNode.type
     // type-specific checks
@@ -77,46 +85,56 @@ bool BatchingChecker::isBatchingCompatible(AbstractNode *baseNode, AbstractNode 
           && baseNodeAsOperatorExpr->getOperands().size()==curNodeAsOperatorExpr->getOperands().size();
     } else {
       // handles all types that do not require any special handling, e.g., LiteralInt, Variable
-      // (it is sufficient for batching compatibility that baseNode and curNode have the same type
-      // in that case)
+      // (it is sufficient for batching compatibility that baseNode and curNode have the same type in that case)
       return true;
     }
   }
 }
 
 bool BatchingChecker::isBatchableSubtree(AbstractNode *subtreeRoot) {
-  std::queue<AbstractNode *> qReading({subtreeRoot});
-  std::queue<AbstractNode *> qWriting({subtreeRoot});
-  std::vector<AbstractNode *> nodesInCurrentLevel;
+  std::vector<AbstractNode *> qReading({subtreeRoot});
+  std::vector<AbstractNode *> qWriting;
+  int numChildrenPerNode = -1;
 
   while (!qReading.empty()) {
     auto curNode = qReading.front();
-    qReading.pop();
+    qReading.erase(qReading.begin());
 
-    // compare nodes
-    AbstractNode *baseNode = nodesInCurrentLevel.front();
-    for (auto nodeIt = std::next(nodesInCurrentLevel.begin()); nodeIt!=nodesInCurrentLevel.end(); ++nodeIt) {
-      // check batching compatibility
-      if (!isBatchingCompatible(baseNode, subtreeRoot)) {
-        // if we detected a batching-incompatibility, we can abort testing further
-        return false;
-      }
+    // enqueue children
+    auto children = getChildren(curNode);
+    if (numChildrenPerNode==-1) {
+      numChildrenPerNode = children.size();
+    } else if (numChildrenPerNode!=children.size()) {
+      return false;
+    }
+    for (auto child : children) { if (dynamic_cast<Operator *>(child)==nullptr) { qWriting.push_back(child); }}
 
-      // enqueue children
-      auto children = getChildren(subtreeRoot);
-      for (auto child : children) { qWriting.push(child); }
+    if (qReading.empty()) {
+      // compare nodes
+      AbstractNode *baseNode = qWriting.front();
+      for (auto nodeIt = std::next(qWriting.begin()); nodeIt!=qWriting.end(); ++nodeIt) {
+        // check batching compatibility
+        if (!isBatchingCompatible(baseNode, *nodeIt)) {
+          // if we detected a batching-incompatibility, we can abort testing further
+          return false;
+        } else if (isTransparentNode(*nodeIt)) {
+          // as we allow max. 1 transparent node per level, we need to make sure to compare any further transparent
+          // nodes with the one we found here
+          baseNode = *nodeIt;
+        }
+      } // end: for
 
-      if (qReading.empty()) {
-        // move elements from one to another queue or assign and create new queue for qWriting
-        // important: qWriting must be empty afterwards
-        qReading = qWriting;
-        assert(qWriting.empty());
-      }
+      // move elements from one to another queue or assign and create new queue for qWriting
+      // important: qWriting must be empty afterwards
+      qReading = std::move(qWriting);
 
-    } // end: while
+      // reset #children counter back to default value
+      numChildrenPerNode = -1;
+    }
 
-    // if we processed all nodes and did not abort in between due to failed batching compatibility, the node rooted
-    // at subtreeRoot is considered as batchable
-    return qReading.empty() && qWriting.empty();
-  }
+  } // end: while
+
+  // if we processed all nodes and did not abort in between due to failed batching compatibility, the node rooted
+  // at subtreeRoot is considered as batchable
+  return qReading.empty() && qWriting.empty();
 }

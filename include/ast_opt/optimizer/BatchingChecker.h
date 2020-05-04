@@ -8,7 +8,6 @@
 // TODO: add comments
 
 class BatchingChecker {
-  static AbstractNode *getLargestBatchableSubtree(AbstractExpr *expr);
 
   static bool isTransparentNode(AbstractNode *node);
 
@@ -17,6 +16,9 @@ class BatchingChecker {
   static bool isBatchableSubtree(AbstractNode *subtreeRoot);
 
   static std::vector<AbstractNode *> getChildren(AbstractNode *node);
+
+ public:
+  static AbstractNode *getLargestBatchableSubtree(AbstractExpr *expr);
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_OPTIMIZER_BATCHINGCHECKER_H_
