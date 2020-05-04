@@ -81,14 +81,15 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/utilities/NodeRelationship.cpp
         ${ast_optimizer_SOURCE_DIR}/src/evaluation/EvaluationAlgorithms.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/MatrixAssignm.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/GetMatrixSize.cpp)
+        ${ast_optimizer_SOURCE_DIR}/src/ast/GetMatrixSize.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/optimizer/BatchingChecker.cpp)
 
 set(HEADER_ONLY_SOURCES
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/OpSymbEnum.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/RandNumGen.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/TestUtils.h)
 
-#TODO: Go through this list and determine which headers aren't actually public
+# TODO (aviand): Go through this list and determine which headers aren't actually public
 set(PUBLIC_HEADERS
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractBinaryExpr.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractExpr.h

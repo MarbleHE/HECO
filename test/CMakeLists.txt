@@ -41,7 +41,8 @@ set(TEST_FILES
         NodeUtilsTest.cpp
         MatrixTest.cpp
         ControlFlowGraphVisitorTest.cpp
-        OperatorExprTest.cpp)
+        OperatorExprTest.cpp
+        BatchingCheckerTest.cpp)
 
 add_executable(testing-all
         ${TEST_FILES})
