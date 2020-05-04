@@ -41,14 +41,17 @@ std::vector<AbstractNode *> BatchingChecker::getChildren(AbstractNode *node) {
   if (isTransparentNode(node)) {
     // no deeper check required as we allow (for the sake of simplicity) only max. 1 level deep transparent node
     // children of childrens because we "skip" the transparent node
-    std::vector<AbstractNode *> children;
+    std::vector<AbstractNode *> resultNodes;
     int numGrandChildren;
     for (auto child : node->castTo<OperatorExpr>()->getOperands()) {
       auto grandChildren = child->getChildrenNonNull();
       numGrandChildren = grandChildren.size();
-      children.insert(children.end(), grandChildren.begin(), grandChildren.end());
+      for (auto gc : grandChildren) {
+        if (auto mef = dynamic_cast<MatrixElementRef *>(gc)) { resultNodes.push_back(mef->getOperand()); }
+        else { resultNodes.push_back(gc); }
+      }
     }
-    return children;
+    return resultNodes;
   } else if (auto nodeAsMatrixElemRef = dynamic_cast<MatrixElementRef *>(node)) {
     // do not enqueue anything further as we do not consider the MatrixElementRef's indices
     return {};
@@ -60,7 +63,7 @@ std::vector<AbstractNode *> BatchingChecker::getChildren(AbstractNode *node) {
 
 bool BatchingChecker::isBatchingCompatible(AbstractNode *baseNode, AbstractNode *curNode) {
   if (baseNode->getNodeType()!=curNode->getNodeType()) {
-    if (!isTransparentNode(baseNode) && !isTransparentNode(curNode)) {
+    if (isTransparentNode(baseNode)==isTransparentNode(curNode)) {
       // not compatible because nodes are of different type and we allow max. 1 transparent node per level
       return false;
     } else {
@@ -80,7 +83,7 @@ bool BatchingChecker::isBatchingCompatible(AbstractNode *baseNode, AbstractNode 
     } else if (auto baseNodeAsOperatorExpr = dynamic_cast<OperatorExpr *>(baseNode)) {
       auto curNodeAsOperatorExpr = dynamic_cast<OperatorExpr *>(curNode);
       // same operator
-      return baseNodeAsOperatorExpr->getOperator()==curNodeAsOperatorExpr->getOperator()
+      return *baseNodeAsOperatorExpr->getOperator()==*curNodeAsOperatorExpr->getOperator()
           // same number of operands
           && baseNodeAsOperatorExpr->getOperands().size()==curNodeAsOperatorExpr->getOperands().size();
     } else {
@@ -99,15 +102,19 @@ bool BatchingChecker::isBatchableSubtree(AbstractNode *subtreeRoot) {
   while (!qReading.empty()) {
     auto curNode = qReading.front();
     qReading.erase(qReading.begin());
-
     // enqueue children
+    // TODO ensure that all nodes have the same number of children
     auto children = getChildren(curNode);
     if (numChildrenPerNode==-1) {
       numChildrenPerNode = children.size();
     } else if (numChildrenPerNode!=children.size()) {
       return false;
     }
-    for (auto child : children) { if (dynamic_cast<Operator *>(child)==nullptr) { qWriting.push_back(child); }}
+    for (auto child : children) {
+      if (dynamic_cast<Operator *>(child)==nullptr && dynamic_cast<MatrixElementRef *>(child)==nullptr) {
+        qWriting.push_back(child);
+      }
+    }
 
     if (qReading.empty()) {
       // compare nodes

@@ -33,12 +33,12 @@ TEST(BatchingChecker, testAst) { /* NOLINT */
   }
 
   // determine the largest batchable subtree for each found expression
-  std::cout << "##############################################";
+  std::cout << "##############################################" << std::endl;
   for (auto expr : statementsTopExprs) {
     auto node = BatchingChecker::getLargestBatchableSubtree(expr);
     if (node!=nullptr) {
       std::cout << "-- subtree rooted in " << node->getUniqueNodeId() << std::endl;
     }
   }
-  std::cout << "##############################################";
+  std::cout << "##############################################" << std::endl;;
 }
