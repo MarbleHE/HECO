@@ -9,17 +9,12 @@
 #include <include/ast_opt/ast/Return.h>
 #include "AstTestingGenerator.h"
 
-TEST(BatchingChecker, testAst) { /* NOLINT */
+TEST(BatchingChecker, laplacianAst) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(61, ast);
 
   CompileTimeExpressionSimplifier ctes;
   ctes.visit(ast);
-
-  // uncomment to see how the CTES'ed AST looks like
-//  PrintVisitor pv;
-//  pv.useUniqueNodeIds(true);
-//  pv.visit(ast);
 
   // find all assignments targets (rvalue-like) in MatrixAssignm and VarAssignm statements
   auto func = ast.getRootNode()->castTo<Function>();
@@ -32,13 +27,17 @@ TEST(BatchingChecker, testAst) { /* NOLINT */
     }
   }
 
-  // determine the largest batchable subtree for each found expression
-  std::cout << "##############################################" << std::endl;
+  // determine the largest batchable subtree using the found expressions
+  AbstractNode *rootOfLargestBatchableSubtree;
   for (auto expr : statementsTopExprs) {
-    auto node = BatchingChecker::getLargestBatchableSubtree(expr);
-    if (node!=nullptr) {
-      std::cout << "-- subtree rooted in " << node->getUniqueNodeId() << std::endl;
-    }
+    rootOfLargestBatchableSubtree = BatchingChecker::getLargestBatchableSubtree(expr);
+    if (rootOfLargestBatchableSubtree!=nullptr) break;
   }
-  std::cout << "##############################################" << std::endl;;
+
+  // probably not the best idea to check for the UniqueNodeId as this may vary between compilers
+  EXPECT_EQ(rootOfLargestBatchableSubtree->getUniqueNodeId(), "OperatorExpr_3393");
+  EXPECT_EQ(rootOfLargestBatchableSubtree->getNodeType(), OperatorExpr().getNodeType());
+  EXPECT_EQ(rootOfLargestBatchableSubtree->countChildrenNonNull(), 10);
+  EXPECT_EQ(rootOfLargestBatchableSubtree->getDescendants().size(), 142);
+  EXPECT_TRUE(rootOfLargestBatchableSubtree->castTo<OperatorExpr>()->getOperator()->equals(ADDITION));
 }
