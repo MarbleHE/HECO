@@ -25,65 +25,6 @@ AbstractNode *BatchingChecker::getLargestBatchableSubtree(AbstractExpr *expr) {
   return nullptr;
 }
 
-bool BatchingChecker::isTransparentNode(AbstractNode *node) {
-  // a node is considered as transparent if it is an OperatorExpr because it can be batched by expanding any other
-  // expression using the neutral element e.g., a and b*2 –- can be batched as a*1 and b*2
-  return dynamic_cast<OperatorExpr *>(node)!=nullptr;
-}
-
-std::vector<AbstractNode *> BatchingChecker::getChildren(AbstractNode *node) {
-  if (auto nodeAsOperatorExpr = dynamic_cast<OperatorExpr *>(node)) {
-    // return the operands only as in the level before, when this OperatorExpr was added to the queue, we already
-    // compared the equality of the OperatorExprs operator
-    auto operands = nodeAsOperatorExpr->getOperands();
-    return std::vector<AbstractNode *>(operands.begin(), operands.end());
-  } else if (auto nodeAsMatrixElemRef = dynamic_cast<MatrixElementRef *>(node)) {
-    // do not enqueue anything further as we do not want to consider the MatrixElementRef's indices
-    return {};
-  } else {
-    // enqueue all children by default
-    auto children = node->getChildrenNonNull();
-    return children;
-  }
-}
-
-bool BatchingChecker::isBatchingCompatible(AbstractNode *baseNode, AbstractNode *curNode) {
-  if (baseNode->getNodeType()!=curNode->getNodeType()) {
-    // return true if...
-    // - exactly one of both is transparent:
-    //   (A XOR B)
-    //   <=> (A && !B) || (!A && B)
-    //   <=> (!A != !B)
-    // - one of both is a AbstractLiteral
-    return (!isTransparentNode(baseNode)!=!isTransparentNode(curNode))
-        || dynamic_cast<AbstractLiteral *>(baseNode)!=nullptr
-        || dynamic_cast<AbstractLiteral *>(curNode)!=nullptr;
-  } else {  // baseNode.type == curNode.type
-    // type-specific checks
-    if (auto baseNodeAsMatrixElementRef = dynamic_cast<MatrixElementRef *>(baseNode)) {
-      auto baseNodeVar = dynamic_cast<Variable *>(baseNodeAsMatrixElementRef->getOperand());
-      // as baseNode's type equals curNode's type, we know that curNodeAsMatrixElementRef != nullptr
-      auto curNodeAsMatrixElementRef = dynamic_cast<MatrixElementRef *>(curNode);
-      auto curNodeVar = dynamic_cast<Variable *>(curNodeAsMatrixElementRef->getOperand());
-      if (baseNodeVar==nullptr || curNodeVar==nullptr) {
-        throw std::runtime_error("MatrixElementRef unexpectedly does not refer to a Variable");
-      }
-      // check that both MatrixElementRefs refer to the same variable
-      return baseNodeVar->getIdentifier()==curNodeVar->getIdentifier();
-    } else if (auto baseNodeAsOperatorExpr = dynamic_cast<OperatorExpr *>(baseNode)) {
-      auto curNodeAsOperatorExpr = dynamic_cast<OperatorExpr *>(curNode);
-      // same operator
-      return *baseNodeAsOperatorExpr->getOperator()==*curNodeAsOperatorExpr->getOperator()
-          // same number of operands
-          && baseNodeAsOperatorExpr->getOperands().size()==curNodeAsOperatorExpr->getOperands().size();
-    } else {
-      // handles all types that do not require any special handling, e.g., LiteralInt, Variable
-      // (it is sufficient for batching compatibility that baseNode and curNode have the same type in that case)
-      return true;
-    }
-  }
-}
-
 bool BatchingChecker::isBatchableSubtree(AbstractNode *subtreeRoot) {
   std::vector<AbstractNode *> qReading({subtreeRoot});
   std::vector<AbstractNode *> qWriting;
@@ -133,4 +74,74 @@ bool BatchingChecker::isBatchableSubtree(AbstractNode *subtreeRoot) {
   // if we processed all nodes and did not abort in between due to failed batching compatibility, the node rooted
   // at subtreeRoot is considered as batchable
   return qReading.empty() && qWriting.empty();
+}
+
+bool BatchingChecker::isBatchingCompatible(AbstractNode *baseNode, AbstractNode *curNode) {
+  if (baseNode->getNodeType()!=curNode->getNodeType()) {
+    // return true if...
+    // - exactly one of both is transparent:
+    //   (A XOR B)
+    //   <=> (A && !B) || (!A && B)
+    //   <=> (!A != !B)
+    // - one of both is a AbstractLiteral
+    return (!isTransparentNode(baseNode)!=!isTransparentNode(curNode))
+        || dynamic_cast<AbstractLiteral *>(baseNode)!=nullptr
+        || dynamic_cast<AbstractLiteral *>(curNode)!=nullptr;
+  } else {  // baseNode.type == curNode.type
+    // type-specific checks
+    if (auto baseNodeAsMatrixElementRef = dynamic_cast<MatrixElementRef *>(baseNode)) {
+      auto baseNodeVar = dynamic_cast<Variable *>(baseNodeAsMatrixElementRef->getOperand());
+      // as baseNode's type equals curNode's type, we know that curNodeAsMatrixElementRef != nullptr
+      auto curNodeAsMatrixElementRef = dynamic_cast<MatrixElementRef *>(curNode);
+      auto curNodeVar = dynamic_cast<Variable *>(curNodeAsMatrixElementRef->getOperand());
+      if (baseNodeVar==nullptr || curNodeVar==nullptr) {
+        throw std::runtime_error("MatrixElementRef unexpectedly does not refer to a Variable");
+      }
+      // check that both MatrixElementRefs refer to the same variable
+      return baseNodeVar->getIdentifier()==curNodeVar->getIdentifier();
+    } else if (auto baseNodeAsOperatorExpr = dynamic_cast<OperatorExpr *>(baseNode)) {
+      auto curNodeAsOperatorExpr = dynamic_cast<OperatorExpr *>(curNode);
+      // same operator
+      return *baseNodeAsOperatorExpr->getOperator()==*curNodeAsOperatorExpr->getOperator()
+          // same number of operands
+          && baseNodeAsOperatorExpr->getOperands().size()==curNodeAsOperatorExpr->getOperands().size();
+    } else {
+      // handles all types that do not require any special handling, e.g., LiteralInt, Variable
+      // (it is sufficient for batching compatibility that baseNode and curNode have the same type in that case)
+      return true;
+    }
+  }
+}
+
+bool BatchingChecker::isTransparentNode(AbstractNode *node) {
+  // a node is considered as transparent if it is an OperatorExpr because it can be batched by expanding any other
+  // expression using the neutral element e.g., a and b*2 –- can be batched as a*1 and b*2
+  return dynamic_cast<OperatorExpr *>(node)!=nullptr;
+}
+
+std::vector<AbstractNode *> BatchingChecker::getChildren(AbstractNode *node) {
+  if (auto nodeAsOperatorExpr = dynamic_cast<OperatorExpr *>(node)) {
+    // return the operands only as in the level before, when this OperatorExpr was added to the queue, we already
+    // compared the equality of the OperatorExprs operator
+    auto operands = nodeAsOperatorExpr->getOperands();
+    return std::vector<AbstractNode *>(operands.begin(), operands.end());
+  } else if (auto nodeAsMatrixElemRef = dynamic_cast<MatrixElementRef *>(node)) {
+    // do not enqueue anything further as we do not want to consider the MatrixElementRef's indices
+    return {};
+  } else {
+    // enqueue all children by default
+    auto children = node->getChildrenNonNull();
+    return children;
+  }
+}
+
+bool BatchingChecker::shouldBeBatched(AbstractNode *largestBatchableSubtreeRoot) {
+  auto nodesInSubtree = largestBatchableSubtreeRoot->getDescendants();
+  auto numSuitableNodes = std::count_if(nodesInSubtree.begin(), nodesInSubtree.end(), [](AbstractNode *an) {
+    auto oe = dynamic_cast<OperatorExpr *>(an);
+    // a node is considered worthwhile for being batched if it includes a multiplication
+    return oe!=nullptr && oe->getOperator()->equals(MULTIPLICATION);
+  });
+  // a batchable subtree is considered as wortwhile for being batched if there are at least three multiplications
+  return numSuitableNodes >= 3;
 }
