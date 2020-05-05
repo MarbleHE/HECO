@@ -16,23 +16,23 @@ if (MSVC)
 
     # Force MSVC to use slightly less broken template rules
     add_compile_options(/permissive-)
-endif()
+endif ()
 
 ##############################
 # Download and install nlohmann-json if required
 ##############################
 
 find_package(nlohmann_json QUIET)
-if(NOT nlohmann_json_FOUND)
+if (NOT nlohmann_json_FOUND)
     message("Downloading nlohmann_json")
     include(FetchContent)
     set(JSON_BuildTests OFF CACHE INTERNAL "")
     FetchContent_Declare(
             nlohmann_json
-            GIT_REPOSITORY    https://github.com/nlohmann/json.git
-            GIT_TAG           v3.7.3)
+            GIT_REPOSITORY https://github.com/nlohmann/json.git
+            GIT_TAG v3.7.3)
     FetchContent_MakeAvailable(nlohmann_json)
-endif()
+endif ()
 
 ##############################
 # TARGET: ast_opt
@@ -96,14 +96,16 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/evaluation/EvaluationAlgorithms.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/MatrixAssignm.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/GetMatrixSize.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/optimizer/BatchingChecker.cpp)
+        ${ast_optimizer_SOURCE_DIR}/src/optimizer/BatchingChecker.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/mockup_classes/Ciphertext.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/RuntimeVisitor.cpp)
 
 set(HEADER_ONLY_SOURCES
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/OpSymbEnum.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/RandNumGen.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/TestUtils.h)
 
-# TODO (aviand): Go through this list and determine which headers aren't actually public
+# TODO: Go through this list and determine which headers aren't actually public
 set(PUBLIC_HEADERS
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractBinaryExpr.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractExpr.h
@@ -194,7 +196,7 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/ast_optConfig.cmake"
         DESTINATION lib/cmake/ast_opt)
 
 install(TARGETS ast_opt
-        EXPORT  ast_optTargets
+        EXPORT ast_optTargets
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib
         RUNTIME DESTINATION bin
@@ -227,8 +229,8 @@ target_link_libraries(ast_demo PRIVATE ast_opt)
 #
 # only if this is the root project
 ####################################################################################
-if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     message("Enabling ast_opt Tests")
     enable_testing()
     add_subdirectory(test EXCLUDE_FROM_ALL)
-endif()
+endif ()
