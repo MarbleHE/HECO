@@ -112,16 +112,15 @@ void AbstractNode::addChildren(const std::vector<AbstractNode *> &childrenToAdd,
     }
   } else {  // otherwise we need to add the children one-by-one by looking for free slots
     size_t childIdx = 0;
+    size_t idx = 0;
     // add child in first empty spot
-    for (auto it = getChildren().begin(); it!=getChildren().end() && childIdx < childrenToAdd.size(); ++it) {
-      if (*it==nullptr) {
-        auto childToAdd = childrenToAdd.at(childIdx);
-        auto newIterator = children.insert(it, childToAdd);  // insert the new child
-        // erase the nullptr that was at that position before and now moved to the next spot
-        children.erase(++newIterator);
-        doInsertPostAction(childToAdd);
+    while(idx < children.size() && childIdx < childrenToAdd.size()) {
+      if (children.at(idx)==nullptr) {
+        children.at(idx) = childrenToAdd.at(childIdx);// insert the new child
+        doInsertPostAction(children.at(idx));
         childIdx++;
       }
+      idx++;
     }
     // check if we were able to add all children, otherwise throw an exception
     if (childIdx!=childrenToAdd.size()) {
@@ -346,6 +345,8 @@ AbstractNode *AbstractNode::getOnlyParent() {
   auto parentsVector = getParentsNonNull();
   if (parentsVector.size() > 1) {
     throw std::logic_error("AbstractNode::getOnlyParent() failed because node has more than one parent!");
+  } else if (parentsVector.empty()) {
+    throw std::logic_error("AbstractNode::getOnlyParent() failed because node does not have a parent");
   }
   return this->getParentsNonNull().front();
 }

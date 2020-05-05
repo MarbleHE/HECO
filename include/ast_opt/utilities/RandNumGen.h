@@ -21,7 +21,7 @@ class RandLiteralGen {
   std::uniform_int_distribution<size_t> distInt;
   std::uniform_int_distribution<size_t> distBool;
   std::uniform_int_distribution<size_t> distString;
-  std::uniform_real_distribution<double> distFloat;
+  std::uniform_real_distribution<float> distFloat;
 
   static constexpr const std::pair<int, int> intRange = std::make_pair(0, 999'999);
   // note: increasing the maximum of floatRange trims the number of decimal places

@@ -1,25 +1,5 @@
 #include "ast_opt/ast/Matrix.h"
 
-template<typename T>
-std::string Matrix<T>::getNodeType() const {
-  return std::string("Matrix<" + std::string(typeid(T).name()) + ">");
-}
-
-template<typename T>
-void Matrix<T>::accept(Visitor &v) {
-  v.visit(*this);
-}
-
-template<typename T>
-int Matrix<T>::getMaxNumberChildren() {
-  return -1;
-}
-
-template<typename T>
-bool Matrix<T>::supportsCircuitMode() {
-  return true;
-}
-
 void throwUnknownOperatorException() {
   throw std::runtime_error("Unknown or unsupported operator/operands combination encountered! "
                            "Cannot determine correct Matrix operation.");
@@ -43,16 +23,10 @@ bool Matrix<AbstractExpr *>::operator==(const Matrix &rhs) const {
 }
 
 // ===== applyBinaryOperatorComponentwise ==========
-// - Matrix<T>
 // - Matrix<int>
 // - Matrix<float>
 // - Matrix<bool>
 // - Matrix<std::string>
-
-template<typename T>
-AbstractMatrix *Matrix<T>::applyBinaryOperatorComponentwise(Matrix<T> *, Operator *) {
-  throw std::runtime_error("applyOperatorComponentwise is unimplemented for type T: " + std::string(typeid(T).name()));
-}
 
 template<>
 AbstractMatrix *Matrix<int>::applyBinaryOperatorComponentwise(Matrix<int> *rhsOperand, Operator *os) {
@@ -168,7 +142,7 @@ AbstractMatrix *Matrix<bool>::applyBinaryOperatorComponentwise(Matrix<bool> *rhs
 
 template<>
 AbstractMatrix *Matrix<std::string>::applyBinaryOperatorComponentwise(Matrix<std::string> *rhsOperand, Operator *os) {
-  std::function<std::string(std::string, std::string)> operatorFunction;
+  std::function < std::string(std::string, std::string) > operatorFunction;
   if (os->equals(ArithmeticOp::ADDITION)) {
     operatorFunction = [](const std::string &a, const std::string &b) -> std::string { return a + b; };
   } else {
@@ -179,15 +153,9 @@ AbstractMatrix *Matrix<std::string>::applyBinaryOperatorComponentwise(Matrix<std
 }
 
 // ===== applyUnaryOperatorComponentwise ==========
-// - Matrix<T>
 // - Matrix<int>
 // - Matrix<float>
 // - Matrix<bool>
-
-template<typename T>
-AbstractMatrix *Matrix<T>::applyUnaryOperatorComponentwise(Operator *) {
-  throw std::runtime_error("applyUnaryOpComponentwise is unimplemented for type T: " + std::string(typeid(T).name()));
-}
 
 template<>
 AbstractMatrix *Matrix<int>::applyUnaryOperatorComponentwise(Operator *os) {
@@ -225,19 +193,45 @@ AbstractMatrix *Matrix<bool>::applyUnaryOperatorComponentwise(Operator *os) {
       ::applyOnEachElement(dynamic_cast<Matrix<bool> *>(this), operatorFunction));
 }
 
+// ===== isScalar ==========
+// - Matrix<bool>
+// - Matrix<int>
+// - Matrix<float>
+// - Matrix<double>
+// - Matrix<std::string>
+template<>
+bool Matrix<bool>::isScalar() const {
+  return dim.equals(1,1);
+}
+
+template<>
+bool Matrix<int>::isScalar() const {
+  return dim.equals(1,1);
+}
+
+template<>
+bool Matrix<float>::isScalar() const {
+  return dim.equals(1,1);
+}
+
+template<>
+bool Matrix<double>::isScalar() const {
+  return dim.equals(1,1);
+}
+
+template<>
+bool Matrix<std::string>::isScalar() const {
+  return dim.equals(1,1);
+}
+
+
 // ===== getElementAt ==========
-// - Matrix<T>
 // - Matrix<int>
 // - Matrix<float>
 // - Matrix<bool>
+// - Matrix<double>
 // - Matrix<std::string>
 // - Matrix<AbstractExpr*>
-
-template<typename T>
-AbstractExpr *Matrix<T>::getElementAt(int, int) {
-  throw std::logic_error("getElementAt failed: Value in matrix is of unknown type. "
-                         "Cannot determine associated AbstractLiteral subtype.");
-}
 
 template<>
 AbstractExpr *Matrix<int>::getElementAt(int row, int column) {
@@ -255,6 +249,12 @@ template<>
 AbstractExpr *Matrix<bool>::getElementAt(int row, int column) {
   boundCheckMatrixAccess(row, column);
   return new LiteralBool(values[row][column]);
+}
+
+template<>
+AbstractExpr *Matrix<double>::getElementAt(int row, int column) {
+  boundCheckMatrixAccess(row, column);
+  return new LiteralFloat(values[row][column]);
 }
 
 template<>
@@ -299,22 +299,12 @@ Matrix<AbstractExpr *>::Matrix(std::vector<std::vector<AbstractExpr *>> inputMat
 }
 
 // ===== toJson ==========
-// - Matrix<T>
 // - Matrix<AbstractExpr*>
-
-template<typename T>
-json Matrix<T>::toJson() const {
-  // Return the scalar value if this is a (1,1) scalar matrix
-  if (isScalar()) return json(getScalarValue());
-  // If this is a matrix of dimension (M,N), return an array of arrays like
-  //   [ [a00, a01, a02], [a10, a11, a12], ..., [aN0, aN1, ..., aMM] ],
-  // where each inner array represents a matrix row.
-  json arrayOfArrays = json::array();
-  for (int i = 0; i < values.size(); ++i) {
-    arrayOfArrays.push_back(json(values[i]));
-  }
-  return arrayOfArrays;
-}
+// - Matrix<bool>
+// - Matrix<int>
+// - Matrix<float>
+// - Matrix<double>
+// - Matrix<std::string>
 
 template<>
 [[nodiscard]] json Matrix<AbstractExpr *>::toJson() const {
@@ -328,16 +318,76 @@ template<>
   }
   return jsonOutput;
 }
+template<>
+json Matrix<bool>::toJson() const {
+  // Return the scalar value if this is a (1,1) scalar matrix
+  if (isScalar()) return json(getScalarValue());
+  // If this is a matrix of dimension (M,N), return an array of arrays like
+  //   [ [a00, a01, a02], [a10, a11, a12], ..., [aN0, aN1, ..., aMM] ],
+  // where each inner array represents a matrix row.
+  json arrayOfArrays = json::array();
+  for (int i = 0; i < values.size(); ++i) {
+    arrayOfArrays.push_back(json(values[i]));
+  }
+  return arrayOfArrays;
+}
+template<>
+json Matrix<int>::toJson() const {
+  // Return the scalar value if this is a (1,1) scalar matrix
+  if (isScalar()) return json(getScalarValue());
+  // If this is a matrix of dimension (M,N), return an array of arrays like
+  //   [ [a00, a01, a02], [a10, a11, a12], ..., [aN0, aN1, ..., aMM] ],
+  // where each inner array represents a matrix row.
+  json arrayOfArrays = json::array();
+  for (int i = 0; i < values.size(); ++i) {
+    arrayOfArrays.push_back(json(values[i]));
+  }
+  return arrayOfArrays;
+}
+template<>
+json Matrix<float>::toJson() const {
+  // Return the scalar value if this is a (1,1) scalar matrix
+  if (isScalar()) return json(getScalarValue());
+  // If this is a matrix of dimension (M,N), return an array of arrays like
+  //   [ [a00, a01, a02], [a10, a11, a12], ..., [aN0, aN1, ..., aMM] ],
+  // where each inner array represents a matrix row.
+  json arrayOfArrays = json::array();
+  for (int i = 0; i < values.size(); ++i) {
+    arrayOfArrays.push_back(json(values[i]));
+  }
+  return arrayOfArrays;
+}
+
+template<>
+json Matrix<double>::toJson() const {
+  // Return the scalar value if this is a (1,1) scalar matrix
+  if (isScalar()) return json(getScalarValue());
+  // If this is a matrix of dimension (M,N), return an array of arrays like
+  //   [ [a00, a01, a02], [a10, a11, a12], ..., [aN0, aN1, ..., aMM] ],
+  // where each inner array represents a matrix row.
+  json arrayOfArrays = json::array();
+  for (int i = 0; i < values.size(); ++i) {
+    arrayOfArrays.push_back(json(values[i]));
+  }
+  return arrayOfArrays;
+}
+
+template<>
+json Matrix<std::string>::toJson() const {
+  // Return the scalar value if this is a (1,1) scalar matrix
+  if (isScalar()) return json(getScalarValue());
+  // If this is a matrix of dimension (M,N), return an array of arrays like
+  //   [ [a00, a01, a02], [a10, a11, a12], ..., [aN0, aN1, ..., aMM] ],
+  // where each inner array represents a matrix row.
+  json arrayOfArrays = json::array();
+  for (int i = 0; i < values.size(); ++i) {
+    arrayOfArrays.push_back(json(values[i]));
+  }
+  return arrayOfArrays;
+}
 
 // ===== clone ==========
-// - Matrix<T>
 // - Matrix<AbstractExpr*>
-
-template<typename T>
-Matrix<T> *Matrix<T>::clone(bool keepOriginalUniqueNodeId) {
-  // it's sufficient to call the copy constructor that creates a copy of all primitives (int, float, etc.)
-  return new Matrix<T>(*this);
-}
 
 template<>
 Matrix<AbstractExpr *> *Matrix<AbstractExpr *>::clone(bool keepOriginalUniqueNodeId) {
@@ -352,7 +402,6 @@ Matrix<AbstractExpr *> *Matrix<AbstractExpr *>::clone(bool keepOriginalUniqueNod
 }
 
 // ===== addElementToStringStream ==========
-// - Matrix<T>
 // - Matrix<AbstractExpr*>
 
 template<>
@@ -361,23 +410,13 @@ void Matrix<AbstractExpr *>::addElementToStringStream(AbstractExpr *elem, std::s
   s << *elem;
 }
 
-template<typename T>
-void Matrix<T>::addElementToStringStream(T elem, std::stringstream &s) {
-  s << elem;
-}
-
 // ===== setElementAt  ==========
-// - Matrix<T>
 // - Matrix<AbstractExpr*>
 // - Matrix<int>
 // - Matrix<float>
 // - Matrix<bool>
 // - Matrix<std::string>
 
-template<typename T>
-void Matrix<T>::setElementAt(int, int, AbstractExpr *) {
-  throw std::runtime_error("setElementAt is unimplemented for type T: " + std::string(typeid(T).name()));
-}
 
 template<>
 void Matrix<AbstractExpr *>::setElementAt(int row, int column, AbstractExpr *element) {
@@ -431,14 +470,7 @@ void Matrix<std::string>::setElementAt(int row, int column, AbstractExpr *elemen
 }
 
 // ===== replaceChild ==========
-// - Matrix<T>
 // - Matrix<AbstractExpr*>
-
-template<typename T>
-void Matrix<T>::replaceChild(AbstractNode *originalChild, AbstractNode *newChildToBeAdded) {
-  // values T are primitives (e.g., int, float, bool, strings) and
-  AbstractNode::replaceChild(originalChild, newChildToBeAdded);
-}
 
 template<>
 void Matrix<AbstractExpr *>::replaceChild(AbstractNode *originalChild, AbstractNode *newChildToBeAdded) {
@@ -454,13 +486,7 @@ void Matrix<AbstractExpr *>::replaceChild(AbstractNode *originalChild, AbstractN
 }
 
 // ===== containsAbstractExprs ==========
-// - Matrix<T>
 // - Matrix<AbstractExpr*>
-
-template<typename T>
-bool Matrix<T>::containsAbstractExprs() {
-  return false;
-}
 
 template<>
 bool Matrix<AbstractExpr *>::containsAbstractExprs() {
