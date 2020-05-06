@@ -14,11 +14,11 @@ Ciphertext Ciphertext::operator+(const Ciphertext &ctxt) const {
 }
 
 Ciphertext Ciphertext::operator+(const double plaintextScalar) const {
-  Ciphertext ctxt = getCiphertext(plaintextScalar, getNumCiphertextElements(), getNumCiphertextSlots());
+  Ciphertext ctxt = generateCiphertext(plaintextScalar, getNumCiphertextElements(), getNumCiphertextSlots());
   return applyBinaryOp(std::plus<double>{}, *this, ctxt);
 }
 
-Ciphertext Ciphertext::getCiphertext(const double plaintextScalar, int fillNSlots, int totalNumCtxtSlots) const {
+Ciphertext Ciphertext::generateCiphertext(const double plaintextScalar, int fillNSlots, int totalNumCtxtSlots) const {
   Ciphertext ctxt({}, totalNumCtxtSlots);
   ctxt.offsetOfFirstElement = getOffsetOfFirstElement();
   auto targetIdx = computeCyclicEndIndex(ctxt.getOffsetOfFirstElement(), getNumCiphertextElements());
@@ -34,7 +34,7 @@ Ciphertext Ciphertext::operator*(const Ciphertext &ctxt) const {
 }
 
 Ciphertext Ciphertext::operator*(const double plaintextScalar) const {
-  Ciphertext ctxt = getCiphertext(plaintextScalar, getNumCiphertextElements(), getNumCiphertextSlots());
+  Ciphertext ctxt = generateCiphertext(plaintextScalar, getNumCiphertextElements(), getNumCiphertextSlots());
   return applyBinaryOp(std::multiplies<double>{}, *this, ctxt);
 }
 
@@ -122,9 +122,16 @@ double &Ciphertext::getElementAt(int n) {
   return data.at(n);
 }
 
-Ciphertext Ciphertext::sumaAndRotate() {
-  // compute initial rotation factor
-  auto rotationFactor = getNumCiphertextSlots()/2;
+Ciphertext Ciphertext::sumaAndRotateAll() {
+  return sumAndRotate(getNumCiphertextSlots()/2);
+}
+
+Ciphertext Ciphertext::sumAndRotatePartially(int numElementsToSum) {
+  return sumAndRotate(numElementsToSum/2);
+}
+
+Ciphertext Ciphertext::sumAndRotate(int initialRotationFactor) {
+  int rotationFactor = initialRotationFactor;
   // create a copy of this ctxt as otherwise we would need to treat the first iteration differently
   auto ctxt = *this;
   // perform rotate-and-sum in total requiring log_2(#ciphertextSlots) rotations

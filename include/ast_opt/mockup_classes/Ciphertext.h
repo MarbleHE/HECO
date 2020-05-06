@@ -16,6 +16,8 @@ class Ciphertext {
   /// the number of elements in the ciphertext starting at position offsetOfFirstElement
   int numCiphertextElements;
 
+  Ciphertext sumAndRotate(int initialRotationFactor);
+
  public:
   explicit Ciphertext(std::vector<double> data, int numCiphertextSlots = 8'192);
 
@@ -48,13 +50,16 @@ class Ciphertext {
 
   [[nodiscard]] int computeCyclicEndIndex(int startIndex, int numElements) const;
 
-  [[nodiscard]] Ciphertext getCiphertext(double plaintextScalar, int fillNSlots, int totalNumCtxtSlots) const;
+  [[nodiscard]] Ciphertext generateCiphertext(double plaintextScalar, int fillNSlots, int totalNumCtxtSlots) const;
 
   Ciphertext rotate(int n);
 
   double &getElementAt(int n);
 
-  Ciphertext sumaAndRotate();
+  Ciphertext sumaAndRotateAll();
+
+  Ciphertext sumAndRotatePartially(int numElementsToSum);
+
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_MOCKUP_CLASSES_CIPHERTEXT_H_
