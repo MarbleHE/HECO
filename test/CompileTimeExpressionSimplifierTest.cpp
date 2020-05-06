@@ -2560,7 +2560,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, fourNestedLoopsLaplacianSharpenin
   //     return img2;
   // }
   // -- expected --
-  // VecInt2D runLaplacianSharpeningAlgorithm(Vector<int> img, int imgSize, int x, int y) {
+  // VecInt2D runLaplacianSharpeningAlgorithm(Vector<int> img, int imgSize) {
   //     Matrix<int> img2;
   //     for (int x = 1; x < imgSize - 1; ++x) {
   //         for (int y = 1; y < imgSize - 1; ++y) {
