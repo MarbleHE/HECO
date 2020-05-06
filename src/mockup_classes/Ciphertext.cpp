@@ -84,13 +84,14 @@ bool Ciphertext::operator!=(const Ciphertext &rhs) const {
 Ciphertext Ciphertext::applyBinaryOp(const std::function<double(double, double)> &binaryOp,
                                      const Ciphertext &lhs,
                                      const Ciphertext &rhs) const {
-  lhs.verifyNumElementsAndAlignment(rhs);
+  //lhs.verifyNumElementsAndAlignment(rhs);
+  if (lhs.getNumCiphertextSlots()!=rhs.getNumCiphertextSlots())
+    throw std::runtime_error("");
 
-  Ciphertext result({});
+  Ciphertext result({}, lhs.getNumCiphertextSlots());
   result.offsetOfFirstElement = getOffsetOfFirstElement();
 
-  auto targetIdx = computeCyclicEndIndex(offsetOfFirstElement, getNumCiphertextElements());
-  for (auto i = offsetOfFirstElement; i!=cyclicIncrement(targetIdx, result.data); i = cyclicIncrement(i, result.data)) {
+  for (auto i = 0; i < lhs.getNumCiphertextSlots(); ++i) {
     result.data[i] = binaryOp(lhs.data[i], rhs.data[i]);
   }
   result.numCiphertextElements = getNumCiphertextElements();
@@ -121,6 +122,16 @@ double &Ciphertext::getElementAt(int n) {
   return data.at(n);
 }
 
-Ciphertext sumaAndRotate() {
-
+Ciphertext Ciphertext::sumaAndRotate() {
+  // compute initial rotation factor
+  auto rotationFactor = getNumCiphertextSlots()/2;
+  // create a copy of this ctxt as otherwise we would need to treat the first iteration differently
+  auto ctxt = *this;
+  // perform rotate-and-sum in total requiring log_2(#ciphertextSlots) rotations
+  while (rotationFactor >= 1) {
+    auto rotatedCtxt = ctxt.rotate(rotationFactor);
+    ctxt = ctxt + rotatedCtxt;
+    rotationFactor = rotationFactor/2;
+  }
+  return ctxt;
 }

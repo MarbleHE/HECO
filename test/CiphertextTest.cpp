@@ -75,3 +75,22 @@ TEST(CiphertextTest, rotatePositiveJumpOver) { /* NOLINT */
     EXPECT_EQ(rotatedCtxt.getElementAt(i), (7936 + i)%numCiphertextSlots);
 }
 
+TEST(CiphertextTest, sumAndRotate) { /* NOLINT */
+  Ciphertext ctxt({32, 12, 53, 32, 1}, 32);
+  auto result = ctxt.sumaAndRotate();
+  for (int i = 0; i < ctxt.getNumCiphertextSlots(); ++i) EXPECT_EQ(result.getElementAt(i), 130);
+}
+
+TEST(CiphertextTest, sumAndRotate2) { /* NOLINT */
+  Ciphertext ctxt({32, 12, 53, 32, 1}, 8192);
+  auto result = ctxt.sumaAndRotate();
+  for (int i = 0; i < ctxt.getNumCiphertextSlots(); ++i) EXPECT_EQ(result.getElementAt(i), 130);
+}
+
+TEST(CiphertextTest, sumAndRotate3) { /* NOLINT */
+  Ciphertext ctxt
+      ({7, 50, 73, 59, 16, 19, 14, 89, 100, 30, 67, 38, 40, 100, 98, 32, 59, 93, 42, 50, 18, 92, 95, 66, 24, 4, 5, 22,
+        60, 18, 76, 35}, 32);
+  auto result = ctxt.sumaAndRotate();
+  for (int i = 0; i < ctxt.getNumCiphertextSlots(); ++i) EXPECT_EQ(result.getElementAt(i), 1591);
+}

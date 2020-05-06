@@ -53,6 +53,8 @@ class Ciphertext {
   Ciphertext rotate(int n);
 
   double &getElementAt(int n);
+
+  Ciphertext sumaAndRotate();
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_MOCKUP_CLASSES_CIPHERTEXT_H_
