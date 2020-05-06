@@ -40,13 +40,10 @@ TEST(CiphertextTest, copyCtor) { /* NOLINT */
   EXPECT_EQ(ctxtB, Ciphertext({10, 20, 30, 40}));
 }
 
-// TODO test for rotation where rotation factor is negative
-
-// TODO test for rotation where rotation "jumps over" (cyclic property)
-
-TEST(CiphertextTest, textRotate) { /* NOLINT */
+TEST(CiphertextTest, rotatePositive) { /* NOLINT */
   Ciphertext ctxtA({10, 20, 30, 40});
   auto rotatedA = ctxtA.rotate(14);
+  EXPECT_EQ(rotatedA.getOffsetOfFirstElement(), 14);
   for (int i = 0; i < 14; ++i) EXPECT_EQ(rotatedA.getElementAt(i), 0);
   EXPECT_EQ(rotatedA.getElementAt(14), 10);
   EXPECT_EQ(rotatedA.getElementAt(15), 20);
@@ -54,3 +51,27 @@ TEST(CiphertextTest, textRotate) { /* NOLINT */
   EXPECT_EQ(rotatedA.getElementAt(17), 40);
   for (int i = 18; i < rotatedA.getNumCiphertextSlots(); ++i) EXPECT_EQ(rotatedA.getElementAt(i), 0);
 }
+
+TEST(CiphertextTest, rotateNegative) { /* NOLINT */
+  Ciphertext ctxtA({10, 20, 30, 40});
+  auto rotatedA = ctxtA.rotate(-3);
+  EXPECT_EQ(rotatedA.getOffsetOfFirstElement(), -3);
+  for (int i = 1; i < 8188; ++i) EXPECT_EQ(rotatedA.getElementAt(i), 0);
+  EXPECT_EQ(rotatedA.getElementAt(8189), 10);
+  EXPECT_EQ(rotatedA.getElementAt(8190), 20);
+  EXPECT_EQ(rotatedA.getElementAt(8191), 30);
+  EXPECT_EQ(rotatedA.getElementAt(0), 40);
+}
+
+TEST(CiphertextTest, rotatePositiveJumpOver) { /* NOLINT */
+  auto numCiphertextSlots = 8192;
+  std::vector<double> seqNums(numCiphertextSlots);
+  std::iota(seqNums.begin(), seqNums.end(), 0);
+  Ciphertext ctxt(seqNums, numCiphertextSlots);
+  auto rotatedCtxt = ctxt.rotate(256);
+  EXPECT_EQ(rotatedCtxt.getOffsetOfFirstElement(), 256);
+  // numCiphertextSlots - rotationFactor = 8192 - 256 = 7936 => ctxt slot 0 has value 7936
+  for (int i = 0; i < ctxt.getNumCiphertextSlots(); ++i)
+    EXPECT_EQ(rotatedCtxt.getElementAt(i), (7936 + i)%numCiphertextSlots);
+}
+

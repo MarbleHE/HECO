@@ -111,6 +111,7 @@ int Ciphertext::cyclicIncrement(int i, const std::vector<double> &vec) {
 
 Ciphertext Ciphertext::rotate(int n) {
   Ciphertext result = *this;
+  result.offsetOfFirstElement = (getOffsetOfFirstElement() + n)%result.getNumCiphertextSlots();
   auto rotTarget = (n > 0) ? (result.data.begin() + result.getNumCiphertextSlots() - n) : (result.data.begin() - n);
   std::rotate(result.data.begin(), rotTarget, result.data.end());
   return result;
@@ -118,4 +119,8 @@ Ciphertext Ciphertext::rotate(int n) {
 
 double &Ciphertext::getElementAt(int n) {
   return data.at(n);
+}
+
+Ciphertext sumaAndRotate() {
+
 }
