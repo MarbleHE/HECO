@@ -105,6 +105,14 @@ void OperatorExpr::setAttributes(Operator *newOperator, std::vector<AbstractExpr
           // if this literal is the operator's neutral element (e.g., 0 for ADDITION), drop this element by not
           // adding it to the new OperatorExpr's operands
           continue;
+        } else if (getOperator()->equals(MULTIPLICATION) &&
+            valueAsAbstractLiteral!=nullptr && (valueAsAbstractLiteral->isEqual(new LiteralInt(0))
+            || valueAsAbstractLiteral->isEqual(new LiteralFloat(0.0f)))) {
+          // drop any other operands as <something> * 0 = 0
+          simplifiedAbstractExprs.clear();
+          simplifiedAbstractExprs.push_back(c);
+          // do not process any other operands
+          break;
         } else if (valueAsAbstractLiteral!=nullptr && !valueAsAbstractLiteral->getMatrix()->containsAbstractExprs()) {
           // if this is an AbstractLiteral not containing AbstractExprs (but primitive values such as int, float),
           // then we can use that AbstractLiteral for applying the operator on it

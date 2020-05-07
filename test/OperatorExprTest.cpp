@@ -194,3 +194,8 @@ TEST_F(OperatorExprFixture, leftAssociateOperatorRequiringAllKnownOperands) {   
                        {new LiteralInt(1), new LiteralInt(3), new Variable("a"), new LiteralInt(2)});
   EXPECT_TRUE(opExpr.isEqual(expectedOperatorExpr));
 }
+
+TEST_F(OperatorExprFixture, test) {
+  auto oe = OperatorExpr(new Operator(MULTIPLICATION), {new LiteralInt(0), new Variable("a"), new LiteralInt(34)});
+  EXPECT_TRUE(oe.isEqual(new OperatorExpr(new Operator(MULTIPLICATION), {new LiteralInt(0)})));
+}
