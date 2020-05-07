@@ -1,4 +1,5 @@
 #include <regex>
+#include <include/ast_opt/visitor/CompileTimeExpressionSimplifier.h>
 #include "ast_opt/visitor/PrintVisitor.h"
 #include "ast_opt/visitor/SecretTaintingVisitor.h"
 #include "ast_opt/utilities/DotPrinter.h"
@@ -7,6 +8,8 @@
 #include "ast_opt/ast/Call.h"
 #include "ast_opt/ast/Block.h"
 #include "ast_opt/ast/VarAssignm.h"
+#include "ast_opt/ast/For.h"
+#include "ast_opt/ast/MatrixAssignm.h"
 #include "AstTestingGenerator.h"
 #include "gtest/gtest.h"
 
@@ -341,4 +344,255 @@ TEST_F(SecretTaintingFixture, unsupportedStatement_CallExternal) {  /* NOLINT */
   // perform tainting
   SecretTaintingVisitor stv;
   ASSERT_THROW(stv.visit(ast), std::invalid_argument);
+}
+
+TEST_F(SecretTaintingFixture, taintedMatrixAssignmTest) { /* NOLINT */
+  generateAst(60);
+
+  // perform compile-time expression simplification (limit max unrolled loops to 2)
+  CompileTimeExpressionSimplifier ctes(CtesConfiguration(2));
+  ctes.visit(ast);
+
+  // perform tainting
+  SecretTaintingVisitor stv;
+  stv.visit(ast);
+  EXPECT_EQ(stv.getSecretTaintingList().size(), 30);
+
+//  Function_0: (runLaplacianSharpeningAlgorithm)	[global]
+//  	ParameterList_1:	[Function_0]...........................................................// tainted
+//  		FunctionParameter_5:...................................................................// tainted
+//  			Datatype_3: (encrypted int)........................................................// tainted
+//  			Variable_4: (img)....................... ..........................................// tainted
+//  		FunctionParameter_8:
+//  			Datatype_6: (plaintext int)
+//  			Variable_7: (imgSize)
+//  	Block_2:
+//  		VarDecl_3338: (img2)	[Block_2]
+//  			Datatype_3339: (plaintext int)
+//  		For_157:
+//  			VarDecl_139: (x)
+//  				Datatype_140: (plaintext int)
+//  				LiteralInt_142: (1)
+//  			LogicalExpr_149:
+//  				Variable_143: (x)
+//  				Operator_150: (<)
+//  				ArithmeticExpr_145:
+//  					Variable_144: (imgSize)
+//  					Operator_146: (sub)
+//  					LiteralInt_148: (1)
+//  			VarAssignm_156: (x)
+//  				ArithmeticExpr_154:
+//  					Variable_151: (x)
+//  					Operator_155: (add)
+//  					LiteralInt_153: (1)
+//  			Block_138:	[Block_138]
+//  				For_137:	[Block_138]
+//  					VarDecl_119: (y)
+//  						Datatype_120: (plaintext int)
+//  						LiteralInt_122: (1)
+//  					LogicalExpr_129:
+//  						Variable_123: (y)
+//  						Operator_130: (<)
+//  						ArithmeticExpr_125:
+//  							Variable_124: (imgSize)
+//  							Operator_126: (sub)
+//  							LiteralInt_128: (1)
+//  					VarAssignm_136: (y)
+//  						ArithmeticExpr_134:
+//  							Variable_131: (y)
+//  							Operator_135: (add)
+//  							LiteralInt_133: (1)
+//  					Block_118:	[Block_118]....................................................// tainted
+//  						MatrixAssignm_117:	[Block_118]........................................// tainted
+//  (0,0)						MatrixElementRef_98:
+//  								Variable_88: (img2)
+//  								LiteralInt_90: (0)
+//  								OperatorExpr_3161:
+//  									Operator_97: (add)
+//  									OperatorExpr_3162:
+//  										Operator_94: (mult)
+//  										Variable_91: (imgSize)
+//  										Variable_92: (x)
+//  									Variable_95: (y)
+//  							OperatorExpr_3163:.................................................// tainted
+//  								Operator_116: (sub)
+//  (0,0)							MatrixElementRef_109:....................... ..................// tainted
+//  									Variable_99: (img).........................................// tainted
+//  									LiteralInt_101: (0)
+//  									OperatorExpr_3164:
+//  										Operator_108: (add)
+//  										OperatorExpr_3165:
+//  											Operator_105: (mult)
+//  											Variable_102: (imgSize)
+//  											Variable_103: (x)
+//  										Variable_106: (y)
+//  								OperatorExpr_3166:.............................................// tainted
+//  									Operator_114: (div)
+//  									OperatorExpr_3337:.........................................// tainted
+//  										Operator_3167: (add)
+//  (0,0)									MatrixElementRef_3188:.................................// tainted
+//  											Variable_3168: (img)...............................// tainted
+//  											LiteralInt_3170: (0)
+//  											OperatorExpr_3185:
+//  												Operator_3171: (add)
+//  												OperatorExpr_3181:
+//  													Operator_3172: (mult)
+//  													Variable_3173: (imgSize)
+//  													OperatorExpr_3178:
+//  														Operator_3174: (add)
+//  														Variable_3175: (x)
+//  														LiteralInt_3177: (-1)
+//  												Variable_3182: (y)
+//  												LiteralInt_3184: (-1)
+//  (0,0)									MatrixElementRef_3203:.................................// tainted
+//  											Variable_3189: (img)...............................// tainted
+//  											LiteralInt_3191: (0)
+//  											OperatorExpr_3200:
+//  												Operator_3192: (add)
+//  												OperatorExpr_3196:
+//  													Operator_3193: (mult)
+//  													Variable_3194: (imgSize)
+//  													Variable_3195: (x)
+//  												Variable_3197: (y)
+//  												LiteralInt_3199: (-1)
+//  (0,0)									MatrixElementRef_3224:.................................// tainted
+//  											Variable_3204: (img)...............................// tainted
+//  											LiteralInt_3206: (0)
+//  											OperatorExpr_3221:
+//  												Operator_3207: (add)
+//  												OperatorExpr_3217:
+//  													Operator_3208: (mult)
+//  													Variable_3209: (imgSize)
+//  													OperatorExpr_3214:
+//  														Operator_3210: (add)
+//  														Variable_3211: (x)
+//  														LiteralInt_3213: (1)
+//  												Variable_3218: (y)
+//  												LiteralInt_3220: (-1)
+//  (0,0)									MatrixElementRef_3241:.................................// tainted
+//  											Variable_3225: (img)...............................// tainted
+//  											LiteralInt_3227: (0)
+//  											OperatorExpr_3240:
+//  												Operator_3228: (add)
+//  												OperatorExpr_3238:
+//  													Operator_3229: (mult)
+//  													Variable_3230: (imgSize)
+//  													OperatorExpr_3235:
+//  														Operator_3231: (add)
+//  														Variable_3232: (x)
+//  														LiteralInt_3234: (-1)
+//  												Variable_3239: (y)
+//  										OperatorExpr_3256:.....................................// tainted
+//  											Operator_3242: (mult)
+//  (0,0)										MatrixElementRef_3253:.............................// tainted
+//  												Variable_3243: (img)...........................// tainted
+//  												LiteralInt_3245: (0)
+//  												OperatorExpr_3252:
+//  													Operator_3246: (add)
+//  													OperatorExpr_3250:
+//  														Operator_3247: (mult)
+//  														Variable_3248: (imgSize)
+//  														Variable_3249: (x)
+//  													Variable_3251: (y)
+//  											LiteralInt_3255: (-8)
+//  (0,0)									MatrixElementRef_3279:.................................// tainted
+//  											Variable_3263: (img)...............................// tainted
+//  											LiteralInt_3265: (0)
+//  											OperatorExpr_3278:
+//  												Operator_3266: (add)
+//  												OperatorExpr_3276:
+//  													Operator_3267: (mult)
+//  													Variable_3268: (imgSize)
+//  													OperatorExpr_3273:
+//  														Operator_3269: (add)
+//  														Variable_3270: (x)
+//  														LiteralInt_3272: (1)
+//  												Variable_3277: (y)
+//  (0,0)									MatrixElementRef_3300:.................................// tainted
+//  											Variable_3280: (img)...............................// tainted
+//  											LiteralInt_3282: (0)
+//  											OperatorExpr_3297:
+//  												Operator_3283: (add)
+//  												OperatorExpr_3293:
+//  													Operator_3284: (mult)
+//  													Variable_3285: (imgSize)
+//  													OperatorExpr_3290:
+//  														Operator_3286: (add)
+//  														Variable_3287: (x)
+//  														LiteralInt_3289: (-1)
+//  												Variable_3294: (y)
+//  												LiteralInt_3296: (1)
+//  (0,0)									MatrixElementRef_3315:.................................// tainted
+//  											Variable_3301: (img)...............................// tainted
+//  											LiteralInt_3303: (0)
+//  											OperatorExpr_3312:
+//  												Operator_3304: (add)
+//  												OperatorExpr_3308:
+//  													Operator_3305: (mult)
+//  													Variable_3306: (imgSize)
+//  													Variable_3307: (x)
+//  												Variable_3309: (y)
+//  												LiteralInt_3311: (1)
+//  (0,0)									MatrixElementRef_3336:.................................// tainted
+//  											Variable_3316: (img)...............................// tainted
+//  											LiteralInt_3318: (0)
+//  											OperatorExpr_3333:
+//  												Operator_3319: (add)
+//  												OperatorExpr_3329:
+//  													Operator_3320: (mult)
+//  													Variable_3321: (imgSize)
+//  													OperatorExpr_3326:
+//  														Operator_3322: (add)
+//  														Variable_3323: (x)
+//  														LiteralInt_3325: (1)
+//  												Variable_3330: (y)
+//  												LiteralInt_3332: (1)
+//  									LiteralInt_112: (2)
+//  		Return_159:	[Block_2]
+//  			Variable_158: (img2)
+//
+
+  auto function = ast.getRootNode()->castTo<Function>();
+  // ParameterList_1 and the first child (FunctionParameter_5) including its descendants
+  expectedTaintedNodeIds.insert(function->getParameterList()->getUniqueNodeId());
+  addStatementAndItsDescendantsToExpectedTaintedNodes(function->getParameterList()->getChildAtIndex(0));
+
+  // Block_2 -> 2nd statement (For_157) -> For-loop body (Block_138) -> For-loop (For_137)
+  auto outerForLoop = function->getBodyStatements().at(1)->castTo<For>();
+  auto innerForLoop = outerForLoop->getStatementToBeExecuted()->castTo<Block>()->getStatements().at(0)->castTo<For>();
+
+  // add tainted: For-loop (For_137) -> For-loop body (Block_118)
+  auto innerForLoopBlock = innerForLoop->getStatementToBeExecuted();
+  expectedTaintedNodeIds.insert(innerForLoopBlock->getUniqueNodeId());
+
+  // add tainted: 1st statement (MatrixAssignm_117)
+  auto matrixAssignm = innerForLoopBlock->getChildAtIndex(0)->castTo<MatrixAssignm>();
+  expectedTaintedNodeIds.insert(matrixAssignm->getUniqueNodeId());
+
+  // add tainted: all MatrixElementRef
+  // add tainted: all Variable with identifier 'img'
+  for (auto node : matrixAssignm->getValue()->getDescendants()) {
+    auto mxElementRef = dynamic_cast<MatrixElementRef *>(node);
+    auto var = dynamic_cast<Variable *>(node);
+    auto operatorExpr = dynamic_cast<OperatorExpr *>(node);
+    if (mxElementRef!=nullptr
+        || (var!=nullptr && var->getIdentifier()=="img")
+        || (operatorExpr!=nullptr
+            && ((operatorExpr->getOperator()->equals(MULTIPLICATION)
+                && operatorExpr->getOperands().at(1)->isEqual(new LiteralInt(-8)))
+                || (operatorExpr->getOperator()->equals(ADDITION) && operatorExpr->countChildrenNonNull()==10)
+                || (operatorExpr->getOperator()->equals(DIVISION))))) {
+      expectedTaintedNodeIds.insert(node->getUniqueNodeId());
+    }
+  }
+  // add tainted: OperatorExpr with subtraction operator
+  expectedTaintedNodeIds.insert(matrixAssignm->getValue()->getUniqueNodeId());
+
+  // check tainted status
+  // - make sure that the number of expected tainted nodes and the actual number of tainted nodes equals
+  EXPECT_EQ(stv.getSecretTaintingList().size(), expectedTaintedNodeIds.size());
+  // - check for each tainted if its expected to be tainted
+  for (auto &nodeId : stv.getSecretTaintingList())
+    EXPECT_EQ(expectedTaintedNodeIds.count(nodeId), 1)
+              << "Node (" << nodeId << ") is tainted but not expected to be tainted.";
 }
