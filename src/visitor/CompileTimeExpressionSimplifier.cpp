@@ -295,9 +295,8 @@ void CompileTimeExpressionSimplifier::visit(Variable &elem) {
       && (!(onBackwardPassInForLoop() && ctes.isUnrollLoopAllowed()) || visitingUnrolledLoopStatements)) {
     // if we know the variable's value (i.e., its value is either any subtype of AbstractLiteral or an AbstractExpr if
     // this is a symbolic value that defines on other variables), we can replace this variable node by its value
-    auto variableParent = elem.getOnlyParent();
     auto newValue = getKnownValue(&elem);
-    variableParent->replaceChild(&elem, newValue);
+    if (!elem.getParentsNonNull().empty()) elem.getOnlyParent()->replaceChild(&elem, newValue);
   }
 }
 
