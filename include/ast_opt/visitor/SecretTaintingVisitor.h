@@ -105,6 +105,7 @@ class SecretTaintingVisitor : public Visitor {
       return std::find(taintedVariables.begin(), taintedVariables.end(), identifier)!=taintedVariables.end();
     });
   }
+  void visit(MatrixAssignm &elem) override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_VISITOR_SECRETTAINTINGVISITOR_H_
