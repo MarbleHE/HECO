@@ -1,0 +1,9 @@
+#ifndef AST_OPTIMIZER_SRC_MOCKUP_CLASSES_PLAINTEXT_H_
+#define AST_OPTIMIZER_SRC_MOCKUP_CLASSES_PLAINTEXT_H_
+
+#include "Ciphertext.h"
+class Plaintext : Ciphertext {
+
+};
+
+#endif //AST_OPTIMIZER_SRC_MOCKUP_CLASSES_PLAINTEXT_H_
