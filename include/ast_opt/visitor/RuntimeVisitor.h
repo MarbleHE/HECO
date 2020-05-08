@@ -3,10 +3,14 @@
 
 #include "Visitor.h"
 #include <map>
+#include <unordered_map>
+#include <unordered_set>
 #include "ast_opt/mockup_classes/Ciphertext.h"
 #include "ast_opt/ast/Matrix.h"
+//#include "SecretTaintingVisitor.h"
 
 class EvaluationVisitor;
+class SecretTaintingVisitor;
 class Ciphertext;
 class AbstractMatrix;
 
@@ -27,6 +31,9 @@ class RuntimeVisitor : public Visitor {
  private:
   // an instance of the EvaluationVisitor to be used to partially evaluate certain parts/expressions of the AST
   EvaluationVisitor *ev;
+
+  // an instance
+  std::unordered_set<std::string> taintedNodesUniqueIds;
 
   // an enum that defines valid variable access types
   enum MatrixAccessMode { READ = 0, WRITE = 1 };

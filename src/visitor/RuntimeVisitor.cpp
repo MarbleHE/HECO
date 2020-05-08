@@ -2,15 +2,24 @@
 
 #include <utility>
 #include "ast_opt/visitor/EvaluationVisitor.h"
+#include "ast_opt/visitor/SecretTaintingVisitor.h"
 #include "ast_opt/ast/MatrixElementRef.h"
 #include "ast_opt/ast/For.h"
 #include "ast_opt/ast/Variable.h"
 #include "ast_opt/ast/VarDecl.h"
 #include "ast_opt/ast/MatrixAssignm.h"
+#include "ast_opt/ast/OperatorExpr.h"
 #include "ast_opt/ast/FunctionParameter.h"
 #include "ast_opt/mockup_classes/Ciphertext.h"
 
 void RuntimeVisitor::visit(Ast &elem) {
+  // determine the tainted nodes, i.e., nodes that deal with secret inputs
+  SecretTaintingVisitor stv;
+  stv.visit(elem);
+  auto result = stv.getSecretTaintingList();
+  taintedNodesUniqueIds.insert(result.begin(), result.end());
+
+  // start AST traversal
   Visitor::visit(elem);
 }
 
@@ -64,6 +73,7 @@ void RuntimeVisitor::visit(MatrixElementRef &elem) {
 
 RuntimeVisitor::RuntimeVisitor(std::unordered_map<std::string, AbstractLiteral *> funcCallParameterValues) {
   ev = new EvaluationVisitor(std::move(funcCallParameterValues));
+
 }
 
 void RuntimeVisitor::registerMatrixAccess(const std::string &variableIdentifier, int rowIndex, int columnIndex) {
@@ -156,7 +166,7 @@ void RuntimeVisitor::executeRotations(const std::string &varIdentifier, const st
 }
 
 std::vector<RotationData> RuntimeVisitor::determineRequiredRotations(std::map<int, Ciphertext> existingRotations,
-                                                                     const std::set<int>& reqIndices, int targetSlot) {
+                                                                     const std::set<int> &reqIndices, int targetSlot) {
   if (targetSlot==-1) {
     // TODO: Implement logic to find the best suitable targetSlot to realize the given reqIndices.
     throw std::logic_error("Logic to automatically determine the best targetSlot is not implemented yet! Please "
