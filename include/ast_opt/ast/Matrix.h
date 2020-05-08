@@ -106,7 +106,7 @@ class Matrix : public AbstractMatrix {
   /// \param column The column number of the element to be returned a reference to.
   /// \return A reference to the element at position (row, column).
   typename std::vector<T>::reference operator()(int row, int column) {
-    boundCheckMatrixAccess(row, column);
+    checkBoundsAndResizeMatrix(row, column);
     return values[row][column];
   }
 
