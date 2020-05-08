@@ -98,7 +98,8 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/ast/GetMatrixSize.cpp
         ${ast_optimizer_SOURCE_DIR}/src/optimizer/BatchingChecker.cpp
         ${ast_optimizer_SOURCE_DIR}/src/mockup_classes/Ciphertext.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/visitor/RuntimeVisitor.cpp)
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/RuntimeVisitor.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/mockup_classes/Plaintext.cpp)
 
 set(HEADER_ONLY_SOURCES
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/OpSymbEnum.h
