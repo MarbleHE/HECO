@@ -81,7 +81,9 @@ TEST(CiphertextTest, rotatePositive) { /* NOLINT */
   EXPECT_EQ(rotatedA.getElementAt(15), 20);
   EXPECT_EQ(rotatedA.getElementAt(16), 30);
   EXPECT_EQ(rotatedA.getElementAt(17), 40);
-  for (int i = 18; i < rotatedA.getNumCiphertextSlots(); ++i) EXPECT_EQ(rotatedA.getElementAt(i), 0);
+  for (int i = 18; i < rotatedA.getNumCiphertextSlots(); ++i) {
+    EXPECT_EQ(rotatedA.getElementAt(i), 0);
+  }
 }
 
 TEST(CiphertextTest, rotateNegative) { /* NOLINT */
@@ -110,13 +112,17 @@ TEST(CiphertextTest, rotatePositiveJumpOver) { /* NOLINT */
 TEST(CiphertextTest, sumAndRotate) { /* NOLINT */
   Ciphertext ctxt({32, 12, 53, 32, 1}, 32);
   auto result = ctxt.sumaAndRotateAll();
-  for (int i = 0; i < ctxt.getNumCiphertextSlots(); ++i) EXPECT_EQ(result.getElementAt(i), 130);
+  for (int i = 0; i < ctxt.getNumCiphertextSlots(); ++i) {
+    EXPECT_EQ(result.getElementAt(i), 130);
+  }
 }
 
 TEST(CiphertextTest, sumAndRotate2) { /* NOLINT */
   Ciphertext ctxt({32, 12, 53, 32, 1}, 8192);
   auto result = ctxt.sumaAndRotateAll();
-  for (int i = 0; i < ctxt.getNumCiphertextSlots(); ++i) EXPECT_EQ(result.getElementAt(i), 130);
+  for (int i = 0; i < ctxt.getNumCiphertextSlots(); ++i) {
+    EXPECT_EQ(result.getElementAt(i), 130);
+  }
 }
 
 TEST(CiphertextTest, sumAndRotate3) { /* NOLINT */
@@ -124,7 +130,9 @@ TEST(CiphertextTest, sumAndRotate3) { /* NOLINT */
       ({7, 50, 73, 59, 16, 19, 14, 89, 100, 30, 67, 38, 40, 100, 98, 32, 59, 93, 42, 50, 18, 92, 95, 66, 24, 4, 5, 22,
         60, 18, 76, 35}, 32);
   auto result = ctxt.sumaAndRotateAll();
-  for (int i = 0; i < ctxt.getNumCiphertextSlots(); ++i) EXPECT_EQ(result.getElementAt(i), 1591);
+  for (int i = 0; i < ctxt.getNumCiphertextSlots(); ++i) {
+    EXPECT_EQ(result.getElementAt(i), 1591);
+  }
 }
 
 TEST(CiphertextTest, sumAndRotatePartially) { /* NOLINT */
@@ -141,4 +149,13 @@ TEST(CiphertextTest, sumAndRotatePartiallyOffsetted) { /* NOLINT */
   auto result = ctxt.sumAndRotatePartially(4);
   // partial sum is at offsetOfFirstElement + numSummedOperands-1 = 4 + 4-1 = 7
   EXPECT_EQ(result.getElementAt(7), 126);
+}
+
+TEST(CiphertextTest, genCtxtFromScalar) { /* NOLINT */
+  auto numSlots = 4'096;
+  auto scalarValue = 3.2;
+  Ciphertext ctxt(scalarValue, numSlots);
+  for (int i = 0; i < numSlots; ++i) {
+    EXPECT_EQ(ctxt.getElementAt(i), scalarValue);
+  }
 }
