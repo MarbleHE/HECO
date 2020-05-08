@@ -10,6 +10,12 @@ Ciphertext::Ciphertext(std::vector<double> inputData, int numCiphertextSlots)
   data.resize(numCiphertextSlots);
 }
 
+Ciphertext::Ciphertext(double scalar, int numCiphertextSlots)
+    : numCiphertextElements(numCiphertextSlots), offsetOfFirstElement(0) {
+  data.resize(numCiphertextSlots);
+  std::fill(data.begin(), data.end(), scalar);
+}
+
 Ciphertext Ciphertext::operator+(const Ciphertext &ctxt) const {
   return applyBinaryOp(std::plus<double>{}, *this, ctxt);
 }

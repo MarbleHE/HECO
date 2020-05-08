@@ -18,10 +18,15 @@ class Ciphertext {
 
   Ciphertext sumAndRotate(int initialRotationFactor);
 
+ protected:
+  const static int DEFAULT_NUM_SLOTS = 8'192;
+
  public:
   Ciphertext() = default;
 
-  explicit Ciphertext(std::vector<double> data, int numCiphertextSlots = 8'192);
+  explicit Ciphertext(std::vector<double> data, int numCiphertextSlots = DEFAULT_NUM_SLOTS);
+
+  explicit Ciphertext(double scalar, int numCiphertextSlots = DEFAULT_NUM_SLOTS);
 
   Ciphertext(const Ciphertext &ctxt); // copy constructor
 
