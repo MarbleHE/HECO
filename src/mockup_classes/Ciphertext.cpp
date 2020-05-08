@@ -34,6 +34,15 @@ Ciphertext Ciphertext::operator*(const Ciphertext &ctxt) const {
   return applyBinaryOp(std::multiplies<double>{}, *this, ctxt);
 }
 
+Ciphertext Ciphertext::operator-(const Ciphertext &ctxt) const {
+  return applyBinaryOp(std::minus<double>{}, *this, ctxt);
+}
+
+Ciphertext Ciphertext::operator-(double plaintextScalar) const {
+  Ciphertext ctxt = generateCiphertext(plaintextScalar, getNumCiphertextElements(), getNumCiphertextSlots());
+  return applyBinaryOp(std::minus<double>{}, *this, ctxt);
+}
+
 Ciphertext Ciphertext::operator*(const double plaintextScalar) const {
   Ciphertext ctxt = generateCiphertext(plaintextScalar, getNumCiphertextElements(), getNumCiphertextSlots());
   return applyBinaryOp(std::multiplies<double>{}, *this, ctxt);
@@ -151,3 +160,4 @@ void Ciphertext::printCiphertextData() {
     std::cout << val << std::endl;
   }
 }
+

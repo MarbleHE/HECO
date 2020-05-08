@@ -13,6 +13,17 @@ TEST(CiphertextTest, testMulCtxtCtxt) { /* NOLINT */
   EXPECT_EQ(ctxtA*ctxtB, Ciphertext({90, 100, 210, 520}));
 }
 
+TEST(CiphertextTest, testSubtractCtxtCtxt) { /* NOLINT */
+  Ciphertext ctxtA({10, 20, 30, 40});
+  Ciphertext ctxtB({9, 5, 7, 13});
+  EXPECT_EQ(ctxtA - ctxtB, Ciphertext({1, 15, 23, 27}));
+}
+
+TEST(CiphertextTest, testSubtractCtxtScalar) { /* NOLINT */
+  Ciphertext ctxtA({10, 20, 30, 40});
+  EXPECT_EQ(ctxtA - 11, Ciphertext({-1, 9, 19, 29}));
+}
+
 TEST(CiphertextTest, testAddCtxtScalar) { /* NOLINT */
   Ciphertext ctxtA({10, 20, 30, 40});
   EXPECT_EQ(ctxtA + 3.0, Ciphertext({13, 23, 33, 43}));

@@ -33,6 +33,10 @@ class Ciphertext {
 
   Ciphertext operator*(double plaintextScalar) const;
 
+  Ciphertext operator-(const Ciphertext &ctxt) const;
+
+  Ciphertext operator-(double plaintextScalar) const;
+
   bool operator==(const Ciphertext &rhs) const;
 
   bool operator!=(const Ciphertext &rhs) const;
