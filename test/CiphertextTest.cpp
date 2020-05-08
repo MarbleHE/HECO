@@ -34,6 +34,27 @@ TEST(CiphertextTest, testMulCtxtScalar) { /* NOLINT */
   EXPECT_EQ(ctxtA*3.0, Ciphertext({30, 60, 90, 120}));
 }
 
+TEST(CiphertextTest, testDivCtxtCtxt) { /* NOLINT */
+  Ciphertext ctxtA({10, 20, 30, 40});
+  auto divisionResult = ctxtA/ctxtA;
+  EXPECT_EQ(divisionResult.getElementAt(0), 1);
+  EXPECT_EQ(divisionResult.getElementAt(1), 1);
+  EXPECT_EQ(divisionResult.getElementAt(2), 1);
+  EXPECT_EQ(divisionResult.getElementAt(3), 1);
+  // Note that all other slots are NaN because empty slots have value 0 and 0/0 = NaN
+}
+
+TEST(CiphertextTest, testDivCtxtCtx2) { /* NOLINT */
+  Ciphertext ctxtA({10, 20, 30, 40});
+  Ciphertext ctxtB({1, 10, 3, 10});
+  auto divisionResult = ctxtA/ctxtB;
+  EXPECT_EQ(divisionResult.getElementAt(0), 10);
+  EXPECT_EQ(divisionResult.getElementAt(1), 2);
+  EXPECT_EQ(divisionResult.getElementAt(2), 10);
+  EXPECT_EQ(divisionResult.getElementAt(3), 4);
+  // Note that all other slots are NaN because empty slots have value 0 and 0/0 = NaN
+}
+
 TEST(CiphertextTest, copyCtor) { /* NOLINT */
   Ciphertext ctxtA({10, 20, 30, 40});
   EXPECT_EQ(ctxtA, Ciphertext({10, 20, 30, 40}));

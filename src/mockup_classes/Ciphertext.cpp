@@ -43,6 +43,15 @@ Ciphertext Ciphertext::operator-(double plaintextScalar) const {
   return applyBinaryOp(std::minus<double>{}, *this, ctxt);
 }
 
+Ciphertext Ciphertext::operator/(const Ciphertext &ctxt) const {
+  return applyBinaryOp(std::divides<double>{}, *this, ctxt);
+}
+
+Ciphertext Ciphertext::operator/(double plaintextScalar) const {
+  Ciphertext ctxt = generateCiphertext(plaintextScalar, getNumCiphertextElements(), getNumCiphertextSlots());
+  return applyBinaryOp(std::divides<double>{}, *this, ctxt);
+}
+
 Ciphertext Ciphertext::operator*(const double plaintextScalar) const {
   Ciphertext ctxt = generateCiphertext(plaintextScalar, getNumCiphertextElements(), getNumCiphertextSlots());
   return applyBinaryOp(std::multiplies<double>{}, *this, ctxt);
@@ -121,7 +130,7 @@ int Ciphertext::cyclicIncrement(int i, const std::vector<double> &vec) {
 }
 
 Ciphertext Ciphertext::rotate(int n) {
-  if (n == 0 || getNumCiphertextElements() == 0) return Ciphertext(*this);
+  if (n==0 || getNumCiphertextElements()==0) return Ciphertext(*this);
 
   Ciphertext result = *this;
   auto rotTarget = (n > 0) ? (result.data.begin() + result.getNumCiphertextSlots() - n) : (result.data.begin() - n);
