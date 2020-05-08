@@ -11,14 +11,16 @@ class Ciphertext {
 
   /// the offset to the first element after applying any operations on the ciphertext, e.g.,
   /// initial data [a b c d ... z] -> rot(7) -> [h i j k l ... z a b c .. g] then offset would be 7.
-  int offsetOfFirstElement;
+  int offsetOfFirstElement{0};
 
   /// the number of elements in the ciphertext starting at position offsetOfFirstElement
-  int numCiphertextElements;
+  int numCiphertextElements{0};
 
   Ciphertext sumAndRotate(int initialRotationFactor);
 
  public:
+  Ciphertext() = default;
+
   explicit Ciphertext(std::vector<double> data, int numCiphertextSlots = 8'192);
 
   Ciphertext(const Ciphertext &ctxt); // copy constructor
