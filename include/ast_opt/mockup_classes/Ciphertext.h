@@ -60,6 +60,7 @@ class Ciphertext {
 
   Ciphertext sumAndRotatePartially(int numElementsToSum);
 
+  void printCiphertextData();
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_MOCKUP_CLASSES_CIPHERTEXT_H_

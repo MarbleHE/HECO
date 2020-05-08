@@ -1,4 +1,5 @@
 #include "ast_opt/mockup_classes/Ciphertext.h"
+#include <iostream>
 
 Ciphertext::Ciphertext(std::vector<double> inputData, int numCiphertextSlots)
     : numCiphertextElements(inputData.size()), offsetOfFirstElement(0) {
@@ -141,4 +142,10 @@ Ciphertext Ciphertext::sumAndRotate(int initialRotationFactor) {
     rotationFactor = rotationFactor/2;
   }
   return ctxt;
+}
+
+void Ciphertext::printCiphertextData() {
+  for (double val : data) {
+    std::cout << val << std::endl;
+  }
 }
