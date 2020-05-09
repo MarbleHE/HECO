@@ -1,23 +1,26 @@
 #include "ast_opt/visitor/RuntimeVisitor.h"
-
 #include <utility>
+#include <queue>
 #include "ast_opt/visitor/EvaluationVisitor.h"
 #include "ast_opt/visitor/SecretTaintingVisitor.h"
-#include "ast_opt/ast/MatrixElementRef.h"
 #include "ast_opt/ast/For.h"
 #include "ast_opt/ast/Variable.h"
 #include "ast_opt/ast/VarDecl.h"
-#include "ast_opt/ast/MatrixAssignm.h"
 #include "ast_opt/ast/OperatorExpr.h"
 #include "ast_opt/ast/FunctionParameter.h"
+#include "ast_opt/ast/AbstractLiteral.h"
+#include "ast_opt/ast/MatrixAssignm.h"
+#include "ast_opt/ast/MatrixElementRef.h"
 #include "ast_opt/mockup_classes/Ciphertext.h"
+#include <ast_opt/mockup_classes/Plaintext.h>
 
 void RuntimeVisitor::visit(Ast &elem) {
   // determine the tainted nodes, i.e., nodes that deal with secret inputs
   SecretTaintingVisitor stv;
   stv.visit(elem);
   auto result = stv.getSecretTaintingList();
-  taintedNodesUniqueIds.insert(result.begin(), result.end());
+  // create a new set to ensure that remaining values of the last run are overwritten
+  taintedNodesUniqueIds = std::unordered_set<std::string>(result.begin(), result.end());
 
   // start AST traversal
   Visitor::visit(elem);
@@ -34,12 +37,20 @@ void RuntimeVisitor::visit(For &elem) {
   };
 
   for (elem.getInitializer()->accept(*ev); conditionIsTrue(); elem.getUpdateStatement()->accept(*ev)) {
-    elem.getStatementToBeExecuted()->accept(*this);
+    // note: create clones that have the same uniqueNodeId as otherwise the secret tainting IDs won't match anymore
+    auto clonedBlock = elem.getStatementToBeExecuted()->clone(true);
+    clonedBlock->accept(*this);
+    delete clonedBlock;
+
+    std::cout << "== " << ev->getVarValue("x")->castTo<LiteralInt>()->getValue() << ","
+              << ev->getVarValue("y")->castTo<LiteralInt>()->getValue() << std::endl;
   }
 }
 
 void RuntimeVisitor::visit(MatrixElementRef &elem) {
+  auto intermedResultSize = intermedResult.size();
   Visitor::visit(elem);
+  clearIntermediateResults(intermedResultSize);
 
   // a helper utility that either returns the value of an already existing LiteralInt (in AST) or performs evaluation
   // and then retrieves the value of the evaluation result (LiteralInt)
@@ -50,6 +61,7 @@ void RuntimeVisitor::visit(MatrixElementRef &elem) {
     expr->accept(*ev);
     auto evalResult = ev->getResults().front();
     if (auto evalResultAsLInt = dynamic_cast<LiteralInt *>(evalResult)) {
+      expr->getOnlyParent()->replaceChild(expr, evalResultAsLInt);
       return evalResultAsLInt->getValue();
     } else {
       throw std::runtime_error("MatrixElementRef row and column indices must evaluate to LiteralInt!");
@@ -67,13 +79,18 @@ void RuntimeVisitor::visit(MatrixElementRef &elem) {
     throw std::runtime_error("MatrixElementRef does not refer to a Variable. Cannot continue. Aborting.");
   }
 
+  if (visitingForEvaluation==EVALUATION_CIPHERTEXT) {
+    if (precomputedCiphertexts.count(MatrixElementAccess(rowIdx, colIdx, varIdentifier)) > 0) {
+      intermedResult.push(precomputedCiphertexts.at(MatrixElementAccess(rowIdx, colIdx, varIdentifier))->second.ctxt);
+    }
+  }
   // store accessed index pair (rowIdx, colidx) and associated variable (matrix) globally
   registerMatrixAccess(varIdentifier, rowIdx, colIdx);
 }
 
-RuntimeVisitor::RuntimeVisitor(std::unordered_map<std::string, AbstractLiteral *> funcCallParameterValues) {
+RuntimeVisitor::RuntimeVisitor(std::unordered_map<std::string, AbstractLiteral *> funcCallParameterValues)
+    : visitingForEvaluation(ANALYSIS) {
   ev = new EvaluationVisitor(std::move(funcCallParameterValues));
-
 }
 
 void RuntimeVisitor::registerMatrixAccess(const std::string &variableIdentifier, int rowIndex, int columnIndex) {
@@ -81,7 +98,7 @@ void RuntimeVisitor::registerMatrixAccess(const std::string &variableIdentifier,
   ss << variableIdentifier << "[" << rowIndex << "]"
      << "[" << columnIndex << "]" << "\t(" << currentMatrixAccessMode << ")";
   matrixAccessMap[variableIdentifier][std::pair(rowIndex, columnIndex)] = currentMatrixAccessMode;
-//  std::cout << ss.str() << std::endl;
+  std::cout << ss.str() << std::endl;
 }
 
 void RuntimeVisitor::visit(VarDecl &elem) {
@@ -92,12 +109,37 @@ void RuntimeVisitor::visit(VarDecl &elem) {
     throw std::runtime_error("RuntimeVisitor and EvaluationVisitor cannot handle variable scoping yet. Please use "
                              "unique variable identifiers to allow the RuntimeVisitor to distinguish variables.");
   } catch (std::logic_error &e) {}
+
   elem.accept(*ev);
+
+  // if this is a secret variable, create a ciphertext object in varValues
+  if (elem.getDatatype()->isEncrypted()) {
+    if (elem.getInitializer()!=nullptr) {
+      // Handle initialization with given initializer
+      Ciphertext *ctxt;
+      if (auto valAsLiteralInt = dynamic_cast<LiteralInt *>(elem.getInitializer())) {
+        auto vecDoubles = transformToDoubleVector<int>(valAsLiteralInt->getMatrix());
+        ctxt = new Ciphertext(vecDoubles);
+      } else if (auto valAsLiteralFloat = dynamic_cast<LiteralFloat *>(elem.getInitializer())) {
+        auto vecDoubles = transformToDoubleVector<float>(valAsLiteralFloat->getMatrix());
+        ctxt = new Ciphertext(vecDoubles);
+      } else {
+        throw std::logic_error("RuntimeVisitor currently supports only variable declaration of secret int and float "
+                               "variables (including matrices).");
+      }
+      varValues[elem.getIdentifier()].emplace(0, ctxt);
+    } else {
+      varValues[elem.getIdentifier()].emplace(0, new Ciphertext());
+    }
+  }
 }
 
 void RuntimeVisitor::visit(MatrixAssignm &elem) {
-  // inlines Visitor::visit(elem);
-  Visitor::addStatementToScope(elem);
+  if (visitingForEvaluation==ANALYSIS) {
+    // after the analysis pass the MatrixAssignm's value will already be modified (e.g., MatrixElementRef indices
+    // replaced by LiteralInts) thus we only make this copy while visiting this node for the first time
+    lastVisitedStatement = elem.clone(true)->castTo<AbstractStatement>();
+  }
 
   // visit the right-hand side of the MatrixAssignm
   currentMatrixAccessMode = WRITE;
@@ -119,54 +161,124 @@ void RuntimeVisitor::visit(MatrixAssignm &elem) {
   currentMatrixAccessMode = READ;
   elem.getValue()->accept(*this);
 
-  // collect all (read) matrix accesses on the right-hand side of this assignment and execute the rotations that are
-  // required to execute them
-  for (auto &[varIdentifier, varAccessMap] : matrixAccessMap) {
-    // TODO add check that this variable (varIdentifier) refers to an encrypted variable
-    // if (variablesDatatype.at(varIdentifier) != encrypted) continue;
+  // check if we already visited this MatrixAssignm before and precomputed the required ciphertexts
+  if (visitingForEvaluation==EVALUATION_PLAINTEXT || visitingForEvaluation==EVALUATION_CIPHERTEXT) {
+    matrixAccessMap.clear();
+    precomputedStatements.erase(elem.getUniqueNodeId());
 
-    std::set<int> accessedIndices;
-    for (auto &[indexPair, accessMode] : varAccessMap) {
-      checkIndexValidity(indexPair);
-      accessedIndices.insert(indexPair.second);
+    // assign the latest result from intermedResult to the respective target slot ciphertext
+    varValues[varTargetIdentifier][targetSlot.second]
+        = VarValuesEntry(intermedResult.top(), lastVisitedStatement->castTo<MatrixAssignm>()->getValue());
+
+    // empty the intermedResult vector
+    // TODO: Do this at the end of all statement visit methods (i.e., AST nodes that inherit from AbstractStatement),
+    //  as long as we are using the RuntimeVisitor for the Laplacian sharpening example only, this is fine though.
+    clearIntermediateResults();
+  } else {
+    // if this MatrixAssignm is not tainted then it does not perform any computations on secret variables hence we can
+    // simply revisit the operands by after we set te visitingForEvaluation flag
+    if (taintedNodesUniqueIds.count(elem.getUniqueNodeId())==0) {
+      matrixAccessMap.clear();
+      visitingForEvaluation = EVALUATION_PLAINTEXT;
+      elem.accept(*this);
+      return;
     }
 
-    // get rotated ciphertexts that already exist for this variable
-    auto existingRotations = varValues.at(varIdentifier);
+    // a variable to define whether we can skip the additional evaluation pass over this subtree (this is given if we
+    // already computed the required expression in a previous iteration)
+    bool skipEvaluationPass = false;
 
-    // determine the required rotations for this computations
-    auto reqRotations = determineRequiredRotations(existingRotations, accessedIndices, targetSlot.second);
+    // collect all (read) matrix accesses on the right-hand side of this assignment and execute the rotations that are
+    // required to execute them
+    for (auto &[varIdentifier, varAccessMap] : matrixAccessMap) {
+      // add check that this variable (varIdentifier) refers to an encrypted variable, otherwise continue with next
+      // variable
+      if (varValues.count(varIdentifier)==0) continue;
 
-    // execute rotations on Ciphertext and add them to the varValues map
-    executeRotations(varIdentifier, reqRotations);
+      std::unordered_set<int> accessedIndices;
+      for (auto &[indexPair, accessMode] : varAccessMap) {
+        checkIndexValidity(indexPair);
+        accessedIndices.insert(indexPair.second);
+      }
+
+      // get rotated ciphertexts that already exist for this variable
+      auto existingRotations = varValues.at(varIdentifier);
+      // determine the required rotations for this computation
+      auto reqRotations = determineRequiredRotations(existingRotations, accessedIndices, targetSlot.second);
+
+      // if all rd of reqRotations have rd.numRotations == 0, we already did computations on this matrix element:
+      // if the target ciphertext (e.g., img2[imgSize*x+y]) was computed for the same expression before, i.e., we know
+      // that the involved MatrixElementRefs had the same offsets, we also know that we speculatively already computed
+      // the expression before -> no need to revisit expression for evaluation pass
+      auto allRequiredNumRotationsZero = [&]() -> bool {
+        return std::all_of(reqRotations.begin(), reqRotations.end(),
+                           [](RotationData &rd) { return rd.requiredNumRotations==0; });
+      };
+      auto sameExpressionComputed =
+          [this, elem](const std::string &varIdentifier, int offset) -> bool {
+            if (varValues.count(varIdentifier) > 0) {
+              for (auto mapEntry : varValues.at(varIdentifier)) {
+                if (mapEntry.second.expr!=nullptr
+                    && lastVisitedStatement->castTo<MatrixAssignm>()->getValue()->isEqual(mapEntry.second.expr)) {
+                  return true;
+                }
+              }
+            }
+            return false;
+          };
+      auto b = allRequiredNumRotationsZero();
+      auto sameExpr = sameExpressionComputed(varTargetIdentifier, targetSlot.second);
+      if (b && sameExpr) {
+        skipEvaluationPass = true;
+      }
+
+      // execute rotations on Ciphertext and add them to the varValues map
+      auto rotatedCtxt = executeRotations(varIdentifier, reqRotations);
+
+      // store precomputed ciphertexts by adding a mapping between information in MatrixElementRef (e.g., mx[a][b]) and
+      // the associated precoomputed (rotated) ciphertext
+      for (auto &varValMapIterator : rotatedCtxt) {
+        if (targetSlot.first!=0) throw std::logic_error("Matrix ciphertexts not supported, only row vectors!");
+        precomputedCiphertexts.emplace(MatrixElementAccess(targetSlot.first,
+                                                           targetSlot.second - varValMapIterator->first,
+                                                           varIdentifier), varValMapIterator);
+      }
+
+      // mark this MatrixAssignm statement as precomputed, on next visit we can do actual execution on Ciphertexts
+      precomputedStatements.insert(elem.getUniqueNodeId());
+    }
+    // re-visit AST and perform actions using recently generated rotated Ciphertexts and the Ciphertext operations
+    matrixAccessMap.clear();
+    if (!skipEvaluationPass) {
+      visitingForEvaluation = EVALUATION_CIPHERTEXT;
+      elem.accept(*this);
+      visitingForEvaluation = ANALYSIS;
+    }
   }
-  matrixAccessMap.clear();
-
-  // TODO re-visit AST and perform actions using recently generated rotated Ciphertexts and the Ciphertext operations
-  std::cout << "stop";
 }
 
-void RuntimeVisitor::executeRotations(const std::string &varIdentifier, const std::vector<RotationData> &reqRotations) {
+std::vector<VarValuesMap::iterator>
+RuntimeVisitor::executeRotations(const std::string &varIdentifier, const std::vector<RotationData> &reqRotations) {
+  std::vector<VarValuesMap::iterator> ciphertexts;
   for (auto rd : reqRotations) {
-//    // Check if there is already an existing ciphertext with the same rotation as we need. This should never happen
-//    // as the existing rotations should have been passed to determineRequiredRotations before.
-//    if (varValues.at(varIdentifier).count(rd.baseCiphertext.getOffsetOfFirstElement()+rd.requiredNumRotations) > 0) {
-//      std::cerr << "Requested rotation already exists. This indicates that there's something wrong with your program "
-//                   "as you should have passed the existing rotations to determineRequiredRotations." << std::endl;
-//      continue; // skip executing this rotation
-//    }
     // no need to do anything further as the requested rotation already exists
-    if (rd.requiredNumRotations==0) continue;
+    if (rd.requiredNumRotations==0) {
+      ciphertexts.emplace_back(varValues.at(varIdentifier).find(rd.baseCiphertext->getOffsetOfFirstElement()));
+      continue;
+    }
 
     // execute rotation on ciphertext
-    Ciphertext rotatedCtxt = rd.baseCiphertext.rotate(rd.requiredNumRotations);
+    auto rotatedCtxt = new Ciphertext(rd.baseCiphertext->rotate(rd.requiredNumRotations));
     // store rotated ciphertext in varValues
-    varValues.at(varIdentifier).emplace(rotatedCtxt.getOffsetOfFirstElement(), rotatedCtxt);
+    auto[it, inserted] = varValues.at(varIdentifier).emplace(rotatedCtxt->getOffsetOfFirstElement(), rotatedCtxt);
+    ciphertexts.emplace_back(it);
   }
+  return ciphertexts;
 }
 
-std::vector<RotationData> RuntimeVisitor::determineRequiredRotations(std::map<int, Ciphertext> existingRotations,
-                                                                     const std::set<int> &reqIndices, int targetSlot) {
+std::vector<RotationData> RuntimeVisitor::determineRequiredRotations(VarValuesMap existingRotations,
+                                                                     const std::unordered_set<int> &reqIndices,
+                                                                     int targetSlot) {
   if (targetSlot==-1) {
     // TODO: Implement logic to find the best suitable targetSlot to realize the given reqIndices.
     throw std::logic_error("Logic to automatically determine the best targetSlot is not implemented yet! Please "
@@ -187,7 +299,7 @@ std::vector<RotationData> RuntimeVisitor::determineRequiredRotations(std::map<in
     }
     // create rotations for each index in reqIndices
     for (auto idx : reqIndices) {
-      resultSet.emplace_back(idx, existingRotations.at(0), targetSlot - idx);
+      resultSet.emplace_back(idx, existingRotations.at(0).ctxt, targetSlot - idx);
     }
   } else { // existingRotations.size() > 1, i.e., there is more than one existing rotation for this ciphertext
     // if other rotations are existing: figure out the "cheapest" way to align ciphertexts to given target slot based
@@ -197,17 +309,17 @@ std::vector<RotationData> RuntimeVisitor::determineRequiredRotations(std::map<in
     for (auto idx : reqIndices) {
       // a vector that describes how many additional rotations an existing ciphertext would require to align it to
       // the target slot
-      std::vector<std::pair<int, Ciphertext>> rotations;
+      std::vector<std::pair<int, Ciphertext *>> rotations;
 
       // determine the difference between current index and existing index for each idx in reqIndices
       bool canReuseExistingRotation = false;
       rotations.reserve(existingRotations.size());
-      for (auto[offset, ctxt] : existingRotations) {
+      for (auto[offset, varValEntry] : existingRotations) {
         auto numRequiredRotations = targetSlot - (offset + idx);
-        rotations.emplace_back(numRequiredRotations, ctxt);
+        rotations.emplace_back(numRequiredRotations, varValEntry.ctxt);
         if (numRequiredRotations==0) {
           // if we can reuse an existing rotation there is no need
-          resultSet.emplace_back(idx, ctxt, numRequiredRotations);
+          resultSet.emplace_back(idx, varValEntry.ctxt, numRequiredRotations);
           canReuseExistingRotation = true;
           break;
         }
@@ -258,8 +370,8 @@ void RuntimeVisitor::visit(FunctionParameter &elem) {
     }
 
     // create and store ciphertextt in varValues map
-    Ciphertext ctxt(mx);
-    varValues[var->getIdentifier()].emplace(ctxt.getOffsetOfFirstElement(), mx);
+    auto ctxt = new Ciphertext(mx);
+    varValues[var->getIdentifier()][ctxt->getOffsetOfFirstElement()].ctxt = ctxt;
   }
 }
 
@@ -268,10 +380,105 @@ void RuntimeVisitor::visit(Datatype &elem) {
 }
 
 void RuntimeVisitor::visit(OperatorExpr &elem) {
-  Visitor::visit(elem);
+  int intermedResultsSize = intermedResult.size();
+  if (visitingForEvaluation==EVALUATION_CIPHERTEXT) {
+    Visitor::visit(elem);
 
-  // TODO check if secret variables are involved (integrate the secret tainting visitor!)
-  //  if yes: check if we already calculated the required rotations
-  //    if yes: execute the operation on the ciphertext
+    // Results from subexpressions (i.e., operands of this OperatorExpr) are pushed to a stack, hence the last
+    // evaluated expression in on the top of the stack. As we need to add the elements in reverse order to the
+    // operands vector, we use a queue that allows us to deque elements in the order the elements were added.
+    std::deque<Ciphertext *> intermedResultReversed;
+    for (int i = intermedResult.size() - intermedResultsSize; i > 0; --i) {
+      intermedResultReversed.push_back(intermedResult.top());
+      intermedResult.pop();
+    }
+
+    std::vector<Ciphertext *> operands;
+    // create a Plaintext for any involved plaintext literal to allow operation exec between Ciphertext and Plaintext
+    for (auto opnd : elem.getOperands()) {
+      if (auto literalInt = dynamic_cast<LiteralInt *>(opnd)) {
+        operands.push_back(new Plaintext(literalInt->getValue()));
+      } else if (auto literalFloat = dynamic_cast<LiteralFloat *>(opnd)) {
+        operands.push_back(new Plaintext(literalFloat->getValue()));
+      } else if (dynamic_cast<OperatorExpr *>(opnd) || dynamic_cast<MatrixElementRef *>(opnd)) {
+        // in this case the OperatorExpr/MatrixElementRef was visited before and its Ciphertext was pushed to
+        // intermedResult
+        operands.push_back(intermedResultReversed.back());
+        intermedResultReversed.pop_back();
+      } else {
+        throw std::runtime_error("Encountered an operand in OperatorExpr that cannot be handled yet!");
+      }
+    }
+
+    // make sure that we collected all operands
+    assert(operands.size()==elem.getOperands().size());
+
+    // execute operation
+    auto it = operands.begin();
+    Ciphertext *result = new Ciphertext(**it);
+    for (++it; it!=operands.end(); ++it) {
+      if (elem.getOperator()->equals(ADDITION)) {
+        *result = (*result) + *(*it);
+      } else if (elem.getOperator()->equals(SUBTRACTION)) {
+        *result = (*result) - *(*it);
+      } else if (elem.getOperator()->equals(MULTIPLICATION)) {
+        *result = (*result)**(*it);
+      } else if (elem.getOperator()->equals(DIVISION)) {
+        *result = (*result)/(*(*it));
+      } else {
+        throw std::logic_error("Operator not implemented yet!");
+      }
+    }
+
+    // push the result up to the parent - decision of what to do is to be taken by the statement
+    clearIntermediateResults(intermedResultsSize);
+    intermedResult.push(result);
+  } else if (visitingForEvaluation==EVALUATION_PLAINTEXT) {  //  visitingForEvaluation = EVALUATION_PLAINTEXT
+    throw std::logic_error("OperatorExpr evaluation of plaintext (Literals) not implemented yet!");
+    // visit the expression using the EvaluationVisitor
+    // replace this node in its parent by the evaluation result
+  } else {
+    Visitor::visit(elem);
+  }
 }
 
+void RuntimeVisitor::clearIntermediateResults(int numElementsBeforeVisitingChildren) {
+  int removeNumElements = (numElementsBeforeVisitingChildren==-1) ?
+                          intermedResult.size() :
+                          intermedResult.size() - numElementsBeforeVisitingChildren;
+  while (removeNumElements > 0) {
+    intermedResult.pop();
+    --removeNumElements;
+  }
+}
+
+void RuntimeVisitor::visit(Return &elem) {
+  int intermedResultSize = intermedResult.size();
+  Visitor::visit(elem);
+  while (intermedResult.size() - intermedResultSize > 0) {
+    returnValues.push_back(intermedResult.top());
+    intermedResult.pop();
+  }
+}
+
+void RuntimeVisitor::visit(Variable &elem) {
+  Visitor::visit(elem);
+
+  // TODO: Find a better way to manage how we distinguish subexpression ciphertexts from those that actually
+  //  represent a variable most recent value. For now, we just return the first Ciphertext that has an associated
+  //  expression (this works fine for img2 but would break for img).
+  if (taintedNodesUniqueIds.count(elem.getUniqueNodeId()) > 0 && varValues.count(elem.getIdentifier()) > 0) {
+    for (auto varValMap : varValues.at(elem.getIdentifier())) {
+      if (varValMap.second.expr!=nullptr) {
+        intermedResult.push(varValMap.second.ctxt);
+        return;
+      }
+    }
+  } else {
+    // TODO: Retrieve value from EvaluationVisitor's map (getVarValue).
+  }
+}
+
+const std::vector<Ciphertext *> &RuntimeVisitor::getReturnValues() const {
+  return returnValues;
+}
