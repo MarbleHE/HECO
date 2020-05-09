@@ -1990,7 +1990,7 @@ void AstTestingGenerator::genAstNestedLoopUnrollingLaplacianSharpeningFilterAllL
   func->addParameter(new FunctionParameter(new Datatype(Types::INT, false), new Variable("imgSize")));
 
   // std::vector<int> img2;
-  func->addStatement(new VarDecl("img2", new Datatype(Types::INT), nullptr));
+  func->addStatement(new VarDecl("img2", new Datatype(Types::INT, true), nullptr));
 
   // Matrix<int> weightMatrix = [1 1 1; 1 -8 1; 1 1 1];  –- row-wise concatenation of the original matrix
   func->addStatement(new VarDecl("weightMatrix", new Datatype(Types::INT),
