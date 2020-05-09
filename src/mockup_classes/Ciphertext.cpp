@@ -114,7 +114,7 @@ Ciphertext Ciphertext::applyBinaryOp(const std::function<double(double, double)>
     throw std::runtime_error("");
 
   Ciphertext result({}, lhs.getNumCiphertextSlots());
-  result.offsetOfFirstElement = getOffsetOfFirstElement();
+  result.offsetOfFirstElement = lhs.getOffsetOfFirstElement() + rhs.getOffsetOfFirstElement();
 
   for (auto i = 0; i < lhs.getNumCiphertextSlots(); ++i) {
     result.data[i] = binaryOp(lhs.data[i], rhs.data[i]);
