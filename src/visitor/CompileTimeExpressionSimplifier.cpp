@@ -287,12 +287,23 @@ void CompileTimeExpressionSimplifier::visit(LiteralFloat &elem) {
 void CompileTimeExpressionSimplifier::visit(Variable &elem) {
   Visitor::visit(elem);
   // TODO: Introduce a depth threshold (#nodes) to stop inlining if a variable's symbolic value reached a certain depth.
-  auto varValue = getVariableValueDeclaredInThisOrOuterScope(elem.getIdentifier());
+  auto varEntry = getVariableEntryDeclaredInThisOrOuterScope(elem.getIdentifier());
+  auto varValue = (varEntry!=variableValues.end()) ? varEntry->second->value : nullptr;
   auto vvAsLiteral = dynamic_cast<AbstractLiteral *>(varValue);
+
+  auto isVariableUsedInAst = [&]() {
+    return varValue!=nullptr && emittedVariableDeclarations.count(varEntry->first) > 0
+        && (!emittedVariableDeclarations.at(varEntry->first)->emittedVarAssignms.empty()
+            || !emittedVariableDeclarations.at(varEntry->first)->dependentAssignms.empty());
+  };
+
   if (varValue!=nullptr
       // if varValue is an AbstractLiteral then its value must not be an empty matrix (i.e., have dim (0,0))
       && (!(vvAsLiteral!=nullptr) || !vvAsLiteral->getMatrix()->isEmpty())
-      && (!(onBackwardPassInForLoop() && ctes.isUnrollLoopAllowed()) || visitingUnrolledLoopStatements)) {
+      && (!(onBackwardPassInForLoop() && ctes.isUnrollLoopAllowed()) || visitingUnrolledLoopStatements)
+          // this variable must not belong to an emitted variable declaration otherwise there are still statements in
+          // the AST such that we cannot just substitute Variables as we do not know the variable's most recent value
+      && !(isVariableUsedInAst() && !visitingUnrolledLoopStatements)) {
     // if we know the variable's value (i.e., its value is either any subtype of AbstractLiteral or an AbstractExpr if
     // this is a symbolic value that defines on other variables), we can replace this variable node by its value
     auto newValue = getKnownValue(&elem);
