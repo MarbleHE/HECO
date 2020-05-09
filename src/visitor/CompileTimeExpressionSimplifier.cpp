@@ -1541,10 +1541,22 @@ void CompileTimeExpressionSimplifier::visit(AbstractMatrix &elem) {
 void CompileTimeExpressionSimplifier::emitVariableDeclaration(VariableValuesMapType::iterator variableToEmit) {
   auto parent = variableToEmit->first.second->getScopeOpener();
   auto children = parent->getChildren();
-  auto newVarDecl = new VarDecl(variableToEmit->first.first, variableToEmit->second->datatype);
+
+  // if this variable is not a scalar, we need to emit the variable value too, otherwise the information about the
+  // matrix dimension will be lost!
+  VarDecl *newVarDeclaration;
+  auto varAsLiteral = dynamic_cast<AbstractLiteral *>(variableToEmit->second->value);
+  if (varAsLiteral!=nullptr && !varAsLiteral->getMatrix()->getDimensions().equals(1, 1)) {
+    newVarDeclaration = new VarDecl(variableToEmit->first.first,
+                                    variableToEmit->second->datatype,
+                                    variableToEmit->second->value);
+  } else {
+    newVarDeclaration = new VarDecl(variableToEmit->first.first, variableToEmit->second->datatype);
+  }
+
   // passing position in children vector is req. to prepend the new VarAssignm (i.e., as new first child of parent)
-  parent->addChildren({newVarDecl}, true, parent->getChildren().begin());
-  emittedVariableDeclarations.emplace(variableToEmit->first, new EmittedVariableData(newVarDecl));
+  parent->addChildren({newVarDeclaration}, true, parent->getChildren().begin());
+  emittedVariableDeclarations.emplace(variableToEmit->first, new EmittedVariableData(newVarDeclaration));
 }
 
 VarAssignm *CompileTimeExpressionSimplifier::emitVariableAssignment(VariableValuesMapType::iterator variableToEmit) {
