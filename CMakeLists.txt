@@ -1,9 +1,21 @@
-cmake_minimum_required(VERSION 3.14)
-cmake_policy(SET CMP0091 NEW) # Required for selecting MSVC runtime library
+cmake_minimum_required (VERSION 3.9...3.17)
+
+# For older versions that do not automatically use highest allowed policy
+if(${CMAKE_VERSION} VERSION_LESS 3.12)
+    cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
+endif()
+
+# Required for selecting MSVC runtime library
+if (MSVC)
+    cmake_policy(SET CMP0091 NEW)
+endif()
+
 project(ast_optimizer
         VERSION 0.1
         DESCRIPTION "Optimizer for Fully Homomorphic Encryption (FHE) working on an AST-like (Abstract Syntax Tree) representation of a program"
         LANGUAGES CXX)
+
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules" ${CMAKE_MODULE_PATH})
 
 if (MSVC)
     message("Using MSVC")
@@ -17,6 +29,11 @@ if (MSVC)
     # Force MSVC to use slightly less broken template rules
     add_compile_options(/permissive-)
 endif ()
+
+##############################
+# Determine if SEAL is available
+##############################
+find_package(SEAL) # sets SEAL_FOUND variable
 
 ##############################
 # Download and install nlohmann-json if required
@@ -176,6 +193,14 @@ target_include_directories(ast_opt PUBLIC
         $<INSTALL_INTERFACE:include>)
 set_target_properties(ast_opt PROPERTIES PUBLIC_HEADER ${PUBLIC_HEADERS})
 target_compile_features(ast_opt PUBLIC cxx_std_17)
+
+if (SEAL_FOUND)
+    message("Enabling SEAL functionality")
+    target_include_directories(ast_opt PUBLIC ${SEAL_INCLUDE_DIRS})
+    target_link_libraries(ast_opt PUBLIC ${SEAL_LIBRARIES})
+    target_compile_definitions(ast_opt PUBLIC -DHAVE_SEAL_BFV)
+    target_compile_definitions(ast_opt PUBLIC -DHAVE_SEAL_CKKS)
+endif(SEAL_FOUND)
 
 ####################################################################################
 ## ast_opt installation
