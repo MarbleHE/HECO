@@ -18,14 +18,14 @@ class Ciphertext {
   /// the seal context, i.e. object that holds params/etc
   static std::shared_ptr<seal::SEALContext> context;
 
-  /// secret key, also used for (more efficient) encryption
-  static seal::SecretKey secretKey;
+  /// secret key, also used for (more efficient) encryption (ptr for consistency)
+  static std::unique_ptr<seal::SecretKey> secretKey;
 
-  /// public key
-  static seal::PublicKey publicKey;
+  /// public key (ptr because PublicKey() segfaults)
+  static std::unique_ptr<seal::PublicKey> publicKey;
 
-  /// keys required to rotate
-  static seal::GaloisKeys galoisKeys;
+  /// keys required to rotate (ptr because GaloisKeys() segfaults)
+  static std::unique_ptr<seal::GaloisKeys> galoisKeys;
 #endif
 
   /// plaintext data for testing

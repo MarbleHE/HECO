@@ -4,9 +4,15 @@
 #ifdef HAVE_SEAL_BFV
 // Initialize static members
 std::shared_ptr<seal::SEALContext> Ciphertext::context = nullptr;
-seal::SecretKey Ciphertext::secretKey = seal::SecretKey();
-seal::PublicKey Ciphertext::publicKey = seal::PublicKey();
-seal::GaloisKeys Ciphertext::galoisKeys = seal::GaloisKeys();
+
+// SecretKey() actually works, ptr for consistency
+std::unique_ptr<seal::SecretKey> Ciphertext::secretKey = nullptr;
+
+// The default constructor used by SEAL in PublicKey() segfaults. Therefore, it's a ptr
+std::unique_ptr<seal::PublicKey> Ciphertext::publicKey = nullptr;
+
+// The default constructor used by SEAL in GaloisKey() segfaults. Therefore, it's a ptr
+std::unique_ptr<seal::GaloisKeys> Ciphertext::galoisKeys = nullptr;
 
 /// Hack until we have real parameter setup
 /// Sets up a context and keys, iff the context is not yet setup
@@ -16,9 +22,9 @@ seal::GaloisKeys Ciphertext::galoisKeys = seal::GaloisKeys();
 /// \param publicKey
 /// \param galoisKeys
 void setup_context(std::shared_ptr<seal::SEALContext> &context,
-                   seal::SecretKey &secretKey,
-                   seal::PublicKey &publicKey,
-                   seal::GaloisKeys &galoisKeys) {
+                   std::unique_ptr<seal::SecretKey> &secretKey,
+                   std::unique_ptr<seal::PublicKey> &publicKey,
+                   std::unique_ptr<seal::GaloisKeys> &galoisKeys) {
   if (!context || !context->parameters_set()) {
 
     /// Wrapper for parameters
@@ -39,9 +45,9 @@ void setup_context(std::shared_ptr<seal::SEALContext> &context,
     /// Helper object to create keys
     seal::KeyGenerator keyGenerator(context);
 
-    secretKey = keyGenerator.secret_key();
-    publicKey = keyGenerator.public_key();
-    galoisKeys = keyGenerator.galois_keys();
+    secretKey = std::make_unique<seal::SecretKey>(keyGenerator.secret_key());
+    publicKey = std::make_unique<seal::PublicKey>(keyGenerator.public_key());
+    galoisKeys = std::make_unique<seal::GaloisKeys>(keyGenerator.galois_keys());
   }
 }
 #endif
@@ -67,7 +73,7 @@ Ciphertext::Ciphertext(std::vector<double> inputData, int numCiphertextSlots)
   batchEncoder.encode(std::vector<std::int64_t>(data.begin(), data.end()), plaintext);
 
   /// Helper object for encryption
-  seal::Encryptor encryptor(context, publicKey);
+  seal::Encryptor encryptor(context, *publicKey);
 
   encryptor.encrypt(plaintext, ciphertext);
 #endif
@@ -90,7 +96,7 @@ Ciphertext::Ciphertext(double scalar, int numCiphertextSlots)
   batchEncoder.encode(std::vector<std::int64_t>(data.begin(), data.end()), plaintext);
 
   /// Helper object for encryption
-  seal::Encryptor encryptor(context, publicKey);
+  seal::Encryptor encryptor(context, *publicKey);
 
   encryptor.encrypt(plaintext, ciphertext);
 #endif
@@ -279,7 +285,7 @@ Ciphertext Ciphertext::rotate(int n) {
   result.offsetOfFirstElement = (getOffsetOfFirstElement() + n)%result.getNumCiphertextSlots();
 #ifdef HAVE_SEAL_BFV
   seal::Evaluator evaluator(context);
-  evaluator.rotate_vector_inplace(result.ciphertext, n, galoisKeys);
+  evaluator.rotate_vector_inplace(result.ciphertext, n, *galoisKeys);
 #endif
   return result;
 }
@@ -308,7 +314,7 @@ Ciphertext Ciphertext::sumAndRotate(int initialRotationFactor) {
   while (rotationFactor >= 1) {
     auto rotatedCtxt = ctxt.rotate(rotationFactor);
 #ifdef HAVE_SEAL_BFV
-    evaluator.rotate_vector_inplace(rotatedCtxt.ciphertext, rotationFactor, galoisKeys);
+    evaluator.rotate_vector_inplace(rotatedCtxt.ciphertext, rotationFactor, *galoisKeys);
 #endif
     ctxt = ctxt + rotatedCtxt;
     rotationFactor = rotationFactor/2;
