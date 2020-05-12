@@ -4,9 +4,31 @@
 #include <vector>
 #include <ast_opt/ast/AbstractExpr.h>
 
+#ifdef HAVE_SEAL_BFV
+#include <seal/seal.h>
+#endif
+
 class Ciphertext {
  private:
-  /// the encrypted data in this Ciphertext (supports plaintext data for testing)
+
+#ifdef HAVE_SEAL_BFV
+  /// the encrypted data in this Ciphertext
+  seal::Ciphertext ciphertext;
+
+  /// the seal context, i.e. object that holds params/etc
+  static std::shared_ptr<seal::SEALContext> context;
+
+  /// secret key, also used for (more efficient) encryption
+  static seal::SecretKey secretKey;
+
+  /// public key
+  static seal::PublicKey publicKey;
+
+  /// keys required to rotate
+  static seal::GaloisKeys galoisKeys;
+#endif
+
+  /// plaintext data for testing
   std::vector<double> data;
 
   /// the offset to the first element after applying any operations on the ciphertext, e.g.,
@@ -55,6 +77,7 @@ class Ciphertext {
   Ciphertext applyBinaryOp(const std::function<double(double, double)> &binaryOp, const Ciphertext &lhs,
                            const Ciphertext &rhs) const;
 
+  //TODO: What does this do?
   static int cyclicIncrement(int i, const std::vector<double> &vec);
 
   [[nodiscard]] int getNumCiphertextElements() const;

@@ -1,28 +1,121 @@
 #include "ast_opt/mockup_classes/Ciphertext.h"
 #include <iostream>
 
+#ifdef HAVE_SEAL_BFV
+// Initialize static members
+std::shared_ptr<seal::SEALContext> Ciphertext::context = nullptr;
+seal::SecretKey Ciphertext::secretKey = seal::SecretKey();
+seal::PublicKey Ciphertext::publicKey = seal::PublicKey();
+seal::GaloisKeys Ciphertext::galoisKeys = seal::GaloisKeys();
+
+/// Hack until we have real parameter setup
+/// Sets up a context and keys, iff the context is not yet setup
+/// Takes everything by reference, so we don't have to make it a friend and expose its existence in the header
+/// \param context
+/// \param secretKey
+/// \param publicKey
+/// \param galoisKeys
+void setup_context(std::shared_ptr<seal::SEALContext> &context,
+                   seal::SecretKey &secretKey,
+                   seal::PublicKey &publicKey,
+                   seal::GaloisKeys &galoisKeys) {
+  if (!context || !context->parameters_set()) {
+
+    /// Wrapper for parameters
+    seal::EncryptionParameters params(seal::scheme_type::BFV);
+
+    // in BFV, this degree is also the number of slots.
+    params.set_poly_modulus_degree(8192);
+
+    // Let SEAL select a "suitable" coefficient modulus (not necessarily maximal)
+    params.set_coeff_modulus(seal::CoeffModulus::BFVDefault(params.poly_modulus_degree()));
+
+    // Let SEAL select a plaintext modulus that actually supports batching
+    params.set_plain_modulus(seal::PlainModulus::Batching(params.poly_modulus_degree(), 20));
+
+    // Instantiate context
+    context = seal::SEALContext::Create(params);
+
+    /// Helper object to create keys
+    seal::KeyGenerator keyGenerator(context);
+
+    secretKey = keyGenerator.secret_key();
+    publicKey = keyGenerator.public_key();
+    galoisKeys = keyGenerator.galois_keys();
+  }
+}
+#endif
+
 Ciphertext::Ciphertext(std::vector<double> inputData, int numCiphertextSlots)
     : numCiphertextElements(inputData.size()), offsetOfFirstElement(0) {
+  //TODO (Alex): numCiphertextSlots should probably be static after first init and input should  match exactly
   if (inputData.size() > numCiphertextSlots) {
     throw std::runtime_error("");
   }
   data.insert(data.begin(), inputData.begin(), inputData.end());
   data.resize(numCiphertextSlots);
+#ifdef HAVE_SEAL_BFV
+  // Ensure context is setup
+  setup_context(context, secretKey, publicKey, galoisKeys);
+
+  /// Helper object for encoding
+  seal::BatchEncoder batchEncoder(context);
+  seal::Plaintext plaintext;
+
+  //TODO (Alex): Throw exception if non-integer data and mode is BFV
+  /// Encode, force conversion from double to int64
+  batchEncoder.encode(std::vector<std::int64_t>(data.begin(), data.end()), plaintext);
+
+  /// Helper object for encryption
+  seal::Encryptor encryptor(context, publicKey);
+
+  encryptor.encrypt(plaintext, ciphertext);
+#endif
 }
 
 Ciphertext::Ciphertext(double scalar, int numCiphertextSlots)
     : numCiphertextElements(numCiphertextSlots), offsetOfFirstElement(0) {
   data.resize(numCiphertextSlots);
   std::fill(data.begin(), data.end(), scalar);
+#ifdef HAVE_SEAL_BFV
+  // Ensure context is setup
+  setup_context(context, secretKey, publicKey, galoisKeys);
+
+  /// Helper object for encoding
+  seal::BatchEncoder batchEncoder(context);
+  seal::Plaintext plaintext;
+
+  //TODO (Alex): Throw exception if non-integer data and mode is BFV
+  /// Encode, force conversion from double to int64
+  batchEncoder.encode(std::vector<std::int64_t>(data.begin(), data.end()), plaintext);
+
+  /// Helper object for encryption
+  seal::Encryptor encryptor(context, publicKey);
+
+  encryptor.encrypt(plaintext, ciphertext);
+#endif
 }
 
 Ciphertext Ciphertext::operator+(const Ciphertext &ctxt) const {
-  return applyBinaryOp(std::plus<double>{}, *this, ctxt);
+  auto result = applyBinaryOp(std::plus<double>{}, *this, ctxt);
+#ifdef HAVE_SEAL_BFV
+  seal::Evaluator evaluator(context);
+  evaluator.add(ciphertext, ctxt.ciphertext, result.ciphertext);
+#endif
+  return result;
 }
 
 Ciphertext Ciphertext::operator+(const double plaintextScalar) const {
   Ciphertext ctxt = generateCiphertext(plaintextScalar, getNumCiphertextElements(), getNumCiphertextSlots());
-  return applyBinaryOp(std::plus<double>{}, *this, ctxt);
+  auto result = applyBinaryOp(std::plus<double>{}, *this, ctxt);
+#ifdef HAVE_SEAL_BFV
+  seal::Evaluator evaluator(context);
+  seal::BatchEncoder batchEncoder(context);
+  seal::Plaintext plaintext;
+  batchEncoder.encode(std::vector<uint64_t>(getNumCiphertextSlots(), plaintextScalar), plaintext);
+  evaluator.add_plain(ciphertext, plaintext, result.ciphertext);
+#endif
+  return result;
 }
 
 Ciphertext Ciphertext::generateCiphertext(const double plaintextScalar, int fillNSlots, int totalNumCtxtSlots) const {
@@ -37,30 +130,62 @@ Ciphertext Ciphertext::generateCiphertext(const double plaintextScalar, int fill
 }
 
 Ciphertext Ciphertext::operator*(const Ciphertext &ctxt) const {
-  return applyBinaryOp(std::multiplies<double>{}, *this, ctxt);
+  auto result = applyBinaryOp(std::multiplies<double>{}, *this, ctxt);
+#ifdef HAVE_SEAL_BFV
+  seal::Evaluator evaluator(context);
+  evaluator.multiply(ciphertext, ctxt.ciphertext, result.ciphertext);
+#endif
+  return result;
 }
 
 Ciphertext Ciphertext::operator-(const Ciphertext &ctxt) const {
-  return applyBinaryOp(std::minus<double>{}, *this, ctxt);
+  auto result = applyBinaryOp(std::minus<double>{}, *this, ctxt);
+#ifdef HAVE_SEAL_BFV
+  seal::Evaluator evaluator(context);
+  evaluator.sub(ciphertext, ctxt.ciphertext, result.ciphertext);
+#endif
+  return result;
 }
 
 Ciphertext Ciphertext::operator-(double plaintextScalar) const {
   Ciphertext ctxt = generateCiphertext(plaintextScalar, getNumCiphertextElements(), getNumCiphertextSlots());
-  return applyBinaryOp(std::minus<double>{}, *this, ctxt);
+  auto result = applyBinaryOp(std::minus<double>{}, *this, ctxt);
+#ifdef HAVE_SEAL_BFV
+  seal::Evaluator evaluator(context);
+  seal::BatchEncoder batchEncoder(context);
+  seal::Plaintext plaintext;
+  batchEncoder.encode(std::vector<uint64_t>(getNumCiphertextSlots(), plaintextScalar), plaintext);
+  evaluator.sub_plain(ciphertext, plaintext, result.ciphertext);
+#endif
+  return result;
 }
 
 Ciphertext Ciphertext::operator/(const Ciphertext &ctxt) const {
+#ifdef HAVE_SEAL_BFV
+  throw std::runtime_error("Cannot perform division on encrypted data when using BFV.");
+#endif
   return applyBinaryOp(std::divides<double>{}, *this, ctxt);
 }
 
 Ciphertext Ciphertext::operator/(double plaintextScalar) const {
+#ifdef HAVE_SEAL_BFV
+  throw std::runtime_error("Cannot perform division on encrypted data when using BFV.");
+#endif
   Ciphertext ctxt = generateCiphertext(plaintextScalar, getNumCiphertextElements(), getNumCiphertextSlots());
   return applyBinaryOp(std::divides<double>{}, *this, ctxt);
 }
 
 Ciphertext Ciphertext::operator*(const double plaintextScalar) const {
   Ciphertext ctxt = generateCiphertext(plaintextScalar, getNumCiphertextElements(), getNumCiphertextSlots());
-  return applyBinaryOp(std::multiplies<double>{}, *this, ctxt);
+  auto result = applyBinaryOp(std::multiplies<double>{}, *this, ctxt);
+#ifdef HAVE_SEAL_BFV
+  seal::Evaluator evaluator(context);
+  seal::BatchEncoder batchEncoder(context);
+  seal::Plaintext plaintext;
+  batchEncoder.encode(std::vector<uint64_t>(getNumCiphertextSlots(), plaintextScalar), plaintext);
+  evaluator.multiply_plain(ciphertext, plaintext, result.ciphertext);
+#endif
+  return result;
 }
 
 int Ciphertext::computeCyclicEndIndex(int startIndex, int numElements) const {
@@ -97,12 +222,18 @@ int Ciphertext::getNumCiphertextSlots() const {
 }
 
 bool Ciphertext::operator==(const Ciphertext &rhs) const {
+#ifdef HAVE_SEAL_BFV
+  throw std::runtime_error("Cannot perform boolean tests on encrypted data when using BFV.");
+#endif
   return data==rhs.data &&
       offsetOfFirstElement==rhs.offsetOfFirstElement &&
       numCiphertextElements==rhs.numCiphertextElements;
 }
 
 bool Ciphertext::operator!=(const Ciphertext &rhs) const {
+#ifdef HAVE_SEAL_BFV
+  throw std::runtime_error("Cannot perform boolean tests on encrypted data when using BFV.");
+#endif
   return !(rhs==*this);
 }
 
@@ -127,7 +258,11 @@ Ciphertext Ciphertext::applyBinaryOp(const std::function<double(double, double)>
 Ciphertext::Ciphertext(const Ciphertext &ctxt)
     : data(ctxt.data),
       offsetOfFirstElement(ctxt.offsetOfFirstElement),
-      numCiphertextElements(ctxt.numCiphertextElements) {
+      numCiphertextElements(ctxt.numCiphertextElements)
+#ifdef HAVE_SEAL_BFV
+    , ciphertext(ctxt.ciphertext)
+#endif
+{
 
 }
 
@@ -142,10 +277,15 @@ Ciphertext Ciphertext::rotate(int n) {
   auto rotTarget = (n > 0) ? (result.data.begin() + result.getNumCiphertextSlots() - n) : (result.data.begin() - n);
   std::rotate(result.data.begin(), rotTarget, result.data.end());
   result.offsetOfFirstElement = (getOffsetOfFirstElement() + n)%result.getNumCiphertextSlots();
+#ifdef HAVE_SEAL_BFV
+  seal::Evaluator evaluator(context);
+  evaluator.rotate_vector_inplace(result.ciphertext, n, galoisKeys);
+#endif
   return result;
 }
 
 double &Ciphertext::getElementAt(int n) {
+  //TODO: Make decryption an explicit operation
   return data.at(n);
 }
 
@@ -154,16 +294,22 @@ Ciphertext Ciphertext::sumaAndRotateAll() {
 }
 
 Ciphertext Ciphertext::sumAndRotatePartially(int numElementsToSum) {
-  return sumAndRotate(numElementsToSum/2);
+  return sumAndRotate(numElementsToSum/2); //TODO: Why divide by two?
 }
 
 Ciphertext Ciphertext::sumAndRotate(int initialRotationFactor) {
   int rotationFactor = initialRotationFactor;
   // create a copy of this ctxt as otherwise we would need to treat the first iteration differently
   auto ctxt = *this;
+#ifdef HAVE_SEAL_BFV
+  seal::Evaluator evaluator(context);
+#endif
   // perform rotate-and-sum in total requiring log_2(#ciphertextSlots) rotations
   while (rotationFactor >= 1) {
     auto rotatedCtxt = ctxt.rotate(rotationFactor);
+#ifdef HAVE_SEAL_BFV
+    evaluator.rotate_vector_inplace(rotatedCtxt.ciphertext, rotationFactor, galoisKeys);
+#endif
     ctxt = ctxt + rotatedCtxt;
     rotationFactor = rotationFactor/2;
   }
