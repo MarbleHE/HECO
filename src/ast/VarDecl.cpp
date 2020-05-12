@@ -40,7 +40,7 @@ VarDecl::VarDecl(std::string name, int valueAssignedTo) {
 }
 
 VarDecl::VarDecl(std::string name, Datatype *datatype) {
-  setAttributes(std::move(name), new Datatype(Types::INT), nullptr);
+  setAttributes(std::move(name), datatype, nullptr);
 }
 
 VarDecl::VarDecl(std::string name, float valueAssignedTo) {

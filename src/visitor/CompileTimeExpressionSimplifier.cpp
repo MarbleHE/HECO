@@ -287,17 +287,27 @@ void CompileTimeExpressionSimplifier::visit(LiteralFloat &elem) {
 void CompileTimeExpressionSimplifier::visit(Variable &elem) {
   Visitor::visit(elem);
   // TODO: Introduce a depth threshold (#nodes) to stop inlining if a variable's symbolic value reached a certain depth.
-  auto varValue = getVariableValueDeclaredInThisOrOuterScope(elem.getIdentifier());
+  auto varEntry = getVariableEntryDeclaredInThisOrOuterScope(elem.getIdentifier());
+  auto varValue = (varEntry!=variableValues.end()) ? varEntry->second->value : nullptr;
   auto vvAsLiteral = dynamic_cast<AbstractLiteral *>(varValue);
+
+  auto isVariableUsedInAst = [&]() {
+    return varValue!=nullptr && emittedVariableDeclarations.count(varEntry->first) > 0
+        && (!emittedVariableDeclarations.at(varEntry->first)->emittedVarAssignms.empty()
+            || !emittedVariableDeclarations.at(varEntry->first)->dependentAssignms.empty());
+  };
+
   if (varValue!=nullptr
       // if varValue is an AbstractLiteral then its value must not be an empty matrix (i.e., have dim (0,0))
       && (!(vvAsLiteral!=nullptr) || !vvAsLiteral->getMatrix()->isEmpty())
-      && (!(onBackwardPassInForLoop() && ctes.isUnrollLoopAllowed()) || visitingUnrolledLoopStatements)) {
+      && (!(onBackwardPassInForLoop() && ctes.isUnrollLoopAllowed()) || visitingUnrolledLoopStatements)
+          // this variable must not belong to an emitted variable declaration otherwise there are still statements in
+          // the AST such that we cannot just substitute Variables as we do not know the variable's most recent value
+      && !(isVariableUsedInAst() && !visitingUnrolledLoopStatements)) {
     // if we know the variable's value (i.e., its value is either any subtype of AbstractLiteral or an AbstractExpr if
     // this is a symbolic value that defines on other variables), we can replace this variable node by its value
-    auto variableParent = elem.getOnlyParent();
     auto newValue = getKnownValue(&elem);
-    variableParent->replaceChild(&elem, newValue);
+    if (!elem.getParentsNonNull().empty()) elem.getOnlyParent()->replaceChild(&elem, newValue);
   }
 }
 
@@ -1542,10 +1552,22 @@ void CompileTimeExpressionSimplifier::visit(AbstractMatrix &elem) {
 void CompileTimeExpressionSimplifier::emitVariableDeclaration(VariableValuesMapType::iterator variableToEmit) {
   auto parent = variableToEmit->first.second->getScopeOpener();
   auto children = parent->getChildren();
-  auto newVarDecl = new VarDecl(variableToEmit->first.first, variableToEmit->second->datatype);
+
+  // if this variable is not a scalar, we need to emit the variable value too, otherwise the information about the
+  // matrix dimension will be lost!
+  VarDecl *newVarDeclaration;
+  auto varAsLiteral = dynamic_cast<AbstractLiteral *>(variableToEmit->second->value);
+  if (varAsLiteral!=nullptr && !varAsLiteral->getMatrix()->getDimensions().equals(1, 1)) {
+    newVarDeclaration = new VarDecl(variableToEmit->first.first,
+                                    variableToEmit->second->datatype,
+                                    variableToEmit->second->value);
+  } else {
+    newVarDeclaration = new VarDecl(variableToEmit->first.first, variableToEmit->second->datatype);
+  }
+
   // passing position in children vector is req. to prepend the new VarAssignm (i.e., as new first child of parent)
-  parent->addChildren({newVarDecl}, true, parent->getChildren().begin());
-  emittedVariableDeclarations.emplace(variableToEmit->first, new EmittedVariableData(newVarDecl));
+  parent->addChildren({newVarDeclaration}, true, parent->getChildren().begin());
+  emittedVariableDeclarations.emplace(variableToEmit->first, new EmittedVariableData(newVarDeclaration));
 }
 
 VarAssignm *CompileTimeExpressionSimplifier::emitVariableAssignment(VariableValuesMapType::iterator variableToEmit) {

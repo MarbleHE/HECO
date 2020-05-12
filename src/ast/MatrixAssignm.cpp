@@ -57,8 +57,12 @@ AbstractExpr *MatrixAssignm::getValue() const {
 }
 
 AbstractNode *MatrixAssignm::clone(bool keepOriginalUniqueNodeId) {
-  return new MatrixAssignm(getAssignmTarget()->clone(keepOriginalUniqueNodeId)->castTo<MatrixElementRef>(),
-                           getValue()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
+  auto clonedMatrixAssigm = new MatrixAssignm(
+      getAssignmTarget()->clone(keepOriginalUniqueNodeId)->castTo<MatrixElementRef>(),
+      getValue()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
+
+  clonedMatrixAssigm->updateClone(keepOriginalUniqueNodeId, this);
+  return clonedMatrixAssigm;
 }
 
 bool MatrixAssignm::supportsCircuitMode() {

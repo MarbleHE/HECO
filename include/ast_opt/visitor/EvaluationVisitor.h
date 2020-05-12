@@ -32,11 +32,6 @@ class EvaluationVisitor : public Visitor {
   /// - AbstractLiteral*: The evaluated value of the variable.
   std::unordered_map<std::string, AbstractLiteral *> variableValuesForEvaluation;
 
-  /// Returns the value in variableValuesForEvaluation for a given variable identifier.
-  /// \param variableIdentifier The identifier of which the value should be determined.
-  /// \return The variable's value.
-  AbstractLiteral *getVarValue(const std::string &variableIdentifier);
-
   /// Updates the value of the variable identified by a given identifier variableIdentifier, by a new value (newValue).
   /// \param variableIdentifier The variable to be updated.
   /// \param newValue The new value to be assigned to the variable.
@@ -114,6 +109,11 @@ class EvaluationVisitor : public Visitor {
   void reset();
 
   void updateVarValues(std::unordered_map<std::string, AbstractLiteral *> variableValues);
+
+  /// Returns the value in variableValuesForEvaluation for a given variable identifier.
+  /// \param variableIdentifier The identifier of which the value should be determined.
+  /// \return The variable's value.
+  AbstractLiteral *getVarValue(const std::string &variableIdentifier);
 
   template<typename T, typename U>
   Matrix<T> *evaluateAbstractExprMatrix(EvaluationVisitor &ev, AbstractMatrix &mx);

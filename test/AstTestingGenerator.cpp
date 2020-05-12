@@ -87,7 +87,8 @@ static std::map<int, std::function<void(Ast &)> > call = {  /* NOLINT */
     {57, AstTestingGenerator::genAstMatrixAssignmentKnownThenUnknown},
     {58, AstTestingGenerator::genAstFullAssignmentToMatrix},
     {59, AstTestingGenerator::genAstMatrixAssignmIncludingPushBack},
-    {60, AstTestingGenerator::genAstNestedLoopUnrollingLaplacianSharpeningFilterAllLoops}
+    {60, AstTestingGenerator::genAstNestedLoopUnrollingLaplacianSharpeningFilterAllLoops},
+    {61, AstTestingGenerator::genAstNestedLoopUnrollingLaplacianSharpeningFilterInnerLoopsWithNonStdWeights}
 };
 
 void AstTestingGenerator::generateAst(int id, Ast &ast) {
@@ -1596,7 +1597,7 @@ void AstTestingGenerator::genAstSimpleForLoopUnrolling(Ast &ast) {
   ast.setRootNode(func);
 }
 
-void AstTestingGenerator::genAstNestedLoopUnrollingLaplacianSharpeningFilterInnerLoops(Ast &ast) {
+void AstTestingGenerator::genLaplacianInnerLoopsOnlyAstWithCustomWeights(Ast &ast, Matrix<int> *weights) {
   // -- source code --
   // /// \param img A quadratic image given as vector consisting of concatenated rows.
   // /// \param imgSize The image's size, i.e., img has dimension (imgSize, imgSize).
@@ -1614,7 +1615,6 @@ void AstTestingGenerator::genAstNestedLoopUnrollingLaplacianSharpeningFilterInne
   //     img2[imgSize*x+y] = img[imgSize*x+y] - (value/2);
   //     return img2;
   //  }
-
   auto func = new Function("runLaplacianSharpeningAlgorithm");
   func->addParameter(new FunctionParameter(new Datatype(Types::INT, true), new Variable("img")));
   func->addParameter(new FunctionParameter(new Datatype(Types::INT, false), new Variable("imgSize")));
@@ -1629,9 +1629,7 @@ void AstTestingGenerator::genAstNestedLoopUnrollingLaplacianSharpeningFilterInne
 
   // Matrix<int> weightMatrix = [1 1 1; 1 -8 1; 1 1 1];  –- row-wise concatenation of the original matrix
   func->addStatement(new VarDecl("weightMatrix", new Datatype(Types::INT),
-                                 new LiteralInt(new Matrix<int>({{1, 1, 1},
-                                                                 {1, -8, 1},
-                                                                 {1, 1, 1}}))));
+                                 new LiteralInt(weights)));
 
   // value = value + weightMatrix[i+1][j+1] * img[imgSize*(x+i)+y+j]; -- innermost loop body
   auto wmTerm = new MatrixElementRef(new Variable("weightMatrix"),
@@ -1692,6 +1690,14 @@ void AstTestingGenerator::genAstNestedLoopUnrollingLaplacianSharpeningFilterInne
   func->addStatement(new Return(new Variable("img2")));
 
   ast.setRootNode(func);
+}
+
+void AstTestingGenerator::genAstNestedLoopUnrollingLaplacianSharpeningFilterInnerLoops(Ast &ast) {
+  genLaplacianInnerLoopsOnlyAstWithCustomWeights(ast, new Matrix<int>({{1, 1, 1}, {1, -8, 1}, {1, 1, 1}}));
+}
+
+void AstTestingGenerator::genAstNestedLoopUnrollingLaplacianSharpeningFilterInnerLoopsWithNonStdWeights(Ast &ast) {
+  genLaplacianInnerLoopsOnlyAstWithCustomWeights(ast, new Matrix<int>({{2, 2, 2}, {2, -8, 2}, {2, 2, 2}}));
 }
 
 void AstTestingGenerator::genAstMatrixAssignment(Ast &ast) {
@@ -1842,7 +1848,6 @@ void AstTestingGenerator::genAstMatrixAssignmAndGetMatrixSize(Ast &ast) {
                            innermostStatements);
 
   // outer loop body
-  // TODO why is m[m.dimSize(0)] = t; deleted?
   auto outerLoopBody = new Block({
                                      new VarDecl("t", new Datatype(Types::INT)),
                                      innerLoop,
@@ -1984,8 +1989,10 @@ void AstTestingGenerator::genAstNestedLoopUnrollingLaplacianSharpeningFilterAllL
   func->addParameter(new FunctionParameter(new Datatype(Types::INT, true), new Variable("img")));
   func->addParameter(new FunctionParameter(new Datatype(Types::INT, false), new Variable("imgSize")));
 
-  // std::vector<int> img2;
-  func->addStatement(new VarDecl("img2", new Datatype(Types::INT), nullptr));
+  // std::vector<int> img2;  // has dimension (1,1024)
+  func->addStatement(new VarDecl("img2", new Datatype(Types::INT, true),
+                                 new LiteralInt(
+                                     new Matrix<int>(std::vector<std::vector<int>>(1, std::vector<int>(1024))))));
 
   // Matrix<int> weightMatrix = [1 1 1; 1 -8 1; 1 1 1];  –- row-wise concatenation of the original matrix
   func->addStatement(new VarDecl("weightMatrix", new Datatype(Types::INT),

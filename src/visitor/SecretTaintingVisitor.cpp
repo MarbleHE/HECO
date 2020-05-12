@@ -12,6 +12,8 @@
 #include "ast_opt/ast/Call.h"
 #include "ast_opt/ast/If.h"
 #include "ast_opt/ast/GetMatrixSize.h"
+#include "ast_opt/ast/MatrixAssignm.h"
+#include "ast_opt/ast/MatrixElementRef.h"
 
 void SecretTaintingVisitor::visit(Ast &elem) {
   Visitor::visit(elem);
@@ -91,10 +93,15 @@ void SecretTaintingVisitor::visit(VarDecl &elem) {
     addTaintedNodes(elem.getDescendants());
   }
   // this does not consider Call nodes
-  checkAndAddTaintedChildren(static_cast<AbstractStatement *>(&elem), elem.getInitializer()->getVariableIdentifiers());
+  if (elem.getInitializer()!=nullptr) {
+    checkAndAddTaintedChildren(static_cast<AbstractStatement *>(&elem),
+                               elem.getInitializer()->getVariableIdentifiers());
+  } else {
+    checkAndAddTaintedChildren(static_cast<AbstractStatement *>(&elem), {});
+  }
   Visitor::visit(elem);
   // after visiting the initializer, check if it is tainted - this is needed for Call nodes
-  if (nodeIsTainted(*elem.getInitializer())) {
+  if (elem.getInitializer() != nullptr && nodeIsTainted(*elem.getInitializer())) {
     addTaintedNode(&elem);
   }
 }
@@ -224,6 +231,18 @@ void SecretTaintingVisitor::visit(Transpose &elem) {
 
 void SecretTaintingVisitor::visit(MatrixElementRef &elem) {
   Visitor::visit(elem);
+  if (taintedNodes.count(elem.getOperand()->getUniqueNodeId()) > 0) {
+    addTaintedNode(&elem);
+  }
+}
+
+void SecretTaintingVisitor::visit(MatrixAssignm &elem) {
+  checkAndAddTaintedChildren(static_cast<AbstractStatement *>(&elem), elem.getValue()->getVariableIdentifiers());
+  Visitor::visit(elem);
+  // after visiting the initializer, check if it is tainted - this is needed for Call nodes
+  if (nodeIsTainted(*elem.getValue())) {
+    addTaintedNode(&elem);
+  }
 }
 
 // ==========================
