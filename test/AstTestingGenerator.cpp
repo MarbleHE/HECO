@@ -1990,7 +1990,7 @@ void AstTestingGenerator::genAstNestedLoopUnrollingLaplacianSharpeningFilterAllL
   func->addParameter(new FunctionParameter(new Datatype(Types::INT, false), new Variable("imgSize")));
 
   // std::vector<int> img2;  // has dimension (1,1024)
-  func->addStatement(new VarDecl("img2", new Datatype(Types::INT, true),
+  func->addStatement(new VarDecl("img2", new Datatype(Types::INT, false),
                                  new LiteralInt(
                                      new Matrix<int>(std::vector<std::vector<int>>(1, std::vector<int>(1024))))));
 
