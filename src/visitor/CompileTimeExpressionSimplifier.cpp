@@ -288,8 +288,8 @@ void CompileTimeExpressionSimplifier::visit(Variable &elem) {
   Visitor::visit(elem);
   // TODO: Introduce a depth threshold (#nodes) to stop inlining if a variable's symbolic value reached a certain depth.
   auto varEntry = getVariableEntryDeclaredInThisOrOuterScope(elem.getIdentifier());
-  auto varValue = (varEntry!=variableValues.end()) ? varEntry->second->value : nullptr;
-  auto vvAsLiteral = dynamic_cast<AbstractLiteral *>(varValue);
+  auto varValue = (varEntry!=variableValues.end()) ? varEntry->second : nullptr;
+  auto vvAsLiteral = varValue ? dynamic_cast<AbstractLiteral *>(varValue->value) : nullptr;
 
   auto isVariableUsedInAst = [&]() {
     return varValue!=nullptr && emittedVariableDeclarations.count(varEntry->first) > 0
