@@ -522,6 +522,7 @@ void CompileTimeExpressionSimplifier::simplifyLogicalExpr(OperatorExpr &elem) {
   }
 }
 
+//TODO: This now needs to do recursive resolution of nested blocks, since we took that out of for loop unrolling
 void CompileTimeExpressionSimplifier::visit(Block &elem) {
   auto nodesForDeletionBeforeVisit = nodesQueuedForDeletion;
 
@@ -892,167 +893,79 @@ int CompileTimeExpressionSimplifier::determineNumLoopIterations(For &elem) {
 }
 
 void CompileTimeExpressionSimplifier::visit(For &elem) {
+  // Update LoopDepth tracking.
   enteredForLoop();
-  auto maxDepthBeforeVisitingChildren = currentLoopDepth_maxLoopDepth.second;
 
+  // Before visiting our children, we need to save the current VariableValues
+  /// Copy of the VariableValues before visiting children
   auto varValuesBackup = getClonedVariableValuesMap();
 
-  // Check if there is another loop in this loop's body, and if yes, visit that loop first.
-  // Note: It is not needed to find the innermost loop as this automatically happens thanks to recursion.
-  auto variableValuesBeforeVisitingNestedLoop = getClonedVariableValuesMap();
-  auto clonedBody = elem.getStatementToBeExecuted()->clone(false);
+  // Visit initializer, inlining it into current VariableValues
+  elem.getInitializer()->accept(*this);
+  //TODO: Remove the initializer if empty, if not move to just before loop in parent scope?
 
+  // TODO: Identify "loop variables" from body + updateStmt and remove them from VariableValues
+  // Loop Variables are variables that are both written to and read from during the loop
+  // Therefore, their initial value before the loop / after loop initializer should not be substituted inside the loop
+
+
+
+  // Visit Body to simplify it + recursively deal with nested loops
+  // This will also update the maxLoopDepth in case there are nested loops
+  // This in turn allows us to determine if this For-Loop should be unrolled - see isUnrollLoopAllowed()
+  //TODO: This visit (i.e. the entire visitor) should respect scopes!
+  //  This would mean that e.g. while some variables might be prematurely eliminated,
+  //  they will be re-emitted upon exiting scope
   elem.getStatementToBeExecuted()->accept(*this);
 
-  // if this is the innermost For-loop, then visiting the loop's body was 'harmful' and we need to restore the
-  // original body
-  if (maxDepthBeforeVisitingChildren==currentLoopDepth_maxLoopDepth.second) {
-    elem.replaceChildren(elem.getStatementToBeExecuted(), {clonedBody});
-  }
-  variableValues = variableValuesBeforeVisitingNestedLoop;
-
-  // TODO: If condition depends on (reads) a secret variable throw an exception as this is extremely slow.
-  //  Cannot be checked yet as SecretTaintingVisitor does not support variable scopes yet.
-  // TODO: Move this check to SecretTainingVisitor, as tainting is generally not yet calculated when CTES is called
-  if (false) {
-    throw std::runtime_error(
-        "For-loops containing secret variables are not supported because they cannot efficiently "
-        "be unrolled or optimized in any other way. Aborting.");
-  }
-
-  // If s For-loop's condition is compile-time known & short enough, do full "symbolic eval/unroll", i.e., no
-  // For-loop is left afterwards; otherwise just partially unroll the loop to enable batching by executing
-  // computations of multiple loop iterations simultaneously.
-  visitingUnrolledLoopStatements = true;
-  int numIterations = determineNumLoopIterations(elem);
-  visitingUnrolledLoopStatements = false;
-  // if loop unrolling replaced the For node by a new one, then newNode points to that node, otherwise it is nullptr
-  AbstractNode *newNode;
+  // Now we are ready to analyze if this loop can be unrolled:
+  // 1. Are we set to do unrolling at this LoopDepth?
   if (ctes.isUnrollLoopAllowed()) {
+    // 2. Are we doing full unrolling or partial unrolling?
+    // If the For-loop's condition is compile-time known & the loop is short enough, do full "symbolic eval/loopUnrollHelper",
+    // i.e., no For-loop is left afterwards; otherwise just partially loopUnrollHelper the loop to enable batching by executing
+    // computations of multiple loop iterations simultaneously.
+    /// number of iterations that this for loop requires (or -1 if unknown/too large)
+    int numIterations = determineNumLoopIterations(elem);
     if (numIterations!=-1 && numIterations < ctes.fullyUnrollLoopMaxNumIterations) {
-      // do full loop unrolling
-      newNode = doFullLoopUnrolling(elem, numIterations);
+      // FULL LOOP UNROLLING
+      auto unrolledBlock = loopUnrollHelper(nullptr, nullptr, numIterations);
       ctes.incrementNumLoopUnrollingsCounter();
-      // After unrolling the outermost loop is finished, visit the loop's body (again) to remove unneeded statements and
-      // store the latest variable values; this is only required if full loop unrolling was performed. In that case, the
-      // new node must NOT be a Block statement. We use that fact to distinguish between full and partial unrolling.
-      if (newNode!=nullptr
-          && ((ctes.allowsInfiniteLoopUnrollings() && currentLoopDepth_maxLoopDepth.first==1)
-              || (!ctes.allowsInfiniteLoopUnrollings()
-                  && currentLoopDepth_maxLoopDepth.first - 1
-                      ==(currentLoopDepth_maxLoopDepth.second - ctes.maxNumLoopUnrollings)))) {
-        // Performing the loop unrolling may involve adding temporary variables in the variableValues map. Although they
-        // are only valid in the loop's scope, we do not need them as they are substituted. As we are visiting the unrolled
-        // statements afterwards, we must discard these temporary variables by restoring a previously made copy.
-        variableValues = varValuesBackup;
-        visitingUnrolledLoopStatements = true;
-        newNode->accept(*this);
-        if (removableNodes.count(newNode) > 0) enqueueNodeForDeletion(newNode);
-        visitingUnrolledLoopStatements = false;
-      } else if (auto newNodeAsBlock = dynamic_cast<Block *>(newNode)) {
-        auto blockStatement = newNodeAsBlock->getStatements();
-        newNode->getOnlyParent()->replaceChildren(newNode,
-                                                  std::vector<AbstractNode *>(blockStatement.begin(),
-                                                                              blockStatement.end()));
-      }
+
+      // Replace the current For-Loop node (elem) with the the new block
+      elem.getOnlyParent()->replaceChild(&elem,unrolledBlock);
+
+      // Mark the current For-Loop node (elem) for deletion
+      nodesQueuedForDeletion.push_back(&elem);
+
+      // TODO: Rewind visiting in parent, so that block magically gets evaluated again?
+      //  We want the parent to inline stuff like VarDecls and resolve nested Blocks
+
     } else {
-      // do partial unrolling w.r.t. #ciphertext slots and add a cleanup loop for handling remaining iterations
-      newNode = doPartialLoopUnrolling(elem);
-      ctes.incrementNumLoopUnrollingsCounter();
+      // PARTIAL UNROLLING
+      throw std::runtime_error("Partial loop unrolling currently not supported.");
     }
   }
-  cleanUpAfterStatementVisited(reinterpret_cast<AbstractNode *>(&elem), false);
 
+  //TODO: Somehow reset variable stuff?
+
+  // Update LoopDepth tracking
   leftForLoop();
 }
 
-AbstractNode *CompileTimeExpressionSimplifier::doFullLoopUnrolling(For &elem, int numLoopIterations) {
-  // create a new Block statemeny: necessary to avoid overriding user-defined variables that expect the initalizer
-  // to be within the for-loop's scope only
+Block *CompileTimeExpressionSimplifier::loopUnrollHelper(AbstractStatement *body,
+                                                         AbstractStatement *updateStmt,
+                                                         int numLoopIterations) {
   auto unrolledStatementsBlock = new Block();
-
-  // create copies to allow reverting any changes made by visiting nodes
-  auto variableValuesBackup = getClonedVariableValuesMap();
-  auto nodesQueuedForDeletionBackup = nodesQueuedForDeletion;
-
-  // move initializer from For-loop into newly added block
-  unrolledStatementsBlock->addChild(elem.getInitializer()->removeFromParents(true));
-  // visit the initializer to determine the loop variables
-  visitingUnrolledLoopStatements = true;
-  unrolledStatementsBlock->accept(*this);
-  visitingUnrolledLoopStatements = false;
-  auto loopVariablesMap = getChangedVariables(variableValuesBackup);
-
   while (numLoopIterations > 0) {
-    // for each statement in the for-loop's body
-    std::vector<AbstractStatement *>
-        stmtsToVisit = elem.getStatementToBeExecuted()->castTo<Block>()->getStatements();
-    for (auto it = stmtsToVisit.begin(); it!=stmtsToVisit.end(); ++it) {
-      // if this is a block that was created by unrolling a nested loop, we need to consider its containing statements
-      if (auto stmtAsBlock = dynamic_cast<Block *>(*it)) {
-        auto blockStmts = stmtAsBlock->getStatements();
-        it = stmtsToVisit.insert(it + 1, blockStmts.begin(), blockStmts.end());
-      }
-      // clone the body statement and append the statement to the unrolledForLoop Body
-      unrolledStatementsBlock->addChild((*it)->clone(false));
-    }
-    // add a copy of the update statement, visiting the body then automatically handles the iteration variable in the
+    // clone the body statement and append the statement to the unrolledStatementsBlock
+    unrolledStatementsBlock->addChild(body->clone(false));
+    // add a copy of the update statement,
+    // visiting the body then automatically handles the iteration variable in the
     // cloned loop body statements (i.e., no need to manually adapt them)
-    unrolledStatementsBlock->addChild(elem.getUpdateStatement()->clone(false));
-
+    unrolledStatementsBlock->addChild(updateStmt->clone(false));
     numLoopIterations--;
   }
-
-  // remove all variables that are read and written in the body (see ELSE branch)
-  removeVarsWrittenAndReadFromVariableValues(*unrolledStatementsBlock);
-  // restore the value of the loop variable otherwise its value will not be substituted
-  for (auto &loopVar : loopVariablesMap) {
-    variableValues.at(loopVar.first)->setValue(loopVar.second->value);
-  }
-
-  // visit the unrolled statements to perform variable substitution and store the most recent variable values
-  auto variableValuesBeforeVisitingUnrolledBody = getClonedVariableValuesMap();
-  auto nodesQueuedForDeletionBeforeVisitingUnrolledBody = nodesQueuedForDeletion;
-  visitingUnrolledLoopStatements = true;
-  unrolledStatementsBlock->accept(*this);
-  visitingUnrolledLoopStatements = false;
-  // find the nodes that were newly marked for deletion and detach them from their parents because otherwise they will
-  // unnecessarily be considered while unrolling any possibly existing outer loop
-  auto curNode = nodesQueuedForDeletion.back();
-  nodesQueuedForDeletion.pop_back();
-  while (curNode!=nodesQueuedForDeletionBackup.back()) {
-    curNode->removeFromParents();
-    curNode = nodesQueuedForDeletion.back();
-    nodesQueuedForDeletion.pop_back();
-  }
-
-  // after visiting the block statements, the statements (VarDecl and VarAssignm) are marked for deletion hence we
-  // need to emit new statements for every changed variable except the loop iteration variable
-  for (auto &[varIdentiferScope, varValue] : getChangedVariables(variableValuesBeforeVisitingUnrolledBody)) {
-    auto varIterator = variableValues.find(varIdentiferScope);
-
-    // if this is a loop variable: skip iteration because due to full unrolling we do not need it anymore as it is
-    // already substituted by its value in the statements using it
-    if (loopVariablesMap.count(varIdentiferScope) > 0) {
-      variableValues.erase(varIterator);
-    } else {
-      // otherwise emit and add a variable assignment to the unrolled body
-      unrolledStatementsBlock->addChild(emitVariableAssignment(varIterator));
-    }
-  }
-
-  // replace the For-loop's body by the unrolled statements
-  auto blockStatements = unrolledStatementsBlock->getStatements();
-  std::vector<AbstractNode *> statements(blockStatements.begin(), blockStatements.end());
-  // Mark each statement in the block for deletion as it could be that the statement was emitted before, for example,
-  // if this For-loop contained another For-loop, and we must make sure to update the emittedVariableDeclarations
-  // structure such that now obsolete declaration will be deleted from the AST.
-  // We must directly delete the node (instead of calling markNodeAsRemovable) because in the next step this For loop
-  // will be replaced hence it cannot enqueue the statements for deletion anymore.
-  for (auto &stmt : elem.getStatementToBeExecuted()->castTo<Block>()->getStatements()) enqueueNodeForDeletion(stmt);
-
-  elem.getOnlyParent()->replaceChild(&elem, unrolledStatementsBlock);
-
   return unrolledStatementsBlock;
 }
 
