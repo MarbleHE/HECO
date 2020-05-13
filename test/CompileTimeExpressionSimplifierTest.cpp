@@ -2282,6 +2282,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, partialforLoopUnrolling) { /* NOL
   EXPECT_TRUE(simplifiedAst->isEqual(func->getBody()));
 }
 
+//TODO: Why is the exepected output VarDecl, VarAssignm, Return(Variable) instead of Return(Expression)?
 TEST_F(CompileTimeExpressionSimplifierFixture, fullForLoopUnrolling) { /* NOLINT */
   // -- input --
   //  VecInt2D runLaplacianSharpeningAlgorithm(Vector<int> img, int imgSize, int x, int y) {
@@ -2681,4 +2682,158 @@ TEST_F(CompileTimeExpressionSimplifierFixture, fourNestedLoopsLaplacianSharpenin
   // get the body of the AST on that the CompileTimeExpressionSimplifier was applied on
   auto simplifiedAst = ast.getRootNode()->castTo<Function>()->getBody();
   EXPECT_TRUE(simplifiedAst->isEqual(expectedFunction->getBody()));
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, trivialLoop) { /* NOLINT */
+  Ast ast;
+  auto function = new Function("trivialLoop");
+  auto loop = new For(new VarDecl("i", Types::INT, new LiteralInt(0)),
+                      new LogicalExpr(new Variable("i"), LogCompOp::SMALLER, new LiteralInt(3)),
+                      new VarAssignm("i",
+                                     new ArithmeticExpr(new Variable("i"),
+                                                        ArithmeticOp::ADDITION,
+                                                        new LiteralInt(1))),
+                      new VarAssignm("x", new LiteralInt(42)));
+  auto varDecl = new VarDecl("x", Types::INT, new LiteralInt(0));
+  auto returnStmt = new Return(new Variable("x"));
+  function->addStatement(varDecl);
+  function->addStatement(loop);
+  function->addStatement(returnStmt);
+  ast.setRootNode(function);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  auto expectedFunc = new Function("trivialLoop");
+  expectedFunc->addStatement(new Return(new LiteralInt(42)));
+
+  // get the body of the AST on that the CompileTimeExpressionSimplifier was applied on
+  auto simplifiedAstBody = ast.getRootNode()->castTo<Function>()->getBody();
+  EXPECT_TRUE(simplifiedAstBody->isEqual(expectedFunc->getBody()));
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, trivialNestedLoops) { /* NOLINT */
+  Ast ast;
+  auto function = new Function("trivialNestedLoops");
+  auto innerloop = new For(new VarDecl("i", Types::INT, new LiteralInt(0)),
+                           new LogicalExpr(new Variable("i"), LogCompOp::SMALLER, new LiteralInt(3)),
+                           new VarAssignm("i",
+                                          new ArithmeticExpr(new Variable("i"),
+                                                             ArithmeticOp::ADDITION,
+                                                             new LiteralInt(1))),
+                           new VarAssignm("x", new LiteralInt(42)));
+  auto outerloop = new For(new VarDecl("j", Types::INT, new LiteralInt(0)),
+                           new LogicalExpr(new Variable("j"), LogCompOp::SMALLER, new LiteralInt(3)),
+                           new VarAssignm("j",
+                                          new ArithmeticExpr(new Variable("j"),
+                                                             ArithmeticOp::ADDITION,
+                                                             new LiteralInt(1))),
+                           innerloop);
+  auto varDecl = new VarDecl("x", Types::INT, new LiteralInt(0));
+  auto returnStmt = new Return(new Variable("x"));
+  function->addStatement(varDecl);
+  function->addStatement(outerloop);
+  function->addStatement(returnStmt);
+  ast.setRootNode(function);
+
+  // perform the compile-time expression simplification
+  ctes.visit(ast);
+
+  auto expectedFunc = new Function("trivialNestedLoops");
+  expectedFunc->addStatement(new Return(new LiteralInt(42)));
+
+  // get the body of the AST on that the CompileTimeExpressionSimplifier was applied on
+  auto simplifiedAstBody = ast.getRootNode()->castTo<Function>()->getBody();
+  EXPECT_TRUE(simplifiedAstBody->isEqual(expectedFunc->getBody()));
+}
+
+TEST_F(CompileTimeExpressionSimplifierFixture, maxNumUnrollings) { /* NOLINT */
+  Ast ast;
+  auto function = new Function("maxNumUnrollings");
+  auto innerloop = new For(new VarDecl("i", Types::INT, new LiteralInt(0)),
+                           new LogicalExpr(new Variable("i"), LogCompOp::SMALLER, new LiteralInt(3)),
+                           new VarAssignm("i",
+                                          new ArithmeticExpr(new Variable("i"),
+                                                             ArithmeticOp::ADDITION,
+                                                             new LiteralInt(1))),
+                           new VarAssignm("x", new LiteralInt(42)));
+  auto outerloop = new For(new VarDecl("j", Types::INT, new LiteralInt(0)),
+                           new LogicalExpr(new Variable("j"), LogCompOp::SMALLER, new LiteralInt(3)),
+                           new VarAssignm("j",
+                                          new ArithmeticExpr(new Variable("j"),
+                                                             ArithmeticOp::ADDITION,
+                                                             new LiteralInt(1))),
+                           innerloop);
+  auto varDecl = new VarDecl("x", Types::INT, new LiteralInt(0));
+  auto returnStmt = new Return(new Variable("x"));
+  function->addStatement(varDecl);
+  function->addStatement(outerloop);
+  function->addStatement(returnStmt);
+  ast.setRootNode(function);
+
+  // Function: (maxNumUnrollings)	[global]
+  //	ParameterList:	[Function_0]
+  //	Block:
+  //		VarDecl: (x)	[Block_2]
+  //			Datatype: (plaintext int)
+  //			LiteralInt: (0)
+  //		For:
+  //			VarDecl: (j)
+  //				Datatype: (plaintext int)
+  //				LiteralInt: (0)
+  //			LogicalExpr:
+  //				Variable: (j)
+  //				Operator: (<)
+  //				LiteralInt: (3)
+  //			VarAssignm: (j)
+  //				ArithmeticExpr:
+  //					Variable: (j)
+  //					Operator: (add)
+  //					LiteralInt: (1)
+  //			Block:	[Block_39]
+  //				For:	[Block_39]
+  //					VarDecl: (i)
+  //						Datatype: (plaintext int)
+  //						LiteralInt: (0)
+  //					LogicalExpr:
+  //						Variable: (i)
+  //						Operator: (<)
+  //						LiteralInt: (3)
+  //					VarAssignm: (i)
+  //						ArithmeticExpr:
+  //							Variable: (i)
+  //							Operator: (add)
+  //							LiteralInt: (1)
+  //					Block:	[Block_22]
+  //						VarAssignm: (x)	[Block_22]
+  //							LiteralInt: (42)
+  //		Return:	[Block_2]
+  //			Variable: (x)
+
+  // perform the compile-time expression simplification
+  CompileTimeExpressionSimplifier ctes((CtesConfiguration(1)));
+  ctes.visit(ast);
+
+  // For easier debugging
+  PrintVisitor p;
+  p.visit(ast);
+
+  auto expectedFunc = new Function("maxNumUnrollings");
+  expectedFunc->addStatement(new VarDecl("x", Types::INT, new LiteralInt(42)));
+  //TODO: For now, we want to keep the dummy outerloop for debugging
+  //      However, in the future, a loop with no Body and an updateStmt that only affects variables from
+  //      its own scope, should probably be eliminated by the CTES
+  auto outerLoopNew = new For(new VarDecl("j", Types::INT, new LiteralInt(0)),
+                              new LogicalExpr(new Variable("j"), LogCompOp::SMALLER, new LiteralInt(3)),
+                              new VarAssignm("j",
+                                             new ArithmeticExpr(new Variable("j"),
+                                                                ArithmeticOp::ADDITION,
+                                                                new LiteralInt(1))),
+                              new Block());
+  expectedFunc->addStatement(outerLoopNew);
+  expectedFunc->addStatement(returnStmt);
+
+  // get the body of the AST on that the CompileTimeExpressionSimplifier was applied on
+  auto simplifiedAstBody = ast.getRootNode()->castTo<Function>()->getBody();
+  EXPECT_TRUE(simplifiedAstBody->isEqual(expectedFunc->getBody()));
 }
