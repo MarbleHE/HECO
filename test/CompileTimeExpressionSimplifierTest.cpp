@@ -2318,7 +2318,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, fullForLoopUnrolling) { /* NOLINT
   expectedFunction->addParameter(new FunctionParameter(new Datatype(Types::INT, false), new Variable("x")));
   expectedFunction->addParameter(new FunctionParameter(new Datatype(Types::INT, false), new Variable("y")));
 
-  expectedFunction->addStatement(new VarDecl("img2", new Datatype(Types::INT)));
+  expectedFunction->addStatement(new VarDecl("img2", new Datatype(Types::INT), new LiteralInt()));
 
   // a helper to generate img[imgSize*(x-i)+y+j] terms
   auto createImgIdx = [](int i, int j) -> AbstractExpr * {
@@ -2488,7 +2488,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, matrixAssignmentUnknownThenKnown)
   auto expectedFunc = new Function("computeMatrix");
   expectedFunc->addParameter(new FunctionParameter(new Datatype(Types::INT, false), new Variable("k")));
   expectedFunc->addParameter(new FunctionParameter(new Datatype(Types::INT, false), new Variable("a")));
-  expectedFunc->addStatement(new VarDecl("M", new Datatype(Types::INT, false)));
+  expectedFunc->addStatement(new VarDecl("M", new Datatype(Types::INT, false), new LiteralInt()));
   expectedFunc->addStatement(new MatrixAssignm(
       new MatrixElementRef(new Variable("M"), new Variable("k"), new LiteralInt(0)), new LiteralInt(4)));
   expectedFunc->addStatement(new MatrixAssignm(new MatrixElementRef(new Variable("M"), 0, 0),
@@ -2544,7 +2544,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, fullAssignmentToMatrix) { /* NOLI
 TEST_F(CompileTimeExpressionSimplifierFixture, fourNestedLoopsLaplacianSharpeningFilter) { /* NOLINT */
   // -- input --
   // VecInt2D runLaplacianSharpeningAlgorithm(Vector<int> img, int imgSize) {
-  //     Vector<int> img2;
+  //     Vector<int> img2 = {0, 0, .... ,0};
   //     Matrix<int> weightMatrix = [1 1 1; 1 -8 1; 1 1 1];
   //     for (int x = 1; x < imgSize - 1; ++x) {
   //         for (int y = 1; y < imgSize - 1; ++y) {
@@ -2561,7 +2561,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, fourNestedLoopsLaplacianSharpenin
   // }
   // -- expected --
   // VecInt2D runLaplacianSharpeningAlgorithm(Vector<int> img, int imgSize) {
-  //     Matrix<int> img2;
+  //     Matrix<int> img2 = {0, 0, .... ,0};
   //     for (int x = 1; x < imgSize - 1; ++x) {
   //         for (int y = 1; y < imgSize - 1; ++y) {
   //            img2[imgSize*x+y] = img[imgSize*x+y] - (
@@ -2584,7 +2584,10 @@ TEST_F(CompileTimeExpressionSimplifierFixture, fourNestedLoopsLaplacianSharpenin
   expectedFunction->addParameter(new FunctionParameter(new Datatype(Types::INT, true), new Variable("img")));
   expectedFunction->addParameter(new FunctionParameter(new Datatype(Types::INT, false), new Variable("imgSize")));
 
-  expectedFunction->addStatement(new VarDecl("img2", new Datatype(Types::INT)));
+  expectedFunction->addStatement(new VarDecl("img2", new Datatype(Types::INT),
+                                             new LiteralInt(new Matrix<int>(std::vector<std::vector<int>>(1,
+                                                                                                          std::vector<
+                                                                                                              int>(1024))))));
 
   // a helper to generate img[imgSize*(x-i)+y+j] terms
   auto createImgIdx = [](int i, int j) -> AbstractExpr * {
