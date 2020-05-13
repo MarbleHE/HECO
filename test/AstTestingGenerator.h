@@ -143,6 +143,10 @@ class AstTestingGenerator {
 
   static void genAstNestedLoopUnrollingLaplacianSharpeningFilterInnerLoopsWithNonStdWeights(Ast &ast);
 
+  static void genAstPublicTurnedSecret(Ast &ast);
+
+  static void genAstPublicTurnedSecretMatrix(Ast &ast);
+
   /** @} */ // End of astGenerators group
 
   static void genLaplacianInnerLoopsOnlyAstWithCustomWeights(Ast &ast, Matrix<int> *weights);

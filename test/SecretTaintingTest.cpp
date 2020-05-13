@@ -1,10 +1,11 @@
 #include <regex>
-#include <include/ast_opt/visitor/CompileTimeExpressionSimplifier.h>
+#include "ast_opt/visitor/CompileTimeExpressionSimplifier.h"
 #include "ast_opt/visitor/PrintVisitor.h"
 #include "ast_opt/visitor/SecretTaintingVisitor.h"
 #include "ast_opt/utilities/DotPrinter.h"
 #include "ast_opt/ast/Ast.h"
 #include "ast_opt/ast/Function.h"
+#include "ast_opt/ast/Return.h"
 #include "ast_opt/ast/Call.h"
 #include "ast_opt/ast/Block.h"
 #include "ast_opt/ast/VarAssignm.h"
@@ -39,6 +40,10 @@ class SecretTaintingFixture : public ::testing::Test {
     for (auto &node : n->getDescendants()) {
       expectedTaintedNodeIds.insert(node->getUniqueNodeId());
     }
+  }
+
+  void addNodeToExpectedTaintedNodes(AbstractNode *n) {
+    expectedTaintedNodeIds.insert(n->getUniqueNodeId());
   }
 };
 
@@ -87,7 +92,7 @@ TEST_F(SecretTaintingFixture, simpleAst_singleStatementTainted) { /* NOLINT */
   //        VarAssignm_23: (argPow)              // tainted
   //            ArithmeticExpr_21:               // tainted
   //                Variable_19: (inputC)        // tainted
-  //                Operator_22: (mult)          // tainted
+  //                Operator_22: (mult)
   //                Variable_20: (inputC)        // tainted
   //        Return_29:
   //            ArithmeticExpr_27:
@@ -95,8 +100,8 @@ TEST_F(SecretTaintingFixture, simpleAst_singleStatementTainted) { /* NOLINT */
   //                Operator_28: (div)
   //                LiteralInt_26: (3)
 
-  // check that exactly 11 nodes are tainted
-  EXPECT_EQ(stv.getSecretTaintingList().size(), 11);
+  // check that exactly 10 nodes are tainted
+  EXPECT_EQ(stv.getSecretTaintingList().size(), 10);
 
   // Function_0
   auto function = ast.getRootNode()->castTo<Function>();
@@ -111,8 +116,13 @@ TEST_F(SecretTaintingFixture, simpleAst_singleStatementTainted) { /* NOLINT */
   // Block_2
   expectedTaintedNodeIds.insert(function->getBody()->getUniqueNodeId());
 
-  // VarAssignm_23 and its descendants
-  addStatementAndItsDescendantsToExpectedTaintedNodes(function->getBodyStatements().at(1));
+  // VarAssignm_23, the arithmetic expression and both variables, but not the operator
+  auto varAssignm = dynamic_cast<VarAssignm *>(function->getBodyStatements().at(1));
+  expectedTaintedNodeIds.insert(varAssignm->getUniqueNodeId());
+  auto arithExpr = dynamic_cast<ArithmeticExpr *>(varAssignm->getValue());
+  expectedTaintedNodeIds.insert(arithExpr->getUniqueNodeId());
+  expectedTaintedNodeIds.insert(arithExpr->getLeft()->getUniqueNodeId()); //lhs
+  expectedTaintedNodeIds.insert(arithExpr->getRight()->getUniqueNodeId()); //rhs
 
   // check tainted status
   // - make sure that the number of expected tainted nodes and the actual number of tainted nodes equals
@@ -133,7 +143,6 @@ TEST_F(SecretTaintingFixture, simpleAst_multipleStatementsTainted) { /* NOLINT *
   stv.visit(ast);
   // make sure that the visitor collected anything
   ASSERT_FALSE(stv.getSecretTaintingList().empty());
-  EXPECT_EQ(stv.getSecretTaintingList().size(), 22);
 
   // Function_0: (computePrivate) [global]        // tainted
   //     ParameterList_3: [Function_0]            // tainted
@@ -148,21 +157,21 @@ TEST_F(SecretTaintingFixture, simpleAst_multipleStatementsTainted) { /* NOLINT *
   //             Variable_11: (inputC)
   //     Block_2:                                 // tainted
   //         VarDecl_17: (prod) [Block_2]         // tainted
-  //             Datatype_18: (plaintext int)     // tainted
+  //             Datatype_18: (plaintext int)
   //             ArithmeticExpr_15:               // tainted
   //                 Variable_13: (inputA)        // tainted
-  //                 Operator_16: (mult)          // tainted
-  //                 Variable_14: (inputB)        // tainted
+  //                 Operator_16: (mult)
+  //                 Variable_14: (inputB)
   //         VarAssignm_23: (prod)                // tainted
   //             ArithmeticExpr_21:               // tainted
   //                 Variable_19: (prod)          // tainted
-  //                 Operator_22: (mult)          // tainted
-  //                 Variable_20: (inputC)        // tainted
+  //                 Operator_22: (mult)
+  //                 Variable_20: (inputC)
   //         Return_29:                           // tainted
   //             ArithmeticExpr_27:               // tainted
   //                 Variable_24: (prod)          // tainted
-  //                 Operator_28: (mult)          // tainted
-  //                 LiteralInt_26: (3)           // tainted
+  //                 Operator_28: (mult)
+  //                 LiteralInt_26: (3)
 
   auto function = ast.getRootNode()->castTo<Function>();
   // Function_0
@@ -174,8 +183,30 @@ TEST_F(SecretTaintingFixture, simpleAst_multipleStatementsTainted) { /* NOLINT *
   // FunctionParameter_6 and its descendants
   addStatementAndItsDescendantsToExpectedTaintedNodes(function->getParameters().front());
 
-  // Block_2 and its descendants
-  addStatementAndItsDescendantsToExpectedTaintedNodes(function->getBody());
+  // Block_2
+  expectedTaintedNodeIds.insert(function->getBody()->getUniqueNodeId());
+
+  // VarDecl_17 + ArithmeticExpr_15 and lhs
+  auto varDecl = dynamic_cast<VarDecl *>(function->getBodyStatements()[0]);
+  addNodeToExpectedTaintedNodes(varDecl);
+  auto arithExpr15 = dynamic_cast<ArithmeticExpr*>(varDecl->getInitializer());
+  addNodeToExpectedTaintedNodes(arithExpr15);
+  addNodeToExpectedTaintedNodes(arithExpr15->getLeft());
+
+  // VarAssignm_23 + expr + lhs
+  auto varAssignm = dynamic_cast<VarAssignm *>(function->getBodyStatements()[1]);
+  addNodeToExpectedTaintedNodes(varAssignm);
+  auto arithExpr21 = dynamic_cast<ArithmeticExpr*>(varAssignm->getValue());
+  addNodeToExpectedTaintedNodes(arithExpr21);
+  addNodeToExpectedTaintedNodes(arithExpr21->getLeft());
+
+  // Return_29 + expr + lhs
+  auto returnStmt = dynamic_cast<Return*>(function->getBodyStatements()[2]);
+  addNodeToExpectedTaintedNodes(returnStmt);
+  auto arithExpr27 = dynamic_cast<ArithmeticExpr*>(returnStmt->getReturnExpressions()[0]);
+  addNodeToExpectedTaintedNodes(arithExpr27);
+  addNodeToExpectedTaintedNodes(arithExpr27->getLeft());
+
 
   // check tainted status
   // - make sure that the number of expected tainted nodes and the actual number of tainted nodes equals
@@ -183,6 +214,9 @@ TEST_F(SecretTaintingFixture, simpleAst_multipleStatementsTainted) { /* NOLINT *
   // - check for each tainted if its expected to be tainted
   for (auto &nodeId : stv.getSecretTaintingList())
     EXPECT_EQ(expectedTaintedNodeIds.count(nodeId), 1) << "Node (" << nodeId << ") is not expected to be tainted.";
+  for (auto &nodeId : expectedTaintedNodeIds)
+    EXPECT_EQ(stv.getSecretTaintingList().count(nodeId), 1)
+              << "Node (" << nodeId << ") is not tainted but expected to be tainted.";
 }
 
 TEST_F(SecretTaintingFixture, complexAst_multipleNonSequentialStatementsTainted) { /* NOLINT */
@@ -193,7 +227,6 @@ TEST_F(SecretTaintingFixture, complexAst_multipleNonSequentialStatementsTainted)
   stv.visit(ast);
   // make sure that the visitor collected anything
   ASSERT_FALSE(stv.getSecretTaintingList().empty());
-  EXPECT_EQ(stv.getSecretTaintingList().size(), 40);
 
   //  Function_0: (computeTotal) [global]                                                      // tainted
   //      ParameterList_1: [Function_0]
@@ -229,22 +262,22 @@ TEST_F(SecretTaintingFixture, complexAst_multipleNonSequentialStatementsTainted)
   //                                  ArithmeticExpr_39:                                       // tainted
   //                                      ArithmeticExpr_28:                                   // tainted
   //                                          Variable_25: (qualifiesForSpecialDiscount)       // tainted
-  //                                          Operator_29: (mult)                              // tainted
-  //                                          LiteralFloat_27: (0.9)                           // tainted
-  //                                      Operator_40: (add)                                   // tainted
+  //                                          Operator_29: (mult)
+  //                                          LiteralFloat_27: (0.9)
+  //                                      Operator_40: (add)
   //                                      ArithmeticExpr_37:                                   // tainted
   //                                          ArithmeticExpr_33:                               // tainted
-  //                                              LiteralInt_31: (1)                           // tainted
-  //                                              Operator_34: (sub)                           // tainted
+  //                                              LiteralInt_31: (1)
+  //                                              Operator_34: (sub)
   //                                              Variable_32: (qualifiesForSpecialDiscount)   // tainted
-  //                                          Operator_38: (mult)                              // tainted
-  //                                          LiteralFloat_36: (0.98)                          // tainted
+  //                                          Operator_38: (mult)
+  //                                          LiteralFloat_36: (0.98)
   //                          Return_44: [Block_17]                                            // tainted
   //                              Variable_43: (discountRate)                                  // tainted
   //          Return_56:                                                                       // tainted
   //              ArithmeticExpr_54:                                                           // tainted
-  //                  Variable_52: (subtotal)                                                  // tainted
-  //                  Operator_55: (mult)                                                      // tainted
+  //                  Variable_52: (subtotal)
+  //                  Operator_55: (mult)
   //                  Variable_53: (discount)                                                  // tainted
 
   auto func = ast.getRootNode()->castTo<Function>();
@@ -258,8 +291,11 @@ TEST_F(SecretTaintingFixture, complexAst_multipleNonSequentialStatementsTainted)
   // VarDecl_51 and its descendants
   addStatementAndItsDescendantsToExpectedTaintedNodes(func->getBodyStatements().at(1));
 
-  // Return_56 and its descendants
-  addStatementAndItsDescendantsToExpectedTaintedNodes(func->getBodyStatements().at(2));
+  // Return_56 , arith expr +  rhs
+  addNodeToExpectedTaintedNodes(func->getBodyStatements().at(2));
+  auto arithExpr = dynamic_cast<ArithmeticExpr*>(func->getBodyStatements().at(2)->getChildren()[0]);
+  addNodeToExpectedTaintedNodes(arithExpr);
+  addNodeToExpectedTaintedNodes(arithExpr->getRight());
 
   // check tainted status
   // - make sure that the number of expected tainted nodes and the actual number of tainted nodes equals
@@ -268,6 +304,9 @@ TEST_F(SecretTaintingFixture, complexAst_multipleNonSequentialStatementsTainted)
   for (auto &nodeId : stv.getSecretTaintingList())
     EXPECT_EQ(expectedTaintedNodeIds.count(nodeId), 1)
               << "Node (" << nodeId << ") is tainted but not expected to be tainted.";
+  for (auto &nodeId : expectedTaintedNodeIds)
+    EXPECT_EQ(stv.getSecretTaintingList().count(nodeId), 1)
+              << "Node (" << nodeId << ") is not tainted but expected to be tainted.";
 }
 
 TEST_F(SecretTaintingFixture, unsupportedStatement_While) {  /* NOLINT */
@@ -345,6 +384,136 @@ TEST_F(SecretTaintingFixture, unsupportedStatement_CallExternal) {  /* NOLINT */
   SecretTaintingVisitor stv;
   ASSERT_THROW(stv.visit(ast), std::invalid_argument);
 }
+
+TEST_F(SecretTaintingFixture, publicTurnedSecret) { /* NOLINT */
+  // id=62 generates AST for:
+  // int publicTurnedSecret(int x) { // x secret
+  //    int k; // k public
+  //    k = x + 5; // k now tainted
+  //    return k;
+  // }
+  generateAst(62);
+
+//  Function_0: (publicTurnedSecret)	[global].......//tainted
+//    ParameterList_1:	[Function_0]...................//tainted
+//      FunctionParameter_5:...........................//tainted
+//        Datatype_3: (encrypted int)..................//tainted
+//        Variable_4: (x)..............................//tainted
+//  Block_2:...........................................//tainted
+//    VarDecl_7: (k)	[Block_2]
+//      Datatype_6: (plaintext int)
+//    VarAssignm_13: (k)...............................//tainted
+//      ArithmeticExpr_11:.............................//tainted
+//        Variable_8: (x)..............................//tainted
+//        Operator_12: (add)
+//        LiteralInt_10: (5)
+//    Return_15:.......................................//tainted
+//      Variable_14: (k)...............................//tainted
+
+  // perform tainting
+  SecretTaintingVisitor stv;
+  stv.visit(ast);
+
+  expectedTaintedNodeIds.clear();
+  //function should be tainted
+  auto function = dynamic_cast<Function *>(ast.getRootNode());
+  expectedTaintedNodeIds.insert(function->getUniqueNodeId());
+  // parameter list and children should be tainted
+  addStatementAndItsDescendantsToExpectedTaintedNodes(function->getParameterList());
+  // function body should be tainted
+  expectedTaintedNodeIds.insert(function->getBody()->getUniqueNodeId());
+  // second statement in function body should be tainted
+  auto varAssignm = dynamic_cast<VarAssignm *>(function->getBodyStatements()[1]);
+  expectedTaintedNodeIds.insert(varAssignm->getUniqueNodeId());
+  // binary expression should be tainted
+  expectedTaintedNodeIds.insert(varAssignm->getValue()->getUniqueNodeId());
+  // lhs of binary expression should be tainted
+  expectedTaintedNodeIds.insert(varAssignm->getValue()->getChildren()[0]->getUniqueNodeId());
+  // third stmt (return) in function body and its subnodes should be tainted
+  addStatementAndItsDescendantsToExpectedTaintedNodes(function->getBodyStatements()[2]);
+
+  // check tainted status
+  // - make sure that the number of expected tainted nodes and the actual number of tainted nodes equals
+  EXPECT_EQ(stv.getSecretTaintingList().size(), expectedTaintedNodeIds.size());
+  // - check for each tainted if its expected to be tainted
+  for (auto &nodeId : stv.getSecretTaintingList())
+    EXPECT_EQ(expectedTaintedNodeIds.count(nodeId), 1)
+              << "Node (" << nodeId << ") is tainted but not expected to be tainted.";
+  for (auto &nodeId : expectedTaintedNodeIds)
+    EXPECT_EQ(stv.getSecretTaintingList().count(nodeId), 1)
+              << "Node (" << nodeId << ") is not tainted but expected to be tainted.";
+}
+
+TEST_F(SecretTaintingFixture, publicTurnedSecretMatrix) { /* NOLINT */
+  // id=63 generates AST for:
+  // int publicTurnedSecret(int x) { // x secret
+  //    int k; // k public
+  //    k[0][0] = 7; // still public
+  //    k[0][1] = x + 5; // k now tainted
+  //    return k;
+  // }
+  generateAst(63);
+
+  //  Function_0: (publicTurnedSecret)	[global].......//tainted
+  //	ParameterList_1:	[Function_0]...............//tainted
+  //		FunctionParameter_5:.......................//tainted
+  //			Datatype_3: (encrypted int)............//tainted
+  //			Variable_4: (x)........................//tainted
+  //	Block_2:
+  //		VarDecl_7: (k)	[Block_2]
+  //			Datatype_6: (plaintext int)
+  //		MatrixAssignm_16:
+  //(0,0)		MatrixElementRef_13:
+  //				Variable_8: (k)
+  //				LiteralInt_10: (0)
+  //				LiteralInt_12: (0)
+  //			LiteralInt_15: (7)
+  //		MatrixAssignm_28:...........................//tainted
+  //(0,0)		MatrixElementRef_22:
+  //				Variable_17: (k)
+  //				LiteralInt_19: (0)
+  //				LiteralInt_21: (1)
+  //			ArithmeticExpr_26:......................//tainted
+  //				Variable_23: (x)....................//tainted
+  //				Operator_27: (add)
+  //				LiteralInt_25: (5)
+  //		Return_30:..................................//tainted
+  //			Variable_29: (k)........................//tainted
+
+  // perform tainting
+  SecretTaintingVisitor stv;
+  stv.visit(ast);
+
+  expectedTaintedNodeIds.clear();
+  //function should be tainted
+  auto function = dynamic_cast<Function *>(ast.getRootNode());
+  addNodeToExpectedTaintedNodes(function);
+  // parameter list and children should be tainted
+  addStatementAndItsDescendantsToExpectedTaintedNodes(function->getParameterList());
+  // function body should be tainted
+  addNodeToExpectedTaintedNodes(function->getBody());
+  // second MatrixAssignm should be tainted
+  auto matrixAssignm = dynamic_cast<MatrixAssignm *>(function->getBodyStatements()[2]);
+  addNodeToExpectedTaintedNodes(matrixAssignm);
+  // binary expression should be tainted
+  addNodeToExpectedTaintedNodes(matrixAssignm->getValue());
+  // lhs of binary expression should be tainted
+  addNodeToExpectedTaintedNodes(matrixAssignm->getValue()->getChildren()[0]);
+  // fourth stmt (return) in function body and its subnodes should be tainted
+  addStatementAndItsDescendantsToExpectedTaintedNodes(function->getBodyStatements()[3]);
+
+  // check tainted status
+  // - make sure that the number of expected tainted nodes and the actual number of tainted nodes equals
+  EXPECT_EQ(stv.getSecretTaintingList().size(), expectedTaintedNodeIds.size());
+  // - check for each tainted if its expected to be tainted
+  for (auto &nodeId : stv.getSecretTaintingList())
+    EXPECT_EQ(expectedTaintedNodeIds.count(nodeId), 1)
+              << "Node (" << nodeId << ") is tainted but not expected to be tainted.";
+  for (auto &nodeId : expectedTaintedNodeIds)
+    EXPECT_EQ(stv.getSecretTaintingList().count(nodeId), 1)
+              << "Node (" << nodeId << ") is not tainted but expected to be tainted.";
+}
+
 
 // TODO: This test is borked, because whenever CTES changes what it does, it breaks
 // TODO: Instead, let's output the AST in a specific state, save that, and use it for testing

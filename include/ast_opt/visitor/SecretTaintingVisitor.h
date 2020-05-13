@@ -88,8 +88,6 @@ class SecretTaintingVisitor : public Visitor {
 
   [[nodiscard]] bool anyNodesAreTainted(std::vector<AbstractNode *> nodes) const;
 
-  void checkAndAddTaintedChildren(AbstractStatement *n, std::vector<std::string> varIdentifiersInRhs);
-
   template<class RandomAccessIterator>
   void addTaintedVariableIdentifiers(RandomAccessIterator first, RandomAccessIterator last) {
     std::copy(first, last, std::inserter(taintedVariables, taintedVariables.end()));

@@ -15,6 +15,7 @@
 #include "ast_opt/ast/Call.h"
 #include "ast_opt/ast/For.h"
 #include "ast_opt/ast/LiteralFloat.h"
+#include "ast_opt/ast/Return.h"
 #include "ast_opt/ast/Rotate.h"
 #include "ast_opt/ast/Transpose.h"
 #include "ast_opt/ast/OperatorExpr.h"
@@ -88,7 +89,9 @@ static std::map<int, std::function<void(Ast &)> > call = {  /* NOLINT */
     {58, AstTestingGenerator::genAstFullAssignmentToMatrix},
     {59, AstTestingGenerator::genAstMatrixAssignmIncludingPushBack},
     {60, AstTestingGenerator::genAstNestedLoopUnrollingLaplacianSharpeningFilterAllLoops},
-    {61, AstTestingGenerator::genAstNestedLoopUnrollingLaplacianSharpeningFilterInnerLoopsWithNonStdWeights}
+    {61, AstTestingGenerator::genAstNestedLoopUnrollingLaplacianSharpeningFilterInnerLoopsWithNonStdWeights},
+    {62, AstTestingGenerator::genAstPublicTurnedSecret},
+    {63, AstTestingGenerator::genAstPublicTurnedSecretMatrix}
 };
 
 void AstTestingGenerator::generateAst(int id, Ast &ast) {
@@ -2093,4 +2096,34 @@ void AstTestingGenerator::genAstNestedLoopUnrollingLaplacianSharpeningFilterAllL
   func->addStatement(new Return(new Variable("img2")));
 
   ast.setRootNode(func);
+}
+void AstTestingGenerator::genAstPublicTurnedSecret(Ast &ast) {
+  // int publicTurnedSecret(int x) { // x secret
+  //    int k; // k public
+  //    k = x + 5; // k now tainted
+  //    return k;
+  // }
+  auto function = new Function("publicTurnedSecret");
+  function->addParameter(new FunctionParameter(new Datatype(Types::INT,true), new Variable("x")));
+  function->addStatement(new VarDecl("k", new Datatype(Types::INT, false)));
+  function->addStatement(new VarAssignm("k", new ArithmeticExpr(new Variable("x"),ADDITION,new LiteralInt(5))));
+  function->addStatement(new Return(new Variable("k")));
+  ast.setRootNode(function);
+}
+
+void AstTestingGenerator::genAstPublicTurnedSecretMatrix(Ast &ast) {
+  // int publicTurnedSecret(int x) { // x secret
+  //    int k; // k public
+  //    k[0][0] = 7; // still public
+  //    k[0][1] = x + 5; // k now tainted
+  //    return k;
+  // }
+  auto function = new Function("publicTurnedSecret");
+  function->addParameter(new FunctionParameter(new Datatype(Types::INT,true), new Variable("x")));
+  function->addStatement(new VarDecl("k", new Datatype(Types::INT, false)));
+  function->addStatement(new MatrixAssignm(new MatrixElementRef(new Variable("k"),new LiteralInt(0), new LiteralInt(0)),  new LiteralInt(7)));
+  function->addStatement(new MatrixAssignm(new MatrixElementRef(new Variable("k"),new LiteralInt(0), new LiteralInt(1)),
+                        new ArithmeticExpr(new Variable("x"),ADDITION,new LiteralInt(5))));
+  function->addStatement(new Return(new Variable("k")));
+  ast.setRootNode(function);
 }

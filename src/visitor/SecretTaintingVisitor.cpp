@@ -50,24 +50,10 @@ void SecretTaintingVisitor::visit(If &elem) {
 }
 
 void SecretTaintingVisitor::visit(Return &elem) {
-  std::set<std::string> returnValueVariables;
-  // go through all expression of the return statement and collected the variables contained therein
-  for (auto &curExpression : elem.getReturnExpressions()) {
-    // collect all variables in the current expression
-    auto vars = curExpression->getVariableIdentifiers();
-    // copy the variables into the set returnValueVariables
-    std::copy(vars.begin(), vars.end(), std::inserter(returnValueVariables, returnValueVariables.end()));
-  }
-  // update tainted status
-  if (nodeIsTainted(elem) || anyVariableIdentifierIsTainted(returnValueVariables.begin(), returnValueVariables.end())) {
-    // mark current node as tainted (as taintedNodes is a set, adding it again does not change anything)
-    taintedNodes.insert(elem.getUniqueNodeId());
-    // mark all of its descendants as tainted
-    addTaintedNodes(elem.getDescendants());
-    // mark all variables as tainted
-    addTaintedVariableIdentifiers(returnValueVariables.begin(), returnValueVariables.end());
-  }
   Visitor::visit(elem);
+  if (anyNodesAreTainted(elem.getChildren())) {
+    addTaintedNode(&elem);
+  }
 }
 
 void SecretTaintingVisitor::visit(While &elem) {
@@ -78,11 +64,11 @@ void SecretTaintingVisitor::visit(VarAssignm &elem) {
   // TODO: Overwriting a secret variable by a public value on all execution paths makes the variable become public.
   //  Use the ControlFlowGraphVisitor to determine the execution paths and the generated DataFlowGraph to analyze if
   //  a variable is written in all of these paths and if the written value is public.
-  checkAndAddTaintedChildren(static_cast<AbstractStatement *>(&elem), elem.getValue()->getVariableIdentifiers());
   Visitor::visit(elem);
   // after visiting the initializer, check if it is tainted - this is needed for Call nodes
   if (nodeIsTainted(*elem.getValue())) {
     addTaintedNode(&elem);
+    taintedVariables.insert(elem.getIdentifier());
   }
 }
 
@@ -92,17 +78,11 @@ void SecretTaintingVisitor::visit(VarDecl &elem) {
     taintedNodes.insert(elem.getUniqueNodeId());
     addTaintedNodes(elem.getDescendants());
   }
-  // this does not consider Call nodes
-  if (elem.getInitializer()!=nullptr) {
-    checkAndAddTaintedChildren(static_cast<AbstractStatement *>(&elem),
-                               elem.getInitializer()->getVariableIdentifiers());
-  } else {
-    checkAndAddTaintedChildren(static_cast<AbstractStatement *>(&elem), {});
-  }
   Visitor::visit(elem);
   // after visiting the initializer, check if it is tainted - this is needed for Call nodes
   if (elem.getInitializer() != nullptr && nodeIsTainted(*elem.getInitializer())) {
     addTaintedNode(&elem);
+    taintedVariables.insert(elem.getIdentifier());
   }
 }
 
@@ -237,11 +217,14 @@ void SecretTaintingVisitor::visit(MatrixElementRef &elem) {
 }
 
 void SecretTaintingVisitor::visit(MatrixAssignm &elem) {
-  checkAndAddTaintedChildren(static_cast<AbstractStatement *>(&elem), elem.getValue()->getVariableIdentifiers());
   Visitor::visit(elem);
   // after visiting the initializer, check if it is tainted - this is needed for Call nodes
   if (nodeIsTainted(*elem.getValue())) {
     addTaintedNode(&elem);
+    for(auto &v: elem.getAssignmTarget()->getVariableIdentifiers()) {
+      taintedVariables.insert(v);
+    }
+
   }
 }
 
@@ -273,18 +256,5 @@ void SecretTaintingVisitor::addTaintedNodes(std::vector<AbstractNode *> nodesToA
 
 void SecretTaintingVisitor::addTaintedNode(AbstractNode *n) {
   taintedNodes.insert(n->getUniqueNodeId());
-}
-
-void SecretTaintingVisitor::checkAndAddTaintedChildren(AbstractStatement *n,
-                                                       std::vector<std::string> varIdentifiersInRhs) {
-  // if any variable used in the initializer of this elem is tainted -> the whole assignment becomes tainted
-  if (anyVariableIdentifierIsTainted(varIdentifiersInRhs.begin(), varIdentifiersInRhs.end())) {
-    // add the target variable (e.g., 'alpha' in 'int alpha = secretX + 4')
-    taintedVariables.insert(n->getVarTargetIdentifier());
-    // mark this node as tainted
-    taintedNodes.insert(n->getUniqueNodeId());
-    // also all children of this assignment become tainted
-    for (auto &node : n->getDescendants()) taintedNodes.insert(node->getUniqueNodeId());
-  }
 }
 
