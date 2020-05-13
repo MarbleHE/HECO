@@ -913,6 +913,7 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
 
   // TODO: If condition depends on (reads) a secret variable throw an exception as this is extremely slow.
   //  Cannot be checked yet as SecretTaintingVisitor does not support variable scopes yet.
+  // TODO: Move this check to SecretTainingVisitor, as tainting is generally not yet calculated when CTES is called
   if (false) {
     throw std::runtime_error(
         "For-loops containing secret variables are not supported because they cannot efficiently "
