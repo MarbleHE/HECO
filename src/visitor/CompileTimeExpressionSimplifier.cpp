@@ -299,15 +299,17 @@ void CompileTimeExpressionSimplifier::visit(Variable &elem) {
 
   if (varValue!=nullptr
       // if varValue is an AbstractLiteral then its value must not be an empty matrix (i.e., have dim (0,0))
-      && (!(vvAsLiteral!=nullptr) || !vvAsLiteral->getMatrix()->isEmpty())
+      && ((vvAsLiteral==nullptr) || !vvAsLiteral->getMatrix()->isEmpty())
       && (!(onBackwardPassInForLoop() && ctes.isUnrollLoopAllowed()) || visitingUnrolledLoopStatements)
           // this variable must not belong to an emitted variable declaration otherwise there are still statements in
           // the AST such that we cannot just substitute Variables as we do not know the variable's most recent value
       && !(isVariableUsedInAst() && !visitingUnrolledLoopStatements)) {
     // if we know the variable's value (i.e., its value is either any subtype of AbstractLiteral or an AbstractExpr if
     // this is a symbolic value that defines on other variables), we can replace this variable node by its value
-    auto newValue = getKnownValue(&elem);
-    if (!elem.getParentsNonNull().empty()) elem.getOnlyParent()->replaceChild(&elem, newValue);
+    if (hasKnownValue(&elem)) {
+      auto newValue = getKnownValue(&elem);
+      if (!elem.getParentsNonNull().empty()) elem.getOnlyParent()->replaceChild(&elem, newValue);
+    }
   }
 }
 
