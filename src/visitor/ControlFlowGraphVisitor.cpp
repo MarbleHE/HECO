@@ -459,7 +459,13 @@ void ControlFlowGraphVisitor::buildDataFlowGraph() {
       // merge the nodes already existing in nodeToVarLastWrittenMapping with those newly collected
       for (auto &[varIdentifier, gNodeSet] : varLastWritten) {
         auto set = varLastWritten.at(varIdentifier);
-        nodeToVarLastWrittenMapping.at(curNode).at(varIdentifier).insert(set.begin(), set.end());
+        //check if the variable already exists at this node, if not, create it
+        if (nodeToVarLastWrittenMapping.at(curNode).find(varIdentifier)
+            ==nodeToVarLastWrittenMapping.at(curNode).end()) {
+          nodeToVarLastWrittenMapping.at(curNode).insert(std::make_pair<>(varIdentifier, set));
+        } else {
+          nodeToVarLastWrittenMapping.at(curNode).at(varIdentifier).insert(set.begin(), set.end());
+        }
       }
     }
 
@@ -510,9 +516,9 @@ void ControlFlowGraphVisitor::buildDataFlowGraph() {
   std::vector<std::string> read;
   for (auto &n : processedNodes) {
     auto w = n->getVariables(AccessType::WRITE);
-    std::copy(w.begin(),w.end(),std::back_inserter(written));
+    std::copy(w.begin(), w.end(), std::back_inserter(written));
     auto r = n->getVariables(AccessType::READ);
-    std::copy(w.begin(),w.end(),std::back_inserter(written));
+    std::copy(w.begin(), w.end(), std::back_inserter(written));
   }
   // determine the variables that were read and written (must be both!)
   std::sort(written.begin(), written.end());
