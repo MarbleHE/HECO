@@ -802,42 +802,43 @@ void CompileTimeExpressionSimplifier::visit(While &elem) {
   cleanUpAfterStatementVisited(reinterpret_cast<AbstractNode *>(&elem), false);
 }
 
-//TODO: Write tests for this?
-//TODO: Need to ensure that this works correctly, especially w.r.t scopes
 std::set<ScopedVariable>
-CompileTimeExpressionSimplifier::identifyReadWriteVariables(Block &blockStmt, VariableValuesMapType VariableValues) {
-  // we need to update the scope because calling getVariableEntryDeclaredInThisOrOuterScope uses the current's scope
-  // to search for the variable entry in variableValues
-  auto oldScope = curScope;
-  if (stmtToScopeMapper.count(&blockStmt) > 0) curScope = stmtToScopeMapper.at(&blockStmt);
-  // Erase any variable from variableValues that is written AND read in any of the block's statements from the loop's
-  // body such that they are not replaced by any value while visiting the body's statements.
+CompileTimeExpressionSimplifier::identifyReadWriteVariables(For &forLoop, VariableValuesMapType VariableValues) {
+
+  /// Visitor to create Control- and Data-Flow Graphs used to analyze which variables are read and written in Block
   ControlFlowGraphVisitor cfgv;
-  cfgv.setIgnoreScope(true); // as we're not using the AST as entry point, the scope logic won't work properly
-  // a set of variables that are written by the body's statements
-  std::set<std::pair<std::string, Scope *>> writtenVars;
-  // for each statement in the For-loop's body, collect all variables that are both read and written
-  for (auto &bodyStatement: blockStmt.getStatements()) {
-    bodyStatement->accept(cfgv);
-    auto varsWrittenAndRead = cfgv.getLastVariablesReadAndWrite();
-    // determine the scope for each of the variables
-    for (auto &varIdentifier : varsWrittenAndRead) {
-      auto varValuesIterator = getVariableEntryDeclaredInThisOrOuterScope(varIdentifier);
-      // check if we found the respective variable in the variableValues, otherwise there is no need to add it to
-      // writtenVars and to remove its value in variableValues
-      if (varValuesIterator!=variableValues.end()) {
-        auto scope = varValuesIterator->first.second;
-        writtenVars.insert(std::pair(varIdentifier, scope));
+  // Pass current scope information, so that CFGV has correct starting point
+  cfgv.forceScope(stmtToScopeMapper, curScope);
+  // Create Control-Flow Graph for blockStmt
+  cfgv.visit(forLoop);
+  // Build Data-Flow Graph from Control-Flow Graph.
+  cfgv.buildDataFlowGraph();
+
+  auto variablesReadAndWritten = cfgv.getVariablesReadAndWritten();
+  // TODO: Because CFGV doesn't fully support scopes yet, we must manually re-identify them for now
+  std::set<ScopedVariable> scopedVariablesReadAndWritten;
+  for (auto &str: variablesReadAndWritten) {
+    std::set<ScopedVariable> matches;
+    for (auto &[scopedVariable, value] : variableValues) {
+      if (scopedVariable.first==str) {
+        matches.insert(scopedVariable);
       }
     }
+    if (matches.size()==1) {
+      scopedVariablesReadAndWritten.insert(*matches.begin());
+    } else if (matches.empty()) {
+      throw std::logic_error("Did not find valid corresponding scoped Variable for variable " + str +
+          " returned from Control Flow Graph Visitor.");
+    } else {
+      std::stringstream candidates;
+      for (auto &[name, scope] : matches) {
+        candidates << name << " in " << scope->getScopeIdentifier() << " ";
+      }
+      throw std::logic_error("Found multiple conflicting scoped Variables for variable " + str +
+          " returned from Control Flow Graph Visitor. Candidates were " + candidates.str());
+    }
   }
-  // remove all variables from the current variablesValues that are written in the given Block
-  // instead of erasing them, we just set the value to nullptr to keep information such as the scope and datatype
-  for (auto &varIdentifierScopePair : writtenVars) {
-    variableValues.at(varIdentifierScopePair)->setValue(nullptr);
-  }
-  curScope = oldScope;
-  return writtenVars;
+
 }
 
 int CompileTimeExpressionSimplifier::determineNumLoopIterations(For &elem) {

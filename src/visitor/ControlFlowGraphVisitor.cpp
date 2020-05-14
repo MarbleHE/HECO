@@ -501,29 +501,31 @@ void ControlFlowGraphVisitor::buildDataFlowGraph() {
       }
     }
   }
+
+  // =================
+  // STEP 3:
+  // Traverse all graph nodes and collect all variable reads and writes to build variablesReadAndWritten
+  // =================
+  std::vector<std::string> written;
+  std::vector<std::string> read;
+  for (auto &n : processedNodes) {
+    auto w = n->getVariables(AccessType::WRITE);
+    std::copy(w.begin(),w.end(),std::back_inserter(written));
+    auto r = n->getVariables(AccessType::READ);
+    std::copy(w.begin(),w.end(),std::back_inserter(written));
+  }
+  // determine the variables that were read and written (must be both!)
+  std::sort(written.begin(), written.end());
+  std::sort(read.begin(), read.end());
+  // Intersection requires sorted inputs
+  std::set_intersection(written.begin(),
+                        written.end(),
+                        read.begin(),
+                        read.end(),
+                        std::inserter(variablesReadAndWritten, variablesReadAndWritten.begin()));
 }
 
-std::vector<std::string> ControlFlowGraphVisitor::getLastVariablesReadAndWrite() {
-  if (lastCreatedNodes.empty()) {
-    throw std::logic_error("Cannot get any variables that were read and written as there are no existing GraphNodes."
-                           "Did you visit a statement before by passing this ControlFlowGraphVisitor instace?");
-  } else {
-    std::set<std::string> written;
-    std::set<std::string> read;
-    // go through all created GraphNodes (one for each statement) an collect all variable reads and writes
-    // (we need to visit all statements because there might be nested statements e.g., For-loop's body)
-    for (auto &n : lastCreatedNodes) {
-      auto w = lastCreatedNodes.back()->getVariables(AccessType::WRITE);
-      written.insert(w.begin(), w.end());
-      auto r = lastCreatedNodes.back()->getVariables(AccessType::READ);
-      read.insert(r.begin(), r.end());
-    }
-    std::vector<std::string> variablesReadAndWritten;
-    // determine the variables that were read and written (must be both!)
-    // no need for prior sorting as set is already sorted
-    std::set_intersection(written.begin(), written.end(), read.begin(), read.end(),
-                          std::back_inserter(variablesReadAndWritten));
-    return variablesReadAndWritten;
-  }
+std::set<std::string> ControlFlowGraphVisitor::getVariablesReadAndWritten() {
+  return variablesReadAndWritten;
 }
 

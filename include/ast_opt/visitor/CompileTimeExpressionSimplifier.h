@@ -349,12 +349,11 @@ class CompileTimeExpressionSimplifier : public Visitor {
   /// \param elem The OperatorExpr that should be simplified using Boolean laws.
   static void simplifyLogicalExpr(OperatorExpr &elem);
 
-  /// Identify all variables that are written and read from in a certain block
-  /// This is useful e.g. in loop bodies, to detect variables that need to be treated with care
-  /// \param blockStmt The Block consisting of the statements that are analyzed for variable writes and reads
+  /// Identify all variables that are written and read from in the body + condition of a for-loop
+  /// \param forLoop The for loop to investigate
   /// \param VariableValues Initial VariableValues BEFORE the block
   /// \return Variables, with their associated scopes, that match the criteria
-  std::set<ScopedVariable> identifyReadWriteVariables(Block &blockStmt, VariableValuesMapType VariableValues);
+  std::set<ScopedVariable> identifyReadWriteVariables(For &forLoop, VariableValuesMapType VariableValues);
 
   /// Returns the current value of the variable identified by the given variableName. If there are multiple
   /// declarations within different scopes, returns the declaration that is closest to curScope.
@@ -447,7 +446,7 @@ class CompileTimeExpressionSimplifier : public Visitor {
   /// \param elem The For-loop to be unrolled.
   /// \return A pointer to the new node if the given For-loop was replaced in the children vector of the For-loop's
   /// parent.
-  AbstractNode *doPartialLoopUnrolling(For &elem);
+//  AbstractNode *doPartialLoopUnrolling(For &elem);
 };
 
 /// Takes a Literal (e.g., LiteralInt) and checks whether its values are defined using a Matrix<AbstractExpr*>. In

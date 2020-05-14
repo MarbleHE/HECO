@@ -23,6 +23,9 @@ enum class AccessType { READ = 0, WRITE = 1 };
 /// The visitor further collects information that is required to build the Data Flow Graph (DFG) therefrom.
 class ControlFlowGraphVisitor : public Visitor {
  private:
+  /// Ugly hack: Variables in CFG that are both read and written to
+  std::set<std::string> variablesReadAndWritten;
+
   /// The nodes that were created most recently. Those are the parent nodes of the next node to be created.
   std::vector<GraphNode *> lastCreatedNodes;
 
@@ -79,11 +82,6 @@ class ControlFlowGraphVisitor : public Visitor {
   /// \param gNode The node where the recently accessed variables should be moved to.
   /// \invariant lastCreatedNodes is always empty after calling this method.
   void postActionsStatementVisited(GraphNode *gNode);
-
-  /// Returns all variables that are read and written among all GraphNodes. This makes sense if the
-  /// ControlFlowGraphVisitor is only called on a subtree (e.g., For-loop's body Block statement) of the whole AST.
-  /// \return All variables that are read and written.
-  std::vector<std::string> getLastVariablesReadAndWrite();
 
   /** @defgroup visit Methods for handling visits of AbstractNode subclasses
    *  @{
@@ -148,6 +146,11 @@ class ControlFlowGraphVisitor : public Visitor {
   /** @} */ // End of visit group
 
   void buildDataFlowGraph();
+
+  /// Return all variables that were both written and read in the current CFG
+  /// WARNING: only returns valid answers when Data Flow Graph has been built!
+  /// \return all variables that are both written and read in the current CFG
+  std::set<std::string> getVariablesReadAndWritten();
 
   void handleOperatorExpr(AbstractExpr &ae);
 };
