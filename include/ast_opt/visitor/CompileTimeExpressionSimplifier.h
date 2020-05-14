@@ -36,8 +36,8 @@ struct VariableValue {
     VariableValue::value = val;
   }
 };
-
-typedef std::map<std::pair<std::string, Scope *>, VariableValue *> VariableValuesMapType;
+typedef std::pair<std::string, Scope *> ScopedVariable;
+typedef std::map<ScopedVariable, VariableValue *> VariableValuesMapType;
 
 /**
  * A helper struct that is used by emittedVariableDeclarations and helps to keep track of the relationship between a
@@ -108,6 +108,9 @@ struct CtesConfiguration {
   }
 };
 
+//TODO: This visitor must respect scopes!
+//  This would mean that e.g. while some variables might be prematurely eliminated,
+//  they will be re-emitted upon exiting scope
 class CompileTimeExpressionSimplifier : public Visitor {
  private:
   /// A CompileTimeExpressionSimplifier configuration object containing configuration parameters.
@@ -346,11 +349,12 @@ class CompileTimeExpressionSimplifier : public Visitor {
   /// \param elem The OperatorExpr that should be simplified using Boolean laws.
   static void simplifyLogicalExpr(OperatorExpr &elem);
 
-  /// Removes all variables from variableValues that are written in any statement of the given block (blockStmt).
-  /// \param blockStmt The Block consisting of the statements that are analyzed for variable writes.
-  /// \return A list of pairs consisting of (variable identifier, variable declaration scope) of those variables that
-  /// are identified to be written to within in the block's statements.
-  std::set<std::pair<std::string, Scope *>> removeVarsWrittenAndReadFromVariableValues(Block &blockStmt);
+  /// Identify all variables that are written and read from in a certain block
+  /// This is useful e.g. in loop bodies, to detect variables that need to be treated with care
+  /// \param blockStmt The Block consisting of the statements that are analyzed for variable writes and reads
+  /// \param VariableValues Initial VariableValues BEFORE the block
+  /// \return Variables, with their associated scopes, that match the criteria
+  std::set<ScopedVariable> identifyReadWriteVariables(Block &blockStmt, VariableValuesMapType VariableValues);
 
   /// Returns the current value of the variable identified by the given variableName. If there are multiple
   /// declarations within different scopes, returns the declaration that is closest to curScope.
@@ -373,6 +377,12 @@ class CompileTimeExpressionSimplifier : public Visitor {
   /// \return A variable assignment statement for the given variable (variableToEmit).
   VarAssignm *emitVariableAssignment(VariableValuesMapType::iterator variableToEmit);
 
+  /// Emit variable assignments (and/or declaration, if necessary) for each of variables
+  /// The VarDecl will be created in the scope associated with the variable
+  /// \param variables  Variables for which VarDecls are to be emitted, and their associated scope
+  /// \param variableValues Map that associates scoped variables with their values
+  void emitVariableAssignments(std::set<ScopedVariable> variables, VariableValuesMapType variableValues);
+
   /// Creates a new VarDecl statements of the variable that the given iterator (variableToEmit) is pointing to.
   /// The variable declaration is emitted as the first statement in the scope where the variable was initially
   /// declared. The generated declaration statement is added to the emittedVariableDeclarations map to keep track of
@@ -380,7 +390,7 @@ class CompileTimeExpressionSimplifier : public Visitor {
   /// returning the generated statement.
   /// \param variableToEmit The variable to be emitted, i.e., for that a variable declaration statement should be
   /// generated.
-  void emitVariableDeclaration(std::map<std::pair<std::string, Scope *>, VariableValue *>::iterator variableToEmit);
+  void emitVariableDeclaration(VariableValuesMapType::iterator variableToEmit);
 
   /// Creates a clone of the variableValues map. As the map consists of VariableValue pointers, each of the
   /// VariableValue objects pointed to needs to be copied.

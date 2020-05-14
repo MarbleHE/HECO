@@ -803,8 +803,9 @@ void CompileTimeExpressionSimplifier::visit(While &elem) {
 }
 
 //TODO: Write tests for this?
-std::set<std::pair<std::string, Scope *>>
-CompileTimeExpressionSimplifier::removeVarsWrittenAndReadFromVariableValues(Block &blockStmt) {
+//TODO: Need to ensure that this works correctly, especially w.r.t scopes
+std::set<ScopedVariable>
+CompileTimeExpressionSimplifier::identifyReadWriteVariables(Block &blockStmt, VariableValuesMapType VariableValues) {
   // we need to update the scope because calling getVariableEntryDeclaredInThisOrOuterScope uses the current's scope
   // to search for the variable entry in variableValues
   auto oldScope = curScope;
@@ -903,33 +904,46 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
 
   // Manual handling of scope (usually done via Visitor::visit(elem))
   addStatementToScope(elem);
-  //TODO: See Visitor::visit(For &elem), need to fix issue that we cannot emit VarDecls into for loop scope
+
   changeToInnerScope(elem.getUniqueNodeId(), &elem);
 
-  // Visit initializer
-  // Visiting this is important, in case it affects variables that are not "loop variables"!
+  // INITIALIZER
+
+  // Visit initializer. Visiting this is important, in case it affects variables that won't be detected as "loop variables"
   // If we did not visit it, the recursive visit of the body might go wrong!
-  //elem.getInitializer()->accept(*this); //TODO: Re-enable once fixed
+  elem.getInitializer()->accept(*this);
+  // Now, int i = 0 and similar things have been deleted from AST and are in VariableValuesMap
 
+  // UPDATE STMT INLINING
+  // Semantically, there is no difference between stmts in the update block and stmts at the end of the body block
+  // Therefore, we simply transfer these stmts, to simplify our logic
+  for(auto &s: elem.getUpdate()->getStatements()) {
+    elem.getBody()->addChild(s);
+  }
 
-  // Loop Variables are variables that are both written to and read from during the loop
-  // Therefore, their initial value before the loop / after loop initializer should not be substituted inside the loop
-  //TODO: Need to ensure that this works correctly, especially w.r.t scopes
-  auto loopVariables = removeVarsWrittenAndReadFromVariableValues(*elem.getBody());
+  // BODY
+
+  // Before we can visit the body, we must remove "loop variables":
+  /// Loop Variables are variables that are both written to and read from during the loop
+  auto loopVariables = identifyReadWriteVariables(*elem.getBody(), variableValues);
+
+  // We need to emit VariableDeclarations for each of these Variables (because of next step)
+  emitVariableAssignments(loopVariables, variableValues);
+  // The initial value before the loop / after loop initializer should not be substituted inside the loop
+  // Therefore, we need to remove their values from the variableValues map
+  for(auto &v: loopVariables) {
+    auto it = variableValues.find(v);
+    if (it != variableValues.end()) {
+      it->second = nullptr;
+    }
+  }
 
   // Visit Body to simplify it + recursively deal with nested loops
   // This will also update the maxLoopDepth in case there are nested loops
   // This in turn allows us to determine if this For-Loop should be unrolled - see isUnrollLoopAllowed()
-  //TODO: This visit (i.e. the entire visitor) should respect scopes!
-  //  This would mean that e.g. while some variables might be prematurely eliminated,
-  //  they will be re-emitted upon exiting scope
-  //elem.getBody()->accept(*this); //TODO: Re-enable once fixed
+  elem.getBody()->accept(*this);
+  // Now, parts of the body statements (e.g. x++) might have been deleted and are only in VariableValuesMap
 
-  //TODO: Remove loop variables from update stmt
-
-  // Visit Update Statement to simplify it
-  // Because we have identified and removed the loop variables, this should not affect correctness
-  //elem.getUpdateStatement()->accept(*this); //TODO: Re-enable once loop variable handling is done
 
   // Manual scope handling
   changeToOuterScope();
@@ -952,17 +966,6 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
                                             numIterations);
       ctes.incrementNumLoopUnrollingsCounter();
 
-      // We would now like to wind back time and have our caller function visit unrolledBlock
-      // instead of visiting the original for loop (elem). Since that's not possible, we need to do some magic!
-      // Note that simply replacing elem with unrolledBlock is not sufficient - unrolledBlock would not be visited.
-      // Equally, inserting unrolledBlock after elem assumes that elem's parent is e.g. a Block
-      // and even then would invalidate the iterators that our caller function might be using
-
-      // Therefore, we will instead use the VariableValuesMap to pass as much as possible up to the parent.
-      // The parent will then have to deal with emitting suitable VarDecls/VarAssignm
-      // However, this does not work if there are stmts in the loop which cannot be stored as Values
-      // e.g. another loop - However, this specific case isn't possible with full unrolling.
-
       // We need to remove elem from its parents scope
       removeStatementFromScope(elem);
 
@@ -976,45 +979,26 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
       // Mark the current For-Loop node (elem) for deletion
       nodesQueuedForDeletion.push_back(&elem);
 
+      // Now, visit the block
       // Before we go through the Block, we must reset the VariableValues to the version before we visited the body
       // Otherwise, we would not have the initialization values in the map
       variableValues = varValuesBackup;
-
-      // Now, visit the block
       changeToInnerScope(unrolledBlock->getUniqueNodeId(), unrolledBlock);
       unrolledBlock->accept(*this);
       Scope *unrolledBlockScope = curScope;
       changeToOuterScope();
-      // The block should now contain only VarDecls for variables that matter only in the loop's scope
-      for (auto &s: unrolledBlock->getStatements()) {
-        if (auto vd = dynamic_cast<VarDecl *>(s)) {
-          if (loopVariables.count(std::make_pair(vd->getIdentifier(), unrolledBlockScope))) {
-            // "remove" via nullptr, because we're inside a loop iterating over the stmts
-            unrolledBlock->replaceChild(vd, nullptr);
-          }
-        }
-      }
 
-      // If everything worked out, the unrolled block should now be empty
-      if (!unrolledBlock->getChildrenNonNull().empty()) {
-        throw std::logic_error(
-            "Full Loop Unrolling failed because a statement could not be inlined into VariableValues.");
-      }
-
-      // Replace unrolled Block with a nullptr in the parent
-      // We cannot remove it properly because of iteratior invailidation concerns
-      unrolledBlock->getOnlyParent()->replaceChild(unrolledBlock, nullptr);
+      // Note that if the parent of elem/unrolledBlock is a Block-like stmt,
+      // our caller (e.g. visit(Block)) will have to deal with unpacking it
 
     } else {
       // PARTIAL UNROLLING
       throw std::runtime_error("Partial loop unrolling currently not supported.");
     }
-  } else {
-    // NO UNROLLING
-    // If no unrolling should take place, the already executed visits of the children are both correct and sufficient
   }
-
-
+  // else
+  // NO UNROLLING
+  // If no unrolling should take place, the already executed visits of the children are both correct and sufficient
 
   // Update LoopDepth tracking
   leftForLoop();
@@ -1060,7 +1044,7 @@ AbstractNode *CompileTimeExpressionSimplifier::doPartialLoopUnrolling(For &elem)
   // - a copy of the whole For-loop including initializer, condition, update stmt, body (required for cleanup loop)
   auto cleanupForLoop = elem.clone(false)->castTo<For>();
   auto ignrd =
-      removeVarsWrittenAndReadFromVariableValues(*cleanupForLoop->getBody()->castTo<Block>());
+      identifyReadWriteVariables(*cleanupForLoop->getBody()->castTo<Block>(), VariableValuesMapType());
   // visit the condiiton, body, and update statement to make required replacements (e.g., Arithmetic/LogicalExpr to
   // OperatorExpr)
   cleanupForLoop->getCondition()->accept(*this);
@@ -1116,7 +1100,7 @@ AbstractNode *CompileTimeExpressionSimplifier::doPartialLoopUnrolling(For &elem)
   // known value while visiting the body's statements. This includes the iteration variable as we moved the update
   // statement into the loop's body.
   auto readAndWrittenVars =
-      removeVarsWrittenAndReadFromVariableValues(*elem.getBody()->castTo<Block>());
+      identifyReadWriteVariables(*elem.getBody()->castTo<Block>(), VariableValuesMapType());
 
   variableValuesBackup = getClonedVariableValuesMap();
 
@@ -1534,6 +1518,9 @@ void CompileTimeExpressionSimplifier::visit(AbstractMatrix &elem) {
   Visitor::visit(elem);
 }
 
+//TODO: Make emit... functions more robust and add support for For-loop
+//TODO: See visitor for for, need to fix issue that we cannot emit VarDecls into for loop scope
+// Ok, we CAN just emit into initializer!
 void CompileTimeExpressionSimplifier::emitVariableDeclaration(VariableValuesMapType::iterator variableToEmit) {
   auto parent = variableToEmit->first.second->getScopeOpener();
   auto children = parent->getChildren();
@@ -1574,6 +1561,16 @@ VarAssignm *CompileTimeExpressionSimplifier::emitVariableAssignment(VariableValu
   // add a reference to link from this VarAssignm to the associated VarDecl
   emittedVariableAssignms[newVarAssignm] = emittedVariableDeclarations.find(variableToEmit->first);
   return newVarAssignm;
+}
+
+void CompileTimeExpressionSimplifier::emitVariableAssignments(std::set<ScopedVariable> variables,
+                                                              VariableValuesMapType variableValues) {
+  for (auto &v : variables) {
+    auto it = variableValues.find(v);
+    if (it!=variableValues.end()) {
+      emitVariableAssignment(it);
+    }
+  }
 }
 
 VariableValuesMapType CompileTimeExpressionSimplifier::getClonedVariableValuesMap() {
