@@ -427,9 +427,9 @@ class CompileTimeExpressionSimplifier : public Visitor {
   /// \param updateStmt Update statement of the for-loop to be unrolled
   /// \param numLoopIterations The number of iterations this For-loop would have been executed.
   /// \return Block of body; updateStmt; body; updateStmt; ... repeated numLoopIteration times
-  Block * loopUnrollHelper(AbstractStatement *body,
-                           AbstractStatement *updateStmt,
-                           int numLoopIterations);
+  Block *loopUnrollHelper(AbstractStatement *body,
+                          AbstractStatement *updateStmt,
+                          int numLoopIterations);
 
   /// Handles the partial loop unrolling to enable batching of the loop's body statements.
   /// \param elem The For-loop to be unrolled.
