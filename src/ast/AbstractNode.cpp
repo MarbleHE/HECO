@@ -306,28 +306,12 @@ AbstractNode *AbstractNode::cloneFlat() {
 }
 
 void AbstractNode::replaceChild(AbstractNode *originalChild, AbstractNode *newChild) {
-  replaceChildren(originalChild, {newChild});
-}
-
-void AbstractNode::replaceChildren(AbstractNode *originalChild, std::vector<AbstractNode *> newChildren) {
-  // find the node to be replaced in the children vector (pos points to its position)
   auto pos = std::find(children.begin(), children.end(), originalChild);
   if (pos==children.end()) {
     throw std::runtime_error("Could not execute AbstractNode::replaceChildren because the node to be replaced could "
                              "not be found in the children vector!");
   }
-  // if the given node was found, remove it from the children vector using erase
-  auto posAfterErasedNode = children.erase(pos);
-  // insert all new children at the position where the deleted node was before
-  children.insert(posAfterErasedNode, newChildren.begin(), newChildren.end());
-
-  // remove edge: originalChild -> currentNode
-  originalChild->removeParent(this, false);
-  // add edges: newChildToBeAdded -> currentNode but before detach any existing parents from this child node
-  for (auto &child : newChildren) {
-    child->removeFromParents();
-    child->addParent(this, false);
-  }
+  children[std::distance(children.begin(), pos)] = newChild;
 }
 
 AbstractNode *AbstractNode::removeFromParents(bool removeParentBackreference) {

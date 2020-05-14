@@ -129,20 +129,10 @@ class AbstractNode {
   void removeChildren();
 
   /// Replaces a given child (originalChild) of this node by a new node (newChild) and updates the child and
-  /// parent references of both nodes. This method preserves the order of the children.
+  /// parent references of both nodes. This method does not invalidate iterators over the children
   /// \param originalChild The node to be replaced by newChild.
   /// \param newChild The node to be added at the same position as the original child was.
   virtual void replaceChild(AbstractNode *originalChild, AbstractNode *newChild);
-
-  /// Replaces a given child (originalChild) of this node by one or multiple new nodes (newChildren) and updates the
-  /// child and parent references of all affected nodes. This method preserves the order of the children when
-  /// inserting the nodes. For example:
-  ///     replaceChildren(C, [X, V, W]) on node with children = [a b C d e f]
-  /// results in
-  ///     children = [a b X V W d e f].
-  /// \param originalChild The node to be replaced by newChildren.
-  /// \param newChildren The children to be added at the originalChild's current position.
-  void replaceChildren(AbstractNode *originalChild, std::vector<AbstractNode *> newChildren);
 
   /// Returns the number of children nodes that are not null (nullptr).
   /// \return An integer indicating the number of non-nullptr children nodes.
