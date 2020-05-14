@@ -197,11 +197,11 @@ void Visitor::visit(For &elem) {
   // condition
   if (elem.getCondition()!=nullptr) elem.getCondition()->accept(*this);
   // update
-  if (elem.getUpdateStatement()!=nullptr) elem.getUpdateStatement()->accept(*this);
+  if (elem.getUpdate()!=nullptr) elem.getUpdate()->accept(*this);
 
-  changeToInnerScope(elem.getStatementToBeExecuted()->getUniqueNodeId(), &elem);
+  changeToInnerScope(elem.getBody()->getUniqueNodeId(), &elem);
   // For statement body is always in a separate scope (even without a separate block "{...}")
-  elem.getStatementToBeExecuted()->accept(*this);
+  elem.getBody()->accept(*this);
   changeToOuterScope();
 }
 

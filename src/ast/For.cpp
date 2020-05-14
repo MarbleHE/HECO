@@ -17,20 +17,20 @@ For::For(AbstractStatement *initializer,
   setAttributes(initializer, condition, update, statementToBeExecuted);
 }
 
-AbstractStatement *For::getInitializer() const {
-  return reinterpret_cast<AbstractStatement *>(getChildAtIndex(0));
+Block * For::getInitializer() const {
+  return reinterpret_cast<Block *>(getChildAtIndex(0));
 }
 
 AbstractExpr *For::getCondition() const {
   return reinterpret_cast<AbstractExpr *>(getChildAtIndex(1));
 }
 
-AbstractStatement *For::getUpdateStatement() const {
-  return reinterpret_cast<AbstractStatement *>(getChildAtIndex(2));
+Block * For::getUpdate() const {
+  return reinterpret_cast<Block *>(getChildAtIndex(2));
 }
 
-AbstractStatement *For::getStatementToBeExecuted() const {
-  return reinterpret_cast<AbstractStatement *>(getChildAtIndex(3));
+Block * For::getBody() const {
+  return reinterpret_cast<Block *>(getChildAtIndex(3));
 }
 
 void For::setAttributes(AbstractStatement *initializer,
@@ -56,12 +56,12 @@ AbstractNode *For::clone(bool keepOriginalUniqueNodeId) {
   auto clonedCondition = (getCondition()==nullptr)
                          ? nullptr
                          : getCondition()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>();
-  auto clonedUpdater = (getUpdateStatement()==nullptr)
+  auto clonedUpdater = (getUpdate()==nullptr)
                        ? nullptr
-                       : getUpdateStatement()->clone(false)->castTo<AbstractStatement>();
-  auto clonedBody = (getStatementToBeExecuted()==nullptr)
+                       : getUpdate()->clone(false)->castTo<AbstractStatement>();
+  auto clonedBody = (getBody()==nullptr)
                     ? nullptr
-                    : getStatementToBeExecuted()->clone(keepOriginalUniqueNodeId)->castTo<AbstractStatement>();
+                    : getBody()->clone(keepOriginalUniqueNodeId)->castTo<AbstractStatement>();
 
   auto clonedNode = new For(clonedInitializer, clonedCondition, clonedUpdater, clonedBody);
   clonedNode->updateClone(keepOriginalUniqueNodeId, this);
@@ -81,8 +81,8 @@ json For::toJson() const {
   j["type"] = getNodeType();
   j["condition"] = getCondition()->toJson();
   j["initializer"] = getInitializer()->toJson();
-  j["update"] = getUpdateStatement()->toJson();
-  j["statement"] = getStatementToBeExecuted()->toJson();
+  j["update"] = getUpdate()->toJson();
+  j["statement"] = getBody()->toJson();
   return j;
 }
 
@@ -92,9 +92,9 @@ bool For::isEqual(AbstractStatement *other) {
         || getInitializer()->isEqual(otherFor->getInitializer());
     auto sameCondition = (getCondition()==nullptr && otherFor->getCondition()==nullptr)
         || getCondition()->isEqual(otherFor->getCondition());
-    auto sameUpdateStmt = (getUpdateStatement()==nullptr && otherFor->getUpdateStatement()==nullptr)
-        || getUpdateStatement()->isEqual(otherFor->getUpdateStatement());
-    auto sameBody = getStatementToBeExecuted()->isEqual(otherFor->getStatementToBeExecuted());
+    auto sameUpdateStmt = (getUpdate()==nullptr && otherFor->getUpdate()==nullptr)
+        || getUpdate()->isEqual(otherFor->getUpdate());
+    auto sameBody = getBody()->isEqual(otherFor->getBody());
     return sameInitializer && sameCondition && sameUpdateStmt && sameBody;
   }
   return false;

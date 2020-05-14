@@ -77,10 +77,10 @@ void ControlFlowGraphVisitor::visit(For &elem) {
   handleExpressionsAsStatements = false;
 
   // body (For (int i = 0; ... ) { body statements })
-  elem.getStatementToBeExecuted()->accept(*this);
+  elem.getBody()->accept(*this);
 
   // update statement (e.g., i=i+1;)
-  elem.getUpdateStatement()->accept(*this);
+  elem.getUpdate()->accept(*this);
   auto lastStatementInUpdate = lastCreatedNodes;
 
   // create an edge from update statement to first statement in for-loop's condition

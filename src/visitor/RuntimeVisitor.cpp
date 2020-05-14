@@ -4,6 +4,7 @@
 #include "ast_opt/visitor/EvaluationVisitor.h"
 #include "ast_opt/visitor/SecretTaintingVisitor.h"
 #include "ast_opt/ast/For.h"
+#include "ast_opt/ast/Block.h"
 #include "ast_opt/ast/Variable.h"
 #include "ast_opt/ast/VarDecl.h"
 #include "ast_opt/ast/OperatorExpr.h"
@@ -36,9 +37,9 @@ void RuntimeVisitor::visit(For &elem) {
     return cond==LiteralBool(true);
   };
 
-  for (elem.getInitializer()->accept(*ev); conditionIsTrue(); elem.getUpdateStatement()->accept(*ev)) {
+  for (elem.getInitializer()->accept(*ev); conditionIsTrue(); elem.getUpdate()->accept(*ev)) {
     // note: create clones that have the same uniqueNodeId as otherwise the secret tainting IDs won't match anymore
-    auto clonedBlock = elem.getStatementToBeExecuted()->clone(true);
+    auto clonedBlock = elem.getBody()->clone(true);
     clonedBlock->accept(*this);
     delete clonedBlock;
 

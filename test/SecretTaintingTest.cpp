@@ -730,10 +730,10 @@ TEST_F(SecretTaintingFixture, publicTurnedSecretMatrix) { /* NOLINT */
 //
 //  // Block_2 -> 2nd statement (For_157) -> For-loop body (Block_138) -> For-loop (For_137)
 //  auto outerForLoop = function->getBodyStatements().at(1)->castTo<For>();
-//  auto innerForLoop = outerForLoop->getStatementToBeExecuted()->castTo<Block>()->getStatements().at(0)->castTo<For>();
+//  auto innerForLoop = outerForLoop->getBody()->castTo<Block>()->getStatements().at(0)->castTo<For>();
 //
 //  // add tainted: For-loop (For_137) -> For-loop body (Block_118)
-//  auto innerForLoopBlock = innerForLoop->getStatementToBeExecuted();
+//  auto innerForLoopBlock = innerForLoop->getBody();
 //  expectedTaintedNodeIds.insert(innerForLoopBlock->getUniqueNodeId());
 //
 //  // add tainted: 1st statement (MatrixAssignm_117)

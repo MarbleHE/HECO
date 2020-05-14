@@ -379,8 +379,8 @@ void EvaluationVisitor::visit(For &elem) {
     return cond==LiteralBool(true);
   };
 
-  for (elem.getInitializer()->accept(*this); checkCondition(); elem.getUpdateStatement()->accept(*this)) {
-    elem.getStatementToBeExecuted()->accept(*this);
+  for (elem.getInitializer()->accept(*this); checkCondition(); elem.getUpdate()->accept(*this)) {
+    elem.getBody()->accept(*this);
   }
 }
 

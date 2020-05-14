@@ -871,7 +871,7 @@ int CompileTimeExpressionSimplifier::determineNumLoopIterations(For &elem) {
       return evalResult->isEqual(new LiteralBool(true));
     };
     auto executeUpdateStmt = [&]() {
-      auto clonedUpdateStmt = elem.getUpdateStatement()->clone(false);
+      auto clonedUpdateStmt = elem.getUpdate()->clone(false);
       clonedUpdateStmt->accept(*this);
       deleteNodes.push_back(clonedUpdateStmt);
     };
@@ -915,8 +915,7 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
   // Loop Variables are variables that are both written to and read from during the loop
   // Therefore, their initial value before the loop / after loop initializer should not be substituted inside the loop
   //TODO: Need to ensure that this works correctly, especially w.r.t scopes
-  auto bodyAsBlock = dynamic_cast<Block *>(elem.getStatementToBeExecuted());
-  auto loopVariables = removeVarsWrittenAndReadFromVariableValues(*bodyAsBlock);
+  auto loopVariables = removeVarsWrittenAndReadFromVariableValues(*elem.getBody());
 
   // Visit Body to simplify it + recursively deal with nested loops
   // This will also update the maxLoopDepth in case there are nested loops
@@ -924,7 +923,7 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
   //TODO: This visit (i.e. the entire visitor) should respect scopes!
   //  This would mean that e.g. while some variables might be prematurely eliminated,
   //  they will be re-emitted upon exiting scope
-  //elem.getStatementToBeExecuted()->accept(*this); //TODO: Re-enable once fixed
+  //elem.getBody()->accept(*this); //TODO: Re-enable once fixed
 
   //TODO: Remove loop variables from update stmt
 
@@ -948,8 +947,8 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
     if (numIterations!=-1 && numIterations < ctes.fullyUnrollLoopMaxNumIterations) {
       // FULL LOOP UNROLLING
       auto unrolledBlock = loopUnrollHelper(elem.getInitializer(),
-                                            elem.getStatementToBeExecuted(),
-                                            elem.getUpdateStatement(),
+                                            elem.getBody(),
+                                            elem.getUpdate(),
                                             numIterations);
       ctes.incrementNumLoopUnrollingsCounter();
 
@@ -1061,12 +1060,12 @@ AbstractNode *CompileTimeExpressionSimplifier::doPartialLoopUnrolling(For &elem)
   // - a copy of the whole For-loop including initializer, condition, update stmt, body (required for cleanup loop)
   auto cleanupForLoop = elem.clone(false)->castTo<For>();
   auto ignrd =
-      removeVarsWrittenAndReadFromVariableValues(*cleanupForLoop->getStatementToBeExecuted()->castTo<Block>());
+      removeVarsWrittenAndReadFromVariableValues(*cleanupForLoop->getBody()->castTo<Block>());
   // visit the condiiton, body, and update statement to make required replacements (e.g., Arithmetic/LogicalExpr to
   // OperatorExpr)
   cleanupForLoop->getCondition()->accept(*this);
-  cleanupForLoop->getStatementToBeExecuted()->accept(*this);
-  cleanupForLoop->getUpdateStatement()->accept(*this);
+  cleanupForLoop->getBody()->accept(*this);
+  cleanupForLoop->getUpdate()->accept(*this);
   // undo changes made by visiting the condition, body, and update statement: we need them for the cleanup loop and
   // do not want them to be deleted
   variableValues = variableValuesBackup;
@@ -1092,7 +1091,7 @@ AbstractNode *CompileTimeExpressionSimplifier::doPartialLoopUnrolling(For &elem)
   std::vector<Return *> tempReturnStmts;
   for (int i = 0; i < ctes.partiallyUnrollLoopNumCipherslots; i++) {
     // for each statement in the for-loop's body
-    for (auto &stmt : elem.getStatementToBeExecuted()->castTo<Block>()->getStatements()) {
+    for (auto &stmt : elem.getBody()->castTo<Block>()->getStatements()) {
       // clone the body statement and append the statement to the unrolledForLoop Body
       unrolledForLoopBody->addChild(stmt->clone(false));
     }
@@ -1104,20 +1103,20 @@ AbstractNode *CompileTimeExpressionSimplifier::doPartialLoopUnrolling(For &elem)
 
     // add a copy of the update statement, visiting the body then automatically handles the iteration variable in the
     // cloned loop body statements - no need to manually adapt them
-    unrolledForLoopBody->addChild(elem.getUpdateStatement()->clone(false));
+    unrolledForLoopBody->addChild(elem.getUpdate()->clone(false));
   }
   // replace the for loop's body by the unrolled statements
-  elem.replaceChild(elem.getStatementToBeExecuted(), unrolledForLoopBody);
+  elem.replaceChild(elem.getBody(), unrolledForLoopBody);
 
   // delete update statement from loop since it's now incorporated into the body but keep a copy since we need it
   // for the cleanup loop
-  elem.getUpdateStatement()->removeFromParents();
+  elem.getUpdate()->removeFromParents();
 
   // Erase any variable from variableValues that is written in the loop's body such that it is not replaced by any
   // known value while visiting the body's statements. This includes the iteration variable as we moved the update
   // statement into the loop's body.
   auto readAndWrittenVars =
-      removeVarsWrittenAndReadFromVariableValues(*elem.getStatementToBeExecuted()->castTo<Block>());
+      removeVarsWrittenAndReadFromVariableValues(*elem.getBody()->castTo<Block>());
 
   variableValuesBackup = getClonedVariableValuesMap();
 
@@ -1127,7 +1126,7 @@ AbstractNode *CompileTimeExpressionSimplifier::doPartialLoopUnrolling(For &elem)
   // visit the for-loop's body to do inlining
   auto variableValuesBeforeVisitingLoopBody = getClonedVariableValuesMap();
   visitingUnrolledLoopStatements = true;
-  elem.getStatementToBeExecuted()->accept(*this);
+  elem.getBody()->accept(*this);
   visitingUnrolledLoopStatements = false;
 
 
@@ -1177,7 +1176,7 @@ AbstractNode *CompileTimeExpressionSimplifier::doPartialLoopUnrolling(For &elem)
     (*it).second->value = nullptr;
   }
   // append the emitted loop body statements
-  elem.getStatementToBeExecuted()->castTo<Block>()->addChildren(
+  elem.getBody()->castTo<Block>()->addChildren(
       std::vector<AbstractNode *>(emittedVarAssignms.begin(), emittedVarAssignms.end()), true);
 
   // TODO: Future work (maybe): for large enough num_..., e.g. 128 or 256, it might make sense to have a binary series
