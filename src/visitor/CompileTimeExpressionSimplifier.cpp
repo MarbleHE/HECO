@@ -792,14 +792,14 @@ void CompileTimeExpressionSimplifier::visit(While &elem) {
   auto conditionValue = dynamic_cast<LiteralBool *>(elem.getCondition());
   if (conditionValue!=nullptr && !conditionValue->getValue()) {
     // While is never executed: remove While-loop including contained statements
-    cleanUpAfterStatementVisited(reinterpret_cast<AbstractNode *>(&elem), true);
+    cleanUpAfterStatementVisited(dynamic_cast<AbstractNode *>(&elem), true);
     return;
   }
 
   // visit body (and condition again, but that's acceptable)
   Visitor::visit(elem);
 
-  cleanUpAfterStatementVisited(reinterpret_cast<AbstractNode *>(&elem), false);
+  cleanUpAfterStatementVisited(dynamic_cast<AbstractNode *>(&elem), false);
 }
 
 std::set<ScopedVariable>
@@ -841,71 +841,12 @@ CompileTimeExpressionSimplifier::identifyReadWriteVariables(For &forLoop, Variab
   return scopedVariablesReadAndWritten;
 }
 
-int CompileTimeExpressionSimplifier::determineNumLoopIterations(For &elem) {
-
-  // Create a new Visitor
-  CompileTimeExpressionSimplifier loopCTES;
-  loopCTES.forceScope(stmtToScopeMapper, curScope);
-  loopCTES.variableValues = variableValues;
-
-  // run initializer
-  elem.getInitializer()->accept(loopCTES);
-
-  // check if values of all variables in the condition are known
-  bool allVariableHaveKnownValue = true;
-  auto variableIdentifiers = elem.getCondition()->getVariableIdentifiers();
-  for (auto &var : variableIdentifiers) {
-    auto value =  loopCTES.getVariableValueDeclaredInThisOrOuterScope(var);
-    if (value==nullptr) {
-      allVariableHaveKnownValue = false;
-      // no need to continue checking other variables
-      //cannot execute this loop during compile
-      return -1;
-    }
-  }
-
-  auto conditionEvaluatesTrue = [&]() -> bool {
-    auto result = evaluateNodeRecursive(elem.getCondition(), loopCTES.getTransformedVariableMap());
-    auto evalResult = result.empty() ? nullptr : result.back();
-    if (evalResult==nullptr)
-      throw std::runtime_error("Unexpected: Could not evaluate For-loops condition although "
-                               "all variable have known values. Cannot continue.");
-    return evalResult->isEqual(new LiteralBool(true));
-  };
-
-  auto executeLoopStmts = [&]() {
-    // BODY
-    auto clonedBodyStmt = elem.getBody()->clone(false);
-    clonedBodyStmt->accept(loopCTES);
-    nodesQueuedForDeletion.push_back(clonedBodyStmt);
-
-    // LOOP
-    auto clonedUpdateStmt = elem.getUpdate()->clone(false);
-    clonedUpdateStmt->accept(loopCTES);
-    nodesQueuedForDeletion.push_back(clonedUpdateStmt);
-  };
-
-  int numSimulatedIterations = 0;
-  while (conditionEvaluatesTrue()) {
-    numSimulatedIterations++;
-    executeLoopStmts();
-  }
-
-  // return counter value
-  return numSimulatedIterations;
-}
-
 void CompileTimeExpressionSimplifier::visit(For &elem) {
   // Update LoopDepth tracking.
   enteredForLoop();
 
-  // Before visiting the children , we need to save a
-  /// Copy of the VariableValues before visiting body and update
-  auto varValuesBackup = getClonedVariableValuesMap();
-
   // Manual handling of scope (usually done via Visitor::visit(elem))
   addStatementToScope(elem);
-
   changeToInnerScope(elem.getUniqueNodeId(), &elem);
 
   // INITIALIZER
@@ -913,25 +854,19 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
   // Visit initializer. Visiting this is important, in case it affects variables that won't be detected as "loop variables"
   // If we did not visit it, the recursive visit of the body might go wrong!
   elem.getInitializer()->accept(*this);
-  // Now, int i = 0 and similar things have been deleted from AST and are in VariableValuesMap
-
-  // UPDATE STMT INLINING
-  // Semantically, there is no difference between stmts in the update block and stmts at the end of the body block
-  // Therefore, we simply transfer these stmts, to simplify our logic
-  for (auto &s: elem.getUpdate()->getStatements()) {
-    elem.getBody()->addChild(s);
-  }
+  // Now, int i = 0 and similar things might have been deleted from AST and are in VariableValuesMap
 
 
   // VARIABLE MANAGEMENT
 
-  // Before we can visit the body, we must remove "loop variables":
+  // Before we can visit the body, we must deal with the "loop variables":
   /// Loop Variables are variables that are both written to and read from during the loop
   auto loopVariables = identifyReadWriteVariables(elem, variableValues);
 
-  // We need to emit VariableDeclarations for each of these Variables (because of next step)
-  emitVariableAssignments(loopVariables, variableValues);
-  // The initial value before the loop / after loop initializer should not be substituted inside the loop
+  // We need to emit VariableDeclarations for each of these Variables into the initializer (because of next step)
+  emitVariableAssignments(loopVariables, variableValues); //TODO: Needs to emit into initializer
+  // The values of loop variables we got from the initializer should not be substituted inside the loop
+  // Since they will be different in each iteration, CTES should treat them as "compile time unknown"
   // Therefore, we need to remove their values from the variableValues map
   for (auto &v: loopVariables) {
     auto it = variableValues.find(v);
@@ -948,27 +883,95 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
   elem.getBody()->accept(*this);
   // Now, parts of the body statements (e.g. x++) might have been deleted and are only in VariableValuesMap
 
-
   // Manual scope handling
+  //TODO: Emit any variables that are needed?
   changeToOuterScope();
 
-  // At this point, the loop has been visited and some parts have simplified.
+  // At this point, the loop has been visited and some parts have been simplified.
   // Now we are ready to analyze if this loop can additionally also be unrolled:
-  // 1. Are we even set to do unrolling at this LoopDepth?
+  // Are we even set to do unrolling at this LoopDepth?
   if (ctes.isUnrollLoopAllowed()) {
-    // 2. Are we doing full unrolling or partial unrolling?
-    // If the For-loop's condition is compile-time known & the loop is short enough, do full "symbolic eval/loopUnrollHelper",
-    // i.e., no For-loop is left afterwards; otherwise just partially loopUnrollHelper the loop to enable batching by executing
-    // computations of multiple loop iterations simultaneously.
-    /// number of iterations that this for loop requires (or -1 if unknown/too large)
-    int numIterations = determineNumLoopIterations(elem);
-    if (numIterations!=-1 && numIterations < ctes.fullyUnrollLoopMaxNumIterations) {
-      // FULL LOOP UNROLLING
-      auto unrolledBlock = loopUnrollHelper(elem.getInitializer(),
-                                            elem.getBody(),
-                                            elem.getUpdate(),
-                                            numIterations);
-      ctes.incrementNumLoopUnrollingsCounter();
+
+    // We cannot know if the loop can be fully unrolled without evaluating it
+    // So we speculatively unroll the loop until its either too long or we cannot determine something at compile time
+
+    /// A separate Visitor, for isolation, brought up to date in terms of variables and scopes
+    CompileTimeExpressionSimplifier loopCTES;
+    loopCTES.forceScope(stmtToScopeMapper, curScope);
+    loopCTES.variableValues = variableValues;
+
+    /// Visit the initializer (this will load the loop variables back into variableValues)
+    elem.getInitializer()->accept(loopCTES);
+
+    /// Do we have everything we need to evaluate the condition?
+    auto conditionCompileTimeKnown = [&]() -> bool {
+      auto variableIdentifiers = elem.getCondition()->getVariableIdentifiers();
+      for (auto &var : variableIdentifiers) {
+        auto value = loopCTES.getVariableValueDeclaredInThisOrOuterScope(var);
+        if (value==nullptr) {
+          // no need to continue checking other variables
+          return false;
+        }
+      }
+      return true;
+    };
+
+    /// Condition Execution Helper
+    auto conditionEvaluatesTrue = [&]() -> bool {
+      auto result = evaluateNodeRecursive(elem.getCondition(), loopCTES.getTransformedVariableMap());
+      auto evalResult = result.empty() ? nullptr : result.back();
+      if (evalResult==nullptr)
+        throw std::runtime_error("Unexpected: Could not evaluate For-loops condition although "
+                                 "all variable have known values. Cannot continue.");
+      return evalResult->isEqual(new LiteralBool(true));
+    };
+
+    /// Block for stmts that cannot be compile-time evaluated but do not affect condition
+    auto unrolledBlock = new Block();
+
+    /// Helper for executing the loop (also deals with update, in case we ever change stmt inlining)
+    auto executeLoopStmts = [&]() {
+
+      //TODO: Its OK if stmts aren't executable, as long as they don't affect loop variables!
+      //      If we have these (complex/runtime dependent) stmts, simply move them into the unrolledBlock
+
+      // BODY
+      Block * clonedBody = elem.getBody()->clone(false);
+      clonedBody->accept(loopCTES);
+      // If there are any stmts left, transfer them to the unrolledBlock
+      for (auto &s: clonedBody->getStatements()) {
+        s->removeParents();
+        unrolledBlock->addChild(s, true);
+      }
+      nodesQueuedForDeletion.push_back(clonedBody);
+
+
+      // LOOP
+      Block * clonedUpdate = elem.getUpdate()->clone(false);
+      clonedUpdate->accept(loopCTES);
+      // If there are any stmts left, transfer them to the unrolledBlock
+      for (auto &s: clonedUpdate->getStatements()) {
+        s->removeParents();
+        unrolledBlock->addChild(s, true);
+      }
+      nodesQueuedForDeletion.push_back(clonedUpdate);
+    };
+
+    /// Track iterations
+    int numIterations = 0;
+
+    while (conditionCompileTimeKnown() && numIterations < ctes.fullyUnrollLoopMaxNumIterations
+        && conditionEvaluatesTrue()) {
+      executeLoopStmts();
+      numIterations++;
+    }
+
+    if (conditionCompileTimeKnown() && numIterations < ctes.fullyUnrollLoopMaxNumIterations) {
+      // Loop unrolling was successful
+
+      // Transfer in scope Information and VariableValues from loopCTES
+      forceScope(loopCTES.stmtToScopeMapper, loopCTES.curScope);
+      variableValues = loopCTES.variableValues;
 
       // We need to remove elem from its parents scope
       removeStatementFromScope(elem);
@@ -983,48 +986,32 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
       // Mark the current For-Loop node (elem) for deletion
       nodesQueuedForDeletion.push_back(&elem);
 
-      // Now, visit the block
-      // Before we go through the Block, we must reset the VariableValues to the version before we visited the body
-      // Otherwise, we would not have the initialization values in the map
-      variableValues = varValuesBackup;
-      changeToInnerScope(unrolledBlock->getUniqueNodeId(), unrolledBlock);
-      unrolledBlock->accept(*this);
-      Scope *unrolledBlockScope = curScope;
-      changeToOuterScope();
-
       // Note that if the parent of elem/unrolledBlock is a Block-like stmt,
       // our caller (e.g. visit(Block)) will have to deal with unpacking it
-
-    } else {
+    } else if (numIterations > ctes.fullyUnrollLoopMaxNumIterations) {
       // PARTIAL UNROLLING
       throw std::runtime_error("Partial loop unrolling currently not supported.");
     }
+    // else: nothing to undo since we used a new visitor
   }
-  // else
-  // NO UNROLLING
-  // If no unrolling should take place, the already executed visits of the children are both correct and sufficient
+
+  // TODO: What to do if no unrolling should take place, or an unrolling attempt was unsuccessful?
+  // the already executed visits of the children are both correct and sufficient
+  //...or maybe not?
+  //TODO: Not sure where to put this, but if "complex statements" are those that we cannot or do not resolve
+  // e.g. a public runtime if stmt or a for-loop we choose not to unroll
+  // then we need to emit all the variables used inside this complex stmt before it,
+  // otherwise the result might be wrong!!
+
+  //TODO: get variables that are EITHER read or written (do we need written? Can runtime system deal with that instead?)
+  // and emit them before this loop, i.e. requires putting things into a block??
 
   // Update LoopDepth tracking
   leftForLoop();
 }
 
-Block *CompileTimeExpressionSimplifier::loopUnrollHelper(AbstractStatement *initializer,
-                                                         AbstractStatement *body,
-                                                         AbstractStatement *updateStmt,
-                                                         int numLoopIterations) {
-  auto unrolledStatementsBlock = new Block();
-  unrolledStatementsBlock->addChild(initializer);
-  while (numLoopIterations > 0) {
-    // clone the body statement and append the statement to the unrolledStatementsBlock
-    unrolledStatementsBlock->addChild(body->clone(false));
-    // add a copy of the update statement,
-    // visiting the body then automatically handles the iteration variable in the
-    // cloned loop body statements (i.e., no need to manually adapt them)
-    unrolledStatementsBlock->addChild(updateStmt->clone(false));
-    numLoopIterations--;
-  }
-  return unrolledStatementsBlock;
-}
+
+
 
 //AbstractNode *CompileTimeExpressionSimplifier::doPartialLoopUnrolling(For &elem) {
 //  // create a new Block statemeny: necessary for cleanup loop and to avoid overriding user-defined variables that expect

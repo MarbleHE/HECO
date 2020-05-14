@@ -396,14 +396,6 @@ class CompileTimeExpressionSimplifier : public Visitor {
   /// \return A copy of the VariableValues map.
   VariableValuesMapType getClonedVariableValuesMap();
 
-  /// A helper method that simulates the execution of the given For-loop to determine the number of iterations the
-  /// loop would be executed. If variable values involved in the loop's condition are unknown, the method returns -1.
-  /// Global data structures (e.g., variableValues or nodesQueuedForDeletion) are restored to their state before
-  /// calling this method.
-  /// \param elem The For-loop for that the number of loop iterations should be determined.
-  /// \return The number of iterations or -1 if not all variables required to simulate the loop's execution are known.
-  int determineNumLoopIterations(For &elem);
-
   /// Marks the given node for deletion. The node will be deleted after all nodes of the AST have been visited.
   /// \param node The node to be marked for deletion.
   void enqueueNodeForDeletion(AbstractNode *node);
@@ -431,16 +423,6 @@ class CompileTimeExpressionSimplifier : public Visitor {
   /// \param matrixRowOrColumn An AbstractLiteral consisting of a (1,x) or (x,1) matrix.
   void appendVectorToMatrix(const std::string &variableIdentifier, int posIndex, AbstractExpr *matrixRowOrColumn);
 
-  /// Generates a Block of initializer; body; updateStmt; body; updateStmt; ... repeated numLoopIteration times
-  /// \param initializer Initalizer of the for-loop to be unrolled
-  /// \param body Body of the for-loop to be unrolled
-  /// \param updateStmt Update statement of the for-loop to be unrolled
-  /// \param numLoopIterations The number of iterations this For-loop would have been executed.
-  /// \return Block of initializer; body; updateStmt; body; updateStmt; ... repeated numLoopIteration times
-  Block *loopUnrollHelper(AbstractStatement *initializer,
-                          AbstractStatement *body,
-                          AbstractStatement *updateStmt,
-                          int numLoopIterations);
 
   /// Handles the partial loop unrolling to enable batching of the loop's body statements.
   /// \param elem The For-loop to be unrolled.
