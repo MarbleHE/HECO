@@ -838,7 +838,7 @@ CompileTimeExpressionSimplifier::identifyReadWriteVariables(For &forLoop, Variab
           " returned from Control Flow Graph Visitor. Candidates were " + candidates.str());
     }
   }
-
+  return scopedVariablesReadAndWritten;
 }
 
 int CompileTimeExpressionSimplifier::determineNumLoopIterations(For &elem) {
