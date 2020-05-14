@@ -49,11 +49,11 @@ GetMatrixSize::GetMatrixSize(AbstractExpr *matrix, AbstractExpr *requestedDimens
 }
 
 AbstractExpr *GetMatrixSize::getMatrixOperand() const {
-  return reinterpret_cast<AbstractExpr *>(getChildAtIndex(0));
+  return dynamic_cast<AbstractExpr *>(getChildAtIndex(0));
 }
 
 AbstractExpr *GetMatrixSize::getDimensionParameter() const {
-  return reinterpret_cast<AbstractExpr *>(getChildAtIndex(1));
+  return dynamic_cast<AbstractExpr *>(getChildAtIndex(1));
 }
 
 GetMatrixSize::~GetMatrixSize() = default;

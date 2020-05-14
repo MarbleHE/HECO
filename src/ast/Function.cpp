@@ -83,15 +83,15 @@ Function *Function::clone(bool keepOriginalUniqueNodeId) {
 
 std::vector<FunctionParameter *> Function::getParameters() const {
   return children.empty() ? std::vector<FunctionParameter *>()
-                          : reinterpret_cast<ParameterList *>(getChildAtIndex(0))->getParameters();
+                          : dynamic_cast<ParameterList *>(getChildAtIndex(0))->getParameters();
 }
 
 ParameterList *Function::getParameterList() const {
-  return reinterpret_cast<ParameterList *>(getChildAtIndex(0));
+  return dynamic_cast<ParameterList *>(getChildAtIndex(0));
 }
 
 Block *Function::getBody() const {
-  return reinterpret_cast<Block *>(getChildAtIndex(1));
+  return dynamic_cast<Block *>(getChildAtIndex(1));
 }
 
 Function::Function(std::string functionName,

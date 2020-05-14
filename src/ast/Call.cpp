@@ -32,11 +32,11 @@ Call::Call(std::vector<FunctionParameter *> parameterValuesForCalledFunction, Fu
 }
 
 Function *Call::getFunc() const {
-  return reinterpret_cast<Function *>(getChildAtIndex(1));
+  return dynamic_cast<Function *>(getChildAtIndex(1));
 }
 
 std::vector<FunctionParameter *> Call::getArguments() const {
-  return reinterpret_cast<ParameterList *>(getChildAtIndex(0))->getParameters();
+  return dynamic_cast<ParameterList *>(getChildAtIndex(0))->getParameters();
 }
 
 AbstractNode *Call::clone(bool keepOriginalUniqueNodeId) {
@@ -65,5 +65,5 @@ bool Call::supportsCircuitMode() {
 }
 
 ParameterList *Call::getParameterList() const {
-  return reinterpret_cast<ParameterList *>(getChildAtIndex(0));
+  return dynamic_cast<ParameterList *>(getChildAtIndex(0));
 }

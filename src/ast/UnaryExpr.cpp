@@ -17,11 +17,11 @@ void UnaryExpr::accept(Visitor &v) {
 }
 
 Operator *UnaryExpr::getOperator() const {
-  return reinterpret_cast<Operator *>(getChildAtIndex(0, true));
+  return dynamic_cast<Operator *>(getChildAtIndex(0, true));
 }
 
 AbstractExpr *UnaryExpr::getRight() const {
-  return reinterpret_cast<AbstractExpr *>(getChildAtIndex(1, true));
+  return dynamic_cast<AbstractExpr *>(getChildAtIndex(1, true));
 }
 
 std::string UnaryExpr::getNodeType() const {

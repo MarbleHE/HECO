@@ -20,7 +20,7 @@ class For : public AbstractStatement {
   void setAttributes(AbstractStatement *initializer,
                      AbstractExpr *condition,
                      AbstractStatement *update,
-                     AbstractStatement *statementToBeExecuted);
+                     AbstractStatement *body);
 
   [[nodiscard]] Block * getInitializer() const;
 

@@ -56,15 +56,15 @@ json MatrixElementRef::toJson() const {
 }
 
 AbstractExpr *MatrixElementRef::getOperand() const {
-  return reinterpret_cast<AbstractExpr *>(getChildAtIndex(0));
+  return dynamic_cast<AbstractExpr *>(getChildAtIndex(0));
 }
 
 AbstractExpr *MatrixElementRef::getRowIndex() const {
-  return reinterpret_cast<AbstractExpr *>(getChildAtIndex(1));
+  return dynamic_cast<AbstractExpr *>(getChildAtIndex(1));
 }
 
 AbstractExpr *MatrixElementRef::getColumnIndex() const {
-  return reinterpret_cast<AbstractExpr *>(getChildAtIndex(2));
+  return dynamic_cast<AbstractExpr *>(getChildAtIndex(2));
 }
 
 std::vector<std::string> MatrixElementRef::getVariableIdentifiers() {

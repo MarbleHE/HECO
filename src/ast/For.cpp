@@ -18,30 +18,36 @@ For::For(AbstractStatement *initializer,
 }
 
 Block * For::getInitializer() const {
-  return reinterpret_cast<Block *>(getChildAtIndex(0));
+  return dynamic_cast<Block *>(getChildAtIndex(0));
 }
 
 AbstractExpr *For::getCondition() const {
-  return reinterpret_cast<AbstractExpr *>(getChildAtIndex(1));
+  return dynamic_cast<AbstractExpr *>(getChildAtIndex(1));
 }
 
 Block * For::getUpdate() const {
-  return reinterpret_cast<Block *>(getChildAtIndex(2));
+  return dynamic_cast<Block *>(getChildAtIndex(2));
 }
 
 Block * For::getBody() const {
-  return reinterpret_cast<Block *>(getChildAtIndex(3));
+  return dynamic_cast<Block *>(getChildAtIndex(3));
 }
 
 void For::setAttributes(AbstractStatement *initializer,
                         AbstractExpr *condition,
                         AbstractStatement *update,
-                        AbstractStatement *statementToBeExecuted) {
+                        AbstractStatement *body) {
   removeChildren();
-  if (dynamic_cast<Block *>(statementToBeExecuted)==nullptr) {
-    statementToBeExecuted = new Block(statementToBeExecuted);
+  if (dynamic_cast<Block *>(initializer)==nullptr) {
+    initializer = new Block(initializer);
   }
-  addChildren({initializer, condition, update, statementToBeExecuted}, true);
+  if (dynamic_cast<Block *>(update)==nullptr) {
+    update = new Block(update);
+  }
+  if (dynamic_cast<Block *>(body)==nullptr) {
+    body = new Block(body);
+  }
+  addChildren({initializer, condition, update, body}, true);
 }
 
 int For::getMaxNumberChildren() {

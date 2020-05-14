@@ -180,7 +180,7 @@ bool OperatorExpr::isLogicalExpr() const {
 }
 
 Operator *OperatorExpr::getOperator() const {
-  return reinterpret_cast<Operator *>(getChildAtIndex(0));
+  return dynamic_cast<Operator *>(getChildAtIndex(0));
 }
 
 bool OperatorExpr::isArithmeticExpr() const {
@@ -217,14 +217,14 @@ AbstractExpr *OperatorExpr::getRight() const {
   if (getOperands().size() > 2) {
     throw std::logic_error("OperatorExpr::getRight() only supported for expressions with two operands!");
   }
-  return reinterpret_cast<AbstractExpr *>(getChildAtIndex(2));
+  return dynamic_cast<AbstractExpr *>(getChildAtIndex(2));
 }
 
 AbstractExpr *OperatorExpr::getLeft() const {
   if (getOperands().size() > 2) {
     throw std::logic_error("OperatorExpr::getLeft() only supported for expressions with two operands!");
   }
-  return reinterpret_cast<AbstractExpr *>(getChildAtIndex(1));
+  return dynamic_cast<AbstractExpr *>(getChildAtIndex(1));
 }
 
 void OperatorExpr::replaceChild(AbstractNode *originalChild, AbstractNode *newChildToBeAdded) {

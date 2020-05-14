@@ -11,7 +11,7 @@ Rotate::Rotate(AbstractExpr *vector, int rotationFactor) {
 Rotate::Rotate() = default;
 
 AbstractExpr *Rotate::getRotationFactor() const {
-  return reinterpret_cast<AbstractExpr *>(getChildAtIndex(1));
+  return dynamic_cast<AbstractExpr *>(getChildAtIndex(1));
 }
 
 int Rotate::getMaxNumberChildren() {
@@ -39,7 +39,7 @@ bool Rotate::supportsCircuitMode() {
 }
 
 AbstractExpr *Rotate::getOperand() const {
-  return reinterpret_cast<AbstractExpr *>(getChildAtIndex(0));
+  return dynamic_cast<AbstractExpr *>(getChildAtIndex(0));
 }
 
 std::string Rotate::getNodeType() const {

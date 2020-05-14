@@ -45,7 +45,7 @@ AbstractMatrix *Matrix<int>::applyBinaryOperatorComponentwise(Matrix<int> *rhsOp
       operatorFunction = [](int a, int b) -> int { return a*b; };
     } else {
       // otherwise both are matrices -> do matrix multiplication
-      return reinterpret_cast<AbstractMatrix *>(::applyMatrixMultiplication(
+      return dynamic_cast<AbstractMatrix *>(::applyMatrixMultiplication(
           dynamic_cast<Matrix<int> *>(this), dynamic_cast<Matrix<int> *>(rhsOperand)));
     }
   } else if (os->equals(ArithmeticOp::MODULO)) { // only for integers
@@ -69,7 +69,7 @@ AbstractMatrix *Matrix<int>::applyBinaryOperatorComponentwise(Matrix<int> *rhsOp
   } else {
     throwUnknownOperatorException();
   }
-  return reinterpret_cast<AbstractMatrix *>(::applyComponentwise(
+  return dynamic_cast<AbstractMatrix *>(::applyComponentwise(
       dynamic_cast<Matrix<int> *>(this), dynamic_cast<Matrix<int> *>(rhsOperand), operatorFunction));
 }
 
@@ -90,7 +90,7 @@ AbstractMatrix *Matrix<float>::applyBinaryOperatorComponentwise(Matrix<float> *r
       operatorFunction = [](float a, float b) -> float { return a*b; };
     } else {
       // otherwise both are matrices -> do matrix multiplication
-      return reinterpret_cast<AbstractMatrix *>(::applyMatrixMultiplication(
+      return dynamic_cast<AbstractMatrix *>(::applyMatrixMultiplication(
           dynamic_cast<Matrix<float> *>(this), dynamic_cast<Matrix<float> *>(rhsOperand)));
     }
   } else if (os->equals(LogCompOp::SMALLER)) {           // ==== Comparison Operators =============================
@@ -108,7 +108,7 @@ AbstractMatrix *Matrix<float>::applyBinaryOperatorComponentwise(Matrix<float> *r
   } else {
     throwUnknownOperatorException();
   }
-  return reinterpret_cast<AbstractMatrix *>(::applyComponentwise(
+  return dynamic_cast<AbstractMatrix *>(::applyComponentwise(
       dynamic_cast<Matrix<float> *>(this), dynamic_cast<Matrix<float> *>(rhsOperand), operatorFunction));
 }
 
@@ -136,7 +136,7 @@ AbstractMatrix *Matrix<bool>::applyBinaryOperatorComponentwise(Matrix<bool> *rhs
   } else {
     throwUnknownOperatorException();
   }
-  return reinterpret_cast<AbstractMatrix *>(::applyComponentwise(
+  return dynamic_cast<AbstractMatrix *>(::applyComponentwise(
       dynamic_cast<Matrix<bool> *>(this), dynamic_cast<Matrix<bool> *>(rhsOperand), operatorFunction));
 }
 
@@ -148,7 +148,7 @@ AbstractMatrix *Matrix<std::string>::applyBinaryOperatorComponentwise(Matrix<std
   } else {
     throwUnknownOperatorException();
   }
-  return reinterpret_cast<AbstractMatrix *>(::applyComponentwise(
+  return dynamic_cast<AbstractMatrix *>(::applyComponentwise(
       dynamic_cast<Matrix<std::string> *>(this), dynamic_cast<Matrix<std::string> *>(rhsOperand), operatorFunction));
 }
 
@@ -165,7 +165,7 @@ AbstractMatrix *Matrix<int>::applyUnaryOperatorComponentwise(Operator *os) {
   } else {
     throwUnknownOperatorException();
   }
-  return reinterpret_cast<AbstractMatrix *>(
+  return dynamic_cast<AbstractMatrix *>(
       ::applyOnEachElement(dynamic_cast<Matrix<int> *>(this), operatorFunction));
 }
 
@@ -177,7 +177,7 @@ AbstractMatrix *Matrix<float>::applyUnaryOperatorComponentwise(Operator *os) {
   } else {
     throwUnknownOperatorException();
   }
-  return reinterpret_cast<AbstractMatrix *>(
+  return dynamic_cast<AbstractMatrix *>(
       ::applyOnEachElement(dynamic_cast<Matrix<float> *>(this), operatorFunction));
 }
 
@@ -189,7 +189,7 @@ AbstractMatrix *Matrix<bool>::applyUnaryOperatorComponentwise(Operator *os) {
   } else {
     throwUnknownOperatorException();
   }
-  return reinterpret_cast<AbstractMatrix *>(
+  return dynamic_cast<AbstractMatrix *>(
       ::applyOnEachElement(dynamic_cast<Matrix<bool> *>(this), operatorFunction));
 }
 
