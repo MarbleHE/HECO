@@ -180,6 +180,14 @@ void Visitor::visit(LogicalExpr &elem) {
   elem.getRight()->accept(*this);
 }
 
+
+//TODO: The scope logic does not seem to quite work for for-loops
+//      E.g. we really should have the scope be for elem
+//      but then there'd be no place to emit VarDecls
+//      The way it's done here is incorrect, since the initializer, condtion, and update statements
+//      should all be inside the for loops scope.
+//      Using the body scope for all of it would also be an issue, e.g. if the initalizer would emit
+//      VarDecls into the body, that would change semantics
 void Visitor::visit(For &elem) {
   // a for-statement
   // e.g., for (int i = 0; i < N; i++) { cout << i << endl; }
