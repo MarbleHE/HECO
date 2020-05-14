@@ -422,12 +422,14 @@ class CompileTimeExpressionSimplifier : public Visitor {
   /// \param matrixRowOrColumn An AbstractLiteral consisting of a (1,x) or (x,1) matrix.
   void appendVectorToMatrix(const std::string &variableIdentifier, int posIndex, AbstractExpr *matrixRowOrColumn);
 
-  /// Generates a Block of body; updateStmt; body; updateStmt; ... repeated numLoopIteration times
+  /// Generates a Block of initializer; body; updateStmt; body; updateStmt; ... repeated numLoopIteration times
+  /// \param initializer Initalizer of the for-loop to be unrolled
   /// \param body Body of the for-loop to be unrolled
   /// \param updateStmt Update statement of the for-loop to be unrolled
   /// \param numLoopIterations The number of iterations this For-loop would have been executed.
-  /// \return Block of body; updateStmt; body; updateStmt; ... repeated numLoopIteration times
-  Block *loopUnrollHelper(AbstractStatement *body,
+  /// \return Block of initializer; body; updateStmt; body; updateStmt; ... repeated numLoopIteration times
+  Block *loopUnrollHelper(AbstractStatement *initializer,
+                          AbstractStatement *body,
                           AbstractStatement *updateStmt,
                           int numLoopIterations);
 

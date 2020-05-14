@@ -897,15 +897,9 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
   // Update LoopDepth tracking.
   enteredForLoop();
 
-  // Before visiting our children, we need to save a few things for later
-  /// Copy of the VariableValues before visiting children
+  // Before visiting the children , we need to save a
+  /// Copy of the VariableValues before visiting body and update
   auto varValuesBackup = getClonedVariableValuesMap();
-  /// Copy of the initializer before visiting children
-  auto initializerBackup = elem.getInitializer()->clone(false)->castTo<AbstractStatement>();
-  /// Copy of the body before visiting children
-  auto bodyBackup = elem.getStatementToBeExecuted()->clone(false)->castTo<AbstractStatement>();
-  /// Copy of the updateStmt before visiting children
-  auto updateStmtBackup = elem.getUpdateStatement()->clone(false)->castTo<AbstractStatement>();
 
   // Manual handling of scope (usually done via Visitor::visit(elem))
   addStatementToScope(elem);
@@ -915,13 +909,14 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
   // Visit initializer
   // Visiting this is important, in case it affects variables that are not "loop variables"!
   // If we did not visit it, the recursive visit of the body might go wrong!
-  elem.getInitializer()->accept(*this);
+  //elem.getInitializer()->accept(*this); //TODO: Re-enable once fixed
+
 
   // Loop Variables are variables that are both written to and read from during the loop
   // Therefore, their initial value before the loop / after loop initializer should not be substituted inside the loop
   //TODO: Need to ensure that this works correctly, especially w.r.t scopes
   auto bodyAsBlock = dynamic_cast<Block *>(elem.getStatementToBeExecuted());
-  removeVarsWrittenAndReadFromVariableValues(*bodyAsBlock);
+  auto loopVariables = removeVarsWrittenAndReadFromVariableValues(*bodyAsBlock);
 
   // Visit Body to simplify it + recursively deal with nested loops
   // This will also update the maxLoopDepth in case there are nested loops
@@ -929,16 +924,20 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
   //TODO: This visit (i.e. the entire visitor) should respect scopes!
   //  This would mean that e.g. while some variables might be prematurely eliminated,
   //  they will be re-emitted upon exiting scope
-  elem.getStatementToBeExecuted()->accept(*this);
+  //elem.getStatementToBeExecuted()->accept(*this); //TODO: Re-enable once fixed
 
   //TODO: Remove loop variables from update stmt
 
   // Visit Update Statement to simplify it
   // Because we have identified and removed the loop variables, this should not affect correctness
-  elem.getUpdateStatement()->accept(*this);
+  //elem.getUpdateStatement()->accept(*this); //TODO: Re-enable once loop variable handling is done
 
-  // Now we are ready to analyze if this loop can be unrolled:
-  // 1. Are we set to do unrolling at this LoopDepth?
+  // Manual scope handling
+  changeToOuterScope();
+
+  // At this point, the loop has been visited and some parts have simplified.
+  // Now we are ready to analyze if this loop can additionally also be unrolled:
+  // 1. Are we even set to do unrolling at this LoopDepth?
   if (ctes.isUnrollLoopAllowed()) {
     // 2. Are we doing full unrolling or partial unrolling?
     // If the For-loop's condition is compile-time known & the loop is short enough, do full "symbolic eval/loopUnrollHelper",
@@ -948,7 +947,10 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
     int numIterations = determineNumLoopIterations(elem);
     if (numIterations!=-1 && numIterations < ctes.fullyUnrollLoopMaxNumIterations) {
       // FULL LOOP UNROLLING
-      auto unrolledBlock = loopUnrollHelper(bodyBackup, updateStmtBackup, numIterations);
+      auto unrolledBlock = loopUnrollHelper(elem.getInitializer(),
+                                            elem.getStatementToBeExecuted(),
+                                            elem.getUpdateStatement(),
+                                            numIterations);
       ctes.incrementNumLoopUnrollingsCounter();
 
       // We would now like to wind back time and have our caller function visit unrolledBlock
@@ -957,12 +959,52 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
       // Equally, inserting unrolledBlock after elem assumes that elem's parent is e.g. a Block
       // and even then would invalidate the iterators that our caller function might be using
 
-      // TODO: MAGIC
+      // Therefore, we will instead use the VariableValuesMap to pass as much as possible up to the parent.
+      // The parent will then have to deal with emitting suitable VarDecls/VarAssignm
+      // However, this does not work if there are stmts in the loop which cannot be stored as Values
+      // e.g. another loop - However, this specific case isn't possible with full unrolling.
 
+      // We need to remove elem from its parents scope
+      removeStatementFromScope(elem);
 
+      // Add the new unrolled Block to the scope instead
+      addStatementToScope(*unrolledBlock);
+
+      // Then, we replace elem with the unrolled Block.
+      // This is mostly so that code that looks for parents works correctly
+      elem.getOnlyParent()->replaceChild(&elem, unrolledBlock);
 
       // Mark the current For-Loop node (elem) for deletion
       nodesQueuedForDeletion.push_back(&elem);
+
+      // Before we go through the Block, we must reset the VariableValues to the version before we visited the body
+      // Otherwise, we would not have the initialization values in the map
+      variableValues = varValuesBackup;
+
+      // Now, visit the block
+      changeToInnerScope(unrolledBlock->getUniqueNodeId(), unrolledBlock);
+      unrolledBlock->accept(*this);
+      Scope *unrolledBlockScope = curScope;
+      changeToOuterScope();
+      // The block should now contain only VarDecls for variables that matter only in the loop's scope
+      for (auto &s: unrolledBlock->getStatements()) {
+        if (auto vd = dynamic_cast<VarDecl *>(s)) {
+          if (loopVariables.count(std::make_pair(vd->getIdentifier(), unrolledBlockScope))) {
+            // "remove" via nullptr, because we're inside a loop iterating over the stmts
+            unrolledBlock->replaceChild(vd, nullptr);
+          }
+        }
+      }
+
+      // If everything worked out, the unrolled block should now be empty
+      if (!unrolledBlock->getChildrenNonNull().empty()) {
+        throw std::logic_error(
+            "Full Loop Unrolling failed because a statement could not be inlined into VariableValues.");
+      }
+
+      // Replace unrolled Block with a nullptr in the parent
+      // We cannot remove it properly because of iteratior invailidation concerns
+      unrolledBlock->getOnlyParent()->replaceChild(unrolledBlock, nullptr);
 
     } else {
       // PARTIAL UNROLLING
@@ -973,14 +1015,18 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
     // If no unrolling should take place, the already executed visits of the children are both correct and sufficient
   }
 
+
+
   // Update LoopDepth tracking
   leftForLoop();
 }
 
-Block *CompileTimeExpressionSimplifier::loopUnrollHelper(AbstractStatement *body,
+Block *CompileTimeExpressionSimplifier::loopUnrollHelper(AbstractStatement *initializer,
+                                                         AbstractStatement *body,
                                                          AbstractStatement *updateStmt,
                                                          int numLoopIterations) {
   auto unrolledStatementsBlock = new Block();
+  unrolledStatementsBlock->addChild(initializer);
   while (numLoopIterations > 0) {
     // clone the body statement and append the statement to the unrolledStatementsBlock
     unrolledStatementsBlock->addChild(body->clone(false));
