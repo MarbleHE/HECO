@@ -312,6 +312,13 @@ void AbstractNode::replaceChild(AbstractNode *originalChild, AbstractNode *newCh
                              "not be found in the children vector!");
   }
   children[std::distance(children.begin(), pos)] = newChild;
+
+  // remove edge: originalChild -> currentNode
+  originalChild->removeParent(this, false);
+
+  // add edges: newChildToBeAdded -> currentNode but before detach any existing parents from this child node
+  newChild->removeFromParents();
+  newChild->addParent(this, false);
 }
 
 AbstractNode *AbstractNode::removeFromParents(bool removeParentBackreference) {
