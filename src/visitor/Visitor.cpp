@@ -347,3 +347,7 @@ void Visitor::addStatementToScope(AbstractStatement &stat) {
 void Visitor::setIgnoreScope(bool ignScope) {
   Visitor::ignoreScope = ignScope;
 }
+void Visitor::forceScope(std::unordered_map<AbstractStatement *, Scope *> stmtToScopeMapper, Scope *curScope) {
+  this->stmtToScopeMapper = stmtToScopeMapper;
+  this->curScope = curScope;
+}

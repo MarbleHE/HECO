@@ -125,6 +125,11 @@ class Visitor {
   virtual void visit(Ast &elem);
 
   void addStatementToScope(AbstractStatement &stat);
+
+  /// Hack to force-overwrite the current scope information in a visitor
+  /// Useful when you need to call a visitor on a subtree from another visitor:
+  /// Simply pass the calling visitor's scope information to the callee visitor
+  void forceScope(std::unordered_map<AbstractStatement *, Scope *> stmtToScopeMapper, Scope * curScope);
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_VISITOR_VISITOR_H_
