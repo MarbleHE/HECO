@@ -33,6 +33,8 @@ class Scope {
 
   void addStatement(AbstractStatement *absStatement);
 
+  void removeStatement(AbstractStatement *absStatement);
+
   /// Returns the nth last element of the scope statements.
   /// For example, n=1 prints the last element and n=2 the penultimate element.
   /// \param n The position of the element counted from back of the vector.

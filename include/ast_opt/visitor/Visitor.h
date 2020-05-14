@@ -126,6 +126,8 @@ class Visitor {
 
   void addStatementToScope(AbstractStatement &stat);
 
+  void removeStatementFromScope(AbstractStatement &stat);
+
   /// Hack to force-overwrite the current scope information in a visitor
   /// Useful when you need to call a visitor on a subtree from another visitor:
   /// Simply pass the calling visitor's scope information to the callee visitor

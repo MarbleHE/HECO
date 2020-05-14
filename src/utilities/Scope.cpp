@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <utility>
 #include "ast_opt/utilities/Scope.h"
 #include "ast_opt/ast/VarDecl.h"
@@ -40,6 +41,11 @@ Scope *Scope::getOrCreateInnerScope(const std::string &identifier, AbstractNode 
 
 void Scope::addStatement(AbstractStatement *absStatement) {
   this->scopeStatements.emplace_back(absStatement);
+}
+
+void Scope::removeStatement(AbstractStatement *absStatement) {
+  scopeStatements
+      .erase(std::remove(scopeStatements.begin(), scopeStatements.end(), absStatement), scopeStatements.end());
 }
 
 AbstractStatement *Scope::getNthLastStatement(int n) {

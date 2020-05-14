@@ -344,6 +344,14 @@ void Visitor::addStatementToScope(AbstractStatement &stat) {
   curScope->addStatement(&stat);
 }
 
+void Visitor::removeStatementFromScope(AbstractStatement &stat) {
+  if (ignoreScope) return;
+  if (curScope==nullptr) {
+    throw std::logic_error("[Visitor] Cannot remove statement from scope as Scope is not created yet (nullptr).");
+  }
+  curScope->removeStatement(&stat);
+}
+
 void Visitor::setIgnoreScope(bool ignScope) {
   Visitor::ignoreScope = ignScope;
 }
