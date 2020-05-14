@@ -12,17 +12,22 @@
     "type": "LogicalExpr"
   },
   "initializer": {
-    "datatype": {
-      "encrypted": false,
-      "specifier": "int",
-      "type": "Datatype"
-    },
-    "identifier": "v",
-    "initializer": {
-      "type": "LiteralInt",
-      "value": 42
-    },
-    "type": "VarDecl"
+    "statements": [
+      {
+        "datatype": {
+          "encrypted": false,
+          "specifier": "int",
+          "type": "Datatype"
+        },
+        "identifier": "v",
+        "initializer": {
+          "type": "LiteralInt",
+          "value": 42
+        },
+        "type": "VarDecl"
+      }
+    ],
+    "type": "Block"
   },
   "statement": {
     "statements": [
@@ -55,19 +60,24 @@
   },
   "type": "For",
   "update": {
-    "identifier": "v",
-    "type": "VarAssignm",
-    "value": {
-      "leftOperand": {
+    "statements": [
+      {
         "identifier": "v",
-        "type": "Variable"
-      },
-      "operator": "sub",
-      "rightOperand": {
-        "type": "LiteralInt",
-        "value": 1
-      },
-      "type": "ArithmeticExpr"
-    }
+        "type": "VarAssignm",
+        "value": {
+          "leftOperand": {
+            "identifier": "v",
+            "type": "Variable"
+          },
+          "operator": "sub",
+          "rightOperand": {
+            "type": "LiteralInt",
+            "value": 1
+          },
+          "type": "ArithmeticExpr"
+        }
+      }
+    ],
+    "type": "Block"
   }
 }

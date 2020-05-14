@@ -835,11 +835,11 @@ class ForLoopFixture : public ::testing::Test {
  public:
   ForLoopFixture() {
     // int = 0;
-    forInitializer = new VarDecl("i", Types::INT, new LiteralInt(0));
+    forInitializer = new Block(new VarDecl("i", Types::INT, new LiteralInt(0)));
     // i < 3
     forCondition = new LogicalExpr(new Variable("i"), SMALLER, new LiteralInt(3));
     // i = i+1
-    forUpdate = new VarAssignm("i", new ArithmeticExpr(new Variable("i"), ADDITION, new LiteralInt(1)));
+    forUpdate = new Block(new VarAssignm("i", new ArithmeticExpr(new Variable("i"), ADDITION, new LiteralInt(1))));
     // sum = sum + base * i;
     forBody = new Block(
         new VarAssignm("sum",

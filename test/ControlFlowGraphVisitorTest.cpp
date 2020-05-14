@@ -223,11 +223,13 @@ TEST_F(FlowGraphVisitorFixture, controlFlowGraphIncludingForStatement) { /* NOLI
   auto varDecl9 = new GraphNode(relType, {block2});
   auto varDecl13 = new GraphNode(relType, {varDecl9});
   auto for38 = new GraphNode(relType, {varDecl13});
-  auto varDecl17 = new GraphNode(relType, {for38});
+  auto initializerBlockWrapper  = new GraphNode(relType, {for38});
+  auto varDecl17 = new GraphNode(relType, {initializerBlockWrapper});
   auto logicalExpr21 = new GraphNode(relType, {varDecl17});
   auto block37 = new GraphNode(relType, {logicalExpr21});
   auto varAssignm36 = new GraphNode(relType, {block37});
-  auto varAssignm28 = new GraphNode(relType, {varAssignm36});
+  auto updateStmtBlockWrapper = new GraphNode(relType, {varAssignm36});
+  auto varAssignm28 = new GraphNode(relType, {updateStmtBlockWrapper});
   logicalExpr21->getControlFlowGraph()->addParent(varAssignm28);
   auto return40 = new GraphNode(relType, {logicalExpr21});  /* NOLINT ignore_unused */
 
@@ -267,8 +269,12 @@ TEST_F(FlowGraphVisitorFixture, dataflowGraph_detectedVariableReadWrites) { /* N
   auto forStmt = varDeclBase->getControlFlowGraph()->getOnlyChild();
   EXPECT_TRUE(checkVariableReadWrites({}, {}, forStmt));
 
+  // [Block] initalizer wrapper
+  auto initWrapper = forStmt->getControlFlowGraph()->getOnlyChild();
+  EXPECT_TRUE(checkVariableReadWrites({}, {}, initWrapper));
+
   // [VarDecl] int i = 0;
-  auto varDeclI = forStmt->getControlFlowGraph()->getOnlyChild();
+  auto varDeclI = initWrapper->getControlFlowGraph()->getOnlyChild();
   EXPECT_TRUE(checkVariableReadWrites({}, {"i"}, varDeclI));
 
   // [LogicalExpr] i <= inputA
@@ -283,8 +289,12 @@ TEST_F(FlowGraphVisitorFixture, dataflowGraph_detectedVariableReadWrites) { /* N
   auto varAssignmSum = logicalExpr->getControlFlowGraph()->getChildAtIndex(0)->getControlFlowGraph()->getOnlyChild();
   EXPECT_TRUE(checkVariableReadWrites({"sum", "base", "i"}, {"sum"}, varAssignmSum));
 
+  // [Block] Update Wrapper
+  auto updateWrapper = varAssignmSum->getControlFlowGraph()->getOnlyChild();
+  EXPECT_TRUE(checkVariableReadWrites({}, {}, updateWrapper));
+
   // [VarAssignm] i= i + 1;
-  auto varAssignmI = varAssignmSum->getControlFlowGraph()->getOnlyChild();
+  auto varAssignmI = updateWrapper->getControlFlowGraph()->getOnlyChild();
   EXPECT_TRUE(checkVariableReadWrites({"i"}, {"i"}, varAssignmI));
 }
 
@@ -408,8 +418,12 @@ TEST_F(FlowGraphVisitorFixture, dataflowGraph_addedEdgesInForLoop) { /* NOLINT *
   auto forStmt = varDeclBase->getControlFlowGraph()->getOnlyChild();
   EXPECT_EQ(getDataFlowGraphNumParents(forStmt), 0);
   EXPECT_EQ(getDataFlowGraphNumChildren(forStmt), 0);
+  // [Block] (For initializer Wrapper)
+  auto initWrapper = forStmt->getControlFlowGraph()->getOnlyChild();
+  EXPECT_EQ(getDataFlowGraphNumParents(initWrapper), 0);
+  EXPECT_EQ(getDataFlowGraphNumChildren(initWrapper), 0);
   // [VarDecl] int i = 0;  (For initializer)
-  auto varDeclI = forStmt->getControlFlowGraph()->getOnlyChild();
+  auto varDeclI = initWrapper->getControlFlowGraph()->getOnlyChild();
   EXPECT_EQ(getDataFlowGraphNumParents(varDeclI), 0);
   EXPECT_EQ(getDataFlowGraphNumChildren(varDeclI), 3);
   // [LogicalExpr] i <= inputA  (For condition)
@@ -424,8 +438,12 @@ TEST_F(FlowGraphVisitorFixture, dataflowGraph_addedEdgesInForLoop) { /* NOLINT *
   auto varAssignmSum = logicalExpr->getControlFlowGraph()->getChildAtIndex(0)->getControlFlowGraph()->getOnlyChild();
   EXPECT_EQ(getDataFlowGraphNumParents(varAssignmSum), 2 + 1 + 2);
   EXPECT_EQ(getDataFlowGraphNumChildren(varAssignmSum), 2);
+  // [Block] (For update Wrapper)
+  auto updateWrapper = varAssignmSum->getControlFlowGraph()->getOnlyChild();
+  EXPECT_EQ(getDataFlowGraphNumParents(updateWrapper), 0);
+  EXPECT_EQ(getDataFlowGraphNumChildren(updateWrapper), 0);
   // [VarAssignm] i= i + 1;   (For update)
-  auto varAssignmI = varAssignmSum->getControlFlowGraph()->getOnlyChild();
+  auto varAssignmI = updateWrapper->getControlFlowGraph()->getOnlyChild();
   EXPECT_EQ(getDataFlowGraphNumParents(varAssignmI), 2);
   EXPECT_EQ(getDataFlowGraphNumChildren(varAssignmI), 3);
 
