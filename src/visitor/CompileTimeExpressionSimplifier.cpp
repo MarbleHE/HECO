@@ -842,54 +842,54 @@ CompileTimeExpressionSimplifier::identifyReadWriteVariables(For &forLoop, Variab
 }
 
 int CompileTimeExpressionSimplifier::determineNumLoopIterations(For &elem) {
-  // make a backup of global data structures to allow reverting state
-  auto bakNodesQueuedForDeletion = nodesQueuedForDeletion;
-  auto bakVariableValues = getClonedVariableValuesMap();
+
+  // Create a new Visitor
+  CompileTimeExpressionSimplifier loopCTES;
+  loopCTES.forceScope(stmtToScopeMapper, curScope);
+  loopCTES.variableValues = variableValues;
 
   // run initializer
-  if (elem.getInitializer()==nullptr) return -1;
-  elem.getInitializer()->accept(*this);
+  elem.getInitializer()->accept(loopCTES);
 
   // check if values of all variables in the condition are known
   bool allVariableHaveKnownValue = true;
   auto variableIdentifiers = elem.getCondition()->getVariableIdentifiers();
   for (auto &var : variableIdentifiers) {
-    auto value = getVariableValueDeclaredInThisOrOuterScope(var);
-    if (value==nullptr || value==nullptr) {
+    auto value =  loopCTES.getVariableValueDeclaredInThisOrOuterScope(var);
+    if (value==nullptr) {
       allVariableHaveKnownValue = false;
-      break; // no need to continue checking other variables
+      // no need to continue checking other variables
+      //cannot execute this loop during compile
+      return -1;
     }
   }
 
-  std::vector<AbstractNode *> deleteNodes;
+  auto conditionEvaluatesTrue = [&]() -> bool {
+    auto result = evaluateNodeRecursive(elem.getCondition(), loopCTES.getTransformedVariableMap());
+    auto evalResult = result.empty() ? nullptr : result.back();
+    if (evalResult==nullptr)
+      throw std::runtime_error("Unexpected: Could not evaluate For-loops condition although "
+                               "all variable have known values. Cannot continue.");
+    return evalResult->isEqual(new LiteralBool(true));
+  };
+
+  auto executeLoopStmts = [&]() {
+    // BODY
+    auto clonedBodyStmt = elem.getBody()->clone(false);
+    clonedBodyStmt->accept(loopCTES);
+    nodesQueuedForDeletion.push_back(clonedBodyStmt);
+
+    // LOOP
+    auto clonedUpdateStmt = elem.getUpdate()->clone(false);
+    clonedUpdateStmt->accept(loopCTES);
+    nodesQueuedForDeletion.push_back(clonedUpdateStmt);
+  };
+
   int numSimulatedIterations = 0;
-  if (allVariableHaveKnownValue) {
-    auto conditionEvaluatesTrue = [&]() -> bool {
-      auto result = evaluateNodeRecursive(elem.getCondition(), getTransformedVariableMap());
-      auto evalResult = result.empty() ? nullptr : result.back();
-      if (evalResult==nullptr)
-        throw std::runtime_error("Unexpected: Could not evaluate For-loops condition although "
-                                 "all variable have known values. Cannot continue.");
-      return evalResult->isEqual(new LiteralBool(true));
-    };
-    auto executeUpdateStmt = [&]() {
-      auto clonedUpdateStmt = elem.getUpdate()->clone(false);
-      clonedUpdateStmt->accept(*this);
-      deleteNodes.push_back(clonedUpdateStmt);
-    };
-    while (conditionEvaluatesTrue()) {
-      numSimulatedIterations++;
-      executeUpdateStmt();
-    }
-  } else {
-    // -1 indicates an error, i.e., loop could not be simulated – must be handled by caller properly
-    numSimulatedIterations = -1;
+  while (conditionEvaluatesTrue()) {
+    numSimulatedIterations++;
+    executeLoopStmts();
   }
-
-  // restore global data structures using backup
-  nodesQueuedForDeletion = bakNodesQueuedForDeletion;
-  nodesQueuedForDeletion.insert(nodesQueuedForDeletion.end(), deleteNodes.begin(), deleteNodes.end());
-  variableValues = bakVariableValues;
 
   // return counter value
   return numSimulatedIterations;
