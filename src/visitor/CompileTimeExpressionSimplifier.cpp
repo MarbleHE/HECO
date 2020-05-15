@@ -297,17 +297,22 @@ void CompileTimeExpressionSimplifier::visit(Variable &elem) {
 }
 
 void CompileTimeExpressionSimplifier::visit(VarDecl &elem) {
+  // Visit and simplify datatype and initializer (if present)
   Visitor::visit(elem);
+
   // determine the variable's value
   AbstractExpr *variableValue;
   auto variableInitializer = elem.getInitializer();
   if (variableInitializer==nullptr) {
+    // Default initialization
     variableValue = AbstractLiteral::createLiteralBasedOnDatatype(elem.getDatatype());
   } else {
     variableValue = variableInitializer;
   }
   // store the variable's value
   addDeclaredVariable(elem.getIdentifier(), elem.getDatatype(), variableValue);
+  
+  // we no longer need this node or its children, since the value is now in the variableValues map
   enqueueNodeForDeletion(&elem);
 }
 
