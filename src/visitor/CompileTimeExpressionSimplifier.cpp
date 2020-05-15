@@ -284,33 +284,15 @@ void CompileTimeExpressionSimplifier::visit(LiteralFloat &elem) {
 }
 
 void CompileTimeExpressionSimplifier::visit(Variable &elem) {
+  // Variables have no AbstractNode children, so this should do nothing
   Visitor::visit(elem);
+  
   // TODO: Introduce a depth threshold (#nodes) to stop inlining if a variable's symbolic value reached a certain depth.
-  auto varEntry = getVariableEntryDeclaredInThisOrOuterScope(elem.getIdentifier());
-  auto varValue = (varEntry!=variableValues.end()) ? varEntry->second : nullptr;
-  auto vvAsLiteral = varValue ? dynamic_cast<AbstractLiteral *>(varValue->value) : nullptr;
-
-  auto isVariableUsedInAst = [&]() {
-    return varValue!=nullptr && emittedVariableDeclarations.count(varEntry->first) > 0
-        && (!emittedVariableDeclarations.at(varEntry->first)->emittedVarAssignms.empty()
-            || !emittedVariableDeclarations.at(varEntry->first)->dependentAssignms.empty());
-  };
-
-  if (varValue!=nullptr && ((vvAsLiteral==nullptr) || !vvAsLiteral->getMatrix()->isEmpty())) {
-    // if varValue is an AbstractLiteral then its value must not be an empty matrix (i.e., have dim (0,0))
-
-    //TODO: Deal with removal of onBackwardPassInForLoop and visitingUnrolledLoopStatements
-    //&& (!(onBackwardPassInForLoop() && ctes.isUnrollLoopAllowed()) || visitingUnrolledLoopStatements)
-    // this variable must not belong to an emitted variable declaration otherwise there are still statements in
-    // the AST such that we cannot just substitute Variables as we do not know the variable's most recent value
-    //&& !(isVariableUsedInAst() && !visitingUnrolledLoopStatements)
-
-    // if we know the variable's value (i.e., its value is either any subtype of AbstractLiteral or an AbstractExpr if
-    // this is a symbolic value that defines on other variables), we can replace this variable node by its value
-    if (hasKnownValue(&elem)) {
-      auto newValue = getKnownValue(&elem);
-      if (!elem.getParentsNonNull().empty()) elem.getOnlyParent()->replaceChild(&elem, newValue);
-    }
+  // if we know the variable's value (i.e., its value is either any subtype of AbstractLiteral or an AbstractExpr if
+  // this is a symbolic value that defines on other variables), we can replace this variable node by its value
+  if (hasKnownValue(&elem)) {
+    auto newValue = getKnownValue(&elem);
+    if (!elem.getParentsNonNull().empty()) elem.getOnlyParent()->replaceChild(&elem, newValue);
   }
 }
 
@@ -522,6 +504,8 @@ void CompileTimeExpressionSimplifier::visit(Block &elem) {
   // If all Block's statements are marked for deletion, mark it as evaluated to notify its parent.
   // The parent is then responsible to decide whether it makes sense to delete this Block or not.
   // check if there is any statement within this Block that is not marked for deletion
+
+  //TODO: If we come to the end of a scope, do we need to emit variables?
 //  bool allStatementsInBlockAreMarkedForDeletion = true;
 //  for (auto &statement : elem.getStatements()) {
 //    if (removableNodes.count(statement)==0) {
