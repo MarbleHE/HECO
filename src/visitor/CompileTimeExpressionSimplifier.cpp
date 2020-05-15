@@ -98,7 +98,7 @@ void CompileTimeExpressionSimplifier::visit(MatrixAssignm &elem) {
   // Do not visit the MatrixElementRef because it would replace the node by a copy of the retrieved value but in a
   // MatrixAssignm we need to modify the value at the given position instead. However, our implementation does not
   // allow to retrieve a real (assignable) reference using MatrixElementRef.
-//  Visitor::visit(elem);
+  // Visitor::visit(elem);
 
   // visit the row and column index
   auto assignmTarget = elem.getAssignmTarget();
@@ -229,9 +229,16 @@ void CompileTimeExpressionSimplifier::visit(GetMatrixSize &elem) {
 }
 
 void CompileTimeExpressionSimplifier::visit(Ast &elem) {
-  // clean up the variableValues map from any possible previous run
+  // clean up data structures from any possible previous run
+  emittedVariableDeclarations.clear();
+  emittedVariableAssignms.clear();
+  nodesQueuedForDeletion.clear();
   variableValues.clear();
+  stmtToScopeMapper.clear();
+  currentLoopDepth_maxLoopDepth = {std::pair(0, 0)};
+  curScope = nullptr;
 
+  // takes care of creating root scope & visits entire AST, starting at rootNode
   Visitor::visit(elem);
 
   // add all emitted VarDecls to nodesQueuedForDeletion that are not required anymore, i.e, there are no emitted
@@ -297,13 +304,15 @@ void CompileTimeExpressionSimplifier::visit(Variable &elem) {
             || !emittedVariableDeclarations.at(varEntry->first)->dependentAssignms.empty());
   };
 
-  if (varValue!=nullptr
-      // if varValue is an AbstractLiteral then its value must not be an empty matrix (i.e., have dim (0,0))
-      && ((vvAsLiteral==nullptr) || !vvAsLiteral->getMatrix()->isEmpty())
-      && (!(onBackwardPassInForLoop() && ctes.isUnrollLoopAllowed()) || visitingUnrolledLoopStatements)
-          // this variable must not belong to an emitted variable declaration otherwise there are still statements in
-          // the AST such that we cannot just substitute Variables as we do not know the variable's most recent value
-      && !(isVariableUsedInAst() && !visitingUnrolledLoopStatements)) {
+  if (varValue!=nullptr && ((vvAsLiteral==nullptr) || !vvAsLiteral->getMatrix()->isEmpty())) {
+    // if varValue is an AbstractLiteral then its value must not be an empty matrix (i.e., have dim (0,0))
+
+    //TODO: Deal with removal of onBackwardPassInForLoop and visitingUnrolledLoopStatements
+    //&& (!(onBackwardPassInForLoop() && ctes.isUnrollLoopAllowed()) || visitingUnrolledLoopStatements)
+    // this variable must not belong to an emitted variable declaration otherwise there are still statements in
+    // the AST such that we cannot just substitute Variables as we do not know the variable's most recent value
+    //&& !(isVariableUsedInAst() && !visitingUnrolledLoopStatements)
+
     // if we know the variable's value (i.e., its value is either any subtype of AbstractLiteral or an AbstractExpr if
     // this is a symbolic value that defines on other variables), we can replace this variable node by its value
     if (hasKnownValue(&elem)) {
@@ -530,7 +539,6 @@ void CompileTimeExpressionSimplifier::visit(Block &elem) {
   addStatementToScope(elem);
   changeToInnerScope(elem.getUniqueNodeId(), &elem);
   for (auto &stat : elem.getStatements()) {
-    if (onBackwardPassInForLoop() && ctes.isUnrollLoopAllowed() && !visitingUnrolledLoopStatements) continue;
     stat->accept(*this);
   }
   changeToOuterScope();
@@ -550,16 +558,16 @@ void CompileTimeExpressionSimplifier::visit(Block &elem) {
   // -> let the Block's parent decide whether to keep this empty Block or not
   if (allStatementsInBlockAreMarkedForDeletion) markNodeAsRemovable(&elem);
 
-  // detach all nodes marked for deletion; required to enable unrolling of a possible outer loop
-  if (onBackwardPassInForLoop() || visitingUnrolledLoopStatements) {
-    int lowIdx = nodesForDeletionBeforeVisit.size();
-    int maxIdx = nodesQueuedForDeletion.size() - 1;
-    while (lowIdx <= maxIdx) {
-      auto curNode = nodesQueuedForDeletion.at(lowIdx);
-      if (curNode->getParents().size() > 0) curNode->removeFromParents();
-      ++lowIdx;
-    }
-  }
+//  // detach all nodes marked for deletion; required to enable unrolling of a possible outer loop
+//  if (onBackwardPassInForLoop() || visitingUnrolledLoopStatements) {
+//    int lowIdx = nodesForDeletionBeforeVisit.size();
+//    int maxIdx = nodesQueuedForDeletion.size() - 1;
+//    while (lowIdx <= maxIdx) {
+//      auto curNode = nodesQueuedForDeletion.at(lowIdx);
+//      if (curNode->getParents().size() > 0) curNode->removeFromParents();
+//      ++lowIdx;
+//    }
+//  }
 
   cleanUpAfterStatementVisited(&elem, false);
 }
@@ -936,7 +944,7 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
       //      If we have these (complex/runtime dependent) stmts, simply move them into the unrolledBlock
 
       // BODY
-      Block * clonedBody = elem.getBody()->clone(false);
+      Block *clonedBody = elem.getBody()->clone(false);
       clonedBody->accept(loopCTES);
       // If there are any stmts left, transfer them to the unrolledBlock
       for (auto &s: clonedBody->getStatements()) {
@@ -947,7 +955,7 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
 
 
       // LOOP
-      Block * clonedUpdate = elem.getUpdate()->clone(false);
+      Block *clonedUpdate = elem.getUpdate()->clone(false);
       clonedUpdate->accept(loopCTES);
       // If there are any stmts left, transfer them to the unrolledBlock
       for (auto &s: clonedUpdate->getStatements()) {
@@ -1354,8 +1362,10 @@ AbstractExpr *CompileTimeExpressionSimplifier::generateIfDependentValue(
 void CompileTimeExpressionSimplifier::cleanUpAfterStatementVisited(
     AbstractNode *statement, bool enqueueStatementForDeletion) {
   // mark this statement for deletion as we don't need it anymore
-  if (enqueueStatementForDeletion && (!onBackwardPassInForLoop() || visitingUnrolledLoopStatements))
-    enqueueNodeForDeletion(statement);
+
+  //TODO: deal with removal of onBackwardPassInForLoop
+  //if (enqueueStatementForDeletion && (!onBackwardPassInForLoop() || visitingUnrolledLoopStatements))
+  // enqueueNodeForDeletion(statement);
 }
 
 void CompileTimeExpressionSimplifier::setVariableValue(const std::string &variableIdentifier,

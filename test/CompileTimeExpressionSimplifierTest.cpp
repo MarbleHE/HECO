@@ -2704,6 +2704,9 @@ TEST_F(CompileTimeExpressionSimplifierFixture, trivialLoop) { /* NOLINT */
   // perform the compile-time expression simplification
   ctes.visit(ast);
 
+  PrintVisitor p;
+  p.visit(ast);
+
   auto expectedFunc = new Function("trivialLoop");
   expectedFunc->addStatement(new Return(new LiteralInt(42)));
 

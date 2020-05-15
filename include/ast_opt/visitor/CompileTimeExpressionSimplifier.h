@@ -95,12 +95,6 @@ struct CtesConfiguration {
     return allowsInfiniteLoopUnrollings() || (numUnrolledLoopsCounter < maxNumLoopUnrollings);
   }
 
-  /// Updates the counter of unrolled loops. Method must be invoked immediately after a partial or full loop unrolling
-  /// operation is performed.
-  void incrementNumLoopUnrollingsCounter() {
-    numUnrolledLoopsCounter = numUnrolledLoopsCounter + 1;
-  }
-
   /// Determines whether there is any limitation in the number of loop unrolling operations.
   /// \return True if there is no restriction w.r.t. number of loop unrollings.
   bool allowsInfiniteLoopUnrollings() {
@@ -138,20 +132,12 @@ class CompileTimeExpressionSimplifier : public Visitor {
   ///   ...
   std::pair<int, int> currentLoopDepth_maxLoopDepth = {std::pair(0, 0)};
 
-  /// Indicates whether the deepest nested loop was visited and we are now on the back path of recursion.
-  bool onBackwardPassInForLoop() {
-    return currentLoopDepth_maxLoopDepth.first < currentLoopDepth_maxLoopDepth.second;
-  }
-
-  /// A flag that indicates that we are currently visiting statements that are generated as part of loop unrolling.
-  /// This flag has various implications, for example, if statements are visited and if Variables are substituted by
-  /// their known value. See its usages in the source file for more details.
-  bool visitingUnrolledLoopStatements{false};
-
   /// A method to be called immediately after entering the For-loop's visit method.
+  /// updates currentLoopDepth_maxLoopDepth
   void enteredForLoop();
 
   /// A method to be called before leaving the For-loop's visit method.
+  /// updates currentLoopDepth_maxLoopDepth
   void leftForLoop();
 
  public:
@@ -190,6 +176,8 @@ class CompileTimeExpressionSimplifier : public Visitor {
 
   void visit(AbstractMatrix &elem) override;
 
+  /// Simplify entire AST
+  /// Will reset any scope/variable information that the visitor might have held from previous calls
   void visit(Ast &elem) override;
 
   void visit(Block &elem) override;
