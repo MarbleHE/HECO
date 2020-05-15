@@ -58,8 +58,6 @@ struct EmittedVariableData {
 
   void addVarAssignm(AbstractNode *varAssignm) { emittedVarAssignms.insert(varAssignm); }
 
-  void addDependentAssignm(AbstractNode *assignm) { dependentAssignms.insert(assignm); }
-
   void removeVarAssignm(AbstractNode *varAssignm) { emittedVarAssignms.erase(varAssignm); }
 
   bool hasNoReferringAssignments() { return emittedVarAssignms.empty() && dependentAssignms.empty(); }
@@ -114,11 +112,11 @@ class CompileTimeExpressionSimplifier : public Visitor {
   EvaluationVisitor evalVisitor;
 
   /// Keeps track of all emitted variable declarations and maps each to an associated EmittedVariableData pointer.
-  std::map<std::pair<std::string, Scope *>, EmittedVariableData *> emittedVariableDeclarations;
+  std::map<ScopedVariable, EmittedVariableData *> emittedVariableDeclarations;
 
   /// Maps emitted VarAssignms to their corresponding VarDecl statement in emittedVariableDeclarations.
   std::map<AbstractNode *,
-           std::map<std::pair<std::string, Scope *>, EmittedVariableData *>::iterator> emittedVariableAssignms;
+           std::map<ScopedVariable, EmittedVariableData *>::iterator> emittedVariableAssignms;
 
   /// A counter that keeps track of the nesting level while visiting For-loops. The first value indicates the
   /// depth of the currently visiting loop body. The second value the depth of the deepest loop. For example:
@@ -143,13 +141,7 @@ class CompileTimeExpressionSimplifier : public Visitor {
  public:
   CompileTimeExpressionSimplifier();
 
-  CompileTimeExpressionSimplifier(CtesConfiguration cfg);
-
-  /// Contains all nodes that can potentially be removed. The decision of a node's removal is to be made by its parent
-  /// statement. If this decision is made (i.e., at the end of processing the statement), the node must be deleted from
-  /// removableNodes.
-  /// - AbstractNode*: A reference to the removable node.
-  std::unordered_set<AbstractNode *> removableNodes;
+  explicit CompileTimeExpressionSimplifier(CtesConfiguration cfg);
 
   /// Stores the latest value of a variable while traversing through the AST. Entries in this map consist of a key
   /// (pair) that is made of a variable identifier (first) and the scope where the variable was declared in (second).
@@ -244,11 +236,6 @@ class CompileTimeExpressionSimplifier : public Visitor {
   /// \return True if the node's value is known, otherwise False.
   bool hasKnownValue(AbstractNode *node);
 
-  /// Marks a node as a candidate for deletion. The node's first ancestor that is a statement has to decide whether its
-  /// children that are marked to be removed can be deleted or not.
-  /// \param node The node for which the evaluation result should be stored.
-  void markNodeAsRemovable(AbstractNode *node);
-
   /// Returns the value of the given node that is either the node itself if the node is an subtype of AbstractLiteral
   /// or the known value (AbstractExpr) stored previously in the variableValues map.
   /// \param node The node for which the value should be retrieved.
@@ -286,14 +273,6 @@ class CompileTimeExpressionSimplifier : public Visitor {
   /// \return An arithmetic expression of the form condition*trueValue + (1-b)*falseValue.
   static AbstractExpr *generateIfDependentValue(
       AbstractExpr *condition, AbstractExpr *trueValue, AbstractExpr *falseValue);
-
-  /// This method must be called at the end of the visit(...) of each statement. The method makes sure that the binary
-  /// expression accumulator is reset and if specified by enqueueStatementForDeletion=True, also marks the given
-  /// statement for deletion.
-  /// \param statement The statement for which visit(...) was executed.
-  /// \param enqueueStatementForDeletion True if this statement should be marked for deletion, otherwise False
-  /// (default).
-  void cleanUpAfterStatementVisited(AbstractNode *statement, bool enqueueStatementForDeletion = false);
 
   /// Saves information about a declared variable. Must include the variable's identifier, the variable's datatype, and
   /// optionally also an initializer (or nullptr otherwise). The method assumes that it is called from the variable's

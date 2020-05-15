@@ -109,7 +109,7 @@ void CompileTimeExpressionSimplifier::visit(MatrixAssignm &elem) {
   elem.getValue()->accept(*this);
 
   // flag to mark whether to delete this MatrixAssignm node after it has been visited
-  bool enqueueNodeForDeletion = false;
+  bool enqueueNodeForDeletion_ = false;
 
   // get operand (matrix) where assignment is targeted to
   auto operandAsVariable = dynamic_cast<Variable *>(assignmTarget->getOperand());
@@ -150,13 +150,7 @@ void CompileTimeExpressionSimplifier::visit(MatrixAssignm &elem) {
       appendVectorToMatrix(operandAsVariable->getIdentifier(), rowIdx, elem.getValue());
     }
 
-    // clean up removableNodes result from children that indicates whether a child node can safely be deleted
-    removableNodes.erase(assignmTarget->getRowIndex());
-    removableNodes.erase(assignmTarget->getColumnIndex());
-
-    // this MatrixAssignm has been executed and is not needed anymore
-    markNodeAsRemovable(&elem);
-    enqueueNodeForDeletion = true;
+    enqueueNodeForDeletion_ = true;
   } else { // matrix/indices are not known or there was a previous assignment that could not be executed
     auto var = getVariableEntryDeclaredInThisOrOuterScope(operandAsVariable->getIdentifier());
     if (var->second==nullptr) {
@@ -192,7 +186,9 @@ void CompileTimeExpressionSimplifier::visit(MatrixAssignm &elem) {
       variableValues[var->first] = nullptr;
     }
   }
-  cleanUpAfterStatementVisited(&elem, enqueueNodeForDeletion);
+  if (enqueueNodeForDeletion_) {
+    enqueueNodeForDeletion(&elem);
+  }
 }
 
 void CompileTimeExpressionSimplifier::visit(MatrixElementRef &elem) {
@@ -257,9 +253,6 @@ void CompileTimeExpressionSimplifier::visit(Ast &elem) {
   for (auto &n : nodesToDelete) { n->isolateNode(); }
   // now delete the nodes sequentially
   for (auto node : nodesToDelete) { elem.deleteNode(&node, true); }
-
-  // clean up removableNodes result from children that indicates whether a child node can safely be deleted
-  removableNodes.erase(elem.getRootNode());
 }
 
 void CompileTimeExpressionSimplifier::visit(Datatype &elem) {
@@ -268,7 +261,6 @@ void CompileTimeExpressionSimplifier::visit(Datatype &elem) {
 
 void CompileTimeExpressionSimplifier::visit(CallExternal &elem) {
   Visitor::visit(elem);
-  cleanUpAfterStatementVisited(elem.AbstractExpr::castTo<AbstractExpr>(), false);
 }
 
 // =====================
@@ -334,21 +326,14 @@ void CompileTimeExpressionSimplifier::visit(VarDecl &elem) {
   }
   // store the variable's value
   addDeclaredVariable(elem.getIdentifier(), elem.getDatatype(), variableValue);
-  // clean up removableNodes result from children that indicates whether a child node can safely be deleted
-  removableNodes.erase(variableInitializer);
-  // mark this statement as removable as it is deleted
-  markNodeAsRemovable(&elem);
-  cleanUpAfterStatementVisited(&elem, true);
+  enqueueNodeForDeletion(&elem);
 }
 
 void CompileTimeExpressionSimplifier::visit(VarAssignm &elem) {
   Visitor::visit(elem);
   // store the variable's value
   setVariableValue(elem.getVarTargetIdentifier(), elem.getValue());
-  // clean up removableNodes result from children that indicates whether a child node can safely be deleted
-  removableNodes.erase(elem.getValue());
-  markNodeAsRemovable(&elem);
-  cleanUpAfterStatementVisited(&elem, true);
+  enqueueNodeForDeletion(&elem);
 }
 
 void CompileTimeExpressionSimplifier::visit(ArithmeticExpr &elem) {
@@ -365,10 +350,6 @@ void CompileTimeExpressionSimplifier::visit(ArithmeticExpr &elem) {
     operatorExpr->accept(*this);
   } else {
     Visitor::visit(elem);
-    // clean up removableNodes result from children that indicates whether a child node can safely be deleted
-    removableNodes.erase(elem.getLeft());
-    removableNodes.erase(elem.getRight());
-    removableNodes.erase(elem.getOperator());
   }
 }
 
@@ -386,18 +367,11 @@ void CompileTimeExpressionSimplifier::visit(LogicalExpr &elem) {
     operatorExpr->accept(*this);
   } else {
     Visitor::visit(elem);
-    // clean up removableNodes result from children that indicates whether a child node can safely be deleted
-    removableNodes.erase(elem.getLeft());
-    removableNodes.erase(elem.getRight());
-    removableNodes.erase(elem.getOperator());
   }
 }
 
 void CompileTimeExpressionSimplifier::visit(UnaryExpr &elem) {
   Visitor::visit(elem);
-  // clean up removableNodes result from children that indicates whether a child node can safely be deleted
-  removableNodes.erase(elem.getRight());
-  removableNodes.erase(elem.getOperator());
 
   // check if the unary expression can be evaluated such that we can replace the whole node by its evaluation result
   if (dynamic_cast<AbstractLiteral *>(elem.getRight())) {
@@ -543,20 +517,22 @@ void CompileTimeExpressionSimplifier::visit(Block &elem) {
   }
   changeToOuterScope();
 
+
+  //TODO
   // If all Block's statements are marked for deletion, mark it as evaluated to notify its parent.
   // The parent is then responsible to decide whether it makes sense to delete this Block or not.
   // check if there is any statement within this Block that is not marked for deletion
-  bool allStatementsInBlockAreMarkedForDeletion = true;
-  for (auto &statement : elem.getStatements()) {
-    if (removableNodes.count(statement)==0) {
-      allStatementsInBlockAreMarkedForDeletion = false;
-    }
-    // clean up removableNodes result from children that indicates whether a child node can safely be deleted
-    removableNodes.erase(statement);
-  }
+//  bool allStatementsInBlockAreMarkedForDeletion = true;
+//  for (auto &statement : elem.getStatements()) {
+//    if (removableNodes.count(statement)==0) {
+//      allStatementsInBlockAreMarkedForDeletion = false;
+//    }
+//    // clean up removableNodes result from children that indicates whether a child node can safely be deleted
+//    removableNodes.erase(statement);
+//  }
   // if all statements of this Block are marked for deletion, we can mark the Block as removable
   // -> let the Block's parent decide whether to keep this empty Block or not
-  if (allStatementsInBlockAreMarkedForDeletion) markNodeAsRemovable(&elem);
+  // if (allStatementsInBlockAreMarkedForDeletion) markNodeAsRemovable(&elem);
 
 //  // detach all nodes marked for deletion; required to enable unrolling of a possible outer loop
 //  if (onBackwardPassInForLoop() || visitingUnrolledLoopStatements) {
@@ -568,8 +544,6 @@ void CompileTimeExpressionSimplifier::visit(Block &elem) {
 //      ++lowIdx;
 //    }
 //  }
-
-  cleanUpAfterStatementVisited(&elem, false);
 }
 
 void CompileTimeExpressionSimplifier::visit(Call &elem) {
@@ -622,37 +596,20 @@ void CompileTimeExpressionSimplifier::visit(Call &elem) {
 
 void CompileTimeExpressionSimplifier::visit(ParameterList &elem) {
   Visitor::visit(elem);
-  // if all of the FunctionParameter children are marked as removable, mark this node as removable too
-  bool allFunctionParametersAreRemovable = true;
+  // if all of the FunctionParameter children are marked as known, remove this node
+  bool allFunctionParametersAreKnown = true;
   for (auto &fp : elem.getParameters()) {
-    if (!hasKnownValue(fp)) allFunctionParametersAreRemovable = false;
-    // clean up removableNodes result from children that indicates whether a child node can safely be deleted
-    removableNodes.erase(fp);
+    if (!hasKnownValue(fp)) allFunctionParametersAreKnown = false;
   }
-  if (allFunctionParametersAreRemovable) {
-    markNodeAsRemovable(&elem);
-  }
-  cleanUpAfterStatementVisited(&elem, false);
 }
 
 void CompileTimeExpressionSimplifier::visit(Function &elem) {
   Visitor::visit(elem);
-  // This node is marked as removable if both the ParameterList (implies all of the FunctionParameters) and the Block
-  // (implies all of the statements) are removable. This mark is only relevant in case that this Function is included
-  // in a Call statement because Call statements can be replaced by inlining the Function's computation.
-  if (hasKnownValue(elem.getParameterList()) && hasKnownValue(elem.getBody())) {
-    markNodeAsRemovable(&elem);
-  }
-
-  // mark all body statement that are removable for deletion
-  for (auto &stat : elem.getBodyStatements()) {
-    if (removableNodes.count(stat) > 0) enqueueNodeForDeletion(stat);
-  }
-
-  // clean up removableNodes result from children that indicates whether a child node can safely be deleted
-  removableNodes.erase(elem.getParameterList());
-  removableNodes.erase(elem.getBody());
-  cleanUpAfterStatementVisited(&elem, false);
+  //TODO: When can a function be deleted?
+  // TODO: When can a function be inlined?
+  //  This node is marked as removable if both the ParameterList (implies all of the FunctionParameters) and the Block
+  //  (implies all of the statements) are removable. This mark is only relevant in case that this Function is included
+  //  in a Call statement because Call statements can be replaced by inlining the Function's computation.
 }
 
 void CompileTimeExpressionSimplifier::visit(FunctionParameter &elem) {
@@ -662,11 +619,6 @@ void CompileTimeExpressionSimplifier::visit(FunctionParameter &elem) {
   if (auto valueAsVar = dynamic_cast<Variable *>(elem.getValue())) {
     addDeclaredVariable(valueAsVar->getIdentifier(), elem.getDatatype(), nullptr);
   }
-
-  // This simplifier does not care about the variable's datatype, hence we can mark this node as removable. This mark is
-  // only relevant in case that this FunctionParameter is part of a Function that is included into a Call
-  // statement because Call statements can be replaced by inlining the Function's computation.
-  markNodeAsRemovable(&elem);
 }
 
 void CompileTimeExpressionSimplifier::visit(If &elem) {
@@ -703,7 +655,6 @@ void CompileTimeExpressionSimplifier::visit(If &elem) {
       auto condition = elem.getCondition();
       condition->removeFromParents();
       auto newCondition = new OperatorExpr(new Operator(UnaryOp::NEGATION), {condition});
-      removableNodes.erase(condition);
       // replace the If statement's Then branch by the Else branch
       elem.removeChild(elem.getThenBranch(), true);
       elem.setAttributes(newCondition, elem.getElseBranch(), nullptr);
@@ -784,12 +735,6 @@ void CompileTimeExpressionSimplifier::visit(If &elem) {
     // enqueue the If statement and its children for deletion
     enqueueNodeForDeletion(&elem);
   }
-  // clean up removableNodes result from children that indicates whether a child node can safely be deleted
-  removableNodes.erase(elem.getCondition());
-  removableNodes.erase(elem.getThenBranch());
-  removableNodes.erase(elem.getElseBranch());
-
-  cleanUpAfterStatementVisited(&elem, false);
 }
 
 void CompileTimeExpressionSimplifier::visit(While &elem) {
@@ -800,14 +745,12 @@ void CompileTimeExpressionSimplifier::visit(While &elem) {
   auto conditionValue = dynamic_cast<LiteralBool *>(elem.getCondition());
   if (conditionValue!=nullptr && !conditionValue->getValue()) {
     // While is never executed: remove While-loop including contained statements
-    cleanUpAfterStatementVisited(dynamic_cast<AbstractNode *>(&elem), true);
+    enqueueNodeForDeletion(&elem);
     return;
   }
 
   // visit body (and condition again, but that's acceptable)
   Visitor::visit(elem);
-
-  cleanUpAfterStatementVisited(dynamic_cast<AbstractNode *>(&elem), false);
 }
 
 std::set<ScopedVariable>
@@ -1180,17 +1123,7 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
 
 void CompileTimeExpressionSimplifier::visit(Return &elem) {
   Visitor::visit(elem);
-  // simplify return expression: replace each evaluated expression by its evaluation result
-  bool allValuesAreKnown = true;
-  for (auto &returnExpr : elem.getReturnExpressions()) {
-    if (!hasKnownValue(returnExpr)) allValuesAreKnown = false;
-    // clean up removableNodes result from children that indicates whether a child node can safely be deleted
-    removableNodes.erase(returnExpr);
-  }
-  // marking this node as removable is only useful for the case that this Return belongs to a nested Function that can
-  // be replaced by inlining the return expressions into the position where the function is called
-  if (allValuesAreKnown) markNodeAsRemovable(&elem);
-  cleanUpAfterStatementVisited(&elem, false);
+  //TODO: Shouldn't return need more handling?
 }
 
 // =====================
@@ -1252,12 +1185,7 @@ bool CompileTimeExpressionSimplifier::hasKnownValue(AbstractNode *node) {
         // and its value is not symbolic (i.e., contains no variables for which the value is unknown)
         && var->getVariableIdentifiers().empty();
   }
-  // ii.) or the node is removable and its value does not matter (hence considered as known)
-  return removableNodes.count(node) > 0;
-}
-
-void CompileTimeExpressionSimplifier::markNodeAsRemovable(AbstractNode *node) {
-  removableNodes.insert(node);
+  return false;
 }
 
 std::vector<AbstractLiteral *> CompileTimeExpressionSimplifier::evaluateNodeRecursive(
@@ -1359,15 +1287,6 @@ AbstractExpr *CompileTimeExpressionSimplifier::generateIfDependentValue(
                         {factorIsFalse, falseValue->clone(false)->castTo<AbstractExpr>()})});
 }
 
-void CompileTimeExpressionSimplifier::cleanUpAfterStatementVisited(
-    AbstractNode *statement, bool enqueueStatementForDeletion) {
-  // mark this statement for deletion as we don't need it anymore
-
-  //TODO: deal with removal of onBackwardPassInForLoop
-  //if (enqueueStatementForDeletion && (!onBackwardPassInForLoop() || visitingUnrolledLoopStatements))
-  // enqueueNodeForDeletion(statement);
-}
-
 void CompileTimeExpressionSimplifier::setVariableValue(const std::string &variableIdentifier,
                                                        AbstractExpr *valueAnyLiteralOrAbstractExpr) {
   AbstractExpr *valueToStore = nullptr;
@@ -1427,7 +1346,9 @@ void CompileTimeExpressionSimplifier::appendVectorToMatrix(const std::string &va
   literal->getMatrix()->appendVectorAt(posIndex, vec);
 }
 
-void CompileTimeExpressionSimplifier::setMatrixVariableValue(const std::string &variableIdentifier, int row, int column,
+void CompileTimeExpressionSimplifier::setMatrixVariableValue(const std::string &variableIdentifier,
+                                                             int row,
+                                                             int column,
                                                              AbstractExpr *matrixElementValue) {
   AbstractExpr *valueToStore = nullptr;
   if (matrixElementValue!=nullptr) {
@@ -1494,7 +1415,8 @@ VariableValuesMapType CompileTimeExpressionSimplifier::getChangedVariables(
     auto existingVariable = !newDeclaredVariable;
 
     // check if exactly one of both is a nullptr -> no need to compare their concrete value
-    auto anyOfTwoIsNullptr = [&](std::pair<std::string, Scope *> varIdentifierScope, VariableValue *varValue) -> bool {
+    auto
+        anyOfTwoIsNullptr = [&](std::pair<std::string, Scope *> varIdentifierScope, VariableValue *varValue) -> bool {
       return (variableValuesBeforeVisitingNode.at(varIdentifierScope)->value==nullptr)!=(varValue->value==nullptr);
     };
 

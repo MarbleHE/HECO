@@ -66,8 +66,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, arithmeticExpr_literalsOnly_fully
   EXPECT_EQ(alphaValue->castTo<LiteralInt>()->getValue(), 242);
   // check that the statement VarDecl and its children are deleted
   EXPECT_EQ(function->getBody()->getStatements().size(), 0);
-  // check that at the end of the evaluation traversal, the removableNodes map is empty
-  EXPECT_EQ(ctes.removableNodes.size(), 0);
+
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, arithmeticExpr_variableUnknown_rhsOperandEvaluableOnly) { /* NOLINT */
@@ -103,8 +102,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, arithmeticExpr_variableUnknown_rh
   EXPECT_TRUE(getVariableValueByUniqueName("alpha")->isEqual(expected));
   EXPECT_EQ(function->getBodyStatements().size(), 0);
 
-  // check that at the end of the evaluation traversal, the removableNodes map is empty
-  EXPECT_EQ(ctes.removableNodes.size(), 0);
+
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, arithmeticExpr_variableKnown_fullyEvaluable) { /* NOLINT */
@@ -139,8 +137,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, arithmeticExpr_variableKnown_full
   // check that the statement VarDecl and its children are deleted
   EXPECT_EQ(function->getBody()->getStatements().size(), 0);
 
-  // check that at the end of the evaluation traversal, the removableNodes map is empty
-  EXPECT_EQ(ctes.removableNodes.size(), 0);
+
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, arithmeticExpr_variablesUnknown_notAnythingEvaluable) { /* NOLINT */
@@ -187,8 +184,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, arithmeticExpr_variablesUnknown_n
   EXPECT_EQ(numberOfNodesBeforeSimplification - 9, ast.getAllNodes().size());
   EXPECT_EQ(function->getBodyStatements().size(), 0);
 
-  // check that at the end of the evaluation traversal, the removableNodes map is empty
-  EXPECT_EQ(ctes.removableNodes.size(), 0);
+
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_literalsOnly_fullyEvaluable) { /* NOLINT */
@@ -218,8 +214,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_literalsOnly_fullyEva
   // check that the statement VarDecl and its children are deleted
   EXPECT_EQ(function->getBody()->getStatements().size(), 0);
 
-  // check that at the end of the evaluation traversal, the removableNodes map is empty
-  EXPECT_EQ(ctes.removableNodes.size(), 0);
+
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_variableUnknown_lhsOperandEvaluableOnly) { /* NOLINT */
@@ -257,8 +252,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_variableUnknown_lhsOp
   // check that the variable declaration statement is deleted
   EXPECT_EQ(function->getBodyStatements().size(), 0);
 
-  // check that at the end of the evaluation traversal, the removableNodes map is empty
-  EXPECT_EQ(ctes.removableNodes.size(), 0);
+
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_variableKnown_fullyEvaluable) { /* NOLINT */
@@ -293,8 +287,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_variableKnown_fullyEv
   // check that the statement VarDecl and its children are deleted
   EXPECT_EQ(function->getBody()->getStatements().size(), 0);
 
-  // check that at the end of the evaluation traversal, the removableNodes map is empty
-  EXPECT_EQ(ctes.removableNodes.size(), 0);
+
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_variablesUnknown_notAnythingEvaluable) { /* NOLINT */
@@ -341,8 +334,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_variablesUnknown_notA
   // check that 9 nodes are deleted
   EXPECT_EQ(numberOfNodesBeforeSimplification - 9, ast.getAllNodes().size());
 
-  // check that at the end of the evaluation traversal, the removableNodes map is empty
-  EXPECT_EQ(ctes.removableNodes.size(), 0);
+
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, unaryExpr_literalsOnly_fullyEvaluable) { /* NOLINT */
@@ -369,8 +361,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, unaryExpr_literalsOnly_fullyEvalu
   // check that the statement VarDecl and its children are deleted
   EXPECT_EQ(function->getBody()->getStatements().size(), 0);
 
-  // check that at the end of the evaluation traversal, the removableNodes map is empty
-  EXPECT_EQ(ctes.removableNodes.size(), 0);
+
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, unaryExpr_variableKnown_fullyEvaluable) { /* NOLINT */
@@ -433,8 +424,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, unaryExpr_variableUnknown_notEval
   // check that statements is deleted
   EXPECT_EQ(function->getBodyStatements().size(), 0);
 
-  // check that at the end of the evaluation traversal, the removableNodes map is empty
-  EXPECT_EQ(ctes.removableNodes.size(), 0);
+
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, varAssignm_variablesKnown_fullyEvaluable) { /* NOLINT */
@@ -469,8 +459,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, varAssignm_variablesKnown_fullyEv
   // check that the statements and their children are deleted
   EXPECT_EQ(function->getBody()->getStatements().size(), 0);
 
-  // check that at the end of the evaluation traversal, the removableNodes map is empty
-  EXPECT_EQ(ctes.removableNodes.size(), 0);
+
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, varAssignm_previouslyDeclaredNonInitializedVariable) { /* NOLINT */
@@ -497,8 +486,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, varAssignm_previouslyDeclaredNonI
   // check that the statement VarDecl and its children are deleted
   EXPECT_EQ(function->getBody()->getStatements().size(), 0);
 
-  // check that at the end of the evaluation traversal, the removableNodes map is empty
-  EXPECT_EQ(ctes.removableNodes.size(), 0);
+
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, varAssignm_assignmentToParameter) { /* NOLINT */
@@ -526,8 +514,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, varAssignm_assignmentToParameter)
   // check that the statement VarDecl and its children are deleted
   EXPECT_EQ(function->getBody()->getStatements().size(), 0);
 
-  // check that at the end of the evaluation traversal, the removableNodes map is empty
-  EXPECT_EQ(ctes.removableNodes.size(), 0);
+
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture,  /* NOLINT */
@@ -585,8 +572,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture,  /* NOLINT */
   EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
   EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedAst));
 
-  // check that at the end of the evaluation traversal, the removableNodes map is empty
-  EXPECT_EQ(ctes.removableNodes.size(), 0);
+
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, return_literalOnly_expectedNoChange) { /* NOLINT */
@@ -609,8 +595,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, return_literalOnly_expectedNoChan
   auto numberOfNodesBeforeSimplification = ast.getAllNodes().size();
   EXPECT_EQ(numberOfNodesBeforeSimplification, ast.getAllNodes().size());
 
-  // check that at the end of the evaluation traversal, the removableNodes map is empty
-  EXPECT_EQ(ctes.removableNodes.size(), 0);
+
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture,  /* NOLINT */
@@ -645,8 +630,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture,  /* NOLINT */
   ASSERT_NE(newLiteralIntNode, nullptr);
   EXPECT_EQ(newLiteralIntNode->getValue(), 23);
 
-  // check that at the end of the evaluation traversal, the removableNodes map is empty
-  EXPECT_EQ(ctes.removableNodes.size(), 0);
+
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
@@ -684,8 +668,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   ASSERT_NE(newLiteralIntNode, nullptr);
   EXPECT_EQ(newLiteralIntNode->getValue(), 122);
 
-  // check that at the end of the evaluation traversal, the removableNodes map is empty
-  EXPECT_EQ(ctes.removableNodes.size(), 0);
+
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, return_variableUnknown_expectedNoChange) { /* NOLINT */
@@ -714,8 +697,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, return_variableUnknown_expectedNo
   // check that 'b' remains unknown
   EXPECT_THROW(getVariableValueByUniqueName("b"), std::logic_error);
 
-  // check that at the end of the evaluation traversal, the removableNodes map is empty
-  EXPECT_EQ(ctes.removableNodes.size(), 0);
+
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, return_multipleReturnValues_expectedPartlyEvaluation) { /* NOLINT */
@@ -769,8 +751,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, return_multipleReturnValues_expec
   // check return expression 3: 21
   EXPECT_TRUE(returnStatement->getReturnExpressions().at(2)->isEqual(new LiteralInt(21)));
 
-  // check that at the end of the evaluation traversal, the removableNodes map is empty
-  EXPECT_EQ(ctes.removableNodes.size(), 0);
+
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
@@ -829,8 +810,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   // check that the return value is the expected one
   EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(new LiteralInt(32'768)));
 
-  // check that at the end of the evaluation traversal, the removableNodes map is empty
-  EXPECT_EQ(ctes.removableNodes.size(), 0);
+
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
@@ -892,8 +872,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   // check that the return value is the expected one
   EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(new LiteralInt(32'768)));
 
-  // check that at the end of the evaluation traversal, the removableNodes map is empty
-  EXPECT_EQ(ctes.removableNodes.size(), 0);
+
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
@@ -957,8 +936,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   // check that the return value is the expected one
   EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(new LiteralInt(32)));
 
-  // check that at the end of the evaluation traversal, the removableNodes map is empty
-  EXPECT_EQ(ctes.removableNodes.size(), 0);
+
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
@@ -1027,8 +1005,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   // check that 'b' was memorized correctly
   EXPECT_TRUE(getVariableValueByUniqueName("b")->isEqual(expectedResult));
 
-  // check that at the end of the evaluation traversal, the removableNodes map is empty
-  EXPECT_EQ(ctes.removableNodes.size(), 0);
+
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
@@ -1096,8 +1073,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   // variable 'c' is not expected to be memorized because it's declared in the Then-branch only
   EXPECT_THROW(getVariableValueByUniqueName("c"), std::logic_error);
 
-  // check that at the end of the evaluation traversal, the removableNodes map is empty
-  EXPECT_EQ(ctes.removableNodes.size(), 0);
+
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
@@ -1169,8 +1145,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   // check that 'b' was memorized correctly
   EXPECT_TRUE(getVariableValueByUniqueName("b")->isEqual(expectedResult));
 
-  // check that at the end of the evaluation traversal, the removableNodes map is empty
-  EXPECT_EQ(ctes.removableNodes.size(), 0);
+
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
@@ -1240,8 +1215,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   // check that 'b' was memorized correctly
   EXPECT_TRUE(getVariableValueByUniqueName("b")->isEqual(expectedResult));
 
-  // check that at the end of the evaluation traversal, the removableNodes map is empty
-  EXPECT_EQ(ctes.removableNodes.size(), 0);
+
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
@@ -1346,8 +1320,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   // check that 'b' was memorized correctly
   EXPECT_TRUE(getVariableValueByUniqueName("b")->isEqual(expectedResult));
 
-  // check that at the end of the evaluation traversal, the removableNodes map is empty
-  EXPECT_EQ(ctes.removableNodes.size(), 0);
+
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_partiallyEvaluableOnly) { /* NOLINT */
@@ -1386,8 +1359,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_partiallyEvaluableO
   EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
   EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
 
-  // check that at the end of the evaluation traversal, the removableNodes map is empty
-  EXPECT_EQ(ctes.removableNodes.size(), 0);
+
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_includingOperatorExprs) { /* NOLINT */
@@ -1438,8 +1410,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_includingOperatorEx
   EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
   EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
 
-  // check that at the end of the evaluation traversal, the removableNodes map is empty
-  EXPECT_EQ(ctes.removableNodes.size(), 0);
+
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_nestedDivisionOperator) { /* NOLINT */
@@ -1480,8 +1451,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_nestedDivisionOpera
   EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
   EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
 
-  // check that at the end of the evaluation traversal, the removableNodes map is empty
-  EXPECT_EQ(ctes.removableNodes.size(), 0);
+
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_nestedOperatorsSimplifiableOnOneSideOnly) { /* NOLINT */
@@ -1521,8 +1491,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_nestedOperatorsSimp
   EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
   EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
 
-  // check that at the end of the evaluation traversal, the removableNodes map is empty
-  EXPECT_EQ(ctes.removableNodes.size(), 0);
+
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_nestedLogicalOperators) { /* NOLINT */
@@ -1568,8 +1537,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_nestedLogicalOperat
   EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
   EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
 
-  // check that at the end of the evaluation traversal, the removableNodes map is empty
-  EXPECT_EQ(ctes.removableNodes.size(), 0);
+
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_logicalAndSimplification_ANDtrue) { /* NOLINT */
