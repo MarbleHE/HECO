@@ -286,7 +286,7 @@ void CompileTimeExpressionSimplifier::visit(LiteralFloat &elem) {
 void CompileTimeExpressionSimplifier::visit(Variable &elem) {
   // Variables have no AbstractNode children, so this should do nothing
   Visitor::visit(elem);
-  
+
   // TODO: Introduce a depth threshold (#nodes) to stop inlining if a variable's symbolic value reached a certain depth.
   // if we know the variable's value (i.e., its value is either any subtype of AbstractLiteral or an AbstractExpr if
   // this is a symbolic value that defines on other variables), we can replace this variable node by its value
@@ -311,7 +311,7 @@ void CompileTimeExpressionSimplifier::visit(VarDecl &elem) {
   }
   // store the variable's value
   addDeclaredVariable(elem.getIdentifier(), elem.getDatatype(), variableValue);
-  
+
   // we no longer need this node or its children, since the value is now in the variableValues map
   enqueueNodeForDeletion(&elem);
 }
@@ -1287,10 +1287,9 @@ void CompileTimeExpressionSimplifier::setVariableValue(const std::string &variab
 
   // find the scope this variable was declared in
   auto iterator = getVariableEntryDeclaredInThisOrOuterScope(variableIdentifier);
-  // If no scope could be found, this variable cannot be saved. As For-loop unrolling currently makes use of the fact
-  // that unknown variables are not replaced, we should not throw any exception here. Maybe the For-loop's case can
-  // be handled by using the replaceVariableByValues(=False) flag instead?
-  if (iterator==variableValues.end()) return;
+  if (iterator==variableValues.end()) {
+    throw std::runtime_error("Cannot assign to a variable that was not declared previously.");
+  }
 
   Scope *varDeclScope = iterator->first.second;
 
