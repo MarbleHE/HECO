@@ -1,5 +1,5 @@
-find_path(SEAL_INCLUDE_DIR NAMES seal/seal.h PATH_SUFFIXES SEAL-3.4)
-find_library(SEAL_LIBRARY NAMES seal seal-3.4)
+find_path(SEAL_INCLUDE_DIR NAMES seal/seal.h PATH_SUFFIXES SEAL-3.5)
+find_library(SEAL_LIBRARY NAMES seal seal-3.5)
 
 
 set(SEAL_INCLUDE_DIRS ${SEAL_INCLUDE_DIR})
