@@ -518,7 +518,7 @@ void ControlFlowGraphVisitor::buildDataFlowGraph() {
     auto w = n->getVariables(AccessType::WRITE);
     std::copy(w.begin(), w.end(), std::back_inserter(written));
     auto r = n->getVariables(AccessType::READ);
-    std::copy(w.begin(), w.end(), std::back_inserter(written));
+    std::copy(r.begin(), r.end(), std::back_inserter(read));
   }
   // determine the variables that were read and written (must be both!)
   std::sort(written.begin(), written.end());
