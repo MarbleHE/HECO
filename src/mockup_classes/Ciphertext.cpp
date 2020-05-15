@@ -47,7 +47,7 @@ void setup_context(std::shared_ptr<seal::SEALContext> &context,
 
     secretKey = std::make_unique<seal::SecretKey>(keyGenerator.secret_key());
     publicKey = std::make_unique<seal::PublicKey>(keyGenerator.public_key());
-    galoisKeys = std::make_unique<seal::GaloisKeys>(keyGenerator.galois_keys());
+    galoisKeys = std::make_unique<seal::GaloisKeys>(keyGenerator.galois_keys_local());
   }
 }
 #endif
