@@ -805,6 +805,8 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
 
   // We need to emit VariableDeclarations for each of these Variables into the initializer (because of next step)
   emitVariableAssignments(loopVariables, variableValues); //TODO: Needs to emit into initializer
+  //TODO: What if the scope that VarDecls should go into is e.g. our caller's elem? ITERATOR INVALIDATION!!!
+
   // The values of loop variables we got from the initializer should not be substituted inside the loop
   // Since they will be different in each iteration, CTES should treat them as "compile time unknown"
   // Therefore, we need to remove their values from the variableValues map
@@ -1432,6 +1434,7 @@ void CompileTimeExpressionSimplifier::visit(AbstractMatrix &elem) {
 //TODO: Make emit... functions more robust and add support for For-loop
 //TODO: See visitor for for, need to fix issue that we cannot emit VarDecls into for loop scope
 // Ok, we CAN just emit into initializer!
+//TODO: What about function parameters?
 void CompileTimeExpressionSimplifier::emitVariableDeclaration(VariableValuesMapType::iterator variableToEmit) {
   auto parent = variableToEmit->first.second->getScopeOpener();
   auto children = parent->getChildren();
@@ -1474,6 +1477,9 @@ VarAssignm *CompileTimeExpressionSimplifier::emitVariableAssignment(VariableValu
   return newVarAssignm;
 }
 
+//TODO: We have a big issue when emitting multiple assignments at the same time
+// They need to all be "next to" each other rather than "underneath" each other in the program!!
+// circular dependency 
 void CompileTimeExpressionSimplifier::emitVariableAssignments(std::set<ScopedVariable> variables,
                                                               VariableValuesMapType variableValues) {
   for (auto &v : variables) {
@@ -1515,5 +1521,9 @@ void CompileTimeExpressionSimplifier::leftForLoop() {
 
 void CompileTimeExpressionSimplifier::enteredForLoop() {
   ++currentLoopDepth_maxLoopDepth.first;
-  ++currentLoopDepth_maxLoopDepth.second;
+  // Only increase the maximum if we're currently in the deepest level
+  // Otherwise, things like for() { for() {}; ...; for() {}; } would give wrong level
+  if (currentLoopDepth_maxLoopDepth.first == currentLoopDepth_maxLoopDepth.second) {
+    ++currentLoopDepth_maxLoopDepth.second;
+  }
 }
