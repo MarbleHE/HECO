@@ -2653,6 +2653,14 @@ TEST_F(CompileTimeExpressionSimplifierFixture, fourNestedLoopsLaplacianSharpenin
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, trivialLoop) { /* NOLINT */
+
+  //  int trivialLoop() {
+  //    int x = 0;
+  //    for(int i = 0; i < 3; i = i + 1) {
+  //      x = 42;
+  //    }
+  //    return x;
+  //  }
   Ast ast;
   auto function = new Function("trivialLoop");
   auto loop = new For(new VarDecl("i", Types::INT, new LiteralInt(0)),
@@ -2669,10 +2677,12 @@ TEST_F(CompileTimeExpressionSimplifierFixture, trivialLoop) { /* NOLINT */
   function->addStatement(returnStmt);
   ast.setRootNode(function);
 
+  PrintVisitor p;
+  p.visit(ast);
+
   // perform the compile-time expression simplification
   ctes.visit(ast);
 
-  PrintVisitor p;
   p.visit(ast);
 
   auto expectedFunc = new Function("trivialLoop");
