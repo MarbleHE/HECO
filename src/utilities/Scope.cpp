@@ -2,12 +2,13 @@
 #include <utility>
 #include "ast_opt/utilities/Scope.h"
 #include "ast_opt/ast/VarDecl.h"
+#include "ast_opt/ast/For.h"
+#include "ast_opt/ast/Block.h"
 
 Scope::Scope(std::string scopeIdentifier, AbstractNode *scopeOpener, Scope *outerScope)
     : scopeIdentifier(std::move(scopeIdentifier)), scopeOpener(scopeOpener), outerScope(outerScope) {
 
 }
-
 
 Scope *Scope::getOuterScope() const {
   return outerScope;
@@ -33,7 +34,13 @@ Scope *Scope::getOrCreateInnerScope(const std::string &identifier, AbstractNode 
     return sc;
   } else {
     // create and return new scope
-    auto *newScope = new Scope(identifier, statement, this);
+    Scope *newScope;
+    // for loops (for, while), the scope opener should be the initializer
+    if (auto forstmt = dynamic_cast<For *>(statement)) {
+      newScope = new Scope(identifier, forstmt->getInitializer(), this);
+    } else {
+      newScope = new Scope(identifier, statement, this);
+    }
     this->innerScopes.insert({identifier, newScope});
     return newScope;
   }

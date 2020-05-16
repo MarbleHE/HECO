@@ -1438,6 +1438,7 @@ void CompileTimeExpressionSimplifier::visit(AbstractMatrix &elem) {
 //TODO: See visitor for for, need to fix issue that we cannot emit VarDecls into for loop scope
 // Ok, we CAN just emit into initializer!
 //TODO: What about function parameters?
+//TODO: What if the scope that VarDecls should go into is e.g. our caller's elem? ITERATOR INVALIDATION!!!
 void CompileTimeExpressionSimplifier::emitVariableDeclaration(VariableValuesMapType::iterator variableToEmit) {
   auto parent = variableToEmit->first.second->getScopeOpener();
   auto children = parent->getChildren();
@@ -1459,7 +1460,6 @@ void CompileTimeExpressionSimplifier::emitVariableDeclaration(VariableValuesMapT
   emittedVariableDeclarations.emplace(variableToEmit->first, new EmittedVariableData(newVarDeclaration));
 }
 
-//TODO: What if the scope that VarDecls should go into is e.g. our caller's elem? ITERATOR INVALIDATION!!!
 std::set<VarAssignm *> CompileTimeExpressionSimplifier::emitVariableAssignment(VariableValuesMapType::iterator variableToEmit) {
   std::set<VarAssignm *> result;
 
