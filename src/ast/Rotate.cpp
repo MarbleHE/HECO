@@ -76,3 +76,19 @@ bool Rotate::isOneDimensionalVector(AbstractExpr *operand) {
   }
   return false;
 }
+std::vector<std::string> Rotate::getVariableIdentifiers() {
+  auto results = getOperand()->getVariableIdentifiers();
+  auto vec = getRotationFactor()->getVariableIdentifiers();
+  if (!vec.empty()) {
+    results.insert(results.end(), vec.begin(), vec.end());
+  }
+  return results;
+}
+std::vector<Variable *> Rotate::getVariables() {
+  auto results = getOperand()->getVariables();
+  auto vec = getRotationFactor()->getVariables();
+  if (!vec.empty()) {
+    results.insert(results.end(), vec.begin(), vec.end());
+  }
+  return results;
+}

@@ -67,3 +67,24 @@ bool Call::supportsCircuitMode() {
 ParameterList *Call::getParameterList() const {
   return dynamic_cast<ParameterList *>(getChildAtIndex(0));
 }
+std::vector<std::string> Call::getVariableIdentifiers() {
+  std::vector<std::string> results;
+  for(auto &fp : getArguments()) {
+    auto vec = fp->getVariableIdentifiers();
+    if(!vec.empty()) {
+      results.insert(results.end(), vec.begin(), vec.end());
+    }
+  }
+  return results;
+}
+
+std::vector<Variable *> Call::getVariables() {
+  std::vector<Variable*> results;
+  for(auto &fp : getArguments()) {
+    auto vec = fp->getVariables();
+    if(!vec.empty()) {
+      results.insert(results.end(), vec.begin(), vec.end());
+    }
+  }
+  return results;
+}

@@ -39,6 +39,8 @@ class FunctionParameter : public AbstractExpr {
 
   std::vector<std::string> getVariableIdentifiers() override;
 
+  std::vector<Variable *> getVariables() override;
+
   [[nodiscard]] std::string toString(bool printChildren) const override;
 };
 

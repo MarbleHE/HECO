@@ -50,10 +50,6 @@ int AbstractExpr::countByTemplate(AbstractExpr *abstractExpr) {
   return 0;
 }
 
-std::vector<std::string> AbstractExpr::getVariableIdentifiers() {
-  return std::vector<std::string>();
-}
-
 AbstractNode *AbstractExpr::createParam(AbstractNode *node) {
   throw std::runtime_error(
       "Method AbstractNode::createParam does not support AbstractNode objects. Did you forget to cast the AbstractNode object?");

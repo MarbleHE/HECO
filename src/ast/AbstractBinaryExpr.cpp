@@ -41,6 +41,14 @@ std::vector<std::string> AbstractBinaryExpr::getVariableIdentifiers() {
   return leftVec;
 }
 
+std::vector<Variable *> AbstractBinaryExpr::getVariables() {
+  auto leftVec = getLeft()->getVariables();
+  auto rightVec = getRight()->getVariables();
+  leftVec.reserve(leftVec.size() + rightVec.size());
+  leftVec.insert(leftVec.end(), rightVec.begin(), rightVec.end());
+  return leftVec;
+}
+
 bool AbstractBinaryExpr::isEqual(AbstractExpr *other) {
   if (auto otherLexp = dynamic_cast<AbstractBinaryExpr *>(other)) {
     auto sameLeft = this->getLeft()->isEqual(otherLexp->getLeft());

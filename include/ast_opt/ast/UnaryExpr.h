@@ -29,6 +29,10 @@ class UnaryExpr : public AbstractExpr {
 
   bool isEqual(AbstractExpr *other) override;
 
+  std::vector<std::string> getVariableIdentifiers() override;
+
+  std::vector<Variable *> getVariables() override;
+
  protected:
   bool supportsCircuitMode() override;
 

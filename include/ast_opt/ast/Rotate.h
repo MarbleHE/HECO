@@ -41,6 +41,10 @@ class Rotate : public AbstractExpr {
   void setAttributes(AbstractExpr *pExpr, AbstractExpr *rotationFactor);
 
   static bool isOneDimensionalVector(AbstractExpr *operand);
+
+  std::vector<std::string> getVariableIdentifiers() override;
+
+  std::vector<Variable *> getVariables() override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_ROTATE_H_

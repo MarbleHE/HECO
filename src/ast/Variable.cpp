@@ -46,6 +46,10 @@ std::vector<std::string> Variable::getVariableIdentifiers() {
   return {getIdentifier()};
 }
 
+std::vector<Variable *> Variable::getVariables() {
+  return {this};
+}
+
 std::string Variable::toString(bool printChildren) const {
   return AbstractNode::generateOutputString(printChildren, {getIdentifier()});
 }

@@ -52,6 +52,10 @@ class OperatorExpr : public AbstractExpr {
   bool isEqual(AbstractExpr *other) override;
 
   void replaceChild(AbstractNode *originalChild, AbstractNode *newChildToBeAdded) override;
+
+  std::vector<std::string> getVariableIdentifiers() override;
+
+  std::vector<Variable *> getVariables() override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_OPERATOREXPR_H_

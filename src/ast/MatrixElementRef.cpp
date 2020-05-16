@@ -78,6 +78,17 @@ std::vector<std::string> MatrixElementRef::getVariableIdentifiers() {
   return resultVec;
 }
 
+std::vector<Variable *> MatrixElementRef::getVariables() {
+  std::vector<Variable*> resultVec;
+  auto insertIfNonEmpty = [&resultVec](std::vector<Variable*> vec) {
+    if (!vec.empty()) resultVec.insert(resultVec.end(), vec.begin(), vec.end());
+  };
+  insertIfNonEmpty(getOperand()->getVariables());
+  insertIfNonEmpty(getRowIndex()->getVariables());
+  insertIfNonEmpty(getColumnIndex()->getVariables());
+  return resultVec;
+}
+
 bool MatrixElementRef::contains(Variable *var) {
   auto vars = getVariableIdentifiers();
   return std::count(vars.begin(), vars.end(), var->getIdentifier()) > 0;

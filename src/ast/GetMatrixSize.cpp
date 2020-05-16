@@ -47,6 +47,23 @@ GetMatrixSize::GetMatrixSize(AbstractExpr *matrix, AbstractExpr *requestedDimens
   removeChildren();
   addChildren({matrix, requestedDimension}, true);
 }
+std::vector<std::string> GetMatrixSize::getVariableIdentifiers() {
+  auto results = getMatrixOperand()->getVariableIdentifiers();
+  auto vec = getDimensionParameter()->getVariableIdentifiers();
+  if (!vec.empty()) {
+    results.insert(results.end(), vec.begin(), vec.end());
+  }
+  return results;
+}
+
+std::vector<Variable *> GetMatrixSize::getVariables() {
+  auto results = getMatrixOperand()->getVariables();
+  auto vec = getDimensionParameter()->getVariables();
+  if (!vec.empty()) {
+    results.insert(results.end(), vec.begin(), vec.end());
+  }
+  return results;
+}
 
 AbstractExpr *GetMatrixSize::getMatrixOperand() const {
   return dynamic_cast<AbstractExpr *>(getChildAtIndex(0));

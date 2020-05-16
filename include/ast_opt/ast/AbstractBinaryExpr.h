@@ -30,6 +30,8 @@ class AbstractBinaryExpr : public AbstractExpr {
   bool isEqual(AbstractExpr *other) override;
 
   static void swapOperandsLeftAWithRightB(AbstractBinaryExpr *aexpA, AbstractBinaryExpr *aexpB);
+
+  std::vector<Variable *> getVariables() override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_ABSTRACTBINARYEXPR_H_

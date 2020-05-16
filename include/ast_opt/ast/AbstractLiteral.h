@@ -49,6 +49,10 @@ class AbstractLiteral : public AbstractExpr {
   /// \param dt A pointer to a Datatype object.
   /// \return The created AbstractLiteral subtype instance.
   static AbstractLiteral *createLiteralBasedOnDatatype(Datatype *dt);
+
+  std::vector<std::string> getVariableIdentifiers() override;
+  std::vector<Variable *> getVariables() override;
+
 };
 
 inline std::ostream &operator<<(std::ostream &os, const std::vector<AbstractLiteral *> &v) {

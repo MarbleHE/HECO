@@ -290,9 +290,8 @@ void CompileTimeExpressionSimplifier::visit(Variable &elem) {
   // TODO: Introduce a depth threshold (#nodes) to stop inlining if a variable's symbolic value reached a certain depth.
   // if we know the variable's value (i.e., its value is either any subtype of AbstractLiteral or an AbstractExpr if
   // this is a symbolic value that defines on other variables), we can replace this variable node by its value
-  if (hasKnownValue(&elem)) {
-    auto newValue = getKnownValue(&elem);
-    if (!elem.getParentsNonNull().empty()) elem.getOnlyParent()->replaceChild(&elem, newValue);
+  if (auto value = getVariableValueDeclaredInThisOrOuterScope(elem.getIdentifier())) {
+    if (!elem.getParentsNonNull().empty()) elem.getOnlyParent()->replaceChild(&elem, value->clone(false));
   }
 }
 

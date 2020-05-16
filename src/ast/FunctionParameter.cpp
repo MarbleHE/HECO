@@ -52,7 +52,9 @@ Datatype *FunctionParameter::getDatatype() const {
 std::vector<std::string> FunctionParameter::getVariableIdentifiers() {
   return getValue()->getVariableIdentifiers();
 }
-
+std::vector<Variable *> FunctionParameter::getVariables() {
+  return getValue()->getVariables();
+}
 FunctionParameter *FunctionParameter::clone(bool keepOriginalUniqueNodeId) {
   auto clonedNode = new FunctionParameter(this->getDatatype()->clone(keepOriginalUniqueNodeId)->castTo<Datatype>(),
                                           this->getValue()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());

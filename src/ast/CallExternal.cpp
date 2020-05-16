@@ -42,6 +42,27 @@ AbstractNode *CallExternal::clone(bool keepOriginalUniqueNodeId) {
   auto clonedCallExt = new CallExternal(getFunctionName(), args);
   return clonedCallExt;
 }
+std::vector<std::string> CallExternal::getVariableIdentifiers() {
+  std::vector<std::string> results;
+  for (auto &fp : getArguments()) {
+    auto vec = fp->getVariableIdentifiers();
+    if (!vec.empty()) {
+      results.insert(results.end(), vec.begin(), vec.end());
+    }
+  }
+  return results;
+}
+
+std::vector<Variable *> CallExternal::getVariables() {
+  std::vector<Variable*> results;
+  for (auto &fp : getArguments()) {
+    auto vec = fp->getVariables();
+    if (!vec.empty()) {
+      results.insert(results.end(), vec.begin(), vec.end());
+    }
+  }
+  return results;
+}
 
 const std::vector<FunctionParameter *> &CallExternal::getArguments() const {
   return arguments;

@@ -39,6 +39,7 @@ class Variable : public AbstractExpr {
   [[nodiscard]] std::string toString(bool printChildren) const override;
 
   bool supportsCircuitMode() override;
+  std::vector<Variable *> getVariables() override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_VARIABLE_H_

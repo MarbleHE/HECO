@@ -26,6 +26,8 @@ class MatrixElementRef : public AbstractExpr {
 
   std::vector<std::string> getVariableIdentifiers() override;
 
+  std::vector<Variable *> getVariables() override;
+
   bool contains(Variable *var) override;
 
   bool isEqual(AbstractExpr *other) override;

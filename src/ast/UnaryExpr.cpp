@@ -69,3 +69,10 @@ bool UnaryExpr::isEqual(AbstractExpr *other) {
 std::string UnaryExpr::toString(bool printChildren) const {
   return AbstractNode::generateOutputString(printChildren, {});
 }
+std::vector<std::string> UnaryExpr::getVariableIdentifiers() {
+  return getRight()->getVariableIdentifiers();
+}
+
+std::vector<Variable *> UnaryExpr::getVariables() {
+  return getRight()->getVariables();
+}

@@ -20,6 +20,8 @@ class Transpose : public AbstractExpr {
   [[nodiscard]] json toJson() const override;
 
   std::vector<std::string> getVariableIdentifiers() override;
+  
+  std::vector<Variable *> getVariables() override;
 
   bool contains(Variable *var) override;
 

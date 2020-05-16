@@ -34,6 +34,11 @@ std::vector<std::string> Transpose::getVariableIdentifiers() {
   return getOperand()->getVariableIdentifiers();
 }
 
+std::vector<Variable *> Transpose::getVariables() {
+  return getOperand()->getVariables();
+}
+
+
 bool Transpose::contains(Variable *var) {
   return getOperand()->contains(var);
 }
@@ -57,5 +62,4 @@ AbstractNode *Transpose::cloneFlat() {
 bool Transpose::supportsCircuitMode() {
   return true;
 }
-
 Transpose::Transpose() = default;

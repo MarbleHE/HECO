@@ -33,7 +33,9 @@ class AbstractExpr : public AbstractNode {
 
   virtual int countByTemplate(AbstractExpr *abstractExpr);
 
-  virtual std::vector<std::string> getVariableIdentifiers();
+  virtual std::vector<std::string> getVariableIdentifiers() = 0;
+
+  virtual std::vector<Variable*> getVariables()  = 0;
 
   virtual bool contains(Variable *var);
 

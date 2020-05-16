@@ -49,3 +49,12 @@ AbstractLiteral *AbstractLiteral::createLiteralBasedOnDatatype(Datatype *dt) {
 }
 
 AbstractLiteral::AbstractLiteral(AbstractMatrix *matrix) : matrix(matrix) {}
+std::vector<std::string> AbstractLiteral::getVariableIdentifiers() {
+  // Literals never contain Variables
+  return std::vector<std::string>();
+}
+
+std::vector<Variable *> AbstractLiteral::getVariables() {
+  // Literals never contain Variables
+  return std::vector<Variable *>();
+}
