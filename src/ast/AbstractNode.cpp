@@ -100,30 +100,30 @@ void AbstractNode::addChildren(const std::vector<AbstractNode *> &childrenToAdd,
     if (addBackReference && childToAdd!=nullptr) childToAdd->addParent(this, false);
   };
 
-  if (getChildren().empty() || allowsInfiniteNumberOfChildren) {
-    // if the children list is empty or the node type supports an unlimited number of children, then add all nodes in
-    // one batch to the children vector's end
-    children.insert(insertPosition, childrenToAdd.begin(), childrenToAdd.end());
-    std::for_each(childrenToAdd.begin(), childrenToAdd.end(), doInsertPostAction);
-    // if this nodes accepts an infinite number of children, pre-filling the slots does not make any sense -> skip it
-    if (getMaxNumberChildren()!=-1) {
-      // fill remaining slots with nullptr values
-      children.insert(children.end(), getMaxNumberChildren() - getChildren().size(), nullptr);
+  // if this nodes accepts an infinite number of children, pre-filling the slots does not make any sense -> skip it
+  if (getMaxNumberChildren()!=-1) {
+    // fill remaining slots with nullptr values
+    children.insert(children.end(), getMaxNumberChildren() - getChildren().size(), nullptr);
+  }
+
+  // add the children one-by-one by looking for free slots
+  size_t childIdx = 0;
+  size_t idx = 0;
+  // add child in first empty spot
+  while (idx < children.size() && childIdx < childrenToAdd.size()) {
+    if (children.at(idx)==nullptr) {
+      children.at(idx) = childrenToAdd.at(childIdx);// insert the new child
+      doInsertPostAction(children.at(idx));
+      childIdx++;
     }
-  } else {  // otherwise we need to add the children one-by-one by looking for free slots
-    size_t childIdx = 0;
-    size_t idx = 0;
-    // add child in first empty spot
-    while (idx < children.size() && childIdx < childrenToAdd.size()) {
-      if (children.at(idx)==nullptr) {
-        children.at(idx) = childrenToAdd.at(childIdx);// insert the new child
-        doInsertPostAction(children.at(idx));
-        childIdx++;
-      }
-      idx++;
-    }
-    // check if we were able to add all children, otherwise throw an exception
-    if (childIdx!=childrenToAdd.size()) {
+    idx++;
+  }
+  if (childIdx!=childrenToAdd.size()) {
+    if (allowsInfiniteNumberOfChildren) {
+      // then add all remaining nodes in one batch to the children vector's end
+      children.insert(insertPosition, childrenToAdd.begin() + childIdx, childrenToAdd.end());
+      std::for_each(childrenToAdd.begin(), childrenToAdd.end(), doInsertPostAction);
+    } else {
       throw std::logic_error("Cannot add one or multiple children to " + this->getUniqueNodeId()
                                  + " without overwriting an existing one. Consider removing an existing child first.");
     }
