@@ -179,8 +179,13 @@ void CompileTimeExpressionSimplifier::visit(MatrixAssignm &elem) {
       auto varAssignm = emitVariableAssignment(
           getVariableEntryDeclaredInThisOrOuterScope(operandAsVariable->getIdentifier()));
 
+      //TODO: THIS CAUSES ITERATOR INVALIDATION ISSUES!!
+      //  INSTEAD: REPLACE CURRENT ELEM WITH NEW BLOCK, LET PARENT DEAL WITH INLINING
       // and attach the assignment statement immediately before this MatrixAssignm
-      elem.getOnlyParent()->addChildren({varAssignm}, true, &elem);
+      for (auto &s: varAssignm) {
+        elem.getOnlyParent()->addChild(s, true);
+      }
+
 
       // and remove the value in variableValues map to avoid saving any further assignments
       variableValues[var->first] = nullptr;
@@ -803,8 +808,7 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
   auto loopVariables = identifyReadWriteVariables(elem, variableValues);
 
   // We need to emit VariableDeclarations for each of these Variables into the initializer (because of next step)
-  emitVariableAssignments(loopVariables, variableValues); //TODO: Needs to emit into initializer
-  //TODO: What if the scope that VarDecls should go into is e.g. our caller's elem? ITERATOR INVALIDATION!!!
+  emitVariableAssignments(loopVariables, variableValues);
 
   // The values of loop variables we got from the initializer should not be substituted inside the loop
   // Since they will be different in each iteration, CTES should treat them as "compile time unknown"
@@ -1455,9 +1459,12 @@ void CompileTimeExpressionSimplifier::emitVariableDeclaration(VariableValuesMapT
   emittedVariableDeclarations.emplace(variableToEmit->first, new EmittedVariableData(newVarDeclaration));
 }
 
-VarAssignm *CompileTimeExpressionSimplifier::emitVariableAssignment(VariableValuesMapType::iterator variableToEmit) {
+//TODO: What if the scope that VarDecls should go into is e.g. our caller's elem? ITERATOR INVALIDATION!!!
+std::set<VarAssignm *> CompileTimeExpressionSimplifier::emitVariableAssignment(VariableValuesMapType::iterator variableToEmit) {
+  std::set<VarAssignm *> result;
+
   // if the variable has no value, there's no need to create a variable assignment
-  if (variableToEmit->second->value==nullptr) return nullptr;
+  if (variableToEmit->second->value==nullptr) return result;
 
   // check if a variable declaration statement was emitted before for this variable
   if (emittedVariableDeclarations.count(variableToEmit->first)==0) {
@@ -1479,20 +1486,52 @@ VarAssignm *CompileTimeExpressionSimplifier::emitVariableAssignment(VariableValu
   // After visiting and removing these statements, something like the following is saved in variableValues:
   // [a, OpExp(+,Var(b),"1")], [b, OpExp(+, OpExp(+,Var(b),"1"), "2")]
   //
-  // Now, if we where to emit assignments for these two statements in the "wrong" order, this would happen f
+  // Now, if we where to emit assignments for these two statements in the "wrong" order, this would happen:
   // foo(0,10):
   //    b = (b + 1) + 2;  //b = (10 + 1) + 2 = 13 (correct)
   //    a = b + 1;        //a = 13 + 1 = 14 (incorrect!!)
   //
   // The issue is, that the Variable(..) expressions occurring in the expression stored in VariableValues
-  // refer to the values of the variables *before* the variables are updated
+  // refer to the values of the variables as they are *before* the variables are updated by the emitted assignment.
   //
   // Therefore, whenever we emit a variable, we must check if it is used inside other VariableValues expressions
   // If yes, we emit a temporary variable to hold the "pre-emit" value, e.g. "int temp_b = b;"
   // before we emit the actual assignment (e.g. "b = b + 3;")
   // Inside the expressions in VariableValues that used Var(b), we then replace this occurrence with Var(temp_b)
 
-  //TODO: TEMP VARS
+  // Find occurrences of this variable in other variable's values in the VariableValues map
+  ScopedVariable scopedVariableToEmit = variableToEmit->first;
+  std::vector<Variable *> occurrences;
+  for (auto it = variableValues.begin(); it!=variableValues.end(); ++it) {
+    if (it!=variableToEmit && it->second->value!=nullptr) {
+      for (auto &v: it->second->value->getVariables()) {
+        if (v->getIdentifier()==scopedVariableToEmit.first) {
+          occurrences.push_back(v);
+        }
+      }
+    }
+  }
+
+  // Emit a new temporary variable and replace occurrences
+  if (!occurrences.empty()) {
+    // Create a unique name - currently uses one of the to-be-replaced-nodes unique IDs for uniqueness
+    std::string temp_id = "temp_" + occurrences[0]->getUniqueNodeId();
+
+    // add to variableValues and emit
+    auto sv = std::make_pair(temp_id, curScope);
+    auto vv = new VariableValue(*variableToEmit->second);
+    variableValues.insert(std::make_pair(sv, vv));
+    auto it = variableValues.find(sv);
+    auto new_assignments = emitVariableAssignment(it);
+    result.insert(new_assignments.begin(), new_assignments.end());
+
+    // replace all occurrences with a new Var(temp_...) node
+    for (auto &o: occurrences) {
+      auto p = o->getOnlyParent();
+      auto n = new Variable(temp_id);
+      p->replaceChild(o, n);
+    }
+  }
 
   auto newVarAssignm = new VarAssignm(variableToEmit->first.first,
                                       variableToEmit->second->value->clone(false)->castTo<AbstractExpr>());
@@ -1500,17 +1539,21 @@ VarAssignm *CompileTimeExpressionSimplifier::emitVariableAssignment(VariableValu
   emittedVariableDeclarations.at(variableToEmit->first)->addVarAssignm(newVarAssignm);
   // add a reference to link from this VarAssignm to the associated VarDecl
   emittedVariableAssignms[newVarAssignm] = emittedVariableDeclarations.find(variableToEmit->first);
-  return newVarAssignm;
+  result.insert(newVarAssignm);
+  return result;
 }
 
-void CompileTimeExpressionSimplifier::emitVariableAssignments(std::set<ScopedVariable> variables,
-                                                              VariableValuesMapType variableValues) {
+std::set<VarAssignm *> CompileTimeExpressionSimplifier::emitVariableAssignments(std::set<ScopedVariable> variables,
+                                                                                VariableValuesMapType variableValues) {
+  std::set<VarAssignm *> result;
   for (auto &v : variables) {
     auto it = variableValues.find(v);
     if (it!=variableValues.end()) {
-      emitVariableAssignment(it);
+      auto new_assignments = emitVariableAssignment(it);
+      result.insert(new_assignments.begin(), new_assignments.end());
     }
   }
+  return result;
 }
 
 VariableValuesMapType CompileTimeExpressionSimplifier::getClonedVariableValuesMap() {
