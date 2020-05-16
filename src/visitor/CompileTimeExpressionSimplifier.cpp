@@ -1468,6 +1468,33 @@ VarAssignm *CompileTimeExpressionSimplifier::emitVariableAssignment(VariableValu
     emitVariableDeclaration(variableToEmit);
   }
 
+  // When emitting Variable assignments, we must consider dependencies among variables!
+  //
+  // Consider a program like this:
+  // void foo(int a, int b) { //foo(0,10)
+  //    a = b + 1; // a = 10 + 1 = 11
+  //    b = a + 2; // b = 11 + 2 = 13
+  //    ...
+  // }
+  //
+  // After visiting and removing these statements, something like the following is saved in variableValues:
+  // [a, OpExp(+,Var(b),"1")], [b, OpExp(+, OpExp(+,Var(b),"1"), "2")]
+  //
+  // Now, if we where to emit assignments for these two statements in the "wrong" order, this would happen f
+  // foo(0,10):
+  //    b = (b + 1) + 2;  //b = (10 + 1) + 2 = 13 (correct)
+  //    a = b + 1;        //a = 13 + 1 = 14 (incorrect!!)
+  //
+  // The issue is, that the Variable(..) expressions occurring in the expression stored in VariableValues
+  // refer to the values of the variables *before* the variables are updated
+  //
+  // Therefore, whenever we emit a variable, we must check if it is used inside other VariableValues expressions
+  // If yes, we emit a temporary variable to hold the "pre-emit" value, e.g. "int temp_b = b;"
+  // before we emit the actual assignment (e.g. "b = b + 3;")
+  // Inside the expressions in VariableValues that used Var(b), we then replace this occurrence with Var(temp_b)
+
+  //TODO: TEMP VARS
+
   auto newVarAssignm = new VarAssignm(variableToEmit->first.first,
                                       variableToEmit->second->value->clone(false)->castTo<AbstractExpr>());
   // add a reference in the list of the associated VarDecl
@@ -1477,9 +1504,6 @@ VarAssignm *CompileTimeExpressionSimplifier::emitVariableAssignment(VariableValu
   return newVarAssignm;
 }
 
-//TODO: We have a big issue when emitting multiple assignments at the same time
-// They need to all be "next to" each other rather than "underneath" each other in the program!!
-// circular dependency 
 void CompileTimeExpressionSimplifier::emitVariableAssignments(std::set<ScopedVariable> variables,
                                                               VariableValuesMapType variableValues) {
   for (auto &v : variables) {
@@ -1523,7 +1547,7 @@ void CompileTimeExpressionSimplifier::enteredForLoop() {
   ++currentLoopDepth_maxLoopDepth.first;
   // Only increase the maximum if we're currently in the deepest level
   // Otherwise, things like for() { for() {}; ...; for() {}; } would give wrong level
-  if (currentLoopDepth_maxLoopDepth.first == currentLoopDepth_maxLoopDepth.second) {
+  if (currentLoopDepth_maxLoopDepth.first==currentLoopDepth_maxLoopDepth.second) {
     ++currentLoopDepth_maxLoopDepth.second;
   }
 }
