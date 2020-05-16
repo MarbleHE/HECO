@@ -114,28 +114,17 @@ void Visitor::visit(If &elem) {
   // consisting of multiple commands, we need in the following manually open a new scope
 
   // thenBranch
-  if (auto *thenBranch = dynamic_cast<Block *>(elem.getThenBranch())) {
-    thenBranch->accept(*this);
-  } else {
-    // if thenBranch is no Block we need to manually open a new scope here
-    auto thenNode = dynamic_cast<AbstractNode *>(elem.getThenBranch());
-    assert(thenNode!=nullptr); // this should never happen
-    changeToInnerScope(thenNode->getUniqueNodeId(), &elem);
+  if (elem.getThenBranch()!=nullptr) {
+    changeToInnerScope(elem.getThenBranch()->getUniqueNodeId(), &elem);
     elem.getThenBranch()->accept(*this);
     changeToOuterScope();
   }
 
+  // elseBranch
   if (elem.getElseBranch()!=nullptr) {
-    // elseBranch
-    if (auto *elseBranch = dynamic_cast<AbstractNode *>(elem.getElseBranch())) {
-      elem.getElseBranch()->accept(*this);
-    } else {
-      auto elseNode = dynamic_cast<AbstractNode *>(elem.getElseBranch());
-      assert(elseNode!=nullptr);
-      changeToInnerScope(elseBranch->getUniqueNodeId(), &elem);
-      elem.getElseBranch()->accept(*this);
-      changeToOuterScope();
-    }
+    changeToInnerScope(elem.getElseBranch()->getUniqueNodeId(), &elem);
+    elem.getElseBranch()->accept(*this);
+    changeToOuterScope();
   }
 }
 
@@ -179,7 +168,6 @@ void Visitor::visit(LogicalExpr &elem) {
   // right
   elem.getRight()->accept(*this);
 }
-
 
 //TODO: The scope logic does not seem to quite work for for-loops
 //      E.g. we really should have the scope be for elem

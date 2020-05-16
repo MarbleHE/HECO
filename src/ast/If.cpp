@@ -31,7 +31,7 @@ AbstractExpr *If::getCondition() const {
 }
 
 AbstractStatement *If::getThenBranch() const {
-  return getChildAtIndex(1)->castTo<AbstractStatement>();
+  return getChildAtIndex(1) ? getChildAtIndex(1)->castTo<AbstractStatement>() : nullptr;
 }
 
 AbstractStatement *If::getElseBranch() const {

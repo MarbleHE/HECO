@@ -924,7 +924,10 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   ast.setRootNode(function);
 
   // perform the compile-time expression simplification
+  PrintVisitor p;
+  p.visit(ast);
   ctes.visit(ast);
+  p.visit(ast);
 
   // check that 'a' was memorized correctly
   EXPECT_EQ(getVariableValueByUniqueName("a")->castTo<LiteralInt>()->getValue(), 1);

@@ -192,6 +192,7 @@ void CompileTimeExpressionSimplifier::visit(MatrixAssignm &elem) {
     }
   }
   if (enqueueNodeForDeletion_) {
+    elem.getOnlyParent()->replaceChild(&elem, nullptr);
     enqueueNodeForDeletion(&elem);
   }
 }
@@ -317,6 +318,7 @@ void CompileTimeExpressionSimplifier::visit(VarDecl &elem) {
   addDeclaredVariable(elem.getIdentifier(), elem.getDatatype(), variableValue);
 
   // we no longer need this node or its children, since the value is now in the variableValues map
+  elem.getOnlyParent()->replaceChild(&elem, nullptr);
   enqueueNodeForDeletion(&elem);
 }
 
@@ -324,6 +326,9 @@ void CompileTimeExpressionSimplifier::visit(VarAssignm &elem) {
   Visitor::visit(elem);
   // store the variable's value
   setVariableValue(elem.getVarTargetIdentifier(), elem.getValue());
+
+  // Delete this node
+  elem.getOnlyParent()->replaceChild(&elem, nullptr);
   enqueueNodeForDeletion(&elem);
 }
 
@@ -418,6 +423,7 @@ void CompileTimeExpressionSimplifier::visit(OperatorExpr &elem) {
         newOperands.push_back(operand->castTo<AbstractExpr>());
       }
       // mark the obsolete OperatorExpr child for deletion
+      elem.replaceChild(*it, nullptr);
       enqueueNodeForDeletion(*it);
     } else {
       // if this operand is not an OperatorExpr, we also need to remove it from this OperatorExpr because re-adding it
@@ -496,7 +502,6 @@ void CompileTimeExpressionSimplifier::simplifyLogicalExpr(OperatorExpr &elem) {
   }
 }
 
-//TODO: This now needs to do recursive resolution of nested blocks, since we took that out of for loop unrolling
 void CompileTimeExpressionSimplifier::visit(Block &elem) {
   auto nodesForDeletionBeforeVisit = nodesQueuedForDeletion;
 
@@ -508,35 +513,8 @@ void CompileTimeExpressionSimplifier::visit(Block &elem) {
   }
   changeToOuterScope();
 
-
-  //TODO
-  // If all Block's statements are marked for deletion, mark it as evaluated to notify its parent.
-  // The parent is then responsible to decide whether it makes sense to delete this Block or not.
-  // check if there is any statement within this Block that is not marked for deletion
-
+  //TODO: This now needs to do recursive resolution of nested blocks, since we took that out of for loop unrolling
   //TODO: If we come to the end of a scope, do we need to emit variables?
-//  bool allStatementsInBlockAreMarkedForDeletion = true;
-//  for (auto &statement : elem.getStatements()) {
-//    if (removableNodes.count(statement)==0) {
-//      allStatementsInBlockAreMarkedForDeletion = false;
-//    }
-//    // clean up removableNodes result from children that indicates whether a child node can safely be deleted
-//    removableNodes.erase(statement);
-//  }
-  // if all statements of this Block are marked for deletion, we can mark the Block as removable
-  // -> let the Block's parent decide whether to keep this empty Block or not
-  // if (allStatementsInBlockAreMarkedForDeletion) markNodeAsRemovable(&elem);
-
-//  // detach all nodes marked for deletion; required to enable unrolling of a possible outer loop
-//  if (onBackwardPassInForLoop() || visitingUnrolledLoopStatements) {
-//    int lowIdx = nodesForDeletionBeforeVisit.size();
-//    int maxIdx = nodesQueuedForDeletion.size() - 1;
-//    while (lowIdx <= maxIdx) {
-//      auto curNode = nodesQueuedForDeletion.at(lowIdx);
-//      if (curNode->getParents().size() > 0) curNode->removeFromParents();
-//      ++lowIdx;
-//    }
-//  }
 }
 
 void CompileTimeExpressionSimplifier::visit(Call &elem) {
@@ -637,20 +615,24 @@ void CompileTimeExpressionSimplifier::visit(If &elem) {
     if (thenAlwaysExecuted) { // the Then-branch is always executed
       // recursively remove the Else-branch (sanity-check, may not necessarily exist)
       if (elem.getElseBranch()!=nullptr) {
-        enqueueNodeForDeletion(elem.getElseBranch());
+        auto elseBranch = elem.getElseBranch();
         // we also unlink it from the If statement such that it will not be visited
-        elem.removeChild(elem.getElseBranch(), true);
+        elem.removeChild(elseBranch, true);
+        enqueueNodeForDeletion(elseBranch);
       }
     } else {  // the Else-branch is always executed
       // recursively remove the Then-branch (always exists)
-      enqueueNodeForDeletion(elem.getThenBranch());
+      auto then = elem.getThenBranch();
+      elem.removeChild(then);
+      enqueueNodeForDeletion(then);
       // negate the condition and delete the conditions stored value (is now invalid)
       auto condition = elem.getCondition();
       condition->removeFromParents();
       auto newCondition = new OperatorExpr(new Operator(UnaryOp::NEGATION), {condition});
       // replace the If statement's Then branch by the Else branch
-      elem.removeChild(elem.getThenBranch(), true);
-      elem.setAttributes(newCondition, elem.getElseBranch(), nullptr);
+      auto newThen = elem.getElseBranch();
+      elem.removeChild(elem.getElseBranch(), true); //necessary to avoid double parent link
+      elem.setAttributes(newCondition, newThen, nullptr);
     }
 
     // continue visiting the remaining branches: the condition will be visited again, but that's ok
@@ -658,12 +640,13 @@ void CompileTimeExpressionSimplifier::visit(If &elem) {
 
     // we can remove the whole If statement if...
     if ( // the Then-branch is always executed and it is empty after simplification (thus queued for deletion)
-        (thenAlwaysExecuted && isQueuedForDeletion(elem.getThenBranch()))
+        (thenAlwaysExecuted && elem.getThenBranch()==nullptr)
             // the Then-branch is never executed but there is no Else-branch
             || (!thenAlwaysExecuted && elem.getElseBranch()==nullptr)
                 // the Else-branch is always executed but it is empty after simplification  (thus queued for deletion)
-            || (!thenAlwaysExecuted && isQueuedForDeletion(elem.getElseBranch()))) {
+            || (!thenAlwaysExecuted && elem.getElseBranch()==nullptr)) {
       // enqueue the If statement and its children for deletion
+      elem.getOnlyParent()->replaceChild(&elem, nullptr);
       enqueueNodeForDeletion(&elem);
     }
   }
@@ -726,6 +709,7 @@ void CompileTimeExpressionSimplifier::visit(If &elem) {
     variableValues = originalVariableValues;
 
     // enqueue the If statement and its children for deletion
+    elem.getOnlyParent()->replaceChild(&elem, nullptr);
     enqueueNodeForDeletion(&elem);
   }
 }
@@ -738,6 +722,7 @@ void CompileTimeExpressionSimplifier::visit(While &elem) {
   auto conditionValue = dynamic_cast<LiteralBool *>(elem.getCondition());
   if (conditionValue!=nullptr && !conditionValue->getValue()) {
     // While is never executed: remove While-loop including contained statements
+    elem.getOnlyParent()->replaceChild(&elem, nullptr);
     enqueueNodeForDeletion(&elem);
     return;
   }
@@ -808,7 +793,10 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
   auto loopVariables = identifyReadWriteVariables(elem, variableValues);
 
   // We need to emit VariableDeclarations for each of these Variables into the initializer (because of next step)
-  emitVariableAssignments(loopVariables, variableValues);
+  auto assignments = emitVariableAssignments(loopVariables, variableValues);
+  for (auto &a : assignments) {
+    elem.getInitializer()->addChild(a, true);
+  }
 
   // The values of loop variables we got from the initializer should not be substituted inside the loop
   // Since they will be different in each iteration, CTES should treat them as "compile time unknown"
@@ -1564,6 +1552,14 @@ VariableValuesMapType CompileTimeExpressionSimplifier::getClonedVariableValuesMa
 }
 
 void CompileTimeExpressionSimplifier::enqueueNodeForDeletion(AbstractNode *node) {
+
+  for (auto &p: node->getParentsNonNull()) {
+    auto pc = p->getChildrenNonNull();
+    if (std::find(pc.begin(), pc.end(), node)!=pc.end()) {
+      throw std::invalid_argument("Cannot enqueue a Node for deletion if it is still linked in parent");
+    }
+  }
+
   for (auto &n : node->getDescendants()) {
     nodesQueuedForDeletion.push_back(n);
   }

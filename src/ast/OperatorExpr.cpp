@@ -206,7 +206,8 @@ bool OperatorExpr::isEqual(AbstractExpr *other) {
 std::vector<AbstractExpr *> OperatorExpr::getOperands() const {
   std::vector<AbstractExpr *> operands;
   // ++children.begin() because operands start from index 1
-  std::transform(++children.begin(), children.end(), std::back_inserter(operands),
+  auto cs = getChildrenNonNull();
+  std::transform(++cs.begin(), cs.end(), std::back_inserter(operands),
                  [](AbstractNode *node) -> AbstractExpr * {
                    return node->castTo<AbstractExpr>();
                  });

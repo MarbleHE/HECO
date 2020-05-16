@@ -114,7 +114,7 @@ void AbstractNode::addChildren(const std::vector<AbstractNode *> &childrenToAdd,
     size_t childIdx = 0;
     size_t idx = 0;
     // add child in first empty spot
-    while(idx < children.size() && childIdx < childrenToAdd.size()) {
+    while (idx < children.size() && childIdx < childrenToAdd.size()) {
       if (children.at(idx)==nullptr) {
         children.at(idx) = childrenToAdd.at(childIdx);// insert the new child
         doInsertPostAction(children.at(idx));
@@ -317,8 +317,10 @@ void AbstractNode::replaceChild(AbstractNode *originalChild, AbstractNode *newCh
   originalChild->removeParent(this, false);
 
   // add edges: newChildToBeAdded -> currentNode but before detach any existing parents from this child node
-  newChild->removeFromParents();
-  newChild->addParent(this, false);
+  if (newChild!=nullptr) {
+    newChild->removeFromParents();
+    newChild->addParent(this, false);
+  }
 }
 
 AbstractNode *AbstractNode::removeFromParents(bool removeParentBackreference) {
