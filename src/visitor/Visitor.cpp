@@ -30,6 +30,7 @@
 
 void Visitor::visit(Ast &elem) {
   // assumption: AST is always the enclosing object that points to the root
+  stmtToScopeMapper.clear();
   this->curScope = new Scope("global", elem.getRootNode(), nullptr);
   elem.getRootNode()->accept(*this);
 }

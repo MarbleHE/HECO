@@ -236,9 +236,7 @@ void CompileTimeExpressionSimplifier::visit(Ast &elem) {
   emittedVariableAssignms.clear();
   nodesQueuedForDeletion.clear();
   variableValues.clear();
-  stmtToScopeMapper.clear();
   currentLoopDepth_maxLoopDepth = {std::pair(0, 0)};
-  curScope = nullptr;
 
   // takes care of creating root scope & visits entire AST, starting at rootNode
   Visitor::visit(elem);
