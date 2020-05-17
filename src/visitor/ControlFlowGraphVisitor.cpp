@@ -502,8 +502,18 @@ void ControlFlowGraphVisitor::buildDataFlowGraph() {
       } else { // DEFAULT CASE
         // add an bilateral edge (last node that wrote to variable, current node) to each of the variables that last
         // wrote to the variable (e.g., in case of a branch statement, it can be multiple nodes)
-        for (auto &writeNodes : nodeToVarLastWrittenMapping.at(v).at(varIdentifierRead))
-          writeNodes->getDataFlowGraph()->addChild(v);
+        if (nodeToVarLastWrittenMapping.find(v)==nodeToVarLastWrittenMapping.end()) {
+          throw std::logic_error(
+              "CFGV expected node corresponding to " + v->getRefToOriginalNode()->getUniqueNodeId()
+                  + " to have a LastWrittenMap but it did not.");
+        } else if (nodeToVarLastWrittenMapping.at(v).find(varIdentifierRead)==nodeToVarLastWrittenMapping.at(v).end()) {
+          throw std::runtime_error("CFGV: Found uninitialized (i.e. never written) variable: "
+                                       + varIdentifierRead + " in statement "
+                                       + v->getRefToOriginalNode()->getUniqueNodeId());
+        } else {
+          for (auto &writeNodes : nodeToVarLastWrittenMapping.at(v).at(varIdentifierRead))
+            writeNodes->getDataFlowGraph()->addChild(v);
+        }
       }
     }
   }

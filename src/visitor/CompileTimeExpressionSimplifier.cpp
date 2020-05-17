@@ -778,6 +778,13 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
   addStatementToScope(elem);
   changeToInnerScope(elem.getUniqueNodeId(), &elem);
 
+
+  // Before we can visit the children, we must identify with the "loop variables"
+  // Since the CFGV used in identifyReadWriteVariables does not take variableValues into account
+  // we must do this before we visit any children and potentially inline things like e.g. int i = 0;
+  /// Loop Variables are variables that are both written to and read from during the loop
+  auto loopVariables = identifyReadWriteVariables(elem, variableValues);
+
   // INITIALIZER
 
   // Visit initializer. Visiting this is important, in case it affects variables that won't be detected as "loop variables"
@@ -785,14 +792,7 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
   elem.getInitializer()->accept(*this);
   // Now, int i = 0 and similar things might have been deleted from AST and are in VariableValuesMap
 
-
-  // VARIABLE MANAGEMENT
-
-  // Before we can visit the body, we must deal with the "loop variables":
-  /// Loop Variables are variables that are both written to and read from during the loop
-  auto loopVariables = identifyReadWriteVariables(elem, variableValues);
-
-  // We need to emit VariableDeclarations for each of these Variables into the initializer (because of next step)
+  // We need to emit Assignments (and Decl's if ndeeded) for each of the loop variables Variables into the initializer
   auto assignments = emitVariableAssignments(loopVariables, variableValues);
   for (auto &a : assignments) {
     elem.getInitializer()->addChild(a, true);
