@@ -25,7 +25,7 @@ class LiteralString : public AbstractLiteral {
 
   void print(std::ostream &str) const override;
 
-  LiteralString *clone(bool keepOriginalUniqueNodeId) override;
+  LiteralString *clone(bool keepOriginalUniqueNodeId) const override;
 
   [[nodiscard]] json toJson() const override;
 

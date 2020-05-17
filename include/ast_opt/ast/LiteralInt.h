@@ -24,7 +24,7 @@ class LiteralInt : public AbstractLiteral {
 
   ~LiteralInt() override;
 
-  LiteralInt *clone(bool keepOriginalUniqueNodeId) override;
+  LiteralInt *clone(bool keepOriginalUniqueNodeId) const override;
 
   [[nodiscard]] int getValue() const;
 

@@ -27,7 +27,7 @@ class LogicalExpr : public AbstractBinaryExpr {
     setAttributes(AbstractExpr::createParam(left), op, AbstractExpr::createParam(right));
   }
 
-  LogicalExpr *clone(bool keepOriginalUniqueNodeId) override;
+  LogicalExpr *clone(bool keepOriginalUniqueNodeId) const override;
 
   void accept(Visitor &v) override;
 

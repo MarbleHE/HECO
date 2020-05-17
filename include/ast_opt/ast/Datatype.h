@@ -19,7 +19,7 @@ class Datatype : public AbstractNode {
 
   AbstractNode *cloneFlat() override;
 
-  AbstractNode *clone(bool keepOriginalUniqueNodeId) override;
+  AbstractNode *clone(bool keepOriginalUniqueNodeId) const override;
 
   explicit Datatype(Types di) : val(di) {}
 

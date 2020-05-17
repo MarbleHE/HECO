@@ -9,7 +9,7 @@ class UnaryExpr : public AbstractExpr {
  public:
   UnaryExpr(UnaryOp op, AbstractExpr *right);
 
-  UnaryExpr *clone(bool keepOriginalUniqueNodeId) override;
+  UnaryExpr *clone(bool keepOriginalUniqueNodeId) const override;
 
   [[nodiscard]] json toJson() const override;
 

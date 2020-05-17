@@ -13,7 +13,7 @@ class OperatorExpr : public AbstractExpr {
 
   OperatorExpr(Operator *op, std::vector<AbstractExpr *> operands);
 
-  OperatorExpr *clone(bool keepOriginalUniqueNodeId) override;
+  OperatorExpr *clone(bool keepOriginalUniqueNodeId) const override;
 
   void accept(Visitor &v) override;
 

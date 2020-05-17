@@ -48,26 +48,56 @@ class Scope {
 };
 
 /**
- * A helper struct to store the value of a variable and its associated datatype in the variableValues map.
+ * A helper class to store the value of a variable and its associated datatype in the variableValues map.
  */
-struct VariableValue {
-  Datatype *datatype;
-  AbstractExpr *value;
+class VariableValue {
+ private:
+  Datatype datatype;
+  std::unique_ptr<AbstractExpr> value;
 
-  VariableValue(Datatype *dtype, AbstractExpr *varValue) : datatype(dtype), value(varValue) {}
+ public:
 
-  // copy constructor
-  VariableValue(const VariableValue &vv) {
-    datatype = vv.datatype->clone(false)->castTo<Datatype>();
-    value = (vv.value!=nullptr) ? vv.value->clone(false)->castTo<AbstractExpr>() : nullptr;
+  /// Destructor
+  ~VariableValue() = default;
+
+  /// Create directly
+  VariableValue(Datatype dtype, AbstractExpr *varValue)
+      : datatype(std::move(dtype)), value(varValue->clone(false)->castTo<AbstractExpr>()) {};
+
+  /// Copy constructor
+  VariableValue(const VariableValue &vv)
+      : datatype(vv.datatype), value(vv.value->clone(false)->castTo<AbstractExpr>()) {};
+
+  /// Move constructor
+  VariableValue(VariableValue &&vv) = default;
+
+  /// Copy assignment
+  VariableValue &operator=(const VariableValue &other) {
+    datatype = other.datatype;
+    value = std::unique_ptr<AbstractExpr>(other.value->clone(false)->castTo<AbstractExpr>());
+    return *this;
+  };
+
+  /// Move assigment
+  VariableValue &operator=(VariableValue &&other) = default;
+
+  /// Creates a copy of the value!
+  AbstractExpr *getValue() {
+    return value->clone(false)->castTo<AbstractExpr>();
+  }
+
+  const Datatype &getDatatype() {
+    return datatype;
   }
 
   void setValue(AbstractExpr *val) {
-    VariableValue::value = val;
+    value = std::unique_ptr<AbstractExpr>(val->clone(false)->castTo<AbstractExpr>());
   }
+
+  // Datatype is fixed, therefore no way to change this
 };
+
 typedef std::pair<std::string, Scope *> ScopedVariable;
-typedef std::map<ScopedVariable, VariableValue *> VariableValuesMapType;
 
 /**
  * A helper class to store Mappings Between Variables and Scopes
@@ -105,23 +135,16 @@ class VariableValuesMap {
   };
 
   /// Saves information about a declared variable. Must include the variable's identifier, the variable's datatype, and
-  /// optionally also an initializer (or nullptr otherwise). The method assumes that it is called from the variable's
-  /// declaration scope, hence saves Visitor::curScope as the variable's declaration scope.
-  /// \param varIdentifier The identifier of the declared variable.
-  /// \param dType The variable's datatype.
-  /// \param value The variable's value, i.e., initializer.
-  void addDeclaredVariable(std::string varIdentifier, Datatype *dType, AbstractExpr *value, Scope *curScope);
+  /// optionally also an initializer (or nullptr otherwise). Deep copies VariableValue
+  void addDeclaredVariable(ScopedVariable scopedVariable, VariableValue *value);
 
-  /// A helper method that takes a copy of the variableValues map that was created before visiting a node and determines
-  /// the changes made by visiting the node. The changes recognized are newly declared variables (added variables) and
-  /// variables whose value changed.
-  /// \param variableValuesBeforeVisitingNode A copy of the variable values map.
-  /// \return The changes between the map variableValuesBeforeVisitingNode and the current variableValues map.
-  VariableValuesMap getChangedVariables(VariableValuesMapType variableValuesBeforeVisitingNode);
+  /// Saves information about a declared variable. Must include the variable's identifier, the variable's datatype, and
+  /// optionally also an initializer (or nullptr otherwise).
+  void addDeclaredVariable(ScopedVariable scopedVariable, VariableValue value);
 
   VariableValue *getVariableValue(ScopedVariable scopedVariable);
 
-  void addVariable(ScopedVariable scopedVariable, VariableValue * value);
+  void addVariable(ScopedVariable scopedVariable, VariableValue *value);
 
   void setVariableValue(ScopedVariable scopedVariable, VariableValue *value);
 

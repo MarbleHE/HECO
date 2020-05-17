@@ -25,7 +25,7 @@ enum class AccessType { READ = 0, WRITE = 1 };
 class ControlFlowGraphVisitor : public Visitor {
  private:
   /// Maps ScopedVariables (i.e. scope + identifier) to an AbstractExpr representing their value
-  VariableValuesMapType  variableValues;
+  VariableValuesMap variableValues;
 
   /// Ugly hack: Variables in CFG that are both read and written to
   std::set<std::string> variablesReadAndWritten;

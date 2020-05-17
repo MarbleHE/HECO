@@ -18,7 +18,7 @@ class Variable : public AbstractExpr {
 
   ~Variable() override;
 
-  Variable *clone(bool keepOriginalUniqueNodeId) override;
+  Variable *clone(bool keepOriginalUniqueNodeId) const override;
 
   void accept(Visitor &v) override;
 

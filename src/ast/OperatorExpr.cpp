@@ -27,7 +27,7 @@ std::string OperatorExpr::toString(bool printChildren) const {
   return AbstractNode::generateOutputString(printChildren, {});
 }
 
-OperatorExpr *OperatorExpr::clone(bool keepOriginalUniqueNodeId) {
+OperatorExpr *OperatorExpr::clone(bool keepOriginalUniqueNodeId) const {
   // clone operator (child0)
   auto clonedOperator = getOperator()->clone(keepOriginalUniqueNodeId);
   // clone all operands (child1...childN)

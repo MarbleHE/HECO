@@ -109,7 +109,7 @@ class AbstractMatrix : public AbstractNode {
 
   bool operator!=(const AbstractMatrix &rhs) const;
 
-  AbstractMatrix *clone(bool keepOriginalUniqueNodeId) override = 0;
+  AbstractMatrix *clone(bool keepOriginalUniqueNodeId) const override = 0;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_ABSTRACTMATRIX_H_

@@ -23,7 +23,7 @@ class ArithmeticExpr : public AbstractBinaryExpr {
 
   explicit ArithmeticExpr(ArithmeticOp op);
 
-  ArithmeticExpr *clone(bool keepOriginalUniqueNodeId) override;
+  ArithmeticExpr *clone(bool keepOriginalUniqueNodeId) const override;
 
   template<typename T1, typename T2>
   ArithmeticExpr(T1 left, ArithmeticOp op, T2 right) {

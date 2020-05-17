@@ -14,7 +14,7 @@ class Function : public AbstractStatement {
   std::string name;
 
  public:
-  Function *clone(bool keepOriginalUniqueNodeId) override;
+  Function *clone(bool keepOriginalUniqueNodeId) const override;
 
   [[nodiscard]] const std::string &getName() const;
 

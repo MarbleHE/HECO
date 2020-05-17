@@ -23,7 +23,7 @@ class VarDecl : public AbstractStatement {
 
   VarDecl(std::string name, bool value);
 
-  VarDecl *clone(bool keepOriginalUniqueNodeId) override;
+  VarDecl *clone(bool keepOriginalUniqueNodeId) const override;
 
   /// This is just a helper constructor that allows to call VarDecl("randomString", "aiermkr");
   /// without this constructor the call will wrongly be forwarded to the VarDecl(std::string, bool) constructor.

@@ -13,7 +13,7 @@ class Block : public AbstractStatement {
 
   ~Block() override = default;
 
-  Block *clone(bool keepOriginalUniqueNodeId) override;
+  Block *clone(bool keepOriginalUniqueNodeId) const override;
 
   AbstractNode *cloneFlat() override;
 

@@ -13,7 +13,7 @@ class ParameterList : public AbstractStatement {
 
   void accept(Visitor &v) override;
 
-  ParameterList *clone(bool keepOriginalUniqueNodeId) override;
+  ParameterList *clone(bool keepOriginalUniqueNodeId) const override;
 
   std::vector<FunctionParameter*> getParameters();
 

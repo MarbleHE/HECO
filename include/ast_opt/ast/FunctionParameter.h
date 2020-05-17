@@ -15,7 +15,7 @@ class FunctionParameter : public AbstractExpr {
   /// \param value The value of the function parameter.
   FunctionParameter(const std::string &datatypeEnumString, AbstractExpr *value);
 
-  FunctionParameter *clone(bool keepOriginalUniqueNodeId) override;
+  FunctionParameter *clone(bool keepOriginalUniqueNodeId) const override;
 
   [[nodiscard]] json toJson() const override;
 

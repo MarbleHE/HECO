@@ -9,7 +9,7 @@ class While : public AbstractStatement {
  public:
   While(AbstractExpr *condition, AbstractStatement *body);
 
-  While *clone(bool keepOriginalUniqueNodeId) override;
+  While *clone(bool keepOriginalUniqueNodeId) const override;
 
   [[nodiscard]] json toJson() const override;
 

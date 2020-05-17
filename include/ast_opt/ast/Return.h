@@ -24,7 +24,7 @@ class Return : public AbstractStatement {
 
   [[nodiscard]] std::vector<AbstractExpr *> getReturnExpressions() const;
 
-  Return *clone(bool keepOriginalUniqueNodeId) override;
+  Return *clone(bool keepOriginalUniqueNodeId) const override;
 
   void setAttributes(std::vector<AbstractExpr *> returnExpr);
 

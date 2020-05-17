@@ -354,7 +354,7 @@ class Matrix : public AbstractMatrix {
     return dim;
   }
 
-  Matrix<T> *clone(bool keepOriginalUniqueNodeId) override {
+  Matrix<T> *clone(bool keepOriginalUniqueNodeId) const override {
     // it's sufficient to call the copy constructor that creates a copy of all primitives (int, float, etc.)
     return new Matrix<T>(*this);
   }
@@ -575,7 +575,7 @@ template<>
 json Matrix<std::string>::toJson() const;
 
 template<>
-Matrix<AbstractExpr *> *Matrix<AbstractExpr *>::clone(bool keepOriginalUniqueNodeId);
+Matrix<AbstractExpr *> *Matrix<AbstractExpr *>::clone(bool keepOriginalUniqueNodeId) const;
 
 template<>
 void Matrix<AbstractExpr *>::addElementToStringStream(AbstractExpr *elem, std::stringstream &s);
