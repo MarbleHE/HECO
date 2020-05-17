@@ -16,28 +16,9 @@
 #include "ast_opt/ast/LiteralFloat.h"
 #include "ast_opt/ast/Variable.h"
 #include "ast_opt/ast/OperatorExpr.h"
+#include "ast_opt/utilities/Scope.h"
 
-/**
- * A helper struct to store the value of a variable and its associated datatype in the variableValues map.
- */
-struct VariableValue {
-  Datatype *datatype;
-  AbstractExpr *value;
 
-  VariableValue(Datatype *dtype, AbstractExpr *varValue) : datatype(dtype), value(varValue) {}
-
-  // copy constructor
-  VariableValue(const VariableValue &vv) {
-    datatype = vv.datatype->clone(false)->castTo<Datatype>();
-    value = (vv.value!=nullptr) ? vv.value->clone(false)->castTo<AbstractExpr>() : nullptr;
-  }
-
-  void setValue(AbstractExpr *val) {
-    VariableValue::value = val;
-  }
-};
-typedef std::pair<std::string, Scope *> ScopedVariable;
-typedef std::map<ScopedVariable, VariableValue *> VariableValuesMapType;
 
 /**
  * A helper struct that is used by emittedVariableDeclarations and helps to keep track of the relationship between a

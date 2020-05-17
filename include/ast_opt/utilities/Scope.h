@@ -7,6 +7,8 @@
 #include <string>
 #include <unordered_map>
 #include "ast_opt/ast/AbstractStatement.h"
+#include "ast_opt/ast/Variable.h"
+#include "ast_opt/ast/Datatype.h"
 
 class Scope {
  private:
@@ -43,5 +45,28 @@ class Scope {
 
   AbstractStatement *getLastStatement();
 };
+
+/**
+ * A helper struct to store the value of a variable and its associated datatype in the variableValues map.
+ */
+struct VariableValue {
+  Datatype *datatype;
+  AbstractExpr *value;
+
+  VariableValue(Datatype *dtype, AbstractExpr *varValue) : datatype(dtype), value(varValue) {}
+
+  // copy constructor
+  VariableValue(const VariableValue &vv) {
+    datatype = vv.datatype->clone(false)->castTo<Datatype>();
+    value = (vv.value!=nullptr) ? vv.value->clone(false)->castTo<AbstractExpr>() : nullptr;
+  }
+
+  void setValue(AbstractExpr *val) {
+    VariableValue::value = val;
+  }
+};
+typedef std::pair<std::string, Scope *> ScopedVariable;
+typedef std::map<ScopedVariable, VariableValue *> VariableValuesMapType;
+
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_UTILITIES_SCOPE_H_
