@@ -81,9 +81,6 @@ struct CtesConfiguration {
   }
 };
 
-//TODO: This visitor must respect scopes!
-//  This would mean that e.g. while some variables might be prematurely eliminated,
-//  they will be re-emitted upon exiting scope
 class CompileTimeExpressionSimplifier : public Visitor {
  private:
   /// A CompileTimeExpressionSimplifier configuration object containing configuration parameters.
@@ -127,7 +124,7 @@ class CompileTimeExpressionSimplifier : public Visitor {
   /// Stores the latest value of a variable while traversing through the AST. Entries in this map consist of a key
   /// (pair) that is made of a variable identifier (first) and the scope where the variable was declared in (second).
   /// The entry of the variableValues map is the current value of the associated variable.
-  VariableValuesMapType variableValues;
+  VariableValuesMap variableValues;
 
   /// Contains pointer to those nodes for which full or partial evaluation could be performed and hence can be deleted
   /// at the end of this simplification traversal.
@@ -255,34 +252,13 @@ class CompileTimeExpressionSimplifier : public Visitor {
   static AbstractExpr *generateIfDependentValue(
       AbstractExpr *condition, AbstractExpr *trueValue, AbstractExpr *falseValue);
 
-  /// Saves information about a declared variable. Must include the variable's identifier, the variable's datatype, and
-  /// optionally also an initializer (or nullptr otherwise). The method assumes that it is called from the variable's
-  /// declaration scope, hence saves Visitor::curScope as the variable's declaration scope.
-  /// \param varIdentifier The identifier of the declared variable.
-  /// \param dType The variable's datatype.
-  /// \param value The variable's value, i.e., initializer.
-  void addDeclaredVariable(std::string varIdentifier, Datatype *dType, AbstractExpr *value);
-
-  /// This method sets the value (valueAnyLiteralOrAbstractExpr) of a variable named as given by the
-  /// variableIdentifier parameter. It keeps the scope of the already existing entry in the variableValues map and
-  /// only changes the variable's value. The suitable entry for the given variable identifier is determined starting by
-  /// the current scope (Visitor::curScope) and then visiting the outer scope, the next outer scope, et cetera.
-  /// \param variableIdentifier The variable identifier ("name" of the variable).
-  /// \param valueAnyLiteralOrAbstractExpr The variable's value. This can be any kind of AbstractLiteral or
-  /// AbstractExpr.
-  void setVariableValue(const std::string &variableIdentifier, AbstractExpr *valueAnyLiteralOrAbstractExpr);
 
   /// Checks whether the given node is queued for deletion. Deletion will be carried out at the end of the traversal.
   /// \param node The node to be checked for deletion.
   /// \return True if this node is enqueued for deletion, otherwise False.
   bool isQueuedForDeletion(const AbstractNode *node);
 
-  /// A helper method that takes a copy of the variableValues map that was created before visiting a node and determines
-  /// the changes made by visiting the node. The changes recognized are newly declared variables (added variables) and
-  /// variables whose value changed.
-  /// \param variableValuesBeforeVisitingNode A copy of the variable values map.
-  /// \return The changes between the map variableValuesBeforeVisitingNode and the current variableValues map.
-  VariableValuesMapType getChangedVariables(VariableValuesMapType variableValuesBeforeVisitingNode);
+
 
   /// Takes an OperatorExpr consisting of a logical operator (i.e., AND, XOR, OR) and applies the Boolean laws to
   /// simplify the expression. For example, the expression <anything> AND False always evaluates to False, hence we can
@@ -301,20 +277,7 @@ class CompileTimeExpressionSimplifier : public Visitor {
   /// \param forLoop The for loop to investigate
   /// \param VariableValues Initial VariableValues BEFORE the block
   /// \return Variables, with their associated scopes, that match the criteria
-  std::set<ScopedVariable> identifyReadWriteVariables(For &forLoop, VariableValuesMapType VariableValues);
-
-  /// Returns the current value of the variable identified by the given variableName. If there are multiple
-  /// declarations within different scopes, returns the declaration that is closest to curScope.
-  /// \param variableName The variable identifiers whose value should be retrieved.
-  /// \return An AbstractExpr pointer of the variable's current value.
-  AbstractExpr *getVariableValueDeclaredInThisOrOuterScope(std::string variableName);
-
-  /// Returns an iterator to the variable entry in variableValues that has the given variable identifier
-  /// (variableName) and is closest from the current scope (curScope).
-  /// \param variableName The variable identifiers whose variableValues entry should be retrieved.
-  /// \return An iterator to the variableValues entry pointing to the variable whose declaratin is closest to the
-  /// current scope.
-  VariableValuesMapType::iterator getVariableEntryDeclaredInThisOrOuterScope(std::string variableName);
+  std::set<ScopedVariable> identifyReadWriteVariables(For &forLoop, VariableValuesMap VariableValues);
 
   /// Creates a new VarAssignm statement of the variable that the given iterator (variableToEmit) is pointing to.
   /// The method ensures that there exists a variable declaration statement (VarDecl) in the scope where this
@@ -323,14 +286,13 @@ class CompileTimeExpressionSimplifier : public Visitor {
   /// \param variableToEmit The variable to be emitted, i.e., for that a variable assignment statement should be
   /// generated.
   /// \return A  set of variable assignment statements for the given variable (variableToEmit).
-  std::set<VarAssignm *> emitVariableAssignment(VariableValuesMapType::iterator variableToEmit);
+  std::set<VarAssignm *> emitVariableAssignment(ScopedVariable variableToEmit);
 
   /// Emit variable assignments (and/or declaration, if necessary) for each of variables
   /// The VarDecl will be created in the scope associated with the variable
   /// \param variables  Variables for which VarDecls are to be emitted, and their associated scope
-  /// \param variableValues Map that associates scoped variables with their values
   /// \return Set of variable assignment statements for the given variables.
-  std::set<VarAssignm*> emitVariableAssignments(std::set<ScopedVariable> variables, VariableValuesMapType variableValues);
+  std::set<VarAssignm *> emitVariableAssignments(std::set<ScopedVariable> variables);
 
   /// Creates a new VarDecl statements of the variable that the given iterator (variableToEmit) is pointing to.
   /// The variable declaration is emitted as the first statement in the scope where the variable was initially
@@ -339,12 +301,7 @@ class CompileTimeExpressionSimplifier : public Visitor {
   /// returning the generated statement.
   /// \param variableToEmit The variable to be emitted, i.e., for that a variable declaration statement should be
   /// generated.
-  void emitVariableDeclaration(VariableValuesMapType::iterator variableToEmit);
-
-  /// Creates a clone of the variableValues map. As the map consists of VariableValue pointers, each of the
-  /// VariableValue objects pointed to needs to be copied.
-  /// \return A copy of the VariableValues map.
-  VariableValuesMapType getClonedVariableValuesMap();
+  void emitVariableDeclaration(ScopedVariable variableToEmit);
 
   /// Marks the given node for deletion. The node will be deleted after all nodes of the AST have been visited.
   /// \param node The node to be marked for deletion.

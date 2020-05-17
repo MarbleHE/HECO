@@ -16,8 +16,14 @@
 #include "ast_opt/ast/LogicalExpr.h"
 #include "ast_opt/ast/OperatorExpr.h"
 #include "ast_opt/ast/MatrixAssignm.h"
+#include "ast_opt/utilities/Scope.h"
 
 void ControlFlowGraphVisitor::visit(Ast &elem) {
+  // reset all custom variables
+  variablesReadAndWritten.clear();
+  lastCreatedNodes.clear();
+  varAccess.clear();
+  rootNode = nullptr;
   Visitor::visit(elem);
 }
 

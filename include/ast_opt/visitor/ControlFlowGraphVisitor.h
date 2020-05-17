@@ -9,7 +9,8 @@
 #include <deque>
 #include <stack>
 #include <unordered_set>
-#include "Visitor.h"
+#include "ast_opt/visitor/Visitor.h"
+#include "ast_opt/utilities/Scope.h"
 
 // forward declarations
 class GraphNode;
@@ -23,6 +24,9 @@ enum class AccessType { READ = 0, WRITE = 1 };
 /// The visitor further collects information that is required to build the Data Flow Graph (DFG) therefrom.
 class ControlFlowGraphVisitor : public Visitor {
  private:
+  /// Maps ScopedVariables (i.e. scope + identifier) to an AbstractExpr representing their value
+  VariableValuesMapType  variableValues;
+
   /// Ugly hack: Variables in CFG that are both read and written to
   std::set<std::string> variablesReadAndWritten;
 

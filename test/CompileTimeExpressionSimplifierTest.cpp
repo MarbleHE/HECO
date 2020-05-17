@@ -34,8 +34,10 @@ class CompileTimeExpressionSimplifierFixture : public ::testing::Test {
   AbstractExpr *getVariableValueByUniqueName(const std::string &varIdentifier) {
     // NOTE: This method does not work if there are multiple variables with the same variable identifier but in
     // different scopes. In that case the method always returns the value of the variable in the outermost scope.
-    for (auto &[varIdentifierScope, varValue] : ctes.variableValues) {
-      if (varIdentifierScope.first==varIdentifier) return varValue->value;
+    for (auto &[scopedVariable, varValue] : ctes.variableValues.getMap()) {
+      if (scopedVariable.first==varIdentifier) {
+        return varValue->value;
+      }
     }
     throw std::logic_error("Variable identifier '" + varIdentifier + "' not found!");
   }
@@ -94,7 +96,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, arithmeticExpr_variableUnknown_rh
   ctes.visit(ast);
 
   // variableValues is expected to contain: [encryptedA, alpha][
-  EXPECT_EQ(ctes.variableValues.size(), 2);
+  EXPECT_EQ(ctes.variableValues.getMap().size(), 2);
   // check that the rhs operand of arithmeticExpr is simplified
   auto expected = new OperatorExpr(new Operator(ArithmeticOp::MULTIPLICATION),
                                    {new Variable("encryptedA"),
@@ -418,7 +420,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, unaryExpr_variableUnknown_notEval
   ctes.visit(ast);
 
   // variableValues is expected to contain: [paramA, beta]
-  EXPECT_EQ(ctes.variableValues.size(), 2);
+  EXPECT_EQ(ctes.variableValues.getMap().size(), 2);
   EXPECT_TRUE(getVariableValueByUniqueName("beta")
                   ->isEqual(new OperatorExpr(new Operator(UnaryOp::NEGATION), {new Variable("paramA")})));
   // check that statements is deleted
@@ -2150,8 +2152,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, partialforLoopUnrolling) { /* NOL
   //    int sum;
   //    int i;
   //    {
-  //      int i = 0;
-  //      for (; i < numIterations && i+1 < numIterations && i+2 < numIterations;) {
+  //      for (int i = 0; i < numIterations && i+1 < numIterations && i+2 < numIterations;) {
   //        sum = sum + M[i] + M[i+1] + M[i+2];
   //        i = i+3;
   //      }
