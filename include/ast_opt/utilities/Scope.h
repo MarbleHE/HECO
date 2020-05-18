@@ -62,11 +62,11 @@ class VariableValue {
 
   /// Create directly
   VariableValue(Datatype dtype, AbstractExpr *varValue)
-      : datatype(std::move(dtype)), value(varValue->clone(false)->castTo<AbstractExpr>()) {};
+      : datatype(std::move(dtype)), value(varValue ? varValue->clone(false)->castTo<AbstractExpr>() : nullptr) {};
 
   /// Copy constructor
   VariableValue(const VariableValue &vv)
-      : datatype(vv.datatype), value(vv.value->clone(false)->castTo<AbstractExpr>()) {};
+      : datatype(vv.datatype), value(vv.value ? vv.value->clone(false)->castTo<AbstractExpr>() : nullptr) {};
 
   /// Move constructor
   VariableValue(VariableValue &&vv) = default;
@@ -83,7 +83,7 @@ class VariableValue {
 
   /// Creates a copy of the value!
   AbstractExpr *getValue() {
-    return value->clone(false)->castTo<AbstractExpr>();
+    return value ? value->clone(false)->castTo<AbstractExpr>() : nullptr;
   }
 
   Datatype getDatatype() {
