@@ -15,7 +15,7 @@ class CallExternal : public AbstractExpr {
 
   CallExternal(std::string functionName, std::vector<FunctionParameter *> arguments);
 
-  AbstractNode *clone(bool keepOriginalUniqueNodeId) const override;
+  AbstractExpr *clone(bool keepOriginalUniqueNodeId) const override;
 
   [[nodiscard]] json toJson() const override;
 

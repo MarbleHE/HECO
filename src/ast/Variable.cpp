@@ -60,7 +60,7 @@ bool Variable::supportsCircuitMode() {
 
 Variable::~Variable() = default;
 
-Variable *Variable::clone(bool keepOriginalUniqueNodeId) {
+Variable *Variable::clone(bool keepOriginalUniqueNodeId) const {
   auto clonedNode = new Variable(getIdentifier());
   clonedNode->updateClone(keepOriginalUniqueNodeId, this);
   return clonedNode;

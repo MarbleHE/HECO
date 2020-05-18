@@ -9,7 +9,7 @@ void ParameterList::accept(Visitor &v) {
   v.visit(*this);
 }
 
-ParameterList *ParameterList::clone(bool keepOriginalUniqueNodeId) {
+ParameterList *ParameterList::clone(bool keepOriginalUniqueNodeId) const {
   auto childrenCopy = children;
   for (auto &c: childrenCopy) {
     c = c->clone(keepOriginalUniqueNodeId);

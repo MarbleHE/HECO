@@ -55,7 +55,7 @@ bool Return::supportsCircuitMode() {
   return true;
 }
 
-Return *Return::clone(bool keepOriginalUniqueNodeId) {
+Return *Return::clone(bool keepOriginalUniqueNodeId) const {
   std::vector<AbstractExpr *> returnValues;
   for (auto &child : getReturnExpressions())
     returnValues.push_back(child->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());

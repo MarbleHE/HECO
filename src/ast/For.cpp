@@ -54,7 +54,7 @@ int For::getMaxNumberChildren() {
   return 4;
 }
 
-AbstractNode *For::clone(bool keepOriginalUniqueNodeId) {
+AbstractNode *For::clone(bool keepOriginalUniqueNodeId) const {
 
   auto clonedInitializer = (getInitializer()==nullptr)
                            ? nullptr

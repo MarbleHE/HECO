@@ -72,7 +72,7 @@ bool LiteralInt::supportsCircuitMode() {
   return true;
 }
 
-LiteralInt *LiteralInt::clone(bool keepOriginalUniqueNodeId) {
+LiteralInt *LiteralInt::clone(bool keepOriginalUniqueNodeId) const {
   auto clonedNode = new LiteralInt(matrix->clone(keepOriginalUniqueNodeId));
   clonedNode->updateClone(keepOriginalUniqueNodeId, this);
   return clonedNode;

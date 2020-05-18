@@ -36,7 +36,7 @@ void MatrixElementRef::accept(Visitor &v) {
   v.visit(*this);
 }
 
-AbstractNode *MatrixElementRef::clone(bool keepOriginalUniqueNodeId) {
+AbstractExpr *MatrixElementRef::clone(bool keepOriginalUniqueNodeId) const {
   auto clonedNode = new MatrixElementRef(
       getOperand()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
       getRowIndex()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
@@ -79,8 +79,8 @@ std::vector<std::string> MatrixElementRef::getVariableIdentifiers() {
 }
 
 std::vector<Variable *> MatrixElementRef::getVariables() {
-  std::vector<Variable*> resultVec;
-  auto insertIfNonEmpty = [&resultVec](std::vector<Variable*> vec) {
+  std::vector<Variable *> resultVec;
+  auto insertIfNonEmpty = [&resultVec](std::vector<Variable *> vec) {
     if (!vec.empty()) resultVec.insert(resultVec.end(), vec.begin(), vec.end());
   };
   insertIfNonEmpty(getOperand()->getVariables());

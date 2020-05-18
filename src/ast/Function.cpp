@@ -73,7 +73,7 @@ void Function::setParameterList(ParameterList *paramsVec) {
   addChild(paramsVec);
 }
 
-Function *Function::clone(bool keepOriginalUniqueNodeId) {
+Function *Function::clone(bool keepOriginalUniqueNodeId) const {
   auto clonedParams = getParameterList() ? getParameterList()->clone(keepOriginalUniqueNodeId) : nullptr;
   auto clonedBody = getBody() ? getBody()->clone(keepOriginalUniqueNodeId) : nullptr;
   auto clonedNode = new Function(this->getName(), clonedParams, clonedBody);

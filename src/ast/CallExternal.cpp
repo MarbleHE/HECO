@@ -34,7 +34,7 @@ std::string CallExternal::getNodeType() const {
   return "CallExternal";
 }
 
-AbstractNode *CallExternal::clone(bool keepOriginalUniqueNodeId) {
+AbstractExpr *CallExternal::clone(bool keepOriginalUniqueNodeId) const {
   std::vector<FunctionParameter *> args;
   for (auto &fp : this->getArguments()) {
     args.push_back(fp->clone(keepOriginalUniqueNodeId)->castTo<FunctionParameter>());

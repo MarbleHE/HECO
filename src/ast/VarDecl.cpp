@@ -93,7 +93,7 @@ VarDecl::~VarDecl() {
   for (auto &c : getChildren()) delete c;
 }
 
-std::string VarDecl::getVarTargetIdentifier() {
+std::string VarDecl::getVarTargetIdentifier() const {
   return this->getIdentifier();
 }
 
@@ -116,7 +116,7 @@ int VarDecl::getMaxNumberChildren() {
   return 2;
 }
 
-VarDecl *VarDecl::clone(bool keepOriginalUniqueNodeId) {
+VarDecl *VarDecl::clone(bool keepOriginalUniqueNodeId) const {
   auto clonedNode = new VarDecl(this->getVarTargetIdentifier(),
                                 this->getDatatype()->getType(),
                                 getInitializer()!=nullptr

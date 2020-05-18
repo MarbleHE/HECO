@@ -17,7 +17,7 @@ AbstractExpr *Transpose::getOperand() const {
   return dynamic_cast<AbstractExpr *>(getChildAtIndex(0));
 }
 
-Transpose *Transpose::clone(bool keepOriginalUniqueNodeId) {
+Transpose *Transpose::clone(bool keepOriginalUniqueNodeId) const {
   auto clonedNode = new Transpose(getOperand()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
   clonedNode->updateClone(keepOriginalUniqueNodeId, this);
   return clonedNode;

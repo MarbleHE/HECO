@@ -133,7 +133,7 @@ const OpSymbolVariant &Operator::getOperatorSymbol() const {
 
 Operator::~Operator() = default;
 
-Operator *Operator::clone(bool keepOriginalUniqueNodeId) {
+Operator *Operator::clone(bool keepOriginalUniqueNodeId) const {
   auto clonedNode = new Operator(this->getOperatorSymbol());
   clonedNode->updateClone(keepOriginalUniqueNodeId, this);
   return clonedNode;

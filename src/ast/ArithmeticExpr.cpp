@@ -24,7 +24,7 @@ std::string ArithmeticExpr::getNodeType() const {
 
 ArithmeticExpr::~ArithmeticExpr() = default;
 
-ArithmeticExpr *ArithmeticExpr::clone(bool keepOriginalUniqueNodeId) {
+ArithmeticExpr *ArithmeticExpr::clone(bool keepOriginalUniqueNodeId) const {
   auto clonedNode = new ArithmeticExpr(this->getLeft()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
                                        this->getOperator()->clone(keepOriginalUniqueNodeId)->castTo<Operator>(),
                                        this->getRight()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());

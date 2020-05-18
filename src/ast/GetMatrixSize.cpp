@@ -34,7 +34,7 @@ std::string GetMatrixSize::toString(bool printChildren) const {
   return AbstractNode::generateOutputString(printChildren, {});
 }
 
-AbstractNode *GetMatrixSize::clone(bool keepOriginalUniqueNodeId) {
+AbstractExpr *GetMatrixSize::clone(bool keepOriginalUniqueNodeId) const {
   return new GetMatrixSize(getMatrixOperand()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
                            getDimensionParameter()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
 }

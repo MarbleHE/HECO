@@ -12,7 +12,7 @@ AbstractBinaryExpr *AbstractStatement::contains(AbstractBinaryExpr *aexpTemplate
   return nullptr;
 }
 
-std::string AbstractStatement::getVarTargetIdentifier() {
+std::string AbstractStatement::getVarTargetIdentifier() const {
   return std::string();
 }
 

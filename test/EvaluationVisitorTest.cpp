@@ -314,7 +314,8 @@ TEST(EvaluationVisitorTests, astGetMatrixSizeKnownMatrix) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(52, ast);
   auto result = dynamic_cast<LiteralInt *>(ast.evaluateAst({}, false).front());
-  ASSERT_EQ(*result, *new LiteralInt(new Matrix<int>({{44}})));
+  std::vector<std::vector<int>> v = {{44}};
+  ASSERT_EQ(*result, *new LiteralInt(new Matrix<int>(v)));
 }
 
 TEST(EvaluationVisitorTests, astGetMatrixSizeAbstractMatrix) { /* NOLINT */

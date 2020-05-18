@@ -42,6 +42,8 @@ class AbstractExpr : public AbstractNode {
   virtual bool isEqual(AbstractExpr *other);
 
   AbstractExpr() = default;
+
+  AbstractExpr *clone(bool keepOriginalUniqueNodeId) const override = 0;
 };
 
 std::ostream &operator<<(std::ostream &outs, const AbstractExpr &obj);

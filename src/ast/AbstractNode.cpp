@@ -5,7 +5,7 @@
 
 int AbstractNode::nodeIdCounter = 0;
 
-std::string AbstractNode::generateUniqueNodeId() {
+std::string AbstractNode::generateUniqueNodeId() const {
   if (assignedNodeId==-1) {
     throw std::logic_error("Could not find any reserved ID for node. "
                            "Node constructor needs to reserve ID for node (see empty constructor).");
@@ -23,9 +23,9 @@ AbstractNode::AbstractNode() {
   assignedNodeId = getAndIncrementNodeId();
 }
 
-std::string AbstractNode::getUniqueNodeId() {
+std::string AbstractNode::getUniqueNodeId() const {
   // if there is no ID defined yet, create and assign an ID
-  if (uniqueNodeId.empty()) this->uniqueNodeId = generateUniqueNodeId();
+  if (uniqueNodeId.empty()) this->uniqueNodeId = this->generateUniqueNodeId();
   // otherwise just return the previously generated ID
   return uniqueNodeId;
 }
@@ -344,7 +344,7 @@ AbstractNode *AbstractNode::getOnlyParent() {
   return this->getParentsNonNull().front();
 }
 
-void AbstractNode::updateClone(bool keepOriginalUniqueNodeId, AbstractNode *originalNode) {
+void AbstractNode::updateClone(bool keepOriginalUniqueNodeId, const AbstractNode *originalNode) {
   if (keepOriginalUniqueNodeId) setUniqueNodeId(originalNode->getUniqueNodeId());
   if (originalNode->isReversed) swapChildrenParents();
 }

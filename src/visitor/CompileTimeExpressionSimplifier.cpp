@@ -1321,9 +1321,10 @@ void CompileTimeExpressionSimplifier::emitVariableDeclaration(ScopedVariable var
   if (varAsLiteral!=nullptr && !varAsLiteral->getMatrix()->getDimensions().equals(1, 1)) {
     newVarDeclaration = new VarDecl(variableToEmit.first,
                                     new Datatype(varValue->getDatatype()),
-                                    varValue->getValue()->clone());
+                                    varValue->getValue()->clone(false));
   } else {
-    newVarDeclaration = new VarDecl(variableToEmit.first, varValue->getDatatype());
+    Datatype *d = new Datatype(varValue->getDatatype());
+    newVarDeclaration = new VarDecl(variableToEmit.first, d);
   }
 
   // passing position in children vector is req. to prepend the new VarAssignm (i.e., as new first child of parent)
@@ -1376,8 +1377,8 @@ std::set<VarAssignm *> CompileTimeExpressionSimplifier::emitVariableAssignment(S
   std::vector<Variable *> occurrences;
   auto m = variableValues.getMap();
   for (auto it = m.begin(); it!=m.end(); ++it) {
-    if (it->first!=variableToEmit && it->second->value!=nullptr) {
-      for (auto &v: it->second->value->getVariables()) {
+    if (it->first!=variableToEmit && it->second->getValue()!=nullptr) {
+      for (auto &v: it->second->getValue()->getVariables()) {
         if (v->getIdentifier()==scopedVariableToEmit.first) {
           occurrences.push_back(v);
         }
@@ -1406,7 +1407,7 @@ std::set<VarAssignm *> CompileTimeExpressionSimplifier::emitVariableAssignment(S
   }
 
   auto newVarAssignm = new VarAssignm(variableToEmit.first,
-                                      variableValues.getVariableValue(variableToEmit)->value
+                                      variableValues.getVariableValue(variableToEmit)->getValue()
                                           ->clone(false)->castTo<AbstractExpr>());
   // add a reference in the list of the associated VarDecl
   emittedVariableDeclarations.at(variableToEmit)->addVarAssignm(newVarAssignm);

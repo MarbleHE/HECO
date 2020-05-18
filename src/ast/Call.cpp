@@ -39,7 +39,7 @@ std::vector<FunctionParameter *> Call::getArguments() const {
   return dynamic_cast<ParameterList *>(getChildAtIndex(0))->getParameters();
 }
 
-AbstractNode *Call::clone(bool keepOriginalUniqueNodeId) {
+AbstractExpr *Call::clone(bool keepOriginalUniqueNodeId) const{
   std::vector<FunctionParameter *> clonedArgs;
   for (auto &arg : getArguments()) {
     clonedArgs.push_back(arg->clone(keepOriginalUniqueNodeId)->castTo<FunctionParameter>());

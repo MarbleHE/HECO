@@ -72,7 +72,7 @@ bool LiteralString::supportsDatatype(Datatype &datatype) {
   return datatype.getType()==Types::STRING;
 }
 
-LiteralString *LiteralString::clone(bool keepOriginalUniqueNodeId) {
+LiteralString *LiteralString::clone(bool keepOriginalUniqueNodeId) const {
   auto clonedNode = new LiteralString(matrix->clone(keepOriginalUniqueNodeId));
   clonedNode->updateClone(keepOriginalUniqueNodeId, this);
   return clonedNode;

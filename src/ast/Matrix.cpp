@@ -390,7 +390,7 @@ json Matrix<std::string>::toJson() const {
 // - Matrix<AbstractExpr*>
 
 template<>
-Matrix<AbstractExpr *> *Matrix<AbstractExpr *>::clone(bool keepOriginalUniqueNodeId) {
+Matrix<AbstractExpr *> *Matrix<AbstractExpr *>::clone(bool keepOriginalUniqueNodeId) const {
   std::vector<std::vector<AbstractExpr *>> clonedMatrix(dim.numRows, std::vector<AbstractExpr *>(dim.numColumns));
   // we need to clone each AbstractExpr contained in this matrix
   for (int i = 0; i < values.size(); ++i) {
@@ -422,7 +422,7 @@ template<>
 void Matrix<AbstractExpr *>::setElementAt(int row, int column, AbstractExpr *element) {
   checkBoundsAndResizeMatrix(row, column);
   values[row][column] = element;
-  getDimensions().update(values.size(), values.at(0).size());
+  setDimension(Dimension(values.size(), values.at(0).size()));
 }
 
 template<>
@@ -430,7 +430,7 @@ void Matrix<int>::setElementAt(int row, int column, AbstractExpr *element) {
   if (auto elementAsLiteral = dynamic_cast<LiteralInt *>(element)) {
     checkBoundsAndResizeMatrix(row, column);
     values[row][column] = elementAsLiteral->getValue();
-    getDimensions().update(values.size(), values.at(0).size());
+    setDimension(Dimension(values.size(), values.at(0).size()));
   } else {
     throw std::runtime_error("Unexpected element given that cannot be added to Matrix<int>.");
   }
@@ -441,7 +441,7 @@ void Matrix<float>::setElementAt(int row, int column, AbstractExpr *element) {
   if (auto elementAsLiteral = dynamic_cast<LiteralFloat *>(element)) {
     checkBoundsAndResizeMatrix(row, column);
     values[row][column] = elementAsLiteral->getValue();
-    getDimensions().update(values.size(), values.at(0).size());
+    setDimension(Dimension(values.size(), values.at(0).size()));
   } else {
     throw std::runtime_error("Unexpected element given that cannot be added to Matrix<float>.");
   }
@@ -452,7 +452,7 @@ void Matrix<bool>::setElementAt(int row, int column, AbstractExpr *element) {
   if (auto elementAsLiteral = dynamic_cast<LiteralBool *>(element)) {
     checkBoundsAndResizeMatrix(row, column);
     values[row][column] = elementAsLiteral->getValue();
-    getDimensions().update(values.size(), values.at(0).size());
+    setDimension(Dimension(values.size(), values.at(0).size()));
   } else {
     throw std::runtime_error("Unexpected element given that cannot be added to Matrix<bool>.");
   }
@@ -463,7 +463,7 @@ void Matrix<std::string>::setElementAt(int row, int column, AbstractExpr *elemen
   if (auto elementAsLiteral = dynamic_cast<LiteralString *>(element)) {
     checkBoundsAndResizeMatrix(row, column);
     values[row][column] = elementAsLiteral->getValue();
-    getDimensions().update(values.size(), values.at(0).size());
+    setDimension(Dimension(values.size(), values.at(0).size()));
   } else {
     throw std::runtime_error("Unexpected element given that cannot be added to Matrix<std::string>.");
   }

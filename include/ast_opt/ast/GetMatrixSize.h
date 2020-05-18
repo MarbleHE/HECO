@@ -34,7 +34,7 @@ class GetMatrixSize : public AbstractExpr {
 
   [[nodiscard]] std::string toString(bool printChildren) const override;
 
-  AbstractNode *clone(bool keepOriginalUniqueNodeId) const override;
+  AbstractExpr *clone(bool keepOriginalUniqueNodeId) const override;
 
   bool supportsCircuitMode() override;
 

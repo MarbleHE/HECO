@@ -43,19 +43,44 @@ class Matrix : public AbstractMatrix {
   /// Creates a new empty matrix.
   Matrix() : values(std::vector<std::vector<T>>()), dim(Dimension(0, 0)) {}
 
+
+  explicit Matrix(std::initializer_list<std::vector<T>> init_list) {
+    std::vector<std::vector<T>> v;
+    for(auto it = init_list.begin(); it != init_list.end(); ++it) {
+      v.push_back(*it);
+    }
+    values = v;
+    dim = Dimension(values.size(), values.empty() ? 0 : values.at(0).size());
+    int elementsPerRow = values.empty() ? 0 : values.at(0).size();
+    for (auto const &rowVector : values) {
+      if (rowVector.size()!=elementsPerRow) {
+        throw std::invalid_argument("Vector rows must all have the same number of elements!");
+      }
+    }
+  }
+
   /// Creates a new matrix with the elements provided in inputMatrix.
   /// \param inputMatrix The elements of the matrix to create.
-  Matrix(std::vector<std::vector<T>> inputMatrix)  /* NOLINT intentionally not explicit */;
+  //TODO: For MSVC, this should really be defined outside class, but for explicit, it needs to be inside
+  Matrix(std::vector<std::vector<T>> inputMatrix)
+      : values(std::move(inputMatrix)), dim(values.size(), values.empty() ? 0 : values.at(0).size()) {
+    int elementsPerRow = values.empty() ? 0 : values.at(0).size();
+    for (auto const &rowVector : values) {
+      if (rowVector.size()!=elementsPerRow) {
+        throw std::invalid_argument("Vector rows must all have the same number of elements!");
+      }
+    }
+  }
 
   /// Creates a new (1,1)-matrix consisting of a single value.
   /// \param scalarValue The value to be used to create this new one-element "scalar" matrix.
-  Matrix(T scalarValue) : dim({1, 1}) {  /* NOLINT intentionally not explicit */
+  explicit Matrix(T scalarValue) : dim({1, 1}) {
     values = {{scalarValue}};
   }
 
   /// Creates a new matrix by copying the values of another, existing matrix other.
   /// \param other The matrix to be copied to create the new matrix.
-  Matrix(Matrix<T> &other) : dim(Dimension(other.getDimensions().numRows, other.getDimensions().numColumns)) {
+  Matrix(const Matrix<T> &other) : dim(Dimension(other.getDimensions().numRows, other.getDimensions().numColumns)) {
     values = other.values;
   }
 
@@ -141,7 +166,7 @@ class Matrix : public AbstractMatrix {
   /// For example, given targetDimension=(2,4) and scalarValue=7 would result in the matrix [7 7 7 7; 7 7 7 7].
   /// \param targetDimension The dimension this matrix should be expanded to.
   /// \param scalarValue The scalar value this matrix should be filled with.
-  void expandAndFillMatrix(Dimension &targetDimension, T scalarValue) {
+  void expandAndFillMatrix(const Dimension &targetDimension, T scalarValue) {
     values = std::vector<std::vector<T>>(targetDimension.numRows,
                                          std::vector<T>(targetDimension.numColumns, scalarValue));
     getDimensions().update(targetDimension.numRows, targetDimension.numColumns);
@@ -201,13 +226,15 @@ class Matrix : public AbstractMatrix {
         transposedVec[j].push_back(matrixToTranspose->values[i][j]);
       }
     }
-    matrixToTranspose->getDimensions().update(matrixToTranspose->values[0].size(), matrixToTranspose->values.size());
+    auto new_dim = matrixToTranspose->getDimensions();
+    new_dim.update(matrixToTranspose->values[0].size(), matrixToTranspose->values.size());
+    matrixToTranspose->setDimension(new_dim);
     matrixToTranspose->values = transposedVec;
     return matrixToTranspose;
   }
 
   Matrix<T> *rotate(int rotationFactor, bool inPlace) override {
-    Matrix<T> *matrixToRotate = inPlace ? this : new Matrix<T>(*this);
+    Matrix<T> *matrixToRotate = inPlace ? this : clone(false);
     if (matrixToRotate->getDimensions().equals(1, -1)) {  // a row vector
       auto &vec = matrixToRotate->values[0];
       std::rotate(vec.begin(), computeRotationTarget(vec.begin(), vec.size(), rotationFactor), vec.end());
@@ -338,7 +365,7 @@ class Matrix : public AbstractMatrix {
       values.at(idx) = castedMx->getNthRowVector(0);
     }
     // update the dimensions of this matrix
-    getDimensions().update(values.size(), values.empty() ? 0 : values.at(0).size());
+    setDimension(Dimension(values.size(), values.empty() ? 0 : values.at(0).size()));
 
     // transpose this matrix back as we transposed the given matrix mx previously to avoid reimplmenting the append
     // logic for column vectors
@@ -350,8 +377,12 @@ class Matrix : public AbstractMatrix {
     AbstractNode::replaceChild(originalChild, newChildToBeAdded);
   }
 
-  Dimension &getDimensions() override {
+  Dimension getDimensions() const override {
     return dim;
+  }
+
+  void setDimension(Dimension newDim) {
+    dim = newDim;
   }
 
   Matrix<T> *clone(bool keepOriginalUniqueNodeId) const override {
@@ -468,16 +499,6 @@ static Matrix<T> *applyMatrixMultiplication(Matrix<T> *matrixA, Matrix<T> *matri
 // and the specialized version isn't ODR-used in the same translation unit
 // Therefore, these following functions are all defined outside the class:
 
-template<typename T>
-Matrix<T>::Matrix(std::vector<std::vector<T>> inputMatrix)  /* NOLINT intentionally not explicit */
-    : values(std::move(inputMatrix)), dim(values.size(), values.empty() ? 0 : values.at(0).size()) {
-  int elementsPerRow = values.empty() ? 0 : values.at(0).size();
-  for (auto const &rowVector : values) {
-    if (rowVector.size()!=elementsPerRow) {
-      throw std::invalid_argument("Vector rows must all have the same number of elements!");
-    }
-  }
-}
 
 template<typename T>
 AbstractMatrix *Matrix<T>::applyBinaryOperatorComponentwise(Matrix<T> *rhsOperand, Operator *op) {
@@ -552,9 +573,6 @@ AbstractExpr *Matrix<std::string>::getElementAt(int row, int column);
 
 template<>
 AbstractExpr *Matrix<AbstractExpr *>::getElementAt(int row, int column);
-
-template<>
-Matrix<AbstractExpr *>::Matrix(std::vector<std::vector<AbstractExpr *>> inputMatrix);
 
 template<>
 [[nodiscard]] json Matrix<AbstractExpr *>::toJson() const;

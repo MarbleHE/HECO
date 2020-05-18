@@ -46,7 +46,7 @@ void UnaryExpr::setAttributes(UnaryOp op, AbstractExpr *expr) {
   addChildren(nodesToBeAdded, true);
 }
 
-UnaryExpr *UnaryExpr::clone(bool keepOriginalUniqueNodeId) {
+UnaryExpr *UnaryExpr::clone(bool keepOriginalUniqueNodeId) const {
   try {
     auto clonedNode = new UnaryExpr(std::get<UnaryOp>(this->getOperator()->getOperatorSymbol()),
                                     this->getRight()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());

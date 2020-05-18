@@ -13,7 +13,7 @@ class Call : public AbstractExpr {
 
   explicit Call(Function *func);
 
-  AbstractNode *clone(bool keepOriginalUniqueNodeId) const override;
+  AbstractExpr *clone(bool keepOriginalUniqueNodeId) const override;
 
   [[nodiscard]] json toJson() const override;
 

@@ -198,7 +198,7 @@ TEST_F(MatrixTestFixture, modifyMatrix_modifyWholeMatrixUsingAssignmentOp) {  /*
   EXPECT_EQ(m(2, 2), 0);
 
   // overwrite whole matrix
-  m = std::vector<std::vector<int>>({{0, 2, 1}, {1, 1, 1}, {90, 1, 34}});
+  m = Matrix<int>({{0, 2, 1}, {1, 1, 1}, {90, 1, 34}});
 
   // check values using getter
   EXPECT_EQ(m(0, 0), 0);

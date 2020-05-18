@@ -34,7 +34,7 @@ AbstractBinaryExpr *VarAssignm::contains(AbstractBinaryExpr *aexpTemplate, Arith
   return this->getValue()->contains(aexpTemplate, excludedSubtree);
 }
 
-std::string VarAssignm::getVarTargetIdentifier() {
+std::string VarAssignm::getVarTargetIdentifier() const {
   return this->getIdentifier();
 }
 
@@ -59,7 +59,7 @@ void VarAssignm::setAttribute(AbstractExpr *assignmentValue) {
   addChildren({assignmentValue}, true);
 }
 
-VarAssignm *VarAssignm::clone(bool keepOriginalUniqueNodeId) {
+VarAssignm *VarAssignm::clone(bool keepOriginalUniqueNodeId) const {
   auto clonedNode = new VarAssignm(this->getIdentifier(),
                                    this->getValue()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
   clonedNode->updateClone(keepOriginalUniqueNodeId, this);

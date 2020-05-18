@@ -38,7 +38,7 @@ bool Dimension::isValidAccess(int row, int column) {
   return row >= 0 && row < numRows && column >= 0 && column < numColumns;
 }
 
-int Dimension::getNthDimensionSize(int n) {
+int Dimension::getNthDimensionSize(int n) const {
   switch (n) {
     case 0:return numRows;
     case 1:return numColumns;

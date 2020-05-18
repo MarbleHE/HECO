@@ -36,7 +36,7 @@ class CompileTimeExpressionSimplifierFixture : public ::testing::Test {
     // different scopes. In that case the method always returns the value of the variable in the outermost scope.
     for (auto &[scopedVariable, varValue] : ctes.variableValues.getMap()) {
       if (scopedVariable.first==varIdentifier) {
-        return varValue->value;
+        return varValue->getValue();
       }
     }
     throw std::logic_error("Variable identifier '" + varIdentifier + "' not found!");

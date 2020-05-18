@@ -15,7 +15,7 @@ class AbstractStatement : public AbstractNode {
 
   virtual AbstractBinaryExpr *contains(AbstractBinaryExpr *aexpTemplate, ArithmeticExpr *excludedSubtree);
 
-  virtual std::string getVarTargetIdentifier();
+  virtual std::string getVarTargetIdentifier() const;
 
   virtual bool isEqual(AbstractStatement *as);
 };

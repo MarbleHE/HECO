@@ -7,7 +7,17 @@ class Dimension {
  public:
   int numRows, numColumns;
 
+  Dimension() = default;
+
   Dimension(int numberOfRows, int numberOfColumns);
+
+  Dimension(const Dimension&) = default;
+
+  Dimension(Dimension&&) = default;
+
+  Dimension& operator=(const Dimension&) = default;
+
+  Dimension& operator=(Dimension&&) = default;
 
   bool operator==(const Dimension &rhs) const;
 
@@ -21,7 +31,7 @@ class Dimension {
 
   void update(int numberOfRows, int numberOfColumns);
 
-  int getNthDimensionSize(int n);
+  int getNthDimensionSize(int n) const;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_DIMENSION_H_

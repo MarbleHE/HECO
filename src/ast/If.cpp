@@ -42,7 +42,7 @@ AbstractStatement *If::getElseBranch() const {
 
 If::~If() = default;
 
-If *If::clone(bool keepOriginalUniqueNodeId) {
+If *If::clone(bool keepOriginalUniqueNodeId) const {
   auto clonedNode = new If(getCondition()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
                            getThenBranch()->clone(keepOriginalUniqueNodeId)->castTo<AbstractStatement>(),
                            getElseBranch()->clone(keepOriginalUniqueNodeId)->castTo<AbstractStatement>());

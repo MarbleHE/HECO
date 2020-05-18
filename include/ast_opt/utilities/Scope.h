@@ -86,7 +86,7 @@ class VariableValue {
     return value->clone(false)->castTo<AbstractExpr>();
   }
 
-  const Datatype &getDatatype() {
+  Datatype getDatatype() {
     return datatype;
   }
 

@@ -37,8 +37,8 @@ class AbstractMatrix : public AbstractNode {
   virtual AbstractMatrix *transpose(bool inPlace) = 0;
 
   /// Returns the dimension object that indicates the matrix dimensions.
-  /// \return A reference to the dimension object associated to this matrix.
-  virtual Dimension &getDimensions() = 0;
+  /// \return A copy of the dimension object associated to this matrix.
+  virtual Dimension getDimensions() const = 0;
 
   /// Creates a string representation of this matrix using the matrix text representation by MATLAB.
   /// For example, a 3x2 matrix would look like [2 3; 2 332; 43 3] where the semicolon (;) serves as row delimiter.

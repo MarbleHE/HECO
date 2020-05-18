@@ -50,7 +50,7 @@ void Rotate::accept(Visitor &v) {
   v.visit(*this);
 }
 
-Rotate *Rotate::clone(bool keepOriginalUniqueNodeId) {
+Rotate *Rotate::clone(bool keepOriginalUniqueNodeId) const {
   return new Rotate(getOperand()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>(),
                     getRotationFactor()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>());
 }
@@ -69,10 +69,9 @@ void Rotate::setAttributes(AbstractExpr *pExpr, AbstractExpr *rotationFactor) {
 }
 
 bool Rotate::isOneDimensionalVector(AbstractExpr *operand) {
-  Dimension *dim;
   if (auto literal = dynamic_cast<AbstractLiteral *>(operand)) {
-    dim = &(literal->getMatrix()->getDimensions());
-    return dim->equals(1, -1) || dim->equals(-1, 1);
+    auto dim = literal->getMatrix()->getDimensions();
+    return dim.equals(1, -1) || dim.equals(-1, 1);
   }
   return false;
 }
