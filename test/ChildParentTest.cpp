@@ -397,6 +397,7 @@ TEST_F(IfStmtFixture, IfStmtAddChildException_TooManyChildrenAdded) {  /* NOLINT
 TEST_F(IfStmtFixture, IfStmtAddChildSuccess) {  /* NOLINT */
   auto ifStmt = new If(condition, thenBranch);
   auto newElseBranch = new Block(new VarAssignm("a", new LiteralInt(1024)));
+  ifStmt->removeChild(ifStmt->getElseBranch(),true);
   ifStmt->addChild(newElseBranch, true);
 
   // children

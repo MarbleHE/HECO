@@ -23,9 +23,9 @@ class If : public AbstractStatement {
 
   [[nodiscard]] AbstractExpr *getCondition() const;
 
-  [[nodiscard]] AbstractStatement *getThenBranch() const;
+  [[nodiscard]] Block * getThenBranch() const;
 
-  [[nodiscard]] AbstractStatement *getElseBranch() const;
+  [[nodiscard]] Block * getElseBranch() const;
 
   int getMaxNumberChildren() override;
 

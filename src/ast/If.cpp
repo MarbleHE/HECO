@@ -1,5 +1,6 @@
 #include "ast_opt/ast/If.h"
 #include "ast_opt/ast/LiteralBool.h"
+#include "ast_opt/ast/Block.h"
 
 json If::toJson() const {
   json j;
@@ -30,14 +31,12 @@ AbstractExpr *If::getCondition() const {
   return getChildAtIndex(0)->castTo<AbstractExpr>();
 }
 
-AbstractStatement *If::getThenBranch() const {
-  return getChildAtIndex(1) ? getChildAtIndex(1)->castTo<AbstractStatement>() : nullptr;
+Block *If::getThenBranch() const {
+  return getChildAtIndex(1) ? getChildAtIndex(1)->castTo<Block>() : nullptr;
 }
 
-AbstractStatement *If::getElseBranch() const {
-  // make sure that there exists an Else branch
-  if (getChildAtIndex(2)!=nullptr) return getChildAtIndex(2)->castTo<AbstractStatement>();
-  return nullptr;
+Block *If::getElseBranch() const {
+  return getChildAtIndex(2) ? getChildAtIndex(2)->castTo<Block>() : nullptr;
 }
 
 If::~If() = default;
@@ -59,7 +58,23 @@ bool If::supportsCircuitMode() {
 void If::setAttributes(AbstractExpr *condition, AbstractStatement *thenBranch, AbstractStatement *elseBranch) {
   // update tree structure
   removeChildren();
-  addChildren({condition, thenBranch, elseBranch}, true);
+
+  addChild(condition, true);
+
+  auto thenBranchAsBlock = dynamic_cast<Block *>(thenBranch);
+  if (!thenBranchAsBlock) {
+    thenBranchAsBlock = new Block;
+    thenBranchAsBlock->addChild(thenBranch, true);
+  }
+  addChild(thenBranchAsBlock, true);
+
+  auto elseBranchAsBlock = dynamic_cast<Block *>(elseBranch);
+  if (!elseBranchAsBlock) {
+    elseBranchAsBlock = new Block;
+    elseBranchAsBlock->addChild(elseBranch, true);
+  }
+  addChild(elseBranchAsBlock, true);
+
 }
 std::string If::toString(bool printChildren) const {
   return AbstractNode::generateOutputString(printChildren, {});

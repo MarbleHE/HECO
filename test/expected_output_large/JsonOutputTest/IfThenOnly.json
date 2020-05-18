@@ -29,11 +29,20 @@
     }
   },
   "thenBranch": {
-    "type": "VarAssignm",
-    "identifier": "isValid",
-    "value": {
-      "type": "LiteralBool",
-      "value": true
-    }
+    "type": "Block",
+    "statements": [
+      {
+        "type": "VarAssignm",
+        "identifier": "isValid",
+        "value": {
+          "type": "LiteralBool",
+          "value": true
+        }
+      }
+    ]
+  },
+  "elseBranch": {
+    "statements": [],
+    "type": "Block"
   }
 }
