@@ -101,7 +101,7 @@ class Ciphertext {
   Ciphertext sumAndRotatePartially(int numElementsToSum);
 
   void printCiphertextData();
-  std::vector<int64_t> decrypt();
+  std::vector<int64_t> decryptAndDecode();
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_MOCKUP_CLASSES_CIPHERTEXT_H_

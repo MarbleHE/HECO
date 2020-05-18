@@ -301,7 +301,7 @@ double &Ciphertext::getElementAt(int n) {
   return data.at(n);
 }
 
-std::vector<std::int64_t> Ciphertext::decrypt() {
+std::vector<std::int64_t> Ciphertext::decryptAndDecode() {
 #ifdef HAVE_SEAL_BFV
   seal::Plaintext plaintext;
 
@@ -309,8 +309,12 @@ std::vector<std::int64_t> Ciphertext::decrypt() {
   seal::Decryptor decryptor(context, *secretKey);
   decryptor.decrypt(ciphertext, plaintext);
 
-  auto arr = plaintext.int_array();
-  return std::vector<std::int64_t>(arr.begin(), arr.end());
+  // Helper object for decoding
+  seal::BatchEncoder batchEncoder(context);
+  std::vector<std::int64_t> decodedValues;
+  batchEncoder.decode(plaintext, decodedValues);
+
+  return decodedValues;
 #endif
 }
 
