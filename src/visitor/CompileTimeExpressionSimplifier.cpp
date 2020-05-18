@@ -918,6 +918,9 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
       // This is mostly so that code that looks for parents works correctly
       elem.getOnlyParent()->replaceChild(&elem, unrolledBlock);
 
+      // Cleanup the Block we just inserted, in case it's empty/has NULL stmts left
+      cleanUpBlock(*unrolledBlock);
+
       // Mark the current For-Loop node (elem) for deletion
       nodesQueuedForDeletion.push_back(&elem);
 
@@ -1465,9 +1468,12 @@ void CompileTimeExpressionSimplifier::enteredForLoop() {
 void CompileTimeExpressionSimplifier::cleanUpBlock(Block &elem) {
   // Since some children might have replaced themselves with nullptr, let's collect only the valid children
   auto newChildren = elem.getChildrenNonNull();
-  if (newChildren.empty()) {
-    // Block is empty => remove it from parent
-    elem.getOnlyParent()->replaceChild(&elem, nullptr);
+  if (newChildren.empty()
+      && !elem.getParentsNonNull().empty()) { //sometimes, e.g. in loop unrolling, a block might not yet have a parent!
+    // Block is empty => remove it from parents
+    for (auto &p: elem.getParentsNonNull()) {
+      p->replaceChild(&elem, nullptr);
+    }
     // mark for deletion
     enqueueNodeForDeletion(&elem);
   } else {
