@@ -125,7 +125,7 @@ Ciphertext Ciphertext::operator+(const double plaintextScalar) const {
   seal::Evaluator evaluator(context);
   seal::BatchEncoder batchEncoder(context);
   seal::Plaintext plaintext;
-  batchEncoder.encode(std::vector<uint64_t>(getNumCiphertextSlots(), plaintextScalar), plaintext);
+  batchEncoder.encode(std::vector<int64_t>(getNumCiphertextSlots(), plaintextScalar), plaintext);
   evaluator.add_plain(ciphertext, plaintext, result.ciphertext);
 #endif
   return result;
@@ -167,7 +167,7 @@ Ciphertext Ciphertext::operator-(double plaintextScalar) const {
   seal::Evaluator evaluator(context);
   seal::BatchEncoder batchEncoder(context);
   seal::Plaintext plaintext;
-  batchEncoder.encode(std::vector<uint64_t>(getNumCiphertextSlots(), plaintextScalar), plaintext);
+  batchEncoder.encode(std::vector<int64_t>(getNumCiphertextSlots(), plaintextScalar), plaintext);
   evaluator.sub_plain(ciphertext, plaintext, result.ciphertext);
 #endif
   return result;
@@ -195,7 +195,7 @@ Ciphertext Ciphertext::operator*(const double plaintextScalar) const {
   seal::Evaluator evaluator(context);
   seal::BatchEncoder batchEncoder(context);
   seal::Plaintext plaintext;
-  batchEncoder.encode(std::vector<uint64_t>(getNumCiphertextSlots(), plaintextScalar), plaintext);
+  batchEncoder.encode(std::vector<int64_t>(getNumCiphertextSlots(), plaintextScalar), plaintext);
   evaluator.multiply_plain(ciphertext, plaintext, result.ciphertext);
 #endif
   return result;

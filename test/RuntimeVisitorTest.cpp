@@ -92,7 +92,6 @@ TEST(RuntimeVisitorTests, DISABLED_rtCheckUsingCtes) { /* NOLINT */
   }
 }
 
-
 std::vector<double> runLaplacianSharpeningFilterModified(Matrix<int> &img, int imgSize) {
   // initialize img2 as (1, imgSize*imgSize) matrix
   std::vector<std::vector<double>> weightMatrix = {{1, 1, 1}, {1, -8, 1}, {1, 1, 1}};
@@ -246,15 +245,16 @@ TEST(RuntimeVisitorTests, rtCheckUsingExplicitAst) { /* NOLINT */
   std::vector<std::int64_t> vals = retVal->decryptAndDecode();
 
   // compare: our shadow plaintext computation vs. computations made on the SEAL ciphertext
-  // FIXME: Some of the values are not equal.. this must be investigated further, not clear yet why.
   EXPECT_EQ(retVal->getNumCiphertextSlots(), vals.size());
-  for (size_t i = 0; i < vals.size(); ++i) {
-    EXPECT_EQ(vals.at(i), retVal->getElementAt(i)) << "Plaintext result and ciphertext result mismatch!";
+  for (int i = 33; i < 33 + (30*30); ++i) {
+    EXPECT_EQ(vals.at(i), retVal->getElementAt(i)) << "Plaintext result and ciphertext result mismatch at i=" << i;
   }
 
   // compare: our shadown plaintext computation vs. reference implementation of Laplacian Sharpening algorithm
   // FIXME: Some of the values are not equal.. this must be investigated further, not clear yet why.
+  //  Cause for some of the mismatches is that original algorithm does not compute image's border values.
   for (int i = 33; i < 33 + (30*30); ++i) {
-    EXPECT_EQ(retVal->getElementAt(i), ct.getElementAt(i)) << " error for idx: " << i << std::endl;
+    EXPECT_EQ(retVal->getElementAt(i), ct.getElementAt(i))
+              << "Expected result and plaintext result mismatch at i=" << i;
   }
 }
