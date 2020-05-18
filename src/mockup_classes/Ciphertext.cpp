@@ -1,5 +1,6 @@
 #include "ast_opt/mockup_classes/Ciphertext.h"
 #include <iostream>
+#include <cmath>
 
 #ifdef HAVE_SEAL_BFV
 // Initialize static members
@@ -56,7 +57,7 @@ Ciphertext::Ciphertext(std::vector<double> inputData, int numCiphertextSlots)
     : numCiphertextElements(inputData.size()), offsetOfFirstElement(0) {
   //TODO (Alex): numCiphertextSlots should probably be static after first init and input should  match exactly
   if (inputData.size() > numCiphertextSlots) {
-    throw std::runtime_error("");
+    throw std::runtime_error("Cannot add more elements than ciphertext slots are available!");
   }
   data.insert(data.begin(), inputData.begin(), inputData.end());
   data.resize(numCiphertextSlots);
@@ -68,7 +69,10 @@ Ciphertext::Ciphertext(std::vector<double> inputData, int numCiphertextSlots)
   seal::BatchEncoder batchEncoder(context);
   seal::Plaintext plaintext;
 
-  //TODO (Alex): Throw exception if non-integer data and mode is BFV
+  // Throw exception if non-integer data and mode is BFV
+  if (std::any_of(inputData.begin(), inputData.end(), [this](double d) { return !isInteger(d); })) {
+    throw std::invalid_argument("Unsupported: Cannot create ciphertext of doubles when using SEAL with BFV.");
+  }
   /// Encode, force conversion from double to int64
   batchEncoder.encode(std::vector<std::int64_t>(data.begin(), data.end()), plaintext);
 
@@ -91,7 +95,10 @@ Ciphertext::Ciphertext(double scalar, int numCiphertextSlots)
   seal::BatchEncoder batchEncoder(context);
   seal::Plaintext plaintext;
 
-  //TODO (Alex): Throw exception if non-integer data and mode is BFV
+  // Throw exception if non-integer data and mode is BFV
+  if (!isInteger(scalar)) {
+    throw std::invalid_argument("Unsupported: Cannot create ciphertext of double when using SEAL with BFV.");
+  }
   /// Encode, force conversion from double to int64
   batchEncoder.encode(std::vector<std::int64_t>(data.begin(), data.end()), plaintext);
 
@@ -285,14 +292,26 @@ Ciphertext Ciphertext::rotate(int n) {
   result.offsetOfFirstElement = (getOffsetOfFirstElement() + n)%result.getNumCiphertextSlots();
 #ifdef HAVE_SEAL_BFV
   seal::Evaluator evaluator(context);
-  evaluator.rotate_vector_inplace(result.ciphertext, n, *galoisKeys);
+  evaluator.rotate_rows_inplace(result.ciphertext, n, *galoisKeys);
 #endif
   return result;
 }
 
 double &Ciphertext::getElementAt(int n) {
-  //TODO: Make decryption an explicit operation
   return data.at(n);
+}
+
+std::vector<std::int64_t> Ciphertext::decrypt() {
+#ifdef HAVE_SEAL_BFV
+  seal::Plaintext plaintext;
+
+  // Helper object for decryption
+  seal::Decryptor decryptor(context, *secretKey);
+  decryptor.decrypt(ciphertext, plaintext);
+
+  auto arr = plaintext.int_array();
+  return std::vector<std::int64_t>(arr.begin(), arr.end());
+#endif
 }
 
 Ciphertext Ciphertext::sumaAndRotateAll() {
@@ -314,7 +333,7 @@ Ciphertext Ciphertext::sumAndRotate(int initialRotationFactor) {
   while (rotationFactor >= 1) {
     auto rotatedCtxt = ctxt.rotate(rotationFactor);
 #ifdef HAVE_SEAL_BFV
-    evaluator.rotate_vector_inplace(rotatedCtxt.ciphertext, rotationFactor, *galoisKeys);
+    evaluator.rotate_rows_inplace(rotatedCtxt.ciphertext, rotationFactor, *galoisKeys);
 #endif
     ctxt = ctxt + rotatedCtxt;
     rotationFactor = rotationFactor/2;
@@ -328,3 +347,6 @@ void Ciphertext::printCiphertextData() {
   }
 }
 
+bool Ciphertext::isInteger(double k) {
+  return std::floor(k)==k;
+}

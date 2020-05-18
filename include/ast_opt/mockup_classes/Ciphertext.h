@@ -52,6 +52,8 @@ class Ciphertext {
 
   Ciphertext(const Ciphertext &ctxt); // copy constructor
 
+  static bool isInteger(double k);
+
   Ciphertext operator+(const Ciphertext &ctxt) const;
 
   Ciphertext operator+(double plaintextScalar) const;
@@ -99,6 +101,7 @@ class Ciphertext {
   Ciphertext sumAndRotatePartially(int numElementsToSum);
 
   void printCiphertextData();
+  std::vector<int64_t> decrypt();
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_MOCKUP_CLASSES_CIPHERTEXT_H_
