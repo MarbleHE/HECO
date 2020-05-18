@@ -194,8 +194,6 @@ class VariableValuesMap {
 
   VariableValue *getVariableValue(ScopedVariable scopedVariable);
 
-  void addVariable(ScopedVariable scopedVariable, VariableValue *value);
-
   void setVariableValue(ScopedVariable scopedVariable, VariableValue *value);
 
   /// Returns the current value of the variable identified by the given variableName. If there are multiple

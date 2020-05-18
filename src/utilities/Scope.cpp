@@ -168,14 +168,6 @@ VariableValue *VariableValuesMap::getVariableValue(ScopedVariable scopedVariable
     return it->second;
   }
 }
-void VariableValuesMap::addVariable(ScopedVariable scopedVariable, VariableValue *value) {
-  auto it = variableValues.find(scopedVariable);
-  if (it!=variableValues.end()) {
-    throw std::invalid_argument("Variable " + scopedVariable.getIdentifier() + " already exists.");
-  } else {
-    variableValues.insert_or_assign(scopedVariable, value);
-  }
-}
 void VariableValuesMap::setVariableValue(ScopedVariable scopedVariable, VariableValue *value) {
   auto it = variableValues.find(scopedVariable);
   if (it==variableValues.end()) {

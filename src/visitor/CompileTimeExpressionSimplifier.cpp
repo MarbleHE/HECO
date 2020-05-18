@@ -1405,7 +1405,7 @@ std::set<VarAssignm *> CompileTimeExpressionSimplifier::emitVariableAssignment(S
     // add to variableValues and emit
     auto sv = ScopedVariable(temp_id, curScope);
     auto vv = new VariableValue(*variableValues.getVariableValue(variableToEmit));
-    variableValues.addVariable(sv, vv);
+    variableValues.addDeclaredVariable(sv, vv);
     auto new_assignments = emitVariableAssignment(sv);
     result.insert(new_assignments.begin(), new_assignments.end());
 
