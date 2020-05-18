@@ -74,11 +74,12 @@ void Visitor::visit(Block &elem) {
 void Visitor::visit(Call &elem) {
   // callee
   elem.getFunc()->accept(*this);
-  changeToOuterScope();
   // arguments
+  changeToInnerScope(elem.getFunc()->getUniqueNodeId(),elem.getFunc());
   for (auto arg : elem.getArguments()) {
     arg->accept(*this);
   }
+  changeToOuterScope();
 }
 
 void Visitor::visit(CallExternal &elem) {
