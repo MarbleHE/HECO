@@ -74,7 +74,9 @@ class VariableValue {
   /// Copy assignment
   VariableValue &operator=(const VariableValue &other) {
     datatype = other.datatype;
-    value = std::unique_ptr<AbstractExpr>(other.value->clone(false)->castTo<AbstractExpr>());
+    if (other.value) {
+      value = std::unique_ptr<AbstractExpr>(other.value->clone(false)->castTo<AbstractExpr>());
+    }
     return *this;
   };
 
@@ -82,7 +84,7 @@ class VariableValue {
   VariableValue &operator=(VariableValue &&other) = default;
 
   /// Creates a copy of the value!
-  AbstractExpr *getValue() {
+  AbstractExpr *getValue() const {
     return value ? value->clone(false)->castTo<AbstractExpr>() : nullptr;
   }
 
@@ -154,7 +156,7 @@ struct tuple_element<N, ScopedVariable> {
  */
 class VariableValuesMap {
  private:
-  std::map<ScopedVariable, VariableValue *> variableValues;
+  std::map<ScopedVariable, VariableValue> variableValues;
  public:
   /// Create an empty map
   VariableValuesMap() = default;
@@ -163,7 +165,7 @@ class VariableValuesMap {
   ~VariableValuesMap() = default;
 
   /// Create a map  directly
-  explicit VariableValuesMap(std::map<ScopedVariable, VariableValue *> variableValues) : variableValues(std::move(
+  explicit VariableValuesMap(std::map<ScopedVariable, VariableValue> variableValues) : variableValues(std::move(
       variableValues)) {};
 
   /// Copy ctor (Deep-ish copy that clones AbstractExpr's stored as values)
@@ -185,16 +187,12 @@ class VariableValuesMap {
   };
 
   /// Saves information about a declared variable. Must include the variable's identifier, the variable's datatype, and
-  /// optionally also an initializer (or nullptr otherwise). Deep copies VariableValue
-  void addDeclaredVariable(ScopedVariable scopedVariable, VariableValue *value);
-
-  /// Saves information about a declared variable. Must include the variable's identifier, the variable's datatype, and
   /// optionally also an initializer (or nullptr otherwise).
   void addDeclaredVariable(ScopedVariable scopedVariable, VariableValue value);
 
-  VariableValue *getVariableValue(ScopedVariable scopedVariable);
+  VariableValue getVariableValue(ScopedVariable scopedVariable);
 
-  void setVariableValue(ScopedVariable scopedVariable, VariableValue *value);
+  void setVariableValue(ScopedVariable scopedVariable, VariableValue value);
 
   /// Returns the current value of the variable identified by the given variableName. If there are multiple
   /// declarations within different scopes, returns the declaration that is closest to curScope.
@@ -210,7 +208,7 @@ class VariableValuesMap {
   ScopedVariable getVariableEntryDeclaredInThisOrOuterScope(std::string variableName, Scope *curScope);
 
   //LAZY HACK
-  const std::map<ScopedVariable, VariableValue *> &getMap() { return variableValues; };
+  const std::map<ScopedVariable, VariableValue> &getMap() { return variableValues; };
 
 };
 

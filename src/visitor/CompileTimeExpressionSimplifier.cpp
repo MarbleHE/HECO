@@ -154,8 +154,8 @@ void CompileTimeExpressionSimplifier::visit(MatrixAssignm &elem) {
     enqueueNodeForDeletion_ = true;
   } else { // matrix/indices are not known or there was a previous assignment that could not be executed
     auto var = variableValues.getVariableEntryDeclaredInThisOrOuterScope(operandAsVariable->getIdentifier(), curScope);
-    auto varValueExpr =
-        variableValues.getVariableValue(var) ? variableValues.getVariableValue(var)->getValue() : nullptr;
+    auto varValue = variableValues.getVariableValue(var);
+    auto varValueExpr = varValue.getValue();
     if (varValueExpr==nullptr) {
       // The Matrix already has the UNKNOWN value (nullptr) assigned, i.e., a MatrixAssignm was visited before that
       // could not be executed as there were unknown indices involved.
@@ -173,7 +173,7 @@ void CompileTimeExpressionSimplifier::visit(MatrixAssignm &elem) {
         emittedVariableDeclarations.at(var)->addVarAssignm(&elem);
       }
       // and then mark the value as UNKNOWN
-      variableValues.setVariableValue(var, nullptr);
+      variableValues.setVariableValue(var, VariableValue(varValue.getDatatype(), nullptr));
     } else {
       // The variable's value is set, i.e., a previous MatrixAssignm was executed by CTES. As we now encountered a
       // MatrixAssignm that cannot be executed due to unknown indices, we need to undo the removal of any previous
@@ -189,9 +189,8 @@ void CompileTimeExpressionSimplifier::visit(MatrixAssignm &elem) {
         elem.getOnlyParent()->addChild(s, true);
       }
 
-
       // and remove the value in variableValues map to avoid saving any further assignments
-      variableValues.setVariableValue(var, nullptr);
+      variableValues.setVariableValue(var, VariableValue(varValue.getDatatype(), nullptr));
     }
   }
   if (enqueueNodeForDeletion_) {
@@ -329,10 +328,7 @@ void CompileTimeExpressionSimplifier::visit(VarAssignm &elem) {
   Visitor::visit(elem);
   // store the variable's value
   auto var = variableValues.getVariableEntryDeclaredInThisOrOuterScope(elem.getVarTargetIdentifier(), curScope);
-  auto newVV =
-      variableValues.getVariableValue(var) ?
-      new VariableValue(variableValues.getVariableValue(var)->getDatatype(), elem.getValue())
-                                        : nullptr;
+  auto newVV = VariableValue(variableValues.getVariableValue(var).getDatatype(), elem.getValue());
   variableValues.setVariableValue(var, newVV);
 
   // Delete this node
@@ -679,16 +675,16 @@ void CompileTimeExpressionSimplifier::visit(If &elem) {
     // note: up to this point (and beyond), the Else-branch's modifications are in variableValues
     for (auto &[variableIdentifier, originalValue] : originalVariableValues.getMap()) {
       // check if the variable was changed in the Then-branch
-      auto thenBranchValue = variableValuesAfterVisitingThen.getVariableValue(variableIdentifier)->getValue();
-      auto thenBranchModifiedCurrentVariable = (thenBranchValue!=originalValue->getValue());
+      auto thenBranchValue = variableValuesAfterVisitingThen.getVariableValue(variableIdentifier).getValue();
+      auto thenBranchModifiedCurrentVariable = (thenBranchValue!=originalValue.getValue());
       // check if the variable was changed in the Else-branch
       // if there is no Else-branch, elseBranchModifiedCurrentVariable stays False
       bool elseBranchModifiedCurrentVariable = false;
       AbstractExpr *elseBranchValue = nullptr;
       //Check elseBranch directly longer works because the else branch might have self-eliminated
       if (hadElseBranch) {
-        elseBranchValue = variableValues.getVariableValue(variableIdentifier)->getValue();
-        elseBranchModifiedCurrentVariable = (elseBranchValue!=originalValue->getValue());
+        elseBranchValue = variableValues.getVariableValue(variableIdentifier).getValue();
+        elseBranchModifiedCurrentVariable = (elseBranchValue!=originalValue.getValue());
       }
 
       // Determine if an If statement-dependent value needs to be assigned to the variable.
@@ -700,16 +696,16 @@ void CompileTimeExpressionSimplifier::visit(If &elem) {
       if (thenBranchModifiedCurrentVariable && elseBranchModifiedCurrentVariable) {
         newValue = generateIfDependentValue(elem.getCondition(), thenBranchValue, elseBranchValue);
       } else if (thenBranchModifiedCurrentVariable) {
-        newValue = generateIfDependentValue(elem.getCondition(), thenBranchValue, originalValue->getValue());
+        newValue = generateIfDependentValue(elem.getCondition(), thenBranchValue, originalValue.getValue());
       } else if (elseBranchModifiedCurrentVariable) {
-        newValue = generateIfDependentValue(elem.getCondition(), originalValue->getValue(), elseBranchValue);
+        newValue = generateIfDependentValue(elem.getCondition(), originalValue.getValue(), elseBranchValue);
       } else {
         // otherwise neither one of the two branches modified the variable's value and we can keep it unchanged
         continue;
       }
       // assign the new If statement-dependent value (e.g., myVarIdentifier = condition*32+[1-condition]*11)
       auto newVariableValue =
-          new VariableValue(originalVariableValues.getVariableValue(variableIdentifier)->getDatatype(), newValue);
+          VariableValue(originalVariableValues.getVariableValue(variableIdentifier).getDatatype(), newValue);
       originalVariableValues.setVariableValue(variableIdentifier, newVariableValue);
     }
     // restore the original map that contains the merged changes from the visited branches
@@ -800,7 +796,7 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
   // Since they will be different in each iteration, CTES should treat them as "compile time unknown"
   // Therefore, we need to remove their values from the variableValues map
   for (auto &v: loopVariables) {
-    variableValues.setVariableValue(v, nullptr);
+    variableValues.setVariableValue(v, VariableValue(variableValues.getVariableValue(v).getDatatype(), nullptr));
   }
 
   // BODY
@@ -844,7 +840,7 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
       auto variableIdentifiers = elem.getCondition()->getVariableIdentifiers();
       for (auto &identifier : variableIdentifiers) {
         auto var = loopCTES.variableValues.getVariableEntryDeclaredInThisOrOuterScope(identifier, loopCTES.curScope);
-        auto value = loopCTES.variableValues.getVariableValue(var);
+        auto value = loopCTES.variableValues.getVariableValue(var).getValue();
         if (value==nullptr) {
           // no need to continue checking other variables
           return false;
@@ -1172,7 +1168,7 @@ AbstractExpr *CompileTimeExpressionSimplifier::getKnownValue(AbstractNode *node)
 std::unordered_map<std::string, AbstractLiteral *> CompileTimeExpressionSimplifier::getTransformedVariableMap() {
   std::unordered_map<std::string, AbstractLiteral *> variableMap;
   for (auto &[k, v] : variableValues.getMap()) {
-    if (auto varAsLiteral = v ? dynamic_cast<AbstractLiteral *>(v->getValue()) : nullptr) {
+    if (auto varAsLiteral = dynamic_cast<AbstractLiteral *>(v.getValue())) {
       variableMap[k.getIdentifier()] = varAsLiteral;
     }
   }
@@ -1255,7 +1251,7 @@ void CompileTimeExpressionSimplifier::appendVectorToMatrix(const std::string &va
 
   // on contrary to simple scalars, we do not need to replace the variable in the variableValues map, instead we
   // need to retrieve the associated matrix and set the element at the specified (row, column)
-  auto literal = dynamic_cast<AbstractLiteral *>(variableValues.getVariableValue(var)->getValue());
+  auto literal = dynamic_cast<AbstractLiteral *>(variableValues.getVariableValue(var).getValue());
   if (literal==nullptr) {
     std::stringstream errorMsg;
     errorMsg << "appendVectorToMatrix failed: " << "Current value of matrix " << var.getIdentifier() << " ";
@@ -1281,17 +1277,10 @@ void CompileTimeExpressionSimplifier::setMatrixVariableValue(const std::string &
   }
 
   auto var = variableValues.getVariableEntryDeclaredInThisOrOuterScope(variableIdentifier, curScope);
-  if (variableValues.getVariableValue(var)==nullptr) {
-    std::stringstream errorMsg;
-    errorMsg << "setMatrixValue failed: ";
-    errorMsg << "Could not find entry in variableValues for variable identifier " << var.getIdentifier() << " ";
-    errorMsg << "by starting search from scope " << var.getScope()->getScopeIdentifier() << ".";
-    throw std::runtime_error(errorMsg.str());
-  }
 
   // on contrary to simple scalars, we do not need to replace the variable in the variableValues map, instead we
   // need to retrieve the associated matrix and set the element at the specified (row, column)
-  auto literal = dynamic_cast<AbstractLiteral *>(variableValues.getVariableValue(var)->getValue());
+  auto literal = dynamic_cast<AbstractLiteral *>(variableValues.getVariableValue(var).getValue());
   if (literal==nullptr) {
     std::stringstream errorMsg;
     errorMsg << "setMatrixValue failed: ";
@@ -1305,7 +1294,7 @@ void CompileTimeExpressionSimplifier::setMatrixVariableValue(const std::string &
   // store the value at the given position - matrix must handle indices and make sure that matrix is large enough
   literal->getMatrix()->setElementAt(row, column, valueToStore);
   // Update the VariableValuesMap with this new matrix
-  variableValues.setVariableValue(var, new VariableValue(variableValues.getVariableValue(var)->getDatatype(), literal));
+  variableValues.setVariableValue(var, VariableValue(variableValues.getVariableValue(var).getDatatype(), literal));
 
 }
 
@@ -1325,13 +1314,13 @@ void CompileTimeExpressionSimplifier::emitVariableDeclaration(ScopedVariable var
   // if this variable is not a scalar, we need to emit the variable value too, otherwise the information about the
   // matrix dimension will be lost!
   VarDecl *newVarDeclaration;
-  auto varAsLiteral = dynamic_cast<AbstractLiteral *>(varValue->getValue());
+  auto varAsLiteral = dynamic_cast<AbstractLiteral *>(varValue.getValue());
   if (varAsLiteral!=nullptr && !varAsLiteral->getMatrix()->getDimensions().equals(1, 1)) {
     newVarDeclaration = new VarDecl(variableToEmit.getIdentifier(),
-                                    new Datatype(varValue->getDatatype()),
-                                    varValue->getValue()->clone(false));
+                                    new Datatype(varValue.getDatatype()),
+                                    varValue.getValue()->clone(false));
   } else {
-    Datatype *d = new Datatype(varValue->getDatatype());
+    Datatype *d = new Datatype(varValue.getDatatype());
     newVarDeclaration = new VarDecl(variableToEmit.getIdentifier(), d);
   }
 
@@ -1345,7 +1334,7 @@ std::set<VarAssignm *> CompileTimeExpressionSimplifier::emitVariableAssignment(S
   std::set<VarAssignm *> result;
 
   // if the variable has no value, there's no need to create a variable assignment
-  if (varValue==nullptr) return result;
+  if (varValue.getValue()==nullptr) return result;
 
   // check if a variable declaration statement was emitted before for this variable
   if (emittedVariableDeclarations.count(variableToEmit)==0) {
@@ -1385,8 +1374,8 @@ std::set<VarAssignm *> CompileTimeExpressionSimplifier::emitVariableAssignment(S
   std::vector<Variable *> occurrences;
   auto m = variableValues.getMap();
   for (auto it = m.begin(); it!=m.end(); ++it) {
-    if (it->first!=variableToEmit && it->second && it->second->getValue()!=nullptr) {
-      for (auto &v: it->second->getValue()->getVariables()) {
+    if (it->first!=variableToEmit && it->second.getValue()!=nullptr) {
+      for (auto &v: it->second.getValue()->getVariables()) {
         if (v->getIdentifier()==scopedVariableToEmit.getIdentifier()) {
           occurrences.push_back(v);
         }
@@ -1401,7 +1390,7 @@ std::set<VarAssignm *> CompileTimeExpressionSimplifier::emitVariableAssignment(S
 
     // add to variableValues and emit
     auto sv = ScopedVariable(temp_id, curScope);
-    auto vv = new VariableValue(*variableValues.getVariableValue(variableToEmit));
+    auto vv = VariableValue(variableValues.getVariableValue(variableToEmit));
     variableValues.addDeclaredVariable(sv, vv);
     auto new_assignments = emitVariableAssignment(sv);
     result.insert(new_assignments.begin(), new_assignments.end());
@@ -1415,7 +1404,7 @@ std::set<VarAssignm *> CompileTimeExpressionSimplifier::emitVariableAssignment(S
   }
 
   auto newVarAssignm = new VarAssignm(variableToEmit.getIdentifier(),
-                                      variableValues.getVariableValue(variableToEmit)->getValue()
+                                      variableValues.getVariableValue(variableToEmit).getValue()
                                           ->clone(false)->castTo<AbstractExpr>());
   // add a reference in the list of the associated VarDecl
   emittedVariableDeclarations.at(variableToEmit)->addVarAssignm(newVarAssignm);

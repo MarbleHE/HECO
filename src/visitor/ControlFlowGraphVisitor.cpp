@@ -224,7 +224,7 @@ void ControlFlowGraphVisitor::visit(VarDecl &elem) {
 
   // store the variable, but ignore value since we don't care about that in CFGV
   auto sv = ScopedVariable(elem.getIdentifier(), curScope);
-  variableValues.addDeclaredVariable(sv, nullptr);
+  variableValues.addDeclaredVariable(sv, VariableValue(*elem.getDatatype(), nullptr));
 
   auto gNode = appendStatementToCfg(elem);
   markVariableAccess(sv, AccessType::WRITE);
@@ -321,7 +321,7 @@ void ControlFlowGraphVisitor::visit(FunctionParameter &elem) {
   auto valueAsVar = dynamic_cast<Variable *>(elem.getValue());
   if (valueAsVar) {
     // Ignoring value, as it's irrelevant for CFGV
-    variableValues.addDeclaredVariable(ScopedVariable(valueAsVar->getIdentifier(), curScope), nullptr);
+    variableValues.addDeclaredVariable(ScopedVariable(valueAsVar->getIdentifier(), curScope), VariableValue(*elem.getDatatype(), nullptr));
   } else {
     throw std::runtime_error("Function parameter " + elem.getUniqueNodeId() + " contained invalid Variable value.");
   }
