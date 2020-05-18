@@ -1368,7 +1368,7 @@ std::set<VarAssignm *> CompileTimeExpressionSimplifier::emitVariableAssignment(S
   std::vector<Variable *> occurrences;
   auto m = variableValues.getMap();
   for (auto it = m.begin(); it!=m.end(); ++it) {
-    if (it->first!=variableToEmit && it->second->getValue()!=nullptr) {
+    if (it->first!=variableToEmit && it->second && it->second->getValue()!=nullptr) {
       for (auto &v: it->second->getValue()->getVariables()) {
         if (v->getIdentifier()==scopedVariableToEmit.getIdentifier()) {
           occurrences.push_back(v);

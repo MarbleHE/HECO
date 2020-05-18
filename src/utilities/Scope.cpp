@@ -179,7 +179,11 @@ void VariableValuesMap::setVariableValue(ScopedVariable scopedVariable, Variable
 VariableValuesMap::VariableValuesMap(const VariableValuesMap &other) {
   // call the object's copy constructor for each VariableValue
   for (auto &[k, v] : other.variableValues) {
-    variableValues.insert_or_assign(k, new VariableValue(*v));
+    if (v) {
+      variableValues.insert_or_assign(k, new VariableValue(*v));
+    } else {
+      variableValues.insert_or_assign(k, nullptr);
+    }
   }
 }
 
@@ -193,5 +197,5 @@ bool operator==(const ScopedVariable &lhs, const ScopedVariable &rhs) {
       && (lhs.getScope()->getScopeIdentifier()==rhs.getScope()->getScopeIdentifier());
 }
 bool operator!=(const ScopedVariable &lhs, const ScopedVariable &rhs) {
-  return !(lhs == rhs);
+  return !(lhs==rhs);
 }
