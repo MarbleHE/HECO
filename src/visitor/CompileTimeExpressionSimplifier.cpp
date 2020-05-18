@@ -508,16 +508,7 @@ void CompileTimeExpressionSimplifier::simplifyLogicalExpr(OperatorExpr &elem) {
 }
 
 void CompileTimeExpressionSimplifier::visit(Block &elem) {
-  auto nodesForDeletionBeforeVisit = nodesQueuedForDeletion;
-
-  // inlined Visitor::visit(elem) because we need to change it for proper loop unrolling
-  addStatementToScope(elem);
-  changeToInnerScope(elem.getUniqueNodeId(), &elem);
-  for (auto &stat : elem.getStatements()) {
-    stat->accept(*this);
-  }
-  changeToOuterScope();
-
+  Visitor::visit(elem);
   //TODO: This now needs to do recursive resolution of nested blocks, since we took that out of for loop unrolling
   //TODO: If we come to the end of a scope, do we need to emit variables?
 }
