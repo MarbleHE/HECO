@@ -584,14 +584,20 @@ void CompileTimeExpressionSimplifier::visit(Function &elem) {
 }
 
 void CompileTimeExpressionSimplifier::visit(FunctionParameter &elem) {
-  Visitor::visit(elem);
+  // We cannot simply visit the Variable, as it would try to look it up when of course it does not exist yet
+  // So instead of Visitor::visit(elem); we visit only the Datatype and inspect the Value manually
+  elem.getDatatype()->accept(*this);
 
-  // a FunctionParameter is a kind of variable declaration but instead of a concrete value we need to use a 'nullptr'
-  if (auto valueAsVar = dynamic_cast<Variable *>(elem.getValue())) {
+  // The value in a FunctionParamter must be a single Variable
+  auto valueAsVar = dynamic_cast<Variable *>(elem.getValue());
+  if (valueAsVar) {
     variableValues
         .addDeclaredVariable(ScopedVariable(valueAsVar->getIdentifier(), curScope), VariableValue(*elem.getDatatype(),
                                                                                                   nullptr));
+  } else {
+    throw std::runtime_error("Function parameter " + elem.getUniqueNodeId() + " contained invalid Variable value.");
   }
+
 }
 
 void CompileTimeExpressionSimplifier::visit(If &elem) {
