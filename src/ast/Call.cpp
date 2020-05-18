@@ -28,6 +28,9 @@ Call::Call(Function *func) {
 }
 
 Call::Call(std::vector<FunctionParameter *> parameterValuesForCalledFunction, Function *func) {
+  //TODO: Should no longer use FunctionParameter for arguments instead list of AbstractExpr?
+  // How to actually map arguments to function parameters? Probably better to use a specifc FunctionArgument
+  // that includes both the name of the parameter that it replaces and an AbstractExpr* value
   setAttributes(std::move(parameterValuesForCalledFunction), func);
 }
 
