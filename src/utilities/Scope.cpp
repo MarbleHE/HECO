@@ -108,42 +108,57 @@ AbstractExpr *VariableValuesMap::getVariableValueDeclaredInThisOrOuterScope(std:
 
 ScopedVariable VariableValuesMap::getVariableEntryDeclaredInThisOrOuterScope(std::string variableName,
                                                                              Scope *curScope) {
-  // variables to store the iterator to the declaration that is closest in terms of scopes and the distance between the
-  // current scope and the scope of the declaration (e.g., distance is zero iff. both are in the same scope)
-  std::map<ScopedVariable, VariableValue *>::iterator closestDeclarationIterator;
-  int closestDeclarationDistance = INT_MAX;
 
-  // go through all variables declared yet
-  for (auto it = variableValues.begin(); it!=variableValues.end(); ++it) {
-    // if the variable's identifier ("name") does not match, continue iterating
-    if ((*it).first.first!=variableName) continue;
-    // check if this variable declaration is valid in the current scope: start from curScope and go the scope hierarchy
-    // upwards until the current scope matches the scope of the declaration -> declaration is valid in current scope
-    auto scope = curScope;
-    int scopeDistance = 0;
-    while (scope!=nullptr) {
-      // check if the current scope and the scope of the declaration are the same
-      if (scope==(*it).first.second) {
-        // check if this found variable declaration has a lower scope distance
-        if (scopeDistance < closestDeclarationDistance) {
-          closestDeclarationDistance = scopeDistance;
-          closestDeclarationIterator = it;
-          break;
-        }
+  //  ALTERNATIVE IMPLEMENTATION FOR SIMPLER DEBUGGING:
+  //  Since we don't have the VariableValuesMap sorted by scopes, we're iterating over it for each scope
+  //  This is somewhat inefficient in deep call stacks
+  auto scope = curScope;
+  while (scope!=nullptr) {
+    for (auto &[sv, vv] : variableValues) {
+      if (sv.second==scope && sv.first==variableName) {
+        return sv;
       }
-      // go to the next "higher" scope and increment the scope distance
-      scope = scope->getOuterScope();
-      scopeDistance++;
     }
+    scope = scope->getOuterScope();
   }
-  // if the bestIteratorDistance has still its default value (INT_MAX), return the variableValue's end iterator,
-  // otherwise return the variableValues entry (iterator) that is closest to the current scope
-  auto returnIt = (closestDeclarationDistance==INT_MAX) ? variableValues.end() : closestDeclarationIterator;
-  if (returnIt==variableValues.end()) {
-    throw std::invalid_argument("No variable with identifier " + variableName + " exists in this scope.");
-  } else {
-    return returnIt->first;
-  }
+  throw std::invalid_argument("No variable with identifier " + variableName + " exists in this scope.");
+
+//  // variables to store the iterator to the declaration that is closest in terms of scopes and the distance between the
+//  // current scope and the scope of the declaration (e.g., distance is zero iff. both are in the same scope)
+//  std::map<ScopedVariable, VariableValue *>::iterator closestDeclarationIterator;
+//  int closestDeclarationDistance = INT_MAX;
+//
+//  // go through all variables declared yet
+//  for (auto it = variableValues.begin(); it!=variableValues.end(); ++it) {
+//    // if the variable's identifier ("name") does not match, continue iterating
+//    if ((*it).first.first!=variableName) continue;
+//    // check if this variable declaration is valid in the current scope: start from curScope and go the scope hierarchy
+//    // upwards until the current scope matches the scope of the declaration -> declaration is valid in current scope
+//    auto scope = curScope;
+//    int scopeDistance = 0;
+//    while (scope!=nullptr) {
+//      // check if the current scope and the scope of the declaration are the same
+//      if (scope==(*it).first.second) {
+//        // check if this found variable declaration has a lower scope distance
+//        if (scopeDistance < closestDeclarationDistance) {
+//          closestDeclarationDistance = scopeDistance;
+//          closestDeclarationIterator = it;
+//          break;
+//        }
+//      }
+//      // go to the next "higher" scope and increment the scope distance
+//      scope = scope->getOuterScope();
+//      scopeDistance++;
+//    }
+//  }
+//  // if the bestIteratorDistance has still its default value (INT_MAX), return the variableValue's end iterator,
+//  // otherwise return the variableValues entry (iterator) that is closest to the current scope
+//  auto returnIt = (closestDeclarationDistance==INT_MAX) ? variableValues.end() : closestDeclarationIterator;
+//  if (returnIt==variableValues.end()) {
+//    throw std::invalid_argument("No variable with identifier " + variableName + " exists in this scope.");
+//  } else {
+//    return returnIt->first;
+//  }
 }
 VariableValue *VariableValuesMap::getVariableValue(ScopedVariable scopedVariable) {
   auto it = variableValues.find(scopedVariable);
