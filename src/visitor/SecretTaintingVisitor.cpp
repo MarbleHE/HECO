@@ -237,11 +237,13 @@ void SecretTaintingVisitor::visit(MatrixElementRef &elem) {
 }
 
 void SecretTaintingVisitor::visit(MatrixAssignm &elem) {
-  checkAndAddTaintedChildren(static_cast<AbstractStatement *>(&elem), elem.getValue()->getVariableIdentifiers());
   Visitor::visit(elem);
   // after visiting the initializer, check if it is tainted - this is needed for Call nodes
   if (nodeIsTainted(*elem.getValue())) {
     addTaintedNode(&elem);
+    for(auto &v: elem.getAssignmTarget()->getVariableIdentifiers()) {
+      taintedVariables.insert(v);
+    }
   }
 }
 
