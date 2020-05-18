@@ -1307,6 +1307,9 @@ void CompileTimeExpressionSimplifier::setMatrixVariableValue(const std::string &
 
   // store the value at the given position - matrix must handle indices and make sure that matrix is large enough
   literal->getMatrix()->setElementAt(row, column, valueToStore);
+  // Update the VariableValuesMap with this new matrix
+  variableValues.setVariableValue(var,new VariableValue(variableValues.getVariableValue(var)->getDatatype(), literal));
+
 }
 
 bool CompileTimeExpressionSimplifier::isQueuedForDeletion(const AbstractNode *node) {
