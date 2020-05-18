@@ -188,13 +188,20 @@ VariableValuesMap::VariableValuesMap(const VariableValuesMap &other) {
 }
 
 bool operator<(const ScopedVariable &lhs, const ScopedVariable &rhs) {
-  return (lhs.getIdentifier() < rhs.getIdentifier())
-      || (lhs.getIdentifier()==rhs.getIdentifier()
-          && lhs.getScope()->getScopeIdentifier() < rhs.getScope()->getScopeIdentifier());
+  bool id_smaller = lhs.getIdentifier() < rhs.getIdentifier();
+  bool id_same = lhs.getIdentifier()==rhs.getIdentifier();
+  bool both_have_scope = lhs.getScope()!=nullptr && rhs.getScope()!=nullptr;
+  if (both_have_scope) {
+    bool scope_smaller = lhs.getScope()->getScopeIdentifier() < rhs.getScope()->getScopeIdentifier();
+    return id_smaller || (id_same && scope_smaller);
+  } else {
+    return id_smaller || (!lhs.getScope() && rhs.getScope());
+  }
 }
 bool operator==(const ScopedVariable &lhs, const ScopedVariable &rhs) {
   return (lhs.getIdentifier()==rhs.getIdentifier())
-      && (lhs.getScope()->getScopeIdentifier()==rhs.getScope()->getScopeIdentifier());
+      && ((lhs.getScope()==nullptr && rhs.getScope()==nullptr) || (lhs.getScope()!=nullptr && rhs.getScope()!=nullptr
+          && lhs.getScope()->getScopeIdentifier()==rhs.getScope()->getScopeIdentifier()));
 }
 bool operator!=(const ScopedVariable &lhs, const ScopedVariable &rhs) {
   return !(lhs==rhs);
