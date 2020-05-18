@@ -35,7 +35,7 @@ class CompileTimeExpressionSimplifierFixture : public ::testing::Test {
     // NOTE: This method does not work if there are multiple variables with the same variable identifier but in
     // different scopes. In that case the method always returns the value of the variable in the outermost scope.
     for (auto &[scopedVariable, varValue] : ctes.variableValues.getMap()) {
-      if (scopedVariable.first==varIdentifier) {
+      if (scopedVariable.getIdentifier()==varIdentifier) {
         return varValue->getValue();
       }
     }

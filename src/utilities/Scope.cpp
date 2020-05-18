@@ -80,7 +80,7 @@ AbstractNode *Scope::getScopeOpener() const {
 
 void VariableValuesMap::addDeclaredVariable(ScopedVariable scopedVariable, VariableValue *value) {
   if (variableValues.find(scopedVariable)!=variableValues.end()) {
-    throw std::invalid_argument("Variable " + scopedVariable.first + " already exists in this scope!");
+    throw std::invalid_argument("Variable " + scopedVariable.getIdentifier() + " already exists in this scope!");
   } else {
     auto value_copy = value ? new VariableValue(*value) : nullptr;
     variableValues.insert_or_assign(scopedVariable, value_copy);
@@ -89,7 +89,7 @@ void VariableValuesMap::addDeclaredVariable(ScopedVariable scopedVariable, Varia
 
 void VariableValuesMap::addDeclaredVariable(ScopedVariable scopedVariable, VariableValue value) {
   if (variableValues.find(scopedVariable)!=variableValues.end()) {
-    throw std::invalid_argument("Variable " + scopedVariable.first + " already exists in this scope!");
+    throw std::invalid_argument("Variable " + scopedVariable.getIdentifier() + " already exists in this scope!");
   } else {
     auto value_copy = new VariableValue(value);
     variableValues.insert_or_assign(scopedVariable, value_copy);
@@ -115,7 +115,7 @@ ScopedVariable VariableValuesMap::getVariableEntryDeclaredInThisOrOuterScope(std
   auto scope = curScope;
   while (scope!=nullptr) {
     for (auto &[sv, vv] : variableValues) {
-      if (sv.second==scope && sv.first==variableName) {
+      if (sv.getScope()==scope && sv.getIdentifier()==variableName) {
         return sv;
       }
     }
@@ -163,7 +163,7 @@ ScopedVariable VariableValuesMap::getVariableEntryDeclaredInThisOrOuterScope(std
 VariableValue *VariableValuesMap::getVariableValue(ScopedVariable scopedVariable) {
   auto it = variableValues.find(scopedVariable);
   if (it==variableValues.end()) {
-    throw std::invalid_argument("Variable " + scopedVariable.first + " not found.");
+    throw std::invalid_argument("Variable " + scopedVariable.getIdentifier() + " not found.");
   } else {
     return it->second;
   }
@@ -171,7 +171,7 @@ VariableValue *VariableValuesMap::getVariableValue(ScopedVariable scopedVariable
 void VariableValuesMap::addVariable(ScopedVariable scopedVariable, VariableValue *value) {
   auto it = variableValues.find(scopedVariable);
   if (it!=variableValues.end()) {
-    throw std::invalid_argument("Variable " + scopedVariable.first + " already exists.");
+    throw std::invalid_argument("Variable " + scopedVariable.getIdentifier() + " already exists.");
   } else {
     variableValues.insert_or_assign(scopedVariable, value);
   }
@@ -179,7 +179,7 @@ void VariableValuesMap::addVariable(ScopedVariable scopedVariable, VariableValue
 void VariableValuesMap::setVariableValue(ScopedVariable scopedVariable, VariableValue *value) {
   auto it = variableValues.find(scopedVariable);
   if (it==variableValues.end()) {
-    throw std::invalid_argument("Variable " + scopedVariable.first + " not found.");
+    throw std::invalid_argument("Variable " + scopedVariable.getIdentifier() + " not found.");
   } else {
     it->second = value;
   }
@@ -189,4 +189,17 @@ VariableValuesMap::VariableValuesMap(const VariableValuesMap &other) {
   for (auto &[k, v] : other.variableValues) {
     variableValues.insert_or_assign(k, new VariableValue(*v));
   }
+}
+
+bool operator<(const ScopedVariable &lhs, const ScopedVariable &rhs) {
+  return (lhs.getIdentifier() < rhs.getIdentifier())
+      || (lhs.getIdentifier()==rhs.getIdentifier()
+          && lhs.getScope()->getScopeIdentifier() < rhs.getScope()->getScopeIdentifier());
+}
+bool operator==(const ScopedVariable &lhs, const ScopedVariable &rhs) {
+  return (lhs.getIdentifier()==rhs.getIdentifier())
+      && (lhs.getScope()->getScopeIdentifier()==rhs.getScope()->getScopeIdentifier());
+}
+bool operator!=(const ScopedVariable &lhs, const ScopedVariable &rhs) {
+  return !(lhs == rhs);
 }

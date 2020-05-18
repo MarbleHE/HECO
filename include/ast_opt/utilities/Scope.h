@@ -97,7 +97,57 @@ class VariableValue {
   // Datatype is fixed, therefore no way to change this
 };
 
-typedef std::pair<std::string, Scope *> ScopedVariable;
+class ScopedVariable {
+ private:
+  /// Variable Identifier
+  std::string identifier;
+
+  /// Scope (not lifecycle managed by this class)
+  Scope *scope;
+
+ public:
+  /// Direct Constructor
+  ScopedVariable(std::string identifier, Scope *scope) : identifier(std::move(identifier)), scope(scope) {};
+
+  /// Identifier Getter
+  [[nodiscard]] std::string getIdentifier() const {
+    return identifier;
+  }
+
+  /// Scope Getter
+  [[nodiscard]] Scope const *getScope() const {
+    return scope;
+  }
+
+  /// Magic to support structured bindings, i.e. auto &[id, scope] : scopedvariable
+  template<std::size_t N>
+  decltype(auto) get() const {
+    if constexpr (N==0) return identifier;
+    else if constexpr (N==1) return getScope();
+  }
+
+};
+
+/// Total ordering over ScopedVariables to allow std::map
+bool operator<(const ScopedVariable &lhs, const ScopedVariable &rhs);
+
+/// Equality for Scoped Variables, based on identifier and scope identifier
+bool operator==(const ScopedVariable &lhs, const ScopedVariable &rhs);
+
+/// Inequality for Scoped Variables, based on identifier and scope identifier
+bool operator!=(const ScopedVariable &lhs, const ScopedVariable &rhs);
+
+/// To support structured bindings, i.e. auto &[id,scope]: scopedvar
+namespace std {
+template<>
+struct tuple_size<ScopedVariable>
+    : std::integral_constant<std::size_t, 2> {
+};
+template<std::size_t N>
+struct tuple_element<N, ScopedVariable> {
+  using type = decltype(std::declval<ScopedVariable>().get<N>());
+};
+}
 
 /**
  * A helper class to store Mappings Between Variables and Scopes

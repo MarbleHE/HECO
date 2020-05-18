@@ -761,7 +761,7 @@ CompileTimeExpressionSimplifier::identifyReadWriteVariables(For &forLoop, Variab
   for (auto &str: variablesReadAndWritten) {
     std::set<ScopedVariable> matches;
     for (auto &[scopedVariable, value] : variableValues.getMap()) {
-      if (scopedVariable.first==str) {
+      if (scopedVariable.getIdentifier()==str) {
         matches.insert(scopedVariable);
       }
     }
@@ -1176,7 +1176,7 @@ std::unordered_map<std::string, AbstractLiteral *> CompileTimeExpressionSimplifi
   std::unordered_map<std::string, AbstractLiteral *> variableMap;
   for (auto &[k, v] : variableValues.getMap()) {
     if (auto varAsLiteral = dynamic_cast<AbstractLiteral *>(v->getValue())) {
-      variableMap[k.first] = varAsLiteral;
+      variableMap[k.getIdentifier()] = varAsLiteral;
     }
   }
   return variableMap;
@@ -1261,7 +1261,7 @@ void CompileTimeExpressionSimplifier::appendVectorToMatrix(const std::string &va
   auto literal = dynamic_cast<AbstractLiteral *>(variableValues.getVariableValue(var)->getValue());
   if (literal==nullptr) {
     std::stringstream errorMsg;
-    errorMsg << "appendVectorToMatrix failed: " << "Current value of matrix " << var.first << " ";
+    errorMsg << "appendVectorToMatrix failed: " << "Current value of matrix " << var.getIdentifier() << " ";
     errorMsg << "in variableValues is nullptr. ";
     errorMsg << "This should never happen and indicates that an earlier visited MatrixAssignm could not be executed.";
     errorMsg << "Because of that any subsequent MatrixAssignms should not be executed too.";
@@ -1287,8 +1287,8 @@ void CompileTimeExpressionSimplifier::setMatrixVariableValue(const std::string &
   if (variableValues.getVariableValue(var)==nullptr) {
     std::stringstream errorMsg;
     errorMsg << "setMatrixValue failed: ";
-    errorMsg << "Could not find entry in variableValues for variable identifier " << var.first << " ";
-    errorMsg << "by starting search from scope " << var.second->getScopeIdentifier() << ".";
+    errorMsg << "Could not find entry in variableValues for variable identifier " << var.getIdentifier() << " ";
+    errorMsg << "by starting search from scope " << var.getScope()->getScopeIdentifier() << ".";
     throw std::runtime_error(errorMsg.str());
   }
 
@@ -1298,7 +1298,7 @@ void CompileTimeExpressionSimplifier::setMatrixVariableValue(const std::string &
   if (literal==nullptr) {
     std::stringstream errorMsg;
     errorMsg << "setMatrixValue failed: ";
-    errorMsg << "Current value of matrix " << var.first << " ";
+    errorMsg << "Current value of matrix " << var.getIdentifier() << " ";
     errorMsg << "in variableValues is nullptr. ";
     errorMsg << "This should never happen and indicates that an earlier visited MatrixAssignm could not be executed.";
     errorMsg << "Because of that any subsequent MatrixAssignms should not be executed too.";
@@ -1322,7 +1322,7 @@ void CompileTimeExpressionSimplifier::visit(AbstractMatrix &elem) {
 }
 
 void CompileTimeExpressionSimplifier::emitVariableDeclaration(ScopedVariable variableToEmit) {
-  auto parent = variableToEmit.second->getScopeOpener();
+  auto parent = variableToEmit.getScope()->getScopeOpener();
   auto children = parent->getChildren();
   auto varValue = variableValues.getVariableValue(variableToEmit);
   // if this variable is not a scalar, we need to emit the variable value too, otherwise the information about the
@@ -1330,12 +1330,12 @@ void CompileTimeExpressionSimplifier::emitVariableDeclaration(ScopedVariable var
   VarDecl *newVarDeclaration;
   auto varAsLiteral = dynamic_cast<AbstractLiteral *>(varValue->getValue());
   if (varAsLiteral!=nullptr && !varAsLiteral->getMatrix()->getDimensions().equals(1, 1)) {
-    newVarDeclaration = new VarDecl(variableToEmit.first,
+    newVarDeclaration = new VarDecl(variableToEmit.getIdentifier(),
                                     new Datatype(varValue->getDatatype()),
                                     varValue->getValue()->clone(false));
   } else {
     Datatype *d = new Datatype(varValue->getDatatype());
-    newVarDeclaration = new VarDecl(variableToEmit.first, d);
+    newVarDeclaration = new VarDecl(variableToEmit.getIdentifier(), d);
   }
 
   // passing position in children vector is req. to prepend the new VarAssignm (i.e., as new first child of parent)
@@ -1390,7 +1390,7 @@ std::set<VarAssignm *> CompileTimeExpressionSimplifier::emitVariableAssignment(S
   for (auto it = m.begin(); it!=m.end(); ++it) {
     if (it->first!=variableToEmit && it->second->getValue()!=nullptr) {
       for (auto &v: it->second->getValue()->getVariables()) {
-        if (v->getIdentifier()==scopedVariableToEmit.first) {
+        if (v->getIdentifier()==scopedVariableToEmit.getIdentifier()) {
           occurrences.push_back(v);
         }
       }
@@ -1403,7 +1403,7 @@ std::set<VarAssignm *> CompileTimeExpressionSimplifier::emitVariableAssignment(S
     std::string temp_id = "temp_" + occurrences[0]->getUniqueNodeId();
 
     // add to variableValues and emit
-    auto sv = std::make_pair(temp_id, curScope);
+    auto sv = ScopedVariable(temp_id, curScope);
     auto vv = new VariableValue(*variableValues.getVariableValue(variableToEmit));
     variableValues.addVariable(sv, vv);
     auto new_assignments = emitVariableAssignment(sv);
@@ -1417,7 +1417,7 @@ std::set<VarAssignm *> CompileTimeExpressionSimplifier::emitVariableAssignment(S
     }
   }
 
-  auto newVarAssignm = new VarAssignm(variableToEmit.first,
+  auto newVarAssignm = new VarAssignm(variableToEmit.getIdentifier(),
                                       variableValues.getVariableValue(variableToEmit)->getValue()
                                           ->clone(false)->castTo<AbstractExpr>());
   // add a reference in the list of the associated VarDecl
