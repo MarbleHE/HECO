@@ -465,7 +465,7 @@ void RuntimeVisitor::visit(Variable &elem) {
   Visitor::visit(elem);
 
   // TODO: Find a better way to manage how we distinguish subexpression ciphertexts from those that actually
-  //  represent a variable most recent value. For now, we just return the first Ciphertext that has an associated
+  //  represent a variable's most recent value. For now, we just return the first Ciphertext that has an associated
   //  expression (this works fine for img2 but would break for img).
   if (taintedNodesUniqueIds.count(elem.getUniqueNodeId()) > 0 && varValues.count(elem.getIdentifier()) > 0) {
     for (auto varValMap : varValues.at(elem.getIdentifier())) {
