@@ -28,7 +28,7 @@ class ControlFlowGraphVisitor : public Visitor {
   VariableValuesMap variableValues;
 
   /// Ugly hack: Variables in CFG that are both read and written to
-  std::set<std::string> variablesReadAndWritten;
+  std::set<ScopedVariable> variablesReadAndWritten;
 
   /// The nodes that were created most recently. Those are the parent nodes of the next node to be created.
   std::vector<GraphNode *> lastCreatedNodes;
@@ -38,10 +38,10 @@ class ControlFlowGraphVisitor : public Visitor {
   /// NOTE: The defaultAccessMode must be set back to AccessType::READ after visiting the children.
   AccessType defaultAccessMode{AccessType::READ};
 
-  /// A set containing pairs of (variable identifier, access type) where variable identifier is the name of a variable
+  /// A set containing pairs of (variable, access type) where variable identifier is the name of a variable
   /// and access type describes if a variable was read or written. This set collects all information of visited children
   /// of a statement and is cleared before leaving a statement (see postActionsStatementVisited).
-  std::set<std::pair<std::string, AccessType>> varAccess;
+  std::set<std::pair<ScopedVariable, AccessType>> varAccess;
 
   /// The root node of the control flow graph that also contains information about the data flow.
   GraphNode *rootNode;
@@ -54,12 +54,12 @@ class ControlFlowGraphVisitor : public Visitor {
  public:
   /// Marks a variable as accessed by using the value in defaultAccessMode.
   /// \param var The variable to be marked as accessed.
-  void markVariableAccess(Variable &var);
+  void markVariableAccess(const ScopedVariable &var);
 
   /// Marks a variable as read or write, depending on the given access type.
   /// \param variableIdentifier The variable's identifier ("variable name").
-  /// \param accessMode Whether the variable access should be a read or write.
-  void markVariableAccess(const std::string &variableIdentifier, AccessType accessMode);
+  /// \param accessType Whether the variable access should be a read or write.
+  void markVariableAccess(const ScopedVariable &var, AccessType accessType);
 
   /// Creates a new node for the control flow graph of type GraphNode. Adds the created node as child of each of the
   /// nodes in lastCreatedNodes, and returns the created GraphNode.
@@ -154,7 +154,10 @@ class ControlFlowGraphVisitor : public Visitor {
   /// Return all variables that were both written and read in the current CFG
   /// WARNING: only returns valid answers when Data Flow Graph has been built!
   /// \return all variables that are both written and read in the current CFG
-  std::set<std::string> getVariablesReadAndWritten();
+  std::set<ScopedVariable> getVariablesReadAndWritten();
+
+  /// Sets variableValues
+  void forceVariableValues(const VariableValuesMap& map);
 
   void handleOperatorExpr(AbstractExpr &ae);
 };

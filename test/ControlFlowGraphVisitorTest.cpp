@@ -20,19 +20,19 @@ class FlowGraphVisitorFixture : public ::testing::Test {
   /// \param expectedWrites The variables expected to have been written by the given gNode (i.e., program statement).
   /// \param gNode The node whose variable accessed should be checked.
   /// \return True if the actual variable reads and writes equal the expected ones.
-  static bool checkVariableReadWrites(std::initializer_list<std::string> expectedReads,
-                                      std::initializer_list<std::string> expectedWrites, GraphNode *gNode) {
+  static bool checkVariableReadWrites(std::initializer_list<ScopedVariable> expectedReads,
+                                      std::initializer_list<ScopedVariable> expectedWrites, GraphNode *gNode) {
     // generate sets out of given read/write variables to have fast O(1) access
-    std::set<std::string> reads(expectedReads.begin(), expectedReads.end());
-    std::set<std::string> writes(expectedWrites.begin(), expectedWrites.end());
+    std::set<ScopedVariable> reads(expectedReads.begin(), expectedReads.end());
+    std::set<ScopedVariable> writes(expectedWrites.begin(), expectedWrites.end());
     // Iterate over all accessed variables and depending on the access type, check whether it is expected to be read or
     // write, delete the variable afterwards from the reads/writes set as gNode's accessedVariables is a set too.
     // If any variable were accessed unexpectedly, abort by returning False.
-    for (auto &[varIdentifier, accessType] : gNode->getAccessedVariables()) {
-      if (accessType==AccessType::READ && reads.count(varIdentifier)==1) {
-        reads.erase(varIdentifier);
-      } else if (accessType==AccessType::WRITE && writes.count(varIdentifier)==1) {
-        writes.erase(varIdentifier);
+    for (auto &[var, accessType] : gNode->getAccessedVariables()) {
+      if (accessType==AccessType::READ && reads.count(var)==1) {
+        reads.erase(var);
+      } else if (accessType==AccessType::WRITE && writes.count(var)==1) {
+        writes.erase(var);
       } else {
         return false;  // abort if there is an unexpected read or write variable access
       }
@@ -223,7 +223,7 @@ TEST_F(FlowGraphVisitorFixture, controlFlowGraphIncludingForStatement) { /* NOLI
   auto varDecl9 = new GraphNode(relType, {block2});
   auto varDecl13 = new GraphNode(relType, {varDecl9});
   auto for38 = new GraphNode(relType, {varDecl13});
-  auto initializerBlockWrapper  = new GraphNode(relType, {for38});
+  auto initializerBlockWrapper = new GraphNode(relType, {for38});
   auto varDecl17 = new GraphNode(relType, {initializerBlockWrapper});
   auto logicalExpr21 = new GraphNode(relType, {varDecl17});
   auto block37 = new GraphNode(relType, {logicalExpr21});
@@ -245,57 +245,68 @@ TEST_F(FlowGraphVisitorFixture, controlFlowGraphIncludingForStatement) { /* NOLI
 TEST_F(FlowGraphVisitorFixture, dataflowGraph_detectedVariableReadWrites) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(23, ast);
-
+  //    sumNTimes2(int inputA) {
+  //      int sum = 0;
+  //      int base = 2;
+  //      for (int i = 0; i <= inputA; i=i+1) {
+  //        sum = sum + base * i;
+  //      }
+  //      return sum;  // 2*0 + 2*1 + ... + 2*inputA
+  //    }
   ControlFlowGraphVisitor fgv;
   fgv.visit(ast);
 
+  //TODO: Rework this to include scopes in variables
   // [Function] sumNTimes2
   auto cfgRootNode = fgv.getRootNodeCfg();
   EXPECT_TRUE(checkVariableReadWrites({}, {}, cfgRootNode));
 
   // [ParameterList] (int inputA)
   auto parameterList = cfgRootNode->getControlFlowGraph()->getOnlyChild();
-  EXPECT_TRUE(checkVariableReadWrites({}, {"inputA"}, parameterList));
+  EXPECT_TRUE(checkVariableReadWrites({}, {ScopedVariable("inputA", nullptr)}, parameterList));
 
   // [VarDecl] int sum = 0;
   auto varDeclSum = parameterList->getControlFlowGraph()->getOnlyChild()->getControlFlowGraph()->getOnlyChild();
-  EXPECT_TRUE(checkVariableReadWrites({}, {"sum"}, varDeclSum));
+  EXPECT_TRUE(checkVariableReadWrites({}, {ScopedVariable("sum", nullptr)}, varDeclSum));
 
-  // [VarDecl] int base = 2;
+// [VarDecl] int base = 2;
   auto varDeclBase = varDeclSum->getControlFlowGraph()->getOnlyChild();
-  EXPECT_TRUE(checkVariableReadWrites({}, {"base"}, varDeclBase));
+  EXPECT_TRUE(checkVariableReadWrites({}, {ScopedVariable("base", nullptr)}, varDeclBase));
 
-  // [For] for (initializer; condition; updateStatement)
+// [For] for (initializer; condition; updateStatement)
   auto forStmt = varDeclBase->getControlFlowGraph()->getOnlyChild();
   EXPECT_TRUE(checkVariableReadWrites({}, {}, forStmt));
 
-  // [Block] initalizer wrapper
+// [Block] initalizer wrapper
   auto initWrapper = forStmt->getControlFlowGraph()->getOnlyChild();
   EXPECT_TRUE(checkVariableReadWrites({}, {}, initWrapper));
 
-  // [VarDecl] int i = 0;
+// [VarDecl] int i = 0;
   auto varDeclI = initWrapper->getControlFlowGraph()->getOnlyChild();
-  EXPECT_TRUE(checkVariableReadWrites({}, {"i"}, varDeclI));
+  EXPECT_TRUE(checkVariableReadWrites({}, {ScopedVariable("i", nullptr)}, varDeclI));
 
-  // [LogicalExpr] i <= inputA
+// [LogicalExpr] i <= inputA
   auto logicalExpr = varDeclI->getControlFlowGraph()->getOnlyChild();
-  EXPECT_TRUE(checkVariableReadWrites({"i", "inputA"}, {}, logicalExpr));
+  EXPECT_TRUE(checkVariableReadWrites({ScopedVariable("i", nullptr), ScopedVariable("inputA", nullptr)},
+                                      {},
+                                      logicalExpr));
 
-  // [Return] return sum;
+// [Return] return sum;
   auto returnStmt = logicalExpr->getControlFlowGraph()->getChildAtIndex(1);
-  EXPECT_TRUE(checkVariableReadWrites({"sum"}, {}, returnStmt));
+  EXPECT_TRUE(checkVariableReadWrites({ScopedVariable("sum", nullptr)}, {}, returnStmt));
 
-  // [VarAssignm] sum = logicalExpr + base * i;
+// [VarAssignm] sum = logicalExpr + base * i;
   auto varAssignmSum = logicalExpr->getControlFlowGraph()->getChildAtIndex(0)->getControlFlowGraph()->getOnlyChild();
-  EXPECT_TRUE(checkVariableReadWrites({"sum", "base", "i"}, {"sum"}, varAssignmSum));
+  EXPECT_TRUE(checkVariableReadWrites({ScopedVariable("sum", nullptr), ScopedVariable("base", nullptr),
+                                       ScopedVariable("i", nullptr)}, {ScopedVariable("sum", nullptr)}, varAssignmSum));
 
-  // [Block] Update Wrapper
+// [Block] Update Wrapper
   auto updateWrapper = varAssignmSum->getControlFlowGraph()->getOnlyChild();
   EXPECT_TRUE(checkVariableReadWrites({}, {}, updateWrapper));
 
-  // [VarAssignm] i= i + 1;
+// [VarAssignm] i= i + 1;
   auto varAssignmI = updateWrapper->getControlFlowGraph()->getOnlyChild();
-  EXPECT_TRUE(checkVariableReadWrites({"i"}, {"i"}, varAssignmI));
+  EXPECT_TRUE(checkVariableReadWrites({ScopedVariable("i", nullptr)}, {ScopedVariable("i", nullptr)}, varAssignmI));
 }
 
 TEST_F(FlowGraphVisitorFixture, dataflowGraph_addedEdgesInBranchingProgram) { /* NOLINT */

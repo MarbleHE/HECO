@@ -12,7 +12,7 @@ class GraphNode {
  private:
   AbstractNode *refToOriginalNode{nullptr};
 
-  std::set<std::pair<std::string, AccessType>> accessedVariables;
+  std::set<std::pair<ScopedVariable, AccessType>> accessedVariables;
 
   NodeRelationship *controlFlowGraph = new NodeRelationship{RelationshipType::CTRL_FLOW_GRAPH, this};
 
@@ -31,13 +31,13 @@ class GraphNode {
 
   [[nodiscard]] NodeRelationship *getRelationship(RelationshipType rel) const;
 
-  [[nodiscard]] const std::set<std::pair<std::string, AccessType>> &getAccessedVariables() const;
+  [[nodiscard]] const std::set<std::pair<ScopedVariable, AccessType>> & getAccessedVariables() const;
 
   [[nodiscard]] AbstractNode *getRefToOriginalNode() const;
 
-  void setAccessedVariables(std::set<std::pair<std::string, AccessType>> set);
+  void setAccessedVariables(std::set<std::pair<ScopedVariable, AccessType>> set);
 
-  [[nodiscard]] std::set<std::string> getVariables(AccessType accessTypeFilter) const;
+  [[nodiscard]] std::set<ScopedVariable> getVariables(AccessType accessTypeFilter) const;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_UTILITIES_GRAPHNODE_H_

@@ -16,7 +16,6 @@
 #include "ast_opt/ast/LogicalExpr.h"
 #include "ast_opt/ast/OperatorExpr.h"
 #include "ast_opt/ast/MatrixAssignm.h"
-#include "ast_opt/utilities/Scope.h"
 
 void ControlFlowGraphVisitor::visit(Ast &elem) {
   // reset all custom variables
@@ -185,7 +184,8 @@ void ControlFlowGraphVisitor::visit(Return &elem) {
 
 void ControlFlowGraphVisitor::visit(VarAssignm &elem) {
   auto gNode = appendStatementToCfg(elem);
-  markVariableAccess(elem.getVarTargetIdentifier(), AccessType::WRITE);
+  auto scopedVar = variableValues.getVariableEntryDeclaredInThisOrOuterScope(elem.getVarTargetIdentifier(), curScope);
+  markVariableAccess(scopedVar, AccessType::WRITE);
   Visitor::visit(elem);
   postActionsStatementVisited(gNode);
 }
@@ -200,15 +200,23 @@ void ControlFlowGraphVisitor::visit(MatrixAssignm &elem) {
   // to refer to the element at (32,1) of matrix M. This does not work well because there might exist different index
   // expressions pointing to the same element (e.g., M[a][b] == M[b][d] if a==b and b==d), hence we cannot easily
   // distinguish matrix accesses.
-  markVariableAccess(elem.getAssignmTargetString(), AccessType::WRITE);
+  auto scopedVar = variableValues.getVariableEntryDeclaredInThisOrOuterScope(elem.getAssignmTargetString(), curScope);
+  markVariableAccess(scopedVar, AccessType::WRITE);
   Visitor::visit(elem);
   postActionsStatementVisited(gNode);
 }
 
 void ControlFlowGraphVisitor::visit(VarDecl &elem) {
-  auto gNode = appendStatementToCfg(elem);
-  markVariableAccess(elem.getVarTargetIdentifier(), AccessType::WRITE);
+  // Visit and simplify datatype and initializer (if present)
   Visitor::visit(elem);
+
+  // store the variable, but ignore value since we don't care about that in CFGV
+  auto sv = ScopedVariable(elem.getIdentifier(), curScope);
+  auto vv = VariableValue(*elem.getDatatype(), nullptr);
+  variableValues.addDeclaredVariable(sv, vv);
+
+  auto gNode = appendStatementToCfg(elem);
+  markVariableAccess(sv, AccessType::WRITE);
   postActionsStatementVisited(gNode);
 }
 
@@ -330,7 +338,8 @@ void ControlFlowGraphVisitor::visit(UnaryExpr &elem) {
 }
 
 void ControlFlowGraphVisitor::visit(Variable &elem) {
-  markVariableAccess({elem});
+  auto sv = variableValues.getVariableEntryDeclaredInThisOrOuterScope(elem.getIdentifier(), curScope);
+  markVariableAccess(sv);
   Visitor::visit(elem);
 }
 
@@ -376,12 +385,12 @@ void ControlFlowGraphVisitor::postActionsStatementVisited(GraphNode *gNode) {
   }
 }
 
-void ControlFlowGraphVisitor::markVariableAccess(const std::string &variableIdentifier, AccessType accessMode) {
-  varAccess.insert(std::make_pair(variableIdentifier, accessMode));
+void ControlFlowGraphVisitor::markVariableAccess(const ScopedVariable &var) {
+  markVariableAccess(var, defaultAccessMode);
 }
 
-void ControlFlowGraphVisitor::markVariableAccess(Variable &var) {
-  markVariableAccess(var.getIdentifier(), defaultAccessMode);
+void ControlFlowGraphVisitor::markVariableAccess(const ScopedVariable &var, AccessType accessType) {
+  varAccess.insert(std::make_pair(var, accessType));
 }
 
 void ControlFlowGraphVisitor::buildDataFlowGraph() {
@@ -393,10 +402,10 @@ void ControlFlowGraphVisitor::buildDataFlowGraph() {
 
   // a temporary map to remember the statements where a variable was last written, this is used as temporary storage
   // for the node currently processed (curNode)
-  std::unordered_map<std::string, std::unordered_set<GraphNode *>> varLastWritten;
+  std::map<ScopedVariable, std::unordered_set<GraphNode *>> varLastWritten;
 
   // a map to remember for each GraphNode where all the variables visited on the way to the node were last written
-  std::unordered_map<GraphNode *, std::unordered_map<std::string, std::unordered_set<GraphNode *>>>
+  std::map<GraphNode *, std::map<ScopedVariable, std::unordered_set<GraphNode *>>>
       nodeToVarLastWrittenMapping;
 
   // a set to recognize already visited nodes, this is needed because our CFG potentially contains cycles
@@ -417,26 +426,26 @@ void ControlFlowGraphVisitor::buildDataFlowGraph() {
       // skip this parent if it was not visited before -> no information to collect available
       if (nodeToVarLastWrittenMapping.count(pNode)==0) continue;
       // go though all variables for which the parent has registered writes
-      for (auto &[varIdentifier, vectorOfReferencedNodes] : nodeToVarLastWrittenMapping.at(pNode)) {
+      for (auto &[var, vectorOfReferencedNodes] : nodeToVarLastWrittenMapping.at(pNode)) {
         // either add the nodes that refer to the variable (then) in case that this variable is already known [merging],
         // or (else) create a new vector using the vector of referenced nodes [replacing]
-        if (varLastWritten.count(varIdentifier) > 0) {
-          for (auto &val : vectorOfReferencedNodes) varLastWritten.at(varIdentifier).insert(val);
+        if (varLastWritten.count(var) > 0) {
+          for (auto &val : vectorOfReferencedNodes) varLastWritten.at(var).insert(val);
         } else {
-          varLastWritten[varIdentifier] = vectorOfReferencedNodes;
+          varLastWritten[var] = vectorOfReferencedNodes;
         }
       }
     }
 
     // add writes to variables happening in curNode to varLastWritten
-    for (auto &varIdentifier : curNode->getVariables(AccessType::WRITE)) {
+    for (auto &var : curNode->getVariables(AccessType::WRITE)) {
       // store the variable writes of this node (curNode)
-      if (varLastWritten.count(varIdentifier) > 0) {
+      if (varLastWritten.count(var) > 0) {
         // if this is not a join point, we need to remove the existing information before adding the new one
-        if (!nodeIsJoinPoint) varLastWritten.at(varIdentifier).clear();
-        varLastWritten.at(varIdentifier).insert(curNode);
+        if (!nodeIsJoinPoint) varLastWritten.at(var).clear();
+        varLastWritten.at(var).insert(curNode);
       } else {
-        varLastWritten[varIdentifier] = std::unordered_set<GraphNode *>({curNode});
+        varLastWritten[var] = std::unordered_set<GraphNode *>({curNode});
       }
     }
 
@@ -492,17 +501,17 @@ void ControlFlowGraphVisitor::buildDataFlowGraph() {
   // for each node that was visited in the CFG
   for (auto &v : processedNodes) {
     // retrieve all variables that were read
-    for (auto &varIdentifierRead : v->getVariables(AccessType::READ)) {
+    for (auto &var : v->getVariables(AccessType::READ)) {
       // SPECIAL CASE: node has a WRITE to the same variable (=> READ + WRITE, e.g., i = i + 1), in that case it does
       // not make sense to add a self-edge, but in case that the node is within a loop, its parent node will have the
       // same information about the last write
-      if (v->getVariables(AccessType::WRITE).count(varIdentifierRead) > 0) {
+      if (v->getVariables(AccessType::WRITE).count(var) > 0) {
         // iterate over all parents of node v
         for (auto &parentNode : v->getControlFlowGraph()->getParents()) {
           // if the parent knows where the last write for the given variable identifier happened lastly
-          if (nodeToVarLastWrittenMapping.at(parentNode).count(varIdentifierRead)==0) continue;
+          if (nodeToVarLastWrittenMapping.at(parentNode).count(var)==0) continue;
           // then create an edge from each of the nodes that have written to the variable recently to this node v
-          for (auto &edgeSrc : nodeToVarLastWrittenMapping.at(parentNode).at(varIdentifierRead))
+          for (auto &edgeSrc : nodeToVarLastWrittenMapping.at(parentNode).at(var))
             edgeSrc->getDataFlowGraph()->addChild(v);
         }
       } else { // DEFAULT CASE
@@ -512,12 +521,12 @@ void ControlFlowGraphVisitor::buildDataFlowGraph() {
           throw std::logic_error(
               "CFGV expected node corresponding to " + v->getRefToOriginalNode()->getUniqueNodeId()
                   + " to have a LastWrittenMap but it did not.");
-        } else if (nodeToVarLastWrittenMapping.at(v).find(varIdentifierRead)==nodeToVarLastWrittenMapping.at(v).end()) {
+        } else if (nodeToVarLastWrittenMapping.at(v).find(var)==nodeToVarLastWrittenMapping.at(v).end()) {
           throw std::runtime_error("CFGV: Found uninitialized (i.e. never written) variable: "
-                                       + varIdentifierRead + " in statement "
+                                       + var.getIdentifier() + " in statement "
                                        + v->getRefToOriginalNode()->getUniqueNodeId());
         } else {
-          for (auto &writeNodes : nodeToVarLastWrittenMapping.at(v).at(varIdentifierRead))
+          for (auto &writeNodes : nodeToVarLastWrittenMapping.at(v).at(var))
             writeNodes->getDataFlowGraph()->addChild(v);
         }
       }
@@ -528,8 +537,8 @@ void ControlFlowGraphVisitor::buildDataFlowGraph() {
   // STEP 3:
   // Traverse all graph nodes and collect all variable reads and writes to build variablesReadAndWritten
   // =================
-  std::vector<std::string> written;
-  std::vector<std::string> read;
+  std::vector<ScopedVariable> written;
+  std::vector<ScopedVariable> read;
   for (auto &n : processedNodes) {
     auto w = n->getVariables(AccessType::WRITE);
     std::copy(w.begin(), w.end(), std::back_inserter(written));
@@ -547,7 +556,11 @@ void ControlFlowGraphVisitor::buildDataFlowGraph() {
                         std::inserter(variablesReadAndWritten, variablesReadAndWritten.begin()));
 }
 
-std::set<std::string> ControlFlowGraphVisitor::getVariablesReadAndWritten() {
+std::set<ScopedVariable> ControlFlowGraphVisitor::getVariablesReadAndWritten() {
   return variablesReadAndWritten;
+}
+
+void ControlFlowGraphVisitor::forceVariableValues(const VariableValuesMap &variableValues) {
+  this->variableValues = variableValues;
 }
 

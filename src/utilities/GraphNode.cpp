@@ -18,14 +18,14 @@ NodeRelationship *GraphNode::getDataFlowGraph() const {
   return dataFlowGraph;
 }
 
-const std::set<std::pair<std::string, AccessType>> &GraphNode::getAccessedVariables() const {
+const std::set<std::pair<ScopedVariable, AccessType>> & GraphNode::getAccessedVariables() const {
   return accessedVariables;
 }
 
-std::set<std::string> GraphNode::getVariables(AccessType accessTypeFilter) const {
-  std::set<std::string> filteredVariables;
-  for (auto &[varIdentifier, acType] : accessedVariables) {
-    if (acType==accessTypeFilter) filteredVariables.insert(varIdentifier);
+std::set<ScopedVariable> GraphNode::getVariables(AccessType accessTypeFilter) const {
+  std::set<ScopedVariable> filteredVariables;
+  for (auto &[var, acType] : accessedVariables) {
+    if (acType==accessTypeFilter) filteredVariables.insert(var);
   }
   return filteredVariables;
 }
@@ -44,7 +44,7 @@ NodeRelationship *GraphNode::getRelationship(RelationshipType rel) const {
   }
 }
 
-void GraphNode::setAccessedVariables(std::set<std::pair<std::string, AccessType>> set) {
+void GraphNode::setAccessedVariables(std::set<std::pair<ScopedVariable, AccessType>> set) {
   accessedVariables = std::move(set);
 }
 

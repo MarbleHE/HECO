@@ -750,36 +750,13 @@ CompileTimeExpressionSimplifier::identifyReadWriteVariables(For &forLoop, Variab
   ControlFlowGraphVisitor cfgv;
   // Pass current scope information, so that CFGV has correct starting point
   cfgv.forceScope(stmtToScopeMapper, curScope);
+  cfgv.forceVariableValues(variableValues);
   // Create Control-Flow Graph for blockStmt
   cfgv.visit(forLoop);
   // Build Data-Flow Graph from Control-Flow Graph.
   cfgv.buildDataFlowGraph();
 
-  auto variablesReadAndWritten = cfgv.getVariablesReadAndWritten();
-  // TODO: Because CFGV doesn't fully support scopes yet, we must manually re-identify them for now
-  std::set<ScopedVariable> scopedVariablesReadAndWritten;
-  for (auto &str: variablesReadAndWritten) {
-    std::set<ScopedVariable> matches;
-    for (auto &[scopedVariable, value] : variableValues.getMap()) {
-      if (scopedVariable.getIdentifier()==str) {
-        matches.insert(scopedVariable);
-      }
-    }
-    if (matches.size()==1) {
-      scopedVariablesReadAndWritten.insert(*matches.begin());
-    } else if (matches.empty()) {
-      throw std::logic_error("Did not find valid corresponding scoped Variable for variable " + str +
-          " returned from Control Flow Graph Visitor.");
-    } else {
-      std::stringstream candidates;
-      for (auto &[name, scope] : matches) {
-        candidates << name << " in " << scope->getScopeIdentifier() << " ";
-      }
-      throw std::logic_error("Found multiple conflicting scoped Variables for variable " + str +
-          " returned from Control Flow Graph Visitor. Candidates were " + candidates.str());
-    }
-  }
-  return scopedVariablesReadAndWritten;
+  return cfgv.getVariablesReadAndWritten();
 }
 
 void CompileTimeExpressionSimplifier::visit(For &elem) {
