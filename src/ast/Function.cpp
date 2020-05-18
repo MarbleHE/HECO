@@ -31,6 +31,10 @@ Function::Function(std::string functionName, ParameterList *functionParameters,
 
 void Function::addStatement(AbstractStatement *statement) {
   if (children.empty()) addChild(new ParameterList());
+  if (children.size() == 1) {// only Parameters
+      // Introduce the wrapper Block
+      addChild(new Block);
+  }
   getBody()->addChild(statement);
 }
 
