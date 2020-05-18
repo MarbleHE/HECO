@@ -1392,6 +1392,7 @@ void AstTestingGenerator::genAstFlipMatrixElements(Ast &ast) {
   //            M[0][2] ];    // LiteralBool(false)
   // }
   auto func = new Function("extractArbitraryMatrixElements");
+  func->addParameter(new FunctionParameter(new Datatype(Types::BOOL), new Variable("y")));
 
   auto decl = new VarDecl("M", new Datatype(Types::BOOL),
                           new LiteralBool(
