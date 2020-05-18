@@ -672,7 +672,8 @@ void CompileTimeExpressionSimplifier::visit(If &elem) {
     auto variableValuesAfterVisitingThen = variableValues;
 
     // check if there is an Else-branch that we need to visit
-    if (elem.getElseBranch()!=nullptr) {
+    bool hadElseBranch = elem.getElseBranch()!=nullptr;
+    if (hadElseBranch) {
       // restore the original map via copy assignment prior visiting Else-branch
       variableValues = originalVariableValues;
       // visit the Else-branch
@@ -689,7 +690,8 @@ void CompileTimeExpressionSimplifier::visit(If &elem) {
       // if there is no Else-branch, elseBranchModifiedCurrentVariable stays False
       bool elseBranchModifiedCurrentVariable = false;
       AbstractExpr *elseBranchValue = nullptr;
-      if (elem.getElseBranch()!=nullptr) {
+      //Check elseBranch directly longer works because the else branch might have self-eliminated
+      if (hadElseBranch) {
         elseBranchValue = variableValues.getVariableValue(variableIdentifier)->getValue();
         elseBranchModifiedCurrentVariable = (elseBranchValue!=originalValue->getValue());
       }
