@@ -116,7 +116,8 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/optimizer/BatchingChecker.cpp
         ${ast_optimizer_SOURCE_DIR}/src/mockup_classes/Ciphertext.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/RuntimeVisitor.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/mockup_classes/Plaintext.cpp)
+        ${ast_optimizer_SOURCE_DIR}/src/mockup_classes/Plaintext.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/evaluation/Benchmark.cpp)
 
 set(HEADER_ONLY_SOURCES
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/OpSymbEnum.h
@@ -249,6 +250,17 @@ add_executable(ast_demo
         ${ast_optimizer_SOURCE_DIR}/examples/genAstDemo.cpp)
 
 target_link_libraries(ast_demo PRIVATE ast_opt)
+
+##############################
+# TARGET: ast_benchmark
+#
+# A simple example of the ast_optimizer
+##############################
+
+add_executable(ast_benchmark
+        ${ast_optimizer_SOURCE_DIR}/src/evaluation/Benchmark.cpp)
+
+target_link_libraries(ast_benchmark PRIVATE ast_opt)
 
 ####################################################################################
 # TESTING
