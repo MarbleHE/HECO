@@ -2691,8 +2691,18 @@ TEST_F(CompileTimeExpressionSimplifierFixture, trivialLoop) { /* NOLINT */
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, trivialNestedLoops) { /* NOLINT */
+  //  int trivialLoop() {
+  //    int x = 0;
+  //    for(int j = 0; j < 3; j = j + 1) {
+  //      for(int i = 0; i < 3; i = i + 1) {
+  //        x = 42;
+  //      }
+  //    }
+  //    return x;
+  //  }
   Ast ast;
   auto function = new Function("trivialNestedLoops");
+  auto varDecl = new VarDecl("x", Types::INT, new LiteralInt(0));
   auto innerloop = new For(new VarDecl("i", Types::INT, new LiteralInt(0)),
                            new LogicalExpr(new Variable("i"), LogCompOp::SMALLER, new LiteralInt(3)),
                            new VarAssignm("i",
@@ -2707,7 +2717,6 @@ TEST_F(CompileTimeExpressionSimplifierFixture, trivialNestedLoops) { /* NOLINT *
                                                              ArithmeticOp::ADDITION,
                                                              new LiteralInt(1))),
                            innerloop);
-  auto varDecl = new VarDecl("x", Types::INT, new LiteralInt(0));
   auto returnStmt = new Return(new Variable("x"));
   function->addStatement(varDecl);
   function->addStatement(outerloop);

@@ -329,7 +329,10 @@ void CompileTimeExpressionSimplifier::visit(VarAssignm &elem) {
   Visitor::visit(elem);
   // store the variable's value
   auto var = variableValues.getVariableEntryDeclaredInThisOrOuterScope(elem.getVarTargetIdentifier(), curScope);
-  auto newVV = new VariableValue(variableValues.getVariableValue(var)->getDatatype(), elem.getValue());
+  auto newVV =
+      variableValues.getVariableValue(var) ?
+      new VariableValue(variableValues.getVariableValue(var)->getDatatype(), elem.getValue())
+                                        : nullptr;
   variableValues.setVariableValue(var, newVV);
 
   // Delete this node
@@ -776,6 +779,16 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
   /// Loop Variables are variables that are both written to and read from during the loop
   auto loopVariables = identifyReadWriteVariables(elem, variableValues);
 
+  // The CFGV also returns variables that are read&written in inner loops, which we might not be aware of!
+  std::set<ScopedVariable> filteredLoopVariables;
+  auto m = variableValues.getMap();
+  for (auto &sv : loopVariables) {
+    if (m.find(sv)!=m.end()) {
+      filteredLoopVariables.insert(sv);
+    }
+  }
+  loopVariables = filteredLoopVariables;
+
   // We need to emit Assignments (and Decl's if needed) for each of the loop variables Variables into the initializer
   if (!elem.getInitializer()) { elem.setInitializer(new Block()); };
   auto assignments = emitVariableAssignments(loopVariables);
@@ -814,13 +827,17 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
     loopCTES.forceScope(stmtToScopeMapper, curScope);
     loopCTES.variableValues = variableValues;
 
+    // Manual handling of scope (usually done via Visitor::visit(elem))
+    loopCTES.addStatementToScope(elem);
+    loopCTES.changeToInnerScope(elem.getUniqueNodeId(), &elem);
+
     /// Visit the initializer (this will load the loop variables back into variableValues)
     // Manually visit the statements in the block, since otherwise Visitor::visit would create a new scope!
     for (auto &s: elem.getInitializer()->getStatements()) {
       s->accept(loopCTES);
     }
     // Since we manually visited, we also need to manually clean up
-    cleanUpBlock(*elem.getInitializer());
+    loopCTES.cleanUpBlock(*elem.getInitializer());
 
     /// Do we have everything we need to evaluate the condition?
     auto conditionCompileTimeKnown = [&]() -> bool {
