@@ -17,7 +17,7 @@ For::For(AbstractStatement *initializer,
   setAttributes(initializer, condition, update, statementToBeExecuted);
 }
 
-Block * For::getInitializer() const {
+Block *For::getInitializer() const {
   return dynamic_cast<Block *>(getChildAtIndex(0));
 }
 
@@ -25,11 +25,11 @@ AbstractExpr *For::getCondition() const {
   return dynamic_cast<AbstractExpr *>(getChildAtIndex(1));
 }
 
-Block * For::getUpdate() const {
+Block *For::getUpdate() const {
   return dynamic_cast<Block *>(getChildAtIndex(2));
 }
 
-Block * For::getBody() const {
+Block *For::getBody() const {
   return dynamic_cast<Block *>(getChildAtIndex(3));
 }
 
@@ -104,4 +104,13 @@ bool For::isEqual(AbstractStatement *other) {
     return sameInitializer && sameCondition && sameUpdateStmt && sameBody;
   }
   return false;
+}
+void For::setInitializer(Block *initializer) {
+  if (getInitializer()) {
+    throw std::runtime_error("Cannot overwrite initializer.");
+    // Because we cannot really "delete" nodes safely unless we're in a visitor?
+  } else {
+    children[0] = initializer;
+    initializer->addParent(this,false);
+  }
 }

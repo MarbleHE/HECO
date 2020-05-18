@@ -67,7 +67,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, arithmeticExpr_literalsOnly_fully
   auto alphaValue = getVariableValueByUniqueName("alpha");
   EXPECT_EQ(alphaValue->castTo<LiteralInt>()->getValue(), 242);
   // check that the statement VarDecl and its children are deleted
-  EXPECT_EQ(function->getBody()->getStatements().size(), 0);
+  EXPECT_EQ(function->getBody(), nullptr);
 
 }
 
@@ -102,7 +102,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, arithmeticExpr_variableUnknown_rh
                                    {new Variable("encryptedA"),
                                     new LiteralInt(28)});
   EXPECT_TRUE(getVariableValueByUniqueName("alpha")->isEqual(expected));
-  EXPECT_EQ(function->getBodyStatements().size(), 0);
+  EXPECT_EQ(function->getBody(), nullptr);
 
 
 }
@@ -137,7 +137,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, arithmeticExpr_variableKnown_full
   EXPECT_EQ(alphaValue->castTo<LiteralInt>()->getValue(), 1'204);
 
   // check that the statement VarDecl and its children are deleted
-  EXPECT_EQ(function->getBody()->getStatements().size(), 0);
+  EXPECT_EQ(function->getBody(), nullptr);
 
 
 }
@@ -182,9 +182,9 @@ TEST_F(CompileTimeExpressionSimplifierFixture, arithmeticExpr_variablesUnknown_n
       });
   EXPECT_TRUE(getVariableValueByUniqueName("alpha")->isEqual(expected));
 
-  // check that 9 nodes were deleted and the function's body is empty
-  EXPECT_EQ(numberOfNodesBeforeSimplification - 9, ast.getAllNodes().size());
-  EXPECT_EQ(function->getBodyStatements().size(), 0);
+  // check that 10 nodes were deleted and the function's body is empty
+  EXPECT_EQ(numberOfNodesBeforeSimplification - 10, ast.getAllNodes().size());
+  EXPECT_EQ(function->getBody(), nullptr);
 
 
 }
@@ -214,7 +214,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_literalsOnly_fullyEva
   EXPECT_EQ(alphaValue->castTo<LiteralBool>()->getValue(), false);
 
   // check that the statement VarDecl and its children are deleted
-  EXPECT_EQ(function->getBody()->getStatements().size(), 0);
+  EXPECT_EQ(function->getBody(), nullptr);
 
 
 }
@@ -252,7 +252,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_variableUnknown_lhsOp
   auto expected = new LiteralBool(true);
   EXPECT_TRUE(getVariableValueByUniqueName("alpha")->isEqual(expected));
   // check that the variable declaration statement is deleted
-  EXPECT_EQ(function->getBodyStatements().size(), 0);
+  EXPECT_EQ(function->getBody(), nullptr);
 
 
 }
@@ -287,7 +287,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_variableKnown_fullyEv
   EXPECT_EQ(alphaValue->castTo<LiteralBool>()->getValue(), true);
 
   // check that the statement VarDecl and its children are deleted
-  EXPECT_EQ(function->getBody()->getStatements().size(), 0);
+  EXPECT_EQ(function->getBody(), nullptr);
 
 
 }
@@ -349,7 +349,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, unaryExpr_literalsOnly_fullyEvalu
   EXPECT_EQ(alphaValue->castTo<LiteralBool>()->getValue(), true);
 
   // check that the statement VarDecl and its children are deleted
-  EXPECT_EQ(function->getBody()->getStatements().size(), 0);
+  EXPECT_EQ(function->getBody(), nullptr);
 
 
 }
@@ -383,7 +383,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, unaryExpr_variableKnown_fullyEval
   EXPECT_EQ(betaValue->castTo<LiteralBool>()->getValue(), false);
 
   // check that both statements and their children are deleted
-  EXPECT_EQ(function->getBody()->getStatements().size(), 0);
+  EXPECT_EQ(function->getBody(), nullptr);
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, unaryExpr_variableUnknown_notEvaluable) { /* NOLINT */
@@ -412,7 +412,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, unaryExpr_variableUnknown_notEval
   EXPECT_TRUE(getVariableValueByUniqueName("beta")
                   ->isEqual(new OperatorExpr(new Operator(UnaryOp::NEGATION), {new Variable("paramA")})));
   // check that statements is deleted
-  EXPECT_EQ(function->getBodyStatements().size(), 0);
+  EXPECT_EQ(function->getBody(), nullptr);
 
 
 }
@@ -447,7 +447,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, varAssignm_variablesKnown_fullyEv
   EXPECT_EQ(betaValue->castTo<LiteralFloat>()->getValue(), 2.75);
 
   // check that the statements and their children are deleted
-  EXPECT_EQ(function->getBody()->getStatements().size(), 0);
+  EXPECT_EQ(function->getBody(), nullptr);
 
 
 }
@@ -474,7 +474,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, varAssignm_previouslyDeclaredNonI
   EXPECT_EQ(alphaValue->castTo<LiteralFloat>()->getValue(), 2.95f);
 
   // check that the statement VarDecl and its children are deleted
-  EXPECT_EQ(function->getBody()->getStatements().size(), 0);
+  EXPECT_EQ(function->getBody(), nullptr);
 
 
 }
@@ -502,7 +502,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, varAssignm_assignmentToParameter)
   EXPECT_EQ(alphaValue->castTo<LiteralFloat>()->getValue(), 42.24f);
 
   // check that the statement VarDecl and its children are deleted
-  EXPECT_EQ(function->getBody()->getStatements().size(), 0);
+  EXPECT_EQ(function->getBody(), nullptr);
 
 
 }

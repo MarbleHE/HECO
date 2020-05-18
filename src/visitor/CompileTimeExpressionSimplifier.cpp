@@ -509,7 +509,8 @@ void CompileTimeExpressionSimplifier::simplifyLogicalExpr(OperatorExpr &elem) {
 
 void CompileTimeExpressionSimplifier::visit(Block &elem) {
   Visitor::visit(elem);
-  //TODO: This now needs to do recursive resolution of nested blocks, since we took that out of for loop unrolling
+  cleanUpBlock(elem);
+
   //TODO: If we come to the end of a scope, do we need to emit variables?
 }
 
@@ -759,20 +760,24 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
   changeToInnerScope(elem.getUniqueNodeId(), &elem);
 
 
-  // Before we can visit the children, we must identify with the "loop variables"
-  // Since the CFGV used in identifyReadWriteVariables does not take variableValues into account
-  // we must do this before we visit any children and potentially inline things like e.g. int i = 0;
-  /// Loop Variables are variables that are both written to and read from during the loop
-  auto loopVariables = identifyReadWriteVariables(elem, variableValues);
-
   // INITIALIZER
 
   // Visit initializer. Visiting this is important, in case it affects variables that won't be detected as "loop variables"
   // If we did not visit it, the recursive visit of the body might go wrong!
-  elem.getInitializer()->accept(*this);
+  // Manually visit the statements in the block, since otherwise Visitor::visit would create a new scope!
+  for (auto &s: elem.getInitializer()->getStatements()) {
+    s->accept(*this);
+  }
+  // Since we manually visited, we also need to manually clean up
+  cleanUpBlock(*elem.getInitializer());
+
   // Now, int i = 0 and similar things might have been deleted from AST and are in VariableValuesMap
 
-  // We need to emit Assignments (and Decl's if ndeeded) for each of the loop variables Variables into the initializer
+  /// Loop Variables are variables that are both written to and read from during the loop
+  auto loopVariables = identifyReadWriteVariables(elem, variableValues);
+
+  // We need to emit Assignments (and Decl's if needed) for each of the loop variables Variables into the initializer
+  if (!elem.getInitializer()) { elem.setInitializer(new Block()); };
   auto assignments = emitVariableAssignments(loopVariables);
   for (auto &a : assignments) {
     elem.getInitializer()->addChild(a, true);
@@ -810,7 +815,12 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
     loopCTES.variableValues = variableValues;
 
     /// Visit the initializer (this will load the loop variables back into variableValues)
-    elem.getInitializer()->accept(loopCTES);
+    // Manually visit the statements in the block, since otherwise Visitor::visit would create a new scope!
+    for (auto &s: elem.getInitializer()->getStatements()) {
+      s->accept(loopCTES);
+    }
+    // Since we manually visited, we also need to manually clean up
+    cleanUpBlock(*elem.getInitializer());
 
     /// Do we have everything we need to evaluate the condition?
     auto conditionCompileTimeKnown = [&]() -> bool {
@@ -842,29 +852,31 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
     /// Helper for executing the loop (also deals with update, in case we ever change stmt inlining)
     auto executeLoopStmts = [&]() {
 
-      //TODO: Its OK if stmts aren't executable, as long as they don't affect loop variables!
-      //      If we have these (complex/runtime dependent) stmts, simply move them into the unrolledBlock
-
       // BODY
-      Block *clonedBody = elem.getBody()->clone(false);
-      clonedBody->accept(loopCTES);
-      // If there are any stmts left, transfer them to the unrolledBlock
-      for (auto &s: clonedBody->getStatements()) {
-        s->removeParents();
-        unrolledBlock->addChild(s, true);
+      if (elem.getBody()) {
+        Block *clonedBody = elem.getBody()->clone(false);
+        clonedBody->accept(loopCTES);
+
+        // If there are any stmts left, transfer them to the unrolledBlock
+        for (auto &s: clonedBody->getStatements()) {
+          s->removeParents();
+          unrolledBlock->addChild(s, true);
+        }
+        nodesQueuedForDeletion.push_back(clonedBody);
       }
-      nodesQueuedForDeletion.push_back(clonedBody);
 
 
-      // LOOP
-      Block *clonedUpdate = elem.getUpdate()->clone(false);
-      clonedUpdate->accept(loopCTES);
-      // If there are any stmts left, transfer them to the unrolledBlock
-      for (auto &s: clonedUpdate->getStatements()) {
-        s->removeParents();
-        unrolledBlock->addChild(s, true);
+      // UPDATE
+      if (elem.getUpdate()) {
+        Block *clonedUpdate = elem.getUpdate()->clone(false);
+        clonedUpdate->accept(loopCTES);
+        // If there are any stmts left, transfer them to the unrolledBlock
+        for (auto &s: clonedUpdate->getStatements()) {
+          s->removeParents();
+          unrolledBlock->addChild(s, true);
+        }
+        nodesQueuedForDeletion.push_back(clonedUpdate);
       }
-      nodesQueuedForDeletion.push_back(clonedUpdate);
     };
 
     /// Track iterations
@@ -1143,7 +1155,7 @@ AbstractExpr *CompileTimeExpressionSimplifier::getKnownValue(AbstractNode *node)
 std::unordered_map<std::string, AbstractLiteral *> CompileTimeExpressionSimplifier::getTransformedVariableMap() {
   std::unordered_map<std::string, AbstractLiteral *> variableMap;
   for (auto &[k, v] : variableValues.getMap()) {
-    if (auto varAsLiteral = dynamic_cast<AbstractLiteral *>(v->getValue())) {
+    if (auto varAsLiteral = v ? dynamic_cast<AbstractLiteral *>(v->getValue()) : nullptr) {
       variableMap[k.getIdentifier()] = varAsLiteral;
     }
   }
@@ -1276,7 +1288,7 @@ void CompileTimeExpressionSimplifier::setMatrixVariableValue(const std::string &
   // store the value at the given position - matrix must handle indices and make sure that matrix is large enough
   literal->getMatrix()->setElementAt(row, column, valueToStore);
   // Update the VariableValuesMap with this new matrix
-  variableValues.setVariableValue(var,new VariableValue(variableValues.getVariableValue(var)->getDatatype(), literal));
+  variableValues.setVariableValue(var, new VariableValue(variableValues.getVariableValue(var)->getDatatype(), literal));
 
 }
 
@@ -1441,5 +1453,20 @@ void CompileTimeExpressionSimplifier::enteredForLoop() {
   // Otherwise, things like for() { for() {}; ...; for() {}; } would give wrong level
   if (currentLoopDepth_maxLoopDepth.first==currentLoopDepth_maxLoopDepth.second) {
     ++currentLoopDepth_maxLoopDepth.second;
+  }
+}
+
+void CompileTimeExpressionSimplifier::cleanUpBlock(Block &elem) {
+  // Since some children might have replaced themselves with nullptr, let's collect only the valid children
+  auto newChildren = elem.getChildrenNonNull();
+  if (newChildren.empty()) {
+    // Block is empty => remove it from parent
+    elem.getOnlyParent()->replaceChild(&elem, nullptr);
+    // mark for deletion
+    enqueueNodeForDeletion(&elem);
+  } else {
+    elem.removeChildren();
+    // not adding backreferences because they already exist
+    elem.addChildren(newChildren, false);
   }
 }

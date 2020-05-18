@@ -22,13 +22,15 @@ class For : public AbstractStatement {
                      AbstractStatement *update,
                      AbstractStatement *body);
 
-  [[nodiscard]] Block * getInitializer() const;
+  [[nodiscard]] Block *getInitializer() const;
+
+  void setInitializer(Block *initializer);
 
   [[nodiscard]] AbstractExpr *getCondition() const;
 
-  [[nodiscard]] Block * getUpdate() const;
+  [[nodiscard]] Block *getUpdate() const;
 
-  [[nodiscard]] Block * getBody() const;
+  [[nodiscard]] Block *getBody() const;
 
   int getMaxNumberChildren() override;
 

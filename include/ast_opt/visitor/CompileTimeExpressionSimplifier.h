@@ -336,6 +336,11 @@ class CompileTimeExpressionSimplifier : public Visitor {
   /// \return A pointer to the new node if the given For-loop was replaced in the children vector of the For-loop's
   /// parent.
 //  AbstractNode *doPartialLoopUnrolling(For &elem);
+
+  /// When a Block has been visited, some of its statements might have been replaced by nullptrs
+  /// This function removes those nullptrs from the Block. If the resulting Block is empty,
+  /// It also replaces the Block with nullptr in its parent
+  void cleanUpBlock(Block &elem);
 };
 
 /// Takes a Literal (e.g., LiteralInt) and checks whether its values are defined using a Matrix<AbstractExpr*>. In
