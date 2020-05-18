@@ -43,10 +43,9 @@ class Matrix : public AbstractMatrix {
   /// Creates a new empty matrix.
   Matrix() : values(std::vector<std::vector<T>>()), dim(Dimension(0, 0)) {}
 
-
   explicit Matrix(std::initializer_list<std::vector<T>> init_list) {
     std::vector<std::vector<T>> v;
-    for(auto it = init_list.begin(); it != init_list.end(); ++it) {
+    for (auto it = init_list.begin(); it!=init_list.end(); ++it) {
       v.push_back(*it);
     }
     values = v;
@@ -58,11 +57,10 @@ class Matrix : public AbstractMatrix {
       }
     }
   }
-
   /// Creates a new matrix with the elements provided in inputMatrix.
   /// \param inputMatrix The elements of the matrix to create.
   //TODO: For MSVC, this should really be defined outside class, but for explicit, it needs to be inside
-  Matrix(std::vector<std::vector<T>> inputMatrix)
+  explicit Matrix(std::vector<std::vector<T>> inputMatrix)
       : values(std::move(inputMatrix)), dim(values.size(), values.empty() ? 0 : values.at(0).size()) {
     int elementsPerRow = values.empty() ? 0 : values.at(0).size();
     for (auto const &rowVector : values) {
@@ -498,7 +496,6 @@ static Matrix<T> *applyMatrixMultiplication(Matrix<T> *matrixA, Matrix<T> *matri
 // code for template specialisations is not properly emitted if the functions are defined inside the class body
 // and the specialized version isn't ODR-used in the same translation unit
 // Therefore, these following functions are all defined outside the class:
-
 
 template<typename T>
 AbstractMatrix *Matrix<T>::applyBinaryOperatorComponentwise(Matrix<T> *rhsOperand, Operator *op) {

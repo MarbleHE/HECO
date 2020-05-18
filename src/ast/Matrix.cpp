@@ -142,7 +142,7 @@ AbstractMatrix *Matrix<bool>::applyBinaryOperatorComponentwise(Matrix<bool> *rhs
 
 template<>
 AbstractMatrix *Matrix<std::string>::applyBinaryOperatorComponentwise(Matrix<std::string> *rhsOperand, Operator *os) {
-  std::function < std::string(std::string, std::string) > operatorFunction;
+  std::function<std::string(std::string, std::string)> operatorFunction;
   if (os->equals(ArithmeticOp::ADDITION)) {
     operatorFunction = [](const std::string &a, const std::string &b) -> std::string { return a + b; };
   } else {
@@ -201,27 +201,27 @@ AbstractMatrix *Matrix<bool>::applyUnaryOperatorComponentwise(Operator *os) {
 // - Matrix<std::string>
 template<>
 bool Matrix<bool>::isScalar() const {
-  return dim.equals(1,1);
+  return dim.equals(1, 1);
 }
 
 template<>
 bool Matrix<int>::isScalar() const {
-  return dim.equals(1,1);
+  return dim.equals(1, 1);
 }
 
 template<>
 bool Matrix<float>::isScalar() const {
-  return dim.equals(1,1);
+  return dim.equals(1, 1);
 }
 
 template<>
 bool Matrix<double>::isScalar() const {
-  return dim.equals(1,1);
+  return dim.equals(1, 1);
 }
 
 template<>
 bool Matrix<std::string>::isScalar() const {
-  return dim.equals(1,1);
+  return dim.equals(1, 1);
 }
 
 
@@ -271,6 +271,37 @@ AbstractExpr *Matrix<AbstractExpr *>::getElementAt(int row, int column) {
 
 // ===== Matrix Constructor (additional constructor) ==========
 // - Matrix<AbstractExpr*>
+
+template<>
+Matrix<AbstractExpr *>::Matrix(std::initializer_list<std::vector<AbstractExpr *>> init_list)  /* NOLINT intentionally not explicit */{
+  std::vector<std::vector<AbstractExpr*>> v;
+  for (auto it = init_list.begin(); it!=init_list.end(); ++it) {
+    v.push_back(*it);
+  }
+  values = v;
+  dim = Dimension(values.size(), values.size()==0 ? 0 : values.at(0).size());
+  // In a Matrix<AbstractExpr*> it is needed that we use the parent-child relationship by attaching each of the matrix
+  // elements as a child to the Matrix object. This is needed, for example, in the CompileTimeExpressionSimplifier where
+  // we replace nodes that can be evaluated at compile-time (e.g., variables by their known value).
+  int elementsPerRow = values.size()==0 ? 0 : values.at(0).size();
+  std::vector<AbstractNode *> childrenToBeAdded;
+  for (auto &matrixRows : values) {
+    // check that matrix has the same number of elements in each row
+    if (matrixRows.size()!=elementsPerRow) {
+      throw std::invalid_argument("Vector rows must all have the same number of elements!");
+    }
+    for (auto &element : matrixRows) {
+      // check that matrix elements are all one-dimensional
+      auto lit = dynamic_cast<AbstractLiteral *>(element);
+      if (lit!=nullptr && !lit->getMatrix()->getDimensions().equals(1, 1)) {
+        throw std::logic_error("Cannot create a matrix where elements are not one-dimensional!");
+      }
+      childrenToBeAdded.push_back(element);
+    }
+  }
+  removeChildren();
+  addChildren(childrenToBeAdded, true);
+}
 
 template<>
 Matrix<AbstractExpr *>::Matrix(std::vector<std::vector<AbstractExpr *>> inputMatrix)  /* NOLINT intentionally not explicit */
