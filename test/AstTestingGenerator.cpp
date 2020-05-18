@@ -401,6 +401,18 @@ void AstTestingGenerator::genAstEvalTwo(Ast &ast) {
 
 void AstTestingGenerator::genAstEvalThree(Ast &ast) {
   // bool computeLogical(int inputA, bool strong, bool negate, int inputB)
+  //    if (strong == true) {
+  //       inputA = inputA * 42;
+  //    } else {
+  //       inputA = inputA + 42;
+  //    }
+  //    if (negate) {
+  //       inputA = -inputA;
+  //    }
+  //    return inputA >= inputB
+  // }
+
+  // bool computeLogical(int inputA, bool strong, bool negate, int inputB)
   auto func = new Function("computePrivate");
   auto funcParams = new ParameterList();
   funcParams->addChild(new FunctionParameter(

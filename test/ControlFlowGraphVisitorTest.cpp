@@ -135,6 +135,17 @@ TEST_F(FlowGraphVisitorFixture, controlFlowGraphIncludingIfStatement) { /* NOLIN
 TEST_F(FlowGraphVisitorFixture, traverseAndPrintNodeTest) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(9, ast);
+  // bool computeLogical(int inputA, bool strong, bool negate, int inputB)
+  //    if (strong == true) {
+  //       inputA = inputA * 42;
+  //    } else {
+  //       inputA = inputA + 42;
+  //    }
+  //    if (negate) {
+  //       inputA = -inputA;
+  //    }
+  //    return inputA >= inputB
+  // }
 
   ControlFlowGraphVisitor fgv;
   fgv.visit(ast);
@@ -212,7 +223,14 @@ TEST_F(FlowGraphVisitorFixture, controlFlowGraphIncludingWhileStatement) { /* NO
 TEST_F(FlowGraphVisitorFixture, controlFlowGraphIncludingForStatement) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(23, ast);
-
+//    sumNTimes2(int inputA) {
+//      int sum = 0;
+//      int base = 2;
+//      for (int i = 0; i <= inputA; i=i+1) {
+//        sum = sum + base * i;
+//      }
+//      return sum;  // 2*0 + 2*1 + ... + 2*inputA
+//    }
   ControlFlowGraphVisitor fgv;
   fgv.visit(ast);
 

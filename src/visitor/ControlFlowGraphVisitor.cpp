@@ -71,8 +71,17 @@ void ControlFlowGraphVisitor::visit(Block &elem) {
 void ControlFlowGraphVisitor::visit(For &elem) {
   auto gNode = appendStatementToCfg(elem);
 
+  // Manual handling of scope (usually done via Visitor::visit(elem))
+  addStatementToScope(elem);
+  changeToInnerScope(elem.getUniqueNodeId(), &elem);
+
   // initializer (e.g., int i = 0;)
-  elem.getInitializer()->accept(*this);
+  // Manually visit the statements in the block, since otherwise Visitor::visit would create a new scope!
+  if (elem.getInitializer()) {
+    for (auto &s: elem.getInitializer()->getStatements()) {
+      s->accept(*this);
+    }
+  }
   auto lastStatementInInitializer = lastCreatedNodes;
 
   // condition (e.g., i <= N)
@@ -96,6 +105,9 @@ void ControlFlowGraphVisitor::visit(For &elem) {
 
   // restore the last created nodes in the condition as those need to be connected to the next statement
   lastCreatedNodes = lastStatementCondition;
+
+  // Manual scope handling
+  changeToOuterScope();
 
   postActionsStatementVisited(gNode);
 }
@@ -212,8 +224,7 @@ void ControlFlowGraphVisitor::visit(VarDecl &elem) {
 
   // store the variable, but ignore value since we don't care about that in CFGV
   auto sv = ScopedVariable(elem.getIdentifier(), curScope);
-  auto vv = VariableValue(*elem.getDatatype(), nullptr);
-  variableValues.addDeclaredVariable(sv, vv);
+  variableValues.addDeclaredVariable(sv, nullptr);
 
   auto gNode = appendStatementToCfg(elem);
   markVariableAccess(sv, AccessType::WRITE);
@@ -302,7 +313,18 @@ void ControlFlowGraphVisitor::visit(Datatype &elem) {
 }
 
 void ControlFlowGraphVisitor::visit(FunctionParameter &elem) {
-  Visitor::visit(elem);
+  // We cannot simply visit the Variable, as it would try to look it up when of course it does not exist yet
+  // So instead of Visitor::visit(elem); we visit only the Datatype and inspect the Value manually
+  elem.getDatatype()->accept(*this);
+
+  // The value in a FunctionParamter must be a single Variable
+  auto valueAsVar = dynamic_cast<Variable *>(elem.getValue());
+  if (valueAsVar) {
+    // Ignoring value, as it's irrelevant for CFGV
+    variableValues.addDeclaredVariable(ScopedVariable(valueAsVar->getIdentifier(), curScope), nullptr);
+  } else {
+    throw std::runtime_error("Function parameter " + elem.getUniqueNodeId() + " contained invalid Variable value.");
+  }
 }
 
 void ControlFlowGraphVisitor::visit(LiteralBool &elem) {
@@ -407,6 +429,17 @@ void ControlFlowGraphVisitor::buildDataFlowGraph() {
   // a map to remember for each GraphNode where all the variables visited on the way to the node were last written
   std::map<GraphNode *, std::map<ScopedVariable, std::unordered_set<GraphNode *>>>
       nodeToVarLastWrittenMapping;
+
+  //TODO: Can we maybe ignore the entire variableValues thing in the main CFG visitor
+  // and instead just pass in VariableValues into this function?
+
+  // TODO: Anything stored in VariableValues should be associated with having been "last written" in the root node?
+  std::unordered_set us = {getRootNodeCfg()}; //necessary to disambiguate calls
+  for (auto &[sv, vv]: variableValues.getMap()) {
+    varLastWritten.clear(); //hack-ish
+    varLastWritten.insert_or_assign(sv, us);
+    nodeToVarLastWrittenMapping.insert_or_assign(getRootNodeCfg(), varLastWritten);
+  }
 
   // a set to recognize already visited nodes, this is needed because our CFG potentially contains cycles
   std::set<GraphNode *> processedNodes;
@@ -563,4 +596,3 @@ std::set<ScopedVariable> ControlFlowGraphVisitor::getVariablesReadAndWritten() {
 void ControlFlowGraphVisitor::forceVariableValues(const VariableValuesMap &variableValues) {
   this->variableValues = variableValues;
 }
-
