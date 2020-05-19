@@ -117,3 +117,13 @@ void For::setInitializer(Block *initializer) {
     initializer->addParent(this, false);
   }
 }
+
+void For::setBody(Block *body) {
+  if (getBody()) {
+    throw std::runtime_error("Cannot overwrite body.");
+    // Because we cannot really "delete" nodes safely unless we're in a visitor?
+  } else {
+    children[3] = body;
+    body->addParent(this, false);
+  }
+}

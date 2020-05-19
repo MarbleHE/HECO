@@ -26,6 +26,8 @@ class For : public AbstractStatement {
 
   void setInitializer(Block *initializer);
 
+  void setBody(Block *body);
+
   [[nodiscard]] AbstractExpr *getCondition() const;
 
   [[nodiscard]] Block *getUpdate() const;

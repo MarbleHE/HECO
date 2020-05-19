@@ -820,7 +820,7 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
   // Visit Body to simplify it + recursively deal with nested loops
   // This will also update the maxLoopDepth in case there are nested loops
   // This in turn allows us to determine if this For-Loop should be unrolled - see isUnrollLoopAllowed()
-  if(elem.getBody()) elem.getBody()->accept(*this);
+  if (elem.getBody()) elem.getBody()->accept(*this);
   // Now, parts of the body statements (e.g. x++) might have been deleted and are only in VariableValuesMap
 
   // UPDATE
@@ -828,9 +828,17 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
   // Visit Update to simplify it + recursively deal with nested loops
   // This will also update the maxLoopDepth in case there are nested loops (which would be weird but possible)
   // This in turn allows us to determine if this For-Loop should be unrolled - see isUnrollLoopAllowed()
-  if(elem.getUpdate()) elem.getUpdate()->accept(*this);
+  if (elem.getUpdate()) elem.getUpdate()->accept(*this);
   // Now, parts of the body statements (e.g. x++) might have been deleted and are only in VariableValuesMap
 
+
+  // We have potentially removed stmts from body and update (loop-variable init has already been re-emitted)
+  // Go through and re-emit any loop variables into the body:
+  if (!elem.getBody()) { elem.setBody(new Block()); };
+  auto new_assignments = emitVariableAssignments(loopVariables);
+  for (auto &a : new_assignments) {
+    elem.getBody()->addChild(a, true);
+  }
 
   // Manual scope handling
   changeToOuterScope();
@@ -838,7 +846,9 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
   // At this point, the loop has been visited and some parts have been simplified.
   // Now we are ready to analyze if this loop can additionally also be unrolled:
   // Are we even set to do unrolling at this LoopDepth?
-  if (ctes.isUnrollLoopAllowed()) {
+  if (!ctes.isUnrollLoopAllowed()) {
+    //TODO: Any further steps necessary?
+  } else {
 
     // We cannot know if the loop can be fully unrolled without evaluating it
     // So we speculatively unroll the loop until its either too long or we cannot determine something at compile time
@@ -957,16 +967,6 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
     }
     // else: nothing to undo since we used a new visitor
   }
-
-  // TODO: What to do if no unrolling should take place, or an unrolling attempt was unsuccessful?
-  //  the already executed visits of the children are both correct and sufficient
-  //  ...or maybe not?
-  //  Not sure where to put this, but if "complex statements" are those that we cannot or do not resolve
-  //  e.g. a public runtime if stmt or a for-loop we choose not to unroll
-  //  then we need to emit all the variables used inside this complex stmt before it,
-  //  otherwise the result might be wrong!!
-  //  Get variables that are EITHER read or written (do we need written? Can runtime system deal with that instead?)
-  //  and emit them before this loop, i.e. requires putting things into a block??
 
   // Update LoopDepth tracking
   leftForLoop();
