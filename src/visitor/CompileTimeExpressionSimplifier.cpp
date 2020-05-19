@@ -802,6 +802,10 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
   loopVariables = filteredLoopVariables;
 
   // We need to emit Assignments (and Decl's if needed) for each of the loop variables Variables into the initializer
+  //TODO: Idea to avoid both iterator invalidation of new VarDecls being inserted in parent lists,
+  //      and the issue with "higher" VarDecls outside loop never being optimized away since they're never re-visited
+  //      Instead of emitting in original scope, always emit into current scope
+  //      What about shadowing, though?
   if (!elem.getInitializer()) { elem.setInitializer(new Block()); };
   auto assignments = emitVariableAssignments(loopVariables);
   for (auto &a : assignments) {
