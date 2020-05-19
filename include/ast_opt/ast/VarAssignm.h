@@ -28,7 +28,7 @@ class VarAssignm : public AbstractStatement {
 
   AbstractBinaryExpr *contains(AbstractBinaryExpr *aexpTemplate, ArithmeticExpr *excludedSubtree) override;
 
-  std::string getVarTargetIdentifier() const override;
+  std::string getVarTargetIdentifier() const;
 
   bool isEqual(AbstractStatement *as) override;
 

@@ -2,6 +2,7 @@
 #define AST_OPTIMIZER_INCLUDE_AST_OPT_AST_MATRIXASSIGNM_H_
 
 #include "AbstractStatement.h"
+#include "ast_opt/ast/MatrixElementRef.h"
 #include <string>
 
 class MatrixAssignm : public AbstractStatement {

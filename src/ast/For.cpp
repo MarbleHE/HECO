@@ -95,11 +95,14 @@ json For::toJson() const {
 bool For::isEqual(AbstractStatement *other) {
   if (auto otherFor = dynamic_cast<For *>(other)) {
     auto sameInitializer = (getInitializer()==nullptr && otherFor->getInitializer()==nullptr)
-        || getInitializer()->isEqual(otherFor->getInitializer());
+        || (getInitializer()!=nullptr && otherFor->getInitializer()!=nullptr
+            && getInitializer()->isEqual(otherFor->getInitializer()));
     auto sameCondition = (getCondition()==nullptr && otherFor->getCondition()==nullptr)
-        || getCondition()->isEqual(otherFor->getCondition());
+        || (getCondition()!=nullptr && otherFor->getCondition()!=nullptr
+            && getCondition()->isEqual(otherFor->getCondition()));
     auto sameUpdateStmt = (getUpdate()==nullptr && otherFor->getUpdate()==nullptr)
-        || getUpdate()->isEqual(otherFor->getUpdate());
+        || (getUpdate()!=nullptr && otherFor->getUpdate()!=nullptr
+            && getUpdate()->isEqual(otherFor->getUpdate()));
     auto sameBody = getBody()->isEqual(otherFor->getBody());
     return sameInitializer && sameCondition && sameUpdateStmt && sameBody;
   }
@@ -111,6 +114,6 @@ void For::setInitializer(Block *initializer) {
     // Because we cannot really "delete" nodes safely unless we're in a visitor?
   } else {
     children[0] = initializer;
-    initializer->addParent(this,false);
+    initializer->addParent(this, false);
   }
 }

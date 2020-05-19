@@ -12,10 +12,6 @@ AbstractBinaryExpr *AbstractStatement::contains(AbstractBinaryExpr *aexpTemplate
   return nullptr;
 }
 
-std::string AbstractStatement::getVarTargetIdentifier() const {
-  return std::string();
-}
-
 bool AbstractStatement::isEqual(AbstractStatement *as) {
   throw std::runtime_error("Unimplemented AbstractStatement::isEqual.");
 }

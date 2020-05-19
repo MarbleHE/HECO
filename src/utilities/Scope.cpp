@@ -3,8 +3,24 @@
 #include <climits>
 #include "ast_opt/utilities/Scope.h"
 #include "ast_opt/ast/VarDecl.h"
+#include "ast_opt/ast/VarAssignm.h"
 #include "ast_opt/ast/For.h"
 #include "ast_opt/ast/Block.h"
+#include "ast_opt/ast/MatrixAssignm.h"
+
+/// Helper function to get target identifiers from Decls and Assignments
+std::string getVarTargetIdentifier(AbstractStatement const *stmt) {
+  if (auto stmtAsVarDecl = dynamic_cast<VarDecl const *>(stmt)) {
+    return stmtAsVarDecl->getVarTargetIdentifier();
+  } else if (auto stmtAsVarAssignm = dynamic_cast<VarAssignm const *>(stmt)) {
+    return stmtAsVarAssignm->getVarTargetIdentifier();
+  } else if (auto stmtAsMatrixAssignm = dynamic_cast<MatrixAssignm const *>(stmt)) {
+    //TODO: Currently, we treat matrices as entire variables for CFGV
+    return stmtAsMatrixAssignm->getAssignmTarget()->getVariableIdentifiers()[0];
+  } else {
+    throw std::invalid_argument("Statement does not have TargetIdentifiers.");
+  }
+}
 
 Scope::Scope(std::string scopeIdentifier, AbstractNode *scopeOpener, Scope *outerScope)
     : scopeIdentifier(std::move(scopeIdentifier)), scopeOpener(scopeOpener), outerScope(outerScope) {
@@ -163,7 +179,7 @@ void VariableValuesMap::setVariableValue(ScopedVariable scopedVariable, Variable
   if (it==variableValues.end()) {
     throw std::invalid_argument("Variable " + scopedVariable.getIdentifier() + " not found.");
   } else {
-    it->second = value;
+    it->second = std::move(value);
   }
 }
 VariableValuesMap::VariableValuesMap(const VariableValuesMap &other) {

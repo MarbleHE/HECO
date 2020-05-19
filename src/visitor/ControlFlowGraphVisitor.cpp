@@ -212,7 +212,8 @@ void ControlFlowGraphVisitor::visit(MatrixAssignm &elem) {
   // to refer to the element at (32,1) of matrix M. This does not work well because there might exist different index
   // expressions pointing to the same element (e.g., M[a][b] == M[b][d] if a==b and b==d), hence we cannot easily
   // distinguish matrix accesses.
-  auto scopedVar = variableValues.getVariableEntryDeclaredInThisOrOuterScope(elem.getAssignmTargetString(), curScope);
+  // TODO: Currently, we simply consider the entire matrix variable, not the individual indices
+  auto scopedVar = variableValues.getVariableEntryDeclaredInThisOrOuterScope(getVarTargetIdentifier(&elem), curScope);
   markVariableAccess(scopedVar, AccessType::WRITE);
   Visitor::visit(elem);
   postActionsStatementVisited(gNode);

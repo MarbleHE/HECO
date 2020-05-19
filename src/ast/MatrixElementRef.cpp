@@ -70,11 +70,27 @@ AbstractExpr *MatrixElementRef::getColumnIndex() const {
 std::vector<std::string> MatrixElementRef::getVariableIdentifiers() {
   std::vector<std::string> resultVec;
   auto insertIfNonEmpty = [&resultVec](std::vector<std::string> vec) {
-    if (!vec.empty()) resultVec.insert(resultVec.end(), vec.begin(), vec.end());
+    if (!vec.empty()) {
+      resultVec.insert(resultVec.end(), vec.begin(), vec.end());
+    } else {
+      resultVec.emplace_back("");
+    }
   };
-  insertIfNonEmpty(getOperand()->getVariableIdentifiers());
-  insertIfNonEmpty(getRowIndex()->getVariableIdentifiers());
-  insertIfNonEmpty(getColumnIndex()->getVariableIdentifiers());
+  if (getOperand()) {
+    insertIfNonEmpty(getOperand()->getVariableIdentifiers());
+  } else {
+    throw std::logic_error("Matrix Element Ref does not have a Variable Identifier.");
+  };
+  if (getRowIndex()) {
+    insertIfNonEmpty(getRowIndex()->getVariableIdentifiers());
+  } else {
+    resultVec.emplace_back("");
+  }
+  if (getColumnIndex()) {
+    insertIfNonEmpty(getColumnIndex()->getVariableIdentifiers());
+  } else {
+    resultVec.emplace_back("");
+  }
   return resultVec;
 }
 

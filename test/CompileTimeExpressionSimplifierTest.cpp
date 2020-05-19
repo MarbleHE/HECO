@@ -104,7 +104,6 @@ TEST_F(CompileTimeExpressionSimplifierFixture, arithmeticExpr_variableUnknown_rh
   EXPECT_TRUE(getVariableValueByUniqueName("alpha")->isEqual(expected));
   EXPECT_EQ(function->getBody(), nullptr);
 
-
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, arithmeticExpr_variableKnown_fullyEvaluable) { /* NOLINT */
@@ -138,7 +137,6 @@ TEST_F(CompileTimeExpressionSimplifierFixture, arithmeticExpr_variableKnown_full
 
   // check that the statement VarDecl and its children are deleted
   EXPECT_EQ(function->getBody(), nullptr);
-
 
 }
 
@@ -186,7 +184,6 @@ TEST_F(CompileTimeExpressionSimplifierFixture, arithmeticExpr_variablesUnknown_n
   EXPECT_EQ(numberOfNodesBeforeSimplification - 10, ast.getAllNodes().size());
   EXPECT_EQ(function->getBody(), nullptr);
 
-
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_literalsOnly_fullyEvaluable) { /* NOLINT */
@@ -215,7 +212,6 @@ TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_literalsOnly_fullyEva
 
   // check that the statement VarDecl and its children are deleted
   EXPECT_EQ(function->getBody(), nullptr);
-
 
 }
 
@@ -254,7 +250,6 @@ TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_variableUnknown_lhsOp
   // check that the variable declaration statement is deleted
   EXPECT_EQ(function->getBody(), nullptr);
 
-
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_variableKnown_fullyEvaluable) { /* NOLINT */
@@ -288,7 +283,6 @@ TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_variableKnown_fullyEv
 
   // check that the statement VarDecl and its children are deleted
   EXPECT_EQ(function->getBody(), nullptr);
-
 
 }
 
@@ -324,7 +318,6 @@ TEST_F(CompileTimeExpressionSimplifierFixture, logicalExpr_variablesUnknown_notA
   // Should fail due to unknown variable
   EXPECT_THROW(ctes.visit(ast), std::invalid_argument);
 
-
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, unaryExpr_literalsOnly_fullyEvaluable) { /* NOLINT */
@@ -350,7 +343,6 @@ TEST_F(CompileTimeExpressionSimplifierFixture, unaryExpr_literalsOnly_fullyEvalu
 
   // check that the statement VarDecl and its children are deleted
   EXPECT_EQ(function->getBody(), nullptr);
-
 
 }
 
@@ -414,7 +406,6 @@ TEST_F(CompileTimeExpressionSimplifierFixture, unaryExpr_variableUnknown_notEval
   // check that statements is deleted
   EXPECT_EQ(function->getBody(), nullptr);
 
-
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, varAssignm_variablesKnown_fullyEvaluable) { /* NOLINT */
@@ -449,7 +440,6 @@ TEST_F(CompileTimeExpressionSimplifierFixture, varAssignm_variablesKnown_fullyEv
   // check that the statements and their children are deleted
   EXPECT_EQ(function->getBody(), nullptr);
 
-
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, varAssignm_previouslyDeclaredNonInitializedVariable) { /* NOLINT */
@@ -475,7 +465,6 @@ TEST_F(CompileTimeExpressionSimplifierFixture, varAssignm_previouslyDeclaredNonI
 
   // check that the statement VarDecl and its children are deleted
   EXPECT_EQ(function->getBody(), nullptr);
-
 
 }
 
@@ -503,7 +492,6 @@ TEST_F(CompileTimeExpressionSimplifierFixture, varAssignm_assignmentToParameter)
 
   // check that the statement VarDecl and its children are deleted
   EXPECT_EQ(function->getBody(), nullptr);
-
 
 }
 
@@ -562,7 +550,6 @@ TEST_F(CompileTimeExpressionSimplifierFixture,  /* NOLINT */
   EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
   EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedAst));
 
-
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, return_literalOnly_expectedNoChange) { /* NOLINT */
@@ -584,7 +571,6 @@ TEST_F(CompileTimeExpressionSimplifierFixture, return_literalOnly_expectedNoChan
   // check that none of the nodes are deleted
   auto numberOfNodesBeforeSimplification = ast.getAllNodes().size();
   EXPECT_EQ(numberOfNodesBeforeSimplification, ast.getAllNodes().size());
-
 
 }
 
@@ -619,7 +605,6 @@ TEST_F(CompileTimeExpressionSimplifierFixture,  /* NOLINT */
   auto newLiteralIntNode = dynamic_cast<LiteralInt *>(firstReturnExpr);
   ASSERT_NE(newLiteralIntNode, nullptr);
   EXPECT_EQ(newLiteralIntNode->getValue(), 23);
-
 
 }
 
@@ -658,7 +643,6 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   ASSERT_NE(newLiteralIntNode, nullptr);
   EXPECT_EQ(newLiteralIntNode->getValue(), 122);
 
-
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, return_variableUnknown_expectedNoChange) { /* NOLINT */
@@ -687,7 +671,6 @@ TEST_F(CompileTimeExpressionSimplifierFixture, return_variableUnknown_expectedNo
 
   // check that 'b' remains unknown
   EXPECT_EQ(getVariableValueByUniqueName("b"), nullptr);
-
 
 }
 
@@ -741,7 +724,6 @@ TEST_F(CompileTimeExpressionSimplifierFixture, return_multipleReturnValues_expec
   EXPECT_TRUE(returnStatement->getReturnExpressions().at(1)->isEqual(new LiteralInt(-5)));
   // check return expression 3: 21
   EXPECT_TRUE(returnStatement->getReturnExpressions().at(2)->isEqual(new LiteralInt(21)));
-
 
 }
 
@@ -800,7 +782,6 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   EXPECT_EQ(returnStatement->getReturnExpressions().size(), 1);
   // check that the return value is the expected one
   EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(new LiteralInt(32'768)));
-
 
 }
 
@@ -862,7 +843,6 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   EXPECT_EQ(returnStatement->getReturnExpressions().size(), 1);
   // check that the return value is the expected one
   EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(new LiteralInt(32'768)));
-
 
 }
 
@@ -929,7 +909,6 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   EXPECT_EQ(returnStatement->getReturnExpressions().size(), 1);
   // check that the return value is the expected one
   EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(new LiteralInt(32)));
-
 
 }
 
@@ -999,7 +978,6 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   // check that 'b' was memorized correctly
   EXPECT_TRUE(getVariableValueByUniqueName("b")->isEqual(expectedResult));
 
-
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
@@ -1066,7 +1044,6 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   EXPECT_TRUE(getVariableValueByUniqueName("b")->isEqual(expectedResult));
   // variable 'c' is not expected to be memorized because it's declared in the Then-branch only
   EXPECT_THROW(getVariableValueByUniqueName("c"), std::logic_error);
-
 
 }
 
@@ -1139,7 +1116,6 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   // check that 'b' was memorized correctly
   EXPECT_TRUE(getVariableValueByUniqueName("b")->isEqual(expectedResult));
 
-
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
@@ -1208,7 +1184,6 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   EXPECT_TRUE(returnStatement->getReturnExpressions().front()->isEqual(expectedResult));
   // check that 'b' was memorized correctly
   EXPECT_TRUE(getVariableValueByUniqueName("b")->isEqual(expectedResult));
-
 
 }
 
@@ -1314,7 +1289,6 @@ TEST_F(CompileTimeExpressionSimplifierFixture, /* NOLINT */
   // check that 'b' was memorized correctly
   EXPECT_TRUE(getVariableValueByUniqueName("b")->isEqual(expectedResult));
 
-
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_partiallyEvaluableOnly) { /* NOLINT */
@@ -1352,7 +1326,6 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_partiallyEvaluableO
   auto expectedReturnVal = new OperatorExpr(new Operator(ADDITION), {new Variable("x"), new LiteralInt(71)});
   EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
   EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
-
 
 }
 
@@ -1404,7 +1377,6 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_includingOperatorEx
   EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
   EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
 
-
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_nestedDivisionOperator) { /* NOLINT */
@@ -1445,7 +1417,6 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_nestedDivisionOpera
   EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
   EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
 
-
 }
 
 TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_nestedOperatorsSimplifiableOnOneSideOnly) { /* NOLINT */
@@ -1484,7 +1455,6 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_nestedOperatorsSimp
                                                               {new Variable("a"), new LiteralInt(8)})});
   EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
   EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
-
 
 }
 
@@ -1530,7 +1500,6 @@ TEST_F(CompileTimeExpressionSimplifierFixture, symbolicTerms_nestedLogicalOperat
   auto expectedReturnVal = new OperatorExpr(new Operator(LOGICAL_XOR), {new Variable("a"), new Variable("b")});
   EXPECT_EQ(returnStmt->getReturnExpressions().size(), 1);
   EXPECT_TRUE(returnStmt->getReturnExpressions().front()->isEqual(expectedReturnVal));
-
 
 }
 
@@ -2118,7 +2087,7 @@ TEST_F(CompileTimeExpressionSimplifierFixture, nestedOperatorExprsTest) { /* NOL
   auto ret = new Return(opExpr1);
   func->addStatement(ret);
   func->addParameter(new FunctionParameter(new Datatype(Types::INT), new Variable("a")));
-  
+
   Ast ast;
   ast.setRootNode(func);
   ctes.visit(ast);
@@ -2411,6 +2380,17 @@ TEST_F(CompileTimeExpressionSimplifierFixture, getMatrixSizeOfUnknownMatrix) { /
 TEST_F(CompileTimeExpressionSimplifierFixture, nestedFullLoopUnrolling_matrixAssignmAndGetMatrixSize) { /* NOLINT */
   Ast ast;
   AstTestingGenerator::generateAst(55, ast);
+  // Matrix<int> extendMatrixAddingElements() {
+  //   Matrix<int> m;   // size: 0x0
+  //   for (int i = 0; i < 3; ++i) {
+  //     Vector<int> t;
+  //     for (int j = 0; j < 3; ++j) {
+  //       t[0][t.dimSize(1)] = i*j;
+  //     }
+  //     m[m.dimSize(0)] = t;
+  //   }
+  //   return m;  // m = [0*0 0*1 0*2; 1*0 1*1 1*2; 2*0 2*1 2*2] = [0 0 0; 0 1 2; 0 2 4], size: 3x3
+  // }
 
   // perform the compile-time expression simplification
   ctes.visit(ast);
@@ -2430,6 +2410,16 @@ TEST_F(CompileTimeExpressionSimplifierFixture, matrixAssignmIncludingPushBack) {
   Ast ast;
   AstTestingGenerator::generateAst(59, ast);
 
+  // Matrix<int> extendMatrixAddingElements() {
+  //  Matrix<int> m;   // size: 0x0
+  //  Vector<int> t;
+  //  for (int i = 0; i < 3; ++i) {
+  //    t[0][t.dimSize(1)] = i*i;
+  //  }
+  //  m[m.dimSize(0)] = t;
+  //  return m;  // m = [0*0 1*1 2*2] = [0 1 4], size: 1x3
+  //}
+
   // perform the compile-time expression simplification
   ctes.visit(ast);
 
@@ -2448,8 +2438,18 @@ TEST_F(CompileTimeExpressionSimplifierFixture, matrixAssignmentUnknownThenKnown)
   Ast ast;
   AstTestingGenerator::generateAst(56, ast);
 
+  // void computeMatrix(int k, int a) {
+  //   Matrix<int> M;
+  //   M[k][0] = 4;
+  //   M[0][0] = 21 + a;
+  //   return M;
+  // }
+
   // perform the compile-time expression simplification
+  PrintVisitor p;
+  p.visit(ast);
   ctes.visit(ast);
+  p.visit(ast);
 
   auto expectedFunc = new Function("computeMatrix");
   expectedFunc->addParameter(new FunctionParameter(new Datatype(Types::INT, false), new Variable("k")));
@@ -2461,6 +2461,8 @@ TEST_F(CompileTimeExpressionSimplifierFixture, matrixAssignmentUnknownThenKnown)
                                                new OperatorExpr(new Operator(ADDITION),
                                                                 {new Variable("a"), new LiteralInt(21)})));
   expectedFunc->addStatement(new Return(new Variable("M")));
+  auto expectedAst = Ast(expectedFunc);
+  p.visit(expectedAst);
 
   // get the body of the AST on that the CompileTimeExpressionSimplifier was applied on
   auto simplifiedAst = ast.getRootNode()->castTo<Function>()->getBody();

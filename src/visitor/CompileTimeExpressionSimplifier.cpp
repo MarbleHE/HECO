@@ -1266,6 +1266,9 @@ void CompileTimeExpressionSimplifier::appendVectorToMatrix(const std::string &va
 
   // store the value at the given position - matrix must handle indices and make sure that matrix is large enough
   literal->getMatrix()->appendVectorAt(posIndex, vec);
+  // Update the VariableValuesMap with this new matrix
+  variableValues.setVariableValue(var, VariableValue(variableValues.getVariableValue(var).getDatatype(), literal));
+
 }
 
 void CompileTimeExpressionSimplifier::setMatrixVariableValue(const std::string &variableIdentifier,

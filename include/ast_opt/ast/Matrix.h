@@ -309,6 +309,11 @@ class Matrix : public AbstractMatrix {
   }
 
   void appendVectorAt(int idx, AbstractMatrix *mx) override {
+    bool isEmpty = mx->getDimensions().equals(0,0);
+    if(isEmpty) {
+      throw std::invalid_argument("Cannot append empty vector");
+    }
+
     // determine if given matrix mx is a row or column vector
     bool isRowVector = mx->getDimensions().equals(1, -1);
     bool isColumnVector = mx->getDimensions().equals(-1, 1);

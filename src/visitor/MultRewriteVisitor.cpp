@@ -4,6 +4,8 @@
 #include "ast_opt/ast/OperatorExpr.h"
 #include "ast_opt/ast/Block.h"
 #include "ast_opt/ast/Variable.h"
+#include "ast_opt/ast/VarDecl.h"
+#include "ast_opt/ast/VarAssignm.h"
 
 void MultRewriteVisitor::visit(Ast &elem) {
   Visitor::visit(elem);
@@ -29,8 +31,8 @@ void MultRewriteVisitor::visit(ArithmeticExpr &elem) {
       // If previous statement in scope contains a ArithmeticExpr multiplication...
       if (auto lastStat = puStat->contains(new ArithmeticExpr(ArithmeticOp::MULTIPLICATION), nullptr)) {
         // Retrieve variable identifier from last statement (VarDecl or VarAssignm)
-        std::string puVarTargetIdentifier = puStat->getVarTargetIdentifier();
-        std::string curAexpTargetIdentifier = curScope->getLastStatement()->getVarTargetIdentifier();
+        std::string puVarTargetIdentifier = getVarTargetIdentifier(puStat);
+        std::string curAexpTargetIdentifier = getVarTargetIdentifier(curScope->getLastStatement());
         // Check that left operand reuses variable of previous statement in its left branch
         if (!puVarTargetIdentifier.empty() && elem.getLeft()->contains(new Variable(puVarTargetIdentifier))) {
           // Check that both target variables are the same, otherwise this transformation will change semantics.

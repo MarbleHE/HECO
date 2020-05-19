@@ -52,7 +52,7 @@ class VarDecl : public AbstractStatement {
 
   ~VarDecl() override;
 
-  std::string getVarTargetIdentifier() const override;
+  std::string getVarTargetIdentifier() const;
 
   bool isEqual(AbstractStatement *as) override;
 

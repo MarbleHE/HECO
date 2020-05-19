@@ -11,6 +11,9 @@
 #include "ast_opt/ast/Variable.h"
 #include "ast_opt/ast/Datatype.h"
 
+/// Helper function to get target identifiers from Decls and Assignments
+std::string getVarTargetIdentifier(AbstractStatement const *stmt);
+
 class Scope {
  private:
   std::unordered_map<std::string, Scope *> innerScopes;
@@ -69,7 +72,7 @@ class VariableValue {
       : datatype(vv.datatype), value(vv.value ? vv.value->clone(false)->castTo<AbstractExpr>() : nullptr) {};
 
   /// Move constructor
-  VariableValue(VariableValue &&vv) = default;
+  VariableValue(VariableValue &&vv)  noexcept : datatype(std::move(vv.datatype)), value(std::move(vv.value)) {};
 
   /// Copy assignment
   VariableValue &operator=(const VariableValue &other) {
@@ -190,8 +193,16 @@ class VariableValuesMap {
   /// optionally also an initializer (or nullptr otherwise).
   void addDeclaredVariable(ScopedVariable scopedVariable, VariableValue value);
 
+  /// Find the VariableValue associated with a (scoped) Variable
+  /// \param scopedVariable The Variable for which we want to retrieve the Value
+  /// \return A VariableValue wrapper. NOTE: The actual AbstractExpr* value might be nullptr if the variable is unknown
+  /// \throws std::invalid_argument if scopedVariable does not exist in this VariableValuesMap
   VariableValue getVariableValue(ScopedVariable scopedVariable);
 
+  /// Update an existing Variable's Value
+  /// \param scopedVariable Variable to update NOTE: Variable must exist in this map already!
+  /// \param value Value to write into map. Might contain AbstractExpr* that is nullptr
+  /// \throws std::invalid_argument if scopedVariable does not exist in this VariableValuesMap
   void setVariableValue(ScopedVariable scopedVariable, VariableValue value);
 
   /// Returns the current value of the variable identified by the given variableName. If there are multiple
