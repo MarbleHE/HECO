@@ -784,14 +784,14 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
     s->accept(*this);
   }
   // Since we manually visited, we also need to manually clean up
-  cleanUpBlock(*elem.getInitializer());
+  cleanUpBlock(*elem.getInitializer()); //TODO: This turns the scope pointers of ScopedVariables to dangling pointers!!!
 
   // Now, int i = 0 and similar things might have been deleted from AST and are in VariableValuesMap
 
   /// Loop Variables are variables that are both written to and read from during the loop
   auto loopVariables = identifyReadWriteVariables(elem, variableValues);
 
-  // The CFGV also returns variables that are read&written in inner loops, which we might not be aware of!
+  // The CFGV also returns variables that are read&written in inner loops, which we might not yet be aware of
   std::set<ScopedVariable> filteredLoopVariables;
   auto m = variableValues.getMap();
   for (auto &sv : loopVariables) {
