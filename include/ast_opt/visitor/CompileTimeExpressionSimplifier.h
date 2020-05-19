@@ -328,7 +328,7 @@ class CompileTimeExpressionSimplifier : public Visitor {
   /// this index is considered as row index. Otherwise, if matrixRowOrColumn is a column vector, this index is
   /// considered as column index.
   /// \param matrixRowOrColumn An AbstractLiteral consisting of a (1,x) or (x,1) matrix.
-  void appendVectorToMatrix(const std::string &variableIdentifier, int posIndex, AbstractExpr *matrixRowOrColumn);
+  void appendVectorToMatrix(const std::string &variableIdentifier, int posIndex, AbstractLiteral *matrixRowOrColumn);
 
 
   /// Handles the partial loop unrolling to enable batching of the loop's body statements.

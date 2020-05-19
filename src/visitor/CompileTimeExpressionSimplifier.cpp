@@ -128,14 +128,14 @@ void CompileTimeExpressionSimplifier::visit(MatrixAssignm &elem) {
     return literal->getMatrix()->getDimensions().equals(0, 0);
   };
 
-  bool isExecutableMatrixElementAssignment = hasKnownValue(assignmTarget->getRowIndex())
+  bool isKnownExecutableMatrixElementAssignment = hasKnownValue(assignmTarget->getRowIndex())
       && hasKnownValue(assignmTarget->getColumnIndex())
       && hasKnownValue(assignmTarget->getOperand());
-  bool isExecutableMatrixRowColumnAssignment = hasKnownValue(assignmTarget->getRowIndex())
+  bool isKnownExecutableMatrixRowColumnAssignment = hasKnownValue(assignmTarget->getRowIndex())
       && assignmTarget->getColumnIndex()==nullptr
       && hasKnownValue(assignmTarget->getOperand());
 
-  if ((isExecutableMatrixElementAssignment || isExecutableMatrixRowColumnAssignment)
+  if ((isKnownExecutableMatrixElementAssignment || isKnownExecutableMatrixRowColumnAssignment)
       // Matrix must either have dimension (0,0) or a value of anything != nullptr, otherwise there was a
       // previous MatrixAssignm that could not be executed, hence it does not make sense to store this assigned value.
       && (isNullDimensionLiteral(operandAsVariable) || getKnownValue(operandAsVariable)!=nullptr)) {
@@ -144,13 +144,29 @@ void CompileTimeExpressionSimplifier::visit(MatrixAssignm &elem) {
     // execute the assignment and mark this node for deletion afterwards
     auto rowIdx = getKnownValue(assignmTarget->getRowIndex())->castTo<LiteralInt>()->getValue();
 
-    if (isExecutableMatrixElementAssignment) {
-      auto colIdx = getKnownValue(assignmTarget->getColumnIndex())->castTo<LiteralInt>()->getValue();
-      setMatrixVariableValue(operandAsVariable->getIdentifier(), rowIdx, colIdx, elem.getValue());
-    } else if (isExecutableMatrixRowColumnAssignment) {
-      appendVectorToMatrix(operandAsVariable->getIdentifier(), rowIdx, elem.getValue());
+    if (auto valueAsLiteral = dynamic_cast<AbstractLiteral *>(elem.getValue())) {
+      if (isKnownExecutableMatrixElementAssignment) {
+        auto colIdx = getKnownValue(assignmTarget->getColumnIndex())->castTo<LiteralInt>()->getValue();
+        setMatrixVariableValue(operandAsVariable->getIdentifier(), rowIdx, colIdx, valueAsLiteral);
+      } else if (isKnownExecutableMatrixRowColumnAssignment) {
+        appendVectorToMatrix(operandAsVariable->getIdentifier(), rowIdx, valueAsLiteral);
+      }
+    } else {
+      // TODO: How to add Variable/OperatorExpr/etc?
+      auto targetVV = variableValues
+          .getVariableValue(ScopedVariable(elem.getAssignmTarget()->getVariableIdentifiers()[0], curScope));
+      if (auto m = dynamic_cast<AbstractLiteral *>(targetVV.getValue())) {
+        //TODO: Implement
+        // Matrix is currently stored as a Literal
+        throw std::runtime_error("Updating Literal Matrix with AbstractExpr not yet implemented.");
+      } else if (auto m = dynamic_cast<AbstractMatrix *>(targetVV.getValue())) {
+        // Matrix already contains expr elements
+        //TODO: Implement, should be simpler
+        throw std::runtime_error("Updating AbstractExpr Matrix not yet implemented.");
+      } else {
+        throw std::logic_error("CTES encountered an unexpected Matrix state while trying to perform MatrixAssignm.");
+      }
     }
-
     enqueueNodeForDeletion_ = true;
   } else { // matrix/indices are not known or there was a previous assignment that could not be executed
     auto var = variableValues.getVariableEntryDeclaredInThisOrOuterScope(operandAsVariable->getIdentifier(), curScope);
@@ -1242,15 +1258,9 @@ AbstractExpr *CompileTimeExpressionSimplifier::generateIfDependentValue(
 }
 
 void CompileTimeExpressionSimplifier::appendVectorToMatrix(const std::string &variableIdentifier, int posIndex,
-                                                           AbstractExpr *matrixRowOrColumn) {
-  AbstractMatrix *vec = nullptr;
-  auto vectorToAdd = dynamic_cast<AbstractLiteral *>(matrixRowOrColumn);
-  if (vectorToAdd!=nullptr) {
-    auto pMatrix = vectorToAdd->getMatrix();
-    vec = pMatrix->clone(false);
-  } else {
-
-  }
+                                                           AbstractLiteral *matrixRowOrColumn) {
+  auto pMatrix = matrixRowOrColumn->getMatrix();
+  AbstractMatrix *vec = pMatrix->clone(false);
 
   auto var = variableValues.getVariableEntryDeclaredInThisOrOuterScope(variableIdentifier, curScope);
 //  if (iterator->second->value==nullptr) {
