@@ -436,10 +436,10 @@ void ControlFlowGraphVisitor::buildDataFlowGraph() {
   // TODO: Anything stored in VariableValues should be associated with having been "last written" in the root node?
   std::unordered_set us = {getRootNodeCfg()}; //necessary to disambiguate calls
   for (auto &[sv, vv]: variableValues.getMap()) {
-    varLastWritten.clear(); //hack-ish
     varLastWritten.insert_or_assign(sv, us);
-    nodeToVarLastWrittenMapping.insert_or_assign(getRootNodeCfg(), varLastWritten);
   }
+  nodeToVarLastWrittenMapping.insert_or_assign(getRootNodeCfg(), varLastWritten);
+  varLastWritten.clear();
 
   // a set to recognize already visited nodes, this is needed because our CFG potentially contains cycles
   std::set<GraphNode *> processedNodes;
