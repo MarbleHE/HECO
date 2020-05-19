@@ -1415,7 +1415,7 @@ std::set<VarAssignm *> CompileTimeExpressionSimplifier::emitVariableAssignment(S
   // Emit a new temporary variable and replace occurrences
   if (!occurrences.empty()) {
     // Create a unique name - currently uses one of the to-be-replaced-nodes unique IDs for uniqueness
-    std::string temp_id = "temp_" + occurrences[0]->getUniqueNodeId();
+    std::string temp_id = "temp_" + scopedVariableToEmit.getIdentifier() + "_" + occurrences[0]->getUniqueNodeId();
 
     // add to variableValues and emit
     auto sv = ScopedVariable(temp_id, curScope);
