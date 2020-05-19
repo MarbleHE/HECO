@@ -54,9 +54,6 @@ struct CtesConfiguration {
 
   explicit CtesConfiguration(int maxNumLoopUnrollings) : maxNumLoopUnrollings(maxNumLoopUnrollings) {}
 
-  /// A counter that indicates how many loops have been fully or partially unrolled so far.
-  int numUnrolledLoopsCounter = 0;
-
   /// Indicates the total number of allowed loop unrolling operations. If the maximum is reached, any further For-loops
   /// are simplified but not fully or partially unrolled.
   const int maxNumLoopUnrollings = -1;
@@ -67,24 +64,23 @@ struct CtesConfiguration {
   /// Specifies the number of ciphertext slots that partial loop unrolling optimizes for.
   const int partiallyUnrollLoopNumCipherslots = 3;
 
-  /// Determines whether the number of total allowed loop unrollings is already exhausted.
-  /// \return True if the maxNumLoopUnrollings is not reached yet or if there is no limitation in the number of total
-  /// loop unrollings. Otherwise returns False.
-  bool isUnrollLoopAllowed() {
-    return allowsInfiniteLoopUnrollings() || (numUnrolledLoopsCounter < maxNumLoopUnrollings);
-  }
-
   /// Determines whether there is any limitation in the number of loop unrolling operations.
   /// \return True if there is no restriction w.r.t. number of loop unrollings.
-  bool allowsInfiniteLoopUnrollings() {
+  bool allowsInfiniteLoopUnrollings() const {
     return maxNumLoopUnrollings==-1;
   }
 };
 
 class CompileTimeExpressionSimplifier : public Visitor {
  private:
+
+  /// Determines whether the number of total allowed loop unrollings is already exhausted.
+  /// \return True if the maxNumLoopUnrollings is not reached yet or if there is no limitation in the number of total
+  /// loop unrollings. Otherwise returns False.
+  bool isUnrollLoopAllowed() const;
+
   /// A CompileTimeExpressionSimplifier configuration object containing configuration parameters.
-  CtesConfiguration ctes;
+  CtesConfiguration configuration;
 
   /// A EvaluationVisitor instance that is used to evaluate parts of the AST in order to simplify them.
   EvaluationVisitor evalVisitor;

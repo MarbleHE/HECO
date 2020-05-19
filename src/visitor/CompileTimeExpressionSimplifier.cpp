@@ -28,11 +28,11 @@
 #include "ast_opt/ast/GetMatrixSize.h"
 #include "ast_opt/ast/MatrixAssignm.h"
 
-CompileTimeExpressionSimplifier::CompileTimeExpressionSimplifier() : ctes(CtesConfiguration()) {
+CompileTimeExpressionSimplifier::CompileTimeExpressionSimplifier() : configuration(CtesConfiguration()) {
   evalVisitor = EvaluationVisitor();
 }
 
-CompileTimeExpressionSimplifier::CompileTimeExpressionSimplifier(CtesConfiguration cfg) : ctes(cfg) {
+CompileTimeExpressionSimplifier::CompileTimeExpressionSimplifier(CtesConfiguration cfg) : configuration(cfg) {
   evalVisitor = EvaluationVisitor();
 }
 
@@ -850,7 +850,7 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
   // At this point, the loop has been visited and some parts have been simplified.
   // Now we are ready to analyze if this loop can additionally also be unrolled:
   // Are we even set to do unrolling at this LoopDepth?
-  if (!ctes.isUnrollLoopAllowed()) {
+  if (!isUnrollLoopAllowed()) {
     //TODO: Any further steps necessary?
   } else {
 
@@ -934,13 +934,13 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
     /// Track iterations
     int numIterations = 0;
 
-    while (conditionCompileTimeKnown() && numIterations < ctes.fullyUnrollLoopMaxNumIterations
+    while (conditionCompileTimeKnown() && numIterations < configuration.fullyUnrollLoopMaxNumIterations
         && conditionEvaluatesTrue()) {
       executeLoopStmts();
       numIterations++;
     }
 
-    if (conditionCompileTimeKnown() && numIterations < ctes.fullyUnrollLoopMaxNumIterations) {
+    if (conditionCompileTimeKnown() && numIterations < configuration.fullyUnrollLoopMaxNumIterations) {
       // Loop unrolling was successful
 
       // Transfer in scope Information and VariableValues from loopCTES
@@ -965,7 +965,7 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
 
       // Note that if the parent of elem/unrolledBlock is a Block-like stmt,
       // our caller (e.g. visit(Block)) will have to deal with unpacking it
-    } else if (numIterations > ctes.fullyUnrollLoopMaxNumIterations) {
+    } else if (numIterations > configuration.fullyUnrollLoopMaxNumIterations) {
       // PARTIAL UNROLLING
       throw std::runtime_error("Partial loop unrolling currently not supported.");
     }
@@ -1483,12 +1483,13 @@ void CompileTimeExpressionSimplifier::leftForLoop() {
 }
 
 void CompileTimeExpressionSimplifier::enteredForLoop() {
-  ++currentLoopDepth_maxLoopDepth.first;
   // Only increase the maximum if we're currently in the deepest level
   // Otherwise, things like for() { for() {}; ...; for() {}; } would give wrong level
   if (currentLoopDepth_maxLoopDepth.first==currentLoopDepth_maxLoopDepth.second) {
     ++currentLoopDepth_maxLoopDepth.second;
   }
+
+  ++currentLoopDepth_maxLoopDepth.first;
 }
 
 void CompileTimeExpressionSimplifier::cleanUpBlock(Block &elem) {
@@ -1507,4 +1508,9 @@ void CompileTimeExpressionSimplifier::cleanUpBlock(Block &elem) {
     // not adding backreferences because they already exist
     elem.addChildren(newChildren, false);
   }
+}
+bool CompileTimeExpressionSimplifier::isUnrollLoopAllowed() const {
+  return configuration.allowsInfiniteLoopUnrollings()
+      || (currentLoopDepth_maxLoopDepth.second - currentLoopDepth_maxLoopDepth.first
+          < configuration.maxNumLoopUnrollings);
 }

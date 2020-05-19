@@ -2744,6 +2744,15 @@ TEST_F(CompileTimeExpressionSimplifierFixture, trivialNestedLoops) { /* NOLINT *
 
 TEST_F(CompileTimeExpressionSimplifierFixture, maxNumUnrollings) { /* NOLINT */
   Ast ast;
+  //  int maxNumUnrollings() {
+  //    int x = 0;
+  //    for(int j = 0; j < 3; j = j + 1) { //do not unroll this
+  //      for(int i = 0; i < 3; i = i + 1) {
+  //        x = 42;
+  //      }
+  //    }
+  //    return x;
+  //  }
   auto function = new Function("maxNumUnrollings");
   auto innerloop = new For(new VarDecl("i", Types::INT, new LiteralInt(0)),
                            new LogicalExpr(new Variable("i"), LogCompOp::SMALLER, new LiteralInt(3)),
@@ -2808,8 +2817,18 @@ TEST_F(CompileTimeExpressionSimplifierFixture, maxNumUnrollings) { /* NOLINT */
   // perform the compile-time expression simplification
   CompileTimeExpressionSimplifier ctes((CtesConfiguration(1)));
   ctes.visit(ast);
+  PrintVisitor p;
+  p.visit(ast);
 
   auto expectedFunc = new Function("maxNumUnrollings");
+  auto expectedOuterloop = new For(new VarDecl("j", Types::INT, new LiteralInt(0)),
+                                   new LogicalExpr(new Variable("j"), LogCompOp::SMALLER, new LiteralInt(3)),
+                                   new Block(new VarAssignm("j",
+                                                            new ArithmeticExpr(new Variable("j"),
+                                                                               ArithmeticOp::ADDITION,
+                                                                               new LiteralInt(1)))),
+                                   nullptr); // no content here
+  expectedFunc->addStatement(expectedOuterloop);
   expectedFunc->addStatement(returnStmt);
 
   // get the body of the AST on that the CompileTimeExpressionSimplifier was applied on
