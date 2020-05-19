@@ -804,8 +804,17 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
   // Visit Body to simplify it + recursively deal with nested loops
   // This will also update the maxLoopDepth in case there are nested loops
   // This in turn allows us to determine if this For-Loop should be unrolled - see isUnrollLoopAllowed()
-  elem.getBody()->accept(*this);
+  if(elem.getBody()) elem.getBody()->accept(*this);
   // Now, parts of the body statements (e.g. x++) might have been deleted and are only in VariableValuesMap
+
+  // UPDATE
+
+  // Visit Update to simplify it + recursively deal with nested loops
+  // This will also update the maxLoopDepth in case there are nested loops (which would be weird but possible)
+  // This in turn allows us to determine if this For-Loop should be unrolled - see isUnrollLoopAllowed()
+  if(elem.getUpdate()) elem.getUpdate()->accept(*this);
+  // Now, parts of the body statements (e.g. x++) might have been deleted and are only in VariableValuesMap
+
 
   // Manual scope handling
   changeToOuterScope();
