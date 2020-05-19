@@ -152,12 +152,12 @@ void CompileTimeExpressionSimplifier::visit(MatrixAssignm &elem) {
         appendVectorToMatrix(operandAsVariable->getIdentifier(), rowIdx, valueAsLiteral);
       }
     } else {
-      // TODO: How to add Variable/OperatorExpr/etc?
-      auto targetVV = variableValues
-          .getVariableValue(ScopedVariable(elem.getAssignmTarget()->getVariableIdentifiers()[0], curScope));
+      auto sv = variableValues
+          .getVariableEntryDeclaredInThisOrOuterScope(elem.getAssignmTarget()->getVariableIdentifiers()[0], curScope);
+      auto targetVV = variableValues.getVariableValue(sv);
       if (auto m = dynamic_cast<AbstractLiteral *>(targetVV.getValue())) {
-        //TODO: Implement
         // Matrix is currently stored as a Literal
+        //TODO: Implement
         throw std::runtime_error("Updating Literal Matrix with AbstractExpr not yet implemented.");
       } else if (auto m = dynamic_cast<AbstractMatrix *>(targetVV.getValue())) {
         // Matrix already contains expr elements
