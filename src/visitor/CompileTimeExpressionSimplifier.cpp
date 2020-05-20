@@ -784,7 +784,7 @@ void CompileTimeExpressionSimplifier::visit(For &elem) {
     s->accept(*this);
   }
   // Since we manually visited, we also need to manually clean up
-  cleanUpBlock(*elem.getInitializer()); //TODO: This turns the scope pointers of ScopedVariables to dangling pointers!!!
+  cleanUpBlock(*elem.getInitializer());
 
   // Now, int i = 0 and similar things might have been deleted from AST and are in VariableValuesMap
 

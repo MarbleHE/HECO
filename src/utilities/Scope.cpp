@@ -51,13 +51,7 @@ Scope *Scope::getOrCreateInnerScope(const std::string &identifier, AbstractNode 
     return sc;
   } else {
     // create and return new scope
-    Scope *newScope;
-    // for loops (for, while), the scope opener should be the initializer
-    if (auto forstmt = dynamic_cast<For *>(statement)) {
-      newScope = new Scope(identifier, forstmt->getInitializer(), this);
-    } else {
-      newScope = new Scope(identifier, statement, this);
-    }
+    auto newScope = new Scope(identifier, statement, this);
     this->innerScopes.insert({identifier, newScope});
     return newScope;
   }
@@ -91,7 +85,18 @@ const std::vector<AbstractStatement *> &Scope::getScopeStatements() const {
 }
 
 AbstractNode *Scope::getScopeOpener() const {
-  return scopeOpener;
+  // If the scope opener variable is a For loop, we actually need to return the initalizer
+  if (auto forstmt = dynamic_cast<For *>(scopeOpener)) {
+    if(forstmt->getInitializer()) {
+      return forstmt->getInitializer();
+    } else {
+      auto newBlock = new Block();
+      forstmt->setInitializer(newBlock);
+      return newBlock;
+    }
+  } else {
+    return scopeOpener;
+  }
 }
 
 void VariableValuesMap::addDeclaredVariable(ScopedVariable scopedVariable, VariableValue value) {
