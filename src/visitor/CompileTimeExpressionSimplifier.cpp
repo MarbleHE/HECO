@@ -288,7 +288,7 @@ void CompileTimeExpressionSimplifier::visit(Variable &elem) {
   Visitor::visit(elem);
   // TODO: Introduce a depth threshold (#nodes) to stop inlining if a variable's symbolic value reached a certain depth.
   auto varEntry = getVariableEntryDeclaredInThisOrOuterScope(elem.getIdentifier());
-  auto varValue = (varEntry!=variableValues.end() && varEntry->second != nullptr) ? varEntry->second->value : nullptr;
+  auto varValue = (varEntry!=variableValues.end() && varEntry->second!=nullptr) ? varEntry->second->value : nullptr;
   auto vvAsLiteral = dynamic_cast<AbstractLiteral *>(varValue);
 
   auto isVariableUsedInAst = [&]() {
@@ -849,7 +849,8 @@ int CompileTimeExpressionSimplifier::determineNumLoopIterations(For &elem) {
   auto variableIdentifiers = elem.getCondition()->getVariableIdentifiers();
   for (auto &var : variableIdentifiers) {
     auto value = getVariableValueDeclaredInThisOrOuterScope(var);
-    if (value==nullptr || value==nullptr) {
+    auto b = hasKnownValue(value);
+    if (value==nullptr || b==false) {
       allVariableHaveKnownValue = false;
       break; // no need to continue checking other variables
     }
@@ -1525,12 +1526,16 @@ VariableValuesMapType CompileTimeExpressionSimplifier::getChangedVariables(
 
     // check if exactly one of both is a nullptr -> no need to compare their concrete value
     auto anyOfTwoIsNullptr = [&](std::pair<std::string, Scope *> varIdentifierScope, VariableValue *varValue) -> bool {
-      return (variableValuesBeforeVisitingNode.at(varIdentifierScope)->value==nullptr)!=(varValue->value==nullptr);
+      return variableValuesBeforeVisitingNode.count(varIdentifierScope) > 0
+          && varValue!=nullptr
+          && (variableValuesBeforeVisitingNode.at(varIdentifierScope)->value==nullptr)!=(varValue->value==nullptr);
     };
 
     // check if their value is unequal: compare the value of both but prior to that make sure that value is not nullptr
     auto valueIsUnequal = [&](std::pair<std::string, Scope *> varIdentifierScope, VariableValue *varValue) -> bool {
-      return (variableValuesBeforeVisitingNode.at(varIdentifierScope)->value!=nullptr && varValue->value!=nullptr)
+      return variableValuesBeforeVisitingNode.count(varIdentifierScope) > 0
+          && varValue!=nullptr
+          && (variableValuesBeforeVisitingNode.at(varIdentifierScope)->value!=nullptr && varValue->value!=nullptr)
           && !variableValuesBeforeVisitingNode.at(varIdentifierScope)->value->isEqual(varValue->value);
     };
 

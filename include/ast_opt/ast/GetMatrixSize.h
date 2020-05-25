@@ -41,6 +41,7 @@ class GetMatrixSize : public AbstractExpr {
   [[nodiscard]] AbstractExpr *getMatrixOperand() const;
 
   [[nodiscard]] AbstractExpr *getDimensionParameter() const;
+  std::vector<std::string> getVariableIdentifiers() override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_GETMATRIXSIZE_H_

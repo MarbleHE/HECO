@@ -76,3 +76,11 @@ bool Rotate::isOneDimensionalVector(AbstractExpr *operand) {
   }
   return false;
 }
+
+bool Rotate::isEqual(AbstractExpr *other) {
+  if (auto otherAsRotate = dynamic_cast<Rotate *>(other)) {
+    return getOperand()->isEqual(otherAsRotate->getOperand())
+        && getRotationFactor()->isEqual(otherAsRotate->getRotationFactor());
+  }
+  return false;
+}

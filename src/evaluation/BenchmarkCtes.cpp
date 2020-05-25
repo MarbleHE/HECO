@@ -7,6 +7,7 @@
 #include "ast_opt/ast/OperatorExpr.h"
 #include "ast_opt/ast/Return.h"
 #include "ast_opt/visitor/CompileTimeExpressionSimplifier.h"
+#include <chrono>
 
 Ast BenchmarkCtes::createShallowAstOfKnownValuesOnly(int numAssignments) {
   // int foo(int a) {
@@ -84,16 +85,64 @@ numRunsPerSize) {
 }
 
 int main() {
-  std::vector<int> sizes{1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1'024, 2'048, 4'096, 8'192, 16'384, 32'768, 65'536};
-  int numRunsPerSize = 5;
+//  std::vector<int> sizes{1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1'024, 2'048, 4'096, 8'192, 16'384, 32'768, 65'536};
 
   //  ============== AST With Known Values Only ==============
-  std::function<Ast(int)> f = &BenchmarkCtes::createShallowAstOfKnownValuesOnly;
-  BenchmarkCtes::runBenchmarkAndPrintResult(f, sizes, numRunsPerSize);
+
+  std::vector<int> sizes{0,
+                         5'000,
+                         10'000,
+                         15'000,
+                         20'000,
+                         25'000,
+                         30'000,
+                         35'000,
+                         40'000,
+                         45'000,
+                         50'000,
+                         55'000,
+                         60'000,
+                         65'000,
+                         70'000,
+                         75'000,
+                         80'000,
+                         85'000,
+                         90'000,
+                         95'000,
+                         100'000,
+  };
+  int numRunsPerSize = 5;
+
+//  std::function<Ast(int)> f = &BenchmarkCtes::createShallowAstOfKnownValuesOnly;
+//  BenchmarkCtes::runBenchmarkAndPrintResult(f, sizes, numRunsPerSize);
 
   //  ============== AST With Unknown Values Only ==============
-  std::function<Ast(int)> g = &BenchmarkCtes::createDeepAstWithUnknownValues;
-  BenchmarkCtes::runBenchmarkAndPrintResult(f, sizes, numRunsPerSize);
+
+  std::vector<int> sizes2{
+//      1,
+//      10,
+//      25,
+//      50,
+//      75,
+//      100,
+//      150,
+//      200,
+//      500,
+//      750,
+//                         1'000,
+//      1250,
+//      1500,
+//      1750,
+//                         2'000,
+//    1250,
+//    1500,
+      1750,
+//    2000,
+//    2250
+  };
+  int numRunsPerSize2 = 2;
+  std::function<Ast(int)> f = &BenchmarkCtes::createDeepAstWithUnknownValues;
+  BenchmarkCtes::runBenchmarkAndPrintResult(f, sizes2, numRunsPerSize2);
 
   return 0;
 }

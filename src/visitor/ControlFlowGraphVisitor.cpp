@@ -67,8 +67,11 @@ void ControlFlowGraphVisitor::visit(For &elem) {
   auto gNode = appendStatementToCfg(elem);
 
   // initializer (e.g., int i = 0;)
-  elem.getInitializer()->accept(*this);
-  auto lastStatementInInitializer = lastCreatedNodes;
+  std::vector<GraphNode*> lastStatementInInitializer;
+  if (elem.getInitializer()!=nullptr) {
+    elem.getInitializer()->accept(*this);
+    lastStatementInInitializer = lastCreatedNodes;
+  }
 
   // condition (e.g., i <= N)
   handleExpressionsAsStatements = true;
@@ -78,16 +81,25 @@ void ControlFlowGraphVisitor::visit(For &elem) {
 
   // body (For (int i = 0; ... ) { body statements })
   elem.getStatementToBeExecuted()->accept(*this);
+  auto lastStatementInBody = lastCreatedNodes;
 
   // update statement (e.g., i=i+1;)
-  elem.getUpdateStatement()->accept(*this);
-  auto lastStatementInUpdate = lastCreatedNodes;
+  std::vector<GraphNode*> lastStatementInUpdate;
+  if (elem.getUpdateStatement()!=nullptr) {
+    elem.getUpdateStatement()->accept(*this);
+    lastStatementInUpdate = lastCreatedNodes;
+  }
+
+  // TODO if there is an update statement and a condition
+
+  // TODO otherwise ...
 
   // create an edge from update statement to first statement in for-loop's condition
   auto firstConditionStatement = lastStatementInInitializer.front()->getControlFlowGraph()->getChildren().front();
   for (auto &updateStmt : lastStatementInUpdate) {
     updateStmt->getControlFlowGraph()->addChild(firstConditionStatement);
   }
+
 
   // restore the last created nodes in the condition as those need to be connected to the next statement
   lastCreatedNodes = lastStatementCondition;

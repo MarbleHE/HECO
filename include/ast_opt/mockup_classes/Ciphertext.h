@@ -40,9 +40,6 @@ class Ciphertext {
 
   Ciphertext sumAndRotate(int initialRotationFactor);
 
- protected:
-  const static int DEFAULT_NUM_SLOTS = 8'192;
-
  public:
   Ciphertext() = default;
 
@@ -101,7 +98,10 @@ class Ciphertext {
   Ciphertext sumAndRotatePartially(int numElementsToSum);
 
   void printCiphertextData();
+
   std::vector<int64_t> decryptAndDecode();
+
+  const static int DEFAULT_NUM_SLOTS = 16'384;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_MOCKUP_CLASSES_CIPHERTEXT_H_

@@ -33,7 +33,12 @@ endif ()
 ##############################
 # Determine if SEAL is available
 ##############################
+
 find_package(SEAL) # sets SEAL_FOUND variable
+
+SET(SEAL_FOUND 0)
+
+add_compile_definitions(SEAL_FOUND=${SEAL_FOUND} )
 
 ##############################
 # Download and install nlohmann-json if required
@@ -116,8 +121,7 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/optimizer/BatchingChecker.cpp
         ${ast_optimizer_SOURCE_DIR}/src/mockup_classes/Ciphertext.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/RuntimeVisitor.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/mockup_classes/Plaintext.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/evaluation/Benchmark.cpp)
+        ${ast_optimizer_SOURCE_DIR}/src/mockup_classes/Plaintext.cpp)
 
 set(HEADER_ONLY_SOURCES
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/OpSymbEnum.h
@@ -252,15 +256,27 @@ add_executable(ast_demo
 target_link_libraries(ast_demo PRIVATE ast_opt)
 
 ##############################
+# TARGET: ast_benchmarkCtes
+#
+# A simple example of the ast_optimizer
+##############################
+
+add_executable(ast_benchmarkCtes
+        ${ast_optimizer_SOURCE_DIR}/src/evaluation/BenchmarkCtes.cpp)
+
+target_link_libraries(ast_benchmarkCtes PRIVATE ast_opt)
+
+
+##############################
 # TARGET: ast_benchmark
 #
 # A simple example of the ast_optimizer
 ##############################
 
-add_executable(ast_benchmark
-        ${ast_optimizer_SOURCE_DIR}/src/evaluation/Benchmark.cpp)
+add_executable(ast_benchmarkRuntime
+        ${ast_optimizer_SOURCE_DIR}/src/evaluation/BenchmarkRuntime.cpp)
 
-target_link_libraries(ast_benchmark PRIVATE ast_opt)
+target_link_libraries(ast_benchmarkRuntime PRIVATE ast_opt)
 
 ####################################################################################
 # TESTING

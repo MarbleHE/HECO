@@ -41,6 +41,7 @@ class Rotate : public AbstractExpr {
   void setAttributes(AbstractExpr *pExpr, AbstractExpr *rotationFactor);
 
   static bool isOneDimensionalVector(AbstractExpr *operand);
+  bool isEqual(AbstractExpr *other) override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_ROTATE_H_

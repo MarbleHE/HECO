@@ -57,3 +57,13 @@ AbstractExpr *GetMatrixSize::getDimensionParameter() const {
 }
 
 GetMatrixSize::~GetMatrixSize() = default;
+
+std::vector<std::string> GetMatrixSize::getVariableIdentifiers() {
+  std::vector<std::string> resultVec;
+  auto insertIfNonEmpty = [&resultVec](std::vector<std::string> vec) {
+    if (!vec.empty()) resultVec.insert(resultVec.end(), vec.begin(), vec.end());
+  };
+  insertIfNonEmpty(getMatrixOperand()->getVariableIdentifiers());
+  insertIfNonEmpty(getDimensionParameter()->getVariableIdentifiers());
+  return resultVec;
+}

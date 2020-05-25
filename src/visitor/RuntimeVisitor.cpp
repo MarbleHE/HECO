@@ -10,9 +10,12 @@
 #include "ast_opt/ast/FunctionParameter.h"
 #include "ast_opt/ast/AbstractLiteral.h"
 #include "ast_opt/ast/MatrixAssignm.h"
+#include "ast_opt/ast/VarAssignm.h"
 #include "ast_opt/ast/MatrixElementRef.h"
+#include "ast_opt/ast/ArithmeticExpr.h"
 #include "ast_opt/mockup_classes/Ciphertext.h"
 #include <ast_opt/mockup_classes/Plaintext.h>
+
 
 void RuntimeVisitor::visit(Ast &elem) {
   // determine the tainted nodes, i.e., nodes that deal with secret inputs
@@ -36,15 +39,26 @@ void RuntimeVisitor::visit(For &elem) {
     return cond==LiteralBool(true);
   };
 
-  for (elem.getInitializer()->accept(*ev); conditionIsTrue(); elem.getUpdateStatement()->accept(*ev)) {
+  if (elem.getInitializer()!=nullptr) elem.getInitializer()->accept(*ev);
+  for (; conditionIsTrue();) {
     // note: create clones that have the same uniqueNodeId as otherwise the secret tainting IDs won't match anymore
     auto clonedBlock = elem.getStatementToBeExecuted()->clone(true);
     clonedBlock->accept(*this);
     delete clonedBlock;
+    if (elem.getUpdateStatement()!=nullptr) elem.getUpdateStatement()->accept(*ev);
 
-    std::cout << "== " << ev->getVarValue("x")->castTo<LiteralInt>()->getValue() << ","
-              << ev->getVarValue("y")->castTo<LiteralInt>()->getValue() << std::endl;
+//    std::cout << "== " << ev->getVarValue("x")->castTo<LiteralInt>()->getValue() << ","
+//              << ev->getVarValue("y")->castTo<LiteralInt>()->getValue() << std::endl;
   }
+}
+
+void RuntimeVisitor::visit(VarAssignm &elem) {
+  if (taintedNodesUniqueIds.count(elem.getUniqueNodeId())==0) {
+    elem.accept(*ev);
+  } else {
+    Visitor::visit(elem);
+  }
+  matrixAccessMap.clear();
 }
 
 void RuntimeVisitor::visit(MatrixElementRef &elem) {
@@ -75,7 +89,7 @@ void RuntimeVisitor::visit(MatrixElementRef &elem) {
   std::string varIdentifier;
   if (auto var = dynamic_cast<Variable *>(elem.getOperand())) {
     varIdentifier = var->getIdentifier();
-  } else {
+  } else if (dynamic_cast<AbstractLiteral *>(elem.getOperand())==nullptr) {
     throw std::runtime_error("MatrixElementRef does not refer to a Variable. Cannot continue. Aborting.");
   }
 
@@ -94,21 +108,21 @@ RuntimeVisitor::RuntimeVisitor(std::unordered_map<std::string, AbstractLiteral *
 }
 
 void RuntimeVisitor::registerMatrixAccess(const std::string &variableIdentifier, int rowIndex, int columnIndex) {
-  std::stringstream ss;
-  ss << variableIdentifier << "[" << rowIndex << "]"
-     << "[" << columnIndex << "]" << "\t(" << currentMatrixAccessMode << ")";
+//  std::stringstream ss;
+//  ss << variableIdentifier << "[" << rowIndex << "]"
+//     << "[" << columnIndex << "]" << "\t(" << currentMatrixAccessMode << ")";
   matrixAccessMap[variableIdentifier][std::pair(rowIndex, columnIndex)] = currentMatrixAccessMode;
-  std::cout << ss.str() << std::endl;
+//  std::cout << ss.str() << std::endl;
 }
 
 void RuntimeVisitor::visit(VarDecl &elem) {
   // Note the counter-intuitive logic here: If getVarValue does *not* throw an exception then the variable has been
   // declared before and we need to inform the user as this will cause issues.
-  try {
-    static_cast<void>(*ev->getVarValue(elem.getIdentifier()));
-    throw std::runtime_error("RuntimeVisitor and EvaluationVisitor cannot handle variable scoping yet. Please use "
-                             "unique variable identifiers to allow the RuntimeVisitor to distinguish variables.");
-  } catch (std::logic_error &e) {}
+//  try {
+//    static_cast<void>(*ev->getVarValue(elem.getIdentifier()));
+//    throw std::runtime_error("RuntimeVisitor and EvaluationVisitor cannot handle variable scoping yet. Please use "
+//                             "unique variable identifiers to allow the RuntimeVisitor to distinguish variables.");
+//  } catch (std::logic_error &e) {}
 
   elem.accept(*ev);
 
@@ -163,6 +177,9 @@ void RuntimeVisitor::visit(MatrixAssignm &elem) {
 
   // check if we already visited this MatrixAssignm before and precomputed the required ciphertexts
   if (visitingForEvaluation==EVALUATION_PLAINTEXT || visitingForEvaluation==EVALUATION_CIPHERTEXT) {
+#ifndef NDEBUG
+    std::cout << "Skipping recomputation of already existing result..." << std::endl;
+#endif
     matrixAccessMap.clear();
     precomputedStatements.erase(elem.getUniqueNodeId());
 
@@ -253,6 +270,10 @@ void RuntimeVisitor::visit(MatrixAssignm &elem) {
       visitingForEvaluation = EVALUATION_CIPHERTEXT;
       elem.accept(*this);
       visitingForEvaluation = ANALYSIS;
+    } else {
+#ifndef NDEBUG
+      std::cout << "Skipping evaluation pass..." << std::endl;
+#endif
     }
   }
 }
@@ -266,6 +287,10 @@ RuntimeVisitor::executeRotations(const std::string &varIdentifier, const std::ve
       ciphertexts.emplace_back(varValues.at(varIdentifier).find(rd.baseCiphertext->getOffsetOfFirstElement()));
       continue;
     }
+
+#ifndef NDEBUG
+    std::cout << "Executing rotations..." << std::endl;
+#endif
 
     // execute rotation on ciphertext
     auto rotatedCtxt = new Ciphertext(rd.baseCiphertext->rotate(rd.requiredNumRotations));
@@ -348,7 +373,7 @@ void RuntimeVisitor::checkIndexValidity(std::pair<int, int> rowColumnIndex) {
 void RuntimeVisitor::visit(FunctionParameter &elem) {
   // inline Visitor::visit(elem);
   elem.getDatatype()->accept(*this);
-  elem.getValue()->accept(*this);
+//  elem.getValue()->accept(*this);
 
   // create new Ciphertext if this FunctionParameter refers to an encrypted variable (secret input)
   if (elem.getDatatype()->isEncrypted()) {
@@ -379,6 +404,16 @@ void RuntimeVisitor::visit(Datatype &elem) {
   Visitor::visit(elem);
 }
 
+void RuntimeVisitor::visit(ArithmeticExpr &elem) {
+  Visitor::visit(elem);
+
+  if (taintedNodesUniqueIds.count(elem.getUniqueNodeId()) > 0) {
+
+  } else {
+    ev->visit(elem);
+  }
+}
+
 void RuntimeVisitor::visit(OperatorExpr &elem) {
   int intermedResultsSize = intermedResult.size();
   if (visitingForEvaluation==EVALUATION_CIPHERTEXT) {
@@ -388,7 +423,7 @@ void RuntimeVisitor::visit(OperatorExpr &elem) {
     // evaluated expression in on the top of the stack. As we need to add the elements in reverse order to the
     // operands vector, we use a queue that allows us to deque elements in the order the elements were added.
     std::deque<Ciphertext *> intermedResultReversed;
-    for (int i = intermedResult.size() - intermedResultsSize; i > 0; --i) {
+    for (size_t i = intermedResult.size() - intermedResultsSize; i > 0; --i) {
       intermedResultReversed.push_back(intermedResult.top());
       intermedResult.pop();
     }
@@ -413,9 +448,13 @@ void RuntimeVisitor::visit(OperatorExpr &elem) {
     // make sure that we collected all operands
     assert(operands.size()==elem.getOperands().size());
 
+#ifndef NDEBUG
+    std::cout << "Computing expression on ciphertext..." << std::endl;
+#endif
+
     // execute operation
     auto it = operands.begin();
-    Ciphertext *result = new Ciphertext(**it);
+    auto result = new Ciphertext(**it);
     for (++it; it!=operands.end(); ++it) {
       if (elem.getOperator()->equals(ADDITION)) {
         *result = (*result) + *(*it);
@@ -476,6 +515,7 @@ void RuntimeVisitor::visit(Variable &elem) {
     }
   } else {
     // TODO: Retrieve value from EvaluationVisitor's map (getVarValue).
+    elem.getOnlyParent()->replaceChild(&elem, ev->getVarValue(elem.getIdentifier())->clone(true));
   }
 }
 

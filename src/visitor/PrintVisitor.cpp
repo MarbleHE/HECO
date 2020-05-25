@@ -93,6 +93,7 @@ void PrintVisitor::visit(LiteralBool &elem) {
 }
 
 void PrintVisitor::visit(LiteralInt &elem) {
+  if (elem.getMatrix()->getDimensions().numColumns > 1000) return;
   if (elem.getMatrix()->containsAbstractExprs()) {
     addOutputStr(elem);
     printChildNodesIndented(elem);

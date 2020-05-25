@@ -27,12 +27,11 @@ void setup_context(std::shared_ptr<seal::SEALContext> &context,
                    std::unique_ptr<seal::PublicKey> &publicKey,
                    std::unique_ptr<seal::GaloisKeys> &galoisKeys) {
   if (!context || !context->parameters_set()) {
-
     /// Wrapper for parameters
     seal::EncryptionParameters params(seal::scheme_type::BFV);
 
     // in BFV, this degree is also the number of slots.
-    params.set_poly_modulus_degree(8192);
+    params.set_poly_modulus_degree(Ciphertext::DEFAULT_NUM_SLOTS);
 
     // Let SEAL select a "suitable" coefficient modulus (not necessarily maximal)
     params.set_coeff_modulus(seal::CoeffModulus::BFVDefault(params.poly_modulus_degree()));

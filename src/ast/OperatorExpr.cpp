@@ -240,3 +240,12 @@ void OperatorExpr::replaceChild(AbstractNode *originalChild, AbstractNode *newCh
     setAttributes(op, operands);
   }
 }
+
+std::vector<std::string> OperatorExpr::getVariableIdentifiers() {
+  std::vector<std::string> vars;
+  for (auto op : getOperands()) {
+    auto identifiers = op->getVariableIdentifiers();
+    vars.insert(vars.end(), identifiers.begin(), identifiers.end());
+  }
+  return vars;
+}
