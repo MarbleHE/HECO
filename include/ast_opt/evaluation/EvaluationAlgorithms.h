@@ -4,6 +4,9 @@
 #include <utility>
 #include <vector>
 #include <ast_opt/ast/Ast.h>
+#ifdef HAVE_SEAL_BFV
+#include <seal/seal.h>
+#endif
 
 class EvaluationAlgorithms {
  public:
@@ -65,6 +68,14 @@ class EvaluationAlgorithms {
   static void genPolynomialRegressionAstAfterCtes(Ast &ast);
 
   static void genSobelFilterAstAfterCtes(Ast &ast);
+
+  // ===================================================================================================================
+  // ============================================= Using SEAL directly  ================================================
+  // ===================================================================================================================
+#ifdef HAVE_SEAL_BFV
+  static void encryptedLaplacianSharpeningAlgorithmBatched(std::vector<std::vector<int>> img);
+  static void encryptedLaplacianSharpeningAlgorithmNaive(std::vector<std::vector<int>> img);
+#endif
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_EVALUATION_EVALUATIONALGORITHMS_H_
