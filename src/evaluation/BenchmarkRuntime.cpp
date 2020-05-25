@@ -4,6 +4,7 @@
 #include <ast_opt/visitor/CompileTimeExpressionSimplifier.h>
 #include <ast_opt/visitor/RuntimeVisitor.h>
 #include <fstream>
+#include <chrono>
 #include "ast_opt/evaluation/BenchmarkRuntime.h"
 #include "../../test/AstTestingGenerator.h"
 
