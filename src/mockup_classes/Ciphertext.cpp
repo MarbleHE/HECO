@@ -314,6 +314,13 @@ std::vector<std::int64_t> Ciphertext::decryptAndDecode() {
   batchEncoder.decode(plaintext, decodedValues);
 
   return decodedValues;
+#else
+  std::vector<std::int64_t> r;
+  r.reserve(data.size());
+  for(auto &d: data) {
+    r.push_back(d); //implicit conversion
+  }
+  return r;
 #endif
 }
 
