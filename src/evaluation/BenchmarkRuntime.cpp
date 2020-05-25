@@ -92,7 +92,11 @@ int main() {
       totalTime += duration_us;
       std::cout << duration_us.count() << " μs" << std::endl;
     }
-    resultFile << SEAL_FOUND << "," << Ciphertext::DEFAULT_NUM_SLOTS
+    bool seal_found = false;
+#ifdef HAVE_SEAL_BFV
+    seal_found = true;
+#endif
+    resultFile << seal_found << "," << Ciphertext::DEFAULT_NUM_SLOTS
                << "," << size << "," << totalTime.count()/numRuns << std::endl;
   }
   resultFile.close();
