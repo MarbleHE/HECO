@@ -1653,14 +1653,17 @@ void AstTestingGenerator::genLaplacianInnerLoopsOnlyAstWithCustomWeights(Ast &as
                                      new ArithmeticExpr(new Variable("j"), ADDITION, new LiteralInt(1)));
   auto imgTerm = new MatrixElementRef(new Variable("img"),
                                       new LiteralInt(0),  // as img is a single row vector
-                                      new ArithmeticExpr(
-                                          new ArithmeticExpr(new Variable("imgSize"),
-                                                             MULTIPLICATION,
-                                                             new ArithmeticExpr(
-                                                                 new Variable("x"), ADDITION,
-                                                                 new Variable("i"))),
-                                          ADDITION,
-                                          new ArithmeticExpr(new Variable("y"), ADDITION, new Variable("j"))));
+                                      new OperatorExpr(
+                                          new Operator(ADDITION),
+                                          {new OperatorExpr(new Operator(MULTIPLICATION),
+                                                            {new Variable("imgSize"),
+                                                             new OperatorExpr(
+                                                                 new Operator(ADDITION),
+                                                                 {new Variable("x"),
+                                                                  new Variable("i")})}),
+                                           new OperatorExpr(new Operator(ADDITION),
+                                                            {new Variable("y"),
+                                                             new Variable("j")})}));
   auto innerBody = new Block(new VarAssignm("value",
                                             new ArithmeticExpr(new Variable("value"),
                                                                ADDITION,
@@ -1988,7 +1991,6 @@ void AstTestingGenerator::genAstNestedLoopUnrollingLaplacianSharpeningFilterAllL
   //     Matrix<int> weightMatrix = [1 1 1; 1 -8 1; 1 1 1];
   //     for (int x = 1; x < imgSize - 1; ++x) {
   //         for (int y = 1; y < imgSize - 1; ++y) {
-  //
   //             int value = 0;
   //             for (int j = -1; j < 2; ++j) {
   //                 for (int i = -1; i < 2; ++i) {
@@ -1996,7 +1998,6 @@ void AstTestingGenerator::genAstNestedLoopUnrollingLaplacianSharpeningFilterAllL
   //                 }
   //             }
   //             img2[imgSize*x+y] = img[imgSize*x+y] - (value/2);
-  //
   //         }
   //     }
   //     return img2;
@@ -2022,14 +2023,17 @@ void AstTestingGenerator::genAstNestedLoopUnrollingLaplacianSharpeningFilterAllL
                                      new ArithmeticExpr(new Variable("j"), ADDITION, new LiteralInt(1)));
   auto imgTerm = new MatrixElementRef(new Variable("img"),
                                       new LiteralInt(0),  // as img is a single row vector
-                                      new ArithmeticExpr(
-                                          new ArithmeticExpr(new Variable("imgSize"),
-                                                             MULTIPLICATION,
-                                                             new ArithmeticExpr(
-                                                                 new Variable("x"), ADDITION,
-                                                                 new Variable("i"))),
-                                          ADDITION,
-                                          new ArithmeticExpr(new Variable("y"), ADDITION, new Variable("j"))));
+                                      new OperatorExpr(
+                                          new Operator(ADDITION),
+                                          {new OperatorExpr(new Operator(MULTIPLICATION),
+                                                            {new Variable("imgSize"),
+                                                             new OperatorExpr(
+                                                                 new Operator(ADDITION),
+                                                                 {new Variable("x"),
+                                                                  new Variable("i")})}),
+                                           new OperatorExpr(new Operator(ADDITION),
+                                                            {new Variable("y"),
+                                                             new Variable("j")})}));
 
   auto fourthLoopBody = new Block(new VarAssignm("value",
                                                  new ArithmeticExpr(new Variable("value"),

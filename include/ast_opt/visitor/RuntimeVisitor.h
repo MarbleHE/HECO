@@ -1,6 +1,8 @@
 #ifndef AST_OPTIMIZER_INCLUDE_AST_OPT_VISITOR_RUNTIMEVISITOR_H_
 #define AST_OPTIMIZER_INCLUDE_AST_OPT_VISITOR_RUNTIMEVISITOR_H_
 
+#define NDEBUG 1
+
 #include "Visitor.h"
 #include <map>
 #include <utility>
@@ -11,6 +13,8 @@
 #include <unordered_set>
 #include "ast_opt/mockup_classes/Ciphertext.h"
 #include "ast_opt/ast/Matrix.h"
+
+
 
 class EvaluationVisitor;
 class SecretTaintingVisitor;
@@ -135,6 +139,8 @@ class RuntimeVisitor : public Visitor {
   void visit(Return &elem) override;
   void visit(Variable &elem) override;
   const std::vector<Ciphertext *> &getReturnValues() const;
+  void visit(VarAssignm &elem) override;
+  void visit(ArithmeticExpr &elem) override;
 };
 
 template<typename T>

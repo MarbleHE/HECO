@@ -3,9 +3,15 @@
 
 #include <utility>
 #include <vector>
+#include <ast_opt/ast/Ast.h>
 
 class EvaluationAlgorithms {
  public:
+
+  // ===================================================================================================================
+  // ================================================ Plain C++ Versions ===============================================
+  // ===================================================================================================================
+
   /// Implements linear regression: Computes and returns the parameters (a,b) of the regression line y = ax + by.
   /// Implementation based on
   /// https://www.codesansar.com/numerical-methods/linear-regression-method-using-cpp-output.htm.
@@ -35,6 +41,30 @@ class EvaluationAlgorithms {
   /// Dathathri, R. et al.: EVA: An Encrypted Vector Arithmetic Language and Compiler for Efficient Homomorphic
   /// Computation. arXiv:1912.11951 [cs]. (2019).
   static std::vector<int> runSobelFilter(const std::vector<int> &img);
+
+  // ===================================================================================================================
+  // ==================================================== Plain ASTs ===================================================
+  // ===================================================================================================================
+
+  static void genLinearRegressionAst(Ast &ast);
+
+  static void genLaplacianSharpeningAlgorithmAst(Ast &ast);
+
+  static void genPolynomialRegressionAst(Ast &ast);
+
+  static void genSobelFilterAst(Ast &ast);
+
+  // ===================================================================================================================
+  // ============================================= ASTs after Running CTES =============================================
+  // ===================================================================================================================
+
+  static void genLinearRegressionAstAfterCtes(Ast &ast);
+
+  static void genLaplacianSharpeningAlgorithmAstAfterCtes(Ast &ast);
+
+  static void genPolynomialRegressionAstAfterCtes(Ast &ast);
+
+  static void genSobelFilterAstAfterCtes(Ast &ast);
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_EVALUATION_EVALUATIONALGORITHMS_H_

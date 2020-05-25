@@ -77,7 +77,7 @@ void ControlFlowGraphVisitor::visit(For &elem) {
 
   // initializer (e.g., int i = 0;)
   // Manually visit the statements in the block, since otherwise Visitor::visit would create a new scope!
-  if (elem.getInitializer()) {
+  if (elem.getInitializer()!=nullptr) {
     for (auto &s: elem.getInitializer()->getStatements()) {
       s->accept(*this);
     }
@@ -92,10 +92,18 @@ void ControlFlowGraphVisitor::visit(For &elem) {
 
   // body (For (int i = 0; ... ) { body statements })
   elem.getBody()->accept(*this);
+  auto lastStatementInBody = lastCreatedNodes;
 
   // update statement (e.g., i=i+1;)
-  elem.getUpdate()->accept(*this);
-  auto lastStatementInUpdate = lastCreatedNodes;
+  std::vector<GraphNode*> lastStatementInUpdate;
+  if (elem.getUpdate()!=nullptr) {
+    elem.getUpdate()->accept(*this);
+    lastStatementInUpdate = lastCreatedNodes;
+  }
+
+  // TODO if there is an update statement and a condition
+
+  // TODO otherwise ...
 
   // create an edge from update statement to first statement in for-loop's condition
   auto firstConditionStatement = lastStatementInInitializer.front()->getControlFlowGraph()->getChildren().front();

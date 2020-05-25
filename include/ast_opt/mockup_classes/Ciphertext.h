@@ -4,9 +4,31 @@
 #include <vector>
 #include <ast_opt/ast/AbstractExpr.h>
 
+#ifdef HAVE_SEAL_BFV
+#include <seal/seal.h>
+#endif
+
 class Ciphertext {
  private:
-  /// the encrypted data in this Ciphertext (supports plaintext data for testing)
+
+#ifdef HAVE_SEAL_BFV
+  /// the encrypted data in this Ciphertext
+  seal::Ciphertext ciphertext;
+
+  /// the seal context, i.e. object that holds params/etc
+  static std::shared_ptr<seal::SEALContext> context;
+
+  /// secret key, also used for (more efficient) encryption (ptr for consistency)
+  static std::unique_ptr<seal::SecretKey> secretKey;
+
+  /// public key (ptr because PublicKey() segfaults)
+  static std::unique_ptr<seal::PublicKey> publicKey;
+
+  /// keys required to rotate (ptr because GaloisKeys() segfaults)
+  static std::unique_ptr<seal::GaloisKeys> galoisKeys;
+#endif
+
+  /// plaintext data for testing
   std::vector<double> data;
 
   /// the offset to the first element after applying any operations on the ciphertext, e.g.,
@@ -18,9 +40,6 @@ class Ciphertext {
 
   Ciphertext sumAndRotate(int initialRotationFactor);
 
- protected:
-  const static int DEFAULT_NUM_SLOTS = 8'192;
-
  public:
   Ciphertext() = default;
 
@@ -29,6 +48,8 @@ class Ciphertext {
   explicit Ciphertext(double scalar, int numCiphertextSlots = DEFAULT_NUM_SLOTS);
 
   Ciphertext(const Ciphertext &ctxt); // copy constructor
+
+  static bool isInteger(double k);
 
   Ciphertext operator+(const Ciphertext &ctxt) const;
 
@@ -55,6 +76,7 @@ class Ciphertext {
   Ciphertext applyBinaryOp(const std::function<double(double, double)> &binaryOp, const Ciphertext &lhs,
                            const Ciphertext &rhs) const;
 
+  //TODO: What does this do?
   static int cyclicIncrement(int i, const std::vector<double> &vec);
 
   [[nodiscard]] int getNumCiphertextElements() const;
@@ -76,6 +98,10 @@ class Ciphertext {
   Ciphertext sumAndRotatePartially(int numElementsToSum);
 
   void printCiphertextData();
+
+  std::vector<int64_t> decryptAndDecode();
+
+  const static int DEFAULT_NUM_SLOTS = 16'384;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_MOCKUP_CLASSES_CIPHERTEXT_H_

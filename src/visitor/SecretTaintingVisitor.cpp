@@ -232,7 +232,6 @@ void SecretTaintingVisitor::visit(MatrixAssignm &elem) {
     for(auto &v: elem.getAssignmTarget()->getVariableIdentifiers()) {
       taintedVariables.insert(v);
     }
-
   }
 }
 

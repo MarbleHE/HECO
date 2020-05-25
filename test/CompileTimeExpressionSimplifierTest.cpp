@@ -2652,6 +2652,9 @@ TEST_F(CompileTimeExpressionSimplifierFixture, fourNestedLoopsLaplacianSharpenin
   // return img2;
   expectedFunction->addStatement(new Return(new Variable("img2")));
 
+  PrintVisitor pv;
+  pv.visit(ast);
+
   // get the body of the AST on that the CompileTimeExpressionSimplifier was applied on
   auto simplifiedAst = ast.getRootNode()->castTo<Function>()->getBody();
   EXPECT_TRUE(simplifiedAst->isEqual(expectedFunction->getBody()));
