@@ -36,10 +36,6 @@ endif ()
 
 find_package(SEAL) # sets SEAL_FOUND variable
 
-SET(SEAL_FOUND 0)
-
-add_compile_definitions(SEAL_FOUND=${SEAL_FOUND} )
-
 ##############################
 # Download and install nlohmann-json if required
 ##############################
