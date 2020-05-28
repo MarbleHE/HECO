@@ -1326,7 +1326,7 @@ void EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmNaive(VecInt2D i
   std::chrono::microseconds tEnc;
 
   // Encrypt input (very inefficiently)
-  std::vector<std::vector<seal::Ciphertext>> img_ctxt(img.size(), std::vector<seal::Ciphertext>(img.at(0).size()));
+  std::vector<std::vector<seal::Ciphertext>> img_ctxt(img.size(), std::vector<seal::Ciphertext>(img.at(0).size(), seal::Ciphertext(context)));
 
   auto tStart = std::chrono::high_resolution_clock::now();
   for (int x = 1; x < img.size() - 1; ++x) {
@@ -1348,7 +1348,7 @@ void EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmNaive(VecInt2D i
   std::vector<std::vector<seal::Ciphertext>> img2_ctxt;
   for (int x = 1; x < img.size() - 1; ++x) {
     for (int y = 1; y < img.at(x).size() - 1; ++y) {
-      seal::Ciphertext value;
+      seal::Ciphertext value(context);
       for (int j = -1; j < 2; ++j) {
         for (int i = -1; i < 2; ++i) {
 //          std::cout << x << ", " << y << ", " << i << ", " << j << std::endl;
