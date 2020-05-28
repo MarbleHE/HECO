@@ -1349,6 +1349,7 @@ void EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmNaive(VecInt2D i
   // This time, we actually want "default initialized" Ctxts since they'll be overriden anyway
   std::vector<std::vector<seal::Ciphertext>> img2_ctxt
       (std::vector<std::vector<seal::Ciphertext>>(img.size(), std::vector<seal::Ciphertext>(img.at(0).size())));
+
   for (int x = 1; x < img.size() - 1; ++x) {
     for (int y = 1; y < img.at(x).size() - 1; ++y) {
       seal::Ciphertext value(context);
@@ -1371,13 +1372,16 @@ void EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmNaive(VecInt2D i
   }
 
   auto decryptor = seal::Decryptor(context, *secretKey);
-  for (const auto &rowVec : img2_ctxt) {
-    for (const auto &elem : rowVec) {
+
+  for (int k = 1; k < img.size() - 1; ++k) {
+    for (int h = 1; h < img.size() - 1; ++h) {
       seal::Plaintext ptxt;
-      decryptor.decrypt(elem, ptxt);
-      std::cout << ptxt.to_string() << " ";
+      std::vector<int64_t> output;
+      decryptor.decrypt(img2_ctxt[k][h], ptxt);
+      encoder.decode(ptxt, output);
+      std::cout << std::endl;
     }
-    std::cout << std::endl;
   }
+
 }
 #endif
