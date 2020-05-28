@@ -150,14 +150,15 @@ TEST(RuntimeVisitorTests, rtCheckUsingExplicitAst) { /* NOLINT */
 
   // compare: our shadow plaintext computation vs. computations made on the SEAL ciphertext
   EXPECT_EQ(retVal->getNumCiphertextSlots(), vals.size());
-  //TODO: Check indices (also below)
-  for (int i = imgSize + 1; i < imgSize + 1 + (imgSize - 2)*(imgSize - 2); ++i) {
+
+  for (int i = 0; i < imgSize*imgSize; ++i) {
     EXPECT_EQ(vals.at(i), retVal->getElementAt(i)) << "Plaintext result and ciphertext result mismatch at i=" << i;
   }
 
   // compare: our shadown plaintext computation vs. reference implementation of Laplacian Sharpening algorithm
   // FIXME: Some of the values are not equal.. this must be investigated further, not clear yet why.
   //  Cause for some of the mismatches is that original algorithm does not compute image's border values.
+  // TODO: Check indices
   for (int i = imgSize + 1; i < imgSize + 1 + (imgSize - 2)*(imgSize - 2); ++i) {
     EXPECT_EQ(retVal->getElementAt(i), ct.getElementAt(i))
               << "Expected result and plaintext result mismatch at i=" << i;
