@@ -63,7 +63,13 @@ void RuntimeVisitor::visit(VarAssignm &elem) {
 
 void RuntimeVisitor::visit(MatrixElementRef &elem) {
   auto intermedResultSize = intermedResult.size();
-  Visitor::visit(elem);
+  //THIS WILL DESTROY THE VARIABLE!!!
+  //  Visitor::visit(elem);
+  // INSTEAD VISIT ONLY INDICES
+  // row index
+  elem.getRowIndex()->accept(*this);
+  // column index
+  if (elem.getColumnIndex()!=nullptr) elem.getColumnIndex()->accept(*this);
   clearIntermediateResults(intermedResultSize);
 
   // a helper utility that either returns the value of an already existing LiteralInt (in AST) or performs evaluation
@@ -91,6 +97,8 @@ void RuntimeVisitor::visit(MatrixElementRef &elem) {
     varIdentifier = var->getIdentifier();
   } else if (dynamic_cast<AbstractLiteral *>(elem.getOperand())==nullptr) {
     throw std::runtime_error("MatrixElementRef does not refer to a Variable. Cannot continue. Aborting.");
+  } else {
+    throw std::runtime_error("Variable does not have an identifier.");
   }
 
   if (visitingForEvaluation==EVALUATION_CIPHERTEXT) {

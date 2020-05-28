@@ -168,6 +168,15 @@ void OperatorExpr::setAttributes(Operator *newOperator, std::vector<AbstractExpr
     // add the aggregated/simplified operands
     std::vector<AbstractNode *> abstractExprsVec(simplifiedAbstractExprs.begin(), simplifiedAbstractExprs.end());
     addChildren(abstractExprsVec, true);
+    if (getOperands().size() < 2) {
+      throw std::logic_error("Operator expression reduced to below 2 operands.");
+    }
+  } else if (newOperands.size()==2) {
+    // add the operands without any prior aggregation
+    std::vector<AbstractNode *> abstractExprsVec(newOperands.begin(), newOperands.end());
+    addChildren(abstractExprsVec, true);
+  } else if (newOperands.size()==1 || newOperands.size()==0) {
+    throw std::logic_error("Operator expression with 1 or 0 operands is not valid.");
   } else {
     // add the operands without any prior aggregation
     std::vector<AbstractNode *> abstractExprsVec(newOperands.begin(), newOperands.end());
@@ -239,6 +248,10 @@ void OperatorExpr::replaceChild(AbstractNode *originalChild, AbstractNode *newCh
     op->removeFromParents();
     for (auto &operand : operands) operand->removeFromParents(true);
     setAttributes(op, operands);
+  } else if (operands.size()==1) {
+    throw std::logic_error("Operator Expression was reduced to single operand.");
+  } else {// size == 0
+    throw std::logic_error("Operator Expression was reduced to zero operands.");
   }
 }
 std::vector<std::string> OperatorExpr::getVariableIdentifiers() {
@@ -253,7 +266,7 @@ std::vector<std::string> OperatorExpr::getVariableIdentifiers() {
 }
 
 std::vector<Variable *> OperatorExpr::getVariables() {
-  std::vector<Variable*> result;
+  std::vector<Variable *> result;
   for (auto &expr : getOperands()) {
     auto vec = expr->getVariables();
     if (!vec.empty()) {
