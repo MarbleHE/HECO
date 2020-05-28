@@ -15,13 +15,6 @@ std::unique_ptr<seal::PublicKey> Ciphertext::publicKey = nullptr;
 // The default constructor used by SEAL in GaloisKey() segfaults. Therefore, it's a ptr
 std::unique_ptr<seal::GaloisKeys> Ciphertext::galoisKeys = nullptr;
 
-/// Hack until we have real parameter setup
-/// Sets up a context and keys, iff the context is not yet setup
-/// Takes everything by reference, so we don't have to make it a friend and expose its existence in the header
-/// \param context
-/// \param secretKey
-/// \param publicKey
-/// \param galoisKeys
 void setup_context(std::shared_ptr<seal::SEALContext> &context,
                    std::unique_ptr<seal::SecretKey> &secretKey,
                    std::unique_ptr<seal::PublicKey> &publicKey,

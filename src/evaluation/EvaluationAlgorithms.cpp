@@ -23,6 +23,7 @@
 #include <ast_opt/ast/Variable.h>
 #include <ast_opt/ast/Return.h>
 #include <ast_opt/ast/Rotate.h>
+#include <ast_opt/mockup_classes/Ciphertext.h>
 
 typedef std::vector<std::vector<int>> VecInt2D;
 
@@ -1238,42 +1239,6 @@ std::unique_ptr<seal::GaloisKeys> galoisKeys = nullptr;
 
 /// the seal context, i.e. object that holds params/etc
 std::shared_ptr<seal::SEALContext> context;
-
-/// Hack until we have real parameter setup
-/// Sets up a context and keys, iff the context is not yet setup
-/// Takes everything by reference, so we don't have to make it a friend and expose its existence in the header
-/// \param context
-/// \param secretKey
-/// \param publicKey
-/// \param galoisKeys
-void setup_context(std::shared_ptr<seal::SEALContext> &context,
-                   std::unique_ptr<seal::SecretKey> &secretKey,
-                   std::unique_ptr<seal::PublicKey> &publicKey,
-                   std::unique_ptr<seal::GaloisKeys> &galoisKeys) {
-  if (!context || !context->parameters_set()) {
-    /// Wrapper for parameters
-    seal::EncryptionParameters params(seal::scheme_type::BFV);
-
-    // in BFV, this degree is also the number of slots.
-    params.set_poly_modulus_degree(16384);
-
-    // Let SEAL select a "suitable" coefficient modulus (not necessarily maximal)
-    params.set_coeff_modulus(seal::CoeffModulus::BFVDefault(params.poly_modulus_degree()));
-
-    // Let SEAL select a plaintext modulus that actually supports batching
-    params.set_plain_modulus(seal::PlainModulus::Batching(params.poly_modulus_degree(), 20));
-
-    // Instantiate context
-    context = seal::SEALContext::Create(params);
-
-    /// Helper object to create keys
-    seal::KeyGenerator keyGenerator(context);
-
-    secretKey = std::make_unique<seal::SecretKey>(keyGenerator.secret_key());
-    publicKey = std::make_unique<seal::PublicKey>(keyGenerator.public_key());
-    galoisKeys = std::make_unique<seal::GaloisKeys>(keyGenerator.galois_keys_local());
-  }
-}
 
 void EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmBatched(VecInt2D img) {
   // time measurements
