@@ -224,13 +224,7 @@ void RuntimeVisitor::visit(MatrixAssignm &elem) {
       // get rotated ciphertexts that already exist for this variable
       auto existingRotations = varValues.at(varIdentifier);
       // determine the required rotations for this computation
-      std::vector<RotationData> reqRotations;
-      if (varIdentifier=="value") {
-        // TODO: Once var assignms have same logic as matrix assign, we can remove this ugly eval hack
-        reqRotations = determineRequiredRotations(existingRotations, {targetSlot.second}, targetSlot.second);
-      } else {
-        reqRotations = determineRequiredRotations(existingRotations, accessedIndices, targetSlot.second);
-      }
+      auto reqRotations = determineRequiredRotations(existingRotations, accessedIndices, targetSlot.second);
 
       // if all rd of reqRotations have rd.numRotations == 0, we already did computations on this matrix element:
       // if the target ciphertext (e.g., img2[imgSize*x+y]) was computed for the same expression before, i.e., we know
