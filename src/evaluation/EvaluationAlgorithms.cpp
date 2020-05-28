@@ -1370,4 +1370,34 @@ void EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmNaive(VecInt2D i
   tTotal = std::chrono::duration_cast<std::chrono::microseconds>(tEnd - tStart);
   std::cout << "Total: " << tTotal.count() << std::endl;
 }
-#endif
+std::vector<double> EvaluationAlgorithms::runLaplacianSharpeningFilterModified(Matrix<int> &img, int imgSize) {
+  // initialize img2 as (1, imgSize*imgSize) matrix
+  std::vector<std::vector<double>> weightMatrix = {{1, 1, 1}, {1, -8, 1}, {1, 1, 1}};
+  std::vector<double> img2(imgSize*imgSize);
+  for (int x = 1; x < imgSize - 1; ++x) {
+    for (int y = 1; y < imgSize - 1; ++y) {
+      double value = 0;
+      for (int j = -1; j < 2; ++j) {
+        for (int i = -1; i < 2; ++i) {
+          value = value + weightMatrix[i + 1][j + 1]*img(0, imgSize*(x + i) + y + j);
+        }
+      }
+      img2[imgSize*x + y] = 2*img(0, imgSize*x + y) - value;
+    }
+  }
+  return img2;
+}
+#endif // HAVE_SEAL_BFV
+
+Matrix<int> *genRandomImageData(int imageSize, int numSlots) {
+  // helpers to generate pseudorandom but reproducible numbers
+  const unsigned int RANDOM_SEED = 874'332'410;
+  std::mt19937 random_engine(RANDOM_SEED);
+  std::uniform_int_distribution<int> distribution_1_1000(1, 1000);
+  // generate a Matrix<int> of dimension (1, imageSize*imageSize) representing an image of size (imageSize, imageSize)
+  std::vector<int> vec(numSlots);
+  std::generate(vec.begin(), vec.begin() + (imageSize*imageSize), [&]() {
+    return distribution_1_1000(random_engine);
+  });
+  return new Matrix<int>({vec});
+}

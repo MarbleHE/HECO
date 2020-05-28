@@ -4,6 +4,7 @@
 #include <utility>
 #include <vector>
 #include <ast_opt/ast/Ast.h>
+#include <ast_opt/ast/Matrix.h>
 #ifdef HAVE_SEAL_BFV
 #include <seal/seal.h>
 #endif
@@ -38,6 +39,9 @@ class EvaluationAlgorithms {
   /// \param img The 1-channel input image.
   /// \return The resulting image after the Laplacian sharpening has been applied.
   static std::vector<std::vector<int>> runLaplacianSharpeningAlgorithm(std::vector<std::vector<int>> img);
+
+  ///TODO: Document
+  static std::vector<double> runLaplacianSharpeningFilterModified(Matrix<int> &img, int imgSize);
 
   /// Implements the Sobel edge detection filter based on the implementation in the EVA paper [1] that uses batching.
   /// References:
@@ -77,5 +81,8 @@ class EvaluationAlgorithms {
   static void encryptedLaplacianSharpeningAlgorithmNaive(std::vector<std::vector<int>> img);
 #endif
 };
+
+Matrix<int> *genRandomImageData(int imageSize, int numSlots);
+
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_EVALUATION_EVALUATIONALGORITHMS_H_

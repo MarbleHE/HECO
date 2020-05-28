@@ -156,15 +156,60 @@ int main() {
   // │  SEAL-NATIVE IMPLEMENTATIONS
   //  ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
 
-  int imageSize = 16; // e.g., 32x32 px image
-  std::vector<int> vec(imageSize);
-  std::iota(vec.begin(), vec.end(), 0);
-  std::vector<std::vector<int>> img(imageSize, vec);
-#ifdef HAVE_SEAL_BFV
-  EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmNaive(img);
-//  EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmBatched(img);
 
+ // OPTIMIZED
+  EvaluationAlgorithms::genLaplacianSharpeningAlgorithmAstAfterCtes(ast);
+
+  /// Image size
+  size_t imgSize = 128;
+
+  // a img_size x img_size image encoded as single img_size^2 elements row vector
+  auto imgData = genRandomImageData(imgSize, Ciphertext::DEFAULT_NUM_SLOTS);
+
+  // execute the plaintext algorithm to know the expected result
+  auto expectedResult = EvaluationAlgorithms::runLaplacianSharpeningFilterModified(*imgData, imgSize);
+//  Ciphertext ct = Ciphertext(expectedResult);
+
+  // perform the actual execution by running the RuntimeVisitor
+  RuntimeVisitor rt({{"img", new LiteralInt(imgData)}, {"imgSize", new LiteralInt(imgSize)}});
+  std::chrono::microseconds totalTime;
+  auto t_start = std::chrono::high_resolution_clock::now();
+  rt.visit(ast);
+  auto t_end = std::chrono::high_resolution_clock::now();
+  auto duration_us = std::chrono::duration_cast<std::chrono::microseconds>(t_end - t_start);
+  std::cout << duration_us.count() << " μs" << std::endl;
+
+#ifdef HAVE_SEAL_BFV
+  std::vector<int> vec(imgSize);
+  std::iota(vec.begin(), vec.end(), 0);
+  std::vector<std::vector<int>> img(imgSize, vec);
+  t_start = std::chrono::high_resolution_clock::now();
+  EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmBatched(img);
+  //EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmBatched(img));
+  t_end = std::chrono::high_resolution_clock::now();
+  duration_us = std::chrono::duration_cast<std::chrono::microseconds>(t_end - t_start);
+  std::cout << duration_us.count() << " μs" << std::endl;
 #endif
 
+
+  // UNOPTIMIZED
+  std::cout << "UNOPTIMIZED:" << std::endl;
+  EvaluationAlgorithms::genLaplacianSharpeningAlgorithmAst(ast);
+
+  // perform the actual execution by running the RuntimeVisitor
+  RuntimeVisitor rt_original({{"img", new LiteralInt(imgData)}, {"imgSize", new LiteralInt(imgSize)}});
+  t_start = std::chrono::high_resolution_clock::now();
+  rt_original.visit(ast);
+  t_end = std::chrono::high_resolution_clock::now();
+  duration_us = std::chrono::duration_cast<std::chrono::microseconds>(t_end - t_start);
+  std::cout << duration_us.count() << " μs" << std::endl;
+
+#ifdef HAVE_SEAL_BFV
+  t_start = std::chrono::high_resolution_clock::now();
+  EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmNaive(img);
+  t_end = std::chrono::high_resolution_clock::now();
+  duration_us = std::chrono::duration_cast<std::chrono::microseconds>(t_end - t_start);
+  std::cout << duration_us.count() << " μs" << std::endl;
+#endif
   return 0;
 }
