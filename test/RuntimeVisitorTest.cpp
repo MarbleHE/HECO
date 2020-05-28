@@ -195,7 +195,7 @@ TEST(RuntimeVisitorTests, rtCheckUsingExplicitOriginalAst) { /* NOLINT */
   //             int value = 0;
   //             for (int j = -1; j < 2; ++j) {
   //                 for (int i = -1; i < 2; ++i) {
-  //                     value = value + weightMatrix[i+1][j+1] * img[imgSize*(x+i)+y+j];
+  //                     value = value[0][0] + (weightMatrix[i+1][j+1] * img[imgSize*(x+i)+y+j]);
   //                 }
   //             }
   //             img2[imgSize*x+y] = img[imgSize*x+y] * 2 - value; //slightly adapted for ints

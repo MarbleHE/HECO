@@ -104,6 +104,12 @@ void RuntimeVisitor::visit(MatrixElementRef &elem) {
   if (visitingForEvaluation==EVALUATION_CIPHERTEXT) {
     if (precomputedCiphertexts.count(MatrixElementAccess(rowIdx, colIdx, varIdentifier)) > 0) {
       intermedResult.push(precomputedCiphertexts.at(MatrixElementAccess(rowIdx, colIdx, varIdentifier))->second.ctxt);
+    } else {
+      // Not a ciphertext. Create a Plaintext from the Literal and push it
+      // slight misnomer but just evals exprs:
+      //TODO: fix memoryleak
+      auto memoryleak = new Plaintext(determineIndexValue(&elem)); //TODO: Correct size (default param)?
+      intermedResult.push(memoryleak);
     }
   }
   // store accessed index pair (rowIdx, colidx) and associated variable (matrix) globally
@@ -439,6 +445,7 @@ void RuntimeVisitor::visit(OperatorExpr &elem) {
       intermedResult.pop();
     }
 
+    /// Remaining, non-precomputed operands
     std::vector<Ciphertext *> operands;
     // create a Plaintext for any involved plaintext literal to allow operation exec between Ciphertext and Plaintext
     for (auto opnd : elem.getOperands()) {
@@ -459,8 +466,12 @@ void RuntimeVisitor::visit(OperatorExpr &elem) {
       }
     }
 
-    // make sure that we collected all operands
-    assert(operands.size()==elem.getOperands().size());
+    // Add precomputed operands
+    //TODO: precomputation in this form is not correct for non-commutative operators!
+    //     Example: 100 / 10 / 2, if 10 is precomp, then inserting it at either end or begin is incorrect.
+    //     Need to associate precomputed results with the AST again. Probably requires massive refactoring...
+    //     Until then: TODO: Add exception if precomp + non-precomp exist && operator is non-commutative.
+    operands.insert(operands.end(),intermedResultReversed.begin(),intermedResultReversed.end());
 
 #ifndef NDEBUG
     std::cout << "Computing expression on ciphertext..." << std::endl;
