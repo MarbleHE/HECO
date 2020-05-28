@@ -130,15 +130,18 @@ TEST(RuntimeVisitorTests, rtCheckUsingExplicitAst) { /* NOLINT */
   Ast ast;
   EvaluationAlgorithms::genLaplacianSharpeningAlgorithmAstAfterCtes(ast);
 
-  // a 32x32 image encoded as single 1'024 elements row vector
-  auto imgData = genRandomImageData(32, Ciphertext::DEFAULT_NUM_SLOTS);
+  /// Image size
+  size_t imgSize = 32;
+
+  // a img_size x img_size image encoded as single img_size^2 elements row vector
+  auto imgData = genRandomImageData(imgSize, Ciphertext::DEFAULT_NUM_SLOTS);
 
   // execute the plaintext algorithm to know the expected result
   auto expectedResult = runLaplacianSharpeningFilterModified(*imgData, 32);
   Ciphertext ct = Ciphertext(expectedResult);
 
   // perform the actual execution by running the RuntimeVisitor
-  RuntimeVisitor rt({{"img", new LiteralInt(imgData)}, {"imgSize", new LiteralInt(32)}});
+  RuntimeVisitor rt({{"img", new LiteralInt(imgData)}, {"imgSize", new LiteralInt(imgSize)}});
   rt.visit(ast);
 
   // retrieve the RuntimeVisitor result
@@ -147,14 +150,15 @@ TEST(RuntimeVisitorTests, rtCheckUsingExplicitAst) { /* NOLINT */
 
   // compare: our shadow plaintext computation vs. computations made on the SEAL ciphertext
   EXPECT_EQ(retVal->getNumCiphertextSlots(), vals.size());
-  for (int i = 33; i < 33 + (30*30); ++i) {
+  //TODO: Check indices (also below)
+  for (int i = imgSize + 1; i < imgSize + 1 + (imgSize - 2)*(imgSize - 2); ++i) {
     EXPECT_EQ(vals.at(i), retVal->getElementAt(i)) << "Plaintext result and ciphertext result mismatch at i=" << i;
   }
 
   // compare: our shadown plaintext computation vs. reference implementation of Laplacian Sharpening algorithm
   // FIXME: Some of the values are not equal.. this must be investigated further, not clear yet why.
   //  Cause for some of the mismatches is that original algorithm does not compute image's border values.
-  for (int i = 33; i < 33 + (30*30); ++i) {
+  for (int i = imgSize + 1; i < imgSize + 1 + (imgSize - 2)*(imgSize - 2); ++i) {
     EXPECT_EQ(retVal->getElementAt(i), ct.getElementAt(i))
               << "Expected result and plaintext result mismatch at i=" << i;
   }
