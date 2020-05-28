@@ -374,14 +374,18 @@ Ciphertext::Ciphertext(Ciphertext &&ctxt) : data(std::move(ctxt.data)),
 {}
 
 Ciphertext &Ciphertext::operator=(const Ciphertext &ctxt) {
+#ifdef HAVE_SEAL_BFV
   ciphertext = seal::Ciphertext(ctxt.ciphertext);
+#endif
   offsetOfFirstElement = ctxt.offsetOfFirstElement;
   numCiphertextElements = ctxt.numCiphertextElements;
   data = ctxt.data;
   return *this;
 }
 Ciphertext &Ciphertext::operator=(Ciphertext &&ctxt) {
+#ifdef HAVE_SEAL_BFV
   ciphertext = std::move(seal::Ciphertext(ctxt.ciphertext));
+#endif
   offsetOfFirstElement = std::move(ctxt.offsetOfFirstElement);
   numCiphertextElements = std::move(ctxt.numCiphertextElements);
   data = std::move(ctxt.data);

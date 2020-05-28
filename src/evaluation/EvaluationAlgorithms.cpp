@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cmath>
 #include <functional>
+#include <random>
 #include <ast_opt/ast/Ast.h>
 #include <ast_opt/ast/Function.h>
 #include <ast_opt/ast/GetMatrixSize.h>
@@ -1382,6 +1383,8 @@ void EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmNaive(VecInt2D i
 //  tTotal = std::chrono::duration_cast<std::chrono::microseconds>(tEnd - tStart);
 //  std::cout << "Total: " << tTotal.count() << std::endl;
 }
+#endif // HAVE_SEAL_BFV
+
 std::vector<double> EvaluationAlgorithms::runLaplacianSharpeningFilterModified(Matrix<int> &img, int imgSize) {
   // initialize img2 as (1, imgSize*imgSize) matrix
   std::vector<std::vector<double>> weightMatrix = {{1, 1, 1}, {1, -8, 1}, {1, 1, 1}};
@@ -1399,7 +1402,7 @@ std::vector<double> EvaluationAlgorithms::runLaplacianSharpeningFilterModified(M
   }
   return img2;
 }
-#endif // HAVE_SEAL_BFV
+
 
 Matrix<int> *genRandomImageData(int imageSize, int numSlots) {
   // helpers to generate pseudorandom but reproducible numbers
