@@ -141,18 +141,27 @@ TEST(RuntimeVisitorTests, rtCheckUsingExplicitAst) { /* NOLINT */
   Ciphertext ct = Ciphertext(expectedResult);
 
   // perform the actual execution by running the RuntimeVisitor
-  RuntimeVisitor rt({{"img", new LiteralInt(imgData)}, {"imgSize", new LiteralInt(imgSize)}});
+  EvaluationVisitor rt({{"img", new LiteralInt(imgData)}, {"imgSize", new LiteralInt(imgSize)}});
   rt.visit(ast);
 
   // retrieve the RuntimeVisitor result
-  auto retVal = rt.getReturnValues().front();
-  std::vector<std::int64_t> vals = retVal->decryptAndDecode();
-
-  // compare: our shadow plaintext computation vs. computations made on the SEAL ciphertext
-  EXPECT_EQ(retVal->getNumCiphertextSlots(), vals.size());
-
-  for (int i = 0; i < imgSize*imgSize; ++i) {
-    EXPECT_EQ(vals.at(i), retVal->getElementAt(i)) << "Plaintext result and ciphertext result mismatch at i=" << i;
+//  auto retVal = rt.getReturnValues().front();
+//  std::vector<std::int64_t> vals = retVal->decryptAndDecode();
+//
+//  // compare: our shadow plaintext computation vs. computations made on the SEAL ciphertext
+//  EXPECT_EQ(retVal->getNumCiphertextSlots(), vals.size());
+//
+//  for (int i = 0; i < imgSize*imgSize; ++i) {
+//    EXPECT_EQ(vals.at(i), retVal->getElementAt(i)) << "Plaintext result and ciphertext result mismatch at i=" << i;
+//  }
+  auto retLits = rt.getResults();
+  std::vector<int> retVal;
+  for (auto &l: retLits) {
+    if (auto m = l->getMatrix()->getElementAt(0, 0)) {
+      retVal.push_back(m->castTo<LiteralInt>()->getValue());
+    } else {
+      retVal.push_back(-1);
+    }
   }
 
   // compare: our shadown plaintext computation vs. reference implementation of Laplacian Sharpening algorithm
@@ -160,7 +169,7 @@ TEST(RuntimeVisitorTests, rtCheckUsingExplicitAst) { /* NOLINT */
   //  Cause for some of the mismatches is that original algorithm does not compute image's border values.
   // TODO: Check indices
   for (int i = imgSize + 1; i < imgSize + 1 + (imgSize - 2)*(imgSize - 2); ++i) {
-    EXPECT_EQ(retVal->getElementAt(i), ct.getElementAt(i))
+    EXPECT_EQ(retVal[i], ct.getElementAt(i))
               << "Expected result and plaintext result mismatch at i=" << i;
   }
 }
