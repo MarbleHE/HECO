@@ -131,7 +131,7 @@ TEST(RuntimeVisitorTests, rtCheckUsingExplicitAst) { /* NOLINT */
   EvaluationAlgorithms::genLaplacianSharpeningAlgorithmAstAfterCtes(ast);
 
   // a 32x32 image encoded as single 1'024 elements row vector
-  auto imgData = genRandomImageData(32, 8192);
+  auto imgData = genRandomImageData(32, Ciphertext::DEFAULT_NUM_SLOTS);
 
   // execute the plaintext algorithm to know the expected result
   auto expectedResult = runLaplacianSharpeningFilterModified(*imgData, 32);
