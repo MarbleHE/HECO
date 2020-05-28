@@ -1338,26 +1338,26 @@ void EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmNaive(VecInt2D i
 
 
 
-  // Encrypt input (very inefficiently)
-  std::vector<std::vector<seal::Ciphertext>>
-      img_ctxt(img.size(), std::vector<seal::Ciphertext>(img.at(0).size(), seal::Ciphertext(context)));
-
-  for (int x = 0; x < img.size(); ++x) {
-    for (int y = 0; y < img.at(x).size(); ++y) {
-      seal::Plaintext p;
-      encoder.encode(std::vector<int64_t>(1, img[x][y]), p);
-      encryptor.encrypt(p, img_ctxt[x][y]);
+  // Encrypt input
+  std::vector<int64_t> img_as_vec;
+  img_as_vec.reserve(img.size()*img.size());
+  for (int x = 1; x < img.size() - 1; ++x) {
+    for (int y = 1; y < img.at(x).size() - 1; ++y) {
+      img_as_vec.push_back(img[x][y]);
     }
   }
+  seal::Plaintext img_ptxt;
+  encoder.encode(img_as_vec, img_ptxt);
+  seal::Ciphertext img_ctxt(context);
+  encryptor.encrypt_symmetric(img_ptxt, img_ctxt);
 
   // Compute sharpening filter
   auto evaluator = seal::Evaluator(context);
 
   // Naive way: very similar to plain C++
   VecInt2D weightMatrix = {{1, 1, 1}, {1, -8, 1}, {1, 1, 1}};
-  // This time, we actually want "default initialized" Ctxts since they'll be overriden anyway
-  std::vector<std::vector<seal::Ciphertext>> img2_ctxt
-      (std::vector<std::vector<seal::Ciphertext>>(img.size(), std::vector<seal::Ciphertext>(img.at(0).size())));
+  // Can be default constructed because this is overriden in each loop
+  seal::Ciphertext img2_ctxt;
 
   for (int x = 1; x < img.size() - 1; ++x) {
     for (int y = 1; y < img.at(x).size() - 1; ++y) {
@@ -1367,27 +1367,35 @@ void EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmNaive(VecInt2D i
 //          std::cout << x << ", " << y << ", " << i << ", " << j << std::endl;
           seal::Plaintext w;
           encoder.encode(std::vector<int64_t>(1, weightMatrix.at(i + 1).at(j + 1)), w);
-          seal::Ciphertext &temp = img_ctxt.at(x + i).at(y + j);
+          seal::Ciphertext temp;
+          evaluator.rotate_rows(img_ctxt, (x + i)*img.size() + (y + j), *galoisKeys, temp);
           evaluator.multiply_plain_inplace(temp, w);
           evaluator.add_inplace(value, temp);
         }
       }
-      img2_ctxt[x][y] = img_ctxt.at(x).at(y);
+
       seal::Plaintext two;
       encoder.encode(std::vector<int64_t>(1, 2), two);
-      evaluator.multiply_plain_inplace(img2_ctxt[x][y], two);
-      evaluator.sub_inplace(img2_ctxt[x][y], value);
+      seal::Ciphertext temp = img_ctxt;
+      evaluator.multiply_plain_inplace(temp, two);
+      evaluator.sub_inplace(temp, value);
+      //TODO: Add masking and merge masking and mult by two
+      //std::vector<int64_t> mask(16384,0);
+      //mask[x*img.size()+y] = 1;
+      //seal::Plaintext mask_ptxt;
+      //encoder.encode(mask,mask_ptxt);
+      //evaluator.multiply_plain_inplace(temp,mask_ptxt);
+      img2_ctxt = temp;
     }
   }
 
   auto decryptor = seal::Decryptor(context, *secretKey);
-
+  seal::Plaintext ptxt;
+  std::vector<int64_t> output;
+  decryptor.decrypt(img2_ctxt, ptxt);
+  encoder.decode(ptxt, output);
   for (int k = 1; k < img.size() - 1; ++k) {
     for (int h = 1; h < img.size() - 1; ++h) {
-      seal::Plaintext ptxt;
-      std::vector<int64_t> output;
-      decryptor.decrypt(img2_ctxt[k][h], ptxt);
-      encoder.decode(ptxt, output);
 //      std::cout << output[0] << " ";
     }
 //    std::cout << std::endl;
