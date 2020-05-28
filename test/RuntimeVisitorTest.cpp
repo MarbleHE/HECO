@@ -137,7 +137,7 @@ TEST(RuntimeVisitorTests, rtCheckUsingExplicitAst) { /* NOLINT */
   auto imgData = genRandomImageData(imgSize, Ciphertext::DEFAULT_NUM_SLOTS);
 
   // execute the plaintext algorithm to know the expected result
-  auto expectedResult = runLaplacianSharpeningFilterModified(*imgData, 32);
+  auto expectedResult = runLaplacianSharpeningFilterModified(*imgData, imgSize);
   Ciphertext ct = Ciphertext(expectedResult);
 
   // perform the actual execution by running the RuntimeVisitor
