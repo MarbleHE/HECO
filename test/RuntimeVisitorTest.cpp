@@ -11,8 +11,10 @@
 #include <include/ast_opt/ast/Return.h>
 #include <include/ast_opt/visitor/CompileTimeExpressionSimplifier.h>
 #include <include/ast_opt/visitor/RuntimeVisitor.h>
+#include <include/ast_opt/evaluation/EvaluationAlgorithms.h>
 #include <include/ast_opt/visitor/PrintVisitor.h>
 #include <random>
+#include <include/ast_opt/evaluation/EvaluationAlgorithms.h>
 #include "AstTestingGenerator.h"
 
 Matrix<int> *genRandomImageData(int imageSize, int numSlots) {
@@ -125,109 +127,8 @@ TEST(RuntimeVisitorTests, rtCheckUsingExplicitAst) { /* NOLINT */
   //     }
   //     return img2;
   // }
-
-
-  // VecInt2D runLaplacianSharpeningAlgorithm(Vector<int> img, int imgSize, int x, int y) {
-  auto func = new Function("runLaplacianSharpeningAlgorithm");
-  func->addParameter(new FunctionParameter(new Datatype(Types::INT, true), new Variable("img")));
-  func->addParameter(new FunctionParameter(new Datatype(Types::INT, false), new Variable("imgSize")));
-
-  func->addStatement(new VarDecl("img2", new Datatype(Types::INT)));
-
-  // a helper to generate img[imgSize*(x-i)+y+j] terms
-  auto createImgIdx = [](int i, int j) -> AbstractExpr * {
-    auto buildTermI = [](int i) -> AbstractExpr * {
-      if (i==0) {
-        return new Variable("x");
-      } else {
-        return new OperatorExpr(new Operator(ADDITION), {new Variable("x"), new LiteralInt(i)});
-      }
-    };
-
-    auto buildTermJ = [&](int j) -> AbstractExpr * {
-      if (j==0) {
-        return new OperatorExpr(new Operator(ADDITION),
-                                {new OperatorExpr(new Operator(MULTIPLICATION),
-                                                  {new Variable("imgSize"),
-                                                   buildTermI(i)}),
-                                 new Variable("y")});
-      } else {
-        return new OperatorExpr(new Operator(ADDITION),
-                                {new OperatorExpr(new Operator(MULTIPLICATION),
-                                                  {new Variable("imgSize"),
-                                                   buildTermI(i)}),
-                                 new Variable("y"),
-                                 new LiteralInt(j)});
-      }
-    };
-    return new MatrixElementRef(new Variable("img"), new LiteralInt(0), buildTermJ(j));
-  };
-
-  // img[imgSize*(x-1)+y-1]  * 1 + ... + img[imgSize*(x+1)+y+1]  * 1;
-  auto varValue =
-      new OperatorExpr(
-          new Operator(ADDITION),
-          {createImgIdx(-1, -1),
-           createImgIdx(0, -1),
-           createImgIdx(1, -1),
-           createImgIdx(-1, 0),
-           new OperatorExpr(new Operator(MULTIPLICATION), {createImgIdx(0, 0), new LiteralInt(-8)}),
-           createImgIdx(1, 0),
-           createImgIdx(-1, 1),
-           createImgIdx(0, 1),
-           createImgIdx(1, 1)});
-
-
-  // img2[imgSize*x+y] = img[imgSize*x+y] - (value/2);
-  auto secondLoopBody = new Block(
-      new MatrixAssignm(new MatrixElementRef(new Variable("img2"),
-                                             new LiteralInt(0),
-                                             new OperatorExpr(
-                                                 new Operator(ADDITION),
-                                                 {new OperatorExpr(new Operator(MULTIPLICATION),
-                                                                   {new Variable("imgSize"), new Variable("x")}),
-                                                  new Variable("y")})),
-                        new OperatorExpr(
-                            new Operator(SUBTRACTION),
-                            {new OperatorExpr(new Operator(MULTIPLICATION),
-                                              {new MatrixElementRef(
-                                                  new Variable("img"),
-                                                  new LiteralInt(0),
-                                                  new OperatorExpr(
-                                                      new Operator(ADDITION),
-                                                      {new OperatorExpr(new Operator(MULTIPLICATION),
-                                                                        {new Variable("imgSize"), new Variable("x")}),
-                                                       new Variable("y")})),
-                                               new LiteralInt(2)}),
-                             varValue})));
-
-  // for (int y = 1; y < imgSize - 1; ++y)  -- 2nd level loop
-  auto firstLoopBody = new Block(new For(new VarDecl("y", 1),
-                                         new LogicalExpr(new Variable("y"),
-                                                         SMALLER,
-                                                         new ArithmeticExpr(new Variable("imgSize"), SUBTRACTION, 1)),
-                                         new VarAssignm("y",
-                                                        new ArithmeticExpr(new Variable("y"),
-                                                                           ADDITION,
-                                                                           new LiteralInt(1))),
-                                         secondLoopBody));
-
-  // for (int x = 1; x < imgSize - 1; ++x)  -- 1st level loop
-  func->addStatement(new For(new VarDecl("x", 1),
-                             new LogicalExpr(new Variable("x"),
-                                             SMALLER,
-                                             new ArithmeticExpr(new Variable("imgSize"), SUBTRACTION, 1)),
-                             new VarAssignm("x",
-                                            new ArithmeticExpr(new Variable("x"),
-                                                               ADDITION,
-                                                               new LiteralInt(1))),
-                             firstLoopBody));
-
-  // return img2;
-  func->addStatement(new Return(new Variable("img2")));
-
   Ast ast;
-  ast.setRootNode(func);
+  EvaluationAlgorithms::genLaplacianSharpeningAlgorithmAstAfterCtes(ast);
 
   // a 32x32 image encoded as single 1'024 elements row vector
   auto imgData = genRandomImageData(32, 8192);
