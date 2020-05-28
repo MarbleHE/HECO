@@ -16,6 +16,7 @@
 #include "ast_opt/ast/ArithmeticExpr.h"
 #include "ast_opt/mockup_classes/Ciphertext.h"
 #include <ast_opt/mockup_classes/Plaintext.h>
+#include <climits>
 
 void RuntimeVisitor::visit(Ast &elem) {
   // determine the tainted nodes, i.e., nodes that deal with secret inputs
@@ -370,12 +371,18 @@ std::vector<RotationData> RuntimeVisitor::determineRequiredRotations(VarValuesMa
       // a vector that describes how many additional rotations an existing ciphertext would require to align it to
       // the target slot
       std::vector<std::pair<int, Ciphertext *>> rotations;
+      std::pair<int, Ciphertext *> cur_best;
+      int cur_best_distance = INT_MAX;
 
       // determine the difference between current index and existing index for each idx in reqIndices
       bool canReuseExistingRotation = false;
       rotations.reserve(existingRotations.size());
       for (auto[offset, varValEntry] : existingRotations) {
         auto numRequiredRotations = targetSlot - (offset + idx);
+        if (numRequiredRotations < cur_best_distance) {
+          cur_best_distance = numRequiredRotations;
+          cur_best = std::make_pair(numRequiredRotations, varValEntry.ctxt);
+        }
         rotations.emplace_back(numRequiredRotations, varValEntry.ctxt);
         if (numRequiredRotations==0) {
           // if we can reuse an existing rotation there is no need
@@ -390,6 +397,8 @@ std::vector<RotationData> RuntimeVisitor::determineRequiredRotations(VarValuesMa
       //  Take the values in the set rotations and push the determine cheapest one into resultSet.
       if (!canReuseExistingRotation) {
         //TODO: Find optimal rotations instead of simply outputting the required input without much processing.
+        // For now, just take smallest values of required rotations
+        resultSet.emplace_back(idx, cur_best.second, cur_best.first);
       }
     }
   }
