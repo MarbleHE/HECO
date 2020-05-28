@@ -141,35 +141,41 @@ TEST(RuntimeVisitorTests, rtCheckUsingExplicitAst) { /* NOLINT */
 //  Ciphertext ct = Ciphertext(expectedResult);
 
   // perform the actual execution by running the RuntimeVisitor
-  EvaluationVisitor rt({{"img", new LiteralInt(imgData)}, {"imgSize", new LiteralInt(imgSize)}});
+  RuntimeVisitor rt({{"img", new LiteralInt(imgData)}, {"imgSize", new LiteralInt(imgSize)}});
   rt.visit(ast);
 
   // retrieve the RuntimeVisitor result
-//  auto retVal = rt.getReturnValues().front();
-//  std::vector<std::int64_t> vals = retVal->decryptAndDecode();
-//
-//  // compare: our shadow plaintext computation vs. computations made on the SEAL ciphertext
-//  EXPECT_EQ(retVal->getNumCiphertextSlots(), vals.size());
-//
-//  for (int i = 0; i < imgSize*imgSize; ++i) {
-//    EXPECT_EQ(vals.at(i), retVal->getElementAt(i)) << "Plaintext result and ciphertext result mismatch at i=" << i;
-//  }
-  auto retLits = rt.getResults();
-  std::vector<int> retVal;
-  for (auto &e: retLits[0]->getMatrix()->castTo<Matrix<AbstractExpr*>>()->values[0]) {
-    if (e) {
-      retVal.push_back(e->castTo<LiteralInt>()->getValue());
-    } else {
-      retVal.push_back(0);
-    }
+  auto retVal = rt.getReturnValues().front();
+  std::vector<std::int64_t> vals = retVal->decryptAndDecode();
+
+  // compare: our shadow plaintext computation vs. computations made on the SEAL ciphertext
+  EXPECT_EQ(retVal->getNumCiphertextSlots(), vals.size());
+
+  for (int i = 0; i < imgSize*imgSize; ++i) {
+    EXPECT_EQ(vals.at(i), retVal->getElementAt(i)) << "Plaintext result and ciphertext result mismatch at i=" << i;
   }
+//  auto retLits = rt.getResults();
+//  std::vector<int> retVal;
+//  for (auto &e: retLits[0]->getMatrix()->castTo<Matrix<AbstractExpr*>>()->values[0]) {
+//    if (e) {
+//      retVal.push_back(e->castTo<LiteralInt>()->getValue());
+//    } else {
+//      retVal.push_back(0);
+//    }
+//  }
 
   // compare: our shadown plaintext computation vs. reference implementation of Laplacian Sharpening algorithm
   // FIXME: Some of the values are not equal.. this must be investigated further, not clear yet why.
   //  Cause for some of the mismatches is that original algorithm does not compute image's border values.
   // TODO: Check indices
   for (int i = 0; i < imgSize*imgSize; ++i) {
-    EXPECT_EQ(retVal[i], expectedResult[i])
-              << "Expected result and plaintext result mismatch at i=" << i;
+    auto row = i/imgSize;
+    auto col = i%imgSize;
+    if (row==0 || col==0 || row==imgSize - 1 || col==imgSize - 1) {
+      // DON'T CARE
+    } else {
+      EXPECT_EQ(retVal->getElementAt(i), expectedResult[i])
+                << "Expected result and plaintext result mismatch at i=" << i;
+    }
   }
 }

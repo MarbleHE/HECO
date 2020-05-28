@@ -298,6 +298,7 @@ void EvaluationVisitor::visit(MatrixAssignm &elem) {
   // evaluate the assigned value (rvalue) as it might be an expression (e.g., M[0][3] = 43+12)
   elem.getValue()->accept(*this);
   auto val = getOnlyEvaluationResult(results.top());
+  results.pop();
 
   auto matrixRef = elem.getAssignmTarget();
   // row index
@@ -325,7 +326,6 @@ void EvaluationVisitor::visit(MatrixAssignm &elem) {
     auto vec = getOnlyEvaluationResult(results.top())->castTo<AbstractLiteral>();
     variableValuesForEvaluation[mx->getIdentifier()]->getMatrix()->appendVectorAt(rowIdx, vec->getMatrix());
   }
-  results.pop();
 }
 
 void EvaluationVisitor::visit(VarAssignm &elem) {
