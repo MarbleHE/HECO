@@ -1329,8 +1329,8 @@ void EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmNaive(VecInt2D i
   std::vector<std::vector<seal::Ciphertext>> img_ctxt(img.size(), std::vector<seal::Ciphertext>(img.at(0).size(), seal::Ciphertext(context)));
 
   auto tStart = std::chrono::high_resolution_clock::now();
-  for (int x = 1; x < img.size() - 1; ++x) {
-    for (int y = 1; y < img.at(x).size() - 1; ++y) {
+  for (int x = 0; x < img.size(); ++x) {
+    for (int y = 0; y < img.at(x).size(); ++y) {
       seal::Plaintext p;
       encoder.encode(std::vector<int64_t>(1, img[x][y]), p);
       encryptor.encrypt(p, img_ctxt[x][y]);
