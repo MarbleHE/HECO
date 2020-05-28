@@ -168,8 +168,11 @@ void OperatorExpr::setAttributes(Operator *newOperator, std::vector<AbstractExpr
     // add the aggregated/simplified operands
     std::vector<AbstractNode *> abstractExprsVec(simplifiedAbstractExprs.begin(), simplifiedAbstractExprs.end());
     addChildren(abstractExprsVec, true);
-    if (getOperands().size() < 2) {
-      throw std::logic_error("Operator expression reduced to below 2 operands.");
+    if (getOperands().size()==0) {
+      throw std::logic_error("Operator expression reduced to zero operands.");
+    } else if (getOperands().size()==1) {
+      //Replace myself with operand in parent.
+      getOnlyParent()->replaceChild(this, getOperands()[0]);
     }
   } else if (newOperands.size()==2) {
     // add the operands without any prior aggregation
