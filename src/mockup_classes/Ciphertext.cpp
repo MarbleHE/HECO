@@ -15,10 +15,14 @@ std::unique_ptr<seal::PublicKey> Ciphertext::publicKey = nullptr;
 // The default constructor used by SEAL in GaloisKey() segfaults. Therefore, it's a ptr
 std::unique_ptr<seal::GaloisKeys> Ciphertext::galoisKeys = nullptr;
 
+// Do not repeat yourself is optional today?
+std::unique_ptr<seal::RelinKeys> Ciphertext::relinKeys = nullptr;
+
 void setup_context(std::shared_ptr<seal::SEALContext> &context,
                    std::unique_ptr<seal::SecretKey> &secretKey,
                    std::unique_ptr<seal::PublicKey> &publicKey,
-                   std::unique_ptr<seal::GaloisKeys> &galoisKeys) {
+                   std::unique_ptr<seal::GaloisKeys> &galoisKeys,
+                   std::unique_ptr<seal::RelinKeys> &relinKeys) {
   if (!context || !context->parameters_set()) {
     /// Wrapper for parameters
     seal::EncryptionParameters params(seal::scheme_type::BFV);
@@ -41,6 +45,7 @@ void setup_context(std::shared_ptr<seal::SEALContext> &context,
     secretKey = std::make_unique<seal::SecretKey>(keyGenerator.secret_key());
     publicKey = std::make_unique<seal::PublicKey>(keyGenerator.public_key());
     galoisKeys = std::make_unique<seal::GaloisKeys>(keyGenerator.galois_keys_local());
+    relinKeys = std::make_unique<seal::RelinKeys>(keyGenerator.relin_keys_local());
   }
 }
 #endif
@@ -55,7 +60,7 @@ Ciphertext::Ciphertext(std::vector<double> inputData, int numCiphertextSlots)
   data.resize(numCiphertextSlots);
 #ifdef HAVE_SEAL_BFV
   // Ensure context is setup
-  setup_context(context, secretKey, publicKey, galoisKeys);
+  setup_context(context, secretKey, publicKey, galoisKeys, relinKeys);
 
   /// Helper object for encoding
   seal::BatchEncoder batchEncoder(context);
@@ -81,7 +86,7 @@ Ciphertext::Ciphertext(double scalar, int numCiphertextSlots)
   std::fill(data.begin(), data.end(), scalar);
 #ifdef HAVE_SEAL_BFV
   // Ensure context is setup
-  setup_context(context, secretKey, publicKey, galoisKeys);
+  setup_context(context, secretKey, publicKey, galoisKeys, relinKeys);
 
   /// Helper object for encoding
   seal::BatchEncoder batchEncoder(context);
@@ -139,6 +144,7 @@ Ciphertext Ciphertext::operator*(const Ciphertext &ctxt) const {
 #ifdef HAVE_SEAL_BFV
   seal::Evaluator evaluator(context);
   evaluator.multiply(ciphertext, ctxt.ciphertext, result.ciphertext);
+  evaluator.relinearize(result.ciphertext, *relinKeys, result.ciphertext);
 #endif
   return result;
 }
@@ -376,7 +382,7 @@ Ciphertext &Ciphertext::operator=(const Ciphertext &ctxt) {
 }
 Ciphertext &Ciphertext::operator=(Ciphertext &&ctxt) {
   ciphertext = std::move(seal::Ciphertext(ctxt.ciphertext));
-  offsetOfFirstElement =  std::move(ctxt.offsetOfFirstElement);
+  offsetOfFirstElement = std::move(ctxt.offsetOfFirstElement);
   numCiphertextElements = std::move(ctxt.numCiphertextElements);
   data = std::move(ctxt.data);
   return *this;

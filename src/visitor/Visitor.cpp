@@ -314,7 +314,9 @@ void Visitor::visit(OperatorExpr &elem) {
   // visit operator
   elem.getOperator()->accept(*this);
   // visit all operands
-  for (auto &child : elem.getOperands()) child->accept(*this);
+  for (auto &child : elem.getOperands()) {
+    child->accept(*this);
+  }
 }
 
 void Visitor::addStatementToScope(AbstractStatement &stat) {

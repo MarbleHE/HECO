@@ -105,11 +105,29 @@ void RuntimeVisitor::visit(MatrixElementRef &elem) {
     if (precomputedCiphertexts.count(MatrixElementAccess(rowIdx, colIdx, varIdentifier)) > 0) {
       intermedResult.push(precomputedCiphertexts.at(MatrixElementAccess(rowIdx, colIdx, varIdentifier))->second.ctxt);
     } else {
-      // Not a ciphertext. Create a Plaintext from the Literal and push it
-      // slight misnomer but just evals exprs:
-      //TODO: fix memoryleak
-      auto memoryleak = new Plaintext(determineIndexValue(&elem)); //TODO: Correct size (default param)?
-      intermedResult.push(memoryleak);
+      if (currentMatrixAccessMode==READ) {
+        // if we are in READ mode, this probably means that we have a literal value
+        int val;
+        try {
+          val = determineIndexValue(&elem);
+        } catch (std::runtime_error e) {
+          throw std::runtime_error(
+              "Variable has neither a precomputed ciphertext available nor is it known: ");
+          //+ e.what()); TODO: Figure out how to append caught exceptions error message to new exception
+        }
+        // Not a ciphertext. Create a Plaintext from the Literal and push it
+        // slight misnomer but just evals exprs:
+        //TODO: fix memoryleak
+        auto memoryleak = new Plaintext(val); //TODO: Correct size (default param)?
+        intermedResult.push(memoryleak);
+      } else if (currentMatrixAccessMode==WRITE) {
+        // If we are in write mode, we can simply push a dummy plaintext which should be overridden eventually
+        //TODO: fix memoryleak
+        auto memoryleak = new Plaintext(0);
+        intermedResult.push(memoryleak);
+      } else {
+        throw std::logic_error("Unknown currentMatrixAccessMode.");
+      }
     }
   }
   // store accessed index pair (rowIdx, colidx) and associated variable (matrix) globally
@@ -142,7 +160,7 @@ void RuntimeVisitor::visit(VarDecl &elem) {
 
   //TODO: The RuntimeVisitor currently seems to assume that when a varable is declared non-secret,
   // it will never become secret later!
-  
+
   // if this is a secret variable, create a ciphertext object in varValues
   if (elem.getDatatype()->isEncrypted()) {
     if (elem.getInitializer()!=nullptr) {
@@ -172,7 +190,7 @@ void RuntimeVisitor::visit(MatrixAssignm &elem) {
     lastVisitedStatement = elem.clone(true)->castTo<AbstractStatement>();
   }
 
-  // visit the right-hand side of the MatrixAssignm
+  // visit the left-hand side of the MatrixAssignm
   currentMatrixAccessMode = WRITE;
   elem.getAssignmTarget()->accept(*this);
 
@@ -371,8 +389,7 @@ std::vector<RotationData> RuntimeVisitor::determineRequiredRotations(VarValuesMa
       //  Implement technique used in SEAL that uses bit representation and allows determining cheapest rotation.
       //  Take the values in the set rotations and push the determine cheapest one into resultSet.
       if (!canReuseExistingRotation) {
-        throw std::runtime_error(
-            "Not implemented: Cannot determine the optimal (ciphertext, req. rotations) set yet.");
+        //TODO: Find optimal rotations instead of simply outputting the required input without much processing.
       }
     }
   }
@@ -456,7 +473,7 @@ void RuntimeVisitor::visit(OperatorExpr &elem) {
       } else if (dynamic_cast<OperatorExpr *>(opnd) || dynamic_cast<MatrixElementRef *>(opnd)) {
         // in this case the OperatorExpr/MatrixElementRef was visited before and its Ciphertext was pushed to
         // intermedResult
-        if(!intermedResultReversed.back()) {
+        if (!intermedResultReversed.back()) {
           throw std::logic_error("A result is missing and we don't know why!");
         }
         operands.push_back(intermedResultReversed.back());
@@ -471,7 +488,7 @@ void RuntimeVisitor::visit(OperatorExpr &elem) {
     //     Example: 100 / 10 / 2, if 10 is precomp, then inserting it at either end or begin is incorrect.
     //     Need to associate precomputed results with the AST again. Probably requires massive refactoring...
     //     Until then: TODO: Add exception if precomp + non-precomp exist && operator is non-commutative.
-    operands.insert(operands.end(),intermedResultReversed.begin(),intermedResultReversed.end());
+    operands.insert(operands.end(), intermedResultReversed.begin(), intermedResultReversed.end());
 
 #ifndef NDEBUG
     std::cout << "Computing expression on ciphertext..." << std::endl;

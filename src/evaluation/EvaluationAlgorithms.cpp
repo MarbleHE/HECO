@@ -1246,6 +1246,9 @@ std::unique_ptr<seal::PublicKey> publicKey = nullptr;
 /// The default constructor used by SEAL in GaloisKey() segfaults. Therefore, it's a ptr
 std::unique_ptr<seal::GaloisKeys> galoisKeys = nullptr;
 
+/// DId not test segfaulting, ptr for consistency
+std::unique_ptr<seal::RelinKeys> relinKeys = nullptr;
+
 /// the seal context, i.e. object that holds params/etc
 std::shared_ptr<seal::SEALContext> context;
 
@@ -1254,7 +1257,7 @@ void EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmBatched(VecInt2D
 //  std::chrono::microseconds tTotal;
 //  auto tStart = std::chrono::high_resolution_clock::now();
 
-  setup_context(context, secretKey, publicKey, galoisKeys);
+  setup_context(context, secretKey, publicKey, galoisKeys, relinKeys);
   auto encoder = seal::BatchEncoder(context);
   auto encryptor = seal::Encryptor(context, *publicKey, *secretKey); //secret Key encryptor is more efficient
 
@@ -1306,7 +1309,7 @@ void EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmNaive(VecInt2D i
 //  std::chrono::microseconds tTotal;
 //  auto tStart = std::chrono::high_resolution_clock::now();
 
-  setup_context(context, secretKey, publicKey, galoisKeys);
+  setup_context(context, secretKey, publicKey, galoisKeys, relinKeys);
   auto encoder = seal::BatchEncoder(context);
   auto encryptor = seal::Encryptor(context, *publicKey, *secretKey); //secret Key encryptor is more efficient
 

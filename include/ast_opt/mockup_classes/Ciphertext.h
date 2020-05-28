@@ -26,6 +26,9 @@ class Ciphertext {
 
   /// keys required to rotate (ptr because GaloisKeys() segfaults)
   static std::unique_ptr<seal::GaloisKeys> galoisKeys;
+
+  /// keys required to relinearize after multipliction (segfaulting not tested, but ptr for consistency)
+  static std::unique_ptr<seal::RelinKeys> relinKeys;
 #endif
 
   /// plaintext data for testing
@@ -55,7 +58,7 @@ class Ciphertext {
 
   Ciphertext &operator=(const Ciphertext &ctxt); //copy assignment
 
-  Ciphertext &operator=(Ciphertext&& ctxt); //move assignment;
+  Ciphertext &operator=(Ciphertext &&ctxt); //move assignment;
 
   static bool isInteger(double k);
 
@@ -123,7 +126,8 @@ class Ciphertext {
 void setup_context(std::shared_ptr<seal::SEALContext> &context,
                    std::unique_ptr<seal::SecretKey> &secretKey,
                    std::unique_ptr<seal::PublicKey> &publicKey,
-                   std::unique_ptr<seal::GaloisKeys> &galoisKeys);
+                   std::unique_ptr<seal::GaloisKeys> &galoisKeys,
+                   std::unique_ptr<seal::RelinKeys> &relinKeys);
 #endif
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_MOCKUP_CLASSES_CIPHERTEXT_H_
