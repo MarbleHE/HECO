@@ -710,7 +710,7 @@ void EvaluationAlgorithms::genLaplacianSharpeningAlgorithmAst(Ast &ast) {
   //                     value = value + weightMatrix[i+1][j+1] * img[imgSize*(x+i)+y+j];
   //                 }
   //             }
-  //             img2[imgSize*x+y] = img[imgSize*x+y] - (value/2);
+  //             img2[imgSize*x+y] = 2 * img[imgSize*x+y] - value; //slight adjustment to fit with FHE
   //         }
   //     }
   //     return img2;
@@ -755,10 +755,10 @@ void EvaluationAlgorithms::genLaplacianSharpeningAlgorithmAst(Ast &ast) {
   auto fourthLoopBody = new Block(new VarAssignm("value",
                                                  new OperatorExpr(new Operator(ADDITION),
                                                                   {
-                                                                    new MatrixElementRef(new  Variable("value"), 0,0),
-                                                                   new OperatorExpr(new Operator(MULTIPLICATION),
-                                                                                    {wmTerm,
-                                                                                     imgTerm})})));
+                                                                      new MatrixElementRef(new Variable("value"), 0, 0),
+                                                                      new OperatorExpr(new Operator(MULTIPLICATION),
+                                                                                       {wmTerm,
+                                                                                        imgTerm})})));
   // for (int i = -1; i < 2; ++i)  -- 4th level loop
   auto thirdLoopBody = new Block(new For(new VarDecl("i", -1),
                                          new LogicalExpr(new Variable("i"), SMALLER, new LiteralInt(2)),
@@ -773,8 +773,11 @@ void EvaluationAlgorithms::genLaplacianSharpeningAlgorithmAst(Ast &ast) {
                                       // int value = 0;
                                       new VarDecl("value",
                                                   new Datatype(Types::INT, true),
-                                                  new LiteralInt(new Matrix<int>(std::vector<std::vector<int>>(1, std::vector<int>(1))))
-                                          ),
+                                                  new LiteralInt(new Matrix<int>(std::vector<std::vector<int>>(1,
+                                                                                                               std::vector<
+                                                                                                                   int>(
+                                                                                                                   1))))
+                                      ),
                                       // for (int j = -1; j < 2; ++j) {...}  -- 3rd level loop
                                       new For(new VarDecl("j", -1),
                                               new LogicalExpr(new Variable("j"), SMALLER, new LiteralInt(2)),
@@ -795,20 +798,21 @@ void EvaluationAlgorithms::genLaplacianSharpeningAlgorithmAst(Ast &ast) {
                                                                                   new Variable("y")})),
                                                         new OperatorExpr(
                                                             new Operator(SUBTRACTION),
-                                                            {new MatrixElementRef(new Variable("img"),
-                                                                                  new LiteralInt(0),
-                                                                                  new OperatorExpr(
-                                                                                      new Operator(ADDITION),
-                                                                                      {new OperatorExpr(
-                                                                                          new Operator(MULTIPLICATION),
-                                                                                          {new Variable("imgSize"),
-                                                                                           new Variable("x")}),
-                                                                                       new Variable("y")})),
-
-                                                             new OperatorExpr(
-                                                                 new Operator(DIVISION),
-                                                                 { new MatrixElementRef(new  Variable("value"), 0,0),
-                                                                  new LiteralInt(2)})}))});
+                                                            {new OperatorExpr(
+                                                                new Operator(MULTIPLICATION),
+                                                                {
+                                                                    new MatrixElementRef(new Variable("img"),
+                                                                                         new LiteralInt(0),
+                                                                                         new OperatorExpr(
+                                                                                             new Operator(ADDITION),
+                                                                                             {new OperatorExpr(
+                                                                                                 new Operator(
+                                                                                                     MULTIPLICATION),
+                                                                                                 {new Variable("imgSize"),
+                                                                                                  new Variable("x")}),
+                                                                                              new Variable("y")})),
+                                                                    new LiteralInt(2)}),
+                                                             new MatrixElementRef(new Variable("value"), 0, 0)}))});
 
   // for (int y = 1; y < imgSize - 1; ++y)  -- 2nd level loop
   auto firstLoopBody = new Block(new For(new VarDecl("y", 1),
