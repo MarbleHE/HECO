@@ -1276,6 +1276,10 @@ void setup_context(std::shared_ptr<seal::SEALContext> &context,
 }
 
 void EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmBatched(VecInt2D img) {
+  // time measurements
+  std::chrono::microseconds tTotal;
+  auto tStart = std::chrono::high_resolution_clock::now();
+
   setup_context(context, secretKey, publicKey, galoisKeys);
   auto encoder = seal::BatchEncoder(context);
   auto encryptor = seal::Encryptor(context, *publicKey, *secretKey); //secret Key encryptor is more efficient
@@ -1317,21 +1321,27 @@ void EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmBatched(VecInt2D
   // Sum up all the ctxts
   seal::Ciphertext res_ctxt(context);
   evaluator.add_many(img_ctxts, res_ctxt);
+
+  auto tEnd = std::chrono::high_resolution_clock::now();
+  tTotal = std::chrono::duration_cast<std::chrono::microseconds>(tEnd - tStart);
+  std::cout << "Total: " << tTotal.count() << std::endl;
 }
 
 void EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmNaive(VecInt2D img) {
+  // time measurements
+  std::chrono::microseconds tTotal;
+  auto tStart = std::chrono::high_resolution_clock::now();
+
   setup_context(context, secretKey, publicKey, galoisKeys);
   auto encoder = seal::BatchEncoder(context);
   auto encryptor = seal::Encryptor(context, *publicKey, *secretKey); //secret Key encryptor is more efficient
 
-  // time measurements
-  std::chrono::microseconds tEnc;
+
 
   // Encrypt input (very inefficiently)
   std::vector<std::vector<seal::Ciphertext>>
       img_ctxt(img.size(), std::vector<seal::Ciphertext>(img.at(0).size(), seal::Ciphertext(context)));
 
-  auto tStart = std::chrono::high_resolution_clock::now();
   for (int x = 0; x < img.size(); ++x) {
     for (int y = 0; y < img.at(x).size(); ++y) {
       seal::Plaintext p;
@@ -1339,9 +1349,6 @@ void EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmNaive(VecInt2D i
       encryptor.encrypt(p, img_ctxt[x][y]);
     }
   }
-  auto tEnd = std::chrono::high_resolution_clock::now();
-  tEnc = std::chrono::duration_cast<std::chrono::microseconds>(tEnd - tStart);
-  std::cout << "Encryption: " << tEnc.count() << std::endl;
 
   // Compute sharpening filter
   auto evaluator = seal::Evaluator(context);
@@ -1381,10 +1388,13 @@ void EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmNaive(VecInt2D i
       std::vector<int64_t> output;
       decryptor.decrypt(img2_ctxt[k][h], ptxt);
       encoder.decode(ptxt, output);
-      std::cout << output[0] << " ";
+//      std::cout << output[0] << " ";
     }
-    std::cout << std::endl;
+//    std::cout << std::endl;
   }
 
+  auto tEnd = std::chrono::high_resolution_clock::now();
+  tTotal = std::chrono::duration_cast<std::chrono::microseconds>(tEnd - tStart);
+  std::cout << "Total: " << tTotal.count() << std::endl;
 }
 #endif
