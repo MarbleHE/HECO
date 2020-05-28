@@ -752,7 +752,7 @@ void EvaluationAlgorithms::genLaplacianSharpeningAlgorithmAst(Ast &ast) {
                                                             {new Variable("y"),
                                                              new Variable("j")})}));
 
-  auto fourthLoopBody = new Block(new VarAssignm("value",
+  auto fourthLoopBody = new Block(new MatrixAssignm(new MatrixElementRef(new Variable("value"), 0, 0),
                                                  new OperatorExpr(new Operator(ADDITION),
                                                                   {
                                                                       new MatrixElementRef(new Variable("value"), 0, 0),
