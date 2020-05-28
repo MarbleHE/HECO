@@ -132,6 +132,7 @@ void EvaluationVisitor::visit(CallExternal &elem) {
 
 void EvaluationVisitor::visit(Function &elem) {
   // visit all statements of the Function's body in order of execution
+  //TODO: Must visit block for correct scoping!
   for (size_t i = 0; i < elem.getBodyStatements().size(); i++) {
     elem.getBodyStatements().at(i)->accept(*this);
   }
@@ -324,6 +325,7 @@ void EvaluationVisitor::visit(MatrixAssignm &elem) {
     auto vec = getOnlyEvaluationResult(results.top())->castTo<AbstractLiteral>();
     variableValuesForEvaluation[mx->getIdentifier()]->getMatrix()->appendVectorAt(rowIdx, vec->getMatrix());
   }
+  results.pop();
 }
 
 void EvaluationVisitor::visit(VarAssignm &elem) {

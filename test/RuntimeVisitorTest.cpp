@@ -138,7 +138,7 @@ TEST(RuntimeVisitorTests, rtCheckUsingExplicitAst) { /* NOLINT */
 
   // execute the plaintext algorithm to know the expected result
   auto expectedResult = runLaplacianSharpeningFilterModified(*imgData, imgSize);
-  Ciphertext ct = Ciphertext(expectedResult);
+//  Ciphertext ct = Ciphertext(expectedResult);
 
   // perform the actual execution by running the RuntimeVisitor
   EvaluationVisitor rt({{"img", new LiteralInt(imgData)}, {"imgSize", new LiteralInt(imgSize)}});
@@ -156,11 +156,11 @@ TEST(RuntimeVisitorTests, rtCheckUsingExplicitAst) { /* NOLINT */
 //  }
   auto retLits = rt.getResults();
   std::vector<int> retVal;
-  for (auto &l: retLits) {
-    if (auto m = l->getMatrix()->getElementAt(0, 0)) {
-      retVal.push_back(m->castTo<LiteralInt>()->getValue());
+  for (auto &e: retLits[0]->getMatrix()->castTo<Matrix<AbstractExpr*>>()->values[0]) {
+    if (e) {
+      retVal.push_back(e->castTo<LiteralInt>()->getValue());
     } else {
-      retVal.push_back(-1);
+      retVal.push_back(0);
     }
   }
 
@@ -168,8 +168,8 @@ TEST(RuntimeVisitorTests, rtCheckUsingExplicitAst) { /* NOLINT */
   // FIXME: Some of the values are not equal.. this must be investigated further, not clear yet why.
   //  Cause for some of the mismatches is that original algorithm does not compute image's border values.
   // TODO: Check indices
-  for (int i = imgSize + 1; i < imgSize + 1 + (imgSize - 2)*(imgSize - 2); ++i) {
-    EXPECT_EQ(retVal[i], ct.getElementAt(i))
+  for (int i = 0; i < imgSize*imgSize; ++i) {
+    EXPECT_EQ(retVal[i], expectedResult[i])
               << "Expected result and plaintext result mismatch at i=" << i;
   }
 }
