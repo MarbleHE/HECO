@@ -161,7 +161,9 @@ int main() {
   std::iota(vec.begin(), vec.end(), 0);
   std::vector<std::vector<int>> img(imageSize, vec);
 #ifdef HAVE_SEAL_BFV
-  EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmNaive(img);
+//  EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmNaive(img);
+  EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmBatched(img);
+
 #endif
 
   return 0;

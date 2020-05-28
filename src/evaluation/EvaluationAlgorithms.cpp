@@ -1278,7 +1278,7 @@ void setup_context(std::shared_ptr<seal::SEALContext> &context,
 void EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmBatched(VecInt2D img) {
   setup_context(context, secretKey, publicKey, galoisKeys);
   auto encoder = seal::BatchEncoder(context);
-  auto encryptor = seal::Encryptor(context, *secretKey); //secret Key encryptor is more efficient
+  auto encryptor = seal::Encryptor(context, *publicKey, *secretKey); //secret Key encryptor is more efficient
 
   // Encrypt input
   std::vector<int64_t> img_as_vec;
@@ -1290,8 +1290,8 @@ void EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmBatched(VecInt2D
   }
   seal::Plaintext img_ptxt;
   encoder.encode(img_as_vec, img_ptxt);
-  seal::Ciphertext img_ctxt;
-  encryptor.encrypt(img_ptxt, img_ctxt);
+  seal::Ciphertext img_ctxt(context);
+  encryptor.encrypt_symmetric(img_ptxt, img_ctxt);
 
 
   // Compute sharpening filter
@@ -1303,17 +1303,19 @@ void EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmBatched(VecInt2D
   std::vector<size_t> rotations =
       {0, 1, 2, img.size(), img.size() + 1, img.size() + 2, 2*img.size(), 2*img.size() + 1, 2*img.size() + 2};
   seal::Plaintext w_ptxt;
-  std::vector<seal::Ciphertext> img_ctxts;
+  std::vector<seal::Ciphertext> img_ctxts(img.size(), seal::Ciphertext(context));
   img_ctxts.reserve(weights.size());
   for (size_t i = 0; i < weights.size(); ++i) {
     img_ctxts[i] = (i==0) ? std::move(img_ctxt) : img_ctxts[0]; //move for i == 0 saves one ctxt copy
-    evaluator.rotate_vector_inplace(img_ctxts[i], (int) rotations[i], *galoisKeys);
+    evaluator.rotate_rows_inplace(img_ctxts[i], (int) rotations[i], *galoisKeys);
+//    seal::Ciphertext dst(context);
+//    evaluator.rotate_vector(img_ctxts[i], (int) rotations[i], *galoisKeys, dst);
     encoder.encode(std::vector<int64_t>(img_as_vec.size(), weights[i]), w_ptxt);
     evaluator.multiply_plain_inplace(img_ctxts[i], w_ptxt);
   }
 
   // Sum up all the ctxts
-  seal::Ciphertext res_ctxt;
+  seal::Ciphertext res_ctxt(context);
   evaluator.add_many(img_ctxts, res_ctxt);
 }
 
@@ -1379,8 +1381,9 @@ void EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmNaive(VecInt2D i
       std::vector<int64_t> output;
       decryptor.decrypt(img2_ctxt[k][h], ptxt);
       encoder.decode(ptxt, output);
-      std::cout << std::endl;
+      std::cout << output[0] << " ";
     }
+    std::cout << std::endl;
   }
 
 }
