@@ -128,7 +128,7 @@ void RuntimeVisitor::visit(VarDecl &elem) {
 
   //TODO: The RuntimeVisitor currently seems to assume that when a varable is declared non-secret,
   // it will never become secret later!
-
+  
   // if this is a secret variable, create a ciphertext object in varValues
   if (elem.getDatatype()->isEncrypted()) {
     if (elem.getInitializer()!=nullptr) {
@@ -228,15 +228,6 @@ void RuntimeVisitor::visit(MatrixAssignm &elem) {
       if (varIdentifier=="value") {
         // TODO: Once var assignms have same logic as matrix assign, we can remove this ugly eval hack
         reqRotations = determineRequiredRotations(existingRotations, {targetSlot.second}, targetSlot.second);
-        if (precomputedCiphertexts.find(MatrixElementAccess(targetSlot.first, targetSlot.second, "value"))
-            ==precomputedCiphertexts.end()) {
-          if (varValues.find("value")==varValues.end()) {
-            throw std::logic_error("Not sure what to put into the precomputedCiphertexts");
-          }
-          //TODO: PURE GUESSING TO MAKE IT COMPILE
-          precomputedCiphertexts
-              .emplace(MatrixElementAccess(targetSlot.first, targetSlot.second, "value"), varValues.find("value")->second.find(targetSlot.second));
-        }
       } else {
         reqRotations = determineRequiredRotations(existingRotations, accessedIndices, targetSlot.second);
       }
@@ -456,7 +447,7 @@ void RuntimeVisitor::visit(OperatorExpr &elem) {
       } else if (dynamic_cast<OperatorExpr *>(opnd) || dynamic_cast<MatrixElementRef *>(opnd)) {
         // in this case the OperatorExpr/MatrixElementRef was visited before and its Ciphertext was pushed to
         // intermedResult
-        if (!intermedResultReversed.back()) {
+        if(!intermedResultReversed.back()) {
           throw std::logic_error("A result is missing and we don't know why!");
         }
         operands.push_back(intermedResultReversed.back());
