@@ -855,7 +855,7 @@ void EvaluationAlgorithms::genLaplacianSharpeningAlgorithmAstAfterCtes(Ast &ast)
   func->addParameter(new FunctionParameter(new Datatype(Types::INT, true), new Variable("img")));
   func->addParameter(new FunctionParameter(new Datatype(Types::INT, false), new Variable("imgSize")));
 
-  func->addStatement(new VarDecl("img2", new Datatype(Types::INT)));
+  func->addStatement(new VarDecl("img2", new Datatype(Types::INT, true)));
 
   // a helper to generate img[imgSize*(x-i)+y+j] terms
   auto createImgIdx = [](int i, int j) -> AbstractExpr * {
