@@ -126,6 +126,9 @@ void RuntimeVisitor::visit(VarDecl &elem) {
 
   elem.accept(*ev);
 
+  //TODO: The RuntimeVisitor currently seems to assume that when a varable is declared non-secret,
+  // it will never become secret later!
+  
   // if this is a secret variable, create a ciphertext object in varValues
   if (elem.getDatatype()->isEncrypted()) {
     if (elem.getInitializer()!=nullptr) {
