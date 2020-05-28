@@ -36,18 +36,26 @@ class Ciphertext {
   int offsetOfFirstElement{0};
 
   /// the number of elements in the ciphertext starting at position offsetOfFirstElement
-  int numCiphertextElements{0};
+  int numCiphertextElements{DEFAULT_NUM_SLOTS};
 
   Ciphertext sumAndRotate(int initialRotationFactor);
 
  public:
-  Ciphertext() = default;
+  ~Ciphertext() = default;
+
+  Ciphertext();
 
   explicit Ciphertext(std::vector<double> data, int numCiphertextSlots = DEFAULT_NUM_SLOTS);
 
   explicit Ciphertext(double scalar, int numCiphertextSlots = DEFAULT_NUM_SLOTS);
 
   Ciphertext(const Ciphertext &ctxt); // copy constructor
+
+  Ciphertext(Ciphertext &&ctxt); //move constructor
+
+  Ciphertext &operator=(const Ciphertext &ctxt); //copy assignment
+
+  Ciphertext &operator=(Ciphertext&& ctxt); //move assignment;
 
   static bool isInteger(double k);
 

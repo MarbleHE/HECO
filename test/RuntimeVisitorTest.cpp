@@ -198,7 +198,8 @@ TEST(RuntimeVisitorTests, rtCheckUsingExplicitOriginalAst) { /* NOLINT */
   //                     value = value + weightMatrix[i+1][j+1] * img[imgSize*(x+i)+y+j];
   //                 }
   //             }
-  //             img2[imgSize*x+y] = img[imgSize*x+y] - (value/2);
+  //             img2[imgSize*x+y] = img[imgSize*x+y] - value/2; //slighly adapted for ints
+                //TODO: Put this into AST, too!
   //         }
   //     }
   //     return img2;

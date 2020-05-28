@@ -353,3 +353,31 @@ void Ciphertext::printCiphertextData() {
 bool Ciphertext::isInteger(double k) {
   return std::floor(k)==k;
 }
+Ciphertext::Ciphertext() {
+  data = std::vector<double>(numCiphertextElements);
+#ifdef HAVE_SEAL_BFV
+  ciphertext = seal::Ciphertext(context);
+#endif
+}
+Ciphertext::Ciphertext(Ciphertext &&ctxt) : data(std::move(ctxt.data)),
+                                            offsetOfFirstElement(ctxt.offsetOfFirstElement),
+                                            numCiphertextElements(ctxt.numCiphertextElements)
+#ifdef HAVE_SEAL_BFV
+    , ciphertext(std::move(ctxt.ciphertext))
+#endif
+{}
+
+Ciphertext &Ciphertext::operator=(const Ciphertext &ctxt) {
+  ciphertext = seal::Ciphertext(ctxt.ciphertext);
+  offsetOfFirstElement = ctxt.offsetOfFirstElement;
+  numCiphertextElements = ctxt.numCiphertextElements;
+  data = ctxt.data;
+  return *this;
+}
+Ciphertext &Ciphertext::operator=(Ciphertext &&ctxt) {
+  ciphertext = std::move(seal::Ciphertext(ctxt.ciphertext));
+  offsetOfFirstElement =  std::move(ctxt.offsetOfFirstElement);
+  numCiphertextElements = std::move(ctxt.numCiphertextElements);
+  data = std::move(ctxt.data);
+  return *this;
+}
