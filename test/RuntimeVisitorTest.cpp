@@ -148,3 +148,106 @@ TEST(RuntimeVisitorTests, rtCheckUsingExplicitAst) { /* NOLINT */
     }
   }
 }
+//todo: test if original and modified return result, assuming you divide modified's result by two
+TEST(RuntimeVisitorTests, sharpeningSanityTest) {
+  /// Image size
+  size_t imgSize = 32;
+
+  // a img_size x img_size image encoded as single img_size^2 elements row vector
+  auto imgData = genRandomImageData(imgSize, Ciphertext::DEFAULT_NUM_SLOTS);
+
+  std::vector<std::vector<int>> imgVecVec;
+  for (size_t i = 0; i < imgSize; ++i) {
+    imgVecVec.push_back(std::vector<int>());
+    for (size_t j = 0; j < imgSize; ++j) {
+      auto e = imgData->getElementAt(0, i * imgSize +  j);
+      if (e) {
+        imgVecVec[i].push_back(e->castTo<LiteralInt>()->getValue());
+      } else {
+        imgVecVec[i].push_back(0);
+      }
+    }
+  }
+
+  auto optimizedResult = EvaluationAlgorithms::runLaplacianSharpeningFilterModified(*imgData, imgSize);
+
+  auto originalResult = EvaluationAlgorithms::runLaplacianSharpeningAlgorithm(imgVecVec);
+
+  //TODO: Because of an integer divison in the orignial algorithm, some are off-by-one
+  for (int i = 0; i < imgSize*imgSize; ++i) {
+    auto row = i/imgSize;
+    auto col = i%imgSize;
+    EXPECT_EQ(optimizedResult[i], originalResult[row][col]*2)
+              << "optimized result and original result mismatch at i=" << i;
+  }
+
+}
+
+TEST(RuntimeVisitorTests, rtCheckUsingExplicitOriginalAst) { /* NOLINT */
+  // -- source code --
+  // /// \param img A quadratic image given as row vector (single row matrix) consisting of concatenated rows.
+  // /// \param imgSize The image's size. Assumes that img is quadratic, i.e., img has dimension (imgSize, imgSize).
+  // VecInt2D runLaplacianSharpeningAlgorithm(Vector<secret_int> img, int imgSize) {
+  //     Vector<int> img2;
+  //     Matrix<int> weightMatrix = [1 1 1; 1 -8 1; 1 1 1];
+  //     for (int x = 1; x < imgSize - 1; ++x) {
+  //         for (int y = 1; y < imgSize - 1; ++y) {
+  //             int value = 0;
+  //             for (int j = -1; j < 2; ++j) {
+  //                 for (int i = -1; i < 2; ++i) {
+  //                     value = value + weightMatrix[i+1][j+1] * img[imgSize*(x+i)+y+j];
+  //                 }
+  //             }
+  //             img2[imgSize*x+y] = img[imgSize*x+y] - (value/2);
+  //         }
+  //     }
+  //     return img2;
+  // }
+  Ast ast;
+  EvaluationAlgorithms::genLaplacianSharpeningAlgorithmAst(ast);
+
+  /// Image size
+  size_t imgSize = 32;
+
+  // a img_size x img_size image encoded as single img_size^2 elements row vector
+  auto imgData = genRandomImageData(imgSize, Ciphertext::DEFAULT_NUM_SLOTS);
+
+  // execute the plaintext algorithm to know the expected result
+  auto expectedResult = EvaluationAlgorithms::runLaplacianSharpeningFilterModified(*imgData, imgSize);
+//  Ciphertext ct = Ciphertext(expectedResult);
+
+  // perform the actual execution by running the RuntimeVisitor
+  RuntimeVisitor rt({{"img", new LiteralInt(imgData)}, {"imgSize", new LiteralInt(imgSize)}});
+  rt.visit(ast);
+
+  // retrieve the RuntimeVisitor result
+  auto retVal = rt.getReturnValues().front();
+  std::vector<std::int64_t> vals = retVal->decryptAndDecode();
+
+  // compare: our shadow plaintext computation vs. computations made on the SEAL ciphertext
+  EXPECT_EQ(retVal->getNumCiphertextSlots(), vals.size());
+
+  for (int i = 0; i < imgSize*imgSize; ++i) {
+    EXPECT_EQ(vals.at(i), retVal->getElementAt(i)) << "Plaintext result and ciphertext result mismatch at i=" << i;
+  }
+//  auto retLits = rt.getResults();
+//  std::vector<int> retVal;
+//  for (auto &e: retLits[0]->getMatrix()->castTo<Matrix<AbstractExpr*>>()->values[0]) {
+//    if (e) {
+//      retVal.push_back(e->castTo<LiteralInt>()->getValue());
+//    } else {
+//      retVal.push_back(0);
+//    }
+//  }
+
+  for (int i = 0; i < imgSize*imgSize; ++i) {
+    auto row = i/imgSize;
+    auto col = i%imgSize;
+    if (row==0 || col==0 || row==imgSize - 1 || col==imgSize - 1) {
+      // DON'T CARE
+    } else {
+      EXPECT_EQ(retVal->getElementAt(i), expectedResult[i])
+                << "Expected result and plaintext result mismatch at i=" << i;
+    }
+  }
+}

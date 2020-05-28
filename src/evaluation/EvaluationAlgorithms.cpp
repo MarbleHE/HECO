@@ -678,7 +678,7 @@ void EvaluationAlgorithms::genPolynomialRegressionAstAfterCtes(Ast &ast) {
 
 VecInt2D EvaluationAlgorithms::runLaplacianSharpeningAlgorithm(VecInt2D img) {
   VecInt2D weightMatrix = {{1, 1, 1}, {1, -8, 1}, {1, 1, 1}};
-  VecInt2D img2(img);
+  VecInt2D img2(img.size(), std::vector<int>(img.size())); //TODO: What is actually CORRECT for laplacian sharpening?
   for (int x = 1; x < img.size() - 1; ++x) {
     for (int y = 1; y < img.at(x).size() - 1; ++y) {
       int value = 0;
@@ -688,7 +688,7 @@ VecInt2D EvaluationAlgorithms::runLaplacianSharpeningAlgorithm(VecInt2D img) {
           value = value + weightMatrix.at(i + 1).at(j + 1)*img.at(x + i).at(y + j);
         }
       }
-      img2[x][y] = img.at(x).at(y) - (value/2);
+      img2[x][y] = img.at(x).at(y) - (value/2); //FIXME: This is an integer divison
     }
   }
   return img2;
