@@ -24,6 +24,7 @@
 #include <ast_opt/ast/Return.h>
 #include <ast_opt/ast/Rotate.h>
 #include <ast_opt/mockup_classes/Ciphertext.h>
+#include <ast_opt/visitor/PrintVisitor.h>
 
 typedef std::vector<std::vector<int>> VecInt2D;
 
@@ -723,7 +724,7 @@ void EvaluationAlgorithms::genLaplacianSharpeningAlgorithmAst(Ast &ast) {
 //  func->addStatement(new VarDecl("img2", new Datatype(Types::INT, true),
 //                                 new LiteralInt(
 //                                     new Matrix<int>(std::vector<std::vector<int>>(1, std::vector<int>(1024))))));
-  func->addStatement(new VarDecl("img2", new Datatype(Types::INT,true)));
+  func->addStatement(new VarDecl("img2", new Datatype(Types::INT, true)));
 
   // Matrix<int> weightMatrix = [1 1 1; 1 -8 1; 1 1 1];  –- row-wise concatenation of the original matrix
   func->addStatement(new VarDecl("weightMatrix", new Datatype(Types::INT),
@@ -753,7 +754,8 @@ void EvaluationAlgorithms::genLaplacianSharpeningAlgorithmAst(Ast &ast) {
 
   auto fourthLoopBody = new Block(new VarAssignm("value",
                                                  new OperatorExpr(new Operator(ADDITION),
-                                                                  {new Variable("value"),
+                                                                  {
+                                                                    new MatrixElementRef(new  Variable("value"), 0,0),
                                                                    new OperatorExpr(new Operator(MULTIPLICATION),
                                                                                     {wmTerm,
                                                                                      imgTerm})})));
@@ -769,7 +771,10 @@ void EvaluationAlgorithms::genLaplacianSharpeningAlgorithmAst(Ast &ast) {
   // includes the 3rd level loop
   auto secondLoopBody = new Block({
                                       // int value = 0;
-                                      new VarDecl("value", 0),
+                                      new VarDecl("value",
+                                                  new Datatype(Types::INT, true),
+                                                  new LiteralInt(new Matrix<int>(std::vector<std::vector<int>>(1, std::vector<int>(1))))
+                                          ),
                                       // for (int j = -1; j < 2; ++j) {...}  -- 3rd level loop
                                       new For(new VarDecl("j", -1),
                                               new LogicalExpr(new Variable("j"), SMALLER, new LiteralInt(2)),
@@ -802,7 +807,7 @@ void EvaluationAlgorithms::genLaplacianSharpeningAlgorithmAst(Ast &ast) {
 
                                                              new OperatorExpr(
                                                                  new Operator(DIVISION),
-                                                                 {new Variable("value"),
+                                                                 { new MatrixElementRef(new  Variable("value"), 0,0),
                                                                   new LiteralInt(2)})}))});
 
   // for (int y = 1; y < imgSize - 1; ++y)  -- 2nd level loop
