@@ -1326,7 +1326,8 @@ void EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmNaive(VecInt2D i
   std::chrono::microseconds tEnc;
 
   // Encrypt input (very inefficiently)
-  std::vector<std::vector<seal::Ciphertext>> img_ctxt(img.size(), std::vector<seal::Ciphertext>(img.at(0).size(), seal::Ciphertext(context)));
+  std::vector<std::vector<seal::Ciphertext>>
+      img_ctxt(img.size(), std::vector<seal::Ciphertext>(img.at(0).size(), seal::Ciphertext(context)));
 
   auto tStart = std::chrono::high_resolution_clock::now();
   for (int x = 0; x < img.size(); ++x) {
@@ -1345,7 +1346,9 @@ void EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmNaive(VecInt2D i
 
   // Naive way: very similar to plain C++
   VecInt2D weightMatrix = {{1, 1, 1}, {1, -8, 1}, {1, 1, 1}};
-  std::vector<std::vector<seal::Ciphertext>> img2_ctxt;
+  // This time, we actually want "default initialized" Ctxts since they'll be overriden anyway
+  std::vector<std::vector<seal::Ciphertext>> img2_ctxt
+      (std::vector<std::vector<seal::Ciphertext>>(img.size(), std::vector<seal::Ciphertext>(img.at(0).size())));
   for (int x = 1; x < img.size() - 1; ++x) {
     for (int y = 1; y < img.at(x).size() - 1; ++y) {
       seal::Ciphertext value(context);
@@ -1355,7 +1358,7 @@ void EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmNaive(VecInt2D i
           seal::Plaintext w;
           encoder.encode(std::vector<int64_t>(1, weightMatrix.at(i + 1).at(j + 1)), w);
           seal::Ciphertext &temp = img_ctxt.at(x + i).at(y + j);
-//          evaluator.multiply_plain_inplace(temp, w);
+          evaluator.multiply_plain_inplace(temp, w);
           evaluator.add_inplace(value, temp);
         }
       }
