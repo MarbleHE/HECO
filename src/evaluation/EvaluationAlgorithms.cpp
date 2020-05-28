@@ -1271,7 +1271,7 @@ void setup_context(std::shared_ptr<seal::SEALContext> &context,
 
     secretKey = std::make_unique<seal::SecretKey>(keyGenerator.secret_key());
     publicKey = std::make_unique<seal::PublicKey>(keyGenerator.public_key());
-    galoisKeys = std::make_unique<seal::GaloisKeys>(keyGenerator.galois_keys());
+    galoisKeys = std::make_unique<seal::GaloisKeys>(keyGenerator.galois_keys_local());
   }
 }
 
@@ -1320,19 +1320,25 @@ void EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmBatched(VecInt2D
 void EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmNaive(VecInt2D img) {
   setup_context(context, secretKey, publicKey, galoisKeys);
   auto encoder = seal::BatchEncoder(context);
-  auto encryptor = seal::Encryptor(context, *secretKey); //secret Key encryptor is more efficient
+  auto encryptor = seal::Encryptor(context, *publicKey, *secretKey); //secret Key encryptor is more efficient
+
+  // time measurements
+  std::chrono::microseconds tEnc;
 
   // Encrypt input (very inefficiently)
-  std::vector<std::vector<seal::Ciphertext>> img_ctxt;
+  std::vector<std::vector<seal::Ciphertext>> img_ctxt(img.size(), std::vector<seal::Ciphertext>(img.at(0).size()));
 
+  auto tStart = std::chrono::high_resolution_clock::now();
   for (int x = 1; x < img.size() - 1; ++x) {
     for (int y = 1; y < img.at(x).size() - 1; ++y) {
       seal::Plaintext p;
       encoder.encode(std::vector<int64_t>(1, img[x][y]), p);
       encryptor.encrypt(p, img_ctxt[x][y]);
-
     }
   }
+  auto tEnd = std::chrono::high_resolution_clock::now();
+  tEnc = std::chrono::duration_cast<std::chrono::microseconds>(tEnd - tStart);
+  std::cout << "Encryption: " << tEnc.count() << std::endl;
 
   // Compute sharpening filter
   auto evaluator = seal::Evaluator(context);
@@ -1348,9 +1354,8 @@ void EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmNaive(VecInt2D i
 //          std::cout << x << ", " << y << ", " << i << ", " << j << std::endl;
           seal::Plaintext w;
           encoder.encode(std::vector<int64_t>(1, weightMatrix.at(i + 1).at(j + 1)), w);
-          seal::Ciphertext temp;
-          temp = img_ctxt.at(x + i).at(y + j);
-          evaluator.multiply_plain_inplace(temp, w);
+          seal::Ciphertext &temp = img_ctxt.at(x + i).at(y + j);
+//          evaluator.multiply_plain_inplace(temp, w);
           evaluator.add_inplace(value, temp);
         }
       }
@@ -1360,6 +1365,16 @@ void EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmNaive(VecInt2D i
       evaluator.multiply_plain_inplace(img2_ctxt[x][y], two);
       evaluator.sub_inplace(img2_ctxt[x][y], value);
     }
+  }
+
+  auto decryptor = seal::Decryptor(context, *secretKey);
+  for (const auto &rowVec : img2_ctxt) {
+    for (const auto &elem : rowVec) {
+      seal::Plaintext ptxt;
+      decryptor.decrypt(elem, ptxt);
+      std::cout << ptxt.to_string() << " ";
+    }
+    std::cout << std::endl;
   }
 }
 #endif
