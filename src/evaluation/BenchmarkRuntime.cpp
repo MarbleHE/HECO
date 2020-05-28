@@ -156,12 +156,15 @@ int main() {
   // │  SEAL-NATIVE IMPLEMENTATIONS
   //  ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
 
-
- // OPTIMIZED
-  EvaluationAlgorithms::genLaplacianSharpeningAlgorithmAstAfterCtes(ast);
-
   /// Image size
   size_t imgSize = 128;
+  std::cout << "EVALUATING Laplacian Sharpening on an Image of size " << imgSize << "x" << imgSize <<"." << std::endl;
+
+ // OPTIMIZED
+  std::cout << "OPTIMIZED (RuntimeVisitor):" << std::endl;
+  EvaluationAlgorithms::genLaplacianSharpeningAlgorithmAstAfterCtes(ast);
+
+
 
   // a img_size x img_size image encoded as single img_size^2 elements row vector
   auto imgData = genRandomImageData(imgSize, Ciphertext::DEFAULT_NUM_SLOTS);
@@ -180,6 +183,7 @@ int main() {
   std::cout << duration_us.count() << " μs" << std::endl;
 
 #ifdef HAVE_SEAL_BFV
+  std::cout << "OPTIMIZED (native SEAL):" << std::endl;
   std::vector<int> vec(imgSize);
   std::iota(vec.begin(), vec.end(), 0);
   std::vector<std::vector<int>> img(imgSize, vec);
@@ -193,7 +197,7 @@ int main() {
 
 
   // UNOPTIMIZED
-  std::cout << "UNOPTIMIZED:" << std::endl;
+  std::cout << "UNOPTIMIZED (RuntimeVisitor):" << std::endl;
   EvaluationAlgorithms::genLaplacianSharpeningAlgorithmAst(ast);
 
   // perform the actual execution by running the RuntimeVisitor
@@ -205,6 +209,7 @@ int main() {
   std::cout << duration_us.count() << " μs" << std::endl;
 
 #ifdef HAVE_SEAL_BFV
+  std::cout << "UNOPTIMIZED (native SEAL):" << std::endl;
   t_start = std::chrono::high_resolution_clock::now();
   EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmNaive(img);
   t_end = std::chrono::high_resolution_clock::now();

@@ -1241,9 +1241,9 @@ std::unique_ptr<seal::GaloisKeys> galoisKeys = nullptr;
 std::shared_ptr<seal::SEALContext> context;
 
 void EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmBatched(VecInt2D img) {
-  // time measurements
-  std::chrono::microseconds tTotal;
-  auto tStart = std::chrono::high_resolution_clock::now();
+//  // time measurements
+//  std::chrono::microseconds tTotal;
+//  auto tStart = std::chrono::high_resolution_clock::now();
 
   setup_context(context, secretKey, publicKey, galoisKeys);
   auto encoder = seal::BatchEncoder(context);
@@ -1287,15 +1287,15 @@ void EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmBatched(VecInt2D
   seal::Ciphertext res_ctxt(context);
   evaluator.add_many(img_ctxts, res_ctxt);
 
-  auto tEnd = std::chrono::high_resolution_clock::now();
-  tTotal = std::chrono::duration_cast<std::chrono::microseconds>(tEnd - tStart);
-  std::cout << "Total: " << tTotal.count() << std::endl;
+//  auto tEnd = std::chrono::high_resolution_clock::now();
+//  tTotal = std::chrono::duration_cast<std::chrono::microseconds>(tEnd - tStart);
+//  std::cout << "Total: " << tTotal.count() << std::endl;
 }
 
 void EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmNaive(VecInt2D img) {
   // time measurements
-  std::chrono::microseconds tTotal;
-  auto tStart = std::chrono::high_resolution_clock::now();
+//  std::chrono::microseconds tTotal;
+//  auto tStart = std::chrono::high_resolution_clock::now();
 
   setup_context(context, secretKey, publicKey, galoisKeys);
   auto encoder = seal::BatchEncoder(context);
@@ -1366,9 +1366,9 @@ void EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmNaive(VecInt2D i
 //    std::cout << std::endl;
   }
 
-  auto tEnd = std::chrono::high_resolution_clock::now();
-  tTotal = std::chrono::duration_cast<std::chrono::microseconds>(tEnd - tStart);
-  std::cout << "Total: " << tTotal.count() << std::endl;
+//  auto tEnd = std::chrono::high_resolution_clock::now();
+//  tTotal = std::chrono::duration_cast<std::chrono::microseconds>(tEnd - tStart);
+//  std::cout << "Total: " << tTotal.count() << std::endl;
 }
 std::vector<double> EvaluationAlgorithms::runLaplacianSharpeningFilterModified(Matrix<int> &img, int imgSize) {
   // initialize img2 as (1, imgSize*imgSize) matrix
