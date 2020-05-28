@@ -447,6 +447,9 @@ void RuntimeVisitor::visit(OperatorExpr &elem) {
       } else if (dynamic_cast<OperatorExpr *>(opnd) || dynamic_cast<MatrixElementRef *>(opnd)) {
         // in this case the OperatorExpr/MatrixElementRef was visited before and its Ciphertext was pushed to
         // intermedResult
+        if(!intermedResultReversed.back()) {
+          throw std::logic_error("A result is missing and we don't know why!");
+        }
         operands.push_back(intermedResultReversed.back());
         intermedResultReversed.pop_back();
       } else {
