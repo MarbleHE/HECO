@@ -8,11 +8,17 @@
 #include "ast_opt/evaluation/BenchmarkRuntime.h"
 #include "../../test/AstTestingGenerator.h"
 #include <filesystem>
+#include <sys/stat.h>
 
 namespace fs = std::filesystem;
 
 #define TRUE "1"
 #define FALSE "0"
+
+inline bool fileExists(const std::string &name) {
+  struct stat buffer;
+  return (stat(name.c_str(), &buffer)==0);
+}
 
 int main(int argc, char *argv[]) {
 
@@ -36,9 +42,10 @@ int main(int argc, char *argv[]) {
     std::stringstream outputFileName;
     outputFileName << "result_" << prog.get<std::string>() << ".csv";
     fs::path full_path = fs::path(resultDirectory)/fs::path(outputFileName.str());
-    std::ofstream resultFile(full_path);
+    bool fileExistedBefore = fileExists(full_path);
+    std::ofstream resultFile(full_path, std::ios_base::app);
     // write header
-    resultFile << "run,imgSize,timeUs" << std::endl;
+    if (!fileExistedBefore) resultFile << "run,imgSize,timeUs" << std::endl;
 
     for (int i = 1; i <= numTestruns; ++i) {
       for (int imgSize : imageSizes) {
