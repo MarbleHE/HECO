@@ -1254,10 +1254,6 @@ std::unique_ptr<seal::RelinKeys> relinKeys = nullptr;
 std::shared_ptr<seal::SEALContext> context;
 
 void EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmBatched(VecInt2D img) {
-//  // time measurements
-//  std::chrono::microseconds tTotal;
-//  auto tStart = std::chrono::high_resolution_clock::now();
-
   setup_context(context, secretKey, publicKey, galoisKeys, relinKeys);
   auto encoder = seal::BatchEncoder(context);
   auto encryptor = seal::Encryptor(context, *publicKey, *secretKey); //secret Key encryptor is more efficient
@@ -1299,17 +1295,9 @@ void EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmBatched(VecInt2D
   // Sum up all the ctxts
   seal::Ciphertext res_ctxt(context);
   evaluator.add_many(img_ctxts, res_ctxt);
-
-//  auto tEnd = std::chrono::high_resolution_clock::now();
-//  tTotal = std::chrono::duration_cast<std::chrono::microseconds>(tEnd - tStart);
-//  std::cout << "Total: " << tTotal.count() << std::endl;
 }
 
 void EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmNaive(VecInt2D img) {
-  // time measurements
-//  std::chrono::microseconds tTotal;
-//  auto tStart = std::chrono::high_resolution_clock::now();
-
   setup_context(context, secretKey, publicKey, galoisKeys, relinKeys);
   auto encoder = seal::BatchEncoder(context);
   auto encryptor = seal::Encryptor(context, *publicKey, *secretKey); //secret Key encryptor is more efficient
@@ -1366,22 +1354,6 @@ void EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmNaive(VecInt2D i
       img2_ctxt = temp;
     }
   }
-
-  auto decryptor = seal::Decryptor(context, *secretKey);
-  seal::Plaintext ptxt;
-  std::vector<int64_t> output;
-  decryptor.decrypt(img2_ctxt, ptxt);
-  encoder.decode(ptxt, output);
-  for (int k = 1; k < img.size() - 1; ++k) {
-    for (int h = 1; h < img.size() - 1; ++h) {
-//      std::cout << output[0] << " ";
-    }
-//    std::cout << std::endl;
-  }
-
-//  auto tEnd = std::chrono::high_resolution_clock::now();
-//  tTotal = std::chrono::duration_cast<std::chrono::microseconds>(tEnd - tStart);
-//  std::cout << "Total: " << tTotal.count() << std::endl;
 }
 #endif // HAVE_SEAL_BFV
 
