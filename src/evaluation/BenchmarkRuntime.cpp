@@ -49,8 +49,7 @@ int main(int argc, char *argv[]) {
 
     for (int i = 1; i <= numTestruns; ++i) {
       for (int imgSize : imageSizes) {
-        Ast ast;
-        EvaluationAlgorithms::genLaplacianSharpeningAlgorithmAst(ast);
+
 
         // create random data as image input
         auto imgData = genRandomImageData(imgSize, Ciphertext::DEFAULT_NUM_SLOTS);
@@ -61,6 +60,8 @@ int main(int argc, char *argv[]) {
         // execute benchmark
         auto t_start = std::chrono::high_resolution_clock::now();
         if (prog=="OPT_RV") {
+          Ast ast;
+          EvaluationAlgorithms::genLaplacianSharpeningAlgorithmAstAfterCtes(ast);
           RuntimeVisitor rtv({{"img", new LiteralInt(new Matrix<int>({vec}))}, {"imgSize", new LiteralInt(imgSize)}});
           rtv.visit(ast);
         } else if (prog=="OPT_SEAL") {
@@ -70,6 +71,8 @@ int main(int argc, char *argv[]) {
           throw std::runtime_error("Cannot continue as SEAL could not be found!");
 #endif
         } else if (prog=="UNOPT_RV") {
+          Ast ast;
+          EvaluationAlgorithms::genLaplacianSharpeningAlgorithmAst(ast);
           RuntimeVisitor rtv({{"img", new LiteralInt(new Matrix<int>({vec}))}, {"imgSize", new LiteralInt(imgSize)}});
           rtv.disableBatchingOpt = true;
           rtv.visit(ast);
