@@ -313,7 +313,7 @@ void RuntimeVisitor::visit(MatrixAssignm &elem) {
       elem.accept(*this);
       visitingForEvaluation = ANALYSIS;
     } else {
-#ifndef NDEBUG_
+#ifndef NDEBUG
       std::cout << "Skipping evaluation pass..." << std::endl;
 #endif
     }
