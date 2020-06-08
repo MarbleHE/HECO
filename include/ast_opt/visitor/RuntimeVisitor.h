@@ -75,6 +75,9 @@ enum MatrixAccessMode { READ = 0, WRITE = 1 };
 enum TraversalPass { ANALYSIS, EVALUATION_PLAINTEXT, EVALUATION_CIPHERTEXT };
 
 class RuntimeVisitor : public Visitor {
+ public:
+  /// Toggle to disable all batching optimizations in this function
+  bool disableBatchingOpt = false;
  private:
   // an instance of the EvaluationVisitor to be used to evaluate expressions of the AST
   EvaluationVisitor *ev;

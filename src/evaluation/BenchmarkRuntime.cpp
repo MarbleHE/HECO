@@ -88,7 +88,7 @@ int main() {
   //  ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
 
   /// Image size
-  size_t imgSize = 128;
+  size_t imgSize = 32;
 
   // Timers
   decltype(std::chrono::high_resolution_clock::now()) t_start;
@@ -131,6 +131,7 @@ int main() {
   std::cout << "UNOPTIMIZED (RuntimeVisitor):" << std::endl;
   EvaluationAlgorithms::genLaplacianSharpeningAlgorithmAst(ast);
   RuntimeVisitor rt_original({{"img", new LiteralInt(imgData)}, {"imgSize", new LiteralInt(imgSize)}});
+  rt_original.disableBatchingOpt = true;
   t_start = std::chrono::high_resolution_clock::now();
   rt_original.visit(ast);
   t_end = std::chrono::high_resolution_clock::now();

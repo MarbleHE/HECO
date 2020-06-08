@@ -256,6 +256,12 @@ void RuntimeVisitor::visit(MatrixAssignm &elem) {
 
       // get rotated ciphertexts that already exist for this variable
       auto existingRotations = varValues.at(varIdentifier);
+      //TODO: Because of memory issues, we might have to allow it to discard existing rotations somehow?
+      if (disableBatchingOpt) {
+        auto base_rotation = existingRotations.find(0);
+        existingRotations.clear();
+        existingRotations.insert_or_assign(0, base_rotation->second);
+      }
       // determine the required rotations for this computation
       auto reqRotations = determineRequiredRotations(existingRotations, accessedIndices, targetSlot.second);
 
@@ -302,12 +308,12 @@ void RuntimeVisitor::visit(MatrixAssignm &elem) {
     }
     // re-visit AST and perform actions using recently generated rotated Ciphertexts and the Ciphertext operations
     matrixAccessMap.clear();
-    if (!skipEvaluationPass) {
+    if (disableBatchingOpt || !skipEvaluationPass) {
       visitingForEvaluation = EVALUATION_CIPHERTEXT;
       elem.accept(*this);
       visitingForEvaluation = ANALYSIS;
     } else {
-#ifndef NDEBUG
+#ifndef NDEBUG_
       std::cout << "Skipping evaluation pass..." << std::endl;
 #endif
     }
