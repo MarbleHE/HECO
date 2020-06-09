@@ -1334,7 +1334,11 @@ void EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmNaive(VecInt2D i
           seal::Plaintext w;
           encoder.encode(std::vector<int64_t>(1, weightMatrix.at(i + 1).at(j + 1)), w);
           seal::Ciphertext temp;
-          evaluator.rotate_rows(img_ctxt, (x + i)*img.size() + (y + j), *galoisKeys, temp);
+          int steps = (x + i)*img.size() + (y + j);
+          if (steps >= Ciphertext::DEFAULT_NUM_SLOTS/2) {
+            steps = Ciphertext::DEFAULT_NUM_SLOTS/2 - steps;
+          }
+          evaluator.rotate_rows(img_ctxt, steps, *galoisKeys, temp);
           evaluator.multiply_plain_inplace(temp, w);
           evaluator.add_inplace(value, temp);
         }
