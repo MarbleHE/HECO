@@ -79,6 +79,7 @@ class EvaluationAlgorithms {
 #ifdef HAVE_SEAL_BFV
   static void encryptedLaplacianSharpeningAlgorithmBatched(std::vector<std::vector<int>> img);
   static void encryptedLaplacianSharpeningAlgorithmNaive(std::vector<std::vector<int>> img);
+  static void setUpAndEncryptOnly(std::vector<std::vector<int>> img);
 #endif
 };
 

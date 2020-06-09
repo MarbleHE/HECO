@@ -1253,6 +1253,27 @@ std::unique_ptr<seal::RelinKeys> relinKeys = nullptr;
 /// the seal context, i.e. object that holds params/etc
 std::shared_ptr<seal::SEALContext> context;
 
+
+void EvaluationAlgorithms::setUpAndEncryptOnly(VecInt2D img) {
+  setup_context(context, secretKey, publicKey, galoisKeys, relinKeys);
+  auto encoder = seal::BatchEncoder(context);
+  auto encryptor = seal::Encryptor(context, *publicKey, *secretKey); //secret Key encryptor is more efficient
+
+  // Encrypt input
+  std::vector<int64_t> img_as_vec;
+  img_as_vec.reserve(img.size()*img.size());
+  for (int x = 1; x < img.size() - 1; ++x) {
+    for (int y = 1; y < img.at(x).size() - 1; ++y) {
+      img_as_vec.push_back(img[x][y]);
+    }
+  }
+  seal::Plaintext img_ptxt;
+  encoder.encode(img_as_vec, img_ptxt);
+  seal::Ciphertext img_ctxt(context);
+  encryptor.encrypt_symmetric(img_ptxt, img_ctxt);
+}
+
+
 void EvaluationAlgorithms::encryptedLaplacianSharpeningAlgorithmBatched(VecInt2D img) {
   setup_context(context, secretKey, publicKey, galoisKeys, relinKeys);
   auto encoder = seal::BatchEncoder(context);
