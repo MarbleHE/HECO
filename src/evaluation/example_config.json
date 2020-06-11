@@ -4,10 +4,7 @@
     8
   ],
   "programs": [
-    "OPT_RV",
-    "OPT_SEAL",
-    "UNOPT_RV",
-    "UNOPT_SEAL"
+    "OPT_RV"
   ],
-  "result_files_directory": "/home/ubuntu/benchmark_results"
+  "result_files_directory": "/Users/patrick/git/master_thesis_code/src/evaluation/results"
 }
