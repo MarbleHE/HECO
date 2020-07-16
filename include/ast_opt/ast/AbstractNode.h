@@ -287,6 +287,7 @@ class NodeIterator {
 template<typename T>
 class BaseIteratorImpl {
  public:
+  virtual ~BaseIteratorImpl() = default;
   virtual const T &getNode() const = 0;
   virtual T &getNode() = 0;
   virtual std::unique_ptr<BaseIteratorImpl> clone() = 0;
@@ -302,6 +303,7 @@ class EmptyIteratorImpl : public BaseIteratorImpl<T> {
  private:
   T &node;
  public:
+  virtual ~EmptyIteratorImpl() = default;
   explicit EmptyIteratorImpl(T &node) : node(node) {};
   const T &getNode() const {
     return node;
@@ -334,7 +336,7 @@ class PositionIteratorImpl : public BaseIteratorImpl<T> {
   N &node;
 
   /// Indicates the current position
-  uint position = 0;
+  unsigned int position = 0;
 
   T &getNode() override {
     return node;
@@ -344,7 +346,9 @@ class PositionIteratorImpl : public BaseIteratorImpl<T> {
   };
 
  public:
-  PositionIteratorImpl(N &node, uint position) : node(node), position(position) {};
+  virtual ~PositionIteratorImpl() = default;
+
+  PositionIteratorImpl(N &node, unsigned int position) : node(node), position(position) {};
 
   void increment() override {
     ++position;
