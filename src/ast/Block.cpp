@@ -1,95 +1,157 @@
 #include <iostream>
 #include <exception>
-#include "ast_opt/ast/AbstractNode.h"
 #include "ast_opt/ast/Block.h"
-#include "ast_opt/ast/VarDecl.h"
+#include "ast_opt/visitor/IVisitor.h"
 
-json Block::toJson() const {
-  std::vector<AbstractStatement *> stmts;
-  stmts.reserve(countChildrenNonNull());
-  for (auto c : getChildrenNonNull()) {
-    stmts.push_back(dynamic_cast<AbstractStatement *>(c));
+/// Convenience typedef for conciseness
+typedef std::unique_ptr<AbstractStatement> stmtPtr;
+
+Block::~Block() = default;
+
+Block::Block() = default;
+
+Block::Block(std::unique_ptr<AbstractStatement> statement) {
+  statements = std::vector<stmtPtr>(1);
+  statements[0] = std::move(statement);
+}
+
+Block::Block(std::vector<std::unique_ptr<AbstractStatement>> &&vectorOfStatements)
+    : statements(std::move(vectorOfStatements)) {};
+
+Block::Block(const Block &other) {
+  // deep-copy the statements, including nullptrs
+  statements.reserve(other.statements.size());
+  for (auto &s: other.statements) {
+    statements.emplace_back(s ? s->clone() : nullptr);
   }
-  json j = {{"type", getNodeType()},
-            {"statements", stmts}};
+}
+
+Block::Block(Block &&other) noexcept: statements(std::move(other.statements)) {}
+
+Block &Block::operator=(const Block &other) {
+  statements.clear();
+  // deep-copy the statements, including nullptrs
+  statements.reserve(other.statements.size());
+  for (auto &s: other.statements) {
+    statements.emplace_back(s ? s->clone() : nullptr);
+  }
+  return *this;
+}
+Block &Block::operator=(Block &&other) noexcept {
+  statements = std::move(other.statements);
+  return *this;
+}
+std::unique_ptr<Block> Block::clone() const {
+  return std::unique_ptr<Block>(clone_impl());
+}
+
+bool Block::isEmpty() {
+  return countChildren()==0;
+}
+
+bool Block::hasNullStatements() {
+  // Because std::unique_ptr doesn't have copy, we can't use std::count_if
+  size_t count = 0;
+  for (auto &s : statements) {
+    if (s==nullptr) { count++; }
+  }
+  return count!=0;
+}
+
+std::vector<std::reference_wrapper<AbstractStatement>> Block::getStatements() {
+  std::vector<std::reference_wrapper<AbstractStatement>> r;
+  for (auto &s: statements) {
+    if (s!=nullptr) { r.emplace_back(*s); }
+  }
+  return r;
+}
+
+std::vector<std::reference_wrapper<const AbstractStatement>> Block::getStatements() const {
+  std::vector<std::reference_wrapper<const AbstractStatement>> r;
+  for (auto &s: statements) {
+    if (s!=nullptr) { r.emplace_back(*s); }
+  }
+  return r;
+}
+
+void Block::appendStatement(std::unique_ptr<AbstractStatement> statement) {
+  statements.emplace_back(std::move(statement));
+}
+
+void Block::prependStatement(std::unique_ptr<AbstractStatement> statement) {
+  statements.insert(statements.begin(),std::move(statement));
+}
+
+void Block::removeNullStatements() {
+  std::vector<stmtPtr> new_statements;
+  for (auto &s: statements) {
+    if (s!=nullptr) { new_statements.emplace_back(std::move(s)); }
+  }
+  statements = std::move(new_statements);
+}
+///////////////////////////////////////////////
+////////// AbstractNode Interface /////////////
+///////////////////////////////////////////////
+Block *Block::clone_impl() const {
+  return new Block(*this);
+}
+
+void Block::accept(IVisitor &v) {
+  v.visit(*this);
+}
+
+AbstractNode::iterator Block::begin() {
+  return AbstractNode::iterator(std::make_unique<BlockIteratorImpl<AbstractNode>>(*this,
+                                                                                  statements.begin(),
+                                                                                  statements.end()));
+}
+
+AbstractNode::const_iterator Block::begin() const {
+  return AbstractNode::const_iterator(std::make_unique<BlockIteratorImpl<const AbstractNode>>(*this,
+                                                                                              statements.begin(),
+                                                                                              statements.end()));
+}
+
+AbstractNode::iterator Block::end() {
+  return AbstractNode::iterator(std::make_unique<BlockIteratorImpl<AbstractNode>>(*this,
+                                                                                  statements.end(),
+                                                                                  statements.end()));
+}
+
+AbstractNode::const_iterator Block::end() const {
+  return AbstractNode::const_iterator(std::make_unique<BlockIteratorImpl<const AbstractNode>>(*this,
+                                                                                              statements.end(),
+                                                                                              statements.end()));
+}
+
+size_t Block::countChildren() const {
+  // Only non-null entries in the vector are counted as children
+  // Because std::unique_ptr doesn't have copy, we can't use std::count_if
+  size_t count = 0;
+  for (auto &s : statements) {
+    if (s!=nullptr) { count++; }
+  }
+  return count;
+}
+
+nlohmann::json Block::toJson() const {
+  std::vector<std::reference_wrapper<const AbstractStatement>> stmts = getStatements();
+  std::vector<nlohmann::json> stmtsJson;
+  for(const AbstractStatement& s: stmts) {
+    stmtsJson.push_back(s.toJson());
+ }
+  nlohmann::json j = {{"type", getNodeType()},
+                      {"statements", stmtsJson}};
   return j;
 }
 
-Block::Block(AbstractStatement *stat) {
-  this->addChild(stat);
-}
-
-Block::Block(std::vector<AbstractStatement *> statements) {
-  if (statements.empty()) {
-    throw std::logic_error("Block statement vector is empty!"
-                           "If this is intended, use the parameter-less constructor instead.");
-  }
-  addChildren(std::vector<AbstractNode *>(statements.begin(), statements.end()), true);
-}
-
-void Block::accept(Visitor &v) {
-  v.visit(*this);
+std::string Block::toString(bool printChildren) const {
+  return AbstractNode::toStringHelper(printChildren, {});
 }
 
 std::string Block::getNodeType() const {
   return "Block";
 }
 
-std::vector<AbstractStatement *> Block::getStatements() const {
-  std::vector<AbstractStatement *> stmts;
-  stmts.reserve(countChildrenNonNull());
-  for (auto c : getChildrenNonNull()) {
-    stmts.emplace_back(dynamic_cast<AbstractStatement *>(c));
-  }
-  return stmts;
-}
 
-Block *Block::clone(bool keepOriginalUniqueNodeId) const {
-  std::vector<AbstractStatement *> clonedStatements;
-  for (auto &statement : this->getStatements()) {
-    clonedStatements.push_back(statement->clone(keepOriginalUniqueNodeId)->castTo<AbstractStatement>());
-  }
-  auto clonedNode = clonedStatements.empty() ? new Block() : new Block(clonedStatements);
-  clonedNode->updateClone(keepOriginalUniqueNodeId, this);
-  return clonedNode;
-}
 
-AbstractNode *Block::cloneFlat() {
-  auto block = new Block();
-  block->setUniqueNodeId(this->getUniqueNodeId());
-  return block;
-}
-
-int Block::getMaxNumberChildren() {
-  return -1;
-}
-
-bool Block::supportsCircuitMode() {
-  return true;
-}
-
-std::string Block::toString(bool printChildren) const {
-  return AbstractNode::generateOutputString(printChildren, {});
-}
-
-bool Block::isEqual(AbstractStatement *otherBlockStatement) {
-  if (auto otherAsBlock = dynamic_cast<Block *>(otherBlockStatement)) {
-    auto thisStatements = getStatements();
-    auto otherStatements = otherAsBlock->getStatements();
-
-    auto thisStatIt = thisStatements.begin();
-    auto otherStatIt = otherStatements.begin();
-
-    // compare statement-per-statement
-    for (; thisStatIt!=thisStatements.end() && otherStatIt!=otherStatements.end(); ++thisStatIt) {
-      // break up if any pair of two compared statements do not match
-      if (!(*thisStatIt)->isEqual(*otherStatIt)) return false;
-      otherStatIt++;
-    }
-
-    // make sure that both blocks reached their end (otherwise one could have more than the other one but still be
-    // recognized as being equal)
-    return (thisStatIt==thisStatements.end()) && (otherStatIt==otherStatements.end());
-  }
-  return false;
-}

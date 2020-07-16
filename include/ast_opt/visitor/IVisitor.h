@@ -1,0 +1,86 @@
+#ifndef AST_OPTIMIZER_VISITOR_IVISITOR_H
+#define AST_OPTIMIZER_VISITOR_IVISITOR_H
+
+#include <string>
+
+class AbstractExpression;
+
+class AbstractStatement;
+
+class BinaryExpression;
+
+class Block;
+
+class Call;
+
+class CallExternal;
+
+class Function;
+
+class FunctionParameter;
+
+class For;
+
+class Group;
+
+class If;
+
+template<typename T>
+class Literal;
+
+typedef Literal<bool> LiteralBool;
+typedef Literal<char> LiteralChar;
+typedef Literal<int> LiteralInt;
+typedef Literal<float> LiteralFloat;
+typedef Literal<double> LiteralDouble;
+typedef Literal<std::string> LiteralString;
+
+class LogicalExpr;
+
+class Operator;
+
+class Return;
+
+class UnaryExpression;
+
+class VariableAssignment;
+
+class VariableDeclaration;
+
+class Variable;
+
+class Scope;
+
+class IVisitor {
+ public:
+  virtual void visit(BinaryExpression &elem) = 0;
+
+  virtual void visit(Block &elem) = 0;
+
+  virtual void visit(For &elem) = 0;
+
+  virtual void visit(If &elem) = 0;
+
+  virtual void visit(LiteralBool &elem) = 0;
+
+  virtual void visit(LiteralChar &elem) = 0;
+
+  virtual void visit(LiteralInt &elem) = 0;
+
+  virtual void visit(LiteralFloat &elem) = 0;
+
+  virtual void visit(LiteralDouble &elem) = 0;
+
+  virtual void visit(LiteralString &elem) = 0;
+
+  virtual void visit(UnaryExpression &elem) = 0;
+
+  virtual void visit(VariableAssignment &elem) = 0;
+
+  virtual void visit(VariableDeclaration &elem) = 0;
+
+  virtual void visit(Variable &elem) = 0;
+
+};
+
+#endif //AST_OPTIMIZER_VISITOR_IVISITOR_H

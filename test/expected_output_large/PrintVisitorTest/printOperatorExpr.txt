@@ -1,7 +1,0 @@
-Function: (addNums)	[global]
-	ParameterList:	[Function_0]
-	Block:
-		Return:	[Block_2]
-			OperatorExpr:
-				Operator: (add)
-				LiteralInt: (77)

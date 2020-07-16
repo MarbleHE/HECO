@@ -1,43 +1,37 @@
 #include <utility>
 #include "ast_opt/ast/OperatorExpr.h"
-#include "ast_opt/ast/Operator.h"
-#include "ast_opt/ast/AbstractMatrix.h"
+#include "ast_opt/utilities/Operator.h"
 
 int OperatorExpr::getMaxNumberChildren() {
   return -1;
-}
-
-bool OperatorExpr::supportsCircuitMode() {
-  return true;
 }
 
 OperatorExpr::OperatorExpr(Operator *op) {
   setAttributes(op, {});
 }
 
-OperatorExpr::OperatorExpr(Operator *op, std::vector<AbstractExpr *> operands) {
+OperatorExpr::OperatorExpr(Operator *op, std::vector<AbstractExpression *> operands) {
   setAttributes(op, std::move(operands));
 }
 
-OperatorExpr::OperatorExpr(AbstractExpr *lhsOperand, Operator *op, AbstractExpr *rhsOperand) {
+OperatorExpr::OperatorExpr(AbstractExpression *lhsOperand, Operator *op, AbstractExpression *rhsOperand) {
   setAttributes(op, {lhsOperand, rhsOperand});
 }
 
 std::string OperatorExpr::toString(bool printChildren) const {
-  return AbstractNode::generateOutputString(printChildren, {});
+  return AbstractNode::toStringHelper(printChildren, {});
 }
 
-OperatorExpr *OperatorExpr::clone(bool keepOriginalUniqueNodeId) const {
+OperatorExpr *OperatorExpr::clone() const {
   // clone operator (child0)
-  auto clonedOperator = getOperator()->clone(keepOriginalUniqueNodeId);
+  auto clonedOperator = getOperator()->clone();
   // clone all operands (child1...childN)
-  std::vector<AbstractExpr *> clonedAes;
+  std::vector<AbstractExpression *> clonedAes;
   std::transform(++children.begin(), children.end(), std::back_inserter(clonedAes),
-                 [keepOriginalUniqueNodeId](AbstractNode *node) -> AbstractExpr * {
-                   return node->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>();
+                 [](AbstractNode *node) -> AbstractExpression * {
+                   return node->clone()->castTo<AbstractExpression>();
                  });
   auto clonedOperatorExpr = new OperatorExpr(clonedOperator, clonedAes);
-  clonedOperatorExpr->updateClone(keepOriginalUniqueNodeId, this);
   return clonedOperatorExpr;
 }
 
@@ -49,28 +43,35 @@ std::string OperatorExpr::getNodeType() const {
   return std::string("OperatorExpr");
 }
 
-void OperatorExpr::addOperand(AbstractExpr *operand) {
+void OperatorExpr::addOperand(AbstractExpression *operand) {
   auto newOperator = getOperator();
-  std::vector<AbstractExpr *> newOperands = getOperands();
+  std::vector<AbstractExpression *> newOperands = getOperands();
   newOperands.push_back(operand);
   // use the setAttributes method that evaluates operands while adding them
   setAttributes(newOperator, newOperands);
 }
 
+void OperatorExpr::addOperands(std::vector<AbstractExpression *> operands) {
+  for (auto &o : operands) {
+    addOperand(o);
+  }
+}
+
 void OperatorExpr::setOperator(Operator *op) {
   // child at index 0 is always the operator
-  auto curOperator = getChildAtIndex(0);
+  auto curOperator = children.at(0);
   replaceChild(curOperator, op);
   delete curOperator;
 }
 
 OperatorExpr::OperatorExpr() = default;
 
-void OperatorExpr::setAttributes(Operator *newOperator, std::vector<AbstractExpr *> newOperands) {
+void OperatorExpr::setAttributes(Operator *newOperator, std::vector<AbstractExpression *> newOperands) {
   // remove any existing children (i.e., operator and operands)
   removeChildren();
   // add the operator
-  addChild(newOperator);
+  op = newOperator;
+  newOperator->setParent(this);
 
   // The basic idea of this OperatorExpr aggregation logic can be summarized as follow:
   // Adding operands to this OperatorExpr always automatically applies the operator on the known operands
@@ -91,9 +92,9 @@ void OperatorExpr::setAttributes(Operator *newOperator, std::vector<AbstractExpr
   // operands before adding them
   if (newOperands.size() >= 2 && (getOperator()->isCommutative() || getOperator()->isLeftAssociative())) {
     // a vector of the operands to be finally added to this OperatorExpr
-    std::vector<AbstractExpr *> simplifiedAbstractExprs;
+    std::vector<const AbstractExpression *> simplifiedAbstractExprs;
     // a vector containing those operands that can be aggregated (AbstractLiterals)
-    std::vector<AbstractLiteral *> tempAggregator;
+    std::vector<const AbstractLiteral *> tempAggregator;
 
     if (getOperator()->isCommutative()) {
       // if operator is commutative: collect all known operands from current OperatorExpr, independent of their position
@@ -166,24 +167,39 @@ void OperatorExpr::setAttributes(Operator *newOperator, std::vector<AbstractExpr
       }
     } // end of: else if (getOperator()->isLeftAssociative())
     // add the aggregated/simplified operands
-    std::vector<AbstractNode *> abstractExprsVec(simplifiedAbstractExprs.begin(), simplifiedAbstractExprs.end());
-    addChildren(abstractExprsVec, true);
+    std::vector<AbstractExpression *> abstractExprsVec;
+    // clone the operands to match non-const-ness requirements
+    for (auto &e: simplifiedAbstractExprs) {
+      abstractExprsVec.emplace_back(e->clone());
+    }
+    addOperands(abstractExprsVec);
     if (getOperands().size()==0) {
       throw std::logic_error("Operator expression reduced to zero operands.");
     } else if (getOperands().size()==1) {
       //Replace myself with operand in parent.
-      getOnlyParent()->replaceChild(this, getOperands()[0]);
+      getParent()->replaceChild(this, getOperands()[0]);
     }
   } else if (newOperands.size()==2) {
     // add the operands without any prior aggregation
-    std::vector<AbstractNode *> abstractExprsVec(newOperands.begin(), newOperands.end());
-    addChildren(abstractExprsVec, true);
+    std::vector<AbstractExpression *> abstractExprsVec(newOperands.begin(), newOperands.end());
+    // clone the operands to match non-const-ness requirements
+    for (auto &e: newOperands) {
+      abstractExprsVec.emplace_back(e->clone());
+    }
+    addOperands(abstractExprsVec);
   } else if (newOperands.size()==1 || newOperands.size()==0) {
     throw std::logic_error("Operator expression with 1 or 0 operands is not valid.");
   } else {
     // add the operands without any prior aggregation
-    std::vector<AbstractNode *> abstractExprsVec(newOperands.begin(), newOperands.end());
-    addChildren(abstractExprsVec, true);
+    std::vector<AbstractExpression *> abstractExprsVec(newOperands.begin(), newOperands.end());
+    // clone the operands to match non-const-ness requirements
+    for (auto &e: newOperands) {
+      abstractExprsVec.emplace_back(e->clone());
+    }
+    addOperands(abstractExprsVec);
+  }
+  for (auto &c: operands) {
+    c->setParent(this);
   }
 }
 
@@ -192,7 +208,7 @@ bool OperatorExpr::isLogicalExpr() const {
 }
 
 Operator *OperatorExpr::getOperator() const {
-  return dynamic_cast<Operator *>(getChildAtIndex(0));
+  return dynamic_cast<Operator *>(children.at(0));
 }
 
 bool OperatorExpr::isArithmeticExpr() const {
@@ -203,7 +219,7 @@ bool OperatorExpr::isUnaryExpr() const {
   return getOperator()->isUnaryOp();
 }
 
-bool OperatorExpr::isEqual(AbstractExpr *other) {
+bool OperatorExpr::isEqual(AbstractExpression *other) {
   if (auto expr = dynamic_cast<OperatorExpr *>(other)) {
     if (this->getChildren().size()!=other->getChildren().size()) return false;
     if (!this->getOperator()->equals(expr->getOperator()->getOperatorSymbol())) return false;
@@ -215,29 +231,22 @@ bool OperatorExpr::isEqual(AbstractExpr *other) {
   return false;
 }
 
-std::vector<AbstractExpr *> OperatorExpr::getOperands() const {
-  std::vector<AbstractExpr *> operands;
-  // ++children.begin() because operands start from index 1
-  auto cs = getChildrenNonNull();
-  std::transform(++cs.begin(), cs.end(), std::back_inserter(operands),
-                 [](AbstractNode *node) -> AbstractExpr * {
-                   return node->castTo<AbstractExpr>();
-                 });
+std::vector<AbstractExpression *> OperatorExpr::getOperands() const {
   return operands;
 }
 
-AbstractExpr *OperatorExpr::getRight() const {
+AbstractExpression *OperatorExpr::getRight() const {
   if (getOperands().size() > 2) {
     throw std::logic_error("OperatorExpr::getRight() only supported for expressions with two operands!");
   }
-  return dynamic_cast<AbstractExpr *>(getChildAtIndex(2));
+  return dynamic_cast<AbstractExpression *>(children.at(2));
 }
 
-AbstractExpr *OperatorExpr::getLeft() const {
+AbstractExpression *OperatorExpr::getLeft() const {
   if (getOperands().size() > 2) {
     throw std::logic_error("OperatorExpr::getLeft() only supported for expressions with two operands!");
   }
-  return dynamic_cast<AbstractExpr *>(getChildAtIndex(1));
+  return dynamic_cast<AbstractExpression *>(children.at(1));
 }
 
 void OperatorExpr::replaceChild(AbstractNode *originalChild, AbstractNode *newChildToBeAdded) {
@@ -248,8 +257,8 @@ void OperatorExpr::replaceChild(AbstractNode *originalChild, AbstractNode *newCh
     // apply the operand aggregation mechanism again as replacing a child may have generated new aggregation
     // opportunities (e.g., if variable is now a Literal value)
     auto op = getOperator();
-    op->removeFromParents();
-    for (auto &operand : operands) operand->removeFromParents(true);
+    op->removeFromParent();
+    for (auto &operand : operands) operand->takeFromParent();
     setAttributes(op, operands);
   } else if (operands.size()==1) {
     throw std::logic_error("Operator Expression was reduced to single operand.");
@@ -278,3 +287,31 @@ std::vector<Variable *> OperatorExpr::getVariables() {
   }
   return result;
 }
+
+void OperatorExpr::removeOperand(AbstractExpression *operand) {
+  auto it = std::find(children.begin(), children.end(), operand);
+  if (it!=children.end()) {
+    (*it)->takeFromParent();
+    // if the node supports an infinite number of children (getMaxNumberChildren() == -1), we can delete the node from
+    // the children list, otherwise we just overwrite the slot with a nullptr
+    if (this->getMaxNumberChildren()!=-1) {
+      *it = nullptr;
+    } else {
+      children.erase(it);
+    }
+  }
+}
+
+std::vector<AbstractNode *> OperatorExpr::getChildren() {
+  //TODO: RETURN SOMETHING USEFUL
+  return {};
+}
+std::vector<const AbstractNode *> OperatorExpr::getChildren() const {
+  //TODO: RETURN SOMETHING USEFUL
+  return {};
+}
+void OperatorExpr::removeChildren() {
+  //TODO: Actually remove
+}
+
+

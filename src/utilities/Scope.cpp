@@ -2,11 +2,6 @@
 #include <utility>
 #include <climits>
 #include "ast_opt/utilities/Scope.h"
-#include "ast_opt/ast/VarDecl.h"
-#include "ast_opt/ast/VarAssignm.h"
-#include "ast_opt/ast/For.h"
-#include "ast_opt/ast/Block.h"
-#include "ast_opt/ast/MatrixAssignm.h"
 
 /// Helper function to get target identifiers from Decls and Assignments
 std::string getVarTargetIdentifier(AbstractStatement const *stmt) {
@@ -107,7 +102,7 @@ void VariableValuesMap::addDeclaredVariable(ScopedVariable scopedVariable, Varia
   }
 }
 
-AbstractExpr *VariableValuesMap::getVariableValueDeclaredInThisOrOuterScope(std::string variableName, Scope *curScope) {
+AbstractExpression *VariableValuesMap::getVariableValueDeclaredInThisOrOuterScope(std::string variableName, Scope *curScope) {
   auto sv = variableValues.find(getVariableEntryDeclaredInThisOrOuterScope(variableName, curScope));
   if (sv==variableValues.end()) {
     throw std::invalid_argument("Variable " + variableName + " does not exist in this scope.");

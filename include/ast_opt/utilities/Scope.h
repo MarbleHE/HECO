@@ -9,7 +9,7 @@
 #include <unordered_map>
 #include "ast_opt/ast/AbstractStatement.h"
 #include "ast_opt/ast/Variable.h"
-#include "ast_opt/ast/Datatype.h"
+#include "Datatype.h"
 
 /// Helper function to get target identifiers from Decls and Assignments
 std::string getVarTargetIdentifier(AbstractStatement const *stmt);
@@ -56,7 +56,7 @@ class Scope {
 class VariableValue {
  private:
   Datatype datatype;
-  std::unique_ptr<AbstractExpr> value;
+  std::unique_ptr<AbstractExpression> value;
 
  public:
 
@@ -64,12 +64,12 @@ class VariableValue {
   ~VariableValue() = default;
 
   /// Create directly
-  VariableValue(Datatype dtype, AbstractExpr *varValue)
-      : datatype(std::move(dtype)), value(varValue ? varValue->clone(false)->castTo<AbstractExpr>() : nullptr) {};
+  VariableValue(Datatype dtype, AbstractExpression *varValue)
+      : datatype(std::move(dtype)), value(varValue ? varValue->clone()->castTo<AbstractExpression>() : nullptr) {};
 
   /// Copy constructor
   VariableValue(const VariableValue &vv)
-      : datatype(vv.datatype), value(vv.value ? vv.value->clone(false)->castTo<AbstractExpr>() : nullptr) {};
+      : datatype(vv.datatype), value(vv.value ? vv.value->clone()->castTo<AbstractExpression>() : nullptr) {};
 
   /// Move constructor
   VariableValue(VariableValue &&vv)  noexcept : datatype(std::move(vv.datatype)), value(std::move(vv.value)) {};
@@ -78,7 +78,7 @@ class VariableValue {
   VariableValue &operator=(const VariableValue &other) {
     datatype = other.datatype;
     if (other.value) {
-      value = std::unique_ptr<AbstractExpr>(other.value->clone(false)->castTo<AbstractExpr>());
+      value = std::unique_ptr<AbstractExpression>(other.value->clone()->castTo<AbstractExpression>());
     }
     return *this;
   };
@@ -87,16 +87,16 @@ class VariableValue {
   VariableValue &operator=(VariableValue &&other) = default;
 
   /// Creates a copy of the value!
-  AbstractExpr *getValue() const {
-    return value ? value->clone(false)->castTo<AbstractExpr>() : nullptr;
+  AbstractExpression *getValue() const {
+    return value ? value->clone()->castTo<AbstractExpression>() : nullptr;
   }
 
   Datatype getDatatype() {
     return datatype;
   }
 
-  void setValue(AbstractExpr *val) {
-    value = std::unique_ptr<AbstractExpr>(val->clone(false)->castTo<AbstractExpr>());
+  void setValue(AbstractExpression *val) {
+    value = std::unique_ptr<AbstractExpression>(val->clone()->castTo<AbstractExpression>());
   }
 
   // Datatype is fixed, therefore no way to change this
@@ -209,7 +209,7 @@ class VariableValuesMap {
   /// declarations within different scopes, returns the declaration that is closest to curScope.
   /// \param variableName The variable identifiers whose value should be retrieved.
   /// \return An AbstractExpr pointer of the variable's current value.
-  AbstractExpr *getVariableValueDeclaredInThisOrOuterScope(std::string variableName, Scope *curScope);
+  AbstractExpression *getVariableValueDeclaredInThisOrOuterScope(std::string variableName, Scope *curScope);
 
   /// Returns the variable entry in variableValues that has the given variable identifier
   /// (variableName) and is closest from the current scope (curScope).

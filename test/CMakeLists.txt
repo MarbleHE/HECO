@@ -20,31 +20,18 @@ FetchContent_MakeAvailable(googletest)
 # TARGET: testing
 ##############################
 set(TEST_FILES
-        ArithmeticExprTest.cpp
-        JsonOutputTest.cpp
-        PrintVisitorTest.cpp
-        MultRewriteTest.cpp
         AstTestingGenerator.cpp
         AstTestingGenerator.h
-        EvaluationVisitorTest.cpp
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/TestUtils.h
-        MultDepthVisitorTest.cpp
-        ChildParentTest.cpp
-        AstClassTest.cpp
-        DotPrinterTest.cpp
-        ConeRewriterTest.cpp
-        LiteralTest.cpp
-        NodeTest.cpp
-        NodeCloneRecursiveDeepTest.cpp
-        CompileTimeExpressionSimplifierTest.cpp
-        SecretTaintingTest.cpp
-        NodeUtilsTest.cpp
-        MatrixTest.cpp
-        ControlFlowGraphVisitorTest.cpp
-        OperatorExprTest.cpp
-        BatchingCheckerTest.cpp
-        CiphertextTest.cpp
-        RuntimeVisitorTest.cpp)
+        ast/BlockTest.cpp
+        ast/IfTest.cpp
+        ast/LiteralTest.cpp
+        ast/VariableTest.cpp
+        ast/VariableAssignmentTest.cpp
+        ast/VariableDeclarationTest.cpp
+        JsonOutputTest.cpp
+        visitor/PrintVisitorTest.cpp
+        visitor/VisitorTest.cpp
+        )
 
 add_executable(testing-all
         ${TEST_FILES})

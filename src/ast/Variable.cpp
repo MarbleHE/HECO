@@ -1,67 +1,74 @@
 #include <utility>
 #include "ast_opt/ast/Variable.h"
-#include "ast_opt/ast/Ast.h"
+#include "ast_opt/visitor/IVisitor.h"
+
+Variable::~Variable() = default;
 
 Variable::Variable(std::string variableIdentifier) : identifier(std::move(variableIdentifier)) {}
 
-json Variable::toJson() const {
-  json j;
-  j["type"] = getNodeType();
-  j["identifier"] = getIdentifier();
-  return j;
+Variable::Variable(const Variable &other)  : identifier(other.identifier){}
+
+Variable::Variable(Variable &&other) noexcept : identifier(std::move(other.identifier)) {}
+
+Variable &Variable::operator=(const Variable &other) {
+  identifier = other.identifier;
+  return *this;
+}
+Variable &Variable::operator=(Variable &&other) noexcept {
+  identifier = std::move(other.identifier);
+  return *this;
 }
 
-void Variable::accept(Visitor &v) {
-  v.visit(*this);
-}
-
-std::string Variable::getNodeType() const {
-  return "Variable";
+std::unique_ptr<Variable> Variable::clone() const {
+  return std::unique_ptr<Variable>(clone_impl());
 }
 
 std::string Variable::getIdentifier() const {
   return identifier;
 }
 
-bool Variable::contains(Variable *var) {
-  return *this==*var;
+///////////////////////////////////////////////
+////////// AbstractNode Interface /////////////
+///////////////////////////////////////////////
+Variable *Variable::clone_impl() const {
+  return new Variable(identifier);
 }
 
-bool Variable::operator==(const Variable &rhs) const {
-  return identifier==rhs.getIdentifier();
+void Variable::accept(IVisitor &v) {
+  v.visit(*this);
 }
 
-bool Variable::operator!=(const Variable &rhs) const {
-  return !(rhs==*this);
+AbstractNode::iterator Variable::begin() {
+  return iterator(std::make_unique<EmptyIteratorImpl<AbstractNode>>(*this));
 }
 
-bool Variable::isEqual(AbstractExpr *other) {
-  if (auto otherVar = dynamic_cast<Variable *>(other)) {
-    return *this==*otherVar;
-  }
-  return false;
+AbstractNode::const_iterator Variable::begin() const {
+  return const_iterator(std::make_unique<EmptyIteratorImpl<const AbstractNode>>(*this));
 }
 
-std::vector<std::string> Variable::getVariableIdentifiers() {
-  return {getIdentifier()};
+AbstractNode::iterator Variable::end() {
+  return iterator(std::make_unique<EmptyIteratorImpl<AbstractNode>>(*this));
 }
 
-std::vector<Variable *> Variable::getVariables() {
-  return {this};
+AbstractNode::const_iterator Variable::end() const {
+  return const_iterator(std::make_unique<EmptyIteratorImpl<const AbstractNode>>(*this));
+}
+
+size_t Variable::countChildren() const {
+  return 0;
+}
+
+nlohmann::json Variable::toJson() const {
+  nlohmann::json j;
+  j["type"] = getNodeType();
+  j["identifier"] = getIdentifier();
+  return j;
 }
 
 std::string Variable::toString(bool printChildren) const {
-  return AbstractNode::generateOutputString(printChildren, {getIdentifier()});
+  return AbstractNode::toStringHelper(printChildren, {getIdentifier()});
 }
 
-bool Variable::supportsCircuitMode() {
-  return true;
-}
-
-Variable::~Variable() = default;
-
-Variable *Variable::clone(bool keepOriginalUniqueNodeId) const {
-  auto clonedNode = new Variable(getIdentifier());
-  clonedNode->updateClone(keepOriginalUniqueNodeId, this);
-  return clonedNode;
+std::string Variable::getNodeType() const {
+  return "Variable";
 }

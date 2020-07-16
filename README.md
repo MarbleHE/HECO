@@ -87,7 +87,7 @@ The implementation is heavily based on the pseudo-codes provided in the paper, e
 
 ## AST Representation
 
-The AST to be used as a foundation for FHE optimizations consists of nodes that are derived from either `AbstractExpr` or `AbstractStatement`, depending on whether the operation is an expression or a statement, respectively. Note that `CallExternal` is a special node/operation as it can either be used as an expression (e.g., in an assignment `int z = computeZ();`) or as a statement (e.g., `updateVarZ();`). A UML showing the inheritance hierarchy is given in Fig. 1. 
+The AST to be used as a foundation for FHE optimizations consists of nodes that are derived from either `AbstractExpression` or `AbstractStatement`, depending on whether the operation is an expression or a statement, respectively. Note that `CallExternal` is a special node/operation as it can either be used as an expression (e.g., in an assignment `int z = computeZ();`) or as a statement (e.g., `updateVarZ();`). A UML showing the inheritance hierarchy is given in Fig. 1. 
 
 ```
                         ┌───────────────────┐                                       
@@ -104,7 +104,7 @@ The AST to be used as a foundation for FHE optimizations consists of nodes that 
                  ┌────────────────┴───────────────┐                                 
                  │                                │                                 
        ┌───────────────────┐            ┌───────────────────┐                       
-       │ AbstractStatement │            │   AbstractExpr    │                       
+       │ AbstractStatement │            │   AbstractExpression    │                       
        └───────────────────┘            └───────────────────┘                       
                  ▲                                ▲  ┌─────────────────┐            
 ┌─────────────┐  │        ┌───────────────┐       ├──│      Call       │            
@@ -149,12 +149,12 @@ The AST to be used as a foundation for FHE optimizations consists of nodes that 
 
 Following, the different node types are briefly explained. The examples in brackets show how the commands would look like in "plain" C++.
 
-- Classes derived from `AbstractExpr`
+- Classes derived from `AbstractExpression`
     - `BinaryExpr` – a binary arithmetic expression (e.g., `13 + 37`).
     - `Call` – a call to an internal function, i.e., its implementation is represented in the AST as a Function.
     - `CallExternal` – a call to an external function which is treated as *black box*, i.e., without accessibility to its definition.
     - `FunctionParameter` – describes the parameters that a function accepts. To evaluate an AST, values must be passed for each of the parameter defined by the function's `FunctionParameter` node.
-    - `Literal` – base class for all Literals derived from.
+    - `Literal` – base class for all Literal derived from.
     - `LiteralBool` – models a Boolean value.
     - `LiteralInt` – models an integer value.
     - `LiteralString` – models an string value.

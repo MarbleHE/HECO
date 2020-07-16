@@ -1,129 +1,191 @@
 #include "ast_opt/ast/For.h"
-#include "ast_opt/ast/AbstractExpr.h"
-#include "ast_opt/ast/Block.h"
+#include "ast_opt/visitor/IVisitor.h"
 
-std::string For::getNodeType() const {
-  return "For";
+For::~For() {
+
+}
+For::For(std::unique_ptr<Block> initializer,
+         std::unique_ptr<AbstractExpression> condition,
+         std::unique_ptr<Block> update,
+         std::unique_ptr<Block> body)
+    : initializer(std::move(initializer)),
+      condition(std::move(condition)),
+      update(std::move(update)),
+      body(std::move(body)) {}
+
+For::For(const For &other)
+    : initializer(other.initializer ? other.initializer->clone() : nullptr),
+      condition(other.condition ? other.condition->clone() : nullptr),
+      update(other.update ? other.update->clone() : nullptr),
+      body(other.body ? other.body->clone() : nullptr) {}
+
+For::For(For &&other) noexcept
+    : initializer(std::move(other.initializer)),
+      condition(std::move(other.condition)),
+      update(std::move(other.update)),
+      body(std::move(other.body)) {}
+
+For &For::operator=(const For &other) {
+  initializer = other.initializer ? other.initializer->clone() : nullptr;
+  condition = other.condition ? other.condition->clone() : nullptr;
+  update = other.update ? other.update->clone() : nullptr;
+  body = other.body ? other.body->clone() : nullptr;
+  return *this;
 }
 
-void For::accept(Visitor &v) {
+For &For::operator=(For &&other) noexcept {
+  initializer = std::move(other.initializer);
+  condition = std::move(other.condition);
+  update = std::move(other.update);
+  body = std::move(other.body);
+  return *this;
+}
+
+std::unique_ptr<For> For::clone() const {
+  return std::unique_ptr<For>(clone_impl());
+}
+
+bool For::hasInitializer() const {
+  return initializer!=nullptr;
+}
+
+bool For::hasCondition() const {
+  return condition!=nullptr;
+}
+
+bool For::hasUpdate() const {
+  return update!=nullptr;
+}
+
+bool For::hasBody() const {
+  return body!=nullptr;
+}
+
+Block &For::getInitializer() {
+  if (hasInitializer()) {
+    return *initializer;
+  } else {
+    throw std::runtime_error("Cannot get null initializer.");
+  }
+}
+
+const Block &For::getInitializer() const {
+  if (hasInitializer()) {
+    return *initializer;
+  } else {
+    throw std::runtime_error("Cannot get null initializer.");
+  }
+}
+
+AbstractExpression &For::getCondition() {
+  if (hasCondition()) {
+    return *condition;
+  } else {
+    throw std::runtime_error("Cannot get null condition.");
+  }
+}
+
+const AbstractExpression &For::getCondition() const {
+  if (hasCondition()) {
+    return *condition;
+  } else {
+    throw std::runtime_error("Cannot get null condition.");
+  }
+}
+
+Block &For::getUpdate() {
+  if (hasUpdate()) {
+    return *update;
+  } else {
+    throw std::runtime_error("Cannot get null update.");
+  }
+}
+
+const Block &For::getUpdate() const {
+  if (hasUpdate()) {
+    return *update;
+  } else {
+    throw std::runtime_error("Cannot get null update.");
+  }
+}
+
+Block &For::getBody() {
+  if (hasBody()) {
+    return *body;
+  } else {
+    throw std::runtime_error("Cannot get null body.");
+  }
+}
+
+const Block &For::getBody() const {
+  if (hasBody()) {
+    return *body;
+  } else {
+    throw std::runtime_error("Cannot get null body.");
+  }
+}
+
+void For::setInitializer(std::unique_ptr<Block> newInitializer) {
+  initializer = std::move(newInitializer);
+}
+
+void For::setCondition(std::unique_ptr<AbstractExpression> newCondition) {
+  condition = std::move(newCondition);
+}
+
+void For::setUpdate(std::unique_ptr<Block> newUpdate) {
+  update = std::move(newUpdate);
+}
+
+void For::setBody(std::unique_ptr<Block> newBody) {
+  body = std::move(newBody);
+}
+
+///////////////////////////////////////////////
+////////// AbstractNode Interface /////////////
+///////////////////////////////////////////////
+For *For::clone_impl() const {
+  return new For(*this);
+}
+void For::accept(IVisitor &v) {
   v.visit(*this);
 }
 
-For::For(AbstractStatement *initializer,
-         AbstractExpr *condition,
-         AbstractStatement *update,
-         AbstractStatement *statementToBeExecuted) {
-  setAttributes(initializer, condition, update, statementToBeExecuted);
+AbstractNode::iterator For::begin() {
+  return AbstractNode::iterator(std::make_unique<ForIteratorImpl<AbstractNode>>
+                                    (*this, 0));
 }
 
-Block *For::getInitializer() const {
-  return dynamic_cast<Block *>(getChildAtIndex(0));
+AbstractNode::const_iterator For::begin() const {
+  return AbstractNode::const_iterator(std::make_unique<ForIteratorImpl<const AbstractNode>>(*this, 0));
 }
 
-AbstractExpr *For::getCondition() const {
-  return dynamic_cast<AbstractExpr *>(getChildAtIndex(1));
+AbstractNode::iterator For::end() {
+  return AbstractNode::iterator(std::make_unique<ForIteratorImpl<AbstractNode>>
+                                    (*this, countChildren()));
 }
 
-Block *For::getUpdate() const {
-  return dynamic_cast<Block *>(getChildAtIndex(2));
+AbstractNode::const_iterator For::end() const {
+  return AbstractNode::const_iterator(std::make_unique<ForIteratorImpl<const AbstractNode>>(*this, countChildren()));
+}
+size_t For::countChildren() const {
+  return hasInitializer() + hasCondition() + hasUpdate() + hasBody();
 }
 
-Block *For::getBody() const {
-  return dynamic_cast<Block *>(getChildAtIndex(3));
-}
-
-void For::setAttributes(AbstractStatement *initializer,
-                        AbstractExpr *condition,
-                        AbstractStatement *update,
-                        AbstractStatement *body) {
-  removeChildren();
-  if (dynamic_cast<Block *>(initializer)==nullptr) {
-    initializer = new Block(initializer);
-  }
-  if (dynamic_cast<Block *>(update)==nullptr) {
-    update = new Block(update);
-  }
-  if (dynamic_cast<Block *>(body)==nullptr) {
-    body = new Block(body);
-  }
-  addChildren({initializer, condition, update, body}, true);
-}
-
-int For::getMaxNumberChildren() {
-  return 4;
-}
-
-AbstractNode *For::clone(bool keepOriginalUniqueNodeId) const {
-
-  auto clonedInitializer = (getInitializer()==nullptr)
-                           ? nullptr
-                           : getInitializer()->clone(keepOriginalUniqueNodeId)->castTo<AbstractStatement>();
-  auto clonedCondition = (getCondition()==nullptr)
-                         ? nullptr
-                         : getCondition()->clone(keepOriginalUniqueNodeId)->castTo<AbstractExpr>();
-  auto clonedUpdater = (getUpdate()==nullptr)
-                       ? nullptr
-                       : getUpdate()->clone(false)->castTo<AbstractStatement>();
-  auto clonedBody = (getBody()==nullptr)
-                    ? nullptr
-                    : getBody()->clone(keepOriginalUniqueNodeId)->castTo<AbstractStatement>();
-
-  auto clonedNode = new For(clonedInitializer, clonedCondition, clonedUpdater, clonedBody);
-  clonedNode->updateClone(keepOriginalUniqueNodeId, this);
-  return clonedNode;
-}
-
-std::string For::toString(bool printChildren) const {
-  return AbstractNode::generateOutputString(printChildren, {});
-}
-
-bool For::supportsCircuitMode() {
-  return true;
-}
-
-json For::toJson() const {
-  json j;
+nlohmann::json For::toJson() const {
+  nlohmann::json j;
   j["type"] = getNodeType();
-  j["condition"] = getCondition()->toJson();
-  j["initializer"] = getInitializer()->toJson();
-  j["update"] = getUpdate()->toJson();
-  j["statement"] = getBody()->toJson();
+  if (hasInitializer()) j["initializer"] = getInitializer().toJson();
+  if (hasCondition()) j["condition"] = getCondition().toJson();
+  if (hasUpdate()) j["update"] = getUpdate().toJson();
+  if (hasBody()) j["body"] = getBody().toJson();
   return j;
 }
 
-bool For::isEqual(AbstractStatement *other) {
-  if (auto otherFor = dynamic_cast<For *>(other)) {
-    auto sameInitializer = (getInitializer()==nullptr && otherFor->getInitializer()==nullptr)
-        || (getInitializer()!=nullptr && otherFor->getInitializer()!=nullptr
-            && getInitializer()->isEqual(otherFor->getInitializer()));
-    auto sameCondition = (getCondition()==nullptr && otherFor->getCondition()==nullptr)
-        || (getCondition()!=nullptr && otherFor->getCondition()!=nullptr
-            && getCondition()->isEqual(otherFor->getCondition()));
-    auto sameUpdateStmt = (getUpdate()==nullptr && otherFor->getUpdate()==nullptr)
-        || (getUpdate()!=nullptr && otherFor->getUpdate()!=nullptr
-            && getUpdate()->isEqual(otherFor->getUpdate()));
-    auto sameBody = getBody()->isEqual(otherFor->getBody());
-    return sameInitializer && sameCondition && sameUpdateStmt && sameBody;
-  }
-  return false;
-}
-void For::setInitializer(Block *initializer) {
-  if (getInitializer()) {
-    throw std::runtime_error("Cannot overwrite initializer.");
-    // Because we cannot really "delete" nodes safely unless we're in a visitor?
-  } else {
-    children[0] = initializer;
-    initializer->addParent(this, false);
-  }
+std::string For::toString(bool printChildren) const {
+  return AbstractNode::toStringHelper(printChildren, {});
 }
 
-void For::setBody(Block *body) {
-  if (getBody()) {
-    throw std::runtime_error("Cannot overwrite body.");
-    // Because we cannot really "delete" nodes safely unless we're in a visitor?
-  } else {
-    children[3] = body;
-    body->addParent(this, false);
-  }
+std::string For::getNodeType() const {
+  return "For";
 }

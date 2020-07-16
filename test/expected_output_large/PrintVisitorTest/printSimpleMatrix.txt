@@ -1,8 +1,0 @@
-Function: (computeCrossProduct)	[global]
-	ParameterList:	[Function_0]
-	Block:
-		VarDecl: (M)	[Block_2]
-			Datatype: (plaintext int)
-			LiteralInt: ([14 27 32; 34 3 23; 1 1 3])
-		Return:
-			Variable: (M)

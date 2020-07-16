@@ -7,29 +7,185 @@
 #include <string>
 #include <typeinfo>
 #include <nlohmann/json.hpp>
-#include "ast_opt/visitor/Visitor.h"
 
-using json = nlohmann::json;
+/// forward declaration of Visitor interface from ast_opt/visitor/IVisitor.h
+class IVisitor;
 
+/// Forward Iterator that redirects all calls to a (polymorphic) BaseIteratorImpl iterator
+template<typename T>
+class NodeIterator;
+
+/// AbstractNode defines the common interface for all nodes.
+///
+/// DIRECTED GRAPH:
+/// Nodes form a directed graph, with one end of each edge being the parent and the other being the child.
+/// Nodes have exactly one pointer to their parent. If null, we say the node does not have a parent.
+/// Nodes might have an arbitrary number of children, including none.
+/// Some derived classes have a fixed number of children, while this changes dynamically for others.
+/// Interaction with children should primarily happen via derived classes' specific getter/setter methods.
+/// However, it is also possible to iterate over the children of any node with a NodeIterator
+/// The order of the children is up to the derived class.
+/// Note that some derived classes might internally use nullptr to represent "empty slots"
+/// (e.g. deleted stmts in a Block, or an empty else-stmt in an If stmt)
+/// If a child is null, we say it does not exist and it is not exposed externally.
+///
+/// LIFECYCLE MANAGEMENT:
+/// A node owns its children and its children are deleted when the node itself is deleted.
+/// Derived classes MUST implement this behavior, for example by using std::unique_ptr<>
+/// Note that the parent is a raw pointer, however the above semantics should exclude dangling parent pointers.
+/// Deleting a node will invalidate all iterators over this node and its children.
+///
+/// Changing Ownership of a Node (e.g. when moving a node around in a tree)
+/// should proceed by first taking ownership to the local scope via takeNode()
+/// Then, adding the node to its new parent via a derived class's setter method
+/// Internally, the setter should first add the child and then use setParent()
+///
 class AbstractNode {
+ private:
+  /// Stores the parent nodes of the current node.
+  AbstractNode *parent = nullptr;
+
+  /// Clones a node recursively, i.e., by including all of its children.
+  /// Because return-type covariance does not work with smart pointers,
+  /// derived classes are expected to both override this function (for usage with base class ptrs/refs/etc)
+  /// and introduce a std::unique_ptr<DerivedNode> clone() method that hides AbstractNode::clone() (for use with derived class ptrs/refs)
+  /// WARNING: This method should never be called outside of this clone() method for memory safety reasons
+  /// \return A clone of the node including clones of all of its children.
+  [[nodiscard]] virtual AbstractNode *clone_impl() const = 0;
+
+ public:
+  /// Virtual Destructor, force class to be abstract
+  virtual ~AbstractNode() = 0;
+
+  /// Clones a node recursively, i.e., by including all of its children.
+  /// Because return-type covariance does not work with smart pointers,
+  /// derived classes are expected to introduce a std::unique_ptr<DerivedNode> clone() method that hides this (for use with derived class ptrs/refs)
+  /// \return A clone of the node including clones of all of its children.
+  std::unique_ptr<AbstractNode> clone() const;
+
+  /// Compares two nodes for equality
+  /// For efficiency, this currently considers only two exact same objects (i.e. same address) to be equal
+  /// \param other
+  /// \return true iff this and other are the exact same object
+  bool operator==(const AbstractNode &other) const noexcept;
+
+  /// Compares two nodes for equality
+  /// For efficiency, this currently considers only two exact same objects (i.e. same address) to be equal
+  /// \param other
+  /// \return false iff this and other are the exact same object
+  bool operator!=(const AbstractNode &other) const noexcept;
+
+  /// Part of the visitor pattern.
+  /// Must be overridden in derived classes and must call v.visit(node).
+  /// This allows the correct overload for the derived class to be called in the visitor.
+  /// \param v Visitor that offers a visit() method
+  virtual void accept (IVisitor &v) = 0;
+
+  /** @defgroup DAG Methods for handling parent/child relationship
+   *  @{
+   */
+ public:
+
+  /// Forward Iterator through Nodes
+  typedef NodeIterator<AbstractNode> iterator;
+
+  /// Const Forward Iterator through Nodes
+  typedef NodeIterator<const AbstractNode> const_iterator;
+
+  /// Forward Iterator marking begin of children
+  virtual iterator begin() = 0;
+
+  /// Forward Const Iterator marking begin of children
+  virtual const_iterator begin() const = 0;
+
+  /// Forward Iterator marking end of children
+  virtual iterator end() = 0;
+
+  /// Forward Const Iterator marking end of children
+  virtual const_iterator end() const = 0;
+
+  // Returns the number of (non-null) children nodes
+  /// \return An integer indicating the number of children nodes.
+  [[nodiscard]] virtual size_t countChildren() const = 0;
+
+  /// Checks whether this node has a parent set
+  /// \return True if this node has a parent, otherwise returns False.
+  bool hasParent() const;
+
+  /// Returns a pointer to the only parent node.
+  /// \return A pointer to the node's parent node.
+  /// \throws std::runtime_error if the node has no parent
+  AbstractNode &getParent();
+
+  /// Returns a pointer to the only parent node.
+  /// \return A pointer to the node's parent node.
+  /// \throws std::runtime_error if the node has no parent
+  const AbstractNode &getParent() const;
+
  protected:
+  /// Set the parent of this node.
+  /// Derived classes must ensure that a node's parent has the node as its child!
+  /// This is also why this function does not take a const AbstractNode& parameter
+  /// Because one should not call this on a node that one isn't also modifying
+  /// by adding this node as a child
+  /// \param newParent The new parent
+  /// \throws std::logic_error if this node already has a parent
+  void setParent(AbstractNode &newParent);
+
+  /** @} */ // End of DAG group
+
+  /** @defgroup output Methods for output
+  *  @{
+  */
+ public:
+
+  /// Get the nlohmann::json representation of the node including all of its children.
+  /// \return nlohmann::json representation of the node
+  [[nodiscard]] virtual nlohmann::json toJson() const = 0;
+
+  /// Returns a string representation of the node,
+  /// if printChildren is True then calls toString for its children too.
+  /// Hence, toString(false) is equivalent to printing a node's attributes only.
+  /// \return A textual representation of the node.
+  [[nodiscard]] virtual std::string toString(bool printChildren) const;
+
+  /// Prints the output of node.toString(true) to the stream os
+  /// \param os Stream to print to
+  /// \param node Any node
+  /// \return The written to stream
+  friend std::ostream &operator<<(std::ostream &os, const AbstractNode &node);
+
+ protected:
+  /// Generates an output string to be used by the toString() method.
+  /// \param printChildren Specifies whether to print details of this node only (False) or also its children (True).
+  /// \param attributes The node's attributes to be printed (fields in the node's class).
+  /// \return A string representation of the node.
+  [[nodiscard]] std::string toStringHelper(bool printChildren, std::vector<std::string> attributes) const;
+
+  /// Returns the node's type, which is the name of the object in the AST. This method must be overridden by all classes
+  /// that inherit from AbstractNode by their respective name (e.g., ArithmeticExp, Function, Variable).
+  /// \return The name of the node type.
+  [[nodiscard]] virtual std::string getNodeType() const = 0;
+
+  /** @} */ // End of output group
+
+  /** @defgroup nodeID Methods to support unique node ids
+  *  @{
+  */
+
+ private:
   /// Stores the reserved node ID until the first call of getUniqueNodeId() at which the reserved ID is
   /// fetched and the node's ID is assigned (field uniqueNodeId) based on the node's name and this reserved ID.
   /// This is a workaround because getNodeType() is a virtual method that cannot be called from derived classes'
   /// constructor.
   int assignedNodeId{-1};
 
-  /// Stores the children nodes of the current node.
-  std::vector<AbstractNode *> children{};
-
-  /// Stores the parent nodes of the current node.
-  std::vector<AbstractNode *> parents{};
-
   /// A static ongoing counter that is incremented after creating a new AbstractNode object. The counter's value is used
   /// to build the unique node ID.
   static int nodeIdCounter;
 
   /// An identifier that is unique among all nodes during runtime.
+  /// Needs to be mutable, since it is constructed on-demand by the first call of getUniqueNode()
   mutable std::string uniqueNodeId;
 
   /// Generates a new node ID in the form "<NodeTypeName>_nodeIdCounter" where <NodeTypeName> is the value obtained by
@@ -42,239 +198,193 @@ class AbstractNode {
   /// \return The current ID as integer.
   static int getAndIncrementNodeId();
 
+ protected:
   /// Default Constructor, defines some default behavior for subclasses related to IDs
   AbstractNode();
 
  public:
-  /// Virtual Destructor, force class to be abstract
-  virtual ~AbstractNode() = 0;
-
-  /// Returns the node's type, which is the name of the object in the AST. This method must be overridden by all classes
-  /// that inherit from AbstractNode by their respective name (e.g., ArithmeticExp, Function, Variable).
-  /// \return The name of the node type.
-  [[nodiscard]] virtual std::string getNodeType() const = 0;
-
   /// Returns a node's unique ID, or generates it by calling generateUniqueNodeId() if the name was not defined yet.
   /// \return The node's name consisting of the node type and an ongoing number (e.g., Function_1).
   std::string getUniqueNodeId() const;
 
-  /// Resets the static node ID counter that is used to build the unique node ID.
-  /// This method is required for testing.
-  static void resetNodeIdCounter();
+  /** @} */ // End of nodeID group
+};
 
-  /** @defgroup parents Methods for handling children
-   *  @{
-   */
+/// BaseIteratorImpl is an abstract class that simply specifies the functions required in the wrapper
+template<typename T>
+class BaseIteratorImpl;
 
-  /// Indicates the number of children that are allowed for a specific node.
-  /// For example, a arithmetic expression accepts exactly three attributes and hence also exactly three children:
-  /// left operand, right operand, and operator.
-  /// If the node does not implement support for child/parent relationships, getMaxNumberChildren() return 0.
-  /// \return An integer indicating the number of allowed children for a specific node.
-  virtual int getMaxNumberChildren();
+/// Forward Iterator that redirects all calls to a (polymorphic) BaseIteratorImpl iterator
+template<typename T>
+class NodeIterator {
+ private:
+  /// Pointer to the actual iterator implementation, which depends on the derived class' data layout
+  std::unique_ptr<BaseIteratorImpl<T>> impl;
 
-  /// Returns a reference to the vector of children nodes.
-  /// \return A reference to the vector of this node's children.
-  [[nodiscard]] const std::vector<AbstractNode *> &getChildren() const;
+ public:
+  typedef std::ptrdiff_t difference_type;
+  typedef T value_type;
+  typedef T *pointer;
+  typedef T &reference;
+  typedef std::forward_iterator_tag iterator_category;
 
-  /// Returns a vector of pointers to children nodes but without those children that are nullptr.
-  /// \return A vector of non-nullptr children.
-  [[nodiscard]] std::vector<AbstractNode *> getChildrenNonNull() const;
+  /// A default constructed iterator is uninitialized and should not be used
+  NodeIterator() = default;
 
-  /// Returns all the descendants nodes of the current node, i.e., the children of the children and the children of
-  /// their children et cetera.
-  /// \return A list of descendant nodes.
-  std::vector<AbstractNode *> getDescendants();
+  /// Create a NodeIterator Wrapper from an IteratorImpl, taking ownership of the Impl
+  /// \param impl Pointer to an IteratorImpl
+  explicit NodeIterator(std::unique_ptr<BaseIteratorImpl<T>> impl) : impl(std::move(impl)) {};
 
-  /// Adds a new child node to the node's list of children. If addBackReference is True then also updates the child's
-  /// list of parent nodes.
-  /// \param child The node to be added as child.
-  /// \param addBackReference If True, then adds this node as parent to the child node.
-  void addChild(AbstractNode *child, bool addBackReference = true);
+  /// Copy constructor
+  NodeIterator(const NodeIterator &other) : impl(other.impl->clone()) {};
 
-  /// Adds multiple children to the node's list of children. If addBackReference is True then also updates the child's
-  /// list of parent nodes for each of the added children.
-  /// \param childrenToAdd A vector of nodes to be added as children to this node.
-  /// \param addBackReference If True, then adds this node as parent to each of the child nodes.
-  void addChildren(const std::vector<AbstractNode *> &childrenToAdd, bool addBackReference = true);
+  /// Move constructor
+  NodeIterator(NodeIterator &&other) noexcept: impl(std::move(other.impl)) {};
 
-  /// Adds multiple children to the node's list of children at the position (or more precisely, before) indicated by
-  /// the passed insertPosition iterator of the children vector. If addBackReference is True then also updates the
-  /// child's list of parent nodes for each of the added children.
-  /// \param childrenToAdd A vector of nodes to be added as children to this node.
-  /// \param addBackReference If True, then adds this node as parent to each of the child nodes.
-  /// \param insertPosition The position before which the new nodes should be added to.
-  void addChildren(const std::vector<AbstractNode *> &childrenToAdd, bool addBackReference,
-                   std::vector<AbstractNode *>::const_iterator insertPosition);
+  /// Copy assignment
+  NodeIterator &operator=(const NodeIterator &other) {
+    impl = other.impl->clone();
+  }
 
-  /// Adds multiple children to the node's list of children at the position (or more precisely, before) indicated by
-  /// the passed node  of the children vector. If addBackReference is True then also updates the
-  /// child's list of parent nodes for each of the added children.
-  /// \param childrenToAdd A vector of nodes to be added as children to this node.
-  /// \param addBackReference If True, then adds this node as parent to each of the child nodes.
-  /// \param insertBeforeNode The node (must be a children of this node) that is used to determine the insert
-  /// position of the children to be added.
-  /// \throws std::runtime_error if the given node (insertBeforeNode) could not be found.
-  void addChildren(const std::vector<AbstractNode *> &childrenToAdd, bool addBackReference,
-                   AbstractNode *insertBeforeNode);
+  /// Move assignment
+  NodeIterator &operator=(NodeIterator &&other) noexcept {
+    impl = std::move(other.impl);
+  }
 
-  /// Removes the given child from the list of children. If getMaxNumberChildren() returns -1 (i.e., this node supports
-  /// an inifinite number of children, then the respective child is simply deleted. In any other case, the child node is
-  /// overwritten by -1 such that the order of other children is preserved.
-  /// \param child The child to be removed from this node's children.
-  /// \param removeBackreference If True, then also removes this node from the children's list of parent nodes.
-  void removeChild(AbstractNode *child, bool removeBackreference = true);
+  /// Pre-increment
+  NodeIterator &operator++() {
+    impl->increment();
+    return *this;
+  }
 
-  /// Removes all children from this node. Note: Does not update the child's parent.
-  void removeChildren();
+  /// Post-increment
+  /// l-value ref-qualified because of
+  /// https://stackoverflow.com/questions/52871026/overloaded-operator-returns-a-non-const-and-clang-tidy-complains
+  NodeIterator<T> operator++(int) &{
+    NodeIterator tmp(*this);
+    impl->increment();
+    return tmp;
+  }
 
-  /// Replaces a given child (originalChild) of this node by a new node (newChild) and updates the child and
-  /// parent references of both nodes. This method does not invalidate iterators over the children
-  /// \param originalChild The node to be replaced by newChild.
-  /// \param newChild The node to be added at the same position as the original child was.
-  virtual void replaceChild(AbstractNode *originalChild, AbstractNode *newChild);
+  /// Equality
+  bool operator==(const NodeIterator &other) const {
+    return impl->equal(*other.impl);
+  }
 
-  /// Returns the number of children nodes that are not null (nullptr).
-  /// \return An integer indicating the number of non-nullptr children nodes.
-  [[nodiscard]] int countChildrenNonNull() const;
+  /// Inequality
+  bool operator!=(const NodeIterator &other) const {
+    return !(this->operator==(other));
+  }
 
-  /// Returns the child at the given index.
-  /// \param idx The position of the children in the AbstractNode::children vector.
-  /// \return The child at the given index of the children vector, or a nullptr if there is no child at this position.
-  [[nodiscard]] AbstractNode *getChildAtIndex(int idx) const;
+  /// Dereference
+  T &operator*() {
+    return **impl;
+  }
 
-  /// This special variant of getChildAtIndex returns the n-th parent instead of n-th child if isEdgeDirectionAware is
-  /// passed and is true, and the current node has the property isReversed set to True.
-  /// \param idx The position of the child to be retrieved.
-  /// \param isEdgeDirectionAware If the node's status of isReversed should be considered.
-  /// \return A reference to the node at the specified index in the children or parent vector.
-  [[nodiscard]] AbstractNode *getChildAtIndex(int idx, bool isEdgeDirectionAware) const;
-  /** @} */ // End of children group
+};
 
-  /** @defgroup parents Methods for handling Parents
-   *  @{
-   */
+/// BaseIteratorImpl is an abstract class that simply specifies the functions required in the wrapper
+template<typename T>
+class BaseIteratorImpl {
+ public:
+  virtual const T &getNode() const = 0;
+  virtual T &getNode() = 0;
+  virtual std::unique_ptr<BaseIteratorImpl> clone() = 0;
+  virtual void increment() = 0;
+  virtual bool equal(const BaseIteratorImpl &other) = 0;
+  virtual T &operator*() = 0;
+};
 
-  /// Returns a reference to the vector of parent nodes.
-  /// \return A reference to the vector of this node's parents.
-  [[nodiscard]] const std::vector<AbstractNode *> &getParents() const;
+/// EmptyIteratorImpl is a "dummy" iterator that can be used for node classes that do not have children
+/// Any two EmptyIteratorImpl for the same node will always be equal, i.e begin() == end() if used for begin/end
+template<typename T>
+class EmptyIteratorImpl : public BaseIteratorImpl<T> {
+ private:
+  T &node;
+ public:
+  explicit EmptyIteratorImpl(T &node) : node(node) {};
+  const T &getNode() const {
+    return node;
+  };
+  T &getNode() override {
+    return node;
+  }
+  std::unique_ptr<BaseIteratorImpl<T>> clone() override {
+    return std::make_unique<EmptyIteratorImpl<T>>(node);
+  }
+  void increment() override { /* do nothing */ };
+  bool equal(const BaseIteratorImpl<T> &other) override {
+    return getNode()==other.getNode();
+  };
+  T &operator*() override {
+    throw std::logic_error("Cannot dereference dummy iterator EmptyIteratorImpl.");
+  };
+};
 
-  /// Returns a vector of pointers to parent nodes but without those parents that are nullptr.
-  /// \return A vector of non-nullptr parent nodes.
-  [[nodiscard]] std::vector<AbstractNode *> getParentsNonNull() const;
+/// PositionIteratorImpl is a "default" iterator that can be used as a base class for iterators for node classes
+/// that have a fixed number of children held as named member variables.
+// Designed to be instantiated only with T = (const) AbstractNode
+template<typename T, typename NodeType>
+class PositionIteratorImpl : public BaseIteratorImpl<T> {
+ protected:
+  // Select const NodeType / NodeType depending on whether or not T is const/non-const
+  typedef typename std::conditional<std::is_const<T>::value, const NodeType, NodeType>::type N;
 
-  /// Returns all the ancestor nodes of the current node, i.e., the ancestors of this node, the ancestors of the
-  /// ancestors et cetera.
-  /// \return A list of ancestor nodes.
-  std::vector<AbstractNode *> getAncestors();
+  /// The node object that this iterator belongs to
+  N &node;
 
-  /// Adds a new parent to this node's list of parents.
-  /// \param parentToAdd The parent node to be added.
-  /// \param addBackreference If True, then also adds this node as child to the new parent node.
-  void addParent(AbstractNode *parentToAdd, bool addBackreference = true);
+  /// Indicates the current position
+  uint position = 0;
 
-  /// Removes a certain parent from this node.
-  /// \param parentToBeRemoved The node to be removed from this node's parents.
-  /// \param removeBackreference If True, then also removes this node from the parentToBeRemoved node's children list.
-  void removeParent(AbstractNode *parentToBeRemoved, bool removeBackreference = true);
+  T &getNode() override {
+    return node;
+  };
+  const T &getNode() const override {
+    return node;
+  };
 
-  /// Removes this node from its parent's children list. If removeParentBackreference is True, then also removes the
-  /// parents from this node's parent list.
-  /// \param removeParentBackreference Indicates whether to update this node's parents list too.
-  AbstractNode *removeFromParents(bool removeParentBackreference = true);
+ public:
+  PositionIteratorImpl(N &node, uint position) : node(node), position(position) {};
 
-  /// Removes all parents from this node. Note: Does not update the parent's children.
-  void removeParents();
+  void increment() override {
+    ++position;
+  }
 
-  /// Checks whether this node has a certain parent (parentNode).
-  /// \param parentNode The node that is searched for in this node's parent list.
-  /// \return True if this node has the given parentNode as parent, otherwise returns False.
-  bool hasParent(AbstractNode *parentNode);
-
-  /// Returns a pointer to the only parent node. If this node has more than one parent, then a std::logic_exception is
-  /// thrown.
-  /// \return A pointer to the node's only parent node.
-  AbstractNode *getOnlyParent();
-
-  /** @} */ // End of parents group
-
-  /// Swaps the children and parents vectors which corresponds to flipping the edges of this node.
-  /// Note: This should never be performed on individual nodes only but instead on the whole AST, see method
-  /// Ast::reverseEdges(). Keep in mind that most methods are not aware of this swapped relationship and do not work.
-  /// Use *getChildAtIndex(int idx, bool isEdgeDirectionAware) by specifying isEdgeDirectionAware=true to get a specific
-  /// child.
-  void swapChildrenParents();
-
-  /// Part of the visitor pattern.
-  /// Must be overridden in derived classes and must call v.visit(node).
-  /// This allows the correct overload for the derived class to be called in the visitor.
-  /// \param v Visitor that offers a visit() method
-  virtual void accept(Visitor &v) = 0;
-
-  /// Get the JSON representation of the node including all of its children.
-  /// \return JSON representation of the node
-  [[nodiscard]] virtual json toJson() const;
-
-  /// Returns a string representation of the node, if printChildren is True then calls toString for its children too.
-  /// Hence, toString(false) is equivalent to printing a node's attributes only.
-  /// \return A textual representation of the node.
-  [[nodiscard]] virtual std::string toString(bool printChildren) const;
-
-  /// Creates a flat copy of the node without including any parents or children.
-  /// \return A flat copy of this node.
-  [[nodiscard]] virtual AbstractNode *cloneFlat();
-
-  /// Clones a node recursively, i.e., by including all of its children.
-  /// \param keepOriginalUniqueNodeId Specifies whether to keep all of the unique node IDs of the original nodes.
-  /// \return A clone of the node including clones of all of its children.
-  [[nodiscard]] virtual AbstractNode *clone(bool keepOriginalUniqueNodeId) const = 0;
-
-  /// Method that updates a cloned node. Must be called within each derived clone() method.
-  /// \param keepOriginalUniqueNodeId Determines whether to replace the cloned node's unique node ID by the ID of the
-  ///        original node.
-  /// \param originalNode The node of which the cloned node is based on.
-  void updateClone(bool keepOriginalUniqueNodeId, const AbstractNode *originalNode);
-
-  /// Sets the uniqueNodeId attribute. This attribute should be auto-generated by generateUniqueNodeId().
-  /// \param newUniqueNodeId The new unique node's identifier.
-  void setUniqueNodeId(const std::string &newUniqueNodeId);
-
-  /// This method returns True iff the class derived from the AbstractNode class properly makes use of the child/parent
-  /// fields as it would be expected in a circuit.
-  virtual bool supportsCircuitMode();
-
-  /// Indicates whether the edges of this node are reversed compared to its initial state.
-  bool isReversed{false};
-
-  /// Removes this node from all of its parents and children, and also removes all parents and children from this node.
-  void isolateNode();
-
-  /// Checks whether the edges of this node are reversed (i.e., node's parents and children are swapped).
-  /// \return True iff the node's edges are reversed.
-  [[nodiscard]] bool hasReversedEdges() const;
-
-  /// Casts a node to type T which must be the specific derived class of the node to cast successfully.
-  /// \tparam T The derived class of the node object.
-  /// \return A pointer to the casted object, or a std::logic_error if cast was unsuccessful.
-  template<typename T>
-  T *castTo() {
-    if (auto castedNode = dynamic_cast<T *>(this)) {
-      return castedNode;
+  bool equal(const BaseIteratorImpl<T> &other) override {
+    if (node==other.getNode()) {
+      auto otherNodePtr = dynamic_cast<const PositionIteratorImpl *>(&other);
+      assert(otherNodePtr); // If the other node has the same type, the Iterator must be the same type, too
+      return (position==otherNodePtr->position);
     } else {
-      std::stringstream outputMsg;
-      outputMsg << "Cannot cast object of type AbstractNode to given class ";
-      outputMsg << typeid(T).name() << ". ";
-      outputMsg << "Because node (" << this->getUniqueNodeId() << ") is of type ";
-      outputMsg << this->getNodeType() << ".";
-      throw std::logic_error(outputMsg.str());
+      return false;
     }
   }
 
-  /// Generates an output string to be used by the toString() method.
-  /// \param printChildren Specifies whether to print details of this node only (False) or also its children (True).
-  /// \param attributes The node's attributes to be printed (fields in the node's class).
-  /// \return A string representation of the node.
-  [[nodiscard]] std::string generateOutputString(bool printChildren, std::vector<std::string> attributes) const;
+  T &operator*() override  = 0;
+  /* The dereference function needs to be overridden, similar to the example below:
+    switch (position) {
+      case 0:
+        if (node.hasTarget())
+          return node.getTarget();
+        else if (node.hasValue())
+          return node.getValue();
+        else
+          throw std::runtime_error("Cannot dereference iterator since node has no children.");
+      case 1:
+        if (node.hasTarget())
+          if (node.hasValue())
+            return node.getValue();
+        // If there is no target, then position 1 is past end even if value exists
+        // If there is target, but no value, we're also past end, so just continue into default
+      default:
+        // calling dereference on higher elements is an error
+        throw std::runtime_error("Trying to dereference iterator past end.");
+    }
+  }
+  */
+
+  std::unique_ptr<BaseIteratorImpl<T>> clone() override = 0;
+  // Deriving class needs to implement this, returning a new copy of themselves
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_ABSTRACTNODE_H_

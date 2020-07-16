@@ -1,28 +1,20 @@
 #ifndef AST_OPTIMIZER_INCLUDE_AST_OPT_AST_ABSTRACTSTATEMENT_H_
 #define AST_OPTIMIZER_INCLUDE_AST_OPT_AST_ABSTRACTSTATEMENT_H_
-
-#include <string>
-#include <nlohmann/json.hpp>
-#include "ast_opt/visitor/Visitor.h"
 #include "ast_opt/ast/AbstractNode.h"
-#include "ast_opt/ast/AbstractBinaryExpr.h"
 
-using json = nlohmann::json;
-
+/// This class merely structures the inheritance hierarchy
 class AbstractStatement : public AbstractNode {
  public:
-  [[nodiscard]] json toJson() const override;
-
-  virtual AbstractBinaryExpr *contains(AbstractBinaryExpr *aexpTemplate, ArithmeticExpr *excludedSubtree);
-
-  virtual bool isEqual(AbstractStatement *as);
+  /// Clones a node recursively, i.e., by including all of its children.
+  /// Because return-type covariance does not work with smart pointers,
+  /// derived classes are expected to introduce a std::unique_ptr<DerivedNode> clone() method that hides this (for use with derived class ptrs/refs)
+  /// \return A clone of the node including clones of all of its children.
+  inline std::unique_ptr<AbstractStatement> clone() const {
+    return std::unique_ptr<AbstractStatement>(clone_impl());
+  }
+ private:
+  /// Refines return type to AbstractStatement
+  AbstractStatement *clone_impl() const override = 0;
 };
-
-std::ostream &operator<<(std::ostream &outs, const AbstractStatement &obj);
-
-/// JSON representation to be used for vector<AbstractStatement> objects.
-void to_json(json &j, const AbstractStatement &absStat);
-
-void to_json(json &j, const AbstractStatement *absStat);
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_ABSTRACTSTATEMENT_H_

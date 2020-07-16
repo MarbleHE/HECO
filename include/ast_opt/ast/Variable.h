@@ -4,42 +4,63 @@
 #include <map>
 #include <string>
 #include <vector>
-#include "AbstractExpr.h"
-#include "Matrix.h"
+#include "ast_opt/ast/AbstractTarget.h"
 
-class Variable : public AbstractExpr {
+class Variable : public AbstractTarget {
  private:
+  /// Name of this variable
   std::string identifier;
 
+  /// Creates a deep copy of the current node
+  /// Should be used only by Nodes' clone()
+  /// \return a copy of the current node
+  Variable *clone_impl() const override;
+
  public:
-  explicit Variable(std::string identifier);
-
-  [[nodiscard]] json toJson() const override;
-
+  /// Destructor
   ~Variable() override;
 
-  Variable *clone(bool keepOriginalUniqueNodeId) const override;
+  /// Create a variable with name identifier
+  /// \param identifier Variable name, can be any valid string
+  explicit Variable(std::string identifier);
 
-  void accept(Visitor &v) override;
+  /// Copy constructor
+  /// \param other Variable to copy
+  Variable(const Variable &other);
 
-  [[nodiscard]] std::string getNodeType() const override;
+  /// Move constructor
+  /// \param other Variable to copy
+  Variable(Variable &&other) noexcept ;
+
+  /// Copy assignment
+  /// \param other Variable to copy
+  /// \return This object
+  Variable &operator=(const Variable &other);
+
+  /// Move assignment
+  /// \param other Variable to move
+  /// \return This object
+  Variable &operator=(Variable &&other)  noexcept;
+
+  /// Deep copy of the current node
+  /// \return A deep copy of the current node
+  std::unique_ptr<Variable> clone() const;
 
   [[nodiscard]] std::string getIdentifier() const;
 
-  bool operator==(const Variable &rhs) const;
-
-  bool operator!=(const Variable &rhs) const;
-
-  bool contains(Variable *var) override;
-
-  bool isEqual(AbstractExpr *other) override;
-
-  std::vector<std::string> getVariableIdentifiers() override;
-
-  [[nodiscard]] std::string toString(bool printChildren) const override;
-
-  bool supportsCircuitMode() override;
-  std::vector<Variable *> getVariables() override;
+  ///////////////////////////////////////////////
+  ////////// AbstractNode Interface /////////////
+  ///////////////////////////////////////////////
+  void accept(IVisitor &v) override;
+  iterator begin() override;
+  const_iterator begin() const override;
+  iterator end() override;
+  const_iterator end() const override;
+  size_t countChildren() const override;
+  nlohmann::json toJson() const override;
+  std::string toString(bool printChildren) const override;
+ protected:
+  std::string getNodeType() const override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_VARIABLE_H_

@@ -5,114 +5,35 @@
 #include <sstream>
 #include <string>
 #include <utility>
-#include "ast_opt/visitor/Visitor.h"
+
 #include "ast_opt/ast/AbstractNode.h"
+#include "ast_opt/visitor/Visitor.h"
 
-class PrintVisitor : public Visitor {
+
+/// Forward declaration of the class that will actually implement the PrintVisitor's logic
+class SpecialPrintVisitor;
+
+/// PrintVisitor uses the Visitor<T> template to allow specifying default behaviour
+typedef Visitor<SpecialPrintVisitor> PrintVisitor;
+
+class SpecialPrintVisitor : public ScopedVisitor {
  private:
-  int level;
-  Scope *lastPrintedScope;
-  std::stringstream ss;
-  bool printScreen;
-  bool showUniqueNodeIds{false};
+  /// Reference to the stream to which we write the output
+  std::ostream& os;
 
- public:
-  std::pair<int, int> nextMatrixIndexToBePrinted{0, 0};
+  /// Current indentation level
+  int indentation_level = 0;
 
-  PrintVisitor();
-
-  explicit PrintVisitor(bool printScreen);
-
-  virtual ~PrintVisitor();
-
-  void visit(Ast &elem) override;
-
-  void visit(ArithmeticExpr &elem) override;
-
-  void visit(Block &elem) override;
-
-  void visit(Call &elem) override;
-
-  void visit(Datatype &elem) override;
-
-  void visit(CallExternal &elem) override;
-
-  void visit(Function &elem) override;
-
-  void visit(FunctionParameter &elem) override;
-
-  void visit(If &elem) override;
-
-  void visit(LiteralBool &elem) override;
-
-  void visit(LiteralInt &elem) override;
-
-  void visit(LiteralString &elem) override;
-
-  void visit(LiteralFloat &elem) override;
-
-  void visit(LogicalExpr &elem) override;
-
-  void visit(Operator &elem) override;
-
-  void visit(Return &elem) override;
-
-  void visit(UnaryExpr &elem) override;
-
-  void visit(VarAssignm &elem) override;
-
-  void visit(VarDecl &elem) override;
-
-  void visit(Variable &elem) override;
-
-  void visit(While &elem) override;
-
-  void visit(GetMatrixSize &elem) override;
-
-  void incrementLevel();
-
-  void decrementLevel();
-
-  void resetLevel();
-
+  /// Compute the current required indentation string
+  /// from the current indentation_level
   std::string getIndentation();
 
-  void addOutputStr(AbstractNode &node, const std::list<std::string> &args);
+ public:
+  explicit SpecialPrintVisitor(std::ostream& os);
 
-  [[nodiscard]] Scope *getLastPrintedScope() const;
+  /// We only need one behaviour, therefore we provide a function only for the top level of the class hierarchy
+  void visit(AbstractNode&);
 
-  void setLastPrintedScope(Scope *scope);
-
-  template<typename T>
-  void printChildNodesIndented(T &elem);
-
-  std::string getOutput() const;
-
-  void resetVisitor();
-
-  void printScope();
-
-  void addOutputStr(AbstractNode &node);
-
-  void printNodeName(AbstractNode &node);
-
-  void useUniqueNodeIds(bool value);
-
-  void visit(For &elem) override;
-
-  void visit(ParameterList &elem) override;
-
-  void visit(Rotate &elem) override;
-
-  void visit(Transpose &elem) override;
-
-  void visit(MatrixElementRef &elem) override;
-
-  void printMatrixIndex();
-
-  void visit(OperatorExpr &elem) override;
-
-  void visit(MatrixAssignm &elem) override;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_VISITOR_PRINTVISITOR_H_
