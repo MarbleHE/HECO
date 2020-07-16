@@ -28,7 +28,7 @@ class Literal : public AbstractExpression {
 
  public:
   /// Destructor
-  ~Literal() override {};
+  ~Literal() override = default;
 
   //TODO: Template magic to decide if there's a default value (free function?)
   /// Default constructor
@@ -123,7 +123,7 @@ class Literal : public AbstractExpression {
     return j;
   }
 
-  std::string toString(bool printChildren) const {
+  std::string toString(bool printChildren) const override {
     std::stringstream ss;
     ss << std::boolalpha; // Ensure that bools are printed as true/false instead of 1/0
     ss << value; // Since there is no toString on builtins

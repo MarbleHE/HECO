@@ -4,7 +4,7 @@
 
 UnaryExpression::~UnaryExpression() = default;
 
-UnaryExpression::UnaryExpression(std::unique_ptr<AbstractExpression> Operand, Operator op)
+UnaryExpression::UnaryExpression(std::unique_ptr<AbstractExpression> operand, Operator op)
     : operand(std::move(operand)), op(op) {}
 
 UnaryExpression::UnaryExpression(const UnaryExpression &other)

@@ -17,7 +17,8 @@ project(ast_optimizer
 
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules" ${CMAKE_MODULE_PATH})
 
-set(CXXFLAGS "--coverage")
+# Global flags aren't good CMAKE style, but these should work across pretty much all compilers
+set(CXXFLAGS "--coverage --pedantic-errors -WError")
 
 if (MSVC)
     message("Using MSVC")

@@ -305,7 +305,7 @@ class EmptyIteratorImpl : public BaseIteratorImpl<T> {
  public:
   virtual ~EmptyIteratorImpl() = default;
   explicit EmptyIteratorImpl(T &node) : node(node) {};
-  const T &getNode() const {
+  const T &getNode() const override {
     return node;
   };
   T &getNode() override {
