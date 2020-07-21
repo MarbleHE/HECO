@@ -46,6 +46,11 @@ endif ()
 target_link_libraries(testing-all PRIVATE gtest ast_opt gtest_main)
 target_include_directories(testing-all PRIVATE ${ast_optimizer_SOURCE_DIR}/include/)
 
+if(MSVC)
+# Mark gtest as external
+target_compile_options(testing-all PRIVATE /external:I${gtest_SOURCE_DIR}/include)
+endif()
+
 # create ctest targets
 gtest_discover_tests(testing-all TEST_PREFIX gtest:)
 

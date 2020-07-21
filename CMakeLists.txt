@@ -1,14 +1,14 @@
-cmake_minimum_required (VERSION 3.9...3.17)
+cmake_minimum_required(VERSION 3.9...3.17)
 
 # For older versions that do not automatically use highest allowed policy
-if(${CMAKE_VERSION} VERSION_LESS 3.12)
+if (${CMAKE_VERSION} VERSION_LESS 3.12)
     cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
-endif()
+endif ()
 
 # Required for selecting MSVC runtime library
 if (MSVC)
     cmake_policy(SET CMP0091 NEW)
-endif()
+endif ()
 
 project(ast_optimizer
         VERSION 0.1
@@ -18,7 +18,7 @@ project(ast_optimizer
 set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules" ${CMAKE_MODULE_PATH})
 
 # Global flags aren't good CMAKE style, but these should work across pretty much all compilers
-set(CXXFLAGS "--coverage --pedantic-errors -WError")
+set(CXXFLAGS "--coverage --pedantic-errors -Wall -WError")
 
 if (MSVC)
     message("Using MSVC")
@@ -31,6 +31,17 @@ if (MSVC)
 
     # Force MSVC to use slightly less broken template rules
     add_compile_options(/permissive-)
+
+    # Force MSVC to conform to C++ standard's idea of exceptions
+    add_compile_options(/EHsc)
+
+    # Make (nearly) all warnings errors
+    add_compile_options(/W4 /WX)
+
+    # Mark system headers as external
+    # Treats all #include <..> as system includes, so requires some care from developers
+    add_compile_options(/experimental:external /external:anglebrackets /external:W0)
+
 endif ()
 
 ##############################
@@ -117,7 +128,7 @@ if (SEAL_FOUND)
     target_link_libraries(ast_opt PUBLIC ${SEAL_LIBRARIES})
     target_compile_definitions(ast_opt PUBLIC -DHAVE_SEAL_BFV)
     target_compile_definitions(ast_opt PUBLIC -DHAVE_SEAL_CKKS)
-endif(SEAL_FOUND)
+endif (SEAL_FOUND)
 
 ####################################################################################
 ## ast_opt installation
