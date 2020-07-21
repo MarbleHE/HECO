@@ -132,7 +132,7 @@ AbstractNode::const_iterator BinaryExpression::end() const {
 }
 
 size_t BinaryExpression::countChildren() const {
-  return hasLeft() + hasRight();
+  return size_t(hasLeft()) + hasRight();
 }
 
 nlohmann::json BinaryExpression::toJson() const {

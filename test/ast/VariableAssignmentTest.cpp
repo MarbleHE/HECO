@@ -105,6 +105,7 @@ TEST(VariableAssignmentTest, node_countChildrenReportsCorrectNumber) {
   // (indirectly via range-based for loop for conciseness)
   size_t actual_count = 0;
   for(auto &c: assignment) {
+    c = c; // Use c to suppress warning
     ++actual_count;
   }
 

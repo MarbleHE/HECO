@@ -1,7 +1,6 @@
 #include "ast_opt/ast/Literal.h"
 #include "gtest/gtest.h"
 
-
 TEST(LiteralTest, typedefCheck) {
   // There are several typedefs of the Literal<T> template for specific Ts
   // This is mostly for readability and legacy support of code written pre-templatization
@@ -33,7 +32,7 @@ TEST(LiteralTest, values_ValueGivenInCtorIsRetrievable) {
   Literal<std::string> s("Hello World!");
 
   EXPECT_EQ(i.getValue(), 42);
-  EXPECT_EQ(s.getValue(),"Hello World!");
+  EXPECT_EQ(s.getValue(), "Hello World!");
 }
 
 TEST(LiteralTest, values_SetAndGet) {
@@ -47,7 +46,7 @@ TEST(LiteralTest, values_SetAndGet) {
   i.setValue(1);
   s.setValue("Goodbye!");
 
-  EXPECT_EQ(i.getValue(),1);
+  EXPECT_EQ(i.getValue(), 1);
   EXPECT_EQ(s.getValue(), "Goodbye!");
 }
 
@@ -62,7 +61,7 @@ TEST(LiteralTest, values_CopyCtorCopiesValue) {
   Literal<int> i_copy(i);
   Literal<std::string> s_copy(s);
 
-  EXPECT_EQ(i_copy.getValue(),42);
+  EXPECT_EQ(i_copy.getValue(), 42);
   EXPECT_EQ(s_copy.getValue(), "Hello World!");
 }
 
@@ -79,7 +78,7 @@ TEST(LiteralTest, values_CopyAssignmentCopiesValue) {
   i_copy = i;
   s_copy = s;
 
-  EXPECT_EQ(i_copy.getValue(),42);
+  EXPECT_EQ(i_copy.getValue(), 42);
   EXPECT_EQ(s_copy.getValue(), "Hello World!");
 }
 
@@ -94,7 +93,7 @@ TEST(LiteralTest, values_MoveCtorPreservesValue) {
   Literal<int> i_new(std::move(i));
   Literal<std::string> s_new(std::move(s));
 
-  EXPECT_EQ(i_new.getValue(),42);
+  EXPECT_EQ(i_new.getValue(), 42);
   EXPECT_EQ(s_new.getValue(), "Hello World!");
 }
 
@@ -111,7 +110,7 @@ TEST(LiteralTest, values_MoveAssignmentPreservesValue) {
   i_new = std::move(i);
   s_new = std::move(s);
 
-  EXPECT_EQ(i_new.getValue(),42);
+  EXPECT_EQ(i_new.getValue(), 42);
   EXPECT_EQ(s_new.getValue(), "Hello World!");
 }
 
@@ -124,11 +123,12 @@ TEST(LiteralTest, node_countChildrenReportsCorrectNumber) {
   // Iterate through all the children using the iterators
   // (indirectly via range-based for loop for conciseness)
   size_t actual_count = 0;
-  for(auto &c: i) {
+  for (auto &c: i) {
+    c = c; // Use c to suppress warning
     ++actual_count;
   }
 
-  EXPECT_EQ(reported_count,actual_count);
+  EXPECT_EQ(reported_count, actual_count);
 }
 
 TEST(LiteralTest, node_literalsAreLeafNodes) {
@@ -136,22 +136,22 @@ TEST(LiteralTest, node_literalsAreLeafNodes) {
 
   Literal<int> i(42);
 
-  EXPECT_EQ(i.countChildren(),0);
+  EXPECT_EQ(i.countChildren(), 0);
 }
 
 TEST(LiteralTest, JsonOutputTestLiteralInt) { /* NOLINT */
   int val = 2;
   auto *lint = new LiteralInt(val);
   nlohmann::json j = {{"type", "LiteralInt"},
-            {"value", val}};
+                      {"value", val}};
   EXPECT_EQ(lint->toJson(), j);
 }
 
 TEST(LiteralTest, JsonOutputTestLiteralFloat) { /* NOLINT */
-  float val = 33.214;
+  float val = 33.214f;
   auto *lint = new LiteralFloat(val);
   nlohmann::json j = {{"type", "LiteralFloat"},
-            {"value", val}};
+                      {"value", val}};
   EXPECT_EQ(lint->toJson(), j);
 }
 
@@ -159,7 +159,7 @@ TEST(LiteralTest, JsonOutputTestLiteralBool) { /* NOLINT */
   bool val = true;
   auto *lbool = new LiteralBool(val);
   nlohmann::json j = {{"type", "LiteralBool"},
-            {"value", val}};
+                      {"value", val}};
   EXPECT_EQ(lbool->toJson(), j);
 }
 
@@ -167,6 +167,6 @@ TEST(LiteralTest, JsonOutputTestLiteralString) { /* NOLINT */
   std::string val = "hello world!";
   auto *lString = new LiteralString(val);
   nlohmann::json j = {{"type", "LiteralString"},
-            {"value", val}};
+                      {"value", val}};
   EXPECT_EQ(lString->toJson(), j);
 }

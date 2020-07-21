@@ -76,6 +76,7 @@ TEST(IfTest, countChildrenReportsCorrectNumber) {
   // (indirectly via range-based for loop for conciseness)
   size_t actual_count = 0;
   for (auto &c: iff) {
+    c = c; // Use c to suppress warning
     ++actual_count;
   }
 
@@ -94,7 +95,6 @@ TEST(IfTest, JsonOutputTest) { /* NOLINT */
   If iff(std::make_unique<LiteralBool>(true),
          std::make_unique<Block>(variableDeclaration1.clone()),
          std::make_unique<Block>(variableDeclaration2.clone()));
-  auto reported_count = iff.countChildren();
 
   nlohmann::json j = {{"type", "If"},
                       {"condition", {
@@ -123,5 +123,6 @@ TEST(IfTest, JsonOutputTest) { /* NOLINT */
                           }
                       }
                       }};
+
   EXPECT_EQ(iff.toJson(), j);
 }

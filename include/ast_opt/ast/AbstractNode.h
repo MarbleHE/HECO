@@ -336,7 +336,7 @@ class PositionIteratorImpl : public BaseIteratorImpl<T> {
   N &node;
 
   /// Indicates the current position
-  unsigned int position = 0;
+  size_t position = 0;
 
   T &getNode() override {
     return node;
@@ -348,7 +348,7 @@ class PositionIteratorImpl : public BaseIteratorImpl<T> {
  public:
   virtual ~PositionIteratorImpl() = default;
 
-  PositionIteratorImpl(N &node, unsigned int position) : node(node), position(position) {};
+  PositionIteratorImpl(N &node, size_t position) : node(node), position(position) {};
 
   void increment() override {
     ++position;

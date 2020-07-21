@@ -84,7 +84,7 @@ size_t AstTestingGenerator::getLargestId() {
   return call.size();
 }
 
-void AstTestingGenerator::genSuperSimpleAst(AbstractNode &ast) {
+void AstTestingGenerator::genSuperSimpleAst(AbstractNode &) {
 //  // float getPiApproximated()
 //  auto func = new Function("getPiApproximated");
 //  // return 3.14159265359;
@@ -92,7 +92,7 @@ void AstTestingGenerator::genSuperSimpleAst(AbstractNode &ast) {
 //  ast = func;
 }
 
-void AstTestingGenerator::genAstRewritingOne(AbstractNode &ast) {
+void AstTestingGenerator::genAstRewritingOne(AbstractNode &) {
 //  // int computePrivate(int inputA, int inputB, int inputC)
 //  auto func = new Function("computePrivate");
 //  auto funcParams = new ParameterList();
@@ -123,7 +123,7 @@ void AstTestingGenerator::genAstRewritingOne(AbstractNode &ast) {
 //  ast = func;
 }
 
-void AstTestingGenerator::genAstRewritingTwo(AbstractNode &ast) {
+void AstTestingGenerator::genAstRewritingTwo(AbstractNode &) {
 //  // int computePrivate(int inputA, int inputB, int inputC)
 //  auto func = new Function("computePrivate");
 //  auto funcParams = new ParameterList();
@@ -158,7 +158,7 @@ void AstTestingGenerator::genAstRewritingTwo(AbstractNode &ast) {
 //  ast = func;
 }
 
-void AstTestingGenerator::genAstRewritingThree(AbstractNode &ast) {
+void AstTestingGenerator::genAstRewritingThree(AbstractNode &) {
 //  // int computePrivate(int inputA, int inputB, int inputC)
 //  auto func = new Function("computePrivate");
 //  auto funcParams = new ParameterList();
@@ -197,7 +197,7 @@ void AstTestingGenerator::genAstRewritingThree(AbstractNode &ast) {
 //  ast = func;
 }
 
-void AstTestingGenerator::genAstRewritingFour(AbstractNode &ast) {
+void AstTestingGenerator::genAstRewritingFour(AbstractNode &) {
 //  // int computePrivate(int inputA, int inputB, int inputC)
 //  auto func = new Function("computePrivate");
 //  auto funcParams = new ParameterList();
@@ -235,7 +235,7 @@ void AstTestingGenerator::genAstRewritingFour(AbstractNode &ast) {
 //  ast = func;
 }
 
-void AstTestingGenerator::genAstRewritingFive(AbstractNode &ast) {
+void AstTestingGenerator::genAstRewritingFive(AbstractNode &) {
 //  // int computePrivate(int inputA, int inputB, int inputC)
 //  auto func = new Function("computePrivate");
 //  auto funcParams = new ParameterList();
@@ -270,7 +270,7 @@ void AstTestingGenerator::genAstRewritingFive(AbstractNode &ast) {
 //  ast = func;
 }
 
-void AstTestingGenerator::genAstRewritingSix(AbstractNode &ast) {
+void AstTestingGenerator::genAstRewritingSix(AbstractNode &) {
 //  // int computePrivate(int inputA, int inputB, int inputC)
 //  auto func = new Function("computePrivate");
 //  auto funcParams = new ParameterList();
@@ -305,7 +305,7 @@ void AstTestingGenerator::genAstRewritingSix(AbstractNode &ast) {
 //  ast = func;
 }
 
-void AstTestingGenerator::genAstEvalOne(AbstractNode &ast) {
+void AstTestingGenerator::genAstEvalOne(AbstractNode &) {
 //  // int computePrivate(int inputA, int inputB, int inputC)
 //  auto func = new Function("computeAvg");
 //  auto funcParams = new ParameterList();
@@ -336,7 +336,7 @@ void AstTestingGenerator::genAstEvalOne(AbstractNode &ast) {
 //  ast = func;
 }
 
-void AstTestingGenerator::genAstEvalTwo(AbstractNode &ast) {
+void AstTestingGenerator::genAstEvalTwo(AbstractNode &) {
 //  // int computePrivate(int inputA, int inputB, int inputC)
 //  auto func = new Function("computePrivate");
 //  auto funcParams = new ParameterList();
@@ -377,7 +377,7 @@ void AstTestingGenerator::genAstEvalTwo(AbstractNode &ast) {
 //  ast = func;
 }
 
-void AstTestingGenerator::genAstEvalThree(AbstractNode &ast) {
+void AstTestingGenerator::genAstEvalThree(AbstractNode &) {
   // bool computeLogical(int inputA, bool strong, bool negate, int inputB)
   //    if (strong == true) {
   //       inputA = inputA * 42;
@@ -434,7 +434,7 @@ void AstTestingGenerator::genAstEvalThree(AbstractNode &ast) {
 //  ast = func;
 }
 
-void AstTestingGenerator::genAstEvalFour(AbstractNode &ast) {
+void AstTestingGenerator::genAstEvalFour(AbstractNode &) {
 //  auto func = new Function("concatString");
 //  auto funcParams = new ParameterList();
 //  funcParams->addParameter(
@@ -453,7 +453,7 @@ void AstTestingGenerator::genAstEvalFour(AbstractNode &ast) {
 //  ast = func;
 }
 
-void AstTestingGenerator::genAstEvalFive(AbstractNode &ast) {
+void AstTestingGenerator::genAstEvalFive(AbstractNode &) {
 //  // int determineSuitableX(int encryptedA, int encryptedB) {...}
 //  Function *func = dynamic_cast<Function *>(ast.setRootNode(new Function("determineSuitableX")));
 //  func->addParameter(
@@ -508,7 +508,7 @@ void AstTestingGenerator::genAstEvalFive(AbstractNode &ast) {
 //      new Return(new Variable("sum")));
 }
 
-void AstTestingGenerator::genAstEvalSix(AbstractNode &ast) {
+void AstTestingGenerator::genAstEvalSix(AbstractNode &) {
   // int nestedCall() { ...
 //  auto *fnc = new Function("nestedCall");
 //  ast.setRootNode(fnc);
@@ -529,7 +529,7 @@ void AstTestingGenerator::genAstEvalSix(AbstractNode &ast) {
 //  fnc->addStatement(new Return(new Variable("result")));
 }
 
-void AstTestingGenerator::genAstEvalSeven(AbstractNode &ast) {
+void AstTestingGenerator::genAstEvalSeven(AbstractNode &) {
 //  // int nestedCall() { ...
 //  auto *fnc = new Function("nestedCall");
 //  ast.setRootNode(fnc);
@@ -556,7 +556,7 @@ void AstTestingGenerator::genAstEvalSeven(AbstractNode &ast) {
 //  fnc->addStatement(new Return(new Variable("result")));
 }
 
-void AstTestingGenerator::genAstPrintVisitorOne(AbstractNode &ast) {
+void AstTestingGenerator::genAstPrintVisitorOne(AbstractNode &) {
 //  // int computePrivate(int x) { ... }
 //  Function *func = dynamic_cast<Function *>(ast.setRootNode(new Function("computePrivate")));
 //  func->addParameter(new FunctionParameter("int", new Variable("x")));
@@ -593,7 +593,7 @@ void AstTestingGenerator::genAstPrintVisitorOne(AbstractNode &ast) {
 //  func->addStatement(new Return(new Variable("k")));
 }
 
-void AstTestingGenerator::genAstPrintVisitorTwo(AbstractNode &ast) {
+void AstTestingGenerator::genAstPrintVisitorTwo(AbstractNode &) {
 //// int determineSuitableX(int encryptedA, int encryptedB) {...}
 //  Function *func = dynamic_cast<Function *>(ast.setRootNode(new Function("determineSuitableX")));
 //  func->addParameter(new FunctionParameter("int", new Variable("encryptedA")));
@@ -660,7 +660,7 @@ void AstTestingGenerator::genAstPrintVisitorTwo(AbstractNode &ast) {
 //      new Return(new Variable("sum")));
 }
 
-void AstTestingGenerator::genAstMultDepthOne(AbstractNode &ast) {
+void AstTestingGenerator::genAstMultDepthOne(AbstractNode &) {
 //  // int computePrivate(int inputA, int inputB, int inputC)
 //  auto func = new Function("computePrivate");
 //  auto funcParams = new ParameterList();
@@ -695,7 +695,7 @@ void AstTestingGenerator::genAstMultDepthOne(AbstractNode &ast) {
 //  ast = func;
 }
 
-void AstTestingGenerator::genAstMultDepthTwo(AbstractNode &ast) {
+void AstTestingGenerator::genAstMultDepthTwo(AbstractNode &) {
 //  // int computePrivate(int inputA, int inputB, int inputC)
 //  auto func = new Function("computePrivate");
 //  auto funcParams = new ParameterList();
@@ -761,7 +761,7 @@ void AstTestingGenerator::genAstMultDepthTwo(AbstractNode &ast) {
 //  ast = func;
 }
 
-void AstTestingGenerator::genAstRewritingSimple(AbstractNode &ast) {
+void AstTestingGenerator::genAstRewritingSimple(AbstractNode &) {
   // -----------------------------
   // Schematic diagram of the AST
   // -----------------------------
@@ -806,7 +806,7 @@ void AstTestingGenerator::genAstRewritingSimple(AbstractNode &ast) {
 //  ast.setRootNode(returnStatement);
 }
 
-void AstTestingGenerator::genAstRewritingSimpleExtended(AbstractNode &ast) {
+void AstTestingGenerator::genAstRewritingSimpleExtended(AbstractNode &) {
   // -----------------------------
   // Schematic diagram of the AST
   // -----------------------------
@@ -869,7 +869,7 @@ void AstTestingGenerator::genAstRewritingSimpleExtended(AbstractNode &ast) {
 //  ast.setRootNode(returnStatement);
 }
 
-void AstTestingGenerator::genAstRewritingMultiInputY(AbstractNode &ast) {
+void AstTestingGenerator::genAstRewritingMultiInputY(AbstractNode &) {
 //  auto *returnStatement = new Return(new LogicalExpr(
 //      new LogicalExpr(
 //
@@ -918,7 +918,7 @@ void AstTestingGenerator::genAstRewritingMultiInputY(AbstractNode &ast) {
 //  ast.setRootNode(returnStatement);
 }
 
-void AstTestingGenerator::genAstRewritingTwoDepth2ConesButSingleVNode(AbstractNode &ast) {
+void AstTestingGenerator::genAstRewritingTwoDepth2ConesButSingleVNode(AbstractNode &) {
 //  AbstractExpression *aCone = new LogicalExpr(  // level 1
 //      new LogicalExpr(
 //
@@ -1026,7 +1026,7 @@ void AstTestingGenerator::genAstRewritingTwoDepth2ConesButSingleVNode(AbstractNo
 ///     return discountRate;
 ///   }
 /// \endcode
-void AstTestingGenerator::genAstForSecretTaintingWithMultipleNonSequentialStatements(AbstractNode &ast) {
+void AstTestingGenerator::genAstForSecretTaintingWithMultipleNonSequentialStatements(AbstractNode &) {
 //// int determineSuitableX(int encryptedA, int encryptedB) {...}
 //  auto funcComputeTotal = dynamic_cast<Function *>(ast.setRootNode(new Function("computeTotal")));
 //  funcComputeTotal->addParameter(new FunctionParameter(new Datatype(Types::INT, false), new Variable("subtotal")));
@@ -1085,7 +1085,7 @@ void AstTestingGenerator::genAstForSecretTaintingWithMultipleNonSequentialStatem
 //                                    new Variable("discount"))));
 }
 
-void AstTestingGenerator::genAstIncludingForStatement(AbstractNode &ast) {
+void AstTestingGenerator::genAstIncludingForStatement(AbstractNode &) {
 //    sumNTimes2(int inputA) {
 //      int sum = 0;
 //      int base = 2;
@@ -1135,7 +1135,7 @@ void AstTestingGenerator::genAstIncludingForStatement(AbstractNode &ast) {
 //  ast = func;
 }
 
-void AstTestingGenerator::genAstUsingRotation(AbstractNode &ast) {
+void AstTestingGenerator::genAstUsingRotation(AbstractNode &) {
   // rotateVec(int inputA) {
   //   int sumVec = {{1, 7, 3}};   // [1 7 3]
   //   return sumVec.rotate(1);    // [3 1 7]
@@ -1152,7 +1152,7 @@ void AstTestingGenerator::genAstUsingRotation(AbstractNode &ast) {
 //  ast = func;
 }
 
-void AstTestingGenerator::genAstRotateAndSum(AbstractNode &ast) {
+void AstTestingGenerator::genAstRotateAndSum(AbstractNode &) {
 //  // rotateAndSum(int inputA) {
 //  //   int sumVec = {{1, 7, 3}};             // [1 7 3]
 //  //   int sum = sumVec + sumVec.rotate(1);  // [1 7 3] + [3 1 7]
@@ -1185,7 +1185,7 @@ void AstTestingGenerator::genAstRotateAndSum(AbstractNode &ast) {
 //  ast = func;
 }
 
-void AstTestingGenerator::genAstTranspose(AbstractNode &ast) {
+void AstTestingGenerator::genAstTranspose(AbstractNode &) {
 //  // LiteralInt transposeMatrix()
 //  auto func = new Function("transposeMatrix");
 //
@@ -1199,7 +1199,7 @@ void AstTestingGenerator::genAstTranspose(AbstractNode &ast) {
 //  ast = func;
 }
 
-void AstTestingGenerator::genAstUsingMatrixElements(AbstractNode &ast) {
+void AstTestingGenerator::genAstUsingMatrixElements(AbstractNode &) {
   // extractArbitraryMatrixElements {
   //   int M = [[14 27 32]];
   //   int N = [[19 21 38]];
@@ -1223,7 +1223,7 @@ void AstTestingGenerator::genAstUsingMatrixElements(AbstractNode &ast) {
 //  ast = func;
 }
 
-void AstTestingGenerator::genAstCombineMatricesInt(AbstractNode &ast) {
+void AstTestingGenerator::genAstCombineMatricesInt(AbstractNode &) {
   // extractArbitraryMatrixElements {
   //   int M = [ 14 27 32 ];
   //   int B = [ 19 21 38 ];
@@ -1259,7 +1259,7 @@ void AstTestingGenerator::genAstCombineMatricesInt(AbstractNode &ast) {
 //  ast = func;
 }
 
-void AstTestingGenerator::genAstCombineMatricesFloat(AbstractNode &ast) {
+void AstTestingGenerator::genAstCombineMatricesFloat(AbstractNode &) {
   // extractArbitraryMatrixElements {
   //   int M = [ 1.4 2.7 3.2 ];
   //   int B = [ 1.9 2.1 3.8 ];
@@ -1282,7 +1282,7 @@ void AstTestingGenerator::genAstCombineMatricesFloat(AbstractNode &ast) {
 //  ast = func;
 }
 
-void AstTestingGenerator::genAstCombineMatricesBool(AbstractNode &ast) {
+void AstTestingGenerator::genAstCombineMatricesBool(AbstractNode &) {
   // extractArbitraryMatrixElements {
   //   int M = [ true true false ];
   //   int B = [ false true true ];
@@ -1305,7 +1305,7 @@ void AstTestingGenerator::genAstCombineMatricesBool(AbstractNode &ast) {
 //  ast = func;
 }
 
-void AstTestingGenerator::genAstCombineMatricesString(AbstractNode &ast) {
+void AstTestingGenerator::genAstCombineMatricesString(AbstractNode &) {
   // extractArbitraryMatrixElements {
   //   int M = [ "epsilon" "alpha" "delta" ];
   //   int B = [ "beta" "zetta" "gamma" ];
@@ -1328,7 +1328,7 @@ void AstTestingGenerator::genAstCombineMatricesString(AbstractNode &ast) {
 //  ast = func;
 }
 
-void AstTestingGenerator::genAstCrossProduct(AbstractNode &ast) {
+void AstTestingGenerator::genAstCrossProduct(AbstractNode &) {
   // computeCrossProduct {
   //   int M = [[14 27 32]];
   //   int B = [[19 21 38]];
@@ -1360,7 +1360,7 @@ void AstTestingGenerator::genAstCrossProduct(AbstractNode &ast) {
 //  ast = func;
 }
 
-void AstTestingGenerator::genSimpleMatrix(AbstractNode &ast) {
+void AstTestingGenerator::genSimpleMatrix(AbstractNode &) {
   // generateMatrix {
   //   int M = [14 27 32; 34 3 23; 1 1 3];
   //   return M;
@@ -1374,7 +1374,7 @@ void AstTestingGenerator::genSimpleMatrix(AbstractNode &ast) {
 //  ast = func;
 }
 
-void AstTestingGenerator::genAstFlipMatrixElements(AbstractNode &ast) {
+void AstTestingGenerator::genAstFlipMatrixElements(AbstractNode &) {
   // flipMatrixElements {
   //   int M = [ true y false ];
   //   return [ M[0][1];      // y
@@ -1397,7 +1397,7 @@ void AstTestingGenerator::genAstFlipMatrixElements(AbstractNode &ast) {
 //  ast = func;
 }
 
-void AstTestingGenerator::genAstOperatorExpr_fullyEvaluable(AbstractNode &ast) {
+void AstTestingGenerator::genAstOperatorExpr_fullyEvaluable(AbstractNode &) {
 //  // int addNums()
 //  auto func = new Function("addNums");
 //  // return 34 + 31 + 11 + 1;
@@ -1408,7 +1408,7 @@ void AstTestingGenerator::genAstOperatorExpr_fullyEvaluable(AbstractNode &ast) {
 //  ast = func;
 }
 
-void AstTestingGenerator::genAstOperatorExpr_partiallyEvaluable(AbstractNode &ast) {
+void AstTestingGenerator::genAstOperatorExpr_partiallyEvaluable(AbstractNode &) {
 //  auto func = new Function("addNums");
 //  func->addParameter(new FunctionParameter(new Datatype(Types::INT, false), new Variable("a")));
 //  auto operatorExp = new OperatorExpr(new Operator(MULTIPLICATION),
@@ -1417,7 +1417,7 @@ void AstTestingGenerator::genAstOperatorExpr_partiallyEvaluable(AbstractNode &as
 //  ast = func;
 }
 
-void AstTestingGenerator::genAstOperatorExpr_logicalAndFalse(AbstractNode &ast) {
+void AstTestingGenerator::genAstOperatorExpr_logicalAndFalse(AbstractNode &) {
 //  auto func = new Function("addNums");
 //  func->addParameter(new FunctionParameter(new Datatype(Types::BOOL, false), new Variable("a")));
 //  auto operatorExp = new OperatorExpr(new Operator(LOGICAL_AND),
@@ -1427,7 +1427,7 @@ void AstTestingGenerator::genAstOperatorExpr_logicalAndFalse(AbstractNode &ast) 
 //  ast = func;
 }
 
-void AstTestingGenerator::genAstOperatorExpr_logicalAndTrue_oneRemainingOperand(AbstractNode &ast) {
+void AstTestingGenerator::genAstOperatorExpr_logicalAndTrue_oneRemainingOperand(AbstractNode &) {
 //  auto func = new Function("addNums");
 //  func->addParameter(new FunctionParameter(new Datatype(Types::BOOL, false), new Variable("a")));
 //  auto operatorExp = new OperatorExpr(new Operator(LOGICAL_AND),
@@ -1437,7 +1437,7 @@ void AstTestingGenerator::genAstOperatorExpr_logicalAndTrue_oneRemainingOperand(
 //  ast = func;
 }
 
-void AstTestingGenerator::genAstOperatorExpr_logicalAndTrue_twoRemainingOperands(AbstractNode &ast) {
+void AstTestingGenerator::genAstOperatorExpr_logicalAndTrue_twoRemainingOperands(AbstractNode &) {
 //  auto func = new Function("addNums");
 //  func->addParameter(new FunctionParameter(new Datatype(Types::BOOL, false), new Variable("a")));
 //  func->addParameter(new FunctionParameter(new Datatype(Types::BOOL, false), new Variable("b")));
@@ -1448,7 +1448,7 @@ void AstTestingGenerator::genAstOperatorExpr_logicalAndTrue_twoRemainingOperands
 //  ast = func;
 }
 
-void AstTestingGenerator::genAstOperatorExpr_logicalOrTrue(AbstractNode &ast) {
+void AstTestingGenerator::genAstOperatorExpr_logicalOrTrue(AbstractNode &) {
 //  auto func = new Function("addNums");
 //  func->addParameter(new FunctionParameter(new Datatype(Types::BOOL, false), new Variable("a")));
 //  auto operatorExp = new OperatorExpr(new Operator(LOGICAL_OR),
@@ -1458,7 +1458,7 @@ void AstTestingGenerator::genAstOperatorExpr_logicalOrTrue(AbstractNode &ast) {
 //  ast = func;
 }
 
-void AstTestingGenerator::genAstOperatorExpr_logicalOrFalse_oneRemainingOperand(AbstractNode &ast) {
+void AstTestingGenerator::genAstOperatorExpr_logicalOrFalse_oneRemainingOperand(AbstractNode &) {
 //  auto func = new Function("addNums");
 //  func->addParameter(new FunctionParameter(new Datatype(Types::BOOL, false), new Variable("a")));
 //  auto operatorExp = new OperatorExpr(new Operator(LOGICAL_OR),
@@ -1468,7 +1468,7 @@ void AstTestingGenerator::genAstOperatorExpr_logicalOrFalse_oneRemainingOperand(
 //  ast = func;
 }
 
-void AstTestingGenerator::genAstOperatorExpr_logicalOrFalse_twoRemainingOperands(AbstractNode &ast) {
+void AstTestingGenerator::genAstOperatorExpr_logicalOrFalse_twoRemainingOperands(AbstractNode &) {
 //  auto func = new Function("addNums");
 //  func->addParameter(new FunctionParameter(new Datatype(Types::BOOL, false), new Variable("a")));
 //  func->addParameter(new FunctionParameter(new Datatype(Types::BOOL, false), new Variable("b")));
@@ -1479,7 +1479,7 @@ void AstTestingGenerator::genAstOperatorExpr_logicalOrFalse_twoRemainingOperands
 //  ast = func;
 }
 
-void AstTestingGenerator::genAstOperatorExpr_logicalXorTrue(AbstractNode &ast) {
+void AstTestingGenerator::genAstOperatorExpr_logicalXorTrue(AbstractNode &) {
 //  auto func = new Function("addNums");
 //  func->addParameter(new FunctionParameter(new Datatype(Types::BOOL, false), new Variable("a")));
 //  auto operatorExp = new OperatorExpr(new Operator(LOGICAL_XOR),
@@ -1489,7 +1489,7 @@ void AstTestingGenerator::genAstOperatorExpr_logicalXorTrue(AbstractNode &ast) {
 //  ast = func;
 }
 
-void AstTestingGenerator::genAstOperatorExpr_logicalXorFalse_oneRemainingOperand(AbstractNode &ast) {
+void AstTestingGenerator::genAstOperatorExpr_logicalXorFalse_oneRemainingOperand(AbstractNode &) {
 //  auto func = new Function("addNums");
 //  func->addParameter(new FunctionParameter(new Datatype(Types::BOOL, false), new Variable("a")));
 //  auto operatorExp = new OperatorExpr(new Operator(LOGICAL_XOR),
@@ -1499,7 +1499,7 @@ void AstTestingGenerator::genAstOperatorExpr_logicalXorFalse_oneRemainingOperand
 //  ast = func;
 }
 
-void AstTestingGenerator::genAstOperatorExpr_logicalXorFalse_twoRemainingOperands(AbstractNode &ast) {
+void AstTestingGenerator::genAstOperatorExpr_logicalXorFalse_twoRemainingOperands(AbstractNode &) {
 //  auto func = new Function("addNums");
 //  func->addParameter(new FunctionParameter(new Datatype(Types::BOOL, false), new Variable("a")));
 //  func->addParameter(new FunctionParameter(new Datatype(Types::BOOL, false), new Variable("b")));
@@ -1510,7 +1510,7 @@ void AstTestingGenerator::genAstOperatorExpr_logicalXorFalse_twoRemainingOperand
 //  ast = func;
 }
 
-void AstTestingGenerator::genAstIncludingIfStatement(AbstractNode &ast) {
+void AstTestingGenerator::genAstIncludingIfStatement(AbstractNode &) {
   // source code:
   // int simpleIfConditionalAssignment(encrypted_int cond) {
   //    int a = 1;
@@ -1531,7 +1531,7 @@ void AstTestingGenerator::genAstIncludingIfStatement(AbstractNode &ast) {
 //  ast = func;
 }
 
-void AstTestingGenerator::genAstNestedOperatorExpr(AbstractNode &ast) {
+void AstTestingGenerator::genAstNestedOperatorExpr(AbstractNode &) {
 //  auto func = new Function("addNums");
 //  // bool x = true;
 //  func->addStatement(new VarDecl("x", true));
@@ -1550,7 +1550,7 @@ void AstTestingGenerator::genAstNestedOperatorExpr(AbstractNode &ast) {
 //  ast = func;
 }
 
-void AstTestingGenerator::genAstSimpleForLoopUnrolling(AbstractNode &ast) {
+void AstTestingGenerator::genAstSimpleForLoopUnrolling(AbstractNode &) {
   // -- source code --
   // int sumVectorElements(int numIterations) {
   //    Matrix<int> M = [54; 32; 63; 38; 13; 20];
@@ -1689,15 +1689,15 @@ void AstTestingGenerator::genAstSimpleForLoopUnrolling(AbstractNode &ast) {
 //  ast = func;
 //}
 
-void AstTestingGenerator::genAstNestedLoopUnrollingLaplacianSharpeningFilterInnerLoops(AbstractNode &ast) {
+void AstTestingGenerator::genAstNestedLoopUnrollingLaplacianSharpeningFilterInnerLoops(AbstractNode &) {
 //  genLaplacianInnerLoopsOnlyAstWithCustomWeights(ast, new Matrix<int>({{1, 1, 1}, {1, -8, 1}, {1, 1, 1}}));
 }
 
-void AstTestingGenerator::genAstNestedLoopUnrollingLaplacianSharpeningFilterInnerLoopsWithNonStdWeights(AbstractNode &ast) {
+void AstTestingGenerator::genAstNestedLoopUnrollingLaplacianSharpeningFilterInnerLoopsWithNonStdWeights(AbstractNode &) {
 //  genLaplacianInnerLoopsOnlyAstWithCustomWeights(ast, new Matrix<int>({{2, 2, 2}, {2, -8, 2}, {2, 2, 2}}));
 }
 
-void AstTestingGenerator::genAstMatrixAssignment(AbstractNode &ast) {
+void AstTestingGenerator::genAstMatrixAssignment(AbstractNode &) {
   // int permuteMatrixElements() {
   //    int M = [ 14 27 32 ];
   //    M[0][0] = 11;
@@ -1711,7 +1711,7 @@ void AstTestingGenerator::genAstMatrixAssignment(AbstractNode &ast) {
 //  ast = func;
 }
 
-void AstTestingGenerator::genAstMatrixPermutation(AbstractNode &ast) {
+void AstTestingGenerator::genAstMatrixPermutation(AbstractNode &) {
   // int permuteMatrixElements() {
   //    int M = [ 14 27 32 ];
   //    int element00 = M[0][0];  // 14
@@ -1737,7 +1737,7 @@ void AstTestingGenerator::genAstMatrixPermutation(AbstractNode &ast) {
 //  ast = func;
 }
 
-void AstTestingGenerator::genAstGetMatrixSizeOfKnownMatrix(AbstractNode &ast) {
+void AstTestingGenerator::genAstGetMatrixSizeOfKnownMatrix(AbstractNode &) {
 //  // -- input --
 //  //  int returnLastVectorElement() {
 //  //    Matrix<int> v = [ 3 1 4 5 44 ];
@@ -1761,7 +1761,7 @@ void AstTestingGenerator::genAstGetMatrixSizeOfKnownMatrix(AbstractNode &ast) {
 //  ast = function;
 }
 
-void AstTestingGenerator::genAstGetMatrixSizeOfAbstractMatrix(AbstractNode &ast) {
+void AstTestingGenerator::genAstGetMatrixSizeOfAbstractMatrix(AbstractNode &) {
 //  // Matrix<int> getNumElementsPerDimension(int factor) {
 //  //   int val = 567;
 //  //   Matrix<int> M = [ 3*factor 1*factor val*factor 5*factor 19 ];
@@ -1799,7 +1799,7 @@ void AstTestingGenerator::genAstGetMatrixSizeOfAbstractMatrix(AbstractNode &ast)
 //  ast = function;
 }
 
-void AstTestingGenerator::genAstGetMatrixSizeOfUnknownMatrix(AbstractNode &ast) {
+void AstTestingGenerator::genAstGetMatrixSizeOfUnknownMatrix(AbstractNode &) {
 //  // int getNumElementsNthDimension(Matrix<int> inputMatrix, int dimension) {
 //  //   return inputMatrix.dimSize(dimension);  // UNKNOWN at compile-time, not (0,0)!
 //  // }
@@ -1815,7 +1815,7 @@ void AstTestingGenerator::genAstGetMatrixSizeOfUnknownMatrix(AbstractNode &ast) 
 //  ast = function;
 }
 
-void AstTestingGenerator::genAstMatrixAssignmAndGetMatrixSize(AbstractNode &ast) {
+void AstTestingGenerator::genAstMatrixAssignmAndGetMatrixSize(AbstractNode &) {
 //  // Matrix<int> extendMatrixAddingElements() {
 //  //   Matrix<int> m;   // size: 0x0
 //  //   for (int i = 0; i < 3; ++i) {
@@ -1866,7 +1866,7 @@ void AstTestingGenerator::genAstMatrixAssignmAndGetMatrixSize(AbstractNode &ast)
 //  ast = func;
 }
 
-void AstTestingGenerator::genAstMatrixAssignmIncludingPushBack(AbstractNode &ast) {
+void AstTestingGenerator::genAstMatrixAssignmIncludingPushBack(AbstractNode &) {
 //  // Matrix<int> extendMatrixAddingElements() {
 //  //  Matrix<int> m;   // size: 0x0
 //  //  Vector<int> t;
@@ -1905,7 +1905,7 @@ void AstTestingGenerator::genAstMatrixAssignmIncludingPushBack(AbstractNode &ast
 //  ast = func;
 }
 
-void AstTestingGenerator::genAstMatrixAssignmUnknownThenKnown(AbstractNode &ast) {
+void AstTestingGenerator::genAstMatrixAssignmUnknownThenKnown(AbstractNode &) {
 //  // void computeMatrix(int k, int a) {
 //  //   Matrix<int> M;
 //  //   M[k][0] = 4;
@@ -1924,7 +1924,7 @@ void AstTestingGenerator::genAstMatrixAssignmUnknownThenKnown(AbstractNode &ast)
 //  ast = func;
 }
 
-void AstTestingGenerator::genAstMatrixAssignmentKnownThenUnknown(AbstractNode &ast) {
+void AstTestingGenerator::genAstMatrixAssignmentKnownThenUnknown(AbstractNode &) {
 //  // void computeMatrix(int k) {
 //  //   Matrix<int> M;
 //  //   M[0][0] = 21;
@@ -1941,7 +1941,7 @@ void AstTestingGenerator::genAstMatrixAssignmentKnownThenUnknown(AbstractNode &a
 //  ast = func;
 }
 
-void AstTestingGenerator::genAstFullAssignmentToMatrix(AbstractNode &ast) {
+void AstTestingGenerator::genAstFullAssignmentToMatrix(AbstractNode &) {
 //  // void computeMatrix() {
 //  //   Matrix<int> M = [31 84 21; 3 3 0]
 //  //   M[0][0] = 11;
@@ -1960,7 +1960,7 @@ void AstTestingGenerator::genAstFullAssignmentToMatrix(AbstractNode &ast) {
 //  ast = func;
 }
 
-void AstTestingGenerator::genAstNestedLoopUnrollingLaplacianSharpeningFilterAllLoops(AbstractNode &ast) {
+void AstTestingGenerator::genAstNestedLoopUnrollingLaplacianSharpeningFilterAllLoops(AbstractNode &) {
 //  // -- source code --
 //  // /// \param img A quadratic image given as row vector (single row matrix) consisting of concatenated rows.
 //  // /// \param imgSize The image's size. Assumes that img is quadratic, i.e., img has dimension (imgSize, imgSize).
@@ -2092,7 +2092,7 @@ void AstTestingGenerator::genAstNestedLoopUnrollingLaplacianSharpeningFilterAllL
 //
 //  ast = func;
 }
-void AstTestingGenerator::genAstPublicTurnedSecret(AbstractNode &ast) {
+void AstTestingGenerator::genAstPublicTurnedSecret(AbstractNode &) {
   // int publicTurnedSecret(int x) { // x secret
   //    int k; // k public
   //    k = x + 5; // k now tainted
@@ -2106,7 +2106,7 @@ void AstTestingGenerator::genAstPublicTurnedSecret(AbstractNode &ast) {
 //  ast = function;
 }
 
-void AstTestingGenerator::genAstPublicTurnedSecretMatrix(AbstractNode &ast) {
+void AstTestingGenerator::genAstPublicTurnedSecretMatrix(AbstractNode &) {
   // int publicTurnedSecret(int x) { // x secret
   //    int k; // k public
   //    k[0][0] = 7; // still public

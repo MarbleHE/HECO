@@ -169,7 +169,7 @@ AbstractNode::const_iterator For::end() const {
   return AbstractNode::const_iterator(std::make_unique<ForIteratorImpl<const AbstractNode>>(*this, countChildren()));
 }
 size_t For::countChildren() const {
-  return hasInitializer() + hasCondition() + hasUpdate() + hasBody();
+  return size_t(hasInitializer()) + hasCondition() + hasUpdate() + hasBody();
 }
 
 nlohmann::json For::toJson() const {
