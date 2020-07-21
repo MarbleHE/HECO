@@ -27,3 +27,22 @@ jobs:
         run: cmake --build build --target testing-all
       - name: test
         run: cd build && ctest
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: configure
+        shell: cmd
+        run: |
+            call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+            md build
+            cd build
+            cmake -DCMAKE_CXX_FLAGS="/W4 /WX" -G "NMake Makefiles" ..
+      - name: build
+        shell: cmd
+        run: |
+            call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+            cmake --build build --target testing-all
+      - name: test
+        shell: cmd
+        run: cd build && ctest
