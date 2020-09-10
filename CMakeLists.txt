@@ -77,6 +77,7 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/ast/BinaryExpression.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/Block.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/For.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/FunctionParameter.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/If.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/UnaryExpression.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/Variable.cpp
@@ -100,6 +101,7 @@ set(PUBLIC_HEADERS
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractStatement.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/Block.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/For.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/FunctionParameter.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/If.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/Literal.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/Variable.h
