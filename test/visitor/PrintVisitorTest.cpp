@@ -18,3 +18,4 @@ TEST(PrintVisitor, printTree) {
                               "  LiteralBool (true)\n");
 }
 
+//TODO: Extend to non-trivial trees

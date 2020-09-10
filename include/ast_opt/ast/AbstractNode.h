@@ -146,7 +146,7 @@ class AbstractNode {
   /// Returns a string representation of the node,
   /// if printChildren is True then calls toString for its children too.
   /// Hence, toString(false) is equivalent to printing a node's attributes only.
-  /// \return A textual representation of the node.
+  /// \return A textual representation of the node, including a newline at the end
   [[nodiscard]] virtual std::string toString(bool printChildren) const;
 
   /// Prints the output of node.toString(true) to the stream os
