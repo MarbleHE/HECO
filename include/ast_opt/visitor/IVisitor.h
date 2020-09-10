@@ -11,17 +11,18 @@ class BinaryExpression;
 
 class Block;
 
+//TODO: Define and implement AST node for Call
+// Might want to introduce "FunctionArguments" or something similar
+// that links an AbstractExpression to each FunctionParameter
 class Call;
 
-class CallExternal;
+class ExpressionList;
 
 class Function;
 
 class FunctionParameter;
 
 class For;
-
-class Group;
 
 class If;
 
@@ -34,8 +35,6 @@ typedef Literal<int> LiteralInt;
 typedef Literal<float> LiteralFloat;
 typedef Literal<double> LiteralDouble;
 typedef Literal<std::string> LiteralString;
-
-class LogicalExpr;
 
 class Operator;
 
@@ -51,6 +50,7 @@ class VariableDeclaration;
 
 class Variable;
 
+// TODO: Implement Scope
 class Scope;
 
 class IVisitor {
@@ -58,6 +58,8 @@ class IVisitor {
   virtual void visit(BinaryExpression &elem) = 0;
 
   virtual void visit(Block &elem) = 0;
+
+  virtual void visit(ExpressionList &elem) = 0;
 
   virtual void visit(For &elem) = 0;
 

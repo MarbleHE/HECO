@@ -24,6 +24,7 @@ set(TEST_FILES
         AstTestingGenerator.h
         ast/BinaryExpressionTest.cpp
         ast/BlockTest.cpp
+        ast/ExpressionListTest.cpp
         ast/ForTest.cpp
         ast/FunctionTest.cpp
         ast/FunctionParameterTest.cpp

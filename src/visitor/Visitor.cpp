@@ -4,6 +4,8 @@ void ScopedVisitor::visit(BinaryExpression &) {}
 
 void ScopedVisitor::visit(Block &) {}
 
+void ScopedVisitor::visit(ExpressionList &) {}
+
 void ScopedVisitor::visit(For &) {}
 
 void ScopedVisitor::visit(Function &) {}

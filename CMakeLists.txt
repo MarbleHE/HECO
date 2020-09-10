@@ -76,6 +76,7 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/ast/AbstractNode.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/BinaryExpression.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/Block.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/ExpressionList.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/For.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/Function.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/FunctionParameter.cpp
@@ -103,6 +104,7 @@ set(PUBLIC_HEADERS
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractNode.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractStatement.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/BinaryExpression.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/ExpressionList.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/Block.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/For.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/Function.h

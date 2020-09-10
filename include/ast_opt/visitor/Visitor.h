@@ -12,6 +12,8 @@ class ScopedVisitor : public IVisitor {
 
   void visit(Block &elem) override;
 
+  void visit(ExpressionList &elem) override;
+
   void visit(For &elem) override;
 
   void visit(Function &elem) override;
@@ -123,8 +125,32 @@ class Visitor : public SpecialVisitor{
     }
   }
 
+  void visit(ExpressionList &elem) override {
+    if constexpr (has_visit<SpecialVisitor,ExpressionList&>)  {
+      this->SpecialVisitor::visit(elem);
+    } else {
+      this->ScopedVisitor::visit(elem);
+    }
+  }
+
   void visit(For &elem) override {
     if constexpr (has_visit<SpecialVisitor,For&>)  {
+      this->SpecialVisitor::visit(elem);
+    } else {
+      this->ScopedVisitor::visit(elem);
+    }
+  }
+
+  void visit(Function &elem) override {
+    if constexpr (has_visit<SpecialVisitor,Function&>)  {
+      this->SpecialVisitor::visit(elem);
+    } else {
+      this->ScopedVisitor::visit(elem);
+    }
+  }
+
+  void visit(FunctionParameter &elem) override {
+    if constexpr (has_visit<SpecialVisitor,FunctionParameter&>)  {
       this->SpecialVisitor::visit(elem);
     } else {
       this->ScopedVisitor::visit(elem);
@@ -181,6 +207,22 @@ class Visitor : public SpecialVisitor{
 
   void visit(LiteralString &elem) override {
     if constexpr (has_visit<SpecialVisitor,LiteralString&>)  {
+      this->SpecialVisitor::visit(elem);
+    } else {
+      this->ScopedVisitor::visit(elem);
+    }
+  }
+
+  void visit(OperatorExpression &elem) override {
+    if constexpr (has_visit<SpecialVisitor, OperatorExpression&>)  {
+      this->SpecialVisitor::visit(elem);
+    } else {
+      this->ScopedVisitor::visit(elem);
+    }
+  }
+
+  void visit(Return &elem) override {
+    if constexpr (has_visit<SpecialVisitor, Return&>)  {
       this->SpecialVisitor::visit(elem);
     } else {
       this->ScopedVisitor::visit(elem);
