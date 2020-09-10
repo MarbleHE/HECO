@@ -24,6 +24,8 @@ void ScopedVisitor::visit(LiteralDouble &) {}
 
 void ScopedVisitor::visit(LiteralString &) {}
 
+void ScopedVisitor::visit(OperatorExpression &) {}
+
 void ScopedVisitor::visit(Return &) {}
 
 void ScopedVisitor::visit(UnaryExpression &) {}

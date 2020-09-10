@@ -32,6 +32,8 @@ class ScopedVisitor : public IVisitor {
 
   void visit(LiteralString &elem) override;
 
+  void visit(OperatorExpression &elem) override;
+
   void visit(Return &elem) override;
 
   void visit(UnaryExpression &elem) override;

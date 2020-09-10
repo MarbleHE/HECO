@@ -80,6 +80,7 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/ast/Function.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/FunctionParameter.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/If.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/OperatorExpression.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/Return.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/UnaryExpression.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/Variable.cpp
@@ -108,8 +109,9 @@ set(PUBLIC_HEADERS
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/FunctionParameter.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/If.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/Literal.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/UnaryExpression.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/OperatorExpression.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/Return.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/UnaryExpression.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/Variable.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/VariableAssignment.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/VariableDeclaration.h

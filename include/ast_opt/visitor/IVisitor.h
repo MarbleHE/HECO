@@ -39,6 +39,8 @@ class LogicalExpr;
 
 class Operator;
 
+class OperatorExpression;
+
 class Return;
 
 class UnaryExpression;
@@ -76,6 +78,8 @@ class IVisitor {
   virtual void visit(LiteralDouble &elem) = 0;
 
   virtual void visit(LiteralString &elem) = 0;
+
+  virtual void visit(OperatorExpression &elem) = 0;
 
   virtual void visit(Return &elem) = 0;
 

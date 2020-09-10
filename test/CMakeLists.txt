@@ -29,6 +29,7 @@ set(TEST_FILES
         ast/FunctionParameterTest.cpp
         ast/IfTest.cpp
         ast/LiteralTest.cpp
+        ast/OperatorExpressionTest.cpp
         ast/ReturnTest.cpp
         ast/UnaryExpressionTest.cpp
         ast/VariableTest.cpp

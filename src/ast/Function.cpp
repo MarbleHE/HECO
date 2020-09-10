@@ -5,7 +5,7 @@
 #include "ast_opt/visitor/IVisitor.h"
 
 /// Convenience typedef for conciseness
-typedef std::unique_ptr<AbstractStatement> stmtPtr;
+typedef std::unique_ptr<AbstractStatement> exprPtr;
 
 Function::~Function() = default;
 
