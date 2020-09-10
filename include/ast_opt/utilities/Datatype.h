@@ -3,7 +3,6 @@
 
 #include <string>
 #include <map>
-#include "ast_opt/ast/AbstractNode.h"
 
 /// Simple ENUM to list the supported types
 enum class Type {

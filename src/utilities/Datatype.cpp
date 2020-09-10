@@ -1,3 +1,4 @@
+#include <unordered_map>
 #include "ast_opt/utilities/Datatype.h"
 
 std::string enumToString(const Type type) {
