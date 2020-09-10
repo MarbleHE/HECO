@@ -6,7 +6,7 @@
 
 /// Simple ENUM to list the supported types
 enum class Type {
-  BOOL, CHAR, INT, FLOAT, DOUBLE, STRING,
+  BOOL, CHAR, INT, FLOAT, DOUBLE, STRING, VOID
 };
 
 /// String representation of enums

@@ -25,6 +25,7 @@ set(TEST_FILES
         ast/BinaryExpressionTest.cpp
         ast/BlockTest.cpp
         ast/ForTest.cpp
+        ast/FunctionTest.cpp
         ast/FunctionParameterTest.cpp
         ast/IfTest.cpp
         ast/LiteralTest.cpp

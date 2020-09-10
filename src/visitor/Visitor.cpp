@@ -6,6 +6,8 @@ void ScopedVisitor::visit(Block &) {}
 
 void ScopedVisitor::visit(For &) {}
 
+void ScopedVisitor::visit(Function &) {}
+
 void ScopedVisitor::visit(FunctionParameter &) {}
 
 void ScopedVisitor::visit(If &) {}

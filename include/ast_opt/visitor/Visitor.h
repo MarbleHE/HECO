@@ -14,6 +14,8 @@ class ScopedVisitor : public IVisitor {
 
   void visit(For &elem) override;
 
+  void visit(Function &elem) override;
+
   void visit(FunctionParameter &elem) override;
 
   void visit(If &elem) override;

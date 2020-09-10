@@ -59,6 +59,8 @@ class IVisitor {
 
   virtual void visit(For &elem) = 0;
 
+  virtual void visit(Function &elem) = 0;
+
   virtual void visit(FunctionParameter &elem) = 0;
 
   virtual void visit(If &elem) = 0;
