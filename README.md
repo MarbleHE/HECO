@@ -86,6 +86,7 @@ The implementation is heavily based on the pseudo-codes provided in the paper, e
 // TODO write some sentences about optimizations
 
 ## AST Representation
+// TODO: Update to current class hierachy
 
 The AST to be used as a foundation for FHE optimizations consists of nodes that are derived from either `AbstractExpression` or `AbstractStatement`, depending on whether the operation is an expression or a statement, respectively. Note that `CallExternal` is a special node/operation as it can either be used as an expression (e.g., in an assignment `int z = computeZ();`) or as a statement (e.g., `updateVarZ();`). A UML showing the inheritance hierarchy is given in Fig. 1. 
 
