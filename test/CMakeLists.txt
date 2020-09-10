@@ -22,9 +22,12 @@ FetchContent_MakeAvailable(googletest)
 set(TEST_FILES
         AstTestingGenerator.cpp
         AstTestingGenerator.h
+        ast/BinaryExpressionTest.cpp
         ast/BlockTest.cpp
+        ast/ForTest.cpp
         ast/IfTest.cpp
         ast/LiteralTest.cpp
+        ast/UnaryExpressionTest.cpp
         ast/VariableTest.cpp
         ast/VariableAssignmentTest.cpp
         ast/VariableDeclarationTest.cpp
