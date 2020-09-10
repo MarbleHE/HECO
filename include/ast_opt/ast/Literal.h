@@ -14,6 +14,7 @@ typedef Literal<float> LiteralFloat;
 typedef Literal<double> LiteralDouble;
 typedef Literal<std::string> LiteralString;
 
+/// Literals contain a scalar value (of type bool, char, int, float, double, string, etc)
 template<typename T>
 class Literal : public AbstractExpression {
  private:
