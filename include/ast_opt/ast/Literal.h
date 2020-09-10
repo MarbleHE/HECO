@@ -14,21 +14,7 @@ typedef Literal<float> LiteralFloat;
 typedef Literal<double> LiteralDouble;
 typedef Literal<std::string> LiteralString;
 
-typedef Literal<std::vector<bool>> LiteralVectorBool;
-typedef Literal<std::vector<char>> LiteralVectorChar;
-typedef Literal<std::vector<int>> LiteralVectorInt;
-typedef Literal<std::vector<float>> LiteralVectorFloat;
-typedef Literal<std::vector<double>> LiteralVectorDouble;
-typedef Literal<std::vector<std::string>> LiteralVectorString;
-
-typedef Literal<std::vector<std::vector<bool>>> LiteralMatrixBool;
-typedef Literal<std::vector<std::vector<char>>> LiteralMatrixChar;
-typedef Literal<std::vector<std::vector<int>>> LiteralMatrixInt;
-typedef Literal<std::vector<std::vector<float>>> LiteralMatrixFloat;
-typedef Literal<std::vector<std::vector<double>> > LiteralMatrixDouble;
-typedef Literal<std::vector<std::vector<std::string>>>  LiteralMatrixString;
-
-/// Literals contain a value (e.g., of type bool, char, int, float, double, string)
+/// Literals contain a scalar value (of type bool, char, int, float, double, string, etc)
 template<typename T>
 class Literal : public AbstractExpression {
  private:
@@ -159,58 +145,23 @@ class Literal : public AbstractExpression {
 
 
 // Pretty "getNodeType()" specializations for the common types:
-template<>
-inline std::string LiteralBool::getNodeType() const { return "LiteralBool"; };
 
 template<>
-inline std::string LiteralChar::getNodeType() const { return "LiteralChar"; };
+inline std::string Literal<bool>::getNodeType() const { return "LiteralBool"; };
 
 template<>
-inline std::string LiteralInt::getNodeType() const { return "LiteralInt"; };
+inline std::string Literal<char>::getNodeType() const { return "LiteralChar"; };
 
 template<>
-inline std::string LiteralFloat::getNodeType() const { return "LiteralFloat"; };
+inline std::string Literal<int>::getNodeType() const { return "LiteralInt"; };
 
 template<>
-inline std::string LiteralDouble::getNodeType() const { return "LiteralDouble"; };
+inline std::string Literal<float>::getNodeType() const { return "LiteralFloat"; };
 
 template<>
-inline std::string LiteralString::getNodeType() const { return "LiteralString"; };
+inline std::string Literal<double>::getNodeType() const { return "LiteralBool"; };
 
 template<>
-inline std::string LiteralVectorBool::getNodeType() const { return "LiteralVectorBool"; };
-
-template<>
-inline std::string LiteralVectorChar::getNodeType() const { return "LiteralVectorChar"; };
-
-template<>
-inline std::string LiteralVectorInt::getNodeType() const { return "LiteralVectorInt"; };
-
-template<>
-inline std::string LiteralVectorFloat::getNodeType() const { return "LiteralVectorFloat"; };
-
-template<>
-inline std::string LiteralVectorDouble::getNodeType() const { return "LiteralVectorDouble"; };
-
-template<>
-inline std::string LiteralVectorString::getNodeType() const { return "LiteralVectorString"; };
-
-template<>
-inline std::string LiteralMatrixBool::getNodeType() const { return "LiteralMatrixBool"; };
-
-template<>
-inline std::string LiteralMatrixChar::getNodeType() const { return "LiteralMatrixChar"; };
-
-template<>
-inline std::string LiteralMatrixInt::getNodeType() const { return "LiteralMatrixInt"; };
-
-template<>
-inline std::string LiteralMatrixFloat::getNodeType() const { return "LiteralMatrixFloat"; };
-
-template<>
-inline std::string LiteralMatrixDouble::getNodeType() const { return "LiteralMatrixDouble"; };
-
-template<>
-inline std::string LiteralMatrixString::getNodeType() const { return "LiteralMatrixString"; };
+inline std::string Literal<std::string>::getNodeType() const { return "LiteralString"; };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_LITERAL_H_
