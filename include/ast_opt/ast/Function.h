@@ -116,12 +116,6 @@ class Function : public AbstractStatement {
 
 };
 
-//TODO: Implement iterator.
-// Should check if params exist. If yes, iterate through params vector. Once vector iterator has ended, continue on to body (if it exists)
-// Designed to be instantiated only with T = (const) AbstractNode
-// Designed to be instantiated only with T = (const) AbstractNode
-// This essentially just wraps the vector iterator
-// jumping over null positions on operator++
 template<typename T>
 class FunctionIteratorImpl : public BaseIteratorImpl<T> {
  private:

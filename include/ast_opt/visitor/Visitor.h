@@ -32,6 +32,8 @@ class ScopedVisitor : public IVisitor {
 
   void visit(LiteralString &elem) override;
 
+  void visit(Return &elem) override;
+
   void visit(UnaryExpression &elem) override;
 
   void visit(VariableAssignment &elem) override;
@@ -92,6 +94,9 @@ constexpr bool has_visit = is_visit_available<T, Args...>::value;
 /// \tparam SpecialVisitor  The class implementing the actual visiting logic
 template <typename SpecialVisitor>
 class Visitor : public SpecialVisitor{
+  //TODO: Replace ScopedVisitor with a template argument "DefaultVisitor"
+  //TODO: Write a Macro for the functions so you don't have to repeat things
+  //TODO: Extend for new AST classes (e.g. Return, Function, ...)
  public:
   /// Ensure that SpecialVisitor is actually a visitor
   static_assert(std::is_base_of<IVisitor,SpecialVisitor>::value);

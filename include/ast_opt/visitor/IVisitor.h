@@ -77,6 +77,8 @@ class IVisitor {
 
   virtual void visit(LiteralString &elem) = 0;
 
+  virtual void visit(Return &elem) = 0;
+
   virtual void visit(UnaryExpression &elem) = 0;
 
   virtual void visit(VariableAssignment &elem) = 0;
