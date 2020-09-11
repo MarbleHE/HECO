@@ -4,7 +4,8 @@
 
 FunctionParameter::~FunctionParameter() = default;
 
-FunctionParameter::FunctionParameter(std::string identifier, Datatype parameter_type)
+FunctionParameter::FunctionParameter(Datatype parameter_type,
+                                     std::string identifier)
     : identifier(std::move(identifier)), parameter_type(std::move(parameter_type)) {}
 
 FunctionParameter::FunctionParameter(const FunctionParameter &other) : identifier(other.identifier), parameter_type(other.parameter_type){}
@@ -37,7 +38,7 @@ Datatype FunctionParameter::getParameterType() const {
 ////////// AbstractNode Interface /////////////
 ///////////////////////////////////////////////
 FunctionParameter *FunctionParameter::clone_impl() const {
-  return new FunctionParameter(identifier, parameter_type);
+  return new FunctionParameter(parameter_type, identifier);
 }
 
 void FunctionParameter::accept(IVisitor &v) {

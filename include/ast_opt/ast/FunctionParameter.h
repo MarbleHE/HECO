@@ -26,7 +26,8 @@ class FunctionParameter : public AbstractTarget {
 
   /// Create a FunctionParameter with name identifier
   /// \param identifier FunctionParameter name, can be any valid string
-  explicit FunctionParameter(std::string identifier, Datatype parameter_type);
+  explicit FunctionParameter(Datatype parameter_type,
+                             std::string identifier);
 
   /// Copy constructor
   /// \param other FunctionParameter to copy
