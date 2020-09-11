@@ -3,9 +3,9 @@
 
 If::~If() = default;
 
-If::If(std::unique_ptr<AbstractExpression> condition,
-       std::unique_ptr<Block> thenBranch,
-       std::unique_ptr<Block> elseBranch)
+If::If(std::unique_ptr<AbstractExpression> &&condition,
+       std::unique_ptr<Block> &&thenBranch,
+       std::unique_ptr<Block> &&elseBranch)
     : condition(std::move(condition)), thenBranch(std::move(thenBranch)), elseBranch(std::move(elseBranch)) {}
 
 If::If(const If &other) : condition(other.condition ? other.condition->clone() : nullptr),
@@ -93,15 +93,15 @@ const Block &If::getElseBranch() const {
   }
 }
 
-void If::setCondition(std::unique_ptr<AbstractExpression> newCondition) {
+void If::setCondition(std::unique_ptr<AbstractExpression> &&newCondition) {
   condition = std::move(newCondition);
 }
 
-void If::setThenBranch(std::unique_ptr<Block> newThenBranch) {
+void If::setThenBranch(std::unique_ptr<Block> &&newThenBranch) {
   thenBranch = std::move(newThenBranch);
 }
 
-void If::setElseBranch(std::unique_ptr<Block> newElseBranch) {
+void If::setElseBranch(std::unique_ptr<Block> &&newElseBranch) {
   elseBranch = std::move(newElseBranch);
 }
 

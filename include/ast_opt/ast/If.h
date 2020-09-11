@@ -33,9 +33,9 @@ class If : public AbstractStatement {
   /// \param condition Should evaluate to a boolean value
   /// \param thenBranch Statements to be executed if condition evaluates to true
   /// \param elseBranch Statements to be executed if condition evaluates to false
-  If(std::unique_ptr<AbstractExpression> condition,
-     std::unique_ptr<Block> thenBranch,
-     std::unique_ptr<Block> elseBranch = nullptr);
+  If(std::unique_ptr<AbstractExpression> &&condition,
+     std::unique_ptr<Block> &&thenBranch,
+     std::unique_ptr<Block> &&elseBranch = nullptr);
 
   /// Copy constructor
   /// \param other If to copy
@@ -103,15 +103,15 @@ class If : public AbstractStatement {
 
   /// Set a new condition
   /// \param newCondition condition to set, If takes ownership
-  void setCondition(std::unique_ptr<AbstractExpression> newCondition);
+  void setCondition(std::unique_ptr<AbstractExpression> &&newCondition);
 
   /// Set a new thenBranch
   /// \param newThenBranch thenBranch to set, If takes ownership
-  void setThenBranch(std::unique_ptr<Block> newThenBranch);
+  void setThenBranch(std::unique_ptr<Block> &&newThenBranch);
 
   /// Set a new elseBranch
   /// \param newElseBranch elseBranch to set, If takes ownership
-  void setElseBranch(std::unique_ptr<Block> newElseBranch);
+  void setElseBranch(std::unique_ptr<Block> &&newElseBranch);
 
   ///////////////////////////////////////////////
   ////////// AbstractNode Interface /////////////
