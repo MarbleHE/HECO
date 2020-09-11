@@ -87,6 +87,7 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/ast/Variable.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/VariableAssignment.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/VariableDeclaration.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/parser/Parser.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/Datatype.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/Operator.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/PrintVisitor.cpp
@@ -117,6 +118,7 @@ set(PUBLIC_HEADERS
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/Variable.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/VariableAssignment.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/VariableDeclaration.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/parser/Parser.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/Datatype.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/Operator.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/IVisitor.h

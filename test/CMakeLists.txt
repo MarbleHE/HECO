@@ -37,6 +37,7 @@ set(TEST_FILES
         ast/VariableAssignmentTest.cpp
         ast/VariableDeclarationTest.cpp
         JsonOutputTest.cpp
+        parser/ParserTest.cpp
         visitor/PrintVisitorTest.cpp
         visitor/VisitorTest.cpp
         )
