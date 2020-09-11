@@ -142,7 +142,7 @@ class FunctionIteratorImpl : public BaseIteratorImpl<T> {
 
  public:
 
-  FunctionIteratorImpl(N &node, I it, I end, int positions_beyond_parameter_vector)
+  FunctionIteratorImpl(N &node, I it, I end, size_t positions_beyond_parameter_vector)
       : node(node), it(it), end(end), positions_beyond_parameter_vector(positions_beyond_parameter_vector) {};
 
   const T &getNode() const override {
@@ -189,6 +189,7 @@ class FunctionIteratorImpl : public BaseIteratorImpl<T> {
       return node.getBody(); // if there is no body, this call is already UB so throwing an exception is fine
     } else {
       assert(0); // Undefined Behaviour, might as well crash
+      return **it; // to avoid "not all paths return a value"
     }
   }
 
