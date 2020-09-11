@@ -22,6 +22,8 @@ class ScopedVisitor : public IVisitor {
 
   void visit(If &elem) override;
 
+  void visit(IndexAccess &elem) override;
+
   void visit(LiteralBool &elem) override;
 
   void visit(LiteralChar &elem) override;
@@ -100,7 +102,6 @@ template <typename SpecialVisitor>
 class Visitor : public SpecialVisitor{
   //TODO: Replace ScopedVisitor with a template argument "DefaultVisitor"
   //TODO: Write a Macro for the functions so you don't have to repeat things
-  //TODO: Extend for new AST classes (e.g. Return, Function, ...)
  public:
   /// Ensure that SpecialVisitor is actually a visitor
   static_assert(std::is_base_of<IVisitor,SpecialVisitor>::value);
@@ -159,6 +160,14 @@ class Visitor : public SpecialVisitor{
 
   void visit(If &elem) override {
     if constexpr (has_visit<SpecialVisitor,If&>)  {
+      this->SpecialVisitor::visit(elem);
+    } else {
+      this->ScopedVisitor::visit(elem);
+    }
+  }
+
+  void visit(IndexAccess &elem) override {
+    if constexpr (has_visit<SpecialVisitor,IndexAccess&>)  {
       this->SpecialVisitor::visit(elem);
     } else {
       this->ScopedVisitor::visit(elem);

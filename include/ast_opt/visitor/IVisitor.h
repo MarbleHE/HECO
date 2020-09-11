@@ -26,6 +26,8 @@ class For;
 
 class If;
 
+class IndexAccess;
+
 template<typename T>
 class Literal;
 
@@ -68,6 +70,8 @@ class IVisitor {
   virtual void visit(FunctionParameter &elem) = 0;
 
   virtual void visit(If &elem) = 0;
+
+  virtual void visit(IndexAccess &elem) = 0;
 
   virtual void visit(LiteralBool &elem) = 0;
 

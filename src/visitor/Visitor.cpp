@@ -14,6 +14,8 @@ void ScopedVisitor::visit(FunctionParameter &) {}
 
 void ScopedVisitor::visit(If &) {}
 
+void ScopedVisitor::visit(IndexAccess &) {}
+
 void ScopedVisitor::visit(LiteralBool &) {}
 
 void ScopedVisitor::visit(LiteralChar &) {}
