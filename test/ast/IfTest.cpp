@@ -1,3 +1,4 @@
+#include <include/ast_opt/ast/UnaryExpression.h>
 #include "ast_opt/ast/If.h"
 #include "ast_opt/ast/Literal.h"
 #include "ast_opt/ast/Variable.h"
@@ -39,27 +40,121 @@ TEST(IfTest, values_ValuesGivenInCtorAreRetrievable) {
 }
 
 TEST(IfTest, SetAndGet) {
-  // TODO: This test simply checks that target and value can be set and get correctly.
+  // This test simply checks that target and value can be set and get correctly.
 
+  If iff(std::make_unique<LiteralBool>(true),
+         std::make_unique<Block>(),
+         std::make_unique<Block>());
 
+  iff.setCondition(std::make_unique<LiteralBool>(false));
+  EXPECT_EQ(getValue(iff.getCondition()), false);
+
+  auto variableDeclaration2 = std::make_unique<VariableDeclaration>(Datatype(Type::BOOL),
+                                                                    std::make_unique<Variable>("bar"),
+                                                                    std::make_unique<LiteralBool>(true));
+  iff.setThenBranch(std::make_unique<Block>(std::move(variableDeclaration2)));
+  ASSERT_TRUE(iff.hasThenBranch());
+  EXPECT_EQ(getNameFromBlock(iff.getThenBranch()), "bar");
+
+  auto variableDeclaration3 = std::make_unique<VariableDeclaration>(Datatype(Type::BOOL),
+                                                                    std::make_unique<Variable>("mau"),
+                                                                    std::make_unique<LiteralBool>(false));
+  iff.setElseBranch(std::make_unique<Block>(std::move(variableDeclaration3)));
+  ASSERT_TRUE(iff.hasElseBranch());
+  EXPECT_EQ(getNameFromBlock(iff.getElseBranch()), "mau");
 }
 
 TEST(IfTest, CopyCtorCopiesValue) {
-  // TODO: When copying a If, the new object should contain a (deep) copy of the condition and branches
+  // When copying a If, the new object should contain a (deep) copy of the condition and branches
 
+  auto variableDeclaration1 =
+      std::make_unique<VariableDeclaration>(Datatype(Type::BOOL), std::make_unique<Variable>("foo"));
+  auto variableDeclaration2 =
+      std::make_unique<VariableDeclaration>(Datatype(Type::BOOL), std::make_unique<Variable>("boo"));
+  If iff(std::make_unique<LiteralBool>(true),
+         std::make_unique<Block>(std::move(variableDeclaration1)),
+         std::make_unique<Block>(std::move(variableDeclaration1)));
+
+  // create a copy by using the copy constructor
+  If copiedIff(iff);
+
+  // check if copy is a deep copy
+  ASSERT_NE(iff.getCondition(), copiedIff.getCondition());
+  ASSERT_NE(iff.getThenBranch(), copiedIff.getThenBranch());
+  ASSERT_NE(iff.getElseBranch(), copiedIff.getElseBranch());
 }
 
 TEST(IfTest, CopyAssignmentCopiesValue) {
-  // TODO: When copying a If, the new object should contain a copy of the condition and branches
+  // When copying a If, the new object should contain a copy of the condition and branches
 
+  auto variableDeclaration1 = std::make_unique<VariableDeclaration>(
+      Datatype(Type::BOOL), std::make_unique<Variable>("foo"));
+  auto variableDeclaration2 = std::make_unique<VariableDeclaration>(
+      Datatype(Type::BOOL), std::make_unique<Variable>("boo"));
+  If iff(std::make_unique<LiteralBool>(true),
+         std::make_unique<Block>(std::move(variableDeclaration1)),
+         std::make_unique<Block>(std::move(variableDeclaration2)));
+
+  If copiedIff(std::make_unique<LiteralBool>(false), std::make_unique<Block>(), std::make_unique<Block>());
+  // create a copy by using the copy constructor
+  copiedIff = iff;
+
+  // check if copy is a deep copy
+  ASSERT_NE(iff.getCondition(), copiedIff.getCondition());
+  ASSERT_NE(iff.getThenBranch(), copiedIff.getThenBranch());
+  ASSERT_NE(iff.getElseBranch(), copiedIff.getElseBranch());
 }
 
 TEST(IfTest, MoveCtorPreservesValue) {
-  // TODO: When moving a If, the new object should contain the same condition and branches
+  // When moving a If, the new object should contain the same condition and branches
+
+  VariableDeclaration variableDeclaration1(Datatype(Type::BOOL), std::make_unique<Variable>("foo"));
+  VariableDeclaration variableDeclaration2(Datatype(Type::BOOL), std::make_unique<Variable>("boo"));
+  If iff(std::make_unique<LiteralBool>(true),
+         std::make_unique<Block>(variableDeclaration1.clone()),
+         std::make_unique<Block>(variableDeclaration2.clone()));
+
+  If newIff(std::move(iff));
+
+  ASSERT_FALSE(iff.hasCondition());
+  EXPECT_THROW(iff.getCondition(), std::runtime_error);
+  ASSERT_FALSE(iff.hasThenBranch());
+  EXPECT_THROW(iff.getThenBranch(), std::runtime_error);
+  ASSERT_FALSE(iff.hasElseBranch());
+  EXPECT_THROW(iff.getElseBranch(), std::runtime_error);
+
+  ASSERT_TRUE(newIff.hasCondition());
+  EXPECT_EQ(getValue(newIff.getCondition()), true);
+  ASSERT_TRUE(newIff.hasThenBranch());
+  EXPECT_EQ(getNameFromBlock(newIff.getThenBranch()), "foo");
+  ASSERT_TRUE(newIff.hasElseBranch());
+  EXPECT_EQ(getNameFromBlock(newIff.getElseBranch()), "boo");
 }
 
 TEST(IfTest, MoveAssignmentPreservesValue) {
-  // TODO: When moving a If, the new object should contain the same condition and branches
+  // When moving a If, the new object should contain the same condition and branches
+
+  VariableDeclaration variableDeclaration1(Datatype(Type::BOOL), std::make_unique<Variable>("foo"));
+  VariableDeclaration variableDeclaration2(Datatype(Type::BOOL), std::make_unique<Variable>("boo"));
+  If iff(std::make_unique<LiteralBool>(true),
+         std::make_unique<Block>(variableDeclaration1.clone()),
+         std::make_unique<Block>(variableDeclaration2.clone()));
+
+  If newIff = std::move(iff);
+
+  ASSERT_FALSE(iff.hasCondition());
+  EXPECT_THROW(iff.getCondition(), std::runtime_error);
+  ASSERT_FALSE(iff.hasThenBranch());
+  EXPECT_THROW(iff.getThenBranch(), std::runtime_error);
+  ASSERT_FALSE(iff.hasElseBranch());
+  EXPECT_THROW(iff.getElseBranch(), std::runtime_error);
+
+  ASSERT_TRUE(newIff.hasCondition());
+  EXPECT_EQ(getValue(newIff.getCondition()), true);
+  ASSERT_TRUE(newIff.hasThenBranch());
+  EXPECT_EQ(getNameFromBlock(newIff.getThenBranch()), "foo");
+  ASSERT_TRUE(newIff.hasElseBranch());
+  EXPECT_EQ(getNameFromBlock(newIff.getElseBranch()), "boo");
 }
 
 TEST(IfTest, countChildrenReportsCorrectNumber) {
@@ -84,11 +179,34 @@ TEST(IfTest, countChildrenReportsCorrectNumber) {
 }
 
 TEST(IfTest, node_iterate_children) {
-  // TODO: This test checks that we can iterate correctly through the children
+  // This test checks that we can iterate correctly through the children
   // Even if some of the elements are null (in which case they should not appear)
 
-}
+  auto variableDeclaration1 = std::make_unique<VariableDeclaration>(
+      Datatype(Type::BOOL), std::make_unique<Variable>("foo"));
+  auto variableDeclaration2 = std::make_unique<VariableDeclaration>(
+      Datatype(Type::BOOL), std::make_unique<Variable>("boo"));
+  If iff({},
+         std::make_unique<Block>(std::move(variableDeclaration1)),
+         std::make_unique<Block>(std::move(variableDeclaration2)));
 
+  auto it = iff.begin();
+  AbstractNode &child1 = *it;
+  ++it;
+  AbstractNode &child2 = *it;
+  ++it;
+
+  EXPECT_EQ(it, iff.end());
+
+  auto getNameFromDeclaration = [](const AbstractStatement &s) {
+    auto vd = dynamic_cast<const VariableDeclaration &>(s);
+    return vd.getTarget().getIdentifier();
+  };
+
+  // we need to extract the child at index 0 from the if/else block
+  EXPECT_EQ(getNameFromDeclaration(dynamic_cast<Block &>(child1).getStatements()[0]), "foo");
+  EXPECT_EQ(getNameFromDeclaration(dynamic_cast<Block &>(child2).getStatements()[0]), "boo");
+}
 TEST(IfTest, JsonOutputTest) { /* NOLINT */
   VariableDeclaration variableDeclaration1(Datatype(Type::BOOL), std::make_unique<Variable>("foo"));
   VariableDeclaration variableDeclaration2(Datatype(Type::BOOL), std::make_unique<Variable>("boo"));
