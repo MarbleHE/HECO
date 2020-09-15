@@ -9,17 +9,19 @@
 #include "Tokens.h"
 
 namespace stork {
-class push_back_stream;
+class PushBackStream;
 
 class tokens_iterator {
-  tokens_iterator(const tokens_iterator &) = delete;
-  void operator=(const tokens_iterator &) = delete;
  private:
   std::function<token()> _get_next_token;
   token _current;
+
  public:
-  tokens_iterator(push_back_stream &stream);
-  tokens_iterator(std::deque<token> &tokens);
+  explicit tokens_iterator(PushBackStream &stream);
+  explicit tokens_iterator(std::deque<token> &tokens);
+
+  tokens_iterator(const tokens_iterator &) = delete;
+  void operator=(const tokens_iterator &) = delete;
 
   const token &operator*() const;
   const token *operator->() const;

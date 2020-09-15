@@ -22,14 +22,14 @@ TEST(TokenizerTest, recognizeInputTest) {
   stork::get_character get = [&]() {
     return f();
   };
-  stork::push_back_stream stream(&get);
+  stork::PushBackStream stream(&get);
 
   stork::tokens_iterator it(stream);
 
   int iteration_index = 0;
   while (it) {
 
-    std::cout << iteration_index << ": " << std::to_string(it->get_value()) << std::endl;
+    std::cout << iteration_index << ": " << std::to_string(it->getValue()) << std::endl;
     ++iteration_index;
     ++it;
   }

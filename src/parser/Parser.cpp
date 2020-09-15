@@ -7,66 +7,66 @@ std::unique_ptr<AbstractNode> Parser::parse(std::string) {
   return std::make_unique<LiteralBool>(0);
 }
 
-AbstractStatement *Parser::parse_statement(stork::tokens_iterator &it) {
-  if (it->is_reserved_token()) {
+AbstractStatement *Parser::parseStatement(stork::tokens_iterator &it) {
+  if (it->isReservedToken()) {
     switch (it->get_reserved_token()) {
-      case stork::reserved_token::kw_for:return parse_for_statement(it);
-      case stork::reserved_token::kw_if:return parse_if_statement(it);
-      case stork::reserved_token::kw_return:return parse_return_statement(it);
-      case stork::reserved_token::open_curly:return parse_block_statement(it);
-      case stork::reserved_token::kw_public: return parse_function_statement(it);
+      case stork::reservedTokens::kw_for:return parseForStatement(it);
+      case stork::reservedTokens::kw_if:return parseIfStatement(it);
+      case stork::reservedTokens::kw_return:return parseReturnStatement(it);
+      case stork::reservedTokens::open_curly:return parseBlockStatement(it);
+      case stork::reservedTokens::kw_public: return parseFunctionStatement(it);
       default:
-        // it starts with a type?
-        return parse_variable_declaration_statement(it);
+        // it starts with a data type? (e.g., int)
+        return parseVariableDeclarationStatement(it);
     }
   } else {
     // it better start with an identifier and be an assignment:
-    return parse_variable_assignment_statement(it);
+    return parseVariableAssignmentStatement(it);
   }
 }
 
-AbstractExpression *Parser::parse_expression(stork::tokens_iterator &it) {
+AbstractExpression *Parser::parseExpression(stork::tokens_iterator &it) {
   //TODO:
   return nullptr;
 }
 
 /// consume token "value" and throw error if something different
-void Parser::parse_token_value(stork::tokens_iterator &it, const stork::token_value &value) {
-  if (it->has_value(value)) {
+void Parser::parseTokenValue(stork::tokens_iterator &it, const stork::token_value &value) {
+  if (it->hasValue(value)) {
     ++it;
     return;
   }
-  throw stork::expected_syntax_error(std::to_string(value), it->get_line_number(), it->get_char_index());
+  throw stork::throwExpectedSyntaxError(std::to_string(value), it->getLineNumber(), it->getCharIndex());
 }
 
-Function *Parser::parse_function_statement(stork::tokens_iterator &it) {
+Function *Parser::parseFunctionStatement(stork::tokens_iterator &it) {
   return nullptr;
 }
-For *Parser::parse_for_statement(stork::tokens_iterator &it) {
+For *Parser::parseForStatement(stork::tokens_iterator &it) {
   return nullptr;
 }
-If *Parser::parse_if_statement(stork::tokens_iterator &it) {
+If *Parser::parseIfStatement(stork::tokens_iterator &it) {
   return nullptr;
 }
 
-Return *Parser::parse_return_statement(stork::tokens_iterator &it) {
-  parse_token_value(it, stork::reserved_token::kw_return);
+Return *Parser::parseReturnStatement(stork::tokens_iterator &it) {
+  parseTokenValue(it, stork::reservedTokens::kw_return);
 
   // Is it a return; i.e. no return value?
-  if (it->has_value(stork::reserved_token::semicolon)) {
+  if (it->hasValue(stork::reservedTokens::semicolon)) {
     return new Return();
   } else {
-    AbstractExpression *p = parse_expression(it);
+    AbstractExpression *p = parseExpression(it);
     return new Return(std::unique_ptr<AbstractExpression>(p));
   }
 }
 
-Block *Parser::parse_block_statement(stork::tokens_iterator &it) {
+Block *Parser::parseBlockStatement(stork::tokens_iterator &it) {
   return nullptr;
 }
-VariableDeclaration *Parser::parse_variable_declaration_statement(stork::tokens_iterator &it) {
+VariableDeclaration *Parser::parseVariableDeclarationStatement(stork::tokens_iterator &it) {
   return nullptr;
 }
-VariableAssignment *Parser::parse_variable_assignment_statement(stork::tokens_iterator &it) {
+VariableAssignment *Parser::parseVariableAssignmentStatement(stork::tokens_iterator &it) {
   return nullptr;
 }

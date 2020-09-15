@@ -7,22 +7,19 @@
 
 namespace stork {
 template<typename Key, typename Value>
-class lookup {
+class Lookup {
  public:
   using value_type = std::pair<Key, Value>;
   using container_type = std::vector<value_type>;
- private:
-  container_type _container;
- public:
   using iterator = typename container_type::const_iterator;
   using const_iterator = iterator;
 
-  lookup(std::initializer_list<value_type> init) :
+  Lookup(std::initializer_list<value_type> init) :
       _container(init) {
     std::sort(_container.begin(), _container.end());
   }
 
-  lookup(container_type container) :
+  explicit Lookup(container_type container) :
       _container(std::move(container)) {
     std::sort(_container.begin(), _container.end());
   }
@@ -48,9 +45,12 @@ class lookup {
     return it!=end() && it->first==key ? it : end();
   }
 
-  size_t size() const {
+  [[nodiscard]] size_t size() const {
     return _container.size();
   }
+
+ private:
+  container_type _container;
 };
 }
 

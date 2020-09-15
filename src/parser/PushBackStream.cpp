@@ -1,13 +1,13 @@
 #include "ast_opt/parser/PushBackStream.h"
 
 namespace stork {
-push_back_stream::push_back_stream(const get_character *input) :
+PushBackStream::PushBackStream(const get_character *input) :
     _input(*input),
     _line_number(0),
     _char_index(0) {
 }
 
-char push_back_stream::operator()() {
+char PushBackStream::operator()() {
   char ret = -1;
   if (_stack.empty()) {
     ret = _input();
@@ -24,7 +24,7 @@ char push_back_stream::operator()() {
   return ret;
 }
 
-void push_back_stream::push_back(char c) {
+void PushBackStream::pushBack(char c) {
   _stack.push(c);
 
   if (c=='\n') {
@@ -34,11 +34,11 @@ void push_back_stream::push_back(char c) {
   --_char_index;
 }
 
-size_t push_back_stream::line_number() const {
+size_t PushBackStream::getLineNumber() const {
   return _line_number;
 }
 
-size_t push_back_stream::char_index() const {
+size_t PushBackStream::getCharIndex() const {
   return _char_index;
 }
 }

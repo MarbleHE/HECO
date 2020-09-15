@@ -29,9 +29,9 @@ character_type get_character_type(int c) {
   return character_type::punct;
 }
 
-token fetch_word(push_back_stream &stream) {
-  size_t line_number = stream.line_number();
-  size_t char_index = stream.char_index();
+token fetch_word(PushBackStream &stream) {
+  size_t line_number = stream.getLineNumber();
+  size_t char_index = stream.getCharIndex();
 
   std::string word;
 
@@ -44,15 +44,15 @@ token fetch_word(push_back_stream &stream) {
     c = stream();
 
     if (c=='.' && word.back()=='.') {
-      stream.push_back(word.back());
+      stream.pushBack(word.back());
       word.pop_back();
       break;
     }
   } while (get_character_type(c)==character_type::alphanum || (is_number && c=='.'));
 
-  stream.push_back(c);
+  stream.pushBack(c);
 
-  if (std::optional<reserved_token> t = get_keyword(word)) {
+  if (std::optional<reservedTokens> t = getKeyword(word)) {
     return token(*t, line_number, char_index);
   } else {
     if (std::isdigit(word.front())) {
@@ -62,10 +62,10 @@ token fetch_word(push_back_stream &stream) {
         num = strtod(word.c_str(), &endptr);
         if (*endptr!=0) {
           size_t remaining = word.size() - (endptr - word.c_str());
-          throw unexpected_error(
+          throw throwUnexpectedError(
               std::string(1, char(*endptr)),
-              stream.line_number(),
-              stream.char_index() - remaining
+              stream.getLineNumber(),
+              stream.getCharIndex() - remaining
           );
         }
       }
@@ -76,26 +76,26 @@ token fetch_word(push_back_stream &stream) {
   }
 }
 
-token fetch_operator(push_back_stream &stream) {
-  size_t line_number = stream.line_number();
-  size_t char_index = stream.char_index();
+token fetch_operator(PushBackStream &stream) {
+  size_t line_number = stream.getLineNumber();
+  size_t char_index = stream.getCharIndex();
 
-  if (std::optional<reserved_token> t = get_operator(stream)) {
+  if (std::optional<reservedTokens> t = getOperator(stream)) {
     return token(*t, line_number, char_index);
   } else {
     std::string unexpected;
-    size_t err_line_number = stream.line_number();
-    size_t err_char_index = stream.char_index();
+    size_t err_line_number = stream.getLineNumber();
+    size_t err_char_index = stream.getCharIndex();
     for (int c = stream(); get_character_type(c)==character_type::punct; c = stream()) {
       unexpected.push_back(char(c));
     }
-    throw unexpected_error(unexpected, err_line_number, err_char_index);
+    throw throwUnexpectedError(unexpected, err_line_number, err_char_index);
   }
 }
 
-token fetch_string(push_back_stream &stream) {
-  size_t line_number = stream.line_number();
-  size_t char_index = stream.char_index();
+token fetch_string(PushBackStream &stream) {
+  size_t line_number = stream.getLineNumber();
+  size_t char_index = stream.getCharIndex();
 
   std::string str;
 
@@ -123,30 +123,30 @@ token fetch_string(push_back_stream &stream) {
         switch (c) {
           case '\t':
           case '\n':
-          case '\r': stream.push_back(c);
-            throw parsing_error("Expected closing '\"'", stream.line_number(), stream.char_index());
+          case '\r': stream.pushBack(c);
+            throw throwParsingError("Expected closing '\"'", stream.getLineNumber(), stream.getCharIndex());
           case '"': return token(std::move(str), line_number, char_index);
           default: str.push_back(c);
         }
       }
     }
   }
-  stream.push_back(c);
-  throw parsing_error("Expected closing '\"'", stream.line_number(), stream.char_index());
+  stream.pushBack(c);
+  throw throwParsingError("Expected closing '\"'", stream.getLineNumber(), stream.getCharIndex());
 }
 
-void skip_line_comment(push_back_stream &stream) {
+void skip_line_comment(PushBackStream &stream) {
   char c;
   do {
     c = stream();
   } while (c!='\n' && get_character_type(c)!=character_type::eof);
 
   if (c!='\n') {
-    stream.push_back(c);
+    stream.pushBack(c);
   }
 }
 
-void skip_block_comment(push_back_stream &stream) {
+void skip_block_comment(PushBackStream &stream) {
   bool closing = false;
   char c;
   do {
@@ -157,19 +157,19 @@ void skip_block_comment(push_back_stream &stream) {
     closing = (c=='*');
   } while (get_character_type(c)!=character_type::eof);
 
-  stream.push_back(c);
-  throw parsing_error("Expected closing '*/'", stream.line_number(), stream.char_index());
+  stream.pushBack(c);
+  throw throwParsingError("Expected closing '*/'", stream.getLineNumber(), stream.getCharIndex());
 }
 
-token tokenize(push_back_stream &stream) {
+token tokenize(PushBackStream &stream) {
   while (true) {
-    size_t line_number = stream.line_number();
-    size_t char_index = stream.char_index();
+    size_t line_number = stream.getLineNumber();
+    size_t char_index = stream.getCharIndex();
     char c = stream();
     switch (get_character_type(c)) {
       case character_type::eof: return {eof(), line_number, char_index};
       case character_type::space: continue;
-      case character_type::alphanum: stream.push_back(c);
+      case character_type::alphanum: stream.pushBack(c);
         return fetch_word(stream);
       case character_type::punct:
         switch (c) {
@@ -181,10 +181,10 @@ token tokenize(push_back_stream &stream) {
                 continue;
               case '*': skip_block_comment(stream);
                 continue;
-              default: stream.push_back(c1);
+              default: stream.pushBack(c1);
             }
           }
-          default: stream.push_back(c);
+          default: stream.pushBack(c);
             return fetch_operator(stream);
         }
         break;
@@ -193,7 +193,7 @@ token tokenize(push_back_stream &stream) {
 }
 }
 
-tokens_iterator::tokens_iterator(push_back_stream &stream) :
+tokens_iterator::tokens_iterator(PushBackStream &stream) :
     _current(eof(), 0, 0),
     _get_next_token([&stream]() {
       return tokenize(stream);
@@ -229,7 +229,7 @@ const token *tokens_iterator::operator->() const {
 }
 
 tokens_iterator::operator bool() const {
-  return !_current.is_eof();
+  return !_current.isEof();
 }
 }
 

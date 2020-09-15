@@ -7,7 +7,7 @@
 #include <variant>
 
 namespace stork {
-enum struct reserved_token {
+enum struct reservedTokens {
   inc,
   dec,
 
@@ -98,13 +98,13 @@ enum struct reserved_token {
   kw_public,
 };
 
-class push_back_stream;
+class PushBackStream;
 
-std::ostream &operator<<(std::ostream &os, reserved_token t);
+std::ostream &operator<<(std::ostream &os, reservedTokens t);
 
-std::optional<reserved_token> get_keyword(std::string_view word);
+std::optional<reservedTokens> getKeyword(std::string_view word);
 
-std::optional<reserved_token> get_operator(push_back_stream &stream);
+std::optional<reservedTokens> getOperator(PushBackStream &stream);
 
 struct identifier {
   std::string name;
@@ -119,7 +119,7 @@ struct eof {
 bool operator==(const eof &, const eof &);
 bool operator!=(const eof &, const eof &);
 
-typedef std::variant<reserved_token, identifier, double, std::string, eof, int> token_value;
+typedef std::variant<reservedTokens, identifier, double, std::string, eof, int> token_value;
 
 class token {
  private:
@@ -129,29 +129,29 @@ class token {
  public:
   token(token_value value, size_t line_number, size_t char_index);
 
-  bool is_reserved_token() const;
-  bool is_identifier() const;
-  bool is_number() const;
-  bool is_integer() const;
-  bool is_string() const;
-  bool is_eof() const;
+  [[nodiscard]] bool isReservedToken() const;
+  [[nodiscard]] bool isIdentifier() const;
+  [[nodiscard]] bool isNumber() const;
+  [[nodiscard]] bool isInteger() const;
+  [[nodiscard]] bool isString() const;
+  [[nodiscard]] bool isEof() const;
 
-  reserved_token get_reserved_token() const;
-  const identifier &get_identifier() const;
-  double get_number() const;
-  const std::string &get_string() const;
-  const token_value &get_value() const;
+  [[nodiscard]] reservedTokens get_reserved_token() const;
+  [[nodiscard]] const identifier &getIdentifier() const;
+  [[nodiscard]] double getNumber() const;
+  [[nodiscard]] const std::string &getString() const;
+  [[nodiscard]] const token_value &getValue() const;
 
-  size_t get_line_number() const;
-  size_t get_char_index() const;
+  [[nodiscard]] size_t getLineNumber() const;
+  [[nodiscard]] size_t getCharIndex() const;
 
-  bool has_value(const token_value &value) const;
-  double get_integer() const;
+  [[nodiscard]] bool hasValue(const token_value &value) const;
+  [[nodiscard]] double getInteger() const;
 };
 }
 
 namespace std {
-std::string to_string(stork::reserved_token t);
+std::string to_string(stork::reservedTokens t);
 std::string to_string(const stork::token_value &t);
 }
 

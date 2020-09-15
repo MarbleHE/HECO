@@ -11,7 +11,7 @@ File::~File() {
 File::File(const char *path) :
     _fp(fopen(path, "rt")) {
   if (!_fp) {
-    throw stork::file_not_found(std::string("'") + path + "' not found");
+    throw stork::FileNotFound(std::string("'") + path + "' not found");
   }
 }
 
