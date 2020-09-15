@@ -537,16 +537,16 @@ runtime_context compile(
         const incomplete_function &f = incomplete_functions.emplace_back(ctx, it);
 
         if (public_function) {
-          auto it = public_function_types.find(f.get_decl().name);
+          auto local_it = public_function_types.find(f.get_decl().name);
 
-          if (it!=public_function_types.end() && it->second!=f.get_decl().type_id) {
+          if (local_it!=public_function_types.end() && local_it->second!=f.get_decl().type_id) {
             throw semantic_error(
-                "Public function doesn't match it's declaration " + std::to_string(it->second),
+                "Public function doesn't match it's declaration " + std::to_string(local_it->second),
                 line_number,
                 char_index
             );
           } else {
-            public_function_types.erase(it);
+            public_function_types.erase(local_it);
           }
 
           public_functions.emplace(
