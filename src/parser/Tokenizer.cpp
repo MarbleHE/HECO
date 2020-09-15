@@ -57,6 +57,7 @@ token fetch_word(PushBackStream &stream) {
   } else {
     if (std::isdigit(word.front())) {
       char *endptr;
+      // TODO: consider different data types, e.g., float, double, int
       double num = strtol(word.c_str(), &endptr, 0);
       if (*endptr!=0) {
         num = strtod(word.c_str(), &endptr);
