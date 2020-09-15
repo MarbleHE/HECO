@@ -100,12 +100,7 @@ const Lookup<std::string_view, reservedTokens> keyword_token_map{
     {"string", reservedTokens::kw_string},
     {"void", reservedTokens::kw_void},
 
-    {"secret_bool", reservedTokens::kw_secret_bool},
-    {"secret_char", reservedTokens::kw_secret_char},
-    {"secret_int", reservedTokens::kw_secret_int},
-    {"secret_float", reservedTokens::kw_secret_float},
-    {"secret_double", reservedTokens::kw_secret_double},
-    {"secret_string", reservedTokens::kw_secret_string},
+    {"secret", reservedTokens::secret},
 
     {"public", reservedTokens::kw_public}
 };

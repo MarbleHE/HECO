@@ -98,12 +98,7 @@ enum struct reservedTokens {
   kw_string,
   kw_void,
 
-  kw_secret_bool,
-  kw_secret_char,
-  kw_secret_int,
-  kw_secret_float,
-  kw_secret_double,
-  kw_secret_string,
+  secret,
 
   kw_public,
 };

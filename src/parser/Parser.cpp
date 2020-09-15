@@ -44,47 +44,37 @@ Datatype *Parser::parseDatatype(stork::tokens_iterator &it) {
     throw stork::unexpectedSyntaxError(std::to_string(it->getValue()), it->getLineNumber(), it->getCharIndex());
   }
 
-  // TODO: Introduce secret counterparts and adapts datatype parsing appropriately
+  bool isSecret = false;
+  if (it->hasValue(stork::reservedTokens::secret)) {
+    isSecret = true;
+    parseTokenValue(it, stork::reservedTokens::secret);
+  }
+
   switch (it->get_reserved_token()) {
     case stork::reservedTokens::kw_bool:
-    case stork::reservedTokens::kw_secret_bool:
-      return new Datatype(Type::BOOL, it->get_reserved_token() == stork::reservedTokens::kw_secret_bool);
-
+      return new Datatype(Type::BOOL, isSecret);
     case stork::reservedTokens::kw_char:
-    case stork::reservedTokens::kw_secret_char:
-      return new Datatype(Type::CHAR, it->get_reserved_token() == stork::reservedTokens::kw_secret_char);
-
-
+      return new Datatype(Type::CHAR, isSecret);
     case stork::reservedTokens::kw_int:
-    case stork::reservedTokens::kw_secret_int:
-      return new Datatype(Type::INT);
-
+      return new Datatype(Type::INT, isSecret);
     case stork::reservedTokens::kw_float:
-      return new Datatype(Type::FLOAT);
+      return new Datatype(Type::FLOAT, isSecret);
+    case stork::reservedTokens::kw_double:
+      return new Datatype(Type::DOUBLE, isSecret);
     case stork::reservedTokens::kw_string:
-      return new Datatype(Type::STRING);
-
+      return new Datatype(Type::STRING, isSecret);
     case stork::reservedTokens::kw_void:
       return new Datatype(Type::VOID);
     default:
       throw stork::unexpectedSyntaxError(std::to_string(it->getValue()), it->getLineNumber(), it->getCharIndex());
   }
-
-  //   kw_bool,
-  //  kw_char,
-  //  kw_int,
-  //  kw_float,
-  //  kw_double,
-  //  kw_string,
-  //  kw_void,
 }
-
 
 Function *Parser::parseFunctionStatement(stork::tokens_iterator &it) {
   // consume 'public'
   parseTokenValue(it, stork::reservedTokens::kw_public);
 
-  // TODO: parse return type
+  // parse return type
   auto dt = parseDatatype(it);
 
   // TODO: parse function name
