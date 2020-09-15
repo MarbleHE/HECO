@@ -6,6 +6,8 @@
 #include "ast_opt/utilities/Operator.h"
 #include "ast_opt/parser/Tokenizer.h"
 
+// In order to avoid excessive compilation dependencies,
+// we use forward-declarations rather than includes when possible
 class AbstractExpression;
 class AbstractNode;
 class AbstractStatement;
@@ -18,8 +20,6 @@ class FunctionParameter;
 class For;
 class If;
 class IndexAccess;
-template<typename T>
-class Literal;
 class Operator;
 class Return;
 class UnaryExpression;
@@ -52,10 +52,8 @@ class Parser {
 
   static If *parseIfStatement(stork::tokens_iterator &it);
 
-  static IndexAccess* parseIndexAccess(stork::tokens_iterator &it);
-
-  template<typename  T>
-  static Literal<T>* parseLiteral(stork::tokens_iterator &it);
+  /// Returns a Literal of _some_ type without caring about type
+  static AbstractExpression* parseLiteral(stork::tokens_iterator &it);
 
   static Return *parseReturnStatement(stork::tokens_iterator &it);
 

@@ -46,6 +46,65 @@ AbstractExpression *Parser::parseExpression(stork::tokens_iterator &it) {
   return nullptr;
 }
 
+AbstractTarget *Parser::parseTarget(stork::tokens_iterator &it) {
+  //Any valid target must begin with a Variable as its "root"
+  Variable* v = parseVariable(it);
+
+  std::vector<AbstractExpression*> indices;
+  // if the next token is a "[" we need to keep on parsing
+  while(it->hasValue(stork::reservedTokens::open_square)) {
+    parseTokenValue(it, stork::reservedTokens::open_square);
+    indices.push_back(parseExpression(it));
+    parseTokenValue(it, stork::reservedTokens::close_square);
+  }
+
+  if(indices.empty()) {
+    return v;
+  } else {
+    auto cur = new IndexAccess(std::unique_ptr<AbstractTarget>(v), std::unique_ptr<AbstractExpression>(indices[0]));
+    for(size_t i = 1; i < indices.size(); ++i) {
+      cur = new IndexAccess(std::unique_ptr<AbstractTarget>(cur), std::unique_ptr<AbstractExpression>(indices[i]));
+    }
+    return cur;
+  }
+}
+
+BinaryExpression *Parser::parseBinaryExpression(stork::tokens_iterator &it) {
+  //TODO:
+  return nullptr;
+}
+
+ExpressionList *Parser::parseExpressionList(stork::tokens_iterator &it) {
+  //TODO:
+  return nullptr;
+}
+
+FunctionParameter *Parser::parseFunctionParameter(stork::tokens_iterator &it) {
+  //TODO:
+  return nullptr;
+}
+
+AbstractExpression *Parser::parseLiteral(stork::tokens_iterator &it) {
+  //TODO:
+  return nullptr;
+}
+
+
+UnaryExpression *Parser::parseUnaryExpression(stork::tokens_iterator &it) {
+  //TODO:
+  return nullptr;
+}
+
+Variable *Parser::parseVariable(stork::tokens_iterator &it) {
+  //TODO:
+  return nullptr;
+}
+
+Operator *Parser::parseOperator(stork::tokens_iterator &it) {
+  //TODO:
+  return nullptr;
+}
+
 /// consume token "value" and throw error if something different
 void Parser::parseTokenValue(stork::tokens_iterator &it, const stork::token_value &value) {
   if (it->hasValue(value)) {
