@@ -99,7 +99,7 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/parser/PushBackStream.cpp
         ${ast_optimizer_SOURCE_DIR}/src/parser/Tokenizer.cpp
         ${ast_optimizer_SOURCE_DIR}/src/parser/Tokens.cpp
-)
+        ${ast_optimizer_SOURCE_DIR}/src/parser/File.cpp)
 
 set(HEADER_ONLY_SOURCES
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractExpression.h
