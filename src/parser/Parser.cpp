@@ -21,6 +21,7 @@
 #include "ast_opt/parser/Parser.h"
 
 std::unique_ptr<AbstractNode> Parser::parse(std::string) {
+  // TODO: Implement me!
   return std::make_unique<LiteralBool>(0);
 }
 
@@ -33,11 +34,11 @@ AbstractStatement *Parser::parseStatement(stork::tokens_iterator &it) {
       case stork::reservedTokens::open_curly:return parseBlockStatement(it);
       case stork::reservedTokens::kw_public: return parseFunctionStatement(it);
       default:
-        // it starts with a data type? (e.g., int)
+        // it starts with a data type (e.g., int, float)
         return parseVariableDeclarationStatement(it);
     }
   } else {
-    // it better start with an identifier and be an assignment:
+    // it start with an identifier -> must be an assignment
     return parseVariableAssignmentStatement(it);
   }
 }
@@ -281,22 +282,25 @@ Function *Parser::parseFunctionStatement(stork::tokens_iterator &it) {
   }
   parseTokenValue(it, stork::reservedTokens::close_round);
 
-  // TODO: parse block/body statements
+  // parse block/body statements
   parseTokenValue(it, stork::reservedTokens::open_curly);
   std::vector<std::unique_ptr<AbstractStatement>> blockStatements;
   while (!it->hasValue(stork::reservedTokens::close_curly)) {
-//    blockStatements.push_back(std::unique_ptr<AbstractStatement>(parseStatement(it)));
+    blockStatements.push_back(std::unique_ptr<AbstractStatement>(parseStatement(it)));
   }
   parseTokenValue(it, stork::reservedTokens::close_curly);
-  auto block = new Block(std::move(blockStatements));
+  auto block = std::make_unique<Block>(std::move(blockStatements));
 
-//  return new Function(datatype, functionName, functionParams, std::unique_ptr<Block>(block));
-  return nullptr;
+  return new Function(datatype, functionName, std::move(functionParams), std::move(block));
 }
+
 For *Parser::parseForStatement(stork::tokens_iterator &it) {
+  // TODO: Implement me!
   return nullptr;
 }
+
 If *Parser::parseIfStatement(stork::tokens_iterator &it) {
+  // TODO: Implement me!
   return nullptr;
 }
 
@@ -313,11 +317,45 @@ Return *Parser::parseReturnStatement(stork::tokens_iterator &it) {
 }
 
 Block *Parser::parseBlockStatement(stork::tokens_iterator &it) {
+  // TODO: Implement me!
   return nullptr;
 }
 VariableDeclaration *Parser::parseVariableDeclarationStatement(stork::tokens_iterator &it) {
-  return nullptr;
+  // the variable's datatype
+  auto datatype = parseDatatype(it);
+
+  // the variable's name
+  auto identifier = parseDeclarationName(it);
+  auto variable = std::make_unique<Variable>(identifier);
+
+  // the variable's assigned value, if any assigned
+  if (!it->hasValue(stork::reservedTokens::semicolon)) {
+    parseTokenValue(it, stork::reservedTokens::assign);
+    AbstractExpression *value;
+    if (it->isBool()) {
+      value = new LiteralBool(it->getBool());
+    } else if (it->isChar()) {
+      value = new LiteralChar(it->getChar());
+    } else if (it->isFloat()) {
+      value = new LiteralFloat(it->getFloat());
+    } else if (it->isDouble()) {
+      value = new LiteralDouble(it->getDouble());
+    } else if (it->isString()) {
+      value = new LiteralString(it->getString());
+    } else if (it->isInteger()) {
+      value = new LiteralInt(it->getInteger());
+    } else {
+      throw stork::unexpectedSyntaxError(std::to_string(it->getValue()), it->getLineNumber(), it->getCharIndex());
+    }
+    ++it;
+    parseTokenValue(it, stork::reservedTokens::semicolon);
+    return new VariableDeclaration(datatype, std::move(variable), std::unique_ptr<AbstractExpression>(value));
+  } else {
+    parseTokenValue(it, stork::reservedTokens::semicolon);
+    return new VariableDeclaration(datatype, std::move(variable));
+  }
 }
 VariableAssignment *Parser::parseVariableAssignmentStatement(stork::tokens_iterator &it) {
+  // TODO: Implement me!
   return nullptr;
 }
