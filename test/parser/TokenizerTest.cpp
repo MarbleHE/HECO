@@ -44,45 +44,62 @@ void parse_token_value(tokens_iterator &it, const token_value &value) {
   throw expected_syntax_error(std::to_string(value), it->get_line_number(), it->get_char_index());
 }
 
-Function* compile_function_statement(tokens_iterator &it) {
+AbstractExpression* parse_expression(tokens_iterator &it);
+
+Function* parse_function_statement(tokens_iterator &it) {
   return nullptr;
 }
-For* compile_for_statement(tokens_iterator &it) {
+For* parse_for_statement(tokens_iterator &it) {
   return nullptr;
 }
-If* compile_if_statement(tokens_iterator &it) {
+If* parse_if_statement(tokens_iterator &it) {
   return nullptr;
 }
-Return* compile_return_statement(tokens_iterator &it) {
+
+Return* parse_return_statement(tokens_iterator &it) {
+  parse_token_value(it, reserved_token::kw_return);
+
+    // Is it a return; i.e. no return value?
+    if (it->has_value(reserved_token::semicolon)) {
+      return new Return();
+    } else {
+      AbstractExpression * p = parse_expression(it);
+      return new Return(std::unique_ptr<AbstractExpression>(p));
+    }
+}
+
+Block* parse_block_statement(tokens_iterator &it) {
   return nullptr;
 }
-Block* compile_block_statement(tokens_iterator &it) {
+VariableDeclaration* parse_variable_declaration_statement(tokens_iterator &it) {
   return nullptr;
 }
-VariableDeclaration* compile_variable_declaration_statement(tokens_iterator &it) {
-  return nullptr;
-}
-VariableAssignment* compile_variable_assignment_statement(tokens_iterator &it) {
+VariableAssignment* parse_variable_assignment_statement(tokens_iterator &it) {
   return nullptr;
 }
 
 ///
-AbstractStatement* compile_statement(tokens_iterator &it) {
+AbstractStatement* parse_statement(tokens_iterator &it) {
   if (it->is_reserved_token()) {
     switch (it->get_reserved_token()) {
-      case reserved_token::kw_for:return compile_for_statement(it);
-      case reserved_token::kw_if:return compile_if_statement(it);
-      case reserved_token::kw_return:return compile_return_statement(it);
-      case reserved_token::open_curly:return compile_block_statement(it);
-      case reserved_token::kw_public: return compile_function_statement(it);
+      case reserved_token::kw_for:return parse_for_statement(it);
+      case reserved_token::kw_if:return parse_if_statement(it);
+      case reserved_token::kw_return:return parse_return_statement(it);
+      case reserved_token::open_curly:return parse_block_statement(it);
+      case reserved_token::kw_public: return parse_function_statement(it);
       default:
         // it starts with a type?
-        return compile_variable_declaration_statement(it);
+        return parse_variable_declaration_statement(it);
     }
   } else {
     // it better start with an identifier and be an assignment:
-    return compile_variable_assignment_statement(it);
+    return parse_variable_assignment_statement(it);
   }
+}
+
+AbstractExpression* parse_expression(tokens_iterator &it){
+  //TODO:
+  return nullptr;
 }
 
 
@@ -112,7 +129,7 @@ TEST(TokenizerTest, recognizeInputTest) {
 
 
   // We enforce a lack of global variables and a single statement (e.g. function) for now:
-  compile_statement(it);
+  parse_statement(it);
 
 //  for (const std::pair<std::string, function> &p : external_functions) {
 //    stork::get_character get = [i = 0, &p]() mutable {
