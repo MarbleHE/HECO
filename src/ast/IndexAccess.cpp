@@ -3,7 +3,7 @@
 
 IndexAccess::~IndexAccess() = default;
 
-IndexAccess::IndexAccess(std::unique_ptr<AbstractTarget> target, std::unique_ptr<AbstractExpression> index)
+IndexAccess::IndexAccess(std::unique_ptr<AbstractTarget> &&target, std::unique_ptr<AbstractExpression> &&index)
     : target(std::move(target)), index(std::move(index)) {}
 
 IndexAccess::IndexAccess(const IndexAccess &other) : target(other.target ? other.target->clone() : nullptr),

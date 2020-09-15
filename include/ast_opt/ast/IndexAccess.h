@@ -28,7 +28,7 @@ class IndexAccess : public AbstractTarget {
   /// Create an IndexAccess that accesses index of target
   /// \param target The target
   /// \param index The value that resolves to the index
-  explicit IndexAccess(std::unique_ptr<AbstractTarget> &&target, std::unique_ptr<AbstractExpression> &&index);
+  IndexAccess(std::unique_ptr<AbstractTarget> &&target, std::unique_ptr<AbstractExpression> &&index);
 
   /// Copy constructor
   /// \param other IndexAccess to copy
@@ -74,21 +74,21 @@ class IndexAccess : public AbstractTarget {
   /// Get the index, if it exists
   /// \return (a const reference to) the index
   /// \throws std::runtime_error if no index exists
-  const AbstractTarget& getIndex() const;
+  const AbstractExpression& getIndex() const;
 
 
   /// Get the index, if it exists
   /// \return (a reference to) the index
   /// \throws std::runtime_error if no index exists
-  AbstractTarget& getIndex();
+  AbstractExpression& getIndex();
 
   /// Set a new target
   /// \param newTarget condition to set, IndexAccess takes ownership
   void setTarget(std::unique_ptr<AbstractTarget> &&newTarget);
 
-  /// Set a new value
-  /// \param newValue condition to set, IndexAccess takes ownership
-  void setValue(std::unique_ptr<AbstractExpression> &&newValue);
+  /// Set a new index
+  /// \param newIndex condition to set, IndexAccess takes ownership
+  void setIndex(std::unique_ptr<AbstractExpression> &&newIndex);
 
 
   ///////////////////////////////////////////////
@@ -118,13 +118,13 @@ class IndexAccessIteratorImpl : public PositionIteratorImpl<T, IndexAccess> {
       case 0:
         if (this->node.hasTarget())
           return this->node.getTarget();
-        else if (this->node.hasValue())
+        else if (this->node.hasIndex())
           return this->node.getIndex();
         else
           throw std::runtime_error("Cannot dereference iterator since node has no children.");
       case 1:
         if (this->node.hasTarget()) {
-          if (this->node.hasValue())
+          if (this->node.hasIndex())
             return this->node.getIndex();
           // Else: continue to default
         }
