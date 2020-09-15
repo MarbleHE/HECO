@@ -35,5 +35,6 @@ class Parser {
   If *parseIfStatement(stork::tokens_iterator &it);
 
   void parseTokenValue(stork::tokens_iterator &it, const stork::token_value &value);
+  Datatype *parseDatatype(stork::tokens_iterator &iterator);
 };
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_PARSER_PARSER_H_

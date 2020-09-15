@@ -92,9 +92,20 @@ const Lookup<std::string_view, reservedTokens> keyword_token_map{
 
     {"function", reservedTokens::kw_function},
 
-    {"void", reservedTokens::kw_void},
-    {"number", reservedTokens::kw_number},
+    {"bool", reservedTokens::kw_bool},
+    {"char", reservedTokens::kw_char},
+    {"int", reservedTokens::kw_int},
+    {"float", reservedTokens::kw_float},
+    {"double", reservedTokens::kw_double},
     {"string", reservedTokens::kw_string},
+    {"void", reservedTokens::kw_void},
+
+    {"secret_bool", reservedTokens::kw_secret_bool},
+    {"secret_char", reservedTokens::kw_secret_char},
+    {"secret_int", reservedTokens::kw_secret_int},
+    {"secret_float", reservedTokens::kw_secret_float},
+    {"secret_double", reservedTokens::kw_secret_double},
+    {"secret_string", reservedTokens::kw_secret_string},
 
     {"public", reservedTokens::kw_public}
 };
@@ -122,7 +133,7 @@ class maximal_munch_comparator {
  private:
   size_t _idx;
  public:
-  maximal_munch_comparator(size_t idx) :
+  explicit maximal_munch_comparator(size_t idx) :
       _idx(idx) {
   }
 
@@ -186,12 +197,16 @@ bool token::isIdentifier() const {
   return std::holds_alternative<identifier>(_value);
 }
 
-bool token::isNumber() const {
+bool token::isDouble() const {
   return std::holds_alternative<double>(_value);
 }
 
 bool token::isInteger() const {
   return std::holds_alternative<int>(_value);
+}
+
+bool token::isBool() const {
+  return std::holds_alternative<bool>(_value);
 }
 
 bool token::isString() const {
@@ -202,6 +217,14 @@ bool token::isEof() const {
   return std::holds_alternative<eof>(_value);
 }
 
+bool token::isChar() const {
+  return std::holds_alternative<char>(_value);
+}
+
+bool token::isFloat() const {
+  return std::holds_alternative<float>(_value);
+}
+
 reservedTokens token::get_reserved_token() const {
   return std::get<reservedTokens>(_value);
 }
@@ -210,7 +233,7 @@ const identifier &token::getIdentifier() const {
   return std::get<identifier>(_value);
 }
 
-double token::getNumber() const {
+double token::getDouble() const {
   return std::get<double>(_value);
 }
 
@@ -236,6 +259,17 @@ size_t token::getCharIndex() const {
 
 bool token::hasValue(const token_value &value) const {
   return _value==value;
+}
+bool token::getBool() const {
+  return std::get<bool>(_value);
+}
+
+char token::getChar() const {
+  return std::get<char>(_value);
+}
+
+float token::getFloat() const {
+  return std::get<float>(_value);
 }
 
 bool operator==(const identifier &id1, const identifier &id2) {

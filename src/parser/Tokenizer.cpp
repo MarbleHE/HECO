@@ -62,7 +62,7 @@ token fetch_word(PushBackStream &stream) {
         num = strtod(word.c_str(), &endptr);
         if (*endptr!=0) {
           size_t remaining = word.size() - (endptr - word.c_str());
-          throw throwUnexpectedError(
+          throw unexpectedError(
               std::string(1, char(*endptr)),
               stream.getLineNumber(),
               stream.getCharIndex() - remaining
@@ -89,7 +89,7 @@ token fetch_operator(PushBackStream &stream) {
     for (int c = stream(); get_character_type(c)==character_type::punct; c = stream()) {
       unexpected.push_back(char(c));
     }
-    throw throwUnexpectedError(unexpected, err_line_number, err_char_index);
+    throw unexpectedError(unexpected, err_line_number, err_char_index);
   }
 }
 
@@ -124,7 +124,7 @@ token fetch_string(PushBackStream &stream) {
           case '\t':
           case '\n':
           case '\r': stream.pushBack(c);
-            throw throwParsingError("Expected closing '\"'", stream.getLineNumber(), stream.getCharIndex());
+            throw parsingError("Expected closing '\"'", stream.getLineNumber(), stream.getCharIndex());
           case '"': return token(std::move(str), line_number, char_index);
           default: str.push_back(c);
         }
@@ -132,7 +132,7 @@ token fetch_string(PushBackStream &stream) {
     }
   }
   stream.pushBack(c);
-  throw throwParsingError("Expected closing '\"'", stream.getLineNumber(), stream.getCharIndex());
+  throw parsingError("Expected closing '\"'", stream.getLineNumber(), stream.getCharIndex());
 }
 
 void skip_line_comment(PushBackStream &stream) {
@@ -158,7 +158,7 @@ void skip_block_comment(PushBackStream &stream) {
   } while (get_character_type(c)!=character_type::eof);
 
   stream.pushBack(c);
-  throw throwParsingError("Expected closing '*/'", stream.getLineNumber(), stream.getCharIndex());
+  throw parsingError("Expected closing '*/'", stream.getLineNumber(), stream.getCharIndex());
 }
 
 token tokenize(PushBackStream &stream) {

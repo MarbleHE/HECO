@@ -20,61 +20,61 @@ size_t Error::getCharIndex() const noexcept {
   return _char_index;
 }
 
-Error throwParsingError(std::string_view message, size_t line_number, size_t char_index) {
+Error parsingError(std::string_view message, size_t line_number, size_t char_index) {
   std::string error_message("Parsing error: ");
   error_message += message;
   return Error(std::move(error_message), line_number, char_index);
 }
 
-Error throwSyntaxError(std::string_view message, size_t line_number, size_t char_index) {
+Error syntaxError(std::string_view message, size_t line_number, size_t char_index) {
   std::string error_message("Syntax error: ");
   error_message += message;
   return Error(std::move(error_message), line_number, char_index);
 }
 
-Error throwSemanticError(std::string_view message, size_t line_number, size_t char_index) {
+Error semanticError(std::string_view message, size_t line_number, size_t char_index) {
   std::string error_message("Semantic error: ");
   error_message += message;
   return Error(std::move(error_message), line_number, char_index);
 }
 
-Error throwCompilerError(std::string_view message, size_t line_number, size_t char_index) {
+Error compilerError(std::string_view message, size_t line_number, size_t char_index) {
   std::string error_message("Compiler error: ");
   error_message += message;
   return Error(std::move(error_message), line_number, char_index);
 }
 
-Error throwUnexpectedError(std::string_view unexpected, size_t line_number, size_t char_index) {
+Error unexpectedError(std::string_view unexpected, size_t line_number, size_t char_index) {
   std::string message("Unexpected '");
   message += unexpected;
   message += "'";
-  return throwParsingError(message, line_number, char_index);
+  return parsingError(message, line_number, char_index);
 }
 
-Error throwUnexpectedSyntaxError(std::string_view unexpected, size_t line_number, size_t char_index) {
+Error unexpectedSyntaxError(std::string_view unexpected, size_t line_number, size_t char_index) {
   std::string message("Unexpected '");
   message += unexpected;
   message += "'";
-  return throwSyntaxError(message, line_number, char_index);
+  return syntaxError(message, line_number, char_index);
 }
 
-Error throwExpectedSyntaxError(std::string_view expected, size_t line_number, size_t char_index) {
+Error expectedSyntaxError(std::string_view expected, size_t line_number, size_t char_index) {
   std::string message("Expected '");
   message += expected;
   message += "'";
-  return throwSyntaxError(message, line_number, char_index);
+  return syntaxError(message, line_number, char_index);
 }
 
-Error throwUndeclaredError(std::string_view undeclared, size_t line_number, size_t char_index) {
+Error undeclaredError(std::string_view undeclared, size_t line_number, size_t char_index) {
   std::string message("Undeclared identifier '");
   message += undeclared;
   message += "'";
-  return throwSemanticError(message, line_number, char_index);
+  return semanticError(message, line_number, char_index);
 }
 
-Error throwWrongTypeError(std::string_view source, std::string_view destination,
-                          bool lvalue, size_t line_number,
-                          size_t char_index) {
+Error wrongTypeError(std::string_view source, std::string_view destination,
+                     bool lvalue, size_t line_number,
+                     size_t char_index) {
   std::string message;
   if (lvalue) {
     message += "'";
@@ -87,14 +87,14 @@ Error throwWrongTypeError(std::string_view source, std::string_view destination,
     message += destination;
     message += "'";
   }
-  return throwSemanticError(message, line_number, char_index);
+  return semanticError(message, line_number, char_index);
 }
 
-Error throwAlreadyDeclaredError(std::string_view name, size_t line_number, size_t char_index) {
+Error alreadyDeclaredError(std::string_view name, size_t line_number, size_t char_index) {
   std::string message = "'";
   message += name;
   message += "' is already declared";
-  return throwSemanticError(message, line_number, char_index);
+  return semanticError(message, line_number, char_index);
 }
 
 void formatError(const Error &err, const get_character &source, std::ostream &output) {

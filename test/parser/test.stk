@@ -1,4 +1,3 @@
-public function void main() {
-    int i = 2;
-    trace(i);
+public void main() {
+    return;
 }

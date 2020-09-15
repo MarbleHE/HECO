@@ -26,16 +26,16 @@ TEST(TokenizerTest, recognizeInputTest) {
 
   stork::tokens_iterator it(stream);
 
-  int iteration_index = 0;
-  while (it) {
-
-    std::cout << iteration_index << ": " << std::to_string(it->getValue()) << std::endl;
-    ++iteration_index;
-    ++it;
-  }
+//  int iteration_index = 0;
+//  while (it) {
+//
+//    std::cout << iteration_index << ": " << std::to_string(it->getValue()) << std::endl;
+//    ++iteration_index;
+//    ++it;
+//  }
 
   // We enforce a lack of global variables and a single statement (e.g. function) for now:
-  Parser().parse_statement(it);
+  Parser().parseStatement(it);
 
 //  for (const std::pair<std::string, function> &p : external_functions) {
 //    stork::get_character get = [i = 0, &p]() mutable {

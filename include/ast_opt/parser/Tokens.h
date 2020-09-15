@@ -90,10 +90,20 @@ enum struct reservedTokens {
 
   kw_function,
 
-  kw_void,
-  kw_number,
+  kw_bool,
+  kw_char,
   kw_int,
+  kw_float,
+  kw_double,
   kw_string,
+  kw_void,
+
+  kw_secret_bool,
+  kw_secret_char,
+  kw_secret_int,
+  kw_secret_float,
+  kw_secret_double,
+  kw_secret_string,
 
   kw_public,
 };
@@ -119,7 +129,7 @@ struct eof {
 bool operator==(const eof &, const eof &);
 bool operator!=(const eof &, const eof &);
 
-typedef std::variant<reservedTokens, identifier, double, std::string, eof, int> token_value;
+typedef std::variant<reservedTokens, identifier, double, std::string, eof, int, bool, char, float> token_value;
 
 class token {
  private:
@@ -131,22 +141,29 @@ class token {
 
   [[nodiscard]] bool isReservedToken() const;
   [[nodiscard]] bool isIdentifier() const;
-  [[nodiscard]] bool isNumber() const;
-  [[nodiscard]] bool isInteger() const;
+  [[nodiscard]] bool isDouble() const;
   [[nodiscard]] bool isString() const;
   [[nodiscard]] bool isEof() const;
+  [[nodiscard]] bool isInteger() const;
+  [[nodiscard]] bool isBool() const;
+  [[nodiscard]] bool isChar() const;
+  [[nodiscard]] bool isFloat() const;
 
   [[nodiscard]] reservedTokens get_reserved_token() const;
   [[nodiscard]] const identifier &getIdentifier() const;
-  [[nodiscard]] double getNumber() const;
+  [[nodiscard]] double getDouble() const;
   [[nodiscard]] const std::string &getString() const;
-  [[nodiscard]] const token_value &getValue() const;
+  [[nodiscard]] double getInteger() const;
+  [[nodiscard]] bool getBool() const;
+  [[nodiscard]] char getChar() const;
+  [[nodiscard]] float getFloat() const;
+
 
   [[nodiscard]] size_t getLineNumber() const;
   [[nodiscard]] size_t getCharIndex() const;
 
   [[nodiscard]] bool hasValue(const token_value &value) const;
-  [[nodiscard]] double getInteger() const;
+  [[nodiscard]] const token_value &getValue() const;
 };
 }
 
