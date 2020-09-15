@@ -10,6 +10,7 @@ enum struct simple_type {
   nothing,
   number,
   string,
+  integer
 };
 
 struct array_type;
@@ -51,6 +52,7 @@ class type_registry {
   static type void_type;
   static type number_type;
   static type string_type;
+  static type integer_type;
  public:
   type_registry();
 
@@ -66,6 +68,10 @@ class type_registry {
 
   static type_handle get_string_handle() {
     return &string_type;
+  }
+
+  static type_handle get_integer_handle() {
+    return &integer_type;
   }
 };
 }

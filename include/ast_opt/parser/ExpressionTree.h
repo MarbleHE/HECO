@@ -68,7 +68,7 @@ enum struct node_operation {
 struct node;
 using node_ptr = std::unique_ptr<node>;
 
-using node_value = std::variant<node_operation, std::string, double, identifier>;
+using node_value = std::variant<node_operation, std::string, double, identifier, int>;
 
 class compiler_context;
 

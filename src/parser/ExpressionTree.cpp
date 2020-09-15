@@ -62,11 +62,16 @@ node::node(compiler_context &context,
     _char_index(char_index) {
   const type_handle void_handle = type_registry::get_void_handle();
   const type_handle number_handle = type_registry::get_number_handle();
+  const type_handle integer_handle = type_registry::get_integer_handle();
   const type_handle string_handle = type_registry::get_string_handle();
 
   std::visit(overloaded{
       [&](const std::string &value) {
         _type_id = string_handle;
+        _lvalue = false;
+      },
+      [&](int value) {
+        _type_id = integer_handle;
         _lvalue = false;
       },
       [&](double value) {

@@ -92,6 +92,7 @@ enum struct reserved_token {
 
   kw_void,
   kw_number,
+  kw_int,
   kw_string,
 
   kw_public,
@@ -118,7 +119,7 @@ struct eof {
 bool operator==(const eof &, const eof &);
 bool operator!=(const eof &, const eof &);
 
-using token_value = std::variant<reserved_token, identifier, double, std::string, eof>;
+using token_value = std::variant<reserved_token, identifier, double, std::string, eof, int>;
 
 class token {
  private:
@@ -131,6 +132,7 @@ class token {
   bool is_reserved_token() const;
   bool is_identifier() const;
   bool is_number() const;
+  bool is_integer() const;
   bool is_string() const;
   bool is_eof() const;
 
@@ -144,6 +146,7 @@ class token {
   size_t get_char_index() const;
 
   bool has_value(const token_value &value) const;
+  double get_integer() const;
 };
 }
 

@@ -19,6 +19,7 @@ class variable_impl;
 class runtime_context;
 
 using number = double;
+using integer = int;
 using string = std::shared_ptr<std::string>;
 using array = std::deque<variable_ptr>;
 using function = std::function<void(runtime_context &)>;
@@ -27,6 +28,7 @@ using initializer_list = array;
 
 using lvalue = variable_ptr;
 using lnumber = std::shared_ptr<variable_impl<number> >;
+using linteger = std::shared_ptr<variable_impl<integer> >;
 using lstring = std::shared_ptr<variable_impl<string> >;
 using larray = std::shared_ptr<variable_impl<array> >;
 using lfunction = std::shared_ptr<variable_impl<function> >;
