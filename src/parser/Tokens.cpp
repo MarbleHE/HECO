@@ -150,7 +150,7 @@ std::optional<reserved_token> get_operator(push_back_stream &stream) {
   std::optional<reserved_token> ret;
   size_t match_size = 0;
 
-  std::stack<int> chars;
+  std::stack<char> chars;
 
   for (size_t idx = 0; candidates.first!=candidates.second; ++idx) {
     chars.push(stream());

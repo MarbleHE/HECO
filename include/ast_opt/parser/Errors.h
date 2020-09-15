@@ -34,7 +34,7 @@ error wrong_type_error(std::string_view source, std::string_view destination, bo
                        size_t line_number, size_t char_index);
 error already_declared_error(std::string_view name, size_t line_number, size_t char_index);
 
-using get_character = std::function<int()>;
+using get_character = std::function<char()>;
 void format_error(const error &err, const get_character &source, std::ostream &output);
 
 class runtime_error : public std::exception {

@@ -35,7 +35,7 @@ token fetch_word(push_back_stream &stream) {
 
   std::string word;
 
-  int c = stream();
+  char c = stream();
 
   bool is_number = isdigit(c);
 
@@ -100,7 +100,7 @@ token fetch_string(push_back_stream &stream) {
   std::string str;
 
   bool escaped = false;
-  int c = stream();
+  char c = stream();
   for (; get_character_type(c)!=character_type::eof; c = stream()) {
     if (c=='\\') {
       escaped = true;
@@ -136,7 +136,7 @@ token fetch_string(push_back_stream &stream) {
 }
 
 void skip_line_comment(push_back_stream &stream) {
-  int c;
+  char c;
   do {
     c = stream();
   } while (c!='\n' && get_character_type(c)!=character_type::eof);
@@ -148,7 +148,7 @@ void skip_line_comment(push_back_stream &stream) {
 
 void skip_block_comment(push_back_stream &stream) {
   bool closing = false;
-  int c;
+  char c;
   do {
     c = stream();
     if (closing && c=='/') {
@@ -165,7 +165,7 @@ token tokenize(push_back_stream &stream) {
   while (true) {
     size_t line_number = stream.line_number();
     size_t char_index = stream.char_index();
-    int c = stream();
+    char c = stream();
     switch (get_character_type(c)) {
       case character_type::eof: return {eof(), line_number, char_index};
       case character_type::space: continue;

@@ -4,7 +4,6 @@
 #include <functional>
 #include <string_view>
 #include <iostream>
-#include <variant>
 #include <deque>
 
 #include "Tokens.h"

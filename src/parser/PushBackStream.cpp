@@ -7,8 +7,8 @@ push_back_stream::push_back_stream(const get_character *input) :
     _char_index(0) {
 }
 
-int push_back_stream::operator()() {
-  int ret = -1;
+char push_back_stream::operator()() {
+  char ret = -1;
   if (_stack.empty()) {
     ret = _input();
   } else {
@@ -24,7 +24,7 @@ int push_back_stream::operator()() {
   return ret;
 }
 
-void push_back_stream::push_back(int c) {
+void push_back_stream::push_back(char c) {
   _stack.push(c);
 
   if (c=='\n') {

@@ -119,7 +119,7 @@ struct eof {
 bool operator==(const eof &, const eof &);
 bool operator!=(const eof &, const eof &);
 
-using token_value = std::variant<reserved_token, identifier, double, std::string, eof, int>;
+typedef std::variant<reserved_token, identifier, double, std::string, eof, int> token_value;
 
 class token {
  private:
