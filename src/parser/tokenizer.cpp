@@ -1,11 +1,11 @@
-#include "tokenizer.hpp"
+#include "ast_opt/parser/Tokenizer.h"
 #include <map>
 #include <string>
 #include <cctype>
 #include <stack>
 #include <cstdlib>
-#include "push_back_stream.hpp"
-#include "errors.hpp"
+#include "ast_opt/parser/PushBackStream.h"
+#include "ast_opt/parser/Errors.h"
 
 namespace stork {
 	namespace {

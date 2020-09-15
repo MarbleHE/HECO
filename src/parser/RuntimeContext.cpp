@@ -1,5 +1,5 @@
-#include "runtime_context.hpp"
-#include "errors.hpp"
+#include "ast_opt/parser/RuntimeContext.h"
+#include "ast_opt/parser/Errors.h"
 
 namespace stork {
 	runtime_context::runtime_context(

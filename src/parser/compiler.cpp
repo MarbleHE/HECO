@@ -1,12 +1,12 @@
-#include "compiler.hpp"
-#include "errors.hpp"
-#include "compiler_context.hpp"
-#include "expression.hpp"
-#include "incomplete_function.hpp"
-#include "tokenizer.hpp"
-#include "runtime_context.hpp"
-#include "helpers.hpp"
-#include "push_back_stream.hpp"
+#include "ast_opt/parser/Compiler.h"
+#include "ast_opt/parser/Errors.h"
+#include "ast_opt/parser/CompilerContext.h"
+#include "ast_opt/parser/Expression.h"
+#include "ast_opt/parser/IncompleteFunction.h"
+#include "ast_opt/parser/Tokenizer.h"
+#include "ast_opt/parser/RuntimeContext.h"
+#include "ast_opt/parser/Helpers.h"
+#include "ast_opt/parser/PushBackStream.h"
 
 namespace stork {
 	namespace {

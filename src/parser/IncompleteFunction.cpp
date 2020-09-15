@@ -1,8 +1,8 @@
-#include "incomplete_function.hpp"
-#include "compiler.hpp"
-#include "compiler_context.hpp"
-#include "errors.hpp"
-#include "tokenizer.hpp"
+#include "ast_opt/parser/IncompleteFunction.h"
+#include "ast_opt/parser/Compiler.h"
+#include "ast_opt/parser/CompilerContext.h"
+#include "ast_opt/parser/Errors.h"
+#include "ast_opt/parser/Tokenizer.h"
 
 namespace stork {
 	function_declaration parse_function_declaration(compiler_context& ctx, tokens_iterator& it) {

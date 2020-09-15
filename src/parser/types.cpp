@@ -1,5 +1,5 @@
-#include "types.hpp"
-#include "helpers.hpp"
+#include "ast_opt/parser/Types.h"
+#include "ast_opt/parser/Helpers.h"
 
 namespace stork {
 	bool type_registry::types_less::operator()(const type& t1, const type& t2) const {

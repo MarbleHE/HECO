@@ -91,7 +91,25 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/utilities/Datatype.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/Operator.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/PrintVisitor.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/visitor/Visitor.cpp)
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/Visitor.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/parser/Compiler.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/parser/CompilerContext.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/parser/Errors.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/parser/Expression.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/parser/ExpressionTree.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/parser/ExpressionTreeParser.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/parser/IncompleteFunction.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/parser/Module.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/parser/Parser.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/parser/PushBackStream.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/parser/RuntimeContext.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/parser/StandardFunctions.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/parser/Statement.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/parser/Tokenizer.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/parser/Tokens.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/parser/Types.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/parser/Variable.cpp
+)
 
 set(HEADER_ONLY_SOURCES
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractExpression.h
@@ -123,7 +141,26 @@ set(PUBLIC_HEADERS
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/Operator.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/IVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/PrintVisitor.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/Visitor.h)
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/Visitor.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/parser/Compiler.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/parser/CompilerContext.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/parser/Errors.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/parser/Expression.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/parser/ExpressionTree.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/parser/ExpressionTreeParser.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/parser/IncompleteFunction.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/parser/Module.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/parser/Parser.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/parser/PushBackStream.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/parser/RuntimeContext.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/parser/StandardFunctions.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/parser/Statement.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/parser/Tokenizer.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/parser/Tokens.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/parser/Types.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/parser/Variable.h
+
+        )
 
 
 # build a library out of the code to be used by the tests

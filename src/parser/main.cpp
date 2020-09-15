@@ -1,6 +1,6 @@
 #include <iostream>
-#include "module.hpp"
-#include "standard_functions.hpp"
+#include "ast_opt/parser/Module.h"
+#include "ast_opt/parser/StandardFunctions.h"
 
 int main() {
 	std::string path = __FILE__;

@@ -1,10 +1,10 @@
-#include "module.hpp"
+#include "ast_opt/parser/Module.h"
 #include <vector>
 #include <cstdio>
-#include "errors.hpp"
-#include "push_back_stream.hpp"
-#include "tokenizer.hpp"
-#include "compiler.hpp"
+#include "ast_opt/parser/Errors.h"
+#include "ast_opt/parser/PushBackStream.h"
+#include "ast_opt/parser/Tokenizer.h"
+#include "ast_opt/parser/Compiler.h"
 
 namespace stork {
 	namespace {

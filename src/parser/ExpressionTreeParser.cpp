@@ -1,7 +1,7 @@
-#include "expression_tree_parser.hpp"
-#include "expression_tree.hpp"
-#include "tokenizer.hpp"
-#include "errors.hpp"
+#include "ast_opt/parser/ExpressionTreeParser.h"
+#include "ast_opt/parser/ExpressionTree.h"
+#include "ast_opt/parser/Tokenizer.h"
+#include "ast_opt/parser/Errors.h"
 #include <stack>
 
 namespace stork {

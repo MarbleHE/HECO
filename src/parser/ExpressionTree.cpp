@@ -1,7 +1,7 @@
-#include "expression_tree.hpp"
-#include "helpers.hpp"
-#include "errors.hpp"
-#include "compiler_context.hpp"
+#include "ast_opt/parser/ExpressionTree.h"
+#include "ast_opt/parser/Helpers.h"
+#include "ast_opt/parser/Errors.h"
+#include "ast_opt/parser/CompilerContext.h"
 
 namespace stork {
 	namespace {

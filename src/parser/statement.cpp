@@ -1,7 +1,7 @@
 #include <unordered_map>
-#include "statement.hpp"
-#include "expression.hpp"
-#include "runtime_context.hpp"
+#include "ast_opt/parser/Statement.h"
+#include "ast_opt/parser/Expression.h"
+#include "ast_opt/parser/RuntimeContext.h"
 
 namespace stork {
 	flow::flow(flow_type type, int break_level):

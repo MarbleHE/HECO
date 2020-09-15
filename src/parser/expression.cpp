@@ -1,12 +1,12 @@
-#include "expression.hpp"
+#include "ast_opt/parser/Expression.h"
 #include <type_traits>
-#include "expression_tree.hpp"
-#include "expression_tree_parser.hpp"
-#include "helpers.hpp"
-#include "errors.hpp"
-#include "runtime_context.hpp"
-#include "tokenizer.hpp"
-#include "compiler_context.hpp"
+#include "ast_opt/parser/ExpressionTree.h"
+#include "ast_opt/parser/ExpressionTreeParser.h"
+#include "ast_opt/parser/Helpers.h"
+#include "ast_opt/parser/Errors.h"
+#include "ast_opt/parser/RuntimeContext.h"
+#include "ast_opt/parser/Tokenizer.h"
+#include "ast_opt/parser/CompilerContext.h"
 
 namespace stork {
 	namespace {

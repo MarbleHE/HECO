@@ -1,5 +1,5 @@
-#include "standard_functions.hpp"
-#include "module.hpp"
+#include "ast_opt/parser/StandardFunctions.h"
+#include "ast_opt/parser/Module.h"
 
 #include <iostream>
 #include <string>
