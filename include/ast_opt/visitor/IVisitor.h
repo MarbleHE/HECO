@@ -3,10 +3,6 @@
 
 #include <string>
 
-class AbstractExpression;
-
-class AbstractStatement;
-
 class BinaryExpression;
 
 class Block;
@@ -37,8 +33,6 @@ typedef Literal<int> LiteralInt;
 typedef Literal<float> LiteralFloat;
 typedef Literal<double> LiteralDouble;
 typedef Literal<std::string> LiteralString;
-
-class Operator;
 
 class OperatorExpression;
 
