@@ -106,18 +106,16 @@ AbstractExpression *Parser::parseExpression(stork::tokens_iterator &it) {
   while (running) {
     if (isOperator(it)) {
       Operator op1 = parseOperator(it);
-      Operator *op2 = operator_stack.empty() ? nullptr : &operator_stack.top();
-
-      while (!operator_stack.empty() && op2!=nullptr) {
-        op2 = &operator_stack.top();
-        if ((!isRightAssociative(op1) && comparePrecedence(op1, *op2)==0) || comparePrecedence(op1, *op2) < 0) {
-          operator_stack.pop(); // pop
+      while (!operator_stack.empty()) {
+        Operator op2 = operator_stack.top();
+        if ((!isRightAssociative(op1) && comparePrecedence(op1, op2)==0) || comparePrecedence(op1, op2) < 0) {
+          operator_stack.pop();
           AbstractExpression *rhs = operands.top();
           operands.pop();
           AbstractExpression *lhs = operands.top();
           operands.pop();
           operands.push(new BinaryExpression(std::unique_ptr<AbstractExpression>(lhs),
-                                             *op2,
+                                             op2,
                                              std::unique_ptr<AbstractExpression>(rhs)));
         } else {
           break;
@@ -138,8 +136,18 @@ AbstractExpression *Parser::parseExpression(stork::tokens_iterator &it) {
     }
   }
 
-  //TODO: Check that stack has been resolved correctly, otherwise throw exception
-  return operands.top();
+  if (!operator_stack.empty()) {
+    Operator op = operator_stack.top();
+    throw stork::unexpectedSyntaxError("Operator " + op.toString() + " unresolved.",
+                                       it->getLineNumber(),
+                                       it->getCharIndex());
+  } else if (operands.empty()) {
+    throw stork::unexpectedSyntaxError("Empty Expression", it->getLineNumber(), it->getCharIndex());
+  } else if (operands.size()==1) {
+    return operands.top();
+  } else {
+    throw stork::unexpectedSyntaxError("Unresolved Operands", it->getLineNumber(), it->getCharIndex());
+  }
 }
 
 AbstractTarget *Parser::parseTarget(stork::tokens_iterator &it) {
