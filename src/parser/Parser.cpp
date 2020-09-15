@@ -1,7 +1,23 @@
-#include <ast_opt/parser/Errors.h>
-#include "ast_opt/parser/Parser.h"
+#include "ast_opt/ast/AbstractNode.h"
+#include "ast_opt/ast/AbstractStatement.h"
+#include "ast_opt/ast/AbstractExpression.h"
+#include "ast_opt/ast/AbstractTarget.h"
+#include "ast_opt/ast/BinaryExpression.h"
+#include "ast_opt/ast/Block.h"
+#include "ast_opt/ast/ExpressionList.h"
+#include "ast_opt/ast/For.h"
+#include "ast_opt/ast/Function.h"
+#include "ast_opt/ast/FunctionParameter.h"
+#include "ast_opt/ast/If.h"
+#include "ast_opt/ast/IndexAccess.h"
 #include "ast_opt/ast/Literal.h"
 #include "ast_opt/ast/Return.h"
+#include "ast_opt/ast/UnaryExpression.h"
+#include "ast_opt/ast/Variable.h"
+#include "ast_opt/ast/VariableAssignment.h"
+#include "ast_opt/ast/VariableDeclaration.h"
+#include "ast_opt/parser/Errors.h"
+#include "ast_opt/parser/Parser.h"
 
 std::unique_ptr<AbstractNode> Parser::parse(std::string) {
   return std::make_unique<LiteralBool>(0);
