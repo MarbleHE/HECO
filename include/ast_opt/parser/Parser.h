@@ -4,7 +4,7 @@
 #include "memory"
 #include "ast_opt/ast/AbstractNode.h"
 
-class Parser{
+class Parser {
  public:
   static std::unique_ptr<AbstractNode> parse(std::string);
 
