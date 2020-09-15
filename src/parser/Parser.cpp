@@ -1,3 +1,4 @@
+#include <stack>
 #include "ast_opt/ast/AbstractNode.h"
 #include "ast_opt/ast/AbstractStatement.h"
 #include "ast_opt/ast/AbstractExpression.h"
@@ -41,28 +42,122 @@ AbstractStatement *Parser::parseStatement(stork::tokens_iterator &it) {
   }
 }
 
+bool isOperator(stork::tokens_iterator &it) {
+  return
+      it->isReservedToken() &&
+          (
+              it->hasValue(stork::reservedTokens::add) ||
+                  it->hasValue(stork::reservedTokens::sub) ||
+                  it->hasValue(stork::reservedTokens::concat) ||
+                  it->hasValue(stork::reservedTokens::mul) ||
+                  it->hasValue(stork::reservedTokens::div) ||
+                  it->hasValue(stork::reservedTokens::idiv) ||
+                  it->hasValue(stork::reservedTokens::mod) ||
+                  it->hasValue(stork::reservedTokens::bitwise_not) ||
+                  it->hasValue(stork::reservedTokens::bitwise_and) ||
+                  it->hasValue(stork::reservedTokens::bitwise_or) ||
+                  it->hasValue(stork::reservedTokens::bitwise_xor) ||
+                  it->hasValue(stork::reservedTokens::shiftl) ||
+                  it->hasValue(stork::reservedTokens::shiftr) ||
+                  it->hasValue(stork::reservedTokens::logical_not) ||
+                  it->hasValue(stork::reservedTokens::logical_and) ||
+                  it->hasValue(stork::reservedTokens::logical_or) ||
+                  it->hasValue(stork::reservedTokens::eq) ||
+                  it->hasValue(stork::reservedTokens::ne) ||
+                  it->hasValue(stork::reservedTokens::lt) ||
+                  it->hasValue(stork::reservedTokens::gt) ||
+                  it->hasValue(stork::reservedTokens::le) ||
+                  it->hasValue(stork::reservedTokens::ge)
+          );
+}
+
+bool isLiteral(stork::tokens_iterator &it) {
+  return it->isBool() || it->isChar() || it->isFloat() || it->isDouble() || it->isInteger() || it->isString();
+}
+
+/// Compares the precedence of this operator against another operator.
+/// \return -1 if op1 is of lower precedence, 1 if it's of greater
+/// precedence, and 0 if they're of equal precedence. If two operators are of
+/// equal precedence, right associativity and parenthetical groupings must be
+/// used to determine precedence.
+int comparePrecedence(const Operator &op1, const Operator &op2) {
+  //TODO: IMPLEMENT
+  return 0;
+}
+
+bool isRightAssociative(const Operator &op) {
+  //TODO:IMPLEMENT
+  return false;
+}
+
 AbstractExpression *Parser::parseExpression(stork::tokens_iterator &it) {
-  //TODO:
-  return nullptr;
+
+  // if it begins with an "{" it must be an expression list which cannot be part of a greater expression
+  if (it->hasValue(stork::reservedTokens::open_curly)) {
+    return parseExpressionList(it);
+  }
+
+  // Shunting-yard algorithm: Keep a stack of operands and check precedence when you see an operator
+  std::stack<AbstractExpression *, std::vector<AbstractExpression *>> operands;
+  std::stack<Operator, std::vector<Operator>> operator_stack;
+
+  bool running = true;
+  while (running) {
+    if (isOperator(it)) {
+      Operator op1 = parseOperator(it);
+      Operator *op2 = operator_stack.empty() ? nullptr : &operator_stack.top();
+
+      while (!operator_stack.empty() && op2!=nullptr) {
+        op2 = &operator_stack.top();
+        if ((!isRightAssociative(op1) && comparePrecedence(op1, *op2)==0) || comparePrecedence(op1, *op2) < 0) {
+          operator_stack.pop(); // pop
+          AbstractExpression *rhs = operands.top();
+          operands.pop();
+          AbstractExpression *lhs = operands.top();
+          operands.pop();
+          operands.push(new BinaryExpression(std::unique_ptr<AbstractExpression>(lhs),
+                                             *op2,
+                                             std::unique_ptr<AbstractExpression>(rhs)));
+        } else {
+          break;
+        }
+      }
+      operator_stack.push(op1);
+    } else if (isLiteral(it)) {
+      operands.push(parseLiteral(it));
+    } else if (it->isIdentifier()) {
+      operands.push(parseVariable(it));
+    } else if (it->hasValue(stork::reservedTokens::open_round)) {
+      // If we see an (, we have nested expressions going on, so use recursion.
+      parseTokenValue(it, stork::reservedTokens::open_round);
+      operands.push(parseExpression(it));
+      parseTokenValue(it, stork::reservedTokens::close_round);
+    } else {
+      running = false;
+    }
+  }
+
+  //TODO: Check that stack has been resolved correctly, otherwise throw exception
+  return operands.top();
 }
 
 AbstractTarget *Parser::parseTarget(stork::tokens_iterator &it) {
   //Any valid target must begin with a Variable as its "root"
-  Variable* v = parseVariable(it);
+  Variable *v = parseVariable(it);
 
-  std::vector<AbstractExpression*> indices;
+  std::vector<AbstractExpression *> indices;
   // if the next token is a "[" we need to keep on parsing
-  while(it->hasValue(stork::reservedTokens::open_square)) {
+  while (it->hasValue(stork::reservedTokens::open_square)) {
     parseTokenValue(it, stork::reservedTokens::open_square);
     indices.push_back(parseExpression(it));
     parseTokenValue(it, stork::reservedTokens::close_square);
   }
 
-  if(indices.empty()) {
+  if (indices.empty()) {
     return v;
   } else {
     auto cur = new IndexAccess(std::unique_ptr<AbstractTarget>(v), std::unique_ptr<AbstractExpression>(indices[0]));
-    for(size_t i = 1; i < indices.size(); ++i) {
+    for (size_t i = 1; i < indices.size(); ++i) {
       cur = new IndexAccess(std::unique_ptr<AbstractTarget>(cur), std::unique_ptr<AbstractExpression>(indices[i]));
     }
     return cur;
@@ -79,16 +174,10 @@ ExpressionList *Parser::parseExpressionList(stork::tokens_iterator &it) {
   return nullptr;
 }
 
-FunctionParameter *Parser::parseFunctionParameter(stork::tokens_iterator &it) {
-  //TODO:
-  return nullptr;
-}
-
 AbstractExpression *Parser::parseLiteral(stork::tokens_iterator &it) {
   //TODO:
   return nullptr;
 }
-
 
 UnaryExpression *Parser::parseUnaryExpression(stork::tokens_iterator &it) {
   //TODO:
@@ -100,9 +189,9 @@ Variable *Parser::parseVariable(stork::tokens_iterator &it) {
   return nullptr;
 }
 
-Operator *Parser::parseOperator(stork::tokens_iterator &it) {
+Operator Parser::parseOperator(stork::tokens_iterator &it) {
   //TODO:
-  return nullptr;
+  throw std::runtime_error("NOT IMPLEMENTED");
 }
 
 /// consume token "value" and throw error if something different
@@ -128,29 +217,21 @@ Datatype Parser::parseDatatype(stork::tokens_iterator &it) {
   // just a placeholder as value-less constructor does not exist
   Datatype datatype(Type::VOID);
   switch (it->get_reserved_token()) {
-    case stork::reservedTokens::kw_bool:
-      datatype = Datatype(Type::BOOL, isSecret);
+    case stork::reservedTokens::kw_bool:datatype = Datatype(Type::BOOL, isSecret);
       break;
-    case stork::reservedTokens::kw_char:
-      datatype = Datatype(Type::CHAR, isSecret);
+    case stork::reservedTokens::kw_char:datatype = Datatype(Type::CHAR, isSecret);
       break;
-    case stork::reservedTokens::kw_int:
-      datatype = Datatype(Type::INT, isSecret);
+    case stork::reservedTokens::kw_int:datatype = Datatype(Type::INT, isSecret);
       break;
-    case stork::reservedTokens::kw_float:
-      datatype = Datatype(Type::FLOAT, isSecret);
+    case stork::reservedTokens::kw_float:datatype = Datatype(Type::FLOAT, isSecret);
       break;
-    case stork::reservedTokens::kw_double:
-      datatype = Datatype(Type::DOUBLE, isSecret);
+    case stork::reservedTokens::kw_double:datatype = Datatype(Type::DOUBLE, isSecret);
       break;
-    case stork::reservedTokens::kw_string:
-      datatype = Datatype(Type::STRING, isSecret);
+    case stork::reservedTokens::kw_string:datatype = Datatype(Type::STRING, isSecret);
       break;
-    case stork::reservedTokens::kw_void:
-      datatype = Datatype(Type::VOID);
+    case stork::reservedTokens::kw_void:datatype = Datatype(Type::VOID);
       break;
-    default:
-      throw stork::unexpectedSyntaxError(std::to_string(it->getValue()), it->getLineNumber(), it->getCharIndex());
+    default:throw stork::unexpectedSyntaxError(std::to_string(it->getValue()), it->getLineNumber(), it->getCharIndex());
   }
 
   ++it;
