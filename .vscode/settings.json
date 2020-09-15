@@ -1,0 +1,28 @@
+{
+    "files.associations": {
+        "__functional_03": "cpp",
+        "__functional_base": "cpp",
+        "__hash_table": "cpp",
+        "__tree": "cpp",
+        "algorithm": "cpp",
+        "bitset": "cpp",
+        "chrono": "cpp",
+        "condition_variable": "cpp",
+        "functional": "cpp",
+        "map": "cpp",
+        "memory": "cpp",
+        "numeric": "cpp",
+        "optional": "cpp",
+        "random": "cpp",
+        "string": "cpp",
+        "string_view": "cpp",
+        "system_error": "cpp",
+        "thread": "cpp",
+        "typeindex": "cpp",
+        "unordered_map": "cpp",
+        "utility": "cpp",
+        "valarray": "cpp",
+        "variant": "cpp",
+        "vector": "cpp"
+    }
+}
