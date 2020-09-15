@@ -69,7 +69,7 @@ class Parser {
 
   static void parseTokenValue(stork::tokens_iterator &it, const stork::token_value &value);
 
-  static Datatype *parseDatatype(stork::tokens_iterator &it);
+  static Datatype parseDatatype(stork::tokens_iterator &it);
 
   static Operator* parseOperator(stork::tokens_iterator &it);
 };

@@ -55,7 +55,7 @@ void Parser::parseTokenValue(stork::tokens_iterator &it, const stork::token_valu
   throw stork::expectedSyntaxError(std::to_string(value), it->getLineNumber(), it->getCharIndex());
 }
 
-Datatype *Parser::parseDatatype(stork::tokens_iterator &it) {
+Datatype Parser::parseDatatype(stork::tokens_iterator &it) {
   if (!it->isReservedToken()) {
     throw stork::unexpectedSyntaxError(std::to_string(it->getValue()), it->getLineNumber(), it->getCharIndex());
   }
@@ -66,28 +66,29 @@ Datatype *Parser::parseDatatype(stork::tokens_iterator &it) {
     parseTokenValue(it, stork::reservedTokens::secret);
   }
 
-  Datatype *datatype;
+  // just a placeholder as value-less constructor does not exist
+  Datatype datatype(Type::VOID);
   switch (it->get_reserved_token()) {
     case stork::reservedTokens::kw_bool:
-      datatype = new Datatype(Type::BOOL, isSecret);
+      datatype = Datatype(Type::BOOL, isSecret);
       break;
     case stork::reservedTokens::kw_char:
-      datatype = new Datatype(Type::CHAR, isSecret);
+      datatype = Datatype(Type::CHAR, isSecret);
       break;
     case stork::reservedTokens::kw_int:
-      datatype = new Datatype(Type::INT, isSecret);
+      datatype = Datatype(Type::INT, isSecret);
       break;
     case stork::reservedTokens::kw_float:
-      datatype = new Datatype(Type::FLOAT, isSecret);
+      datatype = Datatype(Type::FLOAT, isSecret);
       break;
     case stork::reservedTokens::kw_double:
-      datatype = new Datatype(Type::DOUBLE, isSecret);
+      datatype = Datatype(Type::DOUBLE, isSecret);
       break;
     case stork::reservedTokens::kw_string:
-      datatype = new Datatype(Type::STRING, isSecret);
+      datatype = Datatype(Type::STRING, isSecret);
       break;
     case stork::reservedTokens::kw_void:
-      datatype = new Datatype(Type::VOID);
+      datatype = Datatype(Type::VOID);
       break;
     default:
       throw stork::unexpectedSyntaxError(std::to_string(it->getValue()), it->getLineNumber(), it->getCharIndex());
@@ -107,6 +108,21 @@ std::string parseDeclarationName(stork::tokens_iterator &it) {
   return ret;
 }
 
+FunctionParameter *Parser::parseFunctionParameter(stork::tokens_iterator &it) {
+  auto datatype = parseDatatype(it);
+  auto identifier = parseDeclarationName(it);
+
+  auto functionParameter = new FunctionParameter(datatype, identifier);
+
+  // consume comma that separates this parameter from the next one
+  // the caller is responsible for calling this method again for parsing the next parameter
+  if (it->hasValue(stork::reservedTokens::comma)) {
+    parseTokenValue(it, stork::reservedTokens::comma);
+  }
+
+  return functionParameter;
+}
+
 Function *Parser::parseFunctionStatement(stork::tokens_iterator &it) {
   // consume 'public'
   parseTokenValue(it, stork::reservedTokens::kw_public);
@@ -117,18 +133,24 @@ Function *Parser::parseFunctionStatement(stork::tokens_iterator &it) {
   // parse function name
   auto functionName = parseDeclarationName(it);
 
-  // TODO: parse function parameters
+  // parse function parameters
+  parseTokenValue(it, stork::reservedTokens::open_round);
   std::vector<std::unique_ptr<FunctionParameter>> functionParams;
+  while (!it->hasValue(stork::reservedTokens::close_round)) {
+    functionParams.push_back(std::unique_ptr<FunctionParameter>(parseFunctionParameter(it)));
+  }
+  parseTokenValue(it, stork::reservedTokens::close_round);
 
   // TODO: parse block/body statements
   parseTokenValue(it, stork::reservedTokens::open_curly);
+  std::vector<std::unique_ptr<AbstractStatement>> blockStatements;
   while (!it->hasValue(stork::reservedTokens::close_curly)) {
-    parseStatement(it);
+//    blockStatements.push_back(std::unique_ptr<AbstractStatement>(parseStatement(it)));
   }
   parseTokenValue(it, stork::reservedTokens::close_curly);
+  auto block = new Block(std::move(blockStatements));
 
-
-//  auto func = new Function(datatype, functionName, functionParams, std::unique_ptr<Block>(body));
+//  return new Function(datatype, functionName, functionParams, std::unique_ptr<Block>(block));
   return nullptr;
 }
 For *Parser::parseForStatement(stork::tokens_iterator &it) {
