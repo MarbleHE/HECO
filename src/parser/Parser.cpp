@@ -473,11 +473,53 @@ Function *Parser::parseFunctionStatement(stork::tokens_iterator &it) {
 }
 
 For *Parser::parseForStatement(stork::tokens_iterator &it) {
-  // FOR (; expression; variable assignment) BLOCK
-  // TODO: Implement me!
-  ++it; // make MSVC stop complaining about unused function param
-  throw std::runtime_error("NOT IMPLEMENTED");
+  // FOR (initialization statement(s); expression; update statement(s)) BLOCK
+  parseTokenValue(it, stork::reservedTokens::kw_for);
+  parseTokenValue(it, stork::reservedTokens::open_round);
+
+  // initialization statement(s)
+  std::vector<std::unique_ptr<AbstractStatement>> initializerStatements;
+  while (!it->hasValue(stork::reservedTokens::semicolon)) {
+    if (initializerStatements.size() > 1) parseTokenValue(it, stork::reservedTokens::comma);
+    initializerStatements.emplace_back(parseStatement(it));
+  }
+  parseTokenValue(it, stork::reservedTokens::semicolon);
+  auto initializerStatementBlock = std::make_unique<Block>(std::move(initializerStatements));
+
+  // expression (condition)
+  auto condition = std::unique_ptr<AbstractExpression>(parseExpression(it));
+
+  // update statement(s)
+  std::vector<std::unique_ptr<AbstractStatement>> updateStatements;
+  while (!it->hasValue(stork::reservedTokens::semicolon)) {
+    if (updateStatements.size() > 1) parseTokenValue(it, stork::reservedTokens::comma);
+    updateStatements.emplace_back(parseStatement(it));
+  }
+  parseTokenValue(it, stork::reservedTokens::close_round);
+  auto updateStatementBlock = std::make_unique<Block>(std::move(updateStatements));
+
+  // FOR loop's body
+  auto body = std::unique_ptr<Block>(parseBlockStatement(it));
+
+  return new For(std::move(initializerStatementBlock),
+                 std::move(condition),
+                 std::move(updateStatementBlock),
+                 std::move(body));
 }
+
+Block *Parser::parseBlockOrSingleStatement(stork::tokens_iterator &it) {
+  // a helper method that checks whether there is a block (if so, parses the whole block) or otherwise only parses
+  // the single statement and wraps it into a block
+  Block *block;
+  if (it->hasValue(stork::reservedTokens::open_curly)) {
+    // multiple statements wrapped into a block -> parse whole block
+    block = parseBlockStatement(it);
+  } else {
+    // a single statement, not wrapped into a block in the input file -> parse stmt. and manually wrap into a block
+    block = new Block(std::unique_ptr<AbstractStatement>(parseStatement(it)));
+  }
+  return block;
+};
 
 If *Parser::parseIfStatement(stork::tokens_iterator &it) {
   // parse: if (condition)
@@ -486,26 +528,12 @@ If *Parser::parseIfStatement(stork::tokens_iterator &it) {
   auto condition = std::unique_ptr<AbstractExpression>(parseExpression(it));
   parseTokenValue(it, stork::reservedTokens::close_round);
 
-  // a helper method that checks whether there is a block (if so, parses the whole block) or otherwise only parses
-  // the single statement and wraps it into a block
-  auto parseBlockOrSingleStatement = [](stork::tokens_iterator &it) {
-    std::unique_ptr<Block> ifBlock;
-    if (it->hasValue(stork::reservedTokens::open_curly)) {
-      // multiple statements wrapped into a block -> parse whole block
-      ifBlock = std::unique_ptr<Block>(parseBlockStatement(it));
-    } else {
-      // a single statement, not wrapped into a block in the input file -> parse stmt. and manually wrap into a block
-      ifBlock = std::make_unique<Block>(std::unique_ptr<AbstractStatement>(parseStatement(it)));
-    }
-    return ifBlock;
-  };
-
   // check if there is an opening bracket (block)
-  std::unique_ptr<Block> ifBlock = parseBlockOrSingleStatement(it);
+  std::unique_ptr<Block> ifBlock = std::unique_ptr<Block>(parseBlockOrSingleStatement(it));
 
   // check if there is an "else" branch
   if (it->hasValue(stork::reservedTokens::kw_else)) {
-    std::unique_ptr<Block> elseBlock = parseBlockOrSingleStatement(it);
+    std::unique_ptr<Block> elseBlock = std::unique_ptr<Block>(parseBlockOrSingleStatement(it));
     return new If(std::move(condition), std::move(ifBlock), std::move(elseBlock));
   } else {
     return new If(std::move(condition), std::move(ifBlock));

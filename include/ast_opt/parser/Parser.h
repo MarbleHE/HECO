@@ -68,5 +68,7 @@ class Parser {
   static Operator parseOperator(stork::tokens_iterator &it);
 
   static std::string parseIdentifier(stork::tokens_iterator &it);
-  };
+
+  static Block *parseBlockOrSingleStatement(stork::tokens_iterator &it);
+};
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_PARSER_PARSER_H_
