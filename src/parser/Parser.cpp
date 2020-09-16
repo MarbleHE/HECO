@@ -68,7 +68,6 @@ AbstractStatement *Parser::parseStatement(stork::tokens_iterator &it) {
       case stork::reservedTokens::kw_void:return parseVariableDeclarationStatement(it);
       default:
         // has to be an assignment
-        std::cout << "MYSTERY: " << to_string(it->getValue()) << std::endl;
         return parseAssignmentStatement(it);
 
     }
