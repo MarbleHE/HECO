@@ -281,6 +281,11 @@ class NodeIterator {
     return **impl;
   }
 
+  /// Arrow
+  T* operator->() {
+    return &**impl;
+  }
+
 };
 
 /// BaseIteratorImpl is an abstract class that simply specifies the functions required in the wrapper
