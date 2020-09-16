@@ -189,7 +189,7 @@ AbstractExpression *Parser::parseExpression(stork::tokens_iterator &it) {
     }
 
     // Check if we have a right-associative operator (currently only unary supported) ready to go on the stack
-    if (!operator_stack.empty() && operator_stack.top().isRightAssociative()) {
+    if (!operator_stack.empty() && operator_stack.top().isRightAssociative() && !operands.empty()) {
       if (!operator_stack.top().isUnary()) {
         throw stork::parsingError("Cannot handle non-unary right-associative operators!",
                                   it->getLineNumber(),
@@ -197,15 +197,9 @@ AbstractExpression *Parser::parseExpression(stork::tokens_iterator &it) {
       } else {
         Operator op = operator_stack.top();
         operator_stack.pop();
-        if (operands.empty()) {
-          throw stork::expectedSyntaxError("Operand for Unary Operator to work on",
-                                           it->getLineNumber(),
-                                           it->getCharIndex());
-        } else {
-          AbstractExpression *exp = operands.top();
-          operands.pop();
-          operands.push(new UnaryExpression(std::unique_ptr<AbstractExpression>(exp), op));
-        }
+        AbstractExpression *exp = operands.top();
+        operands.pop();
+        operands.push(new UnaryExpression(std::unique_ptr<AbstractExpression>(exp), op));
       }
     }
 
