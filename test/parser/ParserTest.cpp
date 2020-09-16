@@ -156,22 +156,23 @@ Datatype STRING = Datatype(Type::STRING);
   auto it2 = ast2.begin();
   for (; it1!=ast1.end() && it2!=ast2.end(); ++it1, ++it2) {
     auto r = compareAST(*it1, *it2);
-    if (!r){
+    if (!r) {
       return ::testing::AssertionFailure() << ast1.toString(true) << " and " << ast2.toString(true)
-                                           << " differ in children: " << it1->toString(false) << " vs " << it2->toString(false)
+                                           << " differ in children: " << it1->toString(false) << " vs "
+                                           << it2->toString(false)
                                            << "Original issue:" << r.message();
     }
   }
   return ::testing::AssertionSuccess();
 }
 
-TEST(ParserTest, emptyString) {
+TEST(ParserTest, emptyString) { /* NOLINT */
   auto b = Parser::parse("");
   // Should be an empty block
   EXPECT_EQ(b->countChildren(), 0);
 }
 
-TEST(ParserTest, BinaryExp) {
+TEST(ParserTest, BinaryExp) { /* NOLINT */
   auto ast = Parser::parse("a = 5 + 6;");
 
   auto bp = new BinaryExpression(std::make_unique<LiteralInt>(5),
@@ -181,7 +182,7 @@ TEST(ParserTest, BinaryExp) {
   EXPECT_TRUE(compareAST(*ast->begin(), assignment));
 }
 
-TEST(ParserTest, simpleFunction) {
+TEST(ParserTest, simpleFunction) { /* NOLINT */
   std::string minimal = "public int main() {}";
   std::string params = "public int main(bool b, float f) {}";
   std::string body = "public int main() { return 0; }";
@@ -208,7 +209,7 @@ TEST(ParserTest, simpleFunction) {
   EXPECT_TRUE(compareAST(*parsed_body->begin(), expected_body));
 }
 
-TEST(ParserTest, IfStatementThenOnly) {
+TEST(ParserTest, IfStatementThenOnly) { /* NOLINT */
   const char *programCode = R""""(
     public int main(int a) {
       if (a > 5) {
@@ -242,3 +243,74 @@ TEST(ParserTest, IfStatementThenOnly) {
 
   EXPECT_TRUE(compareAST(*parsed->begin(), *expected));
 }
+
+TEST(ParserTest, IfStatementThenOnly_WithoutBlock) { /* NOLINT */
+  const char *programCode = R""""(
+    public int main(int a) {
+      if (a > 5) return 1;
+      return 0;
+    }
+    )"""";
+  auto code = std::string(programCode);
+  auto parsed = Parser::parse(code);
+
+  auto ifStatement = std::make_unique<If>
+      (std::move(std::make_unique<BinaryExpression>(
+          std::move(std::make_unique<Variable>("a")),
+          Operator(GREATER),
+          std::move(std::make_unique<LiteralInt>(5)))),
+       std::move(std::make_unique<Block>(
+           std::move(std::make_unique<Return>
+                         (std::move(std::make_unique<LiteralInt>(1)))))));
+  auto returnStatement = std::make_unique<Return>(std::move(std::make_unique<LiteralInt>(0)));
+
+  std::vector<std::unique_ptr<AbstractStatement>> blockStmts;
+  blockStmts.emplace_back(std::move(ifStatement));
+  blockStmts.emplace_back(std::move(returnStatement));
+  auto expected_body = std::make_unique<Block>(std::move(blockStmts));
+
+  std::vector<std::unique_ptr<FunctionParameter>> fParams;
+  fParams.emplace_back(std::move(std::make_unique<FunctionParameter>(Datatype(Type::INT, false), "a")));
+  auto funcParams = std::vector<std::unique_ptr<FunctionParameter>>(std::move(fParams));
+  auto expected = new Function(Datatype(Type::INT, false), "main", std::move(funcParams), std::move(expected_body));
+
+  EXPECT_TRUE(compareAST(*parsed->begin(), *expected));
+}
+
+TEST(ParserTest, IfElseStatement) { /* NOLINT */
+  const char *programCode = R""""(
+    public int main(int a) {
+      if (a > 5) {
+        return 111;
+      } else {
+        return 0;
+      }
+    }
+    )"""";
+  auto code = std::string(programCode);
+  auto parsed = Parser::parse(code);
+
+  auto ifStatement = std::make_unique<If>
+      (std::move(std::make_unique<BinaryExpression>(
+          std::move(std::make_unique<Variable>("a")),
+          Operator(GREATER),
+          std::move(std::make_unique<LiteralInt>(5)))),
+       std::move(std::make_unique<Block>(
+           std::move(std::make_unique<Return>
+                         (std::move(std::make_unique<LiteralInt>(111)))))),
+       std::move(std::make_unique<Block>(
+           std::move(std::make_unique<Return>
+                         (std::move(std::make_unique<LiteralInt>(0)))))));
+
+  std::vector<std::unique_ptr<AbstractStatement>> blockStmts;
+  blockStmts.emplace_back(std::move(ifStatement));
+  auto expected_body = std::make_unique<Block>(std::move(blockStmts));
+
+  std::vector<std::unique_ptr<FunctionParameter>> fParams;
+  fParams.emplace_back(std::move(std::make_unique<FunctionParameter>(Datatype(Type::INT, false), "a")));
+  auto funcParams = std::vector<std::unique_ptr<FunctionParameter>>(std::move(fParams));
+  auto expected = new Function(Datatype(Type::INT, false), "main", std::move(funcParams), std::move(expected_body));
+
+  EXPECT_TRUE(compareAST(*parsed->begin(), *expected));
+}
+
