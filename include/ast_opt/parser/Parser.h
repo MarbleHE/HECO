@@ -67,8 +67,6 @@ class Parser {
 
   static Operator parseOperator(stork::tokens_iterator &it);
 
-  static AbstractExpression *parseTargetValue(stork::tokens_iterator &it);
-
   static std::string parseDeclarationName(stork::tokens_iterator &it);
   };
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_PARSER_PARSER_H_
