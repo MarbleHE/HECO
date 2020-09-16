@@ -240,5 +240,5 @@ TEST(ParserTest, IfStatementThenOnly) {
   auto funcParams = std::vector<std::unique_ptr<FunctionParameter>>(std::move(fParams));
   auto expected = new Function(Datatype(Type::INT, false), "main", std::move(funcParams), std::move(expected_body));
 
-  EXPECT_TRUE(compareAST(*parsed, *expected));
+  EXPECT_TRUE(compareAST(*parsed->begin(), *expected));
 }
