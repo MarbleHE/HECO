@@ -13,7 +13,21 @@ Datatype STRING = Datatype(Type::STRING);
 
 auto empty_params = std::vector<std::unique_ptr<FunctionParameter>>();
 
-TEST(ParserTest, function) {
+TEST(ParserTest, emptyString) {
+  auto b = Parser::parse("");
+  // Should be an empty block
+  EXPECT_EQ(b->countChildren(),0);
+}
+
+TEST(ParserTest, simpleFunction) {
+  auto b = Parser::parse(
+      "public int main() {\n"
+      "  int a = 0;\n"
+      "  a = a + 5;\n"
+      "  return a;\n"
+      "}"
+      );
+
   //TODO: Write working parser tests
 //  std::string minimal = "int main() {}";
 //  std::string params = "int main(bool b, float f) {}";
@@ -36,22 +50,4 @@ TEST(ParserTest, function) {
   //EXPECT_EQ(*parsed_minimal, expected_minimal);
   //EXPECT_EQ(*parsed_params, expected_params);
   //EXPECT_EQ(*parsed_body, expected_body);
-}
-
-TEST(ParserTest, recognizeInputTest) {
-  std::string path = __FILE__;
-  path = path.substr(0, path.find_last_of("/\\") + 1) + "test.stk";
-
-//  using namespace stork;
-//
-//  module m;
-//
-//  add_standard_functions(m);
-//
-//  auto s_main = m.create_public_function_caller<void>("main");
-//
-//  if (m.try_load(path.c_str(), &std::cerr)) {
-//    s_main();
-//  }
-
 }

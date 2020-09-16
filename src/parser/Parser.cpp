@@ -1,4 +1,6 @@
 #include <stack>
+#include <cstdio>
+
 #include "ast_opt/ast/AbstractNode.h"
 #include "ast_opt/ast/AbstractStatement.h"
 #include "ast_opt/ast/AbstractExpression.h"
@@ -19,10 +21,30 @@
 #include "ast_opt/ast/VariableDeclaration.h"
 #include "ast_opt/parser/Errors.h"
 #include "ast_opt/parser/Parser.h"
+#include "ast_opt/parser/PushBackStream.h"
 
-std::unique_ptr<AbstractNode> Parser::parse(std::string) {
-  // TODO: Implement me!
-  return std::make_unique<LiteralBool>(0);
+std::unique_ptr<AbstractNode> Parser::parse(std::string s) {
+
+  // Setup Tokenizer from String
+  stork::get_character get = [&s]() {
+    if(s.empty()) {
+      return (char) EOF;
+    } else {
+      char c = s.at(0);
+      s.erase(0,1);
+      return c;
+    }
+  };
+  stork::PushBackStream stream(&get);
+  stork::tokens_iterator it(stream);
+
+  auto block = std::make_unique<Block>();
+  // Parse statements until end of file
+  while(!it->isEof()) {
+    block->appendStatement(std::unique_ptr<AbstractStatement>(parseStatement(it)));
+  }
+
+  return std::move(block);
 }
 
 AbstractStatement *Parser::parseStatement(stork::tokens_iterator &it) {
