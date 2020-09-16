@@ -320,6 +320,31 @@ Block *Parser::parseBlockStatement(stork::tokens_iterator &it) {
   // TODO: Implement me!
   return nullptr;
 }
+
+AbstractExpression* Parser::parseTargetValue(stork::tokens_iterator &it) {
+  AbstractExpression* value;
+
+  if (it->isBool()) {
+    value = new LiteralBool(it->getBool());
+  } else if (it->isChar()) {
+    value = new LiteralChar(it->getChar());
+  } else if (it->isFloat()) {
+    value = new LiteralFloat(it->getFloat());
+  } else if (it->isDouble()) {
+    value = new LiteralDouble(it->getDouble());
+  } else if (it->isString()) {
+    value = new LiteralString(it->getString());
+  } else if (it->isInteger()) {
+    value = new LiteralInt(it->getInteger());
+  } else {
+    throw stork::unexpectedSyntaxError(std::to_string(it->getValue()), it->getLineNumber(), it->getCharIndex());
+  }
+
+  ++it;
+
+  return value;
+}
+
 VariableDeclaration *Parser::parseVariableDeclarationStatement(stork::tokens_iterator &it) {
   // the variable's datatype
   auto datatype = parseDatatype(it);
@@ -331,31 +356,28 @@ VariableDeclaration *Parser::parseVariableDeclarationStatement(stork::tokens_ite
   // the variable's assigned value, if any assigned
   if (!it->hasValue(stork::reservedTokens::semicolon)) {
     parseTokenValue(it, stork::reservedTokens::assign);
-    AbstractExpression *value;
-    if (it->isBool()) {
-      value = new LiteralBool(it->getBool());
-    } else if (it->isChar()) {
-      value = new LiteralChar(it->getChar());
-    } else if (it->isFloat()) {
-      value = new LiteralFloat(it->getFloat());
-    } else if (it->isDouble()) {
-      value = new LiteralDouble(it->getDouble());
-    } else if (it->isString()) {
-      value = new LiteralString(it->getString());
-    } else if (it->isInteger()) {
-      value = new LiteralInt(it->getInteger());
-    } else {
-      throw stork::unexpectedSyntaxError(std::to_string(it->getValue()), it->getLineNumber(), it->getCharIndex());
-    }
-    ++it;
+    AbstractExpression *value = parseTargetValue(it);
+    // the trailing semicolon
     parseTokenValue(it, stork::reservedTokens::semicolon);
     return new VariableDeclaration(datatype, std::move(variable), std::unique_ptr<AbstractExpression>(value));
   } else {
+    // the trailing semicolon
     parseTokenValue(it, stork::reservedTokens::semicolon);
     return new VariableDeclaration(datatype, std::move(variable));
   }
 }
+
 VariableAssignment *Parser::parseVariableAssignmentStatement(stork::tokens_iterator &it) {
-  // TODO: Implement me!
-  return nullptr;
+  // the variable's name
+  auto identifier = parseDeclarationName(it);
+  auto variable = std::make_unique<Variable>(identifier);
+
+  // the variable's assigned value
+  parseTokenValue(it, stork::reservedTokens::assign);
+  AbstractExpression *value = parseTargetValue(it);
+
+  // the trailing semicolon
+  parseTokenValue(it, stork::reservedTokens::semicolon);
+
+  return new VariableAssignment(std::move(variable), std::unique_ptr<AbstractExpression>(value));
 }
