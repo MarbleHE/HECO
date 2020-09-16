@@ -58,17 +58,17 @@ AbstractStatement *Parser::parseStatement(stork::tokens_iterator &it) {
       case stork::reservedTokens::open_curly:return parseBlockStatement(it);
       case stork::reservedTokens::kw_public: return parseFunctionStatement(it);
 
-      // it starts with a data type (e.g., int, float)
+        // it starts with a data type (e.g., int, float)
       case stork::reservedTokens::kw_bool:
       case stork::reservedTokens::kw_char:
       case stork::reservedTokens::kw_int:
       case stork::reservedTokens::kw_float:
       case stork::reservedTokens::kw_double:
       case stork::reservedTokens::kw_string:
-      case stork::reservedTokens::kw_void:
-        return parseVariableDeclarationStatement(it);
+      case stork::reservedTokens::kw_void:return parseVariableDeclarationStatement(it);
       default:
         // has to be an assignment
+        std::cout << "MYSTERY: " << to_string(it->getValue()) << std::endl;
         return parseAssignmentStatement(it);
 
     }
@@ -498,6 +498,7 @@ Return *Parser::parseReturnStatement(stork::tokens_iterator &it) {
     return new Return();
   } else {
     AbstractExpression *p = parseExpression(it);
+    parseTokenValue(it, stork::reservedTokens::semicolon);
     return new Return(std::unique_ptr<AbstractExpression>(p));
   }
 }
