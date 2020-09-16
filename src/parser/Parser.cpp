@@ -29,11 +29,11 @@ std::unique_ptr<AbstractNode> Parser::parse(std::string s) {
 
   // Setup Tokenizer from String
   stork::get_character get = [&s]() {
-    if(s.empty()) {
+    if (s.empty()) {
       return (char) EOF;
     } else {
       char c = s.at(0);
-      s.erase(0,1);
+      s.erase(0, 1);
       return c;
     }
   };
@@ -42,7 +42,7 @@ std::unique_ptr<AbstractNode> Parser::parse(std::string s) {
 
   auto block = std::make_unique<Block>();
   // Parse statements until end of file
-  while(!it->isEof()) {
+  while (!it->isEof()) {
     block->appendStatement(std::unique_ptr<AbstractStatement>(parseStatement(it)));
   }
 
@@ -57,9 +57,20 @@ AbstractStatement *Parser::parseStatement(stork::tokens_iterator &it) {
       case stork::reservedTokens::kw_return:return parseReturnStatement(it);
       case stork::reservedTokens::open_curly:return parseBlockStatement(it);
       case stork::reservedTokens::kw_public: return parseFunctionStatement(it);
-      default:
-        // it starts with a data type (e.g., int, float)
+
+      // it starts with a data type (e.g., int, float)
+      case stork::reservedTokens::kw_bool:
+      case stork::reservedTokens::kw_char:
+      case stork::reservedTokens::kw_int:
+      case stork::reservedTokens::kw_float:
+      case stork::reservedTokens::kw_double:
+      case stork::reservedTokens::kw_string:
+      case stork::reservedTokens::kw_void:
         return parseVariableDeclarationStatement(it);
+      default:
+        // has to be a variable assignment
+        return parseVariableAssignmentStatement(it);
+
     }
   } else {
     // it start with an identifier -> must be an assignment
@@ -200,12 +211,33 @@ AbstractExpression *Parser::parseExpression(stork::tokens_iterator &it) {
 
   } //end of while loop
 
-  if (!operator_stack.empty()) {
+  // cleanup any remaining operators
+  while (!operator_stack.empty()) {
     Operator op = operator_stack.top();
-    throw stork::unexpectedSyntaxError("Operator " + op.toString() + " unresolved.",
-                                       it->getLineNumber(),
-                                       it->getCharIndex());
-  } else if (operands.empty()) {
+    operator_stack.pop();
+
+    // has to be binary?
+    if (op.isUnary()) {
+      throw stork::unexpectedSyntaxError("Unresolved Unary Operator", it->getLineNumber(), it->getCharIndex());
+    } else {
+      // Try to get two operands
+      if (operands.size() < 2) {
+        throw stork::unexpectedSyntaxError("Missing at least one Operand for Binary Operator",
+                                           it->getLineNumber(),
+                                           it->getCharIndex());
+      } else {
+        auto e1 = operands.top();
+        operands.pop();
+        auto e2 = operands.top();
+        operands.pop();
+        operands.push(new BinaryExpression(std::unique_ptr<AbstractExpression>(e1),
+                                           op,
+                                           std::unique_ptr<AbstractExpression>(e2)));
+      }
+    }
+  }
+
+  if (operands.empty()) {
     throw stork::unexpectedSyntaxError("Empty Expression", it->getLineNumber(), it->getCharIndex());
   } else if (operands.size()==1) {
     return operands.top();
@@ -503,8 +535,8 @@ VariableDeclaration *Parser::parseVariableDeclarationStatement(stork::tokens_ite
 }
 
 VariableAssignment *Parser::parseVariableAssignmentStatement(stork::tokens_iterator &it) {
-  // the variable's name
-  auto variable = std::unique_ptr<Variable>(parseVariable(it));
+  // the target's name
+  auto target = std::unique_ptr<AbstractTarget>(parseTarget(it));
 
   // the variable's assigned value
   parseTokenValue(it, stork::reservedTokens::assign);
@@ -513,5 +545,5 @@ VariableAssignment *Parser::parseVariableAssignmentStatement(stork::tokens_itera
   // the trailing semicolon
   parseTokenValue(it, stork::reservedTokens::semicolon);
 
-  return new VariableAssignment(std::move(variable), std::unique_ptr<AbstractExpression>(value));
+  return new VariableAssignment(std::move(target), std::unique_ptr<AbstractExpression>(value));
 }
