@@ -1,4 +1,6 @@
+#include "ast_opt/ast/VariableDeclaration.h"
 #include "ast_opt/ast/Function.h"
+#include "ast_opt/ast/FunctionParameter.h"
 #include "ast_opt/ast/Literal.h"
 #include "gtest/gtest.h"
 
@@ -28,12 +30,32 @@ TEST(FunctionTest, MoveAssignmentPreservesValue) {
 }
 
 TEST(FunctionTest, countChildrenReportsCorrectNumber) {
-  // TODO: This tests checks that countChildren delivers the correct number
+  // This tests checks that countChildren delivers the correct number
+
+  VariableDeclaration variableDeclaration1(Datatype(Type::BOOL), std::make_unique<Variable>("foo"));
+  FunctionParameter functionParameter(Datatype(Type::BOOL), "foo");
+  std::vector<std::unique_ptr<FunctionParameter>> paramVec;
+  paramVec.push_back(std::make_unique<FunctionParameter>(functionParameter));
+  std::unique_ptr<Block> block = std::make_unique<Block>(variableDeclaration1.clone());
+  Function f(Datatype(Type::BOOL), "main",std::move(paramVec), std::move(block));
+  auto reported_count = f.countChildren();
+
+  // Iterate through all the children using the iterators
+  // (indirectly via range-based for loop for conciseness)
+  size_t actual_count = 0;
+  for (auto &c: f) {
+    c = c; // Use c to suppress warning
+    ++actual_count;
+  }
+
+  EXPECT_EQ(reported_count, actual_count);
 }
 
 TEST(FunctionTest, node_iterate_children) {
   // TODO: This test checks that we can iterate correctly through the children
   // Even if some of the elements are null (in which case they should not appear)
+
+
 
 }
 
