@@ -285,7 +285,7 @@ bool operator!=(const eof &, const eof &) {
   return false;
 }
 
-std::string to_string(reservedTokens t) {
+std::string to_string(const reservedTokens t) {
   return std::string(token_string_map.find(t)->second);
 }
 

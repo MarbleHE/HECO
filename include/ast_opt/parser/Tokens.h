@@ -161,7 +161,7 @@ class token {
   [[nodiscard]] const token_value &getValue() const;
 };
 
-std::string to_string(stork::reservedTokens t);
+std::string to_string(const stork::reservedTokens t);
 std::string to_string(const stork::token_value &t);
 }
 
