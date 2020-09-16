@@ -123,5 +123,5 @@ std::string Assignment::toString(bool printChildren) const {
 }
 
 std::string Assignment::getNodeType() const {
-  return "VariableAssignment";
+  return "Assignment";
 }
