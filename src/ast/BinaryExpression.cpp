@@ -41,10 +41,6 @@ bool BinaryExpression::hasLeft() const {
   return left!=nullptr;
 }
 
-bool BinaryExpression::hasOperator() const {
-  return true;
-}
-
 bool BinaryExpression::hasRight() const {
   return right!=nullptr;
 }

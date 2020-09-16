@@ -61,10 +61,6 @@ class BinaryExpression : public AbstractExpression {
   /// \return true iff the assignment has the left hand side set
   bool hasLeft() const;
 
-  /// Does this BinaryExpression have its operator set?
-  /// Note: Currently always true
-  bool hasOperator() const;
-
   /// Does this BinaryExpression have its right hand side set?
   /// \return true iff the assignment has the right hand side set
   bool hasRight() const;

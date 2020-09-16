@@ -56,10 +56,6 @@ class OperatorExpression : public AbstractExpression {
   /// Does the current OperatorExpression contain null operands?
   bool hasNullOperands();
 
-  /// Does this OperatorExpression have its operator set?
-  /// Note: Currently always true
-  bool hasOperator() const;
-
   /// Get (a reference to) the Operator
   /// \return A reference to the operator variable
   Operator &getOperator();

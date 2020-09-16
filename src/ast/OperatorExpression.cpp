@@ -80,6 +80,18 @@ void OperatorExpression::removeNullOperands() {
   operands = std::move(new_operands);
 }
 
+Operator &OperatorExpression::getOperator() {
+  return op;
+}
+
+const Operator &OperatorExpression::getOperator() const {
+  return op;
+}
+
+void OperatorExpression::setOperator(Operator newOperator) {
+  op = newOperator;
+}
+
 ///////////////////////////////////////////////
 ////////// AbstractNode Interface /////////////
 ///////////////////////////////////////////////
