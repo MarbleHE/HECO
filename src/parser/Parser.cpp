@@ -101,9 +101,7 @@ AbstractExpression *Parser::parseExpression(stork::tokens_iterator &it) {
 
   bool running = true;
   while (running) {
-    //TODO: Handle Postfix
-    if (isBinaryOperator(it) || isUnaryOperator(it)) {
-      //TODO: Handle Unary/right-assoc properly
+    if (isBinaryOperator(it)) {
       Operator op1 = parseOperator(it);
       while (!operator_stack.empty()) {
         Operator op2 = operator_stack.top();
@@ -121,6 +119,25 @@ AbstractExpression *Parser::parseExpression(stork::tokens_iterator &it) {
         }
       }
       operator_stack.push(op1);
+    } else if (isUnaryOperator(it)) {
+      operator_stack.push(parseOperator(it));
+    } else if (isPostFixOperator(it)) {
+      Operator op(ArithmeticOp::ADDITION);
+      if (it->hasValue(stork::reservedTokens::inc)) {
+        // already an add
+      } else if (it->hasValue(stork::reservedTokens::dec)) {
+        op = Operator(ArithmeticOp::SUBTRACTION);
+      } else {
+        throw stork::parsingError("Unexpected Postfix Operator", it->getLineNumber(), it->getCharIndex());
+      }
+      if (operands.empty()) {
+        throw stork::expectedSyntaxError("operand for postfix operator", it->getLineNumber(), it->getCharIndex());
+      } else {
+        auto exp = operands.top();
+        operands.pop();
+        operands
+            .push(new BinaryExpression(std::unique_ptr<AbstractExpression>(exp), op, std::make_unique<LiteralInt>(1)));
+      }
     } else if (isLiteral(it)) {
       operands.push(parseLiteral(it));
     } else if (it->isIdentifier()) {
@@ -135,7 +152,29 @@ AbstractExpression *Parser::parseExpression(stork::tokens_iterator &it) {
       // Stop parsing tokens as soon as we see a closing ), a semicolon or anything else
       running = false;
     }
-  }
+
+    // Check if we have a right-associative operator (currently only unary supported) ready to go on the stack
+    if (!operator_stack.empty() && operator_stack.top().isRightAssociative()) {
+      if (!operator_stack.top().isUnary()) {
+        throw stork::parsingError("Cannot handle non-unary right-associative operators!",
+                                  it->getLineNumber(),
+                                  it->getCharIndex());
+      } else {
+        Operator op = operator_stack.top();
+        operator_stack.pop();
+        if (operands.empty()) {
+          throw stork::expectedSyntaxError("Operand for Unary Operator to work on",
+                                           it->getLineNumber(),
+                                           it->getCharIndex());
+        } else {
+          AbstractExpression *exp = operands.top();
+          operands.pop();
+          operands.push(new UnaryExpression(std::unique_ptr<AbstractExpression>(exp), op));
+        }
+      }
+    }
+
+  } //end of while loop
 
   if (!operator_stack.empty()) {
     Operator op = operator_stack.top();
@@ -225,7 +264,9 @@ Operator Parser::parseOperator(stork::tokens_iterator &it) {
       ++it;
       return Operator(ArithmeticOp::SUBTRACTION);
     } else if (it->hasValue(stork::reservedTokens::concat)) {
-      throw stork::unexpectedSyntaxError("concatenation (not supported in AST)", it->getLineNumber(), it->getCharIndex());
+      throw stork::unexpectedSyntaxError("concatenation (not supported in AST)",
+                                         it->getLineNumber(),
+                                         it->getCharIndex());
     } else if (it->hasValue(stork::reservedTokens::mul)) {
       ++it;
       return Operator(ArithmeticOp::MULTIPLICATION);
@@ -233,7 +274,9 @@ Operator Parser::parseOperator(stork::tokens_iterator &it) {
       ++it;
       return Operator(ArithmeticOp::DIVISION);
     } else if (it->hasValue(stork::reservedTokens::idiv)) {
-      throw stork::unexpectedSyntaxError("integer division (not supported in AST)", it->getLineNumber(), it->getCharIndex());
+      throw stork::unexpectedSyntaxError("integer division (not supported in AST)",
+                                         it->getLineNumber(),
+                                         it->getCharIndex());
     } else if (it->hasValue(stork::reservedTokens::mod)) {
       ++it;
       return Operator(ArithmeticOp::MODULO);

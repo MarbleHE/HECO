@@ -50,6 +50,8 @@ class Operator {
 
   [[nodiscard]] bool isRightAssociative() const;
 
+  [[nodiscard]] bool isUnary() const;
+
   [[nodiscard]] std::string toString() const;
 };
 

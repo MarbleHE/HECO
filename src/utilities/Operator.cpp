@@ -28,8 +28,13 @@ Operator::Operator(OperatorVariant op) : op(op) {}
 
 bool Operator::isRightAssociative() const {
   // Only UnaryOp are right associative
+ return isUnary();
+}
+
+bool Operator::isUnary() const {
   return op.index()==2;
 }
+
 std::string Operator::toString() const {
   return ::toString(op);
 }
