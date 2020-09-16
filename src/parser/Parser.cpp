@@ -283,13 +283,7 @@ Function *Parser::parseFunctionStatement(stork::tokens_iterator &it) {
   parseTokenValue(it, stork::reservedTokens::close_round);
 
   // parse block/body statements
-  parseTokenValue(it, stork::reservedTokens::open_curly);
-  std::vector<std::unique_ptr<AbstractStatement>> blockStatements;
-  while (!it->hasValue(stork::reservedTokens::close_curly)) {
-    blockStatements.push_back(std::unique_ptr<AbstractStatement>(parseStatement(it)));
-  }
-  parseTokenValue(it, stork::reservedTokens::close_curly);
-  auto block = std::make_unique<Block>(std::move(blockStatements));
+  auto block = std::unique_ptr<Block>(parseBlockStatement(it));
 
   return new Function(datatype, functionName, std::move(functionParams), std::move(block));
 }
@@ -317,8 +311,14 @@ Return *Parser::parseReturnStatement(stork::tokens_iterator &it) {
 }
 
 Block *Parser::parseBlockStatement(stork::tokens_iterator &it) {
-  // TODO: Implement me!
-  return nullptr;
+  // parse block/body statements
+  parseTokenValue(it, stork::reservedTokens::open_curly);
+  std::vector<std::unique_ptr<AbstractStatement>> blockStatements;
+  while (!it->hasValue(stork::reservedTokens::close_curly)) {
+    blockStatements.push_back(std::unique_ptr<AbstractStatement>(parseStatement(it)));
+  }
+  parseTokenValue(it, stork::reservedTokens::close_curly);
+  return new Block(std::move(blockStatements));
 }
 
 AbstractExpression* Parser::parseTargetValue(stork::tokens_iterator &it) {
