@@ -68,13 +68,13 @@ AbstractStatement *Parser::parseStatement(stork::tokens_iterator &it) {
       case stork::reservedTokens::kw_void:
         return parseVariableDeclarationStatement(it);
       default:
-        // has to be a variable assignment
-        return parseVariableAssignmentStatement(it);
+        // has to be an assignment
+        return parseAssignmentStatement(it);
 
     }
   } else {
     // it start with an identifier -> must be an assignment
-    return parseVariableAssignmentStatement(it);
+    return parseAssignmentStatement(it);
   }
 }
 
@@ -306,7 +306,7 @@ ExpressionList *Parser::parseExpressionList(stork::tokens_iterator &it) {
 }
 
 Variable *Parser::parseVariable(stork::tokens_iterator &it) {
-  auto identifier = parseDeclarationName(it);
+  auto identifier = parseIdentifier(it);
   auto variable = std::make_unique<Variable>(identifier);
   return new Variable(identifier);
 }
@@ -430,7 +430,7 @@ Datatype Parser::parseDatatype(stork::tokens_iterator &it) {
   return datatype;
 }
 
-std::string Parser::parseDeclarationName(stork::tokens_iterator &it) {
+std::string Parser::parseIdentifier(stork::tokens_iterator &it) {
   if (!it->isIdentifier()) {
     throw stork::unexpectedSyntaxError(to_string(it->getValue()), it->getLineNumber(), it->getCharIndex());
   }
@@ -441,7 +441,7 @@ std::string Parser::parseDeclarationName(stork::tokens_iterator &it) {
 
 FunctionParameter *Parser::parseFunctionParameter(stork::tokens_iterator &it) {
   auto datatype = parseDatatype(it);
-  auto identifier = parseDeclarationName(it);
+  auto identifier = parseIdentifier(it);
 
   auto functionParameter = new FunctionParameter(datatype, identifier);
 
@@ -462,7 +462,7 @@ Function *Parser::parseFunctionStatement(stork::tokens_iterator &it) {
   auto datatype = parseDatatype(it);
 
   // parse function name
-  auto functionName = parseDeclarationName(it);
+  auto functionName = parseIdentifier(it);
 
   // parse function parameters
   parseTokenValue(it, stork::reservedTokens::open_round);
@@ -534,7 +534,7 @@ VariableDeclaration *Parser::parseVariableDeclarationStatement(stork::tokens_ite
   }
 }
 
-Assignment *Parser::parseVariableAssignmentStatement(stork::tokens_iterator &it) {
+Assignment *Parser::parseAssignmentStatement(stork::tokens_iterator &it) {
   // the target's name
   auto target = std::unique_ptr<AbstractTarget>(parseTarget(it));
 
