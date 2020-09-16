@@ -223,9 +223,9 @@ AbstractExpression *Parser::parseExpression(stork::tokens_iterator &it) {
         operands.pop();
         auto e2 = operands.top();
         operands.pop();
-        operands.push(new BinaryExpression(std::unique_ptr<AbstractExpression>(e1),
+        operands.push(new BinaryExpression(std::unique_ptr<AbstractExpression>(e2),
                                            op,
-                                           std::unique_ptr<AbstractExpression>(e2)));
+                                           std::unique_ptr<AbstractExpression>(e1)));
       }
     }
   }
