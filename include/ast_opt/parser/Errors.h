@@ -10,6 +10,7 @@
 namespace stork {
 class Error : public std::exception {
  private:
+  std::string _long_message;
   std::string _message;
   size_t _line_number;
   size_t _char_index;

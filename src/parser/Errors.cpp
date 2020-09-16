@@ -6,10 +6,11 @@ Error::Error(std::string message, size_t line_number, size_t char_index) noexcep
     _message(std::move(message)),
     _line_number(line_number),
     _char_index(char_index) {
+  _long_message = _message + " on Line " + std::to_string(_line_number) + ", position " + std::to_string(_char_index);
 }
 
 const char *Error::what() const noexcept {
-  return _message.c_str();
+  return _long_message.c_str();
 }
 
 size_t Error::getLineNumber() const noexcept {
