@@ -26,17 +26,21 @@ Datatype FLOAT = Datatype(Type::FLOAT);
 Datatype DOUBLE = Datatype(Type::DOUBLE);
 Datatype STRING = Datatype(Type::STRING);
 
-bool compareAST(const AbstractNode &ast1, const AbstractNode &ast2) {
+::testing::AssertionResult compareAST(const AbstractNode &ast1, const AbstractNode &ast2) {
   //TODO: Don't just return bool, instead provide google test failures
   bool same_attrib = true;
   if (typeid(ast1)!=typeid(ast2)) {
-    return false;
+    return ::testing::AssertionFailure() << "AST nodes have different types: " << ast1.toString(false) << " vs "
+                                         << ast2.toString(false);
   } else if (typeid(ast1)==typeid(const Assignment &)) {
     // No non-AST attributes
   } else if (typeid(ast1)==typeid(const BinaryExpression &)) {
     auto b1 = dynamic_cast<const BinaryExpression &>(ast1);
     auto b2 = dynamic_cast<const BinaryExpression &>(ast2);
-    same_attrib = b1.getOperator().toString()==b2.getOperator().toString();
+    if (b1.getOperator().toString()!=b2.getOperator().toString()) {
+      return ::testing::AssertionFailure() << "BinaryExpressions nodes have different operators: "
+                                           << ast1.toString(false) << " vs " << ast2.toString(false);
+    }
   } else if (typeid(ast1)==typeid(Block)) {
     // No non-AST attributes
   } else if (typeid(ast1)==typeid(ExpressionList)) {
@@ -46,13 +50,27 @@ bool compareAST(const AbstractNode &ast1, const AbstractNode &ast2) {
   } else if (typeid(ast1)==typeid(const Function &)) {
     auto f1 = dynamic_cast<const Function &>(ast1);
     auto f2 = dynamic_cast<const Function &>(ast2);
-    same_attrib = f1.getIdentifier()==f2.getIdentifier()
-        && f1.getReturnType()==f2.getReturnType();
+    if (f1.getIdentifier()!=f2.getIdentifier()) {
+      return ::testing::AssertionFailure() << "Function nodes have different identifiers: " << ast1.toString(false)
+                                           << " vs " << ast2.toString(false);
+    }
+    if (f1.getReturnType()!=f2.getReturnType()) {
+      return ::testing::AssertionFailure() << "Function nodes have different return type: " << ast1.toString(false)
+                                           << " vs " << ast2.toString(false);
+    }
   } else if (typeid(ast1)==typeid(const FunctionParameter &)) {
     auto f1 = dynamic_cast<const FunctionParameter &>(ast1);
     auto f2 = dynamic_cast<const FunctionParameter &>(ast2);
-    same_attrib = f1.getIdentifier()==f2.getIdentifier()
-        && f1.getParameterType()==f2.getParameterType();
+    if (f1.getIdentifier()!=f2.getIdentifier()) {
+      return ::testing::AssertionFailure() << "FunctionParameter nodes have different identifiers: "
+                                           << ast1.toString(false)
+                                           << " vs " << ast2.toString(false);
+    }
+    if (f1.getParameterType()!=f2.getParameterType()) {
+      return ::testing::AssertionFailure() << "FunctionParameter nodes have different parameter type: "
+                                           << ast1.toString(false)
+                                           << " vs " << ast2.toString(false);
+    }
   } else if (typeid(ast1)==typeid(const If &)) {
     // No non-AST attributes
   } else if (typeid(ast1)==typeid(IndexAccess)) {
@@ -60,64 +78,93 @@ bool compareAST(const AbstractNode &ast1, const AbstractNode &ast2) {
   } else if (typeid(ast1)==typeid(const OperatorExpression &)) {
     auto o1 = dynamic_cast<const OperatorExpression &>(ast1);
     auto o2 = dynamic_cast<const OperatorExpression &>(ast2);
-    same_attrib = o1.getOperator().toString()==o2.getOperator().toString();
+    if (o1.getOperator().toString()!=o2.getOperator().toString()) {
+      return ::testing::AssertionFailure() << "OperatorExpression nodes have different operators: "
+                                           << ast1.toString(false) << " vs " << ast2.toString(false);
+    }
   } else if (typeid(ast1)==typeid(Return)) {
     // No non-AST attributes
   } else if (typeid(ast1)==typeid(const UnaryExpression &)) {
     auto u1 = dynamic_cast<const UnaryExpression &>(ast1);
     auto u2 = dynamic_cast<const UnaryExpression &>(ast2);
-    same_attrib = u1.getOperator().toString()==u2.getOperator().toString();
+    if (u1.getOperator().toString()!=u2.getOperator().toString()) {
+      return ::testing::AssertionFailure() << "UnaryExpression nodes have different operators: "
+                                           << ast1.toString(false) << " vs " << ast2.toString(false);
+    }
   } else if (typeid(ast1)==typeid(const Variable &)) {
     auto v1 = dynamic_cast<const Variable &>(ast1);
     auto v2 = dynamic_cast<const Variable &>(ast2);
-    same_attrib = v1.getIdentifier()==v2.getIdentifier();
+    if (v1.getIdentifier()!=v2.getIdentifier()) {
+      return ::testing::AssertionFailure() << "Variable nodes have different identifiers: "
+                                           << ast1.toString(false) << " vs " << ast2.toString(false);
+    }
   } else if (typeid(ast1)==typeid(const VariableDeclaration &)) {
     auto v1 = dynamic_cast<const VariableDeclaration &>(ast1);
     auto v2 = dynamic_cast<const VariableDeclaration &>(ast2);
-    same_attrib = v1.getDatatype()==v2.getDatatype();
+    if (v1.getDatatype()!=v2.getDatatype()) {
+      return ::testing::AssertionFailure() << "VariableDeclaration nodes have different datatypes: "
+                                           << ast1.toString(false) << " vs " << ast2.toString(false);
+    }
   } else if (typeid(ast1)==typeid(const LiteralBool &)) {
     auto l1 = dynamic_cast<const LiteralBool &>(ast1);
     auto l2 = dynamic_cast<const LiteralBool &>(ast2);
-    same_attrib = l1.getValue()==l2.getValue();
+    if (l1.getValue()!=l2.getValue()) {
+      return ::testing::AssertionFailure() << "Literal nodes have different values: "
+                                           << ast1.toString(false) << " vs " << ast2.toString(false);
+    }
   } else if (typeid(ast1)==typeid(const LiteralChar &)) {
     auto l1 = dynamic_cast<const LiteralChar &>(ast1);
     auto l2 = dynamic_cast<const LiteralChar &>(ast2);
-    same_attrib = l1.getValue()==l2.getValue();
+    if (l1.getValue()!=l2.getValue()) {
+      return ::testing::AssertionFailure() << "Literal nodes have different values: "
+                                           << ast1.toString(false) << " vs " << ast2.toString(false);
+    }
   } else if (typeid(ast1)==typeid(const LiteralInt &)) {
     auto l1 = dynamic_cast<const LiteralInt &>(ast1);
     auto l2 = dynamic_cast<const LiteralInt &>(ast2);
-    same_attrib = l1.getValue()==l2.getValue();
+    if (l1.getValue()!=l2.getValue()) {
+      return ::testing::AssertionFailure() << "Literal nodes have different values: "
+                                           << ast1.toString(false) << " vs " << ast2.toString(false);
+    }
   } else if (typeid(ast1)==typeid(const LiteralFloat &)) {
     auto l1 = dynamic_cast<const LiteralFloat &>(ast1);
     auto l2 = dynamic_cast<const LiteralFloat &>(ast2);
-    same_attrib = l1.getValue()==l2.getValue();
+    if (l1.getValue()!=l2.getValue()) {
+      return ::testing::AssertionFailure() << "Literal nodes have different values: "
+                                           << ast1.toString(false) << " vs " << ast2.toString(false);
+    }
   } else if (typeid(ast1)==typeid(const LiteralDouble &)) {
     auto l1 = dynamic_cast<const LiteralDouble &>(ast1);
     auto l2 = dynamic_cast<const LiteralDouble &>(ast2);
-    same_attrib = l1.getValue()==l2.getValue();
+    if (l1.getValue()!=l2.getValue()) {
+      return ::testing::AssertionFailure() << "Literal nodes have different values: "
+                                           << ast1.toString(false) << " vs " << ast2.toString(false);
+    }
   } else if (typeid(ast1)==typeid(const LiteralString &)) {
     auto l1 = dynamic_cast<const LiteralString &>(ast1);
     auto l2 = dynamic_cast<const LiteralString &>(ast2);
-    same_attrib = l1.getValue()==l2.getValue();
+    if (l1.getValue()!=l2.getValue()) {
+      return ::testing::AssertionFailure() << "Literal nodes have different values: "
+                                           << ast1.toString(false) << " vs " << ast2.toString(false);
+    }
   } else {
     throw std::runtime_error("Something bad happened while comparing ASTs.");
   }
 
-  if (!same_attrib) {
-    return false;
-  }
-
   // Compare Children
   if (ast1.countChildren()!=ast2.countChildren())
-    return false;
+    return ::testing::AssertionFailure() << "Nodes do not have equal number of children!" << ast1.toString(false) << " has " << ast1.countChildren() << " while " << ast2.toString(false) << " has " << ast2.countChildren();
   auto it1 = ast1.begin();
   auto it2 = ast2.begin();
   for (; it1!=ast1.end() && it2!=ast2.end(); ++it1, ++it2) {
-    if (!compareAST(*it1, *it2)) {
-      return false;
+    auto r = compareAST(*it1, *it2);
+    if (!r){
+      return ::testing::AssertionFailure() << ast1.toString(true) << " and " << ast2.toString(true)
+                                           << " differ in children: " << it1->toString(false) << " vs " << it2->toString(false)
+                                           << "Original issue:" << r.message();
     }
   }
-  return true;
+  return ::testing::AssertionSuccess();
 }
 
 TEST(ParserTest, emptyString) {
@@ -157,9 +204,10 @@ TEST(ParserTest, simpleFunction) {
   auto body_node = std::make_unique<Block>(std::make_unique<Return>(std::make_unique<LiteralBool>(0)));
   auto expected_body = Function(INT, "main", std::move(empty_params), std::move(body_node));
 
-  EXPECT_TRUE(compareAST(*parsed_minimal, expected_minimal));
-  EXPECT_TRUE(compareAST(*parsed_params, expected_params));
-  EXPECT_TRUE(compareAST(*parsed_body, expected_body));
+  // Since parse wraps everything in a Block, get the first element
+  EXPECT_TRUE(compareAST(*parsed_minimal->begin(), expected_minimal));
+  EXPECT_TRUE(compareAST(*parsed_params->begin(), expected_params));
+  EXPECT_TRUE(compareAST(*parsed_body->begin(), expected_body));
 }
 
 TEST(ParserTest, IfStatementThenOnly) {
