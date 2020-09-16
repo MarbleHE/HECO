@@ -40,7 +40,7 @@ class Return;
 
 class UnaryExpression;
 
-class VariableAssignment;
+class Assignment;
 
 class VariableDeclaration;
 
@@ -85,7 +85,7 @@ class IVisitor {
 
   virtual void visit(UnaryExpression &elem) = 0;
 
-  virtual void visit(VariableAssignment &elem) = 0;
+  virtual void visit(Assignment &elem) = 0;
 
   virtual void visit(VariableDeclaration &elem) = 0;
 

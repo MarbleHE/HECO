@@ -23,7 +23,7 @@ class IndexAccess;
 class Operator;
 class Return;
 class UnaryExpression;
-class VariableAssignment;
+class Assignment;
 class VariableDeclaration;
 class Variable;
 
@@ -59,7 +59,7 @@ class Parser {
 
   static VariableDeclaration *parseVariableDeclarationStatement(stork::tokens_iterator &it);
 
-  static VariableAssignment *parseVariableAssignmentStatement(stork::tokens_iterator &it);
+  static Assignment *parseVariableAssignmentStatement(stork::tokens_iterator &it);
 
   static void parseTokenValue(stork::tokens_iterator &it, const stork::token_value &value);
 

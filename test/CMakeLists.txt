@@ -34,7 +34,7 @@ set(TEST_FILES
         ast/ReturnTest.cpp
         ast/UnaryExpressionTest.cpp
         ast/VariableTest.cpp
-        ast/VariableAssignmentTest.cpp
+        ast/AssignmentTest.cpp
         ast/VariableDeclarationTest.cpp
         JsonOutputTest.cpp
         parser/ParserTest.cpp

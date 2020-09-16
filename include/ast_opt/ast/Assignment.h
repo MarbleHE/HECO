@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_INCLUDE_AST_OPT_AST_VARIABLEASSIGNMENT_H_
-#define AST_OPTIMIZER_INCLUDE_AST_OPT_AST_VARIABLEASSIGNMENT_H_
+#ifndef AST_OPTIMIZER_INCLUDE_AST_OPT_AST_ASSIGNMENT_H_
+#define AST_OPTIMIZER_INCLUDE_AST_OPT_AST_ASSIGNMENT_H_
 
 #include <memory>
 #include "ast_opt/ast/AbstractExpression.h"
@@ -9,7 +9,7 @@
 // Forward Declaration of class Variable
 class Variable;
 
-class VariableAssignment : public AbstractStatement {
+class Assignment : public AbstractStatement {
  private:
   /// Target (left hand side) of the assignment
   std::unique_ptr<AbstractTarget> target;
@@ -20,38 +20,38 @@ class VariableAssignment : public AbstractStatement {
   /// Creates a deep copy of the current node
   /// Should be used only by Nodes' clone()
   /// \return a copy of the current node
-  VariableAssignment *clone_impl() const override;
+  Assignment *clone_impl() const override;
 
  public:
   /// Destructor
-  ~VariableAssignment() override;
+  ~Assignment() override;
 
   /// Create an assignment with a target (lhs) and value (rhs)
   /// \param target The variable to assign to (the assignment will take ownership)
   /// \param value  The value to assign (the assignment will take ownership)
-  VariableAssignment(std::unique_ptr<AbstractTarget> target, std::unique_ptr<AbstractExpression> value);
+  Assignment(std::unique_ptr<AbstractTarget> target, std::unique_ptr<AbstractExpression> value);
 
   /// Copy constructor
-  /// \param other VariableAssignment to copy
-  VariableAssignment(const VariableAssignment &other);
+  /// \param other Assignment to copy
+  Assignment(const Assignment &other);
 
   /// Move constructor
-  /// \param other VariableAssignment to copy
-  VariableAssignment(VariableAssignment &&other) noexcept ;
+  /// \param other Assignment to copy
+  Assignment(Assignment &&other) noexcept ;
 
   /// Copy assignment
-  /// \param other VariableAssignment to copy
+  /// \param other Assignment to copy
   /// \return This object
-  VariableAssignment &operator=(const VariableAssignment &other);
+  Assignment &operator=(const Assignment &other);
 
   /// Move assignment
-  /// \param other VariableAssignment to move
+  /// \param other Assignment to move
   /// \return This object
-  VariableAssignment &operator=(VariableAssignment &&other)  noexcept;
+  Assignment &operator=(Assignment &&other)  noexcept;
 
   /// Deep copy of the current node
   /// \return A deep copy of the current node
-  std::unique_ptr<VariableAssignment> clone() const;
+  std::unique_ptr<Assignment> clone() const;
 
   /// Does this assignment have its target set?
   /// \return true iff the assignment has the target set
@@ -108,10 +108,10 @@ class VariableAssignment : public AbstractStatement {
 
 // Designed to be instantiated only with T = (const) AbstractNode
 template<typename T>
-class VariableAssignmentIteratorImpl : public PositionIteratorImpl<T, VariableAssignment> {
+class AssignmentIteratorImpl : public PositionIteratorImpl<T, Assignment> {
  public:
   // Inherit the constructor from the base class since it does everything we need
-  using PositionIteratorImpl<T,VariableAssignment>::PositionIteratorImpl;
+  using PositionIteratorImpl<T, Assignment>::PositionIteratorImpl;
 
   T &operator*() override {
     switch (this->position) {
@@ -135,8 +135,8 @@ class VariableAssignmentIteratorImpl : public PositionIteratorImpl<T, VariableAs
   }
 
   std::unique_ptr<BaseIteratorImpl<T>> clone() override {
-    return std::make_unique<VariableAssignmentIteratorImpl>(this->node,this->position);
+    return std::make_unique<AssignmentIteratorImpl>(this->node,this->position);
   }
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_VARIABLEASSIGNMENT_H_
+#endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_ASSIGNMENT_H_

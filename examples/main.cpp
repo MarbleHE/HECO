@@ -4,7 +4,7 @@
 #include "ast_opt/ast/Literal.h"
 #include "ast_opt/ast/Variable.h"
 #include <ast_opt/visitor/Visitor.h>
-#include <ast_opt/ast/VariableAssignment.h>
+#include <ast_opt/ast/Assignment.h>
 
 int main() {
 
@@ -20,7 +20,7 @@ int main() {
   Variable v("foo");
 
   // Create a VariableAssignment node
-  VariableAssignment va(std::make_unique<Variable>("boo"), std::make_unique<Literal<bool>>(false));
+  Assignment va(std::make_unique<Variable>("boo"), std::make_unique<Literal<bool>>(false));
 
   // Force Template Magic to be compiled
   ScopedVisitor sv;

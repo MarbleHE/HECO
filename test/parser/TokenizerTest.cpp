@@ -3,7 +3,7 @@
 #include "ast_opt/ast/For.h"
 #include "ast_opt/ast/Return.h"
 #include "ast_opt/ast/VariableDeclaration.h"
-#include "ast_opt/ast/VariableAssignment.h"
+#include "ast_opt/ast/Assignment.h"
 #include "ast_opt/ast/If.h"
 #include "ast_opt/ast/Function.h"
 #include "ast_opt/ast/AbstractStatement.h"

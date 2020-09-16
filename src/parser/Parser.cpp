@@ -17,7 +17,7 @@
 #include "ast_opt/ast/Return.h"
 #include "ast_opt/ast/UnaryExpression.h"
 #include "ast_opt/ast/Variable.h"
-#include "ast_opt/ast/VariableAssignment.h"
+#include "ast_opt/ast/Assignment.h"
 #include "ast_opt/ast/VariableDeclaration.h"
 #include "ast_opt/parser/Errors.h"
 #include "ast_opt/parser/Parser.h"
@@ -534,7 +534,7 @@ VariableDeclaration *Parser::parseVariableDeclarationStatement(stork::tokens_ite
   }
 }
 
-VariableAssignment *Parser::parseVariableAssignmentStatement(stork::tokens_iterator &it) {
+Assignment *Parser::parseVariableAssignmentStatement(stork::tokens_iterator &it) {
   // the target's name
   auto target = std::unique_ptr<AbstractTarget>(parseTarget(it));
 
@@ -545,5 +545,5 @@ VariableAssignment *Parser::parseVariableAssignmentStatement(stork::tokens_itera
   // the trailing semicolon
   parseTokenValue(it, stork::reservedTokens::semicolon);
 
-  return new VariableAssignment(std::move(target), std::unique_ptr<AbstractExpression>(value));
+  return new Assignment(std::move(target), std::unique_ptr<AbstractExpression>(value));
 }
