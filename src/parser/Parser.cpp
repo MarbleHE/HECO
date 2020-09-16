@@ -43,7 +43,7 @@ AbstractStatement *Parser::parseStatement(stork::tokens_iterator &it) {
   }
 }
 
-bool isOperator(stork::tokens_iterator &it) {
+bool isBinaryOperator(const stork::tokens_iterator &it) {
   return
       it->isReservedToken() &&
           (
@@ -54,13 +54,11 @@ bool isOperator(stork::tokens_iterator &it) {
                   it->hasValue(stork::reservedTokens::div) ||
                   it->hasValue(stork::reservedTokens::idiv) ||
                   it->hasValue(stork::reservedTokens::mod) ||
-                  it->hasValue(stork::reservedTokens::bitwise_not) ||
                   it->hasValue(stork::reservedTokens::bitwise_and) ||
                   it->hasValue(stork::reservedTokens::bitwise_or) ||
                   it->hasValue(stork::reservedTokens::bitwise_xor) ||
                   it->hasValue(stork::reservedTokens::shiftl) ||
                   it->hasValue(stork::reservedTokens::shiftr) ||
-                  it->hasValue(stork::reservedTokens::logical_not) ||
                   it->hasValue(stork::reservedTokens::logical_and) ||
                   it->hasValue(stork::reservedTokens::logical_or) ||
                   it->hasValue(stork::reservedTokens::eq) ||
@@ -72,23 +70,22 @@ bool isOperator(stork::tokens_iterator &it) {
           );
 }
 
+bool isUnaryOperator(const stork::tokens_iterator &it) {
+  return
+      it->isReservedToken() &&
+          (
+              it->hasValue(stork::reservedTokens::logical_not) ||
+                  it->hasValue(stork::reservedTokens::bitwise_not)
+          );
+}
+
+bool isPostFixOperator(const stork::tokens_iterator &it) {
+  return
+      it->isReservedToken() && (it->hasValue(stork::reservedTokens::inc) || it->hasValue(stork::reservedTokens::dec));
+}
+
 bool isLiteral(stork::tokens_iterator &it) {
   return it->isBool() || it->isChar() || it->isFloat() || it->isDouble() || it->isInteger() || it->isString();
-}
-
-/// Compares the precedence of this operator against another operator.
-/// \return -1 if op1 is of lower precedence, 1 if it's of greater
-/// precedence, and 0 if they're of equal precedence. If two operators are of
-/// equal precedence, right associativity and parenthetical groupings must be
-/// used to determine precedence.
-int comparePrecedence(const Operator &op1, const Operator &op2) {
-  //TODO: IMPLEMENT
-  return 0;
-}
-
-bool isRightAssociative(const Operator &op) {
-  //TODO:IMPLEMENT
-  return false;
 }
 
 AbstractExpression *Parser::parseExpression(stork::tokens_iterator &it) {
@@ -104,11 +101,11 @@ AbstractExpression *Parser::parseExpression(stork::tokens_iterator &it) {
 
   bool running = true;
   while (running) {
-    if (isOperator(it)) {
+    if (isBinaryOperator(it) || isUnaryOperator(it)) {
       Operator op1 = parseOperator(it);
       while (!operator_stack.empty()) {
         Operator op2 = operator_stack.top();
-        if ((!isRightAssociative(op1) && comparePrecedence(op1, op2)==0) || comparePrecedence(op1, op2) < 0) {
+        if ((!op1.isRightAssociative() && comparePrecedence(op1, op2)==0) || comparePrecedence(op1, op2) < 0) {
           operator_stack.pop();
           AbstractExpression *rhs = operands.top();
           operands.pop();
@@ -125,13 +122,15 @@ AbstractExpression *Parser::parseExpression(stork::tokens_iterator &it) {
     } else if (isLiteral(it)) {
       operands.push(parseLiteral(it));
     } else if (it->isIdentifier()) {
-      operands.push(parseVariable(it));
+      // When we see an identifier, it could be a variable or a more general IndexAccess
+      operands.push(parseTarget(it));
     } else if (it->hasValue(stork::reservedTokens::open_round)) {
       // If we see an (, we have nested expressions going on, so use recursion.
       parseTokenValue(it, stork::reservedTokens::open_round);
       operands.push(parseExpression(it));
       parseTokenValue(it, stork::reservedTokens::close_round);
     } else {
+      // Stop parsing tokens as soon as we see a closing ), a semicolon or anything else
       running = false;
     }
   }
@@ -173,24 +172,40 @@ AbstractTarget *Parser::parseTarget(stork::tokens_iterator &it) {
   }
 }
 
-BinaryExpression *Parser::parseBinaryExpression(stork::tokens_iterator &it) {
-  //TODO:
-  return nullptr;
+AbstractExpression *Parser::parseLiteral(stork::tokens_iterator &it) {
+  AbstractExpression* l = nullptr;
+  if (it->isString()) {
+    l = new LiteralString(it->getString());
+  } else if (it->isDouble()) {
+    l = new LiteralDouble(it->getDouble());
+  } else if (it->isFloat()) {
+    l = new LiteralFloat(it->getFloat());
+  } else if (it->isChar()) {
+    l = new LiteralChar(it->getChar());
+  } else if (it->isInteger()) {
+    l = new LiteralChar(it->getInteger());
+  } else if (it->isBool()) {
+    l = new LiteralBool(it->getBool());
+  } else {
+    throw stork::unexpectedSyntaxError(std::to_string(it->getValue()), it->getLineNumber(), it->getCharIndex());
+  }
+  ++it;
+  return l;
 }
 
 ExpressionList *Parser::parseExpressionList(stork::tokens_iterator &it) {
-  //TODO:
-  return nullptr;
-}
-
-AbstractExpression *Parser::parseLiteral(stork::tokens_iterator &it) {
-  //TODO:
-  return nullptr;
-}
-
-UnaryExpression *Parser::parseUnaryExpression(stork::tokens_iterator &it) {
-  //TODO:
-  return nullptr;
+  parseTokenValue(it, stork::reservedTokens::open_curly);
+  std::vector<std::unique_ptr<AbstractExpression>> expressions;
+  while (true) {
+    expressions.push_back(std::unique_ptr<AbstractExpression>(parseExpression(it)));
+    if (it->hasValue(stork::reservedTokens::comma)) {
+      parseTokenValue(it, stork::reservedTokens::comma);
+    } else {
+      break;
+    }
+  }
+  parseTokenValue(it, stork::reservedTokens::close_curly);
+  return new ExpressionList(std::move(expressions));
 }
 
 Variable *Parser::parseVariable(stork::tokens_iterator &it) {
@@ -200,8 +215,11 @@ Variable *Parser::parseVariable(stork::tokens_iterator &it) {
 }
 
 Operator Parser::parseOperator(stork::tokens_iterator &it) {
-  //TODO:
-  throw std::runtime_error("NOT IMPLEMENTED");
+  if (it->isReservedToken()) {
+
+  }
+  // If we get here, it wasn't an operator
+  throw stork::unexpectedSyntaxError(std::to_string(it->getValue()), it->getLineNumber(), it->getCharIndex());
 }
 
 /// consume token "value" and throw error if something different

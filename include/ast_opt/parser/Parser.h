@@ -38,8 +38,6 @@ class Parser {
 
   static AbstractTarget *parseTarget(stork::tokens_iterator &it);
 
-  static BinaryExpression* parseBinaryExpression(stork::tokens_iterator &it);
-
   static Block *parseBlockStatement(stork::tokens_iterator &it);
 
   static ExpressionList* parseExpressionList(stork::tokens_iterator &it);
@@ -56,8 +54,6 @@ class Parser {
   static AbstractExpression* parseLiteral(stork::tokens_iterator &it);
 
   static Return *parseReturnStatement(stork::tokens_iterator &it);
-
-  static UnaryExpression* parseUnaryExpression(stork::tokens_iterator &it);
 
   static Variable *parseVariable(stork::tokens_iterator &it);
 
