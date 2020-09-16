@@ -57,16 +57,16 @@ token fetch_word(PushBackStream &stream) {
   } else {
     if (std::isdigit(word.front())) {
       char *endptr;
-      token t(0, line_number, char_index); //placeholder
+      token tok(0, line_number, char_index); //placeholder
       // TODO: introduce support for 4.5f style notation for floats
       if (word.find('.') < word.length()) {
           // It's a double
         double num =  strtod(word.c_str(), &endptr);
-        t =  token(num, line_number, char_index);
+        tok =  token(num, line_number, char_index);
       } else {
         // It's an integer type
         int num = (int) strtol(word.c_str(), &endptr, 0);
-        t =  token(num, line_number, char_index);
+        tok =  token(num, line_number, char_index);
       }
 
       if (*endptr!=0) {
@@ -77,7 +77,7 @@ token fetch_word(PushBackStream &stream) {
             stream.getCharIndex() - remaining
         );
       }
-      return t;
+      return tok;
     } else {
       return token(identifier{std::move(word)}, line_number, char_index);
     }

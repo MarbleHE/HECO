@@ -148,7 +148,7 @@ class token {
   [[nodiscard]] const identifier &getIdentifier() const;
   [[nodiscard]] double getDouble() const;
   [[nodiscard]] const std::string &getString() const;
-  [[nodiscard]] double getInteger() const;
+  [[nodiscard]] int getInteger() const;
   [[nodiscard]] bool getBool() const;
   [[nodiscard]] char getChar() const;
   [[nodiscard]] float getFloat() const;

@@ -246,7 +246,7 @@ AbstractExpression *Parser::parseLiteral(stork::tokens_iterator &it) {
   } else if (it->isChar()) {
     l = new LiteralChar(it->getChar());
   } else if (it->isInteger()) {
-    l = new LiteralChar(it->getInteger());
+    l = new LiteralInt(it->getInteger());
   } else if (it->isBool()) {
     l = new LiteralBool(it->getBool());
   } else {
@@ -446,12 +446,14 @@ Function *Parser::parseFunctionStatement(stork::tokens_iterator &it) {
 
 For *Parser::parseForStatement(stork::tokens_iterator &it) {
   // TODO: Implement me!
-  return nullptr;
+  ++it; // make MSVC stop complaining about unused function param
+  throw std::runtime_error("NOT IMPLEMENTED");
 }
 
 If *Parser::parseIfStatement(stork::tokens_iterator &it) {
   // TODO: Implement me!
-  return nullptr;
+  ++it; // make MSVC stop complaining about unused function param
+  throw std::runtime_error("NOT IMPLEMENTED");
 }
 
 Return *Parser::parseReturnStatement(stork::tokens_iterator &it) {

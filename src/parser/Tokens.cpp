@@ -232,7 +232,7 @@ double token::getDouble() const {
   return std::get<double>(_value);
 }
 
-double token::getInteger() const {
+int token::getInteger() const {
   return std::get<int>(_value);
 }
 

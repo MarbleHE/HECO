@@ -41,6 +41,9 @@ if (MSVC)
     # Try using variants
     add_compile_options(/std:c++17)
 
+    # Don't force fopen_s (which is a MSVC-only thing)
+    add_compile_definitions(_CRT_SECURE_NO_DEPRECATE)
+
     # Mark system headers as external
     # Treats all #include <..> as system includes, so requires some care from developers
     add_compile_options(/experimental:external /external:anglebrackets /external:W0)
