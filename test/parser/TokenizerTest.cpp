@@ -11,20 +11,9 @@
 #include "ast_opt/parser/Tokenizer.h"
 #include "ast_opt/parser/Errors.h"
 #include "gtest/gtest.h"
+#include "ParserTestHelpers.h"
 
 using std::to_string;
-
-stork::get_character getCharacterFunc(std::string& inputString) {
-  return [&inputString]() {
-    if (inputString.empty()) {
-      return (char) EOF;
-    } else {
-      char c = inputString.at(0);
-      inputString.erase(0, 1);
-      return c;
-    }
-  };
-}
 
 TEST(TokenizerTest, recognizeInputTest) {
   const char *demoProgram =
@@ -36,7 +25,7 @@ TEST(TokenizerTest, recognizeInputTest) {
   std::vector<std::string> expected = {"public", "secret", "int", "main", "(", ")", "{", "return", ";", "}"};
 
   // Setup Tokenizer from String
-  auto getFunc = getCharacterFunc(inputCode);
+  auto getFunc = stork::getCharacterFunc(inputCode);
   stork::PushBackStream stream(&getFunc);
   stork::tokens_iterator it(stream);
 
@@ -60,7 +49,7 @@ TEST(TokenizerTest, floatingPointTest) {
   std::vector<std::string> expected = {to_string(5.4)};
 
   // Setup Tokenizer from String
-  auto getFunc = getCharacterFunc(s);
+  auto getFunc = stork::getCharacterFunc(s);
   stork::PushBackStream stream(&getFunc);
   stork::tokens_iterator it(stream);
 
@@ -83,7 +72,7 @@ TEST(TokenizerTest, integerTest) {
   std::vector<std::string> expected = {to_string(5)};
 
   // Setup Tokenizer from String
-  auto getFunc = getCharacterFunc(s);
+  auto getFunc = stork::getCharacterFunc(s);
   stork::PushBackStream stream(&getFunc);
   stork::tokens_iterator it(stream);
 
@@ -112,7 +101,7 @@ TEST(TokenizerTest, fromStringTest) {
   std::cout << s << std::endl;
 
   // Setup Tokenizer from String
-  auto getFunc = getCharacterFunc(s);
+  auto getFunc = stork::getCharacterFunc(s);
   stork::PushBackStream stream(&getFunc);
   stork::tokens_iterator it(stream);
 

@@ -1,11 +1,13 @@
 #include "ast_opt/ast/Assignment.h"
 #include "ast_opt/ast/BinaryExpression.h"
+#include <include/ast_opt/parser/PushBackStream.h>
 #include "ast_opt/ast/Function.h"
 #include "ast_opt/ast/FunctionParameter.h"
 #include "ast_opt/ast/Literal.h"
 #include "ast_opt/ast/Return.h"
 #include "ast_opt/parser/Parser.h"
 #include "gtest/gtest.h"
+#include "ParserTestHelpers.h"
 
 Datatype BOOL = Datatype(Type::BOOL);
 Datatype CHAR = Datatype(Type::CHAR);
@@ -24,7 +26,7 @@ bool compareAST(const AbstractNode& ast1, const AbstractNode& ast2) {
 TEST(ParserTest, emptyString) {
   auto b = Parser::parse("");
   // Should be an empty block
-  EXPECT_EQ(b->countChildren(),0);
+  EXPECT_EQ(b->countChildren(), 0);
 }
 
 TEST(ParserTest, BinaryExp) {
@@ -60,4 +62,25 @@ TEST(ParserTest, simpleFunction) {
   EXPECT_TRUE( compareAST(*parsed_minimal, expected_minimal));
   EXPECT_TRUE( compareAST(*parsed_params, expected_params));
   EXPECT_TRUE( compareAST(*parsed_body, expected_body));
+}
+
+TEST(ParserTest, IfStatementThenOnly) {
+  const char *programCode = R""""(
+    public int main(int a) {
+      if (a > 5) {
+        return 1;
+      }
+      return 0;
+    )"""";
+
+  auto code = std::string(programCode);
+  auto get = stork::getCharacterFunc(code);
+  stork::PushBackStream stream(&get);
+
+  stork::tokens_iterator it(stream);
+
+  auto node = Parser::parseStatement(it);
+
+  std::cout << node->toJson() << std::endl;
+
 }
