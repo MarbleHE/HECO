@@ -59,7 +59,7 @@ class Parser {
 
   static VariableDeclaration *parseVariableDeclarationStatement(stork::tokens_iterator &it);
 
-  static Assignment *parseVariableAssignmentStatement(stork::tokens_iterator &it);
+  static Assignment *parseAssignmentStatement(stork::tokens_iterator &it);
 
   static void parseTokenValue(stork::tokens_iterator &it, const stork::token_value &value);
 
