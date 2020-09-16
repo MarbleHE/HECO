@@ -5,6 +5,7 @@
 #include "ast_opt/ast/FunctionParameter.h"
 #include "ast_opt/ast/Literal.h"
 #include "ast_opt/ast/Return.h"
+#include "ast_opt/ast/If.h"
 #include "ast_opt/parser/Parser.h"
 #include "gtest/gtest.h"
 #include "ParserTestHelpers.h"
@@ -16,12 +17,10 @@ Datatype FLOAT = Datatype(Type::FLOAT);
 Datatype DOUBLE = Datatype(Type::DOUBLE);
 Datatype STRING = Datatype(Type::STRING);
 
-bool compareAST(const AbstractNode& ast1, const AbstractNode& ast2) {
+bool compareAST(const AbstractNode &ast1, const AbstractNode &ast2) {
   //TODO: Write helper function to compare two AST's structure & content without caring about IDs
   return false;
 }
-
-
 
 TEST(ParserTest, emptyString) {
   auto b = Parser::parse("");
@@ -32,7 +31,9 @@ TEST(ParserTest, emptyString) {
 TEST(ParserTest, BinaryExp) {
   auto ast = Parser::parse("a = 5 + 6");
 
-  auto bp = new BinaryExpression(std::make_unique<LiteralInt>(5), Operator(ArithmeticOp::ADDITION), std::make_unique<LiteralInt>(6));
+  auto bp = new BinaryExpression(std::make_unique<LiteralInt>(5),
+                                 Operator(ArithmeticOp::ADDITION),
+                                 std::make_unique<LiteralInt>(6));
   auto assignment = Assignment(std::make_unique<Variable>("a"), std::unique_ptr<BinaryExpression>(bp));
   EXPECT_TRUE(compareAST(*ast, assignment));
 }
@@ -58,10 +59,9 @@ TEST(ParserTest, simpleFunction) {
   auto body_node = std::make_unique<Block>(std::make_unique<Return>(std::make_unique<LiteralBool>(0)));
   auto expected_body = Function(INT, "main", std::move(empty_params), std::move(body_node));
 
-
-  EXPECT_TRUE( compareAST(*parsed_minimal, expected_minimal));
-  EXPECT_TRUE( compareAST(*parsed_params, expected_params));
-  EXPECT_TRUE( compareAST(*parsed_body, expected_body));
+  EXPECT_TRUE(compareAST(*parsed_minimal, expected_minimal));
+  EXPECT_TRUE(compareAST(*parsed_params, expected_params));
+  EXPECT_TRUE(compareAST(*parsed_body, expected_body));
 }
 
 TEST(ParserTest, IfStatementThenOnly) {
@@ -71,16 +71,30 @@ TEST(ParserTest, IfStatementThenOnly) {
         return 1;
       }
       return 0;
+    }
     )"""";
-
   auto code = std::string(programCode);
-  auto get = stork::getCharacterFunc(code);
-  stork::PushBackStream stream(&get);
+  auto parsed = Parser::parse(code);
 
-  stork::tokens_iterator it(stream);
+  auto ifStatement = std::make_unique<If>
+      (std::move(std::make_unique<BinaryExpression>(
+          std::move(std::make_unique<Variable>("a")),
+          Operator(GREATER),
+          std::move(std::make_unique<LiteralInt>(5)))),
+       std::move(std::make_unique<Block>(
+           std::move(std::make_unique<Return>
+                         (std::move(std::make_unique<LiteralInt>(1)))))));
+  auto returnStatement = std::make_unique<Return>(std::move(std::make_unique<LiteralInt>(0)));
 
-  auto node = Parser::parseStatement(it);
+  std::vector<std::unique_ptr<AbstractStatement>> blockStmts;
+  blockStmts.emplace_back(std::move(ifStatement));
+  blockStmts.emplace_back(std::move(returnStatement));
+  auto expected_body = std::make_unique<Block>(std::move(blockStmts));
 
-  std::cout << node->toJson() << std::endl;
+  std::vector<std::unique_ptr<FunctionParameter>> fParams;
+  fParams.emplace_back(std::move(std::make_unique<FunctionParameter>(Datatype(Type::INT, false), "a")));
+  auto funcParams = std::vector<std::unique_ptr<FunctionParameter>>(std::move(fParams));
+  auto expected = new Function(Datatype(Type::INT, false), "main", std::move(funcParams), std::move(expected_body));
 
+  EXPECT_TRUE(compareAST(*parsed, *expected));
 }
