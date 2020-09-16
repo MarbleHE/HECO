@@ -27,8 +27,6 @@ Datatype DOUBLE = Datatype(Type::DOUBLE);
 Datatype STRING = Datatype(Type::STRING);
 
 ::testing::AssertionResult compareAST(const AbstractNode &ast1, const AbstractNode &ast2) {
-  //TODO: Don't just return bool, instead provide google test failures
-  bool same_attrib = true;
   if (typeid(ast1)!=typeid(ast2)) {
     return ::testing::AssertionFailure() << "AST nodes have different types: " << ast1.toString(false) << " vs "
                                          << ast2.toString(false);
