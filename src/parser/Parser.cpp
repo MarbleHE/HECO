@@ -186,8 +186,9 @@ UnaryExpression *Parser::parseUnaryExpression(stork::tokens_iterator &it) {
 }
 
 Variable *Parser::parseVariable(stork::tokens_iterator &it) {
-  //TODO:
-  return nullptr;
+  auto identifier = parseDeclarationName(it);
+  auto variable = std::make_unique<Variable>(identifier);
+  return new Variable(identifier);
 }
 
 Operator Parser::parseOperator(stork::tokens_iterator &it) {
@@ -240,7 +241,7 @@ Datatype Parser::parseDatatype(stork::tokens_iterator &it) {
   return datatype;
 }
 
-std::string parseDeclarationName(stork::tokens_iterator &it) {
+std::string Parser::parseDeclarationName(stork::tokens_iterator &it) {
   if (!it->isIdentifier()) {
     throw stork::unexpectedSyntaxError(std::to_string(it->getValue()), it->getLineNumber(), it->getCharIndex());
   }
@@ -350,8 +351,7 @@ VariableDeclaration *Parser::parseVariableDeclarationStatement(stork::tokens_ite
   auto datatype = parseDatatype(it);
 
   // the variable's name
-  auto identifier = parseDeclarationName(it);
-  auto variable = std::make_unique<Variable>(identifier);
+  auto variable = std::unique_ptr<Variable>(parseVariable(it));
 
   // the variable's assigned value, if any assigned
   if (!it->hasValue(stork::reservedTokens::semicolon)) {
@@ -369,8 +369,7 @@ VariableDeclaration *Parser::parseVariableDeclarationStatement(stork::tokens_ite
 
 VariableAssignment *Parser::parseVariableAssignmentStatement(stork::tokens_iterator &it) {
   // the variable's name
-  auto identifier = parseDeclarationName(it);
-  auto variable = std::make_unique<Variable>(identifier);
+  auto variable = std::unique_ptr<Variable>(parseVariable(it));
 
   // the variable's assigned value
   parseTokenValue(it, stork::reservedTokens::assign);
