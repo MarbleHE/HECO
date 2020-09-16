@@ -23,6 +23,8 @@
 #include "ast_opt/parser/Parser.h"
 #include "ast_opt/parser/PushBackStream.h"
 
+using std::to_string;
+
 std::unique_ptr<AbstractNode> Parser::parse(std::string s) {
 
   // Setup Tokenizer from String
@@ -250,7 +252,7 @@ AbstractExpression *Parser::parseLiteral(stork::tokens_iterator &it) {
   } else if (it->isBool()) {
     l = new LiteralBool(it->getBool());
   } else {
-    throw stork::unexpectedSyntaxError(std::to_string(it->getValue()), it->getLineNumber(), it->getCharIndex());
+    throw stork::unexpectedSyntaxError(to_string(it->getValue()), it->getLineNumber(), it->getCharIndex());
   }
   ++it;
   return l;
@@ -348,7 +350,7 @@ Operator Parser::parseOperator(stork::tokens_iterator &it) {
     }
   }
   // If we get here, it wasn't an operator
-  throw stork::unexpectedSyntaxError(std::to_string(it->getValue()), it->getLineNumber(), it->getCharIndex());
+  throw stork::unexpectedSyntaxError(to_string(it->getValue()), it->getLineNumber(), it->getCharIndex());
 }
 
 /// consume token "value" and throw error if something different
@@ -357,12 +359,12 @@ void Parser::parseTokenValue(stork::tokens_iterator &it, const stork::token_valu
     ++it;
     return;
   }
-  throw stork::expectedSyntaxError(std::to_string(value), it->getLineNumber(), it->getCharIndex());
+  throw stork::expectedSyntaxError(to_string(value), it->getLineNumber(), it->getCharIndex());
 }
 
 Datatype Parser::parseDatatype(stork::tokens_iterator &it) {
   if (!it->isReservedToken()) {
-    throw stork::unexpectedSyntaxError(std::to_string(it->getValue()), it->getLineNumber(), it->getCharIndex());
+    throw stork::unexpectedSyntaxError(to_string(it->getValue()), it->getLineNumber(), it->getCharIndex());
   }
 
   bool isSecret = false;
@@ -388,7 +390,7 @@ Datatype Parser::parseDatatype(stork::tokens_iterator &it) {
       break;
     case stork::reservedTokens::kw_void:datatype = Datatype(Type::VOID);
       break;
-    default:throw stork::unexpectedSyntaxError(std::to_string(it->getValue()), it->getLineNumber(), it->getCharIndex());
+    default:throw stork::unexpectedSyntaxError(to_string(it->getValue()), it->getLineNumber(), it->getCharIndex());
   }
 
   ++it;
@@ -398,7 +400,7 @@ Datatype Parser::parseDatatype(stork::tokens_iterator &it) {
 
 std::string Parser::parseDeclarationName(stork::tokens_iterator &it) {
   if (!it->isIdentifier()) {
-    throw stork::unexpectedSyntaxError(std::to_string(it->getValue()), it->getLineNumber(), it->getCharIndex());
+    throw stork::unexpectedSyntaxError(to_string(it->getValue()), it->getLineNumber(), it->getCharIndex());
   }
   std::string ret = it->getIdentifier().name;
   ++it;
@@ -495,7 +497,7 @@ AbstractExpression *Parser::parseTargetValue(stork::tokens_iterator &it) {
   } else if (it->isInteger()) {
     value = new LiteralInt(it->getInteger());
   } else {
-    throw stork::unexpectedSyntaxError(std::to_string(it->getValue()), it->getLineNumber(), it->getCharIndex());
+    throw stork::unexpectedSyntaxError(to_string(it->getValue()), it->getLineNumber(), it->getCharIndex());
   }
 
   ++it;

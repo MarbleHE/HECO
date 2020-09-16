@@ -1,8 +1,10 @@
+#include <string_view>
+#include <stack>
+#include <string>
+
 #include "ast_opt/parser/Tokens.h"
 #include "ast_opt/parser/Lookup.h"
-#include <string_view>
 #include "ast_opt/parser/Helpers.h"
-#include <stack>
 #include "ast_opt/parser/PushBackStream.h"
 
 namespace stork {
@@ -282,39 +284,40 @@ bool operator==(const eof &, const eof &) {
 bool operator!=(const eof &, const eof &) {
   return false;
 }
-}
 
-namespace std {
-using namespace stork;
 std::string to_string(reservedTokens t) {
   return std::string(token_string_map.find(t)->second);
 }
 
 std::string to_string(const token_value &t) {
+  //reservedTokens, identifier, double, std::string, eof, int, bool, char, float
   return std::visit(overloaded{
       [](reservedTokens rt) {
         return to_string(rt);
       },
-      [](int i) {
-        return to_string(i);
-      },
-      [](bool b) {
-        return to_string(b);
-      },
-      [](char c) {
-        return to_string(c);
+      [](const identifier &id) {
+        return id.name;
       },
       [](double d) {
-        return to_string(d);
+        return std::to_string(d);
       },
       [](const std::string &str) {
         return str;
       },
-      [](const identifier &id) {
-        return id.name;
-      },
       [](eof) {
         return std::string("<EOF>");
+      },
+      [](int i) {
+        return std::to_string(i);
+      },
+      [](bool b) {
+        return std::to_string(b);
+      },
+      [](char c) {
+        return std::to_string(c);
+      },
+      [](float f) {
+        return std::to_string(f);
       }
   }, t);
 }

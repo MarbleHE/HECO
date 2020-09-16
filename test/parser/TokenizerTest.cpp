@@ -12,6 +12,7 @@
 #include "ast_opt/parser/Errors.h"
 #include "gtest/gtest.h"
 
+using std::to_string;
 
 TEST(TokenizerTest, recognizeInputTest) {
   std::string path = __FILE__;
@@ -30,7 +31,7 @@ TEST(TokenizerTest, recognizeInputTest) {
 
   std::vector<std::string> actual;
   while (it) {
-    actual.push_back(std::to_string(it->getValue()));
+    actual.push_back(to_string(it->getValue()));
     ++it;
   }
 
@@ -44,7 +45,7 @@ TEST(TokenizerTest, floatingPointTest) {
   std::string s = "5.4";
   std::cout << s << std::endl;
 
-  std::vector<std::string> expected =      {std::to_string(5.4)};
+  std::vector<std::string> expected =      {to_string(5.4)};
 
   // Setup Tokenizer from String
   stork::get_character get = [&s]() {
@@ -61,7 +62,38 @@ TEST(TokenizerTest, floatingPointTest) {
 
   std::vector<std::string> actual;
   while (it) {
-    actual.push_back(std::to_string(it->getValue()));
+    actual.push_back(to_string(it->getValue()));
+    ++it;
+  }
+
+  ASSERT_EQ(actual.size(), expected.size());
+  for (size_t i = 0; i < expected.size(); ++i) {
+    EXPECT_EQ(actual[i], expected[i]);
+  }
+}
+
+TEST(TokenizerTest, integerTest) {
+  std::string s = "5";
+  std::cout << s << std::endl;
+
+  std::vector<std::string> expected =      {to_string(5)};
+
+  // Setup Tokenizer from String
+  stork::get_character get = [&s]() {
+    if (s.empty()) {
+      return (char) EOF;
+    } else {
+      char c = s.at(0);
+      s.erase(0, 1);
+      return c;
+    }
+  };
+  stork::PushBackStream stream(&get);
+  stork::tokens_iterator it(stream);
+
+  std::vector<std::string> actual;
+  while (it) {
+    actual.push_back(to_string(it->getValue()));
     ++it;
   }
 
@@ -104,7 +136,7 @@ TEST(TokenizerTest, fromStringTest) {
 
   std::vector<std::string> actual;
   while (it) {
-   actual.push_back(std::to_string(it->getValue()));
+   actual.push_back(to_string(it->getValue()));
    ++it;
   }
 
