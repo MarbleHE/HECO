@@ -1,3 +1,4 @@
+#include <memory>
 #include <stack>
 #include <cstdio>
 
@@ -472,15 +473,43 @@ Function *Parser::parseFunctionStatement(stork::tokens_iterator &it) {
 }
 
 For *Parser::parseForStatement(stork::tokens_iterator &it) {
+  // FOR (; expression; variable assignment) BLOCK
   // TODO: Implement me!
   ++it; // make MSVC stop complaining about unused function param
   throw std::runtime_error("NOT IMPLEMENTED");
 }
 
 If *Parser::parseIfStatement(stork::tokens_iterator &it) {
-  // TODO: Implement me!
-  ++it; // make MSVC stop complaining about unused function param
-  throw std::runtime_error("NOT IMPLEMENTED");
+  // parse: if (condition)
+  parseTokenValue(it, stork::reservedTokens::kw_if);
+  parseTokenValue(it, stork::reservedTokens::open_round);
+  auto condition = std::unique_ptr<AbstractExpression>(parseExpression(it));
+  parseTokenValue(it, stork::reservedTokens::close_round);
+
+  // a helper method that checks whether there is a block (if so, parses the whole block) or otherwise only parses
+  // the single statement and wraps it into a block
+  auto parseBlockOrSingleStatement = [](stork::tokens_iterator &it) {
+    std::unique_ptr<Block> ifBlock;
+    if (it->hasValue(stork::reservedTokens::open_curly)) {
+      // multiple statements wrapped into a block -> parse whole block
+      ifBlock = std::unique_ptr<Block>(parseBlockStatement(it));
+    } else {
+      // a single statement, not wrapped into a block in the input file -> parse stmt. and manually wrap into a block
+      ifBlock = std::make_unique<Block>(std::unique_ptr<AbstractStatement>(parseStatement(it)));
+    }
+    return ifBlock;
+  };
+
+  // check if there is an opening bracket (block)
+  std::unique_ptr<Block> ifBlock = parseBlockOrSingleStatement(it);
+
+  // check if there is an "else" branch
+  if (it->hasValue(stork::reservedTokens::kw_else)) {
+    std::unique_ptr<Block> elseBlock = parseBlockOrSingleStatement(it);
+    return new If(std::move(condition), std::move(ifBlock), std::move(elseBlock));
+  } else {
+    return new If(std::move(condition), std::move(ifBlock));
+  }
 }
 
 Return *Parser::parseReturnStatement(stork::tokens_iterator &it) {
