@@ -101,7 +101,9 @@ AbstractExpression *Parser::parseExpression(stork::tokens_iterator &it) {
 
   bool running = true;
   while (running) {
+    //TODO: Handle Postfix
     if (isBinaryOperator(it) || isUnaryOperator(it)) {
+      //TODO: Handle Unary/right-assoc properly
       Operator op1 = parseOperator(it);
       while (!operator_stack.empty()) {
         Operator op2 = operator_stack.top();
@@ -173,7 +175,7 @@ AbstractTarget *Parser::parseTarget(stork::tokens_iterator &it) {
 }
 
 AbstractExpression *Parser::parseLiteral(stork::tokens_iterator &it) {
-  AbstractExpression* l = nullptr;
+  AbstractExpression *l = nullptr;
   if (it->isString()) {
     l = new LiteralString(it->getString());
   } else if (it->isDouble()) {
@@ -216,7 +218,69 @@ Variable *Parser::parseVariable(stork::tokens_iterator &it) {
 
 Operator Parser::parseOperator(stork::tokens_iterator &it) {
   if (it->isReservedToken()) {
-
+    if (it->hasValue(stork::reservedTokens::add)) {
+      ++it;
+      return Operator(ArithmeticOp::ADDITION);
+    } else if (it->hasValue(stork::reservedTokens::sub)) {
+      ++it;
+      return Operator(ArithmeticOp::SUBTRACTION);
+    } else if (it->hasValue(stork::reservedTokens::concat)) {
+      throw stork::unexpectedSyntaxError("concatenation (not supported in AST)", it->getLineNumber(), it->getCharIndex());
+    } else if (it->hasValue(stork::reservedTokens::mul)) {
+      ++it;
+      return Operator(ArithmeticOp::MULTIPLICATION);
+    } else if (it->hasValue(stork::reservedTokens::div)) {
+      ++it;
+      return Operator(ArithmeticOp::DIVISION);
+    } else if (it->hasValue(stork::reservedTokens::idiv)) {
+      throw stork::unexpectedSyntaxError("integer division (not supported in AST)", it->getLineNumber(), it->getCharIndex());
+    } else if (it->hasValue(stork::reservedTokens::mod)) {
+      ++it;
+      return Operator(ArithmeticOp::MODULO);
+    } else if (it->hasValue(stork::reservedTokens::bitwise_and)) {
+      ++it;
+      return Operator(LogicalOp::BITWISE_AND);
+    } else if (it->hasValue(stork::reservedTokens::bitwise_or)) {
+      ++it;
+      return Operator(LogicalOp::BITWISE_OR);
+    } else if (it->hasValue(stork::reservedTokens::bitwise_xor)) {
+      ++it;
+      return Operator(LogicalOp::BITWISE_XOR);
+    } else if (it->hasValue(stork::reservedTokens::shiftl)) {
+      throw stork::unexpectedSyntaxError("shift left (not supported in AST)", it->getLineNumber(), it->getCharIndex());
+    } else if (it->hasValue(stork::reservedTokens::shiftr)) {
+      throw stork::unexpectedSyntaxError("shift right (not supported in AST)", it->getLineNumber(), it->getCharIndex());
+    } else if (it->hasValue(stork::reservedTokens::logical_and)) {
+      ++it;
+      return Operator(LogicalOp::LOGICAL_AND);
+    } else if (it->hasValue(stork::reservedTokens::logical_or)) {
+      ++it;
+      return Operator(LogicalOp::LOGICAL_OR);
+    } else if (it->hasValue(stork::reservedTokens::eq)) {
+      ++it;
+      return Operator(LogicalOp::EQUAL);
+    } else if (it->hasValue(stork::reservedTokens::ne)) {
+      ++it;
+      return Operator(LogicalOp::NOTEQUAL);
+    } else if (it->hasValue(stork::reservedTokens::lt)) {
+      ++it;
+      return Operator(LogicalOp::LESS);
+    } else if (it->hasValue(stork::reservedTokens::gt)) {
+      ++it;
+      return Operator(LogicalOp::GREATER);
+    } else if (it->hasValue(stork::reservedTokens::le)) {
+      ++it;
+      return Operator(LogicalOp::LESS_EQUAL);
+    } else if (it->hasValue(stork::reservedTokens::ge)) {
+      ++it;
+      return Operator(LogicalOp::GREATER_EQUAL);
+    } else if (it->hasValue(stork::reservedTokens::logical_not)) {
+      ++it;
+      return Operator(UnaryOp::LOGICAL_NOT);
+    } else if (it->hasValue(stork::reservedTokens::bitwise_not)) {
+      ++it;
+      return Operator(UnaryOp::BITWISE_NOT);
+    }
   }
   // If we get here, it wasn't an operator
   throw stork::unexpectedSyntaxError(std::to_string(it->getValue()), it->getLineNumber(), it->getCharIndex());
@@ -348,8 +412,8 @@ Block *Parser::parseBlockStatement(stork::tokens_iterator &it) {
   return new Block(std::move(blockStatements));
 }
 
-AbstractExpression* Parser::parseTargetValue(stork::tokens_iterator &it) {
-  AbstractExpression* value;
+AbstractExpression *Parser::parseTargetValue(stork::tokens_iterator &it) {
+  AbstractExpression *value;
 
   if (it->isBool()) {
     value = new LiteralBool(it->getBool());

@@ -50,13 +50,13 @@ int comparePrecedence(const Operator &op1, const Operator &op2) {
           {ArithmeticOp::ADDITION, 6},
           {ArithmeticOp::SUBTRACTION, 6},
 
-          {LogicalOp::SMALLER, 9},
-          {LogicalOp::SMALLER_EQUAL, 9},
+          {LogicalOp::LESS, 9},
+          {LogicalOp::LESS_EQUAL, 9},
           {LogicalOp::GREATER_EQUAL, 9},
           {LogicalOp::GREATER, 9},
 
           {LogicalOp::EQUAL, 10},
-          {LogicalOp::UNEQUAL, 10},
+          {LogicalOp::NOTEQUAL, 10},
 
           {LogicalOp::BITWISE_AND, 11},
 

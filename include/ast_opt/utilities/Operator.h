@@ -18,7 +18,7 @@ enum ArithmeticOp : unsigned char {
 // Logical & Relational Operators
 enum LogicalOp : unsigned char {
   LOGICAL_AND = 0, LOGICAL_OR,
-  SMALLER, SMALLER_EQUAL, GREATER, GREATER_EQUAL, EQUAL, UNEQUAL,
+  LESS, LESS_EQUAL, GREATER, GREATER_EQUAL, EQUAL, NOTEQUAL,
   BITWISE_AND, BITWISE_XOR, BITWISE_OR
 };
 
