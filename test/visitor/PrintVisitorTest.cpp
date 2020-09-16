@@ -13,7 +13,7 @@ TEST(PrintVisitor, printTree) {
   PrintVisitor v(ss);
   v.visit(assignment);
 
-  EXPECT_EQ(ss.str(),"VariableAssignment\n"
+  EXPECT_EQ(ss.str(),"Assignment\n"
                               "  Variable (foo)\n"
                               "  LiteralBool (true)\n");
 }
