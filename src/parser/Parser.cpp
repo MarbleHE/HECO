@@ -533,6 +533,7 @@ If *Parser::parseIfStatement(stork::tokens_iterator &it) {
 
   // check if there is an "else" branch
   if (it->hasValue(stork::reservedTokens::kw_else)) {
+    parseTokenValue(it, stork::reservedTokens::kw_else);
     std::unique_ptr<Block> elseBlock = std::unique_ptr<Block>(parseBlockOrSingleStatement(it));
     return new If(std::move(condition), std::move(ifBlock), std::move(elseBlock));
   } else {
