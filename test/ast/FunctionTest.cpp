@@ -48,11 +48,19 @@ TEST(FunctionTest, countChildrenReportsCorrectNumber) {
     ++actual_count;
   }
 
+
+
   EXPECT_EQ(reported_count, actual_count);
 }
 
 TEST(FunctionTest, node_iterate_children) {
   // TODO: This test checks that we can iterate correctly through the children
+
+  Function f(Datatype(Type::BOOL), "main",{}, std::make_unique<Block>());
+  for(auto& c:f) {
+    // Should have only one Block in here
+    EXPECT_EQ(c.toString(true),Block().toString(true));
+  }
   // Even if some of the elements are null (in which case they should not appear)
 
 

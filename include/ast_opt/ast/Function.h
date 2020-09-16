@@ -185,11 +185,8 @@ class FunctionIteratorImpl : public BaseIteratorImpl<T> {
     //simply forward to vector iterator and follow the unique_ptr
     if (it!=end) {
       return **it;
-    } else if (positions_beyond_parameter_vector==1) {
-      return node.getBody(); // if there is no body, this call is already UB so throwing an exception is fine
     } else {
-      assert(0); // Undefined Behaviour, might as well crash
-      return **it; // to avoid "not all paths return a value"
+      return node.getBody(); // if there is no body, this call is already UB so throwing an exception is fine
     }
   }
 

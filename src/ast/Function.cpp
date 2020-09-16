@@ -124,7 +124,7 @@ AbstractNode::const_iterator Function::end() const {
   return AbstractNode::const_iterator(std::make_unique<FunctionIteratorImpl<const AbstractNode>>(*this,
                                                                                                  parameters.end(),
                                                                                                  parameters.end(),
-                                                                                                 1 + hasBody()));
+                                                                                                  1 + hasBody()));
 }
 
 size_t Function::countChildren() const {
