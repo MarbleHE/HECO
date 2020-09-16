@@ -19,6 +19,8 @@ TEST(TokenizerTest, recognizeInputTest) {
 
   stork::File f(path.c_str());
 
+  std::vector<std::string> expected =      { "public", "secret", "int", "main", "(", ")", "{", "return", ";", "}"};
+
   stork::get_character get = [&]() {
     return f();
   };
@@ -26,41 +28,88 @@ TEST(TokenizerTest, recognizeInputTest) {
 
   stork::tokens_iterator it(stream);
 
-//  int iteration_index = 0;
-//  while (it) {
-//
-//    std::cout << iteration_index << ": " << std::to_string(it->getValue()) << std::endl;
-//    ++iteration_index;
-//    ++it;
-//  }
+  std::vector<std::string> actual;
+  while (it) {
+    actual.push_back(std::to_string(it->getValue()));
+    ++it;
+  }
 
-  // We enforce a lack of global variables and a single statement (e.g. function) for now:
-  Parser().parseStatement(it);
+  ASSERT_EQ(actual.size(), expected.size());
+  for (size_t i = 0; i < expected.size(); ++i) {
+    EXPECT_EQ(actual[i], expected[i]);
+  }
+}
 
-//  for (const std::pair<std::string, function> &p : external_functions) {
-//    stork::get_character get = [i = 0, &p]() mutable {
-//      if (i < p.first.size()) {
-//        return int(p.first[i++]);
-//      } else {
-//        return -1;
-//      }
-//    };
+TEST(TokenizerTest, floatingPointTest) {
+  std::string s = "5.4";
+  std::cout << s << std::endl;
 
-//    stork::push_back_stream stream(&get);
+  std::vector<std::string> expected =      {std::to_string(5.4)};
 
-//    stork::tokens_iterator function_it(stream);
+  // Setup Tokenizer from String
+  stork::get_character get = [&s]() {
+    if (s.empty()) {
+      return (char) EOF;
+    } else {
+      char c = s.at(0);
+      s.erase(0, 1);
+      return c;
+    }
+  };
+  stork::PushBackStream stream(&get);
+  stork::tokens_iterator it(stream);
+
+  std::vector<std::string> actual;
+  while (it) {
+    actual.push_back(std::to_string(it->getValue()));
+    ++it;
+  }
+
+  ASSERT_EQ(actual.size(), expected.size());
+  for (size_t i = 0; i < expected.size(); ++i) {
+    EXPECT_EQ(actual[i], expected[i]);
+  }
+}
 
 
-//  using namespace stork;
-//
-//  module m;
-//
-//  add_standard_functions(m);
-//
-//  auto s_main = m.create_public_function_caller<void>("main");
-//
-//  if (m.try_load(path.c_str(), &std::cerr)) {
-//    s_main();
-//  }
+TEST(TokenizerTest, fromStringTest) {
+  std::string s =
+      "public int main() {\n"
+      "  int a = 0;\n"
+      "  a = a + 5;\n"
+      "  return a;\n"
+      "}";
 
+  std::vector<std::string> expected =
+      {"public", "int", "main", "(", ")", "{",
+       "int", "a", "=", "0", ";",
+       "a", "=", "a", "+", "5", ";",
+       "return", "a", ";", "}"
+      };
+
+  std::cout << s << std::endl;
+
+  // Setup Tokenizer from String
+  stork::get_character get = [&s]() {
+    if(s.empty()) {
+      return (char) EOF;
+    } else {
+      char c = s.at(0);
+      s.erase(0,1);
+      return c;
+    }
+  };
+  stork::PushBackStream stream(&get);
+  stork::tokens_iterator it(stream);
+
+  std::vector<std::string> actual;
+  while (it) {
+   actual.push_back(std::to_string(it->getValue()));
+   ++it;
+  }
+
+  ASSERT_EQ(actual.size(),expected.size());
+  for(size_t i = 0; i < expected.size(); ++i) {
+    EXPECT_EQ(actual[i],expected[i]);
+  }
 }

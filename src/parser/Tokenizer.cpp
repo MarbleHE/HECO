@@ -57,20 +57,27 @@ token fetch_word(PushBackStream &stream) {
   } else {
     if (std::isdigit(word.front())) {
       char *endptr;
-      // TODO: consider different data types, e.g., float, double, int
-      double num = strtol(word.c_str(), &endptr, 0);
-      if (*endptr!=0) {
-        num = strtod(word.c_str(), &endptr);
-        if (*endptr!=0) {
-          size_t remaining = word.size() - (endptr - word.c_str());
-          throw unexpectedError(
-              std::string(1, char(*endptr)),
-              stream.getLineNumber(),
-              stream.getCharIndex() - remaining
-          );
-        }
+      token t(0, line_number, char_index); //placeholder
+      // TODO: introduce support for 4.5f style notation for floats
+      if (word.find('.') < word.length()) {
+          // It's a double
+        double num =  strtod(word.c_str(), &endptr);
+        t =  token(num, line_number, char_index);
+      } else {
+        // It's an integer type
+        int num = (int) strtol(word.c_str(), &endptr, 0);
+        t =  token(num, line_number, char_index);
       }
-      return token(num, line_number, char_index);
+
+      if (*endptr!=0) {
+        size_t remaining = word.size() - (endptr - word.c_str());
+        throw unexpectedError(
+            std::string(1, char(*endptr)),
+            stream.getLineNumber(),
+            stream.getCharIndex() - remaining
+        );
+      }
+      return t;
     } else {
       return token(identifier{std::move(word)}, line_number, char_index);
     }

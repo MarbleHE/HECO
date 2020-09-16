@@ -295,6 +295,15 @@ std::string to_string(const token_value &t) {
       [](reservedTokens rt) {
         return to_string(rt);
       },
+      [](int i) {
+        return to_string(i);
+      },
+      [](bool b) {
+        return to_string(b);
+      },
+      [](char c) {
+        return to_string(c);
+      },
       [](double d) {
         return to_string(d);
       },
