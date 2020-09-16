@@ -41,7 +41,7 @@ set(TEST_FILES
         parser/TokenizerTest.cpp
         visitor/PrintVisitorTest.cpp
         visitor/VisitorTest.cpp
-        )
+        parser/ParserTestHelpers.h)
 
 add_executable(testing-all
         ${TEST_FILES})
