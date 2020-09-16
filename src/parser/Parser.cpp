@@ -237,9 +237,9 @@ Datatype Parser::parseDatatype(stork::tokens_iterator &it) {
   }
 
   bool isSecret = false;
-  if (it->hasValue(stork::reservedTokens::secret)) {
+  if (it->hasValue(stork::reservedTokens::kw_secret)) {
     isSecret = true;
-    parseTokenValue(it, stork::reservedTokens::secret);
+    parseTokenValue(it, stork::reservedTokens::kw_secret);
   }
 
   // just a placeholder as value-less constructor does not exist
