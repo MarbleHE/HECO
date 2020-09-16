@@ -201,7 +201,7 @@ TEST(ParserTest, simpleFunction) {
   auto expected_params = Function(INT, "main", std::move(parameter_vector), std::make_unique<Block>());
 
   empty_params = std::vector<std::unique_ptr<FunctionParameter>>();
-  auto body_node = std::make_unique<Block>(std::make_unique<Return>(std::make_unique<LiteralBool>(0)));
+  auto body_node = std::make_unique<Block>(std::make_unique<Return>(std::make_unique<LiteralInt>(0)));
   auto expected_body = Function(INT, "main", std::move(empty_params), std::move(body_node));
 
   // Since parse wraps everything in a Block, get the first element
