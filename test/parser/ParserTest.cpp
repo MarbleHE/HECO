@@ -598,3 +598,41 @@ TEST(ParserTest, MatrixAssignment_invalid) { /* NOLINT */
   auto code = std::string(programCode);
   ASSERT_THROW(Parser::parse(code), stork::Error::exception);
 }
+
+TEST(ParserTest, MatrixDeclaration_brackets) { /* NOLINT */
+  const char *programCode = R""""(
+    public void main() {
+      int scalar[] = 2;
+    }
+    )"""";
+
+  auto code = std::string(programCode);
+  auto parsed = Parser::parse(code);
+
+  // int scalar[] = 2;
+  auto declarationScalar = std::make_unique<VariableDeclaration>(Datatype(Type::INT, false),
+                                                                 std::move(std::make_unique<Variable>("scalar")),
+                                                                 std::move(std::make_unique<LiteralInt>(2)));
+
+  // public void main() { ... }
+  std::vector<std::unique_ptr<AbstractStatement>> statements;
+  statements.push_back(std::move(declarationScalar));
+  auto statementBlock = std::make_unique<Block>(std::move(statements));
+  auto expected = std::make_unique<Function>(Datatype(Type::VOID),
+                                             "main",
+                                             std::move(std::vector<std::unique_ptr<FunctionParameter>>()),
+                                             std::move(statementBlock));
+
+  EXPECT_TRUE(compareAST(*parsed->begin(), *expected));
+}
+
+TEST(ParserTest, MatrixDeclaration_fixArraySizeNotSupported) { /* NOLINT */
+  const char *programCode = R""""(
+    public void main() {
+      int scalar[0] = 2;
+    }
+    )"""";
+
+  auto code = std::string(programCode);
+  EXPECT_THROW(Parser::parse(code), stork::Error::exception);
+}
