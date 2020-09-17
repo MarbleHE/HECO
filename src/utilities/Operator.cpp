@@ -6,12 +6,12 @@ std::string toString(ArithmeticOp bop) {
 }
 
 std::string toString(LogicalOp logop) {
-  static const std::string logicalOpStrings[] = {"AND", "OR", "XOR", "<", "<=", ">", ">=", "==", "!="};
+  static const std::string logicalOpStrings[] = {"AND", "OR", "<", "<=", ">", ">=", "==", "!=", "&", "^", "|"};
   return logicalOpStrings[logop];
 }
 
 std::string toString(UnaryOp uop) {
-  static const std::string unaryOpStrings[] = {"!"};
+  static const std::string unaryOpStrings[] = {"!", "~"};
   return unaryOpStrings[uop];
 }
 
