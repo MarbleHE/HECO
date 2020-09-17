@@ -298,7 +298,9 @@ AbstractExpression *Parser::parseLiteral(stork::tokens_iterator &it, bool isNega
 
   // A negative string|char|integer is not allowed
   if ((it->isString() || it->isChar() || it->isBool()) && isNegative) {
-    throw stork::unexpectedSyntaxError("", it->getLineNumber(), it->getCharIndex());
+    throw stork::unexpectedSyntaxError("A minus sign ('-') in front of a string, char, or bool is not allowed. "
+                                       "Current token: " + to_string(it->getValue()) + ".",
+                                       it->getLineNumber(), it->getCharIndex());
   }
 
   ++it;
