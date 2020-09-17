@@ -1,0 +1,9 @@
+int simpleIfConditionalAssignment(secret int cond) {
+  int a = 1;
+  if (cond > 11) {
+    a = 83;
+  } else {
+    a = 11;
+  }
+  return a;
+}

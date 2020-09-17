@@ -1,0 +1,6 @@
+int[]
+permuteMatrixElements() {
+  int M[] = {14, 27, 32};
+  M[0] = 11;
+  return M;
+}

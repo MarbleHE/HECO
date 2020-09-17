@@ -1,0 +1,5 @@
+int computePrivate(int inputA, int inputB, int inputC) {
+  // NOTE: Operator precedence must be handled properly!
+  int prod = inputA + inputB*inputC;
+  return prod/3;
+}
