@@ -23,27 +23,14 @@
 #include "ast_opt/parser/Errors.h"
 #include "ast_opt/parser/Parser.h"
 #include "ast_opt/parser/PushBackStream.h"
+#include "../../test/parser/ParserTestHelpers.h"
 
 using std::to_string;
 
-// TODO: Add support for vectors/matrices
-//  - Requires adapting variable declarations (parseVariableDeclarationStatement)
-//  - Requires adapting variable assignments (parseAssignmentStatement)
-//  - Requires instantiating (matrix) literals properly
-
 std::unique_ptr<AbstractNode> Parser::parse(std::string s) {
-
   // Setup Tokenizer from String
-  stork::get_character get = [&s]() {
-    if (s.empty()) {
-      return (char) EOF;
-    } else {
-      char c = s.at(0);
-      s.erase(0, 1);
-      return c;
-    }
-  };
-  stork::PushBackStream stream(&get);
+  auto getCharacter = stork::getCharacterFunc(s);
+  stork::PushBackStream stream(&getCharacter);
   stork::tokens_iterator it(stream);
 
   auto block = std::make_unique<Block>();
