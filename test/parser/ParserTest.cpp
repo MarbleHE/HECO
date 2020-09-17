@@ -314,3 +314,80 @@ TEST(ParserTest, IfElseStatement) { /* NOLINT */
   EXPECT_TRUE(compareAST(*parsed->begin(), *expected));
 }
 
+TEST(ParserTest, IfElseIfStatements) { /* NOLINT */
+  // The generated AST is supposed to look as follow:
+  // public int main(int a) {
+  //   if (a < 0) {
+  //     return -1;
+  //   } else {
+  //     if (a == 0) {
+  //       return 1000;
+  //     } else {
+  //       if (a > 4256) {
+  //         return 3434;
+  //       }
+  //     }
+  //   }
+  //   return 0;
+  // }
+  const char *programCode = R""""(
+    public int main(int a) {
+      if (a < 0) {
+        return -1;
+      } else if (a == 0) {
+        return 1000;
+      } else if (a > 4256) {
+        return 3434;
+      }
+      return 0;
+    }
+    )"""";
+
+  auto code = std::string(programCode);
+  auto parsed = Parser::parse(code);
+
+  std::cout << parsed->toString(true) << std::endl;
+
+  auto ifStatement4256 = std::make_unique<If>
+      (std::move(std::make_unique<BinaryExpression>(
+          std::move(std::make_unique<Variable>("a")),
+          Operator(GREATER),
+          std::move(std::make_unique<LiteralInt>(4256)))),
+       std::move(std::make_unique<Block>(
+           std::move(std::make_unique<Return>
+                         (std::move(std::make_unique<LiteralInt>(3434)))))));
+
+  auto ifStatementEqual0 = std::make_unique<If>
+      (std::move(std::make_unique<BinaryExpression>(
+          std::move(std::make_unique<Variable>("a")),
+          Operator(EQUAL),
+          std::move(std::make_unique<LiteralInt>(0)))),
+       std::move(std::make_unique<Block>(
+           std::move(std::make_unique<Return>
+                         (std::move(std::make_unique<LiteralInt>(1000)))))),
+       std::move(std::make_unique<Block>(std::move(ifStatement4256))));
+
+  auto ifStatementLess0 = std::make_unique<If>
+      (std::move(std::make_unique<BinaryExpression>(
+          std::move(std::make_unique<Variable>("a")),
+          Operator(LESS),
+          std::move(std::make_unique<LiteralInt>(0)))),
+       std::move(std::make_unique<Block>(
+           std::move(std::make_unique<Return>
+                         (std::move(std::make_unique<LiteralInt>(-1)))))),
+       std::move(std::make_unique<Block>(std::move(ifStatementEqual0))));
+
+  auto returnStatement = std::make_unique<Return>(std::move(std::make_unique<LiteralInt>(0)));
+
+  std::vector<std::unique_ptr<AbstractStatement>> blockStmts;
+  blockStmts.emplace_back(std::move(ifStatementLess0));
+  blockStmts.emplace_back(std::move(returnStatement));
+  auto expected_body = std::make_unique<Block>(std::move(blockStmts));
+
+  std::vector<std::unique_ptr<FunctionParameter>> fParams;
+  fParams.emplace_back(std::move(std::make_unique<FunctionParameter>(Datatype(Type::INT, false), "a")));
+  auto funcParams = std::vector<std::unique_ptr<FunctionParameter>>(std::move(fParams));
+  auto expected = new Function(Datatype(Type::INT, false), "main", std::move(funcParams), std::move(expected_body));
+
+  EXPECT_TRUE(compareAST(*parsed->begin(), *expected));
+}
