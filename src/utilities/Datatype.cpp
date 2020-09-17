@@ -8,7 +8,8 @@ std::string enumToString(const Type type) {
       {Type::INT, "int"},
       {Type::FLOAT, "float"},
       {Type::DOUBLE, "double"},
-      {Type::STRING, "string"}
+      {Type::STRING, "string"},
+      {Type::VOID, "void"}
   };
   return typeToString.find(type)->second;
 }
