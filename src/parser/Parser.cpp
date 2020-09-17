@@ -619,6 +619,19 @@ VariableDeclaration *Parser::parseVariableDeclarationStatement(stork::tokens_ite
   // the variable's name
   auto variable = std::unique_ptr<Variable>(parseVariable(it));
 
+  // check if this is an array declaration
+  if (it->hasValue(stork::reservedTokens::open_square)) {
+    parseTokenValue(it, stork::reservedTokens::open_square);
+    if (it->hasValue(stork::reservedTokens::close_square)) {
+      parseTokenValue(it, stork::reservedTokens::close_square);
+    } else {
+      throw stork::unexpectedSyntaxError("Fixed-size array declarations not supported (e.g., int i[3]). "
+                                         "Declare array without size, e.g., int i[];.",
+                                         it->getLineNumber(),
+                                         it->getCharIndex());
+    }
+  }
+
   // the variable's assigned value, if any assigned
   if (!it->hasValue(stork::reservedTokens::semicolon)) {
     parseTokenValue(it, stork::reservedTokens::assign);
