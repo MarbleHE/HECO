@@ -29,9 +29,7 @@ class Variable;
 
 /// The parser takes the
 class Parser {
- public:
-  static std::unique_ptr<AbstractNode> parse(std::string);
-
+ private:
   static AbstractExpression *parseExpression(stork::tokens_iterator &it);
 
   static AbstractStatement *parseStatement(stork::tokens_iterator &it, bool gobbleTrailingSemicolon = true);
@@ -40,7 +38,7 @@ class Parser {
 
   static Block *parseBlockStatement(stork::tokens_iterator &it);
 
-  static ExpressionList* parseExpressionList(stork::tokens_iterator &it);
+  static ExpressionList *parseExpressionList(stork::tokens_iterator &it);
 
   static For *parseForStatement(stork::tokens_iterator &it);
 
@@ -72,5 +70,8 @@ class Parser {
   static Block *parseBlockOrSingleStatement(stork::tokens_iterator &it);
 
   static AbstractExpression *parseLiteral(stork::tokens_iterator &it, bool isNegative);
+
+ public:
+  static std::unique_ptr<AbstractNode> parse(std::string);
 };
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_PARSER_PARSER_H_
