@@ -15,7 +15,7 @@
 
 using std::to_string;
 
-TEST(TokenizerTest, recognizeInputTest) {
+TEST(TokenizerTest, recognizeInputTest) { /* NOLINT */
   const char *demoProgram =
       "public secret int main() { "
       "  return; "
@@ -42,7 +42,7 @@ TEST(TokenizerTest, recognizeInputTest) {
   }
 }
 
-TEST(TokenizerTest, floatingPointTest) {
+TEST(TokenizerTest, floatingPointTest) { /* NOLINT */
   std::string s = "5.4";
   std::cout << s << std::endl;
 
@@ -65,7 +65,7 @@ TEST(TokenizerTest, floatingPointTest) {
   }
 }
 
-TEST(TokenizerTest, integerTest) {
+TEST(TokenizerTest, integerTest) { /* NOLINT */
   std::string s = "5";
   std::cout << s << std::endl;
 
@@ -83,7 +83,7 @@ TEST(TokenizerTest, integerTest) {
   }
 }
 
-TEST(TokenizerTest, fromStringTest) {
+TEST(TokenizerTest, fromStringTest) { /* NOLINT */
   std::string s =
       "public int main() {\n"
       "  int a = 0;\n"
@@ -102,6 +102,41 @@ TEST(TokenizerTest, fromStringTest) {
 
   // Setup Tokenizer from String
   auto getFunc = stork::getCharacterFunc(s);
+  stork::PushBackStream stream(&getFunc);
+  stork::tokens_iterator it(stream);
+
+  std::vector<std::string> actual;
+  while (it) {
+    actual.push_back(to_string(it->getValue()));
+    ++it;
+  }
+
+  ASSERT_EQ(actual.size(), expected.size());
+  for (size_t i = 0; i < expected.size(); ++i) {
+    EXPECT_EQ(actual[i], expected[i]);
+  }
+}
+
+TEST(TokenizerTest, ifTest) { /* NOLINT */
+  const char *programCode = R""""(
+    public int main(int a) {
+      if (a > 5) {
+        return 1;
+      }
+      return 0;
+    }
+    )"""";
+  std::string inputCode = std::string(programCode);
+
+  std::vector<std::string> expected =
+      {"public", "int", "main", "(", "int", "a", ")", "{",
+       "if", "(", "a", ">", "5",
+       ")", "{", "return", "1", ";", "}",
+       "return", "0", ";", "}"
+      };
+
+  // Setup Tokenizer from String
+  auto getFunc = stork::getCharacterFunc(inputCode);
   stork::PushBackStream stream(&getFunc);
   stork::tokens_iterator it(stream);
 
