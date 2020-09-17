@@ -1,4 +1,5 @@
 #include <typeinfo>
+#include <include/ast_opt/parser/Errors.h>
 
 #include "ast_opt/ast/Assignment.h"
 #include "ast_opt/ast/BinaryExpression.h"
@@ -446,4 +447,154 @@ TEST(ParserTest, ForStatement) { /* NOLINT */
                                std::move(std::make_unique<Block>(std::move(functionBlockStatements))));
 
   EXPECT_TRUE(compareAST(*parsed->begin(), *expected));
+}
+
+TEST(ParserTest, IgnoreComments) { /* NOLINT */
+  const char *programCode = R""""(
+      // declare and initialize a variable
+      int i = 0;  /* variable's value: 0 */
+    )"""";
+
+  auto code = std::string(programCode);
+  auto parsed = Parser::parse(code);
+
+  auto expected = std::make_unique<VariableDeclaration>(Datatype(Type::INT, false),
+                                                        std::make_unique<Variable>("i"),
+                                                        std::make_unique<LiteralInt>(0));
+
+  EXPECT_TRUE(compareAST(*parsed->begin(), *expected));
+}
+
+TEST(ParserTest, MatrixDeclaration_simple) { /* NOLINT */
+  const char *programCode = R""""(
+    public void main() {
+      int scalar = 2;
+      int vec = {3, 4, 9, 2, 1};
+    }
+    )"""";
+
+  auto code = std::string(programCode);
+  auto parsed = Parser::parse(code);
+
+  // int scalar = {2};
+  auto declarationScalar = std::make_unique<VariableDeclaration>(Datatype(Type::INT, false),
+                                                                 std::move(std::make_unique<Variable>("scalar")),
+                                                                 std::move(std::make_unique<LiteralInt>(2)));
+
+  // int vec = {3, 4, 9, 2, 1};
+  std::vector<std::unique_ptr<AbstractExpression>> exprs;
+  exprs.emplace_back(std::make_unique<LiteralInt>(3));
+  exprs.emplace_back(std::make_unique<LiteralInt>(4));
+  exprs.emplace_back(std::make_unique<LiteralInt>(9));
+  exprs.emplace_back(std::make_unique<LiteralInt>(2));
+  exprs.emplace_back(std::make_unique<LiteralInt>(1));
+  auto declarationVec = std::make_unique<VariableDeclaration>(Datatype(Type::INT, false),
+                                                              std::make_unique<Variable>("vec"),
+                                                              std::make_unique<ExpressionList>(std::move(exprs)));
+
+  // public void main() { ... }
+  std::vector<std::unique_ptr<AbstractStatement>> statements;
+  statements.push_back(std::move(declarationScalar));
+  statements.push_back(std::move(declarationVec));
+  auto statementBlock = std::make_unique<Block>(std::move(statements));
+  auto expected = std::make_unique<Function>(Datatype(Type::VOID),
+                                             "main",
+                                             std::move(std::vector<std::unique_ptr<FunctionParameter>>()),
+                                             std::move(statementBlock));
+
+  EXPECT_TRUE(compareAST(*parsed->begin(), *expected));
+}
+
+TEST(ParserTest, MatrixDeclaration_multiDimensional) { /* NOLINT */
+  const char *programCode = R""""(
+    public void main() {
+      int vec = { {3, 4}, {9, 2}, {1} };
+    }
+    )"""";
+
+  auto code = std::string(programCode);
+  auto parsed = Parser::parse(code);
+
+  // int vec = { {3, 4}, {9, 2}, {1} };
+  typedef std::vector<std::unique_ptr<AbstractExpression>> listOfExpressions;
+
+  listOfExpressions exprs1;
+  exprs1.emplace_back(std::make_unique<LiteralInt>(3));
+  exprs1.emplace_back(std::make_unique<LiteralInt>(4));
+  auto exprList1 = std::make_unique<ExpressionList>(std::move(exprs1));
+
+  listOfExpressions exprs2;
+  exprs2.emplace_back(std::make_unique<LiteralInt>(9));
+  exprs2.emplace_back(std::make_unique<LiteralInt>(2));
+  auto exprList2 = std::make_unique<ExpressionList>(std::move(exprs2));
+
+  listOfExpressions exprs3;
+  exprs3.emplace_back(std::make_unique<LiteralInt>(1));
+  auto exprList3 = std::make_unique<ExpressionList>(std::move(exprs3));
+
+  listOfExpressions exprs;
+  exprs.emplace_back(std::move(exprList1));
+  exprs.emplace_back(std::move(exprList2));
+  exprs.emplace_back(std::move(exprList3));
+  auto exprsList = std::make_unique<ExpressionList>(std::move(exprs));
+
+  auto declarationVec = std::make_unique<VariableDeclaration>(Datatype(Type::INT, false),
+                                                              std::make_unique<Variable>("vec"),
+                                                              std::move(exprsList));
+
+  // public void main() { ... }
+  auto expected = std::make_unique<Function>(Datatype(Type::VOID),
+                                             "main",
+                                             std::move(std::vector<std::unique_ptr<FunctionParameter>>()),
+                                             std::move(std::make_unique<Block>(std::move(declarationVec))));
+
+  EXPECT_TRUE(compareAST(*parsed->begin(), *expected));
+}
+
+TEST(ParserTest, MatrixAssignment) { /* NOLINT */
+  const char *programCode = R""""(
+    public void main() {
+      int vec = {3, 4, 9, 2, 1};
+      vec[3] = 0;
+    }
+    )"""";
+
+  auto code = std::string(programCode);
+  auto parsed = Parser::parse(code);
+
+  // int vec = {3, 4, 9, 2, 1};
+  std::vector<std::unique_ptr<AbstractExpression>> exprs;
+  exprs.emplace_back(std::make_unique<LiteralInt>(3));
+  exprs.emplace_back(std::make_unique<LiteralInt>(4));
+  exprs.emplace_back(std::make_unique<LiteralInt>(9));
+  exprs.emplace_back(std::make_unique<LiteralInt>(2));
+  exprs.emplace_back(std::make_unique<LiteralInt>(1));
+  auto declarationVec = std::make_unique<VariableDeclaration>(Datatype(Type::INT, false),
+                                                              std::make_unique<Variable>("vec"),
+                                                              std::make_unique<ExpressionList>(std::move(exprs)));
+
+  auto assignVec = std::make_unique<Assignment>(std::make_unique<IndexAccess>(std::make_unique<Variable>("vec"),
+                                                                              std::make_unique<LiteralInt>(3)),
+                                                std::make_unique<LiteralInt>(0));
+
+  // public void main() { ... }
+  std::vector<std::unique_ptr<AbstractStatement>> statements;
+  statements.push_back(std::move(declarationVec));
+  statements.push_back(std::move(assignVec));
+  auto statementBlock = std::make_unique<Block>(std::move(statements));
+  auto expected = std::make_unique<Function>(Datatype(Type::VOID),
+                                             "main",
+                                             std::move(std::vector<std::unique_ptr<FunctionParameter>>()),
+                                             std::move(statementBlock));
+
+  EXPECT_TRUE(compareAST(*parsed->begin(), *expected));
+}
+
+TEST(ParserTest, MatrixAssignment_invalid) { /* NOLINT */
+  const char *programCode = R""""(
+      int sum[5] = {3, 4, 9, 2, 1};
+      return sum;
+    )"""";
+  auto code = std::string(programCode);
+  ASSERT_THROW(Parser::parse(code), stork::Error::exception);
 }
