@@ -346,8 +346,6 @@ TEST(ParserTest, IfElseIfStatements) { /* NOLINT */
   auto code = std::string(programCode);
   auto parsed = Parser::parse(code);
 
-  std::cout << parsed->toString(true) << std::endl;
-
   auto ifStatement4256 = std::make_unique<If>
       (std::move(std::make_unique<BinaryExpression>(
           std::move(std::make_unique<Variable>("a")),
@@ -388,6 +386,64 @@ TEST(ParserTest, IfElseIfStatements) { /* NOLINT */
   fParams.emplace_back(std::move(std::make_unique<FunctionParameter>(Datatype(Type::INT, false), "a")));
   auto funcParams = std::vector<std::unique_ptr<FunctionParameter>>(std::move(fParams));
   auto expected = new Function(Datatype(Type::INT, false), "main", std::move(funcParams), std::move(expected_body));
+
+  EXPECT_TRUE(compareAST(*parsed->begin(), *expected));
+}
+
+TEST(ParserTest, ForStatement) { /* NOLINT */
+  const char *programCode = R""""(
+    public secret int computeSum(int bound) {
+      int sum = 0;
+      for (int i = 0; i < bound; i = i + 1) {
+        sum = sum + i;
+      }
+      return sum;
+    }
+    )"""";
+
+  auto code = std::string(programCode);
+  auto parsed = Parser::parse(code);
+
+  // int sum = 0;
+  auto declarationSum =
+      std::make_unique<VariableDeclaration>(Datatype(Type::INT, false),
+                                            std::make_unique<Variable>("sum"),
+                                            std::make_unique<LiteralInt>(0));
+
+  // for (int i = 0; i < bound; i = i + 1) { sum = sum + i; }
+  auto forStatement = std::make_unique<For>(
+      // int i = 0
+      std::make_unique<Block>(std::make_unique<VariableDeclaration>(
+          Datatype(Type::INT, false), std::make_unique<Variable>("i"), std::make_unique<LiteralInt>(0))),
+      // i < bound
+      std::make_unique<BinaryExpression>(
+          std::make_unique<Variable>("i"), Operator(LESS), std::make_unique<Variable>("bound")),
+      // i = i + 1
+      std::make_unique<Block>(std::make_unique<Assignment>(
+          std::make_unique<Variable>("i"), std::make_unique<BinaryExpression>(
+              std::make_unique<Variable>("i"), Operator(ADDITION), std::make_unique<LiteralInt>(1)))),
+      // { sum = sum + i; }
+      std::make_unique<Block>(std::make_unique<Assignment>(
+          std::make_unique<Variable>("sum"),
+          std::make_unique<BinaryExpression>(
+              std::make_unique<Variable>("sum"), Operator(ADDITION), std::make_unique<Variable>("i")))));
+
+  // return sum
+  auto returnStmt = std::make_unique<Return>(std::make_unique<Variable>("sum"));
+
+  std::vector<std::unique_ptr<AbstractStatement>> functionBlockStatements;
+  functionBlockStatements.emplace_back(std::move(declarationSum));
+  functionBlockStatements.emplace_back(std::move(forStatement));
+  functionBlockStatements.emplace_back(std::move(returnStmt));
+
+  std::vector<std::unique_ptr<FunctionParameter>> functionParameters;
+  functionParameters.emplace_back(
+      std::make_unique<FunctionParameter>(Datatype(Type::INT, false), "bound"));
+
+  auto expected = new Function(Datatype(Type::INT, true),
+                               "computeSum",
+                               std::move(functionParameters),
+                               std::move(std::make_unique<Block>(std::move(functionBlockStatements))));
 
   EXPECT_TRUE(compareAST(*parsed->begin(), *expected));
 }
