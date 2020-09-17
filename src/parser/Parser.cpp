@@ -26,6 +26,11 @@
 
 using std::to_string;
 
+// TODO: Add support for vectors/matrices
+//  - Requires adapting variable declarations (parseVariableDeclarationStatement)
+//  - Requires adapting variable assignments (parseAssignmentStatement)
+//  - Requires instantiating (matrix) literals properly
+
 std::unique_ptr<AbstractNode> Parser::parse(std::string s) {
 
   // Setup Tokenizer from String
