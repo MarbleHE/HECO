@@ -34,7 +34,7 @@ class Parser {
 
   static AbstractExpression *parseExpression(stork::tokens_iterator &it);
 
-  static AbstractStatement *parseStatement(stork::tokens_iterator &it);
+  static AbstractStatement *parseStatement(stork::tokens_iterator &it, bool gobbleTrailingSemicolon = true);
 
   static AbstractTarget *parseTarget(stork::tokens_iterator &it);
 

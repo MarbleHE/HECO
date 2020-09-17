@@ -50,14 +50,22 @@ std::unique_ptr<AbstractNode> Parser::parse(std::string s) {
   return std::move(block);
 }
 
-AbstractStatement *Parser::parseStatement(stork::tokens_iterator &it) {
+AbstractStatement *Parser::parseStatement(stork::tokens_iterator &it, bool gobbleTrailingSemicolon) {
   if (it->isReservedToken()) {
     switch (it->get_reserved_token()) {
-      case stork::reservedTokens::kw_for:return parseForStatement(it);
-      case stork::reservedTokens::kw_if:return parseIfStatement(it);
-      case stork::reservedTokens::kw_return:return parseReturnStatement(it);
-      case stork::reservedTokens::open_curly:return parseBlockStatement(it);
-      case stork::reservedTokens::kw_public: return parseFunctionStatement(it);
+      case stork::reservedTokens::kw_for:
+        return parseForStatement(it);
+      case stork::reservedTokens::kw_if:
+        return parseIfStatement(it);
+      case stork::reservedTokens::kw_return: {
+        AbstractStatement *returnStmt = parseReturnStatement(it);
+        if (gobbleTrailingSemicolon) parseTokenValue(it, stork::reservedTokens::semicolon);
+        return returnStmt;
+      }
+      case stork::reservedTokens::open_curly:
+        return parseBlockStatement(it);
+      case stork::reservedTokens::kw_public:
+        return parseFunctionStatement(it);
 
         // it starts with a data type (e.g., int, float)
       case stork::reservedTokens::kw_bool:
@@ -66,15 +74,23 @@ AbstractStatement *Parser::parseStatement(stork::tokens_iterator &it) {
       case stork::reservedTokens::kw_float:
       case stork::reservedTokens::kw_double:
       case stork::reservedTokens::kw_string:
-      case stork::reservedTokens::kw_void:return parseVariableDeclarationStatement(it);
-      default:
+      case stork::reservedTokens::kw_void: {
+        auto variableDeclarationStmt = parseVariableDeclarationStatement(it);
+        if (gobbleTrailingSemicolon) parseTokenValue(it, stork::reservedTokens::semicolon);
+        return variableDeclarationStmt;
+      }
+      default: {
         // has to be an assignment
-        return parseAssignmentStatement(it);
-
+        auto assignmentStatement = parseAssignmentStatement(it);
+        if (gobbleTrailingSemicolon) parseTokenValue(it, stork::reservedTokens::semicolon);
+        return assignmentStatement;
+      }
     }
   } else {
     // it start with an identifier -> must be an assignment
-    return parseAssignmentStatement(it);
+    auto assignmentStatement = parseAssignmentStatement(it);;
+    if (gobbleTrailingSemicolon) parseTokenValue(it, stork::reservedTokens::semicolon);
+    return assignmentStatement;
   }
 }
 
@@ -506,21 +522,34 @@ For *Parser::parseForStatement(stork::tokens_iterator &it) {
 
   // initialization statement(s)
   std::vector<std::unique_ptr<AbstractStatement>> initializerStatements;
-  while (!it->hasValue(stork::reservedTokens::semicolon)) {
-    if (initializerStatements.size() > 1) parseTokenValue(it, stork::reservedTokens::comma);
-    initializerStatements.emplace_back(parseStatement(it));
+  // check if we have at least one statement in the initializer field
+  if (!it->hasValue(stork::reservedTokens::semicolon)) {
+    // parse all initialization statements, e.g., for (int i=0, int j=1, ...; - ; - )
+    do {
+      // if we parsed a statement before, we now need to gobble the comma before parsing the next statement
+      if (initializerStatements.size() > 1) parseTokenValue(it, stork::reservedTokens::comma);
+      initializerStatements.emplace_back(parseStatement(it));
+    } while (it->hasValue(stork::reservedTokens::comma)); // only proceed parsing if there is a comma operator
+  } else {
+    // if there is no statement in the initializer field, we need to manually gobble the semicolon
+    parseTokenValue(it, stork::reservedTokens::semicolon);
   }
-  parseTokenValue(it, stork::reservedTokens::semicolon);
   auto initializerStatementBlock = std::make_unique<Block>(std::move(initializerStatements));
 
   // expression (condition)
   auto condition = std::unique_ptr<AbstractExpression>(parseExpression(it));
+  parseTokenValue(it, stork::reservedTokens::semicolon);
 
   // update statement(s)
   std::vector<std::unique_ptr<AbstractStatement>> updateStatements;
-  while (!it->hasValue(stork::reservedTokens::semicolon)) {
-    if (updateStatements.size() > 1) parseTokenValue(it, stork::reservedTokens::comma);
-    updateStatements.emplace_back(parseStatement(it));
+  // check if we have at least one statement in the update field
+  if (!it->hasValue(stork::reservedTokens::close_round)) {
+    // parse all update statements, e.g., for (- ; - ; i++, j++, ...)
+    do {
+      // if we parsed a statement before, we now need to gobble the comma before parsing the next statement
+      if (updateStatements.size() > 1) parseTokenValue(it, stork::reservedTokens::comma);
+      updateStatements.emplace_back(parseStatement(it, false));
+    } while (it->hasValue(stork::reservedTokens::comma)); // only proceed parsing if there is a comma operator
   }
   parseTokenValue(it, stork::reservedTokens::close_round);
   auto updateStatementBlock = std::make_unique<Block>(std::move(updateStatements));
@@ -576,7 +605,6 @@ Return *Parser::parseReturnStatement(stork::tokens_iterator &it) {
     return new Return();
   } else {
     AbstractExpression *p = parseExpression(it);
-    parseTokenValue(it, stork::reservedTokens::semicolon);
     return new Return(std::unique_ptr<AbstractExpression>(p));
   }
 }
@@ -603,12 +631,8 @@ VariableDeclaration *Parser::parseVariableDeclarationStatement(stork::tokens_ite
   if (!it->hasValue(stork::reservedTokens::semicolon)) {
     parseTokenValue(it, stork::reservedTokens::assign);
     AbstractExpression *value = parseExpression(it);
-    // the trailing semicolon
-    parseTokenValue(it, stork::reservedTokens::semicolon);
     return new VariableDeclaration(datatype, std::move(variable), std::unique_ptr<AbstractExpression>(value));
   } else {
-    // the trailing semicolon
-    parseTokenValue(it, stork::reservedTokens::semicolon);
     return new VariableDeclaration(datatype, std::move(variable));
   }
 }
@@ -620,9 +644,6 @@ Assignment *Parser::parseAssignmentStatement(stork::tokens_iterator &it) {
   // the variable's assigned value
   parseTokenValue(it, stork::reservedTokens::assign);
   AbstractExpression *value = parseExpression(it);
-
-  // the trailing semicolon
-  parseTokenValue(it, stork::reservedTokens::semicolon);
 
   return new Assignment(std::move(target), std::unique_ptr<AbstractExpression>(value));
 }
