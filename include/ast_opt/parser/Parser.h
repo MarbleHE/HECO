@@ -70,5 +70,7 @@ class Parser {
   static std::string parseIdentifier(stork::tokens_iterator &it);
 
   static Block *parseBlockOrSingleStatement(stork::tokens_iterator &it);
+
+  static AbstractExpression *parseLiteral(stork::tokens_iterator &it, bool isNegative);
 };
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_PARSER_PARSER_H_

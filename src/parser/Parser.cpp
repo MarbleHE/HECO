@@ -174,7 +174,16 @@ AbstractExpression *Parser::parseExpression(stork::tokens_iterator &it) {
             .push(new BinaryExpression(std::unique_ptr<AbstractExpression>(exp), op, std::make_unique<LiteralInt>(1)));
       }
     } else if (isLiteral(it)) {
-      operands.push(parseLiteral(it));
+      // This handles the special case of negative values as the minus sign is recognized as separate token.
+      // If we detected a minus sign but have not collected any lhs operand yet, we know that the minus does not act as
+      // a binary operator but belong to the operand.
+      if (operands.empty() && !operator_stack.empty()
+          && operator_stack.top().toString()==Operator(SUBTRACTION).toString()) {
+        operands.push(parseLiteral(it, true));
+        operator_stack.pop();
+      } else {
+        operands.push(parseLiteral(it));
+      }
     } else if (it->isIdentifier()) {
       // When we see an identifier, it could be a variable or a more general IndexAccess
       operands.push(parseTarget(it));
@@ -263,25 +272,41 @@ AbstractTarget *Parser::parseTarget(stork::tokens_iterator &it) {
   }
 }
 
-AbstractExpression *Parser::parseLiteral(stork::tokens_iterator &it) {
+AbstractExpression *Parser::parseLiteral(stork::tokens_iterator &it, bool isNegative) {
+  // Create literal by taking 'isNegative' flag into account. For example, "-3" would be parsed as {"-", "3"} and in
+  // parseExpression it would be recognized that "-" is a binary operator but has a single operand only and as such this
+  // operator negates the literal.
   AbstractExpression *l = nullptr;
   if (it->isString()) {
     l = new LiteralString(it->getString());
   } else if (it->isDouble()) {
-    l = new LiteralDouble(it->getDouble());
+    if (isNegative) l = new LiteralDouble(-it->getDouble());
+    else l = new LiteralDouble(it->getDouble());
   } else if (it->isFloat()) {
-    l = new LiteralFloat(it->getFloat());
+    if (isNegative) l = new LiteralFloat(-it->getFloat());
+    else l = new LiteralFloat(it->getFloat());
   } else if (it->isChar()) {
     l = new LiteralChar(it->getChar());
   } else if (it->isInteger()) {
-    l = new LiteralInt(it->getInteger());
+    if (isNegative) l = new LiteralInt(-it->getInteger());
+    else l = new LiteralInt(it->getInteger());
   } else if (it->isBool()) {
     l = new LiteralBool(it->getBool());
   } else {
     throw stork::unexpectedSyntaxError(to_string(it->getValue()), it->getLineNumber(), it->getCharIndex());
   }
+
+  // A negative string|char|integer is not allowed
+  if ((it->isString() || it->isChar() || it->isBool()) && isNegative) {
+    throw stork::unexpectedSyntaxError("", it->getLineNumber(), it->getCharIndex());
+  }
+
   ++it;
   return l;
+}
+
+AbstractExpression *Parser::parseLiteral(stork::tokens_iterator &it) {
+  return parseLiteral(it, false);
 }
 
 ExpressionList *Parser::parseExpressionList(stork::tokens_iterator &it) {
