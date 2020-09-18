@@ -13,9 +13,9 @@ TEST(PrintVisitor, printTree) {
   PrintVisitor v(ss);
   v.visit(assignment);
 
-  EXPECT_EQ(ss.str(),"Assignment\n"
-                              "  Variable (foo)\n"
-                              "  LiteralBool (true)\n");
+  EXPECT_EQ(ss.str(),"NODE VISITED: Assignment\n"
+                              "NODE VISITED:   Variable (foo)\n"
+                              "LITERAL BOOL VISITED:   LiteralBool (true)\n");
 }
 
 //TODO: Extend to non-trivial trees

@@ -1,4 +1,7 @@
+#include "ast_opt/ast/AbstractNode.h"
+#include "ast_opt/ast/Literal.h"
 #include "ast_opt/visitor/PrintVisitor.h"
+#include "ast_opt/ast/AbstractExpression.h"
 
 std::string SpecialPrintVisitor::getIndentation() {
   // Indent with two spaces per level
@@ -17,13 +20,23 @@ void SpecialPrintVisitor::visit(AbstractNode &elem) {
   std::string curNodeString = elem.toString(false);
 
   // Output current node at required indentation
-  os << getIndentation() << curNodeString;
+  os << "NODE VISITED: " << getIndentation() <<curNodeString;
 
   // increment indentation level and visit children, decrement afterwards
   ++indentation_level;
-  for(auto &c: elem) {
-    visit(c);
+  for(AbstractNode &c: elem) {
+    c.accept(*this);
   }
   --indentation_level;
+
+}
+
+void SpecialPrintVisitor::visit(LiteralBool &elem) {
+  // Get the current node's toString (without children)
+  // This should hopefully be a single line, including end-of-line at the end
+  std::string curNodeString = elem.toString(false);
+
+  // Output current node at required indentation
+  os << "LITERAL BOOL VISITED: " << getIndentation() << curNodeString;
 
 }

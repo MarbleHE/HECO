@@ -31,8 +31,9 @@ class SpecialPrintVisitor : public ScopedVisitor {
  public:
   explicit SpecialPrintVisitor(std::ostream& os);
 
-  /// We only need one behaviour, therefore we provide a function only for the top level of the class hierarchy
   void visit(AbstractNode&);
+
+  void visit(LiteralBool&);
 
 };
 
