@@ -3,7 +3,7 @@
 #include "ast_opt/visitor/PrintVisitor.h"
 #include "ast_opt/ast/AbstractExpression.h"
 
-std::string SpecialPrintVisitor::getIndentation() {
+std::string SpecialPrintVisitor::getIndentation() const {
   // Indent with two spaces per level
   return std::string(2*indentation_level, ' ');
 }

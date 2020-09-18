@@ -26,7 +26,7 @@ class SpecialPrintVisitor : public ScopedVisitor {
 
   /// Compute the current required indentation string
   /// from the current indentation_level
-  std::string getIndentation();
+  [[nodiscard]] std::string getIndentation() const;
 
  public:
   explicit SpecialPrintVisitor(std::ostream& os);
