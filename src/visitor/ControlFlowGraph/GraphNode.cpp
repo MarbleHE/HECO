@@ -58,12 +58,11 @@ const NodeRelationship &GraphNode::getRelationship(RelationshipType relationship
   } else if (relationshipType==RelationshipType::DATA_FLOW_GRAPH) {
     return getDataFlowGraph();
   } else {
-    throw std::invalid_argument("Unknown RelationshipType!");
+    throw std::invalid_argument("Unknown RelationshipType given!");
   }
 }
 
-void GraphNode::setAccessedVariables(std::unordered_set<std::pair<VariableIdentifierScope,
-                                                                  VariableAccessType>> &&variablesAccesses) {
+void GraphNode::setAccessedVariables(std::unordered_set<VarAccessPair> &&variablesAccesses) {
   this->variablesAccessMap = std::move(variablesAccesses);
 }
 
