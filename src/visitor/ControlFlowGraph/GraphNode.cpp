@@ -1,4 +1,5 @@
 #include "ast_opt/visitor/ControlFlowGraph/GraphNode.h"
+#include "ast_opt/visitor/ControlFlowGraph/NodeRelationship.h"
 
 GraphNode::GraphNode(AbstractNode &originalNode) : astNode(originalNode) {
   controlFlowGraph = std::make_unique<NodeRelationship>(RelationshipType::CTRL_FLOW_GRAPH, *this);

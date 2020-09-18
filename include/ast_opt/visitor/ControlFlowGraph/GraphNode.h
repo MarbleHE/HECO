@@ -3,12 +3,13 @@
 
 #include <set>
 
-#include "ast_opt/ast/AbstractNode.h"
-#include "ast_opt/visitor/ControlFlowGraph/NodeRelationship.h"
 #include "ast_opt/visitor/ControlFlowGraph/ControlFlowGraphVisitor.h"
+#include "ast_opt/visitor/ControlFlowGraph/NodeRelationship.h"
 
 /// An enum class to describe how a variable was accessed. Supported values are READ and WRITE.
-enum class VariableAccessType { READ = 0, WRITE = 1 };
+enum class VariableAccessType {
+  READ = 0, WRITE = 1
+};
 
 // TODO: Implement scope logic and replace this.
 struct Scope {};
