@@ -13,8 +13,8 @@ enum class VariableAccessType { READ = 0, WRITE = 1 };
 // TODO: Implement scope logic and replace this.
 struct Scope {};
 
-typedef std::tuple<Scope, std::string> VariableIdentifierScope;
-typedef std::pair<VariableIdentifierScope, VariableAccessType> VarAccessPair;
+typedef std::pair<Scope, std::string> VariableIdentifierScope;
+typedef std::pair<std::string, VariableAccessType> VarAccessPair;
 
 class GraphNode {
  private:
@@ -23,7 +23,7 @@ class GraphNode {
 
   /// A map of {VariableIdentifierScope : VariablesAccessType} pairs that shows which variables were accessed within
   /// this statement and the access type (read or write).
-  std::unordered_set<VarAccessPair> variablesAccessMap;
+  std::set<VarAccessPair> variablesAccessMap;
 
   /// A reference to the edges of this GraphNode in the control flow graph.
   std::unique_ptr<NodeRelationship> controlFlowGraph;
@@ -52,20 +52,20 @@ class GraphNode {
   /// Returns the set of all VarAccessPairs that match the given VariableAccessType.
   /// \param accessType The access type acting as filter for the recorded variable accesses.
   /// \return A set containing (copies from) variable accesses of this GraphNode.
-  [[nodiscard]] std::unordered_set<VarAccessPair> getVariableAccessesByType(
+  [[nodiscard]] std::set<VarAccessPair> getVariableAccessesByType(
       VariableAccessType accessType);
 
   /// Set the variable accesses map by replacing the existing one.
   /// \param variablesAccesses The set of variable accesses to replace the current set with.
-  void setAccessedVariables(std::unordered_set<VarAccessPair> &&variablesAccesses);
+  void setAccessedVariables(std::set<VarAccessPair> &&variablesAccesses);
 
   /// Get all variables that are accessed within the GraphNode's associated AST statement.
   /// \return (A reference to)
-  std::unordered_set<VarAccessPair> &getAccessedVariables();
+  std::set<VarAccessPair> &getAccessedVariables();
 
   /// Get all variables that are accessed within the GraphNode's associated AST statement.
   /// \return (A const reference to)
-  [[nodiscard]] const std::unordered_set<VarAccessPair> &getAccessedVariables() const;
+  [[nodiscard]] const std::set<VarAccessPair> &getAccessedVariables() const;
 
   /// Get the AST node associated with this GraphNode.
   /// \return (A reference to) the associated AST object.

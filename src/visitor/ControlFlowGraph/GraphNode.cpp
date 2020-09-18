@@ -21,16 +21,16 @@ const NodeRelationship &GraphNode::getDataFlowGraph() const {
   return *dataFlowGraph;
 }
 
-const std::unordered_set<VarAccessPair> &GraphNode::getAccessedVariables() const {
+const std::set<VarAccessPair> &GraphNode::getAccessedVariables() const {
   return variablesAccessMap;
 }
 
-std::unordered_set<VarAccessPair> &GraphNode::getAccessedVariables() {
+std::set<VarAccessPair> &GraphNode::getAccessedVariables() {
   return variablesAccessMap;
 }
 
-std::unordered_set<VarAccessPair> GraphNode::getVariableAccessesByType(VariableAccessType accessType) {
-  std::unordered_set<VarAccessPair> resultSet;
+std::set<VarAccessPair> GraphNode::getVariableAccessesByType(VariableAccessType accessType) {
+  std::set<VarAccessPair> resultSet;
   auto hasRequestedAccessType = [&accessType](const VarAccessPair &p) { return p.second==accessType; };
   std::copy_if(variablesAccessMap.begin(),
                variablesAccessMap.end(),
@@ -62,7 +62,7 @@ const NodeRelationship &GraphNode::getRelationship(RelationshipType relationship
   }
 }
 
-void GraphNode::setAccessedVariables(std::unordered_set<VarAccessPair> &&variablesAccesses) {
+void GraphNode::setAccessedVariables(std::set<VarAccessPair> &&variablesAccesses) {
   this->variablesAccessMap = std::move(variablesAccesses);
 }
 
