@@ -80,6 +80,7 @@ endif ()
 
 set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/ast/AbstractNode.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/Assignment.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/BinaryExpression.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/Block.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/ExpressionList.cpp
@@ -92,21 +93,21 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/ast/Return.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/UnaryExpression.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/Variable.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/Assignment.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/VariableDeclaration.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/parser/Parser.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/utilities/Datatype.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/utilities/Operator.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/visitor/PrintVisitor.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/visitor/Visitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/parser/Errors.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/parser/File.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/parser/Parser.cpp
         ${ast_optimizer_SOURCE_DIR}/src/parser/PushBackStream.cpp
         ${ast_optimizer_SOURCE_DIR}/src/parser/Tokenizer.cpp
         ${ast_optimizer_SOURCE_DIR}/src/parser/Tokens.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/parser/File.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/utilities/Datatype.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/utilities/Operator.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/ControlFlowGraph/ControlFlowGraphVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/ControlFlowGraph/GraphNode.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/visitor/ControlFlowGraph/NodeRelationship.cpp)
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/ControlFlowGraph/NodeRelationship.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/PrintVisitor.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/Visitor.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/Vectorizer.cpp)
 
 set(HEADER_ONLY_SOURCES
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractExpression.h
@@ -119,9 +120,10 @@ set(PUBLIC_HEADERS
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractExpression.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractNode.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractStatement.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/Assignment.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/BinaryExpression.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/ExpressionList.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/Block.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/ExpressionList.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/For.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/Function.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/FunctionParameter.h
@@ -132,20 +134,20 @@ set(PUBLIC_HEADERS
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/Return.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/UnaryExpression.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/Variable.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/Assignment.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/VariableDeclaration.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/parser/Parser.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/Datatype.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/Operator.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/IVisitor.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/PrintVisitor.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/Visitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/parser/Errors.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/parser/Parser.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/parser/PushBackStream.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/parser/Tokenizer.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/parser/Tokens.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/Datatype.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/Operator.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/ControlFlowGraph/ControlFlowGraphVisitor.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/ControlFlowGraph/NodeRelationship.h)
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/ControlFlowGraph/NodeRelationship.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/IVisitor.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/PrintVisitor.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/Vectorizer.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/Visitor.h)
 
 
 # build a library out of the code to be used by the tests
