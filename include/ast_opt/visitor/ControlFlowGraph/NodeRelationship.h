@@ -17,22 +17,23 @@ class GraphNode;
 
 class NodeRelationship {
  private:
-  ///
+  /// The relationship type of this node relationship, i.e., whether this is an edge in the control flow graph or in
+  /// the data flow graph as the same GraphNode is used in both.
   RelationshipType relationshipType;
 
-  ///
+  /// A reference to the GraphNode objects this edge belongs to.
   GraphNode &graphNode;
 
-  ///
+  /// A vector of children nodes, i.e., the nodes that this edge (NodeRelationship) points to (outgoing edges).
   std::vector<std::reference_wrapper<GraphNode>> children;
 
-  ///
+  /// A vector of parent nodes, i.e., the nodes that point to this node (incoming edges).
   std::vector<std::reference_wrapper<GraphNode>> parents;
 
  public:
-  ///
-  /// \param relationshipType
-  /// \param graphNode
+  /// Creates a new NodeRelationship object: An edge in the control flow or data flow graph.
+  /// \param relationshipType Indicates whether this edge belongs to the control flow or data flow graph.
+  /// \param graphNode A reference to the graph this edge is associated with.
   NodeRelationship(RelationshipType relationshipType, GraphNode &graphNode);
 
   ///
@@ -46,19 +47,19 @@ class NodeRelationship {
   void addParent(GraphNode &parent, bool addBackreference = true);
 
   ///
-  /// \return
+  /// \return (A reference to) the children nodes of this NodeRelationship.
   std::vector<std::reference_wrapper<GraphNode>> getChildren();
 
   ///
-  /// \return
+  /// \return (A const reference to) the children nodes of this NodeRelationship.
   [[nodiscard]] std::vector<std::reference_wrapper<const GraphNode>> getChildren() const;
 
   ///
-  /// \return
+  /// \return (A reference to) the parent nodes of this NodeRelationship.
   std::vector<std::reference_wrapper<GraphNode>> getParents();
 
   ///
-  /// \return
+  /// \return (A const reference to) the parent nodes of this NodeRelationship.
   [[nodiscard]] std::vector<std::reference_wrapper<const GraphNode>> getParents() const;
 
   ///
@@ -84,26 +85,26 @@ class NodeRelationship {
   /// \param outputStream The stream where to send the output string to.
   void printNodes(std::ostream &outputStream = std::cout) const;
 
-//  /// Compares two graphs given by their respective root node. The node on that this method is called is treated as the
-//  /// first root node, the second root node needs to be passed as rootNodeOther.
-//  /// Note: This method does not compare the refToOriginalNode but instead only  traverses both graphs and compares the
-//  /// number of children and parent nodes (structure-based comparison).
-//  /// \param rootNodeOther The root node of the second graph.
-//  /// \return True if both graphes have the same structure, otherwise False.
-//  bool areEqualGraphs(GraphNode *rootNodeOther) const;
+  /// Compares the current graph with another graph given by its root node.
+  /// Note: This method does not compare the AST nodes but instead only traverses both graphs (GraphNode objects) and
+  /// compares the number of children and parent nodes (graph structure-based comparison).
+  /// \param rootNodeOther The root node of the second graph.
+  /// \return True if both graphes have the same structure, otherwise False.
+  bool isEqualToGraph(GraphNode &rootNodeOther) const;
 
-  ///
-  /// \return
+  /// Iterates over all reachable GraphNodes by considering all children and parent nodes and returns the set of
+  /// reachable nodes. Note that it only considers the RelationshipType of this NodeRelationship.
+  /// \return The set of nodes that are reachable from this NodeRelationship.
   [[nodiscard]] std::set<std::reference_wrapper<GraphNode>> getAllReachableNodes() const;
 
-  ///
-  /// \param node
-  /// \return
+  /// Checks whether the given GraphNode node is a child node in this NodeRelationship.
+  /// \param node The node to be checked whether it is a child node.
+  /// \return True if the given node is a child node in this NodeRelationship.
   bool hasChild(GraphNode &node);
 
-  ///
-  /// \param node
-  /// \return
+  /// Checks whether the given GraphNode node is a parent node in this NodeRelationship.
+  /// \param node The node to be checked whether it is a parent node.
+  /// \return True if the given node is a parent node in this NodeRelationship.
   bool hasParent(GraphNode &node);
 };
 
