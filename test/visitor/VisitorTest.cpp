@@ -1,6 +1,5 @@
 #include "ast_opt/visitor/Visitor.h"
-#include "ast_opt/ast/Assignment.h"
-#include "ast_opt/ast/Variable.h"
+#include "ast_opt/ast/Return.h"
 #include "ast_opt/ast/Literal.h"
 #include "gtest/gtest.h"
 
@@ -42,10 +41,10 @@ TEST(VisitorTemplate, dispatchDefault) {
   // has a visit(...) function in SpecialVisitor, the scoped visitor should be called
   // As a consequence, the message string should remain empty.
 
-  Assignment assignment(std::make_unique<Variable>("foo"), std::make_unique<LiteralBool>(true));
+  auto r = Return();
 
   Visitor<SpecialVisitor> v;
-  v.visit(assignment);
+  v.visit(r);
 
   EXPECT_EQ(v.message, "");
 }
@@ -77,11 +76,11 @@ TEST(VisitorTemplate, dispatchDerivedClass) {
   LiteralBool b(true);
   // Confirm that SpecialVisitor can be called directly on this
   SpecialVisitor sv;
-  sv.visit(b);
+  b.accept(sv);
 
   // Confirm that Visitor<SpecialVisitor> routes to the same
   Visitor<SpecialVisitor> v;
-  v.visit(b);
+  b.accept(v);
 
   EXPECT_EQ(sv.message, "SpecialVisitor::visit(LiteralBool&)");
   EXPECT_EQ(v.message, "SpecialVisitor::visit(LiteralBool&)");

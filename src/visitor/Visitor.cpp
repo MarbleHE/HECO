@@ -1,41 +1,136 @@
-#include <ast_opt/visitor/Visitor.h>
+#include "ast_opt/ast/Assignment.h"
+#include "ast_opt/ast/BinaryExpression.h"
+#include "ast_opt/ast/Block.h"
+#include "ast_opt/ast/ExpressionList.h"
+#include "ast_opt/ast/For.h"
+#include "ast_opt/ast/Function.h"
+#include "ast_opt/ast/FunctionParameter.h"
+#include "ast_opt/ast/If.h"
+#include "ast_opt/ast/IndexAccess.h"
+#include "ast_opt/ast/Literal.h"
+#include "ast_opt/ast/OperatorExpression.h"
+#include "ast_opt/ast/Return.h"
+#include "ast_opt/ast/UnaryExpression.h"
+#include "ast_opt/ast/Variable.h"
+#include "ast_opt/ast/VariableDeclaration.h"
+#include "ast_opt/visitor/Visitor.h"
 
-void ScopedVisitor::visit(BinaryExpression &) {}
+void ScopedVisitor::visit(BinaryExpression & elem) {
+  for(auto& c : elem) {
+    c.accept(*this);
+  }
+}
 
-void ScopedVisitor::visit(Block &) {}
+void ScopedVisitor::visit(Block & elem) {
+  for(auto& c : elem) {
+    c.accept(*this);
+  }
+}
 
-void ScopedVisitor::visit(ExpressionList &) {}
+void ScopedVisitor::visit(ExpressionList & elem) {
+  for(auto& c : elem) {
+    c.accept(*this);
+  }
+}
 
-void ScopedVisitor::visit(For &) {}
+void ScopedVisitor::visit(For & elem) {
+  for(auto& c : elem) {
+    c.accept(*this);
+  }
+}
 
-void ScopedVisitor::visit(Function &) {}
+void ScopedVisitor::visit(Function & elem) {
+  for(auto& c : elem) {
+    c.accept(*this);
+  }
+}
 
-void ScopedVisitor::visit(FunctionParameter &) {}
+void ScopedVisitor::visit(FunctionParameter & elem) {
+  for(auto& c : elem) {
+    c.accept(*this);
+  }
+}
 
-void ScopedVisitor::visit(If &) {}
+void ScopedVisitor::visit(If & elem) {
+  for(auto& c : elem) {
+    c.accept(*this);
+  }
+}
 
-void ScopedVisitor::visit(IndexAccess &) {}
+void ScopedVisitor::visit(IndexAccess & elem) {
+  for(auto& c : elem) {
+    c.accept(*this);
+  }
+}
 
-void ScopedVisitor::visit(LiteralBool &) {}
+void ScopedVisitor::visit(LiteralBool & elem) {
+  for(auto& c : elem) {
+    c.accept(*this);
+  }
+}
 
-void ScopedVisitor::visit(LiteralChar &) {}
+void ScopedVisitor::visit(LiteralChar & elem) {
+  for(auto& c : elem) {
+    c.accept(*this);
+  }
+}
 
-void ScopedVisitor::visit(LiteralInt &) {}
+void ScopedVisitor::visit(LiteralInt & elem) {
+  for(auto& c : elem) {
+    c.accept(*this);
+  }
+}
 
-void ScopedVisitor::visit(LiteralFloat &) {}
+void ScopedVisitor::visit(LiteralFloat & elem) {
+  for(auto& c : elem) {
+    c.accept(*this);
+  }
+}
 
-void ScopedVisitor::visit(LiteralDouble &) {}
+void ScopedVisitor::visit(LiteralDouble & elem) {
+  for(auto& c : elem) {
+    c.accept(*this);
+  }
+}
 
-void ScopedVisitor::visit(LiteralString &) {}
+void ScopedVisitor::visit(LiteralString & elem) {
+  for(auto& c : elem) {
+    c.accept(*this);
+  }
+}
 
-void ScopedVisitor::visit(OperatorExpression &) {}
+void ScopedVisitor::visit(OperatorExpression & elem) {
+  for(auto& c : elem) {
+    c.accept(*this);
+  }
+}
 
-void ScopedVisitor::visit(Return &) {}
+void ScopedVisitor::visit(Return & elem) {
+  for(auto& c : elem) {
+    c.accept(*this);
+  }
+}
 
-void ScopedVisitor::visit(UnaryExpression &) {}
+void ScopedVisitor::visit(UnaryExpression & elem) {
+  for(auto& c : elem) {
+    c.accept(*this);
+  }
+}
 
-void ScopedVisitor::visit(Assignment &) {}
+void ScopedVisitor::visit(Assignment & elem) {
+  for(auto& c : elem) {
+    c.accept(*this);
+  }
+}
 
-void ScopedVisitor::visit(VariableDeclaration &) {}
+void ScopedVisitor::visit(VariableDeclaration & elem) {
+  for(auto& c : elem) {
+    c.accept(*this);
+  }
+}
 
-void ScopedVisitor::visit(Variable &) {}
+void ScopedVisitor::visit(Variable & elem) {
+  for(auto& c : elem) {
+    c.accept(*this);
+  }
+}
