@@ -3,7 +3,7 @@
 #include "main.h"
 #include "ast_opt/ast/Literal.h"
 #include "ast_opt/ast/Variable.h"
-#include <ast_opt/visitor/Visitor.h>
+#include <ast_opt/visitor/ScopedVisitor.h>
 #include <ast_opt/ast/Assignment.h>
 
 int main() {

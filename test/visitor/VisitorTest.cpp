@@ -1,4 +1,4 @@
-#include "ast_opt/visitor/Visitor.h"
+#include "ast_opt/visitor/ScopedVisitor.h"
 #include "ast_opt/ast/Return.h"
 #include "ast_opt/ast/Literal.h"
 #include "gtest/gtest.h"
@@ -24,16 +24,16 @@ class SpecialVisitor : public ScopedVisitor {
 
 };
 
-TEST(VisitorTemplate,  has_visit) {
+TEST(VisitorTemplate, has_visit) {
   // This test confirms that the has_visit SFINAE detection works as expected
 
   // Parentheses required to avoid breaking the GTEST macro
-  EXPECT_EQ((has_visit<SpecialVisitor,AbstractExpression&>), true);
-  EXPECT_EQ((has_visit<SpecialVisitor,LiteralBool&>),true);
-  EXPECT_EQ((has_visit<SpecialVisitor,LiteralInt&>),true); // because of LiteralInt : public AbstractExpression
-  EXPECT_EQ((has_visit<SpecialVisitor,AbstractNode&>),false);
-  EXPECT_EQ((has_visit<SpecialVisitor,AbstractStatement&>),false);
-  EXPECT_EQ((has_visit<SpecialVisitor, Assignment&>), false);
+  EXPECT_EQ((has_visit<SpecialVisitor, AbstractExpression &>), true);
+  EXPECT_EQ((has_visit<SpecialVisitor, LiteralBool &>), true);
+  EXPECT_EQ((has_visit<SpecialVisitor, LiteralInt &>), true); // because of LiteralInt : public AbstractExpression
+  EXPECT_EQ((has_visit<SpecialVisitor, AbstractNode &>), false);
+  EXPECT_EQ((has_visit<SpecialVisitor, AbstractStatement &>), false);
+  EXPECT_EQ((has_visit<SpecialVisitor, Assignment &>), false);
 }
 
 TEST(VisitorTemplate, dispatchDefault) {

@@ -13,7 +13,7 @@
 #include "ast_opt/ast/UnaryExpression.h"
 #include "ast_opt/ast/Variable.h"
 #include "ast_opt/ast/VariableDeclaration.h"
-#include "ast_opt/visitor/Visitor.h"
+#include "ast_opt/visitor/ScopedVisitor.h"
 
 void ScopedVisitor::visit(BinaryExpression & elem) {
   for(auto& c : elem) {

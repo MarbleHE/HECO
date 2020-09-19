@@ -2,7 +2,7 @@
 #define AST_OPTIMIZER_SRC_VISITOR_CONTROLFLOWGRAPHVISITOR_H_
 
 #include <iostream>
-#include "ast_opt/visitor/Visitor.h"
+#include "ast_opt/visitor/ScopedVisitor.h"
 #include "ast_opt/ast/Assignment.h"
 #include "ast_opt/ast/Block.h"
 #include "ast_opt/ast/For.h"

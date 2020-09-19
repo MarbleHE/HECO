@@ -7,7 +7,7 @@
 #include <utility>
 
 #include "ast_opt/ast/AbstractNode.h"
-#include "ast_opt/visitor/Visitor.h"
+#include "ast_opt/visitor/ScopedVisitor.h"
 
 
 /// Forward declaration of the class that will actually implement the PrintVisitor's logic
