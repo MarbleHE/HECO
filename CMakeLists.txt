@@ -103,7 +103,10 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/parser/PushBackStream.cpp
         ${ast_optimizer_SOURCE_DIR}/src/parser/Tokenizer.cpp
         ${ast_optimizer_SOURCE_DIR}/src/parser/Tokens.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/parser/File.cpp)
+        ${ast_optimizer_SOURCE_DIR}/src/parser/File.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/ControlFlowGraph/ControlFlowGraphVisitor.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/ControlFlowGraph/GraphNode.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/ControlFlowGraph/NodeRelationship.cpp)
 
 set(HEADER_ONLY_SOURCES
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractExpression.h
@@ -141,7 +144,8 @@ set(PUBLIC_HEADERS
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/parser/PushBackStream.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/parser/Tokenizer.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/parser/Tokens.h
-        )
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/ControlFlowGraph/ControlFlowGraphVisitor.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/ControlFlowGraph/NodeRelationship.h)
 
 
 # build a library out of the code to be used by the tests

@@ -41,7 +41,8 @@ set(TEST_FILES
         parser/TokenizerTest.cpp
         visitor/PrintVisitorTest.cpp
         visitor/VisitorTest.cpp
-        parser/ParserTestHelpers.h)
+        parser/ParserTestHelpers.h
+        visitor/ControlFlowGraphVisitorTest.cpp)
 
 add_executable(testing-all
         ${TEST_FILES})
