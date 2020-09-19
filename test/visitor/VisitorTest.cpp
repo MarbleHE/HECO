@@ -1,5 +1,5 @@
 #include "ast_opt/visitor/Visitor.h"
-#include "ast_opt/ast/VariableAssignment.h"
+#include "ast_opt/ast/Assignment.h"
 #include "ast_opt/ast/Variable.h"
 #include "ast_opt/ast/Literal.h"
 #include "gtest/gtest.h"
@@ -34,7 +34,7 @@ TEST(VisitorTemplate,  has_visit) {
   EXPECT_EQ((has_visit<SpecialVisitor,LiteralInt&>),true); // because of LiteralInt : public AbstractExpression
   EXPECT_EQ((has_visit<SpecialVisitor,AbstractNode&>),false);
   EXPECT_EQ((has_visit<SpecialVisitor,AbstractStatement&>),false);
-  EXPECT_EQ((has_visit<SpecialVisitor,VariableAssignment&>),false);
+  EXPECT_EQ((has_visit<SpecialVisitor, Assignment&>), false);
 }
 
 TEST(VisitorTemplate, dispatchDefault) {
@@ -42,7 +42,7 @@ TEST(VisitorTemplate, dispatchDefault) {
   // has a visit(...) function in SpecialVisitor, the scoped visitor should be called
   // As a consequence, the message string should remain empty.
 
-  VariableAssignment assignment(std::make_unique<Variable>("foo"), std::make_unique<LiteralBool>(true));
+  Assignment assignment(std::make_unique<Variable>("foo"), std::make_unique<LiteralBool>(true));
 
   Visitor<SpecialVisitor> v;
   v.visit(assignment);

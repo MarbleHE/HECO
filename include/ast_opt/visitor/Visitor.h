@@ -42,7 +42,7 @@ class ScopedVisitor : public IVisitor {
 
   void visit(UnaryExpression &elem) override;
 
-  void visit(VariableAssignment &elem) override;
+  void visit(Assignment &elem) override;
 
   void visit(VariableDeclaration &elem) override;
 
@@ -246,8 +246,8 @@ class Visitor : public SpecialVisitor{
     }
   }
 
-  void visit(VariableAssignment &elem) override {
-    if constexpr (has_visit<SpecialVisitor,VariableAssignment&>)  {
+  void visit(Assignment &elem) override {
+    if constexpr (has_visit<SpecialVisitor, Assignment&>)  {
       this->SpecialVisitor::visit(elem);
     } else {
       this->ScopedVisitor::visit(elem);

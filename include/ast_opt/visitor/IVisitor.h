@@ -3,10 +3,6 @@
 
 #include <string>
 
-class AbstractExpression;
-
-class AbstractStatement;
-
 class BinaryExpression;
 
 class Block;
@@ -38,15 +34,13 @@ typedef Literal<float> LiteralFloat;
 typedef Literal<double> LiteralDouble;
 typedef Literal<std::string> LiteralString;
 
-class Operator;
-
 class OperatorExpression;
 
 class Return;
 
 class UnaryExpression;
 
-class VariableAssignment;
+class Assignment;
 
 class VariableDeclaration;
 
@@ -91,7 +85,7 @@ class IVisitor {
 
   virtual void visit(UnaryExpression &elem) = 0;
 
-  virtual void visit(VariableAssignment &elem) = 0;
+  virtual void visit(Assignment &elem) = 0;
 
   virtual void visit(VariableDeclaration &elem) = 0;
 

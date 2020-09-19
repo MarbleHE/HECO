@@ -1,0 +1,7 @@
+float computeDiscountOnServer(secret bool qualifiesForSpecialDiscount) {
+  secret float discountRate = 0;
+  { // Block does not make any sense but should be valid
+    discountRate = qualifiesForSpecialDiscount*0.90 + (1 - qualifiesForSpecialDiscount)*0.98;
+  }
+  return discountRate;
+}

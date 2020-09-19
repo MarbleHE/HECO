@@ -26,13 +26,14 @@ class SpecialPrintVisitor : public ScopedVisitor {
 
   /// Compute the current required indentation string
   /// from the current indentation_level
-  std::string getIndentation();
+  [[nodiscard]] std::string getIndentation() const;
 
  public:
   explicit SpecialPrintVisitor(std::ostream& os);
 
-  /// We only need one behaviour, therefore we provide a function only for the top level of the class hierarchy
   void visit(AbstractNode&);
+
+  void visit(LiteralBool&);
 
 };
 

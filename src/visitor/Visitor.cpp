@@ -34,7 +34,7 @@ void ScopedVisitor::visit(Return &) {}
 
 void ScopedVisitor::visit(UnaryExpression &) {}
 
-void ScopedVisitor::visit(VariableAssignment &) {}
+void ScopedVisitor::visit(Assignment &) {}
 
 void ScopedVisitor::visit(VariableDeclaration &) {}
 

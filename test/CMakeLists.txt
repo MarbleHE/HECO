@@ -34,13 +34,15 @@ set(TEST_FILES
         ast/ReturnTest.cpp
         ast/UnaryExpressionTest.cpp
         ast/VariableTest.cpp
-        ast/VariableAssignmentTest.cpp
+        ast/AssignmentTest.cpp
         ast/VariableDeclarationTest.cpp
         JsonOutputTest.cpp
         parser/ParserTest.cpp
+        parser/TokenizerTest.cpp
         visitor/PrintVisitorTest.cpp
         visitor/VisitorTest.cpp
-        )
+        parser/ParserTestHelpers.h
+        visitor/ControlFlowGraphVisitorTest.cpp)
 
 add_executable(testing-all
         ${TEST_FILES})

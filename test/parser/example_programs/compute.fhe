@@ -1,0 +1,3 @@
+void compute(secret bool encryptedA) {
+  bool alpha = (true ^ false) || encryptedA;
+}

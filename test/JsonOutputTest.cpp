@@ -1,7 +1,7 @@
 #include <fstream>
 #include "ast_opt/ast/Literal.h"
 #include "ast_opt/ast/Variable.h"
-#include "ast_opt/ast/VariableAssignment.h"
+#include "ast_opt/ast/Assignment.h"
 #include "ast_opt/ast/VariableDeclaration.h"
 #include "gtest/gtest.h"
 
