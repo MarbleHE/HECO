@@ -2,9 +2,13 @@
 #include "ast_opt/visitor/ControlFlowGraph/NodeRelationship.h"
 #include "ast_opt/visitor/ControlFlowGraph/GraphNode.h"
 
+// This operator is required for calling count(...) on a container with <std::reference_wrapper<GraphNode> elements
+bool operator<(const std::reference_wrapper<GraphNode> &fk, const std::reference_wrapper<GraphNode> &lk) {
+  return fk.get() < lk.get();
+}
+
 NodeRelationship::NodeRelationship(RelationshipType relationshipType, GraphNode &graphNode)
     : relationshipType(relationshipType), graphNode(graphNode) {
-
 }
 
 void NodeRelationship::addChild(GraphNode &child, bool addBackreference) {
@@ -61,27 +65,30 @@ void NodeRelationship::printNodes(std::ostream &outputStream) const {
 
   // as long as there are still unprocessed nodes
   while (!q.empty()) {
-    // 
+    // get the next node, i.e., the one on the stack's top
     auto[curNode, indentationLevel] = q.top();
     q.pop();
 
-    //
-
+    // extract required information of current node
     const auto numChildren = curNode.get().getRelationship(relationshipType).getChildren().size();
     auto uniqueNodeId = curNode.get().getAstNode().getUniqueNodeId();
 
+    // write output string
     outputStream << "(" << numChildren << ") "
                  << std::string(indentationLevel, '\t')
                  << uniqueNodeId
                  << std::endl;
+
     // continue with next While-loop iteration if this node was already printed once (avoids infinite loop)
-    if (printedNodesById.count(curNode.get().getAstNode().getUniqueNodeId()) > 0) {
+    if (printedNodesById.count(uniqueNodeId) > 0) {
       if (numChildren > 0) {
         outputStream << "    " << std::string(indentationLevel, '\t')
                      << "... see above, visiting an already visited node ..." << std::endl;
       }
       continue;
     }
+
+    // remember that we visited this node to not visit its children again
     printedNodesById.emplace(curNode.get().getAstNode().getUniqueNodeId());
 
     // as we are using a stack, we need to add the children in reverse order
@@ -92,40 +99,50 @@ void NodeRelationship::printNodes(std::ostream &outputStream) const {
   }
 }
 
-//bool NodeRelationship::areEqualGraphs(GraphNode *rootNodeOther) const {
-//  // nodes that were already visited, helps to detect and bypass graph cycles
-//  std::unordered_set<std::reference_wrapper<GraphNode &>> visitedNodes;
-//  // define queues to be used to define nodes to process next
-//  std::stack<GraphNode &> qOne;
-//  qOne.em
-//
-//  {{ graphNode }};
-//  std::stack<GraphNode &> qOther{{rootNodeOther}};
-//
-//  while (!qOne.empty()) {
-//    auto oneCur = qOne.top();
-//    auto otherCur = qOther.top();
-//    qOne.pop();
-//    qOther.pop();
-//    // check that the number of child and parent nodes is equal
-//    if (oneCur->getRelationship(relationshipType)->getChildren().size()
-//        !=otherCur->getRelationship(relationshipType)->getChildren().size()
-//        || oneCur->getRelationship(relationshipType)->getParents().size()
-//            !=otherCur->getRelationship(relationshipType)->getParents().size()) {
-//      return false;
-//    }
-//    if (visitedNodes.count(oneCur) > 0) {
-//      continue;
-//    }
-//    visitedNodes.insert(oneCur);
-//    for (int i = 0; i < oneCur->getRelationship(relationshipType)->getChildren().size(); ++i) {
-//      qOne.push(oneCur->getRelationship(relationshipType)->getChildren().at(i));
-//      qOther.push(otherCur->getRelationship(relationshipType)->getChildren().at(i));
-//    }
-//  }
-//  // ensure that qOne and qOther are empty (qOne is empty because while-loop ended)
-//  return qOther.empty();
-//}
+bool NodeRelationship::isEqualToGraph(GraphNode &rootNodeOther) const {
+  // nodes that were already visited, helps to detect and bypass graph cycles
+  std::set<std::reference_wrapper<GraphNode>> visitedNodes;
+
+  // define queues to be used to define nodes to process next
+  std::stack<std::reference_wrapper<GraphNode>> qOne;
+  qOne.emplace(graphNode);
+  std::stack<std::reference_wrapper<GraphNode>> qOther;
+  qOther.emplace(rootNodeOther);
+
+  while (!qOne.empty()) {
+    // retrieve next nodes t
+    auto thisCurrentNode = std::move(qOne.top().get());
+    qOne.pop();
+    auto otherCurrentNode = std::move(qOther.top().get());
+    qOther.pop();
+
+    // check that the number of child and parent nodes is equal
+    auto thisChildren = thisCurrentNode.getRelationship(relationshipType).getChildren();
+    auto otherChildren = otherCurrentNode.getRelationship(relationshipType).getChildren();
+    const auto thisNumParents = thisCurrentNode.getRelationship(relationshipType).getParents().size();
+    const auto otherNumParents = otherCurrentNode.getRelationship(relationshipType).getParents().size();
+    if ((thisChildren.size()!=otherChildren.size()) || thisNumParents!=otherNumParents) {
+      return false;
+    }
+
+    // check if we visited thisCurrentNode in the past
+    if (visitedNodes.count(thisCurrentNode) > 0) {
+      continue;
+    }
+    // otherwise remember that we visited this node
+    // it is sufficient to do this by considering the current graph only
+    visitedNodes.emplace(thisCurrentNode);
+
+    // enqueue all children of thisCurrentNode and otherCurrentNode
+    for (int i = 0; i < thisChildren.size(); ++i) {
+      qOne.push(thisCurrentNode.getRelationship(relationshipType).getChildren().at(i));
+      qOther.push(otherChildren.at(i));
+    }
+  }
+
+  // ensure that qOne and qOther are empty (qOne is empty because while-loop ended)
+  return qOther.empty();
+}
 
 std::vector<std::reference_wrapper<GraphNode>> NodeRelationship::getChildren() {
   return children;
@@ -143,11 +160,6 @@ std::vector<std::reference_wrapper<GraphNode>> NodeRelationship::getParents() {
 std::vector<std::reference_wrapper<const GraphNode>> NodeRelationship::getParents() const {
   std::vector<std::reference_wrapper<const GraphNode>> result(parents.begin(), parents.end());
   return result;
-}
-
-// This operator is required for calling count(...) on std::set<std::reference_wrapper<GraphNode>>
-bool operator<(const std::reference_wrapper<GraphNode> &fk, const std::reference_wrapper<GraphNode> &lk) {
-  return fk.get() < lk.get();
 }
 
 std::set<std::reference_wrapper<GraphNode>> NodeRelationship::getAllReachableNodes() const {
