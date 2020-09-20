@@ -102,6 +102,7 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/parser/Tokens.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/Datatype.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/Operator.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/utilities/Scope.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/ControlFlowGraph/ControlFlowGraphVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/ControlFlowGraph/GraphNode.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/ControlFlowGraph/NodeRelationship.cpp
@@ -142,6 +143,7 @@ set(PUBLIC_HEADERS
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/parser/Tokens.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/Datatype.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/Operator.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/Scope.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/ControlFlowGraph/ControlFlowGraphVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/ControlFlowGraph/NodeRelationship.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/IVisitor.h
