@@ -45,19 +45,15 @@ std::unique_ptr<AbstractNode> Parser::parse(std::string s) {
 AbstractStatement *Parser::parseStatement(stork::tokens_iterator &it, bool gobbleTrailingSemicolon) {
   if (it->isReservedToken()) {
     switch (it->get_reserved_token()) {
-      case stork::reservedTokens::kw_for:
-        return parseForStatement(it);
-      case stork::reservedTokens::kw_if:
-        return parseIfStatement(it);
+      case stork::reservedTokens::kw_for:return parseForStatement(it);
+      case stork::reservedTokens::kw_if:return parseIfStatement(it);
       case stork::reservedTokens::kw_return: {
         AbstractStatement *returnStmt = parseReturnStatement(it);
         if (gobbleTrailingSemicolon) parseTokenValue(it, stork::reservedTokens::semicolon);
         return returnStmt;
       }
-      case stork::reservedTokens::open_curly:
-        return parseBlockStatement(it);
-      case stork::reservedTokens::kw_public:
-        return parseFunctionStatement(it);
+      case stork::reservedTokens::open_curly:return parseBlockStatement(it);
+      case stork::reservedTokens::kw_public:return parseFunctionStatement(it);
 
         // it starts with a data type (e.g., int, float)
       case stork::reservedTokens::kw_bool:
@@ -133,11 +129,6 @@ bool isLiteral(stork::tokens_iterator &it) {
 
 AbstractExpression *Parser::parseExpression(stork::tokens_iterator &it) {
 
-  // if it begins with an "{" it must be an expression list which cannot be part of a greater expression
-  if (it->hasValue(stork::reservedTokens::open_curly)) {
-    return parseExpressionList(it);
-  }
-
   // Shunting-yard algorithm: Keep a stack of operands and check precedence when you see an operator
   std::stack<AbstractExpression *, std::vector<AbstractExpression *>> operands;
   std::stack<Operator, std::vector<Operator>> operator_stack;
@@ -194,12 +185,16 @@ AbstractExpression *Parser::parseExpression(stork::tokens_iterator &it) {
       }
     } else if (it->isIdentifier()) {
       // When we see an identifier, it could be a variable or a more general IndexAccess
+      //TODO: It could also be a function call!!
       operands.push(parseTarget(it));
     } else if (it->hasValue(stork::reservedTokens::open_round)) {
       // If we see an (, we have nested expressions going on, so use recursion.
       parseTokenValue(it, stork::reservedTokens::open_round);
       operands.push(parseExpression(it));
       parseTokenValue(it, stork::reservedTokens::close_round);
+    } else if (it->hasValue(stork::reservedTokens::open_curly)) {
+      // if it begins with an "{" it must be an expression list
+      operands.push(parseExpressionList(it));
     } else {
       // Stop parsing tokens as soon as we see a closing ), a semicolon or anything else
       running = false;
