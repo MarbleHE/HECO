@@ -14,6 +14,7 @@
 #include "ast_opt/ast/Variable.h"
 #include "ast_opt/ast/VariableDeclaration.h"
 #include "ast_opt/visitor/ScopedVisitor.h"
+#include "ast_opt/utilities/Scope.h"
 
 void ScopedVisitor::visit(BinaryExpression & elem) {
   for(auto& c : elem) {
@@ -124,13 +125,25 @@ void ScopedVisitor::visit(Assignment & elem) {
 }
 
 void ScopedVisitor::visit(VariableDeclaration & elem) {
-  for(auto& c : elem) {
+  for (auto &c : elem) {
     c.accept(*this);
   }
 }
 
-void ScopedVisitor::visit(Variable & elem) {
-  for(auto& c : elem) {
+void ScopedVisitor::visit(Variable &elem) {
+  for (auto &c : elem) {
     c.accept(*this);
   }
+}
+
+ScopedVisitor::ScopedVisitor() {
+  currentScope = std::make_unique<Scope>();
+}
+
+Scope &ScopedVisitor::getCurrentScope() {
+  return *currentScope;
+}
+
+const Scope &ScopedVisitor::getCurrentScope() const {
+  return *currentScope;
 }

@@ -1,4 +1,5 @@
 #include "ast_opt/visitor/ControlFlowGraph/GraphNode.h"
+#include "ast_opt/ast/AbstractNode.h"
 #include "ast_opt/visitor/ControlFlowGraph/NodeRelationship.h"
 
 GraphNode::GraphNode(AbstractNode &originalNode) : astNode(originalNode) {
@@ -22,17 +23,17 @@ const NodeRelationship &GraphNode::getDataFlowGraph() const {
   return *dataFlowGraph;
 }
 
-const std::set<VarAccessPair> &GraphNode::getAccessedVariables() const {
+const std::set<VariableAccessPair> &GraphNode::getAccessedVariables() const {
   return variablesAccessMap;
 }
 
-std::set<VarAccessPair> &GraphNode::getAccessedVariables() {
+std::set<VariableAccessPair> &GraphNode::getAccessedVariables() {
   return variablesAccessMap;
 }
 
-std::set<VarAccessPair> GraphNode::getVariableAccessesByType(VariableAccessType accessType) {
-  std::set<VarAccessPair> resultSet;
-  auto hasRequestedAccessType = [&accessType](const VarAccessPair &p) { return p.second==accessType; };
+std::set<VariableAccessPair> GraphNode::getVariableAccessesByType(VariableAccessType accessType) {
+  std::set<VariableAccessPair> resultSet;
+  auto hasRequestedAccessType = [&accessType](const VariableAccessPair &p) { return p.second==accessType; };
   std::copy_if(variablesAccessMap.begin(),
                variablesAccessMap.end(),
                std::inserter(resultSet, resultSet.begin()),
@@ -63,7 +64,6 @@ const NodeRelationship &GraphNode::getRelationship(RelationshipType relationship
   }
 }
 
-void GraphNode::setAccessedVariables(std::set<VarAccessPair> &&variablesAccesses) {
+void GraphNode::setAccessedVariables(std::set<VariableAccessPair> &&variablesAccesses) {
   this->variablesAccessMap = std::move(variablesAccesses);
 }
-

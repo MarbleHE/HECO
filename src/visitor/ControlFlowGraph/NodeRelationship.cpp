@@ -1,6 +1,6 @@
-
 #include "ast_opt/visitor/ControlFlowGraph/NodeRelationship.h"
 #include "ast_opt/visitor/ControlFlowGraph/GraphNode.h"
+#include "ast_opt/ast/AbstractNode.h"
 
 // This operator is required for calling count(...) on a container with <std::reference_wrapper<GraphNode> elements
 bool operator<(const std::reference_wrapper<GraphNode> &fk, const std::reference_wrapper<GraphNode> &lk) {

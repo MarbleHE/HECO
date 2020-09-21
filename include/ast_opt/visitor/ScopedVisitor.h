@@ -2,12 +2,18 @@
 #define AST_OPTIMIZER_INCLUDE_AST_OPT_VISITOR_SCOPEDVISITOR_H_
 
 #include "ast_opt/visitor/IVisitor.h"
+#include "ast_opt/utilities/Scope.h"
 
 /// This class implements the "default" behaviour of a visitor
 /// simply visiting a node's children
 /// and setting the scope as required
 class ScopedVisitor : public IVisitor {
+ private:
+  std::unique_ptr<Scope> currentScope;
+
  public:
+  ScopedVisitor();
+
   void visit(BinaryExpression &elem) override;
 
   void visit(Block &elem) override;
@@ -47,6 +53,10 @@ class ScopedVisitor : public IVisitor {
   void visit(VariableDeclaration &elem) override;
 
   void visit(Variable &elem) override;
+
+  Scope &getCurrentScope();
+
+  [[nodiscard]] const Scope &getCurrentScope() const;
 };
 
 
