@@ -18,13 +18,13 @@ class GraphNode;
 class NodeRelationship {
  private:
   /// The relationship type of this node relationship, i.e., whether this is an edge in the control flow graph or in
-  /// the data flow graph as the same GraphNode is used in both.
+  /// the data flow graph as the same GraphNode object is used in both.
   RelationshipType relationshipType;
 
-  /// A reference to the GraphNode objects this edge belongs to.
+  /// A reference to the GraphNode object this edge belongs to.
   GraphNode &graphNode;
 
-  /// A vector of children nodes, i.e., the nodes that this edge (NodeRelationship) points to (outgoing edges).
+  /// A vector of child nodes, i.e., the nodes that this edge (NodeRelationship) points to (outgoing edges).
   std::vector<std::reference_wrapper<GraphNode>> children;
 
   /// A vector of parent nodes, i.e., the nodes that point to this node (incoming edges).
@@ -36,48 +36,54 @@ class NodeRelationship {
   /// \param graphNode A reference to the graph this edge is associated with.
   NodeRelationship(RelationshipType relationshipType, GraphNode &graphNode);
 
-  ///
+  /// Adds a new GraphNode as child to this NodeRelationship.
   /// \param child
   /// \param addBackreference
   void addChild(GraphNode &child, bool addBackreference = true);
 
-  ///
+  /// Adds a new GraphNode as parent to this NodeRelationship.
   /// \param parent
   /// \param addBackreference
   void addParent(GraphNode &parent, bool addBackreference = true);
 
-  ///
-  /// \return (A reference to) the children nodes of this NodeRelationship.
+  /// Get the child nodes of this NodeRelationship, i.e., nodes that this edge's associated GraphNode points to.
+  /// \return (A reference to) the child nodes of this NodeRelationship.
   std::vector<std::reference_wrapper<GraphNode>> getChildren();
 
-  ///
-  /// \return (A const reference to) the children nodes of this NodeRelationship.
+  /// Get the child nodes of this NodeRelationship, i.e., nodes that this edge's associated GraphNode points to.
+  /// \return (A const reference to) the child nodes of this NodeRelationship.
   [[nodiscard]] std::vector<std::reference_wrapper<const GraphNode>> getChildren() const;
 
-  ///
+  /// Get the parent nodes of this NodeRelationship, i.e., nodes that point to the GraphNode that is associated with
+  /// this NodeRelationship.
   /// \return (A reference to) the parent nodes of this NodeRelationship.
   std::vector<std::reference_wrapper<GraphNode>> getParents();
 
-  ///
+  /// Get the parent nodes of this NodeRelationship, i.e., nodes that point to the GraphNode that is associated with
+  /// this NodeRelationship.
   /// \return (A const reference to) the parent nodes of this NodeRelationship.
   [[nodiscard]] std::vector<std::reference_wrapper<const GraphNode>> getParents() const;
 
-  ///
-  /// \return
+  /// Get the only existing child node. If there exists no child node or there exists more than one, it throws a runtime
+  /// error.
+  /// \throws std::runtime_error If this node has no children or more than one child.
+  /// \return (A reference to) The only child node associated with this NodeRelationship.
   GraphNode &getOnlyChild();
 
-  ///
-  /// \return
+  /// Get the only existing child node. If there exists no child node or there exists more than one, it throws a runtime
+  /// error.
+  /// \throws std::runtime_error If this node has no children or more than one child.
+  /// \return (A const reference to) The only child node associated with this NodeRelationship.
   [[nodiscard]] const GraphNode &getOnlyChild() const;
 
-  ///
-  /// \param index
-  /// \return
+  /// Gets the child at the given index.
+  /// \param index The index of the requested child.
+  /// \return (A reference to) The child at the given index.
   [[nodiscard]] GraphNode &getChildAtIndex(int index);
 
-  ///
-  /// \param index
-  /// \return
+  /// Gets the child at the given index.
+  /// \param index The index of the requested child.
+  /// \return (A const reference to) The child at the given index.
   [[nodiscard]] const GraphNode &getChildAtIndex(int index) const;
 
   /// Traverses all nodes reachable from the current nodes (descendants) in a depth-first search style and prints the
