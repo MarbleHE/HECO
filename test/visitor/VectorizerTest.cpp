@@ -88,6 +88,8 @@ TEST(VectorizerTest, sumStatementsPowerOfTwo) {
   //TODO: How to communicate the slot of the result to the runtime system?
   // maybe something like __sum__i__ where i is the slot index?
   // Then we could get rid of the sum = sum * {1,0,0...} masking + it would be less brittle
+  //TODO: Add rotate keyword to Parser (simple workaround until we have real function calls)
+  //TODO: How to represent rotations in AST? Generic function call or specific node
   const char *expectedChars = R""""(
     sum = x + rotate(x, 4);
     sum = sum + rotate(sum, 2);
@@ -121,6 +123,10 @@ TEST(VectorizerTest, sumStatementsGeneral) {
 
   // First extend the vector to the next power of two (and mask away any potential garbage)
   // TODO: Is there a away to avoid this by keeping some additional info or having invariants/guarantees on inputs?
+  // TODO: The compiler should all of this internally, everything output to the runtime system is just executed blindly
+  // i.e. if masking is needed, compiler outputs masking statement, if not it's simply ommitted
+  // TODO: Internally in the computation, the compiler can keep track of target slot and runtime system does not need to know
+  // TODO: However, when returning and decrypting the client needs to know => i.e. generate one auxillary file that defines input encoding and output decoding!
   const char *expectedChars = R""""(
     sum = x * {1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0};
     sum = sum + rotate(sum, 8);
@@ -134,3 +140,13 @@ TEST(VectorizerTest, sumStatementsGeneral) {
 
   EXPECT_TRUE(compareAST(*inputAST,*expectedAST));
 }
+
+//TODO: Extend tests to cardio program
+// Idea for algorithm: Go through operand-expr (lik sum) style and instead of only checking for exact match,
+// do full batchability of expression logic, comparing all in set + current candidate and potentially transforming current or in set
+// Main challenge: need to later output batching "map" from this. easiest if all variables are "free", i.e. not constrained.
+// More difficult in general, lots of option, could also encode things twice, but now optimality no longer obvious.
+
+//TODO: Write of lots of tests for "find best rotation" <- try to extend to general situations and free/constrained encodings of variables
+
+//TODO: Write lots of tests for batchability detection logic and think about algorithm shortcuts for "boring case" like sum.
