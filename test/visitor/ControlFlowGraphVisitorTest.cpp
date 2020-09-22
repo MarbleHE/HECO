@@ -136,6 +136,13 @@ TEST(ControlFlowGraphVisitorTest, cfg_ForProgram) { /* NOLINT */
 
 
 // == Tests for the Data Flow Graph
+// We consider two types of tests here: (1) Tests that check whether the accessedVariables map contains the correct
+// information about read/written variables. (2) Tests that verify that the graph structure of the data flow graph
+// matches the expected one (similar as for the control flow graph).
+// Tests for category (1) are built during the first pass (in which the CFG is built too) and do not require to build
+// the data flow graph at all.
+
+// (1) Tests for the accessedVariables map
 
 bool setContains(const std::set<VariableAccessPair> &variableAccesses,
                  const std::string &expectedIdentifier,
