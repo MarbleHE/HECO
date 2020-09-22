@@ -8,12 +8,10 @@
 #include <stack>
 #include <sstream>
 
+// forward declarations
 class GraphNode;
 
 enum class RelationshipType { CTRL_FLOW_GRAPH, DATA_FLOW_GRAPH };
-
-// forward declarations
-class GraphNode;
 
 class NodeRelationship {
  private:
@@ -101,7 +99,7 @@ class NodeRelationship {
   /// Iterates over all reachable GraphNodes by considering all children and parent nodes and returns the set of
   /// reachable nodes. Note that it only considers the RelationshipType of this NodeRelationship.
   /// \return The set of nodes that are reachable from this NodeRelationship.
-  [[nodiscard]] std::set<std::reference_wrapper<GraphNode>> getAllReachableNodes() const;
+  [[nodiscard]] std::vector<std::reference_wrapper<GraphNode>> getAllReachableNodes() const;
 
   /// Checks whether the given GraphNode node is a child node in this NodeRelationship.
   /// \param node The node to be checked whether it is a child node.

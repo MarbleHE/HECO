@@ -101,7 +101,7 @@ void NodeRelationship::printNodes(std::ostream &outputStream) const {
 
 bool NodeRelationship::isEqualToGraph(GraphNode &rootNodeOther) const {
   // nodes that were already visited, helps to detect and bypass graph cycles
-  std::set<std::reference_wrapper<GraphNode>> visitedNodes;
+  std::unordered_set<std::reference_wrapper<GraphNode>, GraphNodeHashFunction> visitedNodes;
 
   // define queues to be used to define nodes to process next
   std::stack<std::reference_wrapper<GraphNode>> qOne;
@@ -111,9 +111,9 @@ bool NodeRelationship::isEqualToGraph(GraphNode &rootNodeOther) const {
 
   while (!qOne.empty()) {
     // retrieve next nodes t
-    auto thisCurrentNode = std::move(qOne.top().get());
+    GraphNode &thisCurrentNode = qOne.top().get();
     qOne.pop();
-    auto otherCurrentNode = std::move(qOther.top().get());
+    GraphNode &otherCurrentNode = qOther.top().get();
     qOther.pop();
 
     // check that the number of child and parent nodes is equal
@@ -162,9 +162,14 @@ std::vector<std::reference_wrapper<const GraphNode>> NodeRelationship::getParent
   return result;
 }
 
-std::set<std::reference_wrapper<GraphNode>> NodeRelationship::getAllReachableNodes() const {
+inline bool operator==(std::reference_wrapper<GraphNode> const &lhs, std::reference_wrapper<GraphNode> const &rhs) {
+  return true;
+}
+
+std::vector<std::reference_wrapper<GraphNode>> NodeRelationship::getAllReachableNodes() const {
   // the set of nodes that we already  nodes; this is needed because our CFG can contain cycles (e.g., For loop)
-  std::set<std::reference_wrapper<GraphNode>> visitedNodes;
+  std::set<std::string> visitedNodes_uniqueNodeIds;
+  std::vector<std::reference_wrapper<GraphNode>> visitedNodes;
   // the set of nodes that we did not visit yet
   std::stack<std::reference_wrapper<GraphNode>> nextNodeToVisit;
   nextNodeToVisit.emplace(this->graphNode);
@@ -172,9 +177,10 @@ std::set<std::reference_wrapper<GraphNode>> NodeRelationship::getAllReachableNod
     auto curNode = nextNodeToVisit.top();
     nextNodeToVisit.pop();
     // if this node was processed before: do not visit it again, otherwise we'll end up in an infinite loop
-    if (visitedNodes.count(curNode) > 0) { continue; }
+    if (visitedNodes_uniqueNodeIds.count(curNode.get().getAstNode().getUniqueNodeId()) > 0) { continue; }
     // remember that we visited this node
-    visitedNodes.insert(curNode);
+    visitedNodes_uniqueNodeIds.insert(curNode.get().getAstNode().getUniqueNodeId());
+    visitedNodes.push_back(curNode);
     // enqueue children of current node (in reverse order to perform BFS from lhs to rhs)
     auto curNodeChildren = curNode.get().getControlFlowGraph().getChildren();
     for (auto it = curNodeChildren.rbegin(); it!=curNodeChildren.rend(); ++it) { nextNodeToVisit.push(*it); }
