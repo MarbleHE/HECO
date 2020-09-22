@@ -13,9 +13,15 @@
 
 // TODO: Add some tests to see whether CFG is properly constructed.
 
+std::vector<std::reference_wrapper<GraphNode>> createParentsVector(std::initializer_list<GraphNode *> nodes) {
+  std::vector<std::reference_wrapper<GraphNode>> parents;
+  for (auto node : nodes) parents.push_back(std::ref(*node));
+  return parents;
+}
+
 TEST(ControlFlowGraphVisitorTest, cfg_simpleProgram) { /* NOLINT */
   const char *inputChars = R""""(
-    int main() {
+    public int main(int a, int z, int v) {
       int a = 10;
       return a;
     }
@@ -26,8 +32,21 @@ TEST(ControlFlowGraphVisitorTest, cfg_simpleProgram) { /* NOLINT */
   ControlFlowGraphVisitor cfgv;
   inputAST->accept(cfgv);
 
-  // TODO: Complete test after having specified public interface
-  std::cout << "END." << std::endl;
+  auto &gn = cfgv.getRootNode();
+
+  const auto relType = RelationshipType::CTRL_FLOW_GRAPH;
+  auto dummyAstNode = Block();
+  auto functionStmt = std::make_unique<GraphNode>(dummyAstNode);
+  auto blockStmt = std::make_unique<GraphNode>(dummyAstNode, relType, createParentsVector({functionStmt.get()}));
+  auto varDeclStmt = std::make_unique<GraphNode>(dummyAstNode, relType, createParentsVector({blockStmt.get()}));
+  auto returnStmt = std::make_unique<GraphNode>(dummyAstNode, relType, createParentsVector({varDeclStmt.get()}));
+
+// check that the CFG's structure is correct
+  EXPECT_TRUE(functionStmt->getControlFlowGraph().isEqualToGraph(cfgv.getRootNode()));
+
+// check that all nodes of the CFG have a refToOriginalNode set
+  auto allNodes = cfgv.getRootNode().getControlFlowGraph().getAllReachableNodes();
+  EXPECT_EQ(allNodes.size(), 5);
 }
 
 // == Tests for the Data Flow Graph
@@ -190,6 +209,8 @@ TEST(ControlFlowGraphVisitorTest, dfg_forLoop_accumulation) { /* NOLINT */
 }
 
 TEST(ControlFlowGraphVisitorTest, dfg_forLoop_localVariable_emptyUpdate) { /* NOLINT */
+  // TODO: Remove outer block
+  // TODO: ControlFlowGraphVisitor akzeptiert als Eingabe Block/If/For
   const char *inputChars = R""""(
     {
       for (int i = 0; i < 100; ) {
