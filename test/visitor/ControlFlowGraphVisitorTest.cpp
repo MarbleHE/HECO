@@ -13,7 +13,7 @@
 
 // TODO: Add some tests to see whether CFG is properly constructed.
 
-TEST(ControlFlowGraphVisitorTest, forLoop_localVariable_emptyUpdate) { /* NOLINT */
+TEST(ControlFlowGraphVisitorTest, cfg_simpleProgram) { /* NOLINT */
   const char *inputChars = R""""(
     int main() {
       int a = 10;
@@ -48,7 +48,7 @@ GraphNode &getNthStatementInBlock(ControlFlowGraphVisitor &cfgv, int n) {
   return cfgv.getRootNode().getDataFlowGraph().getChildAtIndex(n);
 }
 
-TEST(ControlFlowGraphVisitorTest, noScopeGiven_expectFail) { /* NOLINT */
+TEST(ControlFlowGraphVisitorTest, dfg_noScopeGiven_expectFail) { /* NOLINT */
   const char *inputChars = R""""(
     int z = 0;
     )"""";
@@ -59,7 +59,7 @@ TEST(ControlFlowGraphVisitorTest, noScopeGiven_expectFail) { /* NOLINT */
   EXPECT_THROW(inputAST->accept(cfgv), std::runtime_error);
 }
 
-TEST(ControlFlowGraphVisitorTest, simpleAssignment) { /* NOLINT */
+TEST(ControlFlowGraphVisitorTest, dfg_simpleAssignment) { /* NOLINT */
   const char *inputChars = R""""(
     {
       int z = 0;
@@ -78,7 +78,7 @@ TEST(ControlFlowGraphVisitorTest, simpleAssignment) { /* NOLINT */
   EXPECT_TRUE(setContains(accessedVariables, "z", VariableAccessType::WRITE));
 }
 
-TEST(ControlFlowGraphVisitorTest, simpleReadWriteAssignment) { /* NOLINT */
+TEST(ControlFlowGraphVisitorTest, dfg_simpleReadWriteAssignment) { /* NOLINT */
   const char *inputChars = R""""(
     {
       int q = a + 7;
@@ -97,7 +97,7 @@ TEST(ControlFlowGraphVisitorTest, simpleReadWriteAssignment) { /* NOLINT */
   EXPECT_TRUE(setContains(accessedVariables, "a", VariableAccessType::READ));
 }
 
-TEST(ControlFlowGraphVisitorTest, ifStatement) { /* NOLINT */
+TEST(ControlFlowGraphVisitorTest, dfg_ifStatement) { /* NOLINT */
   const char *inputChars = R""""(
     {
       if (c > 100) {
@@ -121,7 +121,7 @@ TEST(ControlFlowGraphVisitorTest, ifStatement) { /* NOLINT */
   EXPECT_TRUE(setContains(accessedVariables_thenBlock, "a", VariableAccessType::WRITE));
 }
 
-TEST(ControlFlowGraphVisitorTest, ifElseStatement) { /* NOLINT */
+TEST(ControlFlowGraphVisitorTest, dfg_ifElseStatement) { /* NOLINT */
   const char *inputChars = R""""(
     {
       if (c > 100) {
@@ -152,7 +152,7 @@ TEST(ControlFlowGraphVisitorTest, ifElseStatement) { /* NOLINT */
   EXPECT_TRUE(setContains(accessedVariables_thenBlock, "a", VariableAccessType::WRITE));
 }
 
-TEST(ControlFlowGraphVisitorTest, forLoop_accumulation) { /* NOLINT */
+TEST(ControlFlowGraphVisitorTest, dfg_forLoop_accumulation) { /* NOLINT */
   const char *inputChars = R""""(
     {
       int sum = 0;
@@ -189,7 +189,7 @@ TEST(ControlFlowGraphVisitorTest, forLoop_accumulation) { /* NOLINT */
   EXPECT_TRUE(setContains(accessedVariables_initializer, "sum", VariableAccessType::WRITE));
 }
 
-TEST(ControlFlowGraphVisitorTest, forLoop_localVariable_emptyUpdate) { /* NOLINT */
+TEST(ControlFlowGraphVisitorTest, dfg_forLoop_localVariable_emptyUpdate) { /* NOLINT */
   const char *inputChars = R""""(
     {
       for (int i = 0; i < 100; ) {
