@@ -38,24 +38,21 @@ class GraphNode {
   /// consists of statement nodes.
   explicit GraphNode(AbstractNode &originalNode);
 
-//  /// Copy constructor.
-//  /// \param other
-//  GraphNode(const GraphNode &other);
-//
-//  /// Move constructor.
-//  ///
-//  /// \param other
-//  GraphNode(GraphNode &&other) noexcept;
-//
-//  /// Copy assignment constructor.
-//  /// \param other
-//  /// \return
-//  GraphNode &operator=(const GraphNode &other);
-//
-//  /// Move assignment constructor.
-//  /// \param other
-//  /// \return
-//  GraphNode &operator=(GraphNode &&other) noexcept;
+  /// Creates a new GraphNode: a node in the control/data flow graph.
+  /// This method is intended for TESTING PURPOSES ONLY and should not be used in real-world usage.
+  /// \param originalNode The corresponding node in the AST classes. Must inherit from AbstractStatement as CFG/DFG only
+  /// consists of statement nodes.
+  /// \param relationshipType The relationship the given parentsToBeAdded nodes should be added to.
+  /// \param parentsToBeAdded A list of (reference-wrapped) GraphNodes to be added as parent of the this node.
+  GraphNode(AbstractNode &originalNode,
+            RelationshipType relationshipType,
+            const std::vector<std::reference_wrapper<GraphNode>> &parentsToBeAdded);
+
+  /// Compares GraphNodes based on the unique node ID of the associated AST node, the number of children and parents
+  /// in both the control flow graph and the data flow graph.
+  /// \param t A reference-wrapped GraphNode object to compare this GraphNode with.
+  /// \return True iff both GraphNodes are equal.
+  bool operator==(const std::reference_wrapper<GraphNode> &t) const;
 
   /// Retrieves the relationship (i.e., information about edges from this node) that corresponds to the given
   /// relationship type.
@@ -110,6 +107,19 @@ class GraphNode {
   /// Get the edges in the data flow graph.
   /// \return (A const reference to) the NodeRelationship of the dataflow graph.
   [[nodiscard]] const NodeRelationship &getDataFlowGraph() const;
+};
+
+class GraphNodeHashFunction {
+  /// This function must be passed to certain STL containers if they should contain GraphNodes, for example,
+  /// std::unordered_set<std::reference_wrapper<GraphNode>, GraphNodeHashFunction> mySet.
+ public:
+  size_t operator()(const std::reference_wrapper<GraphNode> &t) const {
+    return std::hash<std::string>()(t.get().getAstNode().getUniqueNodeId())
+        ^ std::hash<int>()(t.get().getControlFlowGraph().getChildren().size())
+        ^ std::hash<int>()(t.get().getControlFlowGraph().getParents().size())
+        ^ std::hash<int>()(t.get().getDataFlowGraph().getChildren().size())
+        ^ std::hash<int>()(t.get().getDataFlowGraph().getParents().size());
+  }
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_VISITOR_CONTROLFLOWGRAPH_GRAPHNODE_H_

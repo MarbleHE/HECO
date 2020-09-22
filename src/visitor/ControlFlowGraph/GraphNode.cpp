@@ -7,6 +7,17 @@ GraphNode::GraphNode(AbstractNode &originalNode) : astNode(originalNode) {
   dataFlowGraph = std::make_unique<NodeRelationship>(RelationshipType::DATA_FLOW_GRAPH, *this);
 }
 
+GraphNode::GraphNode(AbstractNode &originalNode,
+                     RelationshipType relationshipType,
+                     const std::vector<std::reference_wrapper<GraphNode>> &parentsToBeAdded)
+    : astNode(originalNode) {
+  controlFlowGraph = std::make_unique<NodeRelationship>(RelationshipType::CTRL_FLOW_GRAPH, *this);
+  dataFlowGraph = std::make_unique<NodeRelationship>(RelationshipType::DATA_FLOW_GRAPH, *this);
+  for (auto &parentNode : parentsToBeAdded) {
+    getRelationship(relationshipType).addParent(parentNode);
+  }
+}
+
 NodeRelationship &GraphNode::getControlFlowGraph() {
   return *controlFlowGraph;
 }
@@ -67,3 +78,23 @@ const NodeRelationship &GraphNode::getRelationship(RelationshipType relationship
 void GraphNode::setAccessedVariables(std::set<VariableAccessPair> &&variablesAccesses) {
   this->variablesAccessMap = std::move(variablesAccesses);
 }
+
+bool GraphNode::operator==(const std::reference_wrapper<GraphNode> &t) const {
+  return
+    // same uniqueNodeId
+      this->getAstNode().getUniqueNodeId()
+          ==t.get().getAstNode().getUniqueNodeId()
+          // same number of control flow graph children
+          && this->getControlFlowGraph().getChildren().size()
+              ==t.get().getControlFlowGraph().getChildren().size()
+              // same number of control flow graph parents
+          && this->getControlFlowGraph().getParents().size()
+              ==t.get().getControlFlowGraph().getParents().size()
+              // same number of data flow graph children
+          && this->getDataFlowGraph().getChildren().size()
+              ==t.get().getDataFlowGraph().getChildren().size()
+              // same number of data flow graph parents
+          && this->getDataFlowGraph().getParents().size()
+              ==t.get().getDataFlowGraph().getParents().size();
+}
+
