@@ -10,8 +10,8 @@
 #include "ast_opt/ast/VariableDeclaration.h"
 
 void SpecialControlFlowGraphVisitor::visit(Assignment &node) {
-  std::cout << "Visiting Assignment..." << std::endl;
-  auto graphNode = createGraphNodeAndAppendToCfg(node);
+  std::cout << "Visiting Assignment (" << node.getUniqueNodeId() << ")" << std::endl;
+  GraphNode &graphNode = createGraphNodeAndAppendToCfg(node);
 
   std::string identifier;
   if (auto variable = dynamic_cast<Variable *>(&node.getTarget())) {
@@ -19,23 +19,22 @@ void SpecialControlFlowGraphVisitor::visit(Assignment &node) {
   } else if (auto indexAccess = dynamic_cast<IndexAccess *>(&node.getTarget())) {
     // TODO implement me: must recursively go tree down and retrieve all variable identifiers
   }
-  // TODO: replace Scope() by current scope
   markVariableAccess(getCurrentScope().resolveIdentifier(identifier),
                      VariableAccessType::WRITE);
   ScopedVisitor::visit(node);
-  storeAccessedVariables(*graphNode);
+  storeAccessedVariables(graphNode);
 }
 
 void SpecialControlFlowGraphVisitor::visit(Block &node) {
-  std::cout << "Visiting Block" << std::endl;
-  auto graphNode = createGraphNodeAndAppendToCfg(node);
+  std::cout << "Visiting Block (" << node.getUniqueNodeId() << ")" << std::endl;
+  GraphNode &graphNode = createGraphNodeAndAppendToCfg(node);
   ScopedVisitor::visit(node);
-  storeAccessedVariables(*graphNode);
+  storeAccessedVariables(graphNode);
 }
 
 void SpecialControlFlowGraphVisitor::visit(For &node) {
-  std::cout << "Visiting For" << std::endl;
-  auto graphNode = createGraphNodeAndAppendToCfg(node);
+  std::cout << "Visiting For (" << node.getUniqueNodeId() << ")" << std::endl;
+  GraphNode &graphNode = createGraphNodeAndAppendToCfg(node);
 
   // initializer (e.g., int i = 0;)
   node.getInitializer().accept(*this);
@@ -43,7 +42,7 @@ void SpecialControlFlowGraphVisitor::visit(For &node) {
 
   // condition expression (e.g., i <= N)
   node.getCondition().accept(*this);
-  storeAccessedVariables(*graphNode);
+  storeAccessedVariables(graphNode);
   auto lastStatementCondition = lastCreatedNodes;
 
   // body (e.g., For (-; -; -) { body statements ... })
@@ -71,80 +70,75 @@ void SpecialControlFlowGraphVisitor::visit(For &node) {
 }
 
 void SpecialControlFlowGraphVisitor::visit(Function &node) {
-  std::cout << "Visiting Function" << std::endl;
-  auto graphNode = createGraphNodeAndAppendToCfg(node);
+  std::cout << "Visiting Function (" << node.getUniqueNodeId() << ")" << std::endl;
+  GraphNode &graphNode = createGraphNodeAndAppendToCfg(node);
   ScopedVisitor::visit(node);
-  storeAccessedVariables(*graphNode);
+  storeAccessedVariables(graphNode);
 }
 
 void SpecialControlFlowGraphVisitor::visit(If &node) {
-  std::cout << "Visiting If" << std::endl;
-  auto graphNode = createGraphNodeAndAppendToCfg(node);
+  std::cout << "Visiting If (" << node.getUniqueNodeId() << ")" << std::endl;
+  GraphNode &graphNode = createGraphNodeAndAppendToCfg(node);
+  auto lastStatementIf = lastCreatedNodes;
 
   // condition
   node.getCondition().accept(*this);
-
-  // TODO store variable read/writes into current statement
-
+  storeAccessedVariables(graphNode);
 
   // then branch: connect this statement with then branch
   node.getThenBranch().accept(*this);
   auto lastStatementThenBranch = lastCreatedNodes;
 
-  // if existing, visit the else branch
+  // if existing, connect If statement with Else block
   if (node.hasElseBranch()) {
-
-  } else {
-
+    lastCreatedNodes = lastStatementIf;
+    // else branch
+    node.getElseBranch().accept(*this);
   }
-
-
-
-  // else branch
-  node.getElseBranch().accept(*this);
-
 //  ScopedVisitor::visit(node);
 }
 
 void SpecialControlFlowGraphVisitor::visit(Return &node) {
-  std::cout << "Visiting Return" << std::endl;
-
-//  ScopedVisitor::visit(node);
+  std::cout << "Visiting Return (" << node.getUniqueNodeId() << ")" << std::endl;
+  GraphNode &graphNode = createGraphNodeAndAppendToCfg(node);
+  ScopedVisitor::visit(node);
+  storeAccessedVariables(graphNode);
 }
 
 void SpecialControlFlowGraphVisitor::visit(VariableDeclaration &node) {
-  std::cout << "Visiting VariableDeclaration" << std::endl;
-
-//  ScopedVisitor::visit(node);
+  std::cout << "Visiting VariableDeclaration (" << node.getUniqueNodeId() << ")" << std::endl;
+  GraphNode &graphNode = createGraphNodeAndAppendToCfg(node);
+  markVariableAccess(getCurrentScope().resolveIdentifier(node.getTarget().getIdentifier()),
+                     VariableAccessType::WRITE);
+  storeAccessedVariables(graphNode);
 }
 
-GraphNode *SpecialControlFlowGraphVisitor::createGraphNodeAndAppendToCfg(AbstractStatement &statement) {
-  createGraphNodeAndAppendToCfg(statement, lastCreatedNodes);
+GraphNode &SpecialControlFlowGraphVisitor::createGraphNodeAndAppendToCfg(AbstractStatement &statement) {
+  return createGraphNodeAndAppendToCfg(statement, lastCreatedNodes);
 }
 
-GraphNode *SpecialControlFlowGraphVisitor::createGraphNodeAndAppendToCfg(
+GraphNode &SpecialControlFlowGraphVisitor::createGraphNodeAndAppendToCfg(
     AbstractStatement &statement,
     const std::vector<std::reference_wrapper<GraphNode>> &parentNodes) {
 
   // create a new GraphNode for the given statement
-  auto graphNode = std::make_unique<GraphNode>(statement);
+  auto graphNodeUniquePtr = std::make_unique<GraphNode>(statement);
+  GraphNode &graphNodeRef = *graphNodeUniquePtr;
 
   // add this node as child to all parents passed in parentNodes vector
   for (auto &p : parentNodes) {
-    p.get().getControlFlowGraph().addChild(*graphNode);
+    p.get().getControlFlowGraph().addChild(graphNodeRef);
   }
-
-  // store this node so that we can delete it during the visitor's destruction
-  nodes.emplace_back(std::move(graphNode));
 
   // update the lastCreatedNodes vector
   lastCreatedNodes.clear();
-  lastCreatedNodes.emplace_back(**nodes.end());
-}
+  lastCreatedNodes.emplace_back(graphNodeRef);
 
-SpecialControlFlowGraphVisitor::~SpecialControlFlowGraphVisitor() {
-  // delete all nodes belonging to this ControlFlowGraphVisitor (CFG/DFG)
-  nodes.clear();
+  // store this node so that we can delete it during the visitor's destruction
+  // NOTE: After this statement graphNodeUniquePtr is not accessible anymore!
+  nodes.emplace_back(std::move(graphNodeUniquePtr));
+
+  return graphNodeRef;
 }
 
 void SpecialControlFlowGraphVisitor::storeAccessedVariables(GraphNode &graphNode) {

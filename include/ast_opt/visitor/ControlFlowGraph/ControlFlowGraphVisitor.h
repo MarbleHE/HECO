@@ -23,9 +23,9 @@ class SpecialControlFlowGraphVisitor : public ScopedVisitor {
   /// The nodes that were created most recently. Those are the parent nodes of the next node to be created.
   std::vector<std::reference_wrapper<GraphNode>> lastCreatedNodes;
 
-  GraphNode *createGraphNodeAndAppendToCfg(AbstractStatement &statement);
+  GraphNode &createGraphNodeAndAppendToCfg(AbstractStatement &statement);
 
-  GraphNode *createGraphNodeAndAppendToCfg(AbstractStatement &statement,
+  GraphNode &createGraphNodeAndAppendToCfg(AbstractStatement &statement,
                                            const std::vector<std::reference_wrapper<GraphNode>> &parentNodes);
 
   /// A set containing pairs of (variable identifier, access type) where variable identifier is the name of a variable
@@ -35,7 +35,7 @@ class SpecialControlFlowGraphVisitor : public ScopedVisitor {
 
  public:
 
-  virtual ~SpecialControlFlowGraphVisitor();
+  virtual ~SpecialControlFlowGraphVisitor() = default;
 
   void visit(Assignment &node) override;
 
