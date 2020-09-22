@@ -108,176 +108,97 @@ constexpr bool has_visit = is_visit_available<T, Args...>::value;
 /// the function for the (potentially abstract) base class will be called by Visitor<...>'s visit(concrete&)
 ///
 /// \tparam SpecialVisitor  The class implementing the actual visiting logic
-template <typename SpecialVisitor>
-class Visitor : public SpecialVisitor{
+
+#define VISIT_SPECIAL_VISITOR_IF_EXISTS(AstClassName) if constexpr (has_visit<SpecialVisitor, AstClassName&>) { this->SpecialVisitor::visit(elem); } else { this->ScopedVisitor::visit(elem); }
+
+template<typename SpecialVisitor>
+class Visitor : public SpecialVisitor {
   //TODO: Replace ScopedVisitor with a template argument "DefaultVisitor"
-  //TODO: Write a Macro for the functions so you don't have to repeat things
  public:
   /// Ensure that SpecialVisitor is actually a visitor
-  static_assert(std::is_base_of<IVisitor,SpecialVisitor>::value);
+  static_assert(std::is_base_of<IVisitor, SpecialVisitor>::value);
 
   /// Inherit Constructors from SpecialVisitor
   using SpecialVisitor::SpecialVisitor;
 
   void visit(BinaryExpression &elem) override {
-    if constexpr (has_visit<SpecialVisitor, BinaryExpression&>)  {
-      this->SpecialVisitor::visit(elem);
-    } else {
-      this->ScopedVisitor::visit(elem);
-    }
-
+    VISIT_SPECIAL_VISITOR_IF_EXISTS(BinaryExpression);
   }
 
   void visit(Block &elem) override {
-    if constexpr (has_visit<SpecialVisitor,Block&>)  {
-      this->SpecialVisitor::visit(elem);
-    } else {
-      this->ScopedVisitor::visit(elem);
-    }
+    VISIT_SPECIAL_VISITOR_IF_EXISTS(Block);
   }
 
   void visit(ExpressionList &elem) override {
-    if constexpr (has_visit<SpecialVisitor,ExpressionList&>)  {
-      this->SpecialVisitor::visit(elem);
-    } else {
-      this->ScopedVisitor::visit(elem);
-    }
+    VISIT_SPECIAL_VISITOR_IF_EXISTS(ExpressionList);
   }
 
   void visit(For &elem) override {
-    if constexpr (has_visit<SpecialVisitor,For&>)  {
-      this->SpecialVisitor::visit(elem);
-    } else {
-      this->ScopedVisitor::visit(elem);
-    }
+    VISIT_SPECIAL_VISITOR_IF_EXISTS(For);
   }
 
   void visit(Function &elem) override {
-    if constexpr (has_visit<SpecialVisitor,Function&>)  {
-      this->SpecialVisitor::visit(elem);
-    } else {
-      this->ScopedVisitor::visit(elem);
-    }
+    VISIT_SPECIAL_VISITOR_IF_EXISTS(Function);
   }
 
   void visit(FunctionParameter &elem) override {
-    if constexpr (has_visit<SpecialVisitor,FunctionParameter&>)  {
-      this->SpecialVisitor::visit(elem);
-    } else {
-      this->ScopedVisitor::visit(elem);
-    }
+    VISIT_SPECIAL_VISITOR_IF_EXISTS(FunctionParameter);
   }
 
   void visit(If &elem) override {
-    if constexpr (has_visit<SpecialVisitor,If&>)  {
-      this->SpecialVisitor::visit(elem);
-    } else {
-      this->ScopedVisitor::visit(elem);
-    }
+    VISIT_SPECIAL_VISITOR_IF_EXISTS(If);
   }
 
   void visit(IndexAccess &elem) override {
-    if constexpr (has_visit<SpecialVisitor,IndexAccess&>)  {
-      this->SpecialVisitor::visit(elem);
-    } else {
-      this->ScopedVisitor::visit(elem);
-    }
+    VISIT_SPECIAL_VISITOR_IF_EXISTS(IndexAccess);
   }
 
   void visit(LiteralBool &elem) override {
-    if constexpr (has_visit<SpecialVisitor,LiteralBool&>)  {
-      this->SpecialVisitor::visit(elem);
-    } else {
-      this->ScopedVisitor::visit(elem);
-    }
+    VISIT_SPECIAL_VISITOR_IF_EXISTS(LiteralBool);
   }
 
   void visit(LiteralChar &elem) override {
-    if constexpr (has_visit<SpecialVisitor,LiteralChar&>)  {
-      this->SpecialVisitor::visit(elem);
-    } else {
-      this->ScopedVisitor::visit(elem);
-    }
+    VISIT_SPECIAL_VISITOR_IF_EXISTS(LiteralChar);
   }
 
   void visit(LiteralInt &elem) override {
-    if constexpr (has_visit<SpecialVisitor,LiteralInt&>)  {
-      this->SpecialVisitor::visit(elem);
-    } else {
-      this->ScopedVisitor::visit(elem);
-    }
+    VISIT_SPECIAL_VISITOR_IF_EXISTS(LiteralInt);
   }
 
   void visit(LiteralFloat &elem) override {
-    if constexpr (has_visit<SpecialVisitor,LiteralFloat&>)  {
-      this->SpecialVisitor::visit(elem);
-    } else {
-      this->ScopedVisitor::visit(elem);
-    }
+    VISIT_SPECIAL_VISITOR_IF_EXISTS(LiteralFloat);
   }
 
   void visit(LiteralDouble &elem) override {
-    if constexpr (has_visit<SpecialVisitor,LiteralDouble&>)  {
-      this->SpecialVisitor::visit(elem);
-    } else {
-      this->ScopedVisitor::visit(elem);
-    }
+    VISIT_SPECIAL_VISITOR_IF_EXISTS(LiteralDouble);
   }
 
   void visit(LiteralString &elem) override {
-    if constexpr (has_visit<SpecialVisitor,LiteralString&>)  {
-      this->SpecialVisitor::visit(elem);
-    } else {
-      this->ScopedVisitor::visit(elem);
-    }
+    VISIT_SPECIAL_VISITOR_IF_EXISTS(LiteralString);
   }
 
   void visit(OperatorExpression &elem) override {
-    if constexpr (has_visit<SpecialVisitor, OperatorExpression&>)  {
-      this->SpecialVisitor::visit(elem);
-    } else {
-      this->ScopedVisitor::visit(elem);
-    }
+    VISIT_SPECIAL_VISITOR_IF_EXISTS(OperatorExpression);
   }
 
   void visit(Return &elem) override {
-    if constexpr (has_visit<SpecialVisitor, Return&>)  {
-      this->SpecialVisitor::visit(elem);
-    } else {
-      this->ScopedVisitor::visit(elem);
-    }
+    VISIT_SPECIAL_VISITOR_IF_EXISTS(Return);
   }
 
   void visit(UnaryExpression &elem) override {
-    if constexpr (has_visit<SpecialVisitor, UnaryExpression&>)  {
-      this->SpecialVisitor::visit(elem);
-    } else {
-      this->ScopedVisitor::visit(elem);
-    }
+    VISIT_SPECIAL_VISITOR_IF_EXISTS(UnaryExpression);
   }
 
   void visit(Assignment &elem) override {
-    if constexpr (has_visit<SpecialVisitor, Assignment&>)  {
-      this->SpecialVisitor::visit(elem);
-    } else {
-      this->ScopedVisitor::visit(elem);
-    }
+    VISIT_SPECIAL_VISITOR_IF_EXISTS(Assignment);
   }
 
   void visit(VariableDeclaration &elem) override {
-    if constexpr (has_visit<SpecialVisitor, VariableDeclaration&>)  {
-      this->SpecialVisitor::visit(elem);
-    } else {
-      this->ScopedVisitor::visit(elem);
-    }
+    VISIT_SPECIAL_VISITOR_IF_EXISTS(VariableDeclaration);
   }
 
   void visit(Variable &elem) override {
-    if constexpr (has_visit<SpecialVisitor,Variable&>)  {
-      this->SpecialVisitor::visit(elem);
-    } else {
-      this->ScopedVisitor::visit(elem);
-    }
+    VISIT_SPECIAL_VISITOR_IF_EXISTS(Variable);
   }
 };
 
