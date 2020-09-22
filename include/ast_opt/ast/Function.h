@@ -138,7 +138,7 @@ class FunctionIteratorImpl : public BaseIteratorImpl<T> {
 
   /// Does iterator point past the parameter vector? I.e. if we reached end, then this is 1,
   /// the "end" FunctionIteratorImpl has it == end & positions_beyond_parameter_vector = 2 (or 1 if there is no body)
-  size_t positions_beyond_parameter_vector;
+  size_t positions_beyond_parameter_vector = 0;
 
  public:
 
