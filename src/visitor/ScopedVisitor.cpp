@@ -16,128 +16,211 @@
 #include "ast_opt/visitor/ScopedVisitor.h"
 #include "ast_opt/utilities/Scope.h"
 
-void ScopedVisitor::visit(BinaryExpression & elem) {
-  for(auto& c : elem) {
-    c.accept(*this);
-  }
+void ScopedVisitor::visit(BinaryExpression &elem) {
+  visitChildren(elem);
 }
 
-void ScopedVisitor::visit(Block & elem) {
-  for(auto& c : elem) {
-    c.accept(*this);
-  }
+void ScopedVisitor::visit(Block &elem) {
+  enterScope(elem);
+  visitChildren(elem);
+  exitScope(elem);
 }
 
-void ScopedVisitor::visit(ExpressionList & elem) {
-  for(auto& c : elem) {
-    c.accept(*this);
-  }
+void ScopedVisitor::visit(ExpressionList &elem) {
+  visitChildren(elem);
 }
 
-void ScopedVisitor::visit(For & elem) {
-  for(auto& c : elem) {
-    c.accept(*this);
-  }
+void ScopedVisitor::visit(For &elem) {
+  enterScope(elem);
+  visitChildren(elem);
+  exitScope(elem);
 }
 
-void ScopedVisitor::visit(Function & elem) {
-  for(auto& c : elem) {
-    c.accept(*this);
-  }
+void ScopedVisitor::visit(Function &elem) {
+  visitChildren(elem);
 }
 
-void ScopedVisitor::visit(FunctionParameter & elem) {
-  for(auto& c : elem) {
-    c.accept(*this);
-  }
+void ScopedVisitor::visit(FunctionParameter &elem) {
+  visitChildren(elem);
 }
 
-void ScopedVisitor::visit(If & elem) {
-  for(auto& c : elem) {
-    c.accept(*this);
-  }
+void ScopedVisitor::visit(If &elem) {
+  enterScope(elem);
+  visitChildren(elem);
+  exitScope(elem);
 }
 
-void ScopedVisitor::visit(IndexAccess & elem) {
-  for(auto& c : elem) {
-    c.accept(*this);
-  }
+void ScopedVisitor::visit(IndexAccess &elem) {
+  visitChildren(elem);
 }
 
-void ScopedVisitor::visit(LiteralBool & elem) {
-  for(auto& c : elem) {
-    c.accept(*this);
-  }
+void ScopedVisitor::visit(LiteralBool &elem) {
+  visitChildren(elem);
 }
 
-void ScopedVisitor::visit(LiteralChar & elem) {
-  for(auto& c : elem) {
-    c.accept(*this);
-  }
+void ScopedVisitor::visit(LiteralChar &elem) {
+  visitChildren(elem);
 }
 
-void ScopedVisitor::visit(LiteralInt & elem) {
-  for(auto& c : elem) {
-    c.accept(*this);
-  }
+void ScopedVisitor::visit(LiteralInt &elem) {
+  visitChildren(elem);
 }
 
-void ScopedVisitor::visit(LiteralFloat & elem) {
-  for(auto& c : elem) {
-    c.accept(*this);
-  }
+void ScopedVisitor::visit(LiteralFloat &elem) {
+  visitChildren(elem);
 }
 
-void ScopedVisitor::visit(LiteralDouble & elem) {
-  for(auto& c : elem) {
-    c.accept(*this);
-  }
+void ScopedVisitor::visit(LiteralDouble &elem) {
+  visitChildren(elem);
 }
 
-void ScopedVisitor::visit(LiteralString & elem) {
-  for(auto& c : elem) {
-    c.accept(*this);
-  }
+void ScopedVisitor::visit(LiteralString &elem) {
+  visitChildren(elem);
 }
 
-void ScopedVisitor::visit(OperatorExpression & elem) {
-  for(auto& c : elem) {
-    c.accept(*this);
-  }
+void ScopedVisitor::visit(OperatorExpression &elem) {
+  visitChildren(elem);
 }
 
-void ScopedVisitor::visit(Return & elem) {
-  for(auto& c : elem) {
-    c.accept(*this);
-  }
+void ScopedVisitor::visit(Return &elem) {
+  visitChildren(elem);
 }
 
-void ScopedVisitor::visit(UnaryExpression & elem) {
-  for(auto& c : elem) {
-    c.accept(*this);
-  }
+void ScopedVisitor::visit(UnaryExpression &elem) {
+  visitChildren(elem);
 }
 
-void ScopedVisitor::visit(Assignment & elem) {
-  for(auto& c : elem) {
-    c.accept(*this);
-  }
+void ScopedVisitor::visit(Assignment &elem) {
+  visitChildren(elem);
 }
 
-void ScopedVisitor::visit(VariableDeclaration & elem) {
-  for (auto &c : elem) {
-    c.accept(*this);
-  }
+void ScopedVisitor::visit(VariableDeclaration &elem) {
+  getCurrentScope().addIdentifier(elem.getTarget().getIdentifier());
+  visitChildren(elem);
 }
 
 void ScopedVisitor::visit(Variable &elem) {
+  visitChildren(elem);
+}
+
+void ScopedVisitor::visitChildren(BinaryExpression &elem) {
   for (auto &c : elem) {
     c.accept(*this);
   }
 }
 
-ScopedVisitor::ScopedVisitor() {
-  currentScope = std::make_unique<Scope>();
+void ScopedVisitor::visitChildren(Block &elem) {
+  for (auto &c : elem) {
+    c.accept(*this);
+  }
+}
+
+void ScopedVisitor::visitChildren(ExpressionList &elem) {
+  for (auto &c : elem) {
+    c.accept(*this);
+  }
+}
+
+void ScopedVisitor::visitChildren(For &elem) {
+  for (auto &c : elem) {
+    c.accept(*this);
+  }
+}
+
+void ScopedVisitor::visitChildren(Function &elem) {
+  for (auto &c : elem) {
+    c.accept(*this);
+  }
+}
+
+void ScopedVisitor::visitChildren(FunctionParameter &elem) {
+  for (auto &c : elem) {
+    c.accept(*this);
+  }
+}
+
+void ScopedVisitor::visitChildren(If &elem) {
+  for (auto &c : elem) {
+    c.accept(*this);
+  }
+}
+
+void ScopedVisitor::visitChildren(IndexAccess &elem) {
+  for (auto &c : elem) {
+    c.accept(*this);
+  }
+}
+
+void ScopedVisitor::visitChildren(LiteralBool &elem) {
+  for (auto &c : elem) {
+    c.accept(*this);
+  }
+}
+
+void ScopedVisitor::visitChildren(LiteralChar &elem) {
+  for (auto &c : elem) {
+    c.accept(*this);
+  }
+}
+
+void ScopedVisitor::visitChildren(LiteralInt &elem) {
+  for (auto &c : elem) {
+    c.accept(*this);
+  }
+}
+
+void ScopedVisitor::visitChildren(LiteralFloat &elem) {
+  for (auto &c : elem) {
+    c.accept(*this);
+  }
+}
+
+void ScopedVisitor::visitChildren(LiteralDouble &elem) {
+  for (auto &c : elem) {
+    c.accept(*this);
+  }
+}
+
+void ScopedVisitor::visitChildren(LiteralString &elem) {
+  for (auto &c : elem) {
+    c.accept(*this);
+  }
+}
+
+void ScopedVisitor::visitChildren(OperatorExpression &elem) {
+  for (auto &c : elem) {
+    c.accept(*this);
+  }
+}
+
+void ScopedVisitor::visitChildren(Return &elem) {
+  for (auto &c : elem) {
+    c.accept(*this);
+  }
+}
+
+void ScopedVisitor::visitChildren(UnaryExpression &elem) {
+  for (auto &c : elem) {
+    c.accept(*this);
+  }
+}
+
+void ScopedVisitor::visitChildren(Assignment &elem) {
+  for (auto &c : elem) {
+    c.accept(*this);
+  }
+}
+
+void ScopedVisitor::visitChildren(VariableDeclaration &elem) {
+  for (auto &c : elem) {
+    c.accept(*this);
+  }
+}
+
+void ScopedVisitor::visitChildren(Variable &elem) {
+  for (auto &c : elem) {
+    c.accept(*this);
+  }
 }
 
 Scope &ScopedVisitor::getCurrentScope() {
@@ -146,4 +229,23 @@ Scope &ScopedVisitor::getCurrentScope() {
 
 const Scope &ScopedVisitor::getCurrentScope() const {
   return *currentScope;
+}
+
+void ScopedVisitor::enterScope(AbstractNode &node) {
+  if (rootScope==nullptr) {
+    // no scope created yet
+    rootScope = std::make_unique<Scope>(node);
+  } else {
+    // create nested scope with current scope as parent
+    currentScope = Scope::createNestedScope(getCurrentScope(), node);
+  }
+}
+
+void ScopedVisitor::exitScope(AbstractNode &node) {
+  if (currentScope) {
+    currentScope = &currentScope->getParentScope();
+  } else {
+    throw std::runtime_error("Cannot leave non-existent scope. "
+                             "Did you forget to call enterScope(...)?");
+  }
 }

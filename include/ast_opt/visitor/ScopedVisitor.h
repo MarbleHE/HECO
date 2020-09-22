@@ -4,15 +4,21 @@
 #include "ast_opt/visitor/IVisitor.h"
 #include "ast_opt/utilities/Scope.h"
 
+class AbstractStatement;
+
 /// This class implements the "default" behaviour of a visitor
 /// simply visiting a node's children
 /// and setting the scope as required
 class ScopedVisitor : public IVisitor {
  private:
-  std::unique_ptr<Scope> currentScope;
+
+  /// the outermost scope of the passed AST (i.e., the scope without a parent)
+  std::unique_ptr<Scope> rootScope;
+
+  /// the scope that the scopedVisitor is currently in during the AST traversal
+  Scope *currentScope;
 
  public:
-  ScopedVisitor();
 
   void visit(BinaryExpression &elem) override;
 
@@ -57,6 +63,50 @@ class ScopedVisitor : public IVisitor {
   Scope &getCurrentScope();
 
   [[nodiscard]] const Scope &getCurrentScope() const;
+
+  void visitChildren(BinaryExpression &elem);
+
+  void visitChildren(Block &elem);
+
+  void visitChildren(ExpressionList &elem);
+
+  void visitChildren(For &elem);
+
+  void visitChildren(Function &elem);
+
+  void visitChildren(FunctionParameter &elem);
+
+  void visitChildren(If &elem);
+
+  void visitChildren(IndexAccess &elem);
+
+  void visitChildren(LiteralBool &elem);
+
+  void visitChildren(LiteralChar &elem);
+
+  void visitChildren(LiteralInt &elem);
+
+  void visitChildren(LiteralFloat &elem);
+
+  void visitChildren(LiteralDouble &elem);
+
+  void visitChildren(LiteralString &elem);
+
+  void visitChildren(OperatorExpression &elem);
+
+  void visitChildren(Return &elem);
+
+  void visitChildren(UnaryExpression &elem);
+
+  void visitChildren(Assignment &elem);
+
+  void visitChildren(VariableDeclaration &elem);
+
+  void visitChildren(Variable &elem);
+
+  void enterScope(AbstractNode &node);
+
+  void exitScope(AbstractNode &node);
 };
 
 
