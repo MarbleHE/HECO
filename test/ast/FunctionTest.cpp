@@ -1,3 +1,4 @@
+#include <include/ast_opt/parser/Parser.h>
 #include "ast_opt/ast/VariableDeclaration.h"
 #include "ast_opt/ast/Function.h"
 #include "ast_opt/ast/FunctionParameter.h"
@@ -37,7 +38,7 @@ TEST(FunctionTest, countChildrenReportsCorrectNumber) {
   std::vector<std::unique_ptr<FunctionParameter>> paramVec;
   paramVec.push_back(std::make_unique<FunctionParameter>(functionParameter));
   std::unique_ptr<Block> block = std::make_unique<Block>(variableDeclaration1.clone());
-  Function f(Datatype(Type::BOOL), "main",std::move(paramVec), std::move(block));
+  Function f(Datatype(Type::BOOL), "main", std::move(paramVec), std::move(block));
   auto reported_count = f.countChildren();
 
   // Iterate through all the children using the iterators
@@ -48,25 +49,71 @@ TEST(FunctionTest, countChildrenReportsCorrectNumber) {
     ++actual_count;
   }
 
-
-
   EXPECT_EQ(reported_count, actual_count);
 }
 
-TEST(FunctionTest, node_iterate_children) {
-  // TODO: This test checks that we can iterate correctly through the children
+TEST(FunctionTest, node_iterate_children_multipleParameters) {
+  // This test checks that we can iterate correctly through the children
+  const char *inputChars = R""""(
+    public int main(int a, int z, int v) {
+      return a;
+    }
+    )"""";
+  auto inputCode = std::string(inputChars);
+  auto inputAST = Parser::parse(inputCode);
 
-  Function f(Datatype(Type::BOOL), "main",{}, std::make_unique<Block>());
-  for(auto& c:f) {
-    // Should have only one Block in here
-    EXPECT_EQ(c.toString(true),Block().toString(true));
-  }
-  // Even if some of the elements are null (in which case they should not appear)
+  auto function = inputAST->begin();
+  auto it = function->begin();
 
+  EXPECT_NE(dynamic_cast<FunctionParameter *>(&(*it)), nullptr);
+  it++;
+  EXPECT_NE(dynamic_cast<FunctionParameter *>(&(*it)), nullptr);
+  it++;
+  EXPECT_NE(dynamic_cast<FunctionParameter *>(&(*it)), nullptr);
+  it++;
+  EXPECT_NE(dynamic_cast<Block *>(&(*it)), nullptr);
+  it++;
+  EXPECT_EQ(it, function->end());
+}
 
+TEST(FunctionTest, node_iterate_children_singleParameter) {
+  // This test checks that we can iterate correctly through the children
+  const char *inputChars = R""""(
+    public int main(int a) {
+      return a;
+    }
+    )"""";
+  auto inputCode = std::string(inputChars);
+  auto inputAST = Parser::parse(inputCode);
 
+  auto function = inputAST->begin();
+  auto it = function->begin();
+
+  EXPECT_NE(dynamic_cast<FunctionParameter *>(&(*it)), nullptr);
+  it++;
+  EXPECT_NE(dynamic_cast<Block *>(&(*it)), nullptr);
+  it++;
+  EXPECT_EQ(it, function->end());
+}
+
+TEST(FunctionTest, node_iterate_children_noParameter) {
+  // This test checks that we can iterate correctly through the children
+  const char *inputChars = R""""(
+    public int main() {
+      return a;
+    }
+    )"""";
+  auto inputCode = std::string(inputChars);
+  auto inputAST = Parser::parse(inputCode);
+
+  auto function = inputAST->begin();
+  auto it = function->begin();
+
+  EXPECT_NE(dynamic_cast<Block *>(&(*it)), nullptr);
+  it++;
+  EXPECT_EQ(it, function->end());
 }
 
 TEST(FunctionTest, JsonOutputTest) { /* NOLINT */
- // TODO: Verify JSON output
+  // TODO: Verify JSON output
 }
