@@ -242,6 +242,9 @@ void ScopedVisitor::enterScope(AbstractNode &node) {
   if (rootScope==nullptr) {
     // no scope created yet: create root scope and also set it as current scope
     rootScope = std::make_unique<Scope>(node);
+    std::for_each(predeclaredVariables.begin(), predeclaredVariables.end(), [&](const std::string &id) {
+      rootScope->addIdentifier(id);
+    });
     currentScope = rootScope.get();
   } else {
     // create nested scope with current scope as parent
@@ -256,4 +259,8 @@ void ScopedVisitor::exitScope(AbstractNode &node) {
     throw std::runtime_error("Cannot leave non-existent scope. "
                              "Did you forget to call enterScope(...)?");
   }
+}
+
+void ScopedVisitor::setPredeclaredVariables(std::vector<std::string> &alreadyDeclaredVariables) {
+  ScopedVisitor::predeclaredVariables = std::move(alreadyDeclaredVariables);
 }

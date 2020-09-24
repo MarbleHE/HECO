@@ -37,9 +37,14 @@ void SpecialControlFlowGraphVisitor::visit(Assignment &node) {
   } else if (auto indexAccess = dynamic_cast<IndexAccess *>(&node.getTarget())) {
     // TODO implement me: must recursively go tree down and retrieve all variable identifiers
   }
-  ScopedVisitor::visit(node);
-  markVariableAccess(getCurrentScope().resolveIdentifier(identifier),
-                     VariableAccessType::WRITE);
+
+  // visit the right-hand side of the assignment
+  node.getValue().accept(*this);
+
+  if (getCurrentScope().identifierExists(identifier) || !ignoreNonDeclaredVariables) {
+    markVariableAccess(getCurrentScope().resolveIdentifier(identifier), VariableAccessType::WRITE);
+  }
+
   storeAccessedVariables(graphNode);
 }
 
@@ -139,9 +144,22 @@ void SpecialControlFlowGraphVisitor::visit(VariableDeclaration &node) {
   SpecialControlFlowGraphVisitor::checkEntrypoint(node);
   std::cout << "Visiting VariableDeclaration (" << node.getUniqueNodeId() << ")" << std::endl;
   GraphNode &graphNode = createGraphNodeAndAppendToCfg(node);
-  ScopedVisitor::visit(node);
-  markVariableAccess(getCurrentScope().resolveIdentifier(node.getTarget().getIdentifier()),
-                     VariableAccessType::WRITE);
+
+  // We do not use ScopedVisitor::visit here as this would visit all children, including the Variable on the left-hand
+  // side of the VariableDeclaration. This would register this variable as having been read, although it is written to
+  // this variable.
+
+  if (node.hasValue()) {
+    node.getValue().accept(*this);
+  }
+
+  getCurrentScope().addIdentifier(node.getTarget().getIdentifier());
+
+  if (getCurrentScope().identifierExists(node.getTarget().getIdentifier()) || !ignoreNonDeclaredVariables) {
+    markVariableAccess(getCurrentScope().resolveIdentifier(node.getTarget().getIdentifier()),
+                       VariableAccessType::WRITE);
+  }
+
   storeAccessedVariables(graphNode);
 }
 
@@ -185,8 +203,9 @@ void SpecialControlFlowGraphVisitor::storeAccessedVariables(GraphNode &graphNode
 void SpecialControlFlowGraphVisitor::visit(Variable &node) {
   SpecialControlFlowGraphVisitor::checkEntrypoint(node);
   ScopedVisitor::visit(node);
-  markVariableAccess(getCurrentScope().resolveIdentifier(node.getIdentifier()),
-                     VariableAccessType::READ);
+  if (getCurrentScope().identifierExists(node.getIdentifier()) || !ignoreNonDeclaredVariables) {
+    markVariableAccess(getCurrentScope().resolveIdentifier(node.getIdentifier()), VariableAccessType::READ);
+  }
 }
 
 void SpecialControlFlowGraphVisitor::markVariableAccess(const ScopedIdentifier &scopedIdentifier,
@@ -213,3 +232,14 @@ GraphNode &SpecialControlFlowGraphVisitor::getRootNode() {
 const GraphNode &SpecialControlFlowGraphVisitor::getRootNode() const {
   return *nodes.front().get();
 }
+
+SpecialControlFlowGraphVisitor::SpecialControlFlowGraphVisitor(bool ignoreNonDeclaredVariables)
+    : ignoreNonDeclaredVariables(ignoreNonDeclaredVariables) {
+}
+
+SpecialControlFlowGraphVisitor::SpecialControlFlowGraphVisitor(
+    std::vector<std::string> &alreadyDeclaredVariables) {
+  ScopedVisitor::setPredeclaredVariables(alreadyDeclaredVariables);
+}
+
+
