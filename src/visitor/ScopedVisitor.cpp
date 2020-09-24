@@ -224,10 +224,16 @@ void ScopedVisitor::visitChildren(Variable &elem) {
 }
 
 Scope &ScopedVisitor::getCurrentScope() {
+  if (currentScope==nullptr) {
+    throw std::runtime_error("Cannot return non-existent scope!");
+  }
   return *currentScope;
 }
 
 const Scope &ScopedVisitor::getCurrentScope() const {
+  if (currentScope==nullptr) {
+    throw std::runtime_error("Cannot return non-existent scope!");
+  }
   return *currentScope;
 }
 
