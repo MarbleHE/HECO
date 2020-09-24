@@ -41,6 +41,7 @@ void ScopedVisitor::visit(Function &elem) {
 }
 
 void ScopedVisitor::visit(FunctionParameter &elem) {
+  getCurrentScope().addIdentifier(elem.getIdentifier());
   visitChildren(elem);
 }
 
