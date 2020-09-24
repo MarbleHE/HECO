@@ -2,12 +2,61 @@
 #define AST_OPTIMIZER_INCLUDE_AST_OPT_UTILITIES_SCOPE_H_
 
 #include <tuple>
-#include <set>
+#include <unordered_set>
 #include "ast_opt/ast/AbstractNode.h"
 
-//TODO: Finish defining interface, add rule of five & implementations
+//TODO: Add rule of five
 
-class ScopedIdentifier;
+// forward declarations
+class Scope;
+
+class ScopedIdentifier {
+ private:
+  /// (weak) pointer to the Scope this identifier belongs to
+  Scope &scope;
+
+  /// identifier (e.g., variable's name)
+  std::string id;
+
+ public:
+  /// Creates a new ScopedIdentifier.
+  /// \param scope The scope where the identifier was declared in.
+  /// \param id The identifier that is defined in the given scope.
+  ScopedIdentifier(Scope &scope, std::string id);
+
+  /// Gets the scope associated with this ScopedIdentifier.
+  /// \return (A reference to) the scope of this ScopedIdentifier.
+  Scope &getScope();
+
+  /// Gets the scope associated with this ScopedIdentifier.
+  /// \return (A const reference to) the scope of this ScopedIdentifier.
+  [[nodiscard]] const Scope &getScope() const;
+
+  /// Gets the identifier associated with this ScopedIdentifier.
+  /// \return (A const string reference to) the identifier of this ScopedIdentifier.
+  [[nodiscard]] const std::string &getId() const;
+
+  /// Gets the identifier associated with this ScopedIdentifier.
+  /// \return (A string reference to) the identifier of this ScopedIdentifier.
+  std::string &getId();
+
+  bool operator==(const ScopedIdentifier &p) const {
+    return &scope==&p.scope && id==p.id;
+  }
+};
+
+class ScopedIdentifierHashFunction {
+  /// This function must be passed to certain STL containers if they should contain GraphNodes, for example,
+  /// std::unordered_set<std::reference_wrapper<GraphNode>, GraphNodeHashFunction> mySet.
+ public:
+  size_t operator()(const std::unique_ptr<ScopedIdentifier> &scopedIdentifier) const {
+    return std::hash<std::string>()(scopedIdentifier->getId());
+  }
+
+  size_t operator()(const ScopedIdentifier &scopedIdentifier) const {
+    return std::hash<std::string>()(scopedIdentifier.getId());
+  }
+};
 
 class Scope {
  private:
@@ -15,7 +64,7 @@ class Scope {
   AbstractNode &astNode;
 
   /// Set of identifiers declared in this scope
-  std::set<std::unique_ptr<ScopedIdentifier>> identifiers;
+  std::unordered_set<std::unique_ptr<ScopedIdentifier>, ScopedIdentifierHashFunction> identifiers;
 
   /// Parent scope (if it exists)
   Scope *parent = nullptr;
@@ -71,38 +120,4 @@ class Scope {
   [[nodiscard]] const ScopedIdentifier &resolveIdentifier(const std::string &id) const;
 };
 
-class ScopedIdentifier {
- private:
-  /// (weak) pointer to the Scope this identifier belongs to
-  Scope &scope;
-
-  /// identifier (e.g., variable's name)
-  std::string id;
-
- public:
-  /// Creates a new ScopedIdentifier.
-  /// \param scope The scope where the identifier was declared in.
-  /// \param id The identifier that is defined in the given scope.
-  ScopedIdentifier(Scope &scope, std::string id);
-
-  bool operator<(const ScopedIdentifier &fk) const {
-    return id < fk.id;
-  }
-
-  /// Gets the scope associated with this ScopedIdentifier.
-  /// \return (A reference to) the scope of this ScopedIdentifier.
-  Scope &getScope();
-
-  /// Gets the scope associated with this ScopedIdentifier.
-  /// \return (A const reference to) the scope of this ScopedIdentifier.
-  [[nodiscard]] const Scope &getScope() const;
-
-  /// Gets the identifier associated with this ScopedIdentifier.
-  /// \return (A const string reference to) the identifier of this ScopedIdentifier.
-  [[nodiscard]] const std::string &getId() const;
-
-  /// Gets the identifier associated with this ScopedIdentifier.
-  /// \return (A string reference to) the identifier of this ScopedIdentifier.
-  std::string &getId();
-};
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_UTILITIES_SCOPE_H_

@@ -1,4 +1,5 @@
 #include <utility>
+#include <iostream>
 
 #include "ast_opt/utilities/Scope.h"
 
@@ -8,7 +9,7 @@ const ScopedIdentifier &Scope::resolveIdentifier(const std::string &id) const {
 }
 
 void Scope::addIdentifier(const std::string &id) {
-  identifiers.insert(std::make_unique<ScopedIdentifier>(*this, id));
+  identifiers.emplace(std::make_unique<ScopedIdentifier>(*this, id));
 }
 
 Scope &Scope::getParentScope() {

@@ -42,7 +42,7 @@ class SpecialControlFlowGraphVisitor : public ScopedVisitor {
   /// A set containing pairs of (scoped identifiers, access type) where the access type describes if a variable was read
   /// or written. This set collects all information of visited children of a statement and must be cleared before
   /// leaving a statement by calling storeAccessedVariables.
-  std::set<VariableAccessPair> variableAccesses;
+  VarAccessMapType variableAccesses;
 
  public:
   virtual ~SpecialControlFlowGraphVisitor() = default;

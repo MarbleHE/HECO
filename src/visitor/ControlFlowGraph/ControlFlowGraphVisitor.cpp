@@ -37,9 +37,9 @@ void SpecialControlFlowGraphVisitor::visit(Assignment &node) {
   } else if (auto indexAccess = dynamic_cast<IndexAccess *>(&node.getTarget())) {
     // TODO implement me: must recursively go tree down and retrieve all variable identifiers
   }
+  ScopedVisitor::visit(node);
   markVariableAccess(getCurrentScope().resolveIdentifier(identifier),
                      VariableAccessType::WRITE);
-  ScopedVisitor::visit(node);
   storeAccessedVariables(graphNode);
 }
 
@@ -55,6 +55,8 @@ void SpecialControlFlowGraphVisitor::visit(For &node) {
   SpecialControlFlowGraphVisitor::checkEntrypoint(node);
   std::cout << "Visiting For (" << node.getUniqueNodeId() << ")" << std::endl;
   GraphNode &graphNode = createGraphNodeAndAppendToCfg(node);
+
+  ScopedVisitor::enterScope(node);
 
   // initializer (e.g., int i = 0;)
   node.getInitializer().accept(*this);
@@ -72,6 +74,8 @@ void SpecialControlFlowGraphVisitor::visit(For &node) {
   // update statement (e.g., i=i+1;)
   node.getUpdate().accept(*this);
   auto lastStatementInUpdate = lastCreatedNodes;
+
+  ScopedVisitor::exitScope(node);
 
   auto firstConditionStatement = lastStatementInInitializer.front().get().getControlFlowGraph().getChildren().front();
   if (lastStatementInUpdate.size() > 1) {
@@ -103,6 +107,8 @@ void SpecialControlFlowGraphVisitor::visit(If &node) {
   GraphNode &graphNode = createGraphNodeAndAppendToCfg(node);
   auto lastStatementIf = lastCreatedNodes;
 
+  ScopedVisitor::enterScope(node);
+
   // condition
   node.getCondition().accept(*this);
   storeAccessedVariables(graphNode);
@@ -117,7 +123,8 @@ void SpecialControlFlowGraphVisitor::visit(If &node) {
     // else branch
     node.getElseBranch().accept(*this);
   }
-//  ScopedVisitor::visit(node);
+
+  ScopedVisitor::exitScope(node);
 }
 
 void SpecialControlFlowGraphVisitor::visit(Return &node) {
@@ -132,6 +139,7 @@ void SpecialControlFlowGraphVisitor::visit(VariableDeclaration &node) {
   SpecialControlFlowGraphVisitor::checkEntrypoint(node);
   std::cout << "Visiting VariableDeclaration (" << node.getUniqueNodeId() << ")" << std::endl;
   GraphNode &graphNode = createGraphNodeAndAppendToCfg(node);
+  ScopedVisitor::visit(node);
   markVariableAccess(getCurrentScope().resolveIdentifier(node.getTarget().getIdentifier()),
                      VariableAccessType::WRITE);
   storeAccessedVariables(graphNode);
@@ -176,14 +184,26 @@ void SpecialControlFlowGraphVisitor::storeAccessedVariables(GraphNode &graphNode
 
 void SpecialControlFlowGraphVisitor::visit(Variable &node) {
   SpecialControlFlowGraphVisitor::checkEntrypoint(node);
-  // TODO: replace Scope() by current scope
+  ScopedVisitor::visit(node);
   markVariableAccess(getCurrentScope().resolveIdentifier(node.getIdentifier()),
                      VariableAccessType::READ);
 }
 
 void SpecialControlFlowGraphVisitor::markVariableAccess(const ScopedIdentifier &scopedIdentifier,
                                                         VariableAccessType accessType) {
-  variableAccesses.emplace(scopedIdentifier, accessType);
+  if (variableAccesses.count(scopedIdentifier) > 0) {
+    // we potentially need to merge the existing access type and the new one
+    if (variableAccesses.at(scopedIdentifier)==accessType) {
+      // no need to merge types as both types are the same
+      return;
+    } else {
+      // as they are different and there are only two types (read, write), both (read+write) must be set
+      variableAccesses[scopedIdentifier] = VariableAccessType::READ_AND_WRITE;
+    }
+  } else {
+    // we can just add the new variable access
+    variableAccesses[scopedIdentifier] = accessType;
+  }
 }
 
 GraphNode &SpecialControlFlowGraphVisitor::getRootNode() {

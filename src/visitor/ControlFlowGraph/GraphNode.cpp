@@ -34,21 +34,27 @@ const NodeRelationship &GraphNode::getDataFlowGraph() const {
   return *dataFlowGraph;
 }
 
-const std::set<VariableAccessPair> &GraphNode::getAccessedVariables() const {
+const VarAccessMapType &GraphNode::getAccessedVariables() const {
   return variablesAccessMap;
 }
 
-std::set<VariableAccessPair> &GraphNode::getAccessedVariables() {
+VarAccessMapType &GraphNode::getAccessedVariables() {
   return variablesAccessMap;
 }
 
-std::set<VariableAccessPair> GraphNode::getVariableAccessesByType(VariableAccessType accessType) {
-  std::set<VariableAccessPair> resultSet;
-  auto hasRequestedAccessType = [&accessType](const VariableAccessPair &p) { return p.second==accessType; };
-  std::copy_if(variablesAccessMap.begin(),
-               variablesAccessMap.end(),
-               std::inserter(resultSet, resultSet.begin()),
-               hasRequestedAccessType);
+std::vector<ScopedIdentifier> GraphNode::getVariableAccessesByType(VariableAccessType accessType) {
+  std::vector<ScopedIdentifier> resultSet;
+//  auto hasRequestedAccessType =
+//      [&accessType](const std::pair<ScopedIdentifier, VariableAccessType> &p) { return p.second==accessType; };
+//  std::copy_if(variablesAccessMap.begin(),
+//               variablesAccessMap.end(),
+//               std::inserter(resultSet, resultSet.begin()),
+//               hasRequestedAccessType);
+  std::for_each(variablesAccessMap.begin(),
+                variablesAccessMap.end(),
+                [&accessType, &resultSet](const std::pair<ScopedIdentifier, VariableAccessType> &p) {
+                  if (p.second==accessType) resultSet.push_back(p.first);
+                });
   return resultSet;
 }
 
@@ -75,7 +81,7 @@ const NodeRelationship &GraphNode::getRelationship(RelationshipType relationship
   }
 }
 
-void GraphNode::setAccessedVariables(std::set<VariableAccessPair> &&variablesAccesses) {
+void GraphNode::setAccessedVariables(VarAccessMapType &&variablesAccesses) {
   this->variablesAccessMap = std::move(variablesAccesses);
 }
 
