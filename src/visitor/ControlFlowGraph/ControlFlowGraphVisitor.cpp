@@ -9,7 +9,25 @@
 #include "ast_opt/ast/Return.h"
 #include "ast_opt/ast/VariableDeclaration.h"
 
+void SpecialControlFlowGraphVisitor::checkEntrypoint(AbstractNode &node) {
+  // if this is not the first visited node, then there's no need for this check
+  if (!nodes.empty()) return;
+
+  // if this is the first visited node ---
+  // make sure that CFGV was called on a Block, If, or For node
+  auto nodeAsBlock = dynamic_cast<Block *>(&node);
+  auto nodeAsIf = dynamic_cast<If *>(&node);
+  auto nodeAsFor = dynamic_cast<For *>(&node);
+
+  if (nodeAsBlock==nullptr && nodeAsIf==nullptr && nodeAsFor==nullptr) {
+    throw std::runtime_error(
+        "Cannot run ControlFlowGraphVisitor on given node (" + node.getUniqueNodeId() + "). " +
+            "Visitor requires a Block, For, or If AST node as (root) input.");
+  }
+}
+
 void SpecialControlFlowGraphVisitor::visit(Assignment &node) {
+  SpecialControlFlowGraphVisitor::checkEntrypoint(node);
   std::cout << "Visiting Assignment (" << node.getUniqueNodeId() << ")" << std::endl;
   GraphNode &graphNode = createGraphNodeAndAppendToCfg(node);
 
@@ -26,6 +44,7 @@ void SpecialControlFlowGraphVisitor::visit(Assignment &node) {
 }
 
 void SpecialControlFlowGraphVisitor::visit(Block &node) {
+  SpecialControlFlowGraphVisitor::checkEntrypoint(node);
   std::cout << "Visiting Block (" << node.getUniqueNodeId() << ")" << std::endl;
   GraphNode &graphNode = createGraphNodeAndAppendToCfg(node);
   ScopedVisitor::visit(node);
@@ -33,6 +52,7 @@ void SpecialControlFlowGraphVisitor::visit(Block &node) {
 }
 
 void SpecialControlFlowGraphVisitor::visit(For &node) {
+  SpecialControlFlowGraphVisitor::checkEntrypoint(node);
   std::cout << "Visiting For (" << node.getUniqueNodeId() << ")" << std::endl;
   GraphNode &graphNode = createGraphNodeAndAppendToCfg(node);
 
@@ -70,6 +90,7 @@ void SpecialControlFlowGraphVisitor::visit(For &node) {
 }
 
 void SpecialControlFlowGraphVisitor::visit(Function &node) {
+  SpecialControlFlowGraphVisitor::checkEntrypoint(node);
   std::cout << "Visiting Function (" << node.getUniqueNodeId() << ")" << std::endl;
   GraphNode &graphNode = createGraphNodeAndAppendToCfg(node);
   ScopedVisitor::visit(node);
@@ -77,6 +98,7 @@ void SpecialControlFlowGraphVisitor::visit(Function &node) {
 }
 
 void SpecialControlFlowGraphVisitor::visit(If &node) {
+  SpecialControlFlowGraphVisitor::checkEntrypoint(node);
   std::cout << "Visiting If (" << node.getUniqueNodeId() << ")" << std::endl;
   GraphNode &graphNode = createGraphNodeAndAppendToCfg(node);
   auto lastStatementIf = lastCreatedNodes;
@@ -99,6 +121,7 @@ void SpecialControlFlowGraphVisitor::visit(If &node) {
 }
 
 void SpecialControlFlowGraphVisitor::visit(Return &node) {
+  SpecialControlFlowGraphVisitor::checkEntrypoint(node);
   std::cout << "Visiting Return (" << node.getUniqueNodeId() << ")" << std::endl;
   GraphNode &graphNode = createGraphNodeAndAppendToCfg(node);
   ScopedVisitor::visit(node);
@@ -106,6 +129,7 @@ void SpecialControlFlowGraphVisitor::visit(Return &node) {
 }
 
 void SpecialControlFlowGraphVisitor::visit(VariableDeclaration &node) {
+  SpecialControlFlowGraphVisitor::checkEntrypoint(node);
   std::cout << "Visiting VariableDeclaration (" << node.getUniqueNodeId() << ")" << std::endl;
   GraphNode &graphNode = createGraphNodeAndAppendToCfg(node);
   markVariableAccess(getCurrentScope().resolveIdentifier(node.getTarget().getIdentifier()),
@@ -151,6 +175,7 @@ void SpecialControlFlowGraphVisitor::storeAccessedVariables(GraphNode &graphNode
 }
 
 void SpecialControlFlowGraphVisitor::visit(Variable &node) {
+  SpecialControlFlowGraphVisitor::checkEntrypoint(node);
   // TODO: replace Scope() by current scope
   markVariableAccess(getCurrentScope().resolveIdentifier(node.getIdentifier()),
                      VariableAccessType::READ);
