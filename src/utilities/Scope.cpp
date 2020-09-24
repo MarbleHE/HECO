@@ -4,8 +4,20 @@
 #include "ast_opt/utilities/Scope.h"
 
 const ScopedIdentifier &Scope::resolveIdentifier(const std::string &id) const {
-  // TODO Implement and throw std::runtime_error in case that identifier cannot be resolved
-  throw std::runtime_error("Scope::resolveIdentifier unimplemented!");
+  // go through scopes, starting from the current scope and then walking up (parent nodes), by looking for the given
+  // identifier
+  const Scope *curScope = this;
+  while (curScope!=nullptr) {
+    auto it = std::find_if(curScope->identifiers.begin(),
+                           curScope->identifiers.end(),
+                           [&id](const auto &p) { return p->getId()==id; });
+    if (it!=curScope->identifiers.end()) {
+      return **it;
+    }
+    curScope = curScope->parent;
+  }
+
+  throw std::runtime_error("Identifier (" + id + ") cannot be resolved!");
 }
 
 void Scope::addIdentifier(const std::string &id) {
@@ -73,3 +85,4 @@ std::string &ScopedIdentifier::getId() {
 }
 
 ScopedIdentifier::ScopedIdentifier(Scope &scope, std::string id) : scope(scope), id(std::move(id)) {}
+
