@@ -56,6 +56,41 @@ void SpecialControlFlowGraphVisitor::visit(Block &node) {
   storeAccessedVariables(graphNode);
 }
 
+////////////////////////////////////
+///////////// For Statement ////////
+////////////////////////////////////
+// CFG Graph
+//
+//        Initializer Stmt. 1
+//                 │
+//                 ▼
+//    ┌── Initializer Stmt. N
+//    │
+//    │
+//    │      Body Stmt. 1    ◀─┐
+//    │            │           │
+//    │            ▼           │
+//    │      Body Stmt. N      │
+//    │            │           │
+//    │            │           │
+//    │            │           │
+//    │            ▼           │
+//    │     Update Stmt. 1     │
+//    │            │           │
+//    │            ▼           │
+//    │     Update Stmt. N     │
+//    │            │           │
+//    │            │           │ condition
+//    │            ▼           │  == true
+//    └─────▶ Condition*  ─────┘
+//                 │
+//                 │   condition
+//                 │   == false
+//                 ▼
+//            Next Stmt.
+//
+// (*)Note: Although the Condition is not a AbstractStatement in our AST model, we include it here as we need the
+// information which variables are accessed.
 void SpecialControlFlowGraphVisitor::visit(For &node) {
   SpecialControlFlowGraphVisitor::checkEntrypoint(node);
   std::cout << "Visiting For (" << node.getUniqueNodeId() << ")" << std::endl;
@@ -64,7 +99,7 @@ void SpecialControlFlowGraphVisitor::visit(For &node) {
   ScopedVisitor::enterScope(node);
 
   // initializer (e.g., int i = 0;)
-  node.getInitializer().accept(*this);
+  ScopedVisitor::visitChildren(node.getInitializer());
   auto lastStatementInInitializer = lastCreatedNodes;
 
   // condition expression (e.g., i <= N)
@@ -77,7 +112,7 @@ void SpecialControlFlowGraphVisitor::visit(For &node) {
   auto lastStatementInBody = lastCreatedNodes;
 
   // update statement (e.g., i=i+1;)
-  node.getUpdate().accept(*this);
+  ScopedVisitor::visitChildren(node.getUpdate());
   auto lastStatementInUpdate = lastCreatedNodes;
 
   ScopedVisitor::exitScope(node);
@@ -94,8 +129,9 @@ void SpecialControlFlowGraphVisitor::visit(For &node) {
     lastStatementInBody.front().get().getControlFlowGraph().addChild(firstConditionStatement);
   }
 
-  // restore the last created nodes in the condition as those need to be connected to the next statement
-  lastCreatedNodes = lastStatementCondition;
+
+  // TODO: Fix issue with missing Condition in CFG. Note that Condition must be connected to both
+  //  the next statement and the first body statement.
 }
 
 void SpecialControlFlowGraphVisitor::visit(Function &node) {
@@ -128,6 +164,8 @@ void SpecialControlFlowGraphVisitor::visit(If &node) {
     // else branch
     node.getElseBranch().accept(*this);
   }
+
+  // TODO check if condition is connected with then and also consecutive statement
 
   ScopedVisitor::exitScope(node);
 }
