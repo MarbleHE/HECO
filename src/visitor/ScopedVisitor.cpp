@@ -233,8 +233,9 @@ const Scope &ScopedVisitor::getCurrentScope() const {
 
 void ScopedVisitor::enterScope(AbstractNode &node) {
   if (rootScope==nullptr) {
-    // no scope created yet
+    // no scope created yet: create root scope and also set it as current scope
     rootScope = std::make_unique<Scope>(node);
+    currentScope = rootScope.get();
   } else {
     // create nested scope with current scope as parent
     currentScope = Scope::createNestedScope(getCurrentScope(), node);
