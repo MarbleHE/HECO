@@ -65,11 +65,11 @@ if (NOT nlohmann_json_FOUND)
     message("Downloading nlohmann_json")
     include(FetchContent)
     set(JSON_BuildTests OFF CACHE INTERNAL "")
+    set(FETCHCONTENT_UPDATES_DISCONNECTED ON)
     FetchContent_Declare(
             nlohmann_json
             GIT_REPOSITORY https://github.com/nlohmann/json.git
-            GIT_TAG v3.7.3
-            FETCHCONTENT_UPDATES_DISCONNECTED ON)
+            GIT_TAG v3.7.3)
     FetchContent_MakeAvailable(nlohmann_json)
 endif ()
 
