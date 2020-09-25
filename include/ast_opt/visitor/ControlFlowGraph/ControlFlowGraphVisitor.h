@@ -22,18 +22,16 @@ class SpecialControlFlowGraphVisitor : public ScopedVisitor {
   /// The nodes that were created most recently. Those are the parent nodes of the next node to be created.
   std::vector<std::reference_wrapper<GraphNode>> lastCreatedNodes;
 
-  /// Creates a new GraphNode for the given AbstractStatement node and appends it as child to each of the last created
-  /// GraphNodes (see lastCreatedNodes). This method only accepts an AbstractStatement because the CFG/DFG only consider
-  /// statements.
-  /// \param astNode The statement for which a new GraphNode object should be created for.
+  /// Creates a new GraphNode for the given AbstractNode and appends it as child to each of the last created
+  /// GraphNodes (see lastCreatedNodes).
+  /// \param astNode The node for which a new GraphNode object should be created for.
   /// \return (A reference to) the newly created GraphNode object.
   GraphNode &createGraphNodeAndAppendToCfg(AbstractNode &astNode);
 
   /// This constructor is required for testing purposes.
-  /// Creates a new GraphNode for the given AbstractStatement node and appends it as child to each of the last created
-  /// GraphNodes (see lastCreatedNodes). This method only accepts an AbstractStatement because the CFG/DFG only consider
-  /// statements.
-  /// \param statement The statement for which a new GraphNode object should be created for.
+  /// Creates a new GraphNode for the given AbstractNode and appends it as child to each of the last created
+  /// GraphNodes (see lastCreatedNodes).
+  /// \param statement The node for which a new GraphNode object should be created for.
   /// \param parentNodes The node(s) that should be added as parent nodes for the newly created GraphNode.
   /// \return (A reference to) the newly created GraphNode object.
   GraphNode &createGraphNodeAndAppendToCfg(AbstractNode &statement,
