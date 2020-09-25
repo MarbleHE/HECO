@@ -450,7 +450,7 @@ TEST(ControlFlowGraphVisitorTest, dfg_forLoop_localVariable_emptyUpdate) { /* NO
 TEST(ControlFlowGraphVisitorTest, dfgGraph_simpleAssignment) { /* NOLINT */
   const char *inputChars = R""""(
     public int main(int a) {
-      a = 34;
+      a = a + 34;
       return a;
     }
     )"""";
@@ -462,21 +462,41 @@ TEST(ControlFlowGraphVisitorTest, dfgGraph_simpleAssignment) { /* NOLINT */
 
   auto &gn = cfgv.getRootNode();
 
+  cfgv.buildDataflowGraph();
+
+//  std::cout << "\n== DATA FLOW GRAPH =======" << std::endl;
+//
+//  for (auto &dfn : cfgv.getRootNode().getControlFlowGraph().getAllReachableNodes()) {
+//    if (!dfn.get().getControlFlowGraph().getChildren().empty()
+//        || !dfn.get().getControlFlowGraph().getParents().empty()) {
+//      std::cout << "Node: " << dfn.get().getAstNode().getUniqueNodeId() << std::endl;
+//      std::cout << "\tchildren: " << std::endl;
+//      for (auto &child : dfn.get().getDataFlowGraph().getChildren()) {
+//        std::cout << "\t– " << child.get().getAstNode().getUniqueNodeId() << std::endl;
+//      }
+//      std::cout << std::endl;
+//      std::cout << "\tparents: " << std::endl;
+//      for (auto &parent : dfn.get().getDataFlowGraph().getParents()) {
+//        std::cout << "\t– " << parent.get().getAstNode().getUniqueNodeId() << std::endl;
+//      }
+//      std::cout << std::endl;
+//    }
+//  }
+
   auto &functionStmt = getGraphNodeByChildrenIdxPath(gn, {0});
-  auto &varAssignm = getGraphNodeByChildrenIdxPath(gn, {0, 0});
-  auto &returnStmt = getGraphNodeByChildrenIdxPath(gn, {0, 0, 0});
+  auto &varAssignm = getGraphNodeByChildrenIdxPath(gn, {0, 0, 0});
+  auto &returnStmt = getGraphNodeByChildrenIdxPath(gn, {0, 0, 0, 0});
 
   EXPECT_EQ(varAssignm.getDataFlowGraph().getParents().size(), 1);
   EXPECT_EQ(&varAssignm.getDataFlowGraph().getParents().at(0).get(), &functionStmt);
   EXPECT_EQ(varAssignm.getDataFlowGraph().getChildren().size(), 1);
   EXPECT_EQ(&varAssignm.getDataFlowGraph().getChildren().at(0).get(), &returnStmt);
-
+//
   EXPECT_EQ(returnStmt.getDataFlowGraph().getParents().size(), 1);
   EXPECT_EQ(&returnStmt.getDataFlowGraph().getParents().at(0).get(), &varAssignm);
   EXPECT_EQ(returnStmt.getDataFlowGraph().getChildren().size(), 0);
+
 }
-
-
 
 
 //TEST(ControlFlowGraphVisitorTest, wip) {
