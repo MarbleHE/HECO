@@ -74,6 +74,8 @@ class SpecialControlFlowGraphVisitor : public ScopedVisitor {
 
   void visit(Function &node) override;
 
+  void visit(FunctionParameter &node) override;
+
   void visit(If &node) override;
 
   void visit(Return &node) override;

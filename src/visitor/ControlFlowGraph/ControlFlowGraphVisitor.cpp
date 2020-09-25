@@ -14,15 +14,16 @@ void SpecialControlFlowGraphVisitor::checkEntrypoint(AbstractNode &node) {
   if (!nodes.empty()) return;
 
   // if this is the first visited node ---
-  // make sure that CFGV was called on a Block, If, or For node
+  // make sure that CFGV was called on a Function, Block, If, or For node
+  auto nodeAsFunction = dynamic_cast<Function *>(&node);
   auto nodeAsBlock = dynamic_cast<Block *>(&node);
   auto nodeAsIf = dynamic_cast<If *>(&node);
   auto nodeAsFor = dynamic_cast<For *>(&node);
 
-  if (nodeAsBlock==nullptr && nodeAsIf==nullptr && nodeAsFor==nullptr) {
+  if (nodeAsFunction==nullptr && nodeAsBlock==nullptr && nodeAsIf==nullptr && nodeAsFor==nullptr) {
     throw std::runtime_error(
         "Cannot run ControlFlowGraphVisitor on given node (" + node.getUniqueNodeId() + "). " +
-            "Visitor requires a Block, For, or If AST node as (root) input.");
+            "Visitor requires a Function, Block, For, or If AST node as (root) input.");
   }
 }
 
@@ -143,8 +144,28 @@ void SpecialControlFlowGraphVisitor::visit(Function &node) {
   SpecialControlFlowGraphVisitor::checkEntrypoint(node);
   std::cout << "Visiting Function (" << node.getUniqueNodeId() << ")" << std::endl;
   GraphNode &graphNode = createGraphNodeAndAppendToCfg(node);
-  ScopedVisitor::visit(node);
+
+  ScopedVisitor::enterScope(node);
+
+  // visit the parameters and remember that they have been declared (is equal to writing to a variable)
+  for (auto &param : node.getParameters()) {
+    param.get().accept(*this);
+  }
   storeAccessedVariables(graphNode);
+
+  // access the function's body
+  node.getBody().accept(*this);
+
+  ScopedVisitor::exitScope(node);
+}
+
+void SpecialControlFlowGraphVisitor::visit(FunctionParameter &node) {
+  SpecialControlFlowGraphVisitor::checkEntrypoint(node);
+  ScopedVisitor::visit(node);
+  std::cout << "Visiting FunctionParameter (" << node.getUniqueNodeId() << ")" << std::endl;
+  if (getCurrentScope().identifierExists(node.getIdentifier()) || !ignoreNonDeclaredVariables) {
+    markVariableAccess(getCurrentScope().resolveIdentifier(node.getIdentifier()), VariableAccessType::WRITE);
+  }
 }
 
 void SpecialControlFlowGraphVisitor::visit(If &node) {
