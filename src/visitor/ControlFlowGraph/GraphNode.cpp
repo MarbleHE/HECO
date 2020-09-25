@@ -42,18 +42,15 @@ VarAccessMapType &GraphNode::getAccessedVariables() {
   return variablesAccessMap;
 }
 
-std::vector<ScopedIdentifier> GraphNode::getVariableAccessesByType(VariableAccessType accessType) {
+std::vector<ScopedIdentifier> GraphNode::getVariableAccessesByType(std::initializer_list<VariableAccessType> accessTypes) {
   std::vector<ScopedIdentifier> resultSet;
-//  auto hasRequestedAccessType =
-//      [&accessType](const std::pair<ScopedIdentifier, VariableAccessType> &p) { return p.second==accessType; };
-//  std::copy_if(variablesAccessMap.begin(),
-//               variablesAccessMap.end(),
-//               std::inserter(resultSet, resultSet.begin()),
-//               hasRequestedAccessType);
+  // transforms given initializer list into an unordered set for fast lookups
+  std::unordered_set<VariableAccessType> requestedTypes(accessTypes.begin(), accessTypes.end());
+
   std::for_each(variablesAccessMap.begin(),
                 variablesAccessMap.end(),
-                [&accessType, &resultSet](const std::pair<ScopedIdentifier, VariableAccessType> &p) {
-                  if (p.second==accessType) resultSet.push_back(p.first);
+                [&requestedTypes, &resultSet](const std::pair<ScopedIdentifier, VariableAccessType> &p) {
+                  if (requestedTypes.count(p.second) > 0) resultSet.push_back(p.first);
                 });
   return resultSet;
 }

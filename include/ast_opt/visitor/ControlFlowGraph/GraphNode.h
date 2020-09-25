@@ -70,7 +70,7 @@ class GraphNode {
   /// \param accessType The access type acting as filter for the recorded variable accesses.
   /// \return A set containing (copies from) variable accesses of this GraphNode.
   [[nodiscard]] std::vector<ScopedIdentifier> getVariableAccessesByType(
-      VariableAccessType accessType);
+      std::initializer_list<VariableAccessType>);
 
   /// Set the variable accesses map by replacing the existing one.
   /// \param variablesAccesses The set of variable accesses to replace the current set with.
