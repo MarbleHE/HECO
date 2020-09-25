@@ -69,4 +69,4 @@ jobs:
       - name: Send message to Slack if job has failed
         if: ${{ failure() }}
         run: |
-          curl.exe -F $'text=⚠️ *Compilation failed for MSVSC on Windows!*\nPlease check status on the <https://github.com/MarbleHE/ABC/actions/runs/${{ github.run_id }}|Actions dashboard>. Consider the changes made in the most recent git commit <https://github.com/MarbleHE/ABC/commit/${{ github.sha }}|`${{ steps.vars.outputs.sha_short }}`>.' -F channel=batching-compiler -H "Authorization: Bearer ${{ secrets.SLACK_APP_TOKEN }}" https://slack.com/api/chat.postMessage
+          curl -F 'text=⚠️ *Compilation failed for MSVSC on Windows!*\nPlease check status on the <https://github.com/MarbleHE/ABC/actions/runs/${{ github.run_id }}|Actions dashboard>. Consider the changes made in the most recent git commit <https://github.com/MarbleHE/ABC/commit/${{ github.sha }}|`${{ steps.vars.outputs.sha_short }}`>.' -F 'channel=batching-compiler' -H 'Authorization: Bearer ${{ secrets.SLACK_APP_TOKEN }}' https://slack.com/api/chat.postMessage
