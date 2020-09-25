@@ -12,7 +12,7 @@
 
 /// Arithmetic Operators
 enum ArithmeticOp : unsigned char {
-  ADDITION = 0, SUBTRACTION, MULTIPLICATION, DIVISION, MODULO,
+  ADDITION = 0, SUBTRACTION, MULTIPLICATION, DIVISION, MODULO, FHE_ADDITION, FHE_SUBTRACTION, FHE_MULTIPLICATION
 };
 
 // Logical & Relational Operators

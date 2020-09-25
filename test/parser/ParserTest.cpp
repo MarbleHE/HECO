@@ -28,7 +28,6 @@ Datatype FLOAT = Datatype(Type::FLOAT);
 Datatype DOUBLE = Datatype(Type::DOUBLE);
 Datatype STRING = Datatype(Type::STRING);
 
-
 TEST(ParserTest, emptyString) { /* NOLINT */
   auto b = Parser::parse("");
   // Should be an empty block
@@ -497,4 +496,20 @@ TEST(ParserTest, MatrixDeclaration_fixArraySizeNotSupported) { /* NOLINT */
 
   auto code = std::string(programCode);
   EXPECT_THROW(Parser::parse(code), stork::Error::exception);
+}
+
+TEST(ParserTest, fhe_expression) { /* NOLINT */
+  const char *programCode = R""""(
+    __input2__ = __input2__ +++ __input3__;
+    )"""";
+
+  auto code = std::string(programCode);
+  auto parsed = Parser::parse(code);
+
+  auto expr = std::make_unique<BinaryExpression>(std::make_unique<Variable>("__input2__"),
+                                                 Operator(ArithmeticOp::FHE_ADDITION),
+                                                 std::make_unique<Variable>("__input3__"));
+  auto assignment = Assignment(std::make_unique<Variable>("__input2__"), std::move(expr));
+
+  EXPECT_TRUE(compareAST(*parsed->begin(), assignment));
 }

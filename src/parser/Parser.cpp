@@ -105,7 +105,10 @@ bool isBinaryOperator(const stork::tokens_iterator &it) {
                   it->hasValue(stork::reservedTokens::lt) ||
                   it->hasValue(stork::reservedTokens::gt) ||
                   it->hasValue(stork::reservedTokens::le) ||
-                  it->hasValue(stork::reservedTokens::ge)
+                  it->hasValue(stork::reservedTokens::ge) ||
+                  it->hasValue(stork::reservedTokens::fhe_add) ||
+                  it->hasValue(stork::reservedTokens::fhe_sub) ||
+                  it->hasValue(stork::reservedTokens::fhe_mul)
           );
 }
 

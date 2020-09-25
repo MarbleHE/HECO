@@ -1,7 +1,7 @@
 #include "ast_opt/utilities/Operator.h"
 
 std::string toString(ArithmeticOp bop) {
-  static const std::string binaryOpStrings[] = {"add", "sub", "mult", "div", "mod"};
+  static const std::string binaryOpStrings[] = {"add", "sub", "mult", "div", "mod", "fhe_add", "fhe_sub", "fhe_mult"};
   return binaryOpStrings[bop];
 }
 
@@ -50,10 +50,13 @@ int comparePrecedence(const Operator &op1, const Operator &op2) {
           {UnaryOp::BITWISE_NOT, 3},
 
           {ArithmeticOp::MULTIPLICATION, 5},
+          {ArithmeticOp::FHE_MULTIPLICATION, 5},
           {ArithmeticOp::DIVISION, 5},
           {ArithmeticOp::MODULO, 5},
           {ArithmeticOp::ADDITION, 6},
+          {ArithmeticOp::FHE_ADDITION, 6},
           {ArithmeticOp::SUBTRACTION, 6},
+          {ArithmeticOp::FHE_SUBTRACTION, 6},
 
           {LogicalOp::LESS, 9},
           {LogicalOp::LESS_EQUAL, 9},

@@ -18,6 +18,9 @@ enum struct reservedTokens {
   div,
   idiv,
   mod,
+  fhe_add,
+  fhe_sub,
+  fhe_mul,
 
   bitwise_not,
   bitwise_and,
@@ -101,6 +104,8 @@ enum struct reservedTokens {
   kw_secret,
 
   kw_public,
+
+  kw_rotate
 };
 
 class PushBackStream;

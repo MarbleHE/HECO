@@ -20,6 +20,9 @@ const Lookup<std::string_view, reservedTokens> operator_token_map{
     {"/", reservedTokens::div},
     {"\\", reservedTokens::idiv},
     {"%", reservedTokens::mod},
+    {"+++", reservedTokens::fhe_add},
+    {"---", reservedTokens::fhe_sub},
+    {"***", reservedTokens::fhe_mul},
 
     {"~", reservedTokens::bitwise_not},
     {"&", reservedTokens::bitwise_and},
@@ -104,7 +107,9 @@ const Lookup<std::string_view, reservedTokens> keyword_token_map{
 
     {"secret", reservedTokens::kw_secret},
 
-    {"public", reservedTokens::kw_public}
+    {"public", reservedTokens::kw_public},
+
+    {"rotate", reservedTokens::kw_rotate}
 };
 
 const Lookup<reservedTokens, std::string_view> token_string_map = ([]() {
