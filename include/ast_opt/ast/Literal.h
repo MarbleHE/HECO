@@ -82,14 +82,16 @@ class Literal : public AbstractExpression {
     value = std::move(newValue);
   };
 
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "HidingNonVirtualFunction"
+#include "ast_opt/utilities/warning_hidingNonVirtualFunction_prologue.h"
+
   /// Deep copy of the current node
   /// \return A deep copy of the current node
   std::unique_ptr<Literal> clone() const { /* intentionally hiding */
     return std::unique_ptr<Literal>(clone_impl());
   }
-#pragma clang diagnostic pop
+
+#include "ast_opt/utilities/warning_hidingNonVirtualFunction_epilogue.h"
+
 
 
   ///////////////////////////////////////////////
