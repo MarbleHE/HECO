@@ -2,9 +2,6 @@ name: build_run_tests
 
 on: [ push ]
 
-env:
-  SHORT_SHA: $(git rev-parse --short=8 ${{ github.sha }})
-
 jobs:
   build-ubuntu:
     runs-on: ubuntu-latest
@@ -14,6 +11,10 @@ jobs:
       - name: install gcc-9
         run: sudo apt-get install -y gcc-9 g++-9 build-essential
       - uses: actions/checkout@v1
+      - name: Generate short commit hash
+        id: vars
+        run: |
+          echo ::set-output name=sha_short::$(git rev-parse --short=8 ${{ github.sha }})
       - name: configure
         run: mkdir build && cd build && cmake -DCMAKE_CXX_FLAGS="-Werror" -DCMAKE_CXX_COMPILER=g++-9 -DCMAKE_C_COMPILER=gcc-9 ..
       - name: build
@@ -23,11 +24,15 @@ jobs:
       - name: Send message to Slack if job has failed
         if: ${{ failure() }}
         run: |
-          curl -F $'text=⚠️ *Compilation failed for gcc on Ubuntu!*\nPlease check status on the <https://github.com/MarbleHE/ABC/actions/runs/${{ github.run_id }}|Actions dashboard>.\Consider the changes made in the most recent git commit <https://github.com/MarbleHE/ABC/commit/${{ github.sha }}|`${{ env.SHORT_SHA }}`>.' -F channel=batching-compiler -H "Authorization: Bearer ${{ secrets.SLACK_APP_TOKEN }}" https://slack.com/api/chat.postMessage
+          curl -F $'text=⚠️ *Compilation failed for gcc on Ubuntu!*\nPlease check status on the <https://github.com/MarbleHE/ABC/actions/runs/${{ github.run_id }}|Actions dashboard>. Consider the changes made in the most recent git commit <https://github.com/MarbleHE/ABC/commit/${{ github.sha }}|`${{ steps.vars.outputs.sha_short }}`>.' -F channel=batching-compiler -H "Authorization: Bearer ${{ secrets.SLACK_APP_TOKEN }}" https://slack.com/api/chat.postMessage
   build-macos:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v1
+      - name: Generate short commit hash
+        id: vars
+        run: |
+          echo ::set-output name=sha_short::$(git rev-parse --short=8 ${{ github.sha }})
       - name: configure
         run: mkdir build && cd build && cmake -DCMAKE_CXX_FLAGS="-Werror" -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang ..
       - name: build
@@ -37,11 +42,15 @@ jobs:
       - name: Send message to Slack if job has failed
         if: ${{ failure() }}
         run: |
-          curl -F $'text=⚠️ *Compilation failed for clang on macOS!*\nPlease check status on the <https://github.com/MarbleHE/ABC/actions/runs/${{ github.run_id }}|Actions dashboard>.\Consider the changes made in the most recent git commit <https://github.com/MarbleHE/ABC/commit/${{ github.sha }}|`${{ env.SHORT_SHA }}`>.' -F channel=batching-compiler -H "Authorization: Bearer ${{ secrets.SLACK_APP_TOKEN }}" https://slack.com/api/chat.postMessage
+          curl -F $'text=⚠️ *Compilation failed for clang on macOS!*\nPlease check status on the <https://github.com/MarbleHE/ABC/actions/runs/${{ github.run_id }}|Actions dashboard>. Consider the changes made in the most recent git commit <https://github.com/MarbleHE/ABC/commit/${{ github.sha }}|`${{ steps.vars.outputs.sha_short }}`>.' -F channel=batching-compiler -H "Authorization: Bearer ${{ secrets.SLACK_APP_TOKEN }}" https://slack.com/api/chat.postMessage
   build-windows:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v1
+      - name: Generate short commit hash
+        id: vars
+        run: |
+          echo ::set-output name=sha_short::$(git rev-parse --short=8 ${{ github.sha }})
       - name: configure
         shell: cmd
         run: |
@@ -60,4 +69,4 @@ jobs:
       - name: Send message to Slack if job has failed
         if: ${{ failure() }}
         run: |
-          curl -F $'text=⚠️ *Compilation failed for MSVSC on Windows!*\nPlease check status on the <https://github.com/MarbleHE/ABC/actions/runs/${{ github.run_id }}|Actions dashboard>.\Consider the changes made in the most recent git commit <https://github.com/MarbleHE/ABC/commit/${{ github.sha }}|`${{ env.SHORT_SHA }}`>.' -F channel=batching-compiler -H "Authorization: Bearer ${{ secrets.SLACK_APP_TOKEN }}" https://slack.com/api/chat.postMessage
+          curl.exe -F $'text=⚠️ *Compilation failed for MSVSC on Windows!*\nPlease check status on the <https://github.com/MarbleHE/ABC/actions/runs/${{ github.run_id }}|Actions dashboard>. Consider the changes made in the most recent git commit <https://github.com/MarbleHE/ABC/commit/${{ github.sha }}|`${{ steps.vars.outputs.sha_short }}`>.' -F channel=batching-compiler -H "Authorization: Bearer ${{ secrets.SLACK_APP_TOKEN }}" https://slack.com/api/chat.postMessage
