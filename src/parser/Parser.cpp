@@ -8,6 +8,7 @@
 #include "ast_opt/ast/AbstractTarget.h"
 #include "ast_opt/ast/BinaryExpression.h"
 #include "ast_opt/ast/Block.h"
+#include "ast_opt/ast/Call.h"
 #include "ast_opt/ast/ExpressionList.h"
 #include "ast_opt/ast/For.h"
 #include "ast_opt/ast/Function.h"
@@ -198,6 +199,17 @@ AbstractExpression *Parser::parseExpression(stork::tokens_iterator &it) {
     } else if (it->hasValue(stork::reservedTokens::open_curly)) {
       // if it begins with an "{" it must be an expression list
       operands.push(parseExpressionList(it));
+    } else if (it->hasValue(stork::reservedTokens::kw_rotate)) {
+      // if it's the rotate keyword, it's a "fake" function call:
+      parseTokenValue(it, stork::reservedTokens::kw_rotate);
+      parseTokenValue(it, stork::reservedTokens::open_round);
+      // The first element must be an identifier rather than a target, since we cannot rotate e.g. x[i]
+      std::string id = parseIdentifier(it);
+      parseTokenValue(it, stork::reservedTokens::comma);
+          std::vector<std::unique_ptr<AbstractExpression>> offset;
+      offset.push_back(std::unique_ptr<AbstractExpression>(parseExpression(it)));
+      parseTokenValue(it, stork::reservedTokens::close_round);
+      operands.push(new Call(id, std::move(offset)));
     } else {
       // Stop parsing tokens as soon as we see a closing ), a semicolon or anything else
       running = false;
@@ -406,6 +418,15 @@ Operator Parser::parseOperator(stork::tokens_iterator &it) {
     } else if (it->hasValue(stork::reservedTokens::bitwise_not)) {
       ++it;
       return Operator(UnaryOp::BITWISE_NOT);
+    } else if (it->hasValue(stork::reservedTokens::fhe_add)) {
+      ++it;
+      return Operator(ArithmeticOp::FHE_ADDITION);
+    } else if (it->hasValue(stork::reservedTokens::fhe_sub)) {
+      ++it;
+      return Operator(ArithmeticOp::FHE_SUBTRACTION);
+    } else if (it->hasValue(stork::reservedTokens::fhe_mul)) {
+      ++it;
+      return Operator(ArithmeticOp::FHE_MULTIPLICATION);
     }
   }
   // If we get here, it wasn't an operator
