@@ -27,6 +27,8 @@ class ScopedVisitor : public IVisitor {
 
   void visit(Block &elem) override;
 
+  void visit(Call &elem) override;
+
   void visit(ExpressionList &elem) override;
 
   void visit(For &elem) override;
@@ -67,45 +69,7 @@ class ScopedVisitor : public IVisitor {
 
   [[nodiscard]] const Scope &getCurrentScope() const;
 
-  void visitChildren(BinaryExpression &elem);
-
-  void visitChildren(Block &elem);
-
-  void visitChildren(ExpressionList &elem);
-
-  void visitChildren(For &elem);
-
-  void visitChildren(Function &elem);
-
-  void visitChildren(FunctionParameter &elem);
-
-  void visitChildren(If &elem);
-
-  void visitChildren(IndexAccess &elem);
-
-  void visitChildren(LiteralBool &elem);
-
-  void visitChildren(LiteralChar &elem);
-
-  void visitChildren(LiteralInt &elem);
-
-  void visitChildren(LiteralFloat &elem);
-
-  void visitChildren(LiteralDouble &elem);
-
-  void visitChildren(LiteralString &elem);
-
-  void visitChildren(OperatorExpression &elem);
-
-  void visitChildren(Return &elem);
-
-  void visitChildren(UnaryExpression &elem);
-
-  void visitChildren(Assignment &elem);
-
-  void visitChildren(VariableDeclaration &elem);
-
-  void visitChildren(Variable &elem);
+  void visitChildren(AbstractNode &elem);
 
   void enterScope(AbstractNode &node);
 

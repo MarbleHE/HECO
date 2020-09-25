@@ -1,6 +1,7 @@
 #include "ast_opt/ast/Assignment.h"
 #include "ast_opt/ast/BinaryExpression.h"
 #include "ast_opt/ast/Block.h"
+#include "ast_opt/ast/Call.h"
 #include "ast_opt/ast/ExpressionList.h"
 #include "ast_opt/ast/For.h"
 #include "ast_opt/ast/Function.h"
@@ -24,6 +25,10 @@ void ScopedVisitor::visit(Block &elem) {
   enterScope(elem);
   visitChildren(elem);
   exitScope(elem);
+}
+
+void ScopedVisitor::visit(Call &elem) {
+  visitChildren(elem);
 }
 
 void ScopedVisitor::visit(ExpressionList &elem) {
@@ -104,121 +109,7 @@ void ScopedVisitor::visit(Variable &elem) {
   visitChildren(elem);
 }
 
-void ScopedVisitor::visitChildren(BinaryExpression &elem) {
-  for (auto &c : elem) {
-    c.accept(*this);
-  }
-}
-
-void ScopedVisitor::visitChildren(Block &elem) {
-  for (auto &c : elem) {
-    c.accept(*this);
-  }
-}
-
-void ScopedVisitor::visitChildren(ExpressionList &elem) {
-  for (auto &c : elem) {
-    c.accept(*this);
-  }
-}
-
-void ScopedVisitor::visitChildren(For &elem) {
-  for (auto &c : elem) {
-    c.accept(*this);
-  }
-}
-
-void ScopedVisitor::visitChildren(Function &elem) {
-  for (auto &c : elem) {
-    c.accept(*this);
-  }
-}
-
-void ScopedVisitor::visitChildren(FunctionParameter &elem) {
-  for (auto &c : elem) {
-    c.accept(*this);
-  }
-}
-
-void ScopedVisitor::visitChildren(If &elem) {
-  for (auto &c : elem) {
-    c.accept(*this);
-  }
-}
-
-void ScopedVisitor::visitChildren(IndexAccess &elem) {
-  for (auto &c : elem) {
-    c.accept(*this);
-  }
-}
-
-void ScopedVisitor::visitChildren(LiteralBool &elem) {
-  for (auto &c : elem) {
-    c.accept(*this);
-  }
-}
-
-void ScopedVisitor::visitChildren(LiteralChar &elem) {
-  for (auto &c : elem) {
-    c.accept(*this);
-  }
-}
-
-void ScopedVisitor::visitChildren(LiteralInt &elem) {
-  for (auto &c : elem) {
-    c.accept(*this);
-  }
-}
-
-void ScopedVisitor::visitChildren(LiteralFloat &elem) {
-  for (auto &c : elem) {
-    c.accept(*this);
-  }
-}
-
-void ScopedVisitor::visitChildren(LiteralDouble &elem) {
-  for (auto &c : elem) {
-    c.accept(*this);
-  }
-}
-
-void ScopedVisitor::visitChildren(LiteralString &elem) {
-  for (auto &c : elem) {
-    c.accept(*this);
-  }
-}
-
-void ScopedVisitor::visitChildren(OperatorExpression &elem) {
-  for (auto &c : elem) {
-    c.accept(*this);
-  }
-}
-
-void ScopedVisitor::visitChildren(Return &elem) {
-  for (auto &c : elem) {
-    c.accept(*this);
-  }
-}
-
-void ScopedVisitor::visitChildren(UnaryExpression &elem) {
-  for (auto &c : elem) {
-    c.accept(*this);
-  }
-}
-
-void ScopedVisitor::visitChildren(Assignment &elem) {
-  for (auto &c : elem) {
-    c.accept(*this);
-  }
-}
-
-void ScopedVisitor::visitChildren(VariableDeclaration &elem) {
-  for (auto &c : elem) {
-    c.accept(*this);
-  }
-}
-
-void ScopedVisitor::visitChildren(Variable &elem) {
+void ScopedVisitor::visitChildren(AbstractNode &elem) {
   for (auto &c : elem) {
     c.accept(*this);
   }

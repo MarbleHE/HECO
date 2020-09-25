@@ -28,6 +28,7 @@ set(TEST_FILES
         ast/AssignmentTest.cpp
         ast/BinaryExpressionTest.cpp
         ast/BlockTest.cpp
+        ast/CallTest.cpp
         ast/ExpressionListTest.cpp
         ast/ForTest.cpp
         ast/FunctionParameterTest.cpp

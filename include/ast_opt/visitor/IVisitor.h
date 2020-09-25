@@ -7,9 +7,6 @@ class BinaryExpression;
 
 class Block;
 
-//TODO: Define and implement AST node for Call
-// Might want to introduce "FunctionArguments" or something similar
-// that links an AbstractExpression to each FunctionParameter
 class Call;
 
 class ExpressionList;
@@ -54,6 +51,8 @@ class IVisitor {
   virtual void visit(BinaryExpression &elem) = 0;
 
   virtual void visit(Block &elem) = 0;
+
+  virtual void visit(Call &elem) = 0;
 
   virtual void visit(ExpressionList &elem) = 0;
 
