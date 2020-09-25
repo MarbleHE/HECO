@@ -42,7 +42,7 @@ VarAccessMapType &GraphNode::getAccessedVariables() {
   return variablesAccessMap;
 }
 
-std::vector<ScopedIdentifier> GraphNode::getVariableAccessesByType(std::initializer_list<VariableAccessType> accessTypes) {
+std::vector<ScopedIdentifier> GraphNode::getVariableAccessesByType(std::vector<VariableAccessType> accessTypes) {
   std::vector<ScopedIdentifier> resultSet;
   // transforms given initializer list into an unordered set for fast lookups
   std::unordered_set<VariableAccessType> requestedTypes(accessTypes.begin(), accessTypes.end());
