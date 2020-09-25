@@ -107,6 +107,30 @@ class SpecialControlFlowGraphVisitor : public ScopedVisitor {
   /// The ControlFlowGraphVisitor requires this to be a Block, For, of If node.
   /// \param node The node on that visit(...) was called on.
   void checkEntrypoint(AbstractNode &node);
+
+  /// This method uses the information gained in the pass of this visitor (i.e., calling visit(..) on a node), in
+  /// particular the information of variable reads and writes, and constructs a data flow graph. This graph has an edge
+  /// from each statement where a variable is read to the last statement where the respective variable was written. By
+  /// considering If statements, there might potentially exist multiple of such last writes to a variable. The following
+  /// example demonstrates a program where variable access to "a" in line 06 would have two backward edges (to line 02
+  /// and line 04) as both statements could cause a write to variable "a".
+  ///
+  ///  01:  if (c > 100) {
+  ///  02:     a = 1;
+  ///  03:  else {
+  ///  04:     a = 0;
+  ///  05:  }
+  ///  06:  c = a*22;
+  ///
+  /// The data flow graph is constructed in two passes:
+  ///   In the first pass, we traverse the control flow graph in a breadth-first search (BFS) style and propagate the
+  /// knowledge at which node a all variables seen so far have been written the last time. This also considers joint
+  /// points (i.e., nodes with two incoming edges) properly. In case that a loop is involved, it might be necessary to
+  /// visit the loops body twice.
+  ///   In the second pass, we iterate over all nodes that we have visited in the first pass and check whether the
+  /// respective node reads a variable. If yes, we lookup when the respective variable was written the last time (i.e.,
+  /// in which node) and add an backward edge (last_written_node -> read_node).
+  void buildDataflowGraph();
 };
 
 #endif //AST_OPTIMIZER_SRC_VISITOR_CONTROLFLOWGRAPHVISITOR_H_

@@ -9,6 +9,8 @@
 #include "ast_opt/ast/Return.h"
 #include "ast_opt/ast/VariableDeclaration.h"
 
+#include <deque>
+
 void SpecialControlFlowGraphVisitor::checkEntrypoint(AbstractNode &node) {
   // if this is not the first visited node, then there's no need for this check
   if (!nodes.empty()) return;
@@ -305,5 +307,151 @@ SpecialControlFlowGraphVisitor::SpecialControlFlowGraphVisitor(
 }
 
 void SpecialControlFlowGraphVisitor::buildDataflowGraph() {
+  // TODO: Improve naming of variables
+
+  // =================
+  // STEP 1: Distribute knowledge about variable writes
+  // Traverse the graph and store for each graph node where (i.e., at which node) all of the variables seen so far were
+  // written the last time with respect to the program's execution flow (control flow graph). This works by propagating
+  // the knowledge about variable writes through the CFG and updating it with the local information (from the current 
+  // graph node).
+  // =================
+
+  typedef std::unordered_map<ScopedIdentifier,
+                             std::vector<std::reference_wrapper<GraphNode>>,
+                             ScopedIdentifierHashFunction,
+                             std::equal_to<>> IdentifierGraphNodeMap;
+
+  // temporary map (to be used by currently processed node) to store where a variable was last written
+  IdentifierGraphNodeMap varsLastWritten;
+
+  // a map that contains for each AST node (key: unique ID) associated with a GraphNode a map describing at which node
+  // all variables (value->key) seen so far were written at the last time (value->value); as the latter can be at
+  // multiple nodes this is modeled as vector
+  std::unordered_map<std::string, IdentifierGraphNodeMap> nodeToVarLastWrittenMapping;
+
+  // a map of all already processed nodes used to detect cycles
+  std::unordered_map<std::string, std::reference_wrapper<GraphNode>> processedNodes;
+
+  // a queue of nodes to be processed next
+  std::deque<std::reference_wrapper<GraphNode>> nextNodesToVisit({std::ref(getRootNode())});
+
+  // iterate over all nodes that are reachable from the CFG's root node
+  while (!nextNodesToVisit.empty()) {
+    // reset temporary structure before next iteration
+    varsLastWritten.clear();
+
+    // get node to be processed in this iteration
+    auto currentNode = nextNodesToVisit.front();
+    nextNodesToVisit.pop_front();
+
+    // extract required information from node
+    auto currentNode_id = currentNode.get().getAstNode().getUniqueNodeId();
+    auto currentNode_parentNodes = currentNode.get().getControlFlowGraph().getParents();
+
+    // joint points a CFG nodes with multiple incoming edges (e.g., statement after a [return-free] If-Else statement)
+    bool currentNode_isJointPoint = currentNode_parentNodes.size() > 1;
+
+    // iterate over currentNode's parents and collect their knowledge about variable writes
+    for (auto &pNode : currentNode_parentNodes) {
+      auto pNode_id = pNode.get().getAstNode().getUniqueNodeId();
+      for (auto &[scopedIdentifier, nodesWritingToVariable] : nodeToVarLastWrittenMapping.at(pNode_id)) {
+        // either add the nodes that refer to the variable (then) in case that this variable is already known [merging],
+        // or (else) create a new vector by assigning/copying the vector of referenced nodes [replacing]
+        if (varsLastWritten.count(scopedIdentifier) > 0) {
+          auto &vec = varsLastWritten.at(scopedIdentifier);
+          vec.insert(vec.end(), nodesWritingToVariable.begin(), nodesWritingToVariable.end());
+        } else {
+          varsLastWritten[scopedIdentifier] = nodesWritingToVariable;
+        }
+      }
+    }
+
+    for (auto &scopedId : currentNode.get()
+        .getVariableAccessesByType({VariableAccessType::WRITE, VariableAccessType::READ_AND_WRITE})) {
+      if (!currentNode_isJointPoint && varsLastWritten.count(scopedId) > 0) varsLastWritten.at(scopedId).clear();
+      varsLastWritten[scopedId].push_back(currentNode);
+    }
+
+    // compare varLastWritten with information in nodeToVarLastWrittenMapping to see whether there were any changes such
+    // that the newly collected knowledge needs to be distributed to the children nodes again -> revisit required
+    // (check will be evaluated only if the node was visited once before, see condition in visitingChildrenRequired)
+    auto collectedWrittenVarsChanged = [&]() -> bool {
+      auto mp = nodeToVarLastWrittenMapping.at(currentNode_id);
+      return std::any_of(varsLastWritten.begin(), varsLastWritten.end(), [&mp](const auto &mapEntry) {
+        return mp.count(mapEntry.first)==0 ||  // a variable that was not tracked before
+            (mp.at(mapEntry.first).size()
+                !=mapEntry.second.size());  // a variable for which new write nodes were determined
+      });
+    };
+
+    // condition that decides whether children must be enqueued / visited next
+    bool visitingChildrenRequired = (
+        processedNodes.count(currentNode_id)==0)  // node was not visited yet
+        || (nodeToVarLastWrittenMapping.count(currentNode_id) > 0
+            && collectedWrittenVarsChanged()); // information changed
+
+
+    // attach the collected write information to this node, for that it is required to check if there is already
+    // existing information in nodeToVarLastWrittenMapping about this node (then append) or not (then move/overwrite)
+    if (nodeToVarLastWrittenMapping.count(currentNode_id)==0) {
+      // simply move the collected nodes in varLastWritten to nodeToVarLastWrittenMapping
+      nodeToVarLastWrittenMapping[currentNode_id] = std::move(varsLastWritten);
+    } else {
+      // merge the nodes already existing in nodeToVarLastWrittenMapping with those newly collected
+      for (auto &[varIdentifier, gNodeSet] : varsLastWritten) {
+        auto set = varsLastWritten.at(varIdentifier);
+        auto vec = nodeToVarLastWrittenMapping.at(currentNode_id).at(varIdentifier);
+        vec.insert(vec.end(), set.begin(), set.end());
+      }
+    }
+
+    // check if we need to visit the current node's children (else) or we can continue with the next node (then)
+    if (!visitingChildrenRequired) {
+      continue;
+    } else {
+      // enqueue children of current node: those are the ones to visit next
+      auto nextNodes = currentNode.get().getControlFlowGraph().getChildren();
+      nextNodesToVisit.insert(nextNodesToVisit.end(), nextNodes.begin(), nextNodes.end());
+      // mark this node as visited to not visit it again
+      processedNodes.emplace(currentNode_id, currentNode);
+    }
+
+  } // end:  while (!nextNodesToVisit.empty())
+
+  // =================
+  // STEP 2:
+  // Traverse all graph nodes that have variable reads and add an edge to the last location where the respective
+  // variable was written last.
+  // =================
+
+  // for each node that was visited in the CFG
+  for (auto &[k, v] : processedNodes) {
+
+    // retrieve all variables that were read
+    for (auto &scopedIdentifier : v.get()
+        .getVariableAccessesByType({VariableAccessType::READ, VariableAccessType::READ_AND_WRITE})) {
+
+      if (v.get().getAccessedVariables().at(scopedIdentifier)==VariableAccessType::READ_AND_WRITE) {
+        for (auto &parentNode : v.get().getControlFlowGraph().getParents()) {
+
+          auto mapEntry = nodeToVarLastWrittenMapping.at(parentNode.get().getAstNode().getUniqueNodeId());
+
+          if (mapEntry.count(scopedIdentifier)==0) continue;
+
+          auto vectorOfWrites = mapEntry.at(scopedIdentifier);
+          for (auto &edgeSrc : vectorOfWrites) edgeSrc.get().getDataFlowGraph().addChild(v);
+
+        }
+      } else {
+        for (auto &writeNodes : nodeToVarLastWrittenMapping.at(v.get().getAstNode().getUniqueNodeId())
+            .at(scopedIdentifier)) {
+          writeNodes.get().getDataFlowGraph().addChild(v);
+        }
+      }
+
+    }
+
+  }
 
 }
