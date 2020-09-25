@@ -94,7 +94,7 @@ void SpecialControlFlowGraphVisitor::visit(Block &node) {
 void SpecialControlFlowGraphVisitor::visit(For &node) {
   SpecialControlFlowGraphVisitor::checkEntrypoint(node);
   std::cout << "Visiting For (" << node.getUniqueNodeId() << ")" << std::endl;
-  GraphNode &graphNode = createGraphNodeAndAppendToCfg(node);
+  [[maybe_unused]] auto &graphNode = createGraphNodeAndAppendToCfg(node);
 
   ScopedVisitor::enterScope(node);
 
@@ -283,4 +283,6 @@ SpecialControlFlowGraphVisitor::SpecialControlFlowGraphVisitor(
   ScopedVisitor::setPredeclaredVariables(alreadyDeclaredVariables);
 }
 
+void SpecialControlFlowGraphVisitor::buildDataflowGraph() {
 
+}
