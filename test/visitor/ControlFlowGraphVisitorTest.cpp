@@ -246,6 +246,29 @@ TEST(ControlFlowGraphVisitorTest, dfg_simpleAssignment) { /* NOLINT */
   EXPECT_TRUE(setContains(accessedVariables, "z", VariableAccessType::WRITE));
 }
 
+TEST(ControlFlowGraphVisitorTest, dfg_functionParameter) { /* NOLINT */
+  const char *inputChars = R""""(
+    public int main(int z) {
+      int v = z+1;
+    }
+    )"""";
+  auto inputCode = std::string(inputChars);
+  auto inputAST = Parser::parse(inputCode);
+
+  ControlFlowGraphVisitor cfgv;
+  inputAST->accept(cfgv);
+
+  auto accessedVars_function = getGraphNodeByChildrenIdxPath(cfgv.getRootNode(), {0}).getAccessedVariables();
+  EXPECT_EQ(accessedVars_function.size(), 1);
+  EXPECT_TRUE(setContains(accessedVars_function, "z", VariableAccessType::WRITE));
+
+  // get first child in Block as the root node is a Block
+  auto accessedVariables = getGraphNodeByChildrenIdxPath(cfgv.getRootNode(), {0, 0, 0}).getAccessedVariables();
+  EXPECT_EQ(accessedVariables.size(), 2);
+  EXPECT_TRUE(setContains(accessedVariables, "z", VariableAccessType::READ));
+  EXPECT_TRUE(setContains(accessedVariables, "v", VariableAccessType::WRITE));
+}
+
 TEST(ControlFlowGraphVisitorTest, dfg_simpleReadWriteAssignment_throwErrorOnNonResolvableVariable) { /* NOLINT */
   const char *inputChars = R""""(
     {
@@ -420,7 +443,41 @@ TEST(ControlFlowGraphVisitorTest, dfg_forLoop_localVariable_emptyUpdate) { /* NO
   EXPECT_EQ(accessedVariables_block.size(), 2);
   EXPECT_TRUE(setContains(accessedVariables_block, "i", VariableAccessType::READ));
   EXPECT_TRUE(setContains(accessedVariables_block, "c", VariableAccessType::WRITE));
-//}
+}
+
+// (2) Tests for the structure accessedVariables map
+
+TEST(ControlFlowGraphVisitorTest, dfgGraph_simpleAssignment) { /* NOLINT */
+  const char *inputChars = R""""(
+    public int main(int a) {
+      a = 34;
+      return a;
+    }
+    )"""";
+  auto inputCode = std::string(inputChars);
+  auto inputAST = Parser::parse(inputCode);
+
+  ControlFlowGraphVisitor cfgv;
+  inputAST->accept(cfgv);
+
+  auto &gn = cfgv.getRootNode();
+
+  auto &functionStmt = getGraphNodeByChildrenIdxPath(gn, {0});
+  auto &varAssignm = getGraphNodeByChildrenIdxPath(gn, {0, 0});
+  auto &returnStmt = getGraphNodeByChildrenIdxPath(gn, {0, 0, 0});
+
+  EXPECT_EQ(varAssignm.getDataFlowGraph().getParents().size(), 1);
+  EXPECT_EQ(&varAssignm.getDataFlowGraph().getParents().at(0).get(), &functionStmt);
+  EXPECT_EQ(varAssignm.getDataFlowGraph().getChildren().size(), 1);
+  EXPECT_EQ(&varAssignm.getDataFlowGraph().getChildren().at(0).get(), &returnStmt);
+
+  EXPECT_EQ(returnStmt.getDataFlowGraph().getParents().size(), 1);
+  EXPECT_EQ(&returnStmt.getDataFlowGraph().getParents().at(0).get(), &varAssignm);
+  EXPECT_EQ(returnStmt.getDataFlowGraph().getChildren().size(), 0);
+}
+
+
+
 
 //TEST(ControlFlowGraphVisitorTest, wip) {
 //  // Confirm that printing children works as expected
@@ -460,4 +517,4 @@ TEST(ControlFlowGraphVisitorTest, dfg_forLoop_localVariable_emptyUpdate) { /* NO
 ////  EXPECT_EQ(ss.str(), "Assignment\n"
 ////                      "  Variable (foo)\n"
 ////                      "  LiteralBool (true)\n");
-}
+
