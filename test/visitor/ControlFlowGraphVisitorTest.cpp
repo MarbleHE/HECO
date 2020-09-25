@@ -89,6 +89,45 @@ TEST(ControlFlowGraphVisitorTest, cfg_ifElseProgram) { /* NOLINT */
   EXPECT_EQ(allNodes.size(), 10);
 }
 
+TEST(ControlFlowGraphVisitorTest, cfg_ifProgram) { /* NOLINT */
+  const char *inputChars = R""""(
+    public int main(int a) {
+      int q;
+      q = 21;
+      if (q > a) {
+        return 1;
+      }
+      return 0;
+    }
+    )"""";
+  auto inputCode = std::string(inputChars);
+  auto inputAST = Parser::parse(inputCode);
+
+  ControlFlowGraphVisitor cfgv;
+  inputAST->accept(cfgv);
+
+  auto &gn = cfgv.getRootNode();
+
+  const auto relType = RelationshipType::CTRL_FLOW_GRAPH;
+  auto dummyAstNode = Block();
+  auto functionStmt = std::make_unique<GraphNode>(dummyAstNode);
+  auto blockStmt = std::make_unique<GraphNode>(dummyAstNode, relType, createParentsVector({functionStmt.get()}));
+  auto varDeclStmt = std::make_unique<GraphNode>(dummyAstNode, relType, createParentsVector({blockStmt.get()}));
+  auto varAssignmStmt = std::make_unique<GraphNode>(dummyAstNode, relType, createParentsVector({varDeclStmt.get()}));
+  auto ifAssignmStmt = std::make_unique<GraphNode>(dummyAstNode, relType, createParentsVector({varAssignmStmt.get()}));
+  auto thenBranch = std::make_unique<GraphNode>(dummyAstNode, relType, createParentsVector({ifAssignmStmt.get()}));
+  auto thenReturnStmt = std::make_unique<GraphNode>(dummyAstNode, relType, createParentsVector({thenBranch.get()}));
+  auto returnStmt2 = std::make_unique<GraphNode>(dummyAstNode, relType, createParentsVector({ifAssignmStmt.get()}));
+
+  // check that the CFG's structure is correct
+  EXPECT_TRUE(functionStmt->getControlFlowGraph().isEqualToGraph(cfgv.getRootNode()));
+
+  // check that all nodes of the CFG have a refToOriginalNode set
+  auto allNodes = cfgv.getRootNode().getControlFlowGraph().getAllReachableNodes();
+  // Note that we added 1 because the Parser always wraps the parsed statements into a Block
+  EXPECT_EQ(allNodes.size(), 9);
+}
+
 TEST(ControlFlowGraphVisitorTest, cfg_ForProgram) { /* NOLINT */
   const char *inputChars = R""""(
     public int main(int a) {
@@ -116,13 +155,14 @@ TEST(ControlFlowGraphVisitorTest, cfg_ForProgram) { /* NOLINT */
   auto varAssignmStmt = std::make_unique<GraphNode>(dummyAstNode, relType, createParentsVector({varDeclStmt.get()}));
   auto forStatement = std::make_unique<GraphNode>(dummyAstNode, relType, createParentsVector({varAssignmStmt.get()}));
   auto forInitializer = std::make_unique<GraphNode>(dummyAstNode, relType, createParentsVector({forStatement.get()}));
+  auto forCondition = std::make_unique<GraphNode>(dummyAstNode, relType, createParentsVector({forInitializer.get()}));
 
-  auto forBlock = std::make_unique<GraphNode>(dummyAstNode, relType, createParentsVector({forInitializer.get()}));
+  auto forBlock = std::make_unique<GraphNode>(dummyAstNode, relType, createParentsVector({forCondition.get()}));
   auto varAssignmStmt2 = std::make_unique<GraphNode>(dummyAstNode, relType, createParentsVector({forBlock.get()}));
   auto forUpdate = std::make_unique<GraphNode>(dummyAstNode, relType, createParentsVector({varAssignmStmt2.get()}));
-  varAssignmStmt2->getControlFlowGraph().addChild(*forUpdate);
+  forCondition->getControlFlowGraph().addParent(*forUpdate);
 
-  auto returnStmt = std::make_unique<GraphNode>(dummyAstNode, relType, createParentsVector({forUpdate.get()}));
+  auto returnStmt = std::make_unique<GraphNode>(dummyAstNode, relType, createParentsVector({forCondition.get()}));
 
   // check that the CFG's structure is correct
   EXPECT_TRUE(functionStmt->getControlFlowGraph().isEqualToGraph(cfgv.getRootNode()));
@@ -132,7 +172,7 @@ TEST(ControlFlowGraphVisitorTest, cfg_ForProgram) { /* NOLINT */
   // Note that we added 1 because the Parser always wraps the parsed statements into a Block.
   // Also, note that initializer and update of the For loop are wrapped into blocks each but we do not visit these
   // blocks and as such they are not counted.
-  EXPECT_EQ(allNodes.size(), 11);
+  EXPECT_EQ(allNodes.size(), 12);
 }
 
 
@@ -342,12 +382,12 @@ TEST(ControlFlowGraphVisitorTest, dfg_forLoop_accumulation) { /* NOLINT */
   EXPECT_TRUE(setContains(accessedVariables_initializer, "i", VariableAccessType::WRITE));
 
   auto accessedVariables_block =
-      getGraphNodeByChildrenIdxPath(cfgv.getRootNode(), {0, 0, 0, 0, 0, 0}).getAccessedVariables();
+      getGraphNodeByChildrenIdxPath(cfgv.getRootNode(), {0, 0, 0, 0, 0, 0, 0}).getAccessedVariables();
   EXPECT_EQ(accessedVariables_block.size(), 1);
   EXPECT_TRUE(setContains(accessedVariables_block, "sum", VariableAccessType::READ_AND_WRITE));
 
   auto accessedVariables_update =
-      getGraphNodeByChildrenIdxPath(cfgv.getRootNode(), {0, 0, 0, 0, 0, 0, 0}).getAccessedVariables();
+      getGraphNodeByChildrenIdxPath(cfgv.getRootNode(), {0, 0, 0, 0, 0, 0, 0, 0}).getAccessedVariables();
   EXPECT_EQ(accessedVariables_update.size(), 1);
   EXPECT_TRUE(setContains(accessedVariables_update, "i", VariableAccessType::READ_AND_WRITE));
 }
@@ -366,28 +406,21 @@ TEST(ControlFlowGraphVisitorTest, dfg_forLoop_localVariable_emptyUpdate) { /* NO
 
   auto accessedVariables_initializer =
       getGraphNodeByChildrenIdxPath(cfgv.getRootNode(), {0, 0}).getAccessedVariables();
+
   EXPECT_EQ(accessedVariables_initializer.size(), 1);
   EXPECT_TRUE(setContains(accessedVariables_initializer, "i", VariableAccessType::WRITE));
 
-  // TODO: Fix For loop in CFG construction, then uncomment this.
-//  auto accessedVariables_condition =
-//      getGraphNodeByChildrenIdxPath(cfgv.getRootNode(), {0, 0, 0}).getAccessedVariables();
-//  EXPECT_EQ(accessedVariables_condition.size(), 1);
-//  EXPECT_TRUE(setContains(accessedVariables_condition, "i", VariableAccessType::READ));
-
-  auto accessedVariables_update =
-      getGraphNodeByChildrenIdxPath(cfgv.getRootNode(), {0, 0, 0, 0, 0}).getAccessedVariables();
-  EXPECT_EQ(accessedVariables_update.size(), 0);
+  auto accessedVariables_condition =
+      getGraphNodeByChildrenIdxPath(cfgv.getRootNode(), {0, 0, 0}).getAccessedVariables();
+  EXPECT_EQ(accessedVariables_condition.size(), 1);
+  EXPECT_TRUE(setContains(accessedVariables_condition, "i", VariableAccessType::READ));
 
   auto accessedVariables_block =
-      getGraphNodeByChildrenIdxPath(cfgv.getRootNode(), {0, 0, 0, 0}).getAccessedVariables();
+      getGraphNodeByChildrenIdxPath(cfgv.getRootNode(), {0, 0, 0, 0, 0}).getAccessedVariables();
   EXPECT_EQ(accessedVariables_block.size(), 2);
   EXPECT_TRUE(setContains(accessedVariables_block, "i", VariableAccessType::READ));
   EXPECT_TRUE(setContains(accessedVariables_block, "c", VariableAccessType::WRITE));
-}
-
-// TODO: add many more test programs
-
+//}
 
 //TEST(ControlFlowGraphVisitorTest, wip) {
 //  // Confirm that printing children works as expected
@@ -427,4 +460,4 @@ TEST(ControlFlowGraphVisitorTest, dfg_forLoop_localVariable_emptyUpdate) { /* NO
 ////  EXPECT_EQ(ss.str(), "Assignment\n"
 ////                      "  Variable (foo)\n"
 ////                      "  LiteralBool (true)\n");
-//}
+}
