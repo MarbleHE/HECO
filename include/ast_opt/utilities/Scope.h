@@ -40,22 +40,16 @@ class ScopedIdentifier {
   /// \return (A string reference to) the identifier of this ScopedIdentifier.
   std::string &getId();
 
-  bool operator==(const ScopedIdentifier &p) const {
-    return &scope==&p.scope && id==p.id;
-  }
+  bool operator==(const ScopedIdentifier &p) const;
 };
 
 class ScopedIdentifierHashFunction {
   /// This function must be passed to certain STL containers if they should contain GraphNodes, for example,
   /// std::unordered_set<std::reference_wrapper<GraphNode>, GraphNodeHashFunction> mySet.
  public:
-  size_t operator()(const std::unique_ptr<ScopedIdentifier> &scopedIdentifier) const {
-    return std::hash<std::string>()(scopedIdentifier->getId());
-  }
+  size_t operator()(const std::unique_ptr<ScopedIdentifier> &scopedIdentifier) const;
 
-  size_t operator()(const ScopedIdentifier &scopedIdentifier) const {
-    return std::hash<std::string>()(scopedIdentifier.getId());
-  }
+  size_t operator()(const ScopedIdentifier &scopedIdentifier) const;
 };
 
 class Scope {
@@ -95,7 +89,7 @@ class Scope {
   /// \param parentScope The scope to be set as parent of this scope.
   void setParent(Scope *parentScope);
 
-  /// Creates a nested scope within this scope.
+  /// Adds a nested scope to this scope's nestedScopes vector.
   /// \param scope The scope to add as nested scope in this scope.
   void addNestedScope(std::unique_ptr<Scope> &&scope);
 
