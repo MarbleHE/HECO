@@ -1,6 +1,9 @@
 name: build_run_tests
 
-on: [push]
+on: [ push ]
+
+env:
+  SHORT_SHA: $(git rev-parse --short=8 ${{ github.sha }})
 
 jobs:
   build-ubuntu:
@@ -20,7 +23,7 @@ jobs:
       - name: Send message to Slack if job has failed
         if: ${{ failure() }}
         run: |
-          curl -F $'text=⚠️ *Compilation failed for gcc on Ubuntu!*\nPlease check status on https://github.com/MarbleHE/ABC/actions/runs/${{ github.run_id }}.\nSee changes made in git commit: https://github.com/MarbleHE/ABC/commit/${{ github.sha }}' -F channel=batching-compiler -H "Authorization: Bearer ${{ secrets.SLACK_APP_TOKEN }}" https://slack.com/api/chat.postMessage
+          curl -F $'text=⚠️ *Compilation failed for gcc on Ubuntu!*\nPlease check status on the <https://github.com/MarbleHE/ABC/actions/runs/${{ github.run_id }}|Actions dashboard>.\Consider the changes made in the most recent git commit <https://github.com/MarbleHE/ABC/commit/${{ github.sha }}|`${{ env.SHORT_SHA }}`>.' -F channel=batching-compiler -H "Authorization: Bearer ${{ secrets.SLACK_APP_TOKEN }}" https://slack.com/api/chat.postMessage
   build-macos:
     runs-on: macos-latest
     steps:
@@ -34,7 +37,7 @@ jobs:
       - name: Send message to Slack if job has failed
         if: ${{ failure() }}
         run: |
-          curl -F $'text=⚠️ *Compilation failed for clang on macOS!*\nPlease check status on https://github.com/MarbleHE/ABC/actions/runs/${{ github.run_id }}.\nSee changes made in git commit: https://github.com/MarbleHE/ABC/commit/${{ github.sha }}' -F channel=batching-compiler -H "Authorization: Bearer ${{ secrets.SLACK_APP_TOKEN }}" https://slack.com/api/chat.postMessage
+          curl -F $'text=⚠️ *Compilation failed for clang on macOS!*\nPlease check status on the <https://github.com/MarbleHE/ABC/actions/runs/${{ github.run_id }}|Actions dashboard>.\Consider the changes made in the most recent git commit <https://github.com/MarbleHE/ABC/commit/${{ github.sha }}|`${{ env.SHORT_SHA }}`>.' -F channel=batching-compiler -H "Authorization: Bearer ${{ secrets.SLACK_APP_TOKEN }}" https://slack.com/api/chat.postMessage
   build-windows:
     runs-on: windows-latest
     steps:
@@ -57,4 +60,4 @@ jobs:
       - name: Send message to Slack if job has failed
         if: ${{ failure() }}
         run: |
-          curl -F $'text=⚠️ *Compilation failed for MSVSC on Windows!*\nPlease check status on https://github.com/MarbleHE/ABC/actions/runs/${{ github.run_id }}.\nSee changes made in git commit: https://github.com/MarbleHE/ABC/commit/${{ github.sha }}' -F channel=batching-compiler -H "Authorization: Bearer ${{ secrets.SLACK_APP_TOKEN }}" https://slack.com/api/chat.postMessage
+          curl -F $'text=⚠️ *Compilation failed for MSVSC on Windows!*\nPlease check status on the <https://github.com/MarbleHE/ABC/actions/runs/${{ github.run_id }}|Actions dashboard>.\Consider the changes made in the most recent git commit <https://github.com/MarbleHE/ABC/commit/${{ github.sha }}|`${{ env.SHORT_SHA }}`>.' -F channel=batching-compiler -H "Authorization: Bearer ${{ secrets.SLACK_APP_TOKEN }}" https://slack.com/api/chat.postMessage
