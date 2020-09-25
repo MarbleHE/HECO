@@ -99,12 +99,15 @@ void SpecialControlFlowGraphVisitor::visit(For &node) {
   ScopedVisitor::enterScope(node);
 
   // initializer (e.g., int i = 0;)
+  // we need to use the visitChildren method here as we do not want to have the initializer's Block to be included in
+  // the CFG as separate GraphNode as this would cause opening a new scope
   ScopedVisitor::visitChildren(node.getInitializer());
   auto lastStatementInInitializer = lastCreatedNodes;
 
   // condition expression (e.g., i <= N)
+  GraphNode &gNodeCondition = createGraphNodeAndAppendToCfg(node.getCondition());
   node.getCondition().accept(*this);
-  storeAccessedVariables(graphNode);
+  storeAccessedVariables(gNodeCondition);
   auto lastStatementCondition = lastCreatedNodes;
 
   // body (e.g., For (-; -; -) { body statements ... })
@@ -112,26 +115,28 @@ void SpecialControlFlowGraphVisitor::visit(For &node) {
   auto lastStatementInBody = lastCreatedNodes;
 
   // update statement (e.g., i=i+1;)
+  // we need to use the visitChildren method here as we do not want to have the update's Block to be included in
+  // the CFG as separate GraphNode as this would cause opening a new scope
   ScopedVisitor::visitChildren(node.getUpdate());
   auto lastStatementInUpdate = lastCreatedNodes;
 
   ScopedVisitor::exitScope(node);
 
+  // edge: update statement -> condition
   auto firstConditionStatement = lastStatementInInitializer.front().get().getControlFlowGraph().getChildren().front();
-  if (lastStatementInUpdate.size() > 1) {
-    throw std::runtime_error("More than one 'lastStatementInUpdate' in For loop detected. Cannot be handled yet!");
-  } else if (lastStatementInUpdate.size()==1) {
-    // create an edge in CFG from last update statement to first statement in condition as the condition is checked
-    // after executing the update statement of a loop iteration
-    lastStatementInUpdate.front().get().getControlFlowGraph().addChild(firstConditionStatement);
-  } else if (lastStatementInUpdate.empty()) {
+  if (!lastStatementInUpdate.empty()) {
+    for (auto &updateStatement : lastStatementInUpdate) {
+      // create an edge in CFG from last update statement to first statement in condition as the condition is checked
+      // after executing the update statement of a loop iteration
+      updateStatement.get().getControlFlowGraph().addChild(firstConditionStatement);
+    }
+  } else {
     // if there is no update statement, create an edge from last body statement to condition
     lastStatementInBody.front().get().getControlFlowGraph().addChild(firstConditionStatement);
   }
 
-
-  // TODO: Fix issue with missing Condition in CFG. Note that Condition must be connected to both
-  //  the next statement and the first body statement.
+  // edge: condition -> next statement after If statement
+  lastCreatedNodes = lastStatementCondition;
 }
 
 void SpecialControlFlowGraphVisitor::visit(Function &node) {
@@ -164,8 +169,6 @@ void SpecialControlFlowGraphVisitor::visit(If &node) {
     // else branch
     node.getElseBranch().accept(*this);
   }
-
-  // TODO check if condition is connected with then and also consecutive statement
 
   ScopedVisitor::exitScope(node);
 }
@@ -201,12 +204,12 @@ void SpecialControlFlowGraphVisitor::visit(VariableDeclaration &node) {
   storeAccessedVariables(graphNode);
 }
 
-GraphNode &SpecialControlFlowGraphVisitor::createGraphNodeAndAppendToCfg(AbstractStatement &statement) {
-  return createGraphNodeAndAppendToCfg(statement, lastCreatedNodes);
+GraphNode &SpecialControlFlowGraphVisitor::createGraphNodeAndAppendToCfg(AbstractNode &astNode) {
+  return createGraphNodeAndAppendToCfg(astNode, lastCreatedNodes);
 }
 
 GraphNode &SpecialControlFlowGraphVisitor::createGraphNodeAndAppendToCfg(
-    AbstractStatement &statement,
+    AbstractNode &statement,
     const std::vector<std::reference_wrapper<GraphNode>> &parentNodes) {
 
   // create a new GraphNode for the given statement

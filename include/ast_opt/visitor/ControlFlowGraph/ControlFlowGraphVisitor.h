@@ -25,9 +25,9 @@ class SpecialControlFlowGraphVisitor : public ScopedVisitor {
   /// Creates a new GraphNode for the given AbstractStatement node and appends it as child to each of the last created
   /// GraphNodes (see lastCreatedNodes). This method only accepts an AbstractStatement because the CFG/DFG only consider
   /// statements.
-  /// \param statement The statement for which a new GraphNode object should be created for.
+  /// \param astNode The statement for which a new GraphNode object should be created for.
   /// \return (A reference to) the newly created GraphNode object.
-  GraphNode &createGraphNodeAndAppendToCfg(AbstractStatement &statement);
+  GraphNode &createGraphNodeAndAppendToCfg(AbstractNode &astNode);
 
   /// This constructor is required for testing purposes.
   /// Creates a new GraphNode for the given AbstractStatement node and appends it as child to each of the last created
@@ -36,7 +36,7 @@ class SpecialControlFlowGraphVisitor : public ScopedVisitor {
   /// \param statement The statement for which a new GraphNode object should be created for.
   /// \param parentNodes The node(s) that should be added as parent nodes for the newly created GraphNode.
   /// \return (A reference to) the newly created GraphNode object.
-  GraphNode &createGraphNodeAndAppendToCfg(AbstractStatement &statement,
+  GraphNode &createGraphNodeAndAppendToCfg(AbstractNode &statement,
                                            const std::vector<std::reference_wrapper<GraphNode>> &parentNodes);
 
   /// A set containing pairs of (scoped identifiers, access type) where the access type describes if a variable was read
