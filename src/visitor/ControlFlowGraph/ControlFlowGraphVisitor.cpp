@@ -366,7 +366,9 @@ void SpecialControlFlowGraphVisitor::buildDataflowGraph() {
   // =================
 
   typedef std::unordered_map<ScopedIdentifier,
-                             std::vector<std::reference_wrapper<GraphNode>>,
+                             std::unordered_set<std::reference_wrapper<GraphNode>,
+                                                GraphNodeHashFunction,
+                                                GraphNodeComparator>,
                              ScopedIdentifierHashFunction,
                              std::equal_to<>> IdentifierGraphNodeMap;
 
@@ -411,7 +413,7 @@ void SpecialControlFlowGraphVisitor::buildDataflowGraph() {
         // either add the nodes that refer to the variable (then) in case that this variable is already known [merging],
         // or (else) create a new vector by assigning/copying the vector of referenced nodes [replacing]
         auto &vec = varsLastWritten[scopedId];
-        vec.insert(vec.end(), nodesWritingToVariable.begin(), nodesWritingToVariable.end());
+        vec.insert(nodesWritingToVariable.begin(), nodesWritingToVariable.end());
       }
     }
 
@@ -419,7 +421,7 @@ void SpecialControlFlowGraphVisitor::buildDataflowGraph() {
     auto writtenVariables = currentNode.get().getVariableAccessesByType(WRITE_TYPES);
     for (auto &scopedId : writtenVariables) {
       if (!currentNode_isJointPoint && varsLastWritten.count(scopedId) > 0) varsLastWritten.at(scopedId).clear();
-      varsLastWritten[scopedId].push_back(currentNode);
+      varsLastWritten[scopedId].insert(currentNode);
     }
 
     // compare varLastWritten with information in uniqueNodeId_variable_writeNodes to see whether there were any changes
@@ -450,7 +452,7 @@ void SpecialControlFlowGraphVisitor::buildDataflowGraph() {
       // merge the nodes already existing in uniqueNodeId_variable_writeNodes with those newly collected
       for (auto &[varIdentifier, gNodeSet] : varsLastWritten) {
         auto &vec = uniqueNodeId_variable_writeNodes.at(currentNode_id).at(varIdentifier);
-        vec.insert(vec.end(), gNodeSet.begin(), gNodeSet.end());
+        vec.insert(gNodeSet.begin(), gNodeSet.end());
       }
     }
 
