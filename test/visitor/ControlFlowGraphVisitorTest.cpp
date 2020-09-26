@@ -30,8 +30,6 @@ TEST(ControlFlowGraphVisitorTest, cfg_simpleProgram) { /* NOLINT */
   ControlFlowGraphVisitor cfgv;
   inputAST->accept(cfgv);
 
-  auto &gn = cfgv.getRootNode();
-
   const auto relType = RelationshipType::CTRL_FLOW_GRAPH;
   auto dummyAstNode = Block();
   auto functionStmt = std::make_unique<GraphNode>(dummyAstNode);
@@ -65,8 +63,6 @@ TEST(ControlFlowGraphVisitorTest, cfg_ifElseProgram) { /* NOLINT */
 
   ControlFlowGraphVisitor cfgv;
   inputAST->accept(cfgv);
-
-  auto &gn = cfgv.getRootNode();
 
   const auto relType = RelationshipType::CTRL_FLOW_GRAPH;
   auto dummyAstNode = Block();
@@ -106,8 +102,6 @@ TEST(ControlFlowGraphVisitorTest, cfg_ifProgram) { /* NOLINT */
   ControlFlowGraphVisitor cfgv;
   inputAST->accept(cfgv);
 
-  auto &gn = cfgv.getRootNode();
-
   const auto relType = RelationshipType::CTRL_FLOW_GRAPH;
   auto dummyAstNode = Block();
   auto functionStmt = std::make_unique<GraphNode>(dummyAstNode);
@@ -144,8 +138,6 @@ TEST(ControlFlowGraphVisitorTest, cfg_ForProgram) { /* NOLINT */
 
   ControlFlowGraphVisitor cfgv;
   inputAST->accept(cfgv);
-
-  auto &gn = cfgv.getRootNode();
 
   const auto relType = RelationshipType::CTRL_FLOW_GRAPH;
   auto dummyAstNode = Block();
@@ -510,25 +502,6 @@ TEST(ControlFlowGraphVisitorTest, dfgGraph_ifAssignment) { /* NOLINT */
 
   cfgv.buildDataflowGraph();
 
-  std::cout << "\n== DATA FLOW GRAPH =======" << std::endl;
-
-  for (auto &dfn : cfgv.getRootNode().getControlFlowGraph().getAllReachableNodes()) {
-    if (!dfn.get().getControlFlowGraph().getChildren().empty()
-        || !dfn.get().getControlFlowGraph().getParents().empty()) {
-      std::cout << "Node: " << dfn.get().getAstNode().getUniqueNodeId() << std::endl;
-      std::cout << "\tchildren: " << std::endl;
-      for (auto &child : dfn.get().getDataFlowGraph().getChildren()) {
-        std::cout << "\t– " << child.get().getAstNode().getUniqueNodeId() << std::endl;
-      }
-      std::cout << std::endl;
-      std::cout << "\tparents: " << std::endl;
-      for (auto &parent : dfn.get().getDataFlowGraph().getParents()) {
-        std::cout << "\t– " << parent.get().getAstNode().getUniqueNodeId() << std::endl;
-      }
-      std::cout << std::endl;
-    }
-  }
-
   auto &functionStmt = getGraphNodeByChildrenIdxPath(gn, {0});
   auto &ifStmt = getGraphNodeByChildrenIdxPath(gn, {0, 0, 0});
   auto &varAssignm = getGraphNodeByChildrenIdxPath(gn, {0, 0, 0, 0, 0});
@@ -627,7 +600,7 @@ TEST(ControlFlowGraphVisitorTest, dfgGraph_forLoop) { /* NOLINT */
 
   auto &functionStmt = getGraphNodeByChildrenIdxPath(gn, {0});
   auto &varDecl = getGraphNodeByChildrenIdxPath(gn, {0, 0, 0});
-  auto &forStatement = getGraphNodeByChildrenIdxPath(gn, {0, 0, 0, 0});
+//  auto &forStatement = getGraphNodeByChildrenIdxPath(gn, {0, 0, 0, 0});
   auto &forStatementInitializer = getGraphNodeByChildrenIdxPath(gn, {0, 0, 0, 0, 0});
   auto &forStatementCondition = getGraphNodeByChildrenIdxPath(gn, {0, 0, 0, 0, 0, 0});
   auto &forStatementBodyAssignment = getGraphNodeByChildrenIdxPath(gn, {0, 0, 0, 0, 0, 0, 0, 0});
