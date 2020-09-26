@@ -575,25 +575,6 @@ TEST(ControlFlowGraphVisitorTest, dfgGraph_ifElseAssignment) { /* NOLINT */
 
   cfgv.buildDataflowGraph();
 
-  std::cout << "\n== DATA FLOW GRAPH =======" << std::endl;
-
-  for (auto &dfn : cfgv.getRootNode().getControlFlowGraph().getAllReachableNodes()) {
-    if (!dfn.get().getControlFlowGraph().getChildren().empty()
-        || !dfn.get().getControlFlowGraph().getParents().empty()) {
-      std::cout << "Node: " << dfn.get().getAstNode().getUniqueNodeId() << std::endl;
-      std::cout << "\tchildren: " << std::endl;
-      for (auto &child : dfn.get().getDataFlowGraph().getChildren()) {
-        std::cout << "\t– " << child.get().getAstNode().getUniqueNodeId() << std::endl;
-      }
-      std::cout << std::endl;
-      std::cout << "\tparents: " << std::endl;
-      for (auto &parent : dfn.get().getDataFlowGraph().getParents()) {
-        std::cout << "\t– " << parent.get().getAstNode().getUniqueNodeId() << std::endl;
-      }
-      std::cout << std::endl;
-    }
-  }
-
   auto &functionStmt = getGraphNodeByChildrenIdxPath(gn, {0});
   auto &ifStmt = getGraphNodeByChildrenIdxPath(gn, {0, 0, 0});
   auto &varAssignmThen = getGraphNodeByChildrenIdxPath(gn, {0, 0, 0, 0, 0});
@@ -601,23 +582,27 @@ TEST(ControlFlowGraphVisitorTest, dfgGraph_ifElseAssignment) { /* NOLINT */
   auto &returnStmt = getGraphNodeByChildrenIdxPath(gn, {0, 0, 0, 0, 0, 0});
 
   EXPECT_EQ(functionStmt.getDataFlowGraph().getParents().size(), 0);
-//  EXPECT_EQ(functionStmt.getDataFlowGraph().getChildren().size(), 3);
-//  EXPECT_TRUE(containsAll(functionStmt.getDataFlowGraph().getChildren(),
-//                          {std::ref(ifStmt), std::ref(varAssignm), std::ref(returnStmt)}));
-//
-//  EXPECT_EQ(ifStmt.getDataFlowGraph().getParents().size(), 1);
-//  EXPECT_EQ(&ifStmt.getDataFlowGraph().getParents().at(0).get(), &functionStmt);
-//  EXPECT_EQ(ifStmt.getDataFlowGraph().getChildren().size(), 0);
-//
-//  EXPECT_EQ(varAssignm.getDataFlowGraph().getParents().size(), 1);
-//  EXPECT_EQ(&varAssignm.getDataFlowGraph().getParents().at(0).get(), &functionStmt);
-//  EXPECT_EQ(varAssignm.getDataFlowGraph().getChildren().size(), 1);
-//  EXPECT_EQ(&varAssignm.getDataFlowGraph().getChildren().at(0).get(), &returnStmt);
-//
-//  EXPECT_EQ(returnStmt.getDataFlowGraph().getChildren().size(), 0);
-//  EXPECT_EQ(returnStmt.getDataFlowGraph().getParents().size(), 2);
-//  EXPECT_TRUE(containsAll(returnStmt.getDataFlowGraph().getParents(),
-//                          {std::ref(functionStmt), std::ref(varAssignm)}));
+  EXPECT_EQ(functionStmt.getDataFlowGraph().getChildren().size(), 2);
+  EXPECT_TRUE(containsAll(functionStmt.getDataFlowGraph().getChildren(),
+                          {std::ref(ifStmt), std::ref(varAssignmThen)}));
+
+  EXPECT_EQ(ifStmt.getDataFlowGraph().getParents().size(), 1);
+  EXPECT_EQ(&ifStmt.getDataFlowGraph().getParents().at(0).get(), &functionStmt);
+  EXPECT_EQ(ifStmt.getDataFlowGraph().getChildren().size(), 0);
+
+  EXPECT_EQ(varAssignmThen.getDataFlowGraph().getParents().size(), 1);
+  EXPECT_EQ(&varAssignmThen.getDataFlowGraph().getParents().at(0).get(), &functionStmt);
+  EXPECT_EQ(varAssignmThen.getDataFlowGraph().getChildren().size(), 1);
+  EXPECT_EQ(&varAssignmThen.getDataFlowGraph().getChildren().at(0).get(), &returnStmt);
+
+  EXPECT_EQ(varAssignmElse.getDataFlowGraph().getParents().size(), 0);
+  EXPECT_EQ(varAssignmElse.getDataFlowGraph().getChildren().size(), 1);
+  EXPECT_EQ(&varAssignmThen.getDataFlowGraph().getChildren().at(0).get(), &returnStmt);
+
+  EXPECT_EQ(returnStmt.getDataFlowGraph().getChildren().size(), 0);
+  EXPECT_EQ(returnStmt.getDataFlowGraph().getParents().size(), 2);
+  EXPECT_TRUE(containsAll(returnStmt.getDataFlowGraph().getParents(),
+                          {std::ref(varAssignmThen), std::ref(varAssignmElse)}));
 }
 
 TEST(ControlFlowGraphVisitorTest, dfgGraph_forLoop) { /* NOLINT */
@@ -630,4 +615,65 @@ TEST(ControlFlowGraphVisitorTest, dfgGraph_forLoop) { /* NOLINT */
       return sum;
     }
     )"""";
+  auto inputCode = std::string(inputChars);
+  auto inputAST = Parser::parse(inputCode);
+
+  ControlFlowGraphVisitor cfgv;
+  inputAST->accept(cfgv);
+
+  auto &gn = cfgv.getRootNode();
+
+  cfgv.buildDataflowGraph();
+
+  auto &functionStmt = getGraphNodeByChildrenIdxPath(gn, {0});
+  auto &varDecl = getGraphNodeByChildrenIdxPath(gn, {0, 0, 0});
+  auto &forStatement = getGraphNodeByChildrenIdxPath(gn, {0, 0, 0, 0});
+  auto &forStatementInitializer = getGraphNodeByChildrenIdxPath(gn, {0, 0, 0, 0, 0});
+  auto &forStatementCondition = getGraphNodeByChildrenIdxPath(gn, {0, 0, 0, 0, 0, 0});
+  auto &forStatementBodyAssignment = getGraphNodeByChildrenIdxPath(gn, {0, 0, 0, 0, 0, 0, 0, 0});
+  auto &forStatementUpdater = getGraphNodeByChildrenIdxPath(gn, {0, 0, 0, 0, 0, 0, 0, 0, 0});
+  auto &returnStmt = getGraphNodeByChildrenIdxPath(gn, {0, 0, 0, 0, 0, 0, 1});
+
+  EXPECT_EQ(functionStmt.getDataFlowGraph().getParents().size(), 0);
+  EXPECT_EQ(functionStmt.getDataFlowGraph().getChildren().size(), 1);
+  EXPECT_EQ(&functionStmt.getDataFlowGraph().getChildren().at(0).get(), &forStatementCondition);
+
+  EXPECT_EQ(varDecl.getDataFlowGraph().getParents().size(), 0);
+  EXPECT_EQ(varDecl.getDataFlowGraph().getChildren().size(), 2);
+  EXPECT_TRUE(containsAll(varDecl.getDataFlowGraph().getChildren(),
+                          {std::ref(forStatementBodyAssignment), std::ref(returnStmt)}));
+
+  EXPECT_EQ(forStatementInitializer.getDataFlowGraph().getParents().size(), 0);
+  EXPECT_EQ(forStatementInitializer.getDataFlowGraph().getChildren().size(), 3);
+  EXPECT_TRUE(containsAll(forStatementInitializer.getDataFlowGraph().getChildren(),
+                          {std::ref(forStatementCondition),
+                           std::ref(forStatementBodyAssignment),
+                           std::ref(forStatementUpdater)}));
+
+  EXPECT_EQ(forStatementCondition.getDataFlowGraph().getParents().size(), 3);
+  EXPECT_TRUE(containsAll(forStatementCondition.getDataFlowGraph().getParents(),
+                          {std::ref(functionStmt), std::ref(forStatementInitializer), std::ref(forStatementUpdater)}));
+  EXPECT_EQ(forStatementCondition.getDataFlowGraph().getChildren().size(), 0);
+
+  EXPECT_EQ(forStatementBodyAssignment.getDataFlowGraph().getParents().size(), 4);
+  EXPECT_TRUE(containsAll(forStatementBodyAssignment.getDataFlowGraph().getParents(),
+                          {std::ref(varDecl), std::ref(forStatementInitializer), std::ref(forStatementUpdater),
+                           std::ref(forStatementBodyAssignment)}));
+  EXPECT_EQ(forStatementBodyAssignment.getDataFlowGraph().getChildren().size(), 2);
+  EXPECT_TRUE(containsAll(forStatementBodyAssignment.getDataFlowGraph().getChildren(),
+                          {std::ref(forStatementBodyAssignment), std::ref(returnStmt)}));
+
+  EXPECT_EQ(forStatementUpdater.getDataFlowGraph().getParents().size(), 2);
+  EXPECT_TRUE(containsAll(forStatementBodyAssignment.getDataFlowGraph().getParents(),
+                          {std::ref(forStatementInitializer),
+                           std::ref(forStatementBodyAssignment)}));
+  EXPECT_EQ(forStatementUpdater.getDataFlowGraph().getChildren().size(), 3);
+  EXPECT_TRUE(containsAll(forStatementUpdater.getDataFlowGraph().getChildren(),
+                          {std::ref(forStatementCondition), std::ref(forStatementBodyAssignment),
+                           std::ref(forStatementUpdater)}));
+
+  EXPECT_EQ(returnStmt.getDataFlowGraph().getChildren().size(), 0);
+  EXPECT_EQ(returnStmt.getDataFlowGraph().getParents().size(), 2);
+  EXPECT_TRUE(containsAll(returnStmt.getDataFlowGraph().getParents(),
+                          {std::ref(varDecl), std::ref(forStatementBodyAssignment)}));
 }
