@@ -59,10 +59,9 @@ void SpecialControlFlowGraphVisitor::visit(Block &node) {
   storeAccessedVariables(graphNode);
 }
 
-////////////////////////////////////
-///////////// For Statement ////////
-////////////////////////////////////
-// CFG Graph
+// ┌────────────────────────────────────────────────────────────────────┐
+// │                            For Statement                           │
+// └────────────────────────────────────────────────────────────────────┘
 //
 //        Initializer Stmt. 1
 //                 │
@@ -170,30 +169,81 @@ void SpecialControlFlowGraphVisitor::visit(FunctionParameter &node) {
   }
 }
 
+// ┌────────────────────────────────────────────────────────────────────┐
+// │                            If Statement                            │
+// └────────────────────────────────────────────────────────────────────┘
+//
+//
+//
+//        If Statement               If/Else
+//                                  Statement
+//              │                       │
+//              ▼                       ▼
+//    ┌───  Condition  ─┐           Condition
+//    │                 │
+//    │                 │               │
+//    │                 ▼               ├───▶ Then Block
+//    │               Block             │          │
+//    │                 │               │          │
+//    │                 │               │          │
+//    │                 ▼               │          ▼
+//    │           Body Stmt. 1          │    Body Stmt. 1
+//    │                 │               │
+//    │                                 │          │
+//    │                 │               │
+//    │                 ▼               │          │
+//    │           Body Stmt. N          │          ▼
+//    │                 │               │    Body Stmt. N ──┐
+//    │                 │               │                   │
+//    │                 │               │                   │
+//    │   If Successor  │               │                   │
+//    └─▶    Stmt.     ◀┘               └───▶Else Block     │
+//                                                │         │
+//                                                ▼         │
+//                                          Body Stmt. 1    │
+//                                                │         │
+//                                                          │
+//                                                ▼         │
+//                                          Body Stmt. N    │
+//                                                          │
+//                                                │         │
+//                                                │         │
+//                                If Successor    │         │
+//                                    Stmt.    ◀──┴─────────┘
+//
+//
 void SpecialControlFlowGraphVisitor::visit(If &node) {
   SpecialControlFlowGraphVisitor::checkEntrypoint(node);
   std::cout << "Visiting If (" << node.getUniqueNodeId() << ")" << std::endl;
   GraphNode &graphNode = createGraphNodeAndAppendToCfg(node);
   auto lastStatementIf = lastCreatedNodes;
 
-  ScopedVisitor::enterScope(node);
-
   // condition
   node.getCondition().accept(*this);
   storeAccessedVariables(graphNode);
 
   // then branch: connect this statement with then branch
+  ScopedVisitor::enterScope(node);
   node.getThenBranch().accept(*this);
+  ScopedVisitor::exitScope(node);
   auto lastStatementThenBranch = lastCreatedNodes;
 
   // if existing, connect If statement with Else block
   if (node.hasElseBranch()) {
     lastCreatedNodes = lastStatementIf;
     // else branch
+    ScopedVisitor::enterScope(node);
     node.getElseBranch().accept(*this);
-  }
+    ScopedVisitor::exitScope(node);
 
-  ScopedVisitor::exitScope(node);
+    // then next statement must be connected with both the last statement in the then branch and the last statement
+    // in the else branch
+    lastCreatedNodes.insert(lastCreatedNodes.end(), lastStatementThenBranch.begin(), lastStatementThenBranch.end());
+  } else {
+    // connect the If statement and the last statement in the body with the next statement
+    lastCreatedNodes = lastStatementIf;
+    lastCreatedNodes.insert(lastCreatedNodes.end(), lastStatementThenBranch.begin(), lastStatementThenBranch.end());
+  }
 }
 
 void SpecialControlFlowGraphVisitor::visit(Return &node) {
