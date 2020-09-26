@@ -21,10 +21,15 @@ jobs:
         run: cmake --build build --target testing-all
       - name: test
         run: cd build && ctest
-      - name: Send message to Slack if job has failed
+      - name: Send message to Slack if build job failed
         if: ${{ failure() }}
-        run: |
-          curl -F $'text=⚠️ *Compilation failed for gcc on Ubuntu!*\nPlease check status on the <https://github.com/MarbleHE/ABC/actions/runs/${{ github.run_id }}|Actions dashboard>. Consider the changes made in the most recent git commit <https://github.com/MarbleHE/ABC/commit/${{ github.sha }}|`${{ steps.vars.outputs.sha_short }}`>.' -F channel=batching-compiler -H "Authorization: Bearer ${{ secrets.SLACK_APP_TOKEN }}" https://slack.com/api/chat.postMessage
+        uses: voxmedia/github-action-slack-notify-build@v1
+        with:
+          channel: batching-compiler
+          status: Building ABC using gcc on Ubuntu failed!
+          color: warning
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_APP_TOKEN }}
   build-macos:
     runs-on: macos-latest
     steps:
@@ -39,10 +44,15 @@ jobs:
         run: cmake --build build --target testing-all
       - name: test
         run: cd build && ctest
-      - name: Send message to Slack if job has failed
+      - name: Send message to Slack if build job failed
         if: ${{ failure() }}
-        run: |
-          curl -F $'text=⚠️ *Compilation failed for clang on macOS!*\nPlease check status on the <https://github.com/MarbleHE/ABC/actions/runs/${{ github.run_id }}|Actions dashboard>. Consider the changes made in the most recent git commit <https://github.com/MarbleHE/ABC/commit/${{ github.sha }}|`${{ steps.vars.outputs.sha_short }}`>.' -F channel=batching-compiler -H "Authorization: Bearer ${{ secrets.SLACK_APP_TOKEN }}" https://slack.com/api/chat.postMessage
+        uses: voxmedia/github-action-slack-notify-build@v1
+        with:
+          channel: batching-compiler
+          status: Building ABC using clang on macOS failed!
+          color: warning
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_APP_TOKEN }}
   build-windows:
     runs-on: windows-latest
     steps:
@@ -66,7 +76,12 @@ jobs:
       - name: test
         shell: cmd
         run: cd build && ctest
-      - name: Send message to Slack if job has failed
+      - name: Send message to Slack if build job failed
         if: ${{ failure() }}
-        run: |
-          curl -F 'text=:warnin️g: `*Compilation failed for MSVSC on Windows!`*`nPlease check status on the <https://github.com/MarbleHE/ABC/actions/runs/${{ github.run_id }}|Actions dashboard>. Consider the changes made in the most recent git commit <https://github.com/MarbleHE/ABC/commit/${{ github.sha }}|```${{ steps.vars.outputs.sha_short }}```>.' -F 'channel=batching-compiler' -H 'Authorization: Bearer ${{ secrets.SLACK_APP_TOKEN }}' https://slack.com/api/chat.postMessage
+        uses: voxmedia/github-action-slack-notify-build@v1
+        with:
+          channel: batching-compiler
+          status: Building ABC using MSVSC on Windows failed!
+          color: warning
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_APP_TOKEN }}
