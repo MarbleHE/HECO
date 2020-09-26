@@ -122,4 +122,12 @@ class GraphNodeHashFunction {
   }
 };
 
+struct GraphNodeComparator {
+  bool
+  operator()(const std::reference_wrapper<GraphNode> &obj1, const std::reference_wrapper<GraphNode> &obj2) const {
+    GraphNodeHashFunction hf;
+    return hf(obj1)==hf(obj2);
+  }
+};
+
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_VISITOR_CONTROLFLOWGRAPH_GRAPHNODE_H_
