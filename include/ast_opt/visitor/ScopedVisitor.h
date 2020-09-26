@@ -73,7 +73,7 @@ class ScopedVisitor : public IVisitor {
 
   void enterScope(AbstractNode &node);
 
-  void exitScope(AbstractNode &node);
+  void exitScope();
 };
 
 

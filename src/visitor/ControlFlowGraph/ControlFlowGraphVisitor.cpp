@@ -122,7 +122,7 @@ void SpecialControlFlowGraphVisitor::visit(For &node) {
   ScopedVisitor::visitChildren(node.getUpdate());
   auto lastStatementInUpdate = lastCreatedNodes;
 
-  ScopedVisitor::exitScope(node);
+  ScopedVisitor::exitScope();
 
   // edge: update statement -> condition
   auto firstConditionStatement = lastStatementInInitializer.front().get().getControlFlowGraph().getChildren().front();
@@ -157,7 +157,7 @@ void SpecialControlFlowGraphVisitor::visit(Function &node) {
   // access the function's body
   node.getBody().accept(*this);
 
-  ScopedVisitor::exitScope(node);
+  ScopedVisitor::exitScope();
 }
 
 void SpecialControlFlowGraphVisitor::visit(FunctionParameter &node) {
@@ -225,7 +225,7 @@ void SpecialControlFlowGraphVisitor::visit(If &node) {
   // then branch: connect this statement with then branch
   ScopedVisitor::enterScope(node);
   node.getThenBranch().accept(*this);
-  ScopedVisitor::exitScope(node);
+  ScopedVisitor::exitScope();
   auto lastStatementThenBranch = lastCreatedNodes;
 
   // if existing, connect If statement with Else block
@@ -234,7 +234,7 @@ void SpecialControlFlowGraphVisitor::visit(If &node) {
     // else branch
     ScopedVisitor::enterScope(node);
     node.getElseBranch().accept(*this);
-    ScopedVisitor::exitScope(node);
+    ScopedVisitor::exitScope();
 
     // then next statement must be connected with both the last statement in the then branch and the last statement
     // in the else branch

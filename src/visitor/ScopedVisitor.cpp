@@ -24,7 +24,7 @@ void ScopedVisitor::visit(BinaryExpression &elem) {
 void ScopedVisitor::visit(Block &elem) {
   enterScope(elem);
   visitChildren(elem);
-  exitScope(elem);
+  exitScope();
 }
 
 void ScopedVisitor::visit(Call &elem) {
@@ -38,7 +38,7 @@ void ScopedVisitor::visit(ExpressionList &elem) {
 void ScopedVisitor::visit(For &elem) {
   enterScope(elem);
   visitChildren(elem);
-  exitScope(elem);
+  exitScope();
 }
 
 void ScopedVisitor::visit(Function &elem) {
@@ -53,7 +53,7 @@ void ScopedVisitor::visit(FunctionParameter &elem) {
 void ScopedVisitor::visit(If &elem) {
   enterScope(elem);
   visitChildren(elem);
-  exitScope(elem);
+  exitScope();
 }
 
 void ScopedVisitor::visit(IndexAccess &elem) {
@@ -143,7 +143,7 @@ void ScopedVisitor::enterScope(AbstractNode &node) {
   }
 }
 
-void ScopedVisitor::exitScope(AbstractNode &node) {
+void ScopedVisitor::exitScope() {
   if (currentScope) {
     currentScope = &currentScope->getParentScope();
   } else {
