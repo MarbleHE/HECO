@@ -163,7 +163,7 @@ std::vector<std::reference_wrapper<const GraphNode>> NodeRelationship::getParent
 }
 
 inline bool operator==(std::reference_wrapper<GraphNode> const &lhs, std::reference_wrapper<GraphNode> const &rhs) {
-  return true;
+  return lhs.get()==rhs.get();
 }
 
 std::vector<std::reference_wrapper<GraphNode>> NodeRelationship::getAllReachableNodes() const {
