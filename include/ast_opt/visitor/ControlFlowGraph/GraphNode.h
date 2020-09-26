@@ -115,10 +115,10 @@ class GraphNodeHashFunction {
  public:
   size_t operator()(const std::reference_wrapper<GraphNode> &t) const {
     return std::hash<std::string>()(t.get().getAstNode().getUniqueNodeId())
-        ^ std::hash<int>()(t.get().getControlFlowGraph().getChildren().size())
-        ^ std::hash<int>()(t.get().getControlFlowGraph().getParents().size())
-        ^ std::hash<int>()(t.get().getDataFlowGraph().getChildren().size())
-        ^ std::hash<int>()(t.get().getDataFlowGraph().getParents().size());
+        ^ std::hash<size_t>()(t.get().getControlFlowGraph().getChildren().size())
+        ^ std::hash<size_t>()(t.get().getControlFlowGraph().getParents().size())
+        ^ std::hash<size_t>()(t.get().getDataFlowGraph().getChildren().size())
+        ^ std::hash<size_t>()(t.get().getDataFlowGraph().getParents().size());
   }
 };
 
