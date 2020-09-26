@@ -398,12 +398,15 @@ void SpecialControlFlowGraphVisitor::buildDataflowGraph() {
     auto currentNode_id = currentNode.get().getAstNode().getUniqueNodeId();
     auto currentNode_parentNodes = currentNode.get().getControlFlowGraph().getParents();
 
+    std::cout << "-- " << currentNode_id << std::endl;
+
     // joint points a CFG nodes with multiple incoming edges (e.g., statement after a [return-free] If-Else statement)
     bool currentNode_isJointPoint = currentNode_parentNodes.size() > 1;
 
     // iterate over currentNode's parents and collect their knowledge about variable writes
     for (auto &parentNode : currentNode_parentNodes) {
       auto parentNode_id = parentNode.get().getAstNode().getUniqueNodeId();
+      if (uniqueNodeId_variable_writeNodes.count(parentNode_id)==0) continue;
       for (auto &[scopedId, nodesWritingToVariable] : uniqueNodeId_variable_writeNodes.at(parentNode_id)) {
         // either add the nodes that refer to the variable (then) in case that this variable is already known [merging],
         // or (else) create a new vector by assigning/copying the vector of referenced nodes [replacing]
@@ -413,7 +416,8 @@ void SpecialControlFlowGraphVisitor::buildDataflowGraph() {
     }
 
     const std::vector<VariableAccessType> WRITE_TYPES = {VariableAccessType::WRITE, VariableAccessType::READ_AND_WRITE};
-    for (auto &scopedId : currentNode.get().getVariableAccessesByType(WRITE_TYPES)) {
+    auto writtenVariables = currentNode.get().getVariableAccessesByType(WRITE_TYPES);
+    for (auto &scopedId : writtenVariables) {
       if (!currentNode_isJointPoint && varsLastWritten.count(scopedId) > 0) varsLastWritten.at(scopedId).clear();
       varsLastWritten[scopedId].push_back(currentNode);
     }
@@ -424,7 +428,7 @@ void SpecialControlFlowGraphVisitor::buildDataflowGraph() {
     auto collectedWrittenVarsChanged = [&]() -> bool {
       auto mp = uniqueNodeId_variable_writeNodes.at(currentNode_id);
       return std::any_of(varsLastWritten.begin(), varsLastWritten.end(), [&mp](const auto &mapEntry) {
-        return mp.count(mapEntry.first)==0 ||  // variable that was not tracked before
+        return (mp.count(mapEntry.first)==0) ||  // variable that was not tracked before
             (mp.at(mapEntry.first).size()!=mapEntry.second.size());  // variable with newly found write nodes
       });
     };
@@ -445,9 +449,8 @@ void SpecialControlFlowGraphVisitor::buildDataflowGraph() {
     } else {
       // merge the nodes already existing in uniqueNodeId_variable_writeNodes with those newly collected
       for (auto &[varIdentifier, gNodeSet] : varsLastWritten) {
-        auto set = varsLastWritten.at(varIdentifier);
-        auto vec = uniqueNodeId_variable_writeNodes.at(currentNode_id).at(varIdentifier);
-        vec.insert(vec.end(), set.begin(), set.end());
+        auto &vec = uniqueNodeId_variable_writeNodes.at(currentNode_id).at(varIdentifier);
+        vec.insert(vec.end(), gNodeSet.begin(), gNodeSet.end());
       }
     }
 
