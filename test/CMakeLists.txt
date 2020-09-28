@@ -46,7 +46,9 @@ set(TEST_FILES
         visitor/ControlFlowGraphVisitorTest.cpp
         visitor/PrintVisitorTest.cpp
         visitor/VectorizerTest.cpp
-        visitor/VisitorTest.cpp visitor/SecretBranchingVisitorTest.cpp)
+        visitor/VisitorTest.cpp
+        visitor/SecretBranchingVisitorTest.cpp
+        visitor/TypeCheckingVisitorTest.cpp)
 
 add_executable(testing-all
         ${TEST_FILES})
