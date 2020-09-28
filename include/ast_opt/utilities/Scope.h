@@ -130,6 +130,10 @@ class Scope {
   /// \param node The node that created the scope that is searched for.
   /// \return (A const reference to) the scope created by the given node.
   const Scope &getNestedScopeByCreator(AbstractNode &node) const;
+
+  /// Get Scope name
+  /// \return the name of this scope (uniqueID of the associated AST node)
+  std::string getScopeName() const;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_UTILITIES_SCOPE_H_

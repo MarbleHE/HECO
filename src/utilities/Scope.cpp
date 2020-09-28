@@ -70,6 +70,9 @@ bool Scope::identifierIsLocal(const std::string &id) const {
     return scopedIdentifier->getId()==id;
   });
 }
+std::string Scope::getScopeName() const {
+  return astNode.getUniqueNodeId();
+}
 
 Scope &Scope::getNestedScopeByCreator(AbstractNode &node) {
   for (auto &scope : nestedScopes) {

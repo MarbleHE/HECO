@@ -5,16 +5,32 @@
 #include "ast_opt/utilities/Datatype.h"
 #include "ast_opt/visitor/ScopedVisitor.h"
 
+// Hashing & Equality function specializations to make std::unordered_map work with ScopedIdentifiers as keys
+namespace std {
+template<>
+struct hash<ScopedIdentifier> {
+  size_t operator()(const ScopedIdentifier &s) const {
+    return std::hash<std::string>{}(s.getScope().getScopeName() + "::" + s.getId());
+  }
+};
+
+template<>
+struct equal_to<ScopedIdentifier> {
+  bool operator()(ScopedIdentifier const &s1, ScopedIdentifier const &s2) {
+    return s1.getId()==s2.getId() && s1.getScope().getScopeName()==s2.getScope().getScopeName();
+  }
+};
+}
+
 typedef std::unordered_map<ScopedIdentifier, Datatype> TypeMap;
 
-class BatchingConstraint;
+class BatchingConstraint {};
 typedef std::unordered_map<ScopedIdentifier, BatchingConstraint> ConstraintMap;
 
-typedef std::unordered_multimap<ScopedIdentifier,int> RotationMap;
+typedef std::unordered_multimap<ScopedIdentifier, int> RotationMap;
 
-class ComplexValue;
+class ComplexValue {};
 typedef std::set<ComplexValue> ValueSet;
-
 
 // Forward Declaration for typedef below (must be above documentation, to ensure documentation is associated with the right type)
 class SpecialVectorizer;
