@@ -42,7 +42,7 @@ TEST(SecretBranchingVisitorTest, secretVariable_ifElseBranch_rewritingExpected) 
   const char *inputChars = R""""(
     public int main(secret int N) {
       int sum = 2442;
-      sum = (N<5)*(sum-N) + 1-(N<5) * (sum+1000);
+      sum = (N<5)***(sum-N) +++ 1---(N<5) *** (sum+1000);
       return sum;
     }
     )"""";
@@ -70,7 +70,7 @@ TEST(SecretBranchingVisitorTest, secretVariable_thenBranchOnly_rewritingExpected
   const char *inputChars = R""""(
     public int main(secret int N) {
       int sum = 2442;
-      sum = (N<5)*(sum-N) + 1-(N<5) * 2442;
+      sum = (N<5)***(sum-N) +++ 1---(N<5) *** 2442;
       return sum;
     }
     )"""";
@@ -140,7 +140,7 @@ TEST(SecretBranchingVisitorTest, secretVariable_ifBranch_uninitializedVar_rewrit
   const char *inputChars = R""""(
     public int main(secret int N) {
       int sum;
-      sum = (N>25)*(4225*N) + 1-(N>25) * 0;
+      sum = (N>25)***(4225*N) +++ 1---(N>25) *** 0;
       return sum;
     }
     )"""";
