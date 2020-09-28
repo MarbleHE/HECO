@@ -131,6 +131,20 @@ const Scope &ScopedVisitor::getCurrentScope() const {
   return *currentScope;
 }
 
+Scope &ScopedVisitor::getRootScope() {
+  if (rootScope==nullptr) {
+    throw std::runtime_error("Cannot return non-existent root scope!");
+  }
+  return *rootScope;
+}
+
+const Scope &ScopedVisitor::getRootScope() const {
+  if (rootScope==nullptr) {
+    throw std::runtime_error("Cannot return non-existent root scope!");
+  }
+  return *rootScope;
+}
+
 void ScopedVisitor::enterScope(AbstractNode &node) {
   if (rootScope==nullptr) {
     // no scope created yet: create root scope and also set it as current scope

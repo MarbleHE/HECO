@@ -69,6 +69,10 @@ class ScopedVisitor : public IVisitor {
 
   [[nodiscard]] const Scope &getCurrentScope() const;
 
+  Scope &getRootScope();
+
+  [[nodiscard]] const Scope &getRootScope() const;
+
   void visitChildren(AbstractNode &elem);
 
   void enterScope(AbstractNode &node);
