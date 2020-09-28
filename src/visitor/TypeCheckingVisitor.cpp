@@ -59,7 +59,7 @@ void SpecialTypeCheckingVisitor::visit(FunctionParameter &elem) {
 }
 
 void SpecialTypeCheckingVisitor::visit(IndexAccess &elem) {
-  int initial_size = typesVisitedNodes.size();
+  size_t initial_size = typesVisitedNodes.size();
   // an index access must always evaluate to an integer, i.e., all involved variables/literals must be integers too
   ScopedVisitor::visit(elem);
 

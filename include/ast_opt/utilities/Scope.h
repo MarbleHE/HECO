@@ -67,9 +67,25 @@ class Scope {
   std::vector<std::unique_ptr<Scope>> nestedScopes;
 
  public:
+  /// Destructor
+  ~Scope() = default;
+
   /// Creates a new scope.
   /// \param abstractNode The node that creates this scope.
   explicit Scope(AbstractNode &abstractNode);
+
+  /// Copy Constructor
+  Scope(const Scope&) = delete;
+
+  /// Move Constructor
+  /// \param other the scope to move
+  Scope(Scope&& other) = default;
+
+  /// Copy Assignment
+  Scope& operator=(const Scope&) = delete;
+
+  /// Move Assignment
+  Scope& operator=(Scope&&) noexcept = delete;
 
   /// Adds an declared identifier (e.g., variable) to this scope.
   /// \param id The identifier to be added to this scope.

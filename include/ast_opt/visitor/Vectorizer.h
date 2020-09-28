@@ -121,6 +121,8 @@ class SpecialVectorizer;
 typedef Visitor<SpecialVectorizer> Vectorizer;
 
 class SpecialVectorizer : public ScopedVisitor {
+ public:
+  std::string getAuxiliaryInformation();
 
 };
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_VISITOR_VECTORIZER_H_

@@ -38,15 +38,14 @@ TEST(SecretBranchingVisitorTest, secretVariable_ifElseBranch_rewritingExpected) 
     )"""";
   auto inputAst = Parser::parse(std::string(inputChars));
 
-  inputChars = R""""(
-  const char *inputChars = R""""(
+  const char *expectedChars  = R""""(
     public int main(secret int N) {
       int sum = 2442;
       sum = (N<5)***(sum-N) +++ 1---(N<5) *** (sum+1000);
       return sum;
     }
     )"""";
-  auto expectedAst = Parser::parse(std::string(inputChars));
+  auto expectedAst = Parser::parse(std::string(expectedChars));
 
   SecretBranchingVisitor sbv;
   inputAst->accept(sbv);
@@ -66,15 +65,14 @@ TEST(SecretBranchingVisitorTest, secretVariable_thenBranchOnly_rewritingExpected
     )"""";
   auto inputAst = Parser::parse(std::string(inputChars));
 
-  inputChars = R""""(
-  const char *inputChars = R""""(
+  const char * expectedChars = R""""(
     public int main(secret int N) {
       int sum = 2442;
       sum = (N<5)***(sum-N) +++ 1---(N<5) *** 2442;
       return sum;
     }
     )"""";
-  auto expectedAst = Parser::parse(std::string(inputChars));
+  auto expectedAst = Parser::parse(std::string(expectedChars));
 
   SecretBranchingVisitor sbv;
   inputAst->accept(sbv);
@@ -136,15 +134,14 @@ TEST(SecretBranchingVisitorTest, secretVariable_ifBranch_uninitializedVar_rewrit
     )"""";
   auto inputAst = Parser::parse(std::string(inputChars));
 
-  inputChars = R""""(
-  const char *inputChars = R""""(
+  const char *expectedChars = R""""(
     public int main(secret int N) {
       int sum;
       sum = (N>25)***(4225*N) +++ 1---(N>25) *** 0;
       return sum;
     }
     )"""";
-  auto expectedAst = Parser::parse(std::string(inputChars));
+  auto expectedAst = Parser::parse(std::string(expectedChars));
 
   SecretBranchingVisitor sbv;
   inputAst->accept(sbv);

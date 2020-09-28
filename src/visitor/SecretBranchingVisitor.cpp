@@ -1,7 +1,7 @@
 #include "ast_opt/visitor/SecretBranchingVisitor.h"
 #include "ast_opt/ast/If.h"
 
-void SpecialSecretBranchingVisitor::visit(If &node) {
+void SpecialSecretBranchingVisitor::visit(If &) {
   unsupportedBodyStatementVisited = false;
 
   // visit the if statement's condition and body

@@ -205,6 +205,7 @@ TEST(VectorizerTest,cardioTest) {
   auto expectedAST = Parser::parse(expectedCode);
 
   EXPECT_TRUE(compareAST(*inputAST, *expectedAST));
+  EXPECT_EQ(v.getAuxiliaryInformation(),expectedAuxillaryChars);
 }
 
 // Simplified test case without "-90" and with same comparison operators in all conditions
@@ -261,6 +262,7 @@ TEST(VectorizerTest,cardioTestSimplified) {
   auto expectedAST = Parser::parse(expectedCode);
 
   EXPECT_TRUE(compareAST(*inputAST, *expectedAST));
+  EXPECT_EQ(v.getAuxiliaryInformation(),expectedAuxillaryChars);
 }
 
 //TODO: Add a test case for matrix-vector-product
