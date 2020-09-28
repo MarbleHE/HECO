@@ -42,7 +42,9 @@ void ScopedVisitor::visit(For &elem) {
 }
 
 void ScopedVisitor::visit(Function &elem) {
+  enterScope(elem);
   visitChildren(elem);
+  exitScope();
 }
 
 void ScopedVisitor::visit(FunctionParameter &elem) {
