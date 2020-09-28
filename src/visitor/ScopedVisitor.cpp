@@ -145,6 +145,10 @@ const Scope &ScopedVisitor::getRootScope() const {
   return *rootScope;
 }
 
+void ScopedVisitor::setRootScope(std::unique_ptr<Scope> &&scope) {
+  rootScope = std::move(scope);
+}
+
 void ScopedVisitor::enterScope(AbstractNode &node) {
   if (rootScope==nullptr) {
     // no scope created yet: create root scope and also set it as current scope
@@ -153,10 +157,13 @@ void ScopedVisitor::enterScope(AbstractNode &node) {
       rootScope->addIdentifier(id);
     });
     currentScope = rootScope.get();
-  } else {
-    // create nested scope with current scope as parent
-    currentScope = Scope::createNestedScope(getCurrentScope(), node);
+    return;
+  } else if (currentScope==nullptr) {
+    // Root scope exists but no current one: set current scope to rootScope
+    currentScope = rootScope.get();
   }
+  // create nested scope with current scope as parent
+  currentScope = Scope::createNestedScope(getCurrentScope(), node);
 }
 
 void ScopedVisitor::exitScope() {

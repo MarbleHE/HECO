@@ -13,7 +13,7 @@ class Scope;
 class ScopedIdentifier {
  private:
   /// (weak) pointer to the Scope this identifier belongs to
-  Scope &scope;
+  Scope *scope;
 
   /// identifier (e.g., variable's name)
   std::string id;
@@ -55,7 +55,7 @@ class ScopedIdentifierHashFunction {
 class Scope {
  private:
   /// (Weak) pointer to the AST node that creates this scope
-  AbstractNode &astNode;
+  AbstractNode *astNode;
 
   /// Set of identifiers declared in this scope
   std::unordered_set<std::unique_ptr<ScopedIdentifier>, ScopedIdentifierHashFunction> identifiers;
@@ -85,7 +85,7 @@ class Scope {
   Scope& operator=(const Scope&) = delete;
 
   /// Move Assignment
-  Scope& operator=(Scope&&) noexcept = delete;
+  Scope& operator=(Scope&&) noexcept = default;
 
   /// Adds an declared identifier (e.g., variable) to this scope.
   /// \param id The identifier to be added to this scope.

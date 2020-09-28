@@ -53,7 +53,7 @@ void Scope::addNestedScope(std::unique_ptr<Scope> &&scope) {
   nestedScopes.push_back(std::move(scope));
 }
 
-Scope::Scope(AbstractNode &abstractNode) : astNode(abstractNode) {}
+Scope::Scope(AbstractNode &abstractNode) : astNode(&abstractNode) {}
 
 bool Scope::identifierExists(const std::string &id) const {
   try {
@@ -71,29 +71,29 @@ bool Scope::identifierIsLocal(const std::string &id) const {
   });
 }
 std::string Scope::getScopeName() const {
-  return astNode.getUniqueNodeId();
+  return astNode->getUniqueNodeId();
 }
 
 Scope &Scope::getNestedScopeByCreator(AbstractNode &node) {
   for (auto &scope : nestedScopes) {
-    if (scope->astNode==node) return *scope;
+    if (*scope->astNode==node) return *scope;
   }
   throw std::runtime_error("Requested nested scope (created by " + node.getUniqueNodeId() + ") not found!");
 }
 
 const Scope &Scope::getNestedScopeByCreator(AbstractNode &node) const {
   for (auto &scope : nestedScopes) {
-    if (scope->astNode==node) return *scope;
+    if (*scope->astNode==node) return *scope;
   }
   throw std::runtime_error("Requested nested scope (created by " + node.getUniqueNodeId() + ") not found!");
 }
 
 Scope &ScopedIdentifier::getScope() {
-  return scope;
+  return *scope;
 }
 
 const Scope &ScopedIdentifier::getScope() const {
-  return scope;
+  return *scope;
 }
 
 const std::string &ScopedIdentifier::getId() const {
@@ -104,7 +104,7 @@ std::string &ScopedIdentifier::getId() {
   return id;
 }
 
-ScopedIdentifier::ScopedIdentifier(Scope &scope, std::string id) : scope(scope), id(std::move(id)) {}
+ScopedIdentifier::ScopedIdentifier(Scope &scope, std::string id) : scope(&scope), id(std::move(id)) {}
 
 bool ScopedIdentifier::operator==(const ScopedIdentifier &p) const {
   ScopedIdentifierHashFunction hashScopedIdentifier;

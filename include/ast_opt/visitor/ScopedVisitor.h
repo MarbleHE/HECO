@@ -13,10 +13,10 @@ class ScopedVisitor : public IVisitor {
  private:
 
   /// the outermost scope of the passed AST (i.e., the scope without a parent)
-  std::unique_ptr<Scope> rootScope;
+  std::unique_ptr<Scope> rootScope = nullptr;
 
   /// the scope that the scopedVisitor is currently in during the AST traversal
-  Scope *currentScope;
+  Scope *currentScope = nullptr;
 
   std::vector<std::string> predeclaredVariables;
 
@@ -72,6 +72,8 @@ class ScopedVisitor : public IVisitor {
   Scope &getRootScope();
 
   [[nodiscard]] const Scope &getRootScope() const;
+
+  void setRootScope(std::unique_ptr<Scope>&& scope);
 
   void visitChildren(AbstractNode &elem);
 
