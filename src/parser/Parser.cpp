@@ -57,6 +57,7 @@ AbstractStatement *Parser::parseStatement(stork::tokens_iterator &it, bool gobbl
       case stork::reservedTokens::kw_public:return parseFunctionStatement(it);
 
         // it starts with a data type (e.g., int, float)
+      case stork::reservedTokens::kw_secret:
       case stork::reservedTokens::kw_bool:
       case stork::reservedTokens::kw_char:
       case stork::reservedTokens::kw_int:
