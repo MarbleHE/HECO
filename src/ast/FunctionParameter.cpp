@@ -29,10 +29,13 @@ std::string FunctionParameter::getIdentifier() const {
   return identifier;
 }
 
-Datatype FunctionParameter::getParameterType() const {
+const Datatype &FunctionParameter::getParameterType() const {
   return parameter_type;
 }
 
+Datatype &FunctionParameter::getParameterType() {
+  return parameter_type;
+}
 
 ///////////////////////////////////////////////
 ////////// AbstractNode Interface /////////////

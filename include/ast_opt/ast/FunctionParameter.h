@@ -45,7 +45,7 @@ class FunctionParameter : public AbstractTarget {
   /// Move assignment
   /// \param other FunctionParameter to move
   /// \return This object
-  FunctionParameter &operator=(FunctionParameter &&other)  noexcept;
+  FunctionParameter &operator=(FunctionParameter &&other) noexcept;
 
   /// Deep copy of the current node
   /// \return A deep copy of the current node
@@ -53,19 +53,29 @@ class FunctionParameter : public AbstractTarget {
 
   [[nodiscard]] std::string getIdentifier() const;
 
-  [[nodiscard]] Datatype getParameterType() const;
+  Datatype &getParameterType();
+
+  [[nodiscard]] const Datatype &getParameterType() const;
 
   ///////////////////////////////////////////////
   ////////// AbstractNode Interface /////////////
   ///////////////////////////////////////////////
   void accept(IVisitor &v) override;
+
   iterator begin() override;
+
   const_iterator begin() const override;
+
   iterator end() override;
+
   const_iterator end() const override;
+
   size_t countChildren() const override;
+
   nlohmann::json toJson() const override;
+
   std::string toString(bool printChildren) const override;
+
  protected:
   std::string getNodeType() const override;
 };
