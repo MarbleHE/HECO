@@ -30,19 +30,7 @@ class SpecialTypeCheckingVisitor : public ScopedVisitor {
  public:
   void visit(BinaryExpression &elem) override;
 
-  void visit(Block &elem) override;
-
-  void visit(Call &elem) override;
-
-  void visit(ExpressionList &elem) override;
-
-  void visit(For &elem) override;
-
-  void visit(Function &elem) override;
-
   void visit(FunctionParameter &elem) override;
-
-  void visit(If &elem) override;
 
   void visit(IndexAccess &elem) override;
 
@@ -58,11 +46,7 @@ class SpecialTypeCheckingVisitor : public ScopedVisitor {
 
   void visit(LiteralString &elem) override;
 
-  void visit(Return &elem) override;
-
   void visit(UnaryExpression &elem) override;
-
-  void visit(Assignment &elem) override;
 
   void visit(VariableDeclaration &elem) override;
 

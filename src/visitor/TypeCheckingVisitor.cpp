@@ -44,14 +44,6 @@ void SpecialTypeCheckingVisitor::visit(BinaryExpression &elem) {
   secretTaintedNodes.insert_or_assign(elem.getUniqueNodeId(), resultIsSecret);
 }
 
-void SpecialTypeCheckingVisitor::visit(Call &elem) {
-  ScopedVisitor::visit(elem);
-}
-
-void SpecialTypeCheckingVisitor::visit(ExpressionList &elem) {
-  ScopedVisitor::visit(elem);
-}
-
 void SpecialTypeCheckingVisitor::visit(FunctionParameter &elem) {
   ScopedVisitor::visit(elem);
   ScopedIdentifier scopedIdentifier = getCurrentScope().resolveIdentifier(elem.getIdentifier());
@@ -118,36 +110,6 @@ void SpecialTypeCheckingVisitor::visit(Variable &elem) {
 // ================================================
 // AST STATEMENTS
 // ================================================
-
-void SpecialTypeCheckingVisitor::visit(Block &elem) {
-  ScopedVisitor::visit(elem);
-  checkStatementFinished();
-}
-
-void SpecialTypeCheckingVisitor::visit(For &elem) {
-  ScopedVisitor::visit(elem);
-  checkStatementFinished();
-}
-
-void SpecialTypeCheckingVisitor::visit(Function &elem) {
-  ScopedVisitor::visit(elem);
-  checkStatementFinished();
-}
-
-void SpecialTypeCheckingVisitor::visit(If &elem) {
-  ScopedVisitor::visit(elem);
-  checkStatementFinished();
-}
-
-void SpecialTypeCheckingVisitor::visit(Return &elem) {
-  ScopedVisitor::visit(elem);
-  checkStatementFinished();
-}
-
-void SpecialTypeCheckingVisitor::visit(Assignment &elem) {
-  ScopedVisitor::visit(elem);
-  checkStatementFinished();
-}
 
 void SpecialTypeCheckingVisitor::visit(VariableDeclaration &elem) {
   ScopedVisitor::visit(elem);
