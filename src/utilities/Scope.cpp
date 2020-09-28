@@ -41,7 +41,7 @@ Scope *Scope::createNestedScope(Scope &parentScope, AbstractNode &scopeOpener) {
   auto scope = std::make_unique<Scope>(scopeOpener);
   Scope *scopePtr = scope.get();
   scope->setParent(&parentScope);
-  scope->addNestedScope(std::move(scope));
+  parentScope.addNestedScope(std::move(scope));
   return scopePtr;
 }
 
@@ -69,6 +69,20 @@ bool Scope::identifierIsLocal(const std::string &id) const {
   return std::any_of(identifiers.begin(), identifiers.end(), [id](const auto &scopedIdentifier) {
     return scopedIdentifier->getId()==id;
   });
+}
+
+Scope &Scope::getNestedScopeByCreator(AbstractNode &node) {
+  for (auto &scope : nestedScopes) {
+    if (scope->astNode==node) return *scope;
+  }
+  throw std::runtime_error("Requested nested scope (created by " + node.getUniqueNodeId() + ") not found!");
+}
+
+const Scope &Scope::getNestedScopeByCreator(AbstractNode &node) const {
+  for (auto &scope : nestedScopes) {
+    if (scope->astNode==node) return *scope;
+  }
+  throw std::runtime_error("Requested nested scope (created by " + node.getUniqueNodeId() + ") not found!");
 }
 
 Scope &ScopedIdentifier::getScope() {

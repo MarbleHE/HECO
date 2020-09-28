@@ -118,6 +118,18 @@ class Scope {
   /// \return (A const reference) to the ScopedIdentifier object associated with the given identifier.
   ScopedIdentifier &resolveIdentifier(const std::string &id);
 
+  /// Gets the nested scoped that is created by the given node. Note that this does NOT include deeper
+  /// nested scopes. It only considers scopes that are directly (next level) nested into this scope.
+  /// \param node The node that created the scope that is searched for.
+  /// \return (A reference to) the scope created by the given node.
+  Scope &getNestedScopeByCreator(AbstractNode &node);
+
+  /// Gets the nested scoped that is created by the given node. Note that this does NOT include deeper
+  /// nested scopes. It only considers scopes that are directly (next level) nested into this scope.
+  /// \param node The node that created the scope that is searched for.
+  /// \param node The node that created the scope that is searched for.
+  /// \return (A const reference to) the scope created by the given node.
+  const Scope &getNestedScopeByCreator(AbstractNode &node) const;
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_UTILITIES_SCOPE_H_
