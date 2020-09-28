@@ -111,7 +111,8 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/visitor/PrintVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/ScopedVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/Vectorizer.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/visitor/SecretBranchingVisitor.cpp)
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/SecretBranchingVisitor.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/TypeCheckingVisitor.cpp)
 
 set(HEADER_ONLY_SOURCES
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractExpression.h
@@ -155,6 +156,7 @@ set(PUBLIC_HEADERS
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/ScopedVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/Vectorizer.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/SecretBranchingVisitor.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/TypeCheckingVisitor.h
         )
 
 
