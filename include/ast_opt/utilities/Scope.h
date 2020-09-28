@@ -112,6 +112,12 @@ class Scope {
   /// \param id The identifier for that the ScopedIdentifier should be determined.
   /// \return (A const reference) to the ScopedIdentifier object associated with the given identifier.
   [[nodiscard]] const ScopedIdentifier &resolveIdentifier(const std::string &id) const;
+
+  /// Determines the ScopedIdentifier of the given identifier.
+  /// \param id The identifier for that the ScopedIdentifier should be determined.
+  /// \return (A const reference) to the ScopedIdentifier object associated with the given identifier.
+  ScopedIdentifier &resolveIdentifier(const std::string &id);
+
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_UTILITIES_SCOPE_H_

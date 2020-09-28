@@ -20,6 +20,11 @@ const ScopedIdentifier &Scope::resolveIdentifier(const std::string &id) const {
   throw std::runtime_error("Identifier (" + id + ") cannot be resolved!");
 }
 
+ScopedIdentifier &Scope::resolveIdentifier(const std::string &id) {
+  // removes const from result of const counterpart, see https://stackoverflow.com/a/856839/3017719
+  return const_cast<ScopedIdentifier &>(const_cast<const Scope *>(this)->resolveIdentifier(id));
+}
+
 void Scope::addIdentifier(const std::string &id) {
   identifiers.emplace(std::make_unique<ScopedIdentifier>(*this, id));
 }
