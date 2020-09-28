@@ -553,3 +553,32 @@ TEST(ParserTest, parenthesisExpression) { /* NOLINT */
 
   EXPECT_TRUE(compareAST(*parsed->begin(), *expected));
 }
+
+TEST(ParserTest, secretKeyword) { /* NOLINT */
+  const char *programCode = R""""(
+    public secret int main(secret int a) {
+      secret int b = 11;
+      return a+b;
+    }
+    )"""";
+  auto code = std::string(programCode);
+  auto parsed = Parser::parse(code);
+
+  auto varDecl = std::make_unique<VariableDeclaration>(Datatype(Type::INT, true),
+                                                       std::make_unique<Variable>("b"),
+                                                       std::make_unique<LiteralInt>(11));
+  auto returnStatement = std::make_unique<Return>(std::make_unique<BinaryExpression>(
+      std::make_unique<Variable>("a"), Operator(ADDITION), std::make_unique<Variable>("b")
+  ));
+  std::vector<std::unique_ptr<AbstractStatement>> blockStmts;
+  blockStmts.emplace_back(std::move(varDecl));
+  blockStmts.emplace_back(std::move(returnStatement));
+  auto expected_body = std::make_unique<Block>(std::move(blockStmts));
+
+  std::vector<std::unique_ptr<FunctionParameter>> fParams;
+  fParams.emplace_back(std::move(std::make_unique<FunctionParameter>(Datatype(Type::INT, true), "a")));
+  auto funcParams = std::vector<std::unique_ptr<FunctionParameter>>(std::move(fParams));
+  auto expected = new Function(Datatype(Type::INT, false), "main", std::move(funcParams), std::move(expected_body));
+
+  EXPECT_TRUE(compareAST(*parsed->begin(), *expected));
+}
