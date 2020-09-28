@@ -10,8 +10,15 @@ class SpecialSecretBranchingVisitor;
 typedef Visitor<SpecialSecretBranchingVisitor> SecretBranchingVisitor;
 
 class SpecialSecretBranchingVisitor : public ScopedVisitor {
+ private:
+  bool unsupportedBodyStatementVisited = false;
+
  public:
   void visit(If &node) override;
+
+  void visit(For &elem) override;
+
+  void visit(Return &elem) override;
 };
 
 #endif //GRAPHNODE_H_SRC_VISITOR_SECRETBRANCHINGVISITOR_H_
