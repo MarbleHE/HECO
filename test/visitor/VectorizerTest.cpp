@@ -21,6 +21,9 @@ TEST(VectorizerTest, trivialVectors) {
   auto inputAST = Parser::parse(inputCode);
 
   Vectorizer v;
+  v.setRootScope(std::make_unique<Scope>(*inputAST));
+  v.getRootScope().addIdentifier("x");
+  v.getRootScope().addIdentifier("y");
   inputAST->accept(v);
 
   const char *expectedChars = R""""(
@@ -49,6 +52,9 @@ TEST(VectorizerTest,singleOutlierVector) {
   auto inputAST = Parser::parse(inputCode);
 
   Vectorizer v;
+  v.setRootScope(std::make_unique<Scope>(*inputAST));
+  v.getRootScope().addIdentifier("x");
+  v.getRootScope().addIdentifier("y");
   inputAST->accept(v);
 
   const char *expectedChars = R""""(
@@ -82,6 +88,9 @@ TEST(VectorizerTest,sumStatementsPowerOfTwo) {
   auto inputAST = Parser::parse(inputCode);
 
   Vectorizer v;
+  v.setRootScope(std::make_unique<Scope>(*inputAST));
+  v.getRootScope().addIdentifier("sum");
+  v.getRootScope().addIdentifier("x");
   inputAST->accept(v);
 
   // We communicate the slot of the result to the runtime system using the auxiliary information file
@@ -115,6 +124,9 @@ TEST(VectorizerTest,sumStatementsGeneral) {
   auto inputAST = Parser::parse(inputCode);
 
   Vectorizer v;
+  v.setRootScope(std::make_unique<Scope>(*inputAST));
+  v.getRootScope().addIdentifier("sum");
+  v.getRootScope().addIdentifier("x");
   inputAST->accept(v);
 
   // First extend the vector to the next power of two (and mask away any potential garbage)
@@ -124,12 +136,10 @@ TEST(VectorizerTest,sumStatementsGeneral) {
   // TODO: Internally in the computation, the compiler can keep track of target slot and runtime system does not need to know
   // TODO: However, when returning and decrypting the client needs to know => i.e. generate one auxillary file that defines input encoding and output decoding!
   const char *expectedChars = R""""(
-    sum = x * {1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0};
     sum = sum + rotate(sum, 8);
     sum = sum + rotate(sum, 4);
     sum = sum + rotate(sum, 2);
     sum = sum + rotate(sum, 1);
-    sum = sum * {1,0,0,0,0,0,0,0};
     )"""";
   auto expectedCode = std::string(expectedChars);
   auto expectedAST = Parser::parse(expectedCode);
@@ -160,6 +170,19 @@ TEST(VectorizerTest,cardioTest) {
   auto inputAST = Parser::parse(inputCode);
 
   Vectorizer v;
+  v.setRootScope(std::make_unique<Scope>(*inputAST));
+  v.getRootScope().addIdentifier("risk");
+  v.getRootScope().addIdentifier("man");
+  v.getRootScope().addIdentifier("age");
+  v.getRootScope().addIdentifier("woman");
+  v.getRootScope().addIdentifier("smoking");
+  v.getRootScope().addIdentifier("diabetic");
+  v.getRootScope().addIdentifier("high_blood_pressure");
+  v.getRootScope().addIdentifier("cholesterol");
+  v.getRootScope().addIdentifier("weight");
+  v.getRootScope().addIdentifier("height");
+  v.getRootScope().addIdentifier("daily_physical_activity");
+  v.getRootScope().addIdentifier("alcohol");
   inputAST->accept(v);
 
   // First extend the vector to the next power of two (and mask away any potential garbage)
@@ -232,21 +255,27 @@ TEST(VectorizerTest,cardioTestSimplified) {
   //  +++ (man && (alcohol > 3)) +++ (woman && (alcohol > 2));
 
   const char *inputChars = R""""(
-    risk = (man && (age > 50));
-    risk = risk +++ (woman && (age > 40));
-    risk = risk +++ smoking;
-    risk = risk +++ diabetic;
-    risk = risk +++ high_blood_pressure;
-    risk = risk +++ (40 > cholesterol);
-    risk = risk +++ (weight > height);
-    risk = risk +++ (30 > daily_physical_activity);
-    risk = risk +++ (man && (alcohol > 3));
-    risk = risk +++ (woman && (alcohol > 2));
+   risk =(man && (age > 50)) +++ (woman && (age > 40)) +++ smoking +++ diabetic
+   +++ high_blood_pressure +++ (40 > cholesterol) +++ (weight > height) +++ (30 > daily_physical_activity)
+   +++ (man && (alcohol > 3)) +++ (woman && (alcohol > 2));
     )"""";
   auto inputCode = std::string(inputChars);
   auto inputAST = Parser::parse(inputCode);
 
   Vectorizer v;
+  v.setRootScope(std::make_unique<Scope>(*inputAST));
+  v.getRootScope().addIdentifier("risk");
+  v.getRootScope().addIdentifier("man");
+  v.getRootScope().addIdentifier("age");
+  v.getRootScope().addIdentifier("woman");
+  v.getRootScope().addIdentifier("smoking");
+  v.getRootScope().addIdentifier("diabetic");
+  v.getRootScope().addIdentifier("high_blood_pressure");
+  v.getRootScope().addIdentifier("cholesterol");
+  v.getRootScope().addIdentifier("weight");
+  v.getRootScope().addIdentifier("height");
+  v.getRootScope().addIdentifier("daily_physical_activity");
+  v.getRootScope().addIdentifier("alcohol");
   inputAST->accept(v);
 
   const char *expectedAuxillaryChars = R""""(
@@ -328,6 +357,78 @@ TEST(VectorizerTest,matrixVectorTest) {
 //TODO: Write of lots of tests for "find best rotation" <- try to extend to general situations and free/constrained encodings of variables
 
 //TODO: Write lots of tests for batchability detection logic and think about algorithm shortcuts for "boring case" like sum.
+
+TEST(VectorizerTest, batchableExpression) {
+  const char *inputChars = R""""(
+    x = (a*b) + (c*d);
+    )"""";
+  auto inputCode = std::string(inputChars);
+  auto inputAST = Parser::parse(inputCode);
+
+  Vectorizer v;
+  v.setRootScope(std::make_unique<Scope>(*inputAST));
+  v.getRootScope().addIdentifier("x");
+  v.getRootScope().addIdentifier("a");
+  v.getRootScope().addIdentifier("b");
+  v.getRootScope().addIdentifier("c");
+  v.getRootScope().addIdentifier("d");
+  inputAST->accept(v);
+
+  const char *expectedAuxillaryChars = R""""(
+    __input0__ = {a,c,b,d};
+    x = __input0__[0];
+    )"""";
+
+  const char *expectedChars = R""""(
+    __input0__ = __input0__ * rotate(__input0__,2);
+    __input0__ = __input0__ + rotate(__input0__,1);
+    )"""";
+  auto expectedCode = std::string(expectedChars);
+  auto expectedAST = Parser::parse(expectedCode);
+
+  EXPECT_TRUE(compareAST(*inputAST, *expectedAST));
+  EXPECT_EQ(v.getAuxiliaryInformation(),expectedAuxillaryChars);
+}
+
+TEST(VectorizerTest, batchableExpressionVectorizable) {
+  const char *inputChars = R""""(
+    x[0] = (a*b) + (c*d);
+    x[1] = (e*f) + (g*h);
+    x[2] = (i*j) + (k*l);
+    x[3] = (m*n) + (o*p);
+    )"""";
+  auto inputCode = std::string(inputChars);
+  auto inputAST = Parser::parse(inputCode);
+
+  Vectorizer v;
+  v.setRootScope(std::make_unique<Scope>(*inputAST));
+  v.getRootScope().addIdentifier("x");
+  v.getRootScope().addIdentifier("a");
+  v.getRootScope().addIdentifier("b");
+  v.getRootScope().addIdentifier("c");
+  v.getRootScope().addIdentifier("d");
+  inputAST->accept(v);
+
+  GTEST_SKIP();
+  // NOTE: This is what we would IDEALLY like to see.
+  // However, with our current greedy system, this is not what would happen
+  // Instead, it would first batch {a,c,b,d} and do the things as in the previous example?
+  const char *expectedAuxillaryChars = R""""(
+    __input0__ = {a,e,i,m,c,g,k,o,b,f,j,n,d,h,l,p};
+    x = __input0__[0];
+    )"""";
+
+  const char *expectedChars = R""""(
+    __input0__ = __input0__ * rotate(__input0__,4);
+    __input0__ = __input0__ * rotate(__input0__,2);
+    __input0__ = __input0__ + rotate(__input0__,1);
+    )"""";
+  auto expectedCode = std::string(expectedChars);
+  auto expectedAST = Parser::parse(expectedCode);
+
+  EXPECT_TRUE(compareAST(*inputAST, *expectedAST));
+  EXPECT_EQ(v.getAuxiliaryInformation(),expectedAuxillaryChars);
+}
 
 //TODO: We batch vectors as continuous elements in a ctxt. But vectors-of-vectors need special logic.
 // Ideally, generalize to 3-dimensional case, but probably not necessary. In that case, just treat each as individual variable.

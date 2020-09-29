@@ -2,6 +2,8 @@
 #define AST_OPTIMIZER_INCLUDE_AST_OPT_VISITOR_VECTORIZER_H_
 #include <set>
 #include <unordered_map>
+#include <stack>
+#include "ast_opt/ast/AbstractExpression.h"
 #include "ast_opt/utilities/Datatype.h"
 #include "ast_opt/visitor/ScopedVisitor.h"
 
@@ -16,7 +18,7 @@ struct hash<ScopedIdentifier> {
 
 template<>
 struct equal_to<ScopedIdentifier> {
-  bool operator()(ScopedIdentifier const &s1, ScopedIdentifier const &s2) {
+  bool operator()(ScopedIdentifier const &s1, ScopedIdentifier const &s2) const {
     return s1.getId()==s2.getId() && s1.getScope().getScopeName()==s2.getScope().getScopeName();
   }
 };
@@ -24,13 +26,37 @@ struct equal_to<ScopedIdentifier> {
 
 typedef std::unordered_map<ScopedIdentifier, Datatype> TypeMap;
 
-class BatchingConstraint {};
+/// For now, we simply consider batching constraints to be a slot and a variable name valid in the local scope
+struct BatchingConstraint {
+ private:
+  int slot = -1;
+  std::string identifier;
+ public:
+  BatchingConstraint() = default;
+  BatchingConstraint(int slot, const std::string &identifier);
+  [[nodiscard]] int getSlot() const;
+  void setSlot(int slot);
+  [[nodiscard]] const std::string &getIdentifier() const;
+  void setIdentifier(const std::string &identifier);
+  bool hasTargetSlot() const;
+};
 typedef std::unordered_map<ScopedIdentifier, BatchingConstraint> ConstraintMap;
 
 typedef std::unordered_multimap<ScopedIdentifier, int> RotationMap;
 
-class ComplexValue {};
-typedef std::set<ComplexValue> ValueSet;
+class ComplexValue {
+ private:
+  BatchingConstraint batchingConstraint;
+
+ public:
+  /// Create a ComplexValue from a simple value and a BatchingConstraint
+  /// \param value Simple Value
+  /// \param batchingConstraint Wrapper around variable name and slot containing the value
+  explicit ComplexValue(AbstractExpression& value);
+
+  /// Get the value's bathing constraints (i.e. where it lives)
+  BatchingConstraint& getBatchingConstraint();
+};
 
 // Forward Declaration for typedef below (must be above documentation, to ensure documentation is associated with the right type)
 class SpecialVectorizer;
@@ -113,7 +139,6 @@ class SpecialVectorizer;
 /// Whenever the Vectorizer encounters an assignment statement, it has to answer two questions:
 /// First: Is there a specific target slot that the result needs to be written to (e.g. slot i for x[i] = ...)
 /// Second: How can the rhs (value) be computed most efficiently (in the target slot, if there is one)?
-/// (if the rhs is a binary op and one of the top-level operands is the target, treat op as in-place and look only at other operand)
 /// This requires looking at the set of existing expressions and rotations.
 /// Potential answers can be "this value is already precomputed", "all rotations exists but a new expression must be calculated",
 /// "some new rotations must be created", etc
@@ -121,7 +146,59 @@ class SpecialVectorizer;
 typedef Visitor<SpecialVectorizer> Vectorizer;
 
 class SpecialVectorizer : public ScopedVisitor {
+ private:
+  /// Records the types of variables
+  TypeMap types;
+
+  typedef std::unordered_map<std::string, ComplexValue> ExpressionValueMap;
+  /// Records pre-computed expressions, based on their valueHash
+  ExpressionValueMap expressionValues;
+
+  typedef std::unordered_map<ScopedIdentifier, ComplexValue&> VariableValueMap;
+
+  /// Associates pre-computed values to variables
+  VariableValueMap variableValues;
+
+  /// Records existing constraints on slot-encodings
+  ConstraintMap constraints;
+
+  /// Records already pre-computed rotations
+  RotationMap rotations;
+
+  /// Used in lieu of being able to pass arguments to visit(..) calls to keep track of current target slot
+  std::stack<int> targetSlotStack;
+
+  /// Used in lieu of being able to return arguments from visit(..) calls to pass back modified expressions
+  std::stack<ComplexValue> resultValueStack;
+
+  /// Map between unique ID's and the nodes "batching structure hash"
+  std::unordered_map<std::string, std::string> structureHashMap;
+
+  /// Map between unique ID's and the nodes "exact value hash"
+  std::unordered_map<std::string, std::string> valueHashMap;
+
+  bool isInExpressionValues(const AbstractNode& elem) const;
+
+  std::string valueHash(const AbstractNode &elem) const;
+
  public:
+
+  /// Creates a Vectorizer without any pre-existing information
+  SpecialVectorizer() = default;
+
+  /// Creates a Vectorizer with initial information already recorded
+  /// \param types Types of variables
+  /// \param values Already pre-computed values of variables and expressions
+  /// \param constraints Existing constraints on slot-encodings
+  /// \param rotations Already pre-computed rotations
+  SpecialVectorizer(TypeMap types, VariableValueMap values, ConstraintMap constraints, RotationMap rotations);
+
+
+  void visit(Assignment& elem);
+
+  /// Dealing with Expression -> ComplexValue conversion
+  //TODO: How? Cannot be a normal visit
+
   std::string getAuxiliaryInformation();
 
 };
