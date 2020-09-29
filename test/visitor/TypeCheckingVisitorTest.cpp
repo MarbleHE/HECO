@@ -55,18 +55,17 @@ TEST(TypeCheckingVisitorTest, incompatibleTypes) { /* NOLINT */
   EXPECT_THROW(inputAST->begin()->accept(tcv), std::runtime_error);
 }
 
-TEST(TypeCheckingVisitorTest, compatibleTypes_literals) { /* NOLINT */
-  // TODO: Complete test
+TEST(TypeCheckingVisitorTest, invalidIndexAccessType) { /* NOLINT */
   const char *inputChars = R""""(
     public secret int main(int N) {
-      secret int sum = 2442;
-      return 4*sum;
+      int options = {2442, 2, 4, 14, 2};
+      return sum[2.0];
     }
     )"""";
   auto inputCode = std::string(inputChars);
   std::vector<std::reference_wrapper<AbstractNode>> createdNodes;
-//  auto inputAST = Parser::parse(inputCode, createdNodes);
-//
-//  TypeCheckingVisitor tcv;
-//  inputAST->begin()->accept(tcv);
+  auto inputAST = Parser::parse(inputCode, createdNodes);
+
+  TypeCheckingVisitor tcv;
+  EXPECT_THROW(inputAST->begin()->accept(tcv), std::runtime_error);
 }
