@@ -35,6 +35,62 @@ TEST(VectorizerTest, trivialVectors) {
   EXPECT_TRUE(compareAST(*inputAST, *expectedAST));
 }
 
+////
+// CV (x[0]):
+/// Computation Plan: __x__ = y;
+/// target_slot = 0
+// CV (x[1]):
+/// Computation Plan: __x__ = y;
+/// target_slot = 1
+/// ditto  for a...
+/// Ok, emit x:
+// iterate through all computation plans for x[0] to x[n]. If there is none, assume x[i] = x_original[i];
+// Check if they're compatible, if yes, output only a single one.
+// Downside: Linear in number of statements
+// Better: Have CV's for entire vectors and work on them as you go
+
+// CV (x):
+// slots: 0
+/// Computation Plan: x = y;
+// slots: 1,2,3....
+// Computation Plan: x = old_x (or rather, ref/ptr to the old expression);
+// CV (x):
+// slots: 0,1
+/// Computation Plan: x = y;
+// slots: 2,3....
+// Computation Plan: x = old_x (or rather, ref/ptr to the old expression);
+
+TEST(VectorizerTest, trivialInterleavedVectors) {
+  const char *inputChars = R""""(
+    x[0] = y[0];
+    a[0] = b[0];
+    x[1] = y[1];
+    a[1] = b[1];
+    x[2] = y[2];
+    a[2] = b[2];
+    x[3] = y[3];
+    a[3] = b[3];
+    )"""";
+  auto inputCode = std::string(inputChars);
+  auto inputAST = Parser::parse(inputCode);
+
+  Vectorizer v;
+  v.setRootScope(std::make_unique<Scope>(*inputAST));
+  v.getRootScope().addIdentifier("x");
+  v.getRootScope().addIdentifier("y");
+  v.getRootScope().addIdentifier("a");
+  v.getRootScope().addIdentifier("b");
+  inputAST->accept(v);
+
+  const char *expectedChars = R""""(
+    x = y;
+    )"""";
+  auto expectedCode = std::string(expectedChars);
+  auto expectedAST = Parser::parse(expectedCode);
+
+  EXPECT_TRUE(compareAST(*inputAST, *expectedAST));
+}
+
 TEST(VectorizerTest,singleOutlierVector) {
   const char *inputChars = R""""(
     x[0] = y[0];
@@ -68,6 +124,17 @@ TEST(VectorizerTest,singleOutlierVector) {
   EXPECT_TRUE(compareAST(*inputAST, *expectedAST));
 }
 
+
+// CV (sum):
+// Computation Plan: old-sum + x[0]
+//..next statement
+// assuming we recognize in-place updates:
+// Computation Plan: old-sum + x[0] + x[1]
+//...
+// CV (sum):
+// Computation Plan: old-sum + x[0] + ... + x[7]; (Operator Expression)
+// If trying to update with non-transparent operation (for now, any different one) causes emit of sum!
+// At the end: Emit OperatorExpression, which introduces rotations
 TEST(VectorizerTest,sumStatementsPowerOfTwo) {
   //If sum is vector valued, this would mean something very different
   // Specifically, it would mean that in each step, x[i] is added to each slot.
@@ -375,12 +442,13 @@ TEST(VectorizerTest, batchableExpression) {
   inputAST->accept(v);
 
   const char *expectedAuxillaryChars = R""""(
-    __input0__ = {a,c,b,d};
+    __input0__ = {a,c};
+    __input1__ = {b,d}
     x = __input0__[0];
     )"""";
 
   const char *expectedChars = R""""(
-    __input0__ = __input0__ * rotate(__input0__,2);
+    __input0__ = __input0__ * __input1__
     __input0__ = __input0__ + rotate(__input0__,1);
     )"""";
   auto expectedCode = std::string(expectedChars);
@@ -390,6 +458,22 @@ TEST(VectorizerTest, batchableExpression) {
   EXPECT_EQ(v.getAuxiliaryInformation(),expectedAuxillaryChars);
 }
 
+// CV(x)
+// TODO: If expressions are this small, maybe actually use our heuristic to skip batching them!
+// slots: 0
+// Execution Plan: [in Constraints: __input0__ = {a,c}, __input1__ = {c,d}]
+//                   __input0__ = __input0__ * __input1__
+//                   __input0__ = __input0__ + rotate(__input0__,1);
+
+// CV(x)
+// slots: 0
+// Execution Plan: [in Constraints: __input0__ = {a,c}, __input1__ = {c,d}]
+//                   __input0__ = __input0__ * __input1__
+//                   __input0__ = __input0__ + rotate(__input0__,1);
+// slots: 1
+// Execution Plan: [in Constraints: __input2__ = {e,g}, __input3__ = {f,h}]
+//                   __input2__ = __input2__ * __input2__
+//                   __input2__ = __input2__ + rotate(__input2__,1);
 TEST(VectorizerTest, batchableExpressionVectorizable) {
   const char *inputChars = R""""(
     x[0] = (a*b) + (c*d);
