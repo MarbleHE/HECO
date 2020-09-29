@@ -8,7 +8,7 @@
 #include "ast_opt/visitor/ScopedVisitor.h"
 
 /// For now, we simply consider batching constraints to be a slot and a variable name valid in the local scope
-struct BatchingConstraint {
+class BatchingConstraint {
  private:
   int slot = -1;
   ScopedIdentifier identifier;
@@ -41,7 +41,39 @@ class ComplexValue {
 
   /// Get the value's bathing constraints (i.e. where it lives)
   BatchingConstraint& getBatchingConstraint();
+
   void merge(ComplexValue value);
+
+  std::vector<std::unique_ptr<AbstractStatement>> statementsToExecutePlan();
+};
+
+class VariableValueMap {
+ private:
+
+  std::unordered_map<ScopedIdentifier, ComplexValue&> map;
+
+  /// Bool represents if it has been updated since last resetChangeFlags()
+  std::unordered_set<ScopedIdentifier> changed;
+
+  typedef std::pair<const ScopedIdentifier, std::tuple<bool,ComplexValue&>> value_type;
+
+ public:
+
+  void add(ScopedIdentifier s, ComplexValue& cv);
+
+  [[nodiscard]] const ComplexValue& get(const ScopedIdentifier& s) const;
+
+  ComplexValue& take(const ScopedIdentifier& s);
+
+  void update(const ScopedIdentifier& s, ComplexValue& cv) ;
+
+  bool has(const ScopedIdentifier& s);
+
+  void resetChangeFlags();
+
+  [[nodiscard]] std::unordered_set<ScopedIdentifier> changedEntries() const;
+
+  ComplexValue &getToModify(const ScopedIdentifier &s);
 };
 
 // Forward Declaration for typedef below (must be above documentation, to ensure documentation is associated with the right type)
@@ -151,7 +183,6 @@ class SpecialVectorizer : public ScopedVisitor {
   /// Records pre-computed expression (as their execution plan)
   Values precomputedValues;
 
-  typedef std::unordered_map<ScopedIdentifier, ComplexValue&> VariableValueMap;
   /// Associates pre-computed values to variables
   VariableValueMap variableValues;
 

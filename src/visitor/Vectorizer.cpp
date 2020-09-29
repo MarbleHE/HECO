@@ -9,7 +9,8 @@
 ////////////////////////////////////////////
 ////        BatchingConstraint          ////
 ////////////////////////////////////////////
-BatchingConstraint::BatchingConstraint(int slot, const ScopedIdentifier &identifier) : slot(slot), identifier(identifier) {}
+BatchingConstraint::BatchingConstraint(int slot, const ScopedIdentifier &identifier)
+    : slot(slot), identifier(identifier) {}
 
 int BatchingConstraint::getSlot() const {
   return slot;
@@ -41,6 +42,52 @@ BatchingConstraint &ComplexValue::getBatchingConstraint() {
 void ComplexValue::merge(ComplexValue value) {
   //TODO: Implement
 }
+std::vector<std::unique_ptr<AbstractStatement>> ComplexValue::statementsToExecutePlan() {
+  //TODO: Implement
+  return {};
+}
+
+////////////////////////////////////////////
+////         VariableValueMap           ////
+////////////////////////////////////////////
+void VariableValueMap::add(ScopedIdentifier s, ComplexValue &cv) {
+  map.insert({s, cv});
+  changed.insert(s);
+}
+
+const ComplexValue &VariableValueMap::get(const ScopedIdentifier &s) const {
+  return map.find(s)->second;
+}
+
+ComplexValue &VariableValueMap::getToModify(const ScopedIdentifier &s) {
+  changed.insert(s);
+  return map.find(s)->second;
+}
+
+ComplexValue &VariableValueMap::take(const ScopedIdentifier &s) {
+  auto it = map.find(s);
+  ComplexValue &cv = it->second;
+  map.erase(it);
+  auto changed_it = changed.find(s);
+  if (changed_it!=changed.end()) {
+    changed.erase(changed_it);
+  }
+  return cv;
+}
+void VariableValueMap::update(const ScopedIdentifier &s, ComplexValue &cv) {
+  map.find(s)->second = cv;
+  changed.insert(s);
+}
+bool VariableValueMap::has(const ScopedIdentifier &s) {
+  return map.find(s)!=map.end();
+}
+void VariableValueMap::resetChangeFlags() {
+  changed.clear();
+}
+std::unordered_set<ScopedIdentifier> VariableValueMap::changedEntries() const {
+  return changed;
+}
+
 
 ////////////////////////////////////////////
 ////          SpecialVectorizer         ////
@@ -48,6 +95,8 @@ void ComplexValue::merge(ComplexValue value) {
 
 void SpecialVectorizer::visit(Block &elem) {
   ScopedVisitor::enterScope(elem);
+  variableValues.resetChangeFlags();
+
   for (auto &p: elem.getStatementPointers()) {
     p->accept(*this);
     if (delete_flag) { p.reset(); }
@@ -56,10 +105,13 @@ void SpecialVectorizer::visit(Block &elem) {
   elem.removeNullStatements();
 
   // TODO: Emit all relevant assignments again!
-  // Get all keys from variableValues
-  // check which ones are from local scope
-  // Output all others?
-  // TODO: Track if a variableValue's entry has been changed since we started!
+  for (auto &scopedID: variableValues.changedEntries()) {
+    auto &cv = variableValues.take(scopedID);
+    for (auto &statement : cv.statementsToExecutePlan()) {
+      elem.appendStatement(std::move(statement));
+    }
+  }
+  variableValues.resetChangeFlags();
   ScopedVisitor::exitScope();
 }
 
@@ -94,12 +146,11 @@ void SpecialVectorizer::visit(Assignment &elem) {
   auto cv = batchExpression(elem.getValue(), targetBatchingConstraint);
 
   /// Combine the execution plans, if they already exist
-  auto it = variableValues.find(targetID);
-  if (it!=variableValues.end()) {
-    it->second.merge(cv);
+  if (variableValues.has(targetID)) {
+    variableValues.getToModify(targetID).merge(cv);
   } else {
     precomputedValues.push_back(cv);
-    variableValues.insert({targetID,precomputedValues[precomputedValues.size()-1]});
+    variableValues.add(targetID, precomputedValues[precomputedValues.size() - 1]);
   }
 
   // Now delete this assignment
