@@ -148,6 +148,14 @@ class Literal : public AbstractExpression {
 
 };
 
+static bool isLiteral(AbstractNode &node) {
+  return (dynamic_cast<LiteralBool *>(&node)!=nullptr)
+      || (dynamic_cast<LiteralChar *>(&node)!=nullptr)
+      || (dynamic_cast<LiteralInt *>(&node)!=nullptr)
+      || (dynamic_cast<LiteralFloat *>(&node)!=nullptr)
+      || (dynamic_cast<LiteralDouble *>(&node)!=nullptr)
+      || (dynamic_cast<LiteralString *>(&node)!=nullptr);
+}
 
 // Pretty "getNodeType()" specializations for the common types:
 
