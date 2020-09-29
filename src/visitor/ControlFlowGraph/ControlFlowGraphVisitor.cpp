@@ -351,11 +351,6 @@ SpecialControlFlowGraphVisitor::SpecialControlFlowGraphVisitor(bool ignoreNonDec
     : ignoreNonDeclaredVariables(ignoreNonDeclaredVariables) {
 }
 
-SpecialControlFlowGraphVisitor::SpecialControlFlowGraphVisitor(
-    std::vector<std::string> &alreadyDeclaredVariables) {
-  ScopedVisitor::setPredeclaredVariables(alreadyDeclaredVariables);
-}
-
 void SpecialControlFlowGraphVisitor::buildDataflowGraph() {
   // =================
   // STEP 1: Distribute knowledge about variable writes
