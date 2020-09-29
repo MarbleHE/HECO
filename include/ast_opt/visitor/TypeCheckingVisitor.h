@@ -54,7 +54,7 @@ class SpecialTypeCheckingVisitor : public ScopedVisitor {
 
   Datatype &getVariableDatatype(ScopedIdentifier &scopedIdentifier);
 
-  void checkStatementFinished();
+  void postStatementAction();
 };
 
 #endif //GRAPHNODE_H_SRC_VISITOR_TYPECHECKINGVISITOR_H_

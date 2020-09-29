@@ -44,6 +44,31 @@ void SpecialTypeCheckingVisitor::visit(BinaryExpression &elem) {
   secretTaintedNodes.insert_or_assign(elem.getUniqueNodeId(), resultIsSecret);
 }
 
+void SpecialTypeCheckingVisitor::visit(Call &elem) {
+  ScopedVisitor::visit(elem);
+}
+
+void SpecialTypeCheckingVisitor::visit(ExpressionList &elem) {
+  ScopedVisitor::visit(elem);
+
+  auto firstExpression = typesVisitedNodes.top();
+  typesVisitedNodes.pop();
+  bool isSecret = firstExpression.getSecretFlag();
+  Type expectedType = firstExpression.getType();
+
+  while (!typesVisitedNodes.empty()) {
+    auto curNode = typesVisitedNodes.top();
+    Type curType = curNode.getType();
+    isSecret |= curNode.getSecretFlag();
+    typesVisitedNodes.pop();
+    if (curType!=expectedType) {
+      throw std::runtime_error("Values in ExpressionList must all be of the same type!");
+    }
+  }
+
+  typesVisitedNodes.push(Datatype(expectedType, isSecret));
+}
+
 void SpecialTypeCheckingVisitor::visit(FunctionParameter &elem) {
   ScopedVisitor::visit(elem);
   ScopedIdentifier scopedIdentifier = getCurrentScope().resolveIdentifier(elem.getIdentifier());
@@ -111,12 +136,42 @@ void SpecialTypeCheckingVisitor::visit(Variable &elem) {
 // AST STATEMENTS
 // ================================================
 
+void SpecialTypeCheckingVisitor::visit(Block &elem) {
+  ScopedVisitor::visit(elem);
+  postStatementAction();
+}
+
+void SpecialTypeCheckingVisitor::visit(For &elem) {
+  ScopedVisitor::visit(elem);
+  postStatementAction();
+}
+
+void SpecialTypeCheckingVisitor::visit(Function &elem) {
+  ScopedVisitor::visit(elem);
+  postStatementAction();
+}
+
+void SpecialTypeCheckingVisitor::visit(If &elem) {
+  ScopedVisitor::visit(elem);
+  postStatementAction();
+}
+
+void SpecialTypeCheckingVisitor::visit(Return &elem) {
+  ScopedVisitor::visit(elem);
+  postStatementAction();
+}
+
+void SpecialTypeCheckingVisitor::visit(Assignment &elem) {
+  ScopedVisitor::visit(elem);
+  postStatementAction();
+}
+
 void SpecialTypeCheckingVisitor::visit(VariableDeclaration &elem) {
   ScopedVisitor::visit(elem);
   ScopedIdentifier scopedIdentifier = getCurrentScope().resolveIdentifier(elem.getTarget().getIdentifier());
   variablesDatatypeMap.insert_or_assign(scopedIdentifier, elem.getDatatype());
   if (elem.hasValue()) typesVisitedNodes.pop();
-  checkStatementFinished();
+  postStatementAction();
 }
 
 
@@ -129,7 +184,7 @@ Datatype &SpecialTypeCheckingVisitor::getVariableDatatype(ScopedIdentifier &scop
   return variablesDatatypeMap.at(scopedIdentifier);
 }
 
-void SpecialTypeCheckingVisitor::checkStatementFinished() {
+void SpecialTypeCheckingVisitor::postStatementAction() {
   if (!typesVisitedNodes.empty()) {
     throw std::runtime_error("Temporary stack was not cleaned up prior leaving statement! "
                              "Did you forget to pop() after retrieving element using top()?");
