@@ -48,6 +48,15 @@ const AbstractNode &AbstractNode::getParent() const {
   }
 }
 
+void AbstractNode::deleteInParent() {
+  if (hasParent()) {
+    //Deletes *this object, so we must return immediately afterwards.
+    pointerToThis->reset();
+    return;
+  } else {
+    throw std::runtime_error("Node has no parent.");
+  }
+}
 ////////////////////////////// OUTPUT ///////////////////////////////
 
 std::string AbstractNode::toString(bool printChildren) const {
