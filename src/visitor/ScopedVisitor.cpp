@@ -112,8 +112,23 @@ void ScopedVisitor::visit(Variable &elem) {
 }
 
 void ScopedVisitor::visitChildren(AbstractNode &elem) {
-  for (auto &c : elem) {
-    c.accept(*this);
+  // special treatment for For loops: we need to visit the children of the initializer/update blocks separately as we
+  // do not want to create a new scope when visiting them (otherwise variables declared in initializer will not be
+  // accessible in condition and update)
+  if (auto forStatement = dynamic_cast<For *>(&elem)) {
+    // call visitChildren directly on the initializer block, otherwise this would create a new scope but that's wrong!
+    visitChildren(forStatement->getInitializer());
+
+    forStatement->getCondition().accept(*this);
+
+    // call visitChildren directly on the update block, otherwise this would create a new scope but that's wrong!
+    visitChildren(forStatement->getUpdate());
+
+    forStatement->getBody().accept(*this);
+  } else {
+    for (auto &c : elem) {
+      c.accept(*this);
+    }
   }
 }
 
