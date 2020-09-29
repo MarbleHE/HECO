@@ -25,19 +25,19 @@ TEST(TypeCheckingVisitorTest, simpleSecretTypeRecognition) { /* NOLINT */
   auto &functionBlockScope = rootScope.getNestedScopeByCreator(*itFunctionChildren);
 
   ScopedIdentifier &variableN = functionBlockScope.resolveIdentifier("N");
-  auto &variableN_datatype = tcv.getVariableDatatype(const_cast<ScopedIdentifier &>(variableN));
-  ASSERT_EQ(variableN_datatype.getType(), Type::INT);
-  ASSERT_FALSE(variableN_datatype.getSecretFlag());
+  auto variableN_datatype = tcv.getVariableDatatype(const_cast<ScopedIdentifier &>(variableN));
+  EXPECT_EQ(variableN_datatype.getType(), Type::INT);
+  EXPECT_FALSE(variableN_datatype.getSecretFlag());
 
   ScopedIdentifier variableSum = functionBlockScope.resolveIdentifier("sum");
-  auto &variableSum_datatype = tcv.getVariableDatatype(variableSum);
-  ASSERT_EQ(variableSum_datatype.getType(), Type::INT);
-  ASSERT_TRUE(variableSum_datatype.getSecretFlag());
+  auto variableSum_datatype = tcv.getVariableDatatype(variableSum);
+  EXPECT_EQ(variableSum_datatype.getType(), Type::INT);
+  EXPECT_TRUE(variableSum_datatype.getSecretFlag());
 
   ScopedIdentifier variableK = functionBlockScope.resolveIdentifier("k");
-  auto &variableK_datatype = tcv.getVariableDatatype(variableK);
-  ASSERT_EQ(variableK_datatype.getType(), Type::DOUBLE);
-  ASSERT_FALSE(variableK_datatype.getSecretFlag());
+  auto variableK_datatype = tcv.getVariableDatatype(variableK);
+  EXPECT_EQ(variableK_datatype.getType(), Type::DOUBLE);
+  EXPECT_FALSE(variableK_datatype.getSecretFlag());
 }
 
 TEST(TypeCheckingVisitorTest, incompatibleTypes) { /* NOLINT */
@@ -68,4 +68,95 @@ TEST(TypeCheckingVisitorTest, invalidIndexAccessType) { /* NOLINT */
 
   TypeCheckingVisitor tcv;
   EXPECT_THROW(inputAST->begin()->accept(tcv), std::runtime_error);
+}
+
+TEST(TypeCheckingVisitorTest, binaryExpressionDatatype) { /* NOLINT */
+  const char *inputChars = R""""(
+    public secret int main(int N) {
+      secret int sum = 2442;
+      return 4*sum;
+    }
+    )"""";
+  auto inputCode = std::string(inputChars);
+  std::vector<std::reference_wrapper<AbstractNode>> createdNodes;
+  auto inputAST = Parser::parse(inputCode, createdNodes);
+
+  TypeCheckingVisitor tcv;
+  inputAST->begin()->accept(tcv);
+
+  auto binaryExprDatatype = tcv.getExpressionDatatype(
+      dynamic_cast<AbstractExpression &>(createdNodes.at(3).get()));
+  EXPECT_EQ(binaryExprDatatype.getType(), Type::INT);
+  EXPECT_FALSE(binaryExprDatatype.getSecretFlag());
+}
+
+TEST(TypeCheckingVisitorTest, unaryExpressionDatatype) { /* NOLINT */
+  const char *inputChars = R""""(
+    public secret bool main(bool isRecommended) {
+      secret bool b = !isRecommended;
+      return b;
+    }
+    )"""";
+  auto inputCode = std::string(inputChars);
+  std::vector<std::reference_wrapper<AbstractNode>> createdNodes;
+  auto inputAST = Parser::parse(inputCode, createdNodes);
+
+  TypeCheckingVisitor tcv;
+  inputAST->begin()->accept(tcv);
+
+  auto binaryExprDatatype = tcv.getExpressionDatatype(
+      dynamic_cast<AbstractExpression &>(createdNodes.at(1).get()));
+  EXPECT_EQ(binaryExprDatatype.getType(), Type::BOOL);
+  EXPECT_FALSE(binaryExprDatatype.getSecretFlag());
+}
+
+TEST(TypeCheckingVisitorTest, returnTypeNotMatchingSpecifiedType) { /* NOLINT */
+  const char *inputChars = R""""(
+    public secret int main(bool isRecommended) {
+      secret bool b = !isRecommended;
+      return b;
+    }
+    )"""";
+  auto inputCode = std::string(inputChars);
+  std::vector<std::reference_wrapper<AbstractNode>> createdNodes;
+  auto inputAST = Parser::parse(inputCode, createdNodes);
+
+  TypeCheckingVisitor tcv;
+  EXPECT_THROW(inputAST->begin()->accept(tcv), std::runtime_error);
+}
+
+TEST(TypeCheckingVisitorTest, returnTypeNotMatchingSpecifiedSecretness) { /* NOLINT */
+  const char *inputChars = R""""(
+    public bool main(bool isRecommended) {
+      secret bool b = !isRecommended;
+      return b;
+    }
+    )"""";
+  auto inputCode = std::string(inputChars);
+  std::vector<std::reference_wrapper<AbstractNode>> createdNodes;
+  auto inputAST = Parser::parse(inputCode, createdNodes);
+
+  TypeCheckingVisitor tcv;
+  EXPECT_THROW(inputAST->begin()->accept(tcv), std::runtime_error);
+}
+
+TEST(TypeCheckingVisitorTest, secretTainting_ifCondition) { /* NOLINT */
+  const char *inputChars = R""""(
+    public secret int main(int threshold) {
+      secret int val = 2411;
+      if (val < threshold) {
+        return 1;
+      }
+      return 0;
+    }
+    )"""";
+  auto inputCode = std::string(inputChars);
+  std::vector<std::reference_wrapper<AbstractNode>> createdNodes;
+  auto inputAST = Parser::parse(inputCode, createdNodes);
+
+  TypeCheckingVisitor tcv;
+  inputAST->begin()->accept(tcv);
+
+  auto binaryExpressionNodeId = createdNodes.at(3).get().getUniqueNodeId();
+  EXPECT_TRUE(tcv.isSecretTaintedNode(binaryExpressionNodeId));
 }
