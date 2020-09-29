@@ -24,7 +24,7 @@ TEST(SecretBranchingVisitorTest, nonSecretVariable_ifStmt_noRemovalExpected) { /
   EXPECT_TRUE(compareAST(*inputAst, *expectedAst));
 }
 
-TEST(SecretBranchingVisitorTest, secretVariable_ifElseBranch_rewritingExpected) { /* NOLINT */
+TEST(SecretBranchingVisitorTest, DISABLED_secretVariable_ifElseBranch_rewritingExpected) { /* NOLINT */
   const char *inputChars = R""""(
     public int main(secret int N) {
       int sum = 2442;
@@ -50,11 +50,10 @@ TEST(SecretBranchingVisitorTest, secretVariable_ifElseBranch_rewritingExpected) 
   SecretBranchingVisitor sbv;
   inputAst->accept(sbv);
 
-  GTEST_SKIP_("Feature not implemented yet.");
   EXPECT_TRUE(compareAST(*inputAst, *expectedAst));
 }
 
-TEST(SecretBranchingVisitorTest, secretVariable_thenBranchOnly_rewritingExpected) { /* NOLINT */
+TEST(SecretBranchingVisitorTest, DISABLED_secretVariable_thenBranchOnly_rewritingExpected) { /* NOLINT */
   const char *inputChars = R""""(
     public int main(secret int N) {
       int sum = 2442;
@@ -78,7 +77,6 @@ TEST(SecretBranchingVisitorTest, secretVariable_thenBranchOnly_rewritingExpected
   SecretBranchingVisitor sbv;
   inputAst->accept(sbv);
 
-  GTEST_SKIP_("Feature not implemented yet.");
   EXPECT_TRUE(compareAST(*inputAst, *expectedAst));
 }
 
@@ -124,7 +122,7 @@ TEST(SecretBranchingVisitorTest, secretVariable_ifStmt_unsupportedBodyReturn_noR
   EXPECT_TRUE(compareAST(*inputAst, *expectedAst));
 }
 
-TEST(SecretBranchingVisitorTest, secretVariable_ifBranch_uninitializedVar_rewritingExpected) { /* NOLINT */
+TEST(SecretBranchingVisitorTest, DISABLED_secretVariable_ifBranch_uninitializedVar_rewritingExpected) { /* NOLINT */
   const char *inputChars = R""""(
     public int main(secret int N) {
       int sum;
@@ -148,6 +146,5 @@ TEST(SecretBranchingVisitorTest, secretVariable_ifBranch_uninitializedVar_rewrit
   SecretBranchingVisitor sbv;
   inputAst->accept(sbv);
 
-  GTEST_SKIP_("Feature not implemented yet.");
   EXPECT_TRUE(compareAST(*inputAst, *expectedAst));
 }
