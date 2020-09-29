@@ -27,9 +27,13 @@ class Assignment;
 class VariableDeclaration;
 class Variable;
 
+/// Vector to keep track of parsed nodes.
+static std::vector<std::reference_wrapper<AbstractNode>> parsedNodes;
+
 /// The parser takes the
 class Parser {
  private:
+
   static AbstractExpression *parseExpression(stork::tokens_iterator &it);
 
   static AbstractStatement *parseStatement(stork::tokens_iterator &it, bool gobbleTrailingSemicolon = true);
@@ -72,6 +76,17 @@ class Parser {
   static AbstractExpression *parseLiteral(stork::tokens_iterator &it, bool isNegative);
 
  public:
-  static std::unique_ptr<AbstractNode> parse(std::string);
+  /// Parses a given input program, returns (a unique ptr) to the created root node of the AST.
+  /// \param s The program to parse given as string in a C++-like syntax.
+  /// \return (A unique pointer) to the root node of the AST.
+  static std::unique_ptr<AbstractNode> parse(std::string s);
+
+  /// Parses a given input program, returns (a unique ptr) to the created root node of the AST and stores a reference to
+  /// each created node (i.e., statement or expression) into the passed createdNodesList.
+  /// \param s The program to parse given as string in a C++-like syntax.
+  /// \param createdNodesList The list of parsed AbstractNodes.
+  /// \return (A unique pointer) to the root node of the AST.
+  static std::unique_ptr<AbstractNode> parse(std::string s,
+                                             std::vector<std::reference_wrapper<AbstractNode>> &createdNodesList);
 };
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_PARSER_PARSER_H_

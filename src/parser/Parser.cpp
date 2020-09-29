@@ -1,6 +1,6 @@
 #include <memory>
 #include <stack>
-#include <cstdio>
+#include <utility>
 
 #include "ast_opt/ast/AbstractNode.h"
 #include "ast_opt/ast/AbstractStatement.h"
@@ -28,7 +28,13 @@
 
 using std::to_string;
 
+void addParsedNode(AbstractNode *parsedNode) {
+  parsedNodes.push_back(std::ref(*parsedNode));
+}
+
 std::unique_ptr<AbstractNode> Parser::parse(std::string s) {
+  parsedNodes.clear();
+
   // Setup Tokenizer from String
   auto getCharacter = stork::getCharacterFunc(s);
   stork::PushBackStream stream(&getCharacter);
@@ -37,24 +43,41 @@ std::unique_ptr<AbstractNode> Parser::parse(std::string s) {
   auto block = std::make_unique<Block>();
   // Parse statements until end of file
   while (!it->isEof()) {
-    block->appendStatement(std::unique_ptr<AbstractStatement>(parseStatement(it)));
+    auto statement = std::unique_ptr<AbstractStatement>(parseStatement(it));
+    block->appendStatement(std::move(statement));
   }
 
   return std::move(block);
 }
 
+std::unique_ptr<AbstractNode> Parser::parse(std::string s,
+                                            std::vector<std::reference_wrapper<AbstractNode>> &createdNodesList) {
+  auto result = parse(std::move(s));
+  createdNodesList = std::move(parsedNodes);
+  return result;
+}
+
 AbstractStatement *Parser::parseStatement(stork::tokens_iterator &it, bool gobbleTrailingSemicolon) {
+  AbstractStatement *parsedStatement;
   if (it->isReservedToken()) {
     switch (it->get_reserved_token()) {
-      case stork::reservedTokens::kw_for:return parseForStatement(it);
-      case stork::reservedTokens::kw_if:return parseIfStatement(it);
+      case stork::reservedTokens::kw_for:
+        parsedStatement = parseForStatement(it);
+        break;
+      case stork::reservedTokens::kw_if:
+        parsedStatement = parseIfStatement(it);
+        break;
       case stork::reservedTokens::kw_return: {
-        AbstractStatement *returnStmt = parseReturnStatement(it);
+        parsedStatement = parseReturnStatement(it);
         if (gobbleTrailingSemicolon) parseTokenValue(it, stork::reservedTokens::semicolon);
-        return returnStmt;
+        break;
       }
-      case stork::reservedTokens::open_curly:return parseBlockStatement(it);
-      case stork::reservedTokens::kw_public:return parseFunctionStatement(it);
+      case stork::reservedTokens::open_curly:
+        parsedStatement = parseBlockStatement(it);
+        break;
+      case stork::reservedTokens::kw_public:
+        parsedStatement = parseFunctionStatement(it);
+        break;
 
         // it starts with a data type or "secret" keyword (e.g., int, float, secret int, secret float)
       case stork::reservedTokens::kw_secret:
@@ -65,23 +88,25 @@ AbstractStatement *Parser::parseStatement(stork::tokens_iterator &it, bool gobbl
       case stork::reservedTokens::kw_double:
       case stork::reservedTokens::kw_string:
       case stork::reservedTokens::kw_void: {
-        auto variableDeclarationStmt = parseVariableDeclarationStatement(it);
+        parsedStatement = parseVariableDeclarationStatement(it);
         if (gobbleTrailingSemicolon) parseTokenValue(it, stork::reservedTokens::semicolon);
-        return variableDeclarationStmt;
+        break;
       }
       default: {
         // has to be an assignment
-        auto assignmentStatement = parseAssignmentStatement(it);
+        parsedStatement = parseAssignmentStatement(it);
         if (gobbleTrailingSemicolon) parseTokenValue(it, stork::reservedTokens::semicolon);
-        return assignmentStatement;
+        break;
       }
     }
   } else {
     // it start with an identifier -> must be an assignment
-    auto assignmentStatement = parseAssignmentStatement(it);;
+    parsedStatement = parseAssignmentStatement(it);;
     if (gobbleTrailingSemicolon) parseTokenValue(it, stork::reservedTokens::semicolon);
-    return assignmentStatement;
   }
+
+  addParsedNode(parsedStatement);
+  return parsedStatement;
 }
 
 bool isBinaryOperator(const stork::tokens_iterator &it) {
@@ -262,6 +287,7 @@ AbstractExpression *Parser::parseExpression(stork::tokens_iterator &it) {
   if (operands.empty()) {
     throw stork::unexpectedSyntaxError("Empty Expression", it->getLineNumber(), it->getCharIndex());
   } else if (operands.size()==1) {
+    addParsedNode(operands.top());
     return operands.top();
   } else {
     throw stork::unexpectedSyntaxError("Unresolved Operands", it->getLineNumber(), it->getCharIndex());
@@ -517,7 +543,9 @@ Function *Parser::parseFunctionStatement(stork::tokens_iterator &it) {
   parseTokenValue(it, stork::reservedTokens::open_round);
   std::vector<std::unique_ptr<FunctionParameter>> functionParams;
   while (!it->hasValue(stork::reservedTokens::close_round)) {
-    functionParams.push_back(std::unique_ptr<FunctionParameter>(parseFunctionParameter(it)));
+    auto functionParam = std::unique_ptr<FunctionParameter>(parseFunctionParameter(it));
+    addParsedNode(functionParam.get());
+    functionParams.push_back(std::move(functionParam));
   }
   parseTokenValue(it, stork::reservedTokens::close_round);
 
@@ -672,3 +700,4 @@ Assignment *Parser::parseAssignmentStatement(stork::tokens_iterator &it) {
 
   return new Assignment(std::move(target), std::unique_ptr<AbstractExpression>(value));
 }
+
