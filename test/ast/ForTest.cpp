@@ -1,42 +1,87 @@
+#include "ast_opt/utilities/Operator.h"
+#include "ast_opt/utilities/Datatype.h"
+#include "ast_opt/ast/VariableDeclaration.h"
+#include "ast_opt/ast/Assignment.h"
+#include "ast_opt/ast/BinaryExpression.h"
 #include "ast_opt/ast/For.h"
 #include "ast_opt/ast/Literal.h"
 #include "gtest/gtest.h"
 
-TEST(ForTest, values_ValuesGivenInCtorAreRetrievable) {
+TEST(ForTest, values_ValuesGivenInCtorAreRetrievable) { /* NOLINT */
   // For statements are created with an initializer, condition, update and body
   // TODO: This test simply confirms that they are retrievable later
 }
 
-TEST(ForTest, SetAndGet) {
+TEST(ForTest, SetAndGet) { /* NOLINT */
   // TODO: This test simply checks that initializer, condition, update and body can be set and get correctly.
 }
 
-TEST(ForTest, CopyCtorCopiesValue) {
+TEST(ForTest, CopyCtorCopiesValue) { /* NOLINT */
   // TODO: When copying a For, the new object should contain a (deep) copy of the initializer, condition, update and body
 }
 
-TEST(ForTest, CopyAssignmentCopiesValue) {
+TEST(ForTest, CopyAssignmentCopiesValue) { /* NOLINT */
   // TODO: When copying a For, the new object should contain a copy of the initializer, condition, update and body
 }
 
-TEST(ForTest, MoveCtorPreservesValue) {
+TEST(ForTest, MoveCtorPreservesValue) { /* NOLINT */
   // TODO: When moving a For, the new object should contain the same initializer, condition, update and body
 }
 
-TEST(ForTest, MoveAssignmentPreservesValue) {
+TEST(ForTest, MoveAssignmentPreservesValue) { /* NOLINT */
   // TODO: When moving a For, the new object should contain the same initializer, condition, update and body
 }
 
-TEST(ForTest, countChildrenReportsCorrectNumber) {
+TEST(ForTest, countChildrenReportsCorrectNumber) { /* NOLINT */
   // TODO: This tests checks that countChildren delivers the correct number
 }
 
-TEST(ForTest, node_iterate_children) {
-  // TODO: This test checks that we can iterate correctly through the children
-  // Even if some of the elements are null (in which case they should not appear)
+TEST(ForTest, node_iterate_children) { /* NOLINT */
+  // This test checks that we can iterate correctly through the children
+  // TODO: Even if some of the elements are null (in which case they should not appear)
 
+  auto initializer = std::make_unique<VariableDeclaration>(Datatype(Type::INT, false),
+                                                           std::make_unique<Variable>("i"),
+                                                           std::make_unique<
+                                                               LiteralInt>(0));
+  auto initializerBlock = std::make_unique<Block>(std::move(initializer));
+
+  auto condition = std::make_unique<BinaryExpression>(std::make_unique<Variable>("i"),
+                                                      Operator(LESS),
+                                                      std::make_unique<LiteralInt>(100));
+
+  auto updater = std::make_unique<Assignment>(std::make_unique<Variable>("i"),
+                                              std::make_unique<BinaryExpression>(std::make_unique<Variable>("i"),
+                                                                                 Operator(ADDITION),
+                                                                                 std::make_unique<LiteralInt>(1)));
+  auto updaterBlock = std::make_unique<Block>(std::move(updater));
+
+  auto bodyStmt = std::make_unique<VariableDeclaration>(Datatype(Type::INT, false),
+                                                        std::make_unique<Variable>("dummy"),
+                                                        std::make_unique<
+                                                            LiteralInt>(111));
+  auto bodyBlock = std::make_unique<Block>(std::move(bodyStmt));
+
+  auto forLoop = std::make_unique<For>(std::move(initializerBlock),
+                                       std::move(condition),
+                                       std::move(updaterBlock),
+                                       std::move(bodyBlock));
+
+  auto it = forLoop->begin();
+  EXPECT_EQ(dynamic_cast<Block *>(&(*it)), &forLoop->getInitializer());
+
+  it++;
+  EXPECT_EQ(dynamic_cast<BinaryExpression *>(&(*it)), &forLoop->getCondition());
+
+  it++;
+  EXPECT_EQ(dynamic_cast<Block *>(&(*it)), &forLoop->getUpdate());
+
+  it++;
+  EXPECT_EQ(dynamic_cast<Block *>(&(*it)), &forLoop->getBody());
+  it++;
+  EXPECT_EQ(it, forLoop->end());
 }
 
 TEST(ForTest, JsonOutputTest) { /* NOLINT */
- // TODO: Verify JSON output
+  // TODO: Verify JSON output
 }
