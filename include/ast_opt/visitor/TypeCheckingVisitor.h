@@ -12,6 +12,10 @@ class AbstractExpression;
 /// ControlFlowGraphVisitor uses the Visitor<T> template to allow specifying default behaviour
 typedef Visitor<SpecialTypeCheckingVisitor> TypeCheckingVisitor;
 
+typedef std::unordered_map<ScopedIdentifier, Datatype> VariableDatatypeMap;
+
+typedef std::unordered_map<std::string, bool> SecretTaintedNodesMap;
+
 class SpecialTypeCheckingVisitor : public ScopedVisitor {
  private:
   /// A temporary structure to keep track of data types visited in children of a statement.
@@ -26,15 +30,14 @@ class SpecialTypeCheckingVisitor : public ScopedVisitor {
   std::vector<std::pair<Datatype, bool>> returnExpressionTypes;
 
   /// Data types of the variables. This is derived from the variable's declaration.
-  std::unordered_map<ScopedIdentifier,
-                     Datatype> variablesDatatypeMap;
+  VariableDatatypeMap variablesDatatypeMap;
 
   /// Data types of all expression nodes in the program.
   std::unordered_map<std::string, Datatype> expressionsDatatypeMap;
 
   /// Stores for each node in the AST (identified by its unique node ID), if the node is tainted secret. This is the
   /// case if any of the operands in the node's expression are secret.
-  std::unordered_map<std::string, bool> secretTaintedNodes;
+  SecretTaintedNodesMap secretTaintedNodes;
 
   /// Internal function to check whether stack was cleaned up properly before leaving statement.
   void postStatementAction();
