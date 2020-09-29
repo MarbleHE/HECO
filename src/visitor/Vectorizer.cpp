@@ -37,26 +37,13 @@ BatchingConstraint& ComplexValue::getBatchingConstraint() {
   //TODO: Implement ComplexValue::getBatchingConstraint
   return batchingConstraint;
 }
+void ComplexValue::merge(ComplexValue value) {
+  //TODO: Implement
+}
 
 ////////////////////////////////////////////
 ////          SpecialVectorizer         ////
 ////////////////////////////////////////////
-SpecialVectorizer::SpecialVectorizer(TypeMap types, VariableValueMap values, ConstraintMap constraints, RotationMap rotations) :
-    types(types), variableValues(values), constraints(constraints), rotations(rotations){}
-
-bool SpecialVectorizer::isInExpressionValues(const AbstractNode &elem) const {
-  return expressionValues.find(valueHash(elem)) != expressionValues.end();
-}
-
-std::string SpecialVectorizer::valueHash(const AbstractNode &elem) const {
-  auto it = valueHashMap.find(elem.getUniqueNodeId());
-  if(it != valueHashMap.end()) {
-    return it->second;
-  } else {
-    throw std::runtime_error("No pre-created Hash found for " + elem.getUniqueNodeId());
-  }
-}
-
 void SpecialVectorizer::visit(Assignment &elem) {
 
   /// current scope
@@ -67,7 +54,7 @@ void SpecialVectorizer::visit(Assignment &elem) {
   ScopedIdentifier targetID(scope, ""); // Dummy, since no default ctor
   BatchingConstraint batchingConstraint(-1, "");
 
-  // TODO: We currently assume that the target has either the form <Variable> or <Variable>[<LiteralInt>]
+  // We currently assume that the target has either the form <Variable> or <Variable>[<LiteralInt>]
   if (target.countChildren() == 0) {
     auto variable = dynamic_cast<Variable&>(target);
     auto id = variable.getIdentifier();
@@ -84,50 +71,24 @@ void SpecialVectorizer::visit(Assignment &elem) {
     batchingConstraint.setSlot(index.getValue());
   }
 
-  // Push the target slot to the target-slot-stack
-  targetSlotStack.push(batchingConstraint.getSlot());
+  /// Optimize the value of the assignment
+  auto cv = batchExpression(elem.getValue(), batchingConstraint);
 
-  /// Value of the assignment
-  AbstractExpression& value = elem.getValue();
-
-  // TODO: Call hash-creating visitor
-
-  if(isInExpressionValues(value)) {
-    // We have this expression pre-computed
-    ComplexValue &cv = expressionValues.find(valueHash(value))->second;
-
-    if(!batchingConstraint.hasTargetSlot()) {
-      // We have no fixed target slot
-      // Simply register the existing value in the variableValueMap
-      variableValues.insert({targetID,cv});
-    } else {
-      //TODO: // Check how to get it to the target slot
-    }
+  /// Combine the execution plans, if they already exist
+  auto it = variableValues.find(targetID);
+  if( it != variableValues.end()) {
+      it->second.merge(cv);
   } else {
-    // Build an execution plan (complex value) from the expression via recursion
-    batchExpression(value);
-
-    // Retrieve that execution plan from the stack
-    ComplexValue cv = resultValueStack.top();
-    resultValueStack.pop();
-
-    // Insert it into expressionValues:
-    expressionValues.insert({valueHash(value),cv});
-
-    // Register the value in variableValues (must be the object in expressionValues since local cv will be destroyed)
-    variableValues.insert({targetID,expressionValues.find(valueHash(value))->second});
+      precomputedValues.push_back(cv);
   }
-
-  // TODO: Remove the assignment statement from the AST?
-
-  // Remove the current target slot
-  targetSlotStack.pop();
 }
 
 std::string SpecialVectorizer::getAuxiliaryInformation() {
   //TODO: Implement returning of auxiliary information
   return "NOT IMPLEMENTED YET";
 }
-void SpecialVectorizer::batchExpression(AbstractExpression &expression) {
+
+ComplexValue SpecialVectorizer::batchExpression(AbstractExpression & exp, BatchingConstraint) {
   //TODO: IMPLEMENT
+  return ComplexValue(exp);
 }

@@ -1,6 +1,6 @@
 #ifndef AST_OPTIMIZER_INCLUDE_AST_OPT_VISITOR_VECTORIZER_H_
 #define AST_OPTIMIZER_INCLUDE_AST_OPT_VISITOR_VECTORIZER_H_
-#include <set>
+#include <unordered_set>
 #include <unordered_map>
 #include <stack>
 #include "ast_opt/ast/AbstractExpression.h"
@@ -24,8 +24,6 @@ struct equal_to<ScopedIdentifier> {
 };
 }
 
-typedef std::unordered_map<ScopedIdentifier, Datatype> TypeMap;
-
 /// For now, we simply consider batching constraints to be a slot and a variable name valid in the local scope
 struct BatchingConstraint {
  private:
@@ -40,9 +38,7 @@ struct BatchingConstraint {
   void setIdentifier(const std::string &identifier);
   bool hasTargetSlot() const;
 };
-typedef std::unordered_map<ScopedIdentifier, BatchingConstraint> ConstraintMap;
 
-typedef std::unordered_multimap<ScopedIdentifier, int> RotationMap;
 
 class ComplexValue {
  private:
@@ -56,6 +52,7 @@ class ComplexValue {
 
   /// Get the value's bathing constraints (i.e. where it lives)
   BatchingConstraint& getBatchingConstraint();
+  void merge(ComplexValue value);
 };
 
 // Forward Declaration for typedef below (must be above documentation, to ensure documentation is associated with the right type)
@@ -147,60 +144,32 @@ typedef Visitor<SpecialVectorizer> Vectorizer;
 
 class SpecialVectorizer : public ScopedVisitor {
  private:
+  typedef std::unordered_map<ScopedIdentifier, Datatype> TypeMap;
   /// Records the types of variables
   TypeMap types;
 
-  typedef std::unordered_map<std::string, ComplexValue> ExpressionValueMap;
-  /// Records pre-computed expression (as their execution plan), based on their AST's valueHash
-  ExpressionValueMap expressionValues;
+  typedef std::vector<ComplexValue> Values;
+  /// Records pre-computed expression (as their execution plan)
+  Values precomputedValues;
 
   typedef std::unordered_map<ScopedIdentifier, ComplexValue&> VariableValueMap;
-
   /// Associates pre-computed values to variables
   VariableValueMap variableValues;
 
+  typedef std::unordered_map<ScopedIdentifier, BatchingConstraint> ConstraintMap;
   /// Records existing constraints on slot-encodings
   ConstraintMap constraints;
 
-  /// Records already pre-computed rotations
-  RotationMap rotations;
-
-  /// Used in lieu of being able to pass arguments to visit(..) calls to keep track of current target slot
-  std::stack<int> targetSlotStack;
-
-  /// Used in lieu of being able to return arguments from visit(..) calls to pass back modified expressions
-  std::stack<ComplexValue> resultValueStack;
-
-  /// Map between unique ID's and the nodes "batching structure hash"
-  std::unordered_map<std::string, std::string> structureHashMap;
-
-  /// Map between unique ID's and the nodes "exact value hash"
-  std::unordered_map<std::string, std::string> valueHashMap;
-
-  bool isInExpressionValues(const AbstractNode& elem) const;
-
-  std::string valueHash(const AbstractNode &elem) const;
+  ComplexValue batchExpression(AbstractExpression &expression, BatchingConstraint batchingConstraint);
 
  public:
 
   /// Creates a Vectorizer without any pre-existing information
   SpecialVectorizer() = default;
 
-  /// Creates a Vectorizer with initial information already recorded
-  /// \param types Types of variables
-  /// \param values Already pre-computed values of variables and expressions
-  /// \param constraints Existing constraints on slot-encodings
-  /// \param rotations Already pre-computed rotations
-  SpecialVectorizer(TypeMap types, VariableValueMap values, ConstraintMap constraints, RotationMap rotations);
-
-
-  void visit(Assignment& elem);
-
-  /// Dealing with Expression -> ComplexValue conversion
-  //TODO: How? Cannot be a normal visit
+  void visit(Assignment& elem) override;
 
   std::string getAuxiliaryInformation();
 
-  void batchExpression(AbstractExpression &expression);
 };
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_VISITOR_VECTORIZER_H_
