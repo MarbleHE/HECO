@@ -28,6 +28,7 @@ void AbstractNode::setParent(AbstractNode &newParent) {
     parent = &newParent;
   }
 }
+
 bool AbstractNode::hasParent() const {
   return parent!=nullptr;
 }
@@ -43,16 +44,6 @@ AbstractNode &AbstractNode::getParent() {
 const AbstractNode &AbstractNode::getParent() const {
   if (hasParent()) {
     return *parent;
-  } else {
-    throw std::runtime_error("Node has no parent.");
-  }
-}
-
-void AbstractNode::deleteInParent() {
-  if (hasParent()) {
-    //Deletes *this object, so we must return immediately afterwards.
-    pointerToThis->reset();
-    return;
   } else {
     throw std::runtime_error("Node has no parent.");
   }

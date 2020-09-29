@@ -45,9 +45,6 @@ class AbstractNode {
   /// Stores the parent nodes of the current node.
   AbstractNode *parent = nullptr;
 
-  /// Stores a reference to the unique_ptr that "owns" this node
-  std::unique_ptr<AbstractNode>* pointerToThis = nullptr;
-
   /// Clones a node recursively, i.e., by including all of its children.
   /// Because return-type covariance does not work with smart pointers,
   /// derived classes are expected to both override this function (for usage with base class ptrs/refs/etc)
@@ -125,11 +122,6 @@ class AbstractNode {
   /// \throws std::runtime_error if the node has no parent
   const AbstractNode &getParent() const;
 
-  /// Removes this node from its parent by setting the ptr to it to null
-  /// \throws std::runtime_error if the node has no parent
-  void deleteInParent();
-
- protected:
   /// Set the parent of this node.
   /// Derived classes must ensure that a node's parent has the node as its child!
   /// This is also why this function does not take a const AbstractNode& parameter
