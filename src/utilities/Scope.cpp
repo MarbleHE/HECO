@@ -29,6 +29,12 @@ void Scope::addIdentifier(const std::string &id) {
   identifiers.emplace(std::make_unique<ScopedIdentifier>(*this, id));
 }
 
+void Scope::addIdentifiers(std::initializer_list<std::string> ids) {
+  std::for_each(ids.begin(), ids.end(), [&](const std::string &id) {
+    addIdentifier(id);
+  });
+}
+
 Scope &Scope::getParentScope() {
   return *parent;
 }

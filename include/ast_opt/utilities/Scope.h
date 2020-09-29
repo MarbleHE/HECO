@@ -85,14 +85,18 @@ class Scope {
   Scope(Scope&& other) = default;
 
   /// Copy Assignment
-  Scope& operator=(const Scope&) = delete;
+  Scope &operator=(const Scope &) = delete;
 
   /// Move Assignment
-  Scope& operator=(Scope&&) noexcept = default;
+  Scope &operator=(Scope &&) noexcept = default;
 
   /// Adds an declared identifier (e.g., variable) to this scope.
   /// \param id The identifier to be added to this scope.
   void addIdentifier(const std::string &id);
+
+  /// Adds multiple declared identifier (e.g., variable) to this scope.
+  /// \param ids (A list of) identifiers to be added to this scope.
+  void addIdentifiers(std::initializer_list<std::string> ids);
 
   /// Checks whether the given identifier is local, i.e., declared in this scope and not in any parent scope.
   /// \param id The identifier to be checked.
