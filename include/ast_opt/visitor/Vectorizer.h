@@ -151,7 +151,7 @@ class SpecialVectorizer : public ScopedVisitor {
   TypeMap types;
 
   typedef std::unordered_map<std::string, ComplexValue> ExpressionValueMap;
-  /// Records pre-computed expressions, based on their valueHash
+  /// Records pre-computed expression (as their execution plan), based on their AST's valueHash
   ExpressionValueMap expressionValues;
 
   typedef std::unordered_map<ScopedIdentifier, ComplexValue&> VariableValueMap;
@@ -201,5 +201,6 @@ class SpecialVectorizer : public ScopedVisitor {
 
   std::string getAuxiliaryInformation();
 
+  void batchExpression(AbstractExpression &expression);
 };
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_VISITOR_VECTORIZER_H_

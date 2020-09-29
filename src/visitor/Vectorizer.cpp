@@ -37,6 +37,7 @@ BatchingConstraint& ComplexValue::getBatchingConstraint() {
   //TODO: Implement ComplexValue::getBatchingConstraint
   return batchingConstraint;
 }
+
 ////////////////////////////////////////////
 ////          SpecialVectorizer         ////
 ////////////////////////////////////////////
@@ -95,15 +96,16 @@ void SpecialVectorizer::visit(Assignment &elem) {
     // We have this expression pre-computed
     ComplexValue &cv = expressionValues.find(valueHash(value))->second;
 
-    // Check how to get it to the target slot
     if(!batchingConstraint.hasTargetSlot()) {
       // We have no fixed target slot
       // Simply register the existing value in the variableValueMap
       variableValues.insert({targetID,cv});
+    } else {
+      //TODO: // Check how to get it to the target slot
     }
   } else {
     // Build an execution plan (complex value) from the expression via recursion
-    value.accept(*this);
+    batchExpression(value);
 
     // Retrieve that execution plan from the stack
     ComplexValue cv = resultValueStack.top();
@@ -116,6 +118,8 @@ void SpecialVectorizer::visit(Assignment &elem) {
     variableValues.insert({targetID,expressionValues.find(valueHash(value))->second});
   }
 
+  // TODO: Remove the assignment statement from the AST?
+
   // Remove the current target slot
   targetSlotStack.pop();
 }
@@ -123,4 +127,7 @@ void SpecialVectorizer::visit(Assignment &elem) {
 std::string SpecialVectorizer::getAuxiliaryInformation() {
   //TODO: Implement returning of auxiliary information
   return "NOT IMPLEMENTED YET";
+}
+void SpecialVectorizer::batchExpression(AbstractExpression &expression) {
+  //TODO: IMPLEMENT
 }
