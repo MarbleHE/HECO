@@ -185,6 +185,8 @@ void SpecialTypeCheckingVisitor::visit(Function &elem) {
 }
 
 void SpecialTypeCheckingVisitor::visit(If &elem) {
+  ScopedVisitor::enterScope(elem);
+
   elem.getCondition().accept(*this);
   typesVisitedNodes.pop();
 
@@ -193,6 +195,8 @@ void SpecialTypeCheckingVisitor::visit(If &elem) {
   if (elem.hasElseBranch()) {
     elem.getElseBranch().accept(*this);
   }
+
+  ScopedVisitor::exitScope();
 
   postStatementAction();
 }
@@ -251,7 +255,7 @@ Datatype SpecialTypeCheckingVisitor::getExpressionDatatype(AbstractExpression &e
   throw std::runtime_error("Cannot get datatype of expression (" + expression.getUniqueNodeId() + ").");
 }
 
-bool SpecialTypeCheckingVisitor::isSecretTaintedNode(std::string &uniqueNodeId) {
+bool SpecialTypeCheckingVisitor::isSecretTaintedNode(const std::string &uniqueNodeId) {
   if (secretTaintedNodes.count(uniqueNodeId)==0) {
     throw std::runtime_error("");
   }

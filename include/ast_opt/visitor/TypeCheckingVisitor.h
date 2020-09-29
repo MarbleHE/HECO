@@ -93,7 +93,7 @@ class SpecialTypeCheckingVisitor : public ScopedVisitor {
   /// Checks whether a given node is secret tainted..
   /// \param uniqueNodeId The unique node ID of the node to be checked.
   /// \return (A bool) indicating whether the given node is secret tainted or not.
-  bool isSecretTaintedNode(std::string &uniqueNodeId);
+  bool isSecretTaintedNode(const std::string &uniqueNodeId);
 
   /// Checks whether both given data types are compatible to be used by the operands of an arithemtic expression.
   /// \param first The first datatype.
