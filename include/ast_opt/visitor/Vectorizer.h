@@ -7,41 +7,23 @@
 #include "ast_opt/utilities/Datatype.h"
 #include "ast_opt/visitor/ScopedVisitor.h"
 
-// Hashing & Equality function specializations to make std::unordered_map work with ScopedIdentifiers as keys
-// COMMENT(pj): Reuse existing hash and equal_to of ScopedIdentifier.h?
-namespace std {
-template<>
-struct hash<ScopedIdentifier> {
-  size_t operator()(const ScopedIdentifier &s) const {
-    return std::hash<std::string>{}(s.getScope().getScopeName() + "::" + s.getId());
-  }
-};
-
-template<>
-struct equal_to<ScopedIdentifier> {
-  bool operator()(ScopedIdentifier const &s1, ScopedIdentifier const &s2) const {
-    return s1.getId()==s2.getId() && s1.getScope().getScopeName()==s2.getScope().getScopeName();
-  }
-};
-}
-
 /// For now, we simply consider batching constraints to be a slot and a variable name valid in the local scope
 struct BatchingConstraint {
  private:
   int slot = -1;
-  std::string identifier; // COMMENT(pj): Shouldn't that be a ScopedIdentifier instead?
+  ScopedIdentifier identifier;
  public:
   BatchingConstraint() = default;
 
-  BatchingConstraint(int slot, const std::string &identifier);
+  BatchingConstraint(int slot, const ScopedIdentifier &identifier);
 
   [[nodiscard]] int getSlot() const;
 
   void setSlot(int slot);
 
-  [[nodiscard]] const std::string &getIdentifier() const;
+  [[nodiscard]] const ScopedIdentifier &getIdentifier() const;
 
-  void setIdentifier(const std::string &identifier);
+  void setIdentifier(const ScopedIdentifier &identifier);
 
   bool hasTargetSlot() const;
 };
@@ -94,6 +76,7 @@ class SpecialVectorizer;
 ///      works:         ((x[0] * x[1]) + x[2]) + x[4]  <==> ((x[3] * x[4]) + x[5]) +  x[7]
 ///      both exprs. share the same set of rotations but cannot be batched:
 ///      does not work: ((x[0] * x[1]) + x[2]) + x[4]  <==> ((x[3] * x[5]) + x[6]) +  x[7]
+/// Therefore, we should first check that their "structure hash" matches, then check if the offsets are compatible?
 ///
 /// The Vectorizer keeps a ConstraintMap, which ensures that batching decisions remain consistent across blocks.
 /// It also maintains the TypeMap, accounting for any variables and changes in the program it introduces.
@@ -105,16 +88,15 @@ class SpecialVectorizer;
 /// The Vectorizer works on a per-Block level, focussing on assignments, declarations that include initial values, and return statements.
 /// More complex statements like loops or branching are simply skipped over and the internal blocks considered.
 /// Generally, the algorithm works greedily, batching as much as possible as early as possible.
-/// COMMENT(PJ): Didn't we agree on that we need to collect everything until the scope's end before we can emit the
-///   batching expression to ensure that we generate an efficiently batched expression?
+/// For an Example, see the batchableExpressionVectorizable test case
 /// However, three components counteract that naive nature:
 ///
 /// Lazy Evaluation:
 /// In order to support programs where statements access different indices of the same or different vectors
 /// e.g. (x[i] = y[i-1] + z[i+1] + y[i]), we copy the ctxts and rotate them to match.
 /// In order to do so optimally, we maintain a set of existing rotations and, for each new required set of indices that need to interact,
-/// we calculate the optimal target index that can be achieved by the smallest number of rotations.
-/// COMMENT(PJ): ...by taking the already existing (i.a. rotated) ciphertexts into accounts.
+/// we calculate the optimal target index that can be achieved by the smallest number of rotations
+/// by taking the already existing (i.a. rotated) ciphertexts into accounts.
 /// However, if the statements are of a form that forces everything onto a single target index (e.g. sum = x[i] + y[i-1]),
 /// this degrades down to the naive baseline, as each new statement requires a unique rotation offset
 /// (For example, if i starts at 0, sum will be in slot 0 so all subsequent statements must be rotated to slot 0).
@@ -131,8 +113,6 @@ class SpecialVectorizer;
 /// We keep a list of previously calculated rotations, even when they are used as R-Values.
 /// We store either the ScopedIdentifier currently containing that rotation, or the rotate() expression where it was created (e.g. if an R-Value or variable overwritten).
 /// Should an R-Value-only rotation become useful again, we go back, introduce a new variable initialized to the rotation and replace its use in the original expression.
-/// TODO: This requires working parent/etc logic!
-/// COMMENT(PJ): Are you unsure if this is working properly? I can write some tests!
 ///
 /// Offset-index-Expression-Re-Use (needs a better name):
 /// Sometimes, we can do more than just re-use an already rotated variable. Sometimes, the exact expression we wanted has
@@ -140,8 +120,7 @@ class SpecialVectorizer;
 /// Note: In our previous solution (which worked only for loops), we could simply mark an Expression node as "precomputed" and check only if the
 /// indices in the current iteration were compatible with the precomputed ones (i.e. that no new rotations were required).
 /// However, in our current solution, arbitrary nodes can appear and the fact that no new rotations are required
-/// does not imply that two nodes represent the same computation.
-/// COMMENT(PJ): Because we are not in a loop anymore where statements are just repeatedly executed.
+/// does not imply that two nodes represent the same computation. Because we are not in a loop anymore where statements are just repeatedly executed.
 /// For example: x[0] = y[15] * 5; and x[2] = y[17] * 7; require the same set of rotations, but neither one is a valid
 /// "pre-computation" for the other one.
 /// We solve this by comparing expression's structure and content, but considering indices not as their absolute values
@@ -149,21 +128,17 @@ class SpecialVectorizer;
 /// or as offsets from the other expression's target slot (if one exists).
 /// However, this would make it impossible to use a single pre-computed value to compare expressions.
 /// Instead, we define indices as offsets from the first index occurring in-order in the expression AST.
-/// COMMENT(PJ): Does this include the rhs of the expression only (e.g., = x[5] + x[23] -> x[5] is considerd as 0), or
-///   does it consider the lhs too (e.g., x[3] = ...)?
 /// Effectively, we  "shift" all indices so that the one occurring first in-order "becomes zero".
 /// This way, offset patterns are always the same for compatible expressions, even if the actual indices are different.
 ///
 /// GENERAL APPROACH:
-/// Whenever the Vectorizer encounters an assignment statement, it has to answer two questions:
-/// COMMENT(PJ): "assignment statement" includes declarations with initialization?
+/// Whenever the Vectorizer encounters an assignment (or decl + init) statement, it has to answer two questions:
 /// First: Is there a specific target slot that the result needs to be written to (e.g. slot i for x[i] = ...)
 /// Second: How can the rhs (value) be computed most efficiently (in the target slot, if there is one)?
 /// This requires looking at the set of existing expressions and rotations.
 /// Potential answers can be "this value is already precomputed", "all rotations exists but a new expression must be calculated",
 /// "some new rotations must be created", etc
-/// Finally, the Vectorizer emits code (actually AST nodes) that correspond to the required operation and updates its maps & sets.
-/// COMMENT(PJ): Does the Vectorizer emit these AST nodes during the traversal or at the end?
+/// Finally, at the end of each Block, the Vectorizer emits code (actually AST nodes) that correspond to the required operation and updates its maps & sets.
 typedef Visitor<SpecialVectorizer> Vectorizer;
 
 class SpecialVectorizer : public ScopedVisitor {

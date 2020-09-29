@@ -14,7 +14,7 @@ class Call : public AbstractExpression {
   /// Creates a deep copy of the current node
   /// Should be used only by Nodes' clone()
   /// \return a copy of the current node
-  Call *clone_impl() const override;
+  Call *clone_impl(AbstractNode* parent) const override;
 
  public:
 
@@ -46,7 +46,7 @@ class Call : public AbstractExpression {
 
   /// Deep copy of the current node
   /// \return A deep copy of the current node
-  std::unique_ptr<Call> clone() const;
+  std::unique_ptr<Call> clone(AbstractNode* parent = nullptr) const;
 
   /// Returns (a copy of) the name of the Call being called
   /// \return the name of the Call being called

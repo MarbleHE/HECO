@@ -366,11 +366,7 @@ void SpecialControlFlowGraphVisitor::buildDataflowGraph() {
   // =================
 
   typedef std::unordered_map<ScopedIdentifier,
-                             std::unordered_set<std::reference_wrapper<GraphNode>,
-                                                GraphNodeHashFunction,
-                                                GraphNodeComparator>,
-                             ScopedIdentifierHashFunction,
-                             std::equal_to<>> IdentifierGraphNodeMap;
+                             std::unordered_set<std::reference_wrapper<GraphNode>>> IdentifierGraphNodeMap;
 
   // temporary map (to be used by currently processed node) to store where a variable was last written;
   // in case that a variable has multiple parents, this is used to aggregate the information

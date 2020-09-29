@@ -19,7 +19,7 @@ class UnaryExpression : public AbstractExpression {
   /// Creates a deep copy of the current node
   /// Should be used only by Nodes' clone()
   /// \return a copy of the current node
-  UnaryExpression *clone_impl() const override;
+  UnaryExpression *clone_impl(AbstractNode* parent) const override;
 
  public:
   /// Destructor
@@ -50,7 +50,7 @@ class UnaryExpression : public AbstractExpression {
 
   /// Deep copy of the current node
   /// \return A deep copy of the current node
-  std::unique_ptr<UnaryExpression> clone() const;
+  std::unique_ptr<UnaryExpression> clone(AbstractNode* parent = nullptr) const;
 
   /// Does this UnaryExpression have its left hand side set?
   /// \return true iff the assignment has the left hand side set

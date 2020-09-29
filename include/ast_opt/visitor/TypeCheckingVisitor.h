@@ -23,8 +23,7 @@ class SpecialTypeCheckingVisitor : public ScopedVisitor {
 
   /// data types of the variables derived from their declaration
   std::unordered_map<ScopedIdentifier,
-                     Datatype,
-                     ScopedIdentifierHashFunction> variablesDatatypeMap;
+                     Datatype> variablesDatatypeMap;
 
   /// data types of the expression nodes
   std::unordered_map<std::string, Datatype> expressionsDatatypeMap;

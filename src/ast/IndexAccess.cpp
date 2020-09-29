@@ -6,15 +6,15 @@ IndexAccess::~IndexAccess() = default;
 IndexAccess::IndexAccess(std::unique_ptr<AbstractTarget> &&target, std::unique_ptr<AbstractExpression> &&index)
     : target(std::move(target)), index(std::move(index)) {}
 
-IndexAccess::IndexAccess(const IndexAccess &other) : target(other.target ? other.target->clone() : nullptr),
-                                                     index(other.index ? other.index->clone() : nullptr) {}
+IndexAccess::IndexAccess(const IndexAccess &other) : target(other.target ? other.target->clone(this) : nullptr),
+                                                     index(other.index ? other.index->clone(this) : nullptr) {}
 
 IndexAccess::IndexAccess(IndexAccess &&other) noexcept: target(std::move(other.target)),
                                                         index(std::move(other.index)) {}
 
 IndexAccess &IndexAccess::operator=(const IndexAccess &other) {
-  target = other.target ? other.target->clone() : nullptr;
-  index = other.index ? other.index->clone() : nullptr;
+  target = other.target ? other.target->clone(this) : nullptr;
+  index = other.index ? other.index->clone(this) : nullptr;
   return *this;
 }
 
@@ -23,8 +23,8 @@ IndexAccess &IndexAccess::operator=(IndexAccess &&other) noexcept {
   index = std::move(other.index);
   return *this;
 }
-std::unique_ptr<IndexAccess> IndexAccess::clone() const {
-  return std::unique_ptr<IndexAccess>(clone_impl());
+std::unique_ptr<IndexAccess> IndexAccess::clone(AbstractNode *parent) const {
+  return std::unique_ptr<IndexAccess>(clone_impl(parent));
 }
 
 bool IndexAccess::hasTarget() const {
@@ -34,8 +34,6 @@ bool IndexAccess::hasTarget() const {
 bool IndexAccess::hasIndex() const {
   return index!=nullptr;
 }
-
-
 
 AbstractTarget &IndexAccess::getTarget() {
   if (hasTarget()) {
@@ -69,20 +67,21 @@ const AbstractExpression &IndexAccess::getIndex() const {
   }
 }
 
-void IndexAccess::setTarget(std::unique_ptr<AbstractTarget> && newTarget) {
+void IndexAccess::setTarget(std::unique_ptr<AbstractTarget> &&newTarget) {
   target = std::move(newTarget);
 }
 
-void IndexAccess::setIndex(std::unique_ptr<AbstractExpression> && newIndex) {
+void IndexAccess::setIndex(std::unique_ptr<AbstractExpression> &&newIndex) {
   index = std::move(newIndex);
 }
-
 
 ///////////////////////////////////////////////
 ////////// AbstractNode Interface /////////////
 ///////////////////////////////////////////////
-IndexAccess *IndexAccess::clone_impl() const {
-  return new IndexAccess(*this);
+IndexAccess *IndexAccess::clone_impl(AbstractNode *parent) const {
+  auto p = new IndexAccess(*this);
+  if (parent) { p->setParent(*parent); }
+  return p;
 }
 
 void IndexAccess::accept(IVisitor &v) {

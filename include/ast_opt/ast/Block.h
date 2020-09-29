@@ -15,7 +15,7 @@ class Block : public AbstractStatement {
   /// Creates a deep copy of the current node
   /// Should be used only by Nodes' clone()
   /// \return a copy of the current node
-  Block *clone_impl() const override;
+  Block *clone_impl(AbstractNode* parent) const override;
 
  public:
   /// Destructor
@@ -52,7 +52,7 @@ class Block : public AbstractStatement {
 
   /// Deep copy of the current node
   /// \return A deep copy of the current node
-  std::unique_ptr<Block> clone() const;
+  std::unique_ptr<Block> clone(AbstractNode* parent = nullptr) const;
 
   /// Is the current Block (logically) empty?
   /// \return true iff the block contains no (non-null) statements

@@ -11,16 +11,16 @@ VariableDeclaration::VariableDeclaration(Datatype datatype,
 
 VariableDeclaration::VariableDeclaration(const VariableDeclaration &other)
     : datatype(other.datatype),
-      target(other.target ? other.target->clone() : nullptr),
-      value(other.value ? other.value->clone() : nullptr) {}
+      target(other.target ? other.target->clone(this) : nullptr),
+      value(other.value ? other.value->clone(this) : nullptr) {}
 
 VariableDeclaration::VariableDeclaration(VariableDeclaration &&other) noexcept
     : datatype(std::move(other.datatype)), target(std::move(other.target)), value(std::move(other.value)) {}
 
 VariableDeclaration &VariableDeclaration::operator=(const VariableDeclaration &other) {
   datatype = other.datatype;
-  target = other.target ? other.target->clone() : nullptr;
-  value = other.value ? other.value->clone() : nullptr;
+  target = other.target ? other.target->clone(this) : nullptr;
+  value = other.value ? other.value->clone(this) : nullptr;
   return *this;
 }
 
@@ -31,8 +31,8 @@ VariableDeclaration &VariableDeclaration::operator=(VariableDeclaration &&other)
   return *this;
 }
 
-std::unique_ptr<VariableDeclaration> VariableDeclaration::clone() const {
-  return std::unique_ptr<VariableDeclaration>(clone_impl());
+std::unique_ptr<VariableDeclaration> VariableDeclaration::clone(AbstractNode* parent) const {
+  return std::unique_ptr<VariableDeclaration>(clone_impl(parent));
 }
 
 bool VariableDeclaration::hasTarget() const {
@@ -94,8 +94,10 @@ void VariableDeclaration::setValue(std::unique_ptr<AbstractExpression> newValue)
 ///////////////////////////////////////////////
 ////////// AbstractNode Interface /////////////
 ///////////////////////////////////////////////
-VariableDeclaration *VariableDeclaration::clone_impl() const {
-  return new VariableDeclaration(*this);
+VariableDeclaration *VariableDeclaration::clone_impl(AbstractNode* parent) const {
+  auto p = new VariableDeclaration(*this);
+  if(parent) {p->setParent(*parent);}
+  return p;
 }
 
 void VariableDeclaration::accept(IVisitor &v) {

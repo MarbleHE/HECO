@@ -8,18 +8,18 @@ If::If(std::unique_ptr<AbstractExpression> &&condition,
        std::unique_ptr<Block> &&elseBranch)
     : condition(std::move(condition)), thenBranch(std::move(thenBranch)), elseBranch(std::move(elseBranch)) {}
 
-If::If(const If &other) : condition(other.condition ? other.condition->clone() : nullptr),
-                          thenBranch(other.thenBranch ? other.thenBranch->clone() : nullptr),
-                          elseBranch(other.elseBranch ? other.elseBranch->clone() : nullptr) {}
+If::If(const If &other) : condition(other.condition ? other.condition->clone(this) : nullptr),
+                          thenBranch(other.thenBranch ? other.thenBranch->clone(this) : nullptr),
+                          elseBranch(other.elseBranch ? other.elseBranch->clone(this) : nullptr) {}
 
 If::If(If &&other) noexcept: condition(std::move(other.condition)),
                              thenBranch(std::move(other.thenBranch)),
                              elseBranch(std::move(other.elseBranch)) {}
 
 If &If::operator=(const If &other) {
-  condition = other.condition ? other.condition->clone() : nullptr;
-  thenBranch = other.thenBranch ? other.thenBranch->clone() : nullptr;
-  elseBranch = other.elseBranch ? other.elseBranch->clone() : nullptr;
+  condition = other.condition ? other.condition->clone(this) : nullptr;
+  thenBranch = other.thenBranch ? other.thenBranch->clone(this) : nullptr;
+  elseBranch = other.elseBranch ? other.elseBranch->clone(this) : nullptr;
   return *this;
 }
 
@@ -29,8 +29,8 @@ If &If::operator=(If &&other) noexcept {
   elseBranch = std::move(other.elseBranch);
   return *this;
 }
-std::unique_ptr<If> If::clone() const {
-  return std::unique_ptr<If>(clone_impl());
+std::unique_ptr<If> If::clone(AbstractNode *parent) const {
+  return std::unique_ptr<If>(clone_impl(parent));
 }
 
 bool If::hasCondition() const {
@@ -108,8 +108,10 @@ void If::setElseBranch(std::unique_ptr<Block> &&newElseBranch) {
 ///////////////////////////////////////////////
 ////////// AbstractNode Interface /////////////
 ///////////////////////////////////////////////
-If *If::clone_impl() const {
-  return new If(*this);
+If *If::clone_impl(AbstractNode *parent) const {
+  auto p = new If(*this);
+  if (parent) { p->setParent(*parent); }
+  return p;
 }
 
 void If::accept(IVisitor &v) {

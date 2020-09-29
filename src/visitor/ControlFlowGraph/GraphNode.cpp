@@ -101,3 +101,23 @@ bool GraphNode::operator==(const std::reference_wrapper<GraphNode> &t) const {
               ==t.get().getDataFlowGraph().getParents().size();
 }
 
+
+bool GraphNode::operator==(const GraphNode &t) const {
+  return
+    // same uniqueNodeId
+      this->getAstNode().getUniqueNodeId()
+          ==t.getAstNode().getUniqueNodeId()
+          // same number of control flow graph children
+          && this->getControlFlowGraph().getChildren().size()
+              ==t.getControlFlowGraph().getChildren().size()
+              // same number of control flow graph parents
+          && this->getControlFlowGraph().getParents().size()
+              ==t.getControlFlowGraph().getParents().size()
+              // same number of data flow graph children
+          && this->getDataFlowGraph().getChildren().size()
+              ==t.getDataFlowGraph().getChildren().size()
+              // same number of data flow graph parents
+          && this->getDataFlowGraph().getParents().size()
+              ==t.getDataFlowGraph().getParents().size();
+}
+

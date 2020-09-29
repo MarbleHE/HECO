@@ -8,9 +8,12 @@ FunctionParameter::FunctionParameter(Datatype parameter_type,
                                      std::string identifier)
     : identifier(std::move(identifier)), parameter_type(std::move(parameter_type)) {}
 
-FunctionParameter::FunctionParameter(const FunctionParameter &other) : identifier(other.identifier), parameter_type(other.parameter_type){}
+FunctionParameter::FunctionParameter(const FunctionParameter &other) : identifier(other.identifier),
+                                                                       parameter_type(other.parameter_type) {}
 
-FunctionParameter::FunctionParameter(FunctionParameter &&other) noexcept: identifier(std::move(other.identifier)), parameter_type(std::move(other.parameter_type)) {}
+FunctionParameter::FunctionParameter(FunctionParameter &&other) noexcept: identifier(std::move(other.identifier)),
+                                                                          parameter_type(std::move(other
+                                                                                                       .parameter_type)) {}
 
 FunctionParameter &FunctionParameter::operator=(const FunctionParameter &other) {
   identifier = other.identifier;
@@ -21,8 +24,8 @@ FunctionParameter &FunctionParameter::operator=(FunctionParameter &&other) noexc
   return *this;
 }
 
-std::unique_ptr<FunctionParameter> FunctionParameter::clone() const {
-  return std::unique_ptr<FunctionParameter>(clone_impl());
+std::unique_ptr<FunctionParameter> FunctionParameter::clone(AbstractNode *parent) const {
+  return std::unique_ptr<FunctionParameter>(clone_impl(parent));
 }
 
 std::string FunctionParameter::getIdentifier() const {
@@ -40,8 +43,10 @@ Datatype &FunctionParameter::getParameterType() {
 ///////////////////////////////////////////////
 ////////// AbstractNode Interface /////////////
 ///////////////////////////////////////////////
-FunctionParameter *FunctionParameter::clone_impl() const {
-  return new FunctionParameter(parameter_type, identifier);
+FunctionParameter *FunctionParameter::clone_impl(AbstractNode *parent) const {
+  auto p = new FunctionParameter(parameter_type, identifier);
+  if (parent) { p->setParent(*parent); }
+  return p;
 }
 
 void FunctionParameter::accept(IVisitor &v) {

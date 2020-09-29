@@ -37,7 +37,7 @@ TEST(FunctionTest, countChildrenReportsCorrectNumber) {
   FunctionParameter functionParameter(Datatype(Type::BOOL), "foo");
   std::vector<std::unique_ptr<FunctionParameter>> paramVec;
   paramVec.push_back(std::make_unique<FunctionParameter>(functionParameter));
-  std::unique_ptr<Block> block = std::make_unique<Block>(variableDeclaration1.clone());
+  std::unique_ptr<Block> block = std::make_unique<Block>(variableDeclaration1.clone(nullptr));
   Function f(Datatype(Type::BOOL), "main", std::move(paramVec), std::move(block));
   auto reported_count = f.countChildren();
 

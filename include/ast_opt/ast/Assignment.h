@@ -20,7 +20,7 @@ class Assignment : public AbstractStatement {
   /// Creates a deep copy of the current node
   /// Should be used only by Nodes' clone()
   /// \return a copy of the current node
-  Assignment *clone_impl() const override;
+  Assignment *clone_impl(AbstractNode* parent) const override;
 
  public:
   /// Destructor
@@ -51,7 +51,7 @@ class Assignment : public AbstractStatement {
 
   /// Deep copy of the current node
   /// \return A deep copy of the current node
-  std::unique_ptr<Assignment> clone() const;
+  std::unique_ptr<Assignment> clone(AbstractNode* parent = nullptr) const;
 
   /// Does this assignment have its target set?
   /// \return true iff the assignment has the target set

@@ -21,7 +21,7 @@ class OperatorExpression : public AbstractExpression {
   /// Creates a deep copy of the current node
   /// Should be used only by Nodes' clone()
   /// \return a copy of the current node
-  OperatorExpression *clone_impl() const override;
+  OperatorExpression *clone_impl(AbstractNode* parent) const override;
  public:
   /// Destructor
   ~OperatorExpression() override;
@@ -51,7 +51,7 @@ class OperatorExpression : public AbstractExpression {
 
   /// Deep copy of the current node
   /// \return A deep copy of the current node
-  std::unique_ptr<OperatorExpression> clone() const;
+  std::unique_ptr<OperatorExpression> clone(AbstractNode* parent = nullptr) const;
 
   /// Does the current OperatorExpression contain null operands?
   bool hasNullOperands();

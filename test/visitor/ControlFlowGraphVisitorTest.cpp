@@ -303,7 +303,7 @@ TEST(ControlFlowGraphVisitorTest, dfg_simpleReadWriteAssignment_takeOutOfScopeDe
   auto inputCode = std::string(inputChars);
   auto inputAST = Parser::parse(inputCode);
 
-  std::unordered_set<std::unique_ptr<ScopedIdentifier>, ScopedIdentifierHashFunction> identifiers;
+  std::unordered_set<std::unique_ptr<ScopedIdentifier>> identifiers;
 
   // here we define which variables were declared in some parent node of the given AST
   std::vector<std::string> predeclaredVariables = {"a"};

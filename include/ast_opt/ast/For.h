@@ -22,7 +22,7 @@ class For : public AbstractStatement {
   /// Creates a deep copy of the current node
   /// Should be used only by Nodes' clone()
   /// \return a copy of the current node
-  For *clone_impl() const override;
+  For *clone_impl(AbstractNode* parent) const override;
 
  public:
   ///Destructor
@@ -58,7 +58,7 @@ class For : public AbstractStatement {
 
   /// Deep copy of the current node
   /// \return A deep copy of the current node
-  std::unique_ptr<For> clone() const;
+  std::unique_ptr<For> clone(AbstractNode* parent = nullptr) const;
 
   /// Does this For have a non-null initializer?
   /// \return true iff the initializer is non-null

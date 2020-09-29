@@ -4,30 +4,36 @@
 
 Assignment::~Assignment() = default;
 
-Assignment::Assignment(std::unique_ptr<AbstractTarget> target,
-                       std::unique_ptr<AbstractExpression> value)
-    : target(std::move(target)), value(std::move(value)) {}
+Assignment::Assignment(std::unique_ptr<AbstractTarget> target_,
+                       std::unique_ptr<AbstractExpression> value_)
+    : target(std::move(target_)), value(std::move(value_)) {
+  target->setParent(*this);
+  value->setParent(*this);
+}
 
 Assignment::Assignment(const Assignment &other)
-    : target(other.target ? other.target->clone() : nullptr), value(other.value ? other.value->clone() : nullptr) {};
+    : target(other.target ? other.target->clone(this) : nullptr),
+      value(other.value ? other.value->clone(this) : nullptr) {};
 
 Assignment::Assignment(Assignment &&other)
 noexcept: target(std::move(other.target)), value(std::move(other.value)) {};
 
 Assignment &Assignment::operator=(const Assignment &other) {
-  target = other.target ? other.target->clone() : nullptr;
-  value = other.value ? other.value->clone() : nullptr;
+  AbstractStatement::operator=(other);
+  target = other.target ? other.target->clone(this) : nullptr;
+  value = other.value ? other.value->clone(this) : nullptr;
   return *this;
 }
 
 Assignment &Assignment::operator=(Assignment &&other) noexcept {
+  AbstractStatement::operator=(other);
   target = std::move(other.target);
   value = std::move(other.value);
   return *this;
 }
 
-std::unique_ptr<Assignment> Assignment::clone() const {
-  return std::unique_ptr<Assignment>(clone_impl());
+std::unique_ptr<Assignment> Assignment::clone(AbstractNode *parent) const {
+  return std::unique_ptr<Assignment>(clone_impl(parent));
 }
 
 bool Assignment::hasTarget() const {
@@ -81,8 +87,10 @@ void Assignment::setValue(std::unique_ptr<AbstractExpression> newValue) {
 ///////////////////////////////////////////////
 ////////// AbstractNode Interface /////////////
 ///////////////////////////////////////////////
-Assignment *Assignment::clone_impl() const {
-  return new Assignment(*this);
+Assignment *Assignment::clone_impl(AbstractNode *parent) const {
+  auto p = new Assignment(*this);
+  if(parent) {p->setParent(*parent);}
+  return p;
 }
 
 void Assignment::accept(IVisitor &v) {
@@ -103,7 +111,7 @@ AbstractNode::iterator Assignment::end() {
 
 AbstractNode::const_iterator Assignment::end() const {
   return AbstractNode::const_iterator(std::make_unique<AssignmentIteratorImpl<const AbstractNode>>(*this,
-                                                                                                           countChildren()));
+                                                                                                   countChildren()));
 }
 
 size_t Assignment::countChildren() const {

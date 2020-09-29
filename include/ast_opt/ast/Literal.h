@@ -23,8 +23,10 @@ class Literal : public AbstractExpression {
   /// Creates a deep copy of the current node
   /// Should be used only by Literal::clone()
   /// \return a copy of the current node
-  Literal *clone_impl() const override {
-    return new Literal(*this);
+  Literal *clone_impl(AbstractNode* parent) const override {
+    auto p = new Literal(*this);
+    if(parent) {p->setParent(*parent);}
+    return p;
   }
 
  public:

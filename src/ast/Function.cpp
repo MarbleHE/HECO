@@ -20,11 +20,11 @@ Function::Function(Datatype return_type,
 
 Function::Function(const Function &other) : return_type(other.return_type),
                                             identifier(other.identifier),
-                                            body(other.body->clone()) {
+                                            body(other.body->clone(this)) {
   // deep-copy the parameters, including nullptrs
   parameters.reserve(other.parameters.size());
   for (auto &p: other.parameters) {
-    parameters.emplace_back(p ? p->clone() : nullptr);
+    parameters.emplace_back(p ? p->clone(this) : nullptr);
   }
 
 }
@@ -41,9 +41,9 @@ Function &Function::operator=(const Function &other) {
   parameters.clear();
   parameters.reserve(other.parameters.size());
   for (auto &p: other.parameters) {
-    parameters.emplace_back(p ? p->clone() : nullptr);
+    parameters.emplace_back(p ? p->clone(this) : nullptr);
   }
-  body = other.body->clone();
+  body = other.body->clone(this);
   return *this;
 }
 Function &Function::operator=(Function &&other) noexcept {
@@ -53,8 +53,8 @@ Function &Function::operator=(Function &&other) noexcept {
   body = std::move(other.body);
   return *this;
 }
-std::unique_ptr<Function> Function::clone() const {
-  return std::unique_ptr<Function>(clone_impl());
+std::unique_ptr<Function> Function::clone(AbstractNode* parent) const {
+  return std::unique_ptr<Function>(clone_impl(parent));
 }
 
 Datatype Function::getReturnType() const {
@@ -91,8 +91,10 @@ Block &Function::getBody() {
 ///////////////////////////////////////////////
 ////////// AbstractNode Interface /////////////
 ///////////////////////////////////////////////
-Function *Function::clone_impl() const {
-  return new Function(*this);
+Function *Function::clone_impl(AbstractNode* parent) const {
+  auto p = new Function(*this);
+  if(parent) {p->setParent(*parent);}
+  return p;
 }
 
 void Function::accept(IVisitor &v) {

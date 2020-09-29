@@ -24,7 +24,7 @@ class BinaryExpression : public AbstractExpression {
   /// Creates a deep copy of the current node
   /// Should be used only by Nodes' clone()
   /// \return a copy of the current node
-  BinaryExpression *clone_impl() const override;
+  BinaryExpression *clone_impl(AbstractNode* parent) const override;
  public:
   /// Destructor
   ~BinaryExpression() override;
@@ -55,7 +55,7 @@ class BinaryExpression : public AbstractExpression {
 
   /// Deep copy of the current node
   /// \return A deep copy of the current node
-  std::unique_ptr<BinaryExpression> clone() const;
+  std::unique_ptr<BinaryExpression> clone(AbstractNode* parent = nullptr) const;
 
   /// Does this BinaryExpression have its left hand side set?
   /// \return true iff the assignment has the left hand side set

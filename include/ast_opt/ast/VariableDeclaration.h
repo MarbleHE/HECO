@@ -26,7 +26,7 @@ class VariableDeclaration : public AbstractStatement {
   /// Creates a deep copy of the current node
   /// Should be used only by Nodes' clone()
   /// \return a copy of the current node
-  VariableDeclaration *clone_impl() const override;
+  VariableDeclaration *clone_impl(AbstractNode* parent) const override;
  public:
   /// Destructor
   ~VariableDeclaration() override;
@@ -59,7 +59,7 @@ class VariableDeclaration : public AbstractStatement {
 
   /// Deep copy of the current node
   /// \return A deep copy of the current node
-  std::unique_ptr<VariableDeclaration> clone() const;
+  std::unique_ptr<VariableDeclaration> clone(AbstractNode* parent = nullptr) const;
 
   /// Does this declaration have its target set?
   /// \return true iff the assignment has the target set

@@ -14,7 +14,7 @@ ExpressionList::ExpressionList(const ExpressionList &other) {
   // deep-copy the expressions, including nullptrs
   expressions.reserve(other.expressions.size());
   for (auto &s: other.expressions) {
-    expressions.emplace_back(s ? s->clone() : nullptr);
+    expressions.emplace_back(s ? s->clone(this) : nullptr);
   }
 }
 
@@ -25,7 +25,7 @@ ExpressionList &ExpressionList::operator=(const ExpressionList &other) {
   // deep-copy the expressions, including nullptrs
   expressions.reserve(other.expressions.size());
   for (auto &s: other.expressions) {
-    expressions.emplace_back(s ? s->clone() : nullptr);
+    expressions.emplace_back(s ? s->clone(this) : nullptr);
   }
   return *this;
 }
@@ -33,8 +33,8 @@ ExpressionList &ExpressionList::operator=(ExpressionList &&other) noexcept {
   expressions = std::move(other.expressions);
   return *this;
 }
-std::unique_ptr<ExpressionList> ExpressionList::clone() const {
-  return std::unique_ptr<ExpressionList>(clone_impl());
+std::unique_ptr<ExpressionList> ExpressionList::clone(AbstractNode* parent) const {
+  return std::unique_ptr<ExpressionList>(clone_impl(parent));
 }
 
 bool ExpressionList::hasNullExpressions() {
@@ -81,8 +81,10 @@ void ExpressionList::removeNullExpressions() {
 ///////////////////////////////////////////////
 ////////// AbstractNode Interface /////////////
 ///////////////////////////////////////////////
-ExpressionList *ExpressionList::clone_impl() const {
-  return new ExpressionList(*this);
+ExpressionList *ExpressionList::clone_impl(AbstractNode* parent) const {
+  auto p = new ExpressionList(*this);
+  if(parent) {p->setParent(*parent);}
+  return p;
 }
 
 void ExpressionList::accept(IVisitor &v) {

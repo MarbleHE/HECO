@@ -105,16 +105,3 @@ std::string &ScopedIdentifier::getId() {
 }
 
 ScopedIdentifier::ScopedIdentifier(Scope &scope, std::string id) : scope(&scope), id(std::move(id)) {}
-
-bool ScopedIdentifier::operator==(const ScopedIdentifier &p) const {
-  ScopedIdentifierHashFunction hashScopedIdentifier;
-  return hashScopedIdentifier(*this)==hashScopedIdentifier(p);
-}
-
-size_t ScopedIdentifierHashFunction::operator()(const std::unique_ptr<ScopedIdentifier> &scopedIdentifier) const {
-  return std::hash<Scope *>()(&scopedIdentifier->getScope()) ^ std::hash<std::string>()(scopedIdentifier->getId());
-}
-
-size_t ScopedIdentifierHashFunction::operator()(const ScopedIdentifier &scopedIdentifier) const {
-  return std::hash<const Scope *>()(&scopedIdentifier.getScope()) ^ std::hash<std::string>()(scopedIdentifier.getId());
-}

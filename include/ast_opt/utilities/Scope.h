@@ -19,6 +19,18 @@ class ScopedIdentifier {
   std::string id;
 
  public:
+  ~ScopedIdentifier() = default;
+
+  ScopedIdentifier() = default;
+
+  ScopedIdentifier(const ScopedIdentifier& other) = default;
+
+  ScopedIdentifier(ScopedIdentifier&& other) = default;
+
+  ScopedIdentifier& operator=(const ScopedIdentifier& other) = default;
+
+  ScopedIdentifier& operator=(ScopedIdentifier&& other) = default;
+
   /// Creates a new ScopedIdentifier.
   /// \param scope The scope where the identifier was declared in.
   /// \param id The identifier that is defined in the given scope.
@@ -43,22 +55,13 @@ class ScopedIdentifier {
   bool operator==(const ScopedIdentifier &p) const;
 };
 
-class ScopedIdentifierHashFunction {
-  /// This function must be passed to certain STL containers if they should contain GraphNodes, for example,
-  /// std::unordered_set<std::reference_wrapper<GraphNode>, GraphNodeHashFunction> mySet.
- public:
-  size_t operator()(const std::unique_ptr<ScopedIdentifier> &scopedIdentifier) const;
-
-  size_t operator()(const ScopedIdentifier &scopedIdentifier) const;
-};
-
 class Scope {
  private:
   /// (Weak) pointer to the AST node that creates this scope
   AbstractNode *astNode;
 
   /// Set of identifiers declared in this scope
-  std::unordered_set<std::unique_ptr<ScopedIdentifier>, ScopedIdentifierHashFunction> identifiers;
+  std::unordered_set<std::unique_ptr<ScopedIdentifier>> identifiers;
 
   /// Parent scope (if it exists)
   Scope *parent = nullptr;
@@ -152,4 +155,19 @@ class Scope {
   std::string getScopeName() const;
 };
 
+namespace std {
+template<>
+struct hash<ScopedIdentifier> {
+  size_t operator()(const ScopedIdentifier &s) const {
+    return std::hash<std::string>{}(s.getScope().getScopeName() + "::" + s.getId());
+  }
+};
+
+template<>
+struct equal_to<ScopedIdentifier> {
+  bool operator()(ScopedIdentifier const &s1, ScopedIdentifier const &s2) const {
+    return s1.getId()==s2.getId() && s1.getScope().getScopeName()==s2.getScope().getScopeName();
+  }
+};
+}
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_UTILITIES_SCOPE_H_

@@ -22,7 +22,7 @@ class ExpressionList : public AbstractExpression {
   /// Creates a deep copy of the current node
   /// Should be used only by Nodes' clone()
   /// \return a copy of the current node
-  ExpressionList *clone_impl() const override;
+  ExpressionList *clone_impl(AbstractNode* parent) const override;
  public:
   /// Destructor
   ~ExpressionList() override;
@@ -51,7 +51,7 @@ class ExpressionList : public AbstractExpression {
 
   /// Deep copy of the current node
   /// \return A deep copy of the current node
-  std::unique_ptr<ExpressionList> clone() const;
+  std::unique_ptr<ExpressionList> clone(AbstractNode* parent = nullptr) const;
 
   /// Does the current ExpressionList contain null expressions?
   bool hasNullExpressions();

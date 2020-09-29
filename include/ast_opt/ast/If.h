@@ -23,7 +23,7 @@ class If : public AbstractStatement {
   /// Creates a deep copy of the current node
   /// Should be used only by Nodes' clone()
   /// \return a copy of the current node
-  If *clone_impl() const override;
+  If *clone_impl(AbstractNode* parent) const override;
 
  public:
   ///Destructor
@@ -57,7 +57,7 @@ class If : public AbstractStatement {
 
   /// Deep copy of the current node
   /// \return A deep copy of the current node
-  std::unique_ptr<If> clone() const;
+  std::unique_ptr<If> clone(AbstractNode* parent = nullptr) const;
 
   /// Does this If have a non-null condition?
   /// \return true iff the condition is non-null

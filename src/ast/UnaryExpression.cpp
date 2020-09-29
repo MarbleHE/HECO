@@ -8,14 +8,14 @@ UnaryExpression::UnaryExpression(std::unique_ptr<AbstractExpression> operand, Op
     : operand(std::move(operand)), op(op) {}
 
 UnaryExpression::UnaryExpression(const UnaryExpression &other)
-    : operand(other.operand ? other.operand->clone() : nullptr),      op(other.op) {}
+    : operand(other.operand ? other.operand->clone(this) : nullptr), op(other.op) {}
 
 UnaryExpression::UnaryExpression(UnaryExpression &&other) noexcept
     : operand(std::move(other.operand)),
       op(other.op) {}
 
 UnaryExpression &UnaryExpression::operator=(const UnaryExpression &other) {
-  operand = other.operand ? other.operand->clone() : nullptr;
+  operand = other.operand ? other.operand->clone(this) : nullptr;
   op = other.op;
   return *this;
 }
@@ -26,8 +26,8 @@ UnaryExpression &UnaryExpression::operator=(UnaryExpression &&other) noexcept {
   return *this;
 }
 
-std::unique_ptr<UnaryExpression> UnaryExpression::clone() const {
-  return std::unique_ptr<UnaryExpression>(clone_impl());
+std::unique_ptr<UnaryExpression> UnaryExpression::clone(AbstractNode *parent) const {
+  return std::unique_ptr<UnaryExpression>(clone_impl(parent));
 }
 
 bool UnaryExpression::hasOperand() const {
@@ -75,8 +75,10 @@ void UnaryExpression::setOperator(Operator newOperator) {
 ////////// AbstractNode Interface /////////////
 ///////////////////////////////////////////////
 
-UnaryExpression *UnaryExpression::clone_impl() const {
-  return new UnaryExpression(*this);
+UnaryExpression *UnaryExpression::clone_impl(AbstractNode *parent) const {
+  auto p = new UnaryExpression(*this);
+  if (parent) { p->setParent(*parent); }
+  return p;
 }
 
 void UnaryExpression::accept(IVisitor &v) {

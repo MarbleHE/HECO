@@ -22,7 +22,7 @@ Block::Block(const Block &other) {
   // deep-copy the statements, including nullptrs
   statements.reserve(other.statements.size());
   for (auto &s: other.statements) {
-    statements.emplace_back(s ? s->clone() : nullptr);
+    statements.emplace_back(s ? s->clone(this) : nullptr);
   }
 }
 
@@ -33,7 +33,7 @@ Block &Block::operator=(const Block &other) {
   // deep-copy the statements, including nullptrs
   statements.reserve(other.statements.size());
   for (auto &s: other.statements) {
-    statements.emplace_back(s ? s->clone() : nullptr);
+    statements.emplace_back(s ? s->clone(this) : nullptr);
   }
   return *this;
 }
@@ -41,8 +41,8 @@ Block &Block::operator=(Block &&other) noexcept {
   statements = std::move(other.statements);
   return *this;
 }
-std::unique_ptr<Block> Block::clone() const {
-  return std::unique_ptr<Block>(clone_impl());
+std::unique_ptr<Block> Block::clone(AbstractNode *parent) const {
+  return std::unique_ptr<Block>(clone_impl(parent));
 }
 
 bool Block::isEmpty() {
@@ -83,7 +83,7 @@ void Block::appendStatement(std::unique_ptr<AbstractStatement> statement) {
 }
 
 void Block::prependStatement(std::unique_ptr<AbstractStatement> statement) {
-  statements.insert(statements.begin(),std::move(statement));
+  statements.insert(statements.begin(), std::move(statement));
 }
 
 void Block::removeNullStatements() {
@@ -96,8 +96,10 @@ void Block::removeNullStatements() {
 ///////////////////////////////////////////////
 ////////// AbstractNode Interface /////////////
 ///////////////////////////////////////////////
-Block *Block::clone_impl() const {
-  return new Block(*this);
+Block *Block::clone_impl(AbstractNode *parent) const {
+  auto p = new Block(*this);
+  if (parent) { p->setParent(*parent); }
+  return p;
 }
 
 void Block::accept(IVisitor &v) {
@@ -141,9 +143,9 @@ size_t Block::countChildren() const {
 nlohmann::json Block::toJson() const {
   std::vector<std::reference_wrapper<const AbstractStatement>> stmts = getStatements();
   std::vector<nlohmann::json> stmtsJson;
-  for(const AbstractStatement& s: stmts) {
+  for (const AbstractStatement &s: stmts) {
     stmtsJson.push_back(s.toJson());
- }
+  }
   nlohmann::json j = {{"type", getNodeType()},
                       {"statements", stmtsJson}};
   return j;

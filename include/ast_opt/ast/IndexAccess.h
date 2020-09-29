@@ -19,7 +19,7 @@ class IndexAccess : public AbstractTarget {
   /// Creates a deep copy of the current node
   /// Should be used only by Nodes' clone()
   /// \return a copy of the current node
-  IndexAccess *clone_impl() const override;
+  IndexAccess *clone_impl(AbstractNode* parent) const override;
 
  public:
   /// Destructor
@@ -50,7 +50,7 @@ class IndexAccess : public AbstractTarget {
 
   /// Deep copy of the current node
   /// \return A deep copy of the current node
-  std::unique_ptr<IndexAccess> clone() const;
+  std::unique_ptr<IndexAccess> clone(AbstractNode* parent = nullptr) const;
 
   /// Checks if the target is set
   /// \return true iff the target is set

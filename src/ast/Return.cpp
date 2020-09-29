@@ -6,12 +6,12 @@ Return::~Return() = default;
 
 Return::Return(std::unique_ptr<AbstractExpression> value) : value(std::move(value)) {}
 
-Return::Return(const Return &other) : value(other.value ? other.value->clone() : nullptr) {}
+Return::Return(const Return &other) : value(other.value ? other.value->clone(this) : nullptr) {}
 
 Return::Return(Return &&other) noexcept: value(std::move(other.value)) {}
 
 Return &Return::operator=(const Return &other) {
-  value = other.value ? other.value->clone() : nullptr;
+  value = other.value ? other.value->clone(this) : nullptr;
   return *this;
 }
 
@@ -20,8 +20,8 @@ Return &Return::operator=(Return &&other) noexcept {
   return *this;
 }
 
-std::unique_ptr<Return> Return::clone() const {
-  return std::unique_ptr<Return>(clone_impl());
+std::unique_ptr<Return> Return::clone(AbstractNode *parent) const {
+  return std::unique_ptr<Return>(clone_impl(parent));
 }
 
 bool Return::hasValue() const {
@@ -50,8 +50,10 @@ void Return::setValue(std::unique_ptr<AbstractExpression> newValue) {
 ///////////////////////////////////////////////
 ////////// AbstractNode Interface /////////////
 ///////////////////////////////////////////////
-Return *Return::clone_impl() const {
-  return new Return(*this);
+Return *Return::clone_impl(AbstractNode *parent) const {
+  auto p = new Return(*this);
+  if (parent) { p->setParent(*parent); }
+  return p;
 }
 
 void Return::accept(IVisitor &v) {

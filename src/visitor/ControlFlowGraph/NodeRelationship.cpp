@@ -96,7 +96,7 @@ void NodeRelationship::printNodes(std::ostream &outputStream) const {
 
 bool NodeRelationship::isEqualToGraph(GraphNode &rootNodeOther) const {
   // nodes that were already visited, helps to detect and bypass graph cycles
-  std::unordered_set<std::reference_wrapper<GraphNode>, GraphNodeHashFunction> visitedNodes;
+  std::unordered_set<std::reference_wrapper<GraphNode>> visitedNodes;
 
   // define queues to be used to define nodes to process next
   std::stack<std::reference_wrapper<GraphNode>> qOne;

@@ -10,9 +10,9 @@ BinaryExpression::BinaryExpression(std::unique_ptr<AbstractExpression> left,
     : left(std::move(left)), op(op), right(std::move(right)) {}
 
 BinaryExpression::BinaryExpression(const BinaryExpression &other)
-    : left(other.left ? other.left->clone() : nullptr),
+    : left(other.left ? other.left->clone(this) : nullptr),
       op(other.op),
-      right(other.right ? other.right->clone() : nullptr) {}
+      right(other.right ? other.right->clone(this) : nullptr) {}
 
 BinaryExpression::BinaryExpression(BinaryExpression &&other) noexcept
     : left(std::move(other.left)),
@@ -20,9 +20,9 @@ BinaryExpression::BinaryExpression(BinaryExpression &&other) noexcept
       right(std::move(other.right)) {}
 
 BinaryExpression &BinaryExpression::operator=(const BinaryExpression &other) {
-  left = other.left ? other.left->clone() : nullptr;
+  left = other.left ? other.left->clone(this) : nullptr;
   op = other.op;
-  right = other.right ? other.right->clone() : nullptr;
+  right = other.right ? other.right->clone(this) : nullptr;
   return *this;
 }
 
@@ -33,8 +33,8 @@ BinaryExpression &BinaryExpression::operator=(BinaryExpression &&other) noexcept
   return *this;
 }
 
-std::unique_ptr<BinaryExpression> BinaryExpression::clone() const {
-  return std::unique_ptr<BinaryExpression>(clone_impl());
+std::unique_ptr<BinaryExpression> BinaryExpression::clone(AbstractNode* parent) const {
+  return std::unique_ptr<BinaryExpression>(clone_impl(parent));
 }
 
 bool BinaryExpression::hasLeft() const {
@@ -101,8 +101,10 @@ void BinaryExpression::setRight(std::unique_ptr<AbstractExpression> newRight) {
 ////////// AbstractNode Interface /////////////
 ///////////////////////////////////////////////
 
-BinaryExpression *BinaryExpression::clone_impl() const {
-  return new BinaryExpression(*this);
+BinaryExpression *BinaryExpression::clone_impl(AbstractNode* parent) const {
+  auto p = new BinaryExpression(*this);
+  if(parent) {p->setParent(*parent);}
+  return p;
 }
 
 void BinaryExpression::accept(IVisitor &v) {

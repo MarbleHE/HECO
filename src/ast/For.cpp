@@ -14,10 +14,10 @@ For::For(std::unique_ptr<Block> initializer,
       body(std::move(body)) {}
 
 For::For(const For &other)
-    : initializer(other.initializer ? other.initializer->clone() : nullptr),
-      condition(other.condition ? other.condition->clone() : nullptr),
-      update(other.update ? other.update->clone() : nullptr),
-      body(other.body ? other.body->clone() : nullptr) {}
+    : initializer(other.initializer ? other.initializer->clone(this) : nullptr),
+      condition(other.condition ? other.condition->clone(this) : nullptr),
+      update(other.update ? other.update->clone(this) : nullptr),
+      body(other.body ? other.body->clone(this) : nullptr) {}
 
 For::For(For &&other) noexcept
     : initializer(std::move(other.initializer)),
@@ -26,10 +26,10 @@ For::For(For &&other) noexcept
       body(std::move(other.body)) {}
 
 For &For::operator=(const For &other) {
-  initializer = other.initializer ? other.initializer->clone() : nullptr;
-  condition = other.condition ? other.condition->clone() : nullptr;
-  update = other.update ? other.update->clone() : nullptr;
-  body = other.body ? other.body->clone() : nullptr;
+  initializer = other.initializer ? other.initializer->clone(this) : nullptr;
+  condition = other.condition ? other.condition->clone(this) : nullptr;
+  update = other.update ? other.update->clone(this) : nullptr;
+  body = other.body ? other.body->clone(this) : nullptr;
   return *this;
 }
 
@@ -41,8 +41,8 @@ For &For::operator=(For &&other) noexcept {
   return *this;
 }
 
-std::unique_ptr<For> For::clone() const {
-  return std::unique_ptr<For>(clone_impl());
+std::unique_ptr<For> For::clone(AbstractNode* parent) const {
+  return std::unique_ptr<For>(clone_impl(parent));
 }
 
 bool For::hasInitializer() const {
@@ -144,8 +144,10 @@ void For::setBody(std::unique_ptr<Block> newBody) {
 ///////////////////////////////////////////////
 ////////// AbstractNode Interface /////////////
 ///////////////////////////////////////////////
-For *For::clone_impl() const {
-  return new For(*this);
+For *For::clone_impl(AbstractNode* parent) const {
+  auto p = new For(*this);
+  if(parent) {p->setParent(*parent);}
+  return p;
 }
 void For::accept(IVisitor &v) {
   v.visit(*this);

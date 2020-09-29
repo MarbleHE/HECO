@@ -51,7 +51,7 @@ class AbstractNode {
   /// and introduce a std::unique_ptr<DerivedNode> clone() method that hides AbstractNode::clone() (for use with derived class ptrs/refs)
   /// WARNING: This method should never be called outside of this clone() method for memory safety reasons
   /// \return A clone of the node including clones of all of its children.
-  [[nodiscard]] virtual AbstractNode *clone_impl() const = 0;
+  [[nodiscard]] virtual AbstractNode *clone_impl(AbstractNode *parent) const = 0;
 
  public:
   /// Virtual Destructor, force class to be abstract
@@ -61,7 +61,7 @@ class AbstractNode {
   /// Because return-type covariance does not work with smart pointers,
   /// derived classes are expected to introduce a std::unique_ptr<DerivedNode> clone() method that hides this (for use with derived class ptrs/refs)
   /// \return A clone of the node including clones of all of its children.
-  std::unique_ptr<AbstractNode> clone() const;
+  std::unique_ptr<AbstractNode> clone(AbstractNode *parent = nullptr) const;
 
   /// Compares two nodes for equality
   /// For efficiency, this currently considers only two exact same objects (i.e. same address) to be equal
@@ -242,7 +242,7 @@ class NodeIterator {
 
   /// Copy assignment
   NodeIterator &operator=(const NodeIterator &other) {
-    impl = other.impl->clone();
+    impl = other.impl->clone(nullptr);
   }
 
   /// Move assignment

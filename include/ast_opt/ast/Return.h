@@ -17,7 +17,7 @@ class Return : public AbstractStatement {
   /// Creates a deep copy of the current node
   /// Should be used only by Nodes' clone()
   /// \return a copy of the current node
-  Return *clone_impl() const override;
+  Return *clone_impl(AbstractNode* parent) const override;
  public:
   /// Destructor
   ~Return() override;
@@ -46,7 +46,7 @@ class Return : public AbstractStatement {
 
   /// Deep copy of the current node
   /// \return A deep copy of the current node
-  std::unique_ptr<Return> clone() const;
+  std::unique_ptr<Return> clone(AbstractNode* parent = nullptr) const;
 
 
   /// Does this return statement have its value set?

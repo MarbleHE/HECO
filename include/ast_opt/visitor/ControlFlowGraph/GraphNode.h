@@ -15,7 +15,7 @@ enum class VariableAccessType {
   READ = 0, WRITE = 1, READ_AND_WRITE = 2
 };
 
-typedef std::unordered_map<ScopedIdentifier, VariableAccessType, ScopedIdentifierHashFunction> VarAccessMapType;
+typedef std::unordered_map<ScopedIdentifier, VariableAccessType> VarAccessMapType;
 
 class GraphNode {
  private:
@@ -53,6 +53,12 @@ class GraphNode {
   /// \param t A reference-wrapped GraphNode object to compare this GraphNode with.
   /// \return True iff both GraphNodes are equal.
   bool operator==(const std::reference_wrapper<GraphNode> &t) const;
+
+  /// Compares GraphNodes based on the unique node ID of the associated AST node, the number of children and parents
+  /// in both the control flow graph and the data flow graph.
+  /// \param t A GraphNode object to compare this GraphNode with.
+  /// \return True iff both GraphNodes are equal.
+  bool operator==(const GraphNode &t) const;
 
   /// Retrieves the relationship (i.e., information about edges from this node) that corresponds to the given
   /// relationship type.
@@ -109,25 +115,63 @@ class GraphNode {
   [[nodiscard]] const NodeRelationship &getDataFlowGraph() const;
 };
 
-class GraphNodeHashFunction {
-  /// This function must be passed to certain STL containers if they should contain GraphNodes, for example,
-  /// std::unordered_set<std::reference_wrapper<GraphNode>, GraphNodeHashFunction> mySet.
- public:
-  size_t operator()(const std::reference_wrapper<GraphNode> &t) const {
-    return std::hash<std::string>()(t.get().getAstNode().getUniqueNodeId())
-        ^ std::hash<size_t>()(t.get().getControlFlowGraph().getChildren().size())
-        ^ std::hash<size_t>()(t.get().getControlFlowGraph().getParents().size())
-        ^ std::hash<size_t>()(t.get().getDataFlowGraph().getChildren().size())
-        ^ std::hash<size_t>()(t.get().getDataFlowGraph().getParents().size());
+
+//TODO: Specialize std::hash and std::<whatever comparator is> for GraphNode (or is it operator<?)
+
+namespace std {
+template<>
+struct hash<GraphNode> {
+  size_t operator()(const GraphNode &t) const {
+    string hash = t.getAstNode().getUniqueNodeId();
+    hash += +"|" + t.getControlFlowGraph().getChildren().size();
+    hash += +"|" + t.getControlFlowGraph().getParents().size();
+    hash += +"|" + t.getDataFlowGraph().getChildren().size();
+    hash += +"|" + t.getDataFlowGraph().getParents().size();
+    return std::hash<std::string>{}(hash);
+  };
+};
+
+template<>
+struct equal_to<GraphNode> {
+  bool operator()(GraphNode const &s1, GraphNode const &s2) const {
+    return s1 == s2;
   }
 };
 
-struct GraphNodeComparator {
-  bool
-  operator()(const std::reference_wrapper<GraphNode> &obj1, const std::reference_wrapper<GraphNode> &obj2) const {
-    GraphNodeHashFunction hf;
-    return hf(obj1)==hf(obj2);
+template<>
+struct equal_to<std::reference_wrapper<GraphNode>> {
+  bool operator()(std::reference_wrapper<GraphNode> const &s1, std::reference_wrapper<GraphNode> const &s2) const {
+    return s1.get() == s2.get();
   }
 };
+
+template<>
+struct hash<std::reference_wrapper<GraphNode>> {
+  size_t operator()(const std::reference_wrapper<GraphNode> &t) const {
+    return std::hash<GraphNode>{}(t);
+  }
+};
+
+}
+//class GraphNodeHashFunction {
+//  /// This function must be passed to certain STL containers if they should contain GraphNodes, for example,
+//  /// std::unordered_set<std::reference_wrapper<GraphNode>, GraphNodeHashFunction> mySet.
+// public:
+//  size_t operator()(const std::reference_wrapper<GraphNode> &t) const {
+//    return std::hash<std::string>()(t.get().getAstNode().getUniqueNodeId())
+//        ^ std::hash<size_t>()(t.get().getControlFlowGraph().getChildren().size())
+//        ^ std::hash<size_t>()(t.get().getControlFlowGraph().getParents().size())
+//        ^ std::hash<size_t>()(t.get().getDataFlowGraph().getChildren().size())
+//        ^ std::hash<size_t>()(t.get().getDataFlowGraph().getParents().size());
+//  }
+//};
+//
+//struct GraphNodeComparator {
+//  bool
+//  operator()(const std::reference_wrapper<GraphNode> &obj1, const std::reference_wrapper<GraphNode> &obj2) const {
+//    GraphNodeHashFunction hf;
+//    return hf(obj1)==hf(obj2);
+//  }
+//};
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_VISITOR_CONTROLFLOWGRAPH_GRAPHNODE_H_

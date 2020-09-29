@@ -28,8 +28,8 @@ TEST(IfTest, values_ValuesGivenInCtorAreRetrievable) {
   VariableDeclaration variableDeclaration1(Datatype(Type::BOOL), std::make_unique<Variable>("foo"));
   VariableDeclaration variableDeclaration2(Datatype(Type::BOOL), std::make_unique<Variable>("boo"));
   If iff(std::make_unique<LiteralBool>(true),
-         std::make_unique<Block>(variableDeclaration1.clone()),
-         std::make_unique<Block>(variableDeclaration2.clone()));
+         std::make_unique<Block>(variableDeclaration1.clone(nullptr)),
+         std::make_unique<Block>(variableDeclaration2.clone(nullptr)));
 
   ASSERT_TRUE(iff.hasCondition());
   EXPECT_EQ(getValue(iff.getCondition()), true);

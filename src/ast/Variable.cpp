@@ -6,9 +6,9 @@ Variable::~Variable() = default;
 
 Variable::Variable(std::string variableIdentifier) : identifier(std::move(variableIdentifier)) {}
 
-Variable::Variable(const Variable &other)  : identifier(other.identifier){}
+Variable::Variable(const Variable &other) : identifier(other.identifier) {}
 
-Variable::Variable(Variable &&other) noexcept : identifier(std::move(other.identifier)) {}
+Variable::Variable(Variable &&other) noexcept: identifier(std::move(other.identifier)) {}
 
 Variable &Variable::operator=(const Variable &other) {
   identifier = other.identifier;
@@ -19,8 +19,8 @@ Variable &Variable::operator=(Variable &&other) noexcept {
   return *this;
 }
 
-std::unique_ptr<Variable> Variable::clone() const {
-  return std::unique_ptr<Variable>(clone_impl());
+std::unique_ptr<Variable> Variable::clone(AbstractNode *parent) const {
+  return std::unique_ptr<Variable>(clone_impl(parent));
 }
 
 std::string Variable::getIdentifier() const {
@@ -30,8 +30,10 @@ std::string Variable::getIdentifier() const {
 ///////////////////////////////////////////////
 ////////// AbstractNode Interface /////////////
 ///////////////////////////////////////////////
-Variable *Variable::clone_impl() const {
-  return new Variable(identifier);
+Variable *Variable::clone_impl(AbstractNode *parent) const {
+  auto p = new Variable(identifier);
+  if (parent) { p->setParent(*parent); }
+  return p;
 }
 
 void Variable::accept(IVisitor &v) {

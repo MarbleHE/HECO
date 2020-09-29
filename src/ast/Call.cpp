@@ -13,7 +13,7 @@ Call::Call(const Call &other) : identifier(other.identifier) {
   // deep-copy the arguments, including nullptrs
   arguments.reserve(other.arguments.size());
   for (auto &a: other.arguments) {
-    arguments.emplace_back(a ? a->clone() : nullptr);
+    arguments.emplace_back(a ? a->clone(this) : nullptr);
   }
 
 }
@@ -26,7 +26,7 @@ Call &Call::operator=(const Call &other) {
   arguments.clear();
   arguments.reserve(other.arguments.size());
   for (auto &a: other.arguments) {
-    arguments.emplace_back(a ? a->clone() : nullptr);
+    arguments.emplace_back(a ? a->clone(this) : nullptr);
   }
   return *this;
 }
@@ -35,8 +35,8 @@ Call &Call::operator=(Call &&other) noexcept {
   arguments = std::move(other.arguments);
   return *this;
 }
-std::unique_ptr<Call> Call::clone() const {
-  return std::unique_ptr<Call>(clone_impl());
+std::unique_ptr<Call> Call::clone(AbstractNode* parent) const {
+  return std::unique_ptr<Call>(clone_impl(parent));
 }
 
 std::string Call::getIdentifier() const {
@@ -61,8 +61,10 @@ std::vector<std::reference_wrapper<AbstractExpression>> Call::getArguments() {
 ///////////////////////////////////////////////
 ////////// AbstractNode Interface /////////////
 ///////////////////////////////////////////////
-Call *Call::clone_impl() const {
-  return new Call(*this);
+Call *Call::clone_impl(AbstractNode* parent) const {
+  auto p = new Call(*this);
+  if(parent) {p->setParent(*parent);}
+  return p;
 }
 
 void Call::accept(IVisitor &v) {

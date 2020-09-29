@@ -7,8 +7,8 @@
 // C++ requires a body for the destructor even if it is declared pure virtual
 AbstractNode::~AbstractNode() = default;
 
-std::unique_ptr<AbstractNode> AbstractNode::clone() const {
-  return std::unique_ptr<AbstractNode>(clone_impl());
+std::unique_ptr<AbstractNode> AbstractNode::clone(AbstractNode *parent) const {
+  return std::unique_ptr<AbstractNode>(clone_impl(parent));
 }
 
 bool AbstractNode::operator==(const AbstractNode &other) const noexcept {

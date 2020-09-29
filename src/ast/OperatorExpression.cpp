@@ -14,7 +14,7 @@ OperatorExpression::OperatorExpression(const OperatorExpression &other) : op(oth
   // deep-copy the operands, including nullptrs
   operands.reserve(other.operands.size());
   for (auto &s: other.operands) {
-    operands.emplace_back(s ? s->clone() : nullptr);
+    operands.emplace_back(s ? s->clone(this) : nullptr);
   }
 }
 
@@ -26,7 +26,7 @@ OperatorExpression &OperatorExpression::operator=(const OperatorExpression &othe
   // deep-copy the operands, including nullptrs
   operands.reserve(other.operands.size());
   for (auto &s: other.operands) {
-    operands.emplace_back(s ? s->clone() : nullptr);
+    operands.emplace_back(s ? s->clone(this) : nullptr);
   }
   return *this;
 }
@@ -35,8 +35,8 @@ OperatorExpression &OperatorExpression::operator=(OperatorExpression &&other) no
   operands = std::move(other.operands);
   return *this;
 }
-std::unique_ptr<OperatorExpression> OperatorExpression::clone() const {
-  return std::unique_ptr<OperatorExpression>(clone_impl());
+std::unique_ptr<OperatorExpression> OperatorExpression::clone(AbstractNode* parent) const {
+  return std::unique_ptr<OperatorExpression>(clone_impl(parent));
 }
 
 bool OperatorExpression::hasNullOperands() {
@@ -95,8 +95,10 @@ void OperatorExpression::setOperator(Operator newOperator) {
 ///////////////////////////////////////////////
 ////////// AbstractNode Interface /////////////
 ///////////////////////////////////////////////
-OperatorExpression *OperatorExpression::clone_impl() const {
-  return new OperatorExpression(*this);
+OperatorExpression *OperatorExpression::clone_impl(AbstractNode* parent) const {
+  auto p = new OperatorExpression(*this);
+  if(parent) {p->setParent(*parent);}
+  return p;
 }
 
 void OperatorExpression::accept(IVisitor &v) {

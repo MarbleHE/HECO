@@ -18,7 +18,7 @@ class FunctionParameter : public AbstractTarget {
   /// Creates a deep copy of the current node
   /// Should be used only by Nodes' clone()
   /// \return a copy of the current node
-  FunctionParameter *clone_impl() const override;
+  FunctionParameter *clone_impl(AbstractNode* parent) const override;
 
  public:
   /// Destructor
@@ -49,7 +49,7 @@ class FunctionParameter : public AbstractTarget {
 
   /// Deep copy of the current node
   /// \return A deep copy of the current node
-  std::unique_ptr<FunctionParameter> clone() const;
+  std::unique_ptr<FunctionParameter> clone(AbstractNode* parent = nullptr) const;
 
   [[nodiscard]] std::string getIdentifier() const;
 
