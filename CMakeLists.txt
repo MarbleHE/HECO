@@ -108,6 +108,7 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/visitor/ControlFlowGraph/ControlFlowGraphVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/ControlFlowGraph/GraphNode.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/ControlFlowGraph/NodeRelationship.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/HashVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/PrintVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/ScopedVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/Vectorizer.cpp
@@ -153,6 +154,7 @@ set(PUBLIC_HEADERS
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/ControlFlowGraph/NodeRelationship.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/IVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/PrintVisitor.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/HashVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/ScopedVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/Vectorizer.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/SecretBranchingVisitor.h
