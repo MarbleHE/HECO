@@ -99,7 +99,7 @@ class SpecialTypeCheckingVisitor : public ScopedVisitor {
   /// \param first The first datatype.
   /// \param second The second datatype.
   /// \return True if both are compatible to be used for operands of an arithmetic expression.
-  bool areCompatibleDatatypes(Datatype &first, Datatype &second);
+  static bool areCompatibleDatatypes(Datatype &first, Datatype &second);
 };
 
 #endif //GRAPHNODE_H_SRC_VISITOR_TYPECHECKINGVISITOR_H_

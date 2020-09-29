@@ -90,6 +90,34 @@ TEST(TypeCheckingVisitorTest, binaryExpressionDatatype) { /* NOLINT */
   EXPECT_FALSE(binaryExprDatatype.getSecretFlag());
 }
 
+TEST(TypeCheckingVisitorTest, deepNestedBinaryExpressionDatatype) { /* NOLINT */
+  const char *inputChars = R""""(
+    public secret int main(int N, int M) {
+      secret int sum = (4096 - (2442 * N)) + (M * 4);
+      return sum;
+    }
+    )"""";
+  auto inputCode = std::string(inputChars);
+  std::vector<std::reference_wrapper<AbstractNode>> createdNodes;
+  auto inputAST = Parser::parse(inputCode, createdNodes);
+
+  TypeCheckingVisitor tcv;
+  inputAST->begin()->accept(tcv);
+
+  auto binExpr1 = tcv.getExpressionDatatype(dynamic_cast<AbstractExpression &>(createdNodes.at(2).get()));
+  EXPECT_EQ(binExpr1.getType(), Type::INT);
+  EXPECT_FALSE(binExpr1.getSecretFlag());
+  auto binExpr2 = tcv.getExpressionDatatype(dynamic_cast<AbstractExpression &>(createdNodes.at(3).get()));
+  EXPECT_EQ(binExpr2.getType(), Type::INT);
+  EXPECT_FALSE(binExpr2.getSecretFlag());
+  auto binExpr3 = tcv.getExpressionDatatype(dynamic_cast<AbstractExpression &>(createdNodes.at(4).get()));
+  EXPECT_EQ(binExpr3.getType(), Type::INT);
+  EXPECT_FALSE(binExpr3.getSecretFlag());
+  auto binExpr4 = tcv.getExpressionDatatype(dynamic_cast<AbstractExpression &>(createdNodes.at(5).get()));
+  EXPECT_EQ(binExpr4.getType(), Type::INT);
+  EXPECT_FALSE(binExpr4.getSecretFlag());
+}
+
 TEST(TypeCheckingVisitorTest, unaryExpressionDatatype) { /* NOLINT */
   const char *inputChars = R""""(
     public secret bool main(bool isRecommended) {
