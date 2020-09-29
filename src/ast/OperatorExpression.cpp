@@ -35,8 +35,8 @@ OperatorExpression &OperatorExpression::operator=(OperatorExpression &&other) no
   operands = std::move(other.operands);
   return *this;
 }
-std::unique_ptr<OperatorExpression> OperatorExpression::clone(AbstractNode* parent) const {
-  return std::unique_ptr<OperatorExpression>(clone_impl(parent));
+std::unique_ptr<OperatorExpression> OperatorExpression::clone(AbstractNode* parent_) const {
+  return std::unique_ptr<OperatorExpression>(clone_impl(parent_));
 }
 
 bool OperatorExpression::hasNullOperands() {
@@ -95,9 +95,9 @@ void OperatorExpression::setOperator(Operator newOperator) {
 ///////////////////////////////////////////////
 ////////// AbstractNode Interface /////////////
 ///////////////////////////////////////////////
-OperatorExpression *OperatorExpression::clone_impl(AbstractNode* parent) const {
+OperatorExpression *OperatorExpression::clone_impl(AbstractNode* parent_) const {
   auto p = new OperatorExpression(*this);
-  if(parent) {p->setParent(*parent);}
+  if(parent_) {p->setParent(*parent_);}
   return p;
 }
 

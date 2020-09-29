@@ -29,8 +29,8 @@ If &If::operator=(If &&other) noexcept {
   elseBranch = std::move(other.elseBranch);
   return *this;
 }
-std::unique_ptr<If> If::clone(AbstractNode *parent) const {
-  return std::unique_ptr<If>(clone_impl(parent));
+std::unique_ptr<If> If::clone(AbstractNode *parent_) const {
+  return std::unique_ptr<If>(clone_impl(parent_));
 }
 
 bool If::hasCondition() const {
@@ -108,9 +108,9 @@ void If::setElseBranch(std::unique_ptr<Block> &&newElseBranch) {
 ///////////////////////////////////////////////
 ////////// AbstractNode Interface /////////////
 ///////////////////////////////////////////////
-If *If::clone_impl(AbstractNode *parent) const {
+If *If::clone_impl(AbstractNode *parent_) const {
   auto p = new If(*this);
-  if (parent) { p->setParent(*parent); }
+  if (parent_) { p->setParent(*parent_); }
   return p;
 }
 

@@ -12,8 +12,8 @@ class AbstractTarget : public AbstractExpression {
   /// Because return-type covariance does not work with smart pointers,
   /// derived classes are expected to introduce a std::unique_ptr<DerivedNode> clone() method that hides this (for use with derived class ptrs/refs)
   /// \return A clone of the node including clones of all of its children.
-  inline std::unique_ptr<AbstractTarget> clone(AbstractNode* parent) const { /* intentionally hiding */
-    return std::unique_ptr<AbstractTarget>(clone_impl(parent));
+  inline std::unique_ptr<AbstractTarget> clone(AbstractNode* parent_) const { /* intentionally hiding */
+    return std::unique_ptr<AbstractTarget>(clone_impl(parent_));
   }
 
 #include "ast_opt/utilities/warning_hidingNonVirtualFunction_epilogue.h"

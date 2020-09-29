@@ -24,8 +24,8 @@ FunctionParameter &FunctionParameter::operator=(FunctionParameter &&other) noexc
   return *this;
 }
 
-std::unique_ptr<FunctionParameter> FunctionParameter::clone(AbstractNode *parent) const {
-  return std::unique_ptr<FunctionParameter>(clone_impl(parent));
+std::unique_ptr<FunctionParameter> FunctionParameter::clone(AbstractNode *parent_) const {
+  return std::unique_ptr<FunctionParameter>(clone_impl(parent_));
 }
 
 std::string FunctionParameter::getIdentifier() const {
@@ -43,9 +43,9 @@ Datatype &FunctionParameter::getParameterType() {
 ///////////////////////////////////////////////
 ////////// AbstractNode Interface /////////////
 ///////////////////////////////////////////////
-FunctionParameter *FunctionParameter::clone_impl(AbstractNode *parent) const {
+FunctionParameter *FunctionParameter::clone_impl(AbstractNode *parent_) const {
   auto p = new FunctionParameter(parameter_type, identifier);
-  if (parent) { p->setParent(*parent); }
+  if (parent_) { p->setParent(*parent_); }
   return p;
 }
 

@@ -20,8 +20,8 @@ Return &Return::operator=(Return &&other) noexcept {
   return *this;
 }
 
-std::unique_ptr<Return> Return::clone(AbstractNode *parent) const {
-  return std::unique_ptr<Return>(clone_impl(parent));
+std::unique_ptr<Return> Return::clone(AbstractNode *parent_) const {
+  return std::unique_ptr<Return>(clone_impl(parent_));
 }
 
 bool Return::hasValue() const {
@@ -50,9 +50,9 @@ void Return::setValue(std::unique_ptr<AbstractExpression> newValue) {
 ///////////////////////////////////////////////
 ////////// AbstractNode Interface /////////////
 ///////////////////////////////////////////////
-Return *Return::clone_impl(AbstractNode *parent) const {
+Return *Return::clone_impl(AbstractNode *parent_) const {
   auto p = new Return(*this);
-  if (parent) { p->setParent(*parent); }
+  if (parent_) { p->setParent(*parent_); }
   return p;
 }
 

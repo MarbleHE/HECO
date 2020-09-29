@@ -31,8 +31,8 @@ VariableDeclaration &VariableDeclaration::operator=(VariableDeclaration &&other)
   return *this;
 }
 
-std::unique_ptr<VariableDeclaration> VariableDeclaration::clone(AbstractNode* parent) const {
-  return std::unique_ptr<VariableDeclaration>(clone_impl(parent));
+std::unique_ptr<VariableDeclaration> VariableDeclaration::clone(AbstractNode* parent_) const {
+  return std::unique_ptr<VariableDeclaration>(clone_impl(parent_));
 }
 
 bool VariableDeclaration::hasTarget() const {
@@ -94,9 +94,9 @@ void VariableDeclaration::setValue(std::unique_ptr<AbstractExpression> newValue)
 ///////////////////////////////////////////////
 ////////// AbstractNode Interface /////////////
 ///////////////////////////////////////////////
-VariableDeclaration *VariableDeclaration::clone_impl(AbstractNode* parent) const {
+VariableDeclaration *VariableDeclaration::clone_impl(AbstractNode* parent_) const {
   auto p = new VariableDeclaration(*this);
-  if(parent) {p->setParent(*parent);}
+  if(parent_) {p->setParent(*parent_);}
   return p;
 }
 

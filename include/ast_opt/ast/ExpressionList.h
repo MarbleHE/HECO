@@ -22,7 +22,7 @@ class ExpressionList : public AbstractExpression {
   /// Creates a deep copy of the current node
   /// Should be used only by Nodes' clone()
   /// \return a copy of the current node
-  ExpressionList *clone_impl(AbstractNode* parent) const override;
+  ExpressionList *clone_impl(AbstractNode* parent_) const override;
  public:
   /// Destructor
   ~ExpressionList() override;

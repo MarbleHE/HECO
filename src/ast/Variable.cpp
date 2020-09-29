@@ -19,8 +19,8 @@ Variable &Variable::operator=(Variable &&other) noexcept {
   return *this;
 }
 
-std::unique_ptr<Variable> Variable::clone(AbstractNode *parent) const {
-  return std::unique_ptr<Variable>(clone_impl(parent));
+std::unique_ptr<Variable> Variable::clone(AbstractNode *parent_) const {
+  return std::unique_ptr<Variable>(clone_impl(parent_));
 }
 
 std::string Variable::getIdentifier() const {
@@ -30,9 +30,9 @@ std::string Variable::getIdentifier() const {
 ///////////////////////////////////////////////
 ////////// AbstractNode Interface /////////////
 ///////////////////////////////////////////////
-Variable *Variable::clone_impl(AbstractNode *parent) const {
+Variable *Variable::clone_impl(AbstractNode *parent_) const {
   auto p = new Variable(identifier);
-  if (parent) { p->setParent(*parent); }
+  if (parent_) { p->setParent(*parent_); }
   return p;
 }
 

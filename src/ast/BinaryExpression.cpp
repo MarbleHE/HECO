@@ -33,8 +33,8 @@ BinaryExpression &BinaryExpression::operator=(BinaryExpression &&other) noexcept
   return *this;
 }
 
-std::unique_ptr<BinaryExpression> BinaryExpression::clone(AbstractNode* parent) const {
-  return std::unique_ptr<BinaryExpression>(clone_impl(parent));
+std::unique_ptr<BinaryExpression> BinaryExpression::clone(AbstractNode* parent_) const {
+  return std::unique_ptr<BinaryExpression>(clone_impl(parent_));
 }
 
 bool BinaryExpression::hasLeft() const {
@@ -101,9 +101,9 @@ void BinaryExpression::setRight(std::unique_ptr<AbstractExpression> newRight) {
 ////////// AbstractNode Interface /////////////
 ///////////////////////////////////////////////
 
-BinaryExpression *BinaryExpression::clone_impl(AbstractNode* parent) const {
+BinaryExpression *BinaryExpression::clone_impl(AbstractNode* parent_) const {
   auto p = new BinaryExpression(*this);
-  if(parent) {p->setParent(*parent);}
+  if(parent_) {p->setParent(*parent_);}
   return p;
 }
 

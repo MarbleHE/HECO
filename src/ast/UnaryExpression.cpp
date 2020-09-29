@@ -26,8 +26,8 @@ UnaryExpression &UnaryExpression::operator=(UnaryExpression &&other) noexcept {
   return *this;
 }
 
-std::unique_ptr<UnaryExpression> UnaryExpression::clone(AbstractNode *parent) const {
-  return std::unique_ptr<UnaryExpression>(clone_impl(parent));
+std::unique_ptr<UnaryExpression> UnaryExpression::clone(AbstractNode *parent_) const {
+  return std::unique_ptr<UnaryExpression>(clone_impl(parent_));
 }
 
 bool UnaryExpression::hasOperand() const {
@@ -75,9 +75,9 @@ void UnaryExpression::setOperator(Operator newOperator) {
 ////////// AbstractNode Interface /////////////
 ///////////////////////////////////////////////
 
-UnaryExpression *UnaryExpression::clone_impl(AbstractNode *parent) const {
+UnaryExpression *UnaryExpression::clone_impl(AbstractNode *parent_) const {
   auto p = new UnaryExpression(*this);
-  if (parent) { p->setParent(*parent); }
+  if (parent_) { p->setParent(*parent_); }
   return p;
 }
 

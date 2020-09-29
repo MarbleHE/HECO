@@ -41,8 +41,8 @@ For &For::operator=(For &&other) noexcept {
   return *this;
 }
 
-std::unique_ptr<For> For::clone(AbstractNode* parent) const {
-  return std::unique_ptr<For>(clone_impl(parent));
+std::unique_ptr<For> For::clone(AbstractNode* parent_) const {
+  return std::unique_ptr<For>(clone_impl(parent_));
 }
 
 bool For::hasInitializer() const {
@@ -144,9 +144,9 @@ void For::setBody(std::unique_ptr<Block> newBody) {
 ///////////////////////////////////////////////
 ////////// AbstractNode Interface /////////////
 ///////////////////////////////////////////////
-For *For::clone_impl(AbstractNode* parent) const {
+For *For::clone_impl(AbstractNode* parent_) const {
   auto p = new For(*this);
-  if(parent) {p->setParent(*parent);}
+  if(parent_) {p->setParent(*parent_);}
   return p;
 }
 void For::accept(IVisitor &v) {

@@ -26,7 +26,7 @@ class Function : public AbstractStatement {
   /// Creates a deep copy of the current node
   /// Should be used only by Nodes' clone()
   /// \return a copy of the current node
-  Function *clone_impl(AbstractNode* parent) const override;
+  Function *clone_impl(AbstractNode* parent_) const override;
 
  public:
   /// Destructor
@@ -62,7 +62,7 @@ class Function : public AbstractStatement {
 
   /// Deep copy of the current node
   /// \return A deep copy of the current node
-  std::unique_ptr<Function> clone(AbstractNode* parent = nullptr) const;
+  std::unique_ptr<Function> clone(AbstractNode* parent_ = nullptr) const;
 
   /// Returns (a copy of) the return type of the Function
   /// \return the return type of the Function

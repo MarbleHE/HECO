@@ -35,8 +35,8 @@ Call &Call::operator=(Call &&other) noexcept {
   arguments = std::move(other.arguments);
   return *this;
 }
-std::unique_ptr<Call> Call::clone(AbstractNode* parent) const {
-  return std::unique_ptr<Call>(clone_impl(parent));
+std::unique_ptr<Call> Call::clone(AbstractNode* parent_) const {
+  return std::unique_ptr<Call>(clone_impl(parent_));
 }
 
 std::string Call::getIdentifier() const {
@@ -61,9 +61,9 @@ std::vector<std::reference_wrapper<AbstractExpression>> Call::getArguments() {
 ///////////////////////////////////////////////
 ////////// AbstractNode Interface /////////////
 ///////////////////////////////////////////////
-Call *Call::clone_impl(AbstractNode* parent) const {
+Call *Call::clone_impl(AbstractNode* parent_) const {
   auto p = new Call(*this);
-  if(parent) {p->setParent(*parent);}
+  if(parent_) {p->setParent(*parent_);}
   return p;
 }
 

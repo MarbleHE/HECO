@@ -53,8 +53,8 @@ Function &Function::operator=(Function &&other) noexcept {
   body = std::move(other.body);
   return *this;
 }
-std::unique_ptr<Function> Function::clone(AbstractNode* parent) const {
-  return std::unique_ptr<Function>(clone_impl(parent));
+std::unique_ptr<Function> Function::clone(AbstractNode* parent_) const {
+  return std::unique_ptr<Function>(clone_impl(parent_));
 }
 
 Datatype Function::getReturnType() const {
@@ -91,9 +91,9 @@ Block &Function::getBody() {
 ///////////////////////////////////////////////
 ////////// AbstractNode Interface /////////////
 ///////////////////////////////////////////////
-Function *Function::clone_impl(AbstractNode* parent) const {
+Function *Function::clone_impl(AbstractNode* parent_) const {
   auto p = new Function(*this);
-  if(parent) {p->setParent(*parent);}
+  if(parent_) {p->setParent(*parent_);}
   return p;
 }
 

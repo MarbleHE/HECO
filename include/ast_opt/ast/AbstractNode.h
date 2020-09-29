@@ -51,7 +51,7 @@ class AbstractNode {
   /// and introduce a std::unique_ptr<DerivedNode> clone() method that hides AbstractNode::clone() (for use with derived class ptrs/refs)
   /// WARNING: This method should never be called outside of this clone() method for memory safety reasons
   /// \return A clone of the node including clones of all of its children.
-  [[nodiscard]] virtual AbstractNode *clone_impl(AbstractNode *parent) const = 0;
+  [[nodiscard]] virtual AbstractNode *clone_impl(AbstractNode *parent_) const = 0;
 
  public:
   /// Virtual Destructor, force class to be abstract

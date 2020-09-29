@@ -33,8 +33,8 @@ ExpressionList &ExpressionList::operator=(ExpressionList &&other) noexcept {
   expressions = std::move(other.expressions);
   return *this;
 }
-std::unique_ptr<ExpressionList> ExpressionList::clone(AbstractNode* parent) const {
-  return std::unique_ptr<ExpressionList>(clone_impl(parent));
+std::unique_ptr<ExpressionList> ExpressionList::clone(AbstractNode* parent_) const {
+  return std::unique_ptr<ExpressionList>(clone_impl(parent_));
 }
 
 bool ExpressionList::hasNullExpressions() {
@@ -81,9 +81,9 @@ void ExpressionList::removeNullExpressions() {
 ///////////////////////////////////////////////
 ////////// AbstractNode Interface /////////////
 ///////////////////////////////////////////////
-ExpressionList *ExpressionList::clone_impl(AbstractNode* parent) const {
+ExpressionList *ExpressionList::clone_impl(AbstractNode* parent_) const {
   auto p = new ExpressionList(*this);
-  if(parent) {p->setParent(*parent);}
+  if(parent_) {p->setParent(*parent_);}
   return p;
 }
 

@@ -21,7 +21,7 @@ class OperatorExpression : public AbstractExpression {
   /// Creates a deep copy of the current node
   /// Should be used only by Nodes' clone()
   /// \return a copy of the current node
-  OperatorExpression *clone_impl(AbstractNode* parent) const override;
+  OperatorExpression *clone_impl(AbstractNode* parent_) const override;
  public:
   /// Destructor
   ~OperatorExpression() override;

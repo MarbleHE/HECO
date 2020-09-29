@@ -23,8 +23,8 @@ IndexAccess &IndexAccess::operator=(IndexAccess &&other) noexcept {
   index = std::move(other.index);
   return *this;
 }
-std::unique_ptr<IndexAccess> IndexAccess::clone(AbstractNode *parent) const {
-  return std::unique_ptr<IndexAccess>(clone_impl(parent));
+std::unique_ptr<IndexAccess> IndexAccess::clone(AbstractNode *parent_) const {
+  return std::unique_ptr<IndexAccess>(clone_impl(parent_));
 }
 
 bool IndexAccess::hasTarget() const {
@@ -78,9 +78,9 @@ void IndexAccess::setIndex(std::unique_ptr<AbstractExpression> &&newIndex) {
 ///////////////////////////////////////////////
 ////////// AbstractNode Interface /////////////
 ///////////////////////////////////////////////
-IndexAccess *IndexAccess::clone_impl(AbstractNode *parent) const {
+IndexAccess *IndexAccess::clone_impl(AbstractNode *parent_) const {
   auto p = new IndexAccess(*this);
-  if (parent) { p->setParent(*parent); }
+  if (parent_) { p->setParent(*parent_); }
   return p;
 }
 

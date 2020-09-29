@@ -41,8 +41,8 @@ Block &Block::operator=(Block &&other) noexcept {
   statements = std::move(other.statements);
   return *this;
 }
-std::unique_ptr<Block> Block::clone(AbstractNode *parent) const {
-  return std::unique_ptr<Block>(clone_impl(parent));
+std::unique_ptr<Block> Block::clone(AbstractNode *parent_) const {
+  return std::unique_ptr<Block>(clone_impl(parent_));
 }
 
 bool Block::isEmpty() {
@@ -96,9 +96,9 @@ void Block::removeNullStatements() {
 ///////////////////////////////////////////////
 ////////// AbstractNode Interface /////////////
 ///////////////////////////////////////////////
-Block *Block::clone_impl(AbstractNode *parent) const {
+Block *Block::clone_impl(AbstractNode *parent_) const {
   auto p = new Block(*this);
-  if (parent) { p->setParent(*parent); }
+  if (parent_) { p->setParent(*parent_); }
   return p;
 }
 

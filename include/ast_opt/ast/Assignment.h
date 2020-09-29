@@ -20,7 +20,7 @@ class Assignment : public AbstractStatement {
   /// Creates a deep copy of the current node
   /// Should be used only by Nodes' clone()
   /// \return a copy of the current node
-  Assignment *clone_impl(AbstractNode* parent) const override;
+  Assignment *clone_impl(AbstractNode* parent_) const override;
 
  public:
   /// Destructor

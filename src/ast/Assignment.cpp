@@ -32,8 +32,8 @@ Assignment &Assignment::operator=(Assignment &&other) noexcept {
   return *this;
 }
 
-std::unique_ptr<Assignment> Assignment::clone(AbstractNode *parent) const {
-  return std::unique_ptr<Assignment>(clone_impl(parent));
+std::unique_ptr<Assignment> Assignment::clone(AbstractNode *parent_) const {
+  return std::unique_ptr<Assignment>(clone_impl(parent_));
 }
 
 bool Assignment::hasTarget() const {
@@ -87,9 +87,9 @@ void Assignment::setValue(std::unique_ptr<AbstractExpression> newValue) {
 ///////////////////////////////////////////////
 ////////// AbstractNode Interface /////////////
 ///////////////////////////////////////////////
-Assignment *Assignment::clone_impl(AbstractNode *parent) const {
+Assignment *Assignment::clone_impl(AbstractNode *parent_) const {
   auto p = new Assignment(*this);
-  if(parent) {p->setParent(*parent);}
+  if(parent_) {p->setParent(*parent_);}
   return p;
 }
 
