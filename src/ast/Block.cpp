@@ -58,6 +58,10 @@ bool Block::hasNullStatements() {
   return count!=0;
 }
 
+std::vector<std::unique_ptr<AbstractStatement>> &Block::getStatementPointers() {
+  return statements;
+}
+
 std::vector<std::reference_wrapper<AbstractStatement>> Block::getStatements() {
   std::vector<std::reference_wrapper<AbstractStatement>> r;
   for (auto &s: statements) {

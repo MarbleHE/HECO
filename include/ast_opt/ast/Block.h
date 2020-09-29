@@ -61,6 +61,11 @@ class Block : public AbstractStatement {
   /// Does the current Block contain null statements?
   bool hasNullStatements();
 
+  /// Get (references to) the vector of statements
+  /// Used for lower-level interactions (e.g. removing statements by nulling them)
+  /// \return (references to) the vector of statements
+  std::vector<std::unique_ptr<AbstractStatement>>& getStatementPointers();
+
   /// Get (a vector of references to) all (non-null) statements
   /// Since std::vector cannot directly handle references,
   /// a wrapper is used, but this can be used exactly like
