@@ -125,10 +125,38 @@ TEST(TypeCheckingVisitorTest, returnTypeNotMatchingSpecifiedType) { /* NOLINT */
   EXPECT_THROW(inputAST->begin()->accept(tcv), std::runtime_error);
 }
 
+TEST(TypeCheckingVisitorTest, returnTypeNonVoidButNoReturnStatementGiven) { /* NOLINT */
+  const char *inputChars = R""""(
+    public int main(bool isRecommended) {
+      secret bool b = !isRecommended;
+    }
+    )"""";
+  auto inputCode = std::string(inputChars);
+  std::vector<std::reference_wrapper<AbstractNode>> createdNodes;
+  auto inputAST = Parser::parse(inputCode, createdNodes);
+
+  TypeCheckingVisitor tcv;
+  EXPECT_THROW(inputAST->begin()->accept(tcv), std::runtime_error);
+}
+
 TEST(TypeCheckingVisitorTest, returnTypeNotMatchingSpecifiedSecretness) { /* NOLINT */
   const char *inputChars = R""""(
     public bool main(bool isRecommended) {
       secret bool b = !isRecommended;
+      return b;
+    }
+    )"""";
+  auto inputCode = std::string(inputChars);
+  std::vector<std::reference_wrapper<AbstractNode>> createdNodes;
+  auto inputAST = Parser::parse(inputCode, createdNodes);
+
+  TypeCheckingVisitor tcv;
+  EXPECT_THROW(inputAST->begin()->accept(tcv), std::runtime_error);
+}
+
+TEST(TypeCheckingVisitorTest, returnTypeVoidButReturningValue) { /* NOLINT */
+  const char *inputChars = R""""(
+    public void main(bool isRecommended) {
       return b;
     }
     )"""";

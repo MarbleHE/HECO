@@ -162,10 +162,16 @@ void SpecialTypeCheckingVisitor::visit(For &elem) {
 void SpecialTypeCheckingVisitor::visit(Function &elem) {
   ScopedVisitor::visit(elem);
 
+  if (elem.getReturnType().getType()!=Type::VOID && returnExpressionTypes.empty()) {
+    throw std::runtime_error("Return type specified (i.e., not void) but no return value found.");
+  }
+
   // check if type and secretness of Return expression matches the one specified in the function's signature
   auto specifiedReturnDatatype = elem.getReturnType();
   for (auto &[t, literalValue] : returnExpressionTypes) {
-    if (t.getType()!=specifiedReturnDatatype.getType()) {
+    if (elem.getReturnType().getType()==Type::VOID) {
+      throw std::runtime_error("Return value found in program although function's signature is declared as 'void'.");
+    } else if (t.getType()!=specifiedReturnDatatype.getType()) {
       throw std::runtime_error("Type specified in function's signature does not match type of return statement.");
     } else if (!literalValue && t.getSecretFlag()!=specifiedReturnDatatype.getSecretFlag()) {
       throw std::runtime_error(
@@ -173,11 +179,6 @@ void SpecialTypeCheckingVisitor::visit(Function &elem) {
           "Note that if any of the involved operands of an expression are secret, the whole expression becomes secret.");
     }
   }
-
-  // TODO: add check:
-  //  - void but return statement
-  //  - non-void but no return statement
-
 
   returnExpressionTypes.clear();
 
