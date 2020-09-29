@@ -306,8 +306,9 @@ TEST(ControlFlowGraphVisitorTest, dfg_simpleReadWriteAssignment_takeOutOfScopeDe
   std::unordered_set<std::unique_ptr<ScopedIdentifier>> identifiers;
 
   // here we define which variables were declared in some parent node of the given AST
-  std::vector<std::string> predeclaredVariables = {"a"};
-  ControlFlowGraphVisitor cfgv(predeclaredVariables);
+  ControlFlowGraphVisitor cfgv;
+  cfgv.setRootScope(std::make_unique<Scope>(*inputAST));
+  cfgv.getRootScope().addIdentifier("a");
   inputAST->begin()->accept(cfgv);
 
   auto accessedVariables = getGraphNodeByChildrenIdxPath(cfgv.getRootNode(), {0}).getAccessedVariables();
@@ -357,8 +358,9 @@ TEST(ControlFlowGraphVisitorTest, dfg_ifElseStatement) { /* NOLINT */
   auto inputCode = std::string(inputChars);
   auto inputAST = Parser::parse(inputCode);
 
-  std::vector<std::string> predeclaredVars = {"c", "a"};
-  ControlFlowGraphVisitor cfgv(predeclaredVars);
+  ControlFlowGraphVisitor cfgv;
+  cfgv.setRootScope(std::make_unique<Scope>(*inputAST));
+  cfgv.getRootScope().addIdentifiers({"c", "a"});
   inputAST->begin()->accept(cfgv);
 
   auto accessedVariables_ifStatement = getGraphNodeByChildrenIdxPath(cfgv.getRootNode(), {0}).getAccessedVariables();
