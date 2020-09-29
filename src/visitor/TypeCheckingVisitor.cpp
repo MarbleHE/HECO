@@ -16,10 +16,6 @@
 
 #include "ast_opt/ast/Literal.h"
 
-bool isCompatible(Datatype &first, Datatype &second) {
-  return (first.getType()==second.getType());
-}
-
 // ================================================
 // AST EXPRESSIONS
 // ================================================
@@ -34,18 +30,19 @@ void SpecialTypeCheckingVisitor::visit(BinaryExpression &elem) {
   auto rhsType = typesVisitedNodes.top();
   typesVisitedNodes.pop();
 
-  if (!isCompatible(lhsType, rhsType))
+  if (!areCompatibleDatatypes(lhsType, rhsType))
     throw std::runtime_error("Cannot apply operator (" + elem.getOperator().toString() + ") on operands of type "
                                  + enumToString(lhsType.getType()) + " and "
                                  + enumToString(rhsType.getType()) + ".");
 
-  // store the datatype of the result: this is the type of this expression
+  // store the datatype of the result: this is the result type of this expression
   expressionsDatatypeMap.insert_or_assign(elem.getUniqueNodeId(), lhsType);
 
   // check if any of the operands is secret -> result will be secret too
   auto resultIsSecret = (lhsType.getSecretFlag() || rhsType.getSecretFlag());
   secretTaintedNodes.insert_or_assign(elem.getUniqueNodeId(), resultIsSecret);
 
+  // save the type of this binary expression, required in case that this is nested
   typesVisitedNodes.push(Datatype(lhsType.getType(), resultIsSecret));
 }
 
@@ -56,11 +53,11 @@ void SpecialTypeCheckingVisitor::visit(Call &elem) {
 void SpecialTypeCheckingVisitor::visit(ExpressionList &elem) {
   ScopedVisitor::visit(elem);
 
+  // check that the type of each expression in the expression list is the same
   auto firstExpression = typesVisitedNodes.top();
   typesVisitedNodes.pop();
   bool isSecret = firstExpression.getSecretFlag();
   Type expectedType = firstExpression.getType();
-
   while (!typesVisitedNodes.empty()) {
     auto curNode = typesVisitedNodes.top();
     Type curType = curNode.getType();
@@ -71,6 +68,7 @@ void SpecialTypeCheckingVisitor::visit(ExpressionList &elem) {
     }
   }
 
+  // push data type to parent as this can be a nested expression (e.g., {1, 2, 3} * var)
   typesVisitedNodes.push(Datatype(expectedType, isSecret));
 }
 
@@ -82,9 +80,10 @@ void SpecialTypeCheckingVisitor::visit(FunctionParameter &elem) {
 
 void SpecialTypeCheckingVisitor::visit(IndexAccess &elem) {
   size_t initial_size = typesVisitedNodes.size();
-  // an index access must always evaluate to an integer, i.e., all involved variables/literals must be integers too
+
   ScopedVisitor::visit(elem);
 
+  // an index access must always evaluate to an integer, i.e., all involved variables/literals must be integers too
   while (typesVisitedNodes.size() > initial_size) {
     auto currentType = typesVisitedNodes.top();
     typesVisitedNodes.pop();
@@ -230,6 +229,9 @@ void SpecialTypeCheckingVisitor::visit(VariableDeclaration &elem) {
 // OTHER METHODS
 // ================================================
 
+bool SpecialTypeCheckingVisitor::areCompatibleDatatypes(Datatype &first, Datatype &second) {
+  return (first.getType()==second.getType());
+}
 
 Datatype SpecialTypeCheckingVisitor::getVariableDatatype(ScopedIdentifier &scopedIdentifier) {
   return variablesDatatypeMap.at(scopedIdentifier);

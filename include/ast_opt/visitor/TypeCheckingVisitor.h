@@ -14,22 +14,30 @@ typedef Visitor<SpecialTypeCheckingVisitor> TypeCheckingVisitor;
 
 class SpecialTypeCheckingVisitor : public ScopedVisitor {
  private:
-  /// a temporary structure to keep track of data types visited in children of a statement
+  /// A temporary structure to keep track of data types visited in children of a statement.
+  /// This stack should be empty after leaving a statement, otherwise it indicates that the statement did not properly
+  /// clean up the stack.
   std::stack<Datatype> typesVisitedNodes;
 
-  /// Datatype:
-  /// bool: whether the returned expression is a literal, in that case we do not need to check the secretness
+  /// A vector to keep track of the data types (pair.first) that the expressions of the return statements have. It
+  /// tracks whether the returned expression is a literal (pair.second) because in that case we do not need to check
+  /// if the secretness specified in the function's signature is the same as the literal's type because we do not
+  /// support defining secret constants.
   std::vector<std::pair<Datatype, bool>> returnExpressionTypes;
 
-  /// data types of the variables derived from their declaration
+  /// Data types of the variables. This is derived from the variable's declaration.
   std::unordered_map<ScopedIdentifier,
                      Datatype> variablesDatatypeMap;
 
-  /// data types of the expression nodes
+  /// Data types of all expression nodes in the program.
   std::unordered_map<std::string, Datatype> expressionsDatatypeMap;
 
-  /// stores for each node in the AST (identified by its unique node ID), if the node is tainted secret
+  /// Stores for each node in the AST (identified by its unique node ID), if the node is tainted secret. This is the
+  /// case if any of the operands in the node's expression are secret.
   std::unordered_map<std::string, bool> secretTaintedNodes;
+
+  /// Internal function to check whether stack was cleaned up properly before leaving statement.
+  void postStatementAction();
 
  public:
   void visit(BinaryExpression &elem) override;
@@ -72,13 +80,26 @@ class SpecialTypeCheckingVisitor : public ScopedVisitor {
 
   void visit(Assignment &elem) override;
 
+  /// Returns the datatype of a given abstract expression.
+  /// \param scopedIdentifier The scoped identifier for which the datatype should be determined.
+  /// \return (A copy of) the datatype associated with the given scoped identifier.
   Datatype getVariableDatatype(ScopedIdentifier &scopedIdentifier);
 
+  /// Gets the datatype of a given expression.
+  /// \param expression The expression for which the datatype should be determined.
+  /// \return (A copy of) the datatype associated with the given abstract expression node.
   Datatype getExpressionDatatype(AbstractExpression &expression);
 
+  /// Checks whether a given node is secret tainted..
+  /// \param uniqueNodeId The unique node ID of the node to be checked.
+  /// \return (A bool) indicating whether the given node is secret tainted or not.
   bool isSecretTaintedNode(std::string &uniqueNodeId);
 
-  void postStatementAction();
+  /// Checks whether both given data types are compatible to be used by the operands of an arithemtic expression.
+  /// \param first The first datatype.
+  /// \param second The second datatype.
+  /// \return True if both are compatible to be used for operands of an arithmetic expression.
+  bool areCompatibleDatatypes(Datatype &first, Datatype &second);
 };
 
 #endif //GRAPHNODE_H_SRC_VISITOR_TYPECHECKINGVISITOR_H_
