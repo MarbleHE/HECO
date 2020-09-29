@@ -5,6 +5,7 @@
 #include "gtest/gtest.h"
 
 TEST(VectorizerTest, trivialVectors) {
+  GTEST_SKIP();
   const char *inputChars = R""""(
     x[0] = y[0];
     x[1] = y[1];
@@ -61,6 +62,7 @@ TEST(VectorizerTest, trivialVectors) {
 // Computation Plan: x = old_x (or rather, ref/ptr to the old expression);
 
 TEST(VectorizerTest, trivialInterleavedVectors) {
+  GTEST_SKIP();
   const char *inputChars = R""""(
     x[0] = y[0];
     a[0] = b[0];
@@ -136,6 +138,7 @@ TEST(VectorizerTest,singleOutlierVector) {
 // If trying to update with non-transparent operation (for now, any different one) causes emit of sum!
 // At the end: Emit OperatorExpression, which introduces rotations
 TEST(VectorizerTest,sumStatementsPowerOfTwo) {
+  GTEST_SKIP();
   //If sum is vector valued, this would mean something very different
   // Specifically, it would mean that in each step, x[i] is added to each slot.
   // TODO: Therefore, we need to pass in some additional information to the Vectorizer
@@ -175,6 +178,7 @@ TEST(VectorizerTest,sumStatementsPowerOfTwo) {
 }
 
 TEST(VectorizerTest,sumStatementsGeneral) {
+  GTEST_SKIP();
   const char *inputChars = R""""(
     sum = sum + x[0];
     sum = sum + x[1];
@@ -219,6 +223,7 @@ TEST(VectorizerTest,sumStatementsGeneral) {
 // Main challenge: need to later output batching "map" from this. easiest if all variables are "free", i.e. not constrained.
 // More difficult in general, lots of option, could also encode things twice, but now optimality no longer obvious.
 TEST(VectorizerTest,cardioTest) {
+  GTEST_SKIP();
   //TODO: With variable substition, this would look very different!
   //TODO: After running the If-Rewriter, we would have to run CTES across the Block again (this is an example why)
   const char *inputChars = R""""(
@@ -300,7 +305,7 @@ TEST(VectorizerTest,cardioTest) {
 
 // Simplified test case without "-90" and with same comparison operators in all conditions
 TEST(VectorizerTest,cardioTestSimplified) {
-
+  GTEST_SKIP();
   // Before Variable Substitution:
   //  risk = risk +++ (man && (age > 50));
   //  risk = risk +++ (woman && (age > 40));
@@ -363,6 +368,7 @@ TEST(VectorizerTest,cardioTestSimplified) {
 
 //TODO: Add a test case for matrix-vector-product
 TEST(VectorizerTest,matrixVectorTest) {
+  GTEST_SKIP();
   // Pre-CTES Program:
   // for (int i = 0; i < 3; i++) {
   //  for (int j = 0; j < 3; j++) {
@@ -426,6 +432,7 @@ TEST(VectorizerTest,matrixVectorTest) {
 //TODO: Write lots of tests for batchability detection logic and think about algorithm shortcuts for "boring case" like sum.
 
 TEST(VectorizerTest, batchableExpression) {
+  GTEST_SKIP();
   const char *inputChars = R""""(
     x = (a*b) + (c*d);
     )"""";
@@ -475,6 +482,7 @@ TEST(VectorizerTest, batchableExpression) {
 //                   __input2__ = __input2__ * __input2__
 //                   __input2__ = __input2__ + rotate(__input2__,1);
 TEST(VectorizerTest, batchableExpressionVectorizable) {
+  GTEST_SKIP();
   const char *inputChars = R""""(
     x[0] = (a*b) + (c*d);
     x[1] = (e*f) + (g*h);
