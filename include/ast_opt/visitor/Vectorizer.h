@@ -167,6 +167,8 @@ class SpecialVectorizer : public ScopedVisitor {
   /// Creates a Vectorizer without any pre-existing information
   SpecialVectorizer() = default;
 
+  void visit(Block& elem) override;
+
   void visit(Assignment& elem) override;
 
   std::string getAuxiliaryInformation();

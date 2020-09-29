@@ -1,5 +1,6 @@
 #include "ast_opt/ast/AbstractTarget.h"
 #include "ast_opt/ast/Assignment.h"
+#include "ast_opt/ast/Block.h"
 #include "ast_opt/ast/IndexAccess.h"
 #include "ast_opt/ast/Literal.h"
 #include "ast_opt/ast/Variable.h"
@@ -44,6 +45,13 @@ void ComplexValue::merge(ComplexValue value) {
 ////////////////////////////////////////////
 ////          SpecialVectorizer         ////
 ////////////////////////////////////////////
+void SpecialVectorizer::visit(Block &elem) {
+  ScopedVisitor::enterScope(elem);
+  ScopedVisitor::visitChildren(elem);
+  // TODO: Emit all relevant assignments again!
+  ScopedVisitor::exitScope();
+}
+
 void SpecialVectorizer::visit(Assignment &elem) {
 
   /// current scope
@@ -81,6 +89,9 @@ void SpecialVectorizer::visit(Assignment &elem) {
   } else {
       precomputedValues.push_back(cv);
   }
+
+  // Now delete this assignment
+  elem.deleteInParent();
 }
 
 std::string SpecialVectorizer::getAuxiliaryInformation() {
