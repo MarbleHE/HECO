@@ -1,5 +1,6 @@
 #include "ast_opt/visitor/TypeCheckingVisitor.h"
 #include "ast_opt/ast/BinaryExpression.h"
+#include "ast_opt/ast/UnaryExpression.h"
 #include "ast_opt/ast/ExpressionList.h"
 #include "ast_opt/ast/Block.h"
 #include "ast_opt/ast/Call.h"
@@ -12,6 +13,8 @@
 #include "ast_opt/ast/Variable.h"
 #include "ast_opt/ast/Variable.h"
 #include "ast_opt/ast/IndexAccess.h"
+
+#include "ast_opt/ast/Literal.h"
 
 bool isCompatible(Datatype &first, Datatype &second) {
   return (first.getType()==second.getType());
@@ -42,6 +45,8 @@ void SpecialTypeCheckingVisitor::visit(BinaryExpression &elem) {
   // check if any of the operands is secret -> result will be secret too
   auto resultIsSecret = (lhsType.getSecretFlag() || rhsType.getSecretFlag());
   secretTaintedNodes.insert_or_assign(elem.getUniqueNodeId(), resultIsSecret);
+
+  typesVisitedNodes.push(Datatype(lhsType.getType(), resultIsSecret));
 }
 
 void SpecialTypeCheckingVisitor::visit(Call &elem) {
@@ -121,6 +126,14 @@ void SpecialTypeCheckingVisitor::visit(LiteralString &elem) {
 
 void SpecialTypeCheckingVisitor::visit(UnaryExpression &elem) {
   ScopedVisitor::visit(elem);
+
+  auto operandType = typesVisitedNodes.top();
+  typesVisitedNodes.pop();
+
+  expressionsDatatypeMap.insert_or_assign(elem.getUniqueNodeId(), operandType);
+  typesVisitedNodes.push(operandType);
+
+  secretTaintedNodes.insert_or_assign(elem.getUniqueNodeId(), operandType.getSecretFlag());
 }
 
 void SpecialTypeCheckingVisitor::visit(Variable &elem) {
@@ -148,16 +161,51 @@ void SpecialTypeCheckingVisitor::visit(For &elem) {
 
 void SpecialTypeCheckingVisitor::visit(Function &elem) {
   ScopedVisitor::visit(elem);
+
+  // check if type and secretness of Return expression matches the one specified in the function's signature
+  auto specifiedReturnDatatype = elem.getReturnType();
+  for (auto &[t, literalValue] : returnExpressionTypes) {
+    if (t.getType()!=specifiedReturnDatatype.getType()) {
+      throw std::runtime_error("Type specified in function's signature does not match type of return statement.");
+    } else if (!literalValue && t.getSecretFlag()!=specifiedReturnDatatype.getSecretFlag()) {
+      throw std::runtime_error(
+          "Secretness specified in function's signature does not match secretness of return statement. "
+          "Note that if any of the involved operands of an expression are secret, the whole expression becomes secret.");
+    }
+  }
+
+  // TODO: add check:
+  //  - void but return statement
+  //  - non-void but no return statement
+
+
+  returnExpressionTypes.clear();
+
   postStatementAction();
 }
 
 void SpecialTypeCheckingVisitor::visit(If &elem) {
-  ScopedVisitor::visit(elem);
+  elem.getCondition().accept(*this);
+  typesVisitedNodes.pop();
+
+  elem.getThenBranch().accept(*this);
+
+  if (elem.hasElseBranch()) {
+    elem.getElseBranch().accept(*this);
+  }
+
   postStatementAction();
 }
 
 void SpecialTypeCheckingVisitor::visit(Return &elem) {
   ScopedVisitor::visit(elem);
+
+  if (elem.hasValue()) {
+    auto typeReturnExpr = typesVisitedNodes.top();
+    typesVisitedNodes.pop();
+    returnExpressionTypes.emplace_back(typeReturnExpr, isLiteral(elem.getValue()));
+  }
+
   postStatementAction();
 }
 
@@ -170,7 +218,9 @@ void SpecialTypeCheckingVisitor::visit(VariableDeclaration &elem) {
   ScopedVisitor::visit(elem);
   ScopedIdentifier scopedIdentifier = getCurrentScope().resolveIdentifier(elem.getTarget().getIdentifier());
   variablesDatatypeMap.insert_or_assign(scopedIdentifier, elem.getDatatype());
-  if (elem.hasValue()) typesVisitedNodes.pop();
+  if (elem.hasValue()) {
+    typesVisitedNodes.pop();
+  }
   postStatementAction();
 }
 
@@ -180,7 +230,7 @@ void SpecialTypeCheckingVisitor::visit(VariableDeclaration &elem) {
 // ================================================
 
 
-Datatype &SpecialTypeCheckingVisitor::getVariableDatatype(ScopedIdentifier &scopedIdentifier) {
+Datatype SpecialTypeCheckingVisitor::getVariableDatatype(ScopedIdentifier &scopedIdentifier) {
   return variablesDatatypeMap.at(scopedIdentifier);
 }
 
@@ -189,5 +239,19 @@ void SpecialTypeCheckingVisitor::postStatementAction() {
     throw std::runtime_error("Temporary stack was not cleaned up prior leaving statement! "
                              "Did you forget to pop() after retrieving element using top()?");
   }
+}
+
+Datatype SpecialTypeCheckingVisitor::getExpressionDatatype(AbstractExpression &expression) {
+  if (expressionsDatatypeMap.count(expression.getUniqueNodeId()) > 0) {
+    return expressionsDatatypeMap.at(expression.getUniqueNodeId());
+  }
+  throw std::runtime_error("Cannot get datatype of expression (" + expression.getUniqueNodeId() + ").");
+}
+
+bool SpecialTypeCheckingVisitor::isSecretTaintedNode(std::string &uniqueNodeId) {
+  if (secretTaintedNodes.count(uniqueNodeId)==0) {
+    throw std::runtime_error("");
+  }
+  return secretTaintedNodes.at(uniqueNodeId);
 }
 

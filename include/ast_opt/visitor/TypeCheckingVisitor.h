@@ -7,6 +7,7 @@
 
 // Forward declaration
 class SpecialTypeCheckingVisitor;
+class AbstractExpression;
 
 /// ControlFlowGraphVisitor uses the Visitor<T> template to allow specifying default behaviour
 typedef Visitor<SpecialTypeCheckingVisitor> TypeCheckingVisitor;
@@ -16,9 +17,13 @@ class SpecialTypeCheckingVisitor : public ScopedVisitor {
   /// a temporary structure to keep track of data types visited in children of a statement
   std::stack<Datatype> typesVisitedNodes;
 
+  /// Datatype:
+  /// bool: whether the returned expression is a literal, in that case we do not need to check the secretness
+  std::vector<std::pair<Datatype, bool>> returnExpressionTypes;
+
   /// data types of the variables derived from their declaration
   std::unordered_map<ScopedIdentifier,
-                     std::reference_wrapper<Datatype>,
+                     Datatype,
                      ScopedIdentifierHashFunction> variablesDatatypeMap;
 
   /// data types of the expression nodes
@@ -29,6 +34,10 @@ class SpecialTypeCheckingVisitor : public ScopedVisitor {
 
  public:
   void visit(BinaryExpression &elem) override;
+
+  void visit(Call &elem) override;
+
+  void visit(ExpressionList &elem) override;
 
   void visit(FunctionParameter &elem) override;
 
@@ -52,7 +61,23 @@ class SpecialTypeCheckingVisitor : public ScopedVisitor {
 
   void visit(Variable &elem) override;
 
-  Datatype &getVariableDatatype(ScopedIdentifier &scopedIdentifier);
+  void visit(Block &elem) override;
+
+  void visit(For &elem) override;
+
+  void visit(Function &elem) override;
+
+  void visit(If &elem) override;
+
+  void visit(Return &elem) override;
+
+  void visit(Assignment &elem) override;
+
+  Datatype getVariableDatatype(ScopedIdentifier &scopedIdentifier);
+
+  Datatype getExpressionDatatype(AbstractExpression &expression);
+
+  bool isSecretTaintedNode(std::string &uniqueNodeId);
 
   void postStatementAction();
 };
