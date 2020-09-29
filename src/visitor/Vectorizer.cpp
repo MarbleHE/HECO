@@ -24,7 +24,7 @@ void BatchingConstraint::setIdentifier(const std::string &identifier_) {
   identifier = identifier_;
 }
 bool BatchingConstraint::hasTargetSlot() const {
-  return getSlot() != -1;
+  return getSlot()!=-1;
 }
 
 ////////////////////////////////////////////
@@ -34,7 +34,7 @@ ComplexValue::ComplexValue(AbstractExpression &) {
   //TODO: Implement ComplexValue Ctor
 }
 
-BatchingConstraint& ComplexValue::getBatchingConstraint() {
+BatchingConstraint &ComplexValue::getBatchingConstraint() {
   //TODO: Implement ComplexValue::getBatchingConstraint
   return batchingConstraint;
 }
@@ -45,9 +45,14 @@ void ComplexValue::merge(ComplexValue value) {
 ////////////////////////////////////////////
 ////          SpecialVectorizer         ////
 ////////////////////////////////////////////
+
 void SpecialVectorizer::visit(Block &elem) {
   ScopedVisitor::enterScope(elem);
-  ScopedVisitor::visitChildren(elem);
+  for (auto &p: elem.getStatementPointers()) {
+    p->accept(*this);
+    if (delete_flag) { p.reset(); }
+    delete_flag = false;
+  }
   // TODO: Emit all relevant assignments again!
   ScopedVisitor::exitScope();
 }
@@ -58,23 +63,23 @@ void SpecialVectorizer::visit(Assignment &elem) {
   auto &scope = getCurrentScope();
 
   /// target of the assignment
-  AbstractTarget& target = elem.getTarget();
+  AbstractTarget &target = elem.getTarget();
   ScopedIdentifier targetID(scope, ""); // Dummy, since no default ctor
   BatchingConstraint batchingConstraint(-1, "");
 
   // We currently assume that the target has either the form <Variable> or <Variable>[<LiteralInt>]
-  if (target.countChildren() == 0) {
-    auto variable = dynamic_cast<Variable&>(target);
+  if (target.countChildren()==0) {
+    auto variable = dynamic_cast<Variable &>(target);
     auto id = variable.getIdentifier();
     targetID = scope.resolveIdentifier(id);
-    if(constraints.find(targetID) != constraints.end()) {
+    if (constraints.find(targetID)!=constraints.end()) {
       auto t = constraints.find(targetID)->second.getSlot();
       batchingConstraint.setSlot(t);
     }
   } else {
-    auto indexAccess = dynamic_cast<IndexAccess&>(target);
-    auto variable = dynamic_cast<Variable&>(indexAccess.getTarget());
-    auto index = dynamic_cast<LiteralInt&>(indexAccess.getIndex());
+    auto indexAccess = dynamic_cast<IndexAccess &>(target);
+    auto variable = dynamic_cast<Variable &>(indexAccess.getTarget());
+    auto index = dynamic_cast<LiteralInt &>(indexAccess.getIndex());
     targetID = scope.resolveIdentifier(variable.getIdentifier());
     batchingConstraint.setSlot(index.getValue());
   }
@@ -84,14 +89,14 @@ void SpecialVectorizer::visit(Assignment &elem) {
 
   /// Combine the execution plans, if they already exist
   auto it = variableValues.find(targetID);
-  if( it != variableValues.end()) {
-      it->second.merge(cv);
+  if (it!=variableValues.end()) {
+    it->second.merge(cv);
   } else {
-      precomputedValues.push_back(cv);
+    precomputedValues.push_back(cv);
   }
 
   // Now delete this assignment
-  elem.deleteInParent();
+  delete_flag = true;
 }
 
 std::string SpecialVectorizer::getAuxiliaryInformation() {
@@ -99,7 +104,7 @@ std::string SpecialVectorizer::getAuxiliaryInformation() {
   return "NOT IMPLEMENTED YET";
 }
 
-ComplexValue SpecialVectorizer::batchExpression(AbstractExpression & exp, BatchingConstraint) {
+ComplexValue SpecialVectorizer::batchExpression(AbstractExpression &exp, BatchingConstraint) {
   //TODO: IMPLEMENT
   return ComplexValue(exp);
 }

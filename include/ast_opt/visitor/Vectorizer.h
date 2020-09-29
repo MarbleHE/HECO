@@ -186,6 +186,9 @@ class SpecialVectorizer : public ScopedVisitor {
 
   ComplexValue batchExpression(AbstractExpression &expression, BatchingConstraint batchingConstraint);
 
+  /// Ugly hack to signal if an AbstractStatement just visited needs to be deleted.
+  bool delete_flag = false;
+
  public:
 
   /// Creates a Vectorizer without any pre-existing information
