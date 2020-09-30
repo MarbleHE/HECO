@@ -22,6 +22,10 @@ class SpecialSecretBranchingVisitor : public ScopedVisitor {
 
   SecretTaintedNodesMap &secretTaintedNodesMap;
 
+  bool visitedStatementMarkedForDeletion = false;
+
+  std::vector<std::unique_ptr<AbstractStatement>> replacementStatements;
+
  public:
 
   explicit SpecialSecretBranchingVisitor(SecretTaintedNodesMap &taintedNodesMap);
@@ -41,6 +45,9 @@ class SpecialSecretBranchingVisitor : public ScopedVisitor {
   void visit(VariableDeclaration &node) override;
 
   void visit(FunctionParameter &node) override;
+
+  void visit(Block &node) override;
+
 };
 
 #endif //GRAPHNODE_H_SRC_VISITOR_SECRETBRANCHINGVISITOR_H_
