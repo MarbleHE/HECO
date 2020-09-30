@@ -4,6 +4,7 @@
 #include "ast_opt/ast/Assignment.h"
 #include "ast_opt/ast/BinaryExpression.h"
 #include "ast_opt/ast/Block.h"
+#include "ast_opt/ast/ExpressionList.h"
 #include "ast_opt/ast/IndexAccess.h"
 #include "ast_opt/ast/Literal.h"
 #include "ast_opt/ast/OperatorExpression.h"
@@ -226,46 +227,79 @@ class ComputationOperator {
 };
 
 /// Invariant (not enforced by class): if computationOperator::batched == true, then children.size() must be 2
-class ComputationNode {
+class TreeNode {
  private:
-  ComputationNode *parent = nullptr;
-  std::vector<std::unique_ptr<ComputationNode>> children{};
-  size_t expected_number_of_children = 0;
+  TreeNode *parent = nullptr;
+  std::vector<std::unique_ptr<TreeNode>> children;
+
+ public:
+  virtual ~TreeNode() = default;
+  TreeNode() = default;
+  TreeNode(TreeNode *parent, std::vector<std::unique_ptr<TreeNode>> &&children) :
+      parent(parent), children(std::move(children)) {}
+  TreeNode(const TreeNode &other) = delete;
+  TreeNode(TreeNode &&other) noexcept = default;
+  TreeNode &operator=(const TreeNode &other) = delete;
+  TreeNode &operator=(TreeNode &&other) = default;
+
+  void addChild(std::unique_ptr<TreeNode> &&newChild) {
+    newChild->parent = this;
+    for (auto &p : children) {
+      if (p==nullptr) {
+        p = std::move(newChild);
+        return;
+      }
+    }
+    throw std::runtime_error("Did not find empty slot to insert child into.");
+  }
+  TreeNode *getParent() { return parent; }
+  std::vector<std::unique_ptr<TreeNode>> &getChildren() { return children; }
+  [[nodiscard]] size_t getExpectedNumberOfChildren() const { return children.size(); }
+};
+
+class ComputationNode : public TreeNode {
+ private:
   ComputationOperator
       computationOperator = ComputationOperator(Operator(ArithmeticOp::FHE_ADDITION)); //Dummy since no () ctor
  public:
+  ~ComputationNode() override = default;
   ComputationNode() = default;
-  ComputationNode(ComputationNode *parent,
-                  std::vector<std::unique_ptr<ComputationNode>> &&children,
-                  size_t expected_number_of_children,
-                  ComputationOperator computationOperator) :
-      parent(parent),
-      children(std::move(children)),
-      expected_number_of_children(expected_number_of_children),
-      computationOperator(computationOperator) {}
+  ComputationNode(TreeNode *parent,
+                  std::vector<std::unique_ptr<TreeNode>> &&children,
+                  ComputationOperator computationOperator) : TreeNode(parent, std::move(children)),
+                                                             computationOperator(computationOperator) {}
   ComputationNode(const ComputationNode &other) = delete;
   ComputationNode(ComputationNode &&other) noexcept = default;
   ComputationNode &operator=(const ComputationNode &other) = delete;
   ComputationNode &operator=(ComputationNode &&other) = default;
 
-  ComputationNode *getParent() { return parent; }
-  std::vector<std::unique_ptr<ComputationNode>> &getChildren() { return children; }
   ComputationOperator &getComputationOperator() { return computationOperator; }
-  [[nodiscard]] size_t getExpectedNumberOfChildren() const { return expected_number_of_children; }
-  void addChild(std::unique_ptr<ComputationNode> &&newChild) {
-    children.emplace_back(std::move(newChild));
-  }
 };
 
-bool operator==(const std::unique_ptr<ComputationNode>& sp, const ComputationNode* const p) { return sp.get() == p;}
+class ValueNode : public TreeNode {
+ private:
+  AbstractNode *value;
+ public:
+  ~ValueNode() override = default;
+  ValueNode() = default;
+  ValueNode(TreeNode *parent, std::vector<std::unique_ptr<TreeNode>> &&children, AbstractNode &value) :
+      TreeNode(parent, std::move(children)),
+      value(&value) {}
+  ValueNode(const ValueNode &other) = delete;
+  ValueNode(ValueNode &&other) noexcept = default;
+  ValueNode &operator=(const ValueNode &other) = delete;
+  ValueNode &operator=(ValueNode &&other) = default;
+
+};
+bool operator==(const std::unique_ptr<TreeNode> &sp, const TreeNode *const p) { return sp.get()==p; }
 
 ComplexValue SpecialVectorizer::batchExpression(AbstractExpression &expr, BatchingConstraint) {
 
   /// Holds nodes of the current level
   std::deque<std::reference_wrapper<AbstractNode>> currentLevelNodes({expr});
 
-  std::unique_ptr<ComputationNode> computationTree = nullptr;
-  ComputationNode *curTreeNode = nullptr;
+  std::unique_ptr<TreeNode> computationTree = nullptr;
+  TreeNode *curTreeNode = nullptr;
 
   /// Each iteration of the loop corresponds to handling one level of the expression tree
   while (!currentLevelNodes.empty()) {
@@ -275,24 +309,60 @@ ComplexValue SpecialVectorizer::batchExpression(AbstractExpression &expr, Batchi
     currentLevelNodes.pop_front();
 
     // Handle the node itself
-    std::unique_ptr<ComputationNode> computationNode;
+    std::unique_ptr<TreeNode> treeNode = nullptr;
+
+    if (auto binaryExpression = dynamic_cast<BinaryExpression *>(&curAbstractNode)) {
+      std::vector<std::unique_ptr<TreeNode>> children;
+      children.emplace_back(nullptr);
+      children.emplace_back(nullptr);
+      treeNode = std::make_unique<ComputationNode>(
+          nullptr,
+          std::move(children),
+          ComputationOperator(binaryExpression->getOperator(), true));
+    } else if (auto operatorExpression = dynamic_cast<OperatorExpression *>(&curAbstractNode)) {
+      std::vector<std::unique_ptr<TreeNode>> children(operatorExpression->countChildren());
+      treeNode = std::make_unique<ComputationNode>(
+          nullptr,
+          std::move(children),
+          ComputationOperator(operatorExpression->getOperator(), true));
+      //TODO: If not a power-of-two, fill the rest of the children with the neutral element for the operator
+    } else if (auto variable = dynamic_cast<Variable *>(&curAbstractNode)) {
+      //TODO: Handle batchingConstraints if they exist
+      std::vector<std::unique_ptr<TreeNode>> children;
+      treeNode = std::make_unique<ValueNode>(nullptr, std::move(children), *variable);
+    } else if (auto indexAccess = dynamic_cast<IndexAccess *>(&curAbstractNode)) {
+      //TODO: Handle batchingConstraints
+      std::vector<std::unique_ptr<TreeNode>> children;
+      treeNode = std::make_unique<ValueNode>(nullptr, std::move(children), *indexAccess);
+    } else if (isLiteral(curAbstractNode)) {
+      std::vector<std::unique_ptr<TreeNode>> children;
+      treeNode = std::make_unique<ValueNode>(nullptr, std::move(children), curAbstractNode);
+    } else if (auto expressionList = dynamic_cast<ExpressionList *>(&curAbstractNode)) {
+      //TODO: Implement ExpressionList batching
+      throw std::runtime_error("ExpressionLists currently not supported in expression batching.");
+    } else if (auto unaryExpression = dynamic_cast<UnaryExpression *>(&curAbstractNode)) {
+      //TODO: Implement UnaryExpression batching
+      throw std::runtime_error("Unary Expressions currently not supported in expression batching.");
+    } else {
+      throw std::runtime_error("Unsupported type of AST node: " + std::string(typeid(curAbstractNode).name()));
+    }
 
     // TODO: Actually handle the AST node and create computationNode from it
 
 
     // Update Tree
-    if(!computationTree) {
-      computationTree = std::move(computationNode);
+    if (!computationTree) {
+      computationTree = std::move(treeNode);
       curTreeNode = computationTree.get();
     } else if (curTreeNode->getChildren().size() > curTreeNode->getExpectedNumberOfChildren()) {
-      curTreeNode->addChild(std::move(computationNode));
+      curTreeNode->addChild(std::move(treeNode));
     } else {
-      std::vector<std::unique_ptr<ComputationNode>> &v = curTreeNode->getParent()->getChildren();
-      auto it = std::find(v.begin(),v.end(),curTreeNode);
+      std::vector<std::unique_ptr<TreeNode>> &v = curTreeNode->getParent()->getChildren();
+      auto it = std::find(v.begin(), v.end(), curTreeNode);
 
-      while(curTreeNode->getChildren().size() >= curTreeNode->getExpectedNumberOfChildren()) {
+      while (curTreeNode->getChildren().size() >= curTreeNode->getExpectedNumberOfChildren()) {
         // Advance to next element
-        if(it == v.end()) {
+        if (it==v.end()) {
           throw std::runtime_error("Cannot add Node to ComputationTree since tree ended unexpectedly.");
         } else {
           ++it;
@@ -300,7 +370,7 @@ ComplexValue SpecialVectorizer::batchExpression(AbstractExpression &expr, Batchi
         }
       }
 
-      curTreeNode->addChild(std::move(computationNode));
+      curTreeNode->addChild(std::move(treeNode));
     }
 
     // enqueue children of curNode to process next
@@ -308,14 +378,15 @@ ComplexValue SpecialVectorizer::batchExpression(AbstractExpression &expr, Batchi
     nextLevelNodes.insert(nextLevelNodes.end(), curAbstractNode.begin(), curAbstractNode.end());
 
     // Are we at the end of a level?
-    if(currentLevelNodes.empty()) {
+    if (currentLevelNodes.empty()) {
       currentLevelNodes = std::move(nextLevelNodes);
       //TODO: Update curTreeNode somehow?
     }
 
   } // END WHILE
 
-
+  //TODO: Implement conversion of Tree to ComplexValue!
+  return ComplexValue(expr);
   /// OLD CODE:
 
 //  // Determine Number of children?
@@ -356,6 +427,5 @@ ComplexValue SpecialVectorizer::batchExpression(AbstractExpression &expr, Batchi
   // at subtreeRoot is considered as batchable
   //bool isBatchable = qReading.empty() && qWriting.empty();
 
-  //TODO: IMPLEMENT
-  return ComplexValue(expr);
+
 }
