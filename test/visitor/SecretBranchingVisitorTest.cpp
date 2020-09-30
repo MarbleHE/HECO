@@ -22,7 +22,7 @@ TEST(SecretBranchingVisitorTest, nonSecretVariable_ifStmt_noRemovalExpected) { /
   // get binary expression node (N < 5)
   SecretTaintedNodesMap secretTaintedNodesMap;
   secretTaintedNodesMap.insert_or_assign(
-      createdNodes.at(3).get().getUniqueNodeId(), true);
+      createdNodes.at(3).get().getUniqueNodeId(), false);
 
   SecretBranchingVisitor sbv(secretTaintedNodesMap);
   inputAst->accept(sbv);
@@ -65,7 +65,7 @@ TEST(SecretBranchingVisitorTest, DISABLED_secretVariable_ifElseBranch_rewritingE
   EXPECT_TRUE(compareAST(*inputAst, *expectedAst));
 }
 
-TEST(SecretBranchingVisitorTest, DISABLED_secretVariable_thenBranchOnly_rewritingExpected) { /* NOLINT */
+TEST(SecretBranchingVisitorTest, secretVariable_thenBranchOnly_rewritingExpected) { /* NOLINT */
   const char *inputChars = R""""(
     public int main(secret int N) {
       int sum = 2442;
@@ -81,7 +81,7 @@ TEST(SecretBranchingVisitorTest, DISABLED_secretVariable_thenBranchOnly_rewritin
   const char *expectedChars = R""""(
     public int main(secret int N) {
       int sum = 2442;
-      sum = (N<5)***(sum-N) +++ 1---(N<5) *** 2442;
+      sum = ((N<5)***(sum-N) +++ ((1---(N<5)) *** 2442));
       return sum;
     }
     )"""";
