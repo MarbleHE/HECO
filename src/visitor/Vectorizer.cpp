@@ -212,75 +212,145 @@ bool isBatchingCompatible(AbstractNode &baseNode, AbstractNode &curNode) {
   }
 }
 
+////////////////////////////////////////////
+////         ExpressionBatching         ////
+////////////////////////////////////////////
+
+class ComputationOperator {
+ private:
+  Operator op;
+  bool batched = false;
+ public:
+  ComputationOperator(const Operator &op, bool batched = false) : op(op), batched(batched) {}
+
+};
+
+/// Invariant (not enforced by class): if computationOperator::batched == true, then children.size() must be 2
+class ComputationNode {
+ private:
+  ComputationNode *parent = nullptr;
+  std::vector<std::unique_ptr<ComputationNode>> children{};
+  size_t expected_number_of_children = 0;
+  ComputationOperator
+      computationOperator = ComputationOperator(Operator(ArithmeticOp::FHE_ADDITION)); //Dummy since no () ctor
+ public:
+  ComputationNode() = default;
+  ComputationNode(ComputationNode *parent,
+                  std::vector<std::unique_ptr<ComputationNode>> &&children,
+                  size_t expected_number_of_children,
+                  ComputationOperator computationOperator) :
+      parent(parent),
+      children(std::move(children)),
+      expected_number_of_children(expected_number_of_children),
+      computationOperator(computationOperator) {}
+  ComputationNode(const ComputationNode &other) = delete;
+  ComputationNode(ComputationNode &&other) noexcept = default;
+  ComputationNode &operator=(const ComputationNode &other) = delete;
+  ComputationNode &operator=(ComputationNode &&other) = default;
+
+  ComputationNode *getParent() { return parent; }
+  std::vector<std::unique_ptr<ComputationNode>> &getChildren() { return children; }
+  ComputationOperator &getComputationOperator() { return computationOperator; }
+  [[nodiscard]] size_t getExpectedNumberOfChildren() const { return expected_number_of_children; }
+  void addChild(std::unique_ptr<ComputationNode> &&newChild) {
+    children.emplace_back(std::move(newChild));
+  }
+};
+
+bool operator==(const std::unique_ptr<ComputationNode>& sp, const ComputationNode* const p) { return sp.get() == p;}
+
 ComplexValue SpecialVectorizer::batchExpression(AbstractExpression &expr, BatchingConstraint) {
 
-//  std::queue<std::reference_wrapper<AbstractExpression>> processingQ({expr});
-//  while (!processingQ.empty()) {
-//    auto &curNode = processingQ.front().get();
-//    processingQ.pop();
-//    std::cout << "Checking subtree rooted at " << curNode.getUniqueNodeId()
-//              << " (#children: " << curNode.countChildren() << ")" << std::endl;
-//    // returns the largest batchable subtree that was found
-//    if (isBatchableSubtree(curNode)) return ComplexValue(curNode);
-//    // otherwise we need to continue our search by checking all OperatorExprs on the next level
-//    for (auto c : curNode->getChildrenNonNull()) { if (dynamic_cast<OperatorExpr *>(c)) processingQ.push(c); }
-//  }
-//  // nullptr = no batchable subtree found
-//  return nullptr;
+  /// Holds nodes of the current level
+  std::deque<std::reference_wrapper<AbstractNode>> currentLevelNodes({expr});
 
+  std::unique_ptr<ComputationNode> computationTree = nullptr;
+  ComputationNode *curTreeNode = nullptr;
 
-  std::vector<std::reference_wrapper<AbstractNode>> unprocessedNodes({expr});
-
-  int numChildrenPerNode = -1;
-
-  while (!unprocessedNodes.empty()) {
+  /// Each iteration of the loop corresponds to handling one level of the expression tree
+  while (!currentLevelNodes.empty()) {
 
     // Get the next node to process
-    auto &curNode = unprocessedNodes.front().get();
-    unprocessedNodes.erase(unprocessedNodes.begin());
+    auto &curAbstractNode = currentLevelNodes.front().get();
+    currentLevelNodes.pop_front();
 
-    // enqueue children to process next
-    std::vector<std::reference_wrapper<AbstractNode>> childNodes;
-    childNodes.insert(childNodes.end(), curNode.begin(), curNode.end());
+    // Handle the node itself
+    std::unique_ptr<ComputationNode> computationNode;
 
-    // Determine
-    if (numChildrenPerNode==-1) {
-      numChildrenPerNode = (int) curNode.countChildren();
-    } else if (numChildrenPerNode!=curNode.countChildren()) {
-      // a subtree is batching incompatible if the children have a different number of operands
-      //TODO: Implement non-symmetric batching
-      throw std::runtime_error("Batching of expressions with different number of children is not yet supported.");
-    }
+    // TODO: Actually handle the AST node and create computationNode from it
 
 
-    // procedure that compares batching compatibility of nodes; if there are no more nodes that need to be processed
-    // (unprocessedNodes.empty()) and there is no next level that needs to be checked (qWriting.empty()) then there is
-    // nothing to check and this subtree is considered as batching-compatible
-    if (unprocessedNodes.empty()) {
+    // Update Tree
+    if(!computationTree) {
+      computationTree = std::move(computationNode);
+      curTreeNode = computationTree.get();
+    } else if (curTreeNode->getChildren().size() > curTreeNode->getExpectedNumberOfChildren()) {
+      curTreeNode->addChild(std::move(computationNode));
+    } else {
+      std::vector<std::unique_ptr<ComputationNode>> &v = curTreeNode->getParent()->getChildren();
+      auto it = std::find(v.begin(),v.end(),curTreeNode);
 
-      // Check that all children are batching compatible to each other
-      AbstractNode &baseNode = childNodes.front().get();
-      for (auto nodeIt = std::next(childNodes.begin()); nodeIt!=childNodes.end(); ++nodeIt) {
-        // check batching compatibility
-        // TODO: Change this to actually construct the new expression as we go!
-        if (!isBatchingCompatible(baseNode, *nodeIt)) {
-          // if we detected a batching incompatibility, we can stop any further testing
-          // TODO: Implement Support for this case!
-          throw std::runtime_error("Rewriting of batching-incompatible expressions is not yet supported.");
-        } else if (isTransparentNode(*nodeIt)) {
-          // as we allow max. 1 transparent node per level, we need to make sure to compare any further transparent
-          // nodes with the one we found here
-          baseNode = *nodeIt;
+      while(curTreeNode->getChildren().size() >= curTreeNode->getExpectedNumberOfChildren()) {
+        // Advance to next element
+        if(it == v.end()) {
+          throw std::runtime_error("Cannot add Node to ComputationTree since tree ended unexpectedly.");
+        } else {
+          ++it;
+          curTreeNode = it->get();
         }
-      } // end: for
+      }
 
-      // move elements from childNodes to unprocessedNodes: childNodes is empty afterwards
-      unprocessedNodes = std::move(childNodes);
-
-      // reset #children counter back to default value
-      numChildrenPerNode = -1;
+      curTreeNode->addChild(std::move(computationNode));
     }
-  } // end: while
+
+    // enqueue children of curNode to process next
+    std::deque<std::reference_wrapper<AbstractNode>> nextLevelNodes;
+    nextLevelNodes.insert(nextLevelNodes.end(), curAbstractNode.begin(), curAbstractNode.end());
+
+    // Are we at the end of a level?
+    if(currentLevelNodes.empty()) {
+      currentLevelNodes = std::move(nextLevelNodes);
+      //TODO: Update curTreeNode somehow?
+    }
+
+  } // END WHILE
+
+
+  /// OLD CODE:
+
+//  // Determine Number of children?
+//  if (numChildrenPerNode==-1) {
+//    numChildrenPerNode = (int) curNode.countChildren();
+//  } else if (numChildrenPerNode!=curNode.countChildren()) {
+//    // a subtree is batching incompatible if the children have a different number of operands
+//    //TODO: Implement non-symmetric batching
+//    throw std::runtime_error("Batching of expressions with different number of children is not yet supported.");
+//  }
+//
+//  if (unprocessedNodes.empty()) {
+//
+//    // Check that all children are batching compatible to each other
+//    AbstractNode &baseNode = childNodes.front().get();
+//    for (auto nodeIt = std::next(childNodes.begin()); nodeIt!=childNodes.end(); ++nodeIt) {
+//      // check batching compatibility
+//      // TODO: Change this to actually construct the new expression as we go!
+//      if (!isBatchingCompatible(baseNode, *nodeIt)) {
+//        // if we detected a batching incompatibility, we can stop any further testing
+//        // TODO: Implement Support for this case!
+//        throw std::runtime_error("Rewriting of batching-incompatible expressions is not yet supported.");
+//      } else if (isTransparentNode(*nodeIt)) {
+//        // as we allow max. 1 transparent node per level, we need to make sure to compare any further transparent
+//        // nodes with the one we found here
+//        baseNode = *nodeIt;
+//      }
+//    } // end: for
+//
+//    // move elements from childNodes to unprocessedNodes: childNodes is empty afterwards
+//    unprocessedNodes = std::move(childNodes);
+//
+//    // reset #children counter back to default value
+//    numChildrenPerNode = -1;
+//  }
 
   // if we processed all nodes and did not abort in between due to failed batching compatibility, the node rooted
   // at subtreeRoot is considered as batchable
