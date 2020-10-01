@@ -30,7 +30,7 @@ TEST(SecretBranchingVisitorTest, nonSecretVariable_ifStmt_noRemovalExpected) { /
   EXPECT_TRUE(compareAST(*inputAst, *expectedAst));
 }
 
-TEST(SecretBranchingVisitorTest, DISABLED_secretVariable_ifElseBranch_rewritingExpected) { /* NOLINT */
+TEST(SecretBranchingVisitorTest, secretVariable_ifElseBranch_rewritingExpected) { /* NOLINT */
   const char *inputChars = R""""(
     public int main(secret int N) {
       int sum = 2442;
@@ -48,7 +48,7 @@ TEST(SecretBranchingVisitorTest, DISABLED_secretVariable_ifElseBranch_rewritingE
   const char *expectedChars = R""""(
     public int main(secret int N) {
       int sum = 2442;
-      sum = (N<5)***(sum-N) +++ 1---(N<5) *** (sum+1000);
+      sum = ((N<5)***(sum-N)) +++ ((1---(N<5)) *** (sum+1000));
       return sum;
     }
     )"""";
@@ -81,7 +81,7 @@ TEST(SecretBranchingVisitorTest, secretVariable_thenBranchOnly_rewritingExpected
   const char *expectedChars = R""""(
     public int main(secret int N) {
       int sum = 2442;
-      sum = ((N<5)***(sum-N) +++ ((1---(N<5)) *** 2442));
+      sum = ((N<5)***(sum-N)) +++ ((1---(N<5)) *** 2442);
       return sum;
     }
     )"""";
@@ -152,7 +152,7 @@ TEST(SecretBranchingVisitorTest, secretVariable_ifStmt_unsupportedBodyReturn_noR
   EXPECT_TRUE(compareAST(*inputAst, *expectedAst));
 }
 
-TEST(SecretBranchingVisitorTest, DISABLED_secretVariable_ifBranch_uninitializedVar_rewritingExpected) { /* NOLINT */
+TEST(SecretBranchingVisitorTest, secretVariable_ifBranch_uninitializedVar_rewritingExpected) { /* NOLINT */
   const char *inputChars = R""""(
     public int main(secret int N) {
       int sum;
@@ -168,7 +168,7 @@ TEST(SecretBranchingVisitorTest, DISABLED_secretVariable_ifBranch_uninitializedV
   const char *expectedChars = R""""(
     public int main(secret int N) {
       int sum;
-      sum = (N>25)***(4225*N) +++ 1---(N>25) *** 0;
+      sum = ((N>25)***(4225*N)) +++ ((1---(N>25)) *** sum);
       return sum;
     }
     )"""";
