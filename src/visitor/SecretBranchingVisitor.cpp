@@ -15,13 +15,6 @@
 #include "ast_opt/ast/If.h"
 #include "ast_opt/ast/Block.h"
 
-void SpecialSecretBranchingVisitor::addIdentifiers(Scope &scope) {
-  std::for_each(expressionValues.begin(), expressionValues.end(),
-                [&](std::pair<ScopedIdentifier, AbstractExpression *> key) {
-                  scope.addIdentifier(key.first.getId());
-                });
-}
-
 VariableValueMap SpecialSecretBranchingVisitor::getChangedVariables(const VariableValueMap &baseMap,
                                                                     const VariableValueMap &changedMap) {
   VariableValueMap result;
@@ -128,7 +121,7 @@ void SpecialSecretBranchingVisitor::visit(If &node) {
             std::move(abstractExp->clone(nullptr)),
             std::move(oldValue));
       } else {
-        // case where variable is not changed in the Else branch
+        // case where variable was declared in the Then branch only
         assignm = createDependentAssignment(
             std::make_unique<Variable>(scopedIdentifer.getId()),
             std::move(node.getCondition().clone(nullptr)),
@@ -217,7 +210,7 @@ void SpecialSecretBranchingVisitor::visit(Return &node) {
 
 void SpecialSecretBranchingVisitor::visit(Assignment &node) {
   // this visitor only considers assignments to plain variables as we cannot rewrite dependent assignments involving
-  // arrays yet
+  // array accesses yet
   if (auto lhsVariable = dynamic_cast<Variable *>(&node.getTarget())) {
     auto scopedIdentifier = getCurrentScope().resolveIdentifier(lhsVariable->getIdentifier());
     expressionValues.insert_or_assign(scopedIdentifier, &node.getValue());
