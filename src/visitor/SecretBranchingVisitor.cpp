@@ -128,6 +128,7 @@ void SpecialSecretBranchingVisitor::visit(If &node) {
             std::move(abstractExp->clone(nullptr)),
             nullptr);
       }
+      expressionValues.insert_or_assign(scopedIdentifer, &assignm->getValue());
       replacementStatements.push_back(std::move(assignm));
     }
   } else { // node has Then and Else branch
@@ -155,6 +156,7 @@ void SpecialSecretBranchingVisitor::visit(If &node) {
             std::move(abstractExp->clone(nullptr)),
             nullptr);
       }
+      expressionValues.insert_or_assign(scopedIdentifer, &assignm->getValue());
       replacementStatements.push_back(std::move(assignm));
     }
     // now go through the list of all variables that were only changed in the Else branch
@@ -164,6 +166,7 @@ void SpecialSecretBranchingVisitor::visit(If &node) {
           std::move(node.getCondition().clone(nullptr)),
           nullptr,
           std::move(abstractExp->clone(nullptr)));
+      expressionValues.insert_or_assign(scopedIdentifer, &assignm->getValue());
       replacementStatements.push_back(std::move(assignm));
     }
   }
