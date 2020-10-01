@@ -70,7 +70,6 @@ std::unique_ptr<Assignment> createDependentAssignment(
 }
 
 void SpecialSecretBranchingVisitor::visit(If &node) {
-  std::cout << "Visiting " << node.getUniqueNodeId() << std::endl;
   unsupportedBodyStatementVisited = false;
 
   VariableValueMap exprValuesBefore = expressionValues;
@@ -117,7 +116,8 @@ void SpecialSecretBranchingVisitor::visit(If &node) {
       std::unique_ptr<Assignment> assignm;
       // check if the variable had a value before entering the Then branch, or if it is a new variable declaration
       if (exprValuesBefore.count(scopedIdentifer)!=0) {
-        // if the variable was declared but not
+        // oldValue is either a concrete AbstractExpression or, if the variable was declared but not initialized, we
+        // simply assign the variable to itself (e.g., sum = c*trueValue + (1-c)*sum)
         std::unique_ptr<AbstractExpression> oldValue =
             (exprValuesBefore.at(scopedIdentifer)==nullptr)
             ? std::make_unique<Variable>(scopedIdentifer.getId())
@@ -128,6 +128,7 @@ void SpecialSecretBranchingVisitor::visit(If &node) {
             std::move(abstractExp->clone(nullptr)),
             std::move(oldValue));
       } else {
+        // case where variable is not changed in the Else branch
         assignm = createDependentAssignment(
             std::make_unique<Variable>(scopedIdentifer.getId()),
             std::move(node.getCondition().clone(nullptr)),
@@ -154,6 +155,7 @@ void SpecialSecretBranchingVisitor::visit(If &node) {
         // changed in the Else branch
         elseModified.erase(scopedIdentifer);
       } else {
+        // case where variable is not changed in the Else branch
         assignm = createDependentAssignment(
             std::make_unique<Variable>(scopedIdentifer.getId()),
             std::move(node.getCondition().clone(nullptr)),
@@ -175,17 +177,18 @@ void SpecialSecretBranchingVisitor::visit(If &node) {
 }
 
 void SpecialSecretBranchingVisitor::visit(For &node) {
-  std::cout << "Visiting " << node.getUniqueNodeId() << std::endl;
   unsupportedBodyStatementVisited = true;
   ScopedVisitor::visit(node);
 }
 
 void SpecialSecretBranchingVisitor::visit(Block &node) {
-  std::cout << "Visiting " << node.getUniqueNodeId() << std::endl;
-  decltype(node.getStatementPointers().begin()) insertionPos;
+  decltype(node.getStatementPointers().end()) insertionPos;
   auto it = node.getStatementPointers().begin();
+  // iterate over all children of this Block
   while (it!=node.getStatementPointers().end()) {
     it->get()->accept(*this);
+    // if the recently visited statement set the visitedStatementMarkedForDeletion flag, then reset it's unique_ptr to
+    // nullptr (these will be removed after looping over the elements) and remember the iterator's position
     if (visitedStatementMarkedForDeletion) {
       visitedStatementMarkedForDeletion = false;
       (*it).reset();
@@ -194,40 +197,42 @@ void SpecialSecretBranchingVisitor::visit(Block &node) {
     it++;
   }
 
-  it = node.getStatementPointers().insert(insertionPos,
-                                          std::make_move_iterator(replacementStatements.begin()),
-                                          std::make_move_iterator(replacementStatements.end()));
-  replacementStatements.clear();
+  // insert the nodes in replacementStatements in the position indicated by insertionPos, i.e., the position where the
+  // node marked for deletion was before
+  if (insertionPos!=node.getStatementPointers().end()) {
+    it = node.getStatementPointers().insert(insertionPos,
+                                            std::make_move_iterator(replacementStatements.begin()),
+                                            std::make_move_iterator(replacementStatements.end()));
+    replacementStatements.clear();
+  }
 
+  // remove all unique_ptr that are null from the Block's list of statements
   node.removeNullStatements();
 }
 
 void SpecialSecretBranchingVisitor::visit(Return &node) {
-  std::cout << "Visiting " << node.getUniqueNodeId() << std::endl;
   unsupportedBodyStatementVisited = true;
   ScopedVisitor::visit(node);
 }
 
 void SpecialSecretBranchingVisitor::visit(Assignment &node) {
-  std::cout << "Visiting " << node.getUniqueNodeId() << std::endl;
+  // this visitor only considers assignments to plain variables as we cannot rewrite dependent assignments involving
+  // arrays yet
   if (auto lhsVariable = dynamic_cast<Variable *>(&node.getTarget())) {
     auto scopedIdentifier = getCurrentScope().resolveIdentifier(lhsVariable->getIdentifier());
     expressionValues.insert_or_assign(scopedIdentifier, &node.getValue());
-  } else {
-    throw std::runtime_error("SecretBranchingVisitor can handle assignments to variables yet only.");
   }
 }
 
 void SpecialSecretBranchingVisitor::visit(VariableDeclaration &node) {
-  std::cout << "Visiting " << node.getUniqueNodeId() << std::endl;
+  // if the variable is declared + initialized, save variable identifier + value, otherwise use "nullptr" as value
   AbstractExpression *value = (node.hasValue()) ? &node.getValue() : nullptr;
   expressionValues.insert_or_assign(ScopedIdentifier(getCurrentScope(), node.getTarget().getIdentifier()), value);
   ScopedVisitor::visit(node);
 }
 
 void SpecialSecretBranchingVisitor::visit(FunctionParameter &node) {
-  std::cout << "Visiting " << node.getUniqueNodeId() << std::endl;
-  // for FunctionParameters, we never know their actual value at this point
+  // for FunctionParameters, we never know their actual value at this point thus we set their value to "nullptr"
   expressionValues.insert_or_assign(ScopedIdentifier(getCurrentScope(), node.getIdentifier()), nullptr);
   ScopedVisitor::visit(node);
 }
