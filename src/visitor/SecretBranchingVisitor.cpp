@@ -36,28 +36,36 @@ VariableValueMap SpecialSecretBranchingVisitor::getChangedVariables(const Variab
 
 std::unique_ptr<Assignment> createDependentAssignment(
     std::unique_ptr<AbstractTarget> assignmentTarget,
-    std::unique_ptr<AbstractExpression> &&condition,
+    std::unique_ptr<AbstractExpression> &&branchingCondition,
     std::unique_ptr<AbstractExpression> &&trueValue,
-    std::unique_ptr<AbstractExpression> &&falseValue = nullptr) {
-  auto conditionLhs = std::move(condition);
-  auto conditionRhs = std::make_unique<BinaryExpression>(std::make_unique<LiteralInt>(1),
-                                                         Operator(FHE_SUBTRACTION),
-                                                         std::move(conditionLhs->clone(nullptr)));
-  auto clauseLhs =
-      std::make_unique<BinaryExpression>(std::move(conditionLhs), Operator(FHE_MULTIPLICATION), std::move(trueValue));
+    std::unique_ptr<AbstractExpression> &&falseValue) {
 
-  if (falseValue!=nullptr) {
-    auto clauseRhs =
-        std::make_unique<BinaryExpression>(std::move(conditionRhs),
-                                           Operator(FHE_MULTIPLICATION),
-                                           std::move(falseValue));
-    auto newExpr =
-        std::make_unique<BinaryExpression>(std::move(clauseLhs), Operator(FHE_ADDITION), std::move(clauseRhs));
-    // returns condition*trueValue + (1-c)*falseValue
-    return std::make_unique<Assignment>(std::move(assignmentTarget), std::move(newExpr));
+  auto conditionThen = std::move(branchingCondition);
+  auto conditionElse = std::make_unique<BinaryExpression>(std::make_unique<LiteralInt>(1),
+                                                          Operator(FHE_SUBTRACTION),
+                                                          std::move(conditionThen->clone(nullptr)));
+  if (trueValue!=nullptr) {
+    auto clauseTrue = std::make_unique<BinaryExpression>(std::move(conditionThen),
+                                                         Operator(FHE_MULTIPLICATION),
+                                                         std::move(trueValue));
+    if (falseValue!=nullptr) {  // rewrite to: (c)*trueValue + (1-c)*falseValue
+      auto clauseRhs = std::make_unique<BinaryExpression>(std::move(conditionElse),
+                                                          Operator(FHE_MULTIPLICATION),
+                                                          std::move(falseValue));
+      auto newExpr = std::make_unique<BinaryExpression>(std::move(clauseTrue),
+                                                        Operator(FHE_ADDITION),
+                                                        std::move(clauseRhs));
+      return std::make_unique<Assignment>(std::move(assignmentTarget), std::move(newExpr));
+    } else {  // rewrite to: (c)*trueValue
+      return std::make_unique<Assignment>(std::move(assignmentTarget), std::move(clauseTrue));
+    }
+  } else if (falseValue!=nullptr) {  // rewrite to: (1-c)*falseValue
+    auto clauseFalse = std::make_unique<BinaryExpression>(std::move(conditionElse),
+                                                          Operator(FHE_MULTIPLICATION),
+                                                          std::move(falseValue));
+    return std::make_unique<Assignment>(std::move(assignmentTarget), std::move(clauseFalse));
   } else {
-    // returns condition*trueValue
-    return std::make_unique<Assignment>(std::move(assignmentTarget), std::move(clauseLhs));
+    throw std::runtime_error("Cannot create dependent assignment where both trueValue and falseValue are not given!");
   }
 }
 
@@ -91,53 +99,77 @@ void SpecialSecretBranchingVisitor::visit(If &node) {
   }
   auto isSecretCondition = secretTaintedNodesMap.at(conditionNodeId);
 
-  if (isSecretCondition && !unsupportedBodyStatementVisited) {
-    // TODO: Implement rewriting of If statement by considering:
-    // - if branch only
-    // - if + else branch
-    // - uninitialized variables (declared only)
+  // exit if there is no secret condition involved or we visited an unsupported body statement in the If statement's
+  // Then or Else branch
+  if (!isSecretCondition || unsupportedBodyStatementVisited)
+    return;
 
-    visitedStatementMarkedForDeletion = true;
+  // == perform the secret branching removal ===============
 
-    // if branch exists only: rewrite to (c)*thenValue+(1-c)*oldValue
-    if (!node.hasElseBranch()) {
+  visitedStatementMarkedForDeletion = true;
 
-      // get those values that were actually changed in the Then branch
-      auto changedVars = getChangedVariables(exprValuesBefore, exprValuesAfterThen);
-
-      for (auto &[scopedIdentifer, abstractExp] : changedVars) {
-        std::unique_ptr<Assignment> assignm;
-        if (exprValuesBefore.count(scopedIdentifer)!=0) {
-          assignm = createDependentAssignment(
-              std::make_unique<Variable>(scopedIdentifer.getId()),
-              std::move(node.getCondition().clone(nullptr)),
-              std::move(abstractExp->clone(nullptr)),
-              std::move(exprValuesBefore.at(scopedIdentifer)->clone(nullptr)));
-        } else {
-          assignm = createDependentAssignment(
-              std::make_unique<Variable>(scopedIdentifer.getId()),
-              std::move(node.getCondition().clone(nullptr)),
-              std::move(abstractExp->clone(nullptr)));
-        }
-        replacementStatements.push_back(std::move(assignm));
+  // if Then branch exists only: rewrite to (c)*thenValue+(1-c)*oldValue
+  if (!node.hasElseBranch()) {
+    // get those values that were actually changed in the Then branch
+    auto changedVars = getChangedVariables(exprValuesBefore, exprValuesAfterThen);
+    // process each variable modified in the Then branch
+    for (auto &[scopedIdentifer, abstractExp] : changedVars) {
+      std::unique_ptr<Assignment> assignm;
+      // check if the variable had a value before entering the Then branch, or if it is a new variable declaration
+      if (exprValuesBefore.count(scopedIdentifer)!=0) {
+        // if the variable was declared but not
+        std::unique_ptr<AbstractExpression> oldValue =
+            (exprValuesBefore.at(scopedIdentifer)==nullptr)
+            ? std::make_unique<Variable>(scopedIdentifer.getId())
+            : std::unique_ptr<AbstractExpression>(exprValuesBefore.at(scopedIdentifer)->clone(nullptr));
+        assignm = createDependentAssignment(
+            std::make_unique<Variable>(scopedIdentifer.getId()),
+            std::move(node.getCondition().clone(nullptr)),
+            std::move(abstractExp->clone(nullptr)),
+            std::move(oldValue));
+      } else {
+        assignm = createDependentAssignment(
+            std::make_unique<Variable>(scopedIdentifer.getId()),
+            std::move(node.getCondition().clone(nullptr)),
+            std::move(abstractExp->clone(nullptr)),
+            nullptr);
       }
-
-      std::cout << "else" << std::endl;
-
-
-//      std::vector<std::unique_ptr<AbstractStatement>> statements;
-//      for (auto &scopedIdentifier : exprValuesAfterThen) {
-//        // a variable with an existing value before the Then branch -> get oldValue
-//        if (exprValuesBefore.count(scopedIdentifier.first) > 0 && ) {
-//
-//          auto assignment = createDependentAssignment(
-//              std::make_unique<Variable>(scopedIdentifier.first.getId()),
-//              std::unique_ptr<AbstractExpression>(node.getCondition().clone(nullptr)),
-//              std::unique_ptr<AbstractExpression>(scopedIdentifier.second->clone(nullptr)),
-//              std::unique_ptr<AbstractExpression>(exprValuesBefore.at(scopedIdentifier.first)->clone(nullptr)));
-//          statements.push_back(std::move(assignment));
-//        }
-//      }
+      replacementStatements.push_back(std::move(assignm));
+    }
+  } else { // node has Then and Else branch
+    // get the variables (and their values) that were changed in the Then or Else branch
+    auto thenModified = getChangedVariables(exprValuesBefore, exprValuesAfterThen);
+    auto elseModified = getChangedVariables(exprValuesBefore, exprValuesAfterElse);
+    // process each variable modified in the Then branch
+    for (auto &[scopedIdentifer, abstractExp] : thenModified) {
+      std::unique_ptr<Assignment> assignm;
+      // check if the variable had a value before entering the Then branch, or if it is a new variable declaration
+      if (elseModified.count(scopedIdentifer)!=0) {
+        assignm = createDependentAssignment(
+            std::make_unique<Variable>(scopedIdentifer.getId()),
+            std::move(node.getCondition().clone(nullptr)),
+            std::move(abstractExp->clone(nullptr)),
+            std::move(elseModified.at(scopedIdentifer)->clone(nullptr)));
+        // this time we need to delete the variables from the elseModified map to remember the ones that were only
+        // changed in the Else branch
+        elseModified.erase(scopedIdentifer);
+      } else {
+        assignm = createDependentAssignment(
+            std::make_unique<Variable>(scopedIdentifer.getId()),
+            std::move(node.getCondition().clone(nullptr)),
+            std::move(abstractExp->clone(nullptr)),
+            nullptr);
+      }
+      replacementStatements.push_back(std::move(assignm));
+    }
+    // now go through the list of all variables that were only changed in the Else branch
+    for (auto &[scopedIdentifer, abstractExp] : elseModified) {
+      std::unique_ptr<Assignment> assignm = createDependentAssignment(
+          std::make_unique<Variable>(scopedIdentifer.getId()),
+          std::move(node.getCondition().clone(nullptr)),
+          nullptr,
+          std::move(abstractExp->clone(nullptr)));
+      replacementStatements.push_back(std::move(assignm));
     }
   }
 }
@@ -153,7 +185,6 @@ void SpecialSecretBranchingVisitor::visit(Block &node) {
   decltype(node.getStatementPointers().begin()) insertionPos;
   auto it = node.getStatementPointers().begin();
   while (it!=node.getStatementPointers().end()) {
-//    auto &ref = *it;
     it->get()->accept(*this);
     if (visitedStatementMarkedForDeletion) {
       visitedStatementMarkedForDeletion = false;
