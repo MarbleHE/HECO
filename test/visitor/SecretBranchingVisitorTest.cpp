@@ -184,3 +184,88 @@ TEST(SecretBranchingVisitorTest, secretVariable_ifBranch_uninitializedVar_rewrit
 
   EXPECT_TRUE(compareAST(*inputAst, *expectedAst));
 }
+
+TEST(SecretBranchingVisitorTest, secretVariable_ifBranch_unsupportedBodyFor_noRewritingExpected) { /* NOLINT */
+  const char *inputChars = R""""(
+    public int main(secret int N) {
+      int sum;
+      if (N > 25) {
+        for (int i = 0; i < 225; i = i + 1) {
+          sum = sum + N;
+        }
+      }
+      return sum;
+    }
+    )"""";
+  std::vector<std::reference_wrapper<AbstractNode>> createdNodes;
+  auto inputAst = Parser::parse(std::string(inputChars), createdNodes);
+
+  auto expectedAst = inputAst->clone();
+
+  // get binary expression node (N > 25)
+  SecretTaintedNodesMap secretTaintedNodesMap;
+  secretTaintedNodesMap.insert_or_assign(
+      createdNodes.at(2).get().getUniqueNodeId(), true);
+
+  SecretBranchingVisitor sbv(secretTaintedNodesMap);
+  inputAst->accept(sbv);
+
+  EXPECT_TRUE(compareAST(*inputAst, *expectedAst));
+}
+
+TEST(SecretBranchingVisitorTest, secretVariable_ifBranch_unsupportedBodyReturn_noRewritingExpected) { /* NOLINT */
+  const char *inputChars = R""""(
+    public int main(secret int N) {
+      int sum;
+      if (N > 25) {
+        return sum+34;
+      }
+      return sum;
+    }
+    )"""";
+  std::vector<std::reference_wrapper<AbstractNode>> createdNodes;
+  auto inputAst = Parser::parse(std::string(inputChars), createdNodes);
+
+  auto expectedAst = inputAst->clone();
+
+  // get binary expression node (N > 25)
+  SecretTaintedNodesMap secretTaintedNodesMap;
+  secretTaintedNodesMap.insert_or_assign(
+      createdNodes.at(2).get().getUniqueNodeId(), true);
+
+  SecretBranchingVisitor sbv(secretTaintedNodesMap);
+  inputAst->accept(sbv);
+
+  EXPECT_TRUE(compareAST(*inputAst, *expectedAst));
+}
+
+TEST(SecretBranchingVisitorTest, secretVariable_ifBranch_noRewritingExpected) { /* NOLINT */
+  const char *inputChars = R""""(
+    public int main(secret int N) {
+      int sum;
+      if (N > 25) {
+        int k;
+        sum = 1;
+      } else {
+        sum = 1;
+      }
+      return sum;
+    }
+    )"""";
+  std::vector<std::reference_wrapper<AbstractNode>> createdNodes;
+  auto inputAst = Parser::parse(std::string(inputChars), createdNodes);
+
+  auto expectedAst = inputAst->clone();
+
+  // get binary expression node (N > 25)
+  SecretTaintedNodesMap secretTaintedNodesMap;
+  secretTaintedNodesMap.insert_or_assign(
+      createdNodes.at(2).get().getUniqueNodeId(), true);
+
+  SecretBranchingVisitor sbv(secretTaintedNodesMap);
+  inputAst->accept(sbv);
+
+  EXPECT_TRUE(compareAST(*inputAst, *expectedAst));
+}
+
+
