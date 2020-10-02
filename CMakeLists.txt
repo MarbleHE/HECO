@@ -113,13 +113,18 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/visitor/ScopedVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/Vectorizer.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/SecretBranchingVisitor.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/visitor/TypeCheckingVisitor.cpp)
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/TypeCheckingVisitor.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/Runtime/RuntimeVisitor.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/Runtime/AbstractCiphertext.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/Runtime/SealCiphertext.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/Runtime/SealCiphertextFactory.cpp)
 
 set(HEADER_ONLY_SOURCES
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractExpression.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractStatement.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractTarget.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/IVisitor.h)
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/IVisitor.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/Runtime/CiphertextFactory.h)
 
 # TODO: Go through this list and determine which headers aren't actually public
 set(PUBLIC_HEADERS
@@ -159,6 +164,10 @@ set(PUBLIC_HEADERS
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/Vectorizer.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/SecretBranchingVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/TypeCheckingVisitor.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/Runtime/AbstractCiphertext.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/Runtime/RuntimeVisitor.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/Runtime/SealCiphertext.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/Runtime/SealCiphertextFactory.h
         )
 
 
