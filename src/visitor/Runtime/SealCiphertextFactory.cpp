@@ -1,12 +1,12 @@
 #include "ast_opt/visitor/Runtime/SealCiphertext.h"
 #include "ast_opt/visitor/Runtime/SealCiphertextFactory.h"
 
-void SealCiphertextFactory::setupContext() {
-  /// Wrapper for parameters
+void SealCiphertextFactory::setupSealContext() {
+  // Wrapper for parameters
   seal::EncryptionParameters params(seal::scheme_type::BFV);
 
   // in BFV, this degree is also the number of slots.
-  params.set_poly_modulus_degree(NUM_CTXT_SLOTS);
+  params.set_poly_modulus_degree(ciphertextSlotSize);
 
   // Let SEAL select a "suitable" coefficient modulus (not necessarily optimal)
   params.set_coeff_modulus(seal::CoeffModulus::BFVDefault(params.poly_modulus_degree()));
@@ -17,15 +17,17 @@ void SealCiphertextFactory::setupContext() {
   // Instantiate context
   context = seal::SEALContext::Create(params);
 
-  /// Helper object to create keys
+  // Create keys
   seal::KeyGenerator keyGenerator(context);
   secretKey = std::make_unique<seal::SecretKey>(keyGenerator.secret_key());
   publicKey = std::make_unique<seal::PublicKey>(keyGenerator.public_key());
   galoisKeys = std::make_unique<seal::GaloisKeys>(keyGenerator.galois_keys_local());
   relinKeys = std::make_unique<seal::RelinKeys>(keyGenerator.relin_keys_local());
 
+  // Create helpers for en-/decoding, en-/decryption, and ciphertext evaluation
   encoder = std::make_unique<seal::BatchEncoder>(context);
   encryptor = std::make_unique<seal::Encryptor>(context, *publicKey);
+  decryptor = std::make_unique<seal::Decryptor>(context, *secretKey);
   evaluator = std::make_unique<seal::Evaluator>(context);
 }
 
@@ -42,15 +44,38 @@ void SealCiphertextFactory::expandVector(std::vector<T> &values) {
 }
 
 std::unique_ptr<AbstractCiphertext> SealCiphertextFactory::createCiphertext(std::vector<int64_t> &data) {
-  if (!context || !context->parameters_set()) setupContext();
+  if (!context || !context->parameters_set()) setupSealContext();
   expandVector(data);
 
   seal::Plaintext ptxt;
   encoder->encode(data, ptxt);
 
-  std::unique_ptr<SealCiphertext> ctxt = std::make_unique<SealCiphertext>();
-  encryptor->encrypt(ptxt, ctxt->ciphertext);
+  std::unique_ptr<SealCiphertext> ctxt = std::make_unique<SealCiphertext>(*this);
+  encryptor->encrypt(ptxt, ctxt->getCiphertext());
 
   return ctxt;
 }
+
+const seal::RelinKeys &SealCiphertextFactory::getRelinKeys() const {
+  return *relinKeys;
+}
+
+void SealCiphertextFactory::decryptCiphertext(AbstractCiphertext &abstractCiphertext,
+                                              std::vector<int64_t> &ciphertextData) {
+  auto &ctxt = dynamic_cast<SealCiphertext &>(abstractCiphertext);
+  seal::Plaintext ptxt;
+  decryptor->decrypt(ctxt.getCiphertext(), ptxt);
+  encoder->decode(ptxt, ciphertextData);
+}
+
+seal::Evaluator &SealCiphertextFactory::getEvaluator() const {
+  return *evaluator;
+}
+
+const seal::GaloisKeys &SealCiphertextFactory::getGaloisKeys() const {
+  return *galoisKeys;
+}
+
+SealCiphertextFactory::SealCiphertextFactory(uint numElementsPerCiphertextSlot)
+    : ciphertextSlotSize(numElementsPerCiphertextSlot) {}
 

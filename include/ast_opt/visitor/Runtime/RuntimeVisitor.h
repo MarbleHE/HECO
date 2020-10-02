@@ -52,7 +52,6 @@ class SpecialRuntimeVisitor : public ScopedVisitor {
   void visit(VariableDeclaration &elem) override;
 
   void visit(Variable &elem) override;
-
 };
 
 #endif //GRAPHNODE_H_INCLUDE_AST_OPT_VISITOR_RUNTIME_H_
