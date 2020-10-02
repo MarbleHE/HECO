@@ -47,7 +47,7 @@ class SealCiphertext : public AbstractCiphertext {
 
   std::unique_ptr<AbstractCiphertext> rotateRows(int steps) override;
 
-  void rotateRowsInplace(AbstractCiphertext &abstractCiphertext, int steps) override;
+  void rotateRowsInplace(int steps) override;
 };
 
 #endif

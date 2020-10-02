@@ -58,7 +58,7 @@ std::unique_ptr<AbstractCiphertext> SealCiphertext::rotateRows(int steps) {
   return resultCiphertext;
 }
 
-void SealCiphertext::rotateRowsInplace(AbstractCiphertext &abstractCiphertext, int steps) {
+void SealCiphertext::rotateRowsInplace(int steps) {
   auto &evaluator = factory.getEvaluator();
   evaluator.rotate_rows_inplace(ciphertext, steps, factory.getGaloisKeys());
 }
