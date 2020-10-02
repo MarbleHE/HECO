@@ -2,6 +2,8 @@
 #include "include/ast_opt/visitor/Runtime/SealCiphertextFactory.h"
 #include "gtest/gtest.h"
 
+#ifdef HAVE_SEAL_BFV
+
 TEST(SealCiphertextFactoryTest, createIntCiphertext) { /* NOLINT */
   // create ciphertext
   std::unique_ptr<SealCiphertextFactory> scf = std::make_unique<SealCiphertextFactory>(4096);
@@ -47,3 +49,5 @@ TEST(SealCiphertextFactoryTest, multiplyCiphertexts) { /* NOLINT */
     ASSERT_EQ(data1.back()*data2.back(), result.at(i));
   }
 }
+
+#endif
