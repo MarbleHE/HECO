@@ -48,7 +48,7 @@ set(TEST_FILES
         visitor/VectorizerTest.cpp
         visitor/VisitorTest.cpp
         visitor/SecretBranchingVisitorTest.cpp
-        visitor/TypeCheckingVisitorTest.cpp visitor/Runtime/CiphertextFactoryTest.cpp)
+        visitor/TypeCheckingVisitorTest.cpp visitor/Runtime/SealCiphertextFactoryTest.cpp)
 
 add_executable(testing-all
         ${TEST_FILES})
