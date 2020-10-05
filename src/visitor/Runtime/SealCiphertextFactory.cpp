@@ -91,3 +91,7 @@ const seal::GaloisKeys &SealCiphertextFactory::getGaloisKeys() const {
 SealCiphertextFactory::SealCiphertextFactory(uint numElementsPerCiphertextSlot)
     : ciphertextSlotSize(numElementsPerCiphertextSlot) {}
 
+uint SealCiphertextFactory::getCiphertextSlotSize() const {
+  return ciphertextSlotSize;
+}
+
