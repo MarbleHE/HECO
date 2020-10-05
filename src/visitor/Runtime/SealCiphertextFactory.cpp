@@ -1,6 +1,8 @@
 #include "ast_opt/visitor/Runtime/SealCiphertext.h"
 #include "ast_opt/visitor/Runtime/SealCiphertextFactory.h"
 
+#ifdef HAVE_SEAL_BFV
+
 void SealCiphertextFactory::setupSealContext() {
   // Wrapper for parameters
   seal::EncryptionParameters params(seal::scheme_type::BFV);
@@ -95,3 +97,4 @@ uint SealCiphertextFactory::getCiphertextSlotSize() const {
   return ciphertextSlotSize;
 }
 
+#endif // ifdef HAVE_SEAL_BFV
