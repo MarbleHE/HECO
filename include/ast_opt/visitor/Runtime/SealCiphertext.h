@@ -49,19 +49,17 @@ class SealCiphertext : public AbstractCiphertext {
 
   void rotateRowsInplace(int steps) override;
 
-  std::unique_ptr<AbstractCiphertext> multiplyPlain(LiteralInt &operand) override;
+  std::unique_ptr<AbstractCiphertext> multiplyPlain(ExpressionList &operand) override;
 
-  void multiplyPlainInplace(LiteralInt &operand) override;
+  void multiplyPlainInplace(ExpressionList &operand) override;
 
-  std::unique_ptr<AbstractCiphertext> addPlain(LiteralInt &operand) override;
+  std::unique_ptr<AbstractCiphertext> addPlain(ExpressionList &operand) override;
 
-  void addPlainInplace(LiteralInt &operand) override;
+  void addPlainInplace(ExpressionList &operand) override;
 
-  std::unique_ptr<AbstractCiphertext> subtractPlain(LiteralInt &operand) override;
+  std::unique_ptr<AbstractCiphertext> subtractPlain(ExpressionList &operand) override;
 
-  void subtractPlainInplace(LiteralInt &operand) override;
-
-  void applyOperatorCtxtCtxtHelper(AbstractCiphertext &operand, std::unique_ptr<AbstractCiphertext> resultCiphertext);
+  void subtractPlainInplace(ExpressionList &operand) override;
 };
 
 #endif

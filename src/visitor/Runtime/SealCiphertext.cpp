@@ -1,5 +1,6 @@
 #include <ast_opt/utilities/Operator.h>
 #include "ast_opt/visitor/Runtime/SealCiphertext.h"
+#include "ast_opt/ast/ExpressionList.h"
 #include "ast_opt/visitor/Runtime/SealCiphertextFactory.h"
 
 #ifdef HAVE_SEAL_BFV
@@ -16,14 +17,12 @@ SealCiphertext &cast(AbstractCiphertext &abstractCiphertext) {
 
 std::unique_ptr<AbstractCiphertext> SealCiphertext::rotateRows(int steps) {
   std::unique_ptr<SealCiphertext> resultCiphertext = std::make_unique<SealCiphertext>(factory);
-  auto &evaluator = factory.getEvaluator();
-  evaluator.rotate_rows(ciphertext, steps, factory.getGaloisKeys(), resultCiphertext->ciphertext);
+  factory.getEvaluator().rotate_rows(ciphertext, steps, factory.getGaloisKeys(), resultCiphertext->ciphertext);
   return resultCiphertext;
 }
 
 void SealCiphertext::rotateRowsInplace(int steps) {
-  auto &evaluator = factory.getEvaluator();
-  evaluator.rotate_rows_inplace(ciphertext, steps, factory.getGaloisKeys());
+  factory.getEvaluator().rotate_rows_inplace(ciphertext, steps, factory.getGaloisKeys());
 }
 
 const seal::Ciphertext &SealCiphertext::getCiphertext() const {
@@ -34,29 +33,41 @@ seal::Ciphertext &SealCiphertext::getCiphertext() {
   return ciphertext;
 }
 
+std::vector<int64_t> castExpressionList(ExpressionList &expressionList) {
+  std::vector<int64_t> result;
+  auto exprs = expressionList.getExpressions();
+  std::for_each(exprs.begin(), exprs.end(), [&result](const std::reference_wrapper<AbstractExpression> &expression) {
+    if (auto expressionAsLiteralInt = dynamic_cast<const LiteralInt *>(&expression.get())) {
+      result.push_back(expressionAsLiteralInt->getValue());
+    } else {
+      throw std::runtime_error(
+          "Expected expression of type LiteralInt in ExpressionList, "
+          "found instead " + std::string(typeid(expression).name()) + ".");
+    }
+  });
+  return result;
+}
+
 // =======================================
 // == CTXT-CTXT operations with returned result
 // =======================================
 
 std::unique_ptr<AbstractCiphertext> SealCiphertext::add(AbstractCiphertext &operand) {
   std::unique_ptr<SealCiphertext> resultCiphertext = std::make_unique<SealCiphertext>(factory);
-  auto &evaluator = factory.getEvaluator();
-  evaluator.add(ciphertext, cast(operand).ciphertext, resultCiphertext->ciphertext);
+  factory.getEvaluator().add(ciphertext, cast(operand).ciphertext, resultCiphertext->ciphertext);
   return resultCiphertext;
 }
 
 std::unique_ptr<AbstractCiphertext> SealCiphertext::subtract(AbstractCiphertext &operand) {
   std::unique_ptr<SealCiphertext> resultCiphertext = std::make_unique<SealCiphertext>(factory);
-  auto &evaluator = factory.getEvaluator();
-  evaluator.sub(ciphertext, cast(operand).ciphertext, resultCiphertext->ciphertext);
+  factory.getEvaluator().sub(ciphertext, cast(operand).ciphertext, resultCiphertext->ciphertext);
   return resultCiphertext;
 }
 
 std::unique_ptr<AbstractCiphertext> SealCiphertext::multiply(AbstractCiphertext &operand) {
   std::unique_ptr<SealCiphertext> resultCiphertext = std::make_unique<SealCiphertext>(factory);
-  auto &evaluator = factory.getEvaluator();
-  evaluator.multiply(ciphertext, cast(operand).ciphertext, resultCiphertext->ciphertext);
-  evaluator.relinearize_inplace(resultCiphertext->ciphertext, factory.getRelinKeys());
+  factory.getEvaluator().multiply(ciphertext, cast(operand).ciphertext, resultCiphertext->ciphertext);
+  factory.getEvaluator().relinearize_inplace(resultCiphertext->ciphertext, factory.getRelinKeys());
   return resultCiphertext;
 }
 
@@ -65,47 +76,44 @@ std::unique_ptr<AbstractCiphertext> SealCiphertext::multiply(AbstractCiphertext 
 // =======================================
 
 void SealCiphertext::addInplace(AbstractCiphertext &operand) {
-  auto &evaluator = factory.getEvaluator();
-  evaluator.add_inplace(ciphertext, cast(operand).ciphertext);
+  factory.getEvaluator().add_inplace(ciphertext, cast(operand).ciphertext);
 }
 
 void SealCiphertext::subtractInplace(AbstractCiphertext &operand) {
-  auto &evaluator = factory.getEvaluator();
-  evaluator.sub_inplace(ciphertext, cast(operand).ciphertext);
+  factory.getEvaluator().sub_inplace(ciphertext, cast(operand).ciphertext);
 }
 
 void SealCiphertext::multiplyInplace(AbstractCiphertext &operand) {
-  auto &evaluator = factory.getEvaluator();
-  evaluator.multiply_inplace(ciphertext, cast(operand).ciphertext);
-  evaluator.relinearize_inplace(ciphertext, factory.getRelinKeys());
+  factory.getEvaluator().multiply_inplace(ciphertext, cast(operand).ciphertext);
+  factory.getEvaluator().relinearize_inplace(ciphertext, factory.getRelinKeys());
 }
 
 // =======================================
 // == CTXT-PLAIN operations with returned result
 // =======================================
 
-std::unique_ptr<AbstractCiphertext> SealCiphertext::addPlain(LiteralInt &operand) {
+std::unique_ptr<AbstractCiphertext> SealCiphertext::addPlain(ExpressionList &operand) {
+  auto castedOperand = castExpressionList(operand);
   std::unique_ptr<SealCiphertext> resultCiphertext = std::make_unique<SealCiphertext>(factory);
-  auto plaintext = factory.createPlaintext(operand.getValue());
-  auto &evaluator = factory.getEvaluator();
-  evaluator.add_plain(ciphertext, *plaintext, resultCiphertext->ciphertext);
+  auto plaintext = factory.createPlaintext(castedOperand);
+  factory.getEvaluator().add_plain(ciphertext, *plaintext, resultCiphertext->ciphertext);
   return resultCiphertext;
 }
 
-std::unique_ptr<AbstractCiphertext> SealCiphertext::subtractPlain(LiteralInt &operand) {
+std::unique_ptr<AbstractCiphertext> SealCiphertext::subtractPlain(ExpressionList &operand) {
+  auto castedOperand = castExpressionList(operand);
   std::unique_ptr<SealCiphertext> resultCiphertext = std::make_unique<SealCiphertext>(factory);
-  auto plaintext = factory.createPlaintext(operand.getValue());
-  auto &evaluator = factory.getEvaluator();
-  evaluator.sub_plain(ciphertext, *plaintext, resultCiphertext->ciphertext);
+  auto plaintext = factory.createPlaintext(castedOperand);
+  factory.getEvaluator().sub_plain(ciphertext, *plaintext, resultCiphertext->ciphertext);
   return resultCiphertext;
 }
 
-std::unique_ptr<AbstractCiphertext> SealCiphertext::multiplyPlain(LiteralInt &operand) {
+std::unique_ptr<AbstractCiphertext> SealCiphertext::multiplyPlain(ExpressionList &operand) {
+  auto castedOperand = castExpressionList(operand);
   std::unique_ptr<SealCiphertext> resultCiphertext = std::make_unique<SealCiphertext>(factory);
-  auto plaintext = factory.createPlaintext(operand.getValue());
-  auto &evaluator = factory.getEvaluator();
-  evaluator.multiply_plain(ciphertext, *plaintext, resultCiphertext->ciphertext);
-  evaluator.relinearize_inplace(resultCiphertext->ciphertext, factory.getRelinKeys());
+  auto plaintext = factory.createPlaintext(castedOperand);
+  factory.getEvaluator().multiply_plain(ciphertext, *plaintext, resultCiphertext->ciphertext);
+  factory.getEvaluator().relinearize_inplace(resultCiphertext->ciphertext, factory.getRelinKeys());
   return resultCiphertext;
 }
 
@@ -113,23 +121,23 @@ std::unique_ptr<AbstractCiphertext> SealCiphertext::multiplyPlain(LiteralInt &op
 // == CTXT-PLAIN in-place operations
 // =======================================
 
-void SealCiphertext::addPlainInplace(LiteralInt &operand) {
-  auto &evaluator = factory.getEvaluator();
-  auto plaintext = factory.createPlaintext(operand.getValue());
-  evaluator.add_plain_inplace(ciphertext, *plaintext);
+void SealCiphertext::addPlainInplace(ExpressionList &operand) {
+  auto castedOperand = castExpressionList(operand);
+  auto plaintext = factory.createPlaintext(castedOperand);
+  factory.getEvaluator().add_plain_inplace(ciphertext, *plaintext);
 }
 
-void SealCiphertext::subtractPlainInplace(LiteralInt &operand) {
-  auto &evaluator = factory.getEvaluator();
-  auto plaintext = factory.createPlaintext(operand.getValue());
-  evaluator.sub_plain_inplace(ciphertext, *plaintext);
+void SealCiphertext::subtractPlainInplace(ExpressionList &operand) {
+  auto castedOperand = castExpressionList(operand);
+  auto plaintext = factory.createPlaintext(castedOperand);
+  factory.getEvaluator().sub_plain_inplace(ciphertext, *plaintext);
 }
 
-void SealCiphertext::multiplyPlainInplace(LiteralInt &operand) {
-  auto &evaluator = factory.getEvaluator();
-  auto plaintext = factory.createPlaintext(operand.getValue());
-  evaluator.multiply_plain_inplace(ciphertext, *plaintext);
-  evaluator.relinearize_inplace(ciphertext, factory.getRelinKeys());
+void SealCiphertext::multiplyPlainInplace(ExpressionList &operand) {
+  auto castedOperand = castExpressionList(operand);
+  auto plaintext = factory.createPlaintext(castedOperand);
+  factory.getEvaluator().multiply_plain_inplace(ciphertext, *plaintext);
+  factory.getEvaluator().relinearize_inplace(ciphertext, factory.getRelinKeys());
 }
 
 #endif
