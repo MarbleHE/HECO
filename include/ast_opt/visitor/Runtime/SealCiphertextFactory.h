@@ -72,7 +72,21 @@ class SealCiphertextFactory : public AbstractCiphertextFactory {
   /// \return (A reference to) the seal::Evaluator instance.
   [[nodiscard]] seal::Evaluator &getEvaluator() const;
 
+  /// Creates a new seal::Plaintext object that encodes the given value. Remaining slots in the plaintext are filled up
+  /// with the same value.
+  /// \param value The value to be encoded in the plaintext.
+  /// \return (A std::unique_ptr to) the seal::Plaintext that encodes the given value.
+  std::unique_ptr<seal::Plaintext> createPlaintext(int64_t value);
+
+  /// Creates a new seal::Plaintext object that encodes the given value. Remaining slots in the plaintext are filled up
+  /// with the last given value.
+  /// \param value The values to be encoded in the plaintext.
+  /// \return (A std::unique_ptr to) the seal::Plaintext that encodes the given values.
+  std::unique_ptr<seal::Plaintext> createPlaintext(std::vector<int64_t> &value);
+
   std::unique_ptr<AbstractCiphertext> createCiphertext(std::vector<int64_t> &data) override;
+
+  std::unique_ptr<AbstractCiphertext> createCiphertext(int64_t data) override;
 
   void decryptCiphertext(AbstractCiphertext &abstractCiphertext, std::vector<int64_t> &ciphertextData) override;
 };

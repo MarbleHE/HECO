@@ -43,17 +43,29 @@ void SealCiphertextFactory::expandVector(std::vector<T> &values) {
   values.insert(values.end(), encoder->slot_count() - values.size(), lastValue);
 }
 
-std::unique_ptr<AbstractCiphertext> SealCiphertextFactory::createCiphertext(std::vector<int64_t> &data) {
+std::unique_ptr<seal::Plaintext> SealCiphertextFactory::createPlaintext(int64_t value) {
+  std::vector<int64_t> valueAsVec = {value};
+  return createPlaintext(valueAsVec);
+}
+
+std::unique_ptr<seal::Plaintext> SealCiphertextFactory::createPlaintext(std::vector<int64_t> &value) {
   if (!context || !context->parameters_set()) setupSealContext();
-  expandVector(data);
+  expandVector(value);
+  auto ptxt = std::make_unique<seal::Plaintext>();
+  encoder->encode(value, *ptxt);
+  return ptxt;
+}
 
-  seal::Plaintext ptxt;
-  encoder->encode(data, ptxt);
-
+std::unique_ptr<AbstractCiphertext> SealCiphertextFactory::createCiphertext(std::vector<int64_t> &data) {
+  auto ptxt = createPlaintext(data);
   std::unique_ptr<SealCiphertext> ctxt = std::make_unique<SealCiphertext>(*this);
-  encryptor->encrypt(ptxt, ctxt->getCiphertext());
-
+  encryptor->encrypt(*ptxt, ctxt->getCiphertext());
   return ctxt;
+}
+
+std::unique_ptr<AbstractCiphertext> SealCiphertextFactory::createCiphertext(int64_t data) {
+  std::vector<int64_t> values = {data};
+  return createCiphertext(values);
 }
 
 const seal::RelinKeys &SealCiphertextFactory::getRelinKeys() const {

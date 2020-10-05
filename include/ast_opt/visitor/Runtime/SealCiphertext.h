@@ -48,6 +48,20 @@ class SealCiphertext : public AbstractCiphertext {
   std::unique_ptr<AbstractCiphertext> rotateRows(int steps) override;
 
   void rotateRowsInplace(int steps) override;
+
+  std::unique_ptr<AbstractCiphertext> multiplyPlain(LiteralInt &operand) override;
+
+  void multiplyPlainInplace(LiteralInt &operand) override;
+
+  std::unique_ptr<AbstractCiphertext> addPlain(LiteralInt &operand) override;
+
+  void addPlainInplace(LiteralInt &operand) override;
+
+  std::unique_ptr<AbstractCiphertext> subtractPlain(LiteralInt &operand) override;
+
+  void subtractPlainInplace(LiteralInt &operand) override;
+
+  void applyOperatorCtxtCtxtHelper(AbstractCiphertext &operand, std::unique_ptr<AbstractCiphertext> resultCiphertext);
 };
 
 #endif
