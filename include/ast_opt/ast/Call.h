@@ -1,5 +1,6 @@
 #ifndef AST_OPTIMIZER_INCLUDE_AST_OPT_AST_CALL_H_
 #define AST_OPTIMIZER_INCLUDE_AST_OPT_AST_CALL_H_
+
 #include "ast_opt/ast/AbstractExpression.h"
 
 // We don't allow side effects, so there's no point in having a stmt with only one call
