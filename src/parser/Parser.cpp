@@ -232,10 +232,12 @@ AbstractExpression *Parser::parseExpression(stork::tokens_iterator &it) {
       // The first element must be an identifier rather than a target, since we cannot rotate e.g. x[i]
       std::string id = parseIdentifier(it);
       parseTokenValue(it, stork::reservedTokens::comma);
-          std::vector<std::unique_ptr<AbstractExpression>> offset;
+      std::vector<std::unique_ptr<AbstractExpression>> offset;
+      offset.push_back(std::make_unique<Variable>(id));
       offset.push_back(std::unique_ptr<AbstractExpression>(parseExpression(it)));
       parseTokenValue(it, stork::reservedTokens::close_round);
-      operands.push(new Call(id, std::move(offset)));
+      operands.push(new Call(stork::to_string(stork::reservedTokens::kw_rotate),
+                             std::move(offset)));
     } else {
       // Stop parsing tokens as soon as we see a closing ), a semicolon or anything else
       running = false;

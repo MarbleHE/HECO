@@ -1,6 +1,7 @@
 #include "ast_opt/ast/Assignment.h"
 #include "ast_opt/ast/BinaryExpression.h"
 #include "ast_opt/ast/Block.h"
+#include "ast_opt/ast/Call.h"
 #include "ast_opt/ast/ExpressionList.h"
 #include "ast_opt/ast/For.h"
 #include "ast_opt/ast/Function.h"
@@ -133,6 +134,22 @@
       auto l2 = dynamic_cast<const LiteralString &>(ast2);
       if (l1.getValue()!=l2.getValue()) {
         return ::testing::AssertionFailure() << "Literal nodes have different values: "
+                                             << ast1.toString(false) << " vs " << ast2.toString(false);
+      }
+    } else if (typeid(ast1)==typeid(const Call &)) {
+      auto l1 = dynamic_cast<const Call &>(ast1);
+      auto l2 = dynamic_cast<const Call &>(ast2);
+
+      auto l1Args = l1.getArguments();
+      bool equalArgs = std::equal(l1Args.begin(), l1Args.end(), l2.getArguments().begin(),
+                                  [&](const std::reference_wrapper<AbstractExpression> &ae1,
+                                      const std::reference_wrapper<AbstractExpression> &ae2) {
+                                    auto comp = compareAST(ae1.get(), ae2.get());
+                                    return comp==::testing::AssertionSuccess();
+                                  });
+
+      if (l1.getIdentifier()!=l2.getIdentifier() || !equalArgs) {
+        return ::testing::AssertionFailure() << "Call nodes have different values: "
                                              << ast1.toString(false) << " vs " << ast2.toString(false);
       }
     } else {

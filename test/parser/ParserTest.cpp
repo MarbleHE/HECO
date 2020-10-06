@@ -9,6 +9,7 @@
 #include "ast_opt/ast/Function.h"
 #include "ast_opt/ast/FunctionParameter.h"
 #include "ast_opt/ast/If.h"
+#include "ast_opt/ast/Call.h"
 #include "ast_opt/ast/IndexAccess.h"
 #include "ast_opt/ast/Literal.h"
 #include "ast_opt/ast/OperatorExpression.h"
@@ -578,6 +579,42 @@ TEST(ParserTest, secretKeyword) { /* NOLINT */
   std::vector<std::unique_ptr<FunctionParameter>> fParams;
   fParams.emplace_back(std::move(std::make_unique<FunctionParameter>(Datatype(Type::INT, true), "a")));
   auto funcParams = std::vector<std::unique_ptr<FunctionParameter>>(std::move(fParams));
+  auto expected = new Function(Datatype(Type::INT, true), "main", std::move(funcParams), std::move(expected_body));
+
+  EXPECT_TRUE(compareAST(*parsed->begin(), *expected));
+}
+
+TEST(ParserTest, callRotate) { /* NOLINT */
+  const char *programCode = R""""(
+    public secret int main() {
+      secret int b = {1, 23, 42, 1, 0};
+      return rotate(b, 2);
+    }
+    )"""";
+  auto code = std::string(programCode);
+  auto parsed = Parser::parse(code);
+
+  std::vector<std::unique_ptr<AbstractExpression>> exprs;
+  exprs.push_back(std::make_unique<LiteralInt>(1));
+  exprs.push_back(std::make_unique<LiteralInt>(23));
+  exprs.push_back(std::make_unique<LiteralInt>(42));
+  exprs.push_back(std::make_unique<LiteralInt>(1));
+  exprs.push_back(std::make_unique<LiteralInt>(0));
+  auto varDecl = std::make_unique<VariableDeclaration>(Datatype(Type::INT, true),
+                                                       std::make_unique<Variable>("b"),
+                                                       std::make_unique<ExpressionList>(std::move(exprs)));
+
+  std::vector<std::unique_ptr<AbstractExpression>> args;
+  args.push_back(std::make_unique<Variable>("b"));
+  args.push_back(std::make_unique<LiteralInt>(2));
+  auto returnStatement = std::make_unique<Return>(std::make_unique<Call>("rotate", std::move(args)));
+
+  std::vector<std::unique_ptr<AbstractStatement>> blockStmts;
+  blockStmts.emplace_back(std::move(varDecl));
+  blockStmts.emplace_back(std::move(returnStatement));
+  auto expected_body = std::make_unique<Block>(std::move(blockStmts));
+
+  auto funcParams = std::vector<std::unique_ptr<FunctionParameter>>();
   auto expected = new Function(Datatype(Type::INT, true), "main", std::move(funcParams), std::move(expected_body));
 
   EXPECT_TRUE(compareAST(*parsed->begin(), *expected));
