@@ -24,6 +24,11 @@ class AbstractCiphertextFactory {
   /// \param abstractCiphertext (A reference to) the ciphertext that should be decrypted and decoded.
   /// \param ciphertextData (A reference to) the vector where the decrypted and decoded values are written to.
   virtual void decryptCiphertext(AbstractCiphertext &abstractCiphertext, std::vector<int64_t> &ciphertextData) = 0;
+
+  /// Generates and returns the textual representation of the given ciphertext.
+  /// \param abstractCiphertext The ciphertext for that a textual representation should be generated for.
+  /// \return (A std::string with) the textual representation of the encrypted ciphertext elements.
+  virtual std::string getString(AbstractCiphertext &abstractCiphertext) = 0;
 };
 
 #endif //GRAPHNODE_H_INCLUDE_AST_OPT_VISITOR_RUNTIME_ABSTRACTCIPHERTEXTFACTORY_H_
