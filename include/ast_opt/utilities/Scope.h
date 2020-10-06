@@ -51,8 +51,6 @@ class ScopedIdentifier {
   /// Gets the identifier associated with this ScopedIdentifier.
   /// \return (A string reference to) the identifier of this ScopedIdentifier.
   std::string &getId();
-
-  bool operator==(const ScopedIdentifier &p) const;
 };
 
 class Scope {
@@ -82,7 +80,7 @@ class Scope {
 
   /// Move Constructor
   /// \param other the scope to move
-  Scope(Scope&& other) = default;
+  Scope(Scope &&other) = default;
 
   /// Copy Assignment
   Scope &operator=(const Scope &) = delete;
@@ -93,6 +91,10 @@ class Scope {
   /// Adds an declared identifier (e.g., variable) to this scope.
   /// \param id The identifier to be added to this scope.
   void addIdentifier(const std::string &id);
+
+  /// Adds the given ScopedIdentifier to this scope. Checks that the scopedIdentifier is actually from this scope.
+  /// \param scopedIdentifier The scoped identifier to be added to this scope.
+  void addIdentifier(std::unique_ptr<ScopedIdentifier> &&scopedIdentifier);
 
   /// Adds multiple declared identifier (e.g., variable) to this scope.
   /// \param ids (A list of) identifiers to be added to this scope.
@@ -156,7 +158,7 @@ class Scope {
 
   /// Get Scope name
   /// \return the name of this scope (uniqueID of the associated AST node)
-  std::string getScopeName() const;
+  [[nodiscard]] std::string getScopeName() const;
 };
 
 namespace std {

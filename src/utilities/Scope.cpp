@@ -29,6 +29,14 @@ void Scope::addIdentifier(const std::string &id) {
   identifiers.emplace(std::make_unique<ScopedIdentifier>(*this, id));
 }
 
+void Scope::addIdentifier(std::unique_ptr<ScopedIdentifier> &&scopedIdentifier) {
+  if (&scopedIdentifier->getScope()!=this) {
+    throw std::runtime_error(
+        "Cannot add scoped identifier to a scope that differs from the scope specified in the scoped identifier.");
+  }
+  identifiers.insert(std::move(scopedIdentifier));
+}
+
 void Scope::addIdentifiers(std::initializer_list<std::string> ids) {
   std::for_each(ids.begin(), ids.end(), [&](const std::string &id) {
     addIdentifier(id);
