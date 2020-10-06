@@ -93,6 +93,8 @@ class SealCiphertextFactory : public AbstractCiphertextFactory {
   std::unique_ptr<AbstractCiphertext> createCiphertext(int64_t data) override;
 
   void decryptCiphertext(AbstractCiphertext &abstractCiphertext, std::vector<int64_t> &ciphertextData) override;
+
+  std::string getString(AbstractCiphertext &abstractCiphertext) override;
 };
 
 #endif

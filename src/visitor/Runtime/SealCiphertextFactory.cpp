@@ -97,4 +97,21 @@ uint SealCiphertextFactory::getCiphertextSlotSize() const {
   return ciphertextSlotSize;
 }
 
+std::string SealCiphertextFactory::getString(AbstractCiphertext &abstractCiphertext) {
+  // decrypt the ciphertext to get its values
+  std::vector<int64_t> plainValues;
+  decryptCiphertext(abstractCiphertext, plainValues);
+
+  // print ciphertext as: [ value 1, value2
+  std::stringstream ss;
+  ss << "[";
+  for (const auto value : plainValues) {
+    ss << " " << value << ", ";
+  }
+  ss.seekp(-1, ss.cur);  // set ptr to overwrite last comma
+  ss << " ]";
+
+  return ss.str();
+}
+
 #endif // ifdef HAVE_SEAL_BFV
