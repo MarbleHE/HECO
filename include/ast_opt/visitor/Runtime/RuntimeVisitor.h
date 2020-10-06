@@ -2,19 +2,21 @@
 #define GRAPHNODE_H_INCLUDE_AST_OPT_VISITOR_RUNTIME_H_
 
 #include <stack>
+
 #include "ast_opt/visitor/ScopedVisitor.h"
 #include "ast_opt/visitor/Runtime/AbstractCiphertext.h"
 #include "ast_opt/visitor/TypeCheckingVisitor.h"
 
 // Forward declaration
 class SpecialSecretBranchingVisitor;
+class AbstractCiphertextFactory;
 
-/// ControlFlowGraphVisitor uses the Visitor<T> template to allow specifying default behaviour
+/// RuntimeVisitor uses the Visitor<T> template to allow specifying default behaviour
 typedef Visitor<SpecialSecretBranchingVisitor> RuntimeVisitor;
+typedef std::vector<std::pair<std::string, std::unique_ptr<AbstractCiphertext>>> OutputIdentifierValuePairs;
 
 class SpecialRuntimeVisitor : public ScopedVisitor {
  private:
-
   std::stack<std::reference_wrapper<AbstractExpression>> intermedResult;
 
   /// this is produced by the TypeCheckingVisitor and lets us determine whether an identifier is secret
@@ -24,13 +26,12 @@ class SpecialRuntimeVisitor : public ScopedVisitor {
   std::unordered_map<ScopedIdentifier, std::unique_ptr<AbstractCiphertext>> ciphertexts;
 
   // TODO: Think how to fix this as Literals do not have a common base class anymore
-//  std::unordered_map<ScopedIdentifier, std::reference_wrapper<Literal>> ciphertexts;
+  std::unordered_map<ScopedIdentifier, std::reference_wrapper<AbstractExpression>> plainValues;
 
-
+  AbstractCiphertextFactory &factory;
 
  public:
-
-  SpecialRuntimeVisitor(AbstractNode &inputs, AbstractNode &outputs);
+  SpecialRuntimeVisitor(AbstractCiphertextFactory &factory, AbstractNode &inputs);
 
   void visit(BinaryExpression &elem) override;
 
@@ -73,6 +74,13 @@ class SpecialRuntimeVisitor : public ScopedVisitor {
   void visit(Variable &elem) override;
 
   AbstractExpression &getNextStackElement();
+
+  void printOutput(AbstractNode &outputAst, std::ostream &targetStream = std::cout);
+
+  template<typename T>
+  void checkAstStructure(AbstractNode &astRootNode);
+
+  std::vector<std::pair<std::string, std::unique_ptr<AbstractCiphertext>>> getOutput(AbstractNode &outputAst);
 };
 
 #endif //GRAPHNODE_H_INCLUDE_AST_OPT_VISITOR_RUNTIME_H_
