@@ -20,10 +20,7 @@ class ScopedVisitor : public IVisitor {
   /// the scope that the scopedVisitor is currently in during the AST traversal
   Scope *currentScope = nullptr;
 
-  std::vector<std::string> predeclaredVariables;
-
  public:
-  void setPredeclaredVariables(std::vector<std::string> &alreadyDeclaredVariables);
 
   void visit(BinaryExpression &elem) override;
 
