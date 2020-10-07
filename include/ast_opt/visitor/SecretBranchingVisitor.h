@@ -4,6 +4,7 @@
 #include "ast_opt/ast/AbstractExpression.h"
 #include "ast_opt/visitor/ScopedVisitor.h"
 #include "TypeCheckingVisitor.h"
+#include "ast_opt/utilities/VariableMap.h"
 
 // Forward declaration
 class SpecialSecretBranchingVisitor;
@@ -12,7 +13,7 @@ class SpecialSecretBranchingVisitor;
 typedef Visitor<SpecialSecretBranchingVisitor> SecretBranchingVisitor;
 
 /// value must be a ptr as variable can be initialized but without a value
-typedef std::unordered_map<ScopedIdentifier, AbstractExpression *> VariableValueMap;
+typedef VariableMap<AbstractExpression*> VariableValueMap;
 
 class SpecialSecretBranchingVisitor : public ScopedVisitor {
  private:

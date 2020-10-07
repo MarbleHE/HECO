@@ -27,7 +27,7 @@ void SpecialVectorizer::visit(Block &elem) {
 
   // TODO: Emit all relevant assignments again!
   for (auto &scopedID: variableValues.changedEntries()) {
-    auto &cv = variableValues.take(scopedID);
+    auto &cv = variableValues.erase(scopedID);
     for (auto &statement : cv.statementsToExecutePlan()) {
       elem.appendStatement(std::move(statement));
     }
@@ -69,7 +69,8 @@ void SpecialVectorizer::visit(Assignment &elem) {
 
   /// Combine the execution plans, if they already exist
   if (variableValues.has(targetID)) {
-    variableValues.getToModify(targetID).merge(cv);
+    ComplexValue& value = variableValues.get(targetID);
+    value.merge(cv); //Since this only changes the object, the reference in the variableValues should still be correct.
   } else {
     precomputedValues.push_back(cv);
     variableValues.add(targetID, precomputedValues[precomputedValues.size() - 1]);

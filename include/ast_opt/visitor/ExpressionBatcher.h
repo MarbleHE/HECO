@@ -7,7 +7,7 @@
 #include "ast_opt/utilities/BatchingConstraint.h"
 #include "ast_opt/utilities/Datatype.h"
 #include "ast_opt/utilities/ComplexValue.h"
-#include "ast_opt/utilities/VariableValueMap.h"
+#include "ast_opt/utilities/VariableMap.h"
 #include "ast_opt/visitor/ScopedVisitor.h"
 
 // Forward Declaration for typedef below (must be above documentation, to ensure documentation is associated with the right type)
@@ -27,7 +27,7 @@ class SpecialExpressionBatcher : public ScopedVisitor {
   Values precomputedValues;
 
   /// Associates pre-computed values to variables
-  VariableValueMap variableValues;
+  VariableMap<ComplexValue&> variableValues;
 
   typedef std::unordered_map<ScopedIdentifier, BatchingConstraint> ConstraintMap;
   /// Records existing constraints on slot-encodings
