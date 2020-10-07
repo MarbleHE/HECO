@@ -346,7 +346,7 @@ void SpecialRuntimeVisitor::checkAstStructure(AbstractNode &astRootNode) {
     if (castedStatement==nullptr) {
       throw std::runtime_error(
           "Block statements of given (input|output) AST are expected to be of type "
-              + std::string(typeid(castedStatement).name()) + ". ");
+              + std::string(typeid(T).name()) + ". ");
     }
     // special condition for assignments: require that assignment's value is a Variable
     if (typeid(T)==typeid(Assignment)) {
@@ -385,6 +385,8 @@ OutputIdentifierValuePairs SpecialRuntimeVisitor::getOutput(AbstractNode &output
     if (auto valueAsVariable = dynamic_cast<Variable *>(&varAssignm.getValue())) {
       // if the value is a Variable, it's sufficient if we get the corresponding ciphertext
       auto scopedIdentifier = getRootScope().resolveIdentifier(valueAsVariable->getIdentifier());
+      // TODO: This modifies the output s.t. calling the same method or printOutput afterward will not work.
+      //  Create a copy-constructor in AbstractCiphertext and use copies instead. Then make this method const.
       ctxt = std::move(ciphertexts.at(scopedIdentifier));
       ciphertexts.erase(scopedIdentifier);
     } else if (auto valueAsIndexAccess = dynamic_cast<IndexAccess *>(&varAssignm.getValue())) {
