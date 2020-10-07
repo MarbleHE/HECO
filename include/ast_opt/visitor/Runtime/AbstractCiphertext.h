@@ -2,9 +2,11 @@
 #define GRAPHNODE_H_INCLUDE_AST_OPT_VISITOR_RUNTIME_ABSTRACTCIPHERTEXT_H_
 
 #include <memory>
-#include "ast_opt/ast/Literal.h"
 
-class AbstractCiphertext {
+#include "ast_opt/ast/Literal.h"
+#include "ast_opt/visitor/Runtime/AbstractValue.h"
+
+class AbstractCiphertext : public AbstractValue {
  public:
   /// Default destructor.
   virtual ~AbstractCiphertext() = default;
