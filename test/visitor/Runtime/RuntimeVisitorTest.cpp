@@ -15,6 +15,84 @@ class RuntimeVisitorTest : public ::testing::Test {
   }
 };
 
+TEST_F(RuntimeVisitorTest, testInputOutputAst) { /* NOLINT */
+  // Test that checks whether we can pass input, run a very simple instruction, and retrieve the output.
+
+  // program's input
+  const char *inputs = R""""(
+      secret int __input0__ = {43, 1, 1, 1, 22, 11, 425, 0, 1, 7};
+      int __input1__ = {43, 1, 1, 1, 22, 11, 425, 0, 1, 0};
+    )"""";
+  auto astInput = Parser::parse(std::string(inputs));
+
+  // program specification
+  const char *program = R""""(
+      __input0__ = rotate(__input0__, -4);
+    )"""";
+  auto astProgram = Parser::parse(std::string(program));
+
+  // program's output
+  const char *outputs = R""""(
+      y = __input0__;
+    )"""";
+  auto astOutput = Parser::parse(std::string(outputs));
+
+  // create a SpecialRuntimeVisitor instance
+  SpecialRuntimeVisitor srv(*scf, *astInput);
+
+  // run the program
+  astProgram->accept(srv);
+
+  std::unordered_map<std::string, std::vector<int64_t>> expectedOutput;
+  std::vector<int64_t> data = {7, 7, 7, 7, 43, 1, 1, 1, 22, 11, 425, 0, 1, 7};
+  expectedOutput.emplace("y", data);
+
+  auto output = srv.getOutput(*astOutput);
+  for (const auto &[identifier, ciphertext] : output) {
+    std::vector<int64_t> decryptedValues;
+    scf->decryptCiphertext(*ciphertext, decryptedValues);
+    EXPECT_TRUE(expectedOutput.count(identifier) > 0);
+    auto expected = expectedOutput.at(identifier);
+    for (int i = 0; i < expected.size(); ++i) {
+      EXPECT_EQ(expected[i], decryptedValues[i]);
+    }
+  }
+}
+
+TEST_F(RuntimeVisitorTest, t) { /* NOLINT */
+  // Test that shows that retrieving the output modifies the AST.
+
+  // program's input
+  const char *inputs = R""""(
+      secret int __input0__ = {43, 1, 1, 1, 22, 11, 425, 0, 1, 7};
+      int __input1__ = {43, 1, 1, 1, 22, 11, 425, 0, 1, 0};
+    )"""";
+  auto astInput = Parser::parse(std::string(inputs));
+
+  // program specification
+  const char *program = R""""(
+      __input0__ = rotate(__input0__, -4);
+    )"""";
+  auto astProgram = Parser::parse(std::string(program));
+
+  // program's output
+  const char *outputs = R""""(
+      y = __input0__;
+    )"""";
+  auto astOutput = Parser::parse(std::string(outputs));
+
+  // create a SpecialRuntimeVisitor instance
+  SpecialRuntimeVisitor srv(*scf, *astInput);
+
+  // run the program
+  astProgram->accept(srv);
+
+  // Get the output --- this modifies the AST such that consecutive calls to getOutput or printOutput lead to an
+  // exception. See the note in RuntimeVisitor.cpp for details on how to fix.
+  auto output = srv.getOutput(*astOutput);
+  EXPECT_THROW(srv.printOutput(*astOutput), std::out_of_range);
+}
+
 TEST_F(RuntimeVisitorTest, programExecution) { /* NOLINT */
   const char *inputChars = R""""(
     public int main(secret int N) {
@@ -27,45 +105,6 @@ TEST_F(RuntimeVisitorTest, programExecution) { /* NOLINT */
     )"""";
   std::vector<std::reference_wrapper<AbstractNode>> createdNodes;
   auto inputAst = Parser::parse(std::string(inputChars), createdNodes);
-
-}
-
-TEST_F(RuntimeVisitorTest, test) { /* NOLINT */
-  // program's input
-  const char *inputs = R""""(
-      secret int __input0__ = {43, 1, 1, 1, 22, 11, 425, 0, 1, 0};
-      int __input1__ = {43, 1, 1, 1, 22, 11, 425, 0, 1, 0};
-    )"""";
-  auto astInput = Parser::parse(std::string(inputs));
-
-  // program specification
-  const char *program = R""""(
-      __input0__ = rotate(__input0__, 4);
-    )"""";
-  auto astProgram = Parser::parse(std::string(program));
-
-  // program's output
-  const char *outputs = R""""(
-      y = __input0__;
-    )"""";
-  auto astOutput = Parser::parse(std::string(outputs));
-
-
-  // create a SpecialRuntimeVisitor instance
-  SpecialRuntimeVisitor srv(*scf, *astInput);
-
-//  // add identifiers to (outermost) root scope, otherwise resolveIdentifier will fail
-//  srv.setRootScope(std::make_unique<Scope>(*astProgram));
-//  srv.getRootScope().addIdentifier("__input0__");
-//  srv.getRootScope().addIdentifier("__input1__");
-
-  // run the program
-  astProgram->accept(srv);
-
-
-
-  // print the output
-  srv.printOutput(*astOutput);
 }
 
 #endif
