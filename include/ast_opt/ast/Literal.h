@@ -23,13 +23,16 @@ class Literal : public AbstractExpression {
   /// Creates a deep copy of the current node
   /// Should be used only by Literal::clone()
   /// \return a copy of the current node
-  Literal *clone_impl(AbstractNode* parent_) const override {
+  Literal *clone_impl(AbstractNode *parent_) const override {
     auto p = new Literal(*this);
-    if(parent_) {p->setParent(*parent_);}
+    if (parent_) { p->setParent(*parent_); }
     return p;
   }
 
  public:
+  /// A typedef that allows obtaining the type T from any Literal<T> class.
+  typedef T value_type;
+
   /// Destructor
   ~Literal() override = default;
 
