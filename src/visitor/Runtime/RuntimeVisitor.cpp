@@ -117,22 +117,25 @@ void SpecialRuntimeVisitor::visit(Call &elem) {
         "Instruction 'rotate' requires two arguments: (1) identifier of ciphertext to be rotated "
         "and the (2) number of steps to rotate the ciphertext.");
   }
+
   // arg 0: ciphertext to rotate
   auto ciphertextIdentifier = elem.getArguments().at(0);
-  std::unique_ptr<AbstractCiphertext> *ctxt;
-  if (auto ciphertextIdentifierVariable = dynamic_cast<Variable *>(&ciphertextIdentifier.get())) {
-    auto scopedIdentifier = getCurrentScope().resolveIdentifier(ciphertextIdentifierVariable->getIdentifier());
-    ctxt = &ciphertexts.at(scopedIdentifier);
-  } else {
+  std::unique_ptr<AbstractCiphertext> ctxt;
+  auto ciphertextIdentifierVariable = dynamic_cast<Variable *>(&ciphertextIdentifier.get());
+  if (ciphertextIdentifierVariable==nullptr) {
     throw std::runtime_error("Argument 'ciphertext' in 'rotate' instruction must be a variable.");
   }
+  auto scopedIdentifier = getCurrentScope().resolveIdentifier(ciphertextIdentifierVariable->getIdentifier());
+
   // arg 1: rotation steps
   auto steps = elem.getArguments().at(1);
-  if (auto stepsLiteralInt = dynamic_cast<LiteralInt *>(&steps.get())) {
-    ctxt->get()->rotateRowsInplace(stepsLiteralInt->getValue());
-  } else {
+  auto stepsLiteralInt = dynamic_cast<LiteralInt *>(&steps.get());
+  if (stepsLiteralInt==nullptr) {
     throw std::runtime_error("Argument 'steps' in 'rotate' instruction must be an integer.");
   }
+
+  // perform rotation
+  ciphertexts.at(scopedIdentifier)->rotateRowsInplace(stepsLiteralInt->getValue());
 }
 
 void SpecialRuntimeVisitor::visit(ExpressionList &elem) {
@@ -308,14 +311,15 @@ void SpecialRuntimeVisitor::visit(VariableDeclaration &elem) {
   if (elem.getDatatype().getSecretFlag()) {
     // declaration of a secret variable, i.e., a ciphertext
     if (auto ivAsLiteralInt = dynamic_cast<LiteralInt *>(&initializationValue)) {
-      auto scopedIdentifer = std::make_unique<ScopedIdentifier>(getCurrentScope(), elem.getTarget().getIdentifier());
+      auto sident = std::make_unique<ScopedIdentifier>(getCurrentScope(), elem.getTarget().getIdentifier());
       auto ciphertext = factory.createCiphertext(ivAsLiteralInt->getValue());
-      ciphertexts[*scopedIdentifer] = std::move(ciphertext);
+
+      ciphertexts.insert_or_assign(*sident, std::move(ciphertext));
     } else if (auto ivAsExprList = dynamic_cast<ExpressionList *>(&initializationValue)) {
-      auto scopedIdentifer = std::make_unique<ScopedIdentifier>(getCurrentScope(), elem.getTarget().getIdentifier());
+      auto sident = std::make_unique<ScopedIdentifier>(getCurrentScope(), elem.getTarget().getIdentifier());
       auto vec = extractIntegerFromLiteralInt(*ivAsExprList);
       auto ciphertext = factory.createCiphertext(vec);
-      ciphertexts[*scopedIdentifer] = std::move(ciphertext);
+      ciphertexts.insert_or_assign(*sident, std::move(ciphertext));
     } else {
       throw std::runtime_error("Cannot create a ciphertext for anything other than a LiteralInt or an ExpressionList "
                                "of LiteralInts yet.");
@@ -331,9 +335,9 @@ void SpecialRuntimeVisitor::visit(Variable &elem) {
   // TODO: Implement me!
   auto scopedIdentifier = getCurrentScope().resolveIdentifier(elem.getIdentifier());
   if (identifierDatatypes.at(scopedIdentifier).getSecretFlag()) {
-    //auto &value = ciphertexts.at(scopedIdentifier);
+//    auto &value = ciphertexts.at(scopedIdentifier);
   } else {
-    //auto value = plainValues.at(scopedIdentifier);
+//    auto value = plainValues.at(scopedIdentifier);
   }
 }
 
@@ -395,16 +399,14 @@ OutputIdentifierValuePairs SpecialRuntimeVisitor::getOutput(AbstractNode &output
       auto scopedIdentifier = getRootScope().resolveIdentifier(valueAsVariable->getIdentifier());
       // TODO: This modifies the output s.t. calling the same method or printOutput afterward will not work.
       //  Create a copy-constructor in AbstractCiphertext and use copies instead. Then make this method const.
-      ctxt = std::move(ciphertexts.at(scopedIdentifier));
-      ciphertexts.erase(scopedIdentifier);
+      ctxt = ciphertexts.at(scopedIdentifier)->clone();
     } else if (auto valueAsIndexAccess = dynamic_cast<IndexAccess *>(&varAssignm.getValue())) {
       // if the value is an IndexAccess
       try {
         auto valueIdentifier = dynamic_cast<Variable &>(valueAsIndexAccess->getTarget());
         auto idx = dynamic_cast<LiteralInt &>(valueAsIndexAccess->getIndex());
         auto scopedIdentifier = getRootScope().resolveIdentifier(valueIdentifier.getIdentifier());
-        auto tmpCtxt = &ciphertexts.at(scopedIdentifier);
-        ctxt = tmpCtxt->get()->rotateRows(idx.getValue());
+        ctxt = ciphertexts.at(scopedIdentifier)->rotateRows(idx.getValue());
       } catch (std::bad_cast &) {
         throw std::runtime_error(
             "Nested index accesses in right-hand side of output AST not allowed (e.g., y = __input0__[a[2]]).");

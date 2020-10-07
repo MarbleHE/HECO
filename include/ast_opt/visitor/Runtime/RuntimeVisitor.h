@@ -6,6 +6,7 @@
 #include "ast_opt/visitor/ScopedVisitor.h"
 #include "ast_opt/visitor/Runtime/AbstractCiphertext.h"
 #include "ast_opt/visitor/TypeCheckingVisitor.h"
+#include "ast_opt/utilities/VariableMap.h"
 
 // Forward declaration
 class SpecialSecretBranchingVisitor;
@@ -23,7 +24,7 @@ class SpecialRuntimeVisitor : public ScopedVisitor {
   // TODO: add this to the constructor
   VariableDatatypeMap identifierDatatypes;
 
-  std::unordered_map<ScopedIdentifier, std::unique_ptr<AbstractCiphertext>> ciphertexts;
+  VariableMap<std::unique_ptr<AbstractCiphertext>> ciphertexts;
 
   // TODO: Think how to fix this as Literals do not have a common base class anymore
   std::unordered_map<ScopedIdentifier, std::reference_wrapper<AbstractExpression>> plainValues;
