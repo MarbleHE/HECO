@@ -7,6 +7,26 @@
 
 SealCiphertext::SealCiphertext(SealCiphertextFactory &sealFactory) : factory(sealFactory) {}
 
+SealCiphertext::SealCiphertext(const SealCiphertext &other)  // copy constructor
+    : factory(other.factory) {
+  ciphertext = seal::Ciphertext(other.ciphertext);
+}
+
+SealCiphertext &SealCiphertext::operator=(const SealCiphertext &other) {  // copy assignment
+  return *this = SealCiphertext(other);
+}
+
+SealCiphertext::SealCiphertext(SealCiphertext &&other) noexcept  // move constructor
+    : factory(other.factory), ciphertext(std::move(other.ciphertext)) {}
+
+SealCiphertext &SealCiphertext::operator=(SealCiphertext &&other) noexcept {  // move assignment
+  // Self-assignment detection
+  if (&other==this) return *this;
+  ciphertext = other.ciphertext;
+  factory = std::move(other.factory);
+  return *this;
+}
+
 SealCiphertext &cast(AbstractCiphertext &abstractCiphertext) {
   if (auto sealCtxt = dynamic_cast<SealCiphertext *>(&abstractCiphertext)) {
     return *sealCtxt;
@@ -138,6 +158,11 @@ void SealCiphertext::multiplyPlainInplace(ExpressionList &operand) {
   auto plaintext = factory.createPlaintext(castedOperand);
   factory.getEvaluator().multiply_plain_inplace(ciphertext, *plaintext);
   factory.getEvaluator().relinearize_inplace(ciphertext, factory.getRelinKeys());
+}
+
+std::unique_ptr<AbstractCiphertext> SealCiphertext::clone() {
+  // call the copy constructor to create a clone of this ciphertext
+  return std::make_unique<SealCiphertext>(*this);
 }
 
 #endif

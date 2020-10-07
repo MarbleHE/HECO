@@ -3,6 +3,7 @@
 
 #include <memory>
 #include "AbstractCiphertext.h"
+#include "SealCiphertextFactory.h"
 
 // forward declarations
 class SealCiphertextFactory;
@@ -20,6 +21,14 @@ class SealCiphertext : public AbstractCiphertext {
 
  public:
   ~SealCiphertext() override = default;
+
+  SealCiphertext(const SealCiphertext &other); // copy constructor
+
+  SealCiphertext(SealCiphertext &&other) noexcept;  // copy assignment
+
+  SealCiphertext &operator=(const SealCiphertext &other);  // move constructor
+
+  SealCiphertext &operator=(SealCiphertext &&other) noexcept;  // move assignment
 
   /// Creates a new SealCiphertext: a wrapper around the seal::Ciphertext class.
   /// \param sealFactory The factory that created this ciphertext.
@@ -60,6 +69,8 @@ class SealCiphertext : public AbstractCiphertext {
   std::unique_ptr<AbstractCiphertext> subtractPlain(ExpressionList &operand) override;
 
   void subtractPlainInplace(ExpressionList &operand) override;
+
+  std::unique_ptr<AbstractCiphertext> clone() override;
 };
 
 #endif
