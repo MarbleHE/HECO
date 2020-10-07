@@ -121,6 +121,8 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/visitor/Runtime/SealCiphertext.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/Runtime/SealCiphertextFactory.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/Runtime/AbstractValue.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/Runtime/SealPlaintext.cpp
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/Runtime/Cleartext.cpp
         )
 
 set(HEADER_ONLY_SOURCES
@@ -129,7 +131,8 @@ set(HEADER_ONLY_SOURCES
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractTarget.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/IVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/Runtime/AbstractCiphertextFactory.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/VariableMap.h)
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/VariableMap.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/Runtime/AbstractPlaintext.h)
 
 # TODO: Go through this list and determine which headers aren't actually public
 set(PUBLIC_HEADERS
@@ -178,6 +181,8 @@ set(PUBLIC_HEADERS
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/Runtime/SealCiphertext.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/Runtime/SealCiphertextFactory.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/Runtime/AbstractValue.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/Runtime/Cleartext.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/Runtime/SealPlaintext.h
         )
 
 
