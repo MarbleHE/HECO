@@ -45,26 +45,19 @@ class VariableMap {
     return v;
   }
 
-  void add(ScopedIdentifier s, T v) {
+  void add(const ScopedIdentifier &s, T v) {
     map.insert({s, v});
     changed.insert(s);
   }
 
-  void insert_or_assign(ScopedIdentifier s, T v) {
-    auto it = map.find(s);
-    if(it == map.end()) {
-      map.insert({s,v});
-      changed.insert(s);
-    } else {
-      it->second = v;
-      changed.insert(s);
-    }
+  void insert_or_assign(ScopedIdentifier s, T &&v) {
+    map.insert_or_assign(s, std::move(v));
+    changed.insert(s);
   }
 
   void update(const ScopedIdentifier &s, T v) {
     auto it = map.find(s);
     if (it!=map.end()) {
-
       it->second = v;
       changed.insert(s);
     } else {
