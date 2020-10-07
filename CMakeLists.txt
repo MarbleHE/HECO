@@ -122,7 +122,7 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/visitor/Runtime/SealCiphertextFactory.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/Runtime/AbstractValue.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/Runtime/SealPlaintext.cpp
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/Runtime/Cleartext.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/Runtime/Cleartext.cpp
         )
 
 set(HEADER_ONLY_SOURCES
@@ -181,8 +181,8 @@ set(PUBLIC_HEADERS
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/Runtime/SealCiphertext.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/Runtime/SealCiphertextFactory.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/Runtime/AbstractValue.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/Runtime/Cleartext.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/Runtime/SealPlaintext.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/Runtime/Cleartext.h
         )
 
 
