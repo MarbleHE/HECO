@@ -13,7 +13,7 @@ class AbstractCiphertext : public AbstractValue {
 
  public:
   /// Default destructor.
-  virtual ~AbstractCiphertext() = default;
+  ~AbstractCiphertext() override = default;
 
   /// Multiplies this ciphertext with the given ciphertext and returns a new ciphertext with the result.
   /// \param operand The ciphertext to multiply this ciphertext with.
@@ -80,6 +80,10 @@ class AbstractCiphertext : public AbstractValue {
   /// Cyclically rotates this ciphertext by the given number of steps.
   /// \param steps The number of steps this ciphertext should be rotated.
   virtual void rotateRowsInplace(int steps) = 0;
+
+  /// Creates and returns a clone of this ciphertext.
+  /// \return A clone of this ciphertext as std::unique_ptr.
+  virtual std::unique_ptr<AbstractCiphertext> clone() = 0;
 };
 
 #endif //GRAPHNODE_H_INCLUDE_AST_OPT_VISITOR_RUNTIME_ABSTRACTCIPHERTEXT_H_

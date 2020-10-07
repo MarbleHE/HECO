@@ -2,6 +2,7 @@
 #define GRAPHNODE_H_INCLUDE_AST_OPT_VISITOR_RUNTIME_CLEARTEXT_H_
 
 #include <vector>
+#include <cstdint>
 
 #include "ast_opt/visitor/Runtime/AbstractValue.h"
 

@@ -10,7 +10,7 @@ class AbstractPlaintext : public AbstractValue {
 
  public:
   /// Default destructor.
-  virtual ~AbstractPlaintext() = default;
+  ~AbstractPlaintext() override = default;
 };
 
 #endif //GRAPHNODE_H_INCLUDE_AST_OPT_VISITOR_RUNTIME_ABSTRACTPLAINTEXT_H_
