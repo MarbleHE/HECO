@@ -9,28 +9,31 @@
 #include "ast_opt/utilities/VariableMap.h"
 
 // Forward declaration
-class SpecialSecretBranchingVisitor;
+class SpecialRuntimeVisitor;
 class AbstractCiphertextFactory;
 
 /// RuntimeVisitor uses the Visitor<T> template to allow specifying default behaviour
-typedef Visitor<SpecialSecretBranchingVisitor> RuntimeVisitor;
+typedef Visitor<SpecialRuntimeVisitor> RuntimeVisitor;
 typedef std::vector<std::pair<std::string, std::unique_ptr<AbstractCiphertext>>> OutputIdentifierValuePairs;
 
 class SpecialRuntimeVisitor : public ScopedVisitor {
  private:
-  std::stack<std::reference_wrapper<AbstractExpression>> intermedResult;
+  ///
+  std::stack<std::unique_ptr<AbstractValue>> intermedResult;
 
-  /// this is produced by the TypeCheckingVisitor and lets us determine whether an identifier is secret
-  // TODO: add this to the constructor
+  ///
   VariableDatatypeMap identifierDatatypes;
 
+  ///
   VariableMap<std::unique_ptr<AbstractCiphertext>> ciphertexts;
 
-  // TODO: Think how to fix this as Literals do not have a common base class anymore
-  std::unordered_map<ScopedIdentifier, std::reference_wrapper<AbstractExpression>> plainValues;
+  ///
+  std::vector<std::unique_ptr<AbstractValue>> cleartexts;
 
+  ///
   AbstractCiphertextFactory &factory;
 
+  ///
   SecretTaintedNodesMap &secretTaintedMap;
 
  public:
@@ -78,7 +81,7 @@ class SpecialRuntimeVisitor : public ScopedVisitor {
 
   void visit(Variable &elem) override;
 
-  AbstractExpression &getNextStackElement();
+  std::unique_ptr<AbstractValue> getNextStackElement();
 
   void printOutput(AbstractNode &outputAst, std::ostream &targetStream = std::cout);
 

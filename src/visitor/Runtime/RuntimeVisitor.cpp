@@ -1,5 +1,7 @@
+#include <memory>
 #include <utility>
 #include <iostream>
+#include <ast_opt/visitor/Runtime/Cleartext.h>
 
 #include "ast_opt/visitor/Runtime/RuntimeVisitor.h"
 #include "ast_opt/ast/BinaryExpression.h"
@@ -21,10 +23,10 @@
 #include "ast_opt/visitor/Runtime/AbstractCiphertextFactory.h"
 #include "ast_opt/parser/Tokens.h"
 
-AbstractExpression &SpecialRuntimeVisitor::getNextStackElement() {
-  auto elem = intermedResult.top();
+std::unique_ptr<AbstractValue> SpecialRuntimeVisitor::getNextStackElement() {
+  auto elem = std::move(intermedResult.top());
   intermedResult.pop();
-  return elem.get();
+  return elem;
 }
 
 void SpecialRuntimeVisitor::visit(BinaryExpression &elem) {
@@ -140,7 +142,25 @@ void SpecialRuntimeVisitor::visit(Call &elem) {
 
 void SpecialRuntimeVisitor::visit(ExpressionList &elem) {
   ScopedVisitor::visit(elem);
-  intermedResult.push(elem);
+  // after visiting the expression list with this visitor, there should only be Literals left, otherwise this expression
+  // list is not valid; we use here that the TypeCheckingVisitor verified that all expressions in an ExpressionList have
+  // the same type
+  auto expr = elem.getExpressions().at(0);
+  if (dynamic_cast<LiteralBool *>(&expr.get())) {
+    intermedResult.emplace(std::make_unique<Cleartext<LiteralBool::value_type>>(elem));
+  } else if (dynamic_cast<LiteralChar *>(&elem)) {
+    intermedResult.emplace(std::make_unique<Cleartext<LiteralChar::value_type>>(elem));
+  } else if (dynamic_cast<LiteralInt *>(&expr.get())) {
+    intermedResult.emplace(std::make_unique<Cleartext<LiteralInt::value_type>>(elem));
+  } else if (dynamic_cast<LiteralFloat *>(&expr.get())) {
+    intermedResult.emplace(std::make_unique<Cleartext<LiteralFloat::value_type>>(elem));
+  } else if (dynamic_cast<LiteralDouble *>(&expr.get())) {
+    intermedResult.emplace(std::make_unique<Cleartext<LiteralDouble::value_type>>(elem));
+  } else if (dynamic_cast<LiteralString *>(&expr.get())) {
+    intermedResult.emplace(std::make_unique<Cleartext<LiteralString::value_type>>(elem));
+  } else {
+    throw std::runtime_error("Could not determine element type of ExpressionList!");
+  }
 }
 
 void SpecialRuntimeVisitor::visit(For &elem) {
@@ -149,8 +169,8 @@ void SpecialRuntimeVisitor::visit(For &elem) {
   // a helper method to check the value of the For loop's condition
   auto evaluateCondition = [&](AbstractExpression &expr) -> bool {
     expr.accept(*this);
-    auto &result = getNextStackElement();
-    if (auto conditionLiteralBool = dynamic_cast<LiteralBool *>(&result)) {
+    auto result = getNextStackElement();
+    if (auto conditionLiteralBool = dynamic_cast<LiteralBool *>(result.get())) {
       return conditionLiteralBool->getValue();
     } else {
       throw std::runtime_error("For loop's condition must be evaluable to a Boolean.");
@@ -176,20 +196,20 @@ void SpecialRuntimeVisitor::visit(Function &) {
 }
 
 void SpecialRuntimeVisitor::visit(If &elem) {
-  ScopedVisitor::visit(elem);
-
   // check if the If statement's condition is secret
   // (although we ran the SecretBranchingVisitor before, it can be that there are still secret conditions left,
   // for example, if the then/else branch contains an unsupported statement such as a loop)
-
-
+  if (secretTaintedMap.at(elem.getCondition().getUniqueNodeId())) {
+    throw std::runtime_error("If statements over secret conditions that cannot be rewritten using the "
+                             "SecretBranchingVisitor are not supported yet!");
+  }
 
   // get the If statement's condition
   elem.getCondition().accept(*this);
-  auto &conditionResult = getNextStackElement();
+  auto conditionResult = getNextStackElement();
 
-  if (auto conditionLiteralBool = dynamic_cast<LiteralBool *>(&conditionResult)) {
-    if (conditionLiteralBool->getValue()) {
+  if (auto conditionLiteralBool = dynamic_cast<Cleartext<bool> *>(conditionResult.get())) {
+    if (conditionLiteralBool->getData().front()) {
       // visit "then" branch
       elem.getThenBranch().accept(*this);
     } else if (elem.hasElseBranch()) {
@@ -197,7 +217,7 @@ void SpecialRuntimeVisitor::visit(If &elem) {
       elem.getElseBranch().accept(*this);
     }
   } else {
-    throw std::runtime_error("Condition of If statement must evaluate to a LiteralBool");
+    throw std::runtime_error("Condition of If statement must be evaluable to a bool.");
   }
 }
 
@@ -212,32 +232,32 @@ void SpecialRuntimeVisitor::visit(IndexAccess &elem) {
 
 void SpecialRuntimeVisitor::visit(LiteralBool &elem) {
   ScopedVisitor::visit(elem);
-  intermedResult.push(elem);
+  cleartexts.emplace_back(std::make_unique<Cleartext<bool>>(elem));
 }
 
 void SpecialRuntimeVisitor::visit(LiteralChar &elem) {
   ScopedVisitor::visit(elem);
-  intermedResult.push(elem);
+  cleartexts.emplace_back(std::make_unique<Cleartext<char>>(elem));
 }
 
 void SpecialRuntimeVisitor::visit(LiteralInt &elem) {
   ScopedVisitor::visit(elem);
-  intermedResult.push(elem);
+  cleartexts.emplace_back(std::make_unique<Cleartext<int>>(elem));
 }
 
 void SpecialRuntimeVisitor::visit(LiteralFloat &elem) {
   ScopedVisitor::visit(elem);
-  intermedResult.push(elem);
+  cleartexts.emplace_back(std::make_unique<Cleartext<float>>(elem));
 }
 
 void SpecialRuntimeVisitor::visit(LiteralDouble &elem) {
   ScopedVisitor::visit(elem);
-  intermedResult.push(elem);
+  cleartexts.emplace_back(std::make_unique<Cleartext<double>>(elem));
 }
 
 void SpecialRuntimeVisitor::visit(LiteralString &elem) {
   ScopedVisitor::visit(elem);
-  intermedResult.push(elem);
+  cleartexts.emplace_back(std::make_unique<Cleartext<std::string>>(elem));
 }
 
 void SpecialRuntimeVisitor::visit(OperatorExpression &) {
@@ -246,7 +266,8 @@ void SpecialRuntimeVisitor::visit(OperatorExpression &) {
 
 void SpecialRuntimeVisitor::visit(Return &elem) {
   ScopedVisitor::visit(elem);
-  // TODO: Implement me!
+  throw std::runtime_error("UNSUPPORT: RuntimeVisitor can neither break out of program with a return statement nor "
+                           "does return specified values as program's output.");
 }
 
 void SpecialRuntimeVisitor::visit(Assignment &elem) {
@@ -300,22 +321,24 @@ std::vector<int64_t> extractIntegerFromLiteralInt(ExpressionList &el) {
 
 void SpecialRuntimeVisitor::visit(VariableDeclaration &elem) {
   auto scopedIdentifier = std::make_unique<ScopedIdentifier>(getCurrentScope(), elem.getTarget().getIdentifier());
-  identifierDatatypes.emplace(*scopedIdentifier,
-                              elem.getDatatype());
+  identifierDatatypes.emplace(*scopedIdentifier, elem.getDatatype());
   getCurrentScope().addIdentifier(std::move(scopedIdentifier));
 
   if (elem.hasValue()) elem.getValue().accept(*this);
-  auto &initializationValue = getNextStackElement();
+  auto initializationValue = getNextStackElement();
 
+  std::cout << "pause..." << std::endl;
   // TODO: Implement me!
+
+  // TODO: Check for a Cleartext<int> here...
   if (elem.getDatatype().getSecretFlag()) {
     // declaration of a secret variable, i.e., a ciphertext
-    if (auto ivAsLiteralInt = dynamic_cast<LiteralInt *>(&initializationValue)) {
+    if (auto ivAsLiteralInt = dynamic_cast<LiteralInt *>(initializationValue.get())) {
       auto sident = std::make_unique<ScopedIdentifier>(getCurrentScope(), elem.getTarget().getIdentifier());
       auto ciphertext = factory.createCiphertext(ivAsLiteralInt->getValue());
 
       ciphertexts.insert_or_assign(*sident, std::move(ciphertext));
-    } else if (auto ivAsExprList = dynamic_cast<ExpressionList *>(&initializationValue)) {
+    } else if (auto ivAsExprList = dynamic_cast<ExpressionList *>(initializationValue.get())) {
       auto sident = std::make_unique<ScopedIdentifier>(getCurrentScope(), elem.getTarget().getIdentifier());
       auto vec = extractIntegerFromLiteralInt(*ivAsExprList);
       auto ciphertext = factory.createCiphertext(vec);

@@ -39,7 +39,7 @@ TEST_F(RuntimeVisitorTest, testInputOutputAst) { /* NOLINT */
 
   // create a SpecialRuntimeVisitor instance
   SecretTaintedNodesMap secretTaintedNodesMap;
-  SpecialRuntimeVisitor srv(*scf, *astInput, secretTaintedNodesMap);
+  RuntimeVisitor srv(*scf, *astInput, secretTaintedNodesMap);
 
   // run the program
   astProgram->accept(srv);
