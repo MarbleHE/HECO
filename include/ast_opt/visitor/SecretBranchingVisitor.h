@@ -12,7 +12,7 @@ class SpecialSecretBranchingVisitor;
 /// ControlFlowGraphVisitor uses the Visitor<T> template to allow specifying default behaviour
 typedef Visitor<SpecialSecretBranchingVisitor> SecretBranchingVisitor;
 
-/// value must be a ptr as variable can be initialized but without a value
+/// value must be a ptr as variable can be declared only (i.e., uninitialized)
 typedef VariableMap<AbstractExpression*> VariableValueMap;
 
 class SpecialSecretBranchingVisitor : public ScopedVisitor {

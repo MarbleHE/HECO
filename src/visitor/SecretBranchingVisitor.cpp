@@ -18,10 +18,14 @@
 VariableValueMap SpecialSecretBranchingVisitor::getChangedVariables(const VariableValueMap &baseMap,
                                                                     const VariableValueMap &changedMap) {
   VariableValueMap result;
-  for (auto &[k, v] : changedMap) {
+  for (auto &[scopedIdentifier, expr] : changedMap) {
     // a newly declared variable or a variable whose value changed
-    if ((baseMap.count(k)==0) || (v!=baseMap.at(k))) {
-      result.insert_or_assign(k, v);
+    if ((baseMap.count(scopedIdentifier)==0) || (expr!=baseMap.at(scopedIdentifier))) {
+      if (result.has(scopedIdentifier)) {
+        result.update(scopedIdentifier, expr);
+      } else {
+        result.add(scopedIdentifier, expr);
+      }
     }
   }
   return result;
@@ -222,8 +226,8 @@ void SpecialSecretBranchingVisitor::visit(Assignment &node) {
 
 void SpecialSecretBranchingVisitor::visit(VariableDeclaration &node) {
   // if the variable is declared + initialized, save variable identifier + value, otherwise use "nullptr" as value
-  AbstractExpression *value = (node.hasValue()) ? &node.getValue() : nullptr;
-  expressionValues.insert_or_assign(ScopedIdentifier(getCurrentScope(), node.getTarget().getIdentifier()), value);
+  expressionValues.insert_or_assign(ScopedIdentifier(getCurrentScope(), node.getTarget().getIdentifier()),
+                                    (node.hasValue()) ? &node.getValue() : nullptr);
   ScopedVisitor::visit(node);
 }
 
