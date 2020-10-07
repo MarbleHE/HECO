@@ -178,7 +178,7 @@ void SpecialSecretBranchingVisitor::visit(For &node) {
 }
 
 void SpecialSecretBranchingVisitor::visit(Block &node) {
-  decltype(node.getStatementPointers().end()) insertionPos;
+  auto insertionPos = node.getStatementPointers().end();
   auto it = node.getStatementPointers().begin();
   // iterate over all children of this Block
   while (it!=node.getStatementPointers().end()) {

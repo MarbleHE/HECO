@@ -5,7 +5,7 @@
 #include "include/ast_opt/visitor/Runtime/SealCiphertextFactory.h"
 
 #include "gtest/gtest.h"
-
+#ifdef HAVE_SEAL_BFV
 class RuntimeVisitorTest : public ::testing::Test {
  protected:
   std::unique_ptr<SealCiphertextFactory> scf;
@@ -68,3 +68,4 @@ TEST_F(RuntimeVisitorTest, test) { /* NOLINT */
   srv.printOutput(*astOutput);
 }
 
+#endif

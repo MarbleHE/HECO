@@ -32,10 +32,10 @@ void SpecialRuntimeVisitor::visit(BinaryExpression &elem) {
 
 
   elem.getLeft().accept(*this);
-  auto &lhsOperand = getNextStackElement();
+  // auto &lhsOperand = getNextStackElement();
 
   elem.getRight().accept(*this);
-  auto &rhsOperand = getNextStackElement();
+  // auto &rhsOperand = getNextStackElement();
 
   auto operatorEquals = [&elem](OperatorVariant op) -> bool { return elem.getOperator()==Operator(op); };
   auto operatorEqualsAnyOf = [&elem](std::initializer_list<OperatorVariant> op) -> bool {
@@ -162,7 +162,7 @@ void SpecialRuntimeVisitor::visit(For &elem) {
   }
 }
 
-void SpecialRuntimeVisitor::visit(Function &elem) {
+void SpecialRuntimeVisitor::visit(Function &) {
   throw std::runtime_error("Function statements are not supported yet by RuntimeVisitor.");
 }
 
@@ -231,7 +231,7 @@ void SpecialRuntimeVisitor::visit(LiteralString &elem) {
   intermedResult.push(elem);
 }
 
-void SpecialRuntimeVisitor::visit(OperatorExpression &elem) {
+void SpecialRuntimeVisitor::visit(OperatorExpression &) {
   throw std::runtime_error("UNIMPLEMENTED: RuntimeVisitor cannot execute OperatorExpressions yet.");
 }
 
@@ -243,7 +243,7 @@ void SpecialRuntimeVisitor::visit(Return &elem) {
 void SpecialRuntimeVisitor::visit(Assignment &elem) {
 
   elem.getTarget().accept(*this);
-  auto &assignmentTarget = getNextStackElement();
+  // auto &assignmentTarget = getNextStackElement();
 
 //  //
 //  if (auto atVariable = dynamic_cast<Variable *>(&assignmentTarget)) {
@@ -325,9 +325,9 @@ void SpecialRuntimeVisitor::visit(Variable &elem) {
   // TODO: Implement me!
   auto scopedIdentifier = getCurrentScope().resolveIdentifier(elem.getIdentifier());
   if (identifierDatatypes.at(scopedIdentifier).getSecretFlag()) {
-    auto &value = ciphertexts.at(scopedIdentifier);
+    //auto &value = ciphertexts.at(scopedIdentifier);
   } else {
-    auto value = plainValues.at(scopedIdentifier);
+    //auto value = plainValues.at(scopedIdentifier);
   }
 }
 
