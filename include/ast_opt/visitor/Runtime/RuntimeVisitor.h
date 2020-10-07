@@ -30,8 +30,12 @@ class SpecialRuntimeVisitor : public ScopedVisitor {
 
   AbstractCiphertextFactory &factory;
 
+  SecretTaintedNodesMap &secretTaintedMap;
+
  public:
-  SpecialRuntimeVisitor(AbstractCiphertextFactory &factory, AbstractNode &inputs);
+  SpecialRuntimeVisitor(AbstractCiphertextFactory &factory,
+                        AbstractNode &inputs,
+                        SecretTaintedNodesMap &secretTaintedNodesMap);
 
   void visit(BinaryExpression &elem) override;
 

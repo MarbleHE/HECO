@@ -38,7 +38,8 @@ TEST_F(RuntimeVisitorTest, testInputOutputAst) { /* NOLINT */
   auto astOutput = Parser::parse(std::string(outputs));
 
   // create a SpecialRuntimeVisitor instance
-  SpecialRuntimeVisitor srv(*scf, *astInput);
+  SecretTaintedNodesMap secretTaintedNodesMap;
+  SpecialRuntimeVisitor srv(*scf, *astInput, secretTaintedNodesMap);
 
   // run the program
   astProgram->accept(srv);
@@ -82,7 +83,8 @@ TEST_F(RuntimeVisitorTest, t) { /* NOLINT */
   auto astOutput = Parser::parse(std::string(outputs));
 
   // create a SpecialRuntimeVisitor instance
-  SpecialRuntimeVisitor srv(*scf, *astInput);
+  SecretTaintedNodesMap secretTaintedNodesMap;
+  SpecialRuntimeVisitor srv(*scf, *astInput, secretTaintedNodesMap);
 
   // run the program
   astProgram->accept(srv);

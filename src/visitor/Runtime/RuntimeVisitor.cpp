@@ -28,8 +28,18 @@ AbstractExpression &SpecialRuntimeVisitor::getNextStackElement() {
 }
 
 void SpecialRuntimeVisitor::visit(BinaryExpression &elem) {
-  // TODO: if lhs or rhs are secret tainted but the operator is non-FHE compatible, throw an exception
+  auto operatorEqualsAnyOf = [&elem](std::initializer_list<OperatorVariant> op) -> bool {
+    return std::any_of(op.begin(), op.end(),
+                       [&elem](OperatorVariant op) { return elem.getOperator()==Operator(op); });
+  };
 
+  // TODO: if lhs or rhs are secret tainted but the operator is non-FHE compatible, throw an exception
+  if ((secretTaintedMap.at(elem.getLeft().getUniqueNodeId()) || secretTaintedMap.at(elem.getRight().getUniqueNodeId()))
+      && !operatorEqualsAnyOf({FHE_ADDITION, FHE_SUBTRACTION, FHE_MULTIPLICATION})) {
+    throw std::runtime_error("An operand in the binary expression is a ciphertext but given operation ("
+                                 + elem.getOperator().toString() + ") cannot be executed on ciphertexts!\n"
+                                 + "Expression: " + elem.toString(false));
+  }
 
   elem.getLeft().accept(*this);
   // auto &lhsOperand = getNextStackElement();
@@ -38,10 +48,6 @@ void SpecialRuntimeVisitor::visit(BinaryExpression &elem) {
   // auto &rhsOperand = getNextStackElement();
 
   auto operatorEquals = [&elem](OperatorVariant op) -> bool { return elem.getOperator()==Operator(op); };
-  auto operatorEqualsAnyOf = [&elem](std::initializer_list<OperatorVariant> op) -> bool {
-    return std::any_of(op.begin(), op.end(),
-                       [&elem](OperatorVariant op) { return elem.getOperator()==Operator(op); });
-  };
 
 
 
@@ -360,8 +366,10 @@ void SpecialRuntimeVisitor::checkAstStructure(AbstractNode &astRootNode) {
   }
 }
 
-SpecialRuntimeVisitor::SpecialRuntimeVisitor(AbstractCiphertextFactory &factory, AbstractNode &inputs)
-    : factory(factory) {
+SpecialRuntimeVisitor::SpecialRuntimeVisitor(AbstractCiphertextFactory &factory,
+                                             AbstractNode &inputs,
+                                             SecretTaintedNodesMap &secretTaintedNodesMap)
+    : factory(factory), secretTaintedMap(secretTaintedNodesMap) {
   // generate ciphertexts for inputs
   checkAstStructure<VariableDeclaration>(inputs);
   inputs.accept(*this);
