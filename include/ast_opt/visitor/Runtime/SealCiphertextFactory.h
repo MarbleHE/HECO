@@ -53,6 +53,14 @@ class SealCiphertextFactory : public AbstractCiphertextFactory {
  public:
   SealCiphertextFactory() = default;
 
+  SealCiphertextFactory(const SealCiphertextFactory &other); // copy constructor
+
+  SealCiphertextFactory(SealCiphertextFactory &&other) noexcept;  // copy assignment
+
+  SealCiphertextFactory &operator=(const SealCiphertextFactory &other);  // move constructor
+
+  SealCiphertextFactory &operator=(SealCiphertextFactory &&other) noexcept;  // move assignment
+
   /// Creates a new SealCiphertextFactory whereat each ciphertext created by the factory can hold
   /// numElementsPerCiphertextSlot elements.
   /// \param numElementsPerCiphertextSlot The number of ciphertext slots of created ciphertexts. Must be a power of

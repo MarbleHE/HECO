@@ -3,6 +3,57 @@
 
 #ifdef HAVE_SEAL_BFV
 
+SealCiphertextFactory::SealCiphertextFactory(const SealCiphertextFactory &other) :
+    ciphertextSlotSize(other.ciphertextSlotSize),
+    context(other.context), // TODO: This should be a real copy, not just shared ownership (copying the shared_ptr)
+    secretKey(std::make_unique<seal::SecretKey>(*other.secretKey)),
+    publicKey(std::make_unique<seal::PublicKey>(*other.publicKey)),
+    galoisKeys(std::make_unique<seal::GaloisKeys>(*other.galoisKeys)),
+    relinKeys(std::make_unique<seal::RelinKeys>(*other.relinKeys)),
+    encoder(std::make_unique<seal::BatchEncoder>(context)),
+    evaluator(std::make_unique<seal::Evaluator>(other.context)),
+    encryptor(std::make_unique<seal::Encryptor>(context, *publicKey)),
+    decryptor(std::make_unique<seal::Decryptor>(other.context, *secretKey)) {  // copy constructor
+}
+
+SealCiphertextFactory::SealCiphertextFactory(SealCiphertextFactory &&other) noexcept // move constructor
+    : ciphertextSlotSize(other.ciphertextSlotSize),
+      context(std::move(other.context)),
+      secretKey(std::move(other.secretKey)),
+      publicKey(std::move(other.publicKey)),
+      galoisKeys(std::move(other.galoisKeys)),
+      relinKeys(std::move(other.relinKeys)),
+      encoder(std::move(other.encoder)),
+      evaluator(std::move(other.evaluator)),
+      encryptor(std::move(other.encryptor)),
+      decryptor(std::move(other.decryptor)) {
+}
+
+SealCiphertextFactory &SealCiphertextFactory::operator=(const SealCiphertextFactory &other) {  // copy assignment
+  return *this = SealCiphertextFactory(other);
+}
+
+SealCiphertextFactory &SealCiphertextFactory::operator=(SealCiphertextFactory &&other) noexcept {  // move assignment
+  // Self-assignment detection
+  if (&other==this) return *this;
+
+  if (ciphertextSlotSize!=other.ciphertextSlotSize) {
+    std::cerr << "Move assignment failed as const ciphertextSlotSize differs and cannot be changed!" << std::endl;
+    exit(1);
+  }
+
+  context = std::move(other.context);
+  secretKey = std::move(other.secretKey);
+  publicKey = std::move(other.publicKey);
+  galoisKeys = std::move(other.galoisKeys);
+  relinKeys = std::move(other.relinKeys);
+  encoder = std::move(other.encoder);
+  evaluator = std::move(other.evaluator);
+  encryptor = std::move(other.encryptor);
+  decryptor = std::move(other.decryptor);
+  return *this;
+}
+
 void SealCiphertextFactory::setupSealContext() {
   // Wrapper for parameters
   seal::EncryptionParameters params(seal::scheme_type::BFV);
