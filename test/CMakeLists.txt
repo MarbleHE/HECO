@@ -43,6 +43,7 @@ set(TEST_FILES
         parser/ParserTest.cpp
         parser/ParserTestHelpers.h
         parser/TokenizerTest.cpp
+        visitor/ExpressionBatcherTest.cpp
         visitor/ControlFlowGraphVisitorTest.cpp
         visitor/PrintVisitorTest.cpp
         visitor/VectorizerTest.cpp
