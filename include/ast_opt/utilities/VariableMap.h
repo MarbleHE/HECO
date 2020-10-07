@@ -19,7 +19,7 @@ class VariableMap {
 
   VariableMap() = default;
 
-  VariableMap(const std::unordered_map<ScopedIdentifier, T> &&map) : map(std::move(map)) {};
+  explicit VariableMap(const std::unordered_map<ScopedIdentifier, T> &&map) : map(std::move(map)) {};
 
   VariableMap(const VariableMap &other) = default;
 
@@ -84,7 +84,7 @@ class VariableMap {
 
   auto end() const { return map.end(); }
 
-  size_t count(ScopedIdentifier s) const {return map.count(s);}
+  [[nodiscard]] size_t count(ScopedIdentifier s) const { return map.count(s); }
 
   [[nodiscard]] const std::unordered_set<ScopedIdentifier> &changedEntries() const { return changed; }
 
