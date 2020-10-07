@@ -7,6 +7,10 @@
 #include "ast_opt/visitor/Runtime/AbstractValue.h"
 
 class AbstractCiphertext : public AbstractValue {
+ protected:
+  /// Protected constructor: makes sure that class is abstract, i.e., cannot be instantiated.
+  AbstractCiphertext() = default;
+
  public:
   /// Default destructor.
   virtual ~AbstractCiphertext() = default;
