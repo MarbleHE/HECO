@@ -20,6 +20,13 @@ class AbstractCiphertextFactory {
   /// \return (A std::unique_ptr) to the created AbstractCiphertext.
   virtual std::unique_ptr<AbstractCiphertext> createCiphertext(int64_t data) = 0;
 
+  /// Creates a new AbstractCiphertext with the instantiated concrete ciphertext factory. Expects an AbstractValue of
+  /// type Cleartext<T> where T is a type that must be supported by the concrete CiphertextFactory used. For example,
+  /// SealCiphertextFactory (BFV) only supports Cleartext<int>.
+  /// \param cleartext The cleartext of which a new ciphertext should be created from.
+  /// \return (A std::unique_ptr) to the created AbstractCiphertext.
+  virtual std::unique_ptr<AbstractCiphertext> createCiphertext(std::unique_ptr<AbstractValue> &&cleartext) = 0;
+
   /// Decrypts a given Abstractciphertext and writes the decrypted and decoded results into the given vector reference.
   /// \param abstractCiphertext (A reference to) the ciphertext that should be decrypted and decoded.
   /// \param ciphertextData (A reference to) the vector where the decrypted and decoded values are written to.

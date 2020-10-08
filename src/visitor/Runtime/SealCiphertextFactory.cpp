@@ -1,5 +1,6 @@
 #include "ast_opt/visitor/Runtime/SealCiphertext.h"
 #include "ast_opt/visitor/Runtime/SealCiphertextFactory.h"
+#include "ast_opt/visitor/Runtime/Cleartext.h"
 
 #ifdef HAVE_SEAL_BFV
 
@@ -163,6 +164,19 @@ std::string SealCiphertextFactory::getString(AbstractCiphertext &abstractCiphert
   ss << " ]";
 
   return ss.str();
+}
+
+std::unique_ptr<AbstractCiphertext> SealCiphertextFactory::createCiphertext(std::unique_ptr<AbstractValue> &&cleartext) {
+  if (auto castedCleartext = dynamic_cast<Cleartext<int> *>(cleartext.get())) {
+    // extract data and from std::vector<int> to std::vector<int64_t>
+    auto castedCleartextData = castedCleartext->getData();
+    std::vector<int64_t> data(castedCleartextData.begin(), castedCleartextData.end());
+    // avoid duplicate code -> delegate creation to other constructor
+    return createCiphertext(data);
+  } else {
+    throw std::runtime_error("Cannot create ciphertext from any other than a Cleartext<int> as used ciphertext factory "
+                             "(SealCiphertextFactory) uses BFV that only supports integers.");
+  }
 }
 
 #endif // ifdef HAVE_SEAL_BFV
