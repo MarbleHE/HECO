@@ -104,7 +104,7 @@ class SealCiphertextFactory : public AbstractCiphertextFactory {
 
   std::string getString(AbstractCiphertext &abstractCiphertext) override;
 
-  std::unique_ptr<AbstractCiphertext> createCiphertext(std::unique_ptr<AbstractValue> &&cleartext) override;
+  std::unique_ptr<AbstractCiphertext> createCiphertext(std::unique_ptr<AbstractValue> &&abstractValue) override;
 };
 
 #endif
