@@ -3,7 +3,10 @@
 
 #include <initializer_list>
 #include <string>
+#include <vector>
+#include <memory>
 
+// forward declarations
 class AbstractCiphertext;
 
 class AbstractCiphertextFactory {
