@@ -3,11 +3,11 @@
 
 #include <stack>
 
+#include "ast_opt/visitor/runtime/Cleartext.h"
 #include "ast_opt/visitor/ScopedVisitor.h"
 #include "ast_opt/visitor/runtime/AbstractCiphertext.h"
 #include "ast_opt/visitor/TypeCheckingVisitor.h"
 #include "ast_opt/utilities/VariableMap.h"
-#include "Cleartext.h"
 
 // Forward declaration
 class SpecialRuntimeVisitor;
@@ -26,10 +26,9 @@ class SpecialRuntimeVisitor : public ScopedVisitor {
   VariableDatatypeMap identifierDatatypes;
 
   ///
-  VariableMap<std::unique_ptr<AbstractCiphertext>> ciphertexts;
+  VariableMap<std::unique_ptr<AbstractCiphertext>> declaredCiphertexts;
 
-  ///
-  std::vector<std::unique_ptr<AbstractValue>> cleartexts;
+  VariableMap<std::unique_ptr<ICleartext>> declaredCleartexts;
 
   ///
   AbstractCiphertextFactory &factory;

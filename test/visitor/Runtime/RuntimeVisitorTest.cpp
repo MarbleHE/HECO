@@ -60,18 +60,53 @@ TEST_F(RuntimeVisitorTest, testInputOutputAst) { /* NOLINT */
   }
 }
 
-TEST_F(RuntimeVisitorTest, DISABLED_programExecution) { /* NOLINT */
-  const char *inputChars = R""""(
-    public int main(secret int N) {
-      int sum = 2442;
-      if (N < 5) {
-        sum = sum-N;
-      }
-      return sum;
-    }
+TEST_F(RuntimeVisitorTest, testSimpleBinaryExpression) { /* NOLINT */
+
+  // program's input
+  const char *inputs = R""""(
+      secret int __input0__ = {43, 1, 1, 1, 22, 11, 425, 0, 1, 7};
+      int __input1__ = {43, 1, 1, 1, 22, 11, 425, 0, 1, 0};
     )"""";
-  std::vector<std::reference_wrapper<AbstractNode>> createdNodes;
-  auto inputAst = Parser::parse(std::string(inputChars), createdNodes);
+  auto astInput = Parser::parse(std::string(inputs));
+
+  // program specification
+  const char *program = R""""(
+      int sum = 10+25;
+    )"""";
+  auto astProgram = Parser::parse(std::string(program));
+
+  // program's output
+  const char *outputs = R""""(
+      y = sum;
+    )"""";
+  auto astOutput = Parser::parse(std::string(outputs));
+
+  // create a SpecialRuntimeVisitor instance
+//  SecretTaintedNodesMap secretTaintedNodesMap;
+  TypeCheckingVisitor typeCheckingVisitor;
+  astProgram->accept(typeCheckingVisitor);
+
+  auto map = typeCheckingVisitor.getSecretTaintedNodes();
+  RuntimeVisitor srv(*scf, *astInput, map);
+
+  // run the program
+  astProgram->accept(srv);
+
+//  std::unordered_map<std::string, std::vector<int64_t>> expectedOutput;
+//  std::vector<int64_t> data = {7, 7, 7, 7, 43, 1, 1, 1, 22, 11, 425, 0, 1, 7};
+//  expectedOutput.emplace("y", data);
+//
+//  auto output = srv.getOutput(*astOutput);
+//  for (const auto &[identifier, ciphertext] : output) {
+//    std::vector<int64_t> decryptedValues;
+//    scf->decryptCiphertext(*ciphertext, decryptedValues);
+//    std::cout << std::endl;
+//    EXPECT_TRUE(expectedOutput.count(identifier) > 0);
+//    auto expected = expectedOutput.at(identifier);
+//    for (int i = 0; i < expected.size(); ++i) {
+//      EXPECT_EQ(expected[i], decryptedValues[i]);
+//    }
+//}
 }
 
 #endif

@@ -1,7 +1,6 @@
 #include <memory>
 #include <utility>
 #include <iostream>
-#include <ast_opt/visitor/runtime/Cleartext.h>
 
 #include "ast_opt/visitor/runtime/RuntimeVisitor.h"
 #include "ast_opt/ast/BinaryExpression.h"
@@ -10,7 +9,6 @@
 #include "ast_opt/ast/ExpressionList.h"
 #include "ast_opt/ast/For.h"
 #include "ast_opt/ast/Function.h"
-#include "ast_opt/ast/FunctionParameter.h"
 #include "ast_opt/ast/If.h"
 #include "ast_opt/ast/IndexAccess.h"
 #include "ast_opt/ast/Literal.h"
@@ -30,27 +28,27 @@ std::unique_ptr<AbstractValue> SpecialRuntimeVisitor::getNextStackElement() {
 }
 
 void SpecialRuntimeVisitor::visit(BinaryExpression &elem) {
+  // ---- some helper methods -------------------------
   auto operatorEqualsAnyOf = [&elem](std::initializer_list<OperatorVariant> op) -> bool {
-    return std::any_of(op.begin(), op.end(),
-                       [&elem](OperatorVariant op) { return elem.getOperator()==Operator(op); });
+    return std::any_of(op.begin(), op.end(), [&elem](OperatorVariant op) { return elem.getOperator()==Operator(op); });
   };
+  auto operatorEquals = [&elem](OperatorVariant op) -> bool { return elem.getOperator()==Operator(op); };
+  // ---- end
 
-  // TODO: if lhs or rhs are secret tainted but the operator is non-FHE compatible, throw an exception
-  if ((secretTaintedMap.at(elem.getLeft().getUniqueNodeId()) || secretTaintedMap.at(elem.getRight().getUniqueNodeId()))
+  // if lhs or rhs are secret tainted but the operator is non-FHE compatible, throw an exception
+  if ((secretTaintedMap.count(elem.getLeft().getUniqueNodeId()) > 0
+      || secretTaintedMap.count(elem.getRight().getUniqueNodeId()) > 0)
       && !operatorEqualsAnyOf({FHE_ADDITION, FHE_SUBTRACTION, FHE_MULTIPLICATION})) {
     throw std::runtime_error("An operand in the binary expression is a ciphertext but given operation ("
-                                 + elem.getOperator().toString() + ") cannot be executed on ciphertexts!\n"
+                                 + elem.getOperator().toString() + ") cannot be executed on ciphertexts using FHE!\n"
                                  + "Expression: " + elem.toString(false));
   }
 
   elem.getLeft().accept(*this);
-  // auto &lhsOperand = getNextStackElement();
+//  auto lhsOperand = getNextStackElement();
 
   elem.getRight().accept(*this);
-  // auto &rhsOperand = getNextStackElement();
-
-  auto operatorEquals = [&elem](OperatorVariant op) -> bool { return elem.getOperator()==Operator(op); };
-
+//  auto rhsOperand = getNextStackElement();
 
 
   // TODO: Implement me!
@@ -60,31 +58,31 @@ void SpecialRuntimeVisitor::visit(BinaryExpression &elem) {
 
   } else if (operatorEqualsAnyOf({MULTIPLICATION, FHE_MULTIPLICATION})) {
 
-  } else if (elem.getOperator()==Operator(DIVISION)) {
+  } else if (operatorEquals(DIVISION)) {
 
-  } else if (elem.getOperator()==Operator(MODULO)) {
+  } else if (operatorEquals(MODULO)) {
 
-  } else if (elem.getOperator()==Operator(LOGICAL_AND)) {
+  } else if (operatorEquals(LOGICAL_AND)) {
 
-  } else if (elem.getOperator()==Operator(LOGICAL_OR)) {
+  } else if (operatorEquals(LOGICAL_OR)) {
 
-  } else if (elem.getOperator()==Operator(LESS)) {
+  } else if (operatorEquals(LESS)) {
 
-  } else if (elem.getOperator()==Operator(LESS_EQUAL)) {
+  } else if (operatorEquals(LESS_EQUAL)) {
 
-  } else if (elem.getOperator()==Operator(GREATER)) {
+  } else if (operatorEquals(GREATER)) {
 
-  } else if (elem.getOperator()==Operator(GREATER_EQUAL)) {
+  } else if (operatorEquals(GREATER_EQUAL)) {
 
-  } else if (elem.getOperator()==Operator(EQUAL)) {
+  } else if (operatorEquals(EQUAL)) {
 
-  } else if (elem.getOperator()==Operator(NOTEQUAL)) {
+  } else if (operatorEquals(NOTEQUAL)) {
 
-  } else if (elem.getOperator()==Operator(BITWISE_AND)) {
+  } else if (operatorEquals(BITWISE_AND)) {
 
-  } else if (elem.getOperator()==Operator(BITWISE_XOR)) {
+  } else if (operatorEquals(BITWISE_XOR)) {
 
-  } else if (elem.getOperator()==Operator(BITWISE_OR)) {
+  } else if (operatorEquals(BITWISE_OR)) {
 
   }
 }
@@ -137,7 +135,7 @@ void SpecialRuntimeVisitor::visit(Call &elem) {
   }
 
   // perform rotation
-  ciphertexts.at(scopedIdentifier)->rotateRowsInplace(stepsLiteralInt->getValue());
+  declaredCiphertexts.at(scopedIdentifier)->rotateRowsInplace(stepsLiteralInt->getValue());
 }
 
 void SpecialRuntimeVisitor::visit(ExpressionList &elem) {
@@ -145,19 +143,33 @@ void SpecialRuntimeVisitor::visit(ExpressionList &elem) {
   // after visiting the expression list with this visitor, there should only be Literals left, otherwise this expression
   // list is not valid; we use here that the TypeCheckingVisitor verified that all expressions in an ExpressionList have
   // the same type
-  auto expr = elem.getExpressions().at(0);
-  if (dynamic_cast<LiteralBool *>(&expr.get())) {
-    intermedResult.emplace(std::make_unique<Cleartext<LiteralBool::value_type>>(elem));
+
+  std::vector<std::unique_ptr<ICleartext>> cleartextVec;
+  for (size_t i = 0; i < elem.getExpressions().size(); ++i) {
+    auto e = getNextStackElement();
+    if (dynamic_cast<ICleartext *>(e.get())) {
+      std::unique_ptr<ICleartext> derivedPointer(dynamic_cast<ICleartext *>(e.release()));
+      // We are now processing elements of the ExpressionList in reverse order, i.e., the last visited element of the
+      // ExpressionList is on the top of the stack. Thus, we need to append elements in the cleartextVec to the front.
+      cleartextVec.insert(cleartextVec.begin(), std::move(derivedPointer));
+    } else {
+      throw std::runtime_error("");
+    }
+  }
+
+  auto firstExpression = elem.getExpressions().at(0);
+  if (dynamic_cast<LiteralBool *>(&firstExpression.get())) {
+    intermedResult.emplace(std::make_unique<Cleartext<LiteralBool::value_type>>(cleartextVec));
   } else if (dynamic_cast<LiteralChar *>(&elem)) {
-    intermedResult.emplace(std::make_unique<Cleartext<LiteralChar::value_type>>(elem));
-  } else if (dynamic_cast<LiteralInt *>(&expr.get())) {
-    intermedResult.emplace(std::make_unique<Cleartext<LiteralInt::value_type>>(elem));
-  } else if (dynamic_cast<LiteralFloat *>(&expr.get())) {
-    intermedResult.emplace(std::make_unique<Cleartext<LiteralFloat::value_type>>(elem));
-  } else if (dynamic_cast<LiteralDouble *>(&expr.get())) {
-    intermedResult.emplace(std::make_unique<Cleartext<LiteralDouble::value_type>>(elem));
-  } else if (dynamic_cast<LiteralString *>(&expr.get())) {
-    intermedResult.emplace(std::make_unique<Cleartext<LiteralString::value_type>>(elem));
+    intermedResult.emplace(std::make_unique<Cleartext<LiteralChar::value_type>>(cleartextVec));
+  } else if (dynamic_cast<LiteralInt *>(&firstExpression.get())) {
+    intermedResult.emplace(std::make_unique<Cleartext<LiteralInt::value_type>>(cleartextVec));
+  } else if (dynamic_cast<LiteralFloat *>(&firstExpression.get())) {
+    intermedResult.emplace(std::make_unique<Cleartext<LiteralFloat::value_type>>(cleartextVec));
+  } else if (dynamic_cast<LiteralDouble *>(&firstExpression.get())) {
+    intermedResult.emplace(std::make_unique<Cleartext<LiteralDouble::value_type>>(cleartextVec));
+  } else if (dynamic_cast<LiteralString *>(&firstExpression.get())) {
+    intermedResult.emplace(std::make_unique<Cleartext<LiteralString::value_type>>(cleartextVec));
   } else {
     throw std::runtime_error("Could not determine element type of ExpressionList!");
   }
@@ -232,32 +244,32 @@ void SpecialRuntimeVisitor::visit(IndexAccess &elem) {
 
 void SpecialRuntimeVisitor::visit(LiteralBool &elem) {
   ScopedVisitor::visit(elem);
-  cleartexts.emplace_back(std::make_unique<Cleartext<bool>>(elem));
+  intermedResult.emplace(std::make_unique<Cleartext<bool>>(elem));
 }
 
 void SpecialRuntimeVisitor::visit(LiteralChar &elem) {
   ScopedVisitor::visit(elem);
-  cleartexts.emplace_back(std::make_unique<Cleartext<char>>(elem));
+  intermedResult.emplace(std::make_unique<Cleartext<char>>(elem));
 }
 
 void SpecialRuntimeVisitor::visit(LiteralInt &elem) {
   ScopedVisitor::visit(elem);
-  cleartexts.emplace_back(std::make_unique<Cleartext<int>>(elem));
+  intermedResult.emplace(std::make_unique<Cleartext<int>>(elem));
 }
 
 void SpecialRuntimeVisitor::visit(LiteralFloat &elem) {
   ScopedVisitor::visit(elem);
-  cleartexts.emplace_back(std::make_unique<Cleartext<float>>(elem));
+  intermedResult.emplace(std::make_unique<Cleartext<float>>(elem));
 }
 
 void SpecialRuntimeVisitor::visit(LiteralDouble &elem) {
   ScopedVisitor::visit(elem);
-  cleartexts.emplace_back(std::make_unique<Cleartext<double>>(elem));
+  intermedResult.emplace(std::make_unique<Cleartext<double>>(elem));
 }
 
 void SpecialRuntimeVisitor::visit(LiteralString &elem) {
   ScopedVisitor::visit(elem);
-  cleartexts.emplace_back(std::make_unique<Cleartext<std::string>>(elem));
+  intermedResult.emplace(std::make_unique<Cleartext<std::string>>(elem));
 }
 
 void SpecialRuntimeVisitor::visit(OperatorExpression &) {
@@ -324,43 +336,44 @@ void SpecialRuntimeVisitor::visit(VariableDeclaration &elem) {
   identifierDatatypes.emplace(*scopedIdentifier, elem.getDatatype());
   getCurrentScope().addIdentifier(std::move(scopedIdentifier));
 
-  if (elem.hasValue()) elem.getValue().accept(*this);
-  auto initializationValue = getNextStackElement();
+  // if this declaration does not have an initialization, we can stop here as there's no value we need to keep track of
+  if (!elem.hasValue()) return;
 
-  std::cout << "pause..." << std::endl;
-  // TODO: Implement me!
+  // after having visited the variable declaration's initialization value, then we should have a Cleartext<T> on the
+  // top of the intermedResult stack
+  elem.getValue().accept(*this);
+  std::unique_ptr<AbstractValue> initializationValue = getNextStackElement();
 
-  // TODO: Check for a Cleartext<int> here...
   if (elem.getDatatype().getSecretFlag()) {
-    // declaration of a secret variable, i.e., a ciphertext
-    if (auto ivAsLiteralInt = dynamic_cast<LiteralInt *>(initializationValue.get())) {
-      auto sident = std::make_unique<ScopedIdentifier>(getCurrentScope(), elem.getTarget().getIdentifier());
-      auto ciphertext = factory.createCiphertext(ivAsLiteralInt->getValue());
-
-      ciphertexts.insert_or_assign(*sident, std::move(ciphertext));
-    } else if (auto ivAsExprList = dynamic_cast<ExpressionList *>(initializationValue.get())) {
-      auto sident = std::make_unique<ScopedIdentifier>(getCurrentScope(), elem.getTarget().getIdentifier());
-      auto vec = extractIntegerFromLiteralInt(*ivAsExprList);
-      auto ciphertext = factory.createCiphertext(vec);
-      ciphertexts.insert_or_assign(*sident, std::move(ciphertext));
-    } else {
-      throw std::runtime_error("Cannot create a ciphertext for anything other than a LiteralInt or an ExpressionList "
-                               "of LiteralInts yet.");
-    }
-  } else {
+    // declaration of a secret variable: we need to create a ciphertext here
+    auto sident = std::make_unique<ScopedIdentifier>(getCurrentScope(), elem.getTarget().getIdentifier());
+    auto ctxt = factory.createCiphertext(std::move(initializationValue));
+    declaredCiphertexts.insert_or_assign(*sident, std::move(ctxt));
+  } else if (dynamic_cast<ICleartext *>(initializationValue.get())) {
     // declaration of a non-secret variable
-
-
+    // we need to convert std::unique_ptr<AbstractValue> from intermedResult into std::unique_ptr<ICleartext>
+    // as we now that this variable declaration's value is not secret tainted, this must be a cleartext
+    auto sident = std::make_unique<ScopedIdentifier>(getCurrentScope(), elem.getTarget().getIdentifier());
+    std::unique_ptr<ICleartext> cleartextUPtr(dynamic_cast<ICleartext *>(initializationValue.release()));
+    declaredCleartexts.insert_or_assign(*sident, std::move(cleartextUPtr));
+  } else {
+    throw std::runtime_error("Initialization value of VariableDeclaration ( " + elem.getTarget().getIdentifier()
+                                 + ") could not be processed successfully.");
   }
 }
 
 void SpecialRuntimeVisitor::visit(Variable &elem) {
-  // TODO: Implement me!
   auto scopedIdentifier = getCurrentScope().resolveIdentifier(elem.getIdentifier());
   if (identifierDatatypes.at(scopedIdentifier).getSecretFlag()) {
-//    auto &value = ciphertexts.at(scopedIdentifier);
+    // we need to clone the ciphertext here as the declaredCiphertext holds ownership and it could be that the same
+    // variable will be referenced later s.t. we need it again
+//    AbstractCiphertext &ac = *declaredCiphertexts.at(scopedIdentifier);
+//    auto cloned = ac.clone();
+
+//    intermedResult.emplace(std::move(b));
   } else {
-//    auto value = plainValues.at(scopedIdentifier);
+//    declaredCleartexts.at(scopedIdentifier).get()->
+//        intermedResult.push(std::move(declaredCleartexts.at(scopedIdentifier).get()->cl));
   }
 }
 
@@ -373,21 +386,23 @@ void SpecialRuntimeVisitor::checkAstStructure(AbstractNode &astRootNode) {
     throw std::runtime_error("Root node of input/output AST is expected to be a Block node.");
   }
 
+  // check each statement of the AST
   for (auto &statement : astRootNode) {
     auto castedStatement = dynamic_cast<T *>(&statement);
+
     // check that statements of Block are of expected type
     if (castedStatement==nullptr) {
-      throw std::runtime_error(
-          "Block statements of given (input|output) AST are expected to be of type "
-              + std::string(typeid(T).name()) + ". ");
+      throw std::runtime_error("Block statements of given (input|output) AST are expected to be of type "
+                                   + std::string(typeid(T).name()) + ". ");
     }
+
     // special condition for assignments: require that assignment's value is a Variable
     if (typeid(T)==typeid(Assignment)) {
       auto valueAsVariable = dynamic_cast<Variable *>(&castedStatement->getTarget());
       auto valueAsIndexAccess = dynamic_cast<IndexAccess *>(&castedStatement->getTarget());
       if (valueAsVariable==nullptr && valueAsIndexAccess==nullptr) {
         throw std::runtime_error(
-            "Output AST must consist of Assignments to (indexed) variables (i.e., Variable or IndexAccess).");
+            "Output AST must consist of Assignments to (indexed) variables, i.e., Variable or IndexAccess.");
       }
     }
   }
@@ -410,7 +425,6 @@ OutputIdentifierValuePairs SpecialRuntimeVisitor::getOutput(AbstractNode &output
   OutputIdentifierValuePairs outputValues;
   auto block = dynamic_cast<Block &>(outputAst);
   for (auto &assignm : block.getStatements()) {
-
     // extract assignment's target (lhs)
     auto varAssignm = dynamic_cast<Assignment &>(assignm.get());
     auto identifier = dynamic_cast<Variable &>(varAssignm.getTarget()).getIdentifier();
@@ -418,18 +432,16 @@ OutputIdentifierValuePairs SpecialRuntimeVisitor::getOutput(AbstractNode &output
     // extract assignment's value (rhs): either a Variable or an IndexAccess
     std::unique_ptr<AbstractCiphertext> ctxt;
     if (auto valueAsVariable = dynamic_cast<Variable *>(&varAssignm.getValue())) {
-      // if the value is a Variable, it's sufficient if we get the corresponding ciphertext
+      // if the value is a Variable: it's sufficient if we clone the corresponding ciphertext
       auto scopedIdentifier = getRootScope().resolveIdentifier(valueAsVariable->getIdentifier());
-      // TODO: This modifies the output s.t. calling the same method or printOutput afterward will not work.
-      //  Create a copy-constructor in AbstractCiphertext and use copies instead. Then make this method const.
-      ctxt = ciphertexts.at(scopedIdentifier)->clone();
+      ctxt = declaredCiphertexts.at(scopedIdentifier)->clone();
     } else if (auto valueAsIndexAccess = dynamic_cast<IndexAccess *>(&varAssignm.getValue())) {
-      // if the value is an IndexAccess
+      // if the value is an IndexAccess we need to clone & rotate the ciphertext accordingly
       try {
         auto valueIdentifier = dynamic_cast<Variable &>(valueAsIndexAccess->getTarget());
         auto idx = dynamic_cast<LiteralInt &>(valueAsIndexAccess->getIndex());
         auto scopedIdentifier = getRootScope().resolveIdentifier(valueIdentifier.getIdentifier());
-        ctxt = ciphertexts.at(scopedIdentifier)->rotateRows(idx.getValue());
+        ctxt = declaredCiphertexts.at(scopedIdentifier)->rotateRows(idx.getValue());
       } catch (std::bad_cast &) {
         throw std::runtime_error(
             "Nested index accesses in right-hand side of output AST not allowed (e.g., y = __input0__[a[2]]).");
@@ -447,7 +459,5 @@ OutputIdentifierValuePairs SpecialRuntimeVisitor::getOutput(AbstractNode &output
 void SpecialRuntimeVisitor::printOutput(AbstractNode &outputAst, std::ostream &targetStream) {
   // retrieve the identifiers mentioned in the output AST, decrypt referred ciphertexts, and print them
   auto outputValues = getOutput(outputAst);
-  for (const auto &v : outputValues) {
-    targetStream << v.first << ": " << factory.getString(*v.second) << std::endl;
-  }
+  for (const auto &v : outputValues) targetStream << v.first << ": " << factory.getString(*v.second) << std::endl;
 }
