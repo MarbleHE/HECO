@@ -14,6 +14,8 @@ typedef Visitor<SpecialTypeCheckingVisitor> TypeCheckingVisitor;
 
 typedef std::unordered_map<ScopedIdentifier, Datatype> VariableDatatypeMap;
 
+// TODO: Either only collect in the SecretTaintedNodesMap the unique node ID of those nodes that are secret tainted or
+//  make sure that in visit methods an entry in this map for ALL nodes is created (with the corresponding boolean flag).
 typedef std::unordered_map<std::string, bool> SecretTaintedNodesMap;
 
 class SpecialTypeCheckingVisitor : public ScopedVisitor {
@@ -103,6 +105,16 @@ class SpecialTypeCheckingVisitor : public ScopedVisitor {
   /// \param second The second datatype.
   /// \return True if both are compatible to be used for operands of an arithmetic expression.
   static bool areCompatibleDatatypes(Datatype &first, Datatype &second);
+
+  /// Gets the list of secret tainted nodes, i.e., variables that are explicitly declared as being secret or that are
+  /// involved in a computation that involves secret variables and as such also become secret.
+  /// \return (A const reference) to the map containing (unique node ID, is tainted) pairs.
+  [[nodiscard]] const SecretTaintedNodesMap &getSecretTaintedNodes() const;
+
+  /// Gets the list of secret tainted nodes, i.e., variables that are explicitly declared as being secret or that are
+  /// involved in a computation that involves secret variables and as such also become secret.
+  /// \return (A reference) to the map containing (unique node ID, is tainted) pairs.
+  SecretTaintedNodesMap &getSecretTaintedNodes();
 };
 
 #endif //GRAPHNODE_H_SRC_VISITOR_TYPECHECKINGVISITOR_H_

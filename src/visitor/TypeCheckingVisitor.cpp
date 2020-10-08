@@ -262,3 +262,10 @@ bool SpecialTypeCheckingVisitor::isSecretTaintedNode(const std::string &uniqueNo
   return secretTaintedNodes.at(uniqueNodeId);
 }
 
+const SecretTaintedNodesMap &SpecialTypeCheckingVisitor::getSecretTaintedNodes() const {
+  return secretTaintedNodes;
+}
+
+SecretTaintedNodesMap &SpecialTypeCheckingVisitor::getSecretTaintedNodes() {
+  return secretTaintedNodes;
+}
