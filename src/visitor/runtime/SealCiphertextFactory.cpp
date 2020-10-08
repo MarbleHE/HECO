@@ -19,16 +19,11 @@ SealCiphertextFactory::SealCiphertextFactory(const SealCiphertextFactory &other)
 }
 
 SealCiphertextFactory::SealCiphertextFactory(SealCiphertextFactory &&other) noexcept // move constructor
-    : ciphertextSlotSize(other.ciphertextSlotSize),
-      context(std::move(other.context)),
-      secretKey(std::move(other.secretKey)),
-      publicKey(std::move(other.publicKey)),
-      galoisKeys(std::move(other.galoisKeys)),
-      relinKeys(std::move(other.relinKeys)),
-      encoder(std::move(other.encoder)),
-      evaluator(std::move(other.evaluator)),
-      encryptor(std::move(other.encryptor)),
-      decryptor(std::move(other.decryptor)) {
+    : ciphertextSlotSize(other.ciphertextSlotSize), context(std::move(other.context)),
+      secretKey(std::move(other.secretKey)), publicKey(std::move(other.publicKey)),
+      galoisKeys(std::move(other.galoisKeys)), relinKeys(std::move(other.relinKeys)),
+      encoder(std::move(other.encoder)), evaluator(std::move(other.evaluator)),
+      encryptor(std::move(other.encryptor)), decryptor(std::move(other.decryptor)) {
 }
 
 SealCiphertextFactory &SealCiphertextFactory::operator=(const SealCiphertextFactory &other) {  // copy assignment
@@ -143,10 +138,10 @@ const seal::GaloisKeys &SealCiphertextFactory::getGaloisKeys() const {
   return *galoisKeys;
 }
 
-SealCiphertextFactory::SealCiphertextFactory(uint numElementsPerCiphertextSlot)
+SealCiphertextFactory::SealCiphertextFactory(unsigned int numElementsPerCiphertextSlot)
     : ciphertextSlotSize(numElementsPerCiphertextSlot) {}
 
-uint SealCiphertextFactory::getCiphertextSlotSize() const {
+unsigned int SealCiphertextFactory::getCiphertextSlotSize() const {
   return ciphertextSlotSize;
 }
 

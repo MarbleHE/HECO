@@ -18,7 +18,7 @@ class SealPlaintext : public AbstractPlaintext {
  public:
   ~SealPlaintext() override = default;
 
-  SealPlaintext(SealCiphertextFactory &sealFactory);
+  explicit SealPlaintext(SealCiphertextFactory &sealFactory);
 
   [[nodiscard]] const seal::Plaintext &getPlaintext() const;
 
