@@ -1,4 +1,4 @@
-#include "ast_opt/visitor/ControlFlowGraph/ControlFlowGraphVisitor.h"
+#include "ast_opt/visitor/controlFlowGraph/ControlFlowGraphVisitor.h"
 #include "ast_opt/ast/IndexAccess.h"
 #include "ast_opt/utilities/Scope.h"
 #include "ast_opt/ast/Assignment.h"

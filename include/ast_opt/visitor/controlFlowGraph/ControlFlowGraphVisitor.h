@@ -5,7 +5,7 @@
 #include <set>
 #include "ast_opt/ast/AbstractStatement.h"
 #include "ast_opt/visitor/ScopedVisitor.h"
-#include "ast_opt/visitor/ControlFlowGraph/GraphNode.h"
+#include "ast_opt/visitor/controlFlowGraph/GraphNode.h"
 
 // Forward declaration
 class SpecialControlFlowGraphVisitor;

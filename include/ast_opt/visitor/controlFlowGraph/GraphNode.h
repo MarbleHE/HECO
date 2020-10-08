@@ -4,7 +4,7 @@
 #include <set>
 
 // include needed due to enum RelationshipType
-#include "ast_opt/visitor/ControlFlowGraph/NodeRelationship.h"
+#include "ast_opt/visitor/controlFlowGraph/NodeRelationship.h"
 #include "ast_opt/utilities/Scope.h"
 
 class AbstractNode;

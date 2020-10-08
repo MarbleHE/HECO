@@ -1,7 +1,7 @@
 #ifndef GRAPHNODE_H_INCLUDE_AST_OPT_VISITOR_RUNTIME_ABSTRACTPLAINTEXT_H_
 #define GRAPHNODE_H_INCLUDE_AST_OPT_VISITOR_RUNTIME_ABSTRACTPLAINTEXT_H_
 
-#include "ast_opt/visitor/Runtime/AbstractValue.h"
+#include "ast_opt/visitor/runtime/AbstractValue.h"
 
 class AbstractPlaintext : public AbstractValue {
  protected:

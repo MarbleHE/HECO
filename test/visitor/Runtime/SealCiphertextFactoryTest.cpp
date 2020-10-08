@@ -1,6 +1,6 @@
-#include "include/ast_opt/visitor/Runtime/SealCiphertext.h"
+#include "include/ast_opt/visitor/runtime/SealCiphertext.h"
 #include "include/ast_opt/ast/ExpressionList.h"
-#include "include/ast_opt/visitor/Runtime/SealCiphertextFactory.h"
+#include "include/ast_opt/visitor/runtime/SealCiphertextFactory.h"
 #include "gtest/gtest.h"
 #include <algorithm>
 

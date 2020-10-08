@@ -1,7 +1,7 @@
 #include <ast_opt/utilities/Operator.h>
-#include "ast_opt/visitor/Runtime/SealCiphertext.h"
+#include "ast_opt/visitor/runtime/SealCiphertext.h"
 #include "ast_opt/ast/ExpressionList.h"
-#include "ast_opt/visitor/Runtime/SealCiphertextFactory.h"
+#include "ast_opt/visitor/runtime/SealCiphertextFactory.h"
 
 #ifdef HAVE_SEAL_BFV
 

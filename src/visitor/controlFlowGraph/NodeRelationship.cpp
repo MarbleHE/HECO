@@ -1,5 +1,5 @@
-#include "ast_opt/visitor/ControlFlowGraph/NodeRelationship.h"
-#include "ast_opt/visitor/ControlFlowGraph/GraphNode.h"
+#include "ast_opt/visitor/controlFlowGraph/NodeRelationship.h"
+#include "ast_opt/visitor/controlFlowGraph/GraphNode.h"
 #include "ast_opt/ast/AbstractNode.h"
 
 NodeRelationship::NodeRelationship(RelationshipType relationshipType, GraphNode &graphNode)

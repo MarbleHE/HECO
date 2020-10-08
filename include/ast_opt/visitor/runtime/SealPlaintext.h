@@ -1,7 +1,7 @@
 #ifndef GRAPHNODE_H_INCLUDE_AST_OPT_VISITOR_RUNTIME_SEALPLAINTEXT_H_
 #define GRAPHNODE_H_INCLUDE_AST_OPT_VISITOR_RUNTIME_SEALPLAINTEXT_H_
 
-#include "ast_opt/visitor/Runtime/AbstractPlaintext.h"
+#include "ast_opt/visitor/runtime/AbstractPlaintext.h"
 #include "SealCiphertextFactory.h"
 
 #ifdef HAVE_SEAL_BFV

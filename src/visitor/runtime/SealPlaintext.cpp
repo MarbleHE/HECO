@@ -1,4 +1,4 @@
-#include "ast_opt/visitor/Runtime/SealPlaintext.h"
+#include "ast_opt/visitor/runtime/SealPlaintext.h"
 
 #ifdef HAVE_SEAL_BFV
 

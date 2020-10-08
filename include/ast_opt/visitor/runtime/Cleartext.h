@@ -5,7 +5,7 @@
 #include <cstdint>
 
 #include "ast_opt/ast/Literal.h"
-#include "ast_opt/visitor/Runtime/AbstractValue.h"
+#include "ast_opt/visitor/runtime/AbstractValue.h"
 #include "ast_opt/ast/ExpressionList.h"
 
 template<typename Derived, typename Base, typename Del>

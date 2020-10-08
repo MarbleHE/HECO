@@ -4,7 +4,7 @@
 #include <memory>
 
 #include "ast_opt/ast/Literal.h"
-#include "ast_opt/visitor/Runtime/AbstractValue.h"
+#include "ast_opt/visitor/runtime/AbstractValue.h"
 
 class AbstractCiphertext : public AbstractValue {
  protected:

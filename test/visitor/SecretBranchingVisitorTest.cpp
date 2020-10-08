@@ -1,6 +1,6 @@
 #include "test/ASTComparison.h"
 #include "include/ast_opt/visitor/SecretBranchingVisitor.h"
-#include "include/ast_opt/visitor/ControlFlowGraph/ControlFlowGraphVisitor.h"
+#include "include/ast_opt/visitor/controlFlowGraph/ControlFlowGraphVisitor.h"
 #include "include/ast_opt/parser/Parser.h"
 #include "gtest/gtest.h"
 
