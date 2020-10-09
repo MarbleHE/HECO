@@ -32,28 +32,41 @@ void SpecialRuntimeVisitor::visit(BinaryExpression &elem) {
   auto operatorEqualsAnyOf = [&elem](std::initializer_list<OperatorVariant> op) -> bool {
     return std::any_of(op.begin(), op.end(), [&elem](OperatorVariant op) { return elem.getOperator()==Operator(op); });
   };
-  auto operatorEquals = [&elem](OperatorVariant op) -> bool { return elem.getOperator()==Operator(op); };
+  auto operatorEquals = [&elem](OperatorVariant op) -> bool {
+    return elem.getOperator()==Operator(op);
+  };
+  auto isSecretTainted = [&](const std::string &uniqueNodeId) -> bool {
+    // we assume here that if it is NOT in the map, then it is NOT secret tainted
+    return (secretTaintedMap.count(uniqueNodeId) > 0 && secretTaintedMap.at(uniqueNodeId));
+  };
   // ---- end
 
+  auto lhsIsSecret = isSecretTainted(elem.getLeft().getUniqueNodeId());
+  auto rhsIsSecret = isSecretTainted(elem.getRight().getUniqueNodeId());
+
   // if lhs or rhs are secret tainted but the operator is non-FHE compatible, throw an exception
-  if ((secretTaintedMap.count(elem.getLeft().getUniqueNodeId()) > 0
-      || secretTaintedMap.count(elem.getRight().getUniqueNodeId()) > 0)
-      && !operatorEqualsAnyOf({FHE_ADDITION, FHE_SUBTRACTION, FHE_MULTIPLICATION})) {
+  if ((lhsIsSecret || rhsIsSecret) && !operatorEqualsAnyOf({FHE_ADDITION, FHE_SUBTRACTION, FHE_MULTIPLICATION})) {
     throw std::runtime_error("An operand in the binary expression is a ciphertext but given operation ("
                                  + elem.getOperator().toString() + ") cannot be executed on ciphertexts using FHE!\n"
                                  + "Expression: " + elem.toString(false));
   }
 
   elem.getLeft().accept(*this);
-//  auto lhsOperand = getNextStackElement();
+  auto lhsOperand = getNextStackElement();
 
   elem.getRight().accept(*this);
-//  auto rhsOperand = getNextStackElement();
+  auto rhsOperand = getNextStackElement();
 
+  // if exactly one of the operands is a ciphertext and we have a commutative operation, then we make sure that
+  // the first operand (the one we call the operation on) is the ciphertext as otherwise it will fail
+  if ((lhsIsSecret!=rhsIsSecret) && elem.getOperator().isCommutative()) {
+    if (rhsIsSecret) std::swap(lhsOperand, rhsOperand);
+  }
 
   // TODO: Implement me!
   if (operatorEqualsAnyOf({ADDITION, FHE_ADDITION})) {
-
+    lhsOperand->add(*rhsOperand);
+    intermedResult.push(std::move(lhsOperand));
   } else if (operatorEqualsAnyOf({SUBTRACTION, FHE_SUBTRACTION})) {
 
   } else if (operatorEqualsAnyOf({MULTIPLICATION, FHE_MULTIPLICATION})) {
@@ -319,18 +332,6 @@ std::vector<int64_t> extractIntegerFromLiteralInt(ExpressionList &el) {
   return result;
 }
 
-//template<typename T>
-//T SpecialRuntimeVisitor::getValue(ScopedIdentifier &scopedIdentifier) {
-//  const auto identifierExists = identifierDatatypes.count(scopedIdentifier)!=0;
-//  if (identifierExists && identifierDatatypes.at(scopedIdentifier).getSecretFlag()==true) {
-//    return ciphertexts.at(scopedIdentifier);
-//  } else if (identifierExists && identifierDatatypes.at(scopedIdentifier).getSecretFlag()==false) {
-//    return 0;
-//  } else {
-//    throw std::runtime_error("");
-//  };
-//}
-
 void SpecialRuntimeVisitor::visit(VariableDeclaration &elem) {
   auto scopedIdentifier = std::make_unique<ScopedIdentifier>(getCurrentScope(), elem.getTarget().getIdentifier());
   identifierDatatypes.emplace(*scopedIdentifier, elem.getDatatype());
@@ -364,16 +365,17 @@ void SpecialRuntimeVisitor::visit(VariableDeclaration &elem) {
 
 void SpecialRuntimeVisitor::visit(Variable &elem) {
   auto scopedIdentifier = getCurrentScope().resolveIdentifier(elem.getIdentifier());
+  // in both cases we need to clone the underlying type (AbstractCiphertext or Cleartext) as the maps
+  // (declaredCiphertexts and declaredCleartexts) holds ownership and it could be that the same variable will be
+  // referenced later again
   if (identifierDatatypes.at(scopedIdentifier).getSecretFlag()) {
-    // we need to clone the ciphertext here as the declaredCiphertext holds ownership and it could be that the same
-    // variable will be referenced later s.t. we need it again
-//    AbstractCiphertext &ac = *declaredCiphertexts.at(scopedIdentifier);
-//    auto cloned = ac.clone();
-
-//    intermedResult.emplace(std::move(b));
+    // variable refers to an encrypted value, i.e., is a ciphertext
+    auto clonedCiphertext = declaredCiphertexts.at(scopedIdentifier)->clone();
+    intermedResult.emplace(std::move(clonedCiphertext));
   } else {
-//    declaredCleartexts.at(scopedIdentifier).get()->
-//        intermedResult.push(std::move(declaredCleartexts.at(scopedIdentifier).get()->cl));
+    // variable refers to a cleartext value
+    auto clonedCleartext = declaredCleartexts.at(scopedIdentifier)->clone();
+    intermedResult.emplace(std::move(clonedCleartext));
   }
 }
 
@@ -382,27 +384,24 @@ void SpecialRuntimeVisitor::checkAstStructure(AbstractNode &astRootNode) {
   /// The input and output ASTs are expected to consist of a single block with variable declaration
   /// statements and variable assignments, respectively.
 
-  if (dynamic_cast<Block *>(&astRootNode)==nullptr) {
-    throw std::runtime_error("Root node of input/output AST is expected to be a Block node.");
-  }
+  if (dynamic_cast<Block *>(&astRootNode)==nullptr)
+    throw std::runtime_error("Root of (in-/out)put AST must be a Block node.");
 
   // check each statement of the AST
   for (auto &statement : astRootNode) {
-    auto castedStatement = dynamic_cast<T *>(&statement);
-
     // check that statements of Block are of expected type
+    auto castedStatement = dynamic_cast<T *>(&statement);
     if (castedStatement==nullptr) {
-      throw std::runtime_error("Block statements of given (input|output) AST are expected to be of type "
+      throw std::runtime_error("Block statements of given (in-/out)put AST must be of type "
                                    + std::string(typeid(T).name()) + ". ");
     }
 
-    // special condition for assignments: require that assignment's value is a Variable
+    // special condition for assignments: require that assignment's value is a Variable or IndexAccess
     if (typeid(T)==typeid(Assignment)) {
       auto valueAsVariable = dynamic_cast<Variable *>(&castedStatement->getTarget());
       auto valueAsIndexAccess = dynamic_cast<IndexAccess *>(&castedStatement->getTarget());
       if (valueAsVariable==nullptr && valueAsIndexAccess==nullptr) {
-        throw std::runtime_error(
-            "Output AST must consist of Assignments to (indexed) variables, i.e., Variable or IndexAccess.");
+        throw std::runtime_error("Output AST must consist of Assignments to variables, i.e., Variable or IndexAccess.");
       }
     }
   }
