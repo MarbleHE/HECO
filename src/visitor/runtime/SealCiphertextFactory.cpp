@@ -1,9 +1,26 @@
 #include "ast_opt/visitor/runtime/SealCiphertext.h"
 #include "ast_opt/visitor/runtime/SealCiphertextFactory.h"
 #include "ast_opt/visitor/runtime/Cleartext.h"
-#include "ast_opt/visitor/runtime/SealPlaintext.h"
+//#include "ast_opt/visitor/runtime/SealPlaintext.h"
 
 #ifdef HAVE_SEAL_BFV
+
+std::unique_ptr<AbstractCiphertext> SealCiphertextFactory::createCiphertext(const std::vector<int64_t> &data) {
+  auto ptxt = createPlaintext(data);
+  std::unique_ptr<SealCiphertext> ctxt = std::make_unique<SealCiphertext>(*this);
+  encryptor->encrypt(*ptxt, ctxt->getCiphertext());
+  return ctxt;
+}
+
+std::unique_ptr<AbstractCiphertext> SealCiphertextFactory::createCiphertext(const std::vector<int> &data) {
+  std::vector<int64_t> ciphertextData(data.begin(), data.end());
+  return createCiphertext(ciphertextData);
+}
+
+std::unique_ptr<AbstractCiphertext> SealCiphertextFactory::createCiphertext(int64_t data) {
+  std::vector<int64_t> values = {data};
+  return createCiphertext(values);
+}
 
 SealCiphertextFactory::SealCiphertextFactory(const SealCiphertextFactory &other) :
     ciphertextSlotSize(other.ciphertextSlotSize),
@@ -82,15 +99,18 @@ void SealCiphertextFactory::setupSealContext() {
 }
 
 template<typename T>
-void SealCiphertextFactory::expandVector(std::vector<T> &values) {
-  if (values.size() > encoder->slot_count()) {
-    throw std::runtime_error("Cannot encode " + std::to_string(values.size())
+std::vector<T> SealCiphertextFactory::expandVector(const std::vector<T> &values) {
+  // passing the vector by value to implicitly get a copy somehow didn't work here
+  std::vector<T> expandedVector(values.begin(), values.end());
+  if (expandedVector.size() > encoder->slot_count()) {
+    throw std::runtime_error("Cannot encode " + std::to_string(expandedVector.size())
                                  + " elements in a ciphertext of size "
                                  + std::to_string(encoder->slot_count()) + ". ");
   }
-  // fill vector up to size of ciphertext with last element in given values
-  auto lastValue = values.back();
-  values.insert(values.end(), encoder->slot_count() - values.size(), lastValue);
+  // fill vector up to size of ciphertext with last element in given expandedVector
+  auto lastValue = expandedVector.back();
+  expandedVector.insert(expandedVector.end(), encoder->slot_count() - expandedVector.size(), lastValue);
+  return expandedVector;
 }
 
 std::unique_ptr<seal::Plaintext> SealCiphertextFactory::createPlaintext(int64_t value) {
@@ -98,24 +118,17 @@ std::unique_ptr<seal::Plaintext> SealCiphertextFactory::createPlaintext(int64_t 
   return createPlaintext(valueAsVec);
 }
 
-std::unique_ptr<seal::Plaintext> SealCiphertextFactory::createPlaintext(std::vector<int64_t> &value) {
+std::unique_ptr<seal::Plaintext> SealCiphertextFactory::createPlaintext(const std::vector<int> &value) {
+  std::vector<int64_t> vecInt64(value.begin(), value.end());
+  return createPlaintext(vecInt64);
+}
+
+std::unique_ptr<seal::Plaintext> SealCiphertextFactory::createPlaintext(const std::vector<int64_t> &value) {
   if (!context || !context->parameters_set()) setupSealContext();
-  expandVector(value);
+  auto expandedVector = expandVector(value);
   auto ptxt = std::make_unique<seal::Plaintext>();
-  encoder->encode(value, *ptxt);
+  encoder->encode(expandedVector, *ptxt);
   return ptxt;
-}
-
-std::unique_ptr<AbstractCiphertext> SealCiphertextFactory::createCiphertext(std::vector<int64_t> &data) {
-  auto ptxt = createPlaintext(data);
-  std::unique_ptr<SealCiphertext> ctxt = std::make_unique<SealCiphertext>(*this);
-  encryptor->encrypt(*ptxt, ctxt->getCiphertext());
-  return ctxt;
-}
-
-std::unique_ptr<AbstractCiphertext> SealCiphertextFactory::createCiphertext(int64_t data) {
-  std::vector<int64_t> values = {data};
-  return createCiphertext(values);
 }
 
 const seal::RelinKeys &SealCiphertextFactory::getRelinKeys() const {
@@ -169,10 +182,6 @@ std::unique_ptr<AbstractCiphertext> SealCiphertextFactory::createCiphertext(std:
     std::vector<int64_t> data(castedCleartextData.begin(), castedCleartextData.end());
     // avoid duplicate code -> delegate creation to other constructor
     return createCiphertext(data);
-  } else if (auto castedPlaintext = dynamic_cast<SealPlaintext *>(abstractValue.get())) {
-    std::unique_ptr<SealCiphertext> ctxt = std::make_unique<SealCiphertext>(*this);
-    encryptor->encrypt(castedPlaintext->getPlaintext(), ctxt->getCiphertext());
-    return ctxt;
   } else {
     throw std::runtime_error("Cannot create ciphertext from any other than a Cleartext<int> as used ciphertext factory "
                              "(SealCiphertextFactory) uses BFV that only supports integers.");
