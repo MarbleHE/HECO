@@ -2,7 +2,6 @@
 #define GRAPHNODE_H_INCLUDE_AST_OPT_VISITOR_RUNTIME_ABSTRACTCIPHERTEXT_H_
 
 #include <memory>
-#include <seal/seal.h>
 
 #include "ast_opt/ast/Literal.h"
 #include "ast_opt/visitor/runtime/AbstractValue.h"
