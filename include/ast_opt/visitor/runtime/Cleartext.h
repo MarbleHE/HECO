@@ -7,6 +7,7 @@
 #include "ast_opt/ast/Literal.h"
 #include "ast_opt/visitor/runtime/AbstractValue.h"
 #include "ast_opt/ast/ExpressionList.h"
+#include "AbstractCiphertext.h"
 
 /// This class serves as a common base class for all Cleartext<T> classes
 class ICleartext : public AbstractValue {
@@ -42,6 +43,10 @@ class Cleartext : public ICleartext {
     }
   }
 
+  explicit Cleartext(std::vector<T> values) {
+    data = values;
+  }
+
   explicit Cleartext(std::vector<std::unique_ptr<ICleartext>> &cleartexts) {
     // go through each ICleartext in this vector
     for (std::unique_ptr<ICleartext> &cleartextUniquePtrRef : cleartexts) {
@@ -72,6 +77,11 @@ class Cleartext : public ICleartext {
   void applyOperator(std::function<T(T, T)> f, AbstractValue &other) {
     if (auto otherCleartxt = dynamic_cast<Cleartext<T> *>(&other)) {
       std::transform(data.begin(), data.end(), otherCleartxt->data.begin(), data.begin(), f);
+    } else {
+      throw std::runtime_error(
+          "Given operation can only be applied on (Cleartext<T>, Cleartext<T>). "
+          "This could happen, for example, if an operation is called on (Cleartext<T>, AbstractCiphertext) "
+          "but the operation is unsupported in FHE.");
     }
   }
 
@@ -262,6 +272,17 @@ inline void Cleartext<float>::logicalBitwiseXor(AbstractValue &other) {
 template<>
 inline void Cleartext<double>::logicalBitwiseXor(AbstractValue &other) {
   throw std::runtime_error("Cannot apply bitwise-XOR to operands of type (double, double).");
+}
+
+template<>
+inline void Cleartext<int>::subtract(AbstractValue &other) {
+  if (auto otherCiphertext = dynamic_cast<AbstractCiphertext *>(&other)) {
+    auto cleartextData = getData();
+    std::unique_ptr<AbstractCiphertext> thisCiphertext = otherCiphertext->getFactory().createCiphertext(cleartextData);
+    thisCiphertext->subtractInplace(*otherCiphertext);
+  } else {
+    applyOperator(std::minus<>(), other);
+  }
 }
 
 #endif //GRAPHNODE_H_INCLUDE_AST_OPT_VISITOR_RUNTIME_CLEARTEXT_H_
