@@ -16,9 +16,6 @@ class SealCiphertext : public AbstractCiphertext {
   /// The encrypted data in this ciphertext wrapper.
   seal::Ciphertext ciphertext;
 
-  /// A reference to the factory that created this ciphertext.
-  SealCiphertextFactory &factory;
-
  public:
   ~SealCiphertext() override = default;
 
@@ -42,35 +39,35 @@ class SealCiphertext : public AbstractCiphertext {
   /// \return (A reference) to the underlying seal::Ciphertext.
   seal::Ciphertext &getCiphertext();
 
-  std::unique_ptr<AbstractCiphertext> multiply(AbstractCiphertext &operand) override;
+  [[nodiscard]] std::unique_ptr<AbstractCiphertext> multiply(AbstractCiphertext &operand) override;
 
   void multiplyInplace(AbstractCiphertext &operand) override;
 
-  std::unique_ptr<AbstractCiphertext> add(AbstractCiphertext &operand) override;
+  [[nodiscard]] std::unique_ptr<AbstractCiphertext> add(AbstractCiphertext &operand) override;
 
   void addInplace(AbstractCiphertext &operand) override;
 
-  std::unique_ptr<AbstractCiphertext> subtract(AbstractCiphertext &operand) override;
+  [[nodiscard]] std::unique_ptr<AbstractCiphertext> subtract(AbstractCiphertext &operand) override;
 
   void subtractInplace(AbstractCiphertext &operand) override;
 
-  std::unique_ptr<AbstractCiphertext> rotateRows(int steps) override;
+  [[nodiscard]] std::unique_ptr<AbstractCiphertext> rotateRows(int steps) override;
 
   void rotateRowsInplace(int steps) override;
 
-  std::unique_ptr<AbstractCiphertext> multiplyPlain(ExpressionList &operand) override;
+  [[nodiscard]] std::unique_ptr<AbstractCiphertext> multiplyPlain(ICleartext &operand) override;
 
-  void multiplyPlainInplace(ExpressionList &operand) override;
+  void multiplyPlainInplace(ICleartext &operand) override;
 
-  std::unique_ptr<AbstractCiphertext> addPlain(ExpressionList &operand) override;
+  [[nodiscard]] std::unique_ptr<AbstractCiphertext> addPlain(ICleartext &operand) override;
 
-  void addPlainInplace(ExpressionList &operand) override;
+  void addPlainInplace(ICleartext &operand) override;
 
-  std::unique_ptr<AbstractCiphertext> subtractPlain(ExpressionList &operand) override;
+  [[nodiscard]] std::unique_ptr<AbstractCiphertext> subtractPlain(ICleartext &operand) override;
 
-  void subtractPlainInplace(ExpressionList &operand) override;
+  void subtractPlainInplace(ICleartext &operand) override;
 
-  std::unique_ptr<AbstractCiphertext> clone() override;
+  [[nodiscard]] std::unique_ptr<AbstractCiphertext> clone() override;
 
   void add(AbstractValue &other) override;
 
@@ -103,6 +100,10 @@ class SealCiphertext : public AbstractCiphertext {
   void logicalBitwiseXor(AbstractValue &other) override;
 
   void logicalBitwiseOr(AbstractValue &other) override;
+
+  SealCiphertextFactory &getFactory() override;
+
+  [[nodiscard]] const SealCiphertextFactory &getFactory() const override;
 };
 
 #endif

@@ -15,7 +15,13 @@ class AbstractCiphertextFactory {
   /// up the remaining slots of the ciphertext, in case that the given data does not use all slots.
   /// \param data The data that should be encrypted in the ciphertext.
   /// \return (A std::unique_ptr) to the created AbstractCiphertext.
-  virtual std::unique_ptr<AbstractCiphertext> createCiphertext(std::vector<int64_t> &data) = 0;
+  virtual std::unique_ptr<AbstractCiphertext> createCiphertext(const std::vector<int64_t> &data) = 0;
+
+  /// Creates a new AbstractCiphertext with the instantiated concrete ciphertext factory. The last value is used to fill
+  /// up the remaining slots of the ciphertext, in case that the given data does not use all slots.
+  /// \param data The data that should be encrypted in the ciphertext.
+  /// \return (A std::unique_ptr) to the created AbstractCiphertext.
+  virtual std::unique_ptr<AbstractCiphertext> createCiphertext(const std::vector<int> &data) = 0;
 
   /// Creates a new AbstractCiphertext with the instantiated concrete ciphertext factory. The given value is written
   /// into each slot of the ciphertext.
