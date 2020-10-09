@@ -69,6 +69,11 @@ std::vector<int64_t> castExpressionList(ExpressionList &expressionList) {
   return result;
 }
 
+std::unique_ptr<AbstractCiphertext> SealCiphertext::clone() {
+  // call the copy constructor to create a clone of this ciphertext
+  return std::make_unique<SealCiphertext>(*this);
+}
+
 // =======================================
 // == CTXT-CTXT operations with returned result
 // =======================================
@@ -161,9 +166,79 @@ void SealCiphertext::multiplyPlainInplace(ExpressionList &operand) {
   factory.getEvaluator().relinearize_inplace(ciphertext, factory.getRelinKeys());
 }
 
-std::unique_ptr<AbstractCiphertext> SealCiphertext::clone() {
-  // call the copy constructor to create a clone of this ciphertext
-  return std::make_unique<SealCiphertext>(*this);
+// =======================================
+// == Overriden methods from AbstractCiphertext interface
+// =======================================
+
+void SealCiphertext::add(AbstractValue &other) {
+  // TODO: Implement me!
+  if (auto otherAsSealCiphertext = dynamic_cast<SealCiphertext *>(&other)) {
+    addInplace(*otherAsSealCiphertext);
+  } else if (auto otherAsCleartext = dynamic_cast<ICleartext *>(&other)) {
+//    addPlainInplace(*otherAsCleartext);
+  } else {
+    throw std::runtime_error("");
+  }
+}
+
+void SealCiphertext::subtract(AbstractValue &other) {
+  // TODO: Implement me!
+}
+
+void SealCiphertext::multiply(AbstractValue &other) {
+  // TODO: Implement me!
+}
+
+void SealCiphertext::divide(AbstractValue &other) {
+  // TODO: Implement me!
+}
+
+void SealCiphertext::modulo(AbstractValue &other) {
+  // TODO: Implement me!
+}
+
+void SealCiphertext::logicalAnd(AbstractValue &other) {
+  // TODO: Implement me!
+}
+
+void SealCiphertext::logicalOr(AbstractValue &other) {
+  // TODO: Implement me!
+}
+
+void SealCiphertext::logicalLess(AbstractValue &other) {
+  // TODO: Implement me!
+}
+
+void SealCiphertext::logicalLessEqual(AbstractValue &other) {
+  // TODO: Implement me!
+}
+
+void SealCiphertext::logicalGreater(AbstractValue &other) {
+  // TODO: Implement me!
+}
+
+void SealCiphertext::logicalGreaterEqual(AbstractValue &other) {
+  // TODO: Implement me!
+}
+
+void SealCiphertext::logicalEqual(AbstractValue &other) {
+  // TODO: Implement me!
+}
+
+void SealCiphertext::logicalNotEqual(AbstractValue &other) {
+  // TODO: Implement me!
+}
+
+void SealCiphertext::logicalBitwiseAnd(AbstractValue &other) {
+  // TODO: Implement me!
+}
+
+void SealCiphertext::logicalBitwiseXor(AbstractValue &other) {
+  // TODO: Implement me!
+}
+
+void SealCiphertext::logicalBitwiseOr(AbstractValue &other) {
+  // TODO: Implement me!
 }
 
 #endif

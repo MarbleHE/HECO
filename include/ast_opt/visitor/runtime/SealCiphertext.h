@@ -71,6 +71,38 @@ class SealCiphertext : public AbstractCiphertext {
   void subtractPlainInplace(ExpressionList &operand) override;
 
   std::unique_ptr<AbstractCiphertext> clone() override;
+
+  void add(AbstractValue &other) override;
+
+  void subtract(AbstractValue &other) override;
+
+  void multiply(AbstractValue &other) override;
+
+  void divide(AbstractValue &other) override;
+
+  void modulo(AbstractValue &other) override;
+
+  void logicalAnd(AbstractValue &other) override;
+
+  void logicalOr(AbstractValue &other) override;
+
+  void logicalLess(AbstractValue &other) override;
+
+  void logicalLessEqual(AbstractValue &other) override;
+
+  void logicalGreater(AbstractValue &other) override;
+
+  void logicalGreaterEqual(AbstractValue &other) override;
+
+  void logicalEqual(AbstractValue &other) override;
+
+  void logicalNotEqual(AbstractValue &other) override;
+
+  void logicalBitwiseAnd(AbstractValue &other) override;
+
+  void logicalBitwiseXor(AbstractValue &other) override;
+
+  void logicalBitwiseOr(AbstractValue &other) override;
 };
 
 #endif
