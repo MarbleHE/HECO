@@ -1,4 +1,5 @@
-#include <ast_opt/utilities/Operator.h>
+#include "ast_opt/utilities/Operator.h"
+#include "ast_opt/visitor/runtime/Cleartext.h"
 #include "ast_opt/visitor/runtime/SealCiphertext.h"
 #include "ast_opt/ast/ExpressionList.h"
 #include "ast_opt/visitor/runtime/SealCiphertextFactory.h"
