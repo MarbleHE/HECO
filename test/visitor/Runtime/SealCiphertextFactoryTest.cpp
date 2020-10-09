@@ -1,8 +1,11 @@
+#include <algorithm>
+
+#include "gtest/gtest.h"
+
 #include "include/ast_opt/visitor/runtime/SealCiphertext.h"
 #include "include/ast_opt/ast/ExpressionList.h"
 #include "include/ast_opt/visitor/runtime/SealCiphertextFactory.h"
-#include "gtest/gtest.h"
-#include <algorithm>
+#include "include/ast_opt/visitor/runtime/Cleartext.h"
 
 #ifdef HAVE_SEAL_BFV
 
@@ -233,12 +236,12 @@ TEST_F(SealCiphertextFactoryTest, multiplyInplace) { /* NOLINT */
 // == CTXT-PLAIN operations with returned result
 // =======================================
 
-ExpressionList createExpressionList(const std::vector<int64_t> &literalIntValues) {
+Cleartext<int> createCleartext(const std::vector<int> &literalIntValues) {
   std::vector<std::unique_ptr<AbstractExpression>> result;
   for (const auto &val : literalIntValues) {
     result.emplace_back(std::make_unique<LiteralInt>(val));
   }
-  return ExpressionList(std::move(result));
+  return Cleartext<int>(literalIntValues);
 }
 
 TEST_F(SealCiphertextFactoryTest, addPlain) { /* NOLINT */
@@ -246,8 +249,8 @@ TEST_F(SealCiphertextFactoryTest, addPlain) { /* NOLINT */
   std::vector<int64_t> data1 = {3, 3, 1, 4, 5, 9};
   std::unique_ptr<AbstractCiphertext> ctxt1 = scf->createCiphertext(data1);
 
-  std::vector<int64_t> data2 = {0, 1, 2, 1, 10, 21};
-  auto operandVector = createExpressionList(data2);
+  std::vector<int> data2 = {0, 1, 2, 1, 10, 21};
+  auto operandVector = createCleartext(data2);
 
   auto ctxtResult = ctxt1->addPlain(operandVector);
   std::vector<int64_t> expectedData = {3, 4, 3, 5, 15, 30};
@@ -262,8 +265,8 @@ TEST_F(SealCiphertextFactoryTest, subPlain) { /* NOLINT */
   std::vector<int64_t> data1 = {3, 3, 1, 4, 5, 9};
   std::unique_ptr<AbstractCiphertext> ctxt1 = scf->createCiphertext(data1);
 
-  std::vector<int64_t> data2 = {0, 1, 2, 1, 10, 21};
-  auto operandVector = createExpressionList(data2);
+  std::vector<int> data2 = {0, 1, 2, 1, 10, 21};
+  auto operandVector = createCleartext(data2);
 
   auto ctxtResult = ctxt1->subtractPlain(operandVector);
   std::vector<int64_t> expectedData = {3, 2, -1, 3, -5, -12};
@@ -278,8 +281,8 @@ TEST_F(SealCiphertextFactoryTest, multiplyPlain) { /* NOLINT */
   std::vector<int64_t> data1 = {3, 3, 1, 4, 5, 9};
   std::unique_ptr<AbstractCiphertext> ctxt1 = scf->createCiphertext(data1);
 
-  std::vector<int64_t> data2 = {0, 1, 2, 1, 10, 21};
-  auto operandVector = createExpressionList(data2);
+  std::vector<int> data2 = {0, 1, 2, 1, 10, 21};
+  auto operandVector = createCleartext(data2);
 
   auto ctxtResult = ctxt1->multiplyPlain(operandVector);
   std::vector<int64_t> expectedData = {0, 3, 2, 4, 50, 189};
@@ -298,8 +301,8 @@ TEST_F(SealCiphertextFactoryTest, addPlainInplace) { /* NOLINT */
   std::vector<int64_t> data1 = {3, 3, 1, 4, 5, 9};
   std::unique_ptr<AbstractCiphertext> ctxt1 = scf->createCiphertext(data1);
 
-  std::vector<int64_t> data2 = {0, 1, 2, 1, 10, 21};
-  auto operandVector = createExpressionList(data2);
+  std::vector<int> data2 = {0, 1, 2, 1, 10, 21};
+  auto operandVector = createCleartext(data2);
 
   ctxt1->addPlainInplace(operandVector);
   std::vector<int64_t> expectedData = {3, 4, 3, 5, 15, 30};
@@ -311,8 +314,8 @@ TEST_F(SealCiphertextFactoryTest, subPlainInplace) { /* NOLINT */
   std::vector<int64_t> data1 = {3, 3, 1, 4, 5, 9};
   std::unique_ptr<AbstractCiphertext> ctxt1 = scf->createCiphertext(data1);
 
-  std::vector<int64_t> data2 = {0, 1, 2, 1, 10, 21};
-  auto operandVector = createExpressionList(data2);
+  std::vector<int> data2 = {0, 1, 2, 1, 10, 21};
+  auto operandVector = createCleartext(data2);
 
   ctxt1->subtractPlainInplace(operandVector);
   std::vector<int64_t> expectedData = {3, 2, -1, 3, -5, -12};
@@ -324,8 +327,8 @@ TEST_F(SealCiphertextFactoryTest, multipluPlainInplace) { /* NOLINT */
   std::vector<int64_t> data1 = {3, 3, 1, 4, 5, 9};
   std::unique_ptr<AbstractCiphertext> ctxt1 = scf->createCiphertext(data1);
 
-  std::vector<int64_t> data2 = {0, 1, 2, 1, 10, 21};
-  auto operandVector = createExpressionList(data2);
+  std::vector<int> data2 = {0, 1, 2, 1, 10, 21};
+  auto operandVector = createCleartext(data2);
 
   ctxt1->multiplyPlainInplace(operandVector);
   std::vector<int64_t> expectedData = {0, 3, 2, 4, 50, 189};
