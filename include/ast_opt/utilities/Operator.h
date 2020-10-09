@@ -54,7 +54,9 @@ class Operator {
 
   [[nodiscard]] std::string toString() const;
 
-  friend bool operator==(const Operator& op1, const Operator& op2);
+  friend bool operator==(const Operator &op1, const Operator &op2);
+
+  [[nodiscard]] bool isCommutative() const;
 };
 
 

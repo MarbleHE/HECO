@@ -28,7 +28,22 @@ Operator::Operator(OperatorVariant op) : op(op) {}
 
 bool Operator::isRightAssociative() const {
   // Only UnaryOp are right associative
- return isUnary();
+  return isUnary();
+}
+
+bool Operator::isCommutative() const {
+  return *this==Operator(FHE_MULTIPLICATION)
+      || *this==Operator(ArithmeticOp::MULTIPLICATION)
+      || *this==Operator(ArithmeticOp::FHE_MULTIPLICATION)
+      || *this==Operator(ArithmeticOp::ADDITION)
+      || *this==Operator(ArithmeticOp::FHE_ADDITION)
+      || *this==Operator(LogicalOp::EQUAL)
+      || *this==Operator(LogicalOp::NOTEQUAL)
+      || *this==Operator(LogicalOp::BITWISE_AND)
+      || *this==Operator(LogicalOp::BITWISE_XOR)
+      || *this==Operator(LogicalOp::BITWISE_OR)
+      || *this==Operator(LogicalOp::LOGICAL_AND)
+      || *this==Operator(LogicalOp::LOGICAL_OR);
 }
 
 bool Operator::isUnary() const {
