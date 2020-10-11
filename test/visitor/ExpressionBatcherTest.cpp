@@ -5,7 +5,7 @@
 #include "ast_opt/parser/Parser.h"
 #include "../ASTComparison.h"
 #include "gtest/gtest.h"
-TEST(ExpressionBatcherTest, DISABLED_batchableExpression) {
+TEST(ExpressionBatcherTest, batchableExpression) {
 
   const char *inputChars = R""""(
     x = (a*b) + (c*d);
@@ -23,7 +23,7 @@ TEST(ExpressionBatcherTest, DISABLED_batchableExpression) {
 
   auto assignment = dynamic_cast<Assignment*>(&*inputAST->begin());
   auto rhs = dynamic_cast<BinaryExpression&>(assignment->getValue());
-  b.batchExpression(rhs, BatchingConstraint());
+  auto cv =  b.batchExpression(rhs, BatchingConstraint());
 
   const char *expectedChars = R""""(
     __input0__ = __input0__ * __input1__
@@ -32,15 +32,14 @@ TEST(ExpressionBatcherTest, DISABLED_batchableExpression) {
   auto expectedCode = std::string(expectedChars);
   auto expectedAST = Parser::parse(expectedCode);
 
-  //TODO: How to return this?
-
+  //TODO: How to compare ComplexValue?
   EXPECT_TRUE(compareAST(*inputAST, *expectedAST));
 }
 
 //TODO: Write lots of tests for batchability detection logic and think about algorithm shortcuts for "boring case" like sum.
 
 
-TEST(ExpressionBatcherTest, DISABLED_cardioTestMegaExpression) {
+TEST(ExpressionBatcherTest, cardioTestMegaExpression) {
 
   // Before Variable Substitution:
   //  risk = risk +++ (man && (age > 50));

@@ -4,7 +4,7 @@
 #include "../ASTComparison.h"
 #include "gtest/gtest.h"
 
-TEST(VectorizerTest, DISABLED_trivialVectors) {
+TEST(VectorizerTest, trivialVectors) {
 
   const char *inputChars = R""""(
     x[0] = y[0];
@@ -61,7 +61,7 @@ TEST(VectorizerTest, DISABLED_trivialVectors) {
 // slots: 2,3....
 // Computation Plan: x = old_x (or rather, ref/ptr to the old expression);
 
-TEST(VectorizerTest, DISABLED_trivialInterleavedVectors) {
+TEST(VectorizerTest, trivialInterleavedVectors) {
 
   const char *inputChars = R""""(
     x[0] = y[0];
@@ -93,7 +93,7 @@ TEST(VectorizerTest, DISABLED_trivialInterleavedVectors) {
   EXPECT_TRUE(compareAST(*inputAST, *expectedAST));
 }
 
-TEST(VectorizerTest, DISABLED_singleOutlierVector) {
+TEST(VectorizerTest, singleOutlierVector) {
   const char *inputChars = R""""(
     x[0] = y[0];
     x[1] = y[1];
@@ -137,7 +137,7 @@ TEST(VectorizerTest, DISABLED_singleOutlierVector) {
 // Computation Plan: old-sum + x[0] + ... + x[7]; (Operator Expression)
 // If trying to update with non-transparent operation (for now, any different one) causes emit of sum!
 // At the end: Emit OperatorExpression, which introduces rotations
-TEST(VectorizerTest, DISABLED_sumStatementsPowerOfTwo) {
+TEST(VectorizerTest, sumStatementsPowerOfTwo) {
 
   //If sum is vector valued, this would mean something very different
   // Specifically, it would mean that in each step, x[i] is added to each slot.
@@ -177,7 +177,7 @@ TEST(VectorizerTest, DISABLED_sumStatementsPowerOfTwo) {
   EXPECT_TRUE(compareAST(*inputAST, *expectedAST));
 }
 
-TEST(VectorizerTest, DISABLED_sumStatementsGeneral) {
+TEST(VectorizerTest, sumStatementsGeneral) {
 
   const char *inputChars = R""""(
     sum = sum + x[0];
@@ -222,7 +222,7 @@ TEST(VectorizerTest, DISABLED_sumStatementsGeneral) {
 // do full batchability of expression logic, comparing all in set + current candidate and potentially transforming current or in set
 // Main challenge: need to later output batching "map" from this. easiest if all variables are "free", i.e. not constrained.
 // More difficult in general, lots of option, could also encode things twice, but now optimality no longer obvious.
-TEST(VectorizerTest, DISABLED_cardioTest) {
+TEST(VectorizerTest, cardioTest) {
 
   //TODO: With variable substition, this would look very different!
   //TODO: After running the If-Rewriter, we would have to run CTES across the Block again (this is an example why)
@@ -304,7 +304,7 @@ TEST(VectorizerTest, DISABLED_cardioTest) {
 }
 
 // Simplified test case without "-90" and with same comparison operators in all conditions
-TEST(VectorizerTest, DISABLED_cardioTestSimplified) {
+TEST(VectorizerTest, cardioTestSimplified) {
 
   // Before Variable Substitution:
   //  risk = risk +++ (man && (age > 50));
@@ -367,7 +367,7 @@ TEST(VectorizerTest, DISABLED_cardioTestSimplified) {
 }
 
 //TODO: Add a test case for matrix-vector-product
-TEST(VectorizerTest, DISABLED_matrixVectorTest) {
+TEST(VectorizerTest, matrixVectorTest) {
 
   // Pre-CTES Program:
   // for (int i = 0; i < 3; i++) {
@@ -431,7 +431,7 @@ TEST(VectorizerTest, DISABLED_matrixVectorTest) {
 
 //TODO: Write lots of tests for batchability detection logic and think about algorithm shortcuts for "boring case" like sum.
 
-TEST(VectorizerTest, DISABLED_batchableExpression) {
+TEST(VectorizerTest, batchableExpression) {
 
   const char *inputChars = R""""(
     x = (a*b) + (c*d);
@@ -481,7 +481,7 @@ TEST(VectorizerTest, DISABLED_batchableExpression) {
 // Execution Plan: [in Constraints: __input2__ = {e,g}, __input3__ = {f,h}]
 //                   __input2__ = __input2__ * __input2__
 //                   __input2__ = __input2__ + rotate(__input2__,1);
-TEST(VectorizerTest, DISABLED_batchableExpressionVectorizable) {
+TEST(VectorizerTest, batchableExpressionVectorizable) {
 
   const char *inputChars = R""""(
     x[0] = (a*b) + (c*d);
