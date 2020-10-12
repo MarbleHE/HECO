@@ -91,6 +91,9 @@ void SpecialTypeCheckingVisitor::visit(IndexAccess &elem) {
       throw std::runtime_error("IndexAccess requires integers!");
     }
   }
+
+  auto targetIsSecretTainted = secretTaintedNodes.at(elem.getTarget().getUniqueNodeId());
+  secretTaintedNodes.insert_or_assign(elem.getUniqueNodeId(), targetIsSecretTainted);
 }
 
 void SpecialTypeCheckingVisitor::visit(LiteralBool &elem) {
@@ -140,6 +143,7 @@ void SpecialTypeCheckingVisitor::visit(Variable &elem) {
   auto scopedIdentifier = variablesDatatypeMap.find(getCurrentScope().resolveIdentifier(elem.getIdentifier()));
   if (scopedIdentifier!=variablesDatatypeMap.end()) {
     typesVisitedNodes.push(scopedIdentifier->second);
+    secretTaintedNodes.insert_or_assign(elem.getUniqueNodeId(), scopedIdentifier->second.getSecretFlag());
   }
 }
 
@@ -215,6 +219,9 @@ void SpecialTypeCheckingVisitor::visit(Return &elem) {
 
 void SpecialTypeCheckingVisitor::visit(Assignment &elem) {
   ScopedVisitor::visit(elem);
+  // The declaration of this identifier already provided us the information about its type, hence we can just discard
+  // the datatype in typesVisitedNodes.
+  typesVisitedNodes.pop();
   postStatementAction();
 }
 
