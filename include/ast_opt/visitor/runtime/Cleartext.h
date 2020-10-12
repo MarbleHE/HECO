@@ -20,6 +20,8 @@ class ICleartext : public AbstractValue {
   ~ICleartext() override = default;
 
   virtual std::unique_ptr<ICleartext> clone() = 0;
+
+  virtual std::string toString() = 0;
 };
 
 template<typename T>
@@ -72,6 +74,13 @@ class Cleartext : public ICleartext {
   std::unique_ptr<ICleartext> clone() override {
     auto cloned = std::make_unique<Cleartext<T>>(*this);
     return cloned;
+  }
+
+  std::string toString() override {
+    std::ostringstream vts;
+    std::copy(data.begin(), data.end() - 1, std::ostream_iterator<T>(vts, ", "));
+    vts << data.back();
+    return vts.str();
   }
 
   void applyOperator(std::function<T(T, T)> f, AbstractValue &other) {
