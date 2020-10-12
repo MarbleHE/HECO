@@ -195,8 +195,9 @@ void SpecialRuntimeVisitor::visit(For &elem) {
     }
   };
 
-  // TODO: Do we support loop's over a secret condition? If not, include check in elem.hasCondition() to make sure that
-  //  the condition is not secret -> otherwise throw exception
+  if (elem.hasCondition() && secretTaintedMap.count(elem.getCondition().getUniqueNodeId()) > 0) {
+    throw std::runtime_error("For loops over secret conditions are not supported yet!");
+  }
 
   // execute the For loop
   if (elem.hasCondition()) {
