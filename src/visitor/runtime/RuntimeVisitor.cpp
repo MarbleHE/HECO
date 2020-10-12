@@ -406,7 +406,7 @@ SpecialRuntimeVisitor::SpecialRuntimeVisitor(AbstractCiphertextFactory &factory,
 void SpecialRuntimeVisitor::executeAst(AbstractNode &rootNode) {
   try {
     rootNode.accept(*this);
-  } catch (ReturnStatementReached &returnStatementReached) {
+  } catch (ReturnStatementReached &) {
     std::cout << "Program reached return statement.." << std::endl;
   }
 }
