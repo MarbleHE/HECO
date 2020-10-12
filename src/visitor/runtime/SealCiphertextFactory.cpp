@@ -1,9 +1,10 @@
 #include "ast_opt/visitor/runtime/SealCiphertext.h"
 #include "ast_opt/visitor/runtime/SealCiphertextFactory.h"
 #include "ast_opt/visitor/runtime/Cleartext.h"
-//#include "ast_opt/visitor/runtime/SealPlaintext.h"
 
 #ifdef HAVE_SEAL_BFV
+#include <memory>
+#include <seal/seal.h>
 
 std::unique_ptr<AbstractCiphertext> SealCiphertextFactory::createCiphertext(const std::vector<int64_t> &data) {
   auto ptxt = createPlaintext(data);

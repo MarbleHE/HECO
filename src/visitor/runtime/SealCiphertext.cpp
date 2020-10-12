@@ -5,6 +5,7 @@
 #include "ast_opt/visitor/runtime/AbstractCiphertext.h"
 
 #ifdef HAVE_SEAL_BFV
+#include <seal/seal.h>
 
 SealCiphertext::SealCiphertext(SealCiphertextFactory &sealFactory) : AbstractCiphertext(sealFactory) {}
 
