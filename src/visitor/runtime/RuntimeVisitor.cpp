@@ -88,11 +88,11 @@ void SpecialRuntimeVisitor::visit(BinaryExpression &elem) {
   } else if (operatorEquals(NOTEQUAL)) {
     lhsOperand->logicalNotEqual(*rhsOperand);
   } else if (operatorEquals(BITWISE_AND)) {
-    lhsOperand->logicalBitwiseAnd(*rhsOperand);
+    lhsOperand->bitwiseAnd(*rhsOperand);
   } else if (operatorEquals(BITWISE_XOR)) {
-    lhsOperand->logicalBitwiseXor(*rhsOperand);
+    lhsOperand->bitwiseXor(*rhsOperand);
   } else if (operatorEquals(BITWISE_OR)) {
-    lhsOperand->logicalBitwiseOr(*rhsOperand);
+    lhsOperand->bitwiseOr(*rhsOperand);
   } else {
     throw std::runtime_error("Unknown binary operator encountered. Cannot continue!");
   }
@@ -100,13 +100,13 @@ void SpecialRuntimeVisitor::visit(BinaryExpression &elem) {
 }
 
 void SpecialRuntimeVisitor::visit(UnaryExpression &elem) {
-  ScopedVisitor::visit(elem);
+  elem.getOperand().accept(*this);
+  auto operand = getNextStackElement();
 
-  // TODO: Implement me!
   if (elem.getOperator()==Operator(LOGICAL_NOT)) {
-
+    operand->logicalNot();
   } else if (elem.getOperator()==Operator(BITWISE_NOT)) {
-
+    operand->bitwiseNot();
   } else {
     throw std::runtime_error("Unknown unary operator encountered!");
   }
@@ -453,7 +453,7 @@ OutputIdentifierValuePairs SpecialRuntimeVisitor::getOutput(AbstractNode &output
   return outputValues;
 }
 
-void SpecialRuntimeVisitor::printOutput(AbstractNode &outputAst, std::ostream &targetStream) {
+[[maybe_unused]] void SpecialRuntimeVisitor::printOutput(AbstractNode &outputAst, std::ostream &targetStream) {
   // retrieve the identifiers mentioned in the output AST, decrypt referred ciphertexts, and print them
   auto outputValues = getOutput(outputAst);
   for (const auto &v : outputValues) {

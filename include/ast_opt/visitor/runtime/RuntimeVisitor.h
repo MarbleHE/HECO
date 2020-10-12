@@ -96,7 +96,7 @@ class SpecialRuntimeVisitor : public ScopedVisitor {
 
   std::unique_ptr<AbstractValue> getNextStackElement();
 
-  void printOutput(AbstractNode &outputAst, std::ostream &targetStream = std::cout);
+  [[maybe_unused]] [[maybe_unused]] void printOutput(AbstractNode &outputAst, std::ostream &targetStream = std::cout);
 
   template<typename T>
   void checkAstStructure(AbstractNode &astRootNode);
