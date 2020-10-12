@@ -36,11 +36,15 @@ class AbstractValue {
 
   virtual void logicalNotEqual(AbstractValue &other) = 0;
 
-  virtual void logicalBitwiseAnd(AbstractValue &other) = 0;
+  virtual void logicalNot() = 0;
 
-  virtual void logicalBitwiseXor(AbstractValue &other) = 0;
+  virtual void bitwiseAnd(AbstractValue &other) = 0;
 
-  virtual void logicalBitwiseOr(AbstractValue &other) = 0;
+  virtual void bitwiseXor(AbstractValue &other) = 0;
+
+  virtual void bitwiseOr(AbstractValue &other) = 0;
+
+  virtual void bitwiseNot() = 0;
 };
 
 #endif //GRAPHNODE_H_INCLUDE_AST_OPT_VISITOR_RUNTIME_ABSTRACTVALUE_H_

@@ -131,8 +131,12 @@ std::unique_ptr<AbstractCiphertext> SealCiphertext::multiplyPlain(ICleartext &op
   if (auto cleartextInt = dynamic_cast<Cleartext<int> *>(&operand)) {
     std::unique_ptr<seal::Plaintext> plaintext = getFactory().createPlaintext(cleartextInt->getData());
     std::unique_ptr<SealCiphertext> resultCiphertext = std::make_unique<SealCiphertext>(getFactory());
-    getFactory().getEvaluator().multiply_plain(ciphertext, *plaintext, resultCiphertext->ciphertext);
-    getFactory().getEvaluator().relinearize_inplace(resultCiphertext->ciphertext, getFactory().getRelinKeys());
+    if (cleartextInt->allEqual(-1)) {
+      getFactory().getEvaluator().negate(ciphertext, resultCiphertext->ciphertext);
+    } else {
+      getFactory().getEvaluator().multiply_plain(ciphertext, *plaintext, resultCiphertext->ciphertext);
+      getFactory().getEvaluator().relinearize_inplace(resultCiphertext->ciphertext, getFactory().getRelinKeys());
+    }
     return resultCiphertext;
   } else {
     throw std::runtime_error("MULTIPLY(Ciphertext,Cleartext) requires a Cleartext<int> as BFV supports integers only.");
@@ -163,9 +167,13 @@ void SealCiphertext::subtractPlainInplace(ICleartext &operand) {
 
 void SealCiphertext::multiplyPlainInplace(ICleartext &operand) {
   if (auto cleartextInt = dynamic_cast<Cleartext<int> *>(&operand)) {
-    std::unique_ptr<seal::Plaintext> plaintext = getFactory().createPlaintext(cleartextInt->getData());
-    getFactory().getEvaluator().multiply_plain_inplace(ciphertext, *plaintext);
-    getFactory().getEvaluator().relinearize_inplace(ciphertext, getFactory().getRelinKeys());
+    if (cleartextInt->allEqual(-1)) {
+      getFactory().getEvaluator().negate_inplace(ciphertext);
+    } else {
+      std::unique_ptr<seal::Plaintext> plaintext = getFactory().createPlaintext(cleartextInt->getData());
+      getFactory().getEvaluator().multiply_plain_inplace(ciphertext, *plaintext);
+      getFactory().getEvaluator().relinearize_inplace(ciphertext, getFactory().getRelinKeys());
+    }
   } else {
     throw std::runtime_error("MULTIPLY(Ciphertext,Cleartext) requires a Cleartext<int> as BFV supports integers only.");
   }
@@ -182,7 +190,7 @@ void SealCiphertext::add(AbstractValue &other) {
     addPlainInplace(*otherAsCleartext);
   } else {
     throw std::runtime_error("Operation ADD only supported for (AbstractCiphertext,AbstractCiphertext) "
-                             "and (AbstractCiphertext, ICleartext).");
+                             "and (SealCiphertext, ICleartext).");
   }
 }
 
@@ -192,8 +200,8 @@ void SealCiphertext::subtract(AbstractValue &other) {
   } else if (auto otherAsCleartext = dynamic_cast<ICleartext *>(&other)) {  // ctxt-ptxt operation
     subtractPlainInplace(*otherAsCleartext);
   } else {
-    throw std::runtime_error("Operation SUBTRACT only supported for (AbstractCiphertext,AbstractCiphertext) "
-                             "and (AbstractCiphertext, ICleartext).");
+    throw std::runtime_error("Operation SUBTRACT only supported for (SealCiphertext,SealCiphertext) "
+                             "and (SealCiphertext, ICleartext).");
   }
 }
 
@@ -203,61 +211,61 @@ void SealCiphertext::multiply(AbstractValue &other) {
   } else if (auto otherAsCleartext = dynamic_cast<ICleartext *>(&other)) {  // ctxt-ptxt operation
     multiplyPlainInplace(*otherAsCleartext);
   } else {
-    throw std::runtime_error("Operation MULTIPLY only supported for (AbstractCiphertext,AbstractCiphertext) "
-                             "and (AbstractCiphertext, ICleartext).");
+    throw std::runtime_error("Operation MULTIPLY only supported for (SealCiphertext,SealCiphertext) "
+                             "and (SealCiphertext, ICleartext).");
   }
 }
 
 void SealCiphertext::divide(AbstractValue &other) {
-  throw std::runtime_error("Operation divide not supported for (AbstractCiphertext, *).");
+  throw std::runtime_error("Operation divide not supported for (SealCiphertext, ANY).");
 }
 
 void SealCiphertext::modulo(AbstractValue &other) {
-  throw std::runtime_error("Operation modulo not supported for (AbstractCiphertext, *).");
+  throw std::runtime_error("Operation modulo not supported for (SealCiphertext, ANY).");
 }
 
 void SealCiphertext::logicalAnd(AbstractValue &other) {
-  throw std::runtime_error("Operation logicalAnd not supported for (AbstractCiphertext, *).");
+  throw std::runtime_error("Operation logicalAnd not supported for (SealCiphertext, ANY).");
 }
 
 void SealCiphertext::logicalOr(AbstractValue &other) {
-  throw std::runtime_error("Operation logicalOr not supported for (AbstractCiphertext, *).");
+  throw std::runtime_error("Operation logicalOr not supported for (SealCiphertext, ANY).");
 }
 
 void SealCiphertext::logicalLess(AbstractValue &other) {
-  throw std::runtime_error("Operation logicalLess not supported for (AbstractCiphertext, *).");
+  throw std::runtime_error("Operation logicalLess not supported for (SealCiphertext, ANY).");
 }
 
 void SealCiphertext::logicalLessEqual(AbstractValue &other) {
-  throw std::runtime_error("Operation logicalLessEqual not supported for (AbstractCiphertext, *).");
+  throw std::runtime_error("Operation logicalLessEqual not supported for (SealCiphertext, ANY).");
 }
 
 void SealCiphertext::logicalGreater(AbstractValue &other) {
-  throw std::runtime_error("Operation logicalGreater not supported for (AbstractCiphertext, *).");
+  throw std::runtime_error("Operation logicalGreater not supported for (SealCiphertext, ANY).");
 }
 
 void SealCiphertext::logicalGreaterEqual(AbstractValue &other) {
-  throw std::runtime_error("Operation logicalGreaterEqual not supported for (AbstractCiphertext, *).");
+  throw std::runtime_error("Operation logicalGreaterEqual not supported for (SealCiphertext, ANY).");
 }
 
 void SealCiphertext::logicalEqual(AbstractValue &other) {
-  throw std::runtime_error("Operation logicalEqual not supported for (AbstractCiphertext, *).");
+  throw std::runtime_error("Operation logicalEqual not supported for (SealCiphertext, ANY).");
 }
 
 void SealCiphertext::logicalNotEqual(AbstractValue &other) {
-  throw std::runtime_error("Operation logicalNotEqual not supported for (AbstractCiphertext, *).");
+  throw std::runtime_error("Operation logicalNotEqual not supported for (SealCiphertext, ANY).");
 }
 
-void SealCiphertext::logicalBitwiseAnd(AbstractValue &other) {
-  throw std::runtime_error("Operation logicalBitwiseAnd not supported for (AbstractCiphertext, *).");
+void SealCiphertext::bitwiseAnd(AbstractValue &other) {
+  throw std::runtime_error("Operation bitwiseAnd not supported for (SealCiphertext, ANY).");
 }
 
-void SealCiphertext::logicalBitwiseXor(AbstractValue &other) {
-  throw std::runtime_error("Operation logicalBitwiseXor not supported for (AbstractCiphertext, *).");
+void SealCiphertext::bitwiseXor(AbstractValue &other) {
+  throw std::runtime_error("Operation bitwiseXor not supported for (SealCiphertext, ANY).");
 }
 
-void SealCiphertext::logicalBitwiseOr(AbstractValue &other) {
-  throw std::runtime_error("Operation logicalBitwiseOr not supported for (AbstractCiphertext, *).");
+void SealCiphertext::bitwiseOr(AbstractValue &other) {
+  throw std::runtime_error("Operation bitwiseOr not supported for (SealCiphertext, ANY).");
 }
 
 SealCiphertextFactory &SealCiphertext::getFactory() {
@@ -271,6 +279,16 @@ const SealCiphertextFactory &SealCiphertext::getFactory() const {
   } else {
     throw std::runtime_error("Cast of AbstractFactory to SealFactory failed. SealCiphertext is probably invalid.");
   }
+}
+
+void SealCiphertext::logicalNot() {
+  throw std::runtime_error("Operation logicalNot not supported for (SealCiphertext, ANY). "
+                           "For an arithmetic negation, multiply by (-1) instead.");
+}
+
+void SealCiphertext::bitwiseNot() {
+  throw std::runtime_error("Operation bitwiseNot not supported for (SealCiphertext, ANY). "
+                           "For an arithmetic negation, multiply by (-1) instead.");
 }
 
 #endif

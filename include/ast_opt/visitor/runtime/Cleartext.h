@@ -40,7 +40,7 @@ class Cleartext : public ICleartext {
       if (auto exprCasted = dynamic_cast<Literal<T> *>(&expression.get())) {
         data.push_back(exprCasted->getValue());
       } else {
-        throw std::runtime_error("");
+        throw std::runtime_error("Element of ExpressionList is not a " + TypeName<Literal<T>>::Get());
       }
     }
   }
@@ -60,6 +60,12 @@ class Cleartext : public ICleartext {
         throw std::runtime_error("Cannot create Cleartext<T> of multiple other Cleartext<T> with different types!");
       }
     }
+  }
+
+  [[nodiscard]] bool allEqual(T value) const {
+    return std::all_of(data.begin(), data.end(), [&value](const T &current) {
+      return current==value;
+    });
   }
 
   // copy constructor
@@ -83,7 +89,7 @@ class Cleartext : public ICleartext {
     return vts.str();
   }
 
-  void applyOperator(std::function<T(T, T)> f, AbstractValue &other) {
+  void applyBinaryOperator(std::function<T(T, T)> f, AbstractValue &other) {
     if (auto otherCleartxt = dynamic_cast<Cleartext<T> *>(&other)) {
       std::transform(data.begin(), data.end(), otherCleartxt->data.begin(), data.begin(), f);
     } else {
@@ -94,68 +100,82 @@ class Cleartext : public ICleartext {
     }
   }
 
+  void applyUnaryOperator(std::function<T(T)> f) {
+    std::transform(data.begin(), data.end(), data.begin(), f);
+  }
+
   void add(AbstractValue &other) override {
-    applyOperator(std::plus<T>(), other);
+    applyBinaryOperator(std::plus<T>(), other);
   }
 
   void subtract(AbstractValue &other) override {
-    applyOperator(std::minus<T>(), other);
+    applyBinaryOperator(std::minus<T>(), other);
   }
 
   void multiply(AbstractValue &other) override {
-    applyOperator(std::multiplies<T>(), other);
+    applyBinaryOperator(std::multiplies<T>(), other);
   }
 
   void divide(AbstractValue &other) override {
-    applyOperator(std::divides<T>(), other);
+    applyBinaryOperator(std::divides<T>(), other);
   }
 
   void modulo(AbstractValue &other) override {
-    applyOperator(std::modulus<T>(), other);
+    applyBinaryOperator(std::modulus<T>(), other);
   }
 
   void logicalAnd(AbstractValue &other) override {
-    applyOperator(std::logical_and<T>(), other);
+    applyBinaryOperator(std::logical_and<T>(), other);
   }
 
   void logicalOr(AbstractValue &other) override {
-    applyOperator(std::logical_or<T>(), other);
+    applyBinaryOperator(std::logical_or<T>(), other);
   }
 
   void logicalLess(AbstractValue &other) override {
-    applyOperator(std::less<T>(), other);
+    applyBinaryOperator(std::less<T>(), other);
   }
 
   void logicalLessEqual(AbstractValue &other) override {
-    applyOperator(std::less_equal<T>(), other);
+    applyBinaryOperator(std::less_equal<T>(), other);
   }
 
   void logicalGreater(AbstractValue &other) override {
-    applyOperator(std::greater<T>(), other);
+    applyBinaryOperator(std::greater<T>(), other);
   }
 
   void logicalGreaterEqual(AbstractValue &other) override {
-    applyOperator(std::greater_equal<T>(), other);
+    applyBinaryOperator(std::greater_equal<T>(), other);
   }
 
-  void logicalEqual(AbstractValue &other) override {
-    applyOperator(std::equal_to<T>(), other);
+  void logicalEqual(AbstractValue &other)
+  override {
+    applyBinaryOperator(std::equal_to<T>(), other);
   }
 
-  void logicalNotEqual(AbstractValue &other) override {
-    applyOperator(std::not_equal_to<T>(), other);
+  void logicalNotEqual(AbstractValue &other)
+  override {
+    applyBinaryOperator(std::not_equal_to<T>(), other);
   }
 
-  void logicalBitwiseAnd(AbstractValue &other) override {
-    applyOperator(std::bit_and<T>(), other);
+  void bitwiseAnd(AbstractValue &other) override {
+    applyBinaryOperator(std::bit_and<T>(), other);
   }
 
-  void logicalBitwiseXor(AbstractValue &other) override {
-    applyOperator(std::bit_xor<T>(), other);
+  void bitwiseXor(AbstractValue &other) override {
+    applyBinaryOperator(std::bit_xor<T>(), other);
   }
 
-  void logicalBitwiseOr(AbstractValue &other) override {
-    applyOperator(std::bit_or<T>(), other);
+  void bitwiseOr(AbstractValue &other) override {
+    applyBinaryOperator(std::bit_or<T>(), other);
+  }
+
+  void logicalNot() override {
+    applyUnaryOperator(std::logical_not<T>());
+  }
+
+  void bitwiseNot() override {
+    applyUnaryOperator(std::bit_not<T>());
   }
 };
 
@@ -239,59 +259,82 @@ inline void Cleartext<std::string>::logicalNotEqual(AbstractValue &other) {
 }
 
 template<>
-inline void Cleartext<std::string>::logicalBitwiseAnd(AbstractValue &other) {
+inline void Cleartext<std::string>::bitwiseAnd(AbstractValue &other) {
   throw std::runtime_error("Cannot apply bitwise-AND to operands of type (std::string, std::string).");
 }
 
 template<>
-inline void Cleartext<float>::logicalBitwiseAnd(AbstractValue &other) {
+inline void Cleartext<float>::bitwiseAnd(AbstractValue &other) {
   throw std::runtime_error("Cannot apply bitwise-AND to operands of type (float, float).");
 }
 
 template<>
-inline void Cleartext<double>::logicalBitwiseAnd(AbstractValue &other) {
+inline void Cleartext<double>::bitwiseAnd(AbstractValue &other) {
   throw std::runtime_error("Cannot apply bitwise-AND to operands of type (double, double).");
 }
 
 template<>
-inline void Cleartext<std::string>::logicalBitwiseOr(AbstractValue &other) {
+inline void Cleartext<std::string>::bitwiseOr(AbstractValue &other) {
   throw std::runtime_error("Cannot apply bitwise-OR to operands of type (std::string, std::string).");
 }
 
 template<>
-inline void Cleartext<float>::logicalBitwiseOr(AbstractValue &other) {
+inline void Cleartext<float>::bitwiseOr(AbstractValue &other) {
   throw std::runtime_error("Cannot apply bitwise-OR to operands of type (float, float).");
 }
 
 template<>
-inline void Cleartext<double>::logicalBitwiseOr(AbstractValue &other) {
+inline void Cleartext<double>::bitwiseOr(AbstractValue &other) {
   throw std::runtime_error("Cannot apply bitwise-OR to operands of type (double, double).");
 }
 
 template<>
-inline void Cleartext<std::string>::logicalBitwiseXor(AbstractValue &other) {
+inline void Cleartext<std::string>::bitwiseXor(AbstractValue &other) {
   throw std::runtime_error("Cannot apply bitwise-XOR to operands of type (std::string, std::string).");
 }
 
 template<>
-inline void Cleartext<float>::logicalBitwiseXor(AbstractValue &other) {
+inline void Cleartext<float>::bitwiseXor(AbstractValue &other) {
   throw std::runtime_error("Cannot apply bitwise-XOR to operands of type (float, float).");
 }
 
 template<>
-inline void Cleartext<double>::logicalBitwiseXor(AbstractValue &other) {
+inline void Cleartext<double>::bitwiseXor(AbstractValue &other) {
   throw std::runtime_error("Cannot apply bitwise-XOR to operands of type (double, double).");
 }
 
 template<>
 inline void Cleartext<int>::subtract(AbstractValue &other) {
+  // Subtraction needs special handling because in case of operands (Cleartext<T>, AbstractCiphertext), we cannot simply
+  // swap both operands as subtraction is non-commutative. Instead, we need to transform the first operand into a
+  // ciphertext and then perform the subtraction.
   if (auto otherCiphertext = dynamic_cast<AbstractCiphertext *>(&other)) {
     auto cleartextData = getData();
     std::unique_ptr<AbstractCiphertext> thisCiphertext = otherCiphertext->getFactory().createCiphertext(cleartextData);
     thisCiphertext->subtractInplace(*otherCiphertext);
   } else {
-    applyOperator(std::minus<>(), other);
+    applyBinaryOperator(std::minus<>(), other);
   }
+}
+
+template<>
+inline void Cleartext<float>::bitwiseNot() {
+  throw std::runtime_error("Cannot apply bitwise-NOT to operand of type (float).");
+}
+
+template<>
+inline void Cleartext<double>::bitwiseNot() {
+  throw std::runtime_error("Cannot apply bitwise-NOT to operand of type (double).");
+}
+
+template<>
+inline void Cleartext<std::string>::bitwiseNot() {
+  throw std::runtime_error("Cannot apply bitwise-NOT to operand of type (std::string).");
+}
+
+template<>
+inline void Cleartext<std::string>::logicalNot() {
+  throw std::runtime_error("Cannot apply (logical) not to operand of type (std::string).");
 }
 
 #endif //GRAPHNODE_H_INCLUDE_AST_OPT_VISITOR_RUNTIME_CLEARTEXT_H_

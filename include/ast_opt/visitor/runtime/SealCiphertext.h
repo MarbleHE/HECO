@@ -95,11 +95,15 @@ class SealCiphertext : public AbstractCiphertext {
 
   void logicalNotEqual(AbstractValue &other) override;
 
-  void logicalBitwiseAnd(AbstractValue &other) override;
+  void logicalNot() override;
 
-  void logicalBitwiseXor(AbstractValue &other) override;
+  void bitwiseAnd(AbstractValue &other) override;
 
-  void logicalBitwiseOr(AbstractValue &other) override;
+  void bitwiseXor(AbstractValue &other) override;
+
+  void bitwiseOr(AbstractValue &other) override;
+
+  void bitwiseNot() override;
 
   SealCiphertextFactory &getFactory() override;
 
