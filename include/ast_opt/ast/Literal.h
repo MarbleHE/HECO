@@ -4,6 +4,9 @@
 #include "ast_opt/ast/AbstractExpression.h"
 #include "ast_opt/visitor/IVisitor.h"
 
+// see https://stackoverflow.com/a/4485051/3017719
+#define ENABLE_TYPENAME(A) template<> struct TypeName<A> { static const char *Get() { return #A; }};
+
 template<typename T>
 class Literal;
 
@@ -14,10 +17,27 @@ typedef Literal<float> LiteralFloat;
 typedef Literal<double> LiteralDouble;
 typedef Literal<std::string> LiteralString;
 
+// Allows to retrieve a human-readable string of the current type T.
+// For example, Typename<Literal<T>>::Get() for T=int returns Literal<int>.
+// See https://stackoverflow.com/a/4485051/3017719 for more details.
+template<typename T>
+struct TypeName {
+  static const char *Get() {
+    return typeid(T).name();
+  }
+};
+ENABLE_TYPENAME(Literal<bool>);
+ENABLE_TYPENAME(Literal<char>);
+ENABLE_TYPENAME(Literal<int>);
+ENABLE_TYPENAME(Literal<float>);
+ENABLE_TYPENAME(Literal<double>);
+ENABLE_TYPENAME(Literal<std::string>);
+
 /// Literals contain a scalar value (of type bool, char, int, float, double, string, etc)
 template<typename T>
 class Literal : public AbstractExpression {
  private:
+  /// The value that this Literal holds.
   T value;
 
   /// Creates a deep copy of the current node
@@ -30,7 +50,7 @@ class Literal : public AbstractExpression {
   }
 
  public:
-  /// A typedef that allows obtaining the type T from any Literal<T> class.
+  /// A typedef that allows obtaining the type T from any Literal<T> class, e.g., LiteralBool::value_type returns bool.
   typedef T value_type;
 
   /// Destructor
@@ -64,7 +84,7 @@ class Literal : public AbstractExpression {
   /// Move assignment
   /// \param other Literal to move
   /// \return This object
-  Literal &operator=(Literal &&other)  noexcept {
+  Literal &operator=(Literal &&other) noexcept {
     value = std::move(other.value);
     return *this;
   }
