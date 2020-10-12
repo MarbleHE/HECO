@@ -4,6 +4,7 @@
 #include "ast_opt/ast/Assignment.h"
 #include "ast_opt/ast/BinaryExpression.h"
 #include "ast_opt/ast/Block.h"
+#include "ast_opt/ast/Call.h"
 #include "ast_opt/ast/ExpressionList.h"
 #include "ast_opt/ast/IndexAccess.h"
 #include "ast_opt/ast/Literal.h"
@@ -22,7 +23,8 @@ class ComputationOperator {
   bool batched = false;
  public:
   ComputationOperator(const Operator &op, bool batched = false) : op(op), batched(batched) {}
-
+  bool isBatched() {return batched;}
+  Operator getOp() {return op;}
 };
 
 /// Invariant (not enforced by class): if computationOperator::batched == true, then children.size() must be 2
@@ -54,6 +56,7 @@ class TreeNode {
   TreeNode *getParent() { return parent; }
   std::vector<std::unique_ptr<TreeNode>> &getChildren() { return children; }
   [[nodiscard]] size_t getExpectedNumberOfChildren() const { return children.size(); }
+  friend TreeNode *insertNodeIntoTree(std::unique_ptr<TreeNode> &&newNode, TreeNode *curTreeNode);
 };
 
 class ComputationNode : public TreeNode {
@@ -92,10 +95,57 @@ class ValueNode : public TreeNode {
 };
 bool operator==(const std::unique_ptr<TreeNode> &sp, const TreeNode *const p) { return sp.get()==p; }
 
-ComplexValue SpecialExpressionBatcher::batchExpression(AbstractExpression &expr, BatchingConstraint) {
+///
+/// \param newNode
+/// \param curTreeNode
+/// \return New curTreeNode pointer, if it needed to be changed
+TreeNode *insertNodeIntoTree(std::unique_ptr<TreeNode> &&newNode, TreeNode *curTreeNode) {
+  // Check if we can insert into the currentTreeNode
+  for (auto &p : curTreeNode->children) {
+    if (p==nullptr) {
+      newNode->parent = curTreeNode;
+      p = std::move(newNode);
+      return curTreeNode;
+    }
+  }
+
+  // If we got here, we can't add it to curTreeNode so go to next node in the current level
+  if (!curTreeNode->parent) {
+    // We are at the root, so no siblings => end of the current level
+  } else {
+    std::vector<std::unique_ptr<TreeNode>> &v = curTreeNode->getParent()->getChildren();
+    auto it = std::find(v.begin(), v.end(), curTreeNode);
+    if (it==v.end()) {
+      throw std::runtime_error("Inconsistency in Tree: Could not find node in children list of its parent.");
+    }
+    // advance to next node
+    ++it;
+    if (it!=v.end()) {
+      // recursively try to insert into the next node's children
+      return insertNodeIntoTree(std::move(newNode), it->get());
+    } else {
+      // We are at the end of the current level
+    }
+  }
+
+  // Try to go down one level
+  for(auto &c: curTreeNode->children) {
+    if(c) {
+      return insertNodeIntoTree(std::move(newNode), c.get());
+    }
+  }
+  // If we get here, the current node had no non-null children
+  throw std::runtime_error("Cannot insert a new node since the tree ended unexpectedly.");
+}
+
+std::unique_ptr<TreeNode> SpecialExpressionBatcher::batchExpression(AbstractExpression &expr, BatchingConstraint) {
+  //TODO: Introduce cut-off for batching when not enough leaf nodes!
 
   /// Holds nodes of the current level
   std::deque<std::reference_wrapper<AbstractNode>> currentLevelNodes({expr});
+
+  /// Holds nodes of the next level
+  std::deque<std::reference_wrapper<AbstractNode>> nextLevelNodes;
 
   std::unique_ptr<TreeNode> computationTree = nullptr;
   TreeNode *curTreeNode = nullptr;
@@ -107,7 +157,9 @@ ComplexValue SpecialExpressionBatcher::batchExpression(AbstractExpression &expr,
     auto &curAbstractNode = currentLevelNodes.front().get();
     currentLevelNodes.pop_front();
 
-    // Handle the node itself
+    // Process the AbstractExpression node, generating a TreeNode for it
+
+    /// TreeNode for the current AST node
     std::unique_ptr<TreeNode> treeNode = nullptr;
 
     if (auto binaryExpression = dynamic_cast<BinaryExpression *>(&curAbstractNode)) {
@@ -146,46 +198,29 @@ ComplexValue SpecialExpressionBatcher::batchExpression(AbstractExpression &expr,
       throw std::runtime_error("Unsupported type of AST node: " + std::string(typeid(curAbstractNode).name()));
     }
 
-    // TODO: Actually handle the AST node and create computationNode from it
-
-
-    // Update Tree
+    // Add the generated TreeNode into the first free slot in the ComputationTree
     if (!computationTree) {
+      // First node to be processed becomes the root node of the CT
       computationTree = std::move(treeNode);
       curTreeNode = computationTree.get();
-    } else if (curTreeNode->getChildren().size() > curTreeNode->getExpectedNumberOfChildren()) {
-      curTreeNode->addChild(std::move(treeNode));
     } else {
-      std::vector<std::unique_ptr<TreeNode>> &v = curTreeNode->getParent()->getChildren();
-      auto it = std::find(v.begin(), v.end(), curTreeNode);
-
-      while (curTreeNode->getChildren().size() >= curTreeNode->getExpectedNumberOfChildren()) {
-        // Advance to next element
-        if (it==v.end()) {
-          throw std::runtime_error("Cannot add Node to ComputationTree since tree ended unexpectedly.");
-        } else {
-          ++it;
-          curTreeNode = it->get();
-        }
-      }
-
-      curTreeNode->addChild(std::move(treeNode));
+      curTreeNode = insertNodeIntoTree(std::move(treeNode), curTreeNode);
     }
 
     // enqueue children of curNode to process next
-    std::deque<std::reference_wrapper<AbstractNode>> nextLevelNodes;
     nextLevelNodes.insert(nextLevelNodes.end(), curAbstractNode.begin(), curAbstractNode.end());
 
     // Are we at the end of a level?
     if (currentLevelNodes.empty()) {
       currentLevelNodes = std::move(nextLevelNodes);
-      //TODO: Update curTreeNode somehow?
+      nextLevelNodes = {};
     }
 
   } // END WHILE
 
-  //TODO: Implement conversion of Tree to ComplexValue!
-  return ComplexValue(expr);
+  return std::move(computationTree);
+
+
   /// OLD CODE:
 
 //  // Determine Number of children?
@@ -228,6 +263,85 @@ ComplexValue SpecialExpressionBatcher::batchExpression(AbstractExpression &expr,
 
 
 }
+
 void SpecialExpressionBatcher::visit(AbstractStatement &) {
-    throw std::runtime_error("Cannot use the Expression Batcher on statements.");
+  throw std::runtime_error("Cannot use the Expression Batcher on statements.");
+}
+
+/// Iterate through a computation tree and generate the required code (+batching constraints)?
+std::unique_ptr<AbstractNode> SpecialExpressionBatcher::computationTreeToAst(std::unique_ptr<TreeNode> &&computationTree) {
+
+  /// Current index for the __input?__ variables
+  unsigned int counter = 0;
+
+  unsigned int depth = 0;
+
+  /// Holds nodes of the current level
+  std::deque<std::reference_wrapper<TreeNode>> currentLevelNodes({*computationTree});
+
+  /// Holds nodes of the next level
+  std::deque<std::reference_wrapper<TreeNode>> nextLevelNodes;
+
+  std::unique_ptr<Block> block = std::make_unique<Block>();
+
+  std::stack<std::string> resultStack;
+
+  /// Each iteration of the loop corresponds to handling one level of the expression tree
+  while (!currentLevelNodes.empty()) {
+
+    // Get the next node to process
+    auto &curTreeNode = currentLevelNodes.front().get();
+    currentLevelNodes.pop_front();
+
+    // Process the TreeNode node, generating an ast node for it
+    if (auto valueNode = dynamic_cast<ValueNode *>(&curTreeNode)) {
+//      std::vector<std::unique_ptr<TreeNode>> children;
+//      children.emplace_back(nullptr);
+//      children.emplace_back(nullptr);
+//      astNode = std::make_unique<ComputationNode>(
+//          nullptr,
+//          std::move(children),
+//          ComputationOperator(binaryExpression->getOperator(), true));
+//    TODO: HANDLE VALUES
+    } else if (auto computationNode = dynamic_cast<ComputationNode *>(&curTreeNode)) {
+      if(computationNode->getComputationOperator().isBatched()) {
+        // It's internal, so we expect the result to be in a single ciphertext //TODO: How to update this if not at top?
+        if(resultStack.empty()) {
+          resultStack.push("__input" + std::to_string(counter++) + "__");
+        }
+        // Rotate it appropriately, depending on depth in computation tree
+        auto var = std::make_unique<Variable>(resultStack.top());
+        std::vector<std::unique_ptr<AbstractExpression>> v;
+        v.emplace_back(std::move(var));
+        auto rotation = std::make_unique<Call>("rotate", std::move(v));
+        // Now apply the actual operation:
+        auto lhs = std::make_unique<Variable>(resultStack.top());
+        auto binaryExpression = std::make_unique<BinaryExpression>(std::move(lhs),computationNode->getComputationOperator().getOp(), std::move(rotation));
+        // And store it back into the same ciphertext? //TODO: Is this always correct?
+        auto target = std::make_unique<Variable>(resultStack.top());
+        auto assignment = std::make_unique<Assignment>(std::move(target),std::move(binaryExpression));
+        block->prependStatement(std::move(assignment));
+      } else {
+        //TODO: Handle non-internal operations
+      }
+    } else {
+      throw std::runtime_error("Unsupported type of Tree node: " + std::string(typeid(curTreeNode).name()));
+    }
+
+
+
+    // enqueue children of curNode to process next
+    //TODO: CONVERT BETWEEN UNIQUE PTRS AND REFERENCE WRAPPERS?
+    //nextLevelNodes.insert(nextLevelNodes.end(), curTreeNode.getChildren().begin(), curTreeNode.getChildren().end());
+
+    // Are we at the end of a level?
+    if (currentLevelNodes.empty()) {
+      currentLevelNodes = std::move(nextLevelNodes);
+      nextLevelNodes = {};
+      depth++;
+    }
+
+  } // END WHILE
+
+  return std::unique_ptr<AbstractNode>();
 }

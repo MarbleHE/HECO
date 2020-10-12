@@ -23,10 +23,10 @@ TEST(ExpressionBatcherTest, batchableExpression) {
 
   auto assignment = dynamic_cast<Assignment*>(&*inputAST->begin());
   auto rhs = dynamic_cast<BinaryExpression&>(assignment->getValue());
-  auto cv =  b.batchExpression(rhs, BatchingConstraint());
+  //auto cv =  b.batchExpression(rhs, BatchingConstraint());
 
   const char *expectedChars = R""""(
-    __input0__ = __input0__ * __input1__
+    __input0__ = __input0__ * __input1__;
     __input0__ = __input0__ + rotate(__input0__,1);
   )"""";
   auto expectedCode = std::string(expectedChars);

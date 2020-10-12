@@ -10,9 +10,10 @@
 #include "ast_opt/utilities/VariableMap.h"
 #include "ast_opt/visitor/ScopedVisitor.h"
 
+class TreeNode;
+
 // Forward Declaration for typedef below (must be above documentation, to ensure documentation is associated with the right type)
 class SpecialExpressionBatcher;
-
 
 typedef Visitor<SpecialExpressionBatcher> ExpressionBatcher;
 
@@ -40,7 +41,9 @@ class SpecialExpressionBatcher : public ScopedVisitor {
 
  public:
 
-  ComplexValue batchExpression(AbstractExpression &expression, BatchingConstraint batchingConstraint);
+  std::unique_ptr<TreeNode> batchExpression(AbstractExpression &expr, BatchingConstraint);
+
+  std::unique_ptr<AbstractNode> computationTreeToAst(std::unique_ptr<TreeNode>&& computationTree);
 
   void visit(AbstractStatement &elem);
 

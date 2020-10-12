@@ -65,7 +65,7 @@ void SpecialVectorizer::visit(Assignment &elem) {
 
   /// Optimize the value of the assignment
   ExpressionBatcher eb;
-  auto cv = eb.batchExpression(elem.getValue(), targetBatchingConstraint);
+  ComplexValue cv(elem.getValue()); //TODO: eb.batchExpression(elem.getValue(), targetBatchingConstraint);
 
   /// Combine the execution plans, if they already exist
   if (variableValues.has(targetID)) {
