@@ -117,11 +117,19 @@ class Cleartext : public ICleartext {
   }
 
   void divide(AbstractValue &other) override {
-    applyBinaryOperator(std::divides<T>(), other);
+    if constexpr (std::is_same<T, bool>::value) {
+      throw std::invalid_argument("Cannot divide booleans. " + std::string(typeid(other).name()));
+    } else {
+      applyBinaryOperator(std::divides<T>(), other);
+    }
   }
 
   void modulo(AbstractValue &other) override {
-    applyBinaryOperator(std::modulus<T>(), other);
+    if constexpr (std::is_same<T, bool>::value) {
+      throw std::invalid_argument("Cannot modulo booleans. " + std::string(typeid(other).name()));
+    } else {
+      applyBinaryOperator(std::modulus<T>(), other);
+    }
   }
 
   void logicalAnd(AbstractValue &other) override {
@@ -175,10 +183,13 @@ class Cleartext : public ICleartext {
   }
 
   void bitwiseNot() override {
-    applyUnaryOperator(std::bit_not<T>());
+    if constexpr (std::is_same<T, bool>::value) {
+      applyUnaryOperator([](bool b){return !b;});
+    } else {
+      applyUnaryOperator(std::bit_not<T>());
+    }
   }
 };
-
 
 template<typename>
 struct isCleartext : public std::false_type {};
