@@ -32,19 +32,16 @@ void SpecialRuntimeVisitor::visit(BinaryExpression &elem) {
   auto operatorEqualsAnyOf = [&elem](std::initializer_list<OperatorVariant> op) -> bool {
     return std::any_of(op.begin(), op.end(), [&elem](OperatorVariant op) { return elem.getOperator()==Operator(op); });
   };
-  auto operatorEquals = [&elem](OperatorVariant op) -> bool {
-    return elem.getOperator()==Operator(op);
-  };
+  auto operatorEquals = [&elem](OperatorVariant op) -> bool { return elem.getOperator()==Operator(op); };
   auto isSecretTainted = [&](const std::string &uniqueNodeId) -> bool {
     // we assume here that if it is NOT in the map, then it is NOT secret tainted
     return (secretTaintedMap.count(uniqueNodeId) > 0 && secretTaintedMap.at(uniqueNodeId));
   };
   // ---- end
 
+  // if lhs or rhs are secret tainted but the operator is not FHE-compatible, throw an exception
   auto lhsIsSecret = isSecretTainted(elem.getLeft().getUniqueNodeId());
   auto rhsIsSecret = isSecretTainted(elem.getRight().getUniqueNodeId());
-
-  // if lhs or rhs are secret tainted but the operator is non-FHE compatible, throw an exception
   if ((lhsIsSecret || rhsIsSecret) && !operatorEqualsAnyOf({FHE_ADDITION, FHE_SUBTRACTION, FHE_MULTIPLICATION})) {
     throw std::runtime_error("An operand in the binary expression is a ciphertext but given operation ("
                                  + elem.getOperator().toString() + ") cannot be executed on ciphertexts using FHE!\n"
@@ -58,52 +55,52 @@ void SpecialRuntimeVisitor::visit(BinaryExpression &elem) {
   auto rhsOperand = getNextStackElement();
 
   // if exactly one of the operands is a ciphertext and we have a commutative operation, then we make sure that
-  // the first operand (the one we call the operation on) is the ciphertext as otherwise it will fail
+  // the first operand (the one we call the operation on) is the ciphertext
   if ((lhsIsSecret!=rhsIsSecret) && elem.getOperator().isCommutative()) {
     if (rhsIsSecret) std::swap(lhsOperand, rhsOperand);
   }
 
-  // TODO: Implement me!
+  // execute the binary operation
   if (operatorEqualsAnyOf({ADDITION, FHE_ADDITION})) {
     lhsOperand->add(*rhsOperand);
-    intermedResult.push(std::move(lhsOperand));
   } else if (operatorEqualsAnyOf({SUBTRACTION, FHE_SUBTRACTION})) {
-
+    lhsOperand->subtract(*rhsOperand);
   } else if (operatorEqualsAnyOf({MULTIPLICATION, FHE_MULTIPLICATION})) {
-
+    lhsOperand->multiply(*rhsOperand);
   } else if (operatorEquals(DIVISION)) {
-
+    lhsOperand->divide(*rhsOperand);
   } else if (operatorEquals(MODULO)) {
-
+    lhsOperand->modulo(*rhsOperand);
   } else if (operatorEquals(LOGICAL_AND)) {
-
+    lhsOperand->logicalAnd(*rhsOperand);
   } else if (operatorEquals(LOGICAL_OR)) {
-
+    lhsOperand->logicalOr(*rhsOperand);
   } else if (operatorEquals(LESS)) {
-
+    lhsOperand->logicalLess(*rhsOperand);
   } else if (operatorEquals(LESS_EQUAL)) {
-
+    lhsOperand->logicalLessEqual(*rhsOperand);
   } else if (operatorEquals(GREATER)) {
-
+    lhsOperand->logicalGreater(*rhsOperand);
   } else if (operatorEquals(GREATER_EQUAL)) {
-
+    lhsOperand->logicalGreaterEqual(*rhsOperand);
   } else if (operatorEquals(EQUAL)) {
-
+    lhsOperand->logicalEqual(*rhsOperand);
   } else if (operatorEquals(NOTEQUAL)) {
-
+    lhsOperand->logicalNotEqual(*rhsOperand);
   } else if (operatorEquals(BITWISE_AND)) {
-
+    lhsOperand->logicalBitwiseAnd(*rhsOperand);
   } else if (operatorEquals(BITWISE_XOR)) {
-
+    lhsOperand->logicalBitwiseXor(*rhsOperand);
   } else if (operatorEquals(BITWISE_OR)) {
-
+    lhsOperand->logicalBitwiseOr(*rhsOperand);
+  } else {
+    throw std::runtime_error("Unknown binary operator encountered. Cannot continue!");
   }
+  intermedResult.push(std::move(lhsOperand));
 }
 
 void SpecialRuntimeVisitor::visit(UnaryExpression &elem) {
   ScopedVisitor::visit(elem);
-
-
 
   // TODO: Implement me!
   if (elem.getOperator()==Operator(LOGICAL_NOT)) {
@@ -113,10 +110,6 @@ void SpecialRuntimeVisitor::visit(UnaryExpression &elem) {
   } else {
     throw std::runtime_error("Unknown unary operator encountered!");
   }
-}
-
-void SpecialRuntimeVisitor::visit(Block &elem) {
-  ScopedVisitor::visit(elem);
 }
 
 void SpecialRuntimeVisitor::visit(Call &elem) {
@@ -256,33 +249,27 @@ void SpecialRuntimeVisitor::visit(IndexAccess &elem) {
 }
 
 void SpecialRuntimeVisitor::visit(LiteralBool &elem) {
-  ScopedVisitor::visit(elem);
-  intermedResult.emplace(std::make_unique<Cleartext<bool>>(elem));
+  visitHelper(elem);
 }
 
 void SpecialRuntimeVisitor::visit(LiteralChar &elem) {
-  ScopedVisitor::visit(elem);
-  intermedResult.emplace(std::make_unique<Cleartext<char>>(elem));
+  visitHelper(elem);
 }
 
 void SpecialRuntimeVisitor::visit(LiteralInt &elem) {
-  ScopedVisitor::visit(elem);
-  intermedResult.emplace(std::make_unique<Cleartext<int>>(elem));
+  visitHelper(elem);
 }
 
 void SpecialRuntimeVisitor::visit(LiteralFloat &elem) {
-  ScopedVisitor::visit(elem);
-  intermedResult.emplace(std::make_unique<Cleartext<float>>(elem));
+  visitHelper(elem);
 }
 
 void SpecialRuntimeVisitor::visit(LiteralDouble &elem) {
-  ScopedVisitor::visit(elem);
-  intermedResult.emplace(std::make_unique<Cleartext<double>>(elem));
+  visitHelper(elem);
 }
 
 void SpecialRuntimeVisitor::visit(LiteralString &elem) {
-  ScopedVisitor::visit(elem);
-  intermedResult.emplace(std::make_unique<Cleartext<std::string>>(elem));
+  visitHelper(elem);
 }
 
 void SpecialRuntimeVisitor::visit(OperatorExpression &) {
@@ -291,8 +278,7 @@ void SpecialRuntimeVisitor::visit(OperatorExpression &) {
 
 void SpecialRuntimeVisitor::visit(Return &elem) {
   ScopedVisitor::visit(elem);
-  throw std::runtime_error("UNSUPPORT: RuntimeVisitor can neither break out of program with a return statement nor "
-                           "does return specified values as program's output.");
+  throw ReturnStatementReached();
 }
 
 void SpecialRuntimeVisitor::visit(Assignment &elem) {
@@ -416,6 +402,14 @@ SpecialRuntimeVisitor::SpecialRuntimeVisitor(AbstractCiphertextFactory &factory,
   inputs.accept(*this);
 }
 
+void SpecialRuntimeVisitor::executeAst(AbstractNode &rootNode) {
+  try {
+    rootNode.accept(*this);
+  } catch (ReturnStatementReached &returnStatementReached) {
+    std::cout << "Program reached return statement.." << std::endl;
+  }
+}
+
 OutputIdentifierValuePairs SpecialRuntimeVisitor::getOutput(AbstractNode &outputAst) {
   // make sure that outputAst consists of a Block with Assignment statements
   checkAstStructure<Assignment>(outputAst);
@@ -429,18 +423,22 @@ OutputIdentifierValuePairs SpecialRuntimeVisitor::getOutput(AbstractNode &output
     auto identifier = dynamic_cast<Variable &>(varAssignm.getTarget()).getIdentifier();
 
     // extract assignment's value (rhs): either a Variable or an IndexAccess
-    std::unique_ptr<AbstractCiphertext> ctxt;
+    std::unique_ptr<AbstractValue> result;
     if (auto valueAsVariable = dynamic_cast<Variable *>(&varAssignm.getValue())) {
       // if the value is a Variable: it's sufficient if we clone the corresponding ciphertext
-      auto scopedIdentifier = getRootScope().resolveIdentifier(valueAsVariable->getIdentifier());
-      ctxt = declaredCiphertexts.at(scopedIdentifier)->clone();
+      auto scopedIdentifier = getCurrentScope().resolveIdentifier(valueAsVariable->getIdentifier());
+      if (identifierDatatypes.at(scopedIdentifier).getSecretFlag()) {
+        result = declaredCiphertexts.at(scopedIdentifier)->clone();
+      } else {
+        result = declaredCleartexts.at(scopedIdentifier)->clone();
+      }
     } else if (auto valueAsIndexAccess = dynamic_cast<IndexAccess *>(&varAssignm.getValue())) {
       // if the value is an IndexAccess we need to clone & rotate the ciphertext accordingly
       try {
         auto valueIdentifier = dynamic_cast<Variable &>(valueAsIndexAccess->getTarget());
         auto idx = dynamic_cast<LiteralInt &>(valueAsIndexAccess->getIndex());
         auto scopedIdentifier = getRootScope().resolveIdentifier(valueIdentifier.getIdentifier());
-        ctxt = declaredCiphertexts.at(scopedIdentifier)->rotateRows(idx.getValue());
+        result = declaredCiphertexts.at(scopedIdentifier)->rotateRows(idx.getValue());
       } catch (std::bad_cast &) {
         throw std::runtime_error(
             "Nested index accesses in right-hand side of output AST not allowed (e.g., y = __input0__[a[2]]).");
@@ -449,7 +447,7 @@ OutputIdentifierValuePairs SpecialRuntimeVisitor::getOutput(AbstractNode &output
       throw std::runtime_error("Right-hand side of output AST is neither a Variable nor IndexAccess "
                                "(e.g., y = __input0__ or y = __input0__[2]).");
     }
-    outputValues.emplace_back(identifier, std::move(ctxt));
+    outputValues.emplace_back(identifier, std::move(result));
   } // end: for (auto &assignm : block.getStatements())
 
   return outputValues;
@@ -458,5 +456,12 @@ OutputIdentifierValuePairs SpecialRuntimeVisitor::getOutput(AbstractNode &output
 void SpecialRuntimeVisitor::printOutput(AbstractNode &outputAst, std::ostream &targetStream) {
   // retrieve the identifiers mentioned in the output AST, decrypt referred ciphertexts, and print them
   auto outputValues = getOutput(outputAst);
-  for (const auto &v : outputValues) targetStream << v.first << ": " << factory.getString(*v.second) << std::endl;
+  for (const auto &v : outputValues) {
+    targetStream << v.first << ": ";
+    if (auto vAsAbstractCiphertext = dynamic_cast<AbstractCiphertext *>(v.second.get())) {
+      targetStream << factory.getString(*vAsAbstractCiphertext) << std::endl;
+    } else if (auto vAsCleartext = dynamic_cast<ICleartext *>(v.second.get())) {
+      targetStream << vAsCleartext->toString() << std::endl;
+    }
+  }
 }

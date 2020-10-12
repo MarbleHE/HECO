@@ -13,9 +13,19 @@
 class SpecialRuntimeVisitor;
 class AbstractCiphertextFactory;
 
+/// A custom exception class to be used to break out of the RuntimeVisitor in case that we visited a Return statement.
+/// This is important for programs that use Return statements to prematurely exit a program, e.g., in the body of a
+/// For loop. The exception must be caught (and ignored) by the caller.
+struct ReturnStatementReached : public std::exception {
+  [[nodiscard]] const char *what() const noexcept override {
+    return "Program reached Return statement. Exception raised to break out of RuntimeVisitor. "
+           "This exception must be caught but can be ignored.";
+  }
+};
+
 /// RuntimeVisitor uses the Visitor<T> template to allow specifying default behaviour
 typedef Visitor<SpecialRuntimeVisitor> RuntimeVisitor;
-typedef std::vector<std::pair<std::string, std::unique_ptr<AbstractCiphertext>>> OutputIdentifierValuePairs;
+typedef std::vector<std::pair<std::string, std::unique_ptr<AbstractValue>>> OutputIdentifierValuePairs;
 
 class SpecialRuntimeVisitor : public ScopedVisitor {
  private:
@@ -43,8 +53,6 @@ class SpecialRuntimeVisitor : public ScopedVisitor {
 
   void visit(BinaryExpression &elem) override;
 
-  void visit(Block &elem) override;
-
   void visit(Call &elem) override;
 
   void visit(ExpressionList &elem) override;
@@ -56,6 +64,11 @@ class SpecialRuntimeVisitor : public ScopedVisitor {
   void visit(If &elem) override;
 
   void visit(IndexAccess &elem) override;
+
+  template<typename T>
+  void visitHelper(Literal<T> &elem) {
+    intermedResult.emplace(std::make_unique<Cleartext<T>>(elem));
+  }
 
   void visit(LiteralBool &elem) override;
 
@@ -88,7 +101,9 @@ class SpecialRuntimeVisitor : public ScopedVisitor {
   template<typename T>
   void checkAstStructure(AbstractNode &astRootNode);
 
-  std::vector<std::pair<std::string, std::unique_ptr<AbstractCiphertext>>> getOutput(AbstractNode &outputAst);
+  OutputIdentifierValuePairs getOutput(AbstractNode &outputAst);
+
+  void executeAst(AbstractNode &rootNode);
 };
 
 #endif //GRAPHNODE_H_INCLUDE_AST_OPT_VISITOR_RUNTIME_H_
