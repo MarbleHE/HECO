@@ -21,6 +21,16 @@
 #include "ast_opt/visitor/runtime/AbstractCiphertextFactory.h"
 #include "ast_opt/parser/Tokens.h"
 
+template<typename S, typename T>
+std::unique_ptr<T> castUniquePtr(std::unique_ptr<S> &&source) {
+  if (dynamic_cast<T *>(source.get())) {
+    return std::unique_ptr<T>(dynamic_cast<T *>(source.release()));
+  } else {
+    throw std::runtime_error("castUniquePtr failed: Cannot cast given unique_ptr from type "
+                                 + std::string(typeid(S).name()) + " to type " + std::string(typeid(T).name()) + ".");
+  }
+}
+
 std::unique_ptr<AbstractValue> SpecialRuntimeVisitor::getNextStackElement() {
   auto elem = std::move(intermedResult.top());
   intermedResult.pop();
@@ -141,7 +151,8 @@ void SpecialRuntimeVisitor::visit(Call &elem) {
   }
 
   // perform rotation
-  declaredCiphertexts.at(scopedIdentifier)->rotateRowsInplace(stepsLiteralInt->getValue());
+  auto rotatedCtxt = declaredCiphertexts.at(scopedIdentifier)->rotateRows(stepsLiteralInt->getValue());
+  intermedResult.push(std::move(rotatedCtxt));
 }
 
 void SpecialRuntimeVisitor::visit(ExpressionList &elem) {
@@ -241,12 +252,33 @@ void SpecialRuntimeVisitor::visit(If &elem) {
 }
 
 void SpecialRuntimeVisitor::visit(IndexAccess &elem) {
-  ScopedVisitor::visit(elem);
-  // TODO: Implement me!
+  if (secretTaintedMap.at(elem.getUniqueNodeId())) {
+    throw std::runtime_error("IndexAccess for secret variables is not supported by RuntimeVisitor. "
+                             "This should have already been removed by the Vectorizer. Error?");
+  }
 
   elem.getTarget().accept(*this);
+  auto target = getNextStackElement();
 
   elem.getIndex().accept(*this);
+  auto index = getNextStackElement();
+
+  // we need to cast the target and the index of this IndexAccess to perform the action
+  auto castedCleartext = dynamic_cast<Cleartext<int> *>(target.get());
+  auto castedIndex = dynamic_cast<Cleartext<int> *>(index.get());
+  if (castedCleartext==nullptr || castedIndex==nullptr) {
+    throw std::runtime_error("IndexAccess only implemented for Cleartext<int> yet.");
+  }
+
+  if (!castedIndex->allEqual()) {
+    throw std::runtime_error("The resolved index of the IndexAccess doesn't seem like to be a scalar integer.");
+  }
+
+  // we create a new Cleartext<int> that only contains the referenced value
+  auto singleValue = castedCleartext->getData().at(castedIndex->getData().at(0));
+  std::unique_ptr<Cleartext<int>> newCleartext = std::make_unique<Cleartext<int>>(std::vector<int>({singleValue}));
+
+  intermedResult.push(std::move(newCleartext));
 }
 
 void SpecialRuntimeVisitor::visit(LiteralBool &elem) {
@@ -283,40 +315,49 @@ void SpecialRuntimeVisitor::visit(Return &elem) {
 }
 
 void SpecialRuntimeVisitor::visit(Assignment &elem) {
-
   elem.getTarget().accept(*this);
-  // auto &assignmentTarget = getNextStackElement();
-
-//  //
-//  if (auto atVariable = dynamic_cast<Variable *>(&assignmentTarget)) {
-//    assignmentTargetIdentifiers.emplace_back(getCurrentScope(), atVariable->getIdentifier());
-//  } else if (auto atIndexAccess = dynamic_cast<IndexAccess *>(&assignmentTarget)) {
-//    // after visiting the target, the index access should not contain any nested index accesses anymore,
-//    // for example, i[k[2]] -> i[4] assuming k[2] = 4
-//    if (auto indexAccessVariable = dynamic_cast<Variable *>(&atIndexAccess->getTarget())) {
-//      assignmentTargetIdentifiers.emplace_back(getCurrentScope(), indexAccessVariable->getIdentifier());
-//    } else {
-//      throw std::runtime_error("");
-//    }
-//  }
+  auto assignmentTarget = getNextStackElement();
 
   elem.getValue().accept(*this);
+  auto assignmentValue = getNextStackElement();
 
+  auto isSecretVariable = [&](const ScopedIdentifier &scopedIdentifier) {
+    return identifierDatatypes.at(scopedIdentifier).getSecretFlag();
+  };
 
-  // TODO: Implement me!
-}
-
-std::vector<int64_t> extractIntegerFromLiteralInt(ExpressionList &el) {
-  std::vector<int64_t> result;
-  for (std::reference_wrapper<AbstractExpression> &abstractExpr : el.getExpressions()) {
-    if (auto casted = dynamic_cast<LiteralInt *>(&abstractExpr.get())) {
-      result.push_back(casted->getValue());
+  if (auto atVariable = dynamic_cast<Variable *>(assignmentTarget.get())) {
+    auto scopedIdentifier = getCurrentScope().resolveIdentifier(atVariable->getIdentifier());
+    // check if this assignment targets a secret variable
+    if (isSecretVariable(scopedIdentifier)) {
+      // we need to convert the std::unique_ptr<AbstractValue> into a std::unique_ptr<AbstractCiphertext>
+      auto ciphertext = castUniquePtr<AbstractValue, AbstractCiphertext>(std::move(assignmentValue));
+      declaredCiphertexts.insert_or_assign(scopedIdentifier, std::move(ciphertext));
     } else {
-      throw std::runtime_error("Elements of ExpressionList are expected to be LiteralInts, "
-                               "found " + std::string(typeid(abstractExpr).name()) + " instead.");
+      auto cleartext = castUniquePtr<AbstractValue, ICleartext>(std::move(assignmentValue));
+      declaredCleartexts.insert_or_assign(scopedIdentifier, std::move(cleartext));
     }
+  } else if (auto atAssignm = dynamic_cast<IndexAccess *>(assignmentTarget.get())) {
+    if (auto var = dynamic_cast<Variable *>(&atAssignm->getTarget())) {
+      // retrieve the index of this IndexAccess
+      atAssignm->getIndex().accept(*this);
+      auto idx = getNextStackElement();
+      auto idxAsInt = dynamic_cast<Cleartext<int> *>(idx.get());
+      if (idxAsInt==nullptr) {
+        throw std::runtime_error("Index given in IndexAccess must be an integer!");
+      } else if (!idxAsInt->allEqual()) {
+        throw std::runtime_error("Index of IndexAccess must be a scalar.");
+      }
+      // now update the cleartext at the determined index with the given value
+      auto scopedIdentifier = getCurrentScope().resolveIdentifier(var->getIdentifier());
+      declaredCleartexts.at(scopedIdentifier)->setValueAtIndex(idxAsInt->getData().at(0), std::move(assignmentValue));
+    } else {
+      throw std::runtime_error(
+          "Only simple, non-nested IndexAccesses on non-secret variables are supported yet "
+          "(e.g., i[2] -> ok, i[j[2]] -> not supported).");
+    }
+  } else {
+    throw std::runtime_error("Assignments currently only supported to (non-indexed) variables.");
   }
-  return result;
 }
 
 void SpecialRuntimeVisitor::visit(VariableDeclaration &elem) {
@@ -394,9 +435,8 @@ void SpecialRuntimeVisitor::checkAstStructure(AbstractNode &astRootNode) {
   }
 }
 
-SpecialRuntimeVisitor::SpecialRuntimeVisitor(AbstractCiphertextFactory &factory,
-                                             AbstractNode &inputs,
-                                             SecretTaintedNodesMap &secretTaintedNodesMap)
+SpecialRuntimeVisitor::SpecialRuntimeVisitor(
+    AbstractCiphertextFactory &factory, AbstractNode &inputs, SecretTaintedNodesMap &secretTaintedNodesMap)
     : factory(factory), secretTaintedMap(secretTaintedNodesMap) {
   // generate ciphertexts for inputs
   checkAstStructure<VariableDeclaration>(inputs);

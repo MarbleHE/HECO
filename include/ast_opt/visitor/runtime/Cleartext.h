@@ -22,6 +22,8 @@ class ICleartext : public AbstractValue {
   virtual std::unique_ptr<ICleartext> clone() = 0;
 
   virtual std::string toString() = 0;
+
+  virtual void setValueAtIndex(int idx, std::unique_ptr<AbstractValue> &&newValue) = 0;
 };
 
 template<typename T>
@@ -45,7 +47,7 @@ class Cleartext : public ICleartext {
     }
   }
 
-  explicit Cleartext(std::vector<T> values) {
+  explicit Cleartext(const std::vector<T> values) {
     data = values;
   }
 
@@ -66,6 +68,11 @@ class Cleartext : public ICleartext {
     return std::all_of(data.begin(), data.end(), [&value](const T &current) {
       return current==value;
     });
+  }
+
+  [[nodiscard]] bool allEqual() const {
+    auto firstValue = data.at(0);
+    return allEqual(firstValue);
   }
 
   // copy constructor
@@ -156,13 +163,11 @@ class Cleartext : public ICleartext {
     applyBinaryOperator(std::greater_equal<T>(), other);
   }
 
-  void logicalEqual(AbstractValue &other)
-  override {
+  void logicalEqual(AbstractValue &other) override {
     applyBinaryOperator(std::equal_to<T>(), other);
   }
 
-  void logicalNotEqual(AbstractValue &other)
-  override {
+  void logicalNotEqual(AbstractValue &other) override {
     applyBinaryOperator(std::not_equal_to<T>(), other);
   }
 
@@ -187,6 +192,18 @@ class Cleartext : public ICleartext {
       applyUnaryOperator([](bool b){return !b;});
     } else {
       applyUnaryOperator(std::bit_not<T>());
+    }
+  }
+
+  void setValueAtIndex(int idx, std::unique_ptr<AbstractValue> &&newValue) override {
+    if (auto d = dynamic_cast<Cleartext<T> *>(newValue.get())) {
+      if (!d->allEqual()) {
+        throw std::runtime_error("Cannot assign multiple values to a single Cleartext element.");
+      }
+      data[idx] = d->getData().at(0);
+    } else {
+      throw std::runtime_error(
+          "Assigning a value to a Cleartext<T> requires the value to be a Cleartext<T> too (i.e., same type T).");
     }
   }
 };
