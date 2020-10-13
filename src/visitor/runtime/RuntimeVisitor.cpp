@@ -54,8 +54,9 @@ void SpecialRuntimeVisitor::visit(BinaryExpression &elem) {
   auto rhsIsSecret = isSecretTainted(elem.getRight().getUniqueNodeId());
   if ((lhsIsSecret || rhsIsSecret) && !operatorEqualsAnyOf({FHE_ADDITION, FHE_SUBTRACTION, FHE_MULTIPLICATION})) {
     throw std::runtime_error("An operand in the binary expression is a ciphertext but given operation ("
-                                 + elem.getOperator().toString() + ") cannot be executed on ciphertexts using FHE!\n"
-                                 + "Expression: " + elem.toString(false));
+                                 + elem.getOperator().toString() + ") cannot be executed on ciphertexts using FHE! "
+                                 + "Note that you need to use FHE operators (+++, ---, ***) for ciphertext operations.\n"
+                                 + "Expression: " + elem.toString(true));
   }
 
   elem.getLeft().accept(*this);
@@ -170,7 +171,7 @@ void SpecialRuntimeVisitor::visit(ExpressionList &elem) {
       // ExpressionList is on the top of the stack. Thus, we need to append elements in the cleartextVec to the front.
       cleartextVec.insert(cleartextVec.begin(), std::move(derivedPointer));
     } else {
-      throw std::runtime_error("");
+      throw std::runtime_error("Found ExpressionList that does contain any other than ICleartext element. Aborting...");
     }
   }
 
@@ -382,17 +383,23 @@ void SpecialRuntimeVisitor::visit(VariableDeclaration &elem) {
   std::unique_ptr<AbstractValue> initializationValue = getNextStackElement();
 
   if (elem.getDatatype().getSecretFlag()) {
-    // declaration of a secret variable: we need to create a ciphertext here
     auto sident = std::make_unique<ScopedIdentifier>(getCurrentScope(), elem.getTarget().getIdentifier());
-    auto ctxt = factory.createCiphertext(std::move(initializationValue));
-    declaredCiphertexts.insert_or_assign(*sident, std::move(ctxt));
+    // declaration of a secret variable: we need to check whether we need to create a ciphertext here or whether the
+    // right-hand side of the expression already created a ciphertext for us (if involved operands were ciphertexts too)
+    if (dynamic_cast<AbstractCiphertext *>(initializationValue.get())) {  // use the result ciphertext from RHS
+      auto ctxt = castUniquePtr<AbstractValue, AbstractCiphertext>(std::move(initializationValue));
+      declaredCiphertexts.insert_or_assign(*sident, std::move(ctxt));
+    } else {  // create a new ciphertext
+      auto ctxt = factory.createCiphertext(std::move(initializationValue));
+      declaredCiphertexts.insert_or_assign(*sident, std::move(ctxt));
+    }
   } else if (dynamic_cast<ICleartext *>(initializationValue.get())) {
     // declaration of a non-secret variable
     // we need to convert std::unique_ptr<AbstractValue> from intermedResult into std::unique_ptr<ICleartext>
     // as we now that this variable declaration's value is not secret tainted, this must be a cleartext
     auto sident = std::make_unique<ScopedIdentifier>(getCurrentScope(), elem.getTarget().getIdentifier());
-    std::unique_ptr<ICleartext> cleartextUPtr(dynamic_cast<ICleartext *>(initializationValue.release()));
-    declaredCleartexts.insert_or_assign(*sident, std::move(cleartextUPtr));
+    auto cleartextUniquePtr = castUniquePtr<AbstractValue, ICleartext>(std::move(initializationValue));
+    declaredCleartexts.insert_or_assign(*sident, std::move(cleartextUniquePtr));
   } else {
     throw std::runtime_error("Initialization value of VariableDeclaration ( " + elem.getTarget().getIdentifier()
                                  + ") could not be processed successfully.");
