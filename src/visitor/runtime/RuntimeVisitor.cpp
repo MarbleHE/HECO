@@ -493,7 +493,7 @@ OutputIdentifierValuePairs SpecialRuntimeVisitor::getOutput(AbstractNode &output
       try {
         auto valueIdentifier = dynamic_cast<Variable &>(valueAsIndexAccess->getTarget());
         auto idx = dynamic_cast<LiteralInt &>(valueAsIndexAccess->getIndex());
-        auto scopedIdentifier = getRootScope().resolveIdentifier(valueIdentifier.getIdentifier());
+        auto scopedIdentifier = getCurrentScope().resolveIdentifier(valueIdentifier.getIdentifier());
         result = declaredCiphertexts.at(scopedIdentifier)->rotateRows(idx.getValue());
       } catch (std::bad_cast &) {
         throw std::runtime_error(
