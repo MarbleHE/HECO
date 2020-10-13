@@ -115,6 +115,8 @@ class SpecialTypeCheckingVisitor : public ScopedVisitor {
   /// involved in a computation that involves secret variables and as such also become secret.
   /// \return (A reference) to the map containing (unique node ID, is tainted) pairs.
   SecretTaintedNodesMap &getSecretTaintedNodes();
+
+  void addVariableDatatype(ScopedIdentifier &scopedIdentifier, Datatype datatype);
 };
 
 #endif //GRAPHNODE_H_SRC_VISITOR_TYPECHECKINGVISITOR_H_

@@ -264,7 +264,7 @@ Datatype SpecialTypeCheckingVisitor::getExpressionDatatype(AbstractExpression &e
 
 bool SpecialTypeCheckingVisitor::isSecretTaintedNode(const std::string &uniqueNodeId) {
   if (secretTaintedNodes.count(uniqueNodeId)==0) {
-    throw std::runtime_error("");
+    throw std::runtime_error("No tainting information available for given node (" + uniqueNodeId + ").");
   }
   return secretTaintedNodes.at(uniqueNodeId);
 }
@@ -275,4 +275,8 @@ const SecretTaintedNodesMap &SpecialTypeCheckingVisitor::getSecretTaintedNodes()
 
 SecretTaintedNodesMap &SpecialTypeCheckingVisitor::getSecretTaintedNodes() {
   return secretTaintedNodes;
+}
+
+void SpecialTypeCheckingVisitor::addVariableDatatype(ScopedIdentifier &scopedIdentifier, Datatype datatype) {
+  variablesDatatypeMap.insert_or_assign(scopedIdentifier, datatype);
 }
