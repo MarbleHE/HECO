@@ -323,6 +323,10 @@ AbstractExpression *Parser::parseLiteral(stork::tokens_iterator &it, bool isNega
   // Create literal by taking 'isNegative' flag into account. For example, "-3" would be parsed as {"-", "3"} and in
   // parseExpression it would be recognized that "-" is a binary operator but has a single operand only and as such this
   // operator negates the literal.
+
+  // We cannot distinguish between integers and booleans as both use the numbers 0,1 in the input syntax. Because of
+  // that, in case of a variable declaration, we also include the information of the parsed datatype here.
+
   AbstractExpression *l = nullptr;
   if (it->isString()) {
     l = new LiteralString(it->getString());
@@ -335,10 +339,17 @@ AbstractExpression *Parser::parseLiteral(stork::tokens_iterator &it, bool isNega
   } else if (it->isChar()) {
     l = new LiteralChar(it->getChar());
   } else if (it->isInteger()) {
-    if (isNegative) l = new LiteralInt(-it->getInteger());
-    else l = new LiteralInt(it->getInteger());
-  } else if (it->isBool()) {
-    l = new LiteralBool(it->getBool());
+    if (varAssignmentDatatype!=nullptr && varAssignmentDatatype->getType()==Type::BOOL) {
+      auto value = it->getInteger();
+      if (value!=0 && value!=1) {
+        throw stork::semanticError("Variable declaration declares Bool but value found is neither 0 nor 1.",
+                                   it->getLineNumber(),
+                                   it->getCharIndex());
+      }
+      l = new LiteralBool(it->getInteger());
+    } else {
+      l = (isNegative) ? new LiteralInt(-it->getInteger()) : new LiteralInt(it->getInteger());
+    }
   } else {
     throw stork::unexpectedSyntaxError(to_string(it->getValue()), it->getLineNumber(), it->getCharIndex());
   }
@@ -665,6 +676,7 @@ Block *Parser::parseBlockStatement(stork::tokens_iterator &it) {
 VariableDeclaration *Parser::parseVariableDeclarationStatement(stork::tokens_iterator &it) {
   // the variable's datatype
   auto datatype = parseDatatype(it);
+  varAssignmentDatatype = &datatype;
 
   // the variable's name
   auto variable = std::unique_ptr<Variable>(parseVariable(it));
@@ -686,8 +698,10 @@ VariableDeclaration *Parser::parseVariableDeclarationStatement(stork::tokens_ite
   if (!it->hasValue(stork::reservedTokens::semicolon)) {
     parseTokenValue(it, stork::reservedTokens::assign);
     AbstractExpression *value = parseExpression(it);
+    varAssignmentDatatype = nullptr;
     return new VariableDeclaration(datatype, std::move(variable), std::unique_ptr<AbstractExpression>(value));
   } else {
+    varAssignmentDatatype = nullptr;
     return new VariableDeclaration(datatype, std::move(variable));
   }
 }

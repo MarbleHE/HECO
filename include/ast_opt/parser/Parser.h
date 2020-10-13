@@ -30,6 +30,10 @@ class Variable;
 /// Vector to keep track of parsed nodes.
 static std::vector<std::reference_wrapper<AbstractNode>> parsedNodes;
 
+/// This datatype contains the datatype of the variable declaration currently processed, or nullptr if the recursion
+/// currently is not parsing a variable declaration. It helps to distinguish between a literal and a bool.
+static Datatype *varAssignmentDatatype;
+
 /// The parser takes the
 class Parser {
  private:
