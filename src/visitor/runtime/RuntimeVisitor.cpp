@@ -121,6 +121,8 @@ void SpecialRuntimeVisitor::visit(UnaryExpression &elem) {
   } else {
     throw std::runtime_error("Unknown unary operator encountered!");
   }
+
+  intermedResult.push(std::move(operand));
 }
 
 void SpecialRuntimeVisitor::visit(Call &elem) {
