@@ -22,6 +22,7 @@
 
 void SpecialTypeCheckingVisitor::visit(BinaryExpression &elem) {
   // check if both operands have the same data type
+
   elem.getLeft().accept(*this);
   auto lhsType = typesVisitedNodes.top();
   typesVisitedNodes.pop();
@@ -79,12 +80,13 @@ void SpecialTypeCheckingVisitor::visit(FunctionParameter &elem) {
 }
 
 void SpecialTypeCheckingVisitor::visit(IndexAccess &elem) {
+  // save initial size to avoid making strong assumption that we only have a target and an index
   size_t initial_size = typesVisitedNodes.size();
 
   ScopedVisitor::visit(elem);
 
-  // an index access must always evaluate to an integer, i.e., all involved variables/literals must be integers too
-  while (typesVisitedNodes.size() > initial_size) {
+  // first, check the index: an index access must always evaluate to an integer
+  while (typesVisitedNodes.size() - 1 > initial_size) {
     auto currentType = typesVisitedNodes.top();
     typesVisitedNodes.pop();
     if (currentType.getType()!=Type::INT) {
@@ -92,8 +94,17 @@ void SpecialTypeCheckingVisitor::visit(IndexAccess &elem) {
     }
   }
 
+  // now retrieve the identifier
+  auto identifierVariableType = typesVisitedNodes.top();
+  typesVisitedNodes.pop();
+
+  // update secret tainting of this node
   auto targetIsSecretTainted = secretTaintedNodes.at(elem.getTarget().getUniqueNodeId());
   secretTaintedNodes.insert_or_assign(elem.getUniqueNodeId(), targetIsSecretTainted);
+
+  // this is pushed to the stack for consistency as the caller expects the return type on the stack, however, we as the
+  // variable this IndexAccess refers to has to be declared before we already know its datatype
+  typesVisitedNodes.push(identifierVariableType);
 }
 
 void SpecialTypeCheckingVisitor::visit(LiteralBool &elem) {
@@ -218,7 +229,8 @@ void SpecialTypeCheckingVisitor::visit(Return &elem) {
 }
 
 void SpecialTypeCheckingVisitor::visit(Assignment &elem) {
-  ScopedVisitor::visit(elem);
+  // No need to visit the left-hand side of an assignment as it does not tell anything about its datatype
+  elem.getTarget().accept(*this);
   // The declaration of this identifier already provided us the information about its type, hence we can just discard
   // the datatype in typesVisitedNodes.
   typesVisitedNodes.pop();
