@@ -325,7 +325,15 @@ void SpecialRuntimeVisitor::visit(Assignment &elem) {
     return identifierDatatypes.at(scopedIdentifier).getSecretFlag();
   };
 
-  if (auto atVariable = dynamic_cast<Variable *>(assignmentTarget.get())) {
+  auto atVariable = dynamic_cast<Variable *>(&elem.getTarget());
+  auto atCiphertext = dynamic_cast<AbstractCiphertext *>(assignmentTarget.get());
+
+  if (atVariable!=nullptr && atCiphertext!=nullptr) {
+    auto scopedIdentifier = getCurrentScope().resolveIdentifier(atVariable->getIdentifier());
+    std::unique_ptr<AbstractCiphertext>
+        actxt = castUniquePtr<AbstractValue, AbstractCiphertext>(std::move(assignmentValue));
+    declaredCiphertexts.insert_or_assign(scopedIdentifier, std::move(actxt));
+  } else if (atVariable!=nullptr) {
     auto scopedIdentifier = getCurrentScope().resolveIdentifier(atVariable->getIdentifier());
     // check if this assignment targets a secret variable
     if (isSecretVariable(scopedIdentifier)) {
@@ -336,7 +344,7 @@ void SpecialRuntimeVisitor::visit(Assignment &elem) {
       auto cleartext = castUniquePtr<AbstractValue, ICleartext>(std::move(assignmentValue));
       declaredCleartexts.insert_or_assign(scopedIdentifier, std::move(cleartext));
     }
-  } else if (auto atAssignm = dynamic_cast<IndexAccess *>(assignmentTarget.get())) {
+  } else if (auto atAssignm = dynamic_cast<IndexAccess *>(&elem.getTarget())) {
     if (auto var = dynamic_cast<Variable *>(&atAssignm->getTarget())) {
       // retrieve the index of this IndexAccess
       atAssignm->getIndex().accept(*this);
