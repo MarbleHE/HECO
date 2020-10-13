@@ -28,12 +28,32 @@ void SpecialVectorizer::visit(Block &elem) {
   // TODO: Emit all relevant assignments again!
   for (auto &scopedID: variableValues.changedEntries()) {
     auto &cv = variableValues.erase(scopedID);
-    for (auto &statement : cv.statementsToExecutePlan()) {
-      elem.appendStatement(std::move(statement));
-    }
+//    for (auto &statement : cv.statementsToExecutePlan()) {
+//      elem.appendStatement(std::move(statement));
+//    }
   }
   variableValues.resetChangeFlags();
   ScopedVisitor::exitScope();
+}
+
+std::pair<ScopedIdentifier,ComplexValue> SpecialVectorizer::turnAssignmentIntoComplexValue(Assignment &elem) {
+  if (auto indexAccessPtr = dynamic_cast<IndexAccess *>(&elem.getTarget())) {
+    if (auto targetVariablePtr = dynamic_cast<Variable *>(&indexAccessPtr->getTarget())) {
+      if (auto literalIntPtr = dynamic_cast<LiteralInt *>(&indexAccessPtr->getIndex())) {
+        ScopedIdentifier scopedId = getCurrentScope().resolveIdentifier(targetVariablePtr->getIdentifier());
+        return {scopedId, ComplexValue(elem.getValue(), literalIntPtr->getValue())};
+      } else {
+        throw std::runtime_error("Assignments to an IndexAccess must have a LiteralInt target slot.");
+      }
+    } else {
+      throw std::runtime_error("Assignments to nested index accesses are currently not supported.");
+    }
+  } else if (auto targetVariablePtr = dynamic_cast<Variable *>(&elem.getTarget())) {
+    ScopedIdentifier scopedId = getCurrentScope().resolveIdentifier(targetVariablePtr->getIdentifier());
+    return {scopedId, ComplexValue(elem.getValue(), -1)};
+  } else {
+    throw std::runtime_error("Unexpected type of target in assignment.");
+  }
 }
 
 void SpecialVectorizer::visit(Assignment &elem) {
@@ -44,35 +64,18 @@ void SpecialVectorizer::visit(Assignment &elem) {
   /// target of the assignment
   AbstractTarget &target = elem.getTarget();
   ScopedIdentifier targetID;
-  BatchingConstraint targetBatchingConstraint;
+  ComplexValue targetValue;
 
-  // We currently assume that the target has either the form <Variable> or <Variable>[<LiteralInt>]
-  if (target.countChildren()==0) {
-    auto variable = dynamic_cast<Variable &>(target);
-    auto id = variable.getIdentifier();
-    targetID = scope.resolveIdentifier(id);
-    if (constraints.find(targetID)!=constraints.end()) {
-      auto t = constraints.find(targetID)->second.getSlot();
-      targetBatchingConstraint = BatchingConstraint(t, targetID);
-    }
-  } else {
-    auto indexAccess = dynamic_cast<IndexAccess &>(target);
-    auto variable = dynamic_cast<Variable &>(indexAccess.getTarget());
-    auto index = dynamic_cast<LiteralInt &>(indexAccess.getIndex());
-    targetID = scope.resolveIdentifier(variable.getIdentifier());
-    targetBatchingConstraint = BatchingConstraint(index.getValue(), targetID);
-  }
 
-  /// Optimize the value of the assignment
-  ExpressionBatcher eb;
-  ComplexValue cv(elem.getValue()); //TODO: eb.batchExpression(elem.getValue(), targetBatchingConstraint);
+   /// TODO: Optimize the value of the assignment
+  std::tie(targetID,targetValue) = turnAssignmentIntoComplexValue(elem);
 
   /// Combine the execution plans, if they already exist
   if (variableValues.has(targetID)) {
-    ComplexValue& value = variableValues.get(targetID);
-    value.merge(cv); //Since this only changes the object, the reference in the variableValues should still be correct.
+    ComplexValue &value = variableValues.get(targetID);
+    value.merge(targetValue); //Since this only changes the object, the reference in the variableValues should still be correct.
   } else {
-    precomputedValues.push_back(cv);
+    precomputedValues.push_back(targetValue);
     variableValues.add(targetID, precomputedValues[precomputedValues.size() - 1]);
   }
 

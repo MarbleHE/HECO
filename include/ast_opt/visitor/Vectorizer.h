@@ -127,6 +127,9 @@ class SpecialVectorizer : public ScopedVisitor {
   /// Ugly hack to signal if an AbstractStatement just visited needs to be deleted.
   bool delete_flag = false;
 
+  /// TODO: Document
+  std::pair<ScopedIdentifier, ComplexValue> turnAssignmentIntoComplexValue(Assignment &elem);
+
  public:
 
   /// Creates a Vectorizer without any pre-existing information

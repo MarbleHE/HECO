@@ -4,22 +4,34 @@
 #include "ast_opt/ast/AbstractStatement.h"
 #include "ast_opt/utilities/BatchingConstraint.h"
 
+/// Represents a SIMD Ciphertext
 class ComplexValue {
  private:
-  BatchingConstraint batchingConstraint;
+  /// Map representing the ctxt, mapping slot index to values
+  std::map<int,std::reference_wrapper<AbstractExpression>> map;
 
  public:
-  /// Create a ComplexValue from a simple value and a BatchingConstraint
+  /// Create an empty ComplexValue
+  ComplexValue() = default;
+
+  ComplexValue(const ComplexValue& other) = default;
+
+  ComplexValue(ComplexValue&& other) noexcept = default;
+
+  ComplexValue& operator=(const ComplexValue& other) = default;
+
+  ComplexValue& operator=(ComplexValue&& other) noexcept = default;
+
+  /// Create a ComplexValue from a simple value (assign to all slots, i.e. slot -1)
   /// \param value Simple Value
-  /// \param batchingConstraint Wrapper around variable name and slot containing the value
   explicit ComplexValue(AbstractExpression& value);
 
-  /// Get the value's bathing constraints (i.e. where it lives)
-  BatchingConstraint& getBatchingConstraint();
+  /// Create a ComplexValue from a simple value and a slot
+  /// \param value Simple Value
+  /// \param slot indicates target slot
+  ComplexValue(AbstractExpression& value, int slot);
 
-  void merge(ComplexValue value);
-
-  std::vector<std::unique_ptr<AbstractStatement>> statementsToExecutePlan();
+  void merge(ComplexValue& value);
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_UTILITIES_COMPLEXVALUE_H_
