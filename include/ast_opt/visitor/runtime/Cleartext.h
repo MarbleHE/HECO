@@ -47,6 +47,20 @@ class Cleartext : public ICleartext {
     }
   }
 
+  explicit Cleartext(std::unique_ptr<AbstractValue> &&abstractValue) {
+    if (typeid(T)==typeid(bool)) {
+      if (auto other = dynamic_cast<Cleartext<int> *>(abstractValue.get())) {
+        auto dataIt = other->getData();
+        data = std::vector<T>(dataIt.begin(), dataIt.end());
+      } else {
+        throw std::runtime_error(
+            "Cannot convert given Cleartext into Cleartext<" + std::string(typeid(this).name()) + ">.");
+      }
+    } else {
+      throw std::runtime_error("This constructor is only defined to take Cleartext<int> and generate a Cleartext<bool>.");
+    }
+  }
+
   explicit Cleartext(const std::vector<T> values) {
     data = values;
   }
