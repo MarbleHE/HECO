@@ -44,11 +44,12 @@ void SpecialTypeCheckingVisitor::visit(BinaryExpression &elem) {
   secretTaintedNodes.insert_or_assign(elem.getUniqueNodeId(), resultIsSecret);
 
   // save the type of this binary expression, required in case that this is nested
-  typesVisitedNodes.push(Datatype(lhsType.getType(), resultIsSecret));
+  typesVisitedNodes.emplace(lhsType.getType(), resultIsSecret);
 }
 
 void SpecialTypeCheckingVisitor::visit(Call &elem) {
   ScopedVisitor::visit(elem);
+  // TODO: If any of the parameters passed to the called function are secret, then this Call would become secret too
 }
 
 void SpecialTypeCheckingVisitor::visit(ExpressionList &elem) {
@@ -110,31 +111,37 @@ void SpecialTypeCheckingVisitor::visit(IndexAccess &elem) {
 void SpecialTypeCheckingVisitor::visit(LiteralBool &elem) {
   ScopedVisitor::visit(elem);
   typesVisitedNodes.push(Datatype(Type::BOOL, false));
+  secretTaintedNodes.insert_or_assign(elem.getUniqueNodeId(), false);
 }
 
 void SpecialTypeCheckingVisitor::visit(LiteralChar &elem) {
   ScopedVisitor::visit(elem);
   typesVisitedNodes.push(Datatype(Type::CHAR, false));
+  secretTaintedNodes.insert_or_assign(elem.getUniqueNodeId(), false);
 }
 
 void SpecialTypeCheckingVisitor::visit(LiteralInt &elem) {
   ScopedVisitor::visit(elem);
   typesVisitedNodes.push(Datatype(Type::INT, false));
+  secretTaintedNodes.insert_or_assign(elem.getUniqueNodeId(), false);
 }
 
 void SpecialTypeCheckingVisitor::visit(LiteralFloat &elem) {
   ScopedVisitor::visit(elem);
   typesVisitedNodes.push(Datatype(Type::FLOAT, false));
+  secretTaintedNodes.insert_or_assign(elem.getUniqueNodeId(), false);
 }
 
 void SpecialTypeCheckingVisitor::visit(LiteralDouble &elem) {
   ScopedVisitor::visit(elem);
   typesVisitedNodes.push(Datatype(Type::DOUBLE, false));
+  secretTaintedNodes.insert_or_assign(elem.getUniqueNodeId(), false);
 }
 
 void SpecialTypeCheckingVisitor::visit(LiteralString &elem) {
   ScopedVisitor::visit(elem);
   typesVisitedNodes.push(Datatype(Type::STRING, false));
+  secretTaintedNodes.insert_or_assign(elem.getUniqueNodeId(), false);
 }
 
 void SpecialTypeCheckingVisitor::visit(UnaryExpression &elem) {
@@ -150,11 +157,14 @@ void SpecialTypeCheckingVisitor::visit(UnaryExpression &elem) {
 }
 
 void SpecialTypeCheckingVisitor::visit(Variable &elem) {
-  ScopedVisitor::visit(elem);
   auto scopedIdentifier = variablesDatatypeMap.find(getCurrentScope().resolveIdentifier(elem.getIdentifier()));
   if (scopedIdentifier!=variablesDatatypeMap.end()) {
     typesVisitedNodes.push(scopedIdentifier->second);
     secretTaintedNodes.insert_or_assign(elem.getUniqueNodeId(), scopedIdentifier->second.getSecretFlag());
+  } else {
+    throw std::runtime_error(
+        "Not datatype information found for variable (" + elem.getIdentifier() + "). "
+            + "Did you forget to initialize it?");
   }
 }
 
@@ -169,7 +179,28 @@ void SpecialTypeCheckingVisitor::visit(Block &elem) {
 }
 
 void SpecialTypeCheckingVisitor::visit(For &elem) {
-  ScopedVisitor::visit(elem);
+  // special treatment for For loops: we need to visit the children of the initializer/update blocks separately as we
+  // do not want to create a new scope when visiting them (otherwise variables declared in initializer will not be
+  // accessible in condition and update)
+  if (auto forStatement = dynamic_cast<For *>(&elem)) {
+    // call visitChildren directly on the initializer block, otherwise this would create a new scope but that's wrong!
+    visitChildren(forStatement->getInitializer());
+
+    forStatement->getCondition().accept(*this);
+    // we need to pop the stack as the condition is an expression unlike the initializer and update statement(s)
+    typesVisitedNodes.pop();
+
+    // call visitChildren directly on the update block, otherwise this would create a new scope but that's wrong!
+    visitChildren(forStatement->getUpdate());
+
+    forStatement->getBody().accept(*this);
+
+    auto anythingIsTainted = isSecretTaintedNode(forStatement->getInitializer().getUniqueNodeId()) ||
+        isSecretTaintedNode(forStatement->getCondition().getUniqueNodeId()) ||
+        isSecretTaintedNode(forStatement->getUpdate().getUniqueNodeId()) ||
+        isSecretTaintedNode(forStatement->getBody().getUniqueNodeId());
+    secretTaintedNodes.insert_or_assign(elem.getUniqueNodeId(), anythingIsTainted);
+  }
   postStatementAction();
 }
 
@@ -204,14 +235,20 @@ void SpecialTypeCheckingVisitor::visit(If &elem) {
 
   elem.getCondition().accept(*this);
   typesVisitedNodes.pop();
+  bool anythingIsTainted = isSecretTaintedNode(elem.getCondition().getUniqueNodeId());
 
   elem.getThenBranch().accept(*this);
 
+  anythingIsTainted = anythingIsTainted || isSecretTaintedNode(elem.getThenBranch().getUniqueNodeId());
+
   if (elem.hasElseBranch()) {
     elem.getElseBranch().accept(*this);
+    anythingIsTainted = anythingIsTainted || isSecretTaintedNode(elem.getElseBranch().getUniqueNodeId());
   }
 
   ScopedVisitor::exitScope();
+
+  secretTaintedNodes.insert_or_assign(elem.getUniqueNodeId(), anythingIsTainted);
 
   postStatementAction();
 }
@@ -219,11 +256,15 @@ void SpecialTypeCheckingVisitor::visit(If &elem) {
 void SpecialTypeCheckingVisitor::visit(Return &elem) {
   ScopedVisitor::visit(elem);
 
+  bool isTainted = false;
   if (elem.hasValue()) {
     auto typeReturnExpr = typesVisitedNodes.top();
     typesVisitedNodes.pop();
     returnExpressionTypes.emplace_back(typeReturnExpr, isLiteral(elem.getValue()));
+    isTainted = isSecretTaintedNode(elem.getValue().getUniqueNodeId());
   }
+
+  secretTaintedNodes.insert_or_assign(elem.getUniqueNodeId(), isTainted);
 
   postStatementAction();
 }
@@ -234,16 +275,28 @@ void SpecialTypeCheckingVisitor::visit(Assignment &elem) {
   // The declaration of this identifier already provided us the information about its type, hence we can just discard
   // the datatype in typesVisitedNodes.
   typesVisitedNodes.pop();
+
+  secretTaintedNodes.insert_or_assign(elem.getUniqueNodeId(), isSecretTaintedNode(elem.getValue().getUniqueNodeId()));
+
   postStatementAction();
 }
 
 void SpecialTypeCheckingVisitor::visit(VariableDeclaration &elem) {
-  ScopedVisitor::visit(elem);
+  // visiting the left-hand side of the declaration is not necessary and causes issues as the datatype for this variable
+  // is not known yet (see few lines below) but the identifier must be registered before we can store the datatype
+  getCurrentScope().addIdentifier(elem.getTarget().getIdentifier());
   ScopedIdentifier scopedIdentifier = getCurrentScope().resolveIdentifier(elem.getTarget().getIdentifier());
   variablesDatatypeMap.insert_or_assign(scopedIdentifier, elem.getDatatype());
+
+  bool isTainted = false;
   if (elem.hasValue()) {
+    elem.getValue().accept(*this);
     typesVisitedNodes.pop();
+    isTainted = isSecretTaintedNode(elem.getValue().getUniqueNodeId());
   }
+
+  secretTaintedNodes.insert_or_assign(elem.getUniqueNodeId(), isTainted);
+
   postStatementAction();
 }
 
@@ -275,10 +328,7 @@ Datatype SpecialTypeCheckingVisitor::getExpressionDatatype(AbstractExpression &e
 }
 
 bool SpecialTypeCheckingVisitor::isSecretTaintedNode(const std::string &uniqueNodeId) {
-  if (secretTaintedNodes.count(uniqueNodeId)==0) {
-    throw std::runtime_error("No tainting information available for given node (" + uniqueNodeId + ").");
-  }
-  return secretTaintedNodes.at(uniqueNodeId);
+  return secretTaintedNodes.count(uniqueNodeId) > 0 && secretTaintedNodes.at(uniqueNodeId);
 }
 
 const SecretTaintedNodesMap &SpecialTypeCheckingVisitor::getSecretTaintedNodes() const {
