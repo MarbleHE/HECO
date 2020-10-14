@@ -71,6 +71,7 @@ void SpecialRuntimeVisitor::visit(BinaryExpression &elem) {
     if (rhsIsSecret) std::swap(lhsOperand, rhsOperand);
   }
 
+  std::unique_ptr<Cleartext<bool>> relationalOperatorResult;
   // execute the binary operation
   if (operatorEqualsAnyOf({ADDITION, FHE_ADDITION})) {
     lhsOperand->add(*rhsOperand);
@@ -107,7 +108,14 @@ void SpecialRuntimeVisitor::visit(BinaryExpression &elem) {
   } else {
     throw std::runtime_error("Unknown binary operator encountered. Cannot continue!");
   }
-  intermedResult.push(std::move(lhsOperand));
+
+  auto lhsAsCleartextBool = dynamic_cast<Cleartext<bool> *>(lhsOperand.get());
+  if (elem.getOperator().isRelationalOperator() && lhsAsCleartextBool==nullptr) {
+    relationalOperatorResult = std::make_unique<Cleartext<bool>>(std::move(lhsOperand));
+    intermedResult.push(std::move(relationalOperatorResult));
+  } else {
+    intermedResult.push(std::move(lhsOperand));
+  }
 }
 
 void SpecialRuntimeVisitor::visit(UnaryExpression &elem) {
@@ -196,28 +204,42 @@ void SpecialRuntimeVisitor::visit(ExpressionList &elem) {
 }
 
 void SpecialRuntimeVisitor::visit(For &elem) {
-  elem.getInitializer().accept(*this);
+  // We need to directly visit the children of the initializer and the updater fields as those are wrapped into a Block
+  // and we don't want to create a new scope for them (would be incorrect and lead to non-resolvability of the iteration
+  // variable, for example, if referred in the loop's body)
+
+  if (elem.hasInitializer()) visitChildren(elem.getInitializer());
 
   // a helper method to check the value of the For loop's condition
   auto evaluateCondition = [&](AbstractExpression &expr) -> bool {
     expr.accept(*this);
     auto result = getNextStackElement();
-    if (auto conditionLiteralBool = dynamic_cast<LiteralBool *>(result.get())) {
-      return conditionLiteralBool->getValue();
+    if (auto cleartxtBool = dynamic_cast<Cleartext<bool> *>(result.get())) {
+      return cleartxtBool->allEqual() && cleartxtBool->getData().front();
     } else {
       throw std::runtime_error("For loop's condition must be evaluable to a Boolean.");
     }
   };
 
-  if (elem.hasCondition() && secretTaintedMap.count(elem.getCondition().getUniqueNodeId()) > 0) {
+  if (elem.hasCondition()
+      && secretTaintedMap.count(elem.getCondition().getUniqueNodeId()) > 0
+      && secretTaintedMap.at(elem.getCondition().getUniqueNodeId())==true) {
     throw std::runtime_error("For loops over secret conditions are not supported yet!");
   }
 
   // execute the For loop
   if (elem.hasCondition()) {
     while (evaluateCondition(elem.getCondition())) {
-      if (elem.hasBody()) elem.getBody().accept(*this);
-      if (elem.hasUpdate()) elem.getUpdate().accept(*this);
+      // visit the body, if existing
+      if (elem.hasBody()) {
+        enterScope(elem.getBody());
+        elem.getBody().accept(*this);
+        exitScope();
+      }
+      // visit the update statement(s), if existing
+      if (elem.hasUpdate()) {
+        visitChildren(elem.getUpdate());
+      }
     }
   } else {
     throw std::runtime_error("For loops without a condition are not supported yet!");
@@ -376,8 +398,12 @@ void SpecialRuntimeVisitor::visit(VariableDeclaration &elem) {
   identifierDatatypes.emplace(*scopedIdentifier, elem.getDatatype());
   getCurrentScope().addIdentifier(std::move(scopedIdentifier));
 
-  // if this declaration does not have an initialization, we can stop here as there's no value we need to keep track of
-  if (!elem.hasValue()) return;
+  // if this declaration does not have an initialization, we throw an exception because we did not define default values
+  // for the types in our AST, also it is safer to require the user to initialize variables
+  if (!elem.hasValue()) {
+    throw std::runtime_error(
+        "Unsupported: Variable declaration without initializer encountered. Please specify an initialization value!");
+  }
 
   // after having visited the variable declaration's initialization value, then we should have a Cleartext<T> on the
   // top of the intermedResult stack
