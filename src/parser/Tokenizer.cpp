@@ -29,6 +29,11 @@ character_type get_character_type(int c) {
   return character_type::punct;
 }
 
+bool has_suffix(const std::string &str, const std::string &suffix) {
+  return str.size() >= suffix.size() &&
+      str.compare(str.size() - suffix.size(), suffix.size(), suffix)==0;
+}
+
 token fetch_word(PushBackStream &stream) {
   size_t line_number = stream.getLineNumber();
   size_t char_index = stream.getCharIndex();
@@ -58,15 +63,19 @@ token fetch_word(PushBackStream &stream) {
     if (std::isdigit(word.front())) {
       char *endptr;
       token tok(0, line_number, char_index); //placeholder
-      // TODO: introduce support for 4.5f style notation for floats
-      if (word.find('.') < word.length()) {
-          // It's a double
-        double num =  strtod(word.c_str(), &endptr);
-        tok =  token(num, line_number, char_index);
+      if (has_suffix(word, "f")) {
+        // It's a float if it ends with f (e.g., 4.3f, 2f)
+        auto withoutSuffixF = word.substr(0, word.size() - 1);
+        float num = strtof(withoutSuffixF.c_str(), &endptr);
+        tok = token(num, line_number, char_index);
+      } else if (word.find('.') < word.length()) {
+        // It's a double
+        double num = strtod(word.c_str(), &endptr);
+        tok = token(num, line_number, char_index);
       } else {
         // It's an integer type
         int num = (int) strtol(word.c_str(), &endptr, 0);
-        tok =  token(num, line_number, char_index);
+        tok = token(num, line_number, char_index);
       }
 
       if (*endptr!=0) {

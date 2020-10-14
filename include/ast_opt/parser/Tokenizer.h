@@ -18,12 +18,15 @@ class tokens_iterator {
 
  public:
   explicit tokens_iterator(PushBackStream &stream);
+
   explicit tokens_iterator(std::deque<token> &tokens);
 
   tokens_iterator(const tokens_iterator &) = delete;
+
   void operator=(const tokens_iterator &) = delete;
 
   const token &operator*() const;
+
   const token *operator->() const;
 
   tokens_iterator &operator++();
