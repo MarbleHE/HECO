@@ -64,7 +64,7 @@ class RuntimeVisitorTest : public ::testing::Test {
   }
 };
 
-TEST_F(RuntimeVisitorTest, testInputOutputAst) { /* NOLINT */
+TEST_F(RuntimeVisitorTest, testRotateNegative) { /* NOLINT */
   // Test that checks whether we can pass input, run a very simple instruction, and retrieve the output.
 
   // program's input
@@ -95,7 +95,7 @@ TEST_F(RuntimeVisitorTest, testInputOutputAst) { /* NOLINT */
   RuntimeVisitor srv(*scf, *astInput, secretTaintedNodesMap);
 
   // run the program
-  astProgram->accept(srv);
+  srv.executeAst(*astProgram);
 
   std::unordered_map<std::string, std::vector<int64_t>> expectedOutput;
   expectedOutput.emplace("y", std::vector<int64_t>({7, 7, 7, 7, 43, 1, 1, 1, 22, 11, 425, 0, 1, 7}));
@@ -431,7 +431,7 @@ TEST_F(RuntimeVisitorTest, testUnaryExpressionPlaintext) { /* NOLINT */
 
   // create and prepopulate TypeCheckingVisitor
   auto rootScope = std::make_unique<Scope>(*astProgram);
-  registerInputVariable(*rootScope, "__input0__", Datatype(Type::INT, false));
+  registerInputVariable(*rootScope, "__input0__", Datatype(Type::BOOL, false));
   tcv->setRootScope(std::move(rootScope));
   astProgram->accept(*tcv);
   auto secretTaintedNodesMap = tcv->getSecretTaintedNodes();
@@ -468,7 +468,7 @@ TEST_F(RuntimeVisitorTest, testUnaryExpressionUnsupportedFhe) { /* NOLINT */
 
   // create and prepopulate TypeCheckingVisitor
   auto rootScope = std::make_unique<Scope>(*astProgram);
-  registerInputVariable(*rootScope, "__input0__", Datatype(Type::INT, false));
+  registerInputVariable(*rootScope, "__input0__", Datatype(Type::BOOL, false));
   tcv->setRootScope(std::move(rootScope));
   astProgram->accept(*tcv);
   auto secretTaintedNodesMap = tcv->getSecretTaintedNodes();
@@ -506,20 +506,172 @@ TEST_F(RuntimeVisitorTest, testUnsupportedFunction) { /* NOLINT */
   EXPECT_THROW(srv.executeAst(*astProgram), std::runtime_error);
 }
 
-TEST_F(RuntimeVisitorTest, testRotateNegative) { /* NOLINT */
-  // TODO: Implement me!
+TEST_F(RuntimeVisitorTest, testRotatePositive) { /* NOLINT */
+  // program's input
+  const char *inputs = R""""(
+      secret int __input0__ = {43, 1, 1, 1, 22, 11, 425, 0, 1, 7};
+    )"""";
+  auto astInput = Parser::parse(std::string(inputs));
+
+  // program specification
+  const char *program = R""""(
+      __input0__ = rotate(__input0__, 6);
+    )"""";
+  auto astProgram = Parser::parse(std::string(program));
+
+  // program's output
+  const char *outputs = R""""(
+      y = __input0__;
+    )"""";
+  auto astOutput = Parser::parse(std::string(outputs));
+
+  auto rootScope = std::make_unique<Scope>(*astProgram);
+  registerInputVariable(*rootScope, "__input0__", Datatype(Type::INT, true));
+  tcv->setRootScope(std::move(rootScope));
+  astProgram->accept(*tcv);
+  auto secretTaintedNodesMap = tcv->getSecretTaintedNodes();
+
+  // create a SpecialRuntimeVisitor instance
+  RuntimeVisitor srv(*scf, *astInput, secretTaintedNodesMap);
+
+  // run the program
+  astProgram->accept(srv);
+
+  std::unordered_map<std::string, std::vector<int64_t>> expectedOutput;
+  expectedOutput.emplace("y", std::vector<int64_t>({425, 0, 1, 7, 7, 7, 7, 7, 7}));
+
+  auto output = srv.getOutput(*astOutput);
+
+  // compare output with expected output
+  assertResult(output, expectedOutput);
 }
 
 TEST_F(RuntimeVisitorTest, testForLoop) { /* NOLINT */
-  // TODO: Implement me!
+  // program's input
+  const char *inputs = R""""(
+      secret int __input0__ = {43, 1, 1, 1, 22, 11, 425, 0, 1, 7};
+    )"""";
+  auto astInput = Parser::parse(std::string(inputs));
+
+  // program specification
+  const char *program = R""""(
+      int LIMIT = 10;
+      secret int result = 0;
+      for (int i = 0; i < LIMIT; i = i + 1) {
+        result = result + __input0__;
+      }
+      return;
+    )"""";
+  std::vector<std::reference_wrapper<AbstractNode>> createdNodesList;
+  auto astProgram = Parser::parse(std::string(program), createdNodesList);
+
+  // program's output
+  const char *outputs = R""""(
+      y = result;
+    )"""";
+
+  auto astOutput = Parser::parse(std::string(outputs));
+
+  auto rootScope = std::make_unique<Scope>(*astProgram);
+  registerInputVariable(*rootScope, "__input0__", Datatype(Type::INT, true));
+  tcv->setRootScope(std::move(rootScope));
+  astProgram->accept(*tcv);
+  auto secretTaintedNodesMap = tcv->getSecretTaintedNodes();
+
+  // create a SpecialRuntimeVisitor instance
+  RuntimeVisitor srv(*scf, *astInput, secretTaintedNodesMap);
+
+  // run the program
+  srv.executeAst(*astProgram);
+
+  std::unordered_map<std::string, std::vector<int64_t>> expectedOutput;
+  expectedOutput.emplace("y", std::vector<int64_t>({430, 10, 10, 10, 220, 110, 4250, 0, 10, 70}));
+
+  auto output = srv.getOutput(*astOutput);
+
+  // compare output with expected output
+  assertResult(output, expectedOutput);
 }
 
 TEST_F(RuntimeVisitorTest, testFullAssignmentToCiphertext) { /* NOLINT */
-  // TODO: Implement me!
+  // program's input
+  const char *inputs = R""""(
+    )"""";
+  auto astInput = Parser::parse(std::string(inputs));
+
+  // program specification
+  const char *program = R""""(
+      secret int fixedKey = {3, 2, 1, 3, 4, 9, 11, 333, 22, 434, 3430, 2211};
+      return;
+    )"""";
+  auto astProgram = Parser::parse(std::string(program));
+
+  // program's output
+  const char *outputs = R""""(
+      result = fixedKey;
+    )"""";
+  auto astOutput = Parser::parse(std::string(outputs));
+
+  astProgram->accept(*tcv);
+  auto secretTaintedNodesMap = tcv->getSecretTaintedNodes();
+
+  // run the program and get its output
+  RuntimeVisitor srv(*scf, *astInput, secretTaintedNodesMap);
+  srv.executeAst(*astProgram);
+
+  std::unordered_map<std::string, std::vector<int64_t>> expectedResult;
+  expectedResult["result"] = {3, 2, 1, 3, 4, 9, 11, 333, 22, 434, 3430, 2211};
+  auto result = srv.getOutput(*astOutput);
+  assertResult(result, expectedResult);
 }
 
 TEST_F(RuntimeVisitorTest, testFullAssignmentToPlaintext) { /* NOLINT */
-  // TODO: Implement me!
+  // program's input
+  const char *inputs = R""""(
+      double __input0__ = {1.25, 2.22, 4.0, 3.22, 11.0, 41.1, 4.0};
+    )"""";
+  auto astInput = Parser::parse(std::string(inputs));
+
+  // program specification
+  const char *program = R""""(
+      double result = __input0__;
+      return;
+    )"""";
+  auto astProgram = Parser::parse(std::string(program));
+
+  // program's output
+  const char *outputs = R""""(
+      r = result;
+    )"""";
+  auto astOutput = Parser::parse(std::string(outputs));
+
+  // create and prepopulate TypeCheckingVisitor
+  auto rootScope = std::make_unique<Scope>(*astProgram);
+  registerInputVariable(*rootScope, "__input0__", Datatype(Type::DOUBLE, false));
+  tcv->setRootScope(std::move(rootScope));
+  astProgram->accept(*tcv);
+  auto secretTaintedNodesMap = tcv->getSecretTaintedNodes();
+
+  // run the program and get its output
+  RuntimeVisitor srv(*scf, *astInput, secretTaintedNodesMap);
+  srv.executeAst(*astProgram);
+
+  std::unordered_map<std::string, std::vector<double>> expectedResult;
+  expectedResult["r"] = {1.25, 2.22, 4, 3.22, 11, 41.1, 4};
+  auto result = srv.getOutput(*astOutput);
+
+  EXPECT_EQ(result.size(), 1);
+  for (const auto &[identifierStr, abstractValueUPtr] : result) {
+    ASSERT_TRUE(expectedResult.count(identifierStr) > 0);
+    auto resultCleartext = dynamic_cast<Cleartext<double> *>(abstractValueUPtr.get());
+    ASSERT_NE(resultCleartext, nullptr);
+    auto resultData = resultCleartext->getData();
+    auto expectedData = expectedResult.at(identifierStr);
+    ASSERT_EQ(resultData.size(), expectedData.size());
+    for (int i = 0; i < expectedData.size(); ++i) {
+      ASSERT_EQ(expectedData[i], resultData[i]);
+    }
+  }
 }
 
 #endif
