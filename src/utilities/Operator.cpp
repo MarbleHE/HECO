@@ -31,6 +31,11 @@ bool Operator::isRightAssociative() const {
   return isUnary();
 }
 
+bool Operator::isRelationalOperator() const {
+  return *this==Operator(LESS) || *this==Operator(LESS_EQUAL) || *this==Operator(GREATER) ||
+      *this==Operator(GREATER_EQUAL) || *this==Operator(EQUAL) || *this==Operator(NOTEQUAL);
+}
+
 bool Operator::isCommutative() const {
   return *this==Operator(FHE_MULTIPLICATION)
       || *this==Operator(ArithmeticOp::MULTIPLICATION)

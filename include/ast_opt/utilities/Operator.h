@@ -57,12 +57,12 @@ class Operator {
   friend bool operator==(const Operator &op1, const Operator &op2);
 
   [[nodiscard]] bool isCommutative() const;
+
+  bool isRelationalOperator() const;
 };
 
-
 /// Compares two Operators for equality
-inline bool operator==(const Operator& op1, const Operator& op2) { return op1.op == op2.op;}
-
+inline bool operator==(const Operator &op1, const Operator &op2) { return op1.op==op2.op; }
 
 /// Compares the precedence of this operator against another operator.
 /// \param op1 First operator
