@@ -51,7 +51,8 @@ set(TEST_FILES
         visitor/SecretBranchingVisitorTest.cpp
         visitor/TypeCheckingVisitorTest.cpp
         visitor/Runtime/SealCiphertextFactoryTest.cpp
-        visitor/Runtime/RuntimeVisitorTest.cpp)
+        visitor/Runtime/RuntimeVisitorTest.cpp
+        end-to-end/KernelTest.cpp)
 
 add_executable(testing-all
         ${TEST_FILES})

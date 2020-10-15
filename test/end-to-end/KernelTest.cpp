@@ -1,0 +1,305 @@
+#include <include/ast_opt/ast/AbstractNode.h>
+#include <include/ast_opt/parser/Parser.h>
+#include <include/ast_opt/visitor/runtime/RuntimeVisitor.h>
+#include <include/ast_opt/visitor/SecretBranchingVisitor.h>
+#include "gtest/gtest.h"
+
+#include "test/ASTComparison.h"
+
+class KernelTest : public ::testing::Test {
+ protected:
+  void SetUp() override {
+
+  }
+
+ public:
+  static std::unique_ptr<AbstractNode> getInputs() {
+    const char *inputs = R""""(
+      secret int image = {2, 3, 1, 5, 9, 1, 3, 3, 9};
+      int imgSize = 3;
+    )"""";
+    return Parser::parse(std::string(inputs));
+  }
+
+  static std::unique_ptr<AbstractNode> getOutputs() {
+    const char *inputs = R""""(
+      resultImage = img2;
+    )"""";
+    return Parser::parse(std::string(inputs));
+  }
+
+  static std::unique_ptr<AbstractNode> getEvaluationProgram() {
+    // program's input
+    const char *inputs = R""""(
+      public void runKernel(int imageVec) {
+        int weightMatrix = {1, 1, 1, 1, -8, 1, 1, 1, 1};
+        secret int img2 = image;
+        for (int x = 1; x < imgSize - 1; x = x + 1) {
+          for (int y = 1; y < imgSize - 1; y = y + 1) {
+            int value = 0;
+            for (int j = -1; j < 2; j = j + 1) {
+              for (int i = -1; i < 2; i = i + 1) {
+                value = value +++ weightMatrix[i+1][j+1] *** image[(x+i)*imgSize+(y+i)];
+              }
+            }
+            img2[x][y] = 2***image[x*imgSize+y] --- value;
+          }
+        }
+        return;  // img2 contains result
+      }
+    )"""";
+    std::vector<std::reference_wrapper<AbstractNode>> createdNodes;
+    auto abstractNode = Parser::parse(std::string(inputs), createdNodes);
+    return abstractNode;
+  }
+
+  static void getInputMatrix(std::vector<std::vector<int>> &destination) {
+    destination = std::vector<std::vector<int>>{
+        {2, 3, 1}, {5, 9, 1}, {3, 3, 9}
+    };
+  }
+
+  static void getInputMatrix(std::vector<int> &destination) {
+    std::vector<std::vector<int>> data;
+    getInputMatrix(data);
+    std::size_t total_size = 0;
+    for (const auto &sub : data) total_size += sub.size();
+    destination.reserve(total_size);
+    for (const auto &sub : data) destination.insert(destination.end(), sub.begin(), sub.end());
+  }
+};
+
+/// Original, plain C++ program
+/// This program is inspired by RAMPARTS, presented by Archer et al. in 2019.
+/// The only modification that we do is instead of computing
+///     img2[x][y] = img[x][y] - (value/2),
+/// we compute
+///     img2[x][y] = 2*img[x][y] - value
+/// to avoid division that is unsupported in FHE.
+std::vector<int> runKernel(std::vector<int> &img) {
+  const auto imgSize = sqrt(img.size());
+  std::vector<std::vector<int>> weightMatrix = {{1, 1, 1}, {1, -8, 1}, {1, 1, 1}};
+  std::vector<int> img2(img.begin(), img.end());
+  for (int x = 1; x < imgSize - 1; ++x) {
+    for (int y = 1; y < imgSize - 1; ++y) {
+      int value = 0;
+      for (int j = -1; j < 2; ++j) {
+        for (int i = -1; i < 2; ++i) {
+          value = value + weightMatrix.at(i + 1).at(j + 1)*img.at((x + i)*imgSize + (y + i));
+        }
+      }
+      img2[imgSize*x + y] = 2*img.at(x*imgSize + y) - value;
+    }
+  }
+  return img2;
+}
+
+/// Check correctness of result between original program and (unmodified) program parsed as AST
+TEST(kernelE2E, DISABLED_originalProgramTest) {  /* NOLINT */
+  // run the original program
+  std::vector<int> data;
+  KernelTest::getInputMatrix(data);
+  auto expectedResult = runKernel(data);
+
+  // run the unoptimized FHE program
+  std::unique_ptr<AbstractNode> evalProgram = KernelTest::getEvaluationProgram();
+  std::unique_ptr<AbstractNode> inputs = KernelTest::getInputs();
+  std::unique_ptr<AbstractNode> outputs = KernelTest::getOutputs();
+  auto scf = std::make_unique<SealCiphertextFactory>(16384);
+
+  TypeCheckingVisitor tcv;
+  auto rootScope = std::make_unique<Scope>(*evalProgram);
+
+  auto siImage = std::make_unique<ScopedIdentifier>(*rootScope, "image");
+  rootScope->addIdentifier("image");
+  tcv.addVariableDatatype(*siImage, Datatype(Type::INT, true));
+
+  auto siImgSize = std::make_unique<ScopedIdentifier>(*rootScope, "imgSize");
+  rootScope->addIdentifier("imgSize");
+  tcv.addVariableDatatype(*siImgSize, Datatype(Type::INT, false));
+
+  tcv.setRootScope(std::move(rootScope));
+
+  evalProgram->accept(tcv);
+  auto stn = tcv.getSecretTaintedNodes();
+
+  RuntimeVisitor rtv(*scf, *inputs, tcv.getSecretTaintedNodes());
+  // TODO: Implement IndexAccess for secret variables (with plaintext index) and then finish implementing this test
+
+  // we need to use ->begin()->end() as the AST is wrapped into a block (begin()) and then we need to skip the Function
+  // statement and instead just visit it's associated Block (end()) because Functions are not supported by the
+  // RuntimeVisitor
+//  rtv.executeAst(*evalProgram->begin()->end());
+//  auto actualResult = rtv.getOutput(*outputs);
+
+  // TODO: Compare expectedResult with actualResult (see RuntimeVisitorTest for examples)
+}
+
+/// Check result generated by TypeCheckingVisitor
+TEST(kernelE2E, STAGE_01_typeCheckingTest) {  /* NOLINT */
+  std::vector<int> data;
+  KernelTest::getInputMatrix(data);
+  std::unique_ptr<AbstractNode> evalProgram = KernelTest::getEvaluationProgram();
+
+  TypeCheckingVisitor tcv;
+  auto rootScope = std::make_unique<Scope>(*evalProgram);
+  auto siImage = std::make_unique<ScopedIdentifier>(*rootScope, "image");
+  rootScope->addIdentifier("image");
+  tcv.addVariableDatatype(*siImage, Datatype(Type::INT, true));
+  auto siImgSize = std::make_unique<ScopedIdentifier>(*rootScope, "imgSize");
+  rootScope->addIdentifier("imgSize");
+  tcv.addVariableDatatype(*siImgSize, Datatype(Type::INT, false));
+  tcv.setRootScope(std::move(rootScope));
+  evalProgram->accept(tcv);
+
+  // only the two assignments (to value and img2[x][y]) and their children should be tainted
+  SecretTaintedNodesMap expectedTaintedNodes = {
+      {"LiteralInt_8", false}, {"Variable_87", false}, {"Variable_119", false}, {"Assignment_162", true},
+      {"BinaryExpression_30", false}, {"BinaryExpression_161", true}, {"LiteralInt_7", false},
+      {"BinaryExpression_95", false}, {"LiteralInt_6", false}, {"VariableDeclaration_63", false},
+      {"VariableDeclaration_14", false}, {"LiteralInt_77", false}, {"LiteralInt_5", false},
+      {"BinaryExpression_129", false}, {"LiteralInt_10", false}, {"LiteralInt_71", false}, {"Variable_152", false},
+      {"LiteralInt_11", false}, {"LiteralInt_12", false}, {"LiteralInt_62", false}, {"LiteralInt_4", false},
+      {"Variable_101", false}, {"Variable_18", true}, {"Variable_35", false}, {"IndexAccess_112", false},
+      {"LiteralInt_83", false}, {"Variable_109", false}, {"Variable_28", false}, {"LiteralInt_29", false},
+      {"IndexAccess_113", false}, {"BinaryExpression_153", false}, {"VariableDeclaration_84", false},
+      {"IndexAccess_157", true}, {"LiteralInt_36", false}, {"BinaryExpression_37", false}, {"LiteralInt_22", false},
+      {"Variable_105", false}, {"Assignment_38", false}, {"BinaryExpression_31", false}, {"Variable_127", false},
+      {"Variable_26", false}, {"BinaryExpression_78", false}, {"VariableDeclaration_23", false},
+      {"Assignment_79", false}, {"LiteralInt_42", false}, {"Variable_76", false}, {"Variable_48", false},
+      {"VariableDeclaration_43", false}, {"BinaryExpression_128", false}, {"Return_167", false}, {"Variable_46", false},
+      {"VariableDeclaration_67", false}, {"LiteralInt_88", false}, {"LiteralInt_49", false},
+      {"BinaryExpression_50", false}, {"Variable_117", false}, {"BinaryExpression_51", false}, {"LiteralInt_9", false},
+      {"LiteralInt_146", false}, {"Variable_55", false}, {"LiteralInt_94", false}, {"BinaryExpression_57", false},
+      {"VariableDeclaration_19", true}, {"Assignment_58", false}, {"LiteralInt_66", false}, {"LiteralInt_56", false},
+      {"Variable_70", false}, {"BinaryExpression_72", false}, {"BinaryExpression_89", false}, {"Variable_93", false},
+      {"Assignment_96", false}, {"Variable_103", false}, {"LiteralInt_106", false}, {"BinaryExpression_107", false},
+      {"LiteralInt_110", false}, {"BinaryExpression_111", false}, {"Variable_115", true},
+      {"BinaryExpression_158", true}, {"BinaryExpression_120", false}, {"Variable_122", false},
+      {"BinaryExpression_123", false}, {"Variable_125", false}, {"IndexAccess_130", true},
+      {"BinaryExpression_131", true}, {"Variable_148", true}, {"BinaryExpression_132", true}, {"Assignment_133", true},
+      {"Variable_150", false}, {"Variable_155", false}, {"BinaryExpression_156", false}, {"Variable_160", false},
+
+  };
+
+  auto actualTaintedNodes = tcv.getSecretTaintedNodes();
+  EXPECT_EQ(actualTaintedNodes.size(), expectedTaintedNodes.size());
+
+  for (const auto &[identifier, status] : expectedTaintedNodes) {
+    ASSERT_TRUE(actualTaintedNodes.count(identifier) > 0) << "failed for: " << identifier << std::endl;;
+    EXPECT_EQ(actualTaintedNodes.at(identifier), status);
+  }
+}
+
+/// Check result after applying CTES
+TEST(kernelE2E, STAGE_02_ctestTest) {  /* NOLINT */
+  // Expected: AST is not changed as there are no optimization opportunities without knowing the inputs
+
+  // TODO: Implement this test as soon as CTES has been implemented
+}
+
+/// Check result after secret branching removal
+TEST(kernelE2E, STAGE_03_secretBranchingRemovalTest) {  /* NOLINT */
+  // Expected: AST is not changed as there are no secret branches to be removed
+
+  std::vector<int> data;
+  KernelTest::getInputMatrix(data);
+  std::unique_ptr<AbstractNode> evalProgram = KernelTest::getEvaluationProgram();
+
+  // get secret tainted nodes map
+  TypeCheckingVisitor tcv;
+  auto rootScope = std::make_unique<Scope>(*evalProgram);
+  auto siImage = std::make_unique<ScopedIdentifier>(*rootScope, "image");
+  rootScope->addIdentifier("image");
+  tcv.addVariableDatatype(*siImage, Datatype(Type::INT, true));
+  auto siImgSize = std::make_unique<ScopedIdentifier>(*rootScope, "imgSize");
+  rootScope->addIdentifier("imgSize");
+  tcv.addVariableDatatype(*siImgSize, Datatype(Type::INT, false));
+  tcv.setRootScope(std::move(rootScope));
+  evalProgram->accept(tcv);
+
+  SecretBranchingVisitor sbv(tcv.getSecretTaintedNodes());
+  evalProgram->accept(sbv);
+
+  auto expectedOriginalAst = KernelTest::getEvaluationProgram();
+  compareAST(*evalProgram, *expectedOriginalAst);
+}
+
+/// Check result after loop unrolling
+TEST(kernelE2E, STAGE_04_loopUnrollingTest) {  /* NOLINT */
+
+  // After unrolling inner loop 1
+  const char *afterInnerLoop1 = R""""(
+      public void runKernel(int imageVec) {
+        int weightMatrix = {1, 1, 1, 1, -8, 1, 1, 1, 1};
+        secret int img2 = image;
+        for (int x = 1; x < imgSize - 1; x = x + 1) {
+          for (int y = 1; y < imgSize - 1; y = y + 1) {
+            int value = 0;
+            for (int j = -1; j < 2; j = j + 1) {
+              value = value +++ weightMatrix[0][j+1] *** image[(x-1)*imgSize+(y-1)];
+              value = value +++ weightMatrix[1][j+1] *** image[(x+i)*imgSize+(y)];
+              value = value +++ weightMatrix[2][j+1] *** image[(x+1)*imgSize+(y+1)];
+            }
+            img2[x][y] = 2***image[x*imgSize+y] --- value;
+          }
+        }
+        return;  // img2 contains result
+      }
+    )"""";
+  auto afterInnerLoop1Ast = Parser::parse(std::string(afterInnerLoop1));
+
+  // After unrolling inner loop 2
+  const char *afterInnerLoop2 = R""""(
+      public void runKernel(int imageVec) {
+        int weightMatrix = {1, 1, 1, 1, -8, 1, 1, 1, 1};
+        secret int img2 = image;
+        for (int x = 1; x < imgSize - 1; x = x + 1) {
+          for (int y = 1; y < imgSize - 1; y = y + 1) {
+            int value = 0;
+            value = value +++ weightMatrix[0][0] *** image[(x-1)*imgSize+(y-1)];
+            value = value +++ weightMatrix[0][1] *** image[(x-1)*imgSize+(y-1)];
+            value = value +++ weightMatrix[0][2] *** image[(x-1)*imgSize+(y-1)];
+            value = value +++ weightMatrix[1][0] *** image[(x+i)*imgSize+(y)];
+            value = value +++ weightMatrix[1][1] *** image[(x+i)*imgSize+(y)];
+            value = value +++ weightMatrix[1][2] *** image[(x+i)*imgSize+(y)];
+            value = value +++ weightMatrix[2][0] *** image[(x+1)*imgSize+(y+1)];
+            value = value +++ weightMatrix[2][1] *** image[(x+1)*imgSize+(y+1)];
+            value = value +++ weightMatrix[2][2] *** image[(x+1)*imgSize+(y+1)];
+            img2[x][y] = 2***image[x*imgSize+y] --- value;
+          }
+        }
+        return;  // img2 contains result
+      }
+    )"""";
+  auto afterInnerLoop2Ast = Parser::parse(std::string(afterInnerLoop2));
+
+  // After applying CTES on unrolled statements
+  const char *afterCtes = R""""(
+      public void runKernel(int imageVec) {
+        int weightMatrix = {1, 1, 1, 1, -8, 1, 1, 1, 1};
+        secret int img2 = image;
+        for (int x = 1; x < imgSize - 1; x = x + 1) {
+          for (int y = 1; y < imgSize - 1; y = y + 1) {
+            img2[x][y] = 2***image[x*imgSize+y] --- (
+              image[(x-1)*imgSize+(y-1)]
+                +++ image[(x-1)*imgSize+(y-1)]
+                +++ image[(x-1)*imgSize+(y-1)]
+                +++ image[(x+i)*imgSize+(y)]
+                +++ -8 *** image[(x+i)*imgSize+(y)]
+                +++ image[(x+i)*imgSize+(y)]
+                +++ image[(x+1)*imgSize+(y+1)]
+                +++ image[(x+1)*imgSize+(y+1)]
+                +++ image[(x+1)*imgSize+(y+1)]);
+          }
+        }
+        return;  // img2 contains result
+      }
+    )"""";
+  auto afterCtesAst = Parser::parse(std::string(afterCtes));
+}
+
+/// Check result after statement vectorization
+TEST(kernelE2E, STAGE_05_statementVectorizationTest) {  /* NOLINT */
+  // TODO: Specify how batched solution generated by StatementVectorizer would look like
+}
