@@ -38,7 +38,9 @@ class SpecialTypeCheckingVisitor : public ScopedVisitor {
   std::unordered_map<std::string, Datatype> expressionsDatatypeMap;
 
   /// Stores for each node in the AST (identified by its unique node ID), if the node is tainted secret. This is the
-  /// case if any of the operands in the node's expression are secret.
+  /// case if any of the operands in the node's expression are secret. The tainting stops at the first statement node
+  /// encountered while walking the AST upwards. Consequently, if a statement in a block is tainted, the block will
+  /// not be tainted. This implies that For statements are never tainted.
   SecretTaintedNodesMap secretTaintedNodes;
 
   /// Internal function to check whether stack was cleaned up properly before leaving statement.

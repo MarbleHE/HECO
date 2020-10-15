@@ -194,12 +194,6 @@ void SpecialTypeCheckingVisitor::visit(For &elem) {
     visitChildren(forStatement->getUpdate());
 
     forStatement->getBody().accept(*this);
-
-    auto anythingIsTainted = isSecretTaintedNode(forStatement->getInitializer().getUniqueNodeId()) ||
-        isSecretTaintedNode(forStatement->getCondition().getUniqueNodeId()) ||
-        isSecretTaintedNode(forStatement->getUpdate().getUniqueNodeId()) ||
-        isSecretTaintedNode(forStatement->getBody().getUniqueNodeId());
-    secretTaintedNodes.insert_or_assign(elem.getUniqueNodeId(), anythingIsTainted);
   }
   postStatementAction();
 }
@@ -271,7 +265,7 @@ void SpecialTypeCheckingVisitor::visit(Return &elem) {
 
 void SpecialTypeCheckingVisitor::visit(Assignment &elem) {
   // No need to visit the left-hand side of an assignment as it does not tell anything about its datatype
-  elem.getTarget().accept(*this);
+  elem.getValue().accept(*this);
   // The declaration of this identifier already provided us the information about its type, hence we can just discard
   // the datatype in typesVisitedNodes.
   typesVisitedNodes.pop();
