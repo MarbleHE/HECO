@@ -104,8 +104,6 @@ AbstractStatement *Parser::parseStatement(stork::tokens_iterator &it, bool gobbl
     parsedStatement = parseAssignmentStatement(it);;
     if (gobbleTrailingSemicolon) parseTokenValue(it, stork::reservedTokens::semicolon);
   }
-
-  addParsedNode(parsedStatement);
   return parsedStatement;
 }
 
@@ -175,9 +173,11 @@ AbstractExpression *Parser::parseExpression(stork::tokens_iterator &it) {
           operands.pop();
           AbstractExpression *lhs = operands.top();
           operands.pop();
-          operands.push(new BinaryExpression(std::unique_ptr<AbstractExpression>(lhs),
-                                             op2,
-                                             std::unique_ptr<AbstractExpression>(rhs)));
+          auto binaryExpr = new BinaryExpression(std::unique_ptr<AbstractExpression>(lhs),
+                                                 op2,
+                                                 std::unique_ptr<AbstractExpression>(rhs));
+          addParsedNode(binaryExpr);
+          operands.push(binaryExpr);
         } else {
           break;
         }
@@ -199,8 +199,11 @@ AbstractExpression *Parser::parseExpression(stork::tokens_iterator &it) {
       } else {
         auto exp = operands.top();
         operands.pop();
-        operands
-            .push(new BinaryExpression(std::unique_ptr<AbstractExpression>(exp), op, std::make_unique<LiteralInt>(1)));
+        auto binaryExpr = new BinaryExpression(std::unique_ptr<AbstractExpression>(exp),
+                                               op,
+                                               std::make_unique<LiteralInt>(1));
+        addParsedNode(binaryExpr);
+        operands.push(binaryExpr);
       }
     } else if (isLiteral(it)) {
       // This handles the special case of negative values as the minus sign is recognized as separate token.
@@ -236,8 +239,10 @@ AbstractExpression *Parser::parseExpression(stork::tokens_iterator &it) {
       offset.push_back(std::make_unique<Variable>(id));
       offset.push_back(std::unique_ptr<AbstractExpression>(parseExpression(it)));
       parseTokenValue(it, stork::reservedTokens::close_round);
-      operands.push(new Call(stork::to_string(stork::reservedTokens::kw_rotate),
-                             std::move(offset)));
+      auto call = new Call(stork::to_string(stork::reservedTokens::kw_rotate),
+                           std::move(offset));
+      addParsedNode(call);
+      operands.push(call);
     } else {
       // Stop parsing tokens as soon as we see a closing ), a semicolon or anything else
       running = false;
@@ -254,7 +259,9 @@ AbstractExpression *Parser::parseExpression(stork::tokens_iterator &it) {
         operator_stack.pop();
         AbstractExpression *exp = operands.top();
         operands.pop();
-        operands.push(new UnaryExpression(std::unique_ptr<AbstractExpression>(exp), op));
+        auto unaryExpression = new UnaryExpression(std::unique_ptr<AbstractExpression>(exp), op);
+        addParsedNode(unaryExpression);
+        operands.push(unaryExpression);
       }
     }
 
@@ -279,9 +286,11 @@ AbstractExpression *Parser::parseExpression(stork::tokens_iterator &it) {
         operands.pop();
         auto e2 = operands.top();
         operands.pop();
-        operands.push(new BinaryExpression(std::unique_ptr<AbstractExpression>(e2),
-                                           op,
-                                           std::unique_ptr<AbstractExpression>(e1)));
+        auto binaryExpression = new BinaryExpression(std::unique_ptr<AbstractExpression>(e2),
+                                                     op,
+                                                     std::unique_ptr<AbstractExpression>(e1));
+        addParsedNode(binaryExpression);
+        operands.push(binaryExpression);
       }
     }
   }
@@ -289,7 +298,6 @@ AbstractExpression *Parser::parseExpression(stork::tokens_iterator &it) {
   if (operands.empty()) {
     throw stork::unexpectedSyntaxError("Empty Expression", it->getLineNumber(), it->getCharIndex());
   } else if (operands.size()==1) {
-    addParsedNode(operands.top());
     return operands.top();
   } else {
     throw stork::unexpectedSyntaxError("Unresolved Operands", it->getLineNumber(), it->getCharIndex());
@@ -312,8 +320,10 @@ AbstractTarget *Parser::parseTarget(stork::tokens_iterator &it) {
     return v;
   } else {
     auto cur = new IndexAccess(std::unique_ptr<AbstractTarget>(v), std::unique_ptr<AbstractExpression>(indices[0]));
+    addParsedNode(cur);
     for (size_t i = 1; i < indices.size(); ++i) {
       cur = new IndexAccess(std::unique_ptr<AbstractTarget>(cur), std::unique_ptr<AbstractExpression>(indices[i]));
+      addParsedNode(cur);
     }
     return cur;
   }
@@ -354,6 +364,8 @@ AbstractExpression *Parser::parseLiteral(stork::tokens_iterator &it, bool isNega
     throw stork::unexpectedSyntaxError(to_string(it->getValue()), it->getLineNumber(), it->getCharIndex());
   }
 
+  addParsedNode(l);
+
   // A negative string|char|integer is not allowed
   if ((it->isString() || it->isChar() || it->isBool()) && isNegative) {
     throw stork::unexpectedSyntaxError("A minus sign ('-') in front of a string, char, or bool is not allowed. "
@@ -381,13 +393,17 @@ ExpressionList *Parser::parseExpressionList(stork::tokens_iterator &it) {
     }
   }
   parseTokenValue(it, stork::reservedTokens::close_curly);
-  return new ExpressionList(std::move(expressions));
+  auto pList = new ExpressionList(std::move(expressions));
+  addParsedNode(pList);
+  return pList;
 }
 
 Variable *Parser::parseVariable(stork::tokens_iterator &it) {
   auto identifier = parseIdentifier(it);
   auto variable = std::make_unique<Variable>(identifier);
-  return new Variable(identifier);
+  auto pVariable = new Variable(identifier);
+  addParsedNode(pVariable);
+  return pVariable;
 }
 
 Operator Parser::parseOperator(stork::tokens_iterator &it) {
@@ -532,6 +548,7 @@ FunctionParameter *Parser::parseFunctionParameter(stork::tokens_iterator &it) {
   auto identifier = parseIdentifier(it);
 
   auto functionParameter = new FunctionParameter(datatype, identifier);
+  addParsedNode(functionParameter);
 
   // consume comma that separates this parameter from the next one
   // the caller is responsible for calling this method again for parsing the next parameter
@@ -557,7 +574,6 @@ Function *Parser::parseFunctionStatement(stork::tokens_iterator &it) {
   std::vector<std::unique_ptr<FunctionParameter>> functionParams;
   while (!it->hasValue(stork::reservedTokens::close_round)) {
     auto functionParam = std::unique_ptr<FunctionParameter>(parseFunctionParameter(it));
-    addParsedNode(functionParam.get());
     functionParams.push_back(std::move(functionParam));
   }
   parseTokenValue(it, stork::reservedTokens::close_round);
@@ -565,7 +581,9 @@ Function *Parser::parseFunctionStatement(stork::tokens_iterator &it) {
   // parse block/body statements
   auto block = std::unique_ptr<Block>(parseBlockStatement(it));
 
-  return new Function(datatype, functionName, std::move(functionParams), std::move(block));
+  auto pFunction = new Function(datatype, functionName, std::move(functionParams), std::move(block));
+  addParsedNode(pFunction);
+  return pFunction;
 }
 
 For *Parser::parseForStatement(stork::tokens_iterator &it) {
@@ -610,10 +628,12 @@ For *Parser::parseForStatement(stork::tokens_iterator &it) {
   // FOR loop's body
   auto body = std::unique_ptr<Block>(parseBlockStatement(it));
 
-  return new For(std::move(initializerStatementBlock),
-                 std::move(condition),
-                 std::move(updateStatementBlock),
-                 std::move(body));
+  auto pFor = new For(std::move(initializerStatementBlock),
+                      std::move(condition),
+                      std::move(updateStatementBlock),
+                      std::move(body));
+  addParsedNode(pFor);
+  return pFor;
 }
 
 Block *Parser::parseBlockOrSingleStatement(stork::tokens_iterator &it) {
@@ -626,6 +646,7 @@ Block *Parser::parseBlockOrSingleStatement(stork::tokens_iterator &it) {
   } else {
     // a single statement, not wrapped into a block in the input file -> parse stmt. and manually wrap into a block
     block = new Block(std::unique_ptr<AbstractStatement>(parseStatement(it)));
+    addParsedNode(block);
   }
   return block;
 };
@@ -644,9 +665,13 @@ If *Parser::parseIfStatement(stork::tokens_iterator &it) {
   if (it->hasValue(stork::reservedTokens::kw_else)) {
     parseTokenValue(it, stork::reservedTokens::kw_else);
     std::unique_ptr<Block> elseBlock = std::unique_ptr<Block>(parseBlockOrSingleStatement(it));
-    return new If(std::move(condition), std::move(ifBlock), std::move(elseBlock));
+    auto pIf = new If(std::move(condition), std::move(ifBlock), std::move(elseBlock));
+    addParsedNode(pIf);
+    return pIf;
   } else {
-    return new If(std::move(condition), std::move(ifBlock));
+    auto pIf = new If(std::move(condition), std::move(ifBlock));
+    addParsedNode(pIf);
+    return pIf;
   }
 }
 
@@ -655,10 +680,14 @@ Return *Parser::parseReturnStatement(stork::tokens_iterator &it) {
 
   // Is it a return; i.e. no return value?
   if (it->hasValue(stork::reservedTokens::semicolon)) {
-    return new Return();
+    auto pReturn = new Return();
+    addParsedNode(pReturn);
+    return pReturn;
   } else {
     AbstractExpression *p = parseExpression(it);
-    return new Return(std::unique_ptr<AbstractExpression>(p));
+    auto pReturn = new Return(std::unique_ptr<AbstractExpression>(p));
+    addParsedNode(pReturn);
+    return pReturn;
   }
 }
 
@@ -670,13 +699,14 @@ Block *Parser::parseBlockStatement(stork::tokens_iterator &it) {
     blockStatements.push_back(std::unique_ptr<AbstractStatement>(parseStatement(it)));
   }
   parseTokenValue(it, stork::reservedTokens::close_curly);
-  return new Block(std::move(blockStatements));
+  auto pBlock = new Block(std::move(blockStatements));
+  addParsedNode(pBlock);
+  return pBlock;
 }
 
 VariableDeclaration *Parser::parseVariableDeclarationStatement(stork::tokens_iterator &it) {
   // the variable's datatype
   auto datatype = parseDatatype(it);
-  varAssignmentDatatype = &datatype;
 
   // the variable's name
   auto variable = std::unique_ptr<Variable>(parseVariable(it));
@@ -698,11 +728,14 @@ VariableDeclaration *Parser::parseVariableDeclarationStatement(stork::tokens_ite
   if (!it->hasValue(stork::reservedTokens::semicolon)) {
     parseTokenValue(it, stork::reservedTokens::assign);
     AbstractExpression *value = parseExpression(it);
-    varAssignmentDatatype = nullptr;
-    return new VariableDeclaration(datatype, std::move(variable), std::unique_ptr<AbstractExpression>(value));
+    auto pDeclaration =
+        new VariableDeclaration(datatype, std::move(variable), std::unique_ptr<AbstractExpression>(value));
+    addParsedNode(pDeclaration);
+    return pDeclaration;
   } else {
-    varAssignmentDatatype = nullptr;
-    return new VariableDeclaration(datatype, std::move(variable));
+    auto pDeclaration = new VariableDeclaration(datatype, std::move(variable));
+    addParsedNode(pDeclaration);
+    return pDeclaration;
   }
 }
 
@@ -714,6 +747,8 @@ Assignment *Parser::parseAssignmentStatement(stork::tokens_iterator &it) {
   parseTokenValue(it, stork::reservedTokens::assign);
   AbstractExpression *value = parseExpression(it);
 
-  return new Assignment(std::move(target), std::unique_ptr<AbstractExpression>(value));
+  auto pAssignment = new Assignment(std::move(target), std::unique_ptr<AbstractExpression>(value));
+  addParsedNode(pAssignment);
+  return pAssignment;
 }
 
