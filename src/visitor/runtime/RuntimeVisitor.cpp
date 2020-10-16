@@ -49,16 +49,6 @@ void SpecialRuntimeVisitor::visit(BinaryExpression &elem) {
   };
   // ---- end
 
-  // if lhs or rhs are secret tainted but the operator is not FHE-compatible, throw an exception
-  auto lhsIsSecret = isSecretTainted(elem.getLeft().getUniqueNodeId());
-  auto rhsIsSecret = isSecretTainted(elem.getRight().getUniqueNodeId());
-  if ((lhsIsSecret || rhsIsSecret) && !operatorEqualsAnyOf({FHE_ADDITION, FHE_SUBTRACTION, FHE_MULTIPLICATION})) {
-    throw std::runtime_error("An operand in the binary expression is a ciphertext but given operation ("
-                                 + elem.getOperator().toString() + ") cannot be executed on ciphertexts using FHE! "
-                                 + "Note that you need to use FHE operators (+++, ---, ***) for ciphertext operations.\n"
-                                 + "Expression: " + elem.toString(true));
-  }
-
   elem.getLeft().accept(*this);
   auto lhsOperand = getNextStackElement();
 
@@ -67,6 +57,8 @@ void SpecialRuntimeVisitor::visit(BinaryExpression &elem) {
 
   // if exactly one of the operands is a ciphertext and we have a commutative operation, then we make sure that
   // the first operand (the one we call the operation on) is the ciphertext
+  auto lhsIsSecret = isSecretTainted(elem.getLeft().getUniqueNodeId());
+  auto rhsIsSecret = isSecretTainted(elem.getRight().getUniqueNodeId());
   if ((lhsIsSecret!=rhsIsSecret) && elem.getOperator().isCommutative()) {
     if (rhsIsSecret) std::swap(lhsOperand, rhsOperand);
   }
@@ -277,7 +269,7 @@ void SpecialRuntimeVisitor::visit(If &elem) {
 }
 
 void SpecialRuntimeVisitor::visit(IndexAccess &elem) {
-  if (secretTaintedMap.at(elem.getUniqueNodeId())) {
+  if (secretTaintedMap.count(elem.getUniqueNodeId()) > 0) {
     throw std::runtime_error("IndexAccess for secret variables is not supported by RuntimeVisitor. "
                              "This should have already been removed by the Vectorizer. Error?");
   }
