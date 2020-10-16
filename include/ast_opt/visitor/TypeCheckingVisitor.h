@@ -20,7 +20,7 @@ class SpecialTypeCheckingVisitor : public ScopedVisitor {
  private:
   /// Stores the number of nodes in typesVisitedNodes before the children of the currently visited nodes have been
   /// visited. For this, registerBeforeVisitChildren must be called before visiting the children.
-  int numNodesBeforeVisitingChildren = 0;
+  size_t numNodesBeforeVisitingChildren = 0;
 
   /// A temporary structure to keep track of data types visited in children of a statement.
   /// This stack should be empty after leaving a statement, otherwise it indicates that the statement did not properly
