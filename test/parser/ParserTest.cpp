@@ -265,7 +265,15 @@ TEST(ParserTest, ForStatement) { /* NOLINT */
     )"""";
 
   auto code = std::string(programCode);
-  auto parsed = Parser::parse(code);
+  std::vector<std::reference_wrapper<AbstractNode>> createdNodesList;
+  auto parsed = Parser::parse(code, createdNodesList);
+
+  // make sure that nodes are not added twice to the createdNodesList
+  std::set<std::string> nodeIds;
+  for (auto &node : createdNodesList) {
+    EXPECT_EQ(nodeIds.count(node.get().getUniqueNodeId()), 0);
+    nodeIds.insert(node.get().getUniqueNodeId());
+  }
 
   // int sum = 0;
   auto declarationSum =
