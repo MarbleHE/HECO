@@ -36,7 +36,7 @@ TEST(SecretBranchingVisitorTest, secretVariable_ifElseBranch_rewritingExpected) 
   // get binary expression node (N < 5)
   SecretTaintedNodesMap secretTaintedNodesMap;
   secretTaintedNodesMap.insert_or_assign(
-      createdNodes.at(3).get().getUniqueNodeId(), true);
+      createdNodes.at(6).get().getUniqueNodeId(), true);
 
   SecretBranchingVisitor sbv(secretTaintedNodesMap);
   inputAst->accept(sbv);
@@ -69,7 +69,7 @@ TEST(SecretBranchingVisitorTest, secretVariable_thenBranchOnly_rewritingExpected
   // get binary expression node (N < 5)
   SecretTaintedNodesMap secretTaintedNodesMap;
   secretTaintedNodesMap.insert_or_assign(
-      createdNodes.at(3).get().getUniqueNodeId(), true);
+      createdNodes.at(6).get().getUniqueNodeId(), true);
 
   SecretBranchingVisitor sbv(secretTaintedNodesMap);
   inputAst->accept(sbv);
@@ -104,9 +104,9 @@ TEST(SecretBranchingVisitorTest, secretVariable_NestedThenBranch_rewritingExpect
   // get binary expression nodes
   SecretTaintedNodesMap secretTaintedNodesMap;
   secretTaintedNodesMap.insert_or_assign(
-      createdNodes.at(4).get().getUniqueNodeId(), true);
+      createdNodes.at(7).get().getUniqueNodeId(), true);
   secretTaintedNodesMap.insert_or_assign(
-      createdNodes.at(5).get().getUniqueNodeId(), true);
+      createdNodes.at(10).get().getUniqueNodeId(), true);
 
   SecretBranchingVisitor sbv(secretTaintedNodesMap);
   inputAst->accept(sbv);
@@ -139,7 +139,7 @@ TEST(SecretBranchingVisitorTest, secretVariable_ifBranch_uninitializedVar_rewrit
   // get binary expression node (N > 25)
   SecretTaintedNodesMap secretTaintedNodesMap;
   secretTaintedNodesMap.insert_or_assign(
-      createdNodes.at(2).get().getUniqueNodeId(), true);
+      createdNodes.at(5).get().getUniqueNodeId(), true);
 
   SecretBranchingVisitor sbv(secretTaintedNodesMap);
   inputAst->accept(sbv);
@@ -169,7 +169,7 @@ TEST(SecretBranchingVisitorTest, nonSecretVariable_ifStmt_noRemovalExpected) { /
   // get binary expression node (N < 5)
   SecretTaintedNodesMap secretTaintedNodesMap;
   secretTaintedNodesMap.insert_or_assign(
-      createdNodes.at(3).get().getUniqueNodeId(), false);
+      createdNodes.at(6).get().getUniqueNodeId(), false);
 
   SecretBranchingVisitor sbv(secretTaintedNodesMap);
   inputAst->accept(sbv);
@@ -197,7 +197,7 @@ TEST(SecretBranchingVisitorTest, secretVariable_ifStmt_unsupportedBodyIf_noRemov
   // get binary expression node (N < 5)
   SecretTaintedNodesMap secretTaintedNodesMap;
   secretTaintedNodesMap.insert_or_assign(
-      createdNodes.at(3).get().getUniqueNodeId(), true);
+      createdNodes.at(6).get().getUniqueNodeId(), true);
 
   SecretBranchingVisitor sbv(secretTaintedNodesMap);
   inputAst->accept(sbv);
@@ -223,7 +223,7 @@ TEST(SecretBranchingVisitorTest, secretVariable_ifStmt_unsupportedBodyReturn_noR
   // get binary expression node (N < 5)
   SecretTaintedNodesMap secretTaintedNodesMap;
   secretTaintedNodesMap.insert_or_assign(
-      createdNodes.at(3).get().getUniqueNodeId(), true);
+      createdNodes.at(6).get().getUniqueNodeId(), true);
 
   SecretBranchingVisitor sbv(secretTaintedNodesMap);
   inputAst->accept(sbv);
@@ -252,7 +252,7 @@ TEST(SecretBranchingVisitorTest, secretVariable_ifBranch_unsupportedBodyFor_noRe
   // get binary expression node (N > 25)
   SecretTaintedNodesMap secretTaintedNodesMap;
   secretTaintedNodesMap.insert_or_assign(
-      createdNodes.at(2).get().getUniqueNodeId(), true);
+      createdNodes.at(5).get().getUniqueNodeId(), true);
 
   SecretBranchingVisitor sbv(secretTaintedNodesMap);
   inputAst->accept(sbv);
@@ -278,7 +278,7 @@ TEST(SecretBranchingVisitorTest, secretVariable_ifBranch_unsupportedBodyReturn_n
   // get binary expression node (N > 25)
   SecretTaintedNodesMap secretTaintedNodesMap;
   secretTaintedNodesMap.insert_or_assign(
-      createdNodes.at(2).get().getUniqueNodeId(), true);
+      createdNodes.at(5).get().getUniqueNodeId(), true);
 
   SecretBranchingVisitor sbv(secretTaintedNodesMap);
   inputAst->accept(sbv);

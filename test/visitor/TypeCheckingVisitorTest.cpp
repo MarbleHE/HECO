@@ -85,7 +85,7 @@ TEST(TypeCheckingVisitorTest, binaryExpressionDatatype) { /* NOLINT */
   inputAST->begin()->accept(tcv);
 
   auto binaryExprDatatype = tcv.getExpressionDatatype(
-      dynamic_cast<AbstractExpression &>(createdNodes.at(3).get()));
+      dynamic_cast<AbstractExpression &>(createdNodes.at(6).get()));
   EXPECT_EQ(binaryExprDatatype.getType(), Type::INT);
   EXPECT_FALSE(binaryExprDatatype.getSecretFlag());
 }
@@ -104,16 +104,16 @@ TEST(TypeCheckingVisitorTest, deepNestedBinaryExpressionDatatype) { /* NOLINT */
   TypeCheckingVisitor tcv;
   inputAST->begin()->accept(tcv);
 
-  auto binExpr1 = tcv.getExpressionDatatype(dynamic_cast<AbstractExpression &>(createdNodes.at(2).get()));
+  auto binExpr1 = tcv.getExpressionDatatype(dynamic_cast<AbstractExpression &>(createdNodes.at(6).get()));
   EXPECT_EQ(binExpr1.getType(), Type::INT);
   EXPECT_FALSE(binExpr1.getSecretFlag());
-  auto binExpr2 = tcv.getExpressionDatatype(dynamic_cast<AbstractExpression &>(createdNodes.at(3).get()));
+  auto binExpr2 = tcv.getExpressionDatatype(dynamic_cast<AbstractExpression &>(createdNodes.at(7).get()));
   EXPECT_EQ(binExpr2.getType(), Type::INT);
   EXPECT_FALSE(binExpr2.getSecretFlag());
-  auto binExpr3 = tcv.getExpressionDatatype(dynamic_cast<AbstractExpression &>(createdNodes.at(4).get()));
+  auto binExpr3 = tcv.getExpressionDatatype(dynamic_cast<AbstractExpression &>(createdNodes.at(10).get()));
   EXPECT_EQ(binExpr3.getType(), Type::INT);
   EXPECT_FALSE(binExpr3.getSecretFlag());
-  auto binExpr4 = tcv.getExpressionDatatype(dynamic_cast<AbstractExpression &>(createdNodes.at(5).get()));
+  auto binExpr4 = tcv.getExpressionDatatype(dynamic_cast<AbstractExpression &>(createdNodes.at(11).get()));
   EXPECT_EQ(binExpr4.getType(), Type::INT);
   EXPECT_FALSE(binExpr4.getSecretFlag());
 }
@@ -133,7 +133,7 @@ TEST(TypeCheckingVisitorTest, unaryExpressionDatatype) { /* NOLINT */
   inputAST->begin()->accept(tcv);
 
   auto binaryExprDatatype = tcv.getExpressionDatatype(
-      dynamic_cast<AbstractExpression &>(createdNodes.at(1).get()));
+      dynamic_cast<AbstractExpression &>(createdNodes.at(3).get()));
   EXPECT_EQ(binaryExprDatatype.getType(), Type::BOOL);
   EXPECT_FALSE(binaryExprDatatype.getSecretFlag());
 }
@@ -213,6 +213,6 @@ TEST(TypeCheckingVisitorTest, secretTainting_ifCondition) { /* NOLINT */
   TypeCheckingVisitor tcv;
   inputAST->begin()->accept(tcv);
 
-  auto binaryExpressionNodeId = createdNodes.at(3).get().getUniqueNodeId();
+  auto binaryExpressionNodeId = createdNodes.at(6).get().getUniqueNodeId();
   EXPECT_TRUE(tcv.isSecretTaintedNode(binaryExpressionNodeId));
 }

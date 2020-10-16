@@ -449,7 +449,7 @@ TEST_F(RuntimeVisitorTest, testUnaryExpressionPlaintext) { /* NOLINT */
 TEST_F(RuntimeVisitorTest, testUnaryExpressionUnsupportedFhe) { /* NOLINT */
   // program's input
   const char *inputs = R""""(
-      bool __input0__ = {0, 0, 1, 1, 0, 0, 0, 0, 1, 1};
+      secret bool __input0__ = {0, 0, 1, 1, 0, 0, 0, 0, 1, 1};
     )"""";
   auto astInput = Parser::parse(std::string(inputs));
 
