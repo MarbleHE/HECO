@@ -36,38 +36,29 @@ class KernelTest : public ::testing::Test {  /* NOLINT (predictable sequence exp
     std::vector<int> inputValues;
     getInputMatrix(size, inputValues);
 
-    // Convert all but the last element to avoid a trailing ","
-    std::ostringstream vts;
-    vts << "{ ";
-    std::copy(inputValues.begin(), inputValues.end() - 1, std::ostream_iterator<int>(vts, ", "));
-    vts << inputValues.back(); // add the last element with no delimiter
-    vts << " };";
+    std::stringstream inputString;
+    inputString << "secret int image = { ";
+    std::copy(inputValues.begin(), inputValues.end() - 1, std::ostream_iterator<int>(inputString, ", "));
+    inputString << inputValues.back(); // add the last element with no delimiter
+    inputString << " };" << std::endl;
+    inputString << "int imgSize = " << size << std::endl;
 
-    const char *inputs = R""""(
-      secret int image = {placeholder};
-      int imgSize = 3;
-    )"""";
-
-    // now replace the placeholder with the generated string of inputs
-    auto str = std::string(inputs);
-    std::string placeholderString = "{placeholder};";
-    str.replace(str.find(placeholderString), placeholderString.length(), vts.str());
-    return Parser::parse(str);
+    return Parser::parse(inputString.str());
   }
 
-  std::unique_ptr<AbstractNode> getOutputs() {
-    const char *inputs = R""""(
+  static std::unique_ptr<AbstractNode> getOutputs() {
+    const char *outputs = R""""(
       resultImage = img2;
     )"""";
-    return Parser::parse(std::string(inputs));
+    return Parser::parse(std::string(outputs));
   }
 
-  std::unique_ptr<AbstractNode> getEvaluationProgram() {
+  static std::unique_ptr<AbstractNode> getEvaluationProgram() {
     std::vector<std::reference_wrapper<AbstractNode>> createdNodes;
     return getEvaluationProgram(createdNodes);
   }
 
-  std::unique_ptr<AbstractNode> getEvaluationProgram(std::vector<std::reference_wrapper<AbstractNode>> &createdNodes) {
+  static std::unique_ptr<AbstractNode> getEvaluationProgram(std::vector<std::reference_wrapper<AbstractNode>> &createdNodes) {
     // program's input
     const char *inputs = R""""(
       public void runKernel(int imageVec) {
