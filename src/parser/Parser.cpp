@@ -232,15 +232,14 @@ AbstractExpression *Parser::parseExpression(stork::tokens_iterator &it) {
       // if it's the rotate keyword, it's a "fake" function call:
       parseTokenValue(it, stork::reservedTokens::kw_rotate);
       parseTokenValue(it, stork::reservedTokens::open_round);
-      // The first element must be an identifier rather than a target, since we cannot rotate e.g. x[i]
-      std::string id = parseIdentifier(it);
+      // the first argument can be a variable (e.g., ctxtA) or an expression (e.g., ctxtInput * 22)
+      auto ciphertextToBeRotated = parseExpression(it);
       parseTokenValue(it, stork::reservedTokens::comma);
       std::vector<std::unique_ptr<AbstractExpression>> offset;
-      offset.push_back(std::make_unique<Variable>(id));
+      offset.push_back(std::unique_ptr<AbstractExpression>(ciphertextToBeRotated));
       offset.push_back(std::unique_ptr<AbstractExpression>(parseExpression(it)));
       parseTokenValue(it, stork::reservedTokens::close_round);
-      auto call = new Call(stork::to_string(stork::reservedTokens::kw_rotate),
-                           std::move(offset));
+      auto call = new Call(stork::to_string(stork::reservedTokens::kw_rotate), std::move(offset));
       addParsedNode(call);
       operands.push(call);
     } else {
