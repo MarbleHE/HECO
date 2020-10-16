@@ -52,7 +52,7 @@ class KernelTest : public ::testing::Test {  /* NOLINT (predictable sequence exp
     auto str = std::string(inputs);
     std::string placeholderString = "{placeholder};";
     str.replace(str.find(placeholderString), placeholderString.length(), vts.str());
-    return Parser::parse(std::string(inputs));
+    return Parser::parse(str);
   }
 
   std::unique_ptr<AbstractNode> getOutputs() {
@@ -205,9 +205,19 @@ TEST_F(KernelTest, STAGE_01_typeCheckingTest) {  /* NOLINT */
 
   auto actualTaintedNodes = tcv.getSecretTaintedNodes();
 
+  // code to determine indices of tainted nodes, afterwards check manually if these are really the nodes that should be
+  // tainted
+//  std::set<std::string> taintedNodesIds;
+//  for (auto &[identifier, flag] : actualTaintedNodes) {
+//    if (flag) taintedNodesIds.insert(identifier);
+//  }
+//  for (size_t i = 0; i < createdNodes.size(); ++i) {
+//    if (taintedNodesIds.count(createdNodes.at(i).get().getUniqueNodeId()) > 0) std::cout << i << ", " << std::endl;
+//  }
+
   // extract ID dynamically from parsed input program from those nodes that are tainted because node IDs depend on
   // execution order of tests
-  std::vector<int> nodesIdxExpectedTainted = {14, 15, 68, 78, 88, 89, 90, 91, 102, 108, 109, 110, 111, 112};
+  std::vector<int> nodesIdxExpectedTainted = {17, 18, 71, 81, 91, 92, 93, 94, 107, 113, 114, 115, 116, 117};
   std::set<std::string> expTainted;
   for (const auto idx : nodesIdxExpectedTainted) {
     expTainted.insert(createdNodes.at(idx).get().getUniqueNodeId());
