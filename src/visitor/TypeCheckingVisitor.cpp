@@ -265,10 +265,11 @@ void SpecialTypeCheckingVisitor::visit(Return &elem) {
 
 void SpecialTypeCheckingVisitor::visit(Assignment &elem) {
   // No need to visit the left-hand side of an assignment as it does not tell anything about its datatype
+  registerBeforeVisitChildren();
   elem.getValue().accept(*this);
   // The declaration of this identifier already provided us the information about its type, hence we can just discard
   // the datatype in typesVisitedNodes.
-  typesVisitedNodes.pop();
+  discardChildrenDatatypes();
 
   secretTaintedNodes.insert_or_assign(elem.getUniqueNodeId(), isSecretTaintedNode(elem.getValue().getUniqueNodeId()));
 
@@ -335,4 +336,21 @@ SecretTaintedNodesMap &SpecialTypeCheckingVisitor::getSecretTaintedNodes() {
 
 void SpecialTypeCheckingVisitor::addVariableDatatype(ScopedIdentifier &scopedIdentifier, Datatype datatype) {
   variablesDatatypeMap.insert_or_assign(scopedIdentifier, datatype);
+}
+
+void SpecialTypeCheckingVisitor::registerBeforeVisitChildren() {
+  numNodesBeforeVisitingChildren = typesVisitedNodes.size();
+}
+
+void SpecialTypeCheckingVisitor::discardChildrenDatatypes() {
+  if (numNodesBeforeVisitingChildren > typesVisitedNodes.size()) {
+    throw std::runtime_error(
+        "Cannot discard datatype of children as numNodesBeforeVisitingChildren > number of current "
+        "nodes in typesVisitedNodes. Did you forget calling registerBeforeVisitChildren() before "
+        "visiting the children?");
+  } else {
+    while (typesVisitedNodes.size() > numNodesBeforeVisitingChildren) {
+      typesVisitedNodes.pop();
+    }
+  }
 }

@@ -14,12 +14,14 @@ typedef Visitor<SpecialTypeCheckingVisitor> TypeCheckingVisitor;
 
 typedef std::unordered_map<ScopedIdentifier, Datatype> VariableDatatypeMap;
 
-// TODO: Either only collect in the SecretTaintedNodesMap the unique node ID of those nodes that are secret tainted or
-//  make sure that in visit methods an entry in this map for ALL nodes is created (with the corresponding boolean flag).
 typedef std::unordered_map<std::string, bool> SecretTaintedNodesMap;
 
 class SpecialTypeCheckingVisitor : public ScopedVisitor {
  private:
+  /// Stores the number of nodes in typesVisitedNodes before the children of the currently visited nodes have been
+  /// visited. For this, registerBeforeVisitChildren must be called before visiting the children.
+  int numNodesBeforeVisitingChildren = 0;
+
   /// A temporary structure to keep track of data types visited in children of a statement.
   /// This stack should be empty after leaving a statement, otherwise it indicates that the statement did not properly
   /// clean up the stack.
@@ -118,7 +120,20 @@ class SpecialTypeCheckingVisitor : public ScopedVisitor {
   /// \return (A reference) to the map containing (unique node ID, is tainted) pairs.
   SecretTaintedNodesMap &getSecretTaintedNodes();
 
+  /// Stores a variable's datatype in the variable-datatype map.
+  /// \param scopedIdentifier The variable's associated scoped identifier.
+  /// \param datatype The datatype the given scoped identifier belongs to.
   void addVariableDatatype(ScopedIdentifier &scopedIdentifier, Datatype datatype);
+
+  /// Remembers the number of nodes in typesVisitedNodes. After the children have been visited, calling
+  /// discardChildrenDatatypes removes the datatype of the visited children from the stack. This mechanism is required
+  /// for nodes that do not require children's type information or where the number of children is arbitrary and hence a
+  /// simple pop() after visiting the children is not sufficient.
+  void registerBeforeVisitChildren();
+
+  /// Removes all datatypes from the typesVisitedNodes stack that were added in between now and the last call to
+  /// registerBeforeVisitChildren. This is useful if you do not need type information of children nodes.
+  void discardChildrenDatatypes();
 };
 
 #endif //GRAPHNODE_H_SRC_VISITOR_TYPECHECKINGVISITOR_H_
