@@ -9,3 +9,4 @@ doc/*
 !doc/doxygen
 /test/CMakeFiles/
 *.vpp*
+/cmake-build*
