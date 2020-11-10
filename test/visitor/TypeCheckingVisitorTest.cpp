@@ -216,3 +216,26 @@ TEST(TypeCheckingVisitorTest, secretTainting_ifCondition) { /* NOLINT */
   auto binaryExpressionNodeId = createdNodes.at(6).get().getUniqueNodeId();
   EXPECT_TRUE(tcv.isSecretTaintedNode(binaryExpressionNodeId));
 }
+
+TEST(TypeCheckingVisitorTest, overwriteSecret) { /* NOLINT */
+    const char *inputChars = R""""(
+    public secret int main(int N) {
+      secret int sum = 2442;
+      sum = 5555;
+      return sum + 1;
+    }
+    )"""";
+    auto inputCode = std::string(inputChars);
+    std::vector<std::reference_wrapper<AbstractNode>> createdNodes;
+    auto inputAST = Parser::parse(inputCode, createdNodes);
+
+    TypeCheckingVisitor tcv;
+    inputAST->begin()->accept(tcv);
+
+    auto binaryExpressionNodeId = createdNodes.at(9).get().getUniqueNodeId();
+
+    //TODO: Currently, the implementation says that (sum + 1) is tainted
+    // However, it might be interesting to allow "overwriting" secrets with public values
+    // and considering this in the secret-tainting analysis
+    EXPECT_TRUE(tcv.isSecretTaintedNode(binaryExpressionNodeId));
+}
