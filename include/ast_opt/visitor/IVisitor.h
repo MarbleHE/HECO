@@ -35,6 +35,8 @@ class OperatorExpression;
 
 class Return;
 
+class TernaryOperator;
+
 class UnaryExpression;
 
 class Assignment;
@@ -81,6 +83,8 @@ class IVisitor {
   virtual void visit(OperatorExpression &elem) = 0;
 
   virtual void visit(Return &elem) = 0;
+
+  virtual void visit(TernaryOperator &elem) = 0;
 
   virtual void visit(UnaryExpression &elem) = 0;
 

@@ -93,6 +93,7 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/ast/IndexAccess.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/OperatorExpression.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/Return.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/ast/TernaryOperator.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/UnaryExpression.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/Variable.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/VariableDeclaration.cpp
@@ -152,6 +153,7 @@ set(PUBLIC_HEADERS
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/Literal.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/OperatorExpression.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/Return.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/TernaryOperator.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/UnaryExpression.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/Variable.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/VariableDeclaration.h

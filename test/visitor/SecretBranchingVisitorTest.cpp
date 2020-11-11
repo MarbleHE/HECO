@@ -285,3 +285,6 @@ TEST(SecretBranchingVisitorTest, secretVariable_ifBranch_unsupportedBodyReturn_n
 
   EXPECT_TRUE(compareAST(*inputAst, *expectedAst));
 }
+
+//TODO: Add test for ternary operator!
+// How should a ternary operator be translated? => Duplicate statement that it occurs in!

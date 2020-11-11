@@ -11,6 +11,7 @@
 #include "ast_opt/ast/Literal.h"
 #include "ast_opt/ast/OperatorExpression.h"
 #include "ast_opt/ast/Return.h"
+#include "ast_opt/ast/TernaryOperator.h"
 #include "ast_opt/ast/UnaryExpression.h"
 #include "ast_opt/ast/Variable.h"
 #include "ast_opt/ast/VariableDeclaration.h"
@@ -91,6 +92,10 @@ void ScopedVisitor::visit(OperatorExpression &elem) {
 }
 
 void ScopedVisitor::visit(Return &elem) {
+  visitChildren(elem);
+}
+
+void ScopedVisitor::visit(TernaryOperator &elem) {
   visitChildren(elem);
 }
 

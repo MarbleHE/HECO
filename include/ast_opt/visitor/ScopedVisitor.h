@@ -56,6 +56,8 @@ class ScopedVisitor : public IVisitor {
 
   void visit(Return &elem) override;
 
+  void visit(TernaryOperator &elem) override;
+
   void visit(UnaryExpression &elem) override;
 
   void visit(Assignment &elem) override;
@@ -72,7 +74,7 @@ class ScopedVisitor : public IVisitor {
 
   [[nodiscard]] const Scope &getRootScope() const;
 
-  void setRootScope(std::unique_ptr<Scope>&& scope);
+  void setRootScope(std::unique_ptr<Scope> &&scope);
 
   void visitChildren(AbstractNode &elem);
 
@@ -80,7 +82,6 @@ class ScopedVisitor : public IVisitor {
 
   void exitScope();
 };
-
 
 /// SFINAE based detection if T::visit(Args...) exists
 /// Taken from https://stackoverflow.com/a/28309612
@@ -205,6 +206,10 @@ class Visitor : public SpecialVisitor {
 
   void visit(Return &elem) override {
     VISIT_SPECIAL_VISITOR_IF_EXISTS(Return);
+  }
+
+  void visit(TernaryOperator &elem) override {
+    VISIT_SPECIAL_VISITOR_IF_EXISTS(TernaryOperator);
   }
 
   void visit(UnaryExpression &elem) override {

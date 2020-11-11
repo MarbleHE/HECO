@@ -14,6 +14,7 @@
 #include "ast_opt/ast/Literal.h"
 #include "ast_opt/ast/OperatorExpression.h"
 #include "ast_opt/ast/Return.h"
+#include "ast_opt/ast/TernaryOperator.h"
 #include "ast_opt/ast/UnaryExpression.h"
 #include "ast_opt/ast/Variable.h"
 #include "ast_opt/ast/VariableDeclaration.h"
@@ -42,6 +43,20 @@ TEST(ParserTest, BinaryExp) { /* NOLINT */
                                  Operator(ArithmeticOp::ADDITION),
                                  std::make_unique<LiteralInt>(6));
   auto assignment = Assignment(std::make_unique<Variable>("a"), std::unique_ptr<BinaryExpression>(bp));
+  EXPECT_TRUE(compareAST(*ast->begin(), assignment));
+}
+
+TEST(ParserTest, TernaryExp) { /* NOLINT */
+  auto ast = Parser::parse("a = b > 5 ? 111 : 6;");
+
+  auto bp = new TernaryOperator(
+      std::make_unique<BinaryExpression>(
+          std::move(std::make_unique<Variable>("b")),
+          Operator(GREATER),
+          std::move(std::make_unique<LiteralInt>(5))),
+      std::make_unique<LiteralInt>(111),
+  std::make_unique<LiteralInt>(0));
+  auto assignment = Assignment(std::make_unique<Variable>("a"), std::unique_ptr<TernaryOperator>(bp));
   EXPECT_TRUE(compareAST(*ast->begin(), assignment));
 }
 
