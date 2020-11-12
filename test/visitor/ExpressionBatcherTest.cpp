@@ -5,7 +5,7 @@
 #include "ast_opt/parser/Parser.h"
 #include "../ASTComparison.h"
 #include "gtest/gtest.h"
-TEST(ExpressionBatcherTest, batchableExpression) {
+TEST(ExpressionBatcherTest, DISABLED_batchableExpression) {
 
   const char *inputChars = R""""(
     x = (a*b) + (c*d);
@@ -39,7 +39,7 @@ TEST(ExpressionBatcherTest, batchableExpression) {
 //TODO: Write lots of tests for batchability detection logic and think about algorithm shortcuts for "boring case" like sum.
 
 
-TEST(ExpressionBatcherTest, cardioTestMegaExpression) {
+TEST(ExpressionBatcherTest, DISABLED_cardioTestMegaExpression) {
 
   // Before Variable Substitution:
   //  risk = risk +++ (man && (age > 50));
