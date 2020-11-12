@@ -1,17 +1,15 @@
 #include "ast_opt/ast/UnaryExpression.h"
-#include "ast_opt/ast/If.h"
+#include "ast_opt/ast/TernaryOperator.h"
 #include "ast_opt/ast/Literal.h"
 #include "ast_opt/ast/Variable.h"
-#include "ast_opt/ast/VariableDeclaration.h"
 #include "gtest/gtest.h"
 
 /// Helper function to handle dynamic casting/etc
-/// \param b A Block that should contain a VariableDeclaration
+/// \param e A Block that should contain a VariableDeclaration
 /// \return The identifier of the variable being declared
-std::string getNameFromVariable(const Block &b) {
-  const AbstractStatement &s = b.getStatements()[0];
-  auto vd = dynamic_cast<const VariableDeclaration &>(s);
-  return vd.getTarget().getIdentifier();
+std::string getNameFromVariable(const AbstractExpression &e) {
+  auto vd = dynamic_cast<const Variable &>(e);
+  return vd.getIdentifier();
 }
 
 /// Helper function to handle dynamic casting/etc
@@ -21,30 +19,29 @@ bool getValue(const AbstractExpression &e) {
   return dynamic_cast<const LiteralBool &>(e).getValue();
 }
 
-TEST(IfTest, values_ValuesGivenInCtorAreRetrievable) {
-  // Ifs are created with a condition and branches
+TEST(TernaryOperatorTest, values_ValuesGivenInCtorAreRetrievable) {
+  // TernaryOperators are created with a condition and branches
   // This test simply confirms that they are retrievable later
 
-  VariableDeclaration variableDeclaration1(Datatype(Type::BOOL), std::make_unique<Variable>("foo"));
-  VariableDeclaration variableDeclaration2(Datatype(Type::BOOL), std::make_unique<Variable>("boo"));
-  If iff(std::make_unique<LiteralBool>(true),
-         std::make_unique<Block>(variableDeclaration1.clone(nullptr)),
-         std::make_unique<Block>(variableDeclaration2.clone(nullptr)));
+  TernaryOperator ternaryOperator(std::make_unique<LiteralBool>(true),
+                                  std::make_unique<Variable>("foo"),
+                                  std::make_unique<Variable>("boo"));
 
-  ASSERT_TRUE(iff.hasCondition());
-  EXPECT_EQ(getValue(iff.getCondition()), true);
-  ASSERT_TRUE(iff.hasThenBranch());
-  EXPECT_EQ(getNameFromVariable(iff.getThenBranch()), "foo");
-  ASSERT_TRUE(iff.hasElseBranch());
-  EXPECT_EQ(getNameFromVariable(iff.getElseBranch()), "boo");
+  ASSERT_TRUE(ternaryOperator.hasCondition());
+  EXPECT_EQ(getValue(ternaryOperator.getCondition()), true);
+  ASSERT_TRUE(ternaryOperator.hasThenExpr());
+  EXPECT_EQ(getNameFromVariable(ternaryOperator.getThenExpr()), "foo");
+  ASSERT_TRUE(ternaryOperator.hasElseExpr());
+  EXPECT_EQ(getNameFromVariable(ternaryOperator.getElseExpr()), "boo");
 }
 
-TEST(IfTest, SetAndGet) {
+//TODO: Finish adapting tests
+TEST(TernaryOperatorTest, SetAndGet) {
   // This test simply checks that target and value can be set and get correctly.
 
-  If iff(std::make_unique<LiteralBool>(true),
-         std::make_unique<Block>(),
-         std::make_unique<Block>());
+  TernaryOperator ternaryOperator(std::make_unique<LiteralBool>(true),
+                                  nullptr,
+                                  nullptr);
 
   iff.setCondition(std::make_unique<LiteralBool>(false));
   EXPECT_EQ(getValue(iff.getCondition()), false);
@@ -52,117 +49,117 @@ TEST(IfTest, SetAndGet) {
   auto variableDeclaration2 = std::make_unique<VariableDeclaration>(Datatype(Type::BOOL),
                                                                     std::make_unique<Variable>("bar"),
                                                                     std::make_unique<LiteralBool>(true));
-  iff.setThenBranch(std::make_unique<Block>(std::move(variableDeclaration2)));
-  ASSERT_TRUE(iff.hasThenBranch());
-  EXPECT_EQ(getNameFromVariable(iff.getThenBranch()), "bar");
+  iff.setThenExpr(std::make_unique<Block>(std::move(variableDeclaration2)));
+  ASSERT_TRUE(iff.hasThenExpr());
+  EXPECT_EQ(getNameFromVariable(iff.getThenExpr()), "bar");
 
   auto variableDeclaration3 = std::make_unique<VariableDeclaration>(Datatype(Type::BOOL),
                                                                     std::make_unique<Variable>("mau"),
                                                                     std::make_unique<LiteralBool>(false));
-  iff.setElseBranch(std::make_unique<Block>(std::move(variableDeclaration3)));
-  ASSERT_TRUE(iff.hasElseBranch());
-  EXPECT_EQ(getNameFromVariable(iff.getElseBranch()), "mau");
+  iff.setElseExpr(std::make_unique<Block>(std::move(variableDeclaration3)));
+  ASSERT_TRUE(iff.hasElseExpr());
+  EXPECT_EQ(getNameFromVariable(iff.getElseExpr()), "mau");
 }
 
-TEST(IfTest, CopyCtorCopiesValue) {
-  // When copying a If, the new object should contain a (deep) copy of the condition and branches
+TEST(TernaryOperatorTest, CopyCtorCopiesValue) {
+  // When copying a TernaryOperator, the new object should contain a (deep) copy of the condition and branches
 
   auto variableDeclaration1 =
       std::make_unique<VariableDeclaration>(Datatype(Type::BOOL), std::make_unique<Variable>("foo"));
   auto variableDeclaration2 =
       std::make_unique<VariableDeclaration>(Datatype(Type::BOOL), std::make_unique<Variable>("boo"));
-  If iff(std::make_unique<LiteralBool>(true),
+  TernaryOperator iff(std::make_unique<LiteralBool>(true),
          std::make_unique<Block>(std::move(variableDeclaration1)),
          std::make_unique<Block>(std::move(variableDeclaration1)));
 
   // create a copy by using the copy constructor
-  If copiedIff(iff);
+  TernaryOperator copiedTernaryOperatorf(iff);
 
   // check if copy is a deep copy
-  ASSERT_NE(iff.getCondition(), copiedIff.getCondition());
-  ASSERT_NE(iff.getThenBranch(), copiedIff.getThenBranch());
-  ASSERT_NE(iff.getElseBranch(), copiedIff.getElseBranch());
+  ASSERT_NE(iff.getCondition(), copiedTernaryOperatorf.getCondition());
+  ASSERT_NE(iff.getThenExpr(), copiedTernaryOperatorf.getThenExpr());
+  ASSERT_NE(iff.getElseExpr(), copiedTernaryOperatorf.getElseExpr());
 }
 
-TEST(IfTest, CopyAssignmentCopiesValue) {
-  // When copying a If, the new object should contain a copy of the condition and branches
+TEST(TernaryOperatorTest, CopyAssignmentCopiesValue) {
+  // When copying a TernaryOperator, the new object should contain a copy of the condition and branches
 
   auto variableDeclaration1 = std::make_unique<VariableDeclaration>(
       Datatype(Type::BOOL), std::make_unique<Variable>("foo"));
   auto variableDeclaration2 = std::make_unique<VariableDeclaration>(
       Datatype(Type::BOOL), std::make_unique<Variable>("boo"));
-  If iff(std::make_unique<LiteralBool>(true),
+  TernaryOperator iff(std::make_unique<LiteralBool>(true),
          std::make_unique<Block>(std::move(variableDeclaration1)),
          std::make_unique<Block>(std::move(variableDeclaration2)));
 
-  If copiedIff(std::make_unique<LiteralBool>(false), std::make_unique<Block>(), std::make_unique<Block>());
+  TernaryOperator copiedTernaryOperatorf(std::make_unique<LiteralBool>(false), std::make_unique<Block>(), std::make_unique<Block>());
   // create a copy by using the copy constructor
-  copiedIff = iff;
+  copiedTernaryOperatorf = iff;
 
   // check if copy is a deep copy
-  ASSERT_NE(iff.getCondition(), copiedIff.getCondition());
-  ASSERT_NE(iff.getThenBranch(), copiedIff.getThenBranch());
-  ASSERT_NE(iff.getElseBranch(), copiedIff.getElseBranch());
+  ASSERT_NE(iff.getCondition(), copiedTernaryOperatorf.getCondition());
+  ASSERT_NE(iff.getThenExpr(), copiedTernaryOperatorf.getThenExpr());
+  ASSERT_NE(iff.getElseExpr(), copiedTernaryOperatorf.getElseExpr());
 }
 
-TEST(IfTest, MoveCtorPreservesValue) {
-  // When moving a If, the new object should contain the same condition and branches
+TEST(TernaryOperatorTest, MoveCtorPreservesValue) {
+  // When moving a TernaryOperator, the new object should contain the same condition and branches
 
   VariableDeclaration variableDeclaration1(Datatype(Type::BOOL), std::make_unique<Variable>("foo"));
   VariableDeclaration variableDeclaration2(Datatype(Type::BOOL), std::make_unique<Variable>("boo"));
-  If iff(std::make_unique<LiteralBool>(true),
+  TernaryOperator iff(std::make_unique<LiteralBool>(true),
          std::make_unique<Block>(variableDeclaration1.clone()),
          std::make_unique<Block>(variableDeclaration2.clone()));
 
-  If newIff(std::move(iff));
+  TernaryOperator newTernaryOperatorf(std::move(iff));
 
   ASSERT_FALSE(iff.hasCondition());
   EXPECT_THROW(iff.getCondition(), std::runtime_error);
-  ASSERT_FALSE(iff.hasThenBranch());
-  EXPECT_THROW(iff.getThenBranch(), std::runtime_error);
-  ASSERT_FALSE(iff.hasElseBranch());
-  EXPECT_THROW(iff.getElseBranch(), std::runtime_error);
+  ASSERT_FALSE(iff.hasThenExpr());
+  EXPECT_THROW(iff.getThenExpr(), std::runtime_error);
+  ASSERT_FALSE(iff.hasElseExpr());
+  EXPECT_THROW(iff.getElseExpr(), std::runtime_error);
 
-  ASSERT_TRUE(newIff.hasCondition());
-  EXPECT_EQ(getValue(newIff.getCondition()), true);
-  ASSERT_TRUE(newIff.hasThenBranch());
-  EXPECT_EQ(getNameFromVariable(newIff.getThenBranch()), "foo");
-  ASSERT_TRUE(newIff.hasElseBranch());
-  EXPECT_EQ(getNameFromVariable(newIff.getElseBranch()), "boo");
+  ASSERT_TRUE(newTernaryOperatorf.hasCondition());
+  EXPECT_EQ(getValue(newTernaryOperatorf.getCondition()), true);
+  ASSERT_TRUE(newTernaryOperatorf.hasThenExpr());
+  EXPECT_EQ(getNameFromVariable(newTernaryOperatorf.getThenExpr()), "foo");
+  ASSERT_TRUE(newTernaryOperatorf.hasElseExpr());
+  EXPECT_EQ(getNameFromVariable(newTernaryOperatorf.getElseExpr()), "boo");
 }
 
-TEST(IfTest, MoveAssignmentPreservesValue) {
-  // When moving a If, the new object should contain the same condition and branches
+TEST(TernaryOperatorTest, MoveAssignmentPreservesValue) {
+  // When moving a TernaryOperator, the new object should contain the same condition and branches
 
   VariableDeclaration variableDeclaration1(Datatype(Type::BOOL), std::make_unique<Variable>("foo"));
   VariableDeclaration variableDeclaration2(Datatype(Type::BOOL), std::make_unique<Variable>("boo"));
-  If iff(std::make_unique<LiteralBool>(true),
+  TernaryOperator iff(std::make_unique<LiteralBool>(true),
          std::make_unique<Block>(variableDeclaration1.clone()),
          std::make_unique<Block>(variableDeclaration2.clone()));
 
-  If newIff = std::move(iff);
+  TernaryOperator newTernaryOperatorf = std::move(iff);
 
   ASSERT_FALSE(iff.hasCondition());
   EXPECT_THROW(iff.getCondition(), std::runtime_error);
-  ASSERT_FALSE(iff.hasThenBranch());
-  EXPECT_THROW(iff.getThenBranch(), std::runtime_error);
-  ASSERT_FALSE(iff.hasElseBranch());
-  EXPECT_THROW(iff.getElseBranch(), std::runtime_error);
+  ASSERT_FALSE(iff.hasThenExpr());
+  EXPECT_THROW(iff.getThenExpr(), std::runtime_error);
+  ASSERT_FALSE(iff.hasElseExpr());
+  EXPECT_THROW(iff.getElseExpr(), std::runtime_error);
 
-  ASSERT_TRUE(newIff.hasCondition());
-  EXPECT_EQ(getValue(newIff.getCondition()), true);
-  ASSERT_TRUE(newIff.hasThenBranch());
-  EXPECT_EQ(getNameFromVariable(newIff.getThenBranch()), "foo");
-  ASSERT_TRUE(newIff.hasElseBranch());
-  EXPECT_EQ(getNameFromVariable(newIff.getElseBranch()), "boo");
+  ASSERT_TRUE(newTernaryOperatorf.hasCondition());
+  EXPECT_EQ(getValue(newTernaryOperatorf.getCondition()), true);
+  ASSERT_TRUE(newTernaryOperatorf.hasThenExpr());
+  EXPECT_EQ(getNameFromVariable(newTernaryOperatorf.getThenExpr()), "foo");
+  ASSERT_TRUE(newTernaryOperatorf.hasElseExpr());
+  EXPECT_EQ(getNameFromVariable(newTernaryOperatorf.getElseExpr()), "boo");
 }
 
-TEST(IfTest, countChildrenReportsCorrectNumber) {
+TEST(TernaryOperatorTest, countChildrenReportsCorrectNumber) {
   // This tests checks that countChildren delivers the correct number
 
   VariableDeclaration variableDeclaration1(Datatype(Type::BOOL), std::make_unique<Variable>("foo"));
   VariableDeclaration variableDeclaration2(Datatype(Type::BOOL), std::make_unique<Variable>("boo"));
-  If iff(std::make_unique<LiteralBool>(true),
+  TernaryOperator iff(std::make_unique<LiteralBool>(true),
          std::make_unique<Block>(variableDeclaration1.clone()),
          std::make_unique<Block>(variableDeclaration2.clone()));
   auto reported_count = iff.countChildren();
@@ -178,7 +175,7 @@ TEST(IfTest, countChildrenReportsCorrectNumber) {
   EXPECT_EQ(reported_count, actual_count);
 }
 
-TEST(IfTest, node_iterate_children) {
+TEST(TernaryOperatorTest, node_iterate_children) {
   // This test checks that we can iterate correctly through the children
   // Even if some of the elements are null (in which case they should not appear)
 
@@ -186,7 +183,7 @@ TEST(IfTest, node_iterate_children) {
       Datatype(Type::BOOL), std::make_unique<Variable>("foo"));
   auto variableDeclaration2 = std::make_unique<VariableDeclaration>(
       Datatype(Type::BOOL), std::make_unique<Variable>("boo"));
-  If iff({},
+  TernaryOperator iff({},
          std::make_unique<Block>(std::move(variableDeclaration1)),
          std::make_unique<Block>(std::move(variableDeclaration2)));
 
@@ -207,18 +204,18 @@ TEST(IfTest, node_iterate_children) {
   EXPECT_EQ(getNameFromDeclaration(dynamic_cast<Block &>(child1).getStatements()[0]), "foo");
   EXPECT_EQ(getNameFromDeclaration(dynamic_cast<Block &>(child2).getStatements()[0]), "boo");
 }
-TEST(IfTest, JsonOutputTest) { /* NOLINT */
+TEST(TernaryOperatorTest, JsonOutputTest) { /* NOLINT */
   VariableDeclaration variableDeclaration1(Datatype(Type::BOOL), std::make_unique<Variable>("foo"));
   VariableDeclaration variableDeclaration2(Datatype(Type::BOOL), std::make_unique<Variable>("boo"));
-  If iff(std::make_unique<LiteralBool>(true),
+  TernaryOperator iff(std::make_unique<LiteralBool>(true),
          std::make_unique<Block>(variableDeclaration1.clone()),
          std::make_unique<Block>(variableDeclaration2.clone()));
 
-  nlohmann::json j = {{"type", "If"},
+  nlohmann::json j = {{"type", "TernaryOperator"},
                       {"condition", {
                           {"type", "LiteralBool"},
                           {"value", true}}},
-                      {"thenBranch", {
+                      {"thenExpr", {
                           {"type", "Block"},
                           {"statements", {
                               {{"type", "VariableDeclaration"},
@@ -229,7 +226,7 @@ TEST(IfTest, JsonOutputTest) { /* NOLINT */
                               }}
                           }
                       }},
-                      {"elseBranch", {
+                      {"elseExpr", {
                           {"type", "Block"},
                           {"statements", {
                               {{"type", "VariableDeclaration"},

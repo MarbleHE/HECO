@@ -37,6 +37,7 @@ set(TEST_FILES
         ast/LiteralTest.cpp
         ast/OperatorExpressionTest.cpp
         ast/ReturnTest.cpp
+        ast/TernaryOperatorTest.cpp
         ast/UnaryExpressionTest.cpp
         ast/VariableDeclarationTest.cpp
         ast/VariableTest.cpp

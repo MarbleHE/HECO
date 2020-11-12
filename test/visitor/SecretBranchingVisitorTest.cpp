@@ -286,5 +286,139 @@ TEST(SecretBranchingVisitorTest, secretVariable_ifBranch_unsupportedBodyReturn_n
   EXPECT_TRUE(compareAST(*inputAst, *expectedAst));
 }
 
-//TODO: Add test for ternary operator!
-// How should a ternary operator be translated? => Duplicate statement that it occurs in!
+TEST(SecretBranchingVisitorTest, noInteractionBetweenDifferentParsings) { /* NOLINT */
+
+  // FIRST PARSE:
+  const char *inputChars1 = R""""(
+    public int main(secret int N) {
+      int sum = 2442;
+      if (N < 5) {
+        sum = sum-N;
+      } else {
+        sum = sum + 1000;
+      }
+      return sum;
+    }
+    )"""";
+  std::vector<std::reference_wrapper<AbstractNode>> createdNodes;
+  auto inputAst1 = Parser::parse(std::string(inputChars1), createdNodes);
+
+  const char *expectedChars1 = R""""(
+    public int main(secret int N) {
+      int sum = 2442;
+      sum = ((N<5)***(sum-N)) +++ ((1---(N<5)) *** (sum+1000));
+      return sum;
+    }
+    )"""";
+  auto expectedAst = Parser::parse(std::string(expectedChars1));
+
+  // get binary expression node (N < 5)
+  SecretTaintedNodesMap secretTaintedNodesMap1;
+  secretTaintedNodesMap1.insert_or_assign(
+      createdNodes.at(6).get().getUniqueNodeId(), true);
+
+  SecretBranchingVisitor sbv(secretTaintedNodesMap1);
+  inputAst1->accept(sbv);
+
+  EXPECT_TRUE(compareAST(*inputAst1, *expectedAst));
+
+
+  // SECOND PARSE:
+  const char *inputChars = R""""(
+    public int main(secret int N) {
+      int sum = 2442;
+      if (N < 5) {
+        sum = sum-N;
+      }
+      return sum;
+    }
+    )"""";
+  //std::vector<std::reference_wrapper<AbstractNode>> createdNodes;
+  auto inputAst2 = Parser::parse(std::string(inputChars), createdNodes);
+
+  const char *expectedChars2 = R""""(
+    public int main(secret int N) {
+      int sum = 2442;
+      sum = ((N<5)***(sum-N)) +++ ((1---(N<5)) *** 2442);
+      return sum;
+    }
+    )"""";
+  auto expectedAst2 = Parser::parse(std::string(expectedChars2));
+
+  // get binary expression node (N < 5)
+  SecretTaintedNodesMap secretTaintedNodesMap2;
+  secretTaintedNodesMap2.insert_or_assign(
+      createdNodes.at(6).get().getUniqueNodeId(), true);
+
+  SecretBranchingVisitor sbv2(secretTaintedNodesMap2);
+  inputAst2->accept(sbv2);
+
+  EXPECT_TRUE(compareAST(*inputAst2, *expectedAst2));
+}
+
+TEST(SecretBranchingVisitorTest, ternaryOperator) {
+  const char *inputChars = R""""(
+    public int main(secret int N) {
+      int sum;
+      sum =  N > 25 ? 5 : 6;
+      return sum;
+    }
+    )"""";
+  std::vector<std::reference_wrapper<AbstractNode>> createdNodes;
+  auto inputAst = Parser::parse(std::string(inputChars), createdNodes);
+
+  // get binary expression node (N > 25)
+  SecretTaintedNodesMap secretTaintedNodesMap;
+  secretTaintedNodesMap.insert_or_assign(
+      createdNodes.at(5).get().getUniqueNodeId(), true);
+
+
+  // Instead of manually specifying target AST,
+  // we write the equivalent code and let the parser translate that into an AST
+  const char *equivalentChars = R""""(
+    public int main(secret int N) {
+      int sum;
+      if(N > 25) {
+        sum = 5;
+      } else {
+        sum = 6;
+      }
+      return sum;
+    }
+    )"""";
+  auto equivalentAst = Parser::parse(std::string(equivalentChars), createdNodes);
+
+  // get binary expression node (N > 25)
+  SecretTaintedNodesMap secretTaintedNodesMapEquiv;
+  secretTaintedNodesMapEquiv.insert_or_assign(
+      createdNodes.at(5).get().getUniqueNodeId(), true);
+  SecretBranchingVisitor equiv_sbv(secretTaintedNodesMapEquiv);
+  equivalentAst->accept(equiv_sbv);
+
+  SecretBranchingVisitor sbv(secretTaintedNodesMap);
+  inputAst->accept(sbv);
+
+  EXPECT_TRUE(compareAST(*inputAst, *equivalentAst));
+}
+
+TEST(SecretBranchingVisitorTest, no_multipleTernaryOperators) {
+  const char *inputChars = R""""(
+    public int main(secret int N) {
+      int sum;
+      sum =  N > 25 ? ((N < 50) ? 2 : 3 ) : 6;
+      return sum;
+    }
+    )"""";
+  std::vector<std::reference_wrapper<AbstractNode>> createdNodes;
+  auto inputAst = Parser::parse(std::string(inputChars), createdNodes);
+
+  // get binary expression node (N > 25)
+  SecretTaintedNodesMap secretTaintedNodesMap;
+  secretTaintedNodesMap.insert_or_assign(
+      createdNodes.at(5).get().getUniqueNodeId(), true);
+
+  SecretBranchingVisitor sbv(secretTaintedNodesMap);
+  EXPECT_THROW(inputAst->accept(sbv), std::runtime_error);
+}
+
+
