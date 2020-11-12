@@ -45,7 +45,6 @@ class VariableDeclaration;
 
 class Variable;
 
-// TODO: Implement Scope
 class Scope;
 
 class IVisitor {

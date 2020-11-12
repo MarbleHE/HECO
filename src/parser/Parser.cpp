@@ -219,6 +219,9 @@ AbstractExpression *Parser::parseExpression(stork::tokens_iterator &it) {
     } else if (it->isIdentifier()) {
       // When we see an identifier, it could be a variable or a more general IndexAccess
       //TODO: It could also be a function call!!
+      // Currently, the rotate "function" is implemented as a hardcoded token
+      // The same could be done for the ctxt maintenance operations from https://github.com/MarbleHE/ABC/issues/7
+      // However, this approach will not work for general functions, as in https://github.com/MarbleHE/ABC/issues/12
       operands.push(parseTarget(it));
     } else if (it->hasValue(stork::reservedTokens::open_round)) {
       // If we see an (, we have nested expressions going on, so use recursion.

@@ -5,8 +5,6 @@
 #include <unordered_set>
 #include "ast_opt/ast/AbstractNode.h"
 
-//TODO: Add rule of five
-
 // forward declarations
 class Scope;
 

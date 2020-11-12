@@ -38,6 +38,7 @@ void SpecialControlFlowGraphVisitor::visit(Assignment &node) {
   if (auto variable = dynamic_cast<Variable *>(&node.getTarget())) {
     identifier = variable->getIdentifier();
   } else if (auto indexAccess = dynamic_cast<IndexAccess *>(&node.getTarget())) {
+    throw std::runtime_error("Sorry, you've hit something yet to be implemented.");
     // TODO implement me: must recursively go tree down and retrieve all variable identifiers
   }
 

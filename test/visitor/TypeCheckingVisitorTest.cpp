@@ -236,6 +236,6 @@ TEST(TypeCheckingVisitorTest, overwriteSecret) { /* NOLINT */
 
     //TODO: Currently, the implementation says that (sum + 1) is tainted
     // However, it might be interesting to allow "overwriting" secrets with public values
-    // and considering this in the secret-tainting analysis
+    // and considering this in the secret-tainting analysis, as described in https://github.com/MarbleHE/ABC/issues/5
     EXPECT_TRUE(tcv.isSecretTaintedNode(binaryExpressionNodeId));
 }

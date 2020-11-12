@@ -6,7 +6,6 @@
 
 class AbstractStatement;
 
-//TODO: Introduce an AbstractScopeOpeningStatement (or better name)
 
 /// This class implements the "default" behaviour of a visitor
 /// simply visiting a node's children
