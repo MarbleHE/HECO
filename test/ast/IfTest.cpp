@@ -17,7 +17,7 @@ std::string getNameFromVariable(const Block &b) {
 /// Helper function to handle dynamic casting/etc
 /// \param e An AbstractExpression that should be a LiteralBool
 /// \return The value of the LiteralBool
-bool getValue(const AbstractExpression &e) {
+inline bool getValue(const AbstractExpression &e) {
   return dynamic_cast<const LiteralBool &>(e).getValue();
 }
 

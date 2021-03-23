@@ -9,7 +9,7 @@ class CardioTest : public ::testing::Test {  /* NOLINT (predictable sequence exp
   void SetUp() override {
   }
 
-  std::unique_ptr<AbstractNode> getInputs(size_t size) {
+  std::unique_ptr<AbstractNode> getInputs(size_t /* size */) {
     const char *inputs = R""""(
       bool sex = true;
       bool antecedents = true;

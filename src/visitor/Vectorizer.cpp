@@ -26,12 +26,12 @@ void SpecialVectorizer::visit(Block &elem) {
   elem.removeNullStatements();
 
   // TODO: Emit all relevant assignments again!
-  for (auto &scopedID: variableValues.changedEntries()) {
-    auto &cv = variableValues.erase(scopedID);
+//  for (auto &scopedID: variableValues.changedEntries()) {
+//    auto &cv = variableValues.erase(scopedID);
 //    for (auto &statement : cv.statementsToExecutePlan()) {
 //      elem.appendStatement(std::move(statement));
 //    }
-  }
+//  }
   variableValues.resetChangeFlags();
   ScopedVisitor::exitScope();
 }
@@ -59,10 +59,10 @@ std::pair<ScopedIdentifier,ComplexValue> SpecialVectorizer::turnAssignmentIntoCo
 void SpecialVectorizer::visit(Assignment &elem) {
 
   /// current scope
-  auto &scope = getCurrentScope();
+  //  auto &scope = getCurrentScope();
 
   /// target of the assignment
-  AbstractTarget &target = elem.getTarget();
+  // AbstractTarget &target = elem.getTarget();
   ScopedIdentifier targetID;
   ComplexValue targetValue;
 

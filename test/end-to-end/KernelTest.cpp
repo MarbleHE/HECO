@@ -114,7 +114,7 @@ class KernelTest : public ::testing::Test {  /* NOLINT (predictable sequence exp
 ///     img2[x][y] = 2*img[x][y] - value
 /// to avoid division that is unsupported in FHE.
 std::vector<int> runKernel(std::vector<int> &img) {
-  const auto imgSize = sqrt(img.size());
+  const auto imgSize = (int) ceil(sqrt(img.size()));
   std::vector<std::vector<int>> weightMatrix = {{1, 1, 1}, {1, -8, 1}, {1, 1, 1}};
   std::vector<int> img2(img.begin(), img.end());
   for (int x = 1; x < imgSize - 1; ++x) {
