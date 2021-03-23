@@ -1,0 +1,21 @@
+name: build_publish_doxygen
+
+on: [push]
+
+# Job that checks-out the current branch, builds the doxygen docs, 
+# and publishes the docs on github pages of this repository.
+jobs:
+  build-ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v1
+      - name: Build doxygen docs
+        uses: mattnotmitt/doxygen-action@v1
+      - name: Deploy to github pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./html
+          publish_branch: gh-pages
+# If build worked successfully, remove /docs folder as not needed anymore
