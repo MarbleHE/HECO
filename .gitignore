@@ -4,6 +4,7 @@ cmake-build-debug/
 CMakeFiles
 _deps
 build
+docs
 doc/*
 !doc/clion
 !doc/doxygen
