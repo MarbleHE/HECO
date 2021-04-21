@@ -88,6 +88,10 @@ class AbstractCiphertext : public AbstractValue {
   /// \param steps The number of steps this ciphertext should be rotated.
   virtual void rotateRowsInplace(int steps) = 0;
 
+  /// Return the current noise budget in the ciphertext, measured in bits
+  /// \return A double measuring the number of bits in the noise budget.
+  virtual double noiseBits() = 0;
+
   /// Creates and returns a clone of this ciphertext.
   /// \return A clone of this ciphertext as std::unique_ptr.
   virtual std::unique_ptr<AbstractCiphertext> clone() = 0;
