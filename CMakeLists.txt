@@ -196,7 +196,7 @@ target_compile_features(ast_opt PUBLIC cxx_std_17)
 if (SEAL_FOUND)
     message("Enabling SEAL functionality")
     target_include_directories(ast_opt PUBLIC ${SEAL_INCLUDE_DIRS})
-    target_link_libraries(ast_opt PUBLIC SEAL::seal )#${SEAL_LIBRARIES}) # Changed this to make seal work...
+    target_link_libraries(ast_opt PUBLIC SEAL::seal)
     target_compile_definitions(ast_opt PUBLIC -DHAVE_SEAL_BFV)
     target_compile_definitions(ast_opt PUBLIC -DHAVE_SEAL_CKKS)
 endif (SEAL_FOUND)
