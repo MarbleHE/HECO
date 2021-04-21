@@ -26,14 +26,14 @@ std::unique_ptr<AbstractCiphertext> SealCiphertextFactory::createCiphertext(int6
 SealCiphertextFactory::SealCiphertextFactory(const SealCiphertextFactory &other) :
     ciphertextSlotSize(other.ciphertextSlotSize),
     context(other.context), // TODO: This should be a real copy, not just shared ownership (copying the shared_ptr)
-    secretKey(std::make_unique<seal::SecretKey>(*other.secretKey)),
-    publicKey(std::make_unique<seal::PublicKey>(*other.publicKey)),
-    galoisKeys(std::make_unique<seal::GaloisKeys>(*other.galoisKeys)),
-    relinKeys(std::make_unique<seal::RelinKeys>(*other.relinKeys)),
-    encoder(std::make_unique<seal::BatchEncoder>(context)),
-    evaluator(std::make_unique<seal::Evaluator>(other.context)),
-    encryptor(std::make_unique<seal::Encryptor>(context, *publicKey)),
-    decryptor(std::make_unique<seal::Decryptor>(other.context, *secretKey)) {  // copy constructor
+    secretKey(std::make_unique<seal::SecretKey>(other.secretKey)),
+    publicKey(std::make_unique<seal::PublicKey>(other.publicKey)),
+    galoisKeys(std::make_unique<seal::GaloisKeys>(other.galoisKeys)),
+    relinKeys(std::make_unique<seal::RelinKeys>(other.relinKeys)),
+    encoder(std::make_unique<seal::BatchEncoder>(*context)),
+    evaluator(std::make_unique<seal::Evaluator>(*other.context)),
+    encryptor(std::make_unique<seal::Encryptor>(*context, publicKey)),
+    decryptor(std::make_unique<seal::Decryptor>(*other.context, secretKey)) {  // copy constructor
 }
 
 SealCiphertextFactory::SealCiphertextFactory(SealCiphertextFactory &&other) noexcept // move constructor
