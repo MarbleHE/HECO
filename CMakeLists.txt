@@ -75,6 +75,7 @@ endif ()
 
 ##############################
 # TARGET: ast_opt
+# TODO: Rename this target!
 #
 # The main ast_optimizer as a library
 ##############################

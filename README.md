@@ -7,15 +7,14 @@
                                              /____/                        /_/                     
 ```
 [![Language](https://img.shields.io/badge/language-C++-blue.svg)](https://isocpp.org/)
-[![CPP_Standard](https://img.shields.io/badge/c%2B%2B-98/11/14/17-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B#Standardization)
-[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](#)
-[![CI/CD](https://github.com/MarbleHE/AST-Optimizer/workflows/build_run_tests/badge.svg)](https://github.com/MarbleHE/AST-Optimizer/actions)
-[![Documentation](https://img.shields.io/badge/docs-doxygen-blue.svg)](http://marblehe.github.io/AST-Optimizer)
+[![CPP_Standard](https://img.shields.io/badge/c%2B%2B-11/14/17-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B#Standardization)
+[![CI/CD](https://github.com/MarbleHE/ABC/workflows/build_run_tests/badge.svg)](https://github.com/MarbleHE/AST-Optimizer/actions)
+[![Documentation](https://img.shields.io/badge/docs-doxygen-blue.svg)](http://marblehe.github.io/ABC)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![contributions welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat)](https://github.com/MarbleHE/AST-Optimizer/issues)
 
-This repository hosts an optimizer for Fully Homomorphic Encryption (FHE) working on an AST-like (Abstract Syntax Tree) representation of a program.
-In future, this optimization component will be integrated into the [Marble](https://github.com/MarbleHE/Marble) FHE compiler [1].
+ABC is an optimizing compiler for Fully Homomorphic Encryption (FHE). 
+FHE allows computation over encrytped data
+
 
 - [Repository's Structure](#repositorys-structure)
 - [Optimizations](#optimizations)
@@ -278,6 +277,10 @@ The library as well as any other dependencies are automatically cloned from its 
 The tests can be found in the [`test`](test) directory and are named according to the class file that the test covers (e.g., `MultDepthVisitorTest` for the test covering the `MultDepthVisitor` class). 
 
 It is required to submit tests for newly added features to ensure correctness and avoid breaking the feature by future changes (regression test). Any PRs without tests will not be considered to be integrated.
+
+
+### Workflow
+This project uses [GitHub flow](https://guides.github.com/introduction/flow/), i.e. all work around an improvement/feature happens on a specific branch and is only merged into main once it passes all checks and has been reviewed.
 
 ## References
 

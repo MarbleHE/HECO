@@ -50,6 +50,46 @@ std::unique_ptr<AbstractNode> Parser::parse(std::string s) {
   return std::move(block);
 }
 
+class Animal {
+ public:
+  virtual std::string sound(Animal &otherAnimal) {
+    return "THIS IS THE DEFAULT NOISE AN ANIMAL MAKES";
+  };
+};
+
+class Dog : public Animal {
+ public:
+  std::string getSounded(Animal &otherAnimal) override {
+    otherAnimal.getSounded(this);
+  }
+
+  sound(Cat cat) { bark }
+
+  sound(Dog dog) {bark bark}
+
+
+};
+
+class Cat : public Animal {
+ public:
+  std::string getSounded(Animal &otherAnimal) override {
+    otherAnimal.sound((Cat)this);
+  }
+
+  sound(Cat cat) {MEOW MEOW}
+
+  sound(Dog dog) {mow}
+};
+
+Animal *other = new Dog();
+Dog *d = new Dog();
+Cat *c = new Cat();
+Animal *a = c; // c;
+other.getSounded(*a);
+
+a.getSounded(*other);
+
+
 std::unique_ptr<AbstractNode> Parser::parse(std::string s,
                                             std::vector<std::reference_wrapper<AbstractNode>> &createdNodesList) {
   auto result = parse(std::move(s));
@@ -61,22 +101,18 @@ AbstractStatement *Parser::parseStatement(stork::tokens_iterator &it, bool gobbl
   AbstractStatement *parsedStatement;
   if (it->isReservedToken()) {
     switch (it->get_reserved_token()) {
-      case stork::reservedTokens::kw_for:
-        parsedStatement = parseForStatement(it);
+      case stork::reservedTokens::kw_for:parsedStatement = parseForStatement(it);
         break;
-      case stork::reservedTokens::kw_if:
-        parsedStatement = parseIfStatement(it);
+      case stork::reservedTokens::kw_if:parsedStatement = parseIfStatement(it);
         break;
       case stork::reservedTokens::kw_return: {
         parsedStatement = parseReturnStatement(it);
         if (gobbleTrailingSemicolon) parseTokenValue(it, stork::reservedTokens::semicolon);
         break;
       }
-      case stork::reservedTokens::open_curly:
-        parsedStatement = parseBlockStatement(it);
+      case stork::reservedTokens::open_curly:parsedStatement = parseBlockStatement(it);
         break;
-      case stork::reservedTokens::kw_public:
-        parsedStatement = parseFunctionStatement(it);
+      case stork::reservedTokens::kw_public:parsedStatement = parseFunctionStatement(it);
         break;
 
         // it starts with a data type or "secret" keyword (e.g., int, float, secret int, secret float)
@@ -653,6 +689,13 @@ Block *Parser::parseBlockOrSingleStatement(stork::tokens_iterator &it) {
   return block;
 };
 
+/**
+ * Parses an If statement, looking for the following pattern, where [] indiciates optional, and <X> means X is another node type
+ * if(<EXPRESSION>) <STATEMENT>|<BLOCK> [else <STATEMENT>|<BLOCK>]
+ * //TODO: Specify in some kind of "real" EBNF or similar for each parsing function!!
+ * @param it
+ * @return
+ */
 If *Parser::parseIfStatement(stork::tokens_iterator &it) {
   // parse: if (condition)
   parseTokenValue(it, stork::reservedTokens::kw_if);

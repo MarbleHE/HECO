@@ -93,6 +93,11 @@ Assignment *Assignment::clone_impl(AbstractNode *parent_) const {
   return p;
 }
 
+
+AbstractNode *ab = new Assignment();
+IVisitor* v = new PrintVisitor();
+ab->accept(v);
+
 void Assignment::accept(IVisitor &v) {
   v.visit(*this);
 }
