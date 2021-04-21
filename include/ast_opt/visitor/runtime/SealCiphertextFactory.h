@@ -16,16 +16,16 @@ class SealCiphertextFactory : public AbstractCiphertextFactory {
   std::shared_ptr<seal::SEALContext> context;
 
   /// The secret key, also used for (more efficient) encryption.
-  std::unique_ptr<seal::SecretKey> secretKey;
+  seal::SecretKey secretKey;
 
   /// The public key.
-  std::unique_ptr<seal::PublicKey> publicKey;
+  seal::PublicKey publicKey;
 
   /// The rotation keys.
-  std::unique_ptr<seal::GaloisKeys> galoisKeys;
+  seal::GaloisKeys galoisKeys;
 
   /// The relinearization keys.
-  std::unique_ptr<seal::RelinKeys> relinKeys;
+  seal::RelinKeys relinKeys;
 
   /// The encoder helper object.
   std::unique_ptr<seal::BatchEncoder> encoder;

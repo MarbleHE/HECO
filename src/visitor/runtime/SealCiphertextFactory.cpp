@@ -71,7 +71,7 @@ SealCiphertextFactory &SealCiphertextFactory::operator=(SealCiphertextFactory &&
 
 void SealCiphertextFactory::setupSealContext() {
   // Wrapper for parameters
-  seal::EncryptionParameters params(seal::scheme_type::BFV);
+  seal::EncryptionParameters params(seal::scheme_type::bfv);
 
   // in BFV, this degree is also the number of slots.
   params.set_poly_modulus_degree(ciphertextSlotSize);
@@ -83,20 +83,20 @@ void SealCiphertextFactory::setupSealContext() {
   params.set_plain_modulus(seal::PlainModulus::Batching(params.poly_modulus_degree(), 20));
 
   // Instantiate context
-  context = seal::SEALContext::Create(params);
+  context = std::make_shared<seal::SEALContext>(params);
 
   // Create keys
-  seal::KeyGenerator keyGenerator(context);
-  secretKey = std::make_unique<seal::SecretKey>(keyGenerator.secret_key());
-  publicKey = std::make_unique<seal::PublicKey>(keyGenerator.public_key());
-  galoisKeys = std::make_unique<seal::GaloisKeys>(keyGenerator.galois_keys_local());
-  relinKeys = std::make_unique<seal::RelinKeys>(keyGenerator.relin_keys_local());
+  seal::KeyGenerator keyGenerator(*context);
+  secretKey = keyGenerator.secret_key();
+  keyGenerator.create_public_key(publicKey);
+  keyGenerator.create_galois_keys(galoisKeys);
+  keyGenerator.create_relin_keys(relinKeys);
 
   // Create helpers for en-/decoding, en-/decryption, and ciphertext evaluation
-  encoder = std::make_unique<seal::BatchEncoder>(context);
-  encryptor = std::make_unique<seal::Encryptor>(context, *publicKey);
-  decryptor = std::make_unique<seal::Decryptor>(context, *secretKey);
-  evaluator = std::make_unique<seal::Evaluator>(context);
+  encoder = std::make_unique<seal::BatchEncoder>(*context);
+  encryptor = std::make_unique<seal::Encryptor>(*context, publicKey);
+  decryptor = std::make_unique<seal::Decryptor>(*context, secretKey);
+  evaluator = std::make_unique<seal::Evaluator>(*context);
 }
 
 template<typename T>
