@@ -9,6 +9,7 @@ class SimulatorCiphertext : public AbstractCiphertext {
   std::unique_ptr<SimulatorCiphertext> clone_impl();
  public:
   ~SimulatorCiphertext() override = default;
+  int64_t initialNoise(AbstractCiphertext &operand) override;
   std::unique_ptr<AbstractCiphertext> multiply(AbstractCiphertext &operand) override;
   void multiplyInplace(AbstractCiphertext &operand) override;
   std::unique_ptr<AbstractCiphertext> multiplyPlain(ICleartext &operand) override;
@@ -25,8 +26,8 @@ class SimulatorCiphertext : public AbstractCiphertext {
   void rotateRowsInplace(int steps) override;
   double noiseBits() override;
   std::unique_ptr<AbstractCiphertext> clone() override;
-  AbstractCiphertextFactory &getFactory() override;
-  const AbstractCiphertextFactory &getFactory() const override;
+  SimulatorCiphertextFactory &getFactory() override;
+  const SimulatorCiphertextFactory &getFactory() const override;
 
 
 };

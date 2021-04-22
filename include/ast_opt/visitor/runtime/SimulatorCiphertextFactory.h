@@ -1,5 +1,5 @@
-#ifndef GRAPHNODE_H_INCLUDE_AST_OPT_VISITOR_RUNTIME_SEALCIPHERTEXTFACTORY_H_
-#define GRAPHNODE_H_INCLUDE_AST_OPT_VISITOR_RUNTIME_SEALCIPHERTEXTFACTORY_H_
+#ifndef GRAPHNODE_H_INCLUDE_AST_OPT_VISITOR_RUNTIME_SIMULATORCIPHERTEXTFACTORY_H_
+#define GRAPHNODE_H_INCLUDE_AST_OPT_VISITOR_RUNTIME_SIMULATORCIPHERTEXTFACTORY_H_
 
 #include <memory>
 #include "ast_opt/visitor/runtime/AbstractCiphertextFactory.h"
@@ -7,7 +7,7 @@
 #ifdef HAVE_SEAL_BFV
 #include <seal/seal.h>
 
-class SealCiphertextFactory : public AbstractCiphertextFactory {
+class SimulatorCiphertextFactory : public AbstractCiphertextFactory {
  private:
   /// The number of slots (i.e., maximum no. of elements) in a ciphertext.
   const unsigned int ciphertextSlotSize = 16'384;
@@ -52,21 +52,21 @@ class SealCiphertextFactory : public AbstractCiphertextFactory {
   std::vector<T> expandVector(const std::vector<T> &values);
 
  public:
-  SealCiphertextFactory() = default;
+  SimulatorCiphertextFactory() = default;
 
   /// Creates a new SealCiphertextFactory whereat each ciphertext created by the factory can hold
   /// numElementsPerCiphertextSlot elements.
   /// \param numElementsPerCiphertextSlot The number of ciphertext slots of created ciphertexts. Must be a power of
   /// two, e.g., 4'096 or 8'192.
-  explicit SealCiphertextFactory(unsigned int numElementsPerCiphertextSlot);
+  explicit SimulatorCiphertextFactory(unsigned int numElementsPerCiphertextSlot);
 
-  SealCiphertextFactory(const SealCiphertextFactory &other); // copy constructor
+  SimulatorCiphertextFactory(const SimulatorCiphertextFactory &other); // copy constructor
 
-  SealCiphertextFactory(SealCiphertextFactory &&other) noexcept;  // copy assignment
+  SimulatorCiphertextFactory(SimulatorCiphertextFactory &&other) noexcept;  // copy assignment
 
-  SealCiphertextFactory &operator=(const SealCiphertextFactory &other);  // move constructor
+  SimulatorCiphertextFactory &operator=(const SimulatorCiphertextFactory &other);  // move constructor
 
-  SealCiphertextFactory &operator=(SealCiphertextFactory &&other) noexcept;  // move assignment
+  SimulatorCiphertextFactory &operator=(SimulatorCiphertextFactory &&other) noexcept;  // move assignment
 
   /// Gets the context to retrieve parameters
   /// \return (A const reference to) the seal::SEALcontext object

@@ -1,30 +1,31 @@
+#include "ast_opt/visitor/runtime/SimulatorCiphertext.h"
 #include "ast_opt/visitor/runtime/SealCiphertext.h"
-#include "ast_opt/visitor/runtime/SealCiphertextFactory.h"
+#include "ast_opt/visitor/runtime/SimulatorCiphertextFactory.h"
 #include "ast_opt/visitor/runtime/Cleartext.h"
 
 #ifdef HAVE_SEAL_BFV
 #include <memory>
 #include <seal/seal.h>
 
-std::unique_ptr<AbstractCiphertext> SealCiphertextFactory::createCiphertext(const std::vector<int64_t> &data) {
+std::unique_ptr<AbstractCiphertext> SimulatorCiphertextFactory::createCiphertext(const std::vector<int64_t> &data) {
   auto ptxt = createPlaintext(data);
   std::unique_ptr<SealCiphertext> ctxt = std::make_unique<SealCiphertext>(*this);
   encryptor->encrypt(*ptxt, ctxt->getCiphertext());
   return ctxt;
 }
 
-std::unique_ptr<AbstractCiphertext> SealCiphertextFactory::createCiphertext(const std::vector<int> &data) {
+std::unique_ptr<AbstractCiphertext> SimulatorCiphertextFactory::createCiphertext(const std::vector<int> &data) {
   std::vector<int64_t> ciphertextData(data.begin(), data.end());
   return createCiphertext(ciphertextData);
 }
 
-std::unique_ptr<AbstractCiphertext> SealCiphertextFactory::createCiphertext(int64_t data) {
+std::unique_ptr<AbstractCiphertext> SimulatorCiphertextFactory::createCiphertext(int64_t data) {
   std::vector<int64_t> values = {data};
   return createCiphertext(values);
 }
 
 // TODO: fix this (figure out)
-SealCiphertextFactory::SealCiphertextFactory(const SealCiphertextFactory &other) :
+SimulatorCiphertextFactory::SimulatorCiphertextFactory(const SimulatorCiphertextFactory &other) :
     ciphertextSlotSize(other.ciphertextSlotSize),
     context(other.context), // TODO: This should be a real copy, not just shared ownership (copying the shared_ptr)
     secretKey(std::make_unique<seal::SecretKey>(other.secretKey)),
@@ -37,7 +38,7 @@ SealCiphertextFactory::SealCiphertextFactory(const SealCiphertextFactory &other)
     decryptor(std::make_unique<seal::Decryptor>(*other.context, secretKey)) {  // copy constructor
 }
 
-SealCiphertextFactory::SealCiphertextFactory(SealCiphertextFactory &&other) noexcept // move constructor
+SimulatorCiphertextFactory::SimulatorCiphertextFactory(SimulatorCiphertextFactory &&other) noexcept // move constructor
     : ciphertextSlotSize(other.ciphertextSlotSize), context(std::move(other.context)),
       secretKey(std::move(other.secretKey)), publicKey(std::move(other.publicKey)),
       galoisKeys(std::move(other.galoisKeys)), relinKeys(std::move(other.relinKeys)),
@@ -45,11 +46,11 @@ SealCiphertextFactory::SealCiphertextFactory(SealCiphertextFactory &&other) noex
       encryptor(std::move(other.encryptor)), decryptor(std::move(other.decryptor)) {
 }
 
-SealCiphertextFactory &SealCiphertextFactory::operator=(const SealCiphertextFactory &other) {  // copy assignment
-  return *this = SealCiphertextFactory(other);
+SimulatorCiphertextFactory &SimulatorCiphertextFactory::operator=(const SimulatorCiphertextFactory &other) {  // copy assignment
+  return *this = SimulatorCiphertextFactory(other);
 }
 
-SealCiphertextFactory &SealCiphertextFactory::operator=(SealCiphertextFactory &&other) noexcept {  // move assignment
+SimulatorCiphertextFactory &SimulatorCiphertextFactory::operator=(SimulatorCiphertextFactory &&other) noexcept {  // move assignment
   // Self-assignment detection
   if (&other==this) return *this;
 
@@ -70,7 +71,7 @@ SealCiphertextFactory &SealCiphertextFactory::operator=(SealCiphertextFactory &&
   return *this;
 }
 
-void SealCiphertextFactory::setupSealContext() {
+void SimulatorCiphertextFactory::setupSealContext() {
   // Wrapper for parameters
   seal::EncryptionParameters params(seal::scheme_type::bfv);
 
@@ -101,7 +102,7 @@ void SealCiphertextFactory::setupSealContext() {
 }
 
 template<typename T>
-std::vector<T> SealCiphertextFactory::expandVector(const std::vector<T> &values) {
+std::vector<T> SimulatorCiphertextFactory::expandVector(const std::vector<T> &values) {
   // passing the vector by value to implicitly get a copy somehow didn't work here
   std::vector<T> expandedVector(values.begin(), values.end());
   if (expandedVector.size() > encoder->slot_count()) {
@@ -115,17 +116,17 @@ std::vector<T> SealCiphertextFactory::expandVector(const std::vector<T> &values)
   return expandedVector;
 }
 
-std::unique_ptr<seal::Plaintext> SealCiphertextFactory::createPlaintext(int64_t value) {
+std::unique_ptr<seal::Plaintext> SimulatorCiphertextFactory::createPlaintext(int64_t value) {
   std::vector<int64_t> valueAsVec = {value};
   return createPlaintext(valueAsVec);
 }
 
-std::unique_ptr<seal::Plaintext> SealCiphertextFactory::createPlaintext(const std::vector<int> &value) {
+std::unique_ptr<seal::Plaintext> SimulatorCiphertextFactory::createPlaintext(const std::vector<int> &value) {
   std::vector<int64_t> vecInt64(value.begin(), value.end());
   return createPlaintext(vecInt64);
 }
 
-std::unique_ptr<seal::Plaintext> SealCiphertextFactory::createPlaintext(const std::vector<int64_t> &value) {
+std::unique_ptr<seal::Plaintext> SimulatorCiphertextFactory::createPlaintext(const std::vector<int64_t> &value) {
   if (!context || !context->parameters_set()) setupSealContext();
   auto expandedVector = expandVector(value);
   auto ptxt = std::make_unique<seal::Plaintext>();
@@ -133,15 +134,15 @@ std::unique_ptr<seal::Plaintext> SealCiphertextFactory::createPlaintext(const st
   return ptxt;
 }
 
-const seal::SEALContext &SealCiphertextFactory::getContext() const {
+const seal::SEALContext &SimulatorCiphertextFactory::getContext() const {
   return *context;
 }
 
-const seal::RelinKeys &SealCiphertextFactory::getRelinKeys() const {
+const seal::RelinKeys &SimulatorCiphertextFactory::getRelinKeys() const {
   return *relinKeys;
 }
 
-void SealCiphertextFactory::decryptCiphertext(AbstractCiphertext &abstractCiphertext,
+void SimulatorCiphertextFactory::decryptCiphertext(AbstractCiphertext &abstractCiphertext,
                                               std::vector<int64_t> &ciphertextData) {
   auto &ctxt = dynamic_cast<SealCiphertext &>(abstractCiphertext);
   seal::Plaintext ptxt;
@@ -149,22 +150,22 @@ void SealCiphertextFactory::decryptCiphertext(AbstractCiphertext &abstractCipher
   encoder->decode(ptxt, ciphertextData);
 }
 
-seal::Evaluator &SealCiphertextFactory::getEvaluator() const {
+seal::Evaluator &SimulatorCiphertextFactory::getEvaluator() const {
   return *evaluator;
 }
 
-const seal::GaloisKeys &SealCiphertextFactory::getGaloisKeys() const {
+const seal::GaloisKeys &SimulatorCiphertextFactory::getGaloisKeys() const {
   return *galoisKeys;
 }
 
-SealCiphertextFactory::SealCiphertextFactory(unsigned int numElementsPerCiphertextSlot)
+SimulatorCiphertextFactory::SimulatorCiphertextFactory(unsigned int numElementsPerCiphertextSlot)
     : ciphertextSlotSize(numElementsPerCiphertextSlot) {}
 
-unsigned int SealCiphertextFactory::getCiphertextSlotSize() const {
+unsigned int SimulatorCiphertextFactory::getCiphertextSlotSize() const {
   return ciphertextSlotSize;
 }
 
-std::string SealCiphertextFactory::getString(AbstractCiphertext &abstractCiphertext) {
+std::string SimulatorCiphertextFactory::getString(AbstractCiphertext &abstractCiphertext) {
   // decrypt the ciphertext to get its values
   std::vector<int64_t> plainValues;
   decryptCiphertext(abstractCiphertext, plainValues);
@@ -181,7 +182,7 @@ std::string SealCiphertextFactory::getString(AbstractCiphertext &abstractCiphert
   return ss.str();
 }
 
-std::unique_ptr<AbstractCiphertext> SealCiphertextFactory::createCiphertext(std::unique_ptr<AbstractValue> &&abstractValue) {
+std::unique_ptr<AbstractCiphertext> SimulatorCiphertextFactory::createCiphertext(std::unique_ptr<AbstractValue> &&abstractValue) {
   if (auto castedCleartext = dynamic_cast<Cleartext<int> *>(abstractValue.get())) {
     // extract data and from std::vector<int> to std::vector<int64_t>
     auto castedCleartextData = castedCleartext->getData();
@@ -190,7 +191,7 @@ std::unique_ptr<AbstractCiphertext> SealCiphertextFactory::createCiphertext(std:
     return createCiphertext(data);
   } else {
     throw std::runtime_error("Cannot create ciphertext from any other than a Cleartext<int> as used ciphertext factory "
-                             "(SealCiphertextFactory) uses BFV that only supports integers.");
+                             "(SimulatorCiphertextFactory) uses BFV that only supports integers.");
   }
 }
 

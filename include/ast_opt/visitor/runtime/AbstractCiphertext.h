@@ -6,6 +6,7 @@
 #include "ast_opt/ast/Literal.h"
 #include "ast_opt/visitor/runtime/AbstractValue.h"
 #include "SealCiphertextFactory.h"
+#include "SimulatorCiphertextFactory.h"
 
 // forward declarations
 class ICleartext;
@@ -21,6 +22,13 @@ class AbstractCiphertext : public AbstractValue {
  public:
   /// Default destructor.
   ~AbstractCiphertext() override = default;
+
+  /// Noise calculation of a freshly encrypted ciphertext
+  /// \param operand The ciphertext which noise must be calculated
+  ///         SECRET KEY?
+  /// \return the noise budget in bits
+  [[nodiscard]] virtual int64_t initialNoise(AbstractCiphertext &operand) {};
+
 
   /// Multiplies this ciphertext with the given ciphertext and returns a new ciphertext with the result.
   /// \param operand The ciphertext to multiply this ciphertext with.
