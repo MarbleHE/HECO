@@ -1,10 +1,18 @@
-#ifndef AST_OPTIMIZER_INCLUDE_AST_OPT_VISITOR_RUNTIME_SIMULATORCIPHERTEXT_H_
-#define AST_OPTIMIZER_INCLUDE_AST_OPT_VISITOR_RUNTIME_SIMULATORCIPHERTEXT_H_
+#ifndef GRAPHNODE_H_INCLUDE_AST_OPT_VISITOR_RUNTIME_SIMULATORCIPHERTEXT_H_
+#define GRAPHNODE_H_INCLUDE_AST_OPT_VISITOR_RUNTIME_SIMULATORCIPHERTEXT_H_
 
 #include "AbstractCiphertext.h"
+#include "SimulatorCiphertextFactory.h"
+
+// forward declarations
+class SimulatorCiphertextFactory;
+
+#ifdef HAVE_SEAL_BFV
+#include <seal/seal.h>
 
 class SimulatorCiphertext : public AbstractCiphertext {
  private:
+  seal::Ciphertext ciphertext;
   double noise_budget = 0;
   std::unique_ptr<SimulatorCiphertext> clone_impl();
  public:
@@ -32,4 +40,5 @@ class SimulatorCiphertext : public AbstractCiphertext {
 
 };
 
-#endif //AST_OPTIMIZER_INCLUDE_AST_OPT_VISITOR_RUNTIME_SIMULATORCIPHERTEXT_H_
+#endif
+#endif

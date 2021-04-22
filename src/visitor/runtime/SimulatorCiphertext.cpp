@@ -1,19 +1,56 @@
-//
-// Created by Alexa on 21/04/2021.
-//
 
+
+#include "ast_opt/utilities/Operator.h"
+#include "ast_opt/visitor/runtime/Cleartext.h"
 #include "ast_opt/visitor/runtime/SimulatorCiphertext.h"
+#include "ast_opt/visitor/runtime/SimulatorCiphertextFactory.h"
+#include "ast_opt/visitor/runtime/AbstractCiphertext.h"
 
+#ifdef HAVE_SEAL_BFV
+#include <seal/seal.h>
+
+SimulatorCiphertext::SimulatorCiphertext(SimulatorCiphertextFactory &simulatorFactory) : AbstractCiphertext(simulatorFactory) {}
+
+SimulatorCiphertext::SimulatorCiphertext(const SimulatorCiphertext &other)  // copy constructor
+    : AbstractCiphertext(other.factory) {
+  ciphertext = seal::Ciphertext(other.ciphertext);
+}
+
+SimulatorCiphertext &SimulatorCiphertext::operator=(const SimulatorCiphertext &other) {  // copy assignment
+  return *this = SimulatorCiphertext(other);
+}
+
+SimulatorCiphertext::SimulatorCiphertext(SimulatorCiphertext &&other) noexcept  // move constructor
+    : AbstractCiphertext(other.factory), ciphertext(std::move(other.ciphertext)) {}
+
+SimulatorCiphertext &SimulatorCiphertext::operator=(SimulatorCiphertext &&other) noexcept {  // move assignment
+  // Self-assignment detection
+  if (&other==this) return *this;
+  ciphertext = other.ciphertext;
+  factory = std::move(other.factory);
+  return *this;
+}
+
+SimulatorCiphertext &cast(AbstractCiphertext &abstractCiphertext) {
+  if (auto sealCtxt = dynamic_cast<SimulatorCiphertext *>(&abstractCiphertext)) {
+    return *sealCtxt;
+  } else {
+    throw std::runtime_error("Cast of AbstractCiphertext to SealCiphertext failed!");
+  }
+}
+
+
+
+///
 int64_t SimulatorCiphertext::initialNoise(AbstractCiphertext &operand) {
   std::unique_ptr<SimulatorCiphertext> new_ctxt = this->clone_impl();
 
   return 0;
 }
 
-
 std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::multiply(AbstractCiphertext &operand) {
   std::unique_ptr<SimulatorCiphertext> new_ctxt = this->clone_impl();
-  std::unique_ptr<SimulatorCiphertext> new_ctxt2 = operand->clone();
+  std::unique_ptr<SimulatorCiphertext> new_ctxt2 = operand.clone_impl();
   uint64_t poly_modulus_degree = new_ctxt->getFactory().getContext().first_context_data()->parms().poly_modulus_degree() - 1;
   uint64_t plain_modulus = new_ctxt->getFactory().getContext().first_context_data()->parms().plain_modulus().value();
   // compute product coeff modulus
@@ -31,7 +68,14 @@ std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::multiply(AbstractCipher
   uint64_t sqrt_factor_2 = seal::util::exponentiate_uint(sqrt_factor_base, operand.ciphertext_size_ - 1);
   uint64_t sqrt_factor_total = exponentiate_uint64(sqrt_factor_base,
                                                    new_ctxt->getFactory().getCiphertextSlotSize() - 1 + operand.ciphertext_size_ - 1);
+  // Compute also t * sqrt(3n)
+  uint64_t leading_sqrt_factor = static_cast<uint64_t>(ceil(sqrt(static_cast<double>(3 * poly_modulus_degree))));
+  uint64_t leading_factor = plain_modulus * leading_sqrt_factor;
 
+  int64_t result_noise = operand.noiseBits() * sqrt_factor_1
+      + this->noiseBits() * sqrt_factor_2
+      + sqrt_factor_total;
+  result_noise *= leading_factor;
 
   //std::unique_ptr<SimulatorCiphertext> m_1 = new_ctxt->getFactory().decryptCiphertext(new_ctxt, );
   return std::unique_ptr<AbstractCiphertext>();
@@ -95,7 +139,9 @@ const SimulatorCiphertextFactory &SimulatorCiphertext::getFactory() const {
   }
 }
 std::unique_ptr<SimulatorCiphertext> SimulatorCiphertext::clone_impl() {
-  //TODO: actual cloning
+  //TODO: cloning as discussed with alex
   return std::unique_ptr<SimulatorCiphertext>();
 }
 
+
+#endif
