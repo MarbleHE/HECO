@@ -19,7 +19,7 @@ class SealCiphertext : public AbstractCiphertext {
  public:
   ~SealCiphertext() override = default;
 
-  SealCiphertext(const SealCiphertext &other); // copy constructor
+  SealCiphertext(SimulatorCiphertextFactory other); // copy constructor
 
   SealCiphertext(SealCiphertext &&other) noexcept;  // copy assignment
 
@@ -54,6 +54,8 @@ class SealCiphertext : public AbstractCiphertext {
   [[nodiscard]] std::unique_ptr<AbstractCiphertext> rotateRows(int steps) override;
 
   void rotateRowsInplace(int steps) override;
+
+  double noiseBits() override;
 
   [[nodiscard]] std::unique_ptr<AbstractCiphertext> multiplyPlain(ICleartext &operand) override;
 

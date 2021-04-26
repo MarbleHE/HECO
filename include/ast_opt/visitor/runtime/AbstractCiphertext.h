@@ -98,7 +98,7 @@ class AbstractCiphertext : public AbstractValue {
 
   /// Return the current noise budget in the ciphertext, measured in bits
   /// \return A double measuring the number of bits in the noise budget.
-  virtual double noiseBits() = 0;
+  virtual double noiseBits(int noise) = 0;
 
   /// Creates and returns a clone of this ciphertext.
   /// \return A clone of this ciphertext as std::unique_ptr.
