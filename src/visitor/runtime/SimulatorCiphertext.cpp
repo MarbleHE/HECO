@@ -14,31 +14,9 @@ SimulatorCiphertext::SimulatorCiphertext(SimulatorCiphertextFactory &acf,
                                          const seal::EncryptionParameters &parms,
                                          int ciphertext_size,
                                          int noise_budget) : AbstractCiphertext(acf) {
-  // Compute product coeff modulus
-  coeff_modulus_ = 1;
-  for (auto mod : parms_.coeff_modulus())
-  {
-    coeff_modulus_ *= mod.value();
-  }
-  coeff_modulus_bit_count_ = coeff_modulus_.significant_bit_count();
 
-  // Verify parameters
-  if (noise_budget < 0 || noise_budget >= coeff_modulus_bit_count_ - 1)
-  {
-    throw std::invalid_argument("noise_budget is not in the valid range");
-  }
-  if (ciphertext_size < 2)
-  {
-    throw std::invalid_argument("ciphertext_size must be at least 2");
-  }
+  // TODO: this is hard since BigUInt class is gone...
 
-  // Set the noise (scaled by coeff_modulus) to have given noise budget
-  // noise_ = 2^(coeff_sig_bit_count - noise_budget - 1) - 1
-  int noise_sig_bit_count = coeff_modulus_bit_count_ - noise_budget - 1;
-  noise_.resize(coeff_modulus_bit_count_);
-  noise_[0] = 1;
-  left_shift_uint(noise_.pointer(), noise_sig_bit_count, noise_.uint64_count(), noise_.pointer());
-  decrement_uint(noise_.pointer(), noise_.uint64_count(), noise_.pointer());
 }
 
 SimulatorCiphertext::SimulatorCiphertext(SimulatorCiphertextFactory &simulatorFactory) : AbstractCiphertext(simulatorFactory) {}
@@ -177,12 +155,13 @@ std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::rotateRows(int steps) {
 void SimulatorCiphertext::rotateRowsInplace(int steps) {
 
 }
-double SimulatorCiphertext::noiseBits(int noise) {
+double SimulatorCiphertext::noiseBits() {
   return noise_budget;
 }
 std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::clone() {
   return clone_impl();
 }
+
 SimulatorCiphertextFactory &SimulatorCiphertext::getFactory() {
   return const_cast<SimulatorCiphertextFactory &>(const_cast<const SimulatorCiphertext *>(this)->getFactory());
 }
@@ -193,6 +172,7 @@ const SimulatorCiphertextFactory &SimulatorCiphertext::getFactory() const {
     throw std::runtime_error("Cast of AbstractFactory to SimulatorFactory failed. SimulatorCiphertext is probably invalid.");
   }
 }
+
 std::unique_ptr<SimulatorCiphertext> SimulatorCiphertext::clone_impl() {
   //TODO: check
   return std::unique_ptr<SimulatorCiphertext>(this);

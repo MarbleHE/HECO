@@ -74,7 +74,7 @@ class SimulatorCiphertext : public AbstractCiphertext {
   void subtractPlainInplace(ICleartext &operand) override;
   std::unique_ptr<AbstractCiphertext> rotateRows(int steps) override;
   void rotateRowsInplace(int steps) override;
-  double noiseBits(int noise) override;
+  double noiseBits() override;
   std::unique_ptr<AbstractCiphertext> clone() override;
   SimulatorCiphertextFactory &getFactory() override;
   const SimulatorCiphertextFactory &getFactory() const override;

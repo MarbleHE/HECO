@@ -15,6 +15,7 @@ class SealCiphertext : public AbstractCiphertext {
  private:
   /// The encrypted data in this ciphertext wrapper.
   seal::Ciphertext ciphertext;
+  std::unique_ptr<SealCiphertext> clone_impl();
 
  public:
   ~SealCiphertext() override = default;
@@ -69,7 +70,7 @@ class SealCiphertext : public AbstractCiphertext {
 
   void subtractPlainInplace(ICleartext &operand) override;
 
-  [[nodiscard]] std::unique_ptr<AbstractCiphertext> clone() override;
+  std::unique_ptr<AbstractCiphertext> clone() override;
 
   void add(AbstractValue &other) override;
 
@@ -110,6 +111,8 @@ class SealCiphertext : public AbstractCiphertext {
   SealCiphertextFactory &getFactory() override;
 
   [[nodiscard]] const SealCiphertextFactory &getFactory() const override;
+
+  double noise_budget();
 };
 
 #endif

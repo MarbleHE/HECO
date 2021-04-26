@@ -57,9 +57,20 @@ seal::Ciphertext &SealCiphertext::getCiphertext() {
 }
 
 std::unique_ptr<AbstractCiphertext> SealCiphertext::clone() {
-  // call the copy constructor to create a clone of this ciphertext
-  return std::make_unique<SealCiphertext>(*this);
+  return clone_impl();
 }
+
+std::unique_ptr<SealCiphertext> SealCiphertext::clone_impl() {
+  //TODO: check
+  return std::unique_ptr<SealCiphertext>(this);
+}
+
+double SealCiphertext::noiseBits() {
+  std::unique_ptr<SealCiphertext> new_ctxt = this->clone();
+  double noise_budget = seal::Decryptor::invariant_noise_budget(*new_ctxt);
+  return noise_budget;
+}
+
 
 // =======================================
 // == CTXT-CTXT operations with returned result
