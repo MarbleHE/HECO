@@ -1,5 +1,5 @@
 #include "ast_opt/visitor/runtime/SimulatorCiphertext.h"
-#include "ast_opt/visitor/runtime/SealCiphertext.h"
+#include "ast_opt/visitor/runtime/SimulatorCiphertext.h"
 #include "ast_opt/visitor/runtime/SimulatorCiphertextFactory.h"
 #include "ast_opt/visitor/runtime/Cleartext.h"
 
@@ -9,8 +9,8 @@
 
 std::unique_ptr<AbstractCiphertext> SimulatorCiphertextFactory::createCiphertext(const std::vector<int64_t> &data) {
   auto ptxt = createPlaintext(data);
-  std::unique_ptr<SealCiphertext> ctxt = std::make_unique<SealCiphertext>(*this);
-  encryptor->encrypt(*ptxt, ctxt->getCiphertext());
+  std::unique_ptr<SimulatorCiphertext> ctxt = std::make_unique<SimulatorCiphertext>(*this);
+  //TODO: Add DATA into simulator ciphertext!
   return ctxt;
 }
 
@@ -28,14 +28,14 @@ std::unique_ptr<AbstractCiphertext> SimulatorCiphertextFactory::createCiphertext
 SimulatorCiphertextFactory::SimulatorCiphertextFactory(const SimulatorCiphertextFactory &other) :
     ciphertextSlotSize(other.ciphertextSlotSize),
     context(other.context), // TODO: This should be a real copy, not just shared ownership (copying the shared_ptr)
-    secretKey(std::make_unique<seal::SecretKey>(other.secretKey)),
-    publicKey(std::make_unique<seal::PublicKey>(other.publicKey)),
-    galoisKeys(std::make_unique<seal::GaloisKeys>(other.galoisKeys)),
-    relinKeys(std::make_unique<seal::RelinKeys>(other.relinKeys)),
+    secretKey(std::make_unique<seal::SecretKey>(*other.secretKey)),
+    publicKey(std::make_unique<seal::PublicKey>(*other.publicKey)),
+    galoisKeys(std::make_unique<seal::GaloisKeys>(*other.galoisKeys)),
+    relinKeys(std::make_unique<seal::RelinKeys>(*other.relinKeys)),
     encoder(std::make_unique<seal::BatchEncoder>(*context)),
     evaluator(std::make_unique<seal::Evaluator>(*other.context)),
-    encryptor(std::make_unique<seal::Encryptor>(*context, publicKey)),
-    decryptor(std::make_unique<seal::Decryptor>(*other.context, secretKey)) {  // copy constructor
+    encryptor(std::make_unique<seal::Encryptor>(*context, *publicKey)),
+    decryptor(std::make_unique<seal::Decryptor>(*other.context, *secretKey)) {  // copy constructor
 }
 
 SimulatorCiphertextFactory::SimulatorCiphertextFactory(SimulatorCiphertextFactory &&other) noexcept // move constructor
@@ -96,8 +96,8 @@ void SimulatorCiphertextFactory::setupSealContext() {
 
   // Create helpers for en-/decoding, en-/decryption, and ciphertext evaluation
   encoder = std::make_unique<seal::BatchEncoder>(*context);
-  encryptor = std::make_unique<seal::Encryptor>(*context, publicKey);
-  decryptor = std::make_unique<seal::Decryptor>(*context, secretKey);
+  encryptor = std::make_unique<seal::Encryptor>(*context, *publicKey);
+  decryptor = std::make_unique<seal::Decryptor>(*context, *secretKey);
   evaluator = std::make_unique<seal::Evaluator>(*context);
 }
 
@@ -144,10 +144,8 @@ const seal::RelinKeys &SimulatorCiphertextFactory::getRelinKeys() const {
 
 void SimulatorCiphertextFactory::decryptCiphertext(AbstractCiphertext &abstractCiphertext,
                                               std::vector<int64_t> &ciphertextData) {
-  auto &ctxt = dynamic_cast<SealCiphertext &>(abstractCiphertext);
-  seal::Plaintext ptxt;
-  decryptor->decrypt(ctxt.getCiphertext(), ptxt);
-  encoder->decode(ptxt, ciphertextData);
+  auto &ctxt = dynamic_cast<SimulatorCiphertext &>(abstractCiphertext);
+ //TODO: "fake" decrypt SimulatorCtxt
 }
 
 seal::Evaluator &SimulatorCiphertextFactory::getEvaluator() const {

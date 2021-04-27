@@ -23,13 +23,6 @@ class AbstractCiphertext : public AbstractValue {
   /// Default destructor.
   ~AbstractCiphertext() override = default;
 
-  /// Noise calculation of a freshly encrypted ciphertext
-  /// \param operand The ciphertext which noise must be calculated
-  ///         SECRET KEY?
-  /// \return the noise budget in bits
-  [[nodiscard]] virtual int64_t initialNoise(AbstractCiphertext &operand) {};
-
-
   /// Multiplies this ciphertext with the given ciphertext and returns a new ciphertext with the result.
   /// \param operand The ciphertext to multiply this ciphertext with.
   /// \return A std::unique_ptr<AbstractCiphertext> containing the result ciphertext.
@@ -95,10 +88,6 @@ class AbstractCiphertext : public AbstractValue {
   /// Cyclically rotates this ciphertext by the given number of steps.
   /// \param steps The number of steps this ciphertext should be rotated.
   virtual void rotateRowsInplace(int steps) = 0;
-
-  /// Return the current noise budget in the ciphertext, measured in bits
-  /// \return A double measuring the number of bits in the noise budget.
-  virtual double noiseBits() = 0;
 
   /// Creates and returns a clone of this ciphertext.
   /// \return A clone of this ciphertext as std::unique_ptr.

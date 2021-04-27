@@ -56,8 +56,6 @@ class SealCiphertext : public AbstractCiphertext {
 
   void rotateRowsInplace(int steps) override;
 
-  double noiseBits() override;
-
   [[nodiscard]] std::unique_ptr<AbstractCiphertext> multiplyPlain(ICleartext &operand) override;
 
   void multiplyPlainInplace(ICleartext &operand) override;
@@ -111,8 +109,6 @@ class SealCiphertext : public AbstractCiphertext {
   SealCiphertextFactory &getFactory() override;
 
   [[nodiscard]] const SealCiphertextFactory &getFactory() const override;
-
-  double noise_budget();
 };
 
 #endif

@@ -33,8 +33,8 @@ SealCiphertextFactory::SealCiphertextFactory(const SealCiphertextFactory &other)
     relinKeys(std::make_unique<seal::RelinKeys>(*other.relinKeys)),
     encoder(std::make_unique<seal::BatchEncoder>(*context)),
     evaluator(std::make_unique<seal::Evaluator>(*other.context)),
-    encryptor(std::make_unique<seal::Encryptor>(*context, publicKey)),
-    decryptor(std::make_unique<seal::Decryptor>(*other.context, secretKey)) {  // copy constructor
+    encryptor(std::make_unique<seal::Encryptor>(*context, *publicKey)),
+    decryptor(std::make_unique<seal::Decryptor>(*other.context, *secretKey)) {  // copy constructor
 }
 
 SealCiphertextFactory::SealCiphertextFactory(SealCiphertextFactory &&other) noexcept // move constructor
@@ -95,8 +95,8 @@ void SealCiphertextFactory::setupSealContext() {
 
   // Create helpers for en-/decoding, en-/decryption, and ciphertext evaluation
   encoder = std::make_unique<seal::BatchEncoder>(*context);
-  encryptor = std::make_unique<seal::Encryptor>(*context, publicKey);
-  decryptor = std::make_unique<seal::Decryptor>(*context, secretKey);
+  encryptor = std::make_unique<seal::Encryptor>(*context, *publicKey);
+  decryptor = std::make_unique<seal::Decryptor>(*context, *secretKey);
   evaluator = std::make_unique<seal::Evaluator>(*context);
 }
 

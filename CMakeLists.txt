@@ -123,7 +123,7 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/visitor/runtime/SimulatorCiphertext.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/runtime/SealCiphertextFactory.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/runtime/SimulatorCiphertextFactory.cpp
-        )
+        include/ast_opt/visitor/runtime/AbstractNoiseMeasuringCiphertext.cpp include/ast_opt/visitor/runtime/AbstractNoiseMeasuringCiphertext.h)
 
 set(HEADER_ONLY_SOURCES
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractExpression.h
@@ -137,7 +137,7 @@ set(HEADER_ONLY_SOURCES
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/AbstractValue.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/SimulatorCiphertext.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/SimulatorCiphertextFactory.h
-        )
+        include/ast_opt/visitor/runtime/AbstractNoiseMeasuringCiphertext.cpp include/ast_opt/visitor/runtime/AbstractNoiseMeasuringCiphertext.h)
 
 # TODO: Go through this list and determine which headers aren't actually public
 set(PUBLIC_HEADERS

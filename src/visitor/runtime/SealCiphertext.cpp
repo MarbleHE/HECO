@@ -65,15 +65,6 @@ std::unique_ptr<SealCiphertext> SealCiphertext::clone_impl() {
   return std::unique_ptr<SealCiphertext>(this);
 }
 
-double noise_impl(seal::Ciphertext ctxt) {    // need help im confused
-  return seal::Decryptor::invariant_noise_budget((ctxt));
-}
-
-double noiseBits() {       // need help im confused
-  seal::Ciphertext new_ctxt = this->clone_impl();
-  return noise_impl(new_ctxt);
-}
-
 
 // =======================================
 // == CTXT-CTXT operations with returned result

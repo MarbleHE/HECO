@@ -10,13 +10,10 @@ class SimulatorCiphertextFactory;
 
 #ifdef HAVE_SEAL_BFV
 #include <seal/seal.h>
+#include "AbstractNoiseMeasuringCiphertext.h"
 
-class SimulatorCiphertext : public AbstractCiphertext {
+class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
  private:
-  SimulatorCiphertext(SimulatorCiphertextFactory &acf,
-                      const seal::EncryptionParameters &parms,
-                      int ciphertext_size,
-                      int noise_budget);
   seal::Ciphertext ciphertext;
   uint64_t _noise; // current invariant noise
   double noise_budget = 0; // current noise budget
@@ -60,7 +57,7 @@ class SimulatorCiphertext : public AbstractCiphertext {
   /// create seal ciphertext given encryption parameters and estimate its noise based on the given enc params
   /// TODO
   std::unique_ptr<AbstractCiphertext> createFresh(const seal::EncryptionParameters &param, int plain_max_coeff_count,
-                                                  uint64_t plain_max_abs_value) override;
+                                                  uint64_t plain_max_abs_value);
 
   /// estimates the noise heuristically of a multiplication op of two Seal ciphertexts
   std::unique_ptr<AbstractCiphertext> multiply(AbstractCiphertext &operand) override;
@@ -83,6 +80,27 @@ class SimulatorCiphertext : public AbstractCiphertext {
   const SimulatorCiphertextFactory &getFactory() const override;
 
   std::unique_ptr<AbstractCiphertext> relinearize();
+
+  int64_t initialNoise() override;
+
+  void add(AbstractValue &other) override;
+  void subtract(AbstractValue &other) override;
+  void multiply(AbstractValue &other) override;
+  void divide(AbstractValue &other) override;
+  void modulo(AbstractValue &other) override;
+  void logicalAnd(AbstractValue &other) override;
+  void logicalOr(AbstractValue &other) override;
+  void logicalLess(AbstractValue &other) override;
+  void logicalLessEqual(AbstractValue &other) override;
+  void logicalGreater(AbstractValue &other) override;
+  void logicalGreaterEqual(AbstractValue &other) override;
+  void logicalEqual(AbstractValue &other) override;
+  void logicalNotEqual(AbstractValue &other) override;
+  void logicalNot() override;
+  void bitwiseAnd(AbstractValue &other) override;
+  void bitwiseXor(AbstractValue &other) override;
+  void bitwiseOr(AbstractValue &other) override;
+  void bitwiseNot() override;
 };
 
 #endif
