@@ -9,7 +9,7 @@
 
 SealCiphertext::SealCiphertext(SealCiphertextFactory &sealFactory) : AbstractCiphertext(sealFactory) {}
 
-SealCiphertext::SealCiphertext(SealCiphertextFactory other)  // copy constructor
+SealCiphertext::SealCiphertext(const SealCiphertext &other)  // copy constructor
     : AbstractCiphertext(other.factory) {
   ciphertext = seal::Ciphertext(other.ciphertext);
 }

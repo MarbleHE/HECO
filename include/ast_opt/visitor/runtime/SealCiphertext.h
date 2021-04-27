@@ -20,7 +20,7 @@ class SealCiphertext : public AbstractCiphertext {
  public:
   ~SealCiphertext() override = default;
 
-  SealCiphertext(SimulatorCiphertextFactory other); // copy constructor
+  SealCiphertext(const SealCiphertext &other); // copy constructor
 
   SealCiphertext(SealCiphertext &&other) noexcept;  // copy assignment
 
