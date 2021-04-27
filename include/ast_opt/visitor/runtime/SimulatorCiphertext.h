@@ -37,6 +37,9 @@ class SimulatorCiphertext : public AbstractCiphertext {
  public:
   ~SimulatorCiphertext() override = default;
 
+
+  //added  constructor to simulate a ciphertext with a given size , params, and noise
+  // PROBLEM: need BigUint from Old seal...
   SimulatorCiphertext(AbstractCiphertextFactory &acf,
                       const seal::EncryptionParameters &parms,
                       int ciphertext_size,
@@ -79,7 +82,7 @@ class SimulatorCiphertext : public AbstractCiphertext {
   SimulatorCiphertextFactory &getFactory() override;
   const SimulatorCiphertextFactory &getFactory() const override;
 
-
+  std::unique_ptr<AbstractCiphertext> relinearize();
 };
 
 #endif

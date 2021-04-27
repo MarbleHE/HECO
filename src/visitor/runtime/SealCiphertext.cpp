@@ -9,7 +9,7 @@
 
 SealCiphertext::SealCiphertext(SealCiphertextFactory &sealFactory) : AbstractCiphertext(sealFactory) {}
 
-SealCiphertext::SealCiphertext(SimulatorCiphertextFactory other)  // copy constructor
+SealCiphertext::SealCiphertext(SealCiphertextFactory other)  // copy constructor
     : AbstractCiphertext(other.factory) {
   ciphertext = seal::Ciphertext(other.ciphertext);
 }
@@ -65,10 +65,13 @@ std::unique_ptr<SealCiphertext> SealCiphertext::clone_impl() {
   return std::unique_ptr<SealCiphertext>(this);
 }
 
-double SealCiphertext::noiseBits() {
-  std::unique_ptr<SealCiphertext> new_ctxt = this->clone();
-  double noise_budget = seal::Decryptor::invariant_noise_budget(*new_ctxt);
-  return noise_budget;
+double noise_impl(seal::Ciphertext ctxt) {    // need help im confused
+  return seal::Decryptor::invariant_noise_budget((ctxt));
+}
+
+double noiseBits() {       // need help im confused
+  seal::Ciphertext new_ctxt = this->clone_impl();
+  return noise_impl(new_ctxt);
 }
 
 
