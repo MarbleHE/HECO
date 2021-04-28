@@ -7,15 +7,41 @@
 
 #ifdef HAVE_SEAL_BFV
 #include <seal/seal.h>
+#include "ast_opt/utilities/seal2.3.0_util/biguint.h"
+
 
 // Constructor for a simulated ciphertext that is created given seal params, size and noise
 SimulatorCiphertext::SimulatorCiphertext(AbstractCiphertextFactory &acf,
                                          const seal::EncryptionParameters &parms,
                                          int ciphertext_size,
-                                         int noise_budget) : AbstractNoiseMeasuringCiphertext(acf) {
+                                         int noise_budget) : AbstractNoiseMeasuringCiphertext(acf) : parms_(parms),
+  ciphertext_size_(ciphertext_size)
+{
+  // Compute product coeff modulus
+  coeff_modulus_ = 1;
+  for (auto mod : parms_.coeff_modulus())
+  {
+    coeff_modulus_ *= mod.value();
+  }
+  coeff_modulus_bit_count_ = coeff_modulus_.significant_bit_count();
 
-  // TODO: this is hard since BigUInt class is gone...
+  // Verify parameters
+  if (noise_budget < 0 || noise_budget >= coeff_modulus_bit_count_ - 1)
+  {
+    throw std::invalid_argument("noise_budget is not in the valid range");
+  }
+  if (ciphertext_size < 2)
+  {
+    throw std::invalid_argument("ciphertext_size must be at least 2");
+  }
 
+  // Set the noise (scaled by coeff_modulus) to have given noise budget
+  // noise_ = 2^(coeff_sig_bit_count - noise_budget - 1) - 1
+  int noise_sig_bit_count = coeff_modulus_bit_count_ - noise_budget - 1;
+  noise_.resize(coeff_modulus_bit_count_);
+  noise_[0] = 1;
+  left_shift_uint(noise_.pointer(), noise_sig_bit_count, noise_.uint64_count(), noise_.pointer());
+  decrement_uint(noise_.pointer(), noise_.uint64_count(), noise_.pointer());
 }
 
 SimulatorCiphertext::SimulatorCiphertext(SimulatorCiphertextFactory &simulatorFactory)

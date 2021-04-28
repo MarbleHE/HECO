@@ -10,17 +10,18 @@ class SimulatorCiphertextFactory;
 
 #ifdef HAVE_SEAL_BFV
 #include <seal/seal.h>
+#include <ast_opt/utilities/seal2.3.0_util/biguint.h>
 #include "AbstractNoiseMeasuringCiphertext.h"
 
 class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
  private:
   seal::Ciphertext ciphertext;
-  uint64_t _noise; // current invariant noise
+  seal_util::BigUInt _noise; // current invariant noise
   double noise_budget = 0; // current noise budget
   std::unique_ptr<SimulatorCiphertext> clone_impl();
 
   // added by MW
-  int64_t noise_;
+  seal_util::BigUInt noise_;
 
   int64_t coeff_modulus_;
 
@@ -35,8 +36,19 @@ class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
   ~SimulatorCiphertext() override = default;
 
 
-  //added  constructor to simulate a ciphertext with a given size , params, and noise
-  // PROBLEM: need BigUint from Old seal...
+/**
+        Creates a simulation of a ciphertext encrypted with the specified encryption
+        parameters and given invariant noise budget. The given noise budget must be
+        at least zero, and at most the significant bit count of the coefficient
+        modulus minus two.
+
+        @param[in] acf
+        @param[in] parms The encryption parameters
+        @param[in] noise_budget The invariant noise budget of the created ciphertext
+        @param[in] ciphertext_size The size of the created ciphertext
+        @throws std::invalid_argument if ciphertext_size is less than 2
+        @throws std::invalid_argument if noise_budget is not in the valid range
+        */
   SimulatorCiphertext(AbstractCiphertextFactory &acf,
                       const seal::EncryptionParameters &parms,
                       int ciphertext_size,
