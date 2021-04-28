@@ -3,17 +3,14 @@
 #include <iostream>
 #include <cstdint>
 #include <string>
-//#include <seal/memorypoolhandle.h>
+#include "ast_opt/utilities/seal2.3.0_util/memorypoolhandle.h"
 #include "ast_opt/utilities/seal2.3.0_util/mempool.h"
-//#include <seal/util/common.h>
-#include <seal/util/uintcore.h>
+#include "ast_opt/utilities/seal2.3.0_util/common.h"
+#include "ast_opt/utilities/seal2.3.0_util/uintcore.h"
 #include "ast_opt/utilities/seal2.3.0_util/uintarith.h"
 #include <seal/util/uintarithmod.h>
 
-#include "ast_opt/utilities/seal2.3.0_util/common.h"
-#include "ast_opt/utilities/seal2.3.0_util/uintcore.h"
-
-using namespace seal;
+//using namespace seal;
 using namespace seal_util;
 
 namespace seal_util
@@ -206,7 +203,7 @@ namespace seal_util
         */
         inline int byte_count() const
         {
-            return seal::util::divide_round_up(bit_count_, seal::util::bits_per_byte);
+            return seal_util::divide_round_up(bit_count_, seal_util::bits_per_byte);
         }
 
         /**
@@ -216,7 +213,7 @@ namespace seal_util
         */
         inline int uint64_count() const
         {
-            return seal::util::divide_round_up(bit_count_, seal::util::bits_per_uint64);
+            return seal_util::divide_round_up(bit_count_, seal_util::bits_per_uint64);
         }
 
         /**
@@ -230,8 +227,8 @@ namespace seal_util
             {
                 return 0;
             }
-            int uint64_count = seal::util::divide_round_up(bit_count_, seal::util::bits_per_uint64);
-            return seal::util::get_significant_bit_count_uint(value_.get(), uint64_count);
+            int uint64_count = seal_util::divide_round_up(bit_count_, seal_util::bits_per_uint64);
+            return seal_util::get_significant_bit_count_uint(value_.get(), uint64_count);
         }
 
         /**
@@ -241,7 +238,7 @@ namespace seal_util
         {
             const double TwoToThe64 = 18446744073709551616.0;
             double result = 0;
-            int uint64_count = seal::util::divide_round_up(bit_count_, seal::util::bits_per_uint64);
+            int uint64_count = seal_util::divide_round_up(bit_count_, seal_util::bits_per_uint64);
             for (int i = uint64_count - 1; i >= 0; --i)
             {
                 result *= TwoToThe64;
@@ -269,8 +266,8 @@ namespace seal_util
             {
                 return true;
             }
-            int uint64_count = seal::util::divide_round_up(bit_count_, seal::util::bits_per_uint64);
-            return seal::util::is_zero_uint(value_.get(), uint64_count);
+            int uint64_count = seal_util::divide_round_up(bit_count_, seal_util::bits_per_uint64);
+            return seal_util::is_zero_uint(value_.get(), uint64_count);
         }
 
         /**
@@ -283,7 +280,7 @@ namespace seal_util
         */
         inline std::uint8_t operator[](int index) const
         {
-            int byte_count = seal::util::divide_round_up(bit_count_, seal::util::bits_per_byte);
+            int byte_count = seal_util::divide_round_up(bit_count_, seal_util::bits_per_byte);
             if (index < 0 || index >= byte_count)
             {
                 throw std::out_of_range("index must be within [0, byte count)");
@@ -304,7 +301,7 @@ namespace seal_util
         */
         inline std::uint8_t &operator[](int index)
         {
-            int byte_count = seal::util::divide_round_up(bit_count_, seal::util::bits_per_byte);
+            int byte_count = seal_util::divide_round_up(bit_count_, seal_util::bits_per_byte);
             if (index < 0 || index >= byte_count)
             {
                 throw std::out_of_range("index must be within [0, byte count)");
@@ -319,8 +316,8 @@ namespace seal_util
         {
             if (bit_count_ > 0)
             {
-                int uint64_count = seal::util::divide_round_up(bit_count_, seal::util::bits_per_uint64);
-                return seal::util::set_zero_uint(uint64_count, value_.get());
+                int uint64_count = seal_util::divide_round_up(bit_count_, seal_util::bits_per_uint64);
+                return seal_util::set_zero_uint(uint64_count, value_.get());
             }
         }
 
@@ -408,7 +405,7 @@ namespace seal_util
         */
         inline BigUInt &operator =(std::uint64_t value)
         {
-            int assign_bit_count = seal::util::get_significant_bit_count(value);
+            int assign_bit_count = seal_util::get_significant_bit_count(value);
             if (assign_bit_count > bit_count_)
             {
                 // Size is too large to currently fit, so resize.
@@ -416,8 +413,8 @@ namespace seal_util
             }
             if (bit_count_ > 0)
             {
-                int uint64_count = seal::util::divide_round_up(bit_count_, seal::util::bits_per_uint64);
-              seal::util::set_uint(value, uint64_count, value_.get());
+                int uint64_count = seal_util::divide_round_up(bit_count_, seal_util::bits_per_uint64);
+              seal_util::set_uint(value, uint64_count, value_.get());
             }
             return *this;
         }
@@ -438,8 +435,8 @@ namespace seal_util
         inline BigUInt operator -() const
         {
             BigUInt result(bit_count_);
-            seal::util::negate_uint(value_.get(), result.uint64_count(), result.pointer());
-            seal::util::filter_highbits_uint(result.pointer(), result.uint64_count(), result.bit_count());
+            seal_util::negate_uint(value_.get(), result.uint64_count(), result.pointer());
+            seal_util::filter_highbits_uint(result.pointer(), result.uint64_count(), result.bit_count());
             return result;
         }
 
@@ -449,8 +446,8 @@ namespace seal_util
         inline BigUInt operator ~() const
         {
             BigUInt result(bit_count_);
-            seal::util::not_uint(value_.get(), result.uint64_count(), result.pointer());
-            seal::util::filter_highbits_uint(result.pointer(), result.uint64_count(), result.bit_count());
+            seal_util::not_uint(value_.get(), result.uint64_count(), result.pointer());
+            seal_util::filter_highbits_uint(result.pointer(), result.uint64_count(), result.bit_count());
             return result;
         }
 
@@ -461,11 +458,11 @@ namespace seal_util
         */
         inline BigUInt &operator ++()
         {
-            if (seal::util::increment_uint(value_.get(), uint64_count(), value_.get()))
+            if (seal_util::increment_uint(value_.get(), uint64_count(), value_.get()))
             {
                 int carry_bit = bit_count_;
                 resize(bit_count_ + 1);
-                seal::util::set_bit_uint(value_.get(), uint64_count(), carry_bit);
+                seal_util::set_bit_uint(value_.get(), uint64_count(), carry_bit);
             }
             bit_count_ = std::max(bit_count_, significant_bit_count());
             return *this;
@@ -476,8 +473,8 @@ namespace seal_util
         */
         inline BigUInt &operator --()
         {
-            seal::util::decrement_uint(value_.get(), uint64_count(), value_.get());
-            seal::util::filter_highbits_uint(value_.get(), uint64_count(), bit_count_);
+            seal_util::decrement_uint(value_.get(), uint64_count(), value_.get());
+            seal_util::filter_highbits_uint(value_.get(), uint64_count(), bit_count_);
             return *this;
         }
 
@@ -488,11 +485,11 @@ namespace seal_util
         {
             BigUInt result;
             result = *this;
-            if (seal::util::increment_uint(value_.get(), uint64_count(), value_.get()))
+            if (seal_util::increment_uint(value_.get(), uint64_count(), value_.get()))
             {
                 int carry_bit = bit_count_;
                 resize(bit_count_ + 1);
-                seal::util::set_bit_uint(value_.get(), uint64_count(), carry_bit);
+                seal_util::set_bit_uint(value_.get(), uint64_count(), carry_bit);
             }
             bit_count_ = std::max(bit_count_, significant_bit_count());
             return result;
@@ -505,8 +502,8 @@ namespace seal_util
         {
             BigUInt result;
             result = *this;
-            seal::util::decrement_uint(value_.get(), uint64_count(), value_.get());
-            seal::util::filter_highbits_uint(value_.get(), uint64_count(), bit_count_);
+            seal_util::decrement_uint(value_.get(), uint64_count(), value_.get());
+            seal_util::filter_highbits_uint(value_.get(), uint64_count(), bit_count_);
             return result;
         }
 
@@ -548,7 +545,7 @@ namespace seal_util
             int result_bits = std::max(bit_count_, operand2.bit_count());
             BigUInt result(result_bits);
             seal_util::sub_uint_uint(value_.get(), uint64_count(), operand2.pointer(), operand2.uint64_count(), false, result.uint64_count(), result.pointer());
-            seal::util::filter_highbits_uint(result.pointer(), result.uint64_count(), result_bits);
+            seal_util::filter_highbits_uint(result.pointer(), result.uint64_count(), result_bits);
             return result;
         }
 
@@ -632,7 +629,7 @@ namespace seal_util
             int result_bits = significant_bit_count();
             BigUInt result(result_bits);
             result = *this;
-            int uint64_count = seal::util::divide_round_up(result_bits, seal::util::bits_per_uint64);
+            int uint64_count = seal_util::divide_round_up(result_bits, seal_util::bits_per_uint64);
             seal::util::modulo_uint_inplace(result.pointer(), uint64_count, modulus, pool_);
             return result;
         }
@@ -782,8 +779,8 @@ namespace seal_util
         */
         inline int compareto(const BigUInt &compare) const
         {
-            int uint64_count = seal::util::divide_round_up(bit_count_, seal::util::bits_per_uint64);
-            int compare_uint64_count = seal::util::divide_round_up(compare.bit_count_, seal::util::bits_per_uint64);
+            int uint64_count = seal_util::divide_round_up(bit_count_, seal_util::bits_per_uint64);
+            int compare_uint64_count = seal_util::divide_round_up(compare.bit_count_, seal_util::bits_per_uint64);
             return seal_util::compare_uint_uint(value_.get(), uint64_count, compare.value_.get(), compare_uint64_count);
         }
 
@@ -807,8 +804,8 @@ namespace seal_util
         */
         inline bool operator <(const BigUInt &compare) const
         {
-            int uint64_count = seal::util::divide_round_up(bit_count_, seal::util::bits_per_uint64);
-            int compare_uint64_count = seal::util::divide_round_up(compare.bit_count_, seal::util::bits_per_uint64);
+            int uint64_count = seal_util::divide_round_up(bit_count_, seal_util::bits_per_uint64);
+            int compare_uint64_count = seal_util::divide_round_up(compare.bit_count_, seal_util::bits_per_uint64);
             return seal_util::compare_uint_uint(value_.get(), uint64_count, compare.value_.get(), compare_uint64_count) < 0;
         }
 
@@ -831,8 +828,8 @@ namespace seal_util
         */
         inline bool operator >(const BigUInt &compare) const
         {
-            int uint64_count = seal::util::divide_round_up(bit_count_, seal::util::bits_per_uint64);
-            int compare_uint64_count = seal::util::divide_round_up(compare.bit_count_, seal::util::bits_per_uint64);
+            int uint64_count = seal_util::divide_round_up(bit_count_, seal_util::bits_per_uint64);
+            int compare_uint64_count = seal_util::divide_round_up(compare.bit_count_, seal_util::bits_per_uint64);
             return seal_util::compare_uint_uint(value_.get(), uint64_count, compare.value_.get(), compare_uint64_count) > 0;
         }
 
@@ -855,8 +852,8 @@ namespace seal_util
         */
         inline bool operator <=(const BigUInt &compare) const
         {
-            int uint64_count = seal::util::divide_round_up(bit_count_, seal::util::bits_per_uint64);
-            int compare_uint64_count = seal::util::divide_round_up(compare.bit_count_, seal::util::bits_per_uint64);
+            int uint64_count = seal_util::divide_round_up(bit_count_, seal_util::bits_per_uint64);
+            int compare_uint64_count = seal_util::divide_round_up(compare.bit_count_, seal_util::bits_per_uint64);
             return seal_util::compare_uint_uint(value_.get(), uint64_count, compare.value_.get(), compare_uint64_count) <= 0;
         }
 
@@ -879,8 +876,8 @@ namespace seal_util
         */
         inline bool operator >=(const BigUInt &compare) const
         {
-            int uint64_count = seal::util::divide_round_up(bit_count_, seal::util::bits_per_uint64);
-            int compare_uint64_count = seal::util::divide_round_up(compare.bit_count_, seal::util::bits_per_uint64);
+            int uint64_count = seal_util::divide_round_up(bit_count_, seal_util::bits_per_uint64);
+            int compare_uint64_count = seal_util::divide_round_up(compare.bit_count_, seal_util::bits_per_uint64);
             return seal_util::compare_uint_uint(value_.get(), uint64_count, compare.value_.get(), compare_uint64_count) >= 0;
         }
 
@@ -903,8 +900,8 @@ namespace seal_util
         */
         inline bool operator ==(const BigUInt &compare) const
         {
-            int uint64_count = seal::util::divide_round_up(bit_count_, seal::util::bits_per_uint64);
-            int compare_uint64_count = seal::util::divide_round_up(compare.bit_count_, seal::util::bits_per_uint64);
+            int uint64_count = seal_util::divide_round_up(bit_count_, seal_util::bits_per_uint64);
+            int compare_uint64_count = seal_util::divide_round_up(compare.bit_count_, seal_util::bits_per_uint64);
             return seal_util::compare_uint_uint(value_.get(), uint64_count, compare.value_.get(), compare_uint64_count) == 0;
         }
 
@@ -958,7 +955,7 @@ namespace seal_util
             int result_bits = significant_bit_count() + shift;
             BigUInt result(result_bits);
             result = *this;
-          seal::util::left_shift_uint(result.pointer(), shift, result.uint64_count(), result.pointer());
+          seal_util::left_shift_uint(result.pointer(), shift, result.uint64_count(), result.pointer());
             return result;
         }
 
@@ -983,7 +980,7 @@ namespace seal_util
             }
             BigUInt result(result_bits);
             result = *this;
-          seal::util::right_shift_uint(result.pointer(), shift, result.uint64_count(), result.pointer());
+          seal_util::right_shift_uint(result.pointer(), shift, result.uint64_count(), result.pointer());
             return result;
         }
 
@@ -1037,7 +1034,7 @@ namespace seal_util
                 resize(result_bits);
             }
           seal_util::sub_uint_uint(value_.get(), uint64_count(), operand2.pointer(), operand2.uint64_count(), false, uint64_count(), value_.get());
-          seal::util::filter_highbits_uint(value_.get(), uint64_count(), result_bits);
+          seal_util::filter_highbits_uint(value_.get(), uint64_count(), result_bits);
             return *this;
         }
 
@@ -1126,7 +1123,7 @@ namespace seal_util
                 throw std::invalid_argument("operand2 must be positive");
             }
           seal_util::Modulus modulus(operand2.pointer(), operand2.uint64_count(), pool_);
-            util::modulo_uint_inplace(value_.get(), uint64_count(), modulus, pool_);
+            seal::util::modulo_uint_inplace(value_.get(), uint64_count(), modulus, pool_);
             return *this;
         }
 
@@ -1265,7 +1262,7 @@ namespace seal_util
             {
                 resize(result_bits);
             }
-            util::left_shift_uint(value_.get(), shift, uint64_count(), value_.get());
+            seal_util::left_shift_uint(value_.get(), shift, uint64_count(), value_.get());
             return *this;
         }
 
@@ -1286,7 +1283,7 @@ namespace seal_util
                 set_zero();
                 return *this;
             }
-            util::right_shift_uint(value_.get(), shift, uint64_count(), value_.get());
+            seal_util::right_shift_uint(value_.get(), shift, uint64_count(), value_.get());
             return *this;
         }
 
@@ -1341,7 +1338,7 @@ namespace seal_util
             }
             BigUInt result(result_bits);
             result = *this;
-            if (!util::try_invert_uint_mod(result.pointer(), modulus.pointer(), result.uint64_count(), result.pointer(), pool_))
+            if (!seal::util::try_invert_uint_mod(result.pointer(), modulus.pointer(), result.uint64_count(), result.pointer(), pool_))
             {
                 throw std::invalid_argument("BigUInt and modulus are not co-prime");
             }
@@ -1391,7 +1388,7 @@ namespace seal_util
                 inverse.resize(result_bits);
             }
             inverse = *this;
-            return util::try_invert_uint_mod(inverse.pointer(), modulus.pointer(), inverse.uint64_count(), inverse.pointer(), pool_);
+            return seal::util::try_invert_uint_mod(inverse.pointer(), modulus.pointer(), inverse.uint64_count(), inverse.pointer(), pool_);
         }
 
         /**
@@ -1470,7 +1467,7 @@ namespace seal_util
         }
 
     private:
-        MemoryPoolHandle pool_;
+        seal_util::MemoryPool pool_;
 
         /**
         Resets the entire state of the BigUInt to an empty, zero-sized state, freeing any memory it internally allocated.

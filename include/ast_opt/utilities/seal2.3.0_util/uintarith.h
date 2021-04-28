@@ -4,9 +4,9 @@
 #include <cstdint>
 #include <functional>
 #include "ast_opt/utilities/seal2.3.0_util/uintcore.h"
-#include "seal/util/mempool.h"
+#include "ast_opt/utilities/seal2.3.0_util/mempool.h"
 #include "ast_opt/utilities/seal2.3.0_util/modulus.h"
-#include "seal/util/defines.h"
+#include <seal/util/defines.h>
 
 
 namespace seal_util

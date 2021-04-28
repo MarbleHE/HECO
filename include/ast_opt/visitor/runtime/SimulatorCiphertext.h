@@ -23,7 +23,7 @@ class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
   // added by MW
   seal_util::BigUInt noise_;
 
-  int64_t coeff_modulus_;
+  seal_util::BigUInt coeff_modulus_;
 
   int coeff_modulus_bit_count_ = 0;
 

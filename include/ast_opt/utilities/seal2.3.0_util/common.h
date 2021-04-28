@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <stdexcept>
 #include <vector>
-#include "seal/util/defines.h"
+#include <seal/util/defines.h>
 
 namespace seal_util
     {

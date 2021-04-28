@@ -1,13 +1,12 @@
-#include "seal/util/uintcore.h"
-#include "seal/util/uintarith.h"
-#include "seal/util/common.h"
-#include "seal/util/modulus.h"
+#include "ast_opt/utilities/seal2.3.0_util/uintcore.h"
+#include "ast_opt/utilities/seal2.3.0_util/uintarith.h"
+#include "ast_opt/utilities/seal2.3.0_util/common.h"
+#include "ast_opt/utilities/seal2.3.0_util/modulus.h"
 #include <algorithm>
 #include <functional>
 #include <array>
 
 using namespace std;
-
 
 namespace seal_util
 {

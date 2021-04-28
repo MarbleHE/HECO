@@ -1,6 +1,6 @@
-#include "seal/util/modulus.h"
-#include "seal/util/uintcore.h"
-#include "seal/util/uintarith.h"
+#include "ast_opt/utilities/seal2.3.0_util/modulus.h"
+#include "ast_opt/utilities/seal2.3.0_util//uintcore.h"
+#include "ast_opt/utilities/seal2.3.0_util//uintarith.h"
 
 using namespace std;
 

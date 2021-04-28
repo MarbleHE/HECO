@@ -4,7 +4,7 @@
 #include <stdexcept>
 #include <algorithm>
 #include <cstring>
-#include <seal/util/common.h>
+#include "ast_opt/utilities/seal2.3.0_util/common.h"
 #include "ast_opt/utilities/seal2.3.0_util/mempool.h"
 #include <seal/util/defines.h>
 

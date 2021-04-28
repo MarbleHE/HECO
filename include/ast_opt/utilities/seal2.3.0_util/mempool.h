@@ -5,9 +5,9 @@
 #include <vector>
 #include <stdexcept>
 #include <memory>
-#include "seal/util/globals.h"
-#include "seal/util/common.h"
-#include "seal/util/locks.h"
+#include <seal/util/globals.h>
+#include "ast_opt/utilities/seal2.3.0_util/common.h"
+#include <seal/util/locks.h>
 
 namespace seal_util
 {

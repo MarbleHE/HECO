@@ -205,7 +205,8 @@ void SimulatorCiphertext::rotateRowsInplace(int steps) {
 }
 
 double SimulatorCiphertext::noiseBits() {
-  noise_budget = -log2(2*this->noise_);
+  //TODO
+//  noise_budget = -log2(2 * this->noise_);
   return noise_budget;
 }
 

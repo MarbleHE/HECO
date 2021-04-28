@@ -1,13 +1,11 @@
 #include <cstring>
 #include <cmath>
-#include "seal/util/mempool.h"
+#include "ast_opt/utilities/seal2.3.0_util/mempool.h"
 
 using namespace std;
 
-namespace seal
+namespace seal_util
 {
-    namespace util
-    {
         const uint64_t MemoryPoolHead::allocation::first_alloc_count = 1;
 
         const double MemoryPoolHead::allocation::alloc_size_multiplier = 1.05;
@@ -285,5 +283,5 @@ namespace seal
 
             return Pointer(new_head);
         }
-    }
+
 }
