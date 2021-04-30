@@ -7,15 +7,14 @@
 
 #ifdef HAVE_SEAL_BFV
 #include <seal/seal.h>
-#include "ast_opt/utilities/seal2.3.0_util/biguint.h"
+#include "ast_opt/utilities/seal_2.3.0/biguint.h"
 
 
 // Constructor for a simulated ciphertext that is created given seal params, size and noise
 SimulatorCiphertext::SimulatorCiphertext(AbstractCiphertextFactory &acf,
                                          const seal::EncryptionParameters &parms,
                                          int ciphertext_size,
-                                         int noise_budget) : AbstractNoiseMeasuringCiphertext(acf) : parms_(parms),
-  ciphertext_size_(ciphertext_size)
+                                         int noise_budget) : AbstractNoiseMeasuringCiphertext(acf)
 {
   // Compute product coeff modulus
   coeff_modulus_ = 1;
@@ -40,8 +39,8 @@ SimulatorCiphertext::SimulatorCiphertext(AbstractCiphertextFactory &acf,
   int noise_sig_bit_count = coeff_modulus_bit_count_ - noise_budget - 1;
   noise_.resize(coeff_modulus_bit_count_);
   noise_[0] = 1;
-  left_shift_uint(noise_.pointer(), noise_sig_bit_count, noise_.uint64_count(), noise_.pointer());
-  decrement_uint(noise_.pointer(), noise_.uint64_count(), noise_.pointer());
+  seal_old::util::left_shift_uint(noise_.pointer(), noise_sig_bit_count, noise_.uint64_count(), noise_.pointer());
+  seal_old::util::decrement_uint(noise_.pointer(), noise_.uint64_count(), noise_.pointer());
 }
 
 SimulatorCiphertext::SimulatorCiphertext(SimulatorCiphertextFactory &simulatorFactory)
@@ -99,7 +98,7 @@ std::unique_ptr<AbstractCiphertext> createFresh(const seal::EncryptionParameters
 std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::relinearize() {
   std::unique_ptr<SimulatorCiphertext> new_ctxt = this->clone_impl();
   // Noise is ~ old + 2 * min(B, 6*sigma) * t * n * (ell+1) * w * relinearize_one_step_calls
-  int64_t old_noise = new_ctxt->noise_;
+  seal_old::BigUInt old_noise = new_ctxt->noise_;
   //TODO: Continue new_ctxt->getFactory().getContext()
 
   throw std::runtime_error("Not implemented yet.");
@@ -140,7 +139,7 @@ std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::multiply(AbstractCipher
   uint64_t leading_sqrt_factor = static_cast<uint64_t>(ceil(sqrt(static_cast<double>(3*poly_modulus_degree))));
   uint64_t leading_factor = plain_modulus*leading_sqrt_factor;
 
-  int64_t result_noise = operand_ctxt->_noise*sqrt_factor_1
+  seal_old::BigUInt result_noise = operand_ctxt->_noise*sqrt_factor_1
       + this->_noise*sqrt_factor_2
       + sqrt_factor_total;
   result_noise *= leading_factor; // this is the resulting invariant noise
@@ -164,7 +163,7 @@ void SimulatorCiphertext::multiplyPlainInplace(ICleartext &operand) {
 std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::add(AbstractCiphertext &operand) {
   std::unique_ptr<SimulatorCiphertext> new_ctxt = this->clone_impl();
   std::unique_ptr<SimulatorCiphertext> operand_ctxt = std::unique_ptr<SimulatorCiphertext>(&cast(operand));
-  uint64_t result_noise = new_ctxt->_noise + operand_ctxt->_noise;
+  seal_old::BigUInt result_noise = new_ctxt->_noise + operand_ctxt->_noise;
 
   // auto new_noiseBits = this->noiseBits() + operand.noiseBits();
   // std::unique_ptr<SimulatorCiphertext> new_ctxt = this->clone_impl();

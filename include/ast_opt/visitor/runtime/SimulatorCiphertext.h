@@ -10,20 +10,20 @@ class SimulatorCiphertextFactory;
 
 #ifdef HAVE_SEAL_BFV
 #include <seal/seal.h>
-#include <ast_opt/utilities/seal2.3.0_util/biguint.h>
+#include "ast_opt/utilities/seal_2.3.0/biguint.h"
 #include "AbstractNoiseMeasuringCiphertext.h"
 
 class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
  private:
   seal::Ciphertext ciphertext;
-  seal_util::BigUInt _noise; // current invariant noise
+  seal_old::BigUInt _noise; // current invariant noise
   double noise_budget = 0; // current noise budget
   std::unique_ptr<SimulatorCiphertext> clone_impl();
 
   // added by MW
-  seal_util::BigUInt noise_;
+  seal_old::BigUInt noise_;
 
-  seal_util::BigUInt coeff_modulus_;
+  seal_old::BigUInt coeff_modulus_;
 
   int coeff_modulus_bit_count_ = 0;
 
