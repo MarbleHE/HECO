@@ -4,6 +4,7 @@
 #include <memory>
 #include "AbstractCiphertext.h"
 #include "SimulatorCiphertextFactory.h"
+#include "AbstractNoiseMeasuringCiphertext.h"
 
 // forward declarations
 class SimulatorCiphertextFactory;
@@ -11,30 +12,28 @@ class SimulatorCiphertextFactory;
 #ifdef HAVE_SEAL_BFV
 #include <seal/seal.h>
 #include "ast_opt/utilities/seal_2.3.0/biguint.h"
-#include "AbstractNoiseMeasuringCiphertext.h"
+#include "ast_opt/utilities/seal_2.3.0/memorypoolhandle.h"
+#include "ast_opt/utilities/seal_2.3.0/bigpoly.h"
+
 
 class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
  private:
+  seal::EncryptionParameters parms_;
   seal::Ciphertext ciphertext;
   seal_old::BigUInt _noise; // current invariant noise
   double noise_budget = 0; // current noise budget
   std::unique_ptr<SimulatorCiphertext> clone_impl();
 
-  // added by MW
   seal_old::BigUInt noise_;
-
   seal_old::BigUInt coeff_modulus_;
-
   int coeff_modulus_bit_count_ = 0;
-
   int ciphertext_size_ = 0;
-
-  seal::EncryptionParameters parms_;
-
+  seal_old::MemoryPoolHandle pool_;
 
  public:
-  ~SimulatorCiphertext() override = default;
+  seal::MemoryPoolHandle pool_;
 
+  ~SimulatorCiphertext() override = default;
 
 /**
         Creates a simulation of a ciphertext encrypted with the specified encryption
@@ -66,8 +65,24 @@ class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
   /// \param simulatorFactory The factory that created this ciphertext.
   explicit SimulatorCiphertext(SimulatorCiphertextFactory &simulatorFactory);
 
-  /// create seal ciphertext given encryption parameters and estimate its noise based on the given enc params
-  /// TODO
+  /**
+        Creates a Simulation object corresponding to a freshly encrypted ciphertext.
+        The noise is estimated based on the given encryption parameters, and size
+        parameters of a virtual input plaintext polynomial, namely an upper bound
+        plain_max_coeff_count on the number of non-zero coefficients in the polynomial,
+        and an upper bound plain_max_abs_value (represented by BigUInt) on the absolute
+        value (modulo the plaintext modulus) of the polynomial coefficients.
+
+        @param[in] parms The encryption parameters
+        @param[in] plain_max_coeff_count An upper bound on the number of non-zero
+        coefficients in the underlying plaintext
+        @param[in] plain_max_abs_value An upper bound on the absolute value of the
+        coefficients in the underlying plaintext
+        @throws std::invalid_argument if plain_max_coeff_count is negative or bigger
+        than the degree of the polynomial modulus
+        @throws std::invalid_argument if plain_max_abs_value is bigger than the
+        plaintext modulus divided by 2
+        */
   std::unique_ptr<AbstractCiphertext> createFresh(const seal::EncryptionParameters &param, int plain_max_coeff_count,
                                                   uint64_t plain_max_abs_value);
 

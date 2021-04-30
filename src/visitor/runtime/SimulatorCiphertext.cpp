@@ -10,12 +10,15 @@
 #include "ast_opt/utilities/seal_2.3.0/biguint.h"
 
 
-// Constructor for a simulated ciphertext that is created given seal params, size and noise
+// Constructor for a simulated ciphertext that is created given seal params, size and noise budget
 SimulatorCiphertext::SimulatorCiphertext(AbstractCiphertextFactory &acf,
                                          const seal::EncryptionParameters &parms,
                                          int ciphertext_size,
                                          int noise_budget) : AbstractNoiseMeasuringCiphertext(acf)
 {
+  this->parms_ = parms;
+  this->ciphertext_size_ = ciphertext_size;
+
   // Compute product coeff modulus
   coeff_modulus_ = 1;
   for (auto mod : parms_.coeff_modulus())
@@ -77,21 +80,34 @@ SimulatorCiphertext &cast(AbstractCiphertext &abstractCiphertext) {
 
 std::unique_ptr<AbstractCiphertext> createFresh(const seal::EncryptionParameters &parms, int plain_max_coeff_count,
                                                 uint64_t plain_max_abs_value) {
+// Verify parameters
+  // plaintext poly can have max poly_modulus_degree many coeffs
+  if (plain_max_coeff_count <= 0 || plain_max_coeff_count >= parms.poly_modulus_degree() + 1) // TODO: check if plus one or not
+  {
+    throw std::invalid_argument("plain_max_coeff_count is not in the valid range");
+  }
+  if (!plain_max_abs_value)
+  {
+    plain_max_coeff_count = 1;
+  }
 
   // Compute product coeff modulus
-  int64_t coeff_modulus = 1;
-  for (auto mod : parms.coeff_modulus()) {
+  seal_old::BigUInt coeff_modulus;
+  coeff_modulus = 1;
+  for (auto mod : parms.coeff_modulus())
+  {
     coeff_modulus *= mod.value();
   }
-  //seal::util::ge
-  // int coeff_bit_count = seal::util::get_significant_bit_count(coeff_modulus);
-  // int coeff_uint64_count = seal::util::divide_round_up(coeff_bit_count, seal::util::bits_per_uint64);
-  // int poly_modulus_degree = parms.poly_modulus_degree() - 1; // check this if it is actually the same!! (here and everywhere else)
 
-  // Widen plain_modulus_ and noise_
-  //TODO continue
+  int coeff_bit_count = coeff_modulus.significant_bit_count();
+  int coeff_uint64_count = seal_old::util::divide_round_up(coeff_bit_count, seal_old::util::bits_per_uint64);
+  int poly_modulus_degree = parms.poly_modulus_degree();
+
+  seal_old::BigUInt noise(coeff_bit_count);
+
   // Noise is ~ r_t(q)*plain_max_abs_value*plain_max_coeff_count + 7 * min(B, 6*sigma)*t*n
-  //TODO
+  //TODO: continue
+
   throw std::runtime_error("Not yet implemented.");
 }
 
@@ -147,8 +163,10 @@ std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::multiply(AbstractCipher
   // update the noise of the ciphertext
   this->noise_ = result_noise;
   this->noise_budget = noiseBits();
+//TODO: finish
 
-  return std::make_unique<SimulatorCiphertext>(this->getFactory(), this->parms_, result_ciphertext_size, result_noise);
+  return nullptr;
+//  return std::make_unique<SimulatorCiphertext>(this->getFactory(), this->parms_, result_ciphertext_size, result_noise);
 }
 
 void SimulatorCiphertext::multiplyInplace(AbstractCiphertext &operand) {
@@ -160,14 +178,12 @@ std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::multiplyPlain(ICleartex
 void SimulatorCiphertext::multiplyPlainInplace(ICleartext &operand) {
 
 }
+
 std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::add(AbstractCiphertext &operand) {
   std::unique_ptr<SimulatorCiphertext> new_ctxt = this->clone_impl();
   std::unique_ptr<SimulatorCiphertext> operand_ctxt = std::unique_ptr<SimulatorCiphertext>(&cast(operand));
   seal_old::BigUInt result_noise = new_ctxt->_noise + operand_ctxt->_noise;
-
-  // auto new_noiseBits = this->noiseBits() + operand.noiseBits();
-  // std::unique_ptr<SimulatorCiphertext> new_ctxt = this->clone_impl();
-  // new_ctxt->noise_budget = new_noiseBits;
+  //TODO: calc noise budget and decide wether to simulate a new ctxt based on the noise calc or actually add
   return std::unique_ptr<AbstractCiphertext>();
 }
 
