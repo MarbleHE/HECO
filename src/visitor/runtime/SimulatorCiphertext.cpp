@@ -421,7 +421,7 @@ void SimulatorCiphertext::createFresh(ICleartext &operand) {
   double noise_max_deviation = noise_standard_deviation * 6; // this is also a standard value (see SEAL: globals.h)
   // calculate encryption noise
   double result_noise = rtq * plain_max_abs_value * plain_max_coeff_count + 7 * noise_max_deviation *
-      new_ctxt->getFactory().getContext().first_context_data()->parms().plain_modulus() *
+      new_ctxt->getFactory().getContext().first_context_data()->parms().plain_modulus().value() *
       new_ctxt->getFactory().getContext().first_context_data()->parms().poly_modulus_degree();
   // set noise of the current object to initaial noise
   this->_noise = result_noise;
