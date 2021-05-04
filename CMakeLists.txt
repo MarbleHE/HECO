@@ -137,7 +137,7 @@ set(HEADER_ONLY_SOURCES
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/AbstractValue.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/SimulatorCiphertext.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/SimulatorCiphertextFactory.h
-        include/ast_opt/visitor/runtime/AbstractNoiseMeasuringCiphertext.cpp include/ast_opt/visitor/runtime/AbstractNoiseMeasuringCiphertext.h)
+        include/ast_opt/visitor/runtime/AbstractNoiseMeasuringCiphertext.cpp include/ast_opt/visitor/runtime/AbstractNoiseMeasuringCiphertext.h src/utilities/PlaintextNorm.cpp include/ast_opt/utilities/PlaintextNorm.h)
 
 # TODO: Go through this list and determine which headers aren't actually public
 set(PUBLIC_HEADERS

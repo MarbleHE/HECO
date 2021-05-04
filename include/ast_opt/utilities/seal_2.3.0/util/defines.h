@@ -1,4 +1,4 @@
-/*#pragma once
+#pragma once
 
 // SEAL version
 #define SEAL_VERSION_STRING "v2.3.0-4"
@@ -115,7 +115,7 @@
 
 // GNU GCC/G++
 #if defined(__GNUC__) && (__GNUC__ < 5)
-#error "SEAL requires __GNUC__ >= 5" 
+//#error "SEAL requires __GNUC__ >= 5"
 #endif
 
 #if (__GNUC__ >= 5) && defined(__cplusplus)
@@ -209,4 +209,3 @@
 #define SEAL_MSB_INDEX_UINT64(result, value) get_msb_index_generic(result, value)
 //#pragma message("SEAL_MSB_INDEX_UINT64 not defined. Using get_msb_index_generic (see util/defines.h).")
 #endif
-*/

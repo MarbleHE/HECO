@@ -13,7 +13,7 @@ class AbstractNoiseMeasuringCiphertext : public AbstractCiphertext {
 
   /// Return the current noise budget in the ciphertext, measured in bits
   /// \return A double measuring the number of bits in the noise budget.
-  virtual double noiseBits() = 0;
+  virtual void noiseBits() = 0;
 
   /// Noise of a freshly encrypted ciphertext
   /// \return the noise budget in bits

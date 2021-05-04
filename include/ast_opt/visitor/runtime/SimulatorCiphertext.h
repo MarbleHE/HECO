@@ -18,40 +18,18 @@ class SimulatorCiphertextFactory;
 
 class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
  private:
-  seal::EncryptionParameters parms_;
   seal::Ciphertext ciphertext;
-  seal_old::BigUInt _noise; // current invariant noise
+  double _noise = 0; // current invariant noise
   double noise_budget = 0; // current noise budget
   std::unique_ptr<SimulatorCiphertext> clone_impl();
-
-  seal_old::BigUInt noise_;
-  seal_old::BigUInt coeff_modulus_;
+  int64_t coeff_modulus_ = 0;
   int coeff_modulus_bit_count_ = 0;
   int ciphertext_size_ = 0;
-  seal_old::MemoryPoolHandle pool_;
+  int number_of_mults = 0;
 
  public:
-  seal::MemoryPoolHandle pool_;
 
   ~SimulatorCiphertext() override = default;
-
-/**
-        Creates a simulation of a ciphertext encrypted with the specified encryption
-        parameters and given invariant noise budget. The given noise budget must be
-        at least zero, and at most the significant bit count of the coefficient
-        modulus minus two.
-
-        @param[in] acf
-        @param[in] parms The encryption parameters
-        @param[in] noise_budget The invariant noise budget of the created ciphertext
-        @param[in] ciphertext_size The size of the created ciphertext
-        @throws std::invalid_argument if ciphertext_size is less than 2
-        @throws std::invalid_argument if noise_budget is not in the valid range
-        */
-  SimulatorCiphertext(AbstractCiphertextFactory &acf,
-                      const seal::EncryptionParameters &parms,
-                      int ciphertext_size,
-                      int noise_budget);
 
   SimulatorCiphertext(const SimulatorCiphertext &other); // copy constructor
 
@@ -65,28 +43,8 @@ class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
   /// \param simulatorFactory The factory that created this ciphertext.
   explicit SimulatorCiphertext(SimulatorCiphertextFactory &simulatorFactory);
 
-  /**
-        Creates a Simulation object corresponding to a freshly encrypted ciphertext.
-        The noise is estimated based on the given encryption parameters, and size
-        parameters of a virtual input plaintext polynomial, namely an upper bound
-        plain_max_coeff_count on the number of non-zero coefficients in the polynomial,
-        and an upper bound plain_max_abs_value (represented by BigUInt) on the absolute
-        value (modulo the plaintext modulus) of the polynomial coefficients.
 
-        @param[in] parms The encryption parameters
-        @param[in] plain_max_coeff_count An upper bound on the number of non-zero
-        coefficients in the underlying plaintext
-        @param[in] plain_max_abs_value An upper bound on the absolute value of the
-        coefficients in the underlying plaintext
-        @throws std::invalid_argument if plain_max_coeff_count is negative or bigger
-        than the degree of the polynomial modulus
-        @throws std::invalid_argument if plain_max_abs_value is bigger than the
-        plaintext modulus divided by 2
-        */
-  std::unique_ptr<AbstractCiphertext> createFresh(const seal::EncryptionParameters &param, int plain_max_coeff_count,
-                                                  uint64_t plain_max_abs_value);
-
-  /// estimates the noise heuristically of a multiplication op of two Seal ciphertexts
+  void createFresh(ICleartext &operand);
   std::unique_ptr<AbstractCiphertext> multiply(AbstractCiphertext &operand) override;
   void multiplyInplace(AbstractCiphertext &operand) override;
   std::unique_ptr<AbstractCiphertext> multiplyPlain(ICleartext &operand) override;
@@ -101,7 +59,7 @@ class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
   void subtractPlainInplace(ICleartext &operand) override;
   std::unique_ptr<AbstractCiphertext> rotateRows(int steps) override;
   void rotateRowsInplace(int steps) override;
-  double noiseBits() override;
+  void noiseBits() override;
   std::unique_ptr<AbstractCiphertext> clone() override;
   SimulatorCiphertextFactory &getFactory() override;
   const SimulatorCiphertextFactory &getFactory() const override;
