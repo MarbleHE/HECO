@@ -43,9 +43,7 @@ SimulatorCiphertext &cast(AbstractCiphertext &abstractCiphertext) {
   }
 }
 
-
-//TODO: find parameter w and \ell in SEAL
-std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::relinearize() {
+void SimulatorCiphertext::relinearize() {
   std::unique_ptr<SimulatorCiphertext> new_ctxt = this->clone_impl();
 
   int destination_size = 2;
@@ -53,12 +51,15 @@ std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::relinearize() {
   uint64_t relinearize_one_step_calls = static_cast<uint64_t>(this->ciphertext_size_ - destination_size);
   if (relinearize_one_step_calls == 0) // nothing to be done
   {
-    auto absCtxt = dynamic_cast<AbstractCiphertext *>(this);
-    return std::unique_ptr<AbstractCiphertext>(absCtxt);
+    return; //do nothing
   }
-  int poly_modulus_degree = new_ctxt->getFactory().getContext().first_context_data()->parms().poly_modulus_degree();
-
   // Noise is ~ old + 2 * min(B, 6*sigma) * t * n * (ell+1) * w * relinearize_one_step_calls
+  double noise_standard_deviation = 3.2; // this is the standard value for the noise standard deviation (see SEAL: hestdparams.h)
+  double noise_max_deviation = noise_standard_deviation * 6; // this is also a standard value (see SEAL: globals.h)
+  int64_t poly_modulus_degree = new_ctxt->getFactory().getContext().first_context_data()->parms().poly_modulus_degree();
+  int64_t plain_modulus = new_ctxt->getFactory().getContext().first_context_data()->parms().plain_modulus().value();
+
+
 
   // First t
   double result_noise = new_ctxt->getFactory().getContext().first_context_data()->parms().plain_modulus().value();

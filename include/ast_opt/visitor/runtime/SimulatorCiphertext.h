@@ -64,7 +64,7 @@ class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
   SimulatorCiphertextFactory &getFactory() override;
   const SimulatorCiphertextFactory &getFactory() const override;
 
-  std::unique_ptr<AbstractCiphertext> relinearize();
+  void relinearize();
 
   int64_t initialNoise() override;
 
