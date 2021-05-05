@@ -9,8 +9,8 @@
 
 std::unique_ptr<AbstractCiphertext> SimulatorCiphertextFactory::createCiphertext(const std::vector<int64_t> &data) {
   auto ptxt = createPlaintext(data);
-  std::unique_ptr<SimulatorCiphertext> ctxt = std::make_unique<SimulatorCiphertext>(*this);
-  //TODO: Add DATA into simulator ciphertext!
+  std::unique_ptr<SimulatorCiphertext> ctxt = std::make_unique<SimulatorCiphertext>(*this); // creates a simulator ciphertext given all the data
+  ctxt->createFresh(ptxt); // calcs initial noise and sets the variables needed
   return ctxt;
 }
 
@@ -24,7 +24,6 @@ std::unique_ptr<AbstractCiphertext> SimulatorCiphertextFactory::createCiphertext
   return createCiphertext(values);
 }
 
-// TODO: fix this (figure out)
 SimulatorCiphertextFactory::SimulatorCiphertextFactory(const SimulatorCiphertextFactory &other) :
     ciphertextSlotSize(other.ciphertextSlotSize),
     context(other.context), // TODO: This should be a real copy, not just shared ownership (copying the shared_ptr)

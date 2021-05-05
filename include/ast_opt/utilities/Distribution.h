@@ -7,10 +7,13 @@
 
 class Distribution {
  private:
-  double sigma = 3.2;
+  double _sigma = 3.2;
+  int _poly_modulus_degree = 0;
+  int _coeff_modulus = 0;
+
 
  public:
-  Distribution(int poly_modulus_degree);
+  Distribution(int poly_modulus_degree, int number_samples, int coeff_modulus);
 };
 
 #endif //AST_OPTIMIZER_SRC_UTILITIES_DISTRIBUTION_H_

@@ -11,21 +11,16 @@ class SimulatorCiphertextFactory;
 
 #ifdef HAVE_SEAL_BFV
 #include <seal/seal.h>
-#include "ast_opt/utilities/seal_2.3.0/biguint.h"
-#include "ast_opt/utilities/seal_2.3.0/memorypoolhandle.h"
-#include "ast_opt/utilities/seal_2.3.0/bigpoly.h"
 
 
 class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
  private:
+  SimulatorCiphertext(SimulatorCiphertextFactory &simulatorFactory, seal::Plaintext ptxt);
   seal::Ciphertext ciphertext;
   double _noise = 0; // current invariant noise
-  double noise_budget = 0; // current noise budget
+  double _noise_budget = 0; // current noise budget
   std::unique_ptr<SimulatorCiphertext> clone_impl();
-  int64_t coeff_modulus_ = 0;
-  int coeff_modulus_bit_count_ = 0;
-  int ciphertext_size_ = 0;
-  int number_of_mults = 0;
+  int ciphertext_size_ = 0; // ciphertext size: this gets bigger when multiplying and reset when relinearizing
 
  public:
 
@@ -43,8 +38,11 @@ class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
   /// \param simulatorFactory The factory that created this ciphertext.
   explicit SimulatorCiphertext(SimulatorCiphertextFactory &simulatorFactory);
 
+  //moritz
+  explicit SimulatorCiphertext(SimulatorCiphertextFactory &simulatorFactory, std::unique_ptr<seal::Plaintext> ptxt);
 
-  void createFresh(ICleartext &operand);
+
+  void createFresh(std::unique_ptr<seal::Plaintext> &plaintext);
   std::unique_ptr<AbstractCiphertext> multiply(AbstractCiphertext &operand) override;
   void multiplyInplace(AbstractCiphertext &operand) override;
   std::unique_ptr<AbstractCiphertext> multiplyPlain(ICleartext &operand) override;
@@ -60,6 +58,7 @@ class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
   std::unique_ptr<AbstractCiphertext> rotateRows(int steps) override;
   void rotateRowsInplace(int steps) override;
   void noiseBits() override;
+
   std::unique_ptr<AbstractCiphertext> clone() override;
   SimulatorCiphertextFactory &getFactory() override;
   const SimulatorCiphertextFactory &getFactory() const override;

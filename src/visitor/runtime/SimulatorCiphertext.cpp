@@ -1,10 +1,8 @@
-
 #include "ast_opt/utilities/Operator.h"
 #include "ast_opt/visitor/runtime/Cleartext.h"
 #include "ast_opt/visitor/runtime/SimulatorCiphertext.h"
 #include "ast_opt/visitor/runtime/SimulatorCiphertextFactory.h"
 #include "ast_opt/visitor/runtime/AbstractCiphertext.h"
-
 
 #ifdef HAVE_SEAL_BFV
 #include <seal/seal.h>
@@ -285,7 +283,7 @@ void SimulatorCiphertext::rotateRowsInplace(int steps) {
 }
 
 void SimulatorCiphertext::noiseBits() {
-  this->noise_budget = -log2(2 * this->_noise);
+  this->_noise_budget = -log2(2 * this->_noise);
 }
 
 std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::clone() {
@@ -408,12 +406,12 @@ int64_t SimulatorCiphertext::initialNoise() {
 }
 
 // so far this needs as input a corresponding plaintext (that we get the "fresh" encryption from)
-void SimulatorCiphertext::createFresh(ICleartext &operand) {
+void SimulatorCiphertext::createFresh(std::unique_ptr<seal::Plaintext> &plaintext) {
   // clone
   std::unique_ptr<SimulatorCiphertext> new_ctxt = this->clone_impl();
   // get plaintext from operand
-  auto cleartextInt = dynamic_cast<Cleartext<int> *>(&operand);
-  std::unique_ptr<seal::Plaintext> plaintext = getFactory().createPlaintext(cleartextInt->getData());
+ // auto cleartextInt = dynamic_cast<Cleartext<int> *>(&operand);
+ // std::unique_ptr<seal::Plaintext> plaintext = getFactory().createPlaintext(cleartextInt->getData());
   // Noise is ~ r_t(q)*plain_max_abs_value * plain_max_coeff_count + 7 * min(B, 6*sigma)*t*n
   int64_t rtq = new_ctxt->getFactory().getContext().first_context_data()->coeff_modulus_mod_plain_modulus();
   int64_t plain_max_coeff_count = plaintext->nonzero_coeff_count();

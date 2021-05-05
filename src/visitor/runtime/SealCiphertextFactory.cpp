@@ -23,7 +23,6 @@ std::unique_ptr<AbstractCiphertext> SealCiphertextFactory::createCiphertext(int6
   return createCiphertext(values);
 }
 
-// TODO: fix this (figure out)
 SealCiphertextFactory::SealCiphertextFactory(const SealCiphertextFactory &other) :
     ciphertextSlotSize(other.ciphertextSlotSize),
     context(other.context), // TODO: This should be a real copy, not just shared ownership (copying the shared_ptr)
