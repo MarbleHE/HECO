@@ -441,17 +441,21 @@ void SimulatorCiphertext::createFresh(std::unique_ptr<seal::Plaintext> &plaintex
   _plaintext = *plaintext;
   // clone
   std::unique_ptr<SimulatorCiphertext> new_ctxt = this->clone_impl();
+  double result_noise;
 
-  // Noise is ~ r_t(q)*plain_max_abs_value * plain_max_coeff_count + 7 * min(B, 6*sigma)*t*n
+  // Noise is ~ r_t(q)*plain_max_abs_value * plain_max_coeff_count + 7 * min(B, 6*sigma)*t*n     (from SEAL 2.3.0)
   int64_t rtq = new_ctxt->getFactory().getContext().first_context_data()->coeff_modulus_mod_plain_modulus();
   int64_t plain_max_coeff_count = plaintext->nonzero_coeff_count();
   int64_t plain_max_abs_value = plaintext_norm(*plaintext);
   double noise_standard_deviation = 3.2; // this is the standard value for the noise standard deviation (see SEAL: hestdparams.h)
   double noise_max_deviation = noise_standard_deviation * 6; // this is also a standard value (see SEAL: globals.h)
   // calculate encryption noise
-  double result_noise = rtq * plain_max_abs_value * plain_max_coeff_count + 7 * noise_max_deviation *
+  result_noise = rtq * plain_max_abs_value * plain_max_coeff_count + 7 * noise_max_deviation *
       new_ctxt->getFactory().getContext().first_context_data()->parms().plain_modulus().value() *
       new_ctxt->getFactory().getContext().first_context_data()->parms().poly_modulus_degree();
+
+  //iliashenko: TODO
+
   // set noise of the current object to initial noise
   this->_noise = result_noise;
   this->noiseBits();
