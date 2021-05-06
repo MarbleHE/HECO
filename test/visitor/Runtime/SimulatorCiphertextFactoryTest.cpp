@@ -63,8 +63,19 @@ class SimulatorCiphertextFactoryTest : public ::testing::Test {
     return result;
   }
 
-
-
+  double calcAddPlainoiseHeuristic(AbstractCiphertext &abstractCiphertext, ICleartext &operand) {
+    //noise is old_noise + r_t(q) * plain_max_coeff_count * plain_max_abs_value
+    double result;
+    auto cleartextInt = dynamic_cast<Cleartext<int> *>(&operand);
+    std::unique_ptr<seal::Plaintext> plaintext = scf.createPlaintext(cleartextInt->getData());
+    auto &ctxt = dynamic_cast<SimulatorCiphertext &>(abstractCiphertext);
+    double old_noise = ctxt.getNoise();
+    int64_t rtq = scf->getContext().first_context_data()->coeff_modulus_mod_plain_modulus();
+    int64_t plain_max_abs_value = plaintext_norm(*plaintext);
+    int64_t plain_max_coeff_count = plaintext->nonzero_coeff_count();
+    result = old_noise + rtq * plain_max_coeff_count * plain_max_abs_value;
+    return result;
+  }
 
   void checkCiphertextData(
       AbstractCiphertext &abstractCiphertext,
@@ -228,7 +239,7 @@ TEST_F(SimulatorCiphertextFactoryTest, addPlain) { /* NOLINT */
   auto operandVector = createCleartext(data2);
 
   auto ctxtResult = ctxt1->addPlain(operandVector);
-  double expected_noise = 10; //TODO calc
+  double expected_noise = calcAddPlainoiseHeuristic(*ctxt1,operandVector); //TODO: check if this works
   checkCiphertextNoise(*ctxtResult, expected_noise);
 
   // make sure that ciphertext operand is not changed
@@ -244,7 +255,7 @@ TEST_F(SimulatorCiphertextFactoryTest, subPlain) { /* NOLINT */
   auto operandVector = createCleartext(data2);
 
   auto ctxtResult = ctxt1->subtractPlain(operandVector);
-  double expected_noise = 10; //TODO calc
+  double expected_noise = calcAddPlainoiseHeuristic(*ctxt1,operandVector); //TODO: check if this works
   checkCiphertextNoise(*ctxtResult, expected_noise);
 
   // make sure that ciphertext operand is not changed

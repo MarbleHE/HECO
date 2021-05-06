@@ -222,7 +222,7 @@ void SimulatorCiphertext::multiplyPlainInplace(ICleartext &operand) {
   int64_t old_noise = new_ctxt->_noise;
   int64_t plain_max_coeff_count = plaintext->nonzero_coeff_count();
   int64_t plain_max_abs_value = plaintext_norm(*plaintext);
-  // clac noise after ptxt ctxt addition
+  // calc noise after ptxt ctxt addition
   double result_noise = old_noise * plain_max_coeff_count * plain_max_abs_value;
   // update noise and noise budget of result ctxt with the new value
   this->_noise = result_noise;
