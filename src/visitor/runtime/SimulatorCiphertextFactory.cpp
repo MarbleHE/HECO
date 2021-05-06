@@ -9,8 +9,8 @@
 
 std::unique_ptr<AbstractCiphertext> SimulatorCiphertextFactory::createCiphertext(const std::vector<int64_t> &data) {
   auto ptxt = createPlaintext(data);
-  std::unique_ptr<SimulatorCiphertext> ctxt = std::make_unique<SimulatorCiphertext>(*this); // creates a simulator ciphertext given all the data
-  ctxt->createFresh(ptxt); // calcs initial noise and sets the variables needed
+  std::unique_ptr<SimulatorCiphertext> ctxt = std::make_unique<SimulatorCiphertext>(*this); // Constructs a simulator ciphertext given all the data
+  ctxt->createFresh(ptxt); // calcs initial noise and sets the variables needed, also stores the plaintext as _plaintext
   return ctxt;
 }
 
@@ -144,7 +144,13 @@ const seal::RelinKeys &SimulatorCiphertextFactory::getRelinKeys() const {
 void SimulatorCiphertextFactory::decryptCiphertext(AbstractCiphertext &abstractCiphertext,
                                               std::vector<int64_t> &ciphertextData) {
   auto &ctxt = dynamic_cast<SimulatorCiphertext &>(abstractCiphertext);
- //TODO: "fake" decrypt SimulatorCtxt
+  seal::Plaintext ptxt = ctxt.getPlaintext(); // this simply returns the stored _plaintext
+  encoder->decode(ptxt, ciphertextData);
+}
+
+double SimulatorCiphertextFactory::getNoise(AbstractCiphertext &abstractCiphertext) {
+  auto &ctxt = dynamic_cast<SimulatorCiphertext &>(abstractCiphertext);
+  return ctxt.getNoise();
 }
 
 seal::Evaluator &SimulatorCiphertextFactory::getEvaluator() const {

@@ -16,7 +16,8 @@ class SimulatorCiphertextFactory;
 class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
  private:
   SimulatorCiphertext(SimulatorCiphertextFactory &simulatorFactory, seal::Plaintext ptxt);
-  seal::Ciphertext ciphertext;
+  seal::Ciphertext _ciphertext;
+  seal::Plaintext _plaintext;
   double _noise = 0; // current invariant noise
   double _noise_budget = 0; // current noise budget
   std::unique_ptr<SimulatorCiphertext> clone_impl();
@@ -63,6 +64,14 @@ class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
   SimulatorCiphertextFactory &getFactory() override;
   const SimulatorCiphertextFactory &getFactory() const override;
 
+  /// Gets the seal::Ciphertext associated with this SealCiphertext.
+  /// \return (A const reference) to the underlying seal::Ciphertext.
+  [[nodiscard]] const seal::Ciphertext &getCiphertext() const;
+
+  /// Gets the seal::Ciphertext associated with this SealCiphertext.
+  /// \return (A reference) to the underlying seal::Ciphertext.
+  seal::Ciphertext &getCiphertext();
+
   void relinearize();
 
   int64_t initialNoise() override;
@@ -85,6 +94,9 @@ class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
   void bitwiseXor(AbstractValue &other) override;
   void bitwiseOr(AbstractValue &other) override;
   void bitwiseNot() override;
+  const seal::Plaintext &getPlaintext() const;
+  seal::Plaintext &getPlaintext();
+  double &getNoise();
 };
 
 #endif

@@ -15,7 +15,10 @@ SimulatorCiphertext::SimulatorCiphertext(SimulatorCiphertextFactory &simulatorFa
 
 SimulatorCiphertext::SimulatorCiphertext(const SimulatorCiphertext &other)  // copy constructor
     : AbstractNoiseMeasuringCiphertext(other.factory) {
-  ciphertext = seal::Ciphertext(other.ciphertext);
+  _ciphertext = other._ciphertext;
+  _noise = other._noise;
+  _noise_budget = other._noise_budget;
+  ciphertext_size_ = other.ciphertext_size_;
 }
 
 SimulatorCiphertext &SimulatorCiphertext::operator=(const SimulatorCiphertext &other) {  // copy assignment
@@ -23,12 +26,12 @@ SimulatorCiphertext &SimulatorCiphertext::operator=(const SimulatorCiphertext &o
 }
 
 SimulatorCiphertext::SimulatorCiphertext(SimulatorCiphertext &&other) noexcept  // move constructor
-    : AbstractNoiseMeasuringCiphertext(other.factory), ciphertext(std::move(other.ciphertext)) {}
+    : AbstractNoiseMeasuringCiphertext(other.factory), _ciphertext(std::move(other._ciphertext)) {}
 
 SimulatorCiphertext &SimulatorCiphertext::operator=(SimulatorCiphertext &&other) noexcept {  // move assignment
   // Self-assignment detection
   if (&other==this) return *this;
-  ciphertext = other.ciphertext;
+  _ciphertext = other._ciphertext;
   factory = std::move(other.factory);
   return *this;
 }
@@ -39,6 +42,26 @@ SimulatorCiphertext &cast(AbstractCiphertext &abstractCiphertext) {
   } else {
     throw std::runtime_error("Cast of AbstractCiphertext to SealCiphertext failed!");
   }
+}
+
+const seal::Ciphertext &SimulatorCiphertext::getCiphertext() const {
+  return _ciphertext;
+}
+
+seal::Ciphertext &SimulatorCiphertext::getCiphertext() {
+  return _ciphertext;
+}
+
+const seal::Plaintext &SimulatorCiphertext::getPlaintext() const {
+  return _plaintext;
+}
+
+seal::Plaintext &SimulatorCiphertext::getPlaintext() {
+  return _plaintext;
+}
+
+double &SimulatorCiphertext::getNoise() {
+  return _noise;
 }
 
 void SimulatorCiphertext::relinearize() {
@@ -407,11 +430,11 @@ int64_t SimulatorCiphertext::initialNoise() {
 
 // so far this needs as input a corresponding plaintext (that we get the "fresh" encryption from)
 void SimulatorCiphertext::createFresh(std::unique_ptr<seal::Plaintext> &plaintext) {
+  // set _plaintext to plaintext (needed for correct "decryption")
+  _plaintext = *plaintext;
   // clone
   std::unique_ptr<SimulatorCiphertext> new_ctxt = this->clone_impl();
-  // get plaintext from operand
- // auto cleartextInt = dynamic_cast<Cleartext<int> *>(&operand);
- // std::unique_ptr<seal::Plaintext> plaintext = getFactory().createPlaintext(cleartextInt->getData());
+
   // Noise is ~ r_t(q)*plain_max_abs_value * plain_max_coeff_count + 7 * min(B, 6*sigma)*t*n
   int64_t rtq = new_ctxt->getFactory().getContext().first_context_data()->coeff_modulus_mod_plain_modulus();
   int64_t plain_max_coeff_count = plaintext->nonzero_coeff_count();
@@ -422,10 +445,10 @@ void SimulatorCiphertext::createFresh(std::unique_ptr<seal::Plaintext> &plaintex
   double result_noise = rtq * plain_max_abs_value * plain_max_coeff_count + 7 * noise_max_deviation *
       new_ctxt->getFactory().getContext().first_context_data()->parms().plain_modulus().value() *
       new_ctxt->getFactory().getContext().first_context_data()->parms().poly_modulus_degree();
-  // set noise of the current object to initaial noise
+  // set noise of the current object to initial noise
   this->_noise = result_noise;
   this->noiseBits();
-  // initial ciphertext has size 2
+  // freshly encrypted ciphertext has size 2
   this->ciphertext_size_ = 2;
 }
 

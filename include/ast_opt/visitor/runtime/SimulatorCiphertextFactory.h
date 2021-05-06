@@ -117,6 +117,7 @@ class SimulatorCiphertextFactory : public AbstractCiphertextFactory {
   std::unique_ptr<AbstractCiphertext> createCiphertext(std::unique_ptr<AbstractValue> &&abstractValue) override;
 
   std::unique_ptr<AbstractCiphertext> createCiphertext(const std::vector<int> &data) override;
+  double getNoise(AbstractCiphertext &abstractCiphertext);
 };
 
 #endif
