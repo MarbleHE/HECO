@@ -322,7 +322,7 @@ TEST_F(SealCiphertextFactoryTest, subPlainInplace) { /* NOLINT */
   checkCiphertextData(*ctxt1, expectedData);
 }
 
-TEST_F(SealCiphertextFactoryTest, multipluPlainInplace) { /* NOLINT */
+TEST_F(SealCiphertextFactoryTest, multiplyPlainInplace) { /* NOLINT */
   // create ciphertext
   std::vector<int64_t> data1 = {3, 3, 1, 4, 5, 9};
   std::unique_ptr<AbstractCiphertext> ctxt1 = scf->createCiphertext(data1);

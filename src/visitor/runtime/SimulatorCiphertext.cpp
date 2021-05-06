@@ -113,6 +113,8 @@ std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::multiply(AbstractCipher
   for (auto mod : new_ctxt->getFactory().getContext().first_context_data()->parms().coeff_modulus()) {
     coeff_modulus *= mod.value();
   }
+  double result_noise;
+  /* SEAL 2.3.0 does it this way:
   // Compute Noise (this is as in Seal v2.3.0):
   // Noise is ~ t * sqrt(3n) * [ (12n)^(j1/2)*noise2 + (12n)^(j2/2)*noise1 + (12n)^((j1+j2)/2) ]
   // First compute sqrt(12n) (rounding up) and the powers needed
@@ -128,10 +130,15 @@ std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::multiply(AbstractCipher
   // Compute also t * sqrt(3n)
   uint64_t leading_sqrt_factor = static_cast<uint64_t>(ceil(sqrt(static_cast<double>(3*poly_modulus_degree))));
   uint64_t leading_factor = plain_modulus*leading_sqrt_factor;
-  double result_noise = operand_ctxt->_noise*sqrt_factor_1
+  result_noise = operand_ctxt->_noise*sqrt_factor_1
       + this->_noise*sqrt_factor_2
       + sqrt_factor_total;
-  result_noise *= leading_factor; // this is the resulting invariant noise
+  result_noise *= leading_factor; // this is the resulting invariant noise */
+  /*iliashenko:*/
+  result_noise = plain_modulus * sqrt(3 * poly_modulus_degree + 2 * pow(poly_modulus_degree,2) )
+      * (new_ctxt->getNoise() + operand_ctxt->getNoise()) + 3 * new_ctxt->getNoise() * operand_ctxt->getNoise() +
+      plain_modulus / coeff_modulus * sqrt(3 * poly_modulus_degree + 2 * pow(poly_modulus_degree,2) +
+      4 * pow(poly_modulus_degree,3) /3);
   //copy
   auto r = std::make_unique<SimulatorCiphertext>(*this);
   // update noise and noise budget of result ctxt with the new value
@@ -430,7 +437,7 @@ int64_t SimulatorCiphertext::initialNoise() {
 
 // so far this needs as input a corresponding plaintext (that we get the "fresh" encryption from)
 void SimulatorCiphertext::createFresh(std::unique_ptr<seal::Plaintext> &plaintext) {
-  // set _plaintext to plaintext (needed for correct "decryption")
+  // set _plaintext to plaintext (needed for correct "decryptiinton")
   _plaintext = *plaintext;
   // clone
   std::unique_ptr<SimulatorCiphertext> new_ctxt = this->clone_impl();
