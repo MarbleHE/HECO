@@ -25,12 +25,14 @@ class SimulatorCiphertextFactoryTest : public ::testing::Test {
     double result;
     auto &ctxt = dynamic_cast<SimulatorCiphertext &>(abstractCiphertext);
     seal::Plaintext ptxt = ctxt.getPlaintext();
-    int64_t rtq = scf->getContext().first_context_data()->coeff_modulus_mod_plain_modulus();
-    int64_t plain_max_coeff_count = ptxt.nonzero_coeff_count();
-    int64_t plain_max_abs_value = plaintext_norm(ptxt);
+    int64_t coeff_modulus = 1;
+    for (auto mod : scf->getContext().first_context_data()->parms().coeff_modulus()) {
+      coeff_modulus *= mod.value();
+    }
     int64_t plain_modulus = scf->getContext().first_context_data()->parms().plain_modulus().value();
     int64_t poly_modulus = scf->getContext().first_context_data()->parms().poly_modulus_degree();
-    result = rtq * plain_max_abs_value * plain_max_coeff_count + 7 * 6 * 3.2 * plain_modulus * poly_modulus;
+    result = plain_modulus / coeff_modulus * (poly_modulus * (coeff_modulus - 1) / 2
+        + 2 * 3.2 *sqrt(12 * pow(poly_modulus,2) + 9 * poly_modulus));
     return result;
   }
 
@@ -234,7 +236,7 @@ TEST_F(SimulatorCiphertextFactoryTest, multiplyInplace) { /* NOLINT */
 // == CTXT-PLAIN operations with returned result
 // =======================================
 
-Cleartext<int> createCleartext(const std::vector<int> &literalIntValues) {
+Cleartext<int> createCleartextSim(const std::vector<int> &literalIntValues) {
   std::vector<std::unique_ptr<AbstractExpression>> result;
   for (const auto &val : literalIntValues) {
     result.emplace_back(std::make_unique<LiteralInt>(val));
@@ -248,7 +250,7 @@ TEST_F(SimulatorCiphertextFactoryTest, addPlain) { /* NOLINT */
   std::unique_ptr<AbstractCiphertext> ctxt1 = scf->createCiphertext(data1);
 
   std::vector<int> data2 = {0, 1, 2, 1, 10, 21};
-  auto operandVector = createCleartext(data2);
+  auto operandVector = createCleartextSim(data2);
 
   auto ctxtResult = ctxt1->addPlain(operandVector);
   double expected_noise = calcAddPlainNoiseHeuristic(*ctxt1,operandVector); //TODO: check if this works
@@ -264,7 +266,7 @@ TEST_F(SimulatorCiphertextFactoryTest, subPlain) { /* NOLINT */
   std::unique_ptr<AbstractCiphertext> ctxt1 = scf->createCiphertext(data1);
 
   std::vector<int> data2 = {0, 1, 2, 1, 10, 21};
-  auto operandVector = createCleartext(data2);
+  auto operandVector = createCleartextSim(data2);
 
   auto ctxtResult = ctxt1->subtractPlain(operandVector);
   double expected_noise = calcAddPlainNoiseHeuristic(*ctxt1,operandVector); //TODO: check if this works
@@ -280,7 +282,7 @@ TEST_F(SimulatorCiphertextFactoryTest, multiplyPlain) { /* NOLINT */
   std::unique_ptr<AbstractCiphertext> ctxt1 = scf->createCiphertext(data1);
 
   std::vector<int> data2 = {0, 1, 2, 1, 10, 21};
-  auto operandVector = createCleartext(data2);
+  auto operandVector = createCleartextSim(data2);
 
   auto ctxtResult = ctxt1->multiplyPlain(operandVector);
   double expected_noise = calcMultiplyPlainNoiseHeuristic(*ctxt1,operandVector); //TODO: check if this works
@@ -300,7 +302,7 @@ TEST_F(SimulatorCiphertextFactoryTest, addPlainInplace) { /* NOLINT */
   std::unique_ptr<AbstractCiphertext> ctxt1 = scf->createCiphertext(data1);
 
   std::vector<int> data2 = {0, 1, 2, 1, 10, 21};
-  auto operandVector = createCleartext(data2);
+  auto operandVector = createCleartextSim(data2);
 
   ctxt1->addPlainInplace(operandVector);
   double expected_noise = calcAddPlainNoiseHeuristic(*ctxt1,operandVector); //TODO: check if this works
@@ -313,7 +315,7 @@ TEST_F(SimulatorCiphertextFactoryTest, subPlainInplace) { /* NOLINT */
   std::unique_ptr<AbstractCiphertext> ctxt1 = scf->createCiphertext(data1);
 
   std::vector<int> data2 = {0, 1, 2, 1, 10, 21};
-  auto operandVector = createCleartext(data2);
+  auto operandVector = createCleartextSim(data2);
 
   ctxt1->subtractPlainInplace(operandVector);
   double expected_noise = calcAddPlainNoiseHeuristic(*ctxt1,operandVector); //TODO: check if this works
@@ -326,7 +328,7 @@ TEST_F(SimulatorCiphertextFactoryTest, multiplyPlainInplace) { /* NOLINT */
   std::unique_ptr<AbstractCiphertext> ctxt1 = scf->createCiphertext(data1);
 
   std::vector<int> data2 = {0, 1, 2, 1, 10, 21};
-  auto operandVector = createCleartext(data2);
+  auto operandVector = createCleartextSim(data2);
 
   ctxt1->multiplyPlainInplace(operandVector);
   double expected_noise = calcMultiplyPlainNoiseHeuristic(*ctxt1,operandVector); //TODO: check if this works
