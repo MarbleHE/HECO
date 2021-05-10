@@ -15,6 +15,7 @@ SimulatorCiphertext::SimulatorCiphertext(SimulatorCiphertextFactory &simulatorFa
 
 SimulatorCiphertext::SimulatorCiphertext(const SimulatorCiphertext &other)  // copy constructor
     : AbstractNoiseMeasuringCiphertext(other.factory) {
+  _plaintext = other._plaintext;
   _ciphertext = other._ciphertext;
   _noise = other._noise;
   _noise_budget = other._noise_budget;
@@ -448,7 +449,6 @@ void SimulatorCiphertext::createFresh(std::unique_ptr<seal::Plaintext> &plaintex
   // set _plaintext to plaintext (needed for correct decryption)
   _plaintext = *plaintext;
   // clone
-  std::unique_ptr<SimulatorCiphertext> new_ctxt = this->clone_impl();
   double result_noise;
   /*
   // SEAL 2.3.0: Noise is ~ r_t(q)*plain_max_abs_value * plain_max_coeff_count + 7 * min(B, 6*sigma)*t*n     (from SEAL 2.3.0)
@@ -465,11 +465,11 @@ void SimulatorCiphertext::createFresh(std::unique_ptr<seal::Plaintext> &plaintex
   //iliashenko: noise is t/q * ( n * (t-1) / 2 + 2 * sigma sqrt(12 * n^2 + 9 * n) )
   // compute product coeff modulus
   uint64_t coeff_modulus = 1;
-  for (auto mod : new_ctxt->getFactory().getContext().first_context_data()->parms().coeff_modulus()) {
+  for (auto mod : this->getFactory().getContext().first_context_data()->parms().coeff_modulus()) {
     coeff_modulus *= mod.value();
   }
-  int64_t plain_modulus = new_ctxt->getFactory().getContext().first_context_data()->parms().plain_modulus().value();
-  int64_t poly_modulus = new_ctxt->getFactory().getContext().first_context_data()->parms().poly_modulus_degree();
+  int64_t plain_modulus = this->getFactory().getContext().first_context_data()->parms().plain_modulus().value();
+  int64_t poly_modulus = this->getFactory().getContext().first_context_data()->parms().poly_modulus_degree();
   double sigma = 3.2;
   result_noise = plain_modulus / coeff_modulus * (poly_modulus * (coeff_modulus - 1) / 2
       + 2 * sigma *sqrt(12 * pow(poly_modulus,2) + 9 * poly_modulus));

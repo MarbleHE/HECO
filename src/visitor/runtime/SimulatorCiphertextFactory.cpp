@@ -87,11 +87,12 @@ void SimulatorCiphertextFactory::setupSealContext() {
   context = std::make_shared<seal::SEALContext>(params);
 
   // Create keys
-  seal::KeyGenerator keyGenerator(*context);
-  *secretKey = keyGenerator.secret_key();
-  keyGenerator.create_public_key(*publicKey);
-  keyGenerator.create_galois_keys(*galoisKeys);
-  keyGenerator.create_relin_keys(*relinKeys);
+  keyGenerator = std::make_unique<seal::KeyGenerator>(*context);
+  //NOTE: The following is inefficient, since we're doing a byte-by-byte copy of the key here!
+  secretKey = std::make_unique<seal::SecretKey>(keyGenerator->secret_key());
+  keyGenerator->create_public_key(*publicKey);
+  keyGenerator->create_galois_keys(*galoisKeys);
+  keyGenerator->create_relin_keys(*relinKeys);
 
   // Create helpers for en-/decoding, en-/decryption, and ciphertext evaluation
   encoder = std::make_unique<seal::BatchEncoder>(*context);
