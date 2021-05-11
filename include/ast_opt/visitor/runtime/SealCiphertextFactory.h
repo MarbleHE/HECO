@@ -19,13 +19,13 @@ class SealCiphertextFactory : public AbstractCiphertextFactory {
   std::unique_ptr<seal::SecretKey> secretKey;
 
   /// The public key.
-  std::unique_ptr<seal::PublicKey> publicKey;
+  std::unique_ptr<seal::PublicKey> publicKey = std::make_unique<seal::PublicKey>();
 
   /// The rotation keys.
-  std::unique_ptr<seal::GaloisKeys> galoisKeys;
+  std::unique_ptr<seal::GaloisKeys> galoisKeys = std::make_unique<seal::GaloisKeys>();
 
   /// The relinearization keys.
-  std::unique_ptr<seal::RelinKeys> relinKeys;
+  std::unique_ptr<seal::RelinKeys> relinKeys = std::make_unique<seal::RelinKeys>();
 
   /// The encoder helper object.
   std::unique_ptr<seal::BatchEncoder> encoder;

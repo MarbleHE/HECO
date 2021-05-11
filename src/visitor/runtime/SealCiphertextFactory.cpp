@@ -87,7 +87,7 @@ void SealCiphertextFactory::setupSealContext() {
 
   // Create keys
   seal::KeyGenerator keyGenerator(*context);
-  *secretKey = keyGenerator.secret_key();
+  secretKey = std::make_unique<seal::SecretKey>(keyGenerator.secret_key());
   keyGenerator.create_public_key(*publicKey);
   keyGenerator.create_galois_keys(*galoisKeys);
   keyGenerator.create_relin_keys(*relinKeys);
