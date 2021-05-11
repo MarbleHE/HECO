@@ -47,7 +47,7 @@ namespace seal_old
         ntt_tables_ = context.plain_ntt_tables_;
 
         // Fill the vector of roots of unity with all distinct odd powers of generator.
-        // These are all the primitive (2*slots_)-th roots of unity in integers modulo parms_.plain_modulus().
+        // These are all the primitive (2*slots_)-th roots of unity in integers modulo_inplace parms_.plain_modulus().
         populate_roots_of_unity_vector();
 
         // Populate matrix representation index map

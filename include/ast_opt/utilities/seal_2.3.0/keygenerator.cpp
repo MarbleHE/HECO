@@ -266,7 +266,7 @@ namespace seal_old
                         negate_poly_coeffmod(eval_keys_first + (j * coeff_count), coeff_count, parms_.coeff_modulus()[j], 
                             eval_keys_first + (j * coeff_count));
 
-                        //multiply w^i * s^(k+2)
+                        //multiply_inplace w^i * s^(k+2)
                         uint64_t decomposition_factor_mod = decomposition_factors[l][i] & static_cast<uint64_t>(-static_cast<int64_t>(l == j));
                         multiply_poly_scalar_coeffmod(secret_key_array_.get() + (k + 1) * coeff_count * coeff_mod_count + (j * coeff_count), 
                             coeff_count, decomposition_factor_mod, parms_.coeff_modulus()[j], temp.get());
@@ -399,7 +399,7 @@ namespace seal_old
                         negate_poly_coeffmod(eval_keys_first + (j * coeff_count), coeff_count, parms_.coeff_modulus()[j], 
                             eval_keys_first + (j * coeff_count));
 
-                        //multiply w^i * rotated_secret_key
+                        //multiply_inplace w^i * rotated_secret_key
                         uint64_t decomposition_factor_mod = decomposition_factors[l][i] & static_cast<uint64_t>(-static_cast<int64_t>(l == j));
                         multiply_poly_scalar_coeffmod(rotated_secret_key.get() + (j * coeff_count), coeff_count, decomposition_factor_mod, 
                             parms_.coeff_modulus()[j], temp.get());
@@ -552,7 +552,7 @@ namespace seal_old
         }
     }
 
-    /*Set the coeffs of a BigPoly to be uniform modulo coeff_mod*/
+    /*Set the coeffs of a BigPoly to be uniform modulo_inplace coeff_mod*/
     void KeyGenerator::set_poly_coeffs_uniform(uint64_t *poly, UniformRandomGenerator *random)
     {
         //get parameters
@@ -578,7 +578,7 @@ namespace seal_old
             }
         }
         
-        // when poly is fully populated, reduce all coefficient modulo coeff_modulus
+        // when poly is fully populated, reduce all coefficient modulo_inplace coeff_modulus
         for (int i = 0; i < coeff_mod_count; i++)
         {
             modulo_poly_coeffs(poly + (i * coeff_count), coeff_count, parms_.coeff_modulus()[i], poly + (i * coeff_count));
@@ -691,7 +691,7 @@ namespace seal_old
             while (current_smallmod != 0)
             {
                 decomposition_factors[i].emplace_back(current_decomposition_factor);
-                //multiply 2^w mod q_i
+                //multiply_inplace 2^w mod q_i
                 current_decomposition_factor = multiply_uint_uint_mod(current_decomposition_factor, power_of_w, parms_.coeff_modulus()[i]);
                 current_smallmod >>= decomposition_bit_count;
             }

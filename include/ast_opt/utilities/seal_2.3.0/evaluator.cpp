@@ -419,8 +419,8 @@ namespace seal_old
                 tmp_encrypted2_bsk.get() + (i * encrypted_bsk_ptr_increment));
         }
         
-        // Step 2: compute product and multiply plain modulus to the result
-        // We need to multiply both in q and Bsk. Values in encrypted_safe are in base q and values in tmp_encrypted_bsk are in base Bsk
+        // Step 2: compute product and multiply_inplace plain modulus to the result
+        // We need to multiply_inplace both in q and Bsk. Values in encrypted_safe are in base q and values in tmp_encrypted_bsk are in base Bsk
         // We iterate over destination poly array and generate each poly based on the indices of inputs (arbitrary sizes for ciphertexts)
         // First allocate two temp polys: one for results in base q and the other for the result in base Bsk
         // These need to be zero for the arbitrary size multiplication; not for 2x2 though
@@ -667,7 +667,7 @@ namespace seal_old
             }
         }
 
-        // Now we multiply plain modulus to both results in base q and Bsk and allocate them together in one 
+        // Now we multiply_inplace plain modulus to both results in base q and Bsk and allocate them together in one
         // container as (te0)q(te'0)Bsk | ... |te count)q (te' count)Bsk to make it ready for fast_floor 
         Pointer tmp_coeff_bsk_together(allocate_poly(coeff_count, dest_count * (coeff_mod_count + bsk_base_mod_count_), pool));
         uint64_t *tmp_coeff_bsk_together_ptr = tmp_coeff_bsk_together.get();
@@ -754,8 +754,8 @@ namespace seal_old
                 tmp_encrypted_bsk.get() + (i * encrypted_bsk_ptr_increment));
         }
 
-        // Step 2: compute product and multiply plain modulus to the result
-        // We need to multiply both in q and Bsk. Values in encrypted_safe are in base q and values in 
+        // Step 2: compute product and multiply_inplace plain modulus to the result
+        // We need to multiply_inplace both in q and Bsk. Values in encrypted_safe are in base q and values in
         // tmp_encrypted_bsk are in base Bsk
         // We iterate over destination poly array and generate each poly based on the indices of inputs 
         // (arbitrary sizes for ciphertexts)
@@ -851,7 +851,7 @@ namespace seal_old
             }
         }
 
-        // Now we multiply plain modulus to both results in base q and Bsk and allocate them together in one 
+        // Now we multiply_inplace plain modulus to both results in base q and Bsk and allocate them together in one
         // container as (te0)q(te'0)Bsk | ... |te count)q (te' count)Bsk to make it ready for fast_floor 
         Pointer tmp_coeff_bsk_together(allocate_poly(coeff_count, dest_count * (coeff_mod_count + bsk_base_mod_count_), pool));
         uint64_t *tmp_coeff_bsk_together_ptr = tmp_coeff_bsk_together.get();
@@ -968,7 +968,7 @@ namespace seal_old
 
         // Decompose encrypted_array[count-1] into base w
         // Want to create an array of polys, each of whose components i is (encrypted_array[count-1])^(i) - in the notation of FV paper
-        // This allocation stores one of the decomposed factors modulo one of the primes
+        // This allocation stores one of the decomposed factors modulo_inplace one of the primes
         Pointer decomp_encrypted_last(allocate_uint(coeff_count, pool));
 
         // Lazy reduction   
@@ -1096,7 +1096,7 @@ namespace seal_old
             return;
         }
 
-        // Repeatedly multiply and add to the back of the vector until the end is reached
+        // Repeatedly multiply_inplace and add to the back of the vector until the end is reached
         Ciphertext product(parms_, pool);
         for (size_t i = 0; i < encrypteds.size() - 1; i += 2)
         {
@@ -1217,7 +1217,7 @@ namespace seal_old
             throw invalid_argument("plain is not valid for encryption parameters");
         }
 #endif
-        // This is Encryptor::preencrypt changed to subtract instead
+        // This is Encryptor::preencrypt changed to subtract_inplace instead
         // Multiply plain by scalar coeff_div_plain_modulus_ and reposition if in upper-half.
         for (int i = 0; i < plain.coeff_count(); i++)
         {
@@ -1460,7 +1460,7 @@ namespace seal_old
             poly_to_transform = adjusted_poly.get();
         }
 
-        // Need to multiply each component in encrypted with decomposed_poly (plain poly)
+        // Need to multiply_inplace each component in encrypted with decomposed_poly (plain poly)
         // Transform plain poly only once
         for (int i = 0; i < coeff_mod_count; i++)
         {
@@ -1753,7 +1753,7 @@ namespace seal_old
 
         // decompose encrypted_array[count-1] into base w
         // want to create an array of polys, each of whose components i is (encrypted_array[count-1])^(i) - in the notation of FV paper
-        // This allocation stores one of the decomposed factors modulo one of the primes
+        // This allocation stores one of the decomposed factors modulo_inplace one of the primes
         Pointer decomp_encrypted_last(allocate_uint(coeff_count, pool));
 
         // Lazy reduction

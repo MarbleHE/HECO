@@ -205,7 +205,7 @@ namespace seal_old
             uint64_t *monic_denominator_scalar = big_alloc.get();
 
             // Create temporary scalars used during calculation of quotient.
-            // Both are purposely twice as wide to store intermediate product prior to modulo operation.
+            // Both are purposely twice as wide to store intermediate product prior to modulo_inplace operation.
             uint64_t *temp_quotient = monic_denominator_scalar + coeff_uint64_count;
             uint64_t *subtrahend = temp_quotient + intermediate_uint64_count;
 
@@ -484,7 +484,7 @@ namespace seal_old
             uint64_t monic_denominator_scalar;
 
             // Create temporary scalars used during calculation of quotient.
-            // Both are purposely twice as wide to store intermediate product prior to modulo operation.
+            // Both are purposely twice as wide to store intermediate product prior to modulo_inplace operation.
             int intermediate_uint64_count = coeff_uint64_count * 2;
             Pointer temp_quotient(allocate_uint(intermediate_uint64_count, pool));
             Pointer subtrahend(allocate_uint(intermediate_uint64_count, pool));

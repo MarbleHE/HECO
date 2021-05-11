@@ -14,7 +14,7 @@ namespace seal_old
     @par Slot Rotations
     Galois keys are used together with batching (PolyCRTBuilder). If the polynomial modulus
     is a polynomial of degree N, in batching the idea is to view a plaintext polynomial as
-    a 2-by-(N/2) matrix of integers modulo plaintext modulus. Normal homomorphic computations
+    a 2-by-(N/2) matrix of integers modulo_inplace plaintext modulus. Normal homomorphic computations
     operate on such encrypted matrices element (slot) wise. However, special rotation
     operations allow us to also rotate the matrix rows cyclically in either direction, and 
     rotate the columns (swap the rows). These operations require the Galois keys.

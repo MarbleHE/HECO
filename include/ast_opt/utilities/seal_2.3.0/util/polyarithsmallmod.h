@@ -573,7 +573,7 @@ namespace seal_old
             Pointer intermediate(allocate_uint(intermediate_coeff_count, pool));
             multiply_poly_poly_coeffmod(operand1, operand2, coeff_count, modulus, intermediate.get());
 
-            // Perform modulo operation.
+            // Perform modulo_inplace operation.
             modulo_poly_inplace(intermediate.get(), intermediate_coeff_count, poly_modulus, modulus);
 
             // Copy to result.
@@ -615,7 +615,7 @@ namespace seal_old
             int result_coeff_count = coeff_count * 2 - 1;
             multiply_poly_poly_coeffmod(operand1, operand2, coeff_count, modulus, result);
 
-            // Perform modulo operation.
+            // Perform modulo_inplace operation.
             modulo_poly_inplace(result, result_coeff_count, poly_modulus, modulus);
         }
 

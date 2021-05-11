@@ -131,7 +131,7 @@ namespace seal_old
         The coefficient modulus directly affects the size of ciphertext elements, the 
         amount of computation that the scheme can perform (bigger is better), and the 
         security level (bigger is worse). In SEAL each of the prime numbers in the 
-        coefficient modulus must be at most 60 bits, and must be congruent to 1 modulo 
+        coefficient modulus must be at most 60 bits, and must be congruent to 1 modulo_inplace
         2*degree(poly_modulus).
 
         @param[in] coeff_modulus The new coefficient modulus

@@ -100,7 +100,7 @@ namespace seal_old
                 throw std::out_of_range("operand2");
             }
 #endif
-            // Sum of operands modulo SmallModulus can never wrap around 2^64
+            // Sum of operands modulo_inplace SmallModulus can never wrap around 2^64
             operand1 += operand2;
             return operand1 - (modulus.value() & static_cast<std::uint64_t>(-static_cast<std::int64_t>(operand1 >= modulus.value())));
         }
@@ -241,10 +241,10 @@ namespace seal_old
 
         bool is_primitive_root(std::uint64_t root, std::uint64_t degree, const SmallModulus &prime_modulus);
 
-        // Try to find a primitive degree-th root of unity modulo small prime modulus, where degree must be a power of two.
+        // Try to find a primitive degree-th root of unity modulo_inplace small prime modulus, where degree must be a power of two.
         bool try_primitive_root(std::uint64_t degree, const SmallModulus &prime_modulus, std::uint64_t &destination);
 
-        // Try to find the smallest (as integer) primitive degree-th root of unity modulo small prime modulus, where degree must be a power of two.
+        // Try to find the smallest (as integer) primitive degree-th root of unity modulo_inplace small prime modulus, where degree must be a power of two.
         bool try_minimal_primitive_root(std::uint64_t degree, const SmallModulus &prime_modulus, std::uint64_t &destination);
    
         std::uint64_t exponentiate_uint_mod(std::uint64_t operand, std::uint64_t exponent, const SmallModulus &modulus);

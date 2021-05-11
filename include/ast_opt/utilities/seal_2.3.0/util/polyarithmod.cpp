@@ -180,7 +180,7 @@ namespace seal_old
             uint64_t *monic_denominator_scalar = alloc_anchor.get();
 
             // Create temporary scalars used during calculation of quotient.
-            // Both are purposely twice as wide to store intermediate product prior to modulo operation.
+            // Both are purposely twice as wide to store intermediate product prior to modulo_inplace operation.
             uint64_t *temp_quotient = monic_denominator_scalar + coeff_uint64_count;
             uint64_t *subtrahend = temp_quotient + intermediate_uint64_count;
 
@@ -253,7 +253,7 @@ namespace seal_old
                 if (is_greater_than_or_equal_uint_uint(poly_modulus.get() + (i * poly_modulus.coeff_uint64_count()), poly_modulus.coeff_uint64_count(),
                     modulus.get(), modulus.uint64_count()))
                 {
-                    throw invalid_argument("poly_modulus coefficients are not reduced modulo modulus");
+                    throw invalid_argument("poly_modulus coefficients are not reduced modulo_inplace modulus");
                 }
             }
 #endif
@@ -309,7 +309,7 @@ namespace seal_old
             uint64_t *monic_poly_modulus_scalar = alloc_anchor.get();
 
             // Create temporary scalars used during calculation of quotient.
-            // Both are purposely twice as wide to store intermediate product prior to modulo operation.
+            // Both are purposely twice as wide to store intermediate product prior to modulo_inplace operation.
             uint64_t *temp_quotient = monic_poly_modulus_scalar + coeff_uint64_count;
             uint64_t *subtrahend = temp_quotient + intermediate_uint64_count;
 
@@ -387,7 +387,7 @@ namespace seal_old
                 if (is_greater_than_or_equal_uint_uint(poly_modulus.get() + (i * poly_modulus.coeff_uint64_count()), poly_modulus.coeff_uint64_count(),
                     modulus.get(), modulus.uint64_count()))
                 {
-                    throw invalid_argument("poly_modulus coefficients are not reduced modulo modulus");
+                    throw invalid_argument("poly_modulus coefficients are not reduced modulo_inplace modulus");
                 }
             }
 #endif
@@ -398,7 +398,7 @@ namespace seal_old
             Pointer intermediate(allocate_poly(intermediate_coeff_count, coeff_uint64_count, pool));
             multiply_poly_poly_coeffmod(operand1, operand2, coeff_count, modulus, intermediate.get(), pool);
 
-            // Perform modulo operation.
+            // Perform modulo_inplace operation.
             modulo_poly_inplace(intermediate.get(), intermediate_coeff_count, poly_modulus, modulus, pool);
 
             // Copy to result.
@@ -437,7 +437,7 @@ namespace seal_old
                 if (is_greater_than_or_equal_uint_uint(poly_modulus.get() + (i * poly_modulus.coeff_uint64_count()), poly_modulus.coeff_uint64_count(),
                     modulus.get(), modulus.uint64_count()))
                 {
-                    throw invalid_argument("poly_modulus coefficients are not reduced modulo modulus");
+                    throw invalid_argument("poly_modulus coefficients are not reduced modulo_inplace modulus");
                 }
             }
 #endif
@@ -446,7 +446,7 @@ namespace seal_old
             int result_coeff_count = coeff_count * 2 - 1;
             multiply_poly_poly_coeffmod(operand1, operand2, coeff_count, modulus, result, pool);
 
-            // Perform modulo operation.
+            // Perform modulo_inplace operation.
             modulo_poly_inplace(result, result_coeff_count, poly_modulus, modulus, pool);
         }
 
@@ -477,7 +477,7 @@ namespace seal_old
             {
                 if (is_greater_than_or_equal_uint_uint(poly_modulus + (i * modulus.uint64_count()), modulus.uint64_count(), modulus.get(), modulus.uint64_count()))
                 {
-                    throw invalid_argument("poly_modulus coefficients are not reduced modulo modulus");
+                    throw invalid_argument("poly_modulus coefficients are not reduced modulo_inplace modulus");
                 }
             }
 #endif
@@ -508,7 +508,7 @@ namespace seal_old
             Pointer monic_denominator_scalar(allocate_uint(coeff_uint64_count, pool));
 
             // Create temporary scalars used during calculation of quotient.
-            // Both are purposely twice as wide to store intermediate product prior to modulo operation.
+            // Both are purposely twice as wide to store intermediate product prior to modulo_inplace operation.
             int intermediate_uint64_count = coeff_uint64_count * 2;
             Pointer temp_quotient(allocate_uint(intermediate_uint64_count, pool));
             Pointer subtrahend(allocate_uint(intermediate_uint64_count, pool));
@@ -685,7 +685,7 @@ namespace seal_old
                 if (is_greater_than_or_equal_uint_uint(poly_modulus.get() + (i * poly_modulus.coeff_uint64_count()), poly_modulus.coeff_uint64_count(),
                     modulus.get(), modulus.uint64_count()))
                 {
-                    throw invalid_argument("poly_modulus coefficients are not reduced modulo modulus");
+                    throw invalid_argument("poly_modulus coefficients are not reduced modulo_inplace modulus");
                 }
             }
 #endif

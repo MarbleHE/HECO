@@ -112,9 +112,9 @@ class SimulatorCiphertextFactoryTest : public ::testing::Test {
     }
   }
 
-  void checkCiphertextNoise(AbstractCiphertext &abstractCiphertext, double expected_noise) {
+  void checkCiphertextNoise(const AbstractCiphertext &abstractCiphertext, double expected_noise) {
     // get noise from input ciphertext and compare with the expected value
-    double result = scf->getNoise(abstractCiphertext);
+    double result = (dynamic_cast<const SimulatorCiphertext&>(abstractCiphertext)).getNoise();
     EXPECT_EQ(result, expected_noise);
   }
 };

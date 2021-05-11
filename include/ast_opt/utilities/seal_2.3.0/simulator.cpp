@@ -341,7 +341,7 @@ using namespace seal_old::util;
             return simulations[0];
         }
 
-        // Repeatedly multiply and add to the back of the vector until the end is reached.
+        // Repeatedly multiply_inplace and add to the back of the vector until the end is reached.
         // We will detect here if one of the elements of the simulations vector was constructed with
         // different encryption parameters than the others.
         for (size_t i = 0; i < simulations.size() - 1; i += 2)
@@ -380,7 +380,7 @@ using namespace seal_old::util;
         {
         return exponentiate(multiply(simulation, simulation), exponent >> 1);
         }
-        return multiply(exponentiate(multiply(simulation, simulation), (exponent - 1) >> 1), simulation);
+        return multiply(exponentiate(multiply_inplace(simulation, simulation), (exponent - 1) >> 1), simulation);
         */
     }
 }

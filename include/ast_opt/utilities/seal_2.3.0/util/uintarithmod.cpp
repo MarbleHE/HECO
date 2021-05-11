@@ -63,7 +63,7 @@ namespace seal_old
 
             Pointer shifted(allocate_uint(uint64_count, pool));
 
-            // Handle fast case modulo is power of 2 minus one.
+            // Handle fast case modulo_inplace is power of 2 minus one.
             int modulo_power_min_one = modulus.power_of_two_minus_one();
             if (modulo_power_min_one >= 2)
             {
@@ -86,7 +86,7 @@ namespace seal_old
                 return;
             }
 
-            // Handle fast case -modulo (clipped to modulus_bits) is small.
+            // Handle fast case -modulo_inplace (clipped to modulus_bits) is small.
             const uint64_t *invmodulus = modulus.get_inverse();
             if (invmodulus != nullptr)
             {
@@ -358,7 +358,7 @@ namespace seal_old
                 }
                 else
                 {
-                    // If both sides of add have opposite sign, then subtract and check for overflow.
+                    // If both sides of add have opposite sign, then subtract_inplace and check for overflow.
                     uint64_t borrow = sub_uint_uint(invert_prior, invert_next, uint64_count, invert_next);
                     if (borrow == 0)
                     {
@@ -390,7 +390,7 @@ namespace seal_old
                 return false;
             }
 
-            // Correct coefficient if negative by modulo.
+            // Correct coefficient if negative by modulo_inplace.
             if (!invert_curr_positive && !is_zero_uint(invert_curr, uint64_count))
             {
                 sub_uint_uint(modulus, invert_curr, uint64_count, invert_curr);
@@ -428,8 +428,8 @@ namespace seal_old
                 return false;
             }
 
-            // We check if root is a degree-th root of unity in integers modulo modulus, where degree is a power of two.
-            // It suffices to check that root^(degree/2) is -1 modulo modulus.
+            // We check if root is a degree-th root of unity in integers modulo_inplace modulus, where degree is a power of two.
+            // It suffices to check that root^(degree/2) is -1 modulo_inplace modulus.
             Pointer power(allocate_uint(uint64_count, pool));
             degree >>= 1;
             exponentiate_uint_mod(root, &degree, 1, prime_modulus, power.get(), pool);
@@ -456,7 +456,7 @@ namespace seal_old
 #endif
             int uint64_count = prime_modulus.uint64_count();
 
-            // We need to divide modulus-1 by degree to get the size of the quotient group
+            // We need to divide_inplace modulus-1 by degree to get the size of the quotient group
             Pointer alloc_anchor(allocate_uint(3 * uint64_count, pool));
             uint64_t *size_entire_group = alloc_anchor.get();
             decrement_uint(prime_modulus.get(), uint64_count, size_entire_group);
@@ -468,7 +468,7 @@ namespace seal_old
             uint64_t *size_quotient_group = divisor + uint64_count;
             divide_uint_uint_inplace(size_entire_group, divisor, uint64_count, size_quotient_group, pool);
 
-            // size_entire_group must be zero now, or otherwise the primitive root does not exist in integers modulo modulus
+            // size_entire_group must be zero now, or otherwise the primitive root does not exist in integers modulo_inplace modulus
             if (!is_zero_uint(size_entire_group, uint64_count))
             {
                 return false;
@@ -483,7 +483,7 @@ namespace seal_old
             {
                 attempt_counter++;
 
-                // Set destination to be a random number modulo modulus
+                // Set destination to be a random number modulo_inplace modulus
                 uint32_t *random_uint32_ptr = reinterpret_cast<uint32_t*>(destination);
                 for (int i = 0; i < 2 * uint64_count; i++)
                 {

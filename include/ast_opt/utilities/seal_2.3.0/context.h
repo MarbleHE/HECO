@@ -38,7 +38,7 @@ namespace seal_old
         /**
         Tells whether FFT can be used for polynomial multiplication. If the polynomial modulus
         is of the form X^N+1, where N is a power of two, then FFT can be used for fast 
-        multiplication of polynomials modulo the polynomial modulus. In this case the 
+        multiplication of polynomials modulo_inplace the polynomial modulus. In this case the
         variable enable_fft will be set to true. However, currently SEAL requires this
         to be the case for the parameters to be valid. Therefore, parameters_set can only
         be true if enable_fft is true.
@@ -47,9 +47,9 @@ namespace seal_old
 
         /**
         Tells whether NTT can be used for polynomial multiplication. If the primes in the 
-        coefficient modulus are congruent to 1 modulo 2N, where X^N+1 is the polynomial 
+        coefficient modulus are congruent to 1 modulo_inplace 2N, where X^N+1 is the polynomial
         modulus and N is a power of two, then the number-theoretic transform (NTT) can be 
-        used for fast multiplications of polynomials modulo the polynomial modulus and 
+        used for fast multiplications of polynomials modulo_inplace the polynomial modulus and
         coefficient modulus. In this case the variable enable_ntt will be set to true. However, 
         currently SEAL requires this to be the case for the parameters to be valid. Therefore, 
         parameters_set can only be true if enable_ntt is true.
@@ -58,9 +58,9 @@ namespace seal_old
 
         /**
         Tells whether batching is supported by the encryption parameters. If the plaintext 
-        modulus is congruent to 1 modulo 2N, where X^N+1 is the polynomial modulus and N is
+        modulus is congruent to 1 modulo_inplace 2N, where X^N+1 is the polynomial modulus and N is
         a power of two, then it is possible to use the PolyCRTBuilder class to view plaintext 
-        elements as 2-by-(N/2) matrices of integers modulo the plaintext modulus. This is 
+        elements as 2-by-(N/2) matrices of integers modulo_inplace the plaintext modulus. This is
         called batching, and allows the user to operate on the matrix elements (slots) in 
         a SIMD fashion, and rotate the matrix rows and columns. When the computation is 
         easily vectorizable, using batching can yield a huge performance boost. If the 

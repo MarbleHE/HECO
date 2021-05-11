@@ -266,7 +266,7 @@ namespace seal_old
                 pos_pointer = &coeff;
             }
 
-            // Add or subtract-in coefficient.
+            // Add or subtract_inplace-in coefficient.
             if (result_is_negative == coeff_is_negative)
             {
                 // Result and coefficient have same signs so add.
@@ -283,7 +283,7 @@ namespace seal_old
             }
             else
             {
-                // Result and coefficient have opposite signs so subtract.
+                // Result and coefficient have opposite signs so subtract_inplace.
                 if (sub_uint_uint64(result, *pos_pointer, result_uint64_count, result))
                 {
                     // Subtraction produced a borrow so coefficient is larger (in magnitude) than result, so need to negate result.
@@ -346,7 +346,7 @@ namespace seal_old
                 pos_pointer = &coeff;
             }
 
-            // Add or subtract-in coefficient.
+            // Add or subtract_inplace-in coefficient.
             if (result_is_negative == coeff_is_negative)
             {
                 // Result and coefficient have same signs so add.
@@ -360,7 +360,7 @@ namespace seal_old
             }
             else
             {
-                // Result and coefficient have opposite signs so subtract.
+                // Result and coefficient have opposite signs so subtract_inplace.
                 if (sub_uint_uint64(result, *pos_pointer, result_uint64_count, result))
                 {
                     // Subtraction produced a borrow so coefficient is larger (in magnitude) than result, so need to negate result.
@@ -705,7 +705,7 @@ namespace seal_old
                 pos_pointer = &coeff;
             }
 
-            // Add or subtract-in coefficient.
+            // Add or subtract_inplace-in coefficient.
             if (result_is_negative == coeff_is_negative)
             {
                 // Result and coefficient have same signs so add.
@@ -722,7 +722,7 @@ namespace seal_old
             }
             else
             {
-                // Result and coefficient have opposite signs so subtract.
+                // Result and coefficient have opposite signs so subtract_inplace.
                 if (sub_uint_uint64(result, *pos_pointer, result_uint64_count, result))
                 {
                     // Subtraction produced a borrow so coefficient is larger (in magnitude) than result, so need to negate result.
@@ -792,7 +792,7 @@ namespace seal_old
                 pos_pointer = &coeff;
             }
 
-            // Add or subtract-in coefficient.
+            // Add or subtract_inplace-in coefficient.
             if (result_is_negative == coeff_is_negative)
             {
                 // Result and coefficient have same signs so add.
@@ -806,7 +806,7 @@ namespace seal_old
             }
             else
             {
-                // Result and coefficient have opposite signs so subtract.
+                // Result and coefficient have opposite signs so subtract_inplace.
                 if (sub_uint_uint64(result, *pos_pointer, result_uint64_count, result))
                 {
                     // Subtraction produced a borrow so coefficient is larger (in magnitude) than result, so need to negate result.
@@ -1054,7 +1054,7 @@ namespace seal_old
             value_int = static_cast<int64_t>(sign * ceil(abs(value) - 0.5));
             value -= value_int;
 
-            // We store the representative of value_int modulo the base (symmetric representative)
+            // We store the representative of value_int modulo_inplace the base (symmetric representative)
             // as the absolute value (in value_int_mod_base) and as the sign (in is_negative).
             bool is_negative = false;
 
@@ -1066,7 +1066,7 @@ namespace seal_old
 
             // Set the constant coefficient of encoded_fract to be the correct absolute value.
             encoded_fract[0] = value_int;
-            // And negate it modulo plain_modulus if it was NOT supposed to be negative, because the
+            // And negate it modulo_inplace plain_modulus if it was NOT supposed to be negative, because the
             // fractional encoding requires the signs of the fractional coefficients to be negatives of
             // what one might naively expect, as they change sign when "wrapping around" the polynomial modulus.
             if (!is_negative && value_int != 0)
@@ -1211,7 +1211,7 @@ namespace seal_old
             is_negative[fraction_coeff_count_ - 1] = 1ULL;
         }
 
-        // And negate it modulo plain_modulus if it was NOT supposed to be negative, because the
+        // And negate it modulo_inplace plain_modulus if it was NOT supposed to be negative, because the
         // fractional encoding requires the signs of the fractional coefficients to be negatives of
         // what one might naively expect, as they change sign when "wrapping around" the polynomial modulus.
         for (int i = fraction_coeff_count_ - 1; i >= 0; --i)

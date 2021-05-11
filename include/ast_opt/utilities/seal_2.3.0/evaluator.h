@@ -27,7 +27,7 @@ namespace seal_old
     the plaintext modulus and X^N+1 is the polynomial modulus, this is the ring where the
     arithmetic operations will take place. PolyCRTBuilder (batching) provider an alternative
     possibly more convenient view of the plaintext elements as 2-by-(N2/2) matrices of
-    integers modulo the plaintext modulus. In the batching view the arithmetic operations
+    integers modulo_inplace the plaintext modulus. In the batching view the arithmetic operations
     act on the matrices element-wise. Some of the operations only apply in the batching
     view, such as matrix row and column rotations. Other operations such as relinearization
     have no semantic meaning but are necessary for performance reasons.
@@ -186,8 +186,8 @@ namespace seal_old
         Subtracts two ciphertexts. This function computes the difference of encrypted1 and
         encrypted2, and stores the result in encrypted1.
 
-        @param[in] encrypted1 The ciphertext to subtract from
-        @param[in] encrypted2 The ciphertext to subtract
+        @param[in] encrypted1 The ciphertext to subtract_inplace from
+        @param[in] encrypted2 The ciphertext to subtract_inplace
         @throws std::invalid_argument if encrypted1 or encrypted2 is not valid for the encryption 
         parameters
         @throws std::logic_error if encrypted1 is aliased and needs to be reallocated
@@ -198,8 +198,8 @@ namespace seal_old
         Subtracts two ciphertexts. This function computes the difference of encrypted1 and 
         encrypted2 and stores the result in the destination parameter.
 
-        @param[in] encrypted1 The ciphertext to subtract from
-        @param[in] encrypted2 The ciphertext to subtract
+        @param[in] encrypted1 The ciphertext to subtract_inplace from
+        @param[in] encrypted2 The ciphertext to subtract_inplace
         @param[out] destination The ciphertext to overwrite with the subtraction result
         @throws std::invalid_argument if encrypted1 or encrypted2 is not valid for the encryption 
         parameters
@@ -217,8 +217,8 @@ namespace seal_old
         encrypted2 and stores the result in encrypted1. Dynamic memory allocations in the 
         process are allocated from the memory pool pointed to by the given MemoryPoolHandle.
 
-        @param[in] encrypted1 The first ciphertext to multiply
-        @param[in] encrypted2 The second ciphertext to multiply
+        @param[in] encrypted1 The first ciphertext to multiply_inplace
+        @param[in] encrypted2 The second ciphertext to multiply_inplace
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if encrypted1 or encrypted2 is not valid for the encryption 
         parameters
@@ -233,8 +233,8 @@ namespace seal_old
         encrypted2 and stores the result in encrypted1. Dynamic memory allocations in the 
         process are allocated from the memory pool pointed to by the local MemoryPoolHandle.
 
-        @param[in] encrypted1 The first ciphertext to multiply
-        @param[in] encrypted2 The second ciphertext to multiply
+        @param[in] encrypted1 The first ciphertext to multiply_inplace
+        @param[in] encrypted2 The second ciphertext to multiply_inplace
         @throws std::invalid_argument if encrypted1 or encrypted2 is not valid for the encryption 
         parameters
         @throws std::logic_error if encrypted1 is aliased and needs to be reallocated
@@ -250,8 +250,8 @@ namespace seal_old
         allocations in the process are allocated from the memory pool pointed to by the
         given MemoryPoolHandle.
 
-        @param[in] encrypted1 The first ciphertext to multiply
-        @param[in] encrypted2 The second ciphertext to multiply
+        @param[in] encrypted1 The first ciphertext to multiply_inplace
+        @param[in] encrypted2 The second ciphertext to multiply_inplace
         @param[out] destination The ciphertext to overwrite with the multiplication result
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if encrypted1 or encrypted2 is not valid for the encryption 
@@ -272,8 +272,8 @@ namespace seal_old
         allocations in the process are allocated from the memory pool pointed to by the
         local MemoryPoolHandle.
 
-        @param[in] encrypted1 The first ciphertext to multiply
-        @param[in] encrypted2 The second ciphertext to multiply
+        @param[in] encrypted1 The first ciphertext to multiply_inplace
+        @param[in] encrypted2 The second ciphertext to multiply_inplace
         @param[out] destination The ciphertext to overwrite with the multiplication result
         @throws std::invalid_argument if encrypted1 or encrypted2 is not valid for the 
         encryption parameters
@@ -441,7 +441,7 @@ namespace seal_old
         evaluation keys are used. Dynamic memory allocations in the process are allocated from 
         the memory pool pointed to by the given MemoryPoolHandle.
 
-        @param[in] encrypteds The ciphertexts to multiply
+        @param[in] encrypteds The ciphertexts to multiply_inplace
         @param[in] evaluation_keys The evaluation keys
         @param[out] destination The ciphertext to overwrite with the multiplication result
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
@@ -464,7 +464,7 @@ namespace seal_old
         evaluation keys are used. Dynamic memory allocations in the process are allocated from
         the memory pool pointed to by the local MemoryPoolHandle.
 
-        @param[in] encrypteds The ciphertexts to multiply
+        @param[in] encrypteds The ciphertexts to multiply_inplace
         @param[in] evaluation_keys The evaluation keys
         @param[out] destination The ciphertext to overwrite with the multiplication result
         @throws std::invalid_argument if encrypteds is empty
@@ -616,8 +616,8 @@ namespace seal_old
         than the plaintext modulus, i.e. the plaintext must be a valid plaintext under the 
         current encryption parameters.
 
-        @param[in] encrypted The ciphertext to subtract from
-        @param[in] plain The plaintext to subtract
+        @param[in] encrypted The ciphertext to subtract_inplace from
+        @param[in] plain The plaintext to subtract_inplace
         @throws std::invalid_argument if encrypted or plain is not valid for the encryption
         parameters
         */
@@ -630,8 +630,8 @@ namespace seal_old
         coefficients, and each coefficient must be less than the plaintext modulus, i.e. 
         the plaintext must be a valid plaintext under the current encryption parameters.
 
-        @param[in] encrypted The ciphertext to subtract from
-        @param[in] plain The plaintext to subtract
+        @param[in] encrypted The ciphertext to subtract_inplace from
+        @param[in] plain The plaintext to subtract_inplace
         @param[out] destination The ciphertext to overwrite with the subtraction result
         @throws std::invalid_argument if encrypted or plain is not valid for the encryption
         parameters
@@ -653,8 +653,8 @@ namespace seal_old
         Dynamic memory allocations in the process are allocated from the memory pool pointed 
         to by the given MemoryPoolHandle.
 
-        @param[in] encrypted The ciphertext to multiply
-        @param[in] plain The plaintext to multiply
+        @param[in] encrypted The ciphertext to multiply_inplace
+        @param[in] plain The plaintext to multiply_inplace
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if the encrypted or plain is not valid for the encryption
         parameters
@@ -673,8 +673,8 @@ namespace seal_old
         Dynamic memory allocations in the process are allocated from the memory pool pointed
         to by the local MemoryPoolHandle.
 
-        @param[in] encrypted The ciphertext to multiply
-        @param[in] plain The plaintext to multiply
+        @param[in] encrypted The ciphertext to multiply_inplace
+        @param[in] plain The plaintext to multiply_inplace
         @throws std::invalid_argument if the encrypted or plain is not valid for the encryption
         parameters
         @throws std::invalid_argument if plain is zero
@@ -693,8 +693,8 @@ namespace seal_old
         Moreover, the plaintext cannot be identially 0. Dynamic memory allocations in the 
         process are allocated from the memory pool pointed to by the given MemoryPoolHandle. 
 
-        @param[in] encrypted The ciphertext to multiply
-        @param[in] plain The plaintext to multiply
+        @param[in] encrypted The ciphertext to multiply_inplace
+        @param[in] plain The plaintext to multiply_inplace
         @param[out] destination The ciphertext to overwrite with the multiplication result
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if the encrypted or plain is not valid for the encryption
@@ -719,8 +719,8 @@ namespace seal_old
         Moreover, the plaintext cannot be identially 0. Dynamic memory allocations in the
         process are allocated from the memory pool pointed to by the local MemoryPoolHandle.
 
-        @param[in] encrypted The ciphertext to multiply
-        @param[in] plain The plaintext to multiply
+        @param[in] encrypted The ciphertext to multiply_inplace
+        @param[in] plain The plaintext to multiply_inplace
         @param[out] destination The ciphertext to overwrite with the multiplication result
         @throws std::invalid_argument if the encrypted or plain is not valid for the encryption
         parameters
@@ -735,8 +735,8 @@ namespace seal_old
 
         /**
         Transforms a plaintext to NTT domain. This functions applies the Number Theoretic
-        Transform to a plaintext by first embedding integers modulo the plaintext modulus
-        to integers modulo the coefficient modulus, and then performing David Harvey's NTT
+        Transform to a plaintext by first embedding integers modulo_inplace the plaintext modulus
+        to integers modulo_inplace the coefficient modulus, and then performing David Harvey's NTT
         on the resulting polynomial.For the operation to be valid, the plaintext must have 
         less than degree(poly_modulus) many non-zero coefficients, and each coefficient must
         be less than the plaintext modulus, i.e. the plaintext must be a valid plaintext 
@@ -753,8 +753,8 @@ namespace seal_old
 
         /**
         Transforms a plaintext to NTT domain. This functions applies the Number Theoretic
-        Transform to a plaintext by first embedding integers modulo the plaintext modulus
-        to integers modulo the coefficient modulus, and then performing David Harvey's NTT
+        Transform to a plaintext by first embedding integers modulo_inplace the plaintext modulus
+        to integers modulo_inplace the coefficient modulus, and then performing David Harvey's NTT
         on the resulting polynomial.For the operation to be valid, the plaintext must have
         less than degree(poly_modulus) many non-zero coefficients, and each coefficient must
         be less than the plaintext modulus, i.e. the plaintext must be a valid plaintext
@@ -772,8 +772,8 @@ namespace seal_old
 
         /**
         Transforms a plaintext to NTT domain. This functions applies the Number Theoretic
-        Transform to a plaintext by first embedding integers modulo the plaintext modulus
-        to integers modulo the coefficient modulus, and then performing David Harvey's NTT
+        Transform to a plaintext by first embedding integers modulo_inplace the plaintext modulus
+        to integers modulo_inplace the coefficient modulus, and then performing David Harvey's NTT
         on the resulting polynomial. The result is stored in the destination_ntt parameter.
         For the operation to be valid, the plaintext must have less than degree(poly_modulus)
         many non-zero coefficients, and each coefficient must be less than the plaintext 
@@ -797,8 +797,8 @@ namespace seal_old
 
         /**
         Transforms a plaintext to NTT domain. This functions applies the Number Theoretic
-        Transform to a plaintext by first embedding integers modulo the plaintext modulus
-        to integers modulo the coefficient modulus, and then performing David Harvey's NTT
+        Transform to a plaintext by first embedding integers modulo_inplace the plaintext modulus
+        to integers modulo_inplace the coefficient modulus, and then performing David Harvey's NTT
         on the resulting polynomial. The result is stored in the destination_ntt parameter.
         For the operation to be valid, the plaintext must have less than degree(poly_modulus)
         many non-zero coefficients, and each coefficient must be less than the plaintext
@@ -873,7 +873,7 @@ namespace seal_old
         cannot be identially 0.
 
         @param[in] encrypted_ntt The ciphertext to multiply
-        @param[in] plain_ntt The plaintext to multiply
+        @param[in] plain_ntt The plaintext to multiply_inplace
         @throws std::invalid_argument if encrypted_ntt or plain_ntt is not valid for the
         encryption parameters
         @throws std::invalid_argument if plain_ntt is zero
@@ -887,7 +887,7 @@ namespace seal_old
         stored in the destination_ntt parameter. The plaintext cannot be identially 0.
 
         @param[in] encrypted_ntt The ciphertext to multiply
-        @param[in] plain_ntt The plaintext to multiply
+        @param[in] plain_ntt The plaintext to multiply_inplace
         @param[out] destination_ntt The ciphertext to overwrite with the multiplication result
         @throws std::invalid_argument if encrypted_ntt or plain_ntt is not valid for the
         encryption parameters

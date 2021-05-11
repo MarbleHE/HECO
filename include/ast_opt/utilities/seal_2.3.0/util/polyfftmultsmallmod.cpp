@@ -48,7 +48,7 @@ namespace seal_old
         }
 
         /*
-        Performs NTT multiply assuming one of the operands (operand2) is already transformed to NTT domain.
+        Performs NTT multiply_inplace assuming one of the operands (operand2) is already transformed to NTT domain.
         */
         void ntt_multiply_poly_nttpoly(const uint64_t *operand1, const uint64_t *operand2, const SmallNTTTables &tables, uint64_t *result, MemoryPool &pool)
         {
@@ -82,7 +82,7 @@ namespace seal_old
         }
 
         /*
-        Perform NTT multiply (a*b, a*c) when b, c are already in NTT domain.
+        Perform NTT multiply_inplace (a*b, a*c) when b, c are already in NTT domain.
         */
         void ntt_double_multiply_poly_nttpoly(const uint64_t *operand1, const uint64_t *operand2, const uint64_t *operand3, const SmallNTTTables &tables, uint64_t *result1, uint64_t *result2, MemoryPool &pool)
         {
@@ -247,8 +247,8 @@ namespace seal_old
             inverse_ntt_negacyclic_harvey(result2, tables);
         }
 
-        // Compute the multiplication of two polynomials modulo x^n + 1 (and modulo q)
-        // using the Nussbaumer algorithm. The modulo q step is done after the multiplication.
+        // Compute the multiplication of two polynomials modulo x^n + 1 (and modulo_inplace q)
+        // using the Nussbaumer algorithm. The modulo_inplace q step is done after the multiplication.
         void nussbaumer_multiply_poly_poly_coeffmod(const uint64_t *operand1, const uint64_t *operand2, int coeff_count_power, const SmallModulus &modulus, uint64_t *result, MemoryPool &pool)
         {
 #ifdef SEAL_DEBUG

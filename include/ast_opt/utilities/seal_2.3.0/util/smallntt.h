@@ -206,7 +206,7 @@ namespace seal_old
         {
             ntt_negacyclic_harvey_lazy(operand, tables);
 
-            // Finally maybe we need to reduce every coefficient modulo q, but we know that they are in the range [0, 4q). 
+            // Finally maybe we need to reduce every coefficient modulo_inplace q, but we know that they are in the range [0, 4q).
             // Since word size is controlled this is fast.
             int n = 1 << tables.coeff_count_power();
             std::uint64_t modulus = tables.modulus().value();

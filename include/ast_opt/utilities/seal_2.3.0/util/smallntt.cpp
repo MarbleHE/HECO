@@ -84,7 +84,7 @@ namespace seal_old
             }
             ntt_scale_powers_of_primitive_root(inv_root_powers_div_two_.get(), scaled_inv_root_powers_div_two_.get());
 
-            // Last compute n^(-1) modulo q. 
+            // Last compute n^(-1) modulo_inplace q.
             uint64_t degree_uint = static_cast<uint64_t>(coeff_count_);
             generated_ = try_invert_uint_mod(degree_uint, modulus_, inv_degree_modulo_);
 
@@ -370,7 +370,7 @@ namespace seal_old
                             *U++ = (currU + (modulus & static_cast<uint64_t>(-static_cast<int64_t>(T & 1)))) >> 1;
 
                             multiply_uint64_hw64(Wprime, T, &H);
-                            // effectively, the next two multiply perform multiply modulo beta = 2**wordsize. 
+                            // effectively, the next two multiply perform multiply_inplace modulo_inplace beta = 2**wordsize.
                             *V++ = W * T - H * modulus;
                         }
                         j1 += (t << 1);

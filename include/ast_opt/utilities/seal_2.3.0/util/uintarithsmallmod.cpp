@@ -31,8 +31,8 @@ namespace seal_old
                 return false;
             }
 
-            // We check if root is a degree-th root of unity in integers modulo modulus, where degree is a power of two.
-            // It suffices to check that root^(degree/2) is -1 modulo modulus.
+            // We check if root is a degree-th root of unity in integers modulo_inplace modulus, where degree is a power of two.
+            // It suffices to check that root^(degree/2) is -1 modulo_inplace modulus.
             return exponentiate_uint_mod(root, degree >> 1, modulus) == (modulus.value() - 1);
         }
         
@@ -48,13 +48,13 @@ namespace seal_old
                 throw invalid_argument("degree must be a power of two and at least two");
             }
 #endif
-            // We need to divide modulus-1 by degree to get the size of the quotient group
+            // We need to divide_inplace modulus-1 by degree to get the size of the quotient group
             uint64_t size_entire_group = modulus.value() - 1;
 
             // Compute size of quotient group
             uint64_t size_quotient_group = size_entire_group / degree;
 
-            // size_entire_group must be divisible by degree, or otherwise the primitive root does not exist in integers modulo modulus
+            // size_entire_group must be divisible by degree, or otherwise the primitive root does not exist in integers modulo_inplace modulus
             if (size_entire_group - size_quotient_group * degree != 0)
             {
                 return false;
@@ -69,7 +69,7 @@ namespace seal_old
             {
                 attempt_counter++;
 
-                // Set destination to be a random number modulo modulus
+                // Set destination to be a random number modulo_inplace modulus
                 destination = (static_cast<uint64_t>(rd()) << 32) | static_cast<uint64_t>(rd());
                 destination %= modulus.value();
 

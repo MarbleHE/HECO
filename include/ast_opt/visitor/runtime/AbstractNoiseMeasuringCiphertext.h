@@ -7,13 +7,14 @@
 class AbstractNoiseMeasuringCiphertext : public AbstractCiphertext {
  protected:
   /// Protected constructor: makes sure that class is abstract, i.e., cannot be instantiated.
-  explicit AbstractNoiseMeasuringCiphertext(AbstractCiphertextFactory  &acf) :  AbstractCiphertext(acf) {};
+  explicit AbstractNoiseMeasuringCiphertext(const std::reference_wrapper<const AbstractCiphertextFactory> acf)
+      : AbstractCiphertext(acf) {};
 
  public:
 
   /// Return the current noise budget in the ciphertext, measured in bits
   /// \return A double measuring the number of bits in the noise budget.
-  virtual void noiseBits() = 0;
+  virtual double noiseBits() const = 0;
 
   /// Noise of a freshly encrypted ciphertext
   /// \return the noise budget in bits

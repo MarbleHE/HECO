@@ -8,8 +8,7 @@
 #include <seal/seal.h>
 #include "ast_opt/utilities/PlaintextNorm.h"
 
-
-SimulatorCiphertext::SimulatorCiphertext(SimulatorCiphertextFactory &simulatorFactory)
+SimulatorCiphertext::SimulatorCiphertext(const std::reference_wrapper<const AbstractCiphertextFactory> simulatorFactory)
     : AbstractNoiseMeasuringCiphertext(
     simulatorFactory) {}
 
@@ -29,16 +28,27 @@ SimulatorCiphertext &SimulatorCiphertext::operator=(const SimulatorCiphertext &o
 SimulatorCiphertext::SimulatorCiphertext(SimulatorCiphertext &&other) noexcept  // move constructor
     : AbstractNoiseMeasuringCiphertext(other.factory), _ciphertext(std::move(other._ciphertext)) {}
 
-SimulatorCiphertext &SimulatorCiphertext::operator=(SimulatorCiphertext &&other) noexcept {  // move assignment
+SimulatorCiphertext &SimulatorCiphertext::operator=(SimulatorCiphertext &&other) {  // move assignment
   // Self-assignment detection
   if (&other==this) return *this;
-  _ciphertext = other._ciphertext;
-  factory = std::move(other.factory);
+  // check if factory is the same, otherwise this is invalid
+  if (&factory.get()!=&(other.factory.get())) {
+    throw std::runtime_error("Cannot move Ciphertext from factory A into Ciphertext created by Factory B.");
+  }
+  _ciphertext = std::move(other._ciphertext);
   return *this;
 }
 
 SimulatorCiphertext &cast_1(AbstractCiphertext &abstractCiphertext) {
   if (auto sealCtxt = dynamic_cast<SimulatorCiphertext *>(&abstractCiphertext)) {
+    return *sealCtxt;
+  } else {
+    throw std::runtime_error("Cast of AbstractCiphertext to SealCiphertext failed!");
+  }
+}
+
+const SimulatorCiphertext &cast_1(const AbstractCiphertext &abstractCiphertext) {
+  if (auto sealCtxt = dynamic_cast<const SimulatorCiphertext *>(&abstractCiphertext)) {
     return *sealCtxt;
   } else {
     throw std::runtime_error("Cast of AbstractCiphertext to SealCiphertext failed!");
@@ -61,7 +71,7 @@ seal::Plaintext &SimulatorCiphertext::getPlaintext() {
   return _plaintext;
 }
 
-double &SimulatorCiphertext::getNoise() {
+double SimulatorCiphertext::getNoise() const {
   return _noise;
 }
 
@@ -71,13 +81,14 @@ void SimulatorCiphertext::relinearize() {
   int destination_size = 2;
   // Determine number of relinearize_one_step calls which would be needed
   int64_t relinearize_one_step_calls = static_cast<int64_t>(this->ciphertext_size_ - destination_size);
-  if (relinearize_one_step_calls == 0) // nothing to be done
+  if (relinearize_one_step_calls==0) // nothing to be done
   {
     return; //do nothing
   }
   // Noise is ~ old + 2 * min(B, 6*sigma) * t * n * (ell+1) * w * relinearize_one_step_calls
-  double noise_standard_deviation = 3.2; // this is the standard value for the noise standard deviation (see SEAL: hestdparams.h)
-  double noise_max_deviation = noise_standard_deviation * 6; // this is also a standard value (see SEAL: globals.h)
+  double noise_standard_deviation =
+      3.2; // this is the standard value for the noise standard deviation (see SEAL: hestdparams.h)
+  double noise_max_deviation = noise_standard_deviation*6; // this is also a standard value (see SEAL: globals.h)
   int64_t poly_modulus_degree = new_ctxt->getFactory().getContext().first_context_data()->parms().poly_modulus_degree();
   int64_t plain_modulus = new_ctxt->getFactory().getContext().first_context_data()->parms().plain_modulus().value();
 
@@ -86,7 +97,7 @@ void SimulatorCiphertext::relinearize() {
   // First t
   double result_noise = new_ctxt->getFactory().getContext().first_context_data()->parms().plain_modulus().value();
 
-  // multiply by w
+  // multiply_inplace by w
 
 
 
@@ -99,11 +110,11 @@ void SimulatorCiphertext::relinearize() {
   throw std::runtime_error("Not implemented yet.");
 }
 
-std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::multiply(AbstractCiphertext &operand) {
+std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::multiply(const AbstractCiphertext &operand) const {
   // clone current ctext
-  std::unique_ptr<SimulatorCiphertext> new_ctxt = this->clone_impl();
+  auto new_ctxt = this->clone_impl();
   // cast operand
-  std::unique_ptr<SimulatorCiphertext> operand_ctxt = std::unique_ptr<SimulatorCiphertext>(&cast_1(operand));
+  auto operand_ctxt = std::unique_ptr<const SimulatorCiphertext>(&cast_1(operand));
   int64_t
       poly_modulus_degree = new_ctxt->getFactory().getContext().first_context_data()->parms().poly_modulus_degree();
   // determine size of new ciphertext
@@ -136,10 +147,10 @@ std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::multiply(AbstractCipher
       + sqrt_factor_total;
   result_noise *= leading_factor; // this is the resulting invariant noise */
   /*iliashenko:*/
-  result_noise = plain_modulus * sqrt(3 * poly_modulus_degree + 2 * pow(poly_modulus_degree,2) )
-      * (new_ctxt->getNoise() + operand_ctxt->getNoise()) + 3 * new_ctxt->getNoise() * operand_ctxt->getNoise() +
-      plain_modulus / coeff_modulus * sqrt(3 * poly_modulus_degree + 2 * pow(poly_modulus_degree,2) +
-      4 * pow(poly_modulus_degree,3) /3);
+  result_noise = plain_modulus*sqrt(3*poly_modulus_degree + 2*pow(poly_modulus_degree, 2))
+      *(new_ctxt->getNoise() + operand_ctxt->getNoise()) + 3*new_ctxt->getNoise()*operand_ctxt->getNoise() +
+      plain_modulus/coeff_modulus*sqrt(3*poly_modulus_degree + 2*pow(poly_modulus_degree, 2) +
+          4*pow(poly_modulus_degree, 3)/3);
   //copy
   auto r = std::make_unique<SimulatorCiphertext>(*this);
   // update noise and noise budget of result ctxt with the new value
@@ -152,11 +163,11 @@ std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::multiply(AbstractCipher
   return r;
 }
 
-void SimulatorCiphertext::multiplyInplace(AbstractCiphertext &operand) {
+void SimulatorCiphertext::multiplyInplace(const AbstractCiphertext &operand) {
   // clone current ctext
-  std::unique_ptr<SimulatorCiphertext> new_ctxt = this->clone_impl();
+  auto new_ctxt = this->clone_impl();
   // cast operand
-  std::unique_ptr<SimulatorCiphertext> operand_ctxt = std::unique_ptr<SimulatorCiphertext>(&cast_1(operand));
+  auto operand_ctxt = std::unique_ptr<const SimulatorCiphertext>(&cast_1(operand));
   uint64_t
       poly_modulus_degree = new_ctxt->getFactory().getContext().first_context_data()->parms().poly_modulus_degree();
   // determine size of new ciphertext
@@ -191,19 +202,19 @@ void SimulatorCiphertext::multiplyInplace(AbstractCiphertext &operand) {
   // update noise and noise budget of result ctxt with the new value
    */
   // iliashenko:
-  result_noise = plain_modulus * sqrt(3 * poly_modulus_degree + 2 * pow(poly_modulus_degree,2) )
-      * (new_ctxt->getNoise() + operand_ctxt->getNoise()) + 3 * new_ctxt->getNoise() * operand_ctxt->getNoise() +
-      plain_modulus / coeff_modulus * sqrt(3 * poly_modulus_degree + 2 * pow(poly_modulus_degree,2) +
-          4 * pow(poly_modulus_degree,3) /3);
+  result_noise = plain_modulus*sqrt(3*poly_modulus_degree + 2*pow(poly_modulus_degree, 2))
+      *(new_ctxt->getNoise() + operand_ctxt->getNoise()) + 3*new_ctxt->getNoise()*operand_ctxt->getNoise() +
+      plain_modulus/coeff_modulus*sqrt(3*poly_modulus_degree + 2*pow(poly_modulus_degree, 2) +
+          4*pow(poly_modulus_degree, 3)/3);
   this->_noise = result_noise;
   this->noiseBits();
   // calculate new ciphertext size (sum of ciphertext sizes), note multiplication increases ciphertext size.
   // this becomes relevant for relinearisation heuristics
   this->ciphertext_size_ += operand_ctxt->ciphertext_size_;
 }
-std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::multiplyPlain(ICleartext &operand) {
+std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::multiplyPlain(const ICleartext &operand) const {
   // get plaintext from operand
-  auto cleartextInt = dynamic_cast<Cleartext<int> *>(&operand);
+  auto cleartextInt = dynamic_cast<const Cleartext<int> *>(&operand);
   std::unique_ptr<seal::Plaintext> plaintext = getFactory().createPlaintext(cleartextInt->getData());
   std::unique_ptr<SimulatorCiphertext> new_ctxt = this->clone_impl();
   // noise is old_noise * plain_max_coeff_count * plain_max_abs_value (SEAL Manual)
@@ -212,7 +223,7 @@ std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::multiplyPlain(ICleartex
   int64_t plain_max_coeff_count = plaintext->nonzero_coeff_count();
   int64_t plain_max_abs_value = plaintext_norm(*plaintext);
   // calc noise after ptxt ctxt addition
-  double result_noise = old_noise * plain_max_coeff_count * plain_max_abs_value;
+  double result_noise = old_noise*plain_max_coeff_count*plain_max_abs_value;
   //copy
   auto r = std::make_unique<SimulatorCiphertext>(*this);
   // update noise and noise budget of result ctxt with the new value
@@ -221,9 +232,9 @@ std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::multiplyPlain(ICleartex
   // return ptr to the current ciphertext cast to Abstract ciphertext
   return r;
 }
-void SimulatorCiphertext::multiplyPlainInplace(ICleartext &operand) {
+void SimulatorCiphertext::multiplyPlainInplace(const ICleartext &operand) {
   // get plaintext from operand
-  auto cleartextInt = dynamic_cast<Cleartext<int> *>(&operand);
+  auto cleartextInt = dynamic_cast<const Cleartext<int> *>(&operand);
   std::unique_ptr<seal::Plaintext> plaintext = getFactory().createPlaintext(cleartextInt->getData());
   std::unique_ptr<SimulatorCiphertext> new_ctxt = this->clone_impl();
   // noise is old_noise * plain_max_coeff_count * plain_max_abs_value (SEAL Manual)
@@ -232,13 +243,13 @@ void SimulatorCiphertext::multiplyPlainInplace(ICleartext &operand) {
   int64_t plain_max_coeff_count = plaintext->nonzero_coeff_count();
   int64_t plain_max_abs_value = plaintext_norm(*plaintext);
   // calc noise after ptxt ctxt mult
-  double result_noise = old_noise * plain_max_coeff_count * plain_max_abs_value;
+  double result_noise = old_noise*plain_max_coeff_count*plain_max_abs_value;
   // update noise and noise budget of result ctxt with the new value
   this->_noise = result_noise;
   this->noiseBits();
 }
 
-std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::add(AbstractCiphertext &operand) {
+std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::add(const AbstractCiphertext &operand) const {
   SimulatorCiphertext operand_ctxt = cast_1(operand);
   // after addition, the noise is the sum of old noise and noise of ctxt that is added
   double result_noise = this->_noise + operand_ctxt._noise;
@@ -251,9 +262,9 @@ std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::add(AbstractCiphertext 
   return r;
 }
 
-void SimulatorCiphertext::addInplace(AbstractCiphertext &operand) {
-  std::unique_ptr<SimulatorCiphertext> new_ctxt = this->clone_impl();
-  std::unique_ptr<SimulatorCiphertext> operand_ctxt = std::unique_ptr<SimulatorCiphertext>(&cast_1(operand)); //FIXME
+void SimulatorCiphertext::addInplace(const AbstractCiphertext &operand) {
+  auto new_ctxt = this->clone_impl();
+  auto operand_ctxt = std::unique_ptr<const SimulatorCiphertext>(&cast_1(operand)); //FIXME
   // after addition, the noise is the sum of old noise and noise of ctext that is added
   double result_noise = new_ctxt->_noise + operand_ctxt->_noise;
   // update noise and noise budget of current ctxt with the new value (for this SimulatorCiphertext)
@@ -261,9 +272,9 @@ void SimulatorCiphertext::addInplace(AbstractCiphertext &operand) {
   this->noiseBits();
 }
 
-std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::addPlain(ICleartext &operand) {
+std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::addPlain(const ICleartext &operand) const {
   // get plaintext from operand
-  auto cleartextInt = dynamic_cast<Cleartext<int> *>(&operand);
+  auto cleartextInt = dynamic_cast<const Cleartext<int> *>(&operand);
   std::unique_ptr<seal::Plaintext> plaintext = getFactory().createPlaintext(cleartextInt->getData());
   std::unique_ptr<SimulatorCiphertext> new_ctxt = this->clone_impl();
   // noise is old_noise + r_t(q) * plain_max_coeff_count * plain_max_abs_value
@@ -272,7 +283,7 @@ std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::addPlain(ICleartext &op
   int64_t plain_max_coeff_count = plaintext->nonzero_coeff_count();
   int64_t plain_max_abs_value = plaintext_norm(*plaintext);
   // calc noise after ptxt ctxt addition
-  double result_noise = old_noise + rtq * plain_max_coeff_count * plain_max_abs_value;
+  double result_noise = old_noise + rtq*plain_max_coeff_count*plain_max_abs_value;
   //copy
   auto r = std::make_unique<SimulatorCiphertext>(*this);
   // update noise and noise budget of result ctxt with the new value
@@ -281,9 +292,9 @@ std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::addPlain(ICleartext &op
   // return ptr to the current ciphertext cast to Abstract ciphertext
   return r;
 }
-void SimulatorCiphertext::addPlainInplace(ICleartext &operand) {
+void SimulatorCiphertext::addPlainInplace(const ICleartext &operand) {
   // get plaintext from operand
-  auto cleartextInt = dynamic_cast<Cleartext<int> *>(&operand);
+  auto cleartextInt = dynamic_cast<const Cleartext<int> *>(&operand);
   std::unique_ptr<seal::Plaintext> plaintext = getFactory().createPlaintext(cleartextInt->getData());
   std::unique_ptr<SimulatorCiphertext> new_ctxt = this->clone_impl();
   // noise is old_noise + r_t(q) * plain_max_coeff_count * plain_max_abs_value
@@ -292,50 +303,51 @@ void SimulatorCiphertext::addPlainInplace(ICleartext &operand) {
   int64_t plain_max_coeff_count = plaintext->nonzero_coeff_count();
   int64_t plain_max_abs_value = plaintext_norm(*plaintext);
   // calc noise after ptxt ctxt addition
-  double result_noise = old_noise + rtq * plain_max_coeff_count * plain_max_abs_value;
+  double result_noise = old_noise + rtq*plain_max_coeff_count*plain_max_abs_value;
   // update noise and noise budget of result ctxt with the new value
   this->_noise = result_noise;
   this->noiseBits();
 }
-std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::subtract(AbstractCiphertext &operand) {
+std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::subtract(const AbstractCiphertext &operand) const {
   // this is the same as SimulatorCiphertext::add
   return SimulatorCiphertext::add(operand);
 }
-void SimulatorCiphertext::subtractInplace(AbstractCiphertext &operand) {
+void SimulatorCiphertext::subtractInplace(const AbstractCiphertext &operand) {
   // this is the same as SimulatorCiphertext::addInPlace
   SimulatorCiphertext::addInplace(operand);
 }
-std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::subtractPlain(ICleartext &operand) {
+std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::subtractPlain(const ICleartext &operand) const {
   // this is the same as SimulatorCiphertext::addPlain
   return SimulatorCiphertext::addPlain(operand);
 }
-void SimulatorCiphertext::subtractPlainInplace(ICleartext &operand) {
+void SimulatorCiphertext::subtractPlainInplace(const ICleartext &operand) {
   // this is the same as SimulatorCiphertext::addPlainInPlace
   SimulatorCiphertext::addPlainInplace(operand);
 }
-std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::rotateRows(int steps) {
+std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::rotateRows(int steps) const {
   return std::unique_ptr<AbstractCiphertext>();
 }
 void SimulatorCiphertext::rotateRowsInplace(int steps) {
 
 }
 
-void SimulatorCiphertext::noiseBits() {
-  this->_noise_budget = -log2(2 * round(this->_noise));
+double SimulatorCiphertext::noiseBits() const {
+  return -log2(2*round(this->_noise));
 }
 
-std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::clone() {
+std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::clone() const {
   return clone_impl();
 }
 
-std::unique_ptr<SimulatorCiphertext> SimulatorCiphertext::clone_impl() {
-  return std::unique_ptr<SimulatorCiphertext>(this);
+std::unique_ptr<SimulatorCiphertext> SimulatorCiphertext::clone_impl() const {
+  return std::make_unique<SimulatorCiphertext>(*this);
 }
 
-void SimulatorCiphertext::add(AbstractValue &other) {
-  if (auto otherAsSimulatorCiphertext = dynamic_cast<SimulatorCiphertext *>(&other)) {  // ctxt-ctxt operation
+void SimulatorCiphertext::add_inplace(const AbstractValue &other) {
+  if (auto
+      otherAsSimulatorCiphertext = dynamic_cast<const SimulatorCiphertext *>(&other)) {  // ctxt-ctxt operation
     addInplace(*otherAsSimulatorCiphertext);
-  } else if (auto otherAsCleartext = dynamic_cast<ICleartext *>(&other)) {  // ctxt-ptxt operation
+  } else if (auto otherAsCleartext = dynamic_cast<const ICleartext *>(&other)) {  // ctxt-ptxt operation
     addPlainInplace(*otherAsCleartext);
   } else {
     throw std::runtime_error("Operation ADD only supported for (AbstractCiphertext,AbstractCiphertext) "
@@ -343,10 +355,10 @@ void SimulatorCiphertext::add(AbstractValue &other) {
   }
 }
 
-void SimulatorCiphertext::subtract(AbstractValue &other) {
-  if (auto otherAsSimulatorCiphertext = dynamic_cast<SimulatorCiphertext *>(&other)) {  // ctxt-ctxt operation
+void SimulatorCiphertext::subtract_inplace(const AbstractValue &other) {
+  if (auto otherAsSimulatorCiphertext = dynamic_cast<const SimulatorCiphertext *>(&other)) {  // ctxt-ctxt operation
     subtractInplace(*otherAsSimulatorCiphertext);
-  } else if (auto otherAsCleartext = dynamic_cast<ICleartext *>(&other)) {  // ctxt-ptxt operation
+  } else if (auto otherAsCleartext = dynamic_cast<const ICleartext *>(&other)) {  // ctxt-ptxt operation
     subtractPlainInplace(*otherAsCleartext);
   } else {
     throw std::runtime_error("Operation SUBTRACT only supported for (SimulatorCiphertext,SimulatorCiphertext) "
@@ -354,10 +366,10 @@ void SimulatorCiphertext::subtract(AbstractValue &other) {
   }
 }
 
-void SimulatorCiphertext::multiply(AbstractValue &other) {
-  if (auto otherAsSimulatorCiphertext = dynamic_cast<SimulatorCiphertext *>(&other)) {  // ctxt-ctxt operation
+void SimulatorCiphertext::multiply_inplace(const AbstractValue &other) {
+  if (auto otherAsSimulatorCiphertext = dynamic_cast<const SimulatorCiphertext *>(&other)) {  // ctxt-ctxt operation
     multiplyInplace(*otherAsSimulatorCiphertext);
-  } else if (auto otherAsCleartext = dynamic_cast<ICleartext *>(&other)) {  // ctxt-ptxt operation
+  } else if (auto otherAsCleartext = dynamic_cast<const ICleartext *>(&other)) {  // ctxt-ptxt operation
     multiplyPlainInplace(*otherAsCleartext);
   } else {
     throw std::runtime_error("Operation MULTIPLY only supported for (SimulatorCiphertext,SimulatorCiphertext) "
@@ -365,79 +377,74 @@ void SimulatorCiphertext::multiply(AbstractValue &other) {
   }
 }
 
-void SimulatorCiphertext::divide(AbstractValue &other) {
-  throw std::runtime_error("Operation divide not supported for (SimulatorCiphertext, ANY).");
+void SimulatorCiphertext::divide_inplace(const AbstractValue &other) {
+  throw std::runtime_error("Operation divide_inplace not supported for (SimulatorCiphertext, ANY).");
 }
 
-void SimulatorCiphertext::modulo(AbstractValue &other) {
-  throw std::runtime_error("Operation modulo not supported for (SimulatorCiphertext, ANY).");
+void SimulatorCiphertext::modulo_inplace(const AbstractValue &other) {
+  throw std::runtime_error("Operation modulo_inplace not supported for (SimulatorCiphertext, ANY).");
 }
 
-void SimulatorCiphertext::logicalAnd(AbstractValue &other) {
-  throw std::runtime_error("Operation logicalAnd not supported for (SimulatorCiphertext, ANY).");
+void SimulatorCiphertext::logicalAnd_inplace(const AbstractValue &other) {
+  throw std::runtime_error("Operation logicalAnd_inplace not supported for (SimulatorCiphertext, ANY).");
 }
 
-void SimulatorCiphertext::logicalOr(AbstractValue &other) {
-  throw std::runtime_error("Operation logicalOr not supported for (SimulatorCiphertext, ANY).");
+void SimulatorCiphertext::logicalOr_inplace(const AbstractValue &other) {
+  throw std::runtime_error("Operation logicalOr_inplace not supported for (SimulatorCiphertext, ANY).");
 }
 
-void SimulatorCiphertext::logicalLess(AbstractValue &other) {
-  throw std::runtime_error("Operation logicalLess not supported for (SimulatorCiphertext, ANY).");
+void SimulatorCiphertext::logicalLess_inplace(const AbstractValue &other) {
+  throw std::runtime_error("Operation logicalLess_inplace not supported for (SimulatorCiphertext, ANY).");
 }
 
-void SimulatorCiphertext::logicalLessEqual(AbstractValue &other) {
-  throw std::runtime_error("Operation logicalLessEqual not supported for (SimulatorCiphertext, ANY).");
+void SimulatorCiphertext::logicalLessEqual_inplace(const AbstractValue &other) {
+  throw std::runtime_error("Operation logicalLessEqual_inplace not supported for (SimulatorCiphertext, ANY).");
 }
 
-void SimulatorCiphertext::logicalGreater(AbstractValue &other) {
-  throw std::runtime_error("Operation logicalGreater not supported for (SimulatorCiphertext, ANY).");
+void SimulatorCiphertext::logicalGreater_inplace(const AbstractValue &other) {
+  throw std::runtime_error("Operation logicalGreater_inplace not supported for (SimulatorCiphertext, ANY).");
 }
 
-void SimulatorCiphertext::logicalGreaterEqual(AbstractValue &other) {
-  throw std::runtime_error("Operation logicalGreaterEqual not supported for (SimulatorCiphertext, ANY).");
+void SimulatorCiphertext::logicalGreaterEqual_inplace(const AbstractValue &other) {
+  throw std::runtime_error("Operation logicalGreaterEqual_inplace not supported for (SimulatorCiphertext, ANY).");
 }
 
-void SimulatorCiphertext::logicalEqual(AbstractValue &other) {
-  throw std::runtime_error("Operation logicalEqual not supported for (SimulatorCiphertext, ANY).");
+void SimulatorCiphertext::logicalEqual_inplace(const AbstractValue &other) {
+  throw std::runtime_error("Operation logicalEqual_inplace not supported for (SimulatorCiphertext, ANY).");
 }
 
-void SimulatorCiphertext::logicalNotEqual(AbstractValue &other) {
-  throw std::runtime_error("Operation logicalNotEqual not supported for (SimulatorCiphertext, ANY).");
+void SimulatorCiphertext::logicalNotEqual_inplace(const AbstractValue &other) {
+  throw std::runtime_error("Operation logicalNotEqual_inplace not supported for (SimulatorCiphertext, ANY).");
 }
 
-void SimulatorCiphertext::bitwiseAnd(AbstractValue &other) {
-  throw std::runtime_error("Operation bitwiseAnd not supported for (SimulatorCiphertext, ANY).");
+void SimulatorCiphertext::bitwiseAnd_inplace(const AbstractValue &other) {
+  throw std::runtime_error("Operation bitwiseAnd_inplace not supported for (SimulatorCiphertext, ANY).");
 }
 
-void SimulatorCiphertext::bitwiseXor(AbstractValue &other) {
-  throw std::runtime_error("Operation bitwiseXor not supported for (SimulatorCiphertext, ANY).");
+void SimulatorCiphertext::bitwiseXor_inplace(const AbstractValue &other) {
+  throw std::runtime_error("Operation bitwiseXor_inplace not supported for (SimulatorCiphertext, ANY).");
 }
 
-void SimulatorCiphertext::bitwiseOr(AbstractValue &other) {
-  throw std::runtime_error("Operation bitwiseOr not supported for (SimulatorCiphertext, ANY).");
-}
-
-SimulatorCiphertextFactory &SimulatorCiphertext::getFactory() {
-  // removes const qualifier from const getFactory (https://stackoverflow.com/a/856839/3017719)
-  return const_cast<SimulatorCiphertextFactory &>(const_cast<const SimulatorCiphertext *>(this)->getFactory());
+void SimulatorCiphertext::bitwiseOr_inplace(const AbstractValue &other) {
+  throw std::runtime_error("Operation bitwiseOr_inplace not supported for (SimulatorCiphertext, ANY).");
 }
 
 const SimulatorCiphertextFactory &SimulatorCiphertext::getFactory() const {
-  if (auto sealFactory = dynamic_cast<SimulatorCiphertextFactory *>(&factory)) {
+  if (auto sealFactory = dynamic_cast<const SimulatorCiphertextFactory *>(&factory.get())) {
     return *sealFactory;
   } else {
     throw std::runtime_error("Cast of AbstractFactory to SealFactory failed. SimulatorCiphertext is probably invalid.");
   }
 }
 
-void SimulatorCiphertext::logicalNot() {
-  throw std::runtime_error("Operation logicalNot not supported for (SimulatorCiphertext, ANY). "
-                           "For an arithmetic negation, multiply by (-1) instead.");
+void SimulatorCiphertext::logicalNot_inplace() {
+  throw std::runtime_error("Operation logicalNot_inplace not supported for (SimulatorCiphertext, ANY). "
+                           "For an arithmetic negation, multiply_inplace by (-1) instead.");
 }
 
-void SimulatorCiphertext::bitwiseNot() {
-  throw std::runtime_error("Operation bitwiseNot not supported for (SimulatorCiphertext, ANY). "
-                           "For an arithmetic negation, multiply by (-1) instead.");
+void SimulatorCiphertext::bitwiseNot_inplace() {
+  throw std::runtime_error("Operation bitwiseNot_inplace not supported for (SimulatorCiphertext, ANY). "
+                           "For an arithmetic negation, multiply_inplace by (-1) instead.");
 }
 int64_t SimulatorCiphertext::initialNoise() {
   return 0;
@@ -470,8 +477,8 @@ void SimulatorCiphertext::createFresh(std::unique_ptr<seal::Plaintext> &plaintex
   int64_t plain_modulus = this->getFactory().getContext().first_context_data()->parms().plain_modulus().value();
   int64_t poly_modulus = this->getFactory().getContext().first_context_data()->parms().poly_modulus_degree();
   double sigma = 3.2;
-  result_noise = plain_modulus / coeff_modulus * (poly_modulus * (coeff_modulus - 1) / 2
-      + 2 * sigma *sqrt(12 * pow(poly_modulus,2) + 9 * poly_modulus));
+  result_noise = plain_modulus/coeff_modulus*(poly_modulus*(coeff_modulus - 1)/2
+      + 2*sigma*sqrt(12*pow(poly_modulus, 2) + 9*poly_modulus));
   // set noise of the current object to initial noise
   this->_noise = result_noise;
   this->noiseBits();

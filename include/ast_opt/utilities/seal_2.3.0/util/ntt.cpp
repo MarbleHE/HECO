@@ -170,7 +170,7 @@ namespace seal_old
             coeff_count_ = 1 << coeff_count_power_;
             coeff_uint64_count_ = modulus.uint64_count();
 
-            // Allocate memory for modulus, the tables, and for the inverse of degree modulo modulus
+            // Allocate memory for modulus, the tables, and for the inverse of degree modulo_inplace modulus
             modulus_alloc_ = allocate_uint(coeff_uint64_count_, pool_);
             root_ = allocate_uint(coeff_uint64_count_, pool_);
             root_powers_ = allocate_uint(coeff_count_ * coeff_uint64_count_, pool_);
@@ -219,7 +219,7 @@ namespace seal_old
             }
             ntt_scale_powers_of_primitive_root(inv_root_powers_div_two_.get(), scaled_inv_root_powers_div_two_.get());
 
-            // Last compute n^(-1) modulo q. 
+            // Last compute n^(-1) modulo_inplace q.
             Pointer degree_uint(allocate_zero_uint(coeff_uint64_count_, pool_));
             *degree_uint.get() = coeff_count_;
             generated_ = try_invert_uint_mod(degree_uint.get(), modulus_.get(), coeff_uint64_count_, inv_degree_modulo_.get(), pool_);
@@ -413,7 +413,7 @@ namespace seal_old
                     }
                 }
             }
-            // Finally maybe we need to reduce everything modulo q, but we know that they are in the range [0, 4q). 
+            // Finally maybe we need to reduce everything modulo_inplace q, but we know that they are in the range [0, 4q).
             // If word size is controlled this should not be a problem. We can use modulo_poly_coeffs in this case. 
             for (int i = 0; i < n; i++)
             {
@@ -488,7 +488,7 @@ namespace seal_old
 
                         tools::multiply_uint_uint(Wprime, T, coeff_uint64_count, prod);
 
-                        // effectively, the next two multiply perform multiply modulo beta = 2**wordsize. 
+                        // effectively, the next two multiply perform multiply_inplace modulo_inplace beta = 2**wordsize.
                         multiply_truncate_uint_uint(W, T, coeff_uint64_count, V);
                         tools::multiply_truncate_uint_uint_sub(Q, modulusptr, coeff_uint64_count, V);
 

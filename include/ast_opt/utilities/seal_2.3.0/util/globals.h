@@ -43,11 +43,11 @@ namespace seal_old
             In SEAL the encryption parameter coeff_modulus is a vector of prime numbers
             represented by instances of the SmallModulus class. We present here vectors
             of pre-selected primes that the user can choose from. These are the largest
-            60-bit, 50-bit, 40-bit, 30-bit primes that are congruent to 1 modulo 2^18. The
+            60-bit, 50-bit, 40-bit, 30-bit primes that are congruent to 1 modulo_inplace 2^18. The
             primes presented here work for poly_modulus up to degree 131072.
 
             The user can also use their own primes. The only restriction is that they
-            must be at most 60 bits in length, and need to be congruent to 1 modulo
+            must be at most 60 bits in length, and need to be congruent to 1 modulo_inplace
             2 * degree(poly_modulus).
             */
             extern const std::vector<SmallModulus> small_mods_60bit;

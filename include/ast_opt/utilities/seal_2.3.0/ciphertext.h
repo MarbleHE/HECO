@@ -379,7 +379,7 @@ namespace seal_old
 
         /**
         Returns a constant pointer to a particular polynomial in the ciphertext data. Note that
-        SEAL stores each polynomial in the ciphertext modulo all of the K primes in the coefficient 
+        SEAL stores each polynomial in the ciphertext modulo_inplace all of the K primes in the coefficient
         modulus. The pointer returned by this function is to the beginning (constant coefficient) 
         of the first one of these K polynomials.
 

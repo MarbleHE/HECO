@@ -187,7 +187,7 @@ namespace seal_old
         parameters of a virtual input plaintext polynomial, namely an upper bound 
         plain_max_coeff_count on the number of non-zero coefficients in the polynomial,
         and an upper bound plain_max_abs_value (represented by BigUInt) on the absolute 
-        value (modulo the plaintext modulus) of the polynomial coefficients.
+        value (modulo_inplace the plaintext modulus) of the polynomial coefficients.
 
         @param[in] parms The encryption parameters
         @param[in] plain_max_coeff_count An upper bound on the number of non-zero 
@@ -242,8 +242,8 @@ namespace seal_old
         Simulates noise budget consumption in Evaluator::sub() and returns 
         the result.
 
-        @param[in] simulation1 The Simulation object to subtract from
-        @param[in] simulation2 The Simulation object to subtract
+        @param[in] simulation1 The Simulation object to subtract_inplace from
+        @param[in] simulation2 The Simulation object to subtract_inplace
         @throws std::invalid_argument if simulation1 and simulation2 were 
         constructed with different encryption parameters
         @see Evaluator::sub() for the corresponding operation on ciphertexts.
@@ -273,11 +273,11 @@ namespace seal_old
         Simulates noise budget consumption in Evaluator::sub_plain() and returns
         the result.
 
-        @param[in] simulation The Simulation object to subtract from
+        @param[in] simulation The Simulation object to subtract_inplace from
         @param[in] plain_max_coeff_count An upper bound on the number of non-zero
-        coefficients in the plain polynomial to subtract
+        coefficients in the plain polynomial to subtract_inplace
         @param[in] plain_max_abs_value An upper bound (represented by std::uint64_t)
-        on the absolute value of coefficients in the plain polynomial to subtract
+        on the absolute value of coefficients in the plain polynomial to subtract_inplace
         @throws std::invalid_argument if plain_max_coeff_count is out of range
         @see Evaluator::sub_plain() for the corresponding operation on ciphertexts.
         */
@@ -293,11 +293,11 @@ namespace seal_old
         bound for their absolute value (represented by std::uint64_t) in the 
         encoding of the plain-text multiplier and returns the result.
 
-        @param[in] simulation The Simulation object to multiply
+        @param[in] simulation The Simulation object to multiply_inplace
         @param[in] plain_max_coeff_count An upper bound on the number of non-zero 
-        coefficients in the plain polynomial to multiply
+        coefficients in the plain polynomial to multiply_inplace
         @param[in] plain_max_abs_value An upper bound (represented by std::uint64_t)
-        on the absolute value of coefficients in the plain polynomial to multiply
+        on the absolute value of coefficients in the plain polynomial to multiply_inplace
         @throws std::invalid_argument if plain_max_coeff_count is out of range
         @throws std::invalid_argument if plain_max_coeff_count or plain_max_abs_value 
         is zero
@@ -307,14 +307,14 @@ namespace seal_old
             std::uint64_t plain_max_abs_value);
 
         /**
-        Simulates noise budget consumption in Evaluator::multiply() and returns 
+        Simulates noise budget consumption in Evaluator::multiply_inplace() and returns
         the result.
 
-        @param[in] simulation1 The first Simulation object to multiply
-        @param[in] simulation2 The second Simulation object to multiply
+        @param[in] simulation1 The first Simulation object to multiply_inplace
+        @param[in] simulation2 The second Simulation object to multiply_inplace
         @throws std::invalid_argument if simulation1 and simulation2 were 
         constructed with different encryption parameters
-        @see Evaluator::multiply() for the corresponding operation on ciphertexts.
+        @see Evaluator::multiply_inplace() for the corresponding operation on ciphertexts.
         */
         Simulation multiply(const Simulation &simulation1, const Simulation &simulation2);
 
@@ -345,7 +345,7 @@ namespace seal_old
         Simulates noise budget consumption in Evaluator::multiply_many() and returns
         the result.
 
-        @param[in] simulations The vector of Simulation objects to multiply
+        @param[in] simulations The vector of Simulation objects to multiply_inplace
         @throws std::invalid_argument if the simulations vector is empty
         @throws std::invalid_argument if at least two of the elements in the 
         simulations vector were

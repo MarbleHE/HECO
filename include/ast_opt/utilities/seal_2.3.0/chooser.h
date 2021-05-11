@@ -281,7 +281,7 @@ namespace seal_old
         corresponding plaintext polynomial and on the absolute values of  the coefficients
         based on the inputs, and sets the operation history accordingly.
 
-        @param[in] operands The vector of ChooserPoly objects to multiply
+        @param[in] operands The vector of ChooserPoly objects to multiply_inplace
         @throws std::invalid_argument if operands vector is empty
         @throws std::invalid_argument if any of the ChooserPoly objects in operands vector
         is not correctly initialized
@@ -329,8 +329,8 @@ namespace seal_old
         of the corresponding plaintext polynomial and on the absolute values of
         the coefficients based on the inputs, and sets the operation history accordingly.
 
-        @param[in] operand1 The ChooserPoly object to subtract from
-        @param[in] operand2 The ChooserPoly object to subtract
+        @param[in] operand1 The ChooserPoly object to subtract_inplace from
+        @param[in] operand2 The ChooserPoly object to subtract_inplace
         @throws std::invalid_argument if either operand1 or operand2 is not correctly 
         initialized
         @see Evaluator::sub() for the corresponding operation on ciphertexts.
@@ -340,17 +340,17 @@ namespace seal_old
         ChooserPoly sub(const ChooserPoly &operand1, const ChooserPoly &operand2);
 
         /**
-        Performs an operation modeling Evaluator::multiply() on ChooserPoly objects. 
+        Performs an operation modeling Evaluator::multiply_inplace() on ChooserPoly objects.
         This operation creates a new ChooserPoly with updated bounds on the degree of 
         the corresponding plaintext polynomial and on the absolute values of the 
         coefficients based on the inputs, and sets the operation history accordingly.
 
-        @param[in] operand1 The first ChooserPoly object to multiply
-        @param[in] operand2 The second ChooserPoly object to multiply
+        @param[in] operand1 The first ChooserPoly object to multiply_inplace
+        @param[in] operand2 The second ChooserPoly object to multiply_inplace
         @throws std::invalid_argument if either operand1 or operand2 is not correctly
         initialized
-        @see Evaluator::multiply() for the corresponding operation on ciphertexts.
-        @see SimulationEvaluator::multiply() for the corresponding operation on
+        @see Evaluator::multiply_inplace() for the corresponding operation on ciphertexts.
+        @see SimulationEvaluator::multiply_inplace() for the corresponding operation on
         Simulation objects.
         */
         ChooserPoly multiply(const ChooserPoly &operand1, const ChooserPoly &operand2);
@@ -397,11 +397,11 @@ namespace seal_old
         values of the coefficients based on the inputs, and sets the operation
         history accordingly.
 
-        @param[in] operand The ChooserPoly object to multiply
+        @param[in] operand The ChooserPoly object to multiply_inplace
         @param[in] plain_max_coeff_count Bound on the number of non-zero coefficients
-        in the plaintext polynomial to multiply
+        in the plaintext polynomial to multiply_inplace
         @param[in] plain_max_abs_value Bound on the absolute value of coefficients of
-        the plaintext polynomial to multiply
+        the plaintext polynomial to multiply_inplace
         @throws std::invalid_argument if operand is not correctly initialized
         @throws std::invalid_argument if plain_max_coeff_count is not positive
         @throws std::invalid_argument if plain_max_abs_value is zero
@@ -424,8 +424,8 @@ namespace seal_old
         construct the appropriate ChooserPoly for plain_chooser_poly. This function
         completely ignores the operation history possibly carried by plain_chooser_poly.
 
-        @param[in] operand The ChooserPoly object to multiply
-        @param[in] plain_chooser_poly The plaintext polynomial to multiply represented 
+        @param[in] operand The ChooserPoly object to multiply_inplace
+        @param[in] plain_chooser_poly The plaintext polynomial to multiply_inplace represented
         by a ChooserPoly
         @throws std::invalid_argument if operand is not correctly initialized
         @throws std::invalid_argument if plain_chooser_poly is not correctly initialized
@@ -493,11 +493,11 @@ namespace seal_old
         the corresponding plaintext polynomial and on the absolute values of the 
         coefficients based on the inputs, and sets the operation history accordingly.
 
-        @param[in] operand The ChooserPoly object to subtract from
+        @param[in] operand The ChooserPoly object to subtract_inplace from
         @param[in] plain_max_coeff_count Bound on the number of non-zero coefficients
-        in the plaintext polynomial to subtract
+        in the plaintext polynomial to subtract_inplace
         @param[in] plain_max_abs_value Bound on the absolute value of coefficients of 
-        the plaintext polynomial to subtract
+        the plaintext polynomial to subtract_inplace
         @throws std::invalid_argument if operand is not correctly initialized
         @throws std::invalid_argument if plain_max_coeff_count is not positive
         @see Evaluator::sub_plain() for the corresponding operation on ciphertexts.
@@ -513,15 +513,15 @@ namespace seal_old
         the corresponding plaintext polynomial and on the absolute values of the
         coefficients based on the inputs, and sets the operation history accordingly.
 
-        This variant of the function takes the plaintext to subtract as input in the 
+        This variant of the function takes the plaintext to subtract_inplace as input in the
         form of another ChooserPoly. If the plaintext to be subtracted is already 
         known at the time of performing the automatic parameter selection, one can 
         use ChooserEncoder to construct the appropriate ChooserPoly for 
         plain_chooser_poly. This function completely ignores the operation history
         possibly carried by plain_chooser_poly.
 
-        @param[in] operand The ChooserPoly object to subtract from
-        @param[in] plain_chooser_poly The plaintext polynomial to subtract represented
+        @param[in] operand The ChooserPoly object to subtract_inplace from
+        @param[in] plain_chooser_poly The plaintext polynomial to subtract_inplace represented
         by a ChooserPoly
         @throws std::invalid_argument if operand is not correctly initialized
         @throws std::invalid_argument if plain_chooser_poly is not correctly initialized
@@ -531,7 +531,7 @@ namespace seal_old
         @see SimulationEvaluator:sub_plain() for the corresponding operation on 
         Simulation objects.
         @see ChooserEncoder for constructing the ChooserPoly for the plaintext to 
-        subtract.
+        subtract_inplace.
         */
         ChooserPoly sub_plain(const ChooserPoly &operand, 
             const ChooserPoly &plain_chooser_poly);

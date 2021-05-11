@@ -152,7 +152,7 @@ namespace seal_old
             }
             else
             {
-                // Otherwise, we know operand > 0 and < modulus so subtract modulus - operand.
+                // Otherwise, we know operand > 0 and < modulus so subtract_inplace modulus - operand.
                 sub_uint_uint(modulus, operand, uint64_count, result);
             }
         }
@@ -319,7 +319,7 @@ namespace seal_old
             Pointer intermediate(allocate_uint(intermediate_uint64_count, pool));
             multiply_uint_uint(operand1, operand2, uint64_count, intermediate.get());
 
-            // Perform modulo operation.
+            // Perform modulo_inplace operation.
             modulo_uint_inplace(intermediate.get(), intermediate_uint64_count, modulus, pool);
 
             // Copy to result.
@@ -359,19 +359,19 @@ namespace seal_old
             int result_uint64_count = uint64_count * 2;
             multiply_uint_uint(operand1, operand2, uint64_count, result);
 
-            // Perform modulo operation.
+            // Perform modulo_inplace operation.
             modulo_uint_inplace(result, result_uint64_count, modulus, pool);
         }
 
         bool try_invert_uint_mod(const std::uint64_t *operand, const std::uint64_t *modulus, int uint64_count, std::uint64_t *result, MemoryPool &pool);
     
-        // Find if root is a primitive degree-th root of unity modulo prime_modulus, where degree must be a power of two.
+        // Find if root is a primitive degree-th root of unity modulo_inplace prime_modulus, where degree must be a power of two.
         bool is_primitive_root(const std::uint64_t *root, std::uint64_t degree, const Modulus &prime_modulus, MemoryPool &pool);
 
-        // Try to find a primitive degree-th root of unity modulo prime_modulus, where degree must be a power of two.
+        // Try to find a primitive degree-th root of unity modulo_inplace prime_modulus, where degree must be a power of two.
         bool try_primitive_root(std::uint64_t degree, const Modulus &prime_modulus, std::uint64_t *destination, MemoryPool &pool);
 
-        // Try to find the smallest (as integer) primitive degree-th root of unity modulo prime_modulus, where degree must be a power of two.
+        // Try to find the smallest (as integer) primitive degree-th root of unity modulo_inplace prime_modulus, where degree must be a power of two.
         bool try_minimal_primitive_root(std::uint64_t degree, const Modulus &prime_modulus, std::uint64_t *destination, MemoryPool &pool);
     
         void exponentiate_uint_mod(const std::uint64_t *operand, const std::uint64_t *exponent, int exponent_uint64_count,

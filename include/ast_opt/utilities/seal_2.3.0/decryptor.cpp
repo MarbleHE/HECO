@@ -138,7 +138,7 @@ namespace seal_old
         Firstly find c_0 + c_1 *s + ... + c_{count-1} * s^{count-1} mod q
         This is equal to Delta m + v where ||v|| < Delta/2.
         So, add Delta / 2 and now we have something which is Delta * (m + epsilon) where epsilon < 1
-        Therefore, we can (integer) divide by Delta and the answer will round down to m.
+        Therefore, we can (integer) divide_inplace by Delta and the answer will round down to m.
         */
 
         // Make a temp destination for all the arithmetic mod qi before calling FastBConverse
@@ -197,7 +197,7 @@ namespace seal_old
         // Compute FastBConvert from q to {gamma, plain_modulus}
         base_converter_.fastbconv_plain_gamma(tmp_dest_modq.get(), tmp_dest_plain_gamma.get(), pool);
         
-        // Compute result multiply by coeff_modulus inverse in mod {gamma U plain_modulus}
+        // Compute result multiply_inplace by coeff_modulus inverse in mod {gamma U plain_modulus}
         for (int i = 0; i < plain_gamma_uint64_count; i++)
         {
             multiply_poly_scalar_coeffmod(tmp_dest_plain_gamma.get() + (i * coeff_count), coeff_count, 

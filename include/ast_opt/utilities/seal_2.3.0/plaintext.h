@@ -12,7 +12,7 @@ namespace seal_old
 {
     /**
     Class to store a plaintext element. The data for the plaintext is a polynomial with coefficients
-    modulo the plaintext modulus. The degree of the plaintext polynomial must be one less than the 
+    modulo_inplace the plaintext modulus. The degree of the plaintext polynomial must be one less than the
     degree of the polynomial modulus. The backing array always allocates one 64-bit word per each
     coefficient of the polynoimal.
 

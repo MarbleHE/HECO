@@ -7,19 +7,20 @@
 #include <memory>
 #include <seal/seal.h>
 
-std::unique_ptr<AbstractCiphertext> SimulatorCiphertextFactory::createCiphertext(const std::vector<int64_t> &data) {
+std::unique_ptr<AbstractCiphertext> SimulatorCiphertextFactory::createCiphertext(const std::vector<int64_t> &data) const {
   auto ptxt = createPlaintext(data);
-  std::unique_ptr<SimulatorCiphertext> ctxt = std::make_unique<SimulatorCiphertext>(*this); // Constructs a simulator ciphertext given all the data
+  std::unique_ptr<SimulatorCiphertext>
+      ctxt = std::make_unique<SimulatorCiphertext>(*this); // Constructs a simulator ciphertext given all the data
   ctxt->createFresh(ptxt); // calcs initial noise and sets the variables needed, also stores the plaintext as _plaintext
   return ctxt;
 }
 
-std::unique_ptr<AbstractCiphertext> SimulatorCiphertextFactory::createCiphertext(const std::vector<int> &data) {
+std::unique_ptr<AbstractCiphertext> SimulatorCiphertextFactory::createCiphertext(const std::vector<int> &data) const {
   std::vector<int64_t> ciphertextData(data.begin(), data.end());
   return createCiphertext(ciphertextData);
 }
 
-std::unique_ptr<AbstractCiphertext> SimulatorCiphertextFactory::createCiphertext(int64_t data) {
+std::unique_ptr<AbstractCiphertext> SimulatorCiphertextFactory::createCiphertext(int64_t data) const {
   std::vector<int64_t> values = {data};
   return createCiphertext(values);
 }
@@ -102,7 +103,7 @@ void SimulatorCiphertextFactory::setupSealContext() {
 }
 
 template<typename T>
-std::vector<T> SimulatorCiphertextFactory::expandVector(const std::vector<T> &values) {
+std::vector<T> SimulatorCiphertextFactory::expandVector(const std::vector<T> &values) const {
   // passing the vector by value to implicitly get a copy somehow didn't work here
   std::vector<T> expandedVector(values.begin(), values.end());
   if (expandedVector.size() > encoder->slot_count()) {
@@ -116,18 +117,17 @@ std::vector<T> SimulatorCiphertextFactory::expandVector(const std::vector<T> &va
   return expandedVector;
 }
 
-std::unique_ptr<seal::Plaintext> SimulatorCiphertextFactory::createPlaintext(int64_t value) {
+std::unique_ptr<seal::Plaintext> SimulatorCiphertextFactory::createPlaintext(int64_t value) const {
   std::vector<int64_t> valueAsVec = {value};
   return createPlaintext(valueAsVec);
 }
 
-std::unique_ptr<seal::Plaintext> SimulatorCiphertextFactory::createPlaintext(const std::vector<int> &value) {
+std::unique_ptr<seal::Plaintext> SimulatorCiphertextFactory::createPlaintext(const std::vector<int> &value) const {
   std::vector<int64_t> vecInt64(value.begin(), value.end());
   return createPlaintext(vecInt64);
 }
 
-std::unique_ptr<seal::Plaintext> SimulatorCiphertextFactory::createPlaintext(const std::vector<int64_t> &value) {
-  if (!context || !context->parameters_set()) setupSealContext();
+std::unique_ptr<seal::Plaintext> SimulatorCiphertextFactory::createPlaintext(const std::vector<int64_t> &value) const {
   auto expandedVector = expandVector(value);
   auto ptxt = std::make_unique<seal::Plaintext>();
   encoder->encode(expandedVector, *ptxt);
@@ -143,15 +143,10 @@ const seal::RelinKeys &SimulatorCiphertextFactory::getRelinKeys() const {
 }
 
 void SimulatorCiphertextFactory::decryptCiphertext(AbstractCiphertext &abstractCiphertext,
-                                              std::vector<int64_t> &ciphertextData) {
+                                                   std::vector<int64_t> &ciphertextData) const {
   auto &ctxt = dynamic_cast<SimulatorCiphertext &>(abstractCiphertext);
   seal::Plaintext ptxt = ctxt.getPlaintext(); // this simply returns the stored _plaintext
   encoder->decode(ptxt, ciphertextData);
-}
-
-double SimulatorCiphertextFactory::getNoise(AbstractCiphertext &abstractCiphertext) {
-  auto &ctxt = dynamic_cast<SimulatorCiphertext &>(abstractCiphertext);
-  return ctxt.getNoise();
 }
 
 seal::Evaluator &SimulatorCiphertextFactory::getEvaluator() const {
@@ -169,7 +164,7 @@ unsigned int SimulatorCiphertextFactory::getCiphertextSlotSize() const {
   return ciphertextSlotSize;
 }
 
-std::string SimulatorCiphertextFactory::getString(AbstractCiphertext &abstractCiphertext) {
+std::string SimulatorCiphertextFactory::getString(AbstractCiphertext &abstractCiphertext) const {
   // decrypt the ciphertext to get its values
   std::vector<int64_t> plainValues;
   decryptCiphertext(abstractCiphertext, plainValues);
@@ -186,7 +181,7 @@ std::string SimulatorCiphertextFactory::getString(AbstractCiphertext &abstractCi
   return ss.str();
 }
 
-std::unique_ptr<AbstractCiphertext> SimulatorCiphertextFactory::createCiphertext(std::unique_ptr<AbstractValue> &&abstractValue) {
+std::unique_ptr<AbstractCiphertext> SimulatorCiphertextFactory::createCiphertext(std::unique_ptr<AbstractValue> &&abstractValue) const {
   if (auto castedCleartext = dynamic_cast<Cleartext<int> *>(abstractValue.get())) {
     // extract data and from std::vector<int> to std::vector<int64_t>
     auto castedCleartextData = castedCleartext->getData();

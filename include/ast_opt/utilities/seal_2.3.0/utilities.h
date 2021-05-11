@@ -18,7 +18,7 @@ namespace seal_old
 
     /**
     Computes the infinity-norm of a given polynomial (represented by BigPoly). The 
-    coefficients of the polynomial are interpreted as integers modulo a given modulus.
+    coefficients of the polynomial are interpreted as integers modulo_inplace a given modulus.
     For each coefficient in the given polynomial, this function first finds 
     a representative in the symmetric interval around zero, then computes its absolute 
     value, and finally outputs the largest of them all. Optionally, the user can give 
@@ -36,8 +36,8 @@ namespace seal_old
 
     /**
     Raises an unsigned integer (represented by BigUInt) to an unsigned integer power
-    (represented by BigUInt) modulo a given modulus and stores the result in a given 
-    BigUInt. The input is expected to be already reduced modulo the modulus. Optionally, 
+    (represented by BigUInt) modulo_inplace a given modulus and stores the result in a given
+    BigUInt. The input is expected to be already reduced modulo_inplace the modulus. Optionally,
     the user can give a reference to a MemoryPoolHandle object to use a custom memory
     pool instead of the global memory pool (default).
 
@@ -46,7 +46,7 @@ namespace seal_old
     @param[in] modulus The modulus
     @param[out] destination The unsigned integer to overwrite with the result
     @param[in] pool The memory pool handle
-    @throws std::invalid_argument if operand is not reduced modulo modulus
+    @throws std::invalid_argument if operand is not reduced modulo_inplace modulus
     @throws std::invalid_argument if both operand and exponent are zero
     @see MemoryPoolHandle for more details on memory pool handles.
     */
@@ -56,8 +56,8 @@ namespace seal_old
 
     /**
     Raises an unsigned integer (represented by BigUInt) to an unsigned integer power
-    (represented by BigUInt) modulo a given modulus and returns the result. The input 
-    is expected to be already reduced modulo the modulus. Optionally, the user can give 
+    (represented by BigUInt) modulo_inplace a given modulus and returns the result. The input
+    is expected to be already reduced modulo_inplace the modulus. Optionally, the user can give
     a reference to a MemoryPoolHandle object to use a custom memory pool instead of the
     global memory pool (default).
 
@@ -65,7 +65,7 @@ namespace seal_old
     @param[in] exponent The unsigned integer exponent
     @param[in] modulus The modulus
     @param[in] pool The memory pool handle
-    @throws std::invalid_argument if operand is not reduced modulo modulus
+    @throws std::invalid_argument if operand is not reduced modulo_inplace modulus
     @throws std::invalid_argument if both operand and exponent are zero
     @see MemoryPoolHandle for more details on memory pool handles.
     */
@@ -74,9 +74,9 @@ namespace seal_old
 
     /**
     Raises a polynomial (represented by BigPoly) to an unsigned integer power 
-    (represented by BigUInt) modulo a polynomial and a coefficient modulus, and 
+    (represented by BigUInt) modulo_inplace a polynomial and a coefficient modulus, and
     stores the result in a given BigPoly. The input is expected to be already 
-    reduced both modulo the polynomial and the coefficient modulus. Optionally, 
+    reduced both modulo_inplace the polynomial and the coefficient modulus. Optionally,
     the user can give a reference to a MemoryPoolHandle object to use a custom 
     memory pool instead of the global memory pool (default).
 
@@ -86,7 +86,7 @@ namespace seal_old
     @param[in] coeff_modulus The coefficient modulus
     @param[out] destination The polynomial to overwrite with the result
     @param[in] pool The memory pool handle
-    @throws std::invalid_argument if operand is not reduced modulo poly_modulus 
+    @throws std::invalid_argument if operand is not reduced modulo_inplace poly_modulus
     and coeff_modulus
     @throws std::invalid_argument if exponent is negative
     @throws std::invalid_argument if both operand and exponent are zero
@@ -98,9 +98,9 @@ namespace seal_old
 
     /**
     Raises a polynomial (represented by BigPoly) to an unsigned integer power 
-    (represented by BigUInt) modulo a polynomial and a coefficient modulus, 
+    (represented by BigUInt) modulo_inplace a polynomial and a coefficient modulus,
     and returns the result. The input is expected to be already reduced both 
-    modulo the polynomial and the coefficient modulus. Optionally, the user can 
+    modulo_inplace the polynomial and the coefficient modulus. Optionally, the user can
     give a reference to a MemoryPoolHandle object to use a custom memory pool 
     instead of the global memory pool (default).
 
@@ -109,7 +109,7 @@ namespace seal_old
     @param[in] poly_modulus The polynomial modulus
     @param[in] coeff_modulus The coefficient modulus
     @param[in] pool The memory pool handle
-    @throws std::invalid_argument if operand is not reduced modulo poly_modulus 
+    @throws std::invalid_argument if operand is not reduced modulo_inplace poly_modulus
     and coeff_modulus
     @throws std::invalid_argument if exponent is negative
     @throws std::invalid_argument if both operand and exponent are zero
@@ -150,9 +150,9 @@ namespace seal_old
         const MemoryPoolHandle &pool = MemoryPoolHandle::Global());
 
     /**
-    Evaluates a given polynomial at another given polynomial modulo a polynomial 
+    Evaluates a given polynomial at another given polynomial modulo_inplace a polynomial
     and a coefficient modulus and stores the result in a given BigPoly. The inputs 
-    are expected to be already reduced both modulo the polynomial and the coefficient 
+    are expected to be already reduced both modulo_inplace the polynomial and the coefficient
     modulus. Optionally, the user can give a reference to a MemoryPoolHandle object 
     to use a custom memory pool instead of the global memory pool (default).
 
@@ -163,9 +163,9 @@ namespace seal_old
     @param[in] coeff_modulus The coefficient modulus
     @param[out] destination The polynomial to overwrite with the result
     @param[in] pool The memory pool handle
-    @throws std::invalid_argument if poly_to_evaluate is not reduced modulo poly_modulus
+    @throws std::invalid_argument if poly_to_evaluate is not reduced modulo_inplace poly_modulus
     and coeff_modulus
-    @throws std::invalid_argument if poly_to_evaluate_at is not reduced modulo poly_modulus
+    @throws std::invalid_argument if poly_to_evaluate_at is not reduced modulo_inplace poly_modulus
     and coeff_modulus
     @see MemoryPoolHandle for more details on memory pool handles.
     */
@@ -175,9 +175,9 @@ namespace seal_old
         const MemoryPoolHandle &pool = MemoryPoolHandle::Global());
 
     /**
-    Evaluates a given polynomial at another given polynomial modulo a polynomial and 
+    Evaluates a given polynomial at another given polynomial modulo_inplace a polynomial and
     a coefficient modulus and returns the result. The inputs are expected to be already
-    reduced both modulo the polynomial and the coefficient modulus. Optionally, the user
+    reduced both modulo_inplace the polynomial and the coefficient modulus. Optionally, the user
     can give a reference to a MemoryPoolHandle object to use a custom memory pool instead
     of the global memory pool (default).
 
@@ -187,9 +187,9 @@ namespace seal_old
     @param[in] poly_modulus The polynomial modulus
     @param[in] coeff_modulus The coefficient modulus
     @param[in] pool The memory pool handle
-    @throws std::invalid_argument if poly_to_evaluate is not reduced modulo poly_modulus 
+    @throws std::invalid_argument if poly_to_evaluate is not reduced modulo_inplace poly_modulus
     and coeff_modulus
-    @throws std::invalid_argument if poly_to_evaluate_at is not reduced modulo poly_modulus 
+    @throws std::invalid_argument if poly_to_evaluate_at is not reduced modulo_inplace poly_modulus
     and coeff_modulus
     @see MemoryPoolHandle for more details on memory pool handles.
     */
@@ -198,9 +198,9 @@ namespace seal_old
         const BigUInt &coeff_modulus, const MemoryPoolHandle &pool = MemoryPoolHandle::Global());
 
     /**
-    Evaluates a given polynomial at an unsigned integer modulo a given modulus and
+    Evaluates a given polynomial at an unsigned integer modulo_inplace a given modulus and
     stores the result in a given BigUInt. The coefficients of poly_to_evaluate and 
-    the value to evaluate at are expected to be already reduced modulo the modulus. 
+    the value to evaluate at are expected to be already reduced modulo_inplace the modulus.
     Optionally, the user can give a reference to a MemoryPoolHandle object to use 
     a custom memory pool instead of the global memory pool (default).
 
@@ -210,8 +210,8 @@ namespace seal_old
     @param[out] destination The unsigned integer to overwrite with the result
     @param[in] pool The memory pool handle
     @throws std::invalid_argument if the coefficients of poly_to_evaluate are not 
-    reduced modulo modulus
-    @throws std::invalid_argument if value is not reduced modulo modulus
+    reduced modulo_inplace modulus
+    @throws std::invalid_argument if value is not reduced modulo_inplace modulus
     @see MemoryPoolHandle for more details on memory pool handles.
     */
     void poly_eval_uint_mod(const BigPoly &poly_to_evaluate, const BigUInt &value, 
@@ -219,9 +219,9 @@ namespace seal_old
         const MemoryPoolHandle &pool = MemoryPoolHandle::Global());
 
     /**
-    Evaluates a given polynomial at an unsigned integer modulo a given modulus and 
+    Evaluates a given polynomial at an unsigned integer modulo_inplace a given modulus and
     returns the result. The coefficients of poly_to_evaluate and the value to evaluate 
-    at are expected to be already reduced modulo the modulus. Optionally, the user can 
+    at are expected to be already reduced modulo_inplace the modulus. Optionally, the user can
     give a reference to a MemoryPoolHandle object to use a custom memory pool instead 
     of the global memory pool (default).
 
@@ -230,8 +230,8 @@ namespace seal_old
     @param[in] modulus The modulus
     @param[in] pool The memory pool handle
     @throws std::invalid_argument if the coefficients of poly_to_evaluate are not 
-    reduced modulo modulus
-    @throws std::invalid_argument if value is not reduced modulo modulus
+    reduced modulo_inplace modulus
+    @throws std::invalid_argument if value is not reduced modulo_inplace modulus
     @see MemoryPoolHandle for more details on memory pool handles.
     */
     BigUInt poly_eval_uint_mod(const BigPoly &poly_to_evaluate, const BigUInt &value, 

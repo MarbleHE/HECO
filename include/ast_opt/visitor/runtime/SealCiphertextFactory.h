@@ -49,10 +49,10 @@ class SealCiphertextFactory : public AbstractCiphertextFactory {
   /// \throws std::runtime_error if the number of elements in values is larger than the size defined in
   /// ciphertextSlotSize.
   template<typename T>
-  std::vector<T> expandVector(const std::vector<T> &values);
+  std::vector<T> expandVector(const std::vector<T> &values) const;
 
  public:
-  SealCiphertextFactory() = default;
+  SealCiphertextFactory();
 
   /// Creates a new SealCiphertextFactory whereat each ciphertext created by the factory can hold
   /// numElementsPerCiphertextSlot elements.
@@ -92,31 +92,31 @@ class SealCiphertextFactory : public AbstractCiphertextFactory {
   /// Creates a new seal::Plaintext that encodes the given data (vector value) using the defined encoder.
   /// \param value The values to be encoded into the new plaintext.
   /// \return (A std::unique_ptr) to the newly created seal::Plaintext.
-  std::unique_ptr<seal::Plaintext> createPlaintext(const std::vector<int> &value);
+  std::unique_ptr<seal::Plaintext> createPlaintext(const std::vector<int> &value) const;
 
   /// Creates a new seal::Plaintext object that encodes the given value. Remaining slots in the plaintext are filled up
   /// with the last given value.
   /// \param value The values to be encoded in the plaintext.
   /// \return (A std::unique_ptr to) the seal::Plaintext that encodes the given values.
-  std::unique_ptr<seal::Plaintext> createPlaintext(const std::vector<int64_t> &value);
+  std::unique_ptr<seal::Plaintext> createPlaintext(const std::vector<int64_t> &value) const;
 
   /// Creates a new seal::Plaintext object that encodes the given value. Remaining slots in the plaintext are filled up
   /// with the same value.
   /// \param value The value to be encoded in the plaintext.
   /// \return (A std::unique_ptr to) the seal::Plaintext that encodes the given value.
-  std::unique_ptr<seal::Plaintext> createPlaintext(int64_t value);
+  std::unique_ptr<seal::Plaintext> createPlaintext(int64_t value) const;
 
-  std::unique_ptr<AbstractCiphertext> createCiphertext(const std::vector<int64_t> &data) override;
+  std::unique_ptr<AbstractCiphertext> createCiphertext(const std::vector<int64_t> &data) const override;
 
-  std::unique_ptr<AbstractCiphertext> createCiphertext(int64_t data) override;
+  std::unique_ptr<AbstractCiphertext> createCiphertext(int64_t data) const override;
 
-  void decryptCiphertext(AbstractCiphertext &abstractCiphertext, std::vector<int64_t> &ciphertextData) override;
+  void decryptCiphertext(AbstractCiphertext &abstractCiphertext, std::vector<int64_t> &ciphertextData) const override;
 
-  std::string getString(AbstractCiphertext &abstractCiphertext) override;
+  std::string getString(AbstractCiphertext &abstractCiphertext) const override;
 
-  std::unique_ptr<AbstractCiphertext> createCiphertext(std::unique_ptr<AbstractValue> &&abstractValue) override;
+  std::unique_ptr<AbstractCiphertext> createCiphertext(std::unique_ptr<AbstractValue> &&abstractValue) const override;
 
-  std::unique_ptr<AbstractCiphertext> createCiphertext(const std::vector<int> &data) override;
+  std::unique_ptr<AbstractCiphertext> createCiphertext(const std::vector<int> &data) const override;
 };
 
 #endif

@@ -6,19 +6,19 @@
 #include <memory>
 #include <seal/seal.h>
 
-std::unique_ptr<AbstractCiphertext> SealCiphertextFactory::createCiphertext(const std::vector<int64_t> &data) {
+std::unique_ptr<AbstractCiphertext> SealCiphertextFactory::createCiphertext(const std::vector<int64_t> &data) const {
   auto ptxt = createPlaintext(data);
   std::unique_ptr<SealCiphertext> ctxt = std::make_unique<SealCiphertext>(*this);
   encryptor->encrypt(*ptxt, ctxt->getCiphertext());
   return ctxt;
 }
 
-std::unique_ptr<AbstractCiphertext> SealCiphertextFactory::createCiphertext(const std::vector<int> &data) {
+std::unique_ptr<AbstractCiphertext> SealCiphertextFactory::createCiphertext(const std::vector<int> &data) const {
   std::vector<int64_t> ciphertextData(data.begin(), data.end());
   return createCiphertext(ciphertextData);
 }
 
-std::unique_ptr<AbstractCiphertext> SealCiphertextFactory::createCiphertext(int64_t data) {
+std::unique_ptr<AbstractCiphertext> SealCiphertextFactory::createCiphertext(int64_t data) const {
   std::vector<int64_t> values = {data};
   return createCiphertext(values);
 }
@@ -100,7 +100,7 @@ void SealCiphertextFactory::setupSealContext() {
 }
 
 template<typename T>
-std::vector<T> SealCiphertextFactory::expandVector(const std::vector<T> &values) {
+std::vector<T> SealCiphertextFactory::expandVector(const std::vector<T> &values) const {
   // passing the vector by value to implicitly get a copy somehow didn't work here
   std::vector<T> expandedVector(values.begin(), values.end());
   if (expandedVector.size() > encoder->slot_count()) {
@@ -114,18 +114,17 @@ std::vector<T> SealCiphertextFactory::expandVector(const std::vector<T> &values)
   return expandedVector;
 }
 
-std::unique_ptr<seal::Plaintext> SealCiphertextFactory::createPlaintext(int64_t value) {
+std::unique_ptr<seal::Plaintext> SealCiphertextFactory::createPlaintext(int64_t value) const {
   std::vector<int64_t> valueAsVec = {value};
   return createPlaintext(valueAsVec);
 }
 
-std::unique_ptr<seal::Plaintext> SealCiphertextFactory::createPlaintext(const std::vector<int> &value) {
+std::unique_ptr<seal::Plaintext> SealCiphertextFactory::createPlaintext(const std::vector<int> &value) const {
   std::vector<int64_t> vecInt64(value.begin(), value.end());
   return createPlaintext(vecInt64);
 }
 
-std::unique_ptr<seal::Plaintext> SealCiphertextFactory::createPlaintext(const std::vector<int64_t> &value) {
-  if (!context || !context->parameters_set()) setupSealContext();
+std::unique_ptr<seal::Plaintext> SealCiphertextFactory::createPlaintext(const std::vector<int64_t> &value) const {
   auto expandedVector = expandVector(value);
   auto ptxt = std::make_unique<seal::Plaintext>();
   encoder->encode(expandedVector, *ptxt);
@@ -141,7 +140,7 @@ const seal::RelinKeys &SealCiphertextFactory::getRelinKeys() const {
 }
 
 void SealCiphertextFactory::decryptCiphertext(AbstractCiphertext &abstractCiphertext,
-                                              std::vector<int64_t> &ciphertextData) {
+                                              std::vector<int64_t> &ciphertextData) const {
   auto &ctxt = dynamic_cast<SealCiphertext &>(abstractCiphertext);
   seal::Plaintext ptxt;
   decryptor->decrypt(ctxt.getCiphertext(), ptxt);
@@ -155,15 +154,20 @@ seal::Evaluator &SealCiphertextFactory::getEvaluator() const {
 const seal::GaloisKeys &SealCiphertextFactory::getGaloisKeys() const {
   return *galoisKeys;
 }
+SealCiphertextFactory::SealCiphertextFactory() {
+  setupSealContext();
+}
 
 SealCiphertextFactory::SealCiphertextFactory(unsigned int numElementsPerCiphertextSlot)
-    : ciphertextSlotSize(numElementsPerCiphertextSlot) {}
+    : ciphertextSlotSize(numElementsPerCiphertextSlot) {
+  setupSealContext();
+}
 
 unsigned int SealCiphertextFactory::getCiphertextSlotSize() const {
   return ciphertextSlotSize;
 }
 
-std::string SealCiphertextFactory::getString(AbstractCiphertext &abstractCiphertext) {
+std::string SealCiphertextFactory::getString(AbstractCiphertext &abstractCiphertext) const {
   // decrypt the ciphertext to get its values
   std::vector<int64_t> plainValues;
   decryptCiphertext(abstractCiphertext, plainValues);
@@ -180,7 +184,7 @@ std::string SealCiphertextFactory::getString(AbstractCiphertext &abstractCiphert
   return ss.str();
 }
 
-std::unique_ptr<AbstractCiphertext> SealCiphertextFactory::createCiphertext(std::unique_ptr<AbstractValue> &&abstractValue) {
+std::unique_ptr<AbstractCiphertext> SealCiphertextFactory::createCiphertext(std::unique_ptr<AbstractValue> &&abstractValue) const {
   if (auto castedCleartext = dynamic_cast<Cleartext<int> *>(abstractValue.get())) {
     // extract data and from std::vector<int> to std::vector<int64_t>
     auto castedCleartextData = castedCleartext->getData();

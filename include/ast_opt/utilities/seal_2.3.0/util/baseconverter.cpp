@@ -544,7 +544,7 @@ namespace seal_old
                 //sub_uint_uint_smallmod(tmp.get() + i, input + i + (aux_base_mod_count_ * coeff_count_), m_sk_, tmp.get() + i);
                 //multiply_uint64_mod(tmp.get() + i, &inv_aux_products_mod_msk_, m_sk_, alpha_sk.get() + i);
 
-                // It is not necessary for the negation to be reduced modulo the small prime
+                // It is not necessary for the negation to be reduced modulo_inplace the small prime
                 //negate_uint_smallmod(input + i + (aux_base_mod_count_ * coeff_count_), m_sk_, &negated_input);
                 uint64_t negated_input = m_sk_value - *input_ptr++;
                 *destination_ptr++ = multiply_uint_uint_mod(*temp_ptr++ + negated_input, inv_aux_products_mod_msk_, m_sk_);
@@ -562,7 +562,7 @@ namespace seal_old
                 {
                     uint64_t m_alpha_sk[2];
 
-                    // Correcting alpha_sk since it is a centered modulo 
+                    // Correcting alpha_sk since it is a centered modulo_inplace
                     if (*temp_ptr > m_sk_div_2)
                     {
                         // Lazy reduction
@@ -574,7 +574,7 @@ namespace seal_old
                     else
                     {
                         // Lazy reduction
-                        // It is not necessary for the negation to be reduced modulo the small prime
+                        // It is not necessary for the negation to be reduced modulo_inplace the small prime
                         multiply_uint64(coeff_base_array_elt_value - aux_products_all_mod_coeff_array_elt, 
                             *temp_ptr, m_alpha_sk);
                         m_alpha_sk[1] += add_uint64(*destination, m_alpha_sk[0], 0, m_alpha_sk);
@@ -655,7 +655,7 @@ namespace seal_old
                 uint64_t inv_coeff_products_all_mod_aux_bsk_array_elt = inv_coeff_products_all_mod_aux_bsk_array_[i];
                 for (int k = 0; k < coeff_count_; k++, destination++)
                 {
-                    // It is not necessary for the negation to be reduced modulo the small prime
+                    // It is not necessary for the negation to be reduced modulo_inplace the small prime
                     //negate_uint_smallmod(base_convert_Bsk.get() + k + (i * coeff_count_), bsk_base_array_[i], &negated_base_convert_Bsk);
                     *destination = multiply_uint_uint_mod(*input++ + bsk_base_array_value - *destination, 
                         inv_coeff_products_all_mod_aux_bsk_array_elt, bsk_base_array_elt);

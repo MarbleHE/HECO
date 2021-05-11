@@ -96,7 +96,7 @@ namespace seal_old
     @par Negative Integers
     Negative integers are represented by using -1 instead of 1 in the binary representation,
     and the negative coefficients are stored in the plaintext polynomials as unsigned integers
-    that represent them modulo the plaintext modulus. Thus, for example, a coefficient of -1
+    that represent them modulo_inplace the plaintext modulus. Thus, for example, a coefficient of -1
     would be stored as a polynomial coefficient plain_modulus-1.
 
     @par Decoding Overflow
@@ -190,7 +190,7 @@ namespace seal_old
         @par Negative Integers
         Negative integers are represented by using -1 instead of 1 in the binary representation,
         and the negative coefficients are stored in the plaintext polynomials as unsigned integers
-        that represent them modulo the plaintext modulus. Thus, for example, a coefficient of -1
+        that represent them modulo_inplace the plaintext modulus. Thus, for example, a coefficient of -1
         would be stored as a polynomial coefficient plain_modulus-1.
 
         @param[in] value The signed integer to encode
@@ -203,7 +203,7 @@ namespace seal_old
         @par Negative Integers
         Negative integers are represented by using -1 instead of 1 in the binary representation,
         and the negative coefficients are stored in the plaintext polynomials as unsigned integers
-        that represent them modulo the plaintext modulus. Thus, for example, a coefficient of -1
+        that represent them modulo_inplace the plaintext modulus. Thus, for example, a coefficient of -1
         would be stored as a polynomial coefficient plain_modulus-1.
 
         @param[in] value The signed integer to encode
@@ -274,7 +274,7 @@ namespace seal_old
         @par Negative Integers
         Negative integers are represented by using -1 instead of 1 in the binary representation,
         and the negative coefficients are stored in the plaintext polynomials as unsigned integers
-        that represent them modulo the plaintext modulus. Thus, for example, a coefficient of -1
+        that represent them modulo_inplace the plaintext modulus. Thus, for example, a coefficient of -1
         would be stored as a polynomial coefficient plain_modulus-1.
 
         @param[in] value The signed integer to encode
@@ -300,7 +300,7 @@ namespace seal_old
         @par Negative Integers
         Negative integers are represented by using -1 instead of 1 in the binary representation,
         and the negative coefficients are stored in the plaintext polynomials as unsigned integers
-        that represent them modulo the plaintext modulus. Thus, for example, a coefficient of -1
+        that represent them modulo_inplace the plaintext modulus. Thus, for example, a coefficient of -1
         would be stored as a polynomial coefficient plain_modulus-1.
 
         @param[in] value The signed integer to encode
@@ -377,7 +377,7 @@ namespace seal_old
     Negative integers in the balanced base-b encoding are represented the same way as
     positive integers, namely, both positive and negative integers can have both positive and negative
     digits in their balanced base-b representation. Negative coefficients are stored in the
-    plaintext polynomials as unsigned integers that represent them modulo the plaintext modulus.
+    plaintext polynomials as unsigned integers that represent them modulo_inplace the plaintext modulus.
     Thus, for example, a coefficient of -1 would be stored as a polynomial coefficient plain_modulus-1.
 
     @par Decoding Overflow
@@ -478,7 +478,7 @@ namespace seal_old
         Negative integers in the balanced base-b encoding are represented the same way as
         positive integers, namely, both positive and negative integers can have both positive and negative
         digits in their balanced base-b representation. Negative coefficients are stored in the
-        plaintext polynomials as unsigned integers that represent them modulo the plaintext modulus.
+        plaintext polynomials as unsigned integers that represent them modulo_inplace the plaintext modulus.
         Thus, for example, a coefficient of -1 would be stored as a polynomial coefficient plain_modulus-1.
 
         @param[in] value The signed integer to encode
@@ -492,7 +492,7 @@ namespace seal_old
         Negative integers in the balanced base-b encoding are represented the same way as
         positive integers, namely, both positive and negative integers can have both positive and negative
         digits in their balanced base-b representation. Negative coefficients are stored in the
-        plaintext polynomials as unsigned integers that represent them modulo the plaintext modulus.
+        plaintext polynomials as unsigned integers that represent them modulo_inplace the plaintext modulus.
         Thus, for example, a coefficient of -1 would be stored as a polynomial coefficient plain_modulus-1.
 
         @param[in] value The signed integer to encode
@@ -564,7 +564,7 @@ namespace seal_old
         Negative integers in the balanced base-b encoding are represented the same way as
         positive integers, namely, both positive and negative integers can have both positive and negative
         digits in their balanced base-b representation. Negative coefficients are stored in the
-        plaintext polynomials as unsigned integers that represent them modulo the plaintext modulus.
+        plaintext polynomials as unsigned integers that represent them modulo_inplace the plaintext modulus.
         Thus, for example, a coefficient of -1 would be stored as a polynomial coefficient plain_modulus-1.
 
         @param[in] value The signed integer to encode
@@ -591,7 +591,7 @@ namespace seal_old
         Negative integers in the balanced base-b encoding are represented the same way as
         positive integers, namely, both positive and negative integers can have both positive and negative
         digits in their balanced base-b representation. Negative coefficients are stored in the
-        plaintext polynomials as unsigned integers that represent them modulo the plaintext modulus.
+        plaintext polynomials as unsigned integers that represent them modulo_inplace the plaintext modulus.
         Thus, for example, a coefficient of -1 would be stored as a polynomial coefficient plain_modulus-1.
 
         @param[in] value The signed integer to encode
@@ -673,7 +673,7 @@ namespace seal_old
     @par Negative Integers
     Negative integers are represented by using -1 instead of 1 in the binary representation,
     and the negative coefficients are stored in the plaintext polynomials as unsigned integers
-    that represent them modulo the plaintext modulus. Thus, for example, a coefficient of -1
+    that represent them modulo_inplace the plaintext modulus. Thus, for example, a coefficient of -1
     would be stored as a polynomial coefficient plain_modulus-1.
 
     @par Decoding Overflow
@@ -842,7 +842,7 @@ namespace seal_old
     Negative integers in the balanced base-b encoding are represented the same way as
     positive integers, namely, both positive and negative integers can have both positive and negative
     digits in their balanced base-b representation. Negative coefficients are stored in the
-    plaintext polynomials as unsigned integers that represent them modulo the plaintext modulus.
+    plaintext polynomials as unsigned integers that represent them modulo_inplace the plaintext modulus.
     Thus, for example, a coefficient of -1 would be stored as a polynomial coefficient plain_modulus-1.
 
     @par Decoding Overflow
@@ -1010,7 +1010,7 @@ namespace seal_old
     Negative integers in the base-b encoding are represented the same way as positive integers, 
     namely, both positive and negative integers can have both positive and negative digits in their 
     base-b representation. Negative coefficients are stored in the plaintext polynomials as unsigned 
-    integers that represent them modulo the plaintext modulus. Thus, for example, a coefficient of -1 
+    integers that represent them modulo_inplace the plaintext modulus. Thus, for example, a coefficient of -1
     would be stored as a polynomial coefficient plain_modulus-1.
 
     @par Decoding Overflow
@@ -1124,7 +1124,7 @@ namespace seal_old
         Negative integers in the base-b encoding are represented the same way as positive integers,
         namely, both positive and negative integers can have both positive and negative digits in their
         base-b representation. Negative coefficients are stored in the plaintext polynomials as unsigned
-        integers that represent them modulo the plaintext modulus. Thus, for example, a coefficient of -1
+        integers that represent them modulo_inplace the plaintext modulus. Thus, for example, a coefficient of -1
         would be stored as a polynomial coefficient plain_modulus-1.
 
         @param[in] value The signed integer to encode
@@ -1141,7 +1141,7 @@ namespace seal_old
         Negative integers in the base-b encoding are represented the same way as positive integers,
         namely, both positive and negative integers can have both positive and negative digits in their
         base-b representation. Negative coefficients are stored in the plaintext polynomials as unsigned
-        integers that represent them modulo the plaintext modulus. Thus, for example, a coefficient of -1
+        integers that represent them modulo_inplace the plaintext modulus. Thus, for example, a coefficient of -1
         would be stored as a polynomial coefficient plain_modulus-1.
 
         @param[in] value The signed integer to encode
@@ -1228,7 +1228,7 @@ namespace seal_old
         Negative integers in the base-b encoding are represented the same way as positive integers,
         namely, both positive and negative integers can have both positive and negative digits in their
         base-b representation. Negative coefficients are stored in the plaintext polynomials as unsigned
-        integers that represent them modulo the plaintext modulus. Thus, for example, a coefficient of -1
+        integers that represent them modulo_inplace the plaintext modulus. Thus, for example, a coefficient of -1
         would be stored as a polynomial coefficient plain_modulus-1.
 
         @param[in] value The signed integer to encode
@@ -1255,7 +1255,7 @@ namespace seal_old
         Negative integers in the base-b encoding are represented the same way as positive integers,
         namely, both positive and negative integers can have both positive and negative digits in their
         base-b representation. Negative coefficients are stored in the plaintext polynomials as unsigned
-        integers that represent them modulo the plaintext modulus. Thus, for example, a coefficient of -1
+        integers that represent them modulo_inplace the plaintext modulus. Thus, for example, a coefficient of -1
         would be stored as a polynomial coefficient plain_modulus-1.
 
         @param[in] value The signed integer to encode
@@ -1326,7 +1326,7 @@ namespace seal_old
     Negative integers in the base-b encoding are represented the same way as positive integers,
     namely, both positive and negative integers can have both positive and negative digits in their
     base-b representation. Negative coefficients are stored in the plaintext polynomials as unsigned
-    integers that represent them modulo the plaintext modulus. Thus, for example, a coefficient of -1
+    integers that represent them modulo_inplace the plaintext modulus. Thus, for example, a coefficient of -1
     would be stored as a polynomial coefficient plain_modulus-1.
 
     @par Decoding Overflow

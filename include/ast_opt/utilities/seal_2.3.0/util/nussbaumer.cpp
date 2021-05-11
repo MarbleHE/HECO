@@ -102,7 +102,7 @@ namespace seal_old
                                 temp_poly_coeff_ptr = alloc_ptr;
                                 for (int a = 0; a < r; a++)
                                 {
-                                    // Add and subtract
+                                    // Add and subtract_inplace
                                     unsigned char borrow = sub_uint64(*x_coeff_ptr, *temp_poly_coeff_ptr, 0, x_coeff_ptr2++);
                                     unsigned char carry = add_uint64(*x_coeff_ptr, *temp_poly_coeff_ptr++, 0, x_coeff_ptr);
                                     x_coeff_ptr++;
@@ -145,7 +145,7 @@ namespace seal_old
                                 uint64_t *dest_coeff_ptr = alloc_ptr;
                                 for (int a = 0; a < r; a++)
                                 {
-                                    // Add and subtract
+                                    // Add and subtract_inplace
                                     unsigned char borrow = sub_uint64(*coeff1_ptr, *coeff2_ptr, 0, dest_coeff_ptr++);
                                     unsigned char carry = add_uint64(*coeff1_ptr, *coeff2_ptr++, 0, coeff1_ptr);
                                     coeff1_ptr++;

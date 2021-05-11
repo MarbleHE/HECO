@@ -22,7 +22,7 @@ class KernelTest : public ::testing::Test {  /* NOLINT (predictable sequence exp
 
   void SetUp() override {
     randomEngine = std::default_random_engine(RAND_SEED);  /* NOLINT (predictable sequence expected) */
-    // the supported number range must be according to the FHE scheme parameters to not wrap around the modulo
+    // the supported number range must be according to the FHE scheme parameters to not wrap around the modulo_inplace
     myUnifIntDist = std::uniform_int_distribution<int>(0, 1024);
   }
 

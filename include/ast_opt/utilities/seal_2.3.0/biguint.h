@@ -535,7 +535,7 @@ namespace seal_old
         Subtracts two BigUInts and returns the difference. The input operands are not modified. The bit count of the difference is set
         to be the significant bit count of the larger of the two input operands.
 
-        @param[in] operand2 The second operand to subtract
+        @param[in] operand2 The second operand to subtract_inplace
         */
         inline BigUInt operator -(const BigUInt &operand2) const
         {
@@ -550,7 +550,7 @@ namespace seal_old
         Subtracts a BigUInt and an unsigned integer and returns the difference. The input operands are not modified. The bit count of
         the difference is set to be the significant bit count of the larger of the two operands.
 
-        @param[in] operand2 The second operand to subtract
+        @param[in] operand2 The second operand to subtract_inplace
         */
         inline BigUInt operator -(std::uint64_t operand2) const
         {
@@ -563,7 +563,7 @@ namespace seal_old
         Multiplies two BigUInts and returns the product. The input operands are not modified. The bit count of the product is set
         to be the sum of the significant bit counts of the two input operands.
 
-        @param[in] operand2 The second operand to multiply
+        @param[in] operand2 The second operand to multiply_inplace
         */
         inline BigUInt operator *(const BigUInt &operand2) const
         {
@@ -577,7 +577,7 @@ namespace seal_old
         Multiplies a BigUInt and an unsigned integer and returns the product. The input operands are not modified. The bit count of
         the product is set to be the sum of the significant bit counts of the two input operands.
 
-        @param[in] operand2 The second operand to multiply
+        @param[in] operand2 The second operand to multiply_inplace
         */
         inline BigUInt operator *(std::uint64_t operand2) const
         {
@@ -590,7 +590,7 @@ namespace seal_old
         Divides two BigUInts and returns the quotient. The input operands are not modified. The bit count of the quotient is set
         to be the significant bit count of the first input operand.
 
-        @param[in] operand2 The second operand to divide
+        @param[in] operand2 The second operand to divide_inplace
         @throws std::invalid_argument if operand2 is zero
         */
         BigUInt operator /(const BigUInt &operand2) const;
@@ -599,7 +599,7 @@ namespace seal_old
         Divides a BigUInt and an unsigned integer and returns the quotient. The input operands are not modified. The bit count of the
         quotient is set to be the significant bit count of the first input operand.
 
-        @param[in] operand2 The second operand to divide
+        @param[in] operand2 The second operand to divide_inplace
         @throws std::invalid_argument if operand2 is zero
         */
         inline BigUInt operator /(std::uint64_t operand2) const
@@ -613,7 +613,7 @@ namespace seal_old
         Divides two BigUInts and returns the remainder. The input operands are not modified. The bit count of the remainder is set
         to be the significant bit count of the first input operand.
 
-        @param[in] operand2 The second operand to divide
+        @param[in] operand2 The second operand to divide_inplace
         @throws std::invalid_argument iff operand2 is zero
         */
         inline BigUInt operator %(const BigUInt &operand2) const
@@ -635,7 +635,7 @@ namespace seal_old
         Divides a BigUInt and an unsigned integer and returns the remainder. The input operands are not modified. The bit count of the
         remainder is set to be the significant bit count of the first input operand.
 
-        @param[in] operand2 The second operand to divide
+        @param[in] operand2 The second operand to divide_inplace
         @throws std::invalid_argument if operand2 is zero
         */
         inline BigUInt operator %(std::uint64_t operand2) const
@@ -1020,7 +1020,7 @@ namespace seal_old
         input operand is not modified. The first operand is resized if and only if its bit count is smaller than the significant
         bit count of the second operand.
 
-        @param[in] operand2 The second operand to subtract
+        @param[in] operand2 The second operand to subtract_inplace
         @throws std::logic_error if the BigUInt is an alias and the operator attempts to enlarge the BigUInt to fit the result
         */
         inline BigUInt &operator -=(const BigUInt &operand2)
@@ -1040,7 +1040,7 @@ namespace seal_old
         operand. The second input operand is not modified. The first operand is resized if and only if its bit count is smaller than
         the significant bit count of the second operand.
 
-        @param[in] operand2 The second operand to subtract
+        @param[in] operand2 The second operand to subtract_inplace
         @throws std::logic_error if the BigUInt is an alias and the operator attempts to enlarge the BigUInt to fit the result
         */
         inline BigUInt &operator -=(std::uint64_t operand2)
@@ -1055,7 +1055,7 @@ namespace seal_old
         input operand is not modified. The first operand is resized if and only if its bit count is smaller than the sum of the
         significant bit counts of the two input operands.
 
-        @param[in] operand2 The second operand to multiply
+        @param[in] operand2 The second operand to multiply_inplace
         @throws std::logic_error if the BigUInt is an alias and the operator attempts to enlarge the BigUInt to fit the result
         */
         inline BigUInt &operator *=(const BigUInt &operand2)
@@ -1069,7 +1069,7 @@ namespace seal_old
         operand. The second input operand is not modified. The first operand is resized if and only if its bit count is smaller than
         the sum of the significant bit counts of the two input operands.
 
-        @param[in] operand2 The second operand to multiply
+        @param[in] operand2 The second operand to multiply_inplace
         @throws std::logic_error if the BigUInt is an alias and the operator attempts to enlarge the BigUInt to fit the result
         */
         inline BigUInt &operator *=(std::uint64_t operand2)
@@ -1083,7 +1083,7 @@ namespace seal_old
         Divides two BigUInts saving the quotient to the first operand, returning a reference of the first operand. The second
         input operand is not modified. The first operand is never resized.
 
-        @param[in] operand2 The second operand to divide
+        @param[in] operand2 The second operand to divide_inplace
         @throws std::invalid_argument if operand2 is zero
         */
         inline BigUInt &operator /=(const BigUInt &operand2)
@@ -1096,7 +1096,7 @@ namespace seal_old
         Divides a BigUInt and an unsigned integer saving the quotient to the first operand, returning a reference of the first operand.
         The second input operand is not modified. The first operand is never resized.
 
-        @param[in] operand2 The second operand to divide
+        @param[in] operand2 The second operand to divide_inplace
         @throws std::invalid_argument if operand2 is zero
         */
         inline BigUInt &operator /=(std::uint64_t operand2)
@@ -1110,7 +1110,7 @@ namespace seal_old
         Divides two BigUInts saving the remainder to the first operand, returning a reference of the first operand. The second
         input operand is not modified. The first operand is never resized.
 
-        @param[in] operand2 The second operand to divide
+        @param[in] operand2 The second operand to divide_inplace
         @throws std::invalid_argument if operand2 is zero
         */
         inline BigUInt &operator %=(const BigUInt &operand2)
@@ -1128,7 +1128,7 @@ namespace seal_old
         Divides a BigUInt and an unsigned integer saving the remainder to the first operand, returning a reference of the first operand.
         The second input operand is not modified. The first operand is never resized.
 
-        @param[in] operand2 The second operand to divide
+        @param[in] operand2 The second operand to divide_inplace
         @throws std::Invalid_argument if operand2 is zero
         */
         inline BigUInt &operator %=(std::uint64_t operand2)
@@ -1289,7 +1289,7 @@ namespace seal_old
         quotient is set to be the significant bit count of the BigUInt. The remainder is resized if and only if it is smaller
         than the bit count of the BigUInt.
 
-        @param[in] operand2 The second operand to divide
+        @param[in] operand2 The second operand to divide_inplace
         @param[out] remainder The BigUInt to store the remainder
         @throws std::Invalid_argument if operand2 is zero
         @throws std::logic_error if the remainder is an alias and the operator attempts to enlarge the BigUInt to fit the result
@@ -1301,7 +1301,7 @@ namespace seal_old
         The bit count of the quotient is set to be the significant bit count of the BigUInt. The remainder is resized if and only
         if it is smaller than the bit count of the BigUInt.
 
-        @param[in] operand2 The second operand to divide
+        @param[in] operand2 The second operand to divide_inplace
         @param[out] remainder The BigUInt to store the remainder
         @throws std::Invalid_argument if operand2 is zero
         @throws std::logic_error if the remainder is an alias which the function attempts to enlarge to fit the result
