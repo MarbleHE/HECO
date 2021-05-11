@@ -158,7 +158,9 @@ const seal::GaloisKeys &SimulatorCiphertextFactory::getGaloisKeys() const {
 }
 
 SimulatorCiphertextFactory::SimulatorCiphertextFactory(unsigned int numElementsPerCiphertextSlot)
-    : ciphertextSlotSize(numElementsPerCiphertextSlot) {}
+    : ciphertextSlotSize(numElementsPerCiphertextSlot) {
+  setupSealContext();
+}
 
 unsigned int SimulatorCiphertextFactory::getCiphertextSlotSize() const {
   return ciphertextSlotSize;
