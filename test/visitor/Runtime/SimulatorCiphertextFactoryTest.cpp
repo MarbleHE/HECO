@@ -31,7 +31,7 @@ class SimulatorCiphertextFactoryTest : public ::testing::Test {
     }
     int64_t plain_modulus = scf->getContext().first_context_data()->parms().plain_modulus().value();
     int64_t poly_modulus = scf->getContext().first_context_data()->parms().poly_modulus_degree();
-    result = plain_modulus / coeff_modulus * (poly_modulus * (coeff_modulus - 1) / 2
+    result = plain_modulus  * (poly_modulus * (coeff_modulus - 1) / 2
         + 2 * 3.2 *sqrt(12 * pow(poly_modulus,2) + 9 * poly_modulus));
     return result;
   }
@@ -58,9 +58,9 @@ class SimulatorCiphertextFactoryTest : public ::testing::Test {
       coeff_modulus *= mod.value();
     }
     // iliashenko mult noise heuristic
-    result = plain_modulus * sqrt(3 * poly_modulus + 2 * pow(poly_modulus,2) )
+    result =  plain_modulus * sqrt(3 * poly_modulus + 2 * pow(poly_modulus,2) )
         * (ctxt1.getNoise() + ctxt2.getNoise()) + 3 * ctxt1.getNoise() * ctxt2.getNoise() +
-        plain_modulus / coeff_modulus * sqrt(3 * poly_modulus + 2 * pow(poly_modulus,2) +
+        plain_modulus * sqrt(3 * poly_modulus + 2 * pow(poly_modulus,2) +
             4 * pow(poly_modulus,3) /3);
     return result;
   }
@@ -124,6 +124,7 @@ TEST_F(SimulatorCiphertextFactoryTest, createCiphertext) { /* NOLINT */
   std::vector<int64_t> data = {3, 3, 1, 4, 5, 9};
   std::unique_ptr<AbstractCiphertext> ctxt = scf->createCiphertext(data);
   checkCiphertextData(*ctxt, data);
+
 }
 
 // =======================================
@@ -137,7 +138,6 @@ TEST_F(SimulatorCiphertextFactoryTest, createFresh) {
 
   double expected_noise = calcInitNoiseHeuristic(*ctxt);
   checkCiphertextNoise(*ctxt, expected_noise);
-
 }
 
 // =======================================
@@ -187,6 +187,7 @@ TEST_F(SimulatorCiphertextFactoryTest, multiply) { /* NOLINT */
   double expected_noise = calcMultNoiseHeuristic(*ctxt1, *ctxt2);
   checkCiphertextNoise(*ctxtResult, expected_noise);
 
+
   // make sure that operands are not changed
   checkCiphertextData(*ctxt1, data1);
   checkCiphertextData(*ctxt2, data2);
@@ -203,8 +204,9 @@ TEST_F(SimulatorCiphertextFactoryTest, addInplace) { /* NOLINT */
   std::vector<int64_t> data2 = {0, 1, 2, 1, 10, 21};
   std::unique_ptr<AbstractCiphertext> ctxt2 = scf->createCiphertext(data2);
 
-  ctxt1->addInplace(*ctxt2);
   double expected_noise = calcAddNoiseHeuristic(*ctxt1, *ctxt2);
+
+  ctxt1->addInplace(*ctxt2);
   checkCiphertextNoise(*ctxt1, expected_noise);
 }
 
@@ -215,8 +217,8 @@ TEST_F(SimulatorCiphertextFactoryTest, subtractInplace) { /* NOLINT */
   std::vector<int64_t> data2 = {0, 1, 2, 1, 10, 21};
   std::unique_ptr<AbstractCiphertext> ctxt2 = scf->createCiphertext(data2);
 
-  ctxt1->subtractInplace(*ctxt2);
   double expected_noise = calcAddNoiseHeuristic(*ctxt1, *ctxt2);
+  ctxt1->subtractInplace(*ctxt2);
   checkCiphertextNoise(*ctxt1, expected_noise);
 }
 
@@ -227,8 +229,8 @@ TEST_F(SimulatorCiphertextFactoryTest, multiplyInplace) { /* NOLINT */
   std::vector<int64_t> data2 = {0, 1, 2, 1, 10, 21};
   std::unique_ptr<AbstractCiphertext> ctxt2 = scf->createCiphertext(data2);
 
-  ctxt1->multiplyInplace(*ctxt2);
   double expected_noise = calcMultNoiseHeuristic(*ctxt1, *ctxt2);
+  ctxt1->multiplyInplace(*ctxt2);
   checkCiphertextNoise(*ctxt1, expected_noise);
 }
 
@@ -252,8 +254,10 @@ TEST_F(SimulatorCiphertextFactoryTest, addPlain) { /* NOLINT */
   std::vector<int> data2 = {0, 1, 2, 1, 10, 21};
   auto operandVector = createCleartextSim(data2);
 
+  double expected_noise = calcAddPlainNoiseHeuristic(*ctxt1,operandVector);
+
   auto ctxtResult = ctxt1->addPlain(operandVector);
-  double expected_noise = calcAddPlainNoiseHeuristic(*ctxt1,operandVector); //TODO: check if this works
+
   checkCiphertextNoise(*ctxtResult, expected_noise);
 
   // make sure that ciphertext operand is not changed
@@ -269,7 +273,7 @@ TEST_F(SimulatorCiphertextFactoryTest, subPlain) { /* NOLINT */
   auto operandVector = createCleartextSim(data2);
 
   auto ctxtResult = ctxt1->subtractPlain(operandVector);
-  double expected_noise = calcAddPlainNoiseHeuristic(*ctxt1,operandVector); //TODO: check if this works
+  double expected_noise = calcAddPlainNoiseHeuristic(*ctxt1,operandVector);
   checkCiphertextNoise(*ctxtResult, expected_noise);
 
   // make sure that ciphertext operand is not changed
@@ -304,8 +308,10 @@ TEST_F(SimulatorCiphertextFactoryTest, addPlainInplace) { /* NOLINT */
   std::vector<int> data2 = {0, 1, 2, 1, 10, 21};
   auto operandVector = createCleartextSim(data2);
 
+  double expected_noise = calcAddPlainNoiseHeuristic(*ctxt1,operandVector);
+
   ctxt1->addPlainInplace(operandVector);
-  double expected_noise = calcAddPlainNoiseHeuristic(*ctxt1,operandVector); //TODO: check if this works
+
   checkCiphertextNoise(*ctxt1, expected_noise);
 }
 
@@ -317,9 +323,10 @@ TEST_F(SimulatorCiphertextFactoryTest, subPlainInplace) { /* NOLINT */
   std::vector<int> data2 = {0, 1, 2, 1, 10, 21};
   auto operandVector = createCleartextSim(data2);
 
+  double expected_noise = calcAddPlainNoiseHeuristic(*ctxt1,operandVector);
   ctxt1->subtractPlainInplace(operandVector);
-  double expected_noise = calcAddPlainNoiseHeuristic(*ctxt1,operandVector); //TODO: check if this works
   checkCiphertextNoise(*ctxt1, expected_noise);
+
 }
 
 TEST_F(SimulatorCiphertextFactoryTest, multiplyPlainInplace) { /* NOLINT */
@@ -330,9 +337,12 @@ TEST_F(SimulatorCiphertextFactoryTest, multiplyPlainInplace) { /* NOLINT */
   std::vector<int> data2 = {0, 1, 2, 1, 10, 21};
   auto operandVector = createCleartextSim(data2);
 
+
+  double expected_noise = calcMultiplyPlainNoiseHeuristic(*ctxt1,operandVector);
   ctxt1->multiplyPlainInplace(operandVector);
-  double expected_noise = calcMultiplyPlainNoiseHeuristic(*ctxt1,operandVector); //TODO: check if this works
   checkCiphertextNoise(*ctxt1, expected_noise);
 }
+
+
 
 #endif

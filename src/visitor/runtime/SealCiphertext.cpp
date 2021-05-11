@@ -7,8 +7,8 @@
 #ifdef HAVE_SEAL_BFV
 #include <seal/seal.h>
 
-SealCiphertext::SealCiphertext(const std::reference_wrapper<const SealCiphertextFactory> sealFactory) : AbstractCiphertext(
-    sealFactory) {}
+SealCiphertext::SealCiphertext(const std::reference_wrapper<const SealCiphertextFactory> sealFactory) :
+AbstractCiphertext( (const std::reference_wrapper<const AbstractCiphertextFactory>) sealFactory){}
 
 SealCiphertext::SealCiphertext(const SealCiphertext &other)  // copy constructor
     : AbstractCiphertext(other.factory) {

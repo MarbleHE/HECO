@@ -16,8 +16,8 @@ class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
  private:
   seal::Ciphertext _ciphertext;
   seal::Plaintext _plaintext;
-  double _noise = 0; // current invariant noise
-  double _noise_budget = 0; // current noise budget
+  double _noise = 0; // current invariant noise scaled by coeff_modulus (i.e: we store actual_noise * coeff_modulus)
+  int _noise_budget = 0; // current noise budget
   int ciphertext_size_ = 0; // ciphertext size: this gets bigger when multiplying and reset when relinearizing
 
   SimulatorCiphertext(std::reference_wrapper<const AbstractCiphertextFactory> simulatorFactory, seal::Plaintext ptxt);
@@ -101,6 +101,7 @@ class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
   const seal::Plaintext &getPlaintext() const;
   seal::Plaintext &getPlaintext();
   double getNoise() const;
+  int64_t getNoiseBudget();
 };
 
 #endif
