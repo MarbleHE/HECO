@@ -15,8 +15,8 @@ SimulatorCiphertext::SimulatorCiphertext(SimulatorCiphertextFactory &simulatorFa
 
 SimulatorCiphertext::SimulatorCiphertext(const SimulatorCiphertext &other)  // copy constructor
     : AbstractNoiseMeasuringCiphertext(other.factory) {
-  _plaintext = other._plaintext;
   _ciphertext = other._ciphertext;
+  _plaintext = other._plaintext;
   _noise = other._noise;
   _noise_budget = other._noise_budget;
   ciphertext_size_ = other.ciphertext_size_;
@@ -239,10 +239,9 @@ void SimulatorCiphertext::multiplyPlainInplace(ICleartext &operand) {
 }
 
 std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::add(AbstractCiphertext &operand) {
-  std::unique_ptr<SimulatorCiphertext> new_ctxt = this->clone_impl();
-  std::unique_ptr<SimulatorCiphertext> operand_ctxt = std::unique_ptr<SimulatorCiphertext>(&cast_1(operand));
-  // after addition, the noise is the sum of old noise and noise of ctext that is added
-  double result_noise = new_ctxt->_noise + operand_ctxt->_noise;
+  SimulatorCiphertext operand_ctxt = cast_1(operand);
+  // after addition, the noise is the sum of old noise and noise of ctxt that is added
+  double result_noise = this->_noise + operand_ctxt._noise;
   //copy
   auto r = std::make_unique<SimulatorCiphertext>(*this);
   // update noise and noise budget of result ctxt with the new value
@@ -254,7 +253,7 @@ std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::add(AbstractCiphertext 
 
 void SimulatorCiphertext::addInplace(AbstractCiphertext &operand) {
   std::unique_ptr<SimulatorCiphertext> new_ctxt = this->clone_impl();
-  std::unique_ptr<SimulatorCiphertext> operand_ctxt = std::unique_ptr<SimulatorCiphertext>(&cast_1(operand));
+  std::unique_ptr<SimulatorCiphertext> operand_ctxt = std::unique_ptr<SimulatorCiphertext>(&cast_1(operand)); //FIXME
   // after addition, the noise is the sum of old noise and noise of ctext that is added
   double result_noise = new_ctxt->_noise + operand_ctxt->_noise;
   // update noise and noise budget of current ctxt with the new value (for this SimulatorCiphertext)

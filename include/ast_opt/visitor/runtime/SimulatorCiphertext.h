@@ -15,13 +15,15 @@ class SimulatorCiphertextFactory;
 
 class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
  private:
-  SimulatorCiphertext(SimulatorCiphertextFactory &simulatorFactory, seal::Plaintext ptxt);
   seal::Ciphertext _ciphertext;
   seal::Plaintext _plaintext;
   double _noise = 0; // current invariant noise
   double _noise_budget = 0; // current noise budget
-  std::unique_ptr<SimulatorCiphertext> clone_impl();
   int ciphertext_size_ = 0; // ciphertext size: this gets bigger when multiplying and reset when relinearizing
+
+  SimulatorCiphertext(SimulatorCiphertextFactory &simulatorFactory, seal::Plaintext ptxt);
+
+  std::unique_ptr<SimulatorCiphertext> clone_impl();
 
  public:
 
