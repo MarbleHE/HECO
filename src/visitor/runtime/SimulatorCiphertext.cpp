@@ -286,10 +286,10 @@ void SimulatorCiphertext::subtractPlainInplace(const ICleartext &operand) {
   // this is the same as SimulatorCiphertext::addPlainInPlace
   SimulatorCiphertext::addPlainInplace(operand);
 }
-std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::rotateRows(int steps) const {
+std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::rotateRows(int) const {
   throw std::runtime_error("Not yet implemented.");
 }
-void SimulatorCiphertext::rotateRowsInplace(int steps) {
+void SimulatorCiphertext::rotateRowsInplace(int) {
   throw std::runtime_error("Not yet implemented.");
 }
 
@@ -344,55 +344,55 @@ void SimulatorCiphertext::multiply_inplace(const AbstractValue &other) {
   }
 }
 
-void SimulatorCiphertext::divide_inplace(const AbstractValue &other) {
+void SimulatorCiphertext::divide_inplace(const AbstractValue &) {
   throw std::runtime_error("Operation divide_inplace not supported for (SimulatorCiphertext, ANY).");
 }
 
-void SimulatorCiphertext::modulo_inplace(const AbstractValue &other) {
+void SimulatorCiphertext::modulo_inplace(const AbstractValue &) {
   throw std::runtime_error("Operation modulo_inplace not supported for (SimulatorCiphertext, ANY).");
 }
 
-void SimulatorCiphertext::logicalAnd_inplace(const AbstractValue &other) {
+void SimulatorCiphertext::logicalAnd_inplace(const AbstractValue &) {
   throw std::runtime_error("Operation logicalAnd_inplace not supported for (SimulatorCiphertext, ANY).");
 }
 
-void SimulatorCiphertext::logicalOr_inplace(const AbstractValue &other) {
+void SimulatorCiphertext::logicalOr_inplace(const AbstractValue &) {
   throw std::runtime_error("Operation logicalOr_inplace not supported for (SimulatorCiphertext, ANY).");
 }
 
-void SimulatorCiphertext::logicalLess_inplace(const AbstractValue &other) {
+void SimulatorCiphertext::logicalLess_inplace(const AbstractValue &) {
   throw std::runtime_error("Operation logicalLess_inplace not supported for (SimulatorCiphertext, ANY).");
 }
 
-void SimulatorCiphertext::logicalLessEqual_inplace(const AbstractValue &other) {
+void SimulatorCiphertext::logicalLessEqual_inplace(const AbstractValue &) {
   throw std::runtime_error("Operation logicalLessEqual_inplace not supported for (SimulatorCiphertext, ANY).");
 }
 
-void SimulatorCiphertext::logicalGreater_inplace(const AbstractValue &other) {
+void SimulatorCiphertext::logicalGreater_inplace(const AbstractValue &) {
   throw std::runtime_error("Operation logicalGreater_inplace not supported for (SimulatorCiphertext, ANY).");
 }
 
-void SimulatorCiphertext::logicalGreaterEqual_inplace(const AbstractValue &other) {
+void SimulatorCiphertext::logicalGreaterEqual_inplace(const AbstractValue &) {
   throw std::runtime_error("Operation logicalGreaterEqual_inplace not supported for (SimulatorCiphertext, ANY).");
 }
 
-void SimulatorCiphertext::logicalEqual_inplace(const AbstractValue &other) {
+void SimulatorCiphertext::logicalEqual_inplace(const AbstractValue &) {
   throw std::runtime_error("Operation logicalEqual_inplace not supported for (SimulatorCiphertext, ANY).");
 }
 
-void SimulatorCiphertext::logicalNotEqual_inplace(const AbstractValue &other) {
+void SimulatorCiphertext::logicalNotEqual_inplace(const AbstractValue &) {
   throw std::runtime_error("Operation logicalNotEqual_inplace not supported for (SimulatorCiphertext, ANY).");
 }
 
-void SimulatorCiphertext::bitwiseAnd_inplace(const AbstractValue &other) {
+void SimulatorCiphertext::bitwiseAnd_inplace(const AbstractValue &) {
   throw std::runtime_error("Operation bitwiseAnd_inplace not supported for (SimulatorCiphertext, ANY).");
 }
 
-void SimulatorCiphertext::bitwiseXor_inplace(const AbstractValue &other) {
+void SimulatorCiphertext::bitwiseXor_inplace(const AbstractValue &) {
   throw std::runtime_error("Operation bitwiseXor_inplace not supported for (SimulatorCiphertext, ANY).");
 }
 
-void SimulatorCiphertext::bitwiseOr_inplace(const AbstractValue &other) {
+void SimulatorCiphertext::bitwiseOr_inplace(const AbstractValue &) {
   throw std::runtime_error("Operation bitwiseOr_inplace not supported for (SimulatorCiphertext, ANY).");
 }
 
