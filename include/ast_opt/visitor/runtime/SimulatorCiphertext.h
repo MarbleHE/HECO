@@ -48,7 +48,7 @@ class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
 
 
   // API function overrides from AbstractNoiseMeasuringCiphertext
-  //TODO: documentation doxygen and push these to BAstractNoise measuring CTXT
+  //TODO: documentation doxygen and push these to AbstractNoise measuring CTXT
   double getNoise() const;
   int64_t getNoiseBudget();
   int64_t getCoeffModulus();

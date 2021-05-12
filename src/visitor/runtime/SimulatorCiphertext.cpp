@@ -51,7 +51,7 @@ const SimulatorCiphertext &cast_1(const AbstractCiphertext &abstractCiphertext) 
   if (auto sealCtxt = dynamic_cast<const SimulatorCiphertext *>(&abstractCiphertext)) {
     return *sealCtxt;
   } else {
-    throw std::runtime_error("Cast of AbstractCiphertext to SealCiphertext failed!");
+    throw std::runtime_error("Cast of AbstractCiphertext to SimulatorCiphertext failed!");
   }
 }
 

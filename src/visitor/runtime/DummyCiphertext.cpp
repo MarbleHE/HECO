@@ -1,5 +1,226 @@
-//
-// Created by Moritz Winger on 12.05.21.
-//
+#include "ast_opt/utilities/Operator.h"
+#include "ast_opt/visitor/runtime/Cleartext.h"
+#include "ast_opt/visitor/runtime/DummyCiphertext.h"
+#include "ast_opt/visitor/runtime/DummyCiphertextFactory.h"
+#include "ast_opt/visitor/runtime/AbstractCiphertext.h"
 
-#include "visitor/runtime/DummyCiphertext.h"
+#ifdef HAVE_SEAL_BFV
+#include <seal/seal.h>
+#include "ast_opt/utilities/PlaintextNorm.h"
+
+DummyCiphertext::DummyCiphertext(const std::reference_wrapper<const AbstractCiphertextFactory> simulatorFactory)
+    : AbstractCiphertext(
+    simulatorFactory) {}
+
+DummyCiphertext::DummyCiphertext(const DummyCiphertext &other)  // copy constructor
+    : AbstractCiphertext(other.factory) {
+  _data = other._data;
+}
+
+DummyCiphertext &DummyCiphertext::operator=(DummyCiphertext &&other) {  // move assignment
+  // Self-assignment detection
+  if (&other==this) return *this;
+  // check if factory is the same, otherwise this is invalid
+  if (&factory.get()!=&(other.factory.get())) {
+    throw std::runtime_error("Cannot move Ciphertext from factory A into Ciphertext created by Factory B.");
+  }
+  _data = std::move(other._data);
+  return *this;
+}
+
+DummyCiphertext &cast_dummy(AbstractCiphertext &abstractCiphertext) {
+  if (auto dummyCtxt = dynamic_cast<DummyCiphertext *>(&abstractCiphertext)) {
+    return *dummyCtxt;
+  } else {
+    throw std::runtime_error("Cast of AbstractCiphertext to DummyCiphertext failed!");
+  }
+}
+
+// encodes _data and returns SEAL plaintext
+const seal::Plaintext &DummyCiphertext::getPlaintext() const {
+  auto expandedVector = expandVector(this._data);
+  auto ptxt = std::make_unique<seal::Plaintext>();
+  encoder->encode(expandedVector, *ptxt);
+  return ptxt;
+}
+
+// encodes _data and returns SEAL plaintext
+seal::Plaintext &DummyCiphertext::getPlaintext() {
+  auto expandedVector = expandVector(this._data);
+  auto ptxt = std::make_unique<seal::Plaintext>();
+  encoder->encode(expandedVector, *ptxt);
+  return ptxt;
+}
+
+std::unique_ptr<AbstractCiphertext> DummyCiphertext::multiply(const AbstractCiphertext &operand) const {
+  //TODO: implement componentwise mult: idea: get Plaintext from operand, decode, add
+}
+
+void DummyCiphertext::multiplyInplace(const AbstractCiphertext &operand) {
+  //TODO: implement componentwise mult inPLace
+}
+
+
+std::unique_ptr<AbstractCiphertext> DummyCiphertext::multiplyPlain(const ICleartext &operand) const {
+  //TODO: implement
+}
+
+void DummyCiphertext::multiplyPlainInplace(const ICleartext &operand) {
+  //TODO: implement
+}
+
+std::unique_ptr<AbstractCiphertext> DummyCiphertext::add(const AbstractCiphertext &operand) const {
+  //TODO: implement
+}
+
+void DummyCiphertext::addInplace(const AbstractCiphertext &operand) {
+  //TODO: implement
+}
+
+
+std::unique_ptr<AbstractCiphertext> DummyCiphertext::addPlain(const ICleartext &operand) const {
+
+}
+
+void DummyCiphertext::addPlainInplace(const ICleartext &operand) {
+
+}
+std::unique_ptr<AbstractCiphertext> DummyCiphertext::subtract(const AbstractCiphertext &operand) const {
+  // this is the same as SimulatorCiphertext::add
+  return DummyCiphertext::add(operand);
+}
+void DummyCiphertext::subtractInplace(const AbstractCiphertext &operand) {
+  // this is the same as SimulatorCiphertext::addInPlace
+  DummyCiphertext::addInplace(operand);
+}
+std::unique_ptr<AbstractCiphertext> DummyCiphertext::subtractPlain(const ICleartext &operand) const {
+  // this is the same as SimulatorCiphertext::addPlain
+  return DummyCiphertext::addPlain(operand);
+}
+void DummyCiphertext::subtractPlainInplace(const ICleartext &operand) {
+  // this is the same as SimulatorCiphertext::addPlainInPlace
+  DummyCiphertext::addPlainInplace(operand);
+}
+std::unique_ptr<AbstractCiphertext> DummyCiphertext::rotateRows(int steps) const {
+  throw std::runtime_error("Not yet implemented.");
+}
+void DummyCiphertext::rotateRowsInplace(int steps) {
+  throw std::runtime_error("Not yet implemented.");
+}
+
+std::unique_ptr<AbstractCiphertext> DummyCiphertext::clone() const {
+  return clone_impl();
+}
+
+std::unique_ptr<DummyCiphertext> DummyCiphertext::clone_impl() const {
+  return std::make_unique<DummyCiphertext>(*this);
+}
+
+void DummyCiphertext::add_inplace(const AbstractValue &other) {
+  if (auto
+      otherAsDummyCiphertext = dynamic_cast<const DummyCiphertext *>(&other)) {  // ctxt-ctxt operation
+    addInplace(*otherAsDummyCiphertext);
+  } else if (auto otherAsCleartext = dynamic_cast<const ICleartext *>(&other)) {  // ctxt-ptxt operation
+    addPlainInplace(*otherAsCleartext);
+  } else {
+    throw std::runtime_error("Operation ADD only supported for (AbstractCiphertext,AbstractCiphertext) "
+                             "and (DummyCiphertext, ICleartext).");
+  }
+}
+
+void DummyCiphertext::subtract_inplace(const AbstractValue &other) {
+  if (auto otherAsDummyCiphertext = dynamic_cast<const DummyCiphertext *>(&other)) {  // ctxt-ctxt operation
+    subtractInplace(*otherAsDummyCiphertext);
+  } else if (auto otherAsCleartext = dynamic_cast<const ICleartext *>(&other)) {  // ctxt-ptxt operation
+    subtractPlainInplace(*otherAsCleartext);
+  } else {
+    throw std::runtime_error("Operation SUBTRACT only supported for (DummyCiphertext,DummyCiphertext) "
+                             "and (DummyCiphertext, ICleartext).");
+  }
+}
+
+void DummyCiphertext::multiply_inplace(const AbstractValue &other) {
+  if (auto otherAsDummyCiphertext = dynamic_cast<const DummyCiphertext *>(&other)) {  // ctxt-ctxt operation
+    multiplyInplace(*otherAsDummyCiphertext);
+  } else if (auto otherAsCleartext = dynamic_cast<const ICleartext *>(&other)) {  // ctxt-ptxt operation
+    multiplyPlainInplace(*otherAsCleartext);
+  } else {
+    throw std::runtime_error("Operation MULTIPLY only supported for (DummyCiphertext,DummyCiphertext) "
+                             "and (DummyCiphertext, ICleartext).");
+  }
+}
+
+void DummyCiphertext::divide_inplace(const AbstractValue &other) {
+  throw std::runtime_error("Operation divide_inplace not supported for (DummyCiphertext, ANY).");
+}
+
+void DummyCiphertext::modulo_inplace(const AbstractValue &other) {
+  throw std::runtime_error("Operation modulo_inplace not supported for (DummyCiphertext, ANY).");
+}
+
+void DummyCiphertext::logicalAnd_inplace(const AbstractValue &other) {
+  throw std::runtime_error("Operation logicalAnd_inplace not supported for (DummyCiphertext, ANY).");
+}
+
+void SimulatorCiphertext::logicalOr_inplace(const AbstractValue &other) {
+  throw std::runtime_error("Operation logicalOr_inplace not supported for (DummyCiphertext, ANY).");
+}
+
+void DummyCiphertext::logicalLess_inplace(const AbstractValue &other) {
+  throw std::runtime_error("Operation logicalLess_inplace not supported for (DummyCiphertext, ANY).");
+}
+
+void DummyCiphertext::logicalLessEqual_inplace(const AbstractValue &other) {
+  throw std::runtime_error("Operation logicalLessEqual_inplace not supported for (DummyCiphertext, ANY).");
+}
+
+void DummyCiphertext::logicalGreater_inplace(const AbstractValue &other) {
+  throw std::runtime_error("Operation logicalGreater_inplace not supported for (DummyCiphertext, ANY).");
+}
+
+void DummyCiphertext::logicalGreaterEqual_inplace(const AbstractValue &other) {
+  throw std::runtime_error("Operation logicalGreaterEqual_inplace not supported for (DummyCiphertext, ANY).");
+}
+
+void DummyCiphertext::logicalEqual_inplace(const AbstractValue &other) {
+  throw std::runtime_error("Operation logicalEqual_inplace not supported for (DummyCiphertext, ANY).");
+}
+
+void DummyCiphertext::logicalNotEqual_inplace(const AbstractValue &other) {
+  throw std::runtime_error("Operation logicalNotEqual_inplace not supported for (DummyCiphertext, ANY).");
+}
+
+void DummyCiphertext::bitwiseAnd_inplace(const AbstractValue &other) {
+  throw std::runtime_error("Operation bitwiseAnd_inplace not supported for (DummyCiphertext, ANY).");
+}
+
+void DummyCiphertext::bitwiseXor_inplace(const AbstractValue &other) {
+  throw std::runtime_error("Operation bitwiseXor_inplace not supported for (DummyCiphertext, ANY).");
+}
+
+void DummyCiphertext::bitwiseOr_inplace(const AbstractValue &other) {
+  throw std::runtime_error("Operation bitwiseOr_inplace not supported for (DummyCiphertext, ANY).");
+}
+
+const DummyCiphertextFactory &DummyCiphertext::getFactory() const {
+  if (auto sealFactory = dynamic_cast<const DummyCiphertextFactory *>(&factory.get())) {
+    return *sealFactory;
+  } else {
+    throw std::runtime_error("Cast of AbstractFactory to DummyCiphertextFactory failed. DummyCiphertext is probably invalid.");
+  }
+}
+
+void DummyCiphertext::logicalNot_inplace() {
+  throw std::runtime_error("Operation logicalNot_inplace not supported for (DummyCiphertext, ANY). "
+                           "For an arithmetic negation, multiply_inplace by (-1) instead.");
+}
+
+void DummyCiphertext::bitwiseNot_inplace() {
+  throw std::runtime_error("Operation bitwiseNot_inplace not supported for (DummyCiphertext, ANY). "
+                           "For an arithmetic negation, multiply_inplace by (-1) instead.");
+}
+int64_t DummyCiphertext::initialNoise() {
+  return 0;
+}
+
+#endif
