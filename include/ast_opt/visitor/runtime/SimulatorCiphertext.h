@@ -46,6 +46,20 @@ class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
   explicit SimulatorCiphertext(const SimulatorCiphertextFactory &simulatorFactory,
                                std::unique_ptr<seal::Plaintext> ptxt);
 
+
+  // API function overrides from AbstractNoiseMeasuringCiphertext
+  //TODO: documentation doxygen and push these to BAstractNoise measuring CTXT
+  double getNoise() const;
+  int64_t getNoiseBudget();
+  int64_t getCoeffModulus();
+  int64_t noiseBits() const;
+
+  // custom stuff
+  const seal::Plaintext &getPlaintext() const;
+  seal::Plaintext &getPlaintext();
+  void relinearize();
+
+
   void createFresh(std::unique_ptr<seal::Plaintext> &plaintext);
   std::unique_ptr<AbstractCiphertext> multiply(const AbstractCiphertext &operand) const override;
   void multiplyInplace(const AbstractCiphertext &operand) override;
@@ -61,7 +75,6 @@ class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
   void subtractPlainInplace(const ICleartext &operand) override;
   std::unique_ptr<AbstractCiphertext> rotateRows(int steps) const override;
   void rotateRowsInplace(int steps) override;
-  double noiseBits() const override ;
 
   double getNoise(AbstractCiphertext &abstractCiphertext) const;
 
@@ -75,8 +88,6 @@ class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
   /// Gets the seal::Ciphertext associated with this SealCiphertext.
   /// \return (A reference) to the underlying seal::Ciphertext.
   seal::Ciphertext &getCiphertext();
-
-  void relinearize();
 
   int64_t initialNoise() override;
 
@@ -98,10 +109,6 @@ class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
   void bitwiseXor_inplace(const AbstractValue &other) override;
   void bitwiseOr_inplace(const AbstractValue &other) override;
   void bitwiseNot_inplace() override;
-  const seal::Plaintext &getPlaintext() const;
-  seal::Plaintext &getPlaintext();
-  double getNoise() const;
-  int64_t getNoiseBudget();
 };
 
 #endif

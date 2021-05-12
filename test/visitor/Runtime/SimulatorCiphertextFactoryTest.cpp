@@ -31,7 +31,7 @@ class SimulatorCiphertextFactoryTest : public ::testing::Test {
     }
     int64_t plain_modulus = scf->getContext().first_context_data()->parms().plain_modulus().value();
     int64_t poly_modulus = scf->getContext().first_context_data()->parms().poly_modulus_degree();
-    result = plain_modulus  * (poly_modulus * (coeff_modulus - 1) / 2
+    result = plain_modulus  * (poly_modulus * (plain_modulus - 1) / 2
         + 2 * 3.2 *sqrt(12 * pow(poly_modulus,2) + 9 * poly_modulus));
     return result;
   }
@@ -115,6 +115,10 @@ class SimulatorCiphertextFactoryTest : public ::testing::Test {
   void checkCiphertextNoise(const AbstractCiphertext &abstractCiphertext, double expected_noise) {
     // get noise from input ciphertext and compare with the expected value
     double result = (dynamic_cast<const SimulatorCiphertext&>(abstractCiphertext)).getNoise();
+
+    std::cout << "Noise  after enc: " << (dynamic_cast<const SimulatorCiphertext&>(abstractCiphertext)).getNoise() << std::endl;
+    std::cout << "Noise Budget after enc: " << (dynamic_cast<const SimulatorCiphertext&>(abstractCiphertext)).noiseBits() << std::endl;
+
     EXPECT_EQ(result, expected_noise);
   }
 };
@@ -138,6 +142,8 @@ TEST_F(SimulatorCiphertextFactoryTest, createFresh) {
 
   double expected_noise = calcInitNoiseHeuristic(*ctxt);
   checkCiphertextNoise(*ctxt, expected_noise);
+
+
 }
 
 // =======================================
@@ -326,7 +332,6 @@ TEST_F(SimulatorCiphertextFactoryTest, subPlainInplace) { /* NOLINT */
   double expected_noise = calcAddPlainNoiseHeuristic(*ctxt1,operandVector);
   ctxt1->subtractPlainInplace(operandVector);
   checkCiphertextNoise(*ctxt1, expected_noise);
-
 }
 
 TEST_F(SimulatorCiphertextFactoryTest, multiplyPlainInplace) { /* NOLINT */
