@@ -25,10 +25,6 @@ class SimulatorCiphertextFactoryTest : public ::testing::Test {
     double result;
     auto &ctxt = dynamic_cast<SimulatorCiphertext &>(abstractCiphertext);
     seal::Plaintext ptxt = ctxt.getPlaintext();
-    int64_t coeff_modulus = 1;
-    for (auto mod : scf->getContext().first_context_data()->parms().coeff_modulus()) {
-      coeff_modulus *= mod.value();
-    }
     int64_t plain_modulus = scf->getContext().first_context_data()->parms().plain_modulus().value();
     int64_t poly_modulus = scf->getContext().first_context_data()->parms().poly_modulus_degree();
     result = plain_modulus  * (poly_modulus * (plain_modulus - 1) / 2
@@ -52,11 +48,6 @@ class SimulatorCiphertextFactoryTest : public ::testing::Test {
     auto &ctxt2 = dynamic_cast<SimulatorCiphertext &>(abstractCiphertext2);
     int64_t plain_modulus = scf->getContext().first_context_data()->parms().plain_modulus().value();
     int64_t poly_modulus = scf->getContext().first_context_data()->parms().poly_modulus_degree();
-    // calculate coeff modulus (product)
-    int64_t coeff_modulus = 1;
-    for (auto mod : scf->getContext().first_context_data()->parms().coeff_modulus()) {
-      coeff_modulus *= mod.value();
-    }
     // iliashenko mult noise heuristic
     result =  plain_modulus * sqrt(3 * poly_modulus + 2 * pow(poly_modulus,2) )
         * (ctxt1.getNoise() + ctxt2.getNoise()) + 3 * ctxt1.getNoise() * ctxt2.getNoise() +
@@ -115,10 +106,6 @@ class SimulatorCiphertextFactoryTest : public ::testing::Test {
   void checkCiphertextNoise(const AbstractCiphertext &abstractCiphertext, double expected_noise) {
     // get noise from input ciphertext and compare with the expected value
     double result = (dynamic_cast<const SimulatorCiphertext&>(abstractCiphertext)).getNoise();
-
-    std::cout << "Noise  after enc: " << (dynamic_cast<const SimulatorCiphertext&>(abstractCiphertext)).getNoise() << std::endl;
-    std::cout << "Noise Budget after enc: " << (dynamic_cast<const SimulatorCiphertext&>(abstractCiphertext)).noiseBits() << std::endl;
-
     EXPECT_EQ(result, expected_noise);
   }
 };
@@ -142,8 +129,6 @@ TEST_F(SimulatorCiphertextFactoryTest, createFresh) {
 
   double expected_noise = calcInitNoiseHeuristic(*ctxt);
   checkCiphertextNoise(*ctxt, expected_noise);
-
-
 }
 
 // =======================================
