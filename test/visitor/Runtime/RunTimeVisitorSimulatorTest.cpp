@@ -4,6 +4,7 @@
 #include "include/ast_opt/ast/Literal.h"
 #include "include/ast_opt/visitor/runtime/RuntimeVisitor.h"
 #include "include/ast_opt/visitor/runtime/SimulatorCiphertextFactory.h"
+#include "ast_opt/utilities/PlaintextNorm.h"
 
 #include "gtest/gtest.h"
 #ifdef HAVE_SEAL_BFV
@@ -58,6 +59,32 @@ class RuntimeVisitorSimulatorTest : public ::testing::Test {
         * (ctxt1.getNoise() + ctxt2.getNoise()) + 3 * ctxt1.getNoise() * ctxt2.getNoise() +
         plain_modulus * sqrt(3 * poly_modulus + 2 * pow(poly_modulus,2) +
             4 * pow(poly_modulus,3) /3);
+    return result;
+  }
+
+  double calcAddPlainNoiseHeuristic(AbstractCiphertext &abstractCiphertext, ICleartext &operand) {
+    //noise is old_noise + r_t(q) * plain_max_coeff_count * plain_max_abs_value
+    double result;
+    auto cleartextInt = dynamic_cast<Cleartext<int> *>(&operand);
+    std::unique_ptr<seal::Plaintext> plaintext = scf->createPlaintext(cleartextInt->getData());
+    auto &ctxt = dynamic_cast<SimulatorCiphertext &>(abstractCiphertext);
+    double old_noise = ctxt.getNoise();
+    int64_t rtq = scf->getContext().first_context_data()->coeff_modulus_mod_plain_modulus();
+    int64_t plain_max_abs_value = plaintext_norm(*plaintext);
+    int64_t plain_max_coeff_count = plaintext->nonzero_coeff_count();
+    result = old_noise + rtq * plain_max_coeff_count * plain_max_abs_value;
+    return result;
+  }
+
+  double calcMultiplyPlainNoiseHeuristic(AbstractCiphertext &abstractCiphertext, ICleartext &operand) {
+    double result;
+    auto cleartextInt = dynamic_cast<Cleartext<int> *>(&operand);
+    std::unique_ptr<seal::Plaintext> plaintext = scf->createPlaintext(cleartextInt->getData());
+    auto &ctxt = dynamic_cast<SimulatorCiphertext &>(abstractCiphertext);
+    double old_noise = ctxt.getNoise();
+    int64_t plain_max_abs_value = plaintext_norm(*plaintext);
+    int64_t plain_max_coeff_count = plaintext->nonzero_coeff_count();
+    result = old_noise * plain_max_coeff_count * plain_max_abs_value;
     return result;
   }
 
@@ -165,6 +192,55 @@ TEST_F(RuntimeVisitorSimulatorTest, testAddCtxtCtxt) {
   ASSERT_EQ(x.getNoise(), expected_noise);
 }
 
+TEST_F(RuntimeVisitorSimulatorTest, testSubCtxtCtxt) {
+  // program's input
+  const char *inputs = R""""(
+      secret int __input0__ = {43,  1,   1,   1,  22, 11, 425,  0, 1, 7};
+      secret int __input1__ = {24, 34, 222,   4,    1, 4,   9, 22, 1, 3};
+    )"""";
+  auto astInput = Parser::parse(std::string(inputs));
+
+  // program specification
+  const char *program = R""""(
+      secret int result = __input0__ --- __input1__;
+      return result;
+    )"""";
+  auto astProgram = Parser::parse(std::string(program));
+
+  // program's output
+  const char *outputs = R""""(
+      y = result;
+    )"""";
+  auto astOutput = Parser::parse(std::string(outputs));
+  // create and prepopulate TypeCheckingVisitor
+  auto rootScope = std::make_unique<Scope>(*astProgram);
+  registerInputVariable(*rootScope, "__input0__", Datatype(Type::INT, true));
+  registerInputVariable(*rootScope, "__input1__", Datatype(Type::INT, true));
+
+  tcv->setRootScope(std::move(rootScope));
+  astProgram->accept(*tcv);
+
+  // run the program and get its output
+  auto map = tcv->getSecretTaintedNodes();
+  RuntimeVisitor srv(*scf, *astInput, map);
+  srv.executeAst(*astProgram);
+
+  std::unordered_map<std::string, std::vector<int64_t>> expectedResult;
+  expectedResult["y"] = {1032, 34, 222, 4, 22, 44, 3825, 0, 1, 21};
+  auto result = srv.getOutput(*astOutput);
+
+  auto x = dynamic_cast<SimulatorCiphertext &>(*result[0].second);
+
+  // create ciphertexts to check noise heuristics
+  std::vector<int64_t> data1 = {43,  1,   1,   1,  22, 11, 425,  0, 1, 7};
+  std::unique_ptr<AbstractCiphertext> ctxt1 = scf->createCiphertext(data1);
+  std::vector<int64_t> data2 = {24, 34, 222,   4,    1, 4,   9, 22, 1, 3};
+  std::unique_ptr<AbstractCiphertext> ctxt2 = scf->createCiphertext(data2);
+  double expected_noise = calcAddNoiseHeuristic(*ctxt1, *ctxt2);
+
+  ASSERT_EQ(x.getNoise(), expected_noise);
+}
+
 TEST_F(RuntimeVisitorSimulatorTest, testMultCtxtCtxt) {
   // program's input
   const char *inputs = R""""(
@@ -214,5 +290,172 @@ TEST_F(RuntimeVisitorSimulatorTest, testMultCtxtCtxt) {
   ASSERT_EQ(x.getNoise(), expected_noise);
 }
 
+// =======================================
+// == CTXT-PLAIN operations with returned result
+// =======================================
+
+Cleartext<int> createCleartextSimVisitor(const std::vector<int> &literalIntValues) {
+  std::vector<std::unique_ptr<AbstractExpression>> result;
+  for (const auto &val : literalIntValues) {
+    result.emplace_back(std::make_unique<LiteralInt>(val));
+  }
+  return Cleartext<int>(literalIntValues);
+}
+
+TEST_F(RuntimeVisitorSimulatorTest, testAddPlaintextCtxt) { /* NOLINT */
+  // program's input
+  const char *inputs = R""""(
+      secret int __input0__ = {43,  1,   1,  22, 11, 7};
+    )"""";
+  auto astInput = Parser::parse(std::string(inputs));
+
+  // program specification
+  const char *program = R""""(
+      int i = 19;
+      secret int result = i +++ __input0__;
+      return result;
+    )"""";
+  auto astProgram = Parser::parse(std::string(program));
+
+  // program's output
+  const char *outputs = R""""(
+      y = result;
+      x = result[3];
+    )"""";
+  auto astOutput = Parser::parse(std::string(outputs));
+
+  // create and prepopulate TypeCheckingVisitor
+  auto rootScope = std::make_unique<Scope>(*astProgram);
+  registerInputVariable(*rootScope, "__input0__", Datatype(Type::INT, true));
+  tcv->setRootScope(std::move(rootScope));
+  astProgram->accept(*tcv);
+  auto secretTaintedNodesMap = tcv->getSecretTaintedNodes();
+
+  // run the program and get its output
+  RuntimeVisitor srv(*scf, *astInput, secretTaintedNodesMap);
+  srv.executeAst(*astProgram);
+
+  std::unordered_map<std::string, std::vector<int64_t>> expectedResult;
+  expectedResult["y"] = {817, 19, 19, 418, 209, 133};
+  expectedResult["x"] = {418};
+  auto result = srv.getOutput(*astOutput);
+
+  auto x = dynamic_cast<SimulatorCiphertext &>(*result[0].second);
+
+  // create ciphertext
+  std::vector<int64_t> data1 = {43,  1,   1,  22, 11, 7};
+  std::unique_ptr<AbstractCiphertext> ctxt1 = scf->createCiphertext(data1);
+
+  std::vector<int> data2 = {19};
+  auto operandVector = createCleartextSimVisitor(data2);
+
+  double expected_noise = calcAddPlainNoiseHeuristic(*ctxt1,operandVector);
+
+  ASSERT_EQ(x.getNoise(), expected_noise);
+}
+
+TEST_F(RuntimeVisitorSimulatorTest, testSubPlaintextCtxt) { /* NOLINT */
+  // program's input
+  const char *inputs = R""""(
+      secret int __input0__ = {43,  1,   1,  22, 11, 7};
+    )"""";
+  auto astInput = Parser::parse(std::string(inputs));
+
+  // program specification
+  const char *program = R""""(
+      int i = 19;
+      secret int result = i --- __input0__;
+      return result;
+    )"""";
+  auto astProgram = Parser::parse(std::string(program));
+
+  // program's output
+  const char *outputs = R""""(
+      y = result;
+      x = result[3];
+    )"""";
+  auto astOutput = Parser::parse(std::string(outputs));
+
+  // create and prepopulate TypeCheckingVisitor
+  auto rootScope = std::make_unique<Scope>(*astProgram);
+  registerInputVariable(*rootScope, "__input0__", Datatype(Type::INT, true));
+  tcv->setRootScope(std::move(rootScope));
+  astProgram->accept(*tcv);
+  auto secretTaintedNodesMap = tcv->getSecretTaintedNodes();
+
+  // run the program and get its output
+  RuntimeVisitor srv(*scf, *astInput, secretTaintedNodesMap);
+  srv.executeAst(*astProgram);
+
+  std::unordered_map<std::string, std::vector<int64_t>> expectedResult;
+  expectedResult["y"] = {817, 19, 19, 418, 209, 133};
+  expectedResult["x"] = {418};
+  auto result = srv.getOutput(*astOutput);
+
+  auto x = dynamic_cast<SimulatorCiphertext &>(*result[0].second);
+
+  // create ciphertext
+  std::vector<int64_t> data1 = {43,  1,   1,  22, 11, 7};
+  std::unique_ptr<AbstractCiphertext> ctxt1 = scf->createCiphertext(data1);
+
+  std::vector<int> data2 = {19};
+  auto operandVector = createCleartextSimVisitor(data2);
+
+  double expected_noise = calcAddPlainNoiseHeuristic(*ctxt1,operandVector);
+
+  ASSERT_EQ(x.getNoise(), expected_noise);
+}
+
+TEST_F(RuntimeVisitorSimulatorTest, testMultPlaintextCtxt) { /* NOLINT */
+  // program's input
+  const char *inputs = R""""(
+      secret int __input0__ = {43,  1,   1,  22, 11, 7};
+    )"""";
+  auto astInput = Parser::parse(std::string(inputs));
+
+  // program specification
+  const char *program = R""""(
+      int i = 19;
+      secret int result = i *** __input0__;
+      return result;
+    )"""";
+  auto astProgram = Parser::parse(std::string(program));
+
+  // program's output
+  const char *outputs = R""""(
+      y = result;
+      x = result[3];
+    )"""";
+  auto astOutput = Parser::parse(std::string(outputs));
+
+  // create and prepopulate TypeCheckingVisitor
+  auto rootScope = std::make_unique<Scope>(*astProgram);
+  registerInputVariable(*rootScope, "__input0__", Datatype(Type::INT, true));
+  tcv->setRootScope(std::move(rootScope));
+  astProgram->accept(*tcv);
+  auto secretTaintedNodesMap = tcv->getSecretTaintedNodes();
+
+  // run the program and get its output
+  RuntimeVisitor srv(*scf, *astInput, secretTaintedNodesMap);
+  srv.executeAst(*astProgram);
+
+  std::unordered_map<std::string, std::vector<int64_t>> expectedResult;
+  expectedResult["y"] = {817, 19, 19, 418, 209, 133};
+  expectedResult["x"] = {418};
+  auto result = srv.getOutput(*astOutput);
+
+  auto x = dynamic_cast<SimulatorCiphertext &>(*result[0].second);
+
+  // create ciphertext
+  std::vector<int64_t> data1 = {43,  1,   1,  22, 11, 7};
+  std::unique_ptr<AbstractCiphertext> ctxt1 = scf->createCiphertext(data1);
+
+  std::vector<int> data2 = {19};
+  auto operandVector = createCleartextSimVisitor(data2);
+
+  double expected_noise = calcMultiplyPlainNoiseHeuristic(*ctxt1,operandVector);
+
+  ASSERT_EQ(x.getNoise(), expected_noise);
+}
 
 #endif
