@@ -1,3 +1,4 @@
+#include <ast_opt/visitor/runtime/SimulatorCiphertext.h>
 #include "include/ast_opt/ast/AbstractNode.h"
 #include "include/ast_opt/parser/Parser.h"
 #include "include/ast_opt/ast/Literal.h"
@@ -61,6 +62,10 @@ TEST_F(RuntimeVisitorSimulatorTest, testBinaryExpressionCtxtCtxt) {
   std::unordered_map<std::string, std::vector<int64_t>> expectedResult;
   expectedResult["y"] = {1032, 34, 222, 4, 22, 44, 3825, 0, 1, 21};
   auto result = srv.getOutput(*astOutput);
+
+  auto x = std::move(   std::dynamic_cast<std::unique_ptr<SimulatorCiphertext>>(result[0].second)  );
+
+
   std::cout << "";
   //assertResult(result, expectedResult);
 }
