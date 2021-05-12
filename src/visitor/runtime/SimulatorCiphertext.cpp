@@ -75,7 +75,7 @@ double SimulatorCiphertext::getNoise() const {
   return _noise;
 }
 
-int64_t SimulatorCiphertext::getNoiseBudget() {
+int64_t SimulatorCiphertext::getNoiseBudget() const {
   return _noise_budget;
 }
 
