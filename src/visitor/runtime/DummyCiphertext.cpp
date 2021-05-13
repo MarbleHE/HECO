@@ -84,11 +84,43 @@ void DummyCiphertext::multiplyInplace(const AbstractCiphertext &operand) {
 
 
 std::unique_ptr<AbstractCiphertext> DummyCiphertext::multiplyPlain(const ICleartext &operand) const {
-  //TODO: implement
+  if (auto cleartextInt = dynamic_cast<const Cleartext<int> *>(&operand)) {
+    // sizes of data vectors must match
+    std::vector<int64_t> result;
+    if (cleartextInt->getData().size() !=this->_data.size()) {
+      throw std::runtime_error("Sizes of data vectors do not match");
+    }
+    else {
+      for (int i = 0; i < _data.size(); i++) {
+        result.push_back(this->_data[i] * cleartextInt->getData()[i]);
+      }
+    }
+    auto r = std::make_unique<DummyCiphertext>(*this);
+    r->_data = result;
+    return r;
+  }
+  else {
+    throw std::runtime_error("Multiply(Ciphertext,Cleartext) requires a Cleartext<int> as BFV supports integers only.");
+  }
 }
 
 void DummyCiphertext::multiplyPlainInplace(const ICleartext &operand) {
-  //TODO: implement
+  if (auto cleartextInt = dynamic_cast<const Cleartext<int> *>(&operand)) {
+    // sizes of data vectors must match
+    std::vector<int64_t> result;
+    if (cleartextInt->getData().size() !=this->_data.size()) {
+      throw std::runtime_error("Sizes of data vectors do not match");
+    }
+    else {
+      for (int i = 0; i < _data.size(); i++) {
+        result.push_back(this->_data[i] * cleartextInt->getData()[i]);
+      }
+    }
+    this->_data = result;
+  }
+  else {
+    throw std::runtime_error("Multiply(Ciphertext,Cleartext) requires a Cleartext<int> as BFV supports integers only.");
+  }
 }
 
 std::unique_ptr<AbstractCiphertext> DummyCiphertext::add(const AbstractCiphertext &operand) const {
@@ -125,28 +157,45 @@ void DummyCiphertext::addInplace(const AbstractCiphertext &operand) {
 
 
 std::unique_ptr<AbstractCiphertext> DummyCiphertext::addPlain(const ICleartext &operand) const {
-
- auto tmp =  dynamic_cast<const Cleartext>(operand);
-
-
-  // sizes of data vectors must match
-  std::vector<int64_t> result;
-  if (operand_cleartext.getData().size() !=this->_data.size()) {
-    throw std::runtime_error("Sizes of data vectors do not match");
+  if (auto cleartextInt = dynamic_cast<const Cleartext<int> *>(&operand)) {
+    // sizes of data vectors must match
+    std::vector<int64_t> result;
+    if (cleartextInt->getData().size() !=this->_data.size()) {
+      throw std::runtime_error("Sizes of data vectors do not match");
+    }
+    else {
+      for (int i = 0; i < _data.size(); i++) {
+        result.push_back(this->_data[i] + cleartextInt->getData()[i]);
+      }
+    }
+    auto r = std::make_unique<DummyCiphertext>(*this);
+    r->_data = result;
+    return r;
   }
   else {
-    for (int i = 0; i < _data.size(); i++) {
-      result.push_back(this->_data[i] + operand_ctxt.getData()[i]);
-    }
+    throw std::runtime_error("ADD(Ciphertext,Cleartext) requires a Cleartext<int> as BFV supports integers only.");
   }
-  auto r = std::make_unique<DummyCiphertext>(*this);
-  r->_data = result;
-  return r;
 }
 
 void DummyCiphertext::addPlainInplace(const ICleartext &operand) {
-
+  if (auto cleartextInt = dynamic_cast<const Cleartext<int> *>(&operand)) {
+    // sizes of data vectors must match
+    std::vector<int64_t> result;
+    if (cleartextInt->getData().size() !=this->_data.size()) {
+      throw std::runtime_error("Sizes of data vectors do not match");
+    }
+    else {
+      for (int i = 0; i < _data.size(); i++) {
+        result.push_back(this->_data[i] + cleartextInt->getData()[i]);
+      }
+    }
+    this->_data = result;
+  }
+  else {
+    throw std::runtime_error("Multiply(Ciphertext,Cleartext) requires a Cleartext<int> as BFV supports integers only.");
+  }
 }
+
 std::unique_ptr<AbstractCiphertext> DummyCiphertext::subtract(const AbstractCiphertext &operand) const {
   DummyCiphertext operand_ctxt = cast_dummy(operand);
   // sizes of data vectors must match
@@ -178,13 +227,44 @@ void DummyCiphertext::subtractInplace(const AbstractCiphertext &operand) {
   this->_data = result;
 }
 std::unique_ptr<AbstractCiphertext> DummyCiphertext::subtractPlain(const ICleartext &operand) const {
-  // this is the same as SimulatorCiphertext::addPlain
-  return DummyCiphertext::addPlain(operand);
+  if (auto cleartextInt = dynamic_cast<const Cleartext<int> *>(&operand)) {
+    // sizes of data vectors must match
+    std::vector<int64_t> result;
+    if (cleartextInt->getData().size() !=this->_data.size()) {
+      throw std::runtime_error("Sizes of data vectors do not match");
+    }
+    else {
+      for (int i = 0; i < _data.size(); i++) {
+        result.push_back(this->_data[i] - cleartextInt->getData()[i]);
+      }
+    }
+    auto r = std::make_unique<DummyCiphertext>(*this);
+    r->_data = result;
+    return r;
+  }
+  else {
+    throw std::runtime_error("ADD(Ciphertext,Cleartext) requires a Cleartext<int> as BFV supports integers only.");
+  }
 }
 void DummyCiphertext::subtractPlainInplace(const ICleartext &operand) {
-  // this is the same as SimulatorCiphertext::addPlainInPlace
-  DummyCiphertext::addPlainInplace(operand);
+  if (auto cleartextInt = dynamic_cast<const Cleartext<int> *>(&operand)) {
+    // sizes of data vectors must match
+    std::vector<int64_t> result;
+    if (cleartextInt->getData().size() !=this->_data.size()) {
+      throw std::runtime_error("Sizes of data vectors do not match");
+    }
+    else {
+      for (int i = 0; i < _data.size(); i++) {
+        result.push_back(this->_data[i] - cleartextInt->getData()[i]);
+      }
+    }
+    this->_data = result;
+  }
+  else {
+    throw std::runtime_error("Multiply(Ciphertext,Cleartext) requires a Cleartext<int> as BFV supports integers only.");
+  }
 }
+
 std::unique_ptr<AbstractCiphertext> DummyCiphertext::rotateRows(int steps) const {
   throw std::runtime_error("Not yet implemented.");
 }
