@@ -20,8 +20,6 @@ class DummyCiphertext : public AbstractCiphertext {
  public:
   ~DummyCiphertext() override = default;
 
-
-
   DummyCiphertext(const DummyCiphertext &other); // copy constructor
 
   DummyCiphertext(DummyCiphertext &&other) noexcept;  // copy assignment
@@ -30,7 +28,7 @@ class DummyCiphertext : public AbstractCiphertext {
 
   DummyCiphertext &operator=(DummyCiphertext &&other);  // move assignment
 
-  /// Creates a new (empty) SimulatorCiphertext
+  /// Creates a new (empty) DummyCiphertext
   /// \param simulatorFactory The factory that created this ciphertext.
   explicit DummyCiphertext(const std::reference_wrapper<const AbstractCiphertextFactory> dummyFactory);
 

@@ -3,9 +3,7 @@
 #include "ast_opt/visitor/runtime/DummyCiphertextFactory.h"
 #include "ast_opt/visitor/runtime/Cleartext.h"
 
-#ifdef HAVE_SEAL_BFV
 #include <memory>
-#include <seal/seal.h>
 
 std::unique_ptr<AbstractCiphertext> DummyCiphertextFactory::createCiphertext(const std::vector<int64_t> &data) const {
   std::unique_ptr<DummyCiphertext>
@@ -114,5 +112,3 @@ std::unique_ptr<AbstractCiphertext> DummyCiphertextFactory::createCiphertext(std
                              "(DummyCiphertextFactory) uses BFV that only supports integers.");
   }
 }
-
-#endif // ifdef HAVE_SEAL_BFV
