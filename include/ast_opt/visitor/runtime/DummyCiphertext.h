@@ -49,7 +49,7 @@ class DummyCiphertext : public AbstractCiphertext {
   void rotateRowsInplace(int steps) override;
 
   std::unique_ptr<AbstractCiphertext> clone() const override;
-  const SimulatorCiphertextFactory &getFactory() const override;
+  const DummyCiphertextFactory &getFactory() const override;
 
   /// Gets the seal::Ciphertext associated with this SealCiphertext.
   /// \return (A const reference) to the underlying seal::Ciphertext.

@@ -32,25 +32,11 @@ DummyCiphertext &cast_dummy(AbstractCiphertext &abstractCiphertext) {
   }
 }
 
-// encodes _data and returns SEAL plaintext
-const seal::Plaintext &DummyCiphertext::getPlaintext() const {
-  auto expandedVector = expandVector(this._data);
-  auto ptxt = std::make_unique<seal::Plaintext>();
-  encoder->encode(expandedVector, *ptxt);
-  return ptxt;
-}
 
-// encodes _data and returns SEAL plaintext
-seal::Plaintext &DummyCiphertext::getPlaintext() {
-  auto expandedVector = expandVector(this._data);
-  auto ptxt = std::make_unique<seal::Plaintext>();
-  encoder->encode(expandedVector, *ptxt);
-  return ptxt;
-}
 
 // initialise the dummy ciphertext (i.e set _data variable)
 void DummyCiphertext::createFresh(const std::vector<int64_t> &data) {
-  this._data = data;
+  this->_data = data;
 }
 
 std::unique_ptr<AbstractCiphertext> DummyCiphertext::multiply(const AbstractCiphertext &operand) const {
@@ -164,7 +150,7 @@ void DummyCiphertext::logicalAnd_inplace(const AbstractValue &other) {
   throw std::runtime_error("Operation logicalAnd_inplace not supported for (DummyCiphertext, ANY).");
 }
 
-void SimulatorCiphertext::logicalOr_inplace(const AbstractValue &other) {
+void DummyCiphertext::logicalOr_inplace(const AbstractValue &other) {
   throw std::runtime_error("Operation logicalOr_inplace not supported for (DummyCiphertext, ANY).");
 }
 
@@ -221,6 +207,4 @@ void DummyCiphertext::bitwiseNot_inplace() {
   throw std::runtime_error("Operation bitwiseNot_inplace not supported for (DummyCiphertext, ANY). "
                            "For an arithmetic negation, multiply_inplace by (-1) instead.");
 }
-int64_t DummyCiphertext::initialNoise() {
-  return 0;
-}
+

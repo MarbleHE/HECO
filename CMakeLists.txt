@@ -121,8 +121,10 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/visitor/runtime/RuntimeVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/runtime/SealCiphertext.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/runtime/SimulatorCiphertext.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/runtime/DummyCiphertext.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/runtime/SealCiphertextFactory.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/runtime/SimulatorCiphertextFactory.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/runtime/DummyCiphertextFactory.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/PlaintextNorm.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/Distribution.cpp
         )
@@ -141,7 +143,8 @@ set(HEADER_ONLY_SOURCES
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/SimulatorCiphertextFactory.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/AbstractNoiseMeasuringCiphertext.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/DummyCiphertext.h
-        include/ast_opt/visitor/runtime/DummyCiphertextFactory.h src/visitor/runtime/DummyCiphertextFactory.cpp)
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/DummyCiphertextFactory.h
+        )
 
 # TODO: Go through this list and determine which headers aren't actually public
 set(PUBLIC_HEADERS
@@ -191,6 +194,8 @@ set(PUBLIC_HEADERS
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/SealCiphertextFactory.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/SimulatorCiphertext.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/SimulatorCiphertextFactory.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/DummyCiphertext.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/DummyCiphertextFactory.h
         )
 
 # build a library out of the code to be used by the tests

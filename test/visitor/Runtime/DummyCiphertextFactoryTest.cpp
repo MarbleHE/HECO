@@ -7,8 +7,6 @@
 #include "include/ast_opt/visitor/runtime/DummyCiphertextFactory.h"
 #include "include/ast_opt/visitor/runtime/Cleartext.h"
 
-#ifdef HAVE_SEAL_BFV
-
 class DummyCiphertextFactoryTest : public ::testing::Test {
  protected:
   const int numCiphertextSlots = 4096;
@@ -48,14 +46,11 @@ TEST_F(DummyCiphertextFactoryTest, createCiphertext) {
   checkCiphertextData(*ctxt, data);
 }*/
 
-TEST_F(DummyCiphertextFactoryTest, createCiphertext) {
+TEST_F(DummyCiphertextFactoryTest, createNewCiphertext) {
+// create ciphertext
   std::vector<int64_t> data = {3, 3, 1, 4, 5, 9};
   std::unique_ptr<AbstractCiphertext> ctxt = scf->createCiphertext(data);
+  checkCiphertextData(*ctxt, data);
 }
 
 
-
-
-
-
-#endif
