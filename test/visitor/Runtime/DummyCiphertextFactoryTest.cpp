@@ -35,19 +35,31 @@ class DummyCiphertextFactoryTest : public ::testing::Test {
     }
   }
 };
-/*
-TEST_F(DummyCiphertextFactoryTest, createCiphertext) {
-  // create ciphertext
-  std::vector<int64_t> data = {3, 3, 1, 4, 5, 9};
-  std::unique_ptr<AbstractCiphertext> ctxt = scf->createCiphertext(data);
-  checkCiphertextData(*ctxt, data);
-}*/
 
-TEST_F(DummyCiphertextFactoryTest, createNewCiphertext) {
+TEST_F(DummyCiphertextFactoryTest, createCiphertext) {
 // create ciphertext
   std::vector<int64_t> data = {3, 3, 1, 4, 5, 9};
   std::unique_ptr<AbstractCiphertext> ctxt = scf->createCiphertext(data);
   checkCiphertextData(*ctxt, data);
 }
 
+// =======================================
+// == "CTXT-CTXT" operations with returned result
+// =======================================
+
+TEST_F(DummyCiphertextFactoryTest, add) { /* NOLINT */
+  // create ciphertexts
+  std::vector<int64_t> data1 = {3, 3, 1, 4, 5, 9};
+  std::unique_ptr<AbstractCiphertext> ctxt1 = scf->createCiphertext(data1);
+  std::vector<int64_t> data2 = {0, 1, 2, 1, 10, 21};
+  std::unique_ptr<AbstractCiphertext> ctxt2 = scf->createCiphertext(data2);
+
+  auto ctxtResult = ctxt1->add(*ctxt2);
+  std::vector<int64_t> expectedData = {3, 4, 3, 5, 15, 30};
+  checkCiphertextData(*ctxtResult, expectedData);
+
+  // make sure that operands are not changed
+  checkCiphertextData(*ctxt1, data1);
+  checkCiphertextData(*ctxt2, data2);
+}
 

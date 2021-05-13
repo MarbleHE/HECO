@@ -32,8 +32,16 @@ DummyCiphertext &cast_dummy(AbstractCiphertext &abstractCiphertext) {
   }
 }
 
+const DummyCiphertext &cast_dummy(const AbstractCiphertext &abstractCiphertext) {
+  if (auto dummyCtxt = dynamic_cast<const DummyCiphertext *>(&abstractCiphertext)) {
+    return *dummyCtxt;
+  } else {
+    throw std::runtime_error("Cast of AbstractCiphertext to DummyCiphertext failed!");
+  }
+}
+
 // return datavector
-std::vector<int64_t> getData() {
+std::vector<int64_t> DummyCiphertext::getData() {
   return this->_data;
 }
 
@@ -43,8 +51,8 @@ void DummyCiphertext::createFresh(const std::vector<int64_t> &data) {
 }
 
 std::unique_ptr<AbstractCiphertext> DummyCiphertext::multiply(const AbstractCiphertext &operand) const {
-  //TODO: implement componentwise mult: idea: get Plaintext from operand, decode, add
-
+  // sizes of data vectors must match
+  //TODO
 }
 
 void DummyCiphertext::multiplyInplace(const AbstractCiphertext &operand) {
@@ -61,7 +69,20 @@ void DummyCiphertext::multiplyPlainInplace(const ICleartext &operand) {
 }
 
 std::unique_ptr<AbstractCiphertext> DummyCiphertext::add(const AbstractCiphertext &operand) const {
-  //TODO: implement
+  DummyCiphertext operand_ctxt = cast_dummy(operand);
+  // sizes of data vectors must match
+  std::vector<int64_t> result;
+  if (operand_ctxt.getData().size() !=this->_data.size()) {
+    throw std::runtime_error("Sizes of data vectors do not match");
+  }
+  else {
+    for (int i = 0; i < _data.size(); i++) {
+      result.push_back(operand_ctxt.getData()[i] + this->_data[i]);
+    }
+  }
+  auto r = std::make_unique<DummyCiphertext>(*this);
+  r->_data = result;
+  return r;
 }
 
 void DummyCiphertext::addInplace(const AbstractCiphertext &operand) {
