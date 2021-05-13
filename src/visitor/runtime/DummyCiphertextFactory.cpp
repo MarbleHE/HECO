@@ -11,6 +11,7 @@ std::unique_ptr<AbstractCiphertext> DummyCiphertextFactory::createCiphertext(con
   std::unique_ptr<DummyCiphertext>
       ctxt = std::make_unique<DummyCiphertext>(*this); // Constructs a dummy ciphertext given all the data
   ctxt->createFresh(data); // calcs initial noise and sets the variables needed, also stores the plaintext as _plaintext
+  return ctxt;
 }
 
 std::unique_ptr<AbstractCiphertext> DummyCiphertextFactory::createCiphertext(const std::vector<int> &data) const {
@@ -66,6 +67,7 @@ std::unique_ptr<seal::Plaintext> DummyCiphertextFactory::createPlaintext(const s
 }
 
 std::unique_ptr<seal::Plaintext> DummyCiphertextFactory::createPlaintext(const std::vector<int64_t> &value) const {
+  return nullptr;
 }
 
 

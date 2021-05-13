@@ -15,12 +15,12 @@ class DummyCiphertext : public AbstractCiphertext {
  private:
   std::vector<int64_t> _data;
 
-  DummyCiphertext(std::reference_wrapper<const AbstractCiphertextFactory> simulatorFactory, seal::Plaintext ptxt);
-
   std::unique_ptr<DummyCiphertext> clone_impl() const;
 
  public:
   ~DummyCiphertext() override = default;
+
+
 
   DummyCiphertext(const DummyCiphertext &other); // copy constructor
 
@@ -29,6 +29,10 @@ class DummyCiphertext : public AbstractCiphertext {
   DummyCiphertext &operator=(const DummyCiphertext &other);  // move constructor
 
   DummyCiphertext &operator=(DummyCiphertext &&other);  // move assignment
+
+  /// Creates a new (empty) SimulatorCiphertext
+  /// \param simulatorFactory The factory that created this ciphertext.
+  explicit DummyCiphertext(const std::reference_wrapper<const AbstractCiphertextFactory> dummyFactory);
 
   void createFresh(const std::vector<int64_t> &data);
   std::unique_ptr<AbstractCiphertext> multiply(const AbstractCiphertext &operand) const override;
