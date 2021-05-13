@@ -23,10 +23,7 @@ class DummyCiphertextFactoryTest : public ::testing::Test {
 
     // decrypt ciphertext
     std::vector<int64_t> result;
-    scf->decryptCiphertext(abstractCiphertext, result);
-
-    // check that the decrypted ciphertext has the expected size
-    EXPECT_EQ(result.size(), numCiphertextSlots);
+    scf->decryptCiphertext(abstractCiphertext, result); // this should give the data vector
 
     // check that provided values are in decryption result
     for (int i = 0; i < expectedValues.size(); ++i) {

@@ -1,5 +1,4 @@
 #include "ast_opt/visitor/runtime/DummyCiphertext.h"
-#include "ast_opt/visitor/runtime/DummyCiphertext.h"
 #include "ast_opt/visitor/runtime/DummyCiphertextFactory.h"
 #include "ast_opt/visitor/runtime/Cleartext.h"
 
@@ -22,13 +21,9 @@ std::unique_ptr<AbstractCiphertext> DummyCiphertextFactory::createCiphertext(int
   return createCiphertext(values);
 }
 
-DummyCiphertextFactory::DummyCiphertextFactory(const DummyCiphertextFactory &other) :
-    ciphertextSlotSize(other.ciphertextSlotSize) {  // copy constructor
-}
+DummyCiphertextFactory::DummyCiphertextFactory(const DummyCiphertextFactory &other) {}  // copy constructor
 
-DummyCiphertextFactory::DummyCiphertextFactory(DummyCiphertextFactory &&other) noexcept // move constructor
-    : ciphertextSlotSize(other.ciphertextSlotSize) {
-}
+DummyCiphertextFactory::DummyCiphertextFactory(DummyCiphertextFactory &&other) noexcept {} // move constructor
 
 DummyCiphertextFactory &DummyCiphertextFactory::operator=(const DummyCiphertextFactory &other) {  // copy assignment
   return *this = DummyCiphertextFactory(other);
@@ -37,22 +32,9 @@ DummyCiphertextFactory &DummyCiphertextFactory::operator=(const DummyCiphertextF
 DummyCiphertextFactory &DummyCiphertextFactory::operator=(DummyCiphertextFactory &&other) noexcept {  // move assignment
   // Self-assignment detection
   if (&other==this) return *this;
-
-  if (ciphertextSlotSize!=other.ciphertextSlotSize) {
-    std::cerr << "Move assignment failed as const ciphertextSlotSize differs and cannot be changed!" << std::endl;
-    exit(1);
-  }
   return *this;
 }
 
-
-template<typename T>
-std::vector<T> DummyCiphertextFactory::expandVector(const std::vector<T> &values) const {
-  // passing the vector by value to implicitly get a copy somehow didn't work here
-  std::vector<T> expandedVector(values.begin(), values.end());
-  //TODO: implement
-  return expandedVector;
-}
 
 std::unique_ptr<seal::Plaintext> DummyCiphertextFactory::createPlaintext(int64_t value) const {
   std::vector<int64_t> valueAsVec = {value};
@@ -71,17 +53,13 @@ std::unique_ptr<seal::Plaintext> DummyCiphertextFactory::createPlaintext(const s
 
 void DummyCiphertextFactory::decryptCiphertext(AbstractCiphertext &abstractCiphertext,
                                                    std::vector<int64_t> &ciphertextData) const {
-  // do nothing
+  // cast to DummyCtxt and getData()
+  auto dummyCtxt = dynamic_cast<DummyCiphertext *>(&abstractCiphertext);
+  ciphertextData = dummyCtxt->getData();
 }
 
-DummyCiphertextFactory::DummyCiphertextFactory(unsigned int numElementsPerCiphertextSlot)
-    : ciphertextSlotSize(numElementsPerCiphertextSlot) {
 
-}
-
-unsigned int DummyCiphertextFactory::getCiphertextSlotSize() const {
-  return ciphertextSlotSize;
-}
+DummyCiphertextFactory::DummyCiphertextFactory(unsigned int numElementsPerCiphertextSlot) {}
 
 std::string DummyCiphertextFactory::getString(AbstractCiphertext &abstractCiphertext) const {
   // decrypt the ciphertext to get its values

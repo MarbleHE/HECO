@@ -10,16 +10,6 @@
 
 class DummyCiphertextFactory : public AbstractCiphertextFactory {
  private:
-  /// The number of slots (i.e., maximum no. of elements) in a ciphertext.
-  const unsigned int ciphertextSlotSize = 16'384;
-
-  /// Fills a given vector with its last element until it has ciphertextSlotSize elements.
-  /// \tparam T The type of the elements that should be encoded in the ciphertext.
-  /// \param values The vector that should be expanded by its last element.
-  /// \throws std::runtime_error if the number of elements in values is larger than the size defined in
-  /// ciphertextSlotSize.
-  template<typename T>
-  std::vector<T> expandVector(const std::vector<T> &values) const;
 
  public:
   DummyCiphertextFactory() = default;

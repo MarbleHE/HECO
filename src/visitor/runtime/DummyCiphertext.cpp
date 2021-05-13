@@ -32,7 +32,10 @@ DummyCiphertext &cast_dummy(AbstractCiphertext &abstractCiphertext) {
   }
 }
 
-
+// return datavector
+std::vector<int64_t> getData() {
+  return this->_data;
+}
 
 // initialise the dummy ciphertext (i.e set _data variable)
 void DummyCiphertext::createFresh(const std::vector<int64_t> &data) {

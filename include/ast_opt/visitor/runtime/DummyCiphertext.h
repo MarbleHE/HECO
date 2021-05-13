@@ -32,6 +32,9 @@ class DummyCiphertext : public AbstractCiphertext {
   /// \param simulatorFactory The factory that created this ciphertext.
   explicit DummyCiphertext(const std::reference_wrapper<const AbstractCiphertextFactory> dummyFactory);
 
+  // return data vector
+  std::vector<int64_t> getData();
+
   void createFresh(const std::vector<int64_t> &data);
   std::unique_ptr<AbstractCiphertext> multiply(const AbstractCiphertext &operand) const override;
   void multiplyInplace(const AbstractCiphertext &operand) override;
@@ -77,9 +80,6 @@ class DummyCiphertext : public AbstractCiphertext {
   void bitwiseXor_inplace(const AbstractValue &other) override;
   void bitwiseOr_inplace(const AbstractValue &other) override;
   void bitwiseNot_inplace() override;
-
-
-
 };
 
 
