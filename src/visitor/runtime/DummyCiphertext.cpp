@@ -51,12 +51,35 @@ void DummyCiphertext::createFresh(const std::vector<int64_t> &data) {
 }
 
 std::unique_ptr<AbstractCiphertext> DummyCiphertext::multiply(const AbstractCiphertext &operand) const {
+  DummyCiphertext operand_ctxt = cast_dummy(operand);
   // sizes of data vectors must match
-  //TODO
+  std::vector<int64_t> result;
+  if (operand_ctxt.getData().size() !=this->_data.size()) {
+    throw std::runtime_error("Sizes of data vectors do not match");
+  }
+  else {
+    for (int i = 0; i < _data.size(); i++) {
+      result.push_back(this->_data[i] * operand_ctxt.getData()[i]);
+    }
+  }
+  auto r = std::make_unique<DummyCiphertext>(*this);
+  r->_data = result;
+  return r;
 }
 
 void DummyCiphertext::multiplyInplace(const AbstractCiphertext &operand) {
-  //TODO: implement componentwise mult inPLace
+  DummyCiphertext operand_ctxt = cast_dummy(operand);
+  // sizes of data vectors must match
+  std::vector<int64_t> result;
+  if (operand_ctxt.getData().size() !=this->_data.size()) {
+    throw std::runtime_error("Sizes of data vectors do not match");
+  }
+  else {
+    for (int i = 0; i < _data.size(); i++) {
+      result.push_back(this->_data[i] * operand_ctxt.getData()[i]);
+    }
+  }
+  this->_data = result;
 }
 
 
@@ -77,7 +100,7 @@ std::unique_ptr<AbstractCiphertext> DummyCiphertext::add(const AbstractCiphertex
   }
   else {
     for (int i = 0; i < _data.size(); i++) {
-      result.push_back(operand_ctxt.getData()[i] + this->_data[i]);
+      result.push_back(this->_data[i] + operand_ctxt.getData()[i]);
     }
   }
   auto r = std::make_unique<DummyCiphertext>(*this);
@@ -86,24 +109,73 @@ std::unique_ptr<AbstractCiphertext> DummyCiphertext::add(const AbstractCiphertex
 }
 
 void DummyCiphertext::addInplace(const AbstractCiphertext &operand) {
-  //TODO: implement
+  DummyCiphertext operand_ctxt = cast_dummy(operand);
+  // sizes of data vectors must match
+  std::vector<int64_t> result;
+  if (operand_ctxt.getData().size() !=this->_data.size()) {
+    throw std::runtime_error("Sizes of data vectors do not match");
+  }
+  else {
+    for (int i = 0; i < _data.size(); i++) {
+      result.push_back(this->_data[i] + operand_ctxt.getData()[i]);
+    }
+  }
+  this->_data = result;
 }
 
 
 std::unique_ptr<AbstractCiphertext> DummyCiphertext::addPlain(const ICleartext &operand) const {
 
+ auto tmp =  dynamic_cast<const Cleartext>(operand);
+
+
+  // sizes of data vectors must match
+  std::vector<int64_t> result;
+  if (operand_cleartext.getData().size() !=this->_data.size()) {
+    throw std::runtime_error("Sizes of data vectors do not match");
+  }
+  else {
+    for (int i = 0; i < _data.size(); i++) {
+      result.push_back(this->_data[i] + operand_ctxt.getData()[i]);
+    }
+  }
+  auto r = std::make_unique<DummyCiphertext>(*this);
+  r->_data = result;
+  return r;
 }
 
 void DummyCiphertext::addPlainInplace(const ICleartext &operand) {
 
 }
 std::unique_ptr<AbstractCiphertext> DummyCiphertext::subtract(const AbstractCiphertext &operand) const {
-  // this is the same as SimulatorCiphertext::add
-  return DummyCiphertext::add(operand);
+  DummyCiphertext operand_ctxt = cast_dummy(operand);
+  // sizes of data vectors must match
+  std::vector<int64_t> result;
+  if (operand_ctxt.getData().size() !=this->_data.size()) {
+    throw std::runtime_error("Sizes of data vectors do not match");
+  }
+  else {
+    for (int i = 0; i < _data.size(); i++) {
+      result.push_back(this->_data[i] - operand_ctxt.getData()[i]);
+    }
+  }
+  auto r = std::make_unique<DummyCiphertext>(*this);
+  r->_data = result;
+  return r;
 }
 void DummyCiphertext::subtractInplace(const AbstractCiphertext &operand) {
-  // this is the same as SimulatorCiphertext::addInPlace
-  DummyCiphertext::addInplace(operand);
+  DummyCiphertext operand_ctxt = cast_dummy(operand);
+  // sizes of data vectors must match
+  std::vector<int64_t> result;
+  if (operand_ctxt.getData().size() !=this->_data.size()) {
+    throw std::runtime_error("Sizes of data vectors do not match");
+  }
+  else {
+    for (int i = 0; i < _data.size(); i++) {
+      result.push_back(this->_data[i] - operand_ctxt.getData()[i]);
+    }
+  }
+  this->_data = result;
 }
 std::unique_ptr<AbstractCiphertext> DummyCiphertext::subtractPlain(const ICleartext &operand) const {
   // this is the same as SimulatorCiphertext::addPlain
