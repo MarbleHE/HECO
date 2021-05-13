@@ -3,7 +3,7 @@
 
 #include <memory>
 #include "AbstractCiphertext.h"
-#include "SimulatorCiphertextFactory.h"
+#include "DummyCiphertextFactory.h"
 
 // forward declarations
 class DummyCiphertextFactory;
@@ -15,7 +15,9 @@ class DummyCiphertext : public AbstractCiphertext {
  private:
   std::vector<int64_t> _data;
 
-  std::unique_ptr<SimulatorCiphertext> clone_impl() const;
+  DummyCiphertext(std::reference_wrapper<const AbstractCiphertextFactory> simulatorFactory, seal::Plaintext ptxt);
+
+  std::unique_ptr<DummyCiphertext> clone_impl() const;
 
  public:
   ~DummyCiphertext() override = default;
@@ -28,6 +30,7 @@ class DummyCiphertext : public AbstractCiphertext {
 
   DummyCiphertext &operator=(DummyCiphertext &&other);  // move assignment
 
+  void createFresh(const std::vector<int64_t> &data);
   std::unique_ptr<AbstractCiphertext> multiply(const AbstractCiphertext &operand) const override;
   void multiplyInplace(const AbstractCiphertext &operand) override;
   std::unique_ptr<AbstractCiphertext> multiplyPlain(const ICleartext &operand) const override;

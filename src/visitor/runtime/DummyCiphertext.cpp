@@ -4,13 +4,9 @@
 #include "ast_opt/visitor/runtime/DummyCiphertextFactory.h"
 #include "ast_opt/visitor/runtime/AbstractCiphertext.h"
 
-#ifdef HAVE_SEAL_BFV
-#include <seal/seal.h>
-#include "ast_opt/utilities/PlaintextNorm.h"
-
-DummyCiphertext::DummyCiphertext(const std::reference_wrapper<const AbstractCiphertextFactory> simulatorFactory)
+DummyCiphertext::DummyCiphertext(const std::reference_wrapper<const AbstractCiphertextFactory> dummyFactory)
     : AbstractCiphertext(
-    simulatorFactory) {}
+    dummyFactory) {}
 
 DummyCiphertext::DummyCiphertext(const DummyCiphertext &other)  // copy constructor
     : AbstractCiphertext(other.factory) {
@@ -52,8 +48,14 @@ seal::Plaintext &DummyCiphertext::getPlaintext() {
   return ptxt;
 }
 
+// initialise the dummy ciphertext (i.e set _data variable)
+void DummyCiphertext::createFresh(const std::vector<int64_t> &data) {
+  this._data = data;
+}
+
 std::unique_ptr<AbstractCiphertext> DummyCiphertext::multiply(const AbstractCiphertext &operand) const {
   //TODO: implement componentwise mult: idea: get Plaintext from operand, decode, add
+
 }
 
 void DummyCiphertext::multiplyInplace(const AbstractCiphertext &operand) {
@@ -222,5 +224,3 @@ void DummyCiphertext::bitwiseNot_inplace() {
 int64_t DummyCiphertext::initialNoise() {
   return 0;
 }
-
-#endif
