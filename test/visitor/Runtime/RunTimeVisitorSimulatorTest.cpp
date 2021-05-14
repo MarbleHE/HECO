@@ -286,7 +286,7 @@ TEST_F(RuntimeVisitorSimulatorTest, testMultCtxtCtxt) {
   std::vector<int64_t> data2 = {24, 34, 222,   4,    1, 4,   9, 22, 1, 3};
   std::unique_ptr<AbstractCiphertext> ctxt2 = scf->createCiphertext(data2);
   double expected_noise = calcMultNoiseHeuristic(*ctxt1, *ctxt2);
-
+  std::cout << x.getNoiseBudget();
   ASSERT_EQ(x.getNoise(), expected_noise);
 }
 

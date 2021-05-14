@@ -276,12 +276,11 @@ void SimulatorCiphertext::rotateRowsInplace(int steps) {
 }
 
 int64_t SimulatorCiphertext::noiseBits() const{
-
-
-  // step1: get significant bit count of coeff modulus
+  // we do log() - log()
   int coeff_modulus_significant_bit_count = this->getFactory().getContext().first_context_data()->total_coeff_modulus_bit_count();
   int noise_log = round(log2(_noise));
-  return std::max(0, coeff_modulus_significant_bit_count - noise_log - 1);
+ // return std::max(0, coeff_modulus_significant_bit_count - noise_log - 1);
+ return coeff_modulus_significant_bit_count - noise_log - 1;
 }
 
 std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::clone() const {

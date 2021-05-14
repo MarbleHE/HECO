@@ -107,6 +107,7 @@ class SimulatorCiphertextFactoryTest : public ::testing::Test {
     // get noise from input ciphertext and compare with the expected value
     double result = (dynamic_cast<const SimulatorCiphertext&>(abstractCiphertext)).getNoise();
     EXPECT_EQ(result, expected_noise);
+    std::cout << (dynamic_cast<const SimulatorCiphertext&>(abstractCiphertext)).noiseBits();
   }
 };
 
@@ -115,7 +116,6 @@ TEST_F(SimulatorCiphertextFactoryTest, createCiphertext) { /* NOLINT */
   std::vector<int64_t> data = {3, 3, 1, 4, 5, 9};
   std::unique_ptr<AbstractCiphertext> ctxt = scf->createCiphertext(data);
   checkCiphertextData(*ctxt, data);
-
 }
 
 // =======================================
