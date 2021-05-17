@@ -14,7 +14,7 @@ class SimulatorCiphertextFactory;
 
 class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
  private:
-  seal::Ciphertext _ciphertext;
+ // seal::Ciphertext _ciphertext;
   seal::Plaintext _plaintext;
   double _noise = 0; // current invariant noise scaled by coeff_modulus (i.e: we store actual_noise * coeff_modulus)
   int _noise_budget = 0; // current noise budget

@@ -14,7 +14,7 @@ SimulatorCiphertext::SimulatorCiphertext(const std::reference_wrapper<const Abst
 
 SimulatorCiphertext::SimulatorCiphertext(const SimulatorCiphertext &other)  // copy constructor
     : AbstractNoiseMeasuringCiphertext(other.factory) {
-  _ciphertext = other._ciphertext;
+  //_ciphertext = other._ciphertext;
   _plaintext = other._plaintext;
   _noise = other._noise;
   _noise_budget = other._noise_budget;
@@ -26,7 +26,7 @@ SimulatorCiphertext &SimulatorCiphertext::operator=(const SimulatorCiphertext &o
 }
 
 SimulatorCiphertext::SimulatorCiphertext(SimulatorCiphertext &&other) noexcept  // move constructor
-    : AbstractNoiseMeasuringCiphertext(other.factory), _ciphertext(std::move(other._ciphertext)) {}
+    : AbstractNoiseMeasuringCiphertext(other.factory) {}//, _ciphertext(std::move(other._ciphertext)) {}
 
 SimulatorCiphertext &SimulatorCiphertext::operator=(SimulatorCiphertext &&other) {  // move assignment
   // Self-assignment detection
@@ -35,7 +35,11 @@ SimulatorCiphertext &SimulatorCiphertext::operator=(SimulatorCiphertext &&other)
   if (&factory.get()!=&(other.factory.get())) {
     throw std::runtime_error("Cannot move Ciphertext from factory A into Ciphertext created by Factory B.");
   }
-  _ciphertext = std::move(other._ciphertext);
+  _plaintext = std::move(other._plaintext);
+  _noise = std::move(other._noise);
+  _noise_budget = std::move(other._noise_budget);
+  ciphertext_size_ = std::move(other.ciphertext_size_);
+  //_ciphertext = std::move(other._ciphertext);
   return *this;
 }
 
@@ -56,11 +60,15 @@ const SimulatorCiphertext &cast_1(const AbstractCiphertext &abstractCiphertext) 
 }
 
 const seal::Ciphertext &SimulatorCiphertext::getCiphertext() const {
-  return _ciphertext;
+//TODO: what should i return here
+  throw std::runtime_error("Operation not supported for SimulatorCiphertext");
+  //return _ciphertext
 }
 
 seal::Ciphertext &SimulatorCiphertext::getCiphertext() {
-  return _ciphertext;
+  //TODO: what should i return here
+  throw std::runtime_error("Operation not supported for SimulatorCiphertext");
+ // return _ciphertext;
 }
 
 const seal::Plaintext &SimulatorCiphertext::getPlaintext() const {
@@ -92,8 +100,8 @@ void SimulatorCiphertext::createFresh(std::unique_ptr<seal::Plaintext> &plaintex
   // set _plaintext to plaintext (needed for correct decryption)
   _plaintext = *plaintext;
   double result_noise;
-  int64_t plain_modulus = this->getFactory().getContext().first_context_data()->parms().plain_modulus().value();
-  int64_t poly_modulus = this->getFactory().getContext().first_context_data()->parms().poly_modulus_degree();
+  uint64_t plain_modulus = this->getFactory().getContext().first_context_data()->parms().plain_modulus().value();
+  uint64_t poly_modulus = this->getFactory().getContext().first_context_data()->parms().poly_modulus_degree();
   double sigma = 3.2;
   result_noise = plain_modulus * (poly_modulus*(plain_modulus - 1)/2
       + 2*sigma*sqrt(12*pow(poly_modulus, 2) + 9*poly_modulus));
@@ -131,13 +139,14 @@ void SimulatorCiphertext::relinearize() {
 std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::multiply(const AbstractCiphertext &operand) const {
   // cast operand
   auto operand_ctxt = cast_1(operand);
-  int64_t
+  uint64_t coeff_modulus = *this->getFactory().getContext().first_context_data()->total_coeff_modulus();
+  uint64_t
       poly_modulus_degree = this->getFactory().getContext().first_context_data()->parms().poly_modulus_degree();
-  int64_t plain_modulus = this->getFactory().getContext().first_context_data()->parms().plain_modulus().value();
+  uint64_t plain_modulus = this->getFactory().getContext().first_context_data()->parms().plain_modulus().value();
   double result_noise;
   /*iliashenko noise heuristics scaled by q */
   result_noise = plain_modulus*sqrt(3*poly_modulus_degree + 2*pow(poly_modulus_degree, 2))
-      *(this->getNoise() + operand_ctxt.getNoise()) + 3*this->getNoise()*operand_ctxt.getNoise() +
+      *(this->getNoise() + operand_ctxt.getNoise()) + 3*this->getNoise()*operand_ctxt.getNoise()/coeff_modulus +
       plain_modulus*sqrt(3*poly_modulus_degree + 2*pow(poly_modulus_degree, 2) +
           4*pow(poly_modulus_degree, 3)/3);
   //copy
@@ -152,13 +161,14 @@ std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::multiply(const Abstract
 void SimulatorCiphertext::multiplyInplace(const AbstractCiphertext &operand) {
   // cast operand
   auto operand_ctxt = cast_1(operand);
+  uint64_t coeff_modulus = *this->getFactory().getContext().first_context_data()->total_coeff_modulus();
   uint64_t
       poly_modulus_degree = this->getFactory().getContext().first_context_data()->parms().poly_modulus_degree();
   uint64_t plain_modulus = this->getFactory().getContext().first_context_data()->parms().plain_modulus().value();
   double result_noise;
   // iliashenko (scaled by q)
   result_noise =plain_modulus*sqrt(3*poly_modulus_degree + 2*pow(poly_modulus_degree, 2))
-      *(this->getNoise() + operand_ctxt.getNoise()) + 3*this->getNoise()*operand_ctxt.getNoise() +
+      *(this->getNoise() + operand_ctxt.getNoise()) + 3*this->getNoise()*operand_ctxt.getNoise()/coeff_modulus +
       plain_modulus*sqrt(3*poly_modulus_degree + 2*pow(poly_modulus_degree, 2) +
           4*pow(poly_modulus_degree, 3)/3);
   this->_noise = result_noise;
@@ -171,8 +181,8 @@ std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::multiplyPlain(const ICl
   if (auto cleartextInt = dynamic_cast<const Cleartext<int> *>(&operand)) {
     std::unique_ptr<seal::Plaintext> plaintext = getFactory().createPlaintext(cleartextInt->getData());
     double old_noise = this->_noise;
-    int64_t plain_max_coeff_count = plaintext->nonzero_coeff_count();
-    int64_t plain_max_abs_value = plaintext_norm(*plaintext);
+    uint64_t plain_max_coeff_count = plaintext->nonzero_coeff_count();
+    uint64_t plain_max_abs_value = plaintext_norm(*plaintext);
     // noise is old_noise * plain_max_coeff_count * plain_max_abs_value (SEAL Manual)
     double result_noise = old_noise*plain_max_coeff_count*plain_max_abs_value;
     //copy
@@ -189,8 +199,8 @@ void SimulatorCiphertext::multiplyPlainInplace(const ICleartext &operand) {
   if (auto cleartextInt = dynamic_cast<const Cleartext<int> *>(&operand)) {
     auto plaintext = getFactory().createPlaintext(cleartextInt->getData());
     double old_noise = this->_noise;
-    int64_t plain_max_coeff_count = plaintext->nonzero_coeff_count();
-    int64_t plain_max_abs_value = plaintext_norm(*plaintext);
+    uint64_t plain_max_coeff_count = plaintext->nonzero_coeff_count();
+    uint64_t plain_max_abs_value = plaintext_norm(*plaintext);
     // noise is old_noise * plain_max_coeff_count * plain_max_abs_value (SEAL Manual)
     double result_noise = old_noise*plain_max_coeff_count*plain_max_abs_value;
     this->_noise = result_noise;
@@ -224,9 +234,9 @@ std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::addPlain(const IClearte
   if (auto cleartextInt = dynamic_cast<const Cleartext<int> *>(&operand)) {
     auto plaintext = getFactory().createPlaintext(cleartextInt->getData());
     double old_noise = this->_noise;
-    int64_t rtq = this->getFactory().getContext().first_context_data()->coeff_modulus_mod_plain_modulus();
-    int64_t plain_max_coeff_count = plaintext->nonzero_coeff_count();
-    int64_t plain_max_abs_value = plaintext_norm(*plaintext);
+    uint64_t rtq = this->getFactory().getContext().first_context_data()->coeff_modulus_mod_plain_modulus();
+    uint64_t plain_max_coeff_count = plaintext->nonzero_coeff_count();
+    uint64_t plain_max_abs_value = plaintext_norm(*plaintext);
     // noise is old_noise + r_t(q) * plain_max_coeff_count * plain_max_abs_value
     double result_noise = old_noise + rtq*plain_max_coeff_count*plain_max_abs_value;
     auto r = std::make_unique<SimulatorCiphertext>(*this);
@@ -241,9 +251,9 @@ void SimulatorCiphertext::addPlainInplace(const ICleartext &operand) {
   if (auto cleartextInt = dynamic_cast<const Cleartext<int> *>(&operand)) {
     auto plaintext = getFactory().createPlaintext(cleartextInt->getData());
     double old_noise = this->_noise;
-    int64_t rtq = this->getFactory().getContext().first_context_data()->coeff_modulus_mod_plain_modulus();
-    int64_t plain_max_coeff_count = plaintext->nonzero_coeff_count();
-    int64_t plain_max_abs_value = plaintext_norm(*plaintext);
+    uint64_t rtq = this->getFactory().getContext().first_context_data()->coeff_modulus_mod_plain_modulus();
+    uint64_t plain_max_coeff_count = plaintext->nonzero_coeff_count();
+    uint64_t plain_max_abs_value = plaintext_norm(*plaintext);
     // noise is old_noise + r_t(q) * plain_max_coeff_count * plain_max_abs_value
     double result_noise = old_noise + rtq*plain_max_coeff_count*plain_max_abs_value;
     this->_noise = result_noise;
@@ -277,10 +287,9 @@ void SimulatorCiphertext::rotateRowsInplace(int steps) {
 
 int64_t SimulatorCiphertext::noiseBits() const{
   // we do log() - log()
-  int coeff_modulus_significant_bit_count = this->getFactory().getContext().first_context_data()->total_coeff_modulus_bit_count();
-  int noise_log = round(log2(_noise));
- // return std::max(0, coeff_modulus_significant_bit_count - noise_log - 1);
- return coeff_modulus_significant_bit_count - noise_log - 1;
+  uint64_t coeff_modulus_significant_bit_count = this->getFactory().getContext().first_context_data()->total_coeff_modulus_bit_count();
+  uint64_t noise_log = round(log2(_noise));
+  return coeff_modulus_significant_bit_count - noise_log - 1;
 }
 
 std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::clone() const {

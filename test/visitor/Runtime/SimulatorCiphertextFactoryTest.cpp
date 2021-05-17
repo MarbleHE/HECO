@@ -25,8 +25,8 @@ class SimulatorCiphertextFactoryTest : public ::testing::Test {
     double result;
     auto &ctxt = dynamic_cast<SimulatorCiphertext &>(abstractCiphertext);
     seal::Plaintext ptxt = ctxt.getPlaintext();
-    int64_t plain_modulus = scf->getContext().first_context_data()->parms().plain_modulus().value();
-    int64_t poly_modulus = scf->getContext().first_context_data()->parms().poly_modulus_degree();
+    uint64_t plain_modulus = scf->getContext().first_context_data()->parms().plain_modulus().value();
+    uint64_t poly_modulus = scf->getContext().first_context_data()->parms().poly_modulus_degree();
     result = plain_modulus  * (poly_modulus * (plain_modulus - 1) / 2
         + 2 * 3.2 *sqrt(12 * pow(poly_modulus,2) + 9 * poly_modulus));
     return result;
@@ -46,13 +46,17 @@ class SimulatorCiphertextFactoryTest : public ::testing::Test {
     double result;
     auto &ctxt1 = dynamic_cast<SimulatorCiphertext &>(abstractCiphertext1);
     auto &ctxt2 = dynamic_cast<SimulatorCiphertext &>(abstractCiphertext2);
-    int64_t plain_modulus = scf->getContext().first_context_data()->parms().plain_modulus().value();
-    int64_t poly_modulus = scf->getContext().first_context_data()->parms().poly_modulus_degree();
+    uint64_t plain_modulus = scf->getContext().first_context_data()->parms().plain_modulus().value();
+    uint64_t poly_modulus = scf->getContext().first_context_data()->parms().poly_modulus_degree();
+    uint64_t coeff_modulus = *scf->getContext().first_context_data()->total_coeff_modulus();
     // iliashenko mult noise heuristic
     result =  plain_modulus * sqrt(3 * poly_modulus + 2 * pow(poly_modulus,2) )
-        * (ctxt1.getNoise() + ctxt2.getNoise()) + 3 * ctxt1.getNoise() * ctxt2.getNoise() +
+        * (ctxt1.getNoise() + ctxt2.getNoise()) + 3 * ctxt1.getNoise() * ctxt2.getNoise() / coeff_modulus +
         plain_modulus * sqrt(3 * poly_modulus + 2 * pow(poly_modulus,2) +
             4 * pow(poly_modulus,3) /3);
+
+    std::cout << "t= " << plain_modulus << " n= " << poly_modulus << " v1= " << ctxt1.getNoise() << " v2= " <<
+                  ctxt2.getNoise() << " q= " << coeff_modulus << " result= " << result << std::endl;
     return result;
   }
 
