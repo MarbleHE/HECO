@@ -10,7 +10,7 @@
 class SimulatorCiphertextFactory : public AbstractCiphertextFactory {
  private:
   /// The number of slots (i.e., maximum no. of elements) in a ciphertext.
-  const unsigned int ciphertextSlotSize = 16'384;
+  const unsigned int ciphertextSlotSize = 16384;
 
   /// The SEAL context.
   std::shared_ptr<seal::SEALContext> context;

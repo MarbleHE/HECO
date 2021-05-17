@@ -99,13 +99,14 @@ int64_t SimulatorCiphertext::getCoeffModulus() {
 void SimulatorCiphertext::createFresh(std::unique_ptr<seal::Plaintext> &plaintext) {
   // set _plaintext to plaintext (needed for correct decryption)
   _plaintext = *plaintext;
-  uint64_t result_noise;
+  uint64_t result_noise = 0;
   uint64_t plain_modulus = this->getFactory().getContext().first_context_data()->parms().plain_modulus().value();
   uint64_t poly_modulus = this->getFactory().getContext().first_context_data()->parms().poly_modulus_degree();
   result_noise = plain_modulus * (poly_modulus*(plain_modulus - 1)/2
       + 2*3.2*sqrt(12*pow(poly_modulus, 2) + 9*poly_modulus));
+
   this->_noise = result_noise;
-  this->_noise_budget = noiseBits();
+  this->_noise_budget = this->noiseBits();
   // freshly encrypted ciphertext has size 2
   this->ciphertext_size_ = 2;
 }
@@ -278,16 +279,15 @@ void SimulatorCiphertext::subtractPlainInplace(const ICleartext &operand) {
   SimulatorCiphertext::addPlainInplace(operand);
 }
 std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::rotateRows(int steps) const {
-  throw std::runtime_error("Not yet implemented.");
+  auto resultCiphertext = std::make_unique<SimulatorCiphertext>(getFactory());
+  return resultCiphertext;
 }
 void SimulatorCiphertext::rotateRowsInplace(int steps) {
-  throw std::runtime_error("Not yet implemented.");
+  //NOOP
 }
-
 int64_t SimulatorCiphertext::noiseBits() const{
-  // we do log() - log()
   uint64_t coeff_modulus_significant_bit_count = this->getFactory().getContext().first_context_data()->total_coeff_modulus_bit_count();
-  uint64_t noise_log = round(log2(_noise));
+  uint64_t noise_log = round(log2(this->_noise));
   return coeff_modulus_significant_bit_count - noise_log - 1;
 }
 

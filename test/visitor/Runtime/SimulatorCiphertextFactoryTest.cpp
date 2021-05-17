@@ -12,7 +12,7 @@
 
 class SimulatorCiphertextFactoryTest : public ::testing::Test {
  protected:
-  const int numCiphertextSlots = 4096;
+  const int numCiphertextSlots = 8192;
 
   std::unique_ptr<SimulatorCiphertextFactory> scf;
 
@@ -106,10 +106,9 @@ class SimulatorCiphertextFactoryTest : public ::testing::Test {
 
   void checkCiphertextNoise(const AbstractCiphertext &abstractCiphertext, double expected_noise) {
     // get noise from input ciphertext and compare with the expected value
-    double result = (dynamic_cast<const SimulatorCiphertext&>(abstractCiphertext)).getNoise();
+    uint64_t result = (dynamic_cast<const SimulatorCiphertext&>(abstractCiphertext)).getNoise();
+    std::cout << " Testbits: " << (dynamic_cast<const SimulatorCiphertext&>(abstractCiphertext)).noiseBits();
     EXPECT_EQ(result, expected_noise);
-    std::cout << "Heuristic Noise budget after op: "  <<
-                  (dynamic_cast<const SimulatorCiphertext&>(abstractCiphertext)).noiseBits() << " bits" << std::endl;
   }
 };
 
@@ -128,8 +127,8 @@ TEST_F(SimulatorCiphertextFactoryTest, createFresh) {
   // create ciphertexts
   std::vector<int64_t> data = {3, 3, 1, 4, 5, 9};
   std::unique_ptr<AbstractCiphertext> ctxt = scf->createCiphertext(data);
-
   uint64_t expected_noise = calcInitNoiseHeuristic(*ctxt);
+
   checkCiphertextNoise(*ctxt, expected_noise);
 }
 

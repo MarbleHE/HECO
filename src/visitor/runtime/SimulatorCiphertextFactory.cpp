@@ -83,6 +83,7 @@ void SimulatorCiphertextFactory::setupSealContext() {
 
   // Let SEAL select a plaintext modulus and 20 bit primes that actually support batching
   params.set_plain_modulus(seal::PlainModulus::Batching(params.poly_modulus_degree(), 20));
+  // params.set_plain_modulus(65537); // costache plain modulus
 
   // Instantiate context
   context = std::make_shared<seal::SEALContext>(params);

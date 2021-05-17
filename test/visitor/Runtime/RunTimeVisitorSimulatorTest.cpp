@@ -27,8 +27,8 @@ class RuntimeVisitorSimulatorTest : public ::testing::Test {
   }
 
   // calculates initial noise heuristic of a freshly encrypted cipheertext
-  double calcInitNoiseHeuristic(AbstractCiphertext &abstractCiphertext) {
-    double result;
+  uint64_t calcInitNoiseHeuristic(AbstractCiphertext &abstractCiphertext) {
+    uint64_t result;
     auto &ctxt = dynamic_cast<SimulatorCiphertext &>(abstractCiphertext);
     seal::Plaintext ptxt = ctxt.getPlaintext();
     int64_t plain_modulus = scf->getContext().first_context_data()->parms().plain_modulus().value();
@@ -39,8 +39,8 @@ class RuntimeVisitorSimulatorTest : public ::testing::Test {
   }
 
   // calculates noise heuristics for ctxt-ctxt add
-  double calcAddNoiseHeuristic(AbstractCiphertext &abstractCiphertext1, AbstractCiphertext &abstractCiphertext2) {
-    double result;
+  uint64_t calcAddNoiseHeuristic(AbstractCiphertext &abstractCiphertext1, AbstractCiphertext &abstractCiphertext2) {
+    uint64_t result;
     auto &ctxt1 = dynamic_cast<SimulatorCiphertext &>(abstractCiphertext1);
     auto &ctxt2 = dynamic_cast<SimulatorCiphertext &>(abstractCiphertext2);
     result = ctxt1.getNoise() + ctxt2.getNoise();
@@ -48,8 +48,8 @@ class RuntimeVisitorSimulatorTest : public ::testing::Test {
   }
 
   // calculates noise heuristics for ctxt-ctxt mult
-  double calcMultNoiseHeuristic(AbstractCiphertext &abstractCiphertext1, AbstractCiphertext &abstractCiphertext2) {
-    double result;
+  uint64_t calcMultNoiseHeuristic(AbstractCiphertext &abstractCiphertext1, AbstractCiphertext &abstractCiphertext2) {
+    uint64_t result;
     auto &ctxt1 = dynamic_cast<SimulatorCiphertext &>(abstractCiphertext1);
     auto &ctxt2 = dynamic_cast<SimulatorCiphertext &>(abstractCiphertext2);
     int64_t plain_modulus = scf->getContext().first_context_data()->parms().plain_modulus().value();
@@ -62,13 +62,13 @@ class RuntimeVisitorSimulatorTest : public ::testing::Test {
     return result;
   }
 
-  double calcAddPlainNoiseHeuristic(AbstractCiphertext &abstractCiphertext, ICleartext &operand) {
+  uint64_t calcAddPlainNoiseHeuristic(AbstractCiphertext &abstractCiphertext, ICleartext &operand) {
     //noise is old_noise + r_t(q) * plain_max_coeff_count * plain_max_abs_value
-    double result;
+    uint64_t result;
     auto cleartextInt = dynamic_cast<Cleartext<int> *>(&operand);
     std::unique_ptr<seal::Plaintext> plaintext = scf->createPlaintext(cleartextInt->getData());
     auto &ctxt = dynamic_cast<SimulatorCiphertext &>(abstractCiphertext);
-    double old_noise = ctxt.getNoise();
+    uint64_t old_noise = ctxt.getNoise();
     int64_t rtq = scf->getContext().first_context_data()->coeff_modulus_mod_plain_modulus();
     int64_t plain_max_abs_value = plaintext_norm(*plaintext);
     int64_t plain_max_coeff_count = plaintext->nonzero_coeff_count();
@@ -76,12 +76,12 @@ class RuntimeVisitorSimulatorTest : public ::testing::Test {
     return result;
   }
 
-  double calcMultiplyPlainNoiseHeuristic(AbstractCiphertext &abstractCiphertext, ICleartext &operand) {
-    double result;
+  uint64_t calcMultiplyPlainNoiseHeuristic(AbstractCiphertext &abstractCiphertext, ICleartext &operand) {
+    uint64_t result;
     auto cleartextInt = dynamic_cast<Cleartext<int> *>(&operand);
     std::unique_ptr<seal::Plaintext> plaintext = scf->createPlaintext(cleartextInt->getData());
     auto &ctxt = dynamic_cast<SimulatorCiphertext &>(abstractCiphertext);
-    double old_noise = ctxt.getNoise();
+    uint64_t old_noise = ctxt.getNoise();
     int64_t plain_max_abs_value = plaintext_norm(*plaintext);
     int64_t plain_max_coeff_count = plaintext->nonzero_coeff_count();
     result = old_noise * plain_max_coeff_count * plain_max_abs_value;
@@ -134,7 +134,7 @@ TEST_F(RuntimeVisitorSimulatorTest, testFreshCtxt) {
   // create ciphertexts to check noise heuristics
   std::vector<int64_t> data1 = {43,  1,   1,   1,  22, 11, 425,  0, 1, 7};
   std::unique_ptr<AbstractCiphertext> ctxt = scf->createCiphertext(data1);
-  double expected_noise = calcInitNoiseHeuristic(*ctxt);
+  uint64_t expected_noise = calcInitNoiseHeuristic(*ctxt);
 
   ASSERT_EQ(x.getNoise(), expected_noise);
 }
@@ -187,7 +187,7 @@ TEST_F(RuntimeVisitorSimulatorTest, testAddCtxtCtxt) {
   std::unique_ptr<AbstractCiphertext> ctxt1 = scf->createCiphertext(data1);
   std::vector<int64_t> data2 = {24, 34, 222,   4,    1, 4,   9, 22, 1, 3};
   std::unique_ptr<AbstractCiphertext> ctxt2 = scf->createCiphertext(data2);
-  double expected_noise = calcAddNoiseHeuristic(*ctxt1, *ctxt2);
+  uint64_t expected_noise = calcAddNoiseHeuristic(*ctxt1, *ctxt2);
 
   ASSERT_EQ(x.getNoise(), expected_noise);
 }
@@ -236,7 +236,7 @@ TEST_F(RuntimeVisitorSimulatorTest, testSubCtxtCtxt) {
   std::unique_ptr<AbstractCiphertext> ctxt1 = scf->createCiphertext(data1);
   std::vector<int64_t> data2 = {24, 34, 222,   4,    1, 4,   9, 22, 1, 3};
   std::unique_ptr<AbstractCiphertext> ctxt2 = scf->createCiphertext(data2);
-  double expected_noise = calcAddNoiseHeuristic(*ctxt1, *ctxt2);
+  uint64_t expected_noise = calcAddNoiseHeuristic(*ctxt1, *ctxt2);
 
   ASSERT_EQ(x.getNoise(), expected_noise);
 }
@@ -285,8 +285,7 @@ TEST_F(RuntimeVisitorSimulatorTest, testMultCtxtCtxt) {
   std::unique_ptr<AbstractCiphertext> ctxt1 = scf->createCiphertext(data1);
   std::vector<int64_t> data2 = {24, 34, 222,   4,    1, 4,   9, 22, 1, 3};
   std::unique_ptr<AbstractCiphertext> ctxt2 = scf->createCiphertext(data2);
-  double expected_noise = calcMultNoiseHeuristic(*ctxt1, *ctxt2);
-  std::cout << x.getNoiseBudget();
+  uint64_t expected_noise = calcMultNoiseHeuristic(*ctxt1, *ctxt2);
   ASSERT_EQ(x.getNoise(), expected_noise);
 }
 
@@ -302,7 +301,7 @@ Cleartext<int> createCleartextSimVisitor(const std::vector<int> &literalIntValue
   return Cleartext<int>(literalIntValues);
 }
 
-TEST_F(RuntimeVisitorSimulatorTest, testAddPlaintextCtxt) { /* NOLINT */
+TEST_F(RuntimeVisitorSimulatorTest, testAddCtxtPlaintext) { /* NOLINT */
   // program's input
   const char *inputs = R""""(
       secret int __input0__ = {43,  1,   1,  22, 11, 7};
@@ -312,7 +311,7 @@ TEST_F(RuntimeVisitorSimulatorTest, testAddPlaintextCtxt) { /* NOLINT */
   // program specification
   const char *program = R""""(
       int i = 19;
-      secret int result = i +++ __input0__;
+      secret int result = __input0__ +++  i;
       return result;
     )"""";
   auto astProgram = Parser::parse(std::string(program));
@@ -342,19 +341,15 @@ TEST_F(RuntimeVisitorSimulatorTest, testAddPlaintextCtxt) { /* NOLINT */
 
   auto x = dynamic_cast<SimulatorCiphertext &>(*result[0].second);
 
-  // create ciphertext
+  // create ciphertext and plaintext to check noise heuristics
   std::vector<int64_t> data1 = {43,  1,   1,  22, 11, 7};
   std::unique_ptr<AbstractCiphertext> ctxt1 = scf->createCiphertext(data1);
-
-  std::vector<int> data2 = {19};
-  auto operandVector = createCleartextSimVisitor(data2);
-
-  double expected_noise = calcAddPlainNoiseHeuristic(*ctxt1,operandVector);
-
+  auto operandVector = createCleartextSimVisitor({19});
+  uint64_t expected_noise = calcAddPlainNoiseHeuristic(*ctxt1,operandVector);
   ASSERT_EQ(x.getNoise(), expected_noise);
 }
 
-TEST_F(RuntimeVisitorSimulatorTest, testSubPlaintextCtxt) { /* NOLINT */
+TEST_F(RuntimeVisitorSimulatorTest, testSubCtxtPlaintext) { /* NOLINT */
   // program's input
   const char *inputs = R""""(
       secret int __input0__ = {43,  1,   1,  22, 11, 7};
@@ -364,7 +359,7 @@ TEST_F(RuntimeVisitorSimulatorTest, testSubPlaintextCtxt) { /* NOLINT */
   // program specification
   const char *program = R""""(
       int i = 19;
-      secret int result = i --- __input0__;
+      secret int result = __input0__ ---  i;
       return result;
     )"""";
   auto astProgram = Parser::parse(std::string(program));
@@ -394,19 +389,15 @@ TEST_F(RuntimeVisitorSimulatorTest, testSubPlaintextCtxt) { /* NOLINT */
 
   auto x = dynamic_cast<SimulatorCiphertext &>(*result[0].second);
 
-  // create ciphertext
+  // create ciphertext and plaintext to check noise heuristics
   std::vector<int64_t> data1 = {43,  1,   1,  22, 11, 7};
   std::unique_ptr<AbstractCiphertext> ctxt1 = scf->createCiphertext(data1);
-
-  std::vector<int> data2 = {19};
-  auto operandVector = createCleartextSimVisitor(data2);
-
-  double expected_noise = calcAddPlainNoiseHeuristic(*ctxt1,operandVector);
-
+  auto operandVector = createCleartextSimVisitor({19});
+  uint64_t expected_noise = calcAddPlainNoiseHeuristic(*ctxt1,operandVector);
   ASSERT_EQ(x.getNoise(), expected_noise);
 }
 
-TEST_F(RuntimeVisitorSimulatorTest, testMultPlaintextCtxt) { /* NOLINT */
+TEST_F(RuntimeVisitorSimulatorTest, testMultCtxtPlaintext) { /* NOLINT */
   // program's input
   const char *inputs = R""""(
       secret int __input0__ = {43,  1,   1,  22, 11, 7};
@@ -416,7 +407,7 @@ TEST_F(RuntimeVisitorSimulatorTest, testMultPlaintextCtxt) { /* NOLINT */
   // program specification
   const char *program = R""""(
       int i = 19;
-      secret int result = i *** __input0__;
+      secret int result = __input0__ ***  i;
       return result;
     )"""";
   auto astProgram = Parser::parse(std::string(program));
@@ -446,16 +437,11 @@ TEST_F(RuntimeVisitorSimulatorTest, testMultPlaintextCtxt) { /* NOLINT */
 
   auto x = dynamic_cast<SimulatorCiphertext &>(*result[0].second);
 
-  // create ciphertext
+  // create ciphertext and plaintext to check noise heuristics
   std::vector<int64_t> data1 = {43,  1,   1,  22, 11, 7};
   std::unique_ptr<AbstractCiphertext> ctxt1 = scf->createCiphertext(data1);
-
-  std::vector<int> data2 = {19};
-  auto operandVector = createCleartextSimVisitor(data2);
-
-  double expected_noise = calcMultiplyPlainNoiseHeuristic(*ctxt1,operandVector);
-
+  auto operandVector = createCleartextSimVisitor({19});
+  uint64_t expected_noise = calcMultiplyPlainNoiseHeuristic(*ctxt1,operandVector);
   ASSERT_EQ(x.getNoise(), expected_noise);
 }
-
 #endif
