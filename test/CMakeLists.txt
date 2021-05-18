@@ -53,7 +53,13 @@ set(TEST_FILES
         visitor/TypeCheckingVisitorTest.cpp
         visitor/Runtime/SealCiphertextFactoryTest.cpp
         visitor/Runtime/RuntimeVisitorTest.cpp
-        end-to-end/KernelTest.cpp end-to-end/CardioTest.cpp visitor/Runtime/SimulatorCiphertextFactoryTest.cpp visitor/Runtime/RunTimeVisitorSimulatorTest.cpp ../include/ast_opt/visitor/runtime/DummyCiphertext.h visitor/Runtime/DummyCiphertextFactoryTest.cpp)
+        visitor/Runtime/DummyCiphertextFactoryTest.cpp
+        end-to-end/KernelTest.cpp
+        end-to-end/CardioTest.cpp
+        visitor/Runtime/SimulatorCiphertextFactoryTest.cpp
+        visitor/Runtime/RunTimeVisitorSimulatorTest.cpp
+        ../include/ast_opt/visitor/runtime/DummyCiphertext.h
+        )
 
 add_executable(testing-all
         ${TEST_FILES})

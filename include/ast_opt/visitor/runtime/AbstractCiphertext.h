@@ -5,9 +5,7 @@
 
 #include "ast_opt/ast/Literal.h"
 #include "ast_opt/visitor/runtime/AbstractValue.h"
-#include "SealCiphertextFactory.h"
-#include "SimulatorCiphertextFactory.h"
-
+#include "ast_opt/visitor/runtime/AbstractCiphertextFactory.h"
 // forward declarations
 class ICleartext;
 

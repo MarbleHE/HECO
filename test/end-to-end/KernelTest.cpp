@@ -4,6 +4,7 @@
 #include "ast_opt/ast/AbstractNode.h"
 #include "ast_opt/parser/Parser.h"
 #include "ast_opt/visitor/runtime/RuntimeVisitor.h"
+#include "ast_opt/visitor/runtime/SealCiphertextFactory.h"
 #include "ast_opt/ast/Assignment.h"
 #include "ast_opt/ast/Variable.h"
 #include "ast_opt/ast/IndexAccess.h"
