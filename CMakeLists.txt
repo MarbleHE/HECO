@@ -54,7 +54,7 @@ endif ()
 # Determine if SEAL is available
 ##############################
 
-find_package(SEAL 3.5) # sets SEAL_FOUND variable
+find_package(SEAL 3.6 CONFIG REQUIRED) # sets SEAL_FOUND variable
 
 ##############################
 # Download and install nlohmann-json if required
@@ -120,7 +120,9 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/visitor/TypeCheckingVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/runtime/RuntimeVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/runtime/SealCiphertext.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/runtime/DummyCiphertext.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/runtime/SealCiphertextFactory.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/runtime/DummyCiphertextFactory.cpp
         )
 
 set(HEADER_ONLY_SOURCES
@@ -133,6 +135,9 @@ set(HEADER_ONLY_SOURCES
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/AbstractCiphertext.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/Cleartext.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/AbstractValue.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/AbstractNoiseMeasuringCiphertext.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/DummyCiphertext.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/DummyCiphertextFactory.h
         )
 
 # TODO: Go through this list and determine which headers aren't actually public
@@ -181,6 +186,8 @@ set(PUBLIC_HEADERS
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/RuntimeVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/SealCiphertext.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/SealCiphertextFactory.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/DummyCiphertext.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/DummyCiphertextFactory.h
         )
 
 # build a library out of the code to be used by the tests
@@ -196,7 +203,7 @@ target_compile_features(ast_opt PUBLIC cxx_std_17)
 if (SEAL_FOUND)
     message("Enabling SEAL functionality")
     target_include_directories(ast_opt PUBLIC ${SEAL_INCLUDE_DIRS})
-    target_link_libraries(ast_opt PUBLIC ${SEAL_LIBRARIES})
+    target_link_libraries(ast_opt PUBLIC SEAL::seal)
     target_compile_definitions(ast_opt PUBLIC -DHAVE_SEAL_BFV)
     target_compile_definitions(ast_opt PUBLIC -DHAVE_SEAL_CKKS)
 endif (SEAL_FOUND)

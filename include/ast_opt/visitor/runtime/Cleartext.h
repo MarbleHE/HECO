@@ -110,8 +110,8 @@ class Cleartext : public ICleartext {
     return vts.str();
   }
 
-  void applyBinaryOperator(std::function<T(T, T)> f, AbstractValue &other) {
-    if (auto otherCleartxt = dynamic_cast<Cleartext<T> *>(&other)) {
+  void applyBinaryOperator(std::function<T(T, T)> f, const AbstractValue &other) {
+    if (auto otherCleartxt = dynamic_cast<const Cleartext<T> *>(&other)) {
       std::transform(data.begin(), data.end(), otherCleartxt->data.begin(), data.begin(), f);
     } else {
       throw std::runtime_error(
@@ -125,83 +125,83 @@ class Cleartext : public ICleartext {
     std::transform(data.begin(), data.end(), data.begin(), f);
   }
 
-  void add(AbstractValue &other) override {
+  void add_inplace(const AbstractValue &other) override {
     applyBinaryOperator(std::plus<T>(), other);
   }
 
-  void subtract(AbstractValue &other) override {
+  void subtract_inplace(const AbstractValue &other) override {
     applyBinaryOperator(std::minus<T>(), other);
   }
 
-  void multiply(AbstractValue &other) override {
+  void multiply_inplace(const AbstractValue &other) override {
     applyBinaryOperator(std::multiplies<T>(), other);
   }
 
-  void divide(AbstractValue &other) override {
+  void divide_inplace(const AbstractValue &other) override {
     if constexpr (std::is_same<T, bool>::value) {
-      throw std::invalid_argument("Cannot divide booleans. " + std::string(typeid(other).name()));
+      throw std::invalid_argument("Cannot divide_inplace booleans. " + std::string(typeid(other).name()));
     } else {
       applyBinaryOperator(std::divides<T>(), other);
     }
   }
 
-  void modulo(AbstractValue &other) override {
+  void modulo_inplace(const AbstractValue &other) override {
     if constexpr (std::is_same<T, bool>::value) {
-      throw std::invalid_argument("Cannot modulo booleans. " + std::string(typeid(other).name()));
+      throw std::invalid_argument("Cannot modulo_inplace booleans. " + std::string(typeid(other).name()));
     } else {
       applyBinaryOperator(std::modulus<T>(), other);
     }
   }
 
-  void logicalAnd(AbstractValue &other) override {
+  void logicalAnd_inplace(const AbstractValue &other) override {
     applyBinaryOperator(std::logical_and<T>(), other);
   }
 
-  void logicalOr(AbstractValue &other) override {
+  void logicalOr_inplace(const AbstractValue &other) override {
     applyBinaryOperator(std::logical_or<T>(), other);
   }
 
-  void logicalLess(AbstractValue &other) override {
+  void logicalLess_inplace(const AbstractValue &other) override {
     applyBinaryOperator(std::less<T>(), other);
   }
 
-  void logicalLessEqual(AbstractValue &other) override {
+  void logicalLessEqual_inplace(const AbstractValue &other) override {
     applyBinaryOperator(std::less_equal<T>(), other);
   }
 
-  void logicalGreater(AbstractValue &other) override {
+  void logicalGreater_inplace(const AbstractValue &other) override {
     applyBinaryOperator(std::greater<T>(), other);
   }
 
-  void logicalGreaterEqual(AbstractValue &other) override {
+  void logicalGreaterEqual_inplace(const AbstractValue &other) override {
     applyBinaryOperator(std::greater_equal<T>(), other);
   }
 
-  void logicalEqual(AbstractValue &other) override {
+  void logicalEqual_inplace(const AbstractValue &other) override {
     applyBinaryOperator(std::equal_to<T>(), other);
   }
 
-  void logicalNotEqual(AbstractValue &other) override {
+  void logicalNotEqual_inplace(const AbstractValue &other) override {
     applyBinaryOperator(std::not_equal_to<T>(), other);
   }
 
-  void bitwiseAnd(AbstractValue &other) override {
+  void bitwiseAnd_inplace(const AbstractValue &other) override {
     applyBinaryOperator(std::bit_and<T>(), other);
   }
 
-  void bitwiseXor(AbstractValue &other) override {
+  void bitwiseXor_inplace(const AbstractValue &other) override {
     applyBinaryOperator(std::bit_xor<T>(), other);
   }
 
-  void bitwiseOr(AbstractValue &other) override {
+  void bitwiseOr_inplace(const AbstractValue &other) override {
     applyBinaryOperator(std::bit_or<T>(), other);
   }
 
-  void logicalNot() override {
+  void logicalNot_inplace() override {
     applyUnaryOperator(std::logical_not<T>());
   }
 
-  void bitwiseNot() override {
+  void bitwiseNot_inplace() override {
     if constexpr (std::is_same<T, bool>::value) {
       applyUnaryOperator([](bool b){return !b;});
     } else {
@@ -231,126 +231,126 @@ struct isCleartext<Cleartext<T>> : public std::true_type {};
 // partial specializations of Cleartext<T> member functions
 
 template<>
-inline void Cleartext<std::string>::subtract(AbstractValue &) {
+inline void Cleartext<std::string>::subtract_inplace(const AbstractValue &) {
   throw std::runtime_error("Cannot apply subtraction to operands of type (std::string, std:string).");
 }
 
 template<>
-inline void Cleartext<std::string>::multiply(AbstractValue &) {
+inline void Cleartext<std::string>::multiply_inplace(const AbstractValue &) {
   throw std::runtime_error("Cannot apply multiplication to operands of type (std::string, std:string).");
 }
 
 template<>
-inline void Cleartext<std::string>::divide(AbstractValue &) {
+inline void Cleartext<std::string>::divide_inplace(const AbstractValue &) {
   throw std::runtime_error("Cannot division to operands of type (std::string, std:string).");
 }
 
 template<>
-inline void Cleartext<float>::modulo(AbstractValue &) {
-  throw std::runtime_error("Cannot apply modulo to operands of type (float, float).");
+inline void Cleartext<float>::modulo_inplace(const AbstractValue &) {
+  throw std::runtime_error("Cannot apply modulo_inplace to operands of type (float, float).");
 }
 
 template<>
-inline void Cleartext<double>::modulo(AbstractValue &) {
-  throw std::runtime_error("Cannot apply modulo to operands of type (double, double).");
+inline void Cleartext<double>::modulo_inplace(const AbstractValue &) {
+  throw std::runtime_error("Cannot apply modulo_inplace to operands of type (double, double).");
 }
 
 template<>
-inline void Cleartext<std::string>::modulo(AbstractValue &) {
-  throw std::runtime_error("Cannot apply modulo to operands of type (std::string, std::string).");
+inline void Cleartext<std::string>::modulo_inplace(const AbstractValue &) {
+  throw std::runtime_error("Cannot apply modulo_inplace to operands of type (std::string, std::string).");
 }
 
 template<>
-inline void Cleartext<std::string>::logicalAnd(AbstractValue &) {
+inline void Cleartext<std::string>::logicalAnd_inplace(const AbstractValue &) {
   throw std::runtime_error("Cannot apply AND to operands of type (std::string, std::string).");
 }
 
 template<>
-inline void Cleartext<std::string>::logicalOr(AbstractValue &) {
+inline void Cleartext<std::string>::logicalOr_inplace(const AbstractValue &) {
   throw std::runtime_error("Cannot apply OR to operands of type (std::string, std::string).");
 }
 
 template<>
-inline void Cleartext<std::string>::logicalLess(AbstractValue &) {
+inline void Cleartext<std::string>::logicalLess_inplace(const AbstractValue &) {
   throw std::runtime_error("Cannot apply less to operands of type (std::string, std::string).");
 }
 
 template<>
-inline void Cleartext<std::string>::logicalLessEqual(AbstractValue &) {
+inline void Cleartext<std::string>::logicalLessEqual_inplace(const AbstractValue &) {
   throw std::runtime_error("Cannot apply less-equal to operands of type (std::string, std::string).");
 }
 
 template<>
-inline void Cleartext<std::string>::logicalGreater(AbstractValue &) {
+inline void Cleartext<std::string>::logicalGreater_inplace(const AbstractValue &) {
   throw std::runtime_error("Cannot apply greater to operands of type (std::string, std::string).");
 }
 
 template<>
-inline void Cleartext<std::string>::logicalGreaterEqual(AbstractValue &) {
+inline void Cleartext<std::string>::logicalGreaterEqual_inplace(const AbstractValue &) {
   throw std::runtime_error("Cannot apply greater-equal to operands of type (std::string, std::string).");
 }
 
 template<>
-inline void Cleartext<std::string>::logicalEqual(AbstractValue &) {
+inline void Cleartext<std::string>::logicalEqual_inplace(const AbstractValue &) {
   throw std::runtime_error("Cannot apply equal to operands of type (std::string, std::string).");
 }
 
 template<>
-inline void Cleartext<std::string>::logicalNotEqual(AbstractValue &) {
+inline void Cleartext<std::string>::logicalNotEqual_inplace(const AbstractValue &) {
   throw std::runtime_error("Cannot apply not-equal to operands of type (std::string, std::string).");
 }
 
 template<>
-inline void Cleartext<std::string>::bitwiseAnd(AbstractValue &) {
+inline void Cleartext<std::string>::bitwiseAnd_inplace(const AbstractValue &) {
   throw std::runtime_error("Cannot apply bitwise-AND to operands of type (std::string, std::string).");
 }
 
 template<>
-inline void Cleartext<float>::bitwiseAnd(AbstractValue &) {
+inline void Cleartext<float>::bitwiseAnd_inplace(const AbstractValue &) {
   throw std::runtime_error("Cannot apply bitwise-AND to operands of type (float, float).");
 }
 
 template<>
-inline void Cleartext<double>::bitwiseAnd(AbstractValue &) {
+inline void Cleartext<double>::bitwiseAnd_inplace(const AbstractValue &) {
   throw std::runtime_error("Cannot apply bitwise-AND to operands of type (double, double).");
 }
 
 template<>
-inline void Cleartext<std::string>::bitwiseOr(AbstractValue &) {
+inline void Cleartext<std::string>::bitwiseOr_inplace(const AbstractValue &) {
   throw std::runtime_error("Cannot apply bitwise-OR to operands of type (std::string, std::string).");
 }
 
 template<>
-inline void Cleartext<float>::bitwiseOr(AbstractValue &) {
+inline void Cleartext<float>::bitwiseOr_inplace(const AbstractValue &) {
   throw std::runtime_error("Cannot apply bitwise-OR to operands of type (float, float).");
 }
 
 template<>
-inline void Cleartext<double>::bitwiseOr(AbstractValue &) {
+inline void Cleartext<double>::bitwiseOr_inplace(const AbstractValue &) {
   throw std::runtime_error("Cannot apply bitwise-OR to operands of type (double, double).");
 }
 
 template<>
-inline void Cleartext<std::string>::bitwiseXor(AbstractValue &) {
+inline void Cleartext<std::string>::bitwiseXor_inplace(const AbstractValue &) {
   throw std::runtime_error("Cannot apply bitwise-XOR to operands of type (std::string, std::string).");
 }
 
 template<>
-inline void Cleartext<float>::bitwiseXor(AbstractValue &) {
+inline void Cleartext<float>::bitwiseXor_inplace(const AbstractValue &) {
   throw std::runtime_error("Cannot apply bitwise-XOR to operands of type (float, float).");
 }
 
 template<>
-inline void Cleartext<double>::bitwiseXor(AbstractValue &) {
+inline void Cleartext<double>::bitwiseXor_inplace(const AbstractValue &) {
   throw std::runtime_error("Cannot apply bitwise-XOR to operands of type (double, double).");
 }
 
 template<>
-inline void Cleartext<int>::subtract(AbstractValue &other) {
+inline void Cleartext<int>::subtract_inplace(const AbstractValue &other) {
   // Subtraction needs special handling because in case of operands (Cleartext<T>, AbstractCiphertext), we cannot simply
   // swap both operands as subtraction is non-commutative. Instead, we need to transform the first operand into a
   // ciphertext and then perform the subtraction.
-  if (auto otherCiphertext = dynamic_cast<AbstractCiphertext *>(&other)) {
+  if (auto otherCiphertext = dynamic_cast<const AbstractCiphertext *>(&other)) {
     auto cleartextData = getData();
     std::unique_ptr<AbstractCiphertext> thisCiphertext = otherCiphertext->getFactory().createCiphertext(cleartextData);
     thisCiphertext->subtractInplace(*otherCiphertext);
@@ -360,22 +360,22 @@ inline void Cleartext<int>::subtract(AbstractValue &other) {
 }
 
 template<>
-inline void Cleartext<float>::bitwiseNot() {
+inline void Cleartext<float>::bitwiseNot_inplace() {
   throw std::runtime_error("Cannot apply bitwise-NOT to operand of type (float).");
 }
 
 template<>
-inline void Cleartext<double>::bitwiseNot() {
+inline void Cleartext<double>::bitwiseNot_inplace() {
   throw std::runtime_error("Cannot apply bitwise-NOT to operand of type (double).");
 }
 
 template<>
-inline void Cleartext<std::string>::bitwiseNot() {
+inline void Cleartext<std::string>::bitwiseNot_inplace() {
   throw std::runtime_error("Cannot apply bitwise-NOT to operand of type (std::string).");
 }
 
 template<>
-inline void Cleartext<std::string>::logicalNot() {
+inline void Cleartext<std::string>::logicalNot_inplace() {
   throw std::runtime_error("Cannot apply (logical) not to operand of type (std::string).");
 }
 
