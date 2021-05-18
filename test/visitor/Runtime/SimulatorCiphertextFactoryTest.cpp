@@ -12,7 +12,7 @@
 
 class SimulatorCiphertextFactoryTest : public ::testing::Test {
  protected:
-  const int numCiphertextSlots = 16384;
+  const int numCiphertextSlots = 4096;
 
   std::unique_ptr<SimulatorCiphertextFactory> scf;
 
@@ -20,7 +20,7 @@ class SimulatorCiphertextFactoryTest : public ::testing::Test {
     scf = std::make_unique<SimulatorCiphertextFactory>(numCiphertextSlots);
   }
 
-  // calculates initial noise heuristic of a freshly encrypted cipheertext
+  // calculates initial noise heuristic of a freshly encrypted ciphertext
   uint64_t calcInitNoiseHeuristic(AbstractCiphertext &abstractCiphertext) {
     uint64_t result;
     auto &ctxt = dynamic_cast<SimulatorCiphertext &>(abstractCiphertext);
@@ -107,7 +107,6 @@ class SimulatorCiphertextFactoryTest : public ::testing::Test {
   void checkCiphertextNoise(const AbstractCiphertext &abstractCiphertext, double expected_noise) {
     // get noise from input ciphertext and compare with the expected value
     uint64_t result = (dynamic_cast<const SimulatorCiphertext&>(abstractCiphertext)).getNoise();
-    std::cout << " Testbits: " << (dynamic_cast<const SimulatorCiphertext&>(abstractCiphertext)).noiseBits();
     EXPECT_EQ(result, expected_noise);
   }
 };
@@ -128,7 +127,7 @@ TEST_F(SimulatorCiphertextFactoryTest, createFresh) {
   std::vector<int64_t> data = {3, 3, 1, 4, 5, 9};
   std::unique_ptr<AbstractCiphertext> ctxt = scf->createCiphertext(data);
   uint64_t expected_noise = calcInitNoiseHeuristic(*ctxt);
-
+  std::cout << (dynamic_cast<const SimulatorCiphertext&>(*ctxt)).noiseBits();
   checkCiphertextNoise(*ctxt, expected_noise);
 }
 
@@ -334,6 +333,14 @@ TEST_F(SimulatorCiphertextFactoryTest, multiplyPlainInplace) { /* NOLINT */
   checkCiphertextNoise(*ctxt1, expected_noise);
 }
 
-
+TEST_F(SimulatorCiphertextFactoryTest, testNoiseBIts) { /* NOLINT */
+  std::vector<int64_t> data1 = {3, 3, 1, 4, 5, 9};
+  std::unique_ptr<AbstractCiphertext> ctxt1 = scf->createCiphertext(data1);
+  uint64_t tmp = round(log2(calcInitNoiseHeuristic(*ctxt1)));
+  int expected_result = std::max(int((dynamic_cast<const SimulatorCiphertext&>(*ctxt1)).getFactory().getContext().first_context_data()->total_coeff_modulus_bit_count()
+      - tmp - 1), 0);
+  int result = (dynamic_cast<const SimulatorCiphertext&>(*ctxt1)).noiseBits();
+  ASSERT_EQ(result, expected_result);
+}
 
 #endif
