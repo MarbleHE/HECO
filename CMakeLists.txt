@@ -54,7 +54,7 @@ endif ()
 # Determine if SEAL is available
 ##############################
 
-find_package(SEAL 3.6 CONFIG REQUIRED) # sets SEAL_FOUND variable
+find_package(SEAL 3.6 CONFIG) # sets SEAL_FOUND variable
 
 ##############################
 # Download and install nlohmann-json if required
