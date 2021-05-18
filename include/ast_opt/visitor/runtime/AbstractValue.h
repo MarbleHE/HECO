@@ -10,41 +10,41 @@ class AbstractValue {
   /// Default destructor.
   virtual ~AbstractValue() = default;
 
-  virtual void add(AbstractValue &other) = 0;
+  virtual void add_inplace(const AbstractValue &other) = 0;
 
-  virtual void subtract(AbstractValue &other) = 0;
+  virtual void subtract_inplace(const AbstractValue &other) = 0;
 
-  virtual void multiply(AbstractValue &other) = 0;
+  virtual void multiply_inplace(const AbstractValue &other) = 0;
 
-  virtual void divide(AbstractValue &other) = 0;
+  virtual void divide_inplace(const AbstractValue &other) = 0;
 
-  virtual void modulo(AbstractValue &other) = 0;
+  virtual void modulo_inplace(const AbstractValue &other) = 0;
 
-  virtual void logicalAnd(AbstractValue &other) = 0;
+  virtual void logicalAnd_inplace(const AbstractValue &other) = 0;
 
-  virtual void logicalOr(AbstractValue &other) = 0;
+  virtual void logicalOr_inplace(const AbstractValue &other) = 0;
 
-  virtual void logicalLess(AbstractValue &other) = 0;
+  virtual void logicalLess_inplace(const AbstractValue &other) = 0;
 
-  virtual void logicalLessEqual(AbstractValue &other) = 0;
+  virtual void logicalLessEqual_inplace(const AbstractValue &other) = 0;
 
-  virtual void logicalGreater(AbstractValue &other) = 0;
+  virtual void logicalGreater_inplace(const AbstractValue &other) = 0;
 
-  virtual void logicalGreaterEqual(AbstractValue &other) = 0;
+  virtual void logicalGreaterEqual_inplace(const AbstractValue &other) = 0;
 
-  virtual void logicalEqual(AbstractValue &other) = 0;
+  virtual void logicalEqual_inplace(const AbstractValue &other) = 0;
 
-  virtual void logicalNotEqual(AbstractValue &other) = 0;
+  virtual void logicalNotEqual_inplace(const AbstractValue &other) = 0;
 
-  virtual void logicalNot() = 0;
+  virtual void logicalNot_inplace() = 0;
 
-  virtual void bitwiseAnd(AbstractValue &other) = 0;
+  virtual void bitwiseAnd_inplace(const AbstractValue &other) = 0;
 
-  virtual void bitwiseXor(AbstractValue &other) = 0;
+  virtual void bitwiseXor_inplace(const AbstractValue &other) = 0;
 
-  virtual void bitwiseOr(AbstractValue &other) = 0;
+  virtual void bitwiseOr_inplace(const AbstractValue &other) = 0;
 
-  virtual void bitwiseNot() = 0;
+  virtual void bitwiseNot_inplace() = 0;
 };
 
 #endif //GRAPHNODE_H_INCLUDE_AST_OPT_VISITOR_RUNTIME_ABSTRACTVALUE_H_
