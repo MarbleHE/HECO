@@ -25,6 +25,15 @@ class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
   std::unique_ptr<SimulatorCiphertext> clone_impl() const;
 
  public:
+  /// Creates a new (empty) SimulatorCiphertext
+  /// \param simulatorFactory The factory that created this ciphertext.
+  explicit SimulatorCiphertext(const std::reference_wrapper<const AbstractCiphertextFactory> simulatorFactory);
+
+  /// Creates a new SimulatorCiphertext from a SEAL Plaintext
+  /// \param simulatorFactory The factory that created this ciphertext.
+  /// \param ptxt The SEAL plaintext which we should use as the base for this ciphertext
+  explicit SimulatorCiphertext(const SimulatorCiphertextFactory &simulatorFactory,
+                               std::unique_ptr<seal::Plaintext> ptxt);
 
   ~SimulatorCiphertext() override = default;
 
@@ -36,30 +45,41 @@ class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
 
   SimulatorCiphertext &operator=(SimulatorCiphertext &&other);  // move assignment
 
-  /// Creates a new (empty) SimulatorCiphertext
-  /// \param simulatorFactory The factory that created this ciphertext.
-  explicit SimulatorCiphertext(const std::reference_wrapper<const AbstractCiphertextFactory> simulatorFactory);
 
-  /// Creates a new SimulatorCiphertext from a SEAL Plaintext
-  /// \param simulatorFactory The factory that created this ciphertext.
-  /// \param ptxt The SEAL plaintext which we should use as the base for this ciphertext
-  explicit SimulatorCiphertext(const SimulatorCiphertextFactory &simulatorFactory,
-                               std::unique_ptr<seal::Plaintext> ptxt);
+  /// Gets the seal::Ciphertext associated with this SealCiphertext.
+  /// \return (A const reference) to the underlying seal::Ciphertext.
+  [[nodiscard]] const seal::Ciphertext &getCiphertext() const;
 
+  /// Gets the seal::Ciphertext associated with this SealCiphertext.
+  /// \return (A reference) to the underlying seal::Ciphertext.
+  seal::Ciphertext &getCiphertext();
 
-  // API function overrides from AbstractNoiseMeasuringCiphertext
-  //TODO: documentation doxygen and push these to AbstractNoise measuring CTXT
-  double getNoise() const;
-  int64_t getNoiseBudget();
-  int64_t getCoeffModulus();
-  int noiseBits() const;
-
-  // custom stuff
-  const seal::Plaintext &getPlaintext() const;
+  //TODO: Document this
   seal::Plaintext &getPlaintext();
+
+  //TODO: Document this
+  const seal::Plaintext &getPlaintext() const;
+
+  //TODO (Alex): Add this as a function in AbstractCtxt instead, and modify SEALCiphertext to no longer relinearize automatically
+  // Note: this will require also updating the Runtime visitor to actually perform relinearizations!
   void relinearize();
 
+  //TODO: Document this
+  int64_t getCoeffModulus();
 
+  //TODO: Document this and move to AbstractNoiseMeasuringCiphertext
+  int noiseBits() const;
+
+  // API inherited from AbstractNoiseMeasuringCiphertext
+  /// For BFV/SEAL simulation, we return the infinity norm of the noise estimate multiplied by q
+  /// \return ||noise_estimate||_{\infty} * q
+  double getNoise() const override;
+  int64_t initialNoise() override;
+  int64_t getNoiseBudget() const override;
+
+  // API inherited from AbstractCiphertext
+  std::unique_ptr<AbstractCiphertext> clone() const override;
+  const SimulatorCiphertextFactory &getFactory() const override;
   void createFresh(std::unique_ptr<seal::Plaintext> &plaintext);
   std::unique_ptr<AbstractCiphertext> multiply(const AbstractCiphertext &operand) const override;
   void multiplyInplace(const AbstractCiphertext &operand) override;
@@ -76,21 +96,8 @@ class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
   std::unique_ptr<AbstractCiphertext> rotateRows(int steps) const override;
   void rotateRowsInplace(int steps) override;
 
-  double getNoise(AbstractCiphertext &abstractCiphertext) const;
 
-  std::unique_ptr<AbstractCiphertext> clone() const override;
-  const SimulatorCiphertextFactory &getFactory() const override;
-
-  /// Gets the seal::Ciphertext associated with this SealCiphertext.
-  /// \return (A const reference) to the underlying seal::Ciphertext.
-  [[nodiscard]] const seal::Ciphertext &getCiphertext() const;
-
-  /// Gets the seal::Ciphertext associated with this SealCiphertext.
-  /// \return (A reference) to the underlying seal::Ciphertext.
-  seal::Ciphertext &getCiphertext();
-
-  int64_t initialNoise() override;
-
+  // API inherited from AbstractValue
   void add_inplace(const AbstractValue &other) override;
   void subtract_inplace(const AbstractValue &other) override;
   void multiply_inplace(const AbstractValue &other) override;
@@ -109,6 +116,7 @@ class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
   void bitwiseXor_inplace(const AbstractValue &other) override;
   void bitwiseOr_inplace(const AbstractValue &other) override;
   void bitwiseNot_inplace() override;
+
 };
 
 #endif

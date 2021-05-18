@@ -238,55 +238,55 @@ void SealCiphertext::multiply_inplace(const AbstractValue &other) {
   }
 }
 
-void SealCiphertext::divide_inplace(const AbstractValue &other) {
+void SealCiphertext::divide_inplace(const AbstractValue &) {
   throw std::runtime_error("Operation divide_inplace not supported for (SealCiphertext, ANY).");
 }
 
-void SealCiphertext::modulo_inplace(const AbstractValue &other) {
+void SealCiphertext::modulo_inplace(const AbstractValue &) {
   throw std::runtime_error("Operation modulo_inplace not supported for (SealCiphertext, ANY).");
 }
 
-void SealCiphertext::logicalAnd_inplace(const AbstractValue &other) {
+void SealCiphertext::logicalAnd_inplace(const AbstractValue &) {
   throw std::runtime_error("Operation logicalAnd_inplace not supported for (SealCiphertext, ANY).");
 }
 
-void SealCiphertext::logicalOr_inplace(const AbstractValue &other) {
+void SealCiphertext::logicalOr_inplace(const AbstractValue &) {
   throw std::runtime_error("Operation logicalOr_inplace not supported for (SealCiphertext, ANY).");
 }
 
-void SealCiphertext::logicalLess_inplace(const AbstractValue &other) {
+void SealCiphertext::logicalLess_inplace(const AbstractValue &) {
   throw std::runtime_error("Operation logicalLess_inplace not supported for (SealCiphertext, ANY).");
 }
 
-void SealCiphertext::logicalLessEqual_inplace(const AbstractValue &other) {
+void SealCiphertext::logicalLessEqual_inplace(const AbstractValue &) {
   throw std::runtime_error("Operation logicalLessEqual_inplace not supported for (SealCiphertext, ANY).");
 }
 
-void SealCiphertext::logicalGreater_inplace(const AbstractValue &other) {
+void SealCiphertext::logicalGreater_inplace(const AbstractValue &) {
   throw std::runtime_error("Operation logicalGreater_inplace not supported for (SealCiphertext, ANY).");
 }
 
-void SealCiphertext::logicalGreaterEqual_inplace(const AbstractValue &other) {
+void SealCiphertext::logicalGreaterEqual_inplace(const AbstractValue &) {
   throw std::runtime_error("Operation logicalGreaterEqual_inplace not supported for (SealCiphertext, ANY).");
 }
 
-void SealCiphertext::logicalEqual_inplace(const AbstractValue &other) {
+void SealCiphertext::logicalEqual_inplace(const AbstractValue &) {
   throw std::runtime_error("Operation logicalEqual_inplace not supported for (SealCiphertext, ANY).");
 }
 
-void SealCiphertext::logicalNotEqual_inplace(const AbstractValue &other) {
+void SealCiphertext::logicalNotEqual_inplace(const AbstractValue &) {
   throw std::runtime_error("Operation logicalNotEqual_inplace not supported for (SealCiphertext, ANY).");
 }
 
-void SealCiphertext::bitwiseAnd_inplace(const AbstractValue &other) {
+void SealCiphertext::bitwiseAnd_inplace(const AbstractValue &) {
   throw std::runtime_error("Operation bitwiseAnd_inplace not supported for (SealCiphertext, ANY).");
 }
 
-void SealCiphertext::bitwiseXor_inplace(const AbstractValue &other) {
+void SealCiphertext::bitwiseXor_inplace(const AbstractValue &) {
   throw std::runtime_error("Operation bitwiseXor_inplace not supported for (SealCiphertext, ANY).");
 }
 
-void SealCiphertext::bitwiseOr_inplace(const AbstractValue &other) {
+void SealCiphertext::bitwiseOr_inplace(const AbstractValue &) {
   throw std::runtime_error("Operation bitwiseOr_inplace not supported for (SealCiphertext, ANY).");
 }
 
