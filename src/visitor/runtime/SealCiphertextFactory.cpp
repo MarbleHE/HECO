@@ -139,6 +139,10 @@ const seal::RelinKeys &SealCiphertextFactory::getRelinKeys() const {
   return *relinKeys;
 }
 
+const seal::SecretKey &SealCiphertextFactory::getSecretKey() const {
+  return *secretKey;
+}
+
 void SealCiphertextFactory::decryptCiphertext(AbstractCiphertext &abstractCiphertext,
                                               std::vector<int64_t> &ciphertextData) const {
   auto &ctxt = dynamic_cast<SealCiphertext &>(abstractCiphertext);

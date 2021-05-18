@@ -107,6 +107,7 @@ class SealCiphertext : public AbstractCiphertext {
   void bitwiseNot_inplace() override;
 
   [[nodiscard]] const SealCiphertextFactory &getFactory() const override;
+  int noiseBits() const;
 };
 
 #endif

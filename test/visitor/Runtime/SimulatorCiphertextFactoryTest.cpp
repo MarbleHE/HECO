@@ -12,7 +12,7 @@
 
 class SimulatorCiphertextFactoryTest : public ::testing::Test {
  protected:
-  const int numCiphertextSlots = 8192;
+  const int numCiphertextSlots = 16384;
 
   std::unique_ptr<SimulatorCiphertextFactory> scf;
 

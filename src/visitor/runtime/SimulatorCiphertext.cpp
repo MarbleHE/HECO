@@ -104,7 +104,6 @@ void SimulatorCiphertext::createFresh(std::unique_ptr<seal::Plaintext> &plaintex
   uint64_t poly_modulus = this->getFactory().getContext().first_context_data()->parms().poly_modulus_degree();
   result_noise = plain_modulus * (poly_modulus*(plain_modulus - 1)/2
       + 2*3.2*sqrt(12*pow(poly_modulus, 2) + 9*poly_modulus));
-
   this->_noise = result_noise;
   this->_noise_budget = this->noiseBits();
   // freshly encrypted ciphertext has size 2
@@ -285,10 +284,10 @@ std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::rotateRows(int steps) c
 void SimulatorCiphertext::rotateRowsInplace(int steps) {
   //NOOP
 }
-int64_t SimulatorCiphertext::noiseBits() const{
+int SimulatorCiphertext::noiseBits() const{
   uint64_t coeff_modulus_significant_bit_count = this->getFactory().getContext().first_context_data()->total_coeff_modulus_bit_count();
   uint64_t noise_log = round(log2(this->_noise));
-  return coeff_modulus_significant_bit_count - noise_log - 1;
+  return std::max(int(coeff_modulus_significant_bit_count - noise_log - 1), 0);
 }
 
 std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::clone() const {

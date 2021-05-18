@@ -52,7 +52,7 @@ class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
   double getNoise() const;
   int64_t getNoiseBudget();
   int64_t getCoeffModulus();
-  int64_t noiseBits() const;
+  int noiseBits() const;
 
   // custom stuff
   const seal::Plaintext &getPlaintext() const;

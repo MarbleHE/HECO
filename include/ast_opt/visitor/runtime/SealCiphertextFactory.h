@@ -117,6 +117,7 @@ class SealCiphertextFactory : public AbstractCiphertextFactory {
   std::unique_ptr<AbstractCiphertext> createCiphertext(std::unique_ptr<AbstractValue> &&abstractValue) const override;
 
   std::unique_ptr<AbstractCiphertext> createCiphertext(const std::vector<int> &data) const override;
+  const seal::SecretKey &getSecretKey() const;
 };
 
 #endif

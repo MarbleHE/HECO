@@ -77,6 +77,11 @@ std::unique_ptr<SealCiphertext> SealCiphertext::clone_impl() const {
   return std::make_unique<SealCiphertext>(*this);
 }
 
+int SealCiphertext::noiseBits() const {
+  seal::Decryptor decryptor(this->getFactory().getContext(), this->getFactory().getSecretKey());
+  return decryptor.invariant_noise_budget(this->getCiphertext());
+}
+
 
 // =======================================
 // == CTXT-CTXT operations with returned result
