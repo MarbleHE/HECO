@@ -12,7 +12,7 @@
 
 class SimulatorCiphertextFactoryTest : public ::testing::Test {
  protected:
-  const int numCiphertextSlots = 16384;
+  const int numCiphertextSlots = 4096;
 
   std::unique_ptr<SimulatorCiphertextFactory> scf;
 
@@ -358,7 +358,7 @@ TEST_F(SimulatorCiphertextFactoryTest, xToPowerFourTimesYBad) {
   std::vector<int> data2 = {0, 1, 2, 1, 10, 21};
   std::unique_ptr<AbstractCiphertext> ctxt3 = scf->createCiphertext(data2);
 
-  std::cout << "Noise(x * x): " << getCurrentNoiseBudget(*ctxt1) << std::endl;
+  std::cout << "Noise(x): " << getCurrentNoiseBudget(*ctxt1) << std::endl;
   // x * x
   auto ctxtResult1 = ctxt1->multiply(*ctxt1);
   std::cout << "Noise(x * x): " << getCurrentNoiseBudget(*ctxtResult1) << std::endl;
@@ -370,13 +370,19 @@ TEST_F(SimulatorCiphertextFactoryTest, xToPowerFourTimesYBad) {
   std::cout << "Noise(x * x * x * x): " << getCurrentNoiseBudget(*ctxtResult3) << std::endl;
 
   auto ctxtResult4  = ctxtResult3->multiply(*ctxt1);
-  std::cout << "Noise(x * x * x * x): " << getCurrentNoiseBudget(*ctxtResult4) << std::endl;
+  std::cout << "Noise(x * x * x * x * x): " << getCurrentNoiseBudget(*ctxtResult4) << std::endl;
 
   auto ctxtResult5  = ctxtResult4->multiply(*ctxt1);
-  std::cout << "Noise(x * x * x * x): " << getCurrentNoiseBudget(*ctxtResult5) << std::endl;
+  std::cout << "Noise(x * x * x * x * x * x): " << getCurrentNoiseBudget(*ctxtResult5) << std::endl;
 
   auto ctxtResult6  = ctxtResult5->multiply(*ctxt1);
-  std::cout << "Noise(x * x * x * x): " << getCurrentNoiseBudget(*ctxtResult6) << std::endl;
+  std::cout << "Noise(x * x * x * x * x * x * x): " << getCurrentNoiseBudget(*ctxtResult6) << std::endl;
+
+  auto ctxtResult7  = ctxtResult6->multiply(*ctxt1);
+  std::cout << "Noise(x * x * x * x * x * x * x * x): " << getCurrentNoiseBudget(*ctxtResult7) << std::endl;
+
+  auto ctxtResult8  = ctxtResult7->multiply(*ctxt1);
+  std::cout << "Noise(x * x * x * x * x * x * x * x * x): " << getCurrentNoiseBudget(*ctxtResult8) << std::endl;
 
 }
 

@@ -132,8 +132,9 @@ std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::multiply(const Abstract
   uint64_t
       poly_modulus_degree = this->getFactory().getContext().first_context_data()->parms().poly_modulus_degree();
   uint64_t plain_modulus = this->getFactory().getContext().first_context_data()->parms().plain_modulus().value();
-  uint64_t result_noise;
+  uint64_t result_noise = 0;
   /*iliashenko noise heuristics scaled by q */
+  result_noise = this->getNoise() + operand_ctxt.getNoise();
   result_noise = plain_modulus*sqrt(3*poly_modulus_degree + 2*pow(poly_modulus_degree, 2))
       *(this->getNoise() + operand_ctxt.getNoise()) + 3*this->getNoise()*operand_ctxt.getNoise()/coeff_modulus +
       plain_modulus*sqrt(3*poly_modulus_degree + 2*pow(poly_modulus_degree, 2) +
@@ -141,7 +142,7 @@ std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::multiply(const Abstract
   //copy
   auto r = std::make_unique<SimulatorCiphertext>(*this);
   r->_noise = result_noise;
-  r->_noise_budget = noiseBits();
+  r->_noise_budget = r->noiseBits();
   r->ciphertext_size_ += operand_ctxt.ciphertext_size_; //ciphertext size increased
   return r;
 }
@@ -153,14 +154,15 @@ void SimulatorCiphertext::multiplyInplace(const AbstractCiphertext &operand) {
   uint64_t
       poly_modulus_degree = this->getFactory().getContext().first_context_data()->parms().poly_modulus_degree();
   uint64_t plain_modulus = this->getFactory().getContext().first_context_data()->parms().plain_modulus().value();
-  uint64_t result_noise;
+  uint64_t result_noise = 0;
   // iliashenko (scaled by q)
-  result_noise =plain_modulus*sqrt(3*poly_modulus_degree + 2*pow(poly_modulus_degree, 2))
+  result_noise = plain_modulus*sqrt(3*poly_modulus_degree + 2*pow(poly_modulus_degree, 2))
       *(this->getNoise() + operand_ctxt.getNoise()) + 3*this->getNoise()*operand_ctxt.getNoise()/coeff_modulus +
       plain_modulus*sqrt(3*poly_modulus_degree + 2*pow(poly_modulus_degree, 2) +
           4*pow(poly_modulus_degree, 3)/3);
   this->_noise = result_noise;
-  this->_noise_budget = noiseBits();
+ // this->_noise_budget += this->_noise_budget;
+  this->_noise_budget = this->noiseBits();
   this->ciphertext_size_ += operand_ctxt.ciphertext_size_;
 }
 
@@ -176,7 +178,7 @@ std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::multiplyPlain(const ICl
     //copy
     auto r = std::make_unique<SimulatorCiphertext>(*this);
     r->_noise = result_noise;
-    r->_noise_budget = noiseBits();
+    r->_noise_budget = r->noiseBits();
     return r;
   } else {
     throw std::runtime_error("Multiply(Ciphertext,Cleartext) requires a Cleartext<int> as BFV supports integers only.");
