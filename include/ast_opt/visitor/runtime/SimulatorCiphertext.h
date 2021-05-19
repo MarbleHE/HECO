@@ -4,9 +4,7 @@
 #include <memory>
 #include "AbstractCiphertext.h"
 #include "SimulatorCiphertextFactory.h"
-#include "DummyCiphertextFactory.h"
 #include "AbstractNoiseMeasuringCiphertext.h"
-#include "DummyCiphertext.h"
 
 // forward declarations
 class SimulatorCiphertextFactory;
@@ -16,7 +14,6 @@ class SimulatorCiphertextFactory;
 
 class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
  private:
-  //DummyCiphertext _dummy_ctxt; // this holds the unencoded data vector
   seal::Plaintext _plaintext;
   uint64_t _noise = 0; // current invariant noise scaled by coeff_modulus (i.e: we store actual_noise * coeff_modulus)
   uint64_t _noise_budget = 0; // current noise budget

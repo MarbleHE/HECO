@@ -3,7 +3,6 @@
 #include "ast_opt/visitor/runtime/SimulatorCiphertext.h"
 #include "ast_opt/visitor/runtime/SimulatorCiphertextFactory.h"
 #include "ast_opt/visitor/runtime/AbstractCiphertext.h"
-#include "ast_opt/visitor/runtime/DummyCiphertext.h"
 
 
 #ifdef HAVE_SEAL_BFV
