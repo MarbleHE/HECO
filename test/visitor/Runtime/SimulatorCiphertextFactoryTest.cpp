@@ -109,6 +109,11 @@ class SimulatorCiphertextFactoryTest : public ::testing::Test {
     uint64_t result = (dynamic_cast<const SimulatorCiphertext&>(abstractCiphertext)).getNoise();
     EXPECT_EQ(result, expected_noise);
   }
+
+  int getCurrentNoiseBudget(const AbstractCiphertext &abstractCiphertext) {
+    return (dynamic_cast<const SimulatorCiphertext&>(abstractCiphertext)).noiseBits();
+  }
+
 };
 
 TEST_F(SimulatorCiphertextFactoryTest, createCiphertext) { /* NOLINT */
@@ -342,5 +347,30 @@ TEST_F(SimulatorCiphertextFactoryTest, testNoiseBIts) { /* NOLINT */
   int result = (dynamic_cast<const SimulatorCiphertext&>(*ctxt1)).noiseBits();
   ASSERT_EQ(result, expected_result);
 }
+
+
+TEST_F(SimulatorCiphertextFactoryTest, xToPowerFourTimesYBad) {
+  // create ciphertext
+  std::vector<int64_t> data1 = {3, 3, 1, 4, 5, 9};
+  std::unique_ptr<AbstractCiphertext> ctxt1 = scf->createCiphertext(data1);
+  std::unique_ptr<AbstractCiphertext> ctxt2 = scf->createCiphertext(data1);
+
+  std::vector<int> data2 = {0, 1, 2, 1, 10, 21};
+  std::unique_ptr<AbstractCiphertext> ctxt3 = scf->createCiphertext(data2);
+
+  std::cout << "Noise(x * x): " << getCurrentNoiseBudget(*ctxt1) << std::endl;
+  // x * x
+  auto ctxtResult1 = ctxt1->multiply(*ctxt1);
+  std::cout << "Noise(x * x): " << getCurrentNoiseBudget(*ctxtResult1) << std::endl;
+  // x * x * x
+  auto ctxtResult2  = ctxtResult1->multiply(*ctxt1);
+  std::cout << "Noise(x * x * x): " << getCurrentNoiseBudget(*ctxtResult2) << std::endl;
+  //  x * x * x * x
+  auto ctxtResult3  = ctxtResult2->multiply(*ctxt1);
+  std::cout << "Noise(x * x * x * x): " << getCurrentNoiseBudget(*ctxtResult3) << std::endl;
+
+
+}
+
 
 #endif
