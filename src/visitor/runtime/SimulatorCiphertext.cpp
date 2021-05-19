@@ -140,7 +140,6 @@ std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::multiply(const Abstract
           4*pow(poly_modulus_degree, 3)/3);
   //copy
   auto r = std::make_unique<SimulatorCiphertext>(*this);
-
   r->_noise = result_noise;
   r->_noise_budget = noiseBits();
   r->ciphertext_size_ += operand_ctxt.ciphertext_size_; //ciphertext size increased
@@ -210,7 +209,6 @@ std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::add(const AbstractCiphe
 }
 
 void SimulatorCiphertext::addInplace(const AbstractCiphertext &operand) {
-  //auto new_ctxt = this->clone_impl();
   auto operand_ctxt = cast_1(operand);
   // after addition, the noise is the sum of old noise and noise of ctext that is added
   uint64_t result_noise = this->_noise + operand_ctxt._noise;

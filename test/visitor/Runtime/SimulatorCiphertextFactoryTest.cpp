@@ -369,6 +369,14 @@ TEST_F(SimulatorCiphertextFactoryTest, xToPowerFourTimesYBad) {
   auto ctxtResult3  = ctxtResult2->multiply(*ctxt1);
   std::cout << "Noise(x * x * x * x): " << getCurrentNoiseBudget(*ctxtResult3) << std::endl;
 
+  auto ctxtResult4  = ctxtResult3->multiply(*ctxt1);
+  std::cout << "Noise(x * x * x * x): " << getCurrentNoiseBudget(*ctxtResult4) << std::endl;
+
+  auto ctxtResult5  = ctxtResult4->multiply(*ctxt1);
+  std::cout << "Noise(x * x * x * x): " << getCurrentNoiseBudget(*ctxtResult5) << std::endl;
+
+  auto ctxtResult6  = ctxtResult5->multiply(*ctxt1);
+  std::cout << "Noise(x * x * x * x): " << getCurrentNoiseBudget(*ctxtResult6) << std::endl;
 
 }
 
