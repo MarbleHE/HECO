@@ -12,35 +12,13 @@ class SimulatorCiphertextFactory : public AbstractCiphertextFactory {
   /// The number of slots (i.e., maximum no. of elements) in a ciphertext.
   const unsigned int ciphertextSlotSize = 16384;
 
+  seal::EncryptionParameters _params;
+
   /// The SEAL context.
   std::shared_ptr<seal::SEALContext> context;
 
-  /// The key generator, which seems to "own" the keys in recent versions of SEAL
-  std::unique_ptr<seal::KeyGenerator> keyGenerator;
-
-  /// The secret key, also used for (more efficient) encryption.
-  std::unique_ptr<seal::SecretKey> secretKey;
-
-  /// The public key.
-  std::unique_ptr<seal::PublicKey> publicKey = std::make_unique<seal::PublicKey>();
-
-  /// The rotation keys.
-  std::unique_ptr<seal::GaloisKeys> galoisKeys = std::make_unique<seal::GaloisKeys>();
-
-  /// The relinearization keys.
-  std::unique_ptr<seal::RelinKeys> relinKeys = std::make_unique<seal::RelinKeys>();
-
   /// The encoder helper object.
   std::unique_ptr<seal::BatchEncoder> encoder;
-
-  /// The evaluator helper object.
-  std::unique_ptr<seal::Evaluator> evaluator;
-
-  /// The encryptor helper object.
-  std::unique_ptr<seal::Encryptor> encryptor;
-
-  /// The decryptor helper object.
-  std::unique_ptr<seal::Decryptor> decryptor;
 
   /// Sets up the FHE scheme by creating a new context, setting required scheme parameters, generating keys, and
   /// instantiating the helper objects.

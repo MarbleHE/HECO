@@ -4,6 +4,7 @@
 #include "ast_opt/visitor/runtime/SimulatorCiphertextFactory.h"
 #include "ast_opt/visitor/runtime/AbstractCiphertext.h"
 
+
 #ifdef HAVE_SEAL_BFV
 #include <seal/seal.h>
 #include "ast_opt/utilities/PlaintextNorm.h"
@@ -14,7 +15,7 @@ SimulatorCiphertext::SimulatorCiphertext(const std::reference_wrapper<const Abst
 
 SimulatorCiphertext::SimulatorCiphertext(const SimulatorCiphertext &other)  // copy constructor
     : AbstractNoiseMeasuringCiphertext(other.factory) {
-  //_ciphertext = other._ciphertext;
+  //_dummy_ctxt = other._dummy_ctxt;
   _plaintext = other._plaintext;
   _noise = other._noise;
   _noise_budget = other._noise_budget;
@@ -35,6 +36,7 @@ SimulatorCiphertext &SimulatorCiphertext::operator=(SimulatorCiphertext &&other)
   if (&factory.get()!=&(other.factory.get())) {
     throw std::runtime_error("Cannot move Ciphertext from factory A into Ciphertext created by Factory B.");
   }
+  //_dummy_ctxt = std::move(other._dummy_ctxt);
   _plaintext = std::move(other._plaintext);
   _noise = std::move(other._noise);
   _noise_budget = std::move(other._noise_budget);
@@ -83,22 +85,10 @@ double SimulatorCiphertext::getNoise() const {
   return _noise;
 }
 
-int64_t SimulatorCiphertext::getNoiseBudget() const {
-  return _noise_budget;
-}
-
-int64_t SimulatorCiphertext::getCoeffModulus() {
-  // THIS IS ACTUALLY NOT NEEDED: There is a SEAL fucntion total_coeff_modulus() returning a pointy=er to the product coeff modulus
-  uint64_t coeff_modulus = 1;
-  for (auto mod : this->getFactory().getContext().first_context_data()->parms().coeff_modulus()) {
-    coeff_modulus *= mod.value();
-  }
-  return coeff_modulus;
-}
-
 void SimulatorCiphertext::createFresh(std::unique_ptr<seal::Plaintext> &plaintext) {
   // set _plaintext to plaintext (needed for correct decryption)
   _plaintext = *plaintext;
+  //calc initial noise and noise budget
   uint64_t result_noise = 0;
   uint64_t plain_modulus = this->getFactory().getContext().first_context_data()->parms().plain_modulus().value();
   uint64_t poly_modulus = this->getFactory().getContext().first_context_data()->parms().poly_modulus_degree();

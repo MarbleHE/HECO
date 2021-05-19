@@ -20,9 +20,6 @@ class AbstractNoiseMeasuringCiphertext : public AbstractCiphertext {
   /// \return current noise estimate
   virtual double getNoise() const = 0;
 
-  //TODO: Document
-  virtual int64_t getNoiseBudget() const = 0;
-
   /// Noise of a freshly encrypted ciphertext
   /// \return the noise budget in bits
   [[nodiscard]] virtual int64_t initialNoise() = 0;

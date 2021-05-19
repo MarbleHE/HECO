@@ -5,6 +5,8 @@
 #include "AbstractCiphertext.h"
 #include "SimulatorCiphertextFactory.h"
 #include "AbstractNoiseMeasuringCiphertext.h"
+#include "DummyCiphertext.h"
+#include "DummyCiphertextFactory.h"
 
 // forward declarations
 class SimulatorCiphertextFactory;
@@ -14,7 +16,7 @@ class SimulatorCiphertextFactory;
 
 class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
  private:
- // seal::Ciphertext _ciphertext;
+ // DummyCiphertext _dummyctxt;
   seal::Plaintext _plaintext;
   uint64_t _noise = 0; // current invariant noise scaled by coeff_modulus (i.e: we store actual_noise * coeff_modulus)
   uint64_t _noise_budget = 0; // current noise budget
@@ -75,7 +77,6 @@ class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
   /// \return ||noise_estimate||_{\infty} * q
   double getNoise() const override;
   int64_t initialNoise() override;
-  int64_t getNoiseBudget() const override;
 
   // API inherited from AbstractCiphertext
   std::unique_ptr<AbstractCiphertext> clone() const override;
