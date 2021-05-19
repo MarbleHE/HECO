@@ -1,7 +1,8 @@
 #include "ast_opt/visitor/runtime/SimulatorCiphertext.h"
-#include "ast_opt/visitor/runtime/SimulatorCiphertext.h"
 #include "ast_opt/visitor/runtime/SimulatorCiphertextFactory.h"
 #include "ast_opt/visitor/runtime/Cleartext.h"
+#include "ast_opt/visitor/runtime/DummyCiphertext.h"
+#include "ast_opt/visitor/runtime/DummyCiphertextFactory.h"
 
 #ifdef HAVE_SEAL_BFV
 #include <memory>
@@ -11,7 +12,8 @@ std::unique_ptr<AbstractCiphertext> SimulatorCiphertextFactory::createCiphertext
   auto ptxt = createPlaintext(data);
   std::unique_ptr<SimulatorCiphertext>
       ctxt = std::make_unique<SimulatorCiphertext>(*this); // Constructs a simulator ciphertext given all the data
-  ctxt->createFresh(ptxt); // calcs initial noise and sets the variables needed, also stores the plaintext as _plaintext
+    //  auto dummyctxt = DummyCiphertext(*this);
+  ctxt->createFresh(ptxt); // calcs initial noise and sets the variables needed, data, also stores the plaintext as _plaintext
   return ctxt;
 }
 
@@ -27,24 +29,13 @@ std::unique_ptr<AbstractCiphertext> SimulatorCiphertextFactory::createCiphertext
 
 SimulatorCiphertextFactory::SimulatorCiphertextFactory(const SimulatorCiphertextFactory &other) :
     ciphertextSlotSize(other.ciphertextSlotSize),
-    context(other.context), // TODO: This should be a real copy, not just shared ownership (copying the shared_ptr)
-    secretKey(std::make_unique<seal::SecretKey>(*other.secretKey)),
-    publicKey(std::make_unique<seal::PublicKey>(*other.publicKey)),
-    galoisKeys(std::make_unique<seal::GaloisKeys>(*other.galoisKeys)),
-    relinKeys(std::make_unique<seal::RelinKeys>(*other.relinKeys)),
-    encoder(std::make_unique<seal::BatchEncoder>(*context)),
-    evaluator(std::make_unique<seal::Evaluator>(*other.context)),
-    encryptor(std::make_unique<seal::Encryptor>(*context, *publicKey)),
-    decryptor(std::make_unique<seal::Decryptor>(*other.context, *secretKey)) {  // copy constructor
-}
+    _params(other._params),
+    context(other.context) {}
 
 SimulatorCiphertextFactory::SimulatorCiphertextFactory(SimulatorCiphertextFactory &&other) noexcept // move constructor
-    : ciphertextSlotSize(other.ciphertextSlotSize), context(std::move(other.context)),
-      secretKey(std::move(other.secretKey)), publicKey(std::move(other.publicKey)),
-      galoisKeys(std::move(other.galoisKeys)), relinKeys(std::move(other.relinKeys)),
-      encoder(std::move(other.encoder)), evaluator(std::move(other.evaluator)),
-      encryptor(std::move(other.encryptor)), decryptor(std::move(other.decryptor)) {
-}
+    : ciphertextSlotSize(other.ciphertextSlotSize),
+      _params(other._params),
+      context(std::move(other.context)){}
 
 SimulatorCiphertextFactory &SimulatorCiphertextFactory::operator=(const SimulatorCiphertextFactory &other) {  // copy assignment
   return *this = SimulatorCiphertextFactory(other);
@@ -58,16 +49,8 @@ SimulatorCiphertextFactory &SimulatorCiphertextFactory::operator=(SimulatorCiphe
     std::cerr << "Move assignment failed as const ciphertextSlotSize differs and cannot be changed!" << std::endl;
     exit(1);
   }
-
+  _params = std::move(other._params);
   context = std::move(other.context);
-  secretKey = std::move(other.secretKey);
-  publicKey = std::move(other.publicKey);
-  galoisKeys = std::move(other.galoisKeys);
-  relinKeys = std::move(other.relinKeys);
-  encoder = std::move(other.encoder);
-  evaluator = std::move(other.evaluator);
-  encryptor = std::move(other.encryptor);
-  decryptor = std::move(other.decryptor);
   return *this;
 }
 
@@ -85,22 +68,10 @@ void SimulatorCiphertextFactory::setupSealContext() {
   params.set_plain_modulus(seal::PlainModulus::Batching(params.poly_modulus_degree(), 20));
   //params.set_plain_modulus(65537); // costache plain modulus
 
-  // Instantiate context
+  // set params
+  this->_params = params;
   context = std::make_shared<seal::SEALContext>(params);
-
-  // Create keys
-  keyGenerator = std::make_unique<seal::KeyGenerator>(*context);
-  //NOTE: The following is inefficient, since we're doing a byte-by-byte copy of the key here!
-  secretKey = std::make_unique<seal::SecretKey>(keyGenerator->secret_key());
-  keyGenerator->create_public_key(*publicKey);
-  keyGenerator->create_galois_keys(*galoisKeys);
-  keyGenerator->create_relin_keys(*relinKeys);
-
-  // Create helpers for en-/decoding, en-/decryption, and ciphertext evaluation
   encoder = std::make_unique<seal::BatchEncoder>(*context);
-  encryptor = std::make_unique<seal::Encryptor>(*context, *publicKey);
-  decryptor = std::make_unique<seal::Decryptor>(*context, *secretKey);
-  evaluator = std::make_unique<seal::Evaluator>(*context);
 }
 
 template<typename T>
@@ -140,7 +111,7 @@ const seal::SEALContext &SimulatorCiphertextFactory::getContext() const {
 }
 
 const seal::RelinKeys &SimulatorCiphertextFactory::getRelinKeys() const {
-  return *relinKeys;
+  throw std::runtime_error("This operation is not supported by SimulatorCiphertext");
 }
 
 void SimulatorCiphertextFactory::decryptCiphertext(AbstractCiphertext &abstractCiphertext,
@@ -151,11 +122,11 @@ void SimulatorCiphertextFactory::decryptCiphertext(AbstractCiphertext &abstractC
 }
 
 seal::Evaluator &SimulatorCiphertextFactory::getEvaluator() const {
-  return *evaluator;
+  throw std::runtime_error("This operation is not supported by SimulatorCiphertext");
 }
 
 const seal::GaloisKeys &SimulatorCiphertextFactory::getGaloisKeys() const {
-  return *galoisKeys;
+  throw std::runtime_error("This operation is not supported by SimulatorCiphertext");
 }
 
 SimulatorCiphertextFactory::SimulatorCiphertextFactory(unsigned int numElementsPerCiphertextSlot)
