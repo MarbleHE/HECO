@@ -5,6 +5,8 @@
 #include "AbstractCiphertext.h"
 #include "SimulatorCiphertextFactory.h"
 #include "AbstractNoiseMeasuringCiphertext.h"
+#include "DummyCiphertext.h"
+#include "DummyCiphertextFactory.h"
 
 // forward declarations
 class SimulatorCiphertextFactory;
@@ -14,6 +16,7 @@ class SimulatorCiphertextFactory;
 
 class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
  private:
+ // DummyCiphertext _dummyctxt;
   seal::Plaintext _plaintext;
   uint64_t _noise = 0; // current invariant noise scaled by coeff_modulus (i.e: we store actual_noise * coeff_modulus)
   uint64_t _noise_budget = 0; // current noise budget
@@ -55,7 +58,6 @@ class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
   const seal::Plaintext &getPlaintext() const;
   seal::Plaintext &getPlaintext();
   void relinearize();
-
 
   void createFresh(std::unique_ptr<seal::Plaintext> &plaintext);
   std::unique_ptr<AbstractCiphertext> multiply(const AbstractCiphertext &operand) const override;

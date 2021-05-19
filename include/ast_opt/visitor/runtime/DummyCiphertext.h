@@ -8,9 +8,6 @@
 // forward declarations
 class DummyCiphertextFactory;
 
-#ifdef HAVE_SEAL_BFV
-#include <seal/seal.h>
-
 class DummyCiphertext : public AbstractCiphertext {
  private:
   std::vector<int64_t> _data;
@@ -83,7 +80,4 @@ class DummyCiphertext : public AbstractCiphertext {
   void bitwiseNot_inplace() override;
 };
 
-
-
-#endif
 #endif

@@ -1,6 +1,7 @@
 #include "ast_opt/visitor/runtime/SimulatorCiphertext.h"
 #include "ast_opt/visitor/runtime/SimulatorCiphertextFactory.h"
 #include "ast_opt/visitor/runtime/Cleartext.h"
+#include "ast_opt/visitor/runtime/DummyCiphertext.h"
 
 #ifdef HAVE_SEAL_BFV
 #include <memory>
@@ -10,7 +11,6 @@ std::unique_ptr<AbstractCiphertext> SimulatorCiphertextFactory::createCiphertext
   auto ptxt = createPlaintext(data);
   std::unique_ptr<SimulatorCiphertext>
       ctxt = std::make_unique<SimulatorCiphertext>(*this); // Constructs a simulator ciphertext given all the data
-  ctxt->createFresh(ptxt); // calcs initial noise and sets the variables needed, data, also stores the plaintext as _plaintext
   return ctxt;
 }
 

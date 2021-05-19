@@ -88,8 +88,6 @@ double SimulatorCiphertext::getNoise() const {
 void SimulatorCiphertext::createFresh(std::unique_ptr<seal::Plaintext> &plaintext) {
   // set _plaintext to plaintext (needed for correct decryption)
   _plaintext = *plaintext;
-  // setup dummy ciphertext holding the data
-//  _dummy_ctxt = dummyctxt;
   //calc initial noise and noise budget
   uint64_t result_noise = 0;
   uint64_t plain_modulus = this->getFactory().getContext().first_context_data()->parms().plain_modulus().value();
