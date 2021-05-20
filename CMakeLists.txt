@@ -56,6 +56,26 @@ endif ()
 
 find_package(SEAL 3.6 CONFIG REQUIRED) # sets SEAL_FOUND variable
 
+## GMP
+
+set(GMP_PREFIX "" CACHE PATH "path ")
+
+
+find_path(GMP_INCLUDE_DIR gmp.h gmpxx.h
+        PATHS ${GMP_PREFIX}/include /usr/include /usr/local/include )
+
+find_library(GMP_LIBRARY NAMES gmp libgmp
+        PATHS ${GMP_PREFIX}/lib /usr/lib /usr/local/lib)
+
+
+if(GMP_INCLUDE_DIR AND GMP_LIBRARY)
+    get_filename_component(GMP_LIBRARY_DIR ${GMP_LIBRARY} PATH)
+    set(GMP_FOUND TRUE)
+endif()
+
+##
+
+
 ##############################
 # Download and install nlohmann-json if required
 ##############################
@@ -215,6 +235,17 @@ if (SEAL_FOUND)
     target_compile_definitions(ast_opt PUBLIC -DHAVE_SEAL_BFV)
     target_compile_definitions(ast_opt PUBLIC -DHAVE_SEAL_CKKS)
 endif (SEAL_FOUND)
+
+##GMP
+if (GMP_FOUND)
+    message("Enabling GMP:")
+    target_link_libraries(ast_opt PUBLIC /usr/local/lib)
+    target_include_directories(ast_opt PUBLIC /usr/local/include)
+    target_link_libraries(ast_opt PUBLIC gmp libgmp)
+    target_compile_definitions(ast_opt PUBLIC -DHAVE_GMP)
+endif(GMP_FOUND)
+##
+
 
 ####################################################################################
 ## ast_opt installation

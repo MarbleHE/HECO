@@ -3,6 +3,8 @@
 #include "ast_opt/visitor/runtime/SimulatorCiphertext.h"
 #include "ast_opt/visitor/runtime/SimulatorCiphertextFactory.h"
 #include "ast_opt/visitor/runtime/AbstractCiphertext.h"
+//#include <gmp.h> //TODO Fix cmakelists
+#include "/usr/local/include/gmp.h"
 
 
 #ifdef HAVE_SEAL_BFV
@@ -17,7 +19,7 @@ SimulatorCiphertext::SimulatorCiphertext(const SimulatorCiphertext &other)  // c
     : AbstractNoiseMeasuringCiphertext(other.factory) {
   //_dummy_ctxt = other._dummy_ctxt;
   _plaintext = other._plaintext;
-  _noise = other._noise;
+  //_noise = other._noise;
   _noise_budget = other._noise_budget;
   ciphertext_size_ = other.ciphertext_size_;
 }
@@ -38,7 +40,7 @@ SimulatorCiphertext &SimulatorCiphertext::operator=(SimulatorCiphertext &&other)
   }
   //_dummy_ctxt = std::move(other._dummy_ctxt);
   _plaintext = std::move(other._plaintext);
-  _noise = std::move(other._noise);
+ // _noise = std::move(other._noise);
   _noise_budget = std::move(other._noise_budget);
   ciphertext_size_ = std::move(other.ciphertext_size_);
   //_ciphertext = std::move(other._ciphertext);
@@ -82,19 +84,28 @@ seal::Plaintext &SimulatorCiphertext::getPlaintext() {
 }
 
 double SimulatorCiphertext::getNoise() const {
-  return _noise;
+ // return _noise;
 }
 
 void SimulatorCiphertext::createFresh(std::unique_ptr<seal::Plaintext> &plaintext) {
+  mpz_init(_noise); // set _noise to 0
   // set _plaintext to plaintext (needed for correct decryption)
   _plaintext = *plaintext;
   //calc initial noise and noise budget
-  uint64_t result_noise = 0;
+  //uint64_t result_noise = 0;
+  mpz_t result_noise;
+  mpz_init(result_noise);
+  mpz_t plain_mod;
+  mpz_init(plain_mod);
+  mpz_init_set_ui(plain_mod, this->getFactory().getContext().first_context_data()->parms().plain_modulus().value());
+//  mpz_set_str(plain_mod,
+//              this->getFactory().getContext().first_context_data()->parms().plain_modulus().value().to_string());
+
   uint64_t plain_modulus = this->getFactory().getContext().first_context_data()->parms().plain_modulus().value();
   uint64_t poly_modulus = this->getFactory().getContext().first_context_data()->parms().poly_modulus_degree();
-  result_noise = plain_modulus * (poly_modulus*(plain_modulus - 1)/2
-      + 2*3.2*sqrt(12*pow(poly_modulus, 2) + 9*poly_modulus));
-  this->_noise = result_noise;
+ // result_noise = plain_modulus * (poly_modulus*(plain_modulus - 1)/2
+   //   + 2*3.2*sqrt(12*pow(poly_modulus, 2) + 9*poly_modulus));
+//  this->_noise = result_noise;
   this->_noise_budget = this->noiseBits();
   // freshly encrypted ciphertext has size 2
   this->ciphertext_size_ = 2;
@@ -133,15 +144,17 @@ std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::multiply(const Abstract
       poly_modulus_degree = this->getFactory().getContext().first_context_data()->parms().poly_modulus_degree();
   uint64_t plain_modulus = this->getFactory().getContext().first_context_data()->parms().plain_modulus().value();
   uint64_t result_noise = 0;
+  uint64_t leading_sqrt_factor = static_cast<uint64_t>(ceil(sqrt(static_cast<double>(3*poly_modulus_degree + 2*pow(poly_modulus_degree, 2)))));
+  result_noise = plain_modulus * leading_sqrt_factor * (this->getNoise() + operand_ctxt.getNoise());
+  std::cout << "noise added " << (this->getNoise() + operand_ctxt.getNoise()) << std::endl;
   /*iliashenko noise heuristics scaled by q */
-  result_noise = this->getNoise() + operand_ctxt.getNoise();
-  result_noise = plain_modulus*sqrt(3*poly_modulus_degree + 2*pow(poly_modulus_degree, 2))
+  /*result_noise = plain_modulus*sqrt(3*poly_modulus_degree + 2*pow(poly_modulus_degree, 2))
       *(this->getNoise() + operand_ctxt.getNoise()) + 3*this->getNoise()*operand_ctxt.getNoise()/coeff_modulus +
       plain_modulus*sqrt(3*poly_modulus_degree + 2*pow(poly_modulus_degree, 2) +
-          4*pow(poly_modulus_degree, 3)/3);
+          4*pow(poly_modulus_degree, 3)/3);*/
   //copy
   auto r = std::make_unique<SimulatorCiphertext>(*this);
-  r->_noise = result_noise;
+ // r->_noise = result_noise;
   r->_noise_budget = r->noiseBits();
   r->ciphertext_size_ += operand_ctxt.ciphertext_size_; //ciphertext size increased
   return r;
@@ -153,15 +166,17 @@ void SimulatorCiphertext::multiplyInplace(const AbstractCiphertext &operand) {
   uint64_t coeff_modulus = *this->getFactory().getContext().first_context_data()->total_coeff_modulus();
   uint64_t
       poly_modulus_degree = this->getFactory().getContext().first_context_data()->parms().poly_modulus_degree();
-  uint64_t plain_modulus = this->getFactory().getContext().first_context_data()->parms().plain_modulus().value();
-  uint64_t result_noise = 0;
+  uint128_t plain_modulus = this->getFactory().getContext().first_context_data()->parms().plain_modulus().value();
+  uint128_t result_noise = 0;
+  uint128_t leading_sqrt_factor = static_cast<uint64_t>(ceil(sqrt(static_cast<double>(3*poly_modulus_degree + 2*pow(poly_modulus_degree, 2)))));
+  result_noise = plain_modulus * leading_sqrt_factor * (this->getNoise() + operand_ctxt.getNoise());
+  std::cout << "noises " << log2(this->getNoise()) << " " <<  log2(operand_ctxt.getNoise()) << " " << log2(result_noise) << std::endl;
   // iliashenko (scaled by q)
   result_noise = plain_modulus*sqrt(3*poly_modulus_degree + 2*pow(poly_modulus_degree, 2))
       *(this->getNoise() + operand_ctxt.getNoise()) + 3*this->getNoise()*operand_ctxt.getNoise()/coeff_modulus +
       plain_modulus*sqrt(3*poly_modulus_degree + 2*pow(poly_modulus_degree, 2) +
           4*pow(poly_modulus_degree, 3)/3);
-  this->_noise = result_noise;
- // this->_noise_budget += this->_noise_budget;
+  //this->_noise = result_noise;
   this->_noise_budget = this->noiseBits();
   this->ciphertext_size_ += operand_ctxt.ciphertext_size_;
 }
@@ -170,14 +185,14 @@ std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::multiplyPlain(const ICl
   // get plaintext from operand
   if (auto cleartextInt = dynamic_cast<const Cleartext<int> *>(&operand)) {
     std::unique_ptr<seal::Plaintext> plaintext = getFactory().createPlaintext(cleartextInt->getData());
-    uint64_t old_noise = this->_noise;
+   // uint64_t old_noise = this->_noise;
     uint64_t plain_max_coeff_count = plaintext->nonzero_coeff_count();
     uint64_t plain_max_abs_value = plaintext_norm(*plaintext);
     // noise is old_noise * plain_max_coeff_count * plain_max_abs_value (SEAL Manual)
-    uint64_t result_noise = old_noise*plain_max_coeff_count*plain_max_abs_value;
+   // uint64_t result_noise = old_noise*plain_max_coeff_count*plain_max_abs_value;
     //copy
     auto r = std::make_unique<SimulatorCiphertext>(*this);
-    r->_noise = result_noise;
+    //r->_noise = result_noise;
     r->_noise_budget = r->noiseBits();
     return r;
   } else {
@@ -188,12 +203,12 @@ std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::multiplyPlain(const ICl
 void SimulatorCiphertext::multiplyPlainInplace(const ICleartext &operand) {
   if (auto cleartextInt = dynamic_cast<const Cleartext<int> *>(&operand)) {
     auto plaintext = getFactory().createPlaintext(cleartextInt->getData());
-    uint64_t old_noise = this->_noise;
+   // uint64_t old_noise = this->_noise;
     uint64_t plain_max_coeff_count = plaintext->nonzero_coeff_count();
     uint64_t plain_max_abs_value = plaintext_norm(*plaintext);
     // noise is old_noise * plain_max_coeff_count * plain_max_abs_value (SEAL Manual)
-    uint64_t result_noise = old_noise*plain_max_coeff_count*plain_max_abs_value;
-    this->_noise = result_noise;
+   // uint64_t result_noise = old_noise*plain_max_coeff_count*plain_max_abs_value;
+   // this->_noise = result_noise;
     this->_noise_budget = noiseBits();
   } else {
     throw std::runtime_error("Multiply(Ciphertext,Cleartext) requires a Cleartext<int> as BFV supports integers only.");
@@ -203,9 +218,9 @@ void SimulatorCiphertext::multiplyPlainInplace(const ICleartext &operand) {
 std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::add(const AbstractCiphertext &operand) const {
   SimulatorCiphertext operand_ctxt = cast_1(operand);
   // noise is noise1 + noise2
-  uint64_t result_noise = this->_noise + operand_ctxt._noise;
+//  uint64_t result_noise = this->_noise + operand_ctxt._noise;
   auto r = std::make_unique<SimulatorCiphertext>(*this);
-  r->_noise = result_noise;
+ // r->_noise = result_noise;
   r->_noise_budget = noiseBits();
   return r;
 }
@@ -213,23 +228,23 @@ std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::add(const AbstractCiphe
 void SimulatorCiphertext::addInplace(const AbstractCiphertext &operand) {
   auto operand_ctxt = cast_1(operand);
   // after addition, the noise is the sum of old noise and noise of ctext that is added
-  uint64_t result_noise = this->_noise + operand_ctxt._noise;
+  //uint64_t result_noise = this->_noise + operand_ctxt._noise;
   // update noise and noise budget of current ctxt with the new value (for this SimulatorCiphertext)
-  this->_noise = result_noise;
+ // this->_noise = result_noise;
   this->_noise_budget = noiseBits();
 }
 
 std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::addPlain(const ICleartext &operand) const {
   if (auto cleartextInt = dynamic_cast<const Cleartext<int> *>(&operand)) {
     auto plaintext = getFactory().createPlaintext(cleartextInt->getData());
-    double old_noise = this->_noise;
+  //  double old_noise = this->_noise;
     uint64_t rtq = this->getFactory().getContext().first_context_data()->coeff_modulus_mod_plain_modulus();
     uint64_t plain_max_coeff_count = plaintext->nonzero_coeff_count();
     uint64_t plain_max_abs_value = plaintext_norm(*plaintext);
     // noise is old_noise + r_t(q) * plain_max_coeff_count * plain_max_abs_value
-    uint64_t result_noise = old_noise + rtq*plain_max_coeff_count*plain_max_abs_value;
+  //  uint64_t result_noise = old_noise + rtq*plain_max_coeff_count*plain_max_abs_value;
     auto r = std::make_unique<SimulatorCiphertext>(*this);
-    r->_noise = result_noise;
+   // r->_noise = result_noise;
     r->_noise_budget = noiseBits();
     return r;
   } else {
@@ -239,13 +254,13 @@ std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::addPlain(const IClearte
 void SimulatorCiphertext::addPlainInplace(const ICleartext &operand) {
   if (auto cleartextInt = dynamic_cast<const Cleartext<int> *>(&operand)) {
     auto plaintext = getFactory().createPlaintext(cleartextInt->getData());
-    double old_noise = this->_noise;
+   // double old_noise = this->_noise;
     uint64_t rtq = this->getFactory().getContext().first_context_data()->coeff_modulus_mod_plain_modulus();
     uint64_t plain_max_coeff_count = plaintext->nonzero_coeff_count();
     uint64_t plain_max_abs_value = plaintext_norm(*plaintext);
     // noise is old_noise + r_t(q) * plain_max_coeff_count * plain_max_abs_value
-    uint64_t result_noise = old_noise + rtq*plain_max_coeff_count*plain_max_abs_value;
-    this->_noise = result_noise;
+   // uint64_t result_noise = old_noise + rtq*plain_max_coeff_count*plain_max_abs_value;
+    //this->_noise = result_noise;
     this->_noise_budget = noiseBits();
   } else {
     throw std::runtime_error("ADD(Ciphertext,Cleartext) requires a Cleartext<int> as BFV supports integers only.");
@@ -276,8 +291,8 @@ void SimulatorCiphertext::rotateRowsInplace(int) {
 
 int SimulatorCiphertext::noiseBits() const{
   uint64_t coeff_modulus_significant_bit_count = this->getFactory().getContext().first_context_data()->total_coeff_modulus_bit_count();
-  uint64_t noise_log = round(log2(this->_noise));
-  return std::max(int(coeff_modulus_significant_bit_count - noise_log - 1), 0);
+//  uint64_t noise_log = round(log2(this->_noise));
+ // return std::max(int(coeff_modulus_significant_bit_count - noise_log - 1), 0);
 }
 
 std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::clone() const {
