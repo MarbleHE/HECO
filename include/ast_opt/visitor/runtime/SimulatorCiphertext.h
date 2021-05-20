@@ -7,6 +7,7 @@
 #include "AbstractNoiseMeasuringCiphertext.h"
 #include "DummyCiphertext.h"
 #include "DummyCiphertextFactory.h"
+#include "/usr/local/include/gmp.h"
 
 
 // forward declarations
@@ -15,12 +16,10 @@ class SimulatorCiphertextFactory;
 #ifdef HAVE_SEAL_BFV
 #include <seal/seal.h>
 
-#ifdef HAVE_GMP
 #include "/usr/local/include/gmp.h"
 
 class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
  private:
- // DummyCiphertext _dummyctxt;
   seal::Plaintext _plaintext;
   mpz_t _noise; // current invariant noise scaled by coeff_modulus (i.e: we store actual_noise * coeff_modulus)
   uint64_t _noise_budget = 0; // current noise budget
@@ -79,7 +78,7 @@ class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
   // API inherited from AbstractNoiseMeasuringCiphertext
   /// For BFV/SEAL simulation, we return the infinity norm of the noise estimate multiplied by q
   /// \return ||noise_estimate||_{\infty} * q
-  double getNoise() const override;
+  double getNoise() const;
   int64_t initialNoise() override;
 
   // API inherited from AbstractCiphertext
@@ -122,8 +121,8 @@ class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
   void bitwiseOr_inplace(const AbstractValue &other) override;
   void bitwiseNot_inplace() override;
 
+  std::unique_ptr<mpz_t> getTest();
 };
 
-#endif
 #endif
 #endif

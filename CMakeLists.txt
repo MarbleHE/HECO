@@ -56,10 +56,8 @@ endif ()
 
 find_package(SEAL 3.6 CONFIG REQUIRED) # sets SEAL_FOUND variable
 
-## GMP
-
+# find GMP
 set(GMP_PREFIX "" CACHE PATH "path ")
-
 
 find_path(GMP_INCLUDE_DIR gmp.h gmpxx.h
         PATHS ${GMP_PREFIX}/include /usr/include /usr/local/include )
@@ -73,7 +71,15 @@ if(GMP_INCLUDE_DIR AND GMP_LIBRARY)
     set(GMP_FOUND TRUE)
 endif()
 
-##
+if(GMP_FOUND)
+    if(NOT GMP_FIND_QUIETLY)
+        MESSAGE(STATUS "Found GMP: ${GMP_LIBRARY}")
+    endif()
+elseif(GMP_FOUND)
+    if(GMP_FIND_REQUIRED)
+        message(FATAL_ERROR "Could not find GMP")
+    endif()
+endif(GMP_FOUND)
 
 
 ##############################
@@ -236,15 +242,12 @@ if (SEAL_FOUND)
     target_compile_definitions(ast_opt PUBLIC -DHAVE_SEAL_CKKS)
 endif (SEAL_FOUND)
 
-##GMP
 if (GMP_FOUND)
-    message("Enabling GMP:")
-    target_link_libraries(ast_opt PUBLIC /usr/local/lib)
-    target_include_directories(ast_opt PUBLIC /usr/local/include)
-    target_link_libraries(ast_opt PUBLIC gmp libgmp)
-    target_compile_definitions(ast_opt PUBLIC -DHAVE_GMP)
+    message("Enabling GMP")
+    find_library(GMP_LIBRARIES NAMES gmp)
+    target_link_libraries(ast_opt PUBLIC ${GMP_LIBRARIES})
+
 endif(GMP_FOUND)
-##
 
 
 ####################################################################################
