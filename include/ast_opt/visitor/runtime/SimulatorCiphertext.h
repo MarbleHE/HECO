@@ -72,7 +72,7 @@ class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
   //TODO (Alex): Add this as a function in AbstractCtxt instead, and modify SEALCiphertext to no longer relinearize automatically
   // Note: this will require also updating the Runtime visitor to actually perform relinearizations!
   void relinearize();
-  
+
   int noiseBits() const override;
 
   // API inherited from AbstractCiphertext

@@ -333,7 +333,6 @@ class SimulatorCiphertextFactoryTest : public ::testing::Test {
   }
 
   void checkCiphertextNoise(const AbstractCiphertext &abstractCiphertext, double expected_noise) {
-    std::cout << (dynamic_cast<const SimulatorCiphertext&>(abstractCiphertext)).noiseBits();
     EXPECT_EQ((dynamic_cast<const SimulatorCiphertext&>(abstractCiphertext)).noiseBits(), expected_noise);
   }
 
