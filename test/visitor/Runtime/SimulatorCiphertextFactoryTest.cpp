@@ -558,8 +558,6 @@ TEST_F(SimulatorCiphertextFactoryTest, multiplyPlainInplace) { /* NOLINT */
   checkCiphertextNoise(*ctxt1, expected_noise);
 }
 
-
-
 TEST_F(SimulatorCiphertextFactoryTest, xToPowerFourTimesYBad) {
   // create ciphertext
   std::vector<int64_t> data1 = {3, 3, 1, 4, 5, 9};
@@ -568,6 +566,8 @@ TEST_F(SimulatorCiphertextFactoryTest, xToPowerFourTimesYBad) {
 
   std::vector<int> data2 = {0, 1, 2, 1, 10, 21};
   std::unique_ptr<AbstractCiphertext> ctxt3 = scf->createCiphertext(data2);
+
+  std::cout << "x^4: The 'bad' way:" << std::endl;
 
   std::cout << "NoiseBudget(x): " << (dynamic_cast<const SimulatorCiphertext&>(*ctxt1)).noiseBits() << std::endl;
   // x * x
@@ -579,13 +579,37 @@ TEST_F(SimulatorCiphertextFactoryTest, xToPowerFourTimesYBad) {
   //  x * x * x * x
   ctxt1->multiplyInplace(*ctxt1);
   std::cout << "NoiseBudget(x * x * x * x): " << (dynamic_cast<const SimulatorCiphertext&>(*ctxt1)).noiseBits() << std::endl;
-  //  x * x * x * x * x
+ /* //  x * x * x * x * x
   ctxt1->multiplyInplace(*ctxt1);
   std::cout << "NoiseBudget(x * x * x * x * x): " << (dynamic_cast<const SimulatorCiphertext&>(*ctxt1)).noiseBits() << std::endl;
   //  x * x * x * x * x * x
   ctxt1->multiplyInplace(*ctxt1);
-  std::cout << "NoiseBudget(x * x * x * x * x * x): " << (dynamic_cast<const SimulatorCiphertext&>(*ctxt1)).noiseBits() << std::endl;
+  std::cout << "NoiseBudget(x * x * x * x * x * x): " << (dynamic_cast<const SimulatorCiphertext&>(*ctxt1)).noiseBits() << std::endl;*/
+
+ std::cout << std::endl;
 }
 
+TEST_F(SimulatorCiphertextFactoryTest, xToPowerFourTimesYGood) {
+  // create ciphertext
+  std::vector<int64_t> data1 = {3, 3, 1, 4, 5, 9};
+  std::unique_ptr<AbstractCiphertext> ctxt1 = scf->createCiphertext(data1);
+  std::unique_ptr<AbstractCiphertext> ctxt2 = scf->createCiphertext(data1);
+
+  std::vector<int> data2 = {0, 1, 2, 1, 10, 21};
+  std::unique_ptr<AbstractCiphertext> ctxt3 = scf->createCiphertext(data2);
+
+  std::cout << "x^4: The 'good' way:" << std::endl;
+
+  std::cout << "NoiseBudget(x): " << (dynamic_cast<const SimulatorCiphertext&>(*ctxt1)).noiseBits() << std::endl;
+  // x * x
+  ctxt1->multiplyInplace(*ctxt1);
+  std::cout << "NoiseBudget(x * x): " << (dynamic_cast<const SimulatorCiphertext&>(*ctxt1)).noiseBits() << std::endl;
+  // x * x * x
+  ctxt2->multiplyInplace(*ctxt2);
+  std::cout << "NoiseBudget(x * x): " << (dynamic_cast<const SimulatorCiphertext&>(*ctxt1)).noiseBits() << std::endl;
+  //  x * x * x * x
+  ctxt1->multiplyInplace(*ctxt2);
+  std::cout << "NoiseBudget(x * x) * (x * x): " << (dynamic_cast<const SimulatorCiphertext&>(*ctxt1)).noiseBits() << std::endl;
+}
 
 #endif

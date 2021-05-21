@@ -44,21 +44,20 @@ SimulatorCiphertext &SimulatorCiphertext::operator=(SimulatorCiphertext &&other)
   mpz_set(_noise, other._noise);
   _noise_budget = std::move(other._noise_budget);
   ciphertext_size_ = std::move(other.ciphertext_size_);
-  //_ciphertext = std::move(other._ciphertext);
   return *this;
 }
 
 SimulatorCiphertext &cast_1(AbstractCiphertext &abstractCiphertext) {
-  if (auto sealCtxt = dynamic_cast<SimulatorCiphertext *>(&abstractCiphertext)) {
-    return *sealCtxt;
+  if (auto simCtxt = dynamic_cast<SimulatorCiphertext *>(&abstractCiphertext)) {
+    return *simCtxt;
   } else {
     throw std::runtime_error("Cast of AbstractCiphertext to SealCiphertext failed!");
   }
 }
 
 const SimulatorCiphertext &cast_1(const AbstractCiphertext &abstractCiphertext) {
-  if (auto sealCtxt = dynamic_cast<const SimulatorCiphertext *>(&abstractCiphertext)) {
-    return *sealCtxt;
+  if (auto simCtxt = dynamic_cast<const SimulatorCiphertext *>(&abstractCiphertext)) {
+    return *simCtxt;
   } else {
     throw std::runtime_error("Cast of AbstractCiphertext to SimulatorCiphertext failed!");
   }
