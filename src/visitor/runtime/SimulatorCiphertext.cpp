@@ -542,9 +542,7 @@ void SimulatorCiphertext::bitwiseNot_inplace() {
   throw std::runtime_error("Operation bitwiseNot_inplace not supported for (SimulatorCiphertext, ANY). "
                            "For an arithmetic negation, multiply_inplace by (-1) instead.");
 }
-int64_t SimulatorCiphertext::initialNoise() {
-  return 0;
-}
+
 
 
 #endif

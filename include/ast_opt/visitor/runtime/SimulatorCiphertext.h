@@ -25,6 +25,9 @@ class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
   uint64_t _noise_budget = 0; // current noise budget
   int ciphertext_size_ = 0; // ciphertext size: this gets bigger when multiplying and reset when relinearizing
 
+  /// Creates a new SealCiphertext: a wrapper around the seal::Ciphertext class.
+  /// \param simulatorFactory The factory that created this ciphertext.
+  /// \param ptxt A Seal Plaintext
   SimulatorCiphertext(std::reference_wrapper<const AbstractCiphertextFactory> simulatorFactory, seal::Plaintext ptxt);
 
   std::unique_ptr<SimulatorCiphertext> clone_impl() const;
@@ -62,20 +65,17 @@ class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
   //TODO: Document this
   seal::Plaintext &getPlaintext();
 
-  //TODO: Document this
+  /// Returns the stored SEAL Plaintext that is kept as a private variable in the SimulatorCiphertext class
+  /// \return A SEAL Plaintext seal::PLaintext
   const seal::Plaintext &getPlaintext() const;
 
   //TODO (Alex): Add this as a function in AbstractCtxt instead, and modify SEALCiphertext to no longer relinearize automatically
   // Note: this will require also updating the Runtime visitor to actually perform relinearizations!
   void relinearize();
 
-  //TODO: Document this
-  int64_t getCoeffModulus();
-
-  //TODO: Document this and move to AbstractNoiseMeasuringCiphertext
+  /// Calculates the invariant noise budget from the ciphertext noise heuristics (see SEAL Manual for the definition)
+  /// \return An integer (number of bits) corresponding to the noise budget
   int noiseBits() const;
-
-  int64_t initialNoise() override;
 
   // API inherited from AbstractCiphertext
   std::unique_ptr<AbstractCiphertext> clone() const override;
@@ -95,8 +95,7 @@ class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
   void subtractPlainInplace(const ICleartext &operand) override;
   std::unique_ptr<AbstractCiphertext> rotateRows(int steps) const override;
   void rotateRowsInplace(int steps) override;
-
-
+  
   // API inherited from AbstractValue
   void add_inplace(const AbstractValue &other) override;
   void subtract_inplace(const AbstractValue &other) override;

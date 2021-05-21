@@ -16,11 +16,6 @@ class AbstractNoiseMeasuringCiphertext : public AbstractCiphertext {
   /// \return An int measuring the number of bits in the noise budget.
   //virtual int64_t noiseBits() const = 0;
 
-
-  /// Noise of a freshly encrypted ciphertext
-  /// \return the noise budget in bits
-  [[nodiscard]] virtual int64_t initialNoise() = 0;
-
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_VISITOR_RUNTIME_ABSTRACTNOISEMEASURINGCIPHERTEXT_H_
