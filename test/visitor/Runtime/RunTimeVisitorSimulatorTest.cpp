@@ -408,11 +408,12 @@ TEST_F(RuntimeVisitorSimulatorTest, testAddCtxtCtxt) {
 
   std::unordered_map<std::string, std::vector<int64_t>> expectedResult;
   expectedResult["y"] = {1032, 34, 222, 4, 22, 44, 3825, 0, 1, 21};
-  auto resultq = srv.getOutput(*astOutput);
+  auto result = srv.getOutput(*astOutput);
+  auto x = dynamic_cast<SimulatorCiphertext &>(*result[0].second);
 
   uint64_t expected_noise = calcAddNoiseHeuristic();
 
-  ASSERT_EQ(dynamic_cast<SimulatorCiphertext &>(*resultq[0].second).noiseBits(), expected_noise);
+  ASSERT_EQ(x.noiseBits(), expected_noise);
 }
 
 TEST_F(RuntimeVisitorSimulatorTest, testSubCtxtCtxt) {
@@ -454,11 +455,6 @@ TEST_F(RuntimeVisitorSimulatorTest, testSubCtxtCtxt) {
 
   auto x = dynamic_cast<SimulatorCiphertext &>(*result[0].second);
 
-  // create ciphertexts to check noise heuristics
-  std::vector<int64_t> data1 = {43,  1,   1,   1,  22, 11, 425,  0, 1, 7};
-  std::unique_ptr<AbstractCiphertext> ctxt1 = scf->createCiphertext(data1);
-  std::vector<int64_t> data2 = {24, 34, 222,   4,    1, 4,   9, 22, 1, 3};
-  std::unique_ptr<AbstractCiphertext> ctxt2 = scf->createCiphertext(data2);
   uint64_t expected_noise = calcAddNoiseHeuristic();
 
   ASSERT_EQ(x.noiseBits(), expected_noise);
@@ -503,11 +499,6 @@ TEST_F(RuntimeVisitorSimulatorTest, testMultCtxtCtxt) {
 
   auto x = dynamic_cast<SimulatorCiphertext &>(*result[0].second);
 
-  // create ciphertexts to check noise heuristics
-  std::vector<int64_t> data1 = {43,  1,   1,   1,  22, 11, 425,  0, 1, 7};
-  std::unique_ptr<AbstractCiphertext> ctxt1 = scf->createCiphertext(data1);
-  std::vector<int64_t> data2 = {24, 34, 222,   4,    1, 4,   9, 22, 1, 3};
-  std::unique_ptr<AbstractCiphertext> ctxt2 = scf->createCiphertext(data2);
   uint64_t expected_noise = calcMultNoiseHeuristic();
   ASSERT_EQ(x.noiseBits(), expected_noise);
 }
