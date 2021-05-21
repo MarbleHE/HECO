@@ -362,11 +362,11 @@ TEST_F(RuntimeVisitorSimulatorTest, testFreshCtxt) {
   expectedResult["y"] = {43,  1,   1,   1,  22, 11, 425,  0, 1, 7};
   auto result = srv.getOutput(*astOutput);
 
-  //auto x = dynamic_cast<SimulatorCiphertext &>(*result[0].second);
+  auto x = dynamic_cast<SimulatorCiphertext &>(*result[0].second);
 
   uint64_t expected_noise = calcInitNoiseHeuristic();
 
-  ASSERT_EQ(dynamic_cast<SimulatorCiphertext &>( *srv.getOutput(*astOutput)[0].second).getNoiseBudget(), expected_noise);
+  ASSERT_EQ( x.noiseBits(), expected_noise);
 }
 
 // =======================================
@@ -411,7 +411,7 @@ TEST_F(RuntimeVisitorSimulatorTest, testAddCtxtCtxt) {
   auto resultq = srv.getOutput(*astOutput);
 
   uint64_t expected_noise = calcAddNoiseHeuristic();
-  
+
   ASSERT_EQ(dynamic_cast<SimulatorCiphertext &>(*resultq[0].second).noiseBits(), expected_noise);
 }
 

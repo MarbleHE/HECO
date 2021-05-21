@@ -13,18 +13,19 @@
 
 SimulatorCiphertext::SimulatorCiphertext(const std::reference_wrapper<const AbstractCiphertextFactory> simulatorFactory)
     : AbstractNoiseMeasuringCiphertext(
-    simulatorFactory) {}
+    simulatorFactory) { mpz_init(_noise); }
 
 SimulatorCiphertext::SimulatorCiphertext(const SimulatorCiphertext &other)  // copy constructor
     : AbstractNoiseMeasuringCiphertext(other.factory) {
   _plaintext = other._plaintext;
-  //mpz_init(other._noise);
-//  mpz_set(_noise, other._noise); // this doesnt work. why?
+  mpz_init(_noise);
+  mpz_set(_noise, other._noise);
   _noise_budget = other._noise_budget;
   ciphertext_size_ = other.ciphertext_size_;
 }
 
 SimulatorCiphertext &SimulatorCiphertext::operator=(const SimulatorCiphertext &other) {  // copy assignment
+  mpz_set(_noise, other._noise);
   return *this = SimulatorCiphertext(other);
 }
 
@@ -39,8 +40,8 @@ SimulatorCiphertext &SimulatorCiphertext::operator=(SimulatorCiphertext &&other)
     throw std::runtime_error("Cannot move Ciphertext from factory A into Ciphertext created by Factory B.");
   }
   _plaintext = std::move(other._plaintext);
-  // mpz_set(_noise,other._noise); //TODO: check
-  // _noise = std::move(other._noise);
+  mpz_init(_noise);
+  mpz_set(_noise, other._noise);
   _noise_budget = std::move(other._noise_budget);
   ciphertext_size_ = std::move(other.ciphertext_size_);
   //_ciphertext = std::move(other._ciphertext);
@@ -335,7 +336,7 @@ void SimulatorCiphertext::addInplace(const AbstractCiphertext &operand) {
   mpz_add(result_noise, this->_noise, cast_1(operand)._noise);
   mpz_init(this->_noise);
   mpz_set(this->_noise,result_noise);
-  this->_noise_budget = noiseBits();
+  this->_noise_budget = this->noiseBits();
 }
 
 std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::addPlain(const ICleartext &operand) const {
