@@ -118,6 +118,7 @@ class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
   void bitwiseNot_inplace() override;
 
   std::unique_ptr<mpz_t> getTest();
+  int getNoiseBudget();
 };
 
 #endif

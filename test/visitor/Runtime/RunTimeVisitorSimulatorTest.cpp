@@ -16,7 +16,7 @@ class RuntimeVisitorSimulatorTest : public ::testing::Test {
   std::unique_ptr<TypeCheckingVisitor> tcv;
 
   void SetUp() override {
-    scf = std::make_unique<SimulatorCiphertextFactory>(4096);
+    scf = std::make_unique<SimulatorCiphertextFactory>(8192);
     tcv = std::make_unique<TypeCheckingVisitor>();
   }
 
@@ -26,68 +26,301 @@ class RuntimeVisitorSimulatorTest : public ::testing::Test {
     tcv->addVariableDatatype(*scopedIdentifier, datatype);
   }
 
-  // calculates initial noise heuristic of a freshly encrypted cipheertext
-  uint64_t calcInitNoiseHeuristic(AbstractCiphertext &abstractCiphertext) {
-    uint64_t result;
-    auto &ctxt = dynamic_cast<SimulatorCiphertext &>(abstractCiphertext);
-    seal::Plaintext ptxt = ctxt.getPlaintext();
-    int64_t plain_modulus = scf->getContext().first_context_data()->parms().plain_modulus().value();
-    int64_t poly_modulus = scf->getContext().first_context_data()->parms().poly_modulus_degree();
-    result = plain_modulus  * (poly_modulus * (plain_modulus - 1) / 2
-        + 2 * 3.2 *sqrt(12 * pow(poly_modulus,2) + 9 * poly_modulus));
-    return result;
+  // calculates initial noise heuristic of a freshly encrypted ciphertext
+  uint64_t calcInitNoiseHeuristic() {
+    uint64_t plain_modulus = scf->getContext().first_context_data()->parms().plain_modulus().value();
+    uint64_t poly_modulus = scf->getContext().first_context_data()->parms().poly_modulus_degree();
+    mpz_t result_noise;
+    mpz_init(result_noise);
+    mpz_t plain_mod;
+    mpz_init(plain_mod);
+    mpz_init_set_ui(plain_mod, plain_modulus);
+    mpz_t poly_mod;
+    mpz_init(poly_mod);
+    mpz_init_set_ui(poly_mod, poly_modulus);
+    // summand_one = n * (t-1) / 2
+    mpz_t summand_one;
+    mpz_init(summand_one);
+    mpz_sub_ui(summand_one, plain_mod, 1);
+    mpz_mul(summand_one, summand_one, poly_mod);
+    mpz_div_ui(summand_one, summand_one, 2);
+    // summand_two = 2 * sigma * sqrt(12 * n ^2 + 9 * n)
+    mpz_t summand_two;
+    mpz_init(summand_two);
+    mpz_pow_ui(summand_two, poly_mod, 2);
+    mpz_mul_ui(summand_two, summand_two, 12);
+    mpz_t poly_mod_times_nine;
+    mpz_init(poly_mod_times_nine);
+    mpz_mul_ui(poly_mod_times_nine, poly_mod, 9);
+    mpz_add(summand_two, summand_two, poly_mod_times_nine);
+    mpz_sqrt(summand_two, summand_two);
+    mpz_mul_ui(summand_two, summand_two, long(6.4)); // sigma = 3.2
+    mpz_t sum;
+    // sum = summand_1 + summand_2
+    mpz_init(sum);
+    mpz_add(sum, summand_one, summand_two);
+    // result_noise = t * sum
+    mpz_mul(result_noise, sum, plain_mod);
+    size_t coeff_modulus_significant_bit_count = scf->getContext().first_context_data()->total_coeff_modulus_bit_count();
+    size_t log_noise = mpz_sizeinbase(result_noise, 2);
+    return std::max(int(coeff_modulus_significant_bit_count - log_noise - 1), 0);
   }
 
   // calculates noise heuristics for ctxt-ctxt add
-  uint64_t calcAddNoiseHeuristic(AbstractCiphertext &abstractCiphertext1, AbstractCiphertext &abstractCiphertext2) {
-    uint64_t result;
-    auto &ctxt1 = dynamic_cast<SimulatorCiphertext &>(abstractCiphertext1);
-    auto &ctxt2 = dynamic_cast<SimulatorCiphertext &>(abstractCiphertext2);
-//    result = ctxt1.getNoise() + ctxt2.getNoise();
-    return result;
+  uint64_t calcAddNoiseHeuristic() {
+    // calc init noise heur for ctxt1 and ctxt2
+    uint64_t plain_modulus = scf->getContext().first_context_data()->parms().plain_modulus().value();
+    uint64_t poly_modulus = scf->getContext().first_context_data()->parms().poly_modulus_degree();
+    mpz_t init_noise;
+    mpz_init(init_noise);
+    mpz_t plain_mod;
+    mpz_init(plain_mod);
+    mpz_init_set_ui(plain_mod, plain_modulus);
+    mpz_t poly_mod;
+    mpz_init(poly_mod);
+    mpz_init_set_ui(poly_mod, poly_modulus);
+    // summand_one = n * (t-1) / 2
+    mpz_t summand_one;
+    mpz_init(summand_one);
+    mpz_sub_ui(summand_one, plain_mod, 1);
+    mpz_mul(summand_one, summand_one, poly_mod);
+    mpz_div_ui(summand_one, summand_one, 2);
+    // summand_two = 2 * sigma * sqrt(12 * n ^2 + 9 * n)
+    mpz_t summand_two;
+    mpz_init(summand_two);
+    mpz_pow_ui(summand_two, poly_mod, 2);
+    mpz_mul_ui(summand_two, summand_two, 12);
+    mpz_t poly_mod_times_nine;
+    mpz_init(poly_mod_times_nine);
+    mpz_mul_ui(poly_mod_times_nine, poly_mod, 9);
+    mpz_add(summand_two, summand_two, poly_mod_times_nine);
+    mpz_sqrt(summand_two, summand_two);
+    mpz_mul_ui(summand_two, summand_two, long(6.4)); // sigma = 3.2
+    mpz_t sum;
+    // sum = summand_1 + summand_2
+    mpz_init(sum);
+    mpz_add(sum, summand_one, summand_two);
+    // result_noise = t * sum
+    mpz_mul(init_noise, sum, plain_mod);
+    mpz_t result_noise;
+    mpz_init(result_noise);
+    mpz_add(result_noise, init_noise, init_noise);
+    size_t coeff_modulus_significant_bit_count = scf->getContext().first_context_data()->total_coeff_modulus_bit_count();
+    size_t log_noise = mpz_sizeinbase(result_noise, 2);
+    return std::max(int(coeff_modulus_significant_bit_count - log_noise - 1), 0);
   }
 
   // calculates noise heuristics for ctxt-ctxt mult
-  uint64_t calcMultNoiseHeuristic(AbstractCiphertext &abstractCiphertext1, AbstractCiphertext &abstractCiphertext2) {
-    uint64_t result;
-    auto &ctxt1 = dynamic_cast<SimulatorCiphertext &>(abstractCiphertext1);
-    auto &ctxt2 = dynamic_cast<SimulatorCiphertext &>(abstractCiphertext2);
-    int64_t plain_modulus = scf->getContext().first_context_data()->parms().plain_modulus().value();
-    int64_t poly_modulus = scf->getContext().first_context_data()->parms().poly_modulus_degree();
-    // iliashenko mult noise heuristic
-   // result =  plain_modulus * sqrt(3 * poly_modulus + 2 * pow(poly_modulus,2) )
-     //   * (ctxt1.getNoise() + ctxt2.getNoise()) + 3 * ctxt1.getNoise() * ctxt2.getNoise() +
-//        plain_modulus * sqrt(3 * poly_modulus + 2 * pow(poly_modulus,2) +
-  //          4 * pow(poly_modulus,3) /3);
-    return result;
+  uint64_t calcMultNoiseHeuristic() {
+    // calc init noise heur for ctxt1 and ctxt2
+    uint64_t plain_modulus = scf->getContext().first_context_data()->parms().plain_modulus().value();
+    uint64_t poly_modulus = scf->getContext().first_context_data()->parms().poly_modulus_degree();
+    mpz_t init_noise;
+    mpz_init(init_noise);
+    mpz_t plain_mod;
+    mpz_init(plain_mod);
+    mpz_init_set_ui(plain_mod, plain_modulus);
+    mpz_t poly_mod;
+    mpz_init(poly_mod);
+    mpz_init_set_ui(poly_mod, poly_modulus);
+    // summand_one = n * (t-1) / 2
+    mpz_t summand_one;
+    mpz_init(summand_one);
+    mpz_sub_ui(summand_one, plain_mod, 1);
+    mpz_mul(summand_one, summand_one, poly_mod);
+    mpz_div_ui(summand_one, summand_one, 2);
+    // summand_two = 2 * sigma * sqrt(12 * n ^2 + 9 * n)
+    mpz_t summand_two;
+    mpz_init(summand_two);
+    mpz_pow_ui(summand_two, poly_mod, 2);
+    mpz_mul_ui(summand_two, summand_two, 12);
+    mpz_t poly_mod_times_nine;
+    mpz_init(poly_mod_times_nine);
+    mpz_mul_ui(poly_mod_times_nine, poly_mod, 9);
+    mpz_add(summand_two, summand_two, poly_mod_times_nine);
+    mpz_sqrt(summand_two, summand_two);
+    mpz_mul_ui(summand_two, summand_two, long(6.4)); // sigma = 3.2
+    mpz_t sum;
+    // sum = summand_1 + summand_2
+    mpz_init(sum);
+    mpz_add(sum, summand_one, summand_two);
+    // result_noise = t * sum
+    mpz_mul(init_noise, sum, plain_mod);
+
+    mpz_t result_noise;
+    mpz_init(result_noise);
+    mpz_t coeff_mod;
+    mpz_init(coeff_mod);
+    mpz_init_set_ui(coeff_mod, *scf->getContext().first_context_data()->total_coeff_modulus());
+    // some powers of n and other things
+    mpz_t poly_mod_squared;
+    mpz_init(poly_mod_squared);
+    mpz_pow_ui(poly_mod_squared, poly_mod, 2);
+    mpz_t poly_mod_cubed;
+    mpz_init(poly_mod_cubed);
+    mpz_pow_ui(poly_mod_cubed, poly_mod, 3);
+    mpz_t poly_mod_squared_times_two;
+    mpz_init(poly_mod_squared_times_two);
+    mpz_mul_ui(poly_mod_squared_times_two, poly_mod, 2);
+    mpz_t poly_mod_cubed_times_four;
+    mpz_init(poly_mod_cubed_times_four);
+    mpz_mul_ui(poly_mod_cubed_times_four, poly_mod_cubed, 4);
+    mpz_t poly_mod_cubed_times_four_div_three;
+    mpz_init(poly_mod_cubed_times_four_div_three);
+    mpz_div_ui(poly_mod_cubed_times_four_div_three, poly_mod_cubed_times_four, 3);
+    // summand_one = t * sqrt(3n + 2n^2) (v1 + v2)
+    mpz_t sum_one;
+    mpz_init(sum_one);
+    mpz_mul_ui(sum_one, poly_mod, 3);
+    mpz_add(sum_one, sum_one, poly_mod_squared_times_two);
+    mpz_sqrt(sum_one, sum_one);
+    mpz_mul(sum_one, sum_one, plain_mod);
+    mpz_t noise_sum;
+    mpz_init(noise_sum);
+    mpz_add(noise_sum, init_noise, init_noise);
+    mpz_mul(sum_one, sum_one, noise_sum);
+    //summand_two = 3 * v1 * v2 / q
+    mpz_t sum_two;
+    mpz_init(sum_two);
+    mpz_mul(sum_two, init_noise, init_noise);
+    mpz_mul_ui(sum_two, sum_two, 3);
+    mpz_div(sum_two, sum_two, coeff_mod);
+    //summand_three = t * sqrt(3d+2d^2+4d^3/3)
+    mpz_t summand_three;
+    mpz_init(summand_three);
+    mpz_mul_ui(summand_three, poly_mod, 3);
+    mpz_add(summand_three, summand_three, poly_mod_squared_times_two);
+    mpz_add(summand_three, summand_three, poly_mod_cubed_times_four_div_three);
+    mpz_sqrt(summand_three, summand_three);
+    mpz_mul(summand_three, summand_three, plain_mod);
+    // result_noise = summand_1 * summand_2 + summand_3
+    mpz_add(result_noise, sum_one, sum_two);
+    mpz_add(result_noise, result_noise, summand_three);
+    size_t coeff_modulus_significant_bit_count = scf->getContext().first_context_data()->total_coeff_modulus_bit_count();
+    size_t log_noise = mpz_sizeinbase(result_noise, 2);
+    return std::max(int(coeff_modulus_significant_bit_count - log_noise - 1), 0);
   }
 
   uint64_t calcAddPlainNoiseHeuristic(AbstractCiphertext &abstractCiphertext, ICleartext &operand) {
     //noise is old_noise + r_t(q) * plain_max_coeff_count * plain_max_abs_value
-    uint64_t result;
-    auto cleartextInt = dynamic_cast<Cleartext<int> *>(&operand);
-    std::unique_ptr<seal::Plaintext> plaintext = scf->createPlaintext(cleartextInt->getData());
-    auto &ctxt = dynamic_cast<SimulatorCiphertext &>(abstractCiphertext);
-  //  uint64_t old_noise = ctxt.getNoise();
+    std::unique_ptr<seal::Plaintext> plaintext = scf->createPlaintext(dynamic_cast<Cleartext<int> *>(&operand)->getData());
     int64_t rtq = scf->getContext().first_context_data()->coeff_modulus_mod_plain_modulus();
     int64_t plain_max_abs_value = plaintext_norm(*plaintext);
     int64_t plain_max_coeff_count = plaintext->nonzero_coeff_count();
-//    result = old_noise + rtq * plain_max_coeff_count * plain_max_abs_value;
-    return result;
+    uint64_t plain_modulus = scf->getContext().first_context_data()->parms().plain_modulus().value();
+    uint64_t poly_modulus = scf->getContext().first_context_data()->parms().poly_modulus_degree();
+    // calc init noise
+    mpz_t init_noise;
+    mpz_init(init_noise);
+    mpz_t plain_mod;
+    mpz_init(plain_mod);
+    mpz_init_set_ui(plain_mod, plain_modulus);
+    mpz_t poly_mod;
+    mpz_init(poly_mod);
+    mpz_init_set_ui(poly_mod, poly_modulus);
+    // summand_one = n * (t-1) / 2
+    mpz_t summand_one;
+    mpz_init(summand_one);
+    mpz_sub_ui(summand_one, plain_mod, 1);
+    mpz_mul(summand_one, summand_one, poly_mod);
+    mpz_div_ui(summand_one, summand_one, 2);
+    // summand_two = 2 * sigma * sqrt(12 * n ^2 + 9 * n)
+    mpz_t summand_two;
+    mpz_init(summand_two);
+    mpz_pow_ui(summand_two, poly_mod, 2);
+    mpz_mul_ui(summand_two, summand_two, 12);
+    mpz_t poly_mod_times_nine;
+    mpz_init(poly_mod_times_nine);
+    mpz_mul_ui(poly_mod_times_nine, poly_mod, 9);
+    mpz_add(summand_two, summand_two, poly_mod_times_nine);
+    mpz_sqrt(summand_two, summand_two);
+    mpz_mul_ui(summand_two, summand_two, long(6.4)); // sigma = 3.2
+    mpz_t sum;
+    // sum = summand_1 + summand_2
+    mpz_init(sum);
+    mpz_add(sum, summand_one, summand_two);
+    // result_noise = t * sum
+    mpz_mul(init_noise, sum, plain_mod);
+    // calc heuristic
+    mpz_t result_noise;
+    mpz_init(result_noise);
+    mpz_t  rt_q;
+    mpz_init(rt_q);
+    mpz_init_set_ui(rt_q, rtq);
+    mpz_t  plain_coeff_ct;
+    mpz_init(plain_coeff_ct);
+    mpz_init_set_ui(plain_coeff_ct, plain_max_coeff_count);
+    mpz_t  plain_abs;
+    mpz_init(plain_abs);
+    mpz_init_set_ui(plain_abs, plain_max_abs_value);
+    mpz_mul(result_noise, rt_q, plain_coeff_ct);
+    mpz_mul(result_noise, result_noise, plain_abs);
+    mpz_add(result_noise, result_noise, init_noise);
+    size_t coeff_modulus_significant_bit_count = scf->getContext().first_context_data()->total_coeff_modulus_bit_count();
+    size_t log_noise = mpz_sizeinbase(result_noise, 2);
+    return std::max(int(coeff_modulus_significant_bit_count - log_noise - 1), 0);
   }
 
   uint64_t calcMultiplyPlainNoiseHeuristic(AbstractCiphertext &abstractCiphertext, ICleartext &operand) {
-    uint64_t result;
-    auto cleartextInt = dynamic_cast<Cleartext<int> *>(&operand);
-    std::unique_ptr<seal::Plaintext> plaintext = scf->createPlaintext(cleartextInt->getData());
-    auto &ctxt = dynamic_cast<SimulatorCiphertext &>(abstractCiphertext);
-   // uint64_t old_noise = ctxt.getNoise();
+    std::unique_ptr<seal::Plaintext> plaintext = scf->createPlaintext(dynamic_cast<Cleartext<int> *>(&operand)->getData());
+    int64_t rtq = scf->getContext().first_context_data()->coeff_modulus_mod_plain_modulus();
     int64_t plain_max_abs_value = plaintext_norm(*plaintext);
     int64_t plain_max_coeff_count = plaintext->nonzero_coeff_count();
-//    result = old_noise * plain_max_coeff_count * plain_max_abs_value;
-    return result;
+    uint64_t plain_modulus = scf->getContext().first_context_data()->parms().plain_modulus().value();
+    uint64_t poly_modulus = scf->getContext().first_context_data()->parms().poly_modulus_degree();
+    // calc init noise
+    mpz_t init_noise;
+    mpz_init(init_noise);
+    mpz_t plain_mod;
+    mpz_init(plain_mod);
+    mpz_init_set_ui(plain_mod, plain_modulus);
+    mpz_t poly_mod;
+    mpz_init(poly_mod);
+    mpz_init_set_ui(poly_mod, poly_modulus);
+    // summand_one = n * (t-1) / 2
+    mpz_t summand_one;
+    mpz_init(summand_one);
+    mpz_sub_ui(summand_one, plain_mod, 1);
+    mpz_mul(summand_one, summand_one, poly_mod);
+    mpz_div_ui(summand_one, summand_one, 2);
+    // summand_two = 2 * sigma * sqrt(12 * n ^2 + 9 * n)
+    mpz_t summand_two;
+    mpz_init(summand_two);
+    mpz_pow_ui(summand_two, poly_mod, 2);
+    mpz_mul_ui(summand_two, summand_two, 12);
+    mpz_t poly_mod_times_nine;
+    mpz_init(poly_mod_times_nine);
+    mpz_mul_ui(poly_mod_times_nine, poly_mod, 9);
+    mpz_add(summand_two, summand_two, poly_mod_times_nine);
+    mpz_sqrt(summand_two, summand_two);
+    mpz_mul_ui(summand_two, summand_two, long(6.4)); // sigma = 3.2
+    mpz_t sum;
+    // sum = summand_1 + summand_2
+    mpz_init(sum);
+    mpz_add(sum, summand_one, summand_two);
+    // result_noise = t * sum
+    mpz_mul(init_noise, sum, plain_mod);
+    //calc heuristic
+    // noise is old_noise * plain_max_coeff_count * plain_max_abs_value (SEAL Manual)
+    mpz_t plain_coeff_ct;
+    mpz_init(plain_coeff_ct);
+    mpz_init_set_ui(plain_coeff_ct, plain_max_coeff_count);
+    mpz_t plain_abs;
+    mpz_init(plain_abs);
+    mpz_init_set_ui(plain_abs, plain_max_abs_value);
+    mpz_t result_noise;
+    mpz_init(result_noise);
+    mpz_mul(result_noise, plain_abs, plain_coeff_ct);
+    mpz_mul(result_noise, result_noise, init_noise);
+    size_t coeff_modulus_significant_bit_count = scf->getContext().first_context_data()->total_coeff_modulus_bit_count();
+    size_t log_noise = mpz_sizeinbase(result_noise, 2);
+    return std::max(int(coeff_modulus_significant_bit_count - log_noise - 1), 0);
   }
 
+  void checkCiphertextNoise(const AbstractCiphertext &abstractCiphertext, double expected_noise) {
+    std::cout << (dynamic_cast<const SimulatorCiphertext&>(abstractCiphertext)).noiseBits();
+    EXPECT_EQ((dynamic_cast<const SimulatorCiphertext&>(abstractCiphertext)).noiseBits(), expected_noise);
+  }
 };
 
 // =======================================
@@ -129,14 +362,11 @@ TEST_F(RuntimeVisitorSimulatorTest, testFreshCtxt) {
   expectedResult["y"] = {43,  1,   1,   1,  22, 11, 425,  0, 1, 7};
   auto result = srv.getOutput(*astOutput);
 
-  auto x = dynamic_cast<SimulatorCiphertext &>(*result[0].second);
+  //auto x = dynamic_cast<SimulatorCiphertext &>(*result[0].second);
 
-  // create ciphertexts to check noise heuristics
-  std::vector<int64_t> data1 = {43,  1,   1,   1,  22, 11, 425,  0, 1, 7};
-  std::unique_ptr<AbstractCiphertext> ctxt = scf->createCiphertext(data1);
-  uint64_t expected_noise = calcInitNoiseHeuristic(*ctxt);
+  uint64_t expected_noise = calcInitNoiseHeuristic();
 
-  ASSERT_EQ(x.noiseBits(), expected_noise);
+  ASSERT_EQ(dynamic_cast<SimulatorCiphertext &>( *srv.getOutput(*astOutput)[0].second).getNoiseBudget(), expected_noise);
 }
 
 // =======================================
@@ -178,18 +408,11 @@ TEST_F(RuntimeVisitorSimulatorTest, testAddCtxtCtxt) {
 
   std::unordered_map<std::string, std::vector<int64_t>> expectedResult;
   expectedResult["y"] = {1032, 34, 222, 4, 22, 44, 3825, 0, 1, 21};
-  auto result = srv.getOutput(*astOutput);
+  auto resultq = srv.getOutput(*astOutput);
 
-  auto x = dynamic_cast<SimulatorCiphertext &>(*result[0].second);
-
-  // create ciphertexts to check noise heuristics
-  std::vector<int64_t> data1 = {43,  1,   1,   1,  22, 11, 425,  0, 1, 7};
-  std::unique_ptr<AbstractCiphertext> ctxt1 = scf->createCiphertext(data1);
-  std::vector<int64_t> data2 = {24, 34, 222,   4,    1, 4,   9, 22, 1, 3};
-  std::unique_ptr<AbstractCiphertext> ctxt2 = scf->createCiphertext(data2);
-  uint64_t expected_noise = calcAddNoiseHeuristic(*ctxt1, *ctxt2);
-
-  ASSERT_EQ(x.noiseBits(), expected_noise);
+  uint64_t expected_noise = calcAddNoiseHeuristic();
+  
+  ASSERT_EQ(dynamic_cast<SimulatorCiphertext &>(*resultq[0].second).noiseBits(), expected_noise);
 }
 
 TEST_F(RuntimeVisitorSimulatorTest, testSubCtxtCtxt) {
@@ -236,7 +459,7 @@ TEST_F(RuntimeVisitorSimulatorTest, testSubCtxtCtxt) {
   std::unique_ptr<AbstractCiphertext> ctxt1 = scf->createCiphertext(data1);
   std::vector<int64_t> data2 = {24, 34, 222,   4,    1, 4,   9, 22, 1, 3};
   std::unique_ptr<AbstractCiphertext> ctxt2 = scf->createCiphertext(data2);
-  uint64_t expected_noise = calcAddNoiseHeuristic(*ctxt1, *ctxt2);
+  uint64_t expected_noise = calcAddNoiseHeuristic();
 
   ASSERT_EQ(x.noiseBits(), expected_noise);
 }
@@ -285,7 +508,7 @@ TEST_F(RuntimeVisitorSimulatorTest, testMultCtxtCtxt) {
   std::unique_ptr<AbstractCiphertext> ctxt1 = scf->createCiphertext(data1);
   std::vector<int64_t> data2 = {24, 34, 222,   4,    1, 4,   9, 22, 1, 3};
   std::unique_ptr<AbstractCiphertext> ctxt2 = scf->createCiphertext(data2);
-  uint64_t expected_noise = calcMultNoiseHeuristic(*ctxt1, *ctxt2);
+  uint64_t expected_noise = calcMultNoiseHeuristic();
   ASSERT_EQ(x.noiseBits(), expected_noise);
 }
 

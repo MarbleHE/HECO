@@ -18,6 +18,7 @@ SimulatorCiphertext::SimulatorCiphertext(const std::reference_wrapper<const Abst
 SimulatorCiphertext::SimulatorCiphertext(const SimulatorCiphertext &other)  // copy constructor
     : AbstractNoiseMeasuringCiphertext(other.factory) {
   _plaintext = other._plaintext;
+  //mpz_init(other._noise);
 //  mpz_set(_noise, other._noise); // this doesnt work. why?
   _noise_budget = other._noise_budget;
   ciphertext_size_ = other.ciphertext_size_;
@@ -37,9 +38,8 @@ SimulatorCiphertext &SimulatorCiphertext::operator=(SimulatorCiphertext &&other)
   if (&factory.get()!=&(other.factory.get())) {
     throw std::runtime_error("Cannot move Ciphertext from factory A into Ciphertext created by Factory B.");
   }
-  //_dummy_ctxt = std::move(other._dummy_ctxt);
   _plaintext = std::move(other._plaintext);
-  mpz_set(_noise,other._noise); //TODO: check
+  // mpz_set(_noise,other._noise); //TODO: check
   // _noise = std::move(other._noise);
   _noise_budget = std::move(other._noise_budget);
   ciphertext_size_ = std::move(other.ciphertext_size_);
@@ -83,6 +83,9 @@ seal::Plaintext &SimulatorCiphertext::getPlaintext() {
   return _plaintext;
 }
 
+int SimulatorCiphertext::getNoiseBudget() {
+  return _noise_budget;
+}
 
 void SimulatorCiphertext::createFresh(std::unique_ptr<seal::Plaintext> &plaintext) {
   mpz_init(_noise); // initialise noise
@@ -120,6 +123,7 @@ void SimulatorCiphertext::createFresh(std::unique_ptr<seal::Plaintext> &plaintex
   mpz_add(sum, summand_one, summand_two);
   // result_noise = t * sum
   mpz_mul(result_noise, sum, plain_mod);
+  mpz_init(this->_noise);
   mpz_set(this->_noise,result_noise);
   this->_noise_budget = this->noiseBits();
   // freshly encrypted ciphertext has size 2
@@ -169,12 +173,12 @@ std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::multiply(const Abstract
   mpz_mul(summand_one, summand_one, plain_mod);
   mpz_t noise_sum;
   mpz_init(noise_sum);
-  mpz_add(noise_sum, this->_noise, operand_ctxt._noise);
+  mpz_add(noise_sum, this->_noise, cast_1(operand)._noise);
   mpz_mul(summand_one, summand_one, noise_sum);
   //summand_two = 3 * v1 * v2 / q
   mpz_t summand_two;
   mpz_init(summand_two);
-  mpz_mul(summand_two, this->_noise, operand_ctxt._noise);
+  mpz_mul(summand_two, this->_noise, cast_1(operand)._noise);
   mpz_mul_ui(summand_two, summand_two, 3);
   mpz_div(summand_two, summand_two, coeff_mod);
   //summand_three = t * sqrt(3d+2d^2+4d^3/3)
@@ -190,15 +194,16 @@ std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::multiply(const Abstract
   mpz_add(result_noise, result_noise, summand_three);
   // copy and assign correct noise and noise budget
   auto r = std::make_unique<SimulatorCiphertext>(*this);
+  mpz_init(r->_noise);
   mpz_set(r->_noise,result_noise);
   r->_noise_budget = r->noiseBits();
-  r->ciphertext_size_ += operand_ctxt.ciphertext_size_; //ciphertext size increased
+  r->ciphertext_size_ += cast_1(operand).ciphertext_size_; //ciphertext size increased
   return r;
 }
 
 void SimulatorCiphertext::multiplyInplace(const AbstractCiphertext &operand) {
   // cast operand
-  auto operand_ctxt = cast_1(operand);
+ // auto operand_ctxt = cast_1(operand);
   mpz_t result_noise;
   mpz_init(result_noise);
   mpz_t plain_mod;
@@ -235,12 +240,12 @@ void SimulatorCiphertext::multiplyInplace(const AbstractCiphertext &operand) {
   mpz_mul(summand_one, summand_one, plain_mod);
   mpz_t noise_sum;
   mpz_init(noise_sum);
-  mpz_add(noise_sum, this->_noise, operand_ctxt._noise);
+  mpz_add(noise_sum, this->_noise, cast_1(operand)._noise);
   mpz_mul(summand_one, summand_one, noise_sum);
   //summand_two = 3 * v1 * v2 / q
   mpz_t summand_two;
   mpz_init(summand_two);
-  mpz_mul(summand_two, this->_noise, operand_ctxt._noise);
+  mpz_mul(summand_two, this->_noise, cast_1(operand)._noise);
   mpz_mul_ui(summand_two, summand_two, 3);
   mpz_div(summand_two, summand_two, coeff_mod);
   //sumand_three = t * sqrt(3d+2d^2+4d^3/3)
@@ -254,9 +259,10 @@ void SimulatorCiphertext::multiplyInplace(const AbstractCiphertext &operand) {
   // result_noise = summand_1 * summand_2 + summand_3
   mpz_add(result_noise, summand_one, summand_two);
   mpz_add(result_noise, result_noise, summand_three);
+  mpz_init(this->_noise);
   mpz_set(this->_noise,result_noise);
   this->_noise_budget = this->noiseBits();
-  this->ciphertext_size_ += operand_ctxt.ciphertext_size_;
+  this->ciphertext_size_ += cast_1(operand).ciphertext_size_;
 }
 
 std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::multiplyPlain(const ICleartext &operand) const {
@@ -278,6 +284,7 @@ std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::multiplyPlain(const ICl
     mpz_mul(result_noise, result_noise, this->_noise);
     //copy
     auto r = std::make_unique<SimulatorCiphertext>(*this);
+    mpz_init(r->_noise);
     mpz_set(r->_noise,result_noise);
     r->_noise_budget = r->noiseBits();
     return r;
@@ -302,8 +309,7 @@ void SimulatorCiphertext::multiplyPlainInplace(const ICleartext &operand) {
     mpz_init(result_noise);
     mpz_mul(result_noise, plain_abs, plain_coeff_ct);
     mpz_mul(result_noise, result_noise, this->_noise);
-    //copy
-    auto r = std::make_unique<SimulatorCiphertext>(*this);
+    mpz_init(this->_noise);
     mpz_set(this->_noise, result_noise);
     this->_noise_budget = noiseBits();
   } else {
@@ -312,23 +318,22 @@ void SimulatorCiphertext::multiplyPlainInplace(const ICleartext &operand) {
 }
 
 std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::add(const AbstractCiphertext &operand) const {
-  SimulatorCiphertext operand_ctxt = cast_1(operand);
-  // noise is noise1 + noise2
+  auto operand_ctxt = cast_1(operand);
   mpz_t result_noise;
   mpz_init(result_noise);
-  mpz_add(result_noise, this->_noise, operand_ctxt._noise);
+  mpz_add(result_noise, this->_noise, cast_1(operand)._noise);
   auto r = std::make_unique<SimulatorCiphertext>(*this);
+  mpz_init(r->_noise);
   mpz_set(r->_noise, result_noise);
   r->_noise_budget = r->noiseBits();
   return r;
 }
 
 void SimulatorCiphertext::addInplace(const AbstractCiphertext &operand) {
-  auto operand_ctxt = cast_1(operand);
-  // noise is noise1 + noise2
   mpz_t result_noise;
   mpz_init(result_noise);
-  mpz_add(result_noise, this->_noise, operand_ctxt._noise);
+  mpz_add(result_noise, this->_noise, cast_1(operand)._noise);
+  mpz_init(this->_noise);
   mpz_set(this->_noise,result_noise);
   this->_noise_budget = noiseBits();
 }
@@ -357,6 +362,7 @@ std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::addPlain(const IClearte
     mpz_add(result_noise, result_noise, this->_noise);
     //copy
     auto r = std::make_unique<SimulatorCiphertext>(*this);
+    mpz_init(r->_noise);
     mpz_set(r->_noise,result_noise);
     r->_noise_budget = r->noiseBits();
     return r;
@@ -388,6 +394,7 @@ void SimulatorCiphertext::addPlainInplace(const ICleartext &operand) {
     mpz_add(result_noise, result_noise, this->_noise);
     //copy
     auto r = std::make_unique<SimulatorCiphertext>(*this);
+    mpz_init(this->_noise);
     mpz_set(this->_noise,result_noise);
     this->_noise_budget = noiseBits();
   } else {
@@ -537,5 +544,6 @@ void SimulatorCiphertext::bitwiseNot_inplace() {
 int64_t SimulatorCiphertext::initialNoise() {
   return 0;
 }
+
 
 #endif
