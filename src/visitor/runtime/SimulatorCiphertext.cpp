@@ -18,7 +18,7 @@ SimulatorCiphertext::SimulatorCiphertext(const std::reference_wrapper<const Abst
 SimulatorCiphertext::SimulatorCiphertext(const SimulatorCiphertext &other)  // copy constructor
     : AbstractNoiseMeasuringCiphertext(other.factory) {
   _plaintext = other._plaintext;
-  mpz_set(_noise, other._noise);
+//  mpz_set(_noise, other._noise); // this doesnt work. why?
   _noise_budget = other._noise_budget;
   ciphertext_size_ = other.ciphertext_size_;
 }
@@ -81,10 +81,6 @@ const seal::Plaintext &SimulatorCiphertext::getPlaintext() const {
 
 seal::Plaintext &SimulatorCiphertext::getPlaintext() {
   return _plaintext;
-}
-
-double SimulatorCiphertext::getNoise() const {
-  return 0;
 }
 
 
@@ -316,7 +312,7 @@ void SimulatorCiphertext::multiplyPlainInplace(const ICleartext &operand) {
 }
 
 std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::add(const AbstractCiphertext &operand) const {
-  auto operand_ctxt = cast_1(operand);
+  SimulatorCiphertext operand_ctxt = cast_1(operand);
   // noise is noise1 + noise2
   mpz_t result_noise;
   mpz_init(result_noise);

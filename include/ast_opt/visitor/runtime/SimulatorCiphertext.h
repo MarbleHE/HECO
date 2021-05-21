@@ -75,10 +75,6 @@ class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
   //TODO: Document this and move to AbstractNoiseMeasuringCiphertext
   int noiseBits() const;
 
-  // API inherited from AbstractNoiseMeasuringCiphertext
-  /// For BFV/SEAL simulation, we return the infinity norm of the noise estimate multiplied by q
-  /// \return ||noise_estimate||_{\infty} * q
-  double getNoise() const;
   int64_t initialNoise() override;
 
   // API inherited from AbstractCiphertext

@@ -65,13 +65,46 @@ class SimulatorCiphertextFactoryTest : public ::testing::Test {
     uint64_t result;
     auto &ctxt1 = dynamic_cast<SimulatorCiphertext &>(abstractCiphertext1);
     auto &ctxt2 = dynamic_cast<SimulatorCiphertext &>(abstractCiphertext2);
+    // calc init noise heur for ctxt1 and ctxt2
+    uint64_t plain_modulus = scf->getContext().first_context_data()->parms().plain_modulus().value();
+    uint64_t poly_modulus = scf->getContext().first_context_data()->parms().poly_modulus_degree();
+    mpz_t init_noise;
+    mpz_init(init_noise);
+    mpz_t plain_mod;
+    mpz_init(plain_mod);
+    mpz_init_set_ui(plain_mod, plain_modulus);
+    mpz_t poly_mod;
+    mpz_init(poly_mod);
+    mpz_init_set_ui(poly_mod, poly_modulus);
+    // summand_one = n * (t-1) / 2
+    mpz_t summand_one;
+    mpz_init(summand_one);
+    mpz_sub_ui(summand_one, plain_mod, 1);
+    mpz_mul(summand_one, summand_one, poly_mod);
+    mpz_div_ui(summand_one, summand_one, 2);
+    // summand_two = 2 * sigma * sqrt(12 * n ^2 + 9 * n)
+    mpz_t summand_two;
+    mpz_init(summand_two);
+    mpz_pow_ui(summand_two, poly_mod, 2);
+    mpz_mul_ui(summand_two, summand_two, 12);
+    mpz_t poly_mod_times_nine;
+    mpz_init(poly_mod_times_nine);
+    mpz_mul_ui(poly_mod_times_nine, poly_mod, 9);
+    mpz_add(summand_two, summand_two, poly_mod_times_nine);
+    mpz_sqrt(summand_two, summand_two);
+    mpz_mul_ui(summand_two, summand_two, long(6.4)); // sigma = 3.2
+    mpz_t sum;
+    // sum = summand_1 + summand_2
+    mpz_init(sum);
+    mpz_add(sum, summand_one, summand_two);
+    // result_noise = t * sum
+    mpz_mul(init_noise, sum, plain_mod);
     mpz_t result_noise;
     mpz_init(result_noise);
-//    mpz_add(result_noise, *ctxt1._noise, operand_ctxt._noise);
-  //  auto r = std::make_unique<SimulatorCiphertext>(*this);
-  //  mpz_set(r->_noise, result_noise);
-  //  r->_noise_budget = r->noiseBits();
-    return result;
+    mpz_add(result_noise, init_noise, init_noise);
+    size_t coeff_modulus_significant_bit_count = scf->getContext().first_context_data()->total_coeff_modulus_bit_count();
+    size_t log_noise = mpz_sizeinbase(result_noise, 2);
+    return std::max(int(coeff_modulus_significant_bit_count - log_noise - 1), 0);
   }
 
   // calculates noise heuristics for ctxt-ctxt mult
@@ -81,6 +114,14 @@ class SimulatorCiphertextFactoryTest : public ::testing::Test {
     uint64_t plain_modulus = scf->getContext().first_context_data()->parms().plain_modulus().value();
     uint64_t poly_modulus = scf->getContext().first_context_data()->parms().poly_modulus_degree();
     uint64_t coeff_modulus = *scf->getContext().first_context_data()->total_coeff_modulus();
+    auto ctx1_init_noise = calcInitNoiseHeuristic(ctxt1);
+    auto ctx2_init_noise = calcInitNoiseHeuristic(ctxt2);
+    mpz_t noise_1;
+    mpz_init(noise_1);
+    mpz_init_set_ui(noise_1, ctx1_init_noise);
+    mpz_t noise_2;
+    mpz_init(noise_2);
+    mpz_init_set_ui(noise_2, ctx2_init_noise);
     mpz_t result_noise;
     mpz_init(result_noise);
     mpz_t plain_mod;
@@ -117,12 +158,12 @@ class SimulatorCiphertextFactoryTest : public ::testing::Test {
     mpz_mul(summand_one, summand_one, plain_mod);
     mpz_t noise_sum;
     mpz_init(noise_sum);
-//    mpz_add(noise_sum, ctxt1._noise, operand_ctxt._noise);
+    mpz_add(noise_sum, noise_1, noise_2);
     mpz_mul(summand_one, summand_one, noise_sum);
     //summand_two = 3 * v1 * v2 / q
     mpz_t summand_two;
     mpz_init(summand_two);
-  //  mpz_mul(summand_two, this->_noise, operand_ctxt._noise);
+    mpz_mul(summand_two, noise_1, noise_2);
     mpz_mul_ui(summand_two, summand_two, 3);
     mpz_div(summand_two, summand_two, coeff_mod);
     //summand_three = t * sqrt(3d+2d^2+4d^3/3)
@@ -147,11 +188,11 @@ class SimulatorCiphertextFactoryTest : public ::testing::Test {
     auto cleartextInt = dynamic_cast<Cleartext<int> *>(&operand);
     std::unique_ptr<seal::Plaintext> plaintext = scf->createPlaintext(cleartextInt->getData());
     auto &ctxt = dynamic_cast<SimulatorCiphertext &>(abstractCiphertext);
-    double old_noise = ctxt.getNoise();
+//    double old_noise = ctxt.getNoise();
     int64_t rtq = scf->getContext().first_context_data()->coeff_modulus_mod_plain_modulus();
     int64_t plain_max_abs_value = plaintext_norm(*plaintext);
     int64_t plain_max_coeff_count = plaintext->nonzero_coeff_count();
-    result = old_noise + rtq * plain_max_coeff_count * plain_max_abs_value;
+//    result = old_noise + rtq * plain_max_coeff_count * plain_max_abs_value;
     return result;
   }
 
@@ -160,10 +201,10 @@ class SimulatorCiphertextFactoryTest : public ::testing::Test {
     auto cleartextInt = dynamic_cast<Cleartext<int> *>(&operand);
     std::unique_ptr<seal::Plaintext> plaintext = scf->createPlaintext(cleartextInt->getData());
     auto &ctxt = dynamic_cast<SimulatorCiphertext &>(abstractCiphertext);
-    uint64_t old_noise = ctxt.getNoise();
+//    uint64_t old_noise = ctxt.getNoise();
     int64_t plain_max_abs_value = plaintext_norm(*plaintext);
     int64_t plain_max_coeff_count = plaintext->nonzero_coeff_count();
-    result = old_noise * plain_max_coeff_count * plain_max_abs_value;
+  //  result = old_noise * plain_max_coeff_count * plain_max_abs_value;
     return result;
   }
 

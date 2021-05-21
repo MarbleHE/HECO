@@ -43,7 +43,7 @@ class RuntimeVisitorSimulatorTest : public ::testing::Test {
     uint64_t result;
     auto &ctxt1 = dynamic_cast<SimulatorCiphertext &>(abstractCiphertext1);
     auto &ctxt2 = dynamic_cast<SimulatorCiphertext &>(abstractCiphertext2);
-    result = ctxt1.getNoise() + ctxt2.getNoise();
+//    result = ctxt1.getNoise() + ctxt2.getNoise();
     return result;
   }
 
@@ -55,10 +55,10 @@ class RuntimeVisitorSimulatorTest : public ::testing::Test {
     int64_t plain_modulus = scf->getContext().first_context_data()->parms().plain_modulus().value();
     int64_t poly_modulus = scf->getContext().first_context_data()->parms().poly_modulus_degree();
     // iliashenko mult noise heuristic
-    result =  plain_modulus * sqrt(3 * poly_modulus + 2 * pow(poly_modulus,2) )
-        * (ctxt1.getNoise() + ctxt2.getNoise()) + 3 * ctxt1.getNoise() * ctxt2.getNoise() +
-        plain_modulus * sqrt(3 * poly_modulus + 2 * pow(poly_modulus,2) +
-            4 * pow(poly_modulus,3) /3);
+   // result =  plain_modulus * sqrt(3 * poly_modulus + 2 * pow(poly_modulus,2) )
+     //   * (ctxt1.getNoise() + ctxt2.getNoise()) + 3 * ctxt1.getNoise() * ctxt2.getNoise() +
+//        plain_modulus * sqrt(3 * poly_modulus + 2 * pow(poly_modulus,2) +
+  //          4 * pow(poly_modulus,3) /3);
     return result;
   }
 
@@ -68,11 +68,11 @@ class RuntimeVisitorSimulatorTest : public ::testing::Test {
     auto cleartextInt = dynamic_cast<Cleartext<int> *>(&operand);
     std::unique_ptr<seal::Plaintext> plaintext = scf->createPlaintext(cleartextInt->getData());
     auto &ctxt = dynamic_cast<SimulatorCiphertext &>(abstractCiphertext);
-    uint64_t old_noise = ctxt.getNoise();
+  //  uint64_t old_noise = ctxt.getNoise();
     int64_t rtq = scf->getContext().first_context_data()->coeff_modulus_mod_plain_modulus();
     int64_t plain_max_abs_value = plaintext_norm(*plaintext);
     int64_t plain_max_coeff_count = plaintext->nonzero_coeff_count();
-    result = old_noise + rtq * plain_max_coeff_count * plain_max_abs_value;
+//    result = old_noise + rtq * plain_max_coeff_count * plain_max_abs_value;
     return result;
   }
 
@@ -81,10 +81,10 @@ class RuntimeVisitorSimulatorTest : public ::testing::Test {
     auto cleartextInt = dynamic_cast<Cleartext<int> *>(&operand);
     std::unique_ptr<seal::Plaintext> plaintext = scf->createPlaintext(cleartextInt->getData());
     auto &ctxt = dynamic_cast<SimulatorCiphertext &>(abstractCiphertext);
-    uint64_t old_noise = ctxt.getNoise();
+   // uint64_t old_noise = ctxt.getNoise();
     int64_t plain_max_abs_value = plaintext_norm(*plaintext);
     int64_t plain_max_coeff_count = plaintext->nonzero_coeff_count();
-    result = old_noise * plain_max_coeff_count * plain_max_abs_value;
+//    result = old_noise * plain_max_coeff_count * plain_max_abs_value;
     return result;
   }
 
@@ -136,7 +136,7 @@ TEST_F(RuntimeVisitorSimulatorTest, testFreshCtxt) {
   std::unique_ptr<AbstractCiphertext> ctxt = scf->createCiphertext(data1);
   uint64_t expected_noise = calcInitNoiseHeuristic(*ctxt);
 
-  ASSERT_EQ(x.getNoise(), expected_noise);
+  ASSERT_EQ(x.noiseBits(), expected_noise);
 }
 
 // =======================================
@@ -189,7 +189,7 @@ TEST_F(RuntimeVisitorSimulatorTest, testAddCtxtCtxt) {
   std::unique_ptr<AbstractCiphertext> ctxt2 = scf->createCiphertext(data2);
   uint64_t expected_noise = calcAddNoiseHeuristic(*ctxt1, *ctxt2);
 
-  ASSERT_EQ(x.getNoise(), expected_noise);
+  ASSERT_EQ(x.noiseBits(), expected_noise);
 }
 
 TEST_F(RuntimeVisitorSimulatorTest, testSubCtxtCtxt) {
@@ -238,7 +238,7 @@ TEST_F(RuntimeVisitorSimulatorTest, testSubCtxtCtxt) {
   std::unique_ptr<AbstractCiphertext> ctxt2 = scf->createCiphertext(data2);
   uint64_t expected_noise = calcAddNoiseHeuristic(*ctxt1, *ctxt2);
 
-  ASSERT_EQ(x.getNoise(), expected_noise);
+  ASSERT_EQ(x.noiseBits(), expected_noise);
 }
 
 TEST_F(RuntimeVisitorSimulatorTest, testMultCtxtCtxt) {
@@ -286,7 +286,7 @@ TEST_F(RuntimeVisitorSimulatorTest, testMultCtxtCtxt) {
   std::vector<int64_t> data2 = {24, 34, 222,   4,    1, 4,   9, 22, 1, 3};
   std::unique_ptr<AbstractCiphertext> ctxt2 = scf->createCiphertext(data2);
   uint64_t expected_noise = calcMultNoiseHeuristic(*ctxt1, *ctxt2);
-  ASSERT_EQ(x.getNoise(), expected_noise);
+  ASSERT_EQ(x.noiseBits(), expected_noise);
 }
 
 // =======================================
@@ -346,7 +346,7 @@ TEST_F(RuntimeVisitorSimulatorTest, testAddCtxtPlaintext) { /* NOLINT */
   std::unique_ptr<AbstractCiphertext> ctxt1 = scf->createCiphertext(data1);
   auto operandVector = createCleartextSimVisitor({19});
   uint64_t expected_noise = calcAddPlainNoiseHeuristic(*ctxt1,operandVector);
-  ASSERT_EQ(x.getNoise(), expected_noise);
+  ASSERT_EQ(x.noiseBits(), expected_noise);
 }
 
 TEST_F(RuntimeVisitorSimulatorTest, testSubCtxtPlaintext) { /* NOLINT */
@@ -394,7 +394,7 @@ TEST_F(RuntimeVisitorSimulatorTest, testSubCtxtPlaintext) { /* NOLINT */
   std::unique_ptr<AbstractCiphertext> ctxt1 = scf->createCiphertext(data1);
   auto operandVector = createCleartextSimVisitor({19});
   uint64_t expected_noise = calcAddPlainNoiseHeuristic(*ctxt1,operandVector);
-  ASSERT_EQ(x.getNoise(), expected_noise);
+  ASSERT_EQ(x.noiseBits(), expected_noise);
 }
 
 TEST_F(RuntimeVisitorSimulatorTest, testMultCtxtPlaintext) { /* NOLINT */
@@ -442,6 +442,6 @@ TEST_F(RuntimeVisitorSimulatorTest, testMultCtxtPlaintext) { /* NOLINT */
   std::unique_ptr<AbstractCiphertext> ctxt1 = scf->createCiphertext(data1);
   auto operandVector = createCleartextSimVisitor({19});
   uint64_t expected_noise = calcMultiplyPlainNoiseHeuristic(*ctxt1,operandVector);
-  ASSERT_EQ(x.getNoise(), expected_noise);
+  ASSERT_EQ(x.noiseBits(), expected_noise);
 }
 #endif
