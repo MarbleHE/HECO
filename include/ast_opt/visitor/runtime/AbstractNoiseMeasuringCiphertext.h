@@ -14,7 +14,7 @@ class AbstractNoiseMeasuringCiphertext : public AbstractCiphertext {
 
   /// Return the current noise budget in the ciphertext, measured in bits
   /// \return An int measuring the number of bits in the noise budget.
-  //virtual int64_t noiseBits() const = 0;
+  virtual int noiseBits() const = 0;
 
 };
 

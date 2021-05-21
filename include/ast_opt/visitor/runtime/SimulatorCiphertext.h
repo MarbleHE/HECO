@@ -72,10 +72,8 @@ class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
   //TODO (Alex): Add this as a function in AbstractCtxt instead, and modify SEALCiphertext to no longer relinearize automatically
   // Note: this will require also updating the Runtime visitor to actually perform relinearizations!
   void relinearize();
-
-  /// Calculates the invariant noise budget from the ciphertext noise heuristics (see SEAL Manual for the definition)
-  /// \return An integer (number of bits) corresponding to the noise budget
-  int noiseBits() const;
+  
+  int noiseBits() const override;
 
   // API inherited from AbstractCiphertext
   std::unique_ptr<AbstractCiphertext> clone() const override;
@@ -95,7 +93,7 @@ class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
   void subtractPlainInplace(const ICleartext &operand) override;
   std::unique_ptr<AbstractCiphertext> rotateRows(int steps) const override;
   void rotateRowsInplace(int steps) override;
-  
+
   // API inherited from AbstractValue
   void add_inplace(const AbstractValue &other) override;
   void subtract_inplace(const AbstractValue &other) override;
