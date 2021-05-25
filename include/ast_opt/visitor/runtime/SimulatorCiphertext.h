@@ -15,8 +15,6 @@ class SimulatorCiphertextFactory;
 #ifdef HAVE_SEAL_BFV
 #include <seal/seal.h>
 
-#include "/usr/local/include/gmp.h"
-
 class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
  private:
   seal::Plaintext _plaintext;
