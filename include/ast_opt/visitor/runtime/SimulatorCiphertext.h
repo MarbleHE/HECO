@@ -7,8 +7,7 @@
 #include "AbstractNoiseMeasuringCiphertext.h"
 #include "DummyCiphertext.h"
 #include "DummyCiphertextFactory.h"
-#include "/usr/local/include/gmp.h"
-
+#include <gmp.h>
 
 // forward declarations
 class SimulatorCiphertextFactory;

@@ -244,9 +244,9 @@ endif (SEAL_FOUND)
 
 if (GMP_FOUND)
     message("Enabling GMP")
+    target_include_directories(ast_opt PUBLIC ${GMP_INCLUDE_DIR})
     find_library(GMP_LIBRARIES NAMES gmp)
     target_link_libraries(ast_opt PUBLIC ${GMP_LIBRARIES})
-
 endif(GMP_FOUND)
 
 

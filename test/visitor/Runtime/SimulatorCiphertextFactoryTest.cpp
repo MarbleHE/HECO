@@ -333,6 +333,7 @@ class SimulatorCiphertextFactoryTest : public ::testing::Test {
   }
 
   void checkCiphertextNoise(const AbstractCiphertext &abstractCiphertext, double expected_noise) {
+    std::cout << "Noise Budget after op: " << (dynamic_cast<const SimulatorCiphertext&>(abstractCiphertext)).noiseBits() << std::endl;
     EXPECT_EQ((dynamic_cast<const SimulatorCiphertext&>(abstractCiphertext)).noiseBits(), expected_noise);
   }
 
@@ -579,14 +580,8 @@ TEST_F(SimulatorCiphertextFactoryTest, xToPowerFourTimesYBad) {
   //  x * x * x * x
   ctxt1->multiplyInplace(*ctxt1);
   std::cout << "NoiseBudget(x * x * x * x): " << (dynamic_cast<const SimulatorCiphertext&>(*ctxt1)).noiseBits() << std::endl;
- /* //  x * x * x * x * x
-  ctxt1->multiplyInplace(*ctxt1);
-  std::cout << "NoiseBudget(x * x * x * x * x): " << (dynamic_cast<const SimulatorCiphertext&>(*ctxt1)).noiseBits() << std::endl;
-  //  x * x * x * x * x * x
-  ctxt1->multiplyInplace(*ctxt1);
-  std::cout << "NoiseBudget(x * x * x * x * x * x): " << (dynamic_cast<const SimulatorCiphertext&>(*ctxt1)).noiseBits() << std::endl;*/
 
- std::cout << std::endl;
+  std::cout << std::endl;
 }
 
 TEST_F(SimulatorCiphertextFactoryTest, xToPowerFourTimesYGood) {

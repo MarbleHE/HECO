@@ -418,7 +418,9 @@ void SimulatorCiphertext::subtractPlainInplace(const ICleartext &operand) {
   SimulatorCiphertext::addPlainInplace(operand);
 }
 std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::rotateRows(int) const {
-  throw std::runtime_error("Not yet implemented.");
+  // this essentially does nothing
+  auto resultCiphertext = std::make_unique<SimulatorCiphertext>(*this);
+  return resultCiphertext;
 }
 void SimulatorCiphertext::rotateRowsInplace(int) {
   throw std::runtime_error("Not yet implemented.");
