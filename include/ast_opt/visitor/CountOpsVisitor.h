@@ -1,6 +1,7 @@
 #ifndef AST_OPTIMIZER_INCLUDE_AST_OPT_VISITOR_COUNTOPSVISITOR_H_
 #define AST_OPTIMIZER_INCLUDE_AST_OPT_VISITOR_COUNTOPSVISITOR_H_
 
+#include <stack>
 #include <list>
 #include <sstream>
 #include <string>
@@ -15,15 +16,6 @@
 class SpecialCountOpsVisitor;
 
 
-/// A custom exception class to be used to break out of the RuntimeVisitor in case that we visited a Return statement.
-/// This is important for programs that use Return statements to prematurely exit a program, e.g., in the body of a
-/// For loop. The exception must be caught (and ignored) by the caller.
-struct ReturnStatementReached : public std::exception {
-  [[nodiscard]] const char *what() const noexcept override {
-    return "Program reached Return statement. Exception raised to break out of RuntimeVisitor. "
-           "This exception must be caught but can be ignored.";
-  }
-};
 
 /// PrintVisitor uses the Visitor<T> template to allow specifying default behaviour
 typedef Visitor<SpecialCountOpsVisitor> CountOpsVisitor;
@@ -31,8 +23,12 @@ typedef Visitor<SpecialCountOpsVisitor> CountOpsVisitor;
 class SpecialCountOpsVisitor : public ScopedVisitor {
  private:
 
-  /// Current indentation level
+  /// A stack that keeps track of intermediate results. Each visit(..) of an expression (node that inherits from
+  /// AbstractExpression) pushes its evaluation result on the stack so that the parent node can acccess the result.
+  std::stack<std::unique_ptr<AbstractValue>> intermedResult;
+
   int _number_ops = 0;
+  int _number_adds = 0;
 
  public:
   SpecialCountOpsVisitor(AbstractNode &inputs);
@@ -48,6 +44,7 @@ class SpecialCountOpsVisitor : public ScopedVisitor {
   /// the input and output AST given in the constructor and the getOutput method, respectively.
   /// \param rootNode The root node of the input program.
   void executeAst(AbstractNode &rootNode);
+  std::unique_ptr<AbstractValue> getNextStackElement();
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_VISITOR_COUNTOPSVISITOR_H_
