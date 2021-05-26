@@ -5,16 +5,6 @@
 #include "ast_opt/ast/AbstractExpression.h"
 #include "ast_opt/ast/BinaryExpression.h"
 
-SpecialCountOpsVisitor::SpecialCountOpsVisitor(AbstractNode &inputs) {
-  _number_ops = 0;
-}
-
-std::unique_ptr<AbstractValue> SpecialCountOpsVisitor::getNextStackElement() {
-  auto elem = std::move(intermedResult.top());
-  intermedResult.pop();
-  return elem;
-}
-
 void SpecialCountOpsVisitor::visit(BinaryExpression &elem) {
   // ---- some helper methods -------------------------
   auto operatorEqualsAnyOf = [&elem](std::initializer_list<OperatorVariant> op) -> bool {
@@ -23,13 +13,7 @@ void SpecialCountOpsVisitor::visit(BinaryExpression &elem) {
   auto operatorEquals = [&elem](OperatorVariant op) -> bool { return elem.getOperator()==Operator(op); };
   // ---- end
 
-  elem.getLeft().accept(*this);
-  auto lhsOperand = getNextStackElement();
-
-  elem.getRight().accept(*this);
-  auto rhsOperand = getNextStackElement();
-
-  // execute the binary operation
+  // count the binary operation(s)
   if (operatorEqualsAnyOf({ADDITION, FHE_ADDITION})) {
     _number_ops++;
     _number_adds++;
@@ -37,14 +21,15 @@ void SpecialCountOpsVisitor::visit(BinaryExpression &elem) {
     _number_ops++;
   } else if (operatorEqualsAnyOf({MULTIPLICATION, FHE_MULTIPLICATION})) {
     _number_ops++;
-  } else if (operatorEquals(DIVISION)) {
-    _number_ops++;
-  } else if (operatorEquals(MODULO)) {
+    _number_mult++;
+  } else if (operatorEqualsAnyOf({DIVISION, MODULO})) {
     _number_ops++;
   } else if (operatorEquals(LOGICAL_AND)) {
     _number_ops++;
+    _number_mult++;
   } else if (operatorEquals(LOGICAL_OR)) {
     _number_ops++;
+    _number_adds++;
   } else if (operatorEquals(LESS)) {
     _number_ops++;
   } else if (operatorEquals(LESS_EQUAL)) {
@@ -59,27 +44,21 @@ void SpecialCountOpsVisitor::visit(BinaryExpression &elem) {
     _number_ops++;
   } else if (operatorEquals(BITWISE_AND)) {
     _number_ops++;
+    _number_mult++;
   } else if (operatorEquals(BITWISE_XOR)) {
     _number_ops++;
+    _number_adds++;
   } else if (operatorEquals(BITWISE_OR)) {
     _number_ops++;
   } else {
     throw std::runtime_error("Unknown binary operator encountered. Cannot continue!");
   }
-}
 
-void SpecialCountOpsVisitor::visit(AbstractNode &elem) {
-
+  elem.getLeft().accept(*this);
+  elem.getRight().accept(*this);
 }
 
 int SpecialCountOpsVisitor::getNumberOps(){
   return _number_ops;
 }
 
-void SpecialCountOpsVisitor::executeAst(AbstractNode &rootNode) {
- // try {
-    rootNode.accept(*this);
-//  } catch (ReturnStatementReached &) {
-    //TODO
- // }
-}

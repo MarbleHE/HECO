@@ -578,7 +578,7 @@ TEST_F(RuntimeVisitorTest, testForLoop) { /* NOLINT */
   astProgram->accept(*tcv);
   auto secretTaintedNodesMap = tcv->getSecretTaintedNodes();
 
-  // create a SpecialRuntimeVisitor instance
+  // create a RuntimeVisitor instance
   RuntimeVisitor srv(*scf, *astInput, secretTaintedNodesMap);
 
   // run the program
