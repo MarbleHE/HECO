@@ -140,6 +140,7 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/visitor/ExpressionBatcher.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/HashVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/PrintVisitor.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/CountOpsVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/ScopedVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/Vectorizer.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/SecretBranchingVisitor.cpp
@@ -170,7 +171,7 @@ set(HEADER_ONLY_SOURCES
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/AbstractNoiseMeasuringCiphertext.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/DummyCiphertext.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/DummyCiphertextFactory.h
-        )
+        include/ast_opt/visitor/CountOpsVisitor.h src/visitor/CountOpsVisitor.cpp)
 
 # TODO: Go through this list and determine which headers aren't actually public
 set(PUBLIC_HEADERS
@@ -210,6 +211,7 @@ set(PUBLIC_HEADERS
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/ExpressionBatcher.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/IVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/PrintVisitor.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/CountOpsVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/HashVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/ScopedVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/Vectorizer.h

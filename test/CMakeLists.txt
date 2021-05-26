@@ -59,7 +59,7 @@ set(TEST_FILES
         visitor/Runtime/SimulatorCiphertextFactoryTest.cpp
         visitor/Runtime/RunTimeVisitorSimulatorTest.cpp
         ../include/ast_opt/visitor/runtime/DummyCiphertext.h
-        )
+        visitor/Runtime/RunTimeOpCounterTest.cpp)
 
 add_executable(testing-all
         ${TEST_FILES})
