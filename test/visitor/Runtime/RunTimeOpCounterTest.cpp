@@ -5,7 +5,7 @@
 #include "ast_opt/visitor/CountOpsVisitor.h"
 
 
-class RuntimeVisitorTest : public ::testing::Test {
+class RunTimeOpCounterTest: public ::testing::Test {
  protected:
   std::unique_ptr<TypeCheckingVisitor> tcv;
 
@@ -20,7 +20,7 @@ class RuntimeVisitorTest : public ::testing::Test {
   }
 };
 
-TEST(CountOpsVisitor, countOps) {
+TEST_F(RunTimeOpCounterTest, countOps) {
 
   std::unique_ptr<TypeCheckingVisitor> tcv;
   tcv = std::make_unique<TypeCheckingVisitor>();
@@ -33,8 +33,9 @@ TEST(CountOpsVisitor, countOps) {
 
   // program specification
   const char *program = R""""(
+      int __input0__ = 0;
       int i = 19;
-      secret int result = __input0__ *** i;
+      int result = __input0__ *** i;
       return result;
     )"""";
   auto astProgram = Parser::parse(std::string(program));
@@ -48,10 +49,10 @@ TEST(CountOpsVisitor, countOps) {
 
   // create a SpecialCountOpsVisitor instance
   astProgram->accept(*tcv);
-/*
+
   //run the program and get output
   CountOpsVisitor srv(*astInput);
-  srv.executeAst(*astProgram);
+ /* srv.executeAst(*astProgram);
   auto result = srv.getNumberOps();
 
   ASSERT_EQ(result, 1);*/
