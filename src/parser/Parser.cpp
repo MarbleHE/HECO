@@ -50,46 +50,6 @@ std::unique_ptr<AbstractNode> Parser::parse(std::string s) {
   return std::move(block);
 }
 
-class Animal {
- public:
-  virtual std::string sound(Animal &otherAnimal) {
-    return "THIS IS THE DEFAULT NOISE AN ANIMAL MAKES";
-  };
-};
-
-class Dog : public Animal {
- public:
-  std::string getSounded(Animal &otherAnimal) override {
-    otherAnimal.getSounded(this);
-  }
-
-  sound(Cat cat) { bark }
-
-  sound(Dog dog) {bark bark}
-
-
-};
-
-class Cat : public Animal {
- public:
-  std::string getSounded(Animal &otherAnimal) override {
-    otherAnimal.sound((Cat)this);
-  }
-
-  sound(Cat cat) {MEOW MEOW}
-
-  sound(Dog dog) {mow}
-};
-
-Animal *other = new Dog();
-Dog *d = new Dog();
-Cat *c = new Cat();
-Animal *a = c; // c;
-other.getSounded(*a);
-
-a.getSounded(*other);
-
-
 std::unique_ptr<AbstractNode> Parser::parse(std::string s,
                                             std::vector<std::reference_wrapper<AbstractNode>> &createdNodesList) {
   auto result = parse(std::move(s));
