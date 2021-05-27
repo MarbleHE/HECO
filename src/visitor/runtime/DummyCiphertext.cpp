@@ -4,14 +4,7 @@
 #include "ast_opt/visitor/runtime/DummyCiphertextFactory.h"
 #include "ast_opt/visitor/runtime/AbstractCiphertext.h"
 
-DummyCiphertext::DummyCiphertext(const std::reference_wrapper<const AbstractCiphertextFactory> dummyFactory)
-    : AbstractCiphertext(
-    dummyFactory) {}
-
-DummyCiphertext::DummyCiphertext(const DummyCiphertext &other)  // copy constructor
-    : AbstractCiphertext(other.factory) {
-  _data = other._data;
-}
+DummyCiphertext::DummyCiphertext(const DummyCiphertext &other) : AbstractCiphertext(other), _data(other._data) {};
 
 DummyCiphertext &DummyCiphertext::operator=(DummyCiphertext &&other) {  // move assignment
   // Self-assignment detection
@@ -23,6 +16,9 @@ DummyCiphertext &DummyCiphertext::operator=(DummyCiphertext &&other) {  // move 
   _data = std::move(other._data);
   return *this;
 }
+
+DummyCiphertext::DummyCiphertext(const std::reference_wrapper<const AbstractCiphertextFactory> dummyFactory)
+    : AbstractCiphertext(dummyFactory) {}
 
 DummyCiphertext &cast_dummy(AbstractCiphertext &abstractCiphertext) {
   if (auto dummyCtxt = dynamic_cast<DummyCiphertext *>(&abstractCiphertext)) {
@@ -54,12 +50,11 @@ std::unique_ptr<AbstractCiphertext> DummyCiphertext::multiply(const AbstractCiph
   DummyCiphertext operand_ctxt = cast_dummy(operand);
   // sizes of data vectors must match
   std::vector<int64_t> result;
-  if (operand_ctxt.getData().size() !=this->_data.size()) {
+  if (operand_ctxt.getData().size()!=this->_data.size()) {
     throw std::runtime_error("Sizes of data vectors do not match");
-  }
-  else {
+  } else {
     for (int i = 0; i < _data.size(); i++) {
-      result.push_back(this->_data[i] * operand_ctxt.getData()[i]);
+      result.push_back(this->_data[i]*operand_ctxt.getData()[i]);
     }
   }
   auto r = std::make_unique<DummyCiphertext>(*this);
@@ -71,35 +66,31 @@ void DummyCiphertext::multiplyInplace(const AbstractCiphertext &operand) {
   DummyCiphertext operand_ctxt = cast_dummy(operand);
   // sizes of data vectors must match
   std::vector<int64_t> result;
-  if (operand_ctxt.getData().size() !=this->_data.size()) {
+  if (operand_ctxt.getData().size()!=this->_data.size()) {
     throw std::runtime_error("Sizes of data vectors do not match");
-  }
-  else {
+  } else {
     for (int i = 0; i < _data.size(); i++) {
-      result.push_back(this->_data[i] * operand_ctxt.getData()[i]);
+      result.push_back(this->_data[i]*operand_ctxt.getData()[i]);
     }
   }
   this->_data = result;
 }
 
-
 std::unique_ptr<AbstractCiphertext> DummyCiphertext::multiplyPlain(const ICleartext &operand) const {
   if (auto cleartextInt = dynamic_cast<const Cleartext<int> *>(&operand)) {
     // sizes of data vectors must match
     std::vector<int64_t> result;
-    if (cleartextInt->getData().size() !=this->_data.size()) {
+    if (cleartextInt->getData().size()!=this->_data.size()) {
       throw std::runtime_error("Sizes of data vectors do not match");
-    }
-    else {
+    } else {
       for (int i = 0; i < _data.size(); i++) {
-        result.push_back(this->_data[i] * cleartextInt->getData()[i]);
+        result.push_back(this->_data[i]*cleartextInt->getData()[i]);
       }
     }
     auto r = std::make_unique<DummyCiphertext>(*this);
     r->_data = result;
     return r;
-  }
-  else {
+  } else {
     throw std::runtime_error("Multiply(Ciphertext,Cleartext) requires a Cleartext<int> as BFV supports integers only.");
   }
 }
@@ -108,17 +99,15 @@ void DummyCiphertext::multiplyPlainInplace(const ICleartext &operand) {
   if (auto cleartextInt = dynamic_cast<const Cleartext<int> *>(&operand)) {
     // sizes of data vectors must match
     std::vector<int64_t> result;
-    if (cleartextInt->getData().size() !=this->_data.size()) {
+    if (cleartextInt->getData().size()!=this->_data.size()) {
       throw std::runtime_error("Sizes of data vectors do not match");
-    }
-    else {
+    } else {
       for (int i = 0; i < _data.size(); i++) {
-        result.push_back(this->_data[i] * cleartextInt->getData()[i]);
+        result.push_back(this->_data[i]*cleartextInt->getData()[i]);
       }
     }
     this->_data = result;
-  }
-  else {
+  } else {
     throw std::runtime_error("Multiply(Ciphertext,Cleartext) requires a Cleartext<int> as BFV supports integers only.");
   }
 }
@@ -127,10 +116,9 @@ std::unique_ptr<AbstractCiphertext> DummyCiphertext::add(const AbstractCiphertex
   DummyCiphertext operand_ctxt = cast_dummy(operand);
   // sizes of data vectors must match
   std::vector<int64_t> result;
-  if (operand_ctxt.getData().size() !=this->_data.size()) {
+  if (operand_ctxt.getData().size()!=this->_data.size()) {
     throw std::runtime_error("Sizes of data vectors do not match");
-  }
-  else {
+  } else {
     for (int i = 0; i < _data.size(); i++) {
       result.push_back(this->_data[i] + operand_ctxt.getData()[i]);
     }
@@ -144,10 +132,9 @@ void DummyCiphertext::addInplace(const AbstractCiphertext &operand) {
   DummyCiphertext operand_ctxt = cast_dummy(operand);
   // sizes of data vectors must match
   std::vector<int64_t> result;
-  if (operand_ctxt.getData().size() !=this->_data.size()) {
+  if (operand_ctxt.getData().size()!=this->_data.size()) {
     throw std::runtime_error("Sizes of data vectors do not match");
-  }
-  else {
+  } else {
     for (int i = 0; i < _data.size(); i++) {
       result.push_back(this->_data[i] + operand_ctxt.getData()[i]);
     }
@@ -155,15 +142,13 @@ void DummyCiphertext::addInplace(const AbstractCiphertext &operand) {
   this->_data = result;
 }
 
-
 std::unique_ptr<AbstractCiphertext> DummyCiphertext::addPlain(const ICleartext &operand) const {
   if (auto cleartextInt = dynamic_cast<const Cleartext<int> *>(&operand)) {
     // sizes of data vectors must match
     std::vector<int64_t> result;
-    if (cleartextInt->getData().size() !=this->_data.size()) {
+    if (cleartextInt->getData().size()!=this->_data.size()) {
       throw std::runtime_error("Sizes of data vectors do not match");
-    }
-    else {
+    } else {
       for (int i = 0; i < _data.size(); i++) {
         result.push_back(this->_data[i] + cleartextInt->getData()[i]);
       }
@@ -171,8 +156,7 @@ std::unique_ptr<AbstractCiphertext> DummyCiphertext::addPlain(const ICleartext &
     auto r = std::make_unique<DummyCiphertext>(*this);
     r->_data = result;
     return r;
-  }
-  else {
+  } else {
     throw std::runtime_error("ADD(Ciphertext,Cleartext) requires a Cleartext<int> as BFV supports integers only.");
   }
 }
@@ -181,17 +165,15 @@ void DummyCiphertext::addPlainInplace(const ICleartext &operand) {
   if (auto cleartextInt = dynamic_cast<const Cleartext<int> *>(&operand)) {
     // sizes of data vectors must match
     std::vector<int64_t> result;
-    if (cleartextInt->getData().size() !=this->_data.size()) {
+    if (cleartextInt->getData().size()!=this->_data.size()) {
       throw std::runtime_error("Sizes of data vectors do not match");
-    }
-    else {
+    } else {
       for (int i = 0; i < _data.size(); i++) {
         result.push_back(this->_data[i] + cleartextInt->getData()[i]);
       }
     }
     this->_data = result;
-  }
-  else {
+  } else {
     throw std::runtime_error("Multiply(Ciphertext,Cleartext) requires a Cleartext<int> as BFV supports integers only.");
   }
 }
@@ -200,10 +182,9 @@ std::unique_ptr<AbstractCiphertext> DummyCiphertext::subtract(const AbstractCiph
   DummyCiphertext operand_ctxt = cast_dummy(operand);
   // sizes of data vectors must match
   std::vector<int64_t> result;
-  if (operand_ctxt.getData().size() !=this->_data.size()) {
+  if (operand_ctxt.getData().size()!=this->_data.size()) {
     throw std::runtime_error("Sizes of data vectors do not match");
-  }
-  else {
+  } else {
     for (int i = 0; i < _data.size(); i++) {
       result.push_back(this->_data[i] - operand_ctxt.getData()[i]);
     }
@@ -216,10 +197,9 @@ void DummyCiphertext::subtractInplace(const AbstractCiphertext &operand) {
   DummyCiphertext operand_ctxt = cast_dummy(operand);
   // sizes of data vectors must match
   std::vector<int64_t> result;
-  if (operand_ctxt.getData().size() !=this->_data.size()) {
+  if (operand_ctxt.getData().size()!=this->_data.size()) {
     throw std::runtime_error("Sizes of data vectors do not match");
-  }
-  else {
+  } else {
     for (int i = 0; i < _data.size(); i++) {
       result.push_back(this->_data[i] - operand_ctxt.getData()[i]);
     }
@@ -230,10 +210,9 @@ std::unique_ptr<AbstractCiphertext> DummyCiphertext::subtractPlain(const ICleart
   if (auto cleartextInt = dynamic_cast<const Cleartext<int> *>(&operand)) {
     // sizes of data vectors must match
     std::vector<int64_t> result;
-    if (cleartextInt->getData().size() !=this->_data.size()) {
+    if (cleartextInt->getData().size()!=this->_data.size()) {
       throw std::runtime_error("Sizes of data vectors do not match");
-    }
-    else {
+    } else {
       for (int i = 0; i < _data.size(); i++) {
         result.push_back(this->_data[i] - cleartextInt->getData()[i]);
       }
@@ -241,8 +220,7 @@ std::unique_ptr<AbstractCiphertext> DummyCiphertext::subtractPlain(const ICleart
     auto r = std::make_unique<DummyCiphertext>(*this);
     r->_data = result;
     return r;
-  }
-  else {
+  } else {
     throw std::runtime_error("ADD(Ciphertext,Cleartext) requires a Cleartext<int> as BFV supports integers only.");
   }
 }
@@ -250,25 +228,23 @@ void DummyCiphertext::subtractPlainInplace(const ICleartext &operand) {
   if (auto cleartextInt = dynamic_cast<const Cleartext<int> *>(&operand)) {
     // sizes of data vectors must match
     std::vector<int64_t> result;
-    if (cleartextInt->getData().size() !=this->_data.size()) {
+    if (cleartextInt->getData().size()!=this->_data.size()) {
       throw std::runtime_error("Sizes of data vectors do not match");
-    }
-    else {
+    } else {
       for (int i = 0; i < _data.size(); i++) {
         result.push_back(this->_data[i] - cleartextInt->getData()[i]);
       }
     }
     this->_data = result;
-  }
-  else {
+  } else {
     throw std::runtime_error("Multiply(Ciphertext,Cleartext) requires a Cleartext<int> as BFV supports integers only.");
   }
 }
 
-std::unique_ptr<AbstractCiphertext> DummyCiphertext::rotateRows(int steps) const {
+std::unique_ptr<AbstractCiphertext> DummyCiphertext::rotateRows(int) const {
   throw std::runtime_error("Not yet implemented.");
 }
-void DummyCiphertext::rotateRowsInplace(int steps) {
+void DummyCiphertext::rotateRowsInplace(int) {
   throw std::runtime_error("Not yet implemented.");
 }
 
@@ -314,55 +290,55 @@ void DummyCiphertext::multiply_inplace(const AbstractValue &other) {
   }
 }
 
-void DummyCiphertext::divide_inplace(const AbstractValue &other) {
+void DummyCiphertext::divide_inplace(const AbstractValue &) {
   throw std::runtime_error("Operation divide_inplace not supported for (DummyCiphertext, ANY).");
 }
 
-void DummyCiphertext::modulo_inplace(const AbstractValue &other) {
+void DummyCiphertext::modulo_inplace(const AbstractValue &) {
   throw std::runtime_error("Operation modulo_inplace not supported for (DummyCiphertext, ANY).");
 }
 
-void DummyCiphertext::logicalAnd_inplace(const AbstractValue &other) {
+void DummyCiphertext::logicalAnd_inplace(const AbstractValue &) {
   throw std::runtime_error("Operation logicalAnd_inplace not supported for (DummyCiphertext, ANY).");
 }
 
-void DummyCiphertext::logicalOr_inplace(const AbstractValue &other) {
+void DummyCiphertext::logicalOr_inplace(const AbstractValue &) {
   throw std::runtime_error("Operation logicalOr_inplace not supported for (DummyCiphertext, ANY).");
 }
 
-void DummyCiphertext::logicalLess_inplace(const AbstractValue &other) {
+void DummyCiphertext::logicalLess_inplace(const AbstractValue &) {
   throw std::runtime_error("Operation logicalLess_inplace not supported for (DummyCiphertext, ANY).");
 }
 
-void DummyCiphertext::logicalLessEqual_inplace(const AbstractValue &other) {
+void DummyCiphertext::logicalLessEqual_inplace(const AbstractValue &) {
   throw std::runtime_error("Operation logicalLessEqual_inplace not supported for (DummyCiphertext, ANY).");
 }
 
-void DummyCiphertext::logicalGreater_inplace(const AbstractValue &other) {
+void DummyCiphertext::logicalGreater_inplace(const AbstractValue &) {
   throw std::runtime_error("Operation logicalGreater_inplace not supported for (DummyCiphertext, ANY).");
 }
 
-void DummyCiphertext::logicalGreaterEqual_inplace(const AbstractValue &other) {
+void DummyCiphertext::logicalGreaterEqual_inplace(const AbstractValue &) {
   throw std::runtime_error("Operation logicalGreaterEqual_inplace not supported for (DummyCiphertext, ANY).");
 }
 
-void DummyCiphertext::logicalEqual_inplace(const AbstractValue &other) {
+void DummyCiphertext::logicalEqual_inplace(const AbstractValue &) {
   throw std::runtime_error("Operation logicalEqual_inplace not supported for (DummyCiphertext, ANY).");
 }
 
-void DummyCiphertext::logicalNotEqual_inplace(const AbstractValue &other) {
+void DummyCiphertext::logicalNotEqual_inplace(const AbstractValue &) {
   throw std::runtime_error("Operation logicalNotEqual_inplace not supported for (DummyCiphertext, ANY).");
 }
 
-void DummyCiphertext::bitwiseAnd_inplace(const AbstractValue &other) {
+void DummyCiphertext::bitwiseAnd_inplace(const AbstractValue &) {
   throw std::runtime_error("Operation bitwiseAnd_inplace not supported for (DummyCiphertext, ANY).");
 }
 
-void DummyCiphertext::bitwiseXor_inplace(const AbstractValue &other) {
+void DummyCiphertext::bitwiseXor_inplace(const AbstractValue &) {
   throw std::runtime_error("Operation bitwiseXor_inplace not supported for (DummyCiphertext, ANY).");
 }
 
-void DummyCiphertext::bitwiseOr_inplace(const AbstractValue &other) {
+void DummyCiphertext::bitwiseOr_inplace(const AbstractValue &) {
   throw std::runtime_error("Operation bitwiseOr_inplace not supported for (DummyCiphertext, ANY).");
 }
 
@@ -370,7 +346,8 @@ const DummyCiphertextFactory &DummyCiphertext::getFactory() const {
   if (auto sealFactory = dynamic_cast<const DummyCiphertextFactory *>(&factory.get())) {
     return *sealFactory;
   } else {
-    throw std::runtime_error("Cast of AbstractFactory to DummyCiphertextFactory failed. DummyCiphertext is probably invalid.");
+    throw std::runtime_error(
+        "Cast of AbstractFactory to DummyCiphertextFactory failed. DummyCiphertext is probably invalid.");
   }
 }
 
