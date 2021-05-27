@@ -1,26 +1,20 @@
-#ifndef GRAPHNODE_H_INCLUDE_AST_OPT_VISITOR_RUNTIME_DUMMYCIPHERTEXT_H_
-#define GRAPHNODE_H_INCLUDE_AST_OPT_VISITOR_RUNTIME_DUMMYCIPHERTEXT_H_
+#ifndef AST_OPTIMIZER_H_INCLUDE_AST_OPT_VISITOR_RUNTIME_DUMMYCIPHERTEXT_H_
+#define AST_OPTIMIZER_H_INCLUDE_AST_OPT_VISITOR_RUNTIME_DUMMYCIPHERTEXT_H_
 
 #include <memory>
-#include "AbstractCiphertext.h"
-#include "DummyCiphertextFactory.h"
-
-// forward declarations
-class DummyCiphertextFactory;
-
-#ifdef HAVE_SEAL_BFV
-#include <seal/seal.h>
+#include "ast_opt/visitor/runtime/AbstractCiphertext.h"
+#include "ast_opt/visitor/runtime/DummyCiphertextFactory.h"
 
 class DummyCiphertext : public AbstractCiphertext {
  private:
   std::vector<int64_t> _data;
 
-  std::unique_ptr<DummyCiphertext> clone_impl() const;
+  [[nodiscard]] std::unique_ptr<DummyCiphertext> clone_impl() const;
 
  public:
   ~DummyCiphertext() override = default;
 
-  DummyCiphertext(const DummyCiphertext &other); // copy constructor
+  DummyCiphertext(const DummyCiphertext &other);// copy constructor
 
   DummyCiphertext(DummyCiphertext &&other) noexcept;  // copy assignment
 
@@ -54,9 +48,6 @@ class DummyCiphertext : public AbstractCiphertext {
   std::unique_ptr<AbstractCiphertext> clone() const override;
   const DummyCiphertextFactory &getFactory() const override;
 
-  /// Gets the seal::Ciphertext associated with this SealCiphertext.
-  /// \return (A const reference) to the underlying seal::Ciphertext.
-  [[nodiscard]] const seal::Ciphertext &getCiphertext() const;
 
   /// Gets the seal::Ciphertext associated with this SealCiphertext.
   /// \return (A reference) to the underlying seal::Ciphertext.
@@ -82,7 +73,4 @@ class DummyCiphertext : public AbstractCiphertext {
   void bitwiseNot_inplace() override;
 };
 
-
-
-#endif
-#endif
+#endif //AST_OPTIMIZER_H_INCLUDE_AST_OPT_VISITOR_RUNTIME_DUMMYCIPHERTEXT_H_

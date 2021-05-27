@@ -8,6 +8,7 @@
 
 // forward declarations
 class AbstractCiphertext;
+class AbstractValue;
 
 class AbstractCiphertextFactory {
  public:

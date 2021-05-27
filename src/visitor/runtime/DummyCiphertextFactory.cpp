@@ -1,5 +1,6 @@
-#include "ast_opt/visitor/runtime/DummyCiphertext.h"
 #include "ast_opt/visitor/runtime/DummyCiphertextFactory.h"
+
+#include "ast_opt/visitor/runtime/DummyCiphertext.h"
 #include "ast_opt/visitor/runtime/Cleartext.h"
 
 #include <memory>
@@ -21,45 +22,26 @@ std::unique_ptr<AbstractCiphertext> DummyCiphertextFactory::createCiphertext(int
   return createCiphertext(values);
 }
 
-DummyCiphertextFactory::DummyCiphertextFactory(const DummyCiphertextFactory &other) {}  // copy constructor
-
-DummyCiphertextFactory::DummyCiphertextFactory(DummyCiphertextFactory &&other) noexcept {} // move constructor
-
-DummyCiphertextFactory &DummyCiphertextFactory::operator=(const DummyCiphertextFactory &other) {  // copy assignment
-  return *this = DummyCiphertextFactory(other);
-}
-
-DummyCiphertextFactory &DummyCiphertextFactory::operator=(DummyCiphertextFactory &&other) noexcept {  // move assignment
-  // Self-assignment detection
-  if (&other==this) return *this;
-  return *this;
-}
-
-
-std::unique_ptr<seal::Plaintext> DummyCiphertextFactory::createPlaintext(int64_t value) const {
+std::unique_ptr<ICleartext> DummyCiphertextFactory::createPlaintext(int64_t value) const {
   std::vector<int64_t> valueAsVec = {value};
   return createPlaintext(valueAsVec);
 }
 
-std::unique_ptr<seal::Plaintext> DummyCiphertextFactory::createPlaintext(const std::vector<int> &value) const {
+std::unique_ptr<ICleartext> DummyCiphertextFactory::createPlaintext(const std::vector<int> &value) const {
   std::vector<int64_t> vecInt64(value.begin(), value.end());
   return createPlaintext(vecInt64);
 }
 
-std::unique_ptr<seal::Plaintext> DummyCiphertextFactory::createPlaintext(const std::vector<int64_t> &value) const {
-  return nullptr;
+std::unique_ptr<ICleartext> DummyCiphertextFactory::createPlaintext(const std::vector<int64_t> &value) const {
+  return std::make_unique<Cleartext<int64_t>>(value);
 }
 
-
 void DummyCiphertextFactory::decryptCiphertext(AbstractCiphertext &abstractCiphertext,
-                                                   std::vector<int64_t> &ciphertextData) const {
+                                               std::vector<int64_t> &ciphertextData) const {
   // cast to DummyCtxt and getData()
   auto dummyCtxt = dynamic_cast<DummyCiphertext *>(&abstractCiphertext);
   ciphertextData = dummyCtxt->getData();
 }
-
-
-DummyCiphertextFactory::DummyCiphertextFactory(unsigned int numElementsPerCiphertextSlot) {}
 
 std::string DummyCiphertextFactory::getString(AbstractCiphertext &abstractCiphertext) const {
   // decrypt the ciphertext to get its values

@@ -31,11 +31,11 @@ class SealCiphertextFactoryTest : public ::testing::Test {
     EXPECT_EQ(result.size(), numCiphertextSlots);
 
     // check that provided values are in decryption result
-    for (int i = 0; i < expectedValues.size(); ++i) {
+    for (auto i = 0; i < expectedValues.size(); ++i) {
       EXPECT_EQ(expectedValues.at(i), result.at(i));
     }
     // check that all remaining ciphertext slots are filled with last value of given input
-    for (int i = expectedValues.size(); i < result.size(); ++i) {
+    for (auto i = expectedValues.size(); i < result.size(); ++i) {
       ASSERT_EQ(expectedValues.back(), result.at(i));
     }
   }
@@ -66,8 +66,8 @@ TEST_F(SealCiphertextFactoryTest, rotateCiphertextLhs) { /* NOLINT */
 
   // check rotated ciphertext
   auto const nextRowStartIdx = scf->getCiphertextSlotSize()/2;  // see the SEAL docs (Evaluator::rotate_rows)
-  for (int i = 0; i < dv.size(); ++i) {
-    if (i < std::min<int>(initialSizeData - steps, nextRowStartIdx - steps)) {
+  for (size_t i = 0; i < dv.size(); ++i) {
+    if (i < std::min<size_t>(initialSizeData - steps, nextRowStartIdx - steps)) {
       // compare values that moved to the beginning of the ciphertext
       EXPECT_EQ(data.at(i + steps), dv.at(i));
     } else if (i >= nextRowStartIdx - steps && i < nextRowStartIdx) {
@@ -124,8 +124,8 @@ TEST_F(SealCiphertextFactoryTest, rotateCiphertextInplace) { /* NOLINT */
 
   size_t j = 0;
   auto const nextRowStartIdx = scf->getCiphertextSlotSize()/2;  // see the SEAL docs (Evaluator::rotate_rows)
-  for (int i = 0; i < dv.size(); ++i, ++j) {
-    if (i < std::min<int>(initialSizeData - steps, nextRowStartIdx - steps)) {
+  for (size_t i = 0; i < dv.size(); ++i, ++j) {
+    if (i < std::min<size_t>(initialSizeData - steps, nextRowStartIdx - steps)) {
       // compare values that moved to the beginning of the ciphertext
       EXPECT_EQ(data.at(i + steps), dv.at(i));
     } else if (i >= nextRowStartIdx - steps && i < nextRowStartIdx) {
