@@ -9,12 +9,10 @@
 
 class DummyCiphertextFactoryTest : public ::testing::Test {
  protected:
-  const int numCiphertextSlots = 4096;
-
   std::unique_ptr<DummyCiphertextFactory> scf;
 
   void SetUp() override {
-    scf = std::make_unique<DummyCiphertextFactory>(numCiphertextSlots);
+    scf = std::make_unique<DummyCiphertextFactory>();
   }
 
   void checkCiphertextData(
@@ -26,11 +24,11 @@ class DummyCiphertextFactoryTest : public ::testing::Test {
     scf->decryptCiphertext(abstractCiphertext, result); // this should give the data vector
 
     // check that provided values are in decryption result
-    for (int i = 0; i < expectedValues.size(); ++i) {
+    for (size_t i = 0; i < expectedValues.size(); ++i) {
       EXPECT_EQ(expectedValues.at(i), result.at(i));
     }
     // check that all remaining ciphertext slots are filled with last value of given input
-    for (int i = expectedValues.size(); i < result.size(); ++i) {
+    for (auto i = expectedValues.size(); i < result.size(); ++i) {
       ASSERT_EQ(expectedValues.back(), result.at(i));
     }
   }
