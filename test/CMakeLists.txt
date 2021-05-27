@@ -54,7 +54,7 @@ set(TEST_FILES
         visitor/Runtime/SealCiphertextFactoryTest.cpp
         visitor/Runtime/RuntimeVisitorTest.cpp
         visitor/Runtime/DummyCiphertextFactoryTest.cpp
-        end-to-end/KernelTest.cpp
+        end-to-end/LaplaceSharpeningTest.cpp
         end-to-end/CardioTest.cpp
         )
 
