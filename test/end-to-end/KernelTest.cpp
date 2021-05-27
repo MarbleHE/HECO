@@ -42,7 +42,7 @@ class KernelTest : public ::testing::Test {  /* NOLINT (predictable sequence exp
     std::copy(inputValues.begin(), inputValues.end() - 1, std::ostream_iterator<int>(inputString, ", "));
     inputString << inputValues.back(); // add the last element with no delimiter
     inputString << " };" << std::endl;
-    inputString << "int imgSize = " << size << std::endl;
+    inputString << "int imgSize = " << size <<  ";" << std::endl;
 
     return Parser::parse(inputString.str());
   }
