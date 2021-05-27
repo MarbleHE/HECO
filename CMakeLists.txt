@@ -23,8 +23,8 @@ set(CXXFLAGS "--coverage --pedantic-errors -Wall -WError")
 if (MSVC)
     message("Using MSVC")
 
-    # Force static MSVC runtime library on Windows
-    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    # Force dynamic MSVC runtime library on Windows
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 
     # Switch MSVC into multi threaded mode
     add_compile_options(/MP)
