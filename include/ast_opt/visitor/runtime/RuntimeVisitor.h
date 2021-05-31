@@ -50,6 +50,9 @@ class SpecialRuntimeVisitor : public ScopedVisitor {
   /// of its dependant nodes (e.g., operand of binary expression) are secret.
   SecretTaintedNodesMap &secretTaintedMap;
 
+  /// A map for noise budgets (only used if AbstractNoiseMeasuringCiphertexts are present)
+  std::unordered_map<std::string, int> noise_map;
+
  public:
   /// Create a new SpecialRuntimeVisitor.
   /// \param factory A reference to the factory that should be used to create the ciphertexts.
@@ -136,6 +139,10 @@ class SpecialRuntimeVisitor : public ScopedVisitor {
   /// the input and output AST given in the constructor and the getOutput method, respectively.
   /// \param rootNode The root node of the input program.
   void executeAst(AbstractNode &rootNode);
+
+
+  //TODO: Document Getter for noise map
+  const std::unordered_map<std::string, int>& getNoiseMap();
 };
 
 #endif //GRAPHNODE_H_INCLUDE_AST_OPT_VISITOR_RUNTIME_H_

@@ -19,6 +19,7 @@
 #include "ast_opt/ast/VariableDeclaration.h"
 #include "ast_opt/ast/Variable.h"
 #include "ast_opt/visitor/runtime/AbstractCiphertextFactory.h"
+#include "ast_opt/visitor/runtime/AbstractNoiseMeasuringCiphertext.h"
 #include "ast_opt/parser/Tokens.h"
 
 template<typename S, typename T>
@@ -51,9 +52,16 @@ void SpecialRuntimeVisitor::visit(BinaryExpression &elem) {
 
   elem.getLeft().accept(*this);
   auto lhsOperand = getNextStackElement();
+  if(auto lhs_ptr = dynamic_cast<AbstractNoiseMeasuringCiphertext*>(&*lhsOperand)) {
+    noise_map.insert_or_assign(elem.getLeft().getUniqueNodeId(), lhs_ptr->getNoiseBudget());
+  }
+
 
   elem.getRight().accept(*this);
   auto rhsOperand = getNextStackElement();
+  if(auto rhs_ptr = dynamic_cast<AbstractNoiseMeasuringCiphertext*>(&*rhsOperand)) {
+    noise_map.insert_or_assign(elem.getRight().getUniqueNodeId(), rhs_ptr->getNoiseBudget());
+  }
 
   // if exactly one of the operands is a ciphertext and we have a commutative operation, then we make sure that
   // the first operand (the one we call the operation on) is the ciphertext
@@ -540,4 +548,7 @@ OutputIdentifierValuePairs SpecialRuntimeVisitor::getOutput(AbstractNode &output
       targetStream << vAsCleartext->toString() << std::endl;
     }
   }
+}
+const std::unordered_map<std::string, int> &SpecialRuntimeVisitor::getNoiseMap() {
+  return noise_map;
 }
