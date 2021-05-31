@@ -139,6 +139,7 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/visitor/controlFlowGraph/NodeRelationship.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/ExpressionBatcher.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/HashVisitor.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/NoisePrintVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/PrintVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/CountOpsVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/ScopedVisitor.cpp
