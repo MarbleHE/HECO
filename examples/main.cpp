@@ -19,7 +19,7 @@ int main() {
   // Create Variable node
   Variable v("foo");
 
-  // Create a VariableAssignment node
+  // Create a VariableAssignment node (boo = false;)
   Assignment va(std::make_unique<Variable>("boo"), std::make_unique<Literal<bool>>(false));
 
   // Force Template Magic to be compiled

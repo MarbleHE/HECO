@@ -3,7 +3,8 @@
 #include "gtest/gtest.h"
 #include "ast_opt/ast/AbstractNode.h"
 #include "ast_opt/parser/Parser.h"
-#include "ast_opt/visitor/runtime/RuntimeVisitor.h"
+#include "ast_opt/runtime/RuntimeVisitor.h"
+#include "ast_opt/runtime/SealCiphertextFactory.h"
 #include "ast_opt/ast/Assignment.h"
 #include "ast_opt/ast/Variable.h"
 #include "ast_opt/ast/IndexAccess.h"
@@ -31,6 +32,7 @@ class KernelTest : public ::testing::Test {  /* NOLINT (predictable sequence exp
     randomEngine.seed(RAND_SEED);
   }
 
+  /// Creates a secret int image vector of the given size and an int imgSize that stores the size
   std::unique_ptr<AbstractNode> getInputs(size_t size) {
     // we use the getInputMatrix method here to create the inputs for the input AST in a reproducible and flexible way
     std::vector<int> inputValues;
@@ -41,7 +43,7 @@ class KernelTest : public ::testing::Test {  /* NOLINT (predictable sequence exp
     std::copy(inputValues.begin(), inputValues.end() - 1, std::ostream_iterator<int>(inputString, ", "));
     inputString << inputValues.back(); // add the last element with no delimiter
     inputString << " };" << std::endl;
-    inputString << "int imgSize = " << size << std::endl;
+    inputString << "int imgSize = " << size <<  ";" << std::endl;
 
     return Parser::parse(inputString.str());
   }
@@ -53,15 +55,15 @@ class KernelTest : public ::testing::Test {  /* NOLINT (predictable sequence exp
     return Parser::parse(std::string(outputs));
   }
 
-  static std::unique_ptr<AbstractNode> getEvaluationProgram() {
+  static std::unique_ptr<AbstractNode> getLaplaceSharpeningProgram() {
     std::vector<std::reference_wrapper<AbstractNode>> createdNodes;
-    return getEvaluationProgram(createdNodes);
+    return getLaplaceSharpeningProgramAndNodes(createdNodes);
   }
 
-  static std::unique_ptr<AbstractNode> getEvaluationProgram(std::vector<std::reference_wrapper<AbstractNode>> &createdNodes) {
+  static std::unique_ptr<AbstractNode> getLaplaceSharpeningProgramAndNodes(std::vector<std::reference_wrapper<AbstractNode>> &createdNodes) {
     // program's input
     const char *inputs = R""""(
-      public void runKernel(int imageVec) {
+      public void laplacianSharpening(int imageVec) {
         int weightMatrix = {{1, 1, 1}, {1, -8, 1}, {1, 1, 1}};
         secret int img2 = image;
         for (int x = 1; x < imgSize - 1; x = x + 1) {
@@ -112,8 +114,9 @@ class KernelTest : public ::testing::Test {  /* NOLINT (predictable sequence exp
 ///     img2[x][y] = img[x][y] - (value/2),
 /// we compute
 ///     img2[x][y] = 2*img[x][y] - value
-/// to avoid division that is unsupported in FHE.
-std::vector<int> runKernel(std::vector<int> &img) {
+/// to avoid division which is unsupported in BFV
+/// The client can easily divide the result by two after decryption
+std::vector<int> laplacianSharpening(std::vector<int> &img) {
   const auto imgSize = (int) ceil(sqrt(img.size()));
   std::vector<std::vector<int>> weightMatrix = {{1, 1, 1}, {1, -8, 1}, {1, 1, 1}};
   std::vector<int> img2(img.begin(), img.end());
@@ -134,14 +137,14 @@ std::vector<int> runKernel(std::vector<int> &img) {
 #if HAVE_SEAL_BFV
 
 /// Check correctness of result between original program and (unmodified) program parsed as AST
-TEST_F(KernelTest, originalProgramTest) {  /* NOLINT */
+TEST_F(KernelTest, laplacianSharpening) {  /* NOLINT */
   // run the original program
   std::vector<int> data;
   getInputMatrix(MATRIX_SIZE, data);
-  auto expectedResult = runKernel(data);
+  auto expectedResult = laplacianSharpening(data);
 
   // run the unoptimized FHE program
-  std::unique_ptr<AbstractNode> evalProgram = KernelTest::getEvaluationProgram();
+  std::unique_ptr<AbstractNode> evalProgram = KernelTest::getLaplaceSharpeningProgram();
   std::unique_ptr<AbstractNode> inputs = KernelTest::getInputs(MATRIX_SIZE);
   std::unique_ptr<AbstractNode> outputs = KernelTest::getOutputs();
   auto scf = std::make_unique<SealCiphertextFactory>(16384);
@@ -181,7 +184,7 @@ TEST_F(KernelTest, STAGE_01_typeCheckingTest) {  /* NOLINT */
   std::vector<int> data;
   KernelTest::getInputMatrix(MATRIX_SIZE, data);
   std::vector<std::reference_wrapper<AbstractNode>> createdNodes;
-  std::unique_ptr<AbstractNode> evalProgram = KernelTest::getEvaluationProgram(createdNodes);
+  std::unique_ptr<AbstractNode> evalProgram = KernelTest::getLaplaceSharpeningProgramAndNodes(createdNodes);
 
   TypeCheckingVisitor tcv;
   auto rootScope = std::make_unique<Scope>(*evalProgram);
@@ -221,7 +224,7 @@ TEST_F(KernelTest, STAGE_01_typeCheckingTest) {  /* NOLINT */
 }
 
 /// Check result after applying CTES
-TEST_F(KernelTest, STAGE_02_ctestTest) {  /* NOLINT */
+TEST_F(KernelTest, DISABLED_STAGE_02_ctestTest) {  /* NOLINT */
   // Expected: AST is not changed as there are no optimization opportunities without knowing the inputs
 
   // TODO: Implement this test as soon as CTES has been implemented.
@@ -230,12 +233,12 @@ TEST_F(KernelTest, STAGE_02_ctestTest) {  /* NOLINT */
 }
 
 /// Check result after secret branching removal
-TEST_F(KernelTest, STAGE_03_secretBranchingRemovalTest) {  /* NOLINT */
+TEST_F(KernelTest, DISABLED_STAGE_03_secretBranchingRemovalTest) {  /* NOLINT */
   // Expected: AST is not changed as there are no secret branches to be removed
 
   std::vector<int> data;
   KernelTest::getInputMatrix(MATRIX_SIZE, data);
-  std::unique_ptr<AbstractNode> evalProgram = KernelTest::getEvaluationProgram();
+  std::unique_ptr<AbstractNode> evalProgram = KernelTest::getLaplaceSharpeningProgram();
 
   // get secret tainted nodes map
   TypeCheckingVisitor tcv;
@@ -252,18 +255,18 @@ TEST_F(KernelTest, STAGE_03_secretBranchingRemovalTest) {  /* NOLINT */
   SecretBranchingVisitor sbv(tcv.getSecretTaintedNodes());
   evalProgram->accept(sbv);
 
-  auto expectedOriginalAst = KernelTest::getEvaluationProgram();
+  auto expectedOriginalAst = KernelTest::getLaplaceSharpeningProgram();
   compareAST(*evalProgram, *expectedOriginalAst);
 }
 
 /// Check result after loop unrolling
-TEST_F(KernelTest, STAGE_04_loopUnrollingTest) {  /* NOLINT */
+TEST_F(KernelTest, DISABLED_STAGE_04_loopUnrollingTest) {  /* NOLINT */
 
   // TODO: Implement this test as soon as Loop Unrolling has been implemented.
 
   // After unrolling inner loop 1
   const char *afterInnerLoop1 = R""""(
-      public void runKernel(int imageVec) {
+      public void laplacianSharpening(int imageVec) {
         int weightMatrix = { {1, 1, 1}, {1, -8, 1}, {1, 1, 1} };
         secret int img2 = image;
         for (int x = 1; x < imgSize - 1; x = x + 1) {
@@ -284,7 +287,7 @@ TEST_F(KernelTest, STAGE_04_loopUnrollingTest) {  /* NOLINT */
 
   // After unrolling inner loop 2
   const char *afterInnerLoop2 = R""""(
-      public void runKernel(int imageVec) {
+      public void laplacianSharpening(int imageVec) {
         int weightMatrix = { {1, 1, 1}, {1, -8, 1}, {1, 1, 1} };
         secret int img2 = image;
         for (int x = 1; x < imgSize - 1; x = x + 1) {
@@ -309,7 +312,7 @@ TEST_F(KernelTest, STAGE_04_loopUnrollingTest) {  /* NOLINT */
 
   // After applying CTES on unrolled statements
   const char *afterCtes = R""""(
-      public void runKernel(int imageVec) {
+      public void laplacianSharpening(int imageVec) {
         int weightMatrix = { {1, 1, 1}, {1, -8, 1}, {1, 1, 1} };
         secret int img2 = image;
         for (int x = 1; x < imgSize - 1; x = x + 1) {
@@ -333,10 +336,10 @@ TEST_F(KernelTest, STAGE_04_loopUnrollingTest) {  /* NOLINT */
 }
 
 /// Check result after statement vectorization
-TEST_F(KernelTest, STAGE_05_statementVectorizationTest) {  /* NOLINT */
+TEST_F(KernelTest, DISABLED_STAGE_05_statementVectorizationTest) {  /* NOLINT */
   // After applying Vectorizer on unrolled statements
   const char *afterVectorization = R""""(
-      public void runKernel(int imageVec) {
+      public void laplacianSharpening(int imageVec) {
         int weightMatrix = { {1, 1, 1}, {1, -8, 1}, {1, 1, 1} };
         secret int img2 = image;
 

@@ -53,7 +53,10 @@ set(TEST_FILES
         visitor/TypeCheckingVisitorTest.cpp
         visitor/Runtime/SealCiphertextFactoryTest.cpp
         visitor/Runtime/RuntimeVisitorTest.cpp
-        end-to-end/KernelTest.cpp end-to-end/CardioTest.cpp)
+        visitor/Runtime/DummyCiphertextFactoryTest.cpp
+        end-to-end/LaplaceSharpeningTest.cpp
+        end-to-end/CardioTest.cpp
+        )
 
 add_executable(testing-all
         ${TEST_FILES})

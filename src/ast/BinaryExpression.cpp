@@ -1,6 +1,6 @@
 #include <vector>
 #include "ast_opt/ast/BinaryExpression.h"
-#include "ast_opt/visitor/IVisitor.h"
+#include "ast_opt/utilities/IVisitor.h"
 
 BinaryExpression::~BinaryExpression() = default;
 

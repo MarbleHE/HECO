@@ -2,7 +2,7 @@
 #include <utility>
 #include <iostream>
 
-#include "ast_opt/visitor/runtime/RuntimeVisitor.h"
+#include "ast_opt/runtime/RuntimeVisitor.h"
 #include "ast_opt/ast/BinaryExpression.h"
 #include "ast_opt/ast/Block.h"
 #include "ast_opt/ast/Call.h"
@@ -18,7 +18,7 @@
 #include "ast_opt/ast/Assignment.h"
 #include "ast_opt/ast/VariableDeclaration.h"
 #include "ast_opt/ast/Variable.h"
-#include "ast_opt/visitor/runtime/AbstractCiphertextFactory.h"
+#include "ast_opt/runtime/AbstractCiphertextFactory.h"
 #include "ast_opt/parser/Tokens.h"
 
 template<typename S, typename T>
@@ -66,37 +66,37 @@ void SpecialRuntimeVisitor::visit(BinaryExpression &elem) {
   std::unique_ptr<Cleartext<bool>> relationalOperatorResult;
   // execute the binary operation
   if (operatorEqualsAnyOf({ADDITION, FHE_ADDITION})) {
-    lhsOperand->add(*rhsOperand);
+    lhsOperand->add_inplace(*rhsOperand);
   } else if (operatorEqualsAnyOf({SUBTRACTION, FHE_SUBTRACTION})) {
-    lhsOperand->subtract(*rhsOperand);
+    lhsOperand->subtract_inplace(*rhsOperand);
   } else if (operatorEqualsAnyOf({MULTIPLICATION, FHE_MULTIPLICATION})) {
-    lhsOperand->multiply(*rhsOperand);
+    lhsOperand->multiply_inplace(*rhsOperand);
   } else if (operatorEquals(DIVISION)) {
-    lhsOperand->divide(*rhsOperand);
+    lhsOperand->divide_inplace(*rhsOperand);
   } else if (operatorEquals(MODULO)) {
-    lhsOperand->modulo(*rhsOperand);
+    lhsOperand->modulo_inplace(*rhsOperand);
   } else if (operatorEquals(LOGICAL_AND)) {
-    lhsOperand->logicalAnd(*rhsOperand);
+    lhsOperand->logicalAnd_inplace(*rhsOperand);
   } else if (operatorEquals(LOGICAL_OR)) {
-    lhsOperand->logicalOr(*rhsOperand);
+    lhsOperand->logicalOr_inplace(*rhsOperand);
   } else if (operatorEquals(LESS)) {
-    lhsOperand->logicalLess(*rhsOperand);
+    lhsOperand->logicalLess_inplace(*rhsOperand);
   } else if (operatorEquals(LESS_EQUAL)) {
-    lhsOperand->logicalLessEqual(*rhsOperand);
+    lhsOperand->logicalLessEqual_inplace(*rhsOperand);
   } else if (operatorEquals(GREATER)) {
-    lhsOperand->logicalGreater(*rhsOperand);
+    lhsOperand->logicalGreater_inplace(*rhsOperand);
   } else if (operatorEquals(GREATER_EQUAL)) {
-    lhsOperand->logicalGreaterEqual(*rhsOperand);
+    lhsOperand->logicalGreaterEqual_inplace(*rhsOperand);
   } else if (operatorEquals(EQUAL)) {
-    lhsOperand->logicalEqual(*rhsOperand);
+    lhsOperand->logicalEqual_inplace(*rhsOperand);
   } else if (operatorEquals(NOTEQUAL)) {
-    lhsOperand->logicalNotEqual(*rhsOperand);
+    lhsOperand->logicalNotEqual_inplace(*rhsOperand);
   } else if (operatorEquals(BITWISE_AND)) {
-    lhsOperand->bitwiseAnd(*rhsOperand);
+    lhsOperand->bitwiseAnd_inplace(*rhsOperand);
   } else if (operatorEquals(BITWISE_XOR)) {
-    lhsOperand->bitwiseXor(*rhsOperand);
+    lhsOperand->bitwiseXor_inplace(*rhsOperand);
   } else if (operatorEquals(BITWISE_OR)) {
-    lhsOperand->bitwiseOr(*rhsOperand);
+    lhsOperand->bitwiseOr_inplace(*rhsOperand);
   } else {
     throw std::runtime_error("Unknown binary operator encountered. Cannot continue!");
   }
@@ -115,9 +115,9 @@ void SpecialRuntimeVisitor::visit(UnaryExpression &elem) {
   auto operand = getNextStackElement();
 
   if (elem.getOperator()==Operator(LOGICAL_NOT)) {
-    operand->logicalNot();
+    operand->logicalNot_inplace();
   } else if (elem.getOperator()==Operator(BITWISE_NOT)) {
-    operand->bitwiseNot();
+    operand->bitwiseNot_inplace();
   } else {
     throw std::runtime_error("Unknown unary operator encountered!");
   }

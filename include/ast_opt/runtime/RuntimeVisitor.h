@@ -3,9 +3,9 @@
 
 #include <stack>
 
-#include "ast_opt/visitor/runtime/Cleartext.h"
-#include "ast_opt/visitor/ScopedVisitor.h"
-#include "ast_opt/visitor/runtime/AbstractCiphertext.h"
+#include "Cleartext.h"
+#include "ast_opt/utilities/ScopedVisitor.h"
+#include "AbstractCiphertext.h"
 #include "ast_opt/visitor/TypeCheckingVisitor.h"
 #include "ast_opt/utilities/VariableMap.h"
 

@@ -25,7 +25,7 @@ jobs:
         if: ${{ failure() }}
         uses: voxmedia/github-action-slack-notify-build@v1
         with:
-          channel: batching-compiler
+          channel: github-batching-compiler
           status: Building ABC using gcc on Ubuntu failed!
           color: warning
         env:
@@ -48,7 +48,7 @@ jobs:
         if: ${{ failure() }}
         uses: voxmedia/github-action-slack-notify-build@v1
         with:
-          channel: batching-compiler
+          channel: github-batching-compiler
           status: Building ABC using clang on macOS failed!
           color: warning
         env:
@@ -80,7 +80,7 @@ jobs:
         if: ${{ failure() }}
         uses: voxmedia/github-action-slack-notify-build@v1
         with:
-          channel: batching-compiler
+          channel: github-batching-compiler
           status: Building ABC using MSVSC on Windows failed!
           color: warning
         env:

@@ -1,8 +1,8 @@
-#include "include/ast_opt/ast/AbstractNode.h"
-#include "include/ast_opt/parser/Parser.h"
-#include "include/ast_opt/ast/Literal.h"
-#include "include/ast_opt/visitor/runtime/RuntimeVisitor.h"
-#include "include/ast_opt/visitor/runtime/SealCiphertextFactory.h"
+#include "ast_opt/ast/AbstractNode.h"
+#include "ast_opt/parser/Parser.h"
+#include "ast_opt/ast/Literal.h"
+#include "ast_opt/runtime/RuntimeVisitor.h"
+#include "ast_opt/runtime/SealCiphertextFactory.h"
 
 #include "gtest/gtest.h"
 #ifdef HAVE_SEAL_BFV
@@ -24,7 +24,7 @@ class RuntimeVisitorTest : public ::testing::Test {
   }
 
   /// A helper method that takes the result produced by the RuntimeVisitor (result) and a list of expected
-  /// (identifier, vector of values) pairs that the program should have been returned.
+  /// (identifier, vector of values) pairs that the program should have returned.
   /// \param result The generated result retrieved by getOutput from the RuntimeVisitor.
   /// \param expectedResult The expected result that the program should have been produced.
   void assertResult(const OutputIdentifierValuePairs &result,

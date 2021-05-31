@@ -23,8 +23,8 @@ set(CXXFLAGS "--coverage --pedantic-errors -Wall -WError")
 if (MSVC)
     message("Using MSVC")
 
-    # Force static MSVC runtime library on Windows
-    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    # Force dynamic MSVC runtime library on Windows
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 
     # Switch MSVC into multi threaded mode
     add_compile_options(/MP)
@@ -54,7 +54,7 @@ endif ()
 # Determine if SEAL is available
 ##############################
 
-find_package(SEAL 3.5) # sets SEAL_FOUND variable
+find_package(SEAL 3.6 CONFIG) # sets SEAL_FOUND variable
 
 ##############################
 # Download and install nlohmann-json if required
@@ -75,10 +75,12 @@ endif ()
 
 ##############################
 # TARGET: ast_opt
+# TODO: Rename this target!
 #
 # The main ast_optimizer as a library
 ##############################
 
+# All source files (*.cpp) for ABC
 set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/ast/AbstractNode.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/Assignment.cpp
@@ -103,39 +105,44 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/parser/PushBackStream.cpp
         ${ast_optimizer_SOURCE_DIR}/src/parser/Tokenizer.cpp
         ${ast_optimizer_SOURCE_DIR}/src/parser/Tokens.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/runtime/DummyCiphertext.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/runtime/DummyCiphertextFactory.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/runtime/RuntimeVisitor.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/runtime/SealCiphertext.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/runtime/SealCiphertextFactory.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/BatchingConstraint.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/ComplexValue.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/Datatype.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/Operator.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/Scope.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/visitor/controlFlowGraph/ControlFlowGraphVisitor.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/visitor/controlFlowGraph/GraphNode.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/visitor/controlFlowGraph/NodeRelationship.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/utilities/ScopedVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/ExpressionBatcher.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/HashVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/PrintVisitor.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/visitor/ScopedVisitor.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/visitor/Vectorizer.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/SecretBranchingVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/TypeCheckingVisitor.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/visitor/runtime/RuntimeVisitor.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/visitor/runtime/SealCiphertext.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/visitor/runtime/SealCiphertextFactory.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/Vectorizer.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/controlFlowGraph/ControlFlowGraphVisitor.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/controlFlowGraph/GraphNode.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/controlFlowGraph/NodeRelationship.cpp
         )
 
+# This contains all the header-only files (e.g., abstract classes, interfaces and templates that don't have *.cpp file)
 set(HEADER_ONLY_SOURCES
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractExpression.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractStatement.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractTarget.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/IVisitor.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/AbstractCiphertextFactory.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/AbstractCiphertext.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/AbstractCiphertextFactory.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/AbstractNoiseMeasuringCiphertext.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/AbstractValue.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/Cleartext.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/IVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/VariableMap.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/AbstractCiphertext.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/Cleartext.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/AbstractValue.h
         )
 
-# TODO: Go through this list and determine which headers aren't actually public
+# This contains the headers that developers that want to link directly against ABC might need to have access to
+# These are the headers that are installed when ABC is installed as a system-wide library
 set(PUBLIC_HEADERS
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractExpression.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractNode.h
@@ -162,25 +169,27 @@ set(PUBLIC_HEADERS
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/parser/PushBackStream.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/parser/Tokenizer.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/parser/Tokens.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/DummyCiphertext.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/DummyCiphertextFactory.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/RuntimeVisitor.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/SealCiphertext.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/SealCiphertextFactory.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/BatchingConstraint.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/ComplexValue.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/Datatype.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/IVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/Operator.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/VariableMap.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/Scope.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/controlFlowGraph/ControlFlowGraphVisitor.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/controlFlowGraph/NodeRelationship.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/ScopedVisitor.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/VariableMap.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/ExpressionBatcher.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/IVisitor.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/PrintVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/HashVisitor.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/ScopedVisitor.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/Vectorizer.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/PrintVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/SecretBranchingVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/TypeCheckingVisitor.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/RuntimeVisitor.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/SealCiphertext.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/SealCiphertextFactory.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/Vectorizer.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/controlFlowGraph/ControlFlowGraphVisitor.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/controlFlowGraph/NodeRelationship.h
         )
 
 # build a library out of the code to be used by the tests
@@ -196,7 +205,7 @@ target_compile_features(ast_opt PUBLIC cxx_std_17)
 if (SEAL_FOUND)
     message("Enabling SEAL functionality")
     target_include_directories(ast_opt PUBLIC ${SEAL_INCLUDE_DIRS})
-    target_link_libraries(ast_opt PUBLIC ${SEAL_LIBRARIES})
+    target_link_libraries(ast_opt PUBLIC SEAL::seal)
     target_compile_definitions(ast_opt PUBLIC -DHAVE_SEAL_BFV)
     target_compile_definitions(ast_opt PUBLIC -DHAVE_SEAL_CKKS)
 endif (SEAL_FOUND)

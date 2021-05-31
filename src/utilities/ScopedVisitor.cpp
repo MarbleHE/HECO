@@ -15,7 +15,7 @@
 #include "ast_opt/ast/UnaryExpression.h"
 #include "ast_opt/ast/Variable.h"
 #include "ast_opt/ast/VariableDeclaration.h"
-#include "ast_opt/visitor/ScopedVisitor.h"
+#include "ast_opt/utilities/ScopedVisitor.h"
 #include "ast_opt/utilities/Scope.h"
 
 void ScopedVisitor::visit(BinaryExpression &elem) {
