@@ -6,7 +6,7 @@
 #include "ast_opt/ast/Function.h"
 #include "ast_opt/ast/ExpressionList.h"
 #include "ast_opt/ast/VariableDeclaration.h"
-#include "include/ast_opt/visitor/controlFlowGraph/ControlFlowGraphVisitor.h"
+#include "ast_opt/visitor/controlFlowGraph/ControlFlowGraphVisitor.h"
 #include "gtest/gtest.h"
 
 // == Tests for the Control Flow Graph

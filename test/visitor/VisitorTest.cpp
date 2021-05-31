@@ -1,4 +1,4 @@
-#include "ast_opt/visitor/ScopedVisitor.h"
+#include "ast_opt/utilities/ScopedVisitor.h"
 #include "ast_opt/ast/Return.h"
 #include "ast_opt/ast/Literal.h"
 #include "gtest/gtest.h"

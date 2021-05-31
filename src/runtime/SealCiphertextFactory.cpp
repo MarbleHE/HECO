@@ -1,6 +1,6 @@
-#include "ast_opt/visitor/runtime/SealCiphertext.h"
-#include "ast_opt/visitor/runtime/SealCiphertextFactory.h"
-#include "ast_opt/visitor/runtime/Cleartext.h"
+#include "ast_opt/runtime/SealCiphertext.h"
+#include "ast_opt/runtime/SealCiphertextFactory.h"
+#include "ast_opt/runtime/Cleartext.h"
 
 #ifdef HAVE_SEAL_BFV
 #include <memory>

@@ -1,7 +1,7 @@
 #ifndef AST_OPTIMIZER_INCLUDE_AST_OPT_VISITOR_SCOPEDVISITOR_H_
 #define AST_OPTIMIZER_INCLUDE_AST_OPT_VISITOR_SCOPEDVISITOR_H_
 
-#include "ast_opt/visitor/IVisitor.h"
+#include "IVisitor.h"
 #include "ast_opt/utilities/Scope.h"
 
 class AbstractStatement;

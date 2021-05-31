@@ -1,5 +1,5 @@
 #include "ast_opt/ast/If.h"
-#include "ast_opt/visitor/IVisitor.h"
+#include "ast_opt/utilities/IVisitor.h"
 
 If::~If() = default;
 

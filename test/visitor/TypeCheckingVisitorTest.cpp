@@ -1,7 +1,7 @@
-#include "include/ast_opt/visitor/controlFlowGraph/ControlFlowGraphVisitor.h"
-#include "include/ast_opt/visitor/TypeCheckingVisitor.h"
-#include "include/ast_opt/ast/Function.h"
-#include "include/ast_opt/parser/Parser.h"
+#include "ast_opt/visitor/controlFlowGraph/ControlFlowGraphVisitor.h"
+#include "ast_opt/visitor/TypeCheckingVisitor.h"
+#include "ast_opt/ast/Function.h"
+#include "ast_opt/parser/Parser.h"
 #include "gtest/gtest.h"
 
 TEST(TypeCheckingVisitorTest, simpleSecretTypeRecognition) { /* NOLINT */

@@ -2,7 +2,7 @@
 #define AST_OPTIMIZER_INCLUDE_AST_OPT_AST_LITERAL_H_
 
 #include "ast_opt/ast/AbstractExpression.h"
-#include "ast_opt/visitor/IVisitor.h"
+#include "ast_opt/utilities/IVisitor.h"
 
 // see https://stackoverflow.com/a/4485051/3017719
 #define ENABLE_TYPENAME(A) template<> struct TypeName<A> { static const char *Get() { return #A; }};

@@ -1,6 +1,6 @@
 #include <utility>
 #include "ast_opt/ast/VariableDeclaration.h"
-#include "ast_opt/visitor/IVisitor.h"
+#include "ast_opt/utilities/IVisitor.h"
 
 VariableDeclaration::~VariableDeclaration() = default;
 

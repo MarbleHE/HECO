@@ -2,8 +2,8 @@
 #define AST_OPTIMIZER_INCLUDE_AST_OPT_VISITOR_RUNTIME_DUMMYCIPHERTEXTFACTORY_H_
 
 #include <memory>
-#include "ast_opt/visitor/runtime/AbstractCiphertextFactory.h"
-#include "ast_opt/visitor/runtime/Cleartext.h"
+#include "AbstractCiphertextFactory.h"
+#include "Cleartext.h"
 
 class DummyCiphertextFactory : public AbstractCiphertextFactory {
  public:

@@ -2,7 +2,7 @@
 #define GRAPHNODE_H_INCLUDE_AST_OPT_VISITOR_RUNTIME_SEALCIPHERTEXTFACTORY_H_
 
 #include <memory>
-#include "ast_opt/visitor/runtime/AbstractCiphertextFactory.h"
+#include "AbstractCiphertextFactory.h"
 
 #ifdef HAVE_SEAL_BFV
 #include <seal/seal.h>

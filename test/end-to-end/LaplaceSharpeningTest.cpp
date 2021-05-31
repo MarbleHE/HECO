@@ -3,8 +3,8 @@
 #include "gtest/gtest.h"
 #include "ast_opt/ast/AbstractNode.h"
 #include "ast_opt/parser/Parser.h"
-#include "ast_opt/visitor/runtime/RuntimeVisitor.h"
-#include "ast_opt/visitor/runtime/SealCiphertextFactory.h"
+#include "ast_opt/runtime/RuntimeVisitor.h"
+#include "ast_opt/runtime/SealCiphertextFactory.h"
 #include "ast_opt/ast/Assignment.h"
 #include "ast_opt/ast/Variable.h"
 #include "ast_opt/ast/IndexAccess.h"
@@ -224,7 +224,7 @@ TEST_F(KernelTest, STAGE_01_typeCheckingTest) {  /* NOLINT */
 }
 
 /// Check result after applying CTES
-TEST_F(KernelTest, STAGE_02_ctestTest) {  /* NOLINT */
+TEST_F(KernelTest, DISABLED_STAGE_02_ctestTest) {  /* NOLINT */
   // Expected: AST is not changed as there are no optimization opportunities without knowing the inputs
 
   // TODO: Implement this test as soon as CTES has been implemented.
@@ -233,7 +233,7 @@ TEST_F(KernelTest, STAGE_02_ctestTest) {  /* NOLINT */
 }
 
 /// Check result after secret branching removal
-TEST_F(KernelTest, STAGE_03_secretBranchingRemovalTest) {  /* NOLINT */
+TEST_F(KernelTest, DISABLED_STAGE_03_secretBranchingRemovalTest) {  /* NOLINT */
   // Expected: AST is not changed as there are no secret branches to be removed
 
   std::vector<int> data;
@@ -260,7 +260,7 @@ TEST_F(KernelTest, STAGE_03_secretBranchingRemovalTest) {  /* NOLINT */
 }
 
 /// Check result after loop unrolling
-TEST_F(KernelTest, STAGE_04_loopUnrollingTest) {  /* NOLINT */
+TEST_F(KernelTest, DISABLED_STAGE_04_loopUnrollingTest) {  /* NOLINT */
 
   // TODO: Implement this test as soon as Loop Unrolling has been implemented.
 
@@ -336,7 +336,7 @@ TEST_F(KernelTest, STAGE_04_loopUnrollingTest) {  /* NOLINT */
 }
 
 /// Check result after statement vectorization
-TEST_F(KernelTest, STAGE_05_statementVectorizationTest) {  /* NOLINT */
+TEST_F(KernelTest, DISABLED_STAGE_05_statementVectorizationTest) {  /* NOLINT */
   // After applying Vectorizer on unrolled statements
   const char *afterVectorization = R""""(
       public void laplacianSharpening(int imageVec) {

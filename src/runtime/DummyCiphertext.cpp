@@ -1,8 +1,8 @@
 #include "ast_opt/utilities/Operator.h"
-#include "ast_opt/visitor/runtime/Cleartext.h"
-#include "ast_opt/visitor/runtime/DummyCiphertext.h"
-#include "ast_opt/visitor/runtime/DummyCiphertextFactory.h"
-#include "ast_opt/visitor/runtime/AbstractCiphertext.h"
+#include "ast_opt/runtime/Cleartext.h"
+#include "ast_opt/runtime/DummyCiphertext.h"
+#include "ast_opt/runtime/DummyCiphertextFactory.h"
+#include "ast_opt/runtime/AbstractCiphertext.h"
 
 DummyCiphertext::DummyCiphertext(const DummyCiphertext &other) : AbstractCiphertext(other), _data(other._data) {};
 
