@@ -212,6 +212,7 @@ set(PUBLIC_HEADERS
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/ExpressionBatcher.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/IVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/PrintVisitor.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/NoisePrintVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/CountOpsVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/HashVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/ScopedVisitor.h
