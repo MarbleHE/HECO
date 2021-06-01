@@ -25,7 +25,6 @@ void SpecialNoisePrintVisitor::visit(AbstractNode &elem) {
   // Output current node at required indentation
   os << "NODE VISITED: " << getIndentation() << curNodeString;
   auto result = noise_map.find(elem.getUniqueNodeId());
-  os << result->second << std::endl;
   if (result!=noise_map.end()) {
     os << "NODE NOISE: " << getIndentation() << result->second << std::endl;
   }
