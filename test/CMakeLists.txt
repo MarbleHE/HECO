@@ -15,7 +15,6 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(googletest)
 
 
-
 ##############################
 # TARGET: testing
 ##############################
@@ -41,8 +40,17 @@ set(TEST_FILES
         ast/UnaryExpressionTest.cpp
         ast/VariableDeclarationTest.cpp
         ast/VariableTest.cpp
+        end-to-end/BoxBlurTest.cpp
         end-to-end/CardioTest.cpp
+        end-to-end/DotProductTest.cpp
+        end-to-end/GxKernelTest.cpp
+        end-to-end/GyKernelTest.cpp
+        end-to-end/HammingDistanceTest.cpp
+        end-to-end/L2DistanceTest.cpp
         end-to-end/LaplaceSharpeningTest.cpp
+        end-to-end/LinearRegressionTest.cpp
+        end-to-end/PolynomialRegressionTest.cpp
+        end-to-end/RobertsCrossTest.cpp
         parser/ParserTest.cpp
         parser/ParserTestHelpers.h
         parser/TokenizerTest.cpp
@@ -71,10 +79,10 @@ endif ()
 target_link_libraries(testing-all PRIVATE gtest ast_opt gtest_main)
 target_include_directories(testing-all PRIVATE ${ast_optimizer_SOURCE_DIR}/include/)
 
-if(MSVC)
-# Mark gtest as external
-target_compile_options(testing-all PRIVATE /external:I${gtest_SOURCE_DIR}/include)
-endif()
+if (MSVC)
+    # Mark gtest as external
+    target_compile_options(testing-all PRIVATE /external:I${gtest_SOURCE_DIR}/include)
+endif ()
 
 # create ctest targets
 gtest_discover_tests(testing-all TEST_PREFIX gtest:)
