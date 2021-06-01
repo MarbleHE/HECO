@@ -53,14 +53,13 @@ void SpecialRuntimeVisitor::visit(BinaryExpression &elem) {
   elem.getLeft().accept(*this);
   auto lhsOperand = getNextStackElement();
   if(auto lhs_ptr = dynamic_cast<AbstractNoiseMeasuringCiphertext*>(&*lhsOperand)) {
-    noise_map.insert_or_assign(elem.getLeft().getUniqueNodeId(), lhs_ptr->getNoiseBudget());
+    noise_map.insert_or_assign(elem.getLeft().getUniqueNodeId(), lhs_ptr->noiseBits());
   }
-
 
   elem.getRight().accept(*this);
   auto rhsOperand = getNextStackElement();
   if(auto rhs_ptr = dynamic_cast<AbstractNoiseMeasuringCiphertext*>(&*rhsOperand)) {
-    noise_map.insert_or_assign(elem.getRight().getUniqueNodeId(), rhs_ptr->getNoiseBudget());
+    noise_map.insert_or_assign(elem.getRight().getUniqueNodeId(), rhs_ptr->noiseBits(  ));
   }
 
   // if exactly one of the operands is a ciphertext and we have a commutative operation, then we make sure that
