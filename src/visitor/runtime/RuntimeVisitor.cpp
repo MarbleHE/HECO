@@ -120,6 +120,9 @@ void SpecialRuntimeVisitor::visit(BinaryExpression &elem) {
 void SpecialRuntimeVisitor::visit(UnaryExpression &elem) {
   elem.getOperand().accept(*this);
   auto operand = getNextStackElement();
+  if(auto op_ptr = dynamic_cast<AbstractNoiseMeasuringCiphertext*>(&*operand)) {
+    noise_map.insert_or_assign(elem.getOperand().getUniqueNodeId(), op_ptr->noiseBits());
+  }
 
   if (elem.getOperator()==Operator(LOGICAL_NOT)) {
     operand->logicalNot_inplace();
@@ -174,6 +177,7 @@ void SpecialRuntimeVisitor::visit(ExpressionList &elem) {
   std::vector<std::unique_ptr<ICleartext>> cleartextVec;
   for (size_t i = 0; i < elem.getExpressions().size(); ++i) {
     auto e = getNextStackElement();
+
     if (dynamic_cast<ICleartext *>(e.get())) {
       std::unique_ptr<ICleartext> derivedPointer(dynamic_cast<ICleartext *>(e.release()));
       // We are now processing elements of the ExpressionList in reverse order, i.e., the last visited element of the
@@ -345,6 +349,11 @@ void SpecialRuntimeVisitor::visit(Assignment &elem) {
   elem.getValue().accept(*this);
   auto assignmentValue = getNextStackElement();
 
+  //added for noise measuring
+  if(auto assign_ptr = dynamic_cast<AbstractNoiseMeasuringCiphertext*>(&*assignmentValue)) {
+    noise_map.insert_or_assign(elem.getValue().getUniqueNodeId(), assign_ptr->noiseBits());
+  }
+
   auto isSecretVariable = [&](const ScopedIdentifier &scopedIdentifier) {
     return identifierDatatypes.at(scopedIdentifier).getSecretFlag();
   };
@@ -408,6 +417,7 @@ void SpecialRuntimeVisitor::visit(VariableDeclaration &elem) {
   // top of the intermedResult stack
   elem.getValue().accept(*this);
   std::unique_ptr<AbstractValue> initializationValue = getNextStackElement();
+
 
   if (elem.getDatatype().getSecretFlag()) {
     auto sident = std::make_unique<ScopedIdentifier>(getCurrentScope(), elem.getTarget().getIdentifier());

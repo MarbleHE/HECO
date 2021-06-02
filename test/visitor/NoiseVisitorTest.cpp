@@ -36,8 +36,9 @@ TEST_F(NoiseVisitorTest, testAdd) {
 
   // program specification
   const char *program = R""""(
-      secret int result = __input0__ +++ __input1__;
-      return result;
+      secret int result = __input0__ *** __input1__;
+      secret int result2 = result --- __input0__;
+      return result2;
     )"""";
   auto astProgram = Parser::parse(std::string(program));
 
@@ -58,15 +59,14 @@ TEST_F(NoiseVisitorTest, testAdd) {
   auto map = tcv->getSecretTaintedNodes();
   RuntimeVisitor srv(*scf, *astInput, map);
   srv.executeAst(*astProgram);
-  // get noise map
-  auto noisemap = srv.getNoiseMap();
 
   std::stringstream ss;
-  NoisePrintVisitor v(ss, noisemap);
+  NoisePrintVisitor v(ss, srv.getNoiseMap());
 
   astProgram->accept(v);
 
-  std::cout << "TEST: " << ss.str();
+  std::cout << "Program: " << std::endl;
+  std::cout << ss.str() << std::endl;
 
 }
 
