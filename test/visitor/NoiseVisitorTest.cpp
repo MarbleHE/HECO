@@ -37,8 +37,7 @@ TEST_F(NoiseVisitorTest, testAdd) {
   // program specification
   const char *program = R""""(
       secret int result = __input0__ *** __input1__;
-      secret int result2 = result --- __input0__;
-      return result2;
+      return result;
     )"""";
   auto astProgram = Parser::parse(std::string(program));
 

@@ -339,6 +339,13 @@ void SpecialRuntimeVisitor::visit(OperatorExpression &) {
 
 void SpecialRuntimeVisitor::visit(Return &elem) {
   ScopedVisitor::visit(elem);
+  if(elem.hasValue()) {
+    elem.getValue().accept(*this);
+    auto assignmentTarget = getNextStackElement();
+    if(auto elem_ptr = dynamic_cast<AbstractNoiseMeasuringCiphertext*>(&*assignmentTarget)) {
+      noise_map.insert_or_assign(elem.getUniqueNodeId(), elem_ptr->noiseBits());
+    }
+  }
   throw ReturnStatementReached();
 }
 
