@@ -114,6 +114,7 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/utilities/ComplexValue.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/Datatype.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/Operator.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/utilities/PlainVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/Scope.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/ScopedVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/ExpressionBatcher.cpp
@@ -180,6 +181,7 @@ set(PUBLIC_HEADERS
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/Datatype.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/IVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/Operator.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/PlainVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/Scope.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/ScopedVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/VariableMap.h
