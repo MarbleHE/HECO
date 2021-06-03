@@ -33,5 +33,5 @@ bool Datatype::getSecretFlag() const {
 }
 
 std::string Datatype::toString() const {
-  return isSecret ? "secret + " + enumToString(type) : enumToString(type);
+  return isSecret ? "secret " + enumToString(type) : enumToString(type);
 }

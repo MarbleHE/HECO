@@ -1,3 +1,9 @@
+#include "ast_opt/utilities/ScopedVisitor.h"
+
+#include "ast_opt/ast/AbstractExpression.h"
+#include "ast_opt/ast/AbstractNode.h"
+#include "ast_opt/ast/AbstractStatement.h"
+#include "ast_opt/ast/AbstractTarget.h"
 #include "ast_opt/ast/Assignment.h"
 #include "ast_opt/ast/BinaryExpression.h"
 #include "ast_opt/ast/Block.h"
@@ -15,8 +21,6 @@
 #include "ast_opt/ast/UnaryExpression.h"
 #include "ast_opt/ast/Variable.h"
 #include "ast_opt/ast/VariableDeclaration.h"
-#include "ast_opt/utilities/ScopedVisitor.h"
-#include "ast_opt/utilities/Scope.h"
 
 void ScopedVisitor::visit(BinaryExpression &elem) {
   visitChildren(elem);

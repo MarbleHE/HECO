@@ -4,7 +4,7 @@
 #include <iostream>
 #include <set>
 #include "ast_opt/ast/AbstractStatement.h"
-#include "ast_opt/utilities/ScopedVisitor.h"
+#include "ast_opt/utilities/Visitor.h"
 #include "ast_opt/visitor/controlFlowGraph/GraphNode.h"
 
 // Forward declaration

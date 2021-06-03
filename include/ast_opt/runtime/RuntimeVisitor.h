@@ -4,7 +4,7 @@
 #include <stack>
 
 #include "Cleartext.h"
-#include "ast_opt/utilities/ScopedVisitor.h"
+#include "ast_opt/utilities/Visitor.h"
 #include "AbstractCiphertext.h"
 #include "ast_opt/visitor/TypeCheckingVisitor.h"
 #include "ast_opt/utilities/VariableMap.h"

@@ -1,21 +1,12 @@
-#ifndef AST_OPTIMIZER_INCLUDE_AST_OPT_UTILITIES_SCOPEDVISITOR_H_
-#define AST_OPTIMIZER_INCLUDE_AST_OPT_UTILITIES_SCOPEDVISITOR_H_
+#ifndef AST_OPTIMIZER_INCLUDE_AST_OPT_UTILITIES_PLAINVISITOR_H_
+#define AST_OPTIMIZER_INCLUDE_AST_OPT_UTILITIES_PLAINVISITOR_H_
 
 #include "ast_opt/utilities/IVisitor.h"
 #include "ast_opt/utilities/Scope.h"
 
 /// This class implements the "default" behaviour of a visitor
 /// simply visiting a node's children
-/// and setting the scope as required
-class ScopedVisitor : public IVisitor {
- private:
-
-  /// the outermost scope of the passed AST (i.e., the scope without a parent)
-  std::unique_ptr<Scope> rootScope = nullptr;
-
-  /// the scope that the scopedVisitor is currently in during the AST traversal
-  Scope *currentScope = nullptr;
-
+class PlainVisitor : public IVisitor {
  public:
 
   void visit(BinaryExpression &elem) override;
@@ -62,22 +53,9 @@ class ScopedVisitor : public IVisitor {
 
   void visit(Variable &elem) override;
 
-  Scope &getCurrentScope();
-
-  [[nodiscard]] const Scope &getCurrentScope() const;
-
-  Scope &getRootScope();
-
-  [[nodiscard]] const Scope &getRootScope() const;
-
-  void setRootScope(std::unique_ptr<Scope> &&scope);
-
   void visitChildren(AbstractNode &elem);
 
-  void enterScope(AbstractNode &node);
-
-  void exitScope();
 };
 
 
-#endif //AST_OPTIMIZER_INCLUDE_AST_OPT_UTILITIES_SCOPEDVISITOR_H_
+#endif //AST_OPTIMIZER_INCLUDE_AST_OPT_UTILITIES_PLAINVISITOR_H_
