@@ -5,11 +5,13 @@
 #include "ast_opt/utilities/Datatype.h"
 #include "ast_opt/utilities/Operator.h"
 #include "ast_opt/parser/Tokenizer.h"
+#include "ast_opt/ast/AbstractNode.h"
 
 // In order to avoid excessive compilation dependencies,
 // we use forward-declarations rather than includes when possible
+// However, we must include AbstractNode since we use it with smart ptrs
+
 class AbstractExpression;
-class AbstractNode;
 class AbstractStatement;
 class AbstractTarget;
 class BinaryExpression;
