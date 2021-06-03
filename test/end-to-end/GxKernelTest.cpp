@@ -41,7 +41,6 @@ std::vector<int> naiveGxKernel(std::vector<int> &img) {
 /// \param img Pixel (x,y) = (column, row) should be at position x*imgSize + y
 /// \return transformed image
 std::vector<int> fastGxKernel(std::vector<int> &img) {
-  //TODO: STILL NEEDS TO BE IMPLEMENTED
   const auto imgSize = (int) std::ceil(std::sqrt(img.size()));
   std::vector<int> img2(img.begin(), img.end());
 
@@ -162,7 +161,7 @@ class GxKernelTest : public ::testing::Test {  /* NOLINT (predictable sequence e
   }
 
   void printMatrix(size_t size, std::vector<int> &matrix) {
-    for (auto row = size - 1; row >= 0; --row) {
+    for (int64_t row = (int64_t)size - 1; row >= 0; --row) {
       std::cout << matrix.at(0*size + row);
       for (size_t col = 1; col < size; ++col) {
         std::cout << "\t" << matrix.at(col*size + row);
