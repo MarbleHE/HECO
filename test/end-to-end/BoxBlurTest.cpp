@@ -148,9 +148,9 @@ class BoxBlurTest : public ::testing::Test {  /* NOLINT (predictable sequence ex
   }
 
   void printMatrix(size_t size, std::vector<int> &matrix) {
-    for (int row = size - 1; row >= 0; --row) {
+    for (auto row = size - 1; row >= 0; --row) {
       std::cout << matrix.at(0*size + row);
-      for (int col = 1; col < size; ++col) {
+      for (size_t col = 1; col < size; ++col) {
         std::cout << "\t" << matrix.at(col*size + row);
       }
       std::cout << std::endl;
