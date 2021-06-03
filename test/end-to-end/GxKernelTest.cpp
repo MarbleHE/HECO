@@ -11,7 +11,7 @@
 ///
 /// \param img Pixel (x,y) = (column, row) should be at position x*imgSize + y
 /// \return transformed image
-std::vector<int> naiveGxKernel(std::vector<int> &img) {
+std::vector<int> naiveGxKernel(const std::vector<int> &img) {
   const auto imgSize = (int) std::ceil(std::sqrt(img.size()));
   // Encoded same as images
   std::vector<std::vector<int>> weightMatrix = {{1, 2, 1}, {0, 0, 0}, {-1, -2, -1}};
@@ -40,7 +40,7 @@ std::vector<int> naiveGxKernel(std::vector<int> &img) {
 ///
 /// \param img Pixel (x,y) = (column, row) should be at position x*imgSize + y
 /// \return transformed image
-std::vector<int> fastGxKernel(std::vector<int> &img) {
+std::vector<int> fastGxKernel(const std::vector<int> &img) {
   const auto imgSize = (int) std::ceil(std::sqrt(img.size()));
   std::vector<int> img2(img.begin(), img.end());
 
@@ -161,7 +161,7 @@ class GxKernelTest : public ::testing::Test {  /* NOLINT (predictable sequence e
   }
 
   void printMatrix(size_t size, std::vector<int> &matrix) {
-    for (int64_t row = (int64_t)size - 1; row >= 0; --row) {
+    for (int64_t row = (int64_t) size - 1; row >= 0; --row) {
       std::cout << matrix.at(0*size + row);
       for (size_t col = 1; col < size; ++col) {
         std::cout << "\t" << matrix.at(col*size + row);

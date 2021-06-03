@@ -13,7 +13,7 @@
 ///
 /// \param img Pixel (x,y) = (column, row) should be at position x*imgSize + y
 /// \return transformed image
-std::vector<int> naiveBoxBlur(std::vector<int> &img) {
+std::vector<int> naiveBoxBlur(const std::vector<int> &img) {
   const auto imgSize = (int) std::ceil(std::sqrt(img.size()));
   std::vector<std::vector<int>> weightMatrix = {{1, 1, 1}, {1, 1, 1}, {1, 1, 1}};
   std::vector<int> img2(img.begin(), img.end());
@@ -49,7 +49,7 @@ std::vector<int> naiveBoxBlur(std::vector<int> &img) {
 ///
 /// \param img Pixel (x,y) = (column, row) should be at position x*imgSize + y
 /// \return transformed image
-std::vector<int> fastBoxBlur(std::vector<int> &img) {
+std::vector<int> fastBoxBlur(const std::vector<int> &img) {
   const auto imgSize = (int) std::ceil(std::sqrt(img.size()));
   std::vector<int> img2(img.begin(), img.end());
 

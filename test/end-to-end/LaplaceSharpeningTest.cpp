@@ -34,7 +34,7 @@
 ///
 /// \param img Pixel (x,y) = (column, row) should be at position x*imgSize + y
 /// \return transformed image
-std::vector<int> laplacianSharpening(std::vector<int> &img) {
+std::vector<int> laplacianSharpening(const std::vector<int> &img) {
   const auto imgSize = (int) std::ceil(std::sqrt(img.size()));
   std::vector<std::vector<int>> weightMatrix = {{1, 1, 1}, {1, -8, 1}, {1, 1, 1}};
   std::vector<int> img2(img.begin(), img.end());
@@ -79,7 +79,7 @@ class KernelTest : public ::testing::Test {  /* NOLINT (predictable sequence exp
     std::copy(inputValues.begin(), inputValues.end() - 1, std::ostream_iterator<int>(inputString, ", "));
     inputString << inputValues.back(); // add the last element with no delimiter
     inputString << " };" << std::endl;
-    inputString << "int imgSize = " << size <<  ";" << std::endl;
+    inputString << "int imgSize = " << size << ";" << std::endl;
 
     return Parser::parse(inputString.str());
   }
@@ -96,7 +96,8 @@ class KernelTest : public ::testing::Test {  /* NOLINT (predictable sequence exp
     return getLaplaceSharpeningProgramAndNodes(createdNodes);
   }
 
-  static std::unique_ptr<AbstractNode> getLaplaceSharpeningProgramAndNodes(std::vector<std::reference_wrapper<AbstractNode>> &createdNodes) {
+  static std::unique_ptr<AbstractNode> getLaplaceSharpeningProgramAndNodes(std::vector<std::reference_wrapper<
+      AbstractNode>> &createdNodes) {
     // program's input
     const char *inputs = R""""(
       public void laplacianSharpening(int imageVec) {
@@ -143,8 +144,6 @@ class KernelTest : public ::testing::Test {  /* NOLINT (predictable sequence exp
     for (const auto &sub : data) destination.insert(destination.end(), sub.begin(), sub.end());
   }
 };
-
-
 
 #if HAVE_SEAL_BFV
 
