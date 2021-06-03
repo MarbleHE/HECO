@@ -20,8 +20,8 @@ FetchContent_MakeAvailable(googletest)
 # TARGET: testing
 ##############################
 set(TEST_FILES
-        ASTComparison.h
         ASTComparison.cpp
+        ASTComparison.h
         AstTestingGenerator.cpp
         AstTestingGenerator.h
         JsonOutputTest.cpp
@@ -41,21 +41,22 @@ set(TEST_FILES
         ast/UnaryExpressionTest.cpp
         ast/VariableDeclarationTest.cpp
         ast/VariableTest.cpp
+        end-to-end/CardioTest.cpp
+        end-to-end/LaplaceSharpeningTest.cpp
         parser/ParserTest.cpp
         parser/ParserTestHelpers.h
         parser/TokenizerTest.cpp
-        visitor/ExpressionBatcherTest.cpp
         visitor/ControlFlowGraphVisitorTest.cpp
+        visitor/ExpressionBatcherTest.cpp
         visitor/PrintVisitorTest.cpp
-        visitor/VectorizerTest.cpp
-        visitor/VisitorTest.cpp
+        visitor/ProgramPrintVisitorTest.cpp
+        visitor/Runtime/DummyCiphertextFactoryTest.cpp
+        visitor/Runtime/RuntimeVisitorTest.cpp
+        visitor/Runtime/SealCiphertextFactoryTest.cpp
         visitor/SecretBranchingVisitorTest.cpp
         visitor/TypeCheckingVisitorTest.cpp
-        visitor/Runtime/SealCiphertextFactoryTest.cpp
-        visitor/Runtime/RuntimeVisitorTest.cpp
-        visitor/Runtime/DummyCiphertextFactoryTest.cpp
-        end-to-end/LaplaceSharpeningTest.cpp
-        end-to-end/CardioTest.cpp
+        visitor/VectorizerTest.cpp
+        visitor/VisitorTest.cpp
         )
 
 add_executable(testing-all
