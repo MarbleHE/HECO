@@ -8,7 +8,7 @@
 #include "ast_opt/utilities/Datatype.h"
 #include "ast_opt/utilities/ComplexValue.h"
 #include "ast_opt/utilities/VariableMap.h"
-#include "ast_opt/utilities/ScopedVisitor.h"
+#include "ast_opt/utilities/Visitor.h"
 
 class TreeNode;
 
