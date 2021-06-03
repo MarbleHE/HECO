@@ -53,6 +53,10 @@ class SpecialRuntimeVisitor : public ScopedVisitor {
   /// A map for noise budgets (only used if AbstractNoiseMeasuringCiphertexts are present)
   std::unordered_map<std::string, int> noise_map;
 
+  /// A map for relative noise budget decay rates (only used if AbstractNoiseMeasuringCiphertexts are present)
+  /// rel_decay = 1/(max(left_noise, right_noise)) * (curr_noise - max(left_noise, right_noise))
+  std::unordered_map<std::string, double> rel_noise_map;
+
  public:
   /// Create a new SpecialRuntimeVisitor.
   /// \param factory A reference to the factory that should be used to create the ciphertexts.
@@ -143,6 +147,7 @@ class SpecialRuntimeVisitor : public ScopedVisitor {
 
   //TODO: Document Getter for noise map
   const std::unordered_map<std::string, int>& getNoiseMap();
+  const std::unordered_map<std::string, double> &getRelNoiseMap();
 };
 
 #endif //GRAPHNODE_H_INCLUDE_AST_OPT_VISITOR_RUNTIME_H_

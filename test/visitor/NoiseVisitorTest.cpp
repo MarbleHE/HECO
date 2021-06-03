@@ -31,25 +31,27 @@ TEST_F(NoiseVisitorTest, testAdd) {
   const char *inputs = R""""(
       secret int __input0__ = {43,  1,   1,   1,  22, 11, 425,  0, 1, 7};
       secret int __input1__ = {24, 34, 222,   4,    1, 4,   9, 22, 1, 3};
+      secret int __input2__ = {24, 34, 222,   4,    1, 4,   9, 22, 1, 3};
     )"""";
   auto astInput = Parser::parse(std::string(inputs));
 
   // program specification
   const char *program = R""""(
-      secret int result = __input0__ *** __input1__;
-      return result;
+      secret int result0 = __input0__ *** __input0__;
+      return result0;
     )"""";
   auto astProgram = Parser::parse(std::string(program));
 
   // program's output
   const char *outputs = R""""(
-      y = result;
+      y = result1;
     )"""";
   auto astOutput = Parser::parse(std::string(outputs));
   // create and prepopulate TypeCheckingVisitor
   auto rootScope = std::make_unique<Scope>(*astProgram);
   registerInputVariable(*rootScope, "__input0__", Datatype(Type::INT, true));
   registerInputVariable(*rootScope, "__input1__", Datatype(Type::INT, true));
+  registerInputVariable(*rootScope, "__input2__", Datatype(Type::INT, true));
 
   tcv->setRootScope(std::move(rootScope));
   astProgram->accept(*tcv);
@@ -60,7 +62,7 @@ TEST_F(NoiseVisitorTest, testAdd) {
   srv.executeAst(*astProgram);
 
   std::stringstream ss;
-  NoisePrintVisitor v(ss, srv.getNoiseMap());
+  NoisePrintVisitor v(ss, srv.getNoiseMap(), srv.getRelNoiseMap());
 
   astProgram->accept(v);
 

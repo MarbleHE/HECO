@@ -29,9 +29,11 @@ class SpecialNoisePrintVisitor : public ScopedVisitor {
   [[nodiscard]] std::string getIndentation() const;
 
   std::unordered_map<std::string, int> noise_map;
+  std::unordered_map<std::string, double> rel_noise_map;
 
  public:
-  explicit SpecialNoisePrintVisitor(std::ostream& os, std::unordered_map<std::string, int> noise_map);
+  explicit SpecialNoisePrintVisitor(std::ostream& os, std::unordered_map<std::string, int> noise_map,
+                                    std::unordered_map<std::string, double> rel_noise_map);
 
   void visit(AbstractNode&);
 

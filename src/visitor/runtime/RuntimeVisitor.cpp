@@ -39,6 +39,11 @@ std::unique_ptr<AbstractValue> SpecialRuntimeVisitor::getNextStackElement() {
 }
 
 void SpecialRuntimeVisitor::visit(BinaryExpression &elem) {
+
+  // some variables needed for rel noise decay calculation
+  int right = 0;
+  int left = 0;
+
   // ---- some helper methods -------------------------
   auto operatorEqualsAnyOf = [&elem](std::initializer_list<OperatorVariant> op) -> bool {
     return std::any_of(op.begin(), op.end(), [&elem](OperatorVariant op) { return elem.getOperator()==Operator(op); });
@@ -54,15 +59,27 @@ void SpecialRuntimeVisitor::visit(BinaryExpression &elem) {
   auto lhsOperand = getNextStackElement();
   if(auto lhs_ptr = dynamic_cast<AbstractNoiseMeasuringCiphertext*>(&*lhsOperand)) {
     noise_map.insert_or_assign(elem.getLeft().getUniqueNodeId(), lhs_ptr->noiseBits());
+    left =  lhs_ptr->noiseBits();
   }
 
   elem.getRight().accept(*this);
   auto rhsOperand = getNextStackElement();
   if(auto rhs_ptr = dynamic_cast<AbstractNoiseMeasuringCiphertext*>(&*rhsOperand)) {
-    noise_map.insert_or_assign(elem.getRight().getUniqueNodeId(), rhs_ptr->noiseBits(  ));
+    noise_map.insert_or_assign(elem.getRight().getUniqueNodeId(), rhs_ptr->noiseBits());
+    right =  rhs_ptr->noiseBits();
   }
+  //rel_noise_map
+ /*
+  if (auto lhs_ptr = dynamic_cast<AbstractNoiseMeasuringCiphertext*>(&*lhsOperand)) {
+    if (auto rhs_ptr = dynamic_cast<AbstractNoiseMeasuringCiphertext*>(&*rhsOperand)) {
 
-  // if exactly one of the operands is a ciphertext and we have a commutative operation, then we make sure that
+      int maximum = std::max(lhs_ptr->noiseBits(), rhs_ptr->noiseBits());
+      rel_noise_map.insert_or_assign(elem.getUniqueNodeId(), 1/maximum*(maximum-));
+    }
+  }*/
+
+
+    // if exactly one of the operands is a ciphertext and we have a commutative operation, then we make sure that
   // the first operand (the one we call the operation on) is the ciphertext
   auto lhsIsSecret = isSecretTainted(elem.getLeft().getUniqueNodeId());
   auto rhsIsSecret = isSecretTainted(elem.getRight().getUniqueNodeId());
@@ -108,6 +125,12 @@ void SpecialRuntimeVisitor::visit(BinaryExpression &elem) {
     throw std::runtime_error("Unknown binary operator encountered. Cannot continue!");
   }
 
+  // calculate relative noise budget decay (now that the lhsOperand carries the updated noise)
+  if(auto lhs_ptr = dynamic_cast<AbstractNoiseMeasuringCiphertext*>(&*lhsOperand)) {
+    std::cout << "Values: " << right << "  " << left << " " << lhs_ptr->noiseBits() << std::endl;
+    double rel_noise_decay = 1 /  std::max(left, right) ;
+  }
+
   auto lhsAsCleartextBool = dynamic_cast<Cleartext<bool> *>(lhsOperand.get());
   if (elem.getOperator().isRelationalOperator() && lhsAsCleartextBool==nullptr) {
     relationalOperatorResult = std::make_unique<Cleartext<bool>>(std::move(lhsOperand));
@@ -115,6 +138,7 @@ void SpecialRuntimeVisitor::visit(BinaryExpression &elem) {
   } else {
     intermedResult.push(std::move(lhsOperand));
   }
+
 }
 
 void SpecialRuntimeVisitor::visit(UnaryExpression &elem) {
@@ -567,4 +591,8 @@ OutputIdentifierValuePairs SpecialRuntimeVisitor::getOutput(AbstractNode &output
 }
 const std::unordered_map<std::string, int> &SpecialRuntimeVisitor::getNoiseMap() {
   return noise_map;
+}
+
+const std::unordered_map<std::string, double> &SpecialRuntimeVisitor::getRelNoiseMap() {
+  return rel_noise_map;
 }
