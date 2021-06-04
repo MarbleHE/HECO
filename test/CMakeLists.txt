@@ -50,7 +50,7 @@ set(TEST_FILES
         end-to-end/L2DistanceTest.cpp
         end-to-end/LaplaceSharpeningTest.cpp
         end-to-end/LinearKernelTest.cpp
-        end-to-end/MatrixVectorProduct.cpp
+        end-to-end/MatrixVectorProductTest.cpp
         end-to-end/PolynomialKernelTest.cpp
         end-to-end/RobertsCrossTest.cpp
         parser/ParserTest.cpp
