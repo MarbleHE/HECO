@@ -41,18 +41,28 @@ set(TEST_FILES
         ast/UnaryExpressionTest.cpp
         ast/VariableDeclarationTest.cpp
         ast/VariableTest.cpp
+        end-to-end/BoxBlurTest.cpp
         end-to-end/CardioTest.cpp
+        end-to-end/DotProductTest.cpp
+        end-to-end/GxKernelTest.cpp
+        end-to-end/GyKernelTest.cpp
+        end-to-end/HammingDistanceTest.cpp
+        end-to-end/L2DistanceTest.cpp
         end-to-end/LaplaceSharpeningTest.cpp
+        end-to-end/LinearKernelTest.cpp
+        end-to-end/MatrixVectorProductTest.cpp
+        end-to-end/PolynomialKernelTest.cpp
+        end-to-end/RobertsCrossTest.cpp
         parser/ParserTest.cpp
         parser/ParserTestHelpers.h
         parser/TokenizerTest.cpp
+        runtime/DummyCiphertextFactoryTest.cpp
+        runtime/RuntimeVisitorTest.cpp
+        runtime/SealCiphertextFactoryTest.cpp
         visitor/ControlFlowGraphVisitorTest.cpp
         visitor/ExpressionBatcherTest.cpp
         visitor/PrintVisitorTest.cpp
-        visitor/ProgramPrintVisitorTest.cpp
-        visitor/Runtime/DummyCiphertextFactoryTest.cpp
-        visitor/Runtime/RuntimeVisitorTest.cpp
-        visitor/Runtime/SealCiphertextFactoryTest.cpp
+ 		visitor/ProgramPrintVisitorTest.cpp
         visitor/SecretBranchingVisitorTest.cpp
         visitor/TypeCheckingVisitorTest.cpp
         visitor/VectorizerTest.cpp
