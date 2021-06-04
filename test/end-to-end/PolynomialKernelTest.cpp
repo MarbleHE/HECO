@@ -34,7 +34,7 @@ float polynomialKernel(const std::vector<std::vector<float>> &xs,
       sum += x[j]*xs[i][j];
     }
     // update sum
-    sum += ws[i]*ys[i]*std::pow(k + c, d);
+    sum += ws[i]*ys[i]*(float)std::pow(k + c, d);
   }
 
   // omitting sgn()
