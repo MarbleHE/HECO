@@ -80,7 +80,8 @@ jobs:
           working-directory: /root
           command: |
             echo "sudo halt" | at now + ${{ env.instance-termination-timeout }} minutes
-            cd /root/ABC/Dockerfile
+            git clone git@github.com:MarbleHE/ABC.git
+            cd ABC/Dockerfile
             docker run -e S3_URL=${{ env.s3-repository-url }} \
               -e S3_FOLDER=${{ needs.setup.outputs.ts }}__${{ github.run_id }} \
               -e AWS_ACCESS_KEY_ID=${{ env.AWS_ACCESS_KEY_ID }} \
