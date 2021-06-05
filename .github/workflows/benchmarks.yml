@@ -1,9 +1,6 @@
 name: run_benchmarks
 
-on:
-  # runs the benchmark workflow only if it is manually triggered (POST API request)
-  repository_dispatch:
-    types: [run_benchmarks]
+on: [ repository_dispatch ]
 
 env:
   # the instance type to be used for the EC2 benchmarking VMs
