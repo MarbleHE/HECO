@@ -13,9 +13,6 @@ upload_file() {
 # build ABC
 mkdir /ABC/build && cd /ABC/build && cmake .. && make -j$(nproc)
 
-# debug
-echo "Given parameters: " $@
-
 # run the benchmark by passing the bench name as arg to program, then upload results to S3 bucket
 echo "Running ABC demo..."
 target_filename=demo_values.csv
