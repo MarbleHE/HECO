@@ -1,4 +1,4 @@
-FROM ubuntu:21.04
+FROM ubuntu:latest
 
 ###### install SEAL dependencies
 ENV DEBIAN_FRONTEND=noninteractive
@@ -15,19 +15,6 @@ RUN git clone --branch 3.6.5 https://github.com/microsoft/SEAL.git && \
 ###### install other ABC dependencies
 RUN apt-get update; \
     apt-get -y install nlohmann-json3-dev
-
-# ###### clone the ABC repository
-# RUN git clone https://github.com/MarbleHE/ABC.git \
-#     # TODO: remove these lines after debugging
-#     && cd ABC \
-#     && git checkout ec2-automation
-
-# ###### build ABC
-# RUN cd ABC; \
-#     mkdir build; \
-#     cd build; \
-#     cmake ..; \
-#     make -j$(nproc)
 
 ###### run the passed benchmark
 COPY entrypoint.sh /entrypoint.sh
