@@ -21,9 +21,9 @@ def save_plot_in_s3(fig: plt.Figure, filename: str, root_folder: str, use_tight_
 
 
 def plot_all_demo():
-    print("Plotting Microbenchmarks")
+    print("Plotting demo")
     try:
-        labels, data, root_folder = get_labels_data_from_s3('microbenchmark')
+        labels, data, root_folder = get_labels_data_from_s3('demo')
     except TypeError:
         return
 
