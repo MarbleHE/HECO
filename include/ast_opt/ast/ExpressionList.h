@@ -60,16 +60,27 @@ class ExpressionList : public AbstractExpression {
   /// Since std::vector cannot directly handle references,
   /// a wrapper is used, but this can be used exactly like
   /// std::vector<AbstractStatement&> could, if it were possible
-  /// \return ExpressionList of (references to) all non-null expressions
+  /// \return vector of (references to) all non-null expressions
   std::vector<std::reference_wrapper<AbstractExpression>> getExpressions();
 
   /// Get (a vector of references to) all (non-null) expressions
   /// Since std::vector cannot directly handle references,
   /// a wrapper is used, but this can be used exactly like
   /// std::vector<AbstractStatement&> could, if it were possible
-  /// \return ExpressionList of (const references to) all non-null expressions
+  /// \return vector of (const references to) all non-null expressions
   std::vector<std::reference_wrapper<const AbstractExpression>> getExpressions() const;
-  
+
+  /// Get (a vector of ptrs to) all expressions
+  /// \return vec of (pointers to) all expressions
+  std::vector<std::unique_ptr<AbstractExpression>>& getExpressionPtrs();
+
+  /// Take Ownership of all expressions, removing them from this ExpressionsList
+  /// \return vector of all unique_ptrs to expressions
+  std::vector<std::unique_ptr<AbstractExpression>> takeExpressions();
+
+  /// Replace existing expression list with new one
+  /// \param expression Expressions to be set, ExpressionList will take ownership
+  void setExpressions(std::vector<std::unique_ptr<AbstractExpression>> new_expressions);
 
   /// Add an expression as the last expression
   /// \param expression Expression to be appended, ExpressionList will take ownership
