@@ -140,6 +140,7 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/visitor/ExpressionBatcher.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/HashVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/NoisePrintVisitor.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/IdentifyNoisySubtreeVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/PrintVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/CountOpsVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/ScopedVisitor.cpp
@@ -213,6 +214,7 @@ set(PUBLIC_HEADERS
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/IVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/PrintVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/NoisePrintVisitor.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/IdentifyNoisySubtreeVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/CountOpsVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/HashVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/ScopedVisitor.h

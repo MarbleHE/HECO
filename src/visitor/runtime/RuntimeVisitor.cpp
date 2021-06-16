@@ -41,6 +41,7 @@ std::unique_ptr<AbstractValue> SpecialRuntimeVisitor::getNextStackElement() {
 void SpecialRuntimeVisitor::visit(BinaryExpression &elem) {
 
   // some variables needed for rel noise decay calculation
+  double rel_noise_decay = 0.;
   int right = 0;
   int left = 0;
 
@@ -68,18 +69,8 @@ void SpecialRuntimeVisitor::visit(BinaryExpression &elem) {
     noise_map.insert_or_assign(elem.getRight().getUniqueNodeId(), rhs_ptr->noiseBits());
     right =  rhs_ptr->noiseBits();
   }
-  //rel_noise_map
- /*
-  if (auto lhs_ptr = dynamic_cast<AbstractNoiseMeasuringCiphertext*>(&*lhsOperand)) {
-    if (auto rhs_ptr = dynamic_cast<AbstractNoiseMeasuringCiphertext*>(&*rhsOperand)) {
 
-      int maximum = std::max(lhs_ptr->noiseBits(), rhs_ptr->noiseBits());
-      rel_noise_map.insert_or_assign(elem.getUniqueNodeId(), 1/maximum*(maximum-));
-    }
-  }*/
-
-
-    // if exactly one of the operands is a ciphertext and we have a commutative operation, then we make sure that
+  // if exactly one of the operands is a ciphertext and we have a commutative operation, then we make sure that
   // the first operand (the one we call the operation on) is the ciphertext
   auto lhsIsSecret = isSecretTainted(elem.getLeft().getUniqueNodeId());
   auto rhsIsSecret = isSecretTainted(elem.getRight().getUniqueNodeId());
@@ -125,10 +116,10 @@ void SpecialRuntimeVisitor::visit(BinaryExpression &elem) {
     throw std::runtime_error("Unknown binary operator encountered. Cannot continue!");
   }
 
-  // calculate relative noise budget decay (now that the lhsOperand carries the updated noise)
+  // calculate relative noise budget decay (now that the lhsOperand carries the updated noise after doing op in place)
   if(auto lhs_ptr = dynamic_cast<AbstractNoiseMeasuringCiphertext*>(&*lhsOperand)) {
-    std::cout << "Values: " << right << "  " << left << " " << lhs_ptr->noiseBits() << std::endl;
-    double rel_noise_decay = 1 /  std::max(left, right) ;
+    rel_noise_decay = 1. /  (float)std::min(left, right) * (std::min(left, right) - lhs_ptr->noiseBits());
+    rel_noise_map.insert_or_assign(elem.getUniqueNodeId(), rel_noise_decay);
   }
 
   auto lhsAsCleartextBool = dynamic_cast<Cleartext<bool> *>(lhsOperand.get());
@@ -138,7 +129,6 @@ void SpecialRuntimeVisitor::visit(BinaryExpression &elem) {
   } else {
     intermedResult.push(std::move(lhsOperand));
   }
-
 }
 
 void SpecialRuntimeVisitor::visit(UnaryExpression &elem) {

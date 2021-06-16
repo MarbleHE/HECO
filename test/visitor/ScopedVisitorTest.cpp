@@ -1,13 +1,14 @@
 
 #include "include/ast_opt/parser/Parser.h"
 #include "include/ast_opt/visitor/runtime/RuntimeVisitor.h"
+#include "include/ast_opt/visitor/ScopedVisitor.h"
 #include "include/ast_opt/visitor/runtime/SimulatorCiphertextFactory.h"
 #include "ast_opt/visitor/NoisePrintVisitor.h"
 
 #include "gtest/gtest.h"
 #ifdef HAVE_SEAL_BFV
 
-class NoiseVisitorTest : public ::testing::Test {
+class ScopedVisitorTest : public ::testing::Test {
  protected:
   std::unique_ptr<SimulatorCiphertextFactory> scf;
   std::unique_ptr<TypeCheckingVisitor> tcv;
@@ -25,7 +26,7 @@ class NoiseVisitorTest : public ::testing::Test {
 
 };
 
-TEST_F(NoiseVisitorTest, testBad) {
+TEST_F(ScopedVisitorTest, testBad) {
 
   /*
    * (x^4 + y) * z
@@ -70,17 +71,15 @@ TEST_F(NoiseVisitorTest, testBad) {
   srv.executeAst(*astProgram);
 
   std::stringstream ss;
-  NoisePrintVisitor v(ss, srv.getNoiseMap(), srv.getRelNoiseMap());
+  ScopedVisitor v;
 
   astProgram->accept(v);
 
-  std::cout << "Program: " << std::endl;
-  std::cout << ss.str() << std::endl;
 
 }
 
 
-TEST_F(NoiseVisitorTest, testGood) {
+TEST_F(ScopedVisitorTest, testGood) {
 
   /*
    * ((x^2)^2 + y) * z
@@ -124,17 +123,16 @@ TEST_F(NoiseVisitorTest, testGood) {
   srv.executeAst(*astProgram);
 
   std::stringstream ss;
-  NoisePrintVisitor v(ss, srv.getNoiseMap(), srv.getRelNoiseMap());
+  ScopedVisitor v;
 
   astProgram->accept(v);
 
-  std::cout << "Program: " << std::endl;
-  std::cout << ss.str() << std::endl;
+
 
 }
 
 
-TEST_F(NoiseVisitorTest, testGoodTimesBad) {
+TEST_F(ScopedVisitorTest, testGoodTimesBad) {
   /*
    * (x*x*x*x) * (x^2 * x^2)
    */
@@ -177,18 +175,16 @@ TEST_F(NoiseVisitorTest, testGoodTimesBad) {
   srv.executeAst(*astProgram);
 
   std::stringstream ss;
-  NoisePrintVisitor v(ss, srv.getNoiseMap(), srv.getRelNoiseMap());
+  ScopedVisitor v;
 
   astProgram->accept(v);
 
-  std::cout << "Program: " << std::endl;
-  std::cout << ss.str() << std::endl;
 
 }
 
 
 
-TEST_F(NoiseVisitorTest, testTwoBadSubtrees) {
+TEST_F(ScopedVisitorTest, testTwoBadSubtrees) {
 
   /*
    * (x^4) * (y^2 * y^2) + (z^6)
@@ -236,12 +232,11 @@ TEST_F(NoiseVisitorTest, testTwoBadSubtrees) {
   srv.executeAst(*astProgram);
 
   std::stringstream ss;
-  NoisePrintVisitor v(ss, srv.getNoiseMap(), srv.getRelNoiseMap());
+  ScopedVisitor v;
 
   astProgram->accept(v);
 
-  std::cout << "Program: " << std::endl;
-  std::cout << ss.str() << std::endl;
+
 
 }
 #endif
