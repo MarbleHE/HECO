@@ -358,6 +358,10 @@ AbstractExpression *Parser::parseLiteral(stork::tokens_iterator &it, bool isNega
     } else {
       l = (isNegative) ? new LiteralInt(-it->getInteger()) : new LiteralInt(it->getInteger());
     }
+  } else if (it->hasValue(stork::reservedTokens::kw_true)) {
+    l = new LiteralBool(true);
+  } else if (it->hasValue(stork::reservedTokens::kw_false)) {
+    l = new LiteralBool(false);
   } else {
     throw stork::unexpectedSyntaxError(to_string(it->getValue()), it->getLineNumber(), it->getCharIndex());
   }
