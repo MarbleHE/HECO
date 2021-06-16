@@ -39,7 +39,7 @@ TEST_F(IdentifyNoisySubtreeVisitorTest, testGoodTimesBad) {
 
   // program specification
   const char *program = R""""(
-      secret int result = __input0__ ***
+      secret int result = (__input0__ ***  __input0__ *** __input0__ ***  __input0__) *** ((__input0__ ***  __input0__) *** (__input0__ ***  __input0__));
       return result;
     )"""";
   auto astProgram = Parser::parse(std::string(program));

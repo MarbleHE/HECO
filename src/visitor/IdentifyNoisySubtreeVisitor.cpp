@@ -15,15 +15,10 @@ void SpecialIdentifyNoisySubtreeVisitor::visit(BinaryExpression &elem) {
     int rightNoiseBudget =  noise_map.find(elem.getRight().getUniqueNodeId())->second;
     int encNoiseBudget = 128;
 
-    std::cout << "left: " << leftNoiseBudget << " right: " << rightNoiseBudget << std::endl;
-    std::cout << "Unique Node ID: " <<  elem.getUniqueNodeId();
-
-
     if ((leftNoiseBudget == rightNoiseBudget) && (rightNoiseBudget == encNoiseBudget)) {
       std::string curNodeString = elem.toString(false);
       os << "CHECK NODE: " << curNodeString;
       os << " " << elem.getUniqueNodeId();
-      os << " " << leftNoiseBudget;
       return;
     }
     else if (leftNoiseBudget < rightNoiseBudget) {
