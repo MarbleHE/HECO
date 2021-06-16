@@ -39,19 +39,14 @@ TEST_F(IdentifyNoisySubtreeVisitorTest, testGoodTimesBad) {
 
   // program specification
   const char *program = R""""(
-      secret int result0 = __input0__ *** __input0__;
-      secret int result1 = result0 *** __input0__;
-      secret int result2 = result1 *** __input0__;
-      secret int result3 = __input1__ *** __input1__;
-      secret int result4 = result3 *** result3;
-      secret int result5 = result2 *** result4;
-      return result5;
+      secret int result = __input0__ ***
+      return result;
     )"""";
   auto astProgram = Parser::parse(std::string(program));
 
   // program's output
   const char *outputs = R""""(
-      y = result5;
+      y = result;
     )"""";
   auto astOutput = Parser::parse(std::string(outputs));
   // create and prepopulate TypeCheckingVisitor
