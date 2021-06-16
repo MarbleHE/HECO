@@ -21,13 +21,13 @@ class ScopedIdentifier {
 
   ScopedIdentifier() = default;
 
-  ScopedIdentifier(const ScopedIdentifier& other) = default;
+  ScopedIdentifier(const ScopedIdentifier &other) = default;
 
-  ScopedIdentifier(ScopedIdentifier&& other) = default;
+  ScopedIdentifier(ScopedIdentifier &&other) = default;
 
-  ScopedIdentifier& operator=(const ScopedIdentifier& other) = default;
+  ScopedIdentifier &operator=(const ScopedIdentifier &other) = default;
 
-  ScopedIdentifier& operator=(ScopedIdentifier&& other) = default;
+  ScopedIdentifier &operator=(ScopedIdentifier &&other) = default;
 
   /// Creates a new ScopedIdentifier.
   /// \param scope The scope where the identifier was declared in.
@@ -73,8 +73,8 @@ class Scope {
   /// \param abstractNode The node that creates this scope.
   explicit Scope(AbstractNode &abstractNode);
 
-  /// Copy Constructor
-  Scope(const Scope&) = delete;
+//  /// Copy Constructor
+//  Scope(const Scope&);
 
   /// Move Constructor
   /// \param other the scope to move
@@ -112,10 +112,6 @@ class Scope {
   /// \param parentScope The scope to be set as parent of this scope.
   void setParent(Scope *parentScope);
 
-  /// Adds a nested scope to this scope's nestedScopes vector.
-  /// \param scope The scope to add as nested scope in this scope.
-  void addNestedScope(std::unique_ptr<Scope> &&scope);
-
   /// Gets the parent scope of this scope.
   /// \return (A reference to) the parent scope of this scope.
   Scope &getParentScope();
@@ -123,6 +119,11 @@ class Scope {
   /// Gets the parent scope of this scope.
   /// \return (A const reference to) the parent scope of this scope.
   [[nodiscard]] const Scope &getParentScope() const;
+
+  /// Returns the pointer to the AST node this is associated with
+  /// WARNING: This can be nullptr or it can even be INVALID!
+  /// \return pointer to the AST node this is associated with
+  AbstractNode *getNodePtr() const;
 
   /// Creates a nested scope with the given parentScope as parent and the given AbstractNode scopeOpener as the AST node
   /// that creates this scope.

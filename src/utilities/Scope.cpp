@@ -26,7 +26,22 @@ ScopedIdentifier &Scope::resolveIdentifier(const std::string &id) {
 }
 
 void Scope::addIdentifier(const std::string &id) {
-  identifiers.emplace(std::make_unique<ScopedIdentifier>(*this, id));
+
+  if (!identifierIsLocal(id)) {
+    // Warning if local variable shadows an outer one
+    if (identifierExists(id)) {
+      auto si = resolveIdentifier(id);
+      std::cout << "WARNING: Variable with name " << si.getId() << " already exists in scope "
+                << si.getScope().getScopeName() << " and the one in scope "
+                << getScopeName() << " will shadow this one." << std::endl;
+    }
+
+    //std::cout << "Adding " << id << " to scope " << this->getScopeName() << "( scope: " << this << ", node: " << astNode
+    //          << ")" << std::endl;
+    identifiers.emplace(std::make_unique<ScopedIdentifier>(*this, id));
+  } //else {
+  //std::cout << "Adding " << id << " is ignored since already exits in scope " << this->getScopeName() << std::endl;
+  //}
 }
 
 void Scope::addIdentifier(std::unique_ptr<ScopedIdentifier> &&scopedIdentifier) {
@@ -34,7 +49,23 @@ void Scope::addIdentifier(std::unique_ptr<ScopedIdentifier> &&scopedIdentifier) 
     throw std::runtime_error(
         "Cannot add scoped identifier to a scope that differs from the scope specified in the scoped identifier.");
   }
-  identifiers.insert(std::move(scopedIdentifier));
+
+  if (!identifierIsLocal(scopedIdentifier->getId())) {
+    // Warning if local variable shadows an outer one
+    if (identifierExists(scopedIdentifier->getId())) {
+      auto si = resolveIdentifier(scopedIdentifier->getId());
+      std::cout << "WARNING: Variable with name " << si.getId() << " already exists in scope "
+                << si.getScope().getScopeName() << " and the one in scope "
+                << getScopeName() << " will shadow this one." << std::endl;
+    }
+
+    //std::cout << "Adding " << scopedIdentifier->getId() << " to scope " << this->getScopeName() << std::endl;
+    identifiers.insert(std::move(scopedIdentifier));
+  } //  else {
+  //  std::cout << "Adding " << scopedIdentifier->getId() << " is ignored since already exits in scope "
+  //            << this->getScopeName() << std::endl;
+  //  }
+
 }
 
 void Scope::addIdentifiers(std::initializer_list<std::string> ids) {
@@ -51,11 +82,29 @@ const Scope &Scope::getParentScope() const {
   return *parent;
 }
 
+AbstractNode *Scope::getNodePtr() const {
+  return astNode;
+}
+
 Scope *Scope::createNestedScope(Scope &parentScope, AbstractNode &scopeOpener) {
+
+  // if a scope already exists, return it
+  for (auto &s: parentScope.nestedScopes) {
+    if (s->astNode==&scopeOpener) {
+      //std::cout << "Not creating a scope for " << scopeOpener.getUniqueNodeId() << "(" << &scopeOpener << ") in scope "
+      //          << parentScope.getScopeName() << " (" << &parentScope << ") since one already exists." << std::endl;
+      return s.get();
+    }
+  }
+
+  // Alternatively, do create a new scope
   auto scope = std::make_unique<Scope>(scopeOpener);
   Scope *scopePtr = scope.get();
   scope->setParent(&parentScope);
-  parentScope.addNestedScope(std::move(scope));
+  scope->astNode = &scopeOpener;
+  //std::cout << "Creating a new scope " << scope->getScopeName() << " ( " << &scope << ") in "
+  //          << parentScope.getScopeName() << " (" << &parentScope << ")" << std::endl;
+  parentScope.nestedScopes.push_back(std::move(scope));
   return scopePtr;
 }
 
@@ -63,19 +112,35 @@ void Scope::setParent(Scope *parentScope) {
   Scope::parent = parentScope;
 }
 
-void Scope::addNestedScope(std::unique_ptr<Scope> &&scope) {
-  nestedScopes.push_back(std::move(scope));
-}
-
 Scope::Scope(AbstractNode &abstractNode) : astNode(&abstractNode) {}
 
+//Scope::Scope(const Scope &other) : astNode(other.astNode), parent(other.parent) {
+//
+//  // Create copies of identifiers
+//  for (auto &si : other.identifiers) {
+//    identifiers.insert(std::make_unique<ScopedIdentifier>(*this, si->getId()));
+//  }
+//
+//  // Recursively copy nested scopes
+//  nestedScopes.reserve(other.nestedScopes.size());
+//  for (auto &s : other.nestedScopes) {
+//    nestedScopes.emplace_back(std::make_unique<Scope>(*s));
+//  }
+//
+//}
+
 bool Scope::identifierExists(const std::string &id) const {
-  try {
-    auto scopedIdentifier = resolveIdentifier(id);
-  } catch (std::runtime_error &) {
-    return false;
+  const Scope *curScope = this;
+  while (curScope!=nullptr) {
+    auto it = std::find_if(curScope->identifiers.begin(),
+                           curScope->identifiers.end(),
+                           [&id](const auto &p) { return p->getId()==id; });
+    if (it!=curScope->identifiers.end()) {
+      return true;
+    }
+    curScope = curScope->parent;
   }
-  return true;
+  return false;
 }
 
 bool Scope::identifierIsLocal(const std::string &id) const {
@@ -85,7 +150,8 @@ bool Scope::identifierIsLocal(const std::string &id) const {
   });
 }
 std::string Scope::getScopeName() const {
-  return astNode->getUniqueNodeId();
+  if (astNode) return astNode->getUniqueNodeId();
+  else return "ScopeForNullptr";
 }
 
 Scope &Scope::getNestedScopeByCreator(AbstractNode &node) {
