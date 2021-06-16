@@ -9,9 +9,9 @@ SpecialProgramPrintVisitor::SpecialProgramPrintVisitor(std::ostream &os) : os(os
 
 void SpecialProgramPrintVisitor::visit(BinaryExpression &elem) {
   os << "(";
-  if(elem.hasLeft()) elem.getLeft().accept(*this);
-  os << " " <<  elem.getOperator().toString() << " ";
-  if(elem.hasRight()) elem.getRight().accept(*this);
+  if (elem.hasLeft()) elem.getLeft().accept(*this);
+  os << " " << elem.getOperator().toString() << " ";
+  if (elem.hasRight()) elem.getRight().accept(*this);
   os << ")";
 }
 void SpecialProgramPrintVisitor::visit(Block &elem) {
@@ -24,11 +24,11 @@ void SpecialProgramPrintVisitor::visit(Block &elem) {
   os << getIndentation() << "}\n";
 }
 void SpecialProgramPrintVisitor::visit(Call &elem) {
-  os  << elem.getIdentifier() << "(";
+  os << elem.getIdentifier() << "(";
   auto args = elem.getArguments();
-  if(!args.empty()) {
+  if (!args.empty()) {
     args[0].get().accept(*this);
-    for(size_t i = 1; i < args.size(); ++i) {
+    for (size_t i = 1; i < args.size(); ++i) {
       os << ", ";
       args[i].get().accept(*this);
     }
@@ -37,18 +37,64 @@ void SpecialProgramPrintVisitor::visit(Call &elem) {
 }
 void SpecialProgramPrintVisitor::visit(ExpressionList &elem) {
   os << "{";
-  auto es = elem.getExpressions();
-  if (!es.empty()) {
-    es[0].get().accept(*this);
-    for (size_t i = 1; i < es.size(); ++i) {
+  auto &vec = elem.getExpressionPtrs();
+  if (!vec.empty()) {
+    if (vec[0]) {
+      vec[0]->accept(*this);
+    } else {
+      os << "-";
+    }
+    for (size_t i = 1; i < vec.size(); ++i) {
       os << ", ";
-      es[i].get().accept(*this);
+      if (vec[i]) {
+        vec[i]->accept(*this);
+      } else {
+        os << "-";
+      }
     }
   }
   os << "}";
 }
 void SpecialProgramPrintVisitor::visit(For &elem) {
-  PlainVisitor::visit(elem);
+  os << getIndentation() << "for({";
+
+  if (elem.hasInitializer()) {
+    // a lot of hacky stuff to get statements to print on one line!
+    auto temp_indentation_level = indentation_level;
+    indentation_level = 0;
+    for (auto &s: elem.getInitializer().getStatementPointers()) {
+      if (s) {
+        s->accept(*this);
+        os.seekp(-1, std::ostream::cur); //rewind stream to get rid of \n
+      }
+    }
+    indentation_level = temp_indentation_level;
+  }
+  os << "};";
+
+  if (elem.hasCondition()) {
+    elem.getCondition().accept(*this);
+  }
+  os << ";{";
+
+  if (elem.hasUpdate()) {
+    // a lot of hacky stuff to get statements to print on one line!
+    auto temp_indentation_level = indentation_level;
+    indentation_level = 0;
+    for (auto &s: elem.getUpdate().getStatementPointers()) {
+      s->accept(*this);
+      os.seekp(-1, std::ostream::cur); //rewind stream to get rid of \n
+    }
+    indentation_level = temp_indentation_level;
+  }
+  os << "})";
+
+  if (elem.hasBody()) {
+    os << "\n";
+    elem.getBody().accept(*this);
+  } else {
+    os << "{}" << "\n";
+  }
 }
 void SpecialProgramPrintVisitor::visit(Function &elem) {
   os << getIndentation() << elem.getReturnType().toString() << " "
@@ -85,7 +131,8 @@ void SpecialProgramPrintVisitor::visit(IndexAccess &elem) {
   os << "]";
 }
 void SpecialProgramPrintVisitor::visit(LiteralBool &elem) {
-  os << elem.getValue();
+  if (elem.getValue()) os << "true";
+  else os << "false";
 }
 void SpecialProgramPrintVisitor::visit(LiteralChar &elem) {
   os << elem.getValue();
@@ -135,16 +182,20 @@ void SpecialProgramPrintVisitor::visit(UnaryExpression &elem) {
 }
 void SpecialProgramPrintVisitor::visit(Assignment &elem) {
   os << getIndentation();
-  elem.getTarget().accept(*this);
+  if(elem.hasTarget()) elem.getTarget().accept(*this);
+  else os << "MISSING";
   os << " = ";
-  elem.getValue().accept(*this);
+  if (elem.hasValue()) elem.getValue().accept(*this);
+  else os << "MISSING";
   os << ";\n";
 }
 void SpecialProgramPrintVisitor::visit(VariableDeclaration &elem) {
   os << getIndentation() << elem.getDatatype().toString() << " ";
   elem.getTarget().accept(*this);
-  os << " = ";
-  elem.getValue().accept(*this);
+  if (elem.hasValue()) {
+    os << " = ";
+    elem.getValue().accept(*this);
+  }
   os << ";\n";
 }
 void SpecialProgramPrintVisitor::visit(Variable &elem) {
