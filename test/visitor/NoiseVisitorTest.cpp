@@ -186,8 +186,6 @@ TEST_F(NoiseVisitorTest, testGoodTimesBad) {
 
 }
 
-
-
 TEST_F(NoiseVisitorTest, testTwoBadSubtrees) {
 
   /*

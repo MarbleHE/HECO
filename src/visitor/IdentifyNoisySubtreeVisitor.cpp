@@ -9,24 +9,33 @@ SpecialIdentifyNoisySubtreeVisitor::SpecialIdentifyNoisySubtreeVisitor(std::ostr
                                                    std::unordered_map<std::string, double> rel_noise_map)
     : os(os), noise_map(std::move(noise_map)), rel_noise_map(std::move(rel_noise_map)) {}
 
-void SpecialIdentifyNoisySubtreeVisitor::visit(AbstractNode &elem) {
-  // This is more of a demonstration of the Visitor template
-  // since AbstractNode::toString can already output its children just fine
-  // However, this PrintVisitor does technically offer the choice to indent things differently ;)
+void SpecialIdentifyNoisySubtreeVisitor::visit(BinaryExpression &elem) {
+  if (elem.countChildren() > 1) {
+    int leftNoiseBudget = noise_map.find(elem.getLeft().getUniqueNodeId())->second;
+    int rightNoiseBudget =  noise_map.find(elem.getRight().getUniqueNodeId())->second;
+    int encNoiseBudget = 128;
 
-  // Get the current node's toString (without children)
-  // This should hopefully be a single line, including end-of-line at the end
-  std::string curNodeString = elem.toString(false);
-
-  int leftParentNodeString = elem.countChildren();
-
-  // Output current node at required indentation
-  os << "--------------" << std::endl;
-  auto result = noise_map.find(elem.getUniqueNodeId());
-  auto result1 = rel_noise_map.find(elem.getUniqueNodeId());
+    std::cout << "left: " << leftNoiseBudget << " right: " << rightNoiseBudget<< std::endl;
 
 
-  for (AbstractNode &c: elem) {
-    c.accept(*this);
+    if ((leftNoiseBudget == rightNoiseBudget) && (rightNoiseBudget == encNoiseBudget)) {
+      std::string curNodeString = elem.toString(false);
+      os << "CHECK NODE: " << curNodeString;
+      os << " " << elem.getUniqueNodeId();
+      os << " " << leftNoiseBudget;
+      return;
+    }
+    else if (leftNoiseBudget < rightNoiseBudget) {
+      std::cout << "Going left: " << leftNoiseBudget << std::endl;
+      elem.getLeft().accept(*this);
+    }
+    else if (leftNoiseBudget > rightNoiseBudget) {
+      std::cout << "Going right: " << rightNoiseBudget << std::endl;
+      elem.getRight().accept(*this);
+    }
+    else {
+      elem.getLeft().accept(*this);
+      elem.getRight().accept(*this);
+    }
   }
 }

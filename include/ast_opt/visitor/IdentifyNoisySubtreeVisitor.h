@@ -29,7 +29,7 @@ class SpecialIdentifyNoisySubtreeVisitor : public ScopedVisitor {
   explicit SpecialIdentifyNoisySubtreeVisitor(std::ostream& os, std::unordered_map<std::string, int> noise_map,
                                     std::unordered_map<std::string, double> rel_noise_map);
 
-  void visit(AbstractNode&);
+  void visit(BinaryExpression& node);
 
 };
 
