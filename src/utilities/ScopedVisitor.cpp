@@ -162,6 +162,10 @@ Scope &ScopedVisitor::getRootScope() {
   return *rootScope;
 }
 
+std::unique_ptr<Scope> ScopedVisitor::takeRootScope() {
+  return std::move(rootScope);
+}
+
 const Scope &ScopedVisitor::getRootScope() const {
   if (rootScope==nullptr) {
     throw std::runtime_error("Cannot return non-existent root scope!");
@@ -171,6 +175,10 @@ const Scope &ScopedVisitor::getRootScope() const {
 
 void ScopedVisitor::setRootScope(std::unique_ptr<Scope> &&scope) {
   rootScope = std::move(scope);
+}
+
+void ScopedVisitor::overrideCurrentScope(Scope *scope) {
+  currentScope = scope;
 }
 
 void ScopedVisitor::enterScope(AbstractNode &node) {

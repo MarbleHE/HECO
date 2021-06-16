@@ -119,6 +119,7 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/utilities/ScopedVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/ExpressionBatcher.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/HashVisitor.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/ParentSettingVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/PrintVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/ProgramPrintVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/SecretBranchingVisitor.cpp
