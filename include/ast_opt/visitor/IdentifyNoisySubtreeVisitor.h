@@ -22,12 +22,13 @@ class SpecialIdentifyNoisySubtreeVisitor : public ScopedVisitor {
   /// Reference to the stream to which we write the output
   std::ostream& os;
 
+  int encNoiseBudget;
   std::unordered_map<std::string, int> noise_map;
   std::unordered_map<std::string, double> rel_noise_map;
 
  public:
   explicit SpecialIdentifyNoisySubtreeVisitor(std::ostream& os, std::unordered_map<std::string, int> noise_map,
-                                    std::unordered_map<std::string, double> rel_noise_map);
+                                    std::unordered_map<std::string, double> rel_noise_map, int encNoiseBudget);
 
   void visit(BinaryExpression& node);
 
