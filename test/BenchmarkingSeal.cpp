@@ -1,5 +1,6 @@
 #include "ast_opt/utilities/PerformanceSeal.h"
 #include <memory>
+#include <algorithm>
 
 #include "gtest/gtest.h"
 
@@ -8,19 +9,19 @@
 class BenchmarkingSeal : public ::testing::Test {
 
  protected:
-  const int poly_modulus_degree = 4096;
-  seal::SEALContext context;
+  const int poly_modulus_degree = 8192;
 
   void SetUp() override {
-    seal::EncryptionParameters parms(seal::scheme_type::bfv);
-    parms.set_poly_modulus_degree(poly_modulus_degree);
-    parms.set_coeff_modulus(seal::CoeffModulus::BFVDefault(poly_modulus_degree));
-    parms.set_plain_modulus(1024);
-    seal::SEALContext context(parms);
+
   }
 };
 
 TEST_F(BenchmarkingSeal, benchmark) {
+  seal::EncryptionParameters parms(seal::scheme_type::bfv);
+  parms.set_poly_modulus_degree(poly_modulus_degree);
+  parms.set_coeff_modulus(seal::CoeffModulus::BFVDefault(poly_modulus_degree));
+  parms.set_plain_modulus(seal::PlainModulus::Batching(parms.poly_modulus_degree(), 20));
+  seal::SEALContext context(parms);
   bfv_performance_test(context);
 }
 
