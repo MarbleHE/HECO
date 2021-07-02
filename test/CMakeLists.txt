@@ -62,7 +62,7 @@ set(TEST_FILES
         visitor/CountOpsVisitorTest.cpp
         visitor/NoiseVisitorTest.cpp
         visitor/ScopedVisitorTest.cpp
-        visitor/IdentifyNoisySubtreeVisitorTest.cpp)
+        visitor/IdentifyNoisySubtreeVisitorTest.cpp BenchmarkingSeal.cpp)
 
 add_executable(testing-all
         ${TEST_FILES})
