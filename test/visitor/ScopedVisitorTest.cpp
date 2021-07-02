@@ -75,7 +75,6 @@ TEST_F(ScopedVisitorTest, testBad) {
 
   astProgram->accept(v);
 
-
 }
 
 
@@ -126,9 +125,6 @@ TEST_F(ScopedVisitorTest, testGood) {
   ScopedVisitor v;
 
   astProgram->accept(v);
-
-
-
 }
 
 
@@ -178,11 +174,7 @@ TEST_F(ScopedVisitorTest, testGoodTimesBad) {
   ScopedVisitor v;
 
   astProgram->accept(v);
-
-
 }
-
-
 
 TEST_F(ScopedVisitorTest, testTwoBadSubtrees) {
 
@@ -235,8 +227,5 @@ TEST_F(ScopedVisitorTest, testTwoBadSubtrees) {
   ScopedVisitor v;
 
   astProgram->accept(v);
-
-
-
 }
 #endif

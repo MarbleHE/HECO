@@ -173,7 +173,7 @@ set(HEADER_ONLY_SOURCES
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/AbstractNoiseMeasuringCiphertext.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/DummyCiphertext.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/DummyCiphertextFactory.h
-        include/ast_opt/visitor/CountOpsVisitor.h src/visitor/CountOpsVisitor.cpp)
+        include/ast_opt/visitor/CountOpsVisitor.h src/visitor/CountOpsVisitor.cpp src/utilities/PerformanceSeal.cpp)
 
 # TODO: Go through this list and determine which headers aren't actually public
 set(PUBLIC_HEADERS
