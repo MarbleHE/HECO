@@ -9,7 +9,7 @@
 class BenchmarkingSeal : public ::testing::Test {
 
  protected:
-  const int poly_modulus_degree = 4096;
+  const int poly_modulus_degree[3] = {4096, 8192, 16384};
 
   void SetUp() override {
 
@@ -17,16 +17,19 @@ class BenchmarkingSeal : public ::testing::Test {
 };
 
 TEST_F(BenchmarkingSeal, benchmark) {
-  seal::EncryptionParameters parms(seal::scheme_type::bfv);
-  parms.set_poly_modulus_degree(poly_modulus_degree);
-  //parms.set_coeff_modulus(seal::CoeffModulus::BFVDefault(poly_modulus_degree));
-  parms.set_coeff_modulus(seal::CoeffModulus::BFVDefault(
-      poly_modulus_degree, seal::sec_level_type::tc128));
- //parms.set_coeff_modulus(seal::CoeffModulus::Create(
-   //   poly_modulus_degree,  {60, 60, 60, 30, 60}));
-  parms.set_plain_modulus(seal::PlainModulus::Batching(parms.poly_modulus_degree(), 20));
-  seal::SEALContext context(parms);
-  bfv_performance_test(context);
+
+  for (int i = 0; i < 3; i++) {
+    seal::EncryptionParameters parms(seal::scheme_type::bfv);
+    parms.set_poly_modulus_degree(poly_modulus_degree[i]);
+    //parms.set_coeff_modulus(seal::CoeffModulus::BFVDefault(poly_modulus_degree));
+    parms.set_coeff_modulus(seal::CoeffModulus::BFVDefault(
+        poly_modulus_degree[i], seal::sec_level_type::tc128));
+    //parms.set_coeff_modulus(seal::CoeffModulus::Create(
+    //   poly_modulus_degree,  {60, 60, 60, 30, 60}));
+    parms.set_plain_modulus(seal::PlainModulus::Batching(parms.poly_modulus_degree(), 20));
+    seal::SEALContext context(parms);
+    bfv_performance_test(context);
+  }
 }
 
 #endif

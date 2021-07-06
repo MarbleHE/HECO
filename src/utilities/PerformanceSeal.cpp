@@ -219,7 +219,8 @@ void bfv_performance_test(seal::SEALContext context) {
   std::cout << "Average multiply plain: " << avg_multiply_plain << " microseconds" << std::endl;
 
   // Write to csv (result vectors)
-  std::ofstream myFile("benchmark_seal.csv"); // this will be in cmake-build-debug/test
+  std::string filename = "benchmark_seal_" + std::to_string(poly_modulus_degree) + ".csv";
+  std::ofstream myFile(filename); // this will be in cmake-build-debug/test
   std::cout << "Writing to file" << std::endl;
   myFile << "polymodulus" << " ," << "plainmodulus" << " ," << "coeffmodulus" << " ,"
          << "batch" << " ," << "enc" << " ," << "dec" << " ,"
