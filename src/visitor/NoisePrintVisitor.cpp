@@ -15,9 +15,6 @@ SpecialNoisePrintVisitor::SpecialNoisePrintVisitor(std::ostream &os, std::unorde
     : os(os), noise_map(std::move(noise_map)), rel_noise_map(std::move(rel_noise_map)) {}
 
 void SpecialNoisePrintVisitor::visit(AbstractNode &elem) {
-  // This is more of a demonstration of the Visitor template
-  // since AbstractNode::toString can already output its children just fine
-  // However, this PrintVisitor does technically offer the choice to indent things differently ;)
 
   // Get the current node's toString (without children)
   // This should hopefully be a single line, including end-of-line at the end

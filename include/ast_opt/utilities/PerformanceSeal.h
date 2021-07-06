@@ -4,6 +4,7 @@
 #include <seal/seal.h>
 #include <chrono>
 #include <vector>
+#include <fstream>
 
 void bfv_performance_test(seal::SEALContext context);
 

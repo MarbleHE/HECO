@@ -2,9 +2,8 @@
 
 #include "ast_opt/utilities/PerformanceSeal.h"
 
+void bfv_performance_test(seal::SEALContext context) {
 
-void bfv_performance_test(seal::SEALContext context)
-{
   std::chrono::high_resolution_clock::time_point time_start, time_end;
   std::chrono::microseconds time_diff;
 
@@ -30,8 +29,7 @@ void bfv_performance_test(seal::SEALContext context)
   // relin and galois keys
   seal::RelinKeys relin_keys;
   seal::GaloisKeys gal_keys;
-  if (context.using_keyswitching())
-  {
+  if (context.using_keyswitching()) {
     /*
     Generate relinearization keys.
     */
@@ -42,8 +40,7 @@ void bfv_performance_test(seal::SEALContext context)
     time_diff = std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
     std::cout << "Done [" << time_diff.count() << " microseconds]" << std::endl;
 
-    if (!context.key_context_data()->qualifiers().using_batching)
-    {
+    if (!context.key_context_data()->qualifiers().using_batching) {
       std::cout << "Given encryption parameters do not support batching." << std::endl;
       return;
     }
@@ -76,23 +73,30 @@ void bfv_performance_test(seal::SEALContext context)
   std::chrono::microseconds time_relinearize_sum(0);
   std::chrono::microseconds time_relin_2_sum(0);
 
-
   // How many times to run the test?
   long long count = 100;
+
+  // Vectors holding results of each round
+  std::vector<std::chrono::microseconds> time_batch_vec;
+  std::vector<std::chrono::microseconds> time_enc_vec;
+  std::vector<std::chrono::microseconds> time_dec_vec;
+  std::vector<std::chrono::microseconds> time_add_vec;
+  std::vector<std::chrono::microseconds> time_mult_vec;
+  std::vector<std::chrono::microseconds> time_add_plain_vec;
+  std::vector<std::chrono::microseconds> time_multiply_plain_vec;
+  std::vector<std::chrono::microseconds> time_relinearize_vec;
 
 
   //Populate a vector of values to batch.
   size_t slot_count = batch_encoder.slot_count();
   std::vector<uint64_t> pod_vector;
   std::random_device rd;
-  for (size_t i = 0; i < slot_count; i++)
-  {
+  for (size_t i = 0; i < slot_count; i++) {
     pod_vector.push_back(plain_modulus.reduce(rd()));
   }
 
   std::cout << "Running tests ";
-  for (size_t i = 0; i < static_cast<size_t>(count); i++)
-  {
+  for (size_t i = 0; i < static_cast<size_t>(count); i++) {
 
     seal::Plaintext plain(poly_modulus_degree, 0);
     seal::Plaintext plain1(poly_modulus_degree, 0);
@@ -109,6 +113,7 @@ void bfv_performance_test(seal::SEALContext context)
     batch_encoder.encode(pod_vector, plain);
     time_end = std::chrono::high_resolution_clock::now();
     time_batch_sum += std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
+    time_batch_vec.push_back(std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start));
 
     // Encryption
     seal::Ciphertext encrypted(context);
@@ -116,14 +121,15 @@ void bfv_performance_test(seal::SEALContext context)
     encryptor.encrypt(plain, encrypted);
     time_end = std::chrono::high_resolution_clock::now();
     time_encrypt_sum += std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
+    time_enc_vec.push_back(std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start));
 
     // Decryption
     time_start = std::chrono::high_resolution_clock::now();
     decryptor.decrypt(encrypted, plain2);
     time_end = std::chrono::high_resolution_clock::now();
     time_decrypt_sum += std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
-    if (plain2 != plain)
-    {
+    time_dec_vec.push_back(std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start));
+    if (plain2!=plain) {
       throw std::runtime_error("Encrypt/decrypt failed. Something is wrong.");
     }
 
@@ -159,98 +165,78 @@ void bfv_performance_test(seal::SEALContext context)
     evaluator.add_inplace(encrypted1, encrypted2);
     time_end = std::chrono::high_resolution_clock::now();
     time_add_sum += std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
+    time_add_vec.push_back(std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start));
 
-    // Ctxt-Ctxt Multiplication 'Level 1'
+    // Ctxt-Ctxt Multiplication
     encrypted1.reserve(3);
     time_start = std::chrono::high_resolution_clock::now();
     evaluator.multiply_inplace(encrypted1, encrypted2);
     time_end = std::chrono::high_resolution_clock::now();
     time_multiply_1_sum += std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
+    time_mult_vec.push_back(std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start));
 
-    //Relin 'Level 1'
+    //Relin
     time_start = std::chrono::high_resolution_clock::now();
     evaluator.relinearize_inplace(encrypted1, relin_keys);
     time_end = std::chrono::high_resolution_clock::now();
     time_relinearize_sum += std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
-
-   /* // Ctxt-Ctxt Multiplication 'Level 2'
-    encrypted1.reserve(3);
-    evaluator.multiply_inplace(encrypted3, encrypted4);
-    evaluator.relinearize_inplace(encrypted1, relin_keys);
-    evaluator.relinearize_inplace(encrypted3, relin_keys);
-    time_start = std::chrono::high_resolution_clock::now();
-    evaluator.multiply_inplace(encrypted1, encrypted3);
-    time_end = std::chrono::high_resolution_clock::now();
-    time_multiply_2_sum += std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
-
-    //Ctxt-Ctxt Multiplication 'Level 3'
-    encrypted1.reserve(3);
-    evaluator.multiply_inplace(encrypted5, encrypted6);
-    evaluator.relinearize_inplace(encrypted5, relin_keys);
-    evaluator.multiply_inplace(encrypted7, encrypted8);
-    evaluator.relinearize_inplace(encrypted7, relin_keys);
-    evaluator.multiply_inplace(encrypted5, encrypted7);
-    evaluator.relinearize_inplace(encrypted5, relin_keys);
-    evaluator.relinearize_inplace(encrypted1, relin_keys);
-   // evaluator.relinearize_inplace(encrypted5, relin_keys);
-    time_start = std::chrono::high_resolution_clock::now();
-    evaluator.multiply_inplace(encrypted1, encrypted5);
-    time_end = std::chrono::high_resolution_clock::now();
-    time_multiply_3_sum += std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
-
-    //Relin 'Level2'
-    evaluator.relinearize_inplace(encrypted1,relin_keys);
-    evaluator.relinearize_inplace(encrypted2, relin_keys);
-    evaluator.relinearize_inplace(encrypted3, relin_keys);
-    evaluator.relinearize_inplace(encrypted4, relin_keys);
-    evaluator.multiply_inplace(encrypted1, encrypted2);
-    evaluator.multiply_inplace(encrypted3, encrypted4);
-    evaluator.multiply_inplace(encrypted1, encrypted3);
-    time_start = std::chrono::high_resolution_clock::now();
-    evaluator.relinearize_inplace(encrypted1,relin_keys);
-    time_end = std::chrono::high_resolution_clock::now();
-    time_relin_2_sum += std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
-  */
+    time_relinearize_vec.push_back(std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start));
 
     // Ptxt-Ctxt Addition
     time_start = std::chrono::high_resolution_clock::now();
     evaluator.add_plain_inplace(encrypted2, plain);
     time_end = std::chrono::high_resolution_clock::now();
     time_add_plain_sum += std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
+    time_add_plain_vec.push_back(std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start));
 
     // Ptxt-Ctxt Multiplication
     time_start = std::chrono::high_resolution_clock::now();
     evaluator.multiply_plain_inplace(encrypted2, plain);
     time_end = std::chrono::high_resolution_clock::now();
     time_multiply_plain_sum += std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
+    time_multiply_plain_vec.push_back(std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start));
   }
 
   std::cout << " Done" << std::endl << std::endl;
   std::cout.flush();
 
-  auto avg_batch = time_batch_sum.count() / count;
-  auto avg_encrypt = time_encrypt_sum.count() / count;
-  auto avg_decrypt = time_decrypt_sum.count() / count;
-  auto avg_add = time_add_sum.count() / (3 * count);
-  auto avg_multiply_1 = time_multiply_1_sum.count() / count;
-  //auto avg_multiply_2 = time_multiply_2_sum.count() / count;
-  //auto avg_multiply_3 = time_multiply_3_sum.count() / count;
-  auto avg_add_plain = time_add_plain_sum.count() / count;
-  auto avg_multiply_plain = time_multiply_plain_sum.count() / count;
-  auto avg_relin = time_relinearize_sum.count() / count;
- // auto avg_relin_2 = time_relin_2_sum.count() / count;
+  auto avg_batch = time_batch_sum.count()/count;
+  auto avg_encrypt = time_encrypt_sum.count()/count;
+  auto avg_decrypt = time_decrypt_sum.count()/count;
+  auto avg_add = time_add_sum.count()/(3*count);
+  auto avg_multiply_1 = time_multiply_1_sum.count()/count;
+  auto avg_add_plain = time_add_plain_sum.count()/count;
+  auto avg_multiply_plain = time_multiply_plain_sum.count()/count;
+  auto avg_relin = time_relinearize_sum.count()/count;
 
   std::cout << "Average batch: " << avg_batch << " microseconds" << std::endl;
   std::cout << "Average encrypt: " << avg_encrypt << " microseconds" << std::endl;
   std::cout << "Average decrypt: " << avg_decrypt << " microseconds" << std::endl;
-  std::cout << "Average relinearize Level 1: " << avg_relin  << " microseconds" << std::endl;
- // std::cout << "Average relinearize Level 2: " << avg_relin_2  << " microseconds" << std::endl;
+  std::cout << "Average relinearize: " << avg_relin << " microseconds" << std::endl;
   std::cout << "Average add: " << avg_add << " microseconds" << std::endl;
   std::cout << "Average multiply: " << avg_multiply_1 << " microseconds" << std::endl;
- // std::cout << "Average multiply Level 2: " << avg_multiply_2 << " microseconds" << std::endl;
- // std::cout << "Average multiply Level 3: " << avg_multiply_3 << " microseconds" << std::endl;
   std::cout << "Average add plain: " << avg_add_plain << " microseconds" << std::endl;
   std::cout << "Average multiply plain: " << avg_multiply_plain << " microseconds" << std::endl;
+
+  // Write to csv (result vectors)
+  std::ofstream myFile("benchmark_seal.csv"); // this will be in cmake-build-debug/test
+  std::cout << "Writing to file" << std::endl;
+  myFile << "polymodulus" << " ," << "plainmodulus" << " ," << "coeffmodulus" << " ,"
+         << "batch" << " ," << "enc" << " ," << "dec" << " ,"
+         << "relin" << " ," << "add" << " ," << "mult" << " ,"
+         << "add_plain" << " ," << "mult_plain" << "\n";
+  myFile << poly_modulus_degree             << " ," << plain_modulus.value()    << " ," << parms.coeff_modulus().data()->value() << " ,"
+         << time_batch_vec[0].count()       << " ," << time_enc_vec[0].count()  << " ," << time_dec_vec[0].count()               << " ,"
+         << time_relinearize_vec[0].count() << " ," << time_add_vec[0].count()  << " ," << time_mult_vec[0].count()              << " ,"
+         << time_add_plain_vec[0].count()   << " ," << time_multiply_plain_vec[0].count() << "\n";
+
+  for (int jj = 1; jj < time_batch_vec.size(); jj++) {
+    myFile <<  " ," <<  " ," <<  " ,"
+           << time_batch_vec[jj].count()       << " ," << time_enc_vec[jj].count()  << " ," << time_dec_vec[jj].count()  << " ,"
+           << time_relinearize_vec[jj].count() << " ," << time_add_vec[jj].count()  << " ," << time_mult_vec[jj].count() << " ,"
+           << time_add_plain_vec[jj].count()   << " ," << time_multiply_plain_vec[jj].count() << "\n";
+  }
+  myFile.close();
 
 }
 
