@@ -127,7 +127,6 @@ void bfv_performance_test(seal::SEALContext context)
       throw std::runtime_error("Encrypt/decrypt failed. Something is wrong.");
     }
 
-
     seal::Ciphertext encrypted1(context);
     batch_encoder.encode(std::vector<uint64_t>(slot_count, i), plain1);
     encryptor.encrypt(plain1, encrypted1);
@@ -174,7 +173,7 @@ void bfv_performance_test(seal::SEALContext context)
     time_end = std::chrono::high_resolution_clock::now();
     time_relinearize_sum += std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
 
-    // Ctxt-Ctxt Multiplication 'Level 2'
+   /* // Ctxt-Ctxt Multiplication 'Level 2'
     encrypted1.reserve(3);
     evaluator.multiply_inplace(encrypted3, encrypted4);
     evaluator.relinearize_inplace(encrypted1, relin_keys);
@@ -199,7 +198,7 @@ void bfv_performance_test(seal::SEALContext context)
     time_end = std::chrono::high_resolution_clock::now();
     time_multiply_3_sum += std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
 
-  /*  //Relin 'Level2'
+    //Relin 'Level2'
     evaluator.relinearize_inplace(encrypted1,relin_keys);
     evaluator.relinearize_inplace(encrypted2, relin_keys);
     evaluator.relinearize_inplace(encrypted3, relin_keys);
@@ -234,22 +233,22 @@ void bfv_performance_test(seal::SEALContext context)
   auto avg_decrypt = time_decrypt_sum.count() / count;
   auto avg_add = time_add_sum.count() / (3 * count);
   auto avg_multiply_1 = time_multiply_1_sum.count() / count;
-  auto avg_multiply_2 = time_multiply_2_sum.count() / count;
-  auto avg_multiply_3 = time_multiply_3_sum.count() / count;
+  //auto avg_multiply_2 = time_multiply_2_sum.count() / count;
+  //auto avg_multiply_3 = time_multiply_3_sum.count() / count;
   auto avg_add_plain = time_add_plain_sum.count() / count;
   auto avg_multiply_plain = time_multiply_plain_sum.count() / count;
   auto avg_relin = time_relinearize_sum.count() / count;
-  auto avg_relin_2 = time_relin_2_sum.count() / count;
+ // auto avg_relin_2 = time_relin_2_sum.count() / count;
 
   std::cout << "Average batch: " << avg_batch << " microseconds" << std::endl;
   std::cout << "Average encrypt: " << avg_encrypt << " microseconds" << std::endl;
   std::cout << "Average decrypt: " << avg_decrypt << " microseconds" << std::endl;
   std::cout << "Average relinearize Level 1: " << avg_relin  << " microseconds" << std::endl;
-  std::cout << "Average relinearize Level 2: " << avg_relin_2  << " microseconds" << std::endl;
+ // std::cout << "Average relinearize Level 2: " << avg_relin_2  << " microseconds" << std::endl;
   std::cout << "Average add: " << avg_add << " microseconds" << std::endl;
-  std::cout << "Average multiply Level 1: " << avg_multiply_1 << " microseconds" << std::endl;
-  std::cout << "Average multiply Level 2: " << avg_multiply_2 << " microseconds" << std::endl;
-  std::cout << "Average multiply Level 3: " << avg_multiply_3 << " microseconds" << std::endl;
+  std::cout << "Average multiply: " << avg_multiply_1 << " microseconds" << std::endl;
+ // std::cout << "Average multiply Level 2: " << avg_multiply_2 << " microseconds" << std::endl;
+ // std::cout << "Average multiply Level 3: " << avg_multiply_3 << " microseconds" << std::endl;
   std::cout << "Average add plain: " << avg_add_plain << " microseconds" << std::endl;
   std::cout << "Average multiply plain: " << avg_multiply_plain << " microseconds" << std::endl;
 
