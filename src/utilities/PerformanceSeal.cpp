@@ -221,7 +221,8 @@ void bfv_performance_test(seal::SEALContext context) {
   // Write to csv (result vectors)
   std::string filename = "benchmark_seal_" + std::to_string(poly_modulus_degree) + ".csv";
   std::ofstream myFile(filename); // this will be in cmake-build-debug/test
-  std::cout << "Writing to file" << std::endl;
+  std::cout << std::endl;
+  std::cout << "Writing to file " << filename << ":";
   myFile << "polymodulus" << " ," << "plainmodulus" << " ," << "coeffmodulus" << " ,"
          << "batch" << " ," << "enc" << " ," << "dec" << " ,"
          << "relin" << " ," << "add" << " ," << "mult" << " ,"
@@ -230,7 +231,6 @@ void bfv_performance_test(seal::SEALContext context) {
          << time_batch_vec[0].count()       << " ," << time_enc_vec[0].count()  << " ," << time_dec_vec[0].count()               << " ,"
          << time_relinearize_vec[0].count() << " ," << time_add_vec[0].count()  << " ," << time_mult_vec[0].count()              << " ,"
          << time_add_plain_vec[0].count()   << " ," << time_multiply_plain_vec[0].count() << "\n";
-
   for (int jj = 1; jj < time_batch_vec.size(); jj++) {
     myFile <<  " ," <<  " ," <<  " ,"
            << time_batch_vec[jj].count()       << " ," << time_enc_vec[jj].count()  << " ," << time_dec_vec[jj].count()  << " ,"
@@ -238,7 +238,8 @@ void bfv_performance_test(seal::SEALContext context) {
            << time_add_plain_vec[jj].count()   << " ," << time_multiply_plain_vec[jj].count() << "\n";
   }
   myFile.close();
-
+  std::cout << " Done" << std::endl;
+  std::cout << std::endl;
 }
 
 #endif

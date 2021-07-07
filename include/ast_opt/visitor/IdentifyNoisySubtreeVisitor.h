@@ -32,6 +32,8 @@ class SpecialIdentifyNoisySubtreeVisitor : public ScopedVisitor {
 
   void visit(BinaryExpression& node);
 
+  void visit(BinaryExpression& node, BinaryExpression& tail);
+
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_VISITOR_NOISEPRINTVISITOR_H_
