@@ -50,6 +50,18 @@ inline void print_parameters(const seal::SEALContext &context)
   std::cout << ") bits" << std::endl;
 
   /*
+   * Print values of coeff mulduli q_i
+   */
+  std::cout << "|   coeff_modulus q (q_1, ..., q_k): ";
+  std::cout << context_data.parms().coeff_modulus().data()->value() << " (";
+  for (std::size_t i = 0; i < coeff_modulus_size - 1; i++)
+  {
+    std::cout << coeff_modulus[i].value() << ", ";
+  }
+  std::cout << coeff_modulus.back().bit_count();
+  std::cout << ")" << std::endl;
+
+  /*
   For the BFV scheme print the plain_modulus parameter.
   */
   if (context_data.parms().scheme() == seal::scheme_type::bfv)
