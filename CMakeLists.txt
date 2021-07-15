@@ -134,6 +134,8 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/utilities/Datatype.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/Operator.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/Scope.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/utilities/MultiplicativeDepthCalculator.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/utilities/ConeRewriter.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/controlFlowGraph/ControlFlowGraphVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/controlFlowGraph/GraphNode.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/controlFlowGraph/NodeRelationship.cpp
@@ -173,7 +175,7 @@ set(HEADER_ONLY_SOURCES
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/AbstractNoiseMeasuringCiphertext.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/DummyCiphertext.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/DummyCiphertextFactory.h
-        include/ast_opt/visitor/CountOpsVisitor.h src/visitor/CountOpsVisitor.cpp src/utilities/PerformanceSeal.cpp include/ast_opt/utilities/PerformanceSeal.h)
+        include/ast_opt/visitor/CountOpsVisitor.h src/visitor/CountOpsVisitor.cpp src/utilities/PerformanceSeal.cpp include/ast_opt/utilities/PerformanceSeal.h include/ast_opt/utilities/ConeRewriter.h src/utilities/ConeRewriter.cpp include/ast_opt/utilities/MultiplicativeDepthCalculator.h src/utilities/MultiplicativeDepthCalculator.cpp)
 
 # TODO: Go through this list and determine which headers aren't actually public
 set(PUBLIC_HEADERS
@@ -208,6 +210,8 @@ set(PUBLIC_HEADERS
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/Operator.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/VariableMap.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/Scope.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/MultiplicativeDepthCalculator.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/ConeRewriter.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/controlFlowGraph/ControlFlowGraphVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/controlFlowGraph/NodeRelationship.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/ExpressionBatcher.h

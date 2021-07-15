@@ -207,6 +207,7 @@ class AbstractNode {
   std::string getUniqueNodeId() const;
 
   /** @} */ // End of nodeID group
+
 };
 
 /// BaseIteratorImpl is an abstract class that simply specifies the functions required in the wrapper

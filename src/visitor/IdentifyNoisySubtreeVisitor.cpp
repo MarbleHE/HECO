@@ -34,6 +34,7 @@ void SpecialIdentifyNoisySubtreeVisitor::visit(BinaryExpression &elem) {
   }
 }
 
+//TODO make this work
 void SpecialIdentifyNoisySubtreeVisitor::visit(BinaryExpression &elem, BinaryExpression &tail) {
   if (elem.countChildren() > 1) {
     int leftNoiseBudget = noise_map.find(elem.getLeft().getUniqueNodeId())->second;
@@ -44,7 +45,7 @@ void SpecialIdentifyNoisySubtreeVisitor::visit(BinaryExpression &elem, BinaryExp
       std::string curNodeString = elem.toString(false);
       std::string tailNodeString = tail.toString(false);
       std::cout << "End";
-      os << "CHECK NODE: " << curNodeString << "" ;
+      os << "CHECK NODE: " << curNodeString << " until" << tailNodeString;
       os << " " << elem.getUniqueNodeId();
       return;
     } else if (leftNoiseBudget < rightNoiseBudget) {
