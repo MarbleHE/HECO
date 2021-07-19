@@ -53,6 +53,9 @@ class AbstractNode {
   /// \return A clone of the node including clones of all of its children.
   [[nodiscard]] virtual AbstractNode *clone_impl(AbstractNode *parent_) const = 0;
 
+
+
+
  public:
   /// Virtual Destructor, force class to be abstract
   virtual ~AbstractNode() = 0;
@@ -136,6 +139,7 @@ class AbstractNode {
   /** @defgroup output Methods for output
   *  @{
   */
+
  public:
 
   /// Get the nlohmann::json representation of the node including all of its children.

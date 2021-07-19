@@ -17,6 +17,16 @@ class ConeRewriter {
 
   std::pair<AbstractNode *, AbstractNode *> getCriticalAndNonCriticalInput(BinaryExpression *logicalExpr);
   bool isCriticalNode(AbstractNode *n);
+
+
+
+  std::vector<AbstractNode *> getReducibleCones(AbstractNode *v, int minDepth);
+
+  std::vector<AbstractNode *> getReducibleCones();
+
+  std::vector<AbstractNode *> computeReducibleCones();
+
+  std::vector<AbstractNode *> *getPredecessorOnCriticalPath(AbstractNode *v);
 };
 
 

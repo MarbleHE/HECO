@@ -107,6 +107,9 @@ class BinaryExpression : public AbstractExpression {
   /// \param newRight new right hand side to set
   void setRight(std::unique_ptr<AbstractExpression> newRight);
 
+  std::unique_ptr<AbstractExpression> takeLeft();
+  std::unique_ptr<AbstractExpression> takeRight();
+
   ///////////////////////////////////////////////
   ////////// AbstractNode Interface /////////////
   ///////////////////////////////////////////////
@@ -120,6 +123,7 @@ class BinaryExpression : public AbstractExpression {
   std::string toString(bool printChildren) const override;
  protected:
   std::string getNodeType() const override;
+
 
 };
 

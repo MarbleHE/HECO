@@ -158,5 +158,12 @@ std::string OperatorExpression::getNodeType() const {
   return "OperatorExpression";
 }
 
+std::unique_ptr<AbstractExpression> OperatorExpression::takeChild(int i) {
+  //TODO: Must set parent null! Currently no API
+  // add protected function in AbstractNode e.g. value.resetParent();
+  // same for all other takeX() methods here and in other classes!
+  return std::move(operands[i]);
+}
+
 
 

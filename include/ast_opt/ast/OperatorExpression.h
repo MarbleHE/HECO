@@ -93,6 +93,8 @@ class OperatorExpression : public AbstractExpression {
   /// Removes any potential nullptrs from the operands vector
   void removeNullOperands();
 
+
+
   ///////////////////////////////////////////////
   ////////// AbstractNode Interface /////////////
   ///////////////////////////////////////////////
@@ -104,6 +106,7 @@ class OperatorExpression : public AbstractExpression {
   size_t countChildren() const override;
   nlohmann::json toJson() const override;
   std::string toString(bool printChildren) const override;
+  std::unique_ptr<AbstractExpression> takeChild(int i);
  protected:
   std::string getNodeType() const override;
 

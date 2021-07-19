@@ -48,6 +48,7 @@ const AbstractNode &AbstractNode::getParent() const {
     throw std::runtime_error("Node has no parent.");
   }
 }
+
 ////////////////////////////// OUTPUT ///////////////////////////////
 
 std::string AbstractNode::toString(bool printChildren) const {

@@ -97,6 +97,20 @@ void BinaryExpression::setRight(std::unique_ptr<AbstractExpression> newRight) {
   right = std::move(newRight);
 }
 
+std::unique_ptr<AbstractExpression> BinaryExpression::takeLeft() {
+  //TODO: Must set parent null! Currently no API
+  // add protected function in AbstractNode e.g. value.resetParent();
+  // same for all other takeX() methods here and in other classes!
+  return std::move(left);
+}
+
+std::unique_ptr<AbstractExpression> BinaryExpression::takeRight() {
+  //TODO: Must set parent null! Currently no API
+  // add protected function in AbstractNode e.g. value.resetParent();
+  // same for all other takeX() methods here and in other classes!
+  return std::move(right);
+}
+
 ///////////////////////////////////////////////
 ////////// AbstractNode Interface /////////////
 ///////////////////////////////////////////////
