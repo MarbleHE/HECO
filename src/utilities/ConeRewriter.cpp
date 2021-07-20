@@ -245,8 +245,9 @@ std::vector<AbstractNode *> ConeRewriter::getReducibleCones(/* AbstractNode *v ,
 
   //TODO: CAREFUL! OLD CODE WAS DESIGNED FOR REVERSED AST!
   AbstractNode *startNode = nullptr;
-  AbstractNode *rootNode = ast.get(); //TODO: WAS ROOT NODE THE SAME IN REVERSED AST?
+  AbstractNode *rootNode = ast.get(); // root node of AST
 
+  // lambda fct to find n-th ancestor logical expression (we do this in order to find our start node v for Algo 1 in Aubry at al.)
   auto getNthAncestorLogicalExpr = [&](int N) -> AbstractNode * {
     // find first OperatorExpression in AST
     //TODO: Consider if changes need to be made if we allow non-logical OperatorExpression?
@@ -260,20 +261,23 @@ std::vector<AbstractNode *> ConeRewriter::getReducibleCones(/* AbstractNode *v ,
         if (candidate.second==N)
           return op_exp_ptr;
       }
-      // add all parent nodes //TODO: WHAT IS A PARENT HERE?
-      // std::for_each(curNode->getParents().begin(), curNode->getParents().end(), [&](AbstractNode *n) { q.push(n); });
+      // add all parent nodes: note this is different from the legacy version since the AST is reversed in the old version
+      // recall: curNode->begin() gets first parent and curNode->end() gets last parent
+       std::for_each(curNode->begin(), curNode->end(), [&](AbstractNode *n) { q.push(n); });
     }
     return nullptr;
   };
+  // now we have the n-th 'ancestor' (paper), in our case it's actually the child operator expr
 
-  // check if v (rootNode) is a LogicalExpr, otherwise find first (N=1) LogicalExpr by its traversing parents
+  // check if v (rootNode) is a LogicalExpr, otherwise find first (N=1) LogicalExpr by its traversing 'parents' (paper), here: child
   if (dynamic_cast<OperatorExpression *>(rootNode)==nullptr) {
-    startNode = getNthAncestorLogicalExpr(1);
+    startNode = getNthAncestorLogicalExpr(1); // our start node v for the Algo1 from Aubry et al. will be this node
     if (!startNode) throw std::logic_error("AST does not contain any LogicalExpr!");
   }
-//
-//  // compute minDepth required by getReducibleCones algorithm
-//  int minDepth = computeMinDepth(startNode);
+
+  // now we get the reducible cones starting from our 'first' logical expression
+  // compute minDepth required by getReducibleCones algorithm
+  int minDepth = computeMinDepth(startNode);
 //
 //  // v has no non-critical input node p -> return empty set
 //  if (minDepth==-1) return std::vector<AbstractNode *>();
@@ -332,6 +336,34 @@ std::vector<AbstractNode *> ConeRewriter::getReducibleCones(/* AbstractNode *v ,
 //  delta.push_back(v);
 //  return delta;
   return std::vector<AbstractNode *>();
+}
+int ConeRewriter::computeMinDepth(AbstractNode *v) {
+  // find a non-critical input node p of v
+  auto isNoOperatorNode = [](AbstractNode *n) { return (dynamic_cast<Operator *>(n)==nullptr); };
+  //for (auto &p : v->getParentsNonNull()) {
+
+  // look at all 'parents'(paper). Here: children
+  std::for_each(v->begin(), v->end(), [&](AbstractNode *p) {
+//    // exclude Operator nodes as they do not have any parent and are not modeled as node in the paper
+   if (isNoOperatorNode(p) && !isCriticalNode(p)) {
+//      // set minMultDepth as l(p)+2 and call getReducibleCones
+//      //return mdc.getMultDepthL(p) + 2;
+//      // According to the paper (see p. 9, §2.4) minMultDepth = l(p)+1 is used but it does not return any result:
+      return getMultDepthL(p) + 1;
+    }
+  });
+//  // return -1 (error) if node v has no non-critical input node
+  return -1;
+}
+
+bool ConeRewriter::isCriticalNode(AbstractNode *n) {
+  //TODO implement
+ return false;
+}
+
+int ConeRewriter::getMultDepthL(AbstractNode *n) {
+  //TODO: implement
+  return 0;
 }
 
 //std::vector<AbstractNode *> ConeRewriter::getReducibleCones() {

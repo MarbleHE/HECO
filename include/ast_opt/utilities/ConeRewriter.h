@@ -35,6 +35,11 @@ class ConeRewriter {
   std::unique_ptr<AbstractNode> rewriteAst(std::unique_ptr<AbstractNode>&& ast);
 
 
+  int computeMinDepth(AbstractNode *v);
+
+  bool isCriticalNode(AbstractNode *n);
+
+  int getMultDepthL(AbstractNode *n);
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_UTILITIES_CONEREWRITER_H_

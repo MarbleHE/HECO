@@ -7,6 +7,7 @@
 #include "ast_opt/visitor/PrintVisitor.h"
 #include "ast_opt/utilities/ConeRewriter.h"
 
+
 #ifdef HAVE_SEAL_BFV
 
 TEST(ConeRewriterTest, testConeRewr) { /* NOLINT */
