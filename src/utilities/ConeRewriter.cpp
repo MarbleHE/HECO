@@ -2,6 +2,7 @@
 #include <queue>
 #include <utility>
 #include <ast_opt/ast/OperatorExpression.h>
+#include <ast_opt/ast/Variable.h>
 #include "ast_opt/utilities/ConeRewriter.h"
 #include "ast_opt/ast/BinaryExpression.h"
 #include "ast_opt/ast/AbstractExpression.h"
@@ -261,13 +262,12 @@ std::vector<AbstractNode *> ConeRewriter::getReducibleCones(/* AbstractNode *v ,
         if (candidate.second==N)
           return op_exp_ptr;
       }
-      // add all parent nodes: note this is different from the legacy version since the AST is reversed in the old version
-      // recall: curNode->begin() gets first parent and curNode->end() gets last parent
-       std::for_each(curNode->begin(), curNode->end(), [&](AbstractNode *n) { q.push(n); });
+      // add all 'parent' (paper), (here: children) nodes: note this is different from the legacy version since the AST is reversed in the old version
+      for(auto& n : *q.front()) { q.push(&n); }
     }
     return nullptr;
   };
-  // now we have the n-th 'ancestor' (paper), in our case it's actually the child operator expr
+  // now we have the n-th 'ancestor' (paper), in our case it's actually the n-th child operator expr
 
   // check if v (rootNode) is a LogicalExpr, otherwise find first (N=1) LogicalExpr by its traversing 'parents' (paper), here: child
   if (dynamic_cast<OperatorExpression *>(rootNode)==nullptr) {
@@ -279,8 +279,10 @@ std::vector<AbstractNode *> ConeRewriter::getReducibleCones(/* AbstractNode *v ,
   // compute minDepth required by getReducibleCones algorithm
   int minDepth = computeMinDepth(startNode);
 //
-//  // v has no non-critical input node p -> return empty set
-//  if (minDepth==-1) return std::vector<AbstractNode *>();
+// v has no non-critical input node p -> return empty set
+  if (minDepth==-1) return std::vector<AbstractNode *>();
+
+
 //
 //  return getReducibleCones(startNode, minDepth);
 
@@ -343,16 +345,16 @@ int ConeRewriter::computeMinDepth(AbstractNode *v) {
   //for (auto &p : v->getParentsNonNull()) {
 
   // look at all 'parents'(paper). Here: children
-  std::for_each(v->begin(), v->end(), [&](AbstractNode *p) {
+  std::for_each(v->begin(), v->end(), [&](AbstractNode &p) {
 //    // exclude Operator nodes as they do not have any parent and are not modeled as node in the paper
-   if (isNoOperatorNode(p) && !isCriticalNode(p)) {
+   if (isNoOperatorNode(&p) && !isCriticalNode(&p)) {
 //      // set minMultDepth as l(p)+2 and call getReducibleCones
 //      //return mdc.getMultDepthL(p) + 2;
 //      // According to the paper (see p. 9, §2.4) minMultDepth = l(p)+1 is used but it does not return any result:
-      return getMultDepthL(p) + 1;
+      return getMultDepthL(&p) + 1;
     }
   });
-//  // return -1 (error) if node v has no non-critical input node
+  // return -1 (error) if node v has no non-critical input node
   return -1;
 }
 
@@ -362,27 +364,54 @@ bool ConeRewriter::isCriticalNode(AbstractNode *n) {
 }
 
 int ConeRewriter::getMultDepthL(AbstractNode *n) {
-  //TODO: implement
+  // check if we have calculated the multiplicative depth previously
+  if (!multiplicativeDepths.empty()) {
+    auto it = multiplicativeDepths.find(n->getUniqueNodeId());
+    if (it!=multiplicativeDepths.end())
+      return it->second;
+  }
+
+  // next nodes to consider (children)
+  std::vector<AbstractNode *> nextNodesToConsider;
+  for(auto& v : *n) { nextNodesToConsider.push_back(&v); }
+
+  // we need to compute the multiplicative depth
+  // trivial case: v is a leaf node, i.e., does not have any parent (here: child)  node
+  // paper: |pred(v)| = 0 => multiplicative depth = 0 (here:  |children(v)| = 0 => multdepth = 0)
+  if (nextNodesToConsider.empty()) {
+    multiplicativeDepths[n->getUniqueNodeId()] = 0 + getInitialDepthOrNull(n).multiplicativeDepth;
+    return 0;
+  }
+
+  // otherwise compute max_{u ∈ pred(v)} l(u) + d(v)
+  int max = 0;
+  for (auto &u : nextNodesToConsider) {
+    int uDepth;
+    // compute the multiplicative depth of parent u
+    uDepth = getMultDepthL(u);
+    // store the computed depth
+    multiplicativeDepths[u->getUniqueNodeId()] = uDepth + getInitialDepthOrNull(n).multiplicativeDepth;
+    max = std::max(uDepth + depthValue(n), max);
+  }
+  return max;
+}
+
+int ConeRewriter::depthValue(AbstractNode *n) {
+  if (auto lexp = dynamic_cast<BinaryExpression *>(n)) {
+    // the multiplicative depth considers logical AND nodes only
+    return (/*lexp->getOperator() != nullptr &&*/ lexp->getOperator().toString() == "AND");
+  }
   return 0;
 }
 
-//std::vector<AbstractNode *> ConeRewriter::getReducibleCones() {
-//
-//}
-//
-//std::vector<AbstractNode *> ConeRewriter::computeReducibleCones() {
-//
-//}
-//
-//std::vector<AbstractNode *> *ConeRewriter::getPredecessorOnCriticalPath(AbstractNode *v) {
-//  // P <- { p ∈ pred(v) | l(p) = l(v) - d(v) }
-//  auto result = new std::vector<AbstractNode *>();
-//  int criterion = mdc.getMultDepthL(v) - mdc.depthValue(v);
-//  for (auto &p : v->getParentsNonNull()) {
-//    if (mdc.getMultDepthL(p)==criterion) result->push_back(p);
-//  }
-//  return result;
-//}
-//
-//
-//
+DepthMapEntry ConeRewriter::getInitialDepthOrNull(AbstractNode *node) {
+  auto nodeAsVar = dynamic_cast<Variable *>(node);
+  if (nodeAsVar!=nullptr && initialMultiplicativeDepths.count(nodeAsVar->getIdentifier()) > 0) {
+    return initialMultiplicativeDepths.at(nodeAsVar->getIdentifier());
+  }
+  return DepthMapEntry(0, 0);
+}
+
+
+DepthMapEntry::DepthMapEntry(int multiplicativeDepth, int reverseMultiplicativeDepth) : multiplicativeDepth(
+    multiplicativeDepth), reverseMultiplicativeDepth(reverseMultiplicativeDepth) {}

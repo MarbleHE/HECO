@@ -3,13 +3,28 @@
 
 #include "ast_opt/ast/BinaryExpression.h"
 #include "ast_opt/ast/AbstractNode.h"
-#include "ast_opt/utilities/MultiplicativeDepthCalculator.h"
+
+
+struct DepthMapEntry {
+  int multiplicativeDepth;
+  int reverseMultiplicativeDepth;
+  DepthMapEntry(int multiplicativeDepth, int reverseMultiplicativeDepth);
+};
+
 
 class ConeRewriter {
  private:
   std::unique_ptr<AbstractNode> ast;
-//  std::unordered_map<std::string, AbstractNode *> underlying_nodes;
+  // A map of the computed multiplicative depths.
+  std::unordered_map<std::string, int> multiplicativeDepths{};
+  // A map of the computed reverse multiplicative depths.
+  std::unordered_map<std::string, int> multiplicativeDepthsReversed{};
+  // A map of the initial multiplicative depth:
+  // - std::string: The variable's identifier for which this initial depth is associated to.
+  // - DepthMapEntry: A struct containing the multiplicative and reverseMultiplicativeDepth.
+  std::unordered_map<std::string, DepthMapEntry> initialMultiplicativeDepths{};
 
+//  std::unordered_map<std::string, AbstractNode *> underlying_nodes;
 
   std::vector<AbstractNode *> getReducibleCones();
 
@@ -39,7 +54,24 @@ class ConeRewriter {
 
   bool isCriticalNode(AbstractNode *n);
 
+  /// Calculates the multiplicative depth based on the definition given in
+  /// [Aubry, P. et al.: Faster Homomorphic Encryption Is Not Enough: Improved Heuristic for Multiplicative Depth
+  ///  Minimization of Boolean Circuits. (2019)].
+  /// \return The multiplicative depth of the current node.
   int getMultDepthL(AbstractNode *n);
+
+  /// Calculates the reverse multiplicative depth based on the definition given in
+  /// [Aubry, P. et al.: Faster Homomorphic Encryption Is Not Enough: Improved Heuristic for Multiplicative Depth
+  ///  Minimization of Boolean Circuits. (2019)].
+  /// \return The reverse multiplicative depth of the current node.
+  int getReverseMultDepthR(AbstractNode *n);
+
+  /// Determine the value of this node for computing the multiplicative depth and reverse multiplicative depth,
+  /// getMultDepthL() and getReverseMultDepthR(), respectively.
+  /// \return Returns 1 iff this node is a LogicalExpr containing an AND operator, otherwise 0.
+  static int depthValue(AbstractNode *n);
+
+  DepthMapEntry getInitialDepthOrNull(AbstractNode *node);
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_UTILITIES_CONEREWRITER_H_
