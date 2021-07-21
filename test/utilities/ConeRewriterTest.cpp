@@ -46,24 +46,20 @@ TEST(ConeRewriterTest, testMultDepth) {
       bool __input0__ = 0;
       bool __input1__ = 1;
       bool __input2__ = 0;
-      bool __input3__ = 1;
-      bool __input4__ = 1;
     )"""";
   auto astInput = Parser::parse(std::string(inputs));
 
   // program specification
   const char *program = R""""(
-      secret bool v1 = __input0__ && __input1__;
-      secret bool v2 = __input2__ && __input3__;
-      secret bool y1 = v1 ^ v2;
-      secret bool r = y1 && __input4__;
-      return r;
+      secret bool v1 = ((__input0__ && __input1__) && __input2__) && __input3__;
+
+      return v2;
     )"""";
   auto astProgram = Parser::parse(std::string(program));
 
   // program's output
   const char *outputs = R""""(
-      y = r;
+      y = v2;
     )"""";
   auto astOutput = Parser::parse(std::string(outputs));
 
@@ -76,5 +72,42 @@ TEST(ConeRewriterTest, testMultDepth) {
 
   auto depth = coneRewriter.getMultDepthL(astProgram.get());
   std::cout << depth << std::endl;
-  ASSERT_EQ(depth,2);
+  ASSERT_EQ(depth,3);
+}
+
+
+TEST(ConeRewriterTest, testReversedMultDepth) {
+
+// program's input
+  const char *inputs = R""""(
+      bool __input0__ = 0;
+      bool __input1__ = 1;
+      bool __input2__ = 0;
+    )"""";
+  auto astInput = Parser::parse(std::string(inputs));
+
+  // program specification
+  const char *program = R""""(
+      secret bool v1 = ((__input0__ && __input1__) && __input2__) && __input3__;
+
+      return v2;
+    )"""";
+  auto astProgram = Parser::parse(std::string(program));
+
+  // program's output
+  const char *outputs = R""""(
+      y = v2;
+    )"""";
+  auto astOutput = Parser::parse(std::string(outputs));
+
+  std::stringstream ss;
+  PrintVisitor p(ss);
+  astProgram->accept(p);
+  std::cout << ss.str() << std::endl;
+
+  ConeRewriter coneRewriter;
+
+  auto depth = coneRewriter.getReverseMultDepthR(astProgram.get());
+  std::cout << depth << std::endl;
+  ASSERT_EQ(depth,0);
 }

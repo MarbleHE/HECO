@@ -19,6 +19,8 @@ class ConeRewriter {
   std::unordered_map<std::string, int> multiplicativeDepths{};
   // A map of the computed reverse multiplicative depths.
   std::unordered_map<std::string, int> multiplicativeDepthsReversed{};
+  // The maximum multiplicative depth, determined using the computed values in multiplicativeDepths.
+  int maximumMultiplicativeDepth{};
   // A map of the initial multiplicative depth:
   // - std::string: The variable's identifier for which this initial depth is associated to.
   // - DepthMapEntry: A struct containing the multiplicative and reverseMultiplicativeDepth.
@@ -49,7 +51,6 @@ class ConeRewriter {
   /// \return a new AST that has been rewritten
   std::unique_ptr<AbstractNode> rewriteAst(std::unique_ptr<AbstractNode>&& ast);
 
-
   int computeMinDepth(AbstractNode *v);
 
   bool isCriticalNode(AbstractNode *n);
@@ -70,6 +71,10 @@ class ConeRewriter {
   /// getMultDepthL() and getReverseMultDepthR(), respectively.
   /// \return Returns 1 iff this node is a LogicalExpr containing an AND operator, otherwise 0.
   static int depthValue(AbstractNode *n);
+
+  void precomputeMultDepths(AbstractNode &ast);
+
+  int getMaximumMultiplicativeDepth();
 
   DepthMapEntry getInitialDepthOrNull(AbstractNode *node);
 };
