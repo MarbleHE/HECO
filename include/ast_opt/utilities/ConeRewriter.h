@@ -5,6 +5,7 @@
 #include "ast_opt/ast/AbstractNode.h"
 
 
+
 struct DepthMapEntry {
   int multiplicativeDepth;
   int reverseMultiplicativeDepth;
@@ -72,7 +73,7 @@ class ConeRewriter {
   /// \return Returns 1 iff this node is a LogicalExpr containing an AND operator, otherwise 0.
   static int depthValue(AbstractNode *n);
 
-  void precomputeMultDepths(AbstractNode &ast);
+  void precomputeMultDepths(AbstractNode *ast);
 
   int getMaximumMultiplicativeDepth();
 

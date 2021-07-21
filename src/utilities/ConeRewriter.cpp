@@ -6,6 +6,9 @@
 #include "ast_opt/utilities/ConeRewriter.h"
 #include "ast_opt/ast/BinaryExpression.h"
 #include "ast_opt/ast/AbstractExpression.h"
+#include "ast_opt/visitor/GetAllNodesVisitor.h"
+
+
 
 std::unique_ptr<AbstractNode> ConeRewriter::rewriteAst(std::unique_ptr<AbstractNode> &&ast_in) {
   ast = std::move(ast_in);
@@ -446,6 +449,30 @@ DepthMapEntry ConeRewriter::getInitialDepthOrNull(AbstractNode *node) {
     return initialMultiplicativeDepths.at(nodeAsVar->getIdentifier());
   }
   return DepthMapEntry(0, 0);
+}
+
+void ConeRewriter::precomputeMultDepths(AbstractNode *ast) {
+  // precompute the AST's multiplicative depth and reverse multiplicative depth
+  multiplicativeDepths.clear();
+  multiplicativeDepthsReversed.clear();
+
+  GetAllNodesVisitor vis;
+  ast->accept(vis);
+
+  //std::cout<< "Allnodes: " << vis.v[0]->toString(false);
+
+  //for (auto &node : ast.getAllNodes()) {
+   // getMultDepthL(node);
+   // getReverseMultDepthR(node);
+  //}
+
+  // determine the AST's maximum multiplicative depth
+  maximumMultiplicativeDepth = std::max_element(
+      multiplicativeDepths.begin(), multiplicativeDepths.end(),
+      [](const std::pair<const std::basic_string<char>, int> &a,
+         const std::pair<const std::basic_string<char>, int> &b) {
+        return a.second < b.second;
+      })->second;
 }
 
 int ConeRewriter::getMaximumMultiplicativeDepth() {

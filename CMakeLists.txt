@@ -158,6 +158,7 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/visitor/runtime/DummyCiphertextFactory.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/PlaintextNorm.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/Distribution.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/GetAllNodesVisitor.cpp
         )
 
 set(HEADER_ONLY_SOURCES
@@ -175,7 +176,7 @@ set(HEADER_ONLY_SOURCES
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/AbstractNoiseMeasuringCiphertext.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/DummyCiphertext.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/DummyCiphertextFactory.h
-        include/ast_opt/visitor/CountOpsVisitor.h src/visitor/CountOpsVisitor.cpp src/utilities/PerformanceSeal.cpp include/ast_opt/utilities/PerformanceSeal.h include/ast_opt/utilities/ConeRewriter.h src/utilities/ConeRewriter.cpp include/ast_opt/utilities/MultiplicativeDepthCalculator.h src/utilities/MultiplicativeDepthCalculator.cpp)
+        include/ast_opt/visitor/CountOpsVisitor.h src/visitor/CountOpsVisitor.cpp src/utilities/PerformanceSeal.cpp include/ast_opt/utilities/PerformanceSeal.h include/ast_opt/utilities/ConeRewriter.h src/utilities/ConeRewriter.cpp include/ast_opt/utilities/MultiplicativeDepthCalculator.h src/utilities/MultiplicativeDepthCalculator.cpp include/ast_opt/visitor/GetAllNodesVisitor.h src/visitor/GetAllNodesVisitor.cpp)
 
 # TODO: Go through this list and determine which headers aren't actually public
 set(PUBLIC_HEADERS
@@ -232,6 +233,7 @@ set(PUBLIC_HEADERS
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/SimulatorCiphertextFactory.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/DummyCiphertext.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/DummyCiphertextFactory.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/GetAllNodesVisitor.h
         )
 
 # build a library out of the code to be used by the tests

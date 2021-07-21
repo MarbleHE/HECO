@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <ast_opt/visitor/GetAllNodesVisitor.h>
 
 #include "ast_opt/parser/Parser.h"
 #include "../ASTComparison.h"
@@ -110,4 +111,44 @@ TEST(ConeRewriterTest, testReversedMultDepth) {
   auto depth = coneRewriter.getReverseMultDepthR(astProgram.get());
   std::cout << depth << std::endl;
   ASSERT_EQ(depth,0);
+}
+
+TEST(ConeRewriterTest, testprecomputeMultDepths) {
+
+// program's input
+  const char *inputs = R""""(
+      bool __input0__ = 0;
+      bool __input1__ = 1;
+      bool __input2__ = 0;
+    )"""";
+  auto astInput = Parser::parse(std::string(inputs));
+
+  // program specification
+  const char *program = R""""(
+      secret bool v1 = ((__input0__ && __input1__) && __input2__) && __input3__;
+
+      return v2;
+    )"""";
+  auto astProgram = Parser::parse(std::string(program));
+
+  // program's output
+  const char *outputs = R""""(
+      y = v2;
+    )"""";
+  auto astOutput = Parser::parse(std::string(outputs));
+
+  std::stringstream ss;
+  PrintVisitor p(ss);
+  astProgram->accept(p);
+  std::cout << ss.str() << std::endl;
+
+  ConeRewriter coneRewriter;
+  GetAllNodesVisitor vis;
+
+  astProgram.get()->accept(vis);
+  //vis.visit(*astProgram.get());
+  std::cout << vis.v[0] << std::endl;
+
+  //coneRewriter.precomputeMultDepths(astProgram.get());
+
 }
