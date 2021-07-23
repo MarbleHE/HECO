@@ -151,61 +151,65 @@ So if we see a multiplication node in the tree,
 we just end up calling something like seal::multiply(ctxt a, ctxt b).
 
 ## AST Representation
-TODO: Update to current class hierarchy
-
 The AST consists of nodes that are derived from either `AbstractExpression` or `AbstractStatement`,
 depending on whether the operation is an expression or a statement, respectively.
+```                                                                                                 
+                                          ┌─────────────────────┐                                                   
+                                          │    AbstractNode     │                                                   
+                                          └─────────────────────┘                                                   
+                                                     ▲                                                              
+                                                     │                                                              
+                                                     │                                                              
+                         ┌─────────────────────┐     │     ┌─────────────────────┐                                  
+                         │  AbstractStatement  │─────┴─────│ AbstractExpression  │                                  
+                         └─────────────────────┘           └─────────────────────┘                                  
+                                    ▲                                 ▲                                             
+         ┌─────────────────────┐    │                                 │     ┌─────────────────────┐                 
+         │     Assignment      │────┤                                 ├─────│   AbstractTarget    │                 
+         └─────────────────────┘    │                                 │     └─────────────────────┘                 
+                                    │                                 │                ▲                            
+         ┌─────────────────────┐    │                                 │                │     ┌─────────────────────┐
+         │        Block        │────┤                                 │                ├─────│  FunctionParameter  │
+         └─────────────────────┘    │                                 │                │     └─────────────────────┘
+                                    │                                 │                │                            
+         ┌─────────────────────┐    │                                 │                │     ┌─────────────────────┐
+         │         For         │────┤                                 │                ├─────│     IndexAccess     │
+         └─────────────────────┘    │                                 │                │     └─────────────────────┘
+                                    │                                 │                │                            
+         ┌─────────────────────┐    │                                 │                │     ┌─────────────────────┐
+         │      Function       │────┤                                 │                └─────│      Variable       │
+         └─────────────────────┘    │                                 │                      └─────────────────────┘
+                                    │                                 │                                             
+         ┌─────────────────────┐    │                                 │     ┌─────────────────────┐                 
+         │         If          │────┤                                 ├─────│  BinaryExpression   │                 
+         └─────────────────────┘    │                                 │     └─────────────────────┘                 
+                                    │                                 │                                             
+         ┌─────────────────────┐    │                                 │     ┌─────────────────────┐                 
+         │       Return        │────┤                                 ├─────│ OperatorExpression  │                 
+         └─────────────────────┘    │                                 │     └─────────────────────┘                 
+                                    │                                 │                                             
+         ┌─────────────────────┐    │                                 │     ┌─────────────────────┐                 
+         │ VariableDeclaration │────┘                                 ├─────│   UnaryExpression   │                 
+         └─────────────────────┘                                      │     └─────────────────────┘                 
+                                                                      │                                             
+                                                                      │     ┌─────────────────────┐                 
+                                                                      ├─────│        Call         │                 
+                                                                      │     └─────────────────────┘                 
+                                                                      │                                             
+                                                                      │     ┌─────────────────────┐                 
+                                                                      ├─────│   ExpressionList    │                 
+                                                                      │     └─────────────────────┘                 
+                                                                      │                                             
+                                                                      │     ┌─────────────────────┐                 
+                                                                      ├─────│     Literal<T>      │                 
+                                                                      │     └─────────────────────┘                 
+                                                                      │                                             
+                                                                      │     ┌─────────────────────┐                 
+                                                                      └─────│   TernaryOperator   │                 
+                                                                            └─────────────────────┘                 
 ```
-                                             
-                        ┌───────────────────┐                                       
-                        │   AbstractNode    │                                       
-                        └───────────────────┘                                       
-                                  ▲                                                 
-                 ┌────────────────┴───────────────┐                                 
-                 │                                │                                 
-       ┌───────────────────┐            ┌───────────────────┐                       
-       │ AbstractStatement │            │   AbstractExpression    │                       
-       └───────────────────┘            └───────────────────┘                       
-                 ▲                                ▲  ┌─────────────────┐            
-┌─────────────┐  │                                ├──│      Call       │            
-│    Block    │──┤                                │  └─────────────────┘            
-└─────────────┘  │                                ├──┌─────────────────┐            
-┌─────────────┐  │                                │  │FunctionParameter│            
-│  Function   │──┤                                │  └─────────────────┘            
-└─────────────┘  │                                │  ┌─────────────────┐            
-┌─────────────┐  │                                ├──│     Literal     │            
-│     If      │──┤                                │  └─────────────────┘            
-└─────────────┘  │                                │           ▲   ┌────────────────┐
-┌─────────────┐  │                                │           ├───│   LiteralInt   │
-│   Return    │──┤                                │           │   └────────────────┘
-└─────────────┘  │                                │           │   ┌────────────────┐
-┌─────────────┐  │                                │           ├───│ LiteralString  │
-│ VarAssignm  │──┤                                │           │   └────────────────┘
-└─────────────┘  │                                │           │   ┌────────────────┐
-┌─────────────┐  │                                │           ├───│  LiteralBool   │
-│   VarDecl   │──┤                                │           │   └────────────────┘
-└─────────────┘  │                                │           │   ┌────────────────┐
-┌─────────────┐  │                                │           └───│  LiteralFloat  │
-│    While    │──┘                                │               └────────────────┘
-└─────────────┘                                   │   ┌────────────────┐            
-┌─────────────┐                                   ├───│   UnaryExpr    │            
-│ParameterList│                                   │   └────────────────┘            
-└─────────────┘                                   │   ┌────────────────┐            
-                                                  ├───│   BinaryExpr   │            
-                                                  │   └────────────────┘            
-                                                  │            ▲   ┌───────────────┐
-                                                  │            ├───│ArithmeticExpr │
-                                                  │            │   └───────────────┘
-                                                  │            │   ┌───────────────┐
-                                                  │            └───│  LogicalExpr  │
-                                                  │                └───────────────┘
-                                                  │   ┌────────────────┐            
-                                                  └───│    Variable    │            
-                                                      └────────────────┘                      
-```
+<!-- Created with monodraw, the source file is in figures/AST_class_hierarchy -->
 ***Figure 1:*** Class hierarchy of the AST classes.
-
-<!-- TODO (pjattke): Replace by diagram generated using draw.io and add source file to repo -->
 
 Following, the different node types are briefly explained. The examples in brackets show how the commands would look like in "plain" C++.
 
