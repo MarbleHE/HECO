@@ -219,7 +219,7 @@ Following, the different node types are briefly explained. The examples in brack
       - `IndexAccess` – represents the `[]` operator in C++; has a target and an index value
       - `Variable` – named lvalue (any string)
   - `BinaryExpression` – an expression with two operands and one operator (e.g., `13 + 37`).
-  - `OperatorExpression` – TODO
+  - `OperatorExpression` – an operator with 0 or more operands (`AbstractExpression`)
   - `UnaryExpression` – an expression with one operator and one operand (e.g., `!b` where `b` is a Boolean).
   - `Call` – a call to an internal function, i.e., its implementation is represented in the AST as a Function.
   - `ExpressionList` – rvalue with an order list of (potentially null) expressions (e.g., `v = {a, b, c}` assigns an `ExpressionList` to vector `v`)

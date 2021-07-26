@@ -7,7 +7,9 @@
 #include "ast_opt/ast/AbstractExpression.h"
 #include "ast_opt/utilities/Operator.h"
 
-/// A OperatorExpression has two Operands (left and right) and an Operator
+/// An OperatorExpression has an operator and 0 or more operands.
+/// Note however that an AST with an OperatorExpression without an
+/// operand would not be a valid program.
 class OperatorExpression : public AbstractExpression {
 
  private:
