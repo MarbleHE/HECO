@@ -3,6 +3,7 @@
 #include "include/ast_opt/visitor/runtime/RuntimeVisitor.h"
 #include "include/ast_opt/visitor/runtime/SimulatorCiphertextFactory.h"
 #include "ast_opt/visitor/NoisePrintVisitor.h"
+#include "ast_opt/utilities/PerformanceSeal.h"
 
 #include "gtest/gtest.h"
 #ifdef HAVE_SEAL_BFV
@@ -13,7 +14,7 @@ class NoiseVisitorTest : public ::testing::Test {
   std::unique_ptr<TypeCheckingVisitor> tcv;
 
   void SetUp() override {
-    scf = std::make_unique<SimulatorCiphertextFactory>(8192);
+    scf = std::make_unique<SimulatorCiphertextFactory>(16384);
     tcv = std::make_unique<TypeCheckingVisitor>();
   }
 
@@ -28,8 +29,11 @@ class NoiseVisitorTest : public ::testing::Test {
 TEST_F(NoiseVisitorTest, testBad) {
 
   /*
-   * (x^4 + y) * z
+   * (x^4 + y) * z^4
    */
+
+  // print seal params
+  print_parameters(scf->getContext());
 
   // program's input
   const char *inputs = R""""(
@@ -41,18 +45,21 @@ TEST_F(NoiseVisitorTest, testBad) {
 
   // program specification
   const char *program = R""""(
-      secret int result0 = __input0__ *** __input0__;
-      secret int result1 = result0 *** __input0__;
-      secret int result2 = result1 *** __input0__;
-      secret int result3 = result2 +++ __input1__;
-      secret int result4 = result3 *** __input2__;
-      return result4;
+      secret int powx2 = __input0__ *** __input0__;
+      secret int powx3 = powx2 *** __input0__;
+      secret int powx4 = powx3 *** __input0__;
+      secret int powx4plusy = powx4 +++ __input1__;
+      secret int powz2 = __input2__ *** __input2__;
+      secret int powz3 = powz2 *** __input2__;
+      secret int powz4 = powz3 *** __input2__;
+      secret int result = powx4plusy *** powz4;
+      return result;
     )"""";
   auto astProgram = Parser::parse(std::string(program));
 
   // program's output
   const char *outputs = R""""(
-      y = result3;
+      y = result;
     )"""";
   auto astOutput = Parser::parse(std::string(outputs));
   // create and prepopulate TypeCheckingVisitor
