@@ -5,6 +5,7 @@
 #include "ast_opt/ast/AbstractExpression.h"
 #include "ast_opt/ast/Block.h"
 
+// a for loop with an initializer, condition, update, and body
 class For : public AbstractStatement {
  private:
   /// Stores the the initializer

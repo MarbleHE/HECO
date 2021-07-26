@@ -6,6 +6,7 @@
 #include <vector>
 #include "ast_opt/ast/AbstractTarget.h"
 
+/// Named lvalue (any string)
 class Variable : public AbstractTarget {
  private:
   /// Name of this variable

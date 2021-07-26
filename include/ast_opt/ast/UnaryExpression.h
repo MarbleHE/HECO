@@ -5,7 +5,7 @@
 #include "ast_opt/ast/AbstractExpression.h"
 #include "ast_opt/utilities/Operator.h"
 
-/// A UnaryExpression has a single Operands and an Operator
+/// A UnaryExpression has a single operand and an Operator
 class UnaryExpression : public AbstractExpression {
 
  private:

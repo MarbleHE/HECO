@@ -9,6 +9,7 @@
 template<typename T>
 class IfIteratorImpl;
 
+/// Defines a condition, a then-branch and (optionally) an else-branch
 class If : public AbstractStatement {
  private:
   /// Stores the condition

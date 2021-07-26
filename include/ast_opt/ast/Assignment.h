@@ -9,6 +9,7 @@
 // Forward Declaration of class Variable
 class Variable;
 
+/// Assigns an expression (rvalue) to a target (lvalue)
 class Assignment : public AbstractStatement {
  private:
   /// Target (left hand side) of the assignment
