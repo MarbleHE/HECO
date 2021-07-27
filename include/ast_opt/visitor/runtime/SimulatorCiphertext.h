@@ -113,6 +113,7 @@ class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
 
   std::unique_ptr<mpz_t> getTest();
   int getNoiseBudget();
+  void modSwitch(const AbstractCiphertext &operand);
 };
 
 #endif

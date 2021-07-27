@@ -133,6 +133,57 @@ void SimulatorCiphertext::relinearize() {
   throw std::runtime_error("Not implemented yet.");
 }
 
+void SimulatorCiphertext::modSwitch(const AbstractCiphertext &operand) {
+  auto operand_ctxt = cast_1(operand);
+  mpz_t result_noise;
+  mpz_init(result_noise);
+  mpz_t plain_mod;
+  mpz_init(plain_mod);
+  mpz_init_set_ui(plain_mod, this->getFactory().getContext().first_context_data()->parms().plain_modulus().value());
+  mpz_t poly_mod;
+  mpz_init(poly_mod);
+  mpz_init_set_ui(poly_mod, this->getFactory().getContext().first_context_data()->parms().poly_modulus_degree());
+  mpz_t coeff_mod;
+  mpz_init(coeff_mod);
+  mpz_init_set_ui(coeff_mod, *this->getFactory().getContext().first_context_data()->total_coeff_modulus());
+  // get last q_i
+  auto &context_data = *this->getFactory().getContext().key_context_data();
+  auto coeff_modulus = context_data.parms().coeff_modulus();
+  std::size_t coeff_modulus_size = coeff_modulus.size();
+  mpz_t last_prime;
+  mpz_init(last_prime);
+  mpz_init_set_ui(last_prime, coeff_modulus[coeff_modulus_size - 1].value()); // last primefactor of coeff modulus
+  mpz_t new_coeff_modulus;
+  // calculate t/(p * q) sqrt(3n+2n^2) = t * q_i / (q^2) sqrt(3n+2n^2)
+  mpz_t summand;
+  mpz_init(summand);
+  // 2n^2
+  mpz_t poly_mod_squared;
+  mpz_init(poly_mod_squared);
+  mpz_pow_ui(poly_mod_squared, poly_mod, 2);
+  mpz_t poly_mod_squared_times_two;
+  mpz_init(poly_mod_squared_times_two);
+  mpz_mul_ui(poly_mod_squared_times_two, poly_mod, 2);
+  // sqrt(3n+2n^2)
+  mpz_mul_ui(summand, poly_mod, 3);
+  mpz_add(summand, summand, poly_mod_squared_times_two);
+  mpz_sqrt(summand, summand);
+  // t * sqrt(3n+2n^2)
+  mpz_mul(summand, summand, plain_mod);
+  // t * q_i * sqrt(3n+2n^2)
+  mpz_mul(summand, summand, last_prime);
+  // q^2
+  mpz_t coeff_mod_squared;
+  mpz_init(coeff_mod_squared);
+  mpz_pow_ui(coeff_mod_squared, coeff_mod, 2);
+  // t * q_i / (q^2) sqrt(3n+2n^2)
+  mpz_div(summand, summand, coeff_mod_squared);
+  // resultnoise = operand._noise + summand
+  mpz_add(result_noise, summand, cast_1(operand)._noise);
+  mpz_set(this->_noise, result_noise);
+  this->_noise_budget = this->noiseBits();
+}
+
 std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::multiply(const AbstractCiphertext &operand) const {
   // cast operand
   auto operand_ctxt = cast_1(operand);
