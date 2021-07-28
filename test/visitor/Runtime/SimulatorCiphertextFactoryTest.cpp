@@ -311,6 +311,83 @@ class SimulatorCiphertextFactoryTest : public ::testing::Test {
     return std::max(int(coeff_modulus_significant_bit_count - log_noise - 1), 0);
   }
 
+  uint64_t calcModSwitchHeuristic(AbstractCiphertext &abstractCiphertext) {
+    mpz_t result_noise;
+    mpz_init(result_noise);
+    mpz_t plain_mod;
+    mpz_init(plain_mod);
+    mpz_init_set_ui(plain_mod, scf->getContext().first_context_data()->parms().plain_modulus().value());
+    mpz_t poly_mod;
+    mpz_init(poly_mod);
+    mpz_init_set_ui(poly_mod, scf->getContext().first_context_data()->parms().poly_modulus_degree());
+    mpz_t coeff_mod;
+    mpz_init(coeff_mod);
+    mpz_init_set_ui(coeff_mod, *scf->getContext().first_context_data()->total_coeff_modulus());
+    // calc init noise
+    mpz_t init_noise;
+    mpz_init(init_noise);
+    // summand_one = n * (t-1) / 2
+    mpz_t summand_one;
+    mpz_init(summand_one);
+    mpz_sub_ui(summand_one, plain_mod, 1);
+    mpz_mul(summand_one, summand_one, poly_mod);
+    mpz_div_ui(summand_one, summand_one, 2);
+    // summand_two = 2 * sigma * sqrt(12 * n ^2 + 9 * n)
+    mpz_t summand_two;
+    mpz_init(summand_two);
+    mpz_pow_ui(summand_two, poly_mod, 2);
+    mpz_mul_ui(summand_two, summand_two, 12);
+    mpz_t poly_mod_times_nine;
+    mpz_init(poly_mod_times_nine);
+    mpz_mul_ui(poly_mod_times_nine, poly_mod, 9);
+    mpz_add(summand_two, summand_two, poly_mod_times_nine);
+    mpz_sqrt(summand_two, summand_two);
+    mpz_mul_ui(summand_two, summand_two, long(6.4)); // sigma = 3.2
+    mpz_t sum;
+    // sum = summand_1 + summand_2
+    mpz_init(sum);
+    mpz_add(sum, summand_one, summand_two);
+    // result_noise = t * sum
+    mpz_mul(init_noise, sum, plain_mod);
+    // get last q_i
+    auto &context_data = *scf->getContext().key_context_data();
+    auto coeff_modulus = context_data.parms().coeff_modulus();
+    std::size_t coeff_modulus_size = coeff_modulus.size();
+    mpz_t last_prime;
+    mpz_init(last_prime);
+    mpz_init_set_ui(last_prime, coeff_modulus[coeff_modulus_size - 1].value()); // last primefactor of coeff modulus
+    mpz_t new_coeff_modulus;
+    // calculate t/(p * q) sqrt(3n+2n^2) = t * q_i / (q^2) sqrt(3n+2n^2)
+    mpz_t summand;
+    mpz_init(summand);
+    // 2n^2
+    mpz_t poly_mod_squared;
+    mpz_init(poly_mod_squared);
+    mpz_pow_ui(poly_mod_squared, poly_mod, 2);
+    mpz_t poly_mod_squared_times_two;
+    mpz_init(poly_mod_squared_times_two);
+    mpz_mul_ui(poly_mod_squared_times_two, poly_mod, 2);
+    // sqrt(3n+2n^2)
+    mpz_mul_ui(summand, poly_mod, 3);
+    mpz_add(summand, summand, poly_mod_squared_times_two);
+    mpz_sqrt(summand, summand);
+    // t * sqrt(3n+2n^2)
+    mpz_mul(summand, summand, plain_mod);
+    // t * q_i * sqrt(3n+2n^2)
+    mpz_mul(summand, summand, last_prime);
+    // q^2
+    mpz_t coeff_mod_squared;
+    mpz_init(coeff_mod_squared);
+    mpz_pow_ui(coeff_mod_squared, coeff_mod, 2);
+    // t * q_i / (q^2) sqrt(3n+2n^2)
+    mpz_div(summand, summand, coeff_mod_squared);
+    // resultnoise = operand._noise + summand
+    mpz_add(result_noise, summand, init_noise);
+    size_t coeff_modulus_significant_bit_count = scf->getContext().first_context_data()->total_coeff_modulus_bit_count();
+    size_t log_noise = mpz_sizeinbase(result_noise, 2);
+    return std::max(int(coeff_modulus_significant_bit_count - log_noise - 1), 0);
+  }
+
   void checkCiphertextData(
       AbstractCiphertext &abstractCiphertext,
       const std::vector<int64_t> &expectedValues) {
@@ -336,7 +413,6 @@ class SimulatorCiphertextFactoryTest : public ::testing::Test {
     std::cout << "Noise Budget after op: " << (dynamic_cast<const SimulatorCiphertext&>(abstractCiphertext)).noiseBits() << std::endl;
     EXPECT_EQ((dynamic_cast<const SimulatorCiphertext&>(abstractCiphertext)).noiseBits(), expected_noise);
   }
-
 };
 
 TEST_F(SimulatorCiphertextFactoryTest, createCiphertext) { /* NOLINT */
@@ -567,11 +643,11 @@ TEST_F(SimulatorCiphertextFactoryTest, modSwitch) { /* NOLINT */
   std::vector<int> data2 = {0, 1, 2, 1, 10, 21};
   auto operandVector = createCleartextSim(data2);
 
-
+  uint64_t expected_noise = calcModSwitchHeuristic(*ctxt1);
   dynamic_cast<SimulatorCiphertext &>(*ctxt1).modSwitch();
-  std::cout << "NoiseBudget after Modswitch: " <<
-      (dynamic_cast<const SimulatorCiphertext&>(*ctxt1)).noiseBits() << std::endl;
-
+  //std::cout << "NoiseBudget after Modswitch: " <<
+    //  (dynamic_cast<const SimulatorCiphertext&>(*ctxt1)).noiseBits() << std::endl;
+  checkCiphertextNoise(*ctxt1, expected_noise);
 }
 
 TEST_F(SimulatorCiphertextFactoryTest, xToPowerFourTimesYBad) {
