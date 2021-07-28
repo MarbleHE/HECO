@@ -72,6 +72,10 @@ class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
 
   int noiseBits() const override;
 
+  /// Calculates Noise Heuristics for The ModSwitch Operation on a ciphertext as in [Costache et al.:
+  /// Evaluating the effectiveness of heuristic worst-case noise analysis in FHE]
+  void modSwitch();
+
   // API inherited from AbstractCiphertext
   std::unique_ptr<AbstractCiphertext> clone() const override;
   const SimulatorCiphertextFactory &getFactory() const override;
@@ -113,7 +117,7 @@ class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
 
   std::unique_ptr<mpz_t> getTest();
   int getNoiseBudget();
-  void modSwitch(const AbstractCiphertext &operand);
+
 };
 
 #endif

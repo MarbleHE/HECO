@@ -133,8 +133,7 @@ void SimulatorCiphertext::relinearize() {
   throw std::runtime_error("Not implemented yet.");
 }
 
-void SimulatorCiphertext::modSwitch(const AbstractCiphertext &operand) {
-  auto operand_ctxt = cast_1(operand);
+void SimulatorCiphertext::modSwitch() {
   mpz_t result_noise;
   mpz_init(result_noise);
   mpz_t plain_mod;
@@ -179,7 +178,7 @@ void SimulatorCiphertext::modSwitch(const AbstractCiphertext &operand) {
   // t * q_i / (q^2) sqrt(3n+2n^2)
   mpz_div(summand, summand, coeff_mod_squared);
   // resultnoise = operand._noise + summand
-  mpz_add(result_noise, summand, cast_1(operand)._noise);
+  mpz_add(result_noise, summand, this->_noise);
   mpz_set(this->_noise, result_noise);
   this->_noise_budget = this->noiseBits();
 }

@@ -12,7 +12,7 @@
 
 class SimulatorCiphertextFactoryTest : public ::testing::Test {
  protected:
-  const int numCiphertextSlots = 8192;
+  const int numCiphertextSlots = 16384;
 
   std::unique_ptr<SimulatorCiphertextFactory> scf;
 
@@ -557,6 +557,21 @@ TEST_F(SimulatorCiphertextFactoryTest, multiplyPlainInplace) { /* NOLINT */
   uint64_t expected_noise = calcMultiplyPlainNoiseHeuristic(*ctxt1,operandVector);
   ctxt1->multiplyPlainInplace(operandVector);
   checkCiphertextNoise(*ctxt1, expected_noise);
+}
+
+TEST_F(SimulatorCiphertextFactoryTest, modSwitch) { /* NOLINT */
+  // create ciphertext
+  std::vector<int64_t> data1 = {3, 3, 1, 4, 5, 9};
+  std::unique_ptr<AbstractCiphertext> ctxt1 = scf->createCiphertext(data1);
+
+  std::vector<int> data2 = {0, 1, 2, 1, 10, 21};
+  auto operandVector = createCleartextSim(data2);
+
+
+  dynamic_cast<SimulatorCiphertext &>(*ctxt1).modSwitch();
+  std::cout << "NoiseBudget after Modswitch: " <<
+      (dynamic_cast<const SimulatorCiphertext&>(*ctxt1)).noiseBits() << std::endl;
+
 }
 
 TEST_F(SimulatorCiphertextFactoryTest, xToPowerFourTimesYBad) {
