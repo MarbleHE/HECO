@@ -21,6 +21,7 @@ class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
   mpz_t _noise; // current invariant noise scaled by coeff_modulus (i.e: we store actual_noise * coeff_modulus)
   uint64_t _noise_budget = 0; // current noise budget
   int ciphertext_size_ = 0; // ciphertext size: this gets bigger when multiplying and reset when relinearizing
+  int _number_mod_switches = 0; // keep track of how many modswitches have been performed so far
 
   /// Creates a new SealCiphertext: a wrapper around the seal::Ciphertext class.
   /// \param simulatorFactory The factory that created this ciphertext.
