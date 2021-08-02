@@ -9,7 +9,7 @@
 class BenchmarkingSeal : public ::testing::Test {
 
  protected:
-  const int poly_modulus_degree = 16384;
+  const int poly_modulus_degree = 8192;
 
   void SetUp() override {
 
@@ -139,17 +139,17 @@ TEST_F(BenchmarkingSeal, noModSwitchTest) {
     }
   }
 
-  auto avg_time = std::chrono::duration_cast<std::chrono::microseconds>(time_sum).count()/(count * iterations);
+  long long avg_time = std::chrono::duration_cast<std::chrono::microseconds>(time_sum).count()/(count * iterations);
 
   //calc std deviation
-  auto standardDeviation = 0;
+  long long standardDeviation = 0;
   for( int i = 0; i < time_vec.size(); ++i) {
-    standardDeviation += std::pow(time_vec[i].count() - avg_time, 2);
+    standardDeviation += (time_vec[i].count() - avg_time) * (time_vec[i].count() - avg_time);
   }
 
   std::cout << "Average evaluation time of (x^4 + y) * z^4 WITHOUT modswitch [" << avg_time << " microseconds]"
             << std::endl;
-  std::cout << "Standard error: " << sqrt(standardDeviation / time_vec.size())  / sqrt(time_vec.size())<< std::endl;
+  std::cout << "Standard error: " << sqrt(double(standardDeviation) / time_vec.size())  / sqrt(time_vec.size())<< std::endl;
 }
 
 TEST_F(BenchmarkingSeal, modSwitchTest) {

@@ -75,8 +75,7 @@ TEST(ConeRewriterTest, testMultDepth) {
   std::cout << depth << std::endl;
   ASSERT_EQ(depth,3);
 }
-
-
+///
 TEST(ConeRewriterTest, testReversedMultDepth) {
 
 // program's input
