@@ -78,6 +78,11 @@ class ConeRewriter {
   int getMaximumMultiplicativeDepth();
 
   DepthMapEntry getInitialDepthOrNull(AbstractNode *node);
+
+  // here getSuccessor
+  std::vector<AbstractNode *> *getPredecessorOnCriticalPath(AbstractNode *v);
+  std::vector<AbstractNode *> getReducibleCones(AbstractNode *v, int minDepth);
+  std::vector<AbstractNode *> getAndCriticalCircuit(std::vector<AbstractNode *> delta);
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_UTILITIES_CONEREWRITER_H_

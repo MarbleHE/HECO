@@ -183,7 +183,7 @@ TEST(ConeRewriterTest, testprecomputeMultDepths) {
   //vis.visit(*astProgram.get());
   std::cout << vis.v[0] << std::endl;
 
-  //coneRewriter.precomputeMultDepths(astProgram.get());
+  coneRewriter.precomputeMultDepths(astProgram.get());
 
 }
 
