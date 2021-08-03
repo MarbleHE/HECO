@@ -24,7 +24,7 @@ void SpecialPrintVisitor::visit(AbstractNode &elem) {
 
   // increment indentation level and visit children, decrement afterwards
   ++indentation_level;
-  for(AbstractNode &c: elem) {
+  for (AbstractNode &c: elem) {
     c.accept(*this);
   }
   --indentation_level;

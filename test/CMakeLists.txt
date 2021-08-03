@@ -20,6 +20,7 @@ FetchContent_MakeAvailable(googletest)
 # TARGET: testing
 ##############################
 set(TEST_FILES
+ 		visitor/ProgramPrintVisitorTest.cpp
         ASTComparison.cpp
         ASTComparison.h
         AstTestingGenerator.cpp
@@ -42,8 +43,18 @@ set(TEST_FILES
         ast/UnaryExpressionTest.cpp
         ast/VariableDeclarationTest.cpp
         ast/VariableTest.cpp
+        end-to-end/BoxBlurTest.cpp
         end-to-end/CardioTest.cpp
-        end-to-end/KernelTest.cpp
+        end-to-end/DotProductTest.cpp
+        end-to-end/GxKernelTest.cpp
+        end-to-end/GyKernelTest.cpp
+        end-to-end/HammingDistanceTest.cpp
+        end-to-end/L2DistanceTest.cpp
+        end-to-end/LaplaceSharpeningTest.cpp
+        end-to-end/LinearKernelTest.cpp
+        end-to-end/MatrixVectorProductTest.cpp
+        end-to-end/PolynomialKernelTest.cpp
+        end-to-end/RobertsCrossTest.cpp
         parser/ParserTest.cpp
         parser/ParserTestHelpers.h
         parser/TokenizerTest.cpp
@@ -64,7 +75,7 @@ set(TEST_FILES
         visitor/TypeCheckingVisitorTest.cpp
         visitor/VectorizerTest.cpp
         visitor/VisitorTest.cpp
-)
+        )
 
 add_executable(testing-all
         ${TEST_FILES})

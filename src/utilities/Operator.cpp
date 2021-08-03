@@ -1,12 +1,12 @@
 #include "ast_opt/utilities/Operator.h"
 
 std::string toString(ArithmeticOp bop) {
-  static const std::string binaryOpStrings[] = {"add", "sub", "mult", "div", "mod", "fhe_add", "fhe_sub", "fhe_mult"};
+  static const std::string binaryOpStrings[] = {"+", "-", "*", "/", "%", "+++", "---", "***"};
   return binaryOpStrings[bop];
 }
 
 std::string toString(LogicalOp logop) {
-  static const std::string logicalOpStrings[] = {"AND", "OR", "<", "<=", ">", ">=", "==", "!=", "&", "^", "|"};
+  static const std::string logicalOpStrings[] = {"&&", "||", "<", "<=", ">", ">=", "==", "!=", "&", "^", "|"};
   return logicalOpStrings[logop];
 }
 

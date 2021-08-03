@@ -23,8 +23,8 @@ set(CXXFLAGS "--coverage --pedantic-errors -Wall -WError")
 if (MSVC)
     message("Using MSVC")
 
-    # Force static MSVC runtime library on Windows
-    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    # Force dynamic MSVC runtime library on Windows
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 
     # Switch MSVC into multi threaded mode
     add_compile_options(/MP)
@@ -54,7 +54,7 @@ endif ()
 # Determine if SEAL is available
 ##############################
 
-find_package(SEAL 3.6 CONFIG REQUIRED) # sets SEAL_FOUND variable
+find_package(SEAL 3.6 CONFIG) # sets SEAL_FOUND variable
 
 # find GMP
 set(GMP_PREFIX "" CACHE PATH "path ")
@@ -101,11 +101,14 @@ endif ()
 
 ##############################
 # TARGET: ast_opt
+# TODO: Rename this target!
 #
 # The main ast_optimizer as a library
 ##############################
 
+# All source files (*.cpp) for ABC
 set(SOURCE_FILES
+		${ast_optimizer_SOURCE_DIR}/src/utilities/ScopedVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/AbstractNode.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/Assignment.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/BinaryExpression.cpp
@@ -144,6 +147,7 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/utilities/MultiplicativeDepthCalculator.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/Operator.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/PerformanceSeal.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/utilities/PlainVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/PlaintextNorm.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/Scope.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/BinaryToOperatorExpressionVisitor.cpp
@@ -155,8 +159,9 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/visitor/HashVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/IdentifyNoisySubtreeVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/NoisePrintVisitor.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/ParentSettingVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/PrintVisitor.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/visitor/ScopedVisitor.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/ProgramPrintVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/SecretBranchingVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/TypeCheckingVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/Vectorizer.cpp
@@ -165,12 +170,11 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/visitor/controlFlowGraph/NodeRelationship.cpp
         )
 
+# This contains all the header-only files (e.g., abstract classes, interfaces and templates that don't have *.cpp file)
 set(HEADER_ONLY_SOURCES
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractExpression.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractStatement.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractTarget.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/VariableMap.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/IVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/AbstractCiphertext.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/AbstractCiphertextFactory.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/AbstractNoiseMeasuringCiphertext.h
@@ -180,10 +184,14 @@ set(HEADER_ONLY_SOURCES
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/DummyCiphertextFactory.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/SimulatorCiphertext.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/SimulatorCiphertextFactory.h
-)
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/VariableMap.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/Visitor.h
+        )
 
-# TODO: Go through this list and determine which headers aren't actually public
+# This contains the headers that developers that want to link directly against ABC might need to have access to
+# These are the headers that are installed when ABC is installed as a system-wide library
 set(PUBLIC_HEADERS
+ 		${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/MultiplicativeDepthCalculator.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractExpression.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractNode.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractStatement.h
@@ -221,30 +229,44 @@ set(PUBLIC_HEADERS
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/ConeRewriter.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/ConeRewriter.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/Datatype.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/MultiplicativeDepthCalculator.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/IVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/MultiplicativeDepthCalculator.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/Operator.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/Operator.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/PerformanceSeal.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/PlainVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/Scope.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/Scope.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/ScopedVisitor.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/VariableMap.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/VariableMap.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/BinaryToOperatorExpressionVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/CountOpsVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/CountOpsVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/ExpressionBatcher.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/ExpressionBatcher.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/GetAllNodesVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/GetAllNodesVisitor.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/HashVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/HashVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/IVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/IdentifyNoisySubtreeVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/NoisePrintVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/PrintVisitor.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/ScopedVisitor.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/PrintVisitor.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/ProgramPrintVisitor.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/ScopedVisitor.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/SecretBranchingVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/SecretBranchingVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/TypeCheckingVisitor.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/TypeCheckingVisitor.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/Vectorizer.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/Vectorizer.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/controlFlowGraph/ControlFlowGraphVisitor.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/controlFlowGraph/ControlFlowGraphVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/controlFlowGraph/NodeRelationship.h
-)
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/controlFlowGraph/NodeRelationship.h
+        )
 
 # build a library out of the code to be used by the tests
 add_library(ast_opt ${SOURCE_FILES} ${HEADER_ONLY_SOURCES})

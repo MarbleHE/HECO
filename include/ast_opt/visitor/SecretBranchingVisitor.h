@@ -2,7 +2,7 @@
 #define GRAPHNODE_H_SRC_VISITOR_SECRETBRANCHINGVISITOR_H_
 
 #include "ast_opt/ast/AbstractExpression.h"
-#include "ast_opt/visitor/ScopedVisitor.h"
+#include "ast_opt/utilities/Visitor.h"
 #include "TypeCheckingVisitor.h"
 #include "ast_opt/utilities/VariableMap.h"
 

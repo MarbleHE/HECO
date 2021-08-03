@@ -2,7 +2,7 @@
 #define GRAPHNODE_H_SRC_VISITOR_TYPECHECKINGVISITOR_H_
 
 #include "ast_opt/utilities/Datatype.h"
-#include "ast_opt/visitor/ScopedVisitor.h"
+#include "ast_opt/utilities/Visitor.h"
 #include <stack>
 
 // Forward declaration

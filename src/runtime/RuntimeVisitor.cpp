@@ -439,7 +439,6 @@ void SpecialRuntimeVisitor::visit(VariableDeclaration &elem) {
   elem.getValue().accept(*this);
   std::unique_ptr<AbstractValue> initializationValue = getNextStackElement();
 
-
   if (elem.getDatatype().getSecretFlag()) {
     auto sident = std::make_unique<ScopedIdentifier>(getCurrentScope(), elem.getTarget().getIdentifier());
     // declaration of a secret variable: we need to check whether we need to create a ciphertext here or whether the

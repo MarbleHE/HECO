@@ -1,3 +1,9 @@
+#include "ast_opt/utilities/ScopedVisitor.h"
+
+#include "ast_opt/ast/AbstractExpression.h"
+#include "ast_opt/ast/AbstractNode.h"
+#include "ast_opt/ast/AbstractStatement.h"
+#include "ast_opt/ast/AbstractTarget.h"
 #include "ast_opt/ast/Assignment.h"
 #include "ast_opt/ast/BinaryExpression.h"
 #include "ast_opt/ast/Block.h"
@@ -15,8 +21,6 @@
 #include "ast_opt/ast/UnaryExpression.h"
 #include "ast_opt/ast/Variable.h"
 #include "ast_opt/ast/VariableDeclaration.h"
-#include "ast_opt/visitor/ScopedVisitor.h"
-#include "ast_opt/utilities/Scope.h"
 
 void ScopedVisitor::visit(BinaryExpression &elem) {
   visitChildren(elem);
@@ -158,6 +162,10 @@ Scope &ScopedVisitor::getRootScope() {
   return *rootScope;
 }
 
+std::unique_ptr<Scope> ScopedVisitor::takeRootScope() {
+  return std::move(rootScope);
+}
+
 const Scope &ScopedVisitor::getRootScope() const {
   if (rootScope==nullptr) {
     throw std::runtime_error("Cannot return non-existent root scope!");
@@ -167,6 +175,10 @@ const Scope &ScopedVisitor::getRootScope() const {
 
 void ScopedVisitor::setRootScope(std::unique_ptr<Scope> &&scope) {
   rootScope = std::move(scope);
+}
+
+void ScopedVisitor::overrideCurrentScope(Scope *scope) {
+  currentScope = scope;
 }
 
 void ScopedVisitor::enterScope(AbstractNode &node) {

@@ -1,7 +1,7 @@
 #ifndef AST_OPTIMIZER_TEST_VISITOR_BINARYTOOPERATOREXPRESSIONVISITOR_H_
 #define AST_OPTIMIZER_TEST_VISITOR_BINARYTOOPERATOREXPRESSIONVISITOR_H_
 
-#include "ast_opt/visitor/ScopedVisitor.h"
+#include "ast_opt/utilities/Visitor.h"
 #include "ast_opt/ast/BinaryExpression.h"
 
 class SpecialBinaryToOperatorExpressionVisitor;

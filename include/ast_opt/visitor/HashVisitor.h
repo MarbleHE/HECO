@@ -5,7 +5,7 @@
 #include <stack>
 
 #include "ast_opt/ast/AbstractNode.h"
-#include "ast_opt/visitor/ScopedVisitor.h"
+#include "ast_opt/utilities/Visitor.h"
 
 
 /// Forward declaration of the class that will actually implement the HashVisitor's logic

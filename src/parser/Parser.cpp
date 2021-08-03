@@ -25,6 +25,7 @@
 #include "ast_opt/parser/Parser.h"
 #include "ast_opt/parser/PushBackStream.h"
 #include "../../test/parser/ParserTestHelpers.h"
+#include "ast_opt/visitor/ParentSettingVisitor.h"
 
 using std::to_string;
 
@@ -47,6 +48,10 @@ std::unique_ptr<AbstractNode> Parser::parse(std::string s) {
     block->appendStatement(std::move(statement));
   }
 
+  // TODO: Remove this workaround once parser sets parents properly
+  ParentSettingVisitor p;
+  block->accept(p);
+
   return std::move(block);
 }
 
@@ -61,22 +66,18 @@ AbstractStatement *Parser::parseStatement(stork::tokens_iterator &it, bool gobbl
   AbstractStatement *parsedStatement;
   if (it->isReservedToken()) {
     switch (it->get_reserved_token()) {
-      case stork::reservedTokens::kw_for:
-        parsedStatement = parseForStatement(it);
+      case stork::reservedTokens::kw_for:parsedStatement = parseForStatement(it);
         break;
-      case stork::reservedTokens::kw_if:
-        parsedStatement = parseIfStatement(it);
+      case stork::reservedTokens::kw_if:parsedStatement = parseIfStatement(it);
         break;
       case stork::reservedTokens::kw_return: {
         parsedStatement = parseReturnStatement(it);
         if (gobbleTrailingSemicolon) parseTokenValue(it, stork::reservedTokens::semicolon);
         break;
       }
-      case stork::reservedTokens::open_curly:
-        parsedStatement = parseBlockStatement(it);
+      case stork::reservedTokens::open_curly:parsedStatement = parseBlockStatement(it);
         break;
-      case stork::reservedTokens::kw_public:
-        parsedStatement = parseFunctionStatement(it);
+      case stork::reservedTokens::kw_public:parsedStatement = parseFunctionStatement(it);
         break;
 
         // it starts with a data type or "secret" keyword (e.g., int, float, secret int, secret float)
@@ -152,7 +153,8 @@ bool isPostFixOperator(const stork::tokens_iterator &it) {
 }
 
 bool isLiteral(stork::tokens_iterator &it) {
-  return it->isBool() || it->isChar() || it->isFloat() || it->isDouble() || it->isInteger() || it->isString();
+  return it->isBool() || it->isChar() || it->isFloat() || it->isDouble() || it->isInteger() || it->isString()
+      || it->hasValue(stork::reservedTokens::kw_true) || it->hasValue(stork::reservedTokens::kw_false);
 }
 
 AbstractExpression *Parser::parseExpression(stork::tokens_iterator &it) {
@@ -362,6 +364,10 @@ AbstractExpression *Parser::parseLiteral(stork::tokens_iterator &it, bool isNega
     } else {
       l = (isNegative) ? new LiteralInt(-it->getInteger()) : new LiteralInt(it->getInteger());
     }
+  } else if (it->hasValue(stork::reservedTokens::kw_true)) {
+    l = new LiteralBool(true);
+  } else if (it->hasValue(stork::reservedTokens::kw_false)) {
+    l = new LiteralBool(false);
   } else {
     throw stork::unexpectedSyntaxError(to_string(it->getValue()), it->getLineNumber(), it->getCharIndex());
   }
@@ -653,6 +659,13 @@ Block *Parser::parseBlockOrSingleStatement(stork::tokens_iterator &it) {
   return block;
 };
 
+/**
+ * Parses an If statement, looking for the following pattern, where [] indiciates optional, and <X> means X is another node type
+ * if(<EXPRESSION>) <STATEMENT>|<BLOCK> [else <STATEMENT>|<BLOCK>]
+ * //TODO: Specify in some kind of "real" EBNF or similar for each parsing function!!
+ * @param it
+ * @return
+ */
 If *Parser::parseIfStatement(stork::tokens_iterator &it) {
   // parse: if (condition)
   parseTokenValue(it, stork::reservedTokens::kw_if);

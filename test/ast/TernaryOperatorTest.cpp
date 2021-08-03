@@ -36,7 +36,7 @@ TEST(TernaryOperatorTest, values_ValuesGivenInCtorAreRetrievable) {
 }
 
 //TODO: Finish adapting tests
-TEST(TernaryOperatorTest, SetAndGet) {
+TEST(TernaryOperatorTest, DISABLED_SetAndGet) {
   // This test simply checks that target and value can be set and get correctly.
 
 //  TernaryOperator ternaryOperator(std::make_unique<LiteralBool>(true),
@@ -61,7 +61,7 @@ TEST(TernaryOperatorTest, SetAndGet) {
 //  EXPECT_EQ(getNameFromVariable(iff.getElseExpr()), "mau");
 }
 
-TEST(TernaryOperatorTest, CopyCtorCopiesValue) {
+TEST(TernaryOperatorTest, DISABLED_CopyCtorCopiesValue) {
   // When copying a TernaryOperator, the new object should contain a (deep) copy of the condition and branches
 
 //  auto variableDeclaration1 =
@@ -81,7 +81,7 @@ TEST(TernaryOperatorTest, CopyCtorCopiesValue) {
 //  ASSERT_NE(iff.getElseExpr(), copiedTernaryOperatorf.getElseExpr());
 }
 
-TEST(TernaryOperatorTest, CopyAssignmentCopiesValue) {
+TEST(TernaryOperatorTest, DISABLED_CopyAssignmentCopiesValue) {
   // When copying a TernaryOperator, the new object should contain a copy of the condition and branches
 
 //  auto variableDeclaration1 = std::make_unique<VariableDeclaration>(
@@ -102,7 +102,7 @@ TEST(TernaryOperatorTest, CopyAssignmentCopiesValue) {
 //  ASSERT_NE(iff.getElseExpr(), copiedTernaryOperatorf.getElseExpr());
 }
 
-TEST(TernaryOperatorTest, MoveCtorPreservesValue) {
+TEST(TernaryOperatorTest, DISABLED_MoveCtorPreservesValue) {
   // When moving a TernaryOperator, the new object should contain the same condition and branches
 
 //  VariableDeclaration variableDeclaration1(Datatype(Type::BOOL), std::make_unique<Variable>("foo"));
@@ -128,7 +128,7 @@ TEST(TernaryOperatorTest, MoveCtorPreservesValue) {
 //  EXPECT_EQ(getNameFromVariable(newTernaryOperatorf.getElseExpr()), "boo");
 }
 
-TEST(TernaryOperatorTest, MoveAssignmentPreservesValue) {
+TEST(TernaryOperatorTest, DISABLED_MoveAssignmentPreservesValue) {
   // When moving a TernaryOperator, the new object should contain the same condition and branches
 
 //  VariableDeclaration variableDeclaration1(Datatype(Type::BOOL), std::make_unique<Variable>("foo"));
@@ -154,7 +154,7 @@ TEST(TernaryOperatorTest, MoveAssignmentPreservesValue) {
 //  EXPECT_EQ(getNameFromVariable(newTernaryOperatorf.getElseExpr()), "boo");
 }
 
-TEST(TernaryOperatorTest, countChildrenReportsCorrectNumber) {
+TEST(TernaryOperatorTest, DISABLED_countChildrenReportsCorrectNumber) {
   // This tests checks that countChildren delivers the correct number
 
 //  VariableDeclaration variableDeclaration1(Datatype(Type::BOOL), std::make_unique<Variable>("foo"));
@@ -175,7 +175,7 @@ TEST(TernaryOperatorTest, countChildrenReportsCorrectNumber) {
 //  EXPECT_EQ(reported_count, actual_count);
 }
 
-TEST(TernaryOperatorTest, node_iterate_children) {
+TEST(TernaryOperatorTest, DISABLED_node_iterate_children) {
   // This test checks that we can iterate correctly through the children
   // Even if some of the elements are null (in which case they should not appear)
 
@@ -204,7 +204,7 @@ TEST(TernaryOperatorTest, node_iterate_children) {
 //  EXPECT_EQ(getNameFromDeclaration(dynamic_cast<Block &>(child1).getStatements()[0]), "foo");
 //  EXPECT_EQ(getNameFromDeclaration(dynamic_cast<Block &>(child2).getStatements()[0]), "boo");
 }
-TEST(TernaryOperatorTest, JsonOutputTest) { /* NOLINT */
+TEST(TernaryOperatorTest, DISABLED_JsonOutputTest) { /* NOLINT */
 //  VariableDeclaration variableDeclaration1(Datatype(Type::BOOL), std::make_unique<Variable>("foo"));
 //  VariableDeclaration variableDeclaration2(Datatype(Type::BOOL), std::make_unique<Variable>("boo"));
 //  TernaryOperator iff(std::make_unique<LiteralBool>(true),

@@ -1,5 +1,5 @@
 #include "ast_opt/ast/TernaryOperator.h"
-#include "ast_opt/visitor/IVisitor.h"
+#include "ast_opt/utilities/IVisitor.h"
 
 TernaryOperator::~TernaryOperator() = default;
 

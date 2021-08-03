@@ -8,7 +8,7 @@
 #include <utility>
 
 #include "ast_opt/ast/AbstractNode.h"
-#include "ast_opt/visitor/ScopedVisitor.h"
+#include "ast_opt/utilities/Visitor.h"
 #include "ast_opt/runtime/AbstractCiphertext.h"
 
 

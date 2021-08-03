@@ -1,5 +1,5 @@
 #include "ast_opt/ast/IndexAccess.h"
-#include "ast_opt/visitor/IVisitor.h"
+#include "ast_opt/utilities/IVisitor.h"
 
 IndexAccess::~IndexAccess() = default;
 
@@ -41,6 +41,10 @@ AbstractTarget &IndexAccess::getTarget() {
   } else {
     throw std::runtime_error("Cannot get null target.");
   }
+}
+
+std::unique_ptr<AbstractTarget> IndexAccess::takeTarget() {
+  return std::move(target);
 }
 
 const AbstractTarget &IndexAccess::getTarget() const {

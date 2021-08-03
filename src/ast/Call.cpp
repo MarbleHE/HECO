@@ -1,5 +1,5 @@
 #include "ast_opt/ast/Call.h"
-#include "ast_opt/visitor/IVisitor.h"
+#include "ast_opt/utilities/IVisitor.h"
 
 /// Convenience typedef for conciseness
 typedef std::unique_ptr<AbstractExpression> exprPtr;
