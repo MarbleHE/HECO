@@ -8,6 +8,7 @@
 #include "ast_opt/ast/Literal.h"
 #include "ast_opt/visitor/PrintVisitor.h"
 #include "ast_opt/utilities/ConeRewriter.h"
+#include "ast_opt/visitor/BinaryToOperatorExpressionVisitor.h"
 
 #ifdef HAVE_SEAL_BFV
 
@@ -51,6 +52,10 @@ TEST(ConeRewriterTest, testConeRewrPaperTree) {
   return ((a && b) || (x || y)) && c;
   )"""";
   auto astProgram = Parser::parse(std::string(program));
+
+  // Rewrite BinaryExpressions to trivial OperatorEpxressions
+  BinaryToOperatorExpressionVisitor v;
+  astProgram->accept(v);
 
   std::stringstream ss;
   PrintVisitor p(ss);
