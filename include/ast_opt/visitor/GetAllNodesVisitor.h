@@ -24,8 +24,13 @@
 #include "ast_opt/ast/VariableDeclaration.h"
 #include "ast_opt/visitor/ScopedVisitor.h"
 #include "ast_opt/utilities/Scope.h"
+#include "ast_opt/visitor/IVisitor.h"
 
-class GetAllNodesVisitor : public ScopedVisitor {
+class SpecialGetAllNodesVisitor;
+
+typedef Visitor<SpecialGetAllNodesVisitor> GetAllNodesVisitor;
+
+class SpecialGetAllNodesVisitor : public ScopedVisitor {
 
  private:
 
@@ -33,11 +38,10 @@ class GetAllNodesVisitor : public ScopedVisitor {
 
   std::vector<AbstractNode *> v;
 
-  explicit GetAllNodesVisitor();
+  explicit SpecialGetAllNodesVisitor();
 
   void visit(AbstractNode &elem);
 
 };
-
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_VISITOR_GETALLNODESVISITOR_H_
