@@ -15,9 +15,6 @@ class SpecialBinaryToOperatorExpressionVisitor : public ScopedVisitor {
 
  public:
   void visit(BinaryExpression& elem);
-
-  void visit(AbstractNode &elem);
-
 };
 
 #endif //AST_OPTIMIZER_TEST_VISITOR_BINARYTOOPERATOREXPRESSIONVISITOR_H_
