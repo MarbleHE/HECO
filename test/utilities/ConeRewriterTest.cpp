@@ -38,33 +38,19 @@ TEST(ConeRewriterTest, testConeRewrNoChange) { /* NOLINT */
   compareAST(*o_copy, *rewritten_ast);
 }
 
-
+/// Test based on Figure 1 of
+/// "Aubry, P. et al. 2019. Faster Homomorphic Encryption is not Enough:
+/// Improved Heuristic for Multiplicative Depth Minimization of Boolean Circuits.
+/// Cryptology ePrint Archive, Report 2019/963."
 TEST(ConeRewriterTest, testConeRewrPaperTree) {
-  // program's input
-  const char *inputs = R""""(
-      bool __input0__ = 0;
-      bool __input1__ = 1;
-      bool __input2__ = 0;
-      bool __input3__ = 0;
-      bool __input4__ = 1;
-    )"""";
-  auto astInput = Parser::parse(std::string(inputs));
-
-  // program specification
+  /// program specification
+  /// v1 = a && b;
+  /// u = v1 || (x || y);
+  /// vt = u && c;
   const char *program = R""""(
-      secret bool v1 = __input0__ && __input1__;
-      secret bool v2 = __input2__ && __input3__;
-      secret bool y1 = v1 || v2;
-      secret bool r  = y1 && __input4__;
-      return r;
-    )"""";
+  return ((a && b) || (x || y)) && c;
+  )"""";
   auto astProgram = Parser::parse(std::string(program));
-
-  // program's output
-  const char *outputs = R""""(
-      y = r;
-    )"""";
-  auto astOutput = Parser::parse(std::string(outputs));
 
   std::stringstream ss;
   PrintVisitor p(ss);
@@ -73,9 +59,22 @@ TEST(ConeRewriterTest, testConeRewrPaperTree) {
 
   ConeRewriter coneRewriter;
 
-  //coneRewriter.rewriteAst(astProgram.get());
-}
+  auto rewritten_ast = coneRewriter.rewriteAst(std::move(astProgram));
 
+  ASSERT_NE(rewritten_ast, nullptr);
+
+
+  /// reference specification
+  /// u1 = a && (b && c)
+  /// u2 = c && (x || y)
+  /// r = u1 || u2
+  const char *expected = R""""(
+  return (a && (b && c)) || (c && (x || y))
+  )"""";
+  auto expected_ast = Parser::parse(std::string(program));
+
+  compareAST(*expected_ast, *rewritten_ast);
+}
 
 TEST(ConeRewriterTest, testMultDepth) {
 

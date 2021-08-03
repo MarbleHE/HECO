@@ -261,7 +261,7 @@ std::vector<AbstractNode *> ConeRewriter::getReducibleCones(/* AbstractNode *v ,
           return op_exp_ptr;
       }
       // add all 'parent' (paper), (here: children) nodes: note this is different from the legacy version since the AST is reversed in the old version
-      for (auto &n : *q.front()) { q.push(&n); }
+      for (auto &n : *curNode) { q.push(&n); }
     }
     return nullptr;
   };
@@ -270,7 +270,7 @@ std::vector<AbstractNode *> ConeRewriter::getReducibleCones(/* AbstractNode *v ,
   // check if v (rootNode) is a LogicalExpr, otherwise find first (N=1) LogicalExpr by its traversing 'parents' (paper), here: child
   if (dynamic_cast<OperatorExpression *>(rootNode)==nullptr) {
     startNode = getNthAncestorLogicalExpr(1); // our start node v for the Algo1 from Aubry et al. will be this node
-    if (!startNode) throw std::logic_error("AST does not contain any LogicalExpr!");
+    if (!startNode) throw std::logic_error("AST does not contain any (logical) OperatorExpr!");
   }
 
   // now we get the reducible cones starting from our 'first' logical expression
