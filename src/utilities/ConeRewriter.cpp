@@ -8,8 +8,6 @@
 #include "ast_opt/ast/AbstractExpression.h"
 #include "ast_opt/visitor/GetAllNodesVisitor.h"
 
-
-
 std::unique_ptr<AbstractNode> ConeRewriter::rewriteAst(std::unique_ptr<AbstractNode> &&ast_in) {
   ast = std::move(ast_in);
 
@@ -23,15 +21,13 @@ std::unique_ptr<AbstractNode> ConeRewriter::rewriteAst(std::unique_ptr<AbstractN
   //  // cAndCkt: C^{AND} circuit consisting of critical AND-nodes that are connected if there is a multiplicative depth-2
   //  // path in between two of those nodes in the initial circuit
   //  // each cone δ ∈ Δ has an unique terminal AND node in C^{AND}
-    std::vector<AbstractNode *> cAndCkt = ConeRewriter::getAndCriticalCircuit(delta); //TODO: Implement
+  std::vector<AbstractNode *> cAndCkt = getAndCriticalCircuit(delta); //TODO: Implement
   //
   //  // deltaMin: the minimum set of reducible cones
   //  std::vector<AbstractNode *> deltaMin = ConeRewriter::selectCones(cAndCkt);
 
   // TODO: Implement rewriteCones()
-  auto new_ast = rewriteCones(delta);
-
-  return std::move(new_ast);
+  return rewriteCones(delta);
 }
 
 std::unique_ptr<AbstractNode> ConeRewriter::rewriteCones(std::vector<AbstractNode *> &coneEndNodes) {
@@ -217,7 +213,7 @@ std::unique_ptr<AbstractNode> ConeRewriter::rewriteCones(std::vector<AbstractNod
 //    xorFinalGate.back()->addParent(rNode, false);
 //
 //  } //end: for (auto coneEnd : coneEndNodes)
-  return nullptr;
+  return std::move(ast);
 }
 
 //std::pair<AbstractNode *, AbstractNode *> ConeRewriter::getCriticalAndNonCriticalInput(BinaryExpression *logicalExpr) {
@@ -289,7 +285,6 @@ std::vector<AbstractNode *> ConeRewriter::getReducibleCones(/* AbstractNode *v ,
   return getReducibleCones(startNode, minDepth);
 }
 
-
 std::vector<AbstractNode *> ConeRewriter::getReducibleCones(AbstractNode *v, int minDepth) {
   // return empty set if minDepth is reached
   if (getMultDepthL(v)==minDepth) return std::vector<AbstractNode *>();
@@ -300,8 +295,7 @@ std::vector<AbstractNode *> ConeRewriter::getReducibleCones(AbstractNode *v, int
   // return v if at least one predecessor of v is non-critical and v is an AND-gate
   auto logicalExp = dynamic_cast<BinaryExpression *>(v);
 
-
-  if (P->size() < 2 && logicalExp!=nullptr && logicalExp->getOperator().toString() == "AND") {
+  if (P->size() < 2 && logicalExp!=nullptr && logicalExp->getOperator().toString()=="AND") {
 //    // return set consisting of start node v only
     return std::vector<AbstractNode *>{v};
   }
@@ -320,23 +314,23 @@ std::vector<AbstractNode *> ConeRewriter::getReducibleCones(AbstractNode *v, int
 //  // b. v is an AND-gate and deltaR is empty
 //  // c. v is a XOR-gate and size of deltaR does not equal size of P
   if (logicalExp==nullptr ||
-      !(logicalExp->getOperator().toString() == "AND"
-         || logicalExp->getOperator().toString() == "XOR") ||
-      (logicalExp->getOperator().toString() == "AND" && deltaR.empty()) ||
-      (logicalExp->getOperator().toString() == "XOR" && deltaR.size()!=P->size())) {
+      !(logicalExp->getOperator().toString()=="AND"
+          || logicalExp->getOperator().toString()=="XOR") ||
+      (logicalExp->getOperator().toString()=="AND" && deltaR.empty()) ||
+      (logicalExp->getOperator().toString()=="XOR" && deltaR.size()!=P->size())) {
     return std::vector<AbstractNode *>();
   }
 
-  if (logicalExp->getOperator().toString() == "AND") {
+  if (logicalExp->getOperator().toString()=="AND") {
 //    // both cones must be reducible because deltaR is non-empty -> pick a random one, and assign to delta
-    delta = *select_randomly(deltaR.begin(), deltaR.end());
-  } else if (logicalExp->getOperator().toString() == "XOR") {
+//    delta = *select_randomly(deltaR.begin(), deltaR.end());
+  } else if (logicalExp->getOperator().toString()=="XOR") {
 //    // critical cones must be reducible because size of deltaR equals size of P
 //    // flatten vector deltaR consisting of sets generated each by getReducibleCones
     std::vector<AbstractNode *> flattenedDeltaR;
-    flattenVectors(flattenedDeltaR, deltaR);
+//    flattenVectors(flattenedDeltaR, deltaR);
 //    // add all elements of flattened deltaR to delta
-    addElements(delta, flattenedDeltaR);
+//    addElements(delta, flattenedDeltaR);
   }
 //
 //  // return 𝛅 ⋃ {v}
@@ -346,6 +340,9 @@ std::vector<AbstractNode *> ConeRewriter::getReducibleCones(AbstractNode *v, int
 }
 
 int ConeRewriter::computeMinDepth(AbstractNode *v) {
+  // Only continue if not null
+  if (v==nullptr) return 0;
+
   // find a non-critical input node p of v
   auto isNoOperatorNode = [](AbstractNode *n) { return (dynamic_cast<Operator *>(n)==nullptr); };
   //for (auto &p : v->getParentsNonNull()) {
@@ -353,7 +350,7 @@ int ConeRewriter::computeMinDepth(AbstractNode *v) {
   // look at all 'parents'(paper). Here: children
   std::for_each(v->begin(), v->end(), [&](AbstractNode &p) {
 //    // exclude Operator nodes as they do not have any parent and are not modeled as node in the paper
-   if (isNoOperatorNode(&p) && !isCriticalNode(&p)) {
+    if (isNoOperatorNode(&p) && !isCriticalNode(&p)) {
 //      // set minMultDepth as l(p)+2 and call getReducibleCones
 //      //return mdc.getMultDepthL(p) + 2;
 //      // According to the paper (see p. 9, §2.4) minMultDepth = l(p)+1 is used but it does not return any result:
@@ -366,12 +363,16 @@ int ConeRewriter::computeMinDepth(AbstractNode *v) {
 
 bool ConeRewriter::isCriticalNode(AbstractNode *n) {
   //TODO implement
- int l = getReverseMultDepthR(n);
- int r = getReverseMultDepthR(n);
- return false;
+  int l = getReverseMultDepthR(n);
+  int r = getReverseMultDepthR(n);
+  return false;
 }
 
 int ConeRewriter::getMultDepthL(AbstractNode *n) {
+
+  // Only continue if n is non-null
+  if (n==nullptr) return 0;
+
   // check if we have calculated the multiplicative depth previously
   if (!multiplicativeDepths.empty()) {
     auto it = multiplicativeDepths.find(n->getUniqueNodeId());
@@ -381,7 +382,7 @@ int ConeRewriter::getMultDepthL(AbstractNode *n) {
 
   // next nodes to consider (children)
   std::vector<AbstractNode *> nextNodesToConsider;
-  for(auto& v : *n) { nextNodesToConsider.push_back(&v); }
+  for (auto &v : *n) { nextNodesToConsider.push_back(&v); }
 
   // we need to compute the multiplicative depth
   // trivial case: v is a leaf node, i.e., does not have any 'parent' (here: child)  node
@@ -412,36 +413,36 @@ int ConeRewriter::getReverseMultDepthR(AbstractNode *n) {
       return it->second;
   }
 
-  AbstractNode* nextNodesToConsider;
+  AbstractNode *nextNodesToConsider;
   // we need to be aware whether this node (and its whole AST, hopefully) is reversed or not
   if (n->hasParent()) {
     nextNodesToConsider = &n->getParent();
   }
   // we need to compute the reverse multiplicative depth
-  if (nextNodesToConsider != nullptr) {
+  if (nextNodesToConsider!=nullptr) {
     multiplicativeDepthsReversed[n->getUniqueNodeId()] = 0 + getInitialDepthOrNull(n).reverseMultiplicativeDepth;
     return 0;
   }
 
   // otherwise compute the reverse depth
   int max = 0;
- // for (auto &u : nextNodesToConsider) {
-    int uDepthR;
-    // compute the multiplicative depth of parent u
-    uDepthR = getReverseMultDepthR(nextNodesToConsider);
-    // store the computed depth
-    multiplicativeDepthsReversed[nextNodesToConsider->getUniqueNodeId()] = uDepthR + getInitialDepthOrNull(n).reverseMultiplicativeDepth;
-    max = std::max(uDepthR + depthValue(nextNodesToConsider), max);
+  // for (auto &u : nextNodesToConsider) {
+  int uDepthR;
+  // compute the multiplicative depth of parent u
+  uDepthR = getReverseMultDepthR(nextNodesToConsider);
+  // store the computed depth
+  multiplicativeDepthsReversed[nextNodesToConsider->getUniqueNodeId()] =
+      uDepthR + getInitialDepthOrNull(n).reverseMultiplicativeDepth;
+  max = std::max(uDepthR + depthValue(nextNodesToConsider), max);
   //}
 
   return max;
 }
 
-
 int ConeRewriter::depthValue(AbstractNode *n) {
   if (auto lexp = dynamic_cast<BinaryExpression *>(n)) {
     // the multiplicative depth considers logical AND nodes only
-    return (/*lexp->getOperator() != nullptr &&*/ lexp->getOperator().toString() == "AND");
+    return (/*lexp->getOperator() != nullptr &&*/ lexp->getOperator().toString()=="AND");
   }
   return 0;
 }
@@ -485,14 +486,13 @@ int ConeRewriter::getMaximumMultiplicativeDepth() {
 DepthMapEntry::DepthMapEntry(int multiplicativeDepth, int reverseMultiplicativeDepth) : multiplicativeDepth(
     multiplicativeDepth), reverseMultiplicativeDepth(reverseMultiplicativeDepth) {}
 
-
 std::vector<AbstractNode *> *ConeRewriter::getPredecessorOnCriticalPath(AbstractNode *v) {
   // P <- { p ∈ pred(v) | l(p) = l(v) - d(v) }
   auto result = new std::vector<AbstractNode *>();
   int criterion = getMultDepthL(v) - depthValue(v);
-  std::for_each(v->begin(), v->end(), [&](AbstractNode &p)) {
-    if (getMultDepthL(p)==criterion) result->push_back(&p);
-  }
+//  std::for_each(v->begin(), v->end(), [&](AbstractNode &p)) {
+//    if (getMultDepthL(p)==criterion) result->push_back(&p);
+//  }
   return result;
 }
 
@@ -542,4 +542,5 @@ std::vector<AbstractNode *> ConeRewriter::getAndCriticalCircuit(std::vector<Abst
 //    }
 //  }
 //  return cAndResultCkt;
+  return {};
 }

@@ -15,7 +15,7 @@ struct DepthMapEntry {
 
 class ConeRewriter {
  private:
-  std::unique_ptr<AbstractNode> ast;
+  std::unique_ptr<AbstractNode> ast = nullptr;
   // A map of the computed multiplicative depths.
   std::unordered_map<std::string, int> multiplicativeDepths{};
   // A map of the computed reverse multiplicative depths.

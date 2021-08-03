@@ -12,6 +12,8 @@
 #ifdef HAVE_SEAL_BFV
 
 TEST(ConeRewriterTest, testConeRewrNoChange) { /* NOLINT */
+
+  /// ||(false,true,false,true,false,true,false,true,false,true)
   auto o =
       std::make_unique<OperatorExpression>(Operator(LOGICAL_OR), std::vector<std::unique_ptr<AbstractExpression>>());
   for (int i = 0; i < 10; ++i) {
@@ -19,10 +21,10 @@ TEST(ConeRewriterTest, testConeRewrNoChange) { /* NOLINT */
     o->appendOperand(std::move(l));
   }
 
-  std::stringstream ss;
-  PrintVisitor p(ss);
-  o->accept(p);
-  std::cout << ss.str() << std::endl;
+//  std::stringstream ss;
+//  PrintVisitor p(ss);
+//  o->accept(p);
+//  std::cout << ss.str() << std::endl;
 
   // Keep a copy of o for later comparison
   auto o_copy = o->clone();
