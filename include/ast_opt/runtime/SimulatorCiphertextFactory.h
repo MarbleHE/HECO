@@ -1,43 +1,24 @@
-#ifndef GRAPHNODE_H_INCLUDE_AST_OPT_VISITOR_RUNTIME_SEALCIPHERTEXTFACTORY_H_
-#define GRAPHNODE_H_INCLUDE_AST_OPT_VISITOR_RUNTIME_SEALCIPHERTEXTFACTORY_H_
+#ifndef GRAPHNODE_H_INCLUDE_AST_OPT_VISITOR_RUNTIME_SIMULATORCIPHERTEXTFACTORY_H_
+#define GRAPHNODE_H_INCLUDE_AST_OPT_VISITOR_RUNTIME_SIMULATORCIPHERTEXTFACTORY_H_
 
 #include <memory>
-#include "ast_opt/visitor/runtime/AbstractCiphertextFactory.h"
+#include "AbstractCiphertextFactory.h"
 
 #ifdef HAVE_SEAL_BFV
 #include <seal/seal.h>
 
-class SealCiphertextFactory : public AbstractCiphertextFactory {
+class SimulatorCiphertextFactory : public AbstractCiphertextFactory {
  private:
   /// The number of slots (i.e., maximum no. of elements) in a ciphertext.
-  const unsigned int ciphertextSlotSize = 16'384;
+  const unsigned int ciphertextSlotSize = 8192;
+
+  seal::EncryptionParameters _params;
 
   /// The SEAL context.
   std::shared_ptr<seal::SEALContext> context;
 
-  /// The secret key, also used for (more efficient) encryption.
-  std::unique_ptr<seal::SecretKey> secretKey;
-
-  /// The public key.
-  std::unique_ptr<seal::PublicKey> publicKey = std::make_unique<seal::PublicKey>();
-
-  /// The rotation keys.
-  std::unique_ptr<seal::GaloisKeys> galoisKeys = std::make_unique<seal::GaloisKeys>();
-
-  /// The relinearization keys.
-  std::unique_ptr<seal::RelinKeys> relinKeys = std::make_unique<seal::RelinKeys>();
-
   /// The encoder helper object.
   std::unique_ptr<seal::BatchEncoder> encoder;
-
-  /// The evaluator helper object.
-  std::unique_ptr<seal::Evaluator> evaluator;
-
-  /// The encryptor helper object.
-  std::unique_ptr<seal::Encryptor> encryptor;
-
-  /// The decryptor helper object.
-  std::unique_ptr<seal::Decryptor> decryptor;
 
   /// Sets up the FHE scheme by creating a new context, setting required scheme parameters, generating keys, and
   /// instantiating the helper objects.
@@ -52,21 +33,21 @@ class SealCiphertextFactory : public AbstractCiphertextFactory {
   std::vector<T> expandVector(const std::vector<T> &values) const;
 
  public:
-  SealCiphertextFactory();
+  SimulatorCiphertextFactory() = default;
 
   /// Creates a new SealCiphertextFactory whereat each ciphertext created by the factory can hold
   /// numElementsPerCiphertextSlot elements.
   /// \param numElementsPerCiphertextSlot The number of ciphertext slots of created ciphertexts. Must be a power of
   /// two, e.g., 4'096 or 8'192.
-  explicit SealCiphertextFactory(unsigned int numElementsPerCiphertextSlot);
+  explicit SimulatorCiphertextFactory(unsigned int numElementsPerCiphertextSlot);
 
-  SealCiphertextFactory(const SealCiphertextFactory &other); // copy constructor
+  SimulatorCiphertextFactory(const SimulatorCiphertextFactory &other); // copy constructor
 
-  SealCiphertextFactory(SealCiphertextFactory &&other) noexcept;  // copy assignment
+  SimulatorCiphertextFactory(SimulatorCiphertextFactory &&other) noexcept;  // copy assignment
 
-  SealCiphertextFactory &operator=(const SealCiphertextFactory &other);  // move constructor
+  SimulatorCiphertextFactory &operator=(const SimulatorCiphertextFactory &other);  // move constructor
 
-  SealCiphertextFactory &operator=(SealCiphertextFactory &&other) noexcept;  // move assignment
+  SimulatorCiphertextFactory &operator=(SimulatorCiphertextFactory &&other) noexcept;  // move assignment
 
   /// Gets the context to retrieve parameters
   /// \return (A const reference to) the seal::SEALcontext object
@@ -106,18 +87,17 @@ class SealCiphertextFactory : public AbstractCiphertextFactory {
   /// \return (A std::unique_ptr to) the seal::Plaintext that encodes the given value.
   std::unique_ptr<seal::Plaintext> createPlaintext(int64_t value) const;
 
-  std::unique_ptr<AbstractCiphertext> createCiphertext(const std::vector<int64_t> &data) const override;
+  std::unique_ptr<AbstractCiphertext> createCiphertext(const std::vector<int64_t> &data)  const override;
 
-  std::unique_ptr<AbstractCiphertext> createCiphertext(int64_t data) const override;
+  std::unique_ptr<AbstractCiphertext> createCiphertext(int64_t data)  const override;
 
-  void decryptCiphertext(AbstractCiphertext &abstractCiphertext, std::vector<int64_t> &ciphertextData) const override;
+  void decryptCiphertext(AbstractCiphertext &abstractCiphertext, std::vector<int64_t> &ciphertextData)  const override;
 
-  std::string getString(AbstractCiphertext &abstractCiphertext) const override;
+  std::string getString(AbstractCiphertext &abstractCiphertext)  const override;
 
-  std::unique_ptr<AbstractCiphertext> createCiphertext(std::unique_ptr<AbstractValue> &&abstractValue) const override;
+  std::unique_ptr<AbstractCiphertext> createCiphertext(std::unique_ptr<AbstractValue> &&abstractValue)  const override;
 
-  std::unique_ptr<AbstractCiphertext> createCiphertext(const std::vector<int> &data) const override;
-  const seal::SecretKey &getSecretKey() const;
+  std::unique_ptr<AbstractCiphertext> createCiphertext(const std::vector<int> &data)  const override;
 };
 
 #endif

@@ -1,9 +1,9 @@
-#include <ast_opt/visitor/runtime/SimulatorCiphertext.h>
+#include <ast_opt/runtime/SimulatorCiphertext.h>
 #include "include/ast_opt/ast/AbstractNode.h"
 #include "include/ast_opt/parser/Parser.h"
 #include "include/ast_opt/ast/Literal.h"
-#include "include/ast_opt/visitor/runtime/RuntimeVisitor.h"
-#include "include/ast_opt/visitor/runtime/SimulatorCiphertextFactory.h"
+#include "include/ast_opt/runtime/RuntimeVisitor.h"
+#include "include/ast_opt/runtime/SimulatorCiphertextFactory.h"
 #include "ast_opt/utilities/PlaintextNorm.h"
 
 #include "gtest/gtest.h"

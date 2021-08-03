@@ -2,7 +2,7 @@
 #include <utility>
 #include <iostream>
 
-#include "ast_opt/visitor/runtime/RuntimeVisitor.h"
+#include "ast_opt/runtime/RuntimeVisitor.h"
 #include "ast_opt/ast/BinaryExpression.h"
 #include "ast_opt/ast/Block.h"
 #include "ast_opt/ast/Call.h"
@@ -18,8 +18,8 @@
 #include "ast_opt/ast/Assignment.h"
 #include "ast_opt/ast/VariableDeclaration.h"
 #include "ast_opt/ast/Variable.h"
-#include "ast_opt/visitor/runtime/AbstractCiphertextFactory.h"
-#include "ast_opt/visitor/runtime/AbstractNoiseMeasuringCiphertext.h"
+#include "ast_opt/runtime/AbstractCiphertextFactory.h"
+#include "ast_opt/runtime/AbstractNoiseMeasuringCiphertext.h"
 #include "ast_opt/parser/Tokens.h"
 
 template<typename S, typename T>

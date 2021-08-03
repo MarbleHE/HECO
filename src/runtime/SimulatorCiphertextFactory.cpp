@@ -1,7 +1,7 @@
-#include "ast_opt/visitor/runtime/SimulatorCiphertext.h"
-#include "ast_opt/visitor/runtime/SimulatorCiphertextFactory.h"
-#include "ast_opt/visitor/runtime/Cleartext.h"
-#include "ast_opt/visitor/runtime/DummyCiphertext.h"
+#include "ast_opt/runtime/SimulatorCiphertext.h"
+#include "ast_opt/runtime/SimulatorCiphertextFactory.h"
+#include "ast_opt/runtime/Cleartext.h"
+#include "ast_opt/runtime/DummyCiphertext.h"
 
 #ifdef HAVE_SEAL_BFV
 #include <memory>

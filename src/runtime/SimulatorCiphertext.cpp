@@ -1,8 +1,8 @@
 #include "ast_opt/utilities/Operator.h"
-#include "ast_opt/visitor/runtime/Cleartext.h"
-#include "ast_opt/visitor/runtime/SimulatorCiphertext.h"
-#include "ast_opt/visitor/runtime/SimulatorCiphertextFactory.h"
-#include "ast_opt/visitor/runtime/AbstractCiphertext.h"
+#include "ast_opt/runtime/Cleartext.h"
+#include "ast_opt/runtime/SimulatorCiphertext.h"
+#include "ast_opt/runtime/SimulatorCiphertextFactory.h"
+#include "ast_opt/runtime/AbstractCiphertext.h"
 #include <gmp.h>
 
 

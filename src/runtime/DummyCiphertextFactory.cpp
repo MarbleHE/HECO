@@ -1,7 +1,7 @@
-#include "ast_opt/visitor/runtime/DummyCiphertextFactory.h"
+#include "ast_opt/runtime/DummyCiphertextFactory.h"
 
-#include "ast_opt/visitor/runtime/DummyCiphertext.h"
-#include "ast_opt/visitor/runtime/Cleartext.h"
+#include "ast_opt/runtime/DummyCiphertext.h"
+#include "ast_opt/runtime/Cleartext.h"
 
 #include <memory>
 

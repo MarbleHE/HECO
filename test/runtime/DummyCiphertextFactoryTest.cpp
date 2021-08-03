@@ -2,10 +2,10 @@
 
 #include "gtest/gtest.h"
 
-#include "include/ast_opt/visitor/runtime/DummyCiphertext.h"
+#include "include/ast_opt/runtime/DummyCiphertext.h"
 #include "include/ast_opt/ast/ExpressionList.h"
-#include "include/ast_opt/visitor/runtime/DummyCiphertextFactory.h"
-#include "include/ast_opt/visitor/runtime/Cleartext.h"
+#include "include/ast_opt/runtime/DummyCiphertextFactory.h"
+#include "include/ast_opt/runtime/Cleartext.h"
 
 class DummyCiphertextFactoryTest : public ::testing::Test {
  protected:

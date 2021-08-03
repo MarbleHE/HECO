@@ -129,6 +129,13 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/parser/PushBackStream.cpp
         ${ast_optimizer_SOURCE_DIR}/src/parser/Tokenizer.cpp
         ${ast_optimizer_SOURCE_DIR}/src/parser/Tokens.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/runtime/DummyCiphertext.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/runtime/DummyCiphertextFactory.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/runtime/RuntimeVisitor.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/runtime/SealCiphertext.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/runtime/SealCiphertextFactory.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/runtime/SimulatorCiphertext.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/runtime/SimulatorCiphertextFactory.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/BatchingConstraint.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/ComplexValue.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/ConeRewriter.cpp
@@ -156,30 +163,23 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/visitor/controlFlowGraph/ControlFlowGraphVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/controlFlowGraph/GraphNode.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/controlFlowGraph/NodeRelationship.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/visitor/runtime/DummyCiphertext.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/visitor/runtime/DummyCiphertextFactory.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/visitor/runtime/RuntimeVisitor.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/visitor/runtime/SealCiphertext.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/visitor/runtime/SealCiphertextFactory.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/visitor/runtime/SimulatorCiphertext.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/visitor/runtime/SimulatorCiphertextFactory.cpp
         )
 
 set(HEADER_ONLY_SOURCES
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractExpression.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractStatement.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractTarget.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/IVisitor.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/AbstractCiphertextFactory.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/VariableMap.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/AbstractCiphertext.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/Cleartext.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/AbstractValue.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/SimulatorCiphertext.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/SimulatorCiphertextFactory.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/AbstractNoiseMeasuringCiphertext.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/DummyCiphertext.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/DummyCiphertextFactory.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/IVisitor.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/AbstractCiphertext.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/AbstractCiphertextFactory.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/AbstractNoiseMeasuringCiphertext.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/AbstractValue.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/Cleartext.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/DummyCiphertext.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/DummyCiphertextFactory.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/SimulatorCiphertext.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/SimulatorCiphertextFactory.h
 )
 
 # TODO: Go through this list and determine which headers aren't actually public
@@ -209,6 +209,13 @@ set(PUBLIC_HEADERS
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/parser/PushBackStream.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/parser/Tokenizer.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/parser/Tokens.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/DummyCiphertext.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/DummyCiphertextFactory.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/RuntimeVisitor.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/SealCiphertext.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/SealCiphertextFactory.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/SimulatorCiphertext.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/SimulatorCiphertextFactory.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/BatchingConstraint.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/ComplexValue.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/ConeRewriter.h
@@ -237,13 +244,6 @@ set(PUBLIC_HEADERS
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/Vectorizer.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/controlFlowGraph/ControlFlowGraphVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/controlFlowGraph/NodeRelationship.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/DummyCiphertext.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/DummyCiphertextFactory.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/RuntimeVisitor.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/SealCiphertext.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/SealCiphertextFactory.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/SimulatorCiphertext.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/runtime/SimulatorCiphertextFactory.h
 )
 
 # build a library out of the code to be used by the tests

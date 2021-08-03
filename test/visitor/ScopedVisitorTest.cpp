@@ -1,8 +1,8 @@
 
 #include "include/ast_opt/parser/Parser.h"
-#include "include/ast_opt/visitor/runtime/RuntimeVisitor.h"
+#include "include/ast_opt/runtime/RuntimeVisitor.h"
 #include "include/ast_opt/visitor/ScopedVisitor.h"
-#include "include/ast_opt/visitor/runtime/SimulatorCiphertextFactory.h"
+#include "include/ast_opt/runtime/SimulatorCiphertextFactory.h"
 #include "ast_opt/visitor/NoisePrintVisitor.h"
 
 #include "gtest/gtest.h"

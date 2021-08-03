@@ -9,7 +9,7 @@
 
 #include "ast_opt/ast/AbstractNode.h"
 #include "ast_opt/visitor/ScopedVisitor.h"
-#include "ast_opt/visitor/runtime/AbstractCiphertext.h"
+#include "ast_opt/runtime/AbstractCiphertext.h"
 
 
 /// Forward declaration of the class that will actually implement the PrintVisitor's logic

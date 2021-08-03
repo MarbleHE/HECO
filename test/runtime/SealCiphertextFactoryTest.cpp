@@ -2,10 +2,10 @@
 
 #include "gtest/gtest.h"
 
-#include "include/ast_opt/visitor/runtime/SealCiphertext.h"
+#include "include/ast_opt/runtime/SealCiphertext.h"
 #include "include/ast_opt/ast/ExpressionList.h"
-#include "include/ast_opt/visitor/runtime/SealCiphertextFactory.h"
-#include "include/ast_opt/visitor/runtime/Cleartext.h"
+#include "include/ast_opt/runtime/SealCiphertextFactory.h"
+#include "include/ast_opt/runtime/Cleartext.h"
 
 #ifdef HAVE_SEAL_BFV
 

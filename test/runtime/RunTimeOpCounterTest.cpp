@@ -1,7 +1,7 @@
 #include <ast_opt/parser/Parser.h>
 #include <ast_opt/ast/BinaryExpression.h>
 #include "gtest/gtest.h"
-#include "include/ast_opt/visitor/runtime/RuntimeVisitor.h"
+#include "include/ast_opt/runtime/RuntimeVisitor.h"
 #include "ast_opt/visitor/CountOpsVisitor.h"
 
 

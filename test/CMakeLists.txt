@@ -20,10 +20,11 @@ FetchContent_MakeAvailable(googletest)
 # TARGET: testing
 ##############################
 set(TEST_FILES
-        ASTComparison.h
         ASTComparison.cpp
+        ASTComparison.h
         AstTestingGenerator.cpp
         AstTestingGenerator.h
+        BenchmarkingSeal.cpp
         JsonOutputTest.cpp
         ast/AssignmentTest.cpp
         ast/BinaryExpressionTest.cpp
@@ -41,30 +42,29 @@ set(TEST_FILES
         ast/UnaryExpressionTest.cpp
         ast/VariableDeclarationTest.cpp
         ast/VariableTest.cpp
+        end-to-end/CardioTest.cpp
+        end-to-end/KernelTest.cpp
         parser/ParserTest.cpp
         parser/ParserTestHelpers.h
         parser/TokenizerTest.cpp
-        visitor/ExpressionBatcherTest.cpp
+        runtime/DummyCiphertextFactoryTest.cpp
+        runtime/RunTimeVisitorSimulatorTest.cpp
+        runtime/RuntimeVisitorTest.cpp
+        runtime/SealCiphertextFactoryTest.cpp
+        runtime/SimulatorCiphertextFactoryTest.cpp
+        utilities/ConeRewriterTest.cpp
         visitor/ControlFlowGraphVisitorTest.cpp
+        visitor/CountOpsVisitorTest.cpp
+        visitor/ExpressionBatcherTest.cpp
+        visitor/IdentifyNoisySubtreeVisitorTest.cpp
+        visitor/NoiseVisitorTest.cpp
         visitor/PrintVisitorTest.cpp
-        visitor/VectorizerTest.cpp
-        visitor/VisitorTest.cpp
+        visitor/ScopedVisitorTest.cpp
         visitor/SecretBranchingVisitorTest.cpp
         visitor/TypeCheckingVisitorTest.cpp
-        visitor/Runtime/SealCiphertextFactoryTest.cpp
-        visitor/Runtime/RuntimeVisitorTest.cpp
-        visitor/Runtime/DummyCiphertextFactoryTest.cpp
-        end-to-end/KernelTest.cpp
-        end-to-end/CardioTest.cpp
-        visitor/Runtime/SimulatorCiphertextFactoryTest.cpp
-        visitor/Runtime/RunTimeVisitorSimulatorTest.cpp
-        ../include/ast_opt/visitor/runtime/DummyCiphertext.h
-        visitor/CountOpsVisitorTest.cpp
-        visitor/NoiseVisitorTest.cpp
-        visitor/ScopedVisitorTest.cpp
-        visitor/IdentifyNoisySubtreeVisitorTest.cpp
-        BenchmarkingSeal.cpp
-        utilities/ConeRewriterTest.cpp)
+        visitor/VectorizerTest.cpp
+        visitor/VisitorTest.cpp
+)
 
 add_executable(testing-all
         ${TEST_FILES})
