@@ -85,7 +85,7 @@ class ConeRewriter {
   /// \param coneEndNodes
   /// \return
   static std::unique_ptr<AbstractNode> rewriteCones(std::unique_ptr<AbstractNode> &&ast,
-                                             std::vector<AbstractNode *> &coneEndNodes);
+                                                    std::vector<AbstractNode *> &coneEndNodes);
 
   /////////////////////////////////////////////////////
   /// UTILITY FUNCTIONS FOR MULTDEPTH CALCULATION /////
@@ -95,7 +95,6 @@ class ConeRewriter {
   /// \param v
   /// \return
   int computeMinDepth(AbstractNode *v);
-
 
   /// TODO: Document -when is a node critical?
   /// \param n
@@ -109,12 +108,20 @@ class ConeRewriter {
   /// \return The multiplicative depth of the current node.
   int getMultDepthL(AbstractNode *n);
 
+  /// Compute the (reverse) multiplicative depths for an AST starting at root
+  /// \param root
+  /// \param map (Optional) map already containing precomputed values
+  /// \return
+  std::unordered_map<std::string, int> computeReverseMultDepthR(AbstractNode &root,
+                                                                std::unordered_map<std::string, int> map = {});
+
   /// Calculates the reverse multiplicative depth based on the definition given in
   /// [Aubry, P. et al.: Faster Homomorphic Encryption Is Not Enough: Improved Heuristic for Multiplicative Depth
   ///  Minimization of Boolean Circuits. (2019)].
+  /// \param multiplicativeDepthsReversed Mapping between nodes and their reversed depth
   /// \param n  Node to consider
   /// \return The reverse multiplicative depth of the current node.
-  int getReverseMultDepthR(AbstractNode *n);
+  int getReverseMultDepthR(std::unordered_map<std::string, int> multiplicativeDepthsReversed, AbstractNode *n);
 
   /// Determine the value of this node for computing the multiplicative depth and reverse multiplicative depth,
   /// getMultDepthL() and getReverseMultDepthR(), respectively.

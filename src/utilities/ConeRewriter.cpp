@@ -359,16 +359,7 @@ std::unique_ptr<AbstractNode> ConeRewriter::rewriteCones(std::unique_ptr<Abstrac
   return std::move(ast);
 }
 
-//std::vector<AbstractNode *> *ConeRewriter::getPredecessorOnCriticalPath(AbstractNode *v) {
-//  // P <- { p ∈ pred(v) | l(p) = l(v) - d(v) }
-//  auto result = new std::vector<AbstractNode *>();
-//  int criterion = getMultDepthL(v) - depthValue(v);
-//  std::for_each(v->begin(), v->end(), [&](AbstractNode &p) {
-//    if (getMultDepthL(&p)==criterion) result->push_back(&p);
-//  });
-//  return result;
-//}
-//int ConeRewriter::computeMinDepth(AbstractNode *v) {
+int ConeRewriter::computeMinDepth(AbstractNode *v) {
 //  // Only continue if not null
 //  if (v==nullptr) return 0;
 //
@@ -387,68 +378,62 @@ std::unique_ptr<AbstractNode> ConeRewriter::rewriteCones(std::unique_ptr<Abstrac
 //    }
 //  });
 //  // return -1 (error) if node v has no non-critical input node
-//  return -1;
-//}
+  return -1;
+}
+
+bool ConeRewriter::isCriticalNode(AbstractNode *n) {
+  //TODO implement
+  //  int l = getReverseMultDepthR(n);
+  //  int r = getReverseMultDepthR(n);
+  return false;
+}
+
+int ConeRewriter::getMultDepthL(AbstractNode *n) {
+
+  //  // Only continue if n is non-null
+  //  if (n==nullptr) return 0;
+  //
+  //  // check if we have calculated the multiplicative depth previously
+  //  if (!multiplicativeDepths.empty()) {
+  //    auto it = multiplicativeDepths.find(n->ReUniqueNodeId());
+  //    if (it!=multiplicativeDepths.end())
+  //      return it->second;
+  //  }
+  //
+  //  // next nodes to consider (children)
+  //  std::vector<AbstractNode *> nextNodesToConsider;
+  //  for (auto &v : *n) { nextNodesToConsider.push_back(&v); }
+  //
+  //  // we need to compute the multiplicative depth
+  //  // trivial case: v is a leaf node, i.e., does not have any 'parent' (here: child)  node
+  //  // paper: |pred(v)| = 0 => multiplicative depth = 0 (here:  |children(v)| = 0 => multdepth = 0)
+  //  if (nextNodesToConsider.empty()) {
+  //    multiplicativeDepths[n->getUniqueNodeId()] = 0 + getInitialDepthOrNull(n).multiplicativeDepth;
+  //    return 0;
+  //  }
+  //
+  //  // otherwise compute max_{u ∈ pred(v)} l(u) + d(v)
+  //  int max = 0;
+  //  for (auto &u : nextNodesToConsider) {
+  //    int uDepth;
+  //    // compute the multiplicative depth of parent u
+  //    uDepth = getMultDepthL(u);
+  //    // store the computed depth
+  //    multiplicativeDepths[u->getUniqueNodeId()] = uDepth + getInitialDepthOrNull(n).multiplicativeDepth;
+  //    max = std::max(uDepth + depthValue(n), max);
+  //  }
+  //  return max;
+  return 0;
+}
+
+std::unordered_map<std::string, int> computeReverseMultDepthR(AbstractNode &ast,
+                                                              std::unordered_map<std::string,
+                                                                                 int> multiplicativeDepthsReversed) {
+  //TODO: Check if algorithm is as simple as possible?
+//  AbstractNode *nextNodeToConsider = &ast;
 //
-//bool ConeRewriter::isCriticalNode(AbstractNode *n) {
-//  //TODO implement
-//  int l = getReverseMultDepthR(n);
-//  int r = getReverseMultDepthR(n);
-//  return false;
-//}
-//
-//int ConeRewriter::getMultDepthL(AbstractNode *n) {
-//
-//  // Only continue if n is non-null
-//  if (n==nullptr) return 0;
-//
-//  // check if we have calculated the multiplicative depth previously
-//  if (!multiplicativeDepths.empty()) {
-//    auto it = multiplicativeDepths.find(n->getUniqueNodeId());
-//    if (it!=multiplicativeDepths.end())
-//      return it->second;
-//  }
-//
-//  // next nodes to consider (children)
-//  std::vector<AbstractNode *> nextNodesToConsider;
-//  for (auto &v : *n) { nextNodesToConsider.push_back(&v); }
-//
-//  // we need to compute the multiplicative depth
-//  // trivial case: v is a leaf node, i.e., does not have any 'parent' (here: child)  node
-//  // paper: |pred(v)| = 0 => multiplicative depth = 0 (here:  |children(v)| = 0 => multdepth = 0)
-//  if (nextNodesToConsider.empty()) {
-//    multiplicativeDepths[n->getUniqueNodeId()] = 0 + getInitialDepthOrNull(n).multiplicativeDepth;
-//    return 0;
-//  }
-//
-//  // otherwise compute max_{u ∈ pred(v)} l(u) + d(v)
-//  int max = 0;
-//  for (auto &u : nextNodesToConsider) {
-//    int uDepth;
-//    // compute the multiplicative depth of parent u
-//    uDepth = getMultDepthL(u);
-//    // store the computed depth
-//    multiplicativeDepths[u->getUniqueNodeId()] = uDepth + getInitialDepthOrNull(n).multiplicativeDepth;
-//    max = std::max(uDepth + depthValue(n), max);
-//  }
-//  return max;
-//}
-//
-//int ConeRewriter::getReverseMultDepthR(AbstractNode *n) {
-//  // check if we have calculated the reverse multiplicative depth previously
-//  if (!multiplicativeDepthsReversed.empty()) {
-//    auto it = multiplicativeDepthsReversed.find(n->getUniqueNodeId());
-//    if (it!=multiplicativeDepthsReversed.end())
-//      return it->second;
-//  }
-//
-//  AbstractNode *nextNodesToConsider;
-//  // we need to be aware whether this node (and its whole AST, hopefully) is reversed or not
-//  if (n->hasParent()) {
-//    nextNodesToConsider = &n->getParent();
-//  }
 //  // we need to compute the reverse multiplicative depth
-//  if (nextNodesToConsider!=nullptr) {
+//  if (nextNodeToConsider!=nullptr) {
 //    multiplicativeDepthsReversed[n->getUniqueNodeId()] = 0 + getInitialDepthOrNull(n).reverseMultiplicativeDepth;
 //    return 0;
 //  }
@@ -458,22 +443,46 @@ std::unique_ptr<AbstractNode> ConeRewriter::rewriteCones(std::unique_ptr<Abstrac
 //  // for (auto &u : nextNodesToConsider) {
 //  int uDepthR;
 //  // compute the multiplicative depth of parent u
-//  uDepthR = getReverseMultDepthR(nextNodesToConsider);
+//  uDepthR = getReverseMultDepthR(nextNodeToConsider);
 //  // store the computed depth
-//  multiplicativeDepthsReversed[nextNodesToConsider->getUniqueNodeId()] =
+//  multiplicativeDepthsReversed[nextNodeToConsider->getUniqueNodeId()] =
 //      uDepthR + getInitialDepthOrNull(n).reverseMultiplicativeDepth;
-//  max = std::max(uDepthR + depthValue(nextNodesToConsider), max);
+//  max = std::max(uDepthR + depthValue(nextNodeToConsider), max);
 //  //}
-//
-//  return max;
-//}
-//
-//int ConeRewriter::depthValue(AbstractNode *n) {
-//  if (auto lexp = dynamic_cast<BinaryExpression *>(n)) {
-//    // the multiplicative depth considers logical AND nodes only
-//    return (/*lexp->getOperator() != nullptr &&*/ lexp->getOperator().toString()=="AND");
-//  }
-//  return 0;
+
+  return multiplicativeDepthsReversed;
+}
+
+int ConeRewriter::getReverseMultDepthR(std::unordered_map<std::string, int> multiplicativeDepthsReversed,
+                                       AbstractNode *n) {
+
+  // check if we have calculated the reverse multiplicative depth previously
+  if (!multiplicativeDepthsReversed.empty()) {
+    auto it = multiplicativeDepthsReversed.find(n->getUniqueNodeId());
+    if (it!=multiplicativeDepthsReversed.end())
+      return it->second;
+  } else {
+    throw std::runtime_error("Map is empty!");
+  }
+}
+
+int ConeRewriter::depthValue(AbstractNode *n) {
+  //TODO: Consider refactoring the name to "isLogicalAnd"
+  if (auto lexp = dynamic_cast<BinaryExpression *>(n)) {
+    // the multiplicative depth considers logical AND nodes only
+    return (lexp->getOperator().toString()=="AND");
+  }
+  return 0;
+}
+
+//std::vector<AbstractNode *> *ConeRewriter::getPredecessorOnCriticalPath(AbstractNode *v) {
+//  // P <- { p ∈ pred(v) | l(p) = l(v) - d(v) }
+//  auto result = new std::vector<AbstractNode *>();
+//  int criterion = getMultDepthL(v) - depthValue(v);
+//  std::for_each(v->begin(), v->end(), [&](AbstractNode &p) {
+//    if (getMultDepthL(&p)==criterion) result->push_back(&p);
+//  });
+//  return result;
 //}
 //
 //DepthMapEntry ConeRewriter::getInitialDepthOrNull(AbstractNode *node) {
