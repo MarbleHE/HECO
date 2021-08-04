@@ -124,16 +124,16 @@ class ConeRewriter {
   bool isCriticalNode(AbstractNode *n);
 
 
-  /// Calculates the multiplicative depths l(v) based for all nodes v of an AST starting at root on the definition given in
+  /// Calculates the multiplicative depths l(n) for a node n of an AST starting at root (output) based on the definition given in
   /// [Aubry, P. et al.: Faster Homomorphic Encryption Is Not Enough: Improved Heuristic for Multiplicative Depth
   ///  Minimization of Boolean Circuits. (2019)].
   /// The multiplicative depth is the max number of AND gates on any path beginning by an input node (leaf of AST) and ending
   /// in the node n.
-  /// \param root Root Node of an AST
+  /// \param n Node of an AST
   /// \param map (Optional) map already containing precomputed values
-  /// \return map containing all mult depths of the AST
-  std::unordered_map<std::string, int> computeMultDepth(AbstractNode &root,
-                                                                std::unordered_map<std::string, int> map = {});
+  /// \return mult depth of the node n
+  int computeMultDepthL(AbstractNode *n, std::unordered_map<std::string, int> map = {});
+
 
   /// Returns multiplicative depth as precomputed in computeMultDepthR for a given node
   /// \param multiplicativeDepths Mapping between nodes and their reversed depth

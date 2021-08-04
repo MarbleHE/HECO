@@ -454,7 +454,7 @@ std::unordered_map<std::string, int> computeReverseMultDepthR(AbstractNode &ast,
 }
 
 int ConeRewriter::getReverseMultDepth(std::unordered_map<std::string, int> multiplicativeDepthsReversed,
-                                       AbstractNode *n) {
+                                      AbstractNode *n) {
 
   // check if we have calculated the reverse multiplicative depth previously
   if (!multiplicativeDepthsReversed.empty()) {
@@ -468,16 +468,49 @@ int ConeRewriter::getReverseMultDepth(std::unordered_map<std::string, int> multi
 
 int ConeRewriter::depthValue(AbstractNode *n) {
   //TODO: Consider refactoring the name to "isLogicalAnd"
-  if (auto lexp = dynamic_cast<BinaryExpression *>(n)) {
+  if (auto lexp = dynamic_cast<OperatorExpression *>(n)) {
     // the multiplicative depth considers logical AND nodes only
-    return (lexp->getOperator().toString()=="AND");
+    return (lexp->getOperator().toString()=="&&");
   }
   return 0;
 }
-std::unordered_map<std::string, int> ConeRewriter::computeMultDepth(AbstractNode &root,
-                                                                    std::unordered_map<std::string, int> map) {
-  return std::unordered_map<std::string, int>();
+
+int ConeRewriter::computeMultDepthL(AbstractNode *n, std::unordered_map<std::string, int> map) {
+
+  // Only continue if n is non-null
+  if (n==nullptr) return 0;
+  //
+  // check if we have calculated the multiplicative depth previously
+  if (!map.empty()) {
+    auto it = map.find(n->getUniqueNodeId());
+    if (it!=map.end())
+      return it->second;
+  }
+
+  // next nodes to consider (children)
+  std::vector<AbstractNode *> nextNodesToConsider;
+  for (auto &v : *n) { nextNodesToConsider.push_back(&v); }
+
+  // we need to compute the multiplicative depth
+  // base case: v is a leaf node (input node), i.e., does not have any child node
+  // paper: |pred(n)| = 0 => multiplicative depth = 0 + d(n) (here:  |children(n)| = 0 => multdepth = 0 + d(n))
+  if (nextNodesToConsider.empty()) {
+    // store value
+    // map[n->getUniqueNodeId()] = 0 + depthValue(n);
+    return 0;
+  }
+
+  // otherwise compute max_{u ∈ children(n)} l(u) + d(n)
+  int max = 0;
+  for (auto &u : nextNodesToConsider) {
+    int uDepth;
+    // compute the multiplicative depth of child u
+    uDepth = computeMultDepthL(u);
+    if (uDepth > max) { max = uDepth; } // update maximum if necessary
+  }
+  return max + depthValue(n);
 }
+
 int ConeRewriter::getMultDepth(std::unordered_map<std::string, int> multiplicativeDepths, AbstractNode &n) {
   return 0;
 }
