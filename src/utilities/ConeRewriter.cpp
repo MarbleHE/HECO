@@ -388,7 +388,7 @@ bool ConeRewriter::isCriticalNode(AbstractNode *n) {
   return false;
 }
 
-int ConeRewriter::getMultDepthL(AbstractNode *n) {
+int ConeRewriter::getMultDepth(AbstractNode *n) {
 
   //  // Only continue if n is non-null
   //  if (n==nullptr) return 0;
@@ -453,7 +453,7 @@ std::unordered_map<std::string, int> computeReverseMultDepthR(AbstractNode &ast,
   return multiplicativeDepthsReversed;
 }
 
-int ConeRewriter::getReverseMultDepthR(std::unordered_map<std::string, int> multiplicativeDepthsReversed,
+int ConeRewriter::getReverseMultDepth(std::unordered_map<std::string, int> multiplicativeDepthsReversed,
                                        AbstractNode *n) {
 
   // check if we have calculated the reverse multiplicative depth previously
