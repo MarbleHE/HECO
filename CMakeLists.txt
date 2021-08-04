@@ -227,7 +227,6 @@ set(PUBLIC_HEADERS
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/BatchingConstraint.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/ComplexValue.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/ConeRewriter.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/ConeRewriter.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/Datatype.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/IVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/MultiplicativeDepthCalculator.h

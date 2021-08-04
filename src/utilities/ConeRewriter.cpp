@@ -474,6 +474,13 @@ int ConeRewriter::depthValue(AbstractNode *n) {
   }
   return 0;
 }
+std::unordered_map<std::string, int> ConeRewriter::computeMultDepth(AbstractNode &root,
+                                                                    std::unordered_map<std::string, int> map) {
+  return std::unordered_map<std::string, int>();
+}
+int ConeRewriter::getMultDepth(std::unordered_map<std::string, int> multiplicativeDepths, AbstractNode &n) {
+  return 0;
+}
 
 //std::vector<AbstractNode *> *ConeRewriter::getPredecessorOnCriticalPath(AbstractNode *v) {
 //  // P <- { p ∈ pred(v) | l(p) = l(v) - d(v) }

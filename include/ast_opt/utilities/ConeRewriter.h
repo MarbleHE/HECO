@@ -29,11 +29,32 @@ class ConeRewriter {
   /// Identify reducible cones in the (sub)tree defined by root
   /// Internal function, used recursively
   /// Implements the recursive cone construction algorithm [see Algorithm 1, page 8]:
-  /// TODO: describe
+  /// Multiplicative depth-2 cone rewrite operators require that at least one input of then v_i-nodes (see Fig 2: paper) is
+  /// non-critical. In the case when both inputs are critical we can explore the input nodes of v_1 and build a  multiplicative depth-3 cone (and so on).
+  ///
+  /// The procedure recursively explores the set of critical predecessor nodes starting from node and incrementally constructs a reducible cone.
+  /// (reducible = can reduce multiplicative depth)
+  /// If the mini- mal multiplicative depth to explore is reached or at least one predecessor of an AND node v is not critical
+  /// then the exploration stops. Otherwise there are two possibilities as a function of node v type:
+  ///
+  /// 1. AND node: If at least one predecessor is reducible then the cone corresponding to this predecessor (or a random one if both are reducible)
+  /// is added to the result, otherwise the exploration is complete.
+  ///
+  /// 2. XOR node If both predecessors are reducible then the respective cones are added to the result, otherwise exploration is also complete.
+  ///
+  /// The procedure is called on a circuit node v. If the procedure returns an empty set then the cone ending at v cannot be reduced.
+  /// Otherwise the procedure output represents the cone to be rewritten and it ensures that the multiplicative depth of this cone can be reduced.
+  /// We use a minDepth value equal to l(p) + 1, where p is the non-critical input of node v.
+  ///
+  /// the ConeRec procedure when applied to the ending node of a reducible multiplicative depth-2 cone will find exactly that cone.
+  /// In the case when no reducible multiplicative depth-2 cone ending at v exists the ConeRec procedure will return a cone with a multiplicative depth larger than 2.
+  /// Rewriting such a cone is very similar to the depth-2 cone rewriting method presented previ- ously. The multiplicative depth cone
+  /// rewriting is a powerful tool for minimizing the multiplicative depth of Boolean circuits.
+  ///
   /// \param root node defining the ast
   /// \param v Starting node for the cone construction procedure.
   /// \param minDepth The minimal multiplicative depth to which cone search will be performed.
-  /// \return
+  /// \return a reducible cone
   static std::vector<AbstractNode *> getReducibleCones(AbstractNode &root, AbstractNode *v, int minDepth);
 
   /// TODO: IMPLEMENT & DOCUMENT
@@ -86,9 +107,9 @@ class ConeRewriter {
   /////////////////////////////////////////////////////
 
   /// Computes minDepth parameter required for cone selection algorithm
-  /// TODO: what is this?
-  /// \param v
-  /// \return
+  /// We use a minDepth value equal to l(p) + 1, where p is the non-critical input of node v.
+  /// \param v node
+  /// \return minDepth value
   int computeMinDepth(AbstractNode *v);
 
   /// Returns the 'overall multiplicative depth' l^{max}, i.e the maximal multiplicative depth of its nodes.
@@ -118,7 +139,7 @@ class ConeRewriter {
   /// \param multiplicativeDepths Mapping between nodes and their reversed depth
   /// \param n  Node to consider
   /// \return The multiplicative depth of the current node.
-  int getMultDepth(std::unordered_map<std::string, int> multiplicativeDepths, AbstractNode *n);
+  int getMultDepth(std::unordered_map<std::string, int> multiplicativeDepths, AbstractNode &n);
 
   /// Compute the (reverse) multiplicative depths r(v) for all nodes v of an AST starting at root based on the definition given in
   /// [Aubry, P. et al.: Faster Homomorphic Encryption Is Not Enough: Improved Heuristic for Multiplicative Depth
