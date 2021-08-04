@@ -158,5 +158,20 @@ std::string OperatorExpression::getNodeType() const {
   return "OperatorExpression";
 }
 
+std::unique_ptr<AbstractNode> OperatorExpression::replaceChild(const AbstractNode &child,
+                                                               std::unique_ptr<AbstractNode> &&new_child) {
+  for (auto &o: operands) {
+    if (o && &child==&*o) {
+      auto t = std::move(o);
+      if (!dynamic_pointer_move(o, new_child)) {
+        throw std::runtime_error("Cannot replace child: Types not compatible");
+      }
+      return t;
+    }
+  }
+
+  throw std::runtime_error("Cannot replace child: not found!");
+}
+
 
 

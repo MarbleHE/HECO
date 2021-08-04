@@ -149,3 +149,21 @@ std::string BinaryExpression::toString(bool printChildren) const {
 std::string BinaryExpression::getNodeType() const {
   return "BinaryExpression";
 }
+std::unique_ptr<AbstractNode> BinaryExpression::replaceChild(const AbstractNode &child,
+                                                             std::unique_ptr<AbstractNode> &&new_child) {
+  if(left && &child == &*left) {
+    auto t = std::move(left);
+    if(!dynamic_pointer_move(left, new_child)) {
+      throw std::runtime_error("Cannot replace child: Types not compatible");
+    }
+    return t;
+  } else if (right && &child == &*right) {
+    auto t = std::move(right);
+    if(!dynamic_pointer_move(right, new_child)) {
+      throw std::runtime_error("Cannot replace child: Types not compatible");
+    }
+    return t;
+  } else {
+    throw std::runtime_error("Cannot replace child: not found!");
+  }
+}

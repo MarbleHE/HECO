@@ -74,3 +74,7 @@ std::string Variable::toString(bool printChildren) const {
 std::string Variable::getNodeType() const {
   return "Variable";
 }
+std::unique_ptr<AbstractNode> Variable::replaceChild(const AbstractNode &child,
+                                                     std::unique_ptr<AbstractNode> &&new_child) {
+  throw std::runtime_error("Cannot replace child: This type of node does not have children.");
+}

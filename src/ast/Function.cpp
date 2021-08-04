@@ -164,5 +164,28 @@ std::string Function::getNodeType() const {
   return "Function";
 }
 
+std::unique_ptr<AbstractNode> Function::replaceChild(const AbstractNode &child,
+                                                     std::unique_ptr<AbstractNode> &&new_child) {
+  if (body && &child==&*body) {
+    auto t = std::move(body);
+    if (!dynamic_pointer_move(body, new_child)) {
+      throw std::runtime_error("Cannot replace child: Types not compatible");
+    }
+    return t;
+  }
+
+  for (auto &p: parameters) {
+    if (p && &child==&*p) {
+      auto t = std::move(p);
+      if (!dynamic_pointer_move(p, new_child)) {
+        throw std::runtime_error("Cannot replace child: Types not compatible");
+      }
+      return t;
+    }
+  }
+
+  throw std::runtime_error("Cannot replace child: not found!");
+}
+
 
 

@@ -161,6 +161,11 @@ class Literal : public AbstractExpression {
     return toStringHelper(printChildren, {ss.str()});
   }
 
+  std::unique_ptr<AbstractNode> replaceChild(const AbstractNode &child,
+                                             std::unique_ptr<AbstractNode> &&new_child) override {
+    throw std::runtime_error("Cannot replace child: This type of node does not have children.");
+  }
+
  protected:
   /// Returns the node's type, which is the name of the object in the AST.
   /// If "pretty" names are desired, a specialization of this function for the type must be provided.

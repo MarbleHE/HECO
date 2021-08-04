@@ -149,3 +149,22 @@ std::string VariableDeclaration::toString(bool printChildren) const {
 std::string VariableDeclaration::getNodeType() const {
   return "VariableDeclaration";
 }
+
+std::unique_ptr<AbstractNode> VariableDeclaration::replaceChild(const AbstractNode &child,
+                                                                std::unique_ptr<AbstractNode> &&new_child) {
+  if(target && &child == &*target) {
+    auto t = std::move(target);
+    if(!dynamic_pointer_move(target, new_child)) {
+      throw std::runtime_error("Cannot replace child: Types not compatible");
+    }
+    return t;
+  } else if (value && &child == &*value) {
+    auto t = std::move(value);
+    if(!dynamic_pointer_move(value, new_child)) {
+      throw std::runtime_error("Cannot replace child: Types not compatible");
+    }
+    return t;
+  } else {
+    throw std::runtime_error("Cannot replace child: not found!");
+  }
+}
