@@ -150,10 +150,10 @@ TEST(ConeRewriterTest, testMultDepth) {
   ConeRewriter coneRewriter;
 
   std::unordered_map<std::string, int> depthMap;
-  int depth = coneRewriter.computeMultDepthL(astProgram.get());        // compute mult depth map for given AST
-  //int depth = coneRewriter.getMultDepth(depthMap, *astProgram); // get root node's mult dept: should be 2
-
-   ASSERT_EQ(depth, 2);
+  int depth = coneRewriter.computeMultDepthL(astProgram.get());  // compute mult depth map for the root node of the AST (should be 2)
+  //depthMap = coneRewriter.preComputeMultDepthsL(astProgram.get());
+  ASSERT_EQ(depth, 2);
+  //ASSERT_EQ(depthMap[astProgram->getUniqueNodeId()], 2);
 }
 
 TEST(ConeRewriterTest, testReversedMultDepth) {

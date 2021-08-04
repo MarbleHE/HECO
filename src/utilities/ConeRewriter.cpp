@@ -479,7 +479,7 @@ int ConeRewriter::computeMultDepthL(AbstractNode *n, std::unordered_map<std::str
 
   // Only continue if n is non-null
   if (n==nullptr) return 0;
-  //
+
   // check if we have calculated the multiplicative depth previously
   if (!map.empty()) {
     auto it = map.find(n->getUniqueNodeId());
@@ -495,9 +495,7 @@ int ConeRewriter::computeMultDepthL(AbstractNode *n, std::unordered_map<std::str
   // base case: v is a leaf node (input node), i.e., does not have any child node
   // paper: |pred(n)| = 0 => multiplicative depth = 0 + d(n) (here:  |children(n)| = 0 => multdepth = 0 + d(n))
   if (nextNodesToConsider.empty()) {
-    // store value
-    // map[n->getUniqueNodeId()] = 0 + depthValue(n);
-    return 0;
+    return 0 + depthValue(n);
   }
 
   // otherwise compute max_{u ∈ children(n)} l(u) + d(n)
@@ -511,8 +509,24 @@ int ConeRewriter::computeMultDepthL(AbstractNode *n, std::unordered_map<std::str
   return max + depthValue(n);
 }
 
-int ConeRewriter::getMultDepth(std::unordered_map<std::string, int> multiplicativeDepths, AbstractNode &n) {
-  return 0;
+std::unordered_map<std::string, int> preComputeMultDepthsL(AbstractNode *root) {
+
+  std::unordered_map<std::string, int> map{};
+  // put all nodes of the AST starting at root in a vector (vis.v)
+  GetAllNodesVisitor vis;
+  root->accept(vis);
+
+  // calculate the multiplicative depth for each node of the AST
+  for (auto &node : vis.v) {
+   // map[node->getUniqueNodeId()] = computeMultDepthL(node); // TODO: fix not sure why this wont work
+  }
+
+  return map;
+
+}
+
+int ConeRewriter::getMultDepthL(std::unordered_map<std::string, int> multiplicativeDepths, AbstractNode &n) {
+  return multiplicativeDepths[n.getUniqueNodeId()];
 }
 
 //std::vector<AbstractNode *> *ConeRewriter::getPredecessorOnCriticalPath(AbstractNode *v) {
