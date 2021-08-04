@@ -426,31 +426,31 @@ int ConeRewriter::getMultDepth(AbstractNode *n) {
   return 0;
 }
 
-std::unordered_map<std::string, int> computeReverseMultDepthR(AbstractNode &ast,
-                                                              std::unordered_map<std::string,
-                                                                                 int> multiplicativeDepthsReversed) {
-  //TODO: Check if algorithm is as simple as possible?
-//  AbstractNode *nextNodeToConsider = &ast;
-//
-//  // we need to compute the reverse multiplicative depth
-//  if (nextNodeToConsider!=nullptr) {
-//    multiplicativeDepthsReversed[n->getUniqueNodeId()] = 0 + getInitialDepthOrNull(n).reverseMultiplicativeDepth;
-//    return 0;
-//  }
-//
-//  // otherwise compute the reverse depth
-//  int max = 0;
-//  // for (auto &u : nextNodesToConsider) {
-//  int uDepthR;
-//  // compute the multiplicative depth of parent u
-//  uDepthR = getReverseMultDepthR(nextNodeToConsider);
-//  // store the computed depth
-//  multiplicativeDepthsReversed[nextNodeToConsider->getUniqueNodeId()] =
-//      uDepthR + getInitialDepthOrNull(n).reverseMultiplicativeDepth;
-//  max = std::max(uDepthR + depthValue(nextNodeToConsider), max);
-//  //}
+int computeReverseMultDepthR(AbstractNode *n, std::unordered_map<std::string, int> multiplicativeDepthsReversed) {
 
-  return multiplicativeDepthsReversed;
+// check if we have calculated the reverse multiplicative depth previously
+  if (!multiplicativeDepthsReversed.empty()) {
+    auto it = multiplicativeDepthsReversed.find(n->getUniqueNodeId());
+    if (it!=multiplicativeDepthsReversed.end())
+      return it->second;
+  }
+
+  AbstractNode& nextNodeToConsider = n->getParent();
+
+  // if root node, the reverse multiplicative depth is 0
+  if (&nextNodeToConsider==nullptr) {
+    return 0;
+  }
+
+  //TODO
+ // otherwise compute the reverse depth
+  int max = 0;
+  int uDepthR;
+
+
+
+//  return multiplicativeDepthsReversed;
+  return 0;
 }
 
 int ConeRewriter::getReverseMultDepth(std::unordered_map<std::string, int> multiplicativeDepthsReversed,
@@ -518,14 +518,14 @@ std::unordered_map<std::string, int> preComputeMultDepthsL(AbstractNode *root) {
 
   // calculate the multiplicative depth for each node of the AST
   for (auto &node : vis.v) {
-   // map[node->getUniqueNodeId()] = computeMultDepthL(node); // TODO: fix not sure why this wont work
+    // map[node->getUniqueNodeId()] = computeMultDepthL(node); // TODO: fix not sure why this wont work
   }
 
   return map;
-
 }
 
-int ConeRewriter::getMultDepthL(std::unordered_map<std::string, int> multiplicativeDepths, AbstractNode &n) {
+int getMultDepthL(std::unordered_map<std::string, int> multiplicativeDepths, AbstractNode &n) {
+  if (multiplicativeDepths.empty()) { return -1; }
   return multiplicativeDepths[n.getUniqueNodeId()];
 }
 

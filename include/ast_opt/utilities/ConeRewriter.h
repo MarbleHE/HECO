@@ -132,13 +132,14 @@ class ConeRewriter {
   /// \param n Node of an AST
   /// \param map (Optional) map already containing precomputed values
   /// \return mult depth of the node n
-  int computeMultDepthL(AbstractNode *n, std::unordered_map<std::string, int> map = {});
+  int computeMultDepthL(AbstractNode *n, std::unordered_map<std::string, int> multiplicativeDepths = {});
 
 
   /// Returns a map 'UniqueNodeId' to 'multiplicative depth' for all nodes n in an AST (defined by its root node).
   /// Uses the function computeMultDepthL to compute multiplicative depths.
   /// \param root
   /// \return map UniqueNodeId to multDepth for all nodes in the ast
+  //TODO: fix and add reverse mult depths as well
   std::unordered_map<std::string, int> preComputeMultDepthsL(AbstractNode *root);
 
 
@@ -148,15 +149,14 @@ class ConeRewriter {
   /// \return The multiplicative depth of the current node.
   int getMultDepthL(std::unordered_map<std::string, int> multiplicativeDepths, AbstractNode &n);
 
-  /// Compute the (reverse) multiplicative depths r(v) for all nodes v of an AST starting at root based on the definition given in
+  /// Compute the (reverse) multiplicative depth r(n) for a node n of an AST based on the definition given in
   /// [Aubry, P. et al.: Faster Homomorphic Encryption Is Not Enough: Improved Heuristic for Multiplicative Depth
   /// The reverse multiplicative depth is the maximum number of AND gates on any path beginning by a parent of n and ending with a
   /// root node (output).
   /// \param root
   /// \param map (Optional) map already containing precomputed values
-  /// \return map containing all reverse mult depths of the AST
-  std::unordered_map<std::string, int> computeReverseMultDepth(AbstractNode &root,
-                                                                std::unordered_map<std::string, int> map = {});
+  /// \return revers multiplicative depth of the node n
+ int computeReverseMultDepthR(AbstractNode *n, std::unordered_map<std::string, int> multiplicativeDepthsReversed = {});
 
   /// Returns multiplicative depth as precomputed in computeReverseMultDepth for a given node
   /// \param multiplicativeDepthsReversed Mapping between nodes and their reversed depth

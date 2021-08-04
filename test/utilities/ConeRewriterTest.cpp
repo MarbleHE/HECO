@@ -158,38 +158,32 @@ TEST(ConeRewriterTest, testMultDepth) {
 
 TEST(ConeRewriterTest, testReversedMultDepth) {
 
-// program's input
-  const char *inputs = R""""(
-      bool __input0__ = 0;
-      bool __input1__ = 1;
-      bool __input2__ = 0;
-    )"""";
-  auto astInput = Parser::parse(std::string(inputs));
 
-  // program specification
+  /// program specification
+  /// v1 = a && b;
+  /// u = v1 || (x || y);
+  /// vt = u && c;
   const char *program = R""""(
-      secret bool v1 = ((__input0__ && __input1__) && __input2__) && __input3__;
-
-      return v2;
-    )"""";
+  return ((a && b) || (x || y)) && c;
+  )"""";
   auto astProgram = Parser::parse(std::string(program));
 
-  // program's output
-  const char *outputs = R""""(
-      y = v2;
-    )"""";
-  auto astOutput = Parser::parse(std::string(outputs));
+  // Rewrite BinaryExpressions to trivial OperatorExpressions
+  BinaryToOperatorExpressionVisitor v;
+  astProgram->accept(v);
 
   std::stringstream ss;
   ProgramPrintVisitor p(ss);
   astProgram->accept(p);
   std::cout << ss.str() << std::endl;
 
+
   ConeRewriter coneRewriter;
 
-  auto depth = 0; // TODO: RENABLE coneRewriter.getReverseMultDepthR(astProgram.get());
-  std::cout << depth << std::endl;
-  ASSERT_EQ(depth, 0);
+  std::unordered_map<std::string, int> depthMap;
+ // int depth = coneRewriter.computeReverseMultDepthR(astProgram.get());  // compute mult depth map for the root node of the AST (should be 2)
+  //depthMap = coneRewriter.preComputeMultDepthsL(astProgram.get());
+  //ASSERT_EQ(depth, 0);
 }
 
 TEST(ConeRewriterTest, testprecomputeMultDepths) {
