@@ -6,7 +6,7 @@
 #include "gtest/gtest.h"
 #include "ast_opt/ast/OperatorExpression.h"
 #include "ast_opt/ast/Literal.h"
-#include "ast_opt/visitor/PrintVisitor.h"
+#include "ast_opt/visitor/ProgramPrintVisitor.h"
 #include "ast_opt/utilities/ConeRewriter.h"
 #include "ast_opt/visitor/BinaryToOperatorExpressionVisitor.h"
 
@@ -53,12 +53,12 @@ TEST(ConeRewriterTest, testConeRewrPaperTree) {
   )"""";
   auto astProgram = Parser::parse(std::string(program));
 
-  // Rewrite BinaryExpressions to trivial OperatorEpxressions
+  // Rewrite BinaryExpressions to trivial OperatorExpressions
   BinaryToOperatorExpressionVisitor v;
   astProgram->accept(v);
 
   std::stringstream ss;
-  PrintVisitor p(ss);
+  ProgramPrintVisitor p(ss);
   astProgram->accept(p);
   std::cout << ss.str() << std::endl;
 
@@ -68,17 +68,30 @@ TEST(ConeRewriterTest, testConeRewrPaperTree) {
 
   ASSERT_NE(rewritten_ast, nullptr);
 
+  std::stringstream rewritten_ss;
+  ProgramPrintVisitor p2(rewritten_ss);
+  rewritten_ast->accept(p2);
+  std::cout << rewritten_ss.str() << std::endl;
+
 
   /// reference specification
   /// u1 = a && (b && c)
   /// u2 = c && (x || y)
   /// r = u1 || u2
   const char *expected = R""""(
-  return (a && (b && c)) || (c && (x || y))
+  return (a && (b && c)) || (c && (x || y));
   )"""";
-  auto expected_ast = Parser::parse(std::string(program));
+  auto expected_ast = Parser::parse(std::string(expected));
 
-  compareAST(*expected_ast, *rewritten_ast);
+  // Rewrite BinaryExpressions to trivial OperatorExpressions
+  expected_ast->accept(v);
+
+  std::stringstream expected_ss;
+  ProgramPrintVisitor p3(expected_ss);
+  expected_ast->accept(p3);
+  std::cout << expected_ss.str() << std::endl;
+
+ EXPECT_EQ(expected_ss.str(),rewritten_ss.str());
 }
 
 TEST(ConeRewriterTest, testMultDepth) {
@@ -106,7 +119,7 @@ TEST(ConeRewriterTest, testMultDepth) {
   auto astOutput = Parser::parse(std::string(outputs));
 
   std::stringstream ss;
-  PrintVisitor p(ss);
+  ProgramPrintVisitor p(ss);
   astProgram->accept(p);
   std::cout << ss.str() << std::endl;
 
@@ -142,7 +155,7 @@ TEST(ConeRewriterTest, testReversedMultDepth) {
   auto astOutput = Parser::parse(std::string(outputs));
 
   std::stringstream ss;
-  PrintVisitor p(ss);
+  ProgramPrintVisitor p(ss);
   astProgram->accept(p);
   std::cout << ss.str() << std::endl;
 
@@ -178,7 +191,7 @@ TEST(ConeRewriterTest, testprecomputeMultDepths) {
   auto astOutput = Parser::parse(std::string(outputs));
 
   std::stringstream ss;
-  PrintVisitor p(ss);
+  ProgramPrintVisitor p(ss);
   astProgram->accept(p);
   std::cout << ss.str() << std::endl;
 
