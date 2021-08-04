@@ -87,7 +87,7 @@ std::unique_ptr<AbstractNode> ConeRewriter::rewriteCones(std::vector<AbstractNod
 //      // remove the edge between the start nodes and the end node
 //
       std::vector<std::unique_ptr<OperatorExpression>> v1_to_vn(coneEnd->countChildren());
-//TODO: continue
+// TODO Continue
 
 //     // for (auto &node : coneStartNodes) {
 //     // v1_to_vn.push_back(node->take());
@@ -95,7 +95,7 @@ std::unique_ptr<AbstractNode> ConeRewriter::rewriteCones(std::vector<AbstractNod
 //        auto child = dynamic_cast<OperatorExpression *>(&xorEndNode)->takeChild(ii);
 //        v1_to_vn.push_back(child); // This confuses me...
 //        // coneEnd->removeChild(node, true);
-//      }
+      }
 //    } else {
 //      // collect all non-critical inputs y_1, ..., y_m in between xorStartNode up to xorEndNode
 //      std::vector<AbstractNode *> inputsY1ToYm;
