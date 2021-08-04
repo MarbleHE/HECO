@@ -87,50 +87,49 @@ std::unique_ptr<AbstractNode> ConeRewriter::rewriteCones(std::vector<AbstractNod
 //      // remove the edge between the start nodes and the end node
 //
       std::vector<std::unique_ptr<OperatorExpression>> v1_to_vn(coneEnd->countChildren());
-// TODO Continue
 
 //     // for (auto &node : coneStartNodes) {
 //     // v1_to_vn.push_back(node->take());
-//     for (int ii = 0; ii < coneEnd->countChildren(); ii++) {
-//        auto child = dynamic_cast<OperatorExpression *>(&xorEndNode)->takeChild(ii);
-//        v1_to_vn.push_back(child); // This confuses me...
-//        // coneEnd->removeChild(node, true);
-      }
-//    } else {
+     for (int ii = 0; ii < coneEnd->countChildren(); ii++) {
+        auto child = dynamic_cast<OperatorExpression *>(&xorEndNode)->takeChild(ii);
+        v1_to_vn.emplace_back(*child); // This confuses me...
+        // coneEnd->removeChild(node, true);
+        }
+    } else {
 //      // collect all non-critical inputs y_1, ..., y_m in between xorStartNode up to xorEndNode
-//      std::vector<AbstractNode *> inputsY1ToYm;
-//      auto currentNode = xorStartNode;
-//      while (true) {
-//        auto *currentNodeAsLogicalExpr = dynamic_cast<BinaryExpression *>(currentNode);
-//        if (currentNode==nullptr)
-//          throw std::logic_error(
-//              "AbstractNode between cone end and cone start node is expected to be a logical expression!");
-//        auto[critIn, nonCritIn] = getCriticalAndNonCriticalInput(currentNodeAsLogicalExpr);
-//        currentNode->removeChild(nonCritIn, false);
-//        nonCritIn->removeParent(currentNode, false);
-//        inputsY1ToYm.push_back(nonCritIn);
-//        currentNode = critIn;
+      std::vector<AbstractNode *> inputsY1ToYm;
+      auto currentNode = xorStartNode;
+      while (true) {
+        auto *currentNodeAsLogicalExpr = dynamic_cast<BinaryExpression *>(currentNode);
+        if (currentNode==nullptr)
+          throw std::logic_error(
+              "AbstractNode between cone end and cone start node is expected to be a logical expression!");
+        auto[critIn, nonCritIn] = getCriticalAndNonCriticalInput(currentNodeAsLogicalExpr);
+//TODO        currentNode->removeChild(nonCritIn, false);
+//TODO        nonCritIn->removeParent(currentNode, false);
+        inputsY1ToYm.push_back(nonCritIn);
+        currentNode = critIn;
 //        // termination criteria (1): we reached the end of the XOR chain
-//        if (currentNode==xorEndNode) {
-//          auto *xorEndNodeAsLogicalExpr = dynamic_cast<BinaryExpression *>(currentNode);
+        if (currentNode->getUniqueNodeId() == xorEndNode.getUniqueNodeId()) {
+          auto *xorEndNodeAsLogicalExpr = dynamic_cast<BinaryExpression *>(currentNode);
 //          // if only one of both is critical, we need to enqueue the non-critical of them.
 //          // exactly one of both inputs is non-critical
 //          //   <=> left is critical XOR right is critical
 //          //   <=> (left is critical) unequal (right is critical)
-//          if (isCriticalNode(xorEndNodeAsLogicalExpr->getLeft())
-//              !=isCriticalNode(xorEndNodeAsLogicalExpr->getRight())) {
+          if (isCriticalNode(xorEndNodeAsLogicalExpr->getLeft())
+              !=isCriticalNode(xorEndNodeAsLogicalExpr->getRight())) {
 //            // then we need to collect this non-critical input
-//            auto nonCriticalInput = getCriticalAndNonCriticalInput(xorEndNodeAsLogicalExpr).second;
-//            inputsY1ToYm.push_back(nonCriticalInput);
-//          }
+            auto nonCriticalInput = getCriticalAndNonCriticalInput(xorEndNodeAsLogicalExpr).second;
+            inputsY1ToYm.push_back(nonCriticalInput);
+          }
 //          // stop traversing further as we reached the xorEndNode
-//          break;
-//        }
+          break;
+        }
 //        // termination criteria (2): we already reached a cone start node
-//        if (std::find(coneStartNodes.begin(), coneStartNodes.end(), currentNode)!=coneStartNodes.end()) {
-//          break;
-//        }
-//      }
+        if (std::find(coneStartNodes.begin(), coneStartNodes.end(), currentNode)!=coneStartNodes.end()) {
+          break;
+        }
+      }
 //
 //      // XorEndNode: remove incoming edges from nodes v_1, ..., v_n
 //      for (auto &p : xorEndNode->getChildrenNonNull()) {
@@ -160,7 +159,7 @@ std::unique_ptr<AbstractNode> ConeRewriter::rewriteCones(std::vector<AbstractNod
 //      }
 //      auto *u_y = new BinaryExpression(a_t->castTo<AbstractExpression>(), LOGICAL_AND, u_y_rightOperand);
 //      finalXorInputs.push_back(u_y);
-//    } // end of handling non-critical inputs y_1, ..., y_m
+    } // end of handling non-critical inputs y_1, ..., y_m
 //
 //    // for each of these start nodes v_i
 //    for (auto sNode : coneStartNodes) {
@@ -315,17 +314,17 @@ std::vector<AbstractNode *> ConeRewriter::getReducibleCones(AbstractNode *v, int
 //  // b. v is an AND-gate and deltaR is empty
 //  // c. v is a XOR-gate and size of deltaR does not equal size of P
   if (logicalExp==nullptr ||
-      !(logicalExp->getOperator().toString()=="AND"
-          || logicalExp->getOperator().toString()=="XOR") ||
-      (logicalExp->getOperator().toString()=="AND" && deltaR.empty()) ||
-      (logicalExp->getOperator().toString()=="XOR" && deltaR.size()!=P->size())) {
+      !(logicalExp->getOperator().toString()=="LOGICAL_AND"
+          || logicalExp->getOperator().toString()=="LOGICAL_XOR") ||
+      (logicalExp->getOperator().toString()=="LOGICAL_AND" && deltaR.empty()) ||
+      (logicalExp->getOperator().toString()=="LOGICAL_XOR" && deltaR.size()!=P->size())) {
     return std::vector<AbstractNode *>();
   }
 
-  if (logicalExp->getOperator().toString()=="AND") {
+  if (logicalExp->getOperator().toString()=="LOGICAL_AND") {
 //    // both cones must be reducible because deltaR is non-empty -> pick a random one, and assign to delta
 //    delta = *select_randomly(deltaR.begin(), deltaR.end());
-  } else if (logicalExp->getOperator().toString()=="XOR") {
+  } else if (logicalExp->getOperator().toString()=="LOGICAL_XOR") {
 //    // critical cones must be reducible because size of deltaR equals size of P
 //    // flatten vector deltaR consisting of sets generated each by getReducibleCones
     std::vector<AbstractNode *> flattenedDeltaR;
