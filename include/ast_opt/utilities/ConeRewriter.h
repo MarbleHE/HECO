@@ -23,11 +23,7 @@ class ConeRewriter {
   //  // - std::string: The variable's identifier for which this initial depth is associated to.
   //  // - DepthMapEntry: A struct containing the multiplicative and reverseMultiplicativeDepth.
   //  std::unordered_map<std::string, DepthMapEntry> initialMultiplicativeDepths{};
-  //
   //  std::unordered_map<std::string, AbstractNode *> underlying_nodes;
-  //
-  //  std::pair<AbstractNode *, AbstractNode *> getCriticalAndNonCriticalInput(BinaryExpression *logicalExpr);
-  //  bool isCriticalNode(AbstractNode *n);
 
 
   /// Identify reducible cones in the (sub)tree defined by root
@@ -91,39 +87,49 @@ class ConeRewriter {
   static std::unique_ptr<AbstractNode> rewriteCones(std::unique_ptr<AbstractNode> &&ast,
                                              std::vector<AbstractNode *> &coneEndNodes);
 
-//  int computeMinDepth(AbstractNode *v);
-//
-//  bool isCriticalNode(AbstractNode *n);
-//
-//  /// Calculates the multiplicative depth based on the definition given in
-//  /// [Aubry, P. et al.: Faster Homomorphic Encryption Is Not Enough: Improved Heuristic for Multiplicative Depth
-//  ///  Minimization of Boolean Circuits. (2019)].
-//  /// \return The multiplicative depth of the current node.
-//  int getMultDepthL(AbstractNode *n);
-//
-//  /// Calculates the reverse multiplicative depth based on the definition given in
-//  /// [Aubry, P. et al.: Faster Homomorphic Encryption Is Not Enough: Improved Heuristic for Multiplicative Depth
-//  ///  Minimization of Boolean Circuits. (2019)].
-//  /// \return The reverse multiplicative depth of the current node.
-//  int getReverseMultDepthR(AbstractNode *n);
-//
-//  /// Determine the value of this node for computing the multiplicative depth and reverse multiplicative depth,
-//  /// getMultDepthL() and getReverseMultDepthR(), respectively.
-//  /// \return Returns 1 iff this node is a LogicalExpr containing an AND operator, otherwise 0.
-//  static int depthValue(AbstractNode *n);
-//
-//  void precomputeMultDepths(AbstractNode *ast);
-//
-//  int getMaximumMultiplicativeDepth();
-//
-//  DepthMapEntry getInitialDepthOrNull(AbstractNode *node);
-//
-//  // here getSuccessor
-//  std::vector<AbstractNode *> *getPredecessorOnCriticalPath(AbstractNode *v);
-//
+  /////////////////////////////////////////////////////
+  /// UTILITY FUNCTIONS FOR MULTDEPTH CALCULATION /////
+  /////////////////////////////////////////////////////
 
+  /// TODO: Document
+  /// \param v
+  /// \return
+  int computeMinDepth(AbstractNode *v);
+
+
+  /// TODO: Document -when is a node critical?
+  /// \param n
+  /// \return
+  bool isCriticalNode(AbstractNode *n);
+
+  /// Calculates the multiplicative depth based on the definition given in
+  /// [Aubry, P. et al.: Faster Homomorphic Encryption Is Not Enough: Improved Heuristic for Multiplicative Depth
+  ///  Minimization of Boolean Circuits. (2019)].
+  /// \param n  Node to consider
+  /// \return The multiplicative depth of the current node.
+  int getMultDepthL(AbstractNode *n);
+
+  /// Calculates the reverse multiplicative depth based on the definition given in
+  /// [Aubry, P. et al.: Faster Homomorphic Encryption Is Not Enough: Improved Heuristic for Multiplicative Depth
+  ///  Minimization of Boolean Circuits. (2019)].
+  /// \param n  Node to consider
+  /// \return The reverse multiplicative depth of the current node.
+  int getReverseMultDepthR(AbstractNode *n);
+
+  /// Determine the value of this node for computing the multiplicative depth and reverse multiplicative depth,
+  /// getMultDepthL() and getReverseMultDepthR(), respectively.
+  /// \param n  Node to consider
+  /// \return Returns 1 iff this node is a LogicalExpr containing an AND operator, otherwise 0.
+  static int depthValue(AbstractNode *n);
+
+//  void precomputeMultDepths(AbstractNode *ast);
+//  int getMaximumMultiplicativeDepth();//
+//  DepthMapEntry getInitialDepthOrNull(AbstractNode *node);
+//  std::vector<AbstractNode *> *getPredecessorOnCriticalPath(AbstractNode *v); // here getSuccessor
 //  std::pair<AbstractNode *, AbstractNode *> getCriticalAndNonCriticalInput(BinaryExpression *logicalExpr);
 //  std::pair<AbstractNode *, AbstractNode *> getCriticalAndNonCriticalInput(LogicalOp *logicalExpr);
+//  std::pair<AbstractNode *, AbstractNode *> getCriticalAndNonCriticalInput(BinaryExpression *logicalExpr);
+//  bool isCriticalNode(AbstractNode *n);
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_UTILITIES_CONEREWRITER_H_
