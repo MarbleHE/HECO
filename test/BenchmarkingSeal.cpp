@@ -260,22 +260,17 @@ TEST_F(BenchmarkingSeal, modSwitchTest) {
     }
   }
 
-  auto avg_time = std::chrono::duration_cast<std::chrono::microseconds>(time_sum).count()/(count * iterations);
+  long long avg_time = std::chrono::duration_cast<std::chrono::microseconds>(time_sum).count()/(count * iterations);
 
   //calc std deviation
-  auto standardDeviation = 0;
+  long long standardDeviation = 0;
   for( int i = 0; i < time_vec.size(); ++i) {
-    standardDeviation += std::pow(time_vec[i].count() - avg_time, 2);
+    standardDeviation += (time_vec[i].count() - avg_time) * (time_vec[i].count() - avg_time);
   }
 
-
-
-
   std::cout << "Average evaluation time of (x^4 + y) * z^4 WITH modswitch [" << avg_time << " microseconds]"
-    << std::endl;
-  std::cout << "Standard deviation: " << sqrt(standardDeviation / time_vec.size()) << std::endl;
-  std::cout << "Standard error: " << sqrt(standardDeviation / time_vec.size()) / sqrt(time_vec.size()) << std::endl;
-
+            << std::endl;
+  std::cout << "Standard error: " << sqrt(double(standardDeviation) / time_vec.size())  / sqrt(time_vec.size())<< std::endl;
 }
 
 
@@ -370,24 +365,19 @@ TEST_F(BenchmarkingSeal, xPow4noConeRewr) {
     }
   }
 
-  auto avg_time = std::chrono::duration_cast<std::chrono::microseconds>(time_sum).count()/(count * iterations);
+  long long avg_time = std::chrono::duration_cast<std::chrono::microseconds>(time_sum).count()/(count * iterations);
 
   //calc std deviation
-  auto standardDeviation = 0;
+  long long standardDeviation = 0;
   for( int i = 0; i < time_vec.size(); ++i) {
-    standardDeviation += std::pow(time_vec[i].count() - avg_time, 2);
-    std::cout << "Time: " << time_vec[i].count() << std::endl;
+    standardDeviation += (time_vec[i].count() - avg_time) * (time_vec[i].count() - avg_time);
   }
 
-
-
-
-  std::cout << "Average evaluation time of (x*x*x*x) * (x^2 * x^2) [" << avg_time << " microseconds]"
+  std::cout << "Average evaluation time of (x*x*x*x) * (x^2 *x^2) [" << avg_time << " microseconds]"
             << std::endl;
-  std::cout << "Standard deviation: " << sqrt(standardDeviation / time_vec.size()) << std::endl;
-  std::cout << "Standard error: " << sqrt(standardDeviation / time_vec.size()) / sqrt(time_vec.size()) << std::endl;
-
+  std::cout << "Standard error: " << sqrt(double(standardDeviation) / time_vec.size())  / sqrt(time_vec.size())<< std::endl;
 }
+
 
 TEST_F(BenchmarkingSeal, xPow4afterConeRewr) {
 
@@ -477,22 +467,17 @@ TEST_F(BenchmarkingSeal, xPow4afterConeRewr) {
     }
   }
 
-  auto avg_time = std::chrono::duration_cast<std::chrono::microseconds>(time_sum).count()/(count * iterations);
+  long long avg_time = std::chrono::duration_cast<std::chrono::microseconds>(time_sum).count()/(count * iterations);
 
   //calc std deviation
-  auto standardDeviation = 0;
+  long long standardDeviation = 0;
   for( int i = 0; i < time_vec.size(); ++i) {
-    standardDeviation += std::pow(time_vec[i].count() - avg_time, 2);
-    std::cout << "Time: " << time_vec[i].count() << std::endl;
+    standardDeviation += (time_vec[i].count() - avg_time) * (time_vec[i].count() - avg_time);
   }
-
-
-
 
   std::cout << "Average evaluation time of (x^2 * x^2) * (x^2 * x^2) [" << avg_time << " microseconds]"
             << std::endl;
-  std::cout << "Standard deviation: " << sqrt(standardDeviation / time_vec.size()) << std::endl;
-  std::cout << "Standard error: " << sqrt(standardDeviation / time_vec.size()) / sqrt(time_vec.size()) << std::endl;
-
+  std::cout << "Standard error: " << sqrt(double(standardDeviation) / time_vec.size())  / sqrt(time_vec.size())<< std::endl;
 }
+
 #endif

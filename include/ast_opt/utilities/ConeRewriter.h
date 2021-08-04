@@ -27,7 +27,7 @@ class ConeRewriter {
   // - DepthMapEntry: A struct containing the multiplicative and reverseMultiplicativeDepth.
   std::unordered_map<std::string, DepthMapEntry> initialMultiplicativeDepths{};
 
-//  std::unordered_map<std::string, AbstractNode *> underlying_nodes;
+  std::unordered_map<std::string, AbstractNode *> underlying_nodes;
 
   std::vector<AbstractNode *> getReducibleCones();
 
@@ -83,6 +83,8 @@ class ConeRewriter {
   std::vector<AbstractNode *> *getPredecessorOnCriticalPath(AbstractNode *v);
   std::vector<AbstractNode *> getReducibleCones(AbstractNode *v, int minDepth);
   std::vector<AbstractNode *> getAndCriticalCircuit(std::vector<AbstractNode *> delta);
+  std::pair<AbstractNode *, AbstractNode *> getCriticalAndNonCriticalInput(BinaryExpression *logicalExpr);
+  std::pair<AbstractNode *, AbstractNode *> getCriticalAndNonCriticalInput(LogicalOp *logicalExpr);
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_UTILITIES_CONEREWRITER_H_
