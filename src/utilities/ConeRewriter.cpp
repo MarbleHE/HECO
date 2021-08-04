@@ -92,7 +92,7 @@ std::unique_ptr<AbstractNode> ConeRewriter::rewriteCones(std::vector<AbstractNod
 //     // v1_to_vn.push_back(node->take());
      for (int ii = 0; ii < coneEnd->countChildren(); ii++) {
         auto child = dynamic_cast<OperatorExpression *>(&xorEndNode)->takeChild(ii);
-        v1_to_vn.emplace_back(*child); // This confuses me...
+       // v1_to_vn.emplace_back(*child); // This confuses me...
         // coneEnd->removeChild(node, true);
         }
     } else {
@@ -116,8 +116,8 @@ std::unique_ptr<AbstractNode> ConeRewriter::rewriteCones(std::vector<AbstractNod
 //          // exactly one of both inputs is non-critical
 //          //   <=> left is critical XOR right is critical
 //          //   <=> (left is critical) unequal (right is critical)
-          if (isCriticalNode(xorEndNodeAsLogicalExpr->getLeft())
-              !=isCriticalNode(xorEndNodeAsLogicalExpr->getRight())) {
+          if (isCriticalNode(&xorEndNodeAsLogicalExpr->getLeft())
+              !=isCriticalNode(&xorEndNodeAsLogicalExpr->getRight())) {
 //            // then we need to collect this non-critical input
             auto nonCriticalInput = getCriticalAndNonCriticalInput(xorEndNodeAsLogicalExpr).second;
             inputsY1ToYm.push_back(nonCriticalInput);
