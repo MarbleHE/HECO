@@ -59,6 +59,8 @@ class Variable : public AbstractTarget {
   size_t countChildren() const override;
   nlohmann::json toJson() const override;
   std::string toString(bool printChildren) const override;
+  std::unique_ptr<AbstractNode> replaceChild(const AbstractNode &child,
+                                             std::unique_ptr<AbstractNode> &&new_child) override;
  protected:
   std::string getNodeType() const override;
 };

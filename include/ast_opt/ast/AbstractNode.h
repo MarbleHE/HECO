@@ -138,6 +138,17 @@ class AbstractNode {
   /// \throws std::logic_error if this node already has a parent
   void setParent(AbstractNode &newParent);
 
+  /// Generically replaces a child node with a different node.
+  /// This is computationally inefficient, iterating through all children and searching for a match
+  /// It also requires a lot of dynamic casting, therefore:
+  /// If it's possible, it is preferred to replace children directly through the derived class interface (e.g. setX)
+  /// \param child Reference to the child that needs to be replaced (compared by address!)
+  /// \param new_child New node to insert, must have suitable type!
+  /// \return Ownership of the old child
+  /// \throws std::runtime_error if the node does not have this child or if the new child does not have the correct type
+  virtual std::unique_ptr<AbstractNode> replaceChild(const AbstractNode &child,
+                                                     std::unique_ptr<AbstractNode> &&new_child) = 0;
+
   /** @} */ // End of DAG group
 
   /** @defgroup output Methods for output
@@ -403,5 +414,24 @@ class PositionIteratorImpl : public BaseIteratorImpl<T> {
   std::unique_ptr<BaseIteratorImpl<T>> clone() override = 0;
   // Deriving class needs to implement this, returning a new copy of themselves
 };
+
+/// Helper Template to do dynamic casting with unique pointers to nodes
+/// Taken from https://stackoverflow.com/a/11003103/
+template<typename T_SRC, typename T_DEST>
+bool dynamic_pointer_move(std::unique_ptr<T_DEST> &dest,
+                          std::unique_ptr<T_SRC> &src) {
+  if (!src) {
+    dest.reset();
+    return true;
+  }
+
+  T_DEST *dest_ptr = dynamic_cast<T_DEST *>(src.get());
+  if (!dest_ptr)
+    return false;
+
+  src.release();
+  dest.reset(dest_ptr);
+  return true;
+}
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_ABSTRACTNODE_H_

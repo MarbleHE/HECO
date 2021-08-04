@@ -128,3 +128,21 @@ std::string IndexAccess::toString(bool printChildren) const {
 std::string IndexAccess::getNodeType() const {
   return "IndexAccess";
 }
+std::unique_ptr<AbstractNode> IndexAccess::replaceChild(const AbstractNode &child,
+                                                        std::unique_ptr<AbstractNode> &&new_child) {
+  if(target && &child == &*target) {
+    auto t = std::move(target);
+    if(!dynamic_pointer_move(target, new_child)) {
+      throw std::runtime_error("Cannot replace child: Types not compatible");
+    }
+    return t;
+  } else if (index && &child == &*index) {
+    auto t = std::move(index);
+    if(!dynamic_pointer_move(index, new_child)) {
+      throw std::runtime_error("Cannot replace child: Types not compatible");
+    }
+    return t;
+  } else {
+    throw std::runtime_error("Cannot replace child: not found!");
+  }
+}

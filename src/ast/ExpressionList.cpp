@@ -154,6 +154,20 @@ std::string ExpressionList::toString(bool printChildren) const {
 std::string ExpressionList::getNodeType() const {
   return "ExpressionList";
 }
+std::unique_ptr<AbstractNode> ExpressionList::replaceChild(const AbstractNode &child,
+                                                           std::unique_ptr<AbstractNode> &&new_child) {
+  for (auto &e: expressions) {
+    if (e && &child==&*e) {
+      auto t = std::move(e);
+      if (!dynamic_pointer_move(e, new_child)) {
+        throw std::runtime_error("Cannot replace child: Types not compatible");
+      }
+      return t;
+    }
+  }
+
+  throw std::runtime_error("Cannot replace child: not found!");
+}
 
 
 

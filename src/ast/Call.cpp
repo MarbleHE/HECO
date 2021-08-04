@@ -125,3 +125,17 @@ std::string Call::toString(bool printChildren) const {
 std::string Call::getNodeType() const {
   return "Call";
 }
+
+std::unique_ptr<AbstractNode> Call::replaceChild(const AbstractNode &child, std::unique_ptr<AbstractNode> &&new_child) {
+  for (auto &a: arguments) {
+    if (a && &child==&*a) {
+      auto t = std::move(a);
+      if (!dynamic_pointer_move(a, new_child)) {
+        throw std::runtime_error("Cannot replace child: Types not compatible");
+      }
+      return t;
+    }
+  }
+
+  throw std::runtime_error("Cannot replace child: not found!");
+}

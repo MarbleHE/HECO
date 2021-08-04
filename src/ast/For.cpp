@@ -191,3 +191,34 @@ std::string For::toString(bool printChildren) const {
 std::string For::getNodeType() const {
   return "For";
 }
+
+std::unique_ptr<AbstractNode> For::replaceChild(const AbstractNode &child, std::unique_ptr<AbstractNode> &&new_child) {
+  if (initializer && &child==&*initializer) {
+    auto t = std::move(initializer);
+    if (!dynamic_pointer_move(initializer, new_child)) {
+      throw std::runtime_error("Cannot replace child: Types not compatible");
+    }
+    return t;
+  } else if (condition && &child==&*condition) {
+    auto t = std::move(condition);
+    if (!dynamic_pointer_move(condition, new_child)) {
+      throw std::runtime_error("Cannot replace child: Types not compatible");
+    }
+    return t;
+
+  } else if (update && &child==&*update) {
+    auto t = std::move(update);
+    if (!dynamic_pointer_move(update, new_child)) {
+      throw std::runtime_error("Cannot replace child: Types not compatible");
+    }
+    return t;
+  } else if (body && &child==&*body) {
+    auto t = std::move(body);
+    if (!dynamic_pointer_move(body, new_child)) {
+      throw std::runtime_error("Cannot replace child: Types not compatible");
+    }
+    return t;
+  } else {
+    throw std::runtime_error("Cannot replace child: not found!");
+  }
+}

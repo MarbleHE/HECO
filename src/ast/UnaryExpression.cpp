@@ -122,3 +122,15 @@ std::string UnaryExpression::toString(bool printChildren) const {
 std::string UnaryExpression::getNodeType() const {
   return "UnaryExpression";
 }
+std::unique_ptr<AbstractNode> UnaryExpression::replaceChild(const AbstractNode &child,
+                                                            std::unique_ptr<AbstractNode> &&new_child) {
+  if (operand && &child==&*operand) {
+    auto t = std::move(operand);
+    if (!dynamic_pointer_move(operand, new_child)) {
+      throw std::runtime_error("Cannot replace child: Types not compatible");
+    }
+    return t;
+  } else {
+    throw std::runtime_error("Cannot replace child: not found!");
+  }
+}

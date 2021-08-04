@@ -154,3 +154,26 @@ std::string If::toString(bool printChildren) const {
 std::string If::getNodeType() const {
   return "If";
 }
+std::unique_ptr<AbstractNode> If::replaceChild(const AbstractNode &child, std::unique_ptr<AbstractNode> &&new_child) {
+  if (condition && &child==&*condition) {
+    auto t = std::move(condition);
+    if (!dynamic_pointer_move(condition, new_child)) {
+      throw std::runtime_error("Cannot replace child: Types not compatible");
+    }
+    return t;
+  } else if (thenBranch && &child==&*thenBranch) {
+    auto t = std::move(thenBranch);
+    if (!dynamic_pointer_move(thenBranch, new_child)) {
+      throw std::runtime_error("Cannot replace child: Types not compatible");
+    }
+    return t;
+  } else if (elseBranch && &child==&*elseBranch) {
+    auto t = std::move(elseBranch);
+    if (!dynamic_pointer_move(elseBranch, new_child)) {
+      throw std::runtime_error("Cannot replace child: Types not compatible");
+    }
+    return t;
+  } else {
+    throw std::runtime_error("Cannot replace child: not found!");
+  }
+}

@@ -158,6 +158,20 @@ std::string Block::toString(bool printChildren) const {
 std::string Block::getNodeType() const {
   return "Block";
 }
+std::unique_ptr<AbstractNode> Block::replaceChild(const AbstractNode &child,
+                                                  std::unique_ptr<AbstractNode> &&new_child) {
+  for (auto &s: statements) {
+    if (s && &child==&*s) {
+      auto t = std::move(s);
+      if (!dynamic_pointer_move(s, new_child)) {
+        throw std::runtime_error("Cannot replace child: Types not compatible");
+      }
+      return t;
+    }
+  }
+
+  throw std::runtime_error("Cannot replace child: not found!");
+}
 
 
 
