@@ -331,8 +331,9 @@ TEST(ConeRewriterTest, computeMinDepthTest) {
   std::cout << ss.str() << std::endl;
 
   ConeRewriter coneRewriter;
+  MultDepthMap  map;
 
-  int minDepth = coneRewriter.computeMinDepth(&*astProgram->begin()->begin());
+  int minDepth = coneRewriter.computeMinDepth(&*astProgram, astProgram.get(), map);
 
   ASSERT_EQ(minDepth, 1);
 }

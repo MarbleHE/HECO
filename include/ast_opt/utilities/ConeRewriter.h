@@ -112,8 +112,7 @@ class ConeRewriter {
   /// A node p is critical if l(p) + r(p) = l^{max}
   /// \param v node
   /// \return minDepth value
-  //TODO: implement
-  int computeMinDepth(AbstractNode *v);
+  int computeMinDepth(AbstractNode *v, AbstractNode *ast, MultDepthMap map);
 
   /// Returns the 'maximum (overall) multiplicative depth' l^{max}, i.e the maximal multiplicative depth of its nodes.
   /// l^{max} = max_{v \in V} l(v) = max_{v \in V} r(v)
