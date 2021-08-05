@@ -65,11 +65,13 @@ class ConeRewriter {
   /// Takes ownership of an AST, rewrites it and returns (potentially a different) rewritten AST
   /// \param ast AST to be rewritten (function takes ownership)
   /// \return a new AST that has been rewritten
+  //TODO: implement
   static std::unique_ptr<AbstractNode> rewriteAst(std::unique_ptr<AbstractNode> &&ast);
 
   /// Identify reducible cones in the (sub)tree defined by root
   /// \param root Root node of the AST
   /// \return A vector of nodes, each node defines a cone starting at root and ending at the node
+  //TODO: implement
   static std::vector<AbstractNode *> getReducibleCones(AbstractNode &root);
 
   /// Creates the graph C^{AND} from Section 3.2 (p 10) from [Aubry, P. et al.: Faster Homomorphic Encryption Is Not Enough: Improved Heuristic for Multiplicative Depth
@@ -81,6 +83,7 @@ class ConeRewriter {
   /// \param root
   /// \param delta
   /// \return
+  //TODO: implement
   static std::vector<AbstractNode *> getAndCriticalCircuit(AbstractNode &root, std::vector<AbstractNode *> delta);
 
   ///  Implements the cone selection algorithm [see Algorithm 3, page 11].
@@ -90,10 +93,12 @@ class ConeRewriter {
   /// \return
   static std::vector<AbstractNode *> selectCones(AbstractNode &root, std::vector<AbstractNode *> cAndCkt);
 
-  /// TODO: Document
+  /// Applies the cone rewriting operator from [Aubry, P. et al.: Faster Homomorphic Encryption Is Not Enough: Improved
+  /// Heuristic for Multiplicative Depth Minimization of Boolean Circuits. (2019)] on selected cones
   /// \param ast
   /// \param coneEndNodes
-  /// \return
+  /// \return ast
+  //TODO: implement
   static std::unique_ptr<AbstractNode> rewriteCones(std::unique_ptr<AbstractNode> &&ast,
                                                     std::vector<AbstractNode *> &coneEndNodes);
 
@@ -105,17 +110,20 @@ class ConeRewriter {
   /// We use a minDepth value equal to l(p) + 1, where p is the non-critical input of node v.
   /// \param v node
   /// \return minDepth value
+  //TODO: implement
   int computeMinDepth(AbstractNode *v);
 
   /// Returns the 'overall multiplicative depth' l^{max}, i.e the maximal multiplicative depth of its nodes.
   /// l^{max} = max_{v \in V} l(v) = max_{v \in V} r(v)
   /// \param root
-  /// \return
+  /// \return overall mult depth
+  //TODO: implement
   static int getOverallMultDepth(AbstractNode *root);
 
   /// Returns true if a node n is critical, i.e. if l(n) + r(n) = l^{max}, false otherwies
   /// \param n node of the AST
   /// \return bool
+  //TODO: implement
   bool isCriticalNode(AbstractNode *n);
 
 
@@ -142,11 +150,11 @@ class ConeRewriter {
   /// \return map UniqueNodeId to multDepth for all nodes in the ast
   std::unordered_map<std::string, int> preComputeReverseMultDepthsR(AbstractNode *root);
 
-
   /// Returns multiplicative depth as precomputed in preComputeMultDepthsL for a given node
   /// \param multiplicativeDepths Mapping between nodes and their reversed depth
   /// \param n  Node to consider
   /// \return The multiplicative depth of the current node.
+  //TODO: implement
   int getMultDepthL(std::unordered_map<std::string, int> multiplicativeDepths, AbstractNode &n);
 
   /// Compute the (reverse) multiplicative depth r(n) for a node n of an AST based on the definition given in
@@ -162,6 +170,7 @@ class ConeRewriter {
   /// \param multiplicativeDepthsReversed Mapping between nodes and their reversed depth
   /// \param n  Node to consider
   /// \return The reverse multiplicative depth of the current node.
+  //TODO: implement
   int getReverseMultDepth(std::unordered_map<std::string, int> multiplicativeDepthsReversed, AbstractNode *n);
 
   /// Determine the value of this node (used for computing the multiplicative depth and reverse multiplicative depth)

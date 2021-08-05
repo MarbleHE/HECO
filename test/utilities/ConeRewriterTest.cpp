@@ -245,11 +245,11 @@ TEST(ConeRewriterTest, testPreComputeReversedMultDepthsL) {
   GetAllNodesVisitor vis;
   astProgram->accept(vis);
 
-   for (int i = 0; i < vis.v.size(); i++) {
-     std::cout << "Node: " << vis.v[i]->toString(false) << " MultDepth: " << map[vis.v[i]->getUniqueNodeId()] << std::endl;
-   }
+  // for (int i = 0; i < vis.v.size(); i++) {
+    // std::cout << "Node: " << vis.v[i]->toString(false) << " MultDepth: " << map[vis.v[i]->getUniqueNodeId()] << std::endl;
+   //}
 
- // EXPECT_EQ(2,map[vis.v[0]->getUniqueNodeId()]);
+ // EXPECT_EQ(0, map[vis.v[0]->getUniqueNodeId()]);
 
 }
 
