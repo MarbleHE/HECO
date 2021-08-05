@@ -182,6 +182,9 @@ class ConeRewriter {
 //  std::pair<AbstractNode *, AbstractNode *> getCriticalAndNonCriticalInput(BinaryExpression *logicalExpr);
 //  bool isCriticalNode(AbstractNode *n);
   int getMultDepth(AbstractNode *n);
+  void flattenVectors(std::vector<AbstractNode *> &resultVector,
+                      std::vector<std::vector<AbstractNode *>> vectorOfVectors);
+  void addElements(std::vector<AbstractNode *> &result, std::vector<AbstractNode *> newElements);
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_UTILITIES_CONEREWRITER_H_

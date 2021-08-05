@@ -41,7 +41,7 @@ std::vector<AbstractNode *> ConeRewriter::getReducibleCone(AbstractNode *root,
     return std::vector<AbstractNode *>();
   }
 
-  // get predecessor (children) { p ∈ pred(v) | l(p) = l(v) - d(v) }: put them in the vector called pvec
+  // get predecessor (children) { p ∈ pred(v) | l(p) = l(v) - d(v) }: put them in the vector called pvec (paper: P)
   auto pvec = std::vector<AbstractNode *>();
   for (auto &p: *v) {
     if (computeMultDepthL(&p, multiplicativeDepths) == computeMultDepthL(v, multiplicativeDepths) - depthValue(v)) {
@@ -49,7 +49,7 @@ std::vector<AbstractNode *> ConeRewriter::getReducibleCone(AbstractNode *root,
     }
   }
 
-  // return v if at least one predecessor of v is non-critical (i.e |pvev| < 2) and v is an AND-gate
+  // return v if at least one predecessor of v is non-critical (i.e |pvec| < 2) and v is an AND-gate
   if (pvec.size() < 2 && v->toString(false) == "&&") {
     // return set consisting of start node v only
     return std::vector<AbstractNode *>{v};
@@ -67,7 +67,7 @@ std::vector<AbstractNode *> ConeRewriter::getReducibleCone(AbstractNode *root,
   // a. v is not a LogicalExpr
   // b. v is a LogicalExpr but not an AND- or XOR-gate
   // b. v is an AND-gate and deltaR is empty
-  // c. v is a XOR-gate and size of deltaR does not equal size of Pvec (P)
+  // c. v is a XOR-gate and size of deltaR does not equal size of pvec
   if (v==nullptr ||
       !(v->toString(false) == "&&"
           || v->toString(false) == "||") ||
@@ -83,10 +83,13 @@ std::vector<AbstractNode *> ConeRewriter::getReducibleCone(AbstractNode *root,
     // critical cones must be reducible because size of deltaR equals size of P
     // flatten vector deltaR consisting of sets generated each by getReducibleCones
     std::vector<AbstractNode *> flattenedDeltaR;
-    // TODO continue here
-    
+    flattenVectors(flattenedDeltaR, deltaR);
+    // add all elements of flattened deltaR to delta
+    addElements(delta, flattenedDeltaR);
   }
-
+  // return 𝛅 ⋃ {v}
+  delta.push_back(v);
+  return delta;
 }
 
 std::vector<AbstractNode *> ConeRewriter::getAndCriticalCircuit(AbstractNode &root, std::vector<AbstractNode *> delta) {
@@ -462,5 +465,19 @@ int ConeRewriter::getMaximumMultDepth(AbstractNode *root, MultDepthMap map) {
 int getMultDepthL(MultDepthMap multiplicativeDepths, AbstractNode &n) {
   if (multiplicativeDepths.empty()) { return -1; }
   return multiplicativeDepths[n.getUniqueNodeId()];
+}
+
+void ConeRewriter::addElements(std::vector<AbstractNode *> &result, std::vector<AbstractNode *> newElements) {
+  result.reserve(result.size() + newElements.size());
+  result.insert(result.end(), newElements.begin(), newElements.end());
+}
+
+void ConeRewriter::flattenVectors(std::vector<AbstractNode *> &resultVector,
+                                  std::vector<std::vector<AbstractNode *>> vectorOfVectors) {
+  std::set<AbstractNode *> res;
+  std::for_each(vectorOfVectors.begin(), vectorOfVectors.end(), [&](std::vector<AbstractNode *> rVec) {
+    res.insert(rVec.begin(), rVec.end());
+  });
+  resultVector.assign(res.begin(), res.end());
 }
 
