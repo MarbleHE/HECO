@@ -7,6 +7,7 @@
 #include "ast_opt/ast/OperatorExpression.h"
 #include "ast_opt/ast/Literal.h"
 #include "ast_opt/visitor/ProgramPrintVisitor.h"
+#include "ast_opt/visitor/PrintVisitor.h"
 #include "ast_opt/utilities/ConeRewriter.h"
 #include "ast_opt/visitor/BinaryToOperatorExpressionVisitor.h"
 
@@ -39,7 +40,7 @@ TEST(ConeRewriterTest, testConeRewrNoChange) { /* NOLINT */
   compareAST(*o_copy, *rewritten_ast);
 }
 
-TEST(ConeRewriterTest, getReducibleCones) {
+TEST(ConeRewriterTest, getReducibleCone) {
   /// program specification
   /// v1 = a && b;
   /// u = v1 || (x || y);
@@ -54,13 +55,13 @@ TEST(ConeRewriterTest, getReducibleCones) {
   astProgram->accept(v);
 
   std::stringstream ss;
-  ProgramPrintVisitor p(ss);
+  PrintVisitor p(ss);
   astProgram->accept(p);
   std::cout << ss.str() << std::endl;
 
   ConeRewriter coneRewriter;
 
-  auto cones = coneRewriter.getReducibleCones(*astProgram);
+  auto cones = coneRewriter.getReducibleCone(*astProgram);
 
   std::cout << "Found " << cones.size() << " reducible cones:" << std::endl;
   for (auto &n: cones) {
@@ -146,11 +147,11 @@ TEST(ConeRewriterTest, testMultDepth) {
   astProgram->accept(p);
   std::cout << ss.str() << std::endl;
 
-
   ConeRewriter coneRewriter;
 
-  std::unordered_map<std::string, int> depthMap;
-  int depth = coneRewriter.computeMultDepthL(astProgram.get());  // compute mult depth map for the root node of the AST (should be 2)
+  MultDepthMap depthMap;
+  int depth = coneRewriter.computeMultDepthL(astProgram.get(),
+                                             depthMap);  // compute mult depth map for the root node of the AST (should be 2)
   //depthMap = coneRewriter.preComputeMultDepthsL(astProgram.get());
   ASSERT_EQ(depth, 2);
   //ASSERT_EQ(depthMap[astProgram->getUniqueNodeId()], 2);
@@ -179,13 +180,14 @@ TEST(ConeRewriterTest, testReversedMultDepth) {
 
   ConeRewriter coneRewriter;
 
-  std::unordered_map<std::string, int> depthMap;
-  int depth = coneRewriter.computeReversedMultDepthR(astProgram.get());  // compute mult depth map for the root node of the AST (should be 2)
+  MultDepthMap depthMap;
+  int depth = coneRewriter.computeReversedMultDepthR(astProgram
+                                                         .get());  // compute mult depth map for the root node of the AST (should be 2)
   //depthMap = coneRewriter.preComputeMultDepthsL(astProgram.get());
   ASSERT_EQ(depth, 0);
 }
 
-TEST(ConeRewriterTest, testPreComputeMultDepthsL) {
+TEST(ConeRewriterTest, testComputeAllDepths) {
 
   /// program specification
   /// v1 = a && b;
@@ -204,19 +206,22 @@ TEST(ConeRewriterTest, testPreComputeMultDepthsL) {
   astProgram->accept(p);
   std::cout << ss.str() << std::endl;
 
-  ConeRewriter coneRewriter;
-
-  std::unordered_map<std::string, int> map = coneRewriter.preComputeMultDepthsL(astProgram.get());
-
+  // Get nodes, but only expression nodes, not the block or return
   GetAllNodesVisitor vis;
-  astProgram->accept(vis);
+  astProgram->begin()->begin()->accept(vis);
 
- // for (int i = 0; i < vis.v.size(); i++) {
- //   std::cout << "Node: " << vis.v[i]->toString(false) << " MultDepth: " << map[vis.v[i]->getUniqueNodeId()] << std::endl;
- // }
+  ConeRewriter coneRewriter;
+  MultDepthMap map;
+  for (auto n : vis.v) {
+    coneRewriter.computeMultDepthL(n, map);
+  }
 
-  EXPECT_EQ(2,map[vis.v[0]->getUniqueNodeId()]);
+  for (auto n : vis.v) {
+    std::cout << "Node: " << n->toString(false) << " MultDepth: " << map[n->getUniqueNodeId()] << std::endl;
+  }
 
+  //TODO: compare against list of hand-computed multdepths!
+  EXPECT_EQ(true, false);
 }
 
 TEST(ConeRewriterTest, testPreComputeReversedMultDepthsL) {
@@ -240,16 +245,16 @@ TEST(ConeRewriterTest, testPreComputeReversedMultDepthsL) {
 
   ConeRewriter coneRewriter;
 
-  std::unordered_map<std::string, int> map = coneRewriter.preComputeReverseMultDepthsR(astProgram.get());
+  MultDepthMap map = coneRewriter.preComputeReverseMultDepthsR(astProgram.get());
 
   GetAllNodesVisitor vis;
   astProgram->accept(vis);
 
   // for (int i = 0; i < vis.v.size(); i++) {
-    // std::cout << "Node: " << vis.v[i]->toString(false) << " MultDepth: " << map[vis.v[i]->getUniqueNodeId()] << std::endl;
-   //}
+  // std::cout << "Node: " << vis.v[i]->toString(false) << " MultDepth: " << map[vis.v[i]->getUniqueNodeId()] << std::endl;
+  //}
 
- // EXPECT_EQ(0, map[vis.v[0]->getUniqueNodeId()]);
+  // EXPECT_EQ(0, map[vis.v[0]->getUniqueNodeId()]);
 
 }
 

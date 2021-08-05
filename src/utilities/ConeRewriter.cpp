@@ -8,7 +8,7 @@
 std::unique_ptr<AbstractNode> ConeRewriter::rewriteAst(std::unique_ptr<AbstractNode> &&ast_in) {
 
   /// set of all reducible cones
-  auto delta = getReducibleCones(*ast_in);
+  auto delta = getReducibleCone(*ast_in);
 
   /// C^{AND} circuit consisting of critical AND-nodes that are connected if there is a multiplicative depth-2
   /// path in between two of those nodes in the initial circuit
@@ -22,7 +22,7 @@ std::unique_ptr<AbstractNode> ConeRewriter::rewriteAst(std::unique_ptr<AbstractN
   return rewriteCones(std::move(ast_in), delta);
 }
 
-std::vector<AbstractNode *> ConeRewriter::getReducibleCones(AbstractNode &root /* AbstractNode *v , int minDepth */) {
+std::vector<AbstractNode *> ConeRewriter::getReducibleCone(AbstractNode &root /* AbstractNode *v , int minDepth */) {
 
   //TODO: CAREFUL! OLD CODE WAS DESIGNED FOR REVERSED AST!
   AbstractNode *startNode = nullptr;
@@ -62,10 +62,10 @@ std::vector<AbstractNode *> ConeRewriter::getReducibleCones(AbstractNode &root /
   // v has no non-critical input node p -> return empty set
   if (minDepth==-1) return std::vector<AbstractNode *>();
 
-  return getReducibleCones(root, startNode, minDepth);
+  return getReducibleCone(root, startNode, minDepth);
 }
 
-std::vector<AbstractNode *> ConeRewriter::getReducibleCones(AbstractNode &root, AbstractNode *v, int minDepth) {
+std::vector<AbstractNode *> ConeRewriter::getReducibleCone(AbstractNode &root, AbstractNode *v, int minDepth) {
   // return empty set if minDepth is reached
   // TODO: RENABLE if (getMultDepthL(v)==minDepth) return std::vector<AbstractNode *>();
 
@@ -371,7 +371,7 @@ int ConeRewriter::computeMinDepth(AbstractNode *v) {
 //  std::for_each(v->begin(), v->end(), [&](AbstractNode &p) {
 ////    // exclude Operator nodes as they do not have any parent and are not modeled as node in the paper
 //    if (isNoOperatorNode(&p) && !isCriticalNode(&p)) {
-////      // set minMultDepth as l(p)+2 and call getReducibleCones
+////      // set minMultDepth as l(p)+2 and call getReducibleCone
 ////      //return mdc.getMultDepthL(p) + 2;
 ////      // According to the paper (see p. 9, §2.4) minMultDepth = l(p)+1 is used but it does not return any result:
 //      return getMultDepthL(&p) + 1;
@@ -426,7 +426,7 @@ int ConeRewriter::getMultDepth(AbstractNode *n) {
   return 0;
 }
 
-int ConeRewriter::getReverseMultDepth(std::unordered_map<std::string, int> multiplicativeDepthsReversed,
+int ConeRewriter::getReverseMultDepth(MultDepthMap multiplicativeDepthsReversed,
                                       AbstractNode *n) {
 
   // check if we have calculated the reverse multiplicative depth previously
@@ -448,7 +448,7 @@ int ConeRewriter::depthValue(AbstractNode *n) {
   return 0;
 }
 
-int ConeRewriter::computeMultDepthL(AbstractNode *n, std::unordered_map<std::string, int> map) {
+int ConeRewriter::computeMultDepthL(AbstractNode *n, MultDepthMap &map) {
 
   // Only continue if n is non-null
   if (n==nullptr) return 0;
@@ -476,13 +476,17 @@ int ConeRewriter::computeMultDepthL(AbstractNode *n, std::unordered_map<std::str
   for (auto &u : nextNodesToConsider) {
     int uDepth;
     // compute the multiplicative depth of child u
-    uDepth = computeMultDepthL(u);
+    MultDepthMap m;
+    uDepth = computeMultDepthL(u, m);
     if (uDepth > max) { max = uDepth; } // update maximum if necessary
   }
-  return max + depthValue(n);
+  auto r = max + depthValue(n);
+  map.insert_or_assign(n->getUniqueNodeId(), r);
+  return r;
 }
 
-int ConeRewriter::computeReversedMultDepthR(AbstractNode *n, std::unordered_map<std::string, int> multiplicativeDepthsReversed) {
+int ConeRewriter::computeReversedMultDepthR(AbstractNode *n,
+                                            MultDepthMap multiplicativeDepthsReversed) {
 
 // check if we have calculated the reverse multiplicative depth previously
   if (!multiplicativeDepthsReversed.empty()) {
@@ -496,8 +500,7 @@ int ConeRewriter::computeReversedMultDepthR(AbstractNode *n, std::unordered_map<
   // if root node, the reverse multiplicative depth is 0
   if (!n->hasParent()) {
     return 0;
-  }
-  else {
+  } else {
     nextNodeToConsider = &n->getParent();
   }
 
@@ -505,25 +508,12 @@ int ConeRewriter::computeReversedMultDepthR(AbstractNode *n, std::unordered_map<
   int max = 0;
   int uDepthR;
   uDepthR = computeReversedMultDepthR(nextNodeToConsider);
-  if (uDepthR > max) {max = uDepthR;}
+  if (uDepthR > max) { max = uDepthR; }
   return max + depthValue(nextNodeToConsider);
 }
 
-std::unordered_map<std::string, int> ConeRewriter::preComputeMultDepthsL(AbstractNode *root) {
-  std::unordered_map<std::string, int> map{};
-  // put all nodes of the AST starting at root in a vector (vis.v)
-  GetAllNodesVisitor vis;
-  root->accept(vis);
-
-  // calculate the multiplicative depth for each node of the AST
-  for (auto &node : vis.v) {
-     map[node->getUniqueNodeId()] = computeMultDepthL(node);
-  }
-  return map;
-}
-
-std::unordered_map<std::string, int> ConeRewriter::preComputeReverseMultDepthsR(AbstractNode *root) {
-  std::unordered_map<std::string, int> map{};
+MultDepthMap ConeRewriter::preComputeReverseMultDepthsR(AbstractNode *root) {
+  MultDepthMap map{};
   // put all nodes of the AST starting at root in a vector (vis.v)
   GetAllNodesVisitor vis;
   root->accept(vis);
@@ -535,7 +525,7 @@ std::unordered_map<std::string, int> ConeRewriter::preComputeReverseMultDepthsR(
   return map;
 }
 
-int getMultDepthL(std::unordered_map<std::string, int> multiplicativeDepths, AbstractNode &n) {
+int getMultDepthL(MultDepthMap multiplicativeDepths, AbstractNode &n) {
   if (multiplicativeDepths.empty()) { return -1; }
   return multiplicativeDepths[n.getUniqueNodeId()];
 }

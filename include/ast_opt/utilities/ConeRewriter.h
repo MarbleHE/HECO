@@ -5,6 +5,7 @@
 #include "ast_opt/ast/AbstractNode.h"
 
 
+typedef std::unordered_map<std::string, int> MultDepthMap;
 class ConeRewriter {
  private:
 
@@ -21,7 +22,7 @@ class ConeRewriter {
   //  std::unordered_map<std::string, AbstractNode *> underlying_nodes;
 
 
-  /// Identify reducible cones in the (sub)tree defined by root
+  /// Identify a reducible cone in the (sub)tree defined by root
   /// Internal function, used recursively
   /// Implements the recursive cone construction algorithm [see Algorithm 1, page 8]:
   /// Multiplicative depth-2 cone rewrite operators require that at least one input of then v_i-nodes (see Fig 2: paper) is
@@ -49,8 +50,8 @@ class ConeRewriter {
   /// \param root node defining the ast
   /// \param v Starting node for the cone construction procedure.
   /// \param minDepth The minimal multiplicative depth to which cone search will be performed.
-  /// \return a reducible cone
-  static std::vector<AbstractNode *> getReducibleCones(AbstractNode &root, AbstractNode *v, int minDepth);
+  /// \return a vector of nodes making up the cone (a connected subset of the AST)
+  static std::vector<AbstractNode *> getReducibleCone(AbstractNode &root, AbstractNode *v, int minDepth);
 
   /// TODO: IMPLEMENT & DOCUMENT
   /// \param v
@@ -68,11 +69,11 @@ class ConeRewriter {
   //TODO: implement
   static std::unique_ptr<AbstractNode> rewriteAst(std::unique_ptr<AbstractNode> &&ast);
 
-  /// Identify reducible cones in the (sub)tree defined by root
+  /// Identify a reducible cone in the (sub)tree defined by root
   /// \param root Root node of the AST
-  /// \return A vector of nodes, each node defines a cone starting at root and ending at the node
+  /// \return A vector of nodes making up the cone (connected subset of the AST)
   //TODO: implement
-  static std::vector<AbstractNode *> getReducibleCones(AbstractNode &root);
+  static std::vector<AbstractNode *> getReducibleCone(AbstractNode &root);
 
   /// Creates the graph C^{AND} from Section 3.2 (p 10) from [Aubry, P. et al.: Faster Homomorphic Encryption Is Not Enough: Improved Heuristic for Multiplicative Depth
   ///  Minimization of Boolean Circuits. (2019)].
@@ -133,29 +134,22 @@ class ConeRewriter {
   /// The multiplicative depth is the max number of AND gates on any path beginning by an input node (leaf of AST) and ending
   /// in the node n.
   /// \param n Node of an AST
-  /// \param map (Optional) map already containing precomputed values
+  /// \param map map already containing precomputed values
   /// \return mult depth of the node n
-  int computeMultDepthL(AbstractNode *n, std::unordered_map<std::string, int> multiplicativeDepths = {});
-
-
-  /// Returns a map 'UniqueNodeId' to 'multiplicative depth' for all nodes n in an AST (defined by its root node).
-  /// Uses the function computeMultDepthL to compute multiplicative depths.
-  /// \param root
-  /// \return map UniqueNodeId to multDepth for all nodes in the ast
-  std::unordered_map<std::string, int> preComputeMultDepthsL(AbstractNode *root);
+  int computeMultDepthL(AbstractNode *n, MultDepthMap &map);
 
   /// Returns a map 'UniqueNodeId' to 'reversed multiplicative depth' for all nodes n in an AST (defined by its root node).
   /// Uses the function computeReversedMultDepthR to compute reverse multiplicative depths.
   /// \param root
   /// \return map UniqueNodeId to multDepth for all nodes in the ast
-  std::unordered_map<std::string, int> preComputeReverseMultDepthsR(AbstractNode *root);
+  MultDepthMap preComputeReverseMultDepthsR(AbstractNode *root);
 
   /// Returns multiplicative depth as precomputed in preComputeMultDepthsL for a given node
   /// \param multiplicativeDepths Mapping between nodes and their reversed depth
   /// \param n  Node to consider
   /// \return The multiplicative depth of the current node.
   //TODO: implement
-  int getMultDepthL(std::unordered_map<std::string, int> multiplicativeDepths, AbstractNode &n);
+  int getMultDepthL(MultDepthMap multiplicativeDepths, AbstractNode &n);
 
   /// Compute the (reverse) multiplicative depth r(n) for a node n of an AST based on the definition given in
   /// [Aubry, P. et al.: Faster Homomorphic Encryption Is Not Enough: Improved Heuristic for Multiplicative Depth
@@ -164,14 +158,14 @@ class ConeRewriter {
   /// \param root
   /// \param map (Optional) map already containing precomputed values
   /// \return revers multiplicative depth of the node n
-  int computeReversedMultDepthR(AbstractNode *n, std::unordered_map<std::string, int> multiplicativeDepthsReversed = {});
+  int computeReversedMultDepthR(AbstractNode *n, MultDepthMap multiplicativeDepthsReversed = {});
 
   /// Returns multiplicative depth as precomputed in preComputeMultDepth for a given node
   /// \param multiplicativeDepthsReversed Mapping between nodes and their reversed depth
   /// \param n  Node to consider
   /// \return The reverse multiplicative depth of the current node.
   //TODO: implement
-  int getReverseMultDepth(std::unordered_map<std::string, int> multiplicativeDepthsReversed, AbstractNode *n);
+  int getReverseMultDepth(MultDepthMap multiplicativeDepthsReversed, AbstractNode *n);
 
   /// Determine the value of this node (used for computing the multiplicative depth and reverse multiplicative depth)
   /// Returns 1 if n AND node, 0 otherwise.
