@@ -333,7 +333,7 @@ TEST(ConeRewriterTest, computeMinDepthTest) {
   ConeRewriter coneRewriter;
   MultDepthMap  map;
 
-  int minDepth = coneRewriter.computeMinDepth(&*astProgram, astProgram.get(), map);
+  int minDepth = coneRewriter.computeMinDepth(&*astProgram->begin()->begin(), astProgram.get(), map);
 
   ASSERT_EQ(minDepth, 1);
 }

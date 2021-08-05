@@ -304,9 +304,11 @@ std::unique_ptr<AbstractNode> ConeRewriter::rewriteCones(std::unique_ptr<Abstrac
 
 int ConeRewriter::computeMinDepth(AbstractNode *v, AbstractNode *ast, MultDepthMap map) {
   // find a non-critical input (child) node p of v
+  auto isNoOperatorNode = [](AbstractNode *n) { return (dynamic_cast<Operator *>(n)==nullptr); };
   for (auto &p : *v) {
-    if (!isCriticalNode(&p, ast) && (p.toString(false) == "&&" || p.toString(false) == "||")) {
-      return computeMultDepthL(&p, map);
+    if (!isCriticalNode(&p, ast) && isNoOperatorNode(&p)) {
+      //std::cout << "Noncrit input " << p.toString(false) << std::endl;
+      return computeMultDepthL(&p, map) + 1;
     }
   }
   // error (-1) if no non-critical child node
