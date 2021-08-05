@@ -302,6 +302,16 @@ TEST(ConeRewriterTest, testPreComputeReversedMultDepthsL) {
 }
 
 TEST(ConeRewriterTest, computeMinDepthTest) {
+  /// a    b  x   y
+  ///  \  /    \ /
+  ///   AND     OR
+  ///     \    /
+  ///       OR    c
+  ///         \  /
+  ///          1
+  ///           |
+  ///           r
+
   /// program specification
   /// v1 = a && b;
   /// u = v1 || (x || y);
@@ -322,10 +332,8 @@ TEST(ConeRewriterTest, computeMinDepthTest) {
 
   ConeRewriter coneRewriter;
 
-  int minDepth = coneRewriter.computeMinDepth(astProgram.get());
+  int minDepth = coneRewriter.computeMinDepth(&*astProgram->begin()->begin());
 
   ASSERT_EQ(minDepth, 1);
-
-
 }
 #endif

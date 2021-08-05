@@ -51,7 +51,7 @@ class ConeRewriter {
   /// \param v Starting node for the cone construction procedure.
   /// \param minDepth The minimal multiplicative depth to which cone search will be performed.
   /// \return a vector of nodes making up the cone (a connected subset of the AST)
-  static std::vector<AbstractNode *> getReducibleCone(AbstractNode &root, AbstractNode *v, int minDepth, MultDepthMap multiplicativeDepths);
+  std::vector<AbstractNode *> getReducibleCone(AbstractNode *root, AbstractNode *v, int minDepth, MultDepthMap multiplicativeDepths);
 
   /// TODO: IMPLEMENT & DOCUMENT
   /// \param v

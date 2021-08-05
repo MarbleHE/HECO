@@ -26,7 +26,7 @@ std::vector<AbstractNode *> ConeRewriter::getReducibleCone(AbstractNode &root /*
 
 }
 
-std::vector<AbstractNode *> ConeRewriter::getReducibleCone(AbstractNode &root,
+std::vector<AbstractNode *> ConeRewriter::getReducibleCone(AbstractNode *root,
                                                            AbstractNode *v,
                                                            int minDepth,
                                                            MultDepthMap multiplicativeDepths) {
@@ -56,7 +56,7 @@ std::vector<AbstractNode *> ConeRewriter::getReducibleCone(AbstractNode &root,
   std::vector<std::vector<AbstractNode *>> deltaR;
   std::vector<AbstractNode *> delta;
   for (auto &p : pvec) { //TODO continue: need computeMindepth
-   // std::vector<AbstractNode *> intermedResult = getReducibleCones(p, computeMinDepth(p));
+    //std::vector<AbstractNode *> intermedResult = getReducibleCone(root, p, computeMinDepth(p));
    // if (!intermedResult.empty()) deltaR.push_back(intermedResult);
   }
 
@@ -303,8 +303,11 @@ std::unique_ptr<AbstractNode> ConeRewriter::rewriteCones(std::unique_ptr<Abstrac
 }
 
 int ConeRewriter::computeMinDepth(AbstractNode *v) {
-  // find a non-critical input node p of v
-  
+  // find a non-critical input (child) node p of v
+  for (auto &p : *v) {
+   //TODO: continue
+  }
+
 
 
   return 0;
