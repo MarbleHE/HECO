@@ -336,4 +336,59 @@ TEST(ConeRewriterTest, computeMinDepthTest) {
 
   ASSERT_EQ(minDepth, 1);
 }
+
+TEST(ConeRewriterTest, isCriticalNodeTest) {
+
+  /// program specification
+  /// v1 = a && b;
+  /// u = v1 || (x || y);
+  /// vt = u && c;
+  const char *program = R""""(
+  return ((a && b) || (x || y)) && c;
+  )"""";
+  auto astProgram = Parser::parse(std::string(program));
+
+  // Rewrite BinaryExpressions to trivial OperatorExpressions
+  BinaryToOperatorExpressionVisitor v;
+  astProgram->accept(v);
+
+  std::stringstream ss;
+  ProgramPrintVisitor p(ss);
+  astProgram->accept(p);
+  std::cout << ss.str() << std::endl;
+
+  ConeRewriter coneRewriter;
+
+  bool isCriticalNode = coneRewriter.isCriticalNode(astProgram.get());
+
+  EXPECT_EQ(false, isCriticalNode);
+
+}
+
+TEST(ConeRewriterTest, getMaximumMultDepthTest) {
+  /// program specification
+  /// v1 = a && b;
+  /// u = v1 || (x || y);
+  /// vt = u && c;
+  const char *program = R""""(
+  return ((a && b) || (x || y)) && c;
+  )"""";
+  auto astProgram = Parser::parse(std::string(program));
+
+  // Rewrite BinaryExpressions to trivial OperatorExpressions
+  BinaryToOperatorExpressionVisitor v;
+  astProgram->accept(v);
+
+  std::stringstream ss;
+  ProgramPrintVisitor p(ss);
+  astProgram->accept(p);
+  std::cout << ss.str() << std::endl;
+
+  ConeRewriter coneRewriter;
+
+  int maximumMultDepth = coneRewriter.getMaximumMultDepth(astProgram.get());
+
+  EXPECT_EQ(2, maximumMultDepth);
+}
+
 #endif

@@ -115,18 +115,19 @@ class ConeRewriter {
   //TODO: implement
   int computeMinDepth(AbstractNode *v);
 
-  /// Returns the 'overall multiplicative depth' l^{max}, i.e the maximal multiplicative depth of its nodes.
+  /// Returns the 'maximum (overall) multiplicative depth' l^{max}, i.e the maximal multiplicative depth of its nodes.
   /// l^{max} = max_{v \in V} l(v) = max_{v \in V} r(v)
   /// \param root
+  /// \param map map of mult depths
   /// \return overall mult depth
   //TODO: implement
-  static int getOverallMultDepth(AbstractNode *root);
+  static int getMaximumMultDepth(AbstractNode *root, MultDepthMap map = {});
 
   /// Returns true if a node n is critical, i.e. if l(n) + r(n) = l^{max}, false otherwies
   /// \param n node of the AST
   /// \return bool
   //TODO: implement
-  bool isCriticalNode(AbstractNode *n);
+  bool isCriticalNode(AbstractNode *n, MultDepthMap map = {});
 
 
   /// Calculates the multiplicative depths l(n) for a node n of an AST starting at root (output) based on the definition given in
