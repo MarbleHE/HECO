@@ -1,5 +1,8 @@
 #include <set>
 #include <queue>
+#include <vector>
+#include  <random>
+#include <utility>
 #include "ast_opt/utilities/ConeRewriter.h"
 #include "ast_opt/ast/OperatorExpression.h"
 #include "ast_opt/ast/Variable.h"
@@ -75,7 +78,13 @@ std::vector<AbstractNode *> ConeRewriter::getReducibleCone(AbstractNode *root,
 
   if (v->toString(false) == "&&") {
     // both cones must be reducible because deltaR is non-empty -> pick a random one, and assign to delta
-   //TODO continue
+    delta = deltaR[rand() % deltaR.size()];
+  } else if (v->toString(false) == "||") {
+    // critical cones must be reducible because size of deltaR equals size of P
+    // flatten vector deltaR consisting of sets generated each by getReducibleCones
+    std::vector<AbstractNode *> flattenedDeltaR;
+    // TODO continue here
+    
   }
 
 }
