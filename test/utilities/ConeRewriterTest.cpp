@@ -182,7 +182,7 @@ TEST(ConeRewriterTest, testReversedMultDepth) {
 
   MultDepthMap depthMap;
   int depth = coneRewriter.computeReversedMultDepthR(astProgram
-                                                         .get());  // compute mult depth map for the root node of the AST (should be 2)
+                                                         .get(), depthMap, nullptr);  // compute mult depth map for the root node of the AST (should be 2)
   //depthMap = coneRewriter.preComputeMultDepthsL(astProgram.get());
   ASSERT_EQ(depth, 0);
 }
@@ -245,7 +245,8 @@ TEST(ConeRewriterTest, testPreComputeReversedMultDepthsL) {
 
   ConeRewriter coneRewriter;
 
-  MultDepthMap map = coneRewriter.preComputeReverseMultDepthsR(astProgram.get());
+  MultDepthMap map;
+  coneRewriter.computeReversedMultDepthR(astProgram.get(), map, nullptr);
 
   GetAllNodesVisitor vis;
   astProgram->accept(vis);

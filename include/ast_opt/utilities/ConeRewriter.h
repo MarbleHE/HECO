@@ -138,11 +138,6 @@ class ConeRewriter {
   /// \return mult depth of the node n
   int computeMultDepthL(AbstractNode *n, MultDepthMap &map);
 
-  /// Returns a map 'UniqueNodeId' to 'reversed multiplicative depth' for all nodes n in an AST (defined by its root node).
-  /// Uses the function computeReversedMultDepthR to compute reverse multiplicative depths.
-  /// \param root
-  /// \return map UniqueNodeId to multDepth for all nodes in the ast
-  MultDepthMap preComputeReverseMultDepthsR(AbstractNode *root);
 
   /// Returns multiplicative depth as precomputed in preComputeMultDepthsL for a given node
   /// \param multiplicativeDepths Mapping between nodes and their reversed depth
@@ -155,10 +150,11 @@ class ConeRewriter {
   /// [Aubry, P. et al.: Faster Homomorphic Encryption Is Not Enough: Improved Heuristic for Multiplicative Depth
   /// The reverse multiplicative depth is the maximum number of AND gates on any path beginning by a parent of n and ending with a
   /// root node (output).
-  /// \param root
-  /// \param map (Optional) map already containing precomputed values
-  /// \return revers multiplicative depth of the node n
-  int computeReversedMultDepthR(AbstractNode *n, MultDepthMap multiplicativeDepthsReversed = {});
+  /// \param n node to compute depth for
+  /// \param map contains precomputed values
+  /// \param root (Optional) root of a subtree to consider. AST root used if left as nullptr
+  /// \return revers multiplicative depth of the node n relative to root
+  int computeReversedMultDepthR(AbstractNode *n, MultDepthMap &multiplicativeDepthsReversed, AbstractNode *root = nullptr);
 
   /// Returns multiplicative depth as precomputed in preComputeMultDepth for a given node
   /// \param multiplicativeDepthsReversed Mapping between nodes and their reversed depth

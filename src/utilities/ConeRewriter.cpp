@@ -486,7 +486,11 @@ int ConeRewriter::computeMultDepthL(AbstractNode *n, MultDepthMap &map) {
 }
 
 int ConeRewriter::computeReversedMultDepthR(AbstractNode *n,
-                                            MultDepthMap multiplicativeDepthsReversed) {
+                                            MultDepthMap &multiplicativeDepthsReversed,
+                                            AbstractNode *root) {
+
+  //TODO: Stop at root, not just follow until no more parent
+  //   if root is nullptr, just keep going!
 
 // check if we have calculated the reverse multiplicative depth previously
   if (!multiplicativeDepthsReversed.empty()) {
@@ -507,22 +511,10 @@ int ConeRewriter::computeReversedMultDepthR(AbstractNode *n,
   // otherwise compute the reverse depth
   int max = 0;
   int uDepthR;
-  uDepthR = computeReversedMultDepthR(nextNodeToConsider);
+  MultDepthMap m;
+  uDepthR = computeReversedMultDepthR(nextNodeToConsider, m, nullptr);
   if (uDepthR > max) { max = uDepthR; }
   return max + depthValue(nextNodeToConsider);
-}
-
-MultDepthMap ConeRewriter::preComputeReverseMultDepthsR(AbstractNode *root) {
-  MultDepthMap map{};
-  // put all nodes of the AST starting at root in a vector (vis.v)
-  GetAllNodesVisitor vis;
-  root->accept(vis);
-
-  // calculate the multiplicative depth for each node of the AST
-  for (auto &node : vis.v) {
-    map[node->getUniqueNodeId()] = computeReversedMultDepthR(node);
-  }
-  return map;
 }
 
 int getMultDepthL(MultDepthMap multiplicativeDepths, AbstractNode &n) {
