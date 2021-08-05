@@ -13,6 +13,8 @@
 
 #ifdef HAVE_SEAL_BFV
 
+
+
 TEST(ConeRewriterTest, testConeRewrNoChange) { /* NOLINT */
 
   /// ||(false,true,false,true,false,true,false,true,false,true)
@@ -76,6 +78,18 @@ TEST(ConeRewriterTest, getReducibleCone) {
 /// "Aubry, P. et al. 2019. Faster Homomorphic Encryption is not Enough:
 /// Improved Heuristic for Multiplicative Depth Minimization of Boolean Circuits.
 /// Cryptology ePrint Archive, Report 2019/963."
+/// AST we are testing on:
+/// a    b  x   y
+///  \  /    \ /
+///   AND     OR
+///     \    /
+///       OR    c
+///         \  /
+///          AND
+///           |
+///           r
+
+
 TEST(ConeRewriterTest, testConeRewrPaperTree) {
   /// program specification
   /// v1 = a && b;
@@ -128,6 +142,16 @@ TEST(ConeRewriterTest, testConeRewrPaperTree) {
 }
 
 TEST(ConeRewriterTest, testMultDepth) {
+  /// excpected mult depths:
+  /// a    b  x   y
+  ///  \  /    \ /
+  ///    1      0
+  ///     \   /
+  ///       1    c
+  ///        \  /
+  ///          2
+  ///          |
+  ///          r
 
   /// program specification
   /// v1 = a && b;
@@ -158,7 +182,16 @@ TEST(ConeRewriterTest, testMultDepth) {
 }
 
 TEST(ConeRewriterTest, testReversedMultDepth) {
-
+  /// excpected reversed mult depths:
+  /// a    b  x   y
+  ///  \  /    \ /
+  ///    1      1
+  ///     \   /
+  ///       1    c
+  ///        \  /
+  ///          0
+  ///          |
+  ///          r
 
   /// program specification
   /// v1 = a && b;
