@@ -359,7 +359,7 @@ TEST(ConeRewriterTest, isCriticalNodeTest) {
 
   ConeRewriter coneRewriter;
 
-  bool isCriticalNode = coneRewriter.isCriticalNode(astProgram.get());
+  bool isCriticalNode = coneRewriter.isCriticalNode(astProgram.get(), astProgram.get());
 
   EXPECT_EQ(false, isCriticalNode);
 

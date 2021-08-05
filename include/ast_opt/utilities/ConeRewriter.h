@@ -125,9 +125,9 @@ class ConeRewriter {
 
   /// Returns true if a node n is critical, i.e. if l(n) + r(n) = l^{max}, false otherwies
   /// \param n node of the AST
+  /// \param ast root node defining the AST
   /// \return bool
-  //TODO: implement
-  bool isCriticalNode(AbstractNode *n, MultDepthMap map = {});
+  bool isCriticalNode(AbstractNode *n, AbstractNode *ast, MultDepthMap map = {});
 
 
   /// Calculates the multiplicative depths l(n) for a node n of an AST starting at root (output) based on the definition given in

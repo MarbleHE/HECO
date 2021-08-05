@@ -313,12 +313,11 @@ int ConeRewriter::computeMinDepth(AbstractNode *v) {
   return 0;
 }
 
-bool ConeRewriter::isCriticalNode(AbstractNode *n, MultDepthMap map) {
+bool ConeRewriter::isCriticalNode(AbstractNode *n, AbstractNode *ast, MultDepthMap map) {
 
   int l = computeMultDepthL(n, map);
   int r = computeReversedMultDepthR(n, map);
-  // return getMaximumMultDepth() == l + r;
-  return false;
+  return (getMaximumMultDepth(ast) == l + r);
 }
 
 int ConeRewriter::getMultDepth(AbstractNode *n) {
@@ -437,91 +436,3 @@ int getMultDepthL(MultDepthMap multiplicativeDepths, AbstractNode &n) {
   return multiplicativeDepths[n.getUniqueNodeId()];
 }
 
-//std::vector<AbstractNode *> *ConeRewriter::getPredecessorOnCriticalPath(AbstractNode *v) {
-//  // P <- { p ∈ pred(v) | l(p) = l(v) - d(v) }
-//  auto result = new std::vector<AbstractNode *>();
-//  int criterion = getMultDepthL(v) - depthValue(v);
-//  std::for_each(v->begin(), v->end(), [&](AbstractNode &p) {
-//    if (getMultDepthL(&p)==criterion) result->push_back(&p);
-//  });
-//  return result;
-//}
-//
-//DepthMapEntry ConeRewriter::getInitialDepthOrNull(AbstractNode *node) {
-//  auto nodeAsVar = dynamic_cast<Variable *>(node);
-//  if (nodeAsVar!=nullptr && initialMultiplicativeDepths.count(nodeAsVar->getIdentifier()) > 0) {
-//    return initialMultiplicativeDepths.at(nodeAsVar->getIdentifier());
-//  }
-//  return DepthMapEntry(0, 0);
-//}
-//
-//void ConeRewriter::precomputeMultDepths(AbstractNode *ast) {
-//  // precompute the AST's multiplicative depth and reverse multiplicative depth
-//  multiplicativeDepths.clear();
-//  multiplicativeDepthsReversed.clear();
-//
-//  GetAllNodesVisitor vis;
-//  ast->accept(vis);
-//
-//  //std::cout<< "Allnodes: " << vis.v[0]->toString(false);
-//
-//  for (auto &node : vis.v) {
-//    getMultDepthL(node);
-//    getReverseMultDepthR(node);
-//  }
-//
-//  // determine the AST's maximum multiplicative depth
-//  maximumMultiplicativeDepth = std::max_element(
-//      multiplicativeDepths.begin(), multiplicativeDepths.end(),
-//      [](const std::pair<const std::basic_string<char>, int> &a,
-//         const std::pair<const std::basic_string<char>, int> &b) {
-//        return a.second < b.second;
-//      })->second;
-//}
-//
-//int ConeRewriter::getMaximumMultiplicativeDepth() {
-//  return maximumMultiplicativeDepth;
-//}
-//
-//DepthMapEntry::DepthMapEntry(int multiplicativeDepth, int reverseMultiplicativeDepth) : multiplicativeDepth(
-//    multiplicativeDepth), reverseMultiplicativeDepth(reverseMultiplicativeDepth) {}
-//
-//std::pair<AbstractNode *, AbstractNode *> ConeRewriter::getCriticalAndNonCriticalInput(BinaryExpression *logicalExpr) {
-//  // check which of the two inputs is critical
-//  bool leftIsCritical = isCriticalNode(&logicalExpr->getLeft());
-//  bool rightIsCritical = isCriticalNode(&logicalExpr->getRight());
-//
-//  // throw exceptions if both are critical or neither of both is critical
-//  if (leftIsCritical && rightIsCritical) {
-//    throw std::invalid_argument("Cannot rewrite given AST because input of cone's end node are both critical!");
-//  } else if (!leftIsCritical && !rightIsCritical) {
-//    throw std::invalid_argument("Neither input left nor input right are critical nodes!");
-//  }
-//
-//  // return a pair of <critical input, non-critical input>
-//  return (leftIsCritical ? std::make_pair(&logicalExpr->getLeft(), &logicalExpr->getRight())
-//                         : std::make_pair(&logicalExpr->getRight(), &logicalExpr->getLeft()));
-//}
-//
-//bool ConeRewriter::isCriticalNode(AbstractNode *n) {
-//  int l = mdc.getMultDepthL(n);
-//  int r = mdc.getReverseMultDepthR(n);
-//  return (mdc.getMaximumMultiplicativeDepth()==l + r);
-//}
-//
-//std::pair<AbstractNode *, AbstractNode *> ConeRewriter::getCriticalAndNonCriticalInput(BinaryExpression *logicalExpr) {
-//  // check which of the two inputs is critical
-//  bool leftIsCritical = isCriticalNode(&logicalExpr->getLeft());
-//  bool rightIsCritical = isCriticalNode(&logicalExpr->getRight());
-//
-//  // throw exceptions if both are critical or neither of both is critical
-//  if (leftIsCritical && rightIsCritical) {
-//    throw std::invalid_argument("Cannot rewrite given AST because input of cone's end node are both critical!");
-//  } else if (!leftIsCritical && !rightIsCritical) {
-//    throw std::invalid_argument("Neither input left nor input right are critical nodes!");
-//  }
-//
-//  // return a pair of <critical input, non-critical input>
-//  return (leftIsCritical ? std::make_pair(&logicalExpr->getLeft(), &logicalExpr->getRight())
-//                         : std::make_pair(&logicalExpr->getRight(), &logicalExpr->getLeft()));
-//}
