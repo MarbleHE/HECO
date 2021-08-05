@@ -78,14 +78,14 @@ TEST(ConeRewriterTest, getReducibleCone) {
 /// "Aubry, P. et al. 2019. Faster Homomorphic Encryption is not Enough:
 /// Improved Heuristic for Multiplicative Depth Minimization of Boolean Circuits.
 /// Cryptology ePrint Archive, Report 2019/963."
-/// AST we are testing on:
+/// Expected output of test (node marked by (*)) //TODO: check with alex
 /// a    b  x   y
 ///  \  /    \ /
 ///   AND     OR
 ///     \    /
 ///       OR    c
 ///         \  /
-///          AND
+///          AND(*)
 ///           |
 ///           r
 
