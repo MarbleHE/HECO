@@ -55,9 +55,27 @@ std::vector<AbstractNode *> ConeRewriter::getReducibleCone(AbstractNode *root,
   // determine reducible input cones
   std::vector<std::vector<AbstractNode *>> deltaR;
   std::vector<AbstractNode *> delta;
-  for (auto &p : pvec) { //TODO continue: need to fix computeMindepth
-    //std::vector<AbstractNode *> intermedResult = getReducibleCone(root, p, computeMinDepth(p));
-   // if (!intermedResult.empty()) deltaR.push_back(intermedResult);
+  for (auto &p : pvec) {
+    std::vector<AbstractNode *> intermedResult = getReducibleCone(root, p, computeMinDepth(p, root, multiplicativeDepths), multiplicativeDepths);
+    if (!intermedResult.empty()) deltaR.push_back(intermedResult);
+  }
+
+  // return empty set if either one of the following is true:
+  // a. v is not a LogicalExpr
+  // b. v is a LogicalExpr but not an AND- or XOR-gate
+  // b. v is an AND-gate and deltaR is empty
+  // c. v is a XOR-gate and size of deltaR does not equal size of Pvec (P)
+  if (v==nullptr ||
+      !(v->toString(false) == "&&"
+          || v->toString(false) == "||") ||
+      (v->toString(false) == "&&" && deltaR.empty()) ||
+      (v->toString(false) == "||" && deltaR.size()!=pvec.size())) {
+    return std::vector<AbstractNode *>();
+  }
+
+  if (v->toString(false) == "&&") {
+    // both cones must be reducible because deltaR is non-empty -> pick a random one, and assign to delta
+   //TODO continue
   }
 
 }
