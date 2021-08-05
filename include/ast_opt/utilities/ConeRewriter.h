@@ -4,11 +4,6 @@
 #include "ast_opt/ast/BinaryExpression.h"
 #include "ast_opt/ast/AbstractNode.h"
 
-struct DepthMapEntry {
-  int multiplicativeDepth;
-  int reverseMultiplicativeDepth;
-  DepthMapEntry(int multiplicativeDepth, int reverseMultiplicativeDepth);
-};
 
 class ConeRewriter {
  private:
@@ -139,8 +134,13 @@ class ConeRewriter {
   /// Uses the function computeMultDepthL to compute multiplicative depths.
   /// \param root
   /// \return map UniqueNodeId to multDepth for all nodes in the ast
-  //TODO: fix and add reverse mult depths as well
   std::unordered_map<std::string, int> preComputeMultDepthsL(AbstractNode *root);
+
+  /// Returns a map 'UniqueNodeId' to 'reversed multiplicative depth' for all nodes n in an AST (defined by its root node).
+  /// Uses the function computeReversedMultDepthR to compute reverse multiplicative depths.
+  /// \param root
+  /// \return map UniqueNodeId to multDepth for all nodes in the ast
+  std::unordered_map<std::string, int> preComputeReverseMultDepthsR(AbstractNode *root);
 
 
   /// Returns multiplicative depth as precomputed in preComputeMultDepthsL for a given node
@@ -156,9 +156,9 @@ class ConeRewriter {
   /// \param root
   /// \param map (Optional) map already containing precomputed values
   /// \return revers multiplicative depth of the node n
- int computeReverseMultDepthR(AbstractNode *n, std::unordered_map<std::string, int> multiplicativeDepthsReversed = {});
+  int computeReversedMultDepthR(AbstractNode *n, std::unordered_map<std::string, int> multiplicativeDepthsReversed = {});
 
-  /// Returns multiplicative depth as precomputed in computeReverseMultDepth for a given node
+  /// Returns multiplicative depth as precomputed in preComputeMultDepth for a given node
   /// \param multiplicativeDepthsReversed Mapping between nodes and their reversed depth
   /// \param n  Node to consider
   /// \return The reverse multiplicative depth of the current node.

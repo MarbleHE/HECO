@@ -426,7 +426,7 @@ int ConeRewriter::getMultDepth(AbstractNode *n) {
   return 0;
 }
 
-int computeReverseMultDepthR(AbstractNode *n, std::unordered_map<std::string, int> multiplicativeDepthsReversed) {
+int ConeRewriter::computeReversedMultDepthR(AbstractNode *n, std::unordered_map<std::string, int> multiplicativeDepthsReversed) {
 
 // check if we have calculated the reverse multiplicative depth previously
   if (!multiplicativeDepthsReversed.empty()) {
@@ -435,22 +435,22 @@ int computeReverseMultDepthR(AbstractNode *n, std::unordered_map<std::string, in
       return it->second;
   }
 
-  AbstractNode& nextNodeToConsider = n->getParent();
+  AbstractNode *nextNodeToConsider;
 
   // if root node, the reverse multiplicative depth is 0
-  if (&nextNodeToConsider==nullptr) {
+  if (!n->hasParent()) {
     return 0;
   }
+  else {
+    nextNodeToConsider = &n->getParent();
+  }
 
-  //TODO
- // otherwise compute the reverse depth
+  // otherwise compute the reverse depth
   int max = 0;
   int uDepthR;
-
-
-
-//  return multiplicativeDepthsReversed;
-  return 0;
+  uDepthR = computeReversedMultDepthR(nextNodeToConsider);
+  if (uDepthR > max) {max = uDepthR;}
+  return max + depthValue(nextNodeToConsider);
 }
 
 int ConeRewriter::getReverseMultDepth(std::unordered_map<std::string, int> multiplicativeDepthsReversed,
@@ -509,7 +509,7 @@ int ConeRewriter::computeMultDepthL(AbstractNode *n, std::unordered_map<std::str
   return max + depthValue(n);
 }
 
-std::unordered_map<std::string, int> preComputeMultDepthsL(AbstractNode *root) {
+std::unordered_map<std::string, int> ConeRewriter::preComputeMultDepthsL(AbstractNode *root) {
 
   std::unordered_map<std::string, int> map{};
   // put all nodes of the AST starting at root in a vector (vis.v)
@@ -518,9 +518,8 @@ std::unordered_map<std::string, int> preComputeMultDepthsL(AbstractNode *root) {
 
   // calculate the multiplicative depth for each node of the AST
   for (auto &node : vis.v) {
-    // map[node->getUniqueNodeId()] = computeMultDepthL(node); // TODO: fix not sure why this wont work
+     map[node->getUniqueNodeId()] = computeMultDepthL(node);
   }
-
   return map;
 }
 
