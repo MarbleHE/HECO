@@ -14,6 +14,20 @@
 #ifdef HAVE_SEAL_BFV
 
 
+/// Test based on Figure 1 of
+/// "Aubry, P. et al. 2019. Faster Homomorphic Encryption is not Enough:
+/// Improved Heuristic for Multiplicative Depth Minimization of Boolean Circuits.
+/// Cryptology ePrint Archive, Report 2019/963.
+/// a    b  x   y
+///  \  /    \ /
+///   AND     OR
+///     \    /
+///       OR    c
+///         \  /
+///          AND
+///           |
+///           r
+
 
 TEST(ConeRewriterTest, testConeRewrNoChange) { /* NOLINT */
 
@@ -43,6 +57,17 @@ TEST(ConeRewriterTest, testConeRewrNoChange) { /* NOLINT */
 }
 
 TEST(ConeRewriterTest, getReducibleCone) {
+  /// Expected output of test (node marked by (*)) //TODO: check with alex
+  ///  a    b  x   y
+  ///   \  /    \ /
+  ///   AND     OR
+  ///     \    /
+  ///      OR    c
+  ///       \  /
+  ///       AND(*)
+  ///         |
+  ///         r
+
   /// program specification
   /// v1 = a && b;
   /// u = v1 || (x || y);
@@ -70,25 +95,9 @@ TEST(ConeRewriterTest, getReducibleCone) {
     std::cout << n->toString(false) << std::endl;
   }
 
-  //TODO: Figure out what the reducible cones in this test should be!
-  EXPECT_EQ(true, false);
+  //TODO: check if this is right (Go through algo with alex)
+  EXPECT_EQ(cones[0]->getUniqueNodeId(), astProgram->getUniqueNodeId());
 }
-
-/// Test based on Figure 1 of
-/// "Aubry, P. et al. 2019. Faster Homomorphic Encryption is not Enough:
-/// Improved Heuristic for Multiplicative Depth Minimization of Boolean Circuits.
-/// Cryptology ePrint Archive, Report 2019/963."
-/// Expected output of test (node marked by (*)) //TODO: check with alex
-/// a    b  x   y
-///  \  /    \ /
-///   AND     OR
-///     \    /
-///       OR    c
-///         \  /
-///          AND(*)
-///           |
-///           r
-
 
 TEST(ConeRewriterTest, testConeRewrPaperTree) {
   /// program specification
@@ -292,4 +301,31 @@ TEST(ConeRewriterTest, testPreComputeReversedMultDepthsL) {
 
 }
 
+TEST(ConeRewriterTest, computeMinDepthTest) {
+  /// program specification
+  /// v1 = a && b;
+  /// u = v1 || (x || y);
+  /// vt = u && c;
+  const char *program = R""""(
+  return ((a && b) || (x || y)) && c;
+  )"""";
+  auto astProgram = Parser::parse(std::string(program));
+
+  // Rewrite BinaryExpressions to trivial OperatorExpressions
+  BinaryToOperatorExpressionVisitor v;
+  astProgram->accept(v);
+
+  std::stringstream ss;
+  ProgramPrintVisitor p(ss);
+  astProgram->accept(p);
+  std::cout << ss.str() << std::endl;
+
+  ConeRewriter coneRewriter;
+
+  int minDepth = coneRewriter.computeMinDepth(astProgram.get());
+
+  ASSERT_EQ(minDepth, 1);
+
+
+}
 #endif

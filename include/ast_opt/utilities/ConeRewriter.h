@@ -51,7 +51,7 @@ class ConeRewriter {
   /// \param v Starting node for the cone construction procedure.
   /// \param minDepth The minimal multiplicative depth to which cone search will be performed.
   /// \return a vector of nodes making up the cone (a connected subset of the AST)
-  static std::vector<AbstractNode *> getReducibleCone(AbstractNode &root, AbstractNode *v, int minDepth);
+  static std::vector<AbstractNode *> getReducibleCone(AbstractNode &root, AbstractNode *v, int minDepth, MultDepthMap multiplicativeDepths);
 
   /// TODO: IMPLEMENT & DOCUMENT
   /// \param v
@@ -108,7 +108,8 @@ class ConeRewriter {
   /////////////////////////////////////////////////////
 
   /// Computes minDepth parameter required for cone selection algorithm
-  /// We use a minDepth value equal to l(p) + 1, where p is the non-critical input of node v.
+  /// We use a minDepth value equal to l(p) + 1, where p is the NON-critical input of node v.
+  /// A node p is critical if l(p) + r(p) = l^{max}
   /// \param v node
   /// \return minDepth value
   //TODO: implement
@@ -136,7 +137,7 @@ class ConeRewriter {
   /// \param n Node of an AST
   /// \param map map already containing precomputed values
   /// \return mult depth of the node n
-  int computeMultDepthL(AbstractNode *n, MultDepthMap &map);
+  static int computeMultDepthL(AbstractNode *n, MultDepthMap &map);
 
 
   /// Returns multiplicative depth as precomputed in preComputeMultDepthsL for a given node
