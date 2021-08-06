@@ -135,8 +135,12 @@ class AbstractNode {
   /// Because one should not call this on a node that one isn't also modifying
   /// by adding this node as a child
   /// \param newParent The new parent
-  /// \throws std::logic_error if this node already has a parent
   void setParent(AbstractNode &newParent);
+
+  /// Set the parent of this node.
+  /// Derived classes must ensure that a node's parent has the node as its child!
+  /// \param newParent The new parent
+  void setParent(AbstractNode* newParent);
 
   /// Generically replaces a child node with a different node.
   /// This is computationally inefficient, iterating through all children and searching for a match
