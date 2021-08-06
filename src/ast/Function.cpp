@@ -53,7 +53,7 @@ Function &Function::operator=(Function &&other) noexcept {
   body = std::move(other.body);
   return *this;
 }
-std::unique_ptr<Function> Function::clone(AbstractNode* parent_) const {
+std::unique_ptr<Function> Function::clone(AbstractNode *parent_) const {
   return std::unique_ptr<Function>(clone_impl(parent_));
 }
 
@@ -91,9 +91,9 @@ Block &Function::getBody() {
 ///////////////////////////////////////////////
 ////////// AbstractNode Interface /////////////
 ///////////////////////////////////////////////
-Function *Function::clone_impl(AbstractNode* parent_) const {
+Function *Function::clone_impl(AbstractNode *parent_) const {
   auto p = new Function(*this);
-  if(parent_) {p->setParent(*parent_);}
+  if (parent_) { p->setParent(*parent_); }
   return p;
 }
 
@@ -169,8 +169,11 @@ std::unique_ptr<AbstractNode> Function::replaceChild(const AbstractNode &child,
   if (body && &child==&*body) {
     auto t = std::move(body);
     if (!dynamic_pointer_move(body, new_child)) {
+      body = std::move(t);
       throw std::runtime_error("Cannot replace child: Types not compatible");
     }
+    t->setParent(nullptr);
+    body->setParent(this);
     return t;
   }
 
@@ -178,8 +181,11 @@ std::unique_ptr<AbstractNode> Function::replaceChild(const AbstractNode &child,
     if (p && &child==&*p) {
       auto t = std::move(p);
       if (!dynamic_pointer_move(p, new_child)) {
+        p = std::move(t);
         throw std::runtime_error("Cannot replace child: Types not compatible");
       }
+      t->setParent(nullptr);
+      p->setParent(this);
       return t;
     }
   }

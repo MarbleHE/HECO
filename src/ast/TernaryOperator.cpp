@@ -160,20 +160,29 @@ std::unique_ptr<AbstractNode> TernaryOperator::replaceChild(const AbstractNode &
   if (condition && &child==&*condition) {
     auto t = std::move(condition);
     if (!dynamic_pointer_move(condition, new_child)) {
+      condition = std::move(t);
       throw std::runtime_error("Cannot replace child: Types not compatible");
     }
+    t->setParent(nullptr);
+    condition->setParent(this);
     return t;
   } else if (thenExpr && &child==&*thenExpr) {
     auto t = std::move(thenExpr);
     if (!dynamic_pointer_move(thenExpr, new_child)) {
+      thenExpr = std::move(t);
       throw std::runtime_error("Cannot replace child: Types not compatible");
     }
+    t->setParent(nullptr);
+    thenExpr->setParent(this);
     return t;
   } else if (elseExpr && &child==&*elseExpr) {
     auto t = std::move(elseExpr);
     if (!dynamic_pointer_move(elseExpr, new_child)) {
+      elseExpr = std::move(t);
       throw std::runtime_error("Cannot replace child: Types not compatible");
     }
+    t->setParent(nullptr);
+    elseExpr->setParent(this);
     return t;
   } else {
     throw std::runtime_error("Cannot replace child: not found!");

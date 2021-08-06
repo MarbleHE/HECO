@@ -164,8 +164,11 @@ std::unique_ptr<AbstractNode> OperatorExpression::replaceChild(const AbstractNod
     if (o && &child==&*o) {
       auto t = std::move(o);
       if (!dynamic_pointer_move(o, new_child)) {
+        o = std::move(t);
         throw std::runtime_error("Cannot replace child: Types not compatible");
       }
+      t->setParent(nullptr);
+      o->setParent(this);
       return t;
     }
   }

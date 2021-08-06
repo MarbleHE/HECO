@@ -127,8 +127,11 @@ std::unique_ptr<AbstractNode> UnaryExpression::replaceChild(const AbstractNode &
   if (operand && &child==&*operand) {
     auto t = std::move(operand);
     if (!dynamic_pointer_move(operand, new_child)) {
+      operand = std::move(t)M;
       throw std::runtime_error("Cannot replace child: Types not compatible");
     }
+    t->setParent(nullptr);
+    operand->setParent(this);
     return t;
   } else {
     throw std::runtime_error("Cannot replace child: not found!");

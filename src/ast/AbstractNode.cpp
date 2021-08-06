@@ -30,6 +30,10 @@ void AbstractNode::setParent(AbstractNode &newParent) {
 //  }
 }
 
+void AbstractNode::setParent(AbstractNode *newParent) {
+  parent = newParent;
+}
+
 bool AbstractNode::hasParent() const {
   return parent!=nullptr;
 }
