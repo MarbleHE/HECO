@@ -5,12 +5,8 @@
 #include "ast_opt/ast/AbstractNode.h"
 
 
-struct MultDepth{
-  int forward;
-  int reverse;
-};
+typedef std::unordered_map<std::string, int> MultDepthMap;
 
-typedef std::unordered_map<std::string, int> MultDepthMap; //Todo: replace the int with MultDepth struct to have both in the same!
 class ConeRewriter {
  private:
 
@@ -125,7 +121,7 @@ class ConeRewriter {
   /// \param n node of the AST
   /// \param ast root node defining the AST
   /// \return bool
-  static bool isCriticalNode(AbstractNode *n, AbstractNode *ast, MultDepthMap map = {});
+  static bool isCriticalNode(AbstractNode *n, AbstractNode *ast, MultDepthMap multDepthmap = {}, MultDepthMap reversedMultDepthsMap = {});
 
 
   /// Calculates the multiplicative depths l(n) for a node n of an AST starting at root (output) based on the definition given in
@@ -136,7 +132,7 @@ class ConeRewriter {
   /// \param n Node of an AST
   /// \param map map already containing precomputed values
   /// \return mult depth of the node n
-  static int computeMultDepthL(AbstractNode *n, MultDepthMap &map);
+  static int computeMultDepthL(AbstractNode *n, MultDepthMap &multDepthMap);
 
 
   /// Returns multiplicative depth as precomputed in preComputeMultDepthsL for a given node
@@ -179,7 +175,7 @@ class ConeRewriter {
 //  std::pair<AbstractNode *, AbstractNode *> getCriticalAndNonCriticalInput(BinaryExpression *logicalExpr);
 //  std::pair<AbstractNode *, AbstractNode *> getCriticalAndNonCriticalInput(LogicalOp *logicalExpr);
 //  std::pair<AbstractNode *, AbstractNode *> getCriticalAndNonCriticalInput(BinaryExpression *logicalExpr);
-//  bool isCriticalNode(AbstractNode *n);
+
   static int getMultDepth(AbstractNode *n);
   static void flattenVectors(std::vector<AbstractNode *> &resultVector,
                       std::vector<std::vector<AbstractNode *>> vectorOfVectors);

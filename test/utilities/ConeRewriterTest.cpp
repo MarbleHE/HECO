@@ -253,13 +253,13 @@ TEST(ConeRewriterTest, testComputeAllDepths) {
   astProgram->begin()->begin()->accept(vis);
 
   ConeRewriter coneRewriter;
-  MultDepthMap map;
+  MultDepthMap multDepths;
   for (auto n : vis.v) {
-    coneRewriter.computeMultDepthL(n, map);
+    coneRewriter.computeMultDepthL(n, multDepths);
   }
 
   for (auto n : vis.v) {
-    std::cout << "Node: " << n->toString(false) << " MultDepth: " << map[n->getUniqueNodeId()] << std::endl;
+    std::cout << "Node: " << n->toString(false) << " MultDepth: " << multDepths[n->getUniqueNodeId()] << std::endl;
   }
 
   //TODO: compare against list of hand-computed multdepths!

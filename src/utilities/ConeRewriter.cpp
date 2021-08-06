@@ -347,10 +347,10 @@ int ConeRewriter::computeMinDepth(AbstractNode *v, AbstractNode *ast, MultDepthM
   return -1;
 }
 
-bool ConeRewriter::isCriticalNode(AbstractNode *n, AbstractNode *ast, MultDepthMap map) {
-  int l = computeMultDepthL(n, map);
-  int r = computeReversedMultDepthR(n, map); //TODO: THIS SHOULD USE TWO MAPS, NOT THE SAME ONE!!!
-  return (getMaximumMultDepth(ast)==l + r);
+bool ConeRewriter::isCriticalNode(AbstractNode *n, AbstractNode *ast, MultDepthMap multDepthmap, MultDepthMap reversedMultDepthsMap) {
+  int l = computeMultDepthL(n, multDepthmap);
+  int r = computeReversedMultDepthR(n, reversedMultDepthsMap);
+  return (getMaximumMultDepth(ast) == l + r);
 }
 
 int ConeRewriter::getMultDepth(AbstractNode *n) {
@@ -380,15 +380,15 @@ int ConeRewriter::depthValue(AbstractNode *n) {
   return 0;
 }
 
-int ConeRewriter::computeMultDepthL(AbstractNode *n, MultDepthMap &map) {
+int ConeRewriter::computeMultDepthL(AbstractNode *n, MultDepthMap &multDepthMap) {
 
   // Only continue if n is non-null
   if (n==nullptr) return 0;
 
   // check if we have calculated the multiplicative depth previously
-  if (!map.empty()) {
-    auto it = map.find(n->getUniqueNodeId());
-    if (it!=map.end())
+  if (!multDepthMap.empty()) {
+    auto it = multDepthMap.find(n->getUniqueNodeId());
+    if (it!=multDepthMap.end())
       return it->second;
   }
 
@@ -413,21 +413,21 @@ int ConeRewriter::computeMultDepthL(AbstractNode *n, MultDepthMap &map) {
     if (uDepth > max) { max = uDepth; } // update maximum if necessary
   }
   auto r = max + depthValue(n);
-  map.insert_or_assign(n->getUniqueNodeId(), r);
+  multDepthMap.insert_or_assign(n->getUniqueNodeId(), r);
   return r;
 }
 
 int ConeRewriter::computeReversedMultDepthR(AbstractNode *n,
-                                            MultDepthMap &multiplicativeDepthsReversed,
+                                            MultDepthMap &multiplicativeDepthsReversedMap,
                                             AbstractNode *root) {
 
   //TODO: Stop at root, not just follow until no more parent
   //   if root is nullptr, just keep going!
 
 // check if we have calculated the reverse multiplicative depth previously
-  if (!multiplicativeDepthsReversed.empty()) {
-    auto it = multiplicativeDepthsReversed.find(n->getUniqueNodeId());
-    if (it!=multiplicativeDepthsReversed.end())
+  if (!multiplicativeDepthsReversedMap.empty()) {
+    auto it = multiplicativeDepthsReversedMap.find(n->getUniqueNodeId());
+    if (it!=multiplicativeDepthsReversedMap.end())
       return it->second;
   }
 
@@ -449,19 +449,19 @@ int ConeRewriter::computeReversedMultDepthR(AbstractNode *n,
   return max + depthValue(nextNodeToConsider);
 }
 int ConeRewriter::getMaximumMultDepth(AbstractNode *root, MultDepthMap map) {
-  if (!map.empty()) {
-    // do nothing
-  } else {
-    // compute map
-    int tmp = computeMultDepthL(root, map);
-  }
-  // find and return max value
-  return std::max_element(
-      map.begin(), map.end(),
-      [](const std::pair<const std::basic_string<char>, int> &a,
-         const std::pair<const std::basic_string<char>, int> &b) {
-        return a.second < b.second;
-      })->second;
+//  if (!map.empty()) {
+//    // do nothing
+//  } else {
+//    // compute map
+//    int tmp = computeMultDepthL(root, map);
+//  }
+//  // find and return max value
+//  return std::max_element(
+//      map.begin(), map.end(),
+//      [](const std::pair<const std::basic_string<char>, MultDepth> &a,
+//         const std::pair<const std::basic_string<char>, MultDepth> &b) {
+//        return a.second.forward < b.second.forward;
+//      })->second.forward;
 }
 
 int getMultDepthL(MultDepthMap multiplicativeDepths, AbstractNode &n) {
