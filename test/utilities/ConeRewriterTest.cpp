@@ -57,7 +57,7 @@ TEST(ConeRewriterTest, testConeRewrNoChange) { /* NOLINT */
 }
 
 TEST(ConeRewriterTest, getReducibleCone) {
-  /// Expected output of test (node marked by (*)) //TODO: check with alex
+  /// Expected output of test (node marked by (*))
   ///  a    b  x   y
   ///   \  /    \ /
   ///   AND     OR
@@ -94,9 +94,9 @@ TEST(ConeRewriterTest, getReducibleCone) {
   for (auto &n: cones) {
     std::cout << n->toString(false) << std::endl;
   }
+  ASSERT_EQ(cones.size(),1);
 
-  //TODO: check if this is right (Go through algo with alex)
-  EXPECT_EQ(cones[0]->getUniqueNodeId(), astProgram->getUniqueNodeId());
+  EXPECT_EQ(cones[0]->getUniqueNodeId(), astProgram->begin()->begin()->getUniqueNodeId());
 }
 
 TEST(ConeRewriterTest, testConeRewrPaperTree) {
