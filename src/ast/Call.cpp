@@ -131,8 +131,11 @@ std::unique_ptr<AbstractNode> Call::replaceChild(const AbstractNode &child, std:
     if (a && &child==&*a) {
       auto t = std::move(a);
       if (!dynamic_pointer_move(a, new_child)) {
+        a = std::move(t);
         throw std::runtime_error("Cannot replace child: Types not compatible");
       }
+      t->setParent(nullptr);
+      a->setParent(this);
       return t;
     }
   }

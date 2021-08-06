@@ -168,14 +168,20 @@ std::unique_ptr<AbstractNode> BinaryExpression::replaceChild(const AbstractNode 
   if(left && &child == &*left) {
     auto t = std::move(left);
     if(!dynamic_pointer_move(left, new_child)) {
+      left = std::move(t);
       throw std::runtime_error("Cannot replace child: Types not compatible");
     }
+    t->setParent(nullptr);
+    left->setParent(this);
     return t;
   } else if (right && &child == &*right) {
     auto t = std::move(right);
     if(!dynamic_pointer_move(right, new_child)) {
+      right = std::move(t);
       throw std::runtime_error("Cannot replace child: Types not compatible");
     }
+    t->setParent(nullptr);
+    right->setParent(this);
     return t;
   } else {
     throw std::runtime_error("Cannot replace child: not found!");
