@@ -196,27 +196,39 @@ std::unique_ptr<AbstractNode> For::replaceChild(const AbstractNode &child, std::
   if (initializer && &child==&*initializer) {
     auto t = std::move(initializer);
     if (!dynamic_pointer_move(initializer, new_child)) {
+      initializer = std::move(t);
       throw std::runtime_error("Cannot replace child: Types not compatible");
     }
+    t->setParent(nullptr);
+    initializer->setParent(this);
     return t;
   } else if (condition && &child==&*condition) {
     auto t = std::move(condition);
     if (!dynamic_pointer_move(condition, new_child)) {
+      condition = std::move(t);
       throw std::runtime_error("Cannot replace child: Types not compatible");
     }
+    t->setParent(nullptr);
+    condition->setParent(this);
     return t;
 
   } else if (update && &child==&*update) {
     auto t = std::move(update);
     if (!dynamic_pointer_move(update, new_child)) {
+      update = std::move(t);
       throw std::runtime_error("Cannot replace child: Types not compatible");
     }
+    t->setParent(nullptr);
+    update->setParent(this);
     return t;
   } else if (body && &child==&*body) {
     auto t = std::move(body);
     if (!dynamic_pointer_move(body, new_child)) {
+      body = std::move(t);
       throw std::runtime_error("Cannot replace child: Types not compatible");
     }
+    t->setParent(nullptr);
+    body->setParent(this);
     return t;
   } else {
     throw std::runtime_error("Cannot replace child: not found!");

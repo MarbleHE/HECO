@@ -133,14 +133,20 @@ std::unique_ptr<AbstractNode> IndexAccess::replaceChild(const AbstractNode &chil
   if(target && &child == &*target) {
     auto t = std::move(target);
     if(!dynamic_pointer_move(target, new_child)) {
+      target = std::move(t);
       throw std::runtime_error("Cannot replace child: Types not compatible");
     }
+    t->setParent(nullptr);
+    target->setParent(this);
     return t;
   } else if (index && &child == &*index) {
     auto t = std::move(index);
     if(!dynamic_pointer_move(index, new_child)) {
+      index = std::move(t);
       throw std::runtime_error("Cannot replace child: Types not compatible");
     }
+    t->setParent(nullptr);
+    index->setParent(this);
     return t;
   } else {
     throw std::runtime_error("Cannot replace child: not found!");

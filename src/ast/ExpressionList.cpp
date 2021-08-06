@@ -160,8 +160,11 @@ std::unique_ptr<AbstractNode> ExpressionList::replaceChild(const AbstractNode &c
     if (e && &child==&*e) {
       auto t = std::move(e);
       if (!dynamic_pointer_move(e, new_child)) {
+        e = std::move(t);
         throw std::runtime_error("Cannot replace child: Types not compatible");
       }
+      t->setParent(nullptr);
+      e->setParent(this);
       return t;
     }
   }
