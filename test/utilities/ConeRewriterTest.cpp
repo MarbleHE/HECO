@@ -10,6 +10,7 @@
 #include "ast_opt/visitor/PrintVisitor.h"
 #include "ast_opt/utilities/ConeRewriter.h"
 #include "ast_opt/visitor/BinaryToOperatorExpressionVisitor.h"
+#include "ast_opt/visitor/ParentSettingVisitor.h"
 
 #ifdef HAVE_SEAL_BFV
 
@@ -56,7 +57,7 @@ TEST(ConeRewriterTest, testConeRewrNoChange) { /* NOLINT */
   compareAST(*o_copy, *rewritten_ast);
 }
 
-TEST(ConeRewriterTest, getReducibleCone) {
+TEST(ConeRewriterTest, getReducibleConePaperCircuit) {
   /// Expected output of test (node marked by (*))
   ///  a    b  x   y
   ///   \  /    \ /
@@ -74,6 +75,53 @@ TEST(ConeRewriterTest, getReducibleCone) {
   /// vt = u && c;
   const char *program = R""""(
   return ((a && b) || (x || y)) && c;
+  )"""";
+  auto astProgram = Parser::parse(std::string(program));
+
+  // Rewrite BinaryExpressions to trivial OperatorExpressions
+  BinaryToOperatorExpressionVisitor v;
+  astProgram->accept(v);
+
+  std::stringstream ss;
+  PrintVisitor p(ss);
+  astProgram->accept(p);
+  std::cout << ss.str() << std::endl;
+
+  auto cones = ConeRewriter::getReducibleCone(astProgram.get(), astProgram.get(), 1, {});
+
+  std::cout << "Found " << cones.size() << " reducible cones:" << std::endl;
+  for (auto &n: cones) {
+    std::cout << n->toString(false) << std::endl;
+  }
+  ASSERT_EQ(cones.size(), 1);
+
+  EXPECT_EQ(cones[0]->getUniqueNodeId(), astProgram->begin()->begin()->getUniqueNodeId());
+}
+
+TEST(ConeRewriterTest, getReducibleConeMoreInterestingCircuit) {
+  /// Expected output of test (node marked by (*))
+  ///  a11  a12      a21  a22
+  ///   \  /          \   /
+  ///   AND            AND
+  ///    \    y1  y2    /
+  ///     \  /      \  /
+  ///      OR (~)    OR (~)
+  ///       \      /
+  ///         AND (*)
+  ///          |
+  ///          r
+  ///
+  /// expected output nodes (*)  and one of the nodes (~) (randomly selected)
+
+  /// program specification
+  /// v1 = a11 && a12;
+  /// v2 = a21 && a22
+  /// u1 = v1 || y1
+  /// u2 = v2 || y2
+  /// vt = u1 && u2;
+
+  const char *program = R""""(
+  return  ((a11 && a12) || y1) && ((a21 && a22) || y2)
   )"""";
   auto astProgram = Parser::parse(std::string(program));
 
@@ -273,7 +321,7 @@ TEST(ConeRewriterTest, testComputeAllDepths) {
   EXPECT_EQ(multDepths["Variable_13"], 0);
 }
 
-TEST(ConeRewriterTest, testComputeAllReversedMultDepthsL) {
+TEST(ConeRewriterTest, testComputeAllReversedMultDepthsR) {
 
   /// program specification
   /// v1 = a && b;
@@ -285,10 +333,10 @@ TEST(ConeRewriterTest, testComputeAllReversedMultDepthsL) {
   auto astProgram = Parser::parse(std::string(program));
 
   // Rewrite BinaryExpressions to trivial OperatorExpressions
-  BinaryToOperatorExpressionVisitor v;
-  astProgram->accept(v);
+  //BinaryToOperatorExpressionVisitor v;
+  //astProgram->accept(v);
   std::stringstream ss;
-  ProgramPrintVisitor p(ss);
+  PrintVisitor p(ss);
   astProgram->accept(p);
   std::cout << ss.str() << std::endl;
 
@@ -305,16 +353,21 @@ TEST(ConeRewriterTest, testComputeAllReversedMultDepthsL) {
 //    coneRewriter.computeReversedMultDepthR(n, revMultDepths);
 //  }
 
-auto nodeptr = astProgram->begin()->begin()->begin()->begin();
-std::cout << "Testing on node " << astProgram->begin()->begin()->begin()->begin()->getUniqueNodeId() << std::endl;
-std::cout << "Has Parent?: " <<  astProgram->begin()->begin()->begin()->begin()->hasParent() << std::endl;
-std::cout << "Its parent is " << astProgram->begin()->begin()->begin()->begin()->getParent().getUniqueNodeId() << std::endl;
-std::cout << "Result: " << coneRewriter.computeReversedMultDepthR(&*astProgram->begin()->begin()->begin()->begin(), revMultDepths, nullptr) << std::endl;
-//  for (auto n : vis.v) {
+//TODO FIX BinToOPvisitor, then this will work!
+
+std::cout << "Testing on node " <<
+                                 astProgram->begin()->begin()->begin()->begin()->begin()->getUniqueNodeId() << " which is " <<
+                                 astProgram->begin()->begin()->begin()->begin()->begin()->toString(false) << std::endl;
+std::cout << "Its parent is " << astProgram->begin()->begin()->begin()->begin()->begin()->getParent().getUniqueNodeId() <<
+             " which is " <<     astProgram->begin()->begin()->begin()->begin()->begin()->getParent().toString(false) << std::endl;
+std::cout << "Result: " << coneRewriter.computeReversedMultDepthR(&*astProgram->begin()->begin()->begin()->begin()->begin(), revMultDepths, nullptr) << std::endl;
+
+  for (auto n : vis.v) {
 //    std::cout << "Node: " << n->toString(false) << "Id: " << n->getUniqueNodeId() << std::endl; //<< " Rev MultDepth: " << revMultDepths[n->getUniqueNodeId()] << std::endl;
-//    std::cout << "Test " << coneRewriter.computeReversedMultDepthR(n, revMultDepths) << std::endl;
-//  }
-////
+   // std::cout << "Test " << coneRewriter.computeReversedMultDepthR(n, revMultDepths) << std::endl;
+  }
+
+
 //  EXPECT_EQ(revMultDepths["OperatorExpression_19"], 2);
 //  EXPECT_EQ(revMultDepths["OperatorExpression_18"], 1);
 //  EXPECT_EQ(revMultDepths["OperatorExpression_16"], 1);

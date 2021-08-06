@@ -432,14 +432,14 @@ int ConeRewriter::computeReversedMultDepthR(AbstractNode *n,
 
   // if root node, the reverse multiplicative depth is 0
   if (!n->hasParent()) {
-    std::cout << "Reached End: " << n->getUniqueNodeId() << std::endl;
     return 0;
   } else {
     nextNodeToConsider = &n->getParent();
-  }
- // std::cout << "Considering: " << n->toString(false) << std::endl;
 
-//  // otherwise compute the reverse depth
+  }
+  //std::cout << "Considering: " << nextNodeToConsider->toString(false) << " ID: " << nextNodeToConsider->getUniqueNodeId() << std::endl;
+
+  // otherwise compute the reverse depth
   int max = 0;
   int uDepthR;
   uDepthR = computeReversedMultDepthR(nextNodeToConsider, multiplicativeDepthsReversedMap, nullptr);
