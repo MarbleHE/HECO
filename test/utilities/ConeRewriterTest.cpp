@@ -259,14 +259,21 @@ TEST(ConeRewriterTest, testComputeAllDepths) {
   }
 
   for (auto n : vis.v) {
-    std::cout << "Node: " << n->toString(false) << " MultDepth: " << multDepths[n->getUniqueNodeId()] << std::endl;
+    std::cout << "Node: " << n->toString(false) << "Id: " << n->getUniqueNodeId() << " MultDepth: " << multDepths[n->getUniqueNodeId()] << std::endl;
   }
 
-  //TODO: compare against list of hand-computed multdepths!
-  EXPECT_EQ(true, false);
+  EXPECT_EQ(multDepths["OperatorExpression_19"], 2);
+  EXPECT_EQ(multDepths["OperatorExpression_18"], 1);
+  EXPECT_EQ(multDepths["OperatorExpression_16"], 1);
+  EXPECT_EQ(multDepths["OperatorExpression_17"], 0);
+  EXPECT_EQ(multDepths["Variable_2"], 0);
+  EXPECT_EQ(multDepths["Variable_4"], 0);
+  EXPECT_EQ(multDepths["Variable_7"], 0);
+  EXPECT_EQ(multDepths["Variable_9"], 0);
+  EXPECT_EQ(multDepths["Variable_13"], 0);
 }
 
-TEST(ConeRewriterTest, testPreComputeReversedMultDepthsL) {
+TEST(ConeRewriterTest, testComputeAllReversedMultDepthsL) {
 
   /// program specification
   /// v1 = a && b;
@@ -287,18 +294,36 @@ TEST(ConeRewriterTest, testPreComputeReversedMultDepthsL) {
 
   ConeRewriter coneRewriter;
 
-  MultDepthMap map;
-  coneRewriter.computeReversedMultDepthR(astProgram.get(), map, nullptr);
-
+  //
   GetAllNodesVisitor vis;
   astProgram->accept(vis);
 
-  // for (int i = 0; i < vis.v.size(); i++) {
-  // std::cout << "Node: " << vis.v[i]->toString(false) << " MultDepth: " << map[vis.v[i]->getUniqueNodeId()] << std::endl;
-  //}
+  std::cout << "";
 
-  // EXPECT_EQ(0, map[vis.v[0]->getUniqueNodeId()]);
+  MultDepthMap revMultDepths;
+//  for (auto n : vis.v) {
+//    coneRewriter.computeReversedMultDepthR(n, revMultDepths);
+//  }
 
+auto nodeptr = astProgram->begin()->begin()->begin()->begin();
+std::cout << "Testing on node " << astProgram->begin()->begin()->begin()->begin()->getUniqueNodeId() << std::endl;
+std::cout << "Has Parent?: " <<  astProgram->begin()->begin()->begin()->begin()->hasParent() << std::endl;
+std::cout << "Its parent is " << astProgram->begin()->begin()->begin()->begin()->getParent().getUniqueNodeId() << std::endl;
+std::cout << "Result: " << coneRewriter.computeReversedMultDepthR(&*astProgram->begin()->begin()->begin()->begin(), revMultDepths, nullptr) << std::endl;
+//  for (auto n : vis.v) {
+//    std::cout << "Node: " << n->toString(false) << "Id: " << n->getUniqueNodeId() << std::endl; //<< " Rev MultDepth: " << revMultDepths[n->getUniqueNodeId()] << std::endl;
+//    std::cout << "Test " << coneRewriter.computeReversedMultDepthR(n, revMultDepths) << std::endl;
+//  }
+////
+//  EXPECT_EQ(revMultDepths["OperatorExpression_19"], 2);
+//  EXPECT_EQ(revMultDepths["OperatorExpression_18"], 1);
+//  EXPECT_EQ(revMultDepths["OperatorExpression_16"], 1);
+//  EXPECT_EQ(revMultDepths["OperatorExpression_17"], 0);
+//  EXPECT_EQ(revMultDepths["Variable_2"], 0);
+//  EXPECT_EQ(revMultDepths["Variable_4"], 0);
+//  EXPECT_EQ(revMultDepths["Variable_7"], 0);
+//  EXPECT_EQ(revMultDepths["Variable_9"], 0);
+//  EXPECT_EQ(revMultDepths["Variable_13"], 0);
 }
 
 TEST(ConeRewriterTest, computeMinDepthTest) {
