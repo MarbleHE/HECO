@@ -5,7 +5,12 @@
 #include "ast_opt/ast/AbstractNode.h"
 
 
-typedef std::unordered_map<std::string, int> MultDepthMap;
+struct MultDepth{
+  int forward;
+  int reverse;
+};
+
+typedef std::unordered_map<std::string, int> MultDepthMap; //Todo: replace the int with MultDepth struct to have both in the same!
 class ConeRewriter {
  private:
 
@@ -21,6 +26,22 @@ class ConeRewriter {
   //  std::unordered_map<std::string, DepthMapEntry> initialMultiplicativeDepths{};
   //  std::unordered_map<std::string, AbstractNode *> underlying_nodes;
 
+
+  /// TODO: IMPLEMENT & DOCUMENT
+  /// \param v
+  /// \return
+  //std::vector<AbstractNode *> *getPredecessorOnCriticalPath(AbstractNode& root, AbstractNode *v);
+
+ public:
+  /// Create a cone rewriting object
+  /// Can be used to rewrite multiple ASTs
+  ConeRewriter() = default; //TODO: Delete, no need to create object, this is static-functions only!
+
+  /// Takes ownership of an AST, rewrites it and returns (potentially a different) rewritten AST
+  /// \param ast AST to be rewritten (function takes ownership)
+  /// \return a new AST that has been rewritten
+  //TODO: implement
+  static std::unique_ptr<AbstractNode> rewriteAst(std::unique_ptr<AbstractNode> &&ast);
 
   /// Identify a reducible cone in the (sub)tree defined by root
   /// Internal function, used recursively
@@ -51,29 +72,7 @@ class ConeRewriter {
   /// \param v Starting node for the cone construction procedure.
   /// \param minDepth The minimal multiplicative depth to which cone search will be performed.
   /// \return a vector of nodes making up the cone (a connected subset of the AST)
-  std::vector<AbstractNode *> getReducibleCone(AbstractNode *root, AbstractNode *v, int minDepth, MultDepthMap multiplicativeDepths);
-
-  /// TODO: IMPLEMENT & DOCUMENT
-  /// \param v
-  /// \return
-  //std::vector<AbstractNode *> *getPredecessorOnCriticalPath(AbstractNode& root, AbstractNode *v);
-
- public:
-  /// Create a cone rewriting object
-  /// Can be used to rewrite multiple ASTs
-  ConeRewriter() = default;
-
-  /// Takes ownership of an AST, rewrites it and returns (potentially a different) rewritten AST
-  /// \param ast AST to be rewritten (function takes ownership)
-  /// \return a new AST that has been rewritten
-  //TODO: implement
-  static std::unique_ptr<AbstractNode> rewriteAst(std::unique_ptr<AbstractNode> &&ast);
-
-  /// Identify a reducible cone in the (sub)tree defined by root
-  /// \param root Root node of the AST
-  /// \return A vector of nodes making up the cone (connected subset of the AST)
-  //TODO: implement
-  static std::vector<AbstractNode *> getReducibleCone(AbstractNode &root);
+  static std::vector<AbstractNode *> getReducibleCone(AbstractNode *root, AbstractNode *v, int minDepth, MultDepthMap multiplicativeDepths);
 
   /// Creates the graph C^{AND} from Section 3.2 (p 10) from [Aubry, P. et al.: Faster Homomorphic Encryption Is Not Enough: Improved Heuristic for Multiplicative Depth
   ///  Minimization of Boolean Circuits. (2019)].
@@ -112,7 +111,7 @@ class ConeRewriter {
   /// A node p is critical if l(p) + r(p) = l^{max}
   /// \param v node
   /// \return minDepth value
-  int computeMinDepth(AbstractNode *v, AbstractNode *ast, MultDepthMap map);
+  static int computeMinDepth(AbstractNode *v, AbstractNode *ast, MultDepthMap map);
 
   /// Returns the 'maximum (overall) multiplicative depth' l^{max}, i.e the maximal multiplicative depth of its nodes.
   /// l^{max} = max_{v \in V} l(v) = max_{v \in V} r(v)
@@ -126,7 +125,7 @@ class ConeRewriter {
   /// \param n node of the AST
   /// \param ast root node defining the AST
   /// \return bool
-  bool isCriticalNode(AbstractNode *n, AbstractNode *ast, MultDepthMap map = {});
+  static bool isCriticalNode(AbstractNode *n, AbstractNode *ast, MultDepthMap map = {});
 
 
   /// Calculates the multiplicative depths l(n) for a node n of an AST starting at root (output) based on the definition given in
@@ -145,7 +144,7 @@ class ConeRewriter {
   /// \param n  Node to consider
   /// \return The multiplicative depth of the current node.
   //TODO: implement
-  int getMultDepthL(MultDepthMap multiplicativeDepths, AbstractNode &n);
+  static int getMultDepthL(MultDepthMap multiplicativeDepths, AbstractNode &n);
 
   /// Compute the (reverse) multiplicative depth r(n) for a node n of an AST based on the definition given in
   /// [Aubry, P. et al.: Faster Homomorphic Encryption Is Not Enough: Improved Heuristic for Multiplicative Depth
@@ -155,14 +154,14 @@ class ConeRewriter {
   /// \param map contains precomputed values
   /// \param root (Optional) root of a subtree to consider. AST root used if left as nullptr
   /// \return revers multiplicative depth of the node n relative to root
-  int computeReversedMultDepthR(AbstractNode *n, MultDepthMap &multiplicativeDepthsReversed, AbstractNode *root = nullptr);
+  static int computeReversedMultDepthR(AbstractNode *n, MultDepthMap &multiplicativeDepthsReversed, AbstractNode *root = nullptr);
 
   /// Returns multiplicative depth as precomputed in preComputeMultDepth for a given node
   /// \param multiplicativeDepthsReversed Mapping between nodes and their reversed depth
   /// \param n  Node to consider
   /// \return The reverse multiplicative depth of the current node.
   //TODO: implement
-  int getReverseMultDepth(MultDepthMap multiplicativeDepthsReversed, AbstractNode *n);
+  static int getReverseMultDepth(MultDepthMap multiplicativeDepthsReversed, AbstractNode *n);
 
   /// Determine the value of this node (used for computing the multiplicative depth and reverse multiplicative depth)
   /// Returns 1 if n AND node, 0 otherwise.
@@ -181,10 +180,10 @@ class ConeRewriter {
 //  std::pair<AbstractNode *, AbstractNode *> getCriticalAndNonCriticalInput(LogicalOp *logicalExpr);
 //  std::pair<AbstractNode *, AbstractNode *> getCriticalAndNonCriticalInput(BinaryExpression *logicalExpr);
 //  bool isCriticalNode(AbstractNode *n);
-  int getMultDepth(AbstractNode *n);
-  void flattenVectors(std::vector<AbstractNode *> &resultVector,
+  static int getMultDepth(AbstractNode *n);
+  static void flattenVectors(std::vector<AbstractNode *> &resultVector,
                       std::vector<std::vector<AbstractNode *>> vectorOfVectors);
-  void addElements(std::vector<AbstractNode *> &result, std::vector<AbstractNode *> newElements);
+  static void addElements(std::vector<AbstractNode *> &result, std::vector<AbstractNode *> newElements);
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_UTILITIES_CONEREWRITER_H_

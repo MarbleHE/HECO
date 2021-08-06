@@ -86,15 +86,13 @@ TEST(ConeRewriterTest, getReducibleCone) {
   astProgram->accept(p);
   std::cout << ss.str() << std::endl;
 
-  ConeRewriter coneRewriter;
-
-  auto cones = coneRewriter.getReducibleCone(*astProgram);
+  auto cones = ConeRewriter::getReducibleCone(astProgram.get(), astProgram.get(), 1, {});
 
   std::cout << "Found " << cones.size() << " reducible cones:" << std::endl;
   for (auto &n: cones) {
     std::cout << n->toString(false) << std::endl;
   }
-  ASSERT_EQ(cones.size(),1);
+  ASSERT_EQ(cones.size(), 1);
 
   EXPECT_EQ(cones[0]->getUniqueNodeId(), astProgram->begin()->begin()->getUniqueNodeId());
 }
@@ -224,7 +222,9 @@ TEST(ConeRewriterTest, testReversedMultDepth) {
 
   MultDepthMap depthMap;
   int depth = coneRewriter.computeReversedMultDepthR(astProgram
-                                                         .get(), depthMap, nullptr);  // compute mult depth map for the root node of the AST (should be 2)
+                                                         .get(),
+                                                     depthMap,
+                                                     nullptr);  // compute mult depth map for the root node of the AST (should be 2)
   //depthMap = coneRewriter.preComputeMultDepthsL(astProgram.get());
   ASSERT_EQ(depth, 0);
 }
@@ -331,7 +331,7 @@ TEST(ConeRewriterTest, computeMinDepthTest) {
   std::cout << ss.str() << std::endl;
 
   ConeRewriter coneRewriter;
-  MultDepthMap  map;
+  MultDepthMap map;
 
   int minDepth = coneRewriter.computeMinDepth(&*astProgram->begin()->begin(), astProgram.get(), map);
 

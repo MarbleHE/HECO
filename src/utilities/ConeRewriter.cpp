@@ -9,9 +9,14 @@
 #include "ast_opt/visitor/GetAllNodesVisitor.h"
 
 std::unique_ptr<AbstractNode> ConeRewriter::rewriteAst(std::unique_ptr<AbstractNode> &&ast_in) {
+  /// map of all mult depths, will be filled as we go along during computation
+  MultDepthMap map;
+
+  /// MinDepth for finding cones
+  auto minDepth = computeMinDepth(ast_in.get(), ast_in.get(), map);
 
   /// set of all reducible cones
-  auto delta = getReducibleCone(*ast_in);
+  auto delta = getReducibleCone(ast_in.get(), ast_in.get(), minDepth, map);
 
   /// C^{AND} circuit consisting of critical AND-nodes that are connected if there is a multiplicative depth-2
   /// path in between two of those nodes in the initial circuit
@@ -23,10 +28,6 @@ std::unique_ptr<AbstractNode> ConeRewriter::rewriteAst(std::unique_ptr<AbstractN
 
   /// Perform actual rewriting
   return rewriteCones(std::move(ast_in), delta);
-}
-
-std::vector<AbstractNode *> ConeRewriter::getReducibleCone(AbstractNode &root /* AbstractNode *v , int minDepth */) {
-
 }
 
 std::vector<AbstractNode *> ConeRewriter::getReducibleCone(AbstractNode *root,
@@ -44,13 +45,13 @@ std::vector<AbstractNode *> ConeRewriter::getReducibleCone(AbstractNode *root,
   // get predecessor (children) { p ∈ pred(v) | l(p) = l(v) - d(v) }: put them in the vector called pvec (paper: P)
   auto pvec = std::vector<AbstractNode *>();
   for (auto &p: *v) {
-    if (computeMultDepthL(&p, multiplicativeDepths) == computeMultDepthL(v, multiplicativeDepths) - depthValue(v)) {
+    if (computeMultDepthL(&p, multiplicativeDepths)==computeMultDepthL(v, multiplicativeDepths) - depthValue(v)) {
       pvec.push_back(&p);
     }
   }
 
   // return v if at least one predecessor of v is non-critical (i.e |pvec| < 2) and v is an AND-gate
-  if (pvec.size() < 2 && v->toString(false) == "&&") {
+  if (pvec.size() < 2 && v->toString(false)=="&&") {
     // return set consisting of start node v only
     return std::vector<AbstractNode *>{v};
   }
@@ -59,7 +60,8 @@ std::vector<AbstractNode *> ConeRewriter::getReducibleCone(AbstractNode *root,
   std::vector<std::vector<AbstractNode *>> deltaR;
   std::vector<AbstractNode *> delta;
   for (auto &p : pvec) {
-    std::vector<AbstractNode *> intermedResult = getReducibleCone(root, p, computeMinDepth(p, root, multiplicativeDepths), multiplicativeDepths);
+    std::vector<AbstractNode *> intermedResult =
+        getReducibleCone(root, p, computeMinDepth(p, root, multiplicativeDepths), multiplicativeDepths);
     if (!intermedResult.empty()) deltaR.push_back(intermedResult);
   }
 
@@ -69,17 +71,17 @@ std::vector<AbstractNode *> ConeRewriter::getReducibleCone(AbstractNode *root,
   // b. v is an AND-gate and deltaR is empty
   // c. v is a XOR-gate and size of deltaR does not equal size of pvec
   if (v==nullptr ||
-      !(v->toString(false) == "&&"
-          || v->toString(false) == "||") ||
-      (v->toString(false) == "&&" && deltaR.empty()) ||
-      (v->toString(false) == "||" && deltaR.size()!=pvec.size())) {
+      !(v->toString(false)=="&&"
+          || v->toString(false)=="||") ||
+      (v->toString(false)=="&&" && deltaR.empty()) ||
+      (v->toString(false)=="||" && deltaR.size()!=pvec.size())) {
     return std::vector<AbstractNode *>();
   }
 
-  if (v->toString(false) == "&&") {
+  if (v->toString(false)=="&&") {
     // both cones must be reducible because deltaR is non-empty -> pick a random one, and assign to delta
-    delta = deltaR[rand() % deltaR.size()];
-  } else if (v->toString(false) == "||") {
+    delta = deltaR[rand()%deltaR.size()];
+  } else if (v->toString(false)=="||") {
     // critical cones must be reducible because size of deltaR equals size of P
     // flatten vector deltaR consisting of sets generated each by getReducibleCones
     std::vector<AbstractNode *> flattenedDeltaR;
@@ -347,8 +349,8 @@ int ConeRewriter::computeMinDepth(AbstractNode *v, AbstractNode *ast, MultDepthM
 
 bool ConeRewriter::isCriticalNode(AbstractNode *n, AbstractNode *ast, MultDepthMap map) {
   int l = computeMultDepthL(n, map);
-  int r = computeReversedMultDepthR(n, map);
-  return (getMaximumMultDepth(ast) == l + r);
+  int r = computeReversedMultDepthR(n, map); //TODO: THIS SHOULD USE TWO MAPS, NOT THE SAME ONE!!!
+  return (getMaximumMultDepth(ast)==l + r);
 }
 
 int ConeRewriter::getMultDepth(AbstractNode *n) {
