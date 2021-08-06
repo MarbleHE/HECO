@@ -79,7 +79,7 @@ class ConeRewriter {
   ///  Minimization of Boolean Circuits. (2019)].
   /// Idea: We want to find a minimal size set \Delta_{min} of cones such that each critical path contains the ending node of at least one cone from this set
   /// (to guarantee that the overall multiplicative depth will in fact decrease)
-  /// For this we need to constrcut a graph C^{AND} containing ALL the crtical end nodes. Two AND nodes are connected in C^{AND}
+  /// For this we need to constrcut a graph C^{AND} containing ALL the critical AND nodes. Two AND nodes are connected in C^{AND}
   /// if there is a depth-2 critical path between them in the initial circuit.
   /// \param root
   /// \param delta

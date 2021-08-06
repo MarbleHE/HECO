@@ -392,4 +392,32 @@ TEST(ConeRewriterTest, getMaximumMultDepthTest) {
   EXPECT_EQ(2, maximumMultDepth);
 }
 
+TEST(ConeRewriterTest, getAndCriticalCircuitTest) {
+  /// expected graph:
+  /// AND
+  ///   \
+  ///   AND
+  /// program specification
+  /// v1 = a && b;
+  /// u = v1 || (x || y);
+  /// vt = u && c;
+  const char *program = R""""(
+  return ((a && b) || (x || y)) && c;
+  )"""";
+  auto astProgram = Parser::parse(std::string(program));
+
+  // Rewrite BinaryExpressions to trivial OperatorExpressions
+  BinaryToOperatorExpressionVisitor v;
+  astProgram->accept(v);
+
+  std::stringstream ss;
+  PrintVisitor p(ss);
+  astProgram->accept(p);
+  std::cout << ss.str() << std::endl;
+
+  ConeRewriter coneRewriter;
+
+  //TODO we want a vector describing the grapth. only AND nodes
+}
+
 #endif
