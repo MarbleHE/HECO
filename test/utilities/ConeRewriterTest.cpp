@@ -121,7 +121,7 @@ TEST(ConeRewriterTest, getReducibleConeMoreInterestingCircuit) {
   /// vt = u1 && u2;
 
   const char *program = R""""(
-  return  ((a11 && a12) || y1) && ((a21 && a22) || y2)
+  return  ((a11 && a12) || y1) && ((a21 && a22) || y2);
   )"""";
   auto astProgram = Parser::parse(std::string(program));
 
