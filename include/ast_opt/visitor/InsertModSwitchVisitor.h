@@ -27,7 +27,7 @@ class SpecialInsertModSwitchVisitor : public ScopedVisitor {
 
   int encNoiseBudget;
   std::unordered_map<std::string, int> noise_map;
-  std::unique_ptr<BinaryExpression> modwitchNode; // bin expr after which modswitch is determined to be possible
+  std::unique_ptr<BinaryExpression> modSwitchNode; // bin expr after which modswitch is determined to be possible
   std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap; // map of current coeff moduli
 
 
@@ -48,7 +48,10 @@ class SpecialInsertModSwitchVisitor : public ScopedVisitor {
   //TODO: implement
   static std::unique_ptr<AbstractNode> rewriteAst(std::unique_ptr<AbstractNode> &&ast);
 
-
+  /// Returns the variable modSwitchNode, i.e. a unique pointer to a binary op that is eligible for insertion of modSwitch after it.
+  /// \return modSwitchNode
+  //TODO: implement
+  std::unique_ptr<BinaryExpression> getModSwitchNode() const;
 
 };
 

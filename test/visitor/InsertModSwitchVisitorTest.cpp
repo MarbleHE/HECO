@@ -209,4 +209,80 @@ TEST_F(InsertModSwitchVisitorTest, modSwitchBeforeLastBinaryOpExpected) {
 
 }
 
+TEST_F(InsertModSwitchVisitorTest, getModSwitchNode) {
+
+  ///
+  /// (x^4 + y) * z^4
+  /// expected: returns last binary expression (corresponding to the last mult in the circuit)
+
+
+  // program's input
+  const char *inputs = R""""(
+      secret int __input0__ = {43,  1,   1,   1,  22, 11, 425,  0, 1, 7};
+      secret int __input1__ = {24, 34, 222,   4,    1, 4,   9, 22, 1, 3};
+      secret int __input2__ = {24, 34, 222,   4,    1, 4,   9, 22, 1, 3};
+    )"""";
+  auto astInput = Parser::parse(std::string(inputs));
+
+  // program specification
+  const char *program = R""""(
+      secret int powx2 = __input0__ *** __input0__;
+      secret int powx3 = powx2 *** __input0__;
+      secret int powx4 = powx3 *** __input0__;
+      secret int powx4plusy = powx4 +++ __input1__;
+      secret int powz2 = __input2__ *** __input2__;
+      secret int powz3 = powz2 *** __input2__;
+      secret int powz4 = powz3 *** __input2__;
+      secret int result = powx4plusy *** powz4;
+      return result;
+    )"""";
+  auto astProgram = Parser::parse(std::string(program));
+
+  // program's output
+  const char *outputs = R""""(
+      y = result;
+    )"""";
+  auto astOutput = Parser::parse(std::string(outputs));
+  // create and prepopulate TypeCheckingVisitor
+  auto rootScope = std::make_unique<Scope>(*astProgram);
+  registerInputVariable(*rootScope, "__input0__", Datatype(Type::INT, true));
+  registerInputVariable(*rootScope, "__input1__", Datatype(Type::INT, true));
+  registerInputVariable(*rootScope, "__input2__", Datatype(Type::INT, true));
+
+  tcv->setRootScope(std::move(rootScope));
+  astProgram->accept(*tcv);
+
+  // run the program and get its output
+  auto map = tcv->getSecretTaintedNodes();
+  RuntimeVisitor srv(*scf, *astInput, map);
+  srv.executeAst(*astProgram);
+
+  // Get nodes, but only expression nodes, not the block or return
+  GetAllNodesVisitor vis;
+  astProgram->accept(vis);
+
+
+  //  map of coeff modulus vectors: we initially populate this map with the original coeff_modulus vector for each node in the AST
+  auto coeff_modulus = scf->getContext().first_context_data()->parms().coeff_modulus();
+  // initially every node has the same ctxtmodulus vector
+  std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap;
+  for (auto n : vis.v) {
+    coeffmodulusmap[n->getUniqueNodeId()] = coeff_modulus;
+  }
+
+
+  //TODO: dont keep a copy rather define program, with inserted modswitch: discuss with alex how to...
+  auto astProgram_expected = astProgram->clone();
+
+  std::stringstream ss;
+  InsertModSwitchVisitor modSwitchVis(ss, srv.getNoiseMap(), coeffmodulusmap, calcInitNoiseHeuristic());
+
+  astProgram->accept(modSwitchVis); // find modswitching node
+
+  auto resultNode = modSwitchVis.getModSwitchNode();
+
+  EXPECT_EQ(resultNode->getUniqueNodeId(), astProgram->begin()->begin()->getUniqueNodeId()); // TODO: check if last param is the correct node
+
+}
+
 #endif

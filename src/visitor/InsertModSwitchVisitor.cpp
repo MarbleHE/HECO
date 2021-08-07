@@ -20,5 +20,8 @@ std::unique_ptr<AbstractNode> SpecialInsertModSwitchVisitor::rewriteAst(std::uni
 
 }
 
+std::unique_ptr<BinaryExpression> SpecialInsertModSwitchVisitor::getModSwitchNode() const{
+  return nullptr;
+};
 
 
