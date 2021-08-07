@@ -87,7 +87,7 @@ TEST(ConeRewriterTest, getReducibleConePaperCircuit) {
   astProgram->accept(p);
   std::cout << ss.str() << std::endl;
 
-  auto cones = ConeRewriter::getReducibleCone(astProgram.get(), astProgram.get(), 1, {});
+  auto cones = ConeRewriter::getReducibleCone(astProgram.get(), astProgram.get(), 1, {}); //TODO: check if this is actually the node v from the paper (last AND)
 
   std::cout << "Found " << cones.size() << " reducible cones:" << std::endl;
   for (auto &n: cones) {
@@ -100,28 +100,30 @@ TEST(ConeRewriterTest, getReducibleConePaperCircuit) {
 
 TEST(ConeRewriterTest, getReducibleConeMoreInterestingCircuit) {
   /// Expected output of test (node marked by (*))
-  ///  a11  a12      a21  a22
-  ///   \  /          \   /
-  ///   AND            AND
-  ///    \    y1  y2    /
-  ///     \  /      \  /
-  ///      OR (~)    OR (~)
-  ///       \      /
-  ///         AND (*)
-  ///          |
-  ///          r
+  ///    a1 a2                 a8 a9
+  ///    \ /                    \ /
+  ///    AND    a3      a6  a7  AND   a10      a13  a14
+  ///      \   /         \ /     \   /         \   /
+  ///       AND  a4  a5  AND     AND  a11  a12  AND
+  ///        \  /    \  /         \  /     \   /
+  ///        AND    AND           AND       AND
+  ///         \     /              \       /
+  ///          \   /                \     /
+  ///          AND                    AND
+  ///           \                    /
+  ///            \    y1  y2        /
+  ///             \  /      \     /
+  ///             OR (~)    OR (~)
+  ///              \      /
+  ///               AND (*)
+  ///                |
+  ///                r
   ///
-  /// expected output nodes (*)  and one of the nodes (~) (randomly selected)
+  /// expected output nodes (*)  and one of the nodes (~) (randomly selected by the algo)
 
-  /// program specification
-  /// v1 = a11 && a12;
-  /// v2 = a21 && a22
-  /// u1 = v1 || y1
-  /// u2 = v2 || y2
-  /// vt = u1 && u2;
 
   const char *program = R""""(
-  return  ((a11 && a12) || y1) && ((a21 && a22) || y2);
+  return  ((((a1 && a2 ) && a3 ) && a4) && (a5 && (a6 && a7)) || y1) && ((((a8 && a9 ) && a10 ) && a11) && (a12 && (a13 && a14)) || y2);
   )"""";
   auto astProgram = Parser::parse(std::string(program));
 
@@ -134,15 +136,22 @@ TEST(ConeRewriterTest, getReducibleConeMoreInterestingCircuit) {
   astProgram->accept(p);
   std::cout << ss.str() << std::endl;
 
+
+  std::cout << "NOdee: " << astProgram->begin()->begin()->begin()->toString(false) << " " << astProgram->begin()->begin()->begin()->getUniqueNodeId() << std::endl;
+
+
+
   auto cones = ConeRewriter::getReducibleCone(astProgram.get(), astProgram.get(), 1, {});
 
   std::cout << "Found " << cones.size() << " reducible cones:" << std::endl;
   for (auto &n: cones) {
     std::cout << n->toString(false) << std::endl;
   }
-  ASSERT_EQ(cones.size(), 1);
+  ASSERT_EQ(cones.size(), 2);
 
-  EXPECT_EQ(cones[0]->getUniqueNodeId(), astProgram->begin()->begin()->getUniqueNodeId());
+  EXPECT_TRUE(((cones[0]->getUniqueNodeId() == astProgram->begin()->begin()->getUniqueNodeId()) && (cones[1]->getUniqueNodeId() ==  astProgram->begin()->begin()->begin()->getUniqueNodeId()))
+                    || ((cones[0]->getUniqueNodeId() == astProgram->begin()->begin()->getUniqueNodeId()) &&  (cones[1]->getUniqueNodeId() ==  astProgram->begin()->begin()->end()->getUniqueNodeId())) );
+
 }
 
 TEST(ConeRewriterTest, testConeRewrPaperTree) {
@@ -333,8 +342,8 @@ TEST(ConeRewriterTest, testComputeAllReversedMultDepthsR) {
   auto astProgram = Parser::parse(std::string(program));
 
   // Rewrite BinaryExpressions to trivial OperatorExpressions
-  //BinaryToOperatorExpressionVisitor v;
-  //astProgram->accept(v);
+  BinaryToOperatorExpressionVisitor v;
+  astProgram->accept(v);
   std::stringstream ss;
   PrintVisitor p(ss);
   astProgram->accept(p);
@@ -342,11 +351,9 @@ TEST(ConeRewriterTest, testComputeAllReversedMultDepthsR) {
 
   ConeRewriter coneRewriter;
 
-  //
   GetAllNodesVisitor vis;
   astProgram->accept(vis);
 
-  std::cout << "";
 
   MultDepthMap revMultDepths;
 //  for (auto n : vis.v) {
@@ -355,28 +362,26 @@ TEST(ConeRewriterTest, testComputeAllReversedMultDepthsR) {
 
 //TODO FIX BinToOPvisitor, then this will work!
 
-std::cout << "Testing on node " <<
-                                 astProgram->begin()->begin()->begin()->begin()->begin()->getUniqueNodeId() << " which is " <<
-                                 astProgram->begin()->begin()->begin()->begin()->begin()->toString(false) << std::endl;
-std::cout << "Its parent is " << astProgram->begin()->begin()->begin()->begin()->begin()->getParent().getUniqueNodeId() <<
-             " which is " <<     astProgram->begin()->begin()->begin()->begin()->begin()->getParent().toString(false) << std::endl;
-std::cout << "Result: " << coneRewriter.computeReversedMultDepthR(&*astProgram->begin()->begin()->begin()->begin()->begin(), revMultDepths, nullptr) << std::endl;
+//std::cout << "Testing on node " <<
+//                                 astProgram->begin()->begin()->begin()->begin()->begin()->getUniqueNodeId() << " which is " <<
+//                                 astProgram->begin()->begin()->begin()->begin()->begin()->toString(false) << std::endl;
+//std::cout << "Its parent is " << astProgram->begin()->begin()->begin()->begin()->begin()->getParent().getUniqueNodeId() <<
+//             " which is " <<     astProgram->begin()->begin()->begin()->begin()->begin()->getParent().toString(false) << std::endl;
+//std::cout << "Result: " << coneRewriter.computeReversedMultDepthR(&*astProgram->begin()->begin()->begin()->begin()->begin(), revMultDepths, nullptr) << std::endl;
 
   for (auto n : vis.v) {
-//    std::cout << "Node: " << n->toString(false) << "Id: " << n->getUniqueNodeId() << std::endl; //<< " Rev MultDepth: " << revMultDepths[n->getUniqueNodeId()] << std::endl;
-   // std::cout << "Test " << coneRewriter.computeReversedMultDepthR(n, revMultDepths) << std::endl;
+    std::cout << "Node: " << n->toString(false) << "Id: " << n->getUniqueNodeId() << " Rev: " << coneRewriter.computeReversedMultDepthR(n, revMultDepths);
   }
 
-
-//  EXPECT_EQ(revMultDepths["OperatorExpression_19"], 2);
-//  EXPECT_EQ(revMultDepths["OperatorExpression_18"], 1);
-//  EXPECT_EQ(revMultDepths["OperatorExpression_16"], 1);
-//  EXPECT_EQ(revMultDepths["OperatorExpression_17"], 0);
-//  EXPECT_EQ(revMultDepths["Variable_2"], 0);
-//  EXPECT_EQ(revMultDepths["Variable_4"], 0);
-//  EXPECT_EQ(revMultDepths["Variable_7"], 0);
-//  EXPECT_EQ(revMultDepths["Variable_9"], 0);
-//  EXPECT_EQ(revMultDepths["Variable_13"], 0);
+  EXPECT_EQ(revMultDepths["OperatorExpression_19"], 0);
+  EXPECT_EQ(revMultDepths["OperatorExpression_18"], 1);
+  EXPECT_EQ(revMultDepths["OperatorExpression_16"], 1);
+  EXPECT_EQ(revMultDepths["OperatorExpression_17"], 1);
+  EXPECT_EQ(revMultDepths["Variable_2"], 2);
+  EXPECT_EQ(revMultDepths["Variable_4"], 2);
+  EXPECT_EQ(revMultDepths["Variable_7"], 1);
+  EXPECT_EQ(revMultDepths["Variable_9"], 1);
+  EXPECT_EQ(revMultDepths["Variable_13"], 1);
 }
 
 TEST(ConeRewriterTest, computeMinDepthTest) {

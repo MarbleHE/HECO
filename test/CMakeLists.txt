@@ -75,7 +75,7 @@ set(TEST_FILES
         visitor/TypeCheckingVisitorTest.cpp
         visitor/VectorizerTest.cpp
         visitor/VisitorTest.cpp
-        )
+        visitor/InsertModSwitchAlgoTest.cpp)
 
 add_executable(testing-all
         ${TEST_FILES})
