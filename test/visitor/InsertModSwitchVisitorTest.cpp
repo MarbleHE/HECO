@@ -3,6 +3,8 @@
 #include "include/ast_opt/runtime/RuntimeVisitor.h"
 #include "include/ast_opt/runtime/SimulatorCiphertextFactory.h"
 #include "ast_opt/visitor/IdentifyNoisySubtreeVisitor.h"
+#include "ast_opt/visitor/InsertModSwitchVisitor.h"
+#include "../ASTComparison.h"
 
 #include "gtest/gtest.h"
 #ifdef HAVE_SEAL_BFV
@@ -87,6 +89,30 @@ TEST_F(InsertModSwitchVisitorTest, noChangeExpected) {
     )"""";
   auto astOutput = Parser::parse(std::string(outputs));
 
+  // create and prepopulate TypeCheckingVisitor
+  auto rootScope = std::make_unique<Scope>(*astProgram);
+  registerInputVariable(*rootScope, "__input0__", Datatype(Type::INT, true));
+  registerInputVariable(*rootScope, "__input1__", Datatype(Type::INT, true));
+
+  tcv->setRootScope(std::move(rootScope));
+  astProgram->accept(*tcv);
+
+  // run the program and get its output
+  auto map = tcv->getSecretTaintedNodes();
+  RuntimeVisitor srv(*scf, *astInput, map);
+  srv.executeAst(*astProgram);
+
+  // Keep a copy of o for later comparison
+  auto astProgram_copy = astProgram->clone();
+
+  std::stringstream ss;
+  InsertModSwitchVisitor modSwitchVis(ss, srv.getNoiseMap(), srv.getRelNoiseMap(), calcInitNoiseHeuristic());
+
+  auto rewritten_ast = modSwitchVis.rewriteAst(std::move(astProgram));
+
+  //In this case, asts should be identical
+  ASSERT_NE(rewritten_ast, nullptr);
+  compareAST(*astProgram_copy, *rewritten_ast);
 
 }
 

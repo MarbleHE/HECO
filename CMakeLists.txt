@@ -158,6 +158,7 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/visitor/GetAllNodesVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/HashVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/IdentifyNoisySubtreeVisitor.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/InsertModSwitchVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/NoisePrintVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/ParentSettingVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/PrintVisitor.cpp
@@ -186,7 +187,7 @@ set(HEADER_ONLY_SOURCES
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/SimulatorCiphertextFactory.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/VariableMap.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/Visitor.h
-        include/ast_opt/visitor/InsertModSwitchVisitor.h)
+        include/ast_opt/visitor/InsertModSwitchVisitor.h src/visitor/InsertModSwitchVisitor.cpp)
 
 # This contains the headers that developers that want to link directly against ABC might need to have access to
 # These are the headers that are installed when ABC is installed as a system-wide library
@@ -250,6 +251,7 @@ set(PUBLIC_HEADERS
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/HashVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/IVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/IdentifyNoisySubtreeVisitor.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/InsertModSwitchVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/NoisePrintVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/PrintVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/PrintVisitor.h

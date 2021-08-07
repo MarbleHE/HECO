@@ -34,7 +34,6 @@ void SpecialIdentifyNoisySubtreeVisitor::visit(BinaryExpression &elem) {
   }
 }
 
-//TODO make this work
 void SpecialIdentifyNoisySubtreeVisitor::visit(BinaryExpression &elem, BinaryExpression &tail) {
   if (elem.countChildren() > 1) {
     int leftNoiseBudget = noise_map.find(elem.getLeft().getUniqueNodeId())->second;
