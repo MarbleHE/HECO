@@ -1,6 +1,5 @@
 #include <algorithm>
 #include <ast_opt/visitor/GetAllNodesVisitor.h>
-
 #include "ast_opt/parser/Parser.h"
 #include "../ASTComparison.h"
 #include "gtest/gtest.h"

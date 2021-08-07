@@ -8,6 +8,7 @@
 #include <sstream>
 #include <string>
 #include <utility>
+#include <seal/seal.h>
 
 #include "ast_opt/ast/AbstractNode.h"
 #include "ast_opt/utilities/Visitor.h"
@@ -26,14 +27,17 @@ class SpecialInsertModSwitchVisitor : public ScopedVisitor {
 
   int encNoiseBudget;
   std::unordered_map<std::string, int> noise_map;
-  std::unordered_map<std::string, double> rel_noise_map;
+  std::unique_ptr<BinaryExpression> modwitchNode; // bin expr after which modswitch is determined to be possible
+  std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap; // map of current coeff moduli
+
 
  public:
   explicit SpecialInsertModSwitchVisitor(std::ostream& os, std::unordered_map<std::string, int> noise_map,
-                                              std::unordered_map<std::string, double> rel_noise_map, int encNoiseBudget);
+                                              std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap, int encNoiseBudget);
 
-  /// Visits an AST and based on noise heuristics and the bitlengths of the primes in the coeff modulus identifies regions
-  /// where modswitch ops are appropriate
+  /// Visits an AST and based on noise heuristics and  identifies a binary expression
+  /// where a modswitch op is appropriate based on the bitlengths of the primes in the coeff modulus and the remaining noise budget.
+  /// pointer to resultiong binary expression will be stored in modwitchNode
   /// \param node
   //TODO: implement
   void visit(BinaryExpression& node);
