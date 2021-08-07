@@ -137,7 +137,7 @@ TEST_F(InsertModSwitchVisitorTest, modSwitchBeforeLastBinaryOpExpected) {
 
   ///
   /// (x^4 + y) * z^4
-  /// expected: modSwitch op inserted after last binary op
+  /// expected: modSwitch ops inserted before last binary op
 
 
   // program's input
