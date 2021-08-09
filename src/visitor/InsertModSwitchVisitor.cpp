@@ -3,6 +3,7 @@
 #include "ast_opt/visitor/IdentifyNoisySubtreeVisitor.h"
 #include "ast_opt/visitor/InsertModSwitchVisitor.h"
 
+
 #include <utility>
 #include "ast_opt/ast/AbstractExpression.h"
 
@@ -65,11 +66,12 @@ void SpecialInsertModSwitchVisitor::visit(BinaryExpression &elem) {
 
 }
 
-std::unique_ptr<AbstractNode> SpecialInsertModSwitchVisitor::insertModSwitchInAst(std::unique_ptr<AbstractNode> *ast, BinaryExpression *binaryExpression, std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap) {
+std::unique_ptr<AbstractNode> SpecialInsertModSwitchVisitor::insertModSwitchInAst(std::unique_ptr<AbstractNode> *ast,
+                                                                                  BinaryExpression *binaryExpression,
+                                                                                  std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap) {
 
   // if no binary expression specified return original ast
   if (binaryExpression == nullptr) {return std::move(*ast);}
-
 
   // prepare argument for 'Call' node (modswitch)
 
@@ -118,6 +120,9 @@ std::unique_ptr<AbstractNode> SpecialInsertModSwitchVisitor::insertModSwitchInAs
   binaryExpression->setLeft(std::move(cLeft));
   binaryExpression->setRight(std::move(cRight));
 
+  //update coeffmodulus map appropriately
+  //TODO
+
   return (std::move(*ast));
 }
 
@@ -125,8 +130,19 @@ std::vector<BinaryExpression *> SpecialInsertModSwitchVisitor::getModSwitchNodes
   return modSwitchNodes;
 }
 
-void updateNoiseMap(AbstractNode& ast) {
+void SpecialInsertModSwitchVisitor::updateNoiseMap(AbstractNode& astProgram, RuntimeVisitor *srv) {
+  // execute ast
+  //TODO: fix the exception (make RuntimeVisitor support ModSwitch)
+  srv->executeAst(astProgram);
+  this->noise_map = srv->getNoiseMap();
+}
 
+static std::unique_ptr<AbstractNode> removeModSwitchFromAst(std::unique_ptr<AbstractNode> *ast,
+                                                            BinaryExpression *binaryExpression,
+                                                            std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap){
+  
+  // TODO: implement
+  return std::move(*ast);
 };
 
 

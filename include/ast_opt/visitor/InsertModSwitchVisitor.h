@@ -10,6 +10,7 @@
 #include <utility>
 #include <seal/seal.h>
 
+#include "ast_opt/runtime/RuntimeVisitor.h"
 #include "ast_opt/ast/AbstractNode.h"
 #include "ast_opt/utilities/Visitor.h"
 
@@ -42,11 +43,14 @@ class SpecialInsertModSwitchVisitor : public ScopedVisitor {
   /// \param node
   void visit(BinaryExpression& node);
 
-  /// Takes ownership of an AST,insert modSwitch Ops at appropriate places and returns (potentially a different) rewritten AST
+  /// Insert modSwitch Ops between a given binary expression and its children. returns (potentially different) rewritten AST
   /// \param ast AST to be rewritten (function takes ownership)
-  /// \param binary expresseion before which modswitches are to be inserted
+  /// \param binary expression before which modswitches are to be inserted
+  /// \param coeffmodulusmap
   /// \return a new AST that has been rewritten
-  static std::unique_ptr<AbstractNode> insertModSwitchInAst(std::unique_ptr<AbstractNode> *ast, BinaryExpression *binaryExpression = nullptr, std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap = {});
+  static std::unique_ptr<AbstractNode> insertModSwitchInAst(std::unique_ptr<AbstractNode> *ast,
+                                                            BinaryExpression *binaryExpression = nullptr,
+                                                            std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap = {});
 
   /// Returns the variable modSwitchNode, i.e. a unique pointer to a binary op that is eligible for insertion of modSwitch before it.
   /// \return modSwitchNode
@@ -57,8 +61,17 @@ class SpecialInsertModSwitchVisitor : public ScopedVisitor {
   /// needed to decide whether an inserted modSwitch is indeed kept.
   /// \param ast (root node)
   /// \return noiseBudget of root node
-  //TODO Implement
-  void updateNoiseMap(AbstractNode& ast);
+  void updateNoiseMap(AbstractNode& astProgram, RuntimeVisitor *srv);
+
+  /// Remove modSwitches from AST from children of a given binary expression
+  /// \param ast the AST
+  /// \param binaryExpression
+  /// \param coeffmodulusmap
+  /// \return AST withoiut the modswitches
+  //TODO: implement
+  static std::unique_ptr<AbstractNode> removeModSwitchFromAst(std::unique_ptr<AbstractNode> *ast,
+                                                            BinaryExpression *binaryExpression = nullptr,
+                                                            std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap = {});
 
 };
 
