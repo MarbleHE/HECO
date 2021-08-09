@@ -34,7 +34,8 @@ void SpecialInsertModSwitchVisitor::visit(BinaryExpression &elem) {
       }
       // if the spent noise budgets for the left and right operators are sufficiently large, we suggest a modswitch insertion procedure
       if ((sum < spentNoiseBudgetLeft) && spentNoiseBudgetRight > coeffmodulusmap[elem.getRight().getUniqueNodeId()][rightIndex].bit_count()) {
-        std::cout << "Suggesting insertion of modswitch(es) applied to operands of node " << elem.getUniqueNodeId() << std::endl;
+       // std::cout << "Suggesting insertion of modswitch(es) applied to operands of node " << elem.getUniqueNodeId() << std::endl;
+        modSwitchNodes.push_back(&elem);
       }
     }
     // if diff < 0 then the left operand has fewer primes remaining in the coeffmodulus chain
@@ -45,14 +46,17 @@ void SpecialInsertModSwitchVisitor::visit(BinaryExpression &elem) {
       }
       // if the spent noise budgets for the left and right operators are sufficiently large, we suggest a modswitch insertion procedure
       if ((sum < spentNoiseBudgetRight) && spentNoiseBudgetLeft > coeffmodulusmap[elem.getLeft().getUniqueNodeId()][leftIndex].bit_count()) {
-        std::cout << "Suggesting insertion of modswitch(es) applied to operands of node " << elem.getUniqueNodeId() << std::endl;
+      //  std::cout << "Suggesting insertion of modswitch(es) applied to operands of node " << elem.getUniqueNodeId() << std::endl;
+        modSwitchNodes.push_back(&elem);
       }
     }
     // if diff = 0, check if a single modswitch after both operands can be inserted
     else {
       if ((spentNoiseBudgetLeft > coeffmodulusmap[elem.getLeft().getUniqueNodeId()][leftIndex].bit_count()) &&
             (spentNoiseBudgetRight > coeffmodulusmap[elem.getRight().getUniqueNodeId()][rightIndex].bit_count())) {
-        std::cout << "Suggesting insertion of modswitch(es) applied to operands of node " << elem.getUniqueNodeId() << std::endl;
+       // std::cout << "Suggesting insertion of modswitch(es) applied to operands of node " << elem.getUniqueNodeId() << " left = " << elem.getLeft().toString(
+         //   false) << " right = " << elem.getRight().toString(false) << std::endl;
+        modSwitchNodes.push_back(&elem);
       }
     }
   }
@@ -62,8 +66,8 @@ std::unique_ptr<AbstractNode> SpecialInsertModSwitchVisitor::rewriteAst(std::uni
 
 }
 
-std::unique_ptr<BinaryExpression> SpecialInsertModSwitchVisitor::getModSwitchNode() const{
-  return nullptr;
+std::vector<BinaryExpression *> SpecialInsertModSwitchVisitor::getModSwitchNode() const{
+  return modSwitchNodes;
 };
 
 

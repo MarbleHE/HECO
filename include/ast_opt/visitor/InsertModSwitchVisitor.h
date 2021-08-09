@@ -27,7 +27,8 @@ class SpecialInsertModSwitchVisitor : public ScopedVisitor {
 
   int encNoiseBudget;
   std::unordered_map<std::string, int> noise_map;
-  std::unique_ptr<BinaryExpression> modSwitchNode; // bin expr before which modswitch is determined to be possible
+  std::vector<BinaryExpression *> modSwitchNodes = {}; // vector of binary ops before which modswitch insertion is deemed possible
+                                                        // (note this does not entail checking the final noisebudget yet)
   std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap; // map of current coeff moduli
 
 
@@ -35,11 +36,10 @@ class SpecialInsertModSwitchVisitor : public ScopedVisitor {
   explicit SpecialInsertModSwitchVisitor(std::ostream& os, std::unordered_map<std::string, int> noise_map,
                                               std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap, int encNoiseBudget);
 
-  /// Visits an AST and based on noise heuristics and  identifies a binary expression
+  /// Visits an AST and based on noise heuristics and  identifies binary expressions
   /// where a modswitch op is appropriate based on the bitlengths of the primes in the coeff modulus and the remaining noise budget.
-  /// pointer to resultiong binary expression will be stored in modwitchNode
+  /// pointer to resulting binary expressions will be stored in the vector modSwitchNodes
   /// \param node
-  //TODO: implement
   void visit(BinaryExpression& node);
 
   /// Takes ownership of an AST,insert modSwitch Ops at appropriate places and returns (potentially a different) rewritten AST
@@ -51,7 +51,7 @@ class SpecialInsertModSwitchVisitor : public ScopedVisitor {
   /// Returns the variable modSwitchNode, i.e. a unique pointer to a binary op that is eligible for insertion of modSwitch before it.
   /// \return modSwitchNode
   //TODO: implement
-  std::unique_ptr<BinaryExpression> getModSwitchNode() const;
+  std::vector<BinaryExpression *> getModSwitchNode() const;
 
 };
 
