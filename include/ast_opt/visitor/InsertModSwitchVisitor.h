@@ -50,8 +50,15 @@ class SpecialInsertModSwitchVisitor : public ScopedVisitor {
 
   /// Returns the variable modSwitchNode, i.e. a unique pointer to a binary op that is eligible for insertion of modSwitch before it.
   /// \return modSwitchNode
-  //TODO: implement
-  std::vector<BinaryExpression *> getModSwitchNode() const;
+  std::vector<BinaryExpression *> getModSwitchNodes() const;
+
+  /// Updates noise heuristics for the AST:
+  /// Note: in BFV modSwitching introduces noise, therefore, we ust check that the noisebudget does not reach zero
+  /// needed to decide whether an inserted modSwitch is indeed kept.
+  /// \param ast (root node)
+  /// \return noiseBudget of root node
+  //TODO Implement
+  void updateNoiseMap(AbstractNode& ast);
 
 };
 

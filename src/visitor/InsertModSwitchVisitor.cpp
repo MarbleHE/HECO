@@ -62,12 +62,18 @@ void SpecialInsertModSwitchVisitor::visit(BinaryExpression &elem) {
   }
 }
 
+
+
 std::unique_ptr<AbstractNode> SpecialInsertModSwitchVisitor::rewriteAst(std::unique_ptr<AbstractNode> &&ast_in) {
 
 }
 
-std::vector<BinaryExpression *> SpecialInsertModSwitchVisitor::getModSwitchNode() const{
+std::vector<BinaryExpression *> SpecialInsertModSwitchVisitor::getModSwitchNodes() const{
   return modSwitchNodes;
+}
+
+void updateNoiseMap(AbstractNode& ast) {
+
 };
 
 
