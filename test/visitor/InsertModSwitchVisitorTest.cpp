@@ -218,7 +218,7 @@ TEST_F(InsertModSwitchVisitorTest, getModSwitchNodesTestNoneFound) {
 
 }
 
-TEST_F(InsertModSwitchVisitorTest, noChangeExpected) {
+TEST_F(InsertModSwitchVisitorTest, rewriteASTnoChangeExpected) {
 /// The circuit x^2 * x^2 remains unchanged
 
 // program's input
@@ -284,7 +284,7 @@ TEST_F(InsertModSwitchVisitorTest, noChangeExpected) {
   compareAST(*astProgram_copy, *rewritten_ast);
 }
 
-TEST_F(InsertModSwitchVisitorTest, modSwitchBeforeLastBinaryOpExpected) {
+TEST_F(InsertModSwitchVisitorTest, rewriteASTmodSwitchBeforeLastBinaryOpExpected) {
 
   ///
   /// (x^4 + y) * z^4

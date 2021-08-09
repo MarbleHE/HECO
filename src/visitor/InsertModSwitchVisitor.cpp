@@ -66,6 +66,17 @@ void SpecialInsertModSwitchVisitor::visit(BinaryExpression &elem) {
 
 std::unique_ptr<AbstractNode> SpecialInsertModSwitchVisitor::rewriteAst(std::unique_ptr<AbstractNode> &&ast_in) {
 
+
+  // TODO: can we do this here or different class?
+  // STEP1: Identify potential insertion sites using the visitor:
+  // STEP2: rewrite: careful! insert the right amount of modswitches!
+  // STEP3 update noise map
+  // STEP4 check if remaining noisebudget > 0
+  // STEP 5 return
+
+
+  //ast_in->accept(*this;)
+
 }
 
 std::vector<BinaryExpression *> SpecialInsertModSwitchVisitor::getModSwitchNodes() const{
