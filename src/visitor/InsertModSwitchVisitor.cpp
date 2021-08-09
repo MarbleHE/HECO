@@ -69,10 +69,13 @@ std::unique_ptr<AbstractNode> SpecialInsertModSwitchVisitor::rewriteAst(std::uni
 
   // TODO: can we do this here or different class?
   // STEP1: Identify potential insertion sites using the visitor:
-  // STEP2: rewrite: careful! insert the right amount of modswitches!
+  // STEP2: newcircuit =  insert the right amount of modswitches!
   // STEP3 update noise map
   // STEP4 check if remaining noisebudget > 0
-  // STEP 5 return
+  //    if > 0 we accept the modswitch and update coeffmodulusmap;
+  //          circuit = newcircuit
+  //    if = 0
+  // STEP 5 return circuit
 
 
   //ast_in->accept(*this;)
