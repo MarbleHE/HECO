@@ -60,26 +60,64 @@ void SpecialInsertModSwitchVisitor::visit(BinaryExpression &elem) {
       }
     }
   }
+  elem.getLeft().accept(*this);
+  elem.getRight().accept(*this);
+
 }
 
+std::unique_ptr<AbstractNode> SpecialInsertModSwitchVisitor::insertModSwitchInAst(std::unique_ptr<AbstractNode> *ast, BinaryExpression *binaryExpression, std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap) {
 
+  // if no binary expression specified return original ast
+  if (binaryExpression ==nullptr) {return std::move(*ast);}
 
-std::unique_ptr<AbstractNode> SpecialInsertModSwitchVisitor::rewriteAst(std::unique_ptr<AbstractNode> &&ast_in) {
+  // prepare argument for 'Call' node (modswitch)
 
+  // we need to know how many modswitches to insert (will be second arg to ModSwitch call)
+  int leftIndex = coeffmodulusmap[binaryExpression->getLeft().getUniqueNodeId()].size() - 1;
+  int rightIndex = coeffmodulusmap[binaryExpression->getLeft().getUniqueNodeId()].size() - 1;
+  int diff = leftIndex - rightIndex;
 
-  // TODO: can we do this here or different class?
-  // STEP1: Identify potential insertion sites using the visitor:
-  // STEP2: newcircuit =  insert the right amount of modswitches!
-  // STEP3 update noise map
-  // STEP4 check if remaining noisebudget > 0
-  //    if > 0 we accept the modswitch and update coeffmodulusmap;
-  //          circuit = newcircuit
-  //    if = 0
-  // STEP 5 return circuit
+  // take left and right child
+  auto l = binaryExpression->takeLeft();
+  auto r = binaryExpression->takeRight();
 
+  std::vector<std::unique_ptr<AbstractExpression>> vLeft;
+  std::vector<std::unique_ptr<AbstractExpression>> vRight;
 
-  //ast_in->accept(*this;)
+  vLeft.emplace_back(std::move(l));
+  vRight.emplace_back(std::move(r));
 
+  // if diff > 0 then the right operand has fewer primes remaining in the coeffmodulus chain
+  // etc...
+  if (diff > 0) {
+    auto leftNumModSw = std::make_unique<LiteralInt>(abs(diff) + 1);
+    auto rightNumModSw = std::make_unique<LiteralInt>(1);
+    vLeft.emplace_back(std::move(leftNumModSw));
+    vRight.emplace_back(std::move(rightNumModSw));
+  } else if (diff < 0) {
+    auto rightNumModSw = std::make_unique<LiteralInt>(abs(diff) + 1);
+    auto leftNumModSw = std::make_unique<LiteralInt>(1);
+    vLeft.emplace_back(std::move(leftNumModSw));
+    vRight.emplace_back(std::move(rightNumModSw));
+  } else {
+    auto rightNumModSw = std::make_unique<LiteralInt>(1);
+    auto leftNumModSw = std::make_unique<LiteralInt>(1);
+    vLeft.emplace_back(std::move(leftNumModSw));
+    vRight.emplace_back(std::move(rightNumModSw));
+  }
+
+  auto cLeft = std::make_unique<Call>("modswitch", std::move(vLeft));
+  auto cRight = std::make_unique<Call>("modswitch", std::move(vRight));
+
+  // set parents to binaryexpr
+  cLeft->setParent(binaryExpression);
+  cRight->setParent(binaryExpression);
+
+  // set children of binary expr to modswitchnodes
+  binaryExpression->setLeft(std::move(cLeft));
+  binaryExpression->setRight(std::move(cRight));
+
+  return (std::move(*ast));
 }
 
 std::vector<BinaryExpression *> SpecialInsertModSwitchVisitor::getModSwitchNodes() const{

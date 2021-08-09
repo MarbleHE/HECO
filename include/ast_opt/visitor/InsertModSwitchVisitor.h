@@ -44,9 +44,10 @@ class SpecialInsertModSwitchVisitor : public ScopedVisitor {
 
   /// Takes ownership of an AST,insert modSwitch Ops at appropriate places and returns (potentially a different) rewritten AST
   /// \param ast AST to be rewritten (function takes ownership)
+  /// \param binary expresseion before which modswitches are to be inserted
   /// \return a new AST that has been rewritten
   //TODO: implement
-  static std::unique_ptr<AbstractNode> rewriteAst(std::unique_ptr<AbstractNode> &&ast);
+  static std::unique_ptr<AbstractNode> insertModSwitchInAst(std::unique_ptr<AbstractNode> *ast, BinaryExpression *binaryExpression = nullptr, std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap = {});
 
   /// Returns the variable modSwitchNode, i.e. a unique pointer to a binary op that is eligible for insertion of modSwitch before it.
   /// \return modSwitchNode
