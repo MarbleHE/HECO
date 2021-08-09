@@ -68,7 +68,8 @@ void SpecialInsertModSwitchVisitor::visit(BinaryExpression &elem) {
 std::unique_ptr<AbstractNode> SpecialInsertModSwitchVisitor::insertModSwitchInAst(std::unique_ptr<AbstractNode> *ast, BinaryExpression *binaryExpression, std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap) {
 
   // if no binary expression specified return original ast
-  if (binaryExpression ==nullptr) {return std::move(*ast);}
+  if (binaryExpression == nullptr) {return std::move(*ast);}
+
 
   // prepare argument for 'Call' node (modswitch)
 
