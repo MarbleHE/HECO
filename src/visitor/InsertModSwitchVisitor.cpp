@@ -140,8 +140,13 @@ void SpecialInsertModSwitchVisitor::updateNoiseMap(AbstractNode& astProgram, Run
 static std::unique_ptr<AbstractNode> removeModSwitchFromAst(std::unique_ptr<AbstractNode> *ast,
                                                             BinaryExpression *binaryExpression,
                                                             std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap){
-  
-  // TODO: implement
+
+  auto l = (binaryExpression->getLeft().begin());
+  l->setParent(binaryExpression);
+  auto r = (binaryExpression->getRight().begin());
+  r->setParent(binaryExpression);
+  //binaryExpression->setLeft(*l); TODO set binary left and right
+
   return std::move(*ast);
 };
 
