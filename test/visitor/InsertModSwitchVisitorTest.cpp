@@ -366,11 +366,11 @@ TEST_F(InsertModSwitchVisitorTest, rewriteASTmodSwitchBeforeLastBinaryOpExpected
 
   auto rewritten_ast = modSwitchVis.insertModSwitchInAst(&astProgram, binExprIns, coeffmodulusmap);
 
-  modSwitchVis.updateNoiseMap(*rewritten_ast, &srv);
+ // modSwitchVis.updateNoiseMap(*rewritten_ast, &srv);
 
   std::stringstream rr;
   ProgramPrintVisitor p(rr);
-  astProgram->accept(p);
+  rewritten_ast->accept(p);
   std::cout << rr.str() << std::endl;
 
 
@@ -379,6 +379,103 @@ TEST_F(InsertModSwitchVisitorTest, rewriteASTmodSwitchBeforeLastBinaryOpExpected
 //  compareAST(*astProgram_expected, *rewritten_ast);
 
 }
+
+TEST_F(InsertModSwitchVisitorTest, rewriteASTTwomodSwitchesBeforeLastBinaryOpExpected) {
+
+  ///
+  /// (x^4 + y) * z^4
+  /// expected: modSwitch ops inserted before last binary op
+
+
+  // program's input
+  const char *inputs = R""""(
+      secret int __input0__ = {43,  1,   1,   1,  22, 11, 425,  0, 1, 7};
+      secret int __input1__ = {24, 34, 222,   4,    1, 4,   9, 22, 1, 3};
+      secret int __input2__ = {24, 34, 222,   4,    1, 4,   9, 22, 1, 3};
+    )"""";
+  auto astInput = Parser::parse(std::string(inputs));
+
+  // program specification
+  const char *program = R""""(
+      secret int powx2 = __input0__ *** __input0__;
+      secret int powx3 = powx2 *** __input0__;
+      secret int powx4 = powx3 *** __input0__;
+      secret int powx4plusy = powx4 +++ __input1__;
+      secret int powz2 = __input2__ *** __input2__;
+      secret int powz3 = powz2 *** __input2__;
+      secret int powz4 = powz3 *** __input2__;
+      secret int result = powx4plusy *** powz4;
+      return result;
+    )"""";
+  auto astProgram = Parser::parse(std::string(program));
+
+  // program's output
+  const char *outputs = R""""(
+      y = result;
+    )"""";
+  auto astOutput = Parser::parse(std::string(outputs));
+  // create and prepopulate TypeCheckingVisitor
+  auto rootScope = std::make_unique<Scope>(*astProgram);
+  registerInputVariable(*rootScope, "__input0__", Datatype(Type::INT, true));
+  registerInputVariable(*rootScope, "__input1__", Datatype(Type::INT, true));
+  registerInputVariable(*rootScope, "__input2__", Datatype(Type::INT, true));
+
+  tcv->setRootScope(std::move(rootScope));
+  astProgram->accept(*tcv);
+
+  // run the program and get its output
+  auto map = tcv->getSecretTaintedNodes();
+  RuntimeVisitor srv(*scf, *astInput, map);
+  srv.executeAst(*astProgram);
+
+  // Get nodes, but only expression nodes, not the block or return
+  GetAllNodesVisitor vis;
+  astProgram->accept(vis);
+
+
+  //  map of coeff modulus vectors: we initially populate this map with the original coeff_modulus vector for each node in the AST
+  auto coeff_modulus = scf->getContext().first_context_data()->parms().coeff_modulus();
+  // initially every node has the same ctxtmodulus vector
+  std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap;
+  for (auto n : vis.v) {
+    coeffmodulusmap[n->getUniqueNodeId()] = coeff_modulus;
+  }
+
+  coeffmodulusmap["Variable_103"].pop_back(); // TODO: think about a different test or something
+
+//  GetAllNodesVisitor allVis;
+//  astProgram->accept(allVis);
+//  for (auto n : allVis.v) {
+//    std::cout << n->getUniqueNodeId() << " " << n->toString(false) << std::endl;
+//  }
+
+
+
+  std::stringstream ss;
+  InsertModSwitchVisitor modSwitchVis(ss, srv.getNoiseMap(), coeffmodulusmap, calcInitNoiseHeuristic());
+
+  astProgram->accept(modSwitchVis); // find modswitching nodes
+
+  std::cout << modSwitchVis.getModSwitchNodes().size() << "nodes found" << std::endl;
+
+  auto binExprIns = modSwitchVis.getModSwitchNodes()[0]; //  modSwitches to be inserted
+
+  auto rewritten_ast = modSwitchVis.insertModSwitchInAst(&astProgram, binExprIns, coeffmodulusmap);
+
+  // modSwitchVis.updateNoiseMap(*rewritten_ast, &srv);
+
+  std::stringstream rr;
+  PrintVisitor p(rr);
+  rewritten_ast->accept(p);
+  std::cout << rr.str() << std::endl;
+
+
+  //In this case, asts should be identical
+  ASSERT_NE(rewritten_ast, nullptr);
+//  compareAST(*astProgram_expected, *rewritten_ast);
+
+}
+
 
 
 #endif
