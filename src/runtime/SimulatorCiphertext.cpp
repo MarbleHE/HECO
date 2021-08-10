@@ -475,8 +475,10 @@ void SimulatorCiphertext::rotateRowsInplace(int) {
   throw std::runtime_error("Not yet implemented.");
 }
 
-std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::modSwitch(int) const {
-  throw std::runtime_error("Not yet implemented.");
+std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::modSwitch(int num)  {
+  for (int i = 0; i < num; i++) {
+    SimulatorCiphertext::modSwitch();
+  }
 }
 
 

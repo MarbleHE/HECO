@@ -86,7 +86,7 @@ class AbstractCiphertext : public AbstractValue {
   /// Performs num modswitches on a ciphertext and returns the resulting ciphertext
   /// \param num Number of modswitches to perform
   /// \return A std::unique_ptr<AbstractCiphertext> containing the modswitched ciphertext.
-  [[nodiscard]] virtual std::unique_ptr<AbstractCiphertext> modSwitch(int num) const = 0;
+  [[nodiscard]] virtual std::unique_ptr<AbstractCiphertext> modSwitch(int num) = 0;
 
   /// Cyclically rotates this ciphertext by the given number of steps.
   /// \param steps The number of steps this ciphertext should be rotated.

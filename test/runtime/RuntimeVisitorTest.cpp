@@ -515,7 +515,7 @@ TEST_F(RuntimeVisitorTest, testModSwitch) {
 
   // program specification
   const char *program = R""""(
-      __input0__ = modswitch(__input0__, 1);
+      __input0__ = modswitch(__input0__ , 1);
     )"""";
   auto astProgram = Parser::parse(std::string(program));
 

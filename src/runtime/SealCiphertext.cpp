@@ -60,8 +60,10 @@ void SealCiphertext::rotateRowsInplace(int steps) {
   getFactory().getEvaluator().rotate_rows_inplace(ciphertext, steps, getFactory().getGaloisKeys());
 }
 
-std::unique_ptr<AbstractCiphertext> SealCiphertext::modSwitch(int steps) const {
-  throw std::runtime_error("Not yet implemented.");
+std::unique_ptr<AbstractCiphertext> SealCiphertext::modSwitch(int steps) {
+  for (int i=0; i < steps; i++) {
+    getFactory().getEvaluator().mod_switch_to_next_inplace(ciphertext);
+  }
 }
 
 const seal::Ciphertext &SealCiphertext::getCiphertext() const {

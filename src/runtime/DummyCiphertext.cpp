@@ -248,7 +248,7 @@ void DummyCiphertext::rotateRowsInplace(int) {
   throw std::runtime_error("Not yet implemented.");
 }
 
-std::unique_ptr<AbstractCiphertext> DummyCiphertext::modSwitch(int) const {
+std::unique_ptr<AbstractCiphertext> DummyCiphertext::modSwitch(int)  {
   throw std::runtime_error("Not yet implemented.");
 }
 

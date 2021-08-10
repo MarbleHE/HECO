@@ -95,7 +95,8 @@ class SimulatorCiphertext : public AbstractNoiseMeasuringCiphertext {
   void subtractPlainInplace(const ICleartext &operand) override;
   std::unique_ptr<AbstractCiphertext> rotateRows(int steps) const override;
   void rotateRowsInplace(int steps) override;
-  std::unique_ptr<AbstractCiphertext> modSwitch(int num) const override;
+  /// applies modswitch heuristics num times
+  std::unique_ptr<AbstractCiphertext> modSwitch(int num)  override;
 
   // API inherited from AbstractValue
   void add_inplace(const AbstractValue &other) override;

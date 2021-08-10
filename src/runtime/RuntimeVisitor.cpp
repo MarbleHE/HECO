@@ -210,9 +210,8 @@ void SpecialRuntimeVisitor::visit(Call &elem) {
     }
 
     // perform modswitch
-    auto modSwitchedCtxt = declaredCiphertexts.at(scopedIdentifier)->rotateRows(numLiteralInt->getValue());
+    auto modSwitchedCtxt = declaredCiphertexts.at(scopedIdentifier)->modSwitch(numLiteralInt->getValue());
     intermedResult.push(std::move(modSwitchedCtxt));
-
   }
 
 }
