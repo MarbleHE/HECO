@@ -476,11 +476,11 @@ void SimulatorCiphertext::rotateRowsInplace(int) {
 }
 
 std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::modSwitch(int num)  {
+// TODO: check if this is correct
   for (int i = 0; i < num; i++) {
     SimulatorCiphertext::modSwitch();
   }
 }
-
 
 int SimulatorCiphertext::noiseBits() const{
   size_t coeff_modulus_significant_bit_count = this->getFactory().getContext().first_context_data()->total_coeff_modulus_bit_count();

@@ -221,7 +221,7 @@ AbstractExpression *Parser::parseExpression(stork::tokens_iterator &it) {
     } else if (it->isIdentifier()) {
       // When we see an identifier, it could be a variable or a more general IndexAccess
       //TODO: It could also be a function call!!
-      // Currently, the rotate "function" is implemented as a hardcoded token
+      // Currently, the rotate and modswitch "functions" are implemented as a hardcoded tokens
       // The same could be done for the ctxt maintenance operations from https://github.com/MarbleHE/ABC/issues/7
       // However, this approach will not work for general functions, as in https://github.com/MarbleHE/ABC/issues/12
       operands.push(parseTarget(it));
@@ -245,6 +245,20 @@ AbstractExpression *Parser::parseExpression(stork::tokens_iterator &it) {
       offset.push_back(std::unique_ptr<AbstractExpression>(parseExpression(it)));
       parseTokenValue(it, stork::reservedTokens::close_round);
       auto call = new Call(stork::to_string(stork::reservedTokens::kw_rotate), std::move(offset));
+      addParsedNode(call);
+      operands.push(call);
+    } else if (it->hasValue(stork::reservedTokens::kw_modswitch)) {
+      // if it's the modswitch keyword, it's a "fake" function call:
+      parseTokenValue(it, stork::reservedTokens::kw_modswitch);
+      parseTokenValue(it, stork::reservedTokens::open_round);
+      // the first argument can be a variable (e.g., ctxtA) or an expression (e.g., ctxtInput * 22)
+      auto ciphertextToBeModSwitched = parseExpression(it);
+      parseTokenValue(it, stork::reservedTokens::comma);
+      std::vector<std::unique_ptr<AbstractExpression>> offset;
+      offset.push_back(std::unique_ptr<AbstractExpression>(ciphertextToBeModSwitched));
+      offset.push_back(std::unique_ptr<AbstractExpression>(parseExpression(it)));
+      parseTokenValue(it, stork::reservedTokens::close_round);
+      auto call = new Call(stork::to_string(stork::reservedTokens::kw_modswitch), std::move(offset));
       addParsedNode(call);
       operands.push(call);
     } else {

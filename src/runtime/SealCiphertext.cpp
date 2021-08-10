@@ -60,10 +60,15 @@ void SealCiphertext::rotateRowsInplace(int steps) {
   getFactory().getEvaluator().rotate_rows_inplace(ciphertext, steps, getFactory().getGaloisKeys());
 }
 
-std::unique_ptr<AbstractCiphertext> SealCiphertext::modSwitch(int steps) {
-  for (int i=0; i < steps; i++) {
-    getFactory().getEvaluator().mod_switch_to_next_inplace(ciphertext);
+std::unique_ptr<AbstractCiphertext> SealCiphertext::modSwitch(int num) {
+  auto tmpCtxt = std::make_unique<SealCiphertext>(getFactory());
+  // modswitch once
+  getFactory().getEvaluator().mod_switch_to_next(ciphertext, tmpCtxt->ciphertext);
+  // modswitch num -1 times
+  for (int i=1; i < num; i++) {
+    getFactory().getEvaluator().mod_switch_to_next(tmpCtxt->ciphertext, tmpCtxt->ciphertext);
   }
+  return tmpCtxt;
 }
 
 const seal::Ciphertext &SealCiphertext::getCiphertext() const {

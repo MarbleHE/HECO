@@ -538,7 +538,7 @@ TEST_F(RuntimeVisitorTest, testModSwitch) {
   astProgram->accept(srv);
 
   std::unordered_map<std::string, std::vector<int64_t>> expectedOutput;
-  expectedOutput.emplace("y", std::vector<int64_t>({425, 0, 1, 7, 7, 7, 7, 7, 7}));
+  expectedOutput.emplace("y", std::vector<int64_t>({43, 1, 1, 1, 22, 11, 425, 0, 1, 7}));
 
   auto output = srv.getOutput(*astOutput);
 
