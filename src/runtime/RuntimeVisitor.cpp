@@ -185,7 +185,36 @@ void SpecialRuntimeVisitor::visit(Call &elem) {
   }
 
   //modswitch
-  
+  if (elem.getIdentifier()==stork::to_string(stork::reservedTokens::kw_modswitch)) {
+    // handle 'modswitch' instruction
+    if (elem.getArguments().size() < 2) {
+      throw std::runtime_error(
+          "Instruction 'modswitch' requires two arguments: (1) identifier of ciphertext to be modswitched "
+          "and the (2) number of modswitches to perform on the ciphertext.");
+    }
+
+    // arg 0: ciphertext to modswitch
+    auto ciphertextIdentifier = elem.getArguments().at(0);
+    std::unique_ptr<AbstractCiphertext> ctxt;
+    auto ciphertextIdentifierVariable = dynamic_cast<Variable *>(&ciphertextIdentifier.get());
+    if (ciphertextIdentifierVariable==nullptr) {
+      throw std::runtime_error("Argument 'ciphertext' in 'modswitch' instruction must be a variable.");
+    }
+    auto scopedIdentifier = getCurrentScope().resolveIdentifier(ciphertextIdentifierVariable->getIdentifier());
+
+    // arg 1: number of modswitches to perform
+    auto num = elem.getArguments().at(1);
+    auto numLiteralInt = dynamic_cast<LiteralInt *>(&num.get());
+    if (numLiteralInt==nullptr) {
+      throw std::runtime_error("Argument 'num' in 'modswitch' instruction must be an integer.");
+    }
+
+    // perform modswitch
+    auto modSwitchedCtxt = declaredCiphertexts.at(scopedIdentifier)->rotateRows(numLiteralInt->getValue());
+    intermedResult.push(std::move(modSwitchedCtxt));
+
+  }
+
 }
 
 void SpecialRuntimeVisitor::visit(ExpressionList &elem) {

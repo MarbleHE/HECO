@@ -56,6 +56,8 @@ class SealCiphertext : public AbstractCiphertext {
 
   void rotateRowsInplace(int steps) override;
 
+  [[nodiscard]] std::unique_ptr<AbstractCiphertext> modSwitch(int num)const  override;
+
   [[nodiscard]] std::unique_ptr<AbstractCiphertext> multiplyPlain(const ICleartext &operand) const override;
 
   void multiplyPlainInplace(const ICleartext &operand) override;

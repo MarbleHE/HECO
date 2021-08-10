@@ -45,6 +45,7 @@ class DummyCiphertext : public AbstractCiphertext {
   void subtractPlainInplace(const ICleartext &operand) override;
   std::unique_ptr<AbstractCiphertext> rotateRows(int steps) const override;
   void rotateRowsInplace(int steps) override;
+  std::unique_ptr<AbstractCiphertext> modSwitch(int num) const override;
 
   std::unique_ptr<AbstractCiphertext> clone() const override;
   const DummyCiphertextFactory &getFactory() const override;

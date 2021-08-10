@@ -248,6 +248,10 @@ void DummyCiphertext::rotateRowsInplace(int) {
   throw std::runtime_error("Not yet implemented.");
 }
 
+std::unique_ptr<AbstractCiphertext> DummyCiphertext::modSwitch(int) const {
+  throw std::runtime_error("Not yet implemented.");
+}
+
 std::unique_ptr<AbstractCiphertext> DummyCiphertext::clone() const {
   return clone_impl();
 }

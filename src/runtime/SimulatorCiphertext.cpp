@@ -475,6 +475,11 @@ void SimulatorCiphertext::rotateRowsInplace(int) {
   throw std::runtime_error("Not yet implemented.");
 }
 
+std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::modSwitch(int) const {
+  throw std::runtime_error("Not yet implemented.");
+}
+
+
 int SimulatorCiphertext::noiseBits() const{
   size_t coeff_modulus_significant_bit_count = this->getFactory().getContext().first_context_data()->total_coeff_modulus_bit_count();
   size_t log_noise = mpz_sizeinbase(this->_noise, 2);
