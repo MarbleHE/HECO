@@ -650,6 +650,23 @@ TEST_F(SimulatorCiphertextFactoryTest, modSwitch) { /* NOLINT */
   checkCiphertextNoise(*ctxt1, expected_noise);
 }
 
+TEST_F(SimulatorCiphertextFactoryTest, modSwitchNTimes) { /* NOLINT */
+  // create ciphertext
+  std::vector<int64_t> data1 = {3, 3, 1, 4, 5, 9};
+  std::unique_ptr<AbstractCiphertext> ctxt1 = scf->createCiphertext(data1);
+  std::unique_ptr<AbstractCiphertext> ctxt2 = scf->createCiphertext(data1);
+
+  uint64_t expected_noise = calcModSwitchHeuristic(*ctxt1);
+  std::cout << "Fresh: " << dynamic_cast<SimulatorCiphertext &>(*ctxt1).getNoiseBudget() << std::endl;
+  dynamic_cast<SimulatorCiphertext &>(*ctxt1).modSwitch();
+  dynamic_cast<SimulatorCiphertext &>(*ctxt1).modSwitch();
+
+  dynamic_cast<SimulatorCiphertext &>(*ctxt2).modSwitch(2);
+  //std::cout << "NoiseBudget after Modswitch: " <<
+  //  (dynamic_cast<const SimulatorCiphertext&>(*ctxt1)).noiseBits() << std::endl;
+  checkCiphertextNoise(*ctxt1, dynamic_cast<SimulatorCiphertext &>(*ctxt2).getNoiseBudget());
+}
+
 TEST_F(SimulatorCiphertextFactoryTest, xToPowerFourTimesYBad) {
   // create ciphertext
   std::vector<int64_t> data1 = {3, 3, 1, 4, 5, 9};

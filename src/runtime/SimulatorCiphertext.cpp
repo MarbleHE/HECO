@@ -476,10 +476,12 @@ void SimulatorCiphertext::rotateRowsInplace(int) {
 }
 
 std::unique_ptr<AbstractCiphertext> SimulatorCiphertext::modSwitch(int num)  {
-// TODO: check if this is correct
   for (int i = 0; i < num; i++) {
-    SimulatorCiphertext::modSwitch();
+    this->modSwitch();
+
   }
+  auto resultCiphertext = std::make_unique<SimulatorCiphertext>(*this);
+  return resultCiphertext;
 }
 
 int SimulatorCiphertext::noiseBits() const{
