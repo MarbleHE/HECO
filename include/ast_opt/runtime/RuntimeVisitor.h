@@ -145,8 +145,12 @@ class SpecialRuntimeVisitor : public ScopedVisitor {
   void executeAst(AbstractNode &rootNode);
 
 
-  //TODO: Document Getter for noise map
+  /// return Map: unique_node_Id -> int with noise budgets for each node of an AST
+  /// \return  std::unordered_map<std::string, int> map
   const std::unordered_map<std::string, int>& getNoiseMap();
+
+  /// return Map: unique_node_Id -> double with relative noise budget decay for each operation in the AST
+  /// \return  std::unordered_map<std::string, double> map
   const std::unordered_map<std::string, double> &getRelNoiseMap();
 };
 
