@@ -506,6 +506,47 @@ TEST_F(RuntimeVisitorTest, testUnsupportedFunction) { /* NOLINT */
   EXPECT_THROW(srv.executeAst(*astProgram), std::runtime_error);
 }
 
+TEST_F(RuntimeVisitorTest, testModSwitch) {
+  // program's input
+  const char *inputs = R""""(
+      secret int __input0__ = {43, 1, 1, 1, 22, 11, 425, 0, 1, 7};
+    )"""";
+  auto astInput = Parser::parse(std::string(inputs));
+
+  // program specification
+  const char *program = R""""(
+      __input0__ = modswitch(__input0__, 1);
+    )"""";
+  auto astProgram = Parser::parse(std::string(program));
+
+  // program's output
+  const char *outputs = R""""(
+      y = __input0__;
+    )"""";
+  auto astOutput = Parser::parse(std::string(outputs));
+
+  auto rootScope = std::make_unique<Scope>(*astProgram);
+  registerInputVariable(*rootScope, "__input0__", Datatype(Type::INT, true));
+  tcv->setRootScope(std::move(rootScope));
+  astProgram->accept(*tcv);
+  auto secretTaintedNodesMap = tcv->getSecretTaintedNodes();
+
+  // create a SpecialRuntimeVisitor instance
+  RuntimeVisitor srv(*scf, *astInput, secretTaintedNodesMap);
+
+  // run the program
+  astProgram->accept(srv);
+
+  std::unordered_map<std::string, std::vector<int64_t>> expectedOutput;
+  expectedOutput.emplace("y", std::vector<int64_t>({425, 0, 1, 7, 7, 7, 7, 7, 7}));
+
+  auto output = srv.getOutput(*astOutput);
+
+  // compare output with expected output
+  assertResult(output, expectedOutput);
+}
+
+
 TEST_F(RuntimeVisitorTest, testRotatePositive) { /* NOLINT */
   // program's input
   const char *inputs = R""""(

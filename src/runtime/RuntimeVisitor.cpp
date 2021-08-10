@@ -150,36 +150,42 @@ void SpecialRuntimeVisitor::visit(UnaryExpression &elem) {
 }
 
 void SpecialRuntimeVisitor::visit(Call &elem) {
-  if (elem.getIdentifier()!=stork::to_string(stork::reservedTokens::kw_rotate)) {
-    throw std::runtime_error("Calls other than 'rotate(identifier: label, numSteps: int);' are not supported yet!");
+  if (elem.getIdentifier()!=stork::to_string(stork::reservedTokens::kw_rotate) && elem.getIdentifier()!=stork::to_string(stork::reservedTokens::kw_modswitch)) {
+    throw std::runtime_error("Calls other than 'rotate(identifier: label, numSteps: int);' and 'modswitch(identifier: label, num: int);'  are not supported yet!");
   }
 
-  // handle 'rotate' instruction
-  if (elem.getArguments().size() < 2) {
-    throw std::runtime_error(
-        "Instruction 'rotate' requires two arguments: (1) identifier of ciphertext to be rotated "
-        "and the (2) number of steps to rotate the ciphertext.");
+  // rotate
+  if (elem.getIdentifier()==stork::to_string(stork::reservedTokens::kw_rotate)) {
+    // handle 'rotate' instruction
+    if (elem.getArguments().size() < 2) {
+      throw std::runtime_error(
+          "Instruction 'rotate' requires two arguments: (1) identifier of ciphertext to be rotated "
+          "and the (2) number of steps to rotate the ciphertext.");
+    }
+
+    // arg 0: ciphertext to rotate
+    auto ciphertextIdentifier = elem.getArguments().at(0);
+    std::unique_ptr<AbstractCiphertext> ctxt;
+    auto ciphertextIdentifierVariable = dynamic_cast<Variable *>(&ciphertextIdentifier.get());
+    if (ciphertextIdentifierVariable==nullptr) {
+      throw std::runtime_error("Argument 'ciphertext' in 'rotate' instruction must be a variable.");
+    }
+    auto scopedIdentifier = getCurrentScope().resolveIdentifier(ciphertextIdentifierVariable->getIdentifier());
+
+    // arg 1: rotation steps
+    auto steps = elem.getArguments().at(1);
+    auto stepsLiteralInt = dynamic_cast<LiteralInt *>(&steps.get());
+    if (stepsLiteralInt==nullptr) {
+      throw std::runtime_error("Argument 'steps' in 'rotate' instruction must be an integer.");
+    }
+
+    // perform rotation
+    auto rotatedCtxt = declaredCiphertexts.at(scopedIdentifier)->rotateRows(stepsLiteralInt->getValue());
+    intermedResult.push(std::move(rotatedCtxt));
   }
 
-  // arg 0: ciphertext to rotate
-  auto ciphertextIdentifier = elem.getArguments().at(0);
-  std::unique_ptr<AbstractCiphertext> ctxt;
-  auto ciphertextIdentifierVariable = dynamic_cast<Variable *>(&ciphertextIdentifier.get());
-  if (ciphertextIdentifierVariable==nullptr) {
-    throw std::runtime_error("Argument 'ciphertext' in 'rotate' instruction must be a variable.");
-  }
-  auto scopedIdentifier = getCurrentScope().resolveIdentifier(ciphertextIdentifierVariable->getIdentifier());
-
-  // arg 1: rotation steps
-  auto steps = elem.getArguments().at(1);
-  auto stepsLiteralInt = dynamic_cast<LiteralInt *>(&steps.get());
-  if (stepsLiteralInt==nullptr) {
-    throw std::runtime_error("Argument 'steps' in 'rotate' instruction must be an integer.");
-  }
-
-  // perform rotation
-  auto rotatedCtxt = declaredCiphertexts.at(scopedIdentifier)->rotateRows(stepsLiteralInt->getValue());
-  intermedResult.push(std::move(rotatedCtxt));
+  //modswitch
+  
 }
 
 void SpecialRuntimeVisitor::visit(ExpressionList &elem) {

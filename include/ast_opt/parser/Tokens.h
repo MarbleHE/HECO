@@ -106,6 +106,7 @@ enum struct reservedTokens {
   kw_public,
 
   kw_rotate,
+  kw_modswitch,
 
   kw_true,
   kw_false
