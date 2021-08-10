@@ -2,12 +2,12 @@
 #include "include/ast_opt/parser/Parser.h"
 #include "include/ast_opt/runtime/RuntimeVisitor.h"
 #include "include/ast_opt/runtime/SimulatorCiphertextFactory.h"
-#include "ast_opt/visitor/IdentifyNoisySubtreeVisitor.h"
 #include "ast_opt/visitor/InsertModSwitchVisitor.h"
 #include <ast_opt/visitor/GetAllNodesVisitor.h>
 #include "../ASTComparison.h"
 #include "ast_opt/visitor/ProgramPrintVisitor.h"
 #include "ast_opt/visitor/PrintVisitor.h"
+#include "ast_opt/utilities/PerformanceSeal.h"
 
 #include "gtest/gtest.h"
 #ifdef HAVE_SEAL_BFV
@@ -20,6 +20,8 @@ class InsertModSwitchVisitorTest : public ::testing::Test {
   void SetUp() override {
     scf = std::make_unique<SimulatorCiphertextFactory>(8192);
     tcv = std::make_unique<TypeCheckingVisitor>();
+
+    print_parameters(scf->getContext());
   }
 
   void registerInputVariable(Scope &rootScope, const std::string &identifier, Datatype datatype) {
@@ -151,7 +153,7 @@ TEST_F(InsertModSwitchVisitorTest, getModSwitchNodesTestOneFound) {
 
 TEST_F(InsertModSwitchVisitorTest, getModSwitchNodesTestNoneFound) {
 
-  /// x^2 * x^2 : we don not exoect a site where insertion of modswitch is possible.
+  /// x^2 * x^2 : we don not expect a site where insertion of modswitch is possible.
 
 
 // program's input
@@ -382,29 +384,30 @@ TEST_F(InsertModSwitchVisitorTest, rewriteASTmodSwitchBeforeLastBinaryOpExpected
 
 TEST_F(InsertModSwitchVisitorTest, rewriteASTTwomodSwitchesBeforeLastBinaryOpExpected) {
 
+  /// input:
+  /// test circuit:    noise heuristics:     #primes in coeffmodulus
+  /// x   x           32    32                 4     3
+  ///  \ /             \    /                   \   /
+  ///   x^2           result_noise                4
   ///
-  /// (x^4 + y) * z^4
-  /// expected: modSwitch ops inserted before last binary op
-
+  /// We manipulate noise map and coeff modulus map in a way that two modSwitches are to be inserted after binaryOp.getLeft()
+  ///
+  /// Expected output program:
+  /// {
+  ///  secret int result = (modswitch(__input0__, 1) *** modswitch(__input1__, 2));
+  ///  return result;
+  /// }
 
   // program's input
   const char *inputs = R""""(
       secret int __input0__ = {43,  1,   1,   1,  22, 11, 425,  0, 1, 7};
       secret int __input1__ = {24, 34, 222,   4,    1, 4,   9, 22, 1, 3};
-      secret int __input2__ = {24, 34, 222,   4,    1, 4,   9, 22, 1, 3};
     )"""";
   auto astInput = Parser::parse(std::string(inputs));
 
   // program specification
   const char *program = R""""(
-      secret int powx2 = __input0__ *** __input0__;
-      secret int powx3 = powx2 *** __input0__;
-      secret int powx4 = powx3 *** __input0__;
-      secret int powx4plusy = powx4 +++ __input1__;
-      secret int powz2 = __input2__ *** __input2__;
-      secret int powz3 = powz2 *** __input2__;
-      secret int powz4 = powz3 *** __input2__;
-      secret int result = powx4plusy *** powz4;
+      secret int result = (__input0__ ***  __input1__);
       return result;
     )"""";
   auto astProgram = Parser::parse(std::string(program));
@@ -418,61 +421,64 @@ TEST_F(InsertModSwitchVisitorTest, rewriteASTTwomodSwitchesBeforeLastBinaryOpExp
   auto rootScope = std::make_unique<Scope>(*astProgram);
   registerInputVariable(*rootScope, "__input0__", Datatype(Type::INT, true));
   registerInputVariable(*rootScope, "__input1__", Datatype(Type::INT, true));
-  registerInputVariable(*rootScope, "__input2__", Datatype(Type::INT, true));
 
   tcv->setRootScope(std::move(rootScope));
   astProgram->accept(*tcv);
+
+  std::stringstream ss;
+  ProgramPrintVisitor p(ss);
+  astProgram->accept(p);
+  std::cout << ss.str() << std::endl;
 
   // run the program and get its output
   auto map = tcv->getSecretTaintedNodes();
   RuntimeVisitor srv(*scf, *astInput, map);
   srv.executeAst(*astProgram);
 
-  // Get nodes, but only expression nodes, not the block or return
   GetAllNodesVisitor vis;
   astProgram->accept(vis);
 
-
   //  map of coeff modulus vectors: we initially populate this map with the original coeff_modulus vector for each node in the AST
   auto coeff_modulus = scf->getContext().first_context_data()->parms().coeff_modulus();
+
   // initially every node has the same ctxtmodulus vector
   std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap;
   for (auto n : vis.v) {
     coeffmodulusmap[n->getUniqueNodeId()] = coeff_modulus;
   }
 
-  coeffmodulusmap["Variable_103"].pop_back(); // TODO: think about a different test or something
-
-//  GetAllNodesVisitor allVis;
-//  astProgram->accept(allVis);
-//  for (auto n : allVis.v) {
-//    std::cout << n->getUniqueNodeId() << " " << n->toString(false) << std::endl;
+//  for (int j = 0; j < coeff_modulus.size(); j++) {
+//    std::cout << coeff_modulus[j].bit_count() << " ";
 //  }
 
+  // remove the last prime for binaryOp.getLeft() in coeffmodulus map (our goal is to have two modswitches inserted...)
+  coeffmodulusmap["Variable_33"].pop_back();
+
+  std::cout << "Initial Noise Heur: " << calcInitNoiseHeuristic() << std::endl;
+
+  auto tamperedNoiseMap = srv.getNoiseMap();
+  tamperedNoiseMap["Variable_33"] = 32;
+  tamperedNoiseMap["Variable_35"] = 32;
 
 
-  std::stringstream ss;
-  InsertModSwitchVisitor modSwitchVis(ss, srv.getNoiseMap(), coeffmodulusmap, calcInitNoiseHeuristic());
+// for (auto n : vis.v) {
+//   std::cout << "Type: " << n->toString(false) << " ID: " << n->getUniqueNodeId() << std::endl;
+// }
 
+  std::stringstream rr;
+  InsertModSwitchVisitor modSwitchVis(rr, tamperedNoiseMap, coeffmodulusmap, calcInitNoiseHeuristic());
   astProgram->accept(modSwitchVis); // find modswitching nodes
 
-  std::cout << modSwitchVis.getModSwitchNodes().size() << "nodes found" << std::endl;
+  std::cout << modSwitchVis.getModSwitchNodes().size() << " potential modSwitch insertion site(s) found:" << std::endl;
 
   auto binExprIns = modSwitchVis.getModSwitchNodes()[0]; //  modSwitches to be inserted
 
   auto rewritten_ast = modSwitchVis.insertModSwitchInAst(&astProgram, binExprIns, coeffmodulusmap);
 
-  // modSwitchVis.updateNoiseMap(*rewritten_ast, &srv);
-
-  std::stringstream rr;
-  PrintVisitor p(rr);
-  rewritten_ast->accept(p);
-  std::cout << rr.str() << std::endl;
-
-
-  //In this case, asts should be identical
-  ASSERT_NE(rewritten_ast, nullptr);
-//  compareAST(*astProgram_expected, *rewritten_ast);
+  std::stringstream rs;
+  ProgramPrintVisitor q(rs);
+  rewritten_ast->accept(q);
+  std::cout << rs.str() << std::endl;
 
 }
 

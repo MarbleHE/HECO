@@ -30,7 +30,7 @@ void SpecialInsertModSwitchVisitor::visit(BinaryExpression &elem) {
     // if diff > 0 then the right operand has fewer primes remaining in the coeffmodulus chain
     if (diff > 0) {
       int sum = 0; // this holds the sum of the bit length of the coeff_moduli in the chain to compare against spent noise budget
-      for (int i = leftIndex; i >= (leftIndex - (abs(diff) + 1)); i--) {
+      for (int i = leftIndex; i >= (leftIndex - (abs(diff))); i--) {
         sum += coeffmodulusmap[elem.getLeft().getUniqueNodeId()][i].bit_count();
       }
       // if the spent noise budgets for the left and right operators are sufficiently large, we suggest a modswitch insertion procedure
@@ -42,7 +42,7 @@ void SpecialInsertModSwitchVisitor::visit(BinaryExpression &elem) {
     // if diff < 0 then the left operand has fewer primes remaining in the coeffmodulus chain
     else if (diff <0) {
       int sum = 0;
-      for (int i = rightIndex; i >= (rightIndex - (abs(diff) + 1)); i--) {
+      for (int i = rightIndex; i >= (rightIndex - (abs(diff))); i--) {
         sum += coeffmodulusmap[elem.getRight().getUniqueNodeId()][i].bit_count();
       }
       // if the spent noise budgets for the left and right operators are sufficiently large, we suggest a modswitch insertion procedure
@@ -73,11 +73,12 @@ std::unique_ptr<AbstractNode> SpecialInsertModSwitchVisitor::insertModSwitchInAs
   // if no binary expression specified return original ast
   if (binaryExpression == nullptr) {return std::move(*ast);}
 
+
   // prepare argument for 'Call' node (modswitch)
 
   // we need to know how many modswitches to insert (will be second arg to ModSwitch call)
   int leftIndex = coeffmodulusmap[binaryExpression->getLeft().getUniqueNodeId()].size() - 1;
-  int rightIndex = coeffmodulusmap[binaryExpression->getLeft().getUniqueNodeId()].size() - 1;
+  int rightIndex = coeffmodulusmap[binaryExpression->getRight().getUniqueNodeId()].size() - 1;
   int diff = leftIndex - rightIndex;
 
   // take left and right child
@@ -148,6 +149,15 @@ static std::unique_ptr<AbstractNode> removeModSwitchFromAst(std::unique_ptr<Abst
   //binaryExpression->setLeft(*l); TODO set binary left and right
 
   return std::move(*ast);
+}
+
+std::unique_ptr<AbstractNode> rewriteAst(std::unique_ptr<AbstractNode> *ast,
+                                         BinaryExpression *binaryExpression,
+                                         std::unordered_map<std::string,
+                                                            std::vector<seal::Modulus>> coeffmodulusmap) {
+
+  return nullptr;
+
 };
 
 
