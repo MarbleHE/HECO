@@ -164,15 +164,24 @@ static std::unique_ptr<AbstractNode> removeModSwitchFromAst(std::unique_ptr<Abst
   return std::move(*ast);
 }
 
-std::unique_ptr<AbstractNode> rewriteAst(std::unique_ptr<AbstractNode> *ast,
+std::unique_ptr<AbstractNode> SpecialInsertModSwitchVisitor::rewriteAst(std::unique_ptr<AbstractNode> *ast, RuntimeVisitor srv,
                                          BinaryExpression *binaryExpression,
                                          std::unordered_map<std::string,
                                          std::vector<seal::Modulus>> coeffmodulusmap) {
 
-  //1. identify sites
+  //1. identify sites eligible for modswitching
+  auto binExprIns = this->getModSwitchNodes()[0];
+
   //2. insert modsw
+  auto rewritten_ast = insertModSwitchInAst(ast, binExprIns, coeffmodulusmap);
+
   //3. recalc noise heurs
+  updateNoiseMap(*rewritten_ast, &srv);
+
   //4. remove modswitch if necessary (i.e if root nodes noise budget is 0)
+  //TODO
+
+
   //5. if modswitch was NOT removed, update coeffmodulusmap
   //5. return ast
 
