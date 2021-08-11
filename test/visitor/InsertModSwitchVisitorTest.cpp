@@ -7,6 +7,7 @@
 #include "../ASTComparison.h"
 #include "ast_opt/visitor/ProgramPrintVisitor.h"
 #include "ast_opt/visitor/PrintVisitor.h"
+#include "ast_opt/visitor/NoisePrintVisitor.h"
 #include "ast_opt/utilities/PerformanceSeal.h"
 
 #include "gtest/gtest.h"
@@ -18,7 +19,7 @@ class InsertModSwitchVisitorTest : public ::testing::Test {
   std::unique_ptr<TypeCheckingVisitor> tcv;
 
   void SetUp() override {
-    scf = std::make_unique<SimulatorCiphertextFactory>(8192);
+    scf = std::make_unique<SimulatorCiphertextFactory>(16384);
     tcv = std::make_unique<TypeCheckingVisitor>();
 
     print_parameters(scf->getContext());
@@ -354,6 +355,7 @@ TEST_F(InsertModSwitchVisitorTest, rewriteASTmodSwitchBeforeLastBinaryOpExpected
 
   //  map of coeff modulus vectors: we initially populate this map with the original coeff_modulus vector for each node in the AST
   auto coeff_modulus = scf->getContext().first_context_data()->parms().coeff_modulus();
+
   // initially every node has the same ctxtmodulus vector
   std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap;
   for (auto n : vis.v) {
@@ -376,10 +378,19 @@ TEST_F(InsertModSwitchVisitorTest, rewriteASTmodSwitchBeforeLastBinaryOpExpected
   modSwitchVis.updateCoeffModulusMap(binExprIns,1);
   coeffmodulusmap = modSwitchVis.getCoeffModulusMap();
 
-  // print coeff modulus map
-  for (auto &n : vis.v) {
-   std::cout << n->toString(false) << " " << coeffmodulusmap[n->getUniqueNodeId()].size() << std::endl;
-  }
+//  // print updated coeff modulus map: seems correct
+//  for (auto &n : vis.v) {
+//   std::cout << n->toString(false) << " " << coeffmodulusmap[n->getUniqueNodeId()].size() << std::endl;
+//  }
+
+//  std::cout << "-----" << std::endl;
+//
+//  // print noise map
+//  std::unordered_map<std::string, int> noisemap = modSwitchVis.getNoiseMap();
+//  for (auto &n : vis.v) {
+//    std::cout << n->toString(false) << " " << noisemap[n->getUniqueNodeId()]  << std::endl;
+//  }
+
 
 
   // print output program
@@ -389,9 +400,24 @@ TEST_F(InsertModSwitchVisitorTest, rewriteASTmodSwitchBeforeLastBinaryOpExpected
   std::cout << rr.str() << std::endl;
 
 
+  // expected program specification
+  const char *expected_program = R""""(
+      secret int powx2 = (__input0__ *** __input0__);
+      secret int powx3 = (powx2 *** __input0__);
+      secret int powx4 = (powx3 *** __input0__);
+      secret int powx4plusy = (powx4 +++ __input1__);
+      secret int powz2 = (__input2__ *** __input2__);
+      secret int powz3 = (powz2 *** __input2__);
+      secret int powz4 = (powz3 *** __input2__);
+      secret int result = (modswitch(powx4plusy, 1) *** modswitch(powz4, 1));
+      return result;
+    )"""";
+  auto astProgram_expected = Parser::parse(std::string(expected_program));
+
+
   //In this case, asts should be identical
   ASSERT_NE(rewritten_ast, nullptr);
-//  compareAST(*astProgram_expected, *rewritten_ast);
+  compareAST(*astProgram_expected, *rewritten_ast);
 
 }
 

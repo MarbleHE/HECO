@@ -35,7 +35,6 @@ void SpecialInsertModSwitchVisitor::visit(BinaryExpression &elem) {
       }
       // if the spent noise budgets for the left and right operators are sufficiently large, we suggest a modswitch insertion procedure
       if ((sum < spentNoiseBudgetLeft) && spentNoiseBudgetRight > coeffmodulusmap[elem.getRight().getUniqueNodeId()][rightIndex].bit_count()) {
-       // std::cout << "Suggesting insertion of modswitch(es) applied to operands of node " << elem.getUniqueNodeId() << std::endl;
         modSwitchNodes.push_back(&elem);
       }
     }
@@ -47,7 +46,6 @@ void SpecialInsertModSwitchVisitor::visit(BinaryExpression &elem) {
       }
       // if the spent noise budgets for the left and right operators are sufficiently large, we suggest a modswitch insertion procedure
       if ((sum < spentNoiseBudgetRight) && spentNoiseBudgetLeft > coeffmodulusmap[elem.getLeft().getUniqueNodeId()][leftIndex].bit_count()) {
-      //  std::cout << "Suggesting insertion of modswitch(es) applied to operands of node " << elem.getUniqueNodeId() << std::endl;
         modSwitchNodes.push_back(&elem);
       }
     }
@@ -55,8 +53,6 @@ void SpecialInsertModSwitchVisitor::visit(BinaryExpression &elem) {
     else {
       if ((spentNoiseBudgetLeft > coeffmodulusmap[elem.getLeft().getUniqueNodeId()][leftIndex].bit_count()) &&
             (spentNoiseBudgetRight > coeffmodulusmap[elem.getRight().getUniqueNodeId()][rightIndex].bit_count())) {
-       // std::cout << "Suggesting insertion of modswitch(es) applied to operands of node " << elem.getUniqueNodeId() << " left = " << elem.getLeft().toString(
-         //   false) << " right = " << elem.getRight().toString(false) << std::endl;
         modSwitchNodes.push_back(&elem);
       }
     }
@@ -148,7 +144,6 @@ void SpecialInsertModSwitchVisitor::updateCoeffModulusMap(BinaryExpression *bina
     for (int i = 0; i < numSwitches; i++) {
       coeffmodulusmap[node->getUniqueNodeId()].pop_back();
     }
-    std::cout << coeffmodulusmap[node->getUniqueNodeId()].size() << std::endl;
     if (node->hasParent()) {
       node = &node->getParent();
     }
@@ -172,12 +167,12 @@ static std::unique_ptr<AbstractNode> removeModSwitchFromAst(std::unique_ptr<Abst
 std::unique_ptr<AbstractNode> rewriteAst(std::unique_ptr<AbstractNode> *ast,
                                          BinaryExpression *binaryExpression,
                                          std::unordered_map<std::string,
-                                                            std::vector<seal::Modulus>> coeffmodulusmap) {
+                                         std::vector<seal::Modulus>> coeffmodulusmap) {
 
   //1. identify sites
   //2. insert modsw
   //3. recalc noise heurs
-  //4. remove modswitch if necessary
+  //4. remove modswitch if necessary (i.e if root nodes noise budget is 0)
   //5. if modswitch was NOT removed, update coeffmodulusmap
   //5. return ast
 
@@ -188,6 +183,9 @@ std::unique_ptr<AbstractNode> rewriteAst(std::unique_ptr<AbstractNode> *ast,
 std::unordered_map<std::string, std::vector<seal::Modulus>> SpecialInsertModSwitchVisitor::getCoeffModulusMap() {
   return coeffmodulusmap;
 }
-;
+
+std::unordered_map<std::string, int> SpecialInsertModSwitchVisitor::getNoiseMap() {
+  return noise_map;
+};
 
 

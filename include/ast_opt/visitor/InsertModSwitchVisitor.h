@@ -100,6 +100,10 @@ class SpecialInsertModSwitchVisitor : public ScopedVisitor {
   /// \return coeffmodulusmap
   std::unordered_map<std::string, std::vector<seal::Modulus>> getCoeffModulusMap();
 
+  /// Return noisemap
+  /// \return noisemap
+  std::unordered_map<std::string, int> getNoiseMap();
+
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_VISITOR_INSERTMODSWITCHVISITOR_H_
