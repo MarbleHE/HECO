@@ -155,11 +155,22 @@ static std::unique_ptr<AbstractNode> removeModSwitchFromAst(std::unique_ptr<Abst
                                                             BinaryExpression *binaryExpression,
                                                             std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap){
 
-  auto l = (binaryExpression->getLeft().begin());
-  l->setParent(binaryExpression);
-  auto r = (binaryExpression->getRight().begin());
-  r->setParent(binaryExpression);
-  //binaryExpression->setLeft(*l); TODO set binary left and right
+  if (!binaryExpression || !binaryExpression->hasLeft() || !binaryExpression->hasRight()) {
+    //throw exception
+  }
+
+  auto &l = binaryExpression->getLeft();
+  auto &r = binaryExpression->getRight();
+
+  if (auto clPointer = dynamic_cast<Call *>(&l)) {
+    if (!clPointer->getArguments().empty() && clPointer->getIdentifier() == "modswitch") {
+    //  auto x = clPointer->takeArgument(0); // returns unique pointer and ownership
+    //  binaryExpression->setLeft(std::move(x));
+    }
+  }
+
+  // do for right as well
+
 
   return std::move(*ast);
 }

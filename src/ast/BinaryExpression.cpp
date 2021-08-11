@@ -87,6 +87,7 @@ const AbstractExpression &BinaryExpression::getRight() const {
 
 void BinaryExpression::setLeft(std::unique_ptr<AbstractExpression> newLeft) {
   left = std::move(newLeft);
+  left->setParent(this);
 }
 
 void BinaryExpression::setOperator(Operator newOperator) {
@@ -95,6 +96,7 @@ void BinaryExpression::setOperator(Operator newOperator) {
 
 void BinaryExpression::setRight(std::unique_ptr<AbstractExpression> newRight) {
   right = std::move(newRight);
+  right->setParent(this);
 }
 
 std::unique_ptr<AbstractExpression> BinaryExpression::takeLeft() {
