@@ -75,7 +75,6 @@ std::unique_ptr<AbstractNode> SpecialInsertModSwitchVisitor::insertModSwitchInAs
 
 
   // prepare argument for 'Call' node (modswitch)
-
   // we need to know how many modswitches to insert (will be second arg to ModSwitch call)
   int leftIndex = coeffmodulusmap[binaryExpression->getLeft().getUniqueNodeId()].size() - 1;
   int rightIndex = coeffmodulusmap[binaryExpression->getRight().getUniqueNodeId()].size() - 1;
@@ -121,9 +120,6 @@ std::unique_ptr<AbstractNode> SpecialInsertModSwitchVisitor::insertModSwitchInAs
   binaryExpression->setLeft(std::move(cLeft));
   binaryExpression->setRight(std::move(cRight));
 
-  //update coeffmodulus map appropriately
-  //TODO
-
   return (std::move(*ast));
 }
 
@@ -133,9 +129,12 @@ std::vector<BinaryExpression *> SpecialInsertModSwitchVisitor::getModSwitchNodes
 
 void SpecialInsertModSwitchVisitor::updateNoiseMap(AbstractNode& astProgram, RuntimeVisitor *srv) {
   // execute ast
-  //TODO: fix the exception (make RuntimeVisitor support ModSwitch)
   srv->executeAst(astProgram);
   this->noise_map = srv->getNoiseMap();
+}
+
+void SpecialInsertModSwitchVisitor::updateCoeffModulusMap(BinaryExpression *binaryExpression) {
+
 }
 
 static std::unique_ptr<AbstractNode> removeModSwitchFromAst(std::unique_ptr<AbstractNode> *ast,
@@ -155,6 +154,13 @@ std::unique_ptr<AbstractNode> rewriteAst(std::unique_ptr<AbstractNode> *ast,
                                          BinaryExpression *binaryExpression,
                                          std::unordered_map<std::string,
                                                             std::vector<seal::Modulus>> coeffmodulusmap) {
+
+  //1. identify sites
+  //2. insert modsw
+  //3. recalc noise heurs
+  //4. remove modswitch if necessary
+  //5. if modswitch was NOT removed, update coeffmodulusmap
+  //5. return ast
 
   return nullptr;
 

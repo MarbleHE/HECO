@@ -368,7 +368,7 @@ TEST_F(InsertModSwitchVisitorTest, rewriteASTmodSwitchBeforeLastBinaryOpExpected
 
   auto rewritten_ast = modSwitchVis.insertModSwitchInAst(&astProgram, binExprIns, coeffmodulusmap);
 
- // modSwitchVis.updateNoiseMap(*rewritten_ast, &srv);
+  modSwitchVis.updateNoiseMap(*rewritten_ast, &srv);
 
   std::stringstream rr;
   ProgramPrintVisitor p(rr);

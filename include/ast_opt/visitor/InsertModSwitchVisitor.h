@@ -89,6 +89,11 @@ class SpecialInsertModSwitchVisitor : public ScopedVisitor {
                                            BinaryExpression *binaryExpression = nullptr,
                                            std::unordered_map<std::string,
                                                               std::vector<seal::Modulus>> coeffmodulusmap = {});
+
+  /// Function to update the coefficient modulus map: After modswitching, the coefficient modulus for all ancestors of the
+  /// modSwitched nodes will change.
+  /// \param binaryExpression
+  void updateCoeffModulusMap(BinaryExpression *binaryExpression);
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_VISITOR_INSERTMODSWITCHVISITOR_H_
