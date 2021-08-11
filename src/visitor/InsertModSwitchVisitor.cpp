@@ -164,14 +164,18 @@ static std::unique_ptr<AbstractNode> removeModSwitchFromAst(std::unique_ptr<Abst
 
   if (auto clPointer = dynamic_cast<Call *>(&l)) {
     if (!clPointer->getArguments().empty() && clPointer->getIdentifier() == "modswitch") {
-    //  auto x = clPointer->takeArgument(0); // returns unique pointer and ownership
-    //  binaryExpression->setLeft(std::move(x));
+      auto x = clPointer->takeArgument(0); // returns unique pointer and ownership
+      binaryExpression->setLeft(std::move(x));
     }
   }
 
   // do for right as well
-
-
+  if (auto crPointer = dynamic_cast<Call *>(&r)) {
+    if (!crPointer->getArguments().empty() && crPointer->getIdentifier() == "modswitch") {
+        auto x = crPointer->takeArgument(0); // returns unique pointer and ownership
+        binaryExpression->setRight(std::move(x));
+    }
+  }
   return std::move(*ast);
 }
 

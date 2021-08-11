@@ -60,12 +60,18 @@ class Call : public AbstractExpression {
   /// \return Vector of (references to) all non-null arguments
   std::vector<std::reference_wrapper<const AbstractExpression>> getArguments() const;
 
+
   /// Get (a vector of references to) all (non-null) parameters
   /// Since std::vector cannot directly handle references,
   /// a wrapper is used, but this can be used exactly like
   /// std::vector<AbstractExpression&> could, if it were possible
   /// \return Vector of (references to) all non-null arguments
   std::vector<std::reference_wrapper<AbstractExpression>> getArguments();
+
+
+  /// Take ownership of argument at position i.
+  /// \return argument at positition i
+  std::unique_ptr<AbstractExpression> takeArgument(size_t i);
 
   ///////////////////////////////////////////////
   ////////// AbstractNode Interface /////////////

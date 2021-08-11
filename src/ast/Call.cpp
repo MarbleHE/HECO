@@ -50,12 +50,22 @@ std::vector<std::reference_wrapper<const AbstractExpression>> Call::getArguments
   }
   return r;
 }
+
 std::vector<std::reference_wrapper<AbstractExpression>> Call::getArguments() {
   std::vector<std::reference_wrapper<AbstractExpression>> r;
   for (auto &a: arguments) {
     if (a) { r.emplace_back(*a); }
   }
   return r;
+}
+
+std::unique_ptr<AbstractExpression> Call::takeArgument(size_t i) {
+  if (arguments.size() > i) {
+    arguments[i]->setParent(nullptr);
+    return std::move(arguments[i]);
+  } else {
+    throw std::runtime_error("Invalid argument size");
+  }
 }
 
 ///////////////////////////////////////////////
