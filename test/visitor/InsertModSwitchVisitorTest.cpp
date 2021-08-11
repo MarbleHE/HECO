@@ -303,6 +303,7 @@ TEST_F(InsertModSwitchVisitorTest, rewriteASTmodSwitchBeforeLastBinaryOpExpected
   ///
   /// (x^4 + y) * z^4
   /// expected: modSwitch ops inserted before last binary op
+  // we also test if the noise_map is correctly recalculated and if the coeffmodulus map is correctly updated after modswitch insertion
 
 
   // program's input
@@ -368,8 +369,20 @@ TEST_F(InsertModSwitchVisitorTest, rewriteASTmodSwitchBeforeLastBinaryOpExpected
 
   auto rewritten_ast = modSwitchVis.insertModSwitchInAst(&astProgram, binExprIns, coeffmodulusmap);
 
+  // update noise map
   modSwitchVis.updateNoiseMap(*rewritten_ast, &srv);
 
+  //update coeff modulus map
+  modSwitchVis.updateCoeffModulusMap(binExprIns,1);
+  coeffmodulusmap = modSwitchVis.getCoeffModulusMap();
+
+  // print coeff modulus map
+  for (auto &n : vis.v) {
+   std::cout << n->toString(false) << " " << coeffmodulusmap[n->getUniqueNodeId()].size() << std::endl;
+  }
+
+
+  // print output program
   std::stringstream rr;
   ProgramPrintVisitor p(rr);
   rewritten_ast->accept(p);

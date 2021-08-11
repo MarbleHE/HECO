@@ -133,8 +133,27 @@ void SpecialInsertModSwitchVisitor::updateNoiseMap(AbstractNode& astProgram, Run
   this->noise_map = srv->getNoiseMap();
 }
 
-void SpecialInsertModSwitchVisitor::updateCoeffModulusMap(BinaryExpression *binaryExpression) {
-
+void SpecialInsertModSwitchVisitor::updateCoeffModulusMap(BinaryExpression *binaryExpression, int numSwitches) {
+  //check that we can even drop that many primes
+  if (numSwitches > coeffmodulusmap[binaryExpression->getUniqueNodeId()].size()) {
+    std::runtime_error("Not possible to drop  primes: coeff modulus vector too short.");
+  }
+  // first, we update the coeffmodulus for the binary expression
+  for (int i = 0; i < numSwitches; i++) {
+    coeffmodulusmap[binaryExpression->getUniqueNodeId()].pop_back();
+  }
+  // now for all ancestors
+  auto node = &binaryExpression->getParent();
+  while (node !=nullptr) {
+    for (int i = 0; i < numSwitches; i++) {
+      coeffmodulusmap[node->getUniqueNodeId()].pop_back();
+    }
+    std::cout << coeffmodulusmap[node->getUniqueNodeId()].size() << std::endl;
+    if (node->hasParent()) {
+      node = &node->getParent();
+    }
+    else {return;}
+  }
 }
 
 static std::unique_ptr<AbstractNode> removeModSwitchFromAst(std::unique_ptr<AbstractNode> *ast,
@@ -164,6 +183,11 @@ std::unique_ptr<AbstractNode> rewriteAst(std::unique_ptr<AbstractNode> *ast,
 
   return nullptr;
 
-};
+}
+
+std::unordered_map<std::string, std::vector<seal::Modulus>> SpecialInsertModSwitchVisitor::getCoeffModulusMap() {
+  return coeffmodulusmap;
+}
+;
 
 
