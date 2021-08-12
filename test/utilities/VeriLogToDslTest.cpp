@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <vector>
 #include <ast_opt/visitor/GetAllNodesVisitor.h>
 #include "ast_opt/parser/Parser.h"
 #include "../ASTComparison.h"
@@ -48,22 +49,34 @@ TEST(VerilogToDsl, testPrelim) {
 
 }
 
-TEST(VerilogToDsl, testOpenFile) {
-
-  VeriLogToDsl verilogParser("/Users/mwinger/Desktop/MasterThesis/ABC/cmake-build-debug/test/adder.v");
-
-  verilogParser.parseFile();
-
+TEST(VerilogToDsl, testTokenizeFile) {
+  VeriLogToDsl verilogParser("adder.v");
+  verilogParser.tokenizeFile();
+  EXPECT_EQ( verilogParser.getTokens().size(), 11959);
 }
 
 
 TEST(VerilogToDsl, testInputParser) {
-
+  VeriLogToDsl verilogParser("test.v");
+  verilogParser.tokenizeFile();
+  verilogParser.parseInput();
+  std::vector<std::string> inputVector = verilogParser.getInputs();
+  EXPECT_EQ(inputVector.size(), 2);
+  EXPECT_EQ(inputVector[0], "a0");
+  EXPECT_EQ(inputVector[1], "a1");
 }
 
 
 TEST(VerilogToDsl, testOutputParser) {
-
+  VeriLogToDsl verilogParser("test.v");
+  verilogParser.tokenizeFile();
+  verilogParser.parseOutput();
+  std::vector<std::string> outputVector = verilogParser.getOutputs();
+  EXPECT_EQ(outputVector.size(), 4);
+  EXPECT_EQ(outputVector[0], "f0");
+  EXPECT_EQ(outputVector[1], "f1");
+  EXPECT_EQ(outputVector[2], "f2");
+  EXPECT_EQ(outputVector[3], "cOut");
 }
 
 

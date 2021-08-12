@@ -15,8 +15,10 @@ class VeriLogToDsl {
  private:
   std::ifstream veriLogFile;
   std::string _filename;
+  std::vector<std::string> tokens;
   std::vector<std::string> inputs = {};
   std::vector<std::string> outputs = {};
+
 
 
 
@@ -26,10 +28,10 @@ class VeriLogToDsl {
   VeriLogToDsl(std::string fileName);
 
 
-  /// parse file
-  void parseFile();
+  /// parses entire file into an array of tokens (tokens)
+  void tokenizeFile();
 
-  /// parse input
+  /// parse input from tokenised file
   void parseInput();
 
 
@@ -40,6 +42,12 @@ class VeriLogToDsl {
   /// parse program
   void parseProgram();
 
+  /// get tokens array (entire file)
+  std::vector<std::string> getTokens();
+
+  std::vector<std::string> getInputs();
+
+  std::vector<std::string> getOutputs();
 
 
 };
