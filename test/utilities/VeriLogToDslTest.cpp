@@ -6,13 +6,12 @@
 #include "ast_opt/ast/OperatorExpression.h"
 #include "ast_opt/ast/Literal.h"
 #include "ast_opt/visitor/ProgramPrintVisitor.h"
-#include "ast_opt/visitor/PrintVisitor.h"
-#include "ast_opt/utilities/ConeRewriter.h"
-#include "ast_opt/visitor/BinaryToOperatorExpressionVisitor.h"
-#include "ast_opt/visitor/ParentSettingVisitor.h"
+#include "ast_opt/utilities/VeriLogToDsl.h"
 
 
 #ifdef HAVE_SEAL_BFV
+
+
 
 TEST(VerilogToDsl, testPrelim) {
 
@@ -46,6 +45,29 @@ TEST(VerilogToDsl, testPrelim) {
   astProgram->accept(p);
   std::cout << rr.str() << std::endl;
 
+
+}
+
+TEST(VerilogToDsl, testOpenFile) {
+
+  VeriLogToDsl verilogParser("/Users/mwinger/Desktop/MasterThesis/ABC/cmake-build-debug/test/adder.v");
+
+  verilogParser.parseFile();
+
+}
+
+
+TEST(VerilogToDsl, testInputParser) {
+
+}
+
+
+TEST(VerilogToDsl, testOutputParser) {
+
+}
+
+
+TEST(VerilogToDsl, testProgramParser) {
 
 }
 
