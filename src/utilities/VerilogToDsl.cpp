@@ -79,9 +79,13 @@ void VeriLogToDsl::parseOutput(){
   }
 }
 
+void VeriLogToDsl::parseAssignment(size_t startIndex, size_t endIndex){
 
 
-void VeriLogToDsl::parseProgram(){}
+
+
+
+}
 
 
 

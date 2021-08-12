@@ -40,7 +40,7 @@ class VeriLogToDsl {
 
 
   /// parse program
-  void parseProgram();
+  void parseAssignment(size_t startIndex, size_t endIndex);
 
   /// get tokens array (entire file)
   std::vector<std::string> getTokens();
