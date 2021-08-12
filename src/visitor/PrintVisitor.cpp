@@ -18,9 +18,11 @@ void SpecialPrintVisitor::visit(AbstractNode &elem) {
   // Get the current node's toString (without children)
   // This should hopefully be a single line, including end-of-line at the end
   std::string curNodeString = elem.toString(false);
+  std::string nodeId = elem.getUniqueNodeId();
 
   // Output current node at required indentation
   os << "NODE VISITED: " << getIndentation() << curNodeString;
+  os << "NODE ID: " << getIndentation() << nodeId << std::endl;
 
   // increment indentation level and visit children, decrement afterwards
   ++indentation_level;

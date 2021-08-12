@@ -75,7 +75,7 @@ set(TEST_FILES
         visitor/TypeCheckingVisitorTest.cpp
         visitor/VectorizerTest.cpp
         visitor/VisitorTest.cpp
-        visitor/InsertModSwitchVisitorTest.cpp)
+        visitor/InsertModSwitchVisitorTest.cpp utilities/VeriLogToDslTest.cpp)
 
 add_executable(testing-all
         ${TEST_FILES})

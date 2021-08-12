@@ -378,27 +378,11 @@ TEST_F(InsertModSwitchVisitorTest, rewriteASTmodSwitchBeforeLastBinaryOpExpected
   modSwitchVis.updateCoeffModulusMap(binExprIns,1);
   coeffmodulusmap = modSwitchVis.getCoeffModulusMap();
 
-//  // print updated coeff modulus map: seems correct
-//  for (auto &n : vis.v) {
-//   std::cout << n->toString(false) << " " << coeffmodulusmap[n->getUniqueNodeId()].size() << std::endl;
-//  }
-
-//  std::cout << "-----" << std::endl;
-//
-//  // print noise map
-//  std::unordered_map<std::string, int> noisemap = modSwitchVis.getNoiseMap();
-//  for (auto &n : vis.v) {
-//    std::cout << n->toString(false) << " " << noisemap[n->getUniqueNodeId()]  << std::endl;
-//  }
-
-
-
   // print output program
   std::stringstream rr;
   ProgramPrintVisitor p(rr);
   rewritten_ast->accept(p);
   std::cout << rr.str() << std::endl;
-
 
   // expected program specification
   const char *expected_program = R""""(
@@ -486,10 +470,6 @@ TEST_F(InsertModSwitchVisitorTest, rewriteASTTwomodSwitchesBeforeLastBinaryOpExp
     coeffmodulusmap[n->getUniqueNodeId()] = coeff_modulus;
   }
 
-//  for (int j = 0; j < coeff_modulus.size(); j++) {
-//    std::cout << coeff_modulus[j].bit_count() << " ";
-//  }
-
   // remove the last prime for binaryOp.getLeft() in coeffmodulus map (our goal is to have two modswitches inserted...)
   coeffmodulusmap["Variable_33"].pop_back();
 
@@ -498,11 +478,6 @@ TEST_F(InsertModSwitchVisitorTest, rewriteASTTwomodSwitchesBeforeLastBinaryOpExp
   auto tamperedNoiseMap = srv.getNoiseMap();
   tamperedNoiseMap["Variable_33"] = 32;
   tamperedNoiseMap["Variable_35"] = 32;
-
-
-// for (auto n : vis.v) {
-//   std::cout << "Type: " << n->toString(false) << " ID: " << n->getUniqueNodeId() << std::endl;
-// }
 
   std::stringstream rr;
   InsertModSwitchVisitor modSwitchVis(rr, tamperedNoiseMap, coeffmodulusmap, calcInitNoiseHeuristic());
@@ -514,10 +489,71 @@ TEST_F(InsertModSwitchVisitorTest, rewriteASTTwomodSwitchesBeforeLastBinaryOpExp
 
   auto rewritten_ast = modSwitchVis.insertModSwitchInAst(&astProgram, binExprIns, coeffmodulusmap);
 
+  std::cout << "Resulting AST:" << std::endl;
+
   std::stringstream rs;
   ProgramPrintVisitor q(rs);
   rewritten_ast->accept(q);
   std::cout << rs.str() << std::endl;
+
+  const char *expected_program = R""""(
+     secret int result = (modswitch(__input0__, 1) *** modswitch(__input1__, 2));
+     return result;
+    )"""";
+  auto expected_astProgram = Parser::parse(std::string(expected_program));
+
+  compareAST(*rewritten_ast, *expected_astProgram);
+}
+
+TEST_F(InsertModSwitchVisitorTest, removeModSwitchTest) {
+  /// we expect removing of the modswitches
+
+  // program's input
+  const char *inputs = R""""(
+      secret int __input0__ = {43,  1,   1,   1,  22, 11, 425,  0, 1, 7};
+      secret int __input1__ = {24, 34, 222,   4,    1, 4,   9, 22, 1, 3};
+    )"""";
+  auto astInput = Parser::parse(std::string(inputs));
+
+  // program specification
+  const char *program = R""""(
+      secret int result = (modswitch(__input0__, 1) *** modswitch(__input1__, 2));
+      return result;
+    )"""";
+  auto astProgram = Parser::parse(std::string(program));
+
+  // program's output
+  const char *outputs = R""""(
+      y = result;
+    )"""";
+  auto astOutput = Parser::parse(std::string(outputs));
+  // create and prepopulate TypeCheckingVisitor
+  auto rootScope = std::make_unique<Scope>(*astProgram);
+  registerInputVariable(*rootScope, "__input0__", Datatype(Type::INT, true));
+  registerInputVariable(*rootScope, "__input1__", Datatype(Type::INT, true));
+
+  std::cout << "Here:" << std::endl;
+
+//  std::stringstream ss;
+//  PrintVisitor p(ss);
+//  astProgram->accept(p);
+//  std::cout << ss.str() << std::endl;
+
+  // WANT: remove BinaryExpression_40
+  // TODO: remove modswitches
+
+
+  //expected circuit
+  // program specification
+  const char *expected_program = R""""(
+      secret int result = (__input0__ ***  __input1__);
+      return result;
+    )"""";
+  auto expected_astProgram = Parser::parse(std::string(expected_program));
+
+  //compareAST(*rewritten_ast, *expected_astProgram);
+
+ EXPECT_EQ(true, false);
 
 }
 

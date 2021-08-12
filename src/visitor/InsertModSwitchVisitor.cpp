@@ -194,14 +194,19 @@ std::unique_ptr<AbstractNode> SpecialInsertModSwitchVisitor::rewriteAst(std::uni
   updateNoiseMap(*rewritten_ast, &srv);
 
   //4. remove modswitch if necessary (i.e if root nodes noise budget is 0)
-  //TODO
+  //
 
-
-  //5. if modswitch was NOT removed, update coeffmodulusmap
-  //5. return ast
-
-  return nullptr;
-
+  auto noiseMap = srv.getNoiseMap();
+//
+  if (noiseMap[rewritten_ast->getUniqueNodeId()] == 0) {
+   // auto final_ast = removeModSwitchFromAst(&rewritten_ast);
+  // return std::move(removeModSwitchFromAst(&rewritten_ast));
+  }
+//  else { //5. if modswitch was NOT removed, update coeffmodulusmap
+//    updateNoiseMap(*rewritten_ast, &srv);
+//  }
+//  //5. return ast
+//  return std::move(rewritten_ast);
 }
 
 std::unordered_map<std::string, std::vector<seal::Modulus>> SpecialInsertModSwitchVisitor::getCoeffModulusMap() {

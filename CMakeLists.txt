@@ -150,6 +150,7 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/utilities/PlainVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/PlaintextNorm.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/Scope.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/utilities/VerilogToDsl.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/BinaryToOperatorExpressionVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/CountOpsVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/CountOpsVisitor.cpp
@@ -187,7 +188,7 @@ set(HEADER_ONLY_SOURCES
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/SimulatorCiphertextFactory.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/VariableMap.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/Visitor.h
-        include/ast_opt/visitor/InsertModSwitchVisitor.h src/visitor/InsertModSwitchVisitor.cpp)
+        include/ast_opt/visitor/InsertModSwitchVisitor.h src/visitor/InsertModSwitchVisitor.cpp src/utilities/VerilogToDsl.cpp include/ast_opt/utilities/VeriLogToDsl.h)
 
 # This contains the headers that developers that want to link directly against ABC might need to have access to
 # These are the headers that are installed when ABC is installed as a system-wide library
@@ -240,6 +241,7 @@ set(PUBLIC_HEADERS
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/ScopedVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/VariableMap.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/VariableMap.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/VerilogToDsl.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/BinaryToOperatorExpressionVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/CountOpsVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/CountOpsVisitor.h
