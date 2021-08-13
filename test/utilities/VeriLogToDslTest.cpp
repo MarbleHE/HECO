@@ -79,9 +79,45 @@ TEST(VerilogToDsl, testOutputParser) {
   EXPECT_EQ(outputVector[3], "cOut");
 }
 
+TEST(VerilogToDsl, testFindAssignBlocks) {
 
-TEST(VerilogToDsl, testProgramParser) {
 
+  VeriLogToDsl verilogParser("test.v");
+  verilogParser.tokenizeFile();
+  int firstAssign = verilogParser.findNextAssignmentBlock(0);
+  int secondAssign = verilogParser.findNextAssignmentBlock(firstAssign);
+
+  EXPECT_EQ(firstAssign, 19);
+  EXPECT_EQ(secondAssign, 29);
+
+}
+
+
+TEST(VerilogToDsl, testAssParser) {
+  VeriLogToDsl verilogParser("test.v");
+  verilogParser.tokenizeFile();
+  int firstAssign = verilogParser.findNextAssignmentBlock(0);
+  int secondAssign = verilogParser.findNextAssignmentBlock(firstAssign);
+  verilogParser.parseAssignment(firstAssign + 1, secondAssign);
+
+}
+
+TEST(VerilogToDsl, testParseAndAssignment) {
+///  cout = a1 & a2   --->  ?
+
+EXPECT_EQ(true, false);
+}
+
+TEST(VerilogToDsl, testParseOrAssignment) {
+///  cout = a1 | a2   --->  ?
+
+  EXPECT_EQ(true, false);
+}
+
+TEST(VerilogToDsl, testParseisNot) {
+///  cout = ~a1 | a2   --->  ?
+
+  EXPECT_EQ(true, false);
 }
 
 #endif

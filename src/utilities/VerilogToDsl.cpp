@@ -27,7 +27,7 @@ void VeriLogToDsl::tokenizeFile() {
 void VeriLogToDsl::parseInput() {
 
    if (tokens.empty()) {
-     throw std::runtime_error("Array of tokens is empty.");
+     throw std::runtime_error("Array of tokens is empty. Unable to parse inputs.");
    }
 
    // find start and end indices of input block
@@ -55,7 +55,7 @@ void VeriLogToDsl::parseInput() {
 void VeriLogToDsl::parseOutput(){
 
   if (tokens.empty()) {
-    throw std::runtime_error("Array of tokens is empty.");
+    throw std::runtime_error("Array of tokens is empty. Unable to parse outputs.");
   }
   // find start and end indices of output block
   size_t output_start;
@@ -79,11 +79,26 @@ void VeriLogToDsl::parseOutput(){
   }
 }
 
-void VeriLogToDsl::parseAssignment(size_t startIndex, size_t endIndex){
+int VeriLogToDsl::findNextAssignmentBlock(int index) {
+  if (tokens.empty()) {
+    throw std::runtime_error("Array of tokens is empty. Unable to parse assignments.");
+  }
+  // find start and end indices of output block
+  size_t first_assign_index;
 
+  int i = index + 1;
+  // search for next 'assign'or EOF
+  while (tokens[i] != "assign" && i < tokens.size()) {
+    i++;
+  }
+  return i;
+}
 
+void VeriLogToDsl::parseAssignment(size_t startIndex,size_t endIndex) {
 
-
+  for(int  i = startIndex; i < endIndex; i++) {
+    std::cout << tokens[i] << " ";
+  }
 
 }
 

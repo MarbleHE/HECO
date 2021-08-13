@@ -38,6 +38,9 @@ class VeriLogToDsl {
   /// parse output
   void parseOutput();
 
+  /// find index of next 'assign'
+  /// \return index
+  int findNextAssignmentBlock(int index);
 
   /// parse program
   void parseAssignment(size_t startIndex, size_t endIndex);
@@ -48,6 +51,7 @@ class VeriLogToDsl {
   std::vector<std::string> getInputs();
 
   std::vector<std::string> getOutputs();
+
 
 
 };
