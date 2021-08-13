@@ -32,7 +32,6 @@ class VeriLogToDsl {
   // constructor
   VeriLogToDsl(std::string fileName);
 
-
   /// parses entire file into an array of tokens (tokens)
   void tokenizeFile();
 
@@ -55,6 +54,18 @@ class VeriLogToDsl {
 
   /// assignment parser. populates the vector of vectors with all assignments.
   void parseAllAssignments();
+
+  /// write inputs to file in DSL format
+  /// \param filename
+  void writeInputToDsl(std::string filename);
+
+  /// write outputs to file in DSL format
+  /// \param filename
+  void writeOutputToDsl(std::string filename);
+
+  /// write assignments to file in DSL format
+  /// \param filename
+  void writeAssignmentsToDsl(std::string filename);
 
   /// get tokens array (entire file)
   /// \return tokens

@@ -29,7 +29,9 @@ TEST(VerilogToDsl, testPrelim) {
 
   // program specification
   const char *program = R""""(
-      n386 = a0  *** b0;
+      secret int n386 = a0  *** b0;
+      secret int n387 = (1 - a0) *** b0;
+      secret int cOut = n1399 +++ n1404 --- n1399 *** n1404;
     )"""";
   auto astProgram = Parser::parse(std::string(program));
 
@@ -129,6 +131,22 @@ TEST(VerilogToDsl, testParseisNot) {
 ///  cout = ~a1 | a2   --->  ?
 
   EXPECT_EQ(true, false);
+}
+
+TEST(VerilogToDsl, testPrintInputAsDSL) {
+  VeriLogToDsl verilogParser("adder.v");
+  verilogParser.tokenizeFile();
+  verilogParser.parseInput();
+  verilogParser.writeInputToDsl("input_adder.dsl");
+
+  EXPECT_EQ(true, false);
+}
+
+TEST(VerilogToDsl, testPrintAssignmentsAsDSL) {
+  VeriLogToDsl verilogParser("adder.v");
+  verilogParser.tokenizeFile();
+  verilogParser.parseAllAssignments();
+  verilogParser.writeAssignmentsToDsl("assignment_adder.dsl");
 }
 
 #endif

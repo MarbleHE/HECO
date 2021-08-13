@@ -167,6 +167,58 @@ void VeriLogToDsl::parseAllAssignments() {
   }
 }
 
+void VeriLogToDsl::writeInputToDsl(std::string filename) {
+
+  std::ofstream inputDSL;
+  inputDSL.open (filename);
+  for (int i = 0; i < inputs.size(); i++) {
+    inputDSL << "secret int " << inputs[i] << " = {43,  1,   1,   1,  22, 11, 425,  0, 1, 7};\n";
+  }
+  inputDSL.close();
+}
+
+void VeriLogToDsl::writeOutputToDsl(std::string filename) {
+  //TODO implement
+}
+
+void VeriLogToDsl::writeAssignmentsToDsl(std::string filename) {
+
+  std::ofstream assignmentDSL;
+  assignmentDSL.open (filename);
+
+  for (int i = 0; i < assignments.size(); i++ ) {
+    // take current assignment
+    std::vector<std::string> currentAss = assignments[i];
+    // check if any of the operands start with "~" and if so then do: ~operand ----> (1 - operand)
+    if (currentAss[1][0] == '~') {
+      // get rid of '~'
+      currentAss[1].erase(remove(currentAss[1].begin(), currentAss[1].end(), '~'), currentAss[1].end());
+      std::string tmp = "(1 --- " + currentAss[1] + ")";
+      currentAss[1] = tmp;
+    }
+    if (currentAss[3][0] == '~') {
+      // get rid of '~'
+      currentAss[3].erase(remove(currentAss[3].begin(), currentAss[3].end(), '~'), currentAss[3].end());
+      std::string tmp = "(1 --- " + currentAss[3] + ")";
+      currentAss[3] = tmp;
+    }
+
+    // now two cases:
+    // if A | B, i.e operator is an OR: then we want (A +++ B --- A *** B)
+    // if A &B, then we want (A *** B)
+    if (currentAss[2] == "|") {
+      assignmentDSL << "secret int " << currentAss[0] << " = " << "(" << currentAss[1] << " +++ " << currentAss[3] << " --- " <<
+                   currentAss[1] << " *** " << currentAss[3] << ");\n";
+    } else if (currentAss[2] == "&") {
+      assignmentDSL << "secret int " << currentAss[0] << " = " << currentAss[1] << " *** " << currentAss[3] << ";\n";
+    } else {throw std::runtime_error("Operator unknown");}
+
+
+  }
+
+}
+
+
 std::vector<std::string> VeriLogToDsl::getTokens() {
   return tokens;
 }
