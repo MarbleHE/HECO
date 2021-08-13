@@ -8,6 +8,7 @@
 #include <vector>
 #include <string>
 #include <sstream>
+//
 
 
 class VeriLogToDsl {
@@ -19,8 +20,12 @@ class VeriLogToDsl {
   std::vector<std::string> inputs = {};
   std::vector<std::string> outputs = {};
 
-
-
+  ///vector holding assignments:
+  /// assignment[0]: result
+  /// assignment[1]: operand1
+  /// assignment[2]: operator
+  /// assignment[3]: operand2
+  std::vector<std::vector<std::string>> assignments;
 
  public:
 
@@ -42,19 +47,25 @@ class VeriLogToDsl {
   /// \return index
   int findNextAssignmentBlock(int index);
 
-  /// parse program
-  void parseAssignment(size_t startIndex, size_t endIndex);
+  /// parse single assignment
+  /// \param startIndex index of first element after 'assign'
+  /// \param endIndex index of next 'assign'
+  /// \return vector containing assignment specified by its indices
+  std::vector<std::string> parseSingleAssignment(size_t startIndex, size_t endIndex);
+
+
 
   /// get tokens array (entire file)
+  /// \return tokens
   std::vector<std::string> getTokens();
 
+  /// get inputs vector
+  /// \return inputs
   std::vector<std::string> getInputs();
 
+  /// get outputs vector
+  /// \return outputs
   std::vector<std::string> getOutputs();
-
-
-
 };
-
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_UTILITIES_VERILOGTODSL_H_

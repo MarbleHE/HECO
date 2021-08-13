@@ -93,13 +93,29 @@ TEST(VerilogToDsl, testFindAssignBlocks) {
 }
 
 
-TEST(VerilogToDsl, testAssParser) {
+TEST(VerilogToDsl, testSingleAssignmentParser) {
+  /// checks if a single assignment is parsed correctly
   VeriLogToDsl verilogParser("test.v");
   verilogParser.tokenizeFile();
   int firstAssign = verilogParser.findNextAssignmentBlock(0);
   int secondAssign = verilogParser.findNextAssignmentBlock(firstAssign);
-  verilogParser.parseAssignment(firstAssign + 1, secondAssign);
+  std::vector<std::string> assignment = verilogParser.parseSingleAssignment(firstAssign + 1, secondAssign);
 
+  EXPECT_EQ("n386", assignment[0]);
+  EXPECT_EQ("a0", assignment[1]);
+  EXPECT_EQ("&", assignment[2]);
+  EXPECT_EQ("~b0", assignment[3]);
+
+}
+
+
+TEST(VerilogToDsl, testAllAssignmentsParser) {
+  /// checks if all assignments are parsed correctly
+  VeriLogToDsl verilogParser("test.v");
+  verilogParser.tokenizeFile();
+  
+
+  EXPECT_EQ(true, false);
 }
 
 TEST(VerilogToDsl, testParseAndAssignment) {

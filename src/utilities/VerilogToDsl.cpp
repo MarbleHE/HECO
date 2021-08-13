@@ -94,12 +94,56 @@ int VeriLogToDsl::findNextAssignmentBlock(int index) {
   return i;
 }
 
-void VeriLogToDsl::parseAssignment(size_t startIndex,size_t endIndex) {
+std::vector<std::string> VeriLogToDsl::parseSingleAssignment(size_t startIndex,size_t endIndex) {
+
+  std::vector<std::string> assignment;
 
   for(int  i = startIndex; i < endIndex; i++) {
-    std::cout << tokens[i] << " ";
+    assignment.push_back(tokens[i]);
   }
 
+  // clean up
+  for (int j = 0; j < assignment.size(); j++) {
+    assignment[j].erase(remove( assignment[j].begin(),  assignment[j].end(), '\\'),  assignment[j].end());
+    assignment[j].erase(remove( assignment[j].begin(),  assignment[j].end(), '['),  assignment[j].end());
+    assignment[j].erase(remove( assignment[j].begin(),  assignment[j].end(), ']'),  assignment[j].end());
+    assignment[j].erase(remove( assignment[j].begin(),  assignment[j].end(), ';'),  assignment[j].end());
+    assignment[j].erase(remove( assignment[j].begin(),  assignment[j].end(), ','),  assignment[j].end());
+    }
+  // erase whitespace, '=' elements
+  std::vector<std::string>::iterator i = assignment.begin();
+  while(i != assignment.end()) {
+    if(i->find('=', 0) != std::string::npos)
+    {
+      i = assignment.erase(i);
+    }
+    else
+    {
+      ++i;
+    }
+  }
+  std::vector<std::string>::iterator j = assignment.begin();
+  while(j != assignment.end()) {
+    if(j->find(" \t\r\n", 0) != std::string::npos)
+    {
+      j = assignment.erase(j);
+    }
+    else
+    {
+      ++j;
+    }
+  }
+  // erase empty elements (need to run this twice for some reason)
+  for (int i=0; i < assignment.size(); i++)
+  {
+    if ( assignment[i].empty() ) assignment.erase( assignment.begin() + i );
+  }
+  for (int i=0; i < assignment.size(); i++)
+  {
+    if ( assignment[i].empty() ) assignment.erase( assignment.begin() + i );
+  }
+
+  return assignment;
 }
 
 
@@ -115,5 +159,6 @@ std::vector<std::string> VeriLogToDsl::getInputs() {
 std::vector<std::string> VeriLogToDsl::getOutputs() {
   return outputs;
 }
+
 
 
