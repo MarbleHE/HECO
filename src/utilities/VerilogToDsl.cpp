@@ -98,7 +98,7 @@ std::vector<std::string> VeriLogToDsl::parseSingleAssignment(size_t startIndex,s
 
   std::vector<std::string> assignment;
 
-  for(int  i = startIndex; i < endIndex; i++) {
+  for(int  i = startIndex + 1; i < endIndex; i++) {
     assignment.push_back(tokens[i]);
   }
 
@@ -110,6 +110,7 @@ std::vector<std::string> VeriLogToDsl::parseSingleAssignment(size_t startIndex,s
     assignment[j].erase(remove( assignment[j].begin(),  assignment[j].end(), ';'),  assignment[j].end());
     assignment[j].erase(remove( assignment[j].begin(),  assignment[j].end(), ','),  assignment[j].end());
     }
+
   // erase whitespace, '=' elements
   std::vector<std::string>::iterator i = assignment.begin();
   while(i != assignment.end()) {
@@ -146,7 +147,25 @@ std::vector<std::string> VeriLogToDsl::parseSingleAssignment(size_t startIndex,s
   return assignment;
 }
 
+void VeriLogToDsl::parseAllAssignments() {
+  // get vector with indices of all 'assign' tokens
+  std::vector<int> assignIndices;
+  for (int i = 0; i < tokens.size(); i++) {
+    if (tokens[i] == "assign") {
+      assignIndices.push_back(i);
+    }
+  }
+  for (int i = 0; i < tokens.size(); i++) {
+    if (tokens[i] == "endmodule") {
+      assignIndices.push_back(i);
+    }
+  }
 
+  // parse all assignments
+  for (int i = 0; i < assignIndices.size() - 1; i++) {
+    assignments.push_back(parseSingleAssignment(assignIndices[i], assignIndices[i+1]));
+  }
+}
 
 std::vector<std::string> VeriLogToDsl::getTokens() {
   return tokens;
@@ -158,6 +177,10 @@ std::vector<std::string> VeriLogToDsl::getInputs() {
 
 std::vector<std::string> VeriLogToDsl::getOutputs() {
   return outputs;
+}
+
+std::vector<std::vector<std::string>> VeriLogToDsl::getAssignments() {
+  return assignments;
 }
 
 

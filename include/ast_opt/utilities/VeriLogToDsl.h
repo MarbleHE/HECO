@@ -53,7 +53,8 @@ class VeriLogToDsl {
   /// \return vector containing assignment specified by its indices
   std::vector<std::string> parseSingleAssignment(size_t startIndex, size_t endIndex);
 
-
+  /// assignment parser. populates the vector of vectors with all assignments.
+  void parseAllAssignments();
 
   /// get tokens array (entire file)
   /// \return tokens
@@ -66,6 +67,12 @@ class VeriLogToDsl {
   /// get outputs vector
   /// \return outputs
   std::vector<std::string> getOutputs();
+
+  /// get assignments vector
+  /// \return assignments (vector holding vectors with all assignments)
+  std::vector<std::vector<std::string>> getAssignments();
+
+
 };
 
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_UTILITIES_VERILOGTODSL_H_
