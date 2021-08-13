@@ -20,8 +20,6 @@ TEST(VerilogToDsl, testPrelim) {
 /// ...
 ///
 
-
-
   // program's input
   const char *inputs = R""""(
       secret int a0;
@@ -45,8 +43,6 @@ TEST(VerilogToDsl, testPrelim) {
   ProgramPrintVisitor p(rr);
   astProgram->accept(p);
   std::cout << rr.str() << std::endl;
-
-
 }
 
 TEST(VerilogToDsl, testTokenizeFile) {
@@ -54,7 +50,6 @@ TEST(VerilogToDsl, testTokenizeFile) {
   verilogParser.tokenizeFile();
   EXPECT_EQ( verilogParser.getTokens().size(), 11959);
 }
-
 
 TEST(VerilogToDsl, testInputParser) {
   VeriLogToDsl verilogParser("test.v");
@@ -65,7 +60,6 @@ TEST(VerilogToDsl, testInputParser) {
   EXPECT_EQ(inputVector[0], "a0");
   EXPECT_EQ(inputVector[1], "a1");
 }
-
 
 TEST(VerilogToDsl, testOutputParser) {
   VeriLogToDsl verilogParser("test.v");
@@ -80,8 +74,6 @@ TEST(VerilogToDsl, testOutputParser) {
 }
 
 TEST(VerilogToDsl, testFindAssignBlocks) {
-
-
   VeriLogToDsl verilogParser("test.v");
   verilogParser.tokenizeFile();
   int firstAssign = verilogParser.findNextAssignmentBlock(0);
@@ -92,14 +84,13 @@ TEST(VerilogToDsl, testFindAssignBlocks) {
 
 }
 
-
 TEST(VerilogToDsl, testSingleAssignmentParser) {
   /// checks if a single assignment is parsed correctly
   VeriLogToDsl verilogParser("test.v");
   verilogParser.tokenizeFile();
   int firstAssign = verilogParser.findNextAssignmentBlock(0);
   int secondAssign = verilogParser.findNextAssignmentBlock(firstAssign);
-  std::vector<std::string> assignment = verilogParser.parseSingleAssignment(firstAssign + 1, secondAssign);
+  std::vector<std::string> assignment = verilogParser.parseSingleAssignment(firstAssign, secondAssign);
 
   EXPECT_EQ("n386", assignment[0]);
   EXPECT_EQ("a0", assignment[1]);
@@ -108,14 +99,18 @@ TEST(VerilogToDsl, testSingleAssignmentParser) {
 
 }
 
-
 TEST(VerilogToDsl, testAllAssignmentsParser) {
   /// checks if all assignments are parsed correctly
   VeriLogToDsl verilogParser("test.v");
   verilogParser.tokenizeFile();
-  
+  verilogParser.parseAllAssignments();
+  std::vector<std::vector<std::string>> assignments = verilogParser.getAssignments();
 
-  EXPECT_EQ(true, false);
+  EXPECT_EQ(assignments.size(), 3);
+  EXPECT_EQ("n386", assignments[0][0]);
+  EXPECT_EQ("a0", assignments[0][1]);
+  EXPECT_EQ("&", assignments[0][2]);
+  EXPECT_EQ("~b0", assignments[0][3]);
 }
 
 TEST(VerilogToDsl, testParseAndAssignment) {
