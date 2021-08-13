@@ -1894,4 +1894,83 @@ secret int cOut = (n1399 +++ n1404 --- n1399 *** n1404);
 
 }
 
+TEST_F(InsertModSwitchVisitorTest, Adder_sub_AST) {
+  // program's input
+  const char *inputs = R""""(
+      secret int a0 = {43,  1,   1,   1,  22, 11, 425,  0, 1, 7};
+      secret int a1 = {24, 34, 222,   4,    1, 4,   9, 22, 1, 3};
+
+    )"""";
+  auto astInput = Parser::parse(std::string(inputs));
+
+  // program specification
+  const char *program = R""""(
+      secret int n387 = (a1 +++ a0) *** a1;
+      secret int n388 = (1 +++ a0) *** a1;
+      return n388;
+    )"""";
+  auto astProgram = Parser::parse(std::string(program));
+
+  // program's output
+  const char *outputs = R""""(
+      y = n387;
+    )"""";
+  auto astOutput = Parser::parse(std::string(outputs));
+  // create and prepopulate TypeCheckingVisitor
+  auto rootScope = std::make_unique<Scope>(*astProgram);
+  registerInputVariable(*rootScope, "a0", Datatype(Type::INT, true));
+  registerInputVariable(*rootScope, "a1", Datatype(Type::INT, true));
+
+  std::stringstream rs;
+  ProgramPrintVisitor p(rs);
+  astProgram->accept(p);
+  std::cout << rs.str() << std::endl;
+
+  tcv->setRootScope(std::move(rootScope));
+  astProgram->accept(*tcv);
+
+  // run the program and get its output
+  auto map = tcv->getSecretTaintedNodes();
+  RuntimeVisitor srv(*scf, *astInput, map);
+  srv.executeAst(*astProgram);
+
+  // Get nodes, but only expression nodes, not the block or return
+  GetAllNodesVisitor vis;
+  astProgram->accept(vis);
+
+  //  map of coeff modulus vectors: we initially populate this map with the original coeff_modulus vector for each node in the AST
+  auto coeff_modulus = scf->getContext().first_context_data()->parms().coeff_modulus();
+
+  // initially every node has the same ctxtmodulus vector
+  std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap;
+  for (auto n : vis.v) {
+    coeffmodulusmap[n->getUniqueNodeId()] = coeff_modulus;
+  }
+
+  std::stringstream ss;
+  InsertModSwitchVisitor modSwitchVis(ss, srv.getNoiseMap(), coeffmodulusmap, calcInitNoiseHeuristic());
+
+  astProgram->accept(modSwitchVis); // find modswitching nodes
+
+  auto binExprIns = modSwitchVis.getModSwitchNodes()[0]; //  modSwitches to be inserted
+
+  auto rewritten_ast = modSwitchVis.insertModSwitchInAst(&astProgram, binExprIns, coeffmodulusmap);
+
+  // update noise map
+  modSwitchVis.updateNoiseMap(*rewritten_ast, &srv);
+
+  //update coeff modulus map
+  modSwitchVis.updateCoeffModulusMap(binExprIns,1);
+  coeffmodulusmap = modSwitchVis.getCoeffModulusMap();
+
+  // print output program
+  std::stringstream rr;
+  ProgramPrintVisitor p1(rr);
+  rewritten_ast->accept(p1);
+  std::cout << rr.str() << std::endl;
+
+}
+
+
+
 #endif
