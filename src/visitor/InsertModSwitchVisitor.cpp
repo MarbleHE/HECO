@@ -2,8 +2,6 @@
 #include "ast_opt/ast/Literal.h"
 #include "ast_opt/visitor/IdentifyNoisySubtreeVisitor.h"
 #include "ast_opt/visitor/InsertModSwitchVisitor.h"
-
-
 #include <utility>
 #include "ast_opt/ast/AbstractExpression.h"
 
@@ -151,7 +149,7 @@ void SpecialInsertModSwitchVisitor::updateCoeffModulusMap(BinaryExpression *bina
   }
 }
 
-static std::unique_ptr<AbstractNode> removeModSwitchFromAst(std::unique_ptr<AbstractNode> *ast,
+std::unique_ptr<AbstractNode> SpecialInsertModSwitchVisitor::removeModSwitchFromAst(std::unique_ptr<AbstractNode> *ast,
                                                             BinaryExpression *binaryExpression,
                                                             std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap){
 
@@ -180,33 +178,45 @@ static std::unique_ptr<AbstractNode> removeModSwitchFromAst(std::unique_ptr<Abst
 }
 
 std::unique_ptr<AbstractNode> SpecialInsertModSwitchVisitor::rewriteAst(std::unique_ptr<AbstractNode> *ast, RuntimeVisitor srv,
-                                         BinaryExpression *binaryExpression,
                                          std::unordered_map<std::string,
                                          std::vector<seal::Modulus>> coeffmodulusmap) {
 
+
+
   //1. identify sites eligible for modswitching
-  auto binExprIns = this->getModSwitchNodes()[0];
+  auto binExprIns = this->getModSwitchNodes();
 
-  //2. insert modsw
-  auto rewritten_ast = insertModSwitchInAst(ast, binExprIns, coeffmodulusmap);
+  std::unique_ptr<AbstractNode> rewritten_ast;
 
-  //3. recalc noise heurs
-  updateNoiseMap(*rewritten_ast, &srv);
+  // for each site try to insert a modswitch
+  for (int i = 1; i < binExprIns.size(); i++) {
+    std::cout << "inserting modswitch at binary expr: " << binExprIns[i]->toString(false)<< std::endl;
+    //2. insert modsw
+    rewritten_ast = insertModSwitchInAst(ast, binExprIns[i], coeffmodulusmap);
 
-  //4. remove modswitch if necessary (i.e if root nodes noise budget is 0)
-  //
+    std::cout << "...Done" <<std::endl;
 
-  auto noiseMap = srv.getNoiseMap();
-//
-  if (noiseMap[rewritten_ast->getUniqueNodeId()] == 0) {
-   // auto final_ast = removeModSwitchFromAst(&rewritten_ast);
-  // return std::move(removeModSwitchFromAst(&rewritten_ast));
+    //3. recalc noise heurs
+
+    std::cout << "Updating noise map... " << std::endl;
+
+    updateNoiseMap(*rewritten_ast, &srv);
+
+    std::cout << "...Done" <<std::endl;
+    //4. remove modswitch if necessary (i.e if root nodes noise budget is 0)
+    auto noiseMap = srv.getNoiseMap();
+
+    std::cout << "noise at root of the new ast: " << noiseMap[rewritten_ast->getUniqueNodeId()] << std::endl;
+    if (noiseMap[rewritten_ast->getUniqueNodeId()] == 0) {
+      rewritten_ast = removeModSwitchFromAst(&rewritten_ast);
+    } else {
+      // how many modswitches have been performed
+      int num = abs(int(coeffmodulusmap[binExprIns[i]->getLeft().getUniqueNodeId()].size() - coeffmodulusmap[binExprIns[i]->getRight().getUniqueNodeId()].size())) + 1;
+      // update coeff_modulus_map
+      updateCoeffModulusMap( binExprIns[i], num);
+    }
   }
-//  else { //5. if modswitch was NOT removed, update coeffmodulusmap
-//    updateNoiseMap(*rewritten_ast, &srv);
-//  }
-//  //5. return ast
-//  return std::move(rewritten_ast);
+
 }
 
 std::unordered_map<std::string, std::vector<seal::Modulus>> SpecialInsertModSwitchVisitor::getCoeffModulusMap() {

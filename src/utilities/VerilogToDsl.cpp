@@ -170,11 +170,20 @@ void VeriLogToDsl::parseAllAssignments() {
 void VeriLogToDsl::writeInputToDsl(std::string filename) {
 
   std::ofstream inputDSL;
-  inputDSL.open (filename);
+  inputDSL.open(filename);
   for (int i = 0; i < inputs.size(); i++) {
     inputDSL << "secret int " << inputs[i] << " = {43,  1,   1,   1,  22, 11, 425,  0, 1, 7};\n";
   }
+  inputDSL << "secret int one"  << " = {1,  1,   1,   1,  1, 1, 1,  1, 1, 1};\n";
   inputDSL.close();
+
+  std::ofstream registerInputvar;
+  registerInputvar.open("register");
+  for (int i = 0; i < inputs.size(); i++) {
+    registerInputvar << "registerInputVariable(*rootScope, \"" << inputs[i] << "\", Datatype(Type::INT, true));\n";
+  }
+
+
 }
 
 void VeriLogToDsl::writeOutputToDsl(std::string filename) {
@@ -193,13 +202,13 @@ void VeriLogToDsl::writeAssignmentsToDsl(std::string filename) {
     if (currentAss[1][0] == '~') {
       // get rid of '~'
       currentAss[1].erase(remove(currentAss[1].begin(), currentAss[1].end(), '~'), currentAss[1].end());
-      std::string tmp = "(1 --- " + currentAss[1] + ")";
+      std::string tmp = "(one --- " + currentAss[1] + ")";
       currentAss[1] = tmp;
     }
     if (currentAss[3][0] == '~') {
       // get rid of '~'
       currentAss[3].erase(remove(currentAss[3].begin(), currentAss[3].end(), '~'), currentAss[3].end());
-      std::string tmp = "(1 --- " + currentAss[3] + ")";
+      std::string tmp = "(one --- " + currentAss[3] + ")";
       currentAss[3] = tmp;
     }
 

@@ -71,24 +71,20 @@ class SpecialInsertModSwitchVisitor : public ScopedVisitor {
   /// \param ast the AST
   /// \param binaryExpression
   /// \param coeffmodulusmap
-  /// \return AST withoiut the modswitches
-  //TODO: implement
+  /// \return AST without the modswitches
   static std::unique_ptr<AbstractNode> removeModSwitchFromAst(std::unique_ptr<AbstractNode> *ast,
                                                               BinaryExpression *binaryExpression = nullptr,
-                                                              std::unordered_map<std::string,
-                                                              std::vector<seal::Modulus>> coeffmodulusmap = {});
+                                                              std::unordered_map<std::string,std::vector<seal::Modulus>> coeffmodulusmap = {});
 
   /// Rewrite Algorithm: Finds potential sites to insert modswitches, then inserts a modswitch, recalculates the coefficient moduli and noise maps
   /// If the remaining noise budget after insertion is greater zero, the change is kept, otherwise the modswitch is removed again.
   /// \param ast the AST
   /// \param binaryExpression
   /// \param coeffmodulusmap
-  /// \return AST reeritten AST
+  /// \return AST rewritten AST
 
   std::unique_ptr<AbstractNode> rewriteAst(std::unique_ptr<AbstractNode> *ast, RuntimeVisitor srv,
-                                           BinaryExpression *binaryExpression = nullptr,
-                                           std::unordered_map<std::string,
-                                           std::vector<seal::Modulus>> coeffmodulusmap = {});
+                                           std::unordered_map<std::string,std::vector<seal::Modulus>> coeffmodulusmap = {});
 
   /// Function to update the coefficient modulus map: After modswitching, the coefficient modulus for all ancestors of the
   /// modSwitched nodes will change.
