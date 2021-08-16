@@ -20,18 +20,19 @@ class SpecialAvoidParamMismatchVisitor;
 /// uses the Visitor<T> template to allow specifying default behaviour
 typedef Visitor<SpecialAvoidParamMismatchVisitor> AvoidParamMismatchVisitor;
 
-class SpecialInsertModSwitchVisitor : public ScopedVisitor {
+class SpecialAvoidParamMismatchVisitor : public ScopedVisitor {
 
   std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap;
 
  public:
-  explicit SpecialAvoidParamMismatchVisitor( std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap)
+  explicit SpecialAvoidParamMismatchVisitor( std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap);
 
   /// Visits an AST and based on the coefficient modulus map identifies binary expressions
   /// where a modswitch op needs to be inserted to avoid parameter mismatch
-  /// pointer to resulting binary expressions will be stored in the vector modSwitchNodes
   /// \param node
+  // TODO Implement
   void visit(BinaryExpression &node);
+
 
 };
 

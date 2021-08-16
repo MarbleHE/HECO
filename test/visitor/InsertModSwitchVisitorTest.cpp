@@ -107,6 +107,7 @@ TEST_F(InsertModSwitchVisitorTest, getModSwitchNodesTestOneFound) {
       y = result;
     )"""";
   auto astOutput = Parser::parse(std::string(outputs));
+
   // create and prepopulate TypeCheckingVisitor
   auto rootScope = std::make_unique<Scope>(*astProgram);
   registerInputVariable(*rootScope, "__input0__", Datatype(Type::INT, true));
@@ -121,7 +122,7 @@ TEST_F(InsertModSwitchVisitorTest, getModSwitchNodesTestOneFound) {
   astProgram->accept(p);
   std::cout << ss.str() << std::endl;
 
-  // run the program and get its output
+  // run the program and get its output (using the SimulatorCiphertextVisitor)
   auto map = tcv->getSecretTaintedNodes();
   RuntimeVisitor srv(*scf, *astInput, map);
   srv.executeAst(*astProgram);
