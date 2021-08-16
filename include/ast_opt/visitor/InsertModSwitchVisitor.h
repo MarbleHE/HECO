@@ -2,8 +2,6 @@
 #ifndef AST_OPTIMIZER_INCLUDE_AST_OPT_VISITOR_INSERTMODSWITCHVISITOR_H_
 #define AST_OPTIMIZER_INCLUDE_AST_OPT_VISITOR_INSERTMODSWITCHVISITOR_H_
 
-
-
 #include <list>
 #include <sstream>
 #include <string>
@@ -15,10 +13,10 @@
 #include "ast_opt/utilities/Visitor.h"
 
 
-/// Forward declaration of the class that will actually implement the PrintVisitor's logic
+/// Forward declaration of the class that will actually implement the Visitor's logic
 class SpecialInsertModSwitchVisitor;
 
-/// PrintVisitor uses the Visitor<T> template to allow specifying default behaviour
+/// ModSwitchVisitor uses the Visitor<T> template to allow specifying default behaviour
 typedef Visitor<SpecialInsertModSwitchVisitor> InsertModSwitchVisitor;
 
 class SpecialInsertModSwitchVisitor : public ScopedVisitor {

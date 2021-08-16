@@ -136,17 +136,18 @@ void SpecialInsertModSwitchVisitor::updateCoeffModulusMap(BinaryExpression *bina
   for (int i = 0; i < numSwitches; i++) {
     coeffmodulusmap[binaryExpression->getUniqueNodeId()].pop_back();
   }
-  // now for all ancestors
-  auto node = &binaryExpression->getParent();
-  while (node !=nullptr) {
-    for (int i = 0; i < numSwitches; i++) {
-      coeffmodulusmap[node->getUniqueNodeId()].pop_back();
-    }
-    if (node->hasParent()) {
-      node = &node->getParent();
-    }
-    else {return;}
-  }
+  // now for all ancestors: actually no, we will write another visitor that recursively visits the bin expressions and insert
+  // modswitches to ensure that params match
+//  auto node = &binaryExpression->getParent();
+//  while (node !=nullptr) {
+//    for (int i = 0; i < numSwitches; i++) {
+//      coeffmodulusmap[node->getUniqueNodeId()].pop_back();
+//    }
+//    if (node->hasParent()) {
+//      node = &node->getParent();
+//    }
+//    else {return;}
+//  }
 }
 
 std::unique_ptr<AbstractNode> SpecialInsertModSwitchVisitor::removeModSwitchFromAst(std::unique_ptr<AbstractNode> *ast,

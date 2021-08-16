@@ -1858,7 +1858,7 @@ secret int cOut = (n1399 +++ n1404 --- n1399 *** n1404);
   std::chrono::high_resolution_clock::time_point time_start, time_end;
   std::chrono::microseconds time_diff, time_sum;
   std::vector<std::chrono::microseconds> time_vec;
-  int count = 1000;
+  int count = 10;
 
   for (int i = 0; i < count; i++) {
     time_start = std::chrono::high_resolution_clock::now();
@@ -3707,7 +3707,7 @@ secret int cOut = (n1399 +++ n1404 --- n1399 *** n1404);
   std::vector<std::chrono::microseconds> time_vec;
   int count = 1000;
 
-  for (int i = 0; i < count; i++) {
+ // for (int i = 0; i < count; i++) {
     time_start = std::chrono::high_resolution_clock::now();
 
     srv.executeAst(*astProgram);
@@ -3719,7 +3719,7 @@ secret int cOut = (n1399 +++ n1404 --- n1399 *** n1404);
     time_sum += std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
 
     std::cout << "Elapsed Time " << time_diff.count() << std::endl;
-  }
+ // }
 
   long long avg_time = std::chrono::duration_cast<std::chrono::microseconds>(time_sum).count()/(count);
 
