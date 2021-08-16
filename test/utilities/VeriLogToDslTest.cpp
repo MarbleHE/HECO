@@ -115,38 +115,19 @@ TEST(VerilogToDsl, testAllAssignmentsParser) {
   EXPECT_EQ("~b0", assignments[0][3]);
 }
 
-TEST(VerilogToDsl, testParseAndAssignment) {
-///  cout = a1 & a2   --->  ?
-
-EXPECT_EQ(true, false);
-}
-
-TEST(VerilogToDsl, testParseOrAssignment) {
-///  cout = a1 | a2   --->  ?
-
-  EXPECT_EQ(true, false);
-}
-
-TEST(VerilogToDsl, testParseisNot) {
-///  cout = ~a1 | a2   --->  ?
-
-  EXPECT_EQ(true, false);
-}
-
 TEST(VerilogToDsl, testPrintInputAsDSL) {
-  VeriLogToDsl verilogParser("adder.v");
+  VeriLogToDsl verilogParser("div.v");
   verilogParser.tokenizeFile();
   verilogParser.parseInput();
-  verilogParser.writeInputToDsl("input_adder.dsl");
+  verilogParser.writeInputToDsl("input_div.dsl");
 
-  EXPECT_EQ(true, false);
 }
 
 TEST(VerilogToDsl, testPrintAssignmentsAsDSL) {
-  VeriLogToDsl verilogParser("adder.v");
+  VeriLogToDsl verilogParser("div.v");
   verilogParser.tokenizeFile();
   verilogParser.parseAllAssignments();
-  verilogParser.writeAssignmentsToDsl("assignment_adder.dsl");
+  verilogParser.writeAssignmentsToDsl("assignment_div.dsl");
 }
 
 #endif

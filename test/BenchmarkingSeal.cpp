@@ -33,7 +33,6 @@ TEST_F(BenchmarkingSeal, benchmark) {
  // }
 }
 
-
 TEST_F(BenchmarkingSeal, noModSwitchTest) {
 
   // set up seal context
@@ -273,7 +272,6 @@ TEST_F(BenchmarkingSeal, modSwitchTest) {
   std::cout << "Standard error: " << sqrt(double(standardDeviation) / time_vec.size())  / sqrt(time_vec.size())<< std::endl;
 }
 
-
 TEST_F(BenchmarkingSeal, xPow4noConeRewr) {
 
   // set up seal context
@@ -334,7 +332,6 @@ TEST_F(BenchmarkingSeal, xPow4noConeRewr) {
   std::chrono::microseconds time_diff;
 
 
-  //compute (x^4 + y) * z^4 WITH modswitch before last mult
 
   for(size_t j = 0; j < static_cast<size_t>(iterations); j++) {
 
@@ -377,7 +374,6 @@ TEST_F(BenchmarkingSeal, xPow4noConeRewr) {
             << std::endl;
   std::cout << "Standard error: " << sqrt(double(standardDeviation) / time_vec.size())  / sqrt(time_vec.size())<< std::endl;
 }
-
 
 TEST_F(BenchmarkingSeal, xPow4afterConeRewr) {
 

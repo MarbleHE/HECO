@@ -154,7 +154,7 @@ std::unique_ptr<AbstractNode> SpecialInsertModSwitchVisitor::removeModSwitchFrom
                                                             std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap){
 
   if (!binaryExpression || !binaryExpression->hasLeft() || !binaryExpression->hasRight()) {
-    //throw exception
+    throw std::runtime_error("Not able to remove modswitches: Either no binary expression or something else went wrong.");
   }
 
   auto &l = binaryExpression->getLeft();

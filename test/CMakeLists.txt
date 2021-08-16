@@ -75,7 +75,7 @@ set(TEST_FILES
         visitor/TypeCheckingVisitorTest.cpp
         visitor/VectorizerTest.cpp
         visitor/VisitorTest.cpp
-        visitor/InsertModSwitchVisitorTest.cpp utilities/VeriLogToDslTest.cpp)
+        visitor/InsertModSwitchVisitorTest.cpp utilities/VeriLogToDslTest.cpp BenchMarkEPFLModSwitch_add.cpp)
 
 add_executable(testing-all
         ${TEST_FILES})

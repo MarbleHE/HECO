@@ -79,10 +79,10 @@ class SpecialInsertModSwitchVisitor : public ScopedVisitor {
   /// Rewrite Algorithm: Finds potential sites to insert modswitches, then inserts a modswitch, recalculates the coefficient moduli and noise maps
   /// If the remaining noise budget after insertion is greater zero, the change is kept, otherwise the modswitch is removed again.
   /// \param ast the AST
+  /// \param srv RuntimeVisitor (to recalculate noise map for a rewritten ast)
   /// \param binaryExpression
   /// \param coeffmodulusmap
   /// \return AST rewritten AST
-
   std::unique_ptr<AbstractNode> rewriteAst(std::unique_ptr<AbstractNode> *ast, RuntimeVisitor srv,
                                            std::unordered_map<std::string,std::vector<seal::Modulus>> coeffmodulusmap = {});
 

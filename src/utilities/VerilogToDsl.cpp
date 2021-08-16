@@ -178,7 +178,7 @@ void VeriLogToDsl::writeInputToDsl(std::string filename) {
   inputDSL.close();
 
   std::ofstream registerInputvar;
-  registerInputvar.open("register");
+  registerInputvar.open("register" + filename);
   for (int i = 0; i < inputs.size(); i++) {
     registerInputvar << "registerInputVariable(*rootScope, \"" << inputs[i] << "\", Datatype(Type::INT, true));\n";
   }
