@@ -31,11 +31,14 @@ class SpecialAvoidParamMismatchVisitor : public ScopedVisitor {
   explicit SpecialAvoidParamMismatchVisitor( std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap);
 
   /// Visits an AST and based on the coefficient modulus map identifies binary expressions
-  /// where a modswitch op needs to be inserted to avoid parameter mismatch
+  /// where a modswitch op needs to be inserted to avoid parameter mismatch. pushes them into the vector modSwitchNodes
   /// \param node
-  // TODO Implement
-  void visit(BinaryExpression &node);
+  void visit(BinaryExpression &elem);
 
+  /// getter function
+  ///
+  /// \return modSwitch nodes: Binary expressions whose children need to be modswitched to ensure correctness of the circuit.
+  std::vector<BinaryExpression *> getModSwitchNodes();
 
 };
 

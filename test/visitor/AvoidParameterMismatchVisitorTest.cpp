@@ -172,12 +172,16 @@ TEST_F(AvoidParameterMismatchVisitorVisitorTest, insertOne) {
 //    std::cout << n->toString(false) << " " << n->getUniqueNodeId() << " " <<  newCoeffmodulusmap[n->getUniqueNodeId()].size() << std::endl;
 //  }
 
+
   // There should be 7 primes at the binary expression whose children had a modswitch inserted
   EXPECT_EQ(newCoeffmodulusmap["BinaryExpression_120"].size(), 7);
 
+//
   auto avoidMismatchVis = AvoidParamMismatchVisitor(newCoeffmodulusmap);
-
-  //TODO: continue
+//
+  astProgram->accept(avoidMismatchVis);
+//
+//  EXPECT_EQ(avoidMismatchVis.getModSwitchNodes().size(), 1);
 
 
 }
