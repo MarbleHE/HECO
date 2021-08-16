@@ -22,7 +22,10 @@ typedef Visitor<SpecialAvoidParamMismatchVisitor> AvoidParamMismatchVisitor;
 
 class SpecialAvoidParamMismatchVisitor : public ScopedVisitor {
 
+  /// map unique_node_id --> bool that indicates if a node has already been visited
+  std::unordered_map<std::string, bool> isVisited;
   std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap;
+  std::vector<BinaryExpression *> modSwitchNodes;
 
  public:
   explicit SpecialAvoidParamMismatchVisitor( std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap);
