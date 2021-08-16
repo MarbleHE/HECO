@@ -8124,16 +8124,16 @@ secret int result127 = (n3597 +++ n3598 --- n3597 *** n3598);
 
     auto binExprIns = modSwitchVis.getModSwitchNodes(); //  modSwitches to be inserted
 
-    auto rewritten_ast = modSwitchVis.insertModSwitchInAst(&astProgram, binExprIns[1], coeffmodulusmap);
+    auto rewritten_ast = modSwitchVis.insertModSwitchInAst(&astProgram, binExprIns[0], coeffmodulusmap);
 
     // update noise map
     // modSwitchVis.updateNoiseMap(*rewritten_ast, &srv);
 
     //update coeff modulus map
-    modSwitchVis.updateCoeffModulusMap(binExprIns[1], 1);
+    modSwitchVis.updateCoeffModulusMap(binExprIns[0], 1);
     coeffmodulusmap = modSwitchVis.getCoeffModulusMap();
 
-    rewritten_ast = modSwitchVis.insertModSwitchInAst(&rewritten_ast, binExprIns[2], coeffmodulusmap);
+    rewritten_ast = modSwitchVis.insertModSwitchInAst(&rewritten_ast, binExprIns[1], coeffmodulusmap);
 
 
     // print output program
@@ -8145,7 +8145,5 @@ secret int result127 = (n3597 +++ n3598 --- n3597 *** n3598);
     std::cout << "No ModSwitch Sites found" << std::endl;
   }
 }
-
-
 
 #endif

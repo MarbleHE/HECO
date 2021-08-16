@@ -199,6 +199,7 @@ void SpecialRuntimeVisitor::visit(Call &elem) {
     auto ciphertextIdentifierVariable = dynamic_cast<Variable *>(&ciphertextIdentifier.get());
     if (ciphertextIdentifierVariable==nullptr) {
       throw std::runtime_error("Argument 'ciphertext' in 'modswitch' instruction must be a variable.");
+
     }
     auto scopedIdentifier = getCurrentScope().resolveIdentifier(ciphertextIdentifierVariable->getIdentifier());
 
