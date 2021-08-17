@@ -6,8 +6,10 @@
 #include "ast_opt/ast/AbstractExpression.h"
 
 SpecialInsertModSwitchVisitor::SpecialInsertModSwitchVisitor(std::ostream &os, std::unordered_map<std::string, int> noise_map,
-                                                             std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap, int encNoiseBudget)
-    : os(os), noise_map(std::move(noise_map)), coeffmodulusmap(std::move(coeffmodulusmap)), encNoiseBudget(std::move(encNoiseBudget)) {}
+                                                             std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap,
+                                                             std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap_vars,
+                                                             int encNoiseBudget)
+    : os(os), noise_map(std::move(noise_map)), coeffmodulusmap(std::move(coeffmodulusmap)), coeffmodulusmap_vars(std::move(coeffmodulusmap_vars)), encNoiseBudget(std::move(encNoiseBudget)) {}
 
 void SpecialInsertModSwitchVisitor::visit(BinaryExpression &elem) {
 
@@ -130,30 +132,22 @@ void SpecialInsertModSwitchVisitor::updateNoiseMap(AbstractNode& astProgram, Run
 void SpecialInsertModSwitchVisitor::updateCoeffModulusMap(BinaryExpression *binaryExpression, int numSwitches) {
   //check that we can even drop that many primes
 
-  std::cout << "Update " << binaryExpression->getLeft().toString(false) << std::endl;
-  std::cout << "IDentifierLeft " << dynamic_cast<Variable *>(&binaryExpression->getLeft())->getIdentifier() << std::endl;
+   std::cout << "Update " << dynamic_cast<Variable &>(*binaryExpression->getLeft().begin()).getIdentifier() << std::endl;
+  // std::cout << "IDentifierLeft " << dynamic_cast<Variable *>(&binaryExpression->getLeft())->getIdentifier() << std::endl;
+
+
 
 
   if (numSwitches > coeffmodulusmap[binaryExpression->getUniqueNodeId()].size()) {
     std::runtime_error("Not possible to drop  primes: coeff modulus vector too short.");
   }
-  // first, we update the coeffmodulus for the binary expression
+  // first, we update the coeffmodulus for the binary expression as well as for the modswitched variables
   for (int i = 0; i < numSwitches; i++) {
-
     coeffmodulusmap[binaryExpression->getUniqueNodeId()].pop_back();
+    coeffmodulusmap_vars[dynamic_cast<Variable &>(*binaryExpression->getLeft().begin()).getIdentifier()].pop_back();
+    coeffmodulusmap_vars[dynamic_cast<Variable &>(*binaryExpression->getRight().begin()).getIdentifier()].pop_back();
+
   }
-  // now for all ancestors: actually no, we will write another visitor that recursively visits the bin expressions and insert
-  // modswitches to ensure that params match
-//  auto node = &binaryExpression->getParent();
-//  while (node !=nullptr) {
-//    for (int i = 0; i < numSwitches; i++) {
-//      coeffmodulusmap[node->getUniqueNodeId()].pop_back();
-//    }
-//    if (node->hasParent()) {
-//      node = &node->getParent();
-//    }
-//    else {return;}
-//  }
 }
 
 std::unique_ptr<AbstractNode> SpecialInsertModSwitchVisitor::removeModSwitchFromAst(std::unique_ptr<AbstractNode> *ast,

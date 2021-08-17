@@ -136,12 +136,13 @@ TEST_F(InsertModSwitchVisitorTest, getModSwitchNodesTestOneFound) {
 
   // initially every node has the same ctxtmodulus vector
   std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap;
+  std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap_vars;
   for (auto n : vis.v) {
     coeffmodulusmap[n->getUniqueNodeId()] = coeff_modulus;
   }
 
   std::stringstream rr;
-  InsertModSwitchVisitor modSwitchVis(rr, srv.getNoiseMap(), coeffmodulusmap, calcInitNoiseHeuristic());
+  InsertModSwitchVisitor modSwitchVis(rr, srv.getNoiseMap(), coeffmodulusmap, coeffmodulusmap_vars, calcInitNoiseHeuristic());
 
   astProgram->accept(modSwitchVis); // find modswitching nodes
 
@@ -206,12 +207,13 @@ TEST_F(InsertModSwitchVisitorTest, getModSwitchNodesTestNoneFound) {
 
   // initially every node has the same ctxtmodulus vector
   std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap;
+  std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap_vars;
   for (auto n : vis.v) {
     coeffmodulusmap[n->getUniqueNodeId()] = coeff_modulus;
   }
 
   std::stringstream rr;
-  InsertModSwitchVisitor modSwitchVis(rr, srv.getNoiseMap(), coeffmodulusmap, calcInitNoiseHeuristic());
+  InsertModSwitchVisitor modSwitchVis(rr, srv.getNoiseMap(), coeffmodulusmap, coeffmodulusmap_vars, calcInitNoiseHeuristic());
 
   astProgram->accept(modSwitchVis); // find modswitching nodes
 
@@ -273,12 +275,13 @@ TEST_F(InsertModSwitchVisitorTest, insertModSwitchTestNoChangeExpected) {
   auto coeff_modulus = scf->getContext().first_context_data()->parms().coeff_modulus();
   // initially every node has the same ctxtmodulus vector
   std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap;
+  std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap_vars;
   for (auto n : vis.v) {
     coeffmodulusmap[n->getUniqueNodeId()] = coeff_modulus;
   }
 
   std::stringstream ss;
-  InsertModSwitchVisitor modSwitchVis(ss, srv.getNoiseMap(), coeffmodulusmap, calcInitNoiseHeuristic());
+  InsertModSwitchVisitor modSwitchVis(ss, srv.getNoiseMap(), coeffmodulusmap, coeffmodulusmap_vars, calcInitNoiseHeuristic());
 
   astProgram->accept(modSwitchVis); // find modswitching nodes
 
@@ -362,12 +365,13 @@ TEST_F(InsertModSwitchVisitorTest, insertModSwitchTestInsertionBeforeLastBinaryO
 
   // initially every node has the same ctxtmodulus vector
   std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap;
+  std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap_vars;
   for (auto n : vis.v) {
     coeffmodulusmap[n->getUniqueNodeId()] = coeff_modulus;
   }
 
   std::stringstream ss;
-  InsertModSwitchVisitor modSwitchVis(ss, srv.getNoiseMap(), coeffmodulusmap, calcInitNoiseHeuristic());
+  InsertModSwitchVisitor modSwitchVis(ss, srv.getNoiseMap(), coeffmodulusmap, coeffmodulusmap_vars, calcInitNoiseHeuristic());
 
   astProgram->accept(modSwitchVis); // find modswitching nodes
 
@@ -470,6 +474,7 @@ TEST_F(InsertModSwitchVisitorTest, insertModSwitchTestTwomodSwitchesBeforeLastBi
 
   // initially every node has the same ctxtmodulus vector
   std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap;
+  std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap_vars;
   for (auto n : vis.v) {
     coeffmodulusmap[n->getUniqueNodeId()] = coeff_modulus;
   }
@@ -484,7 +489,7 @@ TEST_F(InsertModSwitchVisitorTest, insertModSwitchTestTwomodSwitchesBeforeLastBi
   tamperedNoiseMap["Variable_35"] = 32;
 
   std::stringstream rr;
-  InsertModSwitchVisitor modSwitchVis(rr, tamperedNoiseMap, coeffmodulusmap, calcInitNoiseHeuristic());
+  InsertModSwitchVisitor modSwitchVis(rr, tamperedNoiseMap, coeffmodulusmap, coeffmodulusmap_vars, calcInitNoiseHeuristic());
   astProgram->accept(modSwitchVis); // find modswitching nodes
 
   std::cout << modSwitchVis.getModSwitchNodes().size() << " potential modSwitch insertion site(s) found:" << std::endl;
@@ -551,12 +556,13 @@ TEST_F(InsertModSwitchVisitorTest, removeModSwitchTest) {
 
   // initially every node has the same ctxtmodulus vector
   std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap;
+  std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap_vars;
   for (auto n : vis.v) {
     coeffmodulusmap[n->getUniqueNodeId()] = coeff_modulus;
   }
 
   std::stringstream ss;
-  InsertModSwitchVisitor modSwitchVis(ss, srv.getNoiseMap(), coeffmodulusmap, calcInitNoiseHeuristic());
+  InsertModSwitchVisitor modSwitchVis(ss, srv.getNoiseMap(), coeffmodulusmap, coeffmodulusmap_vars, calcInitNoiseHeuristic());
 
 //  int index = 0;
 //  for (auto n : vis.v) {
@@ -646,12 +652,13 @@ TEST_F(InsertModSwitchVisitorTest, rewriteAstTest) {
 
   // initially every node has the same ctxtmodulus vector
   std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap;
+  std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap_vars;
   for (auto n : vis.v) {
     coeffmodulusmap[n->getUniqueNodeId()] = coeff_modulus;
   }
 
   std::stringstream ss;
-  InsertModSwitchVisitor modSwitchVis(ss, srv.getNoiseMap(), coeffmodulusmap, calcInitNoiseHeuristic());
+  InsertModSwitchVisitor modSwitchVis(ss, srv.getNoiseMap(), coeffmodulusmap, coeffmodulusmap_vars, calcInitNoiseHeuristic());
 
  // auto rewrittenAst = modSwitchVis.rewriteAst(&astProgram, srv, coeffmodulusmap); // TODO: figure out how the srv stuff works
 
@@ -2501,6 +2508,7 @@ secret int cOut = (n1399 +++ n1404 --- n1399 *** n1404);
 
   // initially every node has the same ctxtmodulus vector
   std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap;
+  std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap_vars;
   for (auto n : vis.v) {
     coeffmodulusmap[n->getUniqueNodeId()] = coeff_modulus;
   }
@@ -2517,7 +2525,7 @@ secret int cOut = (n1399 +++ n1404 --- n1399 *** n1404);
 
 
   std::stringstream ss;
-  InsertModSwitchVisitor modSwitchVis(ss, srv.getNoiseMap(), coeffmodulusmap, calcInitNoiseHeuristic());
+  InsertModSwitchVisitor modSwitchVis(ss, srv.getNoiseMap(), coeffmodulusmap, coeffmodulusmap_vars, calcInitNoiseHeuristic());
 
   std::cout << "Looking for modswitch insertion sites" << std::endl;
 
@@ -4395,12 +4403,13 @@ secret int cOut = (n1399 +++ n1404 --- n1399 *** n1404);
 
   // initially every node has the same ctxtmodulus vector
   std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap;
+  std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap_vars;
   for (auto n : vis.v) {
     coeffmodulusmap[n->getUniqueNodeId()] = coeff_modulus;
   }
 
   std::stringstream ss;
-  InsertModSwitchVisitor modSwitchVis(ss, srv.getNoiseMap(), coeffmodulusmap, calcInitNoiseHeuristic());
+  InsertModSwitchVisitor modSwitchVis(ss, srv.getNoiseMap(), coeffmodulusmap, coeffmodulusmap_vars, calcInitNoiseHeuristic());
 
   std::cout << "Looking for modswitch insertion sites" << std::endl;
 
@@ -8098,6 +8107,7 @@ secret int result127 = (n3597 +++ n3598 --- n3597 *** n3598);
 
   // initially every node has the same ctxtmodulus vector
   std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap;
+  std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap_vars;
   for (auto n : vis.v) {
     coeffmodulusmap[n->getUniqueNodeId()] = coeff_modulus;
   }
@@ -8114,7 +8124,7 @@ secret int result127 = (n3597 +++ n3598 --- n3597 *** n3598);
 
 
   std::stringstream ss;
-  InsertModSwitchVisitor modSwitchVis(ss, srv.getNoiseMap(), coeffmodulusmap, calcInitNoiseHeuristic());
+  InsertModSwitchVisitor modSwitchVis(ss, srv.getNoiseMap(), coeffmodulusmap, coeffmodulusmap_vars, calcInitNoiseHeuristic());
 
   std::cout << "Looking for modswitch insertion sites" << std::endl;
 

@@ -142,13 +142,18 @@ TEST_F(AvoidParameterMismatchVisitorVisitorTest, insertOne) {
   // initially every node has the same ctxtmodulus vector: this map should change at the binary expreesion after inserting
   // the modswitch
   std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap;
+  std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap_vars;
   for (auto n : vis.v) {
     coeffmodulusmap[n->getUniqueNodeId()] = coeff_modulus;
+    //if (n.)
   }
+
+
+
 
   // modswitchinsertion visitor
   std::stringstream rr;
-  InsertModSwitchVisitor modSwitchVis(rr, srv.getNoiseMap(), coeffmodulusmap, calcInitNoiseHeuristic());
+  InsertModSwitchVisitor modSwitchVis(rr, srv.getNoiseMap(), coeffmodulusmap, coeffmodulusmap_vars, calcInitNoiseHeuristic());
 
   // find modswitching nodes
   astProgram->accept(modSwitchVis);

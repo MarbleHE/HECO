@@ -1853,8 +1853,6 @@ secret int cOut = (n1399 +++ n1404 --- n1399 *** n1404);
   auto map = tcv->getSecretTaintedNodes();
   RuntimeVisitor srv(*scf, *astInput, map);
 
-
-
   std::chrono::high_resolution_clock::time_point time_start, time_end;
   std::chrono::microseconds time_diff, time_sum;
   std::vector<std::chrono::microseconds> time_vec;

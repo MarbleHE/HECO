@@ -29,13 +29,15 @@ class SpecialInsertModSwitchVisitor : public ScopedVisitor {
   std::vector<BinaryExpression *>
       modSwitchNodes = {}; // vector of binary ops before which modswitch insertion is deemed possible
   // (note this does not entail checking the final noisebudget yet)
-  std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap; // map of current coeff moduli
+  std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap; // map of current coeff moduli unique_node_id -> Coeff_modulus
+  std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap_vars; // var_id -> Coeff_modulus
 
 
  public:
   explicit SpecialInsertModSwitchVisitor(std::ostream &os,
                                          std::unordered_map<std::string, int> noise_map,
                                          std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap,
+                                         std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap_vars,
                                          int encNoiseBudget);
 
   /// Visits an AST and based on noise heuristics and  identifies binary expressions
