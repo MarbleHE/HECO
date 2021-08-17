@@ -36,7 +36,6 @@ class SpecialAvoidParamMismatchVisitor : public ScopedVisitor {
   void visit(BinaryExpression &elem);
 
   /// getter function
-  ///
   /// \return modSwitch nodes: Binary expressions whose children need to be modswitched to ensure correctness of the circuit.
   std::vector<BinaryExpression *> getModSwitchNodes();
 

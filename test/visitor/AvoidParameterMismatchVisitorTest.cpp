@@ -133,8 +133,6 @@ TEST_F(AvoidParameterMismatchVisitorVisitorTest, insertOne) {
   srv.executeAst(*astProgram);
 
 
-
-
   GetAllNodesVisitor vis;
   astProgram->accept(vis);
 
@@ -167,23 +165,29 @@ TEST_F(AvoidParameterMismatchVisitorVisitorTest, insertOne) {
   modSwitchVis.updateCoeffModulusMap(binExprIns, 1);
   auto newCoeffmodulusmap = modSwitchVis.getCoeffModulusMap();
 
-  // print updated coeff modulus map (sizes of entries = no. primes )
-//  for (auto n : vis.v) {
-//    std::cout << n->toString(false) << " " << n->getUniqueNodeId() << " " <<  newCoeffmodulusmap[n->getUniqueNodeId()].size() << std::endl;
-//  }
+  //print updated coeff modulus map (sizes of entries = no. primes )
 
+  for (auto n : vis.v) {
+    std::cout << n->toString(false) << " " << n->getUniqueNodeId() << " " <<  newCoeffmodulusmap[n->getUniqueNodeId()].size() << std::endl;
+  }
 
   // There should be 7 primes at the binary expression whose children had a modswitch inserted
   EXPECT_EQ(newCoeffmodulusmap["BinaryExpression_120"].size(), 7);
+
+  // print rewritten AST
+  std::stringstream sr;
+  ProgramPrintVisitor q(sr);
+  rewritten_ast->accept(q);
+  std::cout << sr.str() << std::endl;
 
 //
   auto avoidMismatchVis = AvoidParamMismatchVisitor(newCoeffmodulusmap);
 //
 
 
-  astProgram->accept(avoidMismatchVis);
+  rewritten_ast->accept(avoidMismatchVis);
 //
-//  EXPECT_EQ(avoidMismatchVis.getModSwitchNodes().size(), 1);
+EXPECT_EQ(avoidMismatchVis.getModSwitchNodes().size(), 1);
 
 
 }

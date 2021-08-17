@@ -129,11 +129,17 @@ void SpecialInsertModSwitchVisitor::updateNoiseMap(AbstractNode& astProgram, Run
 
 void SpecialInsertModSwitchVisitor::updateCoeffModulusMap(BinaryExpression *binaryExpression, int numSwitches) {
   //check that we can even drop that many primes
+
+  std::cout << "Update " << binaryExpression->getLeft().toString(false) << std::endl;
+  std::cout << "IDentifierLeft " << dynamic_cast<Variable *>(&binaryExpression->getLeft())->getIdentifier() << std::endl;
+
+
   if (numSwitches > coeffmodulusmap[binaryExpression->getUniqueNodeId()].size()) {
     std::runtime_error("Not possible to drop  primes: coeff modulus vector too short.");
   }
   // first, we update the coeffmodulus for the binary expression
   for (int i = 0; i < numSwitches; i++) {
+
     coeffmodulusmap[binaryExpression->getUniqueNodeId()].pop_back();
   }
   // now for all ancestors: actually no, we will write another visitor that recursively visits the bin expressions and insert
