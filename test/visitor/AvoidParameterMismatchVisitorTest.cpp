@@ -145,11 +145,10 @@ TEST_F(AvoidParameterMismatchVisitorVisitorTest, insertOne) {
   std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap_vars;
   for (auto n : vis.v) {
     coeffmodulusmap[n->getUniqueNodeId()] = coeff_modulus;
-    //if (n.)
+    if (dynamic_cast<Variable *>(n)) {
+      coeffmodulusmap_vars[dynamic_cast<Variable &>(*n).getIdentifier()] = coeff_modulus;
+    }
   }
-
-
-
 
   // modswitchinsertion visitor
   std::stringstream rr;
@@ -158,23 +157,37 @@ TEST_F(AvoidParameterMismatchVisitorVisitorTest, insertOne) {
   // find modswitching nodes
   astProgram->accept(modSwitchVis);
 
-  // binary expression where modSwitch is to be inserted
 
+
+  // binary expression where modSwitch is to be inserted
   auto binExprIns = modSwitchVis.getModSwitchNodes()[0];
   std::cout << modSwitchVis.getModSwitchNodes().size() << " insertions suggested" << std::endl;
 
   // do insert modswitch
   auto rewritten_ast = modSwitchVis.insertModSwitchInAst(&astProgram, binExprIns, coeffmodulusmap);
 
-  //update coeff modulus map
-  modSwitchVis.updateCoeffModulusMap(binExprIns, 1);
+
+
+//  //update coeff modulus map
+//  modSwitchVis.updateCoeffModulusMap(binExprIns, 1);
   auto newCoeffmodulusmap = modSwitchVis.getCoeffModulusMap();
+  auto newCoeffmodulusmap_vars = modSwitchVis.getCoeffModulusMapVars();
 
   //print updated coeff modulus map (sizes of entries = no. primes )
-
+  std::cout << " Updated coeffmodulusmap: " << std::endl;
   for (auto n : vis.v) {
     std::cout << n->toString(false) << " " << n->getUniqueNodeId() << " " <<  newCoeffmodulusmap[n->getUniqueNodeId()].size() << std::endl;
   }
+  std::cout << std::endl;
+
+  std::cout << " Updated coeffmodulusmap_vars: " << std::endl;
+
+  for (auto n : vis.v) {
+    if (dynamic_cast<Variable *>(n)) {
+      std::cout << n->toString(false) << " " << n->getUniqueNodeId() << " " <<  newCoeffmodulusmap_vars[dynamic_cast<Variable &>(*n).getIdentifier()].size() << std::endl;
+    }
+  }
+
 
   // There should be 7 primes at the binary expression whose children had a modswitch inserted
   EXPECT_EQ(newCoeffmodulusmap["BinaryExpression_120"].size(), 7);

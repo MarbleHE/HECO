@@ -51,7 +51,7 @@ class SpecialInsertModSwitchVisitor : public ScopedVisitor {
   /// \param binary expression before which modswitches are to be inserted
   /// \param coeffmodulusmap
   /// \return a new AST that has been rewritten
-  static std::unique_ptr<AbstractNode> insertModSwitchInAst(std::unique_ptr<AbstractNode> *ast,
+  std::unique_ptr<AbstractNode> insertModSwitchInAst(std::unique_ptr<AbstractNode> *ast,
                                                             BinaryExpression *binaryExpression = nullptr,
                                                             std::unordered_map<std::string,
                                                                                std::vector<seal::Modulus>> coeffmodulusmap = {});
@@ -95,6 +95,11 @@ class SpecialInsertModSwitchVisitor : public ScopedVisitor {
   /// Return coeffModulus map
   /// \return coeffmodulusmap
   std::unordered_map<std::string, std::vector<seal::Modulus>> getCoeffModulusMap();
+
+  /// Return coeffModulus map for Variable Ids (keys)
+  /// \return coeffmodulusmap_vars
+  std::unordered_map<std::string, std::vector<seal::Modulus>> getCoeffModulusMapVars();
+
 
   /// Return noisemap
   /// \return noisemap

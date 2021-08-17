@@ -69,12 +69,14 @@ std::unique_ptr<AbstractNode> SpecialInsertModSwitchVisitor::insertModSwitchInAs
   // if no binary expression specified return original ast
   if (binaryExpression == nullptr) {return std::move(*ast);}
 
-
   // prepare argument for 'Call' node (modswitch)
   // we need to know how many modswitches to insert (will be second arg to ModSwitch call)
   int leftIndex = coeffmodulusmap[binaryExpression->getLeft().getUniqueNodeId()].size() - 1;
   int rightIndex = coeffmodulusmap[binaryExpression->getRight().getUniqueNodeId()].size() - 1;
   int diff = leftIndex - rightIndex;
+
+  // update coeff modulus maps
+  updateCoeffModulusMap(binaryExpression, abs(diff) + 1);
 
   // take left and right child
   auto l = binaryExpression->takeLeft();
@@ -86,6 +88,7 @@ std::unique_ptr<AbstractNode> SpecialInsertModSwitchVisitor::insertModSwitchInAs
   vLeft.emplace_back(std::move(l));
   vRight.emplace_back(std::move(r));
 
+
   // if diff > 0 then the right operand has fewer primes remaining in the coeffmodulus chain
   // etc...
   if (diff > 0) {
@@ -93,6 +96,7 @@ std::unique_ptr<AbstractNode> SpecialInsertModSwitchVisitor::insertModSwitchInAs
     auto rightNumModSw = std::make_unique<LiteralInt>(1);
     vLeft.emplace_back(std::move(leftNumModSw));
     vRight.emplace_back(std::move(rightNumModSw));
+
   } else if (diff < 0) {
     auto rightNumModSw = std::make_unique<LiteralInt>(abs(diff) + 1);
     auto leftNumModSw = std::make_unique<LiteralInt>(1);
@@ -132,11 +136,10 @@ void SpecialInsertModSwitchVisitor::updateNoiseMap(AbstractNode& astProgram, Run
 void SpecialInsertModSwitchVisitor::updateCoeffModulusMap(BinaryExpression *binaryExpression, int numSwitches) {
   //check that we can even drop that many primes
 
-   std::cout << "Update " << dynamic_cast<Variable &>(*binaryExpression->getLeft().begin()).getIdentifier() << std::endl;
+  std::cout << "Update " << binaryExpression->getParent().getParent().toString(false) << std::endl;
+   //std::cout << "Update " << dynamic_cast<Variable &>(binaryExpression->getParent()).getIdentifier() << std::endl;
   // std::cout << "IDentifierLeft " << dynamic_cast<Variable *>(&binaryExpression->getLeft())->getIdentifier() << std::endl;
-
-
-
+  //std::cout << "IDentifierRight " << dynamic_cast<Variable *>(&binaryExpression->getRight())->getIdentifier() << std::endl;
 
   if (numSwitches > coeffmodulusmap[binaryExpression->getUniqueNodeId()].size()) {
     std::runtime_error("Not possible to drop  primes: coeff modulus vector too short.");
@@ -144,9 +147,8 @@ void SpecialInsertModSwitchVisitor::updateCoeffModulusMap(BinaryExpression *bina
   // first, we update the coeffmodulus for the binary expression as well as for the modswitched variables
   for (int i = 0; i < numSwitches; i++) {
     coeffmodulusmap[binaryExpression->getUniqueNodeId()].pop_back();
-    coeffmodulusmap_vars[dynamic_cast<Variable &>(*binaryExpression->getLeft().begin()).getIdentifier()].pop_back();
-    coeffmodulusmap_vars[dynamic_cast<Variable &>(*binaryExpression->getRight().begin()).getIdentifier()].pop_back();
-
+    coeffmodulusmap_vars[dynamic_cast<Variable &>(binaryExpression->getLeft()).getIdentifier()].pop_back();
+    coeffmodulusmap_vars[dynamic_cast<Variable &>(binaryExpression->getRight()).getIdentifier()].pop_back();
   }
 }
 
@@ -222,6 +224,10 @@ std::unique_ptr<AbstractNode> SpecialInsertModSwitchVisitor::rewriteAst(std::uni
 
 std::unordered_map<std::string, std::vector<seal::Modulus>> SpecialInsertModSwitchVisitor::getCoeffModulusMap() {
   return coeffmodulusmap;
+}
+
+std::unordered_map<std::string, std::vector<seal::Modulus>> SpecialInsertModSwitchVisitor::getCoeffModulusMapVars() {
+  return coeffmodulusmap_vars;
 }
 
 std::unordered_map<std::string, int> SpecialInsertModSwitchVisitor::getNoiseMap() {
