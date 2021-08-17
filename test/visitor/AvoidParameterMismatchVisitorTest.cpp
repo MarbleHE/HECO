@@ -132,7 +132,6 @@ TEST_F(AvoidParameterMismatchVisitorVisitorTest, insertOne) {
   RuntimeVisitor srv(*scf, *astInput, map);
   srv.executeAst(*astProgram);
 
-
   GetAllNodesVisitor vis;
   astProgram->accept(vis);
 
@@ -152,12 +151,11 @@ TEST_F(AvoidParameterMismatchVisitorVisitorTest, insertOne) {
 
   // modswitchinsertion visitor
   std::stringstream rr;
-  InsertModSwitchVisitor modSwitchVis(rr, srv.getNoiseMap(), coeffmodulusmap, coeffmodulusmap_vars, calcInitNoiseHeuristic());
+  InsertModSwitchVisitor
+      modSwitchVis(rr, srv.getNoiseMap(), coeffmodulusmap, coeffmodulusmap_vars, calcInitNoiseHeuristic());
 
   // find modswitching nodes
   astProgram->accept(modSwitchVis);
-
-
 
   // binary expression where modSwitch is to be inserted
   auto binExprIns = modSwitchVis.getModSwitchNodes()[0];
@@ -176,7 +174,8 @@ TEST_F(AvoidParameterMismatchVisitorVisitorTest, insertOne) {
   //print updated coeff modulus map (sizes of entries = no. primes )
   std::cout << " Updated coeffmodulusmap: " << std::endl;
   for (auto n : vis.v) {
-    std::cout << n->toString(false) << " " << n->getUniqueNodeId() << " " <<  newCoeffmodulusmap[n->getUniqueNodeId()].size() << std::endl;
+    std::cout << n->toString(false) << " " << n->getUniqueNodeId() << " "
+              << newCoeffmodulusmap[n->getUniqueNodeId()].size() << std::endl;
   }
   std::cout << std::endl;
 
@@ -184,7 +183,8 @@ TEST_F(AvoidParameterMismatchVisitorVisitorTest, insertOne) {
 
   for (auto n : vis.v) {
     if (dynamic_cast<Variable *>(n)) {
-      std::cout << n->toString(false) << " " << n->getUniqueNodeId() << " " <<  newCoeffmodulusmap_vars[dynamic_cast<Variable &>(*n).getIdentifier()].size() << std::endl;
+      std::cout << n->toString(false) << " " << n->getUniqueNodeId() << " "
+                << newCoeffmodulusmap_vars[dynamic_cast<Variable &>(*n).getIdentifier()].size() << std::endl;
     }
   }
 
@@ -198,19 +198,30 @@ TEST_F(AvoidParameterMismatchVisitorVisitorTest, insertOne) {
   rewritten_ast->accept(q);
   std::cout << sr.str() << std::endl;
 
-//
-  auto avoidMismatchVis = AvoidParamMismatchVisitor(newCoeffmodulusmap);
-//
+  //
+  auto avoidMismatchVis = AvoidParamMismatchVisitor(newCoeffmodulusmap, newCoeffmodulusmap_vars);
 
-
+  // find the additional modswitch sites needed
   rewritten_ast->accept(avoidMismatchVis);
-//
-EXPECT_EQ(avoidMismatchVis.getModSwitchNodes().size(), 1);
 
+  std::cout << "Insert additional modswitch at: " << avoidMismatchVis.getModSwitchNodes()[0]->toString(false)
+            << " with ID: " << avoidMismatchVis.getModSwitchNodes()[0]->getUniqueNodeId() << std::endl;
+
+  EXPECT_EQ(avoidMismatchVis.getModSwitchNodes().size(), 1);
+
+  // insert additional modswitches
+  auto additionalModSwitchSites = avoidMismatchVis.getModSwitchNodes();
+  auto final_ast = avoidMismatchVis.insertModSwitchInAst(&rewritten_ast, additionalModSwitchSites[0]);
+
+  // print rewritten AST
+  std::stringstream tr;
+  ProgramPrintVisitor m(tr);
+  final_ast->accept(m);
+  std::cout << tr.str() << std::endl;
+
+  // check if coeffmodulus maps are still correct...
 
 }
-
-
 
 #endif
 

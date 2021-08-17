@@ -136,7 +136,14 @@ void SpecialInsertModSwitchVisitor::updateNoiseMap(AbstractNode& astProgram, Run
 void SpecialInsertModSwitchVisitor::updateCoeffModulusMap(BinaryExpression *binaryExpression, int numSwitches) {
   //check that we can even drop that many primes
 
-  std::cout << "Update " << binaryExpression->getParent().getParent().toString(false) << std::endl;
+  // get the result variable to update the coeffmodulusmap_vars for:
+  VariableDeclaration& vd =  dynamic_cast<VariableDeclaration &>(binaryExpression->getParent());
+  AbstractTarget& at = vd.getTarget();
+  Variable&  v = dynamic_cast<Variable&>(at);
+  std::string ident = v.getIdentifier();
+
+ // std::cout << "Update " << ident << std::endl;
+  //std::cout << "Update " << binaryExpression->getParent().toString(false) << std::endl;
    //std::cout << "Update " << dynamic_cast<Variable &>(binaryExpression->getParent()).getIdentifier() << std::endl;
   // std::cout << "IDentifierLeft " << dynamic_cast<Variable *>(&binaryExpression->getLeft())->getIdentifier() << std::endl;
   //std::cout << "IDentifierRight " << dynamic_cast<Variable *>(&binaryExpression->getRight())->getIdentifier() << std::endl;
@@ -147,6 +154,7 @@ void SpecialInsertModSwitchVisitor::updateCoeffModulusMap(BinaryExpression *bina
   // first, we update the coeffmodulus for the binary expression as well as for the modswitched variables
   for (int i = 0; i < numSwitches; i++) {
     coeffmodulusmap[binaryExpression->getUniqueNodeId()].pop_back();
+    coeffmodulusmap_vars[ident].pop_back();
     coeffmodulusmap_vars[dynamic_cast<Variable &>(binaryExpression->getLeft()).getIdentifier()].pop_back();
     coeffmodulusmap_vars[dynamic_cast<Variable &>(binaryExpression->getRight()).getIdentifier()].pop_back();
   }
