@@ -15,11 +15,19 @@ void SpecialFixParamMismatchVisitor::visit(BinaryExpression &elem) {
   // recurse into left and right
   if (elem.hasLeft()) { elem.getLeft().accept(*this); }
   if (elem.hasRight()) { elem.getRight().accept(*this); }
-  // potentially insert modswitches and update coeffmap
 
+  // potentially insert modswitches and update coeffmap
   int leftIndex;
   int rightIndex;
 
+//  if (elem.hasLeft() && elem.hasRight()) {
+//    std::cout << "Visiting" << elem.toString(false) << " left Child: " << elem.getLeft().toString(false)
+//              << " indx: " << coeffmodulusmap[elem.getLeft().getUniqueNodeId()].size()
+//              << " right Child: " << elem.getRight().toString(false)
+//              <<" indx: " << coeffmodulusmap[elem.getRight().getUniqueNodeId()].size()
+//        << std::endl;
+//  }
+//
   // get coeff indices
   if (elem.hasLeft()) {
     leftIndex = coeffmodulusmap[elem.getLeft().getUniqueNodeId()].size();
@@ -71,13 +79,28 @@ void SpecialFixParamMismatchVisitor::visit(BinaryExpression &elem) {
 
 void SpecialFixParamMismatchVisitor::visit(Variable &elem) {
   coeffmodulusmap[elem.getUniqueNodeId()] = coeffmodulusmap_vars[elem.getIdentifier()];
+  std::cout << elem.getIdentifier() << " " << coeffmodulusmap[elem.getUniqueNodeId()].size() << std::endl;
 }
 
 void SpecialFixParamMismatchVisitor::visit(Assignment &elem) {
-  AbstractTarget& at = elem.getTarget();
-  Variable&  v = dynamic_cast<Variable&>(at);
-  std::string ident = v.getIdentifier();
-  coeffmodulusmap[elem.getUniqueNodeId()] = coeffmodulusmap_vars[ident];
+//  AbstractTarget& at = elem.getTarget();
+//  Variable&  v = dynamic_cast<Variable&>(at);
+//  std::string ident = v.getIdentifier();
+//  coeffmodulusmap[elem.getUniqueNodeId()] = coeffmodulusmap_vars[ident];
+//  std::cout << coeffmodulusmap[elem.getUniqueNodeId()].size() << std::endl;
+  //visit the right hand side, which will update the coeffmodulusmap
+  if(!elem.hasValue())  throw std::runtime_error("Invalid assignment: No RHS");
+  elem.getValue().accept(*this);
+
+  // read out the coeff map
+  auto m = coeffmodulusmap[elem.getValue().getUniqueNodeId()];
+
+  // get the variable on the LHS, note that dynamic_cast throws exception if it's not a variable
+  if(!elem.hasTarget()) throw std::runtime_error("Invalid assignment: No LHS");
+  Variable& v = dynamic_cast<Variable&>(elem.getTarget());
+
+  // write to variable map:
+  coeffmodulusmap_vars[v.getIdentifier()] = m;
 }
 
 std::unordered_map<std::string, std::vector<seal::Modulus>> SpecialFixParamMismatchVisitor::getCoeffModulusMap() {
