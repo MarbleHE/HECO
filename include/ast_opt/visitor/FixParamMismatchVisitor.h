@@ -35,7 +35,7 @@ class SpecialFixParamMismatchVisitor : public ScopedVisitor {
 
   void visit(Variable &elem);
 
-  void visit(Assignment &elem);
+  void visit(VariableDeclaration &elem);
 
 
   /// getter for coeffmodulus map

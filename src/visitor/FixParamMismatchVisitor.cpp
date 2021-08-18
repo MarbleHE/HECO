@@ -82,15 +82,11 @@ void SpecialFixParamMismatchVisitor::visit(Variable &elem) {
   std::cout << elem.getIdentifier() << " " << coeffmodulusmap[elem.getUniqueNodeId()].size() << std::endl;
 }
 
-void SpecialFixParamMismatchVisitor::visit(Assignment &elem) {
-//  AbstractTarget& at = elem.getTarget();
-//  Variable&  v = dynamic_cast<Variable&>(at);
-//  std::string ident = v.getIdentifier();
-//  coeffmodulusmap[elem.getUniqueNodeId()] = coeffmodulusmap_vars[ident];
-//  std::cout << coeffmodulusmap[elem.getUniqueNodeId()].size() << std::endl;
+void SpecialFixParamMismatchVisitor::visit(VariableDeclaration &elem) {
   //visit the right hand side, which will update the coeffmodulusmap
   if(!elem.hasValue())  throw std::runtime_error("Invalid assignment: No RHS");
   elem.getValue().accept(*this);
+
 
   // read out the coeff map
   auto m = coeffmodulusmap[elem.getValue().getUniqueNodeId()];
