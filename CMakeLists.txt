@@ -161,6 +161,7 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/visitor/IdentifyNoisySubtreeVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/InsertModSwitchVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/AvoidParamMismatchVisitor.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/FixParamMismatchVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/NoisePrintVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/ParentSettingVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/PrintVisitor.cpp
@@ -256,6 +257,7 @@ set(PUBLIC_HEADERS
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/IdentifyNoisySubtreeVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/InsertModSwitchVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/AvoidParamMismatchVisitor.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/FixParamMismatchVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/NoisePrintVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/PrintVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/PrintVisitor.h
