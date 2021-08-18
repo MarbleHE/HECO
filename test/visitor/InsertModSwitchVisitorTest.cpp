@@ -8138,6 +8138,7 @@ secret int result127 = (n3597 +++ n3598 --- n3597 *** n3598);
     auto newCoeffmodulusmap_vars = modSwitchVis.getCoeffModulusMapVars();
 
     std::cout << "Maps successfully updated" << std::endl;
+    std::cout << "Fixing Potential Mismatches..." << std::endl;
 
     // now get rid of param mismatches: first pass
     auto avoidMismatchVis = AvoidParamMismatchVisitor(newCoeffmodulusmap, newCoeffmodulusmap_vars);
@@ -8151,12 +8152,7 @@ secret int result127 = (n3597 +++ n3598 --- n3597 *** n3598);
     auto final_coeffmap = avoidMismatchVis.getCoeffModulusMap();
     auto final_coeffmap_vars = avoidMismatchVis.getCoeffModulusMapVars();
 
-//    // second pass
-//    auto avoidMismatchVis2 =  AvoidParamMismatchVisitor(final_coeffmap, final_coeffmap_vars);
-//    final_ast->accept(avoidMismatchVis2);
-//    auto additionalModSwitchSites2 = avoidMismatchVis.getModSwitchNodes();
-//    std::cout << "Need to insert " << additionalModSwitchSites2.size() << " additional modswitch(es)" << std::endl;
-//    auto final_ast2 = avoidMismatchVis2.insertModSwitchInAst(&final_ast, additionalModSwitchSites2[0]);
+
 
     std::cout << "Done" << std::endl;
 
