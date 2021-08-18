@@ -165,7 +165,6 @@ TEST_F(AvoidParameterMismatchVisitorVisitorTest, insertOne) {
   auto rewritten_ast = modSwitchVis.insertModSwitchInAst(&astProgram, binExprIns, coeffmodulusmap);
 
 
-
 //  //update coeff modulus map
 //  modSwitchVis.updateCoeffModulusMap(binExprIns, 1);
   auto newCoeffmodulusmap = modSwitchVis.getCoeffModulusMap();
@@ -219,7 +218,11 @@ TEST_F(AvoidParameterMismatchVisitorVisitorTest, insertOne) {
   final_ast->accept(m);
   std::cout << tr.str() << std::endl;
 
-  // check if coeffmodulus maps are still correct...
+  auto final_coeffmap = avoidMismatchVis.getCoeffModulusMap();
+  auto final_coeffmap_vars = avoidMismatchVis.getCoeffModulusMapVars();
+
+  std::cout << "Updated: " << final_coeffmap_vars["__input3__"].size() << std::endl;
+  std::cout << "Updated: " << final_coeffmap_vars["result"].size() << std::endl;
 
 }
 

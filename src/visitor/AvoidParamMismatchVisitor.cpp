@@ -23,17 +23,23 @@ void SpecialAvoidParamMismatchVisitor::visit(BinaryExpression &elem) {
   }
 // base case
   else {
-//    std::cout << "Visiting: " << elem.toString(false)<< std::endl;
-//    std::cout << "Left Child: " << elem.getLeft().toString(false) << std::endl;
-//    std::cout << "Right Child: " << elem.getRight().toString(false) << std::endl;
-//    std::cout << "Left cm: " << coeffmodulusmap_vars[dynamic_cast<Variable &>(elem.getLeft()).getIdentifier()].size() << std::endl;
-//    std::cout << "Right cm: " <<  coeffmodulusmap_vars[dynamic_cast<Variable &>(elem.getRight()).getIdentifier()].size() << std::endl;
-
     // set to 'visited'
     isVisited[elem.getUniqueNodeId()] = true;
     // check if modswitches need to be inserted and how many
-    int diff = coeffmodulusmap_vars[dynamic_cast<Variable &>(elem.getLeft()).getIdentifier()].size()
-        - coeffmodulusmap_vars[dynamic_cast<Variable &>(elem.getRight()).getIdentifier()].size();
+    // first we check if the operands left and right are binary expressions or variables to avoid bad casting and look up in the corresponding map
+    int leftindex;
+    int rightindex;
+    if (dynamic_cast<Variable *>(&elem.getLeft())) {
+      leftindex = coeffmodulusmap_vars[dynamic_cast<Variable &>(elem.getLeft()).getIdentifier()].size();
+    } else if (!dynamic_cast<Variable *>(&elem.getLeft())) {
+      leftindex = coeffmodulusmap[elem.getLeft().getUniqueNodeId()].size();
+    }
+    if (dynamic_cast<Variable *>(&elem.getRight())) {
+      rightindex = coeffmodulusmap_vars[dynamic_cast<Variable &>(elem.getRight()).getIdentifier()].size();
+    } else if (!dynamic_cast<Variable *>(&elem.getRight())) {
+      rightindex =  coeffmodulusmap[elem.getRight().getUniqueNodeId()].size();
+    }
+      int diff = leftindex - rightindex;
     // if not, return
     if (diff==0) { return; }
     else {
@@ -49,17 +55,44 @@ std::unique_ptr<AbstractNode> SpecialAvoidParamMismatchVisitor::insertModSwitchI
 
   // prepare argument for 'Call' node (modswitch)
   // we need to know how many modswitches to insert (will be second arg to ModSwitch call)
-  int leftIndex = coeffmodulusmap_vars[dynamic_cast<Variable &>(binaryExpression->getLeft()).getIdentifier()].size() - 1;
-  int rightIndex = coeffmodulusmap_vars[dynamic_cast<Variable &>(binaryExpression->getRight()).getIdentifier()].size() - 1;
+  int leftIndex;
+  int rightIndex;
+
+  if (dynamic_cast<Variable *>(&binaryExpression->getLeft())) {
+    leftIndex = coeffmodulusmap_vars[dynamic_cast<Variable &>(binaryExpression->getLeft()).getIdentifier()].size() - 1;
+  }
+  else if (!dynamic_cast<Variable *>(&binaryExpression->getLeft())) {
+    leftIndex = coeffmodulusmap[binaryExpression->getLeft().getUniqueNodeId()].size() - 1;
+  }
+  if  (dynamic_cast<Variable *>(&binaryExpression->getRight())) {
+    rightIndex = coeffmodulusmap_vars[dynamic_cast<Variable &>(binaryExpression->getRight()).getIdentifier()].size() - 1;
+  }
+  else if (!dynamic_cast<Variable *>(&binaryExpression->getRight())) {
+    rightIndex = coeffmodulusmap[binaryExpression->getRight().getUniqueNodeId()].size() -1;
+  }
+
   int diff = leftIndex - rightIndex;
 
   // Note: only apply modswitches to var with more primes
   // if diff > 0, then the left side has more primes: need to switch left side only
+
+  // get the result variable to update the coeffmodulusmap_vars for:
+  VariableDeclaration& vd =  dynamic_cast<VariableDeclaration &>(binaryExpression->getParent());
+  AbstractTarget& at = vd.getTarget();
+  Variable&  v = dynamic_cast<Variable&>(at);
+  std::string ident = v.getIdentifier();
+
   if (diff > 0) {
     // update coeffmodulus maps
-    for (int i = 0; i < abs(diff); i++) { // TODO: check if this is correct
+    for (int i = 0; i < abs(diff); i++) {
       coeffmodulusmap[binaryExpression->getUniqueNodeId()].pop_back();
-      coeffmodulusmap_vars[dynamic_cast<Variable &>(binaryExpression->getLeft()).getIdentifier()].pop_back();
+      if (dynamic_cast<Variable *>(&binaryExpression->getLeft())) {
+        coeffmodulusmap_vars[dynamic_cast<Variable &>(binaryExpression->getLeft()).getIdentifier()].pop_back();
+      }
+      else {
+        coeffmodulusmap[binaryExpression->getLeft().getUniqueNodeId()].pop_back();
+      }
+      coeffmodulusmap_vars[ident].pop_back();
     }
     // insert appropriate number of modswitches after left var
     auto leftNumModSw = std::make_unique<LiteralInt>(abs(diff));
@@ -73,9 +106,15 @@ std::unique_ptr<AbstractNode> SpecialAvoidParamMismatchVisitor::insertModSwitchI
   }
   else if(diff < 0) {
     // update coeffmodulus maps
-    for (int i = 0; i < abs(diff); i++) { // TODO: check if this is correct
+    for (int i = 0; i < abs(diff); i++) {
       coeffmodulusmap[binaryExpression->getUniqueNodeId()].pop_back();
-      coeffmodulusmap_vars[dynamic_cast<Variable &>(binaryExpression->getRight()).getIdentifier()].pop_back();
+      if (dynamic_cast<Variable *>(&binaryExpression->getRight())) {
+        coeffmodulusmap_vars[dynamic_cast<Variable &>(binaryExpression->getRight()).getIdentifier()].pop_back();
+      }
+      else {
+        coeffmodulusmap[binaryExpression->getRight().getUniqueNodeId()].pop_back();
+      }
+      coeffmodulusmap_vars[ident].pop_back();
     }
     // insert appropriate number of modswitches after right var
     auto rightNumModSw = std::make_unique<LiteralInt>(abs(diff));
@@ -92,5 +131,13 @@ std::unique_ptr<AbstractNode> SpecialAvoidParamMismatchVisitor::insertModSwitchI
 
 std::vector<BinaryExpression *> SpecialAvoidParamMismatchVisitor::getModSwitchNodes() {
   return modSwitchNodes;
+}
+
+std::unordered_map<std::string, std::vector<seal::Modulus>> SpecialAvoidParamMismatchVisitor::getCoeffModulusMap() {
+  return coeffmodulusmap;
+}
+
+std::unordered_map<std::string, std::vector<seal::Modulus>> SpecialAvoidParamMismatchVisitor::getCoeffModulusMapVars() {
+  return coeffmodulusmap_vars;
 };
 

@@ -3820,17 +3820,17 @@ secret int one = {1,  1,   1,   1,  1, 1, 1,  1, 1, 1};
 
 // program specification
   const char *program = R""""(
-  secret int n264 = (a77 *** shift0);
+ secret int n264 = (a77 *** shift0);
   secret int n265 = (shift1 *** n264);
   secret int n266 = (a78 *** (one --- shift0));
   secret int n267 = (shift1 *** n266);
-  secret int n268 = (modswitch((one --- n265), 1) *** modswitch((one --- n267), 1));
+  secret int n268 = ((one --- n265) *** (one --- n267));
   secret int n269 = (a80 *** (one --- shift0));
   secret int n270 = ((one --- shift1) *** n269);
   secret int n271 = (a79 *** shift0);
   secret int n272 = ((one --- shift1) *** n271);
   secret int n273 = (modswitch((one --- n270), 1) *** modswitch((one --- n272), 1));
-  secret int n274 = (n268 *** n273);
+  secret int n274 = (modswitch(n268, 1) *** n273);
   secret int n275 = ((one --- shift2) *** (one --- shift3));
   secret int n276 = ((one --- n274) *** n275);
   secret int n277 = (a73 *** shift0);

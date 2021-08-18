@@ -44,9 +44,18 @@ class SpecialAvoidParamMismatchVisitor : public ScopedVisitor {
   std::unique_ptr<AbstractNode> insertModSwitchInAst(std::unique_ptr<AbstractNode> *ast,  BinaryExpression *binaryExpression = nullptr);
 
 
-  /// getter function
+  /// getter function for BinaryExpressions where modswitches need to be inserted
   /// \return modSwitch nodes: Binary expressions whose children need to be modswitched to ensure correctness of the circuit.
   std::vector<BinaryExpression *> getModSwitchNodes();
+
+  /// getter for coeffmodulus map
+  /// \return coeffmodulusmap
+  std::unordered_map<std::string, std::vector<seal::Modulus>> getCoeffModulusMap();
+
+  /// getter for coeffmodulus map (key: variable identifier)
+  /// \return coeffmodulusmap_vars
+  std::unordered_map<std::string, std::vector<seal::Modulus>> getCoeffModulusMapVars();
+
 
 };
 

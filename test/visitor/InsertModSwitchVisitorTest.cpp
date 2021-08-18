@@ -9,6 +9,7 @@
 #include "ast_opt/visitor/PrintVisitor.h"
 #include "ast_opt/visitor/NoisePrintVisitor.h"
 #include "ast_opt/utilities/PerformanceSeal.h"
+#include "ast_opt/visitor/AvoidParamMismatchVisitor.h"
 
 #include "gtest/gtest.h"
 #ifdef HAVE_SEAL_BFV
@@ -8079,10 +8080,12 @@ secret int result127 = (n3597 +++ n3598 --- n3597 *** n3598);
   registerInputVariable(*rootScope, "shift4", Datatype(Type::INT, true));
   registerInputVariable(*rootScope, "shift5", Datatype(Type::INT, true));
   registerInputVariable(*rootScope, "shift6", Datatype(Type::INT, true));
-  std::stringstream rs;
-  ProgramPrintVisitor p(rs);
-  astProgram->accept(p);
-  std::cout << rs.str() << std::endl;
+
+//
+//  std::stringstream rs;
+//  ProgramPrintVisitor p(rs);
+//  astProgram->accept(p);
+//  std::cout << rs.str() << std::endl;
 
   tcv->setRootScope(std::move(rootScope));
   astProgram->accept(*tcv);
@@ -8110,18 +8113,10 @@ secret int result127 = (n3597 +++ n3598 --- n3597 *** n3598);
   std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap_vars;
   for (auto n : vis.v) {
     coeffmodulusmap[n->getUniqueNodeId()] = coeff_modulus;
+    if (dynamic_cast<Variable *>(n)) {
+      coeffmodulusmap_vars[dynamic_cast<Variable &>(*n).getIdentifier()] = coeff_modulus;
+    }
   }
-
-
-  // Print Noise Map
-  std::stringstream tt;
-  NoisePrintVisitor v(tt, srv.getNoiseMap(), srv.getRelNoiseMap());
-
-  astProgram->accept(v);
-
-  std::cout << "Program: " << std::endl;
-  std::cout << tt.str() << std::endl;
-
 
   std::stringstream ss;
   InsertModSwitchVisitor modSwitchVis(ss, srv.getNoiseMap(), coeffmodulusmap, coeffmodulusmap_vars, calcInitNoiseHeuristic());
@@ -8135,26 +8130,47 @@ secret int result127 = (n3597 +++ n3598 --- n3597 *** n3598);
 
     auto binExprIns = modSwitchVis.getModSwitchNodes(); //  modSwitches to be inserted
 
-    auto rewritten_ast = modSwitchVis.insertModSwitchInAst(&astProgram, binExprIns[0], coeffmodulusmap);
+    auto rewritten_ast = modSwitchVis.insertModSwitchInAst(&astProgram, binExprIns[1], coeffmodulusmap);
 
-    // update noise map
-    // modSwitchVis.updateNoiseMap(*rewritten_ast, &srv);
+    std::cout << "Inserted modswitches " << std::endl;
 
-    //update coeff modulus map
-    modSwitchVis.updateCoeffModulusMap(binExprIns[0], 1);
-    coeffmodulusmap = modSwitchVis.getCoeffModulusMap();
+    auto newCoeffmodulusmap = modSwitchVis.getCoeffModulusMap();
+    auto newCoeffmodulusmap_vars = modSwitchVis.getCoeffModulusMapVars();
 
-    rewritten_ast = modSwitchVis.insertModSwitchInAst(&rewritten_ast, binExprIns[1], coeffmodulusmap);
+    std::cout << "Maps successfully updated" << std::endl;
 
+    // now get rid of param mismatches: first pass
+    auto avoidMismatchVis = AvoidParamMismatchVisitor(newCoeffmodulusmap, newCoeffmodulusmap_vars);
+    // find the additional modswitch sites needed
+    rewritten_ast->accept(avoidMismatchVis);
+    auto additionalModSwitchSites = avoidMismatchVis.getModSwitchNodes();
+    std::cout << "Need to insert " << additionalModSwitchSites.size() << " additional modswitch(es)" << std::endl;
+    auto final_ast = avoidMismatchVis.insertModSwitchInAst(&rewritten_ast, additionalModSwitchSites[0]);
 
-    // print output program
-    std::stringstream rr;
-    ProgramPrintVisitor p1(rr);
-    rewritten_ast->accept(p1);
-    std::cout << rr.str() << std::endl;
-  } else {
-    std::cout << "No ModSwitch Sites found" << std::endl;
+    // updated maps
+    auto final_coeffmap = avoidMismatchVis.getCoeffModulusMap();
+    auto final_coeffmap_vars = avoidMismatchVis.getCoeffModulusMapVars();
+
+//    // second pass
+//    auto avoidMismatchVis2 =  AvoidParamMismatchVisitor(final_coeffmap, final_coeffmap_vars);
+//    final_ast->accept(avoidMismatchVis2);
+//    auto additionalModSwitchSites2 = avoidMismatchVis.getModSwitchNodes();
+//    std::cout << "Need to insert " << additionalModSwitchSites2.size() << " additional modswitch(es)" << std::endl;
+//    auto final_ast2 = avoidMismatchVis2.insertModSwitchInAst(&final_ast, additionalModSwitchSites2[0]);
+
+    std::cout << "Done" << std::endl;
+
+    // print rewritten AST
+    std::stringstream tr;
+    ProgramPrintVisitor m(tr);
+    final_ast->accept(m);
+    std::cout << tr.str() << std::endl;
+
   }
+
+
+
+
 }
 
 #endif

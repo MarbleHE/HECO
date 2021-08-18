@@ -134,20 +134,14 @@ void SpecialInsertModSwitchVisitor::updateNoiseMap(AbstractNode& astProgram, Run
 }
 
 void SpecialInsertModSwitchVisitor::updateCoeffModulusMap(BinaryExpression *binaryExpression, int numSwitches) {
-  //check that we can even drop that many primes
+
 
   // get the result variable to update the coeffmodulusmap_vars for:
   VariableDeclaration& vd =  dynamic_cast<VariableDeclaration &>(binaryExpression->getParent());
   AbstractTarget& at = vd.getTarget();
   Variable&  v = dynamic_cast<Variable&>(at);
   std::string ident = v.getIdentifier();
-
- // std::cout << "Update " << ident << std::endl;
-  //std::cout << "Update " << binaryExpression->getParent().toString(false) << std::endl;
-   //std::cout << "Update " << dynamic_cast<Variable &>(binaryExpression->getParent()).getIdentifier() << std::endl;
-  // std::cout << "IDentifierLeft " << dynamic_cast<Variable *>(&binaryExpression->getLeft())->getIdentifier() << std::endl;
-  //std::cout << "IDentifierRight " << dynamic_cast<Variable *>(&binaryExpression->getRight())->getIdentifier() << std::endl;
-
+  //check that we can even drop that many primes
   if (numSwitches > coeffmodulusmap[binaryExpression->getUniqueNodeId()].size()) {
     std::runtime_error("Not possible to drop  primes: coeff modulus vector too short.");
   }
@@ -155,8 +149,18 @@ void SpecialInsertModSwitchVisitor::updateCoeffModulusMap(BinaryExpression *bina
   for (int i = 0; i < numSwitches; i++) {
     coeffmodulusmap[binaryExpression->getUniqueNodeId()].pop_back();
     coeffmodulusmap_vars[ident].pop_back();
-    coeffmodulusmap_vars[dynamic_cast<Variable &>(binaryExpression->getLeft()).getIdentifier()].pop_back();
-    coeffmodulusmap_vars[dynamic_cast<Variable &>(binaryExpression->getRight()).getIdentifier()].pop_back();
+    if (dynamic_cast<Variable *>(&binaryExpression->getLeft())) {
+      coeffmodulusmap_vars[dynamic_cast<Variable &>(binaryExpression->getLeft()).getIdentifier()].pop_back();
+    }
+    else if (!dynamic_cast<Variable *>(&binaryExpression->getLeft())) {
+      coeffmodulusmap[binaryExpression->getLeft().getUniqueNodeId()].pop_back();
+    }
+    else if (dynamic_cast<Variable *>(&binaryExpression->getRight())) {
+      coeffmodulusmap_vars[dynamic_cast<Variable &>(binaryExpression->getRight()).getIdentifier()].pop_back();
+    }
+    else {
+      coeffmodulusmap[binaryExpression->getRight().getUniqueNodeId()].pop_back();
+    }
   }
 }
 
