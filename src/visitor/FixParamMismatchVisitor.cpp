@@ -79,7 +79,7 @@ void SpecialFixParamMismatchVisitor::visit(BinaryExpression &elem) {
 
 void SpecialFixParamMismatchVisitor::visit(Variable &elem) {
   coeffmodulusmap[elem.getUniqueNodeId()] = coeffmodulusmap_vars[elem.getIdentifier()];
-  std::cout << elem.getIdentifier() << " " << coeffmodulusmap[elem.getUniqueNodeId()].size() << std::endl;
+  //std::cout << elem.getIdentifier() << " " << coeffmodulusmap[elem.getUniqueNodeId()].size() << std::endl;
 }
 
 void SpecialFixParamMismatchVisitor::visit(VariableDeclaration &elem) {

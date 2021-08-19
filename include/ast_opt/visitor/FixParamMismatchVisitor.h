@@ -31,6 +31,7 @@ class SpecialFixParamMismatchVisitor : public ScopedVisitor {
                                              std::unordered_map<std::string, std::vector<seal::Modulus>> coeffmodulusmap_vars);
 
 
+  /// Visits an AST and based on the coefficient modulus map and inserts modswitches rto operands where a parameter mismatch is found
   void visit(BinaryExpression &elem);
 
   void visit(Variable &elem);

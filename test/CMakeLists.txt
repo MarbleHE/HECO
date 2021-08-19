@@ -75,7 +75,7 @@ set(TEST_FILES
         visitor/TypeCheckingVisitorTest.cpp
         visitor/VectorizerTest.cpp
         visitor/VisitorTest.cpp
-        visitor/InsertModSwitchVisitorTest.cpp utilities/VeriLogToDslTest.cpp BenchMarkEPFLModSwitch_add.cpp BenchMarkEPFLModSwitch_bar.cpp visitor/AvoidParameterMismatchVisitorTest.cpp ../src/visitor/AvoidParamMismatchVisitor.cpp visitor/FixParameterMismatchVisitorTest.cpp)
+        visitor/InsertModSwitchVisitorTest.cpp utilities/VeriLogToDslTest.cpp BenchMarkEPFLModSwitch_add.cpp BenchMarkEPFLModSwitch_bar.cpp visitor/AvoidParameterMismatchVisitorTest.cpp ../src/visitor/AvoidParamMismatchVisitor.cpp visitor/FixParameterMismatchVisitorTest.cpp TruncateEPFLCircuits.cpp InsertModSwitches_EPFLTruncated.cpp BenchMarkEPFL_ModSwitch_max.cpp)
 
 add_executable(testing-all
         ${TEST_FILES})

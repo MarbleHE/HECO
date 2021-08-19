@@ -116,18 +116,18 @@ TEST(VerilogToDsl, testAllAssignmentsParser) {
 }
 
 TEST(VerilogToDsl, testPrintInputAsDSL) {
-  VeriLogToDsl verilogParser("div.v");
+  VeriLogToDsl verilogParser("max.v");
   verilogParser.tokenizeFile();
   verilogParser.parseInput();
-  verilogParser.writeInputToDsl("input_div.dsl");
+  verilogParser.writeInputToDsl("input_max.dsl");
 
 }
 
 TEST(VerilogToDsl, testPrintAssignmentsAsDSL) {
-  VeriLogToDsl verilogParser("div.v");
+  VeriLogToDsl verilogParser("max.v");
   verilogParser.tokenizeFile();
   verilogParser.parseAllAssignments();
-  verilogParser.writeAssignmentsToDsl("assignment_div.dsl");
+  verilogParser.writeAssignmentsToDsl("assignment_max.dsl");
 }
 
 #endif
