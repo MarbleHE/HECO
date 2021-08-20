@@ -15,7 +15,7 @@
 class BenchMarkEPFLModSwitch_max : public ::testing::Test {
 
  protected:
-  const int numCiphertextSlots = 16384;
+  const int numCiphertextSlots = 32768;
 
   std::unique_ptr<SealCiphertextFactory> scf;
   std::unique_ptr<TypeCheckingVisitor> tcv;
@@ -1308,7 +1308,16 @@ secret int n845 = (one --- n843) *** (one --- n844);
 
   long long avg_time = std::chrono::duration_cast<std::chrono::microseconds>(time_sum).count()/(count);
 
-  std::cout << "Av time: " << avg_time << std::endl;
+
+  //calc std deviation
+  long long standardDeviation = 0;
+  for( int i = 0; i < time_vec.size(); ++i) {
+    standardDeviation += (time_vec[i].count() - avg_time) * (time_vec[i].count() - avg_time);
+  }
+
+  std::cout << "Average evaluation time [" << avg_time << " microseconds]"
+            << std::endl;
+  std::cout << "Standard error: " << sqrt(double(standardDeviation) / time_vec.size())  / sqrt(time_vec.size())<< std::endl;
 
 }
 
@@ -1834,7 +1843,7 @@ secret int one = {1,  1,   1,   1,  1, 1, 1,  1, 1, 1};
 
 // program specification
   const char *program = R""""(
-  secret int n643 = (in2119 *** (one --- in3119));
+    secret int n643 = (in2119 *** (one --- in3119));
   secret int n644 = ((one --- in2119) *** in3119);
   secret int n645 = ((one --- in2118) *** in3118);
   secret int n646 = ((one --- n644) *** (one --- n645));
@@ -1889,7 +1898,7 @@ secret int one = {1,  1,   1,   1,  1, 1, 1,  1, 1, 1};
   secret int n695 = ((one --- n693) *** n694);
   secret int n696 = (in293 *** (one --- in393));
   secret int n697 = ((one --- n695) *** (one --- n696));
-  secret int n698 = (n692 *** (one --- n697));
+  secret int n698 = (modswitch(n692, 1) *** modswitch((one --- n697), 1));
   secret int n699 = ((one --- in394) *** (one --- n690));
   secret int n700 = (in294 *** n699);
   secret int n701 = (in287 *** (one --- in387));
@@ -1918,7 +1927,7 @@ secret int one = {1,  1,   1,   1,  1, 1, 1,  1, 1, 1};
   secret int n724 = ((one --- n722) *** n723);
   secret int n725 = (in277 *** (one --- in377));
   secret int n726 = ((one --- n724) *** (one --- n725));
-  secret int n727 = (n721 *** (one --- n726));
+  secret int n727 = (modswitch(n721, 1) *** modswitch((one --- n726), 1));
   secret int n728 = ((one --- in378) *** (one --- n719));
   secret int n729 = (in278 *** n728);
   secret int n730 = (in271 *** (one --- in371));
@@ -1930,7 +1939,7 @@ secret int one = {1,  1,   1,   1,  1, 1, 1,  1, 1, 1};
   secret int n736 = ((one --- n734) *** n735);
   secret int n737 = (in269 *** (one --- in369));
   secret int n738 = ((one --- n736) *** (one --- n737));
-  secret int n739 = (n733 *** (one --- n738));
+  secret int n739 = (modswitch(n733, 1) *** modswitch((one --- n738), 1));
   secret int n740 = ((one --- in370) *** (one --- n731));
   secret int n741 = (in270 *** n740);
   secret int n742 = ((one --- in267) *** in367);
@@ -1956,9 +1965,9 @@ secret int one = {1,  1,   1,   1,  1, 1, 1,  1, 1, 1};
   secret int n762 = ((one --- n760) *** (one --- n761));
   secret int n763 = (in258 *** (one --- in358));
   secret int n764 = (n762 *** (one --- n763));
-  secret int n765 = (n757 *** (one --- n764));
-  secret int n766 = ((one --- n754) *** (one --- n765));
-  secret int n767 = (n753 *** (one --- n766));
+  secret int n765 = (modswitch(n757, 1) *** modswitch((one --- n764), 1));
+  secret int n766 = (modswitch((one --- n754), 1) *** (modswitch(one, 1) --- n765));
+  secret int n767 = (modswitch(n753, 1) *** (modswitch(one, 1) --- n766));
   secret int n768 = (in260 *** (one --- in360));
   secret int n769 = ((one --- n751) *** n768);
   secret int n770 = (in261 *** (one --- in361));
@@ -2588,7 +2597,16 @@ secret int one = {1,  1,   1,   1,  1, 1, 1,  1, 1, 1};
 
   long long avg_time = std::chrono::duration_cast<std::chrono::microseconds>(time_sum).count()/(count);
 
-  std::cout << "Av time: " << avg_time << std::endl;
+
+  //calc std deviation
+  long long standardDeviation = 0;
+  for( int i = 0; i < time_vec.size(); ++i) {
+    standardDeviation += (time_vec[i].count() - avg_time) * (time_vec[i].count() - avg_time);
+  }
+
+  std::cout << "Average evaluation time [" << avg_time << " microseconds]"
+            << std::endl;
+  std::cout << "Standard error: " << sqrt(double(standardDeviation) / time_vec.size())  / sqrt(time_vec.size())<< std::endl;
 
 }
 

@@ -16,7 +16,7 @@
 class BenchMarkEPFLModSwitch_bar : public ::testing::Test {
 
  protected:
-  const int numCiphertextSlots = 16384;
+  const int numCiphertextSlots = 32768;
 
   std::unique_ptr<SealCiphertextFactory> scf;
   std::unique_ptr<TypeCheckingVisitor> tcv;
@@ -415,11 +415,20 @@ secret int n319 = shift4 *** shift5;
 
   long long avg_time = std::chrono::duration_cast<std::chrono::microseconds>(time_sum).count()/(count);
   std::cout << count << std::endl;
-  std::cout << "Av time: " << avg_time << std::endl;
+
+  //calc std deviation
+  long long standardDeviation = 0;
+  for( int i = 0; i < time_vec.size(); ++i) {
+    standardDeviation += (time_vec[i].count() - avg_time) * (time_vec[i].count() - avg_time);
+  }
+
+  std::cout << "Average evaluation time [" << avg_time << " microseconds]"
+            << std::endl;
+  std::cout << "Standard error: " << sqrt(double(standardDeviation) / time_vec.size())  / sqrt(time_vec.size())<< std::endl;
 
 }
 
-TEST_F(BenchMarkEPFLModSwitch_bar, BarModSwitch) {
+TEST_F(BenchMarkEPFLModSwitch_bar, BarModSwitch) { //TODO: fix
 
 /// This test runs the bar circuit from the EPFL circuit collection WITH modswitch ops inserted using SEAL
 
@@ -566,7 +575,7 @@ secret int one = {1,  1,   1,   1,  1, 1, 1,  1, 1, 1};
 
 // program specification
   const char *program = R""""(
-    secret int n264 = (a77 *** shift0);
+     secret int n264 = (a77 *** shift0);
   secret int n265 = (shift1 *** n264);
   secret int n266 = (a78 *** (one --- shift0));
   secret int n267 = (shift1 *** n266);
@@ -583,44 +592,44 @@ secret int one = {1,  1,   1,   1,  1, 1, 1,  1, 1, 1};
   secret int n278 = (shift1 *** n277);
   secret int n279 = (a74 *** (one --- shift0));
   secret int n280 = (shift1 *** n279);
-  secret int n281 = (modswitch((one --- n278), 1) *** modswitch((one --- n280), 1));
+  secret int n281 = ((one --- n278) *** (one --- n280));
   secret int n282 = (a76 *** (one --- shift0));
   secret int n283 = ((one --- shift1) *** n282);
   secret int n284 = (a75 *** shift0);
   secret int n285 = ((one --- shift1) *** n284);
-  secret int n286 = (modswitch((one --- n283), 1) *** modswitch((one --- n285), 1));
-  secret int n287 = (modswitch(n281, 1) *** modswitch(n286, 1));
+  secret int n286 = ((one --- n283) *** (one --- n285));
+  secret int n287 = (n281 *** n286);
   secret int n288 = (shift2 *** (one --- shift3));
-  secret int n289 = ((modswitch(one, 1) --- n287) *** modswitch(n288, 1));
-  secret int n290 = (modswitch((modswitch(one, 1) --- n276), 1) *** modswitch((modswitch(one, 1) --- n289), 1));
+  secret int n289 = ((one --- n287) *** n288);
+  secret int n290 = ((modswitch(one, 1) --- n276) *** modswitch((one --- n289), 1));
   secret int n291 = (a65 *** shift0);
   secret int n292 = (shift1 *** n291);
   secret int n293 = (a66 *** (one --- shift0));
   secret int n294 = (shift1 *** n293);
-  secret int n295 = (modswitch((one --- n292), 1) *** modswitch((one --- n294), 1));
+  secret int n295 = ((one --- n292) *** (one --- n294));
   secret int n296 = (a68 *** (one --- shift0));
   secret int n297 = ((one --- shift1) *** n296);
   secret int n298 = (a67 *** shift0);
   secret int n299 = ((one --- shift1) *** n298);
-  secret int n300 = (modswitch((one --- n297), 1) *** modswitch((one --- n299), 1));
-  secret int n301 = (modswitch(n295, 1) *** modswitch(n300, 1));
+  secret int n300 = ((one --- n297) *** (one --- n299));
+  secret int n301 = (n295 *** n300);
   secret int n302 = (shift2 *** shift3);
-  secret int n303 = ((modswitch(one, 1) --- n301) *** modswitch(n302, 1));
+  secret int n303 = ((one --- n301) *** n302);
   secret int n304 = (a69 *** shift0);
   secret int n305 = (shift1 *** n304);
   secret int n306 = (a70 *** (one --- shift0));
   secret int n307 = (shift1 *** n306);
-  secret int n308 = (modswitch((one --- n305), 1) *** modswitch((one --- n307), 1));
+  secret int n308 = ((one --- n305) *** (one --- n307));
   secret int n309 = (a72 *** (one --- shift0));
   secret int n310 = ((one --- shift1) *** n309);
   secret int n311 = (a71 *** shift0);
   secret int n312 = ((one --- shift1) *** n311);
-  secret int n313 = (modswitch((one --- n310), 1) *** modswitch((one --- n312), 1));
-  secret int n314 = (modswitch(n308, 1) *** modswitch(n313, 1));
+  secret int n313 = ((one --- n310) *** (one --- n312));
+  secret int n314 = (n308 *** n313);
   secret int n315 = ((one --- shift2) *** shift3);
-  secret int n316 = ((modswitch(one, 1) --- n314) *** modswitch(n315, 1));
-  secret int n317 = (modswitch((modswitch(one, 1) --- n303), 1) *** modswitch((modswitch(one, 1) --- n316), 1));
-  secret int n318 = (modswitch(n290, 1) *** modswitch(n317, 1));
+  secret int n316 = ((one --- n314) *** n315);
+  secret int n317 = ((one --- n303) *** (one --- n316));
+  secret int n318 = (n290 *** modswitch(n317, 1));
   secret int n319 = (shift4 *** shift5);
 )"""";
   auto astProgram = Parser::parse(std::string(program));
@@ -798,7 +807,16 @@ secret int one = {1,  1,   1,   1,  1, 1, 1,  1, 1, 1};
 
   long long avg_time = std::chrono::duration_cast<std::chrono::microseconds>(time_sum).count()/(count);
 
-  std::cout << "Av time: " << avg_time << std::endl;
+
+  //calc std deviation
+  long long standardDeviation = 0;
+  for( int i = 0; i < time_vec.size(); ++i) {
+    standardDeviation += (time_vec[i].count() - avg_time) * (time_vec[i].count() - avg_time);
+  }
+
+  std::cout << "Average evaluation time [" << avg_time << " microseconds]"
+            << std::endl;
+  std::cout << "Standard error: " << sqrt(double(standardDeviation) / time_vec.size())  / sqrt(time_vec.size())<< std::endl;
 
 
 }

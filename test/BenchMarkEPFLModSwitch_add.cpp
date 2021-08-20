@@ -16,7 +16,7 @@
 class BenchMarkEPFLModSwitch_add : public ::testing::Test {
 
  protected:
-  const int numCiphertextSlots = 16384;
+  const int numCiphertextSlots = 32768;
 
   std::unique_ptr<SealCiphertextFactory> scf;
   std::unique_ptr<TypeCheckingVisitor> tcv;
@@ -968,7 +968,15 @@ secret int n498 = (one --- n493) *** n496;
 
   long long avg_time = std::chrono::duration_cast<std::chrono::microseconds>(time_sum).count()/(count);
 
-  std::cout << "Av time: " << avg_time << std::endl;
+  //calc std deviation
+  long long standardDeviation = 0;
+  for( int i = 0; i < time_vec.size(); ++i) {
+    standardDeviation += (time_vec[i].count() - avg_time) * (time_vec[i].count() - avg_time);
+  }
+
+  std::cout << "Average evaluation time" << avg_time << " microseconds]"
+            << std::endl;
+  std::cout << "Standard error: " << sqrt(double(standardDeviation) / time_vec.size())  / sqrt(time_vec.size())<< std::endl;
 
 }
 
@@ -1908,7 +1916,15 @@ secret int one = {1,  1,   1,   1,  1, 1, 1,  1, 1, 1};
 
   long long avg_time = std::chrono::duration_cast<std::chrono::microseconds>(time_sum).count()/(count);
 
-  std::cout << "Av time: " << avg_time << std::endl;
+  //calc std deviation
+  long long standardDeviation = 0;
+  for( int i = 0; i < time_vec.size(); ++i) {
+    standardDeviation += (time_vec[i].count() - avg_time) * (time_vec[i].count() - avg_time);
+  }
+
+  std::cout << "Average evaluation time [" << avg_time << " microseconds]"
+            << std::endl;
+  std::cout << "Standard error: " << sqrt(double(standardDeviation) / time_vec.size())  / sqrt(time_vec.size())<< std::endl;
 
 
 }
