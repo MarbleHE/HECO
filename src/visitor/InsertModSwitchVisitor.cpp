@@ -13,47 +13,54 @@ SpecialInsertModSwitchVisitor::SpecialInsertModSwitchVisitor(std::ostream &os, s
 
 void SpecialInsertModSwitchVisitor::visit(BinaryExpression &elem) {
 
-  // for the visited binary expression, calculate the noise budget, coeffmodulus chain length, and spent noise budgets of both operands,
-  // as well as the difference of the chain length of both coeff modulus chains
-  if (elem.countChildren() > 1) {
-    int leftNoiseBudget = noise_map.find(elem.getLeft().getUniqueNodeId())->second;
-    int rightNoiseBudget = noise_map.find(elem.getRight().getUniqueNodeId())->second;
-    int leftIndex = coeffmodulusmap[elem.getLeft().getUniqueNodeId()].size() - 1;
-    int rightIndex = coeffmodulusmap[elem.getRight().getUniqueNodeId()].size() - 1;
-    int diff = leftIndex - rightIndex;
-    int spentNoiseBudgetLeft = encNoiseBudget - leftNoiseBudget;
-    int spentNoiseBudgetRight = encNoiseBudget - rightNoiseBudget;
+  // only try to insert a modswitch for multiplications, since the evaluation times of modswitches excced the eval times of an addition but not mult
+  if (elem.getOperator().toString() == "***" ) {
 
-    // if the sizes of the coeff modulus chains are different, we will want to insert |diff| + 1 many modswitches after one operand
-    // and 1 modSwitch after the other
+    // for the visited binary expression, calculate the noise budget, coeffmodulus chain length, and spent noise budgets of both operands,
+    // as well as the difference of the chain length of both coeff modulus chains
+    if (elem.countChildren() > 1) {
+      int leftNoiseBudget = noise_map.find(elem.getLeft().getUniqueNodeId())->second;
+      int rightNoiseBudget = noise_map.find(elem.getRight().getUniqueNodeId())->second;
+      int leftIndex = coeffmodulusmap[elem.getLeft().getUniqueNodeId()].size() - 1;
+      int rightIndex = coeffmodulusmap[elem.getRight().getUniqueNodeId()].size() - 1;
+      int diff = leftIndex - rightIndex;
+      int spentNoiseBudgetLeft = encNoiseBudget - leftNoiseBudget;
+      int spentNoiseBudgetRight = encNoiseBudget - rightNoiseBudget;
 
-    // if diff > 0 then the right operand has fewer primes remaining in the coeffmodulus chain
-    if (diff > 0) {
-      int sum = 0; // this holds the sum of the bit length of the coeff_moduli in the chain to compare against spent noise budget
-      for (int i = leftIndex; i >= (leftIndex - (abs(diff))); i--) {
-        sum += coeffmodulusmap[elem.getLeft().getUniqueNodeId()][i].bit_count();
+      // if the sizes of the coeff modulus chains are different, we will want to insert |diff| + 1 many modswitches after one operand
+      // and 1 modSwitch after the other
+
+      // if diff > 0 then the right operand has fewer primes remaining in the coeffmodulus chain
+      if (diff > 0) {
+        int sum =
+            0; // this holds the sum of the bit length of the coeff_moduli in the chain to compare against spent noise budget
+        for (int i = leftIndex; i >= (leftIndex - (abs(diff))); i--) {
+          sum += coeffmodulusmap[elem.getLeft().getUniqueNodeId()][i].bit_count();
+        }
+        // if the spent noise budgets for the left and right operators are sufficiently large, we suggest a modswitch insertion procedure
+        if ((sum < spentNoiseBudgetLeft)
+            && spentNoiseBudgetRight > coeffmodulusmap[elem.getRight().getUniqueNodeId()][rightIndex].bit_count()) {
+          modSwitchNodes.push_back(&elem);
+        }
       }
-      // if the spent noise budgets for the left and right operators are sufficiently large, we suggest a modswitch insertion procedure
-      if ((sum < spentNoiseBudgetLeft) && spentNoiseBudgetRight > coeffmodulusmap[elem.getRight().getUniqueNodeId()][rightIndex].bit_count()) {
-        modSwitchNodes.push_back(&elem);
+        // if diff < 0 then the left operand has fewer primes remaining in the coeffmodulus chain
+      else if (diff < 0) {
+        int sum = 0;
+        for (int i = rightIndex; i >= (rightIndex - (abs(diff))); i--) {
+          sum += coeffmodulusmap[elem.getRight().getUniqueNodeId()][i].bit_count();
+        }
+        // if the spent noise budgets for the left and right operators are sufficiently large, we suggest a modswitch insertion procedure
+        if ((sum < spentNoiseBudgetRight)
+            && spentNoiseBudgetLeft > coeffmodulusmap[elem.getLeft().getUniqueNodeId()][leftIndex].bit_count()) {
+          modSwitchNodes.push_back(&elem);
+        }
       }
-    }
-    // if diff < 0 then the left operand has fewer primes remaining in the coeffmodulus chain
-    else if (diff <0) {
-      int sum = 0;
-      for (int i = rightIndex; i >= (rightIndex - (abs(diff))); i--) {
-        sum += coeffmodulusmap[elem.getRight().getUniqueNodeId()][i].bit_count();
-      }
-      // if the spent noise budgets for the left and right operators are sufficiently large, we suggest a modswitch insertion procedure
-      if ((sum < spentNoiseBudgetRight) && spentNoiseBudgetLeft > coeffmodulusmap[elem.getLeft().getUniqueNodeId()][leftIndex].bit_count()) {
-        modSwitchNodes.push_back(&elem);
-      }
-    }
-    // if diff = 0, check if a single modswitch after both operands can be inserted
-    else {
-      if ((spentNoiseBudgetLeft > coeffmodulusmap[elem.getLeft().getUniqueNodeId()][leftIndex].bit_count()) &&
+        // if diff = 0, check if a single modswitch after both operands can be inserted
+      else {
+        if ((spentNoiseBudgetLeft > coeffmodulusmap[elem.getLeft().getUniqueNodeId()][leftIndex].bit_count()) &&
             (spentNoiseBudgetRight > coeffmodulusmap[elem.getRight().getUniqueNodeId()][rightIndex].bit_count())) {
-        modSwitchNodes.push_back(&elem);
+          modSwitchNodes.push_back(&elem);
+        }
       }
     }
   }
