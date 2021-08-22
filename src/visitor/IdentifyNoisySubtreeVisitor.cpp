@@ -22,10 +22,8 @@ void SpecialIdentifyNoisySubtreeVisitor::visit(BinaryExpression &elem) {
       os << " " << elem.getUniqueNodeId();
       return;
     } else if (leftNoiseBudget < rightNoiseBudget) {
-      std::cout << "Going left: " << leftNoiseBudget << std::endl;
       elem.getLeft().accept(*this);
     } else if (leftNoiseBudget > rightNoiseBudget) {
-      std::cout << "Going right: " << rightNoiseBudget << std::endl;
       elem.getRight().accept(*this);
     } else {
       elem.getLeft().accept(*this);

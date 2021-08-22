@@ -15,7 +15,6 @@ void SpecialInsertModSwitchVisitor::visit(BinaryExpression &elem) {
 
   // only try to insert a modswitch for multiplications, since the evaluation times of modswitches excced the eval times of an addition but not mult
   if (elem.getOperator().toString() == "***" ) {
-
     // for the visited binary expression, calculate the noise budget, coeffmodulus chain length, and spent noise budgets of both operands,
     // as well as the difference of the chain length of both coeff modulus chains
     if (elem.countChildren() > 1) {

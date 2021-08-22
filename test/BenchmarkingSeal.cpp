@@ -1008,7 +1008,7 @@ TEST_F(BenchmarkingSeal, ModSwitchToDifferentLevels) {
     standardDeviation += (time_vec[i].count() - avg_time2) * (time_vec[i].count() - avg_time2);
   }
 
-  std::cout << "Average evaluation time of ModSwitching to Level2 [" << avg_time2 << " microseconds]"
+  std::cout << "Average evaluation time of ModSwitching to Level3 [" << avg_time2 << " microseconds]"
             << std::endl;
   std::cout << "Standard error: " << sqrt(double(standardDeviation) / time_vec.size())  / sqrt(time_vec.size())<< std::endl;
 
@@ -1021,7 +1021,7 @@ TEST_F(BenchmarkingSeal, ModSwitchToDifferentLevels) {
 
 
   // benchmark Modswitch Level 1
-  std::cout << "Benchmarking Modswitch Level 2" << std::endl;
+  std::cout << "Benchmarking Modswitch Level 3" << std::endl;
 
   for(size_t j = 0; j < static_cast<size_t>(count); j++) {
 
@@ -1043,14 +1043,53 @@ TEST_F(BenchmarkingSeal, ModSwitchToDifferentLevels) {
   //calc std deviation
   standardDeviation = 0;
   for( int i = 0; i < time_vec.size(); ++i) {
-    standardDeviation += (time_vec[i].count() - avg_time2) * (time_vec[i].count() - avg_time2);
+    standardDeviation += (time_vec[i].count() - avg_time3) * (time_vec[i].count() - avg_time3);
   }
 
-  std::cout << "Average evaluation time of ModSwitching to Level2 [" << avg_time2 << " microseconds]"
+  std::cout << "Average evaluation time of ModSwitching to Level3 [" << avg_time3 << " microseconds]"
             << std::endl;
   std::cout << "Standard error: " << sqrt(double(standardDeviation) / time_vec.size())  / sqrt(time_vec.size())<< std::endl;
 
   //---
+
+
+  // clear time_vec and time_sum
+  time_vec.clear();
+  std::chrono::microseconds time_sum_level4(0);
+
+
+  // benchmark Modswitch Level 1
+  std::cout << "Benchmarking Modswitch Level 4" << std::endl;
+
+  for(size_t j = 0; j < static_cast<size_t>(count); j++) {
+
+    //start timer
+    time_start = std::chrono::high_resolution_clock::now();
+
+    // do modswitch
+    evaluator.mod_switch_to_next(xModswitched2, xModswitched3);
+
+    // end timer
+    time_end = std::chrono::high_resolution_clock::now();
+    time_diff = std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
+    time_vec.push_back(std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start));
+    time_sum_level4 += std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
+    //std::cout << "Time elapsed: " << std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start).count() << std::endl;
+  }
+
+  long long avg_time4 = std::chrono::duration_cast<std::chrono::microseconds>(time_sum_level4).count()/(count);
+  //calc std deviation
+  standardDeviation = 0;
+  for( int i = 0; i < time_vec.size(); ++i) {
+    standardDeviation += (time_vec[i].count() - avg_time4) * (time_vec[i].count() - avg_time4);
+  }
+
+  std::cout << "Average evaluation time of ModSwitching to Level4 [" << avg_time4 << " microseconds]"
+            << std::endl;
+  std::cout << "Standard error: " << sqrt(double(standardDeviation) / time_vec.size())  / sqrt(time_vec.size())<< std::endl;
+
+  //---
+
 
 }
 
