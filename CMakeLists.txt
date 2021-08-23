@@ -143,7 +143,7 @@ set(HEADER_ONLY_SOURCES
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/IVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/VariableMap.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/Visitor.h
-        )
+        include/ast_opt/ast/Ast.h)
 
 # This contains the headers that developers that want to link directly against ABC might need to have access to
 # These are the headers that are installed when ABC is installed as a system-wide library
