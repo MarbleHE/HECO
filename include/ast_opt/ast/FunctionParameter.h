@@ -7,6 +7,7 @@
 #include "ast_opt/ast/AbstractTarget.h"
 #include "ast_opt/utilities/Datatype.h"
 
+/// typed parameters defined as inputs for a function
 class FunctionParameter : public AbstractTarget {
  private:
   /// Name of this FunctionParameter
