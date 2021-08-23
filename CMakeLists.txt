@@ -273,3 +273,21 @@ if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     enable_testing()
     add_subdirectory(test EXCLUDE_FROM_ALL)
 endif ()
+
+
+####################################################################################
+# Python Frontend
+#
+# Use pybind11 as C++ wrapper for the Python frontend
+####################################################################################
+
+find_package(Python COMPONENTS Interpreter Development)
+
+if(NOT Python_VERSION_MAJOR EQUAL 3)
+    message(WARNING "The ABC python frontend requires Python 3, but no installation
+        was found. Skipping frontend building...")
+else()
+    add_subdirectory(extern/pybind11)
+    add_subdirectory(python)
+endif()
+
