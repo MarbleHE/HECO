@@ -28,6 +28,7 @@
 #include "ast_opt/visitor/ParentSettingVisitor.h"
 
 using std::to_string;
+using json = nlohmann::json;
 
 void addParsedNode(AbstractNode *parsedNode) {
   parsedNodes.push_back(std::ref(*parsedNode));
@@ -60,6 +61,35 @@ std::unique_ptr<AbstractNode> Parser::parse(std::string s,
   auto result = parse(std::move(s));
   createdNodesList = std::move(parsedNodes);
   return result;
+}
+
+std::unique_ptr<AbstractNode> Parser::parseJson(std::string s) {
+  return Parser::parseJson(json::parse(s));
+}
+
+std::unique_ptr<AbstractNode> Parser::parseJson(json j) {
+  // TODO [mh]: distinguish three cases, cast all of them to abstract node
+
+  if (j["type"].get<std::string>() == "Assignment") {
+    return Parser::parseJsonStatement(j);
+  }
+  else
+    throw stork::runtime_error("Unsupported type in JSON object.");
+}
+
+std::unique_ptr<AbstractTarget> Parser::parseJsonTarget(json j) {
+  // TODO [mh]
+  return Variable::fromJson(j);
+}
+
+std::unique_ptr<AbstractStatement> Parser::parseJsonStatement(json j) {
+  // TODO [mh]
+  return Assignment::fromJson(j);
+}
+
+std::unique_ptr<AbstractExpression> Parser::parseJsonExpression(json j) {
+  // TODO [mh]
+  return LiteralInt::fromJson(j);
 }
 
 AbstractStatement *Parser::parseStatement(stork::tokens_iterator &it, bool gobbleTrailingSemicolon) {

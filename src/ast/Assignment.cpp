@@ -1,3 +1,4 @@
+#include <ast_opt/parser/Parser.h>
 #include "ast_opt/ast/Assignment.h"
 #include "ast_opt/ast/Variable.h"
 #include "ast_opt/utilities/IVisitor.h"
@@ -132,6 +133,13 @@ nlohmann::json Assignment::toJson() const {
   j["target"] = target ? target->toJson() : "";
   j["value"] = value ? value->toJson() : "";
   return j;
+}
+
+std::unique_ptr<Assignment> Assignment::fromJson(nlohmann::json j) {
+  auto target = Parser::parseJsonTarget(j["target"]);
+  auto value = Parser::parseJsonExpression(j["value"]);
+
+  return std::make_unique<Assignment>(std::move(target), std::move(value));
 }
 
 std::string Assignment::toString(bool printChildren) const {
