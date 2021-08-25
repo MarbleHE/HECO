@@ -94,5 +94,22 @@ class Parser {
   /// \return (A unique pointer) to the root node of the AST.
   static std::unique_ptr<AbstractNode> parse(std::string s,
                                              std::vector<std::reference_wrapper<AbstractNode>> &createdNodesList);
+
+  /// Parses the JSON string representation of an AST and returns (a unique ptr) to the created root node of the AST.
+  /// \param s The JSON string to parse
+  /// \return (A unique pointer) to the root node of the AST.
+  static std::unique_ptr<AbstractNode> parseJson(std::string s);
+
+  /// Parses the JSON representation of an AST and returns (a unique ptr) to the created root node of the AST.
+  /// \param j The JSON structure to parse
+  /// \throws stork::runtime_error if an unknown type is encountered
+  /// \return (A unique pointer) to the root node of the AST.
+  static std::unique_ptr<AbstractNode> parseJson(nlohmann::json j);
+  /// The following three functions are helpers for parseJson, so that we can get the right abstract node type,
+  /// because otherwise we would need to cast down from an AbstractNode.
+  static std::unique_ptr<AbstractExpression> parseJsonExpression(nlohmann::json j);
+  static std::unique_ptr<AbstractStatement> parseJsonStatement(nlohmann::json j);
+  static std::unique_ptr<AbstractTarget> parseJsonTarget(nlohmann::json j);
+
 };
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_PARSER_PARSER_H_

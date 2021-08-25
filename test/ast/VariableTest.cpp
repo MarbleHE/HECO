@@ -80,3 +80,6 @@ TEST(VariableTest, JsonOutputTest) { /* NOLINT */
             {"identifier", varIdentifier}};
   EXPECT_EQ(var->toJson(), j);
 }
+
+
+// TODO[mh]: add json input tests

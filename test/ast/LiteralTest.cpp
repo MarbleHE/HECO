@@ -170,3 +170,5 @@ TEST(LiteralTest, JsonOutputTestLiteralString) { /* NOLINT */
                       {"value", val}};
   EXPECT_EQ(lString->toJson(), j);
 }
+
+// TODO[mh]: add json input tests
