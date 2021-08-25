@@ -30,7 +30,9 @@ class ABCContext():
         for item in walk(python_ast):
             if isinstance(item, With) and item.lineno == parent_frame.f_lineno:
                 logging.debug(f"Start parsing With block at line {item.lineno}")
-                ABCVisitor(self.log_level).visit(item)
+
+                for block in item.body:
+                    ABCVisitor(self.prog, self.log_level).visit(block)
                 break
 
     def __exit__(self, exc_type, exc_val, exc_tb):
