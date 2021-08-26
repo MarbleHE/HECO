@@ -16,7 +16,7 @@
 class BenchMarkEPFLModSwitch_add : public ::testing::Test {
 
  protected:
-  const int numCiphertextSlots = 32768;
+  const int numCiphertextSlots = 16384;
 
   std::unique_ptr<SealCiphertextFactory> scf;
   std::unique_ptr<TypeCheckingVisitor> tcv;
@@ -950,7 +950,7 @@ secret int n498 = (one --- n493) *** n496;
   std::chrono::microseconds time_diff;
   std::chrono::microseconds time_sum(0);
   std::vector<std::chrono::microseconds> time_vec;
-  int count = 10;
+  int count = 100;
 
   for (int i = 0; i < count; i++) {
     time_start = std::chrono::high_resolution_clock::now();
@@ -963,7 +963,7 @@ secret int n498 = (one --- n493) *** n496;
     time_vec.push_back(time_diff);
     time_sum += std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
 
-    std::cout << "Elapsed Time " << time_diff.count() << std::endl;
+    //std::cout << "Elapsed Time " << time_diff.count() << std::endl;
   }
 
   long long avg_time = std::chrono::duration_cast<std::chrono::microseconds>(time_sum).count()/(count);
@@ -977,6 +977,13 @@ secret int n498 = (one --- n493) *** n496;
   std::cout << "Average evaluation time" << avg_time << " microseconds]"
             << std::endl;
   std::cout << "Standard error: " << sqrt(double(standardDeviation) / time_vec.size())  / sqrt(time_vec.size())<< std::endl;
+
+
+  // write to file
+  std::cout << numCiphertextSlots << " , " << "adder : NO MODSWITCH" << std::endl;
+  for (int i=0; i < time_vec.size(); i++) {
+    std::cout << " , " << time_vec[i].count() << "\n";
+  }
 
 }
 
@@ -1377,7 +1384,7 @@ secret int one = {1,  1,   1,   1,  1, 1, 1,  1, 1, 1};
 
   // program specification
   const char *program = R""""(
-  secret int n386 = (a0 *** (one --- b0));
+    secret int n386 = (a0 *** (one --- b0));
   secret int n387 = ((one --- a0) *** b0);
   secret int f0 = ((n386 +++ n387) --- (n386 *** n387));
   secret int n389 = (a0 *** b0);
@@ -1386,15 +1393,15 @@ secret int one = {1,  1,   1,   1,  1, 1, 1,  1, 1, 1};
   secret int n392 = ((one --- n390) *** (one --- n391));
   secret int n393 = (n389 *** (one --- n392));
   secret int n394 = ((one --- n389) *** n392);
-  secret int f1 = (modswitch((n393 +++ n394), 1) --- modswitch((n393 *** n394), 1));
+  secret int f1 = ((n393 +++ n394) --- (n393 *** n394));
   secret int n396 = (n389 *** (one --- n390));
   secret int n397 = ((one --- n391) *** (one --- n396));
   secret int n398 = ((one --- a2) *** (one --- b2));
   secret int n399 = (a2 *** b2);
   secret int n400 = ((one --- n398) *** (one --- n399));
   secret int n401 = (modswitch(n397, 1) *** modswitch((one --- n400), 1));
-  secret int n402 = (modswitch((one --- n397), 1) *** modswitch(n400, 1));
-  secret int f2 = (modswitch((modswitch(one, 1) --- n401), 1) *** modswitch((modswitch(one, 1) --- n402), 1));
+  secret int n402 = ((one --- n397) *** n400);
+  secret int f2 = ((modswitch(one, 1) --- n401) *** modswitch((one --- n402), 1));
   secret int n404 = ((one --- n397) *** (one --- n398));
   secret int n405 = ((one --- n399) *** (one --- n404));
   secret int n406 = ((one --- a3) *** (one --- b3));
@@ -1402,94 +1409,94 @@ secret int one = {1,  1,   1,   1,  1, 1, 1,  1, 1, 1};
   secret int n408 = ((one --- n406) *** (one --- n407));
   secret int n409 = (modswitch(n405, 1) *** modswitch((one --- n408), 1));
   secret int n410 = (modswitch((one --- n405), 1) *** modswitch(n408, 1));
-  secret int f3 = (modswitch((modswitch(one, 1) --- n409), 1) *** modswitch((modswitch(one, 1) --- n410), 1));
+  secret int f3 = ((modswitch(one, 1) --- n409) *** (modswitch(one, 1) --- n410));
   secret int n412 = ((one --- n405) *** (one --- n406));
   secret int n413 = ((one --- n407) *** (one --- n412));
   secret int n414 = ((one --- a4) *** (one --- b4));
   secret int n415 = (a4 *** b4);
   secret int n416 = ((one --- n414) *** (one --- n415));
-  secret int n417 = (modswitch(n413, 1) *** modswitch((one --- n416), 1));
-  secret int n418 = (modswitch((one --- n413), 1) *** modswitch(n416, 1));
-  secret int f4 = (modswitch((modswitch(one, 1) --- n417), 1) *** modswitch((modswitch(one, 1) --- n418), 1));
+  secret int n417 = (n413 *** (one --- n416));
+  secret int n418 = ((one --- n413) *** n416);
+  secret int f4 = ((one --- n417) *** (one --- n418));
   secret int n420 = ((one --- n413) *** (one --- n414));
   secret int n421 = ((one --- n415) *** (one --- n420));
   secret int n422 = ((one --- a5) *** (one --- b5));
   secret int n423 = (a5 *** b5);
   secret int n424 = ((one --- n422) *** (one --- n423));
-  secret int n425 = (modswitch(n421, 1) *** modswitch((one --- n424), 1));
-  secret int n426 = (modswitch((one --- n421), 1) *** modswitch(n424, 1));
-  secret int f5 = (modswitch((modswitch(one, 1) --- n425), 1) *** modswitch((modswitch(one, 1) --- n426), 1));
+  secret int n425 = (n421 *** (one --- n424));
+  secret int n426 = ((one --- n421) *** n424);
+  secret int f5 = ((one --- n425) *** (one --- n426));
   secret int n428 = ((one --- n421) *** (one --- n422));
   secret int n429 = ((one --- n423) *** (one --- n428));
   secret int n430 = ((one --- a6) *** (one --- b6));
   secret int n431 = (a6 *** b6);
   secret int n432 = ((one --- n430) *** (one --- n431));
-  secret int n433 = (modswitch(n429, 1) *** modswitch((one --- n432), 1));
-  secret int n434 = (modswitch((one --- n429), 1) *** modswitch(n432, 1));
-  secret int f6 = (modswitch((modswitch(one, 1) --- n433), 1) *** modswitch((modswitch(one, 1) --- n434), 1));
+  secret int n433 = (n429 *** (one --- n432));
+  secret int n434 = ((one --- n429) *** n432);
+  secret int f6 = ((one --- n433) *** (one --- n434));
   secret int n436 = ((one --- n429) *** (one --- n430));
   secret int n437 = ((one --- n431) *** (one --- n436));
   secret int n438 = ((one --- a7) *** (one --- b7));
   secret int n439 = (a7 *** b7);
   secret int n440 = ((one --- n438) *** (one --- n439));
-  secret int n441 = (modswitch(n437, 1) *** modswitch((one --- n440), 1));
-  secret int n442 = (modswitch((one --- n437), 1) *** modswitch(n440, 1));
-  secret int f7 = (modswitch((modswitch(one, 1) --- n441), 1) *** modswitch((modswitch(one, 1) --- n442), 1));
+  secret int n441 = (n437 *** (one --- n440));
+  secret int n442 = ((one --- n437) *** n440);
+  secret int f7 = ((one --- n441) *** (one --- n442));
   secret int n444 = ((one --- n437) *** (one --- n438));
   secret int n445 = ((one --- n439) *** (one --- n444));
   secret int n446 = ((one --- a8) *** (one --- b8));
   secret int n447 = (a8 *** b8);
   secret int n448 = ((one --- n446) *** (one --- n447));
-  secret int n449 = (modswitch(n445, 1) *** modswitch((one --- n448), 1));
-  secret int n450 = (modswitch((one --- n445), 1) *** modswitch(n448, 1));
-  secret int f8 = (modswitch((modswitch(one, 1) --- n449), 1) *** modswitch((modswitch(one, 1) --- n450), 1));
+  secret int n449 = (n445 *** (one --- n448));
+  secret int n450 = ((one --- n445) *** n448);
+  secret int f8 = ((one --- n449) *** (one --- n450));
   secret int n452 = ((one --- n445) *** (one --- n446));
   secret int n453 = ((one --- n447) *** (one --- n452));
   secret int n454 = ((one --- a9) *** (one --- b9));
   secret int n455 = (a9 *** b9);
   secret int n456 = ((one --- n454) *** (one --- n455));
-  secret int n457 = (modswitch(n453, 1) *** modswitch((one --- n456), 1));
-  secret int n458 = (modswitch((one --- n453), 1) *** modswitch(n456, 1));
-  secret int f9 = (modswitch((modswitch(one, 1) --- n457), 1) *** modswitch((modswitch(one, 1) --- n458), 1));
+  secret int n457 = (n453 *** (one --- n456));
+  secret int n458 = ((one --- n453) *** n456);
+  secret int f9 = ((one --- n457) *** (one --- n458));
   secret int n460 = ((one --- n453) *** (one --- n454));
   secret int n461 = ((one --- n455) *** (one --- n460));
   secret int n462 = ((one --- a10) *** (one --- b10));
   secret int n463 = (a10 *** b10);
   secret int n464 = ((one --- n462) *** (one --- n463));
-  secret int n465 = (modswitch(n461, 1) *** modswitch((one --- n464), 1));
-  secret int n466 = (modswitch((one --- n461), 1) *** modswitch(n464, 1));
-  secret int f10 = (modswitch((modswitch(one, 1) --- n465), 1) *** modswitch((modswitch(one, 1) --- n466), 1));
+  secret int n465 = (n461 *** (one --- n464));
+  secret int n466 = ((one --- n461) *** n464);
+  secret int f10 = ((one --- n465) *** (one --- n466));
   secret int n468 = ((one --- n461) *** (one --- n462));
   secret int n469 = ((one --- n463) *** (one --- n468));
   secret int n470 = ((one --- a11) *** (one --- b11));
   secret int n471 = (a11 *** b11);
   secret int n472 = ((one --- n470) *** (one --- n471));
-  secret int n473 = (modswitch(n469, 1) *** modswitch((one --- n472), 1));
-  secret int n474 = (modswitch((one --- n469), 1) *** modswitch(n472, 1));
-  secret int f11 = (modswitch((modswitch(one, 1) --- n473), 1) *** modswitch((modswitch(one, 1) --- n474), 1));
+  secret int n473 = (n469 *** (one --- n472));
+  secret int n474 = ((one --- n469) *** n472);
+  secret int f11 = ((one --- n473) *** (one --- n474));
   secret int n476 = ((one --- n469) *** (one --- n470));
   secret int n477 = ((one --- n471) *** (one --- n476));
   secret int n478 = ((one --- a12) *** (one --- b12));
   secret int n479 = (a12 *** b12);
   secret int n480 = ((one --- n478) *** (one --- n479));
-  secret int n481 = (modswitch(n477, 1) *** modswitch((one --- n480), 1));
-  secret int n482 = (modswitch((one --- n477), 1) *** modswitch(n480, 1));
-  secret int f12 = (modswitch((modswitch(one, 1) --- n481), 1) *** modswitch((modswitch(one, 1) --- n482), 1));
+  secret int n481 = (n477 *** (one --- n480));
+  secret int n482 = ((one --- n477) *** n480);
+  secret int f12 = ((one --- n481) *** (one --- n482));
   secret int n484 = ((one --- n477) *** (one --- n478));
   secret int n485 = ((one --- n479) *** (one --- n484));
   secret int n486 = ((one --- a13) *** (one --- b13));
   secret int n487 = (a13 *** b13);
   secret int n488 = ((one --- n486) *** (one --- n487));
-  secret int n489 = (modswitch(n485, 1) *** modswitch((one --- n488), 1));
-  secret int n490 = (modswitch((one --- n485), 1) *** modswitch(n488, 1));
-  secret int f13 = (modswitch((modswitch(one, 1) --- n489), 1) *** modswitch((modswitch(one, 1) --- n490), 1));
+  secret int n489 = (n485 *** (one --- n488));
+  secret int n490 = ((one --- n485) *** n488);
+  secret int f13 = ((one --- n489) *** (one --- n490));
   secret int n492 = ((one --- n485) *** (one --- n486));
   secret int n493 = ((one --- n487) *** (one --- n492));
   secret int n494 = ((one --- a14) *** (one --- b14));
   secret int n495 = (a14 *** b14);
   secret int n496 = ((one --- n494) *** (one --- n495));
-  secret int n497 = (modswitch(n493, 1) *** modswitch((one --- n496), 1));
-  secret int n498 = (modswitch((one --- n493), 1) *** modswitch(n496, 1));
+  secret int n497 = (n493 *** (one --- n496));
+  secret int n498 = ((one --- n493) *** n496);
     )"""";
   auto astProgram = Parser::parse(std::string(program));
 
@@ -1888,8 +1895,6 @@ secret int one = {1,  1,   1,   1,  1, 1, 1,  1, 1, 1};
   registerInputVariable(*rootScope, "one", Datatype(Type::INT, true));
 
 
-  std::cout << "Test: " <<  *scf->getContext().first_context_data()->total_coeff_modulus();
-
   // run the program and get its output
   auto map = tcv->getSecretTaintedNodes();
   RuntimeVisitor srv(*scf, *astInput, map);
@@ -1898,7 +1903,7 @@ secret int one = {1,  1,   1,   1,  1, 1, 1,  1, 1, 1};
   std::chrono::microseconds time_diff;
   std::chrono::microseconds time_sum(0);
   std::vector<std::chrono::microseconds> time_vec;
-  int count = 10;
+  int count = 100;
 
   for (int i = 0; i < count; i++) {
     time_start = std::chrono::high_resolution_clock::now();
@@ -1911,7 +1916,7 @@ secret int one = {1,  1,   1,   1,  1, 1, 1,  1, 1, 1};
     time_vec.push_back(time_diff);
     time_sum += std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
 
-    std::cout << "Elapsed Time " << time_diff.count() << std::endl;
+    //std::cout << "Elapsed Time " << time_diff.count() << std::endl;
   }
 
   long long avg_time = std::chrono::duration_cast<std::chrono::microseconds>(time_sum).count()/(count);
@@ -1926,6 +1931,12 @@ secret int one = {1,  1,   1,   1,  1, 1, 1,  1, 1, 1};
             << std::endl;
   std::cout << "Standard error: " << sqrt(double(standardDeviation) / time_vec.size())  / sqrt(time_vec.size())<< std::endl;
 
+
+  // write to file
+  std::cout << numCiphertextSlots << " , " << "adder : MODSWITCH" << std::endl;
+  for (int i=0; i < time_vec.size(); i++) {
+    std::cout << " , " << time_vec[i].count() << "\n";
+  }
 
 }
 

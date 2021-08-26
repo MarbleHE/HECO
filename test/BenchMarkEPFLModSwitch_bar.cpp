@@ -16,7 +16,7 @@
 class BenchMarkEPFLModSwitch_bar : public ::testing::Test {
 
  protected:
-  const int numCiphertextSlots = 32768;
+  const int numCiphertextSlots = 16384;
 
   std::unique_ptr<SealCiphertextFactory> scf;
   std::unique_ptr<TypeCheckingVisitor> tcv;
@@ -428,7 +428,7 @@ secret int n319 = shift4 *** shift5;
 
 }
 
-TEST_F(BenchMarkEPFLModSwitch_bar, BarModSwitch) { //TODO: fix
+TEST_F(BenchMarkEPFLModSwitch_bar, BarModSwitch) {
 
 /// This test runs the bar circuit from the EPFL circuit collection WITH modswitch ops inserted using SEAL
 
@@ -575,7 +575,7 @@ secret int one = {1,  1,   1,   1,  1, 1, 1,  1, 1, 1};
 
 // program specification
   const char *program = R""""(
-     secret int n264 = (a77 *** shift0);
+    secret int n264 = (a77 *** shift0);
   secret int n265 = (shift1 *** n264);
   secret int n266 = (a78 *** (one --- shift0));
   secret int n267 = (shift1 *** n266);

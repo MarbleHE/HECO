@@ -14,7 +14,8 @@ SpecialInsertModSwitchVisitor::SpecialInsertModSwitchVisitor(std::ostream &os, s
 void SpecialInsertModSwitchVisitor::visit(BinaryExpression &elem) {
 
   // only try to insert a modswitch for multiplications, since the evaluation times of modswitches excced the eval times of an addition but not mult
-  if (elem.getOperator().toString() == "***" ) {
+  // also don not perform modswitching if the noise budget is already zero
+  if (elem.getOperator().toString() == "***" && noise_map[elem.getUniqueNodeId()] > 0) {
     // for the visited binary expression, calculate the noise budget, coeffmodulus chain length, and spent noise budgets of both operands,
     // as well as the difference of the chain length of both coeff modulus chains
     if (elem.countChildren() > 1) {
@@ -198,47 +199,46 @@ std::unique_ptr<AbstractNode> SpecialInsertModSwitchVisitor::removeModSwitchFrom
   return std::move(*ast);
 }
 
-std::unique_ptr<AbstractNode> SpecialInsertModSwitchVisitor::rewriteAst(std::unique_ptr<AbstractNode> *ast, RuntimeVisitor srv,
-                                         std::unordered_map<std::string,
-                                         std::vector<seal::Modulus>> coeffmodulusmap) {
-
-
-
-  //1. identify sites eligible for modswitching
-  auto binExprIns = this->getModSwitchNodes();
-
-  std::unique_ptr<AbstractNode> rewritten_ast;
-
-  // for each site try to insert a modswitch
-  for (int i = 1; i < binExprIns.size(); i++) {
-    std::cout << "inserting modswitch at binary expr: " << binExprIns[i]->toString(false)<< std::endl;
-    //2. insert modsw
-    rewritten_ast = insertModSwitchInAst(ast, binExprIns[i], coeffmodulusmap);
-
-    std::cout << "...Done" <<std::endl;
-
-    //3. recalc noise heurs
-
-    std::cout << "Updating noise map... " << std::endl;
-
-    updateNoiseMap(*rewritten_ast, &srv);
-
-    std::cout << "...Done" <<std::endl;
-    //4. remove modswitch if necessary (i.e if root nodes noise budget is 0)
-    auto noiseMap = srv.getNoiseMap();
-
-    std::cout << "noise at root of the new ast: " << noiseMap[rewritten_ast->getUniqueNodeId()] << std::endl;
-    if (noiseMap[rewritten_ast->getUniqueNodeId()] == 0) {
-      rewritten_ast = removeModSwitchFromAst(&rewritten_ast);
-    } else {
-      // how many modswitches have been performed
-      int num = abs(int(coeffmodulusmap[binExprIns[i]->getLeft().getUniqueNodeId()].size() - coeffmodulusmap[binExprIns[i]->getRight().getUniqueNodeId()].size())) + 1;
-      // update coeff_modulus_map
-      updateCoeffModulusMap( binExprIns[i], num);
-    }
-  }
-
-}
+//std::unique_ptr<AbstractNode> SpecialInsertModSwitchVisitor::rewriteAst(std::unique_ptr<AbstractNode> *ast, RuntimeVisitor srv,
+//                                         std::unordered_map<std::string,
+//                                         std::vector<seal::Modulus>> coeffmodulusmap) {
+//
+//
+//
+//  //1. identify sites eligible for modswitching
+//  auto binExprIns = this->getModSwitchNodes();
+//
+//  std::unique_ptr<AbstractNode> rewritten_ast;
+//
+//  // for each site try to insert a modswitch
+//  for (int i = 1; i < binExprIns.size(); i++) {
+//    std::cout << "inserting modswitch at binary expr: " << binExprIns[i]->toString(false)<< std::endl;
+//    //2. insert modsw
+//    rewritten_ast = insertModSwitchInAst(ast, binExprIns[i], coeffmodulusmap);
+//
+//    std::cout << "...Done" <<std::endl;
+//
+//    //3. recalc noise heurs
+//
+//    std::cout << "Updating noise map... " << std::endl;
+//
+//    updateNoiseMap(*rewritten_ast, &srv);
+//
+//    std::cout << "...Done" <<std::endl;
+//    //4. remove modswitch if necessary (i.e if root nodes noise budget is 0)
+//    auto noiseMap = srv.getNoiseMap();
+//
+//    std::cout << "noise at root of the new ast: " << noiseMap[rewritten_ast->getUniqueNodeId()] << std::endl;
+//    if (noiseMap[rewritten_ast->getUniqueNodeId()] == 0) {
+//      rewritten_ast = removeModSwitchFromAst(&rewritten_ast);
+//    } else {
+//      // how many modswitches have been performed
+//      int num = abs(int(coeffmodulusmap[binExprIns[i]->getLeft().getUniqueNodeId()].size() - coeffmodulusmap[binExprIns[i]->getRight().getUniqueNodeId()].size())) + 1;
+//      // update coeff_modulus_map
+//      updateCoeffModulusMap( binExprIns[i], num);
+//    }
+//  }
+//}
 
 std::unordered_map<std::string, std::vector<seal::Modulus>> SpecialInsertModSwitchVisitor::getCoeffModulusMap() {
   return coeffmodulusmap;
