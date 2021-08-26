@@ -396,7 +396,7 @@ secret int n319 = shift4 *** shift5;
   std::chrono::microseconds time_diff;
   std::chrono::microseconds time_sum(0);
   std::vector<std::chrono::microseconds> time_vec;
-  int count = 10;
+  int count = 100;
 
   for (int i = 0; i < count; i++) {
 
@@ -410,7 +410,7 @@ secret int n319 = shift4 *** shift5;
     time_vec.push_back(time_diff);
     time_sum += std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
 
-    std::cout << "Elapsed Time " << time_diff.count() << std::endl;
+    //std::cout << "Elapsed Time " << time_diff.count() << std::endl;
   }
 
   long long avg_time = std::chrono::duration_cast<std::chrono::microseconds>(time_sum).count()/(count);
@@ -425,6 +425,12 @@ secret int n319 = shift4 *** shift5;
   std::cout << "Average evaluation time [" << avg_time << " microseconds]"
             << std::endl;
   std::cout << "Standard error: " << sqrt(double(standardDeviation) / time_vec.size())  / sqrt(time_vec.size())<< std::endl;
+
+  // write to file
+  std::cout << numCiphertextSlots << " , " << "bar : NO MODSWITCH" << std::endl;
+  for (int i=0; i < time_vec.size(); i++) {
+    std::cout << " , " << time_vec[i].count() << "\n";
+  }
 
 }
 
@@ -789,7 +795,7 @@ secret int one = {1,  1,   1,   1,  1, 1, 1,  1, 1, 1};
   std::chrono::microseconds time_diff;
   std::chrono::microseconds time_sum(0);
   std::vector<std::chrono::microseconds> time_vec;
-  int count = 10;
+  int count = 100;
 
   for (int i = 0; i < count; i++) {
     time_start = std::chrono::high_resolution_clock::now();
@@ -802,7 +808,7 @@ secret int one = {1,  1,   1,   1,  1, 1, 1,  1, 1, 1};
     time_vec.push_back(time_diff);
     time_sum += std::chrono::duration_cast<std::chrono::microseconds>(time_end - time_start);
 
-    std::cout << "Elapsed Time " << time_diff.count() << std::endl;
+    //std::cout << "Elapsed Time " << time_diff.count() << std::endl;
   }
 
   long long avg_time = std::chrono::duration_cast<std::chrono::microseconds>(time_sum).count()/(count);
@@ -817,6 +823,12 @@ secret int one = {1,  1,   1,   1,  1, 1, 1,  1, 1, 1};
   std::cout << "Average evaluation time [" << avg_time << " microseconds]"
             << std::endl;
   std::cout << "Standard error: " << sqrt(double(standardDeviation) / time_vec.size())  / sqrt(time_vec.size())<< std::endl;
+
+  // write to file
+  std::cout << numCiphertextSlots << " , " << "bar : MODSWITCH" << std::endl;
+  for (int i=0; i < time_vec.size(); i++) {
+    std::cout << " , " << time_vec[i].count() << "\n";
+  }
 
 
 }
