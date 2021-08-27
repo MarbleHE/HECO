@@ -1,3 +1,5 @@
+#include <ast_opt/parser/Parser.h>
+#include <test/ASTComparison.h>
 #include "ast_opt/ast/Literal.h"
 #include "gtest/gtest.h"
 
@@ -147,12 +149,38 @@ TEST(LiteralTest, JsonOutputTestLiteralInt) { /* NOLINT */
   EXPECT_EQ(lint->toJson(), j);
 }
 
+TEST(LiteralTest, JsonInputTestLiteralInt) {
+  auto expected = LiteralInt(2);
+
+  std::string json = R""""({
+    "type": "LiteralInt",
+    "value": 2
+  })"""";
+
+  auto parsed = Parser::parseJson(json);
+
+  ASSERT_TRUE(compareAST(*parsed, expected));
+}
+
 TEST(LiteralTest, JsonOutputTestLiteralFloat) { /* NOLINT */
   float val = 33.214f;
   auto *lint = new LiteralFloat(val);
   nlohmann::json j = {{"type", "LiteralFloat"},
                       {"value", val}};
   EXPECT_EQ(lint->toJson(), j);
+}
+
+TEST(LiteralTest, JsonInputTestLiteralFloat) {
+  auto expected = LiteralFloat(33.214f);
+
+  std::string json = R""""({
+    "type": "LiteralFloat",
+    "value": 33.214
+  })"""";
+
+  auto parsed = Parser::parseJson(json);
+
+  ASSERT_TRUE(compareAST(*parsed, expected));
 }
 
 TEST(LiteralTest, JsonOutputTestLiteralBool) { /* NOLINT */
@@ -163,6 +191,19 @@ TEST(LiteralTest, JsonOutputTestLiteralBool) { /* NOLINT */
   EXPECT_EQ(lbool->toJson(), j);
 }
 
+TEST(LiteralTest, JsonInputTestLiteralBool) {
+  auto expected = LiteralBool(true);
+
+  std::string json = R""""({
+    "type": "LiteralBool",
+    "value": true
+  })"""";
+
+  auto parsed = Parser::parseJson(json);
+
+  ASSERT_TRUE(compareAST(*parsed, expected));
+}
+
 TEST(LiteralTest, JsonOutputTestLiteralString) { /* NOLINT */
   std::string val = "hello world!";
   auto *lString = new LiteralString(val);
@@ -171,4 +212,17 @@ TEST(LiteralTest, JsonOutputTestLiteralString) { /* NOLINT */
   EXPECT_EQ(lString->toJson(), j);
 }
 
-// TODO[mh]: add json input tests
+TEST(LiteralTest, JsonInputTestLiteralString) {
+  auto expected = LiteralString("hello world!");
+
+  std::string json = R""""({
+    "type": "LiteralString",
+    "value": "hello world!"
+  })"""";
+
+  auto parsed = Parser::parseJson(json);
+
+  ASSERT_TRUE(compareAST(*parsed, expected));
+}
+
+// TODO: test LiteralChar, LiteralDouble

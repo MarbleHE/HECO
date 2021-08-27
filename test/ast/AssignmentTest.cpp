@@ -153,16 +153,16 @@ TEST(AssignmentTest, JsonInputTest) { /* NOLINT */
   auto assignment_expected = Assignment(std::make_unique<Variable>(identifier), std::make_unique<LiteralInt>(val));
 
   std::string assignment_json = R""""({
-        "type": "Assignment",
-        "value": {
-          "type": "LiteralInt",
-          "value": 2
-        },
-        "target": {
-          "identifier": "myCustomVar",
-          "type": "Variable"
-        }
-      })"""";
+    "type": "Assignment",
+    "value": {
+      "type": "LiteralInt",
+      "value": 2
+    },
+    "target": {
+      "identifier": "myCustomVar",
+      "type": "Variable"
+    }
+  })"""";
 
   auto assignment_parsed = Parser::parseJson(assignment_json);
 

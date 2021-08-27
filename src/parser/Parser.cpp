@@ -26,6 +26,7 @@
 #include "ast_opt/parser/PushBackStream.h"
 #include "../../test/parser/ParserTestHelpers.h"
 #include "ast_opt/visitor/ParentSettingVisitor.h"
+#include "ast_opt/utilities/NodeUtils.h"
 
 using std::to_string;
 using json = nlohmann::json;
@@ -68,28 +69,72 @@ std::unique_ptr<AbstractNode> Parser::parseJson(std::string s) {
 }
 
 std::unique_ptr<AbstractNode> Parser::parseJson(json j) {
-  // TODO [mh]: distinguish three cases, cast all of them to abstract node
+  std::string type = j["type"].get<std::string>();
 
-  if (j["type"].get<std::string>() == "Assignment") {
+  if (NodeUtils::isAbstractStatement(type))
     return Parser::parseJsonStatement(j);
-  }
+  else if (NodeUtils::isAbstractTarget(type))
+    return Parser::parseJsonTarget(j);
+  else if (NodeUtils::isAbstractExpression(type))
+    return Parser::parseJsonExpression(j);
   else
-    throw stork::runtime_error("Unsupported type in JSON object.");
+    throw stork::runtime_error("Unsupported type '" + type + "' in JSON object.");
 }
 
 std::unique_ptr<AbstractTarget> Parser::parseJsonTarget(json j) {
-  // TODO [mh]
-  return Variable::fromJson(j);
-}
+  std::string type = j["type"].get<std::string>();
 
-std::unique_ptr<AbstractStatement> Parser::parseJsonStatement(json j) {
-  // TODO [mh]
-  return Assignment::fromJson(j);
+  switch (NodeUtils::stringToEnum(type)) {
+//    case NodeTypeFunctionParameter:
+//    case NodeTypeIndexAccess:
+    case NodeTypeVariable:
+      return Variable::fromJson(j);
+    default:
+      throw stork::runtime_error("Unsupported type: '" + type + "' is not an AbstractTarget.");
+  }
 }
 
 std::unique_ptr<AbstractExpression> Parser::parseJsonExpression(json j) {
-  // TODO [mh]
-  return LiteralInt::fromJson(j);
+  std::string type = j["type"].get<std::string>();
+
+  switch (NodeUtils::stringToEnum(type)) {
+//    case NodeTypeBinaryExpression:
+//    case NodeTypeOperatorExpression:
+//    case NodeTypeUnaryExpression:
+//    case NodeTypeCall:
+//    case NodeTypeExpressionList:
+    case NodeTypeLiteralBool:
+      return LiteralBool::fromJson(j);
+    case NodeTypeLiteralChar:
+      return LiteralChar::fromJson(j);
+    case NodeTypeLiteralInt:
+      return LiteralInt::fromJson(j);
+    case NodeTypeLiteralFloat:
+      return LiteralFloat::fromJson(j);
+    case NodeTypeLiteralDouble:
+      return LiteralDouble::fromJson(j);
+    case NodeTypeLiteralString:
+      return LiteralString::fromJson(j);
+//    case NodeTypeTernaryOperator:
+    default:
+      throw stork::runtime_error("Unsupported type: '" + type + "' is not an AbstractStatement.");
+  }
+}
+
+std::unique_ptr<AbstractStatement> Parser::parseJsonStatement(json j) {
+  std::string type = j["type"].get<std::string>();
+
+  switch (NodeUtils::stringToEnum(type)) {
+      case NodeTypeAssignment:
+        return Assignment::fromJson(j);
+//      case NodeTypeBlock:
+//      case NodeTypeFor:
+//      case NodeTypeIf:
+//      case NodeTypeReturn:
+//      case NodeTypeVariableDeclaration:
+    default:
+      throw stork::runtime_error("Unsupported type: '" + type + "' is not an AbstractStatement.");
+  }
 }
 
 AbstractStatement *Parser::parseStatement(stork::tokens_iterator &it, bool gobbleTrailingSemicolon) {
