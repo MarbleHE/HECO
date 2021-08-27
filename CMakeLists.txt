@@ -135,15 +135,16 @@ set(HEADER_ONLY_SOURCES
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractExpression.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractStatement.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractTarget.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/Ast.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/AbstractCiphertext.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/AbstractCiphertextFactory.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/AbstractNoiseMeasuringCiphertext.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/AbstractValue.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/Cleartext.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/IVisitor.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/NodeUtils.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/VariableMap.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/Visitor.h
-        include/ast_opt/ast/Ast.h)
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/Visitor.h)
 
 # This contains the headers that developers that want to link directly against ABC might need to have access to
 # These are the headers that are installed when ABC is installed as a system-wide library
