@@ -1,4 +1,5 @@
 #include <utility>
+#include <ast_opt/parser/Parser.h>
 #include "ast_opt/ast/Return.h"
 #include "ast_opt/utilities/IVisitor.h"
 
@@ -85,6 +86,11 @@ nlohmann::json Return::toJson() const {
     j["value"] = getValue().toJson();
   }
   return j;
+}
+
+std::unique_ptr<Return> Return::fromJson(nlohmann::json j) {
+  auto expression = Parser::parseJsonExpression(j["value"]);
+  return std::make_unique<Return>(std::move(expression));
 }
 
 std::string Return::toString(bool printChildren) const {

@@ -1,6 +1,7 @@
 
 import logging
 import json
+from ._abc_wrapper import *
 
 class ABCProgram:
     """
@@ -36,3 +37,6 @@ class ABCProgram:
             f"Running main function:\n\targs: {self.main_args}"
             f"\n\tmain AST:\n{json.dumps(self.main_fn, indent=2)}"
         )
+
+        # TODO: actually use arguments, define and use result values
+        print(runIntProgram(json.dumps(self.main_fn), '{"type": "Block", "statements": []}', ["y"]))

@@ -40,6 +40,7 @@ set(TEST_FILES
         ast/UnaryExpressionTest.cpp
         ast/VariableDeclarationTest.cpp
         ast/VariableTest.cpp
+        compiler/CompileDotProductTest.cpp
         end-to-end/BoxBlurTest.cpp
         end-to-end/CardioTest.cpp
         end-to-end/DotProductTest.cpp

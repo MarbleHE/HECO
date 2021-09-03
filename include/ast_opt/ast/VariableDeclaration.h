@@ -121,6 +121,10 @@ class VariableDeclaration : public AbstractStatement {
   /// \param newValue new value to set
   void setValue(std::unique_ptr<AbstractExpression> newValue);
 
+  /// Create a VariableDeclaration node from a nlohmann::json representation of this node.
+  /// \return unique_ptr to a new VariableDeclaration node
+  static std::unique_ptr<VariableDeclaration> fromJson(nlohmann::json j);
+
   ///////////////////////////////////////////////
   ////////// AbstractNode Interface /////////////
   ///////////////////////////////////////////////
