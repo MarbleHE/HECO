@@ -2,11 +2,23 @@
 #include <ast_opt/runtime/RuntimeVisitor.h>
 #include <ast_opt/parser/Parser.h>
 #include <ast_opt/runtime/DummyCiphertextFactory.h>
+#include <ast_opt/parser/Errors.h>
 #include "ast_opt/compiler/Compiler.h"
 
-OutputIdentifierValuePairs Compiler::compileAst(std::unique_ptr<AbstractNode> astProgram,
-                                                std::unique_ptr<AbstractNode> astInput,
-                                                std::unique_ptr<AbstractNode> astOutput) {
+// TODO: put this code somewhere, where both the Compiler and the RuntimeVisitor can use it, once they are both merged.
+template<typename S, typename T>
+std::unique_ptr<T> castUniquePtr(std::unique_ptr<S> &&source) {
+  if (dynamic_cast<T *>(source.get())) {
+    return std::unique_ptr<T>(dynamic_cast<T *>(source.release()));
+  } else {
+    throw std::runtime_error("castUniquePtr failed: Cannot cast given unique_ptr from type "
+                                 + std::string(typeid(S).name()) + " to type " + std::string(typeid(T).name()) + ".");
+  }
+}
+
+OutputIdentifierValuePairs Compiler::compileAst(std::unique_ptr<AbstractNode> programAst,
+                                                std::unique_ptr<Block> inputBlock,
+                                                std::unique_ptr<AbstractNode> outputAst) {
 
   auto scf = std::make_unique<DummyCiphertextFactory>();
   auto tcv = std::make_unique<TypeCheckingVisitor>();
@@ -18,22 +30,34 @@ OutputIdentifierValuePairs Compiler::compileAst(std::unique_ptr<AbstractNode> as
     tcv->addVariableDatatype(*scopedIdentifier, datatype);
   };
 
-  auto rootScope = std::make_unique<Scope>(*astProgram);
+  // Parse the input block and add detected variables to the root scope.
+  auto rootScope = std::make_unique<Scope>(*programAst);
 
-  // TODO [mh]: parse identifiers and types from astInput?
-//  registerInputVariable(*rootScope, "x", Datatype(Type::INT, false));
-//  registerInputVariable(*rootScope, "y", Datatype(Type::INT, false));
-//  registerInputVariable(*rootScope, "size", Datatype(Type::INT, false));
+  for (auto stmt : inputBlock->getStatements()) {
+    if (auto variable_declaration = dynamic_cast<VariableDeclaration *>(&stmt.get())) {
+      if (auto variable = dynamic_cast<Variable *>(&variable_declaration->getTarget())) {
+        registerInputVariable(*rootScope,
+                              variable->getIdentifier(),
+                              variable_declaration->getDatatype());
+      }
+      else {
+        stork::runtime_error("Invalid input block: all statements must contain a variable name on the LHS.");
+      }
+    }
+    else {
+      stork::runtime_error("Invalid input block: must only consists of variable declarations.");
+    }
+  }
 
   tcv->setRootScope(std::move(rootScope));
-  astProgram->accept(*tcv);
+  programAst->accept(*tcv);
 
   // run the program and get its output
   //TODO: Change it so that by passing in an empty secretTaintingMap, we can get the RuntimeVisitor to execute everything "in the clear"!
   auto empty = std::unordered_map<std::string, bool>();
-  RuntimeVisitor srv(*scf, *astInput, empty);
-  srv.executeAst(*astProgram);
-  return srv.getOutput(*astOutput);
+  RuntimeVisitor srv(*scf, *inputBlock, empty);
+  srv.executeAst(*programAst);
+  return srv.getOutput(*outputAst);
 }
 
 std::unique_ptr<AbstractNode> Compiler::buildOutputBlock(std::vector<std::string> outputIdentifiers) {
@@ -54,7 +78,10 @@ OutputIdentifierValuePairs Compiler::compile(std::string program,
   auto inputAst = Parser::parse(input);
   auto outputAst = Compiler::buildOutputBlock(outputIdentifiers);
 
-  return Compiler::compileAst(std::move(programAst), std::move(inputAst), std::move(outputAst));
+  // The input must be a block by convention, otherwise, throw an error
+  auto inputBlock = castUniquePtr<AbstractNode, Block>(std::move(inputAst));
+
+  return Compiler::compileAst(std::move(programAst), std::move(inputBlock), std::move(outputAst));
 }
 
 OutputIdentifierValuePairs Compiler::compileJson(std::string program,
@@ -64,5 +91,8 @@ OutputIdentifierValuePairs Compiler::compileJson(std::string program,
   auto inputAst = Parser::parseJson(input);
   auto outputAst = Compiler::buildOutputBlock(outputIdentifiers);
 
-  return Compiler::compileAst(std::move(programAst), std::move(inputAst), std::move(outputAst));
+  // The input must be a block by convention, otherwise, throw an error
+  auto inputBlock = castUniquePtr<AbstractNode, Block>(std::move(inputAst));
+
+  return Compiler::compileAst(std::move(programAst), std::move(inputBlock), std::move(outputAst));
 }

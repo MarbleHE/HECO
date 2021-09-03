@@ -6,18 +6,16 @@
 
 /// The compiler parses a program (given in JSON or pseudo-c++) and executes it.
 class Compiler {
-  // TODO [mh]: what do I return here, the decrypted results?
-
  private:
-  /// Execute a program given as AST using the inputs provided as AST and returning OutputIdentifierValuePairs for
-  /// the outputs specified as AST too.
+  /// Execute a program given as AST using the inputs provided as a block of variable declarations and returning
+  /// OutputIdentifierValuePairs for the outputs specified as AST.
   /// \param programAst: program AST
-  /// \param inputAst: input AST
+  /// \param inputBlock: Block of statements, each declaring one input variable
   /// \param outputAst: output AST, must be a block of assignment statements, where on the RHS we only have
   ///                   variables or index access statements.
   /// \return: OutputIdentifierValuePairs for the identifiers specified in outputAst
   static OutputIdentifierValuePairs compileAst(std::unique_ptr<AbstractNode> programAst,
-                                               std::unique_ptr<AbstractNode> inputAst,
+                                               std::unique_ptr<Block> inputBlock,
                                                std::unique_ptr<AbstractNode> outputAst);
 
   /// Transform a vector of identifiers to a block of (variable-to-variable) assignements.
