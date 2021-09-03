@@ -1,4 +1,5 @@
 #include <unordered_map>
+#include <ast_opt/parser/Errors.h>
 #include "ast_opt/utilities/Datatype.h"
 
 std::string enumToString(const Type type) {
@@ -12,6 +13,14 @@ std::string enumToString(const Type type) {
       {Type::VOID, "void"}
   };
   return typeToString.find(type)->second;
+}
+
+Type stringToTypeEnum(const std::string s) {
+  for ( auto type : all_types) {
+    if (enumToString(type)  == s)
+      return type;
+  }
+  throw stork::runtime_error("No value type Type found for '" + s + "'!");
 }
 
 Datatype::Datatype(Type type, bool isSecret) : type(type), isSecret(isSecret) {}

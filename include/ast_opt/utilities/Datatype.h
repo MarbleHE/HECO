@@ -9,8 +9,13 @@ enum class Type {
   BOOL, CHAR, INT, FLOAT, DOUBLE, STRING, VOID
 };
 
+const Type all_types[] = {Type::BOOL, Type::CHAR, Type::INT, Type::FLOAT, Type::DOUBLE, Type:: STRING, Type::VOID};
+
 /// String representation of enums
 std::string enumToString(const Type type);
+
+/// Enum from string representation
+Type stringToTypeEnum(const std::string s);
 
 /// A Datatype consists of a Type and a secret? flag
 class Datatype {

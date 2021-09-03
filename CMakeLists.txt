@@ -99,6 +99,7 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/ast/UnaryExpression.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/Variable.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/VariableDeclaration.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/compiler/Compiler.cpp
         ${ast_optimizer_SOURCE_DIR}/src/parser/Errors.cpp
         ${ast_optimizer_SOURCE_DIR}/src/parser/File.cpp
         ${ast_optimizer_SOURCE_DIR}/src/parser/Parser.cpp
@@ -113,6 +114,7 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/utilities/BatchingConstraint.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/ComplexValue.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/Datatype.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/utilities/NodeUtils.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/Operator.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/PlainVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/Scope.cpp
@@ -142,7 +144,6 @@ set(HEADER_ONLY_SOURCES
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/AbstractValue.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/Cleartext.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/IVisitor.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/NodeUtils.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/VariableMap.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/Visitor.h)
 
@@ -169,6 +170,7 @@ set(PUBLIC_HEADERS
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/UnaryExpression.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/Variable.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/VariableDeclaration.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/compiler/Compiler.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/parser/Errors.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/parser/Parser.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/parser/PushBackStream.h
@@ -182,6 +184,7 @@ set(PUBLIC_HEADERS
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/BatchingConstraint.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/ComplexValue.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/Datatype.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/NodeUtils.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/IVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/Operator.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/PlainVisitor.h

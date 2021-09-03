@@ -27,7 +27,11 @@ class ABCVisitor(NodeVisitor):
         self.log_level = log_level
         logging.basicConfig(level=log_level)
 
-        self.builder = ABCJsonAstBuilder()
+        self.builder = ABCJsonAstBuilder(log_level=log_level)
+
+        # A set of variables that were already declared in the current subtree.
+        # This is necessary to decide between creating an Assignment node or a VariableDeclaration.
+        self.declared_vars = set()
 
         super(ABCVisitor, self).__init__(*args, **kwargs)
 
@@ -103,6 +107,14 @@ class ABCVisitor(NodeVisitor):
 
         return d
 
+    def _make_assignment(self, var, expr):
+        var_name = var["identifier"]
+        if var_name in self.declared_vars:
+            return self.builder.make_assignment(var, expr)
+        else:
+            self.declared_vars.add(var_name)
+            return self.builder.make_variable_declaration(var, expr)
+
 
     #
     # Supported visit functions
@@ -118,7 +130,7 @@ class ABCVisitor(NodeVisitor):
         ## Second, create assignments by parsing the LHS targets
         abc_assignments = []
 
-        ### targets can be a list of variables, e.g. [a, b] for "a = b = expr" syntax
+        ### targets can be a list of variables, e.g. ["a", "b"] for "a = b = expr" syntax
         for target in node.targets:
             vars = self._parse_lhs(target)
 
@@ -133,15 +145,22 @@ class ABCVisitor(NodeVisitor):
 
                     for i in range(len(var)):
                         abc_assignments.append(
-                            self.builder.make_assignment(var[i], expr[i])
+                            self._make_assignment(var[i], expr[i])
                         )
                 else:
                     abc_assignments.append(
-                        self.builder.make_assignment(var, expr)
+                        self._make_assignment(var, expr)
                     )
 
         if len(abc_assignments) > 1:
-            return self.builder.make_block(abc_assignments)
+            # XXX: This could be supported with our current AST, but would require us to build the JSON string
+            # manually, so that one visit function can add more than one statement to the resulting string.
+            # Alternatively, support for this can be added to the AST.
+            logging.error(
+                UNSUPPORTED_SYNTAX_ERROR.format(f"Multi-assignments and pattern matching are not yet supported.")
+            )
+            exit(1)
+
         return abc_assignments[0]
 
     def visit_Constant(self, node: Constant):

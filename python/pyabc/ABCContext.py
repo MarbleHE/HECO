@@ -5,7 +5,6 @@ from ast import *
 from inspect import getsource
 from sys import _getframe
 
-from ._abc_wrapper import *
 from .ABCVisitor import ABCVisitor
 from .ABCProgram import ABCProgram
 

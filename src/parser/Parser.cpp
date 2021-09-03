@@ -69,6 +69,11 @@ std::unique_ptr<AbstractNode> Parser::parseJson(std::string s) {
 }
 
 std::unique_ptr<AbstractNode> Parser::parseJson(json j) {
+  // If the parsed JSON does not contain any values, return a null pointer instead of an abstract Node.
+  // There are valid cases for this, e.g., for a function without inputs, the input AST is empty.
+  if (j.empty())
+    throw stork::runtime_error("Empty abstract node encountered.");
+
   std::string type = j["type"].get<std::string>();
 
   if (NodeUtils::isAbstractStatement(type))
@@ -85,10 +90,11 @@ std::unique_ptr<AbstractTarget> Parser::parseJsonTarget(json j) {
   std::string type = j["type"].get<std::string>();
 
   switch (NodeUtils::stringToEnum(type)) {
-//    case NodeTypeFunctionParameter:
-//    case NodeTypeIndexAccess:
     case NodeTypeVariable:
       return Variable::fromJson(j);
+    case NodeTypeFunctionParameter:
+    case NodeTypeIndexAccess:
+      throw stork::runtime_error("Unsupported AbstractTarget: '" + type + "' is not yet implemented.");
     default:
       throw stork::runtime_error("Unsupported type: '" + type + "' is not an AbstractTarget.");
   }
@@ -98,11 +104,6 @@ std::unique_ptr<AbstractExpression> Parser::parseJsonExpression(json j) {
   std::string type = j["type"].get<std::string>();
 
   switch (NodeUtils::stringToEnum(type)) {
-//    case NodeTypeBinaryExpression:
-//    case NodeTypeOperatorExpression:
-//    case NodeTypeUnaryExpression:
-//    case NodeTypeCall:
-//    case NodeTypeExpressionList:
     case NodeTypeLiteralBool:
       return LiteralBool::fromJson(j);
     case NodeTypeLiteralChar:
@@ -115,9 +116,22 @@ std::unique_ptr<AbstractExpression> Parser::parseJsonExpression(json j) {
       return LiteralDouble::fromJson(j);
     case NodeTypeLiteralString:
       return LiteralString::fromJson(j);
-//    case NodeTypeTernaryOperator:
+    case NodeTypeBinaryExpression:
+    case NodeTypeOperatorExpression:
+    case NodeTypeUnaryExpression:
+    case NodeTypeCall:
+    case NodeTypeExpressionList:
+    case NodeTypeTernaryOperator:
+      throw stork::runtime_error("Unsupported AbstractExpression: '" + type + "' is not yet implemented.");
     default:
-      throw stork::runtime_error("Unsupported type: '" + type + "' is not an AbstractStatement.");
+      // AbstractTarget is a subclass of AbstractExpression
+      try {
+        return Parser::parseJsonTarget(j);
+      }
+      catch (stork::runtime_error &e) {
+        // If it's not an abstract target, then it's not an abstract expression, as we checked all other expressions before.
+        throw stork::runtime_error("Unsupported type: '" + type + "' is not an AbstractExpression.");
+      }
   }
 }
 
@@ -125,13 +139,17 @@ std::unique_ptr<AbstractStatement> Parser::parseJsonStatement(json j) {
   std::string type = j["type"].get<std::string>();
 
   switch (NodeUtils::stringToEnum(type)) {
-      case NodeTypeAssignment:
-        return Assignment::fromJson(j);
-//      case NodeTypeBlock:
-//      case NodeTypeFor:
-//      case NodeTypeIf:
-//      case NodeTypeReturn:
-//      case NodeTypeVariableDeclaration:
+    case NodeTypeAssignment:
+      return Assignment::fromJson(j);
+    case NodeTypeBlock:
+      return Block::fromJson(j);
+    case NodeTypeReturn:
+      return Return::fromJson(j);
+    case NodeTypeVariableDeclaration:
+      return VariableDeclaration::fromJson(j);
+    case NodeTypeFor:
+    case NodeTypeIf:
+      throw stork::runtime_error("Unsupported AbstractStatement: '" + type + "' is not yet implemented.");
     default:
       throw stork::runtime_error("Unsupported type: '" + type + "' is not an AbstractStatement.");
   }

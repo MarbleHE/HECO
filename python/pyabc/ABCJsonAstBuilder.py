@@ -1,8 +1,14 @@
 
+import logging
+
 class ABCJsonAstBuilder:
     """
     Provide helper functions to create dictionary elements that correspond to ABC AST nodes when exported as JSON.
     """
+
+    def __init__(self, log_level=logging.INFO):
+        self.log_level = log_level
+        logging.basicConfig(level=log_level)
 
     #
     # Internal helper function to create attributes for ABC nodes
@@ -11,6 +17,24 @@ class ABCJsonAstBuilder:
         d = {"type": type}
         d.update(content)
         return d
+
+    def _make_datatype(self, val):
+        if isinstance(val, bool):
+            type_name = "bool"
+        elif isinstance(val, str):
+            if len(val) > 1:
+                type_name = "string"
+            else:
+                type_name = "char"
+        elif isinstance(val, float):
+            # Actually, in C++ we have floats and doubles. But we can't distinguish them, since their ranges overlap.
+            # Thus, we just take the larger double to not loose precision.
+            type_name = "double"
+            logging.warning("Using double for Python float.")
+        else: # isinstance(val, None):
+            type_name = "void"
+
+        return {"datatype": type_name}
 
     def _make_identifier(self, identifier):
         return {"identifier": identifier}
@@ -28,7 +52,7 @@ class ABCJsonAstBuilder:
     #
     # "Public" functions to create ABC nodes
     #
-    def make_assignment(self, target, value : dict) -> dict:
+    def make_assignment(self, target : dict, value : dict) -> dict:
         """
         Create a dictionary corresponding to an ABC assignment when exported in JSON
 
@@ -40,7 +64,7 @@ class ABCJsonAstBuilder:
         d = self._make_target(target)
         d.update(self._make_value(value))
 
-        return self._make_abc_node("Assigment", d)
+        return self._make_abc_node("Assignment", d)
 
     def make_block(self, stmts : list) -> dict:
         """
@@ -81,3 +105,18 @@ class ABCJsonAstBuilder:
         """
 
         return self._make_abc_node("Variable", self._make_identifier(identifier))
+
+    def make_variable_declaration(self, target : dict, value : dict) -> dict:
+        """
+        Create a dictionary corresponding to an ABC variable declaration when exported in JSON
+
+        :param target: variable (as dict), to which the value is assigned
+        :param value: value (as dict) of ABC node to assign to target
+        :return: JSON-equivalent dictionary for an ABC assignment
+        """
+
+        d = self._make_target(target)
+        d.update(self._make_value(value))
+        d.update(self._make_datatype(value))
+
+        return self._make_abc_node("VariableDeclaration", d)
