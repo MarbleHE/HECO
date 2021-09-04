@@ -119,6 +119,10 @@ class ABCVisitor(NodeVisitor):
     #
     # Supported visit functions
     #
+
+    def visit_Add(self, node: Add) -> dict:
+        return "+"
+
     def visit_Assign(self, node : Assign) -> dict:
         """
         Visit a Python assignment and transform it to a dictionary corresponding to one or more ABC assignments.
@@ -163,6 +167,13 @@ class ABCVisitor(NodeVisitor):
 
         return abc_assignments[0]
 
+    def visit_BinOp(self, node: BinOp) -> dict:
+        return self.builder.make_binary_expression(
+            self.visit(node.left),
+            self.visit(node.op),
+            self.visit(node.right)
+        )
+
     def visit_Constant(self, node: Constant):
         """
         Visit a Python constant and transform it to a dictionary corresponding to an ABC literal.
@@ -172,6 +183,9 @@ class ABCVisitor(NodeVisitor):
             return self.builder.make_literal_int(node.value)
         else:
             logging.error(UNSUPPORTED_CONSTANT_TYPE, type(node.value))
+
+    def visit_Div(self, node: Div) -> dict:
+        return "/"
 
     def visit_FunctionDef(self, node: FunctionDef) -> dict:
         """
@@ -194,6 +208,12 @@ class ABCVisitor(NodeVisitor):
             logging.error(UNSUPPORTED_FUNCTION, node.name)
             exit(1)
 
+    def visit_Mod(self, node: Mod) -> dict:
+        return "%"
+
+    def visit_Mult(self, node: Mult) -> dict:
+        return "*"
+
     def visit_Name(self, node: Name) -> dict:
         """
         Visit a Python name node and convert it to an ABC AST Variable node.
@@ -215,14 +235,12 @@ class ABCVisitor(NodeVisitor):
 
         return self.builder.make_return(ret_node)
 
+    def visit_Sub(self, node: Sub) -> dict:
+        return "-"
 
     #
     # Unsupported visit functions
     #
-
-    def visit_Add(self, node: Add) -> dict:
-        logging.error(UNSUPPORTED_STATEMENT, type(node))
-        exit(1)
 
     def visit_And(self, node: And) -> dict:
         logging.error(UNSUPPORTED_STATEMENT, type(node))
@@ -269,10 +287,6 @@ class ABCVisitor(NodeVisitor):
         exit(1)
 
     def visit_BoolOp(self, node: BoolOp) -> dict:
-        logging.error(UNSUPPORTED_STATEMENT, type(node))
-        exit(1)
-
-    def visit_BinOp(self, node: BinOp) -> dict:
         logging.error(UNSUPPORTED_STATEMENT, type(node))
         exit(1)
 
@@ -325,10 +339,6 @@ class ABCVisitor(NodeVisitor):
         exit(1)
 
     def visit_DictComp(self, node: DictComp) -> dict:
-        logging.error(UNSUPPORTED_STATEMENT, type(node))
-        exit(1)
-
-    def visit_Div(self, node: Div) -> dict:
         logging.error(UNSUPPORTED_STATEMENT, type(node))
         exit(1)
 
@@ -460,15 +470,7 @@ class ABCVisitor(NodeVisitor):
         logging.error(UNSUPPORTED_STATEMENT, type(node))
         exit(1)
 
-    def visit_Mod(self, node: Mod) -> dict:
-        logging.error(UNSUPPORTED_STATEMENT, type(node))
-        exit(1)
-
     def visit_Module(self, node: Module) -> dict:
-        logging.error(UNSUPPORTED_STATEMENT, type(node))
-        exit(1)
-
-    def visit_Mult(self, node: Mult) -> dict:
         logging.error(UNSUPPORTED_STATEMENT, type(node))
         exit(1)
 
@@ -545,10 +547,6 @@ class ABCVisitor(NodeVisitor):
         exit(1)
 
     def visit_Str(self, node: Str) -> dict:
-        logging.error(UNSUPPORTED_STATEMENT, type(node))
-        exit(1)
-
-    def visit_Sub(self, node: Sub) -> dict:
         logging.error(UNSUPPORTED_STATEMENT, type(node))
         exit(1)
 

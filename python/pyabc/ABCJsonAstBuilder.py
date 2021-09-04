@@ -39,6 +39,15 @@ class ABCJsonAstBuilder:
     def _make_identifier(self, identifier):
         return {"identifier": identifier}
 
+    def _make_left(self, left):
+        return {"left": left}
+
+    def _make_op(self, op):
+        return {"operator": op}
+
+    def _make_right(self, right):
+        return {"right": right}
+
     def _make_stmts(self, stmts):
         return {"statements": stmts}
 
@@ -65,6 +74,22 @@ class ABCJsonAstBuilder:
         d.update(self._make_value(value))
 
         return self._make_abc_node("Assignment", d)
+
+    def make_binary_expression(self, left : dict, op : str, right : dict) -> dict:
+        """
+        Create a dictionary corresponding to an ABC BinaryExpression when exported in JSON
+
+        :param left: Expression (as dict) on the left of the operator
+        :param op: Operator (as string)
+        :param right: Expression (as dict) on the right of the operator
+        :return: JSON-equivalent dictionary for an ABC BinaryExpression
+        """
+
+        d = self._make_left(left)
+        d.update(self._make_op(op))
+        d.update(self._make_right(right))
+
+        return self._make_abc_node("BinaryExpression", d)
 
     def make_block(self, stmts : list) -> dict:
         """

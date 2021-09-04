@@ -3,9 +3,9 @@
 
 #include <string>
 
-enum NodeType {
+enum NodeType : unsigned char {
   // AbstractStatement
-  NodeTypeAssignment, NodeTypeBlock, NodeTypeFor, NodeTypeIf, NodeTypeReturn, NodeTypeVariableDeclaration,
+  NodeTypeAssignment = 0, NodeTypeBlock, NodeTypeFor, NodeTypeIf, NodeTypeReturn, NodeTypeVariableDeclaration,
 
   // AbstractExpression -> AbstractTarget
   NodeTypeFunctionParameter, NodeTypeIndexAccess, NodeTypeVariable,

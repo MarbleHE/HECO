@@ -107,6 +107,10 @@ class BinaryExpression : public AbstractExpression {
   /// \param newRight new right hand side to set
   void setRight(std::unique_ptr<AbstractExpression> newRight);
 
+  /// Create a BinaryExpression node from a nlohmann::json representation of this node.
+  /// \return unique_ptr to a new BinaryExpression node
+  static std::unique_ptr<BinaryExpression> fromJson(nlohmann::json j);
+
   ///////////////////////////////////////////////
   ////////// AbstractNode Interface /////////////
   ///////////////////////////////////////////////
