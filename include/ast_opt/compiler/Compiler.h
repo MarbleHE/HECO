@@ -46,5 +46,14 @@ class Compiler {
                                                 std::string input,
                                                 std::vector<std::string> outputIdentifiers);
 
+  /// Execute a program given as ABC AST using the inputs provided as JSON ABC AST and returning
+  /// OutputIdentifierValuePairs for the outputs specified by identifiers given as vector.
+  /// \param program: ABC AST pseudo-code program
+  /// \param input: JSON ABC AST pseudo-code input AST
+  /// \param outputIdentifiers: vector of identifiers of the variables (in the input program) that should be returned.
+  /// \return: OutputIdentifierValuePairs for the identifiers specified in outputIdentifiers
+  static OutputIdentifierValuePairs compileJson(std::unique_ptr<AbstractNode> programAst,
+                                                std::string input,
+                                                std::vector<std::string> outputIdentifiers);
 };
 #endif //AST_OPTIMIZER_INCLUDE_AST_OPT_COMPILER_COMPILER_H_

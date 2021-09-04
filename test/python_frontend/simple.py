@@ -19,5 +19,5 @@ with ABCContext(p, logging.DEBUG):
         y = a + b
         return y
 
-# TODO: run -> compile
-p.run()
+r = p.execute()
+print(f"Received result: '{r}'")
