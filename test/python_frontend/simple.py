@@ -14,8 +14,9 @@ p = ABCProgram(logging.DEBUG)
 
 with ABCContext(p, logging.DEBUG):
     def main():
-        # y = a + 1
-        y = 1
+        a = 1 + 1
+        b = 2 * 6
+        y = a + b
         return y
 
 # TODO: run -> compile

@@ -1,3 +1,5 @@
+#include <ast_opt/parser/Parser.h>
+#include <test/ASTComparison.h>
 #include "ast_opt/ast/BinaryExpression.h"
 #include "ast_opt/ast/Literal.h"
 #include "gtest/gtest.h"
@@ -39,4 +41,29 @@ TEST(BinaryExpressionTest, node_iterate_children) {
 
 TEST(BinaryExpressionTest, JsonOutputTest) { /* NOLINT */
  // TODO: Verify JSON output
+}
+
+TEST(BinaryExpressionTest, JsonInputTest) { /* NOLINT */
+  BinaryExpression expected(
+      std::make_unique<LiteralInt>(1),
+      Operator(ArithmeticOp::ADDITION),
+      std::make_unique<LiteralInt>(1)
+  );
+
+  std::string binExprJson = R""""({
+    "left": {
+      "type": "LiteralInt",
+      "value": 1
+    },
+    "operator": "+",
+    "right": {
+      "type": "LiteralInt",
+      "value": 1
+    },
+    "type": "BinaryExpression"
+  })"""";
+
+  auto parsed = Parser::parseJson(binExprJson);
+
+  ASSERT_TRUE(compareAST(*parsed, expected));
 }

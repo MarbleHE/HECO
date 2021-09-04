@@ -117,6 +117,7 @@ std::unique_ptr<AbstractExpression> Parser::parseJsonExpression(json j) {
     case NodeTypeLiteralString:
       return LiteralString::fromJson(j);
     case NodeTypeBinaryExpression:
+      return BinaryExpression::fromJson(j);
     case NodeTypeOperatorExpression:
     case NodeTypeUnaryExpression:
     case NodeTypeCall:
