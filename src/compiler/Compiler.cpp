@@ -87,7 +87,12 @@ OutputIdentifierValuePairs Compiler::compile(std::string program,
 OutputIdentifierValuePairs Compiler::compileJson(std::string program,
                                                  std::string input,
                                                  std::vector<std::string> outputIdentifiers) {
-  auto programAst = Parser::parseJson(program);
+  return Compiler::compileJson(Parser::parseJson(program), input, outputIdentifiers);
+}
+
+OutputIdentifierValuePairs Compiler::compileJson(std::unique_ptr<AbstractNode> programAst,
+                                                 std::string input,
+                                                 std::vector<std::string> outputIdentifiers) {
   auto inputAst = Parser::parseJson(input);
   auto outputAst = Compiler::buildOutputBlock(outputIdentifiers);
 

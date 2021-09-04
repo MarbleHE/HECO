@@ -197,10 +197,27 @@ class ABCVisitor(NodeVisitor):
         if node.name == MAIN_SYMBOL:
             logging.debug(f"Parsing python main function:\n{unparse(node)}")
 
+            last_stmt = node.body[-1]
+            if not isinstance(last_stmt, Return):
+                logging.error("The FHE main function has to return something.")
+                exit(1)
+
+            # Parse the main function, except the return statement
             stmts = list(map(self.visit, node.body))
             body = self.builder.make_block(stmts)
 
-            self.prog.add_main_fn(body, self._args_to_dict(node.args))
+            # Parse the return statement separately. We do support multiple variables of the same type,
+            # but we don't support expressions.
+            ret_vals = last_stmt.value.elts if isinstance(last_stmt.value, Tuple) else [last_stmt.value]
+            ret_vars = dict()
+            ret_constants = []
+            for i, ret_val in enumerate(ret_vals):
+                if isinstance(ret_val, Name):
+                    ret_vars[ret_val.id] = i
+                elif isinstance(ret_val, Constant):
+                    ret_constants.append(ret_val.value)
+
+            self.prog.add_main_fn(body, self._args_to_dict(node.args), ret_vars, ret_constants)
 
             logging.debug(f"... to ABC AST:\n{json.dumps(body, indent=2)}")
             return {}
