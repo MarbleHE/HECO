@@ -27,7 +27,7 @@ class ABCContext():
 
         # Find the current 'with' block in the source code
         for item in walk(python_ast):
-            if isinstance(item, With) and item.lineno == parent_frame.f_lineno:
+            if isinstance(item, With) and item.lineno == parent_frame.f_lineno - parent_frame.f_code.co_firstlineno + 1:
                 logging.debug(f"Start parsing With block at line {item.lineno}")
 
                 for block in item.body:

@@ -98,3 +98,19 @@ gtest_discover_tests(testing-all TEST_PREFIX gtest:)
 
 # make sure that ast_lib is built before the testing-all target
 add_dependencies(testing-all ast_opt)
+
+
+##############################
+# TARGET: testing-python
+##############################
+find_package(Python3 COMPONENTS Interpreter)
+if(Python3_Interpreter_FOUND)
+    # Install pytest
+    execute_process(COMMAND ${Python3_EXECUTABLE} -m pip install --user pytest)
+
+    set(PYTEST_CMD Python3::Interpreter -m pytest --ignore=extern --ignore cmake-build-debug ${CMAKE_CURRENT_SOURCE_DIR})
+
+    add_test(NAME PythonFrontendSimple
+            COMMAND ${PYTEST_CMD}
+            WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/cmake-build-debug/python)
+endif()
