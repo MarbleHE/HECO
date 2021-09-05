@@ -6,7 +6,6 @@ from ast import *
 
 from .ABCJsonAstBuilder import ABCJsonAstBuilder
 
-UNSUPPORTED_CONSTANT_TYPE       = "Unsupported constant type: '%s' is not supported."
 UNSUPPORTED_FUNCTION            = "Functions other than 'main' are not supported (violating function: '%s')."
 UNSUPPORTED_ONLY_ARGS           = "Positional-only and keyword-only arguments are not supported."
 UNSUPPORTED_STATEMENT           = "Unsupported statement: '%s' is not supported."
@@ -99,11 +98,11 @@ class ABCVisitor(NodeVisitor):
 
         # Add arguments without default value
         for i in range(off):
-            d[args.args[i]] = _make_arg_dict()
+            d[args.args[i].arg] = _make_arg_dict()
 
         # Add arguments with default value
         for i, default in enumerate(args.defaults):
-            d[args.args[i + off]] = _make_arg_dict(True, default)
+            d[args.args[i + off].arg] = _make_arg_dict(True, default.value)
 
         return d
 
@@ -179,10 +178,7 @@ class ABCVisitor(NodeVisitor):
         Visit a Python constant and transform it to a dictionary corresponding to an ABC literal.
         """
 
-        if isinstance(node.value, int):
-            return self.builder.make_literal_int(node.value)
-        else:
-            logging.error(UNSUPPORTED_CONSTANT_TYPE, type(node.value))
+        return self.builder.make_literal(node.value)
 
     def visit_Div(self, node: Div) -> dict:
         return "/"

@@ -13,27 +13,51 @@ class ABCJsonAstBuilder:
     #
     # Internal helper function to create attributes for ABC nodes
     #
+    def _find_datatype(self, d):
+        """
+        We currently simply parse the JSON-equivalent dictionary d and then use the data type of the first literal that
+        we find.
+
+        This assumes that no type casting is supported and variables never change their type.
+
+        :param d: JSON-equivalent dictionary of a value of which we want to find the data type.
+        :return: data type "bool", "string", "char", "int", or "void"
+        """
+
+        if "type" in d and d["type"].startswith("Literal"):
+            if d["type"] == "LiteralBool":
+                type_name = "bool"
+            elif d["type"] == "LiteralString":
+                if len(d["value"]) > 1:
+                    type_name = "string"
+                else:
+                    type_name = "char"
+            elif d["type"] == "LiteralFloat":
+                # Actually, in C++ we have floats and doubles. But we can't distinguish them, since their ranges overlap.
+                # Thus, we just take the larger double to not loose precision.
+                type_name = "double"
+                logging.warning("Using double for Python float.")
+            elif d["type"] == "LiteralInt":
+                type_name = "int"
+            else:
+                type_name = "void"
+
+            return type_name
+        else:
+            if isinstance(d, dict):
+                for v in d.values():
+                    type_name = self._find_datatype(v)
+                    if type_name != "void":
+                        return type_name
+            return "void"
+
     def _make_abc_node(self, type, content):
         d = {"type": type}
         d.update(content)
         return d
 
     def _make_datatype(self, val):
-        if isinstance(val, bool):
-            type_name = "bool"
-        elif isinstance(val, str):
-            if len(val) > 1:
-                type_name = "string"
-            else:
-                type_name = "char"
-        elif isinstance(val, float):
-            # Actually, in C++ we have floats and doubles. But we can't distinguish them, since their ranges overlap.
-            # Thus, we just take the larger double to not loose precision.
-            type_name = "double"
-            logging.warning("Using double for Python float.")
-        else: # isinstance(val, None):
-            type_name = "void"
-
+        type_name = self._find_datatype(val)
         return {"datatype": type_name}
 
     def _make_identifier(self, identifier):
@@ -101,15 +125,31 @@ class ABCJsonAstBuilder:
 
         return self._make_abc_node("Block", self._make_stmts(stmts))
 
-    def make_literal_int(self, value : int) -> dict:
+    def make_literal(self, value) -> dict:
         """
-        Create a dictionary corresponding to an ABC LiteralInt when exported in JSON
+        Create a dictionary corresponding to an ABC Literal* when exported in JSON, where * depends on the type of value.
 
-        :param value: integer value of the node
-        :return: JSON-equivalent dictionary for an ABC LiteralInt
+        All Python floats will be translated to LiteralDouble.
+        All Python strings of length <= 1 to LiteralChar.
+        For other behaviour, special functions should be implemented for that purpose.
+
+        :param value: value of the node (int, float, bool, char, string)
+        :return: JSON-equivalent dictionary for an ABC Literal*
         """
 
-        return self._make_abc_node("LiteralInt", self._make_value(value))
+        if isinstance(value, int):
+            return self._make_abc_node("LiteralInt", self._make_value(value))
+        elif isinstance(value, float):
+            return self._make_abc_node("LiteralDouble", self._make_value(value))
+        elif isinstance(value, bool):
+            return self._make_abc_node("LiteralBool", self._make_value(value))
+        elif isinstance(value, str):
+            if len(value) > 1:
+                return self._make_abc_node("LiteralString", self._make_value(value))
+
+            return self._make_abc_node("LiteralChar", self._make_value(value))
+        else:
+            logging.error(f"Unsupported type '{type(value)}': only int, float, bool, and str have corresponding ABC Literals.")
 
     def make_return(self, value : dict) -> dict:
         """

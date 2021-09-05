@@ -22,7 +22,7 @@ class Program {
   }
 
   /// Execute the compiled program on the given inputs and outputs
-  // TODO: This assumes the result is in clear text.
+  // XXX: This assumes the result is in clear text.
   std::vector<T> execute(std::string inputs, std::vector<std::string> outputIdentifiers) {
     auto result = Compiler::compileJson(std::move(programAst), inputs, outputIdentifiers);
     std::vector<T> result_vec;
