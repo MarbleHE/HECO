@@ -255,6 +255,10 @@ install(EXPORT ast_optTargets
         NAMESPACE ast_opt::
         DESTINATION lib/cmake/ast_opt)
 
+find_package(Python COMPONENTS Interpreter Development)
+if(Python_VERSION_MAJOR EQUAL 3)
+    install(CODE "execute_process(\"python3 -m pip install -e ${PROJECT_SOURCE_DIR}/cmake-build-debug/python/\")")
+endif()
 
 ##############################
 # TARGET: ast_demo
@@ -284,8 +288,6 @@ endif ()
 #
 # Use pybind11 as C++ wrapper for the Python frontend
 ####################################################################################
-
-find_package(Python COMPONENTS Interpreter Development)
 
 if(NOT Python_VERSION_MAJOR EQUAL 3)
     message(WARNING "The ABC python frontend requires Python 3, but no installation
