@@ -13,11 +13,14 @@ p = ABCProgram(logging.DEBUG)
 # TODO: is it possible to take functions from other modules?
 
 with ABCContext(p, logging.DEBUG):
-    def main():
-        a = 1 + 1
-        b = 2 * 6
+    def main(a, x = 3):
+        b = (2 * 6) / x
         y = a + b
         return y
 
-r = p.execute()
+r = p.execute(1, x=2)
 print(f"Received result: '{r}'")
+
+# TODO: fix multiple executes
+# r = p.execute(3)
+# print(f"Received result: '{r}'")

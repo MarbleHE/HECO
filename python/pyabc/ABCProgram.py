@@ -2,6 +2,7 @@
 import logging
 import json
 from ._abc_wrapper import *
+from .ABCJsonAstBuilder import ABCJsonAstBuilder
 
 class ABCProgram:
     """
@@ -12,6 +13,25 @@ class ABCProgram:
         self.log_level = log_level
         logging.basicConfig(level=self.log_level)
 
+        self.builder = ABCJsonAstBuilder(log_level=log_level)
+
+    #
+    # Internal helper functions
+    #
+    def _create_fhe_args_block(self, fhe_args):
+        stmts = []
+        for fhe_arg_name, fhe_arg_val in fhe_args.items():
+            abc_var = self.builder.make_variable(fhe_arg_name)
+            abc_val = self.builder.make_literal(fhe_arg_val)
+            abc_var_decl = self.builder.make_variable_declaration(abc_var, abc_val)
+            stmts.append(abc_var_decl)
+
+        return self.builder.make_block(stmts)
+
+
+    #
+    # External functions
+    #
     def add_main_fn(self, body : dict, args : dict, ret_vars : dict = {}, ret_constants : list = []) -> None:
         """
         Add a main function and its arguments to the program.
@@ -43,7 +63,7 @@ class ABCProgram:
             logging.error("Set main function first, before trying to compile!")
             exit(1)
 
-    def execute(self, **kwargs):
+    def execute(self, *args, **kwargs):
         """
         Executes the main function with the given variable assignments.
         Raises an error when not all required variables are defined.
@@ -57,8 +77,37 @@ class ABCProgram:
         if not self.cpp_program:
             self.compile()
 
+        # Ensure all arguments are present
+        if len(args) > len(self.main_args):
+            logging.error(f"Too many arguments supplied for main (max. {len(self.main_args)} are allowed).")
+            exit(1)
+
+        fhe_args = dict()
+        main_args_keys = list(self.main_args.keys())
+        ## Add positional arguments with names in the order of those specified in self.main_args.
+        for i, arg in enumerate(args):
+            fhe_args[main_args_keys[i]] = arg
+
+        ## Add keyword arguments (if they are actually arguments of main)
+        for arg_name, arg_val in kwargs.items():
+            if arg_name not in main_args_keys:
+                logging.error(f"Unknown argument '{arg_name}' for main.")
+            fhe_args[arg_name] = arg_val
+
+        ## Add remaining arguments of main that have default values
+        for arg_name in list(main_args_keys)[len(args):]:
+            if arg_name not in kwargs:
+                arg_meta = self.main_args[arg_name]
+                if not arg_meta["opt"]:
+                    logging.error(f"Mandatory argument '{arg_name}' is missing!")
+                    exit(1)
+                fhe_args[arg_name] = arg_meta["value"]
+
+        ## Create FHE arguments: make block of assignment statements
+        fhe_args_block = self._create_fhe_args_block(fhe_args)
+
         ret_var_names = list(self.ret_vars.keys())
-        result = self.cpp_program.execute('{"type": "Block", "statements": []}', ret_var_names)
+        result = self.cpp_program.execute(json.dumps(fhe_args_block), ret_var_names)
 
         res_vec = []
         res_val_idx = 0
