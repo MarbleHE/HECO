@@ -21,6 +21,5 @@ with ABCContext(p, logging.DEBUG):
 r = p.execute(1, x=2)
 print(f"Received result: '{r}'")
 
-# TODO: fix multiple executes
-# r = p.execute(3)
-# print(f"Received result: '{r}'")
+r = p.execute(2)
+print(f"Received result: '{r}'")

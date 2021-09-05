@@ -24,10 +24,14 @@ class Program {
   /// Execute the compiled program on the given inputs and outputs
   // XXX: This assumes the result is in clear text.
   std::vector<T> execute(std::string inputs, std::vector<std::string> outputIdentifiers) {
-    auto result = Compiler::compileJson(std::move(programAst), inputs, outputIdentifiers);
+    // Cloning the programAst is necessary to be able to execute the same program multiple times (which uses the same
+    // program AST)
+    auto result = Compiler::compileJson(programAst->clone(), inputs, outputIdentifiers);
+
     std::vector<T> result_vec;
 
     for (const auto &[identifier, cipherClearText] : result) {
+
       if (auto cleartextInt = dynamic_cast<Cleartext<T> *>(cipherClearText.get())) {   // result is a cleartext
         auto cleartextData = cleartextInt->getData();
         result_vec.push_back(cleartextData[0]);
