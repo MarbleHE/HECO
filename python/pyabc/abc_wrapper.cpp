@@ -2,6 +2,7 @@
 #include <pybind11/stl.h>
 #include <ast_opt/parser/Parser.h>
 #include <ast_opt/parser/Errors.h>
+#include <ast_opt/visitor/ProgramPrintVisitor.h>
 #include "ast_opt/compiler/Compiler.h"
 #include "ast_opt/runtime/Cleartext.h"
 
@@ -42,6 +43,14 @@ class Program {
     }
     return result_vec;
   }
+
+  /// Convert the ABC AST to CPP pseudo-code
+  std::string to_cpp_string() {
+    std::stringstream ss;
+    ProgramPrintVisitor v(ss);
+    programAst->accept(v);
+    return ss.str();
+  }
 };
 
 PYBIND11_MODULE(_abc_wrapper, m) {
@@ -49,5 +58,6 @@ PYBIND11_MODULE(_abc_wrapper, m) {
 
   py::class_<Program<int>>(m, "IntProgram")
       .def(py::init<const std::string>(), "Create a program and pre-process the given JSON to a proper ABC AST.")
-      .def("execute", &Program<int>::execute, "Execute the compiled program on the given inputs and outputs");
+      .def("execute", &Program<int>::execute, "Execute the compiled program on the given inputs and outputs")
+      .def("to_cpp_string", &Program<int>::to_cpp_string, "Convert the ABC AST to CPP pseudo-code");
 }

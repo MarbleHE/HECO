@@ -1,3 +1,5 @@
+#include <ast_opt/parser/Parser.h>
+#include <ast_opt/utilities/NodeUtils.h>
 #include "ast_opt/ast/For.h"
 #include "ast_opt/utilities/IVisitor.h"
 
@@ -182,6 +184,24 @@ nlohmann::json For::toJson() const {
   if (hasUpdate()) j["update"] = getUpdate().toJson();
   if (hasBody()) j["body"] = getBody().toJson();
   return j;
+}
+
+std::unique_ptr<For> For::fromJson(nlohmann::json j) {
+  auto initializerStmt = (j.contains("initializer")) ? Parser::parseJsonStatement(j["initializer"]) : nullptr;
+  auto conditionExpr = (j.contains("condition")) ? Parser::parseJsonExpression(j["condition"]) : nullptr;
+  auto updateStmt = (j.contains("update")) ? Parser::parseJsonStatement(j["update"]) : nullptr;
+  auto bodyStmt = (j.contains("body")) ? Parser::parseJsonStatement(j["body"]) : nullptr;
+
+  std::cout << "initializerStmt: " << initializerStmt->toJson() << std::endl;
+  std::cout << "conditionExpr: " << conditionExpr->toJson() << std::endl;
+  std::cout << "updateStmt: " << updateStmt->toJson() << std::endl;
+  std::cout << "bodyStmt: " << bodyStmt->toJson() << std::endl;
+
+  auto initializerBlock = castUniquePtr<AbstractStatement, Block>(std::move(initializerStmt));
+  auto updateBlock = castUniquePtr<AbstractStatement, Block>(std::move(updateStmt));
+  auto bodyBlock = castUniquePtr<AbstractStatement, Block>(std::move(bodyStmt));
+
+  return std::make_unique<For>(std::move(initializerBlock), std::move(conditionExpr), std::move(updateBlock), std::move(bodyBlock));
 }
 
 std::string For::toString(bool printChildren) const {

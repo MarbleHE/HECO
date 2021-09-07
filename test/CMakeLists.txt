@@ -108,9 +108,13 @@ if(Python3_Interpreter_FOUND)
     # Install pytest
     execute_process(COMMAND ${Python3_EXECUTABLE} -m pip install --user pytest)
 
-    set(PYTEST_CMD Python3::Interpreter -m pytest --ignore=extern --ignore cmake-build-debug ${CMAKE_CURRENT_SOURCE_DIR})
+    set(PYTEST_CMD Python3::Interpreter -m pytest --ignore=extern --ignore cmake-build-debug)
 
     add_test(NAME PythonFrontendSimple
-            COMMAND ${PYTEST_CMD}
+            COMMAND ${PYTEST_CMD} ${PROJECT_SOURCE_DIR}/test/python_frontend/test_simple.py
+            WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/cmake-build-debug/python)
+
+    add_test(NAME PythonFrontendHammingDistance
+            COMMAND ${PYTEST_CMD} ${PROJECT_SOURCE_DIR}/test/python_frontend/test_hamming_distance.py
             WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/cmake-build-debug/python)
 endif()

@@ -133,6 +133,10 @@ class For : public AbstractStatement {
   /// \param newBody body to set, For takes ownership
   void setBody(std::unique_ptr<Block> newBody);
 
+  /// Create a For node from a nlohmann::json representation of this node.
+  /// \return unique_ptr to a new For node
+  static std::unique_ptr<For> fromJson(nlohmann::json j);
+
   ///////////////////////////////////////////////
   ////////// AbstractNode Interface /////////////
   ///////////////////////////////////////////////
