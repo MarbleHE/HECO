@@ -19,6 +19,19 @@ enum NodeType : unsigned char {
   NodeTypeLastSymbol
 };
 
+
+/// Cast a unique_ptr of (node) type S to (node) subtype T
+// TODO: change RuntimeVisitor to also use this function, once it's merged.
+template<typename S, typename T>
+std::unique_ptr<T> castUniquePtr(std::unique_ptr<S> &&source) {
+  if (dynamic_cast<T *>(source.get())) {
+    return std::unique_ptr<T>(dynamic_cast<T *>(source.release()));
+  } else {
+    throw std::runtime_error("castUniquePtr failed: Cannot cast given unique_ptr from type "
+                                 + std::string(typeid(S).name()) + " to type " + std::string(typeid(T).name()) + ".");
+  }
+}
+
 class NodeUtils {
  public:
 

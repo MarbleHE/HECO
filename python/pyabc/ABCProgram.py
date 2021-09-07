@@ -123,3 +123,10 @@ class ABCProgram:
         res_vec += self.ret_constants[res_val_idx:]
 
         return res_vec[0] if len(res_vec) == 1 else tuple(res_vec)
+
+    def to_cpp_string(self):
+        if not self.cpp_program:
+            logging.error("No CPP program available yet, call compile() first")
+            exit(1)
+
+        return self.cpp_program.to_cpp_string()

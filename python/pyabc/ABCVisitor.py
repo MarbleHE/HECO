@@ -120,7 +120,10 @@ class ABCVisitor(NodeVisitor):
     #
 
     def visit_Add(self, node: Add) -> dict:
-        return "+"
+        return self.builder.constants.ADD
+
+    def visit_And(self, node: And) -> dict:
+        return self.builder.constants.AND
 
     def visit_Assign(self, node : Assign) -> dict:
         """
@@ -181,7 +184,68 @@ class ABCVisitor(NodeVisitor):
         return self.builder.make_literal(node.value)
 
     def visit_Div(self, node: Div) -> dict:
-        return "/"
+        return self.builder.constants.DIV
+
+    def visit_Eq(self, node: Eq) -> dict:
+        return self.builder.constants.EQ
+
+    def visit_For(self, node: For) -> dict:
+        """
+        Visit a Python For node and convert it to an ABC AST For node.
+        """
+
+        target = self.visit(node.target)
+
+        # Currently only support iterating over range!
+        if node.iter.func.id != "range":
+            logging.error("The python frontend currently only supports iterating over a `range`")
+            exit(1)
+        elif len(node.orelse) != 0:
+            logging.error("Orelse construct of for loops is not supported.")
+            exit(1)
+
+        # case range(stop) -> [0, stop)
+        if len(node.iter.args) == 1:
+            start_val = self.builder.make_literal(0)
+            stop_val = self.visit(node.iter.args[0])
+        # cases range(start, stop[, step]) -> [start, stop)
+        else:
+            start_val = self.visit(node.iter.args[0])
+            stop_val = self.visit(node.iter.args[1])
+
+        # case range(start, stop, step)
+        if len(node.iter.args) == 3:
+            step_val = self.visit(node.iter.args[2])
+        else:
+            step_val = self.builder.make_literal(1)
+
+        # Currently, the initializer is a block with a single statement.
+        var_decl = self.builder.make_variable_declaration(target, start_val)
+
+        # TODO: We force set the type of the for-loop variable to integer. This is not automatically the case, since
+        # variable assignments loose type information (see frontend-limitations markdown).
+        var_decl["datatype"] = "int"
+
+        initializer = self.builder.make_block([var_decl])
+
+        # Python for loops with range only perform addition, the Pythonic way to do more complex conditions is usually
+        # to use while loops.
+        update = self.builder.make_update(target, self.builder.constants.ADD, step_val)
+
+        # If start > stop, the condition is target > stop. Otherwise, it is target < stop.
+        start_lt_stop = self.builder.make_binary_expression(start_val, self.builder.constants.LT, stop_val)
+        start_gt_stop = self.builder.make_binary_expression(start_val, self.builder.constants.GT, stop_val)
+        target_lt_stop = self.builder.make_binary_expression(target, self.builder.constants.LT, stop_val)
+        target_gt_stop = self.builder.make_binary_expression(target, self.builder.constants.GT, stop_val)
+
+        condition_case_1 = self.builder.make_binary_expression(start_lt_stop, self.builder.constants.AND, target_lt_stop)
+        condition_case_2 = self.builder.make_binary_expression(start_gt_stop, self.builder.constants.AND, target_gt_stop)
+        condition = self.builder.make_binary_expression(condition_case_1, self.builder.constants.OR, condition_case_2)
+
+        stmts = list(map(self.visit, node.body))
+        body = self.builder.make_block(stmts)
+
+        return self.builder.make_for(initializer, condition, update, body)
 
     def visit_FunctionDef(self, node: FunctionDef) -> dict:
         """
@@ -221,11 +285,23 @@ class ABCVisitor(NodeVisitor):
             logging.error(UNSUPPORTED_FUNCTION, node.name)
             exit(1)
 
+    def visit_Gt(self, node: Gt) -> dict:
+        return self.builder.constants.GT
+
+    def visit_GtE(self, node: GtE) -> dict:
+        return self.builder.constants.GTE
+
+    def visit_Lt(self, node: Lt) -> dict:
+        return self.builder.constants.LT
+
+    def visit_LtE(self, node: LtE) -> dict:
+        return self.builder.constants.LTE
+
     def visit_Mod(self, node: Mod) -> dict:
-        return "%"
+        return self.builder.constants.MOD
 
     def visit_Mult(self, node: Mult) -> dict:
-        return "*"
+        return self.builder.constants.MUL
 
     def visit_Name(self, node: Name) -> dict:
         """
@@ -233,6 +309,9 @@ class ABCVisitor(NodeVisitor):
         """
 
         return self.builder.make_variable(node.id)
+
+    def visit_Or(self, node: Or) -> dict:
+        return self.builder.constants.OR
 
     def visit_Return(self, node: Return) -> dict:
         """
@@ -249,15 +328,12 @@ class ABCVisitor(NodeVisitor):
         return self.builder.make_return(ret_node)
 
     def visit_Sub(self, node: Sub) -> dict:
-        return "-"
+        return self.builder.constants.SUB
+
 
     #
     # Unsupported visit functions
     #
-
-    def visit_And(self, node: And) -> dict:
-        logging.error(UNSUPPORTED_STATEMENT, type(node))
-        exit(1)
 
     def visit_Assert(self, node: Assert) -> dict:
         logging.error(UNSUPPORTED_STATEMENT, type(node))
@@ -359,10 +435,6 @@ class ABCVisitor(NodeVisitor):
         logging.error(UNSUPPORTED_STATEMENT, type(node))
         exit(1)
 
-    def visit_Eq(self, node: Eq) -> dict:
-        logging.error(UNSUPPORTED_STATEMENT, type(node))
-        exit(1)
-
     def visit_ExceptHandler(self, node: ExceptHandler) -> dict:
         logging.error(UNSUPPORTED_STATEMENT, type(node))
         exit(1)
@@ -383,10 +455,6 @@ class ABCVisitor(NodeVisitor):
         logging.error(UNSUPPORTED_STATEMENT, type(node))
         exit(1)
 
-    def visit_For(self, node: For) -> dict:
-        logging.error(UNSUPPORTED_STATEMENT, type(node))
-        exit(1)
-
     def visit_FormattedValue(self, node: FormattedValue) -> dict:
         logging.error(UNSUPPORTED_STATEMENT, type(node))
         exit(1)
@@ -396,14 +464,6 @@ class ABCVisitor(NodeVisitor):
         exit(1)
 
     def visit_Global(self, node: Global) -> dict:
-        logging.error(UNSUPPORTED_STATEMENT, type(node))
-        exit(1)
-
-    def visit_Gt(self, node: Gt) -> dict:
-        logging.error(UNSUPPORTED_STATEMENT, type(node))
-        exit(1)
-
-    def visit_GtE(self, node: GtE) -> dict:
         logging.error(UNSUPPORTED_STATEMENT, type(node))
         exit(1)
 
@@ -471,14 +531,6 @@ class ABCVisitor(NodeVisitor):
         logging.error(UNSUPPORTED_STATEMENT, type(node))
         exit(1)
 
-    def visit_Lt(self, node: Lt) -> dict:
-        logging.error(UNSUPPORTED_STATEMENT, type(node))
-        exit(1)
-
-    def visit_LtE(self, node: LtE) -> dict:
-        logging.error(UNSUPPORTED_STATEMENT, type(node))
-        exit(1)
-
     def visit_MatMult(self, node: MatMult) -> dict:
         logging.error(UNSUPPORTED_STATEMENT, type(node))
         exit(1)
@@ -512,10 +564,6 @@ class ABCVisitor(NodeVisitor):
         exit(1)
 
     def visit_Num(self, node: Num) -> dict:
-        logging.error(UNSUPPORTED_STATEMENT, type(node))
-        exit(1)
-
-    def visit_Or(self, node: Or) -> dict:
         logging.error(UNSUPPORTED_STATEMENT, type(node))
         exit(1)
 

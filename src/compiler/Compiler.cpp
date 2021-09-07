@@ -3,18 +3,8 @@
 #include <ast_opt/parser/Parser.h>
 #include <ast_opt/runtime/DummyCiphertextFactory.h>
 #include <ast_opt/parser/Errors.h>
-#include "ast_opt/compiler/Compiler.h"
-
-// TODO: put this code somewhere, where both the Compiler and the RuntimeVisitor can use it, once they are both merged.
-template<typename S, typename T>
-std::unique_ptr<T> castUniquePtr(std::unique_ptr<S> &&source) {
-  if (dynamic_cast<T *>(source.get())) {
-    return std::unique_ptr<T>(dynamic_cast<T *>(source.release()));
-  } else {
-    throw std::runtime_error("castUniquePtr failed: Cannot cast given unique_ptr from type "
-                                 + std::string(typeid(S).name()) + " to type " + std::string(typeid(T).name()) + ".");
-  }
-}
+#include <ast_opt/compiler/Compiler.h>
+#include <ast_opt/utilities/NodeUtils.h>
 
 OutputIdentifierValuePairs Compiler::compileAst(std::unique_ptr<AbstractNode> programAst,
                                                 std::unique_ptr<Block> inputBlock,

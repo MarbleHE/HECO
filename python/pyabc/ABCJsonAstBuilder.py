@@ -11,6 +11,24 @@ class ABCJsonAstBuilder:
         logging.basicConfig(level=log_level)
 
     #
+    # "Public" constants
+    #
+    class constants:
+        LT = "<"
+        GT = ">"
+        LTE = "<="
+        GTE = ">="
+        EQ = "="
+        AND = "&&"
+        OR = "||"
+
+        ADD = "+"
+        SUB = "-"
+        DIV = "/"
+        MOD = "%"
+        MUL = "*"
+
+    #
     # Internal helper function to create attributes for ABC nodes
     #
     def _find_datatype(self, d):
@@ -56,12 +74,21 @@ class ABCJsonAstBuilder:
         d.update(content)
         return d
 
+    def _make_body(self, body):
+        return {"body": body}
+
+    def _make_condition(self, condition):
+        return {"condition": condition}
+
     def _make_datatype(self, val):
         type_name = self._find_datatype(val)
         return {"datatype": type_name}
 
     def _make_identifier(self, identifier):
         return {"identifier": identifier}
+
+    def _make_initializer(self, initializer):
+        return {"initializer": initializer}
 
     def _make_left(self, left):
         return {"left": left}
@@ -77,6 +104,9 @@ class ABCJsonAstBuilder:
 
     def _make_target(self, target):
         return {"target": target}
+
+    def _make_update(self, update):
+        return {"update": update}
 
     def _make_value(self, value):
         return {"value": value}
@@ -125,6 +155,25 @@ class ABCJsonAstBuilder:
 
         return self._make_abc_node("Block", self._make_stmts(stmts))
 
+    def make_for(self, initializer : dict, condition : dict, update : dict, body : dict) -> dict:
+        """
+        Create a dictionary corresponding to an ABC For node when exported in JSON
+
+        :param initializer: JSON-equivalent dictionary for an ABC Block which initializes the loop variable
+        :param condition: JSON-equivalent dictionary for an ABC BinaryExpression. We execute the body as long as this
+                          condition is true.
+        :param update: JSON-equivalent dictionary for an ABC Block that updates the loop variable
+        :param body: JSON-equivalent dictionary for an ABC Block of statements that are executed in the loop
+        :return: JSON-equivalent dictionary for an ABC For node
+        """
+
+        d = self._make_initializer(initializer)
+        d.update(self._make_condition(condition))
+        d.update(self._make_update(update))
+        d.update(self._make_body(body))
+
+        return self._make_abc_node("For", d)
+
     def make_literal(self, value) -> dict:
         """
         Create a dictionary corresponding to an ABC Literal* when exported in JSON, where * depends on the type of value.
@@ -160,6 +209,24 @@ class ABCJsonAstBuilder:
         """
 
         return self._make_abc_node("Return", self._make_value(value))
+
+    def make_update(self, target : dict, op : str, value : dict) -> dict:
+        """
+        Create a dictionary corresponding to an update Block of a ABC For AST node.
+
+        :param target: JSON-equivalent dictionary of the target variable
+        :param op: arithmetic operation (represented as string, must be in self.constants)
+        :param value: JSON-equivalent dictionary of the value.
+        :return: JSON-equivalent of a block with the statement "target = `target` `op` `value`"
+        """
+
+        stmts = []
+
+        update_expr = self.make_binary_expression(target, op, value)
+        assignment_expr = self.make_assignment(target, update_expr)
+        stmts.append(assignment_expr)
+
+        return self.make_block(stmts)
 
     def make_variable(self, identifier : str) -> dict:
         """
