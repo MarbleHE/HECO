@@ -117,4 +117,8 @@ if(Python3_Interpreter_FOUND)
     add_test(NAME PythonFrontendHammingDistance
             COMMAND ${PYTEST_CMD} ${PROJECT_SOURCE_DIR}/test/python_frontend/test_hamming_distance.py
             WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/cmake-build-debug/python)
+
+    add_test(NAME PythonMatrixVectorProduct
+            COMMAND ${PYTEST_CMD} ${PROJECT_SOURCE_DIR}/test/python_frontend/test_matrix_vector_product.py
+            WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/cmake-build-debug/python)
 endif()

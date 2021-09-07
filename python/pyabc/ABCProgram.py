@@ -58,7 +58,7 @@ class ABCProgram:
         :return: void, the compiled main function is stored internally in self.cpp_program.
         """
         if self.main_fn:
-            self.cpp_program = IntProgram(json.dumps(self.main_fn))
+            self.cpp_program = ABCProgramWrapper(json.dumps(self.main_fn))
         else:
             logging.error("Set main function first, before trying to compile!")
             exit(1)
@@ -117,7 +117,14 @@ class ABCProgram:
             res_val_idx += self.ret_vars[ret_var] - res_val_idx
 
             # Add result for variable
-            res_vec.append(result[ret_vars_idx])
+
+            # TODO: This is a hack necessary due to python's dynamic (return) types.
+            #   For now, lists that only have a single value are always converted to that value only.
+            #   In the future, we maybe could leverage type hints to know what return value python actually expects.
+            val = result[ret_vars_idx]
+            if isinstance(val, list) and len(val) == 1:
+                val = val[0]
+            res_vec.append(val)
 
         # Append remaining constants
         res_vec += self.ret_constants[res_val_idx:]
