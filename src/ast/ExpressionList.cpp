@@ -1,5 +1,6 @@
 #include <iostream>
 #include <exception>
+#include <ast_opt/parser/Parser.h>
 #include "ast_opt/ast/ExpressionList.h"
 #include "ast_opt/utilities/IVisitor.h"
 
@@ -145,6 +146,14 @@ nlohmann::json ExpressionList::toJson() const {
   nlohmann::json j = {{"type", getNodeType()},
                       {"expressions", expressionsJson}};
   return j;
+}
+
+std::unique_ptr<ExpressionList> ExpressionList::fromJson(nlohmann::json j) {
+  std::vector<std::unique_ptr<AbstractExpression>> expressions;
+  for (auto expression : j["expressions"]) {
+    expressions.emplace_back(Parser::parseJsonExpression(expression));
+  }
+  return std::make_unique<ExpressionList>(std::move(expressions));
 }
 
 std::string ExpressionList::toString(bool printChildren) const {

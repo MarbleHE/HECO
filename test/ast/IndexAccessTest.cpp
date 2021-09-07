@@ -39,3 +39,7 @@ TEST(IndexAccessTest, node_iterate_children) {
 TEST(IndexAccessTest, JsonOutputTest) { /* NOLINT */
  // TODO: Verify JSON output
 }
+
+TEST(IndexAccessTest, JsonInputTest) { /* NOLINT */
+// TODO: Verify JSON input
+}

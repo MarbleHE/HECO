@@ -61,8 +61,8 @@ class ABCVisitor(NodeVisitor):
 
         # XXX: Currently, we do not support tuples in ABC, so we treat them differently at different
         # places. For this reason, we have a helper function instead of using visit_Name, visit_Tuple directly.
-        if isinstance(lhs, Name):
-            return [self.visit_Name(lhs)]
+        if isinstance(lhs, Name) or isinstance(lhs, Subscript):
+            return [self.visit(lhs)]
         elif isinstance(lhs, Tuple):
             return list(map(self._parse_lhs, self._tpl_stmt_to_list(lhs)))
         else:
@@ -107,12 +107,16 @@ class ABCVisitor(NodeVisitor):
         return d
 
     def _make_assignment(self, var, expr):
-        var_name = var["identifier"]
-        if var_name in self.declared_vars:
-            return self.builder.make_assignment(var, expr)
+        if var["type"] == "Variable":
+            var_name = var["identifier"]
+            if var_name in self.declared_vars:
+                return self.builder.make_assignment(var, expr)
+            else:
+                self.declared_vars.add(var_name)
+                return self.builder.make_variable_declaration(var, expr)
         else:
-            self.declared_vars.add(var_name)
-            return self.builder.make_variable_declaration(var, expr)
+            # we never declare an index assignment, the indexed variable was declared before.
+            return self.builder.make_assignment(var, expr)
 
 
     #
@@ -168,6 +172,16 @@ class ABCVisitor(NodeVisitor):
             exit(1)
 
         return abc_assignments[0]
+
+    def visit_AugAssign(self, node: AugAssign) -> dict:
+        """
+        Visit a Python augmented assignment (e.g., +=, -=, *=, ...) and transform it to a dictionary corresponding to
+        an ABC assignments.
+        """
+
+        target = self.visit(node.target)
+        update = self.builder.make_binary_expression(target, self.visit(node.op), self.visit(node.value))
+        return self.builder.make_assignment(target, update)
 
     def visit_BinOp(self, node: BinOp) -> dict:
         return self.builder.make_binary_expression(
@@ -233,7 +247,7 @@ class ABCVisitor(NodeVisitor):
         update = self.builder.make_update(target, self.builder.constants.ADD, step_val)
 
         # If start > stop, the condition is target > stop. Otherwise, it is target < stop.
-        start_lt_stop = self.builder.make_binary_expression(start_val, self.builder.constants.LT, stop_val)
+        start_lt_stop = self.builder.make_binary_expression(start_val, self.builder.constants.LTE, stop_val)
         start_gt_stop = self.builder.make_binary_expression(start_val, self.builder.constants.GT, stop_val)
         target_lt_stop = self.builder.make_binary_expression(target, self.builder.constants.LT, stop_val)
         target_gt_stop = self.builder.make_binary_expression(target, self.builder.constants.GT, stop_val)
@@ -291,6 +305,16 @@ class ABCVisitor(NodeVisitor):
     def visit_GtE(self, node: GtE) -> dict:
         return self.builder.constants.GTE
 
+    def visit_List(self, node: List) -> dict:
+        """
+        Visit a Python list and convert it to an AST ExpressionList.
+        """
+        # TODO: at the moment, python lists are translated to ABC ExpressionLists. We potentially need to give up some
+        # list features if we keep it like this (list comprehension, list concatenation).
+
+        exprs = list(map(self.visit, node.elts))
+        return self.builder.make_expression_list(exprs)
+
     def visit_Lt(self, node: Lt) -> dict:
         return self.builder.constants.LT
 
@@ -330,6 +354,14 @@ class ABCVisitor(NodeVisitor):
     def visit_Sub(self, node: Sub) -> dict:
         return self.builder.constants.SUB
 
+    def visit_Subscript(self, node: Subscript) -> dict:
+        target = self.visit(node.value)
+
+        # Slice accesses will throw an error, since the Slice type is not implemented.
+        index = self.visit(node.slice)
+
+        return self.builder.make_index_access(target, index)
+
 
     #
     # Unsupported visit functions
@@ -360,10 +392,6 @@ class ABCVisitor(NodeVisitor):
         exit(1)
 
     def visit_AsyncWith(self, node: AsyncWith) -> dict:
-        logging.error(UNSUPPORTED_STATEMENT, type(node))
-        exit(1)
-
-    def visit_AugAssign(self, node: AugAssign) -> dict:
         logging.error(UNSUPPORTED_STATEMENT, type(node))
         exit(1)
 
@@ -515,10 +543,6 @@ class ABCVisitor(NodeVisitor):
         logging.error(UNSUPPORTED_STATEMENT, type(node))
         exit(1)
 
-    def visit_List(self, node: List) -> dict:
-        logging.error(UNSUPPORTED_STATEMENT, type(node))
-        exit(1)
-
     def visit_ListComp(self, node: ListComp) -> dict:
         logging.error(UNSUPPORTED_STATEMENT, type(node))
         exit(1)
@@ -608,10 +632,6 @@ class ABCVisitor(NodeVisitor):
         exit(1)
 
     def visit_Str(self, node: Str) -> dict:
-        logging.error(UNSUPPORTED_STATEMENT, type(node))
-        exit(1)
-
-    def visit_Subscript(self, node: Subscript) -> dict:
         logging.error(UNSUPPORTED_STATEMENT, type(node))
         exit(1)
 

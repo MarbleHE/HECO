@@ -7,6 +7,7 @@ Testing simple arithmetic FHE operations using the Python Frontend.
 from pyabc import ABCContext, ABCProgram
 
 import logging
+import random
 import pytest
 
 # TODO: inline function in AST -> parse function, create JSON for it, use it in ABCContext
@@ -25,5 +26,12 @@ def test_hamming_distance():
     x = [1, 1, 0, 1]
     y = [1, 0, 1, 1]
     n = 4
+
     s = p.execute(x, y, n)
     assert s == 2
+
+    n = 10
+    x = [random.randrange(100) for _ in range(n)]
+    y = [random.randrange(100) for _ in range(n)]
+    s = p.execute(x, y, n)
+    assert s == sum([(x[i] - y[i])**2 for i in range(n)])
