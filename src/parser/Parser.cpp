@@ -92,8 +92,9 @@ std::unique_ptr<AbstractTarget> Parser::parseJsonTarget(json j) {
   switch (NodeUtils::stringToEnum(type)) {
     case NodeTypeVariable:
       return Variable::fromJson(j);
-    case NodeTypeFunctionParameter:
     case NodeTypeIndexAccess:
+      return IndexAccess::fromJson(j);
+    case NodeTypeFunctionParameter:
       throw stork::runtime_error("Unsupported AbstractTarget: '" + type + "' is not yet implemented.");
     default:
       throw stork::runtime_error("Unsupported type: '" + type + "' is not an AbstractTarget.");
@@ -104,6 +105,10 @@ std::unique_ptr<AbstractExpression> Parser::parseJsonExpression(json j) {
   std::string type = j["type"].get<std::string>();
 
   switch (NodeUtils::stringToEnum(type)) {
+    case NodeTypeBinaryExpression:
+      return BinaryExpression::fromJson(j);
+    case NodeTypeExpressionList:
+      return ExpressionList::fromJson(j);
     case NodeTypeLiteralBool:
       return LiteralBool::fromJson(j);
     case NodeTypeLiteralChar:
@@ -116,12 +121,9 @@ std::unique_ptr<AbstractExpression> Parser::parseJsonExpression(json j) {
       return LiteralDouble::fromJson(j);
     case NodeTypeLiteralString:
       return LiteralString::fromJson(j);
-    case NodeTypeBinaryExpression:
-      return BinaryExpression::fromJson(j);
     case NodeTypeOperatorExpression:
     case NodeTypeUnaryExpression:
     case NodeTypeCall:
-    case NodeTypeExpressionList:
     case NodeTypeTernaryOperator:
       throw stork::runtime_error("Unsupported AbstractExpression: '" + type + "' is not yet implemented.");
     default:

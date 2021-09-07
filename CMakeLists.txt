@@ -257,6 +257,8 @@ install(EXPORT ast_optTargets
 
 find_package(Python COMPONENTS Interpreter Development)
 if(Python_VERSION_MAJOR EQUAL 3)
+    # TODO: This only links the pyabc package in the cmake-build-debug folder to the python packages. For a
+    # proper installation, we'd need to build a Python Wheel package.
     install(CODE "execute_process(\"python3 -m pip install -e ${PROJECT_SOURCE_DIR}/cmake-build-debug/python/\")")
 endif()
 

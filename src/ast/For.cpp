@@ -192,11 +192,6 @@ std::unique_ptr<For> For::fromJson(nlohmann::json j) {
   auto updateStmt = (j.contains("update")) ? Parser::parseJsonStatement(j["update"]) : nullptr;
   auto bodyStmt = (j.contains("body")) ? Parser::parseJsonStatement(j["body"]) : nullptr;
 
-  std::cout << "initializerStmt: " << initializerStmt->toJson() << std::endl;
-  std::cout << "conditionExpr: " << conditionExpr->toJson() << std::endl;
-  std::cout << "updateStmt: " << updateStmt->toJson() << std::endl;
-  std::cout << "bodyStmt: " << bodyStmt->toJson() << std::endl;
-
   auto initializerBlock = castUniquePtr<AbstractStatement, Block>(std::move(initializerStmt));
   auto updateBlock = castUniquePtr<AbstractStatement, Block>(std::move(updateStmt));
   auto bodyBlock = castUniquePtr<AbstractStatement, Block>(std::move(bodyStmt));

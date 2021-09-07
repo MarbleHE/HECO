@@ -45,3 +45,7 @@ TEST(ExpressionListTest, prependStatement) {
 TEST(ExpressionListTest, JsonOutputTest) { /* NOLINT */
   // TODO: Json output test
 }
+
+TEST(ExpressionListTest, JsonInputTest) { /* NOLINT */
+  // TODO: Json input test
+}

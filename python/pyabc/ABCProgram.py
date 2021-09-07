@@ -22,7 +22,7 @@ class ABCProgram:
         stmts = []
         for fhe_arg_name, fhe_arg_val in fhe_args.items():
             abc_var = self.builder.make_variable(fhe_arg_name)
-            abc_val = self.builder.make_literal(fhe_arg_val)
+            abc_val = self.builder.make_value(fhe_arg_val)
             abc_var_decl = self.builder.make_variable_declaration(abc_var, abc_val)
             stmts.append(abc_var_decl)
 
@@ -128,5 +128,4 @@ class ABCProgram:
         if not self.cpp_program:
             logging.error("No CPP program available yet, call compile() first")
             exit(1)
-
         return self.cpp_program.to_cpp_string()

@@ -34,7 +34,7 @@ def test_simple_for_loop():
         def main(start, end, step):
             sum = 0
             for i in range(start, end, step):
-                sum = sum + i
+                sum += i
             return sum
 
     s = p.execute(1, 3, 1)

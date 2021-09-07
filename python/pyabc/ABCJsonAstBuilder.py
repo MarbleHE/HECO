@@ -31,6 +31,11 @@ class ABCJsonAstBuilder:
     #
     # Internal helper function to create attributes for ABC nodes
     #
+    def _assert_single_type_list(self, l, t):
+        if any(map(lambda e: type(e) != t, l)):
+            logging.error(f"Lists of mixed types are not supported. Expected all elements to be of type {t}.")
+            exit(1)
+
     def _find_datatype(self, d):
         """
         We currently simply parse the JSON-equivalent dictionary d and then use the data type of the first literal that
@@ -67,6 +72,11 @@ class ABCJsonAstBuilder:
                     type_name = self._find_datatype(v)
                     if type_name != "void":
                         return type_name
+            elif isinstance(d, list):
+                # By convention, an ExpressionList has the type of its elements. I.e., a list of LiteralInt is of type
+                # LiteralInt too.
+                return self._find_datatype(d[0])
+
             return "void"
 
     def _make_abc_node(self, type, content):
@@ -87,6 +97,9 @@ class ABCJsonAstBuilder:
     def _make_identifier(self, identifier):
         return {"identifier": identifier}
 
+    def _make_index(self, index):
+        return {"index": index}
+
     def _make_initializer(self, initializer):
         return {"initializer": initializer}
 
@@ -101,6 +114,9 @@ class ABCJsonAstBuilder:
 
     def _make_stmts(self, stmts):
         return {"statements": stmts}
+
+    def _make_expressions(self, stmts):
+        return {"expressions": stmts}
 
     def _make_target(self, target):
         return {"target": target}
@@ -155,6 +171,16 @@ class ABCJsonAstBuilder:
 
         return self._make_abc_node("Block", self._make_stmts(stmts))
 
+    def make_expression_list(self, exprs : list) -> dict:
+        """
+        Create a dictionary corresponding to an ABC ExpressionList node when exported in JSON
+
+        :param exprs: List of JSON-equivalent dictionaries of AbstractExpressions
+        :return: JSON-equivalent dictionary for an ExpressionList node
+        """
+
+        return self._make_abc_node("ExpressionList", self._make_expressions(exprs))
+
     def make_for(self, initializer : dict, condition : dict, update : dict, body : dict) -> dict:
         """
         Create a dictionary corresponding to an ABC For node when exported in JSON
@@ -173,6 +199,19 @@ class ABCJsonAstBuilder:
         d.update(self._make_body(body))
 
         return self._make_abc_node("For", d)
+
+    def make_index_access(self, target : dict, index : dict):
+        """
+        Create a dictionary corresponding to an ABC IndexAccess node when exported in JSON
+
+        :param target: JSON-equivalent dictionary for an ABC AbstractTarget
+        :param index: JSON-equivalent dictionary for an ABC AbstractExpression
+        :return: JSON-equivalent dictionary for an ABC IndexAccess node
+        """
+
+        d = self._make_target(target)
+        d.update(self._make_index(index))
+        return self._make_abc_node("IndexAccess", d)
 
     def make_literal(self, value) -> dict:
         """
@@ -227,6 +266,20 @@ class ABCJsonAstBuilder:
         stmts.append(assignment_expr)
 
         return self.make_block(stmts)
+
+    def make_value(self, value) -> dict:
+        """
+        Helper function to either create a Literal* or an ExpressionList ABC node.
+
+        :param value: Basic python type (bool, str, int, float) or list (of such a basic type)
+        :return: JSON-equivalent dictionary for either a Literal* or an ExpressionList ABC node
+        """
+
+        if isinstance(value, list):
+            self._assert_single_type_list(value[1:], type(value[0]))
+            return self.make_expression_list(list(map(self.make_value, value)))
+        else:
+            return self.make_literal(value)
 
     def make_variable(self, identifier : str) -> dict:
         """
