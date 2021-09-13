@@ -2,6 +2,9 @@
 #define AST_OPTIMIZER_INCLUDE_AST_OPT_UTILITIES_NODEUTILS_H_
 
 #include <string>
+#include <memory>
+#include <stdexcept>
+#include <ast_opt/parser/Errors.h>
 
 enum NodeType : unsigned char {
   // AbstractStatement
@@ -27,7 +30,7 @@ std::unique_ptr<T> castUniquePtr(std::unique_ptr<S> &&source) {
   if (dynamic_cast<T *>(source.get())) {
     return std::unique_ptr<T>(dynamic_cast<T *>(source.release()));
   } else {
-    throw std::runtime_error("castUniquePtr failed: Cannot cast given unique_ptr from type "
+    throw stork::runtime_error("castUniquePtr failed: Cannot cast given unique_ptr from type "
                                  + std::string(typeid(S).name()) + " to type " + std::string(typeid(T).name()) + ".");
   }
 }

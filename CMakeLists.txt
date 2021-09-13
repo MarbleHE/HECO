@@ -10,6 +10,16 @@ if (MSVC)
     cmake_policy(SET CMP0091 NEW)
 endif ()
 
+# Set to test the python frontend. On by default.
+if(NOT PYTHON_FRONTEND_DEV)
+    set(PYTHON_FRONTEND_DEV true)
+endif()
+
+# Set to build the python frontend (installing pybind11 and building the wrapper). On by default.
+if(NOT PYTHON_FRONTEND_BUILD)
+    set(PYTHON_FRONTEND_BUILD true)
+endif()
+
 project(ast_optimizer
         VERSION 0.1
         DESCRIPTION "Optimizer for Fully Homomorphic Encryption (FHE) working on an AST-like (Abstract Syntax Tree) representation of a program"
@@ -210,6 +220,7 @@ target_include_directories(ast_opt PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>)
 set_target_properties(ast_opt PROPERTIES PUBLIC_HEADER "${PUBLIC_HEADERS}")
+set_target_properties(ast_opt PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 target_compile_features(ast_opt PUBLIC cxx_std_17)
 
 if (SEAL_FOUND)
@@ -255,8 +266,13 @@ install(EXPORT ast_optTargets
         NAMESPACE ast_opt::
         DESTINATION lib/cmake/ast_opt)
 
-find_package(Python COMPONENTS Interpreter Development)
-if(Python_VERSION_MAJOR EQUAL 3)
+# Install pyabc package (for dev)
+find_package (Python3 COMPONENTS Interpreter Development)
+
+if(NOT Python3_Interpreter_FOUND)
+    message(WARNING "The ABC python frontend requires Python 3, but no installation
+        was found. Skipping frontend building...")
+elseif(PYTHON_FRONTEND_DEV)
     # TODO: This only links the pyabc package in the cmake-build-debug folder to the python packages. For a
     # proper installation, we'd need to build a Python Wheel package.
     install(CODE "execute_process(\"python3 -m pip install -e ${PROJECT_SOURCE_DIR}/cmake-build-debug/python/\")")
@@ -291,11 +307,20 @@ endif ()
 # Use pybind11 as C++ wrapper for the Python frontend
 ####################################################################################
 
-if(NOT Python_VERSION_MAJOR EQUAL 3)
-    message(WARNING "The ABC python frontend requires Python 3, but no installation
-        was found. Skipping frontend building...")
-else()
-    add_subdirectory(extern/pybind11)
+if(PYTHON_FRONTEND_BUILD)
+    include(FetchContent)
+    set(JSON_BuildTests OFF CACHE INTERNAL "")
+    set(FETCHCONTENT_UPDATES_DISCONNECTED ON)
+    FetchContent_Declare(
+            pybind11
+            GIT_REPOSITORY https://github.com/pybind/pybind11.git
+            GIT_TAG v2.7.1)
+
+    FetchContent_GetProperties(pybind11)
+    if(NOT pybind11_POPULATED)
+        FetchContent_Populate(pybind11)
+        add_subdirectory(${pybind11_SOURCE_DIR} ${pybind11_BINARY_DIR})
+    endif()
     add_subdirectory(python)
 endif()
 

@@ -98,8 +98,7 @@ add_dependencies(testing-all ast_opt)
 ##############################
 # TARGET: testing-python
 ##############################
-find_package(Python3 COMPONENTS Interpreter)
-if(Python3_Interpreter_FOUND)
+if(PYTHON_FRONTEND_DEV)
     # Install pytest
     execute_process(COMMAND ${Python3_EXECUTABLE} -m pip install --user pytest)
 
