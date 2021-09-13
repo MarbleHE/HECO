@@ -107,7 +107,7 @@ The implementation is heavily based on the pseudo-codes provided in the paper, e
 
 Before starting, make sure to clone this repository using: 
 ```
-git clone https://github.com/pjattke/msc-thesis-code-AST.git
+git clone https://github.com/MarbleHE/ABC.git
 ```
 
 The following tools are required to get this project running:
@@ -119,6 +119,8 @@ The following tools are required to get this project running:
     - tested with v1.8.16
 
 The easiest way to use this library is to import the project into [CLion](https://www.jetbrains.com/clion/) which automatically loads the containing cmake build files and adds the respective targets. Development was carried out on macO (10.15.2), although the project should be running on Windows or Linux machines too.
+
+More detailed installation notes, including some for Debian/Ubuntu and Fedora are in [INSTALL.md](INSTALL.md).
 
 The entire framework is built around ASTs,
 the nodes of which are implemented by a class hierarchy that derives from AbstractNode (see above).
