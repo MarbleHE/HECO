@@ -247,12 +247,12 @@ class ABCVisitor(NodeVisitor):
         update = self.builder.make_update(target, self.builder.constants.ADD, step_val)
 
         # If start > stop, the condition is target > stop. Otherwise, it is target < stop.
-        start_lt_stop = self.builder.make_binary_expression(start_val, self.builder.constants.LTE, stop_val)
+        start_lte_stop = self.builder.make_binary_expression(start_val, self.builder.constants.LTE, stop_val)
         start_gt_stop = self.builder.make_binary_expression(start_val, self.builder.constants.GT, stop_val)
         target_lt_stop = self.builder.make_binary_expression(target, self.builder.constants.LT, stop_val)
         target_gt_stop = self.builder.make_binary_expression(target, self.builder.constants.GT, stop_val)
 
-        condition_case_1 = self.builder.make_binary_expression(start_lt_stop, self.builder.constants.AND, target_lt_stop)
+        condition_case_1 = self.builder.make_binary_expression(start_lte_stop, self.builder.constants.AND, target_lt_stop)
         condition_case_2 = self.builder.make_binary_expression(start_gt_stop, self.builder.constants.AND, target_gt_stop)
         condition = self.builder.make_binary_expression(condition_case_1, self.builder.constants.OR, condition_case_2)
 
