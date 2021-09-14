@@ -7,12 +7,14 @@
 #include "ast_opt/runtime/Cleartext.h"
 
 namespace py = pybind11;
+using json = nlohmann::json;
 
 /// Class storing a program and intermediate state. E.g., it stores a pre-compiled program AST to avoid
 /// having to pass a unique pointer to Python.
 class ABCProgramWrapper {
  private:
   std::unique_ptr<AbstractNode> programAst;
+  json programArgs;
 
   /// Helper function to extract literal (array) and push it to the results vector
   template<class T>
@@ -28,8 +30,11 @@ class ABCProgramWrapper {
  public:
   /// Create a program and pre-process the given JSON to a proper ABC AST.
   /// \param program JSON version of ABC AST
-  explicit ABCProgramWrapper(const std::string program) {
+  explicit ABCProgramWrapper(const std::string program, const std::string args) {
     programAst = Parser::parseJson(program);
+    // TODO: where can we mark arguments as secret? The args argument has a boolen for those that should be secret, but do
+    //    we have to already mark them while/before parsing the AST or only when executing?
+    programArgs = json::parse(args);
   }
 
   /// Execute the compiled program on the given inputs and outputs
@@ -72,7 +77,13 @@ PYBIND11_MODULE(_abc_wrapper, m) {
   m.doc() = "Wrapper to export ABC's functionality to read and execute an AST from a JSON file.";
 
   py::class_<ABCProgramWrapper>(m, "ABCProgramWrapper")
-      .def(py::init<const std::string>(), "Create a program and pre-process the given JSON to a proper ABC AST.")
-      .def("execute", &ABCProgramWrapper::execute, "Execute the compiled program on the given inputs and outputs")
-      .def("to_cpp_string", &ABCProgramWrapper::to_cpp_string, "Convert the ABC AST to CPP pseudo-code");
+      .def(py::init<const std::string, const std::string>(),
+          "Create a program and pre-process the given JSON version of an ABC AST to the CPP version of it."\
+          "The second argument is a JSON dump of the arguments and their secret tainting: "\
+          "var_name = {\"opt\": Bool, \"value\": value, \"secret\": Bool}"\
+          "See _args_to_dict in ABCVisitor.")
+      .def("execute", &ABCProgramWrapper::execute,
+           "Execute the compiled program on the given inputs and outputs")
+      .def("to_cpp_string", &ABCProgramWrapper::to_cpp_string,
+           "Convert the ABC AST to CPP pseudo-code");
 }
