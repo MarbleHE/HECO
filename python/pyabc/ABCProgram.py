@@ -1,6 +1,7 @@
 
 import logging
 import json
+
 from ._abc_wrapper import *
 from .ABCJsonAstBuilder import ABCJsonAstBuilder
 
@@ -58,7 +59,7 @@ class ABCProgram:
         :return: void, the compiled main function is stored internally in self.cpp_program.
         """
         if self.main_fn:
-            self.cpp_program = ABCProgramWrapper(json.dumps(self.main_fn))
+            self.cpp_program = ABCProgramWrapper(json.dumps(self.main_fn), json.dumps(self.main_args))
         else:
             logging.error("Set main function first, before trying to compile!")
             exit(1)

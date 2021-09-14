@@ -5,6 +5,7 @@ import json
 from ast import *
 
 from .ABCJsonAstBuilder import ABCJsonAstBuilder
+from .ABCTypes import is_secret
 
 UNSUPPORTED_FUNCTION            = "Functions other than 'main' are not supported (violating function: '%s')."
 UNSUPPORTED_ONLY_ARGS           = "Positional-only and keyword-only arguments are not supported."
@@ -37,6 +38,12 @@ class ABCVisitor(NodeVisitor):
     #
     # Helper functions
     #
+    def _get_annotation(self, arg):
+        if hasattr(arg, "annotation"):
+            return arg.annotation
+        else:
+            return None
+
     def _tpl_stmt_to_list(self, t):
         """
         Convert a LHS or RHS, which may be a tuple of multiple values, to a list.
@@ -75,18 +82,19 @@ class ABCVisitor(NodeVisitor):
         """
         Covert a Python function argument AST node to a dictionary of the following form:
             {
-                var_name = {"opt": Bool, "value": value},
+                var_name = {"opt": Bool, "value": value, "secret": Bool},
                 ...
             }
-        where the item "opt" signals if the variable is optional and the second one stores
+        where the item "opt" signals if the variable is optional and the second entry "value" stores
         the default value for optional variables (and later the real value for non-optional ones).
+        "secret" stores the type hint information and is used to mark secret values.
 
         :param args: Python argument AST node
         :return: variable dictionary
         """
 
-        def _make_arg_dict(opt=False, val=None):
-            return {"opt": opt, "value": val}
+        def _make_arg_dict(secret, opt=False, val=None):
+            return {"opt": opt, "value": val, "secret": secret}
 
         # Don't support positional only / kw only arguments
         if len(args.kwonlyargs) + len(args.posonlyargs) > 0:
@@ -98,11 +106,14 @@ class ABCVisitor(NodeVisitor):
 
         # Add arguments without default value
         for i in range(off):
-            d[args.args[i].arg] = _make_arg_dict()
+            arg = args.args[i]
+            annotation = self._get_annotation(arg)
+            d[arg.arg] = _make_arg_dict(is_secret(annotation))
 
         # Add arguments with default value
         for i, default in enumerate(args.defaults):
-            d[args.args[i + off].arg] = _make_arg_dict(True, default.value)
+            # Arguments with a default can never be secret.
+            d[args.args[i + off].arg] = _make_arg_dict(False, True, default.value)
 
         return d
 
@@ -280,7 +291,7 @@ class ABCVisitor(NodeVisitor):
             stmts = list(map(self.visit, node.body))
             body = self.builder.make_block(stmts)
 
-            # Parse the return statement separately. We do support multiple variables of the same type,
+            # Parse the return statement separately. We do support parsing multiple variables of the same type,
             # but we don't support expressions.
             ret_vals = last_stmt.value.elts if isinstance(last_stmt.value, Tuple) else [last_stmt.value]
             ret_vars = dict()
