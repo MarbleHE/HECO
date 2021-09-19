@@ -268,8 +268,15 @@ target_link_libraries(ast_demo PRIVATE ast_opt)
 #
 # only if this is the root project
 ####################################################################################
-if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
-    message("Enabling ast_opt Tests")
-    enable_testing()
-    add_subdirectory(test EXCLUDE_FROM_ALL)
+#if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+#    message("Enabling ast_opt Tests")
+#    enable_testing()
+#    add_subdirectory(test EXCLUDE_FROM_ALL)
+#endif ()
+
+##############################
+# WIP: MLIR Integration
+##############################
+if(MLIR_DIR)
+add_subdirectory(mlir)
 endif ()
