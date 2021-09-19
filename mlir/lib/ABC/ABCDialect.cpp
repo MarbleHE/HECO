@@ -1,4 +1,4 @@
-//===- StandaloneDialect.cpp - Standalone dialect ---------------*- C++ -*-===//
+//===- ABCDialect.cpp - ABC dialect ---------------*- C++ -*-===//
 //
 // This file is licensed under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -6,21 +6,21 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "Standalone/StandaloneDialect.h"
-#include "Standalone/StandaloneOps.h"
+#include "ABC/ABCDialect.h"
+#include "ABC/ABCOps.h"
 
 using namespace mlir;
-using namespace mlir::standalone;
+using namespace mlir::abc;
 
-#include "Standalone/StandaloneOpsDialect.cpp.inc"
+#include "ABC/ABCOpsDialect.cpp.inc"
 
 //===----------------------------------------------------------------------===//
-// Standalone dialect.
+// ABC dialect.
 //===----------------------------------------------------------------------===//
 
-void StandaloneDialect::initialize() {
+void ABCDialect::initialize() {
   addOperations<
 #define GET_OP_LIST
-#include "Standalone/StandaloneOps.cpp.inc"
+#include "ABC/ABCOps.cpp.inc"
       >();
 }
