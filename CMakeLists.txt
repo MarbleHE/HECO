@@ -322,15 +322,14 @@ if(PYTHON_FRONTEND_BUILD)
     set(JSON_BuildTests OFF CACHE INTERNAL "")
     set(FETCHCONTENT_UPDATES_DISCONNECTED ON)
     FetchContent_Declare(
-            pybind11
-            GIT_REPOSITORY https://github.com/pybind/pybind11.git
-            GIT_TAG v2.7.1)
+    pybind11
+    GIT_REPOSITORY https://github.com/pybind/pybind11.git
+    GIT_TAG v2.7.1)
 
     FetchContent_GetProperties(pybind11)
-    if(NOT pybind11_POPULATED)
-        FetchContent_Populate(pybind11)
-        add_subdirectory(${pybind11_SOURCE_DIR} ${pybind11_BINARY_DIR})
-    endif()
+if(NOT pybind11_POPULATED)
+    FetchContent_Populate(pybind11)
+    add_subdirectory(${pybind11_SOURCE_DIR} ${pybind11_BINARY_DIR})
+endif()
     add_subdirectory(python)
 endif()
-
