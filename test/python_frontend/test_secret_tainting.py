@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-Testing simple arithmetic FHE operations using the Python Frontend.
+Testing type annotations. (Currently only that the syntax compiles)
 """
 
 from pyabc import *

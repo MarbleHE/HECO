@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-Testing simple arithmetic FHE operations using the Python Frontend.
+Testing the computation of the Hamming distance of two vectors using the Python Frontend for the ABC compiler.
 """
 
 from pyabc import ABCContext, ABCProgram
@@ -9,9 +9,6 @@ from pyabc import ABCContext, ABCProgram
 import logging
 import random
 import pytest
-
-# TODO: inline function in AST -> parse function, create JSON for it, use it in ABCContext
-# TODO: is it possible to take functions from other modules?
 
 def test_hamming_distance():
     p = ABCProgram(logging.DEBUG)

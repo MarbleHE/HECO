@@ -9,9 +9,6 @@ from pyabc import ABCContext, ABCProgram
 import logging
 import pytest
 
-# TODO: inline function in AST -> parse function, create JSON for it, use it in ABCContext
-# TODO: is it possible to take functions from other modules?
-
 def test_simple_arithmetic():
     p = ABCProgram(logging.DEBUG)
 
