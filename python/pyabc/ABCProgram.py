@@ -1,6 +1,10 @@
 
 import logging
 import json
+import os
+
+from inspect import getsource, getmodule
+from ast import parse
 
 from ._abc_wrapper import *
 from .ABCJsonAstBuilder import ABCJsonAstBuilder
@@ -131,6 +135,21 @@ class ABCProgram:
         res_vec += self.ret_constants[res_val_idx:]
 
         return res_vec[0] if len(res_vec) == 1 else tuple(res_vec)
+
+    def set_src(self, parent_frame):
+        """
+        Stores the source information. The context source stores the code of the last ABCContext call, the src code
+        stores the source code of the entire file from which the ABCContext was called from.
+        """
+
+        self.src_module = getmodule(parent_frame)
+        self.src_context = getsource(parent_frame)
+        self.src_context_ast = parse(self.src_context)
+
+        self.src_file_path = os.path.realpath(self.src_module.__file__)
+        with open(self.src_file_path, "r") as src_fp:
+            self.src_code = src_fp.read()
+        self.src_code_ast = parse(self.src_code)
 
     def to_cpp_string(self):
         if not self.cpp_program:
