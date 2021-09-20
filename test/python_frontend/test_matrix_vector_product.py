@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-Testing simple arithmetic FHE operations using the Python Frontend.
+Testing a matrix vector product using FHE operations over the Python Frontend.
 """
 
 from pyabc import ABCContext, ABCProgram
