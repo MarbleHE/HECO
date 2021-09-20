@@ -13,6 +13,8 @@ UNSUPPORTED_STATEMENT           = "Unsupported statement: '%s' is not supported.
 UNSUPPORTED_SYNTAX_ERROR        = "Unsupported syntax: %s."
 INVALID_PYTHON_SYNTAX           = "Invalid python syntax: %s."
 UNSUPPORTED_MULTI_VALUE_RETURN  = "Return statements with multiple values are not supported (violating line '%s')"
+NO_FLOOR_DIV                    = "There is no type casting, division of integers will always be integer division. "\
+                                  "Thus '/' and '//' are equivalent in ABC frontend code."
 
 MAIN_SYMBOL = "main"
 
@@ -316,12 +318,16 @@ class ABCVisitor(NodeVisitor):
     def visit_GtE(self, node: GtE) -> dict:
         return self.builder.constants.GTE
 
+    def visit_FloorDiv(self, node: FloorDiv) -> dict:
+        logging.warning(NO_FLOOR_DIV);
+        return self.builder.constants.DIV
+
     def visit_List(self, node: List) -> dict:
         """
         Visit a Python list and convert it to an AST ExpressionList.
         """
         # TODO: at the moment, python lists are translated to ABC ExpressionLists. We potentially need to give up some
-        # list features if we keep it like this (list comprehension, list concatenation).
+        #   list features if we keep it like this (list comprehension, list concatenation).
 
         exprs = list(map(self.visit, node.elts))
         return self.builder.make_expression_list(exprs)
@@ -487,10 +493,6 @@ class ABCVisitor(NodeVisitor):
         exit(1)
 
     def visit_ExtSlice(self, node: ExtSlice) -> dict:
-        logging.error(UNSUPPORTED_STATEMENT, type(node))
-        exit(1)
-
-    def visit_FloorDiv(self, node: FloorDiv) -> dict:
         logging.error(UNSUPPORTED_STATEMENT, type(node))
         exit(1)
 
