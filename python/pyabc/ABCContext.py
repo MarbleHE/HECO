@@ -25,6 +25,10 @@ class ABCContext():
         src = getsource(parent_frame)
         python_ast = parse(src)
 
+        # Store src code and AST in program. The src file path is used to get the entire src code from the calling file
+        # (and not only the functions that are on the call stack to this function call).
+        self.prog.set_src(parent_frame)
+
         # Find the current 'with' block in the source code
         for item in walk(python_ast):
             if isinstance(item, With) and item.lineno == parent_frame.f_lineno - parent_frame.f_code.co_firstlineno + 1:

@@ -119,4 +119,8 @@ if(PYTHON_FRONTEND_DEV)
     add_test(NAME PythonSecretTainting
             COMMAND ${PYTEST_CMD} ${PROJECT_SOURCE_DIR}/test/python_frontend/test_secret_tainting.py
             WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/cmake-build-debug/python)
+
+    add_test(NAME PythonExternalFn
+            COMMAND ${PYTEST_CMD} ${PROJECT_SOURCE_DIR}/test/python_frontend/test_external_fn.py
+            WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/cmake-build-debug/python)
 endif()

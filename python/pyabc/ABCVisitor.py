@@ -4,17 +4,22 @@ import json
 
 from ast import *
 
+from .ABCGenericExpr import ABCGenericExpr
 from .ABCJsonAstBuilder import ABCJsonAstBuilder
 from .ABCTypes import is_secret
+from .FunctionVisitor import FunctionVisitor
 
-UNSUPPORTED_FUNCTION            = "Functions other than 'main' are not supported (violating function: '%s')."
-UNSUPPORTED_ONLY_ARGS           = "Positional-only and keyword-only arguments are not supported."
-UNSUPPORTED_STATEMENT           = "Unsupported statement: '%s' is not supported."
-UNSUPPORTED_SYNTAX_ERROR        = "Unsupported syntax: %s."
-INVALID_PYTHON_SYNTAX           = "Invalid python syntax: %s."
-UNSUPPORTED_MULTI_VALUE_RETURN  = "Return statements with multiple values are not supported (violating line '%s')"
-NO_FLOOR_DIV                    = "There is no type casting, division of integers will always be integer division. "\
-                                  "Thus '/' and '//' are equivalent in ABC frontend code."
+UNSUPPORTED_FUNCTION                = "Functions other than 'main' are not supported (violating function: '%s')."
+UNSUPPORTED_ONLY_ARGS               = "Positional-only and keyword-only arguments are not supported."
+UNSUPPORTED_STATEMENT               = "Unsupported statement: '%s' is not supported."
+UNSUPPORTED_SYNTAX_ERROR            = "Unsupported syntax: %s."
+INVALID_PYTHON_SYNTAX               = "Invalid python syntax: %s."
+UNSUPPORTED_MULTI_VALUE_RETURN      = "Return statements with multiple values are not supported (violating line '%s')"
+NO_FLOOR_DIV                        = "There is no type casting, division of integers will always be integer division. "\
+                                      "Thus '/' and '//' are equivalent in ABC frontend code."
+UNSUPPORTED_LOCAL_FUNCTION_CALL     = "Function calls in the same context object are not yet implemented."
+UNSUPPORTED_GLOBAL_FUNCTION_CALL    = "Global functions calls are not yet implemented."
+BLACKBOX_FUNCTION_CALL              = "Did not find source code of function call, treat it as blackbox."
 
 MAIN_SYMBOL = "main"
 
@@ -202,6 +207,46 @@ class ABCVisitor(NodeVisitor):
             self.visit(node.op),
             self.visit(node.right)
         )
+
+    def visit_Call(self, node: Call) -> dict:
+        """
+        Handle function calls, depending on where the function is located:
+        - Internal functions (inside the same ABCContext) are not yet supported. In the future, they will be translated
+            to AST function calls.
+        - For external function calls we try to extract the expression created by them by running them at compile time
+            on generic FHE objects that track the operations performed on them.
+        """
+
+        # TODO: list limitations
+
+        # Check if the function is defined in the same context
+        fn_ast = FunctionVisitor(node.func.id).visit(self.prog.src_context_ast)
+        if fn_ast:
+            logging.error(UNSUPPORTED_LOCAL_FUNCTION_CALL)
+            exit(1)
+            # TODO: return here when this is implemented
+
+        # Check if the function is defined globally in the same file
+        fn_ast = FunctionVisitor(node.func.id).visit(self.prog.src_code_ast)
+        if fn_ast:
+            logging.error(UNSUPPORTED_GLOBAL_FUNCTION_CALL)
+            exit(1)
+            # TODO: return here when this is implemented
+
+        # Otherwise, treat this function as a blackbox call. We execute the function on generic ABC values and record
+        # the operations performed on those values to build an expression, with which we replace the function call.
+        logging.warning(BLACKBOX_FUNCTION_CALL)
+
+        # Create generic variables for all arguments. Turn normal arguments into AST variable nodes and recursively
+        # evaluate the value of keyword arguments.
+        args = [ABCGenericExpr(self.visit(arg)) for arg in node.args]
+        kwargs = { keyword.arg: ABCGenericExpr(self.visit(keyword.value)) for keyword in node.keywords }
+
+        # Get the blackbox function from the parent module and execute it on our tracing inputs.
+        external_fn_ret = getattr(self.prog.src_module, node.func.id)(*args, **kwargs)
+
+        # Return the AST expression gathered by the generic response object
+        return external_fn_ret.expr
 
     def visit_Constant(self, node: Constant):
         """
@@ -441,10 +486,6 @@ class ABCVisitor(NodeVisitor):
         exit(1)
 
     def visit_Bytes(self, node: Bytes) -> dict:
-        logging.error(UNSUPPORTED_STATEMENT, type(node))
-        exit(1)
-
-    def visit_Call(self, node: Call) -> dict:
         logging.error(UNSUPPORTED_STATEMENT, type(node))
         exit(1)
 
