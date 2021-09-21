@@ -31,11 +31,11 @@ OutputIdentifierValuePairs Compiler::compileAst(std::unique_ptr<AbstractNode> pr
                               variable_declaration->getDatatype());
       }
       else {
-        stork::runtime_error("Invalid input block: all statements must contain a variable name on the LHS.");
+        throw stork::runtime_error("Invalid input block: all statements must contain a variable name on the LHS.");
       }
     }
     else {
-      stork::runtime_error("Invalid input block: must only consists of variable declarations.");
+      throw stork::runtime_error("Invalid input block: must only consists of variable declarations.");
     }
   }
 
@@ -43,10 +43,11 @@ OutputIdentifierValuePairs Compiler::compileAst(std::unique_ptr<AbstractNode> pr
   programAst->accept(*tcv);
 
   // run the program and get its output
-  //TODO: Change it so that by passing in an empty secretTaintingMap, we can get the RuntimeVisitor to execute everything "in the clear"!
-  auto empty = std::unordered_map<std::string, bool>();
-  RuntimeVisitor srv(*scf, *inputBlock, empty);
+  auto secretTaintedNodesMap = tcv->getSecretTaintedNodes();
+  // create a SpecialRuntimeVisitor instance
+  RuntimeVisitor srv(*scf, *inputBlock, secretTaintedNodesMap);
   srv.executeAst(*programAst);
+
   return srv.getOutput(*outputAst);
 }
 

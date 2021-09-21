@@ -23,7 +23,21 @@ Type stringToTypeEnum(const std::string s) {
   throw stork::runtime_error("No value type Type found for '" + s + "'!");
 }
 
+const std::string Datatype::secretPrefix = "secret ";
+
 Datatype::Datatype(Type type, bool isSecret) : type(type), isSecret(isSecret) {}
+
+Datatype::Datatype(std::string typeString) {
+  if (typeString.rfind(secretPrefix, 0) == 0) {
+    // remove secret prefix
+    this->type = stringToTypeEnum(typeString.substr(secretPrefix.size(), typeString.size() - secretPrefix.size()));
+    this->isSecret = true;
+  }
+  else {
+    this->type = stringToTypeEnum(typeString);
+    this->isSecret = false;
+  }
+}
 
 bool Datatype::operator==(const Datatype &rhs) const {
   return type==rhs.type && isSecret==rhs.isSecret;
@@ -42,5 +56,5 @@ bool Datatype::getSecretFlag() const {
 }
 
 std::string Datatype::toString() const {
-  return isSecret ? "secret " + enumToString(type) : enumToString(type);
+  return isSecret ? secretPrefix + enumToString(type) : enumToString(type);
 }

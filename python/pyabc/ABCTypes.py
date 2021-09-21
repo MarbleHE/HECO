@@ -35,13 +35,24 @@ NonSecretBoolVector     = NewType("NonSecretBoolVector", bool)
 NonSecretStringVector   = NewType("NonSecretStringVector", str)
 NonSecretCharVector     = NewType("NonSecretCharVector", str)
 
-def is_secret(type):
+def is_secret(val_type):
     """
     Return true when a type is secret. All unknown values default to being secret.
 
-    :param type: either a Secret* or NonSecret* type. Any other types default to being secret too.
-    :return: false if it is a NonSecret* type, true otherwise
+    :param val_type: either a Secret* or NonSecret* type as type or String representation of the type.
+                 Any other types default to being secret too.
+    :return: false if it is a NonSecret* type (as type or string), true otherwise
     """
 
-    return type not in [NonSecret, NonSecretInt, NonSecretFloat, NonSecretDouble, NonSecretBool, NonSecretString, NonSecretChar, NonSecretIntVector,
-        NonSecretFloatVector, NonSecretDoubleVector, NonSecretBoolVector, NonSecretStringVector, NonSecretCharVector]
+    non_secret_types = [NonSecret, NonSecretInt, NonSecretFloat, NonSecretDouble, NonSecretBool, NonSecretString, NonSecretChar, NonSecretIntVector,
+                        NonSecretFloatVector, NonSecretDoubleVector, NonSecretBoolVector, NonSecretStringVector, NonSecretCharVector]
+
+    # Case 1: type is given as string, check if it corresponds to the string version of a non_secret type
+    if isinstance(val_type, str):
+        return val_type not in map(lambda x: x.__name__, non_secret_types)
+    # Case 2: type is given as TypeVar or NewType, compare it directly to our non-secret types
+    elif isinstance(val_type, TypeVar) or isinstance(val_type, NewType):
+        return val_type not in non_secret_types
+    # Case 3: any other type just defaults to being secret
+    else:
+        return True
