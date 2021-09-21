@@ -63,6 +63,34 @@ git clone git@github.com:MarbleHE/ABC.git
 
 The project is developed with CLion. Open it there and let the CMakefiles install all dependencies.
 
+#### Manually
+Run the following commands to build:
+```
+cmake -S . -B build
+cmake --build build
+```
+
+Install it:
+```
+sudo cmake --install build 
+```
+
+## Install pyabc Python Frontend
+
+If you want to use the python frontend, you can install our package `pyabc`.
+
+### Over CMake
+The package installation is integrated in the CMakefile. You can run `make install` in `cmake-build-debug` and it will install `pyabc`.
+
+### Manual Installation
+To install `pyabc`, first build the CMake project. Next, run the following command (in this repo's root folder):
+```
+python3 -m pip install --user cmake-build-debug/python
+```
+(assuming your build folder is `cmake-build-debug`)
+
+For a developer installation, add the `-e` option to create a symlink to the freshly built files in `cmake-build-debug/python` instead of copying them.
+
 ## Check implementation
 
 1. Check that the CMake project runs through without any fatal error 
