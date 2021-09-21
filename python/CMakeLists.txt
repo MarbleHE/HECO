@@ -11,3 +11,5 @@ add_custom_command(TARGET python
     ${CMAKE_CURRENT_SOURCE_DIR}/pyabc
     ${CMAKE_CURRENT_BINARY_DIR}/pyabc
 )
+
+install(CODE "execute_process(COMMAND ${Python3_EXECUTABLE} -m pip install ${CMAKE_BINARY_DIR}/python)")

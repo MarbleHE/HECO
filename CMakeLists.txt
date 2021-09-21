@@ -272,10 +272,6 @@ find_package (Python3 COMPONENTS Interpreter Development)
 if(NOT Python3_Interpreter_FOUND)
     message(WARNING "The ABC python frontend requires Python 3, but no installation
         was found. Skipping frontend building...")
-elseif(PYTHON_FRONTEND_DEV)
-    # TODO: This only links the pyabc package in the cmake-build-debug folder to the python packages. For a
-    # proper installation, we'd need to build a Python Wheel package.
-    install(CODE "execute_process(\"python3 -m pip install -e ${PROJECT_SOURCE_DIR}/cmake-build-debug/python/\")")
 endif()
 
 ##############################

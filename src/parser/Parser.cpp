@@ -132,7 +132,8 @@ std::unique_ptr<AbstractExpression> Parser::parseJsonExpression(json j) {
         return Parser::parseJsonTarget(j);
       }
       catch (stork::runtime_error &e) {
-        // If it's not an abstract target, then it's not an abstract expression, as we checked all other expressions before.
+        // If it's not an abstract target, then it's not an abstract expression,
+        // as we checked all other expressions before.
         throw stork::runtime_error("Unsupported type: '" + type + "' is not an AbstractExpression.");
       }
   }
