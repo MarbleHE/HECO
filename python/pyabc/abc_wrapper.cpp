@@ -3,6 +3,7 @@
 #include <ast_opt/parser/Parser.h>
 #include <ast_opt/parser/Errors.h>
 #include <ast_opt/visitor/ProgramPrintVisitor.h>
+#include <ast_opt/runtime/DummyCiphertext.h>
 #include "ast_opt/compiler/Compiler.h"
 #include "ast_opt/runtime/Cleartext.h"
 
@@ -27,6 +28,24 @@ class ABCProgramWrapper {
       result_vec.push_back(cleartextData);
     }
   }
+
+  static void extract_ciphertext_result_vec(AbstractValue *resultCiphertext,
+                                            std::vector<py::object> &result_vec, bool &success) {
+
+    if (auto ciphertext = dynamic_cast<AbstractCiphertext *>(resultCiphertext)) {
+      // TODO: we only support dummy ciphertext values. Currently, we cannot pass encrypted data to Python.
+      //  do key management and/or export the ciphertext to Python.
+      auto scf = std::make_unique<DummyCiphertextFactory>();
+
+      // TODO: there's only support for int64_t values in the dummy ciphertext factory
+      std::vector<int64_t> result;
+      scf->decryptCiphertext(*ciphertext, result);
+
+      result_vec.push_back(py::cast(result));
+      success = true;
+    }
+  }
+
  public:
   /// Create a program and pre-process the given JSON to a proper ABC AST.
   /// \param program JSON version of ABC AST
@@ -45,21 +64,25 @@ class ABCProgramWrapper {
     // Cloning the programAst is necessary to be able to execute the same program multiple times (which uses the same
     // program AST)
     auto result = Compiler::compileJson(programAst->clone(), inputs, outputIdentifiers);
-
     std::vector<py::object> result_vec;
 
     for (const auto &[identifier, cipherClearText] : result) {
       bool success = false;
-      extract_literal_result_vec<bool>(cipherClearText.get(), result_vec, success);
-      extract_literal_result_vec<int>(cipherClearText.get(), result_vec, success);
-      extract_literal_result_vec<float>(cipherClearText.get(), result_vec, success);
-      extract_literal_result_vec<double>(cipherClearText.get(), result_vec, success);
-      extract_literal_result_vec<char>(cipherClearText.get(), result_vec, success);
-      extract_literal_result_vec<std::string>(cipherClearText.get(), result_vec, success);
+      auto ciphertextValue = cipherClearText.get();
+
+      // Plaintext values
+      extract_literal_result_vec<bool>(ciphertextValue, result_vec, success);
+      extract_literal_result_vec<int>(ciphertextValue, result_vec, success);
+      extract_literal_result_vec<float>(ciphertextValue, result_vec, success);
+      extract_literal_result_vec<double>(ciphertextValue, result_vec, success);
+      extract_literal_result_vec<char>(ciphertextValue, result_vec, success);
+      extract_literal_result_vec<std::string>(ciphertextValue, result_vec, success);
+
+      // Ciphertext value
+      extract_ciphertext_result_vec(ciphertextValue, result_vec, success);
 
       if (!success)
-        stork::runtime_error("Currently, only the dummy ciphertext factory and cleartext results are implemented!");
-
+        throw stork::runtime_error("Currently, only the dummy ciphertext factory and cleartext results are implemented!");
     }
     return py::cast(result_vec);
   }

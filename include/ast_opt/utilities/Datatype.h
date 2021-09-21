@@ -26,12 +26,19 @@ class Datatype {
   /// If this is a secret/encrypted version
   bool isSecret;
 
+  /// Prefix to mark secret types
+  static const std::string secretPrefix;
+
  public:
 
   /// Create a Datatype with underlying type and secret-ness
   /// \param type Underlying type
   /// \param isSecret (optional) is this a secret/encrypted type?
   explicit Datatype(Type type, bool isSecret = false);
+
+  /// Create a Datatype with underlying type and secret-ness from a string (as stored in JSON)
+  /// \param typeString Type as string with the prefix "secret" for secret values
+  explicit Datatype(std::string typeString);
 
   /// Two types are equal iff they have the same underlying type and isSecret flag
   /// \param rhs Type to compare against

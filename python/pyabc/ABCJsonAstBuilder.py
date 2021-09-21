@@ -28,6 +28,8 @@ class ABCJsonAstBuilder:
         MOD = "%"
         MUL = "*"
 
+        SECRET_PREFIX = "secret "
+
     #
     # Internal helper function to create attributes for ABC nodes
     #
@@ -90,8 +92,13 @@ class ABCJsonAstBuilder:
     def _make_condition(self, condition):
         return {"condition": condition}
 
-    def _make_datatype(self, val):
+    def _make_datatype(self, val, is_secret : bool):
         type_name = self._find_datatype(val)
+
+        # Secret types just have a prefix in the type string in JSON
+        if is_secret:
+            type_name = self.constants.SECRET_PREFIX + type_name
+
         return {"datatype": type_name}
 
     def _make_identifier(self, identifier):
@@ -291,17 +298,18 @@ class ABCJsonAstBuilder:
 
         return self._make_abc_node("Variable", self._make_identifier(identifier))
 
-    def make_variable_declaration(self, target : dict, value : dict) -> dict:
+    def make_variable_declaration(self, target : dict, value : dict, is_secret : bool = False) -> dict:
         """
         Create a dictionary corresponding to an ABC variable declaration when exported in JSON
 
         :param target: variable (as dict), to which the value is assigned
         :param value: value (as dict) of ABC node to assign to target
+        :param is_secret: Boolean set to true if the given value is secret (default: False)
         :return: JSON-equivalent dictionary for an ABC assignment
         """
 
         d = self._make_target(target)
         d.update(self._make_value(value))
-        d.update(self._make_datatype(value))
+        d.update(self._make_datatype(value, is_secret))
 
         return self._make_abc_node("VariableDeclaration", d)

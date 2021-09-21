@@ -145,7 +145,8 @@ nlohmann::json VariableDeclaration::toJson() const {
 }
 
 std::unique_ptr<VariableDeclaration> VariableDeclaration::fromJson(nlohmann::json j) {
-  VariableDeclaration value(Datatype(stringToTypeEnum(j["datatype"])),
+
+  VariableDeclaration value(Datatype(j["datatype"].get<std::string>()),
                             Variable::fromJson(j["target"]),
                             Parser::parseJsonExpression(j["value"]));
 
