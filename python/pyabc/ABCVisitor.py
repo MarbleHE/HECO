@@ -1,4 +1,3 @@
-
 import logging
 import json
 
@@ -9,19 +8,21 @@ from .ABCJsonAstBuilder import ABCJsonAstBuilder
 from .ABCTypes import is_secret
 from .FunctionVisitor import FunctionVisitor
 
-UNSUPPORTED_FUNCTION                = "Functions other than 'main' are not supported (violating function: '%s')."
-UNSUPPORTED_ONLY_ARGS               = "Positional-only and keyword-only arguments are not supported."
-UNSUPPORTED_STATEMENT               = "Unsupported statement: '%s' is not supported."
-UNSUPPORTED_SYNTAX_ERROR            = "Unsupported syntax: %s."
-INVALID_PYTHON_SYNTAX               = "Invalid python syntax: %s."
-UNSUPPORTED_MULTI_VALUE_RETURN      = "Return statements with multiple values are not supported (violating line '%s')"
-NO_FLOOR_DIV                        = "There is no type casting, division of integers will always be integer division. "\
-                                      "Thus '/' and '//' are equivalent in ABC frontend code."
-UNSUPPORTED_LOCAL_FUNCTION_CALL     = "Function calls in the same context object are not yet implemented."
-UNSUPPORTED_GLOBAL_FUNCTION_CALL    = "Global functions calls are not yet implemented."
-BLACKBOX_FUNCTION_CALL              = "Did not find source code of function call, treat it as blackbox."
+UNSUPPORTED_ATTRIBUTE_RESOLUTION = "Attribute resolution is not supported."
+UNSUPPORTED_FUNCTION = "Functions other than 'main' are not supported (violating function: '%s')."
+UNSUPPORTED_ONLY_ARGS = "Positional-only and keyword-only arguments are not supported."
+UNSUPPORTED_STATEMENT = "Unsupported statement: '%s' is not supported."
+UNSUPPORTED_SYNTAX_ERROR = "Unsupported syntax: %s."
+INVALID_PYTHON_SYNTAX = "Invalid python syntax: %s."
+UNSUPPORTED_MULTI_VALUE_RETURN = "Return statements with multiple values are not supported (violating line '%s')"
+NO_FLOOR_DIV = "There is no type casting, division of integers will always be integer division. " \
+               "Thus '/' and '//' are equivalent in ABC frontend code."
+UNSUPPORTED_LOCAL_FUNCTION_CALL = "Function calls in the same context object are not yet implemented."
+UNSUPPORTED_GLOBAL_FUNCTION_CALL = "Global functions calls are not yet implemented."
+BLACKBOX_FUNCTION_CALL = "Did not find source code of function call, treat it as blackbox."
 
 MAIN_SYMBOL = "main"
+
 
 class ABCVisitor(NodeVisitor):
     """
@@ -85,7 +86,7 @@ class ABCVisitor(NodeVisitor):
             )
             exit(1)
 
-    def _args_to_dict(self, args : arguments) -> dict:
+    def _args_to_dict(self, args: arguments) -> dict:
         """
         Covert a Python function argument AST node to a dictionary of the following form:
             {
@@ -136,7 +137,6 @@ class ABCVisitor(NodeVisitor):
             # we never declare an index assignment, the indexed variable was declared before.
             return self.builder.make_assignment(var, expr)
 
-
     #
     # Supported visit functions
     #
@@ -147,7 +147,7 @@ class ABCVisitor(NodeVisitor):
     def visit_And(self, node: And) -> dict:
         return self.builder.constants.AND
 
-    def visit_Assign(self, node : Assign) -> dict:
+    def visit_Assign(self, node: Assign) -> dict:
         """
         Visit a Python assignment and transform it to a dictionary corresponding to one or more ABC assignments.
         """
@@ -217,9 +217,11 @@ class ABCVisitor(NodeVisitor):
             on generic FHE objects that track the operations performed on them.
         """
 
-        # TODO: list limitations
-
         # Check if the function is defined in the same context
+        if isinstance(node.func, Attribute):
+            logging.error(UNSUPPORTED_ATTRIBUTE_RESOLUTION)
+            exit(1)
+
         fn_ast = FunctionVisitor(node.func.id).visit(self.prog.src_context_ast)
         if fn_ast:
             logging.error(UNSUPPORTED_LOCAL_FUNCTION_CALL)
@@ -240,7 +242,7 @@ class ABCVisitor(NodeVisitor):
         # Create generic variables for all arguments. Turn normal arguments into AST variable nodes and recursively
         # evaluate the value of keyword arguments.
         args = [ABCGenericExpr(self.visit(arg)) for arg in node.args]
-        kwargs = { keyword.arg: ABCGenericExpr(self.visit(keyword.value)) for keyword in node.keywords }
+        kwargs = {keyword.arg: ABCGenericExpr(self.visit(keyword.value)) for keyword in node.keywords}
 
         # Get the blackbox function from the parent module and execute it on our tracing inputs.
         external_fn_ret = getattr(self.prog.src_module, node.func.id)(*args, **kwargs)
@@ -310,8 +312,10 @@ class ABCVisitor(NodeVisitor):
         target_lt_stop = self.builder.make_binary_expression(target, self.builder.constants.LT, stop_val)
         target_gt_stop = self.builder.make_binary_expression(target, self.builder.constants.GT, stop_val)
 
-        condition_case_1 = self.builder.make_binary_expression(start_lte_stop, self.builder.constants.AND, target_lt_stop)
-        condition_case_2 = self.builder.make_binary_expression(start_gt_stop, self.builder.constants.AND, target_gt_stop)
+        condition_case_1 = self.builder.make_binary_expression(start_lte_stop, self.builder.constants.AND,
+                                                               target_lt_stop)
+        condition_case_2 = self.builder.make_binary_expression(start_gt_stop, self.builder.constants.AND,
+                                                               target_gt_stop)
         condition = self.builder.make_binary_expression(condition_case_1, self.builder.constants.OR, condition_case_2)
 
         stmts = list(map(self.visit, node.body))
@@ -423,7 +427,6 @@ class ABCVisitor(NodeVisitor):
         index = self.visit(node.slice)
 
         return self.builder.make_index_access(target, index)
-
 
     #
     # Unsupported visit functions
