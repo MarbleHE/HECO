@@ -75,12 +75,35 @@ set(TEST_FILES
         ../bench/GxKernel.cpp
         )
 
+
+add_executable(testing-all
+        ${TEST_FILES})
+
+# this is important to have code coverage in CLion
+if (CMAKE_COMPILER_IS_GNUCXX)
+    set(CMAKE_CXX_FLAGS "--coverage")
+elseif ("${CMAKE_C_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang" OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang")
+    set(CMAKE_CXX_FLAGS "-fprofile-instr-generate -fcoverage-mapping")
+endif ()
+
+target_link_libraries(testing-all PRIVATE gtest ast_opt gtest_main)
+target_include_directories(testing-all PRIVATE ${ast_optimizer_SOURCE_DIR}/include/)
+
+if(MSVC)
+    # Mark gtest as external
+    target_compile_options(testing-all PRIVATE /external:I${gtest_SOURCE_DIR}/include)
+endif()
+
+# create ctest targets
+gtest_discover_tests(testing-all TEST_PREFIX gtest:)
+
+# make sure that ast_lib is built before the testing-all target
+add_dependencies(testing-all ast_opt)
+
 ##############################
 # TARGET: testing-python
 ##############################
 if(PYTHON_FRONTEND_DEV)
-    enable_testing()
-
     # Install pytest
     execute_process(COMMAND ${Python3_EXECUTABLE} -m pip install --user pytest)
 
@@ -121,13 +144,6 @@ endif ()
 target_link_libraries(testing-all PRIVATE gtest ast_opt gtest_main)
 target_include_directories(testing-all PRIVATE ${ast_optimizer_SOURCE_DIR}/include/)
 
-if(MSVC)
-    # Mark gtest as external
-    target_compile_options(testing-all PRIVATE /external:I${gtest_SOURCE_DIR}/include)
-endif()
+# make sure that python is built before the testing-all target
+add_dependencies(testing-all python)
 
-# create ctest targets
-gtest_discover_tests(testing-all TEST_PREFIX gtest:)
-
-# make sure that ast_lib is built before the testing-all target
-add_dependencies(testing-all ast_opt)
