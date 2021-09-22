@@ -36,7 +36,7 @@ def test_external_fn():
     p = ABCProgram(logging.DEBUG)
 
     with ABCContext(p, logging.DEBUG):
-        def main(a : SecretInt, b : SecretInt):
+        def main(a : NonSecretInt, b : NonSecretInt):
             a *= 3
             r = external_add(a, b, c = 1)
             return r

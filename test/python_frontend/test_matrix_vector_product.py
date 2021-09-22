@@ -4,16 +4,15 @@
 Testing a matrix vector product using FHE operations over the Python Frontend.
 """
 
-from pyabc import ABCContext, ABCProgram
+from pyabc import *
 
 import logging
-import pytest
 
 def test_matrix_vector_product():
     p = ABCProgram(logging.DEBUG)
 
     with ABCContext(p, logging.DEBUG):
-        def main(mat, vec, m, n):
+        def main(mat : NonSecretIntVector, vec : NonSecretIntVector, m : NonSecretInt, n : NonSecretInt):
             result = [0, 0, 0]
             for i in range(m):
                 sum = 0

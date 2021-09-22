@@ -46,7 +46,7 @@ class ABCVisitor(NodeVisitor):
     # Helper functions
     #
     def _get_annotation(self, arg):
-        if hasattr(arg, "annotation"):
+        if hasattr(arg, "annotation") and arg.annotation:
             return arg.annotation.id
         else:
             return None
