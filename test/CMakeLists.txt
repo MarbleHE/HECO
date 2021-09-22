@@ -70,38 +70,6 @@ set(TEST_FILES
         visitor/VisitorTest.cpp
         )
 
-##############################
-# TARGET: testing-python
-##############################
-if(PYTHON_FRONTEND_DEV)
-    enable_testing()
-
-    # Install pytest
-    execute_process(COMMAND ${Python3_EXECUTABLE} -m pip install --user pytest)
-
-    set(PYTEST_CMD Python3::Interpreter -m pytest --ignore=extern --ignore ${CMAKE_BINARY_DIR})
-
-    add_test(NAME PythonFrontendSimple
-            COMMAND ${PYTEST_CMD} ${PROJECT_SOURCE_DIR}/test/python_frontend/test_simple.py
-            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/python)
-
-    add_test(NAME PythonFrontendHammingDistance
-            COMMAND ${PYTEST_CMD} ${PROJECT_SOURCE_DIR}/test/python_frontend/test_hamming_distance.py
-            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/python)
-
-    add_test(NAME PythonMatrixVectorProduct
-            COMMAND ${PYTEST_CMD} ${PROJECT_SOURCE_DIR}/test/python_frontend/test_matrix_vector_product.py
-            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/python)
-
-    add_test(NAME PythonSecretTainting
-            COMMAND ${PYTEST_CMD} ${PROJECT_SOURCE_DIR}/test/python_frontend/test_secret_tainting.py
-            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/python)
-
-    add_test(NAME PythonExternalFn
-            COMMAND ${PYTEST_CMD} ${PROJECT_SOURCE_DIR}/test/python_frontend/test_external_fn.py
-            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/python)
-endif()
-
 
 add_executable(testing-all
         ${TEST_FILES})
@@ -126,3 +94,37 @@ gtest_discover_tests(testing-all TEST_PREFIX gtest:)
 
 # make sure that ast_lib is built before the testing-all target
 add_dependencies(testing-all ast_opt)
+
+##############################
+# TARGET: testing-python
+##############################
+if(PYTHON_FRONTEND_DEV)
+    # Install pytest
+    execute_process(COMMAND ${Python3_EXECUTABLE} -m pip install --user pytest)
+
+    set(PYTEST_CMD Python3::Interpreter -m pytest --ignore=extern --ignore ${CMAKE_BINARY_DIR})
+
+    add_test(NAME PythonFrontendSimple
+            COMMAND ${PYTEST_CMD} ${PROJECT_SOURCE_DIR}/test/python_frontend/test_simple.py
+            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/python)
+
+    add_test(NAME PythonFrontendHammingDistance
+            COMMAND ${PYTEST_CMD} ${PROJECT_SOURCE_DIR}/test/python_frontend/test_hamming_distance.py
+            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/python)
+
+    add_test(NAME PythonMatrixVectorProduct
+            COMMAND ${PYTEST_CMD} ${PROJECT_SOURCE_DIR}/test/python_frontend/test_matrix_vector_product.py
+            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/python)
+
+    add_test(NAME PythonSecretTainting
+            COMMAND ${PYTEST_CMD} ${PROJECT_SOURCE_DIR}/test/python_frontend/test_secret_tainting.py
+            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/python)
+
+    add_test(NAME PythonExternalFn
+            COMMAND ${PYTEST_CMD} ${PROJECT_SOURCE_DIR}/test/python_frontend/test_external_fn.py
+            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/python)
+
+    # make sure that python is built before the testing-all target
+    add_dependencies(testing-all python)
+endif()
+

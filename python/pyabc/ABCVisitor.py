@@ -263,6 +263,10 @@ class ABCVisitor(NodeVisitor):
     def visit_Eq(self, node: Eq) -> dict:
         return self.builder.constants.EQ
 
+    def visit_FloorDiv(self, node: FloorDiv) -> dict:
+        logging.warning(NO_FLOOR_DIV);
+        return self.builder.constants.DIV
+
     def visit_For(self, node: For) -> dict:
         """
         Visit a Python For node and convert it to an ABC AST For node.
@@ -331,7 +335,8 @@ class ABCVisitor(NodeVisitor):
         """
 
         if node.name == MAIN_SYMBOL:
-            logging.debug(f"Parsing python main function:\n{unparse(node)}")
+            # TODO: From Python 3.9 onwards, we can use unparse instead of dump (newly added to ast)
+            # logging.debug(f"Parsing python main function:\n{unparse(node)}")
 
             last_stmt = node.body[-1]
             if not isinstance(last_stmt, Return):
@@ -367,9 +372,9 @@ class ABCVisitor(NodeVisitor):
     def visit_GtE(self, node: GtE) -> dict:
         return self.builder.constants.GTE
 
-    def visit_FloorDiv(self, node: FloorDiv) -> dict:
-        logging.warning(NO_FLOOR_DIV);
-        return self.builder.constants.DIV
+    def visit_Index(self, node: Index) -> dict:
+        # TODO: so far, all Index nodes that we used only had the single attribute "value"
+        return self.visit(node.value)
 
     def visit_List(self, node: List) -> dict:
         """
@@ -410,7 +415,8 @@ class ABCVisitor(NodeVisitor):
 
         # Only support single return statements, since we don't support multi-value return statements yet
         if isinstance(node.value, Tuple):
-            logging.error(UNSUPPORTED_MULTI_VALUE_RETURN, unparse(node))
+            # TODO: From Python 3.9 onwards, we can use unparse instead of dump (newly added to ast)
+            logging.error(UNSUPPORTED_MULTI_VALUE_RETURN, dump(node))
             exit(1)
 
         ret_node = self.visit(node.value)
@@ -569,10 +575,6 @@ class ABCVisitor(NodeVisitor):
         exit(1)
 
     def visit_In(self, node: In) -> dict:
-        logging.error(UNSUPPORTED_STATEMENT, type(node))
-        exit(1)
-
-    def visit_Index(self, node: Index) -> dict:
         logging.error(UNSUPPORTED_STATEMENT, type(node))
         exit(1)
 

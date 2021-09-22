@@ -38,6 +38,7 @@ TODO [Miro]
 @Alex: the `-DSEAL_THROW_ON_TRANSPARENT_CIPHERTEXT=OFF` is here because EVA requires it. Do we need it too?
 -->
 
+Enter the repo you just cloned (`cd SEAL` if you haven't changed the name). Then build it as follows:
 ```
 cmake -DSEAL_THROW_ON_TRANSPARENT_CIPHERTEXT=OFF -S . -B build
 cmake --build build

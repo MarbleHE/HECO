@@ -9,7 +9,7 @@ jobs:
       - name: update apt-get sources
         run: sudo apt-get update
       - name: install gcc-9
-        run: sudo apt-get install -y gcc-9 g++-9 build-essential
+        run: sudo apt-get install -y gcc-9 g++-9 build-essential libboost-all-dev python3-dev python3-pip cmake
       - uses: actions/checkout@v1
       - name: Generate short commit hash
         id: vars
