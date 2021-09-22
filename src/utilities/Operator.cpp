@@ -27,8 +27,8 @@ Operator fromStringToOperatorVariant(std::string targetOpString) {
 
   // Searches an operation (given as string) in an array opStrings of opStringSize operations.
   // If found, it sets idx to the index of the operation in the array and returns true. Otherwise, returns false.
-  auto findOp = [targetOpString](auto &opStrings, int opStringSize, int &idx) {
-    for (int i{ 0 }; i < opStringSize; ++i) {
+  auto findOp = [targetOpString](auto &opStrings, size_t opStringSize, int &idx) {
+    for (size_t i{ 0 }; i < opStringSize; ++i) {
       if (opStrings[i] == targetOpString) {
         idx = i;
         return true;
