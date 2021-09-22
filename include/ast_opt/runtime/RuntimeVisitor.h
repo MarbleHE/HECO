@@ -2,6 +2,7 @@
 #define GRAPHNODE_H_INCLUDE_AST_OPT_VISITOR_RUNTIME_H_
 
 #include <stack>
+#include <string>
 
 #include "Cleartext.h"
 #include "ast_opt/utilities/Visitor.h"
@@ -49,6 +50,9 @@ class SpecialRuntimeVisitor : public ScopedVisitor {
   /// A map that contains the unique node ID for each secret tainted node, i.e., a node that must be secret because any
   /// of its dependant nodes (e.g., operand of binary expression) are secret.
   SecretTaintedNodesMap &secretTaintedMap;
+
+  /// Check if a variable is secret. We assume it is not secret if it is not in the secret taint map.
+  bool isVariableSecretTainted(const std::string uniqueNodeId);
 
  public:
   /// Create a new SpecialRuntimeVisitor.

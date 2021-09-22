@@ -13,12 +13,12 @@ SecretBool      = NewType("SecretBool", bool)
 SecretString    = NewType("SecretString", str)
 SecretChar      = NewType("SecretChar", str)
 
-SecretIntVector     = NewType("SecretIntVector", int)
-SecretFloatVector   = NewType("SecretFloatVector", float)
-SecretDoubleVector  = NewType("SecretDoubleVector", float)
-SecretBoolVector    = NewType("SecretBoolVector", bool)
-SecretStringVector  = NewType("SecretStringVector", str)
-SecretCharVector    = NewType("SecretCharVector", str)
+SecretIntVector     = NewType("SecretIntVector", list[int])
+SecretFloatVector   = NewType("SecretFloatVector", list[float])
+SecretDoubleVector  = NewType("SecretDoubleVector", list[float])
+SecretBoolVector    = NewType("SecretBoolVector", list[bool])
+SecretStringVector  = NewType("SecretStringVector", list[str])
+SecretCharVector    = NewType("SecretCharVector", list[str])
 
 
 NonSecretInt    = NewType("NonSecretInt", int)
@@ -28,12 +28,12 @@ NonSecretBool   = NewType("NonSecretBool", bool)
 NonSecretString = NewType("NonSecretString", str)
 NonSecretChar   = NewType("NonSecretChar", str)
 
-NonSecretIntVector      = NewType("NonSecretIntVector", int)
-NonSecretFloatVector    = NewType("NonSecretFloatVector", float)
-NonSecretDoubleVector   = NewType("NonSecretDoubleVector", float)
-NonSecretBoolVector     = NewType("NonSecretBoolVector", bool)
-NonSecretStringVector   = NewType("NonSecretStringVector", str)
-NonSecretCharVector     = NewType("NonSecretCharVector", str)
+NonSecretIntVector      = NewType("NonSecretIntVector", list[int])
+NonSecretFloatVector    = NewType("NonSecretFloatVector", list[float])
+NonSecretDoubleVector   = NewType("NonSecretDoubleVector", list[float])
+NonSecretBoolVector     = NewType("NonSecretBoolVector", list[bool])
+NonSecretStringVector   = NewType("NonSecretStringVector", list[str])
+NonSecretCharVector     = NewType("NonSecretCharVector", list[str])
 
 def is_secret(val_type):
     """
@@ -51,7 +51,7 @@ def is_secret(val_type):
     if isinstance(val_type, str):
         return val_type not in map(lambda x: x.__name__, non_secret_types)
     # Case 2: type is given as TypeVar or NewType, compare it directly to our non-secret types
-    elif isinstance(val_type, TypeVar) or isinstance(val_type, NewType):
+    elif isinstance(val_type, type(TypeVar)) or isinstance(val_type, type(NewType)):
         return val_type not in non_secret_types
     # Case 3: any other type just defaults to being secret
     else:

@@ -4,17 +4,16 @@
 Testing the computation of the Hamming distance of two vectors using the Python Frontend for the ABC compiler.
 """
 
-from pyabc import ABCContext, ABCProgram
+from pyabc import *
 
 import logging
 import random
-import pytest
 
 def test_hamming_distance():
     p = ABCProgram(logging.DEBUG)
 
     with ABCContext(p, logging.DEBUG):
-        def main(x, y, n):
+        def main(x : NonSecretIntVector, y : NonSecretIntVector, n : NonSecretInt):
             sum = 0
             for i in range(n):
                 sum += (x[i] - y[i]) * (x[i] - y[i])

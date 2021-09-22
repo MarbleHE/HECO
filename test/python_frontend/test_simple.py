@@ -4,16 +4,15 @@
 Testing simple arithmetic FHE operations using the Python Frontend.
 """
 
-from pyabc import ABCContext, ABCProgram
+from pyabc import *
 
 import logging
-import pytest
 
 def test_simple_arithmetic():
     p = ABCProgram(logging.DEBUG)
 
     with ABCContext(p, logging.DEBUG):
-        def main(a, x = 3):
+        def main(a : NonSecretInt, x = 3):
             b = (2 * 6) / x
             y = a + b
             return y
@@ -28,7 +27,7 @@ def test_simple_for_loop():
     p = ABCProgram(logging.DEBUG)
 
     with ABCContext(p, logging.DEBUG):
-        def main(start, end, step):
+        def main(start : NonSecretInt, end : NonSecretInt, step : NonSecretInt):
             sum = 0
             for i in range(start, end, step):
                 sum += i
