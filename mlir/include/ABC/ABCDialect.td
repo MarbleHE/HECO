@@ -17,7 +17,7 @@ include "mlir/IR/OpBase.td"
 
 def ABC_Dialect : Dialect {
     let name = "abc";
-    let summary = "Dialect for ABC's high-level C-like AST.";
+    let summary = "Dialect for ABC's high-level C-like DSL.";
     let description = [{
         This dialect represents the AST for the
         Automatic Batching Compiler (ABC) project DSL
@@ -29,6 +29,14 @@ def ABC_Dialect : Dialect {
 // ABC trait definitions.
 //===----------------------------------------------------------------------===//
 
+//===----------------------------------------------------------------------===//
+// ABC constraint definitions.
+//===----------------------------------------------------------------------===//
+
+class ABC_Expression<Pred condition, string descr = "abc.expression"> : Region <condition, descr>;
+
+// TODO: Replace predicate with a function that checks if region contains exactly one Op, and that ob is an expression op
+def AnyExpression : Region<CPred<"true">, "any abc.expression">;
 
 //===----------------------------------------------------------------------===//
 // Base ABC operation definitions.
@@ -37,20 +45,5 @@ def ABC_Dialect : Dialect {
 class ABC_Op<string mnemonic, list<OpTrait> traits = []> :
         Op<ABC_Dialect, mnemonic, traits>;
 
-def ABC_Expression:  Type<ABC_Expression>;
-
-def ABC_Statement :  Type<ABC_Statement>;
-
-
-//===----------------------------------------------------------------------===//
-// Real ABC operation definitions.
-//===----------------------------------------------------------------------===//
-
-def ABC_BinaryOp : ABC_ExpressionOp<"binary_op", []> {
-  let arguments = (ins
-      ABC_ExpressionOp: lhs,
-      ABC_ExpressionOp: rhs
-      )
-}
 
 #endif // STANDALONE_DIALECT
