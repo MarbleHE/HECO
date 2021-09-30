@@ -10,6 +10,7 @@
 #define STANDALONE_DIALECT
 
 include "mlir/IR/OpBase.td"
+include "mlir/Interfaces/SideEffectInterfaces.td"
 
 //===----------------------------------------------------------------------===//
 // ABC dialect definition.
@@ -49,9 +50,9 @@ def ZeroOrMoreStatements : Region<CPred<"true">, "zero or more statements">;
 //===----------------------------------------------------------------------===//
 
 /// NodeOps are used to directly map an AST into MLIR using nested regions.
-/// as a consequence, they always have the NoTerminator trait
+/// as a consequence, they always have the NoTerminator and NoSideEffect trait
 class ABC_NodeOp<string mnemonic, list<OpTrait> traits = []> :
-        Op<ABC_Dialect, mnemonic, !listconcat(traits, [NoTerminator])> {
+        Op<ABC_Dialect, mnemonic, !listconcat(traits, [NoTerminator, NoSideEffect])> {
   let assemblyFormat = [{
   regions attr-dict-with-keyword
   }];
@@ -59,14 +60,14 @@ class ABC_NodeOp<string mnemonic, list<OpTrait> traits = []> :
 
 def isAbcExpression : NativeOpTrait<"isAbcExpression">;
 
-class ABC_ExpressionOp<string mnemonic, list<OpTrait> traits = [NoTerminator]> : ABC_NodeOp<mnemonic, !listconcat(traits, [isAbcExpression])>;
+class ABC_ExpressionOp<string mnemonic, list<OpTrait> traits = []> : ABC_NodeOp<mnemonic, !listconcat(traits, [isAbcExpression])>;
 
 def isAbcStatement : NativeOpTrait<"isAbcStatement">;
 
-class ABC_StatementOp<string mnemonic, list<OpTrait> traits = [NoTerminator]> : ABC_NodeOp<mnemonic, !listconcat(traits, [isAbcStatement])>;
+class ABC_StatementOp<string mnemonic, list<OpTrait> traits = []> : ABC_NodeOp<mnemonic, !listconcat(traits, [isAbcStatement])>;
 
 def isAbcTarget : NativeOpTrait<"isAbcTarget">;
 
-class ABC_TargetOp<string mnemonic, list<OpTrait> traits = [NoTerminator]> : ABC_ExpressionOp<mnemonic, !listconcat(traits, [isAbcTarget])>;
+class ABC_TargetOp<string mnemonic, list<OpTrait> traits = []> : ABC_ExpressionOp<mnemonic, !listconcat(traits, [isAbcTarget])>;
 
 #endif // STANDALONE_DIALECT
