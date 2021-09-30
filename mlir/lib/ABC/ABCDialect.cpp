@@ -11,6 +11,60 @@
 using namespace mlir;
 using namespace mlir::abc;
 
+bool containsExactlyOneExpressionNode(Region &region) {
+
+  if (region.op_begin()==region.op_end()) {
+    emitError(region.getLoc(), "Region must contain exactly one ABC_ExpressionOP but is empty.");
+    return false;
+  } else if (!region.op_begin()->hasTrait<OpTrait::isAbcExpression>()) {
+    emitError(region.op_begin()->getLoc(), "Invalid op in region that should contain exactly one ABC_ExpressionOp.");
+    return false;
+  } else if (++region.op_begin()!=region.op_end()) {
+    emitError((++region.op_begin())->getLoc(),
+              "Additional op in region that should contain exactly one ABC_ExpressionOP.");
+    return false;
+  } else {
+    return true;
+  }
+}
+
+bool containsExactlyOneTargetNode(Region &region) {
+
+  if (region.op_begin()==region.op_end()) {
+    emitError(region.getLoc(), "Region must contain exactly one ABC_TargetOP but is empty.");
+    return false;
+  } else if (!region.op_begin()->hasTrait<OpTrait::isAbcTarget>()) {
+    emitError(region.op_begin()->getLoc(), "Invalid op in region that should contain exactly one ABC_TargetOP.");
+    return false;
+  } else if (++region.op_begin()!=region.op_end()) {
+    emitError((++region.op_begin())->getLoc(),
+              "Additional op in region that should contain exactly one ABC_TargetOP.");
+    return false;
+  } else {
+    return true;
+  }
+}
+
+
+bool containsExactlyOneStatementNode(Region &region) {
+
+  if (region.op_begin()==region.op_end()) {
+    emitError(region.getLoc(), "Region must contain exactly one ABC_StatementOP but is empty.");
+    return false;
+  } else if (!region.op_begin()->hasTrait<OpTrait::isAbcStatement>()) {
+    emitError(region.op_begin()->getLoc(), "Invalid op in region that should contain exactly one ABC_StatementOP.");
+    return false;
+  } else if (++region.op_begin()!=region.op_end()) {
+    emitError((++region.op_begin())->getLoc(),
+              "Additional op in region that should contain exactly one ABC_StatementOP.");
+    return false;
+  } else {
+    return true;
+  }
+}
+
+
+
 #include "ABC/ABCOpsDialect.cpp.inc"
 
 //===----------------------------------------------------------------------===//
@@ -21,7 +75,7 @@ void ABCDialect::initialize() {
   addOperations<
 #define GET_OP_LIST
 #include "ABC/ABCOps.cpp.inc"
-      >();
+  >();
 }
 
 //===----------------------------------------------------------------------===//

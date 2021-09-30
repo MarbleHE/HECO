@@ -48,7 +48,7 @@ def ABC_FunctionOp : ABC_StatementOp<"function", []> {
 }
 
 def ABC_IfOp : ABC_StatementOp<"if", []> {
-  let summary = "AST Node For";
+  let summary = "AST Node If";
   let regions = (region
                   AnyExpression: $condition,
                   AnyBlock: $thenBranch, //name must not be a C++ keyword
@@ -60,6 +60,15 @@ def ABC_IfOp : ABC_StatementOp<"if", []> {
   // but not an OptionalRegion (0 or 1) region constraint
   // TODO: This seems to work, but produces no indication of what the error is, stuff just fails
   let verifier = [{ return mlir::LogicalResult::success(this->getNumRegions() < 4); }];
+}
+
+def ABC_ReturnOp: ABC_StatementOp<"return", []> {
+  let summary = "AST Node Return";
+  let regions = (region VariadicRegion<AnyExpression>: $value);
+
+  // Ensure that this has either 1 (value) or 0  regions (see also verifier in ABC_IfOp)
+  // TODO: This seems to work, but produces no indication of what the error is, stuff just fails
+  let verifier = [{ return mlir::LogicalResult::success(this->getNumRegions() < 2); }];
 }
 
 

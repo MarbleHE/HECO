@@ -32,15 +32,11 @@ def ABC_Dialect : Dialect {
 //===----------------------------------------------------------------------===//
 // ABC constraint definitions.
 //===----------------------------------------------------------------------===//
+def AnyExpression : Region<CPred<"containsExactlyOneExpressionNode($_self)">, "any abc expression">;
 
-// TODO: Replace predicate with a function that checks if region contains exactly one Op, and that ob is an expression op
-def AnyExpression : Region<CPred<"true">, "any abc expression">;
+def AnyTarget : Region<CPred<"containsExactlyOneTargetNode($_self)">, "any abc target">;
 
-// TODO: Replace predicate with a function that checks if region contains exactly one Op, and that ob is a target op
-def AnyTarget : Region<CPred<"true">, "any abc target">;
-
-// TODO: Replace predicate with a function that checks if region contains exactly one Op, and that ob is a statement op
-def AnyStatement : Region<CPred<"true">, "any abc statement">;
+def AnyStatement : Region<CPred<"containsExactlyOneStatementNode($_self)">, "any abc statement">;
 
 // TODO: Replace predicate with a function that checks if region contains exactly one Op, and that ob is a Block op
 def AnyBlock : Region<CPred<"true">, "any abc Block">;
@@ -57,10 +53,16 @@ def ZeroOrMoreStatements : Region<CPred<"true">, "zero or more statements">;
 class ABC_NodeOp<string mnemonic, list<OpTrait> traits = []> :
         Op<ABC_Dialect, mnemonic, !listconcat(traits, [NoTerminator])>;
 
-class ABC_ExpressionOp<string mnemonic, list<OpTrait> traits = [NoTerminator]> : ABC_NodeOp<mnemonic, traits>;
+def isAbcExpression : NativeOpTrait<"isAbcExpression">;
 
-class ABC_StatementOp<string mnemonic, list<OpTrait> traits = [NoTerminator]> : ABC_NodeOp<mnemonic, traits>;
+class ABC_ExpressionOp<string mnemonic, list<OpTrait> traits = [NoTerminator]> : ABC_NodeOp<mnemonic, !listconcat(traits, [isAbcExpression])>;
 
-class ABC_TargetOp<string mnemonic, list<OpTrait> traits = [NoTerminator]> : ABC_ExpressionOp<mnemonic, traits>;
+def isAbcStatement : NativeOpTrait<"isAbcStatement">;
+
+class ABC_StatementOp<string mnemonic, list<OpTrait> traits = [NoTerminator]> : ABC_NodeOp<mnemonic, !listconcat(traits, [isAbcStatement])>;
+
+def isAbcTarget : NativeOpTrait<"isAbcTarget">;
+
+class ABC_TargetOp<string mnemonic, list<OpTrait> traits = [NoTerminator]> : ABC_ExpressionOp<mnemonic, !listconcat(traits, [isAbcTarget])>;
 
 #endif // STANDALONE_DIALECT
