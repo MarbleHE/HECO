@@ -33,17 +33,34 @@ def ABC_Dialect : Dialect {
 // ABC constraint definitions.
 //===----------------------------------------------------------------------===//
 
-class ABC_Expression<Pred condition, string descr = "abc.expression"> : Region <condition, descr>;
-
 // TODO: Replace predicate with a function that checks if region contains exactly one Op, and that ob is an expression op
-def AnyExpression : Region<CPred<"true">, "any abc.expression">;
+def AnyExpression : Region<CPred<"true">, "any abc expression">;
+
+// TODO: Replace predicate with a function that checks if region contains exactly one Op, and that ob is a target op
+def AnyTarget : Region<CPred<"true">, "any abc target">;
+
+// TODO: Replace predicate with a function that checks if region contains exactly one Op, and that ob is a statement op
+def AnyStatement : Region<CPred<"true">, "any abc statement">;
+
+// TODO: Replace predicate with a function that checks if region contains exactly one Op, and that ob is a Block op
+def AnyBlock : Region<CPred<"true">, "any abc Block">;
+
+// TODO: Replace predicate with a function that checks if region contains only statements
+def ZeroOrMoreStatements : Region<CPred<"true">, "zero or more statements">;
 
 //===----------------------------------------------------------------------===//
-// Base ABC operation definitions.
+// Base ABC NodeOp definitions.
 //===----------------------------------------------------------------------===//
 
-class ABC_Op<string mnemonic, list<OpTrait> traits = []> :
-        Op<ABC_Dialect, mnemonic, traits>;
+/// NodeOps are used to directly map an AST into MLIR using nested regions.
+/// as a consequence, they always have the NoTerminator trait
+class ABC_NodeOp<string mnemonic, list<OpTrait> traits = []> :
+        Op<ABC_Dialect, mnemonic, !listconcat(traits, [NoTerminator])>;
 
+class ABC_ExpressionOp<string mnemonic, list<OpTrait> traits = [NoTerminator]> : ABC_NodeOp<mnemonic, traits>;
+
+class ABC_StatementOp<string mnemonic, list<OpTrait> traits = [NoTerminator]> : ABC_NodeOp<mnemonic, traits>;
+
+class ABC_TargetOp<string mnemonic, list<OpTrait> traits = [NoTerminator]> : ABC_ExpressionOp<mnemonic, traits>;
 
 #endif // STANDALONE_DIALECT
