@@ -17,7 +17,7 @@ include "mlir/Interfaces/SideEffectInterfaces.td"
 //===----------------------------------------------------------------------===//
 
 def ABC_AssignmentOp : ABC_StatementOp<"assignment", []> {
-  let summary = "AST Node Function";
+  let summary = "AST Node Assignment";
   let regions = (region AnyTarget: $target, AnyExpression: $value);
 }
 
@@ -38,6 +38,7 @@ def ABC_ForOp : ABC_StatementOp<"for", []> {
 
 def ABC_FunctionOp : ABC_StatementOp<"function", []> {
   let summary = "AST Node Function";
+  // TODO: Parameters should be a list of FunctionParameters, not a single arbitrary expression!
   let regions = (region AnyExpression: $parameters, AnyBlock: $body);
   let arguments = (ins
       // no operands, just attributes
@@ -71,7 +72,17 @@ def ABC_ReturnOp: ABC_StatementOp<"return", []> {
   let verifier = [{ return mlir::LogicalResult::success(this->getNumRegions() < 2); }];
 }
 
+def ABC_VariableDeclarationOp : ABC_StatementOp<"variable_declaration", []> {
+  let summary = "AST Node VariableDeclaration";
+  // TODO: Instead of AnyTarget, this should allow only Variables
+  let regions = (region AnyTarget: $target, VariadicRegion<AnyExpression>: $value);
+  // TODO: Find or introduce attribute to check that this is a legal type
+  let arguments = (ins AnyAttr: $type);
 
+  // Ensure that this has either 2 (target, value) or 1 (target) regions (see also verifier in ABC_IfOp)
+  // TODO: This seems to work, but produces no indication of what the error is, stuff just fails
+  let verifier = [{ return mlir::LogicalResult::success(this->getNumRegions() < 3); }];
+}
 
 //===----------------------------------------------------------------------===//
 // ABC Expression Node definitions.
@@ -81,11 +92,79 @@ def ABC_ReturnOp: ABC_StatementOp<"return", []> {
 def ABC_FunctionParameterOp : ABC_TargetOp<"function_parameter", []> {
   let summary = "AST Node FunctionParameter";
   let arguments = (ins
-    // no operands, just attributes
     SymbolNameAttr : $name,
     // TODO: Find or introduce attribute to check that this is a legal type
     AnyAttr : $type
   );
 }
+
+def ABC_IndexAccessOp : ABC_TargetOp<"index_access", []> {
+  let summary = "AST Node IndexAccess";
+  let regions = (region AnyTarget: $target, AnyExpression: $index);
+}
+
+def ABC_VariableOp : ABC_TargetOp<"variable", []> {
+  let summary = "AST Node Variable";
+  let arguments = (ins
+    SymbolNameAttr : $name
+  );
+}
+
+def ABC_BinaryExpressionOp : ABC_ExpressionOp<"binary_expression", []> {
+  let summary = "AST Node BinaryExpression";
+  let arguments = (ins
+      // TODO: Find or introduce attribute to check that this is actually an operator
+      AnyAttr: $op
+  );
+  let regions = (region
+                AnyExpression: $left,
+                AnyExpression: $right
+  );
+}
+
+def ABC_OperatorExpressionOp : ABC_ExpressionOp<"operator_expression", []> {
+  let summary = "AST Node OperatorExpression";
+  let arguments = (ins
+    // TODO: Find or introduce attribute to check that this is actually an operator
+    AnyAttr: $op
+  );
+  let regions = (region
+    VariadicRegion<AnyExpression>: $operands
+  );
+}
+
+def ABC_UnaryExpressionOp : ABC_ExpressionOp<"unary_expression", []> {
+  let summary = "AST Node UnaryExpression";
+    let arguments = (ins
+    // TODO: Find or introduce attribute to check that this is actually an operator
+    AnyAttr: $op
+  );
+  let regions = (region
+    AnyExpression: $operand
+  );
+}
+
+def ABC_CallOp : ABC_ExpressionOp<"call", []> {
+  let summary = "AST Node Call";
+  let arguments = (ins SymbolNameAttr: $identifier );
+  // TODO: arguments should be a list of Expressions, not a single one
+  let regions = (region AnyExpression: $arguments);
+}
+
+// TODO: Should T be something more semantically relevant, like a Type or something like that?
+class ABC_LiteralOp<string T> : ABC_ExpressionOp<!strconcat("literal_", T), []>{
+  let summary = !strconcat("AST Node Literal<", T, ">");
+  // TODO: Find or introduce attribute to check that this is a legal type
+  let arguments = (ins AnyAttr : $value);
+}
+
+def ABC_LiteralBoolOp : ABC_LiteralOp<"bool">;
+def ABC_LiteralCharOp : ABC_LiteralOp<"char">;
+def ABC_LiteralIntOp : ABC_LiteralOp<"int">;
+def ABC_LiteralFloatOp : ABC_LiteralOp<"float">;
+def ABC_LiteralDoubleOp : ABC_LiteralOp<"double">;
+def ABC_LiteralStringOp : ABC_LiteralOp<"string">;
+
+//TODO: TernaryOperator, once it's supported by the C++ based DSL frnotend
 
 #endif // ABC_OPS

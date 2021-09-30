@@ -6,13 +6,15 @@
    "abc.function_parameter"() {type = "secret int", name = "y"} : () -> ()
 }, {
     "abc.block" () ({
-        //"abc.variable_declaration"() ({
-        //    "abc.literal_int"() {value = "17"} : () -> ()
-        //}) {type = "int", name = "x"}: () -> ()
+        "abc.variable_declaration"() ({
+           "abc.variable"() {type = "int", name = "foo"} : () -> ()
+        }, {
+           "abc.literal_int"() {value = "17"} : () -> ()
+        }) {type = "int", name = "x"}: () -> ()
         "abc.assignment" () ({
-            //"abc.variable" () {name = "foo"} : () -> ()
+            "abc.variable" () {name = "foo"} : () -> ()
          }, {
-            //"abc.literal" () {value = "5"} : () -> ()
+            "abc.literal_int" () {value = "5"} : () -> ()
          }) : () -> ()
          "abc.for" () ({
             // initializer
@@ -21,6 +23,7 @@
             }) : () -> ()
          },{
             // condition
+            "abc.literal_bool" () {value = "true"} : () -> ()
          },{
             // update
             "abc.block" () ({
@@ -32,6 +35,7 @@
                 // if with both branches
                 "abc.if" () ({
                     // condition
+                    "abc.literal_bool" () {value = "true"} : () -> ()
                 }, {
                     // then
                     "abc.block" () ({
@@ -46,6 +50,7 @@
                 // if with only then branch
                 "abc.if" () ({
                     // condition
+                    "abc.literal_bool" () {value = "true"} : () -> ()
                 }, {
                     // then
                     "abc.block" () ({
