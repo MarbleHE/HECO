@@ -9,7 +9,7 @@
 #include "ABC/ABCDialect.h"
 
 using namespace mlir;
-using namespace mlir::abc;
+using namespace abc;
 
 bool containsExactlyOneExpressionNode(Region &region) {
 

@@ -22,7 +22,7 @@ def ABC_Dialect : Dialect {
         This dialect represents the AST for the
         Automatic Batching Compiler (ABC) project DSL
     }];
-    let cppNamespace = "::mlir::abc";
+    let cppNamespace = "::abc";
 }
 
 //===----------------------------------------------------------------------===//
