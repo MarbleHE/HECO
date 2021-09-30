@@ -63,8 +63,6 @@ bool containsExactlyOneStatementNode(Region &region) {
   }
 }
 
-
-
 #include "ABC/ABCOpsDialect.cpp.inc"
 
 //===----------------------------------------------------------------------===//

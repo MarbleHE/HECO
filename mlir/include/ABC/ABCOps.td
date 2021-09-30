@@ -74,14 +74,20 @@ def ABC_ReturnOp: ABC_StatementOp<"return", []> {
 
 def ABC_VariableDeclarationOp : ABC_StatementOp<"variable_declaration", []> {
   let summary = "AST Node VariableDeclaration";
-  // TODO: Instead of AnyTarget, this should allow only Variables
-  let regions = (region AnyTarget: $target, VariadicRegion<AnyExpression>: $value);
-  // TODO: Find or introduce attribute to check that this is a legal type
-  let arguments = (ins AnyAttr: $type);
+  let regions = (region VariadicRegion<AnyExpression>: $value);
+  // NOTE: This is a slight deviation from the C++ AST Node, which
+  // has a "Variable" Child. However, we get much nicer AST with this approach
+  // TODO: Find or introduce attribute to check that $type is a legal type
+  let arguments = (ins SymbolNameAttr: $name, AnyAttr: $type);
 
-  // Ensure that this has either 2 (target, value) or 1 (target) regions (see also verifier in ABC_IfOp)
+  // Ensure that this has either 0 or 1 (value) regions (see also verifier in ABC_IfOp)
   // TODO: This seems to work, but produces no indication of what the error is, stuff just fails
-  let verifier = [{ return mlir::LogicalResult::success(this->getNumRegions() < 3); }];
+  let verifier = [{ return mlir::LogicalResult::success(this->getNumRegions() < 2); }];
+
+  let assemblyFormat = [{
+    $type $name attr-dict-with-keyword ( `=` `(`$value^ `)` )?
+  }];
+
 }
 
 //===----------------------------------------------------------------------===//
@@ -96,6 +102,10 @@ def ABC_FunctionParameterOp : ABC_TargetOp<"function_parameter", []> {
     // TODO: Find or introduce attribute to check that this is a legal type
     AnyAttr : $type
   );
+
+  let assemblyFormat = [{
+  $type $name attr-dict-with-keyword
+  }];
 }
 
 def ABC_IndexAccessOp : ABC_TargetOp<"index_access", []> {
@@ -146,7 +156,7 @@ def ABC_UnaryExpressionOp : ABC_ExpressionOp<"unary_expression", []> {
 
 def ABC_CallOp : ABC_ExpressionOp<"call", []> {
   let summary = "AST Node Call";
-  let arguments = (ins SymbolNameAttr: $identifier );
+  let arguments = (ins SymbolNameAttr: $name );
   // TODO: arguments should be a list of Expressions, not a single one
   let regions = (region AnyExpression: $arguments);
 }
@@ -156,6 +166,11 @@ class ABC_LiteralOp<string T> : ABC_ExpressionOp<!strconcat("literal_", T), []>{
   let summary = !strconcat("AST Node Literal<", T, ">");
   // TODO: Find or introduce attribute to check that this is a legal type
   let arguments = (ins AnyAttr : $value);
+
+  let assemblyFormat = [{
+     $value attr-dict-with-keyword
+  }];
+
 }
 
 def ABC_LiteralBoolOp : ABC_LiteralOp<"bool">;

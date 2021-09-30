@@ -7,8 +7,6 @@
 }, {
     "abc.block" () ({
         "abc.variable_declaration"() ({
-           "abc.variable"() {type = "int", name = "foo"} : () -> ()
-        }, {
            "abc.literal_int"() {value = "17"} : () -> ()
         }) {type = "int", name = "x"}: () -> ()
         "abc.assignment" () ({

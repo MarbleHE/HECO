@@ -51,7 +51,11 @@ def ZeroOrMoreStatements : Region<CPred<"true">, "zero or more statements">;
 /// NodeOps are used to directly map an AST into MLIR using nested regions.
 /// as a consequence, they always have the NoTerminator trait
 class ABC_NodeOp<string mnemonic, list<OpTrait> traits = []> :
-        Op<ABC_Dialect, mnemonic, !listconcat(traits, [NoTerminator])>;
+        Op<ABC_Dialect, mnemonic, !listconcat(traits, [NoTerminator])> {
+  let assemblyFormat = [{
+  regions attr-dict-with-keyword
+  }];
+}
 
 def isAbcExpression : NativeOpTrait<"isAbcExpression">;
 
