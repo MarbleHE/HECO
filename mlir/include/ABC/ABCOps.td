@@ -162,23 +162,24 @@ def ABC_CallOp : ABC_ExpressionOp<"call", []> {
 }
 
 // TODO: Should T be something more semantically relevant, like a Type or something like that?
-class ABC_LiteralOp<string T> : ABC_ExpressionOp<!strconcat("literal_", T), []>{
+class ABC_LiteralOp<string T, Attr value_constrain> : ABC_ExpressionOp<!strconcat("literal_", T), []>{
   let summary = !strconcat("AST Node Literal<", T, ">");
   // TODO: Find or introduce attribute to check that this is a legal type
-  let arguments = (ins AnyAttr : $value);
+  let arguments = (ins value_constrain : $value);
 
   let assemblyFormat = [{
-     $value attr-dict-with-keyword
+    $value attr-dict-with-keyword
   }];
 
 }
 
-def ABC_LiteralBoolOp : ABC_LiteralOp<"bool">;
-def ABC_LiteralCharOp : ABC_LiteralOp<"char">;
-def ABC_LiteralIntOp : ABC_LiteralOp<"int">;
-def ABC_LiteralFloatOp : ABC_LiteralOp<"float">;
-def ABC_LiteralDoubleOp : ABC_LiteralOp<"double">;
-def ABC_LiteralStringOp : ABC_LiteralOp<"string">;
+// TODO: These should support vectors, too!
+def ABC_LiteralBoolOp : ABC_LiteralOp<"bool", BoolAttr>;
+def ABC_LiteralCharOp : ABC_LiteralOp<"char", APIntAttr>;
+def ABC_LiteralIntOp : ABC_LiteralOp<"int", APIntAttr>;
+def ABC_LiteralFloatOp : ABC_LiteralOp<"float", F64Attr>;
+def ABC_LiteralDoubleOp : ABC_LiteralOp<"double", F64Attr>;
+def ABC_LiteralStringOp : ABC_LiteralOp<"string", StrAttr>;
 
 //TODO: TernaryOperator, once it's supported by the C++ based DSL frnotend
 
