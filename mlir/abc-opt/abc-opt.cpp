@@ -20,13 +20,15 @@
 #include "llvm/Support/ToolOutputFile.h"
 
 #include "ABC/ABCDialect.h"
+#include "LowerASTtoSSA.h"
+
+#include <iostream>
 
 using namespace mlir;
 using namespace abc;
 
 int main(int argc, char **argv) {
-  registerAllPasses();
-  // TODO: Register abc passes here.
+  mlir::MLIRContext context;
 
   mlir::DialectRegistry registry;
   registry.insert<ABCDialect>();
@@ -35,6 +37,14 @@ int main(int argc, char **argv) {
   // include what you need like above. You only need to register dialects that
   // will be *parsed* by the tool, not the one generated
   // registerAllDialects(registry);
+
+  //  PassManager pm(&context);
+  //  pm.addNestedPass<abc::ReturnOp>(abc::createLowerASTtoSSAPass());
+
+  //registerAllPasses();
+  PassRegistration<LowerASTtoSSAPass>();
+
+  std::cout << "DONE STUFF" << std::endl;
 
   return asMainReturnCode(
       MlirOptMain(argc, argv, "ABC optimizer driver\n", registry));

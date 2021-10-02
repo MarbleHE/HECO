@@ -6,7 +6,7 @@ set(LIBS
         MLIROptLib
         MLIRABC
         )
-add_llvm_executable(abc-opt abc-opt.cpp)
+add_llvm_executable(abc-opt LowerASTtoSSA.cpp abc-opt.cpp)
 
 llvm_update_compile_flags(abc-opt)
 target_link_libraries(abc-opt PRIVATE ${LIBS})
