@@ -46,6 +46,10 @@ def ABC_FunctionOp : ABC_StatementOp<"function", []> {
       // TODO: Find or introduce attribute to check that this is a legal type
       AnyAttr : $return_type
   );
+
+  let assemblyFormat = [{
+    $return_type $name attr-dict-with-keyword regions
+  }];
 }
 
 def ABC_IfOp : ABC_StatementOp<"if", []> {
