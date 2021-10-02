@@ -179,7 +179,7 @@ class ABC_LiteralOp<string T, Attr value_constrain> : ABC_ExpressionOp<!strconca
 
 // TODO: These should support vectors, too!
 def ABC_LiteralBoolOp : ABC_LiteralOp<"bool", BoolAttr>;
-def ABC_LiteralCharOp : ABC_LiteralOp<"char", APIntAttr>;
+def ABC_LiteralCharOp : ABC_LiteralOp<"char", AnyAttrOf<[APIntAttr, APIntAttr]>>;
 def ABC_LiteralIntOp : ABC_LiteralOp<"int", APIntAttr>;
 def ABC_LiteralFloatOp : ABC_LiteralOp<"float", F64Attr>;
 def ABC_LiteralDoubleOp : ABC_LiteralOp<"double", F64Attr>;

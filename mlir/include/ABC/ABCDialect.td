@@ -45,6 +45,34 @@ def AnyBlock : Region<CPred<"true">, "any abc Block">;
 // TODO: Replace predicate with a function that checks if region contains only statements
 def ZeroOrMoreStatements : Region<CPred<"true">, "zero or more statements">;
 
+//class AnyTypeOf<list<Type> allowedTypes, string summary = "",
+//      string cppClassName = "::mlir::Type"> : Type<
+//  // Satisfy any of the allowed type's condition
+//  Or<!foreach(allowedtype, allowedTypes, allowedtype.predicate)>,
+//  !if(!eq(summary, ""),
+//    !interleave(!foreach(t, allowedTypes, t.summary), " or "),
+//    summary),
+//  cppClassName>;
+
+//class AnyAttrOf<list<Attr> allowedAttrs, string summary = "",
+//      string cppClassName = "::mlir::Attribute"> : Attr<
+//  // Satisfy any of the allowed attr's condition
+//  Or<!foreach(allowedattr, allowedAttrs, allowedattr.predicate)>,
+//  !if(!eq(summary, ""),
+//    !interleave(!foreach(t, allowedAttrs, t.summary), " or "),
+//  summary)>;
+
+// Any attribute from the given list
+class AnyAttrOf<list<Attr> allowedAttrs, string summary = "",
+    string cppClassName = "::mlir::Attribute"> : Attr<
+// Satisfy any of the allowed attribute's condition
+Or<!foreach(allowedattr, allowedAttrs, allowedattr.predicate)>,
+!if(!eq(summary, ""),
+!interleave(!foreach(t, allowedAttrs, t.summary), " or "),
+summary)> {
+let returnType = "::mlir::Attribute";
+let convertFromStorage = "$_self";
+}
 //===----------------------------------------------------------------------===//
 // Base ABC NodeOp definitions.
 //===----------------------------------------------------------------------===//
