@@ -1,4 +1,5 @@
-// RUN: abc-translate %s -mlir-print-op-on-diagnostic -mlir-print-stacktrace-on-diagnostic
+// RUN: abc-opt %s -mlir-print-op-on-diagnostic -mlir-print-stacktrace-on-diagnostic
+//| abc-opt
 //| FileCheck %s
 
 "abc.function"() ({

@@ -14,25 +14,13 @@
 #include "mlir/InitAllTranslations.h"
 #include "mlir/Support/LogicalResult.h"
 #include "mlir/Translation.h"
-#include "mlir/Dialect/StandardOps/IR/Ops.h"
 
 #include "ABC/ABCDialect.h"
 
-using namespace std;
-using namespace mlir;
-using namespace abc;
-
-
 int main(int argc, char **argv) {
-  registerAllTranslations();
+  mlir::registerAllTranslations();
 
-  DialectRegistry registry;
-  registry.insert<ABCDialect>();
-  registry.insert<StandardOpsDialect>();
-  // Add the following to include *all* MLIR Core dialects, or selectively
-  // include what you need like above. You only need to register dialects that
-  // will be *parsed* by the tool, not the one generated
-  // registerAllDialects(registry);
+  // TODO: Register abc translations here.
 
   return failed(
       mlir::mlirTranslateMain(argc, argv, "MLIR Translation Testing Tool"));
