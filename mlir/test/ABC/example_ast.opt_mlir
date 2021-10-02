@@ -1,0 +1,44 @@
+builtin.module  {
+  abc.function "void" @foo  {
+    abc.function_parameter "secret int" @y
+  },  {
+    abc.block  {
+      abc.variable_declaration "int" @x = ( {
+        abc.literal_int 17 : i64
+      })
+      abc.assignment  {
+        abc.variable  attributes {name = "foo"}
+      },  {
+        abc.literal_int 5 : i64
+      }
+      abc.for  {
+        abc.block  {
+        }
+      },  {
+        abc.literal_bool true
+      },  {
+        abc.block  {
+        }
+      },  {
+        abc.block  {
+          abc.if  {
+            abc.literal_bool true
+          },  {
+            abc.block  {
+            }
+          },  {
+            abc.block  {
+            }
+          }
+          abc.if  {
+            abc.literal_bool true
+          },  {
+            abc.block  {
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
