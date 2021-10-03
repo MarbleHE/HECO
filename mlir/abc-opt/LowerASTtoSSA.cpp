@@ -20,22 +20,34 @@ struct ReturnOpLowering : public mlir::ConversionPattern {
   mlir::LogicalResult
   matchAndRewrite(mlir::Operation *op, ArrayRef<mlir::Value> operands,
                   mlir::ConversionPatternRewriter &rewriter) const final {
-    auto loc = op->getLoc();
-
-    std::cout << "WOHOO" << std::endl;
-
-    // TODO: Fix this, for now replace it with an mlir::ReturnOp, ignoring value
-    rewriter.create<mlir::ReturnOp>(loc);
+    
+    // TODO: For now replace it with an mlir::ReturnOp, ignoring value
+    //    rewriter.create<mlir::ReturnOp>(loc);
+    rewriter.eraseOp(op);
 
     return success();
   }
 };
 
 
-
+//struct FunctionOpLowering : public mlir::ConversionPattern {
+//  FunctionOpLowering(mlir::MLIRContext *ctx)
+//      : mlir::ConversionPattern(abc::FunctionOp::getOperationName(), 1, ctx) {}
+//
+//  mlir::LogicalResult
+//  matchAndRewrite(mlir::Operation *op, ArrayRef<mlir::Value> operands,
+//                  mlir::ConversionPatternRewriter &rewriter) const final {
+//    auto loc = op->getLoc();
+//
+//    // TODO: For now replace it with an mlir::ReturnOp, ignoring value
+//    rewriter.create<mlir::ReturnOp>(loc);
+//    rewriter.eraseOp(op);
+//
+//    return success();
+//  }
+//};
 
 void LowerASTtoSSAPass::runOnOperation() {
-  std::cout << "RUN ON OP" << std::endl;
   ConversionTarget target(getContext());
   target.addLegalDialect<AffineDialect, StandardOpsDialect>();
   target.addLegalOp<mlir::ReturnOp>();
@@ -46,6 +58,7 @@ void LowerASTtoSSAPass::runOnOperation() {
   // the set of patterns that will lower the Toy operations.
   RewritePatternSet patterns(&getContext());
   patterns.add<ReturnOpLowering>(&getContext());
+//  patterns.add<FunctionOpLowering>(&getContext());
 
   // With the target and rewrite patterns defined, we can now attempt the
   // conversion. The conversion will signal failure if any of our `illegal`

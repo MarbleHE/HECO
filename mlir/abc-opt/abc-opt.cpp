@@ -44,8 +44,6 @@ int main(int argc, char **argv) {
   //registerAllPasses();
   PassRegistration<LowerASTtoSSAPass>();
 
-  std::cout << "DONE STUFF" << std::endl;
-
   return asMainReturnCode(
       MlirOptMain(argc, argv, "ABC optimizer driver\n", registry));
 }
