@@ -1,7 +1,6 @@
 #ifndef AST_OPTIMIZER_BOXBLURTEST_H
 #define AST_OPTIMIZER_BOXBLURTEST_H
 
-#include "seal/seal.h"
 #include "MultiTimer.h"
 
 /// Encrypted BoxBlur, using 3x3 Kernel batched as 9 rotations of the image

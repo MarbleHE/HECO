@@ -9,6 +9,10 @@
 
 #include "BoxBlurTest.h"
 
+#ifdef HAVE_SEAL_BFV
+#include "seal/seal.h"
+#endif
+
 /// Original, plain C++ program for a naive Box blur
 /// This uses a 3x3 Kernel and applies it by sliding across the 2D image
 ///             | 1  1  1 |
@@ -132,6 +136,7 @@ std::vector<int> fastBoxBlur(const std::vector<int> &img) {
   return img3;
 }
 
+#ifdef HAVE_SEAL_BFV
 /// Encrypted BoxBlur, using 3x3 Kernel batched as 9 rotations of the image
 /// Currently, this requires the image vector to be n/2 long,
 /// so we don't run into issues with rotations.
@@ -324,6 +329,7 @@ std::vector<int64_t> encryptedBatchedBoxBlur_Porcupine(
   timer.stopTimer(t2);
   return retVal;
 }
+#endif
 
 // use this fixed seed to enable reproducibility of the matrix inputs
 #define RAND_SEED 4673838
@@ -402,6 +408,7 @@ TEST_F(BoxBlurTest, NaiveBoxBlur_FastBoxBlur_Equivalence) {  /* NOLINT */
   EXPECT_EQ(fast, naive);
 }
 
+#ifdef HAVE_SEAL_BFV
 /// Test to ensure that fastBoxBlur and encryptedBoxBlur compute the same thing
 TEST_F(BoxBlurTest, EncryptedBoxBlur_FastBoxBlur_Equivalence) { /* NOLINT */
 
@@ -437,6 +444,7 @@ TEST_F(BoxBlurTest, Porcupine_Naive_Equivalence) { /* NOLINT */
 
   EXPECT_EQ(naive, enc);
 }
+#endif
 
 TEST_F(BoxBlurTest, clearTextEvaluationNaive) { /* NOLINT */
   /// program's input

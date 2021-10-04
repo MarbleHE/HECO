@@ -1,4 +1,7 @@
+#ifdef HAVE_SEAL_BFV
+
 #include <complex>
+#include <random>
 
 #include "BoxBlurTest.h"
 #include "MultiTimer.h"
@@ -35,6 +38,7 @@ void getInputMatrix(size_t size, std::vector<int> &destination) {
   for (const auto &sub : data) destination.insert(destination.end(), sub.begin(), sub.end());
 }
 
+
 int main(int argc, char *argv[]) {
   size_t poly_modulus_degree = 2 << 12;
   size_t size = std::sqrt(poly_modulus_degree / 2);
@@ -59,3 +63,5 @@ int main(int argc, char *argv[]) {
   std::cout << "porcupine:" << std::endl;
   porcupineTimer.printToStream(std::cout);
 }
+
+#endif
