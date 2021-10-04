@@ -104,7 +104,7 @@ def ABC_FunctionParameterOp : ABC_TargetOp<"function_parameter", []> {
   let arguments = (ins
     SymbolNameAttr : $name,
     // TODO: Find or introduce attribute to check that this is a legal type
-    AnyAttr : $type
+    TypeAttr : $type
   );
 
   let assemblyFormat = [{

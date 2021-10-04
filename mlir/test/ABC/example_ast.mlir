@@ -3,7 +3,7 @@
 //| FileCheck %s
 
 "abc.function"() ({
-   "abc.function_parameter"() {type = f32, name = "y"} : () -> ()
+   "abc.function_parameter"() {type = !abc.int, name = "y"} : () -> ()
 }, {
     "abc.block" () ({
         "abc.variable_declaration"() ({
