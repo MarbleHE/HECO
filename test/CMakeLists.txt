@@ -53,6 +53,7 @@ set(TEST_FILES
         end-to-end/MatrixVectorProductTest.cpp
         end-to-end/PolynomialKernelTest.cpp
         end-to-end/RobertsCrossTest.cpp
+        end-to-end/MultiTimer.cpp
         parser/ParserTest.cpp
         parser/ParserTestHelpers.h
         parser/TokenizerTest.cpp
@@ -92,3 +93,13 @@ gtest_discover_tests(testing-all TEST_PREFIX gtest:)
 
 # make sure that ast_lib is built before the testing-all target
 add_dependencies(testing-all ast_opt)
+
+# Temporary benchmarking infra:
+set(BB_BENCH_FILES
+        end-to-end/BoxBlurTest.cpp
+        end-to-end/BoxBlurBench.cpp
+        end-to-end/MultiTimer.cpp
+)
+add_executable(bb-bench ${BB_BENCH_FILES})
+target_link_libraries(bb-bench PRIVATE gtest ast_opt gtest_main)
+target_include_directories(bb-bench PRIVATE ${ast_optimizer_SOURCE_DIR}/include/)

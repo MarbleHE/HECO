@@ -7,6 +7,8 @@
 #include "ast_opt/parser/Parser.h"
 #include "gtest/gtest.h"
 
+#include "BoxBlurTest.h"
+
 /// Original, plain C++ program for a naive Box blur
 /// This uses a 3x3 Kernel and applies it by sliding across the 2D image
 ///             | 1  1  1 |
@@ -27,8 +29,31 @@ std::vector<int> naiveBoxBlur(const std::vector<int> &img) {
       int value = 0;
       for (int j = -1; j < 2; ++j) {
         for (int i = -1; i < 2; ++i) {
-          value = value + weightMatrix.at(i + 1).at(j + 1)
+          value += weightMatrix.at(i + 1).at(j + 1)
               *img.at(((x + i)*imgSize + (y + j))%img.size());
+        }
+      }
+      img2[imgSize*x + y] = value;
+    }
+  }
+  return img2;
+}
+
+/// Modified, plain C++ program for a naive Box blur
+/// This uses a 2x2 Kernel and applies it by sliding across the 2D image
+///
+/// \param img Pixel (x,y) = (column, row) should be at position x*imgSize + y
+/// \return transformed image
+std::vector<int> naiveBoxBlur2x2(const std::vector<int> &img) {
+  const auto imgSize = (int) std::ceil(std::sqrt(img.size()));
+  std::vector<std::vector<int>> weightMatrix = {{1, 1}, {1, 1}};
+  std::vector<int> img2(img.begin(), img.end());
+  for (int x = 0; x < imgSize; ++x) {
+    for (int y = 0; y < imgSize; ++y) {
+      int value = 0;
+      for (int j = -1; j < 1; ++j) {
+        for (int i = -1; i < 1; ++i) {
+          value += weightMatrix.at(i + 1).at(j + 1) * img.at(((x + i)*imgSize + (y + j)) % img.size());
         }
       }
       img2[imgSize*x + y] = value;
@@ -107,6 +132,195 @@ std::vector<int> fastBoxBlur(const std::vector<int> &img) {
   return img3;
 }
 
+/// Encrypted BoxBlur, using 3x3 Kernel batched as 9 rotations of the image
+/// Currently, this requires the image vector to be n/2 long,
+/// so we don't run into issues with rotations.
+/// \param img Pixel (x,y) = (column, row) should be at position x*imgSize + y
+/// \param poly_modulus_degree FHE parameter, degree n of the polynomials
+/// \param encrypt_weights By default, the kernel weights are plaintexts. If this is set, they are also ciphertexts.
+/// \return transformed image
+std::vector<int64_t> encryptedBatchedBoxBlur(
+        MultiTimer &timer, const std::vector<int> &img, size_t poly_modulus_degree, bool encrypt_weights)
+{
+  int t0 = timer.startTimer();
+  // Input Check
+  if (img.size() != poly_modulus_degree / 2)
+  {
+    std::cerr << "WARNING: BatchedBoxBlur might be incorrect when img.size() does not match N/2." << std::endl;
+  }
+
+  /// Rotations for 3x3 Kernel
+  /// Offsets correspond to the different kernel positions
+  int img_size = (int)std::sqrt(img.size());
+  std::vector<int> rotations = { -img_size + 1, 1,  img_size + 1, -img_size, 0, img_size,
+                                 -img_size - 1, -1, img_size - 1 };
+  // Context Setup
+  // std::cout << "Setting up SEAL Context" << std::endl;
+  seal::EncryptionParameters parameters(seal::scheme_type::bfv);
+  parameters.set_poly_modulus_degree(poly_modulus_degree);
+  parameters.set_coeff_modulus(seal::CoeffModulus::BFVDefault(parameters.poly_modulus_degree()));
+  parameters.set_plain_modulus(seal::PlainModulus::Batching(parameters.poly_modulus_degree(), 30));
+  seal::SEALContext context(parameters);
+
+  /// Create keys
+  // std::cout << "Generating Keys & Helper Objects" << std::endl;
+  seal::KeyGenerator keygen(context);
+  seal::SecretKey secretKey = keygen.secret_key();
+  seal::PublicKey publicKey;
+  keygen.create_public_key(publicKey);
+  seal::GaloisKeys galoisKeys;
+  keygen.create_galois_keys(rotations, galoisKeys);
+
+  // Create helper objects
+  seal::BatchEncoder encoder(context);
+  seal::Encryptor encryptor(context, publicKey, secretKey);
+  seal::Decryptor decryptor(context, secretKey);
+  seal::Evaluator evaluator(context); // changed from this: EVALUATOR evaluator(context);
+
+  // Create Weight Matrix
+  std::vector<int> weight_matrix = { 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+
+  // Encode & Encrypt the image
+  // std::cout << "Encoding & Encrypting Image" << std::endl;
+  seal::Plaintext img_ptxt;
+  seal::Ciphertext img_ctxt;
+  std::vector<uint64_t> long_vec = std::vector<uint64_t>(img.begin(), img.end());
+  // std::cout << long_vec.size() << std::endl;
+  encoder.encode(long_vec, img_ptxt);
+  encryptor.encrypt(img_ptxt, img_ctxt);
+
+  // Encode & (if needed) Encrypt the weights
+  std::vector<seal::Plaintext> w_ptxts(weight_matrix.size());
+  std::vector<seal::Ciphertext> w_ctxts(weight_matrix.size());
+  for (size_t i = 0; i < weight_matrix.size(); ++i)
+  {
+    encoder.encode(std::vector<int64_t>(encoder.slot_count(), weight_matrix[i]), w_ptxts[i]);
+    if (encrypt_weights)
+    {
+      encryptor.encrypt(w_ptxts[i], w_ctxts[i]);
+    }
+  }
+  timer.stopTimer(t0);
+
+  int t1 = timer.startTimer();
+  // Create rotated copies of the image and multiply by weights
+  // std::cout << "Applying Kernel" << std::endl;
+  std::vector<seal::Ciphertext> rotated_img_ctxts(9, seal::Ciphertext(context));
+  for (size_t i = 0; i < rotations.size(); ++i)
+  {
+    evaluator.rotate_rows(img_ctxt, rotations[i], galoisKeys, rotated_img_ctxts[i]);
+
+    if (encrypt_weights)
+    {
+      evaluator.multiply_inplace(rotated_img_ctxts[i], w_ctxts[i]);
+      // relinearization not needed since no more mults coming up
+    }
+    else
+    {
+      // If the weight is ptxt and one, we can skip this entirely
+      if (weight_matrix[i] != 1)
+      {
+        evaluator.multiply_plain_inplace(rotated_img_ctxts[i], w_ptxts[i]);
+      }
+    }
+  }
+
+  // Sum up all the ciphertexts
+  seal::Ciphertext result_ctxt(context);
+  evaluator.add_many(rotated_img_ctxts, result_ctxt);
+  timer.stopTimer(t1);
+
+  int t2 = timer.startTimer();
+  // Decrypt & Return result
+  // std::cout << "Decrypting Result" << std::endl;
+  seal::Plaintext result_ptxt;
+  decryptor.decrypt(result_ctxt, result_ptxt);
+  std::vector<int64_t> result;
+  encoder.decode(result_ptxt, result);
+  timer.stopTimer(t2);
+  // std::cout << result.size() << std::endl;
+  return result;
+}
+
+//TODO: Need 2x2 expert boxblur example
+
+/// Encrypted BoxBlur, using the pseudocode given by the porcupine paper:
+///  Ciphertext boxblur(Ciphertext c0, int h, int w)
+///      Ciphertext c1 = rotate(c0, -1 * w)
+///      Ciphertext c2 = add(c0, c1)
+///      Ciphertext c3 = rotate(c2, -1)
+///      return add(c2, c3)
+/// \param img Pixel (x,y) = (column, row) should be at position x*imgSize + y
+/// \param poly_modulus_degree FHE parameter, degree n of the polynomials
+/// \return transformed image
+std::vector<int64_t> encryptedBatchedBoxBlur_Porcupine(
+        MultiTimer &timer, const std::vector<int> &img, size_t poly_modulus_degree)
+{
+  /* Setup */
+  auto t0 = timer.startTimer();
+
+  seal::EncryptionParameters params(seal::scheme_type::bfv);
+
+  params.set_poly_modulus_degree(poly_modulus_degree);
+  params.set_coeff_modulus(seal::CoeffModulus::BFVDefault(poly_modulus_degree));
+  params.set_plain_modulus(seal::PlainModulus::Batching(poly_modulus_degree, 20));
+
+  seal::SEALContext context(params);
+
+  seal::KeyGenerator keygen(context);
+  seal::SecretKey secret_key = keygen.secret_key();
+  seal::PublicKey public_key;
+  keygen.create_public_key(public_key);
+  seal::GaloisKeys galois_keys;
+  keygen.create_galois_keys(galois_keys);
+
+  seal::Encryptor encryptor(context, public_key);
+  seal::Evaluator evaluator(context);
+  seal::Decryptor decryptor(context, secret_key);
+
+  seal::BatchEncoder batch_encoder(context);
+
+  seal::Plaintext plain;
+  std::vector<uint64_t> long_vec = std::vector<uint64_t>(img.begin(), img.end());
+  batch_encoder.encode(long_vec, plain);
+
+  seal::Ciphertext c0;
+  encryptor.encrypt(plain, c0);
+  timer.stopTimer(t0);
+
+  /* Computation */
+  auto t1 = timer.startTimer();
+
+  // Ciphertext c1 = rotate(c0, -1 * w)
+  seal::Ciphertext c1;
+  const auto imgSize = (int) std::ceil(std::sqrt(img.size()));
+  evaluator.rotate_rows(c0, -1 * imgSize, galois_keys, c1);
+
+  // Ciphertext c2 = add(c0, c1)
+  seal::Ciphertext c2;
+  evaluator.add(c0, c1, c2);
+
+  // Ciphertext c3 = rotate(c2, -1)
+  seal::Ciphertext c3;
+  evaluator.rotate_rows(c2, -1, galois_keys, c3);
+
+  // return add(c2, c3)
+  seal::Ciphertext result;
+  evaluator.add(c2, c3, result);
+  timer.stopTimer(t1);
+
+  /* Decrypt */
+  auto t2 = timer.startTimer();
+
+  seal::Plaintext decrypted;
+  decryptor.decrypt(result, decrypted);
+
+  std::vector<int64_t> retVal;
+  batch_encoder.decode(decrypted, retVal);
+  timer.stopTimer(t2);
+  return retVal;
+}
+
 // use this fixed seed to enable reproducibility of the matrix inputs
 #define RAND_SEED 4673838
 // use a 4x4 matrix for the tests
@@ -153,7 +367,8 @@ class BoxBlurTest : public ::testing::Test {  /* NOLINT (predictable sequence ex
   }
 
   void printMatrix(size_t size, std::vector<int> &matrix) {
-    for (auto row = size - 1; row >= 0; --row) {
+    /* We assume a row major layout of the matrix, where the first element is the bottom left pixel */
+    for (int64_t row = size - 1; row >= 0; --row) {
       std::cout << matrix.at(0*size + row);
       for (size_t col = 1; col < size; ++col) {
         std::cout << "\t" << matrix.at(col*size + row);
@@ -163,7 +378,7 @@ class BoxBlurTest : public ::testing::Test {  /* NOLINT (predictable sequence ex
   }
 };
 
-/// Test to ensure that naivBoxBlur and fastBoxBlur actually compute the same thing!
+/// Test to ensure that naiveBoxBlur and fastBoxBlur actually compute the same thing!
 TEST_F(BoxBlurTest, NaiveBoxBlur_FastBoxBlur_Equivalence) {  /* NOLINT */
 
   size_t size = 16;
@@ -181,6 +396,42 @@ TEST_F(BoxBlurTest, NaiveBoxBlur_FastBoxBlur_Equivalence) {  /* NOLINT */
   //  printMatrix(size, fast);
 
   EXPECT_EQ(fast, naive);
+}
+
+/// Test to ensure that fastBoxBlur and encryptedBoxBlur compute the same thing
+TEST_F(BoxBlurTest, EncryptedBoxBlur_FastBoxBlur_Equivalence) { /* NOLINT */
+
+  size_t poly_modulus_degree = 2 << 12;
+  size_t size = std::sqrt(poly_modulus_degree / 2);
+  std::vector<int> img;
+  BoxBlurTest::getInputMatrix(size, img);
+
+  auto fast = fastBoxBlur(img);
+
+  auto dummy = MultiTimer();
+  auto encrypted = encryptedBatchedBoxBlur(dummy, img, poly_modulus_degree);
+  std::vector<int> enc(begin(encrypted), end(encrypted));
+  enc.resize(fast.size()); // Is there a more efficient way to do this?
+
+  EXPECT_EQ(fast, enc);
+}
+
+/// Test to ensure that naiveBoxBlur2x2 and encryptedBatchedBoxBlur_Porcupine compute the same thing
+TEST_F(BoxBlurTest, Porcupine_Naive_Equivalence) { /* NOLINT */
+
+  size_t poly_modulus_degree = 2 << 12;
+  size_t size = std::sqrt(poly_modulus_degree / 2);
+  std::vector<int> img;
+  BoxBlurTest::getInputMatrix(size, img);
+
+  auto naive = naiveBoxBlur2x2(img);
+
+  auto dummy = MultiTimer();
+  auto encrypted = encryptedBatchedBoxBlur_Porcupine(dummy, img, poly_modulus_degree);
+  std::vector<int> enc(begin(encrypted), end(encrypted));
+  enc.resize(naive.size()); // Is there a more efficient way to do this?
+
+  EXPECT_EQ(naive, enc);
 }
 
 TEST_F(BoxBlurTest, clearTextEvaluationNaive) { /* NOLINT */
