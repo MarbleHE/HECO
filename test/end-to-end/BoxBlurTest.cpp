@@ -136,7 +136,143 @@ std::vector<int> fastBoxBlur(const std::vector<int> &img) {
   return img3;
 }
 
+std::vector<int> fastBoxBlur2x2(const std::vector<int> &img) {
+  const auto imgSize = (int) std::ceil(std::sqrt(img.size()));
+  std::vector<int> img2(img.begin(), img.end());
+
+  // Horizontal Kernel: for each row y
+  for (int y = 0; y < imgSize; ++y) {
+    // Get kernel for first pixel of row y, using padding
+    int value = img.at((-1*imgSize + y) % img.size()) + img.at(0*imgSize + y);
+    // Division that would usually happen here is omitted
+    img2[0*imgSize + y] = value;
+
+    // Go through the rest of row y
+    for (int x = 1; x < imgSize; ++x) {
+      // remove the previous pixel
+      value -= img.at(((x - 2)*imgSize + y) % img.size());
+      // add the new pixel
+      value += img.at((x*imgSize + y) % img.size());
+      // save result
+      img2[x*imgSize + y] = value;
+    }
+  }
+
+  // Now apply the vertical kernel to img2
+
+  // Create new output image
+  std::vector<int> img3(img2.begin(), img2.end());
+
+  // Vertical Kernel: for each column x
+  for (int x = 0; x < imgSize; ++x) {
+    // Get kernel for first pixel of column x with padding
+    int value = img2.at((x*imgSize - 1) % img.size()) + img2.at(x*imgSize + 0);
+    // Division that would usually happen here is omitted
+    img3[x*imgSize + 0] = value;
+
+    // Go through the rest of column x
+    for (int y = 1; y < imgSize; ++y) {
+      // remove the previous pixel
+      value -= img2.at((x*imgSize + y - 2) % img.size());
+      // add the new pixel
+      value += img2.at((x*imgSize + y) % img.size());
+      // save result
+      img3[x*imgSize + y] = value;
+    }
+  }
+  return img3;
+}
+
 #ifdef HAVE_SEAL_BFV
+std::vector<uint64_t> encryptedFastBoxBlur2x2(MultiTimer &timer, const std::vector<int> &img, size_t poly_modulus_degree) {
+  const auto imgSize = (int) std::ceil(std::sqrt(img.size()));
+
+  // Context Setup
+  seal::EncryptionParameters parameters(seal::scheme_type::bfv);
+  parameters.set_poly_modulus_degree(poly_modulus_degree);
+  parameters.set_coeff_modulus(seal::CoeffModulus::BFVDefault(parameters.poly_modulus_degree()));
+  parameters.set_plain_modulus(seal::PlainModulus::Batching(parameters.poly_modulus_degree(), 30));
+  seal::SEALContext context(parameters);
+
+  // Create keys
+  seal::KeyGenerator keygen(context);
+  seal::SecretKey secretKey = keygen.secret_key();
+  seal::PublicKey publicKey;
+  keygen.create_public_key(publicKey);
+
+  // Create helper objects
+  seal::Encryptor encryptor(context, publicKey, secretKey);
+  seal::Decryptor decryptor(context, secretKey);
+  seal::Evaluator evaluator(context); // changed from this: EVALUATOR evaluator(context);
+
+  std::vector<seal::Ciphertext> encImg(img.size());
+  for (int i = 0; i < img.size(); ++i) {
+    // Here we will assume that img only contains positive values in order to reuse seal utilities
+    uint64_t pixel = img[i];
+    seal::Plaintext ptx = seal::Plaintext(seal::util::uint_to_hex_string(&pixel, std::size_t(1)));
+    encryptor.encrypt(ptx, encImg[i]);
+  }
+  std::vector<seal::Ciphertext> img2(encImg.begin(), encImg.end());
+
+  // Horizontal Kernel: for each row y
+  for (int y = 0; y < imgSize; ++y) {
+    // Get kernel for first pixel of row y, using padding
+    seal::Ciphertext value;
+    evaluator.add(encImg.at((-1*imgSize + y) % encImg.size()), encImg.at(0*imgSize + y), value);
+    // Division that would usually happen here is omitted
+    img2[0*imgSize + y] = value; // Is this gonna copy or just have the reference?
+
+    // Go through the rest of row y
+    for (int x = 1; x < imgSize; ++x) {
+      // remove the previous pixel
+      //value -= img.at(((x - 2)*imgSize + y) % img.size());
+      evaluator.sub(value, encImg.at(((x - 2)*imgSize + y) % encImg.size()), value);
+      // add the new pixel
+      // value += img.at((x*imgSize + y) % img.size());
+      evaluator.add(value, encImg.at((x*imgSize + y) % encImg.size()), value);
+      // save result
+      img2[x*imgSize + y] = value;
+    }
+  }
+
+  // Now apply the vertical kernel to img2
+
+  // Create new output image
+  std::vector<seal::Ciphertext> img3(img2.begin(), img2.end());
+
+  // Vertical Kernel: for each column x
+  for (int x = 0; x < imgSize; ++x) {
+    // Get kernel for first pixel of column x with padding
+    //int value = img2.at((x*imgSize - 1) % img.size()) + img2.at(x*imgSize + 0);
+    seal::Ciphertext value;
+    evaluator.add(img2.at((x*imgSize - 1) % img.size()), img2.at(x*imgSize + 0), value);
+    // Division that would usually happen here is omitted
+    img3[x*imgSize + 0] = value;
+
+    // Go through the rest of column x
+    for (int y = 1; y < imgSize; ++y) {
+      // remove the previous pixel
+      // value -= img2.at((x*imgSize + y - 2) % img.size());
+      evaluator.sub(value, img2.at((x*imgSize + y - 2) % img.size()), value);
+      // add the new pixel
+      // value += img2.at((x*imgSize + y) % img.size());
+      evaluator.add(value, img2.at((x*imgSize + y) % img.size()), value);
+      // save result
+      img3[x*imgSize + y] = value;
+    }
+  }
+
+  std::vector<uint64_t> result(img.size());
+  for (int i = 0; i < img3.size(); ++i) {
+    seal::Plaintext ptx;
+    decryptor.decrypt(img3[i], ptx);
+    result[i] = *ptx.data();
+  }
+
+  return result;
+}
+
+
 /// Encrypted BoxBlur, using 3x3 Kernel batched as 9 rotations of the image
 /// Currently, this requires the image vector to be n/2 long,
 /// so we don't run into issues with rotations.
@@ -381,7 +517,7 @@ class BoxBlurTest : public ::testing::Test {  /* NOLINT (predictable sequence ex
     for (int64_t row = size - 1; row >= 0; --row) {
       std::cout << matrix.at(0*size + row);
       for (size_t col = 1; col < size; ++col) {
-        std::cout << "\t" << matrix.at(col*size + row);
+        std::cout << "\t" << std::setw(4) << matrix.at(col*size + row);
       }
       std::cout << std::endl;
     }
@@ -408,7 +544,45 @@ TEST_F(BoxBlurTest, NaiveBoxBlur_FastBoxBlur_Equivalence) {  /* NOLINT */
   EXPECT_EQ(fast, naive);
 }
 
+
+/// Test to ensure that 2x2 naiveBoxBlur and fastBoxBlur actually compute the same thing!
+TEST_F(BoxBlurTest, NaiveBoxBlur2x2_FastBoxBlur2x2_Equivalence) {  /* NOLINT */
+
+  size_t size = 16;
+  std::vector<int> img;
+  BoxBlurTest::getInputMatrix(size, img);
+  // std::cout << "img:" << std::endl;
+  // printMatrix(size, img);
+
+  auto naive = naiveBoxBlur2x2(img);
+  // std::cout << "naive:" << std::endl;
+  // printMatrix(size, naive);
+
+  auto fast = fastBoxBlur2x2(img);
+  // std::cout << "fast:" << std::endl;
+  // printMatrix(size, fast);
+
+  EXPECT_EQ(fast, naive);
+}
+
 #ifdef HAVE_SEAL_BFV
+/// Test to ensure that 2x2 fastBoxBlur and non-batched encrypted actually compute the same thing!
+TEST_F(BoxBlurTest, NonBatchedBoxBlur2x2_FastBoxBlur2x2_Equivalence) {  /* NOLINT */
+
+  size_t size = 16;
+  std::vector<int> img;
+  size_t poly_modulus_degree = 2 << 12;
+  BoxBlurTest::getInputMatrix(size, img);
+
+  auto fast = fastBoxBlur2x2(img);
+
+  MultiTimer dummy = MultiTimer();
+  auto nonBatched = encryptedFastBoxBlur2x2(dummy, img, poly_modulus_degree);
+  std::vector<int> enc(begin(nonBatched), end(nonBatched));
+
+  EXPECT_EQ(fast, enc);
+}
+
 /// Test to ensure that fastBoxBlur and encryptedBoxBlur compute the same thing
 TEST_F(BoxBlurTest, EncryptedBoxBlur_FastBoxBlur_Equivalence) { /* NOLINT */
 
