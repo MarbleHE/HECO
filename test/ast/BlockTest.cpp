@@ -1,3 +1,5 @@
+#include <ast_opt/parser/Parser.h>
+#include <test/ASTComparison.h>
 #include "ast_opt/ast/Block.h"
 #include "ast_opt/ast/Literal.h"
 #include "ast_opt/ast/Variable.h"
@@ -221,4 +223,50 @@ TEST(BlockTest, JsonOutputTest) { /* NOLINT */
   };
 
   EXPECT_EQ(block.toJson(), j);
+}
+
+
+TEST(BlockTest, JsonInputTest) { /* NOLINT */
+
+  std::vector<std::unique_ptr<AbstractStatement>> statements;
+  statements.emplace_back(std::make_unique<VariableDeclaration>(
+      Datatype(Type::BOOL), std::make_unique<Variable>("foo"), std::make_unique<LiteralBool>(true)));
+  statements.emplace_back(nullptr);
+  statements.emplace_back(std::make_unique<VariableDeclaration>(
+      Datatype(Type::BOOL), std::make_unique<Variable>("boo"), std::make_unique<LiteralBool>(false)));
+  Block expected(std::move(statements));
+
+  std::string json = R""""({
+    "statements": [
+      {
+        "datatype": "bool",
+        "target": {
+          "identifier": "foo",
+          "type": "Variable"
+        },
+        "type": "VariableDeclaration",
+        "value": {
+          "type": "LiteralBool",
+          "value": true
+        }
+      },
+      {
+        "datatype": "bool",
+        "target": {
+          "identifier": "boo",
+          "type": "Variable"
+        },
+        "type": "VariableDeclaration",
+        "value": {
+          "type": "LiteralBool",
+          "value": false
+        }
+      }
+    ],
+    "type": "Block"
+  })"""";
+
+  auto parsed = Parser::parseJson(json);
+
+  ASSERT_TRUE(compareAST(*parsed, expected));
 }

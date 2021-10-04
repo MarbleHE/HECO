@@ -1,5 +1,6 @@
 #include <iostream>
 #include <exception>
+#include <ast_opt/parser/Parser.h>
 #include "ast_opt/ast/Block.h"
 #include "ast_opt/utilities/IVisitor.h"
 
@@ -149,6 +150,14 @@ nlohmann::json Block::toJson() const {
   nlohmann::json j = {{"type", getNodeType()},
                       {"statements", stmtsJson}};
   return j;
+}
+
+std::unique_ptr<Block> Block::fromJson(nlohmann::json j) {
+  std::vector<std::unique_ptr<AbstractStatement>> statements;
+  for (auto statement : j["statements"]) {
+    statements.emplace_back(Parser::parseJsonStatement(statement));
+  }
+  return std::make_unique<Block>(std::move(statements));
 }
 
 std::string Block::toString(bool printChildren) const {

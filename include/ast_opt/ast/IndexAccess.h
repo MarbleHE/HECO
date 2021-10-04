@@ -94,6 +94,9 @@ class IndexAccess : public AbstractTarget {
   /// \param newIndex condition to set, IndexAccess takes ownership
   void setIndex(std::unique_ptr<AbstractExpression> &&newIndex);
 
+  /// Create a Block node from a nlohmann::json representation of this node.
+  /// \return unique_ptr to a new Block node
+  static std::unique_ptr<IndexAccess> fromJson(nlohmann::json j);
 
   ///////////////////////////////////////////////
   ////////// AbstractNode Interface /////////////

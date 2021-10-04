@@ -31,6 +31,10 @@ std::unique_ptr<T> castUniquePtr(std::unique_ptr<S> &&source) {
   }
 }
 
+bool SpecialRuntimeVisitor::isVariableSecretTainted(const std::string uniqueNodeId) {
+  return (secretTaintedMap.count(uniqueNodeId) > 0 && secretTaintedMap.at(uniqueNodeId));
+}
+
 std::unique_ptr<AbstractValue> SpecialRuntimeVisitor::getNextStackElement() {
   auto elem = std::move(intermedResult.top());
   intermedResult.pop();
@@ -43,10 +47,6 @@ void SpecialRuntimeVisitor::visit(BinaryExpression &elem) {
     return std::any_of(op.begin(), op.end(), [&elem](OperatorVariant op) { return elem.getOperator()==Operator(op); });
   };
   auto operatorEquals = [&elem](OperatorVariant op) -> bool { return elem.getOperator()==Operator(op); };
-  auto isSecretTainted = [&](const std::string &uniqueNodeId) -> bool {
-    // we assume here that if it is NOT in the map, then it is NOT secret tainted
-    return (secretTaintedMap.count(uniqueNodeId) > 0 && secretTaintedMap.at(uniqueNodeId));
-  };
   // ---- end
 
   elem.getLeft().accept(*this);
@@ -57,8 +57,8 @@ void SpecialRuntimeVisitor::visit(BinaryExpression &elem) {
 
   // if exactly one of the operands is a ciphertext and we have a commutative operation, then we make sure that
   // the first operand (the one we call the operation on) is the ciphertext
-  auto lhsIsSecret = isSecretTainted(elem.getLeft().getUniqueNodeId());
-  auto rhsIsSecret = isSecretTainted(elem.getRight().getUniqueNodeId());
+  auto lhsIsSecret = isVariableSecretTainted(elem.getLeft().getUniqueNodeId());
+  auto rhsIsSecret = isVariableSecretTainted(elem.getRight().getUniqueNodeId());
   if ((lhsIsSecret!=rhsIsSecret) && elem.getOperator().isCommutative()) {
     if (rhsIsSecret) std::swap(lhsOperand, rhsOperand);
   }
@@ -213,9 +213,7 @@ void SpecialRuntimeVisitor::visit(For &elem) {
     }
   };
 
-  if (elem.hasCondition()
-      && secretTaintedMap.count(elem.getCondition().getUniqueNodeId()) > 0
-      && secretTaintedMap.at(elem.getCondition().getUniqueNodeId())==true) {
+  if (elem.hasCondition() && isVariableSecretTainted(elem.getCondition().getUniqueNodeId())) {
     throw std::runtime_error("For loops over secret conditions are not supported yet!");
   }
 
@@ -269,7 +267,7 @@ void SpecialRuntimeVisitor::visit(If &elem) {
 }
 
 void SpecialRuntimeVisitor::visit(IndexAccess &elem) {
-  if (secretTaintedMap.count(elem.getUniqueNodeId()) > 0) {
+  if (isVariableSecretTainted(elem.getUniqueNodeId())) {
     throw std::runtime_error("IndexAccess for secret variables is not supported by RuntimeVisitor. "
                              "This should have already been removed by the Vectorizer. Error?");
   }

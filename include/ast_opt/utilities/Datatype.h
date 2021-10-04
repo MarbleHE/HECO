@@ -9,8 +9,13 @@ enum class Type {
   BOOL, CHAR, INT, FLOAT, DOUBLE, STRING, VOID
 };
 
+const Type all_types[] = {Type::BOOL, Type::CHAR, Type::INT, Type::FLOAT, Type::DOUBLE, Type:: STRING, Type::VOID};
+
 /// String representation of enums
 std::string enumToString(const Type type);
+
+/// Enum from string representation
+Type stringToTypeEnum(const std::string s);
 
 /// A Datatype consists of a Type and a secret? flag
 class Datatype {
@@ -21,12 +26,19 @@ class Datatype {
   /// If this is a secret/encrypted version
   bool isSecret;
 
+  /// Prefix to mark secret types
+  static const std::string secretPrefix;
+
  public:
 
   /// Create a Datatype with underlying type and secret-ness
   /// \param type Underlying type
   /// \param isSecret (optional) is this a secret/encrypted type?
   explicit Datatype(Type type, bool isSecret = false);
+
+  /// Create a Datatype with underlying type and secret-ness from a string (as stored in JSON)
+  /// \param typeString Type as string with the prefix "secret" for secret values
+  explicit Datatype(std::string typeString);
 
   /// Two types are equal iff they have the same underlying type and isSecret flag
   /// \param rhs Type to compare against

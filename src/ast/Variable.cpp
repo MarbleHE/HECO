@@ -67,6 +67,10 @@ nlohmann::json Variable::toJson() const {
   return j;
 }
 
+std::unique_ptr<Variable> Variable::fromJson(nlohmann::json j) {
+  return std::make_unique<Variable>(j["identifier"].get<std::string>());
+}
+
 std::string Variable::toString(bool printChildren) const {
   return AbstractNode::toStringHelper(printChildren, {getIdentifier()});
 }

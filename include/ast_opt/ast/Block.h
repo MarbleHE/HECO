@@ -91,6 +91,10 @@ class Block : public AbstractStatement {
   /// Removes any potential nullptrs from the statements vector
   void removeNullStatements();
 
+  /// Create a Block node from a nlohmann::json representation of this node.
+  /// \return unique_ptr to a new Block node
+  static std::unique_ptr<Block> fromJson(nlohmann::json j);
+
   ///////////////////////////////////////////////
   ////////// AbstractNode Interface /////////////
   ///////////////////////////////////////////////
