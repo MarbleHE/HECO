@@ -142,7 +142,7 @@ std::vector<int> fastBoxBlur(const std::vector<int> &img) {
 std::vector<int64_t> encryptedBatchedBoxBlur(
         MultiTimer &timer, const std::vector<int> &img, size_t poly_modulus_degree, bool encrypt_weights)
 {
-  int t0 = timer.startTimer();
+  int t0 = timer.startTimer(); // keygen timer start
   // Input Check
   if (img.size() != poly_modulus_degree / 2)
   {
@@ -179,7 +179,9 @@ std::vector<int64_t> encryptedBatchedBoxBlur(
 
   // Create Weight Matrix
   std::vector<int> weight_matrix = { 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+  timer.stopTimer(t0); // keygen timer stop
 
+  auto encryptTime = timer.startTimer(); // encryption timer start
   // Encode & Encrypt the image
   // std::cout << "Encoding & Encrypting Image" << std::endl;
   seal::Plaintext img_ptxt;
@@ -200,9 +202,9 @@ std::vector<int64_t> encryptedBatchedBoxBlur(
       encryptor.encrypt(w_ptxts[i], w_ctxts[i]);
     }
   }
-  timer.stopTimer(t0);
+  timer.stopTimer(encryptTime); // encryption timer stop
 
-  int t1 = timer.startTimer();
+  int t1 = timer.startTimer(); // computation timer start
   // Create rotated copies of the image and multiply by weights
   // std::cout << "Applying Kernel" << std::endl;
   std::vector<seal::Ciphertext> rotated_img_ctxts(9, seal::Ciphertext(context));
@@ -228,16 +230,16 @@ std::vector<int64_t> encryptedBatchedBoxBlur(
   // Sum up all the ciphertexts
   seal::Ciphertext result_ctxt(context);
   evaluator.add_many(rotated_img_ctxts, result_ctxt);
-  timer.stopTimer(t1);
+  timer.stopTimer(t1); // computation timer stop
 
-  int t2 = timer.startTimer();
+  int t2 = timer.startTimer(); // decrypt timer start
   // Decrypt & Return result
   // std::cout << "Decrypting Result" << std::endl;
   seal::Plaintext result_ptxt;
   decryptor.decrypt(result_ctxt, result_ptxt);
   std::vector<int64_t> result;
   encoder.decode(result_ptxt, result);
-  timer.stopTimer(t2);
+  timer.stopTimer(t2); // decrypt timer stop
   // std::cout << result.size() << std::endl;
   return result;
 }
@@ -257,16 +259,16 @@ std::vector<int64_t> encryptedBatchedBoxBlur_Porcupine(
         MultiTimer &timer, const std::vector<int> &img, size_t poly_modulus_degree)
 {
   /* Setup */
-  auto t0 = timer.startTimer();
+  auto t0 = timer.startTimer(); // keygen timer start
 
   seal::EncryptionParameters params(seal::scheme_type::bfv);
 
   params.set_poly_modulus_degree(poly_modulus_degree);
   params.set_coeff_modulus(seal::CoeffModulus::BFVDefault(poly_modulus_degree));
   params.set_plain_modulus(seal::PlainModulus::Batching(poly_modulus_degree, 20));
-
   seal::SEALContext context(params);
 
+  // Create keys objects
   seal::KeyGenerator keygen(context);
   seal::SecretKey secret_key = keygen.secret_key();
   seal::PublicKey public_key;
@@ -274,19 +276,21 @@ std::vector<int64_t> encryptedBatchedBoxBlur_Porcupine(
   seal::GaloisKeys galois_keys;
   keygen.create_galois_keys(galois_keys);
 
-  seal::Encryptor encryptor(context, public_key);
+  // Create helper objects
   seal::Evaluator evaluator(context);
-  seal::Decryptor decryptor(context, secret_key);
-
   seal::BatchEncoder batch_encoder(context);
+  seal::Encryptor encryptor(context, public_key);
+  seal::Decryptor decryptor(context, secret_key);
+  timer.stopTimer(t0); // keygen timer stop
 
+  auto encTime = timer.startTimer(); // encryption timer start
   seal::Plaintext plain;
   std::vector<uint64_t> long_vec = std::vector<uint64_t>(img.begin(), img.end());
   batch_encoder.encode(long_vec, plain);
 
   seal::Ciphertext c0;
   encryptor.encrypt(plain, c0);
-  timer.stopTimer(t0);
+  timer.stopTimer(encTime); // encryption timer stop
 
   /* Computation */
   auto t1 = timer.startTimer();
