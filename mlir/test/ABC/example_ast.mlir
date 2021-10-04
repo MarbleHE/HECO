@@ -57,7 +57,9 @@
                 }) : () -> ()
             }) : () -> ()
         }) : () -> ()
-        "abc.return"() : () -> ()
+        "abc.return"() ({
+            "abc.literal_int" () {value = 5} : () -> ()
+        }) : () -> ()
     }) : () -> ()
 
 }) {name = "foo", return_type = !abc.int}: () -> ()

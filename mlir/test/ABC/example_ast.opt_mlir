@@ -1,6 +1,6 @@
 builtin.module  {
   abc.function !abc.int @foo  {
-    abc.function_parameter f32 @y
+    abc.function_parameter !abc.int @y
   },  {
     abc.block  {
       abc.variable_declaration "int" @x = ( {
@@ -38,7 +38,9 @@ builtin.module  {
           }
         }
       }
-      abc.return 
+      abc.return  {
+        abc.literal_int 5 : i64
+      }
     }
   }
 }

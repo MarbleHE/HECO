@@ -10,7 +10,7 @@
 namespace abc {
 
 /// Lowering from the AST-style ABC dialect to SSA representation
- struct LowerASTtoSSAPass : public mlir::PassWrapper<LowerASTtoSSAPass, mlir::OperationPass<mlir::ModuleOp>> {
+struct LowerASTtoSSAPass : public mlir::PassWrapper<LowerASTtoSSAPass, mlir::OperationPass<mlir::ModuleOp>> {
   void getDependentDialects(mlir::DialectRegistry &registry) const override {
     registry.insert<mlir::AffineDialect, mlir::StandardOpsDialect>();
   }

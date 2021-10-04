@@ -28,18 +28,23 @@ mlir::LogicalResult declare(llvm::StringRef name,
 void convertFunctionOp2FuncOp(FunctionOp &f,
                               IRRewriter &rewriter,
                               llvm::ScopedHashTable<StringRef, mlir::Value> &symbolTable) {
+  // Read the existing function arguments
   std::vector<mlir::Type> argTypes;
   std::vector<OpOperand> arguments;
-  for (auto op: f.getRegion(0).getOps<FunctionParameterOp>()) {
+  for (auto op: f.parameters().getOps<FunctionParameterOp>()) {
     auto param_type = op.typeAttr().getValue();
     argTypes.push_back(param_type);
   }
+
+  // Create the new builtin.func Op
   rewriter.setInsertionPoint(f);
   auto func_type = rewriter.getFunctionType(argTypes, f.return_typeAttr().getValue());
   auto new_f = rewriter.create<FuncOp>(f.getLoc(), f.name(), func_type);
   new_f.setPrivate();
-
   auto entryBlock = new_f.addEntryBlock();
+  rewriter.setInsertionPointToStart(entryBlock);
+
+  // Enter the arguments into the symbol table
   // This sets curScope in symbolTable to varScope
   llvm::ScopedHashTableScope<llvm::StringRef, mlir::Value> var_scope(symbolTable);
   for (auto pair: llvm::zip(f.getRegion(0).getOps<FunctionParameterOp>(), entryBlock->getArguments())) {
@@ -47,24 +52,31 @@ void convertFunctionOp2FuncOp(FunctionOp &f,
     auto arg = std::get<1>(pair);
     auto param_name = op.nameAttr().getValue();
     if (failed(declare(param_name, arg, symbolTable))) {
-      mlir::emitError(arg.getLoc(), "Cannot create FunctionParameter " + param_name + " since name is already taken.");
+      mlir::emitError(arg.getLoc(), "Cannot translate FunctionParameter " + param_name + ": name is already taken.");
     }
   }
 
-  rewriter.setInsertionPointToStart(entryBlock);
-  auto abc_block_it = f.getRegion(1).getOps<abc::BlockOp>();
+  // Move ABC Operations over into the new function's entryBlock
+  auto abc_block_it = f.body().getOps<abc::BlockOp>();
   if (abc_block_it.begin()==abc_block_it.end() || ++abc_block_it.begin()!=abc_block_it.end()) {
     emitError(f.getLoc(), "Expected exactly one Block inside function!");
   } else {
     auto abc_block = *abc_block_it.begin();
-    llvm::iplist<Operation> oplist;
-    assert( abc_block.body().hasOneBlock() && "ABC BlockOp must contain exactly one region and exactly one Block in that!");
-    auto &bb = *abc_block.body().getBlocks().begin();
-    //TODO: Do something better than just dumping the ABC ops into here
-    rewriter.mergeBlocks(&bb, entryBlock);
+    if (abc_block->getNumRegions()!=1 || !abc_block.body().hasOneBlock()) {
+      emitError(abc_block.getLoc(), "ABC BlockOp must contain exactly one region and exactly one Block in that!");
+    } else {
+      llvm::iplist<Operation> oplist;
+      auto &bb = *abc_block.body().getBlocks().begin();
+      rewriter.mergeBlocks(&bb, entryBlock);
+    }
   }
 
-  // TODO: Fix this, for now create a dummy return
+  // TODO: Go through the block and translate each operation
+
+
+
+  // TODO: Remove this after pass translates return properly.
+  //  for now create a dummy return
   rewriter.create<mlir::ReturnOp>(f.getLoc(), entryBlock->getArgument(0));
 
   // Now that we're done, we can remove the original function
@@ -77,6 +89,7 @@ void LowerASTtoSSAPass::runOnOperation() {
   target.addLegalOp<mlir::ReturnOp>();
   // target.addIllegalDialect<ABCDialect>();
 
+  // Get the (default) block in the module's only region:
   auto &block = getOperation()->getRegion(0).getBlocks().front();
   IRRewriter rewriter(&getContext());
 
@@ -85,20 +98,4 @@ void LowerASTtoSSAPass::runOnOperation() {
   for (auto f: llvm::make_early_inc_range(block.getOps<FunctionOp>())) {
     convertFunctionOp2FuncOp(f, rewriter, symbolTable);
   }
-
-  // TODO: Lower the bodies of the FuncOPs, which are still ABC/AST
-
-  // Next approach: Manually walking the IR
-
-//  // Now that the conversion target has been defined, we just need to provide
-//  // the set of patterns that will lower the Toy operations.
-//  RewritePatternSet patterns(&getContext());
-//  patterns.add<ReturnOpLowering>(&getContext());
-//  patterns.add<FunctionOpLowering>(&getContext());
-
-//  // With the target and rewrite patterns defined, we can now attempt the
-//  // conversion. The conversion will signal failure if any of our `illegal`
-//  // operations were not converted successfully.
-//  if (failed(applyPartialConversion(getOperation(), target, std::move(patterns))))
-//    signalPassFailure();
 }
