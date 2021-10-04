@@ -53,6 +53,7 @@ set(TEST_FILES
         end-to-end/MatrixVectorProductTest.cpp
         end-to-end/PolynomialKernelTest.cpp
         end-to-end/RobertsCrossTest.cpp
+        end-to-end/MultiTimer.cpp
         parser/ParserTest.cpp
         parser/ParserTestHelpers.h
         parser/TokenizerTest.cpp
@@ -130,20 +131,5 @@ if(PYTHON_FRONTEND_DEV)
             WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/${CMAKE_BINARY_DIR}/python)
 endif()
 
-
-add_executable(testing-all
-        ${TEST_FILES})
-
-# this is important to have code coverage in CLion
-if (CMAKE_COMPILER_IS_GNUCXX)
-    set(CMAKE_CXX_FLAGS "--coverage")
-elseif ("${CMAKE_C_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang" OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang")
-    set(CMAKE_CXX_FLAGS "-fprofile-instr-generate -fcoverage-mapping")
-endif ()
-
-target_link_libraries(testing-all PRIVATE gtest ast_opt gtest_main)
-target_include_directories(testing-all PRIVATE ${ast_optimizer_SOURCE_DIR}/include/)
-
 # make sure that python is built before the testing-all target
 add_dependencies(testing-all python)
-
