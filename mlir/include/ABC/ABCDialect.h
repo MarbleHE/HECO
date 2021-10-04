@@ -47,4 +47,7 @@ bool containsExactlyOneStatementNode(mlir::Region& region);
 #define GET_OP_CLASSES
 #include "ABC/ABCOps.h.inc"
 
+#define GET_TYPEDEF_CLASSES
+#include "ABC/ABCOpsTypes.h.inc"
+
 #endif // STANDALONE_STANDALONEDIALECT_H

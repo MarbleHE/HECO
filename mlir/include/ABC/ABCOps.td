@@ -44,7 +44,7 @@ def ABC_FunctionOp : ABC_StatementOp<"function", []> {
       // no operands, just attributes
       SymbolNameAttr : $name,
       // TODO: Find or introduce attribute to check that this is a legal type
-      AnyAttr : $return_type
+      TypeAttr  : $return_type
   );
 
   let assemblyFormat = [{

@@ -5,6 +5,19 @@ set(LIBS
         ${conversion_libs}
         MLIROptLib
         MLIRABC
+        MLIRAnalysis
+        MLIRCallInterfaces
+        MLIRCastInterfaces
+        MLIRExecutionEngine
+        MLIRIR
+        MLIRLLVMCommonConversion
+        MLIRLLVMToLLVMIRTranslation
+        MLIRMemRef
+        MLIRParser
+        MLIRPass
+        MLIRSideEffectInterfaces
+        MLIRTargetLLVMIRExport
+        MLIRTransforms
         )
 add_llvm_executable(abc-opt LowerASTtoSSA.cpp abc-opt.cpp)
 

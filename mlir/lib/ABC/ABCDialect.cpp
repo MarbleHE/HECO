@@ -5,8 +5,12 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
-
+#include "mlir/IR/DialectImplementation.h"
+#include "mlir/IR/Types.h"
+#include "mlir/IR/TypeSupport.h"
+#include "mlir/Support/LLVM.h"
 #include "ABC/ABCDialect.h"
+#include "llvm/ADT/TypeSwitch.h"
 
 using namespace mlir;
 using namespace abc;
@@ -45,7 +49,6 @@ bool containsExactlyOneTargetNode(Region &region) {
   }
 }
 
-
 bool containsExactlyOneStatementNode(Region &region) {
 
   if (region.op_begin()==region.op_end()) {
@@ -65,6 +68,9 @@ bool containsExactlyOneStatementNode(Region &region) {
 
 #include "ABC/ABCOpsDialect.cpp.inc"
 
+#define GET_TYPEDEF_CLASSES
+#include "ABC/ABCOpsTypes.cpp.inc"
+
 //===----------------------------------------------------------------------===//
 // ABC dialect.
 //===----------------------------------------------------------------------===//
@@ -74,6 +80,28 @@ void ABCDialect::initialize() {
 #define GET_OP_LIST
 #include "ABC/ABCOps.cpp.inc"
   >();
+
+  addTypes<
+#define GET_TYPEDEF_LIST
+#include "ABC/ABCOpsTypes.cpp.inc"
+  >();
+}
+
+/// Parse a type registered to this dialect.
+::mlir::Type ABCDialect::parseType(::mlir::DialectAsmParser &parser) const {
+  // The parse call returns true UPON A FAILURE
+  if (parser.parseKeyword("int"))
+    return Type();
+  else
+   return TestIntegerType::get(getContext());
+    //return abc::  get();
+}
+
+/// Print a type registered to this dialect.
+void ABCDialect::printType(::mlir::Type type,
+               ::mlir::DialectAsmPrinter &os) const {
+  //ABCIntegerType intType = type.cast<IntegerType>();
+  os << "int";
 }
 
 //===----------------------------------------------------------------------===//

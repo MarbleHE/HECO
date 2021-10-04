@@ -1,10 +1,6 @@
-CREATED A PASS
-CREATED A PASS
-DONE STUFF
-CREATED A PASS
 builtin.module  {
-  abc.function "void" @foo  {
-    abc.function_parameter "secret int" @y
+  abc.function !abc.int @foo  {
+    abc.function_parameter f32 @y
   },  {
     abc.block  {
       abc.variable_declaration "int" @x = ( {

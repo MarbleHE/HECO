@@ -3,7 +3,7 @@
 //| FileCheck %s
 
 "abc.function"() ({
-   "abc.function_parameter"() {type = "secret int", name = "y"} : () -> ()
+   "abc.function_parameter"() {type = f32, name = "y"} : () -> ()
 }, {
     "abc.block" () ({
         "abc.variable_declaration"() ({
@@ -60,4 +60,4 @@
         "abc.return"() : () -> ()
     }) : () -> ()
 
-}) {name = "foo", return_type = "void"}: () -> ()
+}) {name = "foo", return_type = !abc.int}: () -> ()

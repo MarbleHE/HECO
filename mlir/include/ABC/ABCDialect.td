@@ -10,6 +10,7 @@
 #define STANDALONE_DIALECT
 
 include "mlir/IR/OpBase.td"
+//include "mlir/IR/BuiltinTypes.td"
 include "mlir/Interfaces/SideEffectInterfaces.td"
 
 //===----------------------------------------------------------------------===//
@@ -72,6 +73,26 @@ Or<!foreach(allowedattr, allowedAttrs, allowedattr.predicate)>,
 summary)> {
 let returnType = "::mlir::Attribute";
 let convertFromStorage = "$_self";
+}
+
+//===----------------------------------------------------------------------===//
+// ABC type definitions.
+//===----------------------------------------------------------------------===//
+
+// All of the types will extend this class.
+class Test_Type<string name> : TypeDef<ABC_Dialect, name> { }
+
+// An alternate int type.
+def ABCIntegerType : Test_Type<"TestInteger"> {
+  let mnemonic = "int";
+
+  let summary = "An integer type with special semantics";
+
+  let description = [{
+  An alternate integer type. This type differentiates itself from the
+  standard integer type by not having a SignednessSemantics parameter, just
+  a width.
+  }];
 }
 //===----------------------------------------------------------------------===//
 // Base ABC NodeOp definitions.
