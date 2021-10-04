@@ -14,9 +14,20 @@
 using namespace mlir;
 using namespace abc;
 
+/// Declare a variable in the current scope, return success if the variable
+/// wasn't declared yet.
+mlir::LogicalResult declare(llvm::StringRef name,
+                            mlir::Value value,
+                            llvm::ScopedHashTable<StringRef, mlir::Value> &symbolTable) {
+  if (symbolTable.count(name))
+    return mlir::failure();
+  symbolTable.insert(name, value);
+  return mlir::success();
+}
+
 void convertFunctionOp2FuncOp(FunctionOp &f,
                               IRRewriter &rewriter,
-                              llvm::ScopedHashTable<StringRef, mlir::Value>& symbolTable) {
+                              llvm::ScopedHashTable<StringRef, mlir::Value> &symbolTable) {
   std::vector<mlir::Type> argTypes;
   std::vector<OpOperand> arguments;
   for (auto op: f.getRegion(0).getOps<FunctionParameterOp>()) {
@@ -29,18 +40,34 @@ void convertFunctionOp2FuncOp(FunctionOp &f,
   new_f.setPrivate();
 
   auto entryBlock = new_f.addEntryBlock();
+  // This sets curScope in symbolTable to varScope
+  llvm::ScopedHashTableScope<llvm::StringRef, mlir::Value> var_scope(symbolTable);
   for (auto pair: llvm::zip(f.getRegion(0).getOps<FunctionParameterOp>(), entryBlock->getArguments())) {
-    //TODO: Add these to the converter's symbol table
     auto op = std::get<0>(pair);
     auto arg = std::get<1>(pair);
     auto param_name = op.nameAttr().getValue();
+    if (failed(declare(param_name, arg, symbolTable))) {
+      mlir::emitError(arg.getLoc(), "Cannot create FunctionParameter " + param_name + " since name is already taken.");
+    }
   }
 
-  //TODO: fill the entry block by going through all operations
   rewriter.setInsertionPointToStart(entryBlock);
+  auto abc_block_it = f.getRegion(1).getOps<abc::BlockOp>();
+  if (abc_block_it.begin()==abc_block_it.end() || ++abc_block_it.begin()!=abc_block_it.end()) {
+    emitError(f.getLoc(), "Expected exactly one Block inside function!");
+  } else {
+    auto abc_block = *abc_block_it.begin();
+    llvm::iplist<Operation> oplist;
+    assert( abc_block.body().hasOneBlock() && "ABC BlockOp must contain exactly one region and exactly one Block in that!");
+    auto &bb = *abc_block.body().getBlocks().begin();
+    //TODO: Do something better than just dumping the ABC ops into here
+    rewriter.mergeBlocks(&bb, entryBlock);
+  }
+
+  // TODO: Fix this, for now create a dummy return
   rewriter.create<mlir::ReturnOp>(f.getLoc(), entryBlock->getArgument(0));
 
-  // Now that we're done, we can remove the orginal function
+  // Now that we're done, we can remove the original function
   rewriter.eraseOp(f);
 }
 
