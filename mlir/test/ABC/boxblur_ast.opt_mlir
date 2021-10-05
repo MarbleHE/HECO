@@ -1,0 +1,28 @@
+builtin.module  {
+  abc.function tensor<16384x!abc.int> @encryptedBoxBlur  {
+    abc.function_parameter tensor<16384x!abc.int> @img
+  },  {
+    abc.block  {
+      abc.variable_declaration tensor<16384x!abc.int> @img2 = ( {
+        abc.variable @img
+      })
+      affine.for %arg0 = 0 to 128 {
+        affine.for %arg1 = 0 to 128 {
+          affine.for %arg2 = -1 to 2 {
+            affine.for %arg3 = -1 to 2 {
+              abc.assignment  {
+                abc.variable @img
+              },  {
+                abc.literal_int 5 : i64
+              }
+            }
+          }
+        }
+      }
+      abc.return  {
+        abc.variable @img2
+      }
+    }
+  }
+}
+

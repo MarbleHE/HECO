@@ -39,7 +39,7 @@ def ABC_ForOp : ABC_StatementOp<"for", []> {
 def ABC_FunctionOp : ABC_StatementOp<"function", []> {
   let summary = "AST Node Function";
   // TODO: Parameters should be a list of FunctionParameters, not a single arbitrary expression!
-  let regions = (region AnyExpression: $parameters, AnyBlock: $body);
+  let regions = (region ZeroOrMoreExpressions: $parameters, AnyBlock: $body);
   let arguments = (ins
       // no operands, just attributes
       SymbolNameAttr : $name,
@@ -122,6 +122,7 @@ def ABC_VariableOp : ABC_TargetOp<"variable", []> {
   let arguments = (ins
     SymbolNameAttr : $name
   );
+  let assemblyFormat = [{$name attr-dict-with-keyword }];
 }
 
 def ABC_BinaryExpressionOp : ABC_ExpressionOp<"binary_expression", []> {

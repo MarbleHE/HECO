@@ -4,6 +4,7 @@
 
 "abc.function"() ({
    "abc.function_parameter"() {type = !abc.int, name = "y"} : () -> ()
+   "abc.function_parameter"() {type = !abc.int, name = "z"} : () -> ()
 }, {
     "abc.block" () ({
         // if with both branches
