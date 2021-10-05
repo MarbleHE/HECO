@@ -1,0 +1,76 @@
+builtin.module  {
+  abc.function tensor<16384x!abc.int> @encryptedBoxBlur  {
+    abc.function_parameter tensor<16xi64> @img
+  },  {
+    abc.block  {
+      abc.variable_declaration tensor<16xi64> @img2 = ( {
+        abc.variable @img
+      })
+      abc.simple_for @x = [0 : i64, 128 : i64]  {
+        abc.simple_for @y = [0 : i64, 128 : i64]  {
+          abc.variable_declaration i64 @value = ( {
+            abc.literal_int 0 : i64
+          })
+          abc.simple_for @j = [-1 : i64, 2 : i64]  {
+            abc.simple_for @i = [-1 : i64, 2 : i64]  {
+              abc.assignment  {
+                abc.variable @value
+              },  {
+                abc.binary_expression "+"  {
+                  abc.variable @value
+                },  {
+                  abc.index_access  {
+                    abc.variable @img
+                  },  {
+                    abc.binary_expression "%"  {
+                      abc.binary_expression "+"  {
+                        abc.binary_expression "*"  {
+                          abc.binary_expression "+"  {
+                            abc.variable @x
+                          },  {
+                            abc.variable @i
+                          }
+                        },  {
+                          abc.literal_int 4 : i64
+                        }
+                      },  {
+                        abc.binary_expression "+"  {
+                          abc.variable @y
+                        },  {
+                          abc.variable @j
+                        }
+                      }
+                    },  {
+                      abc.literal_int 16 : i64
+                    }
+                  }
+                }
+              }
+            }
+          }
+          abc.assignment  {
+            abc.index_access  {
+              abc.variable @img2
+            },  {
+              abc.binary_expression "+"  {
+                abc.binary_expression "*"  {
+                  abc.literal_int 4 : i64
+                },  {
+                  abc.variable @x
+                }
+              },  {
+                abc.variable @y
+              }
+            }
+          },  {
+            abc.variable @value
+          }
+        }
+      }
+      abc.return  {
+        abc.variable @img2
+      }
+    }
+  }
+}
+
