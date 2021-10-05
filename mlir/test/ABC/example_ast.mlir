@@ -6,6 +6,21 @@
    "abc.function_parameter"() {type = !abc.int, name = "y"} : () -> ()
 }, {
     "abc.block" () ({
+        // if with both branches
+        "abc.if" () ({
+            // condition
+            "abc.literal_bool" () {value = true} : () -> ()
+        }, {
+            // then
+            "abc.block" () ({
+                // ...
+            }) : () -> ()
+        }, {
+             // else
+            "abc.block" () ({
+                // ...
+            }) : () -> ()
+        }) : () -> ()
         "abc.variable_declaration"() ({
            "abc.literal_int"() {value = 17} : () -> ()
         }) {type = "int", name = "x"}: () -> ()
@@ -62,4 +77,4 @@
         }) : () -> ()
     }) : () -> ()
 
-}) {name = "foo", return_type = !abc.int}: () -> ()
+}) {name = "foo", return_type = i1}: () -> ()
