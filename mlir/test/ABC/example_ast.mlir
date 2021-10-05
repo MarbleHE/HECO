@@ -23,7 +23,7 @@
         }) : () -> ()
         "abc.variable_declaration"() ({
            "abc.literal_int"() {value = 17} : () -> ()
-        }) {type = "int", name = "x"}: () -> ()
+        }) {type = i32, name = "x"}: () -> ()
         "abc.assignment" () ({
             "abc.variable" () {name = "foo"} : () -> ()
          }, {
@@ -32,7 +32,9 @@
          "abc.for" () ({
             // initializer
             "abc.block" () ({
-                // ...
+                "abc.variable_declaration"() ({
+                    "abc.literal_int"() {value = 7} : () -> ()
+                }) {type = i32, name = "i"}: () -> ()
             }) : () -> ()
          },{
             // condition
@@ -40,7 +42,11 @@
          },{
             // update
             "abc.block" () ({
-                // ...
+                "abc.assignment" () ({
+                    "abc.variable" () {name = "i"} : () -> ()
+                }, {
+                    "abc.literal_int" () {value = 5} : () -> ()
+                }) : () -> ()
             }) : () -> ()
         },{
             // body

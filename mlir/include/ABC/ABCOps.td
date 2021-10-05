@@ -82,7 +82,7 @@ def ABC_VariableDeclarationOp : ABC_StatementOp<"variable_declaration", []> {
   // NOTE: This is a slight deviation from the C++ AST Node, which
   // has a "Variable" Child. However, we get much nicer AST with this approach
   // TODO: Find or introduce attribute to check that $type is a legal type
-  let arguments = (ins SymbolNameAttr: $name, AnyAttr: $type);
+  let arguments = (ins SymbolNameAttr: $name, TypeAttr: $type);
 
   // Ensure that this has either 0 or 1 (value) regions (see also verifier in ABC_IfOp)
   // TODO: This seems to work, but produces no indication of what the error is, stuff just fails

@@ -25,15 +25,6 @@ mlir::LogicalResult declare(llvm::StringRef name,
   return mlir::success();
 }
 
-mlir::Value
-translateExpression(Operation &op,
-                    IRRewriter &rewriter,
-                    llvm::ScopedHashTable<StringRef, mlir::Value> &symbolTable) {
-  //TODO:  Actually translate expressions
-  auto value = rewriter.create<ConstantOp>(op.getLoc(), rewriter.getIntegerAttr(rewriter.getIntegerType(1), 1));
-  return value;
-}
-
 Operation &firstOp(Region &region) {
   return *region.getOps().begin();
 }
@@ -69,6 +60,30 @@ mlir::Block &getBlock(Region &region_containing_blockop) {
   return region_containing_blockop.front();
 }
 
+mlir::Value
+translateExpression(Operation &op,
+                    IRRewriter &rewriter,
+                    llvm::ScopedHashTable<StringRef, mlir::Value> &symbolTable) {
+  //TODO:  Actually translate expressions
+  auto value = rewriter.create<ConstantOp>(op.getLoc(), rewriter.getIntegerAttr(rewriter.getIntegerType(1), 1));
+  return value;
+}
+
+StringRef translateTarget(Operation &op,
+                          IRRewriter &rewriter,
+                          llvm::ScopedHashTable<StringRef, Value> &symbolTable) {
+
+  if (auto variable_op = llvm::dyn_cast<abc::VariableOp>(op)) {
+    return variable_op.name();
+  } else {
+    // TODO: Support other targets (especially arrays!)
+    emitError(op.getLoc(),
+              "Currently, only variables are supported as assignment targets (got: " + op.getName().getStringRef()
+                  + ").");
+    return "INVALID_TARGET";
+  }
+}
+
 void translateStatement(Operation &op,
                         IRRewriter &rewriter,
                         llvm::ScopedHashTable<StringRef, mlir::Value> &symbolTable);
@@ -95,13 +110,71 @@ void translateIfOp(abc::IfOp &if_op, IRRewriter &rewriter, llvm::ScopedHashTable
   }
 }
 
+void translateVariableDeclarationOp(abc::VariableDeclarationOp vardecl_op,
+                                    IRRewriter &rewriter,
+                                    llvm::ScopedHashTable<StringRef, Value> &symbolTable) {
+
+  if (vardecl_op.value().empty()) {
+    emitError(vardecl_op.getLoc(), "Declarations that do not specify a value are currently not supported.");
+    return;
+  }
+  // Get Name, Type and Value
+  auto name = vardecl_op.name();
+  //auto type = vardecl_op.type();
+  auto value = translateExpression(firstOp(vardecl_op.value().front()), rewriter, symbolTable);
+  // TODO: Somehow check that value and type are compatible
+  (void) declare(name, value, symbolTable); //void cast to suppress "unused result" warning
+}
+
+void translateAssignmentOp(abc::AssignmentOp assignment_op,
+                           IRRewriter &rewriter,
+                           llvm::ScopedHashTable<StringRef, Value> &symbolTable) {
+  // Get Name, Type and Value
+  auto target = translateTarget(firstOp(assignment_op.target()), rewriter, symbolTable);
+  auto value = translateExpression(firstOp(assignment_op.value()), rewriter, symbolTable);
+  symbolTable.insert(target, value);
+
+}
+
+void translateForOp(abc::ForOp &for_op,
+                    IRRewriter &rewriter,
+                    llvm::ScopedHashTable<StringRef, mlir::Value> &symbolTable) {
+
+  auto condition = translateExpression(firstOp(for_op.condition()), rewriter, symbolTable);
+
+  //TODO: support loops!
+  // For now we assume a loop has pattern for({VariableDecl}, {ExprOp}, {AssignmentOp (to same Variable)})
+
+//  // Get lower bound:
+//  Value lower_bound;
+//  StringRef lower_bound_var_name = "";
+//  auto &test_op = *llvm::dyn_cast<abc::BlockOp>(firstOp(for_op.initializer())).getOps().begin();
+//  if (auto vardecl_op = llvm::dyn_cast<VariableDeclarationOp>(test_op)) {
+//    lower_bound_var_name = vardecl_op.name();
+//    lower_bound = translateExpression(firstOp(vardecl_op.value().front()), rewriter, symbolTable);
+//  } else {
+//    emitError(for_op->getLoc(),
+//              "Currently we do not support non-trivial loop initializers. Set lower bound to 0 (got "
+//                  + test_op.getName().getStringRef() + ").");
+//    // Create a dummy initializer so that things can continue.
+//    lower_bound =
+//        rewriter.create<ConstantOp>(for_op.getLoc(), rewriter.getIntegerAttr(rewriter.getIntegerType(32), 0));
+//  }
+//  if (++for_op.initializer().getOps().begin()!=for_op.initializer().getOps().end()) {
+//    emitError(for_op->getLoc(), "Currently we do not support multiple statements in the initializer!.");
+//  }
+//
+//  auto new_for = rewriter.create<scf::ForOp>(for_op->getLoc(),lower_bound, lower_bound);
+
+}
+
 void translateStatement(Operation &op,
                         IRRewriter &rewriter,
                         llvm::ScopedHashTable<StringRef, mlir::Value> &symbolTable) {
   rewriter.setInsertionPoint(&op);
   if (auto block_op = llvm::dyn_cast<abc::BlockOp>(op)) {
     //TODO: Support BlockOp
-    //emitError(op.getLoc(), "Nested Blocks are not yet supported.");
+    emitError(op.getLoc(), "Nested Blocks are not yet supported.");
   } else if (auto return_op = llvm::dyn_cast<abc::ReturnOp>(op)) {
     if (return_op.getNumRegions() > 0) {
       auto &return_value_expr = firstOp(return_op.value().front());
@@ -111,14 +184,14 @@ void translateStatement(Operation &op,
     }
     rewriter.eraseOp(&op);
   } else if (auto assignment_op = llvm::dyn_cast<abc::AssignmentOp>(op)) {
-    //TODO: Support AssignmentOp
-    //emitError(op.getLoc(), "Op not yet supported.");
+    translateAssignmentOp(assignment_op, rewriter, symbolTable);
+    rewriter.eraseOp(&op);
   } else if (auto vardecl_op = llvm::dyn_cast<abc::VariableDeclarationOp>(op)) {
-    //TODO: Support VariableDeclarationOp
-    //emitError(op.getLoc(), "Op not yet supported.");
+    translateVariableDeclarationOp(vardecl_op, rewriter, symbolTable);
+    rewriter.eraseOp(&op);
   } else if (auto for_op = llvm::dyn_cast<abc::ForOp>(op)) {
-    //TODO: Support ForOp
-    //emitError(op.getLoc(), "Op not yet supported.");
+    translateForOp(for_op, rewriter, symbolTable);
+    rewriter.eraseOp(&op);
   } else if (auto if_op = llvm::dyn_cast<abc::IfOp>(op)) {
     translateIfOp(if_op, rewriter, symbolTable);
     rewriter.eraseOp(&op);
