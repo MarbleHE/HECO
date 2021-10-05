@@ -1,22 +1,25 @@
 builtin.module  {
   builtin.func private @encryptedBoxBlur(%arg0: tensor<16xi64>) -> tensor<16xi64> {
-    %c4 = constant 4 : index
     %0 = affine.for %arg1 = 0 to 4 iter_args(%arg2 = %arg0) -> (tensor<16xi64>) {
       %1 = affine.for %arg3 = 0 to 4 iter_args(%arg4 = %arg2) -> (tensor<16xi64>) {
         %c0_i64 = constant 0 : i64
         %2 = affine.for %arg5 = -1 to 2 iter_args(%arg6 = %c0_i64) -> (i64) {
           %6 = affine.for %arg7 = -1 to 2 iter_args(%arg8 = %arg6) -> (i64) {
             %7 = addi %arg1, %arg7 : index
-            %8 = muli %c4, %7 : index
+            %c4_0 = constant 4 : index
+            %8 = muli %c4_0, %7 : index
             %9 = addi %arg3, %arg5 : index
-            %10 = muli %c4, %9 : index
+            %10 = muli %c4_0, %9 : index
             %11 = addi %8, %10 : index
-            %12 = tensor.extract %arg0[%11] : tensor<16xi64>
-            %13 = addi %arg8, %12 : i64
-            affine.yield %13 : i64
+            %c16 = constant 16 : index
+            %12 = remi_unsigned %11, %c16 : index
+            %13 = tensor.extract %arg0[%12] : tensor<16xi64>
+            %14 = addi %arg8, %13 : i64
+            affine.yield %14 : i64
           }
           affine.yield %arg6 : i64
         }
+        %c4 = constant 4 : index
         %3 = muli %c4, %arg1 : index
         %4 = addi %3, %arg3 : index
         %5 = tensor.insert %2 into %arg4[%4] : tensor<16xi64>
