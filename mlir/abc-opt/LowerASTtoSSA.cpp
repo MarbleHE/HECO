@@ -26,9 +26,9 @@ mlir::LogicalResult declare(llvm::StringRef name,
 }
 
 mlir::Value
-translateExpression(Operation & op,
-                    IRRewriter & rewriter,
-                    llvm::ScopedHashTable<StringRef, mlir::Value> & symbolTable) {
+translateExpression(Operation &op,
+                    IRRewriter &rewriter,
+                    llvm::ScopedHashTable<StringRef, mlir::Value> &symbolTable) {
   //TODO:  Actually translate expressions
   auto value = rewriter.create<ConstantOp>(op.getLoc(), rewriter.getIntegerAttr(rewriter.getIntegerType(1), 1));
   return value;
@@ -69,9 +69,35 @@ mlir::Block &getBlock(Region &region_containing_blockop) {
   return region_containing_blockop.front();
 }
 
-void translateStatement(Operation & op,
-                        IRRewriter & rewriter,
-                        llvm::ScopedHashTable<StringRef, mlir::Value> & symbolTable) {
+void translateStatement(Operation &op,
+                        IRRewriter &rewriter,
+                        llvm::ScopedHashTable<StringRef, mlir::Value> &symbolTable);
+
+void translateIfOp(abc::IfOp &if_op, IRRewriter &rewriter, llvm::ScopedHashTable<StringRef, Value> &symbolTable) {
+  auto condition = translateExpression(firstOp(if_op.condition()), rewriter, symbolTable);
+  bool else_branch = if_op->getNumRegions()==3;
+  auto new_if = rewriter.create<scf::IfOp>(if_op->getLoc(), condition, else_branch);
+
+  //THEN
+  rewriter.mergeBlocks(&getBlock(if_op.thenBranch()), new_if.thenBlock());
+  for (auto &inner_op: llvm::make_early_inc_range(new_if.thenBlock()->getOperations())) {
+    translateStatement(inner_op, rewriter, symbolTable);
+  }
+  // TODO: Handle setting values properly!
+
+  // ELSE
+  if (else_branch) {
+    rewriter.mergeBlocks(&getBlock(if_op.elseBranch().front()), new_if.elseBlock());
+    for (auto &inner_op: llvm::make_early_inc_range(new_if.elseBlock()->getOperations())) {
+      translateStatement(inner_op, rewriter, symbolTable);
+    }
+    // TODO: Handle setting values properly!
+  }
+}
+
+void translateStatement(Operation &op,
+                        IRRewriter &rewriter,
+                        llvm::ScopedHashTable<StringRef, mlir::Value> &symbolTable) {
   rewriter.setInsertionPoint(&op);
   if (auto block_op = llvm::dyn_cast<abc::BlockOp>(op)) {
     //TODO: Support BlockOp
@@ -94,32 +120,8 @@ void translateStatement(Operation & op,
     //TODO: Support ForOp
     //emitError(op.getLoc(), "Op not yet supported.");
   } else if (auto if_op = llvm::dyn_cast<abc::IfOp>(op)) {
-    auto condition = translateExpression(firstOp(if_op.condition()), rewriter, symbolTable);
-    bool else_branch = if_op->getNumRegions()==3;
-    auto new_if = rewriter.create<scf::IfOp>(if_op->getLoc(), condition, else_branch);
-
-    //THEN
-    rewriter.mergeBlocks(&getBlock(if_op.thenBranch()), new_if.thenBlock());
-    for (auto &inner_op: llvm::make_early_inc_range(new_if.thenBlock()->getOperations())) {
-      translateStatement(inner_op, rewriter, symbolTable);
-    }
-    // TODO: Handle setting values properly!
-    rewriter.setInsertionPointToEnd(new_if.thenBlock());
-    rewriter.create<scf::YieldOp>(if_op->getLoc());
-
-    // ELSE
-    if (else_branch) {
-      rewriter.mergeBlocks(&getBlock(if_op.elseBranch().front()), new_if.elseBlock());
-      for (auto &inner_op: llvm::make_early_inc_range(new_if.elseBlock()->getOperations())) {
-        translateStatement(inner_op, rewriter, symbolTable);
-      }
-      // TODO: Handle setting values properly!
-      rewriter.setInsertionPointToEnd(new_if.elseBlock());
-      rewriter.create<scf::YieldOp>(if_op->getLoc());
-    }
-
+    translateIfOp(if_op, rewriter, symbolTable);
     rewriter.eraseOp(&op);
-
   } else if (auto yield_op = llvm::dyn_cast<scf::YieldOp>(op)) {
     // Do nothing
   } else {
@@ -197,6 +199,4 @@ void LowerASTtoSSAPass::runOnOperation() {
   for (auto f: llvm::make_early_inc_range(block.getOps<FunctionOp>())) {
     convertFunctionOp2FuncOp(f, rewriter, symbolTable);
   }
-
-  getOperation()->dump();
 }
