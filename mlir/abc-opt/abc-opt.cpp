@@ -34,6 +34,7 @@ int main(int argc, char **argv) {
   registry.insert<ABCDialect>();
   registry.insert<StandardOpsDialect>();
   registry.insert<AffineDialect>();
+  registry.insert<tensor::TensorDialect>();
   context.loadDialect<ABCDialect>();
   context.loadDialect<AffineDialect>();
   // Add the following to include *all* MLIR Core dialects, or selectively

@@ -135,6 +135,8 @@ def ABC_BinaryExpressionOp : ABC_ExpressionOp<"binary_expression", []> {
                 AnyExpression: $left,
                 AnyExpression: $right
   );
+
+  let assemblyFormat = [{ $op attr-dict-with-keyword regions }];
 }
 
 def ABC_OperatorExpressionOp : ABC_ExpressionOp<"operator_expression", []> {

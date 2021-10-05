@@ -8,13 +8,23 @@ builtin.module  {
             })
             affine.for %x = 0 to 128 {
                 affine.for %y = 0 to 128 {
+                    abc.variable_declaration tensor<16384x!abc.int> @value = ( {
+                        abc.literal_int 0
+                    })
                     affine.for %j = -1 to 2 {
                         affine.for %i = - 1 to 2 {
                             abc.assignment {
-                                // TODO: Need to introduce index access operation!
-                                abc.variable @img
+                                abc.variable @value
                             },  {
-                                abc.literal_int 5 : i64
+                                abc.binary_expression "+" {
+                                    abc.variable @value
+                                }, {
+                                    abc.binary_expression "+" {
+                                        abc.variable @value
+                                    }, {
+                                        abc.literal_int 5
+                                    }
+                                }
                             }
                         }
                     }
