@@ -185,6 +185,7 @@ std::vector<int> fastBoxBlur2x2(const std::vector<int> &img) {
 
 #ifdef HAVE_SEAL_BFV
 std::vector<uint64_t> encryptedFastBoxBlur2x2(MultiTimer &timer, const std::vector<int> &img, size_t poly_modulus_degree) {
+  auto keygenTimer = timer.startTimer();
   const auto imgSize = (int) std::ceil(std::sqrt(img.size()));
 
   // Context Setup
@@ -203,8 +204,10 @@ std::vector<uint64_t> encryptedFastBoxBlur2x2(MultiTimer &timer, const std::vect
   // Create helper objects
   seal::Encryptor encryptor(context, publicKey, secretKey);
   seal::Decryptor decryptor(context, secretKey);
-  seal::Evaluator evaluator(context); // changed from this: EVALUATOR evaluator(context);
+  seal::Evaluator evaluator(context);
+  timer.stopTimer(keygenTimer);
 
+  auto encryptTimer = timer.startTimer();
   std::vector<seal::Ciphertext> encImg(img.size());
   for (int i = 0; i < img.size(); ++i) {
     // Here we will assume that img only contains positive values in order to reuse seal utilities
@@ -212,6 +215,9 @@ std::vector<uint64_t> encryptedFastBoxBlur2x2(MultiTimer &timer, const std::vect
     seal::Plaintext ptx = seal::Plaintext(seal::util::uint_to_hex_string(&pixel, std::size_t(1)));
     encryptor.encrypt(ptx, encImg[i]);
   }
+  timer.stopTimer(encryptTimer);
+
+  auto compTimer = timer.startTimer();
   std::vector<seal::Ciphertext> img2(encImg.begin(), encImg.end());
 
   // Horizontal Kernel: for each row y
@@ -225,10 +231,8 @@ std::vector<uint64_t> encryptedFastBoxBlur2x2(MultiTimer &timer, const std::vect
     // Go through the rest of row y
     for (int x = 1; x < imgSize; ++x) {
       // remove the previous pixel
-      //value -= img.at(((x - 2)*imgSize + y) % img.size());
       evaluator.sub(value, encImg.at(((x - 2)*imgSize + y) % encImg.size()), value);
       // add the new pixel
-      // value += img.at((x*imgSize + y) % img.size());
       evaluator.add(value, encImg.at((x*imgSize + y) % encImg.size()), value);
       // save result
       img2[x*imgSize + y] = value;
@@ -243,7 +247,6 @@ std::vector<uint64_t> encryptedFastBoxBlur2x2(MultiTimer &timer, const std::vect
   // Vertical Kernel: for each column x
   for (int x = 0; x < imgSize; ++x) {
     // Get kernel for first pixel of column x with padding
-    //int value = img2.at((x*imgSize - 1) % img.size()) + img2.at(x*imgSize + 0);
     seal::Ciphertext value;
     evaluator.add(img2.at((x*imgSize - 1) % img.size()), img2.at(x*imgSize + 0), value);
     // Division that would usually happen here is omitted
@@ -252,22 +255,23 @@ std::vector<uint64_t> encryptedFastBoxBlur2x2(MultiTimer &timer, const std::vect
     // Go through the rest of column x
     for (int y = 1; y < imgSize; ++y) {
       // remove the previous pixel
-      // value -= img2.at((x*imgSize + y - 2) % img.size());
       evaluator.sub(value, img2.at((x*imgSize + y - 2) % img.size()), value);
       // add the new pixel
-      // value += img2.at((x*imgSize + y) % img.size());
       evaluator.add(value, img2.at((x*imgSize + y) % img.size()), value);
       // save result
       img3[x*imgSize + y] = value;
     }
   }
+  timer.stopTimer(compTimer);
 
+  auto decryptTimer = timer.startTimer();
   std::vector<uint64_t> result(img.size());
   for (int i = 0; i < img3.size(); ++i) {
     seal::Plaintext ptx;
     decryptor.decrypt(img3[i], ptx);
     result[i] = *ptx.data();
   }
+  timer.stopTimer(decryptTimer);
 
   return result;
 }

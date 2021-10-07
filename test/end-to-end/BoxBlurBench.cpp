@@ -10,7 +10,7 @@
 #define RAND_SEED 4673838
 
 // Number of iterations for the benchmark
-#define INTER_COUNT 10
+#define INTER_COUNT 5
 
 void getInputMatrix(size_t size, std::vector<std::vector<int>> &destination) {
   // reset the RNG to make sure that every call to this method results in the same numbers
@@ -57,11 +57,23 @@ int main(int argc, char *argv[]) {
     porcupineTimer.addIteration();
   }
 
+  MultiTimer naiveTimer = MultiTimer();
+  for (int i = 0; i < INTER_COUNT; ++i) {
+    auto encrypted = encryptedFastBoxBlur2x2(naiveTimer, img, poly_modulus_degree);
+    naiveTimer.addIteration();
+  }
+
+  std::cout << "naive:" << std::endl;
+  naiveTimer.printToStream(std::cout);
+  naiveTimer.printToFile("bb_naive_8192_4096.csv");
+
   std::cout << "expert:" << std::endl;
   expertTimer.printToStream(std::cout);
+  expertTimer.printToFile("bb_expert_8192_4096.csv");
 
   std::cout << "porcupine:" << std::endl;
   porcupineTimer.printToStream(std::cout);
+  porcupineTimer.printToFile("bb_porcupine_8192_4096.csv");
 }
 
 #endif

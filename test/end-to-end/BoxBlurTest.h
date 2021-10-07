@@ -16,4 +16,7 @@ std::vector<int64_t> encryptedBatchedBoxBlur(
 std::vector<int64_t> encryptedBatchedBoxBlur_Porcupine(
         MultiTimer &timer, const std::vector<int> &img, size_t poly_modulus_degree);
 
+std::vector<uint64_t> encryptedFastBoxBlur2x2(
+        MultiTimer &timer, const std::vector<int> &img, size_t poly_modulus_degree);
+
 #endif//AST_OPTIMIZER_BOXBLURTEST_H
