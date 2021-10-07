@@ -2,6 +2,7 @@
 
 #include <complex>
 #include <random>
+#include <string>
 
 #include "BoxBlurTest.h"
 #include "MultiTimer.h"
@@ -11,6 +12,14 @@
 
 // Number of iterations for the benchmark
 #define INTER_COUNT 5
+
+#define BENCH_FUNCTION(VERSION, FUNCTION_NAME) if (argv[1] == std::string(#VERSION)) { \
+  for (int i = 0; i < INTER_COUNT; ++i) {                                              \
+    auto result = FUNCTION_NAME(timer, img, poly_modulus_degree);                      \
+    timer.addIteration();                                                              \
+  }                                                                                    \
+  timer.printToFile("bb_" #VERSION "_8192_4096.csv");                                  \
+}
 
 void getInputMatrix(size_t size, std::vector<std::vector<int>> &destination) {
   // reset the RNG to make sure that every call to this method results in the same numbers
@@ -40,40 +49,26 @@ void getInputMatrix(size_t size, std::vector<int> &destination) {
 
 
 int main(int argc, char *argv[]) {
+  if (argc < 2) {
+    std::cout << "USAGE: bb-bench [version]" << std::endl;
+    std::cout << "       versions:" << std::endl;
+    std::cout << "          -naive" << std::endl;
+    std::cout << "          -expert" << std::endl;
+    std::cout << "          -porcupine" << std::endl;
+    std::exit(1);
+  }
+
   size_t poly_modulus_degree = 2 << 12;
   size_t size = std::sqrt(poly_modulus_degree / 2);
   std::vector<int> img;
   getInputMatrix(size, img);
 
-  MultiTimer expertTimer = MultiTimer();
-  for (int i = 0; i < INTER_COUNT; ++i) {
-    auto encrypted = encryptedBatchedBoxBlur(expertTimer, img, poly_modulus_degree);
-    expertTimer.addIteration();
-  }
+  MultiTimer timer = MultiTimer();
+  BENCH_FUNCTION(naive, encryptedFastBoxBlur2x2);
+  BENCH_FUNCTION(expert, encryptedBatchedBoxBlur);
+  BENCH_FUNCTION(porcupine, encryptedBatchedBoxBlur_Porcupine);
 
-  MultiTimer porcupineTimer = MultiTimer();
-  for (int i = 0; i < INTER_COUNT; ++i) {
-    auto encrypted = encryptedBatchedBoxBlur_Porcupine(porcupineTimer, img, poly_modulus_degree);
-    porcupineTimer.addIteration();
-  }
-
-  MultiTimer naiveTimer = MultiTimer();
-  for (int i = 0; i < INTER_COUNT; ++i) {
-    auto encrypted = encryptedFastBoxBlur2x2(naiveTimer, img, poly_modulus_degree);
-    naiveTimer.addIteration();
-  }
-
-  std::cout << "naive:" << std::endl;
-  naiveTimer.printToStream(std::cout);
-  naiveTimer.printToFile("bb_naive_8192_4096.csv");
-
-  std::cout << "expert:" << std::endl;
-  expertTimer.printToStream(std::cout);
-  expertTimer.printToFile("bb_expert_8192_4096.csv");
-
-  std::cout << "porcupine:" << std::endl;
-  porcupineTimer.printToStream(std::cout);
-  porcupineTimer.printToFile("bb_porcupine_8192_4096.csv");
+  return 0;
 }
 
 #endif
