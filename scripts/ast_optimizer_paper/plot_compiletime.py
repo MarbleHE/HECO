@@ -25,6 +25,10 @@ def plot(labels: List[str], pandas_dataframes: List[pd.DataFrame], positions: Di
     :return:
     """
 
+    if len(labels) == 0:
+        # Nothing to plot
+        return None
+
     # Save current figure to restore later
     previous_figure = plt.gcf()
 

@@ -18,7 +18,7 @@
     auto result = FUNCTION_NAME(timer, img, poly_modulus_degree);                      \
     timer.addIteration();                                                              \
   }                                                                                    \
-  timer.printToFile("bb_" #VERSION "_8192_4096.csv");                                  \
+  timer.printToFile("BoxBlur_" #VERSION "_64.csv");                                  \
 }
 
 void getInputMatrix(size_t size, std::vector<std::vector<int>> &destination) {

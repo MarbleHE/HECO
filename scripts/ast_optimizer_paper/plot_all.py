@@ -138,9 +138,11 @@ def plot_all_compiletime(data_dir, output_dir):
 
     labels, positions, group_labels, data = plot_runtime.extract_infos(folder=f'{data_dir}/compiletime', df_names=['t_compile'], param_sizes=param_sizes)
     fig = plot_compiletime.plot(labels, data, positions=positions, group_labels=group_labels)
-    fig.show()
 
-    save_plot(fig, "compiletime", output_dir)
+    if fig:
+        fig.show()
+
+        save_plot(fig, "compiletime", output_dir)
 
 
 def plot_all_runtime(data_dir, output_dir):
@@ -207,8 +209,8 @@ def plot_all():
 
 
     # TODO [nku] these can be removed when actual data exists
-    generate_dummy_data_runtime(data_dir)
-    generate_dummy_data_compiletime(data_dir)
+    # generate_dummy_data_runtime(data_dir)
+    # generate_dummy_data_compiletime(data_dir)
 
     plot_all_runtime(data_dir, output_dir)
     plot_all_compiletime(data_dir, output_dir)
