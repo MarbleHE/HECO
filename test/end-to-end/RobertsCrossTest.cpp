@@ -2,7 +2,9 @@
 #include <random>
 #include "gtest/gtest.h"
 
+#ifdef HAVE_SEAL_BFV
 #include "bench/RobertsCross.h"
+#endif
 
 /// Original, plain C++ program for a naive RobertsCross Kernel
 /// This uses two 2x2 Kernels, which we pad to 3x3 kernels for ease of implementation

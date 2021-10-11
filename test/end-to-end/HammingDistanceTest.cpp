@@ -7,7 +7,9 @@
 #include "ast_opt/parser/Parser.h"
 #include "gtest/gtest.h"
 
+#ifdef HAVE_SEAL_BFV
 #include "bench/HammingDistance.h"
+#endif
 
 /// Original, plain C++ program for the hamming distance between two vectors
 ///

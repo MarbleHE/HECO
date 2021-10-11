@@ -7,7 +7,9 @@
 #include "ast_opt/parser/Parser.h"
 #include "gtest/gtest.h"
 
+#ifdef HAVE_SEAL_BFV
 #include "bench/BoxBlur.h"
+#endif
 
 /// Original, plain C++ program for a naive Box blur
 /// This uses a 3x3 Kernel and applies it by sliding across the 2D image
