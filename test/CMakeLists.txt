@@ -68,7 +68,7 @@ set(TEST_FILES
         visitor/TypeCheckingVisitorTest.cpp
         visitor/VectorizerTest.cpp
         visitor/VisitorTest.cpp
-        )
+        end-to-end/GxKernelTest.h)
 
 add_executable(testing-all
         ${TEST_FILES})
