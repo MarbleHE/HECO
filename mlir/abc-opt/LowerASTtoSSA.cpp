@@ -65,8 +65,10 @@ translateExpression(Operation &op,
                     IRRewriter &rewriter,
                     llvm::ScopedHashTable<StringRef, mlir::Value> &symbolTable) {
   if (auto literal_int = llvm::dyn_cast<abc::LiteralIntOp>(op)) {
+    // TODO: having all ints be index is a nasty hack and we should really instead handle conversions
+    //   between things like index, int, bool properly.
     auto value = rewriter
-        .create<ConstantOp>(op.getLoc(), rewriter.getIntegerAttr(rewriter.getIntegerType(64), literal_int.value()));
+        .create<ConstantOp>(op.getLoc(), rewriter.getIndexAttr(literal_int.value().getLimitedValue()));
     return value;
   } else if (auto variable = llvm::dyn_cast<abc::VariableOp>(op)) {
     return symbolTable.lookup(variable.name());

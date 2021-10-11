@@ -1,7 +1,8 @@
 // Expected AST for BoxBlurTest
+// TODO: Using index for all ints is a nasty hack and needs to be replaced by a proper type system!
 builtin.module  {
-    abc.function tensor<64xi64> @encryptedBoxBlur  {
-        abc.function_parameter tensor<64xi64> @img
+    abc.function tensor<64xindex> @encryptedBoxBlur  {
+        abc.function_parameter tensor<64xindex> @img
     },{
         abc.block  {
             // img_size = 8
@@ -13,7 +14,7 @@ builtin.module  {
                 abc.literal_int 64
             })
             // img2 = img
-            abc.variable_declaration tensor<64xi64> @img2 = ( {
+            abc.variable_declaration tensor<64xindex> @img2 = ( {
                 abc.variable @img
             })
             // TODO: Find a way to express the loop bounds using variables? Or just go back standard abc.for?

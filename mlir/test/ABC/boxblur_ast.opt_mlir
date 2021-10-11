@@ -1,24 +1,24 @@
 builtin.module  {
-  builtin.func private @encryptedBoxBlur(%arg0: tensor<64xi64>) -> tensor<64xi64> {
-    %c8_i64 = constant 8 : i64
-    %c64_i64 = constant 64 : i64
+  builtin.func private @encryptedBoxBlur(%arg0: tensor<64xindex>) -> tensor<64xindex> {
+    %c8 = constant 8 : index
+    %c64 = constant 64 : index
     affine.for %arg1 = 0 to 8 {
       affine.for %arg2 = 0 to 8 {
-        %c0_i64 = constant 0 : i64
+        %c0 = constant 0 : index
         affine.for %arg3 = -1 to 2 {
           affine.for %arg4 = -1 to 2 {
             %0 = addi %arg1, %arg4 : index
-            %1 = "std.muli"(%0, %c8_i64) : (index, i64) -> index
+            %1 = muli %0, %c8 : index
             %2 = addi %arg2, %arg3 : index
             %3 = addi %1, %2 : index
-            %4 = "std.remi_unsigned"(%3, %c64_i64) : (index, i64) -> index
-            %5 = tensor.extract %arg0[%4] : tensor<64xi64>
-            %6 = addi %c0_i64, %5 : i64
+            %4 = remi_unsigned %3, %c64 : index
+            %5 = tensor.extract %arg0[%4] : tensor<64xindex>
+            %6 = addi %c0, %5 : index
           }
         }
       }
     }
-    return %arg0 : tensor<64xi64>
+    return %arg0 : tensor<64xindex>
   }
 }
 
