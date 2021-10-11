@@ -1,13 +1,19 @@
 builtin.module  {
-  abc.function tensor<16384x!abc.int> @encryptedBoxBlur  {
-    abc.function_parameter tensor<16xi64> @img
+  abc.function tensor<64xi64> @encryptedBoxBlur  {
+    abc.function_parameter tensor<64xi64> @img
   },  {
     abc.block  {
-      abc.variable_declaration tensor<16xi64> @img2 = ( {
+      abc.variable_declaration index @img_size = ( {
+        abc.literal_int 8 : i64
+      })
+      abc.variable_declaration index @img_length = ( {
+        abc.literal_int 64 : i64
+      })
+      abc.variable_declaration tensor<64xi64> @img2 = ( {
         abc.variable @img
       })
-      abc.simple_for @x = [0 : i64, 128 : i64]  {
-        abc.simple_for @y = [0 : i64, 128 : i64]  {
+      abc.simple_for @x = [0 : i64, 8 : i64]  {
+        abc.simple_for @y = [0 : i64, 8 : i64]  {
           abc.variable_declaration i64 @value = ( {
             abc.literal_int 0 : i64
           })
@@ -31,7 +37,7 @@ builtin.module  {
                             abc.variable @i
                           }
                         },  {
-                          abc.literal_int 4 : i64
+                          abc.variable @img_size
                         }
                       },  {
                         abc.binary_expression "+"  {
@@ -41,7 +47,7 @@ builtin.module  {
                         }
                       }
                     },  {
-                      abc.literal_int 16 : i64
+                      abc.variable @img_length
                     }
                   }
                 }
@@ -54,7 +60,7 @@ builtin.module  {
             },  {
               abc.binary_expression "+"  {
                 abc.binary_expression "*"  {
-                  abc.literal_int 4 : i64
+                  abc.variable @img_size
                 },  {
                   abc.variable @x
                 }

@@ -1,14 +1,26 @@
 // Expected AST for BoxBlurTest
 builtin.module  {
-    abc.function tensor<16384x!abc.int> @encryptedBoxBlur  {
-        abc.function_parameter tensor<16xi64> @img
+    abc.function tensor<64xi64> @encryptedBoxBlur  {
+        abc.function_parameter tensor<64xi64> @img
     },{
         abc.block  {
-            abc.variable_declaration tensor<16xi64> @img2 = ( {
+            // img_size = 8
+            abc.variable_declaration index @img_size = ( {
+                abc.literal_int 8
+            })
+            // img_length = 64
+            abc.variable_declaration index @img_length = ( {
+                abc.literal_int 64
+            })
+            // img2 = img
+            abc.variable_declaration tensor<64xi64> @img2 = ( {
                 abc.variable @img
             })
-            abc.simple_for @x = [0, 128] {
-                abc.simple_for @y = [0, 128] {
+            // TODO: Find a way to express the loop bounds using variables? Or just go back standard abc.for?
+            // for x in 0..img_size
+            abc.simple_for @x = [0, 8] {
+                // for x in 0..img_size
+                abc.simple_for @y = [0, 8] {
                     // int value = 0;
                     abc.variable_declaration i64 @value = ( {
                         abc.literal_int 0
@@ -16,18 +28,18 @@ builtin.module  {
                     // start looping over kernel
                     abc.simple_for @j = [-1, 2] {
                         abc.simple_for @i =[-1, 2] {
-                            // value = value + img[((x+i) *4 + (y+j))%16]
+                            // value = value + img[((x+i) * img_size + (y+j))%img_length]
                             abc.assignment {
                                 abc.variable @value
                             }, {
-                                // value + img[((x+i) *4 + (y+j))%16]
+                                // value + img[((x+i) *img_size + (y+j))%img_length]
                                 abc.binary_expression "+" {
                                     abc.variable @value
                                 }, {
                                     abc.index_access {
                                         abc.variable @img
                                     }, {
-                                        // (((x+i) *4 + (y+j))%16
+                                        // ((x+i) *img_size + (y+j))%img_length
                                         abc.binary_expression "%" {
                                             abc.binary_expression "+" {
                                                 abc.binary_expression "*" {
@@ -37,7 +49,7 @@ builtin.module  {
                                                         abc.variable @i
                                                     }
                                                 }, {
-                                                    abc.literal_int 4
+                                                    abc.variable @img_size
                                                 }
                                             }, {
                                                 abc.binary_expression "+" {
@@ -47,23 +59,23 @@ builtin.module  {
                                                 }
                                             }
                                         }, {
-                                            abc.literal_int 16
+                                            abc.variable @img_length
                                         }
                                     }
                                 }
                             }
                         } // i loop
                     } //j loop
-                    // img2[4*x + y] = value
+                    // img2[img_size*x + y] = value
                     abc.assignment {
                         abc.index_access {
                             abc.variable @img2
                         }, {
-                            // 4*x + y
+                            // img_size*x + y
                             abc.binary_expression "+" {
-                                //4*x
+                                //img_size*x
                                 abc.binary_expression "*" {
-                                    abc.literal_int 4
+                                    abc.variable @img_size
                                 }, {
                                     abc.variable @x
                                 }
@@ -77,7 +89,7 @@ builtin.module  {
                 } //y loop
             } //x loop
             abc.return  {
-                    abc.variable @img2
+                abc.variable @img2
             }
         }
     }

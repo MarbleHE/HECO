@@ -1,7 +1,8 @@
 // Expected Output for "batched" BoxBlurTest
 
 // should follow this approach:
-// Ctxt foo(Ctxt& img, int img_size) {
+// Ctxt encryptedBoxBlur(Ctxt& img) {
+//  int img_size = ...
 //
 //  // Rotate pixels in outer 3x3 kernel to center pixel's slot
 //  Ctxt img_rot_1 = rotate(img, 1);
