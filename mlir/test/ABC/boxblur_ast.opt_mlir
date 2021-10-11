@@ -1,82 +1,17 @@
+#loc1 = loc("boxblur_ast.mlir":3:5)
 builtin.module  {
-  abc.function tensor<64xi64> @encryptedBoxBlur  {
-    abc.function_parameter tensor<64xi64> @img
-  },  {
-    abc.block  {
-      abc.variable_declaration index @img_size = ( {
-        abc.literal_int 8 : i64
-      })
-      abc.variable_declaration index @img_length = ( {
-        abc.literal_int 64 : i64
-      })
-      abc.variable_declaration tensor<64xi64> @img2 = ( {
-        abc.variable @img
-      })
-      abc.simple_for @x = [0 : i64, 8 : i64]  {
-        abc.simple_for @y = [0 : i64, 8 : i64]  {
-          abc.variable_declaration i64 @value = ( {
-            abc.literal_int 0 : i64
-          })
-          abc.simple_for @j = [-1 : i64, 2 : i64]  {
-            abc.simple_for @i = [-1 : i64, 2 : i64]  {
-              abc.assignment  {
-                abc.variable @value
-              },  {
-                abc.binary_expression "+"  {
-                  abc.variable @value
-                },  {
-                  abc.index_access  {
-                    abc.variable @img
-                  },  {
-                    abc.binary_expression "%"  {
-                      abc.binary_expression "+"  {
-                        abc.binary_expression "*"  {
-                          abc.binary_expression "+"  {
-                            abc.variable @x
-                          },  {
-                            abc.variable @i
-                          }
-                        },  {
-                          abc.variable @img_size
-                        }
-                      },  {
-                        abc.binary_expression "+"  {
-                          abc.variable @y
-                        },  {
-                          abc.variable @j
-                        }
-                      }
-                    },  {
-                      abc.variable @img_length
-                    }
-                  }
-                }
-              }
-            }
-          }
-          abc.assignment  {
-            abc.index_access  {
-              abc.variable @img2
-            },  {
-              abc.binary_expression "+"  {
-                abc.binary_expression "*"  {
-                  abc.variable @img_size
-                },  {
-                  abc.variable @x
-                }
-              },  {
-                abc.variable @y
-              }
-            }
-          },  {
-            abc.variable @value
-          }
-        }
-      }
-      abc.return  {
-        abc.variable @img2
-      }
-    }
-  }
-}
+  builtin.func private @encryptedBoxBlur(%arg0: tensor<64xi64> loc("boxblur_ast.mlir":3:5)) -> tensor<64xi64> {
+    %true = constant true loc(#loc2)
+    %true_0 = constant true loc(#loc3)
+    %true_1 = constant true loc(#loc4)
+    %true_2 = constant true loc(#loc5)
+    return %true_2 : i1 loc(#loc6)
+  } loc(#loc1)
+} loc(#loc0)
+#loc0 = loc("boxblur_ast.mlir":2:1)
+#loc2 = loc("img_size"("boxblur_ast.mlir":9:17))
+#loc3 = loc("img_length"("boxblur_ast.mlir":13:17))
+#loc4 = loc("img2"("boxblur_ast.mlir":17:17))
+#loc5 = loc("boxblur_ast.mlir":92:17)
+#loc6 = loc("boxblur_ast.mlir":91:13)
 

@@ -122,6 +122,7 @@ void translateVariableDeclarationOp(abc::VariableDeclarationOp vardecl_op,
   auto name = vardecl_op.name();
   //auto type = vardecl_op.type();
   auto value = translateExpression(firstOp(vardecl_op.value().front()), rewriter, symbolTable);
+  value.setLoc(NameLoc::get(Identifier::get(name, value.getContext()), value.getLoc()));
   // TODO: Somehow check that value and type are compatible
   (void) declare(name, value, symbolTable); //void cast to suppress "unused result" warning
 }
@@ -136,37 +137,44 @@ void translateAssignmentOp(abc::AssignmentOp assignment_op,
 
 }
 
-void translateForOp(abc::ForOp &for_op,
-                    IRRewriter &rewriter,
-                    llvm::ScopedHashTable<StringRef, mlir::Value> &symbolTable) {
-
-  auto condition = translateExpression(firstOp(for_op.condition()), rewriter, symbolTable);
-
-  //TODO: support loops!
-  // For now we assume a loop has pattern for({VariableDecl}, {ExprOp}, {AssignmentOp (to same Variable)})
-
-//  // Get lower bound:
-//  Value lower_bound;
-//  StringRef lower_bound_var_name = "";
-//  auto &test_op = *llvm::dyn_cast<abc::BlockOp>(firstOp(for_op.initializer())).getOps().begin();
-//  if (auto vardecl_op = llvm::dyn_cast<VariableDeclarationOp>(test_op)) {
-//    lower_bound_var_name = vardecl_op.name();
-//    lower_bound = translateExpression(firstOp(vardecl_op.value().front()), rewriter, symbolTable);
-//  } else {
-//    emitError(for_op->getLoc(),
-//              "Currently we do not support non-trivial loop initializers. Set lower bound to 0 (got "
-//                  + test_op.getName().getStringRef() + ").");
-//    // Create a dummy initializer so that things can continue.
-//    lower_bound =
-//        rewriter.create<ConstantOp>(for_op.getLoc(), rewriter.getIntegerAttr(rewriter.getIntegerType(32), 0));
-//  }
-//  if (++for_op.initializer().getOps().begin()!=for_op.initializer().getOps().end()) {
-//    emitError(for_op->getLoc(), "Currently we do not support multiple statements in the initializer!.");
-//  }
-//
-//  auto new_for = rewriter.create<scf::ForOp>(for_op->getLoc(),lower_bound, lower_bound);
+void translateSimpleForOp(abc::SimpleForOp &simple_for_op,
+                          IRRewriter &rewriter,
+                          llvm::ScopedHashTable<StringRef, mlir::Value> &symbolTable) {
 
 }
+
+//}
+//void translateForOp(abc::ForOp &for_op,
+//                    IRRewriter &rewriter,
+//                    llvm::ScopedHashTable<StringRef, mlir::Value> &symbolTable) {
+//
+//  auto condition = translateExpression(firstOp(for_op.condition()), rewriter, symbolTable);
+//
+//  //TODO: support loops!
+//  // For now we assume a loop has pattern for({VariableDecl}, {ExprOp}, {AssignmentOp (to same Variable)})
+//
+////  // Get lower bound:
+////  Value lower_bound;
+////  StringRef lower_bound_var_name = "";
+////  auto &test_op = *llvm::dyn_cast<abc::BlockOp>(firstOp(for_op.initializer())).getOps().begin();
+////  if (auto vardecl_op = llvm::dyn_cast<VariableDeclarationOp>(test_op)) {
+////    lower_bound_var_name = vardecl_op.name();
+////    lower_bound = translateExpression(firstOp(vardecl_op.value().front()), rewriter, symbolTable);
+////  } else {
+////    emitError(for_op->getLoc(),
+////              "Currently we do not support non-trivial loop initializers. Set lower bound to 0 (got "
+////                  + test_op.getName().getStringRef() + ").");
+////    // Create a dummy initializer so that things can continue.
+////    lower_bound =
+////        rewriter.create<ConstantOp>(for_op.getLoc(), rewriter.getIntegerAttr(rewriter.getIntegerType(32), 0));
+////  }
+////  if (++for_op.initializer().getOps().begin()!=for_op.initializer().getOps().end()) {
+////    emitError(for_op->getLoc(), "Currently we do not support multiple statements in the initializer!.");
+////  }
+////
+////  auto new_for = rewriter.create<scf::ForOp>(for_op->getLoc(),lower_bound, lower_bound);
+//
+//}
 
 void translateStatement(Operation &op,
                         IRRewriter &rewriter,
@@ -190,13 +198,16 @@ void translateStatement(Operation &op,
     translateVariableDeclarationOp(vardecl_op, rewriter, symbolTable);
     rewriter.eraseOp(&op);
   } else if (auto for_op = llvm::dyn_cast<abc::ForOp>(op)) {
-    translateForOp(for_op, rewriter, symbolTable);
-    rewriter.eraseOp(&op);
+    //TODO: Support general ForOp
+    emitError(op.getLoc(), "General For Statements are not yet supported.");
   } else if (auto if_op = llvm::dyn_cast<abc::IfOp>(op)) {
     translateIfOp(if_op, rewriter, symbolTable);
     rewriter.eraseOp(&op);
   } else if (auto yield_op = llvm::dyn_cast<scf::YieldOp>(op)) {
     // Do nothing
+  } else if (auto simple_for_op = llvm::dyn_cast<abc::SimpleForOp>(op)) {
+    translateSimpleForOp(simple_for_op, rewriter, symbolTable);
+    rewriter.eraseOp(&op);
   } else {
     emitError(op.getLoc(), "Unexpected Op encountered: " + op.getName().getStringRef());
   }
