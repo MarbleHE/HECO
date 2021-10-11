@@ -11,10 +11,11 @@
 #define RAND_SEED 4673838
 
 // Number of iterations for the benchmark
-#define INTER_COUNT 5
+#define ITER_COUNT 5
 
 #define BENCH_FUNCTION(VERSION, FUNCTION_NAME) if (argv[1] == std::string(#VERSION)) { \
-  for (int i = 0; i < INTER_COUNT; ++i) {                                              \
+  MultiTimer timer = MultiTimer();                                                     \
+  for (int i = 0; i < ITER_COUNT; ++i) {                                               \
     auto result = FUNCTION_NAME(timer, img, poly_modulus_degree);                      \
     timer.addIteration();                                                              \
   }                                                                                    \
@@ -63,7 +64,6 @@ int main(int argc, char *argv[]) {
   std::vector<int> img;
   getInputMatrix(size, img);
 
-  MultiTimer timer = MultiTimer();
   BENCH_FUNCTION(naive, encryptedFastBoxBlur2x2);
   BENCH_FUNCTION(expert, encryptedBatchedBoxBlur);
   BENCH_FUNCTION(porcupine, encryptedBatchedBoxBlur_Porcupine);
