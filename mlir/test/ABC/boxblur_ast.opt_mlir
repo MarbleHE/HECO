@@ -7,7 +7,8 @@ builtin.module  {
         %c0_i64 = constant 0 : i64
         affine.for %arg3 = -1 to 2 {
           affine.for %arg4 = -1 to 2 {
-            %true = constant true
+            %c1_i64 = constant 1 : i64
+            %0 = addi %c0_i64, %c1_i64 : i64
           }
         }
       }

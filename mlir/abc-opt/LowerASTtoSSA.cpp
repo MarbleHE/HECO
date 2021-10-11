@@ -70,11 +70,24 @@ translateExpression(Operation &op,
     return value;
   } else if (auto variable = llvm::dyn_cast<abc::VariableOp>(op)) {
     return symbolTable.lookup(variable.name());
+  } else if (auto binary_expr = llvm::dyn_cast<abc::BinaryExpressionOp>(op)) {
+    auto lhs = translateExpression(firstOp(binary_expr.left()), rewriter, symbolTable);
+    auto rhs = translateExpression(firstOp(binary_expr.right()), rewriter, symbolTable);
+    if (binary_expr.op()=="+") {
+      return rewriter.create<AddIOp>(binary_expr->getLoc(), lhs, rhs);
+    } else if (binary_expr.op()=="*") {
+      return rewriter.create<MulIOp>(binary_expr->getLoc(), lhs, rhs);
+    } else if (binary_expr.op()=="%") {
+      return rewriter.create<UnsignedRemIOp>(binary_expr->getLoc(), lhs, rhs);
+    } else {
+      //TODO: Implement remaining operators
+      emitError(binary_expr->getLoc(), "Unsupported operator: " + binary_expr.op());
+      return rewriter.create<ConstantOp>(op.getLoc(), rewriter.getIntegerAttr(rewriter.getIntegerType(64), 1));
+    }
   } else {
-    //TODO:  Actually translate expressions
+    //TODO: Actually translate remaining expression types
     emitError(op.getLoc(), "Expression not yet supported.");
-    auto value = rewriter.create<ConstantOp>(op.getLoc(), rewriter.getIntegerAttr(rewriter.getIntegerType(1), 1));
-    return value;
+    return rewriter.create<ConstantOp>(op.getLoc(), rewriter.getIntegerAttr(rewriter.getIntegerType(64), 1));
   }
 
 }
@@ -97,7 +110,7 @@ StringRef translateTarget(Operation &op,
 void translateStatement(Operation &op,
                         IRRewriter &rewriter,
                         llvm::ScopedHashTable<StringRef, mlir::Value> &symbolTable,
-                        AffineForOp* for_op = nullptr);
+                        AffineForOp *for_op = nullptr);
 
 void translateIfOp(abc::IfOp &if_op, IRRewriter &rewriter, llvm::ScopedHashTable<StringRef, Value> &symbolTable) {
   auto condition = translateExpression(firstOp(if_op.condition()), rewriter, symbolTable);
@@ -142,12 +155,12 @@ void translateVariableDeclarationOp(abc::VariableDeclarationOp vardecl_op,
 void translateAssignmentOp(abc::AssignmentOp assignment_op,
                            IRRewriter &rewriter,
                            llvm::ScopedHashTable<StringRef, Value> &symbolTable,
-                           AffineForOp* for_op) {
+                           AffineForOp *for_op) {
   // Get Name, Type and Value
   auto target = translateTarget(firstOp(assignment_op.target()), rewriter, symbolTable);
   auto value = translateExpression(firstOp(assignment_op.value()), rewriter, symbolTable);
 
-  if(for_op) {
+  if (for_op) {
 
     //TODO: check if the symbol table still contains the symbol at the parent scope.
     // If yes, then it's not loop local and we need to do some yield stuff!
@@ -177,7 +190,6 @@ void translateSimpleForOp(abc::SimpleForOp &simple_for_op,
   auto new_for = rewriter.create<AffineForOp>(simple_for_op->getLoc(),
                                               simple_for_op.start().getLimitedValue(),
                                               simple_for_op.end().getLimitedValue());
-
 
   declare(simple_for_op.iv(), new_for.getInductionVar(), symbolTable);
 
@@ -240,7 +252,7 @@ void translateSimpleForOp(abc::SimpleForOp &simple_for_op,
 void translateStatement(Operation &op,
                         IRRewriter &rewriter,
                         llvm::ScopedHashTable<StringRef, mlir::Value> &symbolTable,
-                        AffineForOp* for_op) {
+                        AffineForOp *for_op) {
   rewriter.setInsertionPoint(&op);
   if (auto block_op = llvm::dyn_cast<abc::BlockOp>(op)) {
     //TODO: Support BlockOp

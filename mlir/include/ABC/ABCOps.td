@@ -136,7 +136,7 @@ def ABC_BinaryExpressionOp : ABC_ExpressionOp<"binary_expression", []> {
   let summary = "AST Node BinaryExpression";
   let arguments = (ins
       // TODO: Find or introduce attribute to check that this is actually an operator
-      AnyAttr: $op
+      StrAttr: $op
   );
   let regions = (region
                 AnyExpression: $left,
