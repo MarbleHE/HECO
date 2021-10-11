@@ -64,9 +64,19 @@ mlir::Value
 translateExpression(Operation &op,
                     IRRewriter &rewriter,
                     llvm::ScopedHashTable<StringRef, mlir::Value> &symbolTable) {
-  //TODO:  Actually translate expressions
-  auto value = rewriter.create<ConstantOp>(op.getLoc(), rewriter.getIntegerAttr(rewriter.getIntegerType(1), 1));
-  return value;
+  if (auto literal_int = llvm::dyn_cast<abc::LiteralIntOp>(op)) {
+    auto value = rewriter
+        .create<ConstantOp>(op.getLoc(), rewriter.getIntegerAttr(rewriter.getIntegerType(64), literal_int.value()));
+    return value;
+  } else if (auto variable = llvm::dyn_cast<abc::VariableOp>(op)) {
+    return symbolTable.lookup(variable.name());
+  } else {
+    //TODO:  Actually translate expressions
+    emitError(op.getLoc(), "Expression not yet supported.");
+    auto value = rewriter.create<ConstantOp>(op.getLoc(), rewriter.getIntegerAttr(rewriter.getIntegerType(1), 1));
+    return value;
+  }
+
 }
 
 StringRef translateTarget(Operation &op,
