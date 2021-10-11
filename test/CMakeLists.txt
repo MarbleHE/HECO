@@ -53,7 +53,6 @@ set(TEST_FILES
         end-to-end/MatrixVectorProductTest.cpp
         end-to-end/PolynomialKernelTest.cpp
         end-to-end/RobertsCrossTest.cpp
-        end-to-end/MultiTimer.cpp
         parser/ParserTest.cpp
         parser/ParserTestHelpers.h
         parser/TokenizerTest.cpp
@@ -74,7 +73,7 @@ set(TEST_FILES
         ../bench/HammingDistance.cpp
         ../bench/RobertsCross.cpp
         ../bench/GxKernel.cpp
-)
+        )
 
 
 add_executable(testing-all
