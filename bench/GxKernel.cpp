@@ -1,3 +1,5 @@
+#ifdef HAVE_SEAL_BFV
+
 #include "GxKernel.h"
 
 /// Encrypted GxKernel, using 3x3 Kernel batched as 9 rotations of the image
@@ -227,3 +229,5 @@ std::vector<int64_t> encryptedBatchedGxKernelPorcupine(
 
   return result;
 }
+
+#endif

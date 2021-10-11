@@ -1,3 +1,5 @@
+#ifdef HAVE_SEAL_BFV
+
 #include "BoxBlur.h"
 
 std::vector<uint64_t> encryptedFastBoxBlur2x2(MultiTimer &timer, const std::vector<int> &img, size_t poly_modulus_degree) {
@@ -195,13 +197,11 @@ std::vector<int64_t> encryptedBatchedBoxBlur(
 
   int t2 = timer.startTimer(); // decrypt timer start
   // Decrypt & Return result
-  // std::cout << "Decrypting Result" << std::endl;
   seal::Plaintext result_ptxt;
   decryptor.decrypt(result_ctxt, result_ptxt);
   std::vector<int64_t> result;
   encoder.decode(result_ptxt, result);
   timer.stopTimer(t2); // decrypt timer stop
-  // std::cout << result.size() << std::endl;
   return result;
 }
 
@@ -285,3 +285,5 @@ std::vector<int64_t> encryptedBatchedBoxBlur_Porcupine(
   timer.stopTimer(t2);
   return retVal;
 }
+
+#endif

@@ -1,6 +1,7 @@
 #ifndef AST_OPTIMIZER_HAMMINGDISTANCE_H
 #define AST_OPTIMIZER_HAMMINGDISTANCE_H
 
+#ifdef HAVE_SEAL_BFV
 #include "seal/seal.h"
 #include "MultiTimer.h"
 
@@ -19,4 +20,5 @@
 int encryptedHammingDistancePorcupine(
         MultiTimer &timer, const std::vector<bool> &a, const std::vector<bool> &b, size_t poly_modulus_degree);
 
+#endif
 #endif//AST_OPTIMIZER_HAMMINGDISTANCE_H

@@ -1,3 +1,5 @@
+#ifdef HAVE_SEAL_BFV
+
 #include "LinearKernel.h"
 
 /// Ciphertext linear_reg(Ciphertext a, Ciphertext b, Ciphertext x, Ciphertext y)
@@ -73,3 +75,5 @@ int64_t encryptedLinearKernelPorcupine(
   encoder.decode(result_ptxt, result);
   return result[0];
 }
+
+#endif

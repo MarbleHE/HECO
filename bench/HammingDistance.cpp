@@ -1,3 +1,5 @@
+#ifdef HAVE_SEAL_BFV
+
 #include "HammingDistance.h"
 
 /// For 4-element hamming distance
@@ -89,3 +91,5 @@ int encryptedHammingDistancePorcupine(
   encoder.decode(result_ptxt, result);
   return result[0];
 }
+
+#endif

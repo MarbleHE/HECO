@@ -10,6 +10,8 @@ if (SEAL_FOUND)
     add_executable(bb-bench ${BB_BENCH_FILES})
     target_include_directories(bb-bench PUBLIC ${SEAL_INCLUDE_DIRS})
     target_link_libraries(bb-bench PUBLIC SEAL::seal)
+    target_compile_definitions(bb-bench PUBLIC -DHAVE_SEAL_BFV)
+    target_compile_definitions(bb-bench PUBLIC -DHAVE_SEAL_CKKS)
 
 
     ## GX KERNEL ##
@@ -21,6 +23,8 @@ if (SEAL_FOUND)
     add_executable(gx-bench ${GX_BENCH_FILES})
     target_include_directories(gx-bench PUBLIC ${SEAL_INCLUDE_DIRS})
     target_link_libraries(gx-bench PUBLIC SEAL::seal)
+    target_compile_definitions(gx-bench PUBLIC -DHAVE_SEAL_BFV)
+    target_compile_definitions(gx-bench PUBLIC -DHAVE_SEAL_CKKS)
 
     ## HAMMING DISTANCE ##
     set(HAM_BENCH_FILES
@@ -31,6 +35,8 @@ if (SEAL_FOUND)
     add_executable(ham-bench ${HAM_BENCH_FILES})
     target_include_directories(ham-bench PUBLIC ${SEAL_INCLUDE_DIRS})
     target_link_libraries(ham-bench PUBLIC SEAL::seal)
+    target_compile_definitions(ham-bench PUBLIC -DHAVE_SEAL_BFV)
+    target_compile_definitions(ham-bench PUBLIC -DHAVE_SEAL_CKKS)
 
     ## ROBERTS CROSS ##
     set(RC_BENCH_FILES
@@ -41,5 +47,7 @@ if (SEAL_FOUND)
     add_executable(rc-bench ${RC_BENCH_FILES})
     target_include_directories(rc-bench PUBLIC ${SEAL_INCLUDE_DIRS})
     target_link_libraries(rc-bench PUBLIC SEAL::seal)
+    target_compile_definitions(rc-bench PUBLIC -DHAVE_SEAL_BFV)
+    target_compile_definitions(rc-bench PUBLIC -DHAVE_SEAL_CKKS)
 
 endif (SEAL_FOUND)

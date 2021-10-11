@@ -1,6 +1,7 @@
 #ifndef AST_OPTIMIZER_GXKERNEL_H
 #define AST_OPTIMIZER_GXKERNEL_H
 
+#ifdef HAVE_SEAL_BFV
 #include "seal/seal.h"
 #include "MultiTimer.h"
 
@@ -31,4 +32,5 @@ std::vector<int64_t> encryptedBatchedGxKernel(
 std::vector<int64_t> encryptedBatchedGxKernelPorcupine(
         MultiTimer &timer, const std::vector<int> &img, size_t poly_modulus_degree);
 
+#endif
 #endif//AST_OPTIMIZER_GXKERNEL_H

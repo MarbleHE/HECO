@@ -1,3 +1,5 @@
+#ifdef HAVE_SEAL_BFV
+
 #include "RobertsCross.h"
 
 /// Output is squared to elide square root
@@ -84,3 +86,4 @@ std::vector<int64_t> encryptedRobertsCrossPorcupine(
   return result;
 }
 
+#endif

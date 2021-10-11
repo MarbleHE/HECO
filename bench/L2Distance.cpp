@@ -1,3 +1,5 @@
+#ifdef HAVE_SEAL_BFV
+
 #include "L2Distance.h"
 
 /// Output is squared to elide square root
@@ -86,3 +88,4 @@ int encryptedL2DistanceSquared_Porcupine(
   return result[0];
 }
 
+#endif
