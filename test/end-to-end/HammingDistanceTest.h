@@ -3,6 +3,8 @@
 
 #ifdef HAVE_SEAL_BFV
 #include "seal/seal.h"
+#include "MultiTimer.h"
+
 /// For 4-element hamming distance
 /// Ciphertext hamming_distance(Ciphertext c0, Ciphertext c1)
 ///     Plaintext p0(N, 2) // N is the number of slots
