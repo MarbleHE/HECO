@@ -70,7 +70,7 @@ set(TEST_FILES
         visitor/VisitorTest.cpp
         end-to-end/GxKernelTest.h
         end-to-end/HammingDistanceTest.h
-        end-to-end/L2DistanceTest.h)
+        end-to-end/L2DistanceTest.h end-to-end/RobertsCrossTest.h)
 
 add_executable(testing-all
         ${TEST_FILES})
