@@ -1,3 +1,4 @@
+// Expected AST for BoxBlurTest
 builtin.module  {
     abc.function tensor<16384x!abc.int> @encryptedBoxBlur  {
         abc.function_parameter tensor<16xi64> @img
@@ -14,7 +15,7 @@ builtin.module  {
                     })
                     // start looping over kernel
                     abc.simple_for @j = [-1, 2] {
-                        abc.simple_for @i =[- 1, 2] {
+                        abc.simple_for @i =[-1, 2] {
                             // value = value + img[((x+i) *4 + (y+j))%16]
                             abc.assignment {
                                 abc.variable @value

@@ -45,7 +45,7 @@ int main(int argc, char **argv) {
   //  PassManager pm(&context);
   //  pm.addNestedPass<abc::ReturnOp>(abc::createLowerASTtoSSAPass());
 
-  //registerAllPasses();
+  registerAllPasses();
   PassRegistration<LowerASTtoSSAPass>();
 
   return asMainReturnCode(
