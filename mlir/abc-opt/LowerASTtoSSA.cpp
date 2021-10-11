@@ -181,8 +181,10 @@ void translateAssignmentOp(abc::AssignmentOp assignment_op,
   }
 
   if (for_op) {
-
-    //TODO: check if the symbol table still contains the symbol at the parent scope.
+    //NOTE:
+    // THE BELOW DOESN'T WORK BECAUSE IT SEEMS LIKE WE CAN'T ADD ITER_ARGS TO AN EXISTING FOR_OP?
+    // SO FOR NOW WE JUST PUT EVERYTHING IN WHEN WE GENERATE A FOR OP AND LET THE CANONICALIZATION GET RID OF UNNEEDED ONES
+    // check if the symbol table still contains the symbol at the parent scope.
     // If yes, then it's not loop local and we need to do some yield stuff!
     // Next, we should check if it's already been added to the iter_args!
     // by checking if one of the iter args is the same value as the one we get by looking up the old value
@@ -190,7 +192,7 @@ void translateAssignmentOp(abc::AssignmentOp assignment_op,
     // otherwise, we can just emit a new yield at the end of the loop
     // However, this might be BAD in terms of iterator stuff since we're currently in an llvm:: make early inc range thing
     // iterating over all the ops nested in this for op!
-    emitError(assignment_op->getLoc(), "Currently, we do not handle writing to variables in for loops correctly");
+    //emitError(assignment_op->getLoc(), "Currently, we do not handle writing to variables in for loops correctly");
     symbolTable.insert(target_name, value);
   } else {
     symbolTable.insert(target_name, value);
@@ -212,6 +214,13 @@ void translateSimpleForOp(abc::SimpleForOp &simple_for_op,
                                               simple_for_op.end().getLimitedValue());
 
   declare(simple_for_op.iv(), new_for.getInductionVar(), symbolTable);
+
+  // Get every variable that exists and dump it as an iter args,
+  // since we can't add them later, but ones that don't get used
+  // are easily optimized away by --canonicalize
+  // TODO: SERIOUSLY, WE CAN'T EVEN ENUMERATE EVERY SYMBOL WE HAVE??
+  emitWarning(simple_for_op->getLoc(), "Currently, manually managing yields is required because of...reasons.");
+
 
   // Move ABC Operations over into the new for loop's entryBlock
   rewriter.setInsertionPointToStart(new_for.getBody());
