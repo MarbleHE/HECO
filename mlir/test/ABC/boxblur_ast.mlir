@@ -19,74 +19,82 @@ builtin.module  {
             // TODO: Find a way to express the loop bounds using variables? Or just go back standard abc.for?
             // for x in 0..img_size
             abc.simple_for @x = [0, 8] {
-                // for x in 0..img_size
-                abc.simple_for @y = [0, 8] {
-                    // int value = 0;
-                    abc.variable_declaration i64 @value = ( {
-                        abc.literal_int 0
-                    })
-                    // start looping over kernel
-                    abc.simple_for @j = [-1, 2] {
-                        abc.simple_for @i =[-1, 2] {
-                            // value = value + img[((x+i) * img_size + (y+j))%img_length]
-                            abc.assignment {
-                                abc.variable @value
-                            }, {
-                                // value + img[((x+i) *img_size + (y+j))%img_length]
-                                abc.binary_expression "+" {
-                                    abc.variable @value
-                                }, {
-                                    abc.index_access {
-                                        abc.variable @img
-                                    }, {
-                                        // ((x+i) *img_size + (y+j))%img_length
-                                        abc.binary_expression "%" {
-                                            abc.binary_expression "+" {
-                                                abc.binary_expression "*" {
-                                                    abc.binary_expression "+" {
-                                                        abc.variable @x
-                                                    }, {
-                                                        abc.variable @i
-                                                    }
-                                                }, {
-                                                    abc.variable @img_size
-                                                }
+                abc.block  {
+                    // for x in 0..img_size
+                    abc.simple_for @y = [0, 8] {
+                         abc.block  {
+                            // int value = 0;
+                            abc.variable_declaration i64 @value = ( {
+                                abc.literal_int 0
+                            })
+                            // start looping over kernel
+                            abc.simple_for @j = [-1, 2] {
+                                abc.block  {
+                                    abc.simple_for @i =[-1, 2] {
+                                        abc.block  {
+                                            // value = value + img[((x+i) * img_size + (y+j))%img_length]
+                                            abc.assignment {
+                                                abc.variable @value
                                             }, {
+                                                // value + img[((x+i) *img_size + (y+j))%img_length]
                                                 abc.binary_expression "+" {
-                                                    abc.variable @y
+                                                    abc.variable @value
                                                 }, {
-                                                    abc.variable @j
+                                                    abc.index_access {
+                                                        abc.variable @img
+                                                    }, {
+                                                        // ((x+i) *img_size + (y+j))%img_length
+                                                        abc.binary_expression "%" {
+                                                            abc.binary_expression "+" {
+                                                                abc.binary_expression "*" {
+                                                                    abc.binary_expression "+" {
+                                                                        abc.variable @x
+                                                                    }, {
+                                                                        abc.variable @i
+                                                                    }
+                                                                }, {
+                                                                    abc.variable @img_size
+                                                                }
+                                                            }, {
+                                                                abc.binary_expression "+" {
+                                                                    abc.variable @y
+                                                                }, {
+                                                                    abc.variable @j
+                                                                }
+                                                            }
+                                                        }, {
+                                                            abc.variable @img_length
+                                                        }
+                                                    }
                                                 }
                                             }
-                                        }, {
-                                            abc.variable @img_length
-                                        }
+                                        } // i loop
                                     }
                                 }
-                            }
-                        } // i loop
-                    } //j loop
-                    // img2[img_size*x + y] = value
-                    abc.assignment {
-                        abc.index_access {
-                            abc.variable @img2
-                        }, {
-                            // img_size*x + y
-                            abc.binary_expression "+" {
-                                //img_size*x
-                                abc.binary_expression "*" {
-                                    abc.variable @img_size
+                            } //j loop
+                            // img2[img_size*x + y] = value
+                            abc.assignment {
+                                abc.index_access {
+                                    abc.variable @img2
                                 }, {
-                                    abc.variable @x
+                                    // img_size*x + y
+                                    abc.binary_expression "+" {
+                                        //img_size*x
+                                        abc.binary_expression "*" {
+                                            abc.variable @img_size
+                                        }, {
+                                            abc.variable @x
+                                        }
+                                    }, {
+                                        abc.variable @y
+                                    }
                                 }
                             }, {
-                                abc.variable @y
+                                abc.variable @value
                             }
                         }
-                    }, {
-                        abc.variable @value
-                    }
-                } //y loop
+                    } //y loop
+                }
             } //x loop
             abc.return  {
                 abc.variable @img2

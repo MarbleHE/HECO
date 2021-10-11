@@ -39,7 +39,7 @@ def ABC_ForOp : ABC_StatementOp<"for", []> {
 def ABC_SimpleForOp : ABC_StatementOp<"simple_for", []> {
   let summary = "Simple Version of AST Node For";
   let regions = (region AnyBlock: $body );
-  let arguments = (ins  SymbolNameAttr:$iv,  AnyAttr: $start, AnyAttr: $end );
+  let arguments = (ins  SymbolNameAttr:$iv,  APIntAttr: $start, APIntAttr: $end );
   let assemblyFormat = [{  $iv `=` `[` $start `,` $end `]` attr-dict-with-keyword regions }];
 }
 

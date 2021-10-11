@@ -96,7 +96,8 @@ StringRef translateTarget(Operation &op,
 
 void translateStatement(Operation &op,
                         IRRewriter &rewriter,
-                        llvm::ScopedHashTable<StringRef, mlir::Value> &symbolTable);
+                        llvm::ScopedHashTable<StringRef, mlir::Value> &symbolTable,
+                        AffineForOp* for_op = nullptr);
 
 void translateIfOp(abc::IfOp &if_op, IRRewriter &rewriter, llvm::ScopedHashTable<StringRef, Value> &symbolTable) {
   auto condition = translateExpression(firstOp(if_op.condition()), rewriter, symbolTable);
@@ -131,6 +132,7 @@ void translateVariableDeclarationOp(abc::VariableDeclarationOp vardecl_op,
   // Get Name, Type and Value
   auto name = vardecl_op.name();
   //auto type = vardecl_op.type();
+  // TODO: Support decls without value by defining default values?
   auto value = translateExpression(firstOp(vardecl_op.value().front()), rewriter, symbolTable);
   value.setLoc(NameLoc::get(Identifier::get(name, value.getContext()), value.getLoc()));
   // TODO: Somehow check that value and type are compatible
@@ -139,11 +141,27 @@ void translateVariableDeclarationOp(abc::VariableDeclarationOp vardecl_op,
 
 void translateAssignmentOp(abc::AssignmentOp assignment_op,
                            IRRewriter &rewriter,
-                           llvm::ScopedHashTable<StringRef, Value> &symbolTable) {
+                           llvm::ScopedHashTable<StringRef, Value> &symbolTable,
+                           AffineForOp* for_op) {
   // Get Name, Type and Value
   auto target = translateTarget(firstOp(assignment_op.target()), rewriter, symbolTable);
   auto value = translateExpression(firstOp(assignment_op.value()), rewriter, symbolTable);
-  symbolTable.insert(target, value);
+
+  if(for_op) {
+
+    //TODO: check if the symbol table still contains the symbol at the parent scope.
+    // If yes, then it's not loop local and we need to do some yield stuff!
+    // Next, we should check if it's already been added to the iter_args!
+    // by checking if one of the iter args is the same value as the one we get by looking up the old value
+    // Finally, if we ARE updating an existing iter arg, we need to find the existing yield stmt and change it
+    // otherwise, we can just emit a new yield at the end of the loop
+    // However, this might be BAD in terms of iterator stuff since we're currently in an llvm:: make early inc range thing
+    // iterating over all the ops nested in this for op!
+    emitError(assignment_op->getLoc(), "Currently, we do not handle writing to variables in for loops correctly");
+    symbolTable.insert(target, value);
+  } else {
+    symbolTable.insert(target, value);
+  }
 
 }
 
@@ -151,6 +169,39 @@ void translateSimpleForOp(abc::SimpleForOp &simple_for_op,
                           IRRewriter &rewriter,
                           llvm::ScopedHashTable<StringRef, mlir::Value> &symbolTable) {
 
+  // Create a new scope
+  // This sets curScope in symbolTable to varScope
+  llvm::ScopedHashTableScope<llvm::StringRef, mlir::Value> var_scope(symbolTable);
+
+  // Create the affine for loop
+  auto new_for = rewriter.create<AffineForOp>(simple_for_op->getLoc(),
+                                              simple_for_op.start().getLimitedValue(),
+                                              simple_for_op.end().getLimitedValue());
+
+
+  declare(simple_for_op.iv(), new_for.getInductionVar(), symbolTable);
+
+  // Move ABC Operations over into the new for loop's entryBlock
+  rewriter.setInsertionPointToStart(new_for.getBody());
+  auto abc_block_it = simple_for_op.body().getOps<abc::BlockOp>();
+  if (abc_block_it.begin()==abc_block_it.end() || ++abc_block_it.begin()!=abc_block_it.end()) {
+    emitError(simple_for_op.getLoc(), "Expected exactly one Block inside function!");
+  } else {
+    auto abc_block = *abc_block_it.begin();
+    if (abc_block->getNumRegions()!=1 || !abc_block.body().hasOneBlock()) {
+      emitError(abc_block.getLoc(), "ABC BlockOp must contain exactly one region and exactly one Block in that!");
+    } else {
+      llvm::iplist<Operation> oplist;
+      auto &bb = *abc_block.body().getBlocks().begin();
+      rewriter.mergeBlockBefore(&bb, &new_for.getBody()->front());
+    }
+  }
+
+  // Finally, go through the block and translate each operation
+  // It's the responsiblity of VariableAssignment to update the iterArgs, so we pass this operation along
+  for (auto &op: llvm::make_early_inc_range(new_for.getBody()->getOperations())) {
+    translateStatement(op, rewriter, symbolTable, &new_for);
+  }
 }
 
 //}
@@ -188,7 +239,8 @@ void translateSimpleForOp(abc::SimpleForOp &simple_for_op,
 
 void translateStatement(Operation &op,
                         IRRewriter &rewriter,
-                        llvm::ScopedHashTable<StringRef, mlir::Value> &symbolTable) {
+                        llvm::ScopedHashTable<StringRef, mlir::Value> &symbolTable,
+                        AffineForOp* for_op) {
   rewriter.setInsertionPoint(&op);
   if (auto block_op = llvm::dyn_cast<abc::BlockOp>(op)) {
     //TODO: Support BlockOp
@@ -202,7 +254,7 @@ void translateStatement(Operation &op,
     }
     rewriter.eraseOp(&op);
   } else if (auto assignment_op = llvm::dyn_cast<abc::AssignmentOp>(op)) {
-    translateAssignmentOp(assignment_op, rewriter, symbolTable);
+    translateAssignmentOp(assignment_op, rewriter, symbolTable, for_op);
     rewriter.eraseOp(&op);
   } else if (auto vardecl_op = llvm::dyn_cast<abc::VariableDeclarationOp>(op)) {
     translateVariableDeclarationOp(vardecl_op, rewriter, symbolTable);
@@ -213,8 +265,10 @@ void translateStatement(Operation &op,
   } else if (auto if_op = llvm::dyn_cast<abc::IfOp>(op)) {
     translateIfOp(if_op, rewriter, symbolTable);
     rewriter.eraseOp(&op);
-  } else if (auto yield_op = llvm::dyn_cast<scf::YieldOp>(op)) {
+  } else if (auto scf_yield_op = llvm::dyn_cast<scf::YieldOp>(op)) {
     // Do nothing
+  } else if (auto affine_yield_op = llvm::dyn_cast<AffineYieldOp>(op)) {
+    // do nothing
   } else if (auto simple_for_op = llvm::dyn_cast<abc::SimpleForOp>(op)) {
     translateSimpleForOp(simple_for_op, rewriter, symbolTable);
     rewriter.eraseOp(&op);

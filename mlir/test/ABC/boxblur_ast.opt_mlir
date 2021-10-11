@@ -1,14 +1,18 @@
-#loc2 = loc("img2"("boxblur_ast.mlir":3:5))
 builtin.module  {
-  builtin.func private @encryptedBoxBlur(%arg0: tensor<64xi64> loc("img2"("boxblur_ast.mlir":3:5))) -> tensor<64xi64> {
-    %c8_i64 = constant 8 : i64 loc(#loc3)
-    %c64_i64 = constant 64 : i64 loc(#loc4)
-    return %arg0 : tensor<64xi64> loc(#loc5)
-  } loc(#loc1)
-} loc(#loc0)
-#loc0 = loc("boxblur_ast.mlir":2:1)
-#loc1 = loc("boxblur_ast.mlir":3:5)
-#loc3 = loc("img_size"("boxblur_ast.mlir":9:17))
-#loc4 = loc("img_length"("boxblur_ast.mlir":13:17))
-#loc5 = loc("boxblur_ast.mlir":91:13)
+  builtin.func private @encryptedBoxBlur(%arg0: tensor<64xi64>) -> tensor<64xi64> {
+    %c8_i64 = constant 8 : i64
+    %c64_i64 = constant 64 : i64
+    affine.for %arg1 = 0 to 8 {
+      affine.for %arg2 = 0 to 8 {
+        %c0_i64 = constant 0 : i64
+        affine.for %arg3 = -1 to 2 {
+          affine.for %arg4 = -1 to 2 {
+            %true = constant true
+          }
+        }
+      }
+    }
+    return %arg0 : tensor<64xi64>
+  }
+}
 

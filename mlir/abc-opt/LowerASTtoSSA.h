@@ -7,6 +7,7 @@
 
 #include "ABC/ABCDialect.h"
 #include "mlir/Dialect/SCF/SCF.h"
+#include "mlir/Dialect/Affine/IR/AffineOps.h"
 
 namespace abc {
 
