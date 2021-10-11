@@ -7,8 +7,13 @@ builtin.module  {
         %c0_i64 = constant 0 : i64
         affine.for %arg3 = -1 to 2 {
           affine.for %arg4 = -1 to 2 {
-            %c1_i64 = constant 1 : i64
-            %0 = addi %c0_i64, %c1_i64 : i64
+            %0 = addi %arg1, %arg4 : index
+            %1 = "std.muli"(%0, %c8_i64) : (index, i64) -> index
+            %2 = addi %arg2, %arg3 : index
+            %3 = addi %1, %2 : index
+            %4 = "std.remi_unsigned"(%3, %c64_i64) : (index, i64) -> index
+            %5 = tensor.extract %arg0[%4] : tensor<64xi64>
+            %6 = addi %c0_i64, %5 : i64
           }
         }
       }

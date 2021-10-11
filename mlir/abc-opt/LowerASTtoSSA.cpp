@@ -84,6 +84,17 @@ translateExpression(Operation &op,
       emitError(binary_expr->getLoc(), "Unsupported operator: " + binary_expr.op());
       return rewriter.create<ConstantOp>(op.getLoc(), rewriter.getIntegerAttr(rewriter.getIntegerType(64), 1));
     }
+  } else if (auto index_access = llvm::dyn_cast<abc::IndexAccessOp>(op)) {
+    if (auto target_variable = llvm::dyn_cast<VariableOp>(firstOp(index_access.target()))) {
+      auto target = translateExpression(firstOp(index_access.target()), rewriter, symbolTable);
+      auto index = translateExpression(firstOp(index_access.index()), rewriter, symbolTable);
+      return rewriter.create<tensor::ExtractOp>(index_access->getLoc(), target, index);
+    } else {
+      emitError(op.getLoc(),
+                "Expected Index Access target to be a variable, got " + firstOp(index_access.target()).getName().getStringRef());
+      return rewriter.create<ConstantOp>(op.getLoc(), rewriter.getIntegerAttr(rewriter.getIntegerType(64), 1));
+    }
+
   } else {
     //TODO: Actually translate remaining expression types
     emitError(op.getLoc(), "Expression not yet supported.");
@@ -346,7 +357,7 @@ void convertFunctionOp2FuncOp(FunctionOp &f,
 
 void LowerASTtoSSAPass::runOnOperation() {
   ConversionTarget target(getContext());
-  target.addLegalDialect<AffineDialect, StandardOpsDialect>();
+  target.addLegalDialect<AffineDialect, StandardOpsDialect, tensor::TensorDialect, scf::SCFDialect>();
   target.addLegalOp<mlir::ReturnOp>();
   // target.addIllegalDialect<ABCDialect>();
 
