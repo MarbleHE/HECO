@@ -8,7 +8,6 @@
 #include "gtest/gtest.h"
 
 #include "HammingDistanceTest.h"
-#include "MultiTimer.h"
 
 /// Original, plain C++ program for the hamming distance between two vectors
 ///

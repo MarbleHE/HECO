@@ -9,10 +9,6 @@
 
 #include "BoxBlurTest.h"
 
-#ifdef HAVE_SEAL_BFV
-#include "seal/seal.h"
-#endif
-
 /// Original, plain C++ program for a naive Box blur
 /// This uses a 3x3 Kernel and applies it by sliding across the 2D image
 ///             | 1  1  1 |
