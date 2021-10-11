@@ -1,7 +1,6 @@
-#ifndef AST_OPTIMIZER_L2DISTANCETEST_H
-#define AST_OPTIMIZER_L2DISTANCETEST_H
+#ifndef AST_OPTIMIZER_L2DISTANCE_H
+#define AST_OPTIMIZER_L2DISTANCE_H
 
-#ifdef HAVE_SEAL_BFV
 #include "seal/seal.h"
 #include "MultiTimer.h"
 
@@ -18,6 +17,4 @@
 int encryptedL2DistanceSquared_Porcupine(
         MultiTimer &timer, const std::vector<int> &x, const std::vector<int> &y, size_t poly_modulus_degree);
 
-#endif //HAVE_SEAL_BFV
-
-#endif//AST_OPTIMIZER_L2DISTANCETEST_H
+#endif//AST_OPTIMIZER_L2DISTANCE_H

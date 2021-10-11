@@ -1,7 +1,6 @@
-#ifndef AST_OPTIMIZER_GXKERNELTEST_H
-#define AST_OPTIMIZER_GXKERNELTEST_H
+#ifndef AST_OPTIMIZER_GXKERNEL_H
+#define AST_OPTIMIZER_GXKERNEL_H
 
-#ifdef HAVE_SEAL_BFV
 #include "seal/seal.h"
 #include "MultiTimer.h"
 
@@ -29,8 +28,7 @@ std::vector<int64_t> encryptedBatchedGxKernel(
 /// \param img Pixel (x,y) = (column, row) should be at position x*imgSize + y
 /// \param poly_modulus_degree FHE parameter, degree n of the polynomials
 /// \return transformed image
-std::vector<int64_t> encryptedBatchedGxKernel_Porcupine(
+std::vector<int64_t> encryptedBatchedGxKernelPorcupine(
         MultiTimer &timer, const std::vector<int> &img, size_t poly_modulus_degree);
 
-#endif //HAVE_SEAL_BFV
-#endif //AST_OPTIMIZER_GXKERNELTEST_H
+#endif//AST_OPTIMIZER_GXKERNEL_H

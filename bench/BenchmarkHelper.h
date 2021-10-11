@@ -1,11 +1,7 @@
-#ifdef HAVE_SEAL_BFV
+#ifndef AST_OPTIMIZER_BENCHMARKHELPER_H
+#define AST_OPTIMIZER_BENCHMARKHELPER_H
 
-#include <complex>
 #include <random>
-#include <string>
-
-#include "BoxBlurTest.h"
-#include "MultiTimer.h"
 
 // use this fixed seed to enable reproducibility of the matrix inputs
 #define RAND_SEED 4673838
@@ -13,13 +9,13 @@
 // Number of iterations for the benchmark
 #define ITER_COUNT 5
 
-#define BENCH_FUNCTION(VERSION, FUNCTION_NAME) if (argv[1] == std::string(#VERSION)) { \
+#define BENCH_FUNCTION(PROBLEM, VERSION, FUNCTION_NAME, ...) if (argv[1] == std::string(#VERSION)) { \
   MultiTimer timer = MultiTimer();                                                     \
   for (int i = 0; i < ITER_COUNT; ++i) {                                               \
-    auto result = FUNCTION_NAME(timer, img, poly_modulus_degree);                      \
+    auto result = FUNCTION_NAME(timer, __VA_ARGS__, poly_modulus_degree);                      \
     timer.addIteration();                                                              \
   }                                                                                    \
-  timer.printToFile("BoxBlur_" #VERSION "_64.csv");                                  \
+  timer.printToFile( #PROBLEM "_" #VERSION "_64.csv");                                  \
 }
 
 void getInputMatrix(size_t size, std::vector<std::vector<int>> &destination) {
@@ -48,27 +44,4 @@ void getInputMatrix(size_t size, std::vector<int> &destination) {
   for (const auto &sub : data) destination.insert(destination.end(), sub.begin(), sub.end());
 }
 
-
-int main(int argc, char *argv[]) {
-  if (argc < 2) {
-    std::cout << "USAGE: bb-bench [version]" << std::endl;
-    std::cout << "       versions:" << std::endl;
-    std::cout << "          -naive" << std::endl;
-    std::cout << "          -expert" << std::endl;
-    std::cout << "          -porcupine" << std::endl;
-    std::exit(1);
-  }
-
-  size_t poly_modulus_degree = 2 << 12;
-  size_t size = std::sqrt(poly_modulus_degree / 2);
-  std::vector<int> img;
-  getInputMatrix(size, img);
-
-  BENCH_FUNCTION(naive, encryptedFastBoxBlur2x2);
-  BENCH_FUNCTION(expert, encryptedBatchedBoxBlur);
-  BENCH_FUNCTION(porcupine, encryptedBatchedBoxBlur_Porcupine);
-
-  return 0;
-}
-
-#endif
+#endif//AST_OPTIMIZER_BENCHMARKHELPER_H

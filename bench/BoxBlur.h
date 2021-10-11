@@ -1,7 +1,6 @@
-#ifndef AST_OPTIMIZER_BOXBLURTEST_H
-#define AST_OPTIMIZER_BOXBLURTEST_H
+#ifndef AST_OPTIMIZER_BOXBLUR_H
+#define AST_OPTIMIZER_BOXBLUR_H
 
-#ifdef HAVE_SEAL_BFV
 #include "seal/seal.h"
 #include "MultiTimer.h"
 /// Encrypted BoxBlur, using 3x3 Kernel batched as 9 rotations of the image
@@ -20,5 +19,5 @@ std::vector<int64_t> encryptedBatchedBoxBlur_Porcupine(
 std::vector<uint64_t> encryptedFastBoxBlur2x2(
         MultiTimer &timer, const std::vector<int> &img, size_t poly_modulus_degree);
 
-#endif //HAVE_SEAL_BFV
-#endif//AST_OPTIMIZER_BOXBLURTEST_H
+
+#endif//AST_OPTIMIZER_BOXBLUR_H

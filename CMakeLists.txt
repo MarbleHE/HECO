@@ -273,3 +273,10 @@ if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     enable_testing()
     add_subdirectory(test EXCLUDE_FROM_ALL)
 endif ()
+
+##############################
+# TARGET: benchmarks
+#
+# A collection of benchmarks
+##############################
+add_subdirectory(bench EXCLUDE_FROM_ALL)
