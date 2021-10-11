@@ -7,15 +7,18 @@ builtin.module  {
         %c0 = constant 0 : index
         affine.for %arg3 = -1 to 2 {
           affine.for %arg4 = -1 to 2 {
-            %0 = addi %arg1, %arg4 : index
-            %1 = muli %0, %c8 : index
-            %2 = addi %arg2, %arg3 : index
-            %3 = addi %1, %2 : index
-            %4 = remi_unsigned %3, %c64 : index
-            %5 = tensor.extract %arg0[%4] : tensor<64xindex>
-            %6 = addi %c0, %5 : index
+            %3 = addi %arg1, %arg4 : index
+            %4 = muli %3, %c8 : index
+            %5 = addi %arg2, %arg3 : index
+            %6 = addi %4, %5 : index
+            %7 = remi_unsigned %6, %c64 : index
+            %8 = tensor.extract %arg0[%7] : tensor<64xindex>
+            %9 = addi %c0, %8 : index
           }
         }
+        %0 = muli %c8, %arg1 : index
+        %1 = addi %0, %arg2 : index
+        %2 = tensor.insert %c0 into %arg0[%1] : tensor<64xindex>
       }
     }
     return %arg0 : tensor<64xindex>

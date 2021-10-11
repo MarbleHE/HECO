@@ -93,7 +93,8 @@ translateExpression(Operation &op,
       return rewriter.create<tensor::ExtractOp>(index_access->getLoc(), target, index);
     } else {
       emitError(op.getLoc(),
-                "Expected Index Access target to be a variable, got " + firstOp(index_access.target()).getName().getStringRef());
+                "Expected Index Access target to be a variable, got "
+                    + firstOp(index_access.target()).getName().getStringRef());
       return rewriter.create<ConstantOp>(op.getLoc(), rewriter.getIntegerAttr(rewriter.getIntegerType(64), 1));
     }
 
@@ -103,21 +104,6 @@ translateExpression(Operation &op,
     return rewriter.create<ConstantOp>(op.getLoc(), rewriter.getIntegerAttr(rewriter.getIntegerType(64), 1));
   }
 
-}
-
-StringRef translateTarget(Operation &op,
-                          IRRewriter &rewriter,
-                          llvm::ScopedHashTable<StringRef, Value> &symbolTable) {
-
-  if (auto variable_op = llvm::dyn_cast<abc::VariableOp>(op)) {
-    return variable_op.name();
-  } else {
-    // TODO: Support other targets (especially arrays!)
-    emitError(op.getLoc(),
-              "Currently, only variables are supported as assignment targets (got: " + op.getName().getStringRef()
-                  + ").");
-    return "INVALID_TARGET";
-  }
 }
 
 void translateStatement(Operation &op,
@@ -170,8 +156,29 @@ void translateAssignmentOp(abc::AssignmentOp assignment_op,
                            llvm::ScopedHashTable<StringRef, Value> &symbolTable,
                            AffineForOp *for_op) {
   // Get Name, Type and Value
-  auto target = translateTarget(firstOp(assignment_op.target()), rewriter, symbolTable);
   auto value = translateExpression(firstOp(assignment_op.value()), rewriter, symbolTable);
+  llvm::StringRef target_name = "INVALID_TARGET";
+
+  auto &targetOp = firstOp(assignment_op.target());
+
+  if (auto variable_op = llvm::dyn_cast<abc::VariableOp>(targetOp)) {
+    // If it's a variable,
+    target_name = variable_op.name();
+  } else if (auto index_access = llvm::dyn_cast<abc::IndexAccessOp>(targetOp)) {
+    if (auto target_variable = llvm::dyn_cast<VariableOp>(firstOp(index_access.target()))) {
+      // if this is an index access, we need to first insert an operation, then update table with that result value
+      // instead, we need to insert an operation and then update the value
+      target_name = target_variable.name();
+      auto index = translateExpression(firstOp(index_access.index()), rewriter, symbolTable);
+      value = rewriter.create<tensor::InsertOp>(assignment_op->getLoc(), value, symbolTable.lookup(target_name), index);
+    } else {
+      emitError(assignment_op.getLoc(),
+                "Expected Index Access target to be a variable, got "
+                    + firstOp(index_access.target()).getName().getStringRef());
+    }
+  } else {
+    emitError(assignment_op.target().getLoc(), "Got invalid assignment target!");
+  }
 
   if (for_op) {
 
@@ -184,9 +191,9 @@ void translateAssignmentOp(abc::AssignmentOp assignment_op,
     // However, this might be BAD in terms of iterator stuff since we're currently in an llvm:: make early inc range thing
     // iterating over all the ops nested in this for op!
     emitError(assignment_op->getLoc(), "Currently, we do not handle writing to variables in for loops correctly");
-    symbolTable.insert(target, value);
+    symbolTable.insert(target_name, value);
   } else {
-    symbolTable.insert(target, value);
+    symbolTable.insert(target_name, value);
   }
 
 }
