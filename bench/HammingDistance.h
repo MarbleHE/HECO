@@ -5,6 +5,21 @@
 #include "seal/seal.h"
 #include "MultiTimer.h"
 
+/// Computes the encrypted hamming distance between two vectors of booleans
+/// Note: Hamming distance over binary vectors can be computed semi-efficiently in Z_p by using NEQ = XOR = (a-b)^2
+/// \param a vector of size n
+/// \param b vector of size n
+/// \param poly_modulus_degree FHE parameter, degree n of the polynomials
+/// \param encrypt_both By default, both vectors are encrypted. If set to false, b is plaintext
+/// \return
+uint64_t encryptedBatchedHammingDistance(
+        MultiTimer &timer,
+        const std::vector<bool> &a,
+        const std::vector<bool> &b,
+        size_t poly_modulus_degree,
+        bool encrypt_both = true
+        );
+
 /// For 4-element hamming distance
 /// Ciphertext hamming_distance(Ciphertext c0, Ciphertext c1)
 ///     Plaintext p0(N, 2) // N is the number of slots

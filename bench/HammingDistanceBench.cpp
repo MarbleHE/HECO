@@ -18,6 +18,7 @@ int main(int argc, char *argv[]) {
   size_t poly_modulus_degree = 2 << 12;
 
   BENCH_FUNCTION(HammingDistance, porcupine, encryptedHammingDistancePorcupine, a, b);
+  BENCH_FUNCTION(HammingDistance, expert, encryptedBatchedHammingDistance, a, b);
 
   return 0;
 }

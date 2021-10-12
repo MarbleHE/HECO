@@ -27,7 +27,7 @@ int hammingDistance(const std::vector<bool> &x, const std::vector<bool> &y) {
 }
 
 #ifdef HAVE_SEAL_BFV
-TEST(HammingDistanceTest, Naive_Porcupine_Equivalence) { /* NOLINT */
+TEST(HammingDistanceTest, NaiveClear_Porcupine_Equivalence) { /* NOLINT */
   // Create two vectors of bits (booleans),
   // TODO: Create test values from fixed random seed
   std::vector<bool> a(4, 0);
@@ -35,6 +35,19 @@ TEST(HammingDistanceTest, Naive_Porcupine_Equivalence) { /* NOLINT */
 
   MultiTimer dummy = MultiTimer();
   auto result = encryptedHammingDistancePorcupine(dummy, a, b, 2 << 13);
+
+  // Compare to reference cleartext implementation
+  EXPECT_EQ(hammingDistance(a, b), result);
+}
+
+TEST(HammingDistanceTest, NaiveClear_Batched_Equivalence) { /* NOLINT */
+  // Create two vectors of bits (booleans),
+  // TODO: Create test values from fixed random seed
+  std::vector<bool> a(4, 0);
+  std::vector<bool> b(4, 1);
+
+  MultiTimer dummy = MultiTimer();
+  auto result = encryptedBatchedHammingDistance(dummy, a, b, 2 << 13);
 
   // Compare to reference cleartext implementation
   EXPECT_EQ(hammingDistance(a, b), result);
