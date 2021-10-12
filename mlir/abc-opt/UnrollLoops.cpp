@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <memory>
+#include "mlir/Transforms/LoopUtils.h"
 
 using namespace mlir;
 using namespace abc;
@@ -13,9 +14,11 @@ void unrollLoop(AffineForOp& op, IRRewriter& rewriter) {
     unrollLoop(nested_loop, rewriter);
   }
 
-  std::cout << "LOOKING AT: " << std::endl;
-  op->dump();
-  std::cout << "-------------" << std::endl;
+  if(loopUnrollFull(op).failed()) {
+    emitError(op.getLoc(), "Failed to unroll loop");
+  } else {
+
+  }
 }
 
 void UnrollLoopsPass::runOnOperation() {
