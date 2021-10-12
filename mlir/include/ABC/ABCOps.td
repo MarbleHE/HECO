@@ -201,11 +201,11 @@ def ABC_LiteralStringOp : ABC_LiteralOp<"string", StrAttr>;
 //TODO: These should really move to a separate fhe dialect!
 def ABC_MulOp : Op<ABC_Dialect, "fhe_mul", [NoTerminator, NoSideEffect]> {
   let arguments = (ins
-    Variadic<TensorOf<[Index]>>:$terms
+    Variadic<AnyType>:$terms
   );
 
   let results = (outs
-    TensorOf<[Index]>:$output
+    AnyType:$output
   );
 
   // TODO: Use something like printStandardBinaryOp from STD dialect!
@@ -217,11 +217,11 @@ def ABC_MulOp : Op<ABC_Dialect, "fhe_mul", [NoTerminator, NoSideEffect]> {
 def ABC_AddOp : Op<ABC_Dialect, "fhe_add", [NoTerminator, NoSideEffect]> {
 
   let arguments = (ins
-    Variadic<TensorOf<[Index]>>:$summand
+    Variadic<AnyType>:$summand
   );
 
   let results = (outs
-    TensorOf<[Index]>:$output
+    AnyType:$output
   );
 
   // TODO: Use something like printStandardBinaryOp from STD dialect!
