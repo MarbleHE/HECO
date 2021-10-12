@@ -38,14 +38,14 @@ builtin.module  {
     %img_rot_6 = abc.fhe_rotate %img, %six :    tensor<16xindex>, index, tensor<16xindex>
     %img_rot_7 = abc.fhe_rotate %img, %m_three : tensor<16xindex>, index, tensor<16xindex>
     %img_rot_8 = abc.fhe_rotate %img, %m_five : tensor<16xindex>, index, tensor<16xindex>
-    %sum_0 = abc.fhe_add %img, %img_rot_1   :  tensor<16xindex>, tensor<16xindex>, tensor<16xindex>
-    %sum_1 = abc.fhe_add %sum_0, %img_rot_2 : tensor<16xindex>, tensor<16xindex>, tensor<16xindex>
-    %sum_2 = abc.fhe_add %sum_1, %img_rot_3 : tensor<16xindex>, tensor<16xindex>, tensor<16xindex>
-    %sum_3 = abc.fhe_add %sum_2, %img_rot_4 : tensor<16xindex>, tensor<16xindex>, tensor<16xindex>
-    %sum_4 = abc.fhe_add %sum_3, %img_rot_5 : tensor<16xindex>, tensor<16xindex>, tensor<16xindex>
-    %sum_5 = abc.fhe_add %sum_4, %img_rot_6 : tensor<16xindex>, tensor<16xindex>, tensor<16xindex>
-    %sum_6 = abc.fhe_add %sum_5, %img_rot_7 : tensor<16xindex>, tensor<16xindex>, tensor<16xindex>
-    %sum_7 = abc.fhe_add %sum_6, %img_rot_8 : tensor<16xindex>, tensor<16xindex>, tensor<16xindex>
+    %sum_0 = abc.fhe_add (%img, %img_rot_1) :  (tensor<16xindex>, tensor<16xindex>) ->  tensor<16xindex>
+    %sum_1 = abc.fhe_add (%sum_0, %img_rot_2) : (tensor<16xindex>, tensor<16xindex>) -> tensor<16xindex>
+    %sum_2 = abc.fhe_add (%sum_1, %img_rot_3) : (tensor<16xindex>, tensor<16xindex>) -> tensor<16xindex>
+    %sum_3 = abc.fhe_add (%sum_2, %img_rot_4) : (tensor<16xindex>, tensor<16xindex>) -> tensor<16xindex>
+    %sum_4 = abc.fhe_add (%sum_3, %img_rot_5) : (tensor<16xindex>, tensor<16xindex>) -> tensor<16xindex>
+    %sum_5 = abc.fhe_add (%sum_4, %img_rot_6) : (tensor<16xindex>, tensor<16xindex>) -> tensor<16xindex>
+    %sum_6 = abc.fhe_add (%sum_5, %img_rot_7) : (tensor<16xindex>, tensor<16xindex>) -> tensor<16xindex>
+    %sum_7 = abc.fhe_add (%sum_6, %img_rot_8) : (tensor<16xindex>, tensor<16xindex>) -> tensor<16xindex>
     return %sum_7 : tensor<16xindex>
   }
 }

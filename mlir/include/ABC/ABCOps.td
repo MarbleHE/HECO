@@ -201,8 +201,7 @@ def ABC_LiteralStringOp : ABC_LiteralOp<"string", StrAttr>;
 //TODO: These should really move to a separate fhe dialect!
 def ABC_MulOp : Op<ABC_Dialect, "fhe_mul", [NoTerminator, NoSideEffect]> {
   let arguments = (ins
-    TensorOf<[Index]>:$a,
-    TensorOf<[Index]>:$b
+    Variadic<TensorOf<[Index]>>:$terms
   );
 
   let results = (outs
@@ -211,15 +210,14 @@ def ABC_MulOp : Op<ABC_Dialect, "fhe_mul", [NoTerminator, NoSideEffect]> {
 
   // TODO: Use something like printStandardBinaryOp from STD dialect!
   let assemblyFormat = [{
-    $a `,` $b  `:` type($a) `,` type($b)  `,`   type($output) attr-dict-with-keyword
+    `(` operands `)` `:` `(` type(operands) `)` `->` type($output) attr-dict-with-keyword
   }];
 }
 
 def ABC_AddOp : Op<ABC_Dialect, "fhe_add", [NoTerminator, NoSideEffect]> {
 
   let arguments = (ins
-    TensorOf<[Index]>:$a,
-    TensorOf<[Index]>:$b
+    Variadic<TensorOf<[Index]>>:$summand
   );
 
   let results = (outs
@@ -228,7 +226,7 @@ def ABC_AddOp : Op<ABC_Dialect, "fhe_add", [NoTerminator, NoSideEffect]> {
 
   // TODO: Use something like printStandardBinaryOp from STD dialect!
   let assemblyFormat = [{
-    $a `,` $b  `:` type($a) `,` type($b)  `,`   type($output) attr-dict-with-keyword
+    `(` operands `)` `:` `(` type(operands) `)` `->` type($output) attr-dict-with-keyword
   }];
 }
 
