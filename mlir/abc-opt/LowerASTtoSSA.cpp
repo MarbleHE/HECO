@@ -279,6 +279,9 @@ void translateSimpleForOp(abc::SimpleForOp &simple_for_op,
     rewriter.setInsertionPointToEnd(new_for.getBody());
     rewriter.create<AffineYieldOp>(simple_for_op->getLoc(), yield_values);
 
+    //TODO: This happens to introduce a bunch of redundant yield/iterargs that canoncialize doesn't catch
+    //  fix properly and/or add canonicalization where if yield is same as start value, then it's removed
+
   }
 // exit scope manually
 
