@@ -17,6 +17,7 @@
 int encryptedHammingDistancePorcupine(
         MultiTimer &timer, const std::vector<bool> &a, const std::vector<bool> &b, size_t poly_modulus_degree)
 {
+  auto keygenTimer = timer.startTimer();
   if (a.size() != 4 || b.size() != 4) {
     std::cout << "WARNING: The porcupine example of hamming distance assumes that 4 elements are given." << std::endl;
   }
@@ -43,16 +44,20 @@ int encryptedHammingDistancePorcupine(
   seal::Encryptor encryptor(context, publicKey, secretKey);
   seal::Decryptor decryptor(context, secretKey);
   seal::Evaluator evaluator(context);
+  timer.stopTimer(keygenTimer);
 
   // Encode & Encrypt the vectors
+  auto encTimer = timer.startTimer();
   seal::Plaintext a_ptxt, b_ptxt;
   seal::Ciphertext a_ctxt, b_ctxt;
   encoder.encode(std::vector<uint64_t>(a.begin(), a.end()), a_ptxt);
   encoder.encode(std::vector<uint64_t>(b.begin(), b.end()), b_ptxt);
   encryptor.encrypt(a_ptxt, a_ctxt);
   encryptor.encrypt(b_ptxt, b_ctxt);
+  timer.stopTimer(encTimer);
 
   // Compute differences
+  auto compTimer = timer.startTimer();
   // Plaintext p0(N, 2) // N is the number of slots
   std::vector<long> const_vector(encoder.slot_count(), 2);
   seal::Plaintext p0;
@@ -83,12 +88,15 @@ int encryptedHammingDistancePorcupine(
   // return add(c6, c7)
   seal::Ciphertext result_ctxt;
   evaluator.add(c6, c7, result_ctxt);
+  timer.stopTimer(compTimer);
 
   // Decrypt result
+  auto decTimer = timer.startTimer();
   seal::Plaintext result_ptxt;
   decryptor.decrypt(result_ctxt, result_ptxt);
   std::vector<uint64_t> result;
   encoder.decode(result_ptxt, result);
+  timer.stopTimer(decTimer);
   return result[0];
 }
 

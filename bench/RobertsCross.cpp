@@ -17,6 +17,7 @@
 std::vector<int64_t> encryptedRobertsCrossPorcupine(
         MultiTimer &timer, std::vector<int> &img, size_t poly_modulus_degree)
 {
+  auto keygenTimer = timer.startTimer();
   // TODO: Doesn't work as expected
   int img_size = (int)std::sqrt(img.size());
 
@@ -42,13 +43,18 @@ std::vector<int64_t> encryptedRobertsCrossPorcupine(
   seal::Encryptor encryptor(context, publicKey, secretKey);
   seal::Decryptor decryptor(context, secretKey);
   seal::Evaluator evaluator(context);
+  timer.stopTimer(keygenTimer);
 
   // Encode & Encrypt the image
+  auto encTimer = timer.startTimer();
   seal::Plaintext img_ptxt;
   seal::Ciphertext img_ctxt;
   encoder.encode(std::vector<uint64_t>(img.begin(), img.end()), img_ptxt);
   encryptor.encrypt(img_ptxt, img_ctxt);
+  timer.stopTimer(encTimer);
 
+  // Compute
+  auto compTimer = timer.startTimer();
   // Ciphertext c1 = rotate(c0, w)
   seal::Ciphertext c1;
   evaluator.rotate_rows(img_ctxt, img_size, galoisKeys, c1);
@@ -77,12 +83,15 @@ std::vector<int64_t> encryptedRobertsCrossPorcupine(
   // return add(c4, c7)
   seal::Ciphertext result_ctxt;
   evaluator.add(c4, c7, result_ctxt);
+  timer.stopTimer(compTimer);
 
   // Decrypt & Return result
+  auto decTimer = timer.startTimer();
   seal::Plaintext result_ptxt;
   decryptor.decrypt(result_ctxt, result_ptxt);
   std::vector<int64_t> result;
   encoder.decode(result_ptxt, result);
+  timer.stopTimer(decTimer);
   return result;
 }
 
