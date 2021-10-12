@@ -32,3 +32,37 @@ builtin.module  {
   }
 }
 
+
+// ACTUALLY, THIS SEEMS MORE CORRECT:
+builtin.module  {
+  builtin.func private @encryptedBoxBlur(%arg0: tensor<64xindex>) -> tensor<64xindex> {
+    %c8 = constant 8 : index
+    %c64 = constant 64 : index
+    %ret1 = affine.for %arg1 = 0 to 8 iter_args(%it1 = %arg0) -> tensor<64xindex> {
+      %ret2 = affine.for %arg2 = 0 to 8 iter_args(%it2 = %it1) -> tensor<64xindex> {
+        %c0 = constant 0 : index
+        %ci = affine.for %arg3 = -1 to 2 iter_args(%it3 = %c0) -> index {
+          %cj = affine.for %arg4 = -1 to 2 iter_args(%it4 = %it3) -> index {
+            %3 = addi %arg1, %arg4 : index
+            %4 = muli %3, %c8 : index
+            %5 = addi %arg2, %arg3 : index
+            %6 = addi %4, %5 : index
+            %7 = remi_unsigned %6, %c64 : index
+            %8 = tensor.extract %arg0[%7] : tensor<64xindex>
+            %9 = addi %it4, %8 : index
+            affine.yield %9 : index
+          }
+          affine.yield %cj :index
+        }
+        %0 = muli %c8, %arg1 : index
+        %1 = addi %0, %arg2 : index
+        %2 = tensor.insert %ci into %arg0[%1] : tensor<64xindex>
+        affine.yield %2 : tensor<64xindex>
+      }
+      affine.yield %ret2 : tensor<64xindex>
+    }
+    return %ret1 : tensor<64xindex>
+  }
+}
+
+
