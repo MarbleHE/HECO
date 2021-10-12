@@ -17,6 +17,7 @@ int main(int argc, char *argv[]) {
   getInputMatrix(size, img);
 
   BENCH_FUNCTION(RobertsCross, porcupine, encryptedRobertsCrossPorcupine, img);
+  BENCH_FUNCTION(RobertsCross, expert, encryptedBatchedRobertsCross, img);
 
   return 0;
 }
