@@ -9,6 +9,7 @@
 #include "LowerASTtoSSA.h"
 
 #include <iostream>
+#include <memory>
 #include "llvm/ADT/ScopedHashTable.h"
 
 using namespace mlir;
@@ -204,45 +205,91 @@ void translateSimpleForOp(abc::SimpleForOp &simple_for_op,
                           IRRewriter &rewriter,
                           llvm::ScopedHashTable<StringRef, mlir::Value> &symbolTable) {
 
+  std::vector<std::string> existing_vars;
+  AffineForOp* new_for_ptr = nullptr;
   // Create a new scope
-  // This sets curScope in symbolTable to varScope
-  llvm::ScopedHashTableScope<llvm::StringRef, mlir::Value> var_scope(symbolTable);
+  {
+    // This sets curScope in symbolTable to varScope
+    llvm::ScopedHashTableScope<llvm::StringRef, mlir::Value> var_scope(symbolTable);
 
-  // Create the affine for loop
-  auto new_for = rewriter.create<AffineForOp>(simple_for_op->getLoc(),
-                                              simple_for_op.start().getLimitedValue(),
-                                              simple_for_op.end().getLimitedValue());
+    // Get every variable that exists and dump it as an iter args,
+    // since we can't add them later, but ones that don't get used
+    // are easily optimized away by --canonicalize
+    // TODO: SERIOUSLY, WE CAN'T EVEN ENUMERATE EVERY SYMBOL WE HAVE??
 
-  declare(simple_for_op.iv(), new_for.getInductionVar(), symbolTable);
+    //TODO: THis hack is horrible, but until we fix the symbol table stuff, it'll do for the benchmarks
+    llvm::SmallVector<Value, 4> iter_args;
 
-  // Get every variable that exists and dump it as an iter args,
-  // since we can't add them later, but ones that don't get used
-  // are easily optimized away by --canonicalize
-  // TODO: SERIOUSLY, WE CAN'T EVEN ENUMERATE EVERY SYMBOL WE HAVE??
-  emitWarning(simple_for_op->getLoc(), "Currently, manually managing yields is required because of...reasons.");
-
-
-  // Move ABC Operations over into the new for loop's entryBlock
-  rewriter.setInsertionPointToStart(new_for.getBody());
-  auto abc_block_it = simple_for_op.body().getOps<abc::BlockOp>();
-  if (abc_block_it.begin()==abc_block_it.end() || ++abc_block_it.begin()!=abc_block_it.end()) {
-    emitError(simple_for_op.getLoc(), "Expected exactly one Block inside function!");
-  } else {
-    auto abc_block = *abc_block_it.begin();
-    if (abc_block->getNumRegions()!=1 || !abc_block.body().hasOneBlock()) {
-      emitError(abc_block.getLoc(), "ABC BlockOp must contain exactly one region and exactly one Block in that!");
-    } else {
-      llvm::iplist<Operation> oplist;
-      auto &bb = *abc_block.body().getBlocks().begin();
-      rewriter.mergeBlockBefore(&bb, &new_for.getBody()->front());
+    for (auto &hack: {"img", "img2", "value", "x"}) {
+      if (symbolTable.count(hack)) {
+        existing_vars.emplace_back(hack);
+      }
     }
+    for (auto &var: existing_vars) {
+      iter_args.push_back(symbolTable.lookup(var));
+    }
+
+    // Create the affine for loop
+    auto new_for = rewriter.create<AffineForOp>(simple_for_op->getLoc(),
+                                                simple_for_op.start().getLimitedValue(),
+                                                simple_for_op.end().getLimitedValue(),
+                                                1, //step size
+                                                iter_args);
+    new_for_ptr = &new_for;
+
+    //TODO: Hack from above continued, needs to be cleaned up once we fix symboltable
+    auto iter_args_it = new_for.getIterOperands().begin();
+    for (auto &var: existing_vars) {
+      symbolTable.insert(var, *iter_args_it++);
+    }
+
+    declare(simple_for_op.iv(), new_for.getInductionVar(), symbolTable);
+
+    emitWarning(simple_for_op->getLoc(), "Currently, manually checking yields is required because of...reasons.");
+
+
+    // Move ABC Operations over into the new for loop's entryBlock
+    rewriter.setInsertionPointToStart(new_for.getBody());
+    auto abc_block_it = simple_for_op.body().getOps<abc::BlockOp>();
+    if (abc_block_it.begin()==abc_block_it.end() || ++abc_block_it.begin()!=abc_block_it.end()) {
+      emitError(simple_for_op.getLoc(), "Expected exactly one Block inside function!");
+    } else {
+      auto abc_block = *abc_block_it.begin();
+      if (abc_block->getNumRegions()!=1 || !abc_block.body().hasOneBlock()) {
+        emitError(abc_block.getLoc(), "ABC BlockOp must contain exactly one region and exactly one Block in that!");
+      } else {
+        llvm::iplist<Operation> oplist;
+        auto &bb = *abc_block.body().getBlocks().begin();
+        rewriter.mergeBlocks(&bb, new_for.getBody());
+      }
+    }
+
+    // Finally, go through the block and translate each operation
+    // It's the responsiblity of VariableAssignment to update the iterArgs, so we pass this operation along
+    for (auto &op: llvm::make_early_inc_range(new_for.getBody()->getOperations())) {
+      translateStatement(op, rewriter, symbolTable, &new_for);
+    }
+
+    // TODO: Again, hacky, fix once we have better system
+    llvm::SmallVector<Value, 4> yield_values;
+    for (auto &var: existing_vars) {
+      yield_values.push_back(symbolTable.lookup(var));
+    }
+    rewriter.setInsertionPointToEnd(new_for.getBody());
+    rewriter.create<AffineYieldOp>(simple_for_op->getLoc(), yield_values);
+
+  }
+// exit scope manually
+
+  //Hack: Update the yield values in the symboltable now that we've left the scope
+  auto res_it = new_for_ptr->result_begin();
+  auto var_it = existing_vars.begin();
+  for (size_t i = 0; i < existing_vars.size(); i++) {
+    symbolTable.insert(*var_it, *res_it);
+    res_it++;
+    var_it++;
   }
 
-  // Finally, go through the block and translate each operation
-  // It's the responsiblity of VariableAssignment to update the iterArgs, so we pass this operation along
-  for (auto &op: llvm::make_early_inc_range(new_for.getBody()->getOperations())) {
-    translateStatement(op, rewriter, symbolTable, &new_for);
-  }
 }
 
 //}
@@ -376,8 +423,7 @@ void convertFunctionOp2FuncOp(FunctionOp &f,
 void LowerASTtoSSAPass::runOnOperation() {
   ConversionTarget target(getContext());
   target.addLegalDialect<AffineDialect, StandardOpsDialect, tensor::TensorDialect, scf::SCFDialect>();
-  target.addLegalOp<mlir::ReturnOp>();
-  // target.addIllegalDialect<ABCDialect>();
+  target.addIllegalDialect<ABCDialect>();
 
   // Get the (default) block in the module's only region:
   auto &block = getOperation()->getRegion(0).getBlocks().front();
