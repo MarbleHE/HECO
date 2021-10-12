@@ -225,6 +225,7 @@ void translateSimpleForOp(abc::SimpleForOp &simple_for_op,
         existing_vars.emplace_back(hack);
       }
     }
+    // get current values
     for (auto &var: existing_vars) {
       iter_args.push_back(symbolTable.lookup(var));
     }
@@ -238,7 +239,7 @@ void translateSimpleForOp(abc::SimpleForOp &simple_for_op,
     new_for_ptr = &new_for;
 
     //TODO: Hack from above continued, needs to be cleaned up once we fix symboltable
-    auto iter_args_it = new_for.getIterOperands().begin();
+    auto iter_args_it = new_for.getRegionIterArgs().begin();
     for (auto &var: existing_vars) {
       symbolTable.insert(var, *iter_args_it++);
     }
