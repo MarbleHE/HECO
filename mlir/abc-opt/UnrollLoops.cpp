@@ -16,8 +16,6 @@ void unrollLoop(AffineForOp& op, IRRewriter& rewriter) {
 
   if(loopUnrollFull(op).failed()) {
     emitError(op.getLoc(), "Failed to unroll loop");
-  } else {
-
   }
 }
 
