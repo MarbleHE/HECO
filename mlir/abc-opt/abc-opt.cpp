@@ -22,6 +22,7 @@
 #include "ABC/ABCDialect.h"
 #include "LowerASTtoSSA.h"
 #include "UnrollLoops.h"
+#include "Nary.h"
 #include "Batching.h"
 
 #include <iostream>
@@ -52,6 +53,7 @@ int main(int argc, char **argv) {
   PassRegistration<LowerASTtoSSAPass>();
   PassRegistration<UnrollLoopsPass>();
   PassRegistration<BatchingPass>();
+  PassRegistration<NaryPass>();
 
   return asMainReturnCode(
       MlirOptMain(argc, argv, "ABC optimizer driver\n", registry));
