@@ -263,15 +263,22 @@ add_executable(ast_demo
 
 target_link_libraries(ast_demo PRIVATE ast_opt)
 
-####################################################################################
-# TESTING
-#
-# only if this is the root project
-####################################################################################
-if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
-    message("Enabling ast_opt Tests")
-    enable_testing()
-    add_subdirectory(test EXCLUDE_FROM_ALL)
+#####################################################################################
+## TESTING
+##
+## only if this is the root project
+#####################################################################################
+#if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+#    message("Enabling ast_opt Tests")
+#    enable_testing()
+#    add_subdirectory(test EXCLUDE_FROM_ALL)
+#endif ()
+
+##############################
+# WIP: MLIR Integration
+##############################
+if(MLIR_DIR)
+    add_subdirectory(mlir)
 endif ()
 
 ##############################
@@ -279,11 +286,5 @@ endif ()
 #
 # A collection of benchmarks
 ##############################
-add_subdirectory(bench EXCLUDE_FROM_ALL)
+#add_subdirectory(bench EXCLUDE_FROM_ALL)
 
-##############################
-# WIP: MLIR Integration
-##############################
-if(MLIR_DIR)
-add_subdirectory(mlir)
-endif ()

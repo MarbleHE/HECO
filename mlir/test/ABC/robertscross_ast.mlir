@@ -15,7 +15,7 @@ builtin.module  {
             })
 
             // weights1 = {{0, 1},{0, -1}};
-            abc.variable_declaration tensor<4xindex> @weights1  = ( {
+            abc.variable_declaration tensor<2x2xindex> @weights1  = ( {
                 abc.literal_tensor dense<[[0,1],[0,-1]]> : tensor<2x2xindex>
             })
 

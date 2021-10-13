@@ -194,6 +194,7 @@ def ABC_LiteralIntOp : ABC_LiteralOp<"int", APIntAttr>;
 def ABC_LiteralFloatOp : ABC_LiteralOp<"float", F64Attr>;
 def ABC_LiteralDoubleOp : ABC_LiteralOp<"double", F64Attr>;
 def ABC_LiteralStringOp : ABC_LiteralOp<"string", StrAttr>;
+def ABC_LiteralTensorOp : ABC_LiteralOp<"tensor", IndexElementsAttr>;
 
 //TODO: TernaryOperator, once it's supported by the C++ based DSL frnotend
 

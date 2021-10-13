@@ -71,6 +71,16 @@ translateExpression(Operation &op,
     auto value = rewriter
         .create<ConstantOp>(op.getLoc(), rewriter.getIndexAttr(literal_int.value().getLimitedValue()));
     return value;
+  } else if (auto literal_tensor = llvm::dyn_cast<abc::LiteralTensorOp>(op)) {
+    // TODO: having all ints be index is a nasty hack and we should really instead handle conversions
+    //   between things like index, int, bool properly.
+    llvm::SmallVector<int64_t, 4> stuff;
+    for (auto i: literal_tensor.value().getIntValues()) {
+      stuff.push_back(i.getLimitedValue());
+    }
+    auto value = rewriter
+        .create<ConstantOp>(op.getLoc(), rewriter.getIndexTensorAttr(stuff));
+    return value;
   } else if (auto variable = llvm::dyn_cast<abc::VariableOp>(op)) {
     if (!symbolTable.count(variable.name())) {
       emitError(variable.getLoc(), "Undefined variable " + variable.name());
@@ -99,10 +109,22 @@ translateExpression(Operation &op,
       auto target = translateExpression(firstOp(index_access.target()), rewriter, symbolTable);
       auto index = translateExpression(firstOp(index_access.index()), rewriter, symbolTable);
       return rewriter.create<tensor::ExtractOp>(index_access->getLoc(), target, index);
+    } else if (auto target_ia = llvm::dyn_cast<IndexAccessOp>(firstOp(index_access.target()))) {
+      if (auto nested_target_variable = llvm::dyn_cast<VariableOp>(firstOp(target_ia.target()))) {
+        auto outer_index = translateExpression(firstOp(index_access.index()), rewriter, symbolTable);
+        auto inner_index = translateExpression(firstOp(target_ia.index()), rewriter, symbolTable);
+        auto inner_target = translateExpression(firstOp(target_ia.target()), rewriter, symbolTable);
+        ValueRange indices = {outer_index, inner_index};
+        //TODO: WHY NOT NESTED PROPERLY?
+        return rewriter.create<tensor::ExtractOp>(index_access->getLoc(), inner_target, inner_index);
+      } else {
+        emitError(op.getLoc(),
+                  "Expected Index Access target to be nested once or a  variable, got "
+                      + firstOp(index_access.target()).getName().getStringRef());
+      }
+
     } else {
-      emitError(op.getLoc(),
-                "Expected Index Access target to be a variable, got "
-                    + firstOp(index_access.target()).getName().getStringRef());
+
       return rewriter.create<ConstantOp>(op.getLoc(), rewriter.getIntegerAttr(rewriter.getIntegerType(64), 1));
     }
 
