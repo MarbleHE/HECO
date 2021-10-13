@@ -8,6 +8,8 @@ int main(int argc, char *argv[]) {
     std::cout << "USAGE: ham-bench [version]" << std::endl;
     std::cout << "       versions:" << std::endl;
     std::cout << "          -porcupine" << std::endl;
+    std::cout << "          -expert" << std::endl;
+    std::cout << "          -naive" << std::endl;
     std::exit(1);
   }
 

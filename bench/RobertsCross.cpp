@@ -2,6 +2,86 @@
 
 #include "RobertsCross.h"
 
+std::vector<int> encryptedNaiveRobertsCross(
+        MultiTimer &timer, const std::vector<int> &img, size_t poly_modulus_degree)
+{
+  auto keygenTimer = timer.startTimer();
+  int img_size = (int)std::sqrt(img.size());
+
+  // Context Setup
+  seal::EncryptionParameters parameters(seal::scheme_type::bfv);
+  parameters.set_poly_modulus_degree(poly_modulus_degree);
+  parameters.set_coeff_modulus(seal::CoeffModulus::BFVDefault(parameters.poly_modulus_degree()));
+  parameters.set_plain_modulus(seal::PlainModulus::Batching(parameters.poly_modulus_degree(), 30));
+  seal::SEALContext context(parameters);
+
+  /// Create keys
+  seal::KeyGenerator keygen(context);
+  seal::SecretKey secretKey = keygen.secret_key();
+  seal::PublicKey publicKey;
+  keygen.create_public_key(publicKey);
+  seal::GaloisKeys galoisKeys;
+  keygen.create_galois_keys(galoisKeys);
+  seal::RelinKeys relinKeys;
+  keygen.create_relin_keys(relinKeys);
+
+  // Create helper objects
+  seal::BatchEncoder encoder(context);
+  seal::Encryptor encryptor(context, publicKey, secretKey);
+  seal::Decryptor decryptor(context, secretKey);
+  seal::Evaluator evaluator(context);
+  timer.stopTimer(keygenTimer);
+
+  // Encode & Encrypt the image
+  auto encTimer = timer.startTimer();
+  std::vector<seal::Ciphertext> img_ctxt(img.size());
+  for (int i = 0; i < img.size(); ++i) {
+    uint64_t pixel = img[i];
+    seal::Plaintext tmp = seal::Plaintext(seal::util::uint_to_hex_string(&pixel, std::size_t(1)));
+    encryptor.encrypt(tmp, img_ctxt[i]);
+  }
+  timer.stopTimer(encTimer);
+
+  //Compute
+  auto compTimer = timer.startTimer();
+  std::vector<seal::Ciphertext> result_ctxt(img_ctxt.size());
+
+  // Each point p = img[x][y], where x is row and y is column, in the new image will equal:
+  //   (img[x-1][y-1] - img[x][y])^2 + (img[x-1][y] - img[x][y-1])^2
+  for (int x = 0; x < img_size; ++x) {
+    for (int y = 0; y < img_size; ++y) {
+      seal::Ciphertext tmp1;
+      auto index1 = ((y-1) * img_size + x + 1) % img_ctxt.size();
+      auto index2 = y * img_size + x;
+      evaluator.sub(img_ctxt[index1], img_ctxt[index2], tmp1);
+      evaluator.square_inplace(tmp1);
+      evaluator.relinearize_inplace(tmp1, relinKeys);
+
+      seal::Ciphertext tmp2;
+      auto index3 = (y * img_size + x + 1) % img_ctxt.size();
+      auto index4 = ((y-1) * img_size + x) % img_ctxt.size();
+      evaluator.sub(img_ctxt[index3], img_ctxt[index4], tmp2);
+      evaluator.square_inplace(tmp2);
+      evaluator.relinearize_inplace(tmp2, relinKeys);
+
+      evaluator.add(tmp1, tmp2, result_ctxt[y * img_size + x]);
+    }
+  }
+  timer.stopTimer(compTimer);
+
+  // Decrypt results
+  auto decTimer = timer.startTimer();
+  std::vector<int> result(img.size());
+  for (int i = 0; i < result.size(); ++i) {
+    seal::Plaintext tmp;
+    decryptor.decrypt(result_ctxt[i], tmp);
+    result[i] = (int) *tmp.data();
+  }
+  timer.stopTimer(decTimer);
+  return result;
+}
+
+
 /// Encrypted RobertsCross, using 3x3 Kernel batched as 9 rotations of the image
 /// Currently, this requires the image vector to be n/2 long,
 /// so we don't run into issues with rotations.

@@ -8,6 +8,7 @@ int main(int argc, char *argv[]) {
     std::cout << "USAGE: gx-bench [version]" << std::endl;
     std::cout << "       versions:" << std::endl;
     std::cout << "          -porcupine" << std::endl;
+    std::cout << "          -expert" << std::endl;
     std::exit(1);
   }
 

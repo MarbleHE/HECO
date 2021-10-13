@@ -131,9 +131,9 @@ class RobertsCrossKernelTest : public ::testing::Test {  /* NOLINT (predictable 
 
   void printMatrix(size_t size, std::vector<int> &matrix) {
     for (int64_t row = (int64_t) size - 1; row >= 0; --row) {
-      std::cout << matrix.at(0*size + row);
+      std::cout << std::setw(8) << matrix.at(0*size + row);
       for (size_t col = 1; col < size; ++col) {
-        std::cout << "\t" << matrix.at(col*size + row);
+        std::cout << std::setw(8) << matrix.at(col*size + row);
       }
       std::cout << std::endl;
     }
@@ -162,6 +162,8 @@ TEST_F(RobertsCrossKernelTest, Clear_EncryptedBatched_Equivalence) { /* NOLINT *
   size_t img_size = std::sqrt(poly_modulus_degree / 2);
   std::vector<int> img;
   getInputMatrix(img_size, img);
+  std::cout << "img:" << std::endl;
+  printMatrix(img_size, img);
 
   MultiTimer dummy = MultiTimer();
   auto result = encryptedBatchedRobertsCross(dummy, img, poly_modulus_degree);
@@ -170,7 +172,30 @@ TEST_F(RobertsCrossKernelTest, Clear_EncryptedBatched_Equivalence) { /* NOLINT *
 
   // Compare to reference cleartext implementation
   auto ref = naiveRobertsCrossKernel(img);
+  std::cout << "naive:" << std::endl;
+  printMatrix(img_size, ref);
   EXPECT_EQ(enc, ref);
+}
+
+TEST_F(RobertsCrossKernelTest, Clear_EncryptedNaive_Equivalence) { /* NOLINT */
+  size_t poly_modulus_degree = 2 << 12;
+  size_t img_size = 8;
+  std::vector<int> img;
+  getInputMatrix(img_size, img);
+  //std::cout << "img:" << std::endl;
+  //printMatrix(img_size, img);
+
+  MultiTimer dummy = MultiTimer();
+  auto result = encryptedNaiveRobertsCross(dummy, img, poly_modulus_degree);
+  //std::cout << "encrypted:" << std::endl;
+  //printMatrix(img_size, result);
+
+  // Compare to reference cleartext implementation
+  auto ref = naiveRobertsCrossKernel(img);
+  //std::cout << "clear:" << std::endl;
+  //printMatrix(img_size, ref);
+
+  EXPECT_EQ(result, ref);
 }
 #endif //HAVE_SEAL_BFV
 
