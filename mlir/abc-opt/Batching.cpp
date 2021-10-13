@@ -14,6 +14,7 @@ int getConstIndex(tensor::ExtractOp &op) {
     return const_op.value().dyn_cast<IntegerAttr>().getValue().getLimitedValue();
   } else {
     emitError(index.getLoc(), "Index not defined by a constant op!");
+    return -1;
   }
 }
 
@@ -24,10 +25,11 @@ int getConstIndex(tensor::InsertOp &op) {
     return const_op.value().dyn_cast<IntegerAttr>().getValue().getLimitedValue();
   } else {
     emitError(index.getLoc(), "Index not defined by a constant op!");
+    return -1;
   }
 }
 
-void resolveToSlot(int slot, Value v, IRRewriter &rewriter) {
+Value resolveToSlot(int slot, Value v, IRRewriter &rewriter) {
   //TODO: This is the naive/dumb way, no checking if stuff has already happened!
   auto op = v.getDefiningOp();
 
@@ -43,15 +45,31 @@ void resolveToSlot(int slot, Value v, IRRewriter &rewriter) {
                                                     extract_op.tensor(),
                                                     offset_val);
 
-      extract_op.result().replaceAllUsesWith(new_val);
-    } else {
-      // any other operation just gets resolved recursively
-      for (auto operand: op->getOperands()) {
-        resolveToSlot(slot, operand, rewriter);
+      //extract_op.result().replaceAllUsesWith(new_val);
+      return new_val;
+    } else if (auto fhe_add = llvm::dyn_cast<abc::AddOp>(op)) {
+      llvm::SmallVector<Value, 4> new_summands;
+      for (auto operand: fhe_add.summand()) {
+        auto new_val = resolveToSlot(slot, operand, rewriter);
+        new_summands.push_back(new_val);
       }
+      // and we also need to update the return type for FHE ops.
+      // TODO: would be great if we could do this generically!
+
+      rewriter.setInsertionPointAfter(fhe_add);
+      auto new_add = rewriter.create<abc::AddOp>(fhe_add.getLoc(), new_summands.begin()->getType(), new_summands);
+      fhe_add->replaceAllUsesWith(new_add);
+      //TODO: THIS REQUIRES VERIFY-EACH-ZERO SO THE TYPE SYSTEM DOESN'T COMPLAIN TOO MUCH!
+
+
+      return *op->result_begin();
+    } else {
+      emitError(op->getLoc(), "UNEXPECTED OPERATION.");
+      return v;
     }
   } else {
     //ignore, not defined in this part of code (e.g., might be a function param)
+    return v;
   }
 }
 
@@ -93,9 +111,8 @@ void BatchingPass::runOnOperation() {
     for (auto op: llvm::make_early_inc_range(f.body().getOps<tensor::InsertOp>())) {
 
       int target_index_int = getConstIndex(op);
-      resolveToSlot(target_index_int, op.dest(), rewriter);
-
-      //TODO: Replace the result of this insert op with the new_value
+      auto new_op = resolveToSlot(target_index_int, op.scalar(), rewriter);
+      op.result().replaceAllUsesWith(op.scalar());
 
     }
   }
