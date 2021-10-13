@@ -117,4 +117,18 @@ void BatchingPass::runOnOperation() {
     }
   }
 
+  // We also need to go and resolve any "return" (and probably other stuff, too!)
+  // Now visit each InsertOp and translate it (if necessary)
+  for (auto f: llvm::make_early_inc_range(block.getOps<FuncOp>())) {
+    for (auto op: llvm::make_early_inc_range(f.body().getOps<mlir::ReturnOp>())) {
+
+      int target_index_int = 0; //todo: in the future, this should be -1 and signal "all slots needed" or something like that
+      auto new_op = resolveToSlot(target_index_int, op.getOperand(0), rewriter);
+      op.getOperand(0).replaceAllUsesWith(new_op);
+
+      //op.result().replaceAllUsesWith(op.scalar());
+
+    }
+  }
+
 }
