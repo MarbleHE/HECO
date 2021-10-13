@@ -5,14 +5,10 @@ builtin.module  {
       %1 = tensor.extract %arg3[%arg2] : tensor<4xindex>
       %2 = tensor.extract %arg4[%arg2] : tensor<4xindex>
       %3 = subi %1, %2 : index
-      %4 = tensor.extract %arg3[%arg2] : tensor<4xindex>
-      %5 = tensor.extract %arg4[%arg2] : tensor<4xindex>
-      %6 = subi %4, %5 : index
-      %7 = muli %3, %6 : index
-      %8 = addi %arg5, %7 : index
-      affine.yield %arg3, %arg4, %8 : tensor<4xindex>, tensor<4xindex>, index
+      %4 = muli %3, %3 : index
+      %5 = addi %arg5, %4 : index
+      affine.yield %arg3, %arg4, %5 : tensor<4xindex>, tensor<4xindex>, index
     }
     return %0#2 : index
   }
 }
-
