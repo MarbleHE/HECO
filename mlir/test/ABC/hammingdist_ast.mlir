@@ -9,12 +9,12 @@
 // }
 builtin.module  {
     abc.function index @encryptedHammingDistance {
-        abc.function_parameter tensor<64xindex> @x
-        abc.function_parameter tensor<64xindex> @y
+        abc.function_parameter tensor<4xindex> @x
+        abc.function_parameter tensor<4xindex> @y
     },{
         abc.block  {
 
-            // length = 64
+            // length = 4
             abc.variable_declaration index @length = ( {
                 abc.literal_int 64
             })
@@ -27,7 +27,7 @@ builtin.module  {
 
             // for i in 0..length.
             // TODO: Find a way to express the loop bounds using variables? Or just go back standard abc.for?
-            abc.simple_for @i = [0, 64] {
+            abc.simple_for @i = [0, 4] {
                 abc.block  {
 
                     // sum = sum + (x[i] - y[i])*(x[i] - y[i])
