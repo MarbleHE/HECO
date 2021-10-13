@@ -19,6 +19,7 @@ int main(int argc, char *argv[]) {
 
   BENCH_FUNCTION(HammingDistance, porcupine, encryptedHammingDistancePorcupine, a, b);
   BENCH_FUNCTION(HammingDistance, expert, encryptedBatchedHammingDistance, a, b);
+  BENCH_FUNCTION(HammingDistance, naive, encryptedNaiveHammingDistance, a, b);
 
   return 0;
 }
