@@ -333,10 +333,3 @@ if(NOT pybind11_POPULATED)
 endif()
     add_subdirectory(python)
 endif()
-
-##############################
-# TARGET: benchmarks
-#
-# A collection of benchmarks
-##############################
-add_subdirectory(bench EXCLUDE_FROM_ALL)
