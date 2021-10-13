@@ -18,9 +18,9 @@ int main(int argc, char *argv[]) {
   std::vector<int> img;
   getInputMatrix(size, img);
 
-  BENCH_FUNCTION(BoxBlur, naive, encryptedFastBoxBlur2x2, img);
-  BENCH_FUNCTION(BoxBlur, expert, encryptedBatchedBoxBlur, img);
-  BENCH_FUNCTION(BoxBlur, porcupine, encryptedBatchedBoxBlur_Porcupine, img);
+  BENCH_FUNCTION(BoxBlur, Naive, encryptedFastBoxBlur2x2, img);
+  BENCH_FUNCTION(BoxBlur, HECO, encryptedBatchedBoxBlur, img);
+  BENCH_FUNCTION(BoxBlur, Porcupine, encryptedBatchedBoxBlur_Porcupine, img);
 
   return 0;
 }
