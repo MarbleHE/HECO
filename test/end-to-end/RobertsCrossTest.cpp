@@ -2,6 +2,10 @@
 #include <random>
 #include "gtest/gtest.h"
 
+#ifdef HAVE_SEAL_BFV
+#include "bench/RobertsCross.h"
+#endif
+
 /// Original, plain C++ program for a naive RobertsCross Kernel
 /// This uses two 2x2 Kernels, which we pad to 3x3 kernels for ease of implementation
 ///         |  1   0  0 |
@@ -135,6 +139,40 @@ class RobertsCrossKernelTest : public ::testing::Test {  /* NOLINT (predictable 
     }
   }
 };
+
+#ifdef HAVE_SEAL_BFV
+TEST_F(RobertsCrossKernelTest, Clear_EncryptedPorcupine_Equivalence) { /* NOLINT */
+  size_t poly_modulus_degree = 2 << 12;
+  size_t img_size = std::sqrt(poly_modulus_degree / 2);
+  std::vector<int> img;
+  getInputMatrix(img_size, img);
+
+  MultiTimer dummy = MultiTimer();
+  auto result = encryptedRobertsCrossPorcupine(dummy, img, poly_modulus_degree);
+  result.resize(img.size());
+  std::vector<int> enc(begin(result), end(result));
+
+  // Compare to reference cleartext implementation
+  auto ref = naiveRobertsCrossKernel(img);
+  EXPECT_EQ(enc, ref);
+}
+
+TEST_F(RobertsCrossKernelTest, Clear_EncryptedBatched_Equivalence) { /* NOLINT */
+  size_t poly_modulus_degree = 2 << 12;
+  size_t img_size = std::sqrt(poly_modulus_degree / 2);
+  std::vector<int> img;
+  getInputMatrix(img_size, img);
+
+  MultiTimer dummy = MultiTimer();
+  auto result = encryptedBatchedRobertsCross(dummy, img, poly_modulus_degree);
+  result.resize(img.size());
+  std::vector<int> enc(begin(result), end(result));
+
+  // Compare to reference cleartext implementation
+  auto ref = naiveRobertsCrossKernel(img);
+  EXPECT_EQ(enc, ref);
+}
+#endif //HAVE_SEAL_BFV
 
 /// Test to ensure that naiveRobertsCrossKernel and fastRobertsCrossKernel actually compute the same thing!
 TEST_F(RobertsCrossKernelTest, DISABLED_NaiveRobertsCrossKernel_FastRobertsCrossKernel_Equivalence) {  /* NOLINT */

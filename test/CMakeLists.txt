@@ -15,7 +15,6 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(googletest)
 
 
-
 ##############################
 # TARGET: testing
 ##############################
@@ -67,6 +66,12 @@ set(TEST_FILES
         visitor/TypeCheckingVisitorTest.cpp
         visitor/VectorizerTest.cpp
         visitor/VisitorTest.cpp
+        ../bench/MultiTimer.cpp
+        ../bench/BoxBlur.cpp
+        ../bench/L2Distance.cpp
+        ../bench/HammingDistance.cpp
+        ../bench/RobertsCross.cpp
+        ../bench/GxKernel.cpp
         )
 
 add_executable(testing-all

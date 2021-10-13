@@ -7,6 +7,10 @@
 #include "ast_opt/parser/Parser.h"
 #include "gtest/gtest.h"
 
+#ifdef HAVE_SEAL_BFV
+#include "bench/GxKernel.h"
+#endif
+
 /// Original, plain C++ program for a naive Gx Kernel
 /// This uses a 3x3 Kernel and applies it by sliding across the 2D image
 ///        | +1  0  -1 |
@@ -167,14 +171,60 @@ class GxKernelTest : public ::testing::Test {  /* NOLINT (predictable sequence e
 
   void printMatrix(size_t size, std::vector<int> &matrix) {
     for (int64_t row = (int64_t) size - 1; row >= 0; --row) {
-      std::cout << matrix.at(0*size + row);
+      std::cout << std::setw(6) << matrix.at(0*size + row);
       for (size_t col = 1; col < size; ++col) {
-        std::cout << "\t" << matrix.at(col*size + row);
+        std::cout << " " << std::setw(6) << matrix.at(col*size + row);
       }
       std::cout << std::endl;
     }
   }
 };
+
+#ifdef HAVE_SEAL_BFV
+TEST_F(GxKernelTest, FastGxKernel_BatchedEncryptedGxKernel_Equivalence) { /* NOLINT */
+  size_t poly_modulus_degree = 2 << 12;
+  size_t img_size = std::sqrt(poly_modulus_degree / 2);
+  std::vector<int> img;
+  GxKernelTest::getInputMatrix(img_size, img);
+  //std::cout << "img:" << std::endl;
+  //printMatrix(size, img);
+
+  MultiTimer dummy = MultiTimer();
+  auto encrypted = encryptedBatchedGxKernel(dummy, img, poly_modulus_degree);
+  encrypted.resize(img.size());
+  std::vector<int> enc(begin(encrypted), end(encrypted));
+  //std::cout << "naive:" << std::endl;
+  //printMatrix(size, naive);
+
+  auto fast = fastGxKernel(img);
+  //std::cout << "fast:" << std::endl;
+  //printMatrix(size, fast);
+
+  EXPECT_EQ(fast, enc);
+}
+
+TEST_F(GxKernelTest, FastGxKernel_PorcupineEncryptedGxKernel_Equivalence) { /* NOLINT */
+  size_t poly_modulus_degree = 2 << 12;
+  size_t img_size = std::sqrt(poly_modulus_degree / 2);
+  std::vector<int> img;
+  GxKernelTest::getInputMatrix(img_size, img);
+  std::cout << "img:" << std::endl;
+  printMatrix(img_size, img);
+
+  MultiTimer dummy = MultiTimer();
+  auto encrypted = encryptedBatchedGxKernelPorcupine(dummy, img, poly_modulus_degree);
+  encrypted.resize(img.size());
+  std::vector<int> enc(begin(encrypted), end(encrypted));
+  std::cout << "encrypted:" << std::endl;
+  printMatrix(img_size, enc);
+
+  auto fast = fastGxKernel(img);
+  std::cout << "fast:" << std::endl;
+  printMatrix(img_size, fast);
+
+  EXPECT_EQ(fast, enc);
+}
+#endif //HAVE_SEAL_BFV
 
 /// Test to ensure that naiveGxKernel and fastGxKernel actually compute the same thing!
 TEST_F(GxKernelTest, NaiveGxKernel_FastGxKernel_Equivalence) {  /* NOLINT */

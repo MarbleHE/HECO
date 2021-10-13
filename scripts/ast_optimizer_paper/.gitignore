@@ -1,0 +1,10 @@
+
+out
+
+# for now ignore the dummy data
+data
+
+
+.ipynb_checkpoints
+
+Pipfile.lock
