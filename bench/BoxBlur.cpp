@@ -115,8 +115,11 @@ std::vector<int64_t> encryptedBatchedBoxBlur(
   /// Rotations for 3x3 Kernel
   /// Offsets correspond to the different kernel positions
   int img_size = (int)std::sqrt(img.size());
-  std::vector<int> rotations = { -img_size + 1, 1,  img_size + 1, -img_size, 0, img_size,
-                                 -img_size - 1, -1, img_size - 1 };
+//  std::vector<int> rotations = { -img_size + 1, 1,  img_size + 1, -img_size, 0, img_size,
+//                                 -img_size - 1, -1, img_size - 1 };
+  std::vector<int> rotations = { -1,  -img_size - 1,  0, -img_size};
+  //TODO: pick correct rotations to get same kernel/same result as plaintext reference
+
   // Context Setup
   // std::cout << "Setting up SEAL Context" << std::endl;
   seal::EncryptionParameters parameters(seal::scheme_type::bfv);
