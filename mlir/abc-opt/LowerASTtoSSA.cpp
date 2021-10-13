@@ -227,7 +227,7 @@ void translateSimpleForOp(abc::SimpleForOp &simple_for_op,
     //TODO: THis hack is horrible, but until we fix the symbol table stuff, it'll do for the benchmarks
     llvm::SmallVector<Value, 4> iter_args;
 
-    for (auto &hack: {"img", "img2", "value", "x"}) {
+    for (auto &hack: {"img", "img2", "value", "x",  "y", "sum"}) {
       if (symbolTable.count(hack)) {
         existing_vars.emplace_back(hack);
       }
