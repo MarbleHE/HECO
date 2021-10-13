@@ -83,6 +83,8 @@ translateExpression(Operation &op,
     auto rhs = translateExpression(firstOp(binary_expr.right()), rewriter, symbolTable);
     if (binary_expr.op()=="+") {
       return rewriter.create<AddIOp>(binary_expr->getLoc(), lhs, rhs);
+    } else if (binary_expr.op()=="-") {
+      return rewriter.create<SubIOp>(binary_expr->getLoc(), lhs, rhs);
     } else if (binary_expr.op()=="*") {
       return rewriter.create<MulIOp>(binary_expr->getLoc(), lhs, rhs);
     } else if (binary_expr.op()=="%") {
