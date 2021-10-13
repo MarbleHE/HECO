@@ -1,5 +1,5 @@
 builtin.module  {
-  builtin.func private @encryptedHammingDistance(%arg0: tensor<4xindex>, %arg1: tensor<4xindex>) -> index {
+  builtin.func private @encryptedHammingDistance(%arg0: tensor<4xindex>, %arg1: tensor<4xindex>) -> tensor<4xindex> {
     %c3 = constant 3 : index
     %c2 = constant 2 : index
     %c1 = constant 1 : index

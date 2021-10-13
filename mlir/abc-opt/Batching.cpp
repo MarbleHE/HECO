@@ -176,6 +176,7 @@ void BatchingPass::runOnOperation() {
       if (new_value!=op.getOperand(0)) {
         op.getOperand(0).replaceAllUsesWith(new_value);
       }
+      f.setType(rewriter.getFunctionType(f.getType().getInputs(), new_value.getType()));
 
       //op.result().replaceAllUsesWith(op.scalar());
 
