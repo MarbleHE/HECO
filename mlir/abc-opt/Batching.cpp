@@ -34,6 +34,9 @@ Value resolveToSlot(int slot, Value v, IRRewriter &rewriter) {
   auto op = v.getDefiningOp();
 
   if (op) {
+    //std::cout << "resolving slot for" << std::endl;
+    //op->dump();
+
     if (auto extract_op = llvm::dyn_cast<tensor::ExtractOp>(op)) {
       // if it's an extract op, simply rotate to bring to right slot
       int extracted_index = getConstIndex(extract_op);
@@ -46,6 +49,8 @@ Value resolveToSlot(int slot, Value v, IRRewriter &rewriter) {
                                                     offset_val);
 
       //extract_op.result().replaceAllUsesWith(new_val);
+      //std::cout << "resolved extract to" << std::endl;
+      //new_val.dump();
       return new_val;
     } else if (auto fhe_add = llvm::dyn_cast<abc::AddOp>(op)) {
       llvm::SmallVector<Value, 4> new_summands;
@@ -61,8 +66,10 @@ Value resolveToSlot(int slot, Value v, IRRewriter &rewriter) {
       fhe_add->replaceAllUsesWith(new_add);
       //TODO: THIS REQUIRES VERIFY-EACH-ZERO SO THE TYPE SYSTEM DOESN'T COMPLAIN TOO MUCH!
 
-
-      return *op->result_begin();
+      //std::cout << "resolved add to" << std::endl;
+      auto new_val = *new_add->result_begin();
+      //new_val.dump();
+      return new_val;
     } else if (auto fhe_mul = llvm::dyn_cast<abc::MulOp>(op)) {
       llvm::SmallVector<Value, 4> new_summands;
       for (auto operand: fhe_mul.terms()) {
@@ -78,7 +85,10 @@ Value resolveToSlot(int slot, Value v, IRRewriter &rewriter) {
       //TODO: THIS REQUIRES VERIFY-EACH-ZERO SO THE TYPE SYSTEM DOESN'T COMPLAIN TOO MUCH!
 
 
-      return *op->result_begin();
+      //std::cout << "resolved mul to" << std::endl;
+      auto new_val = *new_mul->result_begin();
+      //new_val.dump();
+      return new_val;
     } else if (auto fhe_sub = llvm::dyn_cast<abc::SubOp>(op)) {
       llvm::SmallVector<Value, 4> new_summands;
       for (auto operand: fhe_sub.summand()) {
@@ -93,8 +103,13 @@ Value resolveToSlot(int slot, Value v, IRRewriter &rewriter) {
       fhe_sub->replaceAllUsesWith(new_sub);
       //TODO: THIS REQUIRES VERIFY-EACH-ZERO SO THE TYPE SYSTEM DOESN'T COMPLAIN TOO MUCH!
 
-
-      return *op->result_begin();
+      //std::cout << "resolved sub to" << std::endl;
+      auto new_val = *new_sub->result_begin();
+      //new_val.dump();
+      return new_val;
+    } else if (auto fhe_rot = llvm::dyn_cast<abc::RotateOp>(op)) {
+      //already solved
+      return v;
     } else {
       emitError(op->getLoc(), "UNEXPECTED OPERATION.");
       return v;
@@ -157,8 +172,10 @@ void BatchingPass::runOnOperation() {
       int target_index_int = 0;
       //todo: in the future, this should be -1 and signal "all slots needed" or something like that
       // TODO: we intentionally don't change the return type, since this should be scalar-ish
-      auto new_op = resolveToSlot(target_index_int, op.getOperand(0), rewriter);
-      op.getOperand(0).replaceAllUsesWith(new_op);
+      auto new_value = resolveToSlot(target_index_int, op.getOperand(0), rewriter);
+      if (new_value!=op.getOperand(0)) {
+        op.getOperand(0).replaceAllUsesWith(new_value);
+      }
 
       //op.result().replaceAllUsesWith(op.scalar());
 
