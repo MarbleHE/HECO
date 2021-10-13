@@ -230,6 +230,22 @@ def ABC_AddOp : Op<ABC_Dialect, "fhe_add", [NoTerminator, NoSideEffect]> {
   }];
 }
 
+def ABC_SubOp : Op<ABC_Dialect, "fhe_sub", [NoTerminator, NoSideEffect]> {
+
+let arguments = (ins
+Variadic<AnyType>:$summand
+);
+
+let results = (outs
+AnyType:$output
+);
+
+// TODO: Use something like printStandardBinaryOp from STD dialect!
+let assemblyFormat = [{
+`(` operands `)` `:` `(` type(operands) `)` `->` type($output) attr-dict-with-keyword
+}];
+}
+
 def ABC_RotateOp : Op<ABC_Dialect, "fhe_rotate", [NoTerminator, NoSideEffect]> {
   let arguments = (ins
       TensorOf<[Index]>:$vector,
