@@ -72,7 +72,12 @@ translateExpression(Operation &op,
         .create<ConstantOp>(op.getLoc(), rewriter.getIndexAttr(literal_int.value().getLimitedValue()));
     return value;
   } else if (auto variable = llvm::dyn_cast<abc::VariableOp>(op)) {
-    return symbolTable.lookup(variable.name());
+    if (!symbolTable.count(variable.name())) {
+      emitError(variable.getLoc(), "Undefined variable " + variable.name());
+      return rewriter.create<ConstantOp>(op.getLoc(), rewriter.getIntegerAttr(rewriter.getIntegerType(64), 1));
+    } else {
+      return symbolTable.lookup(variable.name());
+    }
   } else if (auto binary_expr = llvm::dyn_cast<abc::BinaryExpressionOp>(op)) {
     auto lhs = translateExpression(firstOp(binary_expr.left()), rewriter, symbolTable);
     auto rhs = translateExpression(firstOp(binary_expr.right()), rewriter, symbolTable);
@@ -206,7 +211,7 @@ void translateSimpleForOp(abc::SimpleForOp &simple_for_op,
                           llvm::ScopedHashTable<StringRef, mlir::Value> &symbolTable) {
 
   std::vector<std::string> existing_vars;
-  AffineForOp* new_for_ptr = nullptr;
+  AffineForOp *new_for_ptr = nullptr;
   // Create a new scope
   {
     // This sets curScope in symbolTable to varScope
