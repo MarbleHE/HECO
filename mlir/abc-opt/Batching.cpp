@@ -63,6 +63,38 @@ Value resolveToSlot(int slot, Value v, IRRewriter &rewriter) {
 
 
       return *op->result_begin();
+    } else if (auto fhe_mul = llvm::dyn_cast<abc::MulOp>(op)) {
+      llvm::SmallVector<Value, 4> new_summands;
+      for (auto operand: fhe_mul.terms()) {
+        auto new_val = resolveToSlot(slot, operand, rewriter);
+        new_summands.push_back(new_val);
+      }
+      // and we also need to update the return type for FHE ops.
+      // TODO: would be great if we could do this generically!
+
+      rewriter.setInsertionPointAfter(fhe_mul);
+      auto new_mul = rewriter.create<abc::MulOp>(fhe_mul.getLoc(), new_summands.begin()->getType(), new_summands);
+      fhe_mul->replaceAllUsesWith(new_mul);
+      //TODO: THIS REQUIRES VERIFY-EACH-ZERO SO THE TYPE SYSTEM DOESN'T COMPLAIN TOO MUCH!
+
+
+      return *op->result_begin();
+    } else if (auto fhe_sub = llvm::dyn_cast<abc::SubOp>(op)) {
+      llvm::SmallVector<Value, 4> new_summands;
+      for (auto operand: fhe_sub.summand()) {
+        auto new_val = resolveToSlot(slot, operand, rewriter);
+        new_summands.push_back(new_val);
+      }
+      // and we also need to update the return type for FHE ops.
+      // TODO: would be great if we could do this generically!
+
+      rewriter.setInsertionPointAfter(fhe_sub);
+      auto new_sub = rewriter.create<abc::SubOp>(fhe_sub.getLoc(), new_summands.begin()->getType(), new_summands);
+      fhe_sub->replaceAllUsesWith(new_sub);
+      //TODO: THIS REQUIRES VERIFY-EACH-ZERO SO THE TYPE SYSTEM DOESN'T COMPLAIN TOO MUCH!
+
+
+      return *op->result_begin();
     } else {
       emitError(op->getLoc(), "UNEXPECTED OPERATION.");
       return v;
@@ -122,7 +154,9 @@ void BatchingPass::runOnOperation() {
   for (auto f: llvm::make_early_inc_range(block.getOps<FuncOp>())) {
     for (auto op: llvm::make_early_inc_range(f.body().getOps<mlir::ReturnOp>())) {
 
-      int target_index_int = 0; //todo: in the future, this should be -1 and signal "all slots needed" or something like that
+      int target_index_int = 0;
+      //todo: in the future, this should be -1 and signal "all slots needed" or something like that
+      // TODO: we intentionally don't change the return type, since this should be scalar-ish
       auto new_op = resolveToSlot(target_index_int, op.getOperand(0), rewriter);
       op.getOperand(0).replaceAllUsesWith(new_op);
 
