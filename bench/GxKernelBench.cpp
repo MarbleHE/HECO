@@ -17,6 +17,7 @@ int main(int argc, char *argv[]) {
   getInputMatrix(size, img);
 
   BENCH_FUNCTION(GxKernel, porcupine, encryptedBatchedGxKernelPorcupine, img);
+  BENCH_FUNCTION(GxKernel, expert, encryptedBatchedGxKernel, img);
 
   return 0;
 }
