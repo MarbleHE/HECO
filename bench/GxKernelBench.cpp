@@ -7,8 +7,8 @@ int main(int argc, char *argv[]) {
   if (argc < 2) {
     std::cout << "USAGE: gx-bench [version]" << std::endl;
     std::cout << "       versions:" << std::endl;
-    std::cout << "          -porcupine" << std::endl;
-    std::cout << "          -heco" << std::endl;
+    std::cout << "          - Porcupine" << std::endl;
+    std::cout << "          - HECO" << std::endl;
     std::exit(1);
   }
 
