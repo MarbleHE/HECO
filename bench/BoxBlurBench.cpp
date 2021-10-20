@@ -7,9 +7,9 @@ int main(int argc, char *argv[]) {
   if (argc < 2) {
     std::cout << "USAGE: bb-bench [version]" << std::endl;
     std::cout << "       versions:" << std::endl;
-    std::cout << "          -naive" << std::endl;
-    std::cout << "          -expert" << std::endl;
-    std::cout << "          -porcupine" << std::endl;
+    std::cout << "          - Naive" << std::endl;
+    std::cout << "          - HECO" << std::endl;
+    std::cout << "          - Porcupine" << std::endl;
     std::exit(1);
   }
 
@@ -18,9 +18,9 @@ int main(int argc, char *argv[]) {
   std::vector<int> img;
   getInputMatrix(size, img);
 
-  BENCH_FUNCTION(BoxBlur, naive, encryptedFastBoxBlur2x2, img);
-  BENCH_FUNCTION(BoxBlur, expert, encryptedBatchedBoxBlur, img);
-  BENCH_FUNCTION(BoxBlur, porcupine, encryptedBatchedBoxBlur_Porcupine, img);
+  BENCH_FUNCTION(BoxBlur, Naive, encryptedFastBoxBlur2x2, img);
+  BENCH_FUNCTION(BoxBlur, HECO, encryptedBatchedBoxBlur, img);
+  BENCH_FUNCTION(BoxBlur, Porcupine, encryptedBatchedBoxBlur_Porcupine, img);
 
   return 0;
 }

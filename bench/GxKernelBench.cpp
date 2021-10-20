@@ -7,8 +7,9 @@ int main(int argc, char *argv[]) {
   if (argc < 2) {
     std::cout << "USAGE: gx-bench [version]" << std::endl;
     std::cout << "       versions:" << std::endl;
-    std::cout << "          -porcupine" << std::endl;
-    std::cout << "          -expert" << std::endl;
+    std::cout << "          - Porcupine" << std::endl;
+    std::cout << "          - Naive" << std::endl;
+    std::cout << "          - HECO" << std::endl;
     std::exit(1);
   }
 
@@ -17,9 +18,9 @@ int main(int argc, char *argv[]) {
   std::vector<int> img;
   getInputMatrix(size, img);
 
-  BENCH_FUNCTION(GxKernel, porcupine, encryptedBatchedGxKernelPorcupine, img);
-  BENCH_FUNCTION(GxKernel, expert, encryptedBatchedGxKernel, img);
-  BENCH_FUNCTION(GxKernel, naive, encryptedNaiveGxKernel, img);
+  BENCH_FUNCTION(GxKernel, Porcupine, encryptedBatchedGxKernelPorcupine, img);
+  BENCH_FUNCTION(GxKernel, HECO, encryptedBatchedGxKernel, img);
+  BENCH_FUNCTION(GxKernel, Naive, encryptedNaiveGxKernel, img);
 
   return 0;
 }
