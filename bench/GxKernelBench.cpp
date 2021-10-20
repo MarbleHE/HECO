@@ -19,6 +19,7 @@ int main(int argc, char *argv[]) {
 
   BENCH_FUNCTION(GxKernel, porcupine, encryptedBatchedGxKernelPorcupine, img);
   BENCH_FUNCTION(GxKernel, expert, encryptedBatchedGxKernel, img);
+  BENCH_FUNCTION(GxKernel, naive, encryptedNaiveGxKernel, img);
 
   return 0;
 }

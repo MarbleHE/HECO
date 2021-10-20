@@ -203,6 +203,26 @@ TEST_F(GxKernelTest, FastGxKernel_BatchedEncryptedGxKernel_Equivalence) { /* NOL
   EXPECT_EQ(fast, enc);
 }
 
+TEST_F(GxKernelTest, FastGxKernel_NaiveEncryptedGxKernel_Equivalence) { /* NOLINT */
+  size_t poly_modulus_degree = 2 << 12;
+  size_t img_size = 16;
+  std::vector<int> img;
+  GxKernelTest::getInputMatrix(img_size, img);
+  //std::cout << "img:" << std::endl;
+  //printMatrix(size, img);
+
+  MultiTimer dummy = MultiTimer();
+  auto encrypted = encryptedNaiveGxKernel(dummy, img, poly_modulus_degree);
+  //std::cout << "naive:" << std::endl;
+  //printMatrix(size, naive);
+
+  auto fast = fastGxKernel(img);
+  //std::cout << "fast:" << std::endl;
+  //printMatrix(size, fast);
+
+  EXPECT_EQ(fast, encrypted);
+}
+
 TEST_F(GxKernelTest, FastGxKernel_PorcupineEncryptedGxKernel_Equivalence) { /* NOLINT */
   size_t poly_modulus_degree = 2 << 12;
   size_t img_size = std::sqrt(poly_modulus_degree / 2);
