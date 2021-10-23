@@ -12,7 +12,6 @@
 #include "test/ASTComparison.h"
 
 using namespace std;
-using namespace seal;
 
 // use this fixed seed to enable reproducibility of the matrix inputs
 #define RAND_SEED 4673838
@@ -196,7 +195,7 @@ TEST_F(LaplacianSharpeningTest, Encrypted_Batched_Plain_Equivalence) { /* NOLINT
 TEST_F(LaplacianSharpeningTest, Encrypted_Naive_Plain_Equivalence) { /* NOLINT */
 
   size_t poly_modulus_degree = 2 << 12;
-  size_t size = std::sqrt(poly_modulus_degree / 2);
+  size_t size = 8;
   std::vector<int> img;
   LaplacianSharpeningTest::getInputMatrix(size, img);
 
