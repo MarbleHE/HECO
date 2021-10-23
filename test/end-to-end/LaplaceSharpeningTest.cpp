@@ -11,46 +11,16 @@
 #include "ast_opt/visitor/SecretBranchingVisitor.h"
 #include "test/ASTComparison.h"
 
+using namespace std;
+using namespace seal;
+
 // use this fixed seed to enable reproducibility of the matrix inputs
 #define RAND_SEED 4673838
 // use a 4x4 matrix for the tests
 #define MATRIX_SIZE 4
 
-/// Original, plain C++ program for LaplacianSharpening
-/// This uses a 3x3 Kernel and applies it by sliding across the 2D image
-///             | 1  1  1 |
-///   w = -1 *  | 1 -8  1 |
-///             | 1  1  1 |
-/// No padding is used, so the image is 2px smaller in each dimension
-/// The filtered image is then added to the original image at 50% intensity.
-///
-/// This program is inspired by RAMPARTS, presented by Archer et al. in 2019
-/// The only modification that we do is instead of computing
-///     img2[x][y] = img[x][y] - (value/2),
-/// we compute
-///     img2[x][y] = 2*img[x][y] - value
-/// to avoid division which is unsupported in BFV
-/// The client can easily divide the result by two after decryption
-///
-/// \param img Pixel (x,y) = (column, row) should be at position x*imgSize + y
-/// \return transformed image
-std::vector<int> laplacianSharpening(const std::vector<int> &img) {
-  const auto imgSize = (int) std::ceil(std::sqrt(img.size()));
-  std::vector<std::vector<int>> weightMatrix = {{1, 1, 1}, {1, -8, 1}, {1, 1, 1}};
-  std::vector<int> img2(img.begin(), img.end());
-  for (int x = 1; x < imgSize - 1; ++x) {
-    for (int y = 1; y < imgSize - 1; ++y) {
-      int value = 0;
-      for (int j = -1; j < 2; ++j) {
-        for (int i = -1; i < 2; ++i) {
-          value = value + weightMatrix.at(i + 1).at(j + 1)*img.at((x + i)*imgSize + (y + j));
-        }
-      }
-      img2[imgSize*x + y] = 2*img.at(x*imgSize + y) - value;
-    }
-  }
-  return img2;
-}
+#include "bench/LaplaceSharpening.h"
+#include "bench/MultiTimer.h"
 
 class KernelTest : public ::testing::Test {  /* NOLINT (predictable sequence expected) */
  protected:
@@ -139,16 +109,109 @@ class KernelTest : public ::testing::Test {  /* NOLINT (predictable sequence exp
     std::vector<std::vector<int>> data;
     getInputMatrix(size, data);
     std::size_t total_size = 0;
-    for (const auto &sub : data) total_size += sub.size();
+    for (const auto &sub: data) total_size += sub.size();
     destination.reserve(total_size);
-    for (const auto &sub : data) destination.insert(destination.end(), sub.begin(), sub.end());
+    for (const auto &sub: data) destination.insert(destination.end(), sub.begin(), sub.end());
   }
 };
 
-#if HAVE_SEAL_BFV
+// use this fixed seed to enable reproducibility of the matrix inputs
+#define RAND_SEED 4673838
+// use a 4x4 matrix for the tests
+#define MATRIX_SIZE 4
+
+class LaplacianSharpeningTest : public ::testing::Test {  /* NOLINT (predictable sequence expected) */
+ protected:
+  std::default_random_engine randomEngine;
+  std::uniform_int_distribution<int> myUnifIntDist;
+
+  void SetUp() override {
+    randomEngine = std::default_random_engine(RAND_SEED);  /* NOLINT (predictable sequence expected) */
+    // the supported number range must be according to the FHE scheme parameters to not wrap around the modulo
+    myUnifIntDist = std::uniform_int_distribution<int>(0, 1024);
+  }
+
+ public:
+  void resetRandomEngine() {
+    randomEngine.seed(RAND_SEED);
+  }
+
+  void getInputMatrix(size_t size, std::vector<std::vector<int>> &destination) {
+    // reset the RNG to make sure that every call to this method results in the same numbers
+    resetRandomEngine();
+    // make sure we clear desination vector before, otherwise resize could end up appending elements
+    destination.clear();
+    destination.resize(size, std::vector<int>(size));
+    for (size_t i = 0; i < size; ++i) {
+      for (size_t j = 0; j < size; ++j) {
+        destination[i][j] = myUnifIntDist(randomEngine);
+      }
+    }
+  }
+
+  void getInputMatrix(size_t size, std::vector<int> &destination) {
+    // make sure we clear desination vector before, otherwise resize could end up appending elements
+    destination.clear();
+    std::vector<std::vector<int>> data;
+    getInputMatrix(size, data);
+    std::size_t total_size = 0;
+    for (const auto &sub: data) total_size += sub.size();
+    destination.reserve(total_size);
+    for (const auto &sub: data) destination.insert(destination.end(), sub.begin(), sub.end());
+  }
+
+  void printMatrix(size_t size, std::vector<int> &matrix) {
+    /* We assume a row major layout of the matrix, where the first element is the bottom left pixel */
+    for (int64_t row = size - 1; row >= 0; --row) {
+      std::cout << matrix.at(0*size + row);
+      for (size_t col = 1; col < size; ++col) {
+        std::cout << "\t" << std::setw(4) << matrix.at(col*size + row);
+      }
+      std::cout << std::endl;
+    }
+  }
+};
+
+#ifdef HAVE_SEAL_BFV
+
+/// Test to ensure that plaintext and encrypted compute the same thing
+TEST_F(LaplacianSharpeningTest, Encrypted_Batched_Plain_Equivalence) { /* NOLINT */
+
+  size_t poly_modulus_degree = 2 << 12;
+  size_t size = std::sqrt(poly_modulus_degree/2);
+  std::vector<int> img;
+  LaplacianSharpeningTest::getInputMatrix(size, img);
+
+  auto ref = laplacianSharpening(img);
+
+  auto dummy = MultiTimer();
+  auto encrypted = encryptedLaplacianSharpening(dummy, img, poly_modulus_degree);
+  std::vector<int> enc(begin(encrypted), end(encrypted));
+  enc.resize(ref.size()); // Is there a more efficient way to do this?
+
+  EXPECT_EQ(ref, enc);
+}
+
+/// Test to ensure that plaintext and naive encrypted compute the same thing
+TEST_F(LaplacianSharpeningTest, Encrypted_Naive_Plain_Equivalence) { /* NOLINT */
+
+  size_t poly_modulus_degree = 2 << 12;
+  size_t size = std::sqrt(poly_modulus_degree / 2);
+  std::vector<int> img;
+  LaplacianSharpeningTest::getInputMatrix(size, img);
+
+  auto ref = laplacianSharpening(img);
+
+  auto dummy = MultiTimer();
+  auto encrypted = encryptedNaiveLaplaceSharpening(dummy, img, poly_modulus_degree);
+  std::vector<int> enc(begin(encrypted), end(encrypted));
+  enc.resize(ref.size()); // Is there a more efficient way to do this?
+
+  EXPECT_EQ(ref, enc);
+}
 
 /// Check correctness of result between original program and (unmodified) program parsed as AST
-TEST_F(KernelTest, laplacianSharpening) {  /* NOLINT */
+TEST_F(KernelTest, DISABLED_laplacianSharpening) {  /* NOLINT */
   // run the original program
   std::vector<int> data;
   getInputMatrix(MATRIX_SIZE, data);
@@ -224,11 +287,11 @@ TEST_F(KernelTest, STAGE_01_typeCheckingTest) {  /* NOLINT */
   // execution order of tests
   std::vector<int> nodesIdxExpectedTainted = {17, 18, 71, 81, 91, 92, 93, 94, 107, 113, 114, 115, 116, 117};
   std::set<std::string> expTainted;
-  for (const auto idx : nodesIdxExpectedTainted) {
+  for (const auto idx: nodesIdxExpectedTainted) {
     expTainted.insert(createdNodes.at(idx).get().getUniqueNodeId());
   }
 
-  for (const auto &[identifier, taintedFlag] : actualTaintedNodes) {
+  for (const auto &[identifier, taintedFlag]: actualTaintedNodes) {
     bool expectedTainted = expTainted.count(identifier) > 0;
     EXPECT_EQ(taintedFlag, expectedTainted);
   }

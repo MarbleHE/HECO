@@ -72,6 +72,7 @@ set(TEST_FILES
         ../bench/HammingDistance.cpp
         ../bench/RobertsCross.cpp
         ../bench/GxKernel.cpp
+        ../bench/LaplaceSharpening.cpp
         )
 
 add_executable(testing-all
