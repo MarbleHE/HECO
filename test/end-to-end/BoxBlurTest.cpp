@@ -305,7 +305,7 @@ TEST_F(BoxBlurTest, EncryptedBoxBlur_FastBoxBlur_Equivalence) { /* NOLINT */
   std::vector<int> img;
   BoxBlurTest::getInputMatrix(size, img);
 
-  auto fast = fastBoxBlur(img);
+  auto fast = fastBoxBlur2x2(img);
 
   auto dummy = MultiTimer();
   auto encrypted = encryptedBatchedBoxBlur(dummy, img, poly_modulus_degree);
