@@ -66,12 +66,14 @@ set(TEST_FILES
         visitor/TypeCheckingVisitorTest.cpp
         visitor/VectorizerTest.cpp
         visitor/VisitorTest.cpp
+        end-to-end/LinearPolynomialTest.cpp
         ../bench/MultiTimer.cpp
         ../bench/BoxBlur.cpp
         ../bench/L2Distance.cpp
         ../bench/HammingDistance.cpp
         ../bench/RobertsCross.cpp
         ../bench/GxKernel.cpp
+        ../bench/LinearPolynomial.cpp
         )
 
 add_executable(testing-all

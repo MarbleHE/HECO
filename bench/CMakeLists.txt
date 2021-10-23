@@ -50,4 +50,16 @@ if (SEAL_FOUND)
     target_compile_definitions(rc-bench PUBLIC -DHAVE_SEAL_BFV)
     target_compile_definitions(rc-bench PUBLIC -DHAVE_SEAL_CKKS)
 
+    ## LINEAR POLY ##
+    set(LP_BENCH_FILES
+            LinearPolynomial.cpp
+            LinearPolynomialBench.cpp
+            MultiTimer.cpp
+    )
+    add_executable(lp-bench ${LP_BENCH_FILES})
+    target_include_directories(lp-bench PUBLIC ${SEAL_INCLUDE_DIRS})
+    target_link_libraries(lp-bench PUBLIC SEAL::seal)
+    target_compile_definitions(lp-bench PUBLIC -DHAVE_SEAL_BFV)
+    target_compile_definitions(lp-bench PUBLIC -DHAVE_SEAL_CKKS)
+
 endif (SEAL_FOUND)
