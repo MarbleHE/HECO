@@ -45,4 +45,12 @@ std::vector<int64_t> encryptedLaplacianSharpening(MultiTimer &timer,
 std::vector<int> encryptedNaiveLaplaceSharpening(
     MultiTimer &timer, const std::vector<int> &img, size_t poly_modulus_degree, bool encrypt_weights = false);
 
+/// Encrypted LaplacianSharpening naively encrypting img into one ctxt but using naive index access via rotation
+/// \param img Pixel (x,y) = (column, row) should be at position x*imgSize + y
+/// \param poly_modulus_degree FHE parameter, degree n of the polynomials
+/// \param encrypt_weights By default, the kernel weights are plaintexts. If this is set, they are also ciphertexts.
+/// \return transformed image
+std::vector<int64_t> encryptedNaiveBatchedLaplacianSharpening(
+    MultiTimer &timer, const std::vector<int> &img, size_t poly_modulus_degree, bool encrypt_weights = false);
+
 #endif //AST_OPTIMIZER_BENCH_LAPLACESHARPENING_H_

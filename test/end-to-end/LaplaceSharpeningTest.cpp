@@ -209,6 +209,24 @@ TEST_F(LaplacianSharpeningTest, Encrypted_Naive_Plain_Equivalence) { /* NOLINT *
   EXPECT_EQ(ref, enc);
 }
 
+/// Test to ensure that plaintext and naive batched encrypted compute the same thing
+TEST_F(LaplacianSharpeningTest, Encrypted_Naive_Batched_Plain_Equivalence) { /* NOLINT */
+
+  size_t poly_modulus_degree = 2 << 12;
+  size_t size = std::sqrt(poly_modulus_degree / 2);
+  std::vector<int> img;
+  LaplacianSharpeningTest::getInputMatrix(size, img);
+
+  auto ref = laplacianSharpening(img);
+
+  auto dummy = MultiTimer();
+  auto encrypted = encryptedNaiveLaplaceSharpening(dummy, img, poly_modulus_degree);
+  std::vector<int> enc(begin(encrypted), end(encrypted));
+  enc.resize(ref.size()); // Is there a more efficient way to do this?
+
+  EXPECT_EQ(ref, enc);
+}
+
 /// Check correctness of result between original program and (unmodified) program parsed as AST
 TEST_F(KernelTest, DISABLED_laplacianSharpening) {  /* NOLINT */
   // run the original program

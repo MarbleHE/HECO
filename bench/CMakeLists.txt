@@ -62,4 +62,17 @@ if (SEAL_FOUND)
     target_compile_definitions(lp-bench PUBLIC -DHAVE_SEAL_BFV)
     target_compile_definitions(lp-bench PUBLIC -DHAVE_SEAL_CKKS)
 
+    ## LAPLACE SHARPENING ##
+    set(RC_BENCH_FILES
+            LaplaceSharpening.cpp
+            LaplaceSharpeningBench.cpp
+            MultiTimer.cpp
+            )
+    add_executable(ls-bench ${RC_BENCH_FILES})
+    target_include_directories(ls-bench PUBLIC ${SEAL_INCLUDE_DIRS})
+    target_link_libraries(ls-bench PUBLIC SEAL::seal)
+    target_compile_definitions(ls-bench PUBLIC -DHAVE_SEAL_BFV)
+    target_compile_definitions(ls-bench PUBLIC -DHAVE_SEAL_CKKS)
+
+
 endif (SEAL_FOUND)
