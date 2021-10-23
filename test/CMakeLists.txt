@@ -74,6 +74,7 @@ set(TEST_FILES
         ../bench/RobertsCross.cpp
         ../bench/GxKernel.cpp
         ../bench/LinearPolynomial.cpp
+        ../bench/LaplaceSharpening.cpp
         )
 
 add_executable(testing-all
