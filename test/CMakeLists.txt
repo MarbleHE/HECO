@@ -66,6 +66,7 @@ set(TEST_FILES
         visitor/TypeCheckingVisitorTest.cpp
         visitor/VectorizerTest.cpp
         visitor/VisitorTest.cpp
+        end-to-end/QuadraticPolynomialTest.cpp
         end-to-end/LinearPolynomialTest.cpp
         ../bench/MultiTimer.cpp
         ../bench/BoxBlur.cpp
@@ -73,6 +74,7 @@ set(TEST_FILES
         ../bench/HammingDistance.cpp
         ../bench/RobertsCross.cpp
         ../bench/GxKernel.cpp
+        ../bench/QuadraticPolynomial.cpp
         ../bench/LinearPolynomial.cpp
         ../bench/LaplaceSharpening.cpp
         )

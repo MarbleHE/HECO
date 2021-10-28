@@ -62,6 +62,18 @@ if (SEAL_FOUND)
     target_compile_definitions(lp-bench PUBLIC -DHAVE_SEAL_BFV)
     target_compile_definitions(lp-bench PUBLIC -DHAVE_SEAL_CKKS)
 
+    ## QUADRATIC POLY ##
+    set(QP_BENCH_FILES
+            QuadraticPolynomial.cpp
+            QuadraticPolynomialBench.cpp
+            MultiTimer.cpp
+    )
+    add_executable(qp-bench ${QP_BENCH_FILES})
+    target_include_directories(qp-bench PUBLIC ${SEAL_INCLUDE_DIRS})
+    target_link_libraries(qp-bench PUBLIC SEAL::seal)
+    target_compile_definitions(qp-bench PUBLIC -DHAVE_SEAL_BFV)
+    target_compile_definitions(qp-bench PUBLIC -DHAVE_SEAL_CKKS)
+
     ## LAPLACE SHARPENING ##
     set(RC_BENCH_FILES
             LaplaceSharpening.cpp
