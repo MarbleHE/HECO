@@ -248,7 +248,6 @@ std::vector<int64_t> encryptedRobertsCrossPorcupine(
         MultiTimer &timer, std::vector<int> &img, size_t poly_modulus_degree)
 {
   auto keygenTimer = timer.startTimer();
-  // TODO: Doesn't work as expected
   int img_size = (int)std::sqrt(img.size());
 
   // Context Setup
@@ -313,6 +312,10 @@ std::vector<int64_t> encryptedRobertsCrossPorcupine(
   // return add(c4, c7)
   seal::Ciphertext result_ctxt;
   evaluator.add(c4, c7, result_ctxt);
+
+  // Items don't end up in the same place, so tho fix that this rotation was added
+  // TODO: Should this be measured?
+  evaluator.rotate_rows_inplace(result_ctxt, -img_size, galoisKeys);
   timer.stopTimer(compTimer);
 
   // Decrypt & Return result
