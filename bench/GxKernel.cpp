@@ -328,14 +328,14 @@ std::vector<int64_t> encryptedBatchedGxKernelPorcupine(
   auto compTimer = timer.startTimer();
   // Ciphertext c1 = rotate(c0, w)
   seal::Ciphertext c1;
-  evaluator.rotate_rows(img_ctxt, img_size, galoisKeys, c1); // img_ctxt == c0
+  evaluator.rotate_rows(img_ctxt, -1, galoisKeys, c1); // img_ctxt == c0
   // Ciphertext c2 = add(c0, c1)
   seal::Ciphertext c2;
   evaluator.add(img_ctxt, c1, c2);
   // evaluator.add(img_ctxt, c1, c1); // c1 == c2
   // Ciphertext c3 = rotate(c2, -w)
   seal::Ciphertext c3;
-  evaluator.rotate_rows(c2, -1 * img_size, galoisKeys, c3);
+  evaluator.rotate_rows(c2, 1, galoisKeys, c3);
   // evaluator.rotate_rows(c1, -1 * img_size, galoisKeys, img_ctxt); // img_ctxt == c3
   // Ciphertext c4 = add(c2, c3)
   seal::Ciphertext c4;
@@ -343,11 +343,11 @@ std::vector<int64_t> encryptedBatchedGxKernelPorcupine(
   // evaluator.add(c1, img_ctxt, c1); // c1 == c4
   // Ciphertext c5 = rotate(c4, 1)
   seal::Ciphertext c5;
-  evaluator.rotate_rows(c4, 1, galoisKeys, c5);
+  evaluator.rotate_rows(c4, -1 * img_size, galoisKeys, c5);
   // evaluator.rotate_rows(c1, 1, galoisKeys, img_ctxt); // img_ctxt == c5
   // Ciphertext c6 = rotate(c4, -1)
   seal::Ciphertext c6;
-  evaluator.rotate_rows(c4, -1, galoisKeys, c6);
+  evaluator.rotate_rows(c4, img_size, galoisKeys, c6);
   // evaluator.rotate_rows_inplace(c1, -1, galoisKeys); // c1 == c6
   // return sub(c5, c6)
   seal::Ciphertext result_ctxt;

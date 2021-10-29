@@ -1,9 +1,7 @@
 #include <cmath>
 #include <random>
 #include "ast_opt/runtime/RuntimeVisitor.h"
-#include "ast_opt/utilities/Scope.h"
 #include "ast_opt/runtime/DummyCiphertextFactory.h"
-#include "ast_opt/visitor/TypeCheckingVisitor.h"
 #include "ast_opt/parser/Parser.h"
 #include "gtest/gtest.h"
 
@@ -228,19 +226,19 @@ TEST_F(GxKernelTest, FastGxKernel_PorcupineEncryptedGxKernel_Equivalence) { /* N
   size_t img_size = std::sqrt(poly_modulus_degree / 2);
   std::vector<int> img;
   GxKernelTest::getInputMatrix(img_size, img);
-  std::cout << "img:" << std::endl;
-  printMatrix(img_size, img);
+  // std::cout << "img:" << std::endl;
+  // printMatrix(img_size, img);
 
   MultiTimer dummy = MultiTimer();
   auto encrypted = encryptedBatchedGxKernelPorcupine(dummy, img, poly_modulus_degree);
   encrypted.resize(img.size());
   std::vector<int> enc(begin(encrypted), end(encrypted));
-  std::cout << "encrypted:" << std::endl;
-  printMatrix(img_size, enc);
+  // std::cout << "encrypted:" << std::endl;
+  // printMatrix(img_size, enc);
 
   auto fast = fastGxKernel(img);
-  std::cout << "fast:" << std::endl;
-  printMatrix(img_size, fast);
+  // std::cout << "fast:" << std::endl;
+  // printMatrix(img_size, fast);
 
   EXPECT_EQ(fast, enc);
 }
