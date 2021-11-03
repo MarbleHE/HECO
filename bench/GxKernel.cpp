@@ -132,7 +132,6 @@ std::vector<int> encryptedNaiveGxKernel(
     encoder.decode(tmp, tmp_vec);
     result[i] = (int) tmp_vec[0];
   }
-  std::cout << std::endl;
   timer.stopTimer(decTimer);
   return result;
 }

@@ -7,6 +7,11 @@
 #include "ast_opt/parser/Parser.h"
 #include "gtest/gtest.h"
 
+#ifdef HAVE_SEAL_BFV
+#include "../bench/MultiTimer.h"
+#include "../bench/GyKernel.h"
+#endif
+
 /// Original, plain C++ program for a naive Gy Kernel
 /// This uses a 3x3 Kernel and applies it by sliding across the 2D image
 ///        | +1  +2 +1 |
@@ -167,9 +172,9 @@ class GyKernelTest : public ::testing::Test {  /* NOLINT (predictable sequence e
 
   void printMatrix(size_t size, std::vector<int> &matrix) {
     for (int64_t row = (int64_t) size - 1; row >= 0; --row) {
-      std::cout << matrix.at(0*size + row);
+      std::cout << std::setw(8) << matrix.at(0*size + row);
       for (size_t col = 1; col < size; ++col) {
-        std::cout << "\t" << matrix.at(col*size + row);
+        std::cout << std::setw(8) << matrix.at(col*size + row);
       }
       std::cout << std::endl;
     }
@@ -179,7 +184,7 @@ class GyKernelTest : public ::testing::Test {  /* NOLINT (predictable sequence e
 /// Test to ensure that naiveGyKernel and fastGyKernel actually compute the same thing!
 TEST_F(GyKernelTest, NaiveGyKernel_FastGyKernel_Equivalence) {  /* NOLINT */
 
-  size_t size = 4;
+  size_t size = 16;
   std::vector<int> img;
   GyKernelTest::getInputMatrix(size, img);
   //std::cout << "img:" << std::endl;
@@ -195,6 +200,28 @@ TEST_F(GyKernelTest, NaiveGyKernel_FastGyKernel_Equivalence) {  /* NOLINT */
 
   EXPECT_EQ(fast, naive);
 }
+
+#ifdef HAVE_SEAL_BFV
+TEST_F(GyKernelTest, NaiveEnc_FastClear_Equivalence) { /* NOLINT */
+  size_t poly_modulus_degree = 2 << 12;
+  size_t img_size = 16;
+  std::vector<int> img;
+  GyKernelTest::getInputMatrix(img_size, img);
+  // std::cout << "img:" << std::endl;
+  // printMatrix(img_size, img);
+
+  MultiTimer dummy = MultiTimer();
+  auto encrypted = encryptedNaiveGyKernel(dummy, img, poly_modulus_degree);
+  // std::cout << "encrypted:" << std::endl;
+  // printMatrix(img_size, encrypted);
+
+  auto ref = fastGyKernel(img);
+  // std::cout << "fast:" << std::endl;
+  // printMatrix(img_size, ref);
+
+  EXPECT_EQ(encrypted, ref);
+}
+#endif
 
 TEST_F(GyKernelTest, clearTextEvaluationNaive) { /* NOLINT */
   /// program's input

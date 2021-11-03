@@ -75,6 +75,7 @@ set(TEST_FILES
         ../bench/HammingDistance.cpp
         ../bench/RobertsCross.cpp
         ../bench/GxKernel.cpp
+        ../bench/GyKernel.cpp
         ../bench/QuadraticPolynomial.cpp
         ../bench/LinearPolynomial.cpp
         ../bench/LaplaceSharpening.cpp
