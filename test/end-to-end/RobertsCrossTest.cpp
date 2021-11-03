@@ -146,20 +146,20 @@ TEST_F(RobertsCrossKernelTest, Clear_EncryptedPorcupine_Equivalence) { /* NOLINT
   size_t img_size = std::sqrt(poly_modulus_degree / 2);
   std::vector<int> img;
   getInputMatrix(img_size, img);
-  std::cout << "img:" << std::endl;
-  printMatrix(img_size, img);
+  // std::cout << "img:" << std::endl;
+  // printMatrix(img_size, img);
 
   MultiTimer dummy = MultiTimer();
   auto result = encryptedRobertsCrossPorcupine(dummy, img, poly_modulus_degree);
   result.resize(img.size());
   std::vector<int> enc(begin(result), end(result));
-  std::cout << "encrypted:" << std::endl;
-  printMatrix(img_size, enc);
+  // std::cout << "encrypted:" << std::endl;
+  // printMatrix(img_size, enc);
 
   // Compare to reference cleartext implementation
   auto ref = naiveRobertsCrossKernel(img);
-  std::cout << "ref:" << std::endl;
-  printMatrix(img_size, ref);
+  // std::cout << "ref:" << std::endl;
+  // printMatrix(img_size, ref);
   EXPECT_EQ(enc, ref);
 }
 
@@ -168,20 +168,20 @@ TEST_F(RobertsCrossKernelTest, Clear_EncryptedBatched_Equivalence) { /* NOLINT *
   size_t img_size = std::sqrt(poly_modulus_degree / 2);
   std::vector<int> img;
   getInputMatrix(img_size, img);
-  std::cout << "img:" << std::endl;
-  printMatrix(img_size, img);
+  // std::cout << "img:" << std::endl;
+  // printMatrix(img_size, img);
 
   MultiTimer dummy = MultiTimer();
   auto result = encryptedBatchedRobertsCross(dummy, img, poly_modulus_degree);
   result.resize(img.size());
   std::vector<int> enc(begin(result), end(result));
-  std::cout << "encrypted:" << std::endl;
-  printMatrix(img_size, enc);
+  // std::cout << "encrypted:" << std::endl;
+  // printMatrix(img_size, enc);
 
   // Compare to reference cleartext implementation
   auto ref = naiveRobertsCrossKernel(img);
-  std::cout << "naive:" << std::endl;
-  printMatrix(img_size, ref);
+  // std::cout << "naive:" << std::endl;
+  // printMatrix(img_size, ref);
   EXPECT_EQ(enc, ref);
 }
 

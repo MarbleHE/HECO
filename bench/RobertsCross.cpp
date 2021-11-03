@@ -100,10 +100,10 @@ std::vector<int64_t> encryptedBatchedRobertsCross(
   //   std::endl;
   // }
 
-  /// Rotations for 3x3 Kernel
+  /// Rotations for 2x2 Kernel
   /// Offsets correspond to the different kernel positions
   int img_size = (int)std::sqrt(img.size());
-  std::vector<int> rotations = { 1,  img_size + 1, 0, img_size};
+  std::vector<int> rotations = { 0,  -img_size + 1, 1, -img_size};
   // Context Setup
   seal::EncryptionParameters parameters(seal::scheme_type::bfv);
   parameters.set_poly_modulus_degree(poly_modulus_degree);
@@ -128,8 +128,8 @@ std::vector<int64_t> encryptedBatchedRobertsCross(
   seal::Evaluator evaluator(context);
 
   // Create Weight Matrices
-  std::vector<int> weight_matrix1 = { 1, 0, 0, 0, -1, 0, 0, 0, 0 };
-  std::vector<int> weight_matrix2 = { 0, 1, 0, -1, 0, 0, 0, 0, 0 };
+  std::vector<int> weight_matrix1 = { -1, 1 };
+  std::vector<int> weight_matrix2 = { 1, -1 };
   timer.stopTimer(keygenTimer);
 
   // Encode & Encrypt the image
@@ -165,8 +165,8 @@ std::vector<int64_t> encryptedBatchedRobertsCross(
   // FIRST KERNEL:
 
   // Create rotated copies of the image and multiply by weights
-  std::vector<seal::Ciphertext> rotated_img_ctxts(9, seal::Ciphertext(context));
-  for (size_t i = 0; i < rotations.size(); ++i)
+  std::vector<seal::Ciphertext> rotated_img_ctxts(2, seal::Ciphertext(context));
+  for (size_t i = 0; i < 2; ++i)
   {
     evaluator.rotate_rows(img_ctxt, rotations[i], galoisKeys, rotated_img_ctxts[i]);
 
@@ -192,9 +192,9 @@ std::vector<int64_t> encryptedBatchedRobertsCross(
   // SECOND KERNEL:
 
   // Create rotated copies of the intermediate result and multiply by weights
-  for (size_t i = 0; i < rotations.size(); ++i)
+  for (size_t i = 0; i < 2; ++i)
   {
-    evaluator.rotate_rows(img_ctxt, rotations[i], galoisKeys, rotated_img_ctxts[i]);
+    evaluator.rotate_rows(img_ctxt, rotations[i + 2], galoisKeys, rotated_img_ctxts[i]);
 
     if (encrypt_weights)
     {
@@ -313,7 +313,7 @@ std::vector<int64_t> encryptedRobertsCrossPorcupine(
   seal::Ciphertext result_ctxt;
   evaluator.add(c4, c7, result_ctxt);
 
-  // Items don't end up in the same place, so tho fix that this rotation was added
+  // Items don't end up in the same place, so th fix that this rotation was added
   // TODO: Should this be measured?
   evaluator.rotate_rows_inplace(result_ctxt, -img_size, galoisKeys);
   timer.stopTimer(compTimer);
