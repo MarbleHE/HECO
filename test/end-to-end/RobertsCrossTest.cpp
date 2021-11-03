@@ -7,14 +7,13 @@
 #endif
 
 /// Original, plain C++ program for a naive RobertsCross Kernel
-/// This uses two 2x2 Kernels, which we pad to 3x3 kernels for ease of implementation
-///         |  1   0  0 |
-///   w1 =  |  0  -1  0 |
-///         |  0   0  0 |
+/// This uses two 2x2 Kernels
+///         | +1   0  |
+///   w1 =  |  0  -1  |
 ///
-///         |  0  +1  0 |
-///   w2 =  | -1   0  0 |
-///         |  0   0  0 |
+///         |  0  +1  |
+///   w2 =  | -1   0  |
+///
 /// This uses wrap-around padding
 /// and computes sqt((w1 * I)^2 + (w2 * I)^2) where * stands for convolution
 ///
@@ -29,14 +28,14 @@ std::vector<int> naiveRobertsCrossKernel(const std::vector<int> &img) {
   // Compute first Kernel
 
   // Encoded same as images
-  std::vector<std::vector<int>> weightMatrix1 = {{0, 0, 1}, {0, -1, 0}, {0, 0, 0}};
+  std::vector<std::vector<int>> weightMatrix1 = {{0, 1}, {-1, 0}};
   std::vector<int> img2(img.begin(), img.end());
   for (int x = 0; x < imgSize; ++x) {
     for (int y = 0; y < imgSize; ++y) {
       int value = 0;
-      for (int j = -1; j < 2; ++j) {
-        for (int i = -1; i < 2; ++i) {
-          value = value + weightMatrix1.at(i + 1).at(j + 1)
+      for (int j = 0; j < 2; ++j) {
+        for (int i = -1; i < 1; ++i) {
+          value = value + weightMatrix1.at(i + 1).at(j)
               *img.at(((x + i)*imgSize + (y + j))%img.size());
         }
       }
@@ -47,14 +46,14 @@ std::vector<int> naiveRobertsCrossKernel(const std::vector<int> &img) {
   // Compute Second Kernel
 
   // Encoded same as images
-  std::vector<std::vector<int>> weightMatrix2 = {{0, -1, 0}, {0, 0, 1}, {0, 0, 0}};
+  std::vector<std::vector<int>> weightMatrix2 = {{-1, 0}, {0, 1}};
   std::vector<int> img3(img.begin(), img.end());
   for (int x = 0; x < imgSize; ++x) {
     for (int y = 0; y < imgSize; ++y) {
       int value = 0;
-      for (int j = -1; j < 2; ++j) {
-        for (int i = -1; i < 2; ++i) {
-          value = value + weightMatrix2.at(i + 1).at(j + 1)
+      for (int j = 0; j < 2; ++j) {
+        for (int i = -1; i < 1; ++i) {
+          value = value + weightMatrix2.at(i + 1).at(j)
               *img.at(((x + i)*imgSize + (y + j))%img.size());
         }
       }
@@ -146,20 +145,20 @@ TEST_F(RobertsCrossKernelTest, Clear_EncryptedPorcupine_Equivalence) { /* NOLINT
   size_t img_size = std::sqrt(poly_modulus_degree / 2);
   std::vector<int> img;
   getInputMatrix(img_size, img);
-  // std::cout << "img:" << std::endl;
-  // printMatrix(img_size, img);
+  std::cout << "img:" << std::endl;
+  printMatrix(img_size, img);
 
   MultiTimer dummy = MultiTimer();
   auto result = encryptedRobertsCrossPorcupine(dummy, img, poly_modulus_degree);
   result.resize(img.size());
   std::vector<int> enc(begin(result), end(result));
-  // std::cout << "encrypted:" << std::endl;
-  // printMatrix(img_size, enc);
+  std::cout << "encrypted:" << std::endl;
+  printMatrix(img_size, enc);
 
   // Compare to reference cleartext implementation
   auto ref = naiveRobertsCrossKernel(img);
-  // std::cout << "ref:" << std::endl;
-  // printMatrix(img_size, ref);
+  std::cout << "ref:" << std::endl;
+  printMatrix(img_size, ref);
   EXPECT_EQ(enc, ref);
 }
 
