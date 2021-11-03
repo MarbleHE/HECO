@@ -280,7 +280,6 @@ std::vector<int64_t> encryptedBatchedGxKernel(
 std::vector<int64_t> encryptedBatchedGxKernelPorcupine(
         MultiTimer &timer, const std::vector<int> &img, size_t poly_modulus_degree)
 {
-  // TODO: Doesn't work as expected
   auto keygenTimer = timer.startTimer();
 
   // Input Check

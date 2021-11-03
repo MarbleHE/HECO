@@ -221,6 +221,28 @@ TEST_F(GyKernelTest, NaiveEnc_FastClear_Equivalence) { /* NOLINT */
 
   EXPECT_EQ(encrypted, ref);
 }
+
+TEST_F(GyKernelTest, PorcupineEnc_FastClear_Equivalence) { /* NOLINT */
+  size_t poly_modulus_degree = 2 << 12;
+  size_t img_size = std::sqrt(poly_modulus_degree / 2);
+  std::vector<int> img;
+  GyKernelTest::getInputMatrix(img_size, img);
+  // std::cout << "img:" << std::endl;
+  // printMatrix(img_size, img);
+
+  MultiTimer dummy = MultiTimer();
+  auto encrypted = encryptedGyKernelPorcupine(dummy, img, poly_modulus_degree);
+  encrypted.resize(img.size());
+  std::vector<int> enc(begin(encrypted), end(encrypted));
+  // std::cout << "encrypted:" << std::endl;
+  // printMatrix(img_size, encrypted);
+
+  auto ref = fastGyKernel(img);
+  // std::cout << "fast:" << std::endl;
+  // printMatrix(img_size, ref);
+
+  EXPECT_EQ(enc, ref);
+}
 #endif
 
 TEST_F(GyKernelTest, clearTextEvaluationNaive) { /* NOLINT */

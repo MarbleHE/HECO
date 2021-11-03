@@ -28,7 +28,7 @@ std::vector<int64_t> encryptedBatchedGyKernel(
 /// \param img Pixel (x,y) = (column, row) should be at position x*imgSize + y
 /// \param poly_modulus_degree FHE parameter, degree n of the polynomials
 /// \return transformed image
-std::vector<int64_t> encryptedBatchedGyKernelPorcupine(
+std::vector<int64_t> encryptedGyKernelPorcupine(
         MultiTimer &timer, const std::vector<int> &img, size_t poly_modulus_degree);
 
 /// Encrypted GxKernel, using vectors of ciphertexts.
