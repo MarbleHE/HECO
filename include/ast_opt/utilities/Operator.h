@@ -28,6 +28,7 @@ enum UnaryOp : unsigned char {
 };
 
 // generate a typedef for this std::variant to ensure that always the same Enums order is used
+// Keep opStringArrays in Operator.cpp synchronized with OperatorVariant.
 typedef std::variant<ArithmeticOp, LogicalOp, UnaryOp> OperatorVariant;
 
 std::string toString(OperatorVariant opVar);
@@ -38,6 +39,11 @@ std::string toString(LogicalOp logop);
 
 std::string toString(UnaryOp uop);
 
+// Forward declaration
+class Operator;
+
+// Translate string (generated with toString from Operation) back to an Operation.
+Operator fromStringToOperatorVariant(std::string opString);
 
 class Operator {
  private:
@@ -46,6 +52,10 @@ class Operator {
   friend int comparePrecedence(const Operator &op1, const Operator &op2);
 
  public:
+  static inline const std::string binaryOpStrings[] = {"+", "-", "*", "/", "%", "+++", "---", "***"};
+  static inline const std::string logicalOpStrings[] = {"&&", "||", "<", "<=", ">", ">=", "==", "!=", "&", "^", "|"};
+  static inline const std::string unaryOpStrings[] = {"!", "~"};
+
   explicit Operator(OperatorVariant op);
 
   [[nodiscard]] bool isRightAssociative() const;

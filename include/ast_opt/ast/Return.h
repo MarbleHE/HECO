@@ -68,6 +68,10 @@ class Return : public AbstractStatement {
   /// \param newValue new value to set
   void setValue(std::unique_ptr<AbstractExpression> newValue);
 
+  /// Create a Return node from a nlohmann::json representation of this node.
+  /// \return unique_ptr to a new Return node
+  static std::unique_ptr<Return> fromJson(nlohmann::json j);
+
   ///////////////////////////////////////////////
   ////////// AbstractNode Interface /////////////
   ///////////////////////////////////////////////

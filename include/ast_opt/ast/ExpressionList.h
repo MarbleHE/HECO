@@ -93,6 +93,10 @@ class ExpressionList : public AbstractExpression {
   /// Removes any potential nullptrs from the expressions vector
   void removeNullExpressions();
 
+  /// Create an ExpressionList node from a nlohmann::json representation of this node.
+  /// \return unique_ptr to a new ExpressionList node
+  static std::unique_ptr<ExpressionList> fromJson(nlohmann::json j);
+
   ///////////////////////////////////////////////
   ////////// AbstractNode Interface /////////////
   ///////////////////////////////////////////////

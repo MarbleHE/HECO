@@ -26,8 +26,10 @@
 #include "ast_opt/parser/PushBackStream.h"
 #include "../../test/parser/ParserTestHelpers.h"
 #include "ast_opt/visitor/ParentSettingVisitor.h"
+#include "ast_opt/utilities/NodeUtils.h"
 
 using std::to_string;
+using json = nlohmann::json;
 
 void addParsedNode(AbstractNode *parsedNode) {
   parsedNodes.push_back(std::ref(*parsedNode));
@@ -60,6 +62,102 @@ std::unique_ptr<AbstractNode> Parser::parse(std::string s,
   auto result = parse(std::move(s));
   createdNodesList = std::move(parsedNodes);
   return result;
+}
+
+std::unique_ptr<AbstractNode> Parser::parseJson(std::string s) {
+  return Parser::parseJson(json::parse(s));
+}
+
+std::unique_ptr<AbstractNode> Parser::parseJson(json j) {
+  // If the parsed JSON does not contain any values, return a null pointer instead of an abstract Node.
+  // There are valid cases for this, e.g., for a function without inputs, the input AST is empty.
+  if (j.empty())
+    throw stork::runtime_error("Empty abstract node encountered.");
+
+  std::string type = j["type"].get<std::string>();
+
+  if (NodeUtils::isAbstractStatement(type))
+    return Parser::parseJsonStatement(j);
+  else if (NodeUtils::isAbstractTarget(type))
+    return Parser::parseJsonTarget(j);
+  else if (NodeUtils::isAbstractExpression(type))
+    return Parser::parseJsonExpression(j);
+  else
+    throw stork::runtime_error("Unsupported type '" + type + "' in JSON object.");
+}
+
+std::unique_ptr<AbstractTarget> Parser::parseJsonTarget(json j) {
+  std::string type = j["type"].get<std::string>();
+
+  switch (NodeUtils::stringToEnum(type)) {
+    case NodeTypeVariable:
+      return Variable::fromJson(j);
+    case NodeTypeIndexAccess:
+      return IndexAccess::fromJson(j);
+    case NodeTypeFunctionParameter:
+      throw stork::runtime_error("Unsupported AbstractTarget: '" + type + "' is not yet implemented.");
+    default:
+      throw stork::runtime_error("Unsupported type: '" + type + "' is not an AbstractTarget.");
+  }
+}
+
+std::unique_ptr<AbstractExpression> Parser::parseJsonExpression(json j) {
+  std::string type = j["type"].get<std::string>();
+
+  switch (NodeUtils::stringToEnum(type)) {
+    case NodeTypeBinaryExpression:
+      return BinaryExpression::fromJson(j);
+    case NodeTypeExpressionList:
+      return ExpressionList::fromJson(j);
+    case NodeTypeLiteralBool:
+      return LiteralBool::fromJson(j);
+    case NodeTypeLiteralChar:
+      return LiteralChar::fromJson(j);
+    case NodeTypeLiteralInt:
+      return LiteralInt::fromJson(j);
+    case NodeTypeLiteralFloat:
+      return LiteralFloat::fromJson(j);
+    case NodeTypeLiteralDouble:
+      return LiteralDouble::fromJson(j);
+    case NodeTypeLiteralString:
+      return LiteralString::fromJson(j);
+    case NodeTypeOperatorExpression:
+    case NodeTypeUnaryExpression:
+    case NodeTypeCall:
+    case NodeTypeTernaryOperator:
+      throw stork::runtime_error("Unsupported AbstractExpression: '" + type + "' is not yet implemented.");
+    default:
+      // AbstractTarget is a subclass of AbstractExpression
+      try {
+        return Parser::parseJsonTarget(j);
+      }
+      catch (stork::runtime_error &) {
+        // If it's not an abstract target, then it's not an abstract expression,
+        // as we checked all other expressions before.
+        throw stork::runtime_error("Unsupported type: '" + type + "' is not an AbstractExpression.");
+      }
+  }
+}
+
+std::unique_ptr<AbstractStatement> Parser::parseJsonStatement(json j) {
+  std::string type = j["type"].get<std::string>();
+
+  switch (NodeUtils::stringToEnum(type)) {
+    case NodeTypeAssignment:
+      return Assignment::fromJson(j);
+    case NodeTypeBlock:
+      return Block::fromJson(j);
+    case NodeTypeReturn:
+      return Return::fromJson(j);
+    case NodeTypeVariableDeclaration:
+      return VariableDeclaration::fromJson(j);
+    case NodeTypeFor:
+      return For::fromJson(j);
+    case NodeTypeIf:
+      throw stork::runtime_error("Unsupported AbstractStatement: '" + type + "' is not yet implemented.");
+    default:
+      throw stork::runtime_error("Unsupported type: '" + type + "' is not an AbstractStatement.");
+  }
 }
 
 AbstractStatement *Parser::parseStatement(stork::tokens_iterator &it, bool gobbleTrailingSemicolon) {

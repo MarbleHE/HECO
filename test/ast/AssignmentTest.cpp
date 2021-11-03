@@ -1,7 +1,9 @@
 #include "ast_opt/ast/Literal.h"
 #include "ast_opt/ast/Variable.h"
 #include "ast_opt/ast/Assignment.h"
+#include "ast_opt/parser/Parser.h"
 #include "gtest/gtest.h"
+#include "../ASTComparison.h"
 
 
 TEST(AssignmentTest, values_ValuesGivenInCtorAreRetrievable) {
@@ -143,4 +145,26 @@ TEST(AssignmentTest, JsonOutputTest) { /* NOLINT */
             }
             }};
   EXPECT_EQ(assignment.toJson(), j);
+}
+
+TEST(AssignmentTest, JsonInputTest) { /* NOLINT */
+  std::string identifier = "myCustomVar";
+  int val = 2;
+  auto assignment_expected = Assignment(std::make_unique<Variable>(identifier), std::make_unique<LiteralInt>(val));
+
+  std::string assignment_json = R""""({
+    "type": "Assignment",
+    "value": {
+      "type": "LiteralInt",
+      "value": 2
+    },
+    "target": {
+      "identifier": "myCustomVar",
+      "type": "Variable"
+    }
+  })"""";
+
+  auto assignment_parsed = Parser::parseJson(assignment_json);
+
+  ASSERT_TRUE(compareAST(*assignment_parsed, assignment_expected));
 }

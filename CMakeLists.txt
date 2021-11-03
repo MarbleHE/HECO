@@ -10,6 +10,16 @@ if (MSVC)
     cmake_policy(SET CMP0091 NEW)
 endif ()
 
+# Set to test the python frontend. On by default.
+if(NOT PYTHON_FRONTEND_DEV)
+    set(PYTHON_FRONTEND_DEV true)
+endif()
+
+# Set to build the python frontend (installing pybind11 and building the wrapper). On by default.
+if(NOT PYTHON_FRONTEND_BUILD)
+    set(PYTHON_FRONTEND_BUILD true)
+endif()
+
 project(ast_optimizer
         VERSION 0.1
         DESCRIPTION "Optimizer for Fully Homomorphic Encryption (FHE) working on an AST-like (Abstract Syntax Tree) representation of a program"
@@ -99,6 +109,7 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/ast/UnaryExpression.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/Variable.cpp
         ${ast_optimizer_SOURCE_DIR}/src/ast/VariableDeclaration.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/compiler/Compiler.cpp
         ${ast_optimizer_SOURCE_DIR}/src/parser/Errors.cpp
         ${ast_optimizer_SOURCE_DIR}/src/parser/File.cpp
         ${ast_optimizer_SOURCE_DIR}/src/parser/Parser.cpp
@@ -113,6 +124,7 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/utilities/BatchingConstraint.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/ComplexValue.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/Datatype.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/utilities/NodeUtils.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/Operator.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/PlainVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/utilities/Scope.cpp
@@ -135,6 +147,7 @@ set(HEADER_ONLY_SOURCES
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractExpression.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractStatement.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractTarget.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/Ast.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/AbstractCiphertext.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/AbstractCiphertextFactory.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/AbstractNoiseMeasuringCiphertext.h
@@ -142,8 +155,7 @@ set(HEADER_ONLY_SOURCES
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/Cleartext.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/IVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/VariableMap.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/Visitor.h
-        )
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/Visitor.h)
 
 # This contains the headers that developers that want to link directly against ABC might need to have access to
 # These are the headers that are installed when ABC is installed as a system-wide library
@@ -168,6 +180,7 @@ set(PUBLIC_HEADERS
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/UnaryExpression.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/Variable.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/VariableDeclaration.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/compiler/Compiler.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/parser/Errors.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/parser/Parser.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/parser/PushBackStream.h
@@ -181,6 +194,7 @@ set(PUBLIC_HEADERS
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/BatchingConstraint.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/ComplexValue.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/Datatype.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/NodeUtils.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/IVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/Operator.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/PlainVisitor.h
@@ -206,6 +220,7 @@ target_include_directories(ast_opt PUBLIC
         $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>)
 set_target_properties(ast_opt PROPERTIES PUBLIC_HEADER "${PUBLIC_HEADERS}")
+set_target_properties(ast_opt PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 target_compile_features(ast_opt PUBLIC cxx_std_17)
 
 if (SEAL_FOUND)
@@ -251,6 +266,13 @@ install(EXPORT ast_optTargets
         NAMESPACE ast_opt::
         DESTINATION lib/cmake/ast_opt)
 
+# Install pyabc package (for dev)
+find_package (Python3 COMPONENTS Interpreter Development)
+
+if(NOT Python3_Interpreter_FOUND)
+    message(WARNING "The ABC python frontend requires Python 3, but no installation
+        was found. Skipping frontend building...")
+endif()
 
 ##############################
 # TARGET: ast_demo
@@ -280,3 +302,28 @@ endif ()
 # A collection of benchmarks
 ##############################
 add_subdirectory(bench EXCLUDE_FROM_ALL)
+
+
+####################################################################################
+# Python Frontend
+#
+# Use pybind11 as C++ wrapper for the Python frontend
+####################################################################################
+
+if(PYTHON_FRONTEND_BUILD)
+    include(FetchContent)
+    set(JSON_BuildTests OFF CACHE INTERNAL "")
+    set(FETCHCONTENT_UPDATES_DISCONNECTED ON)
+    FetchContent_Declare(
+            pybind11
+            GIT_REPOSITORY https://github.com/pybind/pybind11.git
+            GIT_TAG v2.7.1)
+
+    FetchContent_GetProperties(pybind11)
+    if(NOT pybind11_POPULATED)
+        FetchContent_Populate(pybind11)
+        add_subdirectory(${pybind11_SOURCE_DIR} ${pybind11_BINARY_DIR})
+    endif()
+    add_subdirectory(python)
+endif()
+

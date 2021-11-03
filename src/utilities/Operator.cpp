@@ -1,18 +1,16 @@
+#include <ast_opt/parser/Errors.h>
 #include "ast_opt/utilities/Operator.h"
 
 std::string toString(ArithmeticOp bop) {
-  static const std::string binaryOpStrings[] = {"+", "-", "*", "/", "%", "+++", "---", "***"};
-  return binaryOpStrings[bop];
+  return Operator::binaryOpStrings[bop];
 }
 
 std::string toString(LogicalOp logop) {
-  static const std::string logicalOpStrings[] = {"&&", "||", "<", "<=", ">", ">=", "==", "!=", "&", "^", "|"};
-  return logicalOpStrings[logop];
+  return Operator::logicalOpStrings[logop];
 }
 
 std::string toString(UnaryOp uop) {
-  static const std::string unaryOpStrings[] = {"!", "~"};
-  return unaryOpStrings[uop];
+  return Operator::unaryOpStrings[uop];
 }
 
 std::string toString(OperatorVariant opVar) {
@@ -22,6 +20,32 @@ std::string toString(OperatorVariant opVar) {
     case 2:return toString(std::get<UnaryOp>(opVar));
     default:return "";
   }
+}
+
+Operator fromStringToOperatorVariant(std::string targetOpString) {
+  // XXX: this function could have a nicer implementation.
+
+  // Searches an operation (given as string) in an array opStrings of opStringSize operations.
+  // If found, it sets idx to the index of the operation in the array and returns true. Otherwise, returns false.
+  auto findOp = [targetOpString](auto &opStrings, size_t opStringSize, int &idx) {
+    for (int i{ 0 }; i < static_cast<int>(opStringSize); ++i) {
+      if (opStrings[i] == targetOpString) {
+        idx = i;
+        return true;
+      }
+    }
+    return false;
+  };
+
+  int idx;
+  if (findOp(Operator::binaryOpStrings, std::size(Operator::binaryOpStrings), idx))
+    return Operator(static_cast<ArithmeticOp>(idx));
+  if (findOp(Operator::logicalOpStrings, std::size(Operator::logicalOpStrings), idx))
+    return Operator(static_cast<LogicalOp>(idx));
+  if (findOp(Operator::unaryOpStrings, std::size(Operator::unaryOpStrings), idx))
+    return Operator(static_cast<UnaryOp>(idx));
+
+  throw stork::runtime_error("Failed to parse operator string '" + targetOpString + "' to Operator!");
 }
 
 Operator::Operator(OperatorVariant op) : op(op) {}

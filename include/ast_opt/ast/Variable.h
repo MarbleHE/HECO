@@ -49,6 +49,10 @@ class Variable : public AbstractTarget {
 
   [[nodiscard]] std::string getIdentifier() const;
 
+  /// Create a Variable node from a nlohmann::json representation of this node.
+  /// \return unique_ptr to a new Variable node
+  static std::unique_ptr<Variable> fromJson(nlohmann::json j);
+
   ///////////////////////////////////////////////
   ////////// AbstractNode Interface /////////////
   ///////////////////////////////////////////////

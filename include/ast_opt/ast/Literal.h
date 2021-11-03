@@ -118,6 +118,10 @@ class Literal : public AbstractExpression {
 #include "ast_opt/utilities/warning_hidingNonVirtualFunction_epilogue.h"
 
 
+  static std::unique_ptr<Literal<T>> fromJson(nlohmann::json j) {
+    return std::make_unique<Literal<T>>(j["value"].get<T>());
+  }
+
 
   ///////////////////////////////////////////////
   ////////// AbstractNode Interface /////////////

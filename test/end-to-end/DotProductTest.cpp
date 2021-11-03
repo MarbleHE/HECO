@@ -22,7 +22,7 @@ int dotProduct(const std::vector<int> &x, const std::vector<int> &y) {
   return sum;
 }
 
-TEST(DotProductTest, clearTextEvaluation) { /* NOLINT */
+TEST(CompileDotProductTest, clearTextEvaluation) { /* NOLINT */
 // program's input
   const char *inputs = R""""(
       int x = {43,  1,   1,   1,  22, 11, 425,  0, 1, 7};

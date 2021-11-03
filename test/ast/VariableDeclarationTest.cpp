@@ -1,3 +1,5 @@
+#include <ast_opt/parser/Parser.h>
+#include <test/ASTComparison.h>
 #include "ast_opt/ast/Literal.h"
 #include "ast_opt/ast/Variable.h"
 #include "ast_opt/ast/VariableDeclaration.h"
@@ -153,4 +155,30 @@ TEST(VariableDeclarationTest, JsonOutputTest) { /* NOLINT */
       }
   };
   EXPECT_EQ(var->toJson(), j);
+}
+
+TEST(VariableDeclarationTest, JsonInputTest) { /* NOLINT */
+  auto identifier = "foo";
+  auto datatype = Datatype(Type::INT);
+  int initializer = 3;
+  VariableDeclaration expected(datatype,
+                              std::make_unique<Variable>(identifier),
+                              std::make_unique<LiteralInt>(initializer));
+
+  std::string json = R""""({
+    "datatype": "int",
+    "target": {
+      "identifier": "foo",
+      "type": "Variable"
+    },
+    "type": "VariableDeclaration",
+    "value": {
+      "type": "LiteralInt",
+      "value": 3
+    }
+  })"""";
+
+  auto parsed = Parser::parseJson(json);
+
+  ASSERT_TRUE(compareAST(*parsed, expected));
 }

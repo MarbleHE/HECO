@@ -1,3 +1,4 @@
+#include <ast_opt/parser/Parser.h>
 #include "ast_opt/ast/IndexAccess.h"
 #include "ast_opt/utilities/IVisitor.h"
 
@@ -119,6 +120,12 @@ nlohmann::json IndexAccess::toJson() const {
   if (hasTarget()) j["target"] = getTarget().toJson();
   if (hasIndex()) j["index"] = getIndex().toJson();
   return j;
+}
+
+std::unique_ptr<IndexAccess> IndexAccess::fromJson(nlohmann::json j) {
+  auto target = Parser::parseJsonTarget(j["target"]);
+  auto index = Parser::parseJsonExpression(j["index"]);
+  return std::make_unique<IndexAccess>(std::move(target), std::move(index));
 }
 
 std::string IndexAccess::toString(bool printChildren) const {

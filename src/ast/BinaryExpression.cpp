@@ -1,4 +1,5 @@
 #include <vector>
+#include <ast_opt/parser/Parser.h>
 #include "ast_opt/ast/BinaryExpression.h"
 #include "ast_opt/utilities/IVisitor.h"
 
@@ -140,6 +141,22 @@ nlohmann::json BinaryExpression::toJson() const {
   if (hasRight()) j["right"] = getRight().toJson();
 
   return j;
+}
+
+std::unique_ptr<BinaryExpression> BinaryExpression::fromJson(nlohmann::json j) {
+  // Parse operation
+  auto op = fromStringToOperatorVariant(j["operator"]);
+
+  // Parse operands (if available)
+  std::unique_ptr<AbstractExpression> left, right;
+
+  if (j.find("left") != j.end())
+    left = Parser::parseJsonExpression(j["left"]);
+
+  if (j.find("right") != j.end())
+    right = Parser::parseJsonExpression(j["right"]);
+
+  return std::make_unique<BinaryExpression>(std::move(left), op, std::move(right));
 }
 
 std::string BinaryExpression::toString(bool printChildren) const {

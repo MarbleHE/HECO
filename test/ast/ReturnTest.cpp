@@ -1,3 +1,5 @@
+#include <ast_opt/parser/Parser.h>
+#include <test/ASTComparison.h>
 #include "ast_opt/ast/Literal.h"
 #include "ast_opt/ast/Variable.h"
 #include "ast_opt/ast/Return.h"
@@ -124,4 +126,21 @@ TEST(ReturnTest, JsonOutputTest) { /* NOLINT */
       }
   };
   EXPECT_EQ(r.toJson(), j);
+}
+
+
+TEST(ReturnTest, JsonInputTest) { /* NOLINT */
+  Return expected(std::make_unique<LiteralInt>(3));
+
+  std::string json = R""""({
+    "type": "Return",
+    "value": {
+      "type": "LiteralInt",
+      "value": 3
+    }
+  })"""";
+
+  auto parsed = Parser::parseJson(json);
+
+  ASSERT_TRUE(compareAST(*parsed, expected));
 }

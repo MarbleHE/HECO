@@ -1,4 +1,6 @@
 #include <utility>
+#include <ast_opt/parser/Parser.h>
+#include <ast_opt/parser/Errors.h>
 #include "ast_opt/ast/VariableDeclaration.h"
 #include "ast_opt/utilities/IVisitor.h"
 
@@ -140,6 +142,15 @@ nlohmann::json VariableDeclaration::toJson() const {
     j["value"] = getValue().toJson();
   }
   return j;
+}
+
+std::unique_ptr<VariableDeclaration> VariableDeclaration::fromJson(nlohmann::json j) {
+
+  VariableDeclaration value(Datatype(j["datatype"].get<std::string>()),
+                            Variable::fromJson(j["target"]),
+                            Parser::parseJsonExpression(j["value"]));
+
+  return std::make_unique<VariableDeclaration>(std::move(value));
 }
 
 std::string VariableDeclaration::toString(bool printChildren) const {

@@ -1,3 +1,5 @@
+#include <ast_opt/parser/Parser.h>
+#include <test/ASTComparison.h>
 #include "ast_opt/ast/Variable.h"
 #include "gtest/gtest.h"
 
@@ -79,4 +81,18 @@ TEST(VariableTest, JsonOutputTest) { /* NOLINT */
   nlohmann::json j = {{"type", "Variable"},
             {"identifier", varIdentifier}};
   EXPECT_EQ(var->toJson(), j);
+}
+
+TEST(VariableTest, JsonInputTest) {
+  std::string varIdentifier = "myVar";
+  auto var_expected = Variable(varIdentifier);
+
+  std::string var_json = R""""({
+    "identifier": "myVar",
+    "type": "Variable"
+  })"""";
+
+  auto var_parsed = Parser::parseJson(var_json);
+
+  ASSERT_TRUE(compareAST(*var_parsed, var_expected));
 }

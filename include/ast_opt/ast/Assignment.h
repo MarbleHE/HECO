@@ -100,6 +100,10 @@ class Assignment : public AbstractStatement {
   /// \param newValue new value to set
   void setValue(std::unique_ptr<AbstractExpression> newValue);
 
+  /// Create an Assignment node from a nlohmann::json representation of this node.
+  /// \return unique_ptr to a new Assignment node
+  static std::unique_ptr<Assignment> fromJson(nlohmann::json j);
+
   ///////////////////////////////////////////////
   ////////// AbstractNode Interface /////////////
   ///////////////////////////////////////////////
@@ -111,6 +115,7 @@ class Assignment : public AbstractStatement {
   size_t countChildren() const override;
   nlohmann::json toJson() const override;
   std::string toString(bool printChildren) const override;
+
  protected:
   std::string getNodeType() const override;
 };
