@@ -26,6 +26,18 @@ if (SEAL_FOUND)
     target_compile_definitions(gx-bench PUBLIC -DHAVE_SEAL_BFV)
     target_compile_definitions(gx-bench PUBLIC -DHAVE_SEAL_CKKS)
 
+    ## GY KERNEL ##
+    set(GY_BENCH_FILES
+            GyKernel.cpp
+            GyKernelBench.cpp
+            MultiTimer.cpp
+            )
+    add_executable(gy-bench ${GY_BENCH_FILES})
+    target_include_directories(gy-bench PUBLIC ${SEAL_INCLUDE_DIRS})
+    target_link_libraries(gy-bench PUBLIC SEAL::seal)
+    target_compile_definitions(gy-bench PUBLIC -DHAVE_SEAL_BFV)
+    target_compile_definitions(gy-bench PUBLIC -DHAVE_SEAL_CKKS)
+
     ## HAMMING DISTANCE ##
     set(HAM_BENCH_FILES
             HammingDistance.cpp
