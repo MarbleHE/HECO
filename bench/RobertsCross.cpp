@@ -286,10 +286,10 @@ std::vector<int64_t> encryptedRobertsCrossPorcupine(
   auto compTimer = timer.startTimer();
   // Ciphertext c1 = rotate(c0, w)
   seal::Ciphertext c1;
-  evaluator.rotate_rows(img_ctxt, img_size, galoisKeys, c1);
+  evaluator.rotate_rows(img_ctxt, 1, galoisKeys, c1);
   // Ciphertext c2 = rotate(c0, 1)
   seal::Ciphertext c2;
-  evaluator.rotate_rows(img_ctxt, 1, galoisKeys, c2);
+  evaluator.rotate_rows(img_ctxt, -img_size, galoisKeys, c2);
   // Ciphertext c3 = sub(c1, c2)
   seal::Ciphertext c3;
   evaluator.sub(c1, c2, c3);
@@ -300,7 +300,7 @@ std::vector<int64_t> encryptedRobertsCrossPorcupine(
   evaluator.relinearize_inplace(c4, relinKeys);
   // Ciphertext c5 = rotate(c0, w + 1)
   seal::Ciphertext c5;
-  evaluator.rotate_rows(img_ctxt, img_size + 1, galoisKeys, c5);
+  evaluator.rotate_rows(img_ctxt, -img_size + 1, galoisKeys, c5);
   // Ciphertext c6 = sub(c5, c0)
   seal::Ciphertext c6;
   evaluator.sub(c5, img_ctxt, c6);
@@ -313,9 +313,6 @@ std::vector<int64_t> encryptedRobertsCrossPorcupine(
   seal::Ciphertext result_ctxt;
   evaluator.add(c4, c7, result_ctxt);
 
-  // Items don't end up in the same place, so th fix that this rotation was added
-  // TODO: Should this be measured?
-  evaluator.rotate_rows_inplace(result_ctxt, -img_size, galoisKeys);
   timer.stopTimer(compTimer);
 
   // Decrypt & Return result
