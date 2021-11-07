@@ -28,12 +28,13 @@ int squaredL2Distance(const std::vector<int> &x, const std::vector<int> &y) {
 }
 
 #ifdef HAVE_SEAL_BFV
-TEST(SquaredL2DistanceTest, DISABLED_Clear_EncryptedPorcupine_Equivalence) { /* NOLINT */
-  std::vector<int> a(4, 50); // TODO: Create from fixed random seed
-  std::vector<int> b(4, 40); // TODO: Create from fixed random seed
+TEST(SquaredL2DistanceTest, Clear_EncryptedPorcupine_Equivalence) { /* NOLINT */
+  size_t poly_modulus_degree = 2 << 12;
+  std::vector<int> a{10, 20, 10, 5}; // TODO: Create from fixed random seed
+  std::vector<int> b{3, 9, 4, 15}; // TODO: Create from fixed random seed
 
   MultiTimer dummy = MultiTimer();
-  auto result = encryptedL2DistanceSquared_Porcupine(dummy, a, b, 2 << 13);
+  auto result = encryptedL2DistanceSquared_Porcupine(dummy, a, b, poly_modulus_degree);
 
   // Compare to reference cleartext implementation
   EXPECT_EQ(squaredL2Distance(a, b), result);

@@ -67,9 +67,9 @@ int encryptedL2DistanceSquared_Porcupine(
   // Ciphertext c5 = add(c3, c4)
   seal::Ciphertext c5;
   evaluator.add(c3, c4, c5);
-  // Ciphertext c6 = rotate(c4, 1)
+  // Ciphertext c6 = rotate(c4, 1) // TODO: This seems wrong, but I changed it and now it works. Not sure what to do with it
   seal::Ciphertext c6;
-  evaluator.rotate_rows(c4, 1, galoisKeys, c6);
+  evaluator.rotate_rows(c5, 1, galoisKeys, c6);
   // return add(c5, c6)
   seal::Ciphertext result_ctxt;
   evaluator.add(c5, c6, result_ctxt);
@@ -79,11 +79,6 @@ int encryptedL2DistanceSquared_Porcupine(
   decryptor.decrypt(result_ctxt, result_ptxt);
   std::vector<int64_t> result;
   encoder.decode(result_ptxt, result);
-
-  for (auto elem : result) {
-    std::cout << elem << " ";
-  }
-  std::cout << std::endl;
 
   return result[0];
 }
