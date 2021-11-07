@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
   size_t poly_modulus_degree = 2 << 12;
 
   BENCH_FUNCTION(L2Distance, Porcupine, encryptedL2DistanceSquared_Porcupine, a, b);
-  // BENCH_FUNCTION(L2Distance, HECO, encryptedBatchedHammingDistance, a, b);
+  BENCH_FUNCTION(L2Distance, HECO, encryptedBatchedSquaredL2Distance, a, b);
   BENCH_FUNCTION(L2Distance, Naive, encryptedL2DistanceSquared_Naive, a, b);
 
   return 0;

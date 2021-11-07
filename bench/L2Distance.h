@@ -23,5 +23,15 @@ int encryptedL2DistanceSquared_Porcupine(
 int encryptedL2DistanceSquared_Naive(
         MultiTimer &timer, const std::vector<int> &x, const std::vector<int> &y, size_t poly_modulus_degree);
 
+/// Compute encrypted (squared) L2 distance between two vectors
+/// \param a vector of size n
+/// \param b vector of size n
+/// \param poly_modulus_degree FHE parameter, degree n of the polynomials
+/// \param encrypt_both By default, both vectors are encrypted. If set to false, b is plaintext
+/// \return L2 distance between the two vectors
+int encryptedBatchedSquaredL2Distance(
+        MultiTimer &timer, const std::vector<int> &a, const std::vector<int> &b, size_t poly_modulus_degree,
+        bool encrypt_both = true);
+
 #endif
 #endif//AST_OPTIMIZER_L2DISTANCE_H

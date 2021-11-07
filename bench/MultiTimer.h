@@ -5,6 +5,13 @@
 #include <vector>
 #include <iostream>
 
+
+#define INIT_TIME_IT() int __timer_index
+#define TIME_IT(TIMER, CODE)              \
+  __timer_index = TIMER.startTimer();     \
+  CODE                                    \
+  TIMER.stopTimer(__timer_index)
+
 typedef std::chrono::time_point<std::chrono::high_resolution_clock> TimePoint;
 typedef std::chrono::microseconds TimeDuration;
 
