@@ -98,5 +98,17 @@ if (SEAL_FOUND)
     target_compile_definitions(ls-bench PUBLIC -DHAVE_SEAL_BFV)
     target_compile_definitions(ls-bench PUBLIC -DHAVE_SEAL_CKKS)
 
+    ## LAPLACE SHARPENING ##
+    set(L2_BENCH_FILES
+            L2Distance.cpp
+            L2DistanceBench.cpp
+            MultiTimer.cpp
+            )
+    add_executable(l2-bench ${L2_BENCH_FILES})
+    target_include_directories(l2-bench PUBLIC ${SEAL_INCLUDE_DIRS})
+    target_link_libraries(l2-bench PUBLIC SEAL::seal)
+    target_compile_definitions(l2-bench PUBLIC -DHAVE_SEAL_BFV)
+    target_compile_definitions(l2-bench PUBLIC -DHAVE_SEAL_CKKS)
+
 
 endif (SEAL_FOUND)

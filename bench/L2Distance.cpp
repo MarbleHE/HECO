@@ -15,6 +15,7 @@
 int encryptedL2DistanceSquared_Porcupine(
         MultiTimer &timer, const std::vector<int> &x, const std::vector<int> &y, size_t poly_modulus_degree)
 {
+  auto keygenTimer = timer.startTimer();
   // TODO: Doesn't work as expected. The summation fails, because the assumption is that the vector is 4 long.
   if (x.size() != 4 || y.size() != 4) {
     std::cout << "WARNING: The porcupine example of l2 distance assumes that 4 elements are given." << std::endl;
@@ -42,16 +43,21 @@ int encryptedL2DistanceSquared_Porcupine(
   seal::Encryptor encryptor(context, publicKey, secretKey);
   seal::Decryptor decryptor(context, secretKey);
   seal::Evaluator evaluator(context);
+  timer.stopTimer(keygenTimer);
 
   // Encode & Encrypt the vectors
+  auto encTimer = timer.startTimer();
   seal::Plaintext x_ptxt, y_ptxt;
   seal::Ciphertext x_ctxt, y_ctxt;
   encoder.encode(std::vector<int64_t>(x.begin(), x.end()), x_ptxt);
   encoder.encode(std::vector<int64_t>(y.begin(), y.end()), y_ptxt);
   encryptor.encrypt(x_ptxt, x_ctxt);
   encryptor.encrypt(y_ptxt, y_ctxt);
+  timer.stopTimer(encTimer);
 
   // Compute Euclidean Distance (x[i] - y[i])*(x[i] - y[i]);
+  auto compTimer = timer.startTimer();
+
   // Ciphertext c2 = sub(c1, c0)
   seal::Ciphertext c2;
   evaluator.sub(y_ctxt, x_ctxt, c2);
@@ -73,14 +79,83 @@ int encryptedL2DistanceSquared_Porcupine(
   // return add(c5, c6)
   seal::Ciphertext result_ctxt;
   evaluator.add(c5, c6, result_ctxt);
+  timer.stopTimer(compTimer);
 
   // Decrypt result
+  auto decTimer = timer.startTimer();
   seal::Plaintext result_ptxt;
   decryptor.decrypt(result_ctxt, result_ptxt);
   std::vector<int64_t> result;
   encoder.decode(result_ptxt, result);
+  timer.stopTimer(decTimer);
 
-  return result[0];
+  return (int) result[0];
+}
+
+/// Output is squared to elide square root
+/// Naive version of encrypted l2 distance. Each value will be it's own ciphertext
+int encryptedL2DistanceSquared_Naive(
+        MultiTimer &timer, const std::vector<int> &x, const std::vector<int> &y, size_t poly_modulus_degree)
+{
+  auto keygenTimer = timer.startTimer();
+  if (x.size()!=y.size()) throw std::runtime_error("Vectors  in l2 distance must have the same length.");
+
+  // Context Setup
+  seal::EncryptionParameters parameters(seal::scheme_type::bfv);
+  parameters.set_poly_modulus_degree(poly_modulus_degree);
+  parameters.set_coeff_modulus(seal::CoeffModulus::BFVDefault(parameters.poly_modulus_degree()));
+  parameters.set_plain_modulus(seal::PlainModulus::Batching(parameters.poly_modulus_degree(), 20));
+  seal::SEALContext context(parameters);
+
+  /// Create keys
+  seal::KeyGenerator keygen(context);
+  seal::SecretKey secretKey = keygen.secret_key();
+  seal::PublicKey publicKey;
+  keygen.create_public_key(publicKey);
+
+  // Create helper objects
+  seal::BatchEncoder encoder(context);
+  seal::Encryptor encryptor(context, publicKey, secretKey);
+  seal::Decryptor decryptor(context, secretKey);
+  seal::Evaluator evaluator(context);
+  timer.stopTimer(keygenTimer);
+
+  // Encrypt values
+  auto encTimer = timer.startTimer();
+  std::vector<seal::Ciphertext> x_ctxt(x.size());
+  std::vector<seal::Ciphertext> y_ctxt(y.size());
+
+  for (int i = 0; i < x.size(); ++i) {
+    uint64_t elem = x[i];
+    seal::Plaintext tmp_a = seal::Plaintext(seal::util::uint_to_hex_string(&elem, std::size_t(1)));
+    encryptor.encrypt(tmp_a, x_ctxt[i]);
+
+    elem = y[i];
+    seal::Plaintext tmp_b = seal::Plaintext(seal::util::uint_to_hex_string(&elem, std::size_t(1)));
+    encryptor.encrypt(tmp_b, y_ctxt[i]);
+  }
+  seal::Plaintext sum_ptxt;
+  seal::Ciphertext sum_ctxt;
+  sum_ptxt.set_zero();
+  encryptor.encrypt(sum_ptxt, sum_ctxt);
+  timer.stopTimer(encTimer);
+
+  // Compute differences
+  auto compTimer = timer.startTimer();
+  for (size_t i = 0; i < x_ctxt.size(); ++i) {
+    // sum += (x[i] - y[i])*(x[i] - y[i]);
+    evaluator.sub_inplace(x_ctxt[i], y_ctxt[i]);
+    evaluator.square_inplace(x_ctxt[i]);
+    evaluator.add_inplace(sum_ctxt, x_ctxt[i]);
+  }
+  timer.stopTimer(compTimer);
+
+  auto decTimer = timer.startTimer();
+  decryptor.decrypt(sum_ctxt, sum_ptxt);
+  uint64_t result = *sum_ptxt.data();
+  timer.stopTimer(decTimer);
+
+  return (int) result;
 }
 
 #endif

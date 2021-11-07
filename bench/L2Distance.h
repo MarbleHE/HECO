@@ -18,5 +18,10 @@
 int encryptedL2DistanceSquared_Porcupine(
         MultiTimer &timer, const std::vector<int> &x, const std::vector<int> &y, size_t poly_modulus_degree);
 
+/// Output is squared to elide square root
+/// Naive version of encrypted l2 distance. Each value will be it's own ciphertext
+int encryptedL2DistanceSquared_Naive(
+        MultiTimer &timer, const std::vector<int> &x, const std::vector<int> &y, size_t poly_modulus_degree);
+
 #endif
 #endif//AST_OPTIMIZER_L2DISTANCE_H

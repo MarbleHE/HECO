@@ -40,6 +40,18 @@ TEST(SquaredL2DistanceTest, Clear_EncryptedPorcupine_Equivalence) { /* NOLINT */
   EXPECT_EQ(squaredL2Distance(a, b), result);
 }
 
+TEST(SquaredL2DistanceTest, Clear_EncryptedNaive_Equivalence) { /* NOLINT */
+  size_t poly_modulus_degree = 2 << 12;
+  std::vector<int> a{10, 20, 10, 5}; // TODO: Create from fixed random seed
+  std::vector<int> b{3, 9, 4, 15}; // TODO: Create from fixed random seed
+
+  MultiTimer dummy = MultiTimer();
+  auto result = encryptedL2DistanceSquared_Naive(dummy, a, b, poly_modulus_degree);
+
+  // Compare to reference cleartext implementation
+  EXPECT_EQ(squaredL2Distance(a, b), result);
+}
+
 #endif //HAVE_SEAL_BFV
 
 TEST(SquaredL2DistanceTest, clearTextEvaluation) { /* NOLINT */
