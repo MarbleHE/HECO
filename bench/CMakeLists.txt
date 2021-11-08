@@ -98,7 +98,7 @@ if (SEAL_FOUND)
     target_compile_definitions(ls-bench PUBLIC -DHAVE_SEAL_BFV)
     target_compile_definitions(ls-bench PUBLIC -DHAVE_SEAL_CKKS)
 
-    ## LAPLACE SHARPENING ##
+    ## L2 DISTANCE ##
     set(L2_BENCH_FILES
             L2Distance.cpp
             L2DistanceBench.cpp
@@ -109,6 +109,18 @@ if (SEAL_FOUND)
     target_link_libraries(l2-bench PUBLIC SEAL::seal)
     target_compile_definitions(l2-bench PUBLIC -DHAVE_SEAL_BFV)
     target_compile_definitions(l2-bench PUBLIC -DHAVE_SEAL_CKKS)
+
+    ## DOT PRODUCT ##
+    set(DP_BENCH_FILES
+            DotProduct.cpp
+            DotProductBench.cpp
+            MultiTimer.cpp
+            )
+    add_executable(dp-bench ${DP_BENCH_FILES})
+    target_include_directories(dp-bench PUBLIC ${SEAL_INCLUDE_DIRS})
+    target_link_libraries(dp-bench PUBLIC SEAL::seal)
+    target_compile_definitions(dp-bench PUBLIC -DHAVE_SEAL_BFV)
+    target_compile_definitions(dp-bench PUBLIC -DHAVE_SEAL_CKKS)
 
 
 endif (SEAL_FOUND)
