@@ -7,6 +7,11 @@
 #include "ast_opt/parser/Parser.h"
 #include "gtest/gtest.h"
 
+#ifdef HAVE_SEAL_BFV
+#include "bench/DotProduct.h"
+#include "TestHelper.h"
+#endif
+
 /// Original, plain C++ program for a dot product between two vectors
 ///
 /// \param x vector of size n
@@ -21,6 +26,25 @@ int dotProduct(const std::vector<int> &x, const std::vector<int> &y) {
   }
   return sum;
 }
+
+#ifdef HAVE_SEAL_BFV
+TEST(DotProductTest, Naive_Clear_Equivalence) { /* NOLINT */
+  size_t poly_modulus_degree = 2 << 12;
+  size_t vec_size = 4;
+  std::vector<int> x(vec_size);
+  std::vector<int> y(vec_size);
+
+  getRandomVector(x, 1);
+  getRandomVector(y, 2);
+
+  MultiTimer dummy = MultiTimer();
+  auto enc = encryptedDotProductNaive(dummy, x, y, poly_modulus_degree);
+
+  auto ref = dotProduct(x, y);
+
+  EXPECT_EQ(enc, ref);
+}
+#endif
 
 TEST(CompileDotProductTest, clearTextEvaluation) { /* NOLINT */
 // program's input

@@ -79,6 +79,7 @@ set(TEST_FILES
         ../bench/QuadraticPolynomial.cpp
         ../bench/LinearPolynomial.cpp
         ../bench/LaplaceSharpening.cpp
+        ../bench/DotProduct.cpp
         )
 
 
