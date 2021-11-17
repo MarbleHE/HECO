@@ -21,12 +21,17 @@
 
 #include "FHE/FHEDialect.h"
 #include "mlir/IR/Matchers.h"
+#include "mlir/IR/Builders.h"
 #include "mlir/IR/PatternMatch.h"
 
 #include <iostream>
 
 using namespace mlir;
 using namespace fhe;
+
+auto make_const(Builder &builder, int64_t number) {
+  return builder.getI64IntegerAttr(number);
+}
 
 namespace {
 #include "LowerFHEtoPoly.inc"
