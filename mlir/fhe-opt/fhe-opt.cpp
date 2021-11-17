@@ -20,33 +20,51 @@
 #include "llvm/Support/ToolOutputFile.h"
 
 #include "FHE/FHEDialect.h"
-#include "LowerFHEtoPoly.h"
+#include "mlir/IR/Matchers.h"
+#include "mlir/IR/PatternMatch.h"
 
 #include <iostream>
 
 using namespace mlir;
 using namespace fhe;
 
+namespace {
+#include "LowerFHEtoPoly.inc"
+}
+
+struct LowerFHEtoPolyPass : public mlir::PassWrapper<LowerFHEtoPolyPass, mlir::OperationPass<mlir::ModuleOp>> {
+  void getDependentDialects(mlir::DialectRegistry &registry) const override {
+    registry.insert<mlir::AffineDialect, mlir::StandardOpsDialect, FHEDialect>();
+  }
+  void runOnOperation() override {
+
+    std::cout << "RUNNING" << std::endl;
+
+    ConversionTarget target(getContext());
+    target.addLegalDialect<AffineDialect, StandardOpsDialect, FHEDialect>();
+    target.addIllegalOp<MultiplyOp>();
+
+    mlir::RewritePatternSet patterns(&getContext());
+
+    //TODO: ADD NEWLY ADDED REWRITE PATTERNS HERE
+    patterns.add<SwitchMultPattern>(&getContext());
+
+    if (mlir::failed(mlir::applyPartialConversion(getOperation(), target, std::move(patterns))))
+      signalPassFailure();
+  };
+
+  mlir::StringRef getArgument() const final {
+    return "fhe2poly";
+  }
+};
+
 int main(int argc, char **argv) {
   mlir::MLIRContext context;
 
   mlir::DialectRegistry registry;
   registry.insert<FHEDialect>();
-  registry.insert<StandardOpsDialect>();
-  registry.insert<AffineDialect>();
-  registry.insert<tensor::TensorDialect>();
   context.loadDialect<FHEDialect>();
-  context.loadDialect<AffineDialect>();
-  context.loadDialect<tensor::TensorDialect>();
-  // Add the following to include *all* MLIR Core dialects, or selectively
-  // include what you need like above. You only need to register dialects that
-  // will be *parsed* by the tool, not the one generated
-  // registerAllDialects(registry);
 
-  //  PassManager pm(&context);
-  //  pm.addNestedPass<abc::ReturnOp>(abc::createLowerASTtoSSAPass());
-
-  registerAllPasses();
   PassRegistration<LowerFHEtoPolyPass>();
 
   return asMainReturnCode(

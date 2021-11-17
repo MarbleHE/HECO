@@ -19,9 +19,15 @@ set(LIBS
         MLIRTargetLLVMIRExport
         MLIRTransforms
         )
-add_llvm_executable(fhe-opt LowerFHEtoPoly.cpp fhe-opt.cpp)
+add_llvm_executable(fhe-opt fhe-opt.cpp)
 
 llvm_update_compile_flags(fhe-opt)
 target_link_libraries(fhe-opt PRIVATE ${LIBS})
+
+set(LLVM_TARGET_DEFINITIONS LowerFHEtoPoly.td)
+mlir_tablegen(LowerFHEtoPoly.inc -gen-rewriters)
+add_public_tablegen_target(fhe2poly)
+add_dependencies(fhe-opt fhe2poly)
+
 
 mlir_check_all_link_libraries(fhe-opt)

@@ -1,10 +1,10 @@
 #ifndef AST_OPTIMIZER_MLIR_FHE_FHEOPS_H_
 #define AST_OPTIMIZER_MLIR_FHE_FHEOPS_H_
 
-include "FHEDialect.td"
+include "FHE/FHEDialect.td"
 include "mlir/Interfaces/SideEffectInterfaces.td"
 
-def ABC_LoadCtxtOp : FHE_Op<"load_ctxt", []> {
+def FHE_LoadCtxtOp : FHE_Op<"load_ctxt", []> {
   let summary = "Loads ciphertext from file into a register.";
 
   let arguments = (ins
@@ -21,7 +21,7 @@ def ABC_LoadCtxtOp : FHE_Op<"load_ctxt", []> {
   }];
 }
 
-def ABC_MultiplyOp : FHE_Op<"multiply", []> {
+def FHE_MultiplyOp : FHE_Op<"multiply", []> {
   let summary = "Multiplication.";
 
   let arguments = (ins
@@ -40,7 +40,7 @@ def ABC_MultiplyOp : FHE_Op<"multiply", []> {
 
 }
 
-def ABC_SinkOp : FHE_Op<"sink", [Terminator]> {
+def FHE_SinkOp : FHE_Op<"sink", [Terminator]> {
   let summary = "An operation that requires the operand to be evaluated (e.g. decrypt, serialize, etc).";
 
   let arguments = (ins
