@@ -37,6 +37,26 @@ namespace {
 #include "LowerFHEtoPoly.inc"
 }
 
+static LogicalResult rewriteMultiply(fhe::MultiplyOp op, PatternRewriter &rewriter) {
+
+  auto loc = op->getLoc();
+
+  auto zero = rewriter.getI64IntegerAttr(0);
+  auto one = rewriter.getI64IntegerAttr(1);
+  auto x0 = rewriter.create<GetPolyOp>(loc, op.x().getType(), op.x(), zero);
+  auto x1 = rewriter.create<GetPolyOp>(loc, op.x().getType(), op.x(), one);
+  auto y0 = rewriter.create<GetPolyOp>(loc, op.y().getType(), op.y(), zero);
+  auto y1 = rewriter.create<GetPolyOp>(loc, op.y().getType(), op.y(), one);
+
+  auto t0 = rewriter.create<PolyMulOp>(loc, op.x().getType(), x0, y0, op.parms());
+  auto temp = rewriter.create<PolyMulOp>(loc, op.x().getType(), x0, y1, op.parms());
+  auto t1 = rewriter.create<PolyMulAccOp>(loc, op.x().getType(), x1, y0, temp, op.parms());
+  auto t2 = rewriter.create<PolyMulOp>(loc, op.x().getType(), x1, y1, op.parms());
+  rewriter.replaceOpWithNewOp<MakeCtxtOp>(op, op.x().getType(), t0, t1, t2);
+
+  return success();
+}
+
 struct LowerFHEtoPolyPass : public mlir::PassWrapper<LowerFHEtoPolyPass, mlir::OperationPass<mlir::ModuleOp>> {
   void getDependentDialects(mlir::DialectRegistry &registry) const override {
     registry.insert<mlir::AffineDialect, mlir::StandardOpsDialect, FHEDialect>();
@@ -52,7 +72,12 @@ struct LowerFHEtoPolyPass : public mlir::PassWrapper<LowerFHEtoPolyPass, mlir::O
     mlir::RewritePatternSet patterns(&getContext());
 
     //TODO: ADD NEWLY ADDED REWRITE PATTERNS HERE
-    patterns.add<SwitchMultPattern>(&getContext());
+
+    // TableGen Version:
+    // patterns.add<SwitchMultPattern>(&getContext());
+
+    // C++ Version:
+    patterns.add(rewriteMultiply);
 
     if (mlir::failed(mlir::applyPartialConversion(getOperation(), target, std::move(patterns))))
       signalPassFailure();

@@ -137,6 +137,7 @@ def FHE_PolyMulAccOp : FHE_Op<"poly_macc", []> {
   let arguments = (ins
     TensorOf<[I64]>:$x,
     TensorOf<[I64]>:$y,
+    TensorOf<[I64]>:$acc,
     StrAttr: $parms
   );
 
@@ -145,7 +146,7 @@ def FHE_PolyMulAccOp : FHE_Op<"poly_macc", []> {
   );
 
   let assemblyFormat = [{
-    `(` $x `,` $y `)`  attr-dict `:`  `(` type($x) `,` type($y) `)`  `->` type($output)
+    `(` $x `,` $y `,` $acc `)`  attr-dict `:`  `(` type($x) `,` type($y) `,` type($acc) `)`  `->` type($output)
   }];
 
 }

@@ -30,24 +30,15 @@ def two : NativeCodeCall<"make_const($_builder, 2)">;
 ///
 /// We use %x0 = poly(x,0) to write x[0] into an SSA value
 /// and ctxt(%x0,%x1,%x2) to combine polynomials back into a ctxt.
-/// These operations are merely to ensure consistency and will not actually be executed
-/// In fact, they will fall away quite naturally during canonicalizaton/dce/cse later
 ///
 /// The syntax here is functional, so we are essentially writing it like this
 /// x*y ==> to_ctxt(
 ///                 pmul(to_poly(x,0), to_poly(y,0)),
-///                 pmacc(pmul(to_poly(x,0), to_poly(y,1), pmul(to_poly(x,1), to_poly(y,0)),
+///                 pmacc(to_poly(x,0), to_poly(y,1), pmul(to_poly(x,1), to_poly(y,0)),
 ///                 pmul(to_poly(x,1), to_poly(y,1))
 ///         )
 def SwitchMultPattern : Pat<(FHE_MultiplyOp $x, $y, $parms),
-                    (FHE_MakeCtxtOp
-                        (FHE_PolyMulOp (FHE_GetPolyOp $x, (zero)), (FHE_GetPolyOp $y, (zero)), $parms),
-                        (FHE_PolyMulAccOp
-                          (FHE_PolyMulOp (FHE_GetPolyOp $x, (one)), (FHE_GetPolyOp $y, (zero)), $parms),
-                          (FHE_PolyMulOp (FHE_GetPolyOp $x, (zero)), (FHE_GetPolyOp $y, (one)), $parms)
-                        ),
-                        (FHE_PolyMulOp (FHE_GetPolyOp $x, (one)), (FHE_GetPolyOp $y, (one)), $parms)
-                    )
+                      (FHE_PolyMulOp $x,$y,$parms)
                     >;
 
 
