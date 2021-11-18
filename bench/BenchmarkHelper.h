@@ -7,7 +7,7 @@
 #define RAND_SEED 4673838
 
 // Number of iterations for the benchmark
-#define ITER_COUNT 5
+#define ITER_COUNT 10
 
 #define BENCH_FUNCTION(PROBLEM, VERSION, FUNCTION_NAME, ...) if (argv[1] == std::string(#VERSION)) { \
   MultiTimer timer = MultiTimer();                                                                   \
