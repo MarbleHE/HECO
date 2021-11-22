@@ -9,6 +9,8 @@ include "mlir/Interfaces/SideEffectInterfaces.td"
 include "mlir/IR/OpAsmInterface.td"
 include "mlir/IR/SymbolInterfaces.td"
 
+// If you extend this list, you will most likely have to also extend the includes in FHDialect.h!
+
 def FHE_LoadCtxtOp : FHE_Op<"load_ctxt", []> {
   let summary = "Loads ciphertext from file into a register.";
 
@@ -98,7 +100,7 @@ def FHE_MakeCtxtOp : FHE_Op<"to_ctxt", []> {
 
 
 
-def FHE_PolyAddOp : FHE_Op<"poly_add", [NoSideEffect, Commutative]> {
+def FHE_PolyAddOp : FHE_Op<"poly_add", [NoSideEffect, Commutative, AllTypesMatch<["x","y","output"]>]> {
   let summary = "Polynomial Addition.";
 
   let arguments = (ins
@@ -133,6 +135,13 @@ def FHE_PolyMulOp : FHE_Op<"poly_mul", [NoSideEffect, Commutative]> {
   let assemblyFormat = [{
     `(` $x `,` $y `)`  attr-dict `:`  `(` type($x) `,` type($y) `)`  `->` type($output)
   }];
+
+    // Builder that computes the shape of the returned ctxt
+    let builders = [
+        OpBuilder<(ins "mlir::Value":$x, "mlir::Value":$y, "mlir::StringAttr":$parms ), [{
+            $_state.addAttribute("parms", $_builder.getStringAttr(parms));
+        }]>
+    ];
 
 }
 

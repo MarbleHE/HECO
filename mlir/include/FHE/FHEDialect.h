@@ -13,6 +13,7 @@
 #include "mlir/Interfaces/CallInterfaces.h"
 #include "mlir/Interfaces/CastInterfaces.h"
 #include "mlir/Interfaces/CopyOpInterface.h"
+#include "mlir/Interfaces/InferTypeOpInterface.h"
 
 #include "FHE/FHEOpsDialect.h.inc"
 

@@ -21,7 +21,7 @@ def two : NativeCodeCall<"make_const($_builder, 2)">;
 // Basic Pattern-Match and Rewrite
 //===----------------------------------------------------------------------===//
 
-/// Transform an FHE mult to a series of polynomial operatons
+/// Transform an FHE mult to a series of polynomial operations
 /// x * y turns into
 /// t[0] = x[0] * y[0];
 /// t[1] = x[0] * y[1] + x[1] * y[0]
@@ -37,8 +37,10 @@ def two : NativeCodeCall<"make_const($_builder, 2)">;
 ///                 pmacc(to_poly(x,0), to_poly(y,1), pmul(to_poly(x,1), to_poly(y,0)),
 ///                 pmul(to_poly(x,1), to_poly(y,1))
 ///         )
+///
+/// The syntax here is DAG = (OPNAME arg1, arg2, arg3) where the args are again DAGs
 def SwitchMultPattern : Pat<(FHE_MultiplyOp $x, $y, $parms),
-                      (FHE_PolyMulOp $x,$y,$parms)
+                      (FHE_MakeCtxtOp (FHE_PolyMulOp $x,$y,$parms), (FHE_PolyAddOp $x,$y,$parms) , (FHE_PolyAddOp $x,$y,$parms))
                     >;
 
 
