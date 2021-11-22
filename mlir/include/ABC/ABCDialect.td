@@ -49,18 +49,6 @@ def ZeroOrMoreStatements : Region<CPred<"true">, "zero or more statements">;
 // TODO: Replace predicate with a function that checks if region contains only expressions
 def ZeroOrMoreExpressions : Region<CPred<"true">, "zero or more expressions">;
 
-// Any attribute from the given list
-class AnyAttrOf<list<Attr> allowedAttrs, string summary = "",
-    string cppClassName = "::mlir::Attribute"> : Attr<
-// Satisfy any of the allowed attribute's condition
-Or<!foreach(allowedattr, allowedAttrs, allowedattr.predicate)>,
-!if(!eq(summary, ""),
-!interleave(!foreach(t, allowedAttrs, t.summary), " or "),
-summary)> {
-let returnType = "::mlir::Attribute";
-let convertFromStorage = "$_self";
-}
-
 //===----------------------------------------------------------------------===//
 // ABC type definitions.
 //===----------------------------------------------------------------------===//

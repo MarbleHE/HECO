@@ -75,8 +75,8 @@ translateExpression(Operation &op,
     // TODO: having all ints be index is a nasty hack and we should really instead handle conversions
     //   between things like index, int, bool properly.
     llvm::SmallVector<int64_t, 4> stuff;
-    for (auto i: literal_tensor.value().getIntValues()) {
-      stuff.push_back(i.getLimitedValue());
+    for (auto i: literal_tensor.value().getValues<IntegerAttr>()) {
+      stuff.push_back(i.getInt());
     }
     auto value = rewriter
         .create<ConstantOp>(op.getLoc(), rewriter.getIndexTensorAttr(stuff));
@@ -92,13 +92,13 @@ translateExpression(Operation &op,
     auto lhs = translateExpression(firstOp(binary_expr.left()), rewriter, symbolTable);
     auto rhs = translateExpression(firstOp(binary_expr.right()), rewriter, symbolTable);
     if (binary_expr.op()=="+") {
-      return rewriter.create<AddIOp>(binary_expr->getLoc(), lhs, rhs);
+      return rewriter.create<arith::AddIOp>(binary_expr->getLoc(), lhs, rhs);
     } else if (binary_expr.op()=="-") {
-      return rewriter.create<SubIOp>(binary_expr->getLoc(), lhs, rhs);
+      return rewriter.create<arith::SubIOp>(binary_expr->getLoc(), lhs, rhs);
     } else if (binary_expr.op()=="*") {
-      return rewriter.create<MulIOp>(binary_expr->getLoc(), lhs, rhs);
+      return rewriter.create<arith::MulIOp>(binary_expr->getLoc(), lhs, rhs);
     } else if (binary_expr.op()=="%") {
-      return rewriter.create<UnsignedRemIOp>(binary_expr->getLoc(), lhs, rhs);
+      return rewriter.create<arith::RemUIOp>(binary_expr->getLoc(), lhs, rhs);
     } else {
       //TODO: Implement remaining operators
       emitError(binary_expr->getLoc(), "Unsupported operator: " + binary_expr.op());
