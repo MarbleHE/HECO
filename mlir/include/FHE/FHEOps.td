@@ -119,7 +119,7 @@ def FHE_PolyAddOp : FHE_Op<"poly_add", [NoSideEffect, Commutative, AllTypesMatch
 
 }
 
-def FHE_PolyMulOp : FHE_Op<"poly_mul", [NoSideEffect, Commutative]> {
+def FHE_PolyMulOp : FHE_Op<"poly_mul", [NoSideEffect, Commutative, InferTypeOpInterface]> {
   let summary = "Polynomial Addition.";
 
   let arguments = (ins
@@ -136,12 +136,17 @@ def FHE_PolyMulOp : FHE_Op<"poly_mul", [NoSideEffect, Commutative]> {
     `(` $x `,` $y `)`  attr-dict `:`  `(` type($x) `,` type($y) `)`  `->` type($output)
   }];
 
-    // Builder that computes the shape of the returned ctxt
-    let builders = [
-        OpBuilder<(ins "mlir::Value":$x, "mlir::Value":$y, "mlir::StringAttr":$parms ), [{
-            $_state.addAttribute("parms", $_builder.getStringAttr(parms));
-        }]>
-    ];
+    let extraClassDeclaration = [{
+        static ::mlir::LogicalResult inferReturnTypes(
+        ::mlir::MLIRContext *context, ::llvm::Optional<::mlir::Location> location,
+        ::mlir::ValueRange operands, ::mlir::DictionaryAttr attributes,
+        ::mlir::RegionRange regions,
+        ::llvm::SmallVectorImpl<::mlir::Type> &inferredReturnTypes) {
+            ::mlir::Builder b(context);
+            inferredReturnTypes.push_back(b.getI64Type());
+            return ::mlir::success();
+        }
+    }];
 
 }
 
