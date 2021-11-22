@@ -2,7 +2,12 @@
 #define AST_OPTIMIZER_MLIR_FHE_FHEOPS_H_
 
 include "FHE/FHEDialect.td"
+include "mlir/Dialect/Shape/IR/ShapeBase.td"
+include "mlir/Interfaces/ControlFlowInterfaces.td"
+include "mlir/Interfaces/InferTypeOpInterface.td"
 include "mlir/Interfaces/SideEffectInterfaces.td"
+include "mlir/IR/OpAsmInterface.td"
+include "mlir/IR/SymbolInterfaces.td"
 
 def FHE_LoadCtxtOp : FHE_Op<"load_ctxt", []> {
   let summary = "Loads ciphertext from file into a register.";
@@ -40,7 +45,7 @@ def FHE_MultiplyOp : FHE_Op<"multiply", []> {
 
 }
 
-def FHE_SinkOp : FHE_Op<"sink", [Terminator]> {
+def FHE_SinkOp : FHE_Op<"sink", [Terminator, ReturnLike]> {
   let summary = "An operation that requires the operand to be evaluated (e.g. decrypt, serialize, etc).";
 
   let arguments = (ins
@@ -93,7 +98,7 @@ def FHE_MakeCtxtOp : FHE_Op<"to_ctxt", []> {
 
 
 
-def FHE_PolyAddOp : FHE_Op<"poly_add", []> {
+def FHE_PolyAddOp : FHE_Op<"poly_add", [NoSideEffect, Commutative]> {
   let summary = "Polynomial Addition.";
 
   let arguments = (ins
@@ -112,7 +117,7 @@ def FHE_PolyAddOp : FHE_Op<"poly_add", []> {
 
 }
 
-def FHE_PolyMulOp : FHE_Op<"poly_mul", []> {
+def FHE_PolyMulOp : FHE_Op<"poly_mul", [NoSideEffect, Commutative]> {
   let summary = "Polynomial Addition.";
 
   let arguments = (ins
@@ -131,7 +136,7 @@ def FHE_PolyMulOp : FHE_Op<"poly_mul", []> {
 
 }
 
-def FHE_PolyMulAccOp : FHE_Op<"poly_macc", []> {
+def FHE_PolyMulAccOp : FHE_Op<"poly_macc", [NoSideEffect]> {
   let summary = "Polynomial Addition.";
 
   let arguments = (ins
