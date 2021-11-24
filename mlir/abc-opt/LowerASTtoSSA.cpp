@@ -69,7 +69,7 @@ translateExpression(Operation &op,
     // TODO: having all ints be index is a nasty hack and we should really instead handle conversions
     //   between things like index, int, bool properly.
     auto value = rewriter
-        .create<ConstantOp>(op.getLoc(), rewriter.getIndexAttr(literal_int.value().getLimitedValue()));
+        .create<arith::ConstantOp>(op.getLoc(), rewriter.getIndexAttr(literal_int.value().getLimitedValue()));
     return value;
   } else if (auto literal_tensor = llvm::dyn_cast<abc::LiteralTensorOp>(op)) {
     // TODO: having all ints be index is a nasty hack and we should really instead handle conversions
@@ -79,12 +79,12 @@ translateExpression(Operation &op,
       stuff.push_back(i.getInt());
     }
     auto value = rewriter
-        .create<ConstantOp>(op.getLoc(), rewriter.getIndexTensorAttr(stuff));
+        .create<arith::ConstantOp>(op.getLoc(), rewriter.getIndexTensorAttr(stuff));
     return value;
   } else if (auto variable = llvm::dyn_cast<abc::VariableOp>(op)) {
     if (!symbolTable.count(variable.name())) {
       emitError(variable.getLoc(), "Undefined variable " + variable.name());
-      return rewriter.create<ConstantOp>(op.getLoc(), rewriter.getIntegerAttr(rewriter.getIntegerType(64), 1));
+      return rewriter.create<arith::ConstantOp>(op.getLoc(), rewriter.getIntegerAttr(rewriter.getIntegerType(64), 1));
     } else {
       return symbolTable.lookup(variable.name());
     }
