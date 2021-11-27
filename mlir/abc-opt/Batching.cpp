@@ -10,7 +10,7 @@ using namespace abc;
 int getConstIndex(tensor::ExtractOp &op) {
   //TODO: check if there's more and throw an error if yes
   auto index = *op.indices().begin();
-  if (auto const_op = llvm::dyn_cast<ConstantOp>(index.getDefiningOp())) {
+  if (auto const_op = llvm::dyn_cast<arith::ConstantOp>(index.getDefiningOp())) {
     return const_op.value().dyn_cast<IntegerAttr>().getValue().getLimitedValue();
   } else {
     emitError(index.getLoc(), "Index not defined by a constant op!");
@@ -21,7 +21,7 @@ int getConstIndex(tensor::ExtractOp &op) {
 int getConstIndex(tensor::InsertOp &op) {
   //TODO: check if there's more and throw an error if yes
   auto index = *op.indices().begin();
-  if (auto const_op = llvm::dyn_cast<ConstantOp>(index.getDefiningOp())) {
+  if (auto const_op = llvm::dyn_cast<arith::ConstantOp>(index.getDefiningOp())) {
     return const_op.value().dyn_cast<IntegerAttr>().getValue().getLimitedValue();
   } else {
     emitError(index.getLoc(), "Index not defined by a constant op!");
@@ -42,7 +42,7 @@ Value resolveToSlot(int slot, Value v, IRRewriter &rewriter) {
       int extracted_index = getConstIndex(extract_op);
       int offset = extracted_index - slot;
       rewriter.setInsertionPointAfter(extract_op);
-      auto offset_val = rewriter.create<ConstantOp>(extract_op.getLoc(), rewriter.getIndexAttr(offset));
+      auto offset_val = rewriter.create<arith::ConstantOp>(extract_op.getLoc(), rewriter.getIndexAttr(offset));
       auto new_val = rewriter.create<abc::RotateOp>(extract_op.getLoc(),
                                                     extract_op.tensor().getType(),
                                                     extract_op.tensor(),

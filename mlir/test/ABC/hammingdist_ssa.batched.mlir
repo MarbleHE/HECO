@@ -1,9 +1,9 @@
 builtin.module  {
   builtin.func private @encryptedHammingDistance(%arg0: tensor<4xindex>, %arg1: tensor<4xindex>) -> tensor<4xindex> {
-    %c3 = constant 3 : index
-    %c2 = constant 2 : index
-    %c1 = constant 1 : index
-    %c0 = constant 0 : index
+    %c3 = arith.constant 3 : index
+    %c2 = arith.constant 2 : index
+    %c1 = arith.constant 1 : index
+    %c0 = arith.constant 0 : index
     %0 = abc.fhe_rotate %arg0, %c0 : tensor<4xindex>, index, tensor<4xindex>
     %1 = abc.fhe_rotate %arg1, %c0 : tensor<4xindex>, index, tensor<4xindex>
     %2 = abc.fhe_sub(%0, %1) : (tensor<4xindex>, tensor<4xindex>) -> tensor<4xindex>

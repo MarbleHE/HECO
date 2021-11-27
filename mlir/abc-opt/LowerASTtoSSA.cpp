@@ -102,7 +102,7 @@ translateExpression(Operation &op,
     } else {
       //TODO: Implement remaining operators
       emitError(binary_expr->getLoc(), "Unsupported operator: " + binary_expr.op());
-      return rewriter.create<ConstantOp>(op.getLoc(), rewriter.getIntegerAttr(rewriter.getIntegerType(64), 1));
+      return rewriter.create<arith::ConstantOp>(op.getLoc(), rewriter.getIntegerAttr(rewriter.getIntegerType(64), 1));
     }
   } else if (auto index_access = llvm::dyn_cast<abc::IndexAccessOp>(op)) {
     if (auto target_variable = llvm::dyn_cast<VariableOp>(firstOp(index_access.target()))) {
@@ -125,13 +125,13 @@ translateExpression(Operation &op,
 
     } else {
 
-      return rewriter.create<ConstantOp>(op.getLoc(), rewriter.getIntegerAttr(rewriter.getIntegerType(64), 1));
+      return rewriter.create<arith::ConstantOp>(op.getLoc(), rewriter.getIntegerAttr(rewriter.getIntegerType(64), 1));
     }
 
   } else {
     //TODO: Actually translate remaining expression types
     emitError(op.getLoc(), "Expression not yet supported.");
-    return rewriter.create<ConstantOp>(op.getLoc(), rewriter.getIntegerAttr(rewriter.getIntegerType(64), 1));
+    return rewriter.create<arith::ConstantOp>(op.getLoc(), rewriter.getIntegerAttr(rewriter.getIntegerType(64), 1));
   }
 
 }

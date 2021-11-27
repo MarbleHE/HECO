@@ -18,6 +18,7 @@
 #include "llvm/Support/InitLLVM.h"
 #include "llvm/Support/SourceMgr.h"
 #include "llvm/Support/ToolOutputFile.h"
+#include "mlir/Dialect/Arithmetic/IR/Arithmetic.h"
 
 #include "ABC/ABCDialect.h"
 #include "LowerASTtoSSA.h"
@@ -38,9 +39,11 @@ int main(int argc, char **argv) {
   registry.insert<StandardOpsDialect>();
   registry.insert<AffineDialect>();
   registry.insert<tensor::TensorDialect>();
+  registry.insert<arith::ArithmeticDialect>();
   context.loadDialect<ABCDialect>();
   context.loadDialect<AffineDialect>();
   context.loadDialect<tensor::TensorDialect>();
+  context.loadDialect<arith::ArithmeticDialect>();
   // Add the following to include *all* MLIR Core dialects, or selectively
   // include what you need like above. You only need to register dialects that
   // will be *parsed* by the tool, not the one generated
