@@ -260,6 +260,9 @@ def ABC_RotateOp : Op<ABC_Dialect, "fhe_rotate", [NoTerminator, NoSideEffect]> {
   let assemblyFormat = [{
     $vector `,` $rotation  `:` type($vector) `,` type($rotation)  `,`   type($output) attr-dict-with-keyword
   }];
+
+  // If the rotation is zero we want to canonicalize to a no op
+  let hasCanonicalizeMethod = 1;
 }
 
 #endif // ABC_OPS

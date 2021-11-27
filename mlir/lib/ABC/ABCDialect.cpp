@@ -6,11 +6,11 @@
 //
 //===----------------------------------------------------------------------===//
 #include "mlir/IR/DialectImplementation.h"
-#include "mlir/IR/Types.h"
 #include "mlir/IR/TypeSupport.h"
-#include "mlir/Support/LLVM.h"
-#include "ABC/ABCDialect.h"
 #include "llvm/ADT/TypeSwitch.h"
+#include <mlir/IR/PatternMatch.h>
+
+#include "ABC/ABCDialect.h"
 
 using namespace mlir;
 using namespace abc;
@@ -107,6 +107,22 @@ void ABCDialect::printType(::mlir::Type type,
 //===----------------------------------------------------------------------===//
 // TableGen'd op method definitions
 //===----------------------------------------------------------------------===//
+
+::mlir::LogicalResult RotateOp::canonicalize(RotateOp op, ::mlir::PatternRewriter &rewriter) {
+  // First check if this is a constant we can reason about statically
+  Operation *valueOp = op.rotation().getDefiningOp();
+  bool isConstLike = valueOp->hasTrait<OpTrait::ConstantLike>();
+  bool hasValue = valueOp->hasAttr("value");
+  if (isConstLike && hasValue) {
+    // Is it zero
+    bool isZero = valueOp->getAttr("value").dyn_cast<IntegerAttr>().getInt() == 0;
+    if(isZero) {
+      // No need to rotate just use the original vector
+      op.replaceAllUsesWith(op.vector());
+    }
+  }
+  return success();
+}
 
 #define GET_OP_CLASSES
 #include "ABC/ABCOps.cpp.inc"
