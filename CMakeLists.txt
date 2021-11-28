@@ -131,6 +131,7 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/utilities/ScopedVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/ExpressionBatcher.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/HashVisitor.cpp
+        ${ast_optimizer_SOURCE_DIR}/src/visitor/MLIRTransformVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/ParentSettingVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/PrintVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/ProgramPrintVisitor.cpp
@@ -290,11 +291,11 @@ target_link_libraries(ast_demo PRIVATE ast_opt)
 ##
 ## only if this is the root project
 #####################################################################################
-#if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
-#    message("Enabling ast_opt Tests")
-#    enable_testing()
-#    add_subdirectory(test EXCLUDE_FROM_ALL)
-#endif ()
+if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+    message("Enabling ast_opt Tests")
+    enable_testing()
+    add_subdirectory(test EXCLUDE_FROM_ALL)
+endif ()
 
 ##############################
 # WIP: MLIR Integration
@@ -327,9 +328,9 @@ if(PYTHON_FRONTEND_BUILD)
     GIT_TAG v2.7.1)
 
     FetchContent_GetProperties(pybind11)
-if(NOT pybind11_POPULATED)
-    FetchContent_Populate(pybind11)
-    add_subdirectory(${pybind11_SOURCE_DIR} ${pybind11_BINARY_DIR})
-endif()
+    if(NOT pybind11_POPULATED)
+        FetchContent_Populate(pybind11)
+        add_subdirectory(${pybind11_SOURCE_DIR} ${pybind11_BINARY_DIR})
+    endif()
     add_subdirectory(python)
 endif()
