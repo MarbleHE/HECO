@@ -8,7 +8,6 @@
 #include "mlir/IR/DialectImplementation.h"
 #include "mlir/IR/TypeSupport.h"
 #include "llvm/ADT/TypeSwitch.h"
-#include <mlir/IR/PatternMatch.h>
 
 #include "ABC/ABCDialect.h"
 
