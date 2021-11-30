@@ -31,6 +31,17 @@
 using namespace mlir;
 using namespace abc;
 
+void pipelineBuilder(OpPassManager &manager) {
+  manager.addPass(std::make_unique<LowerASTtoSSAPass>());
+  manager.addPass(createCanonicalizerPass());
+  manager.addPass(std::make_unique<UnrollLoopsPass>());
+  manager.addPass(createCanonicalizerPass());
+  // manager.addPass(std::make_unique<BatchingPass>());
+  // manager.addPass(createCanonicalizerPass());
+  // manager.addPass(std::make_unique<NaryPass>());
+  // manager.addPass(createCanonicalizerPass());
+}
+
 int main(int argc, char **argv) {
   mlir::MLIRContext context;
 
@@ -49,14 +60,13 @@ int main(int argc, char **argv) {
   // will be *parsed* by the tool, not the one generated
   // registerAllDialects(registry);
 
-  //  PassManager pm(&context);
-  //  pm.addNestedPass<abc::ReturnOp>(abc::createLowerASTtoSSAPass());
-
   registerAllPasses();
   PassRegistration<LowerASTtoSSAPass>();
   PassRegistration<UnrollLoopsPass>();
   PassRegistration<BatchingPass>();
   PassRegistration<NaryPass>();
+
+  PassPipelineRegistration<>("full-pass", "Run all passes", pipelineBuilder);
 
   return asMainReturnCode(
       MlirOptMain(argc, argv, "ABC optimizer driver\n", registry));
