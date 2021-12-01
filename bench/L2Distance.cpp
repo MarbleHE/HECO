@@ -18,7 +18,7 @@ int encryptedL2DistanceSquared_Porcupine(
   auto keygenTimer = timer.startTimer();
   // TODO: Doesn't work as expected. The summation fails, because the assumption is that the vector is 4 long.
   if (x.size() != 4 || y.size() != 4) {
-    std::cout << "WARNING: The porcupine example of l2 distance assumes that 4 elements are given." << std::endl;
+    throw std::runtime_error("The porcupine example of l2 distance assumes that 4 elements are given.");
   }
 
   // Context Setup

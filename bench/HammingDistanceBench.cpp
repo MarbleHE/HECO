@@ -13,11 +13,15 @@ int main(int argc, char *argv[]) {
 
     std::exit(1);
   }
+  size_t vec_size = 4;
+  if (argc == 3) {
+    vec_size = atoi(argv[2]);
+  }
 
   // Create two vectors of bits (booleans),
   // TODO: Create test values from fixed random seed
-  std::vector<bool> a(4, 0);
-  std::vector<bool> b(4, 1);
+  std::vector<bool> a(vec_size, 0);
+  std::vector<bool> b(vec_size, 1);
   size_t poly_modulus_degree = 2 << 12;
 
   BENCH_FUNCTION(HammingDistance, Porcupine, encryptedHammingDistancePorcupine, a, b);

@@ -13,12 +13,16 @@ int main(int argc, char *argv[]) {
 
     std::exit(1);
   }
+  size_t vec_size = 8;
+  if (argc == 3) {
+    vec_size = atoi(argv[2]);
+  }
 
   // Create two vectors of bits (booleans),
   size_t poly_modulus_degree = 2 << 12;
-  std::vector<int> a(8);
+  std::vector<int> a(vec_size);
   getRandomVector(a);
-  std::vector<int> b(8);
+  std::vector<int> b(vec_size);
   getRandomVector(b);
 
   BENCH_FUNCTION(DotProduct, Porcupine, encryptedDotProductPorcupine, a, b);

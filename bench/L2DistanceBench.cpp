@@ -13,11 +13,15 @@ int main(int argc, char *argv[]) {
 
     std::exit(1);
   }
+  size_t vec_size = 4;
+  if (argc == 3) {
+    vec_size = atoi(argv[2]);
+  }
 
   // Create two vectors of bits (booleans),
   // TODO: Create test values from fixed random seed
-  std::vector<int> a(4, 10);
-  std::vector<int> b(4, 20);
+  std::vector<int> a(vec_size, 10);
+  std::vector<int> b(vec_size, 20);
   size_t poly_modulus_degree = 2 << 12;
 
   BENCH_FUNCTION(L2Distance, Porcupine, encryptedL2DistanceSquared_Porcupine, a, b);

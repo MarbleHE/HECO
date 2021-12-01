@@ -175,7 +175,7 @@ int encryptedHammingDistancePorcupine(
 {
   auto keygenTimer = timer.startTimer();
   if (a.size() != 4 || b.size() != 4) {
-    std::cout << "WARNING: The porcupine example of hamming distance assumes that 4 elements are given." << std::endl;
+    throw std::runtime_error("The porcupine example of hamming distance assumes that 4 elements are given.");
   }
 
   // Context Setup
