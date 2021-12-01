@@ -83,6 +83,10 @@ uint64_t encryptedNaiveHammingDistance(MultiTimer &timer, const std::vector<bool
 uint64_t encryptedBatchedHammingDistance(
         MultiTimer &timer, const std::vector<bool> &a, const std::vector<bool> &b, size_t poly_modulus_degree, bool encrypt_both)
 {
+  if (a.size() > poly_modulus_degree / 2)
+  {
+    std::cerr << "WARNING: HammingDistance might be incorrect when vector size is larger than N/2." << std::endl;
+  }
 
   // Context Setup
   auto keygenTimer = timer.startTimer();
@@ -138,12 +142,7 @@ uint64_t encryptedBatchedHammingDistance(
 
   // Fold-and-Sum
   seal::Ciphertext rotation_ctxt;
-  // annoyingly, the first rotation has to be done separately
-  evaluator.rotate_columns(a_ctxt, galoisKeys, rotation_ctxt);
-  evaluator.add_inplace(a_ctxt, rotation_ctxt);
-  // Now rotate over the rows automatically
-  for (auto i = parameters.poly_modulus_degree() / 4; i > 0; i >>= 1)
-  {
+  for (auto i = a.size() / 2; i > 0; i /= 2) {
     evaluator.rotate_rows(a_ctxt, i, galoisKeys, rotation_ctxt);
     evaluator.add_inplace(a_ctxt, rotation_ctxt);
   }
