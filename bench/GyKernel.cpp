@@ -146,7 +146,6 @@ std::vector<int64_t> encryptedGyKernelPorcupine(
   }
 
   int img_size = (int) std::sqrt(img.size());
-  std::vector<int> rotations = {-1 * img_size, img_size - 1, img_size + 1};
 
   // Context Setup
   seal::EncryptionParameters parameters(seal::scheme_type::bfv);
@@ -161,7 +160,7 @@ std::vector<int64_t> encryptedGyKernelPorcupine(
   seal::PublicKey publicKey;
   keygen.create_public_key(publicKey);
   seal::GaloisKeys galoisKeys;
-  keygen.create_galois_keys(rotations, galoisKeys);
+  keygen.create_galois_keys(galoisKeys);
 
   // Create helper objects
   seal::BatchEncoder encoder(context);
