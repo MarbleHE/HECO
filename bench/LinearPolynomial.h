@@ -21,6 +21,16 @@ std::vector<int64_t> encryptedLinearPolynomialPorcupine(
         size_t poly_modulus_degree
 );
 
+/// For a linear polynomial, HECO version (from the porcupine paper)
+std::vector<int64_t> encryptedLinearPolynomialBatched(
+        MultiTimer &timer,
+        std::vector<int> a,
+        std::vector<int> b,
+        std::vector<int> x,
+        std::vector<int> y,
+        size_t poly_modulus_degree
+);
+
 /// For a linear polynomial (from the porcupine paper)
 std::vector<int> encryptedLinearPolynomialNaive(
         MultiTimer &timer,

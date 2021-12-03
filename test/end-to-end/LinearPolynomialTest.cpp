@@ -76,6 +76,28 @@ TEST_F(LinearPolynomialTest, Clear_EncryptedProcupine_Equivalence) { /* NOLINT *
   EXPECT_EQ(clear, enc);
 }
 
+TEST_F(LinearPolynomialTest, Clear_EncryptedBatched_Equivalence) { /* NOLINT */
+  size_t poly_modulus_degree = 2 << 12;
+  size_t vec_size = poly_modulus_degree / 2;
+  std::vector<int> x(vec_size);
+  std::vector<int> y(vec_size);
+  std::vector<int> a(vec_size);
+  std::vector<int> b(vec_size);
+
+  LinearPolynomialTest::getRandomVector(x);
+  LinearPolynomialTest::getRandomVector(y);
+  LinearPolynomialTest::getRandomVector(a);
+  LinearPolynomialTest::getRandomVector(b);
+
+  MultiTimer dummy = MultiTimer();
+  auto encrypted = encryptedLinearPolynomialBatched(dummy, a, b, x, y, poly_modulus_degree);
+  encrypted.resize(a.size());
+  std::vector<int> enc(begin(encrypted), end(encrypted));
+
+  auto clear = linearPolynomial(a, b, x, y);
+  EXPECT_EQ(clear, enc);
+}
+
 TEST_F(LinearPolynomialTest, Clear_EncryptedNaive_Equivalence) { /* NOLINT */
   size_t poly_modulus_degree = 2 << 12;
   size_t vec_size = 32;

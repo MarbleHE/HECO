@@ -9,6 +9,7 @@ int main(int argc, char *argv[]) {
     std::cout << "       versions:" << std::endl;
     std::cout << "          - Naive" << std::endl;
     std::cout << "          - Porcupine" << std::endl;
+    std::cout << "          - HECO" << std::endl;
     std::exit(1);
   }
 
@@ -25,6 +26,7 @@ int main(int argc, char *argv[]) {
   getRandomVector(b);
 
   BENCH_FUNCTION(LinearPolynomial, Naive, encryptedLinearPolynomialNaive, a, b, x, y);
+  BENCH_FUNCTION(LinearPolynomial, HECO, encryptedLinearPolynomialBatched, a, b, x, y);
   BENCH_FUNCTION(LinearPolynomial, Porcupine, encryptedLinearPolynomialPorcupine, a, b, x, y);
 
   return 0;
