@@ -8,6 +8,7 @@ int main(int argc, char *argv[]) {
     std::cout << "USAGE: qp-bench [version]" << std::endl;
     std::cout << "       versions:" << std::endl;
     std::cout << "          - Naive" << std::endl;
+    std::cout << "          - HECO" << std::endl;
     std::cout << "          - Porcupine" << std::endl;
     std::exit(1);
   }
@@ -27,6 +28,7 @@ int main(int argc, char *argv[]) {
   getRandomVector(c);
 
   BENCH_FUNCTION(QuadraticPolynomial, Naive, encryptedQuadraticPolynomialNaive, a, b, c, x, y);
+  BENCH_FUNCTION(QuadraticPolynomial, HECO, encryptedQuadraticPolynomialBatched, a, b, c, x, y);
   BENCH_FUNCTION(QuadraticPolynomial, Porcupine, encryptedQuadraticPolynomialPorcupine, a, b, c, x, y);
 
   return 0;

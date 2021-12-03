@@ -54,7 +54,7 @@ class QuadraticPolynomialTest : public ::testing::Test {  /* NOLINT (predictable
 };
 
 #ifdef HAVE_SEAL_BFV
-TEST_F(QuadraticPolynomialTest, Clear_EncryptedProcupine_Equivalence) { /* NOLINT */
+TEST_F(QuadraticPolynomialTest, Clear_EncryptedPorcupine_Equivalence) { /* NOLINT */
   size_t poly_modulus_degree = 2 << 13;
   size_t vec_size = 32;
   std::vector<int> x(vec_size);
@@ -71,6 +71,30 @@ TEST_F(QuadraticPolynomialTest, Clear_EncryptedProcupine_Equivalence) { /* NOLIN
 
   MultiTimer dummy = MultiTimer();
   auto encrypted = encryptedQuadraticPolynomialPorcupine(dummy, a, b, c, x, y, poly_modulus_degree);
+  encrypted.resize(vec_size);
+  std::vector<int> enc(begin(encrypted), end(encrypted));
+
+  auto clear = quadraticPolynomial(a, b, c, x, y);
+  EXPECT_EQ(clear, enc);
+}
+
+TEST_F(QuadraticPolynomialTest, Clear_EncryptedBatched_Equivalence) { /* NOLINT */
+  size_t poly_modulus_degree = 2 << 13;
+  size_t vec_size = 32;
+  std::vector<int> x(vec_size);
+  std::vector<int> y(vec_size);
+  std::vector<int> a(vec_size);
+  std::vector<int> b(vec_size);
+  std::vector<int> c(vec_size);
+
+  QuadraticPolynomialTest::getRandomVector(x);
+  QuadraticPolynomialTest::getRandomVector(y);
+  QuadraticPolynomialTest::getRandomVector(a);
+  QuadraticPolynomialTest::getRandomVector(b);
+  QuadraticPolynomialTest::getRandomVector(c);
+
+  MultiTimer dummy = MultiTimer();
+  auto encrypted = encryptedQuadraticPolynomialBatched(dummy, a, b, c, x, y, poly_modulus_degree);
   encrypted.resize(vec_size);
   std::vector<int> enc(begin(encrypted), end(encrypted));
 

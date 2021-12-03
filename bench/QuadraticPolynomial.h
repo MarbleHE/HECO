@@ -15,6 +15,18 @@ std::vector<int64_t> encryptedQuadraticPolynomialPorcupine(
         size_t poly_modulus_degree
 );
 
+/// For a quadratic polynomial (from the porcupine paper)
+/// This the batched HECO version
+std::vector<int64_t> encryptedQuadraticPolynomialBatched(
+        MultiTimer &timer,
+        std::vector<int> a,
+        std::vector<int> b,
+        std::vector<int> c,
+        std::vector<int> x,
+        std::vector<int> y,
+        size_t poly_modulus_degree
+);
+
 ///  For a quadratic polynomial (from the porcupine paper)
 /// This is the naive non-batched version
 std::vector<int> encryptedQuadraticPolynomialNaive(

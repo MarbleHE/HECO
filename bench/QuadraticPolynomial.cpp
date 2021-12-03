@@ -95,6 +95,85 @@ std::vector<int64_t> encryptedQuadraticPolynomialPorcupine(
   return result;
 }
 
+/// For a quadratic polynomial (from the porcupine paper)
+/// This the batched HECO version
+std::vector<int64_t> encryptedQuadraticPolynomialBatched(
+        MultiTimer &timer,
+        std::vector<int> a,
+        std::vector<int> b,
+        std::vector<int> c,
+        std::vector<int> x,
+        std::vector<int> y,
+        size_t poly_modulus_degree)
+{
+  // Context Setup
+  auto keygenTimer = timer.startTimer();
+
+  seal::EncryptionParameters parameters(seal::scheme_type::bfv);
+  parameters.set_poly_modulus_degree(poly_modulus_degree);
+  parameters.set_coeff_modulus(seal::CoeffModulus::BFVDefault(parameters.poly_modulus_degree()));
+  parameters.set_plain_modulus(seal::PlainModulus::Batching(parameters.poly_modulus_degree(), 60));
+  seal::SEALContext context(parameters);
+
+  /// Create keys
+  seal::KeyGenerator keygen(context);
+  seal::SecretKey secretKey = keygen.secret_key();
+  seal::PublicKey publicKey;
+  keygen.create_public_key(publicKey);
+  seal::RelinKeys relinKeys;
+  keygen.create_relin_keys(relinKeys);
+
+  // Create helper objects
+  seal::BatchEncoder encoder(context);
+  seal::Encryptor encryptor(context, publicKey, secretKey);
+  seal::Decryptor decryptor(context, secretKey);
+  seal::Evaluator evaluator(context);
+  timer.stopTimer(keygenTimer);
+
+  // Encode & Encrypt
+  auto encTimer = timer.startTimer();
+  seal::Plaintext a_ptxt, b_ptxt, c_ptxt, x_ptxt, y_ptxt;
+  seal::Ciphertext a_ctxt, b_ctxt, c_ctxt, x_ctxt, y_ctxt;
+
+  encoder.encode(std::vector<int64_t>(begin(a), end(a)), a_ptxt);
+  encoder.encode(std::vector<int64_t>(begin(b), end(b)), b_ptxt);
+  encoder.encode(std::vector<int64_t>(begin(c), end(c)), c_ptxt);
+  encoder.encode(std::vector<int64_t>(begin(x), end(x)), x_ptxt);
+  encoder.encode(std::vector<int64_t>(begin(y), end(y)), y_ptxt);
+
+  encryptor.encrypt(a_ptxt, a_ctxt);
+  encryptor.encrypt(b_ptxt, b_ctxt);
+  encryptor.encrypt(c_ptxt, c_ctxt);
+  encryptor.encrypt(x_ptxt, x_ctxt);
+  encryptor.encrypt(y_ptxt, y_ctxt);
+  timer.stopTimer(encTimer);
+
+  // Compute
+  auto compTimer = timer.startTimer();
+
+  evaluator.multiply_inplace(b_ctxt, x_ctxt);
+  evaluator.square_inplace(x_ctxt);
+  evaluator.relinearize_inplace(x_ctxt, relinKeys);
+  evaluator.multiply_inplace(a_ctxt, x_ctxt);
+
+  evaluator.add_inplace(a_ctxt, b_ctxt);
+  evaluator.add_inplace(a_ctxt, c_ctxt);
+
+  seal::Ciphertext result_ctxt;
+  evaluator.sub(y_ctxt, a_ctxt, result_ctxt);
+
+  timer.stopTimer(compTimer);
+
+  // Decrypt results
+  auto decTimer = timer.startTimer();
+  std::vector<int64_t> result(a.size());
+  seal::Plaintext result_ptxt;
+  decryptor.decrypt(result_ctxt, result_ptxt);
+  encoder.decode(result_ptxt, result);
+  timer.stopTimer(decTimer);
+  return result;
+}
+
 ///  For a quadratic polynomial (from the porcupine paper)
 /// This is the naive non-batched version
 std::vector<int> encryptedQuadraticPolynomialNaive(
