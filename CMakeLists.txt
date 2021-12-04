@@ -204,6 +204,7 @@ set(PUBLIC_HEADERS
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/VariableMap.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/ExpressionBatcher.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/HashVisitor.h
+        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/MLIRTransformVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/PrintVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/ProgramPrintVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/SecretBranchingVisitor.h

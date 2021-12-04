@@ -14,10 +14,6 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(googletest)
 
-# TODO: don't set this manually, this is just a quick hack trying to get the build working
-set(MLIR_DIR /usr/local/lib/cmake/mlir)
-set(LVM_EXTERNAL_LIT /home/user/Documents/ETH/Job/llvm-project/build/bin/llvm-lit)
-
 find_package(MLIR REQUIRED CONFIG)
 
 message(STATUS "Using MLIRConfig.cmake in: ${MLIR_DIR}")
