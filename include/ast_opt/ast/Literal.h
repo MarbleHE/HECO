@@ -201,7 +201,7 @@ template<>
 inline std::string Literal<float>::getNodeType() const { return "LiteralFloat"; };
 
 template<>
-inline std::string Literal<double>::getNodeType() const { return "LiteralBool"; };
+inline std::string Literal<double>::getNodeType() const { return "LiteralDouble"; };
 
 template<>
 inline std::string Literal<std::string>::getNodeType() const { return "LiteralString"; };
