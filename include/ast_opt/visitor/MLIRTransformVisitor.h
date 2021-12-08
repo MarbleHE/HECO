@@ -27,6 +27,7 @@ class SpecialMLIRTransformVisitor : public PlainVisitor {
   mlir::OpBuilder builder;
   // TODO: change to mlir::OwningModuleRef
   mlir::FloatAttr module;
+  mlir::Attribute attr;
 
  public:
   explicit SpecialMLIRTransformVisitor(mlir::FloatAttr module, mlir::MLIRContext &context);
@@ -54,10 +55,10 @@ class SpecialMLIRTransformVisitor : public PlainVisitor {
 //  void visit(LiteralChar &elem);
 //
 //  void visit(LiteralInt &elem);
-
-  void visit(LiteralFloat &elem);
-
-//  void visit(LiteralDouble &elem);
+//
+//  void visit(LiteralFloat &elem);
+//
+  void visit(LiteralDouble &elem);
 //
 //  void visit(LiteralString &elem);
 //
@@ -70,9 +71,9 @@ class SpecialMLIRTransformVisitor : public PlainVisitor {
 //  void visit(UnaryExpression &elem);
 //
 //  void visit(Assignment &elem);
-//
-//  void visit(VariableDeclaration &elem);
-//
+
+  void visit(VariableDeclaration &elem);
+
 //  void visit(Variable &elem);
 
 };

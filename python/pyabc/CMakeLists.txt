@@ -25,19 +25,15 @@ set_target_properties(
 # XXX: Add libraries used in python wrapper here
 get_property(dialect_libs GLOBAL PROPERTY MLIR_DIALECT_LIBS)
 get_property(conversion_libs GLOBAL PROPERTY MLIR_CONVERSION_LIBS)
+
 set(LIBS
     ast_opt
     ${dialect_libs}
     ${conversion_libs}
-#    MLIRArithmetic
-#    MLIROptLib
-#    MLIRAnalysis
     MLIRIR
-#    MLIRParser
-#    MLIRSideEffectInterfaces
-#    MLIRTransforms
+    MLIRABC
 )
-
+llvm_update_compile_flags(pyabc)
 target_link_libraries(pyabc
     PRIVATE
     ${LIBS}
@@ -50,4 +46,7 @@ target_link_options(pyabc
     # came through.
     $<$<PLATFORM_ID:Linux>:LINKER:--exclude-libs,ALL>
 )
+
+mlir_check_all_link_libraries(pyabc)
+
 

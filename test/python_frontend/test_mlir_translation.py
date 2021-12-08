@@ -13,7 +13,8 @@ def test_mlir_constant_float():
 
     with ABCContext(p, logging.DEBUG):
         def main():
-            return 1.0
+            r = 10.0
+            return r
 
     r = p.execute()
-    assert r == 1.0
+    assert r == 2.0

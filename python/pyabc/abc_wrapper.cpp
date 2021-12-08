@@ -60,7 +60,6 @@ class ABCProgramWrapper {
 
     MLIRTransformVisitor v(module, context);
     programAst->accept(v);
-    module.dump();
 
     // TODO: where can we mark arguments as secret? The args argument has a boolen for those that should be secret, but do
     //    we have to already mark them while/before parsing the AST or only when executing?
