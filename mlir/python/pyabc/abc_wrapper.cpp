@@ -3,7 +3,6 @@
 #include <ast_opt/parser/Parser.h>
 #include <ast_opt/parser/Errors.h>
 #include <ast_opt/visitor/ProgramPrintVisitor.h>
-#include <ast_opt/visitor/MLIRTransformVisitor.h>
 #include <ast_opt/runtime/DummyCiphertext.h>
 #include <ast_opt/compiler/Compiler.h>
 #include <ast_opt/runtime/Cleartext.h>
@@ -54,12 +53,6 @@ class ABCProgramWrapper {
     programAst = Parser::parseJson(program);
 
     // TODO: WIP transition to MLIR
-
-    mlir::MLIRContext context;
-    mlir::FloatAttr module;
-
-    MLIRTransformVisitor v(module, context);
-    programAst->accept(v);
 
     // TODO: where can we mark arguments as secret? The args argument has a boolen for those that should be secret, but do
     //    we have to already mark them while/before parsing the AST or only when executing?

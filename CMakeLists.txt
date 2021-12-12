@@ -10,16 +10,6 @@ if (MSVC)
     cmake_policy(SET CMP0091 NEW)
 endif ()
 
-# Set to test the python frontend. On by default.
-if(NOT PYTHON_FRONTEND_DEV)
-    set(PYTHON_FRONTEND_DEV true)
-endif()
-
-# Set to build the python frontend (installing pybind11 and building the wrapper). On by default.
-if(NOT PYTHON_FRONTEND_BUILD)
-    set(PYTHON_FRONTEND_BUILD true)
-endif()
-
 project(ast_optimizer
         VERSION 0.1
         DESCRIPTION "Optimizer for Fully Homomorphic Encryption (FHE) working on an AST-like (Abstract Syntax Tree) representation of a program"
@@ -131,7 +121,6 @@ set(SOURCE_FILES
         ${ast_optimizer_SOURCE_DIR}/src/utilities/ScopedVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/ExpressionBatcher.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/HashVisitor.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/visitor/MLIRTransformVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/ParentSettingVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/PrintVisitor.cpp
         ${ast_optimizer_SOURCE_DIR}/src/visitor/ProgramPrintVisitor.cpp
@@ -204,7 +193,6 @@ set(PUBLIC_HEADERS
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/VariableMap.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/ExpressionBatcher.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/HashVisitor.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/MLIRTransformVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/PrintVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/ProgramPrintVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/SecretBranchingVisitor.h
@@ -268,14 +256,6 @@ install(EXPORT ast_optTargets
         NAMESPACE ast_opt::
         DESTINATION lib/cmake/ast_opt)
 
-# Install pyabc package (for dev)
-find_package (Python3 COMPONENTS Interpreter Development)
-
-if(NOT Python3_Interpreter_FOUND)
-    message(WARNING "The ABC python frontend requires Python 3, but no installation
-        was found. Skipping frontend building...")
-endif()
-
 ##############################
 # TARGET: ast_demo
 #
@@ -311,28 +291,3 @@ endif ()
 # A collection of benchmarks
 ##############################
 #add_subdirectory(bench EXCLUDE_FROM_ALL)
-
-
-####################################################################################
-# Python Frontend
-#
-# Use pybind11 as C++ wrapper for the Python frontend
-####################################################################################
-
-if(PYTHON_FRONTEND_BUILD)
-    include(FetchContent)
-    set(JSON_BuildTests OFF CACHE INTERNAL "")
-    set(FETCHCONTENT_UPDATES_DISCONNECTED ON)
-    FetchContent_Declare(
-    pybind11
-    GIT_REPOSITORY https://github.com/pybind/pybind11.git
-    GIT_TAG v2.7.1)
-
-    FetchContent_GetProperties(pybind11)
-    if(NOT pybind11_POPULATED)
-        FetchContent_Populate(pybind11)
-        add_subdirectory(${pybind11_SOURCE_DIR} ${pybind11_BINARY_DIR})
-    endif()
-    add_subdirectory(python)
-endif()
-

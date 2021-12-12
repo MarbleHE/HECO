@@ -1,7 +1,7 @@
 include(AddMLIRPython)
 
 pybind11_add_module(pyabc
-    abc_wrapper.cpp
+        abc_wrapper.cpp
 )
 
 target_compile_options(pyabc PRIVATE
