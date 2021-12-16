@@ -14,8 +14,15 @@ int main(int argc, char *argv[]) {
     std::exit(1);
   }
 
-  size_t poly_modulus_degree = 2 << 12;
-  size_t size = std::sqrt(poly_modulus_degree / 2);
+  size_t size = 64;
+  if (argc == 3) {
+    size = atoi(argv[2]);
+  }
+
+  size_t poly_modulus_degree = size * size * 2;
+  if (poly_modulus_degree < 8192) {
+    poly_modulus_degree = 8192;
+  }
   std::vector<int> img;
   getInputMatrix(size, img);
 
