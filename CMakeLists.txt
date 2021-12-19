@@ -200,7 +200,7 @@ set(PUBLIC_HEADERS
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/Vectorizer.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/controlFlowGraph/ControlFlowGraphVisitor.h
         ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/controlFlowGraph/NodeRelationship.h
-        )
+)
 
 # build a library out of the code to be used by the tests
 add_library(ast_opt ${SOURCE_FILES} ${HEADER_ONLY_SOURCES})

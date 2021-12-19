@@ -30,6 +30,19 @@ add_definitions(${LLVM_DEFINITIONS})
 
 add_subdirectory(include)
 add_subdirectory(lib)
+set(SOURCE_FILES
+    ${PROJECT_SOURCE_DIR}/src/visitor/abc_ast_to_mlir_visitor.cpp
+)
+set(PUBLIC_HEADERS
+    ${PROJECT_SOURCE_DIR}/include/ast_opt_mlir/visitor/abc_ast_to_mlir_visitor.h
+)
+add_library(ast_opt_mlir ${SOURCE_FILES})
+target_include_directories(ast_opt_mlir PUBLIC
+        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>)
+set_target_properties(ast_opt PROPERTIES PUBLIC_HEADER "${PUBLIC_HEADERS}")
+set_target_properties(ast_opt_mlir PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
+target_compile_features(ast_opt_mlir PUBLIC cxx_std_17)
 
 ####################################################################################
 # Python Frontend

@@ -7,8 +7,21 @@
 #include <ast_opt/compiler/Compiler.h>
 #include <ast_opt/runtime/Cleartext.h>
 
+#include <ABC/ABCDialect.h>
+#include <ast_opt_mlir/visitor/abc_ast_to_mlir_visitor.h>
+
 namespace py = pybind11;
 using json = nlohmann::json;
+
+void abc_ast_to_mlir(std::unique_ptr<AbstractNode> programAst) {
+  std::cout << programAst->toJson() << std::endl;
+
+  mlir::MLIRContext ctx;
+  ctx.getOrLoadDialect<abc::ABCDialect>();
+
+  AbcAstToMlirVisitor v(ctx);
+  programAst->accept(v);
+}
 
 /// Class storing a program and intermediate state. E.g., it stores a pre-compiled program AST to avoid
 /// having to pass a unique pointer to Python.
@@ -53,6 +66,7 @@ class ABCProgramWrapper {
     programAst = Parser::parseJson(program);
 
     // TODO: WIP transition to MLIR
+    abc_ast_to_mlir(programAst->clone());
 
     // TODO: where can we mark arguments as secret? The args argument has a boolen for those that should be secret, but do
     //    we have to already mark them while/before parsing the AST or only when executing?

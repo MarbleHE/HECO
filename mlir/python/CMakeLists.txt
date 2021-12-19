@@ -16,3 +16,16 @@ add_custom_command(TARGET python
 )
 
 install(CODE "execute_process(COMMAND ${Python3_EXECUTABLE} -m pip install ${CMAKE_BINARY_DIR}/python)")
+
+
+declare_mlir_python_sources(pyabcSources
+    ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}"
+    SOURCES_GLOB pyabc/*.py
+)
+
+add_mlir_python_modules(pyabcModule
+    ROOT_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/pyabc"
+    INSTALL_PREFIX "python_packages/pyabc"
+    DECLARED_SOURCES
+    pyabcSources
+)
