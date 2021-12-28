@@ -19,6 +19,10 @@ class SpecialAbcAstToMlirVisitor : public PlainVisitor {
  private:
   mlir::OpBuilder builder;
   mlir::ModuleOp module;
+  mlir::Block *block;
+
+  void add_op(mlir::Operation *op);
+  void recursive_visit(AbstractNode &node, mlir::Block *childBlock);
 
  public:
   SpecialAbcAstToMlirVisitor(mlir::MLIRContext &ctx);
@@ -42,22 +46,24 @@ class SpecialAbcAstToMlirVisitor : public PlainVisitor {
 //  void visit(If &elem);
 //
 //  void visit(IndexAccess &elem);
-//
-//  void visit(LiteralBool &elem);
-//
-//  void visit(LiteralChar &elem);
-//
-//  void visit(LiteralInt &elem);
-//
-//  void visit(LiteralFloat &elem);
-//
-//  void visit(LiteralDouble &elem);
-//
-//  void visit(LiteralString &elem);
-//
+
+  void visit(LiteralBool &elem);
+
+  void visit(LiteralChar &elem);
+
+  void visit(LiteralInt &elem);
+
+  void visit(LiteralFloat &elem);
+
+  void visit(LiteralDouble &elem);
+
+  void visit(LiteralString &elem);
+
 //  void visit(OperatorExpression &elem);
 
   void visit(Return &elem);
+
+  void visit(AbstractStatement &stmt);
 
 //  void visit(TernaryOperator &elem);
 //
@@ -67,7 +73,7 @@ class SpecialAbcAstToMlirVisitor : public PlainVisitor {
 
   void visit(VariableDeclaration &elem);
 
-//  void visit(Variable &elem);
+  void visit(Variable &elem);
 
 };
 
