@@ -2,6 +2,7 @@
 #define AST_OPTIMIZER_BENCHMARKHELPER_H
 
 #include <random>
+#include <string>
 
 // use this fixed seed to enable reproducibility of the matrix inputs
 #define RAND_SEED 4673838
@@ -15,7 +16,11 @@
     auto result = FUNCTION_NAME(timer, __VA_ARGS__, poly_modulus_degree);                            \
     timer.addIteration();                                                                            \
   }                                                                                                  \
-  timer.printToFile( #PROBLEM "_" #VERSION "_64.csv");                                               \
+  std::string size_string = "64";                                                                    \
+  if (argc == 3) {                                                                                   \
+    size_string = argv[2];                                                                           \
+  }                                                                                                  \
+  timer.printToFile( #PROBLEM "_" #VERSION "_"+size_string+".csv");                                  \
 }
 
 void getInputMatrix(size_t size, std::vector<std::vector<int>> &destination) {

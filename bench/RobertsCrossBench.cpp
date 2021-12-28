@@ -16,6 +16,14 @@ int main(int argc, char *argv[]) {
 
   size_t poly_modulus_degree = 2 << 12;
   size_t size = std::sqrt(poly_modulus_degree / 2);
+  if (argc == 3) {
+    size = atoi(argv[2]);
+    size_t s_square = size*size;
+    // Ensure that total items is less than half of modulus
+    // Search for poly_modulus degree that's a power of 2 and large enough
+    while (s_square > poly_modulus_degree / 2) poly_modulus_degree *= 2;
+  }
+
   std::vector<int> img;
   getInputMatrix(size, img);
 
