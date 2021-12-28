@@ -11,10 +11,8 @@ SpecialAbcAstToMlirVisitor::SpecialAbcAstToMlirVisitor(mlir::MLIRContext &ctx) :
 void SpecialAbcAstToMlirVisitor::add_op(mlir::Operation *op) {
   if (block->empty()) {
     block->push_back(op);
-    block->dump();
   } else {
     module.push_back(op);
-    module.dump();
   }
 }
 
@@ -61,8 +59,6 @@ void SpecialAbcAstToMlirVisitor::visit(AbstractExpression &expr) {
     visit(*litInt);
   } else if (auto litStr = dynamic_cast<LiteralString *>(&expr)) {
     visit(*litStr);
-  } else if (auto litBool = dynamic_cast<LiteralBool *>(&expr)) {
-    visit(*litBool);
   } else if (auto ternOp = dynamic_cast<TernaryOperator *>(&expr)) {
     visit(*ternOp);
   } else {
@@ -70,16 +66,86 @@ void SpecialAbcAstToMlirVisitor::visit(AbstractExpression &expr) {
   }
 }
 
+void SpecialAbcAstToMlirVisitor::visit(Assignment &elem) {
+  // TODO
+}
+
+void SpecialAbcAstToMlirVisitor::visit(BinaryExpression &elem) {
+  auto opAttr = builder.getStringAttr(llvm::Twine(elem.getOperator().toString()));
+  auto binExpr = builder.create<BinaryExpressionOp>(builder.getUnknownLoc(), opAttr);
+
+  // Add LHS
+  mlir::Block *lhsBlock = new mlir::Block();
+  binExpr.getRegion(0).push_back(lhsBlock);
+  recursive_visit(elem.getLeft(), lhsBlock);
+
+  // Add RHS
+  mlir::Block *rhsBlock = new mlir::Block();
+  binExpr.getRegion(1).push_back(rhsBlock);
+  recursive_visit(elem.getRight(), rhsBlock);
+
+  // Add binary operation
+  add_op(binExpr);
+}
+
 void SpecialAbcAstToMlirVisitor::visit(Block &elem) {
-  std::cout << "Visited block" << std::endl;
-  auto newBlockPtr = std::make_unique<mlir::Block>();
-  // TODO: add block
-//  block = newBlockPtr.get();
-  for (auto &s: elem.getStatements()) {
+  // Temporarily collect statements in a different block
+  mlir::Block *prevBlock = block;
+  block = new mlir::Block();
+
+  // Iterate over all statements
+  for (auto &s : elem.getStatements()) {
     std::cout << s.get().toJson() << std::endl;
     s.get().accept(*this);
   }
-//  module.getRegion().push_back(newBlockPtr.get());
+
+  // Add abc.block op
+  auto blockOp = builder.create<BlockOp>(builder.getUnknownLoc());
+  blockOp.getRegion().push_back(block);
+  prevBlock->push_back(blockOp);
+  block = prevBlock;
+}
+
+// TODO: Functions are not yet supported by the frontend
+void SpecialAbcAstToMlirVisitor::visit(Call &elem) {
+  auto fnName = builder.getStringAttr(llvm::Twine(elem.getIdentifier()));
+  auto callOp = builder.create<CallOp>(builder.getUnknownLoc(), fnName);
+
+  mlir::Block *argBlock;
+  for (auto argExpr : elem.getArguments()) {
+    argBlock = new mlir::Block();
+    callOp.arguments().push_back(argBlock);
+    recursive_visit(argExpr, argBlock);
+  }
+}
+
+void SpecialAbcAstToMlirVisitor::visit(For &elem) {
+  auto forOp = builder.create<ForOp>(builder.getUnknownLoc());
+
+  // Convert initializer
+  mlir::Block *initBlock = new mlir::Block();
+  forOp.initializer().push_back(initBlock);
+  recursive_visit(elem.getInitializer(), initBlock);
+
+  // Convert condition
+  mlir::Block *condBlock = new mlir::Block();
+  forOp.condition().push_back(condBlock);
+  recursive_visit(elem.getCondition(), condBlock);
+
+  // Convert update
+  mlir::Block *updateBlock = new mlir::Block();
+  forOp.update().push_back(updateBlock);
+  recursive_visit(elem.getUpdate(), updateBlock);
+
+  // Convert body
+  mlir::Block *bodyBlock = new mlir::Block();
+  forOp.body().push_back(bodyBlock);
+  recursive_visit(elem.getBody(), bodyBlock);
+
+  // Add for operation
+  add_op(forOp);
+
+  module->dump();
 }
 
 void SpecialAbcAstToMlirVisitor::visit(LiteralBool &elem) {
@@ -103,7 +169,6 @@ void SpecialAbcAstToMlirVisitor::visit(LiteralFloat &elem) {
 }
 
 void SpecialAbcAstToMlirVisitor::visit(LiteralDouble &elem) {
-  std::cout << "MLIR Translation Visitor: visited LiteralDouble" << std::endl;
   auto f64val = builder.getF64FloatAttr(elem.getValue());
   block->push_back(builder.create<LiteralDoubleOp>(builder.getUnknownLoc(), f64val));
 }
@@ -147,35 +212,16 @@ void SpecialAbcAstToMlirVisitor::visit(VariableDeclaration &elem) {
   }
   std::string name = elem.getTarget().getIdentifier();
 
-//  mlir::Block *targetBlock = new mlir::Block();
-//  recursive_visit(elem.getValue(), targetBlock);
-//
-//  auto targetExpr = targetBlock->;
-//  auto varDeclOp = builder.create<VariableDeclarationOp>(builder.getUnknownLoc(),  name, attr.getType(), 1);
-//  add_op(varDeclOp);
-//
-//  mlir::Attribute attr;
-//  if (elem.getDatatype() == Datatype(Type::VOID)) {
-//    attr = builder.getF64FloatAttr(dynamic_cast<const LiteralDouble &>(elem.getValue()).getValue());
-//  }
-//  // TODO: replace with recursive call to visit
-//  // TODO: how do we evaluate expressions here?
-//
-//  auto var_decl = builder.create<VariableDeclarationOp>(builder.getUnknownLoc(),  name, attr.getType(), 1);
-//  mlir::OperationState result = mlir::OperationState(builder.getUnknownLoc(), name);
-//  result.addRegion();
-//  auto assign = builder.create<LiteralDoubleOp>(builder.getUnknownLoc(), builder.getF64FloatAttr(dynamic_cast<const LiteralDouble &>(elem.getValue()).getValue()));
-////  var_decl->getBlock()->push_back(assign);
-////  result.regions.front()->push_back(assign->getBlock());
-////  auto op = builder.createOperation(result);
-//  // TODO: find a way how to assign te value here
-//  block->push_back(assign);
-//  block->push_back(var_decl);
-//  block->dump();
+  mlir::Block *targetBlock = new mlir::Block();
+  recursive_visit(elem.getValue(), targetBlock);
+
+  auto targetAttr = targetBlock->front().getAttr("value");
+  auto varDeclOp = builder.create<VariableDeclarationOp>(builder.getUnknownLoc(),  name, targetAttr.getType(), 1);
+  varDeclOp.getRegion(0).push_back(targetBlock);
+  add_op(varDeclOp);
 }
 
 void SpecialAbcAstToMlirVisitor::visit(Variable &elem) {
-  std::cout << "MLIR Translation Visitor: visited Variable" << std::endl;
   auto varOp = builder.create<VariableOp>(builder.getUnknownLoc(), elem.getIdentifier());
   block->push_back(varOp);
 }

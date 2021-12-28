@@ -29,16 +29,16 @@ class SpecialAbcAstToMlirVisitor : public PlainVisitor {
 
   void visit(AbstractExpression &expr);
 
-//  void visit(BinaryExpression &elem);
+  void visit(BinaryExpression &elem);
 
   void visit(Block &elem);
 
-//  void visit(Call &elem);
-//
+  void visit(Call &elem);
+
 //  void visit(ExpressionList &elem);
-//
-//  void visit(For &elem);
-//
+
+  void visit(For &elem);
+
 //  void visit(Function &elem);
 //
 //  void visit(FunctionParameter &elem);
@@ -68,8 +68,8 @@ class SpecialAbcAstToMlirVisitor : public PlainVisitor {
 //  void visit(TernaryOperator &elem);
 //
 //  void visit(UnaryExpression &elem);
-//
-//  void visit(Assignment &elem);
+
+  void visit(Assignment &elem);
 
   void visit(VariableDeclaration &elem);
 
