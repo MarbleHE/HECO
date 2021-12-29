@@ -4,9 +4,9 @@
 
 using namespace abc;
 
-SpecialAbcAstToMlirVisitor::SpecialAbcAstToMlirVisitor(mlir::MLIRContext &ctx) : builder(&ctx) {
-  module = mlir::ModuleOp::create(builder.getUnknownLoc());
-}
+/*
+ * Private functions
+ */
 
 void SpecialAbcAstToMlirVisitor::add_op(mlir::Operation *op) {
   if (block->empty()) {
@@ -55,6 +55,18 @@ void SpecialAbcAstToMlirVisitor::recursive_visit(AbstractNode &node, mlir::Block
     throw stork::runtime_error("Unknown subclass of AbstractNode.");
   }
   block = parentBlock;
+}
+
+/*
+ * Public functions
+ */
+
+SpecialAbcAstToMlirVisitor::SpecialAbcAstToMlirVisitor(mlir::MLIRContext &ctx) : builder(&ctx) {
+  module = mlir::ModuleOp::create(builder.getUnknownLoc());
+}
+
+mlir::ModuleOp SpecialAbcAstToMlirVisitor::getModule() {
+  return module;
 }
 
 void SpecialAbcAstToMlirVisitor::visit(AbstractExpression &expr) {

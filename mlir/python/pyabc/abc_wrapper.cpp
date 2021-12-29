@@ -14,13 +14,19 @@ namespace py = pybind11;
 using json = nlohmann::json;
 
 void abc_ast_to_mlir(std::unique_ptr<AbstractNode> programAst) {
-  std::cout << programAst->toJson() << std::endl;
-
   mlir::MLIRContext ctx;
   ctx.getOrLoadDialect<abc::ABCDialect>();
 
   AbcAstToMlirVisitor v(ctx);
   programAst->accept(v);
+
+  auto module = v.getModule();
+
+  // TODO (Miro): Rewrite the Python part to parse the entire content of the ABCContext with block, including the main
+  //  function (currently, this would break the exisiting ABC AST execution).
+  //  The following returns an empty module, since only functions are added to the module, but the
+  //  main function is not parsed atm.
+  module.dump();
 }
 
 /// Class storing a program and intermediate state. E.g., it stores a pre-compiled program AST to avoid
@@ -65,7 +71,7 @@ class ABCProgramWrapper {
   explicit ABCProgramWrapper(const std::string program, const std::string args) {
     programAst = Parser::parseJson(program);
 
-    // TODO: WIP transition to MLIR
+    // Translate ABC AST to MLIR
     abc_ast_to_mlir(programAst->clone());
 
     // TODO: where can we mark arguments as secret? The args argument has a boolen for those that should be secret, but do

@@ -29,6 +29,8 @@ class SpecialAbcAstToMlirVisitor : public PlainVisitor {
  public:
   SpecialAbcAstToMlirVisitor(mlir::MLIRContext &ctx);
 
+  mlir::ModuleOp getModule();
+
   void visit(AbstractExpression &expr);
 
   void visit(Assignment &elem);
