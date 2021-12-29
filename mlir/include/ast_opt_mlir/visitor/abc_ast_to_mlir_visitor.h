@@ -22,6 +22,8 @@ class SpecialAbcAstToMlirVisitor : public PlainVisitor {
   mlir::Block *block;
 
   void add_op(mlir::Operation *op);
+  void add_recursive_result_to_region(AbstractNode &node, mlir::Region &region);
+  mlir::Type translate_type(Datatype abc_type);
   void recursive_visit(AbstractNode &node, mlir::Block *childBlock);
 
  public:
@@ -29,23 +31,26 @@ class SpecialAbcAstToMlirVisitor : public PlainVisitor {
 
   void visit(AbstractExpression &expr);
 
+  void visit(Assignment &elem);
+
   void visit(BinaryExpression &elem);
 
   void visit(Block &elem);
 
   void visit(Call &elem);
 
+  // TODO (Miro): What is the ABC MLIR equivalent of the expression list? There is no ExpressionListOp
 //  void visit(ExpressionList &elem);
 
   void visit(For &elem);
 
-//  void visit(Function &elem);
-//
-//  void visit(FunctionParameter &elem);
-//
-//  void visit(If &elem);
-//
-//  void visit(IndexAccess &elem);
+  void visit(Function &elem);
+
+  void visit(FunctionParameter &elem);
+
+  void visit(If &elem);
+
+  void visit(IndexAccess &elem);
 
   void visit(LiteralBool &elem);
 
@@ -59,17 +64,16 @@ class SpecialAbcAstToMlirVisitor : public PlainVisitor {
 
   void visit(LiteralString &elem);
 
-//  void visit(OperatorExpression &elem);
+  void visit(OperatorExpression &elem);
 
   void visit(Return &elem);
 
   void visit(AbstractStatement &stmt);
 
-//  void visit(TernaryOperator &elem);
-//
-//  void visit(UnaryExpression &elem);
+  // TODO (Miro): There is no ternary operator in the ABC MLIR (yet?)
+  // void visit(TernaryOperator &elem);
 
-  void visit(Assignment &elem);
+  void visit(UnaryExpression &elem);
 
   void visit(VariableDeclaration &elem);
 

@@ -16,6 +16,33 @@ void SpecialAbcAstToMlirVisitor::add_op(mlir::Operation *op) {
   }
 }
 
+void SpecialAbcAstToMlirVisitor::add_recursive_result_to_region(AbstractNode &node, mlir::Region &region) {
+  mlir::Block *block = new mlir::Block();
+  region.push_back(block);
+  recursive_visit(node, block);
+}
+
+mlir::Type SpecialAbcAstToMlirVisitor::translate_type(Datatype abc_type) {
+  // TODO (Miro): For some reason, there are no get*Type functions for Bool, Char, String
+  // TODO (Miro): Is the none type the one corresponding to void?
+  if (abc_type == Datatype(Type::BOOL))
+    return builder.getBoolAttr(false).getType();
+  else if (abc_type == Datatype(Type::CHAR))
+    return builder.getStringAttr(mlir::Twine('.')).getType();
+  else if (abc_type == Datatype(Type::DOUBLE))
+    return builder.getF64Type();
+  else if (abc_type == Datatype(Type::FLOAT))
+    return builder.getF32Type();
+  else if (abc_type == Datatype(Type::INT))
+    return builder.getI64Type();
+  else if (abc_type == Datatype(Type::STRING))
+    return builder.getStringAttr(mlir::Twine("..")).getType();
+  else if (abc_type == Datatype(Type::VOID))
+    return builder.getNoneType();
+  else
+    throw stork::runtime_error("Unknown ABC type");
+}
+
 void SpecialAbcAstToMlirVisitor::recursive_visit(AbstractNode &node, mlir::Block *childBlock) {
   // Store current block and use a fresh one for the recursive child visit
   mlir::Block *parentBlock = block;
@@ -67,7 +94,20 @@ void SpecialAbcAstToMlirVisitor::visit(AbstractExpression &expr) {
 }
 
 void SpecialAbcAstToMlirVisitor::visit(Assignment &elem) {
-  // TODO
+  auto assignOp = builder.create<AssignmentOp>(builder.getUnknownLoc());
+
+  // Target
+  mlir::Block *tarBlock = new mlir::Block();
+  assignOp.target().push_back(tarBlock);
+  recursive_visit(elem.getTarget(), tarBlock);
+
+  // Value
+  mlir::Block *valBlock = new mlir::Block();
+  assignOp.value().push_back(valBlock);
+  recursive_visit(elem.getValue(), valBlock);
+
+  // Add new assignment operation
+  add_op(assignOp);
 }
 
 void SpecialAbcAstToMlirVisitor::visit(BinaryExpression &elem) {
@@ -76,12 +116,12 @@ void SpecialAbcAstToMlirVisitor::visit(BinaryExpression &elem) {
 
   // Add LHS
   mlir::Block *lhsBlock = new mlir::Block();
-  binExpr.getRegion(0).push_back(lhsBlock);
+  binExpr.left().push_back(lhsBlock);
   recursive_visit(elem.getLeft(), lhsBlock);
 
   // Add RHS
   mlir::Block *rhsBlock = new mlir::Block();
-  binExpr.getRegion(1).push_back(rhsBlock);
+  binExpr.right().push_back(rhsBlock);
   recursive_visit(elem.getRight(), rhsBlock);
 
   // Add binary operation
@@ -95,7 +135,6 @@ void SpecialAbcAstToMlirVisitor::visit(Block &elem) {
 
   // Iterate over all statements
   for (auto &s : elem.getStatements()) {
-    std::cout << s.get().toJson() << std::endl;
     s.get().accept(*this);
   }
 
@@ -123,29 +162,80 @@ void SpecialAbcAstToMlirVisitor::visit(For &elem) {
   auto forOp = builder.create<ForOp>(builder.getUnknownLoc());
 
   // Convert initializer
-  mlir::Block *initBlock = new mlir::Block();
-  forOp.initializer().push_back(initBlock);
-  recursive_visit(elem.getInitializer(), initBlock);
+  add_recursive_result_to_region(elem.getInitializer(), forOp.initializer());
 
   // Convert condition
-  mlir::Block *condBlock = new mlir::Block();
-  forOp.condition().push_back(condBlock);
-  recursive_visit(elem.getCondition(), condBlock);
+  add_recursive_result_to_region(elem.getCondition(), forOp.condition());
 
   // Convert update
-  mlir::Block *updateBlock = new mlir::Block();
-  forOp.update().push_back(updateBlock);
-  recursive_visit(elem.getUpdate(), updateBlock);
+  add_recursive_result_to_region(elem.getUpdate(), forOp.update());
 
   // Convert body
-  mlir::Block *bodyBlock = new mlir::Block();
-  forOp.body().push_back(bodyBlock);
-  recursive_visit(elem.getBody(), bodyBlock);
+  add_recursive_result_to_region(elem.getBody(), forOp.body());
 
   // Add for operation
   add_op(forOp);
+}
 
-  module->dump();
+void SpecialAbcAstToMlirVisitor::visit(Function &elem) {
+  auto fnName = builder.getStringAttr(llvm::Twine(elem.getIdentifier()));
+  auto type = translate_type(elem.getReturnType());
+  auto fnOp = builder.create<FunctionOp>(builder.getUnknownLoc(), fnName, type);
+
+  // Add parameters
+  for (auto param : elem.getParameters()) {
+    add_recursive_result_to_region(param, fnOp.parameters());
+  }
+
+  // Add body
+  add_recursive_result_to_region(elem.getBody(), fnOp.body());
+
+  // Add function to module (XXX: this makes the assumption that there are no nested functions...)
+  module.push_back(fnOp);
+}
+
+void SpecialAbcAstToMlirVisitor::visit(FunctionParameter &elem) {
+  auto fnParamName = builder.getStringAttr(llvm::Twine(elem.getIdentifier()));
+  auto fnParamType = translate_type(elem.getParameterType());
+  auto fnParamOp = builder.create<FunctionParameterOp>(builder.getUnknownLoc(), fnParamName, fnParamType);
+
+  // add function parameter to current block
+  add_op(fnParamOp);
+}
+
+void SpecialAbcAstToMlirVisitor::visit(If &elem) {
+  auto ifOp = builder.create<IfOp>(builder.getUnknownLoc(), elem.hasElseBranch() ? 1 : 0);
+
+  // Add condition
+  add_recursive_result_to_region(elem.getCondition(), ifOp.condition());
+
+  // Add then branch
+  add_recursive_result_to_region(elem.getThenBranch(), ifOp.thenBranch());
+
+  // Add else branch if present.
+  if (elem.hasElseBranch()) {
+    // Note that MLIR would support multiple else (if) branches, but the ABC AST only supports one.
+    add_recursive_result_to_region(elem.getElseBranch(), ifOp.elseBranch().front());
+  }
+
+  // Add if condition
+  add_op(ifOp);
+}
+
+// TODO (Miro): untested, first need to fix vectors in the Python Frontend
+void SpecialAbcAstToMlirVisitor::visit(IndexAccess &elem) {
+  auto idxAccessOp = builder.create<IndexAccessOp>(builder.getUnknownLoc());
+
+  // Add target
+  add_recursive_result_to_region(elem.getTarget(), idxAccessOp.target());
+
+  // Add index expression
+  add_recursive_result_to_region(elem.getIndex(), idxAccessOp.index());
+
+  // Add index access operation
+  add_op(idxAccessOp);
+
+  block->dump();
 }
 
 void SpecialAbcAstToMlirVisitor::visit(LiteralBool &elem) {
@@ -178,11 +268,33 @@ void SpecialAbcAstToMlirVisitor::visit(LiteralString &elem) {
   block->push_back(builder.create<LiteralStringOp>(builder.getUnknownLoc(), sval));
 }
 
+// TODO (Miro): Untested
+void SpecialAbcAstToMlirVisitor::visit(OperatorExpression &elem) {
+  auto opAttr = builder.getStringAttr(llvm::Twine(elem.getOperator().toString()));
+  auto opExpr = builder.create<OperatorExpressionOp>(builder.getUnknownLoc(), opAttr, elem.getOperands().size());
+
+  // Add all operands as regions
+  int i = 1; // the i = 0 region is not used for operands
+  mlir::Block *operandBlock;
+  for (auto operand : elem.getOperands()) {
+    add_recursive_result_to_region(operand, opExpr.getRegion(i));
+    ++i;
+  }
+
+  // Add new operator expression
+  add_op(opExpr);
+}
+
 void SpecialAbcAstToMlirVisitor::visit(Return &elem) {
-  auto returnOp = builder.create<ReturnOp>(builder.getUnknownLoc(), 1);
-  mlir::Block *retBlock = new mlir::Block();
-  returnOp.getRegion(0).push_back(retBlock);
-  recursive_visit(elem.getValue(), retBlock);
+  auto returnOp = builder.create<ReturnOp>(builder.getUnknownLoc(), elem.hasValue() ? 1 : 0);
+
+  // Add returned expression
+  if (elem.hasValue()) {
+    // Note that the frontend currently only supports returning a single expression
+    add_recursive_result_to_region(elem.getValue(), returnOp.value().front());
+  }
+
+  // Add return op
   add_op(returnOp);
 }
 
@@ -204,6 +316,17 @@ void SpecialAbcAstToMlirVisitor::visit(AbstractStatement &stmt) {
   } else {
     throw stork::runtime_error("Unknown AbstractExpression type occured in ABC to MLIR translation.");
   }
+}
+
+void SpecialAbcAstToMlirVisitor::visit(UnaryExpression &elem) {
+  auto opAttr = builder.getStringAttr(llvm::Twine(elem.getOperator().toString()));
+  auto unExpr = builder.create<UnaryExpressionOp>(builder.getUnknownLoc(), opAttr);
+
+  // Add operand
+  add_recursive_result_to_region(elem.getOperand(), unExpr.operand());
+
+  // Add unary expression operation
+  add_op(unExpr);
 }
 
 void SpecialAbcAstToMlirVisitor::visit(VariableDeclaration &elem) {
