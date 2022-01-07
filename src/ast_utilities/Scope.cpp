@@ -1,7 +1,7 @@
 #include <utility>
 #include <iostream>
 
-#include "ast_opt/ast_utilities/Scope.h"
+#include "abc/ast_utilities/Scope.h"
 
 const ScopedIdentifier &Scope::resolveIdentifier(const std::string &id) const {
   // go through scopes, starting from the current scope and then walking up (parent nodes), by looking for the given

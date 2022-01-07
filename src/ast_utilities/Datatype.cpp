@@ -1,6 +1,6 @@
 #include <unordered_map>
-#include "ast_opt/ast_parser/Errors.h"
-#include "ast_opt/ast_utilities/Datatype.h"
+#include "abc/ast_parser/Errors.h"
+#include "abc/ast_utilities/Datatype.h"
 
 std::string enumToString(const Type type) {
   std::unordered_map<Type, std::string> typeToString = {

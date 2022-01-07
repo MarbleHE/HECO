@@ -19,7 +19,12 @@ set(LIBS
         MLIRTargetLLVMIRExport
         MLIRTransforms
         )
-add_llvm_executable(abc-opt LowerASTtoSSA.cpp UnrollLoops.cpp Batching.cpp Nary.cpp abc-opt.cpp)
+add_llvm_executable(abc-opt
+        ${PROJECT_SOURCE_DIR}/src/Passes/ast2ssa/LowerASTtoSSA.cpp
+        ${PROJECT_SOURCE_DIR}/src/Passes/ssa2ssa/UnrollLoops.cpp
+        ${PROJECT_SOURCE_DIR}/src/Passes/ssa2ssa/Batching.cpp
+        ${PROJECT_SOURCE_DIR}/src/Passes/ssa2ssa/Nary.cpp
+        ${PROJECT_SOURCE_DIR}/src/tools/abc-opt/abc-opt.cpp)
 
 llvm_update_compile_flags(abc-opt)
 target_link_libraries(abc-opt PRIVATE ${LIBS})

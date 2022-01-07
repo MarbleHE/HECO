@@ -1,4 +1,4 @@
-#include "ast_opt/ast/IndexAccess.h"
+#include "abc/ast/IndexAccess.h"
 #include "gtest/gtest.h"
 
 TEST(IndexAccessTest, values_ValuesGivenInCtorAreRetrievable) {

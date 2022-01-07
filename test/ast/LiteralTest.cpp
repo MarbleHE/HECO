@@ -1,6 +1,6 @@
-#include <ast_opt/ast_parser/Parser.h>
+#include <abc/ast_parser/Parser.h>
 #include "ASTComparison.h"
-#include "ast_opt/ast/Literal.h"
+#include "abc/ast/Literal.h"
 #include "gtest/gtest.h"
 
 TEST(LiteralTest, typedefCheck) {

@@ -43,8 +43,8 @@ include_directories(${PROJECT_BINARY_DIR}/include)
 link_directories(${LLVM_BUILD_LIBRARY_DIR})
 add_definitions(${LLVM_DEFINITIONS})
 
-add_subdirectory(include/ast_opt/IR)
-add_subdirectory(include/ast_opt/Passes)
+add_subdirectory(include/abc/IR)
+add_subdirectory(include/abc/Passes)
 add_subdirectory(src/IR)
 add_subdirectory(src/tools)
 
@@ -153,53 +153,53 @@ set(SOURCE_FILES
 
 # This contains all the header-only files (e.g., abstract classes, interfaces and templates that don't have *.cpp file)
 set(HEADER_ONLY_SOURCES
-        ${abc_SOURCE_DIR}/include/ast_opt/ast/AbstractExpression.h
-        ${abc_SOURCE_DIR}/include/ast_opt/ast/AbstractStatement.h
-        ${abc_SOURCE_DIR}/include/ast_opt/ast/AbstractTarget.h
-        ${abc_SOURCE_DIR}/include/ast_opt/ast/Ast.h
-        ${abc_SOURCE_DIR}/include/ast_opt/ast_utilities/IVisitor.h
-        ${abc_SOURCE_DIR}/include/ast_opt/ast_utilities/VariableMap.h
-        ${abc_SOURCE_DIR}/include/ast_opt/ast_utilities/Visitor.h)
+        ${abc_SOURCE_DIR}/include/abc/ast/AbstractExpression.h
+        ${abc_SOURCE_DIR}/include/abc/ast/AbstractStatement.h
+        ${abc_SOURCE_DIR}/include/abc/ast/AbstractTarget.h
+        ${abc_SOURCE_DIR}/include/abc/ast/Ast.h
+        ${abc_SOURCE_DIR}/include/abc/ast_utilities/IVisitor.h
+        ${abc_SOURCE_DIR}/include/abc/ast_utilities/VariableMap.h
+        ${abc_SOURCE_DIR}/include/abc/ast_utilities/Visitor.h)
 
 # This contains the headers that developers that want to link directly against ABC might need to have access to
 # These are the headers that are installed when ABC is installed as a system-wide library
 set(PUBLIC_HEADERS
-        ${abc_SOURCE_DIR}/include/ast_opt/ast/AbstractExpression.h
-        ${abc_SOURCE_DIR}/include/ast_opt/ast/AbstractNode.h
-        ${abc_SOURCE_DIR}/include/ast_opt/ast/AbstractStatement.h
-        ${abc_SOURCE_DIR}/include/ast_opt/ast/Assignment.h
-        ${abc_SOURCE_DIR}/include/ast_opt/ast/BinaryExpression.h
-        ${abc_SOURCE_DIR}/include/ast_opt/ast/Block.h
-        ${abc_SOURCE_DIR}/include/ast_opt/ast/Call.h
-        ${abc_SOURCE_DIR}/include/ast_opt/ast/ExpressionList.h
-        ${abc_SOURCE_DIR}/include/ast_opt/ast/For.h
-        ${abc_SOURCE_DIR}/include/ast_opt/ast/Function.h
-        ${abc_SOURCE_DIR}/include/ast_opt/ast/FunctionParameter.h
-        ${abc_SOURCE_DIR}/include/ast_opt/ast/If.h
-        ${abc_SOURCE_DIR}/include/ast_opt/ast/IndexAccess.h
-        ${abc_SOURCE_DIR}/include/ast_opt/ast/Literal.h
-        ${abc_SOURCE_DIR}/include/ast_opt/ast/OperatorExpression.h
-        ${abc_SOURCE_DIR}/include/ast_opt/ast/Return.h
-        ${abc_SOURCE_DIR}/include/ast_opt/ast/TernaryOperator.h
-        ${abc_SOURCE_DIR}/include/ast_opt/ast/UnaryExpression.h
-        ${abc_SOURCE_DIR}/include/ast_opt/ast/Variable.h
-        ${abc_SOURCE_DIR}/include/ast_opt/ast/VariableDeclaration.h
-        ${abc_SOURCE_DIR}/include/ast_opt/ast_parser/Errors.h
-        ${abc_SOURCE_DIR}/include/ast_opt/ast_parser/Parser.h
-        ${abc_SOURCE_DIR}/include/ast_opt/ast_parser/PushBackStream.h
-        ${abc_SOURCE_DIR}/include/ast_opt/ast_parser/Tokenizer.h
-        ${abc_SOURCE_DIR}/include/ast_opt/ast_parser/Tokens.h
-        ${abc_SOURCE_DIR}/include/ast_opt/ast_utilities/Datatype.h
-        ${abc_SOURCE_DIR}/include/ast_opt/ast_utilities/IVisitor.h
-        ${abc_SOURCE_DIR}/include/ast_opt/ast_utilities/NodeUtils.h
-        ${abc_SOURCE_DIR}/include/ast_opt/ast_utilities/Operator.h
-        ${abc_SOURCE_DIR}/include/ast_opt/ast_utilities/ParentSettingVisitor.h
-        ${abc_SOURCE_DIR}/include/ast_opt/ast_utilities/PlainVisitor.h
-        ${abc_SOURCE_DIR}/include/ast_opt/ast_utilities/PrintVisitor.h
-        ${abc_SOURCE_DIR}/include/ast_opt/ast_utilities/ProgramPrintVisitor.h
-        ${abc_SOURCE_DIR}/include/ast_opt/ast_utilities/Scope.h
-        ${abc_SOURCE_DIR}/include/ast_opt/ast_utilities/ScopedVisitor.h
-        ${abc_SOURCE_DIR}/include/ast_opt/ast_utilities/VariableMap.h
+        ${abc_SOURCE_DIR}/include/abc/ast/AbstractExpression.h
+        ${abc_SOURCE_DIR}/include/abc/ast/AbstractNode.h
+        ${abc_SOURCE_DIR}/include/abc/ast/AbstractStatement.h
+        ${abc_SOURCE_DIR}/include/abc/ast/Assignment.h
+        ${abc_SOURCE_DIR}/include/abc/ast/BinaryExpression.h
+        ${abc_SOURCE_DIR}/include/abc/ast/Block.h
+        ${abc_SOURCE_DIR}/include/abc/ast/Call.h
+        ${abc_SOURCE_DIR}/include/abc/ast/ExpressionList.h
+        ${abc_SOURCE_DIR}/include/abc/ast/For.h
+        ${abc_SOURCE_DIR}/include/abc/ast/Function.h
+        ${abc_SOURCE_DIR}/include/abc/ast/FunctionParameter.h
+        ${abc_SOURCE_DIR}/include/abc/ast/If.h
+        ${abc_SOURCE_DIR}/include/abc/ast/IndexAccess.h
+        ${abc_SOURCE_DIR}/include/abc/ast/Literal.h
+        ${abc_SOURCE_DIR}/include/abc/ast/OperatorExpression.h
+        ${abc_SOURCE_DIR}/include/abc/ast/Return.h
+        ${abc_SOURCE_DIR}/include/abc/ast/TernaryOperator.h
+        ${abc_SOURCE_DIR}/include/abc/ast/UnaryExpression.h
+        ${abc_SOURCE_DIR}/include/abc/ast/Variable.h
+        ${abc_SOURCE_DIR}/include/abc/ast/VariableDeclaration.h
+        ${abc_SOURCE_DIR}/include/abc/ast_parser/Errors.h
+        ${abc_SOURCE_DIR}/include/abc/ast_parser/Parser.h
+        ${abc_SOURCE_DIR}/include/abc/ast_parser/PushBackStream.h
+        ${abc_SOURCE_DIR}/include/abc/ast_parser/Tokenizer.h
+        ${abc_SOURCE_DIR}/include/abc/ast_parser/Tokens.h
+        ${abc_SOURCE_DIR}/include/abc/ast_utilities/Datatype.h
+        ${abc_SOURCE_DIR}/include/abc/ast_utilities/IVisitor.h
+        ${abc_SOURCE_DIR}/include/abc/ast_utilities/NodeUtils.h
+        ${abc_SOURCE_DIR}/include/abc/ast_utilities/Operator.h
+        ${abc_SOURCE_DIR}/include/abc/ast_utilities/ParentSettingVisitor.h
+        ${abc_SOURCE_DIR}/include/abc/ast_utilities/PlainVisitor.h
+        ${abc_SOURCE_DIR}/include/abc/ast_utilities/PrintVisitor.h
+        ${abc_SOURCE_DIR}/include/abc/ast_utilities/ProgramPrintVisitor.h
+        ${abc_SOURCE_DIR}/include/abc/ast_utilities/Scope.h
+        ${abc_SOURCE_DIR}/include/abc/ast_utilities/ScopedVisitor.h
+        ${abc_SOURCE_DIR}/include/abc/ast_utilities/VariableMap.h
 )
 
 # build a library out of the code to be used by the tests

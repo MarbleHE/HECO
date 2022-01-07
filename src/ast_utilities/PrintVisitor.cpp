@@ -1,7 +1,7 @@
-#include "ast_opt/ast/AbstractNode.h"
-#include "ast_opt/ast/Literal.h"
-#include "ast_opt/ast_utilities/PrintVisitor.h"
-#include "ast_opt/ast/AbstractExpression.h"
+#include "abc/ast/AbstractNode.h"
+#include "abc/ast/Literal.h"
+#include "abc/ast_utilities/PrintVisitor.h"
+#include "abc/ast/AbstractExpression.h"
 
 std::string SpecialPrintVisitor::getIndentation() const {
   // Indent with two spaces per level

@@ -1,6 +1,6 @@
 #include <vector>
-#include "ast_opt/ast/UnaryExpression.h"
-#include "ast_opt/ast_utilities/IVisitor.h"
+#include "abc/ast/UnaryExpression.h"
+#include "abc/ast_utilities/IVisitor.h"
 
 UnaryExpression::~UnaryExpression() = default;
 

@@ -1,7 +1,6 @@
-#include <ast_opt/parser/Parser.h>
-#include <ast_opt/utilities/NodeUtils.h>
-#include "ast_opt/ast/If.h"
-#include "ast_opt/ast_utilities/IVisitor.h"
+#include "abc/ast_parser/Parser.h"
+#include "abc/ast/If.h"
+#include "abc/ast_utilities/IVisitor.h"
 
 If::~If() = default;
 

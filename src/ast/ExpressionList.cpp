@@ -1,8 +1,8 @@
 #include <iostream>
 #include <exception>
-#include "ast_opt/ast_parser/Parser.h"
-#include "ast_opt/ast/ExpressionList.h"
-#include "ast_opt/ast_utilities/IVisitor.h"
+#include "abc/ast_parser/Parser.h"
+#include "abc/ast/ExpressionList.h"
+#include "abc/ast_utilities/IVisitor.h"
 
 /// Convenience typedef for conciseness
 typedef std::unique_ptr<AbstractExpression> exprPtr;

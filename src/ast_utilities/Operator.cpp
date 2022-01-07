@@ -1,5 +1,5 @@
-#include "ast_opt/ast_parser/Errors.h"
-#include "ast_opt/ast_utilities/Operator.h"
+#include "abc/ast_parser/Errors.h"
+#include "abc/ast_utilities/Operator.h"
 
 std::string toString(ArithmeticOp bop) {
   return Operator::binaryOpStrings[bop];

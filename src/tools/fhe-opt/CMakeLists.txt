@@ -19,7 +19,8 @@ set(LIBS
         MLIRTargetLLVMIRExport
         MLIRTransforms
         )
-add_llvm_executable(fhe-opt fhe-opt.cpp)
+add_llvm_executable(fhe-opt
+        ${PROJECT_SOURCE_DIR}/src/tools/fhe-opt/fhe-opt.cpp)
 
 llvm_update_compile_flags(fhe-opt)
 target_link_libraries(fhe-opt PRIVATE ${LIBS})

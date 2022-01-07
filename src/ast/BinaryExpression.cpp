@@ -1,7 +1,7 @@
 #include <vector>
-#include "ast_opt/ast_parser/Parser.h"
-#include "ast_opt/ast/BinaryExpression.h"
-#include "ast_opt/ast_utilities/IVisitor.h"
+#include "abc/ast_parser/Parser.h"
+#include "abc/ast/BinaryExpression.h"
+#include "abc/ast_utilities/IVisitor.h"
 
 BinaryExpression::~BinaryExpression() = default;
 

@@ -1,8 +1,8 @@
 #include <utility>
-#include "ast_opt/ast_parser/Parser.h"
-#include "ast_opt/ast_parser/Errors.h"
-#include "ast_opt/ast/VariableDeclaration.h"
-#include "ast_opt/ast_utilities/IVisitor.h"
+#include "abc/ast_parser/Parser.h"
+#include "abc/ast_parser/Errors.h"
+#include "abc/ast/VariableDeclaration.h"
+#include "abc/ast_utilities/IVisitor.h"
 
 VariableDeclaration::~VariableDeclaration() = default;
 

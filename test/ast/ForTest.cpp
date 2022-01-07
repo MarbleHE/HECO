@@ -1,12 +1,12 @@
-#include <ast_opt/ast_parser/Parser.h>
+#include <abc/ast_parser/Parser.h>
 #include "ASTComparison.h"
-#include "ast_opt/ast_utilities/Operator.h"
-#include "ast_opt/ast_utilities/Datatype.h"
-#include "ast_opt/ast/VariableDeclaration.h"
-#include "ast_opt/ast/Assignment.h"
-#include "ast_opt/ast/BinaryExpression.h"
-#include "ast_opt/ast/For.h"
-#include "ast_opt/ast/Literal.h"
+#include "abc/ast_utilities/Operator.h"
+#include "abc/ast_utilities/Datatype.h"
+#include "abc/ast/VariableDeclaration.h"
+#include "abc/ast/Assignment.h"
+#include "abc/ast/BinaryExpression.h"
+#include "abc/ast/For.h"
+#include "abc/ast/Literal.h"
 #include "gtest/gtest.h"
 
 TEST(ForTest, values_ValuesGivenInCtorAreRetrievable) { /* NOLINT */

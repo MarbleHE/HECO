@@ -2,10 +2,10 @@
 #include <stack>
 #include <string>
 
-#include "ast_opt/ast_parser/Tokens.h"
-#include "ast_opt/ast_parser/Lookup.h"
-#include "ast_opt/ast_parser/Helpers.h"
-#include "ast_opt/ast_parser/PushBackStream.h"
+#include "abc/ast_parser/Tokens.h"
+#include "abc/ast_parser/Lookup.h"
+#include "abc/ast_parser/Helpers.h"
+#include "abc/ast_parser/PushBackStream.h"
 
 namespace stork {
 namespace {

@@ -9,7 +9,7 @@
 #include "mlir/IR/TypeSupport.h"
 #include "llvm/ADT/TypeSwitch.h"
 
-#include "ast_opt/IR/ABC/ABCDialect.h"
+#include "abc/IR/ABC/ABCDialect.h"
 
 using namespace mlir;
 using namespace abc;
@@ -65,10 +65,10 @@ bool containsExactlyOneStatementNode(Region &region) {
   }
 }
 
-#include "ast_opt/IR/ABC/ABCOpsDialect.cpp.inc"
+#include "abc/IR/ABC/ABCOpsDialect.cpp.inc"
 
 #define GET_TYPEDEF_CLASSES
-#include "ast_opt/IR/ABC/ABCOpsTypes.cpp.inc"
+#include "abc/IR/ABC/ABCOpsTypes.cpp.inc"
 
 //===----------------------------------------------------------------------===//
 // ABC dialect.
@@ -77,12 +77,12 @@ bool containsExactlyOneStatementNode(Region &region) {
 void ABCDialect::initialize() {
   addOperations<
 #define GET_OP_LIST
-#include "ast_opt/IR/ABC/ABCOps.cpp.inc"
+#include "abc/IR/ABC/ABCOps.cpp.inc"
   >();
 
   addTypes<
 #define GET_TYPEDEF_LIST
-#include "ast_opt/IR/ABC/ABCOpsTypes.cpp.inc"
+#include "abc/IR/ABC/ABCOpsTypes.cpp.inc"
   >();
 }
 
@@ -124,4 +124,4 @@ void ABCDialect::printType(::mlir::Type type,
 }
 
 #define GET_OP_CLASSES
-#include "ast_opt/IR/ABC/ABCOps.cpp.inc"
+#include "abc/IR/ABC/ABCOps.cpp.inc"
