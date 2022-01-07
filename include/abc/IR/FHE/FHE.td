@@ -1,4 +1,4 @@
-#ifndef ABC_FHE_TD_
+#ifndef ABC_FHE_FHE_TD_
 #define ABC_FHE_FHE_TD_
 
 include "mlir/IR/OpBase.td"
@@ -77,7 +77,7 @@ def Ciphertext : TypeDef<FHE_Dialect, "Ciphertext">  {
 // FHE Operations
 //===----------------------------------------------------------------------===//
 
-// This is a TableGen helper, it is more like a "template" than a "class" 
+// This is a TableGen helper, it is more like a "template" than a "class"
 // in that the final C++ classes generated for the operations will not inherit from this
 // nor will there be a C++ class fhe::Op
 class FHE_Op<string mnemonic, list<OpTrait> traits = []> :
@@ -102,9 +102,9 @@ class FHE_Op<string mnemonic, list<OpTrait> traits = []> :
 def FHE_LoadCtxtOp : FHE_Op<"load_ctxt", []> {
   let summary = "Loads ciphertext from file into a register.";
 
-  let arguments = (ins   
+  let arguments = (ins
     // Attributes are compile-time-known inputs ("immediate values"), whereas operands are the results of another operation
-    StrAttr: $file,  
+    StrAttr: $file,
     StrAttr: $parms
     // TODO (Design): In fhe.load_ctxt, should  we add the serialization info (ntt, rns) into another attribute?
   );
@@ -194,4 +194,4 @@ def FHE_SinkOp : FHE_Op<"sink", [Terminator, ReturnLike]> {
 
 }
 
-#endif // TOOLCHAIN_FHE_FHE_TD_
+#endif // ABC_FHE_FHE_TD_

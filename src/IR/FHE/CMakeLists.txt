@@ -5,7 +5,7 @@ add_mlir_dialect_library(MLIRFHE
         ${PROJECT_SOURCE_DIR}/include/FHE
 
         DEPENDS
-        MLIRFHEOpsIncGen
+        MLIRFHEIncGen
 
         LINK_LIBS PUBLIC
         MLIRIR

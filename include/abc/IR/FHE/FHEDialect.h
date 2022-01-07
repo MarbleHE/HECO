@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_MLIR_FHE_FHEDIALECT_H_
-#define AST_OPTIMIZER_MLIR_FHE_FHEDIALECT_H_
+#ifndef ABC_FHE_FHEDIALECT_H
+#define ABC_FHE_FHEDIALECT_H
 
 #include "mlir/IR/Dialect.h"
 #include "mlir/IR/BuiltinTypes.h"
@@ -15,12 +15,15 @@
 #include "mlir/Interfaces/CopyOpInterface.h"
 #include "mlir/Interfaces/InferTypeOpInterface.h"
 
-#include "abc/IR/FHE/FHEOpsDialect.h.inc"
+// Include the C++ class declaration for this Dialect (no define necessary for this one)
+#include "abc/IR/FHE/FHEDialect.h.inc"
 
-#define GET_OP_CLASSES
-#include "abc/IR/FHE/FHEOps.h.inc"
-
+// Include the C++ class (and associated functions) declarations for this Dialect's types
 #define GET_TYPEDEF_CLASSES
-#include "abc/IR/FHE/FHEOpsTypes.h.inc"
+#include "abc/IR/FHE/FHETypes.h.inc"
 
-#endif // AST_OPTIMIZER_MLIR_FHE_FHEDIALECT_H_
+// Include the C++ class (and associated functions) declarations for this Dialect's operations
+#define GET_OP_CLASSES
+#include "abc/IR/FHE/FHE.h.inc"
+
+#endif // ABC_FHE_FHEDIALECT_H
