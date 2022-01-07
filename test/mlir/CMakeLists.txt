@@ -1,8 +1,8 @@
 configure_lit_site_cfg(
-        ${CMAKE_CURRENT_LIST_DIR}/lit.site.cfg.py.in
+        lit.site.cfg.py.in
         ${CMAKE_CURRENT_BINARY_DIR}/lit.site.cfg.py
         MAIN_CONFIG
-        ${CMAKE_CURRENT_LIST_DIR}/lit.cfg.py
+        lit.cfg.py
 )
 
 set(STANDALONE_TEST_DEPENDS
@@ -17,7 +17,7 @@ add_lit_testsuite(check-abc "Running the abc regression tests"
         )
 set_target_properties(check-abc PROPERTIES FOLDER "Tests")
 
-add_lit_testsuites(ABC ${CMAKE_CURRENT_LIST_DIR} DEPENDS ${STANDALONE_TEST_DEPENDS})
+add_lit_testsuites(../ABC . DEPENDS ${STANDALONE_TEST_DEPENDS})
 
 
 ##############################

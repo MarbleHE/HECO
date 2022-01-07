@@ -4,7 +4,7 @@
 #include <ast_opt/utilities/PlainVisitor.h>
 #include <ast_opt/utilities/Visitor.h>
 
-#include <ABC/ABCDialect.h>
+#include "../IR/ABC/ABCDialect.h"
 
 #include <mlir/IR/Builders.h>
 #include <mlir/IR/MLIRContext.h>

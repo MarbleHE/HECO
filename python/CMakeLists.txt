@@ -11,7 +11,7 @@ add_custom_target(python ALL DEPENDS pyabc)
 add_custom_command(TARGET python
     POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${CMAKE_CURRENT_SOURCE_DIR}/pyabc
+        pyabc
     ${CMAKE_CURRENT_BINARY_DIR}/pyabc
 )
 
@@ -19,7 +19,7 @@ install(CODE "execute_process(COMMAND ${Python3_EXECUTABLE} -m pip install ${CMA
 
 
 declare_mlir_python_sources(pyabcSources
-    ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}"
+    ROOT_DIR "."
     SOURCES_GLOB pyabc/*.py
 )
 

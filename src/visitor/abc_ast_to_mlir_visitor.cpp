@@ -1,5 +1,5 @@
 
-#include <ast_opt_mlir/visitor/abc_ast_to_mlir_visitor.h>
+#include "../../include/ast_opt/visitor/abc_ast_to_mlir_visitor.h"
 #include <Errors.h>
 
 using namespace abc;

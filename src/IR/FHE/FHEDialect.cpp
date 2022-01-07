@@ -2,7 +2,7 @@
 #include "mlir/IR/Types.h"
 #include "mlir/IR/TypeSupport.h"
 #include "mlir/Support/LLVM.h"
-#include "FHE/FHEDialect.h"
+#include "../../../include/ast_opt/IR/FHE/FHEDialect.h"
 #include "llvm/ADT/TypeSwitch.h"
 
 using namespace mlir;

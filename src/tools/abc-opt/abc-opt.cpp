@@ -21,7 +21,7 @@
 #include "mlir/Dialect/Arithmetic/IR/Arithmetic.h"
 
 #include "ABC/ABCDialect.h"
-#include "LowerASTtoSSA.h"
+#include "../../include/Passes/ast2ssa/LowerASTtoSSA.h"
 #include "UnrollLoops.h"
 #include "Nary.h"
 #include "Batching.h"

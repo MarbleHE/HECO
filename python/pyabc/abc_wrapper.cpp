@@ -1,14 +1,14 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include <ast_opt/parser/Parser.h>
-#include <ast_opt/parser/Errors.h>
-#include <ast_opt/visitor/ProgramPrintVisitor.h>
-#include <ast_opt/runtime/DummyCiphertext.h>
-#include <ast_opt/compiler/Compiler.h>
-#include <ast_opt/runtime/Cleartext.h>
+#include "ast_opt/parser/Parser.h"
+#include "ast_opt/parser/Errors.h"
+#include "ast_opt/visitor/ProgramPrintVisitor.h"
+#include "ast_opt/runtime/DummyCiphertext.h"
+#include "ast_opt/compiler/Compiler.h"
+#include "ast_opt/runtime/Cleartext.h"
 
 #include <ABC/ABCDialect.h>
-#include <ast_opt_mlir/visitor/abc_ast_to_mlir_visitor.h>
+#include "ast_opt/visitor/abc_ast_to_mlir_visitor.h"
 
 namespace py = pybind11;
 using json = nlohmann::json;

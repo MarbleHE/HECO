@@ -19,7 +19,7 @@
 #include "llvm/Support/SourceMgr.h"
 #include "llvm/Support/ToolOutputFile.h"
 
-#include "FHE/FHEDialect.h"
+#include "../../../include/ast_opt/IR/FHE/FHEDialect.h"
 #include "mlir/IR/Matchers.h"
 #include "mlir/IR/Builders.h"
 #include "mlir/IR/PatternMatch.h"

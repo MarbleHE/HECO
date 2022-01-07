@@ -14,7 +14,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(googletest)
 
-find_package(MLIR REQUIRED CONFIG)
+find_package(mlir REQUIRED CONFIG)
 
 message(STATUS "Using MLIRConfig.cmake in: ${MLIR_DIR}")
 message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
