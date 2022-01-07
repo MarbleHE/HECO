@@ -1,7 +1,7 @@
 #ifndef AST_OPTIMIZER_MLIR_FHE_FHEOPS_H_
 #define AST_OPTIMIZER_MLIR_FHE_FHEOPS_H_
 
-include "FHE/FHEDialect.td"
+include "ast_opt/IR/FHE/FHEDialect.td"
 include "mlir/Dialect/Shape/IR/ShapeBase.td"
 include "mlir/Interfaces/ControlFlowInterfaces.td"
 include "mlir/Interfaces/InferTypeOpInterface.td"

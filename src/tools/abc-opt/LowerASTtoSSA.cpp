@@ -6,7 +6,7 @@
 //===----------------------------------------------------------------------===//
 
 
-#include "../../include/Passes/ast2ssa/LowerASTtoSSA.h"
+#include "ast_opt/Passes/ast2ssa/LowerASTtoSSA.h"
 
 #include <iostream>
 #include <memory>

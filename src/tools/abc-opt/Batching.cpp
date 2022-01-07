@@ -11,7 +11,7 @@ int getConstIndex(tensor::ExtractOp &op) {
   //TODO: check if there's more and throw an error if yes
   auto index = *op.indices().begin();
   if (auto const_op = llvm::dyn_cast<arith::ConstantOp>(index.getDefiningOp())) {
-    return const_op.value().dyn_cast<IntegerAttr>().getValue().getLimitedValue();
+    return const_op.getValue().dyn_cast<IntegerAttr>().getValue().getLimitedValue();
   } else {
     emitError(index.getLoc(), "Index not defined by a constant op!");
     return -1;
@@ -22,7 +22,7 @@ int getConstIndex(tensor::InsertOp &op) {
   //TODO: check if there's more and throw an error if yes
   auto index = *op.indices().begin();
   if (auto const_op = llvm::dyn_cast<arith::ConstantOp>(index.getDefiningOp())) {
-    return const_op.value().dyn_cast<IntegerAttr>().getValue().getLimitedValue();
+    return const_op.getValue().dyn_cast<IntegerAttr>().getValue().getLimitedValue();
   } else {
     emitError(index.getLoc(), "Index not defined by a constant op!");
     return -1;

@@ -5,7 +5,7 @@
 #include "mlir/Dialect/Affine/IR/AffineOps.h"
 #include "mlir/Pass/Pass.h"
 
-#include "ABC/ABCDialect.h"
+#include "ast_opt/IR/ABC/ABCDialect.h"
 #include "mlir/Dialect/SCF/SCF.h"
 #include "mlir/Dialect/Affine/IR/AffineOps.h"
 #include "mlir/Dialect/Tensor/IR/Tensor.h"

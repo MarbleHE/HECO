@@ -11,10 +11,14 @@ project(abc
         DESCRIPTION "Optimizer for Fully Homomorphic Encryption (FHE)"
         LANGUAGES CXX)
 
-##############################
-# MLIR Setup & Helpers
-##############################
+####################################################################################
+## MLIR Main Setup
+##
+## Targets for the individual binaries are defined elsewhere (e.g. src/tools/<tool>)
+####################################################################################
 find_package(MLIR REQUIRED CONFIG)
+
+set(CMAKE_BUILD_WITH_INSTALL_NAME_DIR ON)
 
 message(STATUS "Using MLIRConfig.cmake in: ${MLIR_DIR}")
 message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
@@ -32,6 +36,17 @@ include(AddLLVM)
 include(AddMLIR)
 include(HandleLLVMOptions)
 
+include_directories(${LLVM_INCLUDE_DIRS})
+include_directories(${MLIR_INCLUDE_DIRS})
+include_directories(${PROJECT_SOURCE_DIR}/include)
+include_directories(${PROJECT_BINARY_DIR}/include)
+link_directories(${LLVM_BUILD_LIBRARY_DIR})
+add_definitions(${LLVM_DEFINITIONS})
+
+add_subdirectory(include/ast_opt/IR)
+add_subdirectory(include/ast_opt/Passes)
+add_subdirectory(src/IR)
+add_subdirectory(src/tools)
 
 ##############################
 # Compiler Setup (esp. MSVC)
@@ -249,19 +264,6 @@ add_executable(ast_demo
 
 target_link_libraries(ast_demo PRIVATE cpp_ast)
 
-####################################################################################
-## MLIR Main Setup
-##
-## Targets for the individual binaries are defined elsewhere (e.g. src/tools/<tool>)
-####################################################################################
-set(CMAKE_BUILD_WITH_INSTALL_NAME_DIR ON)
-
-include_directories(${LLVM_INCLUDE_DIRS})
-include_directories(${MLIR_INCLUDE_DIRS})
-include_directories(${PROJECT_SOURCE_DIR}/include)
-include_directories(${PROJECT_BINARY_DIR}/include)
-link_directories(${LLVM_BUILD_LIBRARY_DIR})
-add_definitions(${LLVM_DEFINITIONS})
 
 #####################################################################################
 ## TESTING

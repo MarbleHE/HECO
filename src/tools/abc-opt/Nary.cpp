@@ -78,30 +78,28 @@ void NaryPass::runOnOperation() {
   for (auto f: llvm::make_early_inc_range(block.getOps<FuncOp>())) {
     for (auto op: llvm::make_early_inc_range(f.body().getOps<arith::AddIOp>())) {
       rewriter.setInsertionPointAfter(op.getOperation());
-      llvm::SmallVector<Value, 2> summands = {op.lhs(), op.rhs()};
-      Value value = rewriter.create<abc::AddOp>(op.getLoc(), op.result().getType(), summands);
+      llvm::SmallVector<Value, 2> summands = {op.getLhs(), op.getRhs()};
+      Value value = rewriter.create<abc::AddOp>(op.getLoc(), op.getResult().getType(), summands);
       op.replaceAllUsesWith(value);
       rewriter.eraseOp(op.getOperation());
-
     }
   }
 
   for (auto f: llvm::make_early_inc_range(block.getOps<FuncOp>())) {
     for (auto op: llvm::make_early_inc_range(f.body().getOps<arith::SubIOp>())) {
       rewriter.setInsertionPointAfter(op.getOperation());
-      llvm::SmallVector<Value, 2> summands = {op.lhs(), op.rhs()};
-      Value value = rewriter.create<abc::SubOp>(op.getLoc(), op.result().getType(), summands);
+      llvm::SmallVector<Value, 2> summands = {op.getLhs(), op.getRhs()};
+      Value value = rewriter.create<abc::SubOp>(op.getLoc(), op.getResult().getType(), summands);
       op.replaceAllUsesWith(value);
       rewriter.eraseOp(op.getOperation());
-
     }
   }
 
   for (auto f: llvm::make_early_inc_range(block.getOps<FuncOp>())) {
     for (auto op: llvm::make_early_inc_range(f.body().getOps<arith::MulIOp>())) {
       rewriter.setInsertionPointAfter(op.getOperation());
-      llvm::SmallVector<Value, 2> summands = {op.lhs(), op.rhs()};
-      Value value = rewriter.create<abc::MulOp>(op.getLoc(), op.result().getType(), summands);
+      llvm::SmallVector<Value, 2> summands = {op.getLhs(), op.getRhs()};
+      Value value = rewriter.create<abc::MulOp>(op.getLoc(), op.getResult().getType(), summands);
       op.replaceAllUsesWith(value);
       rewriter.eraseOp(op.getOperation());
     }

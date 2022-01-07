@@ -20,8 +20,8 @@
 #include "llvm/Support/ToolOutputFile.h"
 #include "mlir/Dialect/Arithmetic/IR/Arithmetic.h"
 
-#include "ABC/ABCDialect.h"
-#include "../../include/Passes/ast2ssa/LowerASTtoSSA.h"
+#include "ast_opt/IR/ABC/ABCDialect.h"
+#include "ast_opt/Passes/ast2ssa/LowerASTtoSSA.h"
 #include "UnrollLoops.h"
 #include "Nary.h"
 #include "Batching.h"

@@ -8,10 +8,10 @@
 using namespace mlir;
 using namespace fhe;
 
-#include "FHE/FHEOpsDialect.cpp.inc"
+#include "ast_opt/IR/FHE/FHEOpsDialect.cpp.inc"
 
 #define GET_TYPEDEF_CLASSES
-#include "FHE/FHEOpsTypes.cpp.inc"
+#include "ast_opt/IR/FHE/FHEOpsTypes.cpp.inc"
 
 //===----------------------------------------------------------------------===//
 // FHE dialect.
@@ -20,12 +20,12 @@ using namespace fhe;
 void FHEDialect::initialize() {
   addOperations<
 #define GET_OP_LIST
-#include "FHE/FHEOps.cpp.inc"
+#include "ast_opt/IR/FHE/FHEOps.cpp.inc"
   >();
 
   addTypes<
 #define GET_TYPEDEF_LIST
-#include "FHE/FHEOpsTypes.cpp.inc"
+#include "ast_opt/IR/FHE/FHEOpsTypes.cpp.inc"
   >();
 }
 
@@ -34,4 +34,4 @@ void FHEDialect::initialize() {
 //===----------------------------------------------------------------------===//
 
 #define GET_OP_CLASSES
-#include "FHE/FHEOps.cpp.inc"
+#include "ast_opt/IR/FHE/FHEOps.cpp.inc"

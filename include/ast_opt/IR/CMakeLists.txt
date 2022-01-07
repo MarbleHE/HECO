@@ -1,2 +1,2 @@
 add_subdirectory(ABC)
-add_subdirectory(../../../mlir/include/FHE)
+add_subdirectory(FHE)

@@ -15,12 +15,12 @@
 #include "mlir/Interfaces/CopyOpInterface.h"
 #include "mlir/Interfaces/InferTypeOpInterface.h"
 
-#include "FHE/FHEOpsDialect.h.inc"
+#include "ast_opt/IR/FHE/FHEOpsDialect.h.inc"
 
 #define GET_OP_CLASSES
-#include "FHE/FHEOps.h.inc"
+#include "ast_opt/IR/FHE/FHEOps.h.inc"
 
 #define GET_TYPEDEF_CLASSES
-#include "FHE/FHEOpsTypes.h.inc"
+#include "ast_opt/IR/FHE/FHEOpsTypes.h.inc"
 
 #endif // AST_OPTIMIZER_MLIR_FHE_FHEDIALECT_H_
