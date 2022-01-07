@@ -1,3 +1,5 @@
+#include <ast_opt/parser/Parser.h>
+#include <ast_opt/utilities/NodeUtils.h>
 #include "ast_opt/ast/If.h"
 #include "ast_opt/utilities/IVisitor.h"
 
@@ -145,6 +147,21 @@ nlohmann::json If::toJson() const {
   if (hasThenBranch()) j["thenBranch"] = getThenBranch().toJson();
   if (hasElseBranch()) j["elseBranch"] = getElseBranch().toJson();
   return j;
+}
+
+std::unique_ptr<If> If::fromJson(nlohmann::json j) {
+  auto conditionExpr = (j.contains("condition")) ? Parser::parseJsonExpression(j["condition"]) : nullptr;
+  auto thenBranchStmt = (j.contains("thenBranch")) ? Parser::parseJsonStatement(j["thenBranch"]) : nullptr;
+
+  auto thenBlock = castUniquePtr<AbstractStatement, Block>(std::move(thenBranchStmt));
+
+  if (j.contains("elseBranch")) {
+    auto elseBranchStmt =  Parser::parseJsonStatement(j["elseBranch"]);
+    auto elseBlock = castUniquePtr<AbstractStatement, Block>(std::move(elseBranchStmt));
+    return std::make_unique<If>(std::move(conditionExpr), std::move(thenBlock), std::move(elseBlock));
+  } else {
+    return std::make_unique<If>(std::move(conditionExpr), std::move(thenBlock));
+  }
 }
 
 std::string If::toString(bool printChildren) const {

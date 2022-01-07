@@ -27,6 +27,8 @@ void abc_ast_to_mlir(std::unique_ptr<AbstractNode> programAst) {
   //  The following returns an empty module, since only functions are added to the module, but the
   //  main function is not parsed atm.
   module.dump();
+
+  v.getBlockPtr()->dump();
 }
 
 /// Class storing a program and intermediate state. E.g., it stores a pre-compiled program AST to avoid
@@ -77,6 +79,9 @@ class ABCProgramWrapper {
     // TODO: where can we mark arguments as secret? The args argument has a boolen for those that should be secret, but do
     //    we have to already mark them while/before parsing the AST or only when executing?
     programArgs = json::parse(args);
+
+    // TODO: translate the entire function to mlir instead of separating arguments and program. The new compiler
+    //  will no longer require this.
   }
 
   /// Execute the compiled program on the given inputs and outputs
@@ -84,6 +89,8 @@ class ABCProgramWrapper {
   // We use python types as result values to be able to return different types without having to use templates,
   // since binding templates would require us to instantiate different programs depending on their return type.
   py::tuple execute(std::string inputs, std::vector<std::string> outputIdentifiers) {
+    // TODO: execute MLIR once the other levels are ready
+
     // Cloning the programAst is necessary to be able to execute the same program multiple times (which uses the same
     // program AST)
     auto result = Compiler::compileJson(programAst->clone(), inputs, outputIdentifiers);
@@ -110,6 +117,7 @@ class ABCProgramWrapper {
     return py::cast(result_vec);
   }
 
+  // TODO: remove once the switch to MLIR is done
   /// Convert the ABC AST to CPP pseudo-code
   std::string to_cpp_string() {
     std::stringstream ss;

@@ -114,6 +114,10 @@ class If : public AbstractStatement {
   /// \param newElseBranch elseBranch to set, If takes ownership
   void setElseBranch(std::unique_ptr<Block> &&newElseBranch);
 
+  /// Create an If node from a nlohmann::json representation of this node.
+  /// \return unique_ptr to a new For node
+  static std::unique_ptr<If> fromJson(nlohmann::json j);
+
   ///////////////////////////////////////////////
   ////////// AbstractNode Interface /////////////
   ///////////////////////////////////////////////

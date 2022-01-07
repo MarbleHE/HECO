@@ -69,6 +69,10 @@ mlir::ModuleOp SpecialAbcAstToMlirVisitor::getModule() {
   return module;
 }
 
+mlir::Block *SpecialAbcAstToMlirVisitor::getBlockPtr() {
+  return block;
+}
+
 void SpecialAbcAstToMlirVisitor::visit(AbstractExpression &expr) {
   if (auto variable = dynamic_cast<Variable *>(&expr)) {
     visit(*variable);

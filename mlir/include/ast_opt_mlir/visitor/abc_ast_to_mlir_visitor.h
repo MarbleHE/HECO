@@ -30,6 +30,7 @@ class SpecialAbcAstToMlirVisitor : public PlainVisitor {
   SpecialAbcAstToMlirVisitor(mlir::MLIRContext &ctx);
 
   mlir::ModuleOp getModule();
+  mlir::Block *getBlockPtr();
 
   void visit(AbstractExpression &expr);
 
