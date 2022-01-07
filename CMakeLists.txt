@@ -270,11 +270,11 @@ target_link_libraries(ast_demo PRIVATE cpp_ast)
 ##
 ## only if this is the root project
 #####################################################################################
-#if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
-#    message("Enabling ABC Tests")
-#    enable_testing()
-#    add_subdirectory(test EXCLUDE_FROM_ALL)
-#endif ()
+if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+    message("Enabling ABC Tests")
+    enable_testing()
+    add_subdirectory(test EXCLUDE_FROM_ALL)
+endif ()
 
 ##############################
 # TARGET: benchmarks
@@ -289,38 +289,38 @@ target_link_libraries(ast_demo PRIVATE cpp_ast)
 #
 # Use pybind11 as C++ wrapper for the Python frontend
 ####################################################################################
-#
-## Install pyabc package (for dev)
-#find_package (Python3 COMPONENTS Interpreter Development)
-#
-#if(NOT Python3_Interpreter_FOUND)
-#    message(WARNING "The ABC python frontend requires Python 3, but no installation
-#        was found. Skipping frontend building...")
-#endif()
-#
-## Set to test the python frontend. On by default.
-#if(NOT PYTHON_FRONTEND_DEV)
-#    set(PYTHON_FRONTEND_DEV true)
-#endif()
-#
-## Set to build the python frontend (installing pybind11 and building the wrapper). On by default.
-#if(NOT PYTHON_FRONTEND_BUILD)
-#    set(PYTHON_FRONTEND_BUILD true)
-#endif()
-#
-#if(PYTHON_FRONTEND_BUILD)
-#    include(FetchContent)
-#    set(JSON_BuildTests OFF CACHE INTERNAL "")
-#    set(FETCHCONTENT_UPDATES_DISCONNECTED ON)
-#    FetchContent_Declare(
-#            pybind11
-#            GIT_REPOSITORY https://github.com/pybind/pybind11.git
-#            GIT_TAG v2.7.1)
-#
-#    FetchContent_GetProperties(pybind11)
-#    if(NOT pybind11_POPULATED)
-#        FetchContent_Populate(pybind11)
-#        add_subdirectory(${pybind11_SOURCE_DIR} ${pybind11_BINARY_DIR})
-#    endif()
-#    add_subdirectory(python)
-#endif()
+
+# Install pyabc package (for dev)
+find_package (Python3 COMPONENTS Interpreter Development)
+
+if(NOT Python3_Interpreter_FOUND)
+    message(WARNING "The ABC python frontend requires Python 3, but no installation
+        was found. Skipping frontend building...")
+endif()
+
+# Set to test the python frontend. On by default.
+if(NOT PYTHON_FRONTEND_DEV)
+    set(PYTHON_FRONTEND_DEV true)
+endif()
+
+# Set to build the python frontend (installing pybind11 and building the wrapper). On by default.
+if(NOT PYTHON_FRONTEND_BUILD)
+    set(PYTHON_FRONTEND_BUILD true)
+endif()
+
+if(PYTHON_FRONTEND_BUILD)
+    include(FetchContent)
+    set(JSON_BuildTests OFF CACHE INTERNAL "")
+    set(FETCHCONTENT_UPDATES_DISCONNECTED ON)
+    FetchContent_Declare(
+            pybind11
+            GIT_REPOSITORY https://github.com/pybind/pybind11.git
+            GIT_TAG v2.7.1)
+
+    FetchContent_GetProperties(pybind11)
+    if(NOT pybind11_POPULATED)
+        FetchContent_Populate(pybind11)
+        add_subdirectory(${pybind11_SOURCE_DIR} ${pybind11_BINARY_DIR})
+    endif()
+    add_subdirectory(python)
+endif()

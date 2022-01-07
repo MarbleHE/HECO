@@ -20,8 +20,7 @@
 #include "ast_opt/ast/VariableDeclaration.h"
 #include "ast_opt/ast_parser/Parser.h"
 #include "gtest/gtest.h"
-#include "ParserTestHelpers.h"
-#include "../ASTComparison.h"
+#include "test/ast/ASTComparison.h"
 
 Datatype BOOL = Datatype(Type::BOOL);
 Datatype CHAR = Datatype(Type::CHAR);

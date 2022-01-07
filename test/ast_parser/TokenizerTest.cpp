@@ -11,7 +11,6 @@
 #include "ast_opt/ast_parser/Tokenizer.h"
 #include "ast_opt/ast_parser/Errors.h"
 #include "gtest/gtest.h"
-#include "ParserTestHelpers.h"
 
 using std::to_string;
 

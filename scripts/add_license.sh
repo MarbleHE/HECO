@@ -1,7 +1,7 @@
 #!/bin/bash
 
 prepend_license_info() {
-  for file in include/**/*.h; do
+  for file in ../include/**/*.h; do
     echo "Processing $file..."
     # check whether "MIT License" is already present in file
     grep -q "MIT License" "$file"
@@ -13,7 +13,7 @@ prepend_license_info() {
 }
 
 remove_license_info() {
-  for file in include/**/*.h; do
+  for file in ../include/**/*.h; do
     echo "Processing $file..."
     # check whether "MIT License" is already present in file
     grep -q "MIT License" "$file"

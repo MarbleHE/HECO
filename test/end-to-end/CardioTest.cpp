@@ -52,28 +52,3 @@ TEST_F(CardioTest, DISABLED_originalProgramTest) {  /* NOLINT */
   // TODO: Implement me
 
 }
-
-TEST_F(CardioTest, DISABLED_STAGE_01_typeCheckingTest) {  /* NOLINT */
-  // TODO: Implement me
-
-}
-
-TEST_F(CardioTest, DISABLED_STAGE_02_ctestTest) {  /* NOLINT */
-  // TODO: Implement me
-
-}
-
-TEST_F(CardioTest, DISABLED_STAGE_03_secretBranchingRemovalTest) {  /* NOLINT */
-  // TODO: Implement me
-
-}
-
-TEST_F(CardioTest, DISABLED_STAGE_04_loopUnrollingTest) {  /* NOLINT */
-  // TODO: Implement me
-
-}
-
-TEST_F(CardioTest, DISABLED_STAGE_05_statementVectorizationTest) {  /* NOLINT */
-  // TODO: Implement me
-
-}

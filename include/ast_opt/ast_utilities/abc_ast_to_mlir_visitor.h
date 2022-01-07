@@ -27,7 +27,9 @@ class SpecialAbcAstToMlirVisitor : public PlainVisitor {
   void recursive_visit(AbstractNode &node, mlir::Block *childBlock);
 
  public:
-  SpecialAbcAstToMlirVisitor(mlir::MLIRContext &ctx);
+  explicit SpecialAbcAstToMlirVisitor(mlir::MLIRContext &ctx);
+
+#include "ast_opt/ast_utilities/warning_suggestOverride_prologue.h"
 
   mlir::ModuleOp getModule();
   mlir::Block *getBlockPtr();
@@ -82,6 +84,7 @@ class SpecialAbcAstToMlirVisitor : public PlainVisitor {
 
   void visit(Variable &elem);
 
+#include "ast_opt/ast_utilities/warning_epilogue.h"
 };
 
 #endif //AST_OPTIMIZER_MLIR_PYTHON_PYABC_PYABC_VISITOR_ABC_AST_TO_MLIR_VISITOR_H_

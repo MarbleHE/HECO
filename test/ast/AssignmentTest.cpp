@@ -3,7 +3,7 @@
 #include "ast_opt/ast/Assignment.h"
 #include "ast_opt/ast_parser/Parser.h"
 #include "gtest/gtest.h"
-#include "../ASTComparison.h"
+#include "ASTComparison.h"
 
 
 TEST(AssignmentTest, values_ValuesGivenInCtorAreRetrievable) {

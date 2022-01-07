@@ -1,5 +1,5 @@
 #include <ast_opt/ast_parser/Parser.h>
-#include <test/ASTComparison.h>
+#include "ASTComparison.h"
 #include "ast_opt/ast/Variable.h"
 #include "gtest/gtest.h"
 
