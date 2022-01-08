@@ -265,25 +265,6 @@ add_executable(ast_demo
 target_link_libraries(ast_demo PRIVATE cpp_ast)
 
 
-#####################################################################################
-## TESTING
-##
-## only if this is the root project
-#####################################################################################
-if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
-    message("Enabling ABC Tests")
-    enable_testing()
-    add_subdirectory(test EXCLUDE_FROM_ALL)
-endif ()
-
-##############################
-# TARGET: benchmarks
-#
-# A collection of benchmarks
-##############################
-#add_subdirectory(bench EXCLUDE_FROM_ALL)
-
-
 ####################################################################################
 # Python Frontend
 #
@@ -324,3 +305,21 @@ if(PYTHON_FRONTEND_BUILD)
     endif()
     add_subdirectory(python)
 endif()
+
+#####################################################################################
+## TESTING
+##
+## only if this is the root project
+#####################################################################################
+if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+    message("Enabling ABC Tests")
+    enable_testing()
+    add_subdirectory(test EXCLUDE_FROM_ALL)
+endif ()
+
+##############################
+# TARGET: benchmarks
+#
+# A collection of benchmarks
+##############################
+#add_subdirectory(bench EXCLUDE_FROM_ALL)

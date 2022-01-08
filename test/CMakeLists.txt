@@ -90,3 +90,6 @@ gtest_discover_tests(testing-all TEST_PREFIX gtest:)
 
 # make sure that ast_lib is built before the testing-all target
 add_dependencies(testing-all cpp_ast)
+
+# Python tests
+add_subdirectory(python_frontend)
