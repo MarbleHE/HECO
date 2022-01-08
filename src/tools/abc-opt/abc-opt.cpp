@@ -22,9 +22,9 @@
 
 #include "abc/IR/ABC/ABCDialect.h"
 #include "abc/Passes/ast2ssa/LowerASTtoSSA.h"
-#include "abc/Passes/ast2ssa/ssa2ssa/UnrollLoops.h"
-#include "abc/Passes/ast2ssa/ssa2ssa/Nary.h"
-#include "abc/Passes/ast2ssa/ssa2ssa/Batching.h"
+#include "abc/Passes/ssa2ssa/UnrollLoops.h"
+#include "abc/Passes/ssa2ssa/Nary.h"
+#include "abc/Passes/ssa2ssa/Batching.h"
 
 #include <iostream>
 

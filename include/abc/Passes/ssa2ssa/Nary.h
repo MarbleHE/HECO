@@ -1,12 +1,13 @@
 #ifndef AST_OPTIMIZER_MLIR_ABC_OPT_NARY_H_
 #define AST_OPTIMIZER_MLIR_ABC_OPT_NARY_H_
 
-#include "mlir/include/mlir/Transforms/DialectConversion.h"
-#include "mlir/include/mlir/Dialect/Affine/IR/AffineOps.h"
-#include "mlir/include/mlir/Pass/Pass.h"
-#include "mlir/include/mlir/Dialect/SCF/SCF.h"
-#include "mlir/include/mlir/Dialect/Affine/IR/AffineOps.h"
-#include "mlir/include/mlir/Dialect/Tensor/IR/Tensor.h"
+#include "mlir/Pass/Pass.h"
+#include "mlir/Transforms/DialectConversion.h"
+#include "mlir/Dialect/Affine/IR/AffineOps.h"
+#include "mlir/Pass/Pass.h"
+#include "mlir/Dialect/SCF/SCF.h"
+#include "mlir/Dialect/Affine/IR/AffineOps.h"
+#include "mlir/Dialect/Tensor/IR/Tensor.h"
 #include "abc/IR/ABC/ABCDialect.h"
 
 namespace abc {
