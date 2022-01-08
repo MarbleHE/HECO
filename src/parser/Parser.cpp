@@ -154,7 +154,7 @@ std::unique_ptr<AbstractStatement> Parser::parseJsonStatement(json j) {
     case NodeTypeFor:
       return For::fromJson(j);
     case NodeTypeIf:
-      throw If::fromJson(j);
+      return If::fromJson(j);
     default:
       throw stork::runtime_error("Unsupported type: '" + type + "' is not an AbstractStatement.");
   }

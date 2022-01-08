@@ -27,8 +27,6 @@ void abc_ast_to_mlir(std::unique_ptr<AbstractNode> programAst) {
   //  The following returns an empty module, since only functions are added to the module, but the
   //  main function is not parsed atm.
   module.dump();
-
-  v.getBlockPtr()->dump();
 }
 
 /// Class storing a program and intermediate state. E.g., it stores a pre-compiled program AST to avoid
