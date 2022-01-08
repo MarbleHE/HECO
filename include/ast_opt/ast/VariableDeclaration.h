@@ -5,7 +5,7 @@
 #include "ast_opt/ast/AbstractExpression.h"
 #include "ast_opt/ast/AbstractStatement.h"
 #include "ast_opt/ast/Variable.h"
-#include "ast_opt/utilities/Datatype.h"
+#include "ast_opt/ast_utilities/Datatype.h"
 
 
 /// A Variable Declaration associates a Variable with a type (Datatype)
@@ -163,6 +163,7 @@ class VariableDeclarationIteratorImpl : public PositionIteratorImpl<T, VariableD
             return this->node.getValue();
         // If there is no target, then position 1 is past end even if value exists
         // If there is target, but no value, we're also past end, so just continue into default
+        // fall through
       default:
         // calling dereference on higher elements is an error
         throw std::runtime_error("Trying to dereference iterator past end.");

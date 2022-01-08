@@ -163,6 +163,7 @@ class IfIteratorImpl : public PositionIteratorImpl<T, If> {
           // If there is no condition, then position 1 must be the elseBranch. If not, continue into default
           return this->node.getElseBranch();
         }
+        // fall through
       case 2:
         // Position 2 is only valid if there is a condition, thenBranch and elseBranch
         // If not, continue to default
@@ -170,6 +171,7 @@ class IfIteratorImpl : public PositionIteratorImpl<T, If> {
           if (this->node.hasThenBranch())
             if (this->node.hasElseBranch())
               return this->node.getElseBranch();
+        // fall through
       default:
         // calling dereference on higher elements is an error
         throw std::runtime_error("Trying to dereference iterator past end.");

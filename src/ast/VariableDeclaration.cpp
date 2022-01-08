@@ -1,15 +1,15 @@
 #include <utility>
-#include <ast_opt/parser/Parser.h>
-#include <ast_opt/parser/Errors.h>
+#include "ast_opt/ast_parser/Parser.h"
+#include "ast_opt/ast_parser/Errors.h"
 #include "ast_opt/ast/VariableDeclaration.h"
-#include "ast_opt/utilities/IVisitor.h"
+#include "ast_opt/ast_utilities/IVisitor.h"
 
 VariableDeclaration::~VariableDeclaration() = default;
 
 VariableDeclaration::VariableDeclaration(Datatype datatype,
                                          std::unique_ptr<Variable> target,
                                          std::unique_ptr<AbstractExpression> value)
-    : target(std::move(target)), datatype(std::move(datatype)), value(std::move(value)) {}
+    : datatype(datatype), target(std::move(target)), value(std::move(value)) {}
 
 VariableDeclaration::VariableDeclaration(const VariableDeclaration &other)
     : datatype(other.datatype),

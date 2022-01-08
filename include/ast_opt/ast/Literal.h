@@ -2,7 +2,7 @@
 #define AST_OPTIMIZER_INCLUDE_AST_OPT_AST_LITERAL_H_
 
 #include "ast_opt/ast/AbstractExpression.h"
-#include "ast_opt/utilities/IVisitor.h"
+#include "ast_opt/ast_utilities/IVisitor.h"
 
 // see https://stackoverflow.com/a/4485051/3017719
 #define ENABLE_TYPENAME(A) template<> struct TypeName<A> { static const char *Get() { return #A; }};
@@ -107,7 +107,7 @@ class Literal : public AbstractExpression {
     value = std::move(newValue);
   };
 
-#include "ast_opt/utilities/warning_hidingNonVirtualFunction_prologue.h"
+#include "ast_opt/ast_utilities/warning_hidingNonVirtualFunction_prologue.h"
 
   /// Deep copy of the current node
   /// \return A deep copy of the current node
@@ -115,8 +115,7 @@ class Literal : public AbstractExpression {
     return std::unique_ptr<Literal>(clone_impl());
   }
 
-#include "ast_opt/utilities/warning_hidingNonVirtualFunction_epilogue.h"
-
+#include "ast_opt/ast_utilities/warning_epilogue.h"
 
   static std::unique_ptr<Literal<T>> fromJson(nlohmann::json j) {
     return std::make_unique<Literal<T>>(j["value"].get<T>());

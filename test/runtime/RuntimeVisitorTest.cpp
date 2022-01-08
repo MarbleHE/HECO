@@ -1,5 +1,5 @@
 #include "ast_opt/ast/AbstractNode.h"
-#include "ast_opt/parser/Parser.h"
+#include "ast_opt/ast_parser/Parser.h"
 #include "ast_opt/ast/Literal.h"
 #include "ast_opt/runtime/RuntimeVisitor.h"
 #include "ast_opt/runtime/SealCiphertextFactory.h"

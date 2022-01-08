@@ -1,4 +1,4 @@
-#include <ast_opt/parser/Parser.h>
+#include <ast_opt/ast_parser/Parser.h>
 #include <test/ASTComparison.h>
 #include "ast_opt/ast/BinaryExpression.h"
 #include "ast_opt/ast/Literal.h"

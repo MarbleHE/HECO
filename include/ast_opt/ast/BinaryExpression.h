@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "ast_opt/ast/AbstractExpression.h"
-#include "ast_opt/utilities/Operator.h"
+#include "ast_opt/ast_utilities/Operator.h"
 
 /// A BinaryExpression has two Operands (left and right) and an Operator
 class BinaryExpression : public AbstractExpression {
@@ -147,8 +147,9 @@ class BinaryExpressionIteratorImpl : public PositionIteratorImpl<T, BinaryExpres
         if (this->node.hasLeft())
           if (this->node.hasRight())
             return this->node.getRight();
-        // If there is no left hand side, then position 1 is past end even if value exists
-        // If there is a left han side, but no right, we're also past end, so just continue into default
+        // If there is no left-hand side, then position 1 is past end even if value exists
+        // If there is a left-hand side, but no right, we're also past end, so just continue into default
+        // fall through
       default:
         // calling dereference on higher elements is an error
         throw std::runtime_error("Trying to dereference iterator past end.");

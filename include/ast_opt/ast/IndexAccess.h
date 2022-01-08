@@ -135,6 +135,7 @@ class IndexAccessIteratorImpl : public PositionIteratorImpl<T, IndexAccess> {
             return this->node.getIndex();
           // Else: continue to default
         }
+        // fall through
       default:
         // calling dereference on higher elements is an error
         throw std::runtime_error("Trying to dereference iterator past end.");

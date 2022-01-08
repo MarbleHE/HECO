@@ -216,6 +216,7 @@ class ForIteratorImpl : public PositionIteratorImpl<T, For> {
             if (this->node.hasUpdate())
               if (this->node.hasBody())
                 return this->node.getBody();
+        // fall through
       default:
         // calling dereference on higher elements is an error
         throw std::runtime_error("Trying to dereference iterator past end.");

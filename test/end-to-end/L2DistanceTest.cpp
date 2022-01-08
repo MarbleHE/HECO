@@ -1,10 +1,10 @@
 #include <vector>
 #include <stdexcept>
 #include "ast_opt/runtime/RuntimeVisitor.h"
-#include "ast_opt/utilities/Scope.h"
+#include "ast_opt/ast_utilities/Scope.h"
 #include "ast_opt/runtime/DummyCiphertextFactory.h"
 #include "ast_opt/visitor/TypeCheckingVisitor.h"
-#include "ast_opt/parser/Parser.h"
+#include "ast_opt/ast_parser/Parser.h"
 #include "gtest/gtest.h"
 
 #ifdef HAVE_SEAL_BFV

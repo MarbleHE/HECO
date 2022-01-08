@@ -2,7 +2,7 @@
 #include <exception>
 #include <utility>
 #include "ast_opt/ast/Function.h"
-#include "ast_opt/utilities/IVisitor.h"
+#include "ast_opt/ast_utilities/IVisitor.h"
 
 /// Convenience typedef for conciseness
 typedef std::unique_ptr<AbstractStatement> exprPtr;

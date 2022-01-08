@@ -3,7 +3,7 @@
 
 #include <string>
 #include "ast_opt/ast/AbstractExpression.h"
-#include "ast_opt/utilities/Operator.h"
+#include "ast_opt/ast_utilities/Operator.h"
 
 /// A UnaryExpression has a single operand and an Operator
 class UnaryExpression : public AbstractExpression {

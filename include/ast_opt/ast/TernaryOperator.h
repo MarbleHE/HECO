@@ -160,6 +160,7 @@ class TernaryExpressionIteratorImpl : public PositionIteratorImpl<T, TernaryOper
           // If there is no condition, then position 1 must be the elseExpr. TernaryExpression not, continue into default
           return this->node.getElseExpr();
         }
+        // fall through
       case 2:
         // Position 2 is only valid if there is a condition, thenExpr and elseExpr
         // If not, continue to default
@@ -167,6 +168,7 @@ class TernaryExpressionIteratorImpl : public PositionIteratorImpl<T, TernaryOper
           if (this->node.hasThenExpr())
             if (this->node.hasElseExpr())
               return this->node.getElseExpr();
+        // fall through
       default:
         // calling dereference on higher elements is an error
         throw std::runtime_error("Trying to dereference iterator past end.");

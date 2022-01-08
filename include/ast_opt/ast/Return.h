@@ -5,7 +5,7 @@
 #include "ast_opt/ast/AbstractExpression.h"
 #include "ast_opt/ast/AbstractStatement.h"
 #include "ast_opt/ast/Variable.h"
-#include "ast_opt/utilities/Datatype.h"
+#include "ast_opt/ast_utilities/Datatype.h"
 
 
 /// A Return statement has an (optional) value (AbstractExpression)

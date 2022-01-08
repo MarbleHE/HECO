@@ -1,5 +1,5 @@
-#include <include/ast_opt/utilities/Datatype.h>
-#include <include/ast_opt/parser/Parser.h>
+#include <include/ast_opt/ast_utilities/Datatype.h>
+#include <include/ast_opt/ast_parser/Parser.h>
 #include "ast_opt/ast/Literal.h"
 #include "ast_opt/ast/Variable.h"
 #include "ast_opt/ast/Assignment.h"

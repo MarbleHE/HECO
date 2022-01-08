@@ -1,7 +1,7 @@
-#include <ast_opt/parser/Parser.h>
-#include <ast_opt/utilities/NodeUtils.h>
+#include "ast_opt/ast_parser/Parser.h"
+#include "ast_opt/ast_utilities/NodeUtils.h"
 #include "ast_opt/ast/For.h"
-#include "ast_opt/utilities/IVisitor.h"
+#include "ast_opt/ast_utilities/IVisitor.h"
 
 For::~For() {
 

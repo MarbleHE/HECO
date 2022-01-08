@@ -1,5 +1,5 @@
 #include <typeinfo>
-#include <include/ast_opt/parser/Errors.h>
+#include <include/ast_opt/ast_parser/Errors.h>
 
 #include "ast_opt/ast/Assignment.h"
 #include "ast_opt/ast/BinaryExpression.h"
@@ -18,7 +18,7 @@
 #include "ast_opt/ast/UnaryExpression.h"
 #include "ast_opt/ast/Variable.h"
 #include "ast_opt/ast/VariableDeclaration.h"
-#include "ast_opt/parser/Parser.h"
+#include "ast_opt/ast_parser/Parser.h"
 #include "gtest/gtest.h"
 #include "ParserTestHelpers.h"
 #include "../ASTComparison.h"

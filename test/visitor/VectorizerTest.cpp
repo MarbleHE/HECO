@@ -1,6 +1,6 @@
 #include "ast_opt/ast/AbstractNode.h"
 #include "ast_opt/visitor/Vectorizer.h"
-#include "ast_opt/parser/Parser.h"
+#include "ast_opt/ast_parser/Parser.h"
 #include "../ASTComparison.h"
 #include "gtest/gtest.h"
 

@@ -1,7 +1,7 @@
 #include <utility>
-#include <ast_opt/parser/Parser.h>
+#include "ast_opt/ast_parser/Parser.h"
 #include "ast_opt/ast/Return.h"
-#include "ast_opt/utilities/IVisitor.h"
+#include "ast_opt/ast_utilities/IVisitor.h"
 
 Return::~Return() = default;
 

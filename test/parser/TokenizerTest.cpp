@@ -1,5 +1,5 @@
-#include <include/ast_opt/parser/File.h>
-#include <include/ast_opt/parser/Parser.h>
+#include <include/ast_opt/ast_parser/File.h>
+#include <include/ast_opt/ast_parser/Parser.h>
 #include "ast_opt/ast/For.h"
 #include "ast_opt/ast/Return.h"
 #include "ast_opt/ast/VariableDeclaration.h"
@@ -7,9 +7,9 @@
 #include "ast_opt/ast/If.h"
 #include "ast_opt/ast/Function.h"
 #include "ast_opt/ast/AbstractStatement.h"
-#include "ast_opt/parser/PushBackStream.h"
-#include "ast_opt/parser/Tokenizer.h"
-#include "ast_opt/parser/Errors.h"
+#include "ast_opt/ast_parser/PushBackStream.h"
+#include "ast_opt/ast_parser/Tokenizer.h"
+#include "ast_opt/ast_parser/Errors.h"
 #include "gtest/gtest.h"
 #include "ParserTestHelpers.h"
 

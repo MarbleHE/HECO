@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "ast_opt/ast/AbstractExpression.h"
-#include "ast_opt/utilities/Operator.h"
+#include "ast_opt/ast_utilities/Operator.h"
 
 /// An ExpressionList is an order list of (potentially null) expressions.
 /// However, more specifically, it's intended to be a rough equivalent to the {a,b,c} notation in C++

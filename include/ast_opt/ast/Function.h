@@ -6,7 +6,7 @@
 #include "ast_opt/ast/AbstractStatement.h"
 #include "ast_opt/ast/Block.h"
 #include "ast_opt/ast/FunctionParameter.h"
-#include "ast_opt/utilities/Datatype.h"
+#include "ast_opt/ast_utilities/Datatype.h"
 
 /// A function has a return type, name, a list of parameters and a body
 class Function : public AbstractStatement {

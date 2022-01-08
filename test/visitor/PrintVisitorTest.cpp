@@ -1,7 +1,7 @@
 #include "ast_opt/ast/Literal.h"
 #include "ast_opt/ast/Variable.h"
 #include "ast_opt/ast/Assignment.h"
-#include "ast_opt/visitor/PrintVisitor.h"
+#include "ast_opt/ast_utilities/PrintVisitor.h"
 #include "gtest/gtest.h"
 
 TEST(PrintVisitor, printTree) {

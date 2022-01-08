@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "ast_opt/ast/AbstractExpression.h"
-#include "ast_opt/utilities/Operator.h"
+#include "ast_opt/ast_utilities/Operator.h"
 
 /// An OperatorExpression has an operator and 0 or more operands.
 /// Note however that an AST with an OperatorExpression without an

@@ -1,5 +1,5 @@
-#include "ast_opt/visitor/ProgramPrintVisitor.h"
-#include "ast_opt/parser/Parser.h"
+#include "ast_opt/ast_utilities/ProgramPrintVisitor.h"
+#include "ast_opt/ast_parser/Parser.h"
 #include "gtest/gtest.h"
 
 TEST(ProgramPrintVisitor, printTree) {

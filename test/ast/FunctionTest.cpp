@@ -1,4 +1,4 @@
-#include <include/ast_opt/parser/Parser.h>
+#include <include/ast_opt/ast_parser/Parser.h>
 #include "ast_opt/ast/VariableDeclaration.h"
 #include "ast_opt/ast/Function.h"
 #include "ast_opt/ast/FunctionParameter.h"

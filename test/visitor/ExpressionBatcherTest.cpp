@@ -2,7 +2,7 @@
 #include "ast_opt/ast/Assignment.h"
 #include "ast_opt/ast/BinaryExpression.h"
 #include "ast_opt/visitor/ExpressionBatcher.h"
-#include "ast_opt/parser/Parser.h"
+#include "ast_opt/ast_parser/Parser.h"
 #include "../ASTComparison.h"
 #include "gtest/gtest.h"
 TEST(ExpressionBatcherTest, DISABLED_batchableExpression) {

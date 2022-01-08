@@ -6,7 +6,7 @@
 /// It represents "things that can be assigned to", i.e. lvalues
 class AbstractTarget : public AbstractExpression {
  public:
-#include "ast_opt/utilities/warning_hidingNonVirtualFunction_prologue.h"
+#include "ast_opt/ast_utilities/warning_hidingNonVirtualFunction_prologue.h"
 
   /// Clones a node recursively, i.e., by including all of its children.
   /// Because return-type covariance does not work with smart pointers,
@@ -16,7 +16,7 @@ class AbstractTarget : public AbstractExpression {
     return std::unique_ptr<AbstractTarget>(clone_impl(parent_));
   }
 
-#include "ast_opt/utilities/warning_hidingNonVirtualFunction_epilogue.h"
+#include "ast_opt/ast_utilities/warning_epilogue.h"
 
  private:
   /// Refines return type to AbstractTarget

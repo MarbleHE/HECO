@@ -142,6 +142,7 @@ class AssignmentIteratorImpl : public PositionIteratorImpl<T, Assignment> {
             return this->node.getValue();
         // If there is no target, then position 1 is past end even if value exists
         // If there is target, but no value, we're also past end, so just continue into default
+        // fall through
       default:
         // calling dereference on higher elements is an error
         throw std::runtime_error("Trying to dereference iterator past end.");

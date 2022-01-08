@@ -1,7 +1,7 @@
-#include <ast_opt/parser/Parser.h>
+#include <ast_opt/ast_parser/Parser.h>
 #include <test/ASTComparison.h>
-#include "ast_opt/utilities/Operator.h"
-#include "ast_opt/utilities/Datatype.h"
+#include "ast_opt/ast_utilities/Operator.h"
+#include "ast_opt/ast_utilities/Datatype.h"
 #include "ast_opt/ast/VariableDeclaration.h"
 #include "ast_opt/ast/Assignment.h"
 #include "ast_opt/ast/BinaryExpression.h"
