@@ -1,7 +1,7 @@
 #include <cmath>
 #include <random>
-#include "ast_opt/ast_utilities/Scope.h"
-#include "ast_opt/ast_parser/Parser.h"
+#include "abc/ast_utilities/Scope.h"
+#include "abc/ast_parser/Parser.h"
 #include "gtest/gtest.h"
 
 #ifdef HAVE_SEAL_BFV

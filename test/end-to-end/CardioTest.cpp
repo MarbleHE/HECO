@@ -1,6 +1,6 @@
 #include <random>
-#include <include/ast_opt/ast_parser/Parser.h>
-#include "ast_opt/ast/AbstractNode.h"
+#include <include/abc/ast_parser/Parser.h>
+#include "abc/ast/AbstractNode.h"
 #include "gtest/gtest.h"
 
 class CardioTest : public ::testing::Test {  /* NOLINT (predictable sequence expected) */

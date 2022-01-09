@@ -1,10 +1,10 @@
 #include <set>
 #include <random>
 #include "gtest/gtest.h"
-#include "ast_opt/ast/AbstractNode.h"
-#include "ast_opt/ast_parser/Parser.h"
-#include "ast_opt/ast/Assignment.h"
-#include "ast_opt/ast/Variable.h"
+#include "abc/ast/AbstractNode.h"
+#include "abc/ast_parser/Parser.h"
+#include "abc/ast/Assignment.h"
+#include "abc/ast/Variable.h"
 
 // use this fixed seed to enable reproducibility of the matrix inputs
 #define RAND_SEED 4673838

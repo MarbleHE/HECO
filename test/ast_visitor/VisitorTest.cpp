@@ -1,6 +1,6 @@
-#include "ast_opt/ast_utilities/Visitor.h"
-#include "ast_opt/ast/Return.h"
-#include "ast_opt/ast/Literal.h"
+#include "abc/ast_utilities/Visitor.h"
+#include "abc/ast/Return.h"
+#include "abc/ast/Literal.h"
 #include "gtest/gtest.h"
 
 /// Minimal example of a "SpecialVisitor" to be used with the visitor template

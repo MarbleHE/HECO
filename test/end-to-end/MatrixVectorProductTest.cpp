@@ -1,7 +1,7 @@
 #include <vector>
 #include <stdexcept>
-#include "ast_opt/ast_utilities/Scope.h"
-#include "ast_opt/ast_parser/Parser.h"
+#include "abc/ast_utilities/Scope.h"
+#include "abc/ast_parser/Parser.h"
 #include "gtest/gtest.h"
 
 /// Original, plain C++ program for a matrix-vector product
