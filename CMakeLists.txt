@@ -143,6 +143,7 @@ set(SOURCE_FILES
         ${abc_SOURCE_DIR}/src/ast_utilities/PlainVisitor.cpp
         ${abc_SOURCE_DIR}/src/ast_utilities/PrintVisitor.cpp
         ${abc_SOURCE_DIR}/src/ast_utilities/ProgramPrintVisitor.cpp
+        ${abc_SOURCE_DIR}/src/ast_utilities/abc_ast_to_mlir_visitor.cpp
         ${abc_SOURCE_DIR}/src/ast_utilities/Scope.cpp
         ${abc_SOURCE_DIR}/src/ast_utilities/ScopedVisitor.cpp
         ${abc_SOURCE_DIR}/src/ast_parser/Parser.cpp
