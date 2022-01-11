@@ -11,7 +11,7 @@ add_custom_target(python ALL DEPENDS pyabc)
 add_custom_command(TARGET python
     POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
-        pyabc
+        ${CMAKE_CURRENT_LIST_DIR}/pyabc
     ${CMAKE_CURRENT_BINARY_DIR}/pyabc
 )
 
