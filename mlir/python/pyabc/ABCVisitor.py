@@ -444,6 +444,14 @@ class ABCVisitor(NodeVisitor):
 
         return self.builder.make_variable(node.id)
 
+    def visit_Num(self, node: Num) -> dict:
+        """
+        Visit a Python Num and transform it to a dictionary corresponding to an ABC literal.
+        (deprecated after Python 3.6, here for backwards compatibility)
+        """
+
+        return self.builder.make_literal(node.n)
+
     def visit_Or(self, node: Or) -> dict:
         return self.builder.constants.OR
 
@@ -674,10 +682,6 @@ class ABCVisitor(NodeVisitor):
         exit(1)
 
     def visit_NotIn(self, node: NotIn) -> dict:
-        logging.error(UNSUPPORTED_STATEMENT, type(node))
-        exit(1)
-
-    def visit_Num(self, node: Num) -> dict:
         logging.error(UNSUPPORTED_STATEMENT, type(node))
         exit(1)
 
