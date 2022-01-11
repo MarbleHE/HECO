@@ -665,9 +665,9 @@ class ABCVisitor(NodeVisitor):
         logging.error(UNSUPPORTED_STATEMENT, type(node))
         exit(1)
 
-    def visit_NamedExpr(self, node: NamedExpr) -> dict:
-        logging.error(UNSUPPORTED_STATEMENT, type(node))
-        exit(1)
+    #def visit_NamedExpr(self, node: NamedExpr) -> dict:
+    #    logging.error(UNSUPPORTED_STATEMENT, type(node))
+    #    exit(1)
 
     def visit_Nonlocal(self, node: Nonlocal) -> dict:
         logging.error(UNSUPPORTED_STATEMENT, type(node))
