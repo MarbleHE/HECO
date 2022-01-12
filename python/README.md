@@ -12,13 +12,13 @@ Currently, the frontend does not:
 
 ## Getting MLIR for Python Frontend Code
 
-CLion compiles the `pyabc` Python package and places it in `cmake-build-debug/mlir/python`. Python should find this package if it is run in this folder without the need to install `pyabc` on the local `pip` system.
+CLion compiles the `pyabc` Python package and places it in `cmake-build-debug/python`. Python should find this package if it is run in this folder without the need to install `pyabc` on the local `pip` system.
 
 The Frontend currently translates the content of the `main` function in the `ABCContext` block without translating the main function itself.
 
 ### Example
 
-Add the following Python code to `cmake-build-debug/mlir/python/example.py`:
+Add the following Python code to `cmake-build-debug/python/example.py`:
 ```Python
 from pyabc import *
 import logging
@@ -40,7 +40,7 @@ with ABCContext(p, logging.DEBUG):
 
 Execute the python code:
 ```bash
-python3 cmake-build-debug/mlir/python/test.py
+python3 cmake-build-debug/python/test.py
 ```
 
 Expected output:
