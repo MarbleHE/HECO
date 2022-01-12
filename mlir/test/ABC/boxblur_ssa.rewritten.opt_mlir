@@ -1,0 +1,25 @@
+builtin.module  {
+  builtin.func private @encryptedBoxBlur(%arg0: tensor<64xindex>) -> tensor<64xindex> {
+    %c-63 = constant -63 : index
+    %c-57 = constant -57 : index
+    %c-56 = constant -56 : index
+    %c-55 = constant -55 : index
+    %c-9 = constant -9 : index
+    %c-8 = constant -8 : index
+    %c-7 = constant -7 : index
+    %c-1 = constant -1 : index
+    %c0 = constant 0 : index
+    %0 = abc.fhe_rotate %arg0, %c-9 : tensor<64xindex>, index, tensor<64xindex>
+    %1 = abc.fhe_rotate %arg0, %c-1 : tensor<64xindex>, index, tensor<64xindex>
+    %2 = abc.fhe_rotate %arg0, %c-57 : tensor<64xindex>, index, tensor<64xindex>
+    %3 = abc.fhe_rotate %arg0, %c-8 : tensor<64xindex>, index, tensor<64xindex>
+    %4 = abc.fhe_rotate %arg0, %c0 : tensor<64xindex>, index, tensor<64xindex>
+    %5 = abc.fhe_rotate %arg0, %c-56 : tensor<64xindex>, index, tensor<64xindex>
+    %6 = abc.fhe_rotate %arg0, %c-7 : tensor<64xindex>, index, tensor<64xindex>
+    %7 = abc.fhe_rotate %arg0, %c-63 : tensor<64xindex>, index, tensor<64xindex>
+    %8 = abc.fhe_rotate %arg0, %c-55 : tensor<64xindex>, index, tensor<64xindex>
+    %9 = abc.fhe_add(%8, %7, %6, %5, %4, %3, %2, %0, %1) : (tensor<64xindex>, tensor<64xindex>, tensor<64xindex>, tensor<64xindex>, tensor<64xindex>, tensor<64xindex>, tensor<64xindex>, tensor<64xindex>, tensor<64xindex>) -> tensor<64xindex>
+    return %9 : tensor<64xindex>
+  }
+}
+
