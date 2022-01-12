@@ -1,8 +1,8 @@
 #include <fstream>
-#include "ast_opt/ast/Literal.h"
-#include "ast_opt/ast/Variable.h"
-#include "ast_opt/ast/Assignment.h"
-#include "ast_opt/ast/VariableDeclaration.h"
+#include "abc/ast/Literal.h"
+#include "abc/ast/Variable.h"
+#include "abc/ast/Assignment.h"
+#include "abc/ast/VariableDeclaration.h"
 #include "gtest/gtest.h"
 
 /// This test suite verifies the correctness of the JSON outputs.

@@ -250,6 +250,23 @@ class ABCVisitor(NodeVisitor):
         # Return the AST expression gathered by the generic response object
         return external_fn_ret.expr
 
+    def visit_Compare(self, node: Compare) -> dict:
+        """
+        Visit a Python compare and transform it to a dictionary corresponding to an ABC BinaryExpression.
+        """
+        # TODO: we don't support multiple operands (e.g. 0 <= x < 10). A compare is treated like a
+        #  normal condition
+        if len(node.ops) > 1 or len(node.comparators) > 1:
+            logging.error(UNSUPPORTED_SYNTAX_ERROR,
+                          f"Compare operations with multiple operands are not supported: {node.ops}")
+            exit(1)
+
+        return self.builder.make_binary_expression(
+            self.visit(node.left),
+            self.visit(node.ops[0]),
+            self.visit(node.comparators[0]),
+        )
+
     def visit_Constant(self, node: Constant):
         """
         Visit a Python constant and transform it to a dictionary corresponding to an ABC literal.
@@ -360,7 +377,7 @@ class ABCVisitor(NodeVisitor):
 
             self.prog.add_main_fn(body, self._args_to_dict(node.args), ret_vars, ret_constants)
 
-            logging.debug(f"... to ABC AST:\n{json.dumps(body, indent=2)}")
+            # logging.debug(f"... to ABC AST:\n{json.dumps(body, indent=2)}")
             return {}
         else:
             logging.error(UNSUPPORTED_FUNCTION, node.name)
@@ -371,6 +388,28 @@ class ABCVisitor(NodeVisitor):
 
     def visit_GtE(self, node: GtE) -> dict:
         return self.builder.constants.GTE
+
+    def visit_If(self, node: If) -> dict:
+        """
+        Visit a Python If node and transform it to a dictionary corresponding to an ABC If.
+        """
+
+        # Parse if branch
+        stmts = list(map(self.visit, node.body))
+        if_branch = self.builder.make_block(stmts)
+
+        # Parse else branch
+        if len(node.orelse) > 0:
+            stmts = list(map(self.visit, node.orelse))
+            else_branch = self.builder.make_block(stmts)
+        else:
+            else_branch = None
+
+        return self.builder.make_if(
+            self.visit(node.test),
+            if_branch,
+            else_branch
+        )
 
     def visit_Index(self, node: Index) -> dict:
         # TODO: so far, all Index nodes that we used only had the single attribute "value"
@@ -404,6 +443,14 @@ class ABCVisitor(NodeVisitor):
         """
 
         return self.builder.make_variable(node.id)
+
+    def visit_Num(self, node: Num) -> dict:
+        """
+        Visit a Python Num and transform it to a dictionary corresponding to an ABC literal.
+        (deprecated after Python 3.6, here for backwards compatibility)
+        """
+
+        return self.builder.make_literal(node.n)
 
     def visit_Or(self, node: Or) -> dict:
         return self.builder.constants.OR
@@ -502,10 +549,6 @@ class ABCVisitor(NodeVisitor):
         logging.error(UNSUPPORTED_STATEMENT, type(node))
         exit(1)
 
-    def visit_Compare(self, node: Compare) -> dict:
-        logging.error(UNSUPPORTED_STATEMENT, type(node))
-        exit(1)
-
     def visit_Continue(self, node: Continue) -> dict:
         logging.error(UNSUPPORTED_STATEMENT, type(node))
         exit(1)
@@ -555,10 +598,6 @@ class ABCVisitor(NodeVisitor):
         exit(1)
 
     def visit_Global(self, node: Global) -> dict:
-        logging.error(UNSUPPORTED_STATEMENT, type(node))
-        exit(1)
-
-    def visit_If(self, node: If) -> dict:
         logging.error(UNSUPPORTED_STATEMENT, type(node))
         exit(1)
 
@@ -626,9 +665,9 @@ class ABCVisitor(NodeVisitor):
         logging.error(UNSUPPORTED_STATEMENT, type(node))
         exit(1)
 
-    def visit_NamedExpr(self, node: NamedExpr) -> dict:
-        logging.error(UNSUPPORTED_STATEMENT, type(node))
-        exit(1)
+    #def visit_NamedExpr(self, node: NamedExpr) -> dict:
+    #    logging.error(UNSUPPORTED_STATEMENT, type(node))
+    #    exit(1)
 
     def visit_Nonlocal(self, node: Nonlocal) -> dict:
         logging.error(UNSUPPORTED_STATEMENT, type(node))
@@ -643,10 +682,6 @@ class ABCVisitor(NodeVisitor):
         exit(1)
 
     def visit_NotIn(self, node: NotIn) -> dict:
-        logging.error(UNSUPPORTED_STATEMENT, type(node))
-        exit(1)
-
-    def visit_Num(self, node: Num) -> dict:
         logging.error(UNSUPPORTED_STATEMENT, type(node))
         exit(1)
 

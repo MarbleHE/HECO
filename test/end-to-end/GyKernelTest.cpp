@@ -1,16 +1,8 @@
 #include <cmath>
 #include <random>
-#include "ast_opt/runtime/RuntimeVisitor.h"
-#include "ast_opt/utilities/Scope.h"
-#include "ast_opt/runtime/DummyCiphertextFactory.h"
-#include "ast_opt/visitor/TypeCheckingVisitor.h"
-#include "ast_opt/parser/Parser.h"
+#include "abc/ast_utilities/Scope.h"
+#include "abc/ast_parser/Parser.h"
 #include "gtest/gtest.h"
-
-#ifdef HAVE_SEAL_BFV
-#include "../bench/MultiTimer.h"
-#include "../bench/GyKernel.h"
-#endif
 
 /// Original, plain C++ program for a naive Gy Kernel
 /// This uses a 3x3 Kernel and applies it by sliding across the 2D image
@@ -172,9 +164,9 @@ class GyKernelTest : public ::testing::Test {  /* NOLINT (predictable sequence e
 
   void printMatrix(size_t size, std::vector<int> &matrix) {
     for (int64_t row = (int64_t) size - 1; row >= 0; --row) {
-      std::cout << std::setw(8) << matrix.at(0*size + row);
+      std::cout << matrix.at(0*size + row);
       for (size_t col = 1; col < size; ++col) {
-        std::cout << std::setw(8) << matrix.at(col*size + row);
+        std::cout << "\t" << matrix.at(col*size + row);
       }
       std::cout << std::endl;
     }
@@ -184,7 +176,7 @@ class GyKernelTest : public ::testing::Test {  /* NOLINT (predictable sequence e
 /// Test to ensure that naiveGyKernel and fastGyKernel actually compute the same thing!
 TEST_F(GyKernelTest, NaiveGyKernel_FastGyKernel_Equivalence) {  /* NOLINT */
 
-  size_t size = 16;
+  size_t size = 4;
   std::vector<int> img;
   GyKernelTest::getInputMatrix(size, img);
   //std::cout << "img:" << std::endl;
@@ -199,176 +191,4 @@ TEST_F(GyKernelTest, NaiveGyKernel_FastGyKernel_Equivalence) {  /* NOLINT */
   //printMatrix(size, fast);
 
   EXPECT_EQ(fast, naive);
-}
-
-#ifdef HAVE_SEAL_BFV
-TEST_F(GyKernelTest, NaiveEnc_FastClear_Equivalence) { /* NOLINT */
-  size_t poly_modulus_degree = 2 << 12;
-  size_t img_size = 16;
-  std::vector<int> img;
-  GyKernelTest::getInputMatrix(img_size, img);
-  // std::cout << "img:" << std::endl;
-  // printMatrix(img_size, img);
-
-  MultiTimer dummy = MultiTimer();
-  auto encrypted = encryptedNaiveGyKernel(dummy, img, poly_modulus_degree);
-  // std::cout << "encrypted:" << std::endl;
-  // printMatrix(img_size, encrypted);
-
-  auto ref = fastGyKernel(img);
-  // std::cout << "fast:" << std::endl;
-  // printMatrix(img_size, ref);
-
-  EXPECT_EQ(encrypted, ref);
-}
-
-TEST_F(GyKernelTest, PorcupineEnc_FastClear_Equivalence) { /* NOLINT */
-  size_t poly_modulus_degree = 2 << 12;
-  size_t img_size = std::sqrt(poly_modulus_degree / 2);
-  std::vector<int> img;
-  GyKernelTest::getInputMatrix(img_size, img);
-  // std::cout << "img:" << std::endl;
-  // printMatrix(img_size, img);
-
-  MultiTimer dummy = MultiTimer();
-  auto encrypted = encryptedGyKernelPorcupine(dummy, img, poly_modulus_degree);
-  encrypted.resize(img.size());
-  std::vector<int> enc(begin(encrypted), end(encrypted));
-  // std::cout << "encrypted:" << std::endl;
-  // printMatrix(img_size, encrypted);
-
-  auto ref = fastGyKernel(img);
-  // std::cout << "fast:" << std::endl;
-  // printMatrix(img_size, ref);
-
-  EXPECT_EQ(enc, ref);
-}
-
-TEST_F(GyKernelTest, BatchedEnc_FastClear_Equivalence) { /* NOLINT */
-  size_t poly_modulus_degree = 2 << 12;
-  size_t img_size = std::sqrt(poly_modulus_degree / 2);
-  std::vector<int> img;
-  GyKernelTest::getInputMatrix(img_size, img);
-  // std::cout << "img:" << std::endl;
-  // printMatrix(img_size, img);
-
-  MultiTimer dummy = MultiTimer();
-  auto encrypted = encryptedBatchedGyKernel(dummy, img, poly_modulus_degree);
-  encrypted.resize(img.size());
-  std::vector<int> enc(begin(encrypted), end(encrypted));
-  // std::cout << "encrypted:" << std::endl;
-  // printMatrix(img_size, encrypted);
-
-  auto ref = fastGyKernel(img);
-  // std::cout << "fast:" << std::endl;
-  // printMatrix(img_size, ref);
-
-  EXPECT_EQ(enc, ref);
-}
-#endif
-
-TEST_F(GyKernelTest, clearTextEvaluationNaive) { /* NOLINT */
-  /// program's input
-  const char *inputs = R""""(
-      int img = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
-      int imgSize = 4;
-    )"""";
-  auto astInput = Parser::parse(std::string(inputs));
-
-
-  /// program specification
-  /// TODO: Doesn't use wrap-around padding since the modulo returns negative numbers here :(
-  const char *program = R""""(
-    int weightMatrix = {1, 0, -1, 2, 0,-2, 1, 0, -1};
-    int img2 = img;
-    for (int x = 1; x < imgSize-1; x = x + 1) {
-      for (int y = 1; y < imgSize-1; y = y + 1) {
-        int value = 0;
-        for (int j = -1; j < 2; j = j + 1) {
-          for (int i = -1; i < 2; i = i + 1) {
-            value = value + weightMatrix[(i + 1)*3 +j + 1]
-                *img[((x + i)*imgSize + (y + j))];
-          }
-        }
-        img2[imgSize*x + y] = value;
-      }
-    }
-    return img2;
-    )"""";
-  auto astProgram = Parser::parse(std::string(program));
-
-  // program's output
-  const char *outputs = R""""(
-      img2 = img2;
-    )"""";
-  auto astOutput = Parser::parse(std::string(outputs));
-
-  auto scf = std::make_unique<DummyCiphertextFactory>();
-  auto tcv = std::make_unique<TypeCheckingVisitor>();
-
-  // create and prepopulate TypeCheckingVisitor
-  auto registerInputVariable = [&tcv](Scope &rootScope, const std::string &identifier, Datatype datatype) {
-    auto scopedIdentifier = std::make_unique<ScopedIdentifier>(rootScope, identifier);
-    rootScope.addIdentifier(identifier);
-    tcv->addVariableDatatype(*scopedIdentifier, datatype);
-  };
-
-  auto rootScope = std::make_unique<Scope>(*astProgram);
-  registerInputVariable(*rootScope, "img", Datatype(Type::INT, false));
-  registerInputVariable(*rootScope, "imgSize", Datatype(Type::INT, false));
-
-  tcv->setRootScope(std::move(rootScope));
-  astProgram->accept(*tcv);
-
-  // run the program and get its output
-  //TODO: Change it so that by passing in an empty secretTaintingMap, we can get the RuntimeVisitor to execute everything "in the clear"!
-  auto empty = std::unordered_map<std::string, bool>();
-  RuntimeVisitor srv(*scf, *astInput, empty);
-  srv.executeAst(*astProgram);
-
-
-  /// A helper method that takes the result produced by the RuntimeVisitor (result) and a list of expected
-  /// (identifier, vector of values) pairs that the program should have returned.
-  /// \param result The generated result retrieved by getOutput from the RuntimeVisitor.
-  /// \param expectedResult The expected result that the program should have been produced.
-  auto assertResult = [&scf](const OutputIdentifierValuePairs &result,
-                             const std::unordered_map<std::string, std::vector<int64_t>> &expectedResult) {
-    // Check that the number of results match the number of expected results
-    EXPECT_EQ(result.size(), expectedResult.size());
-
-    for (const auto &[identifier, cipherClearText] : result) {
-      // Check that the result we are currently processing is indeed an expected result
-      EXPECT_EQ(expectedResult.count(identifier), 1);
-
-      // for checking the value, distinguish between a ciphertext (requires decryption) and plaintext
-      std::vector<int64_t> plainValues;
-      if (auto ciphertext = dynamic_cast<AbstractCiphertext *>(cipherClearText.get())) {        // result is a ciphertxt
-        scf->decryptCiphertext(*ciphertext, plainValues);
-        const auto &expResultVec = expectedResult.at(identifier);
-        // to avoid comparing the expanded values (last element of ciphertext is repeated to all remaining slots), we
-        // only compare the values provided in the expectedResult map
-        for (int i = 0; i < expResultVec.size(); ++i) {
-          EXPECT_EQ(plainValues.at(i), expectedResult.at(identifier).at(i));
-        }
-      } else if (auto cleartextInt = dynamic_cast<Cleartext<int> *>(cipherClearText.get())) {   // result is a cleartext
-        auto cleartextData = cleartextInt->getData();
-        // required to convert vector<int> to vector<int64_t>
-        plainValues.insert(plainValues.end(), cleartextData.begin(), cleartextData.end());
-        EXPECT_EQ(plainValues, expectedResult.at(identifier));
-      } else if (auto
-          cleartextBool = dynamic_cast<Cleartext<bool> *>(cipherClearText.get())) {   // result is a cleartext
-        auto cleartextData = cleartextBool->getData();
-        // required to convert vector<int> to vector<int64_t>
-        plainValues.insert(plainValues.end(), cleartextData.begin(), cleartextData.end());
-        EXPECT_EQ(plainValues, expectedResult.at(identifier));
-      } else {
-        throw std::runtime_error("Could not determine type of result.");
-      }
-    }
-  };
-
-  std::unordered_map<std::string, std::vector<int64_t>> expectedResult;
-  expectedResult["img2"] = {1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 1};
-  auto result = srv.getOutput(*astOutput);
-  assertResult(result, expectedResult);
 }

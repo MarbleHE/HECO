@@ -1,9 +1,9 @@
-#include <ast_opt/parser/Parser.h>
-#include <test/ASTComparison.h>
-#include "ast_opt/ast/Block.h"
-#include "ast_opt/ast/Literal.h"
-#include "ast_opt/ast/Variable.h"
-#include "ast_opt/ast/VariableDeclaration.h"
+#include <abc/ast_parser/Parser.h>
+#include "ASTComparison.h"
+#include "abc/ast/Block.h"
+#include "abc/ast/Literal.h"
+#include "abc/ast/Variable.h"
+#include "abc/ast/VariableDeclaration.h"
 #include "gtest/gtest.h"
 
 /// Helper function to handle dynamic casting/etc

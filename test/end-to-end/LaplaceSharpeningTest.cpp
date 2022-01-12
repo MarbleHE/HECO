@@ -1,25 +1,51 @@
 #include <set>
 #include <random>
 #include "gtest/gtest.h"
-#include "ast_opt/ast/AbstractNode.h"
-#include "ast_opt/parser/Parser.h"
-#include "ast_opt/runtime/RuntimeVisitor.h"
-#include "ast_opt/runtime/SealCiphertextFactory.h"
-#include "ast_opt/ast/Assignment.h"
-#include "ast_opt/ast/Variable.h"
-#include "ast_opt/ast/IndexAccess.h"
-#include "ast_opt/visitor/SecretBranchingVisitor.h"
-#include "test/ASTComparison.h"
-
-using namespace std;
+#include "abc/ast/AbstractNode.h"
+#include "abc/ast_parser/Parser.h"
+#include "abc/ast/Assignment.h"
+#include "abc/ast/Variable.h"
 
 // use this fixed seed to enable reproducibility of the matrix inputs
 #define RAND_SEED 4673838
 // use a 4x4 matrix for the tests
 #define MATRIX_SIZE 4
 
-#include "bench/LaplaceSharpening.h"
-#include "bench/MultiTimer.h"
+/// Original, plain C++ program for LaplacianSharpening
+/// This uses a 3x3 Kernel and applies it by sliding across the 2D image
+///             | 1  1  1 |
+///   w = -1 *  | 1 -8  1 |
+///             | 1  1  1 |
+/// No padding is used, so the image is 2px smaller in each dimension
+/// The filtered image is then added to the original image at 50% intensity.
+///
+/// This program is inspired by RAMPARTS, presented by Archer et al. in 2019
+/// The only modification that we do is instead of computing
+///     img2[x][y] = img[x][y] - (value/2),
+/// we compute
+///     img2[x][y] = 2*img[x][y] - value
+/// to avoid division which is unsupported in BFV
+/// The client can easily divide the result by two after decryption
+///
+/// \param img Pixel (x,y) = (column, row) should be at position x*imgSize + y
+/// \return transformed image
+std::vector<int> laplacianSharpening(const std::vector<int> &img) {
+  const auto imgSize = (int) std::ceil(std::sqrt(img.size()));
+  std::vector<std::vector<int>> weightMatrix = {{1, 1, 1}, {1, -8, 1}, {1, 1, 1}};
+  std::vector<int> img2(img.begin(), img.end());
+  for (int x = 1; x < imgSize - 1; ++x) {
+    for (int y = 1; y < imgSize - 1; ++y) {
+      int value = 0;
+      for (int j = -1; j < 2; ++j) {
+        for (int i = -1; i < 2; ++i) {
+          value = value + weightMatrix.at(i + 1).at(j + 1)*img.at((x + i)*imgSize + (y + j));
+        }
+      }
+      img2[imgSize*x + y] = 2*img.at(x*imgSize + y) - value;
+    }
+  }
+  return img2;
+}
 
 class KernelTest : public ::testing::Test {  /* NOLINT (predictable sequence expected) */
  protected:
@@ -108,358 +134,8 @@ class KernelTest : public ::testing::Test {  /* NOLINT (predictable sequence exp
     std::vector<std::vector<int>> data;
     getInputMatrix(size, data);
     std::size_t total_size = 0;
-    for (const auto &sub: data) total_size += sub.size();
+    for (const auto &sub : data) total_size += sub.size();
     destination.reserve(total_size);
-    for (const auto &sub: data) destination.insert(destination.end(), sub.begin(), sub.end());
+    for (const auto &sub : data) destination.insert(destination.end(), sub.begin(), sub.end());
   }
 };
-
-// use this fixed seed to enable reproducibility of the matrix inputs
-#define RAND_SEED 4673838
-// use a 4x4 matrix for the tests
-#define MATRIX_SIZE 4
-
-class LaplacianSharpeningTest : public ::testing::Test {  /* NOLINT (predictable sequence expected) */
- protected:
-  std::default_random_engine randomEngine;
-  std::uniform_int_distribution<int> myUnifIntDist;
-
-  void SetUp() override {
-    randomEngine = std::default_random_engine(RAND_SEED);  /* NOLINT (predictable sequence expected) */
-    // the supported number range must be according to the FHE scheme parameters to not wrap around the modulo
-    myUnifIntDist = std::uniform_int_distribution<int>(0, 1024);
-  }
-
- public:
-  void resetRandomEngine() {
-    randomEngine.seed(RAND_SEED);
-  }
-
-  void getInputMatrix(size_t size, std::vector<std::vector<int>> &destination) {
-    // reset the RNG to make sure that every call to this method results in the same numbers
-    resetRandomEngine();
-    // make sure we clear desination vector before, otherwise resize could end up appending elements
-    destination.clear();
-    destination.resize(size, std::vector<int>(size));
-    for (size_t i = 0; i < size; ++i) {
-      for (size_t j = 0; j < size; ++j) {
-        destination[i][j] = myUnifIntDist(randomEngine);
-      }
-    }
-  }
-
-  void getInputMatrix(size_t size, std::vector<int> &destination) {
-    // make sure we clear desination vector before, otherwise resize could end up appending elements
-    destination.clear();
-    std::vector<std::vector<int>> data;
-    getInputMatrix(size, data);
-    std::size_t total_size = 0;
-    for (const auto &sub: data) total_size += sub.size();
-    destination.reserve(total_size);
-    for (const auto &sub: data) destination.insert(destination.end(), sub.begin(), sub.end());
-  }
-
-  void printMatrix(size_t size, std::vector<int> &matrix) {
-    /* We assume a row major layout of the matrix, where the first element is the bottom left pixel */
-    for (int64_t row = size - 1; row >= 0; --row) {
-      std::cout << matrix.at(0*size + row);
-      for (size_t col = 1; col < size; ++col) {
-        std::cout << "\t" << std::setw(4) << matrix.at(col*size + row);
-      }
-      std::cout << std::endl;
-    }
-  }
-};
-
-#ifdef HAVE_SEAL_BFV
-
-/// Test to ensure that plaintext and encrypted compute the same thing
-TEST_F(LaplacianSharpeningTest, Encrypted_Batched_Plain_Equivalence) { /* NOLINT */
-
-  size_t poly_modulus_degree = 2 << 12;
-  size_t size = std::sqrt(poly_modulus_degree/2);
-  std::vector<int> img;
-  LaplacianSharpeningTest::getInputMatrix(size, img);
-
-  auto ref = laplacianSharpening(img);
-
-  auto dummy = MultiTimer();
-  auto encrypted = encryptedLaplacianSharpening(dummy, img, poly_modulus_degree);
-  std::vector<int> enc(begin(encrypted), end(encrypted));
-  enc.resize(ref.size()); // Is there a more efficient way to do this?
-
-  EXPECT_EQ(ref, enc);
-}
-
-/// Test to ensure that plaintext and naive encrypted compute the same thing
-TEST_F(LaplacianSharpeningTest, Encrypted_Naive_Plain_Equivalence) { /* NOLINT */
-
-  size_t poly_modulus_degree = 2 << 12;
-  size_t size = 8;
-  std::vector<int> img;
-  LaplacianSharpeningTest::getInputMatrix(size, img);
-
-  auto ref = laplacianSharpening(img);
-
-  auto dummy = MultiTimer();
-  auto encrypted = encryptedNaiveLaplaceSharpening(dummy, img, poly_modulus_degree);
-  std::vector<int> enc(begin(encrypted), end(encrypted));
-  enc.resize(ref.size()); // Is there a more efficient way to do this?
-
-  EXPECT_EQ(ref, enc);
-}
-
-/// Test to ensure that plaintext and naive batched encrypted compute the same thing
-TEST_F(LaplacianSharpeningTest, Encrypted_Naive_Batched_Plain_Equivalence) { /* NOLINT */
-
-  size_t poly_modulus_degree = 2 << 12;
-  size_t size = std::sqrt(poly_modulus_degree / 2);
-  std::vector<int> img;
-  LaplacianSharpeningTest::getInputMatrix(size, img);
-
-  auto ref = laplacianSharpening(img);
-
-  auto dummy = MultiTimer();
-  auto encrypted = encryptedNaiveLaplaceSharpening(dummy, img, poly_modulus_degree);
-  std::vector<int> enc(begin(encrypted), end(encrypted));
-  enc.resize(ref.size()); // Is there a more efficient way to do this?
-
-  EXPECT_EQ(ref, enc);
-}
-
-/// Check correctness of result between original program and (unmodified) program parsed as AST
-TEST_F(KernelTest, DISABLED_laplacianSharpening) {  /* NOLINT */
-  // run the original program
-  std::vector<int> data;
-  getInputMatrix(MATRIX_SIZE, data);
-  auto expectedResult = laplacianSharpening(data);
-
-  // run the unoptimized FHE program
-  std::unique_ptr<AbstractNode> evalProgram = KernelTest::getLaplaceSharpeningProgram();
-  std::unique_ptr<AbstractNode> inputs = KernelTest::getInputs(MATRIX_SIZE);
-  std::unique_ptr<AbstractNode> outputs = KernelTest::getOutputs();
-  auto scf = std::make_unique<SealCiphertextFactory>(16384);
-
-  TypeCheckingVisitor tcv;
-  auto rootScope = std::make_unique<Scope>(*evalProgram);
-
-  auto siImage = std::make_unique<ScopedIdentifier>(*rootScope, "image");
-  rootScope->addIdentifier("image");
-  tcv.addVariableDatatype(*siImage, Datatype(Type::INT, true));
-
-  auto siImgSize = std::make_unique<ScopedIdentifier>(*rootScope, "imgSize");
-  rootScope->addIdentifier("imgSize");
-  tcv.addVariableDatatype(*siImgSize, Datatype(Type::INT, false));
-
-  tcv.setRootScope(std::move(rootScope));
-
-  evalProgram->accept(tcv);
-  auto stn = tcv.getSecretTaintedNodes();
-
-  RuntimeVisitor rtv(*scf, *inputs, tcv.getSecretTaintedNodes());
-  // TODO: Implement IndexAccess for secret variables (with plaintext index) and then finish implementing this test
-
-  // we need to use ->begin()->end() as the AST is wrapped into a block (begin()) and then we need to skip the Function
-  // statement and instead just visit it's associated Block (end()) because Functions are not supported by the
-  // RuntimeVisitor
-  // rtv.executeAst(*evalProgram->begin()->end());
-  // auto actualResult = rtv.getOutput(*outputs);
-
-  // TODO: Compare expectedResult with actualResult (see RuntimeVisitorTest for examples)
-}
-
-#endif
-
-/// Check result generated by TypeCheckingVisitor
-TEST_F(KernelTest, STAGE_01_typeCheckingTest) {  /* NOLINT */
-  std::vector<int> data;
-  KernelTest::getInputMatrix(MATRIX_SIZE, data);
-  std::vector<std::reference_wrapper<AbstractNode>> createdNodes;
-  std::unique_ptr<AbstractNode> evalProgram = KernelTest::getLaplaceSharpeningProgramAndNodes(createdNodes);
-
-  TypeCheckingVisitor tcv;
-  auto rootScope = std::make_unique<Scope>(*evalProgram);
-  auto siImage = std::make_unique<ScopedIdentifier>(*rootScope, "image");
-  rootScope->addIdentifier("image");
-  tcv.addVariableDatatype(*siImage, Datatype(Type::INT, true));
-  auto siImgSize = std::make_unique<ScopedIdentifier>(*rootScope, "imgSize");
-  rootScope->addIdentifier("imgSize");
-  tcv.addVariableDatatype(*siImgSize, Datatype(Type::INT, false));
-  tcv.setRootScope(std::move(rootScope));
-  evalProgram->accept(tcv);
-
-  auto actualTaintedNodes = tcv.getSecretTaintedNodes();
-
-  // code to determine indices of tainted nodes, afterwards check manually if these are really the nodes that should be
-  // tainted
-//  std::set<std::string> taintedNodesIds;
-//  for (auto &[identifier, flag] : actualTaintedNodes) {
-//    if (flag) taintedNodesIds.insert(identifier);
-//  }
-//  for (size_t i = 0; i < createdNodes.size(); ++i) {
-//    if (taintedNodesIds.count(createdNodes.at(i).get().getUniqueNodeId()) > 0) std::cout << i << ", " << std::endl;
-//  }
-
-  // extract ID dynamically from parsed input program from those nodes that are tainted because node IDs depend on
-  // execution order of tests
-  std::vector<int> nodesIdxExpectedTainted = {17, 18, 71, 81, 91, 92, 93, 94, 107, 113, 114, 115, 116, 117};
-  std::set<std::string> expTainted;
-  for (const auto idx: nodesIdxExpectedTainted) {
-    expTainted.insert(createdNodes.at(idx).get().getUniqueNodeId());
-  }
-
-  for (const auto &[identifier, taintedFlag]: actualTaintedNodes) {
-    bool expectedTainted = expTainted.count(identifier) > 0;
-    EXPECT_EQ(taintedFlag, expectedTainted);
-  }
-}
-
-/// Check result after applying CTES
-TEST_F(KernelTest, DISABLED_STAGE_02_ctestTest) {  /* NOLINT */
-  // Expected: AST is not changed as there are no optimization opportunities without knowing the inputs
-
-  // TODO: Implement this test as soon as CTES has been implemented.
-  //  Should be similar as "STAGE_03_secretBranchingRemovalTest" where visited AST is compared with the AST that was
-  //  given to the visitor.
-}
-
-/// Check result after secret branching removal
-TEST_F(KernelTest, DISABLED_STAGE_03_secretBranchingRemovalTest) {  /* NOLINT */
-  // Expected: AST is not changed as there are no secret branches to be removed
-
-  std::vector<int> data;
-  KernelTest::getInputMatrix(MATRIX_SIZE, data);
-  std::unique_ptr<AbstractNode> evalProgram = KernelTest::getLaplaceSharpeningProgram();
-
-  // get secret tainted nodes map
-  TypeCheckingVisitor tcv;
-  auto rootScope = std::make_unique<Scope>(*evalProgram);
-  auto siImage = std::make_unique<ScopedIdentifier>(*rootScope, "image");
-  rootScope->addIdentifier("image");
-  tcv.addVariableDatatype(*siImage, Datatype(Type::INT, true));
-  auto siImgSize = std::make_unique<ScopedIdentifier>(*rootScope, "imgSize");
-  rootScope->addIdentifier("imgSize");
-  tcv.addVariableDatatype(*siImgSize, Datatype(Type::INT, false));
-  tcv.setRootScope(std::move(rootScope));
-  evalProgram->accept(tcv);
-
-  SecretBranchingVisitor sbv(tcv.getSecretTaintedNodes());
-  evalProgram->accept(sbv);
-
-  auto expectedOriginalAst = KernelTest::getLaplaceSharpeningProgram();
-  compareAST(*evalProgram, *expectedOriginalAst);
-}
-
-/// Check result after loop unrolling
-TEST_F(KernelTest, DISABLED_STAGE_04_loopUnrollingTest) {  /* NOLINT */
-
-  // TODO: Implement this test as soon as Loop Unrolling has been implemented.
-
-  // After unrolling inner loop 1
-  const char *afterInnerLoop1 = R""""(
-      public void laplacianSharpening(int imageVec) {
-        int weightMatrix = { {1, 1, 1}, {1, -8, 1}, {1, 1, 1} };
-        secret int img2 = image;
-        for (int x = 1; x < imgSize - 1; x = x + 1) {
-          for (int y = 1; y < imgSize - 1; y = y + 1) {
-            int value = 0;
-            for (int j = -1; j < 2; j = j + 1) {
-              value = value + weightMatrix[0][j+1] * image[(x-1)*imgSize+(y+j)];
-              value = value + weightMatrix[1][j+1] * image[(x)*imgSize+(y+j)];
-              value = value + weightMatrix[2][j+1] * image[(x+1)*imgSize+(y+j)];
-            }
-            img2[x][y] = 2*image[x*imgSize+y] - value;
-          }
-        }
-        return;  // img2 contains result
-      }
-    )"""";
-  auto afterInnerLoop1Ast = Parser::parse(std::string(afterInnerLoop1));
-
-  // After unrolling inner loop 2
-  const char *afterInnerLoop2 = R""""(
-      public void laplacianSharpening(int imageVec) {
-        int weightMatrix = { {1, 1, 1}, {1, -8, 1}, {1, 1, 1} };
-        secret int img2 = image;
-        for (int x = 1; x < imgSize - 1; x = x + 1) {
-          for (int y = 1; y < imgSize - 1; y = y + 1) {
-            int value = 0;
-            value = value + weightMatrix[0][0] * image[(x-1)*imgSize+(y-1)];
-            value = value + weightMatrix[1][0] * image[(x)*imgSize+(y-1)];
-            value = value + weightMatrix[2][0] * image[(x+1)*imgSize+(y-1)];
-            value = value + weightMatrix[0][1] * image[(x-1)*imgSize+(y)];
-            value = value + weightMatrix[1][1] * image[(x)*imgSize+(y)];
-            value = value + weightMatrix[2][1] * image[(x+1)*imgSize+(y)];
-            value = value + weightMatrix[0][2] * image[(x-1)*imgSize+(y+1)];
-            value = value + weightMatrix[1][2] * image[(x)*imgSize+(y+1)];
-            value = value + weightMatrix[2][2] * image[(x+1)*imgSize+(y+1)];
-            img2[x][y] = 2*image[x*imgSize+y] - value;
-          }
-        }
-        return;  // img2 contains result
-      }
-    )"""";
-  auto afterInnerLoop2Ast = Parser::parse(std::string(afterInnerLoop2));
-
-  // After applying CTES on unrolled statements
-  const char *afterCtes = R""""(
-      public void laplacianSharpening(int imageVec) {
-        int weightMatrix = { {1, 1, 1}, {1, -8, 1}, {1, 1, 1} };
-        secret int img2 = image;
-        for (int x = 1; x < imgSize - 1; x = x + 1) {
-          for (int y = 1; y < imgSize - 1; y = y + 1) {
-            img2[x][y] = 2*image[x*imgSize+y] -
-                (weightMatrix[0][0] * image[(x-1)*imgSize+(y-1)]
-                + weightMatrix[1][0] * image[(x)*imgSize+(y-1)]
-                + weightMatrix[2][0] * image[(x+1)*imgSize+(y-1)]
-                + weightMatrix[0][1] * image[(x-1)*imgSize+(y)]
-                + weightMatrix[1][1] * image[(x)*imgSize+(y)]
-                + weightMatrix[2][1] * image[(x+1)*imgSize+(y)]
-                + weightMatrix[0][2] * image[(x-1)*imgSize+(y+1)]
-                + weightMatrix[1][2] * image[(x)*imgSize+(y+1)]
-                + weightMatrix[2][2] * image[(x+1)*imgSize+(y+1)]);
-          }
-        }
-        return;  // img2 contains result
-      }
-    )"""";
-  auto afterCtesAst = Parser::parse(std::string(afterCtes));
-}
-
-/// Check result after statement vectorization
-TEST_F(KernelTest, DISABLED_STAGE_05_statementVectorizationTest) {  /* NOLINT */
-  // After applying Vectorizer on unrolled statements
-  const char *afterVectorization = R""""(
-      public void laplacianSharpening(int imageVec) {
-        int weightMatrix = { {1, 1, 1}, {1, -8, 1}, {1, 1, 1} };
-        secret int img2 = image;
-
-        // this should ideally be executed using add_many (not implemented in RuntimeVisitor yet)
-        __result__ = weightMatrix[0][0] * image
-          + rotate(weightMatrix[1][0] * image, imgSize)
-          + rotate(weightMatrix[2][0] * image, 2*imgSize)
-          + rotate(weightMatrix[0][1] * image, 1)
-          + rotate(weightMatrix[1][1] * image, imgSize+1)
-          + rotate(weightMatrix[2][1] * image, 2*imgSize+1)
-          + rotate(weightMatrix[0][2] * image, 2)
-          + rotate(weightMatrix[1][2] * image, imgSize+2)
-          + rotate(weightMatrix[2][2] * image, 2*imgSize+2);
-        __result_mask__ = { 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-        __masked_result__ = __result__ *** __result_mask__;
-
-        // extract border from img2 (actually, the input image as it was copied before)
-        img2 = img2 *** ~__result_mask__;
-
-        // merge border-only img2 with rotated masked_result (rotation required to place results in correct slots)
-        // Vectorizer should compute:  offset = resultSlotBatchedOutput-targetSlot;
-        // For example, offset = 1-6 = -5 => rotate __masked_result__ to the right-hand side by 5
-        int offset = -5;
-        img2 = img2 + rotate(__masked_result__, offset);
-
-        return;  // img2 contains kernel applied to input image
-      }
-    )"""";
-  auto afterCtesAst = Parser::parse(std::string(afterVectorization));
-
-  // TODO: Implement this test as soon as the Vectorizer has been implemented.
-}

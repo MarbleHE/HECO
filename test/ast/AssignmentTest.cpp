@@ -1,9 +1,9 @@
-#include "ast_opt/ast/Literal.h"
-#include "ast_opt/ast/Variable.h"
-#include "ast_opt/ast/Assignment.h"
-#include "ast_opt/parser/Parser.h"
+#include "abc/ast/Literal.h"
+#include "abc/ast/Variable.h"
+#include "abc/ast/Assignment.h"
+#include "abc/ast_parser/Parser.h"
 #include "gtest/gtest.h"
-#include "../ASTComparison.h"
+#include "ASTComparison.h"
 
 
 TEST(AssignmentTest, values_ValuesGivenInCtorAreRetrievable) {

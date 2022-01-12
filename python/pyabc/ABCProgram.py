@@ -68,6 +68,7 @@ class ABCProgram:
 
         :return: void, the compiled main function is stored internally in self.cpp_program.
         """
+
         if self.main_fn:
             self.cpp_program = ABCProgramWrapper(json.dumps(self.main_fn), json.dumps(self.main_args))
         else:
@@ -83,64 +84,68 @@ class ABCProgram:
         :return: whatever the defined FHE main function returns.
         """
 
-        logging.debug(f"Running main function with args: {self.main_args}")
+        # TODO: remove
+        logging.warning("Execution is temporarily deactivated until we switched to MLIR!")
+        return
 
-        if not self.cpp_program:
-            self.compile()
-
-        # Ensure all arguments are present
-        if len(args) > len(self.main_args):
-            logging.error(f"Too many arguments supplied for main (max. {len(self.main_args)} are allowed).")
-            exit(1)
-
-        fhe_args = dict()
-        main_args_keys = list(self.main_args.keys())
-        ## Add positional arguments with names in the order of those specified in self.main_args.
-        for i, arg in enumerate(args):
-            fhe_args[main_args_keys[i]] = (arg, self.main_args[main_args_keys[i]]["secret"])
-
-        ## Add keyword arguments (if they are actually arguments of main)
-        for arg_name, arg_val in kwargs.items():
-            if arg_name not in main_args_keys:
-                logging.error(f"Unknown argument '{arg_name}' for main.")
-            fhe_args[arg_name] = (arg_val, self.main_args[arg_name]["secret"])
-
-        ## Add remaining arguments of main that have default values
-        for arg_name in list(main_args_keys)[len(args):]:
-            if arg_name not in kwargs:
-                arg_meta = self.main_args[arg_name]
-                if not arg_meta["opt"]:
-                    logging.error(f"Mandatory argument '{arg_name}' is missing!")
-                    exit(1)
-                fhe_args[arg_name] = (arg_meta["value"], arg_meta["secret"])
-
-        ## Create FHE arguments: make block of assignment statements
-        fhe_args_block = self._create_fhe_args_block(fhe_args)
-
-        ret_var_names = list(self.ret_vars.keys())
-        result = self.cpp_program.execute(json.dumps(fhe_args_block), ret_var_names)
-
-        res_vec = []
-        res_val_idx = 0
-        for ret_vars_idx, ret_var in enumerate (ret_var_names):
-            # Add constants to fill gaps between variables
-            res_vec += self.ret_constants[res_val_idx : self.ret_vars[ret_var]]
-            res_val_idx = self.ret_vars[ret_var]
-
-            # Add result for variable
-
-            # TODO: This is a hack necessary due to python's dynamic (return) types.
-            #   For now, lists that only have a single value are always converted to that value only.
-            #   In the future, we maybe could leverage type hints to know what return value python actually expects.
-            val = result[ret_vars_idx]
-            if isinstance(val, list) and len(val) == 1:
-                val = val[0]
-            res_vec.append(val)
-
-        # Append remaining constants
-        res_vec += self.ret_constants[res_val_idx:]
-
-        return res_vec[0] if len(res_vec) == 1 else tuple(res_vec)
+        # logging.debug(f"Running main function with args: {self.main_args}")
+        #
+        # if not self.cpp_program:
+        #     self.compile()
+        #
+        # # Ensure all arguments are present
+        # if len(args) > len(self.main_args):
+        #     logging.error(f"Too many arguments supplied for main (max. {len(self.main_args)} are allowed).")
+        #     exit(1)
+        #
+        # fhe_args = dict()
+        # main_args_keys = list(self.main_args.keys())
+        # ## Add positional arguments with names in the order of those specified in self.main_args.
+        # for i, arg in enumerate(args):
+        #     fhe_args[main_args_keys[i]] = (arg, self.main_args[main_args_keys[i]]["secret"])
+        #
+        # ## Add keyword arguments (if they are actually arguments of main)
+        # for arg_name, arg_val in kwargs.items():
+        #     if arg_name not in main_args_keys:
+        #         logging.error(f"Unknown argument '{arg_name}' for main.")
+        #     fhe_args[arg_name] = (arg_val, self.main_args[arg_name]["secret"])
+        #
+        # ## Add remaining arguments of main that have default values
+        # for arg_name in list(main_args_keys)[len(args):]:
+        #     if arg_name not in kwargs:
+        #         arg_meta = self.main_args[arg_name]
+        #         if not arg_meta["opt"]:
+        #             logging.error(f"Mandatory argument '{arg_name}' is missing!")
+        #             exit(1)
+        #         fhe_args[arg_name] = (arg_meta["value"], arg_meta["secret"])
+        #
+        # ## Create FHE arguments: make block of assignment statements
+        # fhe_args_block = self._create_fhe_args_block(fhe_args)
+        #
+        # ret_var_names = list(self.ret_vars.keys())
+        # result = self.cpp_program.execute(json.dumps(fhe_args_block), ret_var_names)
+        #
+        # res_vec = []
+        # res_val_idx = 0
+        # for ret_vars_idx, ret_var in enumerate (ret_var_names):
+        #     # Add constants to fill gaps between variables
+        #     res_vec += self.ret_constants[res_val_idx : self.ret_vars[ret_var]]
+        #     res_val_idx = self.ret_vars[ret_var]
+        #
+        #     # Add result for variable
+        #
+        #     # TODO: This is a hack necessary due to python's dynamic (return) types.
+        #     #   For now, lists that only have a single value are always converted to that value only.
+        #     #   In the future, we maybe could leverage type hints to know what return value python actually expects.
+        #     val = result[ret_vars_idx]
+        #     if isinstance(val, list) and len(val) == 1:
+        #         val = val[0]
+        #     res_vec.append(val)
+        #
+        # # Append remaining constants
+        # res_vec += self.ret_constants[res_val_idx:]
+        #
+        # return res_vec[0] if len(res_vec) == 1 else tuple(res_vec)
 
     def set_src(self, parent_frame):
         """

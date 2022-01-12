@@ -1,8 +1,8 @@
-#include <ast_opt/parser/Parser.h>
-#include <test/ASTComparison.h>
-#include "ast_opt/ast/Literal.h"
-#include "ast_opt/ast/Variable.h"
-#include "ast_opt/ast/Return.h"
+#include <abc/ast_parser/Parser.h>
+#include "ASTComparison.h"
+#include "abc/ast/Literal.h"
+#include "abc/ast/Variable.h"
+#include "abc/ast/Return.h"
 #include "gtest/gtest.h"
 
 TEST(ReturnTest, values_ValuesGivenInCtorAreRetrievable) {

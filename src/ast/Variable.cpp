@@ -1,6 +1,6 @@
 #include <utility>
-#include "ast_opt/ast/Variable.h"
-#include "ast_opt/utilities/IVisitor.h"
+#include "abc/ast/Variable.h"
+#include "abc/ast_utilities/IVisitor.h"
 
 Variable::~Variable() = default;
 

@@ -1,6 +1,6 @@
-#include <ast_opt/parser/Parser.h>
-#include "ast_opt/ast/IndexAccess.h"
-#include "ast_opt/utilities/IVisitor.h"
+#include "abc/ast_parser/Parser.h"
+#include "abc/ast/IndexAccess.h"
+#include "abc/ast_utilities/IVisitor.h"
 
 IndexAccess::~IndexAccess() = default;
 
