@@ -15,14 +15,14 @@
 using namespace mlir;
 using namespace abc;
 
+typedef llvm::ScopedHashTable<StringRef, std::pair<mlir::Type, mlir::Value>> CustomSymbolTable;
+
 /// Declare a variable in the current scope, return success if the variable
 /// wasn't declared yet.
-mlir::LogicalResult declare(llvm::StringRef name,
-                            mlir::Value value,
-                            llvm::ScopedHashTable<StringRef, mlir::Value> &symbolTable) {
+mlir::LogicalResult declare(llvm::StringRef name, mlir::Type type, mlir::Value value, CustomSymbolTable &symbolTable) {
   if (symbolTable.count(name))
     return mlir::failure();
-  symbolTable.insert(name, value);
+  symbolTable.insert(name, {type, value});
   return mlir::success();
 }
 
@@ -64,7 +64,7 @@ mlir::Block &getBlock(Region &region_containing_blockop) {
 mlir::Value
 translateExpression(Operation &op,
                     IRRewriter &rewriter,
-                    llvm::ScopedHashTable<StringRef, mlir::Value> &symbolTable) {
+                    CustomSymbolTable &symbolTable) {
   if (auto literal_int = llvm::dyn_cast<abc::LiteralIntOp>(op)) {
     // TODO: having all ints be index is a nasty hack and we should really instead handle conversions
     //   between things like index, int, bool properly.
@@ -86,17 +86,29 @@ translateExpression(Operation &op,
       emitError(variable.getLoc(), "Undefined variable " + variable.name());
       return rewriter.create<arith::ConstantOp>(op.getLoc(), rewriter.getIntegerAttr(rewriter.getIntegerType(64), 1));
     } else {
-      return symbolTable.lookup(variable.name());
+      return symbolTable.lookup(variable.name()).second;
     }
   } else if (auto binary_expr = llvm::dyn_cast<abc::BinaryExpressionOp>(op)) {
     auto lhs = translateExpression(firstOp(binary_expr.left()), rewriter, symbolTable);
     auto rhs = translateExpression(firstOp(binary_expr.right()), rewriter, symbolTable);
     if (binary_expr.op()=="+") {
-      return rewriter.create<arith::AddIOp>(binary_expr->getLoc(), lhs, rhs);
+      if (auto s_type = lhs.getType().dyn_cast_or_null<fhe::SecretType>()) {
+        return rewriter.create<fhe::AddOp>(binary_expr->getLoc(), ValueRange({lhs, rhs}));
+      } else {
+        return rewriter.create<arith::AddIOp>(binary_expr->getLoc(), lhs, rhs);
+      }
     } else if (binary_expr.op()=="-") {
-      return rewriter.create<arith::SubIOp>(binary_expr->getLoc(), lhs, rhs);
+      if (auto s_type = lhs.getType().dyn_cast_or_null<fhe::SecretType>()) {
+        return rewriter.create<fhe::SubOp>(binary_expr->getLoc(), ValueRange({lhs, rhs}));
+      } else {
+        return rewriter.create<arith::SubIOp>(binary_expr->getLoc(), lhs, rhs);
+      }
     } else if (binary_expr.op()=="*") {
-      return rewriter.create<arith::MulIOp>(binary_expr->getLoc(), lhs, rhs);
+      if (auto s_type = lhs.getType().dyn_cast_or_null<fhe::SecretType>()) {
+        return rewriter.create<fhe::MultiplyOp>(binary_expr->getLoc(), ValueRange({lhs, rhs}));
+      } else {
+        return rewriter.create<arith::MulIOp>(binary_expr->getLoc(), lhs, rhs);
+      }
     } else if (binary_expr.op()=="%") {
       return rewriter.create<arith::RemUIOp>(binary_expr->getLoc(), lhs, rhs);
     } else {
@@ -138,10 +150,10 @@ translateExpression(Operation &op,
 
 void translateStatement(Operation &op,
                         IRRewriter &rewriter,
-                        llvm::ScopedHashTable<StringRef, mlir::Value> &symbolTable,
+                        CustomSymbolTable &symbolTable,
                         AffineForOp *for_op = nullptr);
 
-void translateIfOp(abc::IfOp &if_op, IRRewriter &rewriter, llvm::ScopedHashTable<StringRef, Value> &symbolTable) {
+void translateIfOp(abc::IfOp &if_op, IRRewriter &rewriter, CustomSymbolTable &symbolTable) {
   auto condition = translateExpression(firstOp(if_op.condition()), rewriter, symbolTable);
   bool else_branch = if_op->getNumRegions()==3;
   auto new_if = rewriter.create<scf::IfOp>(if_op->getLoc(), condition, else_branch);
@@ -165,7 +177,7 @@ void translateIfOp(abc::IfOp &if_op, IRRewriter &rewriter, llvm::ScopedHashTable
 
 void translateVariableDeclarationOp(abc::VariableDeclarationOp vardecl_op,
                                     IRRewriter &rewriter,
-                                    llvm::ScopedHashTable<StringRef, Value> &symbolTable) {
+                                    CustomSymbolTable &symbolTable) {
 
   if (vardecl_op.value().empty()) {
     emitError(vardecl_op.getLoc(), "Declarations that do not specify a value are currently not supported.");
@@ -173,17 +185,17 @@ void translateVariableDeclarationOp(abc::VariableDeclarationOp vardecl_op,
   }
   // Get Name, Type and Value
   auto name = vardecl_op.name();
-  //auto type = vardecl_op.type();
+  auto type = vardecl_op.type();
   // TODO: Support decls without value by defining default values?
   auto value = translateExpression(firstOp(vardecl_op.value().front()), rewriter, symbolTable);
   value.setLoc(NameLoc::get(Identifier::get(name, value.getContext()), value.getLoc()));
   // TODO: Somehow check that value and type are compatible
-  (void) declare(name, value, symbolTable); //void cast to suppress "unused result" warning
+  (void) declare(name, type, value, symbolTable); //void cast to suppress "unused result" warning
 }
 
 void translateAssignmentOp(abc::AssignmentOp assignment_op,
                            IRRewriter &rewriter,
-                           llvm::ScopedHashTable<StringRef, Value> &symbolTable,
+                           CustomSymbolTable &symbolTable,
                            AffineForOp *for_op) {
   // Get Name, Type and Value
   auto value = translateExpression(firstOp(assignment_op.value()), rewriter, symbolTable);
@@ -194,13 +206,15 @@ void translateAssignmentOp(abc::AssignmentOp assignment_op,
   if (auto variable_op = llvm::dyn_cast<abc::VariableOp>(targetOp)) {
     // If it's a variable,
     target_name = variable_op.name();
+    Type target_type = symbolTable.lookup(target_name).first;
+    symbolTable.insert(target_name, {target_type, value});
   } else if (auto index_access = llvm::dyn_cast<abc::IndexAccessOp>(targetOp)) {
     if (auto target_variable = llvm::dyn_cast<VariableOp>(firstOp(index_access.target()))) {
       // if this is an index access, we need to first insert an operation, then update table with that result value
       // instead, we need to insert an operation and then update the value
       target_name = target_variable.name();
       auto index = translateExpression(firstOp(index_access.index()), rewriter, symbolTable);
-      value = rewriter.create<tensor::InsertOp>(assignment_op->getLoc(), value, symbolTable.lookup(target_name), index);
+      value = rewriter.create<tensor::InsertOp>(assignment_op->getLoc(), value, symbolTable.lookup(target_name).second, index);
     } else {
       emitError(assignment_op.getLoc(),
                 "Expected Index Access target to be a variable, got "
@@ -223,23 +237,23 @@ void translateAssignmentOp(abc::AssignmentOp assignment_op,
     // However, this might be BAD in terms of iterator stuff since we're currently in an llvm:: make early inc range thing
     // iterating over all the ops nested in this for op!
     //emitError(assignment_op->getLoc(), "Currently, we do not handle writing to variables in for loops correctly");
-    symbolTable.insert(target_name, value);
+    symbolTable.insert(target_name, {Type(), value});
   } else {
-    symbolTable.insert(target_name, value);
+    symbolTable.insert(target_name, {Type(), value});
   }
 
 }
 
 void translateSimpleForOp(abc::SimpleForOp &simple_for_op,
                           IRRewriter &rewriter,
-                          llvm::ScopedHashTable<StringRef, mlir::Value> &symbolTable) {
+                          CustomSymbolTable &symbolTable) {
 
   std::vector<std::string> existing_vars;
   AffineForOp *new_for_ptr = nullptr;
   // Create a new scope
   {
     // This sets curScope in symbolTable to varScope
-    llvm::ScopedHashTableScope<llvm::StringRef, mlir::Value> var_scope(symbolTable);
+    CustomSymbolTable::ScopeTy var_scope(symbolTable);
 
     // Get every variable that exists and dump it as an iter args,
     // since we can't add them later, but ones that don't get used
@@ -256,7 +270,7 @@ void translateSimpleForOp(abc::SimpleForOp &simple_for_op,
     }
     // get current values
     for (auto &var: existing_vars) {
-      iter_args.push_back(symbolTable.lookup(var));
+      iter_args.push_back(symbolTable.lookup(var).second);
     }
 
     // Create the affine for loop
@@ -270,10 +284,10 @@ void translateSimpleForOp(abc::SimpleForOp &simple_for_op,
     //TODO: Hack from above continued, needs to be cleaned up once we fix symboltable
     auto iter_args_it = new_for.getRegionIterArgs().begin();
     for (auto &var: existing_vars) {
-      symbolTable.insert(var, *iter_args_it++);
+      symbolTable.insert(var, {Type(), *iter_args_it++});
     }
 
-    declare(simple_for_op.iv(), new_for.getInductionVar(), symbolTable);
+    declare(simple_for_op.iv(), Type(), new_for.getInductionVar(), symbolTable);
 
     emitWarning(simple_for_op->getLoc(), "Currently, manually checking yields is required because of...reasons.");
 
@@ -303,7 +317,7 @@ void translateSimpleForOp(abc::SimpleForOp &simple_for_op,
     // TODO: Again, hacky, fix once we have better system
     llvm::SmallVector<Value, 4> yield_values;
     for (auto &var: existing_vars) {
-      yield_values.push_back(symbolTable.lookup(var));
+      yield_values.push_back(symbolTable.lookup(var).second);
     }
     rewriter.setInsertionPointToEnd(new_for.getBody());
     rewriter.create<AffineYieldOp>(simple_for_op->getLoc(), yield_values);
@@ -318,7 +332,7 @@ void translateSimpleForOp(abc::SimpleForOp &simple_for_op,
   auto res_it = new_for_ptr->result_begin();
   auto var_it = existing_vars.begin();
   for (size_t i = 0; i < existing_vars.size(); i++) {
-    symbolTable.insert(*var_it, *res_it);
+    symbolTable.insert(*var_it, {Type(), *res_it});
     res_it++;
     var_it++;
   }
@@ -360,7 +374,7 @@ void translateSimpleForOp(abc::SimpleForOp &simple_for_op,
 
 void translateStatement(Operation &op,
                         IRRewriter &rewriter,
-                        llvm::ScopedHashTable<StringRef, mlir::Value> &symbolTable,
+                        CustomSymbolTable &symbolTable,
                         AffineForOp *for_op) {
   rewriter.setInsertionPoint(&op);
   if (auto block_op = llvm::dyn_cast<abc::BlockOp>(op)) {
@@ -400,7 +414,7 @@ void translateStatement(Operation &op,
 
 void convertFunctionOp2FuncOp(FunctionOp &f,
                               IRRewriter &rewriter,
-                              llvm::ScopedHashTable<StringRef, mlir::Value> &symbolTable) {
+                              CustomSymbolTable &symbolTable) {
   // Read the existing function arguments
   std::vector<mlir::Type> argTypes;
   std::vector<OpOperand> arguments;
@@ -419,12 +433,12 @@ void convertFunctionOp2FuncOp(FunctionOp &f,
 
   // Enter the arguments into the symbol table
   // This sets curScope in symbolTable to varScope
-  llvm::ScopedHashTableScope<llvm::StringRef, mlir::Value> var_scope(symbolTable);
+  CustomSymbolTable::ScopeTy var_scope(symbolTable);
   for (auto pair: llvm::zip(f.getRegion(0).getOps<FunctionParameterOp>(), entryBlock->getArguments())) {
     auto op = std::get<0>(pair);
     auto arg = std::get<1>(pair);
     auto param_name = op.nameAttr().getValue();
-    if (failed(declare(param_name, arg, symbolTable))) {
+    if (failed(declare(param_name, Type(), arg, symbolTable))) {
       mlir::emitError(arg.getLoc(), "Cannot translate FunctionParameter " + param_name + ": name is already taken.");
     }
   }
@@ -462,7 +476,7 @@ void LowerASTtoSSAPass::runOnOperation() {
   auto &block = getOperation()->getRegion(0).getBlocks().front();
   IRRewriter rewriter(&getContext());
 
-  llvm::ScopedHashTable<StringRef, mlir::Value> symbolTable;
+  CustomSymbolTable symbolTable;
 
   for (auto f: llvm::make_early_inc_range(block.getOps<FunctionOp>())) {
     convertFunctionOp2FuncOp(f, rewriter, symbolTable);
