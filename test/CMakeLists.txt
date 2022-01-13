@@ -11,7 +11,7 @@ if(NOT TARGET gtest)
     FetchContent_Declare(
         googletest
         GIT_REPOSITORY https://github.com/google/googletest.git
-        GIT_TAG release-1.10.0
+        GIT_TAG release-1.11.0
     )
     FetchContent_MakeAvailable(googletest)
 endif()
@@ -58,12 +58,12 @@ set(TEST_FILES
         ast_visitor/PrintVisitorTest.cpp
         ast_visitor/ProgramPrintVisitorTest.cpp
         ast_visitor/VisitorTest.cpp
-        ../bench/MultiTimer.cpp
-        ../bench/BoxBlur.cpp
-        ../bench/L2Distance.cpp
-        ../bench/HammingDistance.cpp
-        ../bench/RobertsCross.cpp
-        ../bench/GxKernel.cpp
+        bench/MultiTimer.cpp
+        bench/BoxBlur.cpp
+        bench/L2Distance.cpp
+        bench/HammingDistance.cpp
+        bench/RobertsCross.cpp
+        bench/GxKernel.cpp
         )
 
 
