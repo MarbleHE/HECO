@@ -121,10 +121,6 @@ class Literal : public AbstractExpression {
     return std::make_unique<Literal<T>>(j["value"].get<T>());
   }
 
-  static std::unique_ptr<Literal<T>> fromJson(nlohmann::json j) {
-    return std::make_unique<Literal<T>>(j["value"].get<T>());
-  }
-
 
   ///////////////////////////////////////////////
   ////////// AbstractNode Interface /////////////

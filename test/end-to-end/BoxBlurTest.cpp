@@ -5,7 +5,7 @@
 #include "gtest/gtest.h"
 
 #ifdef HAVE_SEAL_BFV
-#include "bench/BoxBlur.h"
+#include "BoxBlur.h"
 #endif
 
 /// Original, plain C++ program for a naive Box blur

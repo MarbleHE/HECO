@@ -5,7 +5,7 @@
 #include "gtest/gtest.h"
 
 #ifdef HAVE_SEAL_BFV
-#include "bench/GxKernel.h"
+#include "GxKernel.h"
 #endif
 
 /// Original, plain C++ program for a naive Gx Kernel
