@@ -58,12 +58,12 @@ set(TEST_FILES
         ast_visitor/PrintVisitorTest.cpp
         ast_visitor/ProgramPrintVisitorTest.cpp
         ast_visitor/VisitorTest.cpp
-        ../bench/MultiTimer.cpp
-        ../bench/BoxBlur.cpp
-        ../bench/L2Distance.cpp
-        ../bench/HammingDistance.cpp
-        ../bench/RobertsCross.cpp
-        ../bench/GxKernel.cpp
+        bench/MultiTimer.cpp
+        bench/BoxBlur.cpp
+        bench/L2Distance.cpp
+        bench/HammingDistance.cpp
+        bench/RobertsCross.cpp
+        bench/GxKernel.cpp
         )
 
 
@@ -78,7 +78,7 @@ elseif ("${CMAKE_C_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang" OR "${CMAKE_CXX_COMP
 endif ()
 
 target_link_libraries(testing-all PRIVATE gtest cpp_ast gtest_main)
-target_include_directories(testing-all PRIVATE ${abc_SOURCE_DIR}/include/)
+target_include_directories(testing-all PRIVATE ${abc_SOURCE_DIR}/include/ bench)
 
 if(MSVC)
     # Mark gtest as external

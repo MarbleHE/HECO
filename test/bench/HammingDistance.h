@@ -5,6 +5,8 @@
 #include "seal/seal.h"
 #include "MultiTimer.h"
 
+uint64_t encryptedNaiveHammingDistance(MultiTimer &timer, const std::vector<bool> &a, const std::vector<bool> &b, size_t poly_modulus_degree);
+
 /// Computes the encrypted hamming distance between two vectors of booleans
 /// Note: Hamming distance over binary vectors can be computed semi-efficiently in Z_p by using NEQ = XOR = (a-b)^2
 /// \param a vector of size n

@@ -5,7 +5,7 @@
 #include "gtest/gtest.h"
 
 #ifdef HAVE_SEAL_BFV
-#include "bench/BoxBlur.h"
+#include "BoxBlur.h"
 #endif
 
 /// Original, plain C++ program for a naive Box blur
@@ -302,7 +302,7 @@ TEST_F(BoxBlurTest, EncryptedBoxBlur_FastBoxBlur_Equivalence) { /* NOLINT */
   std::vector<int> img;
   BoxBlurTest::getInputMatrix(size, img);
 
-  auto fast = fastBoxBlur(img);
+  auto fast = fastBoxBlur2x2(img);
 
   auto dummy = MultiTimer();
   auto encrypted = encryptedBatchedBoxBlur(dummy, img, poly_modulus_degree);

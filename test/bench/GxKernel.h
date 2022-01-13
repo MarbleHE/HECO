@@ -32,5 +32,12 @@ std::vector<int64_t> encryptedBatchedGxKernel(
 std::vector<int64_t> encryptedBatchedGxKernelPorcupine(
         MultiTimer &timer, const std::vector<int> &img, size_t poly_modulus_degree);
 
+/// Encrypted GxKernel, using vectors of ciphertexts.
+/// \param img Pixel (x,y) = (column, row) should be at position x*imgSize + y
+/// \param poly_modulus_degree FHE parameter, degree n of the polynomials
+/// \return transformed image
+std::vector<int> encryptedNaiveGxKernel(
+        MultiTimer &timer, const std::vector<int> &img, size_t poly_modulus_degree);
+
 #endif
 #endif//AST_OPTIMIZER_GXKERNEL_H
