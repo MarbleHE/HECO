@@ -1,5 +1,5 @@
 
-#include "abc/ast_utilities/abc_ast_to_mlir_visitor.h"
+#include "abc/ast_utilities/AbcAstToMlirVisitor.h"
 #include "abc/ast_parser/Errors.h"
 
 using namespace abc;
@@ -9,11 +9,7 @@ using namespace abc;
  */
 
 void SpecialAbcAstToMlirVisitor::add_op(mlir::Operation *op) {
-  if (block->empty()) {
-    block->push_back(op);
-  } else {
-    module.push_back(op);
-  }
+  module.push_back(op); // TODO: write to block instead
 }
 
 void SpecialAbcAstToMlirVisitor::add_recursive_result_to_region(AbstractNode &node, mlir::Region &region) {
@@ -354,8 +350,18 @@ void SpecialAbcAstToMlirVisitor::visit(VariableDeclaration &elem) {
   mlir::Block *targetBlock = new mlir::Block();
   recursive_visit(elem.getValue(), targetBlock);
 
-  auto targetAttr = targetBlock->front().getAttr("value");
-  auto varDeclOp = builder.create<VariableDeclarationOp>(builder.getUnknownLoc(),  name, targetAttr.getType(), 1);
+  auto val = targetBlock->front().clone();
+
+  mlir::Type targetType;
+  if (val->hasAttr("value")) {
+    targetType = val->getAttr("value").getType();
+  } else {
+    targetType = builder.getUnitAttr().getType();
+  }
+
+  VariableDeclarationOp varDeclOp = builder.create<VariableDeclarationOp>(builder.getUnknownLoc(),  name,
+                                                                          targetType, 1);
+
   varDeclOp.getRegion(0).push_back(targetBlock);
   add_op(varDeclOp);
 }

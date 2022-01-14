@@ -143,7 +143,7 @@ set(SOURCE_FILES
         ${abc_SOURCE_DIR}/src/ast_utilities/PlainVisitor.cpp
         ${abc_SOURCE_DIR}/src/ast_utilities/PrintVisitor.cpp
         ${abc_SOURCE_DIR}/src/ast_utilities/ProgramPrintVisitor.cpp
-        ${abc_SOURCE_DIR}/src/ast_utilities/abc_ast_to_mlir_visitor.cpp
+        ${abc_SOURCE_DIR}/src/ast_utilities/AbcAstToMlirVisitor.cpp
         ${abc_SOURCE_DIR}/src/ast_utilities/Scope.cpp
         ${abc_SOURCE_DIR}/src/ast_utilities/ScopedVisitor.cpp
         ${abc_SOURCE_DIR}/src/ast_parser/Parser.cpp
@@ -151,6 +151,7 @@ set(SOURCE_FILES
         ${abc_SOURCE_DIR}/src/ast_parser/Tokenizer.cpp
         ${abc_SOURCE_DIR}/src/ast_parser/Tokens.cpp
         )
+
 
 # This contains all the header-only files (e.g., abstract classes, interfaces and templates that don't have *.cpp file)
 set(HEADER_ONLY_SOURCES

@@ -5,7 +5,7 @@ add_mlir_dialect_library(MLIRABC
         ${PROJECT_SOURCE_DIR}/include/ABC
 
         DEPENDS
-        MLIRABCOpsIncGen
+        MLIRABCIncGen
 
 	LINK_LIBS PUBLIC
 	MLIRIR

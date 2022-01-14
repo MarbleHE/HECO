@@ -10,7 +10,7 @@
 
 namespace abc {
 
-/// Lowering from the AST-style ABC dialect to SSA representation
+/// Aggressively tries to unroll all affine.for (AffineForOp) loops
 struct UnrollLoopsPass : public mlir::PassWrapper<UnrollLoopsPass, mlir::OperationPass<mlir::ModuleOp>> {
   void getDependentDialects(mlir::DialectRegistry &registry) const override {
     registry.insert<mlir::AffineDialect, mlir::StandardOpsDialect, mlir::scf::SCFDialect, mlir::tensor::TensorDialect>();

@@ -30,15 +30,15 @@ builtin.module  {
     %six = constant 3 : index
     %m_three = constant -3 : index
     %m_five = constant -5 : index
-    %img_rot_1 = abc.fhe_rotate %img, %one : tensor<16xindex>, index, tensor<16xindex>
-    %img_rot_2 = abc.fhe_rotate %img, %m_one :  tensor<16xindex>, index, tensor<16xindex>
-    %img_rot_3 = abc.fhe_rotate %img, %four :   tensor<16xindex>, index, tensor<16xindex>
-    %img_rot_4 = abc.fhe_rotate %img, %m_four : tensor<16xindex>, index, tensor<16xindex>
-    %img_rot_5 = abc.fhe_rotate %img, %five :   tensor<16xindex>, index, tensor<16xindex>
-    %img_rot_6 = abc.fhe_rotate %img, %six :    tensor<16xindex>, index, tensor<16xindex>
-    %img_rot_7 = abc.fhe_rotate %img, %m_three : tensor<16xindex>, index, tensor<16xindex>
-    %img_rot_8 = abc.fhe_rotate %img, %m_five : tensor<16xindex>, index, tensor<16xindex>
-    %sum = abc.fhe_add (%img, %img_rot_1, %img_rot_2, %img_rot_3,  %img_rot_4, %img_rot_5, %img_rot_6, %img_rot_7, %img_rot_8) : (tensor<16xindex>, tensor<16xindex>, tensor<16xindex>, tensor<16xindex>, tensor<16xindex>, tensor<16xindex>, tensor<16xindex>, tensor<16xindex>, tensor<16xindex>) -> tensor<16xindex>
+    %img_rot_1 = fhe.rotate %img, %one : tensor<16xindex>, index, tensor<16xindex>
+    %img_rot_2 = fhe.rotate %img, %m_one :  tensor<16xindex>, index, tensor<16xindex>
+    %img_rot_3 = fhe.rotate %img, %four :   tensor<16xindex>, index, tensor<16xindex>
+    %img_rot_4 = fhe.rotate %img, %m_four : tensor<16xindex>, index, tensor<16xindex>
+    %img_rot_5 = fhe.rotate %img, %five :   tensor<16xindex>, index, tensor<16xindex>
+    %img_rot_6 = fhe.rotate %img, %six :    tensor<16xindex>, index, tensor<16xindex>
+    %img_rot_7 = fhe.rotate %img, %m_three : tensor<16xindex>, index, tensor<16xindex>
+    %img_rot_8 = fhe.rotate %img, %m_five : tensor<16xindex>, index, tensor<16xindex>
+    %sum = fhe.add (%img, %img_rot_1, %img_rot_2, %img_rot_3,  %img_rot_4, %img_rot_5, %img_rot_6, %img_rot_7, %img_rot_8) : (tensor<16xindex>, tensor<16xindex>, tensor<16xindex>, tensor<16xindex>, tensor<16xindex>, tensor<16xindex>, tensor<16xindex>, tensor<16xindex>, tensor<16xindex>) -> tensor<16xindex>
     return %sum : tensor<16xindex>
   }
 }

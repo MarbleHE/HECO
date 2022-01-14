@@ -49,28 +49,26 @@ def FHE_Dialect : Dialect {
 // FHE type definitions.
 //===----------------------------------------------------------------------===//
 
-def Ciphertext : TypeDef<FHE_Dialect, "Ciphertext">  {
+def Secret : TypeDef<FHE_Dialect, "Secret">  {
 
   // See https://mlir.llvm.org/docs/OpDefinitions/#type-definitions
   // for detailed information on how declartive type definitions work
 
-  let description = "A Type for Ctxt, tracking parameters";
+  let description = "A Type for Secrets (high-level abstraction of Ciphertexts)";
 
   // Types are written as "!<dialect_name>.<type_mnemonic>" in textal MLIR representation
-  let mnemonic = "ctxt";
+  let mnemonic = "secret";
 
   // This summary is used, among other things, in type-related error messages
-  let summary = "Ciphertext";
+  let summary = "Secret";
 
   let parameters = (ins
-      "unsigned":$size,
-      //TODO (Q&A): Can we restrict CiphertextType's elementType to PolynomialType without circular dependency issues?
-      "Type":$elementType
+      "Type":$plaintextType
   );
 
   // See https://mlir.llvm.org/docs/OpDefinitions/#declarative-assembly-format
   // Which explains assemblyFormat for operations, but works for types, too:
-  let assemblyFormat = "`<` $size `x` $elementType `>`";
+  let assemblyFormat = "`<` $plaintextType `>`";
 }
 
 //===----------------------------------------------------------------------===//
@@ -99,98 +97,105 @@ class FHE_Op<string mnemonic, list<OpTrait> traits = []> :
 // (See https://github.com/llvm/llvm-project/blob/02b6fb218e44490f3ea1597e35df1b1b66c6b869/mlir/lib/TableGen/Operator.cpp#L40-L43 )
 // However, it is good practice to make it <DIALECT>. Similarily, the "Op" at the end is a convention, not a requirement.
 
-def FHE_LoadCtxtOp : FHE_Op<"load_ctxt", []> {
-  let summary = "Loads ciphertext from file into a register.";
-
-  let arguments = (ins
-    // Attributes are compile-time-known inputs ("immediate values"), whereas operands are the results of another operation
-    StrAttr: $file,
-    StrAttr: $parms
-    // TODO (Design): In fhe.load_ctxt, should  we add the serialization info (ntt, rns) into another attribute?
-  );
-
-  let results = (outs
-    Ciphertext:$output
-  );
-
-  // TODO (Q&A): Using type($output) instead of type(results) in operation assembly format causes odd error:
-  //  the output will omit the !fhe.ctxt before the <..>
-  let assemblyFormat = [{
-    attr-dict `:` type(results)
-  }];
-}
-
-def FHE_LoadRelinKeysOp : FHE_Op<"load_relin_keys", []> {
-  let summary = "Loads relineraization keys from file into a register.";
-
-  let arguments = (ins
-    StrAttr: $file,
-    StrAttr: $parms
-    // Maybe add the serialization info (ntt, rns) into another attribute?
-  );
-
-  let results = (outs
-    Ciphertext:$output
-  );
-
-  // TODO (Q&A): Using type($output) instead of type(results) in operation assembly format causes odd error:
-  //  the output will omit the !fhe.ctxt before the <..>
-  let assemblyFormat = [{
-    attr-dict `:` type(results)
-  }];
-}
-
-def FHE_MultiplyOp : FHE_Op<"multiply", [DeclareOpInterfaceMethods<InferTypeOpInterface>]> {
+def FHE_MultiplyOp : FHE_Op<"multiply", [Commutative, DeclareOpInterfaceMethods<InferTypeOpInterface>]> {
   // We add InferTypeOpInterface and define LogicalResult fhe::MultiplyOp::inferReturnTypes(...) in FHEDialect.cpp
-  // This is necessary, because this operation returns a type that is different from both input types
+  // This is necessary, because this operation returns a type that is different from all input types
   // By wrapping InferTypeOpInterface (https://mlir.llvm.org/docs/Interfaces/#utilizing-the-ods-framework)
   // in DeclareOpInterfaceMethods, we don't have to manually add "let extraClassDeclaration = ..."
 
   let summary = "Multiplication.";
 
   let arguments = (ins
-    Ciphertext:$x,
-    Ciphertext:$y
+    Variadic<AnyType>:$x
   );
 
   let results = (outs
-    Ciphertext:$output
+    Secret:$output
   );
 
 }
 
+def FHE_AddOp : FHE_Op<"add", [Commutative, DeclareOpInterfaceMethods<InferTypeOpInterface>]> {
+  // We specify that addition is commutative, which can enable optimizations down the line
+  // Due to the variadic nature of this operation, we annoyingly can't use AllTypesMatch for the types
+  let summary = "Addition.";
 
-def FHE_RelinearizeOp : FHE_Op<"relinearize", [DeclareOpInterfaceMethods<InferTypeOpInterface>]> {
+  let arguments = (ins
+    Variadic<AnyType>:$x
+  );
+
+  let results = (outs
+    Secret:$output
+  );
+
+}
+
+def FHE_SubOp : FHE_Op<"sub", [DeclareOpInterfaceMethods<InferTypeOpInterface>]> {
+  let summary = "Addition.";
+
+  let arguments = (ins
+    Variadic<AnyType>:$x
+  );
+
+  let results = (outs
+    Secret:$output
+  );
+
+}
+
+def FHE_ResolveOp : FHE_Op<"resolve", [DeclareOpInterfaceMethods<InferTypeOpInterface>]> {
+  let summary = "Resolve to a scalar.";
+
+  let arguments = (ins
+    Secret:$x,
+    IndexAttr:$i
+  );
+
+  let results = (outs
+    AnyType:$output
+  );
+
+}
+
+def FHE_RotateOp : FHE_Op<"rotate", [AllTypesMatch<["x","output"]>]> {
+  let summary = "Rotate.";
+
+  let arguments = (ins
+    Secret:$x,
+    IndexAttr:$i
+  );
+
+  let results = (outs
+    Secret:$output
+  );
+
+}
+
+def FHE_RelinearizeOp : FHE_Op<"relinearize", [AllTypesMatch<["x", "output"]>]> {
 
   let summary = "Relinearization.";
 
   let arguments = (ins
-    Ciphertext:$x,
-    //TODO (Q&A): How to make the keys in fhe.relinearize a TensorOf<Polynomial> without circular dependency issues?
-    Ciphertext:$keys
+    Secret:$x
   );
 
   let results = (outs
-    Ciphertext:$output
+    Secret:$output
   );
 
 }
 
-def FHE_SinkOp : FHE_Op<"sink", [Terminator, ReturnLike]> {
-  // We add the "Terminator" trait, which signals that this operation is a valid end statement for a function
-  // We also add the ReturnLike trait, indiciating it is the last operation in its block and has no "results"
+def FHE_CastOp : FHE_Op<"cast", []> {
 
-  let summary = "An operation that requires the operand to be evaluated (e.g. decrypt, serialize, etc).";
+  let summary = "Cast a value into a secret containing the same type.";
 
   let arguments = (ins
-    Ciphertext:$x
+    AnyType:$x
   );
 
-  // TODO (Q&A): Using type($x) instead of type(operands) in operation assembly format causes odd error:
-  //  the output will omit the !fhe.ctxt before the <..>
-  let assemblyFormat = [{
-    `(` $x`)`  attr-dict `:`  `(` type(operands) `)`
-  }];
+  let results = (outs
+    Secret:$output
+  );
 
 }
 

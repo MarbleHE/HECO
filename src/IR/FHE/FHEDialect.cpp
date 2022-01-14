@@ -28,29 +28,74 @@ using namespace fhe;
                                                         ::llvm::SmallVectorImpl<::mlir::Type> &inferredReturnTypes) {
   // Operand adaptors (https://mlir.llvm.org/docs/OpDefinitions/#operand-adaptors) provide a convenient way to access operands
   // when given as a "generic" triple of ValueRange, DictionaryAttr, RegionRange  instead of nicely "packaged" inside the operation class.
-  auto op = MultiplyOpAdaptor(operands, attributes,regions);
-  CiphertextType type_x = op.x().getType().dyn_cast<CiphertextType>();
-  CiphertextType type_y = op.y().getType().dyn_cast<CiphertextType>();
-  assert(type_x && type_y && "Inputs to fhe.multiply must be of type fhe.ctxt."); // Should never trigger
-  assert(type_x.getElementType() == type_y.getElementType() && "Inputs to fhe.multiply must have same elementType.");
-  auto new_size = (type_x.getSize() - 1) + (type_y.getSize() - 1) + 1;
-  inferredReturnTypes.push_back(CiphertextType::get(context, new_size, type_x.getElementType()));
+  auto op = MultiplyOpAdaptor(operands, attributes, regions);
+  auto plaintextType = Type();
+  for (auto operand: op.x()) {
+    if (auto secret_type = operand.getType().dyn_cast_or_null<SecretType>()) {
+      plaintextType = secret_type.getPlaintextType();
+    }
+    //TODO: check things properly!
+  }
+  inferredReturnTypes.push_back(SecretType::get(context, plaintextType));
   return ::mlir::success();
 }
 
-::mlir::LogicalResult fhe::RelinearizeOp::inferReturnTypes(::mlir::MLIRContext *context,
-                                                           ::llvm::Optional<::mlir::Location> location,
-                                                           ::mlir::ValueRange operands,
-                                                           ::mlir::DictionaryAttr attributes,
-                                                           ::mlir::RegionRange regions,
-                                                           ::llvm::SmallVectorImpl<::mlir::Type> &inferredReturnTypes) {
-  auto op = RelinearizeOpAdaptor(operands, attributes,regions);
-  CiphertextType type_x = op.x().getType().dyn_cast<CiphertextType>();
-  assert(type_x && "Input to fhe.relinearize must be of type fhe.ctxt."); // Should never trigger
-  assert(type_x.getSize()==3 && "Size of input to fhe.relinearize must be three!");
-  inferredReturnTypes.push_back(CiphertextType::get(context, 2, type_x.getElementType()));
+::mlir::LogicalResult fhe::AddOp::inferReturnTypes(::mlir::MLIRContext *context,
+                                                   ::llvm::Optional<::mlir::Location> location,
+                                                   ::mlir::ValueRange operands,
+                                                   ::mlir::DictionaryAttr attributes,
+                                                   ::mlir::RegionRange regions,
+                                                   ::llvm::SmallVectorImpl<::mlir::Type> &inferredReturnTypes) {
+  // Operand adaptors (https://mlir.llvm.org/docs/OpDefinitions/#operand-adaptors) provide a convenient way to access operands
+  // when given as a "generic" triple of ValueRange, DictionaryAttr, RegionRange  instead of nicely "packaged" inside the operation class.
+  auto op = AddOpAdaptor(operands, attributes, regions);
+  auto plaintextType = Type();
+  for (auto operand: op.x()) {
+    if (auto secret_type = operand.getType().dyn_cast_or_null<SecretType>()) {
+      plaintextType = secret_type.getPlaintextType();
+    }
+    //TODO: check things properly!
+  }
+  inferredReturnTypes.push_back(SecretType::get(context, plaintextType));
   return ::mlir::success();
 }
+
+::mlir::LogicalResult fhe::SubOp::inferReturnTypes(::mlir::MLIRContext *context,
+                                                   ::llvm::Optional<::mlir::Location> location,
+                                                   ::mlir::ValueRange operands,
+                                                   ::mlir::DictionaryAttr attributes,
+                                                   ::mlir::RegionRange regions,
+                                                   ::llvm::SmallVectorImpl<::mlir::Type> &inferredReturnTypes) {
+  // Operand adaptors (https://mlir.llvm.org/docs/OpDefinitions/#operand-adaptors) provide a convenient way to access operands
+  // when given as a "generic" triple of ValueRange, DictionaryAttr, RegionRange  instead of nicely "packaged" inside the operation class.
+  auto op = SubOpAdaptor(operands, attributes, regions);
+  auto plaintextType = Type();
+  for (auto operand: op.x()) {
+    if (auto secret_type = operand.getType().dyn_cast_or_null<SecretType>()) {
+      plaintextType = secret_type.getPlaintextType();
+    }
+    //TODO: check things properly!
+  }
+  inferredReturnTypes.push_back(SecretType::get(context, plaintextType));
+  return ::mlir::success();
+}
+
+::mlir::LogicalResult fhe::ResolveOp::inferReturnTypes(::mlir::MLIRContext *context,
+                                                       ::llvm::Optional<::mlir::Location> location,
+                                                       ::mlir::ValueRange operands,
+                                                       ::mlir::DictionaryAttr attributes,
+                                                       ::mlir::RegionRange regions,
+                                                       ::llvm::SmallVectorImpl<::mlir::Type> &inferredReturnTypes) {
+  // Operand adaptors (https://mlir.llvm.org/docs/OpDefinitions/#operand-adaptors) provide a convenient way to access operands
+  // when given as a "generic" triple of ValueRange, DictionaryAttr, RegionRange  instead of nicely "packaged" inside the operation class.
+  auto op = ResolveOpAdaptor(operands, attributes, regions);
+  //TODO: check all elements properly
+  auto t = op.x().getType().dyn_cast<SecretType>().getPlaintextType();
+  inferredReturnTypes.push_back(t);
+  return ::mlir::success();
+}
+
+
 
 
 

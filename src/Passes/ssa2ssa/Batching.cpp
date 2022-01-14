@@ -139,7 +139,7 @@ void BatchingPass::runOnOperation() {
 
 
 
-  //TODO: There's very likely a much better way to do this that's not this kinf of manual walk!
+  //TODO: There's very likely a much better way to do this that's not this kind of manual walk!
 
   // First, read all the tensor.extract info to find the slot for each SSA value
   for (auto f: llvm::make_early_inc_range(block.getOps<FuncOp>())) {
@@ -163,8 +163,7 @@ void BatchingPass::runOnOperation() {
     }
   }
 
-  // We also need to go and resolve any "return" (and probably other stuff, too!)
-  // Now visit each InsertOp and translate it (if necessary)
+  // We also need to go and resolve any "return" (TODO: probably other stuff, too!)
   for (auto f: llvm::make_early_inc_range(block.getOps<FuncOp>())) {
     for (auto op: llvm::make_early_inc_range(f.body().getOps<mlir::ReturnOp>())) {
 

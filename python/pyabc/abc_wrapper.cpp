@@ -4,7 +4,7 @@
 #include "abc/ast_parser/Errors.h"
 #include "abc/ast_utilities/ProgramPrintVisitor.h"
 #include "abc/IR/ABC/ABCDialect.h"
-#include "abc/ast_utilities/abc_ast_to_mlir_visitor.h"
+#include "abc/ast_utilities/AbcAstToMlirVisitor.h"
 
 namespace py = pybind11;
 using json = nlohmann::json;
@@ -20,8 +20,6 @@ void abc_ast_to_mlir(std::unique_ptr<AbstractNode> programAst) {
 
   // TODO (Miro): Rewrite the Python part to parse the entire content of the ABCContext with block, including the main
   //  function (currently, this would break the exisiting ABC AST execution).
-  //  The following returns an empty module, since only functions are added to the module, but the
-  //  main function is not parsed atm.
   module.dump();
 }
 

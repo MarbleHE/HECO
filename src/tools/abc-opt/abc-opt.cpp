@@ -21,6 +21,7 @@
 #include "mlir/Dialect/Arithmetic/IR/Arithmetic.h"
 
 #include "abc/IR/ABC/ABCDialect.h"
+#include "abc/IR/FHE/FHEDialect.h"
 #include "abc/Passes/ast2ssa/LowerASTtoSSA.h"
 #include "abc/Passes/ssa2ssa/UnrollLoops.h"
 #include "abc/Passes/ssa2ssa/Nary.h"
@@ -30,6 +31,7 @@
 
 using namespace mlir;
 using namespace abc;
+using namespace fhe;
 
 void pipelineBuilder(OpPassManager &manager) {
   manager.addPass(std::make_unique<LowerASTtoSSAPass>());
@@ -47,11 +49,13 @@ int main(int argc, char **argv) {
 
   mlir::DialectRegistry registry;
   registry.insert<ABCDialect>();
+  registry.insert<FHEDialect>();
   registry.insert<StandardOpsDialect>();
   registry.insert<AffineDialect>();
   registry.insert<tensor::TensorDialect>();
   registry.insert<arith::ArithmeticDialect>();
   context.loadDialect<ABCDialect>();
+  context.loadDialect<FHEDialect>();
   context.loadDialect<AffineDialect>();
   context.loadDialect<tensor::TensorDialect>();
   context.loadDialect<arith::ArithmeticDialect>();

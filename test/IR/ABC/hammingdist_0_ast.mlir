@@ -8,9 +8,9 @@
 //   return sum;
 // }
 builtin.module  {
-    abc.function index @encryptedHammingDistance {
-        abc.function_parameter tensor<4xindex> @x
-        abc.function_parameter tensor<4xindex> @y
+    abc.function !fhe.secret<f64> @encryptedHammingDistance {
+        abc.function_parameter tensor<4x!fhe.secret<f64>> @x
+        abc.function_parameter tensor<4x!fhe.secret<f64>> @y
     },{
         abc.block  {
 
@@ -19,8 +19,8 @@ builtin.module  {
                 abc.literal_int 64
             })
 
-            // int suk = 0;
-            abc.variable_declaration index @sum = ( {
+            // int sum = 0;
+            abc.variable_declaration !fhe.secret<f64> @sum = ( {
                 abc.literal_int 0
             })
 
