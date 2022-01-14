@@ -28,25 +28,35 @@ using namespace fhe;
                                                         ::llvm::SmallVectorImpl<::mlir::Type> &inferredReturnTypes) {
   // Operand adaptors (https://mlir.llvm.org/docs/OpDefinitions/#operand-adaptors) provide a convenient way to access operands
   // when given as a "generic" triple of ValueRange, DictionaryAttr, RegionRange  instead of nicely "packaged" inside the operation class.
-  auto op = MultiplyOpAdaptor(operands, attributes,regions);
-  //TODO: check all elements properly
-  auto t = op.x().getType().front().dyn_cast<SecretType>().getPlaintextType();
-  inferredReturnTypes.push_back(SecretType::get(context, t));
+  auto op = MultiplyOpAdaptor(operands, attributes, regions);
+  auto plaintextType = Type();
+  for (auto operand: op.x()) {
+    if (auto secret_type = operand.getType().dyn_cast_or_null<SecretType>()) {
+      plaintextType = secret_type.getPlaintextType();
+    }
+    //TODO: check things properly!
+  }
+  inferredReturnTypes.push_back(SecretType::get(context, plaintextType));
   return ::mlir::success();
 }
 
 ::mlir::LogicalResult fhe::AddOp::inferReturnTypes(::mlir::MLIRContext *context,
-                                                        ::llvm::Optional<::mlir::Location> location,
-                                                        ::mlir::ValueRange operands,
-                                                        ::mlir::DictionaryAttr attributes,
-                                                        ::mlir::RegionRange regions,
-                                                        ::llvm::SmallVectorImpl<::mlir::Type> &inferredReturnTypes) {
+                                                   ::llvm::Optional<::mlir::Location> location,
+                                                   ::mlir::ValueRange operands,
+                                                   ::mlir::DictionaryAttr attributes,
+                                                   ::mlir::RegionRange regions,
+                                                   ::llvm::SmallVectorImpl<::mlir::Type> &inferredReturnTypes) {
   // Operand adaptors (https://mlir.llvm.org/docs/OpDefinitions/#operand-adaptors) provide a convenient way to access operands
   // when given as a "generic" triple of ValueRange, DictionaryAttr, RegionRange  instead of nicely "packaged" inside the operation class.
-  auto op = AddOpAdaptor(operands, attributes,regions);
-  //TODO: check all elements properly
-  auto t = op.x().getType().front().dyn_cast<SecretType>().getPlaintextType();
-  inferredReturnTypes.push_back(SecretType::get(context, t));
+  auto op = AddOpAdaptor(operands, attributes, regions);
+  auto plaintextType = Type();
+  for (auto operand: op.x()) {
+    if (auto secret_type = operand.getType().dyn_cast_or_null<SecretType>()) {
+      plaintextType = secret_type.getPlaintextType();
+    }
+    //TODO: check things properly!
+  }
+  inferredReturnTypes.push_back(SecretType::get(context, plaintextType));
   return ::mlir::success();
 }
 
@@ -58,28 +68,32 @@ using namespace fhe;
                                                    ::llvm::SmallVectorImpl<::mlir::Type> &inferredReturnTypes) {
   // Operand adaptors (https://mlir.llvm.org/docs/OpDefinitions/#operand-adaptors) provide a convenient way to access operands
   // when given as a "generic" triple of ValueRange, DictionaryAttr, RegionRange  instead of nicely "packaged" inside the operation class.
-  auto op = SubOpAdaptor(operands, attributes,regions);
-  //TODO: check all elements properly
-  auto t = op.x().getType().front().dyn_cast<SecretType>().getPlaintextType();
-  inferredReturnTypes.push_back(SecretType::get(context, t));
+  auto op = SubOpAdaptor(operands, attributes, regions);
+  auto plaintextType = Type();
+  for (auto operand: op.x()) {
+    if (auto secret_type = operand.getType().dyn_cast_or_null<SecretType>()) {
+      plaintextType = secret_type.getPlaintextType();
+    }
+    //TODO: check things properly!
+  }
+  inferredReturnTypes.push_back(SecretType::get(context, plaintextType));
   return ::mlir::success();
 }
 
 ::mlir::LogicalResult fhe::ResolveOp::inferReturnTypes(::mlir::MLIRContext *context,
-                                                   ::llvm::Optional<::mlir::Location> location,
-                                                   ::mlir::ValueRange operands,
-                                                   ::mlir::DictionaryAttr attributes,
-                                                   ::mlir::RegionRange regions,
-                                                   ::llvm::SmallVectorImpl<::mlir::Type> &inferredReturnTypes) {
+                                                       ::llvm::Optional<::mlir::Location> location,
+                                                       ::mlir::ValueRange operands,
+                                                       ::mlir::DictionaryAttr attributes,
+                                                       ::mlir::RegionRange regions,
+                                                       ::llvm::SmallVectorImpl<::mlir::Type> &inferredReturnTypes) {
   // Operand adaptors (https://mlir.llvm.org/docs/OpDefinitions/#operand-adaptors) provide a convenient way to access operands
   // when given as a "generic" triple of ValueRange, DictionaryAttr, RegionRange  instead of nicely "packaged" inside the operation class.
-  auto op = ResolveOpAdaptor(operands, attributes,regions);
+  auto op = ResolveOpAdaptor(operands, attributes, regions);
   //TODO: check all elements properly
   auto t = op.x().getType().dyn_cast<SecretType>().getPlaintextType();
   inferredReturnTypes.push_back(t);
   return ::mlir::success();
 }
-
 
 
 

@@ -74,15 +74,15 @@ void NaryPass::runOnOperation() {
   //TODO: There's very likely a much better way to do this that's not this kind of manual walk!
 
   // First, go and translate std.addi to abc.fhe_add
-  for (auto f: llvm::make_early_inc_range(block.getOps<FuncOp>())) {
-    for (auto op: llvm::make_early_inc_range(f.body().getOps<arith::AddIOp>())) {
-      rewriter.setInsertionPointAfter(op.getOperation());
-      llvm::SmallVector<Value, 2> summands = {op.getLhs(), op.getRhs()};
-      Value value = rewriter.create<abc::AddOp>(op.getLoc(), op.getResult().getType(), summands);
-      op.replaceAllUsesWith(value);
-      rewriter.eraseOp(op.getOperation());
-    }
-  }
+  //for (auto f: llvm::make_early_inc_range(block.getOps<FuncOp>())) {
+  //  for (auto op: llvm::make_early_inc_range(f.body().getOps<arith::AddIOp>())) {
+  //    rewriter.setInsertionPointAfter(op.getOperation());
+  //    llvm::SmallVector<Value, 2> summands = {op.getLhs(), op.getRhs()};
+  //    Value value = rewriter.create<abc::AddOp>(op.getLoc(), op.getResult().getType(), summands);
+  //    op.replaceAllUsesWith(value);
+  //    rewriter.eraseOp(op.getOperation());
+  //  }
+  //}
 
   for (auto f: llvm::make_early_inc_range(block.getOps<FuncOp>())) {
     for (auto op: llvm::make_early_inc_range(f.body().getOps<arith::SubIOp>())) {

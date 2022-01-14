@@ -97,19 +97,19 @@ translateExpression(Operation &op,
     auto lhs = translateExpression(firstOp(binary_expr.left()), rewriter, symbolTable);
     auto rhs = translateExpression(firstOp(binary_expr.right()), rewriter, symbolTable);
     if (binary_expr.op()=="+") {
-      if (auto s_type = lhs.getType().dyn_cast_or_null<fhe::SecretType>()) {
+      if (lhs.getType().dyn_cast_or_null<fhe::SecretType>() || rhs.getType().dyn_cast_or_null<fhe::SecretType>()) {
         return rewriter.create<fhe::AddOp>(binary_expr->getLoc(), ValueRange({lhs, rhs}));
       } else {
         return rewriter.create<arith::AddIOp>(binary_expr->getLoc(), lhs, rhs);
       }
     } else if (binary_expr.op()=="-") {
-      if (auto s_type = lhs.getType().dyn_cast_or_null<fhe::SecretType>()) {
+      if (lhs.getType().dyn_cast_or_null<fhe::SecretType>() || rhs.getType().dyn_cast_or_null<fhe::SecretType>()) {
         return rewriter.create<fhe::SubOp>(binary_expr->getLoc(), ValueRange({lhs, rhs}));
       } else {
         return rewriter.create<arith::SubIOp>(binary_expr->getLoc(), lhs, rhs);
       }
     } else if (binary_expr.op()=="*") {
-      if (auto s_type = lhs.getType().dyn_cast_or_null<fhe::SecretType>()) {
+      if (lhs.getType().dyn_cast_or_null<fhe::SecretType>() || rhs.getType().dyn_cast_or_null<fhe::SecretType>()) {
         return rewriter.create<fhe::MultiplyOp>(binary_expr->getLoc(), ValueRange({lhs, rhs}));
       } else {
         return rewriter.create<arith::MulIOp>(binary_expr->getLoc(), lhs, rhs);
@@ -251,6 +251,10 @@ void translateVariableDeclarationOp(abc::VariableDeclarationOp vardecl_op,
   auto type = vardecl_op.type();
   // TODO: Support decls without value by defining default values?
   auto value = translateExpression(firstOp(vardecl_op.value().front()), rewriter, symbolTable);
+  if (value.getType()!=type) {
+    //TODO: Instead of having cast ops, we should introduce our own constant op and/or attribute?
+    value = rewriter.create<fhe::CastOp>(vardecl_op->getLoc(), type, value);
+  }
   value.setLoc(NameLoc::get(Identifier::get(name, value.getContext()), value.getLoc()));
   // TODO: Somehow check that value and type are compatible
   (void) declare(name, type, value, symbolTable); //void cast to suppress "unused result" warning
@@ -353,12 +357,10 @@ void translateSimpleForOp(abc::SimpleForOp &simple_for_op,
       symbolTable.insert(var.first, {var.second.first, *iter_args_it++});
     }
 
-    if (declare(simple_for_op.iv(), Type(), new_for.getInductionVar(), symbolTable).failed()) {
+    if (declare(simple_for_op.iv(), new_for.getInductionVar().getType(), new_for.getInductionVar(), symbolTable)
+        .failed()) {
       emitError(simple_for_op->getLoc(), "Declaration of for-loop IV failed!");
     }
-
-    emitWarning(simple_for_op->getLoc(), "Currently, manually checking yields is required because of...reasons.");
-
 
     // Move ABC Operations over into the new for loop's entryBlock
     rewriter.setInsertionPointToStart(new_for.getBody());

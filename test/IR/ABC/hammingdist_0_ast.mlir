@@ -8,7 +8,7 @@
 //   return sum;
 // }
 builtin.module  {
-    abc.function index @encryptedHammingDistance {
+    abc.function !fhe.secret<f64> @encryptedHammingDistance {
         abc.function_parameter tensor<4x!fhe.secret<f64>> @x
         abc.function_parameter tensor<4x!fhe.secret<f64>> @y
     },{

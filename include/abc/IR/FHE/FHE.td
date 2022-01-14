@@ -106,7 +106,7 @@ def FHE_MultiplyOp : FHE_Op<"multiply", [Commutative, DeclareOpInterfaceMethods<
   let summary = "Multiplication.";
 
   let arguments = (ins
-    Variadic<Secret>:$x
+    Variadic<AnyType>:$x
   );
 
   let results = (outs
@@ -121,7 +121,7 @@ def FHE_AddOp : FHE_Op<"add", [Commutative, DeclareOpInterfaceMethods<InferTypeO
   let summary = "Addition.";
 
   let arguments = (ins
-    Variadic<Secret>:$x
+    Variadic<AnyType>:$x
   );
 
   let results = (outs
@@ -134,7 +134,7 @@ def FHE_SubOp : FHE_Op<"sub", [DeclareOpInterfaceMethods<InferTypeOpInterface>]>
   let summary = "Addition.";
 
   let arguments = (ins
-    Variadic<Secret>:$x
+    Variadic<AnyType>:$x
   );
 
   let results = (outs
@@ -177,6 +177,20 @@ def FHE_RelinearizeOp : FHE_Op<"relinearize", [AllTypesMatch<["x", "output"]>]> 
 
   let arguments = (ins
     Secret:$x
+  );
+
+  let results = (outs
+    Secret:$output
+  );
+
+}
+
+def FHE_CastOp : FHE_Op<"cast", []> {
+
+  let summary = "Cast a value into a secret containing the same type.";
+
+  let arguments = (ins
+    AnyType:$x
   );
 
   let results = (outs
