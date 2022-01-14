@@ -187,11 +187,12 @@ def FHE_RelinearizeOp : FHE_Op<"relinearize", [AllTypesMatch<["x", "output"]>]> 
 
 def FHE_ConstOp : FHE_Op<"constant", [
         ConstantLike,
-        InferTypeOpInterface,
+        TypesMatchWith<"result type matches plaintext type of secret",
+                            "value", "result",
+                            "fhe::SecretType::get(getContext(),$_self)">,
         DeclareOpInterfaceMethods<InferTypeOpInterface>,
         DeclareOpInterfaceMethods<OpAsmOpInterface, ["getAsmResultNames"]>
     ]> {
-  // The odd double-include of InferTypeOpInterface is so that the assembly format reader can find InferTypeOpInterface
 
   let summary = "FHE constant";
 
