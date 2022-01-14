@@ -8,8 +8,6 @@
 #include "mlir/Dialect/Affine/IR/AffineOps.h"
 #include "mlir/Dialect/Tensor/IR/Tensor.h"
 
-namespace abc {
-
 /// Aggressively tries to unroll all affine.for (AffineForOp) loops
 struct UnrollLoopsPass : public mlir::PassWrapper<UnrollLoopsPass, mlir::OperationPass<mlir::ModuleOp>> {
   void getDependentDialects(mlir::DialectRegistry &registry) const override {
@@ -21,6 +19,5 @@ struct UnrollLoopsPass : public mlir::PassWrapper<UnrollLoopsPass, mlir::Operati
     return "unroll-loops";
   }
 };
-}
 
 #endif //AST_OPTIMIZER_MLIR_ABC_OPT_UNROLLLOOPS_H_

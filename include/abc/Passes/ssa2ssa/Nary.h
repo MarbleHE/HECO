@@ -12,6 +12,4 @@ struct NaryPass : public mlir::PassWrapper<NaryPass, mlir::OperationPass<mlir::M
   }
 };
 
-
-
 #endif //AST_OPTIMIZER_MLIR_ABC_OPT_NARY_H_

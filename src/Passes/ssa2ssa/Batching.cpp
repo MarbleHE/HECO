@@ -1,10 +1,24 @@
 #include <iostream>
 #include <memory>
 #include <unordered_map>
+
+#include "mlir/Transforms/DialectConversion.h"
+#include "mlir/Dialect/Affine/IR/AffineOps.h"
+#include "mlir/Dialect/SCF/SCF.h"
+#include "mlir/Dialect/Tensor/IR/Tensor.h"
+
+#include "abc/IR/FHE/FHEDialect.h"
 #include "abc/Passes/ssa2ssa/Batching.h"
 
 using namespace mlir;
-using namespace abc;
+
+void BatchingPass::getDependentDialects(mlir::DialectRegistry &registry) const {
+  registry.insert<fhe::FHEDialect,
+                  mlir::AffineDialect,
+                  mlir::StandardOpsDialect,
+                  mlir::scf::SCFDialect,
+                  mlir::tensor::TensorDialect>();
+}
 
 int getConstIndex(tensor::ExtractOp &op) {
   //TODO: check if there's more and throw an error if yes
@@ -41,19 +55,18 @@ Value resolveToSlot(int slot, Value v, IRRewriter &rewriter) {
       int extracted_index = getConstIndex(extract_op);
       int offset = extracted_index - slot;
       rewriter.setInsertionPointAfter(extract_op);
-      auto offset_val = rewriter.create<arith::ConstantOp>(extract_op.getLoc(), rewriter.getIndexAttr(offset));
-      auto new_val = rewriter.create<abc::RotateOp>(extract_op.getLoc(),
+      auto new_val = rewriter.create<fhe::RotateOp>(extract_op.getLoc(),
                                                     extract_op.tensor().getType(),
                                                     extract_op.tensor(),
-                                                    offset_val);
+                                                    rewriter.getIndexAttr(offset));
 
       //extract_op.result().replaceAllUsesWith(new_val);
       //std::cout << "resolved extract to" << std::endl;
       //new_val.dump();
       return new_val;
-    } else if (auto fhe_add = llvm::dyn_cast<abc::AddOp>(op)) {
+    } else if (auto fhe_add = llvm::dyn_cast<fhe::AddOp>(op)) {
       llvm::SmallVector<Value, 4> new_summands;
-      for (auto operand: fhe_add.summand()) {
+      for (auto operand: fhe_add.x()) {
         auto new_val = resolveToSlot(slot, operand, rewriter);
         new_summands.push_back(new_val);
       }
@@ -61,7 +74,7 @@ Value resolveToSlot(int slot, Value v, IRRewriter &rewriter) {
       // TODO: would be great if we could do this generically!
 
       rewriter.setInsertionPointAfter(fhe_add);
-      auto new_add = rewriter.create<abc::AddOp>(fhe_add.getLoc(), new_summands.begin()->getType(), new_summands);
+      auto new_add = rewriter.create<fhe::AddOp>(fhe_add.getLoc(), new_summands.begin()->getType(), new_summands);
       fhe_add->replaceAllUsesWith(new_add);
       //TODO: THIS REQUIRES VERIFY-EACH-ZERO SO THE TYPE SYSTEM DOESN'T COMPLAIN TOO MUCH!
 
@@ -69,9 +82,9 @@ Value resolveToSlot(int slot, Value v, IRRewriter &rewriter) {
       auto new_val = *new_add->result_begin();
       //new_val.dump();
       return new_val;
-    } else if (auto fhe_mul = llvm::dyn_cast<abc::MulOp>(op)) {
+    } else if (auto fhe_mul = llvm::dyn_cast<fhe::MultiplyOp>(op)) {
       llvm::SmallVector<Value, 4> new_summands;
-      for (auto operand: fhe_mul.terms()) {
+      for (auto operand: fhe_mul.x()) {
         auto new_val = resolveToSlot(slot, operand, rewriter);
         new_summands.push_back(new_val);
       }
@@ -79,7 +92,7 @@ Value resolveToSlot(int slot, Value v, IRRewriter &rewriter) {
       // TODO: would be great if we could do this generically!
 
       rewriter.setInsertionPointAfter(fhe_mul);
-      auto new_mul = rewriter.create<abc::MulOp>(fhe_mul.getLoc(), new_summands.begin()->getType(), new_summands);
+      auto new_mul = rewriter.create<fhe::MultiplyOp>(fhe_mul.getLoc(), new_summands.begin()->getType(), new_summands);
       fhe_mul->replaceAllUsesWith(new_mul);
       //TODO: THIS REQUIRES VERIFY-EACH-ZERO SO THE TYPE SYSTEM DOESN'T COMPLAIN TOO MUCH!
 
@@ -88,9 +101,9 @@ Value resolveToSlot(int slot, Value v, IRRewriter &rewriter) {
       auto new_val = *new_mul->result_begin();
       //new_val.dump();
       return new_val;
-    } else if (auto fhe_sub = llvm::dyn_cast<abc::SubOp>(op)) {
+    } else if (auto fhe_sub = llvm::dyn_cast<fhe::SubOp>(op)) {
       llvm::SmallVector<Value, 4> new_summands;
-      for (auto operand: fhe_sub.summand()) {
+      for (auto operand: fhe_sub.x()) {
         auto new_val = resolveToSlot(slot, operand, rewriter);
         new_summands.push_back(new_val);
       }
@@ -98,7 +111,7 @@ Value resolveToSlot(int slot, Value v, IRRewriter &rewriter) {
       // TODO: would be great if we could do this generically!
 
       rewriter.setInsertionPointAfter(fhe_sub);
-      auto new_sub = rewriter.create<abc::SubOp>(fhe_sub.getLoc(), new_summands.begin()->getType(), new_summands);
+      auto new_sub = rewriter.create<fhe::SubOp>(fhe_sub.getLoc(), new_summands.begin()->getType(), new_summands);
       fhe_sub->replaceAllUsesWith(new_sub);
       //TODO: THIS REQUIRES VERIFY-EACH-ZERO SO THE TYPE SYSTEM DOESN'T COMPLAIN TOO MUCH!
 
@@ -106,8 +119,11 @@ Value resolveToSlot(int slot, Value v, IRRewriter &rewriter) {
       auto new_val = *new_sub->result_begin();
       //new_val.dump();
       return new_val;
-    } else if (auto fhe_rot = llvm::dyn_cast<abc::RotateOp>(op)) {
+    } else if (auto fhe_rot = llvm::dyn_cast<fhe::RotateOp>(op)) {
       //already solved
+      return v;
+    } else if (auto fhe_const = llvm::dyn_cast<fhe::ConstOp>(op)) {
+      //TODO: What to do about constants?
       return v;
     } else {
       emitError(op->getLoc(), "UNEXPECTED OPERATION.");
