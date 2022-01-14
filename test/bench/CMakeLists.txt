@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.11.0)
 
-## BOX BLUR ##
 if (SEAL_FOUND)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bench")
+
+    ## BOX BLUR ##
     set(BB_BENCH_FILES
             BoxBlur.cpp
             BoxBlurBench.cpp
