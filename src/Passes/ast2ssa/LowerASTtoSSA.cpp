@@ -528,10 +528,15 @@ void convertFunctionOp2FuncOp(abc::FunctionOp &f,
                               CustomSymbolTable &symbolTable) {
   // Read the existing function arguments
   std::vector<mlir::Type> argTypes;
+  llvm::SmallVector<mlir::DictionaryAttr> namedArgs;
   std::vector<OpOperand> arguments;
   for (auto op: f.parameters().getOps<abc::FunctionParameterOp>()) {
-    auto param_type = op.typeAttr().getValue();
-    argTypes.push_back(param_type);
+    auto param_attr = op.typeAttr();
+    argTypes.push_back(param_attr.getValue()); // this is the stored type, getType() would be TypeAttr/StringAttr
+    llvm::SmallVector<mlir::NamedAttribute> namedAttrList;
+    auto dialect = param_attr.getValue().getDialect().getNamespace().str();
+    namedAttrList.push_back(rewriter.getNamedAttr(dialect + "." + op.name().str(), op.typeAttr()));
+    namedArgs.push_back(rewriter.getDictionaryAttr(namedAttrList));
   }
 
   // Create the new builtin.func Op
