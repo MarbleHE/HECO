@@ -95,7 +95,50 @@ using namespace fhe;
   return ::mlir::success();
 }
 
+::mlir::LogicalResult fhe::ConstOp::inferReturnTypes(::mlir::MLIRContext *context,
+                                                     ::llvm::Optional<::mlir::Location> location,
+                                                     ::mlir::ValueRange operands,
+                                                     ::mlir::DictionaryAttr attributes,
+                                                     ::mlir::RegionRange regions,
+                                                     ::llvm::SmallVectorImpl<::mlir::Type> &inferredReturnTypes) {
+  // Operand adaptors (https://mlir.llvm.org/docs/OpDefinitions/#operand-adaptors) provide a convenient way to access operands
+  // when given as a "generic" triple of ValueRange, DictionaryAttr, RegionRange  instead of nicely "packaged" inside the operation class.
+  auto op = ConstOpAdaptor(operands, attributes, regions);
+  inferredReturnTypes.push_back(fhe::SecretType::get(context,op.value().getType()));
+  return ::mlir::success();
+}
 
+void fhe::ConstOp::getAsmResultNames(
+    function_ref<void(Value, StringRef)> setNameFn) {
+  auto type = getType().getPlaintextType();
+  if (auto intCst = value().dyn_cast<IntegerAttr>()) {
+    auto intType = type.dyn_cast<IntegerType>();
+
+    // Sugar i1 constants with 'true' and 'false'.
+    if (intType && intType.getWidth() == 1)
+      return setNameFn(getResult(), (intCst.getInt() ? "true" : "false"));
+
+    // Otherwise, build a complex name with the value and type.
+    SmallString<32> specialNameBuffer;
+    llvm::raw_svector_ostream specialName(specialNameBuffer);
+    specialName << "c" << intCst.getInt();
+    if (intType)
+      specialName << '_' << type;
+    setNameFn(getResult(), specialName.str());
+  } else if (auto fCst = value().dyn_cast<FloatAttr>()) {
+    auto floatType = type.dyn_cast<FloatType>();
+    SmallString<32> specialNameBuffer;
+    llvm::raw_svector_ostream specialName(specialNameBuffer);
+    specialName << "c" << (int)fCst.getValueAsDouble();
+    if (floatType)
+      specialName << "_s" << type;
+    setNameFn(getResult(), specialName.str());
+  }
+
+  else {
+    setNameFn(getResult(), "cst");
+  }
+}
 
 
 

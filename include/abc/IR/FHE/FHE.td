@@ -185,18 +185,27 @@ def FHE_RelinearizeOp : FHE_Op<"relinearize", [AllTypesMatch<["x", "output"]>]> 
 
 }
 
-def FHE_CastOp : FHE_Op<"cast", []> {
+def FHE_ConstOp : FHE_Op<"constant", [
+        ConstantLike,
+        InferTypeOpInterface,
+        DeclareOpInterfaceMethods<InferTypeOpInterface>,
+        DeclareOpInterfaceMethods<OpAsmOpInterface, ["getAsmResultNames"]>
+    ]> {
+  // The odd double-include of InferTypeOpInterface is so that the assembly format reader can find InferTypeOpInterface
+
+  let summary = "FHE constant";
 
   let summary = "Cast a value into a secret containing the same type.";
 
   let arguments = (ins
-    AnyType:$x
+    AnyAttr:$value
   );
 
   let results = (outs
-    Secret:$output
+     Secret:$result
   );
 
+  let assemblyFormat = "attr-dict $value";
 }
 
 #endif // ABC_FHE_FHE_TD_
