@@ -9,6 +9,7 @@
 
 #include <memory>
 #include <unordered_map>
+#include <iostream>
 #include "llvm/ADT/ScopedHashTable.h"
 #include "mlir/Transforms/DialectConversion.h"
 #include "mlir/Dialect/SCF/SCF.h"
@@ -206,7 +207,7 @@ void translateIfOp(abc::IfOp &if_op, IRRewriter &rewriter, CustomSymbolTable &sy
   updated_values.insert(else_values.begin(), else_values.end());
   for (const auto &p: updated_values) {
     auto name = p.first;
-    if(symbolTable.count(name) == 0) {
+    if (symbolTable.count(name)==0) {
       //TODO: TranslateIfOp currently assumes no shadowing ever happens!
       continue; // this was a local variable inside the then/else branch and isn't currently in scope
     }
@@ -318,29 +319,24 @@ void translateSimpleForOp(abc::SimpleForOp &simple_for_op,
                           IRRewriter &rewriter,
                           CustomSymbolTable &symbolTable) {
 
-  std::vector<std::string> existing_vars;
   AffineForOp *new_for_ptr = nullptr;
+  std::vector<std::pair<StringRef, std::pair<Type, Value>>> existing_vars;
+
   // Create a new scope
   {
     // This sets curScope in symbolTable to varScope
-    CustomSymbolTable::ScopeTy var_scope(symbolTable);
+    CustomSymbolTable::ScopeTy for_scope(symbolTable);
 
     // Get every variable that exists and dump it as an iter args,
     // since we can't add them later, but ones that don't get used
     // are easily optimized away by --canonicalize
-    // TODO: SERIOUSLY, WE CAN'T EVEN ENUMERATE EVERY SYMBOL WE HAVE??
-
-    //TODO: THis hack is horrible, but until we fix the symbol table stuff, it'll do for the benchmarks
-    llvm::SmallVector<Value, 4> iter_args;
-
-    for (auto &hack: {"img", "img2", "value", "x", "i", "j", "y", "sum"}) {
-      if (symbolTable.count(hack)) {
-        existing_vars.emplace_back(hack);
-      }
-    }
-    // get current values
-    for (auto &var: existing_vars) {
-      iter_args.push_back(symbolTable.lookup(var).second);
+    std::vector<Value> iter_arg_values;
+    // Note: this requires using the MarbleHE/llvm-project fork since upstream LLVM doesn't include this iterator
+    for (auto it = symbolTable.mapBegin(); it!=symbolTable.mapEnd(); ++it) {
+      auto name = it->getFirst();
+      auto type_and_value = symbolTable.lookup(name);
+      existing_vars.emplace_back(name, type_and_value);
+      iter_arg_values.push_back(type_and_value.second); //to have them conveniently for the rewriter.create call
     }
 
     // Create the affine for loop
@@ -348,13 +344,13 @@ void translateSimpleForOp(abc::SimpleForOp &simple_for_op,
                                                 simple_for_op.start().getLimitedValue(),
                                                 simple_for_op.end().getLimitedValue(),
                                                 1, //step size
-                                                iter_args);
+                                                iter_arg_values);
     new_for_ptr = &new_for;
 
-    //TODO: Hack from above continued, needs to be cleaned up once we fix symboltable
+    // Update the symboltable with the "local version" (iter arg) of all existing variables
     auto iter_args_it = new_for.getRegionIterArgs().begin();
     for (auto &var: existing_vars) {
-      symbolTable.insert(var, {Type(), *iter_args_it++});
+      symbolTable.insert(var.first, {var.second.first, *iter_args_it++});
     }
 
     if (declare(simple_for_op.iv(), Type(), new_for.getInductionVar(), symbolTable).failed()) {
@@ -386,29 +382,28 @@ void translateSimpleForOp(abc::SimpleForOp &simple_for_op,
       translateStatement(op, rewriter, symbolTable, &new_for);
     }
 
-    // TODO: Again, hacky, fix once we have better system
+    // Yield all the iter args
     llvm::SmallVector<Value, 4> yield_values;
     for (auto &var: existing_vars) {
-      yield_values.push_back(symbolTable.lookup(var).second);
+      yield_values.push_back(symbolTable.lookup(var.first).second);
     }
     rewriter.setInsertionPointToEnd(new_for.getBody());
     rewriter.create<AffineYieldOp>(simple_for_op->getLoc(), yield_values);
 
-    //TODO: This happens to introduce a bunch of redundant yield/iterargs that canoncialize doesn't catch
-    //  fix properly and/or add canonicalization where if yield is same as start value, then it's removed
+    //TODO: This happens to introduce a bunch of redundant yield/iter_args that canonicalize doesn't catch
+    //  fix properly and/or add canonicalization where if yield is same as start value, then it's removed.
+    //  This is a low priority issue, since after unrolling, these DO get canonicalized away.
 
-  }
-// exit scope manually
+  } // exit loop scope (by destroying the CustomSymbolTable::ScopeTy object)
 
-  //Hack: Update the yield values in the symboltable now that we've left the scope
+  // Update the existing variables in the symboltable now that we've left the scope
   auto res_it = new_for_ptr->result_begin();
   auto var_it = existing_vars.begin();
   for (size_t i = 0; i < existing_vars.size(); i++) {
-    symbolTable.insert(*var_it, {Type(), *res_it});
+    symbolTable.insert(var_it->first, {var_it->second.first, *res_it});
     res_it++;
     var_it++;
   }
-
 }
 
 //}
