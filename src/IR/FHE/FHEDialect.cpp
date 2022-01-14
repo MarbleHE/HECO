@@ -140,7 +140,9 @@ void fhe::ConstOp::getAsmResultNames(
   }
 }
 
-
+::mlir::OpFoldResult fhe::ConstOp::fold(::llvm::ArrayRef<::mlir::Attribute> operands) {
+  return value();
+}
 
 //===----------------------------------------------------------------------===//
 // FHE dialect definitions

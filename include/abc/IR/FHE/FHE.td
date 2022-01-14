@@ -205,6 +205,8 @@ def FHE_ConstOp : FHE_Op<"constant", [
      Secret:$result
   );
 
+  let hasFolder = 1;
+
   let assemblyFormat = "attr-dict $value";
 }
 

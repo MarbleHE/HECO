@@ -89,22 +89,22 @@ builtin.module  {
     }
 }
 
-//CHECK: module  {
-//CHECK:   func private @encryptedHammingDistance(%arg0: tensor<4x!fhe.secret<f64>>, %arg1: tensor<4x!fhe.secret<f64>>) -> !fhe.secret<f64> {
-//CHECK:     %c64 = arith.constant 64 : index
-//CHECK:     %c0 = arith.constant 0 : index
-//CHECK:     %0 = fhe.constant 0.000000e+00 : f64
-//CHECK:     %1:4 = affine.for %arg2 = 0 to 4 iter_args(%arg3 = %arg1, %arg4 = %c64, %arg5 = %arg0, %arg6 = %0) -> (tensor<4x!fhe.secret<f64>>, index, tensor<4x!fhe.secret<f64>>, !fhe.secret<f64>) {
-//CHECK:       %2 = tensor.extract %arg5[%arg2] : tensor<4x!fhe.secret<f64>>
-//CHECK:       %3 = tensor.extract %arg3[%arg2] : tensor<4x!fhe.secret<f64>>
-//CHECK:       %4 = fhe.sub(%2, %3) : (!fhe.secret<f64>, !fhe.secret<f64>) -> !fhe.secret<f64>
-//CHECK:       %5 = tensor.extract %arg5[%arg2] : tensor<4x!fhe.secret<f64>>
-//CHECK:       %6 = tensor.extract %arg3[%arg2] : tensor<4x!fhe.secret<f64>>
-//CHECK:       %7 = fhe.sub(%5, %6) : (!fhe.secret<f64>, !fhe.secret<f64>) -> !fhe.secret<f64>
-//CHECK:       %8 = fhe.multiply(%4, %7) : (!fhe.secret<f64>, !fhe.secret<f64>) -> !fhe.secret<f64>
-//CHECK:       %9 = fhe.add(%arg6, %8) : (!fhe.secret<f64>, !fhe.secret<f64>) -> !fhe.secret<f64>
-//CHECK:       affine.yield %arg3, %arg4, %arg5, %9 : tensor<4x!fhe.secret<f64>>, index, tensor<4x!fhe.secret<f64>>, !fhe.secret<f64>
-//CHECK:     }
-//CHECK:     return %1#3 : !fhe.secret<f64>
-//CHECK:   }
-//CHECK: }
+// CHECK: module  {
+// CHECK:   func private @encryptedHammingDistance(%arg0: tensor<4x!fhe.secret<f64>>, %arg1: tensor<4x!fhe.secret<f64>>) -> !fhe.secret<f64> {
+// CHECK:     %c64 = arith.constant 64 : index
+// CHECK:     %c0 = arith.constant 0 : index
+// CHECK:     %c0_sf64 = fhe.constant 0.000000e+00 : f64
+// CHECK:     %0:4 = affine.for %arg2 = 0 to 4 iter_args(%arg3 = %arg1, %arg4 = %c64, %arg5 = %arg0, %arg6 = %c0_sf64) -> (tensor<4x!fhe.secret<f64>>, index, tensor<4x!fhe.secret<f64>>, !fhe.secret<f64>) {
+// CHECK:       %1 = tensor.extract %arg5[%arg2] : tensor<4x!fhe.secret<f64>>
+// CHECK:       %2 = tensor.extract %arg3[%arg2] : tensor<4x!fhe.secret<f64>>
+// CHECK:       %3 = fhe.sub(%1, %2) : (!fhe.secret<f64>, !fhe.secret<f64>) -> !fhe.secret<f64>
+// CHECK:       %4 = tensor.extract %arg5[%arg2] : tensor<4x!fhe.secret<f64>>
+// CHECK:       %5 = tensor.extract %arg3[%arg2] : tensor<4x!fhe.secret<f64>>
+// CHECK:       %6 = fhe.sub(%4, %5) : (!fhe.secret<f64>, !fhe.secret<f64>) -> !fhe.secret<f64>
+// CHECK:       %7 = fhe.multiply(%3, %6) : (!fhe.secret<f64>, !fhe.secret<f64>) -> !fhe.secret<f64>
+// CHECK:       %8 = fhe.add(%arg6, %7) : (!fhe.secret<f64>, !fhe.secret<f64>) -> !fhe.secret<f64>
+// CHECK:       affine.yield %arg3, %arg4, %arg5, %8 : tensor<4x!fhe.secret<f64>>, index, tensor<4x!fhe.secret<f64>>, !fhe.secret<f64>
+// CHECK:     }
+// CHECK:     return %0#3 : !fhe.secret<f64>
+// CHECK:   }
+// CHECK: }
