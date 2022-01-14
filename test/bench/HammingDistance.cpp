@@ -2,6 +2,77 @@
 
 #include "HammingDistance.h"
 
+/// \param a vector of size n
+/// \param b vector of size n
+/// \param poly_modulus_degree FHE parameter, degree n of the polynomials
+uint64_t encryptedNaiveHammingDistance(MultiTimer &timer, const std::vector<bool> &a, const std::vector<bool> &b, size_t poly_modulus_degree)
+{
+  auto keygenTimer = timer.startTimer();
+  if (a.size()!=b.size()) throw std::runtime_error("Vectors  in hamming distance must have the same length.");
+
+  // Context Setup
+  seal::EncryptionParameters parameters(seal::scheme_type::bfv);
+  parameters.set_poly_modulus_degree(poly_modulus_degree);
+  parameters.set_coeff_modulus(seal::CoeffModulus::BFVDefault(parameters.poly_modulus_degree()));
+  parameters.set_plain_modulus(seal::PlainModulus::Batching(parameters.poly_modulus_degree(), 20));
+  seal::SEALContext context(parameters);
+
+  /// Create keys
+  seal::KeyGenerator keygen(context);
+  seal::SecretKey secretKey = keygen.secret_key();
+  seal::PublicKey publicKey;
+  keygen.create_public_key(publicKey);
+  seal::GaloisKeys galoisKeys;
+  keygen.create_galois_keys(galoisKeys);
+  seal::RelinKeys relinKeys;
+  keygen.create_relin_keys(relinKeys);
+
+  // Create helper objects
+  seal::BatchEncoder encoder(context);
+  seal::Encryptor encryptor(context, publicKey, secretKey);
+  seal::Decryptor decryptor(context, secretKey);
+  seal::Evaluator evaluator(context);
+  timer.stopTimer(keygenTimer);
+
+  // Encrypt values
+  auto encTimer = timer.startTimer();
+  std::vector<seal::Ciphertext> a_ctxt(b.size());
+  std::vector<seal::Ciphertext> b_ctxt(b.size());
+
+  for (int i = 0; i < a.size(); ++i) {
+    uint64_t elem = a[i];
+    seal::Plaintext tmp_a = seal::Plaintext(seal::util::uint_to_hex_string(&elem, std::size_t(1)));
+    encryptor.encrypt(tmp_a, a_ctxt[i]);
+
+    elem = b[i];
+    seal::Plaintext tmp_b = seal::Plaintext(seal::util::uint_to_hex_string(&elem, std::size_t(1)));
+    encryptor.encrypt(tmp_b, b_ctxt[i]);
+  }
+  seal::Plaintext sum_ptxt;
+  seal::Ciphertext sum_ctxt;
+  sum_ptxt.set_zero();
+  encryptor.encrypt(sum_ptxt, sum_ctxt);
+  timer.stopTimer(encTimer);
+
+  // Compute differences
+  auto compTimer = timer.startTimer();
+  // Note: We can use the fact that NEQ = XOR = (a-b)^2 for a,b \in {0,1}
+  for (int i = 0; i < a_ctxt.size(); ++i) {
+    evaluator.sub_inplace(a_ctxt[i], b_ctxt[i]);
+    evaluator.square_inplace(a_ctxt[i]);
+    evaluator.relinearize_inplace(a_ctxt[i], relinKeys);
+    evaluator.add_inplace(sum_ctxt, a_ctxt[i]);
+  }
+  timer.stopTimer(compTimer);
+
+  auto decTimer = timer.startTimer();
+  decryptor.decrypt(sum_ctxt, sum_ptxt);
+  uint64_t result = *sum_ptxt.data();
+  timer.stopTimer(decTimer);
+
+  return result;
+}
+
 /// Computes the encrypted hamming distance between two vectors of booleans
 /// Note: Hamming distance over binary vectors can be computed semi-efficiently in Z_p by using NEQ = XOR = (a-b)^2
 /// \param a vector of size n
@@ -12,6 +83,10 @@
 uint64_t encryptedBatchedHammingDistance(
         MultiTimer &timer, const std::vector<bool> &a, const std::vector<bool> &b, size_t poly_modulus_degree, bool encrypt_both)
 {
+  if (a.size() > poly_modulus_degree / 2)
+  {
+    std::cerr << "WARNING: HammingDistance might be incorrect when vector size is larger than N/2." << std::endl;
+  }
 
   // Context Setup
   auto keygenTimer = timer.startTimer();
@@ -67,12 +142,7 @@ uint64_t encryptedBatchedHammingDistance(
 
   // Fold-and-Sum
   seal::Ciphertext rotation_ctxt;
-  // annoyingly, the first rotation has to be done separately
-  evaluator.rotate_columns(a_ctxt, galoisKeys, rotation_ctxt);
-  evaluator.add_inplace(a_ctxt, rotation_ctxt);
-  // Now rotate over the rows automatically
-  for (auto i = parameters.poly_modulus_degree() / 4; i > 0; i >>= 1)
-  {
+  for (auto i = a.size() / 2; i > 0; i /= 2) {
     evaluator.rotate_rows(a_ctxt, i, galoisKeys, rotation_ctxt);
     evaluator.add_inplace(a_ctxt, rotation_ctxt);
   }
@@ -105,7 +175,7 @@ int encryptedHammingDistancePorcupine(
 {
   auto keygenTimer = timer.startTimer();
   if (a.size() != 4 || b.size() != 4) {
-    std::cout << "WARNING: The porcupine example of hamming distance assumes that 4 elements are given." << std::endl;
+    throw std::runtime_error("The porcupine example of hamming distance assumes that 4 elements are given.");
   }
 
   // Context Setup

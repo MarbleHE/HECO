@@ -324,4 +324,4 @@ endif ()
 #
 # A collection of benchmarks
 ##############################
-#add_subdirectory(bench EXCLUDE_FROM_ALL)
+add_subdirectory(test/bench EXCLUDE_FROM_ALL)

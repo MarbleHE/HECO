@@ -3,7 +3,7 @@
 #include "gtest/gtest.h"
 
 #ifdef HAVE_SEAL_BFV
-#include "bench/L2Distance.h"
+#include "L2Distance.h"
 #endif
 
 /// Original, plain C++ program for the (squared) L2 distance between two vectors

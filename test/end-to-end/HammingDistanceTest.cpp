@@ -5,7 +5,7 @@
 #include "gtest/gtest.h"
 
 #ifdef HAVE_SEAL_BFV
-#include "bench/HammingDistance.h"
+#include "HammingDistance.h"
 #endif
 
 /// Original, plain C++ program for the hamming distance between two vectors

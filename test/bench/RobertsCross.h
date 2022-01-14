@@ -18,5 +18,8 @@ std::vector<int64_t> encryptedBatchedRobertsCross(
 std::vector<int64_t> encryptedRobertsCrossPorcupine(
         MultiTimer &timer, std::vector<int> &img, size_t poly_modulus_degree);
 
+std::vector<int> encryptedNaiveRobertsCross(
+        MultiTimer &timer, const std::vector<int> &img, size_t poly_modulus_degree);
+
 #endif
 #endif//AST_OPTIMIZER_ROBERTSCROSS_H
