@@ -6,7 +6,7 @@ std::vector<int> encryptedNaiveRobertsCross(
         MultiTimer &timer, const std::vector<int> &img, size_t poly_modulus_degree)
 {
   auto keygenTimer = timer.startTimer();
-  int img_size = (int)std::sqrt(img.size());
+  int img_size = (int) std::sqrt(img.size());
 
   // Context Setup
   seal::EncryptionParameters parameters(seal::scheme_type::bfv);
@@ -35,7 +35,7 @@ std::vector<int> encryptedNaiveRobertsCross(
   // Encode & Encrypt the image
   auto encTimer = timer.startTimer();
   std::vector<seal::Ciphertext> img_ctxt(img.size());
-  for (int i = 0; i < img.size(); ++i) {
+  for (size_t i = 0; i < img.size(); ++i) {
     uint64_t pixel = img[i];
     seal::Plaintext tmp = seal::Plaintext(seal::util::uint_to_hex_string(&pixel, std::size_t(1)));
     encryptor.encrypt(tmp, img_ctxt[i]);
@@ -72,7 +72,7 @@ std::vector<int> encryptedNaiveRobertsCross(
   // Decrypt results
   auto decTimer = timer.startTimer();
   std::vector<int> result(img.size());
-  for (int i = 0; i < result.size(); ++i) {
+  for (size_t i = 0; i < result.size(); ++i) {
     seal::Plaintext tmp;
     decryptor.decrypt(result_ctxt[i], tmp);
     result[i] = (int) *tmp.data();

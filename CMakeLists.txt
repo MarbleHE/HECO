@@ -324,4 +324,6 @@ endif ()
 #
 # A collection of benchmarks
 ##############################
-add_subdirectory(test/bench EXCLUDE_FROM_ALL)
+if (SEAL_FOUND)
+    add_subdirectory(test/bench EXCLUDE_FROM_ALL)
+endif (SEAL_FOUND)

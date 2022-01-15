@@ -39,7 +39,7 @@ uint64_t encryptedNaiveHammingDistance(MultiTimer &timer, const std::vector<bool
   std::vector<seal::Ciphertext> a_ctxt(b.size());
   std::vector<seal::Ciphertext> b_ctxt(b.size());
 
-  for (int i = 0; i < a.size(); ++i) {
+  for (size_t i = 0; i < a.size(); ++i) {
     uint64_t elem = a[i];
     seal::Plaintext tmp_a = seal::Plaintext(seal::util::uint_to_hex_string(&elem, std::size_t(1)));
     encryptor.encrypt(tmp_a, a_ctxt[i]);
@@ -57,7 +57,7 @@ uint64_t encryptedNaiveHammingDistance(MultiTimer &timer, const std::vector<bool
   // Compute differences
   auto compTimer = timer.startTimer();
   // Note: We can use the fact that NEQ = XOR = (a-b)^2 for a,b \in {0,1}
-  for (int i = 0; i < a_ctxt.size(); ++i) {
+  for (size_t i = 0; i < a_ctxt.size(); ++i) {
     evaluator.sub_inplace(a_ctxt[i], b_ctxt[i]);
     evaluator.square_inplace(a_ctxt[i]);
     evaluator.relinearize_inplace(a_ctxt[i], relinKeys);
