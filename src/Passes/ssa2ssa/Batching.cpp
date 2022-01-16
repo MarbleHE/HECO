@@ -6,6 +6,7 @@
 #include "mlir/Dialect/Affine/IR/AffineOps.h"
 #include "mlir/Dialect/SCF/SCF.h"
 #include "mlir/Dialect/Tensor/IR/Tensor.h"
+#include "llvm/ADT/APSInt.h"
 
 #include "abc/IR/FHE/FHEDialect.h"
 #include "abc/Passes/ssa2ssa/Batching.h"
@@ -22,7 +23,7 @@ void BatchingPass::getDependentDialects(mlir::DialectRegistry &registry) const {
 
 Value resolveToSlot(int slot, Value v, IRRewriter &rewriter, std::string indent = "") {
   //TODO: This is the naive/dumb way, no checking if stuff has already happened!
-  
+
   llvm::outs() << indent << "resolving slot for: ";
   v.print(llvm::outs());
   llvm::outs() << indent << "\n";
@@ -137,6 +138,65 @@ Value resolveToSlot(int slot, Value v, IRRewriter &rewriter, std::string indent 
   }
 }
 
+template<typename OpType>
+void batchArithmeticOperation(IRRewriter &rewriter, MLIRContext *context, OpType op) {
+  // We care only about ops that return scalars, assuming others are already "SIMD-compatible"
+  if (auto result_st = op.getType().template dyn_cast_or_null<fhe::SecretType>()) {
+
+    llvm::outs() << "updating ";
+    op.print(llvm::outs());
+    llvm::outs() << "\n";
+
+    // Move rewriter
+    rewriter.setInsertionPointAfter(op);
+
+    /// Target Slot (-1 => no target slot required)
+    int target_slot = -1;
+
+    // convert all operands to batched
+    for (auto it = op->operand_begin(); it!=op.operand_end(); ++it) {
+
+      if (auto bst = (*it).getType().template dyn_cast_or_null<fhe::BatchedSecretType>()) {
+        // already vector-style input, assume it's already slot-aligned appropriately
+      } else if (auto st = (*it).getType().template dyn_cast_or_null<fhe::SecretType>()) {
+        // scalar-type input that needs to be converted
+        if (auto ex_op = (*it).template getDefiningOp<fhe::ExtractOp>()) {
+
+          // instead of using the extract op, issue a rotation instead
+          auto i = (int) ex_op.i().getLimitedValue();
+          if (target_slot==-1) //no other target slot defined yet, let's make this the target
+            target_slot = i; // we'll rotate by zero, but that's later canonicalized to no-op anyway
+          auto rotate_op = rewriter
+              .create<fhe::RotateOp>(ex_op.getLoc(), ex_op.vector(), llvm::APInt(i - target_slot, 32));
+          rewriter.replaceOpWithIf(ex_op, {rotate_op}, [&](OpOperand &operand) { return operand.getOwner()==op; });
+        } else if (auto c_op = (*it).template getDefiningOp<fhe::ConstOp>()) {
+          //TODO: SUPPORT CONSTANT OP IN BATCHING
+        } else {
+          emitError(op.getLoc(), "Encountered unexpected secret operand while trying to batch.");
+        }
+
+      } else {
+        emitError(op.getLoc(), "Encountered unexpected non-secret operand while trying to batch.");
+      }
+    }
+
+    // new op with batched result type
+    auto bst = fhe::BatchedSecretType::get(context, result_st.getPlaintextType());
+    auto new_op = rewriter.create<OpType>(op.getLoc(), bst, op->getOperands());
+
+    // Now create a scalar again by creating an extract, preserving type constraints
+    auto res_ex_op =
+        rewriter.create<fhe::ExtractOp>(op.getLoc(),
+                                        op.getType(),
+                                        new_op.getResult(),
+                                        rewriter.getIndexAttr(target_slot));
+    op->replaceAllUsesWith(res_ex_op);
+
+    // Finally, remove the original op
+    rewriter.eraseOp(op);
+  }
+}
+
 void BatchingPass::runOnOperation() {
 
   //TODO: There's very likely a much better way to do this pass instead of this kind of manual walk!
@@ -186,31 +246,44 @@ void BatchingPass::runOnOperation() {
     }
   }
 
-  // Now visit each InsertOp and translate it (if necessary)
+  //Handle Subtraction
   for (auto f: llvm::make_early_inc_range(block.getOps<FuncOp>())) {
-    for (auto op: llvm::make_early_inc_range(f.body().getOps<fhe::InsertOp>())) {
-      int target_index_int = (int) op.i().getLimitedValue(INT32_MAX);
-      auto new_op = resolveToSlot(target_index_int, op.scalar(), rewriter);
-      op.result().replaceAllUsesWith(op.scalar());
+    for (auto op: llvm::make_early_inc_range(f.body().getOps<fhe::SubOp>())) {
+      batchArithmeticOperation<fhe::SubOp>(rewriter, &getContext(), op);
+    }
+    for (auto op: llvm::make_early_inc_range(f.body().getOps<fhe::MultiplyOp>())) {
+      batchArithmeticOperation<fhe::MultiplyOp>(rewriter, &getContext(), op);
+    }
+    for (auto op: llvm::make_early_inc_range(f.body().getOps<fhe::AddOp>())) {
+      //batchArithmeticOperation<fhe::AddOp>(rewriter, &getContext(), op);
     }
   }
 
-  // We also need to go and resolve any "return" (TODO: probably other stuff, too!)
-  for (auto f: llvm::make_early_inc_range(block.getOps<FuncOp>())) {
-    for (auto op: llvm::make_early_inc_range(f.body().getOps<mlir::ReturnOp>())) {
+//  // Now visit each InsertOp and translate it (if necessary)
+//  for (auto f: llvm::make_early_inc_range(block.getOps<FuncOp>())) {
+//    for (auto op: llvm::make_early_inc_range(f.body().getOps<fhe::InsertOp>())) {
+//      int target_index_int = (int) op.i().getLimitedValue(INT32_MAX);
+//      auto new_op = resolveToSlot(target_index_int, op.scalar(), rewriter);
+//      op.result().replaceAllUsesWith(op.scalar());
+//    }
+//  }
 
-      int target_index_int = 0;
-      //todo: in the future, this should be -1 and signal "all slots needed" or something like that
-      // TODO: we intentionally don't change the return type, since this should be scalar-ish
-      auto new_value = resolveToSlot(target_index_int, op.getOperand(0), rewriter);
-      if (new_value!=op.getOperand(0)) {
-        op.getOperand(0).replaceAllUsesWith(new_value);
-      }
-      f.setType(rewriter.getFunctionType(f.getType().getInputs(), new_value.getType()));
-
-      //op.result().replaceAllUsesWith(op.scalar());
-
-    }
-  }
+//  // We also need to go and resolve any "return" (TODO: probably other stuff, too!)
+//  for (auto f: llvm::make_early_inc_range(block.getOps<FuncOp>())) {
+//    for (auto op: llvm::make_early_inc_range(f.body().getOps<mlir::ReturnOp>())) {
+//
+//      int target_index_int = 0;
+//      //todo: in the future, this should be -1 and signal "all slots needed" or something like that
+//      // TODO: we intentionally don't change the return type, since this should be scalar-ish
+//      auto new_value = resolveToSlot(target_index_int, op.getOperand(0), rewriter);
+//      if (new_value!=op.getOperand(0)) {
+//        op.getOperand(0).replaceAllUsesWith(new_value);
+//      }
+//      f.setType(rewriter.getFunctionType(f.getType().getInputs(), new_value.getType()));
+//
+//      //op.result().replaceAllUsesWith(op.scalar());
+//
+//    }
+//  }
 
 }
