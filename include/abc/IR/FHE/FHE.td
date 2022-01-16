@@ -183,6 +183,8 @@ def FHE_RotateOp : FHE_Op<"rotate", [AllTypesMatch<["x","output"]>]> {
     BatchedSecret:$output
   );
 
+  let hasFolder = 1;
+
 }
 
 def FHE_RelinearizeOp : FHE_Op<"relinearize", [AllTypesMatch<["x", "output"]>]> {

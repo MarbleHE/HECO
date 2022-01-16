@@ -182,6 +182,12 @@ void fhe::ConstOp::getAsmResultNames(
   return {};
 }
 
+::mlir::OpFoldResult fhe::RotateOp::fold(::llvm::ArrayRef<::mlir::Attribute> operands) {
+  if (i().getLimitedValue()==0)
+    return x();
+  return {};
+}
+
 //===----------------------------------------------------------------------===//
 // FHE dialect definitions
 //===----------------------------------------------------------------------===//
