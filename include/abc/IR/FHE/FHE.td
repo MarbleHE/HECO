@@ -138,7 +138,7 @@ def FHE_MultiplyOp : FHE_Op<"multiply", [Commutative, DeclareOpInterfaceMethods<
   );
 
   let results = (outs
-    Secret:$output
+    AnyTypeOf<[Secret,BatchedSecret]>:$output
   );
 
 }
@@ -153,7 +153,7 @@ def FHE_AddOp : FHE_Op<"add", [Commutative, DeclareOpInterfaceMethods<InferTypeO
   );
 
   let results = (outs
-    Secret:$output
+    AnyTypeOf<[Secret,BatchedSecret]>:$output
   );
 
 }
@@ -166,21 +166,7 @@ def FHE_SubOp : FHE_Op<"sub", [DeclareOpInterfaceMethods<InferTypeOpInterface>]>
   );
 
   let results = (outs
-    Secret:$output
-  );
-
-}
-
-def FHE_ResolveOp : FHE_Op<"resolve", [DeclareOpInterfaceMethods<InferTypeOpInterface>]> {
-  let summary = "Resolve to a scalar.";
-
-  let arguments = (ins
-    Secret:$x,
-    IndexAttr:$i
-  );
-
-  let results = (outs
-    AnyType:$output
+    AnyTypeOf<[Secret,BatchedSecret]>:$output
   );
 
 }
@@ -204,11 +190,11 @@ def FHE_RelinearizeOp : FHE_Op<"relinearize", [AllTypesMatch<["x", "output"]>]> 
   let summary = "Relinearization.";
 
   let arguments = (ins
-    Secret:$x
+    AnyTypeOf<[Secret,BatchedSecret]>:$x
   );
 
   let results = (outs
-    Secret:$output
+    AnyTypeOf<[Secret,BatchedSecret]>:$output
   );
 
 }

@@ -34,13 +34,21 @@ SecretType BatchedSecretType::getCorrespondingSecretType() const {
   // when given as a "generic" triple of ValueRange, DictionaryAttr, RegionRange  instead of nicely "packaged" inside the operation class.
   auto op = MultiplyOpAdaptor(operands, attributes, regions);
   auto plaintextType = Type();
+  bool batched = false;
   for (auto operand: op.x()) {
     if (auto secret_type = operand.getType().dyn_cast_or_null<SecretType>()) {
       plaintextType = secret_type.getPlaintextType();
     }
+    if (auto bst = operand.getType().dyn_cast_or_null<BatchedSecretType>()) {
+      plaintextType = bst.getPlaintextType();
+      batched = true;
+    }
     //TODO: check things properly!
   }
-  inferredReturnTypes.push_back(SecretType::get(context, plaintextType));
+  if (batched)
+    inferredReturnTypes.push_back(BatchedSecretType::get(context, plaintextType));
+  else
+    inferredReturnTypes.push_back(SecretType::get(context, plaintextType));
   return ::mlir::success();
 }
 
@@ -54,13 +62,22 @@ SecretType BatchedSecretType::getCorrespondingSecretType() const {
   // when given as a "generic" triple of ValueRange, DictionaryAttr, RegionRange  instead of nicely "packaged" inside the operation class.
   auto op = AddOpAdaptor(operands, attributes, regions);
   auto plaintextType = Type();
+  bool batched = false;
   for (auto operand: op.x()) {
     if (auto secret_type = operand.getType().dyn_cast_or_null<SecretType>()) {
       plaintextType = secret_type.getPlaintextType();
     }
+    if (auto bst = operand.getType().dyn_cast_or_null<BatchedSecretType>()) {
+      plaintextType = bst.getPlaintextType();
+      batched = true;
+    }
     //TODO: check things properly!
   }
-  inferredReturnTypes.push_back(SecretType::get(context, plaintextType));
+  if (batched)
+    inferredReturnTypes.push_back(BatchedSecretType::get(context, plaintextType));
+  else
+    inferredReturnTypes.push_back(SecretType::get(context, plaintextType));
+  return ::mlir::success();
   return ::mlir::success();
 }
 
@@ -74,28 +91,21 @@ SecretType BatchedSecretType::getCorrespondingSecretType() const {
   // when given as a "generic" triple of ValueRange, DictionaryAttr, RegionRange  instead of nicely "packaged" inside the operation class.
   auto op = SubOpAdaptor(operands, attributes, regions);
   auto plaintextType = Type();
+  bool batched = false;
   for (auto operand: op.x()) {
     if (auto secret_type = operand.getType().dyn_cast_or_null<SecretType>()) {
       plaintextType = secret_type.getPlaintextType();
     }
+    if (auto bst = operand.getType().dyn_cast_or_null<BatchedSecretType>()) {
+      plaintextType = bst.getPlaintextType();
+      batched = true;
+    }
     //TODO: check things properly!
   }
-  inferredReturnTypes.push_back(SecretType::get(context, plaintextType));
-  return ::mlir::success();
-}
-
-::mlir::LogicalResult fhe::ResolveOp::inferReturnTypes(::mlir::MLIRContext *context,
-                                                       ::llvm::Optional<::mlir::Location> location,
-                                                       ::mlir::ValueRange operands,
-                                                       ::mlir::DictionaryAttr attributes,
-                                                       ::mlir::RegionRange regions,
-                                                       ::llvm::SmallVectorImpl<::mlir::Type> &inferredReturnTypes) {
-  // Operand adaptors (https://mlir.llvm.org/docs/OpDefinitions/#operand-adaptors) provide a convenient way to access operands
-  // when given as a "generic" triple of ValueRange, DictionaryAttr, RegionRange  instead of nicely "packaged" inside the operation class.
-  auto op = ResolveOpAdaptor(operands, attributes, regions);
-  //TODO: check all elements properly
-  auto t = op.x().getType().dyn_cast<SecretType>().getPlaintextType();
-  inferredReturnTypes.push_back(t);
+  if (batched)
+    inferredReturnTypes.push_back(BatchedSecretType::get(context, plaintextType));
+  else
+    inferredReturnTypes.push_back(SecretType::get(context, plaintextType));
   return ::mlir::success();
 }
 
