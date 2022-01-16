@@ -25,6 +25,7 @@
 #include "abc/Passes/ast2ssa/LowerASTtoSSA.h"
 #include "abc/Passes/ssa2ssa/UnrollLoops.h"
 #include "abc/Passes/ssa2ssa/Nary.h"
+#include "abc/Passes/ssa2ssa/Tensor2BatchedSecret.h"
 #include "abc/Passes/ssa2ssa/Batching.h"
 
 #include <iostream>
@@ -35,13 +36,16 @@ using namespace fhe;
 
 void pipelineBuilder(OpPassManager &manager) {
   manager.addPass(std::make_unique<LowerASTtoSSAPass>());
-  manager.addPass(createCanonicalizerPass());
   manager.addPass(std::make_unique<UnrollLoopsPass>());
+  manager.addPass(std::make_unique<NaryPass>());
+  // Must canonicalize before Tensor2BatchedSecretPass, since it only handles constant indices in tensor.extract
   manager.addPass(createCanonicalizerPass());
+  manager.addPass(std::make_unique<Tensor2BatchedSecretPass>());
+  manager.addPass(createCanonicalizerPass());
+  manager.addPass(createCSEPass());
   // manager.addPass(std::make_unique<BatchingPass>());
   // manager.addPass(createCanonicalizerPass());
-  // manager.addPass(std::make_unique<NaryPass>());
-  // manager.addPass(createCanonicalizerPass());
+
 }
 
 int main(int argc, char **argv) {
@@ -67,8 +71,9 @@ int main(int argc, char **argv) {
   registerAllPasses();
   PassRegistration<LowerASTtoSSAPass>();
   PassRegistration<UnrollLoopsPass>();
-  PassRegistration<BatchingPass>();
   PassRegistration<NaryPass>();
+  PassRegistration<Tensor2BatchedSecretPass>();
+  PassRegistration<BatchingPass>();
 
   PassPipelineRegistration<>("full-pass", "Run all passes", pipelineBuilder);
 

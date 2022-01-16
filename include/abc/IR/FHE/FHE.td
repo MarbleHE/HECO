@@ -54,7 +54,7 @@ def Secret : TypeDef<FHE_Dialect, "Secret">  {
   // See https://mlir.llvm.org/docs/OpDefinitions/#type-definitions
   // for detailed information on how declartive type definitions work
 
-  let description = "A Type for Secrets (high-level abstraction of Ciphertexts)";
+  let description = "A Type for Secrets (high-level abstraction of Ciphertexts encrypting single scalars)";
 
   // Types are written as "!<dialect_name>.<type_mnemonic>" in textal MLIR representation
   let mnemonic = "secret";
@@ -70,6 +70,34 @@ def Secret : TypeDef<FHE_Dialect, "Secret">  {
   // Which explains assemblyFormat for operations, but works for types, too:
   let assemblyFormat = "`<` $plaintextType `>`";
 }
+
+
+def BatchedSecret : TypeDef<FHE_Dialect, "BatchedSecret">  {
+
+  // See https://mlir.llvm.org/docs/OpDefinitions/#type-definitions
+  // for detailed information on how declartive type definitions work
+
+  let description = "A Type for Batched Secrets (high-level abstraction of Ciphertexts encrypting vectors of values)";
+
+  // Types are written as "!<dialect_name>.<type_mnemonic>" in textal MLIR representation
+  let mnemonic = "batched_secret";
+
+  // This summary is used, among other things, in type-related error messages
+  let summary = "Batched Secret";
+
+  let parameters = (ins
+      "Type":$plaintextType
+  );
+
+  let extraClassDeclaration = [{
+        SecretType getCorrespondingSecretType() const;
+  }];
+
+  // See https://mlir.llvm.org/docs/OpDefinitions/#declarative-assembly-format
+  // Which explains assemblyFormat for operations, but works for types, too:
+  let assemblyFormat = "`<` $plaintextType `>`";
+}
+
 
 //===----------------------------------------------------------------------===//
 // FHE Operations
@@ -187,9 +215,7 @@ def FHE_RelinearizeOp : FHE_Op<"relinearize", [AllTypesMatch<["x", "output"]>]> 
 
 def FHE_ConstOp : FHE_Op<"constant", [
         ConstantLike,
-        TypesMatchWith<"result type matches plaintext type of secret",
-                            "value", "result",
-                            "fhe::SecretType::get(getContext(),$_self)">,
+        InferTypeOpInterface,
         DeclareOpInterfaceMethods<InferTypeOpInterface>,
         DeclareOpInterfaceMethods<OpAsmOpInterface, ["getAsmResultNames"]>
     ]> {
@@ -203,7 +229,7 @@ def FHE_ConstOp : FHE_Op<"constant", [
   );
 
   let results = (outs
-     Secret:$result
+     AnyTypeOf<[Secret,BatchedSecret]>:$result
   );
 
   let hasFolder = 1;
@@ -211,4 +237,27 @@ def FHE_ConstOp : FHE_Op<"constant", [
   let assemblyFormat = "attr-dict $value";
 }
 
+
+def FHE_ExtractOp : FHE_Op<"extract", [
+        TypesMatchWith<"result type matches element type of tensor",
+                    "vector", "result",
+                    "$_self.cast<BatchedSecretType>().getCorrespondingSecretType()">
+    ]> {
+
+  let summary = "element extraction operation (actually executing this under FHE is highly inefficient)";
+
+  let arguments = (ins BatchedSecret:$vector, IndexAttr:$i);
+  let results = (outs Secret:$result);
+  let assemblyFormat = "$vector `[` $i `]` attr-dict `:` type($vector)";
+}
+
+def FHE_MaterializeOp: FHE_Op<"materialize", []> {
+  let summary = "No-op operation used to preserve consistency of type system during type conversion";
+
+  let arguments = (ins AnyType:$input);
+  let results = (outs AnyType:$result);
+
+  let hasFolder = 1;
+
+}
 #endif // ABC_FHE_FHE_TD_

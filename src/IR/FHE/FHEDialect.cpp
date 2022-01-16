@@ -14,6 +14,10 @@ using namespace fhe;
 #define GET_TYPEDEF_CLASSES
 #include "abc/IR/FHE/FHETypes.cpp.inc"
 
+SecretType BatchedSecretType::getCorrespondingSecretType() const {
+  return SecretType::get(getContext(), getPlaintextType());
+}
+
 //===----------------------------------------------------------------------===//
 // TableGen'd Operation definitions
 //===----------------------------------------------------------------------===//
@@ -104,18 +108,34 @@ using namespace fhe;
   // Operand adaptors (https://mlir.llvm.org/docs/OpDefinitions/#operand-adaptors) provide a convenient way to access operands
   // when given as a "generic" triple of ValueRange, DictionaryAttr, RegionRange  instead of nicely "packaged" inside the operation class.
   auto op = ConstOpAdaptor(operands, attributes, regions);
-  inferredReturnTypes.push_back(fhe::SecretType::get(context,op.value().getType()));
+  if (auto aa = op.value().dyn_cast_or_null<ArrayAttr>()) {
+    if (aa.empty())
+      return ::mlir::failure();
+    auto t = aa.begin()->getType();
+    for (auto a: aa) {
+      if (a.getType()!=t)
+        return ::mlir::failure();
+    }
+    inferredReturnTypes.push_back(fhe::SecretType::get(context, t));
+  } else {
+    inferredReturnTypes.push_back(fhe::SecretType::get(context, op.value().getType()));
+  }
   return ::mlir::success();
 }
 
 void fhe::ConstOp::getAsmResultNames(
     function_ref<void(Value, StringRef)> setNameFn) {
-  auto type = getType().getPlaintextType();
+  auto type = Type();
+  if (getType().isa<SecretType>())
+    type = getType().cast<SecretType>().getPlaintextType();
+  else
+    type = getType().cast<BatchedSecretType>().getPlaintextType();
+
   if (auto intCst = value().dyn_cast<IntegerAttr>()) {
     auto intType = type.dyn_cast<IntegerType>();
 
     // Sugar i1 constants with 'true' and 'false'.
-    if (intType && intType.getWidth() == 1)
+    if (intType && intType.getWidth()==1)
       return setNameFn(getResult(), (intCst.getInt() ? "true" : "false"));
 
     // Otherwise, build a complex name with the value and type.
@@ -129,19 +149,27 @@ void fhe::ConstOp::getAsmResultNames(
     auto floatType = type.dyn_cast<FloatType>();
     SmallString<32> specialNameBuffer;
     llvm::raw_svector_ostream specialName(specialNameBuffer);
-    specialName << "c" << (int)fCst.getValueAsDouble();
+    specialName << "c" << (int) fCst.getValueAsDouble();
     if (floatType)
       specialName << "_s" << type;
     setNameFn(getResult(), specialName.str());
-  }
-
-  else {
+  } else if (auto arrayCst = value().dyn_cast<ArrayAttr>()) {
+    //TODO: Somehow support array stuff better?
+    setNameFn(getResult(), "vcst");
+  } else {
     setNameFn(getResult(), "cst");
   }
 }
 
 ::mlir::OpFoldResult fhe::ConstOp::fold(::llvm::ArrayRef<::mlir::Attribute> operands) {
   return value();
+}
+
+::mlir::OpFoldResult fhe::MaterializeOp::fold(::llvm::ArrayRef<::mlir::Attribute> operands) {
+  if (auto m_op = input().getDefiningOp<fhe::MaterializeOp>())
+    if (m_op.input().getType()==result().getType())
+      return m_op.input();
+  return {};
 }
 
 //===----------------------------------------------------------------------===//
