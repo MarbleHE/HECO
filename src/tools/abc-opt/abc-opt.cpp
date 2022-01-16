@@ -44,8 +44,8 @@ void pipelineBuilder(OpPassManager &manager) {
   manager.addPass(createCanonicalizerPass()); //necessary to remove redundant fhe.materialize
   manager.addPass(createCSEPass()); //necessary to remove duplicate fhe.extract
   manager.addPass(std::make_unique<BatchingPass>());
-  //manager.addPass(createCanonicalizerPass());
-  //manager.addPass(createCSEPass());
+  manager.addPass(createCanonicalizerPass());
+  manager.addPass(createCSEPass());
 
 }
 
