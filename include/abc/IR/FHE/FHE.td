@@ -176,7 +176,7 @@ def FHE_RotateOp : FHE_Op<"rotate", [AllTypesMatch<["x","output"]>]> {
 
   let arguments = (ins
     BatchedSecret:$x,
-    IndexAttr:$i
+    SI32Attr:$i
   );
 
   let results = (outs

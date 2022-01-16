@@ -161,13 +161,12 @@ void batchArithmeticOperation(IRRewriter &rewriter, MLIRContext *context, OpType
       } else if (auto st = (*it).getType().template dyn_cast_or_null<fhe::SecretType>()) {
         // scalar-type input that needs to be converted
         if (auto ex_op = (*it).template getDefiningOp<fhe::ExtractOp>()) {
-
           // instead of using the extract op, issue a rotation instead
           auto i = (int) ex_op.i().getLimitedValue();
           if (target_slot==-1) //no other target slot defined yet, let's make this the target
             target_slot = i; // we'll rotate by zero, but that's later canonicalized to no-op anyway
           auto rotate_op = rewriter
-              .create<fhe::RotateOp>(ex_op.getLoc(), ex_op.vector(), llvm::APInt(i - target_slot, 32));
+              .create<fhe::RotateOp>(ex_op.getLoc(), ex_op.vector(), i - target_slot);
           rewriter.replaceOpWithIf(ex_op, {rotate_op}, [&](OpOperand &operand) { return operand.getOwner()==op; });
         } else if (auto c_op = (*it).template getDefiningOp<fhe::ConstOp>()) {
           //TODO: SUPPORT CONSTANT OP IN BATCHING
@@ -199,54 +198,11 @@ void batchArithmeticOperation(IRRewriter &rewriter, MLIRContext *context, OpType
 
 void BatchingPass::runOnOperation() {
 
-  //TODO: There's very likely a much better way to do this pass instead of this kind of manual walk!
-
-  //TODO: THINK ABOUT BASIC BATCHING: (maybe disable nary pass)? CAN WE GET STAGES OF BATCHING AS DESCRIBED IN PAPER?
-
-  //TODO: MAKE CONSISTENT LOWERING, REPLACE SCALAR OP WITH ROTATE OP AND MATERIALIZED EXTRACT?
-
-  //TODO: WHEN TO MATERIALIZE EXTRACTIONS? ONLY WHEN ASSIGNED TO SCALAR VALUE?
-
-  //TODO: THIS WOULD BE EVEN IN ORIGINAL STATEMENT!
-
-  //TODO: NOTE THAT BECAUSE OF SSA FORM, THIS KIND OF REASONING DOESN'T MAKE MUCH SENSE ANYMORE
-
-  //TODO: HOWEVER, WE COULD SAY WE EXTRACT WHENEVER ....WELL...WHEN EXACTLY?
-
-  // REPLACE EACH ARITHMETIC OPERATION (ADD, MUL, SUB, later also relin, etc)
-  // WITH AN OPERATION ON ROTATED VECTORS
-  // AND THEN EXTRACT OUT THE RESULT
-
-  // THIS DOESN'T GET YOU ALL THAT FAR.
-  // THEN, MERGE ROTATIONS OF EXTRACTIONS TO OMIT THE EXTRACTION STEP?
-
-
   // Get the (default) block in the module's only region:
   auto &block = getOperation()->getRegion(0).getBlocks().front();
   IRRewriter rewriter(&getContext());
 
-  /// Struct for batching info
-  struct batching_info {
-    int slot;
-    std::shared_ptr<Value> value;
-  };
-
-  /// Lookup stuff
-  std::unordered_map<size_t, batching_info> slot_map;
-
-
-  // First, read all the fhe.extract info to find the slot for each SSA value
-  for (auto f: llvm::make_early_inc_range(block.getOps<FuncOp>())) {
-    for (auto op: llvm::make_early_inc_range(f.body().getOps<fhe::ExtractOp>())) {
-      auto index_int = (int) op.i().getLimitedValue(INT32_MAX);
-      auto val_ptr = std::make_shared<Value>(op.vector());
-      batching_info bi = {index_int, val_ptr};
-      size_t hash = hash_value(op.result());
-      slot_map.insert({hash, bi});
-    }
-  }
-
-  //Handle Subtraction
+  //Translate Arithmetic Operations
   for (auto f: llvm::make_early_inc_range(block.getOps<FuncOp>())) {
     for (auto op: llvm::make_early_inc_range(f.body().getOps<fhe::SubOp>())) {
       batchArithmeticOperation<fhe::SubOp>(rewriter, &getContext(), op);
@@ -255,35 +211,8 @@ void BatchingPass::runOnOperation() {
       batchArithmeticOperation<fhe::MultiplyOp>(rewriter, &getContext(), op);
     }
     for (auto op: llvm::make_early_inc_range(f.body().getOps<fhe::AddOp>())) {
-      //batchArithmeticOperation<fhe::AddOp>(rewriter, &getContext(), op);
+      batchArithmeticOperation<fhe::AddOp>(rewriter, &getContext(), op);
     }
   }
-
-//  // Now visit each InsertOp and translate it (if necessary)
-//  for (auto f: llvm::make_early_inc_range(block.getOps<FuncOp>())) {
-//    for (auto op: llvm::make_early_inc_range(f.body().getOps<fhe::InsertOp>())) {
-//      int target_index_int = (int) op.i().getLimitedValue(INT32_MAX);
-//      auto new_op = resolveToSlot(target_index_int, op.scalar(), rewriter);
-//      op.result().replaceAllUsesWith(op.scalar());
-//    }
-//  }
-
-//  // We also need to go and resolve any "return" (TODO: probably other stuff, too!)
-//  for (auto f: llvm::make_early_inc_range(block.getOps<FuncOp>())) {
-//    for (auto op: llvm::make_early_inc_range(f.body().getOps<mlir::ReturnOp>())) {
-//
-//      int target_index_int = 0;
-//      //todo: in the future, this should be -1 and signal "all slots needed" or something like that
-//      // TODO: we intentionally don't change the return type, since this should be scalar-ish
-//      auto new_value = resolveToSlot(target_index_int, op.getOperand(0), rewriter);
-//      if (new_value!=op.getOperand(0)) {
-//        op.getOperand(0).replaceAllUsesWith(new_value);
-//      }
-//      f.setType(rewriter.getFunctionType(f.getType().getInputs(), new_value.getType()));
-//
-//      //op.result().replaceAllUsesWith(op.scalar());
-//
-//    }
-//  }
 
 }

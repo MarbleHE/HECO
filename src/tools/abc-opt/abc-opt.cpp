@@ -38,15 +38,16 @@ void pipelineBuilder(OpPassManager &manager) {
   manager.addPass(std::make_unique<LowerASTtoSSAPass>());
   manager.addPass(std::make_unique<UnrollLoopsPass>());
   manager.addPass(std::make_unique<NaryPass>());
+
   // Must canonicalize before Tensor2BatchedSecretPass, since it only handles constant indices in tensor.extract
   manager.addPass(createCanonicalizerPass());
   manager.addPass(std::make_unique<Tensor2BatchedSecretPass>());
   manager.addPass(createCanonicalizerPass()); //necessary to remove redundant fhe.materialize
   manager.addPass(createCSEPass()); //necessary to remove duplicate fhe.extract
+
   manager.addPass(std::make_unique<BatchingPass>());
   manager.addPass(createCanonicalizerPass());
   manager.addPass(createCSEPass());
-
 }
 
 int main(int argc, char **argv) {

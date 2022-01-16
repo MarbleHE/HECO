@@ -183,7 +183,7 @@ void fhe::ConstOp::getAsmResultNames(
 }
 
 ::mlir::OpFoldResult fhe::RotateOp::fold(::llvm::ArrayRef<::mlir::Attribute> operands) {
-  if (i().getLimitedValue()==0)
+  if (i()==0)
     return x();
   return {};
 }
