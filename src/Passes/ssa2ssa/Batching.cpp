@@ -204,15 +204,15 @@ void BatchingPass::runOnOperation() {
 
   //Translate Arithmetic Operations
   for (auto f: llvm::make_early_inc_range(block.getOps<FuncOp>())) {
-    for (auto op: llvm::make_early_inc_range(f.body().getOps<fhe::SubOp>())) {
-      batchArithmeticOperation<fhe::SubOp>(rewriter, &getContext(), op);
-    }
-    for (auto op: llvm::make_early_inc_range(f.body().getOps<fhe::MultiplyOp>())) {
-      batchArithmeticOperation<fhe::MultiplyOp>(rewriter, &getContext(), op);
-    }
-    for (auto op: llvm::make_early_inc_range(f.body().getOps<fhe::AddOp>())) {
-      batchArithmeticOperation<fhe::AddOp>(rewriter, &getContext(), op);
-    }
+    // We must translate in order of appearance for this to work, so we walk manually
+    f.walk([&](Operation *op) {
+      if (auto sub_op = llvm::dyn_cast_or_null<fhe::SubOp>(op))
+        batchArithmeticOperation<fhe::SubOp>(rewriter, &getContext(), sub_op);
+      if (auto add_op = llvm::dyn_cast_or_null<fhe::AddOp>(op))
+        batchArithmeticOperation<fhe::AddOp>(rewriter, &getContext(), add_op);
+      if (auto mul_op = llvm::dyn_cast_or_null<fhe::MultiplyOp>(op))
+        batchArithmeticOperation<fhe::MultiplyOp>(rewriter, &getContext(), mul_op);
+    });
   }
 
 }
