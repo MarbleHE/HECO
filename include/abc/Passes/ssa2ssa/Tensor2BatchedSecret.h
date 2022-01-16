@@ -8,7 +8,7 @@ struct Tensor2BatchedSecretPass : public mlir::PassWrapper<Tensor2BatchedSecretP
   void runOnOperation() override;
 
   mlir::StringRef getArgument() const final {
-    return "tensor2batchedsecret";
+    return "tensor2fhe";
   }
 };
 

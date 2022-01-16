@@ -20,28 +20,6 @@ void BatchingPass::getDependentDialects(mlir::DialectRegistry &registry) const {
                   mlir::tensor::TensorDialect>();
 }
 
-int getConstIndex(tensor::ExtractOp &op) {
-  //TODO: check if there's more and throw an error if yes
-  auto index = *op.indices().begin();
-  if (auto const_op = llvm::dyn_cast<arith::ConstantOp>(index.getDefiningOp())) {
-    return const_op.getValue().dyn_cast<IntegerAttr>().getValue().getLimitedValue();
-  } else {
-    emitError(index.getLoc(), "Index not defined by a constant op!");
-    return -1;
-  }
-}
-
-int getConstIndex(tensor::InsertOp &op) {
-  //TODO: check if there's more and throw an error if yes
-  auto index = *op.indices().begin();
-  if (auto const_op = llvm::dyn_cast<arith::ConstantOp>(index.getDefiningOp())) {
-    return const_op.getValue().dyn_cast<IntegerAttr>().getValue().getLimitedValue();
-  } else {
-    emitError(index.getLoc(), "Index not defined by a constant op!");
-    return -1;
-  }
-}
-
 Value resolveToSlot(int slot, Value v, IRRewriter &rewriter) {
   //TODO: This is the naive/dumb way, no checking if stuff has already happened!
   auto op = v.getDefiningOp();
@@ -50,14 +28,14 @@ Value resolveToSlot(int slot, Value v, IRRewriter &rewriter) {
     //std::cout << "resolving slot for" << std::endl;
     //op->dump();
 
-    if (auto extract_op = llvm::dyn_cast<tensor::ExtractOp>(op)) {
+    if (auto extract_op = llvm::dyn_cast<fhe::ExtractOp>(op)) {
       // if it's an extract op, simply rotate to bring to right slot
-      int extracted_index = getConstIndex(extract_op);
+      int extracted_index = (int) extract_op.i().getLimitedValue(INT32_MAX);
       int offset = extracted_index - slot;
       rewriter.setInsertionPointAfter(extract_op);
       auto new_val = rewriter.create<fhe::RotateOp>(extract_op.getLoc(),
-                                                    extract_op.tensor().getType(),
-                                                    extract_op.tensor(),
+                                                    extract_op.vector().getType(),
+                                                    extract_op.vector(),
                                                     rewriter.getIndexAttr(offset));
 
       //extract_op.result().replaceAllUsesWith(new_val);
@@ -136,9 +114,28 @@ Value resolveToSlot(int slot, Value v, IRRewriter &rewriter) {
 }
 
 void BatchingPass::runOnOperation() {
-  ConversionTarget target(getContext());
-  target.addLegalDialect<AffineDialect, StandardOpsDialect, tensor::TensorDialect, scf::SCFDialect>();
-  target.addIllegalOp<AffineForOp>();
+
+  //TODO: There's very likely a much better way to do this pass instead of this kind of manual walk!
+
+  //TODO: THINK ABOUT BASIC BATCHING: (maybe disable nary pass)? CAN WE GET STAGES OF BATCHING AS DESCRIBED IN PAPER?
+
+  //TODO: MAKE CONSISTENT LOWERING, REPLACE SCALAR OP WITH ROTATE OP AND MATERIALIZED EXTRACT?
+
+  //TODO: WHEN TO MATERIALIZE EXTRACTIONS? ONLY WHEN ASSIGNED TO SCALAR VALUE?
+
+  //TODO: THIS WOULD BE EVEN IN ORIGINAL STATEMENT!
+
+  //TODO: NOTE THAT BECAUSE OF SSA FORM, THIS KIND OF REASONING DOESN'T MAKE MUCH SENSE ANYMORE
+
+  //TODO: HOWEVER, WE COULD SAY WE EXTRACT WHENEVER ....WELL...WHEN EXACTLY?
+
+  // REPLACE EACH ARITHMETIC OPERATION (ADD, MUL, SUB, later also relin, etc)
+  // WITH AN OPERATION ON ROTATED VECTORS
+  // AND THEN EXTRACT OUT THE RESULT
+
+  // THIS DOESN'T GET YOU ALL THAT FAR.
+  // THEN, MERGE ROTATIONS OF EXTRACTIONS TO OMIT THE EXTRACTION STEP?
+
 
   // Get the (default) block in the module's only region:
   auto &block = getOperation()->getRegion(0).getBlocks().front();
@@ -154,14 +151,11 @@ void BatchingPass::runOnOperation() {
   std::unordered_map<size_t, batching_info> slot_map;
 
 
-
-  //TODO: There's very likely a much better way to do this that's not this kind of manual walk!
-
-  // First, read all the tensor.extract info to find the slot for each SSA value
+  // First, read all the fhe.extract info to find the slot for each SSA value
   for (auto f: llvm::make_early_inc_range(block.getOps<FuncOp>())) {
-    for (auto op: llvm::make_early_inc_range(f.body().getOps<tensor::ExtractOp>())) {
-      int index_int = getConstIndex(op);
-      auto val_ptr = std::make_shared<Value>(op.tensor());
+    for (auto op: llvm::make_early_inc_range(f.body().getOps<fhe::ExtractOp>())) {
+      auto index_int = (int) op.i().getLimitedValue(INT32_MAX);
+      auto val_ptr = std::make_shared<Value>(op.vector());
       batching_info bi = {index_int, val_ptr};
       size_t hash = hash_value(op.result());
       slot_map.insert({hash, bi});
@@ -170,12 +164,10 @@ void BatchingPass::runOnOperation() {
 
   // Now visit each InsertOp and translate it (if necessary)
   for (auto f: llvm::make_early_inc_range(block.getOps<FuncOp>())) {
-    for (auto op: llvm::make_early_inc_range(f.body().getOps<tensor::InsertOp>())) {
-
-      int target_index_int = getConstIndex(op);
+    for (auto op: llvm::make_early_inc_range(f.body().getOps<fhe::InsertOp>())) {
+      int target_index_int = (int) op.i().getLimitedValue(INT32_MAX);
       auto new_op = resolveToSlot(target_index_int, op.scalar(), rewriter);
       op.result().replaceAllUsesWith(op.scalar());
-
     }
   }
 

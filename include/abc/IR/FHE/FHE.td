@@ -189,12 +189,12 @@ def FHE_RotateOp : FHE_Op<"rotate", [AllTypesMatch<["x","output"]>]> {
   let summary = "Rotate.";
 
   let arguments = (ins
-    Secret:$x,
+    BatchedSecret:$x,
     IndexAttr:$i
   );
 
   let results = (outs
-    Secret:$output
+    BatchedSecret:$output
   );
 
 }
@@ -237,7 +237,6 @@ def FHE_ConstOp : FHE_Op<"constant", [
   let assemblyFormat = "attr-dict $value";
 }
 
-
 def FHE_ExtractOp : FHE_Op<"extract", [
         TypesMatchWith<"result type matches element type of tensor",
                     "vector", "result",
@@ -249,6 +248,24 @@ def FHE_ExtractOp : FHE_Op<"extract", [
   let arguments = (ins BatchedSecret:$vector, IndexAttr:$i);
   let results = (outs Secret:$result);
   let assemblyFormat = "$vector `[` $i `]` attr-dict `:` type($vector)";
+}
+
+def FHE_InsertOp : FHE_Op<"insert", [
+        AllTypesMatch<["dest", "result"]>,
+        TypesMatchWith<"scalar type matches element type of dest",
+                       "dest", "scalar",
+                       "$_self.cast<BatchedSecretType>().getCorrespondingSecretType()">
+    ]> {
+
+  let summary = "element insertion operation (actually executing this under FHE is highly inefficient)";
+
+  let arguments = (ins Secret:$scalar,
+                       BatchedSecret:$dest,
+                       IndexAttr:$i);
+  let results = (outs BatchedSecret:$result);
+  let assemblyFormat = [{
+    $scalar `into` $dest `[` $i `]` attr-dict `:` type($dest)
+  }];
 }
 
 def FHE_MaterializeOp: FHE_Op<"materialize", []> {

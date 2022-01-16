@@ -28,20 +28,51 @@ class ExtractPattern final : public OpConversionPattern<tensor::ExtractOp> {
     auto dstType = this->getTypeConverter()->convertType(op.getType());
     if (!dstType)
       return failure();
-    if (auto bst = dstType.dyn_cast_or_null<fhe::SecretType>()) {
+    if (auto st = dstType.dyn_cast_or_null<fhe::SecretType>()) {
       auto batchedSecret = typeConverter->materializeTargetConversion(rewriter,
                                                                       op.tensor().getLoc(),
                                                                       fhe::BatchedSecretType::get(getContext(),
-                                                                                                  bst.getPlaintextType()),
+                                                                                                  st.getPlaintextType()),
                                                                       op.tensor());
       //TODO: Support  tensor.extract indices format in fhe.extract,too
-      auto cOp =  op.indices().front().getDefiningOp<arith::ConstantOp>();
-      if(!cOp) {
-        emitError(op.getLoc(), "tensor2batchedsecret requires all tensor.extract indices used with tensors of fhe.secret to be constant!");
+      auto cOp = op.indices().front().getDefiningOp<arith::ConstantOp>();
+      if (!cOp) {
+        emitError(op.getLoc(),
+                  "tensor2fhe requires all tensor.extract indices used with tensors of fhe.secret to be constant!");
         return failure();
       }
       auto indexAttr = cOp.getValue().cast<IntegerAttr>();
       rewriter.template replaceOpWithNewOp<fhe::ExtractOp>(op, dstType, batchedSecret, indexAttr);
+    } // else do nothing
+    return success();
+  }
+};
+
+class InsertPattern final : public OpConversionPattern<tensor::InsertOp> {
+ public:
+  using OpConversionPattern<tensor::InsertOp>::OpConversionPattern;
+
+  LogicalResult
+  matchAndRewrite(tensor::InsertOp op, typename tensor::InsertOpAdaptor adaptor,
+                  ConversionPatternRewriter &rewriter) const override {
+    auto dstType = this->getTypeConverter()->convertType(op.getType());
+    if (!dstType)
+      return failure();
+    if (auto bst = dstType.dyn_cast_or_null<fhe::BatchedSecretType>()) {
+      auto batchedSecret = typeConverter->materializeTargetConversion(rewriter,
+                                                                      op.dest().getLoc(),
+                                                                      fhe::BatchedSecretType::get(getContext(),
+                                                                                                  bst.getPlaintextType()),
+                                                                      op.dest());
+      //TODO: Support  tensor.extract indices format in fhe.extract,too
+      auto cOp = op.indices().front().getDefiningOp<arith::ConstantOp>();
+      if (!cOp) {
+        emitError(op.getLoc(),
+                  "tensor2fhe requires all tensor.insert indices used with tensors of fhe.secret to be constant!");
+        return failure();
+      }
+      auto indexAttr = cOp.getValue().cast<IntegerAttr>();
+      rewriter.template replaceOpWithNewOp<fhe::InsertOp>(op, dstType, op.scalar(), batchedSecret, indexAttr);
     } // else do nothing
     return success();
   }
@@ -67,14 +98,14 @@ class FunctionPattern final : public OpConversionPattern<FuncOp> {
 
     rewriter.startRootUpdate(op);
     op.setType(new_functype);
-    for(auto it = op.getRegion().args_begin(); it != op.getRegion().args_end(); ++it) {
+    for (auto it = op.getRegion().args_begin(); it!=op.getRegion().args_end(); ++it) {
       auto arg = *it;
       auto oldType = arg.getType();
       auto newType = typeConverter->convertType(oldType);
       arg.setType(newType);
-      if(newType != oldType) {
+      if (newType!=oldType) {
         rewriter.setInsertionPointToStart(&op.getBody().getBlocks().front());
-        auto m_op = typeConverter->materializeSourceConversion(rewriter,arg.getLoc(),oldType,arg);
+        auto m_op = typeConverter->materializeSourceConversion(rewriter, arg.getLoc(), oldType, arg);
         arg.replaceAllUsesExcept(m_op, m_op.getDefiningOp());
       }
     }
