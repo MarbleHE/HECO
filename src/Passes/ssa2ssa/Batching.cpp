@@ -139,7 +139,7 @@ Value resolveToSlot(int slot, Value v, IRRewriter &rewriter, std::string indent 
 }
 
 template<typename OpType>
-void batchArithmeticOperation(IRRewriter &rewriter, MLIRContext *context, OpType op) {
+LogicalResult batchArithmeticOperation(IRRewriter &rewriter, MLIRContext *context, OpType op) {
   // We care only about ops that return scalars, assuming others are already "SIMD-compatible"
   if (auto result_st = op.getType().template dyn_cast_or_null<fhe::SecretType>()) {
 
@@ -169,13 +169,17 @@ void batchArithmeticOperation(IRRewriter &rewriter, MLIRContext *context, OpType
               .create<fhe::RotateOp>(ex_op.getLoc(), ex_op.vector(), i - target_slot);
           rewriter.replaceOpWithIf(ex_op, {rotate_op}, [&](OpOperand &operand) { return operand.getOwner()==op; });
         } else if (auto c_op = (*it).template getDefiningOp<fhe::ConstOp>()) {
-          //TODO: SUPPORT CONSTANT OP IN BATCHING
+          emitError(op.getLoc(),
+                    "Encountered not yet supported constant op as defining op for secret operand while trying to batch.");
+          return failure();
         } else {
-          emitError(op.getLoc(), "Encountered unexpected secret operand while trying to batch.");
+          emitError(op.getLoc(), "Encountered unexpected defining op for secret operand while trying to batch.");
+          return failure();
         }
 
       } else {
         emitError(op.getLoc(), "Encountered unexpected non-secret operand while trying to batch.");
+        return failure();
       }
     }
 
@@ -194,6 +198,7 @@ void batchArithmeticOperation(IRRewriter &rewriter, MLIRContext *context, OpType
     // Finally, remove the original op
     rewriter.eraseOp(op);
   }
+  return success();
 }
 
 void BatchingPass::runOnOperation() {
@@ -205,14 +210,19 @@ void BatchingPass::runOnOperation() {
   //Translate Arithmetic Operations
   for (auto f: llvm::make_early_inc_range(block.getOps<FuncOp>())) {
     // We must translate in order of appearance for this to work, so we walk manually
-    f.walk([&](Operation *op) {
+    if (f.walk([&](Operation *op) {
       if (auto sub_op = llvm::dyn_cast_or_null<fhe::SubOp>(op))
-        batchArithmeticOperation<fhe::SubOp>(rewriter, &getContext(), sub_op);
+        if (batchArithmeticOperation<fhe::SubOp>(rewriter, &getContext(), sub_op).failed())
+          return WalkResult::interrupt();
       if (auto add_op = llvm::dyn_cast_or_null<fhe::AddOp>(op))
-        batchArithmeticOperation<fhe::AddOp>(rewriter, &getContext(), add_op);
+        if (batchArithmeticOperation<fhe::AddOp>(rewriter, &getContext(), add_op).failed())
+          return WalkResult::interrupt();
       if (auto mul_op = llvm::dyn_cast_or_null<fhe::MultiplyOp>(op))
-        batchArithmeticOperation<fhe::MultiplyOp>(rewriter, &getContext(), mul_op);
-    });
+        if (batchArithmeticOperation<fhe::MultiplyOp>(rewriter, &getContext(), mul_op).failed())
+          return WalkResult::interrupt();
+      return WalkResult(success());
+    }).wasInterrupted())
+      signalPassFailure();
   }
 
 }
