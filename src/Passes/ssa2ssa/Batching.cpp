@@ -20,14 +20,15 @@ void BatchingPass::getDependentDialects(mlir::DialectRegistry &registry) const {
                   mlir::tensor::TensorDialect>();
 }
 
-Value resolveToSlot(int slot, Value v, IRRewriter &rewriter) {
+Value resolveToSlot(int slot, Value v, IRRewriter &rewriter, std::string indent = "") {
   //TODO: This is the naive/dumb way, no checking if stuff has already happened!
+  
+  llvm::outs() << indent << "resolving slot for: ";
+  v.print(llvm::outs());
+  llvm::outs() << indent << "\n";
+
   auto op = v.getDefiningOp();
-
   if (op) {
-    //std::cout << "resolving slot for" << std::endl;
-    //op->dump();
-
     if (auto extract_op = llvm::dyn_cast<fhe::ExtractOp>(op)) {
       // if it's an extract op, simply rotate to bring to right slot
       int extracted_index = (int) extract_op.i().getLimitedValue(INT32_MAX);
@@ -38,14 +39,15 @@ Value resolveToSlot(int slot, Value v, IRRewriter &rewriter) {
                                                     extract_op.vector(),
                                                     rewriter.getIndexAttr(offset));
 
-      //extract_op.result().replaceAllUsesWith(new_val);
-      //std::cout << "resolved extract to" << std::endl;
-      //new_val.dump();
+      llvm::outs() << indent << "resolved extract to: ";
+      new_val.print(llvm::outs());
+      llvm::outs() << indent << "\n";
+
       return new_val;
     } else if (auto fhe_add = llvm::dyn_cast<fhe::AddOp>(op)) {
       llvm::SmallVector<Value, 4> new_summands;
       for (auto operand: fhe_add.x()) {
-        auto new_val = resolveToSlot(slot, operand, rewriter);
+        auto new_val = resolveToSlot(slot, operand, rewriter, indent + "  ");
         new_summands.push_back(new_val);
       }
       // and we also need to update the return type for FHE ops.
@@ -56,14 +58,16 @@ Value resolveToSlot(int slot, Value v, IRRewriter &rewriter) {
       fhe_add->replaceAllUsesWith(new_add);
       //TODO: THIS REQUIRES VERIFY-EACH-ZERO SO THE TYPE SYSTEM DOESN'T COMPLAIN TOO MUCH!
 
-      //std::cout << "resolved add to" << std::endl;
       auto new_val = *new_add->result_begin();
-      //new_val.dump();
+      llvm::outs() << indent << "resolved add to: ";
+      new_val.print(llvm::outs());
+      llvm::outs() << indent << "\n";
+
       return new_val;
     } else if (auto fhe_mul = llvm::dyn_cast<fhe::MultiplyOp>(op)) {
       llvm::SmallVector<Value, 4> new_summands;
       for (auto operand: fhe_mul.x()) {
-        auto new_val = resolveToSlot(slot, operand, rewriter);
+        auto new_val = resolveToSlot(slot, operand, rewriter, indent + "  ");
         new_summands.push_back(new_val);
       }
       // and we also need to update the return type for FHE ops.
@@ -74,15 +78,17 @@ Value resolveToSlot(int slot, Value v, IRRewriter &rewriter) {
       fhe_mul->replaceAllUsesWith(new_mul);
       //TODO: THIS REQUIRES VERIFY-EACH-ZERO SO THE TYPE SYSTEM DOESN'T COMPLAIN TOO MUCH!
 
-
-      //std::cout << "resolved mul to" << std::endl;
       auto new_val = *new_mul->result_begin();
-      //new_val.dump();
+
+      llvm::outs() << indent << "resolved mul to: ";
+      new_val.print(llvm::outs());
+      llvm::outs() << indent << "\n";
+
       return new_val;
     } else if (auto fhe_sub = llvm::dyn_cast<fhe::SubOp>(op)) {
       llvm::SmallVector<Value, 4> new_summands;
       for (auto operand: fhe_sub.x()) {
-        auto new_val = resolveToSlot(slot, operand, rewriter);
+        auto new_val = resolveToSlot(slot, operand, rewriter, indent + "  ");
         new_summands.push_back(new_val);
       }
       // and we also need to update the return type for FHE ops.
@@ -93,22 +99,40 @@ Value resolveToSlot(int slot, Value v, IRRewriter &rewriter) {
       fhe_sub->replaceAllUsesWith(new_sub);
       //TODO: THIS REQUIRES VERIFY-EACH-ZERO SO THE TYPE SYSTEM DOESN'T COMPLAIN TOO MUCH!
 
-      //std::cout << "resolved sub to" << std::endl;
       auto new_val = *new_sub->result_begin();
-      //new_val.dump();
+
+      llvm::outs() << indent << "resolved sub to: ";
+      new_val.print(llvm::outs());
+      llvm::outs() << indent << "\n";
+
       return new_val;
     } else if (auto fhe_rot = llvm::dyn_cast<fhe::RotateOp>(op)) {
       //already solved
+
+      llvm::outs() << indent << "resolved rotation to itself: ";
+      v.print(llvm::outs());
+      llvm::outs() << indent << "\n";
+
       return v;
     } else if (auto fhe_const = llvm::dyn_cast<fhe::ConstOp>(op)) {
       //TODO: What to do about constants?
+
+      llvm::outs() << indent << "resolved constant to itself: ";
+      v.print(llvm::outs());
+      llvm::outs() << indent << "\n";
+
       return v;
     } else {
       emitError(op->getLoc(), "UNEXPECTED OPERATION.");
       return v;
     }
   } else {
-    //ignore, not defined in this part of code (e.g., might be a function param)
+    //ignore, not defined in this part of code (e.g., might be a function param).
+
+    llvm::outs() << indent << "ignored: ";
+    v.print(llvm::outs());
+    llvm::outs() << indent << "\n";
+
     return v;
   }
 }
