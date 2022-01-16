@@ -81,6 +81,13 @@ nlohmann::json FunctionParameter::toJson() const {
   return j;
 }
 
+std::unique_ptr<FunctionParameter> FunctionParameter::fromJson(nlohmann::json j) {
+  auto param_type = Datatype(j["parameter_type"].get<std::string>());
+  auto identifier = j["identifier"].get<std::string>();
+
+  return std::make_unique<FunctionParameter>(param_type, identifier);
+}
+
 std::string FunctionParameter::toString(bool printChildren) const {
   return AbstractNode::toStringHelper(printChildren, {getParameterType().toString(), getIdentifier()});
 }

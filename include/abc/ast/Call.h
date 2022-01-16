@@ -67,6 +67,10 @@ class Call : public AbstractExpression {
   /// \return Vector of (references to) all non-null arguments
   std::vector<std::reference_wrapper<AbstractExpression>> getArguments();
 
+  /// Create a Call node from a nlohmann::json representation of this node.
+  /// \return unique_ptr to a new Call node
+  static std::unique_ptr<Call> fromJson(nlohmann::json j);
+
   ///////////////////////////////////////////////
   ////////// AbstractNode Interface /////////////
   ///////////////////////////////////////////////

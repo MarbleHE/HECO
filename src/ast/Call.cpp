@@ -1,5 +1,6 @@
 #include "abc/ast/Call.h"
 #include "abc/ast_utilities/IVisitor.h"
+#include "abc/ast_parser/Parser.h"
 
 /// Convenience typedef for conciseness
 typedef std::unique_ptr<AbstractExpression> exprPtr;
@@ -116,6 +117,16 @@ nlohmann::json Call::toJson() const {
                       {"arguments", argsJSON}
   };
   return j;
+}
+
+std::unique_ptr<Call> Call::fromJson(nlohmann::json j) {
+  auto identifier = j["identifier"].get<std::string>();
+  std::vector<std::unique_ptr<AbstractExpression>> args;
+  for (auto arg : j["arguments"]) {
+    args.emplace_back(Parser::parseJsonExpression(arg));
+  }
+
+  return std::make_unique<Call>(identifier, std::move(args));
 }
 
 std::string Call::toString(bool printChildren) const {

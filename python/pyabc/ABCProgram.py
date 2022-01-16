@@ -19,6 +19,7 @@ class ABCProgram:
         logging.basicConfig(level=self.log_level)
 
         self.builder = ABCJsonAstBuilder(log_level=log_level)
+        self.abc_ast_json = []
 
     #
     # Internal helper functions
@@ -43,36 +44,34 @@ class ABCProgram:
     #
     # External functions
     #
-    def add_main_fn(self, body : dict, args : dict, ret_vars : dict = {}, ret_constants : list = []) -> None:
-        """
-        Add a main function and its arguments to the program.
 
-        :param body: ABC AST as a JSON-equivalent dictionary
-        :param args: Argument dictionary of the format described in ABCVisitor._args_to_dict
-        :param ret_vars: A dictionary with variable names as keys and the position in the return vector as value
-        :param ret_constants: A list with constant return values. This must be at least as long to cover all gaps in ret_vars.
-                              Additional values will be appended to the return vector.
+    def add_fn(self, fn_json):
+        """
+        Add the json representation of an ABC AST function to self.abc_ast_json. This function will be added to a
+        module in MLIR.
+
+        :param fn_json: json representation of an ABC AST function
         """
 
-        self.main_fn         = body
-        self.main_args       = args
-        self.ret_vars        = ret_vars
-        self.ret_constants   = ret_constants
-
-        self.compile()
+        self.abc_ast_json.append(fn_json)
 
     def compile(self):
         """
-        Compile the main function to an executable ABC AST, i.e., parse the JSON representation to an ABC AST
-        but not yet specify input/output values.
+        Compile the function to MLIR (but not yet specify input/output values).
 
         :return: void, the compiled main function is stored internally in self.cpp_program.
         """
 
-        if self.main_fn:
-            self.cpp_program = ABCProgramWrapper(json.dumps(self.main_fn), json.dumps(self.main_args))
+        if len(self.abc_ast_json) > 0:
+            self.cpp_program = ABCProgramWrapper(json.dumps(self.abc_ast_json[0]))
+            for fn in self.abc_ast_json[1:]:
+                self.cpp_program.add_fn(json.dumps(fn))
+
+            # TODO: Printing MLIR for the moment, remove when we actually execute it.
+            self.cpp_program.dump()
         else:
-            logging.error("Set main function first, before trying to compile!")
+            logging.error("A Python program must first be parsed to a json representation of the ABC AST before it can "
+                          "be compiled")
             exit(1)
 
     def execute(self, *args, **kwargs):
@@ -149,21 +148,23 @@ class ABCProgram:
 
     def set_src(self, parent_frame):
         """
-        Stores the source information. The context source stores the code of the last ABCContext call, the src code
-        stores the source code of the entire file from which the ABCContext was called from.
+        Stores the source information. The context source stores the code of the functions on the call stack,
+        the src code stores the source code of the entire file from which the ABCContext was called from.
         """
 
         self.src_module = getmodule(parent_frame)
         self.src_context = getsource(parent_frame)
-        self.src_context_ast = parse(self.src_context)
+        self.src_call_stack_ast = parse(self.src_context)
 
         self.src_file_path = os.path.realpath(self.src_module.__file__)
         with open(self.src_file_path, "r") as src_fp:
             self.src_code = src_fp.read()
         self.src_code_ast = parse(self.src_code)
 
-    def to_cpp_string(self):
-        if not self.cpp_program:
-            logging.error("No CPP program available yet, call compile() first")
-            exit(1)
-        return self.cpp_program.to_cpp_string()
+    def set_curr_blocks(self, block):
+        """
+        Stores the source code blocks of the current ABCContext call.
+        """
+        self.src_curr_blocks = block
+        self.src_curr_blocks_asts = list(map(parse, self.src_curr_blocks))
+

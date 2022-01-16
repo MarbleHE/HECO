@@ -9,20 +9,6 @@
 namespace py = pybind11;
 using json = nlohmann::json;
 
-void abc_ast_to_mlir(std::unique_ptr<AbstractNode> programAst) {
-  mlir::MLIRContext ctx;
-  ctx.getOrLoadDialect<abc::ABCDialect>();
-
-  AbcAstToMlirVisitor v(ctx);
-  programAst->accept(v);
-
-  auto module = v.getModule();
-
-  // TODO (Miro): Rewrite the Python part to parse the entire content of the ABCContext with block, including the main
-  //  function (currently, this would break the exisiting ABC AST execution).
-  module.dump();
-}
-
 class AbstractValue {
   virtual ~AbstractValue() = default;
 };
@@ -39,52 +25,68 @@ class AbstractCiphertext {};
 class ABCProgramWrapper {
  private:
   std::unique_ptr<AbstractNode> programAst;
-  json programArgs;
+  mlir::ModuleOp module;
 
-  /// Helper function to extract literal (array) and push it to the results vector
-  template<class T>
-  static void extract_literal_result_vec(AbstractValue *cipherClearText,
-                                         std::vector<py::object> &result_vec, bool &success) {
+  // Those two are only attributes because otherwise the module will not be preserves, since it relies on the
+  // context variable to still exist.
+  mlir::MLIRContext ctx;
+  mlir::OpBuilder *builder;
 
-    if (auto cleartextInt = dynamic_cast<Cleartext<T> *>(cipherClearText)) {   // result is a cleartext
-      success = true;
-      auto cleartextData = py::cast(cleartextInt->getData());
-      result_vec.push_back(cleartextData);
-    }
-  }
-
-  static void extract_ciphertext_result_vec(AbstractValue *resultCiphertext,
-                                            std::vector<py::object> &result_vec, bool &success) {
-
-    if (auto ciphertext = dynamic_cast<AbstractCiphertext *>(resultCiphertext)) {
-      // TODO: we only support dummy ciphertext values. Currently, we cannot pass encrypted data to Python.
-      //  do key management and/or export the ciphertext to Python.
-      // TODO: there's only support for int64_t values in the dummy ciphertext factory
-      std::vector<int64_t> result;
-      //TODO: How to actually decryptCiphertext(*ciphertext, result);
-
-      result_vec.push_back(py::cast(result));
-      success = true;
-    } else {
-      success = false;
-    }
-  }
+      // TODO: adapt for extracting results from MLIR or remove entirely
+//  /// Helper function to extract literal (array) and push it to the results vector
+//  template<class T>
+//  static void extract_literal_result_vec(AbstractValue *cipherClearText,
+//                                         std::vector<py::object> &result_vec, bool &success) {
+//
+//    if (auto cleartextInt = dynamic_cast<Cleartext<T> *>(cipherClearText)) {   // result is a cleartext
+//      success = true;
+//      auto cleartextData = py::cast(cleartextInt->getData());
+//      result_vec.push_back(cleartextData);
+//    }
+//  }
+//
+//  static void extract_ciphertext_result_vec(AbstractValue *resultCiphertext,
+//                                            std::vector<py::object> &result_vec, bool &success) {
+//
+//    if (auto ciphertext = dynamic_cast<AbstractCiphertext *>(resultCiphertext)) {
+//      // TODO: we only support dummy ciphertext values. Currently, we cannot pass encrypted data to Python.
+//      //  do key management and/or export the ciphertext to Python.
+//      // TODO: there's only support for int64_t values in the dummy ciphertext factory
+//      std::vector<int64_t> result;
+//      //TODO: How to actually decryptCiphertext(*ciphertext, result);
+//
+//      result_vec.push_back(py::cast(result));
+//      success = true;
+//    } else {
+//      success = false;
+//    }
+//  }
 
  public:
   /// Create a program and pre-process the given JSON to a proper ABC AST.
   /// \param program JSON version of ABC AST
-  explicit ABCProgramWrapper(const std::string program, const std::string args) {
+  explicit ABCProgramWrapper(const std::string program) {
     programAst = Parser::parseJson(program);
 
+    ctx.getOrLoadDialect<abc::ABCDialect>();
+    builder = new mlir::OpBuilder(&ctx);
+    module = mlir::ModuleOp::create(builder->getUnknownLoc());
+
     // Translate ABC AST to MLIR
-    abc_ast_to_mlir(programAst->clone());
+    AbcAstToMlirVisitor v(ctx);
+    programAst->clone()->accept(v);
 
-    // TODO: where can we mark arguments as secret? The args argument has a boolen for those that should be secret, but do
-    //    we have to already mark them while/before parsing the AST or only when executing?
-    programArgs = json::parse(args);
+    module.getRegion().push_back(v.getBlockPtr());
+  }
 
-    // TODO: translate the entire function to mlir instead of separating arguments and program. The new compiler
-    //  will no longer require this.
+  void add_fn(std::string fn) {
+    auto fn_parsed = Parser::parseJson(fn);
+
+    // Translate ABC AST of fn to MLIR
+    AbcAstToMlirVisitor v(ctx);
+    fn_parsed->accept(v);
+
+    module.getRegion().push_back(v.getBlockPtr());
   }
 
   /// Execute the compiled program on the given inputs and outputs
@@ -122,13 +124,8 @@ class ABCProgramWrapper {
     return py::cast(result_vec);
   }
 
-  // TODO: remove once the switch to MLIR is done
-  /// Convert the ABC AST to CPP pseudo-code
-  std::string to_cpp_string() {
-    std::stringstream ss;
-    ProgramPrintVisitor v(ss);
-    programAst->accept(v);
-    return ss.str();
+  void dump() {
+    module.dump();
   }
 };
 
@@ -136,13 +133,12 @@ PYBIND11_MODULE(_abc_wrapper, m) {
   m.doc() = "Wrapper to export ABC's functionality to read and execute an AST from a JSON file.";
 
   py::class_<ABCProgramWrapper>(m, "ABCProgramWrapper")
-      .def(py::init<const std::string, const std::string>(),
-          "Create a program and pre-process the given JSON version of an ABC AST to the CPP version of it."\
-          "The second argument is a JSON dump of the arguments and their secret tainting: "\
-          "var_name = {\"opt\": Bool, \"value\": value, \"secret\": Bool}"\
-          "See _args_to_dict in ABCVisitor.")
+      .def(py::init<const std::string>(),
+          "Create a program and pre-process the given JSON version of an ABC AST to the CPP version of it.")
+      .def("add_fn", &ABCProgramWrapper::add_fn,
+           "Pre-process a json string of a function and add it.")
       .def("execute", &ABCProgramWrapper::execute,
            "Execute the compiled program on the given inputs and outputs")
-      .def("to_cpp_string", &ABCProgramWrapper::to_cpp_string,
-           "Convert the ABC AST to CPP pseudo-code");
+      .def("dump", &ABCProgramWrapper::dump,
+           "Print the parsed MLIR");
 }
