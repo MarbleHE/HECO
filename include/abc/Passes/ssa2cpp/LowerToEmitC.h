@@ -9,7 +9,7 @@ struct LowerToEmitCPass : public mlir::PassWrapper<LowerToEmitCPass, mlir::Opera
   void runOnOperation() override;
 
   mlir::StringRef getArgument() const final {
-    return "fhe2cpp";
+    return "fhe2emitc";
   }
 };
 

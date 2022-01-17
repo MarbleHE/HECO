@@ -10,7 +10,9 @@
 #include "mlir/IR/MLIRContext.h"
 #include "mlir/InitAllDialects.h"
 #include "mlir/InitAllPasses.h"
+#include "mlir/InitAllTranslations.h"
 #include "mlir/Pass/Pass.h"
+#include "mlir/Translation.h"
 #include "mlir/Pass/PassManager.h"
 #include "mlir/Support/FileUtilities.h"
 #include "mlir/Support/MlirOptMain.h"
@@ -36,28 +38,6 @@ using namespace mlir;
 using namespace abc;
 using namespace fhe;
 
-void pipelineBuilder(OpPassManager &manager) {
-  manager.addPass(std::make_unique<LowerASTtoSSAPass>());
-  manager.addPass(std::make_unique<UnrollLoopsPass>());
-  manager.addPass(std::make_unique<NaryPass>());
-
-  // Must canonicalize before Tensor2BatchedSecretPass, since it only handles constant indices in tensor.extract
-  manager.addPass(createCanonicalizerPass());
-  manager.addPass(std::make_unique<Tensor2BatchedSecretPass>());
-  manager.addPass(createCanonicalizerPass()); //necessary to remove redundant fhe.materialize
-  manager.addPass(createCSEPass()); //necessary to remove duplicate fhe.extract
-
-  manager.addPass(std::make_unique<BatchingPass>());
-  manager.addPass(createCanonicalizerPass());
-  manager.addPass(createCSEPass()); // otherwise, the internal batching pass has no "same origin" things to find!
-
-  manager.addPass(std::make_unique<InternalOperandBatchingPass>());
-  manager.addPass(createCanonicalizerPass());
-  manager.addPass(createCSEPass());
-
-  manager.addPass(std::make_unique<LowerToEmitCPass>());
-  manager.addPass(createCanonicalizerPass()); //necessary to remove redundant fhe.materialize
-}
 
 int main(int argc, char **argv) {
   mlir::MLIRContext context;
@@ -69,33 +49,22 @@ int main(int argc, char **argv) {
   registry.insert<AffineDialect>();
   registry.insert<tensor::TensorDialect>();
   registry.insert<arith::ArithmeticDialect>();
+  registry.insert<emitc::EmitCDialect>();
   context.loadDialect<ABCDialect>();
   context.loadDialect<FHEDialect>();
   context.loadDialect<AffineDialect>();
   context.loadDialect<tensor::TensorDialect>();
   context.loadDialect<arith::ArithmeticDialect>();
+  context.loadDialect<emitc::EmitCDialect>();
   // Uncomment the following to include *all* MLIR Core dialects, or selectively
   // include what you need like above. You only need to register dialects that
   // will be *parsed* by the tool, not the one generated
   // registerAllDialects(registry);
 
-  // Uncomment the following to make *all* MLIR core passes available.
-  // This is only useful for experimenting with the command line to compose
-  //registerAllPasses();
+  registerToCppTranslation();
 
-  registerCanonicalizerPass();
-  registerAffineLoopUnrollPass();
-  registerCSEPass();
-  PassRegistration<LowerASTtoSSAPass>();
-  PassRegistration<UnrollLoopsPass>();
-  PassRegistration<NaryPass>();
-  PassRegistration<Tensor2BatchedSecretPass>();
-  PassRegistration<BatchingPass>();
-  PassRegistration<InternalOperandBatchingPass>();
-  PassRegistration<LowerToEmitCPass>();
 
-  PassPipelineRegistration<>("full-pass", "Run all passes", pipelineBuilder);
+  return failed(
+      mlir::mlirTranslateMain(argc, argv, "ABC Translation Tool"));
 
-  return asMainReturnCode(
-      MlirOptMain(argc, argv, "ABC optimizer driver\n", registry));
 }

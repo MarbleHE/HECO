@@ -1,9 +1,10 @@
 get_property(dialect_libs GLOBAL PROPERTY MLIR_DIALECT_LIBS)
-get_property(conversion_libs GLOBAL PROPERTY MLIR_CONVERSION_LIBS)
+get_property(translation_libs GLOBAL PROPERTY MLIR_TRANSLATION_LIBS)
 set(LIBS
         ${dialect_libs}
-        ${conversion_libs}
+        ${translation_libs}
         MLIROptLib
+        MLIRABC
         MLIRFHE
         MLIRAnalysis
         MLIRCallInterfaces
@@ -15,15 +16,16 @@ set(LIBS
         MLIRMemRef
         MLIRParser
         MLIRPass
+        MLIRTargetCpp
+        MLIRTranslation
         MLIRSideEffectInterfaces
         MLIRTargetLLVMIRExport
         MLIRTransforms
         )
-add_llvm_executable(fhe-opt
-        ${PROJECT_SOURCE_DIR}/src/tools/fhe-opt/fhe-opt.cpp)
+add_llvm_executable(abc-translate
+        ${PROJECT_SOURCE_DIR}/src/tools/abc-translate/abc-translate.cpp)
 
-llvm_update_compile_flags(fhe-opt)
-target_link_libraries(fhe-opt PRIVATE ${LIBS})
+llvm_update_compile_flags(abc-translate)
+target_link_libraries(abc-translate PRIVATE ${LIBS})
 
-
-mlir_check_all_link_libraries(fhe-opt)
+mlir_check_all_link_libraries(abc-translate)
