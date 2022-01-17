@@ -2,13 +2,21 @@
 
 The current Python Frontend is an intermediate state of transitioning from executing an ABC AST to translating the Python code to an ABC dialect in MLIR.
 
+Currently, we only support Python `>= 3.9`
+
+## Installation
+
+To install `pyabc` locally for testing purposes, run the following command to link the `pyabc` package in your local Python installation to the build directory of this project. The package is automatically the latest version (also when you recompile this project).
+```bash
+python3 -m pip install -e cmake-build-debug/python
+```
+
 ## Limitations
 
 Currently, the frontend does not:
 - Execute any code (neither ABC AST nor the MLIR Dialect)
 - Does not support all Python syntax elements (an unsupported syntax error is thrown)
-- Does not handle arguments to the main function
-- Does not parse functions other than `main` in `ABCContext`, and only the content of `main`.
+- Argument type (annotations) are not considered yet. All parameters still have type "void"
 
 ## Getting MLIR for Python Frontend Code
 
@@ -18,29 +26,9 @@ The Frontend currently translates the content of the `main` function in the `ABC
 
 ### Example
 
-Add the following Python code to `cmake-build-debug/python/example.py`:
-```Python
-from pyabc import *
-import logging
-
-p = ABCProgram(logging.DEBUG)
-
-with ABCContext(p, logging.DEBUG):
-    def main():
-        a = 1.0
-        if a * a < a:
-            return 20
-
-
-        s = 0
-        for i in range(10):
-            s += i
-        return s
-```
-
 Execute the python code:
 ```bash
-python3 cmake-build-debug/python/test.py
+python3 python/examples/example_basic.py
 ```
 
 Expected output:
@@ -135,3 +123,46 @@ module  {
 ```
 
 Remark: the for loop translation is this complicated, because it has to translate the Python AST object for `range(10)`, which contains lower and upper limits, as well as arbitrary step sizes (positive as well as negative). There is no standard way to specify a "C++-style" for loop in Python.
+
+### Example (function call)
+
+Execute the python code:
+```bash
+python3 python/examples/example_fn_call.py
+```
+
+Expected output:
+```
+module  {
+^bb1:  // no predecessors
+  abc.function none @add  {
+    abc.function_parameter none @i
+  ^bb1:  // no predecessors
+    abc.function_parameter none @j
+  },  {
+    abc.block  {
+      abc.return  {
+        abc.binary_expression "+"  {
+          abc.variable @i
+        },  {
+          abc.variable @j
+        }
+      }
+    }
+  }
+^bb2:  // no predecessors
+  abc.function none @main  {
+    abc.function_parameter none @a
+  },  {
+    abc.block  {
+      abc.return  {
+        abc.call  {
+          abc.variable @a
+        ^bb1:  // no predecessors
+          abc.literal_int 2 : i64
+        } attributes {name = "add"}
+      }
+    }
+  }
+}
+```

@@ -100,6 +100,10 @@ class Function : public AbstractStatement {
   /// \throws std::runtime_error if no body exists
   Block &getBody();
 
+  /// Create a Function node from a nlohmann::json representation of this node.
+  /// \return unique_ptr to a new Function node
+  static std::unique_ptr<Function> fromJson(nlohmann::json j);
+
   ///////////////////////////////////////////////
   ////////// AbstractNode Interface /////////////
   ///////////////////////////////////////////////

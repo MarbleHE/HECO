@@ -6,6 +6,7 @@ std::string NodeUtils::enumToString(const NodeType type) {
   std::unordered_map<NodeType, std::string> typeToString = {
       {NodeType::NodeTypeAssignment, "Assignment"},
       {NodeType::NodeTypeBlock, "Block"},
+      {NodeType::NodeTypeFunction, "Function"},
       {NodeType::NodeTypeFor, "For"},
       {NodeType::NodeTypeIf, "If"},
       {NodeType::NodeTypeReturn, "Return"},
@@ -43,6 +44,7 @@ bool NodeUtils::isAbstractStatement(const std::string s) {
   switch (NodeUtils::stringToEnum(s)) {
     case NodeTypeAssignment:
     case NodeTypeBlock:
+    case NodeTypeFunction:
     case NodeTypeFor:
     case NodeTypeIf:
     case NodeTypeReturn:
