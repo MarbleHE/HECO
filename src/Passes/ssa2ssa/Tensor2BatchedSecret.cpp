@@ -140,7 +140,7 @@ void Tensor2BatchedSecretPass::runOnOperation() {
         if (auto st = tt.getElementType().dyn_cast_or_null<fhe::SecretType>())
           return llvm::Optional<Value>(builder.create<fhe::MaterializeOp>(loc, bst, vs));
     }
-    return llvm::Optional<Value>(); // would instead like to signal NO other conversions can be tried
+    return llvm::Optional<Value>(llvm::None); // would instead like to signal NO other conversions can be tried
   });
   type_converter.addArgumentMaterialization([&](OpBuilder &builder, Type t, ValueRange vs, Location loc) {
     if (auto bst = t.dyn_cast_or_null<fhe::BatchedSecretType>()) {
@@ -150,7 +150,7 @@ void Tensor2BatchedSecretPass::runOnOperation() {
         if (auto st = tt.getElementType().dyn_cast_or_null<fhe::SecretType>())
           return llvm::Optional<Value>(builder.create<fhe::MaterializeOp>(loc, bst, vs));
     }
-    return llvm::Optional<Value>(); // would instead like to signal NO other conversions can be tried
+    return llvm::Optional<Value>(llvm::None); // would instead like to signal NO other conversions can be tried
   });
   type_converter.addSourceMaterialization([&](OpBuilder &builder, Type t, ValueRange vs, Location loc) {
     if (auto tt = t.dyn_cast_or_null<TensorType>()) {
@@ -160,7 +160,7 @@ void Tensor2BatchedSecretPass::runOnOperation() {
         if (tt.getElementType()==bst.getCorrespondingSecretType())
           return llvm::Optional<Value>(builder.create<fhe::MaterializeOp>(loc, tt, vs));
     }
-    return llvm::Optional<Value>(); // would instead like to signal NO other conversions can be tried
+    return llvm::Optional<Value>(llvm::None); // would instead like to signal NO other conversions can be tried
   });
 
   ConversionTarget target(getContext());
@@ -192,6 +192,7 @@ void Tensor2BatchedSecretPass::runOnOperation() {
   mlir::RewritePatternSet patterns(&getContext());
   patterns.add<
       ExtractPattern,
+      InsertPattern,
       FunctionPattern
   >(type_converter, patterns.getContext());
 
