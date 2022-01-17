@@ -141,6 +141,7 @@ def FHE_MultiplyOp : FHE_Op<"multiply", [Commutative, DeclareOpInterfaceMethods<
     AnyTypeOf<[Secret,BatchedSecret]>:$output
   );
 
+  let hasFolder = 1;
 }
 
 def FHE_AddOp : FHE_Op<"add", [Commutative, DeclareOpInterfaceMethods<InferTypeOpInterface>]> {
@@ -156,6 +157,8 @@ def FHE_AddOp : FHE_Op<"add", [Commutative, DeclareOpInterfaceMethods<InferTypeO
     AnyTypeOf<[Secret,BatchedSecret]>:$output
   );
 
+  let hasFolder = 1;
+
 }
 
 def FHE_SubOp : FHE_Op<"sub", [DeclareOpInterfaceMethods<InferTypeOpInterface>]> {
@@ -168,6 +171,8 @@ def FHE_SubOp : FHE_Op<"sub", [DeclareOpInterfaceMethods<InferTypeOpInterface>]>
   let results = (outs
     AnyTypeOf<[Secret,BatchedSecret]>:$output
   );
+
+  let hasFolder = 1;
 
 }
 

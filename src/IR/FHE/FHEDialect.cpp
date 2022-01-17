@@ -181,6 +181,102 @@ void fhe::ConstOp::getAsmResultNames(
   return {};
 }
 
+::mlir::OpFoldResult fhe::AddOp::fold(::llvm::ArrayRef<::mlir::Attribute> operands) {
+  auto neutral_element = 0;
+  SmallVector<Value> new_operands;
+  for (auto v: x()) {
+    bool omit = false;
+    if (auto cst_op = v.getDefiningOp<fhe::ConstOp>()) {
+      if (auto dea = cst_op.value().dyn_cast_or_null<DenseElementsAttr>()) {
+        if (dea.size()==1) {
+          if (dea.getElementType().isIntOrIndex()) {
+            if (dea.value_begin<const IntegerAttr>()->getInt()==neutral_element)
+              omit = true;
+          } else if (dea.getElementType().isIntOrFloat()) {
+            //because we've already excluded IntOrIndex, it must be float
+            if (dea.value_begin<const FloatAttr>()->getValueAsDouble()==neutral_element)
+              omit = true;
+          }
+        }
+      } else if (auto ia = cst_op.value().dyn_cast_or_null<IntegerAttr>()) {
+        if (ia.getInt()==neutral_element)
+          omit = true;
+      } else if (auto fa = cst_op.value().dyn_cast_or_null<FloatAttr>()) {
+        if (fa.getValueAsDouble()==neutral_element)
+          omit = true;
+      }
+    }
+    if (!omit)
+      new_operands.push_back(v);
+  }
+  xMutable().assign(new_operands);
+  return getResult();
+}
+
+::mlir::OpFoldResult fhe::SubOp::fold(::llvm::ArrayRef<::mlir::Attribute> operands) {
+  auto neutral_element = 0;
+  SmallVector<Value> new_operands;
+  for (auto v: x()) {
+    bool omit = false;
+    if (auto cst_op = v.getDefiningOp<fhe::ConstOp>()) {
+      if (auto dea = cst_op.value().dyn_cast_or_null<DenseElementsAttr>()) {
+        if (dea.size()==1) {
+          if (dea.getElementType().isIntOrIndex()) {
+            if (dea.value_begin<const IntegerAttr>()->getInt()==neutral_element)
+              omit = true;
+          } else if (dea.getElementType().isIntOrFloat()) {
+            //because we've already excluded IntOrIndex, it must be float
+            if (dea.value_begin<const FloatAttr>()->getValueAsDouble()==neutral_element)
+              omit = true;
+          }
+        }
+      } else if (auto ia = cst_op.value().dyn_cast_or_null<IntegerAttr>()) {
+        if (ia.getInt()==neutral_element)
+          omit = true;
+      } else if (auto fa = cst_op.value().dyn_cast_or_null<FloatAttr>()) {
+        if (fa.getValueAsDouble()==neutral_element)
+          omit = true;
+      }
+    }
+    if (!omit)
+      new_operands.push_back(v);
+  }
+  xMutable().assign(new_operands);
+  return getResult();
+}
+
+::mlir::OpFoldResult fhe::MultiplyOp::fold(::llvm::ArrayRef<::mlir::Attribute> operands) {
+  auto neutral_element = 1;
+  SmallVector<Value> new_operands;
+  for (auto v: x()) {
+    bool omit = false;
+    if (auto cst_op = v.getDefiningOp<fhe::ConstOp>()) {
+      if (auto dea = cst_op.value().dyn_cast_or_null<DenseElementsAttr>()) {
+        if (dea.size()==1) {
+          if (dea.getElementType().isIntOrIndex()) {
+            if (dea.value_begin<const IntegerAttr>()->getInt()==neutral_element)
+              omit = true;
+          } else if (dea.getElementType().isIntOrFloat()) {
+            //because we've already excluded IntOrIndex, it must be float
+            if (dea.value_begin<const FloatAttr>()->getValueAsDouble()==neutral_element)
+              omit = true;
+          }
+        }
+      } else if (auto ia = cst_op.value().dyn_cast_or_null<IntegerAttr>()) {
+        if (ia.getInt()==neutral_element)
+          omit = true;
+      } else if (auto fa = cst_op.value().dyn_cast_or_null<FloatAttr>()) {
+        if (fa.getValueAsDouble()==neutral_element)
+          omit = true;
+      }
+    }
+    if (!omit)
+      new_operands.push_back(v);
+  }
+  xMutable().assign(new_operands);
+  return getResult();
+}
+
 //===----------------------------------------------------------------------===//
 // FHE dialect definitions
 //===----------------------------------------------------------------------===//
