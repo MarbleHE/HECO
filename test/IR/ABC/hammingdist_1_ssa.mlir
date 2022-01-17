@@ -1,4 +1,4 @@
-// RUN: abc-opt -unroll-loops --canonicalize < %s | FileCheck %s
+// RUN: abc-opt -unroll-loops --canonicalize --cse < %s | FileCheck %s
 module  {
   func private @encryptedHammingDistance(%arg0: tensor<4x!fhe.secret<f64>>, %arg1: tensor<4x!fhe.secret<f64>>) -> !fhe.secret<f64> {
     %c64 = arith.constant 64 : index
