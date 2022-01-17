@@ -142,7 +142,7 @@ class EmitCArithmeticPattern final : public OpConversionPattern<OpType> {
     if (std::is_same<OpType, fhe::MultiplyOp>())
       op_str = "multiply";
 
-    if (op.getNumOperands() >= 2)
+    if (op.getNumOperands() > 2)
       op_str = op_str + "_many";
 
     rewriter.replaceOpWithNewOp<emitc::CallOp>(op, TypeRange(dstType),
