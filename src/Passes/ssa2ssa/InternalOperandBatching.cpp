@@ -83,8 +83,10 @@ LogicalResult internalBatchArithmeticOperation(IRRewriter &rewriter, MLIRContext
     }
 
     for (auto el: originMap) {
+      auto origin = el.first;
+
       llvm::outs() << "(potentially) collapsing uses of: ";
-      el.first.print(llvm::outs());
+      origin.print(llvm::outs());
       llvm::outs() << '\n';
 
       auto uses = el.second;
@@ -97,6 +99,7 @@ LogicalResult internalBatchArithmeticOperation(IRRewriter &rewriter, MLIRContext
       for (size_t i = 1; i < uses.size(); ++i) {
         contiguous = contiguous && uses[i - 1].index + 1==uses[i].index;
       }
+
       if (contiguous) {
         llvm::outs() << "trying to batch contiguous uses of : ";
         el.first.print(llvm::outs());
@@ -106,7 +109,35 @@ LogicalResult internalBatchArithmeticOperation(IRRewriter &rewriter, MLIRContext
         auto n = uses[uses.size() - 1].index + 1;
         auto k = std::log2(n);
         if (k==(int) k) {
+          rewriter.setInsertionPoint(op);
+          Value prev = origin;
+          Value added;
+          for (int i = n/2; i > 0; i /= 2) {
+            auto rotated_down = rewriter.template create<fhe::RotateOp>(op.getLoc(), prev, -i);
+            added = rewriter.template create<fhe::AddOp>(op.getLoc(), ValueRange({prev, rotated_down}));
+            prev = added;
+          }
 
+          // Now we need to replace ONE OF the operands that have this origin with "added" and REMOVE THE REST
+          auto old_range = op.x();
+          SmallVector<Value> new_range = {};
+          for (auto v: old_range) {
+            bool remove = false;
+            for (auto u: uses) {
+              if (v==u.occurrence)  // we need to remove this
+                remove = true;
+            }
+            if (!remove)
+              new_range.push_back(v);
+          }
+          new_range.push_back(added);
+
+          //TODO: This is probably all kinds of unsafe if there are multiple origins that are being replaced in the same op
+          op.xMutable().assign(new_range);
+
+          //llvm::outs() << "current function: ";
+          //op->getParentOp()->print(llvm::outs());
+          //llvm::outs() << '\n';
         } else {
           llvm::outs() << "Ignoring anyway because its not a power of two.\n";
         }
@@ -118,12 +149,6 @@ LogicalResult internalBatchArithmeticOperation(IRRewriter &rewriter, MLIRContext
       }
 
     }
-
-
-
-    //llvm::outs() << "current function: ";
-    //op->getParentOp()->print(llvm::outs());
-    //llvm::outs() << '\n';
 
   }
   return
