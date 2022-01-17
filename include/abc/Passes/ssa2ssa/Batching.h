@@ -1,5 +1,5 @@
-#ifndef AST_OPTIMIZER_MLIR_ABC_OPT_BATCHING_H_
-#define AST_OPTIMIZER_MLIR_ABC_OPT_BATCHING_H_
+#ifndef ABC_PASSES_SSA2SSA_BATCHING_H_
+#define ABC_PASSES_SSA2SSA_BATCHING_H_
 
 #include "mlir/Pass/Pass.h"
 
@@ -13,4 +13,4 @@ struct BatchingPass : public mlir::PassWrapper<BatchingPass, mlir::OperationPass
   }
 };
 
-#endif //AST_OPTIMIZER_MLIR_ABC_OPT_BATCHING_H_
+#endif //ABC_PASSES_SSA2SSA_BATCHING_H_

@@ -28,6 +28,7 @@
 #include "abc/Passes/ssa2ssa/Tensor2BatchedSecret.h"
 #include "abc/Passes/ssa2ssa/Batching.h"
 #include "abc/Passes/ssa2ssa/InternalOperandBatching.h"
+#include "abc/Passes/ssa2cpp/LowerToEmitC.h"
 
 #include <iostream>
 
@@ -53,6 +54,8 @@ void pipelineBuilder(OpPassManager &manager) {
   manager.addPass(std::make_unique<InternalOperandBatchingPass>());
   manager.addPass(createCanonicalizerPass());
   manager.addPass(createCSEPass());
+
+  manager.addPass(std::make_unique<LowerToEmitCPass>());
 }
 
 int main(int argc, char **argv) {
@@ -82,6 +85,7 @@ int main(int argc, char **argv) {
   PassRegistration<Tensor2BatchedSecretPass>();
   PassRegistration<BatchingPass>();
   PassRegistration<InternalOperandBatchingPass>();
+  PassRegistration<LowerToEmitCPass>();
 
   PassPipelineRegistration<>("full-pass", "Run all passes", pipelineBuilder);
 
