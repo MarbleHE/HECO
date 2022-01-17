@@ -56,6 +56,7 @@ void pipelineBuilder(OpPassManager &manager) {
   manager.addPass(createCSEPass());
 
   manager.addPass(std::make_unique<LowerToEmitCPass>());
+  manager.addPass(createCanonicalizerPass());
 }
 
 int main(int argc, char **argv) {

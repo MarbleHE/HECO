@@ -166,7 +166,7 @@ void fhe::ConstOp::getAsmResultNames(
 }
 
 ::mlir::LogicalResult fhe::MaterializeOp::canonicalize(MaterializeOp op, ::mlir::PatternRewriter &rewriter) {
-  
+
   if (auto ot = op.getType().dyn_cast_or_null<emitc::OpaqueType>()) {
     if (ot.getValue()=="seal::Ciphertext") {
       if (auto ex_op = op.input().getDefiningOp<fhe::ExtractOp>()) {
