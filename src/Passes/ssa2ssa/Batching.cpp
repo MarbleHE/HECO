@@ -1,3 +1,4 @@
+#include <queue>
 #include "mlir/Transforms/DialectConversion.h"
 #include "mlir/Dialect/Affine/IR/AffineOps.h"
 #include "mlir/Dialect/SCF/SCF.h"
@@ -28,14 +29,67 @@ LogicalResult batchArithmeticOperation(IRRewriter &rewriter, MLIRContext *contex
 
     /// Target Slot (-1 => no target slot required)
     int target_slot = -1;
+
+    // TODO: the code below does the "wrong" thing for hamming distance, because it isn't aware that the add
+    //  at the end doesn't actually have any slot preferences. We might be able to fix that during internal-batching
+    //  but that sounds like a lot of work/materializing/inserting things.
+    //  This issue might be somehow related to relative vs absolute offsets?
+    // Find a target slot, if it exists, by iterating through users until we wind either extract, insert or scalar return
+    //std::queue<Operation *> users;
+    //for (auto u: op->getUsers()) {
+    //  users.push(u);
+    //}
+    //while (!users.empty()) {
+    //  auto u = users.front();
+    //  users.pop();
+    //  if (auto ex_op = dyn_cast_or_null<fhe::ExtractOp>(u)) {
+    //    // We later want this value to be in slot i??
+    //    target_slot = ex_op.i().getLimitedValue(INT32_MAX);
+    //    break;
+    //  } else if (auto ins_op = dyn_cast_or_null<fhe::InsertOp>(u)) {
+    //    target_slot = ins_op.i().getLimitedValue(INT32_MAX);
+    //    break;
+    //  } else if (auto ret_op = dyn_cast_or_null<ReturnOp>(u)) {
+    //    if (ret_op->getOperandTypes().front().template isa<fhe::SecretType>()) {
+    //      // we eventually want this as a scalar, which means slot 0
+    //      target_slot = 0;
+    //      break;
+    //    }
+    //  }
+    //  for (auto uu: u->getUsers()) {
+    //    users.push(uu);
+    //  }
+    //}
+
+    // TODO: as a basic fix, we only search one level deep for now.
+    //  This prevents the issue mentioned above but of course might prevent optimizations for complex code
+    for (auto u: op->getUsers()) {
+      if (auto ex_op = dyn_cast_or_null<fhe::ExtractOp>(u)) {
+        // We later want this value to be in slot i??
+        target_slot = ex_op.i().getLimitedValue(INT32_MAX);
+        break;
+      } else if (auto ins_op = dyn_cast_or_null<fhe::InsertOp>(u)) {
+        target_slot = ins_op.i().getLimitedValue(INT32_MAX);
+        break;
+      } else if (auto ret_op = dyn_cast_or_null<ReturnOp>(u)) {
+        if (ret_op->getOperandTypes().front().template isa<fhe::SecretType>())
+          // we eventually want this as a scalar, which means slot 0
+          target_slot = 0;
+        break;
+      }
+    }
+
+
     // instead of just picking the first target slot we see, we check if we can find 0
-    for (auto it = op->operand_begin(); it!=op.operand_end(); ++it) {
-      if (auto st = (*it).getType().template dyn_cast_or_null<fhe::SecretType>()) {
-        // scalar-type input that needs to be converted
-        if (auto ex_op = (*it).template getDefiningOp<fhe::ExtractOp>()) {
-          auto i = (int) ex_op.i().getLimitedValue();
-          if (target_slot==-1 || i==0)
-            target_slot = i;
+    if (target_slot==-1) {
+      for (auto it = op->operand_begin(); it!=op.operand_end(); ++it) {
+        if (auto st = (*it).getType().template dyn_cast_or_null<fhe::SecretType>()) {
+          // scalar-type input that needs to be converted
+          if (auto ex_op = (*it).template getDefiningOp<fhe::ExtractOp>()) {
+            auto i = (int) ex_op.i().getLimitedValue();
+            if (target_slot==-1 || i==0)
+              target_slot = i;
+          }
         }
       }
     }
