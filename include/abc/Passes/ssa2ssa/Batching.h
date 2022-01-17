@@ -3,7 +3,6 @@
 
 #include "mlir/Pass/Pass.h"
 
-/// Lowering from the AST-style ABC dialect to SSA representation
 struct BatchingPass : public mlir::PassWrapper<BatchingPass, mlir::OperationPass<mlir::ModuleOp>> {
   void getDependentDialects(mlir::DialectRegistry &registry) const override;
 

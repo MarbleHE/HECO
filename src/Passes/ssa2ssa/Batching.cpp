@@ -1,7 +1,3 @@
-#include <iostream>
-#include <memory>
-#include <unordered_map>
-
 #include "mlir/Transforms/DialectConversion.h"
 #include "mlir/Dialect/Affine/IR/AffineOps.h"
 #include "mlir/Dialect/SCF/SCF.h"
@@ -26,24 +22,9 @@ LogicalResult batchArithmeticOperation(IRRewriter &rewriter, MLIRContext *contex
   // We care only about ops that return scalars, assuming others are already "SIMD-compatible"
   if (auto result_st = op.getType().template dyn_cast_or_null<fhe::SecretType>()) {
 
-    //llvm::outs() << "updating ";
-    //op.print(llvm::outs());
-    //llvm::outs() << "\n";
-
 
     /// Target Slot (-1 => no target slot required)
     int target_slot = -1;
-
-//    /// List of used (Batched type) operand inputs' origins and the indices accessed in each one
-//    typedef llvm::SmallMapVector<Value, std::vector<int>, 1> OriginMap;
-//    OriginMap originMap;
-//
-//    auto addOriginUse = [&](Value o, int index) {
-//      if (originMap.find(o)!=originMap.end())
-//        originMap.find(o)->second.push_back(index);
-//      else
-//        originMap.insert({o, {index}});
-//    };
 
     // new op with batched result type
     auto bst = fhe::BatchedSecretType::get(context, result_st.getPlaintextType());
@@ -51,8 +32,7 @@ LogicalResult batchArithmeticOperation(IRRewriter &rewriter, MLIRContext *contex
     auto new_op = rewriter.create<OpType>(op.getLoc(), bst, op->getOperands());
     rewriter.setInsertionPoint(new_op); //otherwise, any operand transforming ops will be AFTER the new op
 
-    // convert all operands from scalar to batched and collect origin information
-    // CAREFUL: THIS ITERATES OVER THE ACTUAL OPERAND VALUES, WHILE WE NEED TO CHECK TYPE BASED ON WHAT THEY USED TO BE?
+    // convert all operands from scalar to batched
     for (auto it = new_op->operand_begin(); it!=new_op.operand_end(); ++it) {
 
       if (auto bst = (*it).getType().template dyn_cast_or_null<fhe::BatchedSecretType>()) {
@@ -67,9 +47,6 @@ LogicalResult batchArithmeticOperation(IRRewriter &rewriter, MLIRContext *contex
           auto rotate_op = rewriter
               .create<fhe::RotateOp>(ex_op.getLoc(), ex_op.vector(), i - target_slot);
           rewriter.replaceOpWithIf(ex_op, {rotate_op}, [&](OpOperand &operand) { return operand.getOwner()==new_op; });
-          //llvm::outs() << "rewritten operand in op: ";
-          //new_op.print(llvm::outs());
-          //llvm::outs() << '\n';
         } else if (auto c_op = (*it).template getDefiningOp<fhe::ConstOp>()) {
           // Constant Ops don't take part in resolution?
           ShapedType shapedType = RankedTensorType::get({1}, c_op.value().getType());
@@ -91,16 +68,6 @@ LogicalResult batchArithmeticOperation(IRRewriter &rewriter, MLIRContext *contex
       }
     }
 
-//    for (auto el: originMap) {
-//      llvm::outs() << "uses of: ";
-//      el.first.print(llvm::outs());
-//      llvm::outs() << " : ";
-//      for (auto i: el.second) {
-//        llvm::outs() << i << ", ";
-//      }
-//      llvm::outs() << '\n';
-//    }
-
     // Now create a scalar again by creating an extract, preserving type constraints
     rewriter.setInsertionPointAfter(new_op);
     auto res_ex_op =
@@ -112,11 +79,6 @@ LogicalResult batchArithmeticOperation(IRRewriter &rewriter, MLIRContext *contex
 
     // Finally, remove the original op
     rewriter.eraseOp(op);
-
-    //llvm::outs() << "current function: ";
-    //new_op->getParentOp()->print(llvm::outs());
-    //llvm::outs() << '\n';
-
   }
   return success();
 }

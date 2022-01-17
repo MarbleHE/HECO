@@ -22,3 +22,17 @@ module  {
     return %16 : !fhe.secret<f64>
   }
 }
+
+// CHECK: module  {
+// CHECK:   func private @encryptedHammingDistance(%arg0: !fhe.batched_secret<f64>, %arg1: !fhe.batched_secret<f64>) -> !fhe.secret<f64> {
+// CHECK:     %0 = fhe.sub(%arg0, %arg1) : (!fhe.batched_secret<f64>, !fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
+// CHECK:     %1 = fhe.multiply(%0, %0) : (!fhe.batched_secret<f64>, !fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
+// CHECK:     %2 = fhe.rotate(%1) {i = -1 : si32} : (!fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
+// CHECK:     %3 = fhe.rotate(%1) {i = -2 : si32} : (!fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
+// CHECK:     %4 = fhe.rotate(%1) {i = -3 : si32} : (!fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
+// CHECK:     %cst = fhe.constant dense<0.000000e+00> : tensor<1xf64>
+// CHECK:     %5 = fhe.add(%1, %2, %3, %4, %cst) : (!fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
+// CHECK:     %6 = fhe.extract %5[3] : <f64>
+// CHECK:     return %6 : !fhe.secret<f64>
+// CHECK:   }
+// CHECK: }

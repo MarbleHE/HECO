@@ -27,6 +27,7 @@
 #include "abc/Passes/ssa2ssa/Nary.h"
 #include "abc/Passes/ssa2ssa/Tensor2BatchedSecret.h"
 #include "abc/Passes/ssa2ssa/Batching.h"
+#include "abc/Passes/ssa2ssa/InternalOperandBatching.h"
 
 #include <iostream>
 
@@ -76,6 +77,7 @@ int main(int argc, char **argv) {
   PassRegistration<NaryPass>();
   PassRegistration<Tensor2BatchedSecretPass>();
   PassRegistration<BatchingPass>();
+  PassRegistration<InternalOperandBatchingPass>();
 
   PassPipelineRegistration<>("full-pass", "Run all passes", pipelineBuilder);
 
