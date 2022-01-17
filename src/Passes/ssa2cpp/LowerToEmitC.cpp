@@ -56,6 +56,105 @@ class EmitCFunctionPattern final : public OpConversionPattern<FuncOp> {
   }
 };
 
+class EmitCRotatePattern final : public OpConversionPattern<fhe::RotateOp> {
+ public:
+  using OpConversionPattern<fhe::RotateOp>::OpConversionPattern;
+
+  LogicalResult
+  matchAndRewrite(fhe::RotateOp op, typename fhe::RotateOp::Adaptor adaptor,
+                  ConversionPatternRewriter &rewriter) const override {
+
+    rewriter.setInsertionPoint(op);
+
+    auto dstType = typeConverter->convertType(op.getType());
+    if (!dstType)
+      return failure();
+
+    // Materialize the operands if necessary
+    Value x = op.x();
+    auto xDstType = typeConverter->convertType(x.getType());
+    if (!xDstType)
+      return failure();
+    if (x.getType()!=xDstType) {
+      auto new_operand = typeConverter->materializeTargetConversion(rewriter,
+                                                                    op.getLoc(),
+                                                                    xDstType,
+                                                                    x);
+      x = new_operand;
+    }
+
+    // build a series of calls to our custom evaluator wrapper (for now, because it's faster than dealing with seal's API)
+    auto aa = ArrayAttr::get(getContext(), {IntegerAttr::get(IndexType::get(getContext()),
+                                                             0), // means "first operand"
+                                            rewriter.getSI32IntegerAttr(op.i())});
+
+    rewriter.replaceOpWithNewOp<emitc::CallOp>(op, TypeRange(dstType),
+                                               llvm::StringRef("evaluator.rotate"),
+                                               aa,
+                                               ArrayAttr(),
+                                               ValueRange(x));
+
+    return success();
+  }
+};
+
+template<typename OpType>
+class EmitCArithmeticPattern final : public OpConversionPattern<OpType> {
+ protected:
+  using OpConversionPattern<OpType>::typeConverter;
+ public:
+  using OpConversionPattern<OpType>::OpConversionPattern;
+
+  LogicalResult
+  matchAndRewrite(OpType op, typename OpType::Adaptor adaptor,
+                  ConversionPatternRewriter &rewriter) const override {
+
+    rewriter.setInsertionPoint(op);
+
+    auto dstType = typeConverter->convertType(op.getType());
+    if (!dstType)
+      return failure();
+
+    // Materialize the operands where necessary
+    llvm::SmallVector<Value> materialized_operands;
+    for (Value o: op.getOperands()) {
+      auto operandDstType = typeConverter->convertType(o.getType());
+      if (!operandDstType)
+        return failure();
+      if (o.getType()!=operandDstType) {
+
+        auto new_operand = typeConverter->materializeTargetConversion(rewriter,
+                                                                      op.getLoc(),
+                                                                      operandDstType,
+                                                                      o);
+        materialized_operands.push_back(new_operand);
+      } else {
+        materialized_operands.push_back(o);
+      }
+    }
+
+    // build a series of calls to our custom evaluator wrapper (for now, because it's faster than dealing with seal's API)
+    std::string op_str;
+    if (std::is_same<OpType, fhe::SubOp>())
+      op_str = "sub";
+    if (std::is_same<OpType, fhe::AddOp>())
+      op_str = "add";
+    if (std::is_same<OpType, fhe::MultiplyOp>())
+      op_str = "multiply";
+
+    if (op.getNumOperands() >= 2)
+      op_str = op_str + "_many";
+
+    rewriter.replaceOpWithNewOp<emitc::CallOp>(op, TypeRange(dstType),
+                                               llvm::StringRef("evaluator." + op_str),
+                                               ArrayAttr(),
+                                               ArrayAttr(),
+                                               materialized_operands);
+
+    return success();
+  }
+};
+
 class EmitCReturnPattern final : public OpConversionPattern<ReturnOp> {
  public:
   using OpConversionPattern<ReturnOp>::OpConversionPattern;
@@ -85,6 +184,9 @@ class EmitCReturnPattern final : public OpConversionPattern<ReturnOp> {
 };
 
 void LowerToEmitCPass::runOnOperation() {
+
+  //TODO: We still need to emit a pre-amble with an include statement
+  // this should refer to some "magic file" that also sets up keys/etc and our custom evaluator wrapper for now
 
   auto type_converter = TypeConverter();
 
@@ -149,16 +251,25 @@ void LowerToEmitCPass::runOnOperation() {
     return true;
   });
   target.addDynamicallyLegalOp<ReturnOp>([&](Operation *op) {
-    for (auto t: op->getOperandTypes()) {
-      if (!type_converter.isLegal(t))
-        return false;
-    }
-    return true;
+    return type_converter.isLegal(op->getOperandTypes());
+  });
+  target.addDynamicallyLegalOp<fhe::SubOp>([&](Operation *op) {
+    return type_converter.isLegal(op->getOperandTypes()) && type_converter.isLegal(op->getResultTypes());
+  });
+  target.addDynamicallyLegalOp<fhe::AddOp>([&](Operation *op) {
+    return type_converter.isLegal(op->getOperandTypes()) && type_converter.isLegal(op->getResultTypes());
+  });
+  target.addDynamicallyLegalOp<fhe::MultiplyOp>([&](Operation *op) {
+    return type_converter.isLegal(op->getOperandTypes()) && type_converter.isLegal(op->getResultTypes());
   });
 
   mlir::RewritePatternSet patterns(&getContext());
   patterns.add<
       EmitCReturnPattern,
+      EmitCArithmeticPattern<fhe::SubOp>,
+      EmitCArithmeticPattern<fhe::AddOp>,
+      EmitCArithmeticPattern<fhe::MultiplyOp>,
+      EmitCRotatePattern,
       EmitCFunctionPattern
   >(type_converter, patterns.getContext());
 
