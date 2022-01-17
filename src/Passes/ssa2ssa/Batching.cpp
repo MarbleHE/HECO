@@ -169,9 +169,13 @@ LogicalResult batchArithmeticOperation(IRRewriter &rewriter, MLIRContext *contex
               .create<fhe::RotateOp>(ex_op.getLoc(), ex_op.vector(), i - target_slot);
           rewriter.replaceOpWithIf(ex_op, {rotate_op}, [&](OpOperand &operand) { return operand.getOwner()==op; });
         } else if (auto c_op = (*it).template getDefiningOp<fhe::ConstOp>()) {
-          emitError(op.getLoc(),
-                    "Encountered not yet supported constant op as defining op for secret operand while trying to batch.");
-          return failure();
+          ShapedType shapedType = RankedTensorType::get({1}, c_op.value().getType());
+          auto denseAttr = DenseElementsAttr::get(shapedType, ArrayRef<Attribute>(c_op.value()));
+          auto new_cst = rewriter.template create<fhe::ConstOp>(c_op.getLoc(),
+                                                                fhe::BatchedSecretType::get(context,
+                                                                                            st.getPlaintextType()),
+                                                                denseAttr);
+          rewriter.replaceOpWithIf(c_op, {new_cst}, [&](OpOperand &operand) { return operand.getOwner()==op; });
         } else {
           emitError(op.getLoc(), "Encountered unexpected defining op for secret operand while trying to batch.");
           return failure();

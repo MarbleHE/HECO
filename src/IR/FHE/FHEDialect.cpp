@@ -118,15 +118,8 @@ SecretType BatchedSecretType::getCorrespondingSecretType() const {
   // Operand adaptors (https://mlir.llvm.org/docs/OpDefinitions/#operand-adaptors) provide a convenient way to access operands
   // when given as a "generic" triple of ValueRange, DictionaryAttr, RegionRange  instead of nicely "packaged" inside the operation class.
   auto op = ConstOpAdaptor(operands, attributes, regions);
-  if (auto aa = op.value().dyn_cast_or_null<ArrayAttr>()) {
-    if (aa.empty())
-      return ::mlir::failure();
-    auto t = aa.begin()->getType();
-    for (auto a: aa) {
-      if (a.getType()!=t)
-        return ::mlir::failure();
-    }
-    inferredReturnTypes.push_back(fhe::SecretType::get(context, t));
+  if (auto da = op.value().dyn_cast_or_null<DenseElementsAttr>()) {
+    inferredReturnTypes.push_back(fhe::BatchedSecretType::get(context, da.getElementType()));
   } else {
     inferredReturnTypes.push_back(fhe::SecretType::get(context, op.value().getType()));
   }
