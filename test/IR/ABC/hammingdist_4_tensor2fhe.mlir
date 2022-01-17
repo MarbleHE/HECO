@@ -17,7 +17,7 @@ module  {
     %13 = fhe.extract %arg1[3] : <f64>
     %14 = fhe.sub(%12, %13) : (!fhe.secret<f64>, !fhe.secret<f64>) -> !fhe.secret<f64>
     %15 = fhe.multiply(%14, %14) : (!fhe.secret<f64>, !fhe.secret<f64>) -> !fhe.secret<f64>
-    %16 = fhe.add(%15, %11, %7, %3) : (!fhe.secret<f64>, !fhe.secret<f64>, !fhe.secret<f64>, !fhe.secret<f64>) -> !fhe.secret<f64>
+    %16 = fhe.add(%15, %11, %3, %7) : (!fhe.secret<f64>, !fhe.secret<f64>, !fhe.secret<f64>, !fhe.secret<f64>) -> !fhe.secret<f64>
     return %16 : !fhe.secret<f64>
   }
 }
@@ -26,10 +26,10 @@ module  {
 // CHECK:   func private @encryptedHammingDistance(%arg0: !fhe.batched_secret<f64>, %arg1: !fhe.batched_secret<f64>) -> !fhe.secret<f64> {
 // CHECK:     %0 = fhe.sub(%arg0, %arg1) : (!fhe.batched_secret<f64>, !fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
 // CHECK:     %1 = fhe.multiply(%0, %0) : (!fhe.batched_secret<f64>, !fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %2 = fhe.rotate(%1) {i = 3 : si32} : (!fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %3 = fhe.rotate(%1) {i = 2 : si32} : (!fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %4 = fhe.rotate(%1) {i = 1 : si32} : (!fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %5 = fhe.add(%2, %3, %4, %1) : (!fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
+// CHECK:     %2 = fhe.rotate(%1) {i = -3 : si32} : (!fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
+// CHECK:     %3 = fhe.rotate(%1) {i = -2 : si32} : (!fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
+// CHECK:     %4 = fhe.rotate(%1) {i = -1 : si32} : (!fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
+// CHECK:     %5 = fhe.add(%2, %3, %1, %4) : (!fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
 // CHECK:     %6 = fhe.extract %5[0] : <f64>
 // CHECK:     return %6 : !fhe.secret<f64>
 // CHECK:   }

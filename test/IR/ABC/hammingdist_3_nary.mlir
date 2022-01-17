@@ -5,7 +5,6 @@ module  {
     %c1 = arith.constant 1 : index
     %c2 = arith.constant 2 : index
     %c3 = arith.constant 3 : index
-    %c0_sf64 = fhe.constant 0.000000e+00 : f64
     %0 = tensor.extract %arg0[%c0] : tensor<4x!fhe.secret<f64>>
     %1 = tensor.extract %arg1[%c0] : tensor<4x!fhe.secret<f64>>
     %2 = fhe.sub(%0, %1) : (!fhe.secret<f64>, !fhe.secret<f64>) -> !fhe.secret<f64>
@@ -34,14 +33,13 @@ module  {
     %25 = tensor.extract %arg1[%c3] : tensor<4x!fhe.secret<f64>>
     %26 = fhe.sub(%24, %25) : (!fhe.secret<f64>, !fhe.secret<f64>) -> !fhe.secret<f64>
     %27 = fhe.multiply(%23, %26) : (!fhe.secret<f64>, !fhe.secret<f64>) -> !fhe.secret<f64>
-    %28 = fhe.add(%27, %20, %13, %6, %c0_sf64) : (!fhe.secret<f64>, !fhe.secret<f64>, !fhe.secret<f64>, !fhe.secret<f64>, !fhe.secret<f64>) -> !fhe.secret<f64>
+    %28 = fhe.add(%27, %20, %6, %13) : (!fhe.secret<f64>, !fhe.secret<f64>, !fhe.secret<f64>, !fhe.secret<f64>) -> !fhe.secret<f64>
     return %28 : !fhe.secret<f64>
   }
 }
 
 // CHECK: module  {
 // CHECK:   func private @encryptedHammingDistance(%arg0: !fhe.batched_secret<f64>, %arg1: !fhe.batched_secret<f64>) -> !fhe.secret<f64> {
-// CHECK:     %c0_sf64 = fhe.constant 0.000000e+00 : f64
 // CHECK:     %0 = fhe.extract %arg0[0] : <f64>
 // CHECK:     %1 = fhe.extract %arg1[0] : <f64>
 // CHECK:     %2 = fhe.sub(%0, %1) : (!fhe.secret<f64>, !fhe.secret<f64>) -> !fhe.secret<f64>
@@ -58,7 +56,7 @@ module  {
 // CHECK:     %13 = fhe.extract %arg1[3] : <f64>
 // CHECK:     %14 = fhe.sub(%12, %13) : (!fhe.secret<f64>, !fhe.secret<f64>) -> !fhe.secret<f64>
 // CHECK:     %15 = fhe.multiply(%14, %14) : (!fhe.secret<f64>, !fhe.secret<f64>) -> !fhe.secret<f64>
-// CHECK:     %16 = fhe.add(%15, %11, %7, %3, %c0_sf64) : (!fhe.secret<f64>, !fhe.secret<f64>, !fhe.secret<f64>, !fhe.secret<f64>, !fhe.secret<f64>) -> !fhe.secret<f64>
+// CHECK:     %16 = fhe.add(%15, %11, %3, %7) : (!fhe.secret<f64>, !fhe.secret<f64>, !fhe.secret<f64>, !fhe.secret<f64>) -> !fhe.secret<f64>
 // CHECK:     return %16 : !fhe.secret<f64>
 // CHECK:   }
 // CHECK: }

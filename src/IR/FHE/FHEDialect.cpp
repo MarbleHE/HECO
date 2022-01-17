@@ -210,7 +210,10 @@ void fhe::ConstOp::getAsmResultNames(
       new_operands.push_back(v);
   }
   xMutable().assign(new_operands);
-  return getResult();
+  if (x().size() > 1)
+    return getResult();
+  else
+    return x().front();
 }
 
 ::mlir::OpFoldResult fhe::SubOp::fold(::llvm::ArrayRef<::mlir::Attribute> operands) {
@@ -242,7 +245,10 @@ void fhe::ConstOp::getAsmResultNames(
       new_operands.push_back(v);
   }
   xMutable().assign(new_operands);
-  return getResult();
+  if (x().size() > 1)
+    return getResult();
+  else
+    return x().front();
 }
 
 ::mlir::OpFoldResult fhe::MultiplyOp::fold(::llvm::ArrayRef<::mlir::Attribute> operands) {
@@ -274,7 +280,10 @@ void fhe::ConstOp::getAsmResultNames(
       new_operands.push_back(v);
   }
   xMutable().assign(new_operands);
-  return getResult();
+  if (x().size() > 1)
+    return getResult();
+  else
+    return x().front();
 }
 
 //===----------------------------------------------------------------------===//
