@@ -268,6 +268,7 @@ def FHE_MaterializeOp: FHE_Op<"materialize", []> {
   let results = (outs AnyType:$result);
 
   let hasFolder = 1;
+  let hasCanonicalizeMethod = 1;
 
 }
 #endif // ABC_FHE_FHE_TD_

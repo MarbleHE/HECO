@@ -1,6 +1,8 @@
 #include "mlir/IR/DialectImplementation.h"
 #include "mlir/IR/Types.h"
 #include "mlir/IR/TypeSupport.h"
+#include "mlir/Dialect/EmitC/IR/EmitC.h"
+#include "mlir/IR/PatternMatch.h"
 #include "mlir/Support/LLVM.h"
 #include "llvm/ADT/TypeSwitch.h"
 #include "abc/IR/FHE/FHEDialect.h"
@@ -77,7 +79,6 @@ SecretType BatchedSecretType::getCorrespondingSecretType() const {
     inferredReturnTypes.push_back(BatchedSecretType::get(context, plaintextType));
   else
     inferredReturnTypes.push_back(SecretType::get(context, plaintextType));
-  return ::mlir::success();
   return ::mlir::success();
 }
 
@@ -162,6 +163,48 @@ void fhe::ConstOp::getAsmResultNames(
   } else {
     setNameFn(getResult(), "cst");
   }
+}
+
+::mlir::LogicalResult fhe::MaterializeOp::canonicalize(MaterializeOp op, ::mlir::PatternRewriter &rewriter) {
+  
+  if (auto ot = op.getType().dyn_cast_or_null<emitc::OpaqueType>()) {
+    if (ot.getValue()=="seal::Ciphertext") {
+      if (auto ex_op = op.input().getDefiningOp<fhe::ExtractOp>()) {
+        if (auto original_source = ex_op.vector().getDefiningOp<MaterializeOp>()) {
+          if (auto original_ot = original_source.input().getType().dyn_cast_or_null<emitc::OpaqueType>()) {
+            if (original_ot.getValue()=="seal::Ciphertext") {
+              // we now have something like this
+              // %os = materialize(%ctxt)->bst
+              // %ex_op = extract(%os, i)
+              // %op = materialize(%ex_op) -> ctxt
+              //
+              // Instead of doing all of that, we can just change this to
+              // %op = rotate(%ctxt, -i)
+              //
+              // This works because in ctxt land, there are no more scalars (result of extract)
+              // and so "scalar" just means "what's in position 0 of the ctxt"
+              //
+              // Note that we don't actually remove the first materialize and ex_op,
+              // since they'll be canonicalized away anyway as dead code if appropriate
+
+              //rewriter.replaceOpWithNewOp<emitc::CallOp>(op, ex_op.vector(), -ex_op.i().getLimitedValue(INT32_MAX));
+              auto i = (int) ex_op.i().getLimitedValue(INT32_MAX);
+              auto a0 = rewriter.getIndexAttr(0); //stands for "first operand"
+              auto a1 = rewriter.getSI32IntegerAttr(i);
+              auto aa = ArrayAttr::get(rewriter.getContext(), {a0, a1});
+              rewriter.replaceOpWithNewOp<emitc::CallOp>(op, TypeRange(ot),
+                                                         llvm::StringRef("evaluator.rotate"),
+                                                         aa,
+                                                         ArrayAttr(),
+                                                         ValueRange(original_source.input()));
+              return success();
+            }
+          }
+        }
+      }
+    }
+  }
+  return failure();
 }
 
 ::mlir::OpFoldResult fhe::ConstOp::fold(::llvm::ArrayRef<::mlir::Attribute> operands) {
