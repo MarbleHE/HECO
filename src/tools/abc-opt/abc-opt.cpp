@@ -39,6 +39,8 @@ using namespace fhe;
 void pipelineBuilder(OpPassManager &manager) {
   manager.addPass(std::make_unique<LowerASTtoSSAPass>());
   manager.addPass(std::make_unique<UnrollLoopsPass>());
+  manager.addPass(createCanonicalizerPass());
+  manager.addPass(createCSEPass()); //this can greatly reduce the number of operations after unrolling
   manager.addPass(std::make_unique<NaryPass>());
 
   // Must canonicalize before Tensor2BatchedSecretPass, since it only handles constant indices in tensor.extract

@@ -78,6 +78,33 @@ class InsertPattern final : public OpConversionPattern<tensor::InsertOp> {
   }
 };
 
+class ReturnPattern final : public OpConversionPattern<ReturnOp> {
+ public:
+  using OpConversionPattern<ReturnOp>::OpConversionPattern;
+
+  LogicalResult
+  matchAndRewrite(ReturnOp op, typename ReturnOp::Adaptor adaptor,
+                  ConversionPatternRewriter &rewriter) const override {
+    if (op.getNumOperands()!=1) {
+      emitError(op.getLoc(), "Currently only single value return operations are supported.");
+      return failure();
+    }
+    auto dstType = this->getTypeConverter()->convertType(op.getOperandTypes().front());
+    if (!dstType)
+      return failure();
+    if (auto bst = dstType.dyn_cast_or_null<fhe::BatchedSecretType>()) {
+      rewriter.setInsertionPoint(op);
+      auto batchedSecret = typeConverter->materializeTargetConversion(rewriter,
+                                                                      op.getLoc(),
+                                                                      dstType,
+                                                                      op.operands().front());
+      rewriter.template replaceOpWithNewOp<ReturnOp>(op, batchedSecret);
+
+    } // else do nothing
+    return success();
+  }
+};
+
 class FunctionPattern final : public OpConversionPattern<FuncOp> {
  public:
   using OpConversionPattern<FuncOp>::OpConversionPattern;
@@ -188,11 +215,15 @@ void Tensor2BatchedSecretPass::runOnOperation() {
     }
     return true;
   });
+  target.addDynamicallyLegalOp<ReturnOp>([&](Operation *op) {
+    return type_converter.isLegal(op->getOperandTypes());
+  });
 
   mlir::RewritePatternSet patterns(&getContext());
   patterns.add<
       ExtractPattern,
       InsertPattern,
+      ReturnPattern,
       FunctionPattern
   >(type_converter, patterns.getContext());
 
