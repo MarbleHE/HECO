@@ -277,6 +277,9 @@ def FHE_CombineOp : Op<FHE_Dialect, "combine", [NoSideEffect]> {
   // We want a pretty complex pretty-printed syntax, so we're doing it with custom C++
   let parser = [{ return ::parseCombineOp(parser, result); }];
   let printer = [{ return ::print(p, *this); }];
+
+  let hasFolder = 1;
+
 }
 
 def FHE_MaterializeOp: FHE_Op<"materialize", []> {
