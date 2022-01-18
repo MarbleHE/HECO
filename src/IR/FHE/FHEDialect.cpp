@@ -55,15 +55,18 @@ static void print(mlir::OpAsmPrinter &printer, fhe::CombineOp op) {
     printer.printOperand(op.getOperand(i));
     // print the index, if it exists
     if (auto aa = indices[i].dyn_cast_or_null<ArrayAttr>()) {
-      bool continuous = true;
+      bool continuous = aa.size() > 1;
       for (size_t j = 1; j < aa.size(); ++j)
         continuous &= aa[j - 1].dyn_cast<IntegerAttr>().getInt() + 1==aa[j].dyn_cast<IntegerAttr>().getInt();
 
       if (continuous) {
+        //TODO: Update this to always print stuff continuously is possible, gobbling input until non-continuous
+        // and only then emitting a comma and the next value.
+        // Requires writing to a sstream first and later wrapping "["/"]" iff a comma was emitted.
         auto start = aa[0].dyn_cast<IntegerAttr>().getInt();
         auto end = aa[aa.size() - 1].dyn_cast<IntegerAttr>().getInt();
         printer << "#" << start << ":" << end;
-      } else {
+      } else if (aa.size() > 1) {
         printer << "[";
         for (size_t j = 0; j < aa.size(); ++j) {
           if (j!=0)
@@ -71,6 +74,8 @@ static void print(mlir::OpAsmPrinter &printer, fhe::CombineOp op) {
           printer << aa[j].dyn_cast<IntegerAttr>().getInt();
         }
         printer << "]";
+      } else {
+        printer << "#" << aa[0].dyn_cast<IntegerAttr>().getInt();
       }
     } else if (auto ia = indices[i].dyn_cast_or_null<IntegerAttr>()) {
       printer << "#" << ia.getInt();
@@ -308,10 +313,7 @@ void fhe::ConstOp::getAsmResultNames(
   //getOperation()->getParentOp()->dump();
   //this->dump();
 
-  // TODO: Attempt at a general solution:
   // Build a list of all inputs %v:i, including (including all %v:i, %v:j coming from a single operand %v:[i,j,..])
-
-
   auto collectInputs =
       [](CombineOp op, std::vector<std::pair<Value, IntegerAttr>> &single_inputs, Value &remaining_inputs) {
         assert(op.vectors().size()==op.indices().size() && "combine op must have indices foreach operand");
@@ -387,18 +389,33 @@ void fhe::ConstOp::getAsmResultNames(
     }
   }
 
-  // Now go through the list and simplify everything to combine common origins (TODO)
+  // Now go through the list and simplify everything to combine common origins
+  // TODO: The current version only combines sequential bits
 
+  // First, sort by slot
+  std::sort(new_single_inputs.begin(), new_single_inputs.end(), [](auto &left, auto &right) {
+    return left.second.getInt() < right.second.getInt();
+  });
 
-
+  // Now go through and combine ranges
+  std::vector<std::pair<Value, SmallVector<Attribute>>> aggregated_single_inputs;
+  std::pair<Value, SmallVector<Attribute>> cur_p;
+  for (auto p: new_single_inputs) {
+    if (cur_p.first==p.first) {
+      cur_p.second.push_back(p.second);
+    } else {
+      cur_p = {p.first, {p.second}};
+      aggregated_single_inputs.push_back(cur_p);
+    }
+  }
 
   // update the op
   if (updated) {
     SmallVector<Value> new_vectors;
     SmallVector<Attribute> new_indices;
-    for (auto p: new_single_inputs) {
+    for (const auto &p: aggregated_single_inputs) {
       new_vectors.push_back(p.first);
-      new_indices.push_back(p.second);
+      new_indices.push_back(ArrayAttr::get(getContext(), p.second));
     }
     if (remaining_inputs) {
       new_vectors.push_back(remaining_inputs);
