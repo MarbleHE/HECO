@@ -23,6 +23,33 @@ SecretType BatchedSecretType::getCorrespondingSecretType() const {
 //===----------------------------------------------------------------------===//
 // TableGen'd Operation definitions
 //===----------------------------------------------------------------------===//
+
+/// The 'OpAsmParser' class provides a collection of methods for parsing
+/// various punctuation, as well as attributes, operands, types, etc. Each of
+/// these methods returns a `ParseResult`. This class is a wrapper around
+/// `LogicalResult` that can be converted to a boolean `true` value on failure,
+/// or `false` on success. This allows for easily chaining together a set of
+/// parser rules. These rules are used to populate an `mlir::OperationState`
+/// similarly to the `build` methods described above.
+static mlir::ParseResult parseCombineOp(mlir::OpAsmParser &parser,
+                                        mlir::OperationState &result) {
+  mlir::DenseElementsAttr value;
+  if (parser.parseOptionalAttrDict(result.attributes) ||
+      parser.parseAttribute(value, "value", result.attributes))
+    return failure();
+
+  result.addTypes(value.getType());
+  return success();
+}
+
+/// The 'OpAsmPrinter' class is a stream that allows for formatting
+/// strings, attributes, operands, types, etc.
+static void print(mlir::OpAsmPrinter &printer, fhe::CombineOp op) {
+  printer << "("
+  printer.printOptionalAttrDict(op->getAttrs());
+  printer << op.vectors();
+}
+
 #define GET_OP_CLASSES
 #include "abc/IR/FHE/FHE.cpp.inc"
 
@@ -165,6 +192,12 @@ void fhe::ConstOp::getAsmResultNames(
   }
 }
 
+/// Simplifies
+///  %os = materialize(%ctxt)->bst
+///  %ex_op = extract(%os, i)
+///  %op = materialize(%ex_op) -> ctxt
+/// to
+///  %op = rotate(%ctxt, -i)
 ::mlir::LogicalResult fhe::MaterializeOp::canonicalize(MaterializeOp op, ::mlir::PatternRewriter &rewriter) {
 
   if (auto ot = op.getType().dyn_cast_or_null<emitc::OpaqueType>()) {
@@ -207,10 +240,31 @@ void fhe::ConstOp::getAsmResultNames(
   return failure();
 }
 
+// replaces insert (extract %v1, i) into %v2, i  (note: i must match!) with combine (v1,v2) ([i], [-i])
+// where [-i] means "everything except i"
+::mlir::LogicalResult fhe::InsertOp::canonicalize(InsertOp op, ::mlir::PatternRewriter &rewriter) {
+  if (auto ex_op = op.scalar().getDefiningOp<fhe::ExtractOp>()) {
+    auto i = (int) ex_op.i().getLimitedValue(INT32_MAX);
+    auto v1 = ex_op.vector();
+    auto bst = ex_op.vector().getType().dyn_cast<fhe::BatchedSecretType>();
+    assert(bst==op.dest().getType());
+    if (i==(int) op.i().getLimitedValue(INT32_MAX)) {
+      auto ai = rewriter.getSI32IntegerAttr(i);
+      auto ami = rewriter.getSI32IntegerAttr(-i);
+      auto aa = rewriter.getArrayAttr({ai, ami});
+      rewriter.replaceOpWithNewOp<fhe::CombineOp>(op, bst, ValueRange({v1, op.dest()}), aa);
+      return success();
+    }
+  }
+  return failure();
+}
+
+/// simplifies a constant operation to its value (used for constant folding?)
 ::mlir::OpFoldResult fhe::ConstOp::fold(::llvm::ArrayRef<::mlir::Attribute> operands) {
   return value();
 }
 
+/// simplifies away materialization(materialization(x)) to x if the types work
 ::mlir::OpFoldResult fhe::MaterializeOp::fold(::llvm::ArrayRef<::mlir::Attribute> operands) {
   if (auto m_op = input().getDefiningOp<fhe::MaterializeOp>())
     if (m_op.input().getType()==result().getType())
@@ -218,12 +272,13 @@ void fhe::ConstOp::getAsmResultNames(
   return {};
 }
 
+/// simplifies rotate(x,0) to x
 ::mlir::OpFoldResult fhe::RotateOp::fold(::llvm::ArrayRef<::mlir::Attribute> operands) {
   if (i()==0)
     return x();
   return {};
 }
-
+/// simplifies add(x,0) and add(x) to x
 ::mlir::OpFoldResult fhe::AddOp::fold(::llvm::ArrayRef<::mlir::Attribute> operands) {
   auto neutral_element = 0;
   SmallVector<Value> new_operands;
@@ -258,7 +313,7 @@ void fhe::ConstOp::getAsmResultNames(
   else
     return x().front();
 }
-
+/// simplifies sub(x,0) and sub(x) to x
 ::mlir::OpFoldResult fhe::SubOp::fold(::llvm::ArrayRef<::mlir::Attribute> operands) {
   auto neutral_element = 0;
   SmallVector<Value> new_operands;
@@ -293,7 +348,7 @@ void fhe::ConstOp::getAsmResultNames(
   else
     return x().front();
 }
-
+/// simplifies mul(x,1) and mul(x) to x
 ::mlir::OpFoldResult fhe::MultiplyOp::fold(::llvm::ArrayRef<::mlir::Attribute> operands) {
   auto neutral_element = 1;
   SmallVector<Value> new_operands;

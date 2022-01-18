@@ -255,10 +255,28 @@ def FHE_InsertOp : FHE_Op<"insert", [
   let arguments = (ins Secret:$scalar,
                        BatchedSecret:$dest,
                        IndexAttr:$i);
+
   let results = (outs BatchedSecret:$result);
+
   let assemblyFormat = [{
     $scalar `into` $dest `[` $i `]` attr-dict `:` type($dest)
   }];
+
+  let hasCanonicalizeMethod = 1;
+}
+
+// Because we don't want the default assembly pattern from FHE:OP, we have to inherit directly from OP for this one!
+def FHE_CombineOp : Op<FHE_Dialect, "combine", [NoSideEffect]> {
+
+  let summary = "combines elements from multiple vectors into one (executing under FHE requires ptxt-mult with mask and additions)";
+
+  let arguments = (ins Variadic<BatchedSecret>:$vectors,
+                       ArrayAttr:$indices);
+  let results = (outs BatchedSecret:$result);
+
+  // We want a pretty complex pretty-printed syntax, so we're doing it with custom C++
+  let parser = [{ return ::parseCombineOp(parser, result); }];
+  let printer = [{ return ::print(p, *this); }];
 }
 
 def FHE_MaterializeOp: FHE_Op<"materialize", []> {
