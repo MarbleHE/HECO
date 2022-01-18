@@ -62,8 +62,7 @@ static void print(mlir::OpAsmPrinter &printer, fhe::CombineOp op) {
 
     if (attrs.size()==1)
       if (auto ia = attrs.front().dyn_cast_or_null<IntegerAttr>())
-        if (ia.getSInt() >= 0)
-          printer << "#" << ia.getSInt();
+        printer << "#" << ia.getInt();
 
     //TODO: Support printing out multiple indices
   }
@@ -272,7 +271,7 @@ void fhe::ConstOp::getAsmResultNames(
     auto bst = ex_op.vector().getType().dyn_cast<fhe::BatchedSecretType>();
     assert(bst==op.dest().getType());
     if (i==(int) op.i().getLimitedValue(INT32_MAX)) {
-      auto ai = rewriter.getSI32IntegerAttr(i);
+      auto ai = rewriter.getIndexAttr(i);
       auto ami = rewriter.getStringAttr("all");
       auto aa = rewriter.getArrayAttr({ai, ami});
       rewriter.replaceOpWithNewOp<fhe::CombineOp>(op, bst, ValueRange({v1, op.dest()}), aa);
@@ -288,78 +287,99 @@ void fhe::ConstOp::getAsmResultNames(
 //   %op = fhe.combine(%v#[i,j], %w)
 // Technically, the first combine op isn't removed, but if it has no other uses, it'll be canonicalized away, too
 ::mlir::OpFoldResult fhe::CombineOp::fold(::llvm::ArrayRef<::mlir::Attribute> operands) {
+
+  // Basic sanity check, since we frequently iterate over both things at the same time
+  assert(vectors().size()==indices().size() && "combine op must have indices foreach operand");
+
+  /// Flag to indicate if we actually changed anything
   bool updated = false;
 
   //getOperation()->getParentOp()->dump();
   //this->dump();
 
-  assert(vectors().size()==indices().size() && "combine op must have indices foreach operand");
+  // TODO: Attempt at a general solution:
+  // Build a list of all inputs %v:i, including (including all %v:i, %v:j coming from a single operand %v:[i,j,..])
 
-  if (vectors().size()==2)  // Currently, we only do this simple style. Will probably need to generalize later!
-    if (auto c = vectors()[1].getDefiningOp<CombineOp>())
-      if (c.vectors().size()==2)
-        if (c.vectors()[0]==vectors()[0]) // matching vectors!
-          if (auto sa = c.indices()[1].dyn_cast_or_null<StringAttr>())
-            if (sa.getValue()=="all") { // other one determines the rest of the vector
-              // We now have the desired conditions.
-              int five = 4; // :-)
+
+  auto collectInputs =
+      [](CombineOp op, std::vector<std::pair<Value, IntegerAttr>> &single_inputs, Value &remaining_inputs) {
+        for (size_t i = 0; i < op.vectors().size(); ++i) {
+          if (auto aa = op.indices()[i].dyn_cast_or_null<ArrayAttr>()) {
+            // if it's a list of indices, they must all be actual indices!
+            for (auto ia: aa.getAsRange<IntegerAttr>()) {
+              assert(ia && "all indices in sublists in fhe.combine must be integers!");
+              single_inputs.emplace_back(op.vectors()[i], ia);
             }
+          } else if (auto ia = op.indices()[i].dyn_cast_or_null<IntegerAttr>()) {
+            single_inputs.emplace_back(op.vectors()[i], ia);
+          } else if (auto sa = op.indices()[i].dyn_cast_or_null<StringAttr>()) {
+            assert(!remaining_inputs && "There can be only one 'rest' input in an fhe.combine op");
+            remaining_inputs = op.vectors()[i];
+          }
+        }
+      };
 
-//  auto vec = vectors()[i];
-//  auto index = indices()[i];
-//  // We only check
-//  if (auto sa = index.dyn_cast_or_null<StringAttr>())
-//    if (vi.getSInt() >= 0)
-//      if (auto cop = vec.getDefiningOp<CombineOp>()) {
-//        // For now, we handle only very simple cases: one 1-slot operand first, and another "all the rest" vector after.
-//        // This happens to be what canonicalization of an insert produces, so this is still useful ;)
-//        if (cop.vectors().size()==2) {
-//          if (auto i0 = cop.indices()[0].dyn_cast_or_null<IntegerAttr>())
-//            if (auto all = cop.indices()[1].dyn_cast_or_null<StringAttr>())
-//              if (i0==vi && i0.getSInt() >= 0  /* <- always true because we checked vi >= 0 */
-//                  && all.getValue()=="all") {
-//                potential_vectors.push_back(cop.vectors()[0]);
-//                potential_indices.push_back(i0);
-//                potential_replaced.push_back(vec);
-//              }
-//        }
-//      }
-//
-//}
-//// Copy the current things
-//SmallVector<Value> new_vectors = vectors();
-//SmallVector<Attribute> new_indices;
-//for (
-//auto i
-//:
-//indices()
-//)
-//new_indices.
-//push_back(i);
-//// Replace all that were replaced
-//for (
-//size_t i = 0;
-//i<potential_replaced.
-//size();
-//++i) {
-//for (
-//size_t j = 0;
-//j<new_vectors.
-//size();
-//++j) {
-//if (potential_replaced[i]==new_vectors[j]) {
-//new_vectors[j] = potential_vectors[i];
-//new_indices[j] = potential_indices[i];
-//updated = true; //should be below, not here
-//break; // no need to look for more matches for this replacee
-//}
-//}
-//}
-//
-//// Now that we've updated everything, check if can combine anything!
-//
+  std::vector<std::pair<Value, IntegerAttr>> single_inputs;
+  Value remaining_inputs = nullptr; // This is mostly to make sure we only have one "rest" input
+  collectInputs(*this, single_inputs, remaining_inputs);
 
-// update the op
+
+  // Build a list of simplified inputs
+  std::vector<std::pair<Value, IntegerAttr>> new_single_inputs;
+  // For each input, check if it's the result of a combine op (first the single_inputs)
+  for (auto p: single_inputs) {
+    if (auto c = p.first.getDefiningOp<CombineOp>()) {
+      //  If it is, find out what element of %v = fhe.combine(%u:k, ..., %w) is responsible for slot i
+      updated = true;
+      assert(false && "NOT YET IMPLEMENTED IN COMBINEOP CANONICALIZATION.");
+
+      //  This is either something like %u:k where k==i, or if i doesn't appear in any of the lists, it's from the remainder: %w:i
+      //  Then replace %v:i with the found %w:i or %u:i (actually we insert into a new list for later use)
+
+    } else {
+      // Not a combine op, so keep %v:i
+      new_single_inputs.push_back(p);
+    }
+  }
+  // Now we do the same check with the "remaining inputs" operand
+  if (remaining_inputs) {// make sure we're not dereferencing a nullptr, in case everything has an index
+    if (auto c = remaining_inputs.getDefiningOp<CombineOp>()) {
+      updated = true;
+      // If it's a combine op, we want to collect all the inputs of c and make them our input
+      // However, for each of the inputs of c, we need to check if one of our inputs is overriding that slot
+
+      // So we begin by collecting a list of all inputs of c:
+      std::vector<std::pair<Value, IntegerAttr>> c_single_inputs;
+      Value c_remaining_inputs = nullptr;
+      collectInputs(c, c_single_inputs, c_remaining_inputs);
+
+      // Now we can do the overwriting check quite simply:
+      for (auto cp: c_single_inputs) {
+        auto i = cp.second.getInt();
+        bool overwritten = false;
+        for (auto p: single_inputs) {
+          if (i==p.second.getInt()) {
+            overwritten = true;
+            break;
+          }
+        }
+        if (!overwritten) {
+          single_inputs.push_back(cp);
+        }
+      }
+
+      // Finally, once we've promoted all non-overwritten single_inputs,
+      // we replace c as the remaining value with c's remaining value
+      remaining_inputs = c_remaining_inputs;
+    }
+  }
+
+  // Now go through the list and simplify everything to combine common origins (TODO)
+
+
+
+
+  // update the op
   if (updated) {
     return getResult();
   } else {
