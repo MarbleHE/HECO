@@ -53,18 +53,29 @@ static void print(mlir::OpAsmPrinter &printer, fhe::CombineOp op) {
     if (i!=0)
       printer << ", ";
     printer.printOperand(op.getOperand(i));
-    llvm::SmallVector<Attribute> attrs = {};
-    if (auto aa = indices[i].dyn_cast_or_null<ArrayAttr>())
-      for (auto a: aa)
-        attrs.push_back(a);
-    else
-      attrs.push_back(indices[i].dyn_cast<IntegerAttr>());
+    // print the index, if it exists
+    if (auto aa = indices[i].dyn_cast_or_null<ArrayAttr>()) {
+      bool continuous = true;
+      for (size_t j = 1; j < aa.size(); ++j)
+        continuous &= aa[j - 1].dyn_cast<IntegerAttr>().getInt() + 1==aa[j].dyn_cast<IntegerAttr>().getInt();
 
-    if (attrs.size()==1)
-      if (auto ia = attrs.front().dyn_cast_or_null<IntegerAttr>())
-        printer << "#" << ia.getInt();
+      if (continuous) {
+        auto start = aa[0].dyn_cast<IntegerAttr>().getInt();
+        auto end = aa[aa.size() - 1].dyn_cast<IntegerAttr>().getInt();
+        printer << "#" << start << ":" << end;
+      } else {
+        printer << "[";
+        for (size_t j = 0; j < aa.size(); ++j) {
+          if (j!=0)
+            printer << ", ";
+          printer << aa[j].dyn_cast<IntegerAttr>().getInt();
+        }
+        printer << "]";
+      }
+    } else if (auto ia = indices[i].dyn_cast_or_null<IntegerAttr>()) {
+      printer << "#" << ia.getInt();
+    } // else -> do not print implicit "all"
 
-    //TODO: Support printing out multiple indices
   }
   printer << ") : ";
   printer.printType(op.getType());
