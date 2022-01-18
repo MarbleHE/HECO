@@ -1,4 +1,4 @@
-//RUN: abc-opt -batching --canonicalize --cse < %s | FileCheck %s
+//RUN: abc-opt -batching --canonicalize --cse --canonicalize < %s | FileCheck %s
 module  {
   func private @encryptedBoxBlur(%arg0: !fhe.batched_secret<f64>) -> !fhe.batched_secret<f64> {
     %0 = fhe.extract %arg0[55] : <f64>

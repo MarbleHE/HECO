@@ -52,6 +52,7 @@ void pipelineBuilder(OpPassManager &manager) {
   manager.addPass(std::make_unique<BatchingPass>());
   manager.addPass(createCanonicalizerPass());
   manager.addPass(createCSEPass()); // otherwise, the internal batching pass has no "same origin" things to find!
+  manager.addPass(createCanonicalizerPass()); // to fold combine ops that might have simpler form after CSE
 
   manager.addPass(std::make_unique<InternalOperandBatchingPass>());
   manager.addPass(createCanonicalizerPass());
