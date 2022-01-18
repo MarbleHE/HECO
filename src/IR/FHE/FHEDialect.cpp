@@ -311,7 +311,9 @@ void fhe::ConstOp::getAsmResultNames(
   bool updated = false;
 
   //getOperation()->getParentOp()->dump();
-  //this->dump();
+  //this->print(llvm::outs());
+  //llvm::outs() << "\n";
+  //llvm::outs().flush();
 
   // Build a list of all inputs %v:i, including (including all %v:i, %v:j coming from a single operand %v:[i,j,..])
   auto collectInputs =
@@ -398,16 +400,28 @@ void fhe::ConstOp::getAsmResultNames(
   });
 
   // Now go through and combine ranges
+  //llvm::outs() << "///////////////// START RANGE CHECK //////////////////////////\n";
+  //llvm::outs().flush();
   std::vector<std::pair<Value, SmallVector<Attribute>>> aggregated_single_inputs;
-  std::pair<Value, SmallVector<Attribute>> cur_p;
+  Value cur_v;
   for (auto p: new_single_inputs) {
-    if (cur_p.first==p.first) {
-      cur_p.second.push_back(p.second);
+    if (cur_v==p.first) {
+      updated = true;
+      aggregated_single_inputs.back().second.push_back(p.second);
+      //llvm::outs() << "continuation for index " << p.second.getInt() << " of range: ";
+      //cur_v.print(llvm::outs());
+      //llvm::outs() << "\n";
+
     } else {
-      cur_p = {p.first, {p.second}};
-      aggregated_single_inputs.push_back(cur_p);
+      cur_v = p.first;
+      aggregated_single_inputs.push_back({p.first, {p.second}});
+      //llvm::outs() << "START for index " << p.second.getInt() << " of range: ";
+      //cur_v.print(llvm::outs());
+      //llvm::outs() << "\n";
     }
   }
+  //llvm::outs() << "///////////////// END RANGE CHECK //////////////////////////\n";
+  //llvm::outs().flush();
 
   // update the op
   if (updated) {
@@ -423,9 +437,14 @@ void fhe::ConstOp::getAsmResultNames(
     }
     vectorsMutable().assign(new_vectors);
     getOperation()->setAttr("indices", ArrayAttr::get(getContext(), new_indices));
-    //this->dump();
+    //this->print(llvm::outs());
+    //llvm::outs() << "\n";
+    //llvm::outs().flush();
     return getResult();
   } else {
+    //this->print(llvm::outs());
+    //llvm::outs() << "\n";
+    //llvm::outs().flush();
     return {};
   }
 }
