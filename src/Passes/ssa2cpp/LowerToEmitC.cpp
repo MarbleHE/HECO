@@ -10,6 +10,8 @@
 
 using namespace mlir;
 
+//TODO: Handle fhe.combine op!!
+
 void LowerToEmitCPass::getDependentDialects(mlir::DialectRegistry &registry) const {
   registry.insert<mlir::emitc::EmitCDialect,
                   fhe::FHEDialect,
