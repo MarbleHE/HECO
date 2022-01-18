@@ -93,18 +93,18 @@ LogicalResult batchArithmeticOperation(IRRewriter &rewriter, MLIRContext *contex
           }
         }
       }
-      llvm::outs() << "OPERAND-based target slot " << target_slot << " for:";
-      op.print(llvm::outs());
-      llvm::outs() << '\n';
+      //llvm::outs() << "OPERAND-based target slot " << target_slot << " for:";
+      //op.print(llvm::outs());
+      //llvm::outs() << '\n';
     } else {
-      llvm::outs() << "use-based target slot " << target_slot << " for:";
-      op.print(llvm::outs());
-      llvm::outs() << '\n';
+      //llvm::outs() << "use-based target slot " << target_slot << " for:";
+      //op.print(llvm::outs());
+      //llvm::outs() << '\n';
     }
     if(target_slot == -1) {
-      llvm::outs() << "NO target slot (" << target_slot << ") for:";
-      op.print(llvm::outs());
-      llvm::outs() << '\n';
+      //llvm::outs() << "NO target slot (" << target_slot << ") for:";
+      //op.print(llvm::outs());
+      //llvm::outs() << '\n';
     }
 
 

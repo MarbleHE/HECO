@@ -23,9 +23,9 @@ LogicalResult internalBatchArithmeticOperation(IRRewriter &rewriter, MLIRContext
   // We care only about ops that return batched values, which should be pretty much all fhe ops after the "batching" pass
   if (auto result_bst = op.getType().template dyn_cast_or_null<fhe::BatchedSecretType>()) {
 
-    llvm::outs() << "updating ";
-    op.print(llvm::outs());
-    llvm::outs() << "\n";
+    //llvm::outs() << "updating ";
+    //op.print(llvm::outs());
+    //llvm::outs() << "\n";
 
 
     /// Target Slot (-1 => no target slot required)
@@ -72,22 +72,22 @@ LogicalResult internalBatchArithmeticOperation(IRRewriter &rewriter, MLIRContext
 
     }
 
-    for (auto el: originMap) {
-      llvm::outs() << "uses of: ";
-      el.first.print(llvm::outs());
-      llvm::outs() << " : ";
-      for (auto i: el.second) {
-        llvm::outs() << i.index << ", ";
-      }
-      llvm::outs() << '\n';
-    }
+    //for (auto el: originMap) {
+    //  llvm::outs() << "uses of: ";
+    //  el.first.print(llvm::outs());
+    //  llvm::outs() << " : ";
+    //  for (auto i: el.second) {
+    //    llvm::outs() << i.index << ", ";
+    //  }
+    //  llvm::outs() << '\n';
+    //}
 
     for (auto el: originMap) {
       auto origin = el.first;
 
-      llvm::outs() << "(potentially) collapsing uses of: ";
-      origin.print(llvm::outs());
-      llvm::outs() << '\n';
+      //llvm::outs() << "(potentially) collapsing uses of: ";
+      //origin.print(llvm::outs());
+      //llvm::outs() << '\n';
 
       auto uses = el.second;
       std::sort(uses.begin(), uses.end(), [](const BatchingUse &a, const BatchingUse &b) -> bool {
@@ -101,9 +101,9 @@ LogicalResult internalBatchArithmeticOperation(IRRewriter &rewriter, MLIRContext
       }
 
       if (contiguous) {
-        llvm::outs() << "trying to batch contiguous uses of : ";
-        el.first.print(llvm::outs());
-        llvm::outs() << '\n';
+        //llvm::outs() << "trying to batch contiguous uses of : ";
+        //el.first.print(llvm::outs());
+        //llvm::outs() << '\n';
 
         // Check if it's a power of two
         auto n = uses[uses.size() - 1].index + 1;
@@ -139,13 +139,13 @@ LogicalResult internalBatchArithmeticOperation(IRRewriter &rewriter, MLIRContext
           //op->getParentOp()->print(llvm::outs());
           //llvm::outs() << '\n';
         } else {
-          llvm::outs() << "Ignoring anyway because its not a power of two.\n";
+          //llvm::outs() << "Ignoring anyway because its not a power of two.\n";
         }
 
       } else {
-        llvm::outs() << "ignoring non-contiguous/non-repeated uses of : ";
-        el.first.print(llvm::outs());
-        llvm::outs() << '\n';
+        //llvm::outs() << "ignoring non-contiguous/non-repeated uses of : ";
+        //el.first.print(llvm::outs());
+        //llvm::outs() << '\n';
       }
 
     }
