@@ -289,7 +289,7 @@ void fhe::ConstOp::getAsmResultNames(
 ::mlir::OpFoldResult fhe::CombineOp::fold(::llvm::ArrayRef<::mlir::Attribute> operands) {
 
   // Basic sanity check, since we frequently iterate over both things at the same time
-  assert(vectors().size()==indices().size() && "combine op must have indices foreach operand");
+  assert(vectors().size()==indices().size() && "combine op must have indices for each operand");
 
   /// Flag to indicate if we actually changed anything
   bool updated = false;
@@ -303,6 +303,8 @@ void fhe::ConstOp::getAsmResultNames(
 
   auto collectInputs =
       [](CombineOp op, std::vector<std::pair<Value, IntegerAttr>> &single_inputs, Value &remaining_inputs) {
+        assert(op.vectors().size()==op.indices().size() && "combine op must have indices foreach operand");
+        assert(!remaining_inputs && "when calling collectInputs, remaining_inputs must be set to nullptr!");
         for (size_t i = 0; i < op.vectors().size(); ++i) {
           if (auto aa = op.indices()[i].dyn_cast_or_null<ArrayAttr>()) {
             // if it's a list of indices, they must all be actual indices!
@@ -364,7 +366,7 @@ void fhe::ConstOp::getAsmResultNames(
           }
         }
         if (!overwritten) {
-          single_inputs.push_back(cp);
+          new_single_inputs.push_back(cp);
         }
       }
 
@@ -383,7 +385,7 @@ void fhe::ConstOp::getAsmResultNames(
   if (updated) {
     SmallVector<Value> new_vectors;
     SmallVector<Attribute> new_indices;
-    for (auto p: single_inputs) {
+    for (auto p: new_single_inputs) {
       new_vectors.push_back(p.first);
       new_indices.push_back(p.second);
     }
@@ -392,7 +394,8 @@ void fhe::ConstOp::getAsmResultNames(
       new_indices.push_back(StringAttr::get(getContext(), "all"));
     }
     vectorsMutable().assign(new_vectors);
-    indices() = ArrayAttr::get(getContext(), new_indices);
+    getOperation()->setAttr("indices", ArrayAttr::get(getContext(), new_indices));
+    //this->dump();
     return getResult();
   } else {
     return {};
