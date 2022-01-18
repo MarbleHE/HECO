@@ -190,6 +190,8 @@ def FHE_RotateOp : FHE_Op<"rotate", [AllTypesMatch<["x","output"]>]> {
 
   let hasFolder = 1;
 
+  let assemblyFormat = "`(` $x `)` `by` $i attr-dict `:` type($x)";
+
 }
 
 def FHE_RelinearizeOp : FHE_Op<"relinearize", [AllTypesMatch<["x", "output"]>]> {
