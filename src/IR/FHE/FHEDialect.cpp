@@ -381,6 +381,18 @@ void fhe::ConstOp::getAsmResultNames(
 
   // update the op
   if (updated) {
+    SmallVector<Value> new_vectors;
+    SmallVector<Attribute> new_indices;
+    for (auto p: single_inputs) {
+      new_vectors.push_back(p.first);
+      new_indices.push_back(p.second);
+    }
+    if (remaining_inputs) {
+      new_vectors.push_back(remaining_inputs);
+      new_indices.push_back(StringAttr::get(getContext(), "all"));
+    }
+    vectorsMutable().assign(new_vectors);
+    indices() = ArrayAttr::get(getContext(), new_indices);
     return getResult();
   } else {
     return {};
