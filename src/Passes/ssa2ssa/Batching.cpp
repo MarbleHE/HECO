@@ -80,6 +80,7 @@ LogicalResult batchArithmeticOperation(IRRewriter &rewriter, MLIRContext *contex
     }
 
 
+
     // instead of just picking the first target slot we see, we check if we can find 0
     if (target_slot==-1) {
       for (auto it = op->operand_begin(); it!=op.operand_end(); ++it) {
@@ -92,7 +93,20 @@ LogicalResult batchArithmeticOperation(IRRewriter &rewriter, MLIRContext *contex
           }
         }
       }
+      llvm::outs() << "OPERAND-based target slot " << target_slot << " for:";
+      op.print(llvm::outs());
+      llvm::outs() << '\n';
+    } else {
+      llvm::outs() << "use-based target slot " << target_slot << " for:";
+      op.print(llvm::outs());
+      llvm::outs() << '\n';
     }
+    if(target_slot == -1) {
+      llvm::outs() << "NO target slot (" << target_slot << ") for:";
+      op.print(llvm::outs());
+      llvm::outs() << '\n';
+    }
+
 
 
     // new op with batched result type
