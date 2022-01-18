@@ -62,7 +62,7 @@ static void print(mlir::OpAsmPrinter &printer, fhe::CombineOp op) {
 
     if (attrs.size()==1)
       if (auto ia = attrs.front().dyn_cast_or_null<IntegerAttr>())
-        if (ia.getSInt() > 0)
+        if (ia.getSInt() >= 0)
           printer << "#" << ia.getSInt();
 
     //TODO: Support printing out multiple indices
@@ -281,7 +281,12 @@ void fhe::ConstOp::getAsmResultNames(
   }
   return failure();
 }
-// simplifies combine((combine(%v#i, ...)#i,%v#j , ...) to combine (%v#[i,j], ...)
+// simplifies
+//   %c = fhe.combine(%v#j, %w)
+//   %op = fhe.combine(%v#i  %c)
+// to
+//   %op = fhe.combine(%v#[i,j], %w)
+// Technically, the first combine op isn't removed, but if it has no other uses, it'll be canonicalized away, too
 ::mlir::OpFoldResult fhe::CombineOp::fold(::llvm::ArrayRef<::mlir::Attribute> operands) {
   bool updated = false;
 
@@ -290,61 +295,72 @@ void fhe::ConstOp::getAsmResultNames(
 
   assert(vectors().size()==indices().size() && "combine op must have indices foreach operand");
 
-  // TODO: This logic is wrong! We need to FIRST check that the indices match,
-  // and/or support re-mapping when we include
+  if (vectors().size()==2)  // Currently, we only do this simple style. Will probably need to generalize later!
+    if (auto c = vectors()[1].getDefiningOp<CombineOp>())
+      if (c.vectors().size()==2)
+        if (c.vectors()[0]==vectors()[0]) // matching vectors!
+          if (auto sa = c.indices()[1].dyn_cast_or_null<StringAttr>())
+            if (sa.getValue()=="all") { // other one determines the rest of the vector
+              // We now have the desired conditions.
+              int five = 4; // :-)
+            }
 
-  SmallVector<Value> potential_vectors;
-  SmallVector<Attribute> potential_indices;
-  SmallVector<Value> potential_replaced;
+//  auto vec = vectors()[i];
+//  auto index = indices()[i];
+//  // We only check
+//  if (auto sa = index.dyn_cast_or_null<StringAttr>())
+//    if (vi.getSInt() >= 0)
+//      if (auto cop = vec.getDefiningOp<CombineOp>()) {
+//        // For now, we handle only very simple cases: one 1-slot operand first, and another "all the rest" vector after.
+//        // This happens to be what canonicalization of an insert produces, so this is still useful ;)
+//        if (cop.vectors().size()==2) {
+//          if (auto i0 = cop.indices()[0].dyn_cast_or_null<IntegerAttr>())
+//            if (auto all = cop.indices()[1].dyn_cast_or_null<StringAttr>())
+//              if (i0==vi && i0.getSInt() >= 0  /* <- always true because we checked vi >= 0 */
+//                  && all.getValue()=="all") {
+//                potential_vectors.push_back(cop.vectors()[0]);
+//                potential_indices.push_back(i0);
+//                potential_replaced.push_back(vec);
+//              }
+//        }
+//      }
+//
+//}
+//// Copy the current things
+//SmallVector<Value> new_vectors = vectors();
+//SmallVector<Attribute> new_indices;
+//for (
+//auto i
+//:
+//indices()
+//)
+//new_indices.
+//push_back(i);
+//// Replace all that were replaced
+//for (
+//size_t i = 0;
+//i<potential_replaced.
+//size();
+//++i) {
+//for (
+//size_t j = 0;
+//j<new_vectors.
+//size();
+//++j) {
+//if (potential_replaced[i]==new_vectors[j]) {
+//new_vectors[j] = potential_vectors[i];
+//new_indices[j] = potential_indices[i];
+//updated = true; //should be below, not here
+//break; // no need to look for more matches for this replacee
+//}
+//}
+//}
+//
+//// Now that we've updated everything, check if can combine anything!
+//
 
-
-  // Find any potential nested combines to simplify
-  for (size_t i = 0; i < vectors().size(); ++i) {
-    auto vec = vectors()[i];
-    auto index = indices()[i];
-    // We only need to check those that have simple indices for now
-    if (auto vi = index.dyn_cast_or_null<IntegerAttr>())
-      if (vi.getSInt() >= 0)
-        if (auto cop = vec.getDefiningOp<CombineOp>()) {
-          // For now, we handle only very simple cases: one 1-slot operand first, and another "all the rest" vector after.
-          // This happens to be what canonicalization of an insert produces, so this is still useful ;)
-          if (cop.vectors().size()==2) {
-            if (auto i0 = cop.indices()[0].dyn_cast_or_null<IntegerAttr>())
-              if (auto all = cop.indices()[1].dyn_cast_or_null<StringAttr>())
-                if (i0==vi && i0.getSInt() >= 0  /* <- always true because we checked vi >= 0 */
-                    && all.getValue()=="all") {
-                  potential_vectors.push_back(cop.vectors()[0]);
-                  potential_indices.push_back(i0);
-                  potential_replaced.push_back(vec);
-                }
-          }
-        }
-
-  }
-  // Copy the current things
-  SmallVector<Value> new_vectors = vectors();
-  SmallVector<Attribute> new_indices;
-  for (auto i: indices())
-    new_indices.push_back(i);
-  // Replace all that were replaced
-  for (size_t i = 0; i < potential_replaced.size(); ++i) {
-    for (size_t j = 0; j < new_vectors.size(); ++j) {
-      if (potential_replaced[i]==new_vectors[j]) {
-        new_vectors[j] = potential_vectors[i];
-        new_indices[j] = potential_indices[i];
-        updated = true; //should be below, not here
-        break; // no need to look for more matches for this replacee
-      }
-    }
-  }
-
-  // Now that we've updated everything, check if can combine anything!
-
-
-  // update the op
+// update the op
   if (updated) {
-    vectorsMutable().assign(new_vectors);
-    indices() = ArrayAttr::get(getContext(), new_indices);
     return getResult();
   } else {
     return {};
