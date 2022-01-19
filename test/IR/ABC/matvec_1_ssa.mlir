@@ -1,7 +1,7 @@
 // RUN: abc-opt -unroll-loops --canonicalize --cse < %s | FileCheck %s
 // hand-written test -> prettier SSA value names
 module  {
-  func private @encryptedMVP(%m: tensor<16x!fhe.secret<f64>>, %v: tensor<4x!fhe.secret<f64>>) -> tensor<4x!fhe.secret<f64>> {
+  func private @encryptedMVP(%m: tensor<16xf64>, %v: tensor<4x!fhe.secret<f64>>) -> tensor<4x!fhe.secret<f64>> {
     %c0 = arith.constant 0 : index
     %c4 = arith.constant 4 : index
     %c0_sf64 = fhe.constant 0.000000e+00 : f64
@@ -12,9 +12,9 @@ module  {
        // compute ij = i*4 + j
        %2 = arith.muli %i, %c4 : index
        %ij = arith.addi %2, %j : index
-        %mij = tensor.extract %m[%ij] : tensor<16x!fhe.secret<f64>>
+        %mij = tensor.extract %m[%ij] : tensor<16xf64>
         %vj = tensor.extract %v[%j] : tensor<4x!fhe.secret<f64>>
-        %p = fhe.multiply(%mij, %vj) : (!fhe.secret<f64>, !fhe.secret<f64>) -> !fhe.secret<f64>
+        %p = fhe.multiply(%mij, %vj) : (f64, !fhe.secret<f64>) -> !fhe.secret<f64>
         %s = fhe.add(%sum, %p) : (!fhe.secret<f64>, !fhe.secret<f64>) -> !fhe.secret<f64>
         affine.yield %s : !fhe.secret<f64>
       }
