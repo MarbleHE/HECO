@@ -109,10 +109,9 @@ LogicalResult batchArithmeticOperation(IRRewriter &rewriter, MLIRContext *contex
 
 
 
-    // new op with batched result type
-    auto bst = fhe::BatchedSecretType::get(context, result_st.getPlaintextType());
+    // new op
     rewriter.setInsertionPointAfter(op);
-    auto new_op = rewriter.create<OpType>(op.getLoc(), bst, op->getOperands());
+    auto new_op = rewriter.create<OpType>(op.getLoc(), op->getOperands());
     rewriter.setInsertionPoint(new_op); //otherwise, any operand transforming ops will be AFTER the new op
 
     // convert all operands from scalar to batched
@@ -152,6 +151,12 @@ LogicalResult batchArithmeticOperation(IRRewriter &rewriter, MLIRContext *contex
         // non-secret input, which we can always transform as needed -> no action needed now
       }
     }
+
+    // re-create the op to get correct type inference
+    // TODO: avoid this by moving op creation from before operands to after
+    auto newer_op = rewriter.create<OpType>(new_op.getLoc(), new_op->getOperands());
+    rewriter.eraseOp(new_op);
+    new_op = newer_op;
 
     // Now create a scalar again by creating an extract, preserving type constraints
     rewriter.setInsertionPointAfter(new_op);

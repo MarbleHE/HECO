@@ -86,16 +86,19 @@ def BatchedSecret : TypeDef<FHE_Dialect, "BatchedSecret">  {
   let summary = "Batched Secret";
 
   let parameters = (ins
-      "Type":$plaintextType
+      "Type":$plaintextType,
+      "int":$size
   );
 
   let extraClassDeclaration = [{
         SecretType getCorrespondingSecretType() const;
+        /// Sets size = -1
+        static BatchedSecretType get(::mlir::MLIRContext *context, ::mlir::Type plaintextType);
   }];
 
   // See https://mlir.llvm.org/docs/OpDefinitions/#declarative-assembly-format
   // Which explains assemblyFormat for operations, but works for types, too:
-  let assemblyFormat = "`<` $plaintextType `>`";
+  let assemblyFormat = "`<` $size `x` $plaintextType `>`";
 }
 
 

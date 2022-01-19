@@ -25,6 +25,11 @@ class ExtractPattern final : public OpConversionPattern<tensor::ExtractOp> {
   LogicalResult
   matchAndRewrite(tensor::ExtractOp op, typename tensor::ExtractOpAdaptor adaptor,
                   ConversionPatternRewriter &rewriter) const override {
+    int size = -28;
+    auto tt = op.tensor().getType().dyn_cast<TensorType>();
+    if (tt.hasStaticShape() && tt.getShape().size()==1)
+      size = tt.getShape().front();
+
     auto dstType = this->getTypeConverter()->convertType(op.getType());
     if (!dstType)
       return failure();
@@ -32,7 +37,8 @@ class ExtractPattern final : public OpConversionPattern<tensor::ExtractOp> {
       auto batchedSecret = typeConverter->materializeTargetConversion(rewriter,
                                                                       op.tensor().getLoc(),
                                                                       fhe::BatchedSecretType::get(getContext(),
-                                                                                                  st.getPlaintextType()),
+                                                                                                  st.getPlaintextType(),
+                                                                                                  size),
                                                                       op.tensor());
       //TODO: Support  tensor.extract indices format in fhe.extract,too
       auto cOp = op.indices().front().getDefiningOp<arith::ConstantOp>();
@@ -61,8 +67,7 @@ class InsertPattern final : public OpConversionPattern<tensor::InsertOp> {
     if (auto bst = dstType.dyn_cast_or_null<fhe::BatchedSecretType>()) {
       auto batchedSecret = typeConverter->materializeTargetConversion(rewriter,
                                                                       op.dest().getLoc(),
-                                                                      fhe::BatchedSecretType::get(getContext(),
-                                                                                                  bst.getPlaintextType()),
+                                                                      bst,
                                                                       op.dest());
       //TODO: Support  tensor.extract indices format in fhe.extract,too
       auto cOp = op.indices().front().getDefiningOp<arith::ConstantOp>();
@@ -147,8 +152,12 @@ void Tensor2BatchedSecretPass::runOnOperation() {
   auto type_converter = TypeConverter();
 
   type_converter.addConversion([&](TensorType t) {
+    int size = -155;
+    if (t.hasStaticShape() && t.getShape().size()==1) {
+      size = t.getShape().front();
+    }
     if (auto st = t.getElementType().dyn_cast_or_null<fhe::SecretType>()) {
-      return llvm::Optional<Type>(fhe::BatchedSecretType::get(&getContext(), st.getPlaintextType()));
+      return llvm::Optional<Type>(fhe::BatchedSecretType::get(&getContext(), st.getPlaintextType(), size));
     } else {
       return llvm::Optional<Type>(t);
     }

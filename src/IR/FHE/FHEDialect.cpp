@@ -20,6 +20,10 @@ SecretType BatchedSecretType::getCorrespondingSecretType() const {
   return SecretType::get(getContext(), getPlaintextType());
 }
 
+BatchedSecretType BatchedSecretType::get(::mlir::MLIRContext *context, ::mlir::Type plaintextType) {
+  return get(context, plaintextType, -24);
+}
+
 //===----------------------------------------------------------------------===//
 // TableGen'd Operation definitions
 //===----------------------------------------------------------------------===//
@@ -166,6 +170,7 @@ static void print(mlir::OpAsmPrinter &printer, fhe::CombineOp op) {
   // when given as a "generic" triple of ValueRange, DictionaryAttr, RegionRange  instead of nicely "packaged" inside the operation class.
   auto op = MultiplyOpAdaptor(operands, attributes, regions);
   auto plaintextType = Type();
+  int size = -173;
   bool batched = false;
   for (auto operand: op.x()) {
     if (auto secret_type = operand.getType().dyn_cast_or_null<SecretType>()) {
@@ -173,12 +178,13 @@ static void print(mlir::OpAsmPrinter &printer, fhe::CombineOp op) {
     }
     if (auto bst = operand.getType().dyn_cast_or_null<BatchedSecretType>()) {
       plaintextType = bst.getPlaintextType();
+      size = bst.getSize() < 0 ? size : bst.getSize();
       batched = true;
     }
     //TODO: check things properly!
   }
   if (batched)
-    inferredReturnTypes.push_back(BatchedSecretType::get(context, plaintextType));
+    inferredReturnTypes.push_back(BatchedSecretType::get(context, plaintextType, size));
   else
     inferredReturnTypes.push_back(SecretType::get(context, plaintextType));
   return ::mlir::success();
@@ -194,6 +200,7 @@ static void print(mlir::OpAsmPrinter &printer, fhe::CombineOp op) {
   // when given as a "generic" triple of ValueRange, DictionaryAttr, RegionRange  instead of nicely "packaged" inside the operation class.
   auto op = AddOpAdaptor(operands, attributes, regions);
   auto plaintextType = Type();
+  int size = -1;
   bool batched = false;
   for (auto operand: op.x()) {
     if (auto secret_type = operand.getType().dyn_cast_or_null<SecretType>()) {
@@ -201,12 +208,13 @@ static void print(mlir::OpAsmPrinter &printer, fhe::CombineOp op) {
     }
     if (auto bst = operand.getType().dyn_cast_or_null<BatchedSecretType>()) {
       plaintextType = bst.getPlaintextType();
+      size = bst.getSize() < 0 ? size : bst.getSize();
       batched = true;
     }
     //TODO: check things properly!
   }
   if (batched)
-    inferredReturnTypes.push_back(BatchedSecretType::get(context, plaintextType));
+    inferredReturnTypes.push_back(BatchedSecretType::get(context, plaintextType, size));
   else
     inferredReturnTypes.push_back(SecretType::get(context, plaintextType));
   return ::mlir::success();
@@ -222,6 +230,7 @@ static void print(mlir::OpAsmPrinter &printer, fhe::CombineOp op) {
   // when given as a "generic" triple of ValueRange, DictionaryAttr, RegionRange  instead of nicely "packaged" inside the operation class.
   auto op = SubOpAdaptor(operands, attributes, regions);
   auto plaintextType = Type();
+  int size = -1;
   bool batched = false;
   for (auto operand: op.x()) {
     if (auto secret_type = operand.getType().dyn_cast_or_null<SecretType>()) {
@@ -229,12 +238,13 @@ static void print(mlir::OpAsmPrinter &printer, fhe::CombineOp op) {
     }
     if (auto bst = operand.getType().dyn_cast_or_null<BatchedSecretType>()) {
       plaintextType = bst.getPlaintextType();
+      size = bst.getSize() < 0 ? size : bst.getSize();
       batched = true;
     }
     //TODO: check things properly!
   }
   if (batched)
-    inferredReturnTypes.push_back(BatchedSecretType::get(context, plaintextType));
+    inferredReturnTypes.push_back(BatchedSecretType::get(context, plaintextType, size));
   else
     inferredReturnTypes.push_back(SecretType::get(context, plaintextType));
   return ::mlir::success();
@@ -529,9 +539,35 @@ void fhe::ConstOp::getAsmResultNames(
 
 /// simplifies rotate(x,0) to x
 ::mlir::OpFoldResult fhe::RotateOp::fold(::llvm::ArrayRef<::mlir::Attribute> operands) {
+  bool ASSUME_VECTOR_CYCLICAL = true; //TODO: introduce a flag for this!!
+
+  // Simplify
+  //   %op = rotate(%x) by 0
+  // to
+  //   %x
   if (i()==0)
     return x();
+
+  // Simplify
+  //   %op = rotate(%x) by -1
+  // to
+  //   %op = rotate(%x) by k where k == x.size() - 1;
+  // I.e. we wrap around rotations to de-duplicate them for later phases
+  if (ASSUME_VECTOR_CYCLICAL) {
+    if (i() < 0) { // wrap around to positive values. Technically not always the best choice,
+      // but in theory we could always revert that again later when generating code,
+      // when we know what rotations are natively available
+      auto vec_size = x().getType().dyn_cast<BatchedSecretType>().getSize();
+      if (vec_size > 0) {
+        getOperation()->setAttr("i",
+                                IntegerAttr::get(IntegerType::get(getContext(), 32, mlir::IntegerType::Signed),
+                                                 vec_size + i()));
+      }
+    }
+  }
+
   return {};
+
 }
 /// simplifies add(x,0) and add(x) to x
 ::mlir::OpFoldResult fhe::AddOp::fold(::llvm::ArrayRef<::mlir::Attribute> operands) {
