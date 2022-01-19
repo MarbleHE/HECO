@@ -62,6 +62,31 @@ void pipelineBuilder(OpPassManager &manager) {
   manager.addPass(createCanonicalizerPass()); //necessary to remove redundant fhe.materialize
 }
 
+void ssaPipelineBuilder(OpPassManager &manager) {
+  manager.addPass(std::make_unique<UnrollLoopsPass>());
+  manager.addPass(createCanonicalizerPass());
+  manager.addPass(createCSEPass()); //this can greatly reduce the number of operations after unrolling
+  manager.addPass(std::make_unique<NaryPass>());
+
+  // Must canonicalize before Tensor2BatchedSecretPass, since it only handles constant indices in tensor.extract
+  manager.addPass(createCanonicalizerPass());
+  manager.addPass(std::make_unique<Tensor2BatchedSecretPass>());
+  manager.addPass(createCanonicalizerPass()); //necessary to remove redundant fhe.materialize
+  manager.addPass(createCSEPass()); //necessary to remove duplicate fhe.extract
+
+  manager.addPass(std::make_unique<BatchingPass>());
+  manager.addPass(createCanonicalizerPass());
+  manager.addPass(createCSEPass()); // otherwise, the internal batching pass has no "same origin" things to find!
+  manager.addPass(createCanonicalizerPass()); // to fold combine ops that might have simpler form after CSE
+
+  manager.addPass(std::make_unique<InternalOperandBatchingPass>());
+  manager.addPass(createCanonicalizerPass());
+  manager.addPass(createCSEPass());
+
+  manager.addPass(std::make_unique<LowerToEmitCPass>());
+  manager.addPass(createCanonicalizerPass()); //necessary to remove redundant fhe.materialize
+}
+
 int main(int argc, char **argv) {
   mlir::MLIRContext context;
 
@@ -98,6 +123,7 @@ int main(int argc, char **argv) {
   PassRegistration<LowerToEmitCPass>();
 
   PassPipelineRegistration<>("full-pass", "Run all passes", pipelineBuilder);
+  PassPipelineRegistration<>("from-ssa-pass", "Run all passes starting with ssa", ssaPipelineBuilder);
 
   return asMainReturnCode(
       MlirOptMain(argc, argv, "ABC optimizer driver\n", registry));
