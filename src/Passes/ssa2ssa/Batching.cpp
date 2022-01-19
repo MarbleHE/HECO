@@ -143,14 +143,13 @@ LogicalResult batchArithmeticOperation(IRRewriter &rewriter, MLIRContext *contex
                                                                 denseAttr);
           rewriter.replaceOpWithIf(c_op, {new_cst}, [&](OpOperand &operand) { return operand.getOwner()==new_op; });
         } else {
-          emitError(new_op.getLoc(),
+          emitWarning(new_op.getLoc(),
                     "Encountered unexpected (non batchable) defining op for secret operand while trying to batch.");
           return failure();
         }
 
       } else {
-        emitError(new_op.getLoc(), "Encountered unexpected non-secret operand while trying to batch.");
-        return failure();
+        // non-secret input, which we can always transform as needed -> no action needed now
       }
     }
 

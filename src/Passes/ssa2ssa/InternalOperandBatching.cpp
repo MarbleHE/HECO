@@ -65,9 +65,8 @@ LogicalResult internalBatchArithmeticOperation(IRRewriter &rewriter, MLIRContext
           addOriginUse(*it, 0, *it);
         }
       } else {
-        emitError(op.getLoc(),
-                  "Encountered unexpected (non BatchedSecret) defining op as operand while trying to internally batch.");
-        return failure();
+        // Plaintext inputs can be realized to whatever slot we want them to be in
+        addOriginUse(*it, -1, *it);
       }
 
     }
