@@ -10,8 +10,6 @@
 
 using namespace mlir;
 
-//TODO: Handle fhe.combine op!!
-
 void LowerToEmitCPass::getDependentDialects(mlir::DialectRegistry &registry) const {
   registry.insert<mlir::emitc::EmitCDialect,
                   fhe::FHEDialect,
@@ -95,6 +93,83 @@ class EmitCRotatePattern final : public OpConversionPattern<fhe::RotateOp> {
                                                aa,
                                                ArrayAttr(),
                                                ValueRange(x));
+
+    return success();
+  }
+};
+
+class EmitCCombinePattern final : public OpConversionPattern<fhe::CombineOp> {
+ public:
+  using OpConversionPattern<fhe::CombineOp>::OpConversionPattern;
+
+  LogicalResult
+  matchAndRewrite(fhe::CombineOp op, typename fhe::CombineOp::Adaptor adaptor,
+                  ConversionPatternRewriter &rewriter) const override {
+
+    rewriter.setInsertionPoint(op);
+
+    auto dstType = typeConverter->convertType(op.getType());
+    if (!dstType)
+      return failure();
+
+    // Materialize the operands if necessary
+    llvm::SmallVector<Value> new_operands;
+    for (auto x: op.vectors()) {
+      auto xDstType = typeConverter->convertType(x.getType());
+      if (!xDstType)
+        return failure();
+      if (x.getType()!=xDstType) {
+        auto new_operand = typeConverter->materializeTargetConversion(rewriter,
+                                                                      op.getLoc(),
+                                                                      xDstType,
+                                                                      x);
+        new_operands.push_back(new_operand);
+      } else {
+        new_operands.push_back(x);
+      }
+    }
+
+    // TODO: "REAL" lowering of fhe.combine should happen through some type of BGV dialect
+    //  For now we just call a "combine" function in our custom evaluator and let it handle the "lowering"
+
+    // We pass the indices as initializer lists, so we need to build those first
+    std::vector<std::string> init_lists;
+    for (auto a: op.indices()) {
+      if (auto ia = a.dyn_cast<IntegerAttr>()) {
+        init_lists.emplace_back("{" + std::to_string(ia.getInt()) + "}");
+      } else if (auto aa = a.dyn_cast<ArrayAttr>()) {
+        std::string s = "{";
+        bool omit_comma = true;
+        for (auto ia: aa.getAsRange<IntegerAttr>()) {
+          if (!omit_comma) {
+            s += ", ";
+          } else {
+            omit_comma = false;
+          }
+          s += std::to_string(ia.getInt());
+        }
+        s += "}";
+        init_lists.push_back(s);
+      } else if (auto sa = a.dyn_cast<StringAttr>()) {
+        assert(sa.getValue()=="all");
+        init_lists.emplace_back("{}");
+      }
+    }
+
+    // Now interleave operands and initializer lists
+    SmallVector<Attribute> params;
+    for (size_t i = 0; i < op.vectors().size(); ++i) {
+      params.push_back(rewriter.getIndexAttr(i));
+      params.push_back(emitc::OpaqueAttr::get(rewriter.getContext(), init_lists[i]));
+    }
+
+    auto aa = ArrayAttr::get(getContext(), params);
+    rewriter.replaceOpWithNewOp<emitc::CallOp>(op,
+                                               dstType,
+                                               llvm::StringRef("evaluator.combine"),
+                                               aa,
+                                               ArrayAttr(), // no template args
+                                               new_operands);
 
     return success();
   }
@@ -272,6 +347,7 @@ void LowerToEmitCPass::runOnOperation() {
       EmitCArithmeticPattern<fhe::AddOp>,
       EmitCArithmeticPattern<fhe::MultiplyOp>,
       EmitCRotatePattern,
+      EmitCCombinePattern,
       EmitCFunctionPattern
   >(type_converter, patterns.getContext());
 
