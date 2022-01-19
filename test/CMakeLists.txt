@@ -19,28 +19,30 @@ endif()
 ##############################
 # TARGET: testing
 ##############################
+# cpp-ast tests disabled since this is a deprecated feature that is scheduled to be removed in favor of going directly
+# to MLIR ast from parser & python
 set(TEST_FILES
-        ast/ASTComparison.cpp
-        ast/ASTComparison.h
-        AstTestingGenerator.cpp
-        AstTestingGenerator.h
-        JsonOutputTest.cpp
-        ast/AssignmentTest.cpp
-        ast/BinaryExpressionTest.cpp
-        ast/BlockTest.cpp
-        ast/CallTest.cpp
-        ast/ExpressionListTest.cpp
-        ast/ForTest.cpp
-        ast/FunctionParameterTest.cpp
-        ast/FunctionTest.cpp
-        ast/IfTest.cpp
-        ast/LiteralTest.cpp
-        ast/OperatorExpressionTest.cpp
-        ast/ReturnTest.cpp
-        ast/TernaryOperatorTest.cpp
-        ast/UnaryExpressionTest.cpp
-        ast/VariableDeclarationTest.cpp
-        ast/VariableTest.cpp
+        #ast/ASTComparison.cpp
+        #ast/ASTComparison.h
+        #AstTestingGenerator.cpp
+        #AstTestingGenerator.h
+        #JsonOutputTest.cpp
+        #ast/AssignmentTest.cpp
+        #ast/BinaryExpressionTest.cpp
+        #ast/BlockTest.cpp
+        #ast/CallTest.cpp
+        #ast/ExpressionListTest.cpp
+        #ast/ForTest.cpp
+        #ast/FunctionParameterTest.cpp
+        #ast/FunctionTest.cpp
+        #ast/IfTest.cpp
+        #ast/LiteralTest.cpp
+        #ast/OperatorExpressionTest.cpp
+        #ast/ReturnTest.cpp
+        #ast/TernaryOperatorTest.cpp
+        #ast/UnaryExpressionTest.cpp
+        #ast/VariableDeclarationTest.cpp
+        #ast/VariableTest.cpp
         end-to-end/BoxBlurTest.cpp
         end-to-end/CardioTest.cpp
         end-to-end/DotProductTest.cpp
@@ -55,9 +57,9 @@ set(TEST_FILES
         end-to-end/RobertsCrossTest.cpp
         ast_parser/ParserTest.cpp
         ast_parser/TokenizerTest.cpp
-        ast_visitor/PrintVisitorTest.cpp
-        ast_visitor/ProgramPrintVisitorTest.cpp
-        ast_visitor/VisitorTest.cpp
+        #ast_visitor/PrintVisitorTest.cpp
+        #ast_visitor/ProgramPrintVisitorTest.cpp
+        #ast_visitor/VisitorTest.cpp
         bench/MultiTimer.cpp
         bench/BoxBlur.cpp
         bench/L2Distance.cpp
@@ -93,3 +95,6 @@ add_dependencies(testing-all cpp_ast)
 
 # Python tests
 add_subdirectory(python_frontend)
+
+# MLIR testing setup
+add_subdirectory(IR)

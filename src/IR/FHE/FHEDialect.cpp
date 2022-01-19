@@ -30,17 +30,84 @@ SecretType BatchedSecretType::getCorrespondingSecretType() const {
 /// `LogicalResult` that can be converted to a boolean `true` value on failure,
 /// or `false` on success. This allows for easily chaining together a set of
 /// parser rules. These rules are used to populate an `mlir::OperationState`
-/// similarly to the `build` methods described above.
 static mlir::ParseResult parseCombineOp(mlir::OpAsmParser &parser,
                                         mlir::OperationState &result) {
-  //mlir::DenseElementsAttr value;
-  //if (parser.parseOptionalAttrDict(result.attributes) ||
-  //    parser.parseAttribute(value, "value", result.attributes))
-  //  return failure();
-//
-  //result.addTypes(value.getType());
-  //return success();
-  return failure(); //TODO: SUPPORT PARSING COMBINEDOP
+
+  parser.parseLParen();
+
+  llvm::SmallVector<std::pair<mlir::OpAsmParser::OperandType, llvm::SmallVector<Attribute>>> inputs;
+  mlir::OpAsmParser::OperandType remaining_inputs;
+  bool done = false;
+  while (!done) {
+
+    // Get the operand
+    mlir::OpAsmParser::OperandType result;
+    parser.parseOperand(result);
+
+    // Get the indices
+    if (parser.parseOptionalLSquare().succeeded()) {
+      inputs.push_back({result, {}});
+      // TODO: Add support for multiple things, i.e. [i:j, k, l:m] appearing inside one set of square brackets
+      int a;
+      parser.parseInteger(a);
+      int b = a;
+      if (parser.parseOptionalColon().succeeded())
+        parser.parseInteger(b);
+      for (int i = a; i <= b; ++i)
+        inputs.back().second.push_back(parser.getBuilder().getIndexAttr(i));
+
+      parser.parseRSquare();
+    } else {
+      assert(remaining_inputs.name.empty() && "must not have multiple remaining_inputs in fhe.combine op");
+      remaining_inputs = result;
+    }
+
+    // We've parsed the current operand, check if there is another one:
+    if (parser.parseOptionalComma().failed()) {
+      done = true;
+    }
+  }
+
+  parser.parseRParen();
+
+  // Parse type at the end
+  Type type;
+  parser.parseColonType(type);
+
+  // Resolve the operands
+  llvm::SmallVector<Value> operands;
+  SmallVector<Attribute> indices;
+  llvm::SmallVector<Type> types;
+  for (auto p: inputs) {
+    llvm::SmallVector<Value> found_values;
+    parser.resolveOperand(p.first, type, found_values);
+    if (found_values.size()!=1)
+      return failure();
+    operands.push_back(found_values[0]);
+
+    if (p.second.size()==1)
+      indices.push_back(p.second.front());
+    else
+      indices.push_back(parser.getBuilder().getArrayAttr(p.second));
+
+    types.push_back(found_values[0].getType());
+  }
+  if (!remaining_inputs.name.empty()) {
+    llvm::SmallVector<Value> found_values;
+    parser.resolveOperand(remaining_inputs, type, found_values);
+    if (found_values.size()!=1)
+      return failure();
+    operands.push_back(found_values[0]);
+    indices.push_back(parser.getBuilder().getStringAttr("all"));
+    types.push_back(found_values[0].getType());
+  }
+
+  // build the actual op/op state
+  result.addAttribute("indices", parser.getBuilder().getArrayAttr(indices));
+  result.addOperands(operands);
+  result.addTypes(type);
+
+  return success();
 }
 
 /// The 'OpAsmPrinter' class is a stream that allows for formatting
@@ -60,12 +127,12 @@ static void print(mlir::OpAsmPrinter &printer, fhe::CombineOp op) {
         continuous &= aa[j - 1].dyn_cast<IntegerAttr>().getInt() + 1==aa[j].dyn_cast<IntegerAttr>().getInt();
 
       if (continuous) {
-        //TODO: Update this to always print stuff continuously is possible, gobbling input until non-continuous
+        //TODO: Update this to always print stuff continuously if possible, gobbling input until non-continuous
         // and only then emitting a comma and the next value.
         // Requires writing to a sstream first and later wrapping "["/"]" iff a comma was emitted.
         auto start = aa[0].dyn_cast<IntegerAttr>().getInt();
         auto end = aa[aa.size() - 1].dyn_cast<IntegerAttr>().getInt();
-        printer << "#" << start << ":" << end;
+        printer << "[" << start << ":" << end << "]";
       } else if (aa.size() > 1) {
         printer << "[";
         for (size_t j = 0; j < aa.size(); ++j) {
@@ -74,18 +141,16 @@ static void print(mlir::OpAsmPrinter &printer, fhe::CombineOp op) {
           printer << aa[j].dyn_cast<IntegerAttr>().getInt();
         }
         printer << "]";
-      } else {
-        printer << "#" << aa[0].dyn_cast<IntegerAttr>().getInt();
+      } else { //single value inside an array...weird but OK
+        printer << "[" << aa[0].dyn_cast<IntegerAttr>().getInt() << "]";
       }
     } else if (auto ia = indices[i].dyn_cast_or_null<IntegerAttr>()) {
-      printer << "#" << ia.getInt();
+      printer << "[" << ia.getInt() << "]";
     } // else -> do not print implicit "all"
 
   }
   printer << ") : ";
   printer.printType(op.getType());
-  printer << " // GENERIC:";
-  printer.printGenericOp(op);
 }
 
 #define GET_OP_CLASSES

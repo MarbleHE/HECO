@@ -199,178 +199,32 @@ module  {
 
 // CHECK: module  {
 // CHECK:   func private @encryptedBoxBlur(%arg0: !fhe.batched_secret<f64>) -> !fhe.batched_secret<f64> {
-// CHECK:     %0 = fhe.rotate(%arg0) {i = -9 : si32} : (!fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %1 = fhe.rotate(%arg0) {i = -1 : si32} : (!fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %2 = fhe.rotate(%arg0) {i = -57 : si32} : (!fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %3 = fhe.rotate(%arg0) {i = -8 : si32} : (!fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %4 = fhe.rotate(%arg0) {i = -56 : si32} : (!fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %5 = fhe.rotate(%arg0) {i = -7 : si32} : (!fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %6 = fhe.rotate(%arg0) {i = -55 : si32} : (!fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %7 = fhe.rotate(%arg0) {i = -63 : si32} : (!fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
+// CHECK:     %0 = fhe.rotate(%arg0) by -9 : <f64>
+// CHECK:     %1 = fhe.rotate(%arg0) by -1 : <f64>
+// CHECK:     %2 = fhe.rotate(%arg0) by -57 : <f64>
+// CHECK:     %3 = fhe.rotate(%arg0) by -8 : <f64>
+// CHECK:     %4 = fhe.rotate(%arg0) by -56 : <f64>
+// CHECK:     %5 = fhe.rotate(%arg0) by -7 : <f64>
+// CHECK:     %6 = fhe.rotate(%arg0) by -55 : <f64>
+// CHECK:     %7 = fhe.rotate(%arg0) by -63 : <f64>
 // CHECK:     %8 = fhe.add(%0, %1, %2, %3, %arg0, %4, %5, %6, %7) : (!fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %9 = fhe.extract %8[0] : <f64>
-// CHECK:     %10 = fhe.insert %9 into %arg0[0] : <f64>
-// CHECK:     %11 = fhe.rotate(%arg0) {i = -10 : si32} : (!fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %12 = fhe.rotate(%arg0) {i = -2 : si32} : (!fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %13 = fhe.rotate(%arg0) {i = -58 : si32} : (!fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %14 = fhe.add(%11, %12, %13, %0, %1, %2, %3, %4, %arg0) : (!fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %15 = fhe.extract %14[0] : <f64>
-// CHECK:     %16 = fhe.insert %15 into %10[1] : <f64>
-// CHECK:     %17 = fhe.rotate(%arg0) {i = 8 : si32} : (!fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %18 = fhe.rotate(%arg0) {i = -48 : si32} : (!fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %19 = fhe.rotate(%arg0) {i = 1 : si32} : (!fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %20 = fhe.rotate(%arg0) {i = 9 : si32} : (!fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %21 = fhe.rotate(%arg0) {i = -47 : si32} : (!fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %22 = fhe.rotate(%arg0) {i = 2 : si32} : (!fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %23 = fhe.rotate(%arg0) {i = -46 : si32} : (!fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %24 = fhe.rotate(%arg0) {i = 10 : si32} : (!fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %25 = fhe.add(%arg0, %17, %18, %19, %20, %21, %22, %23, %24) : (!fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %26 = fhe.extract %25[11] : <f64>
-// CHECK:     %27 = fhe.insert %26 into %16[2] : <f64>
-// CHECK:     %28 = fhe.extract %25[12] : <f64>
-// CHECK:     %29 = fhe.insert %28 into %27[3] : <f64>
-// CHECK:     %30 = fhe.extract %25[13] : <f64>
-// CHECK:     %31 = fhe.insert %30 into %29[4] : <f64>
-// CHECK:     %32 = fhe.extract %25[14] : <f64>
-// CHECK:     %33 = fhe.insert %32 into %31[5] : <f64>
-// CHECK:     %34 = fhe.extract %25[15] : <f64>
-// CHECK:     %35 = fhe.insert %34 into %33[6] : <f64>
-// CHECK:     %36 = fhe.rotate(%arg0) {i = -16 : si32} : (!fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %37 = fhe.rotate(%arg0) {i = -15 : si32} : (!fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %38 = fhe.rotate(%arg0) {i = -14 : si32} : (!fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %39 = fhe.rotate(%arg0) {i = -62 : si32} : (!fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %40 = fhe.rotate(%arg0) {i = -6 : si32} : (!fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %41 = fhe.add(%36, %3, %arg0, %37, %5, %7, %38, %39, %40) : (!fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %42 = fhe.extract %41[0] : <f64>
-// CHECK:     %43 = fhe.insert %42 into %35[7] : <f64>
-// CHECK:     %44 = fhe.rotate(%arg0) {i = -17 : si32} : (!fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %45 = fhe.add(%44, %0, %1, %36, %3, %arg0, %37, %7, %5) : (!fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %46 = fhe.extract %45[0] : <f64>
-// CHECK:     %47 = fhe.insert %46 into %43[8] : <f64>
-// CHECK:     %48 = fhe.rotate(%arg0) {i = -18 : si32} : (!fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %49 = fhe.add(%48, %11, %12, %44, %0, %1, %36, %arg0, %3) : (!fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %50 = fhe.extract %49[0] : <f64>
-// CHECK:     %51 = fhe.insert %50 into %47[9] : <f64>
-// CHECK:     %52 = fhe.rotate(%arg0) {i = 16 : si32} : (!fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %53 = fhe.rotate(%arg0) {i = 17 : si32} : (!fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %54 = fhe.rotate(%arg0) {i = 18 : si32} : (!fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %55 = fhe.add(%arg0, %17, %52, %19, %20, %53, %22, %54, %24) : (!fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %56 = fhe.extract %55[19] : <f64>
-// CHECK:     %57 = fhe.insert %56 into %51[10] : <f64>
-// CHECK:     %58 = fhe.extract %55[20] : <f64>
-// CHECK:     %59 = fhe.insert %58 into %57[11] : <f64>
-// CHECK:     %60 = fhe.extract %55[21] : <f64>
-// CHECK:     %61 = fhe.insert %60 into %59[12] : <f64>
-// CHECK:     %62 = fhe.extract %55[22] : <f64>
-// CHECK:     %63 = fhe.insert %62 into %61[13] : <f64>
-// CHECK:     %64 = fhe.extract %55[23] : <f64>
-// CHECK:     %65 = fhe.insert %64 into %63[14] : <f64>
-// CHECK:     %66 = fhe.extract %55[24] : <f64>
-// CHECK:     %67 = fhe.insert %66 into %65[15] : <f64>
-// CHECK:     %68 = fhe.extract %55[25] : <f64>
-// CHECK:     %69 = fhe.insert %68 into %67[16] : <f64>
-// CHECK:     %70 = fhe.extract %55[26] : <f64>
-// CHECK:     %71 = fhe.insert %70 into %69[17] : <f64>
-// CHECK:     %72 = fhe.extract %55[27] : <f64>
-// CHECK:     %73 = fhe.insert %72 into %71[18] : <f64>
-// CHECK:     %74 = fhe.extract %55[28] : <f64>
-// CHECK:     %75 = fhe.insert %74 into %73[19] : <f64>
-// CHECK:     %76 = fhe.extract %55[29] : <f64>
-// CHECK:     %77 = fhe.insert %76 into %75[20] : <f64>
-// CHECK:     %78 = fhe.extract %55[30] : <f64>
-// CHECK:     %79 = fhe.insert %78 into %77[21] : <f64>
-// CHECK:     %80 = fhe.extract %55[31] : <f64>
-// CHECK:     %81 = fhe.insert %80 into %79[22] : <f64>
-// CHECK:     %82 = fhe.extract %55[32] : <f64>
-// CHECK:     %83 = fhe.insert %82 into %81[23] : <f64>
-// CHECK:     %84 = fhe.extract %55[33] : <f64>
-// CHECK:     %85 = fhe.insert %84 into %83[24] : <f64>
-// CHECK:     %86 = fhe.extract %55[34] : <f64>
-// CHECK:     %87 = fhe.insert %86 into %85[25] : <f64>
-// CHECK:     %88 = fhe.extract %55[35] : <f64>
-// CHECK:     %89 = fhe.insert %88 into %87[26] : <f64>
-// CHECK:     %90 = fhe.extract %55[36] : <f64>
-// CHECK:     %91 = fhe.insert %90 into %89[27] : <f64>
-// CHECK:     %92 = fhe.extract %55[37] : <f64>
-// CHECK:     %93 = fhe.insert %92 into %91[28] : <f64>
-// CHECK:     %94 = fhe.extract %55[38] : <f64>
-// CHECK:     %95 = fhe.insert %94 into %93[29] : <f64>
-// CHECK:     %96 = fhe.extract %55[39] : <f64>
-// CHECK:     %97 = fhe.insert %96 into %95[30] : <f64>
-// CHECK:     %98 = fhe.extract %55[40] : <f64>
-// CHECK:     %99 = fhe.insert %98 into %97[31] : <f64>
-// CHECK:     %100 = fhe.extract %55[41] : <f64>
-// CHECK:     %101 = fhe.insert %100 into %99[32] : <f64>
-// CHECK:     %102 = fhe.extract %55[42] : <f64>
-// CHECK:     %103 = fhe.insert %102 into %101[33] : <f64>
-// CHECK:     %104 = fhe.extract %55[43] : <f64>
-// CHECK:     %105 = fhe.insert %104 into %103[34] : <f64>
-// CHECK:     %106 = fhe.extract %55[44] : <f64>
-// CHECK:     %107 = fhe.insert %106 into %105[35] : <f64>
-// CHECK:     %108 = fhe.extract %55[45] : <f64>
-// CHECK:     %109 = fhe.insert %108 into %107[36] : <f64>
-// CHECK:     %110 = fhe.extract %55[46] : <f64>
-// CHECK:     %111 = fhe.insert %110 into %109[37] : <f64>
-// CHECK:     %112 = fhe.extract %55[47] : <f64>
-// CHECK:     %113 = fhe.insert %112 into %111[38] : <f64>
-// CHECK:     %114 = fhe.extract %55[48] : <f64>
-// CHECK:     %115 = fhe.insert %114 into %113[39] : <f64>
-// CHECK:     %116 = fhe.extract %55[49] : <f64>
-// CHECK:     %117 = fhe.insert %116 into %115[40] : <f64>
-// CHECK:     %118 = fhe.extract %55[50] : <f64>
-// CHECK:     %119 = fhe.insert %118 into %117[41] : <f64>
-// CHECK:     %120 = fhe.extract %55[51] : <f64>
-// CHECK:     %121 = fhe.insert %120 into %119[42] : <f64>
-// CHECK:     %122 = fhe.extract %55[52] : <f64>
-// CHECK:     %123 = fhe.insert %122 into %121[43] : <f64>
-// CHECK:     %124 = fhe.extract %55[53] : <f64>
-// CHECK:     %125 = fhe.insert %124 into %123[44] : <f64>
-// CHECK:     %126 = fhe.extract %55[54] : <f64>
-// CHECK:     %127 = fhe.insert %126 into %125[45] : <f64>
-// CHECK:     %128 = fhe.extract %55[55] : <f64>
-// CHECK:     %129 = fhe.insert %128 into %127[46] : <f64>
-// CHECK:     %130 = fhe.extract %55[56] : <f64>
-// CHECK:     %131 = fhe.insert %130 into %129[47] : <f64>
-// CHECK:     %132 = fhe.extract %55[57] : <f64>
-// CHECK:     %133 = fhe.insert %132 into %131[48] : <f64>
-// CHECK:     %134 = fhe.extract %55[58] : <f64>
-// CHECK:     %135 = fhe.insert %134 into %133[49] : <f64>
-// CHECK:     %136 = fhe.extract %55[59] : <f64>
-// CHECK:     %137 = fhe.insert %136 into %135[50] : <f64>
-// CHECK:     %138 = fhe.extract %55[60] : <f64>
-// CHECK:     %139 = fhe.insert %138 into %137[51] : <f64>
-// CHECK:     %140 = fhe.extract %55[61] : <f64>
-// CHECK:     %141 = fhe.insert %140 into %139[52] : <f64>
-// CHECK:     %142 = fhe.extract %55[62] : <f64>
-// CHECK:     %143 = fhe.insert %142 into %141[53] : <f64>
-// CHECK:     %144 = fhe.extract %55[63] : <f64>
-// CHECK:     %145 = fhe.insert %144 into %143[54] : <f64>
-// CHECK:     %146 = fhe.rotate(%arg0) {i = -54 : si32} : (!fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %147 = fhe.add(%arg0, %4, %18, %7, %6, %21, %39, %23, %146) : (!fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %148 = fhe.extract %147[0] : <f64>
-// CHECK:     %149 = fhe.insert %148 into %145[55] : <f64>
-// CHECK:     %150 = fhe.rotate(%arg0) {i = -49 : si32} : (!fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %151 = fhe.add(%1, %2, %150, %arg0, %4, %18, %7, %21, %6) : (!fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %152 = fhe.extract %151[0] : <f64>
-// CHECK:     %153 = fhe.insert %152 into %149[56] : <f64>
-// CHECK:     %154 = fhe.rotate(%arg0) {i = -50 : si32} : (!fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %155 = fhe.add(%12, %13, %154, %1, %2, %150, %arg0, %18, %4) : (!fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %156 = fhe.extract %155[0] : <f64>
-// CHECK:     %157 = fhe.insert %156 into %153[57] : <f64>
-// CHECK:     %158 = fhe.add(%arg0, %4, %18, %19, %6, %21, %22, %23, %146) : (!fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %159 = fhe.extract %158[3] : <f64>
-// CHECK:     %160 = fhe.insert %159 into %157[58] : <f64>
-// CHECK:     %161 = fhe.extract %158[4] : <f64>
-// CHECK:     %162 = fhe.insert %161 into %160[59] : <f64>
-// CHECK:     %163 = fhe.extract %158[5] : <f64>
-// CHECK:     %164 = fhe.insert %163 into %162[60] : <f64>
-// CHECK:     %165 = fhe.extract %158[6] : <f64>
-// CHECK:     %166 = fhe.insert %165 into %164[61] : <f64>
-// CHECK:     %167 = fhe.extract %158[7] : <f64>
-// CHECK:     %168 = fhe.insert %167 into %166[62] : <f64>
-// CHECK:     %169 = fhe.add(%3, %arg0, %4, %5, %7, %6, %40, %146, %39) : (!fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
-// CHECK:     %170 = fhe.extract %169[0] : <f64>
-// CHECK:     %171 = fhe.insert %170 into %168[63] : <f64>
-// CHECK:     return %171 : !fhe.batched_secret<f64>
+// CHECK:     %9 = fhe.rotate(%arg0) by 1 : <f64>
+// CHECK:     %10 = fhe.add(%0, %1, %2, %3, %arg0, %4, %5, %6, %9) : (!fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
+// CHECK:     %11 = fhe.rotate(%arg0) by 7 : <f64>
+// CHECK:     %12 = fhe.add(%0, %1, %11, %3, %arg0, %4, %5, %6, %9) : (!fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
+// CHECK:     %13 = fhe.rotate(%arg0) by 8 : <f64>
+// CHECK:     %14 = fhe.add(%0, %1, %11, %3, %arg0, %13, %5, %6, %9) : (!fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
+// CHECK:     %15 = fhe.rotate(%arg0) by 9 : <f64>
+// CHECK:     %16 = fhe.add(%0, %1, %11, %3, %arg0, %13, %5, %15, %9) : (!fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
+// CHECK:     %17 = fhe.rotate(%arg0) by 55 : <f64>
+// CHECK:     %18 = fhe.add(%17, %1, %11, %3, %arg0, %13, %5, %15, %9) : (!fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
+// CHECK:     %19 = fhe.rotate(%arg0) by 56 : <f64>
+// CHECK:     %20 = fhe.add(%17, %1, %11, %19, %arg0, %13, %5, %15, %9) : (!fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
+// CHECK:     %21 = fhe.rotate(%arg0) by 57 : <f64>
+// CHECK:     %22 = fhe.add(%17, %1, %11, %19, %arg0, %13, %21, %15, %9) : (!fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
+// CHECK:     %23 = fhe.rotate(%arg0) by 63 : <f64>
+// CHECK:     %24 = fhe.add(%17, %23, %11, %19, %arg0, %13, %21, %15, %9) : (!fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>, !fhe.batched_secret<f64>) -> !fhe.batched_secret<f64>
+// CHECK:     %25 = fhe.combine(%8[0], %10[1:6], %12[7], %14[8], %16[9:54], %18[55], %20[56], %22[57:62], %24[63], %arg0) : !fhe.batched_secret<f64>
+// CHECK:     return %25 : !fhe.batched_secret<f64>
 // CHECK:   }
 // CHECK: }

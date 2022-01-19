@@ -46,6 +46,7 @@ class CustomEvaluator {
   }
 
 };
+//TODO: Initialize stuff
 CustomEvaluator evaluator;
 
 seal::Ciphertext encryptedHammingDistance(seal::Ciphertext v1, seal::Ciphertext v2) {
