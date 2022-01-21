@@ -27,6 +27,7 @@ add_llvm_executable(abc-opt
         ${PROJECT_SOURCE_DIR}/src/Passes/ssa2ssa/Tensor2BatchedSecret.cpp
         ${PROJECT_SOURCE_DIR}/src/Passes/ssa2ssa/Batching.cpp
         ${PROJECT_SOURCE_DIR}/src/Passes/ssa2ssa/InternalOperandBatching.cpp
+        ${PROJECT_SOURCE_DIR}/src/Passes/ssa2ssa/ScalarBatching.cpp
         ${PROJECT_SOURCE_DIR}/src/Passes/ssa2cpp/LowerToEmitC.cpp
         ${PROJECT_SOURCE_DIR}/src/tools/abc-opt/abc-opt.cpp)
 
