@@ -30,6 +30,7 @@
 #include "abc/Passes/ssa2ssa/InternalOperandBatching.h"
 #include "abc/Passes/ssa2ssa/ScalarBatching.h"
 #include "abc/Passes/ssa2cpp/LowerToEmitC.h"
+#include <time.h>
 
 #include <iostream>
 
@@ -93,6 +94,8 @@ void ssaPipelineBuilder(OpPassManager &manager) {
 }
 
 int main(int argc, char **argv) {
+  clock_t start = clock();
+
   mlir::MLIRContext context;
 
   mlir::DialectRegistry registry;
@@ -131,6 +134,13 @@ int main(int argc, char **argv) {
   PassPipelineRegistration<>("full-pass", "Run all passes", pipelineBuilder);
   PassPipelineRegistration<>("from-ssa-pass", "Run all passes starting with ssa", ssaPipelineBuilder);
 
-  return asMainReturnCode(
+  auto code = asMainReturnCode(
       MlirOptMain(argc, argv, "ABC optimizer driver\n", registry));
+
+  clock_t stop = clock();
+  double elapsed = (double) (stop - start)/CLOCKS_PER_SEC;
+  printf("\nTime elapsed: %.5f\n", elapsed);
+
+  return code;
 }
+
