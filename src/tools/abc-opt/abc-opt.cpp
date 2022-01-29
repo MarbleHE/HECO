@@ -59,7 +59,7 @@ void pipelineBuilder(OpPassManager &manager) {
   manager.addPass(createCanonicalizerPass());
   manager.addPass(createCSEPass());
 
-  manager.addPass(std::make_unique<ScalarBatchingPass>());
+  //manager.addPass(std::make_unique<ScalarBatchingPass>());
 
   manager.addPass(std::make_unique<LowerToEmitCPass>());
   manager.addPass(createCanonicalizerPass()); //necessary to remove redundant fhe.materialize
@@ -86,7 +86,7 @@ void ssaPipelineBuilder(OpPassManager &manager) {
   manager.addPass(createCanonicalizerPass());
   manager.addPass(createCSEPass());
 
-  manager.addPass(std::make_unique<ScalarBatchingPass>());
+  //manager.addPass(std::make_unique<ScalarBatchingPass>());
 
   manager.addPass(std::make_unique<LowerToEmitCPass>());
   manager.addPass(createCanonicalizerPass()); //necessary to remove redundant fhe.materialize
