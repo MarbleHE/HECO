@@ -1,5 +1,4 @@
 import logging
-import json
 
 from ast import *
 
@@ -9,7 +8,6 @@ from .ABCTypes import is_secret
 from .FunctionVisitor import FunctionVisitor
 
 UNSUPPORTED_ATTRIBUTE_RESOLUTION = "Attribute resolution is not supported."
-UNSUPPORTED_FUNCTION = "Functions other than 'main' are not supported (violating function: '%s')."
 UNSUPPORTED_ONLY_ARGS = "Positional-only and keyword-only arguments are not supported."
 UNSUPPORTED_STATEMENT = "Unsupported statement: '%s' is not supported."
 UNSUPPORTED_SYNTAX_ERROR = "Unsupported syntax: %s."
@@ -19,10 +17,8 @@ NO_FLOOR_DIV = "There is no type casting, division of integers will always be in
                "Thus '/' and '//' are equivalent in ABC frontend code."
 UNSUPPORTED_LOCAL_FUNCTION_CALL = "Function calls in the same context object are not yet implemented."
 UNSUPPORTED_GLOBAL_FUNCTION_CALL = "Global functions calls are not yet implemented."
+UNSUPPORTED_FUNCTION_ARGS = "%s are not supported! Violating function:\n%s"
 BLACKBOX_FUNCTION_CALL = "Did not find source code of function call, treat it as blackbox."
-
-MAIN_SYMBOL = "main"
-
 
 class ABCVisitor(NodeVisitor):
     """
@@ -137,6 +133,15 @@ class ABCVisitor(NodeVisitor):
             # we never declare an index assignment, the indexed variable was declared before.
             return self.builder.make_assignment(var, expr)
 
+    def _arg_to_function_param(self, arg : arg):
+        identifier = arg.arg
+
+        # TODO: translate type annotations properly
+        # type = self._get_annotation(arg)
+        param_type = "void"
+
+        return self.builder.make_function_param(identifier, param_type)
+
     #
     # Supported visit functions
     #
@@ -217,12 +222,13 @@ class ABCVisitor(NodeVisitor):
             on generic FHE objects that track the operations performed on them.
         """
 
-        # Check if the function is defined in the same context
+        # Check if the function is defined in the same function
         if isinstance(node.func, Attribute):
             logging.error(UNSUPPORTED_ATTRIBUTE_RESOLUTION)
             exit(1)
 
-        fn_ast = FunctionVisitor(node.func.id).visit(self.prog.src_context_ast)
+        # Check if the function is defined on the call stack
+        fn_ast = FunctionVisitor(node.func.id).visit(self.prog.src_call_stack_ast)
         if fn_ast:
             logging.error(UNSUPPORTED_LOCAL_FUNCTION_CALL)
             exit(1)
@@ -231,9 +237,15 @@ class ABCVisitor(NodeVisitor):
         # Check if the function is defined globally in the same file
         fn_ast = FunctionVisitor(node.func.id).visit(self.prog.src_code_ast)
         if fn_ast:
-            logging.error(UNSUPPORTED_GLOBAL_FUNCTION_CALL)
-            exit(1)
-            # TODO: return here when this is implemented
+            args = list(map(self.visit, node.args))
+            return self.builder.make_call(node.func.id, args)
+
+        # Check if the function is defined in the same with block
+        for block in self.prog.src_curr_blocks_asts:
+            fn_ast = FunctionVisitor(node.func.id).visit(block)
+            if fn_ast:
+                args = list(map(self.visit, node.args))
+                return self.builder.make_call(node.func.id, args)
 
         # Otherwise, treat this function as a blackbox call. We execute the function on generic ABC values and record
         # the operations performed on those values to build an expression, with which we replace the function call.
@@ -347,41 +359,43 @@ class ABCVisitor(NodeVisitor):
     def visit_FunctionDef(self, node: FunctionDef) -> dict:
         """
         Visit a Python function definition and convert it to an AST function definition.
-        The 'main' function is treated differently: it is removed and it's contents are
-        directly converted to the root of the AST.
         """
 
-        if node.name == MAIN_SYMBOL:
-            # TODO: From Python 3.9 onwards, we can use unparse instead of dump (newly added to ast)
-            # logging.debug(f"Parsing python main function:\n{unparse(node)}")
+        # logging.debug(f"Parsing python function:\n{unparse(node)}")
 
-            last_stmt = node.body[-1]
-            if not isinstance(last_stmt, Return):
-                logging.error("The FHE main function has to return something.")
-                exit(1)
+        last_stmt = node.body[-1]
+        if not isinstance(last_stmt, Return):
+            logging.warning("Function without return statement found.")
 
-            # Parse the main function, except the return statement
-            stmts = list(map(self.visit, node.body))
-            body = self.builder.make_block(stmts)
+        # Parse the return type
+        # TODO [mh]: as an addition, we could parse "returns" return type annotations
+        return_type = "void"
 
-            # Parse the return statement separately. We do support parsing multiple variables of the same type,
-            # but we don't support expressions.
-            ret_vals = last_stmt.value.elts if isinstance(last_stmt.value, Tuple) else [last_stmt.value]
-            ret_vars = dict()
-            ret_constants = []
-            for i, ret_val in enumerate(ret_vals):
-                if isinstance(ret_val, Name):
-                    ret_vars[ret_val.id] = i
-                elif isinstance(ret_val, Constant):
-                    ret_constants.append(ret_val.value)
-
-            self.prog.add_main_fn(body, self._args_to_dict(node.args), ret_vars, ret_constants)
-
-            # logging.debug(f"... to ABC AST:\n{json.dumps(body, indent=2)}")
-            return {}
-        else:
-            logging.error(UNSUPPORTED_FUNCTION, node.name)
+        # Parse the function arguments
+        if len(node.args.kwonlyargs) > 0:
+            logging.error(UNSUPPORTED_FUNCTION_ARGS.format("kwonlyargs", unparse(node)))
             exit(1)
+        if len(node.args.posonlyargs) > 0:
+            logging.error(UNSUPPORTED_FUNCTION_ARGS.format("posonlyargs", unparse(node)))
+            exit(1)
+        if len(node.args.kw_defaults) > 0:
+            logging.error(UNSUPPORTED_FUNCTION_ARGS.format("kw_defaults", unparse(node)))
+            exit(1)
+        if len(node.args.defaults) > 0:
+            logging.error(UNSUPPORTED_FUNCTION_ARGS.format("defaults", unparse(node)))
+            exit(1)
+
+        params = list(map(self._arg_to_function_param, node.args.args))
+
+        # Parse the function body
+        stmts = list(map(self.visit, node.body))
+        body = self.builder.make_block(stmts)
+
+        # TODO: nested functions (function definitions inside other functions) are neither detected nor supported.
+        fn = self.builder.make_function(node.name, return_type, params, body)
+        self.prog.add_fn(fn)
+
+        return fn
 
     def visit_Gt(self, node: Gt) -> dict:
         return self.builder.constants.GT
@@ -462,8 +476,7 @@ class ABCVisitor(NodeVisitor):
 
         # Only support single return statements, since we don't support multi-value return statements yet
         if isinstance(node.value, Tuple):
-            # TODO: From Python 3.9 onwards, we can use unparse instead of dump (newly added to ast)
-            logging.error(UNSUPPORTED_MULTI_VALUE_RETURN, dump(node))
+            logging.error(UNSUPPORTED_MULTI_VALUE_RETURN, unparse(node))
             exit(1)
 
         ret_node = self.visit(node.value)

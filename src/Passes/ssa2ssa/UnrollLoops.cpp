@@ -4,7 +4,6 @@
 #include "abc/Passes/ssa2ssa/UnrollLoops.h"
 
 using namespace mlir;
-using namespace abc;
 
 void unrollLoop(AffineForOp& op, IRRewriter& rewriter) {
 

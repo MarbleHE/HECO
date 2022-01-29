@@ -58,6 +58,10 @@ class FunctionParameter : public AbstractTarget {
 
   [[nodiscard]] const Datatype &getParameterType() const;
 
+  /// Create a FunctionParameter node from a nlohmann::json representation of this node.
+  /// \return unique_ptr to a new For node
+  static std::unique_ptr<FunctionParameter> fromJson(nlohmann::json j);
+
   ///////////////////////////////////////////////
   ////////// AbstractNode Interface /////////////
   ///////////////////////////////////////////////

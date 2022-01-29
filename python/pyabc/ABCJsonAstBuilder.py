@@ -86,6 +86,9 @@ class ABCJsonAstBuilder:
         d.update(content)
         return d
 
+    def _make_arguments(self, arguments):
+        return {"arguments": arguments}
+
     def _make_body(self, body):
         return {"body": body}
 
@@ -116,6 +119,12 @@ class ABCJsonAstBuilder:
     def _make_op(self, op):
         return {"operator": op}
 
+    def _make_params(self, params):
+        return {"parameters": params}
+
+    def _make_param_type(self, t):
+        return {"parameter_type": t}
+
     def _make_right(self, right):
         return {"right": right}
 
@@ -124,6 +133,9 @@ class ABCJsonAstBuilder:
 
     def _make_expressions(self, stmts):
         return {"expressions": stmts}
+
+    def _make_return_type(self, stmt):
+        return {"return_type": stmt}
 
     def _make_target(self, target):
         return {"target": target}
@@ -183,6 +195,20 @@ class ABCJsonAstBuilder:
 
         return self._make_abc_node("Block", self._make_stmts(stmts))
 
+    def make_call(self, identifier : str, arguments : list) -> dict:
+        """
+        Create a dictionary corresponding to an ABC Call node for the given function and arguments
+
+        :param identifier: Name of the function
+        :param arguments: List of JSON-equivalent dictionaries of ABC function parameters
+        :return: JSON-equivalent dictionary for an ABC Call
+        """
+
+        d = self._make_identifier(identifier)
+        d.update(self._make_arguments(arguments))
+
+        return self._make_abc_node("Call", d)
+
     def make_expression_list(self, exprs : list) -> dict:
         """
         Create a dictionary corresponding to an ABC ExpressionList node when exported in JSON
@@ -192,6 +218,38 @@ class ABCJsonAstBuilder:
         """
 
         return self._make_abc_node("ExpressionList", self._make_expressions(exprs))
+
+    def make_function(self, identifier : str, return_type : str, params : dict, body : dict) -> dict:
+        """
+        Create a dictionary corresponding to an ABC Function node when exported in JSON
+
+        :param identifier: Name of the function
+        :param return_type: Return type of the function
+        :param params: Parameters of the function (dict with list of FunctionParameters)
+        :param body: Function body
+        :return: JSON-equivalent dictionary for an Function node
+        """
+
+        d = self._make_identifier(identifier)
+        d.update(self._make_return_type(return_type))
+        d.update(self._make_params(params))
+        d.update(self._make_body(body))
+
+        return self._make_abc_node("Function", d)
+
+    def make_function_param(self, identifier : str, param_type : str):
+        """
+        Create a dictionary corresponding to an ABC FunctionParameter node when exported in JSON
+
+        :param identifier: Name of the parameter
+        :param param_type: Type of the parameter
+        :return:
+        """
+
+        d = self._make_identifier(identifier)
+        d.update(self._make_param_type(param_type))
+
+        return self._make_abc_node("FunctionParameter", d)
 
     def make_for(self, initializer : dict, condition : dict, update : dict, body : dict) -> dict:
         """

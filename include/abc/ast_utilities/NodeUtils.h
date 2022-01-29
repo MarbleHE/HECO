@@ -8,7 +8,8 @@
 
 enum NodeType : unsigned char {
   // AbstractStatement
-  NodeTypeAssignment = 0, NodeTypeBlock, NodeTypeFor, NodeTypeIf, NodeTypeReturn, NodeTypeVariableDeclaration,
+  NodeTypeAssignment = 0, NodeTypeBlock, NodeTypeFunction, NodeTypeFor, NodeTypeIf, NodeTypeReturn,
+  NodeTypeVariableDeclaration,
 
   // AbstractExpression -> AbstractTarget
   NodeTypeFunctionParameter, NodeTypeIndexAccess, NodeTypeVariable,

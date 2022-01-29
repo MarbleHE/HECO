@@ -54,7 +54,7 @@ def Secret : TypeDef<FHE_Dialect, "Secret">  {
   // See https://mlir.llvm.org/docs/OpDefinitions/#type-definitions
   // for detailed information on how declartive type definitions work
 
-  let description = "A Type for Secrets (high-level abstraction of Ciphertexts)";
+  let description = "A Type for Secrets (high-level abstraction of Ciphertexts encrypting single scalars)";
 
   // Types are written as "!<dialect_name>.<type_mnemonic>" in textal MLIR representation
   let mnemonic = "secret";
@@ -70,6 +70,37 @@ def Secret : TypeDef<FHE_Dialect, "Secret">  {
   // Which explains assemblyFormat for operations, but works for types, too:
   let assemblyFormat = "`<` $plaintextType `>`";
 }
+
+
+def BatchedSecret : TypeDef<FHE_Dialect, "BatchedSecret">  {
+
+  // See https://mlir.llvm.org/docs/OpDefinitions/#type-definitions
+  // for detailed information on how declartive type definitions work
+
+  let description = "A Type for Batched Secrets (high-level abstraction of Ciphertexts encrypting vectors of values)";
+
+  // Types are written as "!<dialect_name>.<type_mnemonic>" in textal MLIR representation
+  let mnemonic = "batched_secret";
+
+  // This summary is used, among other things, in type-related error messages
+  let summary = "Batched Secret";
+
+  let parameters = (ins
+      "Type":$plaintextType,
+      "int":$size
+  );
+
+  let extraClassDeclaration = [{
+        SecretType getCorrespondingSecretType() const;
+        /// Sets size = -1
+        static BatchedSecretType get(::mlir::MLIRContext *context, ::mlir::Type plaintextType);
+  }];
+
+  // See https://mlir.llvm.org/docs/OpDefinitions/#declarative-assembly-format
+  // Which explains assemblyFormat for operations, but works for types, too:
+  let assemblyFormat = "`<` $size `x` $plaintextType `>`";
+}
+
 
 //===----------------------------------------------------------------------===//
 // FHE Operations
@@ -110,9 +141,10 @@ def FHE_MultiplyOp : FHE_Op<"multiply", [Commutative, DeclareOpInterfaceMethods<
   );
 
   let results = (outs
-    Secret:$output
+    AnyTypeOf<[Secret,BatchedSecret]>:$output
   );
 
+  let hasFolder = 1;
 }
 
 def FHE_AddOp : FHE_Op<"add", [Commutative, DeclareOpInterfaceMethods<InferTypeOpInterface>]> {
@@ -125,8 +157,10 @@ def FHE_AddOp : FHE_Op<"add", [Commutative, DeclareOpInterfaceMethods<InferTypeO
   );
 
   let results = (outs
-    Secret:$output
+    AnyTypeOf<[Secret,BatchedSecret]>:$output
   );
+
+  let hasFolder = 1;
 
 }
 
@@ -138,22 +172,10 @@ def FHE_SubOp : FHE_Op<"sub", [DeclareOpInterfaceMethods<InferTypeOpInterface>]>
   );
 
   let results = (outs
-    Secret:$output
+    AnyTypeOf<[Secret,BatchedSecret]>:$output
   );
 
-}
-
-def FHE_ResolveOp : FHE_Op<"resolve", [DeclareOpInterfaceMethods<InferTypeOpInterface>]> {
-  let summary = "Resolve to a scalar.";
-
-  let arguments = (ins
-    Secret:$x,
-    IndexAttr:$i
-  );
-
-  let results = (outs
-    AnyType:$output
-  );
+  let hasFolder = 1;
 
 }
 
@@ -161,13 +183,17 @@ def FHE_RotateOp : FHE_Op<"rotate", [AllTypesMatch<["x","output"]>]> {
   let summary = "Rotate.";
 
   let arguments = (ins
-    Secret:$x,
-    IndexAttr:$i
+    BatchedSecret:$x,
+    SI32Attr:$i
   );
 
   let results = (outs
-    Secret:$output
+    BatchedSecret:$output
   );
+
+  let hasFolder = 1;
+
+  let assemblyFormat = "`(` $x `)` `by` $i attr-dict `:` type($x)";
 
 }
 
@@ -176,27 +202,99 @@ def FHE_RelinearizeOp : FHE_Op<"relinearize", [AllTypesMatch<["x", "output"]>]> 
   let summary = "Relinearization.";
 
   let arguments = (ins
-    Secret:$x
+    AnyTypeOf<[Secret,BatchedSecret]>:$x
   );
 
   let results = (outs
-    Secret:$output
+    AnyTypeOf<[Secret,BatchedSecret]>:$output
   );
 
 }
 
-def FHE_CastOp : FHE_Op<"cast", []> {
+def FHE_ConstOp : FHE_Op<"constant", [
+        ConstantLike,
+        InferTypeOpInterface,
+        DeclareOpInterfaceMethods<InferTypeOpInterface>,
+        DeclareOpInterfaceMethods<OpAsmOpInterface, ["getAsmResultNames"]>
+    ]> {
+
+  let summary = "FHE constant";
 
   let summary = "Cast a value into a secret containing the same type.";
 
   let arguments = (ins
-    AnyType:$x
+    AnyAttr:$value
   );
 
   let results = (outs
-    Secret:$output
+     AnyTypeOf<[Secret,BatchedSecret]>:$result
   );
+
+  let hasFolder = 1;
+
+  let assemblyFormat = "attr-dict $value";
+}
+
+def FHE_ExtractOp : FHE_Op<"extract", [
+        TypesMatchWith<"result type matches element type of tensor",
+                    "vector", "result",
+                    "$_self.cast<BatchedSecretType>().getCorrespondingSecretType()">
+    ]> {
+
+  let summary = "element extraction operation (actually executing this under FHE is highly inefficient)";
+
+  let arguments = (ins BatchedSecret:$vector, IndexAttr:$i);
+  let results = (outs Secret:$result);
+  let assemblyFormat = "$vector `[` $i `]` attr-dict `:` type($vector)";
+}
+
+def FHE_InsertOp : FHE_Op<"insert", [
+        AllTypesMatch<["dest", "result"]>,
+        TypesMatchWith<"scalar type matches element type of dest",
+                       "dest", "scalar",
+                       "$_self.cast<BatchedSecretType>().getCorrespondingSecretType()">
+    ]> {
+
+  let summary = "element insertion operation (actually executing this under FHE is highly inefficient)";
+
+  let arguments = (ins Secret:$scalar,
+                       BatchedSecret:$dest,
+                       IndexAttr:$i);
+
+  let results = (outs BatchedSecret:$result);
+
+  let assemblyFormat = [{
+    $scalar `into` $dest `[` $i `]` attr-dict `:` type($dest)
+  }];
+
+  let hasCanonicalizeMethod = 1;
+}
+
+// Because we don't want the default assembly pattern from FHE:OP, we have to inherit directly from OP for this one!
+def FHE_CombineOp : Op<FHE_Dialect, "combine", [NoSideEffect]> {
+
+  let summary = "combines elements from multiple vectors into one (executing under FHE requires ptxt-mult with mask and additions)";
+
+  let arguments = (ins Variadic<BatchedSecret>:$vectors,
+                       ArrayAttr:$indices);
+  let results = (outs BatchedSecret:$result);
+
+  // We want a pretty complex pretty-printed syntax, so we're doing it with custom C++
+  let parser = [{ return ::parseCombineOp(parser, result); }];
+  let printer = [{ return ::print(p, *this); }];
+
+  let hasFolder = 1;
 
 }
 
+def FHE_MaterializeOp: FHE_Op<"materialize", []> {
+  let summary = "No-op operation used to preserve consistency of type system during type conversion";
+
+  let arguments = (ins AnyType:$input);
+  let results = (outs AnyType:$result);
+
+  let hasFolder = 1;
+  let hasCanonicalizeMethod = 1;
+
+}
 #endif // ABC_FHE_FHE_TD_

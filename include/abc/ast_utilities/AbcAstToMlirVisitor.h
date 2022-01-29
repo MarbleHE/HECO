@@ -18,7 +18,6 @@ typedef Visitor<SpecialAbcAstToMlirVisitor, PlainVisitor> AbcAstToMlirVisitor;
 class SpecialAbcAstToMlirVisitor : public PlainVisitor {
  private:
   mlir::OpBuilder builder;
-  mlir::ModuleOp module;
   mlir::Block *block;
 
   void add_op(mlir::Operation *op);
@@ -31,7 +30,6 @@ class SpecialAbcAstToMlirVisitor : public PlainVisitor {
 
 #include "abc/ast_utilities/warning_suggestOverride_prologue.h"
 
-  mlir::ModuleOp getModule();
   mlir::Block *getBlockPtr();
 
   void visit(AbstractExpression &expr);

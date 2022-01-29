@@ -1,8 +1,10 @@
 #include <iostream>
 #include <exception>
 #include <utility>
+#include <abc/ast_utilities/NodeUtils.h>
 #include "abc/ast/Function.h"
 #include "abc/ast_utilities/IVisitor.h"
+#include "abc/ast_parser/Parser.h"
 
 /// Convenience typedef for conciseness
 typedef std::unique_ptr<AbstractStatement> exprPtr;
@@ -154,6 +156,23 @@ nlohmann::json Function::toJson() const {
   };
   if (hasBody()) j["body"] = getBody().toJson();
   return j;
+}
+
+std::unique_ptr<Function> Function::fromJson(nlohmann::json j) {
+  auto ret_type = Datatype(j["return_type"].get<std::string>());
+  auto identifier = j["identifier"].get<std::string>();
+
+  std::vector<std::unique_ptr<FunctionParameter>> params;
+  for (auto param : j["parameters"]) {
+    params.emplace_back(castUniquePtr<AbstractExpression, FunctionParameter>(Parser::parseJsonExpression(param)));
+  }
+
+  if (j.contains("body")) {
+    auto body = castUniquePtr<AbstractStatement, Block>(Parser::parseJsonStatement(j["body"]));
+    return std::make_unique<Function>(ret_type, identifier, std::move(params), std::move(body));
+  } else {
+    return std::make_unique<Function>(ret_type, identifier, std::move(params), nullptr);
+  }
 }
 
 std::string Function::toString(bool printChildren) const {

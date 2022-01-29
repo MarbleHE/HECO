@@ -22,6 +22,23 @@ using namespace mlir;
 
 typedef llvm::ScopedHashTable<StringRef, std::pair<mlir::Type, mlir::Value>> CustomSymbolTable;
 
+/// Go from an Int, Float or Index type to the appropriate Attribute type
+Attribute type_to_attr(Type t, Attribute v) {
+  assert(t.isIntOrIndexOrFloat());
+  if (t.isIntOrIndex()) {
+    return IntegerAttr::get(t, getConstantIntValue(v).getValue());
+  }
+  if (t.dyn_cast_or_null<FloatType>()) {
+    if (v.getType().isIntOrFloat() && !v.getType().isIntOrIndex()) {
+      return FloatAttr::get(t, v.cast<FloatAttr>().getValue());
+    } else {
+      return FloatAttr::get(t, getConstantIntValue(v).getValue());
+    }
+  } else {
+    assert(false && "should never be reached.");
+  }
+}
+
 /// Declare a variable in the current scope, return success if the variable wasn't declared yet.
 mlir::LogicalResult declare(llvm::StringRef name, mlir::Type type, mlir::Value value, CustomSymbolTable &symbolTable) {
   if (symbolTable.count(name))
@@ -72,13 +89,10 @@ translateExpression(Operation &op,
                     CustomSymbolTable &symbolTable) {
   if (auto literal_int = llvm::dyn_cast<abc::LiteralIntOp>(op)) {
     // Literal Ints are created as "Index" to start with (since it's most common) and should later be converted if needed
-    // TODO: Binary/Unary ops should create new arith.constants with the required type if needed
     auto value = rewriter
         .create<arith::ConstantOp>(op.getLoc(), rewriter.getIndexAttr(literal_int.value().getLimitedValue()));
     return value;
   } else if (auto literal_tensor = llvm::dyn_cast<abc::LiteralTensorOp>(op)) {
-    // TODO: having all ints be index is a nasty hack and we should really instead handle conversions
-    //   between things like index, int, bool properly.
     llvm::SmallVector<int64_t, 4> stuff;
     for (auto i: literal_tensor.value().getValues<IntegerAttr>()) {
       stuff.push_back(i.getInt());
@@ -252,8 +266,16 @@ void translateVariableDeclarationOp(abc::VariableDeclarationOp vardecl_op,
   // TODO: Support decls without value by defining default values?
   auto value = translateExpression(firstOp(vardecl_op.value().front()), rewriter, symbolTable);
   if (value.getType()!=type) {
-    //TODO: Instead of having cast ops, we should introduce our own constant op and/or attribute?
-    value = rewriter.create<fhe::CastOp>(vardecl_op->getLoc(), type, value);
+    if (auto secret_type = type.cast<fhe::SecretType>()) {
+      if (auto const_op = value.getDefiningOp<arith::ConstantOp>()) {
+        // If this was initialized with a literal, we can coerce the type: //TODO: add checks before type coercion
+        value = rewriter.create<fhe::ConstOp>(vardecl_op->getLoc(),
+                                              type_to_attr(secret_type.getPlaintextType(), const_op.getValue()));
+      }
+    } else {
+      emitError(vardecl_op->getLoc(), "Variable initialized with incompatible type.");
+    }
+
   }
   value.setLoc(NameLoc::get(Identifier::get(name, value.getContext()), value.getLoc()));
   // TODO: Somehow check that value and type are compatible
@@ -506,10 +528,15 @@ void convertFunctionOp2FuncOp(abc::FunctionOp &f,
                               CustomSymbolTable &symbolTable) {
   // Read the existing function arguments
   std::vector<mlir::Type> argTypes;
+  llvm::SmallVector<mlir::DictionaryAttr> namedArgs;
   std::vector<OpOperand> arguments;
   for (auto op: f.parameters().getOps<abc::FunctionParameterOp>()) {
-    auto param_type = op.typeAttr().getValue();
-    argTypes.push_back(param_type);
+    auto param_attr = op.typeAttr();
+    argTypes.push_back(param_attr.getValue()); // this is the stored type, getType() would be TypeAttr/StringAttr
+    llvm::SmallVector<mlir::NamedAttribute> namedAttrList;
+    auto dialect = param_attr.getValue().getDialect().getNamespace().str();
+    namedAttrList.push_back(rewriter.getNamedAttr(dialect + "." + op.name().str(), op.typeAttr()));
+    namedArgs.push_back(rewriter.getDictionaryAttr(namedAttrList));
   }
 
   // Create the new builtin.func Op

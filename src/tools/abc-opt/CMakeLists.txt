@@ -5,6 +5,7 @@ set(LIBS
         ${conversion_libs}
         MLIROptLib
         MLIRABC
+        MLIRFHE
         MLIRAnalysis
         MLIRCallInterfaces
         MLIRCastInterfaces
@@ -22,8 +23,11 @@ set(LIBS
 add_llvm_executable(abc-opt
         ${PROJECT_SOURCE_DIR}/src/Passes/ast2ssa/LowerASTtoSSA.cpp
         ${PROJECT_SOURCE_DIR}/src/Passes/ssa2ssa/UnrollLoops.cpp
-        ${PROJECT_SOURCE_DIR}/src/Passes/ssa2ssa/Batching.cpp
         ${PROJECT_SOURCE_DIR}/src/Passes/ssa2ssa/Nary.cpp
+        ${PROJECT_SOURCE_DIR}/src/Passes/ssa2ssa/Tensor2BatchedSecret.cpp
+        ${PROJECT_SOURCE_DIR}/src/Passes/ssa2ssa/Batching.cpp
+        ${PROJECT_SOURCE_DIR}/src/Passes/ssa2ssa/InternalOperandBatching.cpp
+        ${PROJECT_SOURCE_DIR}/src/Passes/ssa2cpp/LowerToEmitC.cpp
         ${PROJECT_SOURCE_DIR}/src/tools/abc-opt/abc-opt.cpp)
 
 llvm_update_compile_flags(abc-opt)

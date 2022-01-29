@@ -9,7 +9,7 @@ using namespace abc;
  */
 
 void SpecialAbcAstToMlirVisitor::add_op(mlir::Operation *op) {
-  module.push_back(op); // TODO: write to block instead
+  block->push_back(op);
 }
 
 void SpecialAbcAstToMlirVisitor::add_recursive_result_to_region(AbstractNode &node, mlir::Region &region) {
@@ -58,11 +58,7 @@ void SpecialAbcAstToMlirVisitor::recursive_visit(AbstractNode &node, mlir::Block
  */
 
 SpecialAbcAstToMlirVisitor::SpecialAbcAstToMlirVisitor(mlir::MLIRContext &ctx) : builder(&ctx) {
-  module = mlir::ModuleOp::create(builder.getUnknownLoc());
-}
-
-mlir::ModuleOp SpecialAbcAstToMlirVisitor::getModule() {
-  return module;
+  block = new mlir::Block();
 }
 
 mlir::Block *SpecialAbcAstToMlirVisitor::getBlockPtr() {
@@ -162,12 +158,16 @@ void SpecialAbcAstToMlirVisitor::visit(Call &elem) {
   auto fnName = builder.getStringAttr(llvm::Twine(elem.getIdentifier()));
   auto callOp = builder.create<CallOp>(builder.getUnknownLoc(), fnName);
 
+  // Add arguments
   mlir::Block *argBlock;
   for (auto argExpr : elem.getArguments()) {
     argBlock = new mlir::Block();
     callOp.arguments().push_back(argBlock);
     recursive_visit(argExpr, argBlock);
   }
+
+  // Add for operation
+  add_op(callOp);
 }
 
 void SpecialAbcAstToMlirVisitor::visit(For &elem) {
@@ -203,7 +203,7 @@ void SpecialAbcAstToMlirVisitor::visit(Function &elem) {
   add_recursive_result_to_region(elem.getBody(), fnOp.body());
 
   // Add function to module (XXX: this makes the assumption that there are no nested functions...)
-  module.push_back(fnOp);
+  add_op(fnOp);
 }
 
 void SpecialAbcAstToMlirVisitor::visit(FunctionParameter &elem) {
@@ -287,7 +287,6 @@ void SpecialAbcAstToMlirVisitor::visit(OperatorExpression &elem) {
 
   // Add all operands as regions
   int i = 1; // the i = 0 region is not used for operands
-  mlir::Block *operandBlock;
   for (auto operand : elem.getOperands()) {
     add_recursive_result_to_region(operand, opExpr.getRegion(i));
     ++i;

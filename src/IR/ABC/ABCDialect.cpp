@@ -65,10 +65,10 @@ bool containsExactlyOneStatementNode(Region &region) {
   }
 }
 
-#include "abc/IR/ABC/ABCOpsDialect.cpp.inc"
+#include "abc/IR/ABC/ABCDialect.cpp.inc"
 
 #define GET_TYPEDEF_CLASSES
-#include "abc/IR/ABC/ABCOpsTypes.cpp.inc"
+#include "abc/IR/ABC/ABCTypes.cpp.inc"
 
 //===----------------------------------------------------------------------===//
 // ABC dialect.
@@ -77,12 +77,12 @@ bool containsExactlyOneStatementNode(Region &region) {
 void ABCDialect::initialize() {
   addOperations<
 #define GET_OP_LIST
-#include "abc/IR/ABC/ABCOps.cpp.inc"
+#include "abc/IR/ABC/ABC.cpp.inc"
   >();
 
   addTypes<
 #define GET_TYPEDEF_LIST
-#include "abc/IR/ABC/ABCOpsTypes.cpp.inc"
+#include "abc/IR/ABC/ABCTypes.cpp.inc"
   >();
 }
 
@@ -107,21 +107,21 @@ void ABCDialect::printType(::mlir::Type type,
 // TableGen'd op method definitions
 //===----------------------------------------------------------------------===//
 
-::mlir::LogicalResult RotateOp::canonicalize(RotateOp op, ::mlir::PatternRewriter &rewriter) {
-  // First check if this is a constant we can reason about statically
-  Operation *valueOp = op.rotation().getDefiningOp();
-  bool isConstLike = valueOp->hasTrait<OpTrait::ConstantLike>();
-  bool hasValue = valueOp->hasAttr("value");
-  if (isConstLike && hasValue) {
-    // Is it zero
-    bool isZero = valueOp->getAttr("value").dyn_cast<IntegerAttr>().getInt() == 0;
-    if(isZero) {
-      // No need to rotate just use the original vector
-      op.replaceAllUsesWith(op.vector());
-    }
-  }
-  return success();
-}
+//::mlir::LogicalResult RotateOp::canonicalize(RotateOp op, ::mlir::PatternRewriter &rewriter) {
+//  // First check if this is a constant we can reason about statically
+//  Operation *valueOp = op.rotation().getDefiningOp();
+//  bool isConstLike = valueOp->hasTrait<OpTrait::ConstantLike>();
+//  bool hasValue = valueOp->hasAttr("value");
+//  if (isConstLike && hasValue) {
+//    // Is it zero
+//    bool isZero = valueOp->getAttr("value").dyn_cast<IntegerAttr>().getInt() == 0;
+//    if(isZero) {
+//      // No need to rotate just use the original vector
+//      op.replaceAllUsesWith(op.vector());
+//    }
+//  }
+//  return success();
+//}
 
 #define GET_OP_CLASSES
-#include "abc/IR/ABC/ABCOps.cpp.inc"
+#include "abc/IR/ABC/ABC.cpp.inc"

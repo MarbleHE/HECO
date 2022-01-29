@@ -25,7 +25,10 @@
 #include "abc/Passes/ast2ssa/LowerASTtoSSA.h"
 #include "abc/Passes/ssa2ssa/UnrollLoops.h"
 #include "abc/Passes/ssa2ssa/Nary.h"
+#include "abc/Passes/ssa2ssa/Tensor2BatchedSecret.h"
 #include "abc/Passes/ssa2ssa/Batching.h"
+#include "abc/Passes/ssa2ssa/InternalOperandBatching.h"
+#include "abc/Passes/ssa2cpp/LowerToEmitC.h"
 
 #include <iostream>
 
@@ -35,13 +38,53 @@ using namespace fhe;
 
 void pipelineBuilder(OpPassManager &manager) {
   manager.addPass(std::make_unique<LowerASTtoSSAPass>());
-  manager.addPass(createCanonicalizerPass());
   manager.addPass(std::make_unique<UnrollLoopsPass>());
   manager.addPass(createCanonicalizerPass());
-  // manager.addPass(std::make_unique<BatchingPass>());
-  // manager.addPass(createCanonicalizerPass());
-  // manager.addPass(std::make_unique<NaryPass>());
-  // manager.addPass(createCanonicalizerPass());
+  manager.addPass(createCSEPass()); //this can greatly reduce the number of operations after unrolling
+  manager.addPass(std::make_unique<NaryPass>());
+
+  // Must canonicalize before Tensor2BatchedSecretPass, since it only handles constant indices in tensor.extract
+  manager.addPass(createCanonicalizerPass());
+  manager.addPass(std::make_unique<Tensor2BatchedSecretPass>());
+  manager.addPass(createCanonicalizerPass()); //necessary to remove redundant fhe.materialize
+  manager.addPass(createCSEPass()); //necessary to remove duplicate fhe.extract
+
+  manager.addPass(std::make_unique<BatchingPass>());
+  manager.addPass(createCanonicalizerPass());
+  manager.addPass(createCSEPass()); // otherwise, the internal batching pass has no "same origin" things to find!
+  manager.addPass(createCanonicalizerPass()); // to fold combine ops that might have simpler form after CSE
+
+  manager.addPass(std::make_unique<InternalOperandBatchingPass>());
+  manager.addPass(createCanonicalizerPass());
+  manager.addPass(createCSEPass());
+
+  manager.addPass(std::make_unique<LowerToEmitCPass>());
+  manager.addPass(createCanonicalizerPass()); //necessary to remove redundant fhe.materialize
+}
+
+void ssaPipelineBuilder(OpPassManager &manager) {
+  manager.addPass(std::make_unique<UnrollLoopsPass>());
+  manager.addPass(createCanonicalizerPass());
+  manager.addPass(createCSEPass()); //this can greatly reduce the number of operations after unrolling
+  manager.addPass(std::make_unique<NaryPass>());
+
+  // Must canonicalize before Tensor2BatchedSecretPass, since it only handles constant indices in tensor.extract
+  manager.addPass(createCanonicalizerPass());
+  manager.addPass(std::make_unique<Tensor2BatchedSecretPass>());
+  manager.addPass(createCanonicalizerPass()); //necessary to remove redundant fhe.materialize
+  manager.addPass(createCSEPass()); //necessary to remove duplicate fhe.extract
+
+  manager.addPass(std::make_unique<BatchingPass>());
+  manager.addPass(createCanonicalizerPass());
+  manager.addPass(createCSEPass()); // otherwise, the internal batching pass has no "same origin" things to find!
+  manager.addPass(createCanonicalizerPass()); // to fold combine ops that might have simpler form after CSE
+
+  manager.addPass(std::make_unique<InternalOperandBatchingPass>());
+  manager.addPass(createCanonicalizerPass());
+  manager.addPass(createCSEPass());
+
+  manager.addPass(std::make_unique<LowerToEmitCPass>());
+  manager.addPass(createCanonicalizerPass()); //necessary to remove redundant fhe.materialize
 }
 
 int main(int argc, char **argv) {
@@ -59,18 +102,28 @@ int main(int argc, char **argv) {
   context.loadDialect<AffineDialect>();
   context.loadDialect<tensor::TensorDialect>();
   context.loadDialect<arith::ArithmeticDialect>();
-  // Add the following to include *all* MLIR Core dialects, or selectively
+  // Uncomment the following to include *all* MLIR Core dialects, or selectively
   // include what you need like above. You only need to register dialects that
   // will be *parsed* by the tool, not the one generated
   // registerAllDialects(registry);
 
-  registerAllPasses();
+  // Uncomment the following to make *all* MLIR core passes available.
+  // This is only useful for experimenting with the command line to compose
+  //registerAllPasses();
+
+  registerCanonicalizerPass();
+  registerAffineLoopUnrollPass();
+  registerCSEPass();
   PassRegistration<LowerASTtoSSAPass>();
   PassRegistration<UnrollLoopsPass>();
-  PassRegistration<BatchingPass>();
   PassRegistration<NaryPass>();
+  PassRegistration<Tensor2BatchedSecretPass>();
+  PassRegistration<BatchingPass>();
+  PassRegistration<InternalOperandBatchingPass>();
+  PassRegistration<LowerToEmitCPass>();
 
   PassPipelineRegistration<>("full-pass", "Run all passes", pipelineBuilder);
+  PassPipelineRegistration<>("from-ssa-pass", "Run all passes starting with ssa", ssaPipelineBuilder);
 
   return asMainReturnCode(
       MlirOptMain(argc, argv, "ABC optimizer driver\n", registry));
