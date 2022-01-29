@@ -7,20 +7,21 @@ include_directories("${PROJECT_SOURCE_DIR}")
 ##############################
 # Download GoogleTest framework
 ##############################
-FetchContent_Declare(
+if(NOT TARGET gtest)
+    FetchContent_Declare(
         googletest
         GIT_REPOSITORY https://github.com/google/googletest.git
         GIT_TAG release-1.10.0
-)
-FetchContent_MakeAvailable(googletest)
-
+    )
+    FetchContent_MakeAvailable(googletest)
+endif()
 
 ##############################
 # TARGET: testing
 ##############################
 set(TEST_FILES
-        ASTComparison.cpp
-        ASTComparison.h
+        ast/ASTComparison.cpp
+        ast/ASTComparison.h
         AstTestingGenerator.cpp
         AstTestingGenerator.h
         JsonOutputTest.cpp
@@ -40,7 +41,6 @@ set(TEST_FILES
         ast/UnaryExpressionTest.cpp
         ast/VariableDeclarationTest.cpp
         ast/VariableTest.cpp
-        compiler/CompileDotProductTest.cpp
         end-to-end/BoxBlurTest.cpp
         end-to-end/CardioTest.cpp
         end-to-end/DotProductTest.cpp
@@ -53,33 +53,17 @@ set(TEST_FILES
         end-to-end/MatrixVectorProductTest.cpp
         end-to-end/PolynomialKernelTest.cpp
         end-to-end/RobertsCrossTest.cpp
-        parser/ParserTest.cpp
-        parser/ParserTestHelpers.h
-        parser/TokenizerTest.cpp
-        runtime/DummyCiphertextFactoryTest.cpp
-        runtime/RuntimeVisitorTest.cpp
-        runtime/SealCiphertextFactoryTest.cpp
-        visitor/ControlFlowGraphVisitorTest.cpp
-        visitor/ExpressionBatcherTest.cpp
-        visitor/PrintVisitorTest.cpp
- 		visitor/ProgramPrintVisitorTest.cpp
-        visitor/SecretBranchingVisitorTest.cpp
-        visitor/TypeCheckingVisitorTest.cpp
-        visitor/VectorizerTest.cpp
-        visitor/VisitorTest.cpp
-        end-to-end/QuadraticPolynomialTest.cpp
-        end-to-end/LinearPolynomialTest.cpp
-        ../bench/MultiTimer.cpp
-        ../bench/BoxBlur.cpp
-        ../bench/L2Distance.cpp
-        ../bench/HammingDistance.cpp
-        ../bench/RobertsCross.cpp
-        ../bench/GxKernel.cpp
-        ../bench/GyKernel.cpp
-        ../bench/QuadraticPolynomial.cpp
-        ../bench/LinearPolynomial.cpp
-        ../bench/LaplaceSharpening.cpp
-        ../bench/DotProduct.cpp
+        ast_parser/ParserTest.cpp
+        ast_parser/TokenizerTest.cpp
+        ast_visitor/PrintVisitorTest.cpp
+        ast_visitor/ProgramPrintVisitorTest.cpp
+        ast_visitor/VisitorTest.cpp
+        bench/MultiTimer.cpp
+        bench/BoxBlur.cpp
+        bench/L2Distance.cpp
+        bench/HammingDistance.cpp
+        bench/RobertsCross.cpp
+        bench/GxKernel.cpp
         )
 
 
@@ -93,8 +77,8 @@ elseif ("${CMAKE_C_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang" OR "${CMAKE_CXX_COMP
     set(CMAKE_CXX_FLAGS "-fprofile-instr-generate -fcoverage-mapping")
 endif ()
 
-target_link_libraries(testing-all PRIVATE gtest ast_opt gtest_main)
-target_include_directories(testing-all PRIVATE ${ast_optimizer_SOURCE_DIR}/include/)
+target_link_libraries(testing-all PRIVATE gtest cpp_ast gtest_main)
+target_include_directories(testing-all PRIVATE ${abc_SOURCE_DIR}/include/ bench)
 
 if(MSVC)
     # Mark gtest as external
@@ -105,38 +89,7 @@ endif()
 gtest_discover_tests(testing-all TEST_PREFIX gtest:)
 
 # make sure that ast_lib is built before the testing-all target
-add_dependencies(testing-all ast_opt)
+add_dependencies(testing-all cpp_ast)
 
-##############################
-# TARGET: testing-python
-##############################
-if(PYTHON_FRONTEND_DEV)
-    # Install pytest
-    execute_process(COMMAND ${Python3_EXECUTABLE} -m pip install --user pytest)
-
-    set(PYTEST_CMD Python3::Interpreter -m pytest --ignore=extern --ignore ${CMAKE_BINARY_DIR})
-
-    add_test(NAME PythonFrontendSimple
-            COMMAND ${PYTEST_CMD} ${PROJECT_SOURCE_DIR}/test/python_frontend/test_simple.py
-            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/python)
-
-    add_test(NAME PythonFrontendHammingDistance
-            COMMAND ${PYTEST_CMD} ${PROJECT_SOURCE_DIR}/test/python_frontend/test_hamming_distance.py
-            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/python)
-
-    add_test(NAME PythonMatrixVectorProduct
-            COMMAND ${PYTEST_CMD} ${PROJECT_SOURCE_DIR}/test/python_frontend/test_matrix_vector_product.py
-            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/python)
-
-    add_test(NAME PythonSecretTainting
-            COMMAND ${PYTEST_CMD} ${PROJECT_SOURCE_DIR}/test/python_frontend/test_secret_tainting.py
-            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/python)
-
-    add_test(NAME PythonExternalFn
-            COMMAND ${PYTEST_CMD} ${PROJECT_SOURCE_DIR}/test/python_frontend/test_external_fn.py
-            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/python)
-
-    # make sure that python is built before the testing-all target
-    add_dependencies(testing-all python)
-endif()
-
+# Python tests
+add_subdirectory(python_frontend)

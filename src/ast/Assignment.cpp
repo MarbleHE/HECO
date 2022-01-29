@@ -1,7 +1,7 @@
-#include <ast_opt/parser/Parser.h>
-#include "ast_opt/ast/Assignment.h"
-#include "ast_opt/ast/Variable.h"
-#include "ast_opt/utilities/IVisitor.h"
+#include "abc/ast_parser/Parser.h"
+#include "abc/ast/Assignment.h"
+#include "abc/ast/Variable.h"
+#include "abc/ast_utilities/IVisitor.h"
 
 Assignment::~Assignment() = default;
 

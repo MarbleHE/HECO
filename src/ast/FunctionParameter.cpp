@@ -1,6 +1,6 @@
 #include <utility>
-#include "ast_opt/ast/FunctionParameter.h"
-#include "ast_opt/utilities/IVisitor.h"
+#include "abc/ast/FunctionParameter.h"
+#include "abc/ast_utilities/IVisitor.h"
 
 FunctionParameter::~FunctionParameter() = default;
 

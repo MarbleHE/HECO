@@ -1,7 +1,7 @@
 #include <sstream>
 #include <queue>
 #include <set>
-#include "ast_opt/ast/AbstractNode.h"
+#include "abc/ast/AbstractNode.h"
 
 ///////////////////////////// GENERAL ////////////////////////////////
 // C++ requires a body for the destructor even if it is declared pure virtual

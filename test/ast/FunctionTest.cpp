@@ -1,8 +1,8 @@
-#include <include/ast_opt/parser/Parser.h>
-#include "ast_opt/ast/VariableDeclaration.h"
-#include "ast_opt/ast/Function.h"
-#include "ast_opt/ast/FunctionParameter.h"
-#include "ast_opt/ast/Literal.h"
+#include <include/abc/ast_parser/Parser.h>
+#include "abc/ast/VariableDeclaration.h"
+#include "abc/ast/Function.h"
+#include "abc/ast/FunctionParameter.h"
+#include "abc/ast/Literal.h"
 #include "gtest/gtest.h"
 
 TEST(FunctionTest, values_ValuesGivenInCtorAreRetrievable) {

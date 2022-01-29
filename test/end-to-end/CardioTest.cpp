@@ -1,6 +1,6 @@
 #include <random>
-#include <include/ast_opt/parser/Parser.h>
-#include "ast_opt/ast/AbstractNode.h"
+#include <include/abc/ast_parser/Parser.h>
+#include "abc/ast/AbstractNode.h"
 #include "gtest/gtest.h"
 
 class CardioTest : public ::testing::Test {  /* NOLINT (predictable sequence expected) */
@@ -49,31 +49,6 @@ int computeCardioRiskScore() {
 }
 
 TEST_F(CardioTest, DISABLED_originalProgramTest) {  /* NOLINT */
-  // TODO: Implement me
-
-}
-
-TEST_F(CardioTest, DISABLED_STAGE_01_typeCheckingTest) {  /* NOLINT */
-  // TODO: Implement me
-
-}
-
-TEST_F(CardioTest, DISABLED_STAGE_02_ctestTest) {  /* NOLINT */
-  // TODO: Implement me
-
-}
-
-TEST_F(CardioTest, DISABLED_STAGE_03_secretBranchingRemovalTest) {  /* NOLINT */
-  // TODO: Implement me
-
-}
-
-TEST_F(CardioTest, DISABLED_STAGE_04_loopUnrollingTest) {  /* NOLINT */
-  // TODO: Implement me
-
-}
-
-TEST_F(CardioTest, DISABLED_STAGE_05_statementVectorizationTest) {  /* NOLINT */
   // TODO: Implement me
 
 }

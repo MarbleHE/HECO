@@ -3,17 +3,18 @@
 #include "gtest/gtest.h"
 
 #ifdef HAVE_SEAL_BFV
-#include "bench/RobertsCross.h"
+#include "RobertsCross.h"
 #endif
 
 /// Original, plain C++ program for a naive RobertsCross Kernel
-/// This uses two 2x2 Kernels
-///         | +1   0  |
-///   w1 =  |  0  -1  |
+/// This uses two 2x2 Kernels, which we pad to 3x3 kernels for ease of implementation
+///         |  1   0  0 |
+///   w1 =  |  0  -1  0 |
+///         |  0   0  0 |
 ///
-///         |  0  +1  |
-///   w2 =  | -1   0  |
-///
+///         |  0  +1  0 |
+///   w2 =  | -1   0  0 |
+///         |  0   0  0 |
 /// This uses wrap-around padding
 /// and computes sqt((w1 * I)^2 + (w2 * I)^2) where * stands for convolution
 ///
@@ -28,14 +29,14 @@ std::vector<int> naiveRobertsCrossKernel(const std::vector<int> &img) {
   // Compute first Kernel
 
   // Encoded same as images
-  std::vector<std::vector<int>> weightMatrix1 = {{0, 1}, {-1, 0}};
+  std::vector<std::vector<int>> weightMatrix1 = {{0, 0, 1}, {0, -1, 0}, {0, 0, 0}};
   std::vector<int> img2(img.begin(), img.end());
   for (int x = 0; x < imgSize; ++x) {
     for (int y = 0; y < imgSize; ++y) {
       int value = 0;
-      for (int j = 0; j < 2; ++j) {
-        for (int i = -1; i < 1; ++i) {
-          value = value + weightMatrix1.at(i + 1).at(j)
+      for (int j = -1; j < 2; ++j) {
+        for (int i = -1; i < 2; ++i) {
+          value = value + weightMatrix1.at(i + 1).at(j + 1)
               *img.at(((x + i)*imgSize + (y + j))%img.size());
         }
       }
@@ -46,14 +47,14 @@ std::vector<int> naiveRobertsCrossKernel(const std::vector<int> &img) {
   // Compute Second Kernel
 
   // Encoded same as images
-  std::vector<std::vector<int>> weightMatrix2 = {{-1, 0}, {0, 1}};
+  std::vector<std::vector<int>> weightMatrix2 = {{0, -1, 0}, {0, 0, 1}, {0, 0, 0}};
   std::vector<int> img3(img.begin(), img.end());
   for (int x = 0; x < imgSize; ++x) {
     for (int y = 0; y < imgSize; ++y) {
       int value = 0;
-      for (int j = 0; j < 2; ++j) {
-        for (int i = -1; i < 1; ++i) {
-          value = value + weightMatrix2.at(i + 1).at(j)
+      for (int j = -1; j < 2; ++j) {
+        for (int i = -1; i < 2; ++i) {
+          value = value + weightMatrix2.at(i + 1).at(j + 1)
               *img.at(((x + i)*imgSize + (y + j))%img.size());
         }
       }
@@ -130,9 +131,9 @@ class RobertsCrossKernelTest : public ::testing::Test {  /* NOLINT (predictable 
 
   void printMatrix(size_t size, std::vector<int> &matrix) {
     for (int64_t row = (int64_t) size - 1; row >= 0; --row) {
-      std::cout << std::setw(8) << matrix.at(0*size + row);
+      std::cout << std::setw(5) << matrix.at(0*size + row);
       for (size_t col = 1; col < size; ++col) {
-        std::cout << std::setw(8) << matrix.at(col*size + row);
+        std::cout << "\t" << std::setw(5) << matrix.at(col*size + row);
       }
       std::cout << std::endl;
     }
@@ -167,42 +168,15 @@ TEST_F(RobertsCrossKernelTest, Clear_EncryptedBatched_Equivalence) { /* NOLINT *
   size_t img_size = std::sqrt(poly_modulus_degree / 2);
   std::vector<int> img;
   getInputMatrix(img_size, img);
-  // std::cout << "img:" << std::endl;
-  // printMatrix(img_size, img);
 
   MultiTimer dummy = MultiTimer();
   auto result = encryptedBatchedRobertsCross(dummy, img, poly_modulus_degree);
   result.resize(img.size());
   std::vector<int> enc(begin(result), end(result));
-  // std::cout << "encrypted:" << std::endl;
-  // printMatrix(img_size, enc);
 
   // Compare to reference cleartext implementation
   auto ref = naiveRobertsCrossKernel(img);
-  // std::cout << "naive:" << std::endl;
-  // printMatrix(img_size, ref);
   EXPECT_EQ(enc, ref);
-}
-
-TEST_F(RobertsCrossKernelTest, Clear_EncryptedNaive_Equivalence) { /* NOLINT */
-  size_t poly_modulus_degree = 2 << 12;
-  size_t img_size = 8;
-  std::vector<int> img;
-  getInputMatrix(img_size, img);
-  //std::cout << "img:" << std::endl;
-  //printMatrix(img_size, img);
-
-  MultiTimer dummy = MultiTimer();
-  auto result = encryptedNaiveRobertsCross(dummy, img, poly_modulus_degree);
-  //std::cout << "encrypted:" << std::endl;
-  //printMatrix(img_size, result);
-
-  // Compare to reference cleartext implementation
-  auto ref = naiveRobertsCrossKernel(img);
-  //std::cout << "clear:" << std::endl;
-  //printMatrix(img_size, ref);
-
-  EXPECT_EQ(result, ref);
 }
 #endif //HAVE_SEAL_BFV
 

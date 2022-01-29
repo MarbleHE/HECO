@@ -1,7 +1,7 @@
 #include <iostream>
 #include <exception>
-#include "ast_opt/ast/OperatorExpression.h"
-#include "ast_opt/utilities/IVisitor.h"
+#include "abc/ast/OperatorExpression.h"
+#include "abc/ast_utilities/IVisitor.h"
 
 /// Convenience typedef for conciseness
 typedef std::unique_ptr<AbstractExpression> exprPtr;

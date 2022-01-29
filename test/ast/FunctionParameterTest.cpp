@@ -1,5 +1,5 @@
-#include "ast_opt/ast/FunctionParameter.h"
-#include "ast_opt/ast/Literal.h"
+#include "abc/ast/FunctionParameter.h"
+#include "abc/ast/Literal.h"
 #include "gtest/gtest.h"
 
 TEST(FunctionParameterTest, values_ValuesGivenInCtorAreRetrievable) {

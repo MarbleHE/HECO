@@ -134,6 +134,11 @@ class ABCJsonAstBuilder:
     def _make_value(self, value):
         return {"value": value}
 
+    def _make_then_branch(self, body):
+        return {"thenBranch": body}
+
+    def _make_else_branch(self, body):
+        return {"elseBranch": body}
 
     #
     # "Public" functions to create ABC nodes
@@ -206,6 +211,27 @@ class ABCJsonAstBuilder:
         d.update(self._make_body(body))
 
         return self._make_abc_node("For", d)
+
+    def make_if(self, condition : dict, then_branch, else_branch : dict) -> dict:
+        """
+        Create a dictionary corresponding to an ABC IF when exported in JSON
+
+        :param condition: JSON-equivalent dictionary for an ABC for a BinaryExpression
+        :param then_branch: JSON-equivalent dictionary for the ABC Block that is executed when the
+                            condition evaluates to true.
+        :param else_branch: JSON-equivalent dictionary for the ABC Block that is executed when the
+                            condition evaluates to false. (optional)
+        :return: JSON-equivalent dictionary for an ABC If
+        """
+
+        d = dict()
+        d.update(self._make_condition(condition))
+        d.update(self._make_then_branch(then_branch))
+
+        if else_branch:
+            d.update(self._make_else_branch(else_branch))
+
+        return self._make_abc_node("If", d)
 
     def make_index_access(self, target : dict, index : dict):
         """

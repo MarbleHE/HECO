@@ -3,9 +3,9 @@
 #include <fstream>
 
 #include "main.h"
-#include "ast_opt/ast/Literal.h"
-#include "ast_opt/ast/Variable.h"
-#include "ast_opt/ast/Assignment.h"
+#include "abc/ast/Literal.h"
+#include "abc/ast/Variable.h"
+#include "abc/ast/Assignment.h"
 
 int main(int argc, char** argv) {
 

@@ -1,8 +1,8 @@
 #include <iostream>
 #include <exception>
-#include <ast_opt/parser/Parser.h>
-#include "ast_opt/ast/Block.h"
-#include "ast_opt/utilities/IVisitor.h"
+#include "abc/ast_parser/Parser.h"
+#include "abc/ast/Block.h"
+#include "abc/ast_utilities/IVisitor.h"
 
 /// Convenience typedef for conciseness
 typedef std::unique_ptr<AbstractStatement> stmtPtr;

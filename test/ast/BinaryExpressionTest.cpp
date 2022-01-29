@@ -1,7 +1,7 @@
-#include <ast_opt/parser/Parser.h>
-#include <test/ASTComparison.h>
-#include "ast_opt/ast/BinaryExpression.h"
-#include "ast_opt/ast/Literal.h"
+#include <abc/ast_parser/Parser.h>
+#include "ASTComparison.h"
+#include "abc/ast/BinaryExpression.h"
+#include "abc/ast/Literal.h"
 #include "gtest/gtest.h"
 
 TEST(BinaryExpressionTest, values_ValuesGivenInCtorAreRetrievable) {
