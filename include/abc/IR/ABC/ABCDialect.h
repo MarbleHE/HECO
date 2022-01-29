@@ -28,7 +28,7 @@ class isAbcTarget : public mlir::OpTrait::TraitBase<ConcreteType, isAbcTarget> {
 }
 
 
-#include "abc/IR/ABC/ABCOpsDialect.h.inc"
+#include "abc/IR/ABC/ABCDialect.h.inc"
 
 bool containsExactlyOneExpressionNode(mlir::Region& region);
 
@@ -38,9 +38,9 @@ bool containsExactlyOneStatementNode(mlir::Region& region);
 
 
 #define GET_OP_CLASSES
-#include "abc/IR/ABC/ABCOps.h.inc"
+#include "abc/IR/ABC/ABC.h.inc"
 
 #define GET_TYPEDEF_CLASSES
-#include "abc/IR/ABC/ABCOpsTypes.h.inc"
+#include "abc/IR/ABC/ABCTypes.h.inc"
 
 #endif // STANDALONE_STANDALONEDIALECT_H
