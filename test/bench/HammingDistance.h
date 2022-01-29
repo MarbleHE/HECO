@@ -20,7 +20,20 @@ uint64_t encryptedBatchedHammingDistance(
         const std::vector<bool> &b,
         size_t poly_modulus_degree,
         bool encrypt_both = true
-        );
+);
+
+/// Computes the encrypted hamming distance between two vectors of booleans
+/// \param a vector of size n
+/// \param b vector of size n
+/// \param poly_modulus_degree FHE parameter, degree n of the polynomials
+/// \param encrypt_both By default, both vectors are encrypted. If set to false, b is plaintext
+/// \return
+uint64_t encryptedStupidBatchedHammingDistance(
+        MultiTimer &timer,
+        const std::vector<bool> &a,
+        const std::vector<bool> &b,
+        size_t poly_modulus_degree
+);
 
 /// For 4-element hamming distance
 /// Ciphertext hamming_distance(Ciphertext c0, Ciphertext c1)

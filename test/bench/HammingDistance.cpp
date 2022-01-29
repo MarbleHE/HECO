@@ -158,6 +158,87 @@ uint64_t encryptedBatchedHammingDistance(
   return result[0];
 }
 
+/// Computes the encrypted hamming distance between two vectors of booleans
+/// \param a vector of size n
+/// \param b vector of size n
+/// \param poly_modulus_degree FHE parameter, degree n of the polynomials
+/// \param encrypt_both By default, both vectors are encrypted. If set to false, b is plaintext
+/// \return
+uint64_t encryptedStupidBatchedHammingDistance(
+        MultiTimer &timer, const std::vector<bool> &a, const std::vector<bool> &b, size_t poly_modulus_degree)
+{
+  if (a.size() > poly_modulus_degree / 2)
+  {
+    std::cerr << "WARNING: HammingDistance might be incorrect when vector size is larger than N/2." << std::endl;
+  }
+  size_t vec_size = a.size();
+
+  // Context Setup
+  auto keygenTimer = timer.startTimer();
+  seal::EncryptionParameters parameters(seal::scheme_type::bfv);
+  parameters.set_poly_modulus_degree(poly_modulus_degree);
+  parameters.set_coeff_modulus(seal::CoeffModulus::BFVDefault(parameters.poly_modulus_degree()));
+  parameters.set_plain_modulus(seal::PlainModulus::Batching(parameters.poly_modulus_degree(), 20));
+  seal::SEALContext context(parameters);
+
+  /// Create keys
+  seal::KeyGenerator keygen(context);
+  seal::SecretKey secretKey = keygen.secret_key();
+  seal::PublicKey publicKey;
+  keygen.create_public_key(publicKey);
+  seal::GaloisKeys galoisKeys;
+  keygen.create_galois_keys(galoisKeys);
+  seal::RelinKeys relinKeys;
+  keygen.create_relin_keys(relinKeys);
+
+  // Create helper objects
+  seal::BatchEncoder encoder(context);
+  seal::Encryptor encryptor(context, publicKey, secretKey);
+  seal::Decryptor decryptor(context, secretKey);
+  seal::Evaluator evaluator(context);
+  timer.stopTimer(keygenTimer);
+
+  // Encode & Encrypt the vectors
+  auto encTimer = timer.startTimer();
+  seal::Plaintext a_ptxt, b_ptxt;
+  seal::Ciphertext a_ctxt, b_ctxt;
+  encoder.encode(std::vector<uint64_t>(a.begin(), a.end()), a_ptxt);
+  encoder.encode(std::vector<uint64_t>(b.begin(), b.end()), b_ptxt);
+  encryptor.encrypt(a_ptxt, a_ctxt);
+  encryptor.encrypt(b_ptxt, b_ctxt);
+  timer.stopTimer(encTimer);
+
+  // Compute differences
+  auto compTimer = timer.startTimer();
+  seal::Plaintext result_ptxt("0");
+  seal::Ciphertext result_ctxt;
+  encryptor.encrypt(result_ptxt, result_ctxt);
+
+  seal::Ciphertext tmp;
+  for (size_t i = 0; i < vec_size; ++i) {
+    // Compute (a-b)^2 (i.e. XOR) in tmp (to preserve a and b)
+    evaluator.sub(a_ctxt, b_ctxt, tmp);
+    evaluator.square_inplace(tmp);
+
+    // Add tmp to result (assuming we only care about slot 0)
+    evaluator.add_inplace(result_ctxt, tmp);
+
+
+    // Rotate to get the next elements into slot zero.
+    evaluator.rotate_rows_inplace(a_ctxt, 1, galoisKeys);
+    evaluator.rotate_rows_inplace(b_ctxt, 1, galoisKeys);
+  }
+  timer.stopTimer(compTimer);
+
+  // Decrypt result
+  auto decTimer = timer.startTimer();
+  decryptor.decrypt(result_ctxt, result_ptxt);
+  std::vector<uint64_t> result;
+  encoder.decode(result_ptxt, result);
+  timer.stopTimer(decTimer);
+  return result[0];
+}
+
 /// For 4-element hamming distance
 /// Ciphertext hamming_distance(Ciphertext c0, Ciphertext c1)
 ///     Plaintext p0(N, 2) // N is the number of slots

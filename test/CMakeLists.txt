@@ -22,7 +22,7 @@ endif()
 # cpp-ast tests disabled since this is a deprecated feature that is scheduled to be removed in favor of going directly
 # to MLIR ast from parser & python
 set(TEST_FILES
-        #ast/ASTComparison.cpp
+        ast/ASTComparison.cpp
         #ast/ASTComparison.h
         #AstTestingGenerator.cpp
         #AstTestingGenerator.h

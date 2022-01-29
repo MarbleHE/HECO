@@ -50,6 +50,19 @@ TEST(HammingDistanceTest, NaiveClear_Batched_Equivalence) { /* NOLINT */
   EXPECT_EQ(hammingDistance(a, b), result);
 }
 
+TEST(HammingDistanceTest, NaiveClear_StupidBatched_Equivalence) { /* NOLINT */
+  // Create two vectors of bits (booleans),
+  // TODO: Create test values from fixed random seed
+  std::vector<bool> a(4, 0);
+  std::vector<bool> b(4, 1);
+
+  MultiTimer dummy = MultiTimer();
+  auto result = encryptedStupidBatchedHammingDistance(dummy, a, b, 2 << 13);
+
+  // Compare to reference cleartext implementation
+  EXPECT_EQ(hammingDistance(a, b), result);
+}
+
 #endif //HAVE_SEAL_BFV
 
 //Note: Hamming distance over binary vectors can be computed efficiently in Z_p by using NEQ = XOR = (a-b)^2
