@@ -54,9 +54,10 @@ void pipelineBuilder(OpPassManager &manager) {
 
   manager.addPass(std::make_unique<BatchingPass>());
   manager.addPass(createCanonicalizerPass());
+  manager.addPass(createCSEPass()); // try and remove all the redundant rotates, in the hope it also gives us less combine ops?
   manager.addPass(std::make_unique<CombineSimplifyPass>());
   manager.addPass(createCSEPass()); // otherwise, the internal batching pass has no "same origin" things to find!
-  manager.addPass(createCanonicalizerPass()); // to fold combine ops that might have simpler form after CSE
+  manager.addPass(createCanonicalizerPass());
 
   manager.addPass(std::make_unique<InternalOperandBatchingPass>());
   manager.addPass(createCanonicalizerPass());
@@ -82,9 +83,10 @@ void ssaPipelineBuilder(OpPassManager &manager) {
 
   manager.addPass(std::make_unique<BatchingPass>());
   manager.addPass(createCanonicalizerPass());
+  manager.addPass(createCSEPass()); // try and remove all the redundant rotates, in the hope it also gives us less combine ops?
   manager.addPass(std::make_unique<CombineSimplifyPass>());
   manager.addPass(createCSEPass()); // otherwise, the internal batching pass has no "same origin" things to find!
-  manager.addPass(createCanonicalizerPass()); // to fold combine ops that might have simpler form after CSE
+  manager.addPass(createCanonicalizerPass());
 
   manager.addPass(std::make_unique<InternalOperandBatchingPass>());
   manager.addPass(createCanonicalizerPass());
