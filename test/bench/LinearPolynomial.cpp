@@ -188,7 +188,7 @@ std::vector<int> encryptedLinearPolynomialNaive(
   auto encTimer = timer.startTimer();
   std::vector<seal::Ciphertext> a_ctxt(a.size()), b_ctxt(b.size()), x_ctxt(x.size()), y_ctxt(y.size());
 
-  for (int i = 0; i < a.size(); ++i) {
+  for (size_t i = 0; i < a.size(); ++i) {
     // a
     seal::Plaintext tmp_ptxt;
     std::vector<int64_t> tmp_vector(1, a[i]);
@@ -215,7 +215,7 @@ std::vector<int> encryptedLinearPolynomialNaive(
 
   // Compute
   auto compTimer = timer.startTimer();
-  for (int i = 0; i < a_ctxt.size(); ++i) {
+  for (size_t i = 0; i < a_ctxt.size(); ++i) {
     evaluator.multiply_inplace(a_ctxt[i], x_ctxt[i]);
     evaluator.sub_inplace(y_ctxt[i], a_ctxt[i]);
     evaluator.sub_inplace(y_ctxt[i], b_ctxt[i]);
@@ -226,7 +226,7 @@ std::vector<int> encryptedLinearPolynomialNaive(
   auto decTimer = timer.startTimer();
   std::vector<int> result(y_ctxt.size());
 
-  for (int i = 0; i < y_ctxt.size(); ++i) {
+  for (size_t i = 0; i < y_ctxt.size(); ++i) {
     seal::Plaintext tmp_ptxt;
     std::vector<int64_t> tmp_vector(1);
     decryptor.decrypt(y_ctxt[i], tmp_ptxt);

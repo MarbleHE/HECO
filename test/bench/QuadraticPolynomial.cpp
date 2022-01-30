@@ -212,7 +212,7 @@ std::vector<int> encryptedQuadraticPolynomialNaive(
   // Encode & Encrypt
   auto encTimer = timer.startTimer();
   std::vector<seal::Ciphertext> a_ctxt(a.size()), b_ctxt(b.size()), c_ctxt(c.size()), x_ctxt(x.size()), y_ctxt(y.size());
-  for (int i = 0; i < a.size(); ++i) {
+  for (size_t i = 0; i < a.size(); ++i) {
     // a
     seal::Plaintext tmp_ptxt;
     std::vector<int64_t> tmp_vec(1, a[i]);
@@ -244,7 +244,7 @@ std::vector<int> encryptedQuadraticPolynomialNaive(
 
   // Compute
   auto compTimer = timer.startTimer();
-  for (int i = 0; i < a_ctxt.size(); ++i) {
+  for (size_t i = 0; i < a_ctxt.size(); ++i) {
     evaluator.multiply_inplace(a_ctxt[i], x_ctxt[i]);
     evaluator.relinearize_inplace(a_ctxt[i], relinKeys);
     evaluator.multiply_inplace(a_ctxt[i], x_ctxt[i]);
@@ -261,7 +261,7 @@ std::vector<int> encryptedQuadraticPolynomialNaive(
   // Decrypt results
   auto decTimer = timer.startTimer();
   std::vector<int> result(y_ctxt.size());
-  for (int i = 0; i < y_ctxt.size(); ++i) {
+  for (size_t i = 0; i < y_ctxt.size(); ++i) {
     std::vector<int64_t> tmp_vec(1);
     seal::Plaintext tmp_ptxt;
     decryptor.decrypt(y_ctxt[i], tmp_ptxt);
