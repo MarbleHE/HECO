@@ -86,22 +86,6 @@ void ABCDialect::initialize() {
   >();
 }
 
-/// Parse a type registered to this dialect.
-::mlir::Type ABCDialect::parseType(::mlir::DialectAsmParser &parser) const {
-  // The parse call returns true UPON A FAILURE
-  if (parser.parseKeyword("int"))
-    return Type();
-  else
-   return TestIntegerType::get(getContext());
-    //return abc::  get();
-}
-
-/// Print a type registered to this dialect.
-void ABCDialect::printType(::mlir::Type type,
-               ::mlir::DialectAsmPrinter &os) const {
-  //ABCIntegerType intType = type.cast<IntegerType>();
-  os << "int";
-}
 
 //===----------------------------------------------------------------------===//
 // TableGen'd op method definitions

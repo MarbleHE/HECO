@@ -542,22 +542,3 @@ void FHEDialect::initialize() {
   >();
 
 }
-
-// TODO (Q&A): The <dialect>::parseType function seem to be generic boilerplate. Can we make TableGen generate them for us?
-mlir::Type FHEDialect::parseType(::mlir::DialectAsmParser &parser) const {
-  mlir::StringRef typeTag;
-  if (parser.parseKeyword(&typeTag))
-    return {};
-  mlir::Type genType;
-  auto parseResult = generatedTypeParser(parser, typeTag, genType);
-  if (parseResult.hasValue())
-    return genType;
-  parser.emitError(parser.getNameLoc(), "unknown fhe type: ") << typeTag;
-  return {};
-}
-
-// TODO (Q&A): The <dialect>::printType function seem to be generic boilerplate. Can we make TableGen generate them for us?
-void FHEDialect::printType(::mlir::Type type, ::mlir::DialectAsmPrinter &os) const {
-  if (mlir::failed(generatedTypePrinter(type, os)))
-    llvm::report_fatal_error("unknown type to print");
-}
