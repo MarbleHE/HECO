@@ -277,7 +277,7 @@ void translateVariableDeclarationOp(abc::VariableDeclarationOp vardecl_op,
     }
 
   }
-  value.setLoc(NameLoc::get(Identifier::get(name, value.getContext()), value.getLoc()));
+  value.setLoc(NameLoc::get(StringAttr::get(value.getContext(), name), value.getLoc()));
   // TODO: Somehow check that value and type are compatible
   (void) declare(name, type, value, symbolTable); //void cast to suppress "unused result" warning
 }
