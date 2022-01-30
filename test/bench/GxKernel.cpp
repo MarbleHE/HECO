@@ -47,14 +47,14 @@ std::vector<int> encryptedNaiveGxKernel(
   std::vector<seal::Ciphertext> img2(img_ctxt.size());
 
   // First apply [+1  0  -1]
-  for (size_t y = 0; y < img_size; ++y) {
+  for (int y = 0; y < img_size; ++y) {
     // Get kernel for first pixel of row y, using padding
     seal::Ciphertext value;
     evaluator.sub(img_ctxt.at((-1*img_size + y)%img_ctxt.size()), img_ctxt.at(1*img_size + y), value);
     img2[0*img_size + y] = value;
 
     // Go through the rest of row y
-    for (size_t x = 1; x < img_size; ++x) {
+    for (int x = 1; x < img_size; ++x) {
       // remove the old leftmost pixel (old weight +1, now outside kernel)
       //x = middle of current kernel, x-2 = one to the left of kernel
       evaluator.sub_inplace(value, img_ctxt.at(((x - 2)*img_size + y)%img.size()));
@@ -86,7 +86,7 @@ std::vector<int> encryptedNaiveGxKernel(
   std::vector<seal::Ciphertext> img3(img2.begin(), img2.end());
 
   // Vertical Kernel: for each column x
-  for (size_t x = 0; x < img_size; ++x) {
+  for (int x = 0; x < img_size; ++x) {
     // Get kernel for first pixel of column x with padding
     seal::Ciphertext value;
     seal::Ciphertext doublePixel;
@@ -97,7 +97,7 @@ std::vector<int> encryptedNaiveGxKernel(
     img3[x*img_size + 0] = value;
 
     // Go through the rest of column x
-    for (size_t y = 1; y < img_size; ++y) {
+    for (int y = 1; y < img_size; ++y) {
       // remove the old leftmost pixel (old weight +1, now outside kernel)
       //y = middle of current kernel, y-2 = one to the left of kernel
       evaluator.sub_inplace(value, img2.at((x*img_size + y - 2)%img.size()));
