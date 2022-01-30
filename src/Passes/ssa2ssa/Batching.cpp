@@ -101,7 +101,7 @@ LogicalResult batchArithmeticOperation(IRRewriter &rewriter, MLIRContext *contex
       //op.print(llvm::outs());
       //llvm::outs() << '\n';
     }
-    if(target_slot == -1) {
+    if (target_slot==-1) {
       //llvm::outs() << "NO target slot (" << target_slot << ") for:";
       //op.print(llvm::outs());
       //llvm::outs() << '\n';
@@ -143,7 +143,7 @@ LogicalResult batchArithmeticOperation(IRRewriter &rewriter, MLIRContext *contex
           rewriter.replaceOpWithIf(c_op, {new_cst}, [&](OpOperand &operand) { return operand.getOwner()==new_op; });
         } else {
           emitWarning(new_op.getLoc(),
-                    "Encountered unexpected (non batchable) defining op for secret operand while trying to batch.");
+                      "Encountered unexpected (non batchable) defining op for secret operand while trying to batch.");
           return failure();
         }
 
@@ -187,15 +187,19 @@ void BatchingPass::runOnOperation() {
   for (auto f: llvm::make_early_inc_range(block.getOps<FuncOp>())) {
     // We must translate in order of appearance for this to work, so we walk manually
     if (f.walk([&](Operation *op) {
-      if (auto sub_op = llvm::dyn_cast_or_null<fhe::SubOp>(op))
+      //op->print(llvm::outs());
+      //llvm::outs() << "\n";
+      //llvm::outs().flush();
+      if (auto sub_op = llvm::dyn_cast_or_null<fhe::SubOp>(op)) {
         if (batchArithmeticOperation<fhe::SubOp>(rewriter, &getContext(), sub_op).failed())
           return WalkResult::interrupt();
-      if (auto add_op = llvm::dyn_cast_or_null<fhe::AddOp>(op))
+      } else if (auto add_op = llvm::dyn_cast_or_null<fhe::AddOp>(op)) {
         if (batchArithmeticOperation<fhe::AddOp>(rewriter, &getContext(), add_op).failed())
           return WalkResult::interrupt();
-      if (auto mul_op = llvm::dyn_cast_or_null<fhe::MultiplyOp>(op))
+      } else if (auto mul_op = llvm::dyn_cast_or_null<fhe::MultiplyOp>(op)) {
         if (batchArithmeticOperation<fhe::MultiplyOp>(rewriter, &getContext(), mul_op).failed())
           return WalkResult::interrupt();
+      }
       //TODO: Add support for relinearization!
       return WalkResult(success());
     }).wasInterrupted())
