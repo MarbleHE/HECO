@@ -7,78 +7,56 @@ module  {
     %c0 = arith.constant 0 : index
     %c-1 =  arith.constant -1 : index
 
-    // first kernel
-    %w1 = tensor.from_elements %c0, %c0, %c1, %c0, %c-1, %c0, %c0, %c0, %c0 :  tensor<3x3xindex>
-    %k1 = affine.for %x = 0 to 8 iter_args(%imgx = %img) -> tensor<64x!fhe.secret<f64>> {
-      %1 = affine.for %y = 0 to 8 iter_args(%imgy = %imgx) -> tensor<64x!fhe.secret<f64>> {
-        %c0_sf64 = fhe.constant 0.000000e+00 : f64
-        %2 = affine.for %j = -1 to 2 iter_args(%sumj = %c0_sf64) -> !fhe.secret<f64> {
-          %3 = affine.for %i = -1 to 2 iter_args(%sumi = %sumj) -> !fhe.secret<f64> {
-            %4 = arith.addi %i, %c1 : index
-            %5 = arith.addi %j, %c1 : index
-            %6 = tensor.extract %w1[%4,%5] : tensor<3x3xindex>
-            %7 = arith.addi %x, %i : index
-            %8 = arith.muli %7, %c8 : index
-            %9 = arith.addi %y, %j : index
-            %10 = arith.addi %8, %9 : index
-            %11 = arith.remui %10, %c64 : index
-            %12 = tensor.extract %img[%11] : tensor<64x!fhe.secret<f64>>
-            %13 = fhe.multiply(%12,%6) :  (!fhe.secret<f64>, index) -> !fhe.secret<f64>
-            %14 = fhe.add(%sumi, %13) : (!fhe.secret<f64>, !fhe.secret<f64>) -> !fhe.secret<f64>
-            affine.yield %14 : !fhe.secret<f64>
-          }
-          affine.yield %3 : !fhe.secret<f64>
-        }
-        %3 = arith.muli %x, %c8 : index
-        %4 = arith.addi %3, %y : index
-        %5 = tensor.insert %2 into %imgy[%4] : tensor<64x!fhe.secret<f64>>
-        affine.yield %5: tensor<64x!fhe.secret<f64>>
-      }
-      affine.yield %1 : tensor<64x!fhe.secret<f64>>
-    }
-
-    // second kernel
-    %w2 = tensor.from_elements %c0, %c-1, %c0, %c0, %c0, %c-1, %c0, %c0, %c0 :  tensor<3x3xindex>
-    %k2 = affine.for %x = 0 to 8 iter_args(%imgx = %img) -> tensor<64x!fhe.secret<f64>> {
-      %1 = affine.for %y = 0 to 8 iter_args(%imgy = %imgx) -> tensor<64x!fhe.secret<f64>> {
-        %c0_sf64 = fhe.constant 0.000000e+00 : f64
-        %2 = affine.for %j = -1 to 2 iter_args(%sumj = %c0_sf64) -> !fhe.secret<f64> {
-          %3 = affine.for %i = -1 to 2 iter_args(%sumi = %sumj) -> !fhe.secret<f64> {
-            %4 = arith.addi %i, %c1 : index
-            %5 = arith.addi %j, %c1 : index
-            %6 = tensor.extract %w2[%4,%5] : tensor<3x3xindex>
-            %7 = arith.addi %x, %i : index
-            %8 = arith.muli %7, %c8 : index
-            %9 = arith.addi %y, %j : index
-            %10 = arith.addi %8, %9 : index
-            %11 = arith.remui %10, %c64 : index
-            %12 = tensor.extract %img[%11] : tensor<64x!fhe.secret<f64>>
-            %13 = fhe.multiply(%12,%6) :  (!fhe.secret<f64>, index) -> !fhe.secret<f64>
-            %14 = fhe.add(%sumi, %13) : (!fhe.secret<f64>, !fhe.secret<f64>) -> !fhe.secret<f64>
-            affine.yield %14 : !fhe.secret<f64>
-          }
-          affine.yield %3 : !fhe.secret<f64>
-        }
-        %3 = arith.muli %x, %c8 : index
-        %4 = arith.addi %3, %y : index
-        %5 = tensor.insert %2 into %imgy[%4] : tensor<64x!fhe.secret<f64>>
-        affine.yield %5: tensor<64x!fhe.secret<f64>>
-      }
-      affine.yield %1 : tensor<64x!fhe.secret<f64>>
-    }
-
-    // compute x^2 + y^2
+    // Each point p = img[x][y], where x is row and y is column, in the new image will equal:
+    // (img[x-1][y-1] - img[x][y])^2 + (img[x-1][y] - img[x][y-1])^2
     %r = affine.for %x = 0 to 8 iter_args(%imgx = %img) -> tensor<64x!fhe.secret<f64>> {
       %1 = affine.for %y = 0 to 8 iter_args(%imgy = %imgx) -> tensor<64x!fhe.secret<f64>> {
-        %2 = arith.muli %x, %c8 : index
-        %3 = arith.addi %2, %y : index
-        %4 = tensor.extract %k1[%3] : tensor<64x!fhe.secret<f64>>
-        %5 = tensor.extract %k2[%3] : tensor<64x!fhe.secret<f64>>
-        %6 = fhe.multiply(%4,%4) :  (!fhe.secret<f64>, !fhe.secret<f64>) -> !fhe.secret<f64>
-        %7 = fhe.multiply(%5,%5) :  (!fhe.secret<f64>, !fhe.secret<f64>) -> !fhe.secret<f64>
-        %8 = fhe.add(%6,%7) :  (!fhe.secret<f64>, !fhe.secret<f64>) -> !fhe.secret<f64>
-        %9 = tensor.insert %8 into %imgy[%3] : tensor<64x!fhe.secret<f64>>
-        affine.yield %9 : tensor<64x!fhe.secret<f64>>
+
+        // fetch img[x-1][y-1]
+        %4 = arith.addi %x, %c-1 : index
+        %5 = arith.muli %4, %c8 : index
+        %6 = arith.addi %y, %c-1 : index
+        %7 = arith.addi %5, %6 : index
+        %8 = arith.remui %7, %c64 : index
+        %9 = tensor.extract %img[%8] : tensor<64x!fhe.secret<f64>>
+
+        // fetch img[x][y]
+        %10 = arith.muli %x, %c8 : index
+        %11 = arith.addi %10, %y : index
+        %12 = arith.remui %11, %c64 : index
+        %13 = tensor.extract %img[%12] : tensor<64x!fhe.secret<f64>>
+
+        // subtract those two
+        %14 = fhe.sub(%9,%13) : (!fhe.secret<f64>, !fhe.secret<f64>) -> !fhe.secret<f64>
+
+        // fetch img[x-1][y]
+        %15 = arith.addi %x, %c-1 : index
+        %16 = arith.muli %15, %c8 : index
+        %17 = arith.addi %y, %c-1 : index
+        %18 = arith.addi %16, %17 : index
+        %19 = arith.remui %18, %c64 : index
+        %20 = tensor.extract %img[%19] : tensor<64x!fhe.secret<f64>>
+
+        // fetch img[x][y-1]
+        %21 = arith.muli %x, %c8 : index
+        %22 = arith.addi %y, %c-1 : index
+        %23 = arith.addi %21, %22 : index
+        %24 = arith.remui %23, %c64 : index
+        %25 = tensor.extract %img[%24] : tensor<64x!fhe.secret<f64>>
+
+        // subtract those two
+        %26 = fhe.sub(%20,%25) : (!fhe.secret<f64>, !fhe.secret<f64>) -> !fhe.secret<f64>
+
+        // square each difference
+        %27 = fhe.multiply(%14,%14) :  (!fhe.secret<f64>, !fhe.secret<f64>) -> !fhe.secret<f64>
+        %28 = fhe.multiply(%26,%26) :  (!fhe.secret<f64>, !fhe.secret<f64>) -> !fhe.secret<f64>
+
+        // add the squares
+        %29 = fhe.add(%27, %28) : (!fhe.secret<f64>, !fhe.secret<f64>) -> !fhe.secret<f64>
+
+        // save to result[x][y]
+        %30 = tensor.insert %29 into %imgy[%12] : tensor<64x!fhe.secret<f64>>
+        affine.yield %30: tensor<64x!fhe.secret<f64>>
       }
       affine.yield %1 : tensor<64x!fhe.secret<f64>>
     }
