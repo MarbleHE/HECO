@@ -14,7 +14,7 @@ jobs:
       - name: Generate short commit hash
         id: commit_hash
         run: |
-          cd llvm && echo ::set-output name=sha_short::$(git rev-parse --short=8 ${{ github.sha }})
+          cd llvm && echo ::set-output name=sha_short::$(git rev-parse --short=8 HEAD)
       - uses: actions/cache@v2
         id: cache
         with:
@@ -49,7 +49,7 @@ jobs:
       - name: Generate short commit hash for MLIR
         id: commit_hash_mlir
         run: |
-          cd llvm && echo ::set-output name=sha_short::$(git rev-parse --short=8 ${{ github.sha }})
+          cd llvm && echo ::set-output name=sha_short::$(git rev-parse --short=8 HEAD)
       - uses: actions/cache@v2
         id: cache
         with:
