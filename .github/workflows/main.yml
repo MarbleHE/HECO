@@ -6,6 +6,10 @@ jobs:
   setup-mlir:
     runs-on: ubuntu-latest
     steps:
+      - name: Update apt
+        run: sudo apt-get update -y
+      - name: Install awk
+        run: sudo apt-get install -y gawk
       - name: Generate short commit hash for MLIR
         id: commit_hash_mlir
         run: |
@@ -13,26 +17,23 @@ jobs:
       - uses: actions/cache@v2
         id: cache
         with:
-          path: ~/llvm/build
-          key: mlir-${{ steps.commit_hash_mlir.sha_short }} 
+          path: $GITHUB_WORKSPACE/llvm/build
+          key: mlir-${{ steps.commit_hash_mlir.outputs.sha_short }}
       - name: Checkout MLIR source
         if: steps.cache.outputs.cache-hit != 'true'
         uses: actions/checkout@v2
         with:
           repository: MarbleHE/llvm-project
-          path: ~/llvm
-      - name: Update apt
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: sudo apt-get update
+          path: llvm
       - name: Apt install requirements
         if: steps.cache.outputs.cache-hit != 'true'
         run: sudo apt-get install -y ninja-build build-essential cmake
       - name: Configure MLIR
         if: steps.cache.outputs.cache-hit != 'true'
-        run: mkdir ~/llvm/build && cd ~/llvm/build &&  cmake -G Ninja ../llvm -DLLVM_ENABLE_PROJECTS=mlir -DLLVM_BUILD_EXAMPLES=ON -DLLVM_TARGETS_TO_BUILD="X86" -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_ASSERTIONS=ON
+        run: mkdir llvm/build && cd llvm/build &&  cmake -G Ninja ../llvm -DLLVM_ENABLE_PROJECTS=mlir -DLLVM_BUILD_EXAMPLES=ON -DLLVM_TARGETS_TO_BUILD="X86" -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_ASSERTIONS=ON
       - name: Build MLIR
         if: steps.cache.outputs.cache-hit != 'true'
-        run: cmake --build ~/llvm/build
+        run: cmake --build llvm/build
 
   build-ubuntu:
     needs: setup-mlir
@@ -42,11 +43,6 @@ jobs:
         run: sudo apt-get update
       - name: install gcc-9
         run: sudo apt-get install -y gcc-9 g++-9 build-essential libboost-all-dev python3-dev python3-pip cmake
-      - name: Checkout MLIR source
-        uses: actions/checkout@v2
-        with:
-          repository: MarbleHE/llvm-project
-          path: ~/llvm/build
       - name: Generate short commit hash for MLIR
         id: commit_hash_mlir
         run: |
@@ -54,8 +50,8 @@ jobs:
       - uses: actions/cache@v2
         id: cache
         with:
-          path: llvm/build
-          key: mlir-${{ steps.commit_hash_mlir.sha_short }}
+          path: $GITHUB_WORKSPACE/llvm/build
+          key: mlir-${{ steps.commit_hash_mlir.outputs.sha_short }}
       - uses: actions/checkout@v2
         with:
           path: HECO
@@ -64,7 +60,7 @@ jobs:
         run: |
           cd HECO && echo ::set-output name=sha_short::$(git rev-parse --short=8 ${{ github.sha }})
       - name: configure
-        run: mkdir HECO/build && cd HECO/build && cmake -DCMAKE_CXX_FLAGS="-Werror" -DCMAKE_CXX_COMPILER=g++-9 -DCMAKE_C_COMPILER=gcc-9 -DMLIR_DIR=~/llvm/build/lib/cmake/mlir ..
+        run: mkdir HECO/build && cd HECO/build && cmake -DCMAKE_CXX_FLAGS="-Werror" -DCMAKE_CXX_COMPILER=g++-9 -DCMAKE_C_COMPILER=gcc-9 -DMLIR_DIR=$GITHUB_WORKSPACE/llvm/build/lib/cmake/mlir ..
       - name: build
         run: cmake --build HECO/build --target testing-all
       - name: test
