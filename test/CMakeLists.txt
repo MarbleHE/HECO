@@ -94,7 +94,7 @@ gtest_discover_tests(testing-all TEST_PREFIX gtest:)
 add_dependencies(testing-all cpp_ast)
 
 # Python tests
-add_subdirectory(python_frontend)
+# add_subdirectory(python_frontend)
 
 # MLIR testing setup
 add_subdirectory(IR)
