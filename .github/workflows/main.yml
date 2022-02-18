@@ -20,6 +20,7 @@ jobs:
           path: |
             ${{ github.workspace }}/llvm/build
             ${{ github.workspace }}/llvm/llvm
+            ${{ github.workspace }}/llvm/mlir
           key: mlir-${{ steps.commit_hash_mlir.outputs.sha_short }}
       - name: Checkout MLIR source
         if: steps.cache.outputs.cache-hit != 'true'
@@ -55,6 +56,7 @@ jobs:
           path: |
             ${{ github.workspace }}/llvm/build
             ${{ github.workspace }}/llvm/llvm
+            ${{ github.workspace }}/llvm/mlir
           key: mlir-${{ steps.commit_hash_mlir.outputs.sha_short }}
       - uses: actions/checkout@v2
         with:
