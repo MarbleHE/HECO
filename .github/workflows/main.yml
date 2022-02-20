@@ -61,10 +61,38 @@ jobs:
           path: llvm
       - name: Configure MLIR
         if: steps.cache.outputs.cache-hit != 'true'
-        run: mkdir llvm/build && cd llvm/build &&  cmake -G Ninja ../llvm -DLLVM_ENABLE_PROJECTS=mlir -DLLVM_BUILD_EXAMPLES=ON -DLLVM_TARGETS_TO_BUILD="X86" -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_ASSERTIONS=ON
+        run: mkdir llvm/build && cd llvm/build &&  cmake -G Ninja ../llvm -DLLVM_ENABLE_PROJECTS=mlir -DLLVM_BUILD_EXAMPLES=ON -DLLVM_TARGETS_TO_BUILD="X86" -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_ASSERTIONS=ON -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DLLVM_ENABLE_LLD=ON
       - name: Build MLIR
         if: steps.cache.outputs.cache-hit != 'true'
         run: cmake --build llvm/build
+
+  build-windows-mlir:
+    runs-on: windows-latest
+    steps:
+      - name: Generate short commit hash for MLIR
+        id: commit_hash_mlir
+        run: |
+          echo ::set-output name=sha_short::$(git ls-remote https://github.com/MarbleHE/llvm-project.git HEAD).SubString(0,8)
+      - uses: actions/cache@v2
+        id: cache
+        with:
+          path: |
+            ${{ github.workspace }}/llvm/build
+            ${{ github.workspace }}/llvm/llvm
+            ${{ github.workspace }}/llvm/mlir
+          key: windows-mlir-${{ steps.commit_hash_mlir.outputs.sha_short }}
+      - name: Checkout MLIR source
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/checkout@v2
+        with:
+          repository: MarbleHE/llvm-project
+          path: llvm
+      - name: Configure MLIR
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: mkdir llvm\build && cd llvm\build && cmake ..\llvm -G "Visual Studio 15 2017 Win64" -DLLVM_ENABLE_PROJECTS=mlir -DLLVM_BUILD_EXAMPLES=ON -DLLVM_TARGETS_TO_BUILD="host" -DCMAKE_BUILD_TYPE=Release -Thost=x64 -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_ASSERTIONS=ON
+      - name: Build MLIR
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: cmake --build llvm\build
 
   build-ubuntu-gcc:
     needs: build-linux-mlir
@@ -151,9 +179,16 @@ jobs:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_APP_TOKEN }}
 
   build-windows:
+    needs: build-windows-mlir
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v1
+      - name: Generate short commit hash for MLIR
+        id: commit_hash_mlir
+        run: |
+          echo ::set-output name=sha_short::$(git ls-remote https://github.com/MarbleHE/llvm-project.git HEAD).SubString(0,8)
+      - uses: actions/checkout@v2
+        with:
+          path: HECO
       - name: Generate short commit hash
         id: vars
         run: |
