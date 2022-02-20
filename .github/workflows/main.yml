@@ -94,7 +94,7 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         shell: cmd
         run: |
-          where /r "C:\Program Files (x86)\Microsoft Visual Studio" vcvars64.bat
+          where /r "C:\Program Files (x86)\Microsoft Visual Studio" vcvars*
           call "${{ steps.vc_vars.outputs.path }}"
           mkdir llvm\build
           cd llvm\build
@@ -105,6 +105,9 @@ jobs:
         run: |
           call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
           cmake --build llvm\build
+      - name: Setup tmate session in case of a failure
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3
 
   build-ubuntu-gcc:
     needs: build-linux-mlir
