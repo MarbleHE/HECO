@@ -89,12 +89,11 @@ jobs:
           path: llvm
       - name: Find Visual Studio vars
         id: vc_vars
-        run: echo "::set-output name=path::$(dir -Path "C:\Program Files (x86)\Microsoft Visual Studio" -Filter vcvars64.bat -Recurse -ErrorAction SilentlyContinue | %{$_.FullName})"
+        run: echo "::set-output name=path::$(dir -Path "C:\Program Files (x86)\Microsoft Visual Studio","C:\Program Files\Microsoft Visual Studio" -Filter vcvars64.bat -Recurse -ErrorAction SilentlyContinue | %{$_.FullName})"
       - name: Configure MLIR
         if: steps.cache.outputs.cache-hit != 'true'
         shell: cmd
         run: |
-          where /r "C:\Program Files (x86)\Microsoft Visual Studio" vcvars*
           call "${{ steps.vc_vars.outputs.path }}"
           mkdir llvm\build
           cd llvm\build
