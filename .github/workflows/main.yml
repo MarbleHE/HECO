@@ -89,7 +89,7 @@ jobs:
           path: llvm
       - name: Find Visual Studio vars
         id: vc_vars
-        run: echo "::set-output name=path::$(dir -Path "C:\Program Files (x86)\Microsoft Visual Studio","C:\Program Files\Microsoft Visual Studio" -Filter vcvars64.bat -Recurse -ErrorAction SilentlyContinue | %{$_.FullName})"
+        run: echo "::set-output name=path::$(If (Test-Path "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat") {"C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"} Else {dir -Path "C:\Program Files (x86)\Microsoft Visual Studio","C:\Program Files\Microsoft Visual Studio" -Filter vcvars64.bat -Recurse -ErrorAction SilentlyContinue | %{$_.FullName}})"
       - name: Configure MLIR
         if: steps.cache.outputs.cache-hit != 'true'
         shell: cmd
@@ -97,16 +97,18 @@ jobs:
           call "${{ steps.vc_vars.outputs.path }}"
           mkdir llvm\build
           cd llvm\build
-          cmake ..\llvm -G "Visual Studio 16 2019" -A x64 -DLLVM_ENABLE_PROJECTS=mlir -DLLVM_BUILD_EXAMPLES=ON -DLLVM_TARGETS_TO_BUILD="host" -DCMAKE_BUILD_TYPE=Release -Thost=x64 -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_ASSERTIONS=ON
+          cmake ..\llvm -G "Visual Studio 17 2022" -A x64 -DLLVM_ENABLE_PROJECTS=mlir -DLLVM_BUILD_EXAMPLES=ON -DLLVM_TARGETS_TO_BUILD="host" -DCMAKE_BUILD_TYPE=Release -Thost=x64 -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_ASSERTIONS=ON
       - name: Build MLIR
         if: steps.cache.outputs.cache-hit != 'true'
         shell: cmd
         run: |
-          call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+          call "${{ steps.vc_vars.outputs.path }}"
           cmake --build llvm\build
       - name: Setup tmate session in case of a failure
         if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3
+        with:
+          timeout-minutes: 5
 
   build-ubuntu-gcc:
     needs: build-linux-mlir
