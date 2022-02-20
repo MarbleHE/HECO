@@ -91,6 +91,7 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         shell: cmd
         run: |
+          tree "C:\Program Files (x86)\Microsoft Visual Studio"
           call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
           mkdir llvm\build
           cd llvm\build
