@@ -105,6 +105,10 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         id: cpu-cores
         run: echo "::set-output name=count::$(WMIC CPU Get NumberOfLogicalProcessors |  Select -Index 2)"
+      - name: Print folder sizes
+        run: |
+          Get-CimInstance -ClassName Win32_LogicalDisk | Select-Object -Property DeviceID,@{'Name' = 'FreeSpace (GB)'; Expression= { ($_.FreeSpace / 1GB) }},@{'Name' = 'Total (GB)'; Expression= { ($_.Size / 1GB) }}
+          gci -force 'D:' -ErrorAction SilentlyContinue | ? { $_ -is [io.directoryinfo] } | % {$len = 0 gci -recurse -force $_.fullname -ErrorAction SilentlyContinue | % { $len += $_.length } $_.fullname, '{0:N2} GB' -f ($len / 1Gb)}
       - name: Build MLIR
         if: steps.cache.outputs.cache-hit != 'true'
         shell: cmd
