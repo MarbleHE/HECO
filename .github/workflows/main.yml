@@ -33,7 +33,7 @@ jobs:
         run: sudo apt-get install -y ninja-build build-essential cmake
       - name: Configure MLIR
         if: steps.cache.outputs.cache-hit != 'true'
-        run: mkdir llvm/build && cd llvm/build &&  cmake -G Ninja ../llvm -DLLVM_ENABLE_PROJECTS=mlir -DLLVM_BUILD_EXAMPLES=ON -DLLVM_TARGETS_TO_BUILD="X86" -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_ASSERTIONS=ON
+        run: mkdir llvm/build && cd llvm/build &&  cmake -G Ninja ../llvm -DLLVM_ENABLE_PROJECTS=mlir -DLLVM_BUILD_EXAMPLES=OFF -DLLVM_TARGETS_TO_BUILD="X86" -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_ASSERTIONS=ON
       - name: Build MLIR
         if: steps.cache.outputs.cache-hit != 'true'
         run: cmake --build llvm/build
@@ -61,10 +61,12 @@ jobs:
           path: llvm
       - name: Configure MLIR
         if: steps.cache.outputs.cache-hit != 'true'
-        run: mkdir llvm/build && cd llvm/build &&  cmake ../llvm -DLLVM_ENABLE_PROJECTS=mlir -DLLVM_BUILD_EXAMPLES=ON -DLLVM_TARGETS_TO_BUILD="X86" -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_ASSERTIONS=ON -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+        run: mkdir llvm/build && cd llvm/build &&  cmake ../llvm -DLLVM_ENABLE_PROJECTS=mlir -DLLVM_BUILD_EXAMPLES=OFF -DLLVM_TARGETS_TO_BUILD="X86" -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_ASSERTIONS=ON -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+      - name: Get number of CPU cores
+        uses: SimenB/github-actions-cpu-cores@v1
       - name: Build MLIR
         if: steps.cache.outputs.cache-hit != 'true'
-        run: cmake --build llvm/build
+        run: cmake --build llvm/build --parallel ${{ steps.cpu-cores.outputs.count }}
 
   build-windows-mlir:
     runs-on: windows-latest
@@ -97,13 +99,15 @@ jobs:
           call "${{ steps.vc_vars.outputs.path }}"
           mkdir llvm\build
           cd llvm\build
-          cmake ..\llvm -G "Visual Studio 17 2022" -A x64 -DLLVM_ENABLE_PROJECTS=mlir -DLLVM_BUILD_EXAMPLES=ON -DLLVM_TARGETS_TO_BUILD="host" -DCMAKE_BUILD_TYPE=Release -Thost=x64 -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_ASSERTIONS=ON
+          cmake ..\llvm -G "Visual Studio 17 2022" -A x64 -DLLVM_ENABLE_PROJECTS=mlir -DLLVM_BUILD_EXAMPLES=OFF -DLLVM_TARGETS_TO_BUILD="host" -DCMAKE_BUILD_TYPE=Release -Thost=x64 -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_ASSERTIONS=ON
+      - name: Get number of CPU cores
+        uses: SimenB/github-actions-cpu-cores@v1
       - name: Build MLIR
         if: steps.cache.outputs.cache-hit != 'true'
         shell: cmd
         run: |
           call "${{ steps.vc_vars.outputs.path }}"
-          cmake --build llvm\build --target tools/mlir/test/check-mlir
+          cmake --build llvm\build -- /p:CL_MPcount=${{ steps.cpu-cores.outputs.count }}
       - name: Setup tmate session in case of a failure
         if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3
