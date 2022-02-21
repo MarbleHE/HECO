@@ -63,6 +63,7 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         run: mkdir llvm/build && cd llvm/build &&  cmake ../llvm -DLLVM_ENABLE_PROJECTS=mlir -DLLVM_BUILD_EXAMPLES=OFF -DLLVM_TARGETS_TO_BUILD="X86" -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_ASSERTIONS=ON -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
       - name: Get number of CPU cores
+        if: steps.cache.outputs.cache-hit != 'true'
         uses: SimenB/github-actions-cpu-cores@v1
       - name: Build MLIR
         if: steps.cache.outputs.cache-hit != 'true'
@@ -101,7 +102,9 @@ jobs:
           cd llvm\build
           cmake ..\llvm -G "Visual Studio 17 2022" -A x64 -DLLVM_ENABLE_PROJECTS=mlir -DLLVM_BUILD_EXAMPLES=OFF -DLLVM_TARGETS_TO_BUILD="host" -DCMAKE_BUILD_TYPE=Release -Thost=x64 -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_ASSERTIONS=ON
       - name: Get number of CPU cores
-        uses: SimenB/github-actions-cpu-cores@v1
+        if: steps.cache.outputs.cache-hit != 'true'
+        id: cpu-cores
+        run: echo "::set-output name=count::$(WMIC CPU Get NumberOfLogicalProcessors |  Select -Index 2)"
       - name: Build MLIR
         if: steps.cache.outputs.cache-hit != 'true'
         shell: cmd
