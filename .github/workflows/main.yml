@@ -100,7 +100,7 @@ jobs:
           call "${{ steps.vc_vars.outputs.path }}"
           mkdir llvm\build
           cd llvm\build
-          cmake ..\llvm -G "Visual Studio 17 2022" -A x64 -DLLVM_ENABLE_PROJECTS=mlir -DLLVM_TARGETS_TO_BUILD="host" -DCMAKE_BUILD_TYPE=Release -Thost=x64 -DCMAKE_BUILD_TYPE=Release -DLLVM_BUILD_TOOLS=OFF -DLLVM_ENABLE_DIA_SDK=OFF -DLLVM_ENABLE_LIBPFM=OFF
+          cmake ..\llvm -G "Visual Studio 17 2022" -A x64 -DLLVM_ENABLE_PROJECTS=mlir -DLLVM_TARGETS_TO_BUILD="host" -Thost=x64 -DCMAKE_BUILD_TYPE=MinSizeRel -DLLVM_BUILD_TOOLS=OFF -DLLVM_ENABLE_DIA_SDK=OFF -DLLVM_ENABLE_LIBPFM=OFF
       - name: Get number of CPU cores
         if: steps.cache.outputs.cache-hit != 'true'
         id: cpu-cores
@@ -110,7 +110,7 @@ jobs:
         shell: cmd
         run: |
           call "${{ steps.vc_vars.outputs.path }}"
-          cmake --build llvm\build -- /p:CL_MPcount=${{ steps.cpu-cores.outputs.count }}
+          cmake --build llvm\build --parallel ${{ steps.cpu-cores.outputs.count }}
       - name: Setup tmate session in case of a failure
         if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3
