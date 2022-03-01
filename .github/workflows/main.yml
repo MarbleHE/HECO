@@ -99,7 +99,7 @@ jobs:
         run: |
           call "${{ steps.vc_vars.outputs.path }}"
           md llvm\build
-          cmake -S llvm\llvm -B llvm\build -DLLVM_ENABLE_PROJECTS=mlir -DLLVM_TARGETS_TO_BUILD=X86 -Thost=x64
+          cmake -S llvm\llvm -B llvm\build -G "NMake Makefiles" -DLLVM_ENABLE_PROJECTS=mlir -DCMAKE_BUILD_TYPE=MinSizeRel -DLLVM_ENABLE_DIA_SDK=false
       - name: Get number of CPU cores
         if: steps.cache.outputs.cache-hit != 'true'
         id: cpu-cores
