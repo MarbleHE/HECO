@@ -339,7 +339,7 @@ jobs:
           call "${{ steps.vc_vars.outputs.path }}"
           md HECO\build
           cd HECO\build
-          cmake -G  -DCMAKE_CXX_FLAGS="/W4" -DCMAKE_STATIC_LINKER_FLAGS="/WX:NO /DEBUG:NONE" -DCMAKE_BUILD_TYPE=Release -DMLIR_DIR=${{ github.workspace }}\llvm\build\lib\cmake\mlir -DLLVM_DIR=${{ github.workspace }}\llvm\build ..
+          cmake -G "NMake Makefiles" -DCMAKE_CXX_FLAGS="/W4" -DCMAKE_STATIC_LINKER_FLAGS="/WX:NO /DEBUG:NONE" -DCMAKE_BUILD_TYPE=Release -DMLIR_DIR=${{ github.workspace }}\llvm\build\lib\cmake\mlir -DLLVM_DIR=${{ github.workspace }}\llvm\build ..
 
       - name: build
         shell: cmd
