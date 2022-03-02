@@ -226,7 +226,7 @@ jobs:
           cd HECO && echo ::set-output name=sha_short::$(git rev-parse --short=8 ${{ github.sha }})
 
       - name: configure
-        run: mkdir HECO/build && cd HECO/build && cmake -DCMAKE_CXX_COMPILER=clang -DCMAKE_C_COMPILER=clang -DMLIR_DIR=${{ github.workspace }}/llvm/build/lib/cmake/mlir -DLLVM_DIR=${{ github.workspace }}/llvm/build ..
+        run: mkdir HECO/build && cd HECO/build && cmake -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -DMLIR_DIR=${{ github.workspace }}/llvm/build/lib/cmake/mlir -DLLVM_DIR=${{ github.workspace }}/llvm/build ..
 
       - name: build
         run: cmake --build HECO/build --target testing-all
