@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.11.0)
+cmake_minimum_required(VERSION 3.15.0)
 include(FetchContent) # Introduced in CMake 3.11
 include(GoogleTest) # Introduced in CMake 3.10
 
