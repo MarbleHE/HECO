@@ -175,6 +175,9 @@ jobs:
       - name: configure
         run: mkdir HECO/build && cd HECO/build && cmake -DCMAKE_CXX_COMPILER=g++-9 -DCMAKE_C_COMPILER=gcc-9 -DMLIR_DIR=${{ github.workspace }}/llvm/build/lib/cmake/mlir -DLLVM_DIR=${{ github.workspace }}/llvm/build ..
 
+      - name: build mlir headers
+        run: cmake --build HECO/build --target mlir-headers
+
       - name: build
         run: cmake --build HECO/build --target testing-all
 
@@ -228,6 +231,9 @@ jobs:
       - name: configure
         run: mkdir HECO/build && cd HECO/build && cmake -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -DMLIR_DIR=${{ github.workspace }}/llvm/build/lib/cmake/mlir -DLLVM_DIR=${{ github.workspace }}/llvm/build ..
 
+      - name: build mlir headers
+        run: cmake --build HECO/build --target mlir-headers
+
       - name: build
         run: cmake --build HECO/build --target testing-all
 
@@ -274,6 +280,9 @@ jobs:
 
       - name: configure
         run: mkdir HECO/build && cd HECO/build && cmake -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -DMLIR_DIR=${{ github.workspace }}/llvm/build/lib/cmake/mlir -DLLVM_DIR=${{ github.workspace }}/llvm/build ..
+
+      - name: build mlir headers
+        run: cmake --build HECO/build --target mlir-headers
 
       - name: build
         run: cmake --build HECO/build --target testing-all
@@ -336,6 +345,7 @@ jobs:
         shell: cmd
         run: |
           call "${{ steps.vc_vars.outputs.path }}"
+          cmake --build HECO\build --target mlir-headers
           cmake --build HECO\build --target testing-all
 
       - name: test
