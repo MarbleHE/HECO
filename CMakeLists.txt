@@ -70,9 +70,6 @@ if (MSVC)
     # Force MSVC to conform to C++ standard's idea of exceptions
     add_compile_options(/EHsc)
 
-    # Make (nearly) all warnings errors
-    add_compile_options(/W4 /WX)
-
     # Try using variants
     add_compile_options(/std:c++17)
 
