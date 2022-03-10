@@ -7,13 +7,13 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       should-skip: ${{ steps.skip_check.outputs.should_skip }}
-     steps:
-        - id: skip_check
-          uses: fkirc/skip-duplicate-actions@master
-          with:
-            concurrent_skipping: 'same_content'
-            skip_after_successful_duplicate: 'true'
-            do_not_skip: '["workflow_dispatch", "schedule"]'
+    steps:
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@master
+        with:
+          concurrent_skipping: 'same_content'
+          skip_after_successful_duplicate: 'true'
+          do_not_skip: '["workflow_dispatch", "schedule"]'
 
   build-linux-mlir:
     runs-on: ubuntu-latest
