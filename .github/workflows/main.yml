@@ -3,8 +3,22 @@ name: build_run_tests
 on: [ push ]
 
 jobs:
+duplicate-check:
+  runs-on: ubuntu-latest
+  outputs:
+    should-skip: ${{ steps.skip_check.outputs.should_skip }}
+   steps:
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@master
+        with:
+          concurrent_skipping: 'same_content'
+          skip_after_successful_duplicate: 'true'
+          do_not_skip: '["workflow_dispatch", "schedule"]'
+
   build-linux-mlir:
     runs-on: ubuntu-latest
+    needs: duplicate-check
+    if: ${{ needs.duplicate-check.outputs.should_skip != 'true' }}
     steps:
       - name: Update apt
         run: sudo apt-get update -y
@@ -48,6 +62,8 @@ jobs:
 
   build-macos-mlir:
     runs-on: macos-latest
+    needs: duplicate-check
+    if: ${{ needs.duplicate-check.outputs.should_skip != 'true' }}
     steps:
       - name: Generate short commit hash for MLIR
         id: commit_hash_mlir
@@ -85,6 +101,8 @@ jobs:
 
   build-windows-mlir:
     runs-on: windows-latest
+    needs: duplicate-check
+    if: ${{ needs.duplicate-check.outputs.should_skip != 'true' }}
     steps:
       - name: Generate short commit hash for MLIR
         id: commit_hash_mlir
@@ -301,54 +319,54 @@ jobs:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_APP_TOKEN }}
 
 
-  build-macos-gcc:
-    needs: build-macos-mlir
-    runs-on: macos-latest
-    steps:
-      - name: Generate short commit hash for MLIR
-        id: commit_hash_mlir
-        run: |
-          echo ::set-output name=sha_short::$(git ls-remote https://github.com/MarbleHE/llvm-project.git HEAD | awk '{ print substr($1,1,8) }')
+  # build-macos-gcc:
+  #   needs: build-macos-mlir
+  #   runs-on: macos-latest
+  #   steps:
+  #     - name: Generate short commit hash for MLIR
+  #       id: commit_hash_mlir
+  #       run: |
+  #         echo ::set-output name=sha_short::$(git ls-remote https://github.com/MarbleHE/llvm-project.git HEAD | awk '{ print substr($1,1,8) }')
 
-      - uses: actions/cache@v2
-        id: cache
-        with:
-          path: |
-            ${{ github.workspace }}/llvm/build
-            ${{ github.workspace }}/llvm/llvm
-            ${{ github.workspace }}/llvm/mlir
-          key: macos-mlir-${{ steps.commit_hash_mlir.outputs.sha_short }}
+  #     - uses: actions/cache@v2
+  #       id: cache
+  #       with:
+  #         path: |
+  #           ${{ github.workspace }}/llvm/build
+  #           ${{ github.workspace }}/llvm/llvm
+  #           ${{ github.workspace }}/llvm/mlir
+  #         key: macos-mlir-${{ steps.commit_hash_mlir.outputs.sha_short }}
 
-      - uses: actions/checkout@v2
-        with:
-          path: HECO
+  #     - uses: actions/checkout@v2
+  #       with:
+  #         path: HECO
 
-      - name: Generate short commit hash
-        id: vars
-        run: |
-          cd HECO && echo ::set-output name=sha_short::$(git rev-parse --short=8 ${{ github.sha }})
+  #     - name: Generate short commit hash
+  #       id: vars
+  #       run: |
+  #         cd HECO && echo ::set-output name=sha_short::$(git rev-parse --short=8 ${{ github.sha }})
 
-      - name: configure
-        run: mkdir HECO/build && cd HECO/build && cmake -DCMAKE_CXX_COMPILER=g++-9 -DCMAKE_C_COMPILER=gcc-9 -DCMAKE_BUILD_TYPE=Release -DMLIR_DIR=${{ github.workspace }}/llvm/build/lib/cmake/mlir -DLLVM_DIR=${{ github.workspace }}/llvm/build ..
+  #     - name: configure
+  #       run: mkdir HECO/build && cd HECO/build && cmake -DCMAKE_CXX_COMPILER=g++-9 -DCMAKE_C_COMPILER=gcc-9 -DCMAKE_BUILD_TYPE=Release -DMLIR_DIR=${{ github.workspace }}/llvm/build/lib/cmake/mlir -DLLVM_DIR=${{ github.workspace }}/llvm/build ..
 
-      - name: build mlir headers
-        run: cmake --build HECO/build --target mlir-headers
+  #     - name: build mlir headers
+  #       run: cmake --build HECO/build --target mlir-headers
 
-      - name: build
-        run: cmake --build HECO/build --target testing-all
+  #     - name: build
+  #       run: cmake --build HECO/build --target testing-all
 
-      - name: test
-        run: cd HECO/build && ctest
+  #     - name: test
+  #       run: cd HECO/build && ctest
 
-      - name: Send message to Slack if build job failed
-        if: ${{ failure() }}
-        uses: voxmedia/github-action-slack-notify-build@v1
-        with:
-          channel: github-batching-compiler
-          status: Building ABC using clang on macOS failed!
-          color: warning
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_APP_TOKEN }}
+  #     - name: Send message to Slack if build job failed
+  #       if: ${{ failure() }}
+  #       uses: voxmedia/github-action-slack-notify-build@v1
+  #       with:
+  #         channel: github-batching-compiler
+  #         status: Building ABC using clang on macOS failed!
+  #         color: warning
+  #       env:
+  #         SLACK_BOT_TOKEN: ${{ secrets.SLACK_APP_TOKEN }}
 
 
   build-windows:
