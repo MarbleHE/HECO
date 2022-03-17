@@ -1,30 +1,31 @@
-
 import logging
-import json
 import os
 
 from inspect import getsource, getmodule
 from ast import parse
 
-from ._abc_wrapper import *
 from .ABCJsonAstBuilder import ABCJsonAstBuilder
+from .ABCBackend import ABCBackend
+
 
 class ABCProgram:
     """
     Class for an ABC FHE program
     """
 
-    def __init__(self, log_level=logging.INFO):
+    def __init__(self, log_level=logging.INFO, backend=ABCBackend.AST):
+        self.compilation_results = None
         self.log_level = log_level
         logging.basicConfig(level=self.log_level)
 
         self.builder = ABCJsonAstBuilder(log_level=log_level)
+        self.backend_class = backend
         self.abc_ast_json = []
 
     #
     # Internal helper functions
     #
-    def _create_fhe_args_block(self, fhe_args : dict) -> dict:
+    def _create_fhe_args_block(self, fhe_args: dict) -> dict:
         """
         Translate a dictionary of variable-value assignments to a block of ABC variable declaration statements.
 
@@ -39,7 +40,6 @@ class ABCProgram:
             stmts.append(abc_var_decl)
 
         return self.builder.make_block(stmts)
-
 
     #
     # External functions
@@ -62,17 +62,14 @@ class ABCProgram:
         :return: void, the compiled main function is stored internally in self.cpp_program.
         """
 
-        if len(self.abc_ast_json) > 0:
-            self.cpp_program = ABCProgramWrapper(json.dumps(self.abc_ast_json[0]))
-            for fn in self.abc_ast_json[1:]:
-                self.cpp_program.add_fn(json.dumps(fn))
-
-            # TODO: Printing MLIR for the moment, remove when we actually execute it.
-            self.cpp_program.dump()
-        else:
-            logging.error("A Python program must first be parsed to a json representation of the ABC AST before it can "
-                          "be compiled")
+        try:
+            self.compilation_results = self.backend_class.compile(self.abc_ast_json)
+        except Exception as e:
+            logging.error(e)
             exit(1)
+
+    def dump(self):
+        self.backend_class.dump(self.compilation_results)
 
     def execute(self, *args, **kwargs):
         """
@@ -167,4 +164,3 @@ class ABCProgram:
         """
         self.src_curr_blocks = block
         self.src_curr_blocks_asts = list(map(parse, self.src_curr_blocks))
-
