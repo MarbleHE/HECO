@@ -2,6 +2,7 @@ from pyabc import *
 import logging
 
 p = ABCProgram(logging.DEBUG, backend=ABCBackend.MLIRText)
+# p = ABCProgram(logging.DEBUG)
 
 with ABCContext(p, logging.DEBUG):
     def main():

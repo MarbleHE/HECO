@@ -17,16 +17,29 @@ class ABCMLIRTextBuilder:
         append_string = f"{self.indent_string * self.indent_level}{string}"
         self.lines.append(append_string)
         self.current_line = ""
+        # print(append_string)
+
+    def _add_curr_line(self):
+        self._add_line(self.current_line)
 
     def dump(self):
         for line in self.lines:
             print(line)
 
+    def add_start_module(self, obj):
+        self._add_line("builtin.module {")
+        self._increase_indent()
+        return self
+
+    def add_end_module(self, obj):
+        self._decrease_indent()
+        self._add_line("}")
+        return self
+
     def add_start_function(self, func_obj):
         f_type = func_obj["return_type"]
         f_name = func_obj["identifier"]
-        param_list = ",".join(func_obj["parameters"])
-        self._add_line(f"{f_type} {f_name} ({param_list}) {{")
+        self._add_line(f"abc.function {f_type} @{f_name} {{")
         self._increase_indent()
         return self
 
@@ -35,34 +48,59 @@ class ABCMLIRTextBuilder:
         self._add_line("}")
         return self
 
+    def add_start_functionparameter(self, obj):
+        param_type = obj["parameter_type"]
+        param_name = obj["identifier"]
+        self._add_line(f"abc.function_parameter {param_type} @{param_name}")
+        return self
+
+    def add_end_functionparameter(self, obj):
+        # self._decrease_indent()
+        # self._add_line("},{")
+        return self
+
+    def add_separator(self, obj):
+        self._decrease_indent()
+        self._add_line("},{")
+        self._increase_indent()
+        return self
+
     def add_start_block(self, obj):
+        self._add_line("abc.block {")
+        self._increase_indent()
         return self
     
     def add_end_block(self, obj):
+        self._decrease_indent()
+        self._add_line("}")
         return self
 
     def add_start_variabledeclaration(self, obj):
-        print('add_start_variabledeclaration unimplemented')
+        var_type = obj["datatype"]
+        var_name = obj["target"]["identifier"]
+        self._add_line(f"abc.variable_declaration {var_type} @{var_name} = ( {{")
+        self._increase_indent()
         return self
 
     def add_end_variabledeclaration(self, obj):
-        print('add_end_variabledeclaration unimplemented')
+        self._decrease_indent()
+        self._add_line("})")
         return self
 
     def add_start_variable(self, obj):
-        print('add_start_variable unimplemented')
+        name = obj["identifier"]
+        self._add_line(f"abc.variable @{name}")
         return self
 
     def add_end_variable(self, obj):
-        print('add_end_variable unimplemented')
         return self
 
     def add_start_literaldouble(self, obj):
-        print('add_start_literaldouble unimplemented')
+        value = obj["value"]
+        self._add_line(f"abc.literal_double {value}")
         return self
 
     def add_end_literaldouble(self, obj):
-        print('add_end_literaldouble unimplemented')
         return self
 
     def add_start_void(self, obj):
@@ -74,35 +112,42 @@ class ABCMLIRTextBuilder:
         return self
 
     def add_start_if(self, obj):
-        print('add_start_if unimplemented')
+        self._add_line("abc.if {")
+        self._increase_indent()
         return self
 
     def add_end_if(self, obj):
-        print('add_end_if unimplemented')
+        self._decrease_indent()
+        self._add_line("}")
         return self
 
     def add_start_binaryexpression(self, obj):
-        print('add_start_binaryexpression unimplemented')
+        op = obj["operator"]
+        self._add_line(f"abc.binary_expression \"{op}\" {{")
+        self._increase_indent()
         return self
 
     def add_end_binaryexpression(self, obj):
-        print('add_end_binaryexpression unimplemented')
+        self._decrease_indent()
+        self._add_line("}")
         return self
 
     def add_start_return(self, obj):
-        print('add_start_return unimplemented')
+        self._add_line("abc.return {")
+        self._increase_indent()
         return self
 
     def add_end_return(self, obj):
-        print('add_end_return unimplemented')
+        self._decrease_indent()
+        self._add_line("}")
         return self
 
     def add_start_literalint(self, obj):
-        print('add_start_literalint unimplemented')
+        value = obj["value"]
+        self._add_line(f"abc.literal_int {value} : i64")
         return self
 
     def add_end_literalint(self, obj):
-        print('add_end_literalint unimplemented')
         return self
 
     def add_start_int(self, obj):
@@ -114,17 +159,21 @@ class ABCMLIRTextBuilder:
         return self
 
     def add_start_for(self, obj):
-        print('add_start_for unimplemented')
+        self._add_line("abc.for {")
+        self._increase_indent()
         return self
 
     def add_end_for(self, obj):
-        print('add_end_for unimplemented')
+        self._decrease_indent()
+        self._add_line("}")
         return self
 
     def add_start_assignment(self, obj):
-        print('add_start_assignment unimplemented')
+        self._add_line("abc.assignment {")
+        self._increase_indent()
         return self
 
     def add_end_assignment(self, obj):
-        print('add_end_assignment unimplemented')
+        self._decrease_indent()
+        self._add_line("}")
         return self

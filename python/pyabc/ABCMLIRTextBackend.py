@@ -8,8 +8,8 @@ class ABCMLIRTextBackend:
     def compile(ast_json):
         visitor = JSONVisitor()
         builder = ABCMLIRTextBuilder()
-        for function in ast_json:
-            visitor.visit(function, builder)
+        modified_ast = {"type": "module", "functions": ast_json}
+        visitor.visit(modified_ast, builder)
         return builder
 
     def execute(self, program):
