@@ -105,3 +105,7 @@ class JSONVisitor:
         builder = self.visit(obj["value"], builder)
         return builder
 
+    def visit_call(self, obj, builder):
+        for arg in obj["arguments"]:
+            builder = self.visit(arg, builder)
+        return builder

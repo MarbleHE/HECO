@@ -177,3 +177,14 @@ class ABCMLIRTextBuilder:
         self._decrease_indent()
         self._add_line("}")
         return self
+
+    def add_start_call(self, obj):
+        self._add_line("abc.call {")
+        self._increase_indent()
+        return self
+
+    def add_end_call(self, obj):
+        self._decrease_indent()
+        name = obj["identifier"]
+        self._add_line(f"}} attributes {{name=\"{name}\"}}")
+        return self
