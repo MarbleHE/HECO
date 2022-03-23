@@ -327,34 +327,36 @@ class ABCVisitor(NodeVisitor):
             step_val = self.builder.make_literal(1)
 
         # Currently, the initializer is a block with a single statement.
-        var_decl = self.builder.make_variable_declaration(target, start_val)
-
-        # TODO: We force set the type of the for-loop variable to integer. This is not automatically the case, since
-        # variable assignments loose type information (see frontend-limitations markdown).
-        var_decl["datatype"] = "int"
-
-        initializer = self.builder.make_block([var_decl])
-
-        # Python for loops with range only perform addition, the Pythonic way to do more complex conditions is usually
-        # to use while loops.
-        update = self.builder.make_update(target, self.builder.constants.ADD, step_val)
-
-        # If start > stop, the condition is target > stop. Otherwise, it is target < stop.
-        start_lte_stop = self.builder.make_binary_expression(start_val, self.builder.constants.LTE, stop_val)
-        start_gt_stop = self.builder.make_binary_expression(start_val, self.builder.constants.GT, stop_val)
-        target_lt_stop = self.builder.make_binary_expression(target, self.builder.constants.LT, stop_val)
-        target_gt_stop = self.builder.make_binary_expression(target, self.builder.constants.GT, stop_val)
-
-        condition_case_1 = self.builder.make_binary_expression(start_lte_stop, self.builder.constants.AND,
-                                                               target_lt_stop)
-        condition_case_2 = self.builder.make_binary_expression(start_gt_stop, self.builder.constants.AND,
-                                                               target_gt_stop)
-        condition = self.builder.make_binary_expression(condition_case_1, self.builder.constants.OR, condition_case_2)
+        # var_decl = self.builder.make_variable_declaration(target, start_val)
+        #
+        # # TODO: We force set the type of the for-loop variable to integer. This is not automatically the case, since
+        # # variable assignments loose type information (see frontend-limitations markdown).
+        # var_decl["datatype"] = "int"
+        #
+        # initializer = self.builder.make_block([var_decl])
+        #
+        # # Python for loops with range only perform addition, the Pythonic way to do more complex conditions is usually
+        # # to use while loops.
+        # update = self.builder.make_update(target, self.builder.constants.ADD, step_val)
+        #
+        # # If start > stop, the condition is target > stop. Otherwise, it is target < stop.
+        # start_lte_stop = self.builder.make_binary_expression(start_val, self.builder.constants.LTE, stop_val)
+        # start_gt_stop = self.builder.make_binary_expression(start_val, self.builder.constants.GT, stop_val)
+        # target_lt_stop = self.builder.make_binary_expression(target, self.builder.constants.LT, stop_val)
+        # target_gt_stop = self.builder.make_binary_expression(target, self.builder.constants.GT, stop_val)
+        #
+        # condition_case_1 = self.builder.make_binary_expression(start_lte_stop, self.builder.constants.AND,
+        #                                                        target_lt_stop)
+        # condition_case_2 = self.builder.make_binary_expression(start_gt_stop, self.builder.constants.AND,
+        #                                                        target_gt_stop)
+        # condition = self.builder.make_binary_expression(condition_case_1, self.builder.constants.OR, condition_case_2)
 
         stmts = list(map(self.visit, node.body))
         body = self.builder.make_block(stmts)
 
-        return self.builder.make_for(initializer, condition, update, body)
+        # return self.builder.make_for(initializer, condition, update, body)
+
+        return self.builder.make_for_range(start_val, stop_val, step_val, body)
 
     def visit_FunctionDef(self, node: FunctionDef) -> dict:
         """

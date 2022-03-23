@@ -92,6 +92,15 @@ class ABCJsonAstBuilder:
     def _make_body(self, body):
         return {"body": body}
 
+    def _make_for_start(self, start):
+        return {"start": start}
+
+    def _make_for_stop(self, stop):
+        return {"stop": stop}
+
+    def _make_for_step(self, step):
+        return {"step": step}
+
     def _make_condition(self, condition):
         return {"condition": condition}
 
@@ -250,6 +259,13 @@ class ABCJsonAstBuilder:
         d.update(self._make_param_type(param_type))
 
         return self._make_abc_node("FunctionParameter", d)
+
+    def make_for_range(self, start: int, stop: int, step: int, body: dict) -> dict:
+        d = self._make_for_start(start)
+        d.update(self._make_for_stop(stop))
+        d.update(self._make_for_step(step))
+        d.update(self._make_body(body))
+        return self._make_abc_node("ForRange", d)
 
     def make_for(self, initializer : dict, condition : dict, update : dict, body : dict) -> dict:
         """
