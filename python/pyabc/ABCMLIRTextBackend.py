@@ -16,5 +16,5 @@ class ABCMLIRTextBackend:
         pass
 
     @staticmethod
-    def dump(program):
-        program.dump()
+    def dump(program, out):
+        program.dump(out)

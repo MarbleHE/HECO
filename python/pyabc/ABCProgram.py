@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 
 from inspect import getsource, getmodule
 from ast import parse
@@ -68,8 +69,8 @@ class ABCProgram:
             logging.error(e)
             exit(1)
 
-    def dump(self):
-        self.backend_class.dump(self.compilation_results)
+    def dump(self, out=sys.stdout):
+        self.backend_class.dump(self.compilation_results, out)
 
     def execute(self, *args, **kwargs):
         """

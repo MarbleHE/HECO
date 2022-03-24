@@ -1,3 +1,6 @@
+import os
+
+
 class ABCMLIRTextBuilder:
     def __init__(self, indent_size=2):
         self.indent_level = 0
@@ -22,9 +25,10 @@ class ABCMLIRTextBuilder:
     def _add_curr_line(self):
         self._add_line(self.current_line)
 
-    def dump(self):
+    def dump(self, output):
         for line in self.lines:
-            print(line)
+            output.write(line)
+            output.write(os.linesep)
 
     def add_start_module(self, obj):
         self._add_line("builtin.module {")
