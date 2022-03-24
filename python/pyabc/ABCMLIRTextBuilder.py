@@ -168,6 +168,19 @@ class ABCMLIRTextBuilder:
         self._add_line("}")
         return self
 
+    def add_start_forrange(self, obj):
+        start = obj["start"]["value"]
+        end = obj["stop"]["value"]
+        target_name = obj["target"]["identifier"]
+        self._add_line(f"abc.simple_for @{target_name} = [{start}, {end}] {{")
+        self._increase_indent()
+        return self
+
+    def add_end_forrange(self, obj):
+        self._decrease_indent()
+        self._add_line("}")
+        return self
+
     def add_start_assignment(self, obj):
         self._add_line("abc.assignment {")
         self._increase_indent()

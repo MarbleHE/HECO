@@ -99,6 +99,10 @@ class JSONVisitor:
         builder = self.visit(obj["body"], builder)
         return builder
 
+    def visit_forrange(self, obj, builder):
+        builder = self.visit(obj["body"], builder)
+        return builder
+
     def visit_assignment(self, obj, builder):
         builder = self.visit(obj["target"], builder)
         builder = builder.add_separator(obj)

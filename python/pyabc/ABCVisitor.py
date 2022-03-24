@@ -355,8 +355,7 @@ class ABCVisitor(NodeVisitor):
         body = self.builder.make_block(stmts)
 
         # return self.builder.make_for(initializer, condition, update, body)
-
-        return self.builder.make_for_range(start_val, stop_val, step_val, body)
+        return self.builder.make_for_range(target, start_val, stop_val, step_val, body)
 
     def visit_FunctionDef(self, node: FunctionDef) -> dict:
         """
