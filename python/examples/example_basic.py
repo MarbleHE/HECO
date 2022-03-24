@@ -6,7 +6,7 @@ p = ABCProgram(logging.DEBUG, backend=ABCBackend.MLIRText)
 
 with ABCContext(p, logging.DEBUG):
     def main():
-        a = 1.0
+        a = 1
         if a * a < a:
             return 20
 

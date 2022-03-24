@@ -7,6 +7,10 @@ class ABCMLIRTextBuilder:
         self.indent_string = " " * indent_size
         self.lines = list()
         self.current_line = ""
+        self.rewrite_types = {
+            "void": "none",
+            "int": "i64"
+        }
 
     def _increase_indent(self):
         self.indent_level += 1
@@ -42,6 +46,9 @@ class ABCMLIRTextBuilder:
 
     def add_start_function(self, func_obj):
         f_type = func_obj["return_type"]
+        if f_type in self.rewrite_types:
+            f_type = self.rewrite_types[f_type]
+
         f_name = func_obj["identifier"]
         self._add_line(f"abc.function {f_type} @{f_name} {{")
         self._increase_indent()
@@ -81,6 +88,9 @@ class ABCMLIRTextBuilder:
 
     def add_start_variabledeclaration(self, obj):
         var_type = obj["datatype"]
+        if var_type in self.rewrite_types:
+            var_type = self.rewrite_types[var_type]
+
         var_name = obj["target"]["identifier"]
         self._add_line(f"abc.variable_declaration {var_type} @{var_name} = ( {{")
         self._increase_indent()
