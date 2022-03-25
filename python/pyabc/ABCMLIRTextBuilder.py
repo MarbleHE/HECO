@@ -61,6 +61,9 @@ class ABCMLIRTextBuilder:
 
     def add_start_functionparameter(self, obj):
         param_type = obj["parameter_type"]
+        if param_type in self.rewrite_types:
+            param_type = self.rewrite_types[param_type]
+
         param_name = obj["identifier"]
         self._add_line(f"abc.function_parameter {param_type} @{param_name}")
         return self

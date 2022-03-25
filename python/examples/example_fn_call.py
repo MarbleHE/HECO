@@ -13,4 +13,5 @@ with ABCContext(p, logging.DEBUG):
 
 if __name__ == "__main__":
     # TODO: Printing MLIR for the moment, remove when we actually execute it.
-    p.dump()
+    with open("example_fn_call.mlir", "w") as f:
+        p.dump(f)

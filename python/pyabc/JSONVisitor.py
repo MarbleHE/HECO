@@ -110,6 +110,6 @@ class JSONVisitor:
         return builder
 
     def visit_call(self, obj, builder):
-        for arg in obj["arguments"]:
+        for idx, arg in enumerate(obj["arguments"]):
             builder = self.visit(arg, builder)
         return builder
