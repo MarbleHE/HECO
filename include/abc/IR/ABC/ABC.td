@@ -254,7 +254,7 @@ def ABC_CallOp : ABC_ExpressionOp<"call", []> {
   let summary = "AST Node Call";
   let arguments = (ins SymbolNameAttr: $name );
   // TODO: arguments should be a list of Expressions, not a single one
-  let regions = (region AnyExpression: $arguments);
+  let regions = (region ZeroOrMoreExpressions: $arguments);
 }
 
 // TODO: Should T be something more semantically relevant, like a Type or something like that?

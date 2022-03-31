@@ -1,3 +1,4 @@
+import ast
 import logging
 
 from ast import *
@@ -42,11 +43,24 @@ class ABCVisitor(NodeVisitor):
     #
     # Helper functions
     #
+    def _get_composite(self, val):
+        # Base case: this is a leaf object
+        if isinstance(val, ast.Name):
+            return self.builder.make_simpletype(val.id)
+
+        # Recursive case: Collection with content type
+        if isinstance(val, ast.Subscript):
+            return self.builder.make_compositetype(val.value.id, self._get_composite(val.slice))
+
     def _get_annotation(self, arg):
         if hasattr(arg, "annotation") and arg.annotation:
-            return arg.annotation.id
+            # Could be a type of something
+            if isinstance(arg.annotation, ast.Subscript):
+                return self._get_composite(arg.annotation)
+
+            return self.builder.make_simpletype(arg.annotation.id)
         else:
-            return None
+            return self.builder.make_simpletype("void")
 
     def _tpl_stmt_to_list(self, t):
         """
@@ -138,7 +152,7 @@ class ABCVisitor(NodeVisitor):
 
         # TODO: translate type annotations properly
         # type = self._get_annotation(arg)
-        param_type = "void"
+        param_type = self._get_annotation(arg)
 
         return self.builder.make_function_param(identifier, param_type)
 
@@ -329,6 +343,10 @@ class ABCVisitor(NodeVisitor):
         stmts = list(map(self.visit, node.body))
         body = self.builder.make_block(stmts)
 
+        # If step_val is a literal node with value of 1 we change it to 1
+        if "type" in step_val and step_val["type"] == "LiteralInt" and step_val["value"] == 1:
+            step_val = 1
+
         if step_val == 1:
             return self.builder.make_for_range(target, start_val, stop_val, step_val, body)
 
@@ -372,7 +390,12 @@ class ABCVisitor(NodeVisitor):
 
         # Parse the return type
         # TODO [mh]: as an addition, we could parse "returns" return type annotations
-        return_type = "void"
+        if isinstance(node.returns, ast.Subscript):
+            return_type = self._get_composite(node.returns)
+        elif node.returns:
+            return_type = self.builder.make_simpletype(node.returns.id)
+        else:
+            return_type = self.builder.make_simpletype("void")
 
         # Parse the function arguments
         if len(node.args.kwonlyargs) > 0:
@@ -762,6 +785,10 @@ class ABCVisitor(NodeVisitor):
         exit(1)
 
     def visit_UnaryOp(self, node: UnaryOp) -> dict:
+        if isinstance(node.op, ast.USub) and isinstance(node.operand, ast.Constant):
+            # This is a negative constant
+            return self.builder.make_literal(-node.operand.value)
+
         logging.error(UNSUPPORTED_STATEMENT, type(node))
         exit(1)
 

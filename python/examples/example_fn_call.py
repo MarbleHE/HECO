@@ -5,7 +5,7 @@ p = ABCProgram(logging.DEBUG, backend=ABCBackend.MLIRText)
 # p = ABCProgram(logging.DEBUG)
 
 with ABCContext(p, logging.DEBUG):
-    def add(i, j):
+    def add(i: int, j: int) -> int:
         return i + j
 
     def main(a):

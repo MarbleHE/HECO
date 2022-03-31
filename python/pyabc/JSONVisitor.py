@@ -1,7 +1,12 @@
 
 
 class JSONVisitor:
+
+    def _is_node(self, obj):
+        return isinstance(obj, dict) and "type" in obj
+
     def visit(self, obj, builder):
+        # print(obj)
         node_type = obj["type"].lower()
 
         # Before node
@@ -38,6 +43,8 @@ class JSONVisitor:
         return builder
 
     def visit_function(self, obj, builder):
+        builder = self.visit(obj["return_type"], builder)
+        builder = builder.add_return_type_function(obj)
         for param in obj["parameters"]:
             builder = self.visit(param, builder)
         builder = builder.add_separator(obj)
@@ -45,6 +52,7 @@ class JSONVisitor:
         return builder
 
     def visit_functionparameter(self, obj, builder):
+        builder = self.visit(obj["parameter_type"], builder)
         return builder
 
     def visit_block(self, obj, builder):
@@ -53,6 +61,8 @@ class JSONVisitor:
         return builder
 
     def visit_variabledeclaration(self, obj, builder):
+        builder = self.visit(obj["datatype"], builder)
+        builder = builder.add_datatype_variabledeclaration(obj)
         builder = self.visit(obj["value"], builder)
         return builder
 
@@ -112,4 +122,19 @@ class JSONVisitor:
     def visit_call(self, obj, builder):
         for idx, arg in enumerate(obj["arguments"]):
             builder = self.visit(arg, builder)
+        return builder
+
+    def visit_indexaccess(self, obj, builder):
+        builder = self.visit(obj["target"], builder)
+        builder = builder.add_separator(obj)
+        builder = self.visit(obj["index"], builder)
+        return builder
+
+    def visit_compositetype(self, obj, builder):
+        inner = obj["value"]
+        if self._is_node(inner):
+            builder = self.visit(inner, builder)
+        return builder
+
+    def visit_simpletype(self, obj, builder):
         return builder

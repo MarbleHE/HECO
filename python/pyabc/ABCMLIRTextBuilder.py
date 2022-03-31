@@ -9,7 +9,8 @@ class ABCMLIRTextBuilder:
         self.current_line = ""
         self.rewrite_types = {
             "void": "none",
-            "int": "i64"
+            "int": "i64",
+            "List": "tensor"
         }
 
     def _increase_indent(self):
@@ -29,6 +30,11 @@ class ABCMLIRTextBuilder:
     def _add_curr_line(self):
         self._add_line(self.current_line)
 
+    def _out_type(self, t):
+        if t in self.rewrite_types:
+            return self.rewrite_types[t]
+        return t
+
     def dump(self, output):
         for line in self.lines:
             output.write(line)
@@ -45,12 +51,13 @@ class ABCMLIRTextBuilder:
         return self
 
     def add_start_function(self, func_obj):
-        f_type = func_obj["return_type"]
-        if f_type in self.rewrite_types:
-            f_type = self.rewrite_types[f_type]
+        self.current_line += "abc.function "
+        return self
 
-        f_name = func_obj["identifier"]
-        self._add_line(f"abc.function {f_type} @{f_name} {{")
+    def add_return_type_function(self, obj):
+        f_name = obj["identifier"]
+        self.current_line += f" @{f_name} {{"
+        self._add_curr_line()
         self._increase_indent()
         return self
 
@@ -60,17 +67,13 @@ class ABCMLIRTextBuilder:
         return self
 
     def add_start_functionparameter(self, obj):
-        param_type = obj["parameter_type"]
-        if param_type in self.rewrite_types:
-            param_type = self.rewrite_types[param_type]
-
-        param_name = obj["identifier"]
-        self._add_line(f"abc.function_parameter {param_type} @{param_name}")
+        self.current_line += "abc.function_parameter "
         return self
 
     def add_end_functionparameter(self, obj):
-        # self._decrease_indent()
-        # self._add_line("},{")
+        param_name = obj["identifier"]
+        self.current_line += f" @{param_name}"
+        self._add_curr_line()
         return self
 
     def add_separator(self, obj):
@@ -90,12 +93,13 @@ class ABCMLIRTextBuilder:
         return self
 
     def add_start_variabledeclaration(self, obj):
-        var_type = obj["datatype"]
-        if var_type in self.rewrite_types:
-            var_type = self.rewrite_types[var_type]
+        self.current_line = "abc.variable_declaration "
+        return self
 
+    def add_datatype_variabledeclaration(self, obj):
         var_name = obj["target"]["identifier"]
-        self._add_line(f"abc.variable_declaration {var_type} @{var_name} = ( {{")
+        self.current_line += f" @{var_name} = ({{"
+        self._add_curr_line()
         self._increase_indent()
         return self
 
@@ -161,18 +165,10 @@ class ABCMLIRTextBuilder:
 
     def add_start_literalint(self, obj):
         value = obj["value"]
-        self._add_line(f"abc.literal_int {value} : i64")
+        self._add_line(f"abc.literal_int {value}")
         return self
 
     def add_end_literalint(self, obj):
-        return self
-
-    def add_start_int(self, obj):
-        print('add_start_int unimplemented')
-        return self
-
-    def add_end_int(self, obj):
-        print('add_end_int unimplemented')
         return self
 
     def add_start_for(self, obj):
@@ -217,4 +213,37 @@ class ABCMLIRTextBuilder:
         self._decrease_indent()
         name = obj["identifier"]
         self._add_line(f"}} attributes {{name=\"{name}\"}}")
+        return self
+
+    def add_start_indexaccess(self, obj):
+        self._add_line("abc.index_access {")
+        self._increase_indent()
+        return self
+
+    def add_end_indexaccess(self, obj):
+        self._decrease_indent()
+        self._add_line("}")
+        return self
+
+    def add_start_compositetype(self, obj):
+        outer = self._out_type(obj["target"])
+        self.current_line += f"{outer}<?x"
+        return self
+
+    def add_end_compositetype(self, obj):
+        inner = obj["value"]
+        if isinstance(inner, dict):
+            # if inner is a dict we don't output it yet
+            inner = ""
+        else:
+            inner = self._out_type(inner)
+
+        self.current_line += f"{inner}>"
+        return self
+
+    def add_start_simpletype(self, obj):
+        self.current_line += self._out_type(obj["value"])
+        return self
+
+    def add_end_simpletype(self, obj):
         return self
