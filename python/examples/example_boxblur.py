@@ -5,7 +5,7 @@ p = ABCProgram(logging.DEBUG, backend=ABCBackend.MLIRText)
 # p = ABCProgram(logging.DEBUG)
 
 with ABCContext(p, logging.DEBUG):
-    def boxblur(img: List[int]) -> List[int]:
+    def boxblur(img: List[Secret[int]]) -> SecretIntVector:
         img2 = img  # Technically this is not correct in python (since it would only copy the reference)
         for x in range(8):
             for y in range(8):
@@ -19,4 +19,5 @@ with ABCContext(p, logging.DEBUG):
 if __name__ == "__main__":
     # TODO: Printing MLIR for the moment, remove when we actually execute it.
     with open("example_boxblur.mlir", "w") as f:
-       p.dump(f)
+        p.dump()
+        p.dump(f)

@@ -6,7 +6,7 @@ class JSONVisitor:
         return isinstance(obj, dict) and "type" in obj
 
     def visit(self, obj, builder):
-        # print(obj)
+        print(obj)
         node_type = obj["type"].lower()
 
         # Before node

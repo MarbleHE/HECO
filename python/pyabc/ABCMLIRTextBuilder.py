@@ -10,7 +10,9 @@ class ABCMLIRTextBuilder:
         self.rewrite_types = {
             "void": "none",
             "int": "i64",
-            "List": "tensor"
+            "float": "f64",
+            "List": "tensor",
+            "Secret": "!fhe.secret"
         }
 
     def _increase_indent(self):
@@ -33,7 +35,7 @@ class ABCMLIRTextBuilder:
     def _out_type(self, t):
         if t in self.rewrite_types:
             return self.rewrite_types[t]
-        return t
+        raise Exception(f"No translation found for type: {t}")
 
     def dump(self, output):
         for line in self.lines:
@@ -227,7 +229,11 @@ class ABCMLIRTextBuilder:
 
     def add_start_compositetype(self, obj):
         outer = self._out_type(obj["target"])
-        self.current_line += f"{outer}<?x"
+        self.current_line += f"{outer}<"
+        if outer == "tensor":
+            # If it's a tensor type we need to add the dimensions
+            # For now it's a hardcoded dynamic 1D tensor
+            self.current_line += "?x"
         return self
 
     def add_end_compositetype(self, obj):

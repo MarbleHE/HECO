@@ -1,37 +1,53 @@
-from typing import TypeVar, NewType, List
+from typing import TypeVar, NewType, List, Generic
 
-# Generic types. Those rely on Python not enforcing types.
-Secret = TypeVar("Secret")
-NonSecret = TypeVar("NonSecret")
+# Generic types.
+T = TypeVar("T")
+
+
+class Secret(Generic[T]):
+    pass
+
+
+_created_types = dict()
+
+
+def NewTypeWithMemory(name, tp):
+    _created_types[name] = tp
+    return NewType(name, tp)
+
+
+def get_created_type(name):
+    return _created_types.get(name, None)
+
 
 # Specific types. Those are useful if we want to hint to the translation what value the arguments haves
-SecretInt = NewType("SecretInt", int)
-SecretFloat = NewType("SecretFloat", float)
-SecretDouble = NewType("SecretDouble", float)
-SecretBool = NewType("SecretBool", bool)
-SecretString = NewType("SecretString", str)
-SecretChar = NewType("SecretChar", str)
+SecretInt = NewTypeWithMemory("SecretInt", Secret[int])
+SecretFloat = NewTypeWithMemory("SecretFloat", Secret[float])
+SecretDouble = NewTypeWithMemory("SecretDouble", Secret[float])
+SecretBool = NewTypeWithMemory("SecretBool", Secret[bool])
+SecretString = NewTypeWithMemory("SecretString", Secret[str])
+SecretChar = NewTypeWithMemory("SecretChar", Secret[str])
 
-SecretIntVector = NewType("SecretIntVector", List[int])
-SecretFloatVector = NewType("SecretFloatVector", List[float])
-SecretDoubleVector = NewType("SecretDoubleVector", List[float])
-SecretBoolVector = NewType("SecretBoolVector", List[bool])
-SecretStringVector = NewType("SecretStringVector", List[str])
-SecretCharVector = NewType("SecretCharVector", List[str])
+SecretIntVector = NewTypeWithMemory("SecretIntVector", List[Secret[int]])
+SecretFloatVector = NewTypeWithMemory("SecretFloatVector", List[Secret[float]])
+SecretDoubleVector = NewTypeWithMemory("SecretDoubleVector", List[Secret[float]])
+SecretBoolVector = NewTypeWithMemory("SecretBoolVector", List[Secret[bool]])
+SecretStringVector = NewTypeWithMemory("SecretStringVector", List[Secret[str]])
+SecretCharVector = NewTypeWithMemory("SecretCharVector", List[Secret[str]])
 
-NonSecretInt = NewType("NonSecretInt", int)
-NonSecretFloat = NewType("NonSecretFloat", float)
-NonSecretDouble = NewType("NonSecretDouble", float)
-NonSecretBool = NewType("NonSecretBool", bool)
-NonSecretString = NewType("NonSecretString", str)
-NonSecretChar = NewType("NonSecretChar", str)
+NonSecretInt = NewTypeWithMemory("NonSecretInt", int)
+NonSecretFloat = NewTypeWithMemory("NonSecretFloat", float)
+NonSecretDouble = NewTypeWithMemory("NonSecretDouble", float)
+NonSecretBool = NewTypeWithMemory("NonSecretBool", bool)
+NonSecretString = NewTypeWithMemory("NonSecretString", str)
+NonSecretChar = NewTypeWithMemory("NonSecretChar", str)
 
-NonSecretIntVector = NewType("NonSecretIntVector", List[int])
-NonSecretFloatVector = NewType("NonSecretFloatVector", List[float])
-NonSecretDoubleVector = NewType("NonSecretDoubleVector", List[float])
-NonSecretBoolVector = NewType("NonSecretBoolVector", List[bool])
-NonSecretStringVector = NewType("NonSecretStringVector", List[str])
-NonSecretCharVector = NewType("NonSecretCharVector", List[str])
+NonSecretIntVector = NewTypeWithMemory("NonSecretIntVector", List[int])
+NonSecretFloatVector = NewTypeWithMemory("NonSecretFloatVector", List[float])
+NonSecretDoubleVector = NewTypeWithMemory("NonSecretDoubleVector", List[float])
+NonSecretBoolVector = NewTypeWithMemory("NonSecretBoolVector", List[bool])
+NonSecretStringVector = NewTypeWithMemory("NonSecretStringVector", List[str])
+NonSecretCharVector = NewTypeWithMemory("NonSecretCharVector", List[str])
 
 
 def is_secret(val_type):

@@ -5,7 +5,7 @@ from ast import *
 
 from .ABCGenericExpr import ABCGenericExpr
 from .ABCJsonAstBuilder import ABCJsonAstBuilder
-from .ABCTypes import is_secret
+from .ABCTypes import is_secret, get_created_type
 from .FunctionVisitor import FunctionVisitor
 
 UNSUPPORTED_ATTRIBUTE_RESOLUTION = "Attribute resolution is not supported."
@@ -45,12 +45,35 @@ class ABCVisitor(NodeVisitor):
     #
     def _get_composite(self, val):
         # Base case: this is a leaf object
+        # type_string = f"a: {SecretIntVector.__supertype__}"
+        # a = ast.parse(type_string)
+        # print(ast.dump(a, indent=4))
+        # print(type_string, a.body[0].annotation)
         if isinstance(val, ast.Name):
-            return self.builder.make_simpletype(val.id)
+            type_str = val.id
+            created = get_created_type(type_str)
+            if created is None:
+                return self.builder.make_simpletype(type_str)
+
+            sub_ast = ast.parse(f"x: {created}")
+            print(ast.dump(sub_ast, indent=4))
+            return self._get_composite(sub_ast.body[0].annotation)
 
         # Recursive case: Collection with content type
         if isinstance(val, ast.Subscript):
-            return self.builder.make_compositetype(val.value.id, self._get_composite(val.slice))
+            node = val.value
+            inner = val.slice
+            outer_name = "void"
+            if isinstance(node, ast.Attribute):
+                # Might be a fully qualified name
+                outer_name = node.attr
+            elif isinstance(node, ast.Name):
+                outer_name = node.id
+            else:
+                logging.error(f"Unsupported annotation node: {node}")
+                exit(1)
+
+            return self.builder.make_compositetype(outer_name, self._get_composite(inner))
 
     def _get_annotation(self, arg):
         if hasattr(arg, "annotation") and arg.annotation:
@@ -390,10 +413,8 @@ class ABCVisitor(NodeVisitor):
 
         # Parse the return type
         # TODO [mh]: as an addition, we could parse "returns" return type annotations
-        if isinstance(node.returns, ast.Subscript):
+        if isinstance(node.returns, ast.Subscript) or isinstance(node.returns, ast.Name):
             return_type = self._get_composite(node.returns)
-        elif node.returns:
-            return_type = self.builder.make_simpletype(node.returns.id)
         else:
             return_type = self.builder.make_simpletype("void")
 
