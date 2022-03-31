@@ -27,7 +27,9 @@
 #include "abc/Passes/ssa2ssa/Nary.h"
 #include "abc/Passes/ssa2ssa/Tensor2BatchedSecret.h"
 #include "abc/Passes/ssa2ssa/Batching.h"
+#include "abc/Passes/ssa2ssa/CombineSimplify.h"
 #include "abc/Passes/ssa2ssa/InternalOperandBatching.h"
+#include "abc/Passes/ssa2ssa/ScalarBatching.h"
 #include "abc/Passes/ssa2cpp/LowerToEmitC.h"
 
 #include <iostream>
@@ -51,12 +53,16 @@ void pipelineBuilder(OpPassManager &manager) {
 
   manager.addPass(std::make_unique<BatchingPass>());
   manager.addPass(createCanonicalizerPass());
+  manager.addPass(createCSEPass()); // try and remove all the redundant rotates, in the hope it also gives us less combine ops?
+  manager.addPass(std::make_unique<CombineSimplifyPass>());
   manager.addPass(createCSEPass()); // otherwise, the internal batching pass has no "same origin" things to find!
-  manager.addPass(createCanonicalizerPass()); // to fold combine ops that might have simpler form after CSE
+  manager.addPass(createCanonicalizerPass());
 
   manager.addPass(std::make_unique<InternalOperandBatchingPass>());
   manager.addPass(createCanonicalizerPass());
   manager.addPass(createCSEPass());
+
+  //manager.addPass(std::make_unique<ScalarBatchingPass>());
 
   manager.addPass(std::make_unique<LowerToEmitCPass>());
   manager.addPass(createCanonicalizerPass()); //necessary to remove redundant fhe.materialize
@@ -76,12 +82,16 @@ void ssaPipelineBuilder(OpPassManager &manager) {
 
   manager.addPass(std::make_unique<BatchingPass>());
   manager.addPass(createCanonicalizerPass());
+  manager.addPass(createCSEPass()); // try and remove all the redundant rotates, in the hope it also gives us less combine ops?
+  manager.addPass(std::make_unique<CombineSimplifyPass>());
   manager.addPass(createCSEPass()); // otherwise, the internal batching pass has no "same origin" things to find!
-  manager.addPass(createCanonicalizerPass()); // to fold combine ops that might have simpler form after CSE
+  manager.addPass(createCanonicalizerPass());
 
   manager.addPass(std::make_unique<InternalOperandBatchingPass>());
   manager.addPass(createCanonicalizerPass());
   manager.addPass(createCSEPass());
+
+  //manager.addPass(std::make_unique<ScalarBatchingPass>());
 
   manager.addPass(std::make_unique<LowerToEmitCPass>());
   manager.addPass(createCanonicalizerPass()); //necessary to remove redundant fhe.materialize
@@ -89,6 +99,7 @@ void ssaPipelineBuilder(OpPassManager &manager) {
 
 int main(int argc, char **argv) {
   mlir::MLIRContext context;
+  context.enableMultithreading();
 
   mlir::DialectRegistry registry;
   registry.insert<ABCDialect>();
@@ -119,7 +130,9 @@ int main(int argc, char **argv) {
   PassRegistration<NaryPass>();
   PassRegistration<Tensor2BatchedSecretPass>();
   PassRegistration<BatchingPass>();
+  PassRegistration<CombineSimplifyPass>();
   PassRegistration<InternalOperandBatchingPass>();
+  PassRegistration<ScalarBatchingPass>();
   PassRegistration<LowerToEmitCPass>();
 
   PassPipelineRegistration<>("full-pass", "Run all passes", pipelineBuilder);
