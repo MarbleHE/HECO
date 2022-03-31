@@ -118,7 +118,10 @@ class ABCJsonAstBuilder:
         if is_secret:
             type_name = self.constants.SECRET_PREFIX + type_name
 
-        return {"datatype": type_name}
+        return self._make_datatype_known(type_name)
+
+    def _make_datatype_known(self, t):
+        return {"datatype": t}
 
     def _make_identifier(self, identifier):
         return {"identifier": identifier}
@@ -412,7 +415,7 @@ class ABCJsonAstBuilder:
 
         return self._make_abc_node("Variable", self._make_identifier(identifier))
 
-    def make_variable_declaration(self, target : dict, value : dict, is_secret : bool = False) -> dict:
+    def make_variable_declaration(self, target : dict, value : dict, t: dict = None, is_secret : bool = False) -> dict:
         """
         Create a dictionary corresponding to an ABC variable declaration when exported in JSON
 
@@ -424,7 +427,10 @@ class ABCJsonAstBuilder:
 
         d = self._make_target(target)
         d.update(self._make_value(value))
-        d.update(self._make_datatype(value, is_secret))
+        if t is None:
+            d.update(self._make_datatype(value, is_secret))
+        else:
+            d.update(self._make_datatype_known(t))
 
         # Save resulting identifier and type
         # Here we just assume that target is always a variable (this might be problematic)

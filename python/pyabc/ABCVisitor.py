@@ -45,10 +45,6 @@ class ABCVisitor(NodeVisitor):
     #
     def _get_composite(self, val):
         # Base case: this is a leaf object
-        # type_string = f"a: {SecretIntVector.__supertype__}"
-        # a = ast.parse(type_string)
-        # print(ast.dump(a, indent=4))
-        # print(type_string, a.body[0].annotation)
         if isinstance(val, ast.Name):
             type_str = val.id
             created = get_created_type(type_str)
@@ -56,7 +52,6 @@ class ABCVisitor(NodeVisitor):
                 return self.builder.make_simpletype(type_str)
 
             sub_ast = ast.parse(f"x: {created}")
-            print(ast.dump(sub_ast, indent=4))
             return self._get_composite(sub_ast.body[0].annotation)
 
         # Recursive case: Collection with content type
@@ -77,11 +72,7 @@ class ABCVisitor(NodeVisitor):
 
     def _get_annotation(self, arg):
         if hasattr(arg, "annotation") and arg.annotation:
-            # Could be a type of something
-            if isinstance(arg.annotation, ast.Subscript):
-                return self._get_composite(arg.annotation)
-
-            return self.builder.make_simpletype(arg.annotation.id)
+            return self._get_composite(arg.annotation)
         else:
             return self.builder.make_simpletype("void")
 
@@ -166,6 +157,18 @@ class ABCVisitor(NodeVisitor):
             else:
                 self.declared_vars.add(var_name)
                 return self.builder.make_variable_declaration(var, expr)
+        else:
+            # we never declare an index assignment, the indexed variable was declared before.
+            return self.builder.make_assignment(var, expr)
+
+    def _make_assignment_with_type(self, var, expr, type):
+        if var["type"] == "Variable":
+            var_name = var["identifier"]
+            if var_name in self.declared_vars:
+                return self.builder.make_assignment(var, expr)
+            else:
+                self.declared_vars.add(var_name)
+                return self.builder.make_variable_declaration(var, expr, t=type)
         else:
             # we never declare an index assignment, the indexed variable was declared before.
             return self.builder.make_assignment(var, expr)
@@ -558,8 +561,16 @@ class ABCVisitor(NodeVisitor):
         exit(1)
 
     def visit_AnnAssign(self, node: AnnAssign) -> dict:
-        logging.error(UNSUPPORTED_STATEMENT, type(node))
-        exit(1)
+        # First, evaluate the RHS expression
+        exp = self.visit(node.value)
+
+        # Get the target
+        target = self._parse_lhs(node.target)[0]
+
+        # Get type
+        type_ann = self._get_annotation(node)
+
+        return self._make_assignment_with_type(target, exp, type_ann)
 
     def visit_AsyncFor(self, node: AsyncFor) -> dict:
         logging.error(UNSUPPORTED_STATEMENT, type(node))

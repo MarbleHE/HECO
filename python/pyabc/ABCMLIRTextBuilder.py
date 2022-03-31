@@ -35,7 +35,7 @@ class ABCMLIRTextBuilder:
     def _out_type(self, t):
         if t in self.rewrite_types:
             return self.rewrite_types[t]
-        raise Exception(f"No translation found for type: {t}")
+        raise Exception(f"Unsupported type: {t}")
 
     def dump(self, output):
         for line in self.lines:
