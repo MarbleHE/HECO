@@ -56,7 +56,7 @@ LogicalResult internalBatchArithmeticOperation(IRRewriter &rewriter, MLIRContext
 
       if (auto bst = (*it).getType().template dyn_cast_or_null<fhe::BatchedSecretType>()) {
         if (auto r_op = (*it).template getDefiningOp<fhe::RotateOp>()) {
-          addOriginUse(r_op.x(), -r_op.i(), *it);
+          addOriginUse(r_op.x(), r_op.i(), *it);
         } else if (auto c_op = (*it).template getDefiningOp<fhe::ConstOp>()) {
           // Constant Ops can be realized to whatever slot we want them to be in
           addOriginUse(*it, -1, *it);

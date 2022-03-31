@@ -283,8 +283,6 @@ def FHE_CombineOp : Op<FHE_Dialect, "combine", [NoSideEffect]> {
   let parser = [{ return ::parseCombineOp(parser, result); }];
   let printer = [{ return ::print(p, *this); }];
 
-  let hasFolder = 1;
-
 }
 
 def FHE_MaterializeOp: FHE_Op<"materialize", []> {
