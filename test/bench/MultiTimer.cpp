@@ -44,8 +44,8 @@ TimeDuration MultiTimer::getTime(int id) const {
 
 void MultiTimer::printToStream(std::ostream& out) {
   bool isFirstInCol = true;
-  for (int i = 0; i < this->startTimes->size(); ++i) {
-    auto t = getTime(i).count();
+  for (size_t i = 0; i < this->startTimes->size(); ++i) {
+    auto t = getTime((int)i).count();
     if (t > 0) {
       if (!isFirstInCol) {
         out << ",";

@@ -125,7 +125,7 @@ int encryptedL2DistanceSquared_Naive(
   std::vector<seal::Ciphertext> x_ctxt(x.size());
   std::vector<seal::Ciphertext> y_ctxt(y.size());
 
-  for (int i = 0; i < x.size(); ++i) {
+  for (size_t i = 0; i < x.size(); ++i) {
     uint64_t elem = x[i];
     seal::Plaintext tmp_a = seal::Plaintext(seal::util::uint_to_hex_string(&elem, std::size_t(1)));
     encryptor.encrypt(tmp_a, x_ctxt[i]);

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.11.0)
+cmake_minimum_required(VERSION 3.15.0)
 include(FetchContent) # Introduced in CMake 3.11
 include(GoogleTest) # Introduced in CMake 3.10
 
@@ -22,7 +22,7 @@ endif()
 # cpp-ast tests disabled since this is a deprecated feature that is scheduled to be removed in favor of going directly
 # to MLIR ast from parser & python
 set(TEST_FILES
-        #ast/ASTComparison.cpp
+        ast/ASTComparison.cpp
         #ast/ASTComparison.h
         #AstTestingGenerator.cpp
         #AstTestingGenerator.h
@@ -73,11 +73,11 @@ add_executable(testing-all
         ${TEST_FILES})
 
 # this is important to have code coverage in CLion
-if (CMAKE_COMPILER_IS_GNUCXX)
-    set(CMAKE_CXX_FLAGS "--coverage")
-elseif ("${CMAKE_C_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang" OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang")
-    set(CMAKE_CXX_FLAGS "-fprofile-instr-generate -fcoverage-mapping")
-endif ()
+#if (CMAKE_COMPILER_IS_GNUCXX)
+#    set(CMAKE_CXX_FLAGS "--coverage")
+#elseif ("${CMAKE_C_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang" OR "${CMAKE_CXX_COMPILER_ID}" MATCHES "(Apple)?[Cc]lang")
+#    set(CMAKE_CXX_FLAGS "-fprofile-instr-generate -fcoverage-mapping")
+#endif ()
 
 target_link_libraries(testing-all PRIVATE gtest cpp_ast gtest_main)
 target_include_directories(testing-all PRIVATE ${abc_SOURCE_DIR}/include/ bench)
@@ -91,10 +91,11 @@ endif()
 gtest_discover_tests(testing-all TEST_PREFIX gtest:)
 
 # make sure that ast_lib is built before the testing-all target
+add_dependencies(testing-all mlir-headers)
 add_dependencies(testing-all cpp_ast)
 
 # Python tests
-add_subdirectory(python_frontend)
+# add_subdirectory(python_frontend)
 
 # MLIR testing setup
 add_subdirectory(IR)

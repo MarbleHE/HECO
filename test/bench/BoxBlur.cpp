@@ -27,7 +27,7 @@ std::vector<uint64_t> encryptedFastBoxBlur2x2(MultiTimer &timer, const std::vect
 
   auto encryptTimer = timer.startTimer();
   std::vector<seal::Ciphertext> encImg(img.size());
-  for (int i = 0; i < img.size(); ++i) {
+  for (size_t i = 0; i < img.size(); ++i) {
     // Here we will assume that img only contains positive values in order to reuse seal utilities
     uint64_t pixel = img[i];
     seal::Plaintext ptx = seal::Plaintext(seal::util::uint_to_hex_string(&pixel, std::size_t(1)));
@@ -84,7 +84,7 @@ std::vector<uint64_t> encryptedFastBoxBlur2x2(MultiTimer &timer, const std::vect
 
   auto decryptTimer = timer.startTimer();
   std::vector<uint64_t> result(img.size());
-  for (int i = 0; i < img3.size(); ++i) {
+  for (size_t i = 0; i < img3.size(); ++i) {
     seal::Plaintext ptx;
     decryptor.decrypt(img3[i], ptx);
     result[i] = *ptx.data();

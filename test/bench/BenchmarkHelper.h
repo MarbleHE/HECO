@@ -13,7 +13,7 @@
 #define BENCH_FUNCTION(PROBLEM, VERSION, FUNCTION_NAME, ...) if (argv[1] == std::string(#VERSION)) { \
   MultiTimer timer = MultiTimer();                                                                   \
   for (int i = 0; i < ITER_COUNT; ++i) {                                                             \
-    auto result = FUNCTION_NAME(timer, __VA_ARGS__, poly_modulus_degree);                            \
+    FUNCTION_NAME(timer, __VA_ARGS__, poly_modulus_degree);                                          \
     timer.addIteration();                                                                            \
   }                                                                                                  \
   std::string size_string = "64";                                                                    \
