@@ -9,6 +9,7 @@ class ABCJsonAstBuilder:
     def __init__(self, log_level=logging.INFO):
         self.log_level = log_level
         logging.basicConfig(level=log_level)
+        self.var_types = {}
 
     #
     # "Public" constants
@@ -48,7 +49,6 @@ class ABCJsonAstBuilder:
         :param d: JSON-equivalent dictionary of a value of which we want to find the data type.
         :return: data type "bool", "string", "char", "int", or "void"
         """
-
         if "type" in d and d["type"].startswith("Literal"):
             if d["type"] == "LiteralBool":
                 type_name = "bool"
@@ -59,7 +59,7 @@ class ABCJsonAstBuilder:
                     type_name = "char"
             elif d["type"] == "LiteralFloat":
                 # Actually, in C++ we have floats and doubles. But we can't distinguish them, since their ranges overlap.
-                # Thus, we just take the larger double to not loose precision.
+                # Thus, we just take the larger double to not lose precision.
                 type_name = "double"
                 logging.warning("Using double for Python float.")
             elif d["type"] == "LiteralInt":
@@ -67,19 +67,23 @@ class ABCJsonAstBuilder:
             else:
                 type_name = "void"
 
-            return type_name
+            return {"type": "SimpleType", "value": type_name}
         else:
             if isinstance(d, dict):
-                for v in d.values():
-                    type_name = self._find_datatype(v)
-                    if type_name != "void":
-                        return type_name
+                if d["type"] == "Variable":
+                    type_name = self.var_types[d["identifier"]]
+                    return type_name
+                else:
+                    for v in d.values():
+                        type_name = self._find_datatype(v)
+                        if type_name != "void":
+                            return type_name
             elif isinstance(d, list):
                 # By convention, an ExpressionList has the type of its elements. I.e., a list of LiteralInt is of type
                 # LiteralInt too.
                 return self._find_datatype(d[0])
 
-            return "void"
+            return {"type": "SimpleType", "value": "void"}
 
     def _make_abc_node(self, type, content):
         d = {"type": type}
@@ -92,6 +96,18 @@ class ABCJsonAstBuilder:
     def _make_body(self, body):
         return {"body": body}
 
+    def _make_for_target(self, target):
+        return {"target": target}
+
+    def _make_for_start(self, start):
+        return {"start": start}
+
+    def _make_for_stop(self, stop):
+        return {"stop": stop}
+
+    def _make_for_step(self, step):
+        return {"step": step}
+
     def _make_condition(self, condition):
         return {"condition": condition}
 
@@ -102,7 +118,10 @@ class ABCJsonAstBuilder:
         if is_secret:
             type_name = self.constants.SECRET_PREFIX + type_name
 
-        return {"datatype": type_name}
+        return self._make_datatype_known(type_name)
+
+    def _make_datatype_known(self, t):
+        return {"datatype": t}
 
     def _make_identifier(self, identifier):
         return {"identifier": identifier}
@@ -166,6 +185,8 @@ class ABCJsonAstBuilder:
 
         d = self._make_target(target)
         d.update(self._make_value(value))
+
+        # TODO: The type of target might have changed, determine and update type
 
         return self._make_abc_node("Assignment", d)
 
@@ -249,7 +270,19 @@ class ABCJsonAstBuilder:
         d = self._make_identifier(identifier)
         d.update(self._make_param_type(param_type))
 
+        # Save param type
+        self.var_types[d["identifier"]] = d["parameter_type"]
+
         return self._make_abc_node("FunctionParameter", d)
+
+    def make_for_range(self, target: dict, start: int, stop: int, step: int, body: dict) -> dict:
+        d = {}
+        d.update(self._make_for_target(target))
+        d.update(self._make_for_start(start))
+        d.update(self._make_for_stop(stop))
+        d.update(self._make_for_step(step))
+        d.update(self._make_body(body))
+        return self._make_abc_node("ForRange", d)
 
     def make_for(self, initializer : dict, condition : dict, update : dict, body : dict) -> dict:
         """
@@ -382,7 +415,7 @@ class ABCJsonAstBuilder:
 
         return self._make_abc_node("Variable", self._make_identifier(identifier))
 
-    def make_variable_declaration(self, target : dict, value : dict, is_secret : bool = False) -> dict:
+    def make_variable_declaration(self, target : dict, value : dict, t: dict = None, is_secret : bool = False) -> dict:
         """
         Create a dictionary corresponding to an ABC variable declaration when exported in JSON
 
@@ -394,6 +427,23 @@ class ABCJsonAstBuilder:
 
         d = self._make_target(target)
         d.update(self._make_value(value))
-        d.update(self._make_datatype(value, is_secret))
+        if t is None:
+            d.update(self._make_datatype(value, is_secret))
+        else:
+            d.update(self._make_datatype_known(t))
+
+        # Save resulting identifier and type
+        # Here we just assume that target is always a variable (this might be problematic)
+        if d["target"]["type"] == "Variable":
+            self.var_types[d["target"]["identifier"]] = d["datatype"]
 
         return self._make_abc_node("VariableDeclaration", d)
+
+    def make_simpletype(self, type_name: str):
+        d = self._make_value(type_name)
+        return self._make_abc_node("SimpleType", d)
+
+    def make_compositetype(self, outer, inner):
+        d = self._make_target(outer)
+        d.update(self._make_value(inner))
+        return self._make_abc_node("CompositeType", d)

@@ -14,13 +14,14 @@ MIN_PYTHON = (3, 9)
 if version_info < MIN_PYTHON:
     exit("Currently, the frontend only supports Python %s.%s or later.\n" % MIN_PYTHON)
 
-class ABCContext():
+
+class ABCContext:
     """
     The context manager is used to mark the scope where we parse Python code and
     build the ABC AST.
     """
 
-    def __init__(self, prog : ABCProgram, log_level=logging.INFO):
+    def __init__(self, prog: ABCProgram, log_level=logging.INFO):
         self.log_level = log_level
         logging.basicConfig(level=self.log_level)
         self.prog = prog

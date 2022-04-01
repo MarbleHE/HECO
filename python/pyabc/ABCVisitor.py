@@ -1,10 +1,11 @@
+import ast
 import logging
 
 from ast import *
 
 from .ABCGenericExpr import ABCGenericExpr
 from .ABCJsonAstBuilder import ABCJsonAstBuilder
-from .ABCTypes import is_secret
+from .ABCTypes import is_secret, get_created_type
 from .FunctionVisitor import FunctionVisitor
 
 UNSUPPORTED_ATTRIBUTE_RESOLUTION = "Attribute resolution is not supported."
@@ -42,11 +43,38 @@ class ABCVisitor(NodeVisitor):
     #
     # Helper functions
     #
+    def _get_composite(self, val):
+        # Base case: this is a leaf object
+        if isinstance(val, ast.Name):
+            type_str = val.id
+            created = get_created_type(type_str)
+            if created is None:
+                return self.builder.make_simpletype(type_str)
+
+            sub_ast = ast.parse(f"x: {created}")
+            return self._get_composite(sub_ast.body[0].annotation)
+
+        # Recursive case: Collection with content type
+        if isinstance(val, ast.Subscript):
+            node = val.value
+            inner = val.slice
+            outer_name = "void"
+            if isinstance(node, ast.Attribute):
+                # Might be a fully qualified name
+                outer_name = node.attr
+            elif isinstance(node, ast.Name):
+                outer_name = node.id
+            else:
+                logging.error(f"Unsupported annotation node: {node}")
+                exit(1)
+
+            return self.builder.make_compositetype(outer_name, self._get_composite(inner))
+
     def _get_annotation(self, arg):
         if hasattr(arg, "annotation") and arg.annotation:
-            return arg.annotation.id
+            return self._get_composite(arg.annotation)
         else:
-            return None
+            return self.builder.make_simpletype("void")
 
     def _tpl_stmt_to_list(self, t):
         """
@@ -133,12 +161,24 @@ class ABCVisitor(NodeVisitor):
             # we never declare an index assignment, the indexed variable was declared before.
             return self.builder.make_assignment(var, expr)
 
+    def _make_assignment_with_type(self, var, expr, type):
+        if var["type"] == "Variable":
+            var_name = var["identifier"]
+            if var_name in self.declared_vars:
+                return self.builder.make_assignment(var, expr)
+            else:
+                self.declared_vars.add(var_name)
+                return self.builder.make_variable_declaration(var, expr, t=type)
+        else:
+            # we never declare an index assignment, the indexed variable was declared before.
+            return self.builder.make_assignment(var, expr)
+
     def _arg_to_function_param(self, arg : arg):
         identifier = arg.arg
 
         # TODO: translate type annotations properly
         # type = self._get_annotation(arg)
-        param_type = "void"
+        param_type = self._get_annotation(arg)
 
         return self.builder.make_function_param(identifier, param_type)
 
@@ -326,6 +366,16 @@ class ABCVisitor(NodeVisitor):
         else:
             step_val = self.builder.make_literal(1)
 
+        stmts = list(map(self.visit, node.body))
+        body = self.builder.make_block(stmts)
+
+        # If step_val is a literal node with value of 1 we change it to 1
+        if "type" in step_val and step_val["type"] == "LiteralInt" and step_val["value"] == 1:
+            step_val = 1
+
+        if step_val == 1:
+            return self.builder.make_for_range(target, start_val, stop_val, step_val, body)
+
         # Currently, the initializer is a block with a single statement.
         var_decl = self.builder.make_variable_declaration(target, start_val)
 
@@ -351,9 +401,6 @@ class ABCVisitor(NodeVisitor):
                                                                target_gt_stop)
         condition = self.builder.make_binary_expression(condition_case_1, self.builder.constants.OR, condition_case_2)
 
-        stmts = list(map(self.visit, node.body))
-        body = self.builder.make_block(stmts)
-
         return self.builder.make_for(initializer, condition, update, body)
 
     def visit_FunctionDef(self, node: FunctionDef) -> dict:
@@ -369,7 +416,10 @@ class ABCVisitor(NodeVisitor):
 
         # Parse the return type
         # TODO [mh]: as an addition, we could parse "returns" return type annotations
-        return_type = "void"
+        if isinstance(node.returns, ast.Subscript) or isinstance(node.returns, ast.Name):
+            return_type = self._get_composite(node.returns)
+        else:
+            return_type = self.builder.make_simpletype("void")
 
         # Parse the function arguments
         if len(node.args.kwonlyargs) > 0:
@@ -511,8 +561,16 @@ class ABCVisitor(NodeVisitor):
         exit(1)
 
     def visit_AnnAssign(self, node: AnnAssign) -> dict:
-        logging.error(UNSUPPORTED_STATEMENT, type(node))
-        exit(1)
+        # First, evaluate the RHS expression
+        exp = self.visit(node.value)
+
+        # Get the target
+        target = self._parse_lhs(node.target)[0]
+
+        # Get type
+        type_ann = self._get_annotation(node)
+
+        return self._make_assignment_with_type(target, exp, type_ann)
 
     def visit_AsyncFor(self, node: AsyncFor) -> dict:
         logging.error(UNSUPPORTED_STATEMENT, type(node))
@@ -759,6 +817,10 @@ class ABCVisitor(NodeVisitor):
         exit(1)
 
     def visit_UnaryOp(self, node: UnaryOp) -> dict:
+        if isinstance(node.op, ast.USub) and isinstance(node.operand, ast.Constant):
+            # This is a negative constant
+            return self.builder.make_literal(-node.operand.value)
+
         logging.error(UNSUPPORTED_STATEMENT, type(node))
         exit(1)
 
