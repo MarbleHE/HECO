@@ -10,6 +10,7 @@ int main(int argc, char *argv[]) {
     std::cout << "          - Porcupine" << std::endl;
     std::cout << "          - HECO" << std::endl;
     std::cout << "          - Naive" << std::endl;
+    std::cout << "          - TrivialBatch" << std::endl;
 
     std::exit(1);
   }
@@ -27,6 +28,7 @@ int main(int argc, char *argv[]) {
 
   BENCH_FUNCTION(HammingDistance, Porcupine, encryptedHammingDistancePorcupine, a, b);
   BENCH_FUNCTION(HammingDistance, HECO, encryptedBatchedHammingDistance, a, b);
+  BENCH_FUNCTION(HammingDistance, TrivialBatch, encryptedStupidBatchedHammingDistance, a, b);
   BENCH_FUNCTION(HammingDistance, Naive, encryptedNaiveHammingDistance, a, b);
 
   return 0;

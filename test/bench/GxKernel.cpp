@@ -35,7 +35,7 @@ std::vector<int> encryptedNaiveGxKernel(
   // Encode & Encrypt the image
   auto encTimer = timer.startTimer();
   std::vector<seal::Ciphertext> img_ctxt(img.size());
-  for (int i = 0; i < img.size(); ++i) {
+  for (size_t i = 0; i < img.size(); ++i) {
     seal::Plaintext tmp;
     encoder.encode(std::vector<int64_t> (1, img[i]), tmp);
     encryptor.encrypt(tmp, img_ctxt[i]);
@@ -124,7 +124,7 @@ std::vector<int> encryptedNaiveGxKernel(
   // Decrypt results
   auto decTimer = timer.startTimer();
   std::vector<int> result(img.size());
-  for (int i = 0; i < result.size(); ++i) {
+  for (size_t i = 0; i < result.size(); ++i) {
     seal::Plaintext tmp;
     decryptor.decrypt(img3[i], tmp);
 

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.13.4)
+cmake_minimum_required(VERSION 3.15.0)
 project(abc-dialect LANGUAGES CXX C)
 
 # Required for selecting MSVC runtime library
@@ -69,9 +69,6 @@ if (MSVC)
 
     # Force MSVC to conform to C++ standard's idea of exceptions
     add_compile_options(/EHsc)
-
-    # Make (nearly) all warnings errors
-    add_compile_options(/W4 /WX)
 
     # Try using variants
     add_compile_options(/std:c++17)
@@ -324,4 +321,6 @@ endif ()
 #
 # A collection of benchmarks
 ##############################
-add_subdirectory(test/bench EXCLUDE_FROM_ALL)
+if (SEAL_FOUND)
+    add_subdirectory(test/bench EXCLUDE_FROM_ALL)
+endif (SEAL_FOUND)

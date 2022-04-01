@@ -35,7 +35,7 @@ int encryptedDotProductNaive(MultiTimer &timer, std::vector<int> &x, const std::
   std::vector<seal::Ciphertext> x_ctxt(x.size());
   std::vector<seal::Ciphertext> y_ctxt(y.size());
 
-  for (int i = 0; i < x.size(); ++i) {
+  for (size_t i = 0; i < x.size(); ++i) {
     std::vector<int64_t> elem(1);
     elem[0] = x[i];
     seal::Plaintext tmp;
@@ -119,7 +119,7 @@ int encryptedDotProductBatched(MultiTimer &timer, std::vector<int> &x, const std
 
   // Fold-and-Sum
   seal::Ciphertext rotation_ctxt;
-  for (int i = vector_size / 2; i > 0; i /= 2) {
+  for (size_t i = vector_size / 2; i > 0; i /= 2) {
     evaluator.rotate_rows(x_ctxt, i, galoisKeys, rotation_ctxt);
     evaluator.add_inplace(x_ctxt, rotation_ctxt);
   }
