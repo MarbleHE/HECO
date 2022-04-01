@@ -2,6 +2,12 @@ import os
 
 
 class ABCMLIRTextBuilder:
+    """
+      This is the builder given to the JSONVisitor.
+      It implements the add_start_{node_type} and add_end_{node_type} functions.
+      This particular one builds a list of strings (where each element is a line).
+    """
+
     def __init__(self, indent_size=2):
         self.indent_level = 0
         self.indent_string = " " * indent_size

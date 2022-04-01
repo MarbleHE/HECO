@@ -1,8 +1,21 @@
 
 
 class JSONVisitor:
+    """
+      Visitor for the JSON representation of the python program we are compiling.
+      This class is only supposed to traverse the JSON AST and all transformations should happen in the builder.
 
-    def _is_node(self, obj):
+      There is a generic visit function. It retrieves the node type and calls the following functions(in this order):
+        1. builder.add_start_{node_type}
+        2. visit_{node_type}
+        3. builder.add_end_{node_type}
+
+      The visit_{node_type} is responsible for traversing further down the tree and calling "inner" builder functions.
+      The visit_{node_type} should return the builder (so that in the future non-mutable builders are supported).
+    """
+
+    @staticmethod
+    def _is_node(obj):
         return isinstance(obj, dict) and "type" in obj
 
     def visit(self, obj, builder):
@@ -65,13 +78,16 @@ class JSONVisitor:
         builder = self.visit(obj["value"], builder)
         return builder
 
-    def visit_variable(self, obj, builder):
+    @staticmethod
+    def visit_variable(obj, builder):
         return builder
 
-    def visit_literaldouble(self, obj, builder):
+    @staticmethod
+    def visit_literaldouble(obj, builder):
         return builder
 
-    def visit_void(self, obj, builder):
+    @staticmethod
+    def visit_void(obj, builder):
         print('visit_void is unimplemented', obj)
         return builder
 
@@ -91,11 +107,8 @@ class JSONVisitor:
         builder = self.visit(obj["value"], builder)
         return builder
 
-    def visit_literalint(self, obj, builder):
-        return builder
-
-    def visit_int(self, obj, builder):
-        print('visit_int is unimplemented', obj)
+    @staticmethod
+    def visit_literalint(obj, builder):
         return builder
 
     def visit_for(self, obj, builder):
@@ -135,5 +148,6 @@ class JSONVisitor:
             builder = self.visit(inner, builder)
         return builder
 
-    def visit_simpletype(self, obj, builder):
+    @staticmethod
+    def visit_simpletype(obj, builder):
         return builder

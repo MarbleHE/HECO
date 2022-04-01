@@ -15,6 +15,9 @@ class ABCProgram:
     """
 
     def __init__(self, log_level=logging.INFO, backend=ABCBackend.AST):
+        """
+        :param backend: The backend that should be used to run/generate MLIR
+        """
         self.compilation_results = None
         self.log_level = log_level
         logging.basicConfig(level=self.log_level)
@@ -70,6 +73,11 @@ class ABCProgram:
             exit(1)
 
     def dump(self, out=sys.stdout):
+        """
+        Print the compiled program to the specified output stream.
+
+        :param out: The output stream to use
+        """
         self.backend_class.dump(self.compilation_results, out)
 
     def execute(self, *args, **kwargs):
