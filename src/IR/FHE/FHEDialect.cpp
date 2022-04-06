@@ -5,6 +5,7 @@
 #include "mlir/IR/PatternMatch.h"
 #include "mlir/Support/LLVM.h"
 #include "llvm/ADT/TypeSwitch.h"
+#include "llvm/ADT/SmallString.h"
 #include "abc/IR/FHE/FHEDialect.h"
 
 using namespace mlir;
@@ -34,18 +35,16 @@ BatchedSecretType BatchedSecretType::get(::mlir::MLIRContext *context, ::mlir::T
 /// `LogicalResult` that can be converted to a boolean `true` value on failure,
 /// or `false` on success. This allows for easily chaining together a set of
 /// parser rules. These rules are used to populate an `mlir::OperationState`
-static mlir::ParseResult parseCombineOp(mlir::OpAsmParser &parser,
-                                        mlir::OperationState &result) {
-
+::mlir::ParseResult fhe::CombineOp::parse(::mlir::OpAsmParser &parser, ::mlir::OperationState &result) {
   parser.parseLParen();
 
-  llvm::SmallVector<std::pair<mlir::OpAsmParser::OperandType, llvm::SmallVector<Attribute>>> inputs;
-  mlir::OpAsmParser::OperandType remaining_inputs;
+  llvm::SmallVector<std::pair<mlir::OpAsmParser::UnresolvedOperand, llvm::SmallVector<Attribute>>> inputs;
+  mlir::OpAsmParser::UnresolvedOperand remaining_inputs;
   bool done = false;
   while (!done) {
 
     // Get the operand
-    mlir::OpAsmParser::OperandType result;
+    mlir::OpAsmParser::UnresolvedOperand result;
     parser.parseOperand(result);
 
     // Get the indices
@@ -116,7 +115,8 @@ static mlir::ParseResult parseCombineOp(mlir::OpAsmParser &parser,
 
 /// The 'OpAsmPrinter' class is a stream that allows for formatting
 /// strings, attributes, operands, types, etc.
-static void print(mlir::OpAsmPrinter &printer, fhe::CombineOp op) {
+void fhe::CombineOp::print(::mlir::OpAsmPrinter &printer) {
+  auto& op = *this;
   printer << "(";
   assert(op.vectors().size()==op.indices().size() && "combine op must have indices entry for each operand");
   auto indices = op.indices().getValue();

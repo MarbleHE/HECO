@@ -104,7 +104,7 @@ int main(int argc, char **argv) {
   mlir::DialectRegistry registry;
   registry.insert<ABCDialect>();
   registry.insert<FHEDialect>();
-  registry.insert<StandardOpsDialect>();
+  registry.insert<func::FuncDialect>();
   registry.insert<AffineDialect>();
   registry.insert<tensor::TensorDialect>();
   registry.insert<arith::ArithmeticDialect>();

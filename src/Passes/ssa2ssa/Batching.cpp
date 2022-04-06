@@ -1,6 +1,7 @@
 #include <queue>
 #include "mlir/Transforms/DialectConversion.h"
 #include "mlir/Dialect/Affine/IR/AffineOps.h"
+#include "mlir/Dialect/Func/IR/FuncOps.h"
 #include "mlir/Dialect/SCF/SCF.h"
 #include "mlir/Dialect/Tensor/IR/Tensor.h"
 #include "llvm/ADT/APSInt.h"
@@ -13,7 +14,7 @@ using namespace mlir;
 void BatchingPass::getDependentDialects(mlir::DialectRegistry &registry) const {
   registry.insert<fhe::FHEDialect,
                   mlir::AffineDialect,
-                  mlir::StandardOpsDialect,
+                  func::FuncDialect,
                   mlir::scf::SCFDialect,
                   mlir::tensor::TensorDialect>();
 }
@@ -49,7 +50,7 @@ LogicalResult batchArithmeticOperation(IRRewriter &rewriter, MLIRContext *contex
     //  } else if (auto ins_op = dyn_cast_or_null<fhe::InsertOp>(u)) {
     //    target_slot = ins_op.i().getLimitedValue(INT32_MAX);
     //    break;
-    //  } else if (auto ret_op = dyn_cast_or_null<ReturnOp>(u)) {
+    //  } else if (auto ret_op = dyn_cast_or_null<func::ReturnOp>(u)) {
     //    if (ret_op->getOperandTypes().front().template isa<fhe::SecretType>()) {
     //      // we eventually want this as a scalar, which means slot 0
     //      target_slot = 0;
@@ -71,7 +72,7 @@ LogicalResult batchArithmeticOperation(IRRewriter &rewriter, MLIRContext *contex
       } else if (auto ins_op = dyn_cast_or_null<fhe::InsertOp>(u)) {
         target_slot = ins_op.i().getLimitedValue(INT32_MAX);
         break;
-      } else if (auto ret_op = dyn_cast_or_null<ReturnOp>(u)) {
+      } else if (auto ret_op = dyn_cast_or_null<func::ReturnOp>(u)) {
         if (ret_op->getOperandTypes().front().template isa<fhe::SecretType>())
           // we eventually want this as a scalar, which means slot 0
           target_slot = 0;

@@ -1,6 +1,7 @@
 #include <queue>
 #include "mlir/Transforms/DialectConversion.h"
 #include "mlir/Dialect/Affine/IR/AffineOps.h"
+#include "mlir/Dialect/Func/IR/FuncOps.h"
 #include "mlir/Dialect/SCF/SCF.h"
 #include "mlir/Dialect/Tensor/IR/Tensor.h"
 #include "llvm/ADT/APSInt.h"
@@ -13,7 +14,6 @@ using namespace mlir;
 void CombineSimplifyPass::getDependentDialects(mlir::DialectRegistry &registry) const {
   registry.insert<fhe::FHEDialect,
                   mlir::AffineDialect,
-                  mlir::StandardOpsDialect,
                   mlir::scf::SCFDialect,
                   mlir::tensor::TensorDialect>();
 }
@@ -233,8 +233,8 @@ void CombineSimplifyPass::runOnOperation() {
   auto &block = getOperation()->getRegion(0).getBlocks().front();
   IRRewriter rewriter(&getContext());
 
-  for (auto f: llvm::make_early_inc_range(block.getOps<FuncOp>())) {
-    for (auto op: llvm::make_early_inc_range(f.body().getOps<fhe::CombineOp>())) {
+  for (auto f: llvm::make_early_inc_range(block.getOps<func::FuncOp>())) {
+    for (auto op: llvm::make_early_inc_range(f.getBody().getOps<fhe::CombineOp>())) {
       simplify(rewriter, &getContext(), op);
     }
   }

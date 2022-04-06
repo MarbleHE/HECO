@@ -1,5 +1,6 @@
 #include "mlir/Transforms/DialectConversion.h"
 #include "mlir/Dialect/Affine/IR/AffineOps.h"
+#include "mlir/Dialect/Func/IR/FuncOps.h"
 #include "mlir/Dialect/SCF/SCF.h"
 #include "mlir/Dialect/Tensor/IR/Tensor.h"
 #include "llvm/ADT/APSInt.h"
@@ -12,7 +13,7 @@ using namespace mlir;
 void ScalarBatchingPass::getDependentDialects(mlir::DialectRegistry &registry) const {
   registry.insert<fhe::FHEDialect,
                   mlir::AffineDialect,
-                  mlir::StandardOpsDialect,
+                  func::FuncDialect,
                   mlir::scf::SCFDialect,
                   mlir::tensor::TensorDialect>();
 }

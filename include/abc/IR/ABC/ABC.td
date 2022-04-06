@@ -10,6 +10,7 @@
 #define STANDALONE_DIALECT
 
 include "mlir/IR/OpBase.td"
+include "mlir/IR/AttrTypeBase.td"
 include "mlir/IR/BuiltinTypes.td"
 include "mlir/Interfaces/SideEffectInterfaces.td"
 include "mlir/Interfaces/SideEffectInterfaces.td"
@@ -75,24 +76,24 @@ def ABCIntegerType : Test_Type<"TestInteger"> {
 
 /// NodeOps are used to directly map an AST into MLIR using nested regions.
 /// as a consequence, they always have the NoTerminator and NoSideEffect trait
-class ABC_NodeOp<string mnemonic, list<OpTrait> traits = []> :
+class ABC_NodeOp<string mnemonic, list<Trait> traits = []> :
         Op<ABC_Dialect, mnemonic, !listconcat(traits, [NoTerminator, NoSideEffect])> {
   let assemblyFormat = [{
   regions attr-dict-with-keyword
   }];
 }
 
-def isAbcExpression : NativeOpTrait<"isAbcExpression">;
+def isAbcExpression : NativeOpTrait<"isAbcExpression", []>;
 
-class ABC_ExpressionOp<string mnemonic, list<OpTrait> traits = []> : ABC_NodeOp<mnemonic, !listconcat(traits, [isAbcExpression])>;
+class ABC_ExpressionOp<string mnemonic, list<Trait> traits = []> : ABC_NodeOp<mnemonic, !listconcat(traits, [isAbcExpression])>;
 
-def isAbcStatement : NativeOpTrait<"isAbcStatement">;
+def isAbcStatement : NativeOpTrait<"isAbcStatement", []>;
 
-class ABC_StatementOp<string mnemonic, list<OpTrait> traits = []> : ABC_NodeOp<mnemonic, !listconcat(traits, [isAbcStatement])>;
+class ABC_StatementOp<string mnemonic, list<Trait> traits = []> : ABC_NodeOp<mnemonic, !listconcat(traits, [isAbcStatement])>;
 
-def isAbcTarget : NativeOpTrait<"isAbcTarget">;
+def isAbcTarget : NativeOpTrait<"isAbcTarget", []>;
 
-class ABC_TargetOp<string mnemonic, list<OpTrait> traits = []> : ABC_ExpressionOp<mnemonic, !listconcat(traits, [isAbcTarget])>;
+class ABC_TargetOp<string mnemonic, list<Trait> traits = []> : ABC_ExpressionOp<mnemonic, !listconcat(traits, [isAbcTarget])>;
 
 //===----------------------------------------------------------------------===//
 // ABC Statement Node definitions.
@@ -153,7 +154,8 @@ def ABC_IfOp : ABC_StatementOp<"if", []> {
   // this is necessary, because MLIR seems to offer only a VariadicRegion (0 or more)
   // but not an OptionalRegion (0 or 1) region constraint
   // TODO: This seems to work, but produces no indication of what the error is, stuff just fails
-  let verifier = [{ return mlir::LogicalResult::success(this->getNumRegions() < 4); }];
+  // TODO: reactivate verifiers, see https://github.com/llvm/llvm-project/commit/42e5f1d97b3ecf6f967a0e63ca39f05d3262e2b2
+  // let verifier = [{ return mlir::LogicalResult::success(this->getNumRegions() < 4); }];
 }
 
 def ABC_ReturnOp: ABC_StatementOp<"return", []> {
@@ -162,7 +164,8 @@ def ABC_ReturnOp: ABC_StatementOp<"return", []> {
 
   // Ensure that this has either 1 (value) or 0  regions (see also verifier in ABC_IfOp)
   // TODO: This seems to work, but produces no indication of what the error is, stuff just fails
-  let verifier = [{ return mlir::LogicalResult::success(this->getNumRegions() < 2); }];
+  // TODO: reactivate verifiers, see https://github.com/llvm/llvm-project/commit/42e5f1d97b3ecf6f967a0e63ca39f05d3262e2b2
+  // let verifier = [{ return mlir::LogicalResult::success(this->getNumRegions() < 2); }];
 }
 
 def ABC_VariableDeclarationOp : ABC_StatementOp<"variable_declaration", []> {
@@ -175,7 +178,8 @@ def ABC_VariableDeclarationOp : ABC_StatementOp<"variable_declaration", []> {
 
   // Ensure that this has either 0 or 1 (value) regions (see also verifier in ABC_IfOp)
   // TODO: This seems to work, but produces no indication of what the error is, stuff just fails
-  let verifier = [{ return mlir::LogicalResult::success(this->getNumRegions() < 2); }];
+  // TODO: reactivate verifiers, see https://github.com/llvm/llvm-project/commit/42e5f1d97b3ecf6f967a0e63ca39f05d3262e2b2
+  // let verifier = [{ return mlir::LogicalResult::success(this->getNumRegions() < 2); }];
 
   let assemblyFormat = [{
     $type $name attr-dict-with-keyword ( `=` `(`$value^ `)` )?

@@ -2,6 +2,7 @@
 #define ABC_FHE_FHE_TD_
 
 include "mlir/IR/OpBase.td"
+include "mlir/IR/AttrTypeBase.td"
 include "mlir/Interfaces/SideEffectInterfaces.td"
 include "mlir/Dialect/Shape/IR/ShapeBase.td"
 include "mlir/Interfaces/ControlFlowInterfaces.td"
@@ -109,7 +110,7 @@ def BatchedSecret : TypeDef<FHE_Dialect, "BatchedSecret">  {
 // This is a TableGen helper, it is more like a "template" than a "class"
 // in that the final C++ classes generated for the operations will not inherit from this
 // nor will there be a C++ class fhe::Op
-class FHE_Op<string mnemonic, list<OpTrait> traits = []> :
+class FHE_Op<string mnemonic, list<Trait> traits = []> :
         // We specify the dialect, and add the "NoSideEffect" trait to all operations
         Op<FHE_Dialect, mnemonic, !listconcat(traits, [NoSideEffect])> {
 
@@ -279,9 +280,7 @@ def FHE_CombineOp : Op<FHE_Dialect, "combine", [NoSideEffect]> {
                        ArrayAttr:$indices);
   let results = (outs BatchedSecret:$result);
 
-  // We want a pretty complex pretty-printed syntax, so we're doing it with custom C++
-  let parser = [{ return ::parseCombineOp(parser, result); }];
-  let printer = [{ return ::print(p, *this); }];
+  let hasCustomAssemblyFormat = 1;
 
 }
 

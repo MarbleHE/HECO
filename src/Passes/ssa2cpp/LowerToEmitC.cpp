@@ -1,5 +1,6 @@
 #include "mlir/Transforms/DialectConversion.h"
 #include "mlir/Dialect/Affine/IR/AffineOps.h"
+#include "mlir/Dialect/Func/IR/FuncOps.h"
 #include "mlir/Dialect/SCF/SCF.h"
 #include "mlir/Dialect/Tensor/IR/Tensor.h"
 #include "mlir/Dialect/EmitC/IR/EmitC.h"
@@ -14,26 +15,26 @@ void LowerToEmitCPass::getDependentDialects(mlir::DialectRegistry &registry) con
   registry.insert<mlir::emitc::EmitCDialect,
                   fhe::FHEDialect,
                   mlir::AffineDialect,
-                  mlir::StandardOpsDialect,
+                  func::FuncDialect,
                   mlir::scf::SCFDialect,
                   mlir::tensor::TensorDialect>();
 }
 
-class EmitCFunctionPattern final : public OpConversionPattern<FuncOp> {
+class EmitCFunctionPattern final : public OpConversionPattern<func::FuncOp> {
  public:
-  using OpConversionPattern<FuncOp>::OpConversionPattern;
+  using OpConversionPattern<func::FuncOp>::OpConversionPattern;
 
   LogicalResult
-  matchAndRewrite(FuncOp op, typename FuncOp::Adaptor adaptor,
+  matchAndRewrite(func::FuncOp op, typename func::FuncOp::Adaptor adaptor,
                   ConversionPatternRewriter &rewriter) const override {
 
     // Compute the new signature of the function.
-    TypeConverter::SignatureConversion signatureConversion(op.getType().getNumInputs());
+    TypeConverter::SignatureConversion signatureConversion(op.getFunctionType().getNumInputs());
     SmallVector<Type> newResultTypes;
-    if (failed(typeConverter->convertTypes(op.getType().getResults(),
+    if (failed(typeConverter->convertTypes(op.getFunctionType().getResults(),
                                            newResultTypes)))
       return failure();
-    if (typeConverter->convertSignatureArgs(op.getType().getInputs(), signatureConversion).failed())
+    if (typeConverter->convertSignatureArgs(op.getFunctionType().getInputs(), signatureConversion).failed())
       return failure();
     auto new_functype = FunctionType::get(getContext(), signatureConversion.getConvertedTypes(), newResultTypes);
 
@@ -232,12 +233,12 @@ class EmitCArithmeticPattern final : public OpConversionPattern<OpType> {
   }
 };
 
-class EmitCReturnPattern final : public OpConversionPattern<ReturnOp> {
+class EmitCReturnPattern final : public OpConversionPattern<func::ReturnOp> {
  public:
-  using OpConversionPattern<ReturnOp>::OpConversionPattern;
+  using OpConversionPattern<func::ReturnOp>::OpConversionPattern;
 
   LogicalResult
-  matchAndRewrite(ReturnOp op, typename ReturnOp::Adaptor adaptor,
+  matchAndRewrite(func::ReturnOp op, typename func::ReturnOp::Adaptor adaptor,
                   ConversionPatternRewriter &rewriter) const override {
     if (op->getNumOperands()!=1) {
       emitError(op->getLoc(), "Only single value returns support for now.");
@@ -253,7 +254,7 @@ class EmitCReturnPattern final : public OpConversionPattern<ReturnOp> {
                                                                      dstType,
                                                                      op.operands());
       // build a new return op
-      rewriter.replaceOpWithNewOp<ReturnOp>(op, materialized);
+      rewriter.replaceOpWithNewOp<func::ReturnOp>(op, materialized);
 
     } // else do nothing
     return success();
@@ -295,7 +296,7 @@ void LowerToEmitCPass::runOnOperation() {
   });
   type_converter.addSourceMaterialization([&](OpBuilder &builder, Type t, ValueRange vs, Location loc) {
     if (auto bst = t.dyn_cast_or_null<fhe::BatchedSecretType>()) {
-      assert(!vs.empty() && ++vs.begin()==vs.end() && "currently can only materalize single values");
+      assert(!vs.empty() && ++vs.begin()==vs.end() && "currently can only materialize single values");
       auto old_type = vs.front().getType();
       if (auto ot = old_type.dyn_cast_or_null<emitc::OpaqueType>())
         if (ot.getValue().str()=="seal::Ciphertext")
@@ -307,8 +308,8 @@ void LowerToEmitCPass::runOnOperation() {
   ConversionTarget target(getContext());
   target.addLegalDialect<emitc::EmitCDialect>();
   target.addLegalOp<fhe::MaterializeOp>();
-  target.addDynamicallyLegalOp<FuncOp>([&](Operation *op) {
-    auto fop = llvm::dyn_cast<FuncOp>(op);
+  target.addDynamicallyLegalOp<func::FuncOp>([&](Operation *op) {
+    auto fop = llvm::dyn_cast<func::FuncOp>(op);
     for (auto t: op->getOperandTypes()) {
       if (!type_converter.isLegal(t))
         return false;
@@ -317,17 +318,17 @@ void LowerToEmitCPass::runOnOperation() {
       if (!type_converter.isLegal(t))
         return false;
     }
-    for (auto t: fop.getType().getInputs()) {
+    for (auto t: fop.getFunctionType().getInputs()) {
       if (!type_converter.isLegal(t))
         return false;
     }
-    for (auto t: fop.getType().getResults()) {
+    for (auto t: fop.getFunctionType().getResults()) {
       if (!type_converter.isLegal(t))
         return false;
     }
     return true;
   });
-  target.addDynamicallyLegalOp<ReturnOp>([&](Operation *op) {
+  target.addDynamicallyLegalOp<func::ReturnOp>([&](Operation *op) {
     return type_converter.isLegal(op->getOperandTypes());
   });
   target.addDynamicallyLegalOp<fhe::SubOp>([&](Operation *op) {

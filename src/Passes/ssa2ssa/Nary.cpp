@@ -5,6 +5,7 @@
 #include "mlir/Transforms/DialectConversion.h"
 #include "mlir/Dialect/Affine/IR/AffineOps.h"
 #include "mlir/Pass/Pass.h"
+#include "mlir/Dialect/Func/IR/FuncOps.h"
 #include "mlir/Dialect/SCF/SCF.h"
 #include "mlir/Dialect/Affine/IR/AffineOps.h"
 #include "mlir/Dialect/Tensor/IR/Tensor.h"
@@ -15,7 +16,7 @@ using namespace mlir;
 void NaryPass::getDependentDialects(mlir::DialectRegistry &registry) const {
   registry.insert<fhe::FHEDialect,
                   mlir::AffineDialect,
-                  mlir::StandardOpsDialect,
+                  func::FuncDialect,
                   mlir::scf::SCFDialect,
                   mlir::tensor::TensorDialect>();
 }
@@ -79,7 +80,7 @@ void collapseMul(fhe::MultiplyOp &op, IRRewriter &rewriter) {
 
 void NaryPass::runOnOperation() {
   ConversionTarget target(getContext());
-  target.addLegalDialect<AffineDialect, StandardOpsDialect, tensor::TensorDialect, scf::SCFDialect>();
+  target.addLegalDialect<AffineDialect, func::FuncDialect, tensor::TensorDialect, scf::SCFDialect>();
   target.addIllegalOp<AffineForOp>();
 
   // Get the (default) block in the module's only region:
@@ -88,8 +89,8 @@ void NaryPass::runOnOperation() {
 
   //TODO: There's very likely a much better way to do this that's not this kind of manual walk!
 
-  for (auto f: llvm::make_early_inc_range(block.getOps<FuncOp>())) {
-    for (auto op: llvm::make_early_inc_range(f.body().getOps<arith::SubIOp>())) {
+  for (auto f: llvm::make_early_inc_range(block.getOps<func::FuncOp>())) {
+    for (auto op: llvm::make_early_inc_range(f.getBody().getOps<arith::SubIOp>())) {
       rewriter.setInsertionPointAfter(op.getOperation());
       llvm::SmallVector<Value, 2> operands = {op.getLhs(), op.getRhs()};
       Value value = rewriter.create<fhe::SubOp>(op.getLoc(), op.getResult().getType(), operands);
@@ -98,8 +99,8 @@ void NaryPass::runOnOperation() {
     }
   }
 
-  for (auto f: llvm::make_early_inc_range(block.getOps<FuncOp>())) {
-    for (auto op: llvm::make_early_inc_range(f.body().getOps<arith::MulIOp>())) {
+  for (auto f: llvm::make_early_inc_range(block.getOps<func::FuncOp>())) {
+    for (auto op: llvm::make_early_inc_range(f.getBody().getOps<arith::MulIOp>())) {
       rewriter.setInsertionPointAfter(op.getOperation());
       llvm::SmallVector<Value, 2> operands = {op.getLhs(), op.getRhs()};
       Value value = rewriter.create<fhe::MultiplyOp>(op.getLoc(), op.getResult().getType(), operands);
@@ -110,19 +111,19 @@ void NaryPass::runOnOperation() {
 
   // Now, go through and actually start collapsing the operations!
   for (auto f: llvm::make_early_inc_range(block.getOps<FuncOp>())) {
-    for (auto op: llvm::make_early_inc_range(f.body().getOps<fhe::AddOp>())) {
+    for (auto op: llvm::make_early_inc_range(f.getBody().getOps<fhe::AddOp>())) {
       collapseAdd(op, rewriter);
     }
   }
 
   for (auto f: llvm::make_early_inc_range(block.getOps<FuncOp>())) {
-    for (auto op: llvm::make_early_inc_range(f.body().getOps<fhe::SubOp>())) {
+    for (auto op: llvm::make_early_inc_range(f.getBody().getOps<fhe::SubOp>())) {
       collapseSub(op, rewriter);
     }
   }
 
   for (auto f: llvm::make_early_inc_range(block.getOps<FuncOp>())) {
-    for (auto op: llvm::make_early_inc_range(f.body().getOps<fhe::MultiplyOp>())) {
+    for (auto op: llvm::make_early_inc_range(f.getBody().getOps<fhe::MultiplyOp>())) {
       collapseMul(op, rewriter);
     }
   }

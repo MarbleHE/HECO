@@ -3,6 +3,7 @@
 #include "mlir/Dialect/Affine/IR/AffineOps.h"
 #include "mlir/Dialect/SCF/SCF.h"
 #include "mlir/Dialect/Tensor/IR/Tensor.h"
+#include "mlir/Dialect/Func/IR/FuncOps.h"
 #include "llvm/ADT/APSInt.h"
 
 #include "abc/IR/FHE/FHEDialect.h"
@@ -13,7 +14,7 @@ using namespace mlir;
 void InternalOperandBatchingPass::getDependentDialects(mlir::DialectRegistry &registry) const {
   registry.insert<fhe::FHEDialect,
                   mlir::AffineDialect,
-                  mlir::StandardOpsDialect,
+                  mlir::func::FuncDialect,
                   mlir::scf::SCFDialect,
                   mlir::tensor::TensorDialect>();
 }

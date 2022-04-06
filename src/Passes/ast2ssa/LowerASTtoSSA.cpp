@@ -15,6 +15,7 @@
 #include "mlir/Dialect/SCF/SCF.h"
 #include "mlir/Dialect/Affine/IR/AffineOps.h"
 #include "mlir/Dialect/Tensor/IR/Tensor.h"
+#include "mlir/Dialect/Func/IR/FuncOps.h"
 #include "abc/IR/ABC/ABCDialect.h"
 #include "abc/IR/FHE/FHEDialect.h"
 
@@ -481,10 +482,10 @@ void translateStatement(Operation &op,
     emitError(op.getLoc(), "Nested Blocks are not yet supported.");
   } else if (auto return_op = llvm::dyn_cast<abc::ReturnOp>(op)) {
     if (return_op.getNumRegions()==0) {
-      rewriter.create<mlir::ReturnOp>(op.getLoc());
+      rewriter.create<mlir::func::ReturnOp>(op.getLoc());
     } else if (return_op.getNumRegions()==1) {
       auto &return_value_expr = firstOp(return_op.value().front());
-      rewriter.create<mlir::ReturnOp>(op.getLoc(), translateExpression(return_value_expr, rewriter, symbolTable));
+      rewriter.create<mlir::func::ReturnOp>(op.getLoc(), translateExpression(return_value_expr, rewriter, symbolTable));
     } else {
       //TODO: Support multiple return values from abc::ReturnOp in ast2ssa
       emitError(op.getLoc(), "Returning multiple values in abc.return is not yet supported.");
@@ -586,7 +587,7 @@ void convertFunctionOp2FuncOp(abc::FunctionOp &f,
 /// Executed on each builtin.module (ModuleOp)
 void abc::LowerASTtoSSAPass::runOnOperation() {
   ConversionTarget target(getContext());
-  target.addLegalDialect<fhe::FHEDialect, AffineDialect, StandardOpsDialect, tensor::TensorDialect, scf::SCFDialect>();
+  target.addLegalDialect<fhe::FHEDialect, AffineDialect, func::FuncDialect, tensor::TensorDialect, scf::SCFDialect>();
   target.addIllegalDialect<ABCDialect>();
 
   auto module = getOperation();
@@ -615,7 +616,7 @@ void abc::LowerASTtoSSAPass::getDependentDialects(DialectRegistry &registry) con
 
   registry.insert<fhe::FHEDialect,
                   mlir::AffineDialect,
-                  mlir::StandardOpsDialect,
+                  func::FuncDialect,
                   mlir::scf::SCFDialect,
                   mlir::tensor::TensorDialect>();
 }

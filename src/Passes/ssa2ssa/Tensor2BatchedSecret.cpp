@@ -4,6 +4,7 @@
 
 #include "mlir/Transforms/DialectConversion.h"
 #include "mlir/Dialect/Affine/IR/AffineOps.h"
+#include "mlir/Dialect/Func/IR/FuncOps.h"
 #include "mlir/Dialect/SCF/SCF.h"
 #include "mlir/Dialect/Tensor/IR/Tensor.h"
 #include "abc/IR/FHE/FHEDialect.h"
@@ -13,7 +14,7 @@ using namespace mlir;
 void Tensor2BatchedSecretPass::getDependentDialects(mlir::DialectRegistry &registry) const {
   registry.insert<fhe::FHEDialect,
                   mlir::AffineDialect,
-                  mlir::StandardOpsDialect,
+                  mlir::func::FuncDialect,
                   mlir::scf::SCFDialect,
                   mlir::tensor::TensorDialect>();
 }
@@ -83,12 +84,12 @@ class InsertPattern final : public OpConversionPattern<tensor::InsertOp> {
   }
 };
 
-class ReturnPattern final : public OpConversionPattern<ReturnOp> {
+class ReturnPattern final : public OpConversionPattern<func::ReturnOp> {
  public:
-  using OpConversionPattern<ReturnOp>::OpConversionPattern;
+  using OpConversionPattern<func::ReturnOp>::OpConversionPattern;
 
   LogicalResult
-  matchAndRewrite(ReturnOp op, typename ReturnOp::Adaptor adaptor,
+  matchAndRewrite(func::ReturnOp op, typename func::ReturnOp::Adaptor adaptor,
                   ConversionPatternRewriter &rewriter) const override {
     if (op.getNumOperands()!=1) {
       emitError(op.getLoc(), "Currently only single value return operations are supported.");
@@ -103,7 +104,7 @@ class ReturnPattern final : public OpConversionPattern<ReturnOp> {
                                                                       op.getLoc(),
                                                                       dstType,
                                                                       op.operands().front());
-      rewriter.template replaceOpWithNewOp<ReturnOp>(op, batchedSecret);
+      rewriter.template replaceOpWithNewOp<func::ReturnOp>(op, batchedSecret);
 
     } // else do nothing
     return success();
@@ -119,12 +120,12 @@ class FunctionPattern final : public OpConversionPattern<FuncOp> {
                   ConversionPatternRewriter &rewriter) const override {
 
     // Compute the new signature of the function.
-    TypeConverter::SignatureConversion signatureConversion(op.getType().getNumInputs());
+    TypeConverter::SignatureConversion signatureConversion(op.getFunctionType().getNumInputs());
     SmallVector<Type> newResultTypes;
-    if (failed(typeConverter->convertTypes(op.getType().getResults(),
+    if (failed(typeConverter->convertTypes(op.getFunctionType().getResults(),
                                            newResultTypes)))
       return failure();
-    if (typeConverter->convertSignatureArgs(op.getType().getInputs(), signatureConversion).failed())
+    if (typeConverter->convertSignatureArgs(op.getFunctionType().getInputs(), signatureConversion).failed())
       return failure();
     auto new_functype = FunctionType::get(getContext(), signatureConversion.getConvertedTypes(), newResultTypes);
 
@@ -214,17 +215,17 @@ void Tensor2BatchedSecretPass::runOnOperation() {
       if (!type_converter.isLegal(t))
         return false;
     }
-    for (auto t: fop.getType().getInputs()) {
+    for (auto t: fop.getFunctionType().getInputs()) {
       if (!type_converter.isLegal(t))
         return false;
     }
-    for (auto t: fop.getType().getResults()) {
+    for (auto t: fop.getFunctionType().getResults()) {
       if (!type_converter.isLegal(t))
         return false;
     }
     return true;
   });
-  target.addDynamicallyLegalOp<ReturnOp>([&](Operation *op) {
+  target.addDynamicallyLegalOp<func::ReturnOp>([&](Operation *op) {
     return type_converter.isLegal(op->getOperandTypes());
   });
 
