@@ -12,10 +12,10 @@
 #include "mlir/InitAllPasses.h"
 #include "mlir/InitAllTranslations.h"
 #include "mlir/Pass/Pass.h"
-#include "mlir/Translation.h"
+#include "mlir/Tools/mlir-translate/MlirTranslateMain.h"
 #include "mlir/Pass/PassManager.h"
 #include "mlir/Support/FileUtilities.h"
-#include "mlir/Support/MlirOptMain.h"
+#include "mlir/Tools/mlir-opt/MlirOptMain.h"
 #include "llvm/Support/CommandLine.h"
 #include "llvm/Support/InitLLVM.h"
 #include "llvm/Support/SourceMgr.h"
@@ -38,14 +38,14 @@ using namespace mlir;
 using namespace abc;
 using namespace fhe;
 
-
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
   mlir::MLIRContext context;
 
   mlir::DialectRegistry registry;
   registry.insert<ABCDialect>();
   registry.insert<FHEDialect>();
-  registry.insert<StandardOpsDialect>();
+  registry.insert<func::FuncDialect>();
   registry.insert<AffineDialect>();
   registry.insert<tensor::TensorDialect>();
   registry.insert<arith::ArithmeticDialect>();
@@ -63,8 +63,6 @@ int main(int argc, char **argv) {
 
   registerToCppTranslation();
 
-
   return failed(
       mlir::mlirTranslateMain(argc, argv, "ABC Translation Tool"));
-
 }

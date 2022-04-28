@@ -13,7 +13,7 @@
 #include "mlir/Pass/Pass.h"
 #include "mlir/Pass/PassManager.h"
 #include "mlir/Support/FileUtilities.h"
-#include "mlir/Support/MlirOptMain.h"
+#include "mlir/Tools/mlir-opt/MlirOptMain.h"
 #include "llvm/Support/CommandLine.h"
 #include "llvm/Support/InitLLVM.h"
 #include "llvm/Support/SourceMgr.h"
@@ -38,18 +38,19 @@ using namespace mlir;
 using namespace abc;
 using namespace fhe;
 
-void pipelineBuilder(OpPassManager &manager) {
+void pipelineBuilder(OpPassManager &manager)
+{
   manager.addPass(std::make_unique<LowerASTtoSSAPass>());
   manager.addPass(std::make_unique<UnrollLoopsPass>());
   manager.addPass(createCanonicalizerPass());
-  manager.addPass(createCSEPass()); //this can greatly reduce the number of operations after unrolling
+  manager.addPass(createCSEPass()); // this can greatly reduce the number of operations after unrolling
   manager.addPass(std::make_unique<NaryPass>());
 
   // Must canonicalize before Tensor2BatchedSecretPass, since it only handles constant indices in tensor.extract
   manager.addPass(createCanonicalizerPass());
   manager.addPass(std::make_unique<Tensor2BatchedSecretPass>());
-  manager.addPass(createCanonicalizerPass()); //necessary to remove redundant fhe.materialize
-  manager.addPass(createCSEPass()); //necessary to remove duplicate fhe.extract
+  manager.addPass(createCanonicalizerPass()); // necessary to remove redundant fhe.materialize
+  manager.addPass(createCSEPass());           // necessary to remove duplicate fhe.extract
 
   manager.addPass(std::make_unique<BatchingPass>());
   manager.addPass(createCanonicalizerPass());
@@ -62,23 +63,24 @@ void pipelineBuilder(OpPassManager &manager) {
   manager.addPass(createCanonicalizerPass());
   manager.addPass(createCSEPass());
 
-  //manager.addPass(std::make_unique<ScalarBatchingPass>());
+  // manager.addPass(std::make_unique<ScalarBatchingPass>());
 
   manager.addPass(std::make_unique<LowerToEmitCPass>());
-  manager.addPass(createCanonicalizerPass()); //necessary to remove redundant fhe.materialize
+  manager.addPass(createCanonicalizerPass()); // necessary to remove redundant fhe.materialize
 }
 
-void ssaPipelineBuilder(OpPassManager &manager) {
+void ssaPipelineBuilder(OpPassManager &manager)
+{
   manager.addPass(std::make_unique<UnrollLoopsPass>());
   manager.addPass(createCanonicalizerPass());
-  manager.addPass(createCSEPass()); //this can greatly reduce the number of operations after unrolling
+  manager.addPass(createCSEPass()); // this can greatly reduce the number of operations after unrolling
   manager.addPass(std::make_unique<NaryPass>());
 
   // Must canonicalize before Tensor2BatchedSecretPass, since it only handles constant indices in tensor.extract
   manager.addPass(createCanonicalizerPass());
   manager.addPass(std::make_unique<Tensor2BatchedSecretPass>());
-  manager.addPass(createCanonicalizerPass()); //necessary to remove redundant fhe.materialize
-  manager.addPass(createCSEPass()); //necessary to remove duplicate fhe.extract
+  manager.addPass(createCanonicalizerPass()); // necessary to remove redundant fhe.materialize
+  manager.addPass(createCSEPass());           // necessary to remove duplicate fhe.extract
 
   manager.addPass(std::make_unique<BatchingPass>());
   manager.addPass(createCanonicalizerPass());
@@ -91,13 +93,14 @@ void ssaPipelineBuilder(OpPassManager &manager) {
   manager.addPass(createCanonicalizerPass());
   manager.addPass(createCSEPass());
 
-  //manager.addPass(std::make_unique<ScalarBatchingPass>());
+  // manager.addPass(std::make_unique<ScalarBatchingPass>());
 
   manager.addPass(std::make_unique<LowerToEmitCPass>());
-  manager.addPass(createCanonicalizerPass()); //necessary to remove redundant fhe.materialize
+  manager.addPass(createCanonicalizerPass()); // necessary to remove redundant fhe.materialize
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
   mlir::MLIRContext context;
   context.enableMultithreading();
 
@@ -120,7 +123,7 @@ int main(int argc, char **argv) {
 
   // Uncomment the following to make *all* MLIR core passes available.
   // This is only useful for experimenting with the command line to compose
-  //registerAllPasses();
+  // registerAllPasses();
 
   registerCanonicalizerPass();
   registerAffineLoopUnrollPass();

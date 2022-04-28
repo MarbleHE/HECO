@@ -17,7 +17,7 @@ set(LIBS
         MLIRParser
         MLIRPass
         MLIRTargetCpp
-        MLIRTranslation
+        MLIRTranslateLib
         MLIRSideEffectInterfaces
         MLIRTargetLLVMIRExport
         MLIRTransforms
