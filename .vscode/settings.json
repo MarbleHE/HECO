@@ -30,6 +30,8 @@
         "deque": "cpp",
         "forward_list": "cpp",
         "list": "cpp",
-        "span": "cpp"
+        "span": "cpp",
+        "initializer_list": "cpp",
+        "regex": "cpp"
     }
 }

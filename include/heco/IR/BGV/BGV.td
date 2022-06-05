@@ -74,6 +74,30 @@ def Ciphertext : TypeDef<BGV_Dialect, "Ciphertext">  {
   let assemblyFormat = "`<` $size `x` $elementType `>`";
 }
 
+def Plaintext : TypeDef<BGV_Dialect, "Plaintext">  {
+
+  // See https://mlir.llvm.org/docs/OpDefinitions/#type-definitions
+  // for detailed information on how declartive type definitions work
+
+  let description = "A Type for Ptxt, tracking parameters";
+
+  // Types are written as "!<dialect_name>.<type_mnemonic>" in textal MLIR representation
+  let mnemonic = "pxt";
+
+  // This summary is used, among other things, in type-related error messages
+  let summary = "Plaintext";
+
+  let parameters = (ins
+      //TODO (Q&A): Can we restrict PlaintextType's elementType to PolynomialType without circular dependency issues?
+      "Type":$elementType
+  );
+
+  // See https://mlir.llvm.org/docs/OpDefinitions/#declarative-assembly-format
+  // Which explains assemblyFormat for operations, but works for types, too:
+  let assemblyFormat = "`<` $elementType `>`";
+}
+
+
 //===----------------------------------------------------------------------===//
 // BGV Operations
 //===----------------------------------------------------------------------===//
@@ -116,6 +140,31 @@ def BGV_LoadCtxtOp : BGV_Op<"load_ctxt", []> {
 
   let results = (outs
     Ciphertext:$output
+  );
+
+  // TODO (Q&A): Using type($output) instead of type(results) in operation assembly format causes odd error:
+  //  the output will omit the !bgv.ctxt before the <..>
+  let assemblyFormat = [{
+    attr-dict `:` type(results)
+  }];
+}
+
+def BGV_LoadPtxtOp : BGV_Op<"load_ptxt", []> {
+  let summary = "Loads plaintext.";
+
+  let description = [{
+  ...
+  }];
+
+  let arguments = (ins   
+    // Attributes are compile-time-known inputs ("immediate values"), whereas operands are the results of another operation
+    StrAttr: $file,  
+    StrAttr: $parms
+    // TODO (Design): In bgv.load_ptxt, should  we add the serialization info (ntt, rns) into another attribute?
+  );
+
+  let results = (outs
+    Plaintext:$output
   );
 
   // TODO (Q&A): Using type($output) instead of type(results) in operation assembly format causes odd error:
@@ -208,7 +257,83 @@ def BGV_MultiplyOp : BGV_Op<"multiply", [DeclareOpInterfaceMethods<InferTypeOpIn
 
   let arguments = (ins
     Ciphertext:$x,
+    AnyTypeOf<[Ciphertext,Plaintext]>:$y
+  );
+
+  let results = (outs
+    Ciphertext:$output
+  );
+
+}
+
+def BGV_AddOp : BGV_Op<"add", [DeclareOpInterfaceMethods<InferTypeOpInterface>]> {
+  // We add InferTypeOpInterface and define LogicalResult bgv::MultiplyOp::inferReturnTypes(...) in BGVDialect.cpp
+  // This is necessary, because this operation returns a type that is different from both input types
+  // By wrapping InferTypeOpInterface (https://mlir.llvm.org/docs/Interfaces/#utilizing-the-ods-framework)
+  // in DeclareOpInterfaceMethods, we don't have to manually add "let extraClassDeclaration = ..."
+
+  let summary = "Addition.";
+
+  let arguments = (ins
+    Ciphertext:$x,
     Ciphertext:$y
+  );
+
+  let results = (outs
+    Ciphertext:$output
+  );
+
+}
+
+def BGV_AddPlainOp : BGV_Op<"add_plain", [DeclareOpInterfaceMethods<InferTypeOpInterface>]> {
+  // We add InferTypeOpInterface and define LogicalResult bgv::MultiplyOp::inferReturnTypes(...) in BGVDialect.cpp
+  // This is necessary, because this operation returns a type that is different from both input types
+  // By wrapping InferTypeOpInterface (https://mlir.llvm.org/docs/Interfaces/#utilizing-the-ods-framework)
+  // in DeclareOpInterfaceMethods, we don't have to manually add "let extraClassDeclaration = ..."
+
+  let summary = "Ciphertext-Plaintext Addition.";
+
+  let arguments = (ins
+    Ciphertext:$x,
+    Plaintext:$y
+  );
+
+  let results = (outs
+    Ciphertext:$output
+  );
+
+}
+
+def BGV_SubOp : BGV_Op<"sub", [DeclareOpInterfaceMethods<InferTypeOpInterface>]> {
+  // We add InferTypeOpInterface and define LogicalResult bgv::MultiplyOp::inferReturnTypes(...) in BGVDialect.cpp
+  // This is necessary, because this operation returns a type that is different from both input types
+  // By wrapping InferTypeOpInterface (https://mlir.llvm.org/docs/Interfaces/#utilizing-the-ods-framework)
+  // in DeclareOpInterfaceMethods, we don't have to manually add "let extraClassDeclaration = ..."
+
+  let summary = "Subtraction.";
+
+  let arguments = (ins
+    Ciphertext:$x,
+    Ciphertext:$y
+  );
+
+  let results = (outs
+    Ciphertext:$output
+  );
+
+}
+
+def BGV_SubPlainOp : BGV_Op<"sub_plain", [DeclareOpInterfaceMethods<InferTypeOpInterface>]> {
+  // We add InferTypeOpInterface and define LogicalResult bgv::MultiplyOp::inferReturnTypes(...) in BGVDialect.cpp
+  // This is necessary, because this operation returns a type that is different from both input types
+  // By wrapping InferTypeOpInterface (https://mlir.llvm.org/docs/Interfaces/#utilizing-the-ods-framework)
+  // in DeclareOpInterfaceMethods, we don't have to manually add "let extraClassDeclaration = ..."
+
+  let summary = "Ciphertext-Plaintext Addition.";
+
+  let arguments = (ins
+    Ciphertext:$x,
+    Plaintext:$y
   );
 
   let results = (outs
