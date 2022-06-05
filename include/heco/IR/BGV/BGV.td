@@ -101,7 +101,7 @@ class BGV_Op<string mnemonic, list<Trait> traits = []> :
 // However, it is good practice to make it <DIALECT>. Similarily, the "Op" at the end is a convention, not a requirement.
 
 def BGV_LoadCtxtOp : BGV_Op<"load_ctxt", []> {
-  let summary = "Loads ciphertext from file into a register.";
+  let summary = "Loads ciphertext.";
 
   let description = [{
   ...
@@ -125,8 +125,20 @@ def BGV_LoadCtxtOp : BGV_Op<"load_ctxt", []> {
   }];
 }
 
-def BGV_LoadRelinKeysOp : BGV_Op<"load_relin_keys", []> {
-  let summary = "Loads relineraization keys from file into a register.";
+def BGV_FetchCtxtOp : BGV_Op<"fetch_ctxt", []> {
+  let summary = "Returns a Ciphertext.";
+
+  let arguments = (ins
+    Ciphertext: $ctxt
+  );
+
+  let assemblyFormat = [{
+    `(` $ctxt `)` attr-dict `:` type(operands)
+  }];
+}
+
+def BGV_LoadPublicKeyOp : BGV_Op<"load_public_key", []> {
+  let summary = "Load public key.";
 
   let arguments = (ins
     StrAttr: $file,
@@ -144,6 +156,47 @@ def BGV_LoadRelinKeysOp : BGV_Op<"load_relin_keys", []> {
     attr-dict `:` type(results)
   }];
 }
+
+def BGV_LoadRelinKeysOp : BGV_Op<"load_relin_keys", []> {
+  let summary = "Loads relineraization keys.";
+
+  let arguments = (ins
+    StrAttr: $file,
+    StrAttr: $parms
+    // Maybe add the serialization info (ntt, rns) into another attribute?
+  );
+
+  let results = (outs
+    Ciphertext:$output
+  );
+
+  // TODO (Q&A): Using type($output) instead of type(results) in operation assembly format causes odd error:
+  //  the output will omit the !bgv.ctxt before the <..>
+  let assemblyFormat = [{
+    attr-dict `:` type(results)
+  }];
+}
+
+def BGV_LoadGaloisKeysOp : BGV_Op<"load_galois_keys", []> {
+  let summary = "Loads galois keys.";
+
+  let arguments = (ins
+    StrAttr: $file,
+    StrAttr: $parms
+    // Maybe add the serialization info (ntt, rns) into another attribute?
+  );
+
+  let results = (outs
+    Ciphertext:$output
+  );
+
+  // TODO (Q&A): Using type($output) instead of type(results) in operation assembly format causes odd error:
+  //  the output will omit the !bgv.ctxt before the <..>
+  let assemblyFormat = [{
+    attr-dict `:` type(results)
+  }];
+}
+
 
 def BGV_MultiplyOp : BGV_Op<"multiply", [DeclareOpInterfaceMethods<InferTypeOpInterface>]> {
   // We add InferTypeOpInterface and define LogicalResult bgv::MultiplyOp::inferReturnTypes(...) in BGVDialect.cpp
