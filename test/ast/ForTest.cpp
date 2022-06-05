@@ -1,44 +1,52 @@
-#include <abc/ast_parser/Parser.h>
+#include <heco/ast_parser/Parser.h>
 #include "ASTComparison.h"
-#include "abc/ast_utilities/Operator.h"
-#include "abc/ast_utilities/Datatype.h"
-#include "abc/ast/VariableDeclaration.h"
-#include "abc/ast/Assignment.h"
-#include "abc/ast/BinaryExpression.h"
-#include "abc/ast/For.h"
-#include "abc/ast/Literal.h"
+#include "heco/ast_utilities/Operator.h"
+#include "heco/ast_utilities/Datatype.h"
+#include "heco/ast/VariableDeclaration.h"
+#include "heco/ast/Assignment.h"
+#include "heco/ast/BinaryExpression.h"
+#include "heco/ast/For.h"
+#include "heco/ast/Literal.h"
 #include "gtest/gtest.h"
 
-TEST(ForTest, values_ValuesGivenInCtorAreRetrievable) { /* NOLINT */
+TEST(ForTest, values_ValuesGivenInCtorAreRetrievable)
+{ /* NOLINT */
   // For statements are created with an initializer, condition, update and body
   // TODO: This test simply confirms that they are retrievable later
 }
 
-TEST(ForTest, SetAndGet) { /* NOLINT */
+TEST(ForTest, SetAndGet)
+{ /* NOLINT */
   // TODO: This test simply checks that initializer, condition, update and body can be set and get correctly.
 }
 
-TEST(ForTest, CopyCtorCopiesValue) { /* NOLINT */
+TEST(ForTest, CopyCtorCopiesValue)
+{ /* NOLINT */
   // TODO: When copying a For, the new object should contain a (deep) copy of the initializer, condition, update and body
 }
 
-TEST(ForTest, CopyAssignmentCopiesValue) { /* NOLINT */
+TEST(ForTest, CopyAssignmentCopiesValue)
+{ /* NOLINT */
   // TODO: When copying a For, the new object should contain a copy of the initializer, condition, update and body
 }
 
-TEST(ForTest, MoveCtorPreservesValue) { /* NOLINT */
+TEST(ForTest, MoveCtorPreservesValue)
+{ /* NOLINT */
   // TODO: When moving a For, the new object should contain the same initializer, condition, update and body
 }
 
-TEST(ForTest, MoveAssignmentPreservesValue) { /* NOLINT */
+TEST(ForTest, MoveAssignmentPreservesValue)
+{ /* NOLINT */
   // TODO: When moving a For, the new object should contain the same initializer, condition, update and body
 }
 
-TEST(ForTest, countChildrenReportsCorrectNumber) { /* NOLINT */
+TEST(ForTest, countChildrenReportsCorrectNumber)
+{ /* NOLINT */
   // TODO: This tests checks that countChildren delivers the correct number
 }
 
-TEST(ForTest, node_iterate_children) { /* NOLINT */
+TEST(ForTest, node_iterate_children)
+{ /* NOLINT */
   // This test checks that we can iterate correctly through the children
   // TODO: Even if some of the elements are null (in which case they should not appear)
 
@@ -84,11 +92,13 @@ TEST(ForTest, node_iterate_children) { /* NOLINT */
   EXPECT_EQ(it, forLoop->end());
 }
 
-TEST(ForTest, JsonOutputTest) { /* NOLINT */
+TEST(ForTest, JsonOutputTest)
+{ /* NOLINT */
   // TODO: Verify JSON output
 }
 
-TEST(ForTest, JsonInputTest) {
+TEST(ForTest, JsonInputTest)
+{
   auto initializer = std::make_unique<VariableDeclaration>(Datatype(Type::INT, false),
                                                            std::make_unique<Variable>("i"),
                                                            std::make_unique<
@@ -111,7 +121,7 @@ TEST(ForTest, JsonInputTest) {
                                                             LiteralInt>(111));
   auto bodyBlock = std::make_unique<Block>(std::move(bodyStmt));
 
-  For expected(std::move(initializerBlock),std::move(condition),std::move(updaterBlock),std::move(bodyBlock));
+  For expected(std::move(initializerBlock), std::move(condition), std::move(updaterBlock), std::move(bodyBlock));
 
   std::string json = R""""({
     "body": {

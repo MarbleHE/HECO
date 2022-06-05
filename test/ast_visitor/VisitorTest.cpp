@@ -1,30 +1,32 @@
-#include "abc/ast_utilities/Visitor.h"
-#include "abc/ast/Return.h"
-#include "abc/ast/Literal.h"
+#include "heco/ast_utilities/Visitor.h"
+#include "heco/ast/Return.h"
+#include "heco/ast/Literal.h"
 #include "gtest/gtest.h"
 
 /// Minimal example of a "SpecialVisitor" to be used with the visitor template
-class SpecialVisitor : public ScopedVisitor {
- public:
-
+class SpecialVisitor : public ScopedVisitor
+{
+public:
   /// Helper to figure out what was called
   std::string message = "";
 
   /// Non-inheriting visit(...) function hides Base class visit(...) for all other types
 
   /// Base Class function, should be called e.g. for LiteralInt, etc
-  void visit(AbstractExpression &) {
+  void visit(AbstractExpression &)
+  {
     message = "SpecialVisitor::visit(AbstractExpression&)";
   }
 
   /// Specific function that specifies functionality for one derived class
-  void visit(LiteralBool &) {
+  void visit(LiteralBool &)
+  {
     message = "SpecialVisitor::visit(LiteralBool&)";
   }
-
 };
 
-TEST(VisitorTemplate, has_visit) {
+TEST(VisitorTemplate, has_visit)
+{
   // This test confirms that the has_visit SFINAE detection works as expected
 
   // Parentheses required to avoid breaking the GTEST macro
@@ -36,7 +38,8 @@ TEST(VisitorTemplate, has_visit) {
   EXPECT_EQ((has_visit<SpecialVisitor, Assignment &>), false);
 }
 
-TEST(VisitorTemplate, dispatchDefault) {
+TEST(VisitorTemplate, dispatchDefault)
+{
   // When calling visit on a type T where neither T nor any base class of T
   // has a visit(...) function in SpecialVisitor, the scoped visitor should be called
   // As a consequence, the message string should remain empty.
@@ -49,7 +52,8 @@ TEST(VisitorTemplate, dispatchDefault) {
   EXPECT_EQ(v.message, "");
 }
 
-TEST(VisitorTemplate, dispatchBaseClass) {
+TEST(VisitorTemplate, dispatchBaseClass)
+{
   // When calling visit on a type T where SpecialVisitor::visit(T&) does not exist,
   // but there exists SpecialVisitor::visit(B&) with B a base class of T
   // Then this base class function should be called
@@ -68,10 +72,10 @@ TEST(VisitorTemplate, dispatchBaseClass) {
   EXPECT_EQ(v.message, "SpecialVisitor::visit(AbstractExpression&)");
 }
 
-TEST(VisitorTemplate, dispatchDerivedClass) {
+TEST(VisitorTemplate, dispatchDerivedClass)
+{
   // When calling visit on a type T where SpecialVisitor::visit(T&) does  exist,
   // this derived  class function should be called, even if there exists SpecialVisitor::visit(B&) with B a base class of T
-
 
   LiteralBool b(true);
   // Confirm that SpecialVisitor can be called directly on this

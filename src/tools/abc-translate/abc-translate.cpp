@@ -22,20 +22,20 @@
 #include "llvm/Support/ToolOutputFile.h"
 #include "mlir/Dialect/Arithmetic/IR/Arithmetic.h"
 
-#include "abc/IR/ABC/ABCDialect.h"
-#include "abc/IR/FHE/FHEDialect.h"
-#include "abc/Passes/ast2ssa/LowerASTtoSSA.h"
-#include "abc/Passes/ssa2ssa/UnrollLoops.h"
-#include "abc/Passes/ssa2ssa/Nary.h"
-#include "abc/Passes/ssa2ssa/Tensor2BatchedSecret.h"
-#include "abc/Passes/ssa2ssa/Batching.h"
-#include "abc/Passes/ssa2ssa/InternalOperandBatching.h"
-#include "abc/Passes/ssa2cpp/LowerToEmitC.h"
+#include "heco/IR/AST/ASTDialect.h"
+#include "heco/IR/FHE/FHEDialect.h"
+#include "heco/Passes/ast2ssa/LowerASTtoSSA.h"
+#include "heco/Passes/ssa2ssa/UnrollLoops.h"
+#include "heco/Passes/ssa2ssa/Nary.h"
+#include "heco/Passes/ssa2ssa/Tensor2BatchedSecret.h"
+#include "heco/Passes/ssa2ssa/Batching.h"
+#include "heco/Passes/ssa2ssa/InternalOperandBatching.h"
+#include "heco/Passes/ssa2cpp/LowerToEmitC.h"
 
 #include <iostream>
 
 using namespace mlir;
-using namespace abc;
+using namespace heco;
 using namespace fhe;
 
 int main(int argc, char **argv)

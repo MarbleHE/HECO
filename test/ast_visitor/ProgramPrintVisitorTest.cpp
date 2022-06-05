@@ -1,8 +1,9 @@
-#include "abc/ast_utilities/ProgramPrintVisitor.h"
-#include "abc/ast_parser/Parser.h"
+#include "heco/ast_utilities/ProgramPrintVisitor.h"
+#include "heco/ast_parser/Parser.h"
 #include "gtest/gtest.h"
 
-TEST(ProgramPrintVisitor, printTree) {
+TEST(ProgramPrintVisitor, printTree)
+{
 
   const char *programCode = R""""(
   public void main(secret int p, float q, bool x) {

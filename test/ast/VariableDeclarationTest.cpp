@@ -1,11 +1,12 @@
-#include <abc/ast_parser/Parser.h>
+#include <heco/ast_parser/Parser.h>
 #include "ASTComparison.h"
-#include "abc/ast/Literal.h"
-#include "abc/ast/Variable.h"
-#include "abc/ast/VariableDeclaration.h"
+#include "heco/ast/Literal.h"
+#include "heco/ast/Variable.h"
+#include "heco/ast/VariableDeclaration.h"
 #include "gtest/gtest.h"
 
-TEST(VariableDeclarationTest, values_ValuesGivenInCtorAreRetrievable) {
+TEST(VariableDeclarationTest, values_ValuesGivenInCtorAreRetrievable)
+{
   // VariableDeclarations are created with a target Variable and value AbstractExpression and type
   // This test simply confirms that they are retrievable later
 
@@ -19,7 +20,8 @@ TEST(VariableDeclarationTest, values_ValuesGivenInCtorAreRetrievable) {
   // If the value does not have type LiteralBool, the dynamic cast should fail
 }
 
-TEST(VariableDeclarationTest, target_and_value_SetAndGet) {
+TEST(VariableDeclarationTest, target_and_value_SetAndGet)
+{
   // This test simply checks that target and value can be set and get correctly.
 
   VariableDeclaration declaration(Datatype(Type::BOOL), std::make_unique<Variable>("foo"), std::make_unique<LiteralBool>(true));
@@ -36,7 +38,8 @@ TEST(VariableDeclarationTest, target_and_value_SetAndGet) {
   // If the value does not have type LiteralBool, the dynamic cast should fail
 }
 
-TEST(VariableDeclarationTest, values_CopyCtorCopiesValue) {
+TEST(VariableDeclarationTest, values_CopyCtorCopiesValue)
+{
   // When copying a VariableDeclaration, the new object should contain a (deep) copy of the target and value
 
   VariableDeclaration declaration(Datatype(Type::BOOL), std::make_unique<Variable>("foo"), std::make_unique<LiteralBool>(true));
@@ -52,7 +55,8 @@ TEST(VariableDeclarationTest, values_CopyCtorCopiesValue) {
   // If the value does not have type LiteralBool, the dynamic cast should fail
 }
 
-TEST(VariableDeclarationTest, values_CopyAssignmentCopiesValue) {
+TEST(VariableDeclarationTest, values_CopyAssignmentCopiesValue)
+{
   // When copying a VariableDeclaration, the new object should contain a copy of the value
 
   VariableDeclaration declaration(Datatype(Type::BOOL), std::make_unique<Variable>("foo"), std::make_unique<LiteralBool>(true));
@@ -69,7 +73,8 @@ TEST(VariableDeclarationTest, values_CopyAssignmentCopiesValue) {
   // If the value does not have type LiteralBool, the dynamic cast should fail
 }
 
-TEST(VariableDeclarationTest, values_MoveCtorPreservesValue) {
+TEST(VariableDeclarationTest, values_MoveCtorPreservesValue)
+{
   // When moving a VariableDeclaration, the new object should contain the same target and value
 
   VariableDeclaration declaration(Datatype(Type::BOOL), std::make_unique<Variable>("foo"), std::make_unique<LiteralBool>(true));
@@ -85,7 +90,8 @@ TEST(VariableDeclarationTest, values_MoveCtorPreservesValue) {
   // If the value does not have type LiteralBool, the dynamic cast should fail
 }
 
-TEST(VariableDeclarationTest, values_MoveAssignmentPreservesValue) {
+TEST(VariableDeclarationTest, values_MoveAssignmentPreservesValue)
+{
   // When moving a VariableDeclaration, the new object should contain the same target and value
 
   VariableDeclaration declaration(Datatype(Type::BOOL), std::make_unique<Variable>("foo"), std::make_unique<LiteralBool>(true));
@@ -102,7 +108,8 @@ TEST(VariableDeclarationTest, values_MoveAssignmentPreservesValue) {
   // If the value does not have type LiteralBool, the dynamic cast should fail
 }
 
-TEST(VariableDeclarationTest, node_countChildrenReportsCorrectNumber) {
+TEST(VariableDeclarationTest, node_countChildrenReportsCorrectNumber)
+{
   // This tests checks that countChildren delivers the correct number
 
   VariableDeclaration declaration(Datatype(Type::BOOL), std::make_unique<Variable>("foo"), std::make_unique<LiteralBool>(true));
@@ -111,7 +118,8 @@ TEST(VariableDeclarationTest, node_countChildrenReportsCorrectNumber) {
   // Iterate through all the children using the iterators
   // (indirectly via range-based for loop for conciseness)
   size_t actual_count = 0;
-  for (auto &c: declaration) {
+  for (auto &c : declaration)
+  {
     c = c; // Use c to suppress warning
     ++actual_count;
   }
@@ -119,7 +127,8 @@ TEST(VariableDeclarationTest, node_countChildrenReportsCorrectNumber) {
   EXPECT_EQ(reported_count, actual_count);
 }
 
-TEST(VariableDeclarationTest, node_iterate_children) {
+TEST(VariableDeclarationTest, node_iterate_children)
+{
   // This test checks that we can iterate correctly through the children
   // Even if some of the elements are null (in which case they should not appear)
 
@@ -136,34 +145,30 @@ TEST(VariableDeclarationTest, node_iterate_children) {
   EXPECT_EQ(dynamic_cast<LiteralBool &>(value).getValue(), true);
 }
 
-TEST(VariableDeclarationTest, JsonOutputTest) { /* NOLINT */
+TEST(VariableDeclarationTest, JsonOutputTest)
+{ /* NOLINT */
   auto identifier = "foo";
   auto datatype = Datatype(Type::INT);
   int initializer = 3;
   auto *var = new VariableDeclaration(datatype,
                                       std::make_unique<Variable>(identifier),
                                       std::make_unique<LiteralInt>(initializer));
-  nlohmann::json j ={
+  nlohmann::json j = {
       {"type", "VariableDeclaration"},
       {"datatype", datatype.toString()},
-      {"target", {
-        {"type", "Variable"},
-        {"identifier", identifier}}},
-      {"value", {
-              {"type", "LiteralInt"},
-              {"value", initializer}}
-      }
-  };
+      {"target", {{"type", "Variable"}, {"identifier", identifier}}},
+      {"value", {{"type", "LiteralInt"}, {"value", initializer}}}};
   EXPECT_EQ(var->toJson(), j);
 }
 
-TEST(VariableDeclarationTest, JsonInputTest) { /* NOLINT */
+TEST(VariableDeclarationTest, JsonInputTest)
+{ /* NOLINT */
   auto identifier = "foo";
   auto datatype = Datatype(Type::INT);
   int initializer = 3;
   VariableDeclaration expected(datatype,
-                              std::make_unique<Variable>(identifier),
-                              std::make_unique<LiteralInt>(initializer));
+                               std::make_unique<Variable>(identifier),
+                               std::make_unique<LiteralInt>(initializer));
 
   std::string json = R""""({
     "datatype": "int",

@@ -1,5 +1,6 @@
 {
     "files.associations": {
+        "*.sage": "python",
         "__functional_03": "cpp",
         "__functional_base": "cpp",
         "__hash_table": "cpp",
@@ -23,6 +24,12 @@
         "utility": "cpp",
         "valarray": "cpp",
         "variant": "cpp",
-        "vector": "cpp"
+        "vector": "cpp",
+        "*.inc": "cpp",
+        "array": "cpp",
+        "deque": "cpp",
+        "forward_list": "cpp",
+        "list": "cpp",
+        "span": "cpp"
     }
 }

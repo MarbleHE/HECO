@@ -1,0 +1,6 @@
+#ifndef HECO_AST2SSA_LOWERTOEMITC_TD
+#define HECO_AST2SSA_LOWERTOEMITC_TD
+
+include "mlir/IR/PatternBase.td"
+
+#endif // HECO_AST2SSA_LOWERTOEMITC_TD\

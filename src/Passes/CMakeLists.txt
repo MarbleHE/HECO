@@ -1,0 +1,3 @@
+add_subdirectory(ast2ssa)
+add_subdirectory(bgv2emitc)
+add_subdirectory(ssa2ssa)

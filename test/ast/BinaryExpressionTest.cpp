@@ -1,54 +1,62 @@
-#include <abc/ast_parser/Parser.h>
+#include <heco/ast_parser/Parser.h>
 #include "ASTComparison.h"
-#include "abc/ast/BinaryExpression.h"
-#include "abc/ast/Literal.h"
+#include "heco/ast/BinaryExpression.h"
+#include "heco/ast/Literal.h"
 #include "gtest/gtest.h"
 
-TEST(BinaryExpressionTest, values_ValuesGivenInCtorAreRetrievable) {
+TEST(BinaryExpressionTest, values_ValuesGivenInCtorAreRetrievable)
+{
   // Binary expressions are created with two operands and an operator
   // TODO: This test simply confirms that they are retrievable later
 }
 
-TEST(BinaryExpressionTest, SetAndGet) {
+TEST(BinaryExpressionTest, SetAndGet)
+{
   // TODO: This test simply checks that operands and operator can be set and get correctly.
 }
 
-TEST(BinaryExpressionTest, CopyCtorCopiesValue) {
+TEST(BinaryExpressionTest, CopyCtorCopiesValue)
+{
   // TODO: When copying a BinaryExpression, the new object should contain a (deep) copy of the operands and operator
 }
 
-TEST(BinaryExpressionTest, CopyAssignmentCopiesValue) {
+TEST(BinaryExpressionTest, CopyAssignmentCopiesValue)
+{
   // TODO: When copying a BinaryExpression, the new object should contain a copy of the operands and operator
 }
 
-TEST(BinaryExpressionTest, MoveCtorPreservesValue) {
+TEST(BinaryExpressionTest, MoveCtorPreservesValue)
+{
   // TODO: When moving a BinaryExpression, the new object should contain the same operands and operator
 }
 
-TEST(BinaryExpressionTest, MoveAssignmentPreservesValue) {
+TEST(BinaryExpressionTest, MoveAssignmentPreservesValue)
+{
   // TODO: When moving a BinaryExpression, the new object should contain the same operands and operator
 }
 
-TEST(BinaryExpressionTest, countChildrenReportsCorrectNumber) {
+TEST(BinaryExpressionTest, countChildrenReportsCorrectNumber)
+{
   // TODO: This tests checks that countChildren delivers the correct number
 }
 
-TEST(BinaryExpressionTest, node_iterate_children) {
+TEST(BinaryExpressionTest, node_iterate_children)
+{
   // TODO: This test checks that we can iterate correctly through the children
   // Even if some of the elements are null (in which case they should not appear)
-
 }
 
-TEST(BinaryExpressionTest, JsonOutputTest) { /* NOLINT */
- // TODO: Verify JSON output
+TEST(BinaryExpressionTest, JsonOutputTest)
+{ /* NOLINT */
+  // TODO: Verify JSON output
 }
 
-TEST(BinaryExpressionTest, JsonInputTest) { /* NOLINT */
+TEST(BinaryExpressionTest, JsonInputTest)
+{ /* NOLINT */
   BinaryExpression expected(
       std::make_unique<LiteralInt>(1),
       Operator(ArithmeticOp::ADDITION),
-      std::make_unique<LiteralInt>(1)
-  );
+      std::make_unique<LiteralInt>(1));
 
   std::string binExprJson = R""""({
     "left": {

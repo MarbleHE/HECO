@@ -1,36 +1,43 @@
-#include <include/abc/ast_parser/Parser.h>
-#include "abc/ast/VariableDeclaration.h"
-#include "abc/ast/Function.h"
-#include "abc/ast/FunctionParameter.h"
-#include "abc/ast/Literal.h"
+#include <include/heco/ast_parser/Parser.h>
+#include "heco/ast/VariableDeclaration.h"
+#include "heco/ast/Function.h"
+#include "heco/ast/FunctionParameter.h"
+#include "heco/ast/Literal.h"
 #include "gtest/gtest.h"
 
-TEST(FunctionTest, values_ValuesGivenInCtorAreRetrievable) {
+TEST(FunctionTest, values_ValuesGivenInCtorAreRetrievable)
+{
   // Functions are created with a return type, identifier, parameter vector and body
   // TODO: This test simply confirms that they are retrievable later
 }
 
-TEST(FunctionTest, SetAndGet) {
+TEST(FunctionTest, SetAndGet)
+{
   // TODO: This test simply checks that return type, identifier, parameter vector and body can be set and get correctly.
 }
 
-TEST(FunctionTest, CopyCtorCopiesValue) {
+TEST(FunctionTest, CopyCtorCopiesValue)
+{
   // TODO: When copying a Function, the new object should contain a (deep) copy of the return type, identifier, parameter vector and body
 }
 
-TEST(FunctionTest, CopyAssignmentCopiesValue) {
+TEST(FunctionTest, CopyAssignmentCopiesValue)
+{
   // TODO: When copying a Function, the new object should contain a copy of the return type, identifier, parameter vector and body
 }
 
-TEST(FunctionTest, MoveCtorPreservesValue) {
+TEST(FunctionTest, MoveCtorPreservesValue)
+{
   // TODO: When moving a Function, the new object should contain the same return type, identifier, parameter vector and body
 }
 
-TEST(FunctionTest, MoveAssignmentPreservesValue) {
+TEST(FunctionTest, MoveAssignmentPreservesValue)
+{
   // TODO: When moving a Function, the new object should contain the same return type, identifier, parameter vector and body
 }
 
-TEST(FunctionTest, countChildrenReportsCorrectNumber) {
+TEST(FunctionTest, countChildrenReportsCorrectNumber)
+{
   // This tests checks that countChildren delivers the correct number
 
   VariableDeclaration variableDeclaration1(Datatype(Type::BOOL), std::make_unique<Variable>("foo"));
@@ -44,7 +51,8 @@ TEST(FunctionTest, countChildrenReportsCorrectNumber) {
   // Iterate through all the children using the iterators
   // (indirectly via range-based for loop for conciseness)
   size_t actual_count = 0;
-  for (auto &c: f) {
+  for (auto &c : f)
+  {
     c = c; // Use c to suppress warning
     ++actual_count;
   }
@@ -52,7 +60,8 @@ TEST(FunctionTest, countChildrenReportsCorrectNumber) {
   EXPECT_EQ(reported_count, actual_count);
 }
 
-TEST(FunctionTest, node_iterate_children_multipleParameters) {
+TEST(FunctionTest, node_iterate_children_multipleParameters)
+{
   // This test checks that we can iterate correctly through the children
   const char *inputChars = R""""(
     public int main(int a, int z, int v) {
@@ -76,7 +85,8 @@ TEST(FunctionTest, node_iterate_children_multipleParameters) {
   EXPECT_EQ(it, function->end());
 }
 
-TEST(FunctionTest, node_iterate_children_singleParameter) {
+TEST(FunctionTest, node_iterate_children_singleParameter)
+{
   // This test checks that we can iterate correctly through the children
   const char *inputChars = R""""(
     public int main(int a) {
@@ -96,7 +106,8 @@ TEST(FunctionTest, node_iterate_children_singleParameter) {
   EXPECT_EQ(it, function->end());
 }
 
-TEST(FunctionTest, node_iterate_children_noParameter) {
+TEST(FunctionTest, node_iterate_children_noParameter)
+{
   // This test checks that we can iterate correctly through the children
   const char *inputChars = R""""(
     public int main() {
@@ -114,6 +125,7 @@ TEST(FunctionTest, node_iterate_children_noParameter) {
   EXPECT_EQ(it, function->end());
 }
 
-TEST(FunctionTest, JsonOutputTest) { /* NOLINT */
+TEST(FunctionTest, JsonOutputTest)
+{ /* NOLINT */
   // TODO: Verify JSON output
 }

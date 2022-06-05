@@ -20,7 +20,7 @@ install(CODE "execute_process(COMMAND ${Python3_EXECUTABLE} -m pip install ${CMA
 
 declare_mlir_python_sources(pyabcSources
     ROOT_DIR "."
-    SOURCES_GLOB pyabc/*.py
+    SOURCES_GLOB pyheco/*.py
 )
 
 add_mlir_python_modules(pyabcModule

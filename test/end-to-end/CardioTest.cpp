@@ -1,15 +1,17 @@
 #include <random>
-#include <include/abc/ast_parser/Parser.h>
-#include "abc/ast/AbstractNode.h"
+#include <include/heco/ast_parser/Parser.h>
+#include "heco/ast/AbstractNode.h"
 #include "gtest/gtest.h"
 
-class CardioTest : public ::testing::Test {  /* NOLINT (predictable sequence expected) */
- protected:
-
-  void SetUp() override {
+class CardioTest : public ::testing::Test
+{ /* NOLINT (predictable sequence expected) */
+protected:
+  void SetUp() override
+  {
   }
 
-  std::unique_ptr<AbstractNode> getInputs(size_t /* size */) {
+  std::unique_ptr<AbstractNode> getInputs(size_t /* size */)
+  {
     const char *inputs = R""""(
       bool sex = true;
       bool antecedents = true;
@@ -27,14 +29,16 @@ class CardioTest : public ::testing::Test {  /* NOLINT (predictable sequence exp
     return Parser::parse(std::string(inputs));
   }
 
-  static std::unique_ptr<AbstractNode> getOutputs() {
+  static std::unique_ptr<AbstractNode> getOutputs()
+  {
     const char *outputs = R""""(
       riskScore = r;
     )"""";
     return Parser::parse(std::string(outputs));
   }
 
-  std::unique_ptr<AbstractNode> getEvaluationProgram(std::vector<std::reference_wrapper<AbstractNode>> &createdNodes) {
+  std::unique_ptr<AbstractNode> getEvaluationProgram(std::vector<std::reference_wrapper<AbstractNode>> &createdNodes)
+  {
     // TODO: Implement cardio program
     // program's input
     const char *inputs = R""""(
@@ -43,12 +47,13 @@ class CardioTest : public ::testing::Test {  /* NOLINT (predictable sequence exp
   }
 };
 
-int computeCardioRiskScore() {
+int computeCardioRiskScore()
+{
   return 0;
   // TODO: Implement me
 }
 
-TEST_F(CardioTest, DISABLED_originalProgramTest) {  /* NOLINT */
+TEST_F(CardioTest, DISABLED_originalProgramTest)
+{ /* NOLINT */
   // TODO: Implement me
-
 }

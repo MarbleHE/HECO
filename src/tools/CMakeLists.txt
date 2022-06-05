@@ -1,2 +1,1 @@
-add_subdirectory(abc-opt)
-add_subdirectory(abc-translate)
+add_subdirectory(fhe-tool)

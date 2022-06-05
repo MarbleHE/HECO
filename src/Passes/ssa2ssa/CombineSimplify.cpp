@@ -6,12 +6,13 @@
 #include "mlir/Dialect/Tensor/IR/Tensor.h"
 #include "llvm/ADT/APSInt.h"
 
-#include "abc/IR/FHE/FHEDialect.h"
-#include "abc/Passes/ssa2ssa/CombineSimplify.h"
+#include "heco/IR/FHE/FHEDialect.h"
+#include "heco/Passes/ssa2ssa/CombineSimplify.h"
 
 using namespace mlir;
 
-void CombineSimplifyPass::getDependentDialects(mlir::DialectRegistry &registry) const {
+void CombineSimplifyPass::getDependentDialects(mlir::DialectRegistry &registry) const
+{
   registry.insert<fhe::FHEDialect,
                   mlir::AffineDialect,
                   mlir::scf::SCFDialect,
@@ -24,34 +25,41 @@ void CombineSimplifyPass::getDependentDialects(mlir::DialectRegistry &registry) 
 // to
 //   %op = fhe.combine(%v#[i,j], %w)
 // Technically, the first combine op isn't removed, but if it has no other uses, it'll be canonicalized away, too
-void simplify(IRRewriter &rewriter, MLIRContext *context, fhe::CombineOp op) {
+void simplify(IRRewriter &rewriter, MLIRContext *context, fhe::CombineOp op)
+{
   // Basic sanity check, since we frequently iterate over both things at the same time
-  assert(op.vectors().size()==op.indices().size() && "combine op must have indices for each operand");
+  assert(op.vectors().size() == op.indices().size() && "combine op must have indices for each operand");
 
+  // op.getOperation()->getParentOp()->dump();
 
-  //op.getOperation()->getParentOp()->dump();
-
-
-  if (op.getNumOperands()!=2)
+  if (op.getNumOperands() != 2)
     return;
 
-  if (auto ia = op.indices()[0].dyn_cast_or_null<IntegerAttr>()) {
-    if (auto sa = op.indices()[1].dyn_cast<StringAttr>()) {
-      if (auto c = op.vectors()[1].getDefiningOp<fhe::CombineOp>()) {
-        //c->print(llvm::outs());
-        //llvm::outs() << "\n";
-        //op->print(llvm::outs());
-        //llvm::outs() << "\n";
-        //llvm::outs().flush();
+  if (auto ia = op.indices()[0].dyn_cast_or_null<IntegerAttr>())
+  {
+    if (auto sa = op.indices()[1].dyn_cast<StringAttr>())
+    {
+      if (auto c = op.vectors()[1].getDefiningOp<fhe::CombineOp>())
+      {
+        // c->print(llvm::outs());
+        // llvm::outs() << "\n";
+        // op->print(llvm::outs());
+        // llvm::outs() << "\n";
+        // llvm::outs().flush();
 
-        if (c.getNumOperands()==2) {
-          if (c.indices()[1].dyn_cast<StringAttr>()) {
+        if (c.getNumOperands() == 2)
+        {
+          if (c.indices()[1].dyn_cast<StringAttr>())
+          {
             // now we have found simple pattern as desired
 
-            if (auto cia = c.indices()[0].dyn_cast_or_null<IntegerAttr>()) {
+            if (auto cia = c.indices()[0].dyn_cast_or_null<IntegerAttr>())
+            {
               // range is just a single index so far
-              if (ia.getInt()==cia.getInt() + 1) {
-                if (op.vectors()[0]==c.vectors()[0]) {
+              if (ia.getInt() == cia.getInt() + 1)
+              {
+                if (op.vectors()[0] == c.vectors()[0])
+                {
                   auto iaa = rewriter.getArrayAttr({cia, ia});
                   auto aa = rewriter.getArrayAttr({iaa, sa});
                   rewriter.setInsertionPoint(op);
@@ -60,15 +68,19 @@ void simplify(IRRewriter &rewriter, MLIRContext *context, fhe::CombineOp op) {
                                                                            op->getResultTypes(),
                                                                            c.vectors(),
                                                                            aa);
-                  //new_op->print(llvm::outs());
-                  //llvm::outs() << "\n";
-                  //llvm::outs().flush();
+                  // new_op->print(llvm::outs());
+                  // llvm::outs() << "\n";
+                  // llvm::outs().flush();
                 }
               }
-            } else if (auto iaa = c.indices()[0].dyn_cast_or_null<ArrayAttr>()) {
+            }
+            else if (auto iaa = c.indices()[0].dyn_cast_or_null<ArrayAttr>())
+            {
               // there's a range we might need to extend it
-              if (ia.getInt()==iaa[iaa.size() - 1].dyn_cast<IntegerAttr>().getInt() + 1) {
-                if (op.vectors()[0]==c.vectors()[0]) {
+              if (ia.getInt() == iaa[iaa.size() - 1].dyn_cast<IntegerAttr>().getInt() + 1)
+              {
+                if (op.vectors()[0] == c.vectors()[0])
+                {
                   SmallVector<Attribute> sv(iaa.getAsRange<IntegerAttr>());
                   sv.push_back(ia);
                   auto iaa = rewriter.getArrayAttr(sv);
@@ -79,9 +91,9 @@ void simplify(IRRewriter &rewriter, MLIRContext *context, fhe::CombineOp op) {
                                                                            op->getResultTypes(),
                                                                            c.vectors(),
                                                                            aa);
-                  //new_op->print(llvm::outs());
-                  //llvm::outs() << "\n";
-                  //llvm::outs().flush();
+                  // new_op->print(llvm::outs());
+                  // llvm::outs() << "\n";
+                  // llvm::outs().flush();
                 }
               }
             }
@@ -91,7 +103,6 @@ void simplify(IRRewriter &rewriter, MLIRContext *context, fhe::CombineOp op) {
     }
   }
 }
-
 
 //  // Build a list of all inputs %v:i, including (including all %v:i, %v:j coming from a single operand %v:[i,j,..])
 //  auto collectInputs =
@@ -116,7 +127,6 @@ void simplify(IRRewriter &rewriter, MLIRContext *context, fhe::CombineOp op) {
 
 //  std::vector<std::pair<Value, IntegerAttr>> single_inputs;
 //  Value remaining_inputs = nullptr; // This is mostly to make sure we only have one "rest" input
-
 
 //  // Build a list of simplified inputs
 //  std::vector<std::pair<Value, IntegerAttr>> new_single_inputs;
@@ -227,16 +237,18 @@ void simplify(IRRewriter &rewriter, MLIRContext *context, fhe::CombineOp op) {
 //  }
 //}
 
-void CombineSimplifyPass::runOnOperation() {
+void CombineSimplifyPass::runOnOperation()
+{
 
   // Get the (default) block in the module's only region:
   auto &block = getOperation()->getRegion(0).getBlocks().front();
   IRRewriter rewriter(&getContext());
 
-  for (auto f: llvm::make_early_inc_range(block.getOps<func::FuncOp>())) {
-    for (auto op: llvm::make_early_inc_range(f.getBody().getOps<fhe::CombineOp>())) {
+  for (auto f : llvm::make_early_inc_range(block.getOps<func::FuncOp>()))
+  {
+    for (auto op : llvm::make_early_inc_range(f.getBody().getOps<fhe::CombineOp>()))
+    {
       simplify(rewriter, &getContext(), op);
     }
   }
-
 }

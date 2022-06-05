@@ -1,7 +1,7 @@
 #include <cmath>
 #include <random>
-#include "abc/ast_utilities/Scope.h"
-#include "abc/ast_parser/Parser.h"
+#include "heco/ast_utilities/Scope.h"
+#include "heco/ast_parser/Parser.h"
 #include "gtest/gtest.h"
 
 #ifdef HAVE_SEAL_BFV
@@ -19,20 +19,24 @@
 ///
 /// \param img Pixel (x,y) = (column, row) should be at position x*imgSize + y
 /// \return transformed image
-std::vector<int> naiveBoxBlur(const std::vector<int> &img) {
-  const auto imgSize = (int) std::ceil(std::sqrt(img.size()));
+std::vector<int> naiveBoxBlur(const std::vector<int> &img)
+{
+  const auto imgSize = (int)std::ceil(std::sqrt(img.size()));
   std::vector<std::vector<int>> weightMatrix = {{1, 1, 1}, {1, 1, 1}, {1, 1, 1}};
   std::vector<int> img2(img.begin(), img.end());
-  for (int x = 0; x < imgSize; ++x) {
-    for (int y = 0; y < imgSize; ++y) {
+  for (int x = 0; x < imgSize; ++x)
+  {
+    for (int y = 0; y < imgSize; ++y)
+    {
       int value = 0;
-      for (int j = -1; j < 2; ++j) {
-        for (int i = -1; i < 2; ++i) {
-          value += weightMatrix.at(i + 1).at(j + 1)
-              *img.at(((x + i)*imgSize + (y + j))%img.size());
+      for (int j = -1; j < 2; ++j)
+      {
+        for (int i = -1; i < 2; ++i)
+        {
+          value += weightMatrix.at(i + 1).at(j + 1) * img.at(((x + i) * imgSize + (y + j)) % img.size());
         }
       }
-      img2[imgSize*x + y] = value;
+      img2[imgSize * x + y] = value;
     }
   }
   return img2;
@@ -43,19 +47,24 @@ std::vector<int> naiveBoxBlur(const std::vector<int> &img) {
 ///
 /// \param img Pixel (x,y) = (column, row) should be at position x*imgSize + y
 /// \return transformed image
-std::vector<int> naiveBoxBlur2x2(const std::vector<int> &img) {
-  const auto imgSize = (int) std::ceil(std::sqrt(img.size()));
+std::vector<int> naiveBoxBlur2x2(const std::vector<int> &img)
+{
+  const auto imgSize = (int)std::ceil(std::sqrt(img.size()));
   std::vector<std::vector<int>> weightMatrix = {{1, 1}, {1, 1}};
   std::vector<int> img2(img.begin(), img.end());
-  for (int x = 0; x < imgSize; ++x) {
-    for (int y = 0; y < imgSize; ++y) {
+  for (int x = 0; x < imgSize; ++x)
+  {
+    for (int y = 0; y < imgSize; ++y)
+    {
       int value = 0;
-      for (int j = -1; j < 1; ++j) {
-        for (int i = -1; i < 1; ++i) {
-          value += weightMatrix.at(i + 1).at(j + 1) * img.at(((x + i)*imgSize + (y + j)) % img.size());
+      for (int j = -1; j < 1; ++j)
+      {
+        for (int i = -1; i < 1; ++i)
+        {
+          value += weightMatrix.at(i + 1).at(j + 1) * img.at(((x + i) * imgSize + (y + j)) % img.size());
         }
       }
-      img2[imgSize*x + y] = value;
+      img2[imgSize * x + y] = value;
     }
   }
   return img2;
@@ -78,29 +87,31 @@ std::vector<int> naiveBoxBlur2x2(const std::vector<int> &img) {
 ///
 /// \param img Pixel (x,y) = (column, row) should be at position x*imgSize + y
 /// \return transformed image
-std::vector<int> fastBoxBlur(const std::vector<int> &img) {
-  const auto imgSize = (int) std::ceil(std::sqrt(img.size()));
+std::vector<int> fastBoxBlur(const std::vector<int> &img)
+{
+  const auto imgSize = (int)std::ceil(std::sqrt(img.size()));
   std::vector<int> img2(img.begin(), img.end());
 
   // Horizontal Kernel: for each row y
-  for (int y = 0; y < imgSize; ++y) {
+  for (int y = 0; y < imgSize; ++y)
+  {
     // Get kernel for first pixel of row y, using padding
-    int value = img.at((-1*imgSize + y)%img.size()) + img.at(0*imgSize + y) + img.at(1*imgSize + y);
+    int value = img.at((-1 * imgSize + y) % img.size()) + img.at(0 * imgSize + y) + img.at(1 * imgSize + y);
     // Division that would usually happen here is omitted
-    img2[0*imgSize + y] = value;
+    img2[0 * imgSize + y] = value;
 
     // Go through the rest of row y
-    for (int x = 1; x < imgSize; ++x) {
+    for (int x = 1; x < imgSize; ++x)
+    {
       // remove the previous pixel
-      //x = middle of current kernel, x-2 = one to the left of kernel
-      value -= img.at(((x - 2)*imgSize + y)%img.size());
+      // x = middle of current kernel, x-2 = one to the left of kernel
+      value -= img.at(((x - 2) * imgSize + y) % img.size());
       // add the new pixel
-      //x = right pixel of previous kernel, x+1 = right pixel of new kernel
-      value += img.at(((x + 1)*imgSize + y)%img.size());
+      // x = right pixel of previous kernel, x+1 = right pixel of new kernel
+      value += img.at(((x + 1) * imgSize + y) % img.size());
       // save result
-      img2[x*imgSize + y] = value;
+      img2[x * imgSize + y] = value;
     }
-
   }
 
   // Now apply the vertical kernel to img2
@@ -109,47 +120,51 @@ std::vector<int> fastBoxBlur(const std::vector<int> &img) {
   std::vector<int> img3(img2.begin(), img2.end());
 
   // Vertical Kernel: for each column x
-  for (int x = 0; x < imgSize; ++x) {
+  for (int x = 0; x < imgSize; ++x)
+  {
     // Get kernel for first pixel of column x with padding
-    int value = img2.at((x*imgSize - 1)%img.size()) + img2.at(x*imgSize + 0) + img2.at(x*imgSize + 1);
+    int value = img2.at((x * imgSize - 1) % img.size()) + img2.at(x * imgSize + 0) + img2.at(x * imgSize + 1);
     // Division that would usually happen here is omitted
-    img3[x*imgSize + 0] = value;
+    img3[x * imgSize + 0] = value;
 
     // Go through the rest of column x
-    for (int y = 1; y < imgSize; ++y) {
+    for (int y = 1; y < imgSize; ++y)
+    {
       // remove the previous pixel
-      //y = middle of current kernel, y-2 = one to the left of kernel
-      value -= img2.at((x*imgSize + y - 2)%img.size());
+      // y = middle of current kernel, y-2 = one to the left of kernel
+      value -= img2.at((x * imgSize + y - 2) % img.size());
       // add the new pixel
-      //y = right pixel of previous kernel, y+1 = right pixel of new kernel
-      value += img2.at((x*imgSize + y + 1)%img.size());
+      // y = right pixel of previous kernel, y+1 = right pixel of new kernel
+      value += img2.at((x * imgSize + y + 1) % img.size());
       // save result
-      img3[x*imgSize + y] = value;
+      img3[x * imgSize + y] = value;
     }
-
   }
   return img3;
 }
 
-std::vector<int> fastBoxBlur2x2(const std::vector<int> &img) {
-  const auto imgSize = (int) std::ceil(std::sqrt(img.size()));
+std::vector<int> fastBoxBlur2x2(const std::vector<int> &img)
+{
+  const auto imgSize = (int)std::ceil(std::sqrt(img.size()));
   std::vector<int> img2(img.begin(), img.end());
 
   // Horizontal Kernel: for each row y
-  for (int y = 0; y < imgSize; ++y) {
+  for (int y = 0; y < imgSize; ++y)
+  {
     // Get kernel for first pixel of row y, using padding
-    int value = img.at((-1*imgSize + y) % img.size()) + img.at(0*imgSize + y);
+    int value = img.at((-1 * imgSize + y) % img.size()) + img.at(0 * imgSize + y);
     // Division that would usually happen here is omitted
-    img2[0*imgSize + y] = value;
+    img2[0 * imgSize + y] = value;
 
     // Go through the rest of row y
-    for (int x = 1; x < imgSize; ++x) {
+    for (int x = 1; x < imgSize; ++x)
+    {
       // remove the previous pixel
-      value -= img.at(((x - 2)*imgSize + y) % img.size());
+      value -= img.at(((x - 2) * imgSize + y) % img.size());
       // add the new pixel
-      value += img.at((x*imgSize + y) % img.size());
+      value += img.at((x * imgSize + y) % img.size());
       // save result
-      img2[x*imgSize + y] = value;
+      img2[x * imgSize + y] = value;
     }
   }
 
@@ -159,20 +174,22 @@ std::vector<int> fastBoxBlur2x2(const std::vector<int> &img) {
   std::vector<int> img3(img2.begin(), img2.end());
 
   // Vertical Kernel: for each column x
-  for (int x = 0; x < imgSize; ++x) {
+  for (int x = 0; x < imgSize; ++x)
+  {
     // Get kernel for first pixel of column x with padding
-    int value = img2.at((x*imgSize - 1) % img.size()) + img2.at(x*imgSize + 0);
+    int value = img2.at((x * imgSize - 1) % img.size()) + img2.at(x * imgSize + 0);
     // Division that would usually happen here is omitted
-    img3[x*imgSize + 0] = value;
+    img3[x * imgSize + 0] = value;
 
     // Go through the rest of column x
-    for (int y = 1; y < imgSize; ++y) {
+    for (int y = 1; y < imgSize; ++y)
+    {
       // remove the previous pixel
-      value -= img2.at((x*imgSize + y - 2) % img.size());
+      value -= img2.at((x * imgSize + y - 2) % img.size());
       // add the new pixel
-      value += img2.at((x*imgSize + y) % img.size());
+      value += img2.at((x * imgSize + y) % img.size());
       // save result
-      img3[x*imgSize + y] = value;
+      img3[x * imgSize + y] = value;
     }
   }
   return img3;
@@ -183,52 +200,64 @@ std::vector<int> fastBoxBlur2x2(const std::vector<int> &img) {
 // use a 4x4 matrix for the tests
 #define MATRIX_SIZE 4
 
-class BoxBlurTest : public ::testing::Test {  /* NOLINT (predictable sequence expected) */
- protected:
+class BoxBlurTest : public ::testing::Test
+{ /* NOLINT (predictable sequence expected) */
+protected:
   std::default_random_engine randomEngine;
   std::uniform_int_distribution<int> myUnifIntDist;
 
-  void SetUp() override {
-    randomEngine = std::default_random_engine(RAND_SEED);  /* NOLINT (predictable sequence expected) */
+  void SetUp() override
+  {
+    randomEngine = std::default_random_engine(RAND_SEED); /* NOLINT (predictable sequence expected) */
     // the supported number range must be according to the FHE scheme parameters to not wrap around the modulo
     myUnifIntDist = std::uniform_int_distribution<int>(0, 1024);
   }
 
- public:
-  void resetRandomEngine() {
+public:
+  void resetRandomEngine()
+  {
     randomEngine.seed(RAND_SEED);
   }
 
-  void getInputMatrix(size_t size, std::vector<std::vector<int>> &destination) {
+  void getInputMatrix(size_t size, std::vector<std::vector<int>> &destination)
+  {
     // reset the RNG to make sure that every call to this method results in the same numbers
     resetRandomEngine();
     // make sure we clear desination vector before, otherwise resize could end up appending elements
     destination.clear();
     destination.resize(size, std::vector<int>(size));
-    for (size_t i = 0; i < size; ++i) {
-      for (size_t j = 0; j < size; ++j) {
+    for (size_t i = 0; i < size; ++i)
+    {
+      for (size_t j = 0; j < size; ++j)
+      {
         destination[i][j] = myUnifIntDist(randomEngine);
       }
     }
   }
 
-  void getInputMatrix(size_t size, std::vector<int> &destination) {
+  void getInputMatrix(size_t size, std::vector<int> &destination)
+  {
     // make sure we clear desination vector before, otherwise resize could end up appending elements
     destination.clear();
     std::vector<std::vector<int>> data;
     getInputMatrix(size, data);
     std::size_t total_size = 0;
-    for (const auto &sub : data) total_size += sub.size();
+    for (const auto &sub : data)
+      total_size += sub.size();
     destination.reserve(total_size);
-    for (const auto &sub : data) destination.insert(destination.end(), sub.begin(), sub.end());
+    for (const auto &sub : data)
+      destination.insert(destination.end(), sub.begin(), sub.end());
   }
 
-  void printMatrix(size_t size, std::vector<int> &matrix) {
+  void printMatrix(size_t size, std::vector<int> &matrix)
+  {
     /* We assume a row major layout of the matrix, where the first element is the bottom left pixel */
-    for (int64_t row = size - 1; row >= 0; --row) {
-      std::cout << matrix.at(0*size + row);
-      for (size_t col = 1; col < size; ++col) {
-        std::cout << "\t" << std::setw(4) << matrix.at(col*size + row);
+    for (int64_t row = size - 1; row >= 0; --row)
+    {
+      std::cout << matrix.at(0 * size + row);
+      for (size_t col = 1; col < size; ++col)
+      {
+        std::cout << "\t" << std::setw(4) << matrix.at(col * size + row);
       }
       std::cout << std::endl;
     }
@@ -236,7 +265,8 @@ class BoxBlurTest : public ::testing::Test {  /* NOLINT (predictable sequence ex
 };
 
 /// Test to ensure that naiveBoxBlur and fastBoxBlur actually compute the same thing!
-TEST_F(BoxBlurTest, NaiveBoxBlur_FastBoxBlur_Equivalence) {  /* NOLINT */
+TEST_F(BoxBlurTest, NaiveBoxBlur_FastBoxBlur_Equivalence)
+{ /* NOLINT */
 
   size_t size = 16;
   std::vector<int> img;
@@ -255,9 +285,9 @@ TEST_F(BoxBlurTest, NaiveBoxBlur_FastBoxBlur_Equivalence) {  /* NOLINT */
   EXPECT_EQ(fast, naive);
 }
 
-
 /// Test to ensure that 2x2 naiveBoxBlur and fastBoxBlur actually compute the same thing!
-TEST_F(BoxBlurTest, NaiveBoxBlur2x2_FastBoxBlur2x2_Equivalence) {  /* NOLINT */
+TEST_F(BoxBlurTest, NaiveBoxBlur2x2_FastBoxBlur2x2_Equivalence)
+{ /* NOLINT */
 
   size_t size = 16;
   std::vector<int> img;
@@ -278,7 +308,8 @@ TEST_F(BoxBlurTest, NaiveBoxBlur2x2_FastBoxBlur2x2_Equivalence) {  /* NOLINT */
 
 #ifdef HAVE_SEAL_BFV
 /// Test to ensure that 2x2 fastBoxBlur and non-batched encrypted actually compute the same thing!
-TEST_F(BoxBlurTest, NonBatchedBoxBlur2x2_FastBoxBlur2x2_Equivalence) {  /* NOLINT */
+TEST_F(BoxBlurTest, NonBatchedBoxBlur2x2_FastBoxBlur2x2_Equivalence)
+{ /* NOLINT */
 
   size_t size = 16;
   std::vector<int> img;
@@ -295,7 +326,8 @@ TEST_F(BoxBlurTest, NonBatchedBoxBlur2x2_FastBoxBlur2x2_Equivalence) {  /* NOLIN
 }
 
 /// Test to ensure that fastBoxBlur and encryptedBoxBlur compute the same thing
-TEST_F(BoxBlurTest, EncryptedBoxBlur_FastBoxBlur_Equivalence) { /* NOLINT */
+TEST_F(BoxBlurTest, EncryptedBoxBlur_FastBoxBlur_Equivalence)
+{ /* NOLINT */
 
   size_t poly_modulus_degree = 2 << 12;
   size_t size = std::sqrt(poly_modulus_degree / 2);
@@ -313,7 +345,8 @@ TEST_F(BoxBlurTest, EncryptedBoxBlur_FastBoxBlur_Equivalence) { /* NOLINT */
 }
 
 /// Test to ensure that naiveBoxBlur2x2 and encryptedBatchedBoxBlur_Porcupine compute the same thing
-TEST_F(BoxBlurTest, Porcupine_Naive_Equivalence) { /* NOLINT */
+TEST_F(BoxBlurTest, Porcupine_Naive_Equivalence)
+{ /* NOLINT */
 
   size_t poly_modulus_degree = 2 << 12;
   size_t size = std::sqrt(poly_modulus_degree / 2);

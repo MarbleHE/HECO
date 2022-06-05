@@ -1,20 +1,22 @@
-#include <abc/ast_parser/Parser.h>
+#include <heco/ast_parser/Parser.h>
 #include "ASTComparison.h"
-#include "abc/ast/Block.h"
-#include "abc/ast/Literal.h"
-#include "abc/ast/Variable.h"
-#include "abc/ast/VariableDeclaration.h"
+#include "heco/ast/Block.h"
+#include "heco/ast/Literal.h"
+#include "heco/ast/Variable.h"
+#include "heco/ast/VariableDeclaration.h"
 #include "gtest/gtest.h"
 
 /// Helper function to handle dynamic casting/etc
 /// \param s An Abstract statement that should be a VariableDeclaration
 /// \return The identifier of the variable being declared
-std::string getNameFromDeclaration(const AbstractStatement &s) {
+std::string getNameFromDeclaration(const AbstractStatement &s)
+{
   auto vd = dynamic_cast<const VariableDeclaration &>(s);
   return vd.getTarget().getIdentifier();
 }
 
-TEST(BlockTest, values_ValuesGivenInCtorAreRetrievable) {
+TEST(BlockTest, values_ValuesGivenInCtorAreRetrievable)
+{
   // This test simply confirms that statements supplied via Ctor are retrievable later
 
   // Single-argument Ctor
@@ -36,7 +38,8 @@ TEST(BlockTest, values_ValuesGivenInCtorAreRetrievable) {
   EXPECT_EQ(getNameFromDeclaration(blockFromVector.getStatements()[1]), "boo");
 }
 
-TEST(BlockTest, CopyCtorCopiesValue) {
+TEST(BlockTest, CopyCtorCopiesValue)
+{
   // When copying a Block, the new object should contain a (deep) copy of all the statements
 
   Block block(std::make_unique<VariableDeclaration>(
@@ -48,7 +51,8 @@ TEST(BlockTest, CopyCtorCopiesValue) {
   EXPECT_EQ(getNameFromDeclaration(copy_block.getStatements()[0]), "foo");
 }
 
-TEST(BlockTest, CopyAssignmentCopiesValue) {
+TEST(BlockTest, CopyAssignmentCopiesValue)
+{
   // When copying a Block, the new object should contain a (deep) copy of all the statements
 
   Block block(std::make_unique<VariableDeclaration>(
@@ -62,7 +66,8 @@ TEST(BlockTest, CopyAssignmentCopiesValue) {
   EXPECT_EQ(getNameFromDeclaration(copy_block.getStatements()[0]), "foo");
 }
 
-TEST(BlockTest, MoveCtorPreservesValue) {
+TEST(BlockTest, MoveCtorPreservesValue)
+{
   // When moving a Block, the new object should contain the same statements
 
   Block block(std::make_unique<VariableDeclaration>(
@@ -74,7 +79,8 @@ TEST(BlockTest, MoveCtorPreservesValue) {
   EXPECT_EQ(getNameFromDeclaration(new_block.getStatements()[0]), "foo");
 }
 
-TEST(BlockTest, MovedAssignmentPreservesValue) {
+TEST(BlockTest, MovedAssignmentPreservesValue)
+{
   // When moving a Block, the new object should contain the same statements
 
   Block block(std::make_unique<VariableDeclaration>(
@@ -88,7 +94,8 @@ TEST(BlockTest, MovedAssignmentPreservesValue) {
   EXPECT_EQ(getNameFromDeclaration(new_block.getStatements()[0]), "foo");
 }
 
-TEST(BlockTest, NullStatementRemoval) {
+TEST(BlockTest, NullStatementRemoval)
+{
   // Removing null statements should not affect the other children
 
   std::vector<std::unique_ptr<AbstractStatement>> statements;
@@ -107,7 +114,8 @@ TEST(BlockTest, NullStatementRemoval) {
   EXPECT_EQ(getNameFromDeclaration(block.getStatements()[1]), "boo");
 }
 
-TEST(BlockTest, CountChildrenReportsCorrectNumber) {
+TEST(BlockTest, CountChildrenReportsCorrectNumber)
+{
   // This tests checks that countChildren delivers the correct number
 
   Block block(std::make_unique<VariableDeclaration>(Datatype(Type::BOOL),
@@ -118,7 +126,8 @@ TEST(BlockTest, CountChildrenReportsCorrectNumber) {
   // Iterate through all the children using the iterators
   // (indirectly via range-based for loop for conciseness)
   size_t actual_count = 0;
-  for (auto &c: block) {
+  for (auto &c : block)
+  {
     c = c; // Use c to suppress warning
     ++actual_count;
   }
@@ -126,7 +135,8 @@ TEST(BlockTest, CountChildrenReportsCorrectNumber) {
   EXPECT_EQ(reported_count, actual_count);
 }
 
-TEST(BlockTest, node_iterate_children) {
+TEST(BlockTest, node_iterate_children)
+{
   // This test checks that we can iterate correctly through the children
   // Even if some of the elements are null (in which case they should not appear
 
@@ -150,7 +160,8 @@ TEST(BlockTest, node_iterate_children) {
   EXPECT_EQ(getNameFromDeclaration(dynamic_cast<VariableDeclaration &>(child2)), "boo");
 }
 
-TEST(BlockTest, appendStatement) {
+TEST(BlockTest, appendStatement)
+{
   // This test checks that we can append a Statement to the Block
 
   Block block(std::make_unique<VariableDeclaration>(Datatype(Type::BOOL),
@@ -166,7 +177,8 @@ TEST(BlockTest, appendStatement) {
   EXPECT_EQ(getNameFromDeclaration(block.getStatements()[1]), "boo");
 }
 
-TEST(BlockTest, prependStatement) {
+TEST(BlockTest, prependStatement)
+{
   // This test checks that we can prepend a Statement to the Block
 
   // This test checks that we can append a Statement to the Block
@@ -176,15 +188,16 @@ TEST(BlockTest, prependStatement) {
                                                     std::make_unique<LiteralBool>(true)));
 
   block.prependStatement(std::make_unique<VariableDeclaration>(Datatype(Type::BOOL),
-                                                              std::make_unique<Variable>("boo"),
-                                                              std::make_unique<LiteralBool>(true)));
+                                                               std::make_unique<Variable>("boo"),
+                                                               std::make_unique<LiteralBool>(true)));
 
   ASSERT_EQ(block.countChildren(), 2);
   EXPECT_EQ(getNameFromDeclaration(block.getStatements()[0]), "boo");
   EXPECT_EQ(getNameFromDeclaration(block.getStatements()[1]), "foo");
 }
 
-TEST(BlockTest, JsonOutputTest) { /* NOLINT */
+TEST(BlockTest, JsonOutputTest)
+{ /* NOLINT */
 
   std::vector<std::unique_ptr<AbstractStatement>> statements;
   statements.emplace_back(std::make_unique<VariableDeclaration>(
@@ -195,38 +208,24 @@ TEST(BlockTest, JsonOutputTest) { /* NOLINT */
   Block block(std::move(statements));
 
   nlohmann::json j = {{"type", "Block"},
-                      {"statements", {
-                          {
-                              {"type", "VariableDeclaration"},
-                              {"datatype", "bool",},
-                              {"target", {
-                                  {"type", "Variable"},
-                                  {"identifier", "foo"}}},
-                              {"value", {
-                                  {"type", "LiteralBool"},
-                                  {"value", true}}
-                              }
-                          },
-                          {
-                              {"type", "VariableDeclaration"},
-                              {"datatype", "bool",},
-                              {"target", {
-                                  {"type", "Variable"},
-                                  {"identifier", "boo"}}},
-                              {"value", {
-                                  {"type", "LiteralBool"},
-                                  {"value", false}}
-                              }
-                          }
-                      }
-                      }
-  };
+                      {"statements", {{{"type", "VariableDeclaration"}, {
+                                                                            "datatype",
+                                                                            "bool",
+                                                                        },
+                                       {"target", {{"type", "Variable"}, {"identifier", "foo"}}},
+                                       {"value", {{"type", "LiteralBool"}, {"value", true}}}},
+                                      {{"type", "VariableDeclaration"}, {
+                                                                            "datatype",
+                                                                            "bool",
+                                                                        },
+                                       {"target", {{"type", "Variable"}, {"identifier", "boo"}}},
+                                       {"value", {{"type", "LiteralBool"}, {"value", false}}}}}}};
 
   EXPECT_EQ(block.toJson(), j);
 }
 
-
-TEST(BlockTest, JsonInputTest) { /* NOLINT */
+TEST(BlockTest, JsonInputTest)
+{ /* NOLINT */
 
   std::vector<std::unique_ptr<AbstractStatement>> statements;
   statements.emplace_back(std::make_unique<VariableDeclaration>(

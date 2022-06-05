@@ -1,9 +1,10 @@
-#include <abc/ast_parser/Parser.h>
+#include <heco/ast_parser/Parser.h>
 #include "ASTComparison.h"
-#include "abc/ast/Literal.h"
+#include "heco/ast/Literal.h"
 #include "gtest/gtest.h"
 
-TEST(LiteralTest, typedefCheck) {
+TEST(LiteralTest, typedefCheck)
+{
   // There are several typedefs of the Literal<T> template for specific Ts
   // This is mostly for readability and legacy support of code written pre-templatization
 
@@ -25,7 +26,8 @@ TEST(LiteralTest, typedefCheck) {
   EXPECT_TRUE((std::is_same<LiteralString, Literal<std::string>>::value));
 }
 
-TEST(LiteralTest, values_ValueGivenInCtorIsRetrievable) {
+TEST(LiteralTest, values_ValueGivenInCtorIsRetrievable)
+{
   // Literals are little more than a wrapper around a value,
   // this test ensures that when we create a Literal with a value, we can later retrieve it
 
@@ -37,7 +39,8 @@ TEST(LiteralTest, values_ValueGivenInCtorIsRetrievable) {
   EXPECT_EQ(s.getValue(), "Hello World!");
 }
 
-TEST(LiteralTest, values_SetAndGet) {
+TEST(LiteralTest, values_SetAndGet)
+{
   // This test simply checks that values can be set and get correctly.
 
   // Since this is not specific to T, we simply use one built-in and one class type here
@@ -52,7 +55,8 @@ TEST(LiteralTest, values_SetAndGet) {
   EXPECT_EQ(s.getValue(), "Goodbye!");
 }
 
-TEST(LiteralTest, values_CopyCtorCopiesValue) {
+TEST(LiteralTest, values_CopyCtorCopiesValue)
+{
   // When copying a literal, the new object should contain a copy of the value
 
   // Since this is not specific to T, we simply use one built-in and one class type here
@@ -67,7 +71,8 @@ TEST(LiteralTest, values_CopyCtorCopiesValue) {
   EXPECT_EQ(s_copy.getValue(), "Hello World!");
 }
 
-TEST(LiteralTest, values_CopyAssignmentCopiesValue) {
+TEST(LiteralTest, values_CopyAssignmentCopiesValue)
+{
   // When copying a literal, the new object should contain a copy of the value
 
   // Since this is not specific to T, we simply use one built-in and one class type here
@@ -84,7 +89,8 @@ TEST(LiteralTest, values_CopyAssignmentCopiesValue) {
   EXPECT_EQ(s_copy.getValue(), "Hello World!");
 }
 
-TEST(LiteralTest, values_MoveCtorPreservesValue) {
+TEST(LiteralTest, values_MoveCtorPreservesValue)
+{
   // When moving a literal, the new object should contain the same value
 
   // Since this is not specific to T, we simply use one built-in and one class type here
@@ -99,7 +105,8 @@ TEST(LiteralTest, values_MoveCtorPreservesValue) {
   EXPECT_EQ(s_new.getValue(), "Hello World!");
 }
 
-TEST(LiteralTest, values_MoveAssignmentPreservesValue) {
+TEST(LiteralTest, values_MoveAssignmentPreservesValue)
+{
   // When moving a literal, the new object should contain the same value
 
   // Since this is not specific to T, we simply use one built-in and one class type here
@@ -116,7 +123,8 @@ TEST(LiteralTest, values_MoveAssignmentPreservesValue) {
   EXPECT_EQ(s_new.getValue(), "Hello World!");
 }
 
-TEST(LiteralTest, node_countChildrenReportsCorrectNumber) {
+TEST(LiteralTest, node_countChildrenReportsCorrectNumber)
+{
   // This tests checks that countChildren delivers the correct number
 
   Literal<int> i(42);
@@ -125,7 +133,8 @@ TEST(LiteralTest, node_countChildrenReportsCorrectNumber) {
   // Iterate through all the children using the iterators
   // (indirectly via range-based for loop for conciseness)
   size_t actual_count = 0;
-  for (auto &c: i) {
+  for (auto &c : i)
+  {
     c = c; // Use c to suppress warning
     ++actual_count;
   }
@@ -133,7 +142,8 @@ TEST(LiteralTest, node_countChildrenReportsCorrectNumber) {
   EXPECT_EQ(reported_count, actual_count);
 }
 
-TEST(LiteralTest, node_literalsAreLeafNodes) {
+TEST(LiteralTest, node_literalsAreLeafNodes)
+{
   // Literals are supposed to be leaf nodes and should not have any children
 
   Literal<int> i(42);
@@ -141,7 +151,8 @@ TEST(LiteralTest, node_literalsAreLeafNodes) {
   EXPECT_EQ(i.countChildren(), 0);
 }
 
-TEST(LiteralTest, JsonOutputTestLiteralInt) { /* NOLINT */
+TEST(LiteralTest, JsonOutputTestLiteralInt)
+{ /* NOLINT */
   int val = 2;
   auto *lint = new LiteralInt(val);
   nlohmann::json j = {{"type", "LiteralInt"},
@@ -149,7 +160,8 @@ TEST(LiteralTest, JsonOutputTestLiteralInt) { /* NOLINT */
   EXPECT_EQ(lint->toJson(), j);
 }
 
-TEST(LiteralTest, JsonInputTestLiteralInt) {
+TEST(LiteralTest, JsonInputTestLiteralInt)
+{
   auto expected = LiteralInt(2);
 
   std::string json = R""""({
@@ -162,7 +174,8 @@ TEST(LiteralTest, JsonInputTestLiteralInt) {
   ASSERT_TRUE(compareAST(*parsed, expected));
 }
 
-TEST(LiteralTest, JsonOutputTestLiteralFloat) { /* NOLINT */
+TEST(LiteralTest, JsonOutputTestLiteralFloat)
+{ /* NOLINT */
   float val = 33.214f;
   auto *lint = new LiteralFloat(val);
   nlohmann::json j = {{"type", "LiteralFloat"},
@@ -170,7 +183,8 @@ TEST(LiteralTest, JsonOutputTestLiteralFloat) { /* NOLINT */
   EXPECT_EQ(lint->toJson(), j);
 }
 
-TEST(LiteralTest, JsonInputTestLiteralFloat) {
+TEST(LiteralTest, JsonInputTestLiteralFloat)
+{
   auto expected = LiteralFloat(33.214f);
 
   std::string json = R""""({
@@ -183,7 +197,8 @@ TEST(LiteralTest, JsonInputTestLiteralFloat) {
   ASSERT_TRUE(compareAST(*parsed, expected));
 }
 
-TEST(LiteralTest, JsonOutputTestLiteralBool) { /* NOLINT */
+TEST(LiteralTest, JsonOutputTestLiteralBool)
+{ /* NOLINT */
   bool val = true;
   auto *lbool = new LiteralBool(val);
   nlohmann::json j = {{"type", "LiteralBool"},
@@ -191,7 +206,8 @@ TEST(LiteralTest, JsonOutputTestLiteralBool) { /* NOLINT */
   EXPECT_EQ(lbool->toJson(), j);
 }
 
-TEST(LiteralTest, JsonInputTestLiteralBool) {
+TEST(LiteralTest, JsonInputTestLiteralBool)
+{
   auto expected = LiteralBool(true);
 
   std::string json = R""""({
@@ -204,7 +220,8 @@ TEST(LiteralTest, JsonInputTestLiteralBool) {
   ASSERT_TRUE(compareAST(*parsed, expected));
 }
 
-TEST(LiteralTest, JsonOutputTestLiteralString) { /* NOLINT */
+TEST(LiteralTest, JsonOutputTestLiteralString)
+{ /* NOLINT */
   std::string val = "hello world!";
   auto *lString = new LiteralString(val);
   nlohmann::json j = {{"type", "LiteralString"},
@@ -212,7 +229,8 @@ TEST(LiteralTest, JsonOutputTestLiteralString) { /* NOLINT */
   EXPECT_EQ(lString->toJson(), j);
 }
 
-TEST(LiteralTest, JsonInputTestLiteralString) {
+TEST(LiteralTest, JsonInputTestLiteralString)
+{
   auto expected = LiteralString("hello world!");
 
   std::string json = R""""({

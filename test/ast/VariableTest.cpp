@@ -1,10 +1,10 @@
-#include "abc/ast_parser/Parser.h"
+#include "heco/ast_parser/Parser.h"
 #include "ASTComparison.h"
-#include "abc/ast/Variable.h"
+#include "heco/ast/Variable.h"
 #include "gtest/gtest.h"
 
-
-TEST(VariableTest, values_IdentifierGivenInCtorIsRetrievable) {
+TEST(VariableTest, values_IdentifierGivenInCtorIsRetrievable)
+{
   // Variables are little more than a wrapper around a identifier,
   // this test ensures that when we create a Variable with an identifier, we can later retrieve it
 
@@ -13,7 +13,8 @@ TEST(VariableTest, values_IdentifierGivenInCtorIsRetrievable) {
   EXPECT_EQ(foo.getIdentifier(), "foo");
 }
 
-TEST(VariableTest, values_CopyCtorCopiesIdentifier) {
+TEST(VariableTest, values_CopyCtorCopiesIdentifier)
+{
   // When copying a Variable, the new object should contain the same identifier
 
   Variable foo("foo");
@@ -22,7 +23,8 @@ TEST(VariableTest, values_CopyCtorCopiesIdentifier) {
   EXPECT_EQ(foo_copy.getIdentifier(), "foo");
 }
 
-TEST(VariableTest, values_CopyAssignmentCopiesIdentifier) {
+TEST(VariableTest, values_CopyAssignmentCopiesIdentifier)
+{
   // When copying a Variable, the new object should contain the same identifier
 
   Variable foo("foo");
@@ -31,7 +33,8 @@ TEST(VariableTest, values_CopyAssignmentCopiesIdentifier) {
   EXPECT_EQ(foo_copy.getIdentifier(), "foo");
 }
 
-TEST(VariableTest, values_MoveCtorPreservesIdentifier) {
+TEST(VariableTest, values_MoveCtorPreservesIdentifier)
+{
   // When moving a Variable, the new object should contain the same identifier
 
   Variable foo("foo");
@@ -40,7 +43,8 @@ TEST(VariableTest, values_MoveCtorPreservesIdentifier) {
   EXPECT_EQ(new_foo.getIdentifier(), "foo");
 }
 
-TEST(VariableTest, values_MoveAssignmentPreservesIdentifier) {
+TEST(VariableTest, values_MoveAssignmentPreservesIdentifier)
+{
   // When moving a Variable, the new object should contain the same identifier
 
   Variable foo("foo");
@@ -50,7 +54,8 @@ TEST(VariableTest, values_MoveAssignmentPreservesIdentifier) {
   EXPECT_EQ(new_foo.getIdentifier(), "foo");
 }
 
-TEST(VariableTest, node_countChildrenReportsCorrectNumber) {
+TEST(VariableTest, node_countChildrenReportsCorrectNumber)
+{
   // This tests checks that countChildren delivers the correct number
 
   Variable foo("foo");
@@ -59,31 +64,35 @@ TEST(VariableTest, node_countChildrenReportsCorrectNumber) {
   // Iterate through all the children using the iterators
   // (indirectly via range-based for loop for conciseness)
   size_t actual_count = 0;
-  for(auto &c: foo) {
+  for (auto &c : foo)
+  {
     c = c; // Use c to suppress warning
     ++actual_count;
   }
 
-  EXPECT_EQ(reported_count,actual_count);
+  EXPECT_EQ(reported_count, actual_count);
 }
 
-TEST(VariableTest, node_VariablessAreLeafNodes) {
+TEST(VariableTest, node_VariablessAreLeafNodes)
+{
   // Variables are supposed to be leaf nodes and should not have any children
 
   Variable foo("foo");
 
-  EXPECT_EQ(foo.countChildren(),0);
+  EXPECT_EQ(foo.countChildren(), 0);
 }
 
-TEST(VariableTest, JsonOutputTest) { /* NOLINT */
+TEST(VariableTest, JsonOutputTest)
+{ /* NOLINT */
   std::string varIdentifier = "myVar";
   auto var = new Variable(varIdentifier);
   nlohmann::json j = {{"type", "Variable"},
-            {"identifier", varIdentifier}};
+                      {"identifier", varIdentifier}};
   EXPECT_EQ(var->toJson(), j);
 }
 
-TEST(VariableTest, JsonInputTest) {
+TEST(VariableTest, JsonInputTest)
+{
   std::string varIdentifier = "myVar";
   auto var_expected = Variable(varIdentifier);
 

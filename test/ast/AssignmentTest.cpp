@@ -1,25 +1,26 @@
-#include "abc/ast/Literal.h"
-#include "abc/ast/Variable.h"
-#include "abc/ast/Assignment.h"
-#include "abc/ast_parser/Parser.h"
+#include "heco/ast/Literal.h"
+#include "heco/ast/Variable.h"
+#include "heco/ast/Assignment.h"
+#include "heco/ast_parser/Parser.h"
 #include "gtest/gtest.h"
 #include "ASTComparison.h"
 
-
-TEST(AssignmentTest, values_ValuesGivenInCtorAreRetrievable) {
+TEST(AssignmentTest, values_ValuesGivenInCtorAreRetrievable)
+{
   // Assignments are created with a target Variable and value AbstractExpression
   // This test simply confirms that they are retrievable later
 
   Assignment assignment(std::make_unique<Variable>("foo"), std::make_unique<LiteralBool>(true));
 
   ASSERT_TRUE(assignment.hasTarget());
-  EXPECT_EQ(dynamic_cast<Variable&>(assignment.getTarget()).getIdentifier(), "foo");
+  EXPECT_EQ(dynamic_cast<Variable &>(assignment.getTarget()).getIdentifier(), "foo");
   ASSERT_TRUE(assignment.hasValue());
-  EXPECT_EQ(dynamic_cast<LiteralBool&>(assignment.getValue()).getValue(),true);
+  EXPECT_EQ(dynamic_cast<LiteralBool &>(assignment.getValue()).getValue(), true);
   // If the value does not have type LiteralBool, the dynamic cast should fail
 }
 
-TEST(AssignmentTest, target_and_value_SetAndGet) {
+TEST(AssignmentTest, target_and_value_SetAndGet)
+{
   // This test simply checks that target and value can be set and get correctly.
 
   Assignment assignment(std::make_unique<Variable>("foo"), std::make_unique<LiteralBool>(true));
@@ -29,13 +30,14 @@ TEST(AssignmentTest, target_and_value_SetAndGet) {
   assignment.setValue(std::make_unique<LiteralBool>(false));
 
   ASSERT_TRUE(assignment.hasTarget());
-  EXPECT_EQ(dynamic_cast<Variable&>(assignment.getTarget()).getIdentifier(), "boo");
+  EXPECT_EQ(dynamic_cast<Variable &>(assignment.getTarget()).getIdentifier(), "boo");
   ASSERT_TRUE(assignment.hasValue());
-  EXPECT_EQ(dynamic_cast<LiteralBool&>(assignment.getValue()).getValue(),false);
+  EXPECT_EQ(dynamic_cast<LiteralBool &>(assignment.getValue()).getValue(), false);
   // If the value does not have type LiteralBool, the dynamic cast should fail
 }
 
-TEST(AssignmentTest, values_CopyCtorCopiesValue) {
+TEST(AssignmentTest, values_CopyCtorCopiesValue)
+{
   // When copying a Assignment, the new object should contain a (deep) copy of the target and value
 
   Assignment assignment(std::make_unique<Variable>("foo"), std::make_unique<LiteralBool>(true));
@@ -44,13 +46,14 @@ TEST(AssignmentTest, values_CopyCtorCopiesValue) {
   Assignment assignment_copy(assignment);
 
   ASSERT_TRUE(assignment_copy.hasTarget());
-  EXPECT_EQ(dynamic_cast<Variable&>(assignment_copy.getTarget()).getIdentifier(), "foo");
+  EXPECT_EQ(dynamic_cast<Variable &>(assignment_copy.getTarget()).getIdentifier(), "foo");
   ASSERT_TRUE(assignment_copy.hasValue());
-  EXPECT_EQ(dynamic_cast<LiteralBool&>(assignment_copy.getValue()).getValue(),true);
+  EXPECT_EQ(dynamic_cast<LiteralBool &>(assignment_copy.getValue()).getValue(), true);
   // If the value does not have type LiteralBool, the dynamic cast should fail
 }
 
-TEST(AssignmentTest, values_CopyAssignmentCopiesValue) {
+TEST(AssignmentTest, values_CopyAssignmentCopiesValue)
+{
   // When copying a Assignment, the new object should contain a copy of the value
 
   Assignment assignment(std::make_unique<Variable>("foo"), std::make_unique<LiteralBool>(true));
@@ -60,13 +63,14 @@ TEST(AssignmentTest, values_CopyAssignmentCopiesValue) {
   assignment_copy = assignment;
 
   ASSERT_TRUE(assignment_copy.hasTarget());
-  EXPECT_EQ(dynamic_cast<Variable&>(assignment_copy.getTarget()).getIdentifier(), "foo");
+  EXPECT_EQ(dynamic_cast<Variable &>(assignment_copy.getTarget()).getIdentifier(), "foo");
   ASSERT_TRUE(assignment_copy.hasValue());
-  EXPECT_EQ(dynamic_cast<LiteralBool&>(assignment_copy.getValue()).getValue(),true);
+  EXPECT_EQ(dynamic_cast<LiteralBool &>(assignment_copy.getValue()).getValue(), true);
   // If the value does not have type LiteralBool, the dynamic cast should fail
 }
 
-TEST(AssignmentTest, values_MoveCtorPreservesValue) {
+TEST(AssignmentTest, values_MoveCtorPreservesValue)
+{
   // When moving a Assignment, the new object should contain the same target and value
 
   Assignment assignment(std::make_unique<Variable>("foo"), std::make_unique<LiteralBool>(true));
@@ -75,13 +79,14 @@ TEST(AssignmentTest, values_MoveCtorPreservesValue) {
   Assignment new_assignment(std::move(assignment));
 
   ASSERT_TRUE(new_assignment.hasTarget());
-  EXPECT_EQ(dynamic_cast<Variable&>(new_assignment.getTarget()).getIdentifier(), "foo");
+  EXPECT_EQ(dynamic_cast<Variable &>(new_assignment.getTarget()).getIdentifier(), "foo");
   ASSERT_TRUE(new_assignment.hasValue());
-  EXPECT_EQ(dynamic_cast<LiteralBool&>(new_assignment.getValue()).getValue(),true);
+  EXPECT_EQ(dynamic_cast<LiteralBool &>(new_assignment.getValue()).getValue(), true);
   // If the value does not have type LiteralBool, the dynamic cast should fail
 }
 
-TEST(AssignmentTest, values_MoveAssignmentPreservesValue) {
+TEST(AssignmentTest, values_MoveAssignmentPreservesValue)
+{
   // When moving a Assignment, the new object should contain the same target and value
 
   Assignment assignment(std::make_unique<Variable>("foo"), std::make_unique<LiteralBool>(true));
@@ -91,13 +96,14 @@ TEST(AssignmentTest, values_MoveAssignmentPreservesValue) {
   new_assignment = std::move(assignment);
 
   ASSERT_TRUE(new_assignment.hasTarget());
-  EXPECT_EQ(dynamic_cast<Variable&>(new_assignment.getTarget()).getIdentifier(), "foo");
+  EXPECT_EQ(dynamic_cast<Variable &>(new_assignment.getTarget()).getIdentifier(), "foo");
   ASSERT_TRUE(new_assignment.hasValue());
-  EXPECT_EQ(dynamic_cast<LiteralBool&>(new_assignment.getValue()).getValue(),true);
+  EXPECT_EQ(dynamic_cast<LiteralBool &>(new_assignment.getValue()).getValue(), true);
   // If the value does not have type LiteralBool, the dynamic cast should fail
 }
 
-TEST(AssignmentTest, node_countChildrenReportsCorrectNumber) {
+TEST(AssignmentTest, node_countChildrenReportsCorrectNumber)
+{
   // This tests checks that countChildren delivers the correct number
 
   Assignment assignment(std::make_unique<Variable>("foo"), std::make_unique<LiteralBool>(true));
@@ -106,48 +112,46 @@ TEST(AssignmentTest, node_countChildrenReportsCorrectNumber) {
   // Iterate through all the children using the iterators
   // (indirectly via range-based for loop for conciseness)
   size_t actual_count = 0;
-  for(auto &c: assignment) {
+  for (auto &c : assignment)
+  {
     c = c; // Use c to suppress warning
     ++actual_count;
   }
 
-  EXPECT_EQ(reported_count,actual_count);
+  EXPECT_EQ(reported_count, actual_count);
 }
 
-TEST(AssignmentTest, node_iterate_children) {
+TEST(AssignmentTest, node_iterate_children)
+{
   // This test checks that we can iterate correctly through the children
   // Even if some of the elements are null (in which case they should not appear)
 
   Assignment assignment(std::make_unique<Variable>("foo"), std::make_unique<LiteralBool>(true));
   AbstractNode::iterator it = assignment.begin();
-  AbstractNode& variable = *it;
+  AbstractNode &variable = *it;
   ++it;
-  AbstractNode& value = *it;
+  AbstractNode &value = *it;
   ++it;
 
   // Iterator should now be at end. Dynamic casts will fail if wrong type.
   EXPECT_EQ(it, assignment.end());
-  EXPECT_EQ(dynamic_cast<Variable&>(variable).getIdentifier(),"foo");
-  EXPECT_EQ(dynamic_cast<LiteralBool&>(value).getValue(),true);
+  EXPECT_EQ(dynamic_cast<Variable &>(variable).getIdentifier(), "foo");
+  EXPECT_EQ(dynamic_cast<LiteralBool &>(value).getValue(), true);
 }
 
-TEST(AssignmentTest, JsonOutputTest) { /* NOLINT */
+TEST(AssignmentTest, JsonOutputTest)
+{ /* NOLINT */
   std::string identifier = "myCustomVar";
   int val = 2;
   auto assignment = Assignment(std::make_unique<Variable>(identifier), std::make_unique<LiteralInt>(val));
   nlohmann::json j = {{"type", "Assignment"},
-            {"target", {
-                {"type", "Variable"},
-                {"identifier", identifier}}},
-            {"value", {
-                {"type", "LiteralInt"},
-                {"value", val}
-            }
-            }};
+                      {"target", {{"type", "Variable"}, {"identifier", identifier}}},
+                      {"value", {{"type", "LiteralInt"}, {"value", val}}}};
   EXPECT_EQ(assignment.toJson(), j);
 }
 
-TEST(AssignmentTest, JsonInputTest) { /* NOLINT */
+TEST(AssignmentTest, JsonInputTest)
+{ /* NOLINT */
   std::string identifier = "myCustomVar";
   int val = 2;
   auto assignment_expected = Assignment(std::make_unique<Variable>(identifier), std::make_unique<LiteralInt>(val));

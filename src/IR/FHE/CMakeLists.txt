@@ -1,4 +1,4 @@
-add_mlir_dialect_library(MLIRFHE
+add_heco_dialect_library(HECOFHE
         FHEDialect.cpp
 
         ADDITIONAL_HEADER_DIRS

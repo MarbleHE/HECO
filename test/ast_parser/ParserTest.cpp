@@ -1,24 +1,24 @@
 #include <typeinfo>
-#include <include/abc/ast_parser/Errors.h>
+#include <include/heco/ast_parser/Errors.h>
 
-#include "abc/ast/Assignment.h"
-#include "abc/ast/BinaryExpression.h"
-#include "abc/ast/Block.h"
-#include "abc/ast/ExpressionList.h"
-#include "abc/ast/For.h"
-#include "abc/ast/Function.h"
-#include "abc/ast/FunctionParameter.h"
-#include "abc/ast/If.h"
-#include "abc/ast/Call.h"
-#include "abc/ast/IndexAccess.h"
-#include "abc/ast/Literal.h"
-#include "abc/ast/OperatorExpression.h"
-#include "abc/ast/Return.h"
-#include "abc/ast/TernaryOperator.h"
-#include "abc/ast/UnaryExpression.h"
-#include "abc/ast/Variable.h"
-#include "abc/ast/VariableDeclaration.h"
-#include "abc/ast_parser/Parser.h"
+#include "heco/ast/Assignment.h"
+#include "heco/ast/BinaryExpression.h"
+#include "heco/ast/Block.h"
+#include "heco/ast/ExpressionList.h"
+#include "heco/ast/For.h"
+#include "heco/ast/Function.h"
+#include "heco/ast/FunctionParameter.h"
+#include "heco/ast/If.h"
+#include "heco/ast/Call.h"
+#include "heco/ast/IndexAccess.h"
+#include "heco/ast/Literal.h"
+#include "heco/ast/OperatorExpression.h"
+#include "heco/ast/Return.h"
+#include "heco/ast/TernaryOperator.h"
+#include "heco/ast/UnaryExpression.h"
+#include "heco/ast/Variable.h"
+#include "heco/ast/VariableDeclaration.h"
+#include "heco/ast_parser/Parser.h"
 #include "gtest/gtest.h"
 #include "test/ast/ASTComparison.h"
 
@@ -29,13 +29,15 @@ Datatype FLOAT = Datatype(Type::FLOAT);
 Datatype DOUBLE = Datatype(Type::DOUBLE);
 Datatype STRING = Datatype(Type::STRING);
 
-TEST(ParserTest, emptyString) { /* NOLINT */
+TEST(ParserTest, emptyString)
+{ /* NOLINT */
   auto b = Parser::parse("");
   // Should be an empty block
   EXPECT_EQ(b->countChildren(), 0);
 }
 
-TEST(ParserTest, BinaryExp) { /* NOLINT */
+TEST(ParserTest, BinaryExp)
+{ /* NOLINT */
   auto ast = Parser::parse("a = 5 + 6;");
 
   auto bp = new BinaryExpression(std::make_unique<LiteralInt>(5),
@@ -45,7 +47,8 @@ TEST(ParserTest, BinaryExp) { /* NOLINT */
   EXPECT_TRUE(compareAST(*ast->begin(), assignment));
 }
 
-TEST(ParserTest, TernaryExp) { /* NOLINT */
+TEST(ParserTest, TernaryExp)
+{ /* NOLINT */
   GTEST_SKIP();
   // Skipping until TernaryExp is completely implemented
   //  auto ast = Parser::parse("a = b > 5 ? 111 : 6;");
@@ -61,7 +64,8 @@ TEST(ParserTest, TernaryExp) { /* NOLINT */
   //  EXPECT_TRUE(compareAST(*ast->begin(), assignment));
 }
 
-TEST(ParserTest, simpleFunction) { /* NOLINT */
+TEST(ParserTest, simpleFunction)
+{ /* NOLINT */
   std::string minimal = "public int main() {}";
   std::string params = "public int main(bool b, float f) {}";
   std::string body = "public int main() { return 0; }";
@@ -88,7 +92,8 @@ TEST(ParserTest, simpleFunction) { /* NOLINT */
   EXPECT_TRUE(compareAST(*parsed_body->begin(), expected_body));
 }
 
-TEST(ParserTest, IfStatementThenOnly) { /* NOLINT */
+TEST(ParserTest, IfStatementThenOnly)
+{ /* NOLINT */
   const char *programCode = R""""(
     public int main(int a) {
       if (a > 5) {
@@ -100,14 +105,12 @@ TEST(ParserTest, IfStatementThenOnly) { /* NOLINT */
   auto code = std::string(programCode);
   auto parsed = Parser::parse(code);
 
-  auto ifStatement = std::make_unique<If>
-      (std::move(std::make_unique<BinaryExpression>(
-          std::move(std::make_unique<Variable>("a")),
-          Operator(GREATER),
-          std::move(std::make_unique<LiteralInt>(5)))),
-       std::move(std::make_unique<Block>(
-           std::move(std::make_unique<Return>
-                         (std::move(std::make_unique<LiteralInt>(1)))))));
+  auto ifStatement = std::make_unique<If>(std::move(std::make_unique<BinaryExpression>(
+                                              std::move(std::make_unique<Variable>("a")),
+                                              Operator(GREATER),
+                                              std::move(std::make_unique<LiteralInt>(5)))),
+                                          std::move(std::make_unique<Block>(
+                                              std::move(std::make_unique<Return>(std::move(std::make_unique<LiteralInt>(1)))))));
   auto returnStatement = std::make_unique<Return>(std::move(std::make_unique<LiteralInt>(0)));
 
   std::vector<std::unique_ptr<AbstractStatement>> blockStmts;
@@ -123,7 +126,8 @@ TEST(ParserTest, IfStatementThenOnly) { /* NOLINT */
   EXPECT_TRUE(compareAST(*parsed->begin(), *expected));
 }
 
-TEST(ParserTest, IfStatementThenOnly_WithoutBlock) { /* NOLINT */
+TEST(ParserTest, IfStatementThenOnly_WithoutBlock)
+{ /* NOLINT */
   const char *programCode = R""""(
     public int main(int a) {
       if (a > 5) return 1;
@@ -133,14 +137,12 @@ TEST(ParserTest, IfStatementThenOnly_WithoutBlock) { /* NOLINT */
   auto code = std::string(programCode);
   auto parsed = Parser::parse(code);
 
-  auto ifStatement = std::make_unique<If>
-      (std::move(std::make_unique<BinaryExpression>(
-          std::move(std::make_unique<Variable>("a")),
-          Operator(GREATER),
-          std::move(std::make_unique<LiteralInt>(5)))),
-       std::move(std::make_unique<Block>(
-           std::move(std::make_unique<Return>
-                         (std::move(std::make_unique<LiteralInt>(1)))))));
+  auto ifStatement = std::make_unique<If>(std::move(std::make_unique<BinaryExpression>(
+                                              std::move(std::make_unique<Variable>("a")),
+                                              Operator(GREATER),
+                                              std::move(std::make_unique<LiteralInt>(5)))),
+                                          std::move(std::make_unique<Block>(
+                                              std::move(std::make_unique<Return>(std::move(std::make_unique<LiteralInt>(1)))))));
   auto returnStatement = std::make_unique<Return>(std::move(std::make_unique<LiteralInt>(0)));
 
   std::vector<std::unique_ptr<AbstractStatement>> blockStmts;
@@ -156,7 +158,8 @@ TEST(ParserTest, IfStatementThenOnly_WithoutBlock) { /* NOLINT */
   EXPECT_TRUE(compareAST(*parsed->begin(), *expected));
 }
 
-TEST(ParserTest, IfElseStatement) { /* NOLINT */
+TEST(ParserTest, IfElseStatement)
+{ /* NOLINT */
   const char *programCode = R""""(
     public int main(int a) {
       if (a > 5) {
@@ -169,17 +172,14 @@ TEST(ParserTest, IfElseStatement) { /* NOLINT */
   auto code = std::string(programCode);
   auto parsed = Parser::parse(code);
 
-  auto ifStatement = std::make_unique<If>
-      (std::move(std::make_unique<BinaryExpression>(
-          std::move(std::make_unique<Variable>("a")),
-          Operator(GREATER),
-          std::move(std::make_unique<LiteralInt>(5)))),
-       std::move(std::make_unique<Block>(
-           std::move(std::make_unique<Return>
-                         (std::move(std::make_unique<LiteralInt>(111)))))),
-       std::move(std::make_unique<Block>(
-           std::move(std::make_unique<Return>
-                         (std::move(std::make_unique<LiteralInt>(0)))))));
+  auto ifStatement = std::make_unique<If>(std::move(std::make_unique<BinaryExpression>(
+                                              std::move(std::make_unique<Variable>("a")),
+                                              Operator(GREATER),
+                                              std::move(std::make_unique<LiteralInt>(5)))),
+                                          std::move(std::make_unique<Block>(
+                                              std::move(std::make_unique<Return>(std::move(std::make_unique<LiteralInt>(111)))))),
+                                          std::move(std::make_unique<Block>(
+                                              std::move(std::make_unique<Return>(std::move(std::make_unique<LiteralInt>(0)))))));
 
   std::vector<std::unique_ptr<AbstractStatement>> blockStmts;
   blockStmts.emplace_back(std::move(ifStatement));
@@ -193,7 +193,8 @@ TEST(ParserTest, IfElseStatement) { /* NOLINT */
   EXPECT_TRUE(compareAST(*parsed->begin(), *expected));
 }
 
-TEST(ParserTest, IfElseIfStatements) { /* NOLINT */
+TEST(ParserTest, IfElseIfStatements)
+{ /* NOLINT */
   // The generated AST is supposed to look as follow:
   // public int main(int a) {
   //   if (a < 0) {
@@ -225,34 +226,28 @@ TEST(ParserTest, IfElseIfStatements) { /* NOLINT */
   auto code = std::string(programCode);
   auto parsed = Parser::parse(code);
 
-  auto ifStatement4256 = std::make_unique<If>
-      (std::move(std::make_unique<BinaryExpression>(
-          std::move(std::make_unique<Variable>("a")),
-          Operator(GREATER),
-          std::move(std::make_unique<LiteralInt>(4256)))),
-       std::move(std::make_unique<Block>(
-           std::move(std::make_unique<Return>
-                         (std::move(std::make_unique<LiteralInt>(3434)))))));
+  auto ifStatement4256 = std::make_unique<If>(std::move(std::make_unique<BinaryExpression>(
+                                                  std::move(std::make_unique<Variable>("a")),
+                                                  Operator(GREATER),
+                                                  std::move(std::make_unique<LiteralInt>(4256)))),
+                                              std::move(std::make_unique<Block>(
+                                                  std::move(std::make_unique<Return>(std::move(std::make_unique<LiteralInt>(3434)))))));
 
-  auto ifStatementEqual0 = std::make_unique<If>
-      (std::move(std::make_unique<BinaryExpression>(
-          std::move(std::make_unique<Variable>("a")),
-          Operator(EQUAL),
-          std::move(std::make_unique<LiteralInt>(0)))),
-       std::move(std::make_unique<Block>(
-           std::move(std::make_unique<Return>
-                         (std::move(std::make_unique<LiteralInt>(1000)))))),
-       std::move(std::make_unique<Block>(std::move(ifStatement4256))));
+  auto ifStatementEqual0 = std::make_unique<If>(std::move(std::make_unique<BinaryExpression>(
+                                                    std::move(std::make_unique<Variable>("a")),
+                                                    Operator(EQUAL),
+                                                    std::move(std::make_unique<LiteralInt>(0)))),
+                                                std::move(std::make_unique<Block>(
+                                                    std::move(std::make_unique<Return>(std::move(std::make_unique<LiteralInt>(1000)))))),
+                                                std::move(std::make_unique<Block>(std::move(ifStatement4256))));
 
-  auto ifStatementLess0 = std::make_unique<If>
-      (std::move(std::make_unique<BinaryExpression>(
-          std::move(std::make_unique<Variable>("a")),
-          Operator(LESS),
-          std::move(std::make_unique<LiteralInt>(0)))),
-       std::move(std::make_unique<Block>(
-           std::move(std::make_unique<Return>
-                         (std::move(std::make_unique<LiteralInt>(-1)))))),
-       std::move(std::make_unique<Block>(std::move(ifStatementEqual0))));
+  auto ifStatementLess0 = std::make_unique<If>(std::move(std::make_unique<BinaryExpression>(
+                                                   std::move(std::make_unique<Variable>("a")),
+                                                   Operator(LESS),
+                                                   std::move(std::make_unique<LiteralInt>(0)))),
+                                               std::move(std::make_unique<Block>(
+                                                   std::move(std::make_unique<Return>(std::move(std::make_unique<LiteralInt>(-1)))))),
+                                               std::move(std::make_unique<Block>(std::move(ifStatementEqual0))));
 
   auto returnStatement = std::make_unique<Return>(std::move(std::make_unique<LiteralInt>(0)));
 
@@ -269,7 +264,8 @@ TEST(ParserTest, IfElseIfStatements) { /* NOLINT */
   EXPECT_TRUE(compareAST(*parsed->begin(), *expected));
 }
 
-TEST(ParserTest, ForStatement) { /* NOLINT */
+TEST(ParserTest, ForStatement)
+{ /* NOLINT */
   const char *programCode = R""""(
     public secret int computeSum(int bound) {
       int sum = 0;
@@ -286,7 +282,8 @@ TEST(ParserTest, ForStatement) { /* NOLINT */
 
   // make sure that nodes are not added twice to the createdNodesList
   std::set<std::string> nodeIds;
-  for (auto &node : createdNodesList) {
+  for (auto &node : createdNodesList)
+  {
     EXPECT_EQ(nodeIds.count(node.get().getUniqueNodeId()), 0);
     nodeIds.insert(node.get().getUniqueNodeId());
   }
@@ -308,7 +305,7 @@ TEST(ParserTest, ForStatement) { /* NOLINT */
       // i = i + 1
       std::make_unique<Block>(std::make_unique<Assignment>(
           std::make_unique<Variable>("i"), std::make_unique<BinaryExpression>(
-              std::make_unique<Variable>("i"), Operator(ADDITION), std::make_unique<LiteralInt>(1)))),
+                                               std::make_unique<Variable>("i"), Operator(ADDITION), std::make_unique<LiteralInt>(1)))),
       // { sum = sum + i; }
       std::make_unique<Block>(std::make_unique<Assignment>(
           std::make_unique<Variable>("sum"),
@@ -335,7 +332,8 @@ TEST(ParserTest, ForStatement) { /* NOLINT */
   EXPECT_TRUE(compareAST(*parsed->begin(), *expected));
 }
 
-TEST(ParserTest, IgnoreComments) { /* NOLINT */
+TEST(ParserTest, IgnoreComments)
+{ /* NOLINT */
   const char *programCode = R""""(
       // declare and initialize a variable
       int i = 0;  /* variable's value: 0 */
@@ -351,7 +349,8 @@ TEST(ParserTest, IgnoreComments) { /* NOLINT */
   EXPECT_TRUE(compareAST(*parsed->begin(), *expected));
 }
 
-TEST(ParserTest, MatrixDeclaration_simple) { /* NOLINT */
+TEST(ParserTest, MatrixDeclaration_simple)
+{ /* NOLINT */
   const char *programCode = R""""(
     public void main() {
       int scalar = 2;
@@ -391,7 +390,8 @@ TEST(ParserTest, MatrixDeclaration_simple) { /* NOLINT */
   EXPECT_TRUE(compareAST(*parsed->begin(), *expected));
 }
 
-TEST(ParserTest, MatrixDeclaration_multiDimensional) { /* NOLINT */
+TEST(ParserTest, MatrixDeclaration_multiDimensional)
+{ /* NOLINT */
   const char *programCode = R""""(
     public void main() {
       int vec = { {3, 4}, {9, 2}, {1} };
@@ -437,7 +437,8 @@ TEST(ParserTest, MatrixDeclaration_multiDimensional) { /* NOLINT */
   EXPECT_TRUE(compareAST(*parsed->begin(), *expected));
 }
 
-TEST(ParserTest, MatrixAssignment) { /* NOLINT */
+TEST(ParserTest, MatrixAssignment)
+{ /* NOLINT */
   const char *programCode = R""""(
     public void main() {
       int vec = {3, 4, 9, 2, 1};
@@ -476,7 +477,8 @@ TEST(ParserTest, MatrixAssignment) { /* NOLINT */
   EXPECT_TRUE(compareAST(*parsed->begin(), *expected));
 }
 
-TEST(ParserTest, MatrixAssignment_invalid) { /* NOLINT */
+TEST(ParserTest, MatrixAssignment_invalid)
+{ /* NOLINT */
   const char *programCode = R""""(
       int sum[5] = {3, 4, 9, 2, 1};
       return sum;
@@ -485,7 +487,8 @@ TEST(ParserTest, MatrixAssignment_invalid) { /* NOLINT */
   ASSERT_THROW(Parser::parse(code), stork::Error::exception);
 }
 
-TEST(ParserTest, MatrixDeclaration_brackets) { /* NOLINT */
+TEST(ParserTest, MatrixDeclaration_brackets)
+{ /* NOLINT */
   const char *programCode = R""""(
     public void main() {
       int scalar[] = 2;
@@ -512,7 +515,8 @@ TEST(ParserTest, MatrixDeclaration_brackets) { /* NOLINT */
   EXPECT_TRUE(compareAST(*parsed->begin(), *expected));
 }
 
-TEST(ParserTest, MatrixDeclaration_fixArraySizeNotSupported) { /* NOLINT */
+TEST(ParserTest, MatrixDeclaration_fixArraySizeNotSupported)
+{ /* NOLINT */
   const char *programCode = R""""(
     public void main() {
       int scalar[0] = 2;
@@ -523,7 +527,8 @@ TEST(ParserTest, MatrixDeclaration_fixArraySizeNotSupported) { /* NOLINT */
   EXPECT_THROW(Parser::parse(code), stork::Error::exception);
 }
 
-TEST(ParserTest, fhe_expression) { /* NOLINT */
+TEST(ParserTest, fhe_expression)
+{ /* NOLINT */
   const char *programCode = R""""(
     __input2__ = __input2__ +++ __input3__;
     )"""";
@@ -539,7 +544,8 @@ TEST(ParserTest, fhe_expression) { /* NOLINT */
   EXPECT_TRUE(compareAST(*parsed->begin(), assignment));
 }
 
-TEST(ParserTest, parenthesisExpression) { /* NOLINT */
+TEST(ParserTest, parenthesisExpression)
+{ /* NOLINT */
   const char *programCode = R""""(
       public int main(int b) {
         int a = (5+7)*(b<10);
@@ -559,8 +565,7 @@ TEST(ParserTest, parenthesisExpression) { /* NOLINT */
       Operator(MULTIPLICATION),
       std::make_unique<BinaryExpression>(std::make_unique<Variable>("b"),
                                          Operator(LESS),
-                                         std::make_unique<LiteralInt>(10))
-  );
+                                         std::make_unique<LiteralInt>(10)));
 
   blockStatements.push_back(
       std::make_unique<VariableDeclaration>(Datatype(Type::INT),
@@ -579,7 +584,8 @@ TEST(ParserTest, parenthesisExpression) { /* NOLINT */
   EXPECT_TRUE(compareAST(*parsed->begin(), *expected));
 }
 
-TEST(ParserTest, secretKeyword) { /* NOLINT */
+TEST(ParserTest, secretKeyword)
+{ /* NOLINT */
   const char *programCode = R""""(
     public secret int main(secret int a) {
       secret int b = 11;
@@ -593,8 +599,7 @@ TEST(ParserTest, secretKeyword) { /* NOLINT */
                                                        std::make_unique<Variable>("b"),
                                                        std::make_unique<LiteralInt>(11));
   auto returnStatement = std::make_unique<Return>(std::make_unique<BinaryExpression>(
-      std::make_unique<Variable>("a"), Operator(FHE_ADDITION), std::make_unique<Variable>("b")
-  ));
+      std::make_unique<Variable>("a"), Operator(FHE_ADDITION), std::make_unique<Variable>("b")));
   std::vector<std::unique_ptr<AbstractStatement>> blockStmts;
   blockStmts.emplace_back(std::move(varDecl));
   blockStmts.emplace_back(std::move(returnStatement));
@@ -608,7 +613,8 @@ TEST(ParserTest, secretKeyword) { /* NOLINT */
   EXPECT_TRUE(compareAST(*parsed->begin(), *expected));
 }
 
-TEST(ParserTest, callRotate) { /* NOLINT */
+TEST(ParserTest, callRotate)
+{ /* NOLINT */
   const char *programCode = R""""(
     public secret int main() {
       secret int b = {1, 23, 42, 1, 0};
