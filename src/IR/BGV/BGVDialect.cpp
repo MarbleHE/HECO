@@ -38,14 +38,31 @@ using namespace bgv;
     return ::mlir::success();
 }
 
+::mlir::LogicalResult bgv::MultiplyManyOp::inferReturnTypes(
+    ::mlir::MLIRContext *context, ::llvm::Optional<::mlir::Location> location, ::mlir::ValueRange operands,
+    ::mlir::DictionaryAttr attributes, ::mlir::RegionRange regions,
+    ::llvm::SmallVectorImpl<::mlir::Type> &inferredReturnTypes)
+{
+    auto op = MultiplyManyOpAdaptor(operands, attributes, regions);
+    CiphertextType type_x = op.x()[0].getType().dyn_cast<CiphertextType>();
+    auto new_size = type_x.getSize();
+    for (auto xx : op.x())
+    {
+        CiphertextType type_xx = xx.getType().dyn_cast<CiphertextType>();
+        assert(type_x && type_xx && "Inputs to bgv.add must be of type bgv.ctxt."); // Should never trigger
+        assert(type_x.getElementType() == type_xx.getElementType() && "Inputs to bgv.add_many must have same elementType.");
+        new_size = std::max(new_size, type_xx.getSize());
+    }
+    new_size = new_size + 1;
+    inferredReturnTypes.push_back(CiphertextType::get(context, new_size, type_x.getElementType()));
+    return ::mlir::success();
+}
+
 ::mlir::LogicalResult bgv::SubOp::inferReturnTypes(
     ::mlir::MLIRContext *context, ::llvm::Optional<::mlir::Location> location, ::mlir::ValueRange operands,
     ::mlir::DictionaryAttr attributes, ::mlir::RegionRange regions,
     ::llvm::SmallVectorImpl<::mlir::Type> &inferredReturnTypes)
 {
-    // Operand adaptors (https://mlir.llvm.org/docs/OpDefinitions/#operand-adaptors) provide a convenient way to access
-    // operands when given as a "generic" triple of ValueRange, DictionaryAttr, RegionRange  instead of nicely
-    // "packaged" inside the operation class.
     auto op = SubOpAdaptor(operands, attributes, regions);
     CiphertextType type_x = op.x().getType().dyn_cast<CiphertextType>();
     CiphertextType type_y = op.y().getType().dyn_cast<CiphertextType>();
@@ -61,9 +78,6 @@ using namespace bgv;
     ::mlir::DictionaryAttr attributes, ::mlir::RegionRange regions,
     ::llvm::SmallVectorImpl<::mlir::Type> &inferredReturnTypes)
 {
-    // Operand adaptors (https://mlir.llvm.org/docs/OpDefinitions/#operand-adaptors) provide a convenient way to access
-    // operands when given as a "generic" triple of ValueRange, DictionaryAttr, RegionRange  instead of nicely
-    // "packaged" inside the operation class.
     auto op = AddOpAdaptor(operands, attributes, regions);
     CiphertextType type_x = op.x().getType().dyn_cast<CiphertextType>();
     CiphertextType type_y = op.y().getType().dyn_cast<CiphertextType>();
@@ -74,14 +88,44 @@ using namespace bgv;
     return ::mlir::success();
 }
 
+::mlir::LogicalResult bgv::AddManyOp::inferReturnTypes(
+    ::mlir::MLIRContext *context, ::llvm::Optional<::mlir::Location> location, ::mlir::ValueRange operands,
+    ::mlir::DictionaryAttr attributes, ::mlir::RegionRange regions,
+    ::llvm::SmallVectorImpl<::mlir::Type> &inferredReturnTypes)
+{
+    auto op = AddManyOpAdaptor(operands, attributes, regions);
+    CiphertextType type_x = op.x()[0].getType().dyn_cast<CiphertextType>();
+    auto new_size = type_x.getSize();
+    for (auto xx : op.x())
+    {
+        CiphertextType type_xx = xx.getType().dyn_cast<CiphertextType>();
+        assert(type_x && type_xx && "Inputs to bgv.add must be of type bgv.ctxt."); // Should never trigger
+        assert(type_x.getElementType() == type_xx.getElementType() && "Inputs to bgv.add_many must have same elementType.");
+        new_size = std::max(new_size, type_xx.getSize());
+    }
+    inferredReturnTypes.push_back(CiphertextType::get(context, new_size, type_x.getElementType()));
+    return ::mlir::success();
+}
+
+::mlir::LogicalResult bgv::MultiplyPlainOp::inferReturnTypes(
+    ::mlir::MLIRContext *context, ::llvm::Optional<::mlir::Location> location, ::mlir::ValueRange operands,
+    ::mlir::DictionaryAttr attributes, ::mlir::RegionRange regions,
+    ::llvm::SmallVectorImpl<::mlir::Type> &inferredReturnTypes)
+{
+    auto op = MultiplyPlainOpAdaptor(operands, attributes, regions);
+    CiphertextType type_x = op.x().getType().dyn_cast<CiphertextType>();
+    PlaintextType type_y = op.y().getType().dyn_cast<PlaintextType>();
+    assert(type_x && type_y && "Inputs to bgv.multiply_plain must be of type bgv.ctxt & bgv.ptxt."); // Should never trigger
+    assert(type_x.getElementType() == type_y.getElementType() && "Inputs to bgv.multiply_plain must have same elementType.");
+    inferredReturnTypes.push_back(CiphertextType::get(context, type_x.getSize(), type_x.getElementType()));
+    return ::mlir::success();
+}
+
 ::mlir::LogicalResult bgv::AddPlainOp::inferReturnTypes(
     ::mlir::MLIRContext *context, ::llvm::Optional<::mlir::Location> location, ::mlir::ValueRange operands,
     ::mlir::DictionaryAttr attributes, ::mlir::RegionRange regions,
     ::llvm::SmallVectorImpl<::mlir::Type> &inferredReturnTypes)
 {
-    // Operand adaptors (https://mlir.llvm.org/docs/OpDefinitions/#operand-adaptors) provide a convenient way to access
-    // operands when given as a "generic" triple of ValueRange, DictionaryAttr, RegionRange  instead of nicely
-    // "packaged" inside the operation class.
     auto op = AddPlainOpAdaptor(operands, attributes, regions);
     CiphertextType type_x = op.x().getType().dyn_cast<CiphertextType>();
     PlaintextType type_y = op.y().getType().dyn_cast<PlaintextType>();
@@ -96,15 +140,25 @@ using namespace bgv;
     ::mlir::DictionaryAttr attributes, ::mlir::RegionRange regions,
     ::llvm::SmallVectorImpl<::mlir::Type> &inferredReturnTypes)
 {
-    // Operand adaptors (https://mlir.llvm.org/docs/OpDefinitions/#operand-adaptors) provide a convenient way to access
-    // operands when given as a "generic" triple of ValueRange, DictionaryAttr, RegionRange  instead of nicely
-    // "packaged" inside the operation class.
     auto op = SubPlainOpAdaptor(operands, attributes, regions);
     CiphertextType type_x = op.x().getType().dyn_cast<CiphertextType>();
     PlaintextType type_y = op.y().getType().dyn_cast<PlaintextType>();
     assert(type_x && type_y && "Inputs to bgv.multiply_plain must be of type bgv.ctxt & bgv.ptxt."); // Should never trigger
     assert(type_x.getElementType() == type_y.getElementType() && "Inputs to bgv.sub_plain must have same elementType.");
     inferredReturnTypes.push_back(CiphertextType::get(context, type_x.getSize(), type_x.getElementType()));
+    return ::mlir::success();
+}
+
+::mlir::LogicalResult bgv::ExponentiateOp::inferReturnTypes(
+    ::mlir::MLIRContext *context, ::llvm::Optional<::mlir::Location> location, ::mlir::ValueRange operands,
+    ::mlir::DictionaryAttr attributes, ::mlir::RegionRange regions,
+    ::llvm::SmallVectorImpl<::mlir::Type> &inferredReturnTypes)
+{
+    auto op = ExponentiateOpAdaptor(operands, attributes, regions);
+    CiphertextType type_x = op.x().getType().dyn_cast<CiphertextType>();
+    assert(type_x && "First input to bgv.exponentiate must be of type bgv.ctxt."); // Should never trigger
+    auto new_size = type_x.getSize() + 1;
+    inferredReturnTypes.push_back(CiphertextType::get(context, new_size, type_x.getElementType()));
     return ::mlir::success();
 }
 
@@ -118,6 +172,55 @@ using namespace bgv;
     assert(type_x && "Input to bgv.relinearize must be of type bgv.ctxt."); // Should never trigger
     assert(type_x.getSize() == 3 && "Size of input to bgv.relinearize must be three!");
     inferredReturnTypes.push_back(CiphertextType::get(context, 2, type_x.getElementType()));
+    return ::mlir::success();
+}
+
+::mlir::LogicalResult bgv::RotateOp::inferReturnTypes(
+    ::mlir::MLIRContext *context, ::llvm::Optional<::mlir::Location> location, ::mlir::ValueRange operands,
+    ::mlir::DictionaryAttr attributes, ::mlir::RegionRange regions,
+    ::llvm::SmallVectorImpl<::mlir::Type> &inferredReturnTypes)
+{
+    auto op = RotateOpAdaptor(operands, attributes, regions);
+    CiphertextType type_x = op.x().getType().dyn_cast<CiphertextType>();
+    assert(type_x && "Input to bgv.rotate must be of type bgv.ctxt."); // Should never trigger
+    inferredReturnTypes.push_back(type_x);
+    return ::mlir::success();
+}
+
+::mlir::LogicalResult bgv::ModswitchOp::inferReturnTypes(
+    ::mlir::MLIRContext *context, ::llvm::Optional<::mlir::Location> location, ::mlir::ValueRange operands,
+    ::mlir::DictionaryAttr attributes, ::mlir::RegionRange regions,
+    ::llvm::SmallVectorImpl<::mlir::Type> &inferredReturnTypes)
+{
+    auto op = ModswitchOpAdaptor(operands, attributes, regions);
+    CiphertextType type_x = op.x().getType().dyn_cast<CiphertextType>();
+    assert(type_x && "Input to bgv.modswitch must be of type bgv.ctxt."); // Should never trigger
+    inferredReturnTypes.push_back(type_x);
+    return ::mlir::success();
+}
+
+::mlir::LogicalResult bgv::ModswitchPlainOp::inferReturnTypes(
+    ::mlir::MLIRContext *context, ::llvm::Optional<::mlir::Location> location, ::mlir::ValueRange operands,
+    ::mlir::DictionaryAttr attributes, ::mlir::RegionRange regions,
+    ::llvm::SmallVectorImpl<::mlir::Type> &inferredReturnTypes)
+{
+    auto op = ModswitchPlainOpAdaptor(operands, attributes, regions);
+    PlaintextType type_x = op.x().getType().dyn_cast<PlaintextType>();
+    assert(type_x && "Input to bgv.modswitch_plain must be of type bgv.ptxt."); // Should never trigger
+    inferredReturnTypes.push_back(type_x);
+    return ::mlir::success();
+}
+
+::mlir::LogicalResult bgv::ModswitchToOp::inferReturnTypes(
+    ::mlir::MLIRContext *context, ::llvm::Optional<::mlir::Location> location, ::mlir::ValueRange operands,
+    ::mlir::DictionaryAttr attributes, ::mlir::RegionRange regions,
+    ::llvm::SmallVectorImpl<::mlir::Type> &inferredReturnTypes)
+{
+    auto op = ModswitchToOpAdaptor(operands, attributes, regions);
+    CiphertextType type_x = op.x().getType().dyn_cast<CiphertextType>();
+    CiphertextType type_y = op.y().getType().dyn_cast<CiphertextType>();
+    assert(type_x && type_y && "Inputs to bgv.modswitch_plain must be of type bgv.ctxt."); // Should never trigger
+    inferredReturnTypes.push_back(type_y);
     return ::mlir::success();
 }
 

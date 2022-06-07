@@ -257,7 +257,37 @@ def BGV_MultiplyOp : BGV_Op<"multiply", [DeclareOpInterfaceMethods<InferTypeOpIn
 
   let arguments = (ins
     Ciphertext:$x,
-    AnyTypeOf<[Ciphertext,Plaintext]>:$y
+    Ciphertext:$y
+  );
+
+  let results = (outs
+    Ciphertext:$output
+  );
+
+}
+
+def BGV_MultiplyManyOp : BGV_Op<"multiply_many", [DeclareOpInterfaceMethods<InferTypeOpInterface>]> {
+
+  let summary = "Multiplication of many values.";
+
+  let arguments = (ins
+    Variadic<Ciphertext>:$x,
+    Ciphertext:$keys
+  );
+
+  let results = (outs
+    Ciphertext:$output
+  );
+
+}
+
+def BGV_MultiplyPlainOp : BGV_Op<"multiply_plain", [DeclareOpInterfaceMethods<InferTypeOpInterface>]> {
+
+  let summary = "Ciphertext-Plaintext Multiplication.";
+
+  let arguments = (ins
+    Ciphertext:$x,
+    Plaintext:$y
   );
 
   let results = (outs
@@ -267,10 +297,6 @@ def BGV_MultiplyOp : BGV_Op<"multiply", [DeclareOpInterfaceMethods<InferTypeOpIn
 }
 
 def BGV_AddOp : BGV_Op<"add", [DeclareOpInterfaceMethods<InferTypeOpInterface>]> {
-  // We add InferTypeOpInterface and define LogicalResult bgv::MultiplyOp::inferReturnTypes(...) in BGVDialect.cpp
-  // This is necessary, because this operation returns a type that is different from both input types
-  // By wrapping InferTypeOpInterface (https://mlir.llvm.org/docs/Interfaces/#utilizing-the-ods-framework)
-  // in DeclareOpInterfaceMethods, we don't have to manually add "let extraClassDeclaration = ..."
 
   let summary = "Addition.";
 
@@ -285,11 +311,22 @@ def BGV_AddOp : BGV_Op<"add", [DeclareOpInterfaceMethods<InferTypeOpInterface>]>
 
 }
 
+def BGV_AddManyOp : BGV_Op<"add_many", [DeclareOpInterfaceMethods<InferTypeOpInterface>]> {
+
+  let summary = "Addition of many values.";
+
+  let arguments = (ins
+    Variadic<Ciphertext>:$x
+  );
+
+  let results = (outs
+    Ciphertext:$output
+  );
+
+}
+
+
 def BGV_AddPlainOp : BGV_Op<"add_plain", [DeclareOpInterfaceMethods<InferTypeOpInterface>]> {
-  // We add InferTypeOpInterface and define LogicalResult bgv::MultiplyOp::inferReturnTypes(...) in BGVDialect.cpp
-  // This is necessary, because this operation returns a type that is different from both input types
-  // By wrapping InferTypeOpInterface (https://mlir.llvm.org/docs/Interfaces/#utilizing-the-ods-framework)
-  // in DeclareOpInterfaceMethods, we don't have to manually add "let extraClassDeclaration = ..."
 
   let summary = "Ciphertext-Plaintext Addition.";
 
@@ -305,10 +342,6 @@ def BGV_AddPlainOp : BGV_Op<"add_plain", [DeclareOpInterfaceMethods<InferTypeOpI
 }
 
 def BGV_SubOp : BGV_Op<"sub", [DeclareOpInterfaceMethods<InferTypeOpInterface>]> {
-  // We add InferTypeOpInterface and define LogicalResult bgv::MultiplyOp::inferReturnTypes(...) in BGVDialect.cpp
-  // This is necessary, because this operation returns a type that is different from both input types
-  // By wrapping InferTypeOpInterface (https://mlir.llvm.org/docs/Interfaces/#utilizing-the-ods-framework)
-  // in DeclareOpInterfaceMethods, we don't have to manually add "let extraClassDeclaration = ..."
 
   let summary = "Subtraction.";
 
@@ -324,16 +357,28 @@ def BGV_SubOp : BGV_Op<"sub", [DeclareOpInterfaceMethods<InferTypeOpInterface>]>
 }
 
 def BGV_SubPlainOp : BGV_Op<"sub_plain", [DeclareOpInterfaceMethods<InferTypeOpInterface>]> {
-  // We add InferTypeOpInterface and define LogicalResult bgv::MultiplyOp::inferReturnTypes(...) in BGVDialect.cpp
-  // This is necessary, because this operation returns a type that is different from both input types
-  // By wrapping InferTypeOpInterface (https://mlir.llvm.org/docs/Interfaces/#utilizing-the-ods-framework)
-  // in DeclareOpInterfaceMethods, we don't have to manually add "let extraClassDeclaration = ..."
 
   let summary = "Ciphertext-Plaintext Addition.";
 
   let arguments = (ins
     Ciphertext:$x,
     Plaintext:$y
+  );
+
+  let results = (outs
+    Ciphertext:$output
+  );
+
+}
+
+
+def BGV_ExponentiateOp : BGV_Op<"exponentiate", [DeclareOpInterfaceMethods<InferTypeOpInterface>]> {
+  let summary = "Exponentiation.";
+
+  let arguments = (ins
+    Ciphertext:$x,
+    I64Attr:$power,
+    Ciphertext:$keys // relin keys
   );
 
   let results = (outs
@@ -351,6 +396,72 @@ def BGV_RelinearizeOp : BGV_Op<"relinearize", [DeclareOpInterfaceMethods<InferTy
     Ciphertext:$x,
     //TODO (Q&A): How to make the keys in bgv.relinearize a TensorOf<Polynomial> without circular dependency issues?
     Ciphertext:$keys
+  );
+
+  let results = (outs
+    Ciphertext:$output
+  );
+
+}
+
+def BGV_ModswitchOp : BGV_Op<"modswitch", [DeclareOpInterfaceMethods<InferTypeOpInterface>]> {
+
+  let summary = "Modulus switching.";
+
+  let arguments = (ins
+    Ciphertext:$x,
+    StrAttr: $parms    
+  );
+
+  let results = (outs
+    Ciphertext:$output
+  );
+
+}
+
+def BGV_ModswitchToOp : BGV_Op<"modswitch_to", [DeclareOpInterfaceMethods<InferTypeOpInterface>]> {
+
+  let summary = "Modulus switching x to target y's level.";
+
+  let arguments = (ins
+    Ciphertext:$x,
+    Ciphertext:$y
+  );
+
+  let results = (outs
+    Ciphertext:$output
+  );
+
+}
+
+
+def BGV_ModswitchPlainOp : BGV_Op<"modswitch_plain", [DeclareOpInterfaceMethods<InferTypeOpInterface>]> {
+
+  let summary = "Plaintext Modulus switching.";
+
+  let arguments = (ins
+    Ciphertext:$x,
+    StrAttr: $parms
+  );
+
+  let results = (outs
+    Ciphertext:$output
+  );
+
+}
+
+
+
+
+def BGV_RotateOp : BGV_Op<"rotate", [DeclareOpInterfaceMethods<InferTypeOpInterface>]> {
+
+  let summary = "Rotation.";
+
+  let arguments = (ins
+    Ciphertext:$x,
+    //TODO (Q&A): How to make the keys in bgv.rotate a TensorOf<Polynomial> without circular dependency issues?
+    Ciphertext:$keys,
+    I64Attr:$offset
   );
 
   let results = (outs
