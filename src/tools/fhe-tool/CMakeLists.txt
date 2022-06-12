@@ -9,6 +9,7 @@ set(LIBS
         HECOAST
         HECOFHE
         HECOBGV
+        HECOPoly
         MLIRAnalysis
         MLIRCallInterfaces
         MLIRCastInterfaces
@@ -24,8 +25,9 @@ set(LIBS
         MLIRSideEffectInterfaces
         MLIRTargetLLVMIRExport
         MLIRTransforms  
-        HECOLowerAST2SSA
+        HECOLowerast2hir
         HECOLowerBGVToEmitC
+        HECOLowerBGVToLLVM
         HECOCatchAll
         )
 add_llvm_executable(fhe-tool fhe-tool.cpp)
@@ -33,7 +35,7 @@ add_llvm_executable(fhe-tool fhe-tool.cpp)
 llvm_update_compile_flags(fhe-tool)
 target_link_libraries(fhe-tool PRIVATE ${LIBS})
 
-add_dependencies(fhe-tool ast2ssa)
+add_dependencies(fhe-tool ast2hir)
 add_dependencies(fhe-tool bgv2emitc)
 
 mlir_check_all_link_libraries(fhe-tool)

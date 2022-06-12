@@ -6,6 +6,7 @@
 #include "mlir/Support/LLVM.h"
 
 using namespace mlir;
+using namespace heco;
 using namespace bgv;
 
 //===----------------------------------------------------------------------===//
@@ -50,7 +51,9 @@ using namespace bgv;
     {
         CiphertextType type_xx = xx.getType().dyn_cast<CiphertextType>();
         assert(type_x && type_xx && "Inputs to bgv.add must be of type bgv.ctxt."); // Should never trigger
-        assert(type_x.getElementType() == type_xx.getElementType() && "Inputs to bgv.add_many must have same elementType.");
+        assert(
+            type_x.getElementType() == type_xx.getElementType() &&
+            "Inputs to bgv.add_many must have same elementType.");
         new_size = std::max(new_size, type_xx.getSize());
     }
     new_size = new_size + 1;
@@ -100,7 +103,9 @@ using namespace bgv;
     {
         CiphertextType type_xx = xx.getType().dyn_cast<CiphertextType>();
         assert(type_x && type_xx && "Inputs to bgv.add must be of type bgv.ctxt."); // Should never trigger
-        assert(type_x.getElementType() == type_xx.getElementType() && "Inputs to bgv.add_many must have same elementType.");
+        assert(
+            type_x.getElementType() == type_xx.getElementType() &&
+            "Inputs to bgv.add_many must have same elementType.");
         new_size = std::max(new_size, type_xx.getSize());
     }
     inferredReturnTypes.push_back(CiphertextType::get(context, new_size, type_x.getElementType()));
@@ -115,8 +120,12 @@ using namespace bgv;
     auto op = MultiplyPlainOpAdaptor(operands, attributes, regions);
     CiphertextType type_x = op.x().getType().dyn_cast<CiphertextType>();
     PlaintextType type_y = op.y().getType().dyn_cast<PlaintextType>();
-    assert(type_x && type_y && "Inputs to bgv.multiply_plain must be of type bgv.ctxt & bgv.ptxt."); // Should never trigger
-    assert(type_x.getElementType() == type_y.getElementType() && "Inputs to bgv.multiply_plain must have same elementType.");
+    assert(
+        type_x && type_y &&
+        "Inputs to bgv.multiply_plain must be of type bgv.ctxt & bgv.ptxt."); // Should never trigger
+    assert(
+        type_x.getElementType() == type_y.getElementType() &&
+        "Inputs to bgv.multiply_plain must have same elementType.");
     inferredReturnTypes.push_back(CiphertextType::get(context, type_x.getSize(), type_x.getElementType()));
     return ::mlir::success();
 }
@@ -129,7 +138,9 @@ using namespace bgv;
     auto op = AddPlainOpAdaptor(operands, attributes, regions);
     CiphertextType type_x = op.x().getType().dyn_cast<CiphertextType>();
     PlaintextType type_y = op.y().getType().dyn_cast<PlaintextType>();
-    assert(type_x && type_y && "Inputs to bgv.multiply_plain must be of type bgv.ctxt & bgv.ptxt."); // Should never trigger
+    assert(
+        type_x && type_y &&
+        "Inputs to bgv.multiply_plain must be of type bgv.ctxt & bgv.ptxt."); // Should never trigger
     assert(type_x.getElementType() == type_y.getElementType() && "Inputs to bgv.add_plain must have same elementType.");
     inferredReturnTypes.push_back(CiphertextType::get(context, type_x.getSize(), type_x.getElementType()));
     return ::mlir::success();
@@ -143,7 +154,9 @@ using namespace bgv;
     auto op = SubPlainOpAdaptor(operands, attributes, regions);
     CiphertextType type_x = op.x().getType().dyn_cast<CiphertextType>();
     PlaintextType type_y = op.y().getType().dyn_cast<PlaintextType>();
-    assert(type_x && type_y && "Inputs to bgv.multiply_plain must be of type bgv.ctxt & bgv.ptxt."); // Should never trigger
+    assert(
+        type_x && type_y &&
+        "Inputs to bgv.multiply_plain must be of type bgv.ctxt & bgv.ptxt."); // Should never trigger
     assert(type_x.getElementType() == type_y.getElementType() && "Inputs to bgv.sub_plain must have same elementType.");
     inferredReturnTypes.push_back(CiphertextType::get(context, type_x.getSize(), type_x.getElementType()));
     return ::mlir::success();
@@ -156,7 +169,7 @@ using namespace bgv;
 {
     auto op = ExponentiateOpAdaptor(operands, attributes, regions);
     CiphertextType type_x = op.x().getType().dyn_cast<CiphertextType>();
-    assert(type_x && "First input to bgv.exponentiate must be of type bgv.ctxt."); // Should never trigger
+    assert(type_x && "First input to bgv.exponentiate must be of type !bgv.ctxt."); // Should never trigger
     auto new_size = type_x.getSize() + 1;
     inferredReturnTypes.push_back(CiphertextType::get(context, new_size, type_x.getElementType()));
     return ::mlir::success();
@@ -168,9 +181,11 @@ using namespace bgv;
     ::llvm::SmallVectorImpl<::mlir::Type> &inferredReturnTypes)
 {
     auto op = RelinearizeOpAdaptor(operands, attributes, regions);
-    CiphertextType type_x = op.x().getType().dyn_cast<CiphertextType>();
-    assert(type_x && "Input to bgv.relinearize must be of type bgv.ctxt."); // Should never trigger
+    auto type_x = op.x().getType().dyn_cast<CiphertextType>();
+    assert(type_x && "First input to bgv.relinearize must be of type !bgv.ctxt."); // Should never trigger
     assert(type_x.getSize() == 3 && "Size of input to bgv.relinearize must be three!");
+    auto type_keys = op.keys().getType().dyn_cast<RelinKeysType>();
+    assert(type_keys && "Second input to bgv.relinearize must be of type !bgv.rlk."); // Should never trigger
     inferredReturnTypes.push_back(CiphertextType::get(context, 2, type_x.getElementType()));
     return ::mlir::success();
 }

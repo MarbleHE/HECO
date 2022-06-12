@@ -1,4 +1,5 @@
-add_heco_dialect(BGV bgv) #add_heco_dialect(dialect dialect_namespace)
+add_heco_dialect(BGV bgv) 
+# add_heco_dialect(dialect dialect_namespace)
 # This tells tablegen to look for ${dialect}.td and generate the following C++ files from it:
 # ${dialect}.h.inc (Operation Declarations), ${dialect}.cpp.inc (Operation Definitions)
 # ${dialect}Types.h.inc (Type Declarations), # ${dialect}Types.cpp.inc (Type Definitions)

@@ -1,16 +1,18 @@
-#ifndef ABC_PASSES_SSA2CPP_LOWERTOEMITC_H_
-#define ABC_PASSES_SSA2CPP_LOWERTOEMITC_H_
+#ifndef HECO_PASSES_BGV2EMITC_LOWERBGVTOEMITC_H_
+#define HECO_PASSES_BGV2EMITC_LOWERBGVTOEMITC_H_
 
 #include "mlir/Pass/Pass.h"
 
-struct LowerToEmitCPass : public mlir::PassWrapper<LowerToEmitCPass, mlir::OperationPass<mlir::ModuleOp>> {
-  void getDependentDialects(mlir::DialectRegistry &registry) const override;
+struct LowerBGVToEmitCPass : public mlir::PassWrapper<LowerBGVToEmitCPass, mlir::OperationPass<mlir::ModuleOp>>
+{
+    void getDependentDialects(mlir::DialectRegistry &registry) const override;
 
-  void runOnOperation() override;
+    void runOnOperation() override;
 
-  mlir::StringRef getArgument() const final {
-    return "fhe2emitc";
-  }
+    mlir::StringRef getArgument() const final
+    {
+        return "bgv2emitc";
+    }
 };
 
-#endif //ABC_PASSES_SSA2CPP_LOWERTOEMITC_H_
+#endif // HECO_PASSES_BGV2EMITC_LOWERBGVTOEMITC_H_

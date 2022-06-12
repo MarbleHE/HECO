@@ -1,9 +1,9 @@
 #include <fstream>
-#include "heco/ast/Literal.h"
-#include "heco/ast/Variable.h"
-#include "heco/ast/Assignment.h"
-#include "heco/ast/VariableDeclaration.h"
 #include "gtest/gtest.h"
+#include "heco/legacy_ast/ast/Assignment.h"
+#include "heco/legacy_ast/ast/Literal.h"
+#include "heco/legacy_ast/ast/Variable.h"
+#include "heco/legacy_ast/ast/VariableDeclaration.h"
 
 /// This test suite verifies the correctness of the JSON outputs.
 /// For comparison, the JSON expected objects are manually created (for simple objects) or parsed from the corresponding

@@ -1,27 +1,27 @@
-#include "heco/ast_parser/File.h"
+#include "heco/legacy_ast/ast_parser/File.h"
 
 namespace stork
 {
 
-  File::~File()
-  {
-    if (_fp)
+    File::~File()
     {
-      fclose(_fp);
+        if (_fp)
+        {
+            fclose(_fp);
+        }
     }
-  }
 
-  File::File(const char *path) : _fp(fopen(path, "rt"))
-  {
-    if (!_fp)
+    File::File(const char *path) : _fp(fopen(path, "rt"))
     {
-      throw stork::FileNotFound(std::string("'") + path + "' not found");
+        if (!_fp)
+        {
+            throw stork::FileNotFound(std::string("'") + path + "' not found");
+        }
     }
-  }
 
-  int File::operator()()
-  {
-    return fgetc(_fp);
-  }
+    int File::operator()()
+    {
+        return fgetc(_fp);
+    }
 
-}
+} // namespace stork

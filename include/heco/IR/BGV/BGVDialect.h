@@ -1,19 +1,18 @@
-#ifndef TOOLCHAIN_BGV_BGVDIALECT_H_
-#define TOOLCHAIN_BGV_BGVDIALECT_H_
+#ifndef HECO_IR_BGV_BGVDIALECT_H_
+#define HECO_IR_BGV_BGVDIALECT_H_
 
-#include "mlir/IR/Dialect.h"
-#include "mlir/IR/BuiltinTypes.h"
-#include "mlir/IR/BuiltinOps.h"
 #include "mlir/IR/Builders.h"
+#include "mlir/IR/BuiltinOps.h"
+#include "mlir/IR/BuiltinTypes.h"
 #include "mlir/IR/Dialect.h"
 #include "mlir/IR/OpDefinition.h"
 #include "mlir/IR/OpImplementation.h"
-#include "mlir/Interfaces/SideEffectInterfaces.h"
-#include "mlir/Interfaces/ControlFlowInterfaces.h"
 #include "mlir/Interfaces/CallInterfaces.h"
 #include "mlir/Interfaces/CastInterfaces.h"
+#include "mlir/Interfaces/ControlFlowInterfaces.h"
 #include "mlir/Interfaces/CopyOpInterface.h"
 #include "mlir/Interfaces/InferTypeOpInterface.h"
+#include "mlir/Interfaces/SideEffectInterfaces.h"
 
 // Include the C++ class declaration for this Dialect (no define necessary for this one)
 #include "heco/IR/BGV/BGVDialect.h.inc"
@@ -26,4 +25,4 @@
 #define GET_OP_CLASSES
 #include "heco/IR/BGV/BGV.h.inc"
 
-#endif // TOOLCHAIN_BGV_BGVDIALECT_H_
+#endif // HECO_IR_BGV_BGVDIALECT_H_

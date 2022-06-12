@@ -25,7 +25,7 @@ def AST_Dialect : Dialect {
     let description = [{
         This dialect represents the AST for HECO's legacy C-like DSL
     }];
-    let cppNamespace = "::ast";
+    let cppNamespace = "::heco::ast";
 }
 
 //===----------------------------------------------------------------------===//

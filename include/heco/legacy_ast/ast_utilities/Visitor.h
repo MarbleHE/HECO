@@ -4,45 +4,43 @@
 // In order for the template magic to work,
 // we must include ALL ast classes,
 // so that the inheritance relations are known
-#include "heco/ast/AbstractExpression.h"
-#include "heco/ast/AbstractNode.h"
-#include "heco/ast/AbstractStatement.h"
-#include "heco/ast/AbstractTarget.h"
-#include "heco/ast/Assignment.h"
-#include "heco/ast/BinaryExpression.h"
-#include "heco/ast/Block.h"
-#include "heco/ast/Call.h"
-#include "heco/ast/ExpressionList.h"
-#include "heco/ast/For.h"
-#include "heco/ast/Function.h"
-#include "heco/ast/FunctionParameter.h"
-#include "heco/ast/If.h"
-#include "heco/ast/IndexAccess.h"
-#include "heco/ast/Literal.h"
-#include "heco/ast/OperatorExpression.h"
-#include "heco/ast/Return.h"
-#include "heco/ast/TernaryOperator.h"
-#include "heco/ast/UnaryExpression.h"
-#include "heco/ast/Variable.h"
-#include "heco/ast/VariableDeclaration.h"
-
-#include "heco/ast_utilities/IVisitor.h"
-#include "heco/ast_utilities/ScopedVisitor.h"
+#include "heco/legacy_ast/ast/AbstractExpression.h"
+#include "heco/legacy_ast/ast/AbstractNode.h"
+#include "heco/legacy_ast/ast/AbstractStatement.h"
+#include "heco/legacy_ast/ast/AbstractTarget.h"
+#include "heco/legacy_ast/ast/Assignment.h"
+#include "heco/legacy_ast/ast/BinaryExpression.h"
+#include "heco/legacy_ast/ast/Block.h"
+#include "heco/legacy_ast/ast/Call.h"
+#include "heco/legacy_ast/ast/ExpressionList.h"
+#include "heco/legacy_ast/ast/For.h"
+#include "heco/legacy_ast/ast/Function.h"
+#include "heco/legacy_ast/ast/FunctionParameter.h"
+#include "heco/legacy_ast/ast/If.h"
+#include "heco/legacy_ast/ast/IndexAccess.h"
+#include "heco/legacy_ast/ast/Literal.h"
+#include "heco/legacy_ast/ast/OperatorExpression.h"
+#include "heco/legacy_ast/ast/Return.h"
+#include "heco/legacy_ast/ast/TernaryOperator.h"
+#include "heco/legacy_ast/ast/UnaryExpression.h"
+#include "heco/legacy_ast/ast/Variable.h"
+#include "heco/legacy_ast/ast/VariableDeclaration.h"
+#include "heco/legacy_ast/ast_utilities/IVisitor.h"
+#include "heco/legacy_ast/ast_utilities/ScopedVisitor.h"
 
 /// SFINAE based detection if T::visit(Args...) exists
 /// Taken from https://stackoverflow.com/a/28309612
 template <typename T, typename... Args>
 class is_visit_available
 {
-  template <typename C,
-            typename = decltype(std::declval<C>().visit(std::declval<Args>()...))>
-  static std::true_type test(int);
+    template <typename C, typename = decltype(std::declval<C>().visit(std::declval<Args>()...))>
+    static std::true_type test(int);
 
-  template <typename C>
-  static std::false_type test(...);
+    template <typename C>
+    static std::false_type test(...);
 
 public:
-  static constexpr bool value = decltype(test<T>(0))::value;
+    static constexpr bool value = decltype(test<T>(0))::value;
 };
 
 /// Does T::visit(Args...) exist? (Syntactic sugar for is_visit_available)
@@ -79,133 +77,133 @@ constexpr bool has_visit = is_visit_available<T, Args...>::value;
 ///
 /// \tparam SpecialVisitor  The class implementing the actual visiting logic
 
-#define VISIT_SPECIAL_VISITOR_IF_EXISTS(AstClassName)      \
-  if constexpr (has_visit<SpecialVisitor, AstClassName &>) \
-  {                                                        \
-    this->SpecialVisitor::visit(elem);                     \
-  }                                                        \
-  else                                                     \
-  {                                                        \
-    this->DefaultVisitor::visit(elem);                     \
-  }
+#define VISIT_SPECIAL_VISITOR_IF_EXISTS(AstClassName)        \
+    if constexpr (has_visit<SpecialVisitor, AstClassName &>) \
+    {                                                        \
+        this->SpecialVisitor::visit(elem);                   \
+    }                                                        \
+    else                                                     \
+    {                                                        \
+        this->DefaultVisitor::visit(elem);                   \
+    }
 
 template <typename SpecialVisitor, typename DefaultVisitor = ScopedVisitor>
 class Visitor : public SpecialVisitor
 {
 public:
-  /// Allow the SpecialVisitor class to operate on Visitor<SpecialVisitor> as if it was a SpecialVisitor
-  friend SpecialVisitor;
+    /// Allow the SpecialVisitor class to operate on Visitor<SpecialVisitor> as if it was a SpecialVisitor
+    friend SpecialVisitor;
 
-  /// Ensure that SpecialVisitor is actually a visitor
-  static_assert(std::is_base_of<IVisitor, SpecialVisitor>::value);
+    /// Ensure that SpecialVisitor is actually a visitor
+    static_assert(std::is_base_of<IVisitor, SpecialVisitor>::value);
 
-  /// Inherit Constructors from SpecialVisitor
-  using SpecialVisitor::SpecialVisitor;
+    /// Inherit Constructors from SpecialVisitor
+    using SpecialVisitor::SpecialVisitor;
 
-  void visit(BinaryExpression &elem) override
-  {
-    VISIT_SPECIAL_VISITOR_IF_EXISTS(BinaryExpression);
-  }
+    void visit(BinaryExpression &elem) override
+    {
+        VISIT_SPECIAL_VISITOR_IF_EXISTS(BinaryExpression);
+    }
 
-  void visit(Block &elem) override
-  {
-    VISIT_SPECIAL_VISITOR_IF_EXISTS(Block);
-  }
+    void visit(Block &elem) override
+    {
+        VISIT_SPECIAL_VISITOR_IF_EXISTS(Block);
+    }
 
-  void visit(ExpressionList &elem) override
-  {
-    VISIT_SPECIAL_VISITOR_IF_EXISTS(ExpressionList);
-  }
+    void visit(ExpressionList &elem) override
+    {
+        VISIT_SPECIAL_VISITOR_IF_EXISTS(ExpressionList);
+    }
 
-  void visit(For &elem) override
-  {
-    VISIT_SPECIAL_VISITOR_IF_EXISTS(For);
-  }
+    void visit(For &elem) override
+    {
+        VISIT_SPECIAL_VISITOR_IF_EXISTS(For);
+    }
 
-  void visit(Function &elem) override
-  {
-    VISIT_SPECIAL_VISITOR_IF_EXISTS(Function);
-  }
+    void visit(Function &elem) override
+    {
+        VISIT_SPECIAL_VISITOR_IF_EXISTS(Function);
+    }
 
-  void visit(FunctionParameter &elem) override
-  {
-    VISIT_SPECIAL_VISITOR_IF_EXISTS(FunctionParameter);
-  }
+    void visit(FunctionParameter &elem) override
+    {
+        VISIT_SPECIAL_VISITOR_IF_EXISTS(FunctionParameter);
+    }
 
-  void visit(If &elem) override
-  {
-    VISIT_SPECIAL_VISITOR_IF_EXISTS(If);
-  }
+    void visit(If &elem) override
+    {
+        VISIT_SPECIAL_VISITOR_IF_EXISTS(If);
+    }
 
-  void visit(IndexAccess &elem) override
-  {
-    VISIT_SPECIAL_VISITOR_IF_EXISTS(IndexAccess);
-  }
+    void visit(IndexAccess &elem) override
+    {
+        VISIT_SPECIAL_VISITOR_IF_EXISTS(IndexAccess);
+    }
 
-  void visit(LiteralBool &elem) override
-  {
-    VISIT_SPECIAL_VISITOR_IF_EXISTS(LiteralBool);
-  }
+    void visit(LiteralBool &elem) override
+    {
+        VISIT_SPECIAL_VISITOR_IF_EXISTS(LiteralBool);
+    }
 
-  void visit(LiteralChar &elem) override
-  {
-    VISIT_SPECIAL_VISITOR_IF_EXISTS(LiteralChar);
-  }
+    void visit(LiteralChar &elem) override
+    {
+        VISIT_SPECIAL_VISITOR_IF_EXISTS(LiteralChar);
+    }
 
-  void visit(LiteralInt &elem) override
-  {
-    VISIT_SPECIAL_VISITOR_IF_EXISTS(LiteralInt);
-  }
+    void visit(LiteralInt &elem) override
+    {
+        VISIT_SPECIAL_VISITOR_IF_EXISTS(LiteralInt);
+    }
 
-  void visit(LiteralFloat &elem) override
-  {
-    VISIT_SPECIAL_VISITOR_IF_EXISTS(LiteralFloat);
-  }
+    void visit(LiteralFloat &elem) override
+    {
+        VISIT_SPECIAL_VISITOR_IF_EXISTS(LiteralFloat);
+    }
 
-  void visit(LiteralDouble &elem) override
-  {
-    VISIT_SPECIAL_VISITOR_IF_EXISTS(LiteralDouble);
-  }
+    void visit(LiteralDouble &elem) override
+    {
+        VISIT_SPECIAL_VISITOR_IF_EXISTS(LiteralDouble);
+    }
 
-  void visit(LiteralString &elem) override
-  {
-    VISIT_SPECIAL_VISITOR_IF_EXISTS(LiteralString);
-  }
+    void visit(LiteralString &elem) override
+    {
+        VISIT_SPECIAL_VISITOR_IF_EXISTS(LiteralString);
+    }
 
-  void visit(OperatorExpression &elem) override
-  {
-    VISIT_SPECIAL_VISITOR_IF_EXISTS(OperatorExpression);
-  }
+    void visit(OperatorExpression &elem) override
+    {
+        VISIT_SPECIAL_VISITOR_IF_EXISTS(OperatorExpression);
+    }
 
-  void visit(Return &elem) override
-  {
-    VISIT_SPECIAL_VISITOR_IF_EXISTS(Return);
-  }
+    void visit(Return &elem) override
+    {
+        VISIT_SPECIAL_VISITOR_IF_EXISTS(Return);
+    }
 
-  void visit(TernaryOperator &elem) override
-  {
-    VISIT_SPECIAL_VISITOR_IF_EXISTS(TernaryOperator);
-  }
+    void visit(TernaryOperator &elem) override
+    {
+        VISIT_SPECIAL_VISITOR_IF_EXISTS(TernaryOperator);
+    }
 
-  void visit(UnaryExpression &elem) override
-  {
-    VISIT_SPECIAL_VISITOR_IF_EXISTS(UnaryExpression);
-  }
+    void visit(UnaryExpression &elem) override
+    {
+        VISIT_SPECIAL_VISITOR_IF_EXISTS(UnaryExpression);
+    }
 
-  void visit(Assignment &elem) override
-  {
-    VISIT_SPECIAL_VISITOR_IF_EXISTS(Assignment);
-  }
+    void visit(Assignment &elem) override
+    {
+        VISIT_SPECIAL_VISITOR_IF_EXISTS(Assignment);
+    }
 
-  void visit(VariableDeclaration &elem) override
-  {
-    VISIT_SPECIAL_VISITOR_IF_EXISTS(VariableDeclaration);
-  }
+    void visit(VariableDeclaration &elem) override
+    {
+        VISIT_SPECIAL_VISITOR_IF_EXISTS(VariableDeclaration);
+    }
 
-  void visit(Variable &elem) override
-  {
-    VISIT_SPECIAL_VISITOR_IF_EXISTS(Variable);
-  }
+    void visit(Variable &elem) override
+    {
+        VISIT_SPECIAL_VISITOR_IF_EXISTS(Variable);
+    }
 };
 
 #endif // AST_OPTIMIZER_INCLUDE_AST_OPT_UTILITIES_VISITOR_H_

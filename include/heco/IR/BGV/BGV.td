@@ -33,9 +33,7 @@ def BGV_Dialect : Dialect {
         This dialect represents a common abstraction for BGV operations.
     }];
 
-    // If not prefixed with "::", then the namespace will be nested into the namespace
-    // that is active where the generated C++ declaration is included
-    let cppNamespace = "::bgv";
+    let cppNamespace = "::heco::bgv";
 }
 
 //===----------------------------------------------------------------------===//
@@ -96,6 +94,81 @@ def Plaintext : TypeDef<BGV_Dialect, "Plaintext">  {
   // Which explains assemblyFormat for operations, but works for types, too:
   let assemblyFormat = "`<` $elementType `>`";
 }
+
+
+def PublicKey : TypeDef<BGV_Dialect, "PublicKey">  {
+
+  // See https://mlir.llvm.org/docs/OpDefinitions/#type-definitions
+  // for detailed information on how declartive type definitions work
+
+  let description = "A Type for Public Keys, tracking parameters";
+
+  // Types are written as "!<dialect_name>.<type_mnemonic>" in textal MLIR representation
+  let mnemonic = "pk";
+
+  // This summary is used, among other things, in type-related error messages
+  let summary = "PublicKey";
+
+  let parameters = (ins
+      "unsigned":$size,
+      "Type":$elementType
+  );
+
+  // See https://mlir.llvm.org/docs/OpDefinitions/#declarative-assembly-format
+  // Which explains assemblyFormat for operations, but works for types, too:
+  let assemblyFormat = "`<` $size `x` $elementType `>`";
+}
+
+def RelinKeys : TypeDef<BGV_Dialect, "RelinKeys">  {
+
+  // See https://mlir.llvm.org/docs/OpDefinitions/#type-definitions
+  // for detailed information on how declartive type definitions work
+
+  let description = "A Type for Relin Keys, tracking parameters";
+
+  // Types are written as "!<dialect_name>.<type_mnemonic>" in textal MLIR representation
+  let mnemonic = "rlk";
+
+  // This summary is used, among other things, in type-related error messages
+  let summary = "RelinKeys";
+
+  let parameters = (ins
+      "unsigned":$num_keys,
+      "unsigned":$num_elements,
+      "unsigned":$size,
+      "Type":$elementType
+  );
+
+  // See https://mlir.llvm.org/docs/OpDefinitions/#declarative-assembly-format
+  // Which explains assemblyFormat for operations, but works for types, too:
+  let assemblyFormat = "`<` $num_keys `x` $num_elements `x` $size `x` $elementType `>`";
+}
+
+def GaloisKeys : TypeDef<BGV_Dialect, "GaloisKeys">  {
+
+  // See https://mlir.llvm.org/docs/OpDefinitions/#type-definitions
+  // for detailed information on how declartive type definitions work
+
+  let description = "A Type for Galois Keys, tracking parameters";
+
+  // Types are written as "!<dialect_name>.<type_mnemonic>" in textal MLIR representation
+  let mnemonic = "glk";
+
+  // This summary is used, among other things, in type-related error messages
+  let summary = "GaloisKeys";
+
+  let parameters = (ins
+      "unsigned":$num_keys,
+      "unsigned":$num_elements,
+      "unsigned":$size,
+      "Type":$elementType
+  );
+
+  // See https://mlir.llvm.org/docs/OpDefinitions/#declarative-assembly-format
+  // Which explains assemblyFormat for operations, but works for types, too:
+  let assemblyFormat = "`<` $num_keys `x` $num_elements `x` $size `x` $elementType `>`";
+}
+
 
 
 //===----------------------------------------------------------------------===//
@@ -174,18 +247,6 @@ def BGV_LoadPtxtOp : BGV_Op<"load_ptxt", []> {
   }];
 }
 
-def BGV_FetchCtxtOp : BGV_Op<"fetch_ctxt", []> {
-  let summary = "Returns a Ciphertext.";
-
-  let arguments = (ins
-    Ciphertext: $ctxt
-  );
-
-  let assemblyFormat = [{
-    `(` $ctxt `)` attr-dict `:` type(operands)
-  }];
-}
-
 def BGV_LoadPublicKeyOp : BGV_Op<"load_public_key", []> {
   let summary = "Load public key.";
 
@@ -196,7 +257,7 @@ def BGV_LoadPublicKeyOp : BGV_Op<"load_public_key", []> {
   );
 
   let results = (outs
-    Ciphertext:$output
+    PublicKey:$output
   );
 
   // TODO (Q&A): Using type($output) instead of type(results) in operation assembly format causes odd error:
@@ -216,7 +277,7 @@ def BGV_LoadRelinKeysOp : BGV_Op<"load_relin_keys", []> {
   );
 
   let results = (outs
-    Ciphertext:$output
+    RelinKeys:$output
   );
 
   // TODO (Q&A): Using type($output) instead of type(results) in operation assembly format causes odd error:
@@ -236,7 +297,7 @@ def BGV_LoadGaloisKeysOp : BGV_Op<"load_galois_keys", []> {
   );
 
   let results = (outs
-    Ciphertext:$output
+    GaloisKeys:$output
   );
 
   // TODO (Q&A): Using type($output) instead of type(results) in operation assembly format causes odd error:
@@ -244,6 +305,24 @@ def BGV_LoadGaloisKeysOp : BGV_Op<"load_galois_keys", []> {
   let assemblyFormat = [{
     attr-dict `:` type(results)
   }];
+}
+
+def BGV_SinkOp : BGV_Op<"sink", [Terminator, ReturnLike]> {
+  // We add the "Terminator" trait, which signals that this operation is a valid end statement for a function
+  // We also add the ReturnLike trait, indiciating it is the last operation in its block and has no "results"
+
+  let summary = "An operation that requires the operand to be evaluated (e.g. decrypt, serialize, etc).";
+
+  let arguments = (ins
+    Ciphertext: $x
+  );
+
+  // TODO (Q&A): Using type($x) instead of type(operands) in operation assembly format causes odd error:
+  //  the output will omit the !bgv.ctxt before the <..>
+  let assemblyFormat = [{
+    `(` $x`)`  attr-dict `:`  `(` type(operands) `)`
+  }];
+
 }
 
 
@@ -272,7 +351,7 @@ def BGV_MultiplyManyOp : BGV_Op<"multiply_many", [DeclareOpInterfaceMethods<Infe
 
   let arguments = (ins
     Variadic<Ciphertext>:$x,
-    Ciphertext:$keys
+    RelinKeys:$keys
   );
 
   let results = (outs
@@ -326,12 +405,12 @@ def BGV_AddManyOp : BGV_Op<"add_many", [DeclareOpInterfaceMethods<InferTypeOpInt
 }
 
 
-def BGV_AddPlainOp : BGV_Op<"add_plain", [DeclareOpInterfaceMethods<InferTypeOpInterface>]> {
+def BGV_AddPlainOp : BGV_Op<"add_plain",  [DeclareOpInterfaceMethods<InferTypeOpInterface>]> {
 
   let summary = "Ciphertext-Plaintext Addition.";
 
   let arguments = (ins
-    Ciphertext:$x,
+    Ciphertext:$x, 
     Plaintext:$y
   );
 
@@ -395,7 +474,7 @@ def BGV_RelinearizeOp : BGV_Op<"relinearize", [DeclareOpInterfaceMethods<InferTy
   let arguments = (ins
     Ciphertext:$x,
     //TODO (Q&A): How to make the keys in bgv.relinearize a TensorOf<Polynomial> without circular dependency issues?
-    Ciphertext:$keys
+    RelinKeys:$keys
   );
 
   let results = (outs
@@ -451,8 +530,6 @@ def BGV_ModswitchPlainOp : BGV_Op<"modswitch_plain", [DeclareOpInterfaceMethods<
 }
 
 
-
-
 def BGV_RotateOp : BGV_Op<"rotate", [DeclareOpInterfaceMethods<InferTypeOpInterface>]> {
 
   let summary = "Rotation.";
@@ -460,31 +537,13 @@ def BGV_RotateOp : BGV_Op<"rotate", [DeclareOpInterfaceMethods<InferTypeOpInterf
   let arguments = (ins
     Ciphertext:$x,
     //TODO (Q&A): How to make the keys in bgv.rotate a TensorOf<Polynomial> without circular dependency issues?
-    Ciphertext:$keys,
+    GaloisKeys:$keys,
     I64Attr:$offset
   );
 
   let results = (outs
     Ciphertext:$output
   );
-
-}
-
-def BGV_SinkOp : BGV_Op<"sink", [Terminator, ReturnLike]> {
-  // We add the "Terminator" trait, which signals that this operation is a valid end statement for a function
-  // We also add the ReturnLike trait, indiciating it is the last operation in its block and has no "results"
-
-  let summary = "An operation that requires the operand to be evaluated (e.g. decrypt, serialize, etc).";
-
-  let arguments = (ins
-    Ciphertext:$x
-  );
-
-  // TODO (Q&A): Using type($x) instead of type(operands) in operation assembly format causes odd error:
-  //  the output will omit the !bgv.ctxt before the <..>
-  let assemblyFormat = [{
-    `(` $x`)`  attr-dict `:`  `(` type(operands) `)`
-  }];
 
 }
 

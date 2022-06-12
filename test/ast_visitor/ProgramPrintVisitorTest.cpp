@@ -1,11 +1,10 @@
-#include "heco/ast_utilities/ProgramPrintVisitor.h"
-#include "heco/ast_parser/Parser.h"
+#include "heco/legacy_ast/ast_utilities/ProgramPrintVisitor.h"
 #include "gtest/gtest.h"
+#include "heco/legacy_ast/ast_parser/Parser.h"
 
 TEST(ProgramPrintVisitor, printTree)
 {
-
-  const char *programCode = R""""(
+    const char *programCode = R""""(
   public void main(secret int p, float q, bool x) {
     int scalar = 2;
     int vec = {3, 4, 9, 2, 1};
@@ -25,8 +24,8 @@ TEST(ProgramPrintVisitor, printTree)
     }
   }
 )"""";
-  const char *resultCode =
-      R""""({
+    const char *resultCode =
+        R""""({
   void main(secret int p, float q, bool x)
   {
     int scalar = 2;
@@ -57,14 +56,14 @@ TEST(ProgramPrintVisitor, printTree)
 }
 )"""";
 
-  auto code = std::string(programCode);
-  auto ast = Parser::parse(code);
+    auto code = std::string(programCode);
+    auto ast = Parser::parse(code);
 
-  std::stringstream ss;
-  ProgramPrintVisitor v(ss);
-  ast->accept(v);
+    std::stringstream ss;
+    ProgramPrintVisitor v(ss);
+    ast->accept(v);
 
-  std::cout << ss.str() << std::endl;
+    std::cout << ss.str() << std::endl;
 
-  EXPECT_EQ(ss.str(), resultCode);
+    EXPECT_EQ(ss.str(), resultCode);
 }

@@ -1,34 +1,33 @@
-#include "heco/ast_utilities/ParentSettingVisitor.h"
+#include "heco/legacy_ast/ast_utilities/ParentSettingVisitor.h"
 
 void SpecialParentSettingVisitor::visit(AbstractNode &elem)
 {
-
-  // If there is something on the stack, set it as the parent
-  if (!stack.empty())
-  {
-    if (stack.top() == nullptr)
-      throw std::runtime_error("nullptr not a valid parent.");
-
-    if (elem.hasParent())
+    // If there is something on the stack, set it as the parent
+    if (!stack.empty())
     {
-      if (stack.top() != &elem.getParent())
-        throw std::runtime_error("Original parent and parent we would set do not match.");
+        if (stack.top() == nullptr)
+            throw std::runtime_error("nullptr not a valid parent.");
+
+        if (elem.hasParent())
+        {
+            if (stack.top() != &elem.getParent())
+                throw std::runtime_error("Original parent and parent we would set do not match.");
+        }
+        else
+        {
+            elem.setParent(*stack.top());
+        }
     }
-    else
+
+    // Push elem on the stack
+    stack.push(&elem);
+
+    // Visit the children
+    for (auto &c : elem)
     {
-      elem.setParent(*stack.top());
+        c.accept(*this);
     }
-  }
 
-  // Push elem on the stack
-  stack.push(&elem);
-
-  // Visit the children
-  for (auto &c : elem)
-  {
-    c.accept(*this);
-  }
-
-  // Remove elem from the stack
-  stack.pop();
+    // Remove elem from the stack
+    stack.pop();
 }

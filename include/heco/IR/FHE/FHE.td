@@ -33,9 +33,7 @@ def FHE_Dialect : Dialect {
         This dialect represents a common abstraction for FHE operations.
     }];
 
-    // If not prefixed with "::", then the namespace will be nested into the namespace
-    // that is active where the generated C++ declaration is included
-    let cppNamespace = "::fhe";
+    let cppNamespace = "::heco::fhe";
 }
 
 //===----------------------------------------------------------------------===//

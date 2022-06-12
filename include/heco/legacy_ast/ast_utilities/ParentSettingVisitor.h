@@ -2,8 +2,8 @@
 #define AST_OPTIMIZER_INCLUDE_AST_OPT_VISITOR_PARENTSETTINGVISITOR_H_
 
 #include <stack>
-#include "heco/ast_utilities/Visitor.h"
-#include "heco/ast_utilities/PlainVisitor.h"
+#include "heco/legacy_ast/ast_utilities/PlainVisitor.h"
+#include "heco/legacy_ast/ast_utilities/Visitor.h"
 
 class SpecialParentSettingVisitor;
 
@@ -14,10 +14,10 @@ typedef Visitor<SpecialParentSettingVisitor, PlainVisitor> ParentSettingVisitor;
 class SpecialParentSettingVisitor : public PlainVisitor
 {
 private:
-  std::stack<AbstractNode *> stack;
+    std::stack<AbstractNode *> stack;
 
 public:
-  void visit(AbstractNode &elem);
+    void visit(AbstractNode &elem);
 };
 
 #endif // AST_OPTIMIZER_INCLUDE_AST_OPT_VISITOR_PARENTSETTINGVISITOR_H_

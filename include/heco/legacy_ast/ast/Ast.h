@@ -23,4 +23,4 @@
 #include "Variable.h"
 #include "VariableDeclaration.h"
 
-#endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_AST_H_
+#endif // AST_OPTIMIZER_INCLUDE_AST_OPT_AST_AST_H_

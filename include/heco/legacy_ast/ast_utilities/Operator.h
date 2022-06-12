@@ -1,30 +1,49 @@
 #ifndef AST_OPTIMIZER_INCLUDE_AST_OPT_AST_OPERATOR_H_
 #define AST_OPTIMIZER_INCLUDE_AST_OPT_AST_OPERATOR_H_
 
+#include <algorithm>
+#include <exception>
+#include <iostream>
+#include <map>
+#include <string>
 #include <utility>
 #include <variant>
-#include <string>
-#include <iostream>
-#include <algorithm>
-#include <map>
 #include <vector>
-#include <exception>
 
 /// Arithmetic Operators
-enum ArithmeticOp : unsigned char {
-  ADDITION = 0, SUBTRACTION, MULTIPLICATION, DIVISION, MODULO, FHE_ADDITION, FHE_SUBTRACTION, FHE_MULTIPLICATION
+enum ArithmeticOp : unsigned char
+{
+    ADDITION = 0,
+    SUBTRACTION,
+    MULTIPLICATION,
+    DIVISION,
+    MODULO,
+    FHE_ADDITION,
+    FHE_SUBTRACTION,
+    FHE_MULTIPLICATION
 };
 
 // Logical & Relational Operators
-enum LogicalOp : unsigned char {
-  LOGICAL_AND = 0, LOGICAL_OR,
-  LESS, LESS_EQUAL, GREATER, GREATER_EQUAL, EQUAL, NOTEQUAL,
-  BITWISE_AND, BITWISE_XOR, BITWISE_OR
+enum LogicalOp : unsigned char
+{
+    LOGICAL_AND = 0,
+    LOGICAL_OR,
+    LESS,
+    LESS_EQUAL,
+    GREATER,
+    GREATER_EQUAL,
+    EQUAL,
+    NOTEQUAL,
+    BITWISE_AND,
+    BITWISE_XOR,
+    BITWISE_OR
 };
 
 // Unary Operators
-enum UnaryOp : unsigned char {
-  LOGICAL_NOT = 0, BITWISE_NOT
+enum UnaryOp : unsigned char
+{
+    LOGICAL_NOT = 0,
+    BITWISE_NOT
 };
 
 // generate a typedef for this std::variant to ensure that always the same Enums order is used
@@ -45,34 +64,40 @@ class Operator;
 // Translate string (generated with toString from Operation) back to an Operation.
 Operator fromStringToOperatorVariant(std::string opString);
 
-class Operator {
- private:
-  OperatorVariant op;
+class Operator
+{
+private:
+    OperatorVariant op;
 
-  friend int comparePrecedence(const Operator &op1, const Operator &op2);
+    friend int comparePrecedence(const Operator &op1, const Operator &op2);
 
- public:
-  static inline const std::string binaryOpStrings[] = {"+", "-", "*", "/", "%", "+++", "---", "***"};
-  static inline const std::string logicalOpStrings[] = {"&&", "||", "<", "<=", ">", ">=", "==", "!=", "&", "^", "|"};
-  static inline const std::string unaryOpStrings[] = {"!", "~"};
+public:
+    static inline const std::string binaryOpStrings[] = { "+", "-", "*", "/", "%", "+++", "---", "***" };
+    static inline const std::string logicalOpStrings[] = {
+        "&&", "||", "<", "<=", ">", ">=", "==", "!=", "&", "^", "|"
+    };
+    static inline const std::string unaryOpStrings[] = { "!", "~" };
 
-  explicit Operator(OperatorVariant op);
+    explicit Operator(OperatorVariant op);
 
-  [[nodiscard]] bool isRightAssociative() const;
+    [[nodiscard]] bool isRightAssociative() const;
 
-  [[nodiscard]] bool isUnary() const;
+    [[nodiscard]] bool isUnary() const;
 
-  [[nodiscard]] std::string toString() const;
+    [[nodiscard]] std::string toString() const;
 
-  friend bool operator==(const Operator &op1, const Operator &op2);
+    friend bool operator==(const Operator &op1, const Operator &op2);
 
-  [[nodiscard]] bool isCommutative() const;
+    [[nodiscard]] bool isCommutative() const;
 
-  bool isRelationalOperator() const;
+    bool isRelationalOperator() const;
 };
 
 /// Compares two Operators for equality
-inline bool operator==(const Operator &op1, const Operator &op2) { return op1.op==op2.op; }
+inline bool operator==(const Operator &op1, const Operator &op2)
+{
+    return op1.op == op2.op;
+}
 
 /// Compares the precedence of this operator against another operator.
 /// \param op1 First operator
@@ -83,4 +108,4 @@ inline bool operator==(const Operator &op1, const Operator &op2) { return op1.op
 /// used to determine precedence instead.
 int comparePrecedence(const Operator &op1, const Operator &op2);
 
-#endif //AST_OPTIMIZER_INCLUDE_AST_OPT_AST_OPERATOR_H_
+#endif // AST_OPTIMIZER_INCLUDE_AST_OPT_AST_OPERATOR_H_

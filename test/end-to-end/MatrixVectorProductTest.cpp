@@ -1,8 +1,8 @@
-#include <vector>
 #include <stdexcept>
-#include "heco/ast_utilities/Scope.h"
-#include "heco/ast_parser/Parser.h"
+#include <vector>
 #include "gtest/gtest.h"
+#include "heco/legacy_ast/ast_parser/Parser.h"
+#include "heco/legacy_ast/ast_utilities/Scope.h"
 
 /// Original, plain C++ program for a matrix-vector product
 ///
@@ -11,22 +11,21 @@
 /// \return matrix * vec
 std::vector<int> matrixVectorProduct(const std::vector<std::vector<int>> &matrix, const std::vector<int> &vec)
 {
+    if (matrix.empty() || matrix[0].size() != vec.size())
+        throw std::runtime_error("Vectors  in dot product must have the same length.");
 
-  if (matrix.empty() || matrix[0].size() != vec.size())
-    throw std::runtime_error("Vectors  in dot product must have the same length.");
+    size_t m = matrix.size();
+    size_t n = vec.size();
 
-  size_t m = matrix.size();
-  size_t n = vec.size();
-
-  std::vector<int> result(matrix.size());
-  for (size_t i = 0; i < m; ++i)
-  {
-    int sum = 0;
-    for (size_t j = 0; j < n; ++j)
+    std::vector<int> result(matrix.size());
+    for (size_t i = 0; i < m; ++i)
     {
-      sum += matrix[i][j] * vec[j];
+        int sum = 0;
+        for (size_t j = 0; j < n; ++j)
+        {
+            sum += matrix[i][j] * vec[j];
+        }
+        result[i] = sum;
     }
-    result[i] = sum;
-  }
-  return result;
+    return result;
 }

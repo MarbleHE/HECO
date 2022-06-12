@@ -21,7 +21,7 @@ class If;
 
 class IndexAccess;
 
-template<typename T>
+template <typename T>
 class Literal;
 
 typedef Literal<bool> LiteralBool;
@@ -47,55 +47,55 @@ class Variable;
 
 class Scope;
 
-class IVisitor {
- public:
+class IVisitor
+{
+public:
+    virtual ~IVisitor() = default;
+    ;
 
-  virtual ~IVisitor() = default;;
+    virtual void visit(BinaryExpression &elem) = 0;
 
-  virtual void visit(BinaryExpression &elem) = 0;
+    virtual void visit(Block &elem) = 0;
 
-  virtual void visit(Block &elem) = 0;
+    virtual void visit(Call &elem) = 0;
 
-  virtual void visit(Call &elem) = 0;
+    virtual void visit(ExpressionList &elem) = 0;
 
-  virtual void visit(ExpressionList &elem) = 0;
+    virtual void visit(For &elem) = 0;
 
-  virtual void visit(For &elem) = 0;
+    virtual void visit(Function &elem) = 0;
 
-  virtual void visit(Function &elem) = 0;
+    virtual void visit(FunctionParameter &elem) = 0;
 
-  virtual void visit(FunctionParameter &elem) = 0;
+    virtual void visit(If &elem) = 0;
 
-  virtual void visit(If &elem) = 0;
+    virtual void visit(IndexAccess &elem) = 0;
 
-  virtual void visit(IndexAccess &elem) = 0;
+    virtual void visit(LiteralBool &elem) = 0;
 
-  virtual void visit(LiteralBool &elem) = 0;
+    virtual void visit(LiteralChar &elem) = 0;
 
-  virtual void visit(LiteralChar &elem) = 0;
+    virtual void visit(LiteralInt &elem) = 0;
 
-  virtual void visit(LiteralInt &elem) = 0;
+    virtual void visit(LiteralFloat &elem) = 0;
 
-  virtual void visit(LiteralFloat &elem) = 0;
+    virtual void visit(LiteralDouble &elem) = 0;
 
-  virtual void visit(LiteralDouble &elem) = 0;
+    virtual void visit(LiteralString &elem) = 0;
 
-  virtual void visit(LiteralString &elem) = 0;
+    virtual void visit(OperatorExpression &elem) = 0;
 
-  virtual void visit(OperatorExpression &elem) = 0;
+    virtual void visit(Return &elem) = 0;
 
-  virtual void visit(Return &elem) = 0;
+    virtual void visit(TernaryOperator &elem) = 0;
 
-  virtual void visit(TernaryOperator &elem) = 0;
+    virtual void visit(UnaryExpression &elem) = 0;
 
-  virtual void visit(UnaryExpression &elem) = 0;
+    virtual void visit(Assignment &elem) = 0;
 
-  virtual void visit(Assignment &elem) = 0;
+    virtual void visit(VariableDeclaration &elem) = 0;
 
-  virtual void visit(VariableDeclaration &elem) = 0;
-
-  virtual void visit(Variable &elem) = 0;
-
+    virtual void visit(Variable &elem) = 0;
 };
 
-#endif //AST_OPTIMIZER_VISITOR_IVISITOR_H
+#endif // AST_OPTIMIZER_VISITOR_IVISITOR_H

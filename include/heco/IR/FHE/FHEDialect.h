@@ -1,19 +1,19 @@
-#ifndef ABC_FHE_FHEDIALECT_H
-#define ABC_FHE_FHEDIALECT_H
+#ifndef HECO_IR_FHE_FHEDIALECT_H
+#define HECO_IR_FHE_FHEDIALECT_H
 
-#include "mlir/IR/Dialect.h"
-#include "mlir/IR/BuiltinTypes.h"
-#include "mlir/IR/BuiltinOps.h"
 #include "mlir/IR/Builders.h"
+#include "mlir/IR/BuiltinOps.h"
+#include "mlir/IR/BuiltinTypes.h"
 #include "mlir/IR/Dialect.h"
 #include "mlir/IR/OpDefinition.h"
 #include "mlir/IR/OpImplementation.h"
-#include "mlir/Interfaces/SideEffectInterfaces.h"
-#include "mlir/Interfaces/ControlFlowInterfaces.h"
+#include "mlir/IR/PatternMatch.h"
 #include "mlir/Interfaces/CallInterfaces.h"
 #include "mlir/Interfaces/CastInterfaces.h"
+#include "mlir/Interfaces/ControlFlowInterfaces.h"
 #include "mlir/Interfaces/CopyOpInterface.h"
 #include "mlir/Interfaces/InferTypeOpInterface.h"
+#include "mlir/Interfaces/SideEffectInterfaces.h"
 
 // Include the C++ class declaration for this Dialect (no define necessary for this one)
 #include "heco/IR/FHE/FHEDialect.h.inc"
@@ -26,4 +26,4 @@
 #define GET_OP_CLASSES
 #include "heco/IR/FHE/FHE.h.inc"
 
-#endif // ABC_FHE_FHEDIALECT_H
+#endif // HECO_IR_FHE_FHEDIALECT_H
