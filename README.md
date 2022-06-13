@@ -19,6 +19,13 @@ It does so while automating as many aspects of the development as possible,
 including automatically identifying and exploiting opportunities to use the powerful SIMD parallelism ("batching") present in many schemes. 
 
 - [Overview](#Overview)
+- [Using HECO](#UsingHECO)
+  - [Python Frontend](#PythonFrontend)
+  - [Modes](#Modes)
+    - [Interactive Mode](#InteractiveMode)
+    - [Transpiler Mode](#TranspilerMode)
+    - [Compiler Mode](#CompilerMode)
+    - [Advanced Use Cases](#AdvancedUseCases)
 - [Installation](#installation)
   - [Prerequisites](#prerequisites)
   - [Building](#building)
@@ -26,8 +33,25 @@ including automatically identifying and exploiting opportunities to use the powe
 
 
 # Overview
-[//]: # (TODO Documentation: Write a short introduction to HECO, what is, and how to use it.)
+HECO is an end-to-end compiler for FHE that takes high-level imperative programs and emits efficient and secure FHE implementations.
+Currently, it supports Ring-LWE based schemes [B](https://eprint.iacr.org/2012/078)/[FV](https://eprint.iacr.org/2012/144), [BGV](https://eprint.iacr.org/2011/277) and [CKKS](https://eprint.iacr.org/2016/421) which offer powerful [SIMD]-like operations and can _batch_ many thousands of values into a single vector-like ciphertext.
 
+TODO (Documentation): Explain that there's a signifcant challenge in "finding f" in crypto, and that this is what HECO focuses on. Include diagram from PPT.
+
+HECO's design and novel optimizations are described in the accompanying [paper](https://arxiv.org/abs/2202.01649).
+In contrast to previous compilers, HECO removes a significant burden from the developer by automating the task of translating a program to the restricted SIMD programming paradigm available in FHE. This can result in speeupds by over an order of magnitude (i.e., 10x or more) when compared to a naive baseline.
+
+# Using HECO
+
+## Python Frontend
+
+
+## Modes
+### Interactive Mode
+
+### Transpiler Mode
+
+### Compiler Mode
 
 # Installation
 
@@ -91,7 +115,7 @@ python3 -m pip install --user cmake-build-debug/python
 
 For a developer installation, add the `-e` option to create a symlink to the freshly built files in `cmake-build-debug/python` instead of copying them.
 
-## Checking the Installation
+
 
 <!--
 1. Check that the CMake project runs through without any fatal error 
@@ -109,14 +133,14 @@ For a developer installation, add the `-e` option to create a symlink to the fre
 -->
 
 
-## Development
+# Development
 
-### Development Environemnt
+## Development Environemnt
 [Visual Studio Code](https://code.visualstudio.com/) is recommended. Remember to set the `-DMLIR_DIR=...` and `-DLLVM_EXTERNAL_LIT=..` options in "Settings &rarr; Workspace &rarr; Cmake: Configure Args".
 The [LLVM TableGen](https://marketplace.visualstudio.com/items?itemName=jakob-erzar.llvm-tablegen) plugin provides syntax highlighting for `*.td` files, which are used to define Dialects, Types, Operations and Rewrite Rules.
 The [MLIR](https://marketplace.visualstudio.com/items?itemName=llvm-vs-code-extensions.vscode-mlir) plugin provides syntax highlighting for `*.mlir` files, which are MLIR programs in textual representation.
 
-### Repository's Structure
+## Repository's Structure
 
 The repository is organized as follow:
 
@@ -134,24 +158,23 @@ src             – source files (.cpp)
 test            – unit tests for all classes
 ```
 
-### Debugging MLIR
-[//]: # (TODO Documentation: Write up how to get useful debug info out of passes)
-
-Useful command line options for `mlir-opt`/`heco-tool` (see also [MLIR Debugging Tips](https://mlir.llvm.org/getting_started/Debugging/) and [IR Printing](https://mlir.llvm.org/docs/PassManagement/#ir-printing)):
- * `-print-ir-before-all` - Prints the IR before each pass
- * `-debug-only=dialect-conversion` - Prints some very useful information on passes and rules being applied
- * `--verify-each=0` - Turns off the verifier, allowing one to see what the (invalid) IR looks like
- * `--allow-unregistered-dialect` - Makes parser accept unknown operations (only works if they are in generic form!)
+## Development Tips for working with MLIR-based Projects
+[MLIR](https://mlir.llvm.org/) is an incredibly powerful tool and makes developing optimizing compilers significantly easier. 
+However, it is not necessarily an easy-to-pick-up tool, e.g., documentation for the rapdily evolving framework is not yet sufficient in many places.
+This short section cannot replace a thorough familiarization with the [MLIR Guide](https://mlir.llvm.org/getting_started/).
+Instead, it provides high-level summarizes to provide context to the existing documentation. 
+See [test/readme.md](test/readme.md) for information on the MLIR/LLVM testing infrastructure.
 
 
 ### Working with TableGen
-This project uses [Table-driven Declarative Rewrite Rules](https://mlir.llvm.org/docs/DeclarativeRewrites/)
-which uses LLVM's [TableGen](https://llvm.org/docs/TableGen/index.html) language/tool.
+This project uses the [Operation Definition Specification](https://mlir.llvm.org/docs/OpDefinitions/) and [Table-driven Declarative Rewrite Rules](https://mlir.llvm.org/docs/DeclarativeRewrites/)
+which use LLVM's [TableGen](https://llvm.org/docs/TableGen/index.html) language/tool.
 This project specifies things in `*.td` files, which are parsed by TableGen and processed by the [mlir-tblgen](https://llvm.org/docs/CommandGuide/mlir-tblgen.html) backend.
 The backend generates `C++` files (headers/sources, as appropriate),
 which are then included (using standard `#include`) into the headers/sources in this project.
 These generation steps are triggered automatically during build through custom CMake commands.
-In order to debug issues stemming from TableGen, it is important to realize that there are four different types of failures:
+
+In order to debug issues stemming from TableGen, it is important to realize that there are **four different types of TableGen failures**:
 * The TableGen parser throws an error like `error: expected ')' in dag init`. 
   This implies a syntax error in the `*.td` file, e.g., missing comma or parenthesis.
   These errors are presented the same as the next kind, but can be recognized since they usually mention "dag", "init" and/or "node". 
@@ -162,3 +185,12 @@ In order to debug issues stemming from TableGen, it is important to realize that
   This can be caused by either user error, e.g., when trying to do a rewrite that doesn't respect return types,
   or it can also be a sign of a bug in the MLIR TableGen backend.
 * The project builds, but crashes during runtime. Again, this can be an indication of a backend bug or user error.
+
+### Debugging MLIR
+[//]: # (TODO Documentation: Write up how to get useful debug info out of passes)
+
+Useful command line options for `mlir-opt`/`heco-tool` (see also [MLIR Debugging Tips](https://mlir.llvm.org/getting_started/Debugging/) and [IR Printing](https://mlir.llvm.org/docs/PassManagement/#ir-printing)):
+ * `-print-ir-before-all` - Prints the IR before each pass
+ * `-debug-only=dialect-conversion` - Prints some very useful information on passes and rules being applied
+ * `--verify-each=0` - Turns off the verifier, allowing one to see what the (invalid) IR looks like
+ * `--allow-unregistered-dialect` - Makes parser accept unknown operations (only works if they are in generic form!)
