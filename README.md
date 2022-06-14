@@ -51,16 +51,44 @@ This is then lowered to Scheme-specific IR (SIR), with operations corresponding 
 # Using HECO
 
 ## Python Frontend
-
+> **Note**
+> HECO's Python Frontend is currently undergoing major work and is therefore not currently ready to use.
 
 ## Modes
+HECO can be used in three distinct modes, each of which target different user needs.
+
 ### Interactive Mode
+In  interactive mode, an interpreter consumes both the input data and the intermediate representation. HECO performs the usual high-level optimizations and lowers the program to 
+the Scheme-specific Intermediate Representation (SIR).
+This is then executed by the interpreter by calling suitable functions in SEAL.
+
+This mode is designed to be easy-to-use and to allow rapid prototyping. While there is a performance overhead due to the interpreted nature of this mode, it should be insignificant in the context of FHE computations.
+
+> **Note**
+> Interactive mode will become available when the new Python frontend is released.
 
 ### Transpiler Mode
+In transpiler mode, HECO outputs a `*.cpp` source file that can be inspected or modified before compiling & linking against SEAL. HECO performs the usual high-level optimizations and lowers the program to the Scheme-specific Intermediate Representation (SIR). This is then lowered to the MLIR `emitC` Dialect, with FHE operations translated to function calls to a SEAL wrapper. The resulting IR is then translated into an actual `*.cpp` file.
+
+Transpiler mode is designed for advanced users that want to integrate the output into larger, existing software projects and/or modify the compiled code to better match their requirements.
+
+<details>
+  <summary>Transpiler Mode Instructions</summary> 
+> In order to use the transpiler mode, you need to add an `emitC` pass to your compilation pipeline. Assuming you are starting with an `*.mlir` file containing HIR, this means running `fhe-tool --from-ssa-pass --bgv2emitc [filename_in].mlir > emitc-translate > [filename_out].cpp`. In order to compile the file, you will need to include [`wrapper.cpp.inc`](test/IR/BGV/wrapper.cpp.inc) into the file and link it against SEAL (see [`CMakeLists.txt`](test/IR/BGV/CMakeLists.txt)).  Note that the current wrapper assumes (for slightly obscure reasons) that the generated code is inside a function  `seal::Ciphertext trace()`. If this was not the case for your input, you might need to adjust the wrapper. By default, it currently serializes the result of the function into a file `trace.ctxt`.
+</details>
 
 ### Compiler Mode
+In compiler mode, HECO outputs an exectuable. In this mode, HECO performs the usual high-level optimizations and lowers the program to the Scheme-specific Intermediate Representation (SIR). This is then lowered to LLVM IR representing function calls to SEAL's C API, which is then compiled and linked against SEAL.
+
+Compiler mode assumes that the input to HECO is a complete program, e.g., has a valid `main()` function. As a result, any input/output behaviour must be realized through the `LoadCiphertext`/`SaveCiphertext` operations in the scheme-specific IR.
+
+Compiler mode is designed primarily for situations where HECO-compiled applications will be automatically deployed without developer interaction, such as in continous integration or other automated tooling.
+
+> **Note**
+> Compiler mode is not yet implemented. If you require an executable, please use Transpiler mode and subsequent manual compilation & linking for now.
 
 # Installation
+HECO uses CMake as its build system for its C++ components and follows MLIR/LLVM conventions. Please see MLIR's [Getting Started](https://mlir.llvm.org/getting_started/) for more details.
 
 ## Prerequisites
 
