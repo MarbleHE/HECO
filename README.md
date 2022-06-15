@@ -91,11 +91,11 @@ You might want to install clang, lld, ninja and optionally [ccache](https://ccac
 Use the following commands to build SEAL. For more build options, see the official [SEAL repo](https://github.com/Microsoft/SEAL#getting-started).
 
 ### Building the HECO Compiler
-This setup assumes that you have built LLVM and MLIR in `$BUILD_DIR`. To build and launch the tests, run
+This setup assumes that you have built LLVM and MLIR in `$BUILD_DIR` (path must be absolute). To build and launch the tests, run
 ```sh
 mkdir build && cd build
 cmake -G Ninja .. -DMLIR_DIR=$BUILD_DIR/lib/cmake/mlir -DLLVM_EXTERNAL_LIT=$BUILD_DIR/bin/llvm-lit
-cmake --build . --target check-fhe
+cmake --build . --target fhe-tool
 ```
 To build the documentation from the TableGen description of the dialect operations, run
 ```sh
