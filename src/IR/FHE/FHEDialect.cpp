@@ -611,6 +611,27 @@ void fhe::ConstOp::getAsmResultNames(function_ref<void(Value, StringRef)> setNam
         return x().front();
 }
 
+/// Removes a combine if one of the operands completely covers the vector already:
+///  e.g., fhe.combine(%8[0:63], %1) : !fhe.batched_secret<64 x f64>
+///  can be simplified to %0 assuming the types match
+::mlir::OpFoldResult fhe::CombineOp::fold(::llvm::ArrayRef<::mlir::Attribute> operands)
+{
+    for (size_t i = 0; i < vectors().size(); ++i)
+    {
+        auto size = getType().dyn_cast<fhe::BatchedSecretType>().getSize();
+        auto v = vectors()[i];
+        if (v.getType().dyn_cast<fhe::BatchedSecretType>().getSize() == size)
+            // Check if the indices for this one cover everything
+            if (auto iaa = indices()[i].dyn_cast_or_null<ArrayAttr>())
+                // check it matches size
+                if ((int)iaa.size() == size)
+                    // Check there first one is 0
+                    if (iaa[0].dyn_cast<IntegerAttr>().getValue() == 0)
+                        return vectors()[i];
+    }
+    return Value(); // Unsuccessful, could not fold
+}
+
 //===----------------------------------------------------------------------===//
 // FHE dialect definitions
 //===----------------------------------------------------------------------===//

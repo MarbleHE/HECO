@@ -9,8 +9,6 @@ module {
     %6 = fhe.rotate(%arg0) by 9 : <64 x f64>
     %7 = fhe.rotate(%arg0) by 1 : <64 x f64>
     %8 = fhe.add(%0, %1, %2, %3, %arg0, %4, %5, %6, %7) : (!fhe.batched_secret<64 x f64>, !fhe.batched_secret<64 x f64>, !fhe.batched_secret<64 x f64>, !fhe.batched_secret<64 x f64>, !fhe.batched_secret<64 x f64>, !fhe.batched_secret<64 x f64>, !fhe.batched_secret<64 x f64>, !fhe.batched_secret<64 x f64>, !fhe.batched_secret<64 x f64>) -> !fhe.batched_secret<64 x f64>
-    %9 = fhe.combine(%8[0:63], %arg0) : !fhe.batched_secret<64 x f64>
-    return %9 : !fhe.batched_secret<64 x f64>
+    return %8 : !fhe.batched_secret<64 x f64>
   }
 }
-

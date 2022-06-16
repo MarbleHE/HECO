@@ -4,6 +4,7 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
         {
             "name": "fhe2bgv (boxblur)",
             "type": "cppdbg",
@@ -11,6 +12,15 @@
             "cwd": "/home/alex/code/HECO",
             "program": "/home/alex/code/HECO/build/bin/fhe-tool",
             "args" : [ "--fhe2bgv", "/home/alex/code/HECO/test/IR/BGV/boxblur.mlir"]
+        },
+        
+        {
+            "name": "canonicalize (boxblur)",
+            "type": "cppdbg",
+            "request": "launch",
+            "cwd": "/home/alex/code/HECO",
+            "program": "/home/alex/code/HECO/build/bin/fhe-tool",
+            "args" : [ "--canonicalize", "/home/alex/code/HECO/test/IR/BGV/boxblur.mlir"]
         }
     ]
 }

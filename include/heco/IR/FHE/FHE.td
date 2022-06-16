@@ -280,6 +280,8 @@ def FHE_CombineOp : Op<FHE_Dialect, "combine", [NoSideEffect]> {
 
   let hasCustomAssemblyFormat = 1;
 
+  let hasFolder = 1;
+
 }
 
 def FHE_MaterializeOp: FHE_Op<"materialize", []> {
