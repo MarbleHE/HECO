@@ -1,0 +1,16 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "fhe2bgv (boxblur)",
+            "type": "cppdbg",
+            "request": "launch",
+            "cwd": "/home/alex/code/HECO",
+            "program": "/home/alex/code/HECO/build/bin/fhe-tool",
+            "args" : [ "--fhe2bgv", "/home/alex/code/HECO/test/IR/BGV/boxblur.mlir"]
+        }
+    ]
+}

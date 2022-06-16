@@ -14,6 +14,7 @@
 #include "heco/Passes/ast2hir/LowerASTtoHIR.h"
 #include "heco/Passes/bgv2emitc/LowerBGVToEmitC.h"
 #include "heco/Passes/bgv2llvm/LowerBGVToLLVM.h"
+#include "heco/Passes/fhe2bgv/LowerFHEToBGV.h"
 #include "heco/Passes/hir2hir/Batching.h"
 #include "heco/Passes/hir2hir/CombineSimplify.h"
 #include "heco/Passes/hir2hir/InternalOperandBatching.h"
@@ -147,6 +148,7 @@ int main(int argc, char **argv)
     PassRegistration<CombineSimplifyPass>();
     PassRegistration<InternalOperandBatchingPass>();
     PassRegistration<ScalarBatchingPass>();
+    PassRegistration<LowerFHEToBGVPass>();
     PassRegistration<LowerBGVToEmitCPass>();
     PassRegistration<LowerBGVToLLVMPass>();
 

@@ -28,6 +28,7 @@ set(LIBS
         HECOLowerast2hir
         HECOLowerBGVToEmitC
         HECOLowerBGVToLLVM
+        HECOLowerFHEToBGV
         HECOCatchAll
         )
 add_llvm_executable(fhe-tool fhe-tool.cpp)
