@@ -52,7 +52,35 @@ This is then lowered to Scheme-specific IR (SIR), with operations corresponding 
 
 ## Python Frontend
 > **Note**
-> HECO's Python Frontend is currently undergoing major work and is therefore not currently ready to use.
+> HECO's Python Frontend is undergoing major work and is therefore not currently ready to use.
+
+```Python
+from heco import *
+
+p = HECOProgram(logging.DEBUG)
+
+with HECOWrapper(p):
+    def main(x : list[Secret[int]], y : list[Secret[int]]):
+        sum = 0
+        for i in range(4):
+            sum += (x[i] - y[i]) * (x[i] - y[i])
+        return sum
+
+# Compiling FHE code
+context = SEAL.BGV.new(poly_mod_degree = 1024)
+f = p.compile(p, context = context)
+
+# Running FHF code
+x = [random.randrange(100) for _ in range(4)]
+y = [random.randrange(100) for _ in range(4)]
+x_enc = context.encrypt(x)
+y_enc = context.encrypt(y)
+s_enc = f(x_enc, y_enc)
+
+# Verifying Result
+s = context.decrypt(s_enc)
+assert s == sum([(x[i] - y[i])**2 for i in range(4)])
+``` 
 
 ## Modes
 HECO can be used in three distinct modes, each of which target different user needs.
@@ -73,8 +101,15 @@ In transpiler mode, HECO outputs a `*.cpp` source file that can be inspected or 
 Transpiler mode is designed for advanced users that want to integrate the output into larger, existing software projects and/or modify the compiled code to better match their requirements.
 
 <details>
-  <summary>Transpiler Mode Instructions</summary> 
-> In order to use the transpiler mode, you need to add an `emitC` pass to your compilation pipeline. Assuming you are starting with an `*.mlir` file containing HIR, this means running `fhe-tool --from-ssa-pass --bgv2emitc [filename_in].mlir > emitc-translate > [filename_out].cpp`. In order to compile the file, you will need to include [`wrapper.cpp.inc`](test/IR/BGV/wrapper.cpp.inc) into the file and link it against SEAL (see [`CMakeLists.txt`](test/IR/BGV/CMakeLists.txt)).  Note that the current wrapper assumes (for slightly obscure reasons) that the generated code is inside a function  `seal::Ciphertext trace()`. If this was not the case for your input, you might need to adjust the wrapper. By default, it currently serializes the result of the function into a file `trace.ctxt`.
+  <summary>Transpiler Mode Instructions</summary>
+
+> In order to use the transpiler mode, you need to extend the default compilation pipeline (assuming you are starting with an `*.mlir` file containing HIR, this would be `fhe-tool --from-ssa-pass [filename_in].mlir`) in two ways. 
+>  1. Specify the scheme (and some core parameters) to be used by adding, e.g., `--hir2bgv=poly_mod_degree=1024` and the corresponding lowering to emitC, e.g., `--bgv2emitc`.
+>  2. Translate to an actual `*.cpp` file by passing the output through  `emitc-translate`
+>
+> A full example might look like this:  `fhe-tool --from-ssa-pass --hir2bgv=poly_mod_degree=1024 --bgv2emitc [filename_in].mlir > emitc-translate > [filename_out].cpp`.
+>
+> In order to compile the file, you will need to include [`wrapper.cpp.inc`](test/IR/BGV/wrapper.cpp.inc) into the file and link it against SEAL (see [`CMakeLists.txt`](test/IR/BGV/CMakeLists.txt)).  Note that the current wrapper assumes (for slightly obscure reasons) that the generated code is inside a function  `seal::Ciphertext trace()`. If this was not the case for your input, you might need to adjust the wrapper. By default, it currently serializes the result of the function into a file `trace.ctxt`.
 </details>
 
 ### Compiler Mode
