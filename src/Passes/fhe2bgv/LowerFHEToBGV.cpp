@@ -49,7 +49,6 @@ public:
         // TODO: MATCH PARAMETERS PROPERLY OR GET ACTUAL KEY FROM SOMEWHERE
         auto key_type = bgv::GaloisKeysType::get(rewriter.getContext(), 0, 0, 0, poly_type);
         auto keys = rewriter.create<bgv::LoadGaloisKeysOp>(op.getLoc(), key_type, "foo.glk", "glk.parms");
-        op.getOperation()->getParentOp()->dump();
         rewriter.replaceOpWithNewOp<bgv::RotateOp>(op, dstType, materialized_operand, keys, op.i());
         return success();
     };
