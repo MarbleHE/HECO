@@ -1,11 +1,11 @@
+#include "heco/Passes/hir2hir/UnrollLoops.h"
 #include <iostream>
 #include <memory>
 #include "mlir/Dialect/Affine/IR/AffineOps.h"
+#include "mlir/Dialect/Affine/LoopUtils.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
 #include "mlir/Dialect/SCF/SCF.h"
 #include "mlir/Dialect/Tensor/IR/Tensor.h"
-//#include "mlir/Transforms/LoopUtils.h"
-#include "heco/Passes/hir2hir/UnrollLoops.h"
 
 using namespace mlir;
 
@@ -18,9 +18,11 @@ void unrollLoop(AffineForOp &op, IRRewriter &rewriter)
     }
 
     // TODO: Fix MLIR issues in mlir/Transforms/LoopUtils.h where the typedef for FuncOp is messing with the fwd
-    // declaration of FuncOp if(loopUnrollFull(op).failed()) {
-    //   emitError(op.getLoc(), "Failed to unroll loop");
-    // }
+    // declaration of FuncOp
+    if (loopUnrollFull(op).failed())
+    {
+        emitError(op.getLoc(), "Failed to unroll loop");
+    }
 }
 
 void UnrollLoopsPass::runOnOperation()
