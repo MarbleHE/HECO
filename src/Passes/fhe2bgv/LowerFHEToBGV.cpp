@@ -187,7 +187,7 @@ public:
     }
 };
 
-/// More boiler-plate code that isn't really dialect specific (except for one mention of the target type)
+/// More boiler-plate code that isn't dialect specific
 class BGVReturnPattern final : public OpConversionPattern<func::ReturnOp>
 {
 public:
@@ -204,15 +204,12 @@ public:
         auto dstType = this->getTypeConverter()->convertType(op->getOperandTypes().front());
         if (!dstType)
             return failure();
-        if (auto bst = dstType.dyn_cast_or_null<fhe::BatchedSecretType>())
-        {
-            rewriter.setInsertionPoint(op);
-            auto materialized =
-                typeConverter->materializeTargetConversion(rewriter, op.getLoc(), dstType, op.operands());
-            // build a new return op
-            rewriter.replaceOpWithNewOp<func::ReturnOp>(op, materialized);
 
-        } // else do nothing
+        rewriter.setInsertionPoint(op);
+        auto materialized = typeConverter->materializeTargetConversion(rewriter, op.getLoc(), dstType, op.operands());
+        // build a new return op
+        rewriter.replaceOpWithNewOp<func::ReturnOp>(op, materialized);
+
         return success();
     }
 };
