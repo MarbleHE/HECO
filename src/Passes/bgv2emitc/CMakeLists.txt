@@ -17,7 +17,7 @@ add_heco_conversion_library(HECOLowerBGVToEmitC
         Core
 
         LINK_LIBS PUBLIC
-        HECOBGV
-        MLIREmitC
+        HECOBGVDialect
+        MLIREmitCDialect
         )
 

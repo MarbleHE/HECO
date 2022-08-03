@@ -14,7 +14,7 @@
 #include "llvm/ADT/ScopedHashTable.h"
 #include "mlir/Dialect/Affine/IR/AffineOps.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
-#include "mlir/Dialect/SCF/SCF.h"
+#include "mlir/Dialect/SCF/IR/SCF.h"
 #include "mlir/Dialect/Tensor/IR/Tensor.h"
 #include "mlir/Transforms/DialectConversion.h"
 
@@ -664,7 +664,7 @@ void convertFunctionOp2FuncOp(ast::FunctionOp &f, IRRewriter &rewriter, CustomSy
     // Create the new builtin.func Op
     rewriter.setInsertionPoint(f);
     auto func_type = rewriter.getFunctionType(argTypes, f.return_typeAttr().getValue());
-    auto new_f = rewriter.create<FuncOp>(f.getLoc(), f.name(), func_type);
+    auto new_f = rewriter.create<func::FuncOp>(f.getLoc(), f.name(), func_type);
     new_f.setPrivate();
     auto entryBlock = new_f.addEntryBlock();
     rewriter.setInsertionPointToStart(entryBlock);

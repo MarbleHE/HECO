@@ -1,6 +1,7 @@
 #ifndef HECO_PASSES_HIR2HIR_INTERNALOPERANDBATCHING_H_
 #define HECO_PASSES_HIR2HIR_INTERNALOPERANDBATCHING_H_
 
+#include "mlir/IR/BuiltinOps.h"
 #include "mlir/Pass/Pass.h"
 
 struct InternalOperandBatchingPass

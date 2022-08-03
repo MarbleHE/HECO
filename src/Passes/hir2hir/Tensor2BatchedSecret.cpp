@@ -5,7 +5,7 @@
 #include "mlir/Transforms/DialectConversion.h"
 #include "mlir/Dialect/Affine/IR/AffineOps.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
-#include "mlir/Dialect/SCF/SCF.h"
+#include "mlir/Dialect/SCF/IR/SCF.h"
 #include "mlir/Dialect/Tensor/IR/Tensor.h"
 #include "heco/IR/FHE/FHEDialect.h"
 
@@ -125,13 +125,13 @@ public:
   }
 };
 
-class FunctionPattern final : public OpConversionPattern<FuncOp>
+class FunctionPattern final : public OpConversionPattern<func::FuncOp>
 {
 public:
-  using OpConversionPattern<FuncOp>::OpConversionPattern;
+  using OpConversionPattern<func::FuncOp>::OpConversionPattern;
 
   LogicalResult
-  matchAndRewrite(FuncOp op, typename FuncOp::Adaptor adaptor,
+  matchAndRewrite(func::FuncOp op, typename func::FuncOp::Adaptor adaptor,
                   ConversionPatternRewriter &rewriter) const override
   {
 
@@ -223,9 +223,9 @@ void Tensor2BatchedSecretPass::runOnOperation()
   target.addLegalDialect<fhe::FHEDialect>();
   target.addDynamicallyLegalDialect<tensor::TensorDialect>([&](Operation *op)
                                                            { return type_converter.isLegal(op); });
-  target.addDynamicallyLegalOp<FuncOp>([&](Operation *op)
+  target.addDynamicallyLegalOp<func::FuncOp>([&](Operation *op)
                                        {
-    auto fop = llvm::dyn_cast<FuncOp>(op);
+    auto fop = llvm::dyn_cast<func::FuncOp>(op);
     for (auto t: op->getOperandTypes()) {
       if (!type_converter.isLegal(t))
         return false;

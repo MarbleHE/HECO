@@ -1,6 +1,7 @@
 #ifndef HECO_PASSES_HIR2HIR_SCALARBATCHING_H_
 #define HECO_PASSES_HIR2HIR_SCALARBATCHING_H_
 
+#include "mlir/IR/BuiltinOps.h"
 #include "mlir/Pass/Pass.h"
 
 struct ScalarBatchingPass : public mlir::PassWrapper<ScalarBatchingPass, mlir::OperationPass<mlir::ModuleOp>>

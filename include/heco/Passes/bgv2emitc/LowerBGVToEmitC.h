@@ -1,6 +1,7 @@
 #ifndef HECO_PASSES_BGV2EMITC_LOWERBGVTOEMITC_H_
 #define HECO_PASSES_BGV2EMITC_LOWERBGVTOEMITC_H_
 
+#include "mlir/IR/BuiltinOps.h"
 #include "mlir/Pass/Pass.h"
 
 struct LowerBGVToEmitCPass : public mlir::PassWrapper<LowerBGVToEmitCPass, mlir::OperationPass<mlir::ModuleOp>>

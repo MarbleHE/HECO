@@ -4,7 +4,7 @@
 #include "heco/IR/FHE/FHEDialect.h"
 #include "mlir/Dialect/Affine/IR/AffineOps.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
-#include "mlir/Dialect/SCF/SCF.h"
+#include "mlir/Dialect/SCF/IR/SCF.h"
 #include "mlir/Dialect/Tensor/IR/Tensor.h"
 #include "mlir/Pass/Pass.h"
 #include "mlir/Transforms/DialectConversion.h"
@@ -131,7 +131,7 @@ void NaryPass::runOnOperation()
     }
 
     // Now, go through and actually start collapsing the operations!
-    for (auto f : llvm::make_early_inc_range(block.getOps<FuncOp>()))
+    for (auto f : llvm::make_early_inc_range(block.getOps<func::FuncOp>()))
     {
         for (auto op : llvm::make_early_inc_range(f.getBody().getOps<fhe::AddOp>()))
         {
@@ -139,7 +139,7 @@ void NaryPass::runOnOperation()
         }
     }
 
-    for (auto f : llvm::make_early_inc_range(block.getOps<FuncOp>()))
+    for (auto f : llvm::make_early_inc_range(block.getOps<func::FuncOp>()))
     {
         for (auto op : llvm::make_early_inc_range(f.getBody().getOps<fhe::SubOp>()))
         {
@@ -147,7 +147,7 @@ void NaryPass::runOnOperation()
         }
     }
 
-    for (auto f : llvm::make_early_inc_range(block.getOps<FuncOp>()))
+    for (auto f : llvm::make_early_inc_range(block.getOps<func::FuncOp>()))
     {
         for (auto op : llvm::make_early_inc_range(f.getBody().getOps<fhe::MultiplyOp>()))
         {

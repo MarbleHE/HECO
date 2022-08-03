@@ -17,7 +17,7 @@ add_heco_conversion_library(HECOLowerFHEToBGV
         Core
 
         LINK_LIBS PUBLIC
-        HECOFHE
-        HECOBGV
+        HECOFHEDialect
+        HECOBGVDialect
         )
 

@@ -1,6 +1,7 @@
 #ifndef HECO_PASSES_HIR2HIR_NARY_H_
 #define HECO_PASSES_HIR2HIR_NARY_H_
 
+#include "mlir/IR/BuiltinOps.h"
 #include "mlir/Pass/Pass.h"
 
 struct NaryPass : public mlir::PassWrapper<NaryPass, mlir::OperationPass<mlir::ModuleOp>>

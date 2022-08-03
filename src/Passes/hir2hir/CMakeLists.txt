@@ -16,6 +16,6 @@ add_heco_conversion_library(HECOCatchAll
         Core
 
         LINK_LIBS PUBLIC
-        HECOFHE
+        HECOFHEDialect
         )
 

@@ -4,12 +4,12 @@ message(  ${dialect_libs} )
 set(LIBS
         ${dialect_libs}
         ${conversion_libs}
-        MLIREmitC
+        MLIREmitCDialect
         MLIROptLib
-        HECOAST
-        HECOFHE
-        HECOBGV
-        HECOPoly
+        HECOASTDialect
+        HECOFHEDialect
+        HECOBGVDialect
+        HECOPolyDialect
         MLIRAnalysis
         MLIRCallInterfaces
         MLIRCastInterfaces

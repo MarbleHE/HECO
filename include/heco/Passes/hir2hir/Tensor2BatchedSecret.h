@@ -1,6 +1,7 @@
 #ifndef HECO_PASSES_HIR2HIR_TENSOR2BATCHEDSECRET_H_
 #define HECO_PASSES_HIR2HIR_TENSOR2BATCHEDSECRET_H_
 
+#include "mlir/IR/BuiltinOps.h"
 #include "mlir/Pass/Pass.h"
 
 struct Tensor2BatchedSecretPass

@@ -17,7 +17,7 @@ add_heco_conversion_library(HECOLowerast2hir
         Core
 
         LINK_LIBS PUBLIC
-        HECOAST
-        HECOFHE
+        HECOASTDialect
+        HECOFHEDialect
         )
 

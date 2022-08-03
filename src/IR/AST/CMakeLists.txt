@@ -1,4 +1,4 @@
-add_heco_dialect_library(HECOAST
+add_heco_dialect_library(HECOASTDialect
         ASTDialect.cpp
 
         ADDITIONAL_HEADER_DIRS

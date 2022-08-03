@@ -1,4 +1,4 @@
-add_heco_dialect_library(HECOBGV
+add_heco_dialect_library(HECOBGVDialect
         BGVDialect.cpp
 
         ADDITIONAL_HEADER_DIRS

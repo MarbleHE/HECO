@@ -1,4 +1,4 @@
-add_heco_dialect_library(HECOPoly
+add_heco_dialect_library(HECOPolyDialect
         PolyDialect.cpp
 
         ADDITIONAL_HEADER_DIRS
