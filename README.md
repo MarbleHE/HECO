@@ -104,10 +104,10 @@ Transpiler mode is designed for advanced users that want to integrate the output
   <summary>Transpiler Mode Instructions</summary>
 
 > In order to use the transpiler mode, you need to extend the default compilation pipeline (assuming you are starting with an `*.mlir` file containing HIR, this would be `fhe-tool --from-ssa-pass [filename_in].mlir`) in two ways. 
->  1. Specify the scheme (and some core parameters) to be used by adding, e.g., `--fhe2bgv=poly_mod_degree=1024` and the corresponding lowering to emitC, e.g., `--bgv2emitc`.
+>  1. Specify the scheme (and some core parameters) to be used by adding, e.g., `--fhe2bgv=poly_mod_degree=1024` and the corresponding lowering to emitC, e.g., `--bgv2emitc`, followed by `--cse --canonicalize` to clean up redundant operations introduced by the lowering.
 >  2. Translate to an actual `*.cpp` file by passing the output through  `emitc-translate`
 >
-> A full example might look like this:  `fhe-tool --from-ssa-pass --fhe2bgv=poly_mod_degree=1024 --bgv2emitc [filename_in].mlir > emitc-translate > [filename_out].cpp`.
+> A full example might look like this:  `fhe-tool --from-ssa-pass --fhe2bgv=poly_mod_degree=1024 --cse --canonicalize --bgv2emitc [filename_in].mlir > emitc-translate > [filename_out].cpp`.
 >
 > In order to compile the file, you will need to include [`wrapper.cpp.inc`](test/IR/BGV/wrapper.cpp.inc) into the file and link it against SEAL (see [`CMakeLists.txt`](test/IR/BGV/CMakeLists.txt)).  Note that the current wrapper assumes (for slightly obscure reasons) that the generated code is inside a function  `seal::Ciphertext trace()`. If this was not the case for your input, you might need to adjust the wrapper. By default, it currently serializes the result of the function into a file `trace.ctxt`.
 </details>
@@ -148,6 +148,33 @@ Please note that you will need to pull from [this fork](https://github.com/Marbl
 as this project relies on a series of fixes/workarounds that might not yet be upstreamed.
 You might want to install clang, lld, ninja and optionally [ccache](https://ccache.dev/).
 
+<details>
+  <summary>MLIR Installation/Build Commands</summary>
+
+> The following is a reasonable start for a "Developer Friendly" installation of MLIR:
+>  ```sh
+>  git clone https://github.com/llvm/llvm-project.git
+>
+>  mkdir llvm-project/build
+>
+>  cd llvm-project/build
+>
+>  cmake -G Ninja ../llvm \
+>    -DLLVM_ENABLE_PROJECTS=mlir \
+>    -DLLVM_BUILD_EXAMPLES=OFF \
+>    -DLLVM_TARGETS_TO_BUILD=X86 \
+>    -DCMAKE_BUILD_TYPE=Debug \
+>    -DLLVM_ENABLE_ASSERTIONS=ON \
+>    -DCMAKE_C_COMPILER=clang \
+>    -DCMAKE_CXX_COMPILER=clang++ \
+>    -DLLVM_CCACHE_BUILD=ON \
+>    -DLLVM_INSTALL_UTILS=ON \
+>    -DMLIR_INCLUDE_INTEGRATION_TESTS=ON
+>
+>  cmake --build . --target check-mlir mlir-tblgen
+>  ```
+
+</details>
 
 ## Building
 
