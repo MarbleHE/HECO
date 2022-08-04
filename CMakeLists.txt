@@ -5,7 +5,6 @@ if (MSVC)
     cmake_policy(SET CMP0091 NEW)
 endif ()
 
-
 #########################
 # Project Configuration #
 #########################
@@ -148,8 +147,6 @@ endif ()
 ###################
 # Directory Setup #
 ###################
-
-
 add_subdirectory(include/heco)
 add_subdirectory(src)
 
@@ -211,9 +208,6 @@ if (STANDALONE_INSTALL)
 endif()
 
 
-
-
-
 ####################################################################################
 # Python Frontend
 #
@@ -221,10 +215,10 @@ endif()
 ####################################################################################
 
 # Install pyabc package (for dev)
-find_package (Python3 COMPONENTS Interpreter Development)
+find_package (Python3 3.10 COMPONENTS Interpreter Development)
 
 if(NOT Python3_Interpreter_FOUND)
-    message(WARNING "The ABC python frontend requires Python 3, but no installation
+    message(WARNING "The HECO python frontend requires Python 3, but no installation
         was found. Skipping frontend building...")
 endif()
 
@@ -245,7 +239,7 @@ if(PYTHON_FRONTEND_BUILD)
     FetchContent_Declare(
             pybind11
             GIT_REPOSITORY https://github.com/pybind/pybind11.git
-            GIT_TAG v2.7.1)
+            GIT_TAG v2.10.0)
 
     FetchContent_GetProperties(pybind11)
     if(NOT pybind11_POPULATED)
@@ -263,23 +257,26 @@ endif()
 include(GNUInstallDirs)
 
 
-#####################################################################################
+####################################
 ## TESTING
 ##
-## only if this is the root project
-#####################################################################################
+# added only if this is the root project
+####################################
 if (HECO_STANDALONE_BUILD)
     message("Enabling HECO Tests")
     enable_testing()
-    add_subdirectory(test EXCLUDE_FROM_ALL)
+    add_subdirectory(test)
 endif ()
 
 ##############################
 # TARGET: benchmarks
 #
 # A collection of benchmarks
+# added only if this is the root project
 ##############################
-if (SEAL_FOUND)
-    add_subdirectory(test/bench EXCLUDE_FROM_ALL)
-    add_subdirectory(test/IR/BGV)
-endif (SEAL_FOUND)
+if (HECO_STANDALONE_BUILD)
+  if (SEAL_FOUND)
+      add_subdirectory(test/bench)
+      add_subdirectory(test/IR/BGV)
+  endif (SEAL_FOUND)
+endif ()

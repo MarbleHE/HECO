@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15.0)
+cmake_minimum_required(VERSION 3.19.0)
 include(FetchContent) # Introduced in CMake 3.11
 include(GoogleTest) # Introduced in CMake 3.10
 
@@ -11,7 +11,7 @@ if(NOT TARGET gtest)
     FetchContent_Declare(
         googletest
         GIT_REPOSITORY https://github.com/google/googletest.git
-        GIT_TAG release-1.10.0
+        GIT_TAG release-1.12.1
     )
     FetchContent_MakeAvailable(googletest)
 endif()
