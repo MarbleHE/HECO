@@ -137,6 +137,8 @@ On Ubuntu, this can be done by running the following:
 sudo apt-get install cmake doxygen clang libboost-all-dev python3-dev`
 ```
 
+If the version of cmake provided by your package manager is too old, you might need to [manually install](https://askubuntu.com/a/976700) a newer version.
+
 
 ### Microsoft SEAL
 HECO supports the [Microsoft SEAL](https://github.com/microsoft/SEAL) FHE library as a "backend" in its `interactive` mode.
