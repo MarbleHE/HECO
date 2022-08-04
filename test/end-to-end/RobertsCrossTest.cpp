@@ -2,6 +2,10 @@
 #include <random>
 #include "gtest/gtest.h"
 
+#ifdef HAVE_SEAL_BFV
+#include "RobertsCross.h"
+#endif
+
 /// Original, plain C++ program for a naive RobertsCross Kernel
 /// This uses two 2x2 Kernels, which we pad to 3x3 kernels for ease of implementation
 ///         |  1   0  0 |
@@ -127,14 +131,54 @@ class RobertsCrossKernelTest : public ::testing::Test {  /* NOLINT (predictable 
 
   void printMatrix(size_t size, std::vector<int> &matrix) {
     for (int64_t row = (int64_t) size - 1; row >= 0; --row) {
-      std::cout << matrix.at(0*size + row);
+      std::cout << std::setw(5) << matrix.at(0*size + row);
       for (size_t col = 1; col < size; ++col) {
-        std::cout << "\t" << matrix.at(col*size + row);
+        std::cout << "\t" << std::setw(5) << matrix.at(col*size + row);
       }
       std::cout << std::endl;
     }
   }
 };
+
+#ifdef HAVE_SEAL_BFV
+TEST_F(RobertsCrossKernelTest, Clear_EncryptedPorcupine_Equivalence) { /* NOLINT */
+  size_t poly_modulus_degree = 2 << 12;
+  size_t img_size = std::sqrt(poly_modulus_degree / 2);
+  std::vector<int> img;
+  getInputMatrix(img_size, img);
+  std::cout << "img:" << std::endl;
+  printMatrix(img_size, img);
+
+  MultiTimer dummy = MultiTimer();
+  auto result = encryptedRobertsCrossPorcupine(dummy, img, poly_modulus_degree);
+  result.resize(img.size());
+  std::vector<int> enc(begin(result), end(result));
+  std::cout << "encrypted:" << std::endl;
+  printMatrix(img_size, enc);
+
+  // Compare to reference cleartext implementation
+  auto ref = naiveRobertsCrossKernel(img);
+  std::cout << "ref:" << std::endl;
+  printMatrix(img_size, ref);
+  EXPECT_EQ(enc, ref);
+}
+
+TEST_F(RobertsCrossKernelTest, Clear_EncryptedBatched_Equivalence) { /* NOLINT */
+  size_t poly_modulus_degree = 2 << 12;
+  size_t img_size = std::sqrt(poly_modulus_degree / 2);
+  std::vector<int> img;
+  getInputMatrix(img_size, img);
+
+  MultiTimer dummy = MultiTimer();
+  auto result = encryptedBatchedRobertsCross(dummy, img, poly_modulus_degree);
+  result.resize(img.size());
+  std::vector<int> enc(begin(result), end(result));
+
+  // Compare to reference cleartext implementation
+  auto ref = naiveRobertsCrossKernel(img);
+  EXPECT_EQ(enc, ref);
+}
+#endif //HAVE_SEAL_BFV
 
 /// Test to ensure that naiveRobertsCrossKernel and fastRobertsCrossKernel actually compute the same thing!
 TEST_F(RobertsCrossKernelTest, DISABLED_NaiveRobertsCrossKernel_FastRobertsCrossKernel_Equivalence) {  /* NOLINT */

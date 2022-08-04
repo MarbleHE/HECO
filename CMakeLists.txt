@@ -1,34 +1,102 @@
-cmake_minimum_required(VERSION 3.9...3.17)
-
-# For older versions that do not automatically use highest allowed policy
-if (${CMAKE_VERSION} VERSION_LESS 3.12)
-    cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
-endif ()
+cmake_minimum_required(VERSION 3.19)
 
 # Required for selecting MSVC runtime library
 if (MSVC)
     cmake_policy(SET CMP0091 NEW)
 endif ()
 
-# Set to test the python frontend. On by default.
-if(NOT PYTHON_FRONTEND_DEV)
-    set(PYTHON_FRONTEND_DEV true)
+#########################
+# Project Configuration #
+#########################
+
+# Only define a project when this CMakeLists.txt is in the "root" (i.e., this is a standtalone build)
+if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+        project(HECO
+                VERSION 0.1
+                DESCRIPTION "MLIR-based compiler for Fully Homomorphic Encryption (FHE) compilation."
+                LANGUAGES CXX C)
+        set(HECO_STANDALONE_BUILD TRUE)
 endif()
 
-# Set to build the python frontend (installing pybind11 and building the wrapper). On by default.
-if(NOT PYTHON_FRONTEND_BUILD)
-    set(PYTHON_FRONTEND_BUILD true)
+######################
+# SEAL Configuration #
+######################
+
+find_package(SEAL 4.0 CONFIG) # sets SEAL_FOUND variable
+
+###########################
+# MLIR/LLVM Configuration #
+###########################
+if(HECO_STANDALONE_BUILD)
+
+        set(CMAKE_BUILD_WITH_INSTALL_NAME_DIR ON)
+
+        # Locate MLIR, which recursively locates LLVM
+        find_package(MLIR REQUIRED CONFIG)
+        message(STATUS "Using MLIRConfig.cmake in: ${MLIR_DIR}")
+        message(STATUS "Using LLVMConfig.cmake in: ${LLVM_DIR}")
+
+        set(LLVM_RUNTIME_OUTPUT_INTDIR ${CMAKE_BINARY_DIR}/bin)
+        set(LLVM_LIBRARY_OUTPUT_INTDIR ${CMAKE_BINARY_DIR}/lib)
+
+        list(APPEND CMAKE_MODULE_PATH "${MLIR_CMAKE_DIR}")
+        list(APPEND CMAKE_MODULE_PATH "${LLVM_CMAKE_DIR}")
+
+        include(TableGen)
+        include(AddLLVM)
+        include(AddMLIR)
+        include(HandleLLVMOptions)
+
+        include_directories(${LLVM_INCLUDE_DIRS})
+        include_directories(${MLIR_INCLUDE_DIRS})
+        include_directories(${PROJECT_SOURCE_DIR}/include)
+        include_directories(${PROJECT_BINARY_DIR}/include)
+        link_directories(${LLVM_BUILD_LIBRARY_DIR})
+        add_definitions(${LLVM_DEFINITIONS})
+
+        #TODO (Implementation) Handling of unit-tests, e.g. like in CIRCT https://github.com/llvm/circt/blob/fe1ddfc6e3cd2af7d4fa333897d2a4da8d4521f4/CMakeLists.txt#L84-L121
+
+        set(CMAKE_LIBRARY_OUTPUT_DIRECTORY
+                "${CMAKE_CURRENT_BINARY_DIR}/lib${LLVM_LIBDIR_SUFFIX}")
+        set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin")
+
+else() # Not a standalone build
+        #TODO Test out nested builds!
+        message(WARNING "Non-Standalone build for HECO is untested/unsupported.")
 endif()
 
-project(ast_optimizer
-        VERSION 0.1
-        DESCRIPTION "Optimizer for Fully Homomorphic Encryption (FHE) working on an AST-like (Abstract Syntax Tree) representation of a program"
-        LANGUAGES CXX)
 
-set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules" ${CMAKE_MODULE_PATH})
+######################
+# HECO Configuration #
+######################
+
+list(APPEND CMAKE_MODULE_PATH "${MLIR_MAIN_SRC_DIR}/cmake/modules")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
+include(AddHECO)
+
+# Installing the headers and docs needs to depend on generating any public
+# tablegen'd targets.
+add_custom_target(heco-headers)
+set_target_properties(heco-headers PROPERTIES FOLDER "Misc")
+add_custom_target(heco-doc)
+
+# Add MLIR and LLVM headers to the include path
+include_directories(${LLVM_INCLUDE_DIRS})
+include_directories(${MLIR_INCLUDE_DIRS})
+
+# Add HECO files to the include path
+include_directories(${HECO_MAIN_INCLUDE_DIR})
+include_directories(${HECO_INCLUDE_DIR})
+
+
+##############################
+# Compiler Setup (esp. MSVC)
+##############################
 
 # Global flags aren't good CMAKE style, but these should work across pretty much all compilers
 set(CXXFLAGS "--coverage --pedantic-errors -Wall -WError")
+
+set(CMAKE_CXX_STANDARD 14 CACHE STRING "C++ standard to conform to")
 
 if (MSVC)
     message("Using MSVC")
@@ -45,9 +113,6 @@ if (MSVC)
     # Force MSVC to conform to C++ standard's idea of exceptions
     add_compile_options(/EHsc)
 
-    # Make (nearly) all warnings errors
-    add_compile_options(/W4 /WX)
-
     # Try using variants
     add_compile_options(/std:c++17)
 
@@ -61,12 +126,6 @@ if (MSVC)
 endif ()
 
 ##############################
-# Determine if SEAL is available
-##############################
-
-find_package(SEAL 3.6 CONFIG) # sets SEAL_FOUND variable
-
-##############################
 # Download and install nlohmann-json if required
 ##############################
 
@@ -75,6 +134,7 @@ if (NOT nlohmann_json_FOUND)
     message("Downloading nlohmann_json")
     include(FetchContent)
     set(JSON_BuildTests OFF CACHE INTERNAL "")
+    set(JSON_SystemInclude ON CACHE INTERNAL "")
     set(FETCHCONTENT_UPDATES_DISCONNECTED ON)
     FetchContent_Declare(
             nlohmann_json
@@ -83,218 +143,69 @@ if (NOT nlohmann_json_FOUND)
     FetchContent_MakeAvailable(nlohmann_json)
 endif ()
 
-##############################
-# TARGET: ast_opt
-# TODO: Rename this target!
-#
-# The main ast_optimizer as a library
-##############################
 
-# All source files (*.cpp) for ABC
-set(SOURCE_FILES
-        ${ast_optimizer_SOURCE_DIR}/src/ast/AbstractNode.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/Assignment.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/BinaryExpression.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/Block.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/Call.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/ExpressionList.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/For.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/Function.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/FunctionParameter.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/If.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/IndexAccess.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/OperatorExpression.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/Return.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/TernaryOperator.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/UnaryExpression.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/Variable.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/ast/VariableDeclaration.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/compiler/Compiler.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/parser/Errors.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/parser/File.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/parser/Parser.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/parser/PushBackStream.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/parser/Tokenizer.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/parser/Tokens.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/runtime/DummyCiphertext.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/runtime/DummyCiphertextFactory.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/runtime/RuntimeVisitor.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/runtime/SealCiphertext.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/runtime/SealCiphertextFactory.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/utilities/BatchingConstraint.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/utilities/ComplexValue.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/utilities/Datatype.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/utilities/NodeUtils.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/utilities/Operator.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/utilities/PlainVisitor.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/utilities/Scope.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/utilities/ScopedVisitor.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/visitor/ExpressionBatcher.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/visitor/HashVisitor.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/visitor/ParentSettingVisitor.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/visitor/PrintVisitor.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/visitor/ProgramPrintVisitor.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/visitor/SecretBranchingVisitor.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/visitor/TypeCheckingVisitor.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/visitor/Vectorizer.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/visitor/controlFlowGraph/ControlFlowGraphVisitor.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/visitor/controlFlowGraph/GraphNode.cpp
-        ${ast_optimizer_SOURCE_DIR}/src/visitor/controlFlowGraph/NodeRelationship.cpp
-        )
+###################
+# Directory Setup #
+###################
+add_subdirectory(include/heco)
+add_subdirectory(src)
 
-# This contains all the header-only files (e.g., abstract classes, interfaces and templates that don't have *.cpp file)
-set(HEADER_ONLY_SOURCES
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractExpression.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractStatement.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractTarget.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/Ast.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/AbstractCiphertext.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/AbstractCiphertextFactory.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/AbstractNoiseMeasuringCiphertext.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/AbstractValue.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/Cleartext.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/IVisitor.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/VariableMap.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/Visitor.h)
 
-# This contains the headers that developers that want to link directly against ABC might need to have access to
-# These are the headers that are installed when ABC is installed as a system-wide library
-set(PUBLIC_HEADERS
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractExpression.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractNode.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/AbstractStatement.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/Assignment.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/BinaryExpression.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/Block.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/Call.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/ExpressionList.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/For.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/Function.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/FunctionParameter.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/If.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/IndexAccess.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/Literal.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/OperatorExpression.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/Return.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/TernaryOperator.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/UnaryExpression.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/Variable.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/ast/VariableDeclaration.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/compiler/Compiler.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/parser/Errors.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/parser/Parser.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/parser/PushBackStream.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/parser/Tokenizer.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/parser/Tokens.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/DummyCiphertext.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/DummyCiphertextFactory.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/RuntimeVisitor.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/SealCiphertext.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/runtime/SealCiphertextFactory.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/BatchingConstraint.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/ComplexValue.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/Datatype.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/NodeUtils.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/IVisitor.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/Operator.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/PlainVisitor.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/Scope.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/ScopedVisitor.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/utilities/VariableMap.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/ExpressionBatcher.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/HashVisitor.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/PrintVisitor.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/ProgramPrintVisitor.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/SecretBranchingVisitor.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/TypeCheckingVisitor.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/Vectorizer.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/controlFlowGraph/ControlFlowGraphVisitor.h
-        ${ast_optimizer_SOURCE_DIR}/include/ast_opt/visitor/controlFlowGraph/NodeRelationship.h
-        )
+# option(HECO_INCLUDE_DOCS "Generate build targets for the HECO docs.")
+# if (HECO_INCLUDE_DOCS)
+#   add_subdirectory(docs)
+# endif()
 
-# build a library out of the code to be used by the tests
-add_library(ast_opt ${SOURCE_FILES} ${HEADER_ONLY_SOURCES})
-add_library(ast_opt::ast_opt ALIAS ast_opt)
-target_link_libraries(ast_opt PUBLIC nlohmann_json::nlohmann_json)
-target_include_directories(ast_opt PUBLIC
-        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:include>)
-set_target_properties(ast_opt PROPERTIES PUBLIC_HEADER "${PUBLIC_HEADERS}")
-set_target_properties(ast_opt PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
-target_compile_features(ast_opt PUBLIC cxx_std_17)
+install(DIRECTORY include/heco
+  DESTINATION include
+  COMPONENT heco-headers
+  FILES_MATCHING
+  PATTERN "*.def"
+  PATTERN "*.h"
+  PATTERN "*.inc"
+  PATTERN "*.td"
+  PATTERN "*.sv"
+  PATTERN "LICENSE.TXT"
+  )
 
-if (SEAL_FOUND)
-    message("Enabling SEAL functionality")
-    target_include_directories(ast_opt PUBLIC ${SEAL_INCLUDE_DIRS})
-    target_link_libraries(ast_opt PUBLIC SEAL::seal)
-    target_compile_definitions(ast_opt PUBLIC -DHAVE_SEAL_BFV)
-    target_compile_definitions(ast_opt PUBLIC -DHAVE_SEAL_CKKS)
-endif (SEAL_FOUND)
+install(DIRECTORY ${HECO_INCLUDE_DIR}/heco
+  DESTINATION include
+  COMPONENT heco-headers
+  FILES_MATCHING
+  PATTERN "*.def"
+  PATTERN "*.h"
+  PATTERN "*.gen"
+  PATTERN "*.inc"
+  PATTERN "*.td"
+  PATTERN "CMakeFiles" EXCLUDE
+  PATTERN "config.h" EXCLUDE
+  )
 
-####################################################################################
-## ast_opt installation
-##
-## ast_optimizer installed globally as a library
-####################################################################################
-# Create a Version File
-include(CMakePackageConfigHelpers)
-write_basic_package_version_file(
-        ast_optConfigVersion.cmake
-        VERSION ${PACKAGE_VERSION}
-        COMPATIBILITY AnyNewerVersion
-)
-
-# Configure (i.e. generate) the ast_optConfig.cmake file and copy both it and the version to install
-configure_file(ast_optConfig.cmake.in ast_optConfig.cmake @ONLY)
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/ast_optConfig.cmake"
-        "${CMAKE_CURRENT_BINARY_DIR}/ast_optConfigVersion.cmake"
-        DESTINATION lib/cmake/ast_opt)
-
-install(TARGETS ast_opt
-        EXPORT ast_optTargets
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib
-        RUNTIME DESTINATION bin
-        PUBLIC_HEADER DESTINATION include
-        INCLUDES DESTINATION include/ast_opt)
-
-install(DIRECTORY "include/"
-        DESTINATION "include")
-
-install(EXPORT ast_optTargets
-        FILE ast_optTargets.cmake
-        NAMESPACE ast_opt::
-        DESTINATION lib/cmake/ast_opt)
-
-# Install pyabc package (for dev)
-find_package (Python3 COMPONENTS Interpreter Development)
-
-if(NOT Python3_Interpreter_FOUND)
-    message(WARNING "The ABC python frontend requires Python 3, but no installation
-        was found. Skipping frontend building...")
+if (NOT LLVM_ENABLE_IDE)
+  add_llvm_install_targets(install-heco-headers
+                           DEPENDS heco-headers
+                           COMPONENT heco-headers)
 endif()
 
-##############################
-# TARGET: ast_demo
-#
-# A simple example of the ast_optimizer
-##############################
+add_subdirectory(cmake/modules)
 
-add_executable(ast_demo
-        ${ast_optimizer_SOURCE_DIR}/examples/main.cpp)
+# Set RPATH to $ORIGIN on all targets.
+function(set_rpath_all_targets dir)
+  get_property(subdirectories DIRECTORY ${dir} PROPERTY SUBDIRECTORIES)
+  foreach(subdir ${subdirectories})
+    set_rpath_all_targets(${subdir})
+  endforeach()
 
-target_link_libraries(ast_demo PRIVATE ast_opt)
+  get_directory_property(LCL_TARGETS DIRECTORY ${dir} BUILDSYSTEM_TARGETS)
+  set_property(TARGET ${LCL_TARGETS} PROPERTY INSTALL_RPATH "$ORIGIN/../lib")
+endfunction()
 
-####################################################################################
-# TESTING
-#
-# only if this is the root project
-####################################################################################
-if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
-    message("Enabling ast_opt Tests")
-    enable_testing()
-    add_subdirectory(test EXCLUDE_FROM_ALL)
-endif ()
+option(STANDALONE_INSTALL "Create an 'install' for packaging which doesn't \
+         require installation" off)
+if (STANDALONE_INSTALL)
+  message(STATUS "Setting an $ORIGIN-based RPATH on all executables")
+  set_rpath_all_targets(${CMAKE_CURRENT_SOURCE_DIR})
+endif()
 
 
 ####################################################################################
@@ -303,6 +214,24 @@ endif ()
 # Use pybind11 as C++ wrapper for the Python frontend
 ####################################################################################
 
+# Install pyabc package (for dev)
+find_package (Python3 3.10 COMPONENTS Interpreter Development)
+
+if(NOT Python3_Interpreter_FOUND)
+    message(WARNING "The HECO python frontend requires Python 3, but no installation
+        was found. Skipping frontend building...")
+endif()
+
+# Set to test the python frontend. On by default.
+if(NOT PYTHON_FRONTEND_DEV)
+    set(PYTHON_FRONTEND_DEV true)
+endif()
+
+# Set to build the python frontend (installing pybind11 and building the wrapper). On by default.
+if(NOT PYTHON_FRONTEND_BUILD)
+    set(PYTHON_FRONTEND_BUILD true)
+endif()
+
 if(PYTHON_FRONTEND_BUILD)
     include(FetchContent)
     set(JSON_BuildTests OFF CACHE INTERNAL "")
@@ -310,7 +239,7 @@ if(PYTHON_FRONTEND_BUILD)
     FetchContent_Declare(
             pybind11
             GIT_REPOSITORY https://github.com/pybind/pybind11.git
-            GIT_TAG v2.7.1)
+            GIT_TAG v2.10.0)
 
     FetchContent_GetProperties(pybind11)
     if(NOT pybind11_POPULATED)
@@ -320,3 +249,34 @@ if(PYTHON_FRONTEND_BUILD)
     add_subdirectory(python)
 endif()
 
+
+################
+# Installation #
+################
+
+include(GNUInstallDirs)
+
+
+####################################
+## TESTING
+##
+# added only if this is the root project
+####################################
+if (HECO_STANDALONE_BUILD)
+    message("Enabling HECO Tests")
+    enable_testing()
+    add_subdirectory(test)
+endif ()
+
+##############################
+# TARGET: benchmarks
+#
+# A collection of benchmarks
+# added only if this is the root project
+##############################
+if (HECO_STANDALONE_BUILD)
+  if (SEAL_FOUND)
+      add_subdirectory(test/bench)
+      add_subdirectory(test/IR/BGV)
+  endif (SEAL_FOUND)
+endif ()

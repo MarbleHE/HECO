@@ -3,24 +3,205 @@ name: build_run_tests
 on: [ push ]
 
 jobs:
-  build-ubuntu:
+  duplicate-check:
+    runs-on: ubuntu-latest
+    outputs:
+      should-skip: ${{ steps.skip_check.outputs.should_skip }}
+    steps:
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@master
+        with:
+          concurrent_skipping: 'same_content'
+          skip_after_successful_duplicate: 'true'
+          do_not_skip: '["workflow_dispatch", "schedule"]'
+
+  build-linux-mlir:
+    runs-on: ubuntu-latest
+    needs: duplicate-check
+    if: ${{ needs.duplicate-check.outputs.should_skip != 'true' }}
+    steps:
+      - name: Update apt
+        run: sudo apt-get update -y
+
+      - name: Install awk
+        run: sudo apt-get install -y gawk
+
+      - name: Generate short commit hash for MLIR
+        id: commit_hash_mlir
+        run: |
+          echo ::set-output name=sha_short::$(git ls-remote https://github.com/MarbleHE/llvm-project.git HEAD | awk '{ print substr($1,1,8) }')
+
+      - uses: actions/cache@v2
+        id: cache
+        with:
+          path: |
+            ${{ github.workspace }}/llvm/build
+            ${{ github.workspace }}/llvm/llvm
+            ${{ github.workspace }}/llvm/mlir
+          key: linux-mlir-${{ steps.commit_hash_mlir.outputs.sha_short }}
+
+      - name: Checkout MLIR source
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/checkout@v2
+        with:
+          repository: MarbleHE/llvm-project
+          path: llvm
+
+      - name: Apt install requirements
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: sudo apt-get install -y ninja-build build-essential cmake
+
+      - name: Configure MLIR
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: mkdir llvm/build && cd llvm/build &&  cmake -G Ninja ../llvm -DLLVM_ENABLE_PROJECTS=mlir -DLLVM_BUILD_EXAMPLES=OFF -DLLVM_TARGETS_TO_BUILD="X86" -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_ASSERTIONS=ON
+
+      - name: Build MLIR
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: cmake --build llvm/build
+
+
+  #build-macos-mlir:
+  #  runs-on: macos-latest
+  #  needs: duplicate-check
+  #  if: ${{ needs.duplicate-check.outputs.should_skip != 'true' }}
+  #  steps:
+  #    - name: Generate short commit hash for MLIR
+  #      id: commit_hash_mlir
+  #      run: |
+  #        echo ::set-output name=sha_short::$(git ls-remote https://github.com/MarbleHE/llvm-project.git HEAD | awk '{ print substr($1,1,8) }')
+  #
+  #    - uses: actions/cache@v2
+  #      id: cache
+  #      with:
+  #        path: |
+  #          ${{ github.workspace }}/llvm/build
+  #          ${{ github.workspace }}/llvm/llvm
+  #          ${{ github.workspace }}/llvm/mlir
+  #        key: macos-mlir-${{ steps.commit_hash_mlir.outputs.sha_short }}
+  #
+  #    - name: Checkout MLIR source
+  #      if: steps.cache.outputs.cache-hit != 'true'
+  #      uses: actions/checkout@v2
+  #      with:
+  #        repository: MarbleHE/llvm-project
+  #        path: llvm
+  #
+  #    - name: Configure MLIR
+  #      if: steps.cache.outputs.cache-hit != 'true'
+  #      run: mkdir llvm/build && cd llvm/build &&  cmake ../llvm -DLLVM_ENABLE_PROJECTS=mlir -DLLVM_BUILD_EXAMPLES=OFF -DLLVM_TARGETS_TO_BUILD="X86" -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_ASSERTIONS=ON -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+  #
+  #    - name: Get number of CPU cores
+  #      if: steps.cache.outputs.cache-hit != 'true'
+  #      uses: SimenB/github-actions-cpu-cores@v1
+  #
+  #    - name: Build MLIR
+  #      if: steps.cache.outputs.cache-hit != 'true'
+  #      run: cmake --build llvm/build --parallel ${{ steps.cpu-cores.outputs.count }}
+
+
+  build-windows-mlir:
+    runs-on: windows-latest
+    needs: duplicate-check
+    if: ${{ needs.duplicate-check.outputs.should_skip != 'true' }}
+    steps:
+      - name: Generate short commit hash for MLIR
+        id: commit_hash_mlir
+        run: |
+          echo "::set-output name=sha_short::$($(git ls-remote https://github.com/MarbleHE/llvm-project.git HEAD).SubString(0,8))"
+
+      - uses: actions/cache@v2
+        id: cache
+        with:
+          path: |
+            ${{ github.workspace }}\llvm\build
+            ${{ github.workspace }}\llvm\llvm
+            ${{ github.workspace }}\llvm\mlir
+          key: windows-mlir-${{ steps.commit_hash_mlir.outputs.sha_short }}
+
+      - name: Checkout MLIR source
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/checkout@v2
+        with:
+          repository: MarbleHE/llvm-project
+          path: llvm
+
+      - name: Find Visual Studio vars
+        if: steps.cache.outputs.cache-hit != 'true'
+        id: vc_vars
+        run: echo "::set-output name=path::$(If (Test-Path "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat") {"C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"} Else {dir -Path "C:\Program Files (x86)\Microsoft Visual Studio","C:\Program Files\Microsoft Visual Studio" -Filter vcvars64.bat -Recurse -ErrorAction SilentlyContinue | %{$_.FullName}})"
+
+      - name: Configure MLIR
+        if: steps.cache.outputs.cache-hit != 'true'
+        shell: cmd
+        run: |
+          call "${{ steps.vc_vars.outputs.path }}"
+          md llvm\build
+          cmake -S llvm\llvm -B llvm\build -G "NMake Makefiles" -DLLVM_ENABLE_PROJECTS=mlir -DCMAKE_BUILD_TYPE=MinSizeRel -DLLVM_ENABLE_DIA_SDK=false -DLLVM_TARGETS_TO_BUILD="X86"
+
+      - name: Get number of CPU cores
+        if: steps.cache.outputs.cache-hit != 'true'
+        id: cpu-cores
+        run: echo "::set-output name=count::$(WMIC CPU Get NumberOfLogicalProcessors |  Select -Index 2)"
+
+      - name: Build MLIR
+        if: steps.cache.outputs.cache-hit != 'true'
+        shell: cmd
+        run: |
+          call "${{ steps.vc_vars.outputs.path }}"
+          cmake --build llvm\build --parallel ${{ steps.cpu-cores.outputs.count }}
+
+      - name: Setup tmate session in case of a failure
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3
+        with:
+          timeout-minutes: 5
+
+
+  build-ubuntu-gcc:
+    needs: build-linux-mlir
     runs-on: ubuntu-latest
     steps:
       - name: update apt-get sources
         run: sudo apt-get update
+
       - name: install gcc-9
         run: sudo apt-get install -y gcc-9 g++-9 build-essential libboost-all-dev python3-dev python3-pip cmake
-      - uses: actions/checkout@v1
+
+      - name: Generate short commit hash for MLIR
+        id: commit_hash_mlir
+        run: |
+          echo ::set-output name=sha_short::$(git ls-remote https://github.com/MarbleHE/llvm-project.git HEAD | awk '{ print substr($1,1,8) }')
+
+      - uses: actions/cache@v2
+        id: cache
+        with:
+          path: |
+            ${{ github.workspace }}/llvm/build
+            ${{ github.workspace }}/llvm/llvm
+            ${{ github.workspace }}/llvm/mlir
+          key: linux-mlir-${{ steps.commit_hash_mlir.outputs.sha_short }}
+
+      - uses: actions/checkout@v2
+        with:
+          path: HECO
+
       - name: Generate short commit hash
         id: vars
         run: |
-          echo ::set-output name=sha_short::$(git rev-parse --short=8 ${{ github.sha }})
+          cd HECO && echo ::set-output name=sha_short::$(git rev-parse --short=8 ${{ github.sha }})
+
       - name: configure
-        run: mkdir build && cd build && cmake -DCMAKE_CXX_FLAGS="-Werror" -DCMAKE_CXX_COMPILER=g++-9 -DCMAKE_C_COMPILER=gcc-9 ..
+        run: mkdir HECO/build && cd HECO/build && cmake -DCMAKE_CXX_COMPILER=g++-9 -DCMAKE_C_COMPILER=gcc-9 -DCMAKE_BUILD_TYPE=Release -DMLIR_DIR=${{ github.workspace }}/llvm/build/lib/cmake/mlir -DLLVM_DIR=${{ github.workspace }}/llvm/build ..
+
+      - name: build mlir headers
+        run: cmake --build HECO/build --target mlir-headers
+
       - name: build
-        run: cmake --build build --target testing-all
+        run: cmake --build HECO/build --target testing-all
+
       - name: test
-        run: cd build && ctest
+        run: cd HECO/build && ctest
+
       - name: Send message to Slack if build job failed
         if: ${{ failure() }}
         uses: voxmedia/github-action-slack-notify-build@v1
@@ -30,52 +211,215 @@ jobs:
           color: warning
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_APP_TOKEN }}
-  build-macos:
-    runs-on: macos-latest
+
+
+  build-ubuntu-clang:
+    needs: build-linux-mlir
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - name: update apt-get sources
+        run: sudo apt-get update
+
+      - name: install dependencies
+        run: sudo apt-get install -y build-essential libboost-all-dev python3-dev python3-pip cmake
+
+      - name: Generate short commit hash for MLIR
+        id: commit_hash_mlir
+        run: |
+          echo ::set-output name=sha_short::$(git ls-remote https://github.com/MarbleHE/llvm-project.git HEAD | awk '{ print substr($1,1,8) }')
+
+      - uses: actions/cache@v2
+        id: cache
+        with:
+          path: |
+            ${{ github.workspace }}/llvm/build
+            ${{ github.workspace }}/llvm/llvm
+            ${{ github.workspace }}/llvm/mlir
+          key: linux-mlir-${{ steps.commit_hash_mlir.outputs.sha_short }}
+
+      - uses: actions/checkout@v2
+        with:
+          path: HECO
+
       - name: Generate short commit hash
         id: vars
         run: |
-          echo ::set-output name=sha_short::$(git rev-parse --short=8 ${{ github.sha }})
+          cd HECO && echo ::set-output name=sha_short::$(git rev-parse --short=8 ${{ github.sha }})
+
       - name: configure
-        run: mkdir build && cd build && cmake -DCMAKE_CXX_FLAGS="-Werror" -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang ..
+        run: mkdir HECO/build && cd HECO/build && cmake -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -DCMAKE_BUILD_TYPE=Release -DMLIR_DIR=${{ github.workspace }}/llvm/build/lib/cmake/mlir -DLLVM_DIR=${{ github.workspace }}/llvm/build ..
+
+      - name: build mlir headers
+        run: cmake --build HECO/build --target mlir-headers
+
       - name: build
-        run: cmake --build build --target testing-all
+        run: cmake --build HECO/build --target testing-all
+
       - name: test
-        run: cd build && ctest
+        run: cd HECO/build && ctest
+
       - name: Send message to Slack if build job failed
         if: ${{ failure() }}
         uses: voxmedia/github-action-slack-notify-build@v1
         with:
           channel: github-batching-compiler
-          status: Building ABC using clang on macOS failed!
+          status: Building ABC using gcc on Ubuntu failed!
           color: warning
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_APP_TOKEN }}
+
+
+  #build-macos-clang:
+  #  needs: build-macos-mlir
+  #  runs-on: macos-latest
+  #  steps:
+  #    - name: Generate short commit hash for MLIR
+  #      id: commit_hash_mlir
+  #      run: |
+  #        echo ::set-output name=sha_short::$(git ls-remote https://github.com/MarbleHE/llvm-project.git HEAD | awk '{ print substr($1,1,8) }')
+  #
+  #    - uses: actions/cache@v2
+  #      id: cache
+  #      with:
+  #        path: |
+  #          ${{ github.workspace }}/llvm/build
+  #          ${{ github.workspace }}/llvm/llvm
+  #          ${{ github.workspace }}/llvm/mlir
+  #        key: macos-mlir-${{ steps.commit_hash_mlir.outputs.sha_short }}
+  #
+  #    - uses: actions/checkout@v2
+  #      with:
+  #        path: HECO
+  #
+  #    - name: Generate short commit hash
+  #      id: vars
+  #      run: |
+  #        cd HECO && echo ::set-output name=sha_short::$(git rev-parse --short=8 ${{ github.sha }})
+  #
+  #    - name: configure
+  #      run: mkdir HECO/build && cd HECO/build && cmake -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -DCMAKE_BUILD_TYPE=Release -DMLIR_DIR=${{ github.workspace }}/llvm/build/lib/cmake/mlir -DLLVM_DIR=${{ github.workspace }}/llvm/build ..
+  #
+  #    - name: build mlir headers
+  #      run: cmake --build HECO/build --target mlir-headers
+  #
+  #    - name: build
+  #      run: cmake --build HECO/build --target testing-all
+  #
+  #    - name: test
+  #      run: cd HECO/build && ctest
+  #
+  #    - name: Send message to Slack if build job failed
+  #      if: ${{ failure() }}
+  #      uses: voxmedia/github-action-slack-notify-build@v1
+  #      with:
+  #        channel: github-batching-compiler
+  #        status: Building ABC using clang on macOS failed!
+  #        color: warning
+  #      env:
+  #        SLACK_BOT_TOKEN: ${{ secrets.SLACK_APP_TOKEN }}
+
+
+  # build-macos-gcc:
+  #   needs: build-macos-mlir
+  #   runs-on: macos-latest
+  #   steps:
+  #     - name: Generate short commit hash for MLIR
+  #       id: commit_hash_mlir
+  #       run: |
+  #         echo ::set-output name=sha_short::$(git ls-remote https://github.com/MarbleHE/llvm-project.git HEAD | awk '{ print substr($1,1,8) }')
+  #
+  #     - uses: actions/cache@v2
+  #       id: cache
+  #       with:
+  #         path: |
+  #           ${{ github.workspace }}/llvm/build
+  #           ${{ github.workspace }}/llvm/llvm
+  #           ${{ github.workspace }}/llvm/mlir
+  #         key: macos-mlir-${{ steps.commit_hash_mlir.outputs.sha_short }}
+  #
+  #     - uses: actions/checkout@v2
+  #       with:
+  #         path: HECO
+  #
+  #     - name: Generate short commit hash
+  #       id: vars
+  #       run: |
+  #         cd HECO && echo ::set-output name=sha_short::$(git rev-parse --short=8 ${{ github.sha }})
+  #
+  #     - name: configure
+  #       run: mkdir HECO/build && cd HECO/build && cmake -DCMAKE_CXX_COMPILER=g++-9 -DCMAKE_C_COMPILER=gcc-9 -DCMAKE_BUILD_TYPE=Release -DMLIR_DIR=${{ github.workspace }}/llvm/build/lib/cmake/mlir -DLLVM_DIR=${{ github.workspace }}/llvm/build ..
+  #
+  #     - name: build mlir headers
+  #       run: cmake --build HECO/build --target mlir-headers
+  #
+  #     - name: build
+  #       run: cmake --build HECO/build --target testing-all
+  #
+  #     - name: test
+  #       run: cd HECO/build && ctest
+  #
+  #     - name: Send message to Slack if build job failed
+  #       if: ${{ failure() }}
+  #       uses: voxmedia/github-action-slack-notify-build@v1
+  #       with:
+  #         channel: github-batching-compiler
+  #         status: Building ABC using clang on macOS failed!
+  #         color: warning
+  #       env:
+  #         SLACK_BOT_TOKEN: ${{ secrets.SLACK_APP_TOKEN }}
+
+
   build-windows:
+    needs: build-windows-mlir
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v1
+      - name: Generate short commit hash for MLIR
+        id: commit_hash_mlir
+        run: |
+          echo ::set-output name=sha_short::$(git ls-remote https://github.com/MarbleHE/llvm-project.git HEAD).SubString(0,8)
+
+      - uses: actions/cache@v2
+        id: cache
+        with:
+          path: |
+            ${{ github.workspace }}\llvm\build
+            ${{ github.workspace }}\llvm\llvm
+            ${{ github.workspace }}\llvm\mlir
+          key: windows-mlir-${{ steps.commit_hash_mlir.outputs.sha_short }}
+
+      - uses: actions/checkout@v2
+        with:
+          path: HECO
+
       - name: Generate short commit hash
         id: vars
         run: |
+          cd HECO
           echo ::set-output name=sha_short::$(git rev-parse --short=8 ${{ github.sha }})
+
+      - name: Find Visual Studio vars
+        id: vc_vars
+        run: echo "::set-output name=path::$(If (Test-Path "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat") {"C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"} Else {dir -Path "C:\Program Files (x86)\Microsoft Visual Studio","C:\Program Files\Microsoft Visual Studio" -Filter vcvars64.bat -Recurse -ErrorAction SilentlyContinue | %{$_.FullName}})"
+
       - name: configure
         shell: cmd
         run: |
-          call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-          md build
-          cd build
-          cmake -DCMAKE_CXX_FLAGS="/W4 /WX" -G "NMake Makefiles" ..
+          call "${{ steps.vc_vars.outputs.path }}"
+          md HECO\build
+          cd HECO\build
+          cmake -G "NMake Makefiles" -DCMAKE_CXX_FLAGS="/W0" -DCMAKE_STATIC_LINKER_FLAGS="/WX:NO" -DCMAKE_BUILD_TYPE=Release -DMLIR_DIR=${{ github.workspace }}\llvm\build\lib\cmake\mlir -DLLVM_DIR=${{ github.workspace }}\llvm\build ..
+
       - name: build
         shell: cmd
         run: |
-          call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-          cmake --build build --target testing-all
+          call "${{ steps.vc_vars.outputs.path }}"
+          cmake --build HECO\build --target mlir-headers
+          cmake --build HECO\build --target testing-all
+
       - name: test
         shell: cmd
-        run: cd build && ctest
+        run: cd HECO\build && ctest
+
       - name: Send message to Slack if build job failed
         if: ${{ failure() }}
         uses: voxmedia/github-action-slack-notify-build@v1

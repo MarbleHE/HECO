@@ -1,0 +1,37 @@
+# This file allows users to call find_package(HECO) and pick up our targets.
+
+@HECO_CONFIG_CODE@
+
+find_package(MLIR REQUIRED CONFIG
+             HINTS "@HECO_CONFIG_MLIR_CMAKE_DIR@")
+
+set(HECO_EXPORTED_TARGETS "@HECO_EXPORTS@")
+set(HECO_CMAKE_DIR "@HECO_CONFIG_CMAKE_DIR@")
+set(HECO_BINARY_DIR "@HECO_CONFIG_BINARY_DIR@")
+set(HECO_INCLUDE_DIRS "@HECO_CONFIG_INCLUDE_DIRS@")
+set(HECO_LIBRARY_DIRS "@HECO_CONFIG_LIBRARY_DIRS@")
+set(HECO_TOOLS_DIR "@HECO_CONFIG_TOOLS_DIR@")
+
+set_property(GLOBAL PROPERTY HECO_ALL_LIBS "@HECO_ALL_LIBS@")
+set_property(GLOBAL PROPERTY HECO_DIALECT_LIBS "@HECO_DIALECT_LIBS@")
+set_property(GLOBAL PROPERTY HECO_CONVERSION_LIBS "@HECO_CONVERSION_LIBS@")
+set_property(GLOBAL PROPERTY HECO_TRANSLATION_LIBS "@HECO_TRANSLATION_LIBS@")
+
+# Provide all our library targets to users.
+@HECO_CONFIG_INCLUDE_EXPORTS@
+
+# By creating these targets here, subprojects that depend on HECO's
+# tablegen-generated headers can always depend on these targets whether building
+# in-tree with HECO or not.
+if(NOT TARGET heco-tablegen-targets)
+  add_custom_target(heco-tablegen-targets)
+endif()
+if(NOT TARGET heco-headers)
+  add_custom_target(heco-headers)
+endif()
+if(NOT TARGET heco-generic-headers)
+  add_custom_target(heco-generic-headers)
+endif()
+if(NOT TARGET heco-doc)
+  add_custom_target(heco-doc)
+endif()

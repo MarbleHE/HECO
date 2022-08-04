@@ -1,335 +1,296 @@
 ```
-    ___       ____        __       __    _                ______                      _ __         
-   /   |     / __ )____ _/ /______/ /_  (_)___  ____ _   / ____/___  ____ ___  ____  (_) /__  _____
-  / /| |    / __  / __ `/ __/ ___/ __ \/ / __ \/ __ `/  / /   / __ \/ __ `__ \/ __ \/ / / _ \/ ___/
- / ___ |   / /_/ / /_/ / /_/ /__/ / / / / / / / /_/ /  / /___/ /_/ / / / / / / /_/ / / /  __/ /    
-/_/  |_|  /_____/\__,_/\__/\___/_/ /_/_/_/ /_/\__, /   \____/\____/_/ /_/ /_/ .___/_/_/\___/_/     
-                                             /____/                        /_/                     
+    __  __________________          __  ________   ______                      _ __         
+   / / / / ____/ ____/ __ \   _    / / / / ____/  / ____/___  ____ ___  ____  (_) /__  _____
+  / /_/ / __/ / /   / / / /  (_)  / /_/ / __/    / /   / __ \/ __ `__ \/ __ \/ / / _ \/ ___/
+ / __  / /___/ /___/ /_/ /  _    / __  / /___   / /___/ /_/ / / / / / / /_/ / / /  __/ /    
+/_/ /_/_____/\____/\____/  (_)  /_/ /_/_____/   \____/\____/_/ /_/ /_/ .___/_/_/\___/_/     
+                                                                    /_/                     
 ```
 [![Language](https://img.shields.io/badge/language-C++-blue.svg)](https://isocpp.org/)
 [![CPP_Standard](https://img.shields.io/badge/c%2B%2B-11/14/17-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B#Standardization)
 [![CI/CD](https://github.com/MarbleHE/ABC/workflows/build_run_tests/badge.svg)](https://github.com/MarbleHE/AST-Optimizer/actions)
-[![Documentation](https://img.shields.io/badge/docs-doxygen-blue.svg)](http://marblehe.github.io/ABC)
+[![Documentation](https://img.shields.io/badge/docs-doxygen-blue.svg)](http://marblehe.github.io/HECO)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-ABC is an optimizing compiler for Fully Homomorphic Encryption (FHE). 
+HECO is an optimizing compiler for Fully Homomorphic Encryption (FHE). 
 FHE allows computation over encrypted data, but imposes a variety of cryptographic and engineering challenges.
-This compiler translates high-level program descriptions in a C-like language into the circuit-based programming paradigm of FHE.
+This compiler translates high-level program descriptions (expressed in Python) into the circuit-based programming paradigm of FHE.
 It does so while automating as many aspects of the development as possible,
 including automatically identifying and exploiting opportunities to use the powerful SIMD parallelism ("batching") present in many schemes. 
 
-- [Repository's Structure](#repositorys-structure)
-- [Compilation](#compilation)
-  <!--
-    - [Compile-Time Expression Simplifier](#compile-time-expression-simplifier)
-    - [Cone-Rewriting](#cone-rewriting)
-    - [CKKS Scheme-Specific Optimizations](#ckks-scheme-specific-optimizations)
-  -->
-- [Getting Started](#getting-started)
-- [AST Representation](#ast-representation)
-- [Extending the Library](#extending-the-library)
-  - [Code Style](#code-style)
-  - [Inspections](#inspections)
-  - [Documentation](#documentation)
-  - [Testing](#testing)
-- [References](#references)
+- [Overview](#Overview)
+- [Using HECO](#UsingHECO)
+  - [Python Frontend](#PythonFrontend)
+  - [Modes](#Modes)
+    - [Interactive Mode](#InteractiveMode)
+    - [Transpiler Mode](#TranspilerMode)
+    - [Compiler Mode](#CompilerMode)
+    - [Advanced Use Cases](#AdvancedUseCases)
+- [Installation](#installation)
+  - [Prerequisites](#prerequisites)
+  - [Building](#building)
+- [Development](#Development)
+
+
+# Overview
+HECO is an end-to-end compiler for FHE that takes high-level imperative programs and emits efficient and secure FHE implementations.
+Currently, it supports Ring-LWE based schemes [B](https://eprint.iacr.org/2012/078)/[FV](https://eprint.iacr.org/2012/144), [BGV](https://eprint.iacr.org/2011/277) and [CKKS](https://eprint.iacr.org/2016/421) which offer powerful [SIMD]-like operations and can _batch_ many thousands of values into a single vector-like ciphertext.
+
+In FHE (and other advanced cryptographic techniques such as MPC or ZKP), developers must express their applications as an (arithmetic/binary) circuit. Translating a function *f* so that the resulting circuit can be evaluated efficiently is highly non-trivial and doing so manually requires significant expert knowledge. This is where FHE compilers like HECO come in, by automating the transformation of high-level programs into lower-level representations that can be evaluated using FHE.
+
+![program/function  f --> circuit representation --> FHE Schemes](doc/fhe_function_to_circuit.jpg)
+
+HECO's design and novel optimizations are described in the accompanying [paper](https://arxiv.org/abs/2202.01649).
+In contrast to previous compilers, HECO removes a significant burden from the developer by automating the task of translating a program to the restricted SIMD programming paradigm available in FHE. This can result in speeupds by over an order of magnitude (i.e., 10x or more) when compared to a naive baseline.
+
+HECO is built using the [MLIR](https://mlir.llvm.org/) compiler framework and follows a traditional front-, middle- and back-end architecture. It uses two Intermediate Representations (IRs) in the middle-end, High-level IR (HIR) to express programs containing control flow and an abstraction of FHE computing (`heco::fhe`). 
+This is then lowered to Scheme-specific IR (SIR), with operations corresponding to the FHE schemes' underlying operations (e.g., addition, multiplication, relineraization, etc.). Currently, HECO targets [Microsoft SEAL](https://github.com/Microsoft/SEAL) as its backend. In the future, HECO will be extended with Polynomial-level IR (PIR) and RNS IR (RIR) to directly target hardware (both CPUs and dedicated FHE accelerators).
+
+![Architecture Overview of the Dialects](doc/heco_architecture.jpg)
+
+# Using HECO
+
+## Python Frontend
+> **Note**
+> HECO's Python Frontend is undergoing major work and is therefore not currently ready to use.
+
+```Python
+from heco import *
+
+p = HECOProgram(logging.DEBUG)
+
+with HECOWrapper(p):
+    def main(x : list[Secret[int]], y : list[Secret[int]]):
+        sum = 0
+        for i in range(4):
+            sum += (x[i] - y[i]) * (x[i] - y[i])
+        return sum
+
+# Compiling FHE code
+context = SEAL.BGV.new(poly_mod_degree = 1024)
+f = p.compile(p, context = context)
+
+# Running FHF code
+x = [random.randrange(100) for _ in range(4)]
+y = [random.randrange(100) for _ in range(4)]
+x_enc = context.encrypt(x)
+y_enc = context.encrypt(y)
+s_enc = f(x_enc, y_enc)
+
+# Verifying Result
+s = context.decrypt(s_enc)
+assert s == sum([(x[i] - y[i])**2 for i in range(4)])
+``` 
+
+## Modes
+HECO can be used in three distinct modes, each of which target different user needs.
+
+### Interactive Mode
+In  interactive mode, an interpreter consumes both the input data and the intermediate representation. HECO performs the usual high-level optimizations and lowers the program to 
+the Scheme-specific Intermediate Representation (SIR).
+This is then executed by the interpreter by calling suitable functions in SEAL.
+
+This mode is designed to be easy-to-use and to allow rapid prototyping. While there is a performance overhead due to the interpreted nature of this mode, it should be insignificant in the context of FHE computations.
+
+> **Note**
+> Interactive mode will become available when the new Python frontend is released.
+
+### Transpiler Mode
+In transpiler mode, HECO outputs a `*.cpp` source file that can be inspected or modified before compiling & linking against SEAL. HECO performs the usual high-level optimizations and lowers the program to the Scheme-specific Intermediate Representation (SIR). This is then lowered to the MLIR `emitC` Dialect, with FHE operations translated to function calls to a SEAL wrapper. The resulting IR is then translated into an actual `*.cpp` file.
+
+Transpiler mode is designed for advanced users that want to integrate the output into larger, existing software projects and/or modify the compiled code to better match their requirements.
+
+<details>
+  <summary>Transpiler Mode Instructions</summary>
+
+> In order to use the transpiler mode, you need to extend the default compilation pipeline (assuming you are starting with an `*.mlir` file containing HIR, this would be `fhe-tool --from-ssa-pass [filename_in].mlir`) in two ways. 
+>  1. Specify the scheme (and some core parameters) to be used by adding, e.g., `--fhe2bgv=poly_mod_degree=1024` and the corresponding lowering to emitC, e.g., `--bgv2emitc`, followed by `--cse --canonicalize` to clean up redundant operations introduced by the lowering.
+>  2. Translate to an actual `*.cpp` file by passing the output through  `emitc-translate`
+>
+> A full example might look like this:  `fhe-tool --from-ssa-pass --fhe2bgv=poly_mod_degree=1024 --cse --canonicalize --bgv2emitc [filename_in].mlir > emitc-translate > [filename_out].cpp`.
+>
+> In order to compile the file, you will need to include [`wrapper.cpp.inc`](test/IR/BGV/wrapper.cpp.inc) into the file and link it against SEAL (see [`CMakeLists.txt`](test/IR/BGV/CMakeLists.txt)).  Note that the current wrapper assumes (for slightly obscure reasons) that the generated code is inside a function  `seal::Ciphertext trace()`. If this was not the case for your input, you might need to adjust the wrapper. By default, it currently serializes the result of the function into a file `trace.ctxt`.
+</details>
+
+### Compiler Mode
+In compiler mode, HECO outputs an exectuable. In this mode, HECO performs the usual high-level optimizations and lowers the program to the Scheme-specific Intermediate Representation (SIR). This is then lowered to LLVM IR representing function calls to SEAL's C API, which is then compiled and linked against SEAL.
+
+Compiler mode assumes that the input to HECO is a complete program, e.g., has a valid `main()` function. As a result, any input/output behaviour must be realized through the `LoadCiphertext`/`SaveCiphertext` operations in the scheme-specific IR.
+
+Compiler mode is designed primarily for situations where HECO-compiled applications will be automatically deployed without developer interaction, such as in continous integration or other automated tooling.
+
+> **Note**
+> Compiler mode is not yet implemented. If you require an executable, please use Transpiler mode and subsequent manual compilation & linking for now.
+
+# Installation
+HECO uses CMake as its build system for its C++ components and follows MLIR/LLVM conventions. Please see MLIR's [Getting Started](https://mlir.llvm.org/getting_started/) for more details.
+
+## Prerequisites
+
+### Packages
+
+Install `cmake`, `doxygen`, and `clang`/`gcc`.
+`libboost` and `python3` dev tools are needed for pybind11.  
+On Ubuntu, this can be done by running the following:
+
+```
+sudo apt-get install cmake doxygen clang libboost-all-dev python3-dev`
+```
+
+If the version of cmake provided by your package manager is too old, you might need to [manually install](https://askubuntu.com/a/976700) a newer version.
+
+
+### Microsoft SEAL
+HECO supports the [Microsoft SEAL](https://github.com/microsoft/SEAL) FHE library as a "backend" in its `interactive` mode.
+Please follow the SEAL instrutictions on how to build and install SEAL. Currently, the most recent version of SEAL with which this project was tested is `4.0.0`. 
+
+### Getting MLIR
+There seem to be no binary distrubtions of the MLIR framework, so you'll have to compile it from source following the [MLIR getting started guide](https://mlir.llvm.org/getting_started/).
+Please note that you will need to pull from [this fork](https://github.com/MarbleHE/llvm-project) instead of the original llvm repo,
+as this project relies on a series of fixes/workarounds that might not yet be upstreamed.
+You might want to install clang, lld, ninja and optionally [ccache](https://ccache.dev/).
+
+<details>
+  <summary>MLIR Installation/Build Commands</summary>
+
+> The following is a reasonable start for a "Developer Friendly" installation of MLIR:
+>  ```sh
+>  git clone https://github.com/llvm/llvm-project.git
+>
+>  mkdir llvm-project/build
+>
+>  cd llvm-project/build
+>
+>  cmake -G Ninja ../llvm \
+>    -DLLVM_ENABLE_PROJECTS=mlir \
+>    -DLLVM_BUILD_EXAMPLES=OFF \
+>    -DLLVM_TARGETS_TO_BUILD=X86 \
+>    -DCMAKE_BUILD_TYPE=Debug \
+>    -DLLVM_ENABLE_ASSERTIONS=ON \
+>    -DCMAKE_C_COMPILER=clang \
+>    -DCMAKE_CXX_COMPILER=clang++ \
+>    -DLLVM_ENABLE_LLD=ON \
+>    -DLLVM_CCACHE_BUILD=ON \
+>    -DLLVM_INSTALL_UTILS=ON \
+>    -DMLIR_INCLUDE_INTEGRATION_TESTS=ON
+>
+>  cmake --build . --target check-mlir mlir-tblgen
+>  ```
+
+</details>
+
+## Building
+
+Use the following commands to build SEAL. For more build options, see the official [SEAL repo](https://github.com/Microsoft/SEAL#getting-started).
+
+### Building the HECO Compiler
+This setup assumes that you have built LLVM and MLIR in `$BUILD_DIR` (path must be absolute). To build and launch the tests, run
+```sh
+mkdir build && cd build
+cmake -G Ninja .. -DMLIR_DIR=$BUILD_DIR/lib/cmake/mlir -DLLVM_EXTERNAL_LIT=$BUILD_DIR/bin/llvm-lit
+cmake --build . --target fhe-tool
+```
+To build the documentation from the TableGen description of the dialect operations, run
+```sh
+cmake --build . --target mlir-doc
+```
+**Note**: Make sure to pass `-DLLVM_INSTALL_UTILS=ON` when building LLVM with CMake in order to install `FileCheck` to the chosen installation prefix.
+
+Alternatively, you can open this folder in vscode. You will want to build the heco-c target for the command line compiler.
+
+
+## Installing the Python Frontend
+
+If you want to use the python frontend, you can install our package `pyabc`.
+
+### Over CMake
+The package installation is integrated in the CMakefile. You can run `make install` in `cmake-build-debug` and it will install `pyabc`.
+
+### Manual Installation
+To install `pyabc`, first build the CMake project. Next, run the following command (in this repo's root folder):
+```
+python3 -m pip install --user cmake-build-debug/python
+```
+(assuming your build folder is `cmake-build-debug`)
+
+For a developer installation, add the `-e` option to create a symlink to the freshly built files in `cmake-build-debug/python` instead of copying them.
+
+
+
+<!--
+1. Check that the CMake project runs through without any fatal error 
+
+    - Troubleshooting: first, try to use "Reload Cmake Project" and/or delete the `cmake-build-debug` folder to make a fresh new build.
+2. Run the "testing-all" target in CLion to execute all tests and make sure they pass on your local system. Some tests are disabled.
+    - Troubleshooting: if this entry is missing, do the following to add it:
+      - Open the dropdown menu with "Run/Debug Configurations"
+      - Select "Edit Configurations"
+      - Go to Google Tests
+      - Click "add new run configuration"
+      - Name it "testing-all"
+      - Select "resting-all" as target
+      - Save it and run (play symbol) the target
+-->
+
+
+# Development
+
+## Development Environemnt
+[Visual Studio Code](https://code.visualstudio.com/) is recommended. Remember to set the `-DMLIR_DIR=...` and `-DLLVM_EXTERNAL_LIT=..` options in "Settings &rarr; Workspace &rarr; Cmake: Configure Args".
+The [LLVM TableGen](https://marketplace.visualstudio.com/items?itemName=jakob-erzar.llvm-tablegen) plugin provides syntax highlighting for `*.td` files, which are used to define Dialects, Types, Operations and Rewrite Rules.
+The [MLIR](https://marketplace.visualstudio.com/items?itemName=llvm-vs-code-extensions.vscode-mlir) plugin provides syntax highlighting for `*.mlir` files, which are MLIR programs in textual representation.
 
 ## Repository's Structure
 
 The repository is organized as follow:
 
 ```
-examples        – simple examples (WIP)
-include         – header files (.h)
- └ ast          – classes to represents programs as an AST 
- └ parser       – tokenizer and parser
- └ runtime      - the runtime system (execute an AST using an FHE library)
- └ utilities    – utilities for certain tasks on ASTs (e.g., printing in DOT language)
- └ visitor      – various visitors performing optimizations
-libs            – files required by CMake to download dependencies
+.github         – Continous Integration/CI) setup files
+examples        – Simple Examples for both the compiler and frontend
+include         – header (.h) and TableGen (.td) files
+ └ IR             – contains the different dialect definitions
+ └ Passes         – contains the definitions of the different transformations
+python          – the python frontend
 src             – source files (.cpp)
- └ ast
- └ parser
- └ runtime
- └ utilities
- └ visitor
-test             – unit tests for all classes
+ └ IR             – implementations of additional dialect-specific functionality
+ └ Passes         – implementations of the different transformations
+ └ tools          – sources for the main commandline interface
+test            – unit tests for all classes
 ```
 
-## Compilation
-We include a simple C-like high-level input language, 
-and a parser that translates it into Abstract Syntax Trees (ASTs), 
-which form our intermediate representation (IR). 
-
-The compilation itself can be divided into three stages:
-
-**1. Program Transformations.** These AST-to-AST transformations aim to modify the program to make it more "FHE" friendly.
-These include optimizations common in standard compilers and FHE-specific optimizations like our automated batching optimization.
-
-**1. AST-to-Circuit Transformations.** These transform the AST into a circuit by transforming non-compatible operations (e.g., If- and While-Statements) into their circuit-equivalent using gates.
-Note that instead of changing to a wires-and-gates IR, circuits are still expressed using (a subset of) the AST IR.
-
-**3. Circuit-to-Circuit Transformations.** These transformations transform a circuit into a semantically equivalent circuit with better performance in FHE.
-For example, by rewriting the circuit to reduce the multiplicative depth. This allows using smaller parameters that, in turn, enable more efficient computation.
-
-Finally, we include a runtime system that can take (circuit-compatible) ASTs and run them against FHE libraries
-(currently, only Microsoft SEAL is supported) or against a dummy scheme (for faster testing).
-
-<!--
-#### Compile-Time Expression Simplifier
-
-The optimizer contains a compile-time expression simplifier that leverages existing knowledge (e.g., known variable values) to simplify the AST. The goal of this step is to generate an AST that is more easily transferable to a circuit. For example, the simplifier removes all variable declarations and assignments by replacing the respective variable uses with the variable's value. Also, operations that are not circuit-compatible such as If statements are rewritten. For example, an If statement of the form
-``` 
-IF (condition) { x = 5; } ELSE { x = 21; };
-```
-can be rewritten as 
-```
-x = (condition)*5 + (1-condition)*21;
-```
-without using any If statement.
-Furthermore, the simplifier evaluates parts of the computation that are known at compile time, e.g., arithmetic or logical expressions. 
-
-#### Cone-Rewriting
-
-Our optimizer implements the heuristic approach for minimizing the multiplicative depth in Boolean circuits, as proposed by Aubry et al. [2]. This technique finds and rewrites certain structures of a circuit (so-called _cones_) in a way that the multiplicative depth is decreased locally. Repeating this procedure for all cones on the critical path leads to a global reduction of the multiplicative depth.
-
-The approach uses four different algorithms:
-An algorithm (Alg. 1) for cone construction that takes a Boolean circuit and a minimum multiplicative depth, and returns the set delta Δ of all reducible cones. This set is taken by Alg. 2 to create a circuit C^{AND} consisting of all critical AND nodes. Thereafter, a flow-based algorithm (Alg. 3) takes this C^{AND} circuit to determine Δ^{MIN}, the minimum set of cones that are required to reduce the multiplicative depth. It is desirable to minimize the number of cones because each cone rewriting adds additional nodes to the circuit. Lastly, Alg. 4 rewrites the minimum set of reducible cones while ensuring that the multiplicative depth reduced. The whole procedure is repeated until there are no reducible cones found anymore.
-
-The implementation is heavily based on the pseudo-codes provided in the paper, except Alg. 2 (C^{AND} construction) for which no pseudo code was given. Deviant from the paper's implementation (see Sect. 3.3), we also did not consider yet the case in which no more reducible cones are available in C^{AND} but the multiplicative depth can be reduced further.
-
-#### CKKS Scheme-Specific Optimizations
-
-// TODO write some sentences about optimizations
--->
-
-## Getting Started
-
-Before starting, make sure to clone this repository using: 
-```
-git clone https://github.com/MarbleHE/ABC.git
-```
-
-The following tools are required to get this project running:
-- cmake (version ≥ 3.15) to build the project
-    - tested with v3.15.5
-- gcc or clang to compile the sources
-    - tested with Apple clang v11.0.0
-- doxygen to build the documentation files (html)
-    - tested with v1.8.16
-
-The easiest way to use this library is to import the project into [CLion](https://www.jetbrains.com/clion/) which automatically loads the containing cmake build files and adds the respective targets. Development was carried out on macO (10.15.2), although the project should be running on Windows or Linux machines too.
-
-More detailed installation notes, including some for Debian/Ubuntu and Fedora are in [INSTALL.md](INSTALL.md).
-
-The entire framework is built around ASTs,
-the nodes of which are implemented by a class hierarchy that derives from AbstractNode (see above).
-The AST nodes "own" (std::unique_ptr) their children (and, transitively, the entire subgraph).
-
-Our input language is essentially a toy version of C.
-We have a very simple hand-written parser on-top of a tokenizer (Stork) from another open source project.
-It takes a string and returns the root node of the generated AST.
-We also implemented the reverse, allowing us to print an AST back into this language,
-which is much more human-readable than our "real" intermediate representation (JSON of the AST).
-
-The entire compiler relies heavily on the visitor pattern,
-and there is some template magic (see ScopedVisitor)
-that allows one to still use overloading in visitors,
-so one can e.g. handle all AbstractExpressions in one function
-if the visitor only cares about statements.
-This is mostly transparent to the developer.
-
-All of our optimizations and transformations are implemented as visitors.
-Since the visitor pattern doesn't easily allow you to "return" values,
-we frequently use std::unordered_map<std::string, SOMETHING> ,
-allowing us to associate data with (the unique ID of) an AST node.
-So when visiting an If stmt, we can visit both branches recursively
-and then get the "return" by looking into the hash_map at the child-nodes' ids.
-
-Finally, our runtime system is also implemented as a visitor.
-It takes an "AbstractCiphertextFactory",
-the instantiations of which are basically just super thin wrappers around FHE libraries (currently just SEAL).
-So if we see a multiplication node in the tree,
-we just end up calling something like seal::multiply(ctxt a, ctxt b).
-
-## AST Representation
-The AST consists of nodes that are derived from either `AbstractExpression` or `AbstractStatement`,
-depending on whether the operation is an expression or a statement, respectively.
-```                                                                                                 
-                                          ┌─────────────────────┐                                                   
-                                          │    AbstractNode     │                                                   
-                                          └─────────────────────┘                                                   
-                                                     ▲                                                              
-                                                     │                                                              
-                                                     │                                                              
-                         ┌─────────────────────┐     │     ┌─────────────────────┐                                  
-                         │  AbstractStatement  │─────┴─────│ AbstractExpression  │                                  
-                         └─────────────────────┘           └─────────────────────┘                                  
-                                    ▲                                 ▲                                             
-         ┌─────────────────────┐    │                                 │     ┌─────────────────────┐                 
-         │     Assignment      │────┤                                 ├─────│   AbstractTarget    │                 
-         └─────────────────────┘    │                                 │     └─────────────────────┘                 
-                                    │                                 │                ▲                            
-         ┌─────────────────────┐    │                                 │                │     ┌─────────────────────┐
-         │        Block        │────┤                                 │                ├─────│  FunctionParameter  │
-         └─────────────────────┘    │                                 │                │     └─────────────────────┘
-                                    │                                 │                │                            
-         ┌─────────────────────┐    │                                 │                │     ┌─────────────────────┐
-         │         For         │────┤                                 │                ├─────│     IndexAccess     │
-         └─────────────────────┘    │                                 │                │     └─────────────────────┘
-                                    │                                 │                │                            
-         ┌─────────────────────┐    │                                 │                │     ┌─────────────────────┐
-         │      Function       │────┤                                 │                └─────│      Variable       │
-         └─────────────────────┘    │                                 │                      └─────────────────────┘
-                                    │                                 │                                             
-         ┌─────────────────────┐    │                                 │     ┌─────────────────────┐                 
-         │         If          │────┤                                 ├─────│  BinaryExpression   │                 
-         └─────────────────────┘    │                                 │     └─────────────────────┘                 
-                                    │                                 │                                             
-         ┌─────────────────────┐    │                                 │     ┌─────────────────────┐                 
-         │       Return        │────┤                                 ├─────│ OperatorExpression  │                 
-         └─────────────────────┘    │                                 │     └─────────────────────┘                 
-                                    │                                 │                                             
-         ┌─────────────────────┐    │                                 │     ┌─────────────────────┐                 
-         │ VariableDeclaration │────┘                                 ├─────│   UnaryExpression   │                 
-         └─────────────────────┘                                      │     └─────────────────────┘                 
-                                                                      │                                             
-                                                                      │     ┌─────────────────────┐                 
-                                                                      ├─────│        Call         │                 
-                                                                      │     └─────────────────────┘                 
-                                                                      │                                             
-                                                                      │     ┌─────────────────────┐                 
-                                                                      ├─────│   ExpressionList    │                 
-                                                                      │     └─────────────────────┘                 
-                                                                      │                                             
-                                                                      │     ┌─────────────────────┐                 
-                                                                      ├─────│     Literal<T>      │                 
-                                                                      │     └─────────────────────┘                 
-                                                                      │                                             
-                                                                      │     ┌─────────────────────┐                 
-                                                                      └─────│   TernaryOperator   │                 
-                                                                            └─────────────────────┘                 
-```
-<!-- Created with monodraw, the source file is in figures/AST_class_hierarchy -->
-***Figure 1:*** Class hierarchy of the AST classes.
-
-Following, the different node types are briefly explained. The examples in brackets show how the commands would look like in "plain" C++.
-
-- Classes derived from `AbstractExpression`
-  - `AbstractTarget` – represents "things that can be assigned to" (i.e., lvalues)
-      - `FunctionParameter` – describes the parameters that a function accepts. To evaluate an AST, values must be passed for each of the parameter defined by the function's `FunctionParameter` node.
-      - `IndexAccess` – represents the `[]` operator in C++; has a target and an index value
-      - `Variable` – named lvalue (any string)
-  - `BinaryExpression` – an expression with two operands and one operator (e.g., `13 + 37`).
-  - `OperatorExpression` – an operator with 0 or more operands (`AbstractExpression`)
-  - `UnaryExpression` – an expression with one operator and one operand (e.g., `!b` where `b` is a Boolean).
-  - `Call` – a call to an internal function, i.e., its implementation is represented in the AST as a Function.
-  - `ExpressionList` – rvalue with an order list of (potentially null) expressions (e.g., `v = {a, b, c}` assigns an `ExpressionList` to vector `v`)
-  - `Literal<T>` – containing a scalar value of type `T` (`bool`, `char`, `int`, `float`, `double`, or `std::string`)
-  - `TernaryOperator` – has a condition, a `then`-expression and a `else` expression (e.g., `(x < 3) ? 1 : 2`)
-- Classes derived from `AbstractStatement`
-  - `Assignment` – assigns an expression (rvalue) to a target (lvalue)
-  - `Block` – a code block `{...}` indicating scopes (e.g., the `then`-clause of an `if` statement)
-  - `For` – a `for`-loop with an initializer, condition, update, and a body `Block` (i.e., `for(initializer; condition; update) { ... }`)
-  - `Function` – function definition defining a name, list of `FunctionParameter`, `Return` type, and a body `Block`.
-  - `If` – defines a condition, a `then`-branch and (optionally) an `else`-branch (e.g., `if (condition) { ... }` or `if (condition) { ... } else { ... }`)
-  - `Return` – a return statement of a method with optional expression to return (e.g., `return`)
-  - `VariableDeclaration` – associates a `Variable` with a type (`Datatype`) and (optionally) a value (`AbstractExpression`)
-
-<!--
-As an example, the AST generated by the demo (method `generateDemoTwo`) is depicted following:
-
-```
-Function: determineSuitableX
-  FunctionParameter: (encryptedA : int)
-  FunctionParameter: (encryptedB : int)
-  VarDecl: (randInt : int)
-	BinaryExpr: 
-	  CallExternal: (std::rand)
-	  Operator: (mod)
-	  LiteralInt: (42)
-  VarDecl: (b : bool)
-	LogicalExpr: 
-	  Variable: (encryptedA)
-	  Operator: (<)
-	  LiteralInt: (2)
-  VarDecl: (sum : int)
-	LiteralInt: (0)
-  While: 
-	LogicalExpr: 
-	  LogicalExpr: 
-		Variable: (randInt)
-		Operator: (>=)
-		LiteralInt: (0)
-	  Operator: (AND)
-	  LogicalExpr: 
-		UnaryExpr: 
-		  Operator: (!)
-		  Variable: (b)
-		Operator: (!=)
-		LiteralBool: (true)
-	Block: 
-	  VarAssignm: (sum)
-		BinaryExpr: 
-		  Variable: (sum)
-		  Operator: (add)
-		  Variable: (encryptedB)
-	  VarAssignm: (randInt)
-		BinaryExpr: 
-		  Variable: (randInt)
-		  Operator: (sub)
-		  LiteralInt: (1)
-  VarDecl: (outStr : string)
-	LiteralString: (Computation finished!)
-  CallExternal: (printf)
-	FunctionParameter: (outStr : string)
-  Return: 
-	Variable: (sum)
-```
--->
-
-## Extending the Library
-
-In general, PRs are very welcome! However, to ensure that this library keeps a high quality standard, this section introduces some conventions to be followed when extending this library.
-
-### Code Style
-
-The code is written in C++ and formatted according to code style file [MarbleHE_CPP_Code_Style.xml](MarbleHE_CPP_Code_Style.xml). The file can be loaded into the IDE of your choice, for example, in CLion's preferences (Editor → Code Style → C/C++). As the style file can change at any time, please keep in mind to use the latest version before sending a PR.
-
-### Inspections
-
-This codebase was checked against the default C/C++ inspections provided in CLion.
-
-Further, the static code checker [cpplint](https://github.com/cpplint/cpplint) is used that provides more advanced checks. It can be integrated into CLion using the [CLion-cpplint](https://plugins.jetbrains.com/plugin/7871-clion-cpplint) plugin. To ensure consistency, pleasure use the following settings (to be provided in the plugin's options at Preferences -> cpplint option):
-```
---linelength=120 --filter=-legal/copyright,-build/header_guard,-whitespace/comments,-runtime/references,-whitespace/operators
-```
-
-### Documentation
-
-[Doxygen](http://www.doxygen.nl/manual/index.html) comments are used to create a documentation of this library.
-The documentation can be generated using the supplied configuration `doxygen.conf` as described following:
-
-```bash
-doxygen Doxyfile
-```
-
-### Testing
-
-The code is covered by unit tests to achieve high code quality and avoid introducing errors while extending the library.
-For that, the [Google Test](https://github.com/google/googletest) framework is used.
-The library as well as any other dependencies are automatically cloned from its GitHub repository using cmake, see [CMakeLists.txt](test/CMakeLists.txt).
-
-The tests can be found in the [`test`](test) directory and are named according to the class file that the test covers (e.g., `MultDepthVisitorTest` for the test covering the `MultDepthVisitor` class).
-
-It is required to submit tests for newly added features to ensure correctness and avoid breaking the feature by future changes (regression test). Any PRs without tests will not be considered to be integrated.
+## Development Tips for working with MLIR-based Projects
+[MLIR](https://mlir.llvm.org/) is an incredibly powerful tool and makes developing optimizing compilers significantly easier. 
+However, it is not necessarily an easy-to-pick-up tool, e.g., documentation for the rapdily evolving framework is not yet sufficient in many places.
+This short section cannot replace a thorough familiarization with the [MLIR Guide](https://mlir.llvm.org/getting_started/).
+Instead, it provides high-level summarizes to provide context to the existing documentation. 
+See [test/readme.md](test/readme.md) for information on the MLIR/LLVM testing infrastructure.
 
 
-### Workflow
-This project uses [GitHub flow](https://guides.github.com/introduction/flow/), i.e. all work around an improvement/feature happens on a specific branch and is only merged into main once it passes all checks and has been reviewed.
+### Working with TableGen
+This project uses the [Operation Definition Specification](https://mlir.llvm.org/docs/OpDefinitions/) and [Table-driven Declarative Rewrite Rules](https://mlir.llvm.org/docs/DeclarativeRewrites/)
+which use LLVM's [TableGen](https://llvm.org/docs/TableGen/index.html) language/tool.
+This project specifies things in `*.td` files, which are parsed by TableGen and processed by the [mlir-tblgen](https://llvm.org/docs/CommandGuide/mlir-tblgen.html) backend.
+The backend generates `C++` files (headers/sources, as appropriate),
+which are then included (using standard `#include`) into the headers/sources in this project.
+These generation steps are triggered automatically during build through custom CMake commands.
 
-## References
+In order to debug issues stemming from TableGen, it is important to realize that there are **four different types of TableGen failures**:
+* The TableGen parser throws an error like `error: expected ')' in dag init`. 
+  This implies a syntax error in the `*.td` file, e.g., missing comma or parenthesis.
+  These errors are presented the same as the next kind, but can be recognized since they usually mention "dag", "init" and/or "node". 
+* The MLIR TableGen backend throws an error like `error: cannot bind symbol twice`. These are semantic/logical errors in your `*.td` file, or hint at missing features in the backend.
+  Instead of stopping on an error, the backend might also crash with a stack dump. Scroll right to see if this is due to an assert being triggered.
+  This usually indicates a bug in the backend, rather than in your code (at the very least, that an `assert` should be replaced by a `llvm::PrintFatalError`).
+* The C++ compilation fails with an error in the generated `*.h.inc` or `*.cpp.inc` file. 
+  This can be caused by either user error, e.g., when trying to do a rewrite that doesn't respect return types,
+  or it can also be a sign of a bug in the MLIR TableGen backend.
+* The project builds, but crashes during runtime. Again, this can be an indication of a backend bug or user error.
 
-[1] Viand, A., Shafagh, H.: [Marble: Making Fully Homomorphic Encryption Accessible to All.](http://www.vs.inf.ethz.ch/publ/papers/vianda_marble_2018.pdf) In: Proceedings of the 6th workshop on encrypted computing & applied homomorphic cryptography. pp. 49–60 (2018).
+### Debugging MLIR
+[//]: # (TODO Documentation: Write up how to get useful debug info out of passes)
 
-[2] Aubry, P. et al.: [Faster Homomorphic Encryption Is Not Enough: Improved Heuristic for Multiplicative Depth Minimization of Boolean Circuits.](https://eprint.iacr.org/2019/963.pdf) (2019).
+Useful command line options for `mlir-opt`/`heco-tool` (see also [MLIR Debugging Tips](https://mlir.llvm.org/getting_started/Debugging/) and [IR Printing](https://mlir.llvm.org/docs/PassManagement/#ir-printing)):
+ * `-print-ir-before-all` - Prints the IR before each pass
+ * `-debug-only=dialect-conversion` - Prints some very useful information on passes and rules being applied
+ * `--verify-each=0` - Turns off the verifier, allowing one to see what the (invalid) IR looks like
+ * `--allow-unregistered-dialect` - Makes parser accept unknown operations (only works if they are in generic form!)

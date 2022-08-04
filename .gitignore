@@ -8,6 +8,8 @@ docs
 doc/*
 !doc/clion
 !doc/doxygen
+!doc/fhe_function_to_circuit.jpg
+!doc/heco_architecture.jpg
 /test/CMakeFiles/
 *.vpp*
 /cmake-build*

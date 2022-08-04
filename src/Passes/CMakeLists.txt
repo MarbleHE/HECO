@@ -1,0 +1,5 @@
+add_subdirectory(ast2hir)
+add_subdirectory(fhe2bgv)
+add_subdirectory(bgv2emitc)
+add_subdirectory(bgv2llvm)
+add_subdirectory(hir2hir)

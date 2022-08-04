@@ -1,15 +1,14 @@
+import ast
 import logging
-import json
 
 from ast import *
 
 from .ABCGenericExpr import ABCGenericExpr
 from .ABCJsonAstBuilder import ABCJsonAstBuilder
-from .ABCTypes import is_secret
+from .ABCTypes import is_secret, get_created_type
 from .FunctionVisitor import FunctionVisitor
 
 UNSUPPORTED_ATTRIBUTE_RESOLUTION = "Attribute resolution is not supported."
-UNSUPPORTED_FUNCTION = "Functions other than 'main' are not supported (violating function: '%s')."
 UNSUPPORTED_ONLY_ARGS = "Positional-only and keyword-only arguments are not supported."
 UNSUPPORTED_STATEMENT = "Unsupported statement: '%s' is not supported."
 UNSUPPORTED_SYNTAX_ERROR = "Unsupported syntax: %s."
@@ -19,10 +18,8 @@ NO_FLOOR_DIV = "There is no type casting, division of integers will always be in
                "Thus '/' and '//' are equivalent in ABC frontend code."
 UNSUPPORTED_LOCAL_FUNCTION_CALL = "Function calls in the same context object are not yet implemented."
 UNSUPPORTED_GLOBAL_FUNCTION_CALL = "Global functions calls are not yet implemented."
+UNSUPPORTED_FUNCTION_ARGS = "%s are not supported! Violating function:\n%s"
 BLACKBOX_FUNCTION_CALL = "Did not find source code of function call, treat it as blackbox."
-
-MAIN_SYMBOL = "main"
-
 
 class ABCVisitor(NodeVisitor):
     """
@@ -46,11 +43,38 @@ class ABCVisitor(NodeVisitor):
     #
     # Helper functions
     #
+    def _get_composite(self, val):
+        # Base case: this is a leaf object
+        if isinstance(val, ast.Name):
+            type_str = val.id
+            created = get_created_type(type_str)
+            if created is None:
+                return self.builder.make_simpletype(type_str)
+
+            sub_ast = ast.parse(f"x: {created}")
+            return self._get_composite(sub_ast.body[0].annotation)
+
+        # Recursive case: Collection with content type
+        if isinstance(val, ast.Subscript):
+            node = val.value
+            inner = val.slice
+            outer_name = "void"
+            if isinstance(node, ast.Attribute):
+                # Might be a fully qualified name
+                outer_name = node.attr
+            elif isinstance(node, ast.Name):
+                outer_name = node.id
+            else:
+                logging.error(f"Unsupported annotation node: {node}")
+                exit(1)
+
+            return self.builder.make_compositetype(outer_name, self._get_composite(inner))
+
     def _get_annotation(self, arg):
         if hasattr(arg, "annotation") and arg.annotation:
-            return arg.annotation.id
+            return self._get_composite(arg.annotation)
         else:
-            return None
+            return self.builder.make_simpletype("void")
 
     def _tpl_stmt_to_list(self, t):
         """
@@ -137,6 +161,27 @@ class ABCVisitor(NodeVisitor):
             # we never declare an index assignment, the indexed variable was declared before.
             return self.builder.make_assignment(var, expr)
 
+    def _make_assignment_with_type(self, var, expr, type):
+        if var["type"] == "Variable":
+            var_name = var["identifier"]
+            if var_name in self.declared_vars:
+                return self.builder.make_assignment(var, expr)
+            else:
+                self.declared_vars.add(var_name)
+                return self.builder.make_variable_declaration(var, expr, t=type)
+        else:
+            # we never declare an index assignment, the indexed variable was declared before.
+            return self.builder.make_assignment(var, expr)
+
+    def _arg_to_function_param(self, arg : arg):
+        identifier = arg.arg
+
+        # TODO: translate type annotations properly
+        # type = self._get_annotation(arg)
+        param_type = self._get_annotation(arg)
+
+        return self.builder.make_function_param(identifier, param_type)
+
     #
     # Supported visit functions
     #
@@ -217,12 +262,13 @@ class ABCVisitor(NodeVisitor):
             on generic FHE objects that track the operations performed on them.
         """
 
-        # Check if the function is defined in the same context
+        # Check if the function is defined in the same function
         if isinstance(node.func, Attribute):
             logging.error(UNSUPPORTED_ATTRIBUTE_RESOLUTION)
             exit(1)
 
-        fn_ast = FunctionVisitor(node.func.id).visit(self.prog.src_context_ast)
+        # Check if the function is defined on the call stack
+        fn_ast = FunctionVisitor(node.func.id).visit(self.prog.src_call_stack_ast)
         if fn_ast:
             logging.error(UNSUPPORTED_LOCAL_FUNCTION_CALL)
             exit(1)
@@ -231,9 +277,15 @@ class ABCVisitor(NodeVisitor):
         # Check if the function is defined globally in the same file
         fn_ast = FunctionVisitor(node.func.id).visit(self.prog.src_code_ast)
         if fn_ast:
-            logging.error(UNSUPPORTED_GLOBAL_FUNCTION_CALL)
-            exit(1)
-            # TODO: return here when this is implemented
+            args = list(map(self.visit, node.args))
+            return self.builder.make_call(node.func.id, args)
+
+        # Check if the function is defined in the same with block
+        for block in self.prog.src_curr_blocks_asts:
+            fn_ast = FunctionVisitor(node.func.id).visit(block)
+            if fn_ast:
+                args = list(map(self.visit, node.args))
+                return self.builder.make_call(node.func.id, args)
 
         # Otherwise, treat this function as a blackbox call. We execute the function on generic ABC values and record
         # the operations performed on those values to build an expression, with which we replace the function call.
@@ -249,6 +301,23 @@ class ABCVisitor(NodeVisitor):
 
         # Return the AST expression gathered by the generic response object
         return external_fn_ret.expr
+
+    def visit_Compare(self, node: Compare) -> dict:
+        """
+        Visit a Python compare and transform it to a dictionary corresponding to an ABC BinaryExpression.
+        """
+        # TODO: we don't support multiple operands (e.g. 0 <= x < 10). A compare is treated like a
+        #  normal condition
+        if len(node.ops) > 1 or len(node.comparators) > 1:
+            logging.error(UNSUPPORTED_SYNTAX_ERROR,
+                          f"Compare operations with multiple operands are not supported: {node.ops}")
+            exit(1)
+
+        return self.builder.make_binary_expression(
+            self.visit(node.left),
+            self.visit(node.ops[0]),
+            self.visit(node.comparators[0]),
+        )
 
     def visit_Constant(self, node: Constant):
         """
@@ -297,6 +366,16 @@ class ABCVisitor(NodeVisitor):
         else:
             step_val = self.builder.make_literal(1)
 
+        stmts = list(map(self.visit, node.body))
+        body = self.builder.make_block(stmts)
+
+        # If step_val is a literal node with value of 1 we change it to 1
+        if "type" in step_val and step_val["type"] == "LiteralInt" and step_val["value"] == 1:
+            step_val = 1
+
+        if step_val == 1:
+            return self.builder.make_for_range(target, start_val, stop_val, step_val, body)
+
         # Currently, the initializer is a block with a single statement.
         var_decl = self.builder.make_variable_declaration(target, start_val)
 
@@ -322,55 +401,79 @@ class ABCVisitor(NodeVisitor):
                                                                target_gt_stop)
         condition = self.builder.make_binary_expression(condition_case_1, self.builder.constants.OR, condition_case_2)
 
-        stmts = list(map(self.visit, node.body))
-        body = self.builder.make_block(stmts)
-
         return self.builder.make_for(initializer, condition, update, body)
 
     def visit_FunctionDef(self, node: FunctionDef) -> dict:
         """
         Visit a Python function definition and convert it to an AST function definition.
-        The 'main' function is treated differently: it is removed and it's contents are
-        directly converted to the root of the AST.
         """
 
-        if node.name == MAIN_SYMBOL:
-            # TODO: From Python 3.9 onwards, we can use unparse instead of dump (newly added to ast)
-            # logging.debug(f"Parsing python main function:\n{unparse(node)}")
+        # logging.debug(f"Parsing python function:\n{unparse(node)}")
 
-            last_stmt = node.body[-1]
-            if not isinstance(last_stmt, Return):
-                logging.error("The FHE main function has to return something.")
-                exit(1)
+        last_stmt = node.body[-1]
+        if not isinstance(last_stmt, Return):
+            logging.warning("Function without return statement found.")
 
-            # Parse the main function, except the return statement
-            stmts = list(map(self.visit, node.body))
-            body = self.builder.make_block(stmts)
-
-            # Parse the return statement separately. We do support parsing multiple variables of the same type,
-            # but we don't support expressions.
-            ret_vals = last_stmt.value.elts if isinstance(last_stmt.value, Tuple) else [last_stmt.value]
-            ret_vars = dict()
-            ret_constants = []
-            for i, ret_val in enumerate(ret_vals):
-                if isinstance(ret_val, Name):
-                    ret_vars[ret_val.id] = i
-                elif isinstance(ret_val, Constant):
-                    ret_constants.append(ret_val.value)
-
-            self.prog.add_main_fn(body, self._args_to_dict(node.args), ret_vars, ret_constants)
-
-            logging.debug(f"... to ABC AST:\n{json.dumps(body, indent=2)}")
-            return {}
+        # Parse the return type
+        # TODO [mh]: as an addition, we could parse "returns" return type annotations
+        if isinstance(node.returns, ast.Subscript) or isinstance(node.returns, ast.Name):
+            return_type = self._get_composite(node.returns)
         else:
-            logging.error(UNSUPPORTED_FUNCTION, node.name)
+            return_type = self.builder.make_simpletype("void")
+
+        # Parse the function arguments
+        if len(node.args.kwonlyargs) > 0:
+            logging.error(UNSUPPORTED_FUNCTION_ARGS.format("kwonlyargs", unparse(node)))
             exit(1)
+        if len(node.args.posonlyargs) > 0:
+            logging.error(UNSUPPORTED_FUNCTION_ARGS.format("posonlyargs", unparse(node)))
+            exit(1)
+        if len(node.args.kw_defaults) > 0:
+            logging.error(UNSUPPORTED_FUNCTION_ARGS.format("kw_defaults", unparse(node)))
+            exit(1)
+        if len(node.args.defaults) > 0:
+            logging.error(UNSUPPORTED_FUNCTION_ARGS.format("defaults", unparse(node)))
+            exit(1)
+
+        params = list(map(self._arg_to_function_param, node.args.args))
+
+        # Parse the function body
+        stmts = list(map(self.visit, node.body))
+        body = self.builder.make_block(stmts)
+
+        # TODO: nested functions (function definitions inside other functions) are neither detected nor supported.
+        fn = self.builder.make_function(node.name, return_type, params, body)
+        self.prog.add_fn(fn)
+
+        return fn
 
     def visit_Gt(self, node: Gt) -> dict:
         return self.builder.constants.GT
 
     def visit_GtE(self, node: GtE) -> dict:
         return self.builder.constants.GTE
+
+    def visit_If(self, node: If) -> dict:
+        """
+        Visit a Python If node and transform it to a dictionary corresponding to an ABC If.
+        """
+
+        # Parse if branch
+        stmts = list(map(self.visit, node.body))
+        if_branch = self.builder.make_block(stmts)
+
+        # Parse else branch
+        if len(node.orelse) > 0:
+            stmts = list(map(self.visit, node.orelse))
+            else_branch = self.builder.make_block(stmts)
+        else:
+            else_branch = None
+
+        return self.builder.make_if(
+            self.visit(node.test),
+            if_branch,
+            else_branch
+        )
 
     def visit_Index(self, node: Index) -> dict:
         # TODO: so far, all Index nodes that we used only had the single attribute "value"
@@ -405,6 +508,14 @@ class ABCVisitor(NodeVisitor):
 
         return self.builder.make_variable(node.id)
 
+    def visit_Num(self, node: Num) -> dict:
+        """
+        Visit a Python Num and transform it to a dictionary corresponding to an ABC literal.
+        (deprecated after Python 3.6, here for backwards compatibility)
+        """
+
+        return self.builder.make_literal(node.n)
+
     def visit_Or(self, node: Or) -> dict:
         return self.builder.constants.OR
 
@@ -415,8 +526,7 @@ class ABCVisitor(NodeVisitor):
 
         # Only support single return statements, since we don't support multi-value return statements yet
         if isinstance(node.value, Tuple):
-            # TODO: From Python 3.9 onwards, we can use unparse instead of dump (newly added to ast)
-            logging.error(UNSUPPORTED_MULTI_VALUE_RETURN, dump(node))
+            logging.error(UNSUPPORTED_MULTI_VALUE_RETURN, unparse(node))
             exit(1)
 
         ret_node = self.visit(node.value)
@@ -451,8 +561,16 @@ class ABCVisitor(NodeVisitor):
         exit(1)
 
     def visit_AnnAssign(self, node: AnnAssign) -> dict:
-        logging.error(UNSUPPORTED_STATEMENT, type(node))
-        exit(1)
+        # First, evaluate the RHS expression
+        exp = self.visit(node.value)
+
+        # Get the target
+        target = self._parse_lhs(node.target)[0]
+
+        # Get type
+        type_ann = self._get_annotation(node)
+
+        return self._make_assignment_with_type(target, exp, type_ann)
 
     def visit_AsyncFor(self, node: AsyncFor) -> dict:
         logging.error(UNSUPPORTED_STATEMENT, type(node))
@@ -499,10 +617,6 @@ class ABCVisitor(NodeVisitor):
         exit(1)
 
     def visit_ClassDef(self, node: ClassDef) -> dict:
-        logging.error(UNSUPPORTED_STATEMENT, type(node))
-        exit(1)
-
-    def visit_Compare(self, node: Compare) -> dict:
         logging.error(UNSUPPORTED_STATEMENT, type(node))
         exit(1)
 
@@ -555,10 +669,6 @@ class ABCVisitor(NodeVisitor):
         exit(1)
 
     def visit_Global(self, node: Global) -> dict:
-        logging.error(UNSUPPORTED_STATEMENT, type(node))
-        exit(1)
-
-    def visit_If(self, node: If) -> dict:
         logging.error(UNSUPPORTED_STATEMENT, type(node))
         exit(1)
 
@@ -626,9 +736,9 @@ class ABCVisitor(NodeVisitor):
         logging.error(UNSUPPORTED_STATEMENT, type(node))
         exit(1)
 
-    def visit_NamedExpr(self, node: NamedExpr) -> dict:
-        logging.error(UNSUPPORTED_STATEMENT, type(node))
-        exit(1)
+    #def visit_NamedExpr(self, node: NamedExpr) -> dict:
+    #    logging.error(UNSUPPORTED_STATEMENT, type(node))
+    #    exit(1)
 
     def visit_Nonlocal(self, node: Nonlocal) -> dict:
         logging.error(UNSUPPORTED_STATEMENT, type(node))
@@ -643,10 +753,6 @@ class ABCVisitor(NodeVisitor):
         exit(1)
 
     def visit_NotIn(self, node: NotIn) -> dict:
-        logging.error(UNSUPPORTED_STATEMENT, type(node))
-        exit(1)
-
-    def visit_Num(self, node: Num) -> dict:
         logging.error(UNSUPPORTED_STATEMENT, type(node))
         exit(1)
 
@@ -711,6 +817,10 @@ class ABCVisitor(NodeVisitor):
         exit(1)
 
     def visit_UnaryOp(self, node: UnaryOp) -> dict:
+        if isinstance(node.op, ast.USub) and isinstance(node.operand, ast.Constant):
+            # This is a negative constant
+            return self.builder.make_literal(-node.operand.value)
+
         logging.error(UNSUPPORTED_STATEMENT, type(node))
         exit(1)
 
