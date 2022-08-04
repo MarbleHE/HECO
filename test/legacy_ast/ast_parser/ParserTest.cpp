@@ -19,7 +19,7 @@
 #include "heco/legacy_ast/ast/UnaryExpression.h"
 #include "heco/legacy_ast/ast/Variable.h"
 #include "heco/legacy_ast/ast/VariableDeclaration.h"
-#include "test/ast/ASTComparison.h"
+#include "../ast/ASTComparison.h"
 
 Datatype BOOL = Datatype(Type::BOOL);
 Datatype CHAR = Datatype(Type::CHAR);
