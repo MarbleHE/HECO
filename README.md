@@ -167,6 +167,7 @@ You might want to install clang, lld, ninja and optionally [ccache](https://ccac
 >    -DLLVM_ENABLE_ASSERTIONS=ON \
 >    -DCMAKE_C_COMPILER=clang \
 >    -DCMAKE_CXX_COMPILER=clang++ \
+>    -DLLVM_ENABLE_LLD=ON \
 >    -DLLVM_CCACHE_BUILD=ON \
 >    -DLLVM_INSTALL_UTILS=ON \
 >    -DMLIR_INCLUDE_INTEGRATION_TESTS=ON
