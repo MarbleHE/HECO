@@ -246,7 +246,6 @@ The repository is organized as follow:
 
 ```
 .github         – Continous Integration/CI) setup files
-examples        – Simple Examples for both the compiler and frontend
 include         – header (.h) and TableGen (.td) files
  └ IR             – contains the different dialect definitions
  └ Passes         – contains the definitions of the different transformations
