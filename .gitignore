@@ -1,15 +1,71 @@
+## Misc
 .DS_Store
 .idea
-cmake-build-debug/
-CMakeFiles
-_deps
+
+## Documentation
+docs/*
+!docs/fhe_function_to_circuit.jpg
+!docs/heco_architecture.jpg
+
+## vscode stuff
+.vscode
+.history
+*.vsix
+
+## CMake stuff
 build
-docs
-doc/*
-!doc/clion
-!doc/doxygen
-!doc/fhe_function_to_circuit.jpg
-!doc/heco_architecture.jpg
+cmake-build-debug/
 /test/CMakeFiles/
-*.vpp*
 /cmake-build*
+
+########################################################################################
+## CMake gitignore from https://github.com/github/gitignore/blob/main/CMake.gitignore ##
+########################################################################################
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
+
+####################################################################################
+## C++ gitignore from https://github.com/github/gitignore/blob/main/C++.gitignore ##
+####################################################################################
+
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
