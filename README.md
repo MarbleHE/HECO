@@ -38,7 +38,7 @@ Currently, it supports Ring-LWE based schemes [B](https://eprint.iacr.org/2012/0
 
 In FHE (and other advanced cryptographic techniques such as MPC or ZKP), developers must express their applications as an (arithmetic/binary) circuit. Translating a function *f* so that the resulting circuit can be evaluated efficiently is highly non-trivial and doing so manually requires significant expert knowledge. This is where FHE compilers like HECO come in, by automating the transformation of high-level programs into lower-level representations that can be evaluated using FHE.
 
-![program/function  f --> circuit representation --> FHE Schemes](doc/fhe_function_to_circuit.jpg)
+![program/function  f --> circuit representation --> FHE Schemes](docs/fhe_function_to_circuit.jpg)
 
 HECO's design and novel optimizations are described in the accompanying [paper](https://arxiv.org/abs/2202.01649).
 In contrast to previous compilers, HECO removes a significant burden from the developer by automating the task of translating a program to the restricted SIMD programming paradigm available in FHE. This can result in speeupds by over an order of magnitude (i.e., 10x or more) when compared to a naive baseline.
@@ -46,7 +46,7 @@ In contrast to previous compilers, HECO removes a significant burden from the de
 HECO is built using the [MLIR](https://mlir.llvm.org/) compiler framework and follows a traditional front-, middle- and back-end architecture. It uses two Intermediate Representations (IRs) in the middle-end, High-level IR (HIR) to express programs containing control flow and an abstraction of FHE computing (`heco::fhe`). 
 This is then lowered to Scheme-specific IR (SIR), with operations corresponding to the FHE schemes' underlying operations (e.g., addition, multiplication, relineraization, etc.). Currently, HECO targets [Microsoft SEAL](https://github.com/Microsoft/SEAL) as its backend. In the future, HECO will be extended with Polynomial-level IR (PIR) and RNS IR (RIR) to directly target hardware (both CPUs and dedicated FHE accelerators).
 
-![Architecture Overview of the Dialects](doc/heco_architecture.jpg)
+![Architecture Overview of the Dialects](docs/heco_architecture.jpg)
 
 # Using HECO
 
@@ -245,7 +245,6 @@ The [MLIR](https://marketplace.visualstudio.com/items?itemName=llvm-vs-code-exte
 The repository is organized as follow:
 
 ```
-.github         – Continous Integration/CI) setup files
 include         – header (.h) and TableGen (.td) files
  └ IR             – contains the different dialect definitions
  └ Passes         – contains the definitions of the different transformations
@@ -254,7 +253,15 @@ src             – source files (.cpp)
  └ IR             – implementations of additional dialect-specific functionality
  └ Passes         – implementations of the different transformations
  └ tools          – sources for the main commandline interface
-test            – unit tests for all classes
+test            – unit tests
+```
+
+There are also additional folders for various configuration/setup things:
+```
+.github         – Continous Integration/CI) setup files
+cmake           - Configuration files for the CMake build system
+docs            - Additional files for Documentation
+scripts         - Python scripts for plotting benchmark results
 ```
 
 ## Development Tips for working with MLIR-based Projects
