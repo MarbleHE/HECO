@@ -1,13 +1,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include "heco/IR/AST/ASTDialect.h"
-#include "heco/legacy_ast/ast_parser/Errors.h"
-#include "heco/legacy_ast/ast_parser/Parser.h"
-#include "heco/legacy_ast/ast_utilities/AbcAstToMlirVisitor.h"
-#include "heco/legacy_ast/ast_utilities/ProgramPrintVisitor.h"
 
 namespace py = pybind11;
-using json = nlohmann::json;
 
 class AbstractValue
 {
@@ -28,7 +23,7 @@ class AbstractCiphertext
 class ABCProgramWrapper
 {
 private:
-    std::unique_ptr<AbstractNode> programAst;
+    // std::unique_ptr<AbstractNode> programAst;
     mlir::ModuleOp module;
 
     // Those two are only attributes because otherwise the module will not be preserves, since it relies on the
@@ -71,28 +66,28 @@ public:
     /// \param program JSON version of ABC AST
     explicit ABCProgramWrapper(const std::string program)
     {
-        programAst = Parser::parseJson(program);
+        // programAst = Parser::parseJson(program);
 
         ctx.getOrLoadDialect<heco::ast::ASTDialect>();
         builder = new mlir::OpBuilder(&ctx);
         module = mlir::ModuleOp::create(builder->getUnknownLoc());
 
         // Translate ABC AST to MLIR
-        AbcAstToMlirVisitor v(ctx);
-        programAst->clone()->accept(v);
+        // AbcAstToMlirVisitor v(ctx);
+        // programAst->clone()->accept(v);
 
-        module.getRegion().push_back(v.getBlockPtr());
+        // module.getRegion().push_back(v.getBlockPtr());
     }
 
     void add_fn(std::string fn)
     {
-        auto fn_parsed = Parser::parseJson(fn);
+        // auto fn_parsed = Parser::parseJson(fn);
 
         // Translate ABC AST of fn to MLIR
-        AbcAstToMlirVisitor v(ctx);
-        fn_parsed->accept(v);
+        // AbcAstToMlirVisitor v(ctx);
+        // fn_parsed->accept(v);
 
-        module.getRegion().push_back(v.getBlockPtr());
+        // module.getRegion().push_back(v.getBlockPtr());
     }
 
     /// Execute the compiled program on the given inputs and outputs

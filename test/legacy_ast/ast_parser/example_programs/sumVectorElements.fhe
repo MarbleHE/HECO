@@ -1,8 +1,0 @@
-int sumVectorElements(int numIterations) {
-  int M[] = {54, 32, 63, 38, 13, 20};
-  int sum = 0;
-  for (int i = 0; i < numIterations; i++) {
-    sum = sum + M[i];
-  }
-  return sum;
-}

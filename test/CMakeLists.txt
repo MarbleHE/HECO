@@ -13,36 +13,34 @@ if(NOT TARGET gtest)
         GIT_REPOSITORY https://github.com/google/googletest.git
         GIT_TAG release-1.12.1
     )
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    get_property(
+        compile_options
+        DIRECTORY
+        PROPERTY COMPILE_OPTIONS
+    )
+    
+    set_property(
+        DIRECTORY
+        APPEND
+        PROPERTY COMPILE_OPTIONS -w
+    )
+    
     FetchContent_MakeAvailable(googletest)
+    
+    set_property(
+        DIRECTORY
+        PROPERTY COMPILE_OPTIONS ${compile_options}
+    )
+    
 endif()
+
+
 
 ##############################
 # TARGET: testing
 ##############################
-# cpp-ast tests disabled since this is a deprecated feature that is scheduled to be removed in favor of going directly
-# to MLIR ast from parser & python
-set(TEST_FILES
-        legacy_ast/ast/ASTComparison.cpp
-        #ast/ASTComparison.h
-        #AstTestingGenerator.cpp
-        #AstTestingGenerator.h
-        #JsonOutputTest.cpp
-        #ast/AssignmentTest.cpp
-        #ast/BinaryExpressionTest.cpp
-        #ast/BlockTest.cpp
-        #ast/CallTest.cpp
-        #ast/ExpressionListTest.cpp
-        #ast/ForTest.cpp
-        #ast/FunctionParameterTest.cpp
-        #ast/FunctionTest.cpp
-        #ast/IfTest.cpp
-        #ast/LiteralTest.cpp
-        #ast/OperatorExpressionTest.cpp
-        #ast/ReturnTest.cpp
-        #ast/TernaryOperatorTest.cpp
-        #ast/UnaryExpressionTest.cpp
-        #ast/VariableDeclarationTest.cpp
-        #ast/VariableTest.cpp
+set(TEST_FILES       
         end-to-end/BoxBlurTest.cpp
         end-to-end/CardioTest.cpp
         end-to-end/DotProductTest.cpp
@@ -54,19 +52,14 @@ set(TEST_FILES
         end-to-end/LinearKernelTest.cpp
         end-to-end/MatrixVectorProductTest.cpp
         end-to-end/PolynomialKernelTest.cpp
-        end-to-end/RobertsCrossTest.cpp
-        legacy_ast/ast_parser/ParserTest.cpp
-        legacy_ast/ast_parser/TokenizerTest.cpp
-        #ast_visitor/PrintVisitorTest.cpp
-        #ast_visitor/ProgramPrintVisitorTest.cpp
-        #ast_visitor/VisitorTest.cpp
+        end-to-end/RobertsCrossTest.cpp        
         bench/MultiTimer.cpp
         bench/BoxBlur.cpp
         bench/L2Distance.cpp
         bench/HammingDistance.cpp
         bench/RobertsCross.cpp
         bench/GxKernel.cpp
-        )
+)
 
 
 add_executable(testing-all
@@ -79,7 +72,7 @@ add_executable(testing-all
 #    set(CMAKE_CXX_FLAGS "-fprofile-instr-generate -fcoverage-mapping")
 #endif ()
 
-target_link_libraries(testing-all PRIVATE gtest cpp_ast gtest_main)
+target_link_libraries(testing-all PRIVATE gtest gtest_main)
 target_include_directories(testing-all PRIVATE ${abc_SOURCE_DIR}/include/ bench)
 
 if(MSVC)
@@ -89,10 +82,7 @@ endif()
 
 # create ctest targets
 gtest_discover_tests(testing-all TEST_PREFIX gtest:)
-
-# make sure that ast_lib is built before the testing-all target
 add_dependencies(testing-all mlir-headers)
-add_dependencies(testing-all cpp_ast)
 
 # Python tests
 # add_subdirectory(python_frontend)

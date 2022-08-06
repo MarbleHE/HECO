@@ -1,8 +1,6 @@
 #include <stdexcept>
 #include <vector>
 #include "gtest/gtest.h"
-#include "heco/legacy_ast/ast_parser/Parser.h"
-#include "heco/legacy_ast/ast_utilities/Scope.h"
 
 #ifdef HAVE_SEAL_BFV
 #include "HammingDistance.h"

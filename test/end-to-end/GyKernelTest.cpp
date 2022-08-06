@@ -1,8 +1,6 @@
 #include <cmath>
 #include <random>
 #include "gtest/gtest.h"
-#include "heco/legacy_ast/ast_parser/Parser.h"
-#include "heco/legacy_ast/ast_utilities/Scope.h"
 
 /// Original, plain C++ program for a naive Gy Kernel
 /// This uses a 3x3 Kernel and applies it by sliding across the 2D image

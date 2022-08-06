@@ -1,7 +1,0 @@
-int[] extractArbitraryMatrixElements2() {
-  // providing size for 1-dimensional arrays is optional
-  int M[] = {14, 27, 32};   // we should be able to easily infer the size, or will we use a dynamically-sized container?
-  int B[] = {19, 21, 38};
-  int result[] = {M[0], B[0], M[1], B[1]};
-  return result;  // return array here
-}
