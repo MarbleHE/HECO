@@ -1,6 +1,6 @@
-// RUN: abc-opt -nary --canonicalize < %s | FileCheck %s
+// RUN: fhe-tool -nary --canonicalize < %s | FileCheck %s
 module  {
-  func private @encryptedBoxBlur(%arg0: tensor<64x!fhe.secret<f64>>) -> tensor<64x!fhe.secret<f64>> {
+  func.func private @encryptedBoxBlur(%arg0: tensor<64x!fhe.secret<f64>>) -> tensor<64x!fhe.secret<f64>> {
     %c63 = arith.constant 63 : index
     %c56 = arith.constant 56 : index
     %c8 = arith.constant 8 : index

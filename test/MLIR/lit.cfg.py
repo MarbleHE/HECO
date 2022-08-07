@@ -16,7 +16,7 @@ from lit.llvm.subst import FindTool
 # Configuration file for the 'lit' test runner.
 
 # name: The name of this test suite.
-config.name = 'STANDALONE'
+config.name = 'HECO'
 
 config.test_format = lit.formats.ShTest(not llvm_config.use_lit_shell)
 
@@ -40,7 +40,8 @@ llvm_config.use_default_substitutions()
 # excludes: A list of directories to exclude from the testsuite. The 'Inputs'
 # subdirectories contain auxiliary inputs for various tests in their parent
 # directories.
-config.excludes = ['Inputs', 'Examples', 'CMakeLists.txt', 'README.txt', 'LICENSE.txt']
+config.excludes = ['Inputs', 'Examples',
+                   'CMakeLists.txt', 'README.txt', 'LICENSE.txt']
 
 # test_source_root: The root path where tests are located.
 config.test_source_root = os.path.dirname(__file__)
@@ -54,8 +55,8 @@ llvm_config.with_environment('PATH', config.llvm_tools_dir, append_path=True)
 
 tool_dirs = [config.abc_tools_dir, config.llvm_tools_dir]
 tools = [
-    'abc-opt',
-    'abc-translate'
+    'fhe-tool',
+    'emitc-translate'
 ]
 
 llvm_config.add_tool_substitutions(tools, tool_dirs)

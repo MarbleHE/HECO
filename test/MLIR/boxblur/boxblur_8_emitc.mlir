@@ -1,0 +1,1 @@
+//RUN:  emitc-translate -mlir-to-cpp < %s | FileCheck %s

@@ -67,7 +67,7 @@ add_executable(testing-all
 #endif ()
 
 target_link_libraries(testing-all PRIVATE gtest gtest_main)
-target_include_directories(testing-all PRIVATE ${abc_SOURCE_DIR}/include/ bench)
+target_include_directories(testing-all PRIVATE bench)
 
 if(MSVC)
     # Mark gtest as external
@@ -76,4 +76,3 @@ endif()
 
 # create ctest targets
 gtest_discover_tests(testing-all TEST_PREFIX gtest:)
-add_dependencies(testing-all mlir-headers)

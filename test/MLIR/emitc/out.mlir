@@ -1,5 +1,6 @@
+//RUN:
 module {
-  func private @trace() -> !emitc.opaque<"seal::Ciphertext"> {
+  func.func private @trace() -> !emitc.opaque<"seal::Ciphertext"> {
     %0 = "emitc.constant"() {value = #emitc.opaque<"\22p_1.parms\22">} : () -> !emitc.opaque<"std::string">
     %1 = "emitc.constant"() {value = #emitc.opaque<"\22encrpytion_3.ctxt\22">} : () -> !emitc.opaque<"std::string">
     %2 = "emitc.constant"() {value = #emitc.opaque<"\22encrpytion_2.ctxt\22">} : () -> !emitc.opaque<"std::string">

@@ -1,6 +1,6 @@
-//RUN:  abc-translate -mlir-to-cpp < %s | FileCheck %s
+//RUN:  emitc-translate -mlir-to-cpp < %s | FileCheck %s
 module  {
-  func private @encryptedHammingDistance(%arg0: !emitc.opaque<"seal::Ciphertext">, %arg1: !emitc.opaque<"seal::Ciphertext">) -> !emitc.opaque<"seal::Ciphertext"> {
+  func.func private @encryptedHammingDistance(%arg0: !emitc.opaque<"seal::Ciphertext">, %arg1: !emitc.opaque<"seal::Ciphertext">) -> !emitc.opaque<"seal::Ciphertext"> {
     %0 = emitc.call "evaluator.sub"(%arg0, %arg1) : (!emitc.opaque<"seal::Ciphertext">, !emitc.opaque<"seal::Ciphertext">) -> !emitc.opaque<"seal::Ciphertext">
     %1 = emitc.call "evaluator.multiply"(%0, %0) : (!emitc.opaque<"seal::Ciphertext">, !emitc.opaque<"seal::Ciphertext">) -> !emitc.opaque<"seal::Ciphertext">
     %2 = emitc.call "evaluator.rotate"(%1) {args = [0 : index, -2 : si32]} : (!emitc.opaque<"seal::Ciphertext">) -> !emitc.opaque<"seal::Ciphertext">

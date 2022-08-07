@@ -1,7 +1,7 @@
-// RUN: abc-opt -unroll-loops --canonicalize --cse < %s | FileCheck %s
+// RUN: fhe-tool -unroll-loops --canonicalize --cse < %s | FileCheck %s
 // hand-written test -> prettier SSA value names
 module  {
-  func private @encryptedMVP(%m: tensor<16xf64>, %v: tensor<4x!fhe.secret<f64>>) -> tensor<4x!fhe.secret<f64>> {
+  func.func private @encryptedMVP(%m: tensor<16xf64>, %v: tensor<4x!fhe.secret<f64>>) -> tensor<4x!fhe.secret<f64>> {
     %c0 = arith.constant 0 : index
     %c4 = arith.constant 4 : index
     %c0_sf64 = fhe.constant 0.000000e+00 : f64

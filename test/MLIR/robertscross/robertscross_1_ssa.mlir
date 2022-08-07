@@ -1,6 +1,6 @@
-// RUN: abc-opt -unroll-loops --canonicalize --cse < %s | FileCheck %s
+// RUN: fhe-tool -unroll-loops --canonicalize --cse < %s | FileCheck %s
 module  {
-  func private @encryptedRobertsCross(%img: tensor<64x!fhe.secret<f64>>) -> tensor<64x!fhe.secret<f64>> {
+  func.func private @encryptedRobertsCross(%img: tensor<64x!fhe.secret<f64>>) -> tensor<64x!fhe.secret<f64>> {
     %c64 = arith.constant 64 : index
     %c8 = arith.constant 8 : index
     %c1 = arith.constant 1 : index

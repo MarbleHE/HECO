@@ -1,4 +1,5 @@
-func private @trace() -> !bgv.ctxt<2 x !poly.poly<8192, false, 4, "p_1.parms">> {
+//RUN: 
+func.func private @trace() -> !bgv.ctxt<2 x !poly.poly<8192, false, 4, "p_1.parms">> {
   %0 = bgv.load_public_key {file = "public_key_0.pk", parms = "p_0.parms"} : !bgv.pk<2 x !poly.poly<8192, true, 5, "p_0.parms">>
   %1 = bgv.load_relin_keys {file = "relin_keys_1.rk", parms = "p_0.parms"} : !bgv.rlk<1 x 4 x 2 x !poly.poly<8192, true, 5, "p_0.parms">>
   %2 = bgv.load_ctxt {file = "encrpytion_2.ctxt", parms = "p_1.parms"} : !bgv.ctxt<2 x !poly.poly<8192, false, 4, "p_1.parms">>

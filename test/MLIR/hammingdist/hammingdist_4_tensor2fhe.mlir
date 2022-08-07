@@ -1,6 +1,6 @@
-//RUN: abc-opt -batching --canonicalize --cse --canonicalize < %s | FileCheck %s
+//RUN: fhe-tool -batching --canonicalize --cse --canonicalize < %s | FileCheck %s
 module  {
-  func private @encryptedHammingDistance(%arg0: !fhe.batched_secret<f64>, %arg1: !fhe.batched_secret<f64>) -> !fhe.secret<f64> {
+  func.func private @encryptedHammingDistance(%arg0: !fhe.batched_secret<f64>, %arg1: !fhe.batched_secret<f64>) -> !fhe.secret<f64> {
     %0 = fhe.extract %arg0[0] : <f64>
     %1 = fhe.extract %arg1[0] : <f64>
     %2 = fhe.sub(%0, %1) : (!fhe.secret<f64>, !fhe.secret<f64>) -> !fhe.secret<f64>

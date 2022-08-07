@@ -1,6 +1,6 @@
-// RUN: abc-opt -nary --canonicalize < %s | FileCheck %s
+// RUN: fhe-tool -nary --canonicalize < %s | FileCheck %s
 module  {
-  func private @encryptedHammingDistance(%arg0: tensor<4x!fhe.secret<f64>>, %arg1: tensor<4x!fhe.secret<f64>>) -> !fhe.secret<f64> {
+  func.func private @encryptedHammingDistance(%arg0: tensor<4x!fhe.secret<f64>>, %arg1: tensor<4x!fhe.secret<f64>>) -> !fhe.secret<f64> {
     %c3 = arith.constant 3 : index
     %c2 = arith.constant 2 : index
     %c1 = arith.constant 1 : index

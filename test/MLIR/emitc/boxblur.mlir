@@ -1,5 +1,6 @@
+//RUN:
 module {
-  func private @encryptedBoxBlur(%arg0: !fhe.batched_secret<64 x f64>) -> !fhe.batched_secret<64 x f64> {
+  func.func private @encryptedBoxBlur(%arg0: !fhe.batched_secret<64 x f64>) -> !fhe.batched_secret<64 x f64> {
     %0 = fhe.rotate(%arg0) by 55 : <64 x f64>
     %1 = fhe.rotate(%arg0) by 63 : <64 x f64>
     %2 = fhe.rotate(%arg0) by 7 : <64 x f64>

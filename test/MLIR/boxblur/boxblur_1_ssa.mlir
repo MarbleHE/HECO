@@ -1,6 +1,6 @@
-// RUN: abc-opt -unroll-loops --canonicalize --cse < %s | FileCheck %s
+// RUN: fhe-tool -unroll-loops --canonicalize --cse < %s | FileCheck %s
 module  {
-  func private @encryptedBoxBlur(%arg0: tensor<64x!fhe.secret<f64>>) -> tensor<64x!fhe.secret<f64>> {
+  func.func private @encryptedBoxBlur(%arg0: tensor<64x!fhe.secret<f64>>) -> tensor<64x!fhe.secret<f64>> {
     %c64 = arith.constant 64 : index
     %c8 = arith.constant 8 : index
     %0:4 = affine.for %arg1 = 0 to 8 iter_args(%arg2 = %c8, %arg3 = %c64, %arg4 = %arg0, %arg5 = %arg0) -> (index, index, tensor<64x!fhe.secret<f64>>, tensor<64x!fhe.secret<f64>>) {
