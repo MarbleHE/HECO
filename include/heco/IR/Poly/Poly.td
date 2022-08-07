@@ -39,6 +39,9 @@ def Poly_Dialect : Dialect {
     }];
 
     let cppNamespace = "::heco::poly";
+
+    // We set this bit to generate the declarations for the dialect's type parsing and printing hooks.
+    let useDefaultTypePrinterParser = 1;
 }
 
 //===----------------------------------------------------------------------===//
