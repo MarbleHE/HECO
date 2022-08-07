@@ -252,16 +252,3 @@ if (HECO_STANDALONE_BUILD)
     enable_testing()
     add_subdirectory(test)
 endif ()
-
-##############################
-# TARGET: benchmarks
-#
-# A collection of benchmarks
-# added only if this is the root project
-##############################
-if (HECO_STANDALONE_BUILD)
-  if (SEAL_FOUND)
-      add_subdirectory(test/bench)
-      add_subdirectory(test/IR/BGV)
-  endif (SEAL_FOUND)
-endif ()

@@ -18,6 +18,10 @@ cmake-build-debug/
 /test/CMakeFiles/
 /cmake-build*
 
+## Python
+__pycache__
+
+
 ########################################################################################
 ## CMake gitignore from https://github.com/github/gitignore/blob/main/CMake.gitignore ##
 ########################################################################################
