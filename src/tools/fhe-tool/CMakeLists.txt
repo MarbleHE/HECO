@@ -6,7 +6,6 @@ set(LIBS
         ${conversion_libs}
         MLIREmitCDialect
         MLIROptLib
-        HECOASTDialect
         HECOFHEDialect
         HECOBGVDialect
         HECOPolyDialect
@@ -25,7 +24,6 @@ set(LIBS
         MLIRSideEffectInterfaces
         MLIRTargetLLVMIRExport
         MLIRTransforms  
-        HECOLowerast2hir
         HECOLowerBGVToEmitC
         HECOLowerBGVToLLVM
         HECOLowerFHEToBGV
@@ -36,7 +34,6 @@ add_llvm_executable(fhe-tool fhe-tool.cpp)
 llvm_update_compile_flags(fhe-tool)
 target_link_libraries(fhe-tool PRIVATE ${LIBS})
 
-add_dependencies(fhe-tool ast2hir)
 add_dependencies(fhe-tool bgv2emitc)
 
 mlir_check_all_link_libraries(fhe-tool)

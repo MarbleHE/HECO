@@ -7,11 +7,9 @@
 //===----------------------------------------------------------------------===//
 
 #include <iostream>
-#include "heco/IR/AST/ASTDialect.h"
 #include "heco/IR/BGV/BGVDialect.h"
 #include "heco/IR/FHE/FHEDialect.h"
 #include "heco/IR/Poly/PolyDialect.h"
-#include "heco/Passes/ast2hir/LowerASTtoHIR.h"
 #include "heco/Passes/bgv2emitc/LowerBGVToEmitC.h"
 #include "heco/Passes/bgv2llvm/LowerBGVToLLVM.h"
 #include "heco/Passes/fhe2bgv/LowerFHEToBGV.h"
@@ -38,44 +36,11 @@
 
 using namespace mlir;
 using namespace heco;
-using namespace ast;
 using namespace fhe;
 using namespace bgv;
 using namespace poly;
 
 void pipelineBuilder(OpPassManager &manager)
-{
-    manager.addPass(std::make_unique<LowerASTtoHIRPass>());
-    manager.addPass(std::make_unique<UnrollLoopsPass>());
-    manager.addPass(createCanonicalizerPass());
-    manager.addPass(createCSEPass()); // this can greatly reduce the number of operations after unrolling
-    manager.addPass(std::make_unique<NaryPass>());
-
-    // Must canonicalize before Tensor2BatchedSecretPass, since it only handles constant indices in tensor.extract
-    manager.addPass(createCanonicalizerPass());
-    manager.addPass(std::make_unique<Tensor2BatchedSecretPass>());
-    manager.addPass(createCanonicalizerPass()); // necessary to remove redundant fhe.materialize
-    manager.addPass(createCSEPass()); // necessary to remove duplicate fhe.extract
-
-    manager.addPass(std::make_unique<BatchingPass>());
-    manager.addPass(createCanonicalizerPass());
-    manager.addPass(
-        createCSEPass()); // try and remove all the redundant rotates, in the hope it also gives us less combine ops?
-    manager.addPass(std::make_unique<CombineSimplifyPass>());
-    manager.addPass(createCSEPass()); // otherwise, the internal batching pass has no "same origin" things to find!
-    manager.addPass(createCanonicalizerPass());
-
-    manager.addPass(std::make_unique<InternalOperandBatchingPass>());
-    manager.addPass(createCanonicalizerPass());
-    manager.addPass(createCSEPass());
-
-    // manager.addPass(std::make_unique<ScalarBatchingPass>());
-
-    manager.addPass(std::make_unique<LowerBGVToEmitCPass>());
-    manager.addPass(createCanonicalizerPass()); // necessary to remove redundant fhe.materialize
-}
-
-void ssaPipelineBuilder(OpPassManager &manager)
 {
     manager.addPass(std::make_unique<UnrollLoopsPass>());
     manager.addPass(createCanonicalizerPass());
@@ -112,7 +77,6 @@ int main(int argc, char **argv)
     context.enableMultithreading();
 
     mlir::DialectRegistry registry;
-    registry.insert<ASTDialect>();
     registry.insert<FHEDialect>();
     registry.insert<BGVDialect>();
     registry.insert<PolyDialect>();
@@ -120,7 +84,6 @@ int main(int argc, char **argv)
     registry.insert<AffineDialect>();
     registry.insert<tensor::TensorDialect>();
     registry.insert<arith::ArithmeticDialect>();
-    context.loadDialect<ASTDialect>();
     context.loadDialect<FHEDialect>();
     context.loadDialect<BGVDialect>();
     context.loadDialect<PolyDialect>();
@@ -140,7 +103,6 @@ int main(int argc, char **argv)
     registerCanonicalizerPass();
     registerAffineLoopUnrollPass();
     registerCSEPass();
-    PassRegistration<LowerASTtoHIRPass>();
     PassRegistration<UnrollLoopsPass>();
     PassRegistration<NaryPass>();
     PassRegistration<Tensor2BatchedSecretPass>();
@@ -153,7 +115,6 @@ int main(int argc, char **argv)
     PassRegistration<LowerBGVToLLVMPass>();
 
     PassPipelineRegistration<>("full-pass", "Run all passes", pipelineBuilder);
-    PassPipelineRegistration<>("from-ssa-pass", "Run all passes starting with ssa", ssaPipelineBuilder);
 
-    return asMainReturnCode(MlirOptMain(argc, argv, "ABC optimizer driver\n", registry));
+    return asMainReturnCode(MlirOptMain(argc, argv, "HECO optimizer driver\n", registry));
 }
