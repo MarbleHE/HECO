@@ -5,6 +5,9 @@ if (MSVC)
     cmake_policy(SET CMP0091 NEW)
 endif ()
 
+# MLIR/LLVM currently (release 15-rc1) uses DEPFILE in their cmake, which has changed in new versions
+cmake_policy(SET CMP0116 OLD)
+
 #########################
 # Project Configuration #
 #########################
