@@ -1,5 +1,5 @@
-#ifndef TOOLCHAIN_POLY_POLYDIALECT_H_
-#define TOOLCHAIN_POLY_POLYDIALECT_H_
+#ifndef HECO_IR_POLY_POLYDIALECT_H_
+#define HECO_IR_POLY_POLYDIALECT_H_
 
 #include "mlir/IR/Builders.h"
 #include "mlir/IR/BuiltinOps.h"
@@ -25,4 +25,4 @@
 #define GET_OP_CLASSES
 #include "heco/IR/Poly/Poly.h.inc"
 
-#endif // TOOLCHAIN_POLY_POLYDIALECT_H_
+#endif // HECO_IR_POLY_POLYDIALECT_H_
