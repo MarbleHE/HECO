@@ -30,7 +30,6 @@ set(LIBS
     ${dialect_libs}
     ${conversion_libs}
     MLIRIR
-    HECOASTDialect
 )
 llvm_update_compile_flags(pyabc)
 target_link_libraries(pyabc
