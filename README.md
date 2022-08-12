@@ -18,18 +18,31 @@ This compiler translates high-level program descriptions (expressed in Python) i
 It does so while automating as many aspects of the development as possible,
 including automatically identifying and exploiting opportunities to use the powerful SIMD parallelism ("batching") present in many schemes. 
 
-- [Overview](#Overview)
-- [Using HECO](#UsingHECO)
-  - [Python Frontend](#PythonFrontend)
-  - [Modes](#Modes)
-    - [Interactive Mode](#InteractiveMode)
-    - [Transpiler Mode](#TranspilerMode)
-    - [Compiler Mode](#CompilerMode)
-    - [Advanced Use Cases](#AdvancedUseCases)
+- [Overview](#overview)
+- [Using HECO](#using-heco)
+  - [Python Frontend](#python-frontend)
+    - [Frontend Installation](#frontend-installation)
+    - [Examples](#examples)
+    - [Installation for Development](#installation-for-development)
+  - [Modes](#modes)
+    - [Interactive Mode](#interactive-mode)
+    - [Transpiler Mode](#transpiler-mode)
+    - [Compiler Mode](#compiler-mode)
 - [Installation](#installation)
   - [Prerequisites](#prerequisites)
+    - [Packages](#packages)
+    - [Microsoft SEAL](#microsoft-seal)
+    - [Getting MLIR](#getting-mlir)
   - [Building](#building)
-- [Development](#Development)
+    - [Building the HECO Compiler](#building-the-heco-compiler)
+    - [Over CMake](#over-cmake)
+    - [Manual Installation](#manual-installation)
+- [Development](#development)
+  - [Development Environemnt](#development-environemnt)
+  - [Repository's Structure](#repositorys-structure)
+  - [Development Tips for working with MLIR-based Projects](#development-tips-for-working-with-mlir-based-projects)
+    - [Working with TableGen](#working-with-tablegen)
+    - [Debugging MLIR](#debugging-mlir)
 
 
 # Overview
@@ -51,24 +64,54 @@ This is then lowered to Scheme-specific IR (SIR), with operations corresponding 
 # Using HECO
 
 ## Python Frontend
+
 > **Note**
-> HECO's Python Frontend is undergoing major work and is therefore not currently ready to use.
+> HECO's Python Frontend is still undergoing a major revision. 
+> The current version only prints a (almost MLIR) version of the code. 
+> We are working on extending the frontend with more functionality and completing the toolchain, such that frontend programs can be executed again.
 
+### Frontend Installation
+
+The frontend requires Python version 3.10 or higher (check by running `python --version`).
+
+The frontend should be installed automatically with the pip package for HECO:
+```
+python -m pip install heco
+```
+
+Currently, the frontend relies on a branch of xDSL to which we added support for frontends. 
+This will eventually be merged to xDSL as a frontend generator.
+
+### Examples
+
+Examples of HECO can be found in the [examples](./examples/) folder.
+
+One of them, for computing the hamming distance of two encrypted vectors, is shown here: 
 ```Python
-from heco import *
+from xdsl.frontend import *
+from xdsl.frontend.dialects.builtin import *
+from heco.frontend.dialects.fhe import *
 
-p = HECOProgram(logging.DEBUG)
+p = FrontendProgram()
 
-with HECOWrapper(p):
-    def main(x : list[Secret[int]], y : list[Secret[int]]):
-        sum = 0
-        for i in range(4):
-            sum += (x[i] - y[i]) * (x[i] - y[i])
+secret_f64 = SecretType[f64]
+arg_type = BatchedSecretType[f64]
+
+with CodeContext(p):
+    def encryptedHammingDistance(x: arg_type,
+                                 y: arg_type) -> secret_f64:
+        sum: SecretType[f64] = SecretAttr(FloatAttr(0.0))
+
+        for idx in range(0, 4):
+            sum = sum + (x[idx] - y[idx]) * (x[idx] - y[idx])
+
         return sum
+
+# XXX: the part below was not yet ported to the new frontend
 
 # Compiling FHE code
 context = SEAL.BGV.new(poly_mod_degree = 1024)
-f = p.compile(p, context = context)
+f = p.compile(context = context)
 
 # Running FHF code
 x = [random.randrange(100) for _ in range(4)]
@@ -81,6 +124,22 @@ s_enc = f(x_enc, y_enc)
 s = context.decrypt(s_enc)
 assert s == sum([(x[i] - y[i])**2 for i in range(4)])
 ``` 
+
+### Installation for Development
+
+For Development purposes, install a local package from the repository by running the following in the root of your clone of this repo:
+```
+python3.10 -m pip install -e frontend/heco
+```
+
+The following should be handled automatically when you install the `heco` package. 
+However, should you need a manual local installation of the xDSL pip package from our branch of xDSL, do the following:
+```
+git clone git@github.com:xdslproject/xdsl.git
+cd xdsl
+git checkout frontend
+python -m pip install -e .
+```
 
 ## Modes
 HECO can be used in three distinct modes, each of which target different user needs.
@@ -198,11 +257,6 @@ cmake --build . --target mlir-doc
 
 Alternatively, you can open this folder in vscode. You will want to build the heco-c target for the command line compiler.
 
-
-## Installing the Python Frontend
-
-If you want to use the python frontend, you can install our package `pyabc`.
-
 ### Over CMake
 The package installation is integrated in the CMakefile. You can run `make install` in `cmake-build-debug` and it will install `pyabc`.
 
@@ -248,7 +302,7 @@ The repository is organized as follow:
 include         – header (.h) and TableGen (.td) files
  └ IR             – contains the different dialect definitions
  └ Passes         – contains the definitions of the different transformations
-python          – the python frontend
+frontend        – the python frontend for HECO
 src             – source files (.cpp)
  └ IR             – implementations of additional dialect-specific functionality
  └ Passes         – implementations of the different transformations
