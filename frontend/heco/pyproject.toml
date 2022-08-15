@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "heco"
-version = "0.0.1"
+version = "0.0.2a1" # Alpha release, following PEP440
 authors = [
     { name="Alex Viand", email="alexander.viand@inf.ethz.ch" },
 ]

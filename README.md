@@ -23,7 +23,6 @@ including automatically identifying and exploiting opportunities to use the powe
   - [Python Frontend](#python-frontend)
     - [Frontend Installation](#frontend-installation)
     - [Examples](#examples)
-    - [Installation for Development](#installation-for-development)
   - [Modes](#modes)
     - [Interactive Mode](#interactive-mode)
     - [Transpiler Mode](#transpiler-mode)
@@ -43,6 +42,8 @@ including automatically identifying and exploiting opportunities to use the powe
   - [Development Tips for working with MLIR-based Projects](#development-tips-for-working-with-mlir-based-projects)
     - [Working with TableGen](#working-with-tablegen)
     - [Debugging MLIR](#debugging-mlir)
+    - [Frontend Installation](#frontend-installation-1)
+    - [Publishing PyPi Package](#publishing-pypi-package)
 
 
 # Overview
@@ -113,7 +114,7 @@ with CodeContext(p):
 context = SEAL.BGV.new(poly_mod_degree = 1024)
 f = p.compile(context = context)
 
-# Running FHF code
+# Running FHE code
 x = [random.randrange(100) for _ in range(4)]
 y = [random.randrange(100) for _ in range(4)]
 x_enc = context.encrypt(x)
@@ -124,22 +125,6 @@ s_enc = f(x_enc, y_enc)
 s = context.decrypt(s_enc)
 assert s == sum([(x[i] - y[i])**2 for i in range(4)])
 ``` 
-
-### Installation for Development
-
-For Development purposes, install a local package from the repository by running the following in the root of your clone of this repo:
-```
-python3.10 -m pip install -e frontend/heco
-```
-
-The following should be handled automatically when you install the `heco` package. 
-However, should you need a manual local installation of the xDSL pip package from our branch of xDSL, do the following:
-```
-git clone git@github.com:xdslproject/xdsl.git
-cd xdsl
-git checkout frontend
-python -m pip install -e .
-```
 
 ## Modes
 HECO can be used in three distinct modes, each of which target different user needs.
@@ -354,3 +339,26 @@ Useful command line options for `mlir-opt`/`heco-tool` (see also [MLIR Debugging
  * `-debug-only=dialect-conversion` - Prints some very useful information on passes and rules being applied
  * `--verify-each=0` - Turns off the verifier, allowing one to see what the (invalid) IR looks like
  * `--allow-unregistered-dialect` - Makes parser accept unknown operations (only works if they are in generic form!)
+
+### Frontend Installation
+
+For Development purposes, install a local package from the repository by running the following in the root of your clone of this repo:
+```
+python3.10 -m pip install -e frontend/heco
+```
+
+The following should be handled automatically when you install the `heco` package.
+However, should you need a manual local installation of the xDSL pip package from our branch of xDSL, do the following:
+```
+git clone git@github.com:xdslproject/xdsl.git
+cd xdsl
+git checkout frontend
+python -m pip install -e .
+```
+
+### Publishing PyPi Package
+
+To be able to publish a package, you need to register an account on PyPi and set up an [API token](https://pypi.org/help/#apitoken). Store the token and username in `$HOME/.pypirc`, as suggested during the token generation.
+
+To publish a new HECO PyPi package, run the script [frontend/update_pypi.sh](frontend/update_pypi.sh).
+This script follows the process from [the Python packaging guide](https://packaging.python.org/en/latest/tutorials/packaging-projects/).
