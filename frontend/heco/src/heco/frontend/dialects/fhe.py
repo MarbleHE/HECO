@@ -13,7 +13,7 @@
 from dataclasses import dataclass
 from typing import Generic, List, TypeVar, Union
 
-from xdsl_frontend.dialects.builtin import IndexType, IntegerAttr, i32
+from xdsl.frontend.dialects.builtin import IndexType, IntegerAttr, i32
 from xdsl.ir import Attribute
 import heco.dialects.fhe as orig_fhe
 
