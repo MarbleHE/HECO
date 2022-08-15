@@ -25,6 +25,13 @@ including automatically identifying and exploiting opportunities to use the powe
 > The current version only prints a (almost MLIR) version of the code. 
 > We are working on extending the frontend with more functionality and completing the toolchain, such that frontend programs can be executed again.
 
+### Finalize Installation
+
+The HECO frontend relies on a development version of [xdsl](https://pypi.org/project/xdsl/). If you install HECO from PyPi, you need to install the xdsl dependency afterwards with:
+```
+python3 -m pip install git+https://github.com/xdslproject/xdsl.git@frontend
+```
+
 ### Examples
 
 Examples of HECO can be found in the [examples](./examples/) folder.
