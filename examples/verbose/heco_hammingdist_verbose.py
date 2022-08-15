@@ -2,8 +2,8 @@ import logging
 
 # XXX: need to import everything to avoid translation failure for aliases.
 #   This is a current limitation of the frontend.
-from xdsl_frontend import *
-from xdsl_frontend.dialects.builtin import *
+from xdsl.frontend import *
+from xdsl.frontend.dialects.builtin import *
 from heco.frontend.dialects.fhe import *
 
 p = FrontendProgram()
