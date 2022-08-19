@@ -25,6 +25,7 @@
 #include "llvm/Support/SourceMgr.h"
 #include "llvm/Support/ToolOutputFile.h"
 #include "mlir/Dialect/Arithmetic/IR/Arithmetic.h"
+#include "mlir/Dialect/EmitC/IR/EmitC.h"
 #include "mlir/IR/Dialect.h"
 #include "mlir/IR/MLIRContext.h"
 #include "mlir/InitAllDialects.h"
@@ -84,6 +85,8 @@ int main(int argc, char **argv)
     registry.insert<AffineDialect>();
     registry.insert<tensor::TensorDialect>();
     registry.insert<arith::ArithmeticDialect>();
+    registry.insert<emitc::EmitCDialect>();
+    registry.insert<func::FuncDialect>();
     context.loadDialect<FHEDialect>();
     context.loadDialect<BGVDialect>();
     context.loadDialect<PolyDialect>();
@@ -91,6 +94,8 @@ int main(int argc, char **argv)
     context.loadDialect<AffineDialect>();
     context.loadDialect<tensor::TensorDialect>();
     context.loadDialect<arith::ArithmeticDialect>();
+    context.loadDialect<emitc::EmitCDialect>();
+    context.loadDialect<func::FuncDialect>();
     // Uncomment the following to include *all* MLIR Core dialects, or selectively
     // include what you need like above. You only need to register dialects that
     // will be *parsed* by the tool, not the one generated
