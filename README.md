@@ -335,8 +335,8 @@ In order to debug issues stemming from TableGen, it is important to realize that
 [//]: # (TODO Documentation: Write up how to get useful debug info out of passes)
 
 Useful command line options for `mlir-opt`/`heco-tool` (see also [MLIR Debugging Tips](https://mlir.llvm.org/getting_started/Debugging/) and [IR Printing](https://mlir.llvm.org/docs/PassManagement/#ir-printing)):
- * `-print-ir-before-all` - Prints the IR before each pass
- * `-debug-only=dialect-conversion` - Prints some very useful information on passes and rules being applied
+ * `--mlir-print-ir-before-all` - Prints the IR before each pass
+ * `--debug-only=dialect-conversion` - Prints some very useful information on passes and rules being applied
  * `--verify-each=0` - Turns off the verifier, allowing one to see what the (invalid) IR looks like
  * `--allow-unregistered-dialect` - Makes parser accept unknown operations (only works if they are in generic form!)
 
