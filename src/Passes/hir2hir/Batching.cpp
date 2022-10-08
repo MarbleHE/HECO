@@ -23,9 +23,16 @@ LogicalResult batchArithmeticOperation(IRRewriter &rewriter, MLIRContext *contex
     // We care only about ops that return scalars, assuming others are already "SIMD-compatible"
     if (auto result_st = op.getType().template dyn_cast_or_null<fhe::SecretType>())
     {
-        // llvm::outs() << "updating ";
-        // op.print(llvm::outs());
-        // llvm::outs() << "\n";
+        // llvm::outs() << "updating:\n";
+        //  for (auto o : op.getOperands())
+        //{
+        //      llvm::outs() << "\t";
+        //      o.print(llvm::outs());
+        //      llvm::outs() << "\n";
+        //  }
+        //  llvm::outs() << "\t";
+        //  op.print(llvm::outs());
+        //  llvm::outs() << "\n";
 
         /// Target Slot (-1 => no target slot required)
         int target_slot = -1;
@@ -95,26 +102,20 @@ LogicalResult batchArithmeticOperation(IRRewriter &rewriter, MLIRContext *contex
                     if (auto ex_op = (*it).template getDefiningOp<fhe::ExtractOp>())
                     {
                         auto i = (int)ex_op.i().getLimitedValue();
-                        if (target_slot == -1 || i == 0)
+                        if (target_slot == -1)
                             target_slot = i;
                     }
                 }
             }
-            // llvm::outs() << "OPERAND-based target slot " << target_slot << " for:";
-            // op.print(llvm::outs());
-            // llvm::outs() << '\n';
+            // llvm::outs() << "OPERAND-based target slot " << target_slot << "\n";
         }
         else
         {
-            // llvm::outs() << "use-based target slot " << target_slot << " for:";
-            // op.print(llvm::outs());
-            // llvm::outs() << '\n';
+            // llvm::outs() << "use-based target slot " << target_slot << " \n";
         }
         if (target_slot == -1)
         {
-            // llvm::outs() << "NO target slot (" << target_slot << ") for:";
-            // op.print(llvm::outs());
-            // llvm::outs() << '\n';
+            // llvm::outs() << "NO target slot (" << target_slot << ") \n:";
         }
 
         // new op
