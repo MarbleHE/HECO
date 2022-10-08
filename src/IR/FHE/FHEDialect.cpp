@@ -344,7 +344,7 @@ void fhe::ConstOp::getAsmResultNames(function_ref<void(Value, StringRef)> setNam
     }
 }
 
-/// Simplifies
+/// Simplifies /during EmitC processing/
 ///  %os = materialize(%ctxt)->bst
 ///  %ex_op = extract(%os, i)
 ///  %op = materialize(%ex_op) -> ctxt

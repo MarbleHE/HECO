@@ -16,16 +16,45 @@ void ScalarBatchingPass::getDependentDialects(mlir::DialectRegistry &registry) c
         fhe::FHEDialect, mlir::AffineDialect, func::FuncDialect, mlir::scf::SCFDialect, mlir::tensor::TensorDialect>();
 }
 
+template <typename OpType>
+LogicalResult scalarBatchArithmeticOperation(IRRewriter &rewriter, MLIRContext *context, OpType op)
+{
+    // TODO: Implement Scalar Batching Pass
+    return success();
+}
+
 void ScalarBatchingPass::runOnOperation()
 {
     // Get the (default) block in the module's only region:
     auto &block = getOperation()->getRegion(0).getBlocks().front();
     IRRewriter rewriter(&getContext());
 
+    // TODO: Some kind of datastructure to maintain information between operations
+
     for (auto f : llvm::make_early_inc_range(block.getOps<func::FuncOp>()))
     {
-        // We must translate in order of appearance for this to work, so we walk manually
-        if (f.walk([&](Operation *op) { return WalkResult(success()); }).wasInterrupted())
+        if (f.walk([&](Operation *op) {
+                 // op->print(llvm::outs());
+                 // llvm::outs() << "\n";
+                 // llvm::outs().flush();
+                 if (auto sub_op = llvm::dyn_cast_or_null<fhe::SubOp>(op))
+                 {
+                     if (scalarBatchArithmeticOperation<fhe::SubOp>(rewriter, &getContext(), sub_op).failed())
+                         return WalkResult::interrupt();
+                 }
+                 else if (auto add_op = llvm::dyn_cast_or_null<fhe::AddOp>(op))
+                 {
+                     if (scalarBatchArithmeticOperation<fhe::AddOp>(rewriter, &getContext(), add_op).failed())
+                         return WalkResult::interrupt();
+                 }
+                 else if (auto mul_op = llvm::dyn_cast_or_null<fhe::MultiplyOp>(op))
+                 {
+                     if (scalarBatchArithmeticOperation<fhe::MultiplyOp>(rewriter, &getContext(), mul_op).failed())
+                         return WalkResult::interrupt();
+                 }
+                 // TODO: Add support for relinearization!
+                 return WalkResult(success());
+             }).wasInterrupted())
             signalPassFailure();
     }
 }

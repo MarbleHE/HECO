@@ -30,6 +30,22 @@ module  {
   }
 }
 
+func.func private @encryptedBoxBlur(%x: !fhe.batched_secret<64xf64>, %y: !fhe.batched_secret<64xf64>) -> !fhe.batched_secret<64xf64> {
+  %x5 = fhe.extract(%x, 5) : (!fhe.batched_secret<128x f64>) -> !fhe.secret<f64>
+  %y0 = fhe.extract(%y, 0) : (!fhe.batched_secret<128x f64>) -> !fhe.secret<f64>
+ --> %r = fhe.add(%x0, %y0) : (!fhe.secret<f64>, !fhe.secret<f64>) -> !fhe.secret<f64>
+  %x6 = fhe.extract(%x, 6) : (!fhe.batched_secret<128x f64>) -> !fhe.secret<f64>
+  %y1 = fhe.extract(%y, 1) : (!fhe.batched_secret<128x f64>) -> !fhe.secret<f64>
+ --> %r2 = fhe.add(%x6, %y1) : (!fhe.secret<f64>, !fhe.secret<f64>) -> !fhe.secret<f64>
+  return %r + %r2
+
+func.func private @encryptedBoxBlur(%x: !fhe.batched_secret<64xf64>, %y: !fhe.batched_secret<64xf64>) -> !fhe.batched_secret<64xf64> {
+  %x = fhe.rotate(%x, -5) : (!fhe.batched_secret<128x f64>) -> !fhe.secret<f64>
+  %r = fhe.add(%x, %y) : (!fhe.secret<f64>, !fhe.secret<f64>) -> !fhe.secret<f64>
+  return %r
+
+
+
 // CHECK: module  {
 // CHECK:   func private @encryptedBoxBlur(%arg0: tensor<64x!fhe.secret<f64>>) -> tensor<64x!fhe.secret<f64>> {
 // CHECK:     %c63 = arith.constant 63 : index
