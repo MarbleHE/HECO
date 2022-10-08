@@ -147,7 +147,7 @@ Transpiler mode is designed for advanced users that want to integrate the output
 <details>
   <summary>Transpiler Mode Instructions</summary>
 
-> In order to use the transpiler mode, you need to extend the default compilation pipeline (assuming you are starting with an `*.mlir` file containing HIR, this would be `fhe-tool --from-ssa-pass [filename_in].mlir`) in two ways. 
+> In order to use the transpiler mode, you need to extend the default compilation pipeline (assuming you are starting with an `*.mlir` file containing HIR, this would be `fhe-tool --full-pass [filename_in].mlir`) in two ways. 
 >  1. Specify the scheme (and some core parameters) to be used by adding, e.g., `--fhe2bgv=poly_mod_degree=1024` and the corresponding lowering to emitC, e.g., `--bgv2emitc`, followed by `--cse --canonicalize` to clean up redundant operations introduced by the lowering.
 >  2. Translate to an actual `*.cpp` file by passing the output through  `emitc-translate`
 >
@@ -334,7 +334,7 @@ In order to debug issues stemming from TableGen, it is important to realize that
 ### Debugging MLIR
 [//]: # (TODO Documentation: Write up how to get useful debug info out of passes)
 
-Useful command line options for `mlir-opt`/`heco-tool` (see also [MLIR Debugging Tips](https://mlir.llvm.org/getting_started/Debugging/) and [IR Printing](https://mlir.llvm.org/docs/PassManagement/#ir-printing)):
+Useful command line options for `mlir-opt`/`fhe-tool` (see also [MLIR Debugging Tips](https://mlir.llvm.org/getting_started/Debugging/) and [IR Printing](https://mlir.llvm.org/docs/PassManagement/#ir-printing)):
  * `--mlir-print-ir-before-all` - Prints the IR before each pass
  * `--debug-only=dialect-conversion` - Prints some very useful information on passes and rules being applied
  * `--verify-each=0` - Turns off the verifier, allowing one to see what the (invalid) IR looks like
