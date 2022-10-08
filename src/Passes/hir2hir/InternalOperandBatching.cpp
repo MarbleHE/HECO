@@ -19,18 +19,14 @@ void InternalOperandBatchingPass::getDependentDialects(mlir::DialectRegistry &re
 }
 
 template <typename OpType>
-LogicalResult internalBatchArithmeticOperation(IRRewriter &rewriter, MLIRContext *context, OpType op)
+LogicalResult internalBatchArithmeticOperation(
+    IRRewriter &rewriter, MLIRContext *context, OpType op, Value use, int target_slot)
 {
-    // We care only about ops that return batched values, which should be pretty much all fhe ops after the "batching"
-    // pass
     if (auto result_bst = op.getType().template dyn_cast_or_null<fhe::BatchedSecretType>())
     {
-        // llvm::outs() << "updating ";
-        // op.print(llvm::outs());
-        // llvm::outs() << "\n";
-
-        /// Target Slot (-1 => no target slot required)
-        int target_slot = -1;
+        llvm::outs() << "Attempting Internal Batching (target_slot = " << target_slot << ") for ";
+        op.print(llvm::outs());
+        llvm::outs() << "\n";
 
         /// Helper Struct for uses
         struct BatchingUse
@@ -67,6 +63,7 @@ LogicalResult internalBatchArithmeticOperation(IRRewriter &rewriter, MLIRContext
                 }
                 else
                 {
+                    // TODO: SHOULD BE TARGET SLOT!!
                     // Everything else is assumed to have been rotated to slot 0 by previous optimizations
                     addOriginUse(*it, 0, *it);
                 }
@@ -78,23 +75,25 @@ LogicalResult internalBatchArithmeticOperation(IRRewriter &rewriter, MLIRContext
             }
         }
 
-        // for (auto el: originMap) {
-        //   llvm::outs() << "uses of: ";
-        //   el.first.print(llvm::outs());
-        //   llvm::outs() << " : ";
-        //   for (auto i: el.second) {
-        //     llvm::outs() << i.index << ", ";
-        //   }
-        //   llvm::outs() << '\n';
-        // }
+        for (auto el : originMap)
+        {
+            llvm::outs() << "\t\tindices of ";
+            el.first.print(llvm::outs());
+            llvm::outs() << " : ";
+            for (auto i : el.second)
+            {
+                llvm::outs() << i.index << ", ";
+            }
+            llvm::outs() << '\n';
+        }
 
         for (auto el : originMap)
         {
             auto origin = el.first;
 
-            // llvm::outs() << "(potentially) collapsing uses of: ";
-            // origin.print(llvm::outs());
-            // llvm::outs() << '\n';
+            llvm::outs() << "\tTrying to combine occurences of indices from: ";
+            origin.print(llvm::outs());
+            llvm::outs() << '\n';
 
             auto uses = el.second;
             std::sort(uses.begin(), uses.end(), [](const BatchingUse &a, const BatchingUse &b) -> bool {
@@ -108,63 +107,66 @@ LogicalResult internalBatchArithmeticOperation(IRRewriter &rewriter, MLIRContext
                 contiguous = contiguous && uses[i - 1].index + 1 == uses[i].index;
             }
 
-            if (contiguous)
+            if (!contiguous)
             {
-                // llvm::outs() << "trying to batch contiguous uses of : ";
-                // el.first.print(llvm::outs());
-                // llvm::outs() << '\n';
-
-                // Check if it's a power of two
-                auto n = uses[uses.size() - 1].index + 1;
-                auto k = std::log2(n);
-                if (k == (int)k)
-                {
-                    rewriter.setInsertionPoint(op);
-                    Value prev = origin;
-                    Value added;
-                    for (int i = n / 2; i > 0; i /= 2)
-                    {
-                        auto rotated_down = rewriter.template create<fhe::RotateOp>(op.getLoc(), prev, -i);
-                        added = rewriter.template create<fhe::AddOp>(op.getLoc(), ValueRange({ prev, rotated_down }));
-                        prev = added;
-                    }
-
-                    // Now we need to replace ONE OF the operands that have this origin with "added" and REMOVE THE REST
-                    auto old_range = op.x();
-                    SmallVector<Value> new_range = {};
-                    for (auto v : old_range)
-                    {
-                        bool remove = false;
-                        for (auto u : uses)
-                        {
-                            if (v == u.occurrence) // we need to remove this
-                                remove = true;
-                        }
-                        if (!remove)
-                            new_range.push_back(v);
-                    }
-                    new_range.push_back(added);
-
-                    // TODO: This is probably all kinds of unsafe if there are multiple origins that are being replaced
-                    // in the same op
-                    op.xMutable().assign(new_range);
-
-                    // llvm::outs() << "current function: ";
-                    // op->getParentOp()->print(llvm::outs());
-                    // llvm::outs() << '\n';
-                }
-                else
-                {
-                    // llvm::outs() << "Ignoring anyway because its not a power of two.\n";
-                }
+                llvm::outs() << "\t\tIgnoring because of non-contiguous indice. \n";
             }
-            else
+
+            // Check if it's a power of two
+            auto n = uses[uses.size() - 1].index + 1;
+            auto k = std::log2(n);
+            bool power_of_two = (k == (int)k);
+
+            if (!power_of_two)
             {
-                // llvm::outs() << "ignoring non-contiguous/non-repeated uses of : ";
-                // el.first.print(llvm::outs());
-                // llvm::outs() << '\n';
+                llvm::outs() << "\t\tIgnoring because its not a power of two.\n";
+            }
+
+            if (contiguous && power_of_two)
+            {
+                llvm::outs() << "\t\tSuccess! \n";
+
+                rewriter.setInsertionPoint(op);
+                Value prev = origin;
+                Value added;
+                for (int i = n / 2; i > 0; i /= 2)
+                {
+                    auto rotated_down = rewriter.template create<fhe::RotateOp>(op.getLoc(), prev, -i);
+                    added = rewriter.template create<fhe::AddOp>(op.getLoc(), ValueRange({ prev, rotated_down }));
+                    prev = added;
+                }
+
+                // Now we need to replace ONE OF the operands that have this origin with "added" and REMOVE THE REST
+                auto old_range = op.x();
+                SmallVector<Value> new_range = {};
+                for (auto v : old_range)
+                {
+                    bool remove = false;
+                    for (auto u : uses)
+                    {
+                        if (v == u.occurrence) // we need to remove this
+                            remove = true;
+                    }
+                    if (!remove)
+                        new_range.push_back(v);
+                }
+                new_range.push_back(added);
+
+                // TODO: This is probably all kinds of unsafe if there are multiple origins that are being replaced
+                // in the same op
+                op.xMutable().assign(new_range);
+
+                llvm::outs() << "current function: ";
+                op->getParentOp()->print(llvm::outs());
+                llvm::outs() << '\n';
             }
         }
+    }
+    else
+    {
+        llvm::outs() << "Ignoring Internal Batching (target_slot = " << target_slot << ") for ";
+        op.print(llvm::outs());
+        llvm::outs() << " because it's return type is not BatchedSecret\n";
     }
     return success();
 }
@@ -179,16 +181,31 @@ void InternalOperandBatchingPass::runOnOperation()
     {
         // We must translate in order of appearance for this to work, so we walk manually
         if (f.walk([&](Operation *op) {
-                 if (auto sub_op = llvm::dyn_cast_or_null<fhe::SubOp>(op))
-                     if (internalBatchArithmeticOperation<fhe::SubOp>(rewriter, &getContext(), sub_op).failed())
-                         return WalkResult::interrupt();
-                 if (auto add_op = llvm::dyn_cast_or_null<fhe::AddOp>(op))
-                     if (internalBatchArithmeticOperation<fhe::AddOp>(rewriter, &getContext(), add_op).failed())
-                         return WalkResult::interrupt();
-                 if (auto mul_op = llvm::dyn_cast_or_null<fhe::MultiplyOp>(op))
-                     if (internalBatchArithmeticOperation<fhe::MultiplyOp>(rewriter, &getContext(), mul_op).failed())
-                         return WalkResult::interrupt();
-                 // TODO: Add support for relinearization!
+                 if (fhe::ExtractOp ex_op = llvm::dyn_cast_or_null<fhe::ExtractOp>(op))
+                 {
+                     auto target_slot = ex_op.i().getLimitedValue();
+
+                     for (auto o : ex_op.getOperation()->getOperands())
+                     {
+                         if (auto sub_op = llvm::dyn_cast_or_null<fhe::SubOp>(o.getDefiningOp()))
+                             if (internalBatchArithmeticOperation<fhe::SubOp>(
+                                     rewriter, &getContext(), sub_op, o, target_slot)
+                                     .failed())
+                                 return WalkResult::interrupt();
+                         if (auto add_op = llvm::dyn_cast_or_null<fhe::AddOp>(o.getDefiningOp()))
+                             if (internalBatchArithmeticOperation<fhe::AddOp>(
+                                     rewriter, &getContext(), add_op, o, target_slot)
+                                     .failed())
+                                 return WalkResult::interrupt();
+                         if (auto mul_op = llvm::dyn_cast_or_null<fhe::MultiplyOp>(o.getDefiningOp()))
+                             if (internalBatchArithmeticOperation<fhe::MultiplyOp>(
+                                     rewriter, &getContext(), mul_op, o, target_slot)
+                                     .failed())
+                                 return WalkResult::interrupt();
+                         // TODO: Add support for relinearization!
+                     }
+                 }
+                 // TODO: Add support for combine!
                  return WalkResult(success());
              }).wasInterrupted())
             signalPassFailure();

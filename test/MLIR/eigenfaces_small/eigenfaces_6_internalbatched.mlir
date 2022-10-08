@@ -1,3 +1,21 @@
+Attempting Internal Batching (target_slot = 0) for %8 = fhe.add(%5, %6, %4, %7) : (!fhe.batched_secret<16 x f64>, !fhe.batched_secret<16 x f64>, !fhe.batched_secret<16 x f64>, !fhe.batched_secret<16 x f64>) -> !fhe.batched_secret<16 x f64>
+		indices of %4 = fhe.sub(%1, %3) : (!fhe.batched_secret<16 x f64>, !fhe.batched_secret<16 x f64>) -> !fhe.batched_secret<16 x f64> : 13, 14, 0, 15, 
+	Trying to combine occurences of indices from: %4 = fhe.sub(%1, %3) : (!fhe.batched_secret<16 x f64>, !fhe.batched_secret<16 x f64>) -> !fhe.batched_secret<16 x f64>
+		Ignoring because of non-contiguous indice. 
+Attempting Internal Batching (target_slot = 1) for %18 = fhe.add(%14, %15, %16, %17) : (!fhe.batched_secret<16 x f64>, !fhe.batched_secret<16 x f64>, !fhe.batched_secret<16 x f64>, !fhe.batched_secret<16 x f64>) -> !fhe.batched_secret<16 x f64>
+		indices of %13 = fhe.sub(%1, %12) : (!fhe.batched_secret<16 x f64>, !fhe.batched_secret<16 x f64>) -> !fhe.batched_secret<16 x f64> : 10, 11, 13, 12, 
+	Trying to combine occurences of indices from: %13 = fhe.sub(%1, %12) : (!fhe.batched_secret<16 x f64>, !fhe.batched_secret<16 x f64>) -> !fhe.batched_secret<16 x f64>
+		Ignoring because of non-contiguous indice. 
+		Ignoring because its not a power of two.
+Attempting Internal Batching (target_slot = 2) for %27 = fhe.add(%23, %24, %25, %26) : (!fhe.batched_secret<16 x f64>, !fhe.batched_secret<16 x f64>, !fhe.batched_secret<16 x f64>, !fhe.batched_secret<16 x f64>) -> !fhe.batched_secret<16 x f64>
+		indices of %22 = fhe.sub(%1, %21) : (!fhe.batched_secret<16 x f64>, !fhe.batched_secret<16 x f64>) -> !fhe.batched_secret<16 x f64> : 7, 8, 10, 9, 
+	Trying to combine occurences of indices from: %22 = fhe.sub(%1, %21) : (!fhe.batched_secret<16 x f64>, !fhe.batched_secret<16 x f64>) -> !fhe.batched_secret<16 x f64>
+		Ignoring because of non-contiguous indice. 
+		Ignoring because its not a power of two.
+Attempting Internal Batching (target_slot = 3) for %36 = fhe.add(%32, %33, %34, %35) : (!fhe.batched_secret<16 x f64>, !fhe.batched_secret<16 x f64>, !fhe.batched_secret<16 x f64>, !fhe.batched_secret<16 x f64>) -> !fhe.batched_secret<16 x f64>
+		indices of %31 = fhe.sub(%1, %30) : (!fhe.batched_secret<16 x f64>, !fhe.batched_secret<16 x f64>) -> !fhe.batched_secret<16 x f64> : 4, 5, 7, 6, 
+	Trying to combine occurences of indices from: %31 = fhe.sub(%1, %30) : (!fhe.batched_secret<16 x f64>, !fhe.batched_secret<16 x f64>) -> !fhe.batched_secret<16 x f64>
+		Ignoring because of non-contiguous indice. 
 module {
   func.func private @encryptedEigenfaces(%arg0: !fhe.batched_secret<4 x f64>, %arg1: !fhe.batched_secret<16 x f64>) -> !fhe.batched_secret<4 x f64> {
     %0 = linalg.init_tensor [4] : tensor<4x!fhe.secret<f64>>
