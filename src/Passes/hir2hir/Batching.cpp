@@ -122,18 +122,65 @@ LogicalResult batchArithmeticOperation(IRRewriter &rewriter, MLIRContext *contex
         auto new_op = rewriter.create<OpType>(op.getLoc(), op->getOperands());
         rewriter.setInsertionPoint(new_op); // otherwise, any operand transforming ops will be AFTER the new op
 
+        // find the maximum size of vector involved
+        int max_size = -1;
+        for (auto o : new_op.getOperands())
+        {
+            if (auto bst = o.getType().template dyn_cast_or_null<fhe::BatchedSecretType>())
+            {
+                max_size = std::max(max_size, bst.getSize());
+            }
+            else if (auto st = o.getType().template dyn_cast_or_null<fhe::SecretType>())
+            {
+                // scalar-type input that will be converted
+                if (fhe::ExtractOp ex_op = o.template getDefiningOp<fhe::ExtractOp>())
+                {
+                    auto bst = ex_op.vector().getType().dyn_cast_or_null<fhe::BatchedSecretType>();
+                    assert(bst && "fhe.extract must be applied to BatchedSecret");
+                    max_size = std::max(max_size, bst.getSize());
+                }
+            }
+        }
+
         // convert all operands from scalar to batched
         for (auto it = new_op->operand_begin(); it != new_op.operand_end(); ++it)
         {
-            if ((*it).getType().template dyn_cast_or_null<fhe::BatchedSecretType>())
+            if (auto bst = (*it).getType().template dyn_cast_or_null<fhe::BatchedSecretType>())
             {
-                // already a vector-style input, no further action necessary
+                // Check if it needs to be resized
+                if (bst.getSize() < max_size)
+                {
+                    auto resized_type =
+                        fhe::BatchedSecretType::get(rewriter.getContext(), bst.getPlaintextType(), max_size);
+                    auto resized_o = rewriter.create<fhe::MaterializeOp>(op.getLoc(), resized_type, *it);
+                    rewriter.replaceOpWithIf((*it).getDefiningOp(), { resized_o }, [&](OpOperand &operand) {
+                        return operand.getOwner() == new_op;
+                    });
+                }
             }
             else if (auto st = (*it).getType().template dyn_cast_or_null<fhe::SecretType>())
             {
                 // scalar-type input that needs to be converted
-                if (auto ex_op = (*it).template getDefiningOp<fhe::ExtractOp>())
+                if (fhe::ExtractOp ex_op = (*it).template getDefiningOp<fhe::ExtractOp>())
                 {
+                    // Check if it needs to be resized
+                    if (auto bst = ex_op.vector().getType().template dyn_cast_or_null<fhe::BatchedSecretType>())
+                    {
+                        if (bst.getSize() < max_size)
+                        {
+                            auto resized_type =
+                                fhe::BatchedSecretType::get(rewriter.getContext(), bst.getPlaintextType(), max_size);
+                            auto cur_ip = rewriter.getInsertionPoint();
+                            rewriter.setInsertionPoint(ex_op);
+                            auto resized_o =
+                                rewriter.create<fhe::MaterializeOp>(ex_op.getLoc(), resized_type, ex_op.vector());
+                            rewriter.replaceOpWithIf(
+                                ex_op.vector().getDefiningOp(), { resized_o },
+                                [&](OpOperand &operand) { return operand.getOwner() == ex_op; });
+                            rewriter.setInsertionPoint(&*cur_ip);
+                        }
+                    }
+
                     // instead of using the extract op, issue a rotation instead
                     auto i = (int)ex_op.i().getLimitedValue();
                     if (target_slot == -1) // no other target slot defined yet, let's make this the target
@@ -158,8 +205,8 @@ LogicalResult batchArithmeticOperation(IRRewriter &rewriter, MLIRContext *contex
                 else
                 {
                     emitWarning(
-                        new_op.getLoc(),
-                        "Encountered unexpected (non batchable) defining op for secret operand while trying to batch.");
+                        new_op.getLoc(), "Encountered unexpected (non batchable) defining op for secret operand "
+                                         "while trying to batch.");
                     return failure();
                 }
             }

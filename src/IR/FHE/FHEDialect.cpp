@@ -406,14 +406,16 @@ void fhe::ConstOp::getAsmResultNames(function_ref<void(Value, StringRef)> setNam
         auto i = (int)ex_op.i().getLimitedValue(INT32_MAX);
         auto v1 = ex_op.vector();
         auto bst = ex_op.vector().getType().dyn_cast<fhe::BatchedSecretType>();
-        assert(bst == op.dest().getType());
-        if (i == (int)op.i().getLimitedValue(INT32_MAX))
+        if (bst == op.dest().getType())
         {
-            auto ai = rewriter.getIndexAttr(i);
-            auto ami = rewriter.getStringAttr("all");
-            auto aa = rewriter.getArrayAttr({ ai, ami });
-            rewriter.replaceOpWithNewOp<fhe::CombineOp>(op, bst, ValueRange({ v1, op.dest() }), aa);
-            return success();
+            if (i == (int)op.i().getLimitedValue(INT32_MAX))
+            {
+                auto ai = rewriter.getIndexAttr(i);
+                auto ami = rewriter.getStringAttr("all");
+                auto aa = rewriter.getArrayAttr({ ai, ami });
+                rewriter.replaceOpWithNewOp<fhe::CombineOp>(op, bst, ValueRange({ v1, op.dest() }), aa);
+                return success();
+            }
         }
     }
     return failure();
