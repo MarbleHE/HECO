@@ -41,8 +41,7 @@ public:
 
             int64_t new_index = 0;
             int64_t current_offset = 0;
-            // TODO: Verify in which order MLIR lists the dimensions
-            for (size_t i = 0; i < tt.getShape().size(); ++i)
+            for (int i = tt.getShape().size() - 1; i >= 0; --i)
             {
                 // TODO: Support  tensor.extract indices format in fhe.extract,too
                 auto cOp = op.indices()[i].getDefiningOp<arith::ConstantOp>();
@@ -55,14 +54,14 @@ public:
                 }
                 auto index = cOp.getValueAttr().cast<IntegerAttr>().getValue().getLimitedValue();
 
-                if (i == 0)
+                if (i == (int)tt.getShape().size() - 1)
                 {
                     new_index = index;
                     current_offset = 1;
                 }
-                else // i > 0 sinze i is unsigned
+                else // i < tt.getShape().size() - 1
                 {
-                    current_offset *= tt.getDimSize(i - 1);
+                    current_offset *= tt.getDimSize(i + 1);
                     new_index += index * current_offset;
                 }
             }
