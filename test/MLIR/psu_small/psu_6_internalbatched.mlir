@@ -52,12 +52,14 @@ module {
     %48 = fhe.rotate(%47) by 5 : <8 x f64>
     %49 = fhe.rotate(%42) by 6 : <8 x f64>
     %50 = fhe.rotate(%37) by 7 : <8 x f64>
-    %51 = fhe.rotate(%0) by 5 : <8 x f64>
-    %52 = fhe.rotate(%0) by 6 : <8 x f64>
-    %53 = fhe.rotate(%0) by 7 : <8 x f64>
-    %54 = fhe.add(%48, %49, %50, %32, %51, %52, %0, %53) : (!fhe.batched_secret<8 x f64>, !fhe.batched_secret<8 x f64>, !fhe.batched_secret<8 x f64>, !fhe.batched_secret<8 x f64>, !fhe.batched_secret<8 x f64>, !fhe.batched_secret<8 x f64>, !fhe.batched_secret<8 x f64>, !fhe.batched_secret<8 x f64>) -> !fhe.batched_secret<8 x f64>
-    %55 = fhe.extract %54[0] : <8 x f64>
-    return %55 : !fhe.secret<f64>
+    %51 = fhe.rotate(%0) by 2 : <8 x f64>
+    %52 = fhe.add(%0, %51) : (!fhe.batched_secret<8 x f64>, !fhe.batched_secret<8 x f64>) -> !fhe.batched_secret<8 x f64>
+    %53 = fhe.rotate(%52) by 1 : <8 x f64>
+    %54 = fhe.add(%52, %53) : (!fhe.batched_secret<8 x f64>, !fhe.batched_secret<8 x f64>) -> !fhe.batched_secret<8 x f64>
+    %55 = fhe.rotate(%54) by 3 : <8 x f64>
+    %56 = fhe.add(%48, %49, %50, %32, %55) : (!fhe.batched_secret<8 x f64>, !fhe.batched_secret<8 x f64>, !fhe.batched_secret<8 x f64>, !fhe.batched_secret<8 x f64>, !fhe.batched_secret<8 x f64>) -> !fhe.batched_secret<8 x f64>
+    %57 = fhe.extract %56[0] : <8 x f64>
+    return %57 : !fhe.secret<f64>
   }
 }
 
