@@ -24,15 +24,15 @@ LogicalResult batchArithmeticOperation(IRRewriter &rewriter, MLIRContext *contex
     if (auto result_st = op.getType().template dyn_cast_or_null<fhe::SecretType>())
     {
         // llvm::outs() << "updating:\n";
-        //  for (auto o : op.getOperands())
-        //{
-        //      llvm::outs() << "\t";
-        //      o.print(llvm::outs());
-        //      llvm::outs() << "\n";
-        //  }
-        //  llvm::outs() << "\t";
-        //  op.print(llvm::outs());
-        //  llvm::outs() << "\n";
+        // for (auto o : op.getOperands())
+        // {
+        //     llvm::outs() << "\t";
+        //     o.print(llvm::outs());
+        //     llvm::outs() << "\n";
+        // }
+        // llvm::outs() << "\t";
+        // op.print(llvm::outs());
+        // llvm::outs() << "\n";
 
         /// Target Slot (-1 => no target slot required)
         int target_slot = -1;
@@ -169,15 +169,24 @@ LogicalResult batchArithmeticOperation(IRRewriter &rewriter, MLIRContext *contex
                     {
                         if (bst.getSize() < max_size)
                         {
+                            // llvm::outs() << "\tFound mismatching size.\n\t";
+                            // ex_op.print(llvm::outs());
+                            // llvm::outs() << "\n\tWill be resized to " << max_size << "\n";
                             auto resized_type =
                                 fhe::BatchedSecretType::get(rewriter.getContext(), bst.getPlaintextType(), max_size);
                             auto cur_ip = rewriter.getInsertionPoint();
                             rewriter.setInsertionPoint(ex_op);
                             auto resized_o =
                                 rewriter.create<fhe::MaterializeOp>(ex_op.getLoc(), resized_type, ex_op.vector());
-                            rewriter.replaceOpWithIf(
-                                ex_op.vector().getDefiningOp(), { resized_o },
-                                [&](OpOperand &operand) { return operand.getOwner() == ex_op; });
+                            // llvm::outs() << "\t Created new materialization op:\n\t";
+                            // resized_o.print(llvm::outs());
+                            // llvm::outs() << "\n";
+                            auto resized_ex_op = rewriter.create<fhe::ExtractOp>(
+                                ex_op.getLoc(), ex_op.getType(), resized_o, ex_op.iAttr());
+                            rewriter.replaceOpWithIf(ex_op, { resized_ex_op }, [&](OpOperand &operand) {
+                                return operand.getOwner() == new_op;
+                            });
+                            ex_op = resized_ex_op;
                             rewriter.setInsertionPoint(&*cur_ip);
                         }
                     }
@@ -249,6 +258,7 @@ void BatchingPass::runOnOperation()
     {
         // We must translate in order of appearance for this to work, so we walk manually
         if (f.walk([&](Operation *op) {
+                 // llvm::outs() << "Walking operation ";
                  // op->print(llvm::outs());
                  // llvm::outs() << "\n";
                  // llvm::outs().flush();
