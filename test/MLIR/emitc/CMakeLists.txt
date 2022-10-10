@@ -1,2 +1,2 @@
-add_executable(bgv_test out.cpp)
-target_link_libraries(bgv_test SEAL::seal)
+add_executable(emitc_test out.cpp)
+target_link_libraries(emitc_test SEAL::seal)

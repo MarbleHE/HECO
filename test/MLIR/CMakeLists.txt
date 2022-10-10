@@ -17,3 +17,5 @@ add_lit_testsuite(check-heco "Running Tests for MLIR HECO"
 set_target_properties(check-heco PROPERTIES FOLDER "Tests")
 
 add_lit_testsuites(HECO ${CMAKE_CURRENT_LIST_DIR} DEPENDS ${HECO_TEST_DEPENDS})
+
+add_subdirectory(emitc)

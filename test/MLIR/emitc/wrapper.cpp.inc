@@ -6,10 +6,13 @@
 #include <iostream>
 #include <string.h>
 
-seal::Ciphertext trace();
-
 std::unique_ptr<seal::SEALContext> context = nullptr;
 std::unique_ptr<seal::Evaluator> evaluator = nullptr;
+
+inline void insert(std::vector<seal::Ciphertext> &v, seal::Ciphertext &c)
+{
+    v.push_back(c);
+}
 
 inline seal::EncryptionParameters load_parms(std::string parms_file)
 {
@@ -44,16 +47,16 @@ inline seal::RelinKeys evaluator_load_relin_keys(std::string data_file, std::str
     return rks;
 }
 
-inline seal::RelinKeys evaluator_load_galois_keys(std::string data_file, std::string parms_file)
+inline seal::GaloisKeys evaluator_load_galois_keys(std::string data_file, std::string parms_file)
 {
     context = std::make_unique<seal::SEALContext>(load_parms(parms_file));
     evaluator = std::make_unique<seal::Evaluator>(*context);
 
     std::ifstream data_file_stream;
     data_file_stream.open(data_file);
-    seal::RelinKeys rks;
-    rks.load(*context, data_file_stream);
-    return rks;
+    seal::GaloisKeys gks;
+    gks.load(*context, data_file_stream);
+    return gks;
 }
 
 inline seal::Ciphertext evaluator_load_ctxt(std::string data_file, std::string parms_file)
@@ -84,7 +87,31 @@ inline seal::Ciphertext evaluator_multiply(seal::Ciphertext &a, seal::Ciphertext
     return result;
 }
 
-inline seal::Ciphertext evaluator_relinearize(seal::Ciphertext &a, seal::RelinKeys &b)
+inline seal::Ciphertext evaluator_multiply_many(std::vector<seal::Ciphertext> &as, seal::RelinKeys &rlk)
+{
+    assert(context && evaluator);
+    seal::Ciphertext result;
+    evaluator->multiply_many(as, rlk, result);
+    return result;
+}
+
+inline seal::Ciphertext evaluator_add(seal::Ciphertext &a, seal::Ciphertext &b)
+{
+    assert(context && evaluator);
+    seal::Ciphertext result;
+    evaluator->add(a, b, result);
+    return result;
+}
+
+inline seal::Ciphertext evaluator_add_many(std::vector<seal::Ciphertext> &as)
+{
+    assert(context && evaluator);
+    seal::Ciphertext result;
+    evaluator->add_many(as, result);
+    return result;
+}
+
+inline seal::Ciphertext evaluator_relinearize(seal::Ciphertext &a, const seal::RelinKeys &b)
 {
     assert(context && evaluator);
     seal::Ciphertext result;
@@ -100,7 +127,10 @@ inline seal::Ciphertext evaluator_modswitch_to(seal::Ciphertext &a, seal::Cipher
     return result;
 }
 
-int main()
+inline seal::Ciphertext evaluator_rotate(seal::Ciphertext &a, int i, const seal::GaloisKeys &k)
 {
-    evaluator_save_ctxt(trace(), "trace.ctxt");
+    assert(context && evaluator);
+    seal::Ciphertext result;
+    evaluator->rotate_rows_inplace(a, i, k);
+    return result;
 }

@@ -41,7 +41,47 @@ using namespace fhe;
 using namespace bgv;
 using namespace poly;
 
-void pipelineBuilder(OpPassManager &manager)
+void preprocessPipelineBuilder(OpPassManager &manager)
+{
+    manager.addPass(std::make_unique<UnrollLoopsPass>());
+    manager.addPass(createCanonicalizerPass());
+    manager.addPass(createCSEPass()); // this can greatly reduce the number of operations after unrolling
+    manager.addPass(std::make_unique<NaryPass>());
+
+    // Must canonicalize before Tensor2BatchedSecretPass, since it only handles constant indices in tensor.extract
+    manager.addPass(createCanonicalizerPass());
+    manager.addPass(std::make_unique<Tensor2BatchedSecretPass>());
+    manager.addPass(createCanonicalizerPass()); // necessary to remove redundant fhe.materialize
+    manager.addPass(createCSEPass()); // necessary to remove duplicate fhe.extract
+}
+
+void hirPipelineBuilder(OpPassManager &manager)
+{
+    manager.addPass(std::make_unique<UnrollLoopsPass>());
+    manager.addPass(createCanonicalizerPass());
+    manager.addPass(createCSEPass()); // this can greatly reduce the number of operations after unrolling
+    manager.addPass(std::make_unique<NaryPass>());
+
+    // Must canonicalize before Tensor2BatchedSecretPass, since it only handles constant indices in tensor.extract
+    manager.addPass(createCanonicalizerPass());
+    manager.addPass(std::make_unique<Tensor2BatchedSecretPass>());
+    manager.addPass(createCanonicalizerPass()); // necessary to remove redundant fhe.materialize
+    manager.addPass(createCSEPass()); // necessary to remove duplicate fhe.extract
+
+    manager.addPass(std::make_unique<BatchingPass>());
+    manager.addPass(createCanonicalizerPass());
+    manager.addPass(
+        createCSEPass()); // try and remove all the redundant rotates, in the hope it also gives us less combine ops?
+    manager.addPass(std::make_unique<CombineSimplifyPass>());
+    manager.addPass(createCSEPass()); // otherwise, the internal batching pass has no "same origin" things to find!
+    manager.addPass(createCanonicalizerPass());
+
+    manager.addPass(std::make_unique<InternalOperandBatchingPass>());
+    manager.addPass(createCanonicalizerPass());
+    manager.addPass(createCSEPass());
+}
+
+void fullPipelineBuilder(OpPassManager &manager)
 {
     manager.addPass(std::make_unique<UnrollLoopsPass>());
     manager.addPass(createCanonicalizerPass());
@@ -66,24 +106,13 @@ void pipelineBuilder(OpPassManager &manager)
     manager.addPass(createCanonicalizerPass());
     manager.addPass(createCSEPass());
 
-    // manager.addPass(std::make_unique<ScalarBatchingPass>());
+    manager.addPass(std::make_unique<LowerFHEToBGVPass>());
+    manager.addPass(createCanonicalizerPass());
+    manager.addPass(createCSEPass());
 
     manager.addPass(std::make_unique<LowerBGVToEmitCPass>());
     manager.addPass(createCanonicalizerPass()); // necessary to remove redundant fhe.materialize
-}
-
-void preprocessPipelineBuilder(OpPassManager &manager)
-{
-    manager.addPass(std::make_unique<UnrollLoopsPass>());
-    manager.addPass(createCanonicalizerPass());
-    manager.addPass(createCSEPass()); // this can greatly reduce the number of operations after unrolling
-    manager.addPass(std::make_unique<NaryPass>());
-
-    // Must canonicalize before Tensor2BatchedSecretPass, since it only handles constant indices in tensor.extract
-    manager.addPass(createCanonicalizerPass());
-    manager.addPass(std::make_unique<Tensor2BatchedSecretPass>());
-    manager.addPass(createCanonicalizerPass()); // necessary to remove redundant fhe.materialize
-    manager.addPass(createCSEPass()); // necessary to remove duplicate fhe.extract
+    manager.addPass(createCSEPass());
 }
 int main(int argc, char **argv)
 {
@@ -134,8 +163,9 @@ int main(int argc, char **argv)
     PassRegistration<LowerBGVToEmitCPass>();
     PassRegistration<LowerBGVToLLVMPass>();
 
-    PassPipelineRegistration<>("full-pass", "Run all passes", pipelineBuilder);
     PassPipelineRegistration<>("preprocess", "Run the preprocessing passes", preprocessPipelineBuilder);
+    PassPipelineRegistration<>("hir-pass", "Run HIR passes (including preprocessing)", hirPipelineBuilder);
+    PassPipelineRegistration<>("full-pass", "Run all passes", fullPipelineBuilder);
 
     return asMainReturnCode(MlirOptMain(argc, argv, "HECO optimizer driver\n", registry));
 }

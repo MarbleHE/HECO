@@ -16,103 +16,72 @@ module {
     %c3 = arith.constant 3 : index
     %c12 = arith.constant 12 : index
     %c15 = arith.constant 15 : index
+    
+    
     %0 = tensor.extract %arg0[%c0] : tensor<16xf64>
-    %1 = fhe.extract %arg1[0] : <4 x f64>
-    %2 = fhe.rotate(%arg1) by 0 : <4 x f64>
-    %3 = fhe.multiply(%0, %2) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
-    %4 = fhe.extract %3[0] : <4 x f64>
-    %5 = tensor.extract %arg0[%c1] : tensor<16xf64>
-    %6 = fhe.extract %arg1[1] : <4 x f64>
-    %7 = fhe.rotate(%arg1) by 0 : <4 x f64>
-    %8 = fhe.multiply(%5, %7) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
-    %9 = fhe.extract %8[1] : <4 x f64>
-    %10 = tensor.extract %arg0[%c2] : tensor<16xf64>
-    %11 = fhe.extract %arg1[2] : <4 x f64>
-    %12 = fhe.rotate(%arg1) by 0 : <4 x f64>
-    %13 = fhe.multiply(%10, %12) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
-    %14 = fhe.extract %13[2] : <4 x f64>
-    %15 = tensor.extract %arg0[%c3] : tensor<16xf64>
-    %16 = fhe.extract %arg1[3] : <4 x f64>
-    %17 = fhe.rotate(%arg1) by 0 : <4 x f64>
-    %18 = fhe.multiply(%15, %17) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
-    %19 = fhe.extract %18[3] : <4 x f64>
-    %20 = fhe.rotate(%18) by -3 : <4 x f64>
-    %21 = fhe.rotate(%13) by -2 : <4 x f64>
-    %22 = fhe.rotate(%3) by 0 : <4 x f64>
-    %23 = fhe.rotate(%8) by -1 : <4 x f64>
-    %24 = fhe.add(%20, %21, %22, %23) : (!fhe.batched_secret<4 x f64>, !fhe.batched_secret<4 x f64>, !fhe.batched_secret<4 x f64>, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
-    %25 = fhe.extract %24[0] : <4 x f64>
-    %26 = fhe.insert %25 into %arg1[0] : <4 x f64>
-    %27 = tensor.extract %arg0[%c4] : tensor<16xf64>
-    %28 = fhe.rotate(%arg1) by 0 : <4 x f64>
-    %29 = fhe.multiply(%27, %28) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
-    %30 = fhe.extract %29[0] : <4 x f64>
-    %31 = tensor.extract %arg0[%c5] : tensor<16xf64>
-    %32 = fhe.rotate(%arg1) by 0 : <4 x f64>
-    %33 = fhe.multiply(%31, %32) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
-    %34 = fhe.extract %33[1] : <4 x f64>
-    %35 = tensor.extract %arg0[%c6] : tensor<16xf64>
-    %36 = fhe.rotate(%arg1) by 0 : <4 x f64>
-    %37 = fhe.multiply(%35, %36) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
-    %38 = fhe.extract %37[2] : <4 x f64>
-    %39 = tensor.extract %arg0[%c7] : tensor<16xf64>
-    %40 = fhe.rotate(%arg1) by 0 : <4 x f64>
-    %41 = fhe.multiply(%39, %40) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
-    %42 = fhe.extract %41[3] : <4 x f64>
-    %43 = fhe.rotate(%41) by -2 : <4 x f64>
-    %44 = fhe.rotate(%37) by -1 : <4 x f64>
-    %45 = fhe.rotate(%29) by 1 : <4 x f64>
-    %46 = fhe.rotate(%33) by 0 : <4 x f64>
-    %47 = fhe.add(%43, %44, %45, %46) : (!fhe.batched_secret<4 x f64>, !fhe.batched_secret<4 x f64>, !fhe.batched_secret<4 x f64>, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
-    %48 = fhe.extract %47[1] : <4 x f64>
-    %49 = fhe.insert %48 into %26[1] : <4 x f64>
-    %50 = tensor.extract %arg0[%c8] : tensor<16xf64>
-    %51 = fhe.rotate(%arg1) by 0 : <4 x f64>
-    %52 = fhe.multiply(%50, %51) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
-    %53 = fhe.extract %52[0] : <4 x f64>
-    %54 = tensor.extract %arg0[%c9] : tensor<16xf64>
-    %55 = fhe.rotate(%arg1) by 0 : <4 x f64>
-    %56 = fhe.multiply(%54, %55) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
-    %57 = fhe.extract %56[1] : <4 x f64>
-    %58 = tensor.extract %arg0[%c10] : tensor<16xf64>
-    %59 = fhe.rotate(%arg1) by 0 : <4 x f64>
-    %60 = fhe.multiply(%58, %59) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
-    %61 = fhe.extract %60[2] : <4 x f64>
-    %62 = tensor.extract %arg0[%c11] : tensor<16xf64>
-    %63 = fhe.rotate(%arg1) by 0 : <4 x f64>
-    %64 = fhe.multiply(%62, %63) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
-    %65 = fhe.extract %64[3] : <4 x f64>
-    %66 = fhe.rotate(%64) by -1 : <4 x f64>
-    %67 = fhe.rotate(%60) by 0 : <4 x f64>
-    %68 = fhe.rotate(%52) by 2 : <4 x f64>
-    %69 = fhe.rotate(%56) by 1 : <4 x f64>
-    %70 = fhe.add(%66, %67, %68, %69) : (!fhe.batched_secret<4 x f64>, !fhe.batched_secret<4 x f64>, !fhe.batched_secret<4 x f64>, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
-    %71 = fhe.extract %70[2] : <4 x f64>
-    %72 = fhe.insert %71 into %49[2] : <4 x f64>
-    %73 = tensor.extract %arg0[%c12] : tensor<16xf64>
-    %74 = fhe.rotate(%arg1) by 0 : <4 x f64>
-    %75 = fhe.multiply(%73, %74) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
-    %76 = fhe.extract %75[0] : <4 x f64>
-    %77 = tensor.extract %arg0[%c13] : tensor<16xf64>
-    %78 = fhe.rotate(%arg1) by 0 : <4 x f64>
-    %79 = fhe.multiply(%77, %78) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
-    %80 = fhe.extract %79[1] : <4 x f64>
-    %81 = tensor.extract %arg0[%c14] : tensor<16xf64>
-    %82 = fhe.rotate(%arg1) by 0 : <4 x f64>
-    %83 = fhe.multiply(%81, %82) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
-    %84 = fhe.extract %83[2] : <4 x f64>
-    %85 = tensor.extract %arg0[%c15] : tensor<16xf64>
-    %86 = fhe.rotate(%arg1) by 0 : <4 x f64>
-    %87 = fhe.multiply(%85, %86) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
-    %88 = fhe.extract %87[3] : <4 x f64>
-    %89 = fhe.rotate(%87) by 0 : <4 x f64>
-    %90 = fhe.rotate(%83) by 1 : <4 x f64>
-    %91 = fhe.rotate(%75) by 3 : <4 x f64>
-    %92 = fhe.rotate(%79) by 2 : <4 x f64>
-    %93 = fhe.add(%89, %90, %91, %92) : (!fhe.batched_secret<4 x f64>, !fhe.batched_secret<4 x f64>, !fhe.batched_secret<4 x f64>, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
-    %94 = fhe.extract %93[3] : <4 x f64>
-    %95 = fhe.insert %94 into %72[3] : <4 x f64>
-    return %95 : !fhe.batched_secret<4 x f64>
+    %1 = fhe.multiply(%0, %arg1) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
+    %2 = tensor.extract %arg0[%c1] : tensor<16xf64>
+    %3 = fhe.multiply(%2, %arg1) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
+    %4 = tensor.extract %arg0[%c2] : tensor<16xf64>
+    %5 = fhe.multiply(%4, %arg1) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
+    %6 = tensor.extract %arg0[%c3] : tensor<16xf64>
+    %7 = fhe.multiply(%6, %arg1) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
+    
+    %8 = fhe.rotate(%7) by 1 : <4 x f64>
+    %9 = fhe.rotate(%5) by 2 : <4 x f64>
+    %10 = fhe.rotate(%3) by 3 : <4 x f64>
+    %11 = fhe.add(%8, %9, %1, %10) : (!fhe.batched_secret<4 x f64>, !fhe.batched_secret<4 x f64>, !fhe.batched_secret<4 x f64>, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
+    %12 = fhe.combine(%11[0], %arg1) : !fhe.batched_secret<4 x f64>
+    
+
+    %13 = tensor.extract %arg0[%c4] : tensor<16xf64>
+    %14 = fhe.multiply(%13, %arg1) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
+    %15 = tensor.extract %arg0[%c5] : tensor<16xf64>
+    %16 = fhe.multiply(%15, %arg1) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
+    %17 = tensor.extract %arg0[%c6] : tensor<16xf64>
+    %18 = fhe.multiply(%17, %arg1) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
+    %19 = tensor.extract %arg0[%c7] : tensor<16xf64>
+    %20 = fhe.multiply(%19, %arg1) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
+    
+    %21 = fhe.rotate(%20) by 2 : <4 x f64>
+    %22 = fhe.rotate(%18) by 3 : <4 x f64>
+    %23 = fhe.rotate(%14) by 1 : <4 x f64>
+    %24 = fhe.add(%21, %22, %23, %16) : (!fhe.batched_secret<4 x f64>, !fhe.batched_secret<4 x f64>, !fhe.batched_secret<4 x f64>, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
+    %25 = fhe.combine(%24[1], %12) : !fhe.batched_secret<4 x f64>
+    
+    
+    %26 = tensor.extract %arg0[%c8] : tensor<16xf64>
+    %27 = fhe.multiply(%26, %arg1) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
+    %28 = tensor.extract %arg0[%c9] : tensor<16xf64>
+    %29 = fhe.multiply(%28, %arg1) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
+    %30 = tensor.extract %arg0[%c10] : tensor<16xf64>
+    %31 = fhe.multiply(%30, %arg1) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
+    %32 = tensor.extract %arg0[%c11] : tensor<16xf64>
+    %33 = fhe.multiply(%32, %arg1) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
+   
+    %34 = fhe.rotate(%33) by 3 : <4 x f64>
+    %35 = fhe.rotate(%27) by 2 : <4 x f64>
+    %36 = fhe.rotate(%29) by 1 : <4 x f64>
+    %37 = fhe.add(%34, %31, %35, %36) : (!fhe.batched_secret<4 x f64>, !fhe.batched_secret<4 x f64>, !fhe.batched_secret<4 x f64>, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
+    %38 = fhe.combine(%37[2], %25) : !fhe.batched_secret<4 x f64>
+    
+    
+    %39 = tensor.extract %arg0[%c12] : tensor<16xf64>
+    %40 = fhe.multiply(%39, %arg1) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
+    %41 = tensor.extract %arg0[%c13] : tensor<16xf64>
+    %42 = fhe.multiply(%41, %arg1) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
+    %43 = tensor.extract %arg0[%c14] : tensor<16xf64>
+    %44 = fhe.multiply(%43, %arg1) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
+    %45 = tensor.extract %arg0[%c15] : tensor<16xf64>
+    %46 = fhe.multiply(%45, %arg1) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
+    
+    %47 = fhe.rotate(%44) by 1 : <4 x f64>
+    %48 = fhe.rotate(%40) by 3 : <4 x f64>
+    %49 = fhe.rotate(%42) by 2 : <4 x f64>
+    %50 = fhe.add(%46, %47, %48, %49) : (!fhe.batched_secret<4 x f64>, !fhe.batched_secret<4 x f64>, !fhe.batched_secret<4 x f64>, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
+    %51 = fhe.combine(%50[3], %38) : !fhe.batched_secret<4 x f64>
+    
+    return %51 : !fhe.batched_secret<4 x f64>
   }
 }
 

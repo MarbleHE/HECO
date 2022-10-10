@@ -43,3 +43,83 @@ module {
   }
 }
 
+module {
+  func.func private @encryptedEigenfaces(%arg0: !fhe.batched_secret<4 x f64>, %arg1: tensor<4x4xf64>) -> !fhe.batched_secret<4 x f64> {
+    %c0 = arith.constant 0 : index
+    %c1 = arith.constant 1 : index
+    %c2 = arith.constant 2 : index
+    %c3 = arith.constant 3 : index
+    %0 = linalg.init_tensor [4] : tensor<4x!fhe.secret<f64>>
+    %1 = tensor.extract %arg1[%c0, %c0] : tensor<4x4xf64>
+    %2 = arith.mulf %1, %1 : f64
+    %3 = fhe.multiply(%arg0, %arg0) : (!fhe.batched_secret<4 x f64>, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
+    %4 = fhe.sub(%2, %3) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
+    %5 = tensor.extract %arg1[%c0, %c1] : tensor<4x4xf64>
+    %6 = arith.mulf %5, %5 : f64
+    %7 = fhe.sub(%6, %3) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
+    %8 = tensor.extract %arg1[%c0, %c2] : tensor<4x4xf64>
+    %9 = arith.mulf %8, %8 : f64
+    %10 = fhe.sub(%9, %3) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
+    %11 = tensor.extract %arg1[%c0, %c3] : tensor<4x4xf64>
+    %12 = arith.mulf %11, %11 : f64
+    %13 = fhe.sub(%12, %3) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
+    %14 = fhe.rotate(%13) by 1 : <4 x f64>
+    %15 = fhe.rotate(%10) by 2 : <4 x f64>
+    %16 = fhe.rotate(%7) by 3 : <4 x f64>
+    %17 = fhe.add(%14, %15, %4, %16) : (!fhe.batched_secret<4 x f64>, !fhe.batched_secret<4 x f64>, !fhe.batched_secret<4 x f64>, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
+    %18 = fhe.materialize(%0) : (tensor<4x!fhe.secret<f64>>) -> !fhe.batched_secret<4 x f64>
+    %19 = fhe.combine(%17[0], %18) : !fhe.batched_secret<4 x f64>
+    %20 = tensor.extract %arg1[%c1, %c0] : tensor<4x4xf64>
+    %21 = arith.mulf %20, %20 : f64
+    %22 = fhe.sub(%21, %3) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
+    %23 = tensor.extract %arg1[%c1, %c1] : tensor<4x4xf64>
+    %24 = arith.mulf %23, %23 : f64
+    %25 = fhe.sub(%24, %3) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
+    %26 = tensor.extract %arg1[%c1, %c2] : tensor<4x4xf64>
+    %27 = arith.mulf %26, %26 : f64
+    %28 = fhe.sub(%27, %3) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
+    %29 = tensor.extract %arg1[%c1, %c3] : tensor<4x4xf64>
+    %30 = arith.mulf %29, %29 : f64
+    %31 = fhe.sub(%30, %3) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
+    %32 = fhe.rotate(%31) by 2 : <4 x f64>
+    %33 = fhe.rotate(%28) by 3 : <4 x f64>
+    %34 = fhe.rotate(%22) by 1 : <4 x f64>
+    %35 = fhe.add(%32, %33, %34, %25) : (!fhe.batched_secret<4 x f64>, !fhe.batched_secret<4 x f64>, !fhe.batched_secret<4 x f64>, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
+    %36 = fhe.combine(%35[1], %19) : !fhe.batched_secret<4 x f64>
+    %37 = tensor.extract %arg1[%c2, %c0] : tensor<4x4xf64>
+    %38 = arith.mulf %37, %37 : f64
+    %39 = fhe.sub(%38, %3) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
+    %40 = tensor.extract %arg1[%c2, %c1] : tensor<4x4xf64>
+    %41 = arith.mulf %40, %40 : f64
+    %42 = fhe.sub(%41, %3) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
+    %43 = tensor.extract %arg1[%c2, %c2] : tensor<4x4xf64>
+    %44 = arith.mulf %43, %43 : f64
+    %45 = fhe.sub(%44, %3) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
+    %46 = tensor.extract %arg1[%c2, %c3] : tensor<4x4xf64>
+    %47 = arith.mulf %46, %46 : f64
+    %48 = fhe.sub(%47, %3) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
+    %49 = fhe.rotate(%48) by 3 : <4 x f64>
+    %50 = fhe.rotate(%39) by 2 : <4 x f64>
+    %51 = fhe.rotate(%42) by 1 : <4 x f64>
+    %52 = fhe.add(%49, %45, %50, %51) : (!fhe.batched_secret<4 x f64>, !fhe.batched_secret<4 x f64>, !fhe.batched_secret<4 x f64>, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
+    %53 = fhe.combine(%52[2], %36) : !fhe.batched_secret<4 x f64>
+    %54 = tensor.extract %arg1[%c3, %c0] : tensor<4x4xf64>
+    %55 = arith.mulf %54, %54 : f64
+    %56 = fhe.sub(%55, %3) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
+    %57 = tensor.extract %arg1[%c3, %c1] : tensor<4x4xf64>
+    %58 = arith.mulf %57, %57 : f64
+    %59 = fhe.sub(%58, %3) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
+    %60 = tensor.extract %arg1[%c3, %c2] : tensor<4x4xf64>
+    %61 = arith.mulf %60, %60 : f64
+    %62 = fhe.sub(%61, %3) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
+    %63 = tensor.extract %arg1[%c3, %c3] : tensor<4x4xf64>
+    %64 = arith.mulf %63, %63 : f64
+    %65 = fhe.sub(%64, %3) : (f64, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
+    %66 = fhe.rotate(%62) by 1 : <4 x f64>
+    %67 = fhe.rotate(%56) by 3 : <4 x f64>
+    %68 = fhe.rotate(%59) by 2 : <4 x f64>
+    %69 = fhe.add(%65, %66, %67, %68) : (!fhe.batched_secret<4 x f64>, !fhe.batched_secret<4 x f64>, !fhe.batched_secret<4 x f64>, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
+    %70 = fhe.combine(%69[3], %53) : !fhe.batched_secret<4 x f64>
+    return %70 : !fhe.batched_secret<4 x f64>
+  }
+}

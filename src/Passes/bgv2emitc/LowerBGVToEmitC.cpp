@@ -32,26 +32,38 @@ public:
             return failure();
 
         // Materialize the operands if necessary
-        Value x = op.x();
-        auto xDstType = typeConverter->convertType(x.getType());
-        if (!xDstType)
-            return failure();
-        if (x.getType() != xDstType)
+        llvm::SmallVector<Value> materialized_operands;
+        for (Value o : op->getOperands())
         {
-            auto new_operand = typeConverter->materializeTargetConversion(rewriter, op.getLoc(), xDstType, x);
-            x = new_operand;
+            auto operandDstType = typeConverter->convertType(o.getType());
+            if (!operandDstType)
+                return failure();
+            if (o.getType() != operandDstType)
+            {
+                auto new_operand = typeConverter->materializeTargetConversion(rewriter, op.getLoc(), operandDstType, o);
+                materialized_operands.push_back(new_operand);
+            }
+            else
+            {
+                materialized_operands.push_back(o);
+            }
         }
 
         // build a series of calls to our custom evaluator wrapper (for now, because it's faster than dealing with
         // seal's API)
         auto aa = ArrayAttr::get(
-            getContext(), { IntegerAttr::get(
-                                IndexType::get(getContext()),
-                                0), // means "first operand"
-                            rewriter.getSI32IntegerAttr(op.offset()) });
+            getContext(), {
+                              IntegerAttr::get(
+                                  IndexType::get(getContext()),
+                                  0), // means "first operand"
+                              rewriter.getSI32IntegerAttr(op.offset()),
+                              IntegerAttr::get(
+                                  IndexType::get(getContext()),
+                                  1) // means "second operand"
+                          });
 
         rewriter.replaceOpWithNewOp<emitc::CallOp>(
-            op, TypeRange(dstType), llvm::StringRef("evaluator_rotate"), aa, ArrayAttr(), ValueRange(x));
+            op, TypeRange(dstType), llvm::StringRef("evaluator_rotate"), aa, ArrayAttr(), materialized_operands);
 
         return success();
     }
@@ -68,18 +80,25 @@ public:
     {
         rewriter.setInsertionPoint(op);
 
-        // Materialize the operands if necessary
-        Value x = op.x();
-        auto xDstType = typeConverter->convertType(x.getType());
-        if (!xDstType)
-            return failure();
-        if (x.getType() != xDstType)
+        // Materialize the operands where necessary
+        llvm::SmallVector<Value> materialized_operands;
+        for (Value o : op->getOperands())
         {
-            auto new_operand = typeConverter->materializeTargetConversion(rewriter, op.getLoc(), xDstType, x);
-            x = new_operand;
+            auto operandDstType = typeConverter->convertType(o.getType());
+            if (!operandDstType)
+                return failure();
+            if (o.getType() != operandDstType)
+            {
+                auto new_operand = typeConverter->materializeTargetConversion(rewriter, op.getLoc(), operandDstType, o);
+                materialized_operands.push_back(new_operand);
+            }
+            else
+            {
+                materialized_operands.push_back(o);
+            }
         }
 
-        rewriter.replaceOpWithNewOp<func::ReturnOp>(op, x);
+        rewriter.replaceOpWithNewOp<func::ReturnOp>(op, materialized_operands);
 
         return success();
     }
@@ -148,9 +167,43 @@ public:
         else
             return failure();
 
-        rewriter.replaceOpWithNewOp<emitc::CallOp>(
-            op, TypeRange(dstType), llvm::StringRef("evaluator_" + op_str), ArrayAttr(), ArrayAttr(),
-            materialized_operands);
+        // For the _many ops, we need to build a vector of the arguments!
+        if (std::is_same<OpType, bgv::AddManyOp>() || std::is_same<OpType, bgv::MultiplyManyOp>())
+        {
+            auto template_array = ArrayAttr::get(
+                rewriter.getContext(), { emitc::OpaqueAttr::get(rewriter.getContext(), "seal::Ciphertext") });
+            emitc::CallOp v = rewriter.create<emitc::CallOp>(
+                op.getLoc(), TypeRange(emitc::OpaqueType::get(rewriter.getContext(), "std::vector<seal::Ciphertext>")),
+                llvm::StringRef("std::vector"), ArrayAttr(), template_array, ValueRange());
+
+            size_t num_operands =
+                std::is_same<OpType, bgv::AddManyOp>() ? op->getNumOperands() : op->getNumOperands() - 1;
+            for (size_t i = 0; i < num_operands; ++i)
+            {
+                rewriter.create<emitc::CallOp>(
+                    op.getLoc(), TypeRange(), llvm::StringRef("insert"), ArrayAttr(), ArrayAttr(),
+                    ValueRange({ v.getResult(0), materialized_operands[i] }));
+            }
+
+            if (std::is_same<OpType, bgv::AddManyOp>())
+            {
+                rewriter.replaceOpWithNewOp<emitc::CallOp>(
+                    op, TypeRange(dstType), llvm::StringRef("evaluator_" + op_str), ArrayAttr(), ArrayAttr(),
+                    ValueRange{ (v.getResult(0)) });
+            }
+            else
+            {
+                rewriter.replaceOpWithNewOp<emitc::CallOp>(
+                    op, TypeRange(dstType), llvm::StringRef("evaluator_" + op_str), ArrayAttr(), ArrayAttr(),
+                    ValueRange{ (v.getResult(0)), materialized_operands.back() });
+            }
+        }
+        else
+        {
+            rewriter.replaceOpWithNewOp<emitc::CallOp>(
+                op, TypeRange(dstType), llvm::StringRef("evaluator_" + op_str), ArrayAttr(), ArrayAttr(),
+                materialized_operands);
+        }
 
         return success();
     }
@@ -437,6 +490,8 @@ void LowerBGVToEmitCPass::runOnOperation()
     target.addDynamicallyLegalOp<func::ReturnOp>(
         [&](Operation *op) { return type_converter.isLegal(op->getOperandTypes()); });
     mlir::RewritePatternSet patterns(&getContext());
+
+    // TODO: Emit the emitc.include operation!
 
     patterns.add<
         EmitCBasicPattern<bgv::SubOp>, EmitCBasicPattern<bgv::SubPlainOp>, EmitCBasicPattern<bgv::AddOp>,
