@@ -63,3 +63,24 @@ module  {
     return %r : tensor<4096x!fhe.secret<i16>>
   }
 }
+
+===-------------------------------------------------------------------------===
+                         ... Execution time report ...
+===-------------------------------------------------------------------------===
+  Total Execution Time: 0.7905 seconds
+
+  ----Wall Time----  ----Name----
+    0.7905 (100.0%)  root
+    0.6167 ( 78.0%)  Canonicalizer
+    0.0397 (  5.0%)  CSE
+    0.0393 (  5.0%)  UnrollLoopsPass
+    0.0369 (  4.7%)  BatchingPass
+    0.0343 (  4.3%)  CombineSimplifyPass
+    0.0168 (  2.1%)  Tensor2BatchedSecretPass
+    0.0057 (  0.7%)  NaryPass
+    0.0003 (  0.0%)  Output
+    0.0003 (  0.0%)  Parser
+    0.0000 (  0.0%)  InternalOperandBatchingPass
+    0.0000 (  0.0%)  (A) DominanceInfo
+    0.0006 (  0.1%)  Rest
+    0.7905 (100.0%)  Total
