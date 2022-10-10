@@ -72,6 +72,19 @@ void pipelineBuilder(OpPassManager &manager)
     manager.addPass(createCanonicalizerPass()); // necessary to remove redundant fhe.materialize
 }
 
+void preprocessPipelineBuilder(OpPassManager &manager)
+{
+    manager.addPass(std::make_unique<UnrollLoopsPass>());
+    manager.addPass(createCanonicalizerPass());
+    manager.addPass(createCSEPass()); // this can greatly reduce the number of operations after unrolling
+    manager.addPass(std::make_unique<NaryPass>());
+
+    // Must canonicalize before Tensor2BatchedSecretPass, since it only handles constant indices in tensor.extract
+    manager.addPass(createCanonicalizerPass());
+    manager.addPass(std::make_unique<Tensor2BatchedSecretPass>());
+    manager.addPass(createCanonicalizerPass()); // necessary to remove redundant fhe.materialize
+    manager.addPass(createCSEPass()); // necessary to remove duplicate fhe.extract
+}
 int main(int argc, char **argv)
 {
     mlir::MLIRContext context;
@@ -122,6 +135,7 @@ int main(int argc, char **argv)
     PassRegistration<LowerBGVToLLVMPass>();
 
     PassPipelineRegistration<>("full-pass", "Run all passes", pipelineBuilder);
+    PassPipelineRegistration<>("preprocess", "Run the preprocessing passes", preprocessPipelineBuilder);
 
     return asMainReturnCode(MlirOptMain(argc, argv, "HECO optimizer driver\n", registry));
 }
