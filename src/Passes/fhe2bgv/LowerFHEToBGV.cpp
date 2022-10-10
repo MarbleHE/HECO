@@ -70,6 +70,22 @@ public:
     };
 };
 
+class BGVConstPattern final : public OpConversionPattern<fhe::ConstOp>
+{
+protected:
+    using OpConversionPattern<fhe::ConstOp>::typeConverter;
+
+public:
+    using OpConversionPattern<fhe::ConstOp>::OpConversionPattern;
+
+    LogicalResult matchAndRewrite(
+        fhe::ConstOp op, typename fhe::ConstOp::Adaptor adaptor, ConversionPatternRewriter &rewriter) const override
+    {
+        // TODO: Handle combining!
+        return failure();
+    };
+};
+
 /// Basic Pattern for operations without attributes.
 template <typename OpType>
 class BGVBasicPattern final : public OpConversionPattern<OpType>
@@ -138,7 +154,7 @@ public:
                 rewriter.setInsertionPointAfter(new_op);
             }
             else
-                rewriter.replaceOpWithNewOp<bgv::MultiplyOp>(op, TypeRange(dstType), materialized_operands[0]);
+                rewriter.replaceOpWithNewOp<bgv::MultiplyOp>(op, TypeRange(dstType), materialized_operands);
             return success();
         }
 
@@ -265,6 +281,8 @@ void LowerFHEToBGVPass::runOnOperation()
 
     ConversionTarget target(getContext());
     target.addIllegalDialect<fhe::FHEDialect>();
+    // target.addLegalOp<fhe::ConstOp>(); // TODO: Remove this temp override and actually deal with const!
+    // target.addLegalOp<fhe::MaterializeOp>(); // TODO: Remove this temp override and actually deal with materialize!
     target.addLegalDialect<bgv::BGVDialect>();
     target.addLegalOp<ModuleOp>();
     target.addDynamicallyLegalOp<func::FuncOp>([&](Operation *op) {
@@ -297,7 +315,7 @@ void LowerFHEToBGVPass::runOnOperation()
 
     patterns.add<
         BGVFunctionConversionPattern, BGVReturnPattern, BGVBasicPattern<fhe::SubOp>, BGVBasicPattern<fhe::AddOp>,
-        BGVBasicPattern<fhe::SubOp>, BGVBasicPattern<fhe::MultiplyOp>, BGVRotatePattern>(
+        BGVBasicPattern<fhe::SubOp>, BGVBasicPattern<fhe::MultiplyOp>, BGVRotatePattern, BGVConstPattern>(
         type_converter, patterns.getContext());
 
     if (mlir::failed(mlir::applyPartialConversion(getOperation(), target, std::move(patterns))))
