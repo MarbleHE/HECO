@@ -559,4 +559,31 @@ def BGV_MaterializeOp: BGV_Op<"materialize", []> {
   let hasFolder = 1;
 }
 
+
+
+def BGV_ExtractOp : BGV_Op<"extract", []> {
+
+  let summary = "element extraction operation (actually executing this under FHE is highly inefficient)";
+
+  let arguments = (ins AnyType:$vector, IndexAttr:$i);
+  let results = (outs AnyType:$result);
+  let assemblyFormat = "$vector `[` $i `]` attr-dict `:` type($vector) `->` type($result)";
+}
+
+def BGV_InsertOp : BGV_Op<"insert", []> {
+
+  let summary = "element insertion operation (actually executing this under FHE is highly inefficient)";
+
+  let arguments = (ins AnyType:$scalar,
+                       AnyType:$dest,
+                       IndexAttr:$i);
+
+  let results = (outs AnyType:$result);
+
+  let assemblyFormat = [{
+    $scalar `into` $dest `[` $i `]` attr-dict `:`  functional-type(operands, results)
+  }];
+}
+
+
 #endif // TOOLCHAIN_BGV_BGV_TD_

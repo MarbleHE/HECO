@@ -16,6 +16,7 @@
 #include "heco/Passes/hir2hir/Batching.h"
 #include "heco/Passes/hir2hir/CombineSimplify.h"
 #include "heco/Passes/hir2hir/InternalOperandBatching.h"
+#include "heco/Passes/hir2hir/LowerVirtual.h"
 #include "heco/Passes/hir2hir/Nary.h"
 #include "heco/Passes/hir2hir/ScalarBatching.h"
 #include "heco/Passes/hir2hir/Tensor2BatchedSecret.h"
@@ -159,6 +160,7 @@ int main(int argc, char **argv)
     PassRegistration<CombineSimplifyPass>();
     PassRegistration<InternalOperandBatchingPass>();
     PassRegistration<ScalarBatchingPass>();
+    PassRegistration<LowerVirtualPass>();
     PassRegistration<LowerFHEToBGVPass>();
     PassRegistration<LowerBGVToEmitCPass>();
     PassRegistration<LowerBGVToLLVMPass>();

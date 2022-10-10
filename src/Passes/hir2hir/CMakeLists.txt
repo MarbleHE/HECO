@@ -2,6 +2,7 @@ add_heco_conversion_library(HECOCatchAll
         Batching.cpp
         CombineSimplify.cpp
         InternalOperandBatching.cpp
+        LowerVirtual.cpp
         Nary.cpp
         ScalarBatching.cpp
         Tensor2BatchedSecret.cpp

@@ -126,6 +126,87 @@ public:
     }
 };
 
+class BGVInsertPattern final : public OpConversionPattern<fhe::InsertOp>
+{
+protected:
+    using OpConversionPattern<fhe::InsertOp>::typeConverter;
+
+public:
+    using OpConversionPattern<fhe::InsertOp>::OpConversionPattern;
+
+    LogicalResult matchAndRewrite(
+        fhe::InsertOp op, typename fhe::InsertOp::Adaptor adaptor, ConversionPatternRewriter &rewriter) const override
+    {
+        rewriter.setInsertionPoint(op);
+
+        auto dstType = typeConverter->convertType(op.getType());
+        if (!dstType)
+            return failure();
+
+        // Materialize the operands where necessary
+        llvm::SmallVector<Value> materialized_operands;
+        for (Value o : op.getOperands())
+        {
+            auto operandDstType = typeConverter->convertType(o.getType());
+            if (!operandDstType)
+                return failure();
+            if (o.getType() != operandDstType)
+            {
+                auto new_operand = typeConverter->materializeTargetConversion(rewriter, op.getLoc(), operandDstType, o);
+                assert(new_operand && "Type Conversion must not fail");
+                materialized_operands.push_back(new_operand);
+            }
+            else
+            {
+                materialized_operands.push_back(o);
+            }
+        }
+
+        rewriter.replaceOpWithNewOp<bgv::InsertOp>(
+            op, TypeRange(dstType), materialized_operands[0], materialized_operands[1], op.iAttr());
+        return success();
+    }
+};
+
+class BGVExtractPattern final : public OpConversionPattern<fhe::ExtractOp>
+{
+protected:
+    using OpConversionPattern<fhe::ExtractOp>::typeConverter;
+
+public:
+    using OpConversionPattern<fhe::ExtractOp>::OpConversionPattern;
+
+    LogicalResult matchAndRewrite(
+        fhe::ExtractOp op, typename fhe::ExtractOp::Adaptor adaptor, ConversionPatternRewriter &rewriter) const override
+    {
+        rewriter.setInsertionPoint(op);
+
+        auto dstType = typeConverter->convertType(op.getType());
+        if (!dstType)
+            return failure();
+
+        // Materialize the operands where necessary
+        llvm::SmallVector<Value> materialized_operands;
+        auto o = op.getOperand();
+        auto operandDstType = typeConverter->convertType(o.getType());
+        if (!operandDstType)
+            return failure();
+        if (o.getType() != operandDstType)
+        {
+            auto new_operand = typeConverter->materializeTargetConversion(rewriter, op.getLoc(), operandDstType, o);
+            assert(new_operand && "Type Conversion must not fail");
+            materialized_operands.push_back(new_operand);
+        }
+        else
+        {
+            materialized_operands.push_back(o);
+        }
+
+        rewriter.replaceOpWithNewOp<bgv::ExtractOp>(op, TypeRange(dstType), materialized_operands[0], op.iAttr());
+        return success();
+    }
+};
+
 /// Basic Pattern for operations without attributes.
 template <typename OpType>
 class BGVBasicPattern final : public OpConversionPattern<OpType>
@@ -354,7 +435,7 @@ void LowerFHEToBGVPass::runOnOperation()
     patterns.add<
         BGVFunctionConversionPattern, BGVReturnPattern, BGVBasicPattern<fhe::SubOp>, BGVBasicPattern<fhe::AddOp>,
         BGVBasicPattern<fhe::SubOp>, BGVBasicPattern<fhe::MultiplyOp>, BGVRotatePattern, BGVConstPattern,
-        BGVMaterializePattern>(type_converter, patterns.getContext());
+        BGVMaterializePattern, BGVInsertPattern, BGVExtractPattern>(type_converter, patterns.getContext());
 
     if (mlir::failed(mlir::applyPartialConversion(getOperation(), target, std::move(patterns))))
         signalPassFailure();
