@@ -81,9 +81,49 @@ public:
     LogicalResult matchAndRewrite(
         fhe::ConstOp op, typename fhe::ConstOp::Adaptor adaptor, ConversionPatternRewriter &rewriter) const override
     {
-        // TODO: Handle combining!
+        // TODO: Handle const ops!
         return failure();
     };
+};
+
+class BGVMaterializePattern final : public OpConversionPattern<fhe::MaterializeOp>
+{
+protected:
+    using OpConversionPattern<fhe::MaterializeOp>::typeConverter;
+
+public:
+    using OpConversionPattern<fhe::MaterializeOp>::OpConversionPattern;
+
+    LogicalResult matchAndRewrite(
+        fhe::MaterializeOp op, typename fhe::MaterializeOp::Adaptor adaptor,
+        ConversionPatternRewriter &rewriter) const override
+    {
+        rewriter.setInsertionPoint(op);
+
+        auto dstType = typeConverter->convertType(op.getType());
+        if (!dstType)
+            return failure();
+
+        // Materialize the operands where necessary
+        llvm::SmallVector<Value> materialized_operands;
+        auto o = op.getOperand();
+        auto operandDstType = typeConverter->convertType(o.getType());
+        if (!operandDstType)
+            return failure();
+        if (o.getType() != operandDstType)
+        {
+            auto new_operand = typeConverter->materializeTargetConversion(rewriter, op.getLoc(), operandDstType, o);
+            assert(new_operand && "Type Conversion must not fail");
+            materialized_operands.push_back(new_operand);
+        }
+        else
+        {
+            materialized_operands.push_back(o);
+        }
+
+        rewriter.replaceOpWithNewOp<bgv::MaterializeOp>(op, TypeRange(dstType), materialized_operands);
+        return success();
+    }
 };
 
 /// Basic Pattern for operations without attributes.
@@ -130,7 +170,7 @@ public:
             if (op.getNumOperands() > 2)
                 rewriter.replaceOpWithNewOp<bgv::AddManyOp>(op, TypeRange(dstType), materialized_operands);
             else
-                rewriter.replaceOpWithNewOp<bgv::AddOp>(op, TypeRange(dstType), materialized_operands[0]);
+                rewriter.replaceOpWithNewOp<bgv::AddOp>(op, TypeRange(dstType), materialized_operands);
             return success();
         }
         // Subtractions
@@ -281,8 +321,6 @@ void LowerFHEToBGVPass::runOnOperation()
 
     ConversionTarget target(getContext());
     target.addIllegalDialect<fhe::FHEDialect>();
-    // target.addLegalOp<fhe::ConstOp>(); // TODO: Remove this temp override and actually deal with const!
-    // target.addLegalOp<fhe::MaterializeOp>(); // TODO: Remove this temp override and actually deal with materialize!
     target.addLegalDialect<bgv::BGVDialect>();
     target.addLegalOp<ModuleOp>();
     target.addDynamicallyLegalOp<func::FuncOp>([&](Operation *op) {
@@ -315,8 +353,8 @@ void LowerFHEToBGVPass::runOnOperation()
 
     patterns.add<
         BGVFunctionConversionPattern, BGVReturnPattern, BGVBasicPattern<fhe::SubOp>, BGVBasicPattern<fhe::AddOp>,
-        BGVBasicPattern<fhe::SubOp>, BGVBasicPattern<fhe::MultiplyOp>, BGVRotatePattern, BGVConstPattern>(
-        type_converter, patterns.getContext());
+        BGVBasicPattern<fhe::SubOp>, BGVBasicPattern<fhe::MultiplyOp>, BGVRotatePattern, BGVConstPattern,
+        BGVMaterializePattern>(type_converter, patterns.getContext());
 
     if (mlir::failed(mlir::applyPartialConversion(getOperation(), target, std::move(patterns))))
         signalPassFailure();
