@@ -30,7 +30,7 @@ module  {
             %13 = fhe.multiply(%12, %cur2) : (!fhe.secret<f64>, !fhe.secret<f64>) -> !fhe.secret<f64>
             affine.yield %13 : !fhe.secret<f64>
         }   
-        %14 = tensor.extract %a_data[%i] : tensor<4x!fhe.secret<f64>>
+        %14 = tensor.extract %b_data[%i] : tensor<4x!fhe.secret<f64>>
         %15 = fhe.multiply(%14, %4) : (!fhe.secret<f64>, !fhe.secret<f64>) -> !fhe.secret<f64>
         %16 = fhe.add(%cur1, %15) : (!fhe.secret<f64>, !fhe.secret<f64>) -> !fhe.secret<f64>
         affine.yield %16 : !fhe.secret<f64>

@@ -63,3 +63,4 @@ module {
     return %43 : !fhe.batched_secret<4 x f64>
   }
 }
+
