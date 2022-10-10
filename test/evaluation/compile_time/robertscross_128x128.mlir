@@ -1,4 +1,4 @@
-// RUN: fhe-tool -unroll-loops --canonicalize --cse < %s | FileCheck %s
+// RUN: fhe-tool --hir-pass -mlir-timing -mlir-timing-display=list < %s | FileCheck %s
 module  {
   func.func private @encryptedRobertsCross(%img: tensor<16384x!fhe.secret<i16>>) -> tensor<16384x!fhe.secret<i16>> {
     %c16384 = arith.constant 16384 : index

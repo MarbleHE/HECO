@@ -1,4 +1,4 @@
-// RUN: fhe-tool --full-pass -mlir-timing -mlir-timing-display=list < %s | FileCheck %s
+// RUN: fhe-tool --hir-pass -mlir-timing -mlir-timing-display=list < %s | FileCheck %s
 module  {
   func.func private @encryptedPSU(%a_id: tensor<128x8x!fhe.secret<i16>>, %a_data: tensor<128x!fhe.secret<i16>>,
                                   %b_id: tensor<128x8x!fhe.secret<i16>>, %b_data: tensor<128x!fhe.secret<i16>>) -> !fhe.secret<i16> {

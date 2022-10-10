@@ -1,4 +1,4 @@
-// RUN: fhe-tool --full-pass -mlir-timing -mlir-timing-display=list < %s | FileCheck %s
+// RUN: fhe-tool --hir-pass -mlir-timing -mlir-timing-display=list < %s | FileCheck %s
 module  {
   func.func private @encryptedBoxBlur(%arg0: tensor<256x!fhe.secret<i16>>) -> tensor<256x!fhe.secret<i16>> {
     %c256 = arith.constant 256 : index
