@@ -25,6 +25,7 @@ SecretType BatchedSecretType::getCorrespondingSecretType() const
 
 BatchedSecretType BatchedSecretType::get(::mlir::MLIRContext *context, ::mlir::Type plaintextType)
 {
+    assert(false && "This really should not be used!");
     return get(context, plaintextType, -24);
 }
 
@@ -288,9 +289,9 @@ void fhe::CombineOp::print(::mlir::OpAsmPrinter &printer)
     // operands when given as a "generic" triple of ValueRange, DictionaryAttr, RegionRange  instead of nicely
     // "packaged" inside the operation class.
     auto op = ConstOpAdaptor(operands, attributes, regions);
-    if (auto da = op.value().dyn_cast_or_null<DenseElementsAttr>())
+    if (DenseElementsAttr da = op.value().dyn_cast_or_null<DenseElementsAttr>())
     {
-        inferredReturnTypes.push_back(fhe::BatchedSecretType::get(context, da.getElementType()));
+        inferredReturnTypes.push_back(fhe::BatchedSecretType::get(context, da.getElementType(), da.getNumElements()));
     }
     else
     {

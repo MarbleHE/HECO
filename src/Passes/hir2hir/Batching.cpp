@@ -210,11 +210,24 @@ LogicalResult batchArithmeticOperation(IRRewriter &rewriter, MLIRContext *contex
                 }
                 else if (auto c_op = (*it).template getDefiningOp<fhe::ConstOp>())
                 {
-                    // Constant Ops don't take part in resolution?
-                    ShapedType shapedType = RankedTensorType::get({ 1 }, c_op.value().getType());
+                    Type resized_type = c_op.getType();
+                    if (auto bst = c_op.getType().template dyn_cast_or_null<fhe::BatchedSecretType>())
+                    {
+                        resized_type =
+                            fhe::BatchedSecretType::get(rewriter.getContext(), bst.getPlaintextType(), max_size);
+                    }
+                    else if (auto st = c_op.getType().template dyn_cast_or_null<fhe::SecretType>())
+                    {
+                        resized_type =
+                            fhe::BatchedSecretType::get(rewriter.getContext(), st.getPlaintextType(), max_size);
+                    }
+                    else
+                    {
+                        assert(false && "This should not be possible");
+                    }
+                    ShapedType shapedType = RankedTensorType::get({ max_size }, c_op.value().getType());
                     auto denseAttr = DenseElementsAttr::get(shapedType, ArrayRef<Attribute>(c_op.value()));
-                    auto new_cst = rewriter.template create<fhe::ConstOp>(
-                        c_op.getLoc(), fhe::BatchedSecretType::get(context, st.getPlaintextType()), denseAttr);
+                    auto new_cst = rewriter.template create<fhe::ConstOp>(c_op.getLoc(), resized_type, denseAttr);
                     rewriter.replaceOpWithIf(
                         c_op, { new_cst }, [&](OpOperand &operand) { return operand.getOwner() == new_op; });
                 }
