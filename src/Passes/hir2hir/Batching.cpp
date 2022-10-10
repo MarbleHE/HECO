@@ -250,50 +250,51 @@ LogicalResult batchArithmeticOperation(IRRewriter &rewriter, MLIRContext *contex
         rewriter.eraseOp(new_op);
         new_op = newer_op;
 
-        // SCALAR BATCHING: SEE IF WE CAN DO MAGIC :)
-        Value scalar = nullptr;
-        fhe::RotateOp rotate = nullptr;
-        // Check if we have the scalar +/*/- rotate form that we need
-        if (new_op.getNumOperands() == 2)
-        {
-            if (new_op.getOperand(0).getType().isIntOrIndexOrFloat())
-            {
-                scalar = new_op.getOperand(0);
-                rotate = new_op.getOperand(1).template getDefiningOp<fhe::RotateOp>();
-            }
-            else if (new_op.getOperand(1).getType().isIntOrIndexOrFloat())
-            {
-                scalar = new_op.getOperand(1);
-                rotate = new_op.getOperand(0).template getDefiningOp<fhe::RotateOp>();
-            }
-        }
-        if (scalar && rotate)
-        {
-            llvm::outs() << "Attempting scalar batching for:\n";
-            llvm::outs() << "\trotate: ";
-            rotate.print(llvm::outs());
-            llvm::outs() << "\n\tscalar: ";
-            scalar.print(llvm::outs());
-            llvm::outs() << "\n\ttarget_slot = " << target_slot << "\n";
+        // // SCALAR BATCHING: SEE IF WE CAN DO MAGIC :)
+        // Value scalar = nullptr;
+        // fhe::RotateOp rotate = nullptr;
+        // // Check if we have the scalar +/*/- rotate form that we need
+        // if (new_op.getNumOperands() == 2)
+        // {
+        //     if (new_op.getOperand(0).getType().isIntOrIndexOrFloat())
+        //     {
+        //         scalar = new_op.getOperand(0);
+        //         rotate = new_op.getOperand(1).template getDefiningOp<fhe::RotateOp>();
+        //     }
+        //     else if (new_op.getOperand(1).getType().isIntOrIndexOrFloat())
+        //     {
+        //         scalar = new_op.getOperand(1);
+        //         rotate = new_op.getOperand(0).template getDefiningOp<fhe::RotateOp>();
+        //     }
+        // }
+        // if (scalar && rotate)
+        // {
+        //     // llvm::outs() << "Attempting scalar batching for:\n";
+        //     // llvm::outs() << "\trotate: ";
+        //     // rotate.print(llvm::outs());
+        //     // llvm::outs() << "\n\tscalar: ";
+        //     // scalar.print(llvm::outs());
+        //     // llvm::outs() << "\n\ttarget_slot = " << target_slot << "\n";
+        //
+        //     // look up if we have an entry for rotate.vector already. If not, create an empty vector
+        //     auto x_map = map.find(rotate.x());
+        //     if (x_map == map.end())
+        //     {
+        //         // create a new tensor
+        //         rewriter.setInsertionPointAfter(new_op);
+        //         auto tensor = rewriter.create<linalg::InitTensorOp>(
+        //             scalar.getLoc(), ValueRange(), ArrayRef<int64_t>(rotate.getType().getSize()), scalar.getType());
+        //         auto index = rewriter.create<arith::ConstantOp>(
+        //             scalar.getLoc(), rewriter.getIndexAttr(rotate.i() - target_slot), rewriter.getIndexType());
+        //         auto insert = rewriter.create<tensor::InsertOp>(scalar.getLoc(), scalar, tensor, ValueRange({ index
+        //         })); map.insert({ rotate.x(), insert });
+        //     }
+        //     else
+        //     {
+        //         // TODO: THIS WON'T WORK :(
+        //     }
+        // }
 
-            // look up if we have an entry for rotate.vector already. If not, create an empty vector
-            auto x_map = map.find(rotate.x());
-            if (x_map == map.end())
-            {
-                // create a new tensor
-                rewriter.setInsertionPointAfter(new_op);
-                auto tensor = rewriter.create<linalg::InitTensorOp>(
-                    scalar.getLoc(), ValueRange(), ArrayRef<int64_t>(rotate.getType().getSize()), scalar.getType());
-                auto index = rewriter.create<arith::ConstantOp>(
-                    scalar.getLoc(), rewriter.getIndexAttr(rotate.i() - target_slot), rewriter.getIndexType());
-                auto insert = rewriter.create<tensor::InsertOp>(scalar.getLoc(), scalar, tensor, ValueRange({ index }));
-                map.insert({ rotate.x(), insert });
-            }
-            else
-            {
-                // TODO: THIS WON'T WORK :(
-            }
-        }
         // Now create a scalar again by creating an extract, preserving type constraints
         rewriter.setInsertionPointAfter(new_op);
         auto res_ex_op = rewriter.create<fhe::ExtractOp>(
