@@ -13,9 +13,9 @@ module  {
     }
 
     // Now sum only those of B that aren't duplicates of A 
-    %3 = affine.for %i = 0 to 4 iter_args(%cur_sum = %sum_a) -> (!fhe.secret<i16>) {
+    %sum = affine.for %i = 0 to 4 iter_args(%cur_sum = %sum_a) -> (!fhe.secret<i16>) {
         // check if a[i] is a dupe of b[j]
-        %4 = affine.for %j = 0 to 4 iter_args(%cur2 = %c1_si16) -> !fhe.secret<i16>{
+        %unique = affine.for %j = 0 to 4 iter_args(%cur_unique = %c1_si16) -> !fhe.secret<i16>{
             // compute a_id[i] == b_id[j]
             %equal =  affine.for %k = 0 to 2 iter_args(%cur_equal = %c1_si16) -> !fhe.secret<i16>{
                 %6 = tensor.extract %a_id[%i,%k] : tensor<4x2x!fhe.secret<i16>>
@@ -26,15 +26,29 @@ module  {
                 %11 = fhe.multiply(%10, %cur_equal) : (!fhe.secret<i16>, !fhe.secret<i16>) -> !fhe.secret<i16>
                 affine.yield %11 : !fhe.secret<i16>
             }
-            %12 = fhe.sub(%c1_si16, %equal) : (!fhe.secret<i16>, !fhe.secret<i16>) -> !fhe.secret<i16>
-            %13 = fhe.multiply(%cur2, %12) : (!fhe.secret<i16>, !fhe.secret<i16>) -> !fhe.secret<i16>
+            %nequal = fhe.sub(%c1_si16, %equal) : (!fhe.secret<i16>, !fhe.secret<i16>) -> !fhe.secret<i16>
+            %13 = fhe.multiply(%cur_unique, %nequal) : (!fhe.secret<i16>, !fhe.secret<i16>) -> !fhe.secret<i16>
             affine.yield %13 : !fhe.secret<i16>
         }   
         %14 = tensor.extract %b_data[%i] : tensor<4x!fhe.secret<i16>>
-        %15 = fhe.multiply(%4, %14) : (!fhe.secret<i16>, !fhe.secret<i16>) -> !fhe.secret<i16>
-        %16 = fhe.add(%cur1, %15) : (!fhe.secret<i16>, !fhe.secret<i16>) -> !fhe.secret<i16>
+        %15 = fhe.multiply(%14, %unique) : (!fhe.secret<i16>, !fhe.secret<i16>) -> !fhe.secret<i16>
+        %16 = fhe.add(%cur_sum, %15) : (!fhe.secret<i16>, !fhe.secret<i16>) -> !fhe.secret<i16>
         affine.yield %16 : !fhe.secret<i16>
     }
-    return %3 : !fhe.secret<i16>
+    return %sum : !fhe.secret<i16>
 }
 }
+
+
+// Original algorithm uses:
+// n rotations for sum A
+// 2*n*n*k rotations for all the xor extracts
+// 2*n*n*k mults for all the equal
+// n*n mults for the uniques
+// n rotations for the b[i] extracts
+// n multiplies for the unique * b[i]
+// ______________________________
+//   2*n*n*k + n rotations 
+// + 2*n*n*k + n*n + n mults 
+// => for n=128, k = 8, that is 278656 mults and 262272 rotations
+// assuming 10ms for each, it should take 1.5h
