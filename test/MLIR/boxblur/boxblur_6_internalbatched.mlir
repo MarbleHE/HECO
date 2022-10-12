@@ -13,4 +13,3 @@ module {
     return %8 : !fhe.batched_secret<64 x i16>
   }
 }
-
