@@ -51,7 +51,7 @@ def CKKS_Dialect : Dialect {
 // CKKS type definitions.
 //===----------------------------------------------------------------------===//
 
-def Secret : TypeDef<CKKS_Dialect, "Secret">  {
+def ScalarCipher : TypeDef<CKKS_Dialect, "ScalarCipher">  {
 
   // See https://mlir.llvm.org/docs/OpDefinitions/#type-definitions
   // for detailed information on how declartive type definitions work
@@ -59,10 +59,10 @@ def Secret : TypeDef<CKKS_Dialect, "Secret">  {
   let description = "A Type for Secrets (high-level abstraction of Ciphertexts encrypting single scalars)";
 
   // Types are written as "!<dialect_name>.<type_mnemonic>" in textal MLIR representation
-  let mnemonic = "secret";
+  let mnemonic = "scalar_cipher";
 
   // This summary is used, among other things, in type-related error messages
-  let summary = "Secret";
+  let summary = "scalar ciphertext";
 
   let parameters = (ins
       "Type":$plaintextType
@@ -73,19 +73,18 @@ def Secret : TypeDef<CKKS_Dialect, "Secret">  {
   let assemblyFormat = "`<` $plaintextType `>`";
 }
 
-
-def BatchedSecret : TypeDef<CKKS_Dialect, "BatchedSecret">  {
+def VectorCipher : TypeDef<CKKS_Dialect, "VectorCipher">  {
 
   // See https://mlir.llvm.org/docs/OpDefinitions/#type-definitions
   // for detailed information on how declartive type definitions work
 
-  let description = "A Type for Batched Secrets (high-level abstraction of Ciphertexts encrypting vectors of values)";
+  let description = "A Type for Secrets (high-level abstraction of Ciphertexts encrypting vectors of fixed point values)";
 
   // Types are written as "!<dialect_name>.<type_mnemonic>" in textal MLIR representation
-  let mnemonic = "batched_secret";
+  let mnemonic = "vector_cipher";
 
   // This summary is used, among other things, in type-related error messages
-  let summary = "Batched Secret";
+  let summary = "vector of ciphertexts";
 
   let parameters = (ins
       "Type":$plaintextType,
@@ -93,9 +92,9 @@ def BatchedSecret : TypeDef<CKKS_Dialect, "BatchedSecret">  {
   );
 
   let extraClassDeclaration = [{
-        SecretType getCorrespondingSecretType() const;
-        /// Sets size = -1
-        static BatchedSecretType get(::mlir::MLIRContext *context, ::mlir::Type plaintextType);
+        ScalarCipherType getCorrespondingScalarCipherType() const;
+        /// sets size = -1
+        static VectorCipherType get(::mlir::MLIRContext *context, ::mlir::Type plaintextType);
   }];
 
   // See https://mlir.llvm.org/docs/OpDefinitions/#declarative-assembly-format
@@ -143,7 +142,7 @@ def CKKS_MultiplyOp : CKKS_Op<"multiply", [Commutative, DeclareOpInterfaceMethod
   );
 
   let results = (outs
-    AnyTypeOf<[Secret,BatchedSecret]>:$output
+    AnyTypeOf<[ScalarCipher,VectorCipher]>:$output
   );
 
   let hasFolder = 1;
@@ -159,7 +158,7 @@ def CKKS_AddOp : CKKS_Op<"add", [Commutative, DeclareOpInterfaceMethods<InferTyp
   );
 
   let results = (outs
-    AnyTypeOf<[Secret,BatchedSecret]>:$output
+    AnyTypeOf<[ScalarCipher,VectorCipher]>:$output
   );
 
   let hasFolder = 1;
@@ -174,7 +173,7 @@ def CKKS_SubOp : CKKS_Op<"sub", [DeclareOpInterfaceMethods<InferTypeOpInterface>
   );
 
   let results = (outs
-    AnyTypeOf<[Secret,BatchedSecret]>:$output
+    AnyTypeOf<[ScalarCipher,VectorCipher]>:$output
   );
 
   let hasFolder = 1;
@@ -185,12 +184,12 @@ def CKKS_RotateOp : CKKS_Op<"rotate", [AllTypesMatch<["x","output"]>]> {
   let summary = "Rotate.";
 
   let arguments = (ins
-    BatchedSecret:$x,
+    VectorCipher:$x,
     SI32Attr:$i
   );
 
   let results = (outs
-    BatchedSecret:$output
+    VectorCipher:$output
   );
 
   let hasFolder = 1;
@@ -204,14 +203,44 @@ def CKKS_RelinearizeOp : CKKS_Op<"relinearize", [AllTypesMatch<["x", "output"]>]
   let summary = "Relinearization.";
 
   let arguments = (ins
-    AnyTypeOf<[Secret,BatchedSecret]>:$x
+    AnyTypeOf<[ScalarCipher,VectorCipher]>:$x
   );
 
   let results = (outs
-    AnyTypeOf<[Secret,BatchedSecret]>:$output
+    AnyTypeOf<[ScalarCipher,VectorCipher]>:$output
   );
 
 }
+
+def CKKS_RescaleOp : CKKS_Op<"modswitch", [AllTypesMatch<["x", "output"]>]> {
+
+  let summary = "rescale";
+
+  let arguments = (ins
+    AnyTypeOf<[ScalarCipher,VectorCipher]>:$x
+  );
+
+  let results = (outs
+    AnyTypeOf<[ScalarCipher,VectorCipher]>:$output
+  );
+
+}
+
+def CKKS_ModSwitchOp : CKKS_Op<"modswitch", [AllTypesMatch<["x", "output"]>]> {
+
+  let summary = "mod switch";
+
+  let arguments = (ins
+    AnyTypeOf<[ScalarCipher,VectorCipher]>:$x
+  );
+
+  let results = (outs
+    AnyTypeOf<[ScalarCipher,VectorCipher]>:$output
+  );
+
+}
+
+
 
 def CKKS_ConstOp : CKKS_Op<"constant", [
         ConstantLike,
@@ -229,7 +258,7 @@ def CKKS_ConstOp : CKKS_Op<"constant", [
   );
 
   let results = (outs
-     AnyTypeOf<[Secret,BatchedSecret]>:$result
+     AnyTypeOf<[ScalarCipher,VectorCipher]>:$result
   );
 
   let hasFolder = 1;
@@ -237,55 +266,6 @@ def CKKS_ConstOp : CKKS_Op<"constant", [
   let assemblyFormat = "attr-dict $value";
 }
 
-def CKKS_ExtractOp : CKKS_Op<"extract", [
-        TypesMatchWith<"result type matches element type of tensor",
-                    "vector", "result",
-                    "$_self.cast<BatchedSecretType>().getCorrespondingSecretType()">
-    ]> {
-
-  let summary = "element extraction operation (actually executing this under CKKS is highly inefficient)";
-
-  let arguments = (ins BatchedSecret:$vector, IndexAttr:$i);
-  let results = (outs Secret:$result);
-  let assemblyFormat = "$vector `[` $i `]` attr-dict `:` type($vector)";
-}
-
-def CKKS_InsertOp : CKKS_Op<"insert", [
-        AllTypesMatch<["dest", "result"]>,
-        TypesMatchWith<"scalar type matches element type of dest",
-                       "dest", "scalar",
-                       "$_self.cast<BatchedSecretType>().getCorrespondingSecretType()">
-    ]> {
-
-  let summary = "element insertion operation (actually executing this under CKKS is highly inefficient)";
-
-  let arguments = (ins Secret:$scalar,
-                       BatchedSecret:$dest,
-                       IndexAttr:$i);
-
-  let results = (outs BatchedSecret:$result);
-
-  let assemblyFormat = [{
-    $scalar `into` $dest `[` $i `]` attr-dict `:` type($dest)
-  }];
-
-  let hasCanonicalizeMethod = 1;
-}
-
-// Because we don't want the default assembly pattern from CKKS:OP, we have to inherit directly from OP for this one!
-def CKKS_CombineOp : Op<CKKS_Dialect, "combine", [NoSideEffect]> {
-
-  let summary = "combines elements from multiple vectors into one (executing under CKKS requires ptxt-mult with mask and additions)";
-
-  let arguments = (ins Variadic<BatchedSecret>:$vectors,
-                       ArrayAttr:$indices);
-  let results = (outs BatchedSecret:$result);
-
-  let hasCustomAssemblyFormat = 1;
-
-  let hasFolder = 1;
-
-}
 
 def CKKS_MaterializeOp: CKKS_Op<"materialize", []> {
   let summary = "No-op operation used to preserve consistency of type system during type conversion";
