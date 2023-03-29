@@ -1,5 +1,5 @@
-#ifndef ABC_CKKS_CKKS_TD_
-#define ABC_CKKS_CKKS_TD_
+#ifndef ABC_EVA_EVA_TD_
+#define ABC_EVA_EVA_TD_
 
 include "mlir/IR/OpBase.td"
 include "mlir/IR/AttrTypeBase.td"
@@ -14,66 +14,44 @@ include "mlir/IR/SymbolInterfaces.td"
 
 // This is a TableGen file, using ODS (https://mlir.llvm.org/docs/OpDefinitions/) to define a dialect, its types and its operations.
 // The add_mlir_dialect(..) call in CMakeLists.txt adds steps to  generate *.h.inc and *.cpp.inc files from this file.
-// These are included in CKKSDialect.h. Note that the generated files only ever exist in the cmake build folder (not commited to source control).
-// Additional custom function body definitions for advanced functionality are found in src/CKKSDialect.cpp
+// These are included in EVADialect.h. Note that the generated files only ever exist in the cmake build folder (not commited to source control).
+// Additional custom function body definitions for advanced functionality are found in src/EVADialect.cpp
 
 //===----------------------------------------------------------------------===//
-// CKKS dialect definition.
+// EVA dialect definition.
 //===----------------------------------------------------------------------===//
 
-def CKKS_Dialect : Dialect {
+def EVA_Dialect : Dialect {
 
     // This name will prefix all the dialect's operations in textual MLIR representation
     // i.e., operation names will appear as "<dialect_name>.<operation_mnemonic>"
-    let name = "ckks";
+    let name = "eva";
 
-    let summary = "CKKS Dialect.";
+    let summary = "EVA Dialect.";
 
     let description = [{
-        This dialect represents a common abstraction for CKKS operations.
+        This dialect represents a common abstraction for EVA operations.
     }];
 
-    let cppNamespace = "::heco::ckks";
+    let cppNamespace = "::heco::eva";
 
     // We set this bit to generate the declarations for the dialect's type parsing and printing hooks.
     let useDefaultTypePrinterParser = 1;
 }
 
 //===----------------------------------------------------------------------===//
-// CKKS trait definitions.
+// EVA trait definitions.
 //===----------------------------------------------------------------------===//
 
 //===----------------------------------------------------------------------===//
-// CKKS constraint definitions.
+// EVA constraint definitions.
 //===----------------------------------------------------------------------===//
 
 //===----------------------------------------------------------------------===//
-// CKKS type definitions.
+// EVA type definitions.
 //===----------------------------------------------------------------------===//
 
-def ScalarCipher : TypeDef<CKKS_Dialect, "ScalarCipher">  {
-
-  // See https://mlir.llvm.org/docs/OpDefinitions/#type-definitions
-  // for detailed information on how declartive type definitions work
-
-  let description = "A Type for Secrets (high-level abstraction of Ciphertexts encrypting single scalars)";
-
-  // Types are written as "!<dialect_name>.<type_mnemonic>" in textal MLIR representation
-  let mnemonic = "scalar_cipher";
-
-  // This summary is used, among other things, in type-related error messages
-  let summary = "scalar ciphertext";
-
-  let parameters = (ins
-      "Type":$plaintextType
-  );
-
-  // See https://mlir.llvm.org/docs/OpDefinitions/#declarative-assembly-format
-  // Which explains assemblyFormat for operations, but works for types, too:
-  let assemblyFormat = "`<` $plaintextType `>`";
-}
-
-def VectorCipher : TypeDef<CKKS_Dialect, "VectorCipher">  {
+def Cipher : TypeDef<EVA_Dialect, "Cipher">  {
 
   // See https://mlir.llvm.org/docs/OpDefinitions/#type-definitions
   // for detailed information on how declartive type definitions work
@@ -81,38 +59,59 @@ def VectorCipher : TypeDef<CKKS_Dialect, "VectorCipher">  {
   let description = "A Type for Secrets (high-level abstraction of Ciphertexts encrypting vectors of fixed point values)";
 
   // Types are written as "!<dialect_name>.<type_mnemonic>" in textal MLIR representation
-  let mnemonic = "vector_cipher";
+  let mnemonic = "cipher";
 
   // This summary is used, among other things, in type-related error messages
-  let summary = "vector of ciphertexts";
+  let summary = "batched ciphertext";
 
+  //TODO: add encryption parameters
   let parameters = (ins
-      "Type":$plaintextType,
-      "int":$size
+      "int":$size,
+      "int":$scale,
+      "int":$modulo
   );
-
-  let extraClassDeclaration = [{
-        ScalarCipherType getCorrespondingScalarCipherType() const;
-        /// sets size = -1
-        static VectorCipherType get(::mlir::MLIRContext *context, ::mlir::Type plaintextType);
-  }];
 
   // See https://mlir.llvm.org/docs/OpDefinitions/#declarative-assembly-format
   // Which explains assemblyFormat for operations, but works for types, too:
-  let assemblyFormat = "`<` $size `x` $plaintextType `>`";
+  let assemblyFormat = "`<` $size `x` `fixed_point` `:` $scale  `:` $modulo `>`";
 }
+
+def Vector : TypeDef<EVA_Dialect, "Vector">  {
+
+  // See https://mlir.llvm.org/docs/OpDefinitions/#type-definitions
+  // for detailed information on how declartive type definitions work
+
+  let description = "A Type for Vector (plaintext floating point values)";
+
+  // Types are written as "!<dialect_name>.<type_mnemonic>" in textal MLIR representation
+  let mnemonic = "vector";
+
+  // This summary is used, among other things, in type-related error messages
+  let summary = "plaintext vector";
+
+  let parameters = (ins
+      "int":$size
+  );
+
+
+  // See https://mlir.llvm.org/docs/OpDefinitions/#declarative-assembly-format
+  // Which explains assemblyFormat for operations, but works for types, too:
+  let assemblyFormat = "`<` $size `x` `floating_point` `>`";
+}
+
+// LEt us also use integer and float64 from builtin types
 
 
 //===----------------------------------------------------------------------===//
-// CKKS Operations
+// EVA Operations
 //===----------------------------------------------------------------------===//
 
 // This is a TableGen helper, it is more like a "template" than a "class"
 // in that the final C++ classes generated for the operations will not inherit from this
-// nor will there be a C++ class ckks::Op
-class CKKS_Op<string mnemonic, list<Trait> traits = []> :
+// nor will there be a C++ class eva::Op
+class EVA_Op<string mnemonic, list<Trait> traits = []> :
         // We specify the dialect, and add the "NoSideEffect" trait to all operations
-        Op<CKKS_Dialect, mnemonic, !listconcat(traits, [NoSideEffect])> {
+        Op<EVA_Dialect, mnemonic, !listconcat(traits, [NoSideEffect])> {
 
   // The assembly format for most operations is similar enough to allow us
   // to define a generic version here, which only a few operations override.
@@ -129,8 +128,8 @@ class CKKS_Op<string mnemonic, list<Trait> traits = []> :
 // (See https://github.com/llvm/llvm-project/blob/02b6fb218e44490f3ea1597e35df1b1b66c6b869/mlir/lib/TableGen/Operator.cpp#L40-L43 )
 // However, it is good practice to make it <DIALECT>. Similarily, the "Op" at the end is a convention, not a requirement.
 
-def CKKS_MultiplyOp : CKKS_Op<"multiply", [Commutative, DeclareOpInterfaceMethods<InferTypeOpInterface>]> {
-  // We add InferTypeOpInterface and define LogicalResult ckks::MultiplyOp::inferReturnTypes(...) in CKKSDialect.cpp
+def EVA_NegateOp : EVA_Op<"negate", []> {
+  // We add InferTypeOpInterface and define LogicalResult eva::MultiplyOp::inferReturnTypes(...) in EVADialect.cpp
   // This is necessary, because this operation returns a type that is different from all input types
   // By wrapping InferTypeOpInterface (https://mlir.llvm.org/docs/Interfaces/#utilizing-the-ods-framework)
   // in DeclareOpInterfaceMethods, we don't have to manually add "let extraClassDeclaration = ..."
@@ -138,58 +137,75 @@ def CKKS_MultiplyOp : CKKS_Op<"multiply", [Commutative, DeclareOpInterfaceMethod
   let summary = "Multiplication.";
 
   let arguments = (ins
-    Variadic<AnyType>:$x
+    Cipher:$input
   );
 
   let results = (outs
-    AnyTypeOf<[ScalarCipher,VectorCipher]>:$output
+    Cipher:$result
   );
 
   let hasFolder = 1;
 }
 
-def CKKS_AddOp : CKKS_Op<"add", [Commutative, DeclareOpInterfaceMethods<InferTypeOpInterface>]> {
+def EVA_MultiplyOp : EVA_Op<"multiply", [Commutative, DeclareOpInterfaceMethods<InferTypeOpInterface>]> {
+  // We add InferTypeOpInterface and define LogicalResult eva::MultiplyOp::inferReturnTypes(...) in EVADialect.cpp
+  // This is necessary, because this operation returns a type that is different from all input types
+  // By wrapping InferTypeOpInterface (https://mlir.llvm.org/docs/Interfaces/#utilizing-the-ods-framework)
+  // in DeclareOpInterfaceMethods, we don't have to manually add "let extraClassDeclaration = ..."
+
+  let summary = "Multiplication.";
+
+  let arguments = (ins
+    Cipher:$x,
+    AnyTypeOf<[Cipher, Vector]>:$y
+  );
+
+  let results = (outs
+    Cipher:$output
+  );
+
+}
+
+def EVA_AddOp : EVA_Op<"add", [Commutative, DeclareOpInterfaceMethods<InferTypeOpInterface>]> {
   // We specify that addition is commutative, which can enable optimizations down the line
   // Due to the variadic nature of this operation, we annoyingly can't use AllTypesMatch for the types
   let summary = "Addition.";
 
   let arguments = (ins
-    Variadic<AnyType>:$x
+    Cipher:$x,
+    AnyTypeOf<[Cipher, Vector]>:$y
   );
 
   let results = (outs
-    AnyTypeOf<[ScalarCipher,VectorCipher]>:$output
+    Cipher:$output
   );
-
-  let hasFolder = 1;
 
 }
 
-def CKKS_SubOp : CKKS_Op<"sub", [DeclareOpInterfaceMethods<InferTypeOpInterface>]> {
+def EVA_SubOp : EVA_Op<"sub", [DeclareOpInterfaceMethods<InferTypeOpInterface>]> {
   let summary = "Addition.";
 
   let arguments = (ins
-    Variadic<AnyType>:$x
+    Cipher:$x,
+    AnyTypeOf<[Cipher, Vector]>:$y
   );
 
   let results = (outs
-    AnyTypeOf<[ScalarCipher,VectorCipher]>:$output
+    Cipher:$output
   );
-
-  let hasFolder = 1;
 
 }
 
-def CKKS_RotateOp : CKKS_Op<"rotate", [AllTypesMatch<["x","output"]>]> {
+def EVA_RotateOp : EVA_Op<"rotate", [AllTypesMatch<["x","output"]>]> {
   let summary = "Rotate.";
 
   let arguments = (ins
-    VectorCipher:$x,
+    Cipher:$x,
     SI32Attr:$i
   );
 
   let results = (outs
-    VectorCipher:$output
+    Cipher:$output
   );
 
   let hasFolder = 1;
@@ -198,67 +214,68 @@ def CKKS_RotateOp : CKKS_Op<"rotate", [AllTypesMatch<["x","output"]>]> {
 
 }
 
-def CKKS_RelinearizeOp : CKKS_Op<"relinearize", [AllTypesMatch<["x", "output"]>]> {
+def EVA_RelinearizeOp : EVA_Op<"relinearize", [AllTypesMatch<["x", "output"]>]> {
 
   let summary = "Relinearization.";
 
   let arguments = (ins
-    AnyTypeOf<[ScalarCipher,VectorCipher]>:$x
+    Cipher:$x
   );
 
   let results = (outs
-    AnyTypeOf<[ScalarCipher,VectorCipher]>:$output
+    Cipher:$output
   );
 
 }
 
-def CKKS_RescaleOp : CKKS_Op<"modswitch", [AllTypesMatch<["x", "output"]>]> {
+def EVA_RescaleOp : EVA_Op<"modswitch", [AllTypesMatch<["x", "output"]>]> {
 
   let summary = "rescale";
 
   let arguments = (ins
-    AnyTypeOf<[ScalarCipher,VectorCipher]>:$x
+    Cipher:$x
   );
 
   let results = (outs
-    AnyTypeOf<[ScalarCipher,VectorCipher]>:$output
+    Cipher:$output
   );
 
 }
 
-def CKKS_ModSwitchOp : CKKS_Op<"modswitch", [AllTypesMatch<["x", "output"]>]> {
+def EVA_ModSwitchOp : EVA_Op<"modswitch", [AllTypesMatch<["x", "output"]>]> {
 
   let summary = "mod switch";
 
   let arguments = (ins
-    AnyTypeOf<[ScalarCipher,VectorCipher]>:$x
+    Cipher:$x
   );
 
   let results = (outs
-    AnyTypeOf<[ScalarCipher,VectorCipher]>:$output
+   Cipher:$output
   );
 
 }
 
 
 
-def CKKS_ConstOp : CKKS_Op<"constant", [
+def EVA_ConstOp : EVA_Op<"constant", [
         ConstantLike,
         InferTypeOpInterface,
         DeclareOpInterfaceMethods<InferTypeOpInterface>,
         DeclareOpInterfaceMethods<OpAsmOpInterface, ["getAsmResultNames"]>
     ]> {
 
-  let summary = "CKKS constant";
+  let summary = "EVA constant";
 
   let summary = "Cast a value into a secret containing the same type.";
 
+  // TODO: Somehow support array stuff better?
   let arguments = (ins
-    AnyAttr:$value
+    ArrayAttr:$value
   );
 
   let results = (outs
-     AnyTypeOf<[ScalarCipher,VectorCipher]>:$result
+     Cipher:$result
   );
 
   let hasFolder = 1;
@@ -267,7 +284,7 @@ def CKKS_ConstOp : CKKS_Op<"constant", [
 }
 
 
-def CKKS_MaterializeOp: CKKS_Op<"materialize", []> {
+def EVA_MaterializeOp: EVA_Op<"materialize", []> {
   let summary = "No-op operation used to preserve consistency of type system during type conversion";
 
   let arguments = (ins AnyType:$input);
@@ -277,4 +294,4 @@ def CKKS_MaterializeOp: CKKS_Op<"materialize", []> {
   let hasCanonicalizeMethod = 1;
 
 }
-#endif // ABC_CKKS_CKKS_TD_
+#endif // ABC_EVA_EVA_TD_
