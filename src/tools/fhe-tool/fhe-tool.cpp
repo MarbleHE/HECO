@@ -7,12 +7,14 @@
 //===----------------------------------------------------------------------===//
 
 #include <iostream>
+#include "heco/IR/EVA/EVADialect.h"
 #include "heco/IR/BGV/BGVDialect.h"
 #include "heco/IR/FHE/FHEDialect.h"
 #include "heco/IR/Poly/PolyDialect.h"
 #include "heco/Passes/bgv2emitc/LowerBGVToEmitC.h"
 #include "heco/Passes/bgv2llvm/LowerBGVToLLVM.h"
 #include "heco/Passes/fhe2bgv/LowerFHEToBGV.h"
+#include "heco/Passes/fhe2eva/LowerFHEToEVA.h"
 #include "heco/Passes/hir2hir/Batching.h"
 #include "heco/Passes/hir2hir/CombineSimplify.h"
 #include "heco/Passes/hir2hir/InternalOperandBatching.h"
@@ -38,6 +40,7 @@ using namespace mlir;
 using namespace heco;
 using namespace fhe;
 using namespace bgv;
+using namespace eva;
 using namespace poly;
 
 void pipelineBuilder(OpPassManager &manager)
@@ -79,6 +82,7 @@ int main(int argc, char **argv)
     mlir::DialectRegistry registry;
     registry.insert<FHEDialect>();
     registry.insert<BGVDialect>();
+    registry.insert<EVADialect>();
     registry.insert<PolyDialect>();
     registry.insert<func::FuncDialect>();
     registry.insert<AffineDialect>();
@@ -86,6 +90,7 @@ int main(int argc, char **argv)
     registry.insert<arith::ArithmeticDialect>();
     context.loadDialect<FHEDialect>();
     context.loadDialect<BGVDialect>();
+    context.loadDialect<EVADialect>();
     context.loadDialect<PolyDialect>();
     context.loadDialect<func::FuncDialect>();
     context.loadDialect<AffineDialect>();
@@ -111,6 +116,7 @@ int main(int argc, char **argv)
     PassRegistration<InternalOperandBatchingPass>();
     PassRegistration<ScalarBatchingPass>();
     PassRegistration<LowerFHEToBGVPass>();
+    PassRegistration<LowerFHEToEVAPass>();
     PassRegistration<LowerBGVToEmitCPass>();
     PassRegistration<LowerBGVToLLVMPass>();
 
