@@ -228,7 +228,7 @@ def EVA_RelinearizeOp : EVA_Op<"relinearize", [AllTypesMatch<["x", "output"]>]> 
 
 }
 
-def EVA_RescaleOp : EVA_Op<"modswitch", [AllTypesMatch<["x", "output"]>]> {
+def EVA_RescaleOp : EVA_Op<"rescale", [AllTypesMatch<["x", "output"]>]> {
 
   let summary = "rescale";
 
@@ -291,7 +291,8 @@ def EVA_MaterializeOp: EVA_Op<"materialize", []> {
   let results = (outs AnyType:$result);
 
   let hasFolder = 1;
-  let hasCanonicalizeMethod = 1;
+  // TODO: we don't need it for now
+  //let hasCanonicalizeMethod = 1;
 
 }
 #endif // ABC_EVA_EVA_TD_
