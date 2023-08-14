@@ -1,7 +1,7 @@
 #include <mlir/IR/Dialect.h>
 #include <mlir/InitAllDialects.h>
 #include <mlir/Tools/mlir-lsp-server/MlirLspServerMain.h>
-#include "heco/IR/BGV/BGVDialect.h"
+#include "heco/IR/BFV/BFVDialect.h"
 #include "heco/IR/FHE/FHEDialect.h"
 #include "heco/IR/Poly/PolyDialect.h"
 
@@ -12,7 +12,7 @@ int main(int argc, char **argv)
     // TODO (Q&A): Is there a nice way to automate registering dialects to our custom lsp server?
     //  (e.g., via some CMake and/or TableGen magic)
     registry.insert<heco::fhe::FHEDialect>();
-    registry.insert<heco::bgv::BGVDialect>();
+    registry.insert<heco::bfv::BFVDialect>();
     registry.insert<heco::poly::PolyDialect>();
     registerAllDialects(registry);
 

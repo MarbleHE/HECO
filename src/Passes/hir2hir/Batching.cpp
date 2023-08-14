@@ -16,8 +16,8 @@ using namespace heco;
 void BatchingPass::getDependentDialects(mlir::DialectRegistry &registry) const
 {
     registry.insert<
-        fhe::FHEDialect, mlir::AffineDialect, func::FuncDialect, mlir::scf::SCFDialect, mlir::tensor::TensorDialect,
-        mlir::linalg::LinalgDialect>();
+        fhe::FHEDialect, affine::AffineDialect, func::FuncDialect, scf::SCFDialect, tensor::TensorDialect,
+        linalg::LinalgDialect>();
 }
 
 typedef Value VectorValue;
@@ -56,10 +56,10 @@ LogicalResult batchArithmeticOperation(IRRewriter &rewriter, MLIRContext *contex
         //  users.pop();
         //  if (auto ex_op = dyn_cast_or_null<fhe::ExtractOp>(u)) {
         //    // We later want this value to be in slot i??
-        //    target_slot = ex_op.i().getLimitedValue(INT32_MAX);
+        //    target_slot = ex_op.getI().getLimitedValue(INT32_MAX);
         //    break;
         //  } else if (auto ins_op = dyn_cast_or_null<fhe::InsertOp>(u)) {
-        //    target_slot = ins_op.i().getLimitedValue(INT32_MAX);
+        //    target_slot = ins_op.getI().getLimitedValue(INT32_MAX);
         //    break;
         //  } else if (auto ret_op = dyn_cast_or_null<func::ReturnOp>(u)) {
         //    if (ret_op->getOperandTypes().front().template isa<fhe::SecretType>()) {
@@ -80,12 +80,12 @@ LogicalResult batchArithmeticOperation(IRRewriter &rewriter, MLIRContext *contex
             if (auto ex_op = dyn_cast_or_null<fhe::ExtractOp>(u))
             {
                 // We later want this value to be in slot i??
-                target_slot = ex_op.i().getLimitedValue(INT32_MAX);
+                target_slot = ex_op.getI().getLimitedValue(INT32_MAX);
                 break;
             }
             else if (auto ins_op = dyn_cast_or_null<fhe::InsertOp>(u))
             {
-                target_slot = ins_op.i().getLimitedValue(INT32_MAX);
+                target_slot = ins_op.getI().getLimitedValue(INT32_MAX);
                 break;
             }
             else if (auto ret_op = dyn_cast_or_null<func::ReturnOp>(u))
@@ -107,7 +107,7 @@ LogicalResult batchArithmeticOperation(IRRewriter &rewriter, MLIRContext *contex
                     // scalar-type input that needs to be converted
                     if (auto ex_op = (*it).template getDefiningOp<fhe::ExtractOp>())
                     {
-                        auto i = (int)ex_op.i().getLimitedValue();
+                        auto i = (int)ex_op.getI().getLimitedValue();
                         if (target_slot == -1)
                             target_slot = i;
                     }
@@ -142,7 +142,7 @@ LogicalResult batchArithmeticOperation(IRRewriter &rewriter, MLIRContext *contex
                 // scalar-type input that will be converted
                 if (fhe::ExtractOp ex_op = o.template getDefiningOp<fhe::ExtractOp>())
                 {
-                    auto bst = ex_op.vector().getType().dyn_cast_or_null<fhe::BatchedSecretType>();
+                    auto bst = ex_op.getVector().getType().dyn_cast_or_null<fhe::BatchedSecretType>();
                     assert(bst && "fhe.extract must be applied to BatchedSecret");
                     max_size = std::max(max_size, bst.getSize());
                 }
@@ -171,7 +171,7 @@ LogicalResult batchArithmeticOperation(IRRewriter &rewriter, MLIRContext *contex
                 if (fhe::ExtractOp ex_op = (*it).template getDefiningOp<fhe::ExtractOp>())
                 {
                     // Check if it needs to be resized
-                    if (auto bst = ex_op.vector().getType().template dyn_cast_or_null<fhe::BatchedSecretType>())
+                    if (auto bst = ex_op.getVector().getType().template dyn_cast_or_null<fhe::BatchedSecretType>())
                     {
                         if (bst.getSize() < max_size)
                         {
@@ -183,12 +183,12 @@ LogicalResult batchArithmeticOperation(IRRewriter &rewriter, MLIRContext *contex
                             auto cur_ip = rewriter.getInsertionPoint();
                             rewriter.setInsertionPoint(ex_op);
                             auto resized_o =
-                                rewriter.create<fhe::MaterializeOp>(ex_op.getLoc(), resized_type, ex_op.vector());
+                                rewriter.create<fhe::MaterializeOp>(ex_op.getLoc(), resized_type, ex_op.getVector());
                             // llvm::outs() << "\t Created new materialization op:\n\t";
                             // resized_o.print(llvm::outs());
                             // llvm::outs() << "\n";
                             auto resized_ex_op = rewriter.create<fhe::ExtractOp>(
-                                ex_op.getLoc(), ex_op.getType(), resized_o, ex_op.iAttr());
+                                ex_op.getLoc(), ex_op.getType(), resized_o, ex_op.getIAttr());
                             rewriter.replaceOpWithIf(ex_op, { resized_ex_op }, [&](OpOperand &operand) {
                                 return operand.getOwner() == new_op;
                             });
@@ -198,10 +198,10 @@ LogicalResult batchArithmeticOperation(IRRewriter &rewriter, MLIRContext *contex
                     }
 
                     // instead of using the extract op, issue a rotation instead
-                    auto i = (int)ex_op.i().getLimitedValue();
+                    auto i = (int)ex_op.getI().getLimitedValue();
                     if (target_slot == -1) // no other target slot defined yet, let's make this the target
                         target_slot = i; // we'll rotate by zero, but that's later canonicalized to no-op anyway
-                    auto rotate_op = rewriter.create<fhe::RotateOp>(ex_op.getLoc(), ex_op.vector(), target_slot - i);
+                    auto rotate_op = rewriter.create<fhe::RotateOp>(ex_op.getLoc(), ex_op.getVector(), target_slot - i);
                     rewriter.replaceOpWithIf(
                         ex_op, { rotate_op }, [&](OpOperand &operand) { return operand.getOwner() == new_op; });
                     // llvm::outs() << "rewritten operand in op: ";
@@ -225,8 +225,8 @@ LogicalResult batchArithmeticOperation(IRRewriter &rewriter, MLIRContext *contex
                     {
                         assert(false && "This should not be possible");
                     }
-                    ShapedType shapedType = RankedTensorType::get({ max_size }, c_op.value().getType());
-                    auto denseAttr = DenseElementsAttr::get(shapedType, ArrayRef<Attribute>(c_op.value()));
+                    ShapedType shapedType = RankedTensorType::get({ max_size }, c_op.getValue().getType());
+                    auto denseAttr = DenseElementsAttr::get(shapedType, ArrayRef<Attribute>(c_op.getValue()));
                     auto new_cst = rewriter.template create<fhe::ConstOp>(c_op.getLoc(), resized_type, denseAttr);
                     rewriter.replaceOpWithIf(
                         c_op, { new_cst }, [&](OpOperand &operand) { return operand.getOwner() == new_op; });
@@ -277,7 +277,7 @@ LogicalResult batchArithmeticOperation(IRRewriter &rewriter, MLIRContext *contex
         //     // llvm::outs() << "\n\ttarget_slot = " << target_slot << "\n";
         //
         //     // look up if we have an entry for rotate.vector already. If not, create an empty vector
-        //     auto x_map = map.find(rotate.x());
+        //     auto x_map = map.find(rotate.getX());
         //     if (x_map == map.end())
         //     {
         //         // create a new tensor
@@ -285,9 +285,9 @@ LogicalResult batchArithmeticOperation(IRRewriter &rewriter, MLIRContext *contex
         //         auto tensor = rewriter.create<linalg::InitTensorOp>(
         //             scalar.getLoc(), ValueRange(), ArrayRef<int64_t>(rotate.getType().getSize()), scalar.getType());
         //         auto index = rewriter.create<arith::ConstantOp>(
-        //             scalar.getLoc(), rewriter.getIndexAttr(rotate.i() - target_slot), rewriter.getIndexType());
+        //             scalar.getLoc(), rewriter.getIndexAttr(rotate.getI() - target_slot), rewriter.getIndexType());
         //         auto insert = rewriter.create<tensor::InsertOp>(scalar.getLoc(), scalar, tensor, ValueRange({ index
-        //         })); map.insert({ rotate.x(), insert });
+        //         })); map.insert({ rotate.getX(), insert });
         //     }
         //     else
         //     {

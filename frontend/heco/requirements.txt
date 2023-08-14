@@ -1,2 +1,0 @@
-frozenlist
-# xdsl but an inofficial version (see README and/or pyproject.toml)

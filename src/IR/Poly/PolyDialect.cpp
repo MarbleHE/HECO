@@ -1,7 +1,7 @@
 #include "heco/IR/Poly/PolyDialect.h"
 #include <iostream>
 #include "llvm/ADT/TypeSwitch.h"
-#include "mlir/Dialect/Arithmetic/IR/Arithmetic.h"
+#include "mlir/Dialect/Arith/IR/Arith.h"
 #include "mlir/IR/BuiltinTypes.h"
 #include "mlir/IR/DialectImplementation.h"
 #include "mlir/IR/TypeSupport.h"

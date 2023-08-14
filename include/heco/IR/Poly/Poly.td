@@ -93,8 +93,8 @@ def Polynomial : TypeDef<Poly_Dialect, "Polynomial">{
 // in that the final C++ classes generated for the operations will not inherit from this
 // nor will there be a C++ class poly::Op
 class Poly_Op<string mnemonic, list<Trait> traits = []> :
-        // We specify the dialect, and add the "NoSideEffect" trait to all operations
-        Op<Poly_Dialect, mnemonic, !listconcat(traits, [NoSideEffect])> {
+        // We specify the dialect, and add the "Pure" trait to all operations
+        Op<Poly_Dialect, mnemonic, !listconcat(traits, [Pure])> {
 
   // The assembly format for most operations is similar enough to allow us
   // to define a generic version here, which only a few operations override.

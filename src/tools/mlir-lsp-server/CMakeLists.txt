@@ -11,7 +11,7 @@ set(LIBS
         ${dialect_libs}
         ${conversion_libs}
         HECOFHEDialect
-        HECOBGVDialect
+        HECOBFVDialect
         HECOPolyDialect
         MLIRAnalysis
         MLIRDialect

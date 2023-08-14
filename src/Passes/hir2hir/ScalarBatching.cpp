@@ -12,8 +12,8 @@ using namespace heco;
 
 void ScalarBatchingPass::getDependentDialects(mlir::DialectRegistry &registry) const
 {
-    registry.insert<
-        fhe::FHEDialect, mlir::AffineDialect, func::FuncDialect, mlir::scf::SCFDialect, mlir::tensor::TensorDialect>();
+    registry
+        .insert<fhe::FHEDialect, affine::AffineDialect, func::FuncDialect, scf::SCFDialect, tensor::TensorDialect>();
 }
 
 template <typename OpType>

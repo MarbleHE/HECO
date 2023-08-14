@@ -22,6 +22,13 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
 endif()
 
 # #####################
+# Default to Release  #
+# #####################
+if (NOT CMAKE_BUILD_TYPE OR CMAKE_BUILD_TYPE STREQUAL "")
+    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "" FORCE)
+endif()
+
+# #####################
 # SEAL Configuration #
 # #####################
 find_package(SEAL 4.0 CONFIG) # sets SEAL_FOUND variable
@@ -93,7 +100,7 @@ include_directories(${HECO_INCLUDE_DIR})
 # Global flags aren't good CMAKE style, but these should work across pretty much all compilers
 set(CXXFLAGS "--coverage --pedantic-errors -Wall -WError")
 
-set(CMAKE_CXX_STANDARD 14 CACHE STRING "C++ standard to conform to")
+set(CMAKE_CXX_STANDARD 17 CACHE STRING "C++ standard to conform to")
 
 if(MSVC)
   message("Using MSVC")
@@ -198,4 +205,16 @@ if(HECO_STANDALONE_BUILD)
   message("Enabling HECO Tests")
   enable_testing()
   add_subdirectory(test)
+endif()
+
+
+# ###################################
+# # EVALUATION
+# #
+# added only if this is the root project
+# ###################################
+if(HECO_STANDALONE_BUILD)
+  message("Enabling HECO Evaluation")
+  enable_testing()
+  add_subdirectory(evaluation)
 endif()

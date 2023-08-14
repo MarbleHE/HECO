@@ -1,58 +1,29 @@
-```
-    __  __________________          __  ________   ______                      _ __         
-   / / / / ____/ ____/ __ \   _    / / / / ____/  / ____/___  ____ ___  ____  (_) /__  _____
-  / /_/ / __/ / /   / / / /  (_)  / /_/ / __/    / /   / __ \/ __ `__ \/ __ \/ / / _ \/ ___/
- / __  / /___/ /___/ /_/ /  _    / __  / /___   / /___/ /_/ / / / / / / /_/ / / /  __/ /    
-/_/ /_/_____/\____/\____/  (_)  /_/ /_/_____/   \____/\____/_/ /_/ /_/ .___/_/_/\___/_/     
-                                                                    /_/                     
-```
-[![Language](https://img.shields.io/badge/language-C++-blue.svg)](https://isocpp.org/)
-[![CPP_Standard](https://img.shields.io/badge/c%2B%2B-11/14/17-blue.svg)](https://en.wikipedia.org/wiki/C%2B%2B#Standardization)
-[![CI/CD](https://github.com/MarbleHE/ABC/workflows/build_run_tests/badge.svg)](https://github.com/MarbleHE/AST-Optimizer/actions)
-[![Documentation](https://img.shields.io/badge/docs-doxygen-blue.svg)](http://marblehe.github.io/HECO)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+> **Note**
+> Welcome to the Artifact Evaluation version of HECO!   
 
-HECO is an optimizing compiler for Fully Homomorphic Encryption (FHE). 
-FHE allows computation over encrypted data, but imposes a variety of cryptographic and engineering challenges.
-This compiler translates high-level program descriptions (expressed in Python) into the circuit-based programming paradigm of FHE.
-It does so while automating as many aspects of the development as possible,
-including automatically identifying and exploiting opportunities to use the powerful SIMD parallelism ("batching") present in many schemes. 
+HECO is an end-to-end compiler for FHE that takes high-level imperative programs and emits efficient and secure FHE implementations.
+Currently, it supports Ring-LWE based schemes [B](https://eprint.iacr.org/2012/078)/[FV](https://eprint.iacr.org/2012/144), [BFV](https://eprint.iacr.org/2011/277) and [CKKS](https://eprint.iacr.org/2016/421) which offer powerful SIMD-like operations and can _batch_ many thousands of values into a single vector-like ciphertext.
 
-- [Overview](#overview)
+- [About HECO](#about-heco)
 - [Using HECO](#using-heco)
-  - [Python Frontend](#python-frontend)
-    - [Frontend Installation](#frontend-installation)
-    - [Examples](#examples)
   - [Modes](#modes)
     - [Interactive Mode](#interactive-mode)
     - [Transpiler Mode](#transpiler-mode)
     - [Compiler Mode](#compiler-mode)
 - [Installation](#installation)
   - [Prerequisites](#prerequisites)
-    - [Packages](#packages)
-    - [Microsoft SEAL](#microsoft-seal)
-    - [Getting MLIR](#getting-mlir)
+  - [Dependencies](#dependencies)
   - [Building](#building)
-    - [Building the HECO Compiler](#building-the-heco-compiler)
-    - [Over CMake](#over-cmake)
-    - [Manual Installation](#manual-installation)
 - [Development](#development)
   - [Development Environemnt](#development-environemnt)
   - [Repository's Structure](#repositorys-structure)
   - [Development Tips for working with MLIR-based Projects](#development-tips-for-working-with-mlir-based-projects)
     - [Working with TableGen](#working-with-tablegen)
     - [Debugging MLIR](#debugging-mlir)
-    - [Frontend Installation](#frontend-installation-1)
-    - [Publishing PyPi Package](#publishing-pypi-package)
 
 
-# Overview
-HECO is an end-to-end compiler for FHE that takes high-level imperative programs and emits efficient and secure FHE implementations.
-Currently, it supports Ring-LWE based schemes [B](https://eprint.iacr.org/2012/078)/[FV](https://eprint.iacr.org/2012/144), [BGV](https://eprint.iacr.org/2011/277) and [CKKS](https://eprint.iacr.org/2016/421) which offer powerful [SIMD]-like operations and can _batch_ many thousands of values into a single vector-like ciphertext.
-
+# About HECO
 In FHE (and other advanced cryptographic techniques such as MPC or ZKP), developers must express their applications as an (arithmetic/binary) circuit. Translating a function *f* so that the resulting circuit can be evaluated efficiently is highly non-trivial and doing so manually requires significant expert knowledge. This is where FHE compilers like HECO come in, by automating the transformation of high-level programs into lower-level representations that can be evaluated using FHE.
-
-![program/function  f --> circuit representation --> FHE Schemes](docs/fhe_function_to_circuit.jpg)
 
 HECO's design and novel optimizations are described in the accompanying [paper](https://arxiv.org/abs/2202.01649).
 In contrast to previous compilers, HECO removes a significant burden from the developer by automating the task of translating a program to the restricted SIMD programming paradigm available in FHE. This can result in speeupds by over an order of magnitude (i.e., 10x or more) when compared to a naive baseline.
@@ -67,67 +38,24 @@ This is then lowered to Scheme-specific IR (SIR), with operations corresponding 
 ## Python Frontend
 
 > **Note**
-> HECO's Python Frontend is still undergoing a major revision. 
-> The current version only prints a (almost MLIR) version of the code. 
+> HECO's original Python Frontend has been deprecated in favour of using the upcoming [xDSL](https://github.com/xdslproject/xdsl) frontend system.
 > We are working on extending the frontend with more functionality and completing the toolchain, such that frontend programs can be executed again.
-
-### Frontend Installation
-
-The frontend requires Python version 3.10 or higher (check by running `python --version`).
-
-The frontend should be installed automatically with the pip package for HECO:
-```
-python -m pip install heco
-```
-
-Currently, the frontend relies on a branch of xDSL to which we added support for frontends. 
-This will eventually be merged to xDSL as a frontend generator.
-
-### Examples
-
-Examples of HECO can be found in the [examples](./examples/) folder.
-
-One of them, for computing the hamming distance of two encrypted vectors, is shown here: 
-```Python
-from xdsl.frontend import *
-from xdsl.frontend.dialects.builtin import *
-from heco.frontend.dialects.fhe import *
-
-p = FrontendProgram()
-
-secret_f64 = SecretType[f64]
-arg_type = BatchedSecretType[f64]
-
-with CodeContext(p):
-    def encryptedHammingDistance(x: arg_type,
-                                 y: arg_type) -> secret_f64:
-        sum: SecretType[f64] = SecretAttr(FloatAttr(0.0))
-
-        for idx in range(0, 4):
-            sum = sum + (x[idx] - y[idx]) * (x[idx] - y[idx])
-
-        return sum
-
-# XXX: the part below was not yet ported to the new frontend
-
-# Compiling FHE code
-context = SEAL.BGV.new(poly_mod_degree = 1024)
-f = p.compile(context = context)
-
-# Running FHE code
-x = [random.randrange(100) for _ in range(4)]
-y = [random.randrange(100) for _ in range(4)]
-x_enc = context.encrypt(x)
-y_enc = context.encrypt(y)
-s_enc = f(x_enc, y_enc)
-
-# Verifying Result
-s = context.decrypt(s_enc)
-assert s == sum([(x[i] - y[i])**2 for i in range(4)])
-``` 
 
 ## Modes
 HECO can be used in three distinct modes, each of which target different user needs.
+
+### Transpiler Mode
+In transpiler mode, HECO outputs a `*.cpp` source file that can be inspected or modified before compiling & linking against SEAL. HECO performs the usual high-level optimizations and lowers the program to the Scheme-specific Intermediate Representation (SIR). This is then lowered to the MLIR `emitC` Dialect, with FHE operations translated to function calls to a SEAL wrapper. The resulting IR is then translated into an actual `*.cpp` file.
+
+Transpiler mode is designed for advanced users that want to integrate the output into larger, existing software projects and/or modify the compiled code to better match their requirements.
+
+> In order to use the transpiler mode, you need to modify the default compilation pipeline (assuming you are starting with an `*.mlir` file containing HIR, this would be `heco --full-pass [filename_in].mlir`) in two ways. 
+>  1. Specify the scheme (and some core parameters) to be used by adding, e.g., `--fhe2bfv=poly_mod_degree=1024` and the corresponding lowering to emitC, e.g., `--bfv2emitc`, each followed by `--canonicalize` and `--cse` to clean up redundant operations introduced by the lowering.
+>  2. Translate to an actual `*.cpp` file by passing the output through  `emitc-translate` 
+>
+> A full example might look like this:  `heco --hir-pass --fhe2bfv=poly_mod_degree=1024 --canonicalize --cse --bfv2emitc --canonicalize --cse [filename_in].mlir > emitc-translate --mlir-to-cpp > [filename_out].cpp`.
+>
+> In order to compile the file, you will need to include [`wrapper.cpp.inc`](test/IR/BFV/wrapper.cpp.inc) into the file and link it against SEAL (see [`CMakeLists.txt`](test/IR/BFV/CMakeLists.txt)).  Note that the current wrapper assumes (for slightly obscure reasons) that the generated code is inside a function  `seal::Ciphertext trace()`. If this was not the case for your input, you might need to adjust the wrapper. By default, it currently serializes the result of the function into a file `trace.ctxt`.
 
 ### Interactive Mode
 In  interactive mode, an interpreter consumes both the input data and the intermediate representation. HECO performs the usual high-level optimizations and lowers the program to 
@@ -137,25 +65,7 @@ This is then executed by the interpreter by calling suitable functions in SEAL.
 This mode is designed to be easy-to-use and to allow rapid prototyping. While there is a performance overhead due to the interpreted nature of this mode, it should be insignificant in the context of FHE computations.
 
 > **Note**
-> Interactive mode will become available when the new Python frontend is released.
-
-### Transpiler Mode
-In transpiler mode, HECO outputs a `*.cpp` source file that can be inspected or modified before compiling & linking against SEAL. HECO performs the usual high-level optimizations and lowers the program to the Scheme-specific Intermediate Representation (SIR). This is then lowered to the MLIR `emitC` Dialect, with FHE operations translated to function calls to a SEAL wrapper. The resulting IR is then translated into an actual `*.cpp` file.
-
-Transpiler mode is designed for advanced users that want to integrate the output into larger, existing software projects and/or modify the compiled code to better match their requirements.
-
-<details>
-  <summary>Transpiler Mode Instructions</summary>
-
-> In order to use the transpiler mode, you need to modify the default compilation pipeline (assuming you are starting with an `*.mlir` file containing HIR, this would be `fhe-tool --full-pass [filename_in].mlir`) in two ways. 
->  1. Specify the scheme (and some core parameters) to be used by adding, e.g., `--fhe2bgv=poly_mod_degree=1024` and the corresponding lowering to emitC, e.g., `--bgv2emitc`, each followed by `--canonicalize` and `--cse` to clean up redundant operations introduced by the lowering.
->  2. Translate to an actual `*.cpp` file by passing the output through  `emitc-translate` 
->  # TODO: Our emitc-translate build is currently broken, use MLIR's `mlir-translate --mlir2cpp` instead, it's the exact same tool, just not bundled into this repo.
->
-> A full example might look like this:  `fhe-tool --hir-pass --fhe2bgv=poly_mod_degree=1024 --canonicalize --cse --bgv2emitc --canonicalize --cse [filename_in].mlir > emitc-translate > [filename_out].cpp`.
->
-> In order to compile the file, you will need to include [`wrapper.cpp.inc`](test/IR/BGV/wrapper.cpp.inc) into the file and link it against SEAL (see [`CMakeLists.txt`](test/IR/BGV/CMakeLists.txt)).  Note that the current wrapper assumes (for slightly obscure reasons) that the generated code is inside a function  `seal::Ciphertext trace()`. If this was not the case for your input, you might need to adjust the wrapper. By default, it currently serializes the result of the function into a file `trace.ctxt`.
-</details>
+> Interactive mode will become available when the new Python frontend is finished.
 
 ### Compiler Mode
 In compiler mode, HECO outputs an exectuable. In this mode, HECO performs the usual high-level optimizations and lowers the program to the Scheme-specific Intermediate Representation (SIR). This is then lowered to LLVM IR representing function calls to SEAL's C API, which is then compiled and linked against SEAL.
@@ -168,112 +78,130 @@ Compiler mode is designed primarily for situations where HECO-compiled applicati
 > Compiler mode is not yet implemented. If you require an executable, please use Transpiler mode and subsequent manual compilation & linking for now.
 
 # Installation
-HECO uses CMake as its build system for its C++ components and follows MLIR/LLVM conventions. Please see MLIR's [Getting Started](https://mlir.llvm.org/getting_started/) for more details.
+HECO uses CMake as its build system for its C++ components and follows MLIR/LLVM conventions.
 
 ## Prerequisites
 
-### Packages
-
-Install `cmake`, `doxygen`, and `clang`/`gcc`.
-`libboost` and `python3` dev tools are needed for pybind11.  
+Install `cmake` and `clang`. In addition, you will need `lld` and `ninja` in order to compile the MLIR framework.
 On Ubuntu, this can be done by running the following:
 
+```sh
+sudo apt-get install cmake clang lld ninja-build
 ```
-sudo apt-get install cmake doxygen clang libboost-all-dev python3-dev`
+
+If the version of `cmake` provided by your package manager is too old (<3.20), you might need to [manually install](https://askubuntu.com/a/976700) a newer version.
+
+
+## Dependencies
+
+HECO includes two dependencies (the [Microsoft SEAL](https://github.com/microsoft/seal) FHE library, and the [MLIR](https://mlir.llvm.org/) compiler framework) as git submodules, which you need to initialize after cloning:
+```sh
+git submodule update --init --recursive
 ```
 
-If the version of cmake provided by your package manager is too old, you might need to [manually install](https://askubuntu.com/a/976700) a newer version.
-
-
-### Microsoft SEAL
-HECO supports the [Microsoft SEAL](https://github.com/microsoft/SEAL) FHE library as a "backend" in its `interactive` mode.
-Please follow the SEAL instrutictions on how to build and install SEAL. Currently, the most recent version of SEAL with which this project was tested is `4.0.0`. 
-
-### Getting MLIR
-There seem to be no binary distrubtions of the MLIR framework, so you'll have to compile it from source following the [MLIR getting started guide](https://mlir.llvm.org/getting_started/).
-Please note that you will need to pull from [this fork](https://github.com/MarbleHE/llvm-project) instead of the original llvm repo,
-as this project relies on a series of fixes/workarounds that might not yet be upstreamed.
-You might want to install clang, lld, ninja and optionally [ccache](https://ccache.dev/).
-
+For normal use and evaluation, build MLIR and SEAL in Release Mode:  
 <details>
-  <summary>MLIR Installation/Build Commands</summary>
+<summary>Unfold this to see instructions for developer friendly installation instead!</summary>
 
-> The following is a reasonable start for a "Developer Friendly" installation of MLIR:
->  ```sh
->  git clone https://github.com/llvm/llvm-project.git
+>The following is a reasonable start for a "Developer Friendly" installation of MLIR.  
+>Note that it uses [`ccache`](https://ccache.dev/) in order to speed up follow-up compilations, and it is highly recommended to install and set up [`ccache`](https://ccache.dev/) as it can save significant time when re-compiling.
+>It also uses the [`mold`](https://github.com/rui314/mold) linker instead of `lld` as the former provides a significant performance boost.
+>```sh
+>mkdir dependencies/llvm-project/build
 >
->  mkdir llvm-project/build
+>cd dependencies/llvm-project/build
 >
->  cd llvm-project/build
+>cmake -G Ninja ../llvm \
+>  -DLLVM_ENABLE_PROJECTS=mlir \
+>  -DLLVM_BUILD_EXAMPLES=OFF \
+>  -DLLVM_TARGETS_TO_BUILD=X86 \
+>  -DCMAKE_BUILD_TYPE=Debug \
+>  -DLLVM_ENABLE_ASSERTIONS=ON \
+>  -DCMAKE_C_COMPILER=clang \
+>  -DCMAKE_CXX_COMPILER=clang++ \
+>  -DCMAKE_EXE_LINKER_FLAGS_INIT="-fuse-ld=mold" \
+>  -DCMAKE_MODULE_LINKER_FLAGS_INIT="-fuse-ld=mold" \
+>  -DCMAKE_SHARED_LINKER_FLAGS_INIT="-fuse-ld=mold" \
+>  -DLLVM_CCACHE_BUILD=ON \
+>  -DLLVM_INSTALL_UTILS=ON \
+>  -DMLIR_INCLUDE_INTEGRATION_TESTS=ON
 >
->  cmake -G Ninja ../llvm \
->    -DLLVM_ENABLE_PROJECTS=mlir \
->    -DLLVM_BUILD_EXAMPLES=OFF \
->    -DLLVM_TARGETS_TO_BUILD=X86 \
->    -DCMAKE_BUILD_TYPE=Debug \
->    -DLLVM_ENABLE_ASSERTIONS=ON \
->    -DCMAKE_C_COMPILER=clang \
->    -DCMAKE_CXX_COMPILER=clang++ \
->    -DLLVM_ENABLE_LLD=ON \
->    -DLLVM_CCACHE_BUILD=ON \
->    -DLLVM_INSTALL_UTILS=ON \
->    -DMLIR_INCLUDE_INTEGRATION_TESTS=ON
+>cmake --build . --target check-mlir
 >
->  cmake --build . --target check-mlir mlir-tblgen
->  ```
-
+>cd ../../seal
+>
+>cmake -S . -B build
+>cmake --build build
+>sudo cmake --install build
+>
+> cd ../..
+>```
 </details>
+
+
+```sh
+mkdir dependencies/llvm-project/build
+
+cd dependencies/llvm-project/build 
+
+cmake -G Ninja ../llvm \
+-DLLVM_ENABLE_PROJECTS=mlir \
+-DLLVM_BUILD_EXAMPLES=OFF \
+-DLLVM_TARGETS_TO_BUILD=X86 \
+-DCMAKE_BUILD_TYPE=Release \
+-DLLVM_ENABLE_ASSERTIONS=OFF \
+-DCMAKE_C_COMPILER=clang \
+-DCMAKE_CXX_COMPILER=clang++ \
+-DLLVM_ENABLE_LLD=ON \
+-DLLVM_CCACHE_BUILD=OFF \
+-DLLVM_INSTALL_UTILS=ON \
+-DMLIR_INCLUDE_INTEGRATION_TESTS=OFF
+
+cmake --build . --target check-mlir 
+
+cd ../../seal
+
+cmake -S . -B build
+cmake --build build
+sudo cmake --install build
+
+cd ../..
+```
 
 ## Building
 
-Use the following commands to build SEAL. For more build options, see the official [SEAL repo](https://github.com/Microsoft/SEAL#getting-started).
+This setup assumes that you have built MLIR as described above. To build, run the following from the repository root:
+<details>
+<summary>Unfold this to see instructions for developer friendly build instead!</summary>
 
-### Building the HECO Compiler
-This setup assumes that you have built LLVM and MLIR in `$BUILD_DIR` (path must be absolute). To build and launch the tests, run
+>
+>This builds in Debug mode and uses [`ccache`](https://ccache.dev/) and [`mold`](https://github.com/rui314/mold) to speed up compilation.
+>```sh
+>mkdir build
+>cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug \
+>    -DCMAKE_C_COMPILER=clang \
+>    -DCMAKE_CXX_COMPILER=clang++ \
+>    -DCMAKE_EXE_LINKER_FLAGS_INIT="-fuse-ld=mold" \
+>    -DCMAKE_MODULE_LINKER_FLAGS_INIT="-fuse-ld=mold" \
+>    -DCMAKE_SHARED_LINKER_FLAGS_INIT="-fuse-ld=mold" \
+>    -DMLIR_DIR=dependencies/llvm-project/build/lib/cmake/mlir
+>cmake --build build --target heco
+>```
+</details>
+
 ```sh
-mkdir build && cd build
-cmake -G Ninja .. -DMLIR_DIR=$BUILD_DIR/lib/cmake/mlir -DLLVM_EXTERNAL_LIT=$BUILD_DIR/bin/llvm-lit
-cmake --build . --target fhe-tool
+mkdir build
+cmake -S . -B build -DMLIR_DIR=dependencies/llvm-project/build/lib/cmake/mlir 
+cmake --build build --target heco
 ```
 To build the documentation from the TableGen description of the dialect operations, run
 ```sh
-cmake --build . --target mlir-doc
+cmake --build build --target mlir-doc
 ```
-**Note**: Make sure to pass `-DLLVM_INSTALL_UTILS=ON` when building LLVM with CMake in order to install `FileCheck` to the chosen installation prefix.
-
-Alternatively, you can open this folder in vscode. You will want to build the heco-c target for the command line compiler.
-
-### Over CMake
-The package installation is integrated in the CMakefile. You can run `make install` in `cmake-build-debug` and it will install `pyabc`.
-
-### Manual Installation
-To install `pyabc`, first build the CMake project. Next, run the following command (in this repo's root folder):
-```
-python3 -m pip install --user cmake-build-debug/python
-```
-(assuming your build folder is `cmake-build-debug`)
-
-For a developer installation, add the `-e` option to create a symlink to the freshly built files in `cmake-build-debug/python` instead of copying them.
-
-
-
-<!--
-1. Check that the CMake project runs through without any fatal error 
-
-    - Troubleshooting: first, try to use "Reload Cmake Project" and/or delete the `cmake-build-debug` folder to make a fresh new build.
-2. Run the "testing-all" target in CLion to execute all tests and make sure they pass on your local system. Some tests are disabled.
-    - Troubleshooting: if this entry is missing, do the following to add it:
-      - Open the dropdown menu with "Run/Debug Configurations"
-      - Select "Edit Configurations"
-      - Go to Google Tests
-      - Click "add new run configuration"
-      - Name it "testing-all"
-      - Select "resting-all" as target
-      - Save it and run (play symbol) the target
--->
-
+Alternatively, you can open this folder in vscode. You will want to build the `check-heco` target if you want to run the tests, or the `heco` target if you just want to build the command-line compiler.
 
 # Development
+ Please see MLIR's [Getting Started](https://mlir.llvm.org/getting_started/) for more details on MLIR/LLVM conventions.
 
 ## Development Environemnt
 [Visual Studio Code](https://code.visualstudio.com/) is recommended. Remember to set the `-DMLIR_DIR=...` and `-DLLVM_EXTERNAL_LIT=..` options in "Settings &rarr; Workspace &rarr; Cmake: Configure Args".
@@ -285,24 +213,19 @@ The [MLIR](https://marketplace.visualstudio.com/items?itemName=llvm-vs-code-exte
 The repository is organized as follow:
 
 ```
+cmake           - configuration files for the CMake build system
+dependencies    - git submodules for SEAL and MLIR
+docs            - additional files for Documentation
 include         – header (.h) and TableGen (.td) files
  └ IR             – contains the different dialect definitions
  └ Passes         – contains the definitions of the different transformations
-frontend        – the python frontend for HECO
 src             – source files (.cpp)
  └ IR             – implementations of additional dialect-specific functionality
  └ Passes         – implementations of the different transformations
  └ tools          – sources for the main commandline interface
-test            – unit tests
+test            – test & evaluation code
 ```
 
-There are also additional folders for various configuration/setup things:
-```
-.github         – Continous Integration/CI) setup files
-cmake           - Configuration files for the CMake build system
-docs            - Additional files for Documentation
-scripts         - Python scripts for plotting benchmark results
-```
 
 ## Development Tips for working with MLIR-based Projects
 [MLIR](https://mlir.llvm.org/) is an incredibly powerful tool and makes developing optimizing compilers significantly easier. 
@@ -335,31 +258,8 @@ In order to debug issues stemming from TableGen, it is important to realize that
 ### Debugging MLIR
 [//]: # (TODO Documentation: Write up how to get useful debug info out of passes)
 
-Useful command line options for `mlir-opt`/`fhe-tool` (see also [MLIR Debugging Tips](https://mlir.llvm.org/getting_started/Debugging/) and [IR Printing](https://mlir.llvm.org/docs/PassManagement/#ir-printing)):
+Useful command line options for `mlir-opt`/`heco` (see also [MLIR Debugging Tips](https://mlir.llvm.org/getting_started/Debugging/) and [IR Printing](https://mlir.llvm.org/docs/PassManagement/#ir-printing)):
  * `--mlir-print-ir-before-all` - Prints the IR before each pass
  * `--debug-only=dialect-conversion` - Prints some very useful information on passes and rules being applied
  * `--verify-each=0` - Turns off the verifier, allowing one to see what the (invalid) IR looks like
  * `--allow-unregistered-dialect` - Makes parser accept unknown operations (only works if they are in generic form!)
-
-### Frontend Installation
-
-For Development purposes, install a local package from the repository by running the following in the root of your clone of this repo:
-```
-python3.10 -m pip install -e frontend/heco
-```
-
-The following should be handled automatically when you install the `heco` package.
-However, should you need a manual local installation of the xDSL pip package from our branch of xDSL, do the following:
-```
-git clone git@github.com:xdslproject/xdsl.git
-cd xdsl
-git checkout frontend
-python -m pip install -e .
-```
-
-### Publishing PyPi Package
-
-To be able to publish a package, you need to register an account on PyPi and set up an [API token](https://pypi.org/help/#apitoken). Store the token and username in `$HOME/.pypirc`, as suggested during the token generation.
-
-To publish a new HECO PyPi package, run the script [frontend/update_pypi.sh](frontend/update_pypi.sh).
-This script follows the process from [the Python packaging guide](https://packaging.python.org/en/latest/tutorials/packaging-projects/).

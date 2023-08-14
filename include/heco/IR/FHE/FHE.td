@@ -8,6 +8,7 @@ include "mlir/Dialect/Shape/IR/ShapeBase.td"
 include "mlir/Interfaces/ControlFlowInterfaces.td"
 include "mlir/Interfaces/InferTypeOpInterface.td"
 include "mlir/Interfaces/SideEffectInterfaces.td"
+include "mlir/IR/BuiltinAttributeInterfaces.td"
 include "mlir/IR/OpAsmInterface.td"
 include "mlir/IR/SymbolInterfaces.td"
 
@@ -112,8 +113,8 @@ def BatchedSecret : TypeDef<FHE_Dialect, "BatchedSecret">  {
 // in that the final C++ classes generated for the operations will not inherit from this
 // nor will there be a C++ class fhe::Op
 class FHE_Op<string mnemonic, list<Trait> traits = []> :
-        // We specify the dialect, and add the "NoSideEffect" trait to all operations
-        Op<FHE_Dialect, mnemonic, !listconcat(traits, [NoSideEffect])> {
+        // We specify the dialect, and add the "Pure" trait to all operations
+        Op<FHE_Dialect, mnemonic, !listconcat(traits, [Pure])> {
 
   // The assembly format for most operations is similar enough to allow us
   // to define a generic version here, which only a few operations override.
@@ -225,7 +226,7 @@ def FHE_ConstOp : FHE_Op<"constant", [
   let summary = "Cast a value into a secret containing the same type.";
 
   let arguments = (ins
-    AnyAttr:$value
+    TypedAttrInterface:$value
   );
 
   let results = (outs
@@ -273,7 +274,7 @@ def FHE_InsertOp : FHE_Op<"insert", [
 }
 
 // Because we don't want the default assembly pattern from FHE:OP, we have to inherit directly from OP for this one!
-def FHE_CombineOp : Op<FHE_Dialect, "combine", [NoSideEffect]> {
+def FHE_CombineOp : Op<FHE_Dialect, "combine", [Pure]> {
 
   let summary = "combines elements from multiple vectors into one (executing under FHE requires ptxt-mult with mask and additions)";
 

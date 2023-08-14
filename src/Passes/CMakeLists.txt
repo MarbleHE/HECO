@@ -1,4 +1,5 @@
-add_subdirectory(fhe2bgv)
-add_subdirectory(bgv2emitc)
-add_subdirectory(bgv2llvm)
+add_subdirectory(fhe2bfv)
+add_subdirectory(bfv2emitc)
+add_subdirectory(bfv2llvm)
+add_subdirectory(fhe2emitc)
 add_subdirectory(hir2hir)

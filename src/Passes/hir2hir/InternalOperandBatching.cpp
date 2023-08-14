@@ -13,9 +13,8 @@ using namespace heco;
 
 void InternalOperandBatchingPass::getDependentDialects(mlir::DialectRegistry &registry) const
 {
-    registry.insert<
-        fhe::FHEDialect, mlir::AffineDialect, mlir::func::FuncDialect, mlir::scf::SCFDialect,
-        mlir::tensor::TensorDialect>();
+    registry
+        .insert<fhe::FHEDialect, affine::AffineDialect, func::FuncDialect, scf::SCFDialect, tensor::TensorDialect>();
 }
 
 template <typename OpType>
@@ -57,7 +56,7 @@ LogicalResult internalBatchArithmeticOperation(
             {
                 if (auto r_op = (*it).template getDefiningOp<fhe::RotateOp>())
                 {
-                    addOriginUse(r_op.x(), r_op.i() - target_slot, *it);
+                    addOriginUse(r_op.getX(), r_op.getI() - target_slot, *it);
                 }
                 else if (auto c_op = (*it).template getDefiningOp<fhe::ConstOp>())
                 {
@@ -161,7 +160,7 @@ LogicalResult internalBatchArithmeticOperation(
                 added = rewriter.template create<fhe::RotateOp>(op.getLoc(), added, last_slot - target_slot);
 
                 // Now we need to replace ONE OF the operands that have this origin with "added" and REMOVE THE REST
-                auto old_range = op.x();
+                auto old_range = op.getX();
                 SmallVector<Value> new_range = {};
                 for (auto v : old_range)
                 {
@@ -178,7 +177,7 @@ LogicalResult internalBatchArithmeticOperation(
 
                 // TODO: This is probably all kinds of unsafe if there are multiple origins that are being replaced
                 // in the same op
-                op.xMutable().assign(new_range);
+                op.getXMutable().assign(new_range);
 
                 // llvm::outs() << "current function: ";
                 // op->getParentOp()->print(llvm::outs());
@@ -207,7 +206,7 @@ void InternalOperandBatchingPass::runOnOperation()
         if (f.walk([&](Operation *op) {
                  if (fhe::ExtractOp ex_op = llvm::dyn_cast_or_null<fhe::ExtractOp>(op))
                  {
-                     auto target_slot = ex_op.i().getLimitedValue();
+                     auto target_slot = ex_op.getI().getLimitedValue();
 
                      for (auto o : ex_op.getOperation()->getOperands())
                      {

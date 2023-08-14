@@ -1,2 +1,1 @@
-add_subdirectory(evaluation)
-add_subdirectory(MLIR)
+add_subdirectory(filecheck)

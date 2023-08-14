@@ -13,7 +13,7 @@ using namespace heco;
 
 void CombineSimplifyPass::getDependentDialects(mlir::DialectRegistry &registry) const
 {
-    registry.insert<fhe::FHEDialect, mlir::AffineDialect, mlir::scf::SCFDialect, mlir::tensor::TensorDialect>();
+    registry.insert<fhe::FHEDialect, affine::AffineDialect, scf::SCFDialect, tensor::TensorDialect>();
 }
 
 // simplifies
@@ -25,18 +25,18 @@ void CombineSimplifyPass::getDependentDialects(mlir::DialectRegistry &registry) 
 void simplify(IRRewriter &rewriter, MLIRContext *context, fhe::CombineOp op)
 {
     // Basic sanity check, since we frequently iterate over both things at the same time
-    assert(op.vectors().size() == op.indices().size() && "combine op must have indices for each operand");
+    assert(op.getVectors().size() == op.getIndices().size() && "combine op must have indices for each operand");
 
     // op.getOperation()->getParentOp()->dump();
 
     if (op.getNumOperands() != 2)
         return;
 
-    if (auto ia = op.indices()[0].dyn_cast_or_null<IntegerAttr>())
+    if (auto ia = op.getIndices()[0].dyn_cast_or_null<IntegerAttr>())
     {
-        if (auto sa = op.indices()[1].dyn_cast<StringAttr>())
+        if (auto sa = op.getIndices()[1].dyn_cast<StringAttr>())
         {
-            if (auto c = op.vectors()[1].getDefiningOp<fhe::CombineOp>())
+            if (auto c = op.getVectors()[1].getDefiningOp<fhe::CombineOp>())
             {
                 // c->print(llvm::outs());
                 // llvm::outs() << "\n";
@@ -46,34 +46,34 @@ void simplify(IRRewriter &rewriter, MLIRContext *context, fhe::CombineOp op)
 
                 if (c.getNumOperands() == 2)
                 {
-                    if (c.indices()[1].dyn_cast<StringAttr>())
+                    if (c.getIndices()[1].dyn_cast<StringAttr>())
                     {
                         // now we have found simple pattern as desired
 
-                        if (auto cia = c.indices()[0].dyn_cast_or_null<IntegerAttr>())
+                        if (auto cia = c.getIndices()[0].dyn_cast_or_null<IntegerAttr>())
                         {
                             // range is just a single index so far
                             if (ia.getInt() == cia.getInt() + 1)
                             {
-                                if (op.vectors()[0] == c.vectors()[0])
+                                if (op.getVectors()[0] == c.getVectors()[0])
                                 {
                                     auto iaa = rewriter.getArrayAttr({ cia, ia });
                                     auto aa = rewriter.getArrayAttr({ iaa, sa });
                                     rewriter.setInsertionPoint(op);
                                     auto new_op = rewriter.replaceOpWithNewOp<fhe::CombineOp>(
-                                        op, op->getResultTypes(), c.vectors(), aa);
+                                        op, op->getResultTypes(), c.getVectors(), aa);
                                     // new_op->print(llvm::outs());
                                     // llvm::outs() << "\n";
                                     // llvm::outs().flush();
                                 }
                             }
                         }
-                        else if (auto iaa = c.indices()[0].dyn_cast_or_null<ArrayAttr>())
+                        else if (auto iaa = c.getIndices()[0].dyn_cast_or_null<ArrayAttr>())
                         {
                             // there's a range we might need to extend it
                             if (ia.getInt() == iaa[iaa.size() - 1].dyn_cast<IntegerAttr>().getInt() + 1)
                             {
-                                if (op.vectors()[0] == c.vectors()[0])
+                                if (op.getVectors()[0] == c.getVectors()[0])
                                 {
                                     SmallVector<Attribute> sv(iaa.getAsRange<IntegerAttr>());
                                     sv.push_back(ia);
@@ -81,7 +81,7 @@ void simplify(IRRewriter &rewriter, MLIRContext *context, fhe::CombineOp op)
                                     auto aa = rewriter.getArrayAttr({ iaa, sa });
                                     rewriter.setInsertionPoint(op);
                                     auto new_op = rewriter.replaceOpWithNewOp<fhe::CombineOp>(
-                                        op, op->getResultTypes(), c.vectors(), aa);
+                                        op, op->getResultTypes(), c.getVectors(), aa);
                                     // new_op->print(llvm::outs());
                                     // llvm::outs() << "\n";
                                     // llvm::outs().flush();
@@ -98,20 +98,20 @@ void simplify(IRRewriter &rewriter, MLIRContext *context, fhe::CombineOp op)
 //  // Build a list of all inputs %v:i, including (including all %v:i, %v:j coming from a single operand %v:[i,j,..])
 //  auto collectInputs =
 //      [](fhe::CombineOp op, std::vector<std::pair<Value, IntegerAttr>> &single_inputs, Value &remaining_inputs) {
-//        assert(op.vectors().size()==op.indices().size() && "combine op must have indices foreach operand");
+//        assert(op.getVectors().size()==op.getIndices().size() && "combine op must have indices foreach operand");
 //        assert(!remaining_inputs && "when calling collectInputs, remaining_inputs must be set to nullptr!");
-//        for (size_t i = 0; i < op.vectors().size(); ++i) {
-//          if (auto aa = op.indices()[i].dyn_cast_or_null<ArrayAttr>()) {
+//        for (size_t i = 0; i < op.getVectors().size(); ++i) {
+//          if (auto aa = op.getIndices()[i].dyn_cast_or_null<ArrayAttr>()) {
 //            // if it's a list of indices, they must all be actual indices!
 //            for (auto ia: aa.getAsRange<IntegerAttr>()) {
 //              assert(ia && "all indices in sublists in fhe.combine must be integers!");
-//              single_inputs.emplace_back(op.vectors()[i], ia);
+//              single_inputs.emplace_back(op.getVectors()[i], ia);
 //            }
-//          } else if (auto ia = op.indices()[i].dyn_cast_or_null<IntegerAttr>()) {
-//            single_inputs.emplace_back(op.vectors()[i], ia);
-//          } else if (auto sa = op.indices()[i].dyn_cast_or_null<StringAttr>()) {
+//          } else if (auto ia = op.getIndices()[i].dyn_cast_or_null<IntegerAttr>()) {
+//            single_inputs.emplace_back(op.getVectors()[i], ia);
+//          } else if (auto sa = op.getIndices()[i].dyn_cast_or_null<StringAttr>()) {
 //            assert(!remaining_inputs && "There can be only one 'rest' input in an fhe.combine op");
-//            remaining_inputs = op.vectors()[i];
+//            remaining_inputs = op.getVectors()[i];
 //          }
 //        }
 //      };

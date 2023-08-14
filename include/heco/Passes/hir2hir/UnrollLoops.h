@@ -4,7 +4,7 @@
 #include "mlir/Pass/Pass.h"
 #include "mlir/Transforms/DialectConversion.h"
 
-/// Aggressively tries to unroll all affine.for (AffineForOp) loops
+/// Aggressively tries to unroll all affine.for (affine::AffineForOp) loops
 struct UnrollLoopsPass : public mlir::PassWrapper<UnrollLoopsPass, mlir::OperationPass<mlir::ModuleOp>>
 {
     // This never generates new kinds of operations that weren't previously in the program => no dependent dialects

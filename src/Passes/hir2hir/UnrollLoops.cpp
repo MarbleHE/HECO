@@ -9,10 +9,10 @@
 
 using namespace mlir;
 
-void unrollLoop(AffineForOp &op, IRRewriter &rewriter)
+void unrollLoop(affine::AffineForOp &op, IRRewriter &rewriter)
 {
     // First, let's recursively unroll all nested loops:
-    for (auto nested_loop : op.getOps<AffineForOp>())
+    for (auto nested_loop : op.getOps<affine::AffineForOp>())
     {
         unrollLoop(nested_loop, rewriter);
     }
@@ -28,8 +28,8 @@ void unrollLoop(AffineForOp &op, IRRewriter &rewriter)
 void UnrollLoopsPass::runOnOperation()
 {
     ConversionTarget target(getContext());
-    target.addLegalDialect<AffineDialect, func::FuncDialect, tensor::TensorDialect, scf::SCFDialect>();
-    target.addIllegalOp<AffineForOp>();
+    target.addLegalDialect<affine::AffineDialect, func::FuncDialect, tensor::TensorDialect, scf::SCFDialect>();
+    target.addIllegalOp<affine::AffineForOp>();
 
     // Get the (default) block in the module's only region:
     auto &block = getOperation()->getRegion(0).getBlocks().front();
@@ -38,7 +38,7 @@ void UnrollLoopsPass::runOnOperation()
     // TODO: There's likely a much better way to do this that's not this kind of manual walk!
     for (auto f : llvm::make_early_inc_range(block.getOps<func::FuncOp>()))
     {
-        for (auto op : llvm::make_early_inc_range(f.getBody().getOps<AffineForOp>()))
+        for (auto op : llvm::make_early_inc_range(f.getBody().getOps<affine::AffineForOp>()))
         {
             unrollLoop(op, rewriter);
         }

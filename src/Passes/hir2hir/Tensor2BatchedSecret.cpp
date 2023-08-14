@@ -13,9 +13,8 @@ using namespace heco;
 
 void Tensor2BatchedSecretPass::getDependentDialects(mlir::DialectRegistry &registry) const
 {
-    registry.insert<
-        fhe::FHEDialect, mlir::AffineDialect, mlir::func::FuncDialect, mlir::scf::SCFDialect,
-        mlir::tensor::TensorDialect>();
+    registry
+        .insert<fhe::FHEDialect, affine::AffineDialect, func::FuncDialect, scf::SCFDialect, tensor::TensorDialect>();
 }
 
 class ExtractPattern final : public OpConversionPattern<tensor::ExtractOp>
@@ -27,7 +26,7 @@ public:
         tensor::ExtractOp op, typename tensor::ExtractOpAdaptor adaptor,
         ConversionPatternRewriter &rewriter) const override
     {
-        auto tt = op.tensor().getType().dyn_cast<TensorType>();
+        auto tt = op.getTensor().getType().dyn_cast<TensorType>();
         int size = tt.hasStaticShape() ? tt.getNumElements() : -1;
 
         auto dstType = this->getTypeConverter()->convertType(op.getType());
@@ -36,15 +35,15 @@ public:
         if (auto st = dstType.dyn_cast_or_null<fhe::SecretType>())
         {
             auto batchedSecret = typeConverter->materializeTargetConversion(
-                rewriter, op.tensor().getLoc(), fhe::BatchedSecretType::get(getContext(), st.getPlaintextType(), size),
-                op.tensor());
+                rewriter, op.getTensor().getLoc(),
+                fhe::BatchedSecretType::get(getContext(), st.getPlaintextType(), size), op.getTensor());
 
             int64_t new_index = 0;
             int64_t current_offset = 0;
             for (int i = tt.getShape().size() - 1; i >= 0; --i)
             {
                 // TODO: Support  tensor.extract indices format in fhe.extract,too
-                auto cOp = op.indices()[i].getDefiningOp<arith::ConstantOp>();
+                auto cOp = op.getIndices()[i].getDefiningOp<arith::ConstantOp>();
                 if (!cOp)
                 {
                     emitError(
@@ -87,9 +86,9 @@ public:
         if (auto bst = dstType.dyn_cast_or_null<fhe::BatchedSecretType>())
         {
             auto batchedSecret =
-                typeConverter->materializeTargetConversion(rewriter, op.dest().getLoc(), bst, op.dest());
+                typeConverter->materializeTargetConversion(rewriter, op.getDest().getLoc(), bst, op.getDest());
             // TODO: Support  tensor.extract indices format in fhe.extract,too
-            auto cOp = op.indices().front().getDefiningOp<arith::ConstantOp>();
+            auto cOp = op.getIndices().front().getDefiningOp<arith::ConstantOp>();
             if (!cOp)
             {
                 emitError(
@@ -98,7 +97,7 @@ public:
                 return failure();
             }
             auto indexAttr = cOp.getValue().cast<IntegerAttr>();
-            rewriter.template replaceOpWithNewOp<fhe::InsertOp>(op, dstType, op.scalar(), batchedSecret, indexAttr);
+            rewriter.template replaceOpWithNewOp<fhe::InsertOp>(op, dstType, op.getScalar(), batchedSecret, indexAttr);
         } // else do nothing
         return success();
     }
@@ -124,7 +123,7 @@ public:
         {
             rewriter.setInsertionPoint(op);
             auto batchedSecret =
-                typeConverter->materializeTargetConversion(rewriter, op.getLoc(), dstType, op.operands().front());
+                typeConverter->materializeTargetConversion(rewriter, op.getLoc(), dstType, op.getOperands().front());
             rewriter.template replaceOpWithNewOp<func::ReturnOp>(op, batchedSecret);
 
         } // else do nothing
@@ -178,18 +177,18 @@ void Tensor2BatchedSecretPass::runOnOperation()
         int size = t.hasStaticShape() ? t.getNumElements() : -1;
         if (auto st = t.getElementType().dyn_cast_or_null<fhe::SecretType>())
         {
-            return llvm::Optional<Type>(fhe::BatchedSecretType::get(&getContext(), st.getPlaintextType(), size));
+            return std::optional<Type>(fhe::BatchedSecretType::get(&getContext(), st.getPlaintextType(), size));
         }
         else
         {
-            return llvm::Optional<Type>(t);
+            return std::optional<Type>(t);
         }
     });
     type_converter.addConversion([](Type t) {
         if (t.isa<TensorType>())
-            return llvm::Optional<Type>(llvm::None);
+            return std::optional<Type>(std::nullopt);
         else
-            return llvm::Optional<Type>(t);
+            return std::optional<Type>(t);
     });
     type_converter.addTargetMaterialization([&](OpBuilder &builder, Type t, ValueRange vs, Location loc) {
         if (auto bst = t.dyn_cast_or_null<fhe::BatchedSecretType>())
@@ -198,9 +197,9 @@ void Tensor2BatchedSecretPass::runOnOperation()
             auto old_type = vs.front().getType();
             if (auto tt = old_type.dyn_cast_or_null<TensorType>())
                 if (auto st = tt.getElementType().dyn_cast_or_null<fhe::SecretType>())
-                    return llvm::Optional<Value>(builder.create<fhe::MaterializeOp>(loc, bst, vs));
+                    return std::optional<Value>(builder.create<fhe::MaterializeOp>(loc, bst, vs));
         }
-        return llvm::Optional<Value>(llvm::None); /* would instead like to signal NO other conversions can be tried */
+        return std::optional<Value>(std::nullopt); /* would instead like to signal NO other conversions can be tried */
     });
     type_converter.addArgumentMaterialization([&](OpBuilder &builder, Type t, ValueRange vs, Location loc) {
         if (auto bst = t.dyn_cast_or_null<fhe::BatchedSecretType>())
@@ -209,9 +208,9 @@ void Tensor2BatchedSecretPass::runOnOperation()
             auto old_type = vs.front().getType();
             if (auto tt = old_type.dyn_cast_or_null<TensorType>())
                 if (auto st = tt.getElementType().dyn_cast_or_null<fhe::SecretType>())
-                    return llvm::Optional<Value>(builder.create<fhe::MaterializeOp>(loc, bst, vs));
+                    return std::optional<Value>(builder.create<fhe::MaterializeOp>(loc, bst, vs));
         }
-        return llvm::Optional<Value>(llvm::None); /* would instead like to signal NO other conversions can be tried */
+        return std::optional<Value>(std::nullopt); /* would instead like to signal NO other conversions can be tried */
     });
     type_converter.addSourceMaterialization([&](OpBuilder &builder, Type t, ValueRange vs, Location loc) {
         if (auto tt = t.dyn_cast_or_null<TensorType>())
@@ -220,9 +219,9 @@ void Tensor2BatchedSecretPass::runOnOperation()
             auto old_type = vs.front().getType();
             if (auto bst = old_type.dyn_cast_or_null<fhe::BatchedSecretType>())
                 if (tt.getElementType() == bst.getCorrespondingSecretType())
-                    return llvm::Optional<Value>(builder.create<fhe::MaterializeOp>(loc, tt, vs));
+                    return std::optional<Value>(builder.create<fhe::MaterializeOp>(loc, tt, vs));
         }
-        return llvm::Optional<Value>(llvm::None); /* would instead like to signal NO other conversions can be tried */
+        return std::optional<Value>(std::nullopt); /* would instead like to signal NO other conversions can be tried */
     });
 
     ConversionTarget target(getContext());

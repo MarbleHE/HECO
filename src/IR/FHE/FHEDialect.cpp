@@ -1,6 +1,7 @@
 #include "heco/IR/FHE/FHEDialect.h"
 #include "llvm/ADT/SmallString.h"
 #include "llvm/ADT/TypeSwitch.h"
+#include "mlir/Dialect/Arith/IR/Arith.h"
 #include "mlir/Dialect/EmitC/IR/EmitC.h"
 #include "mlir/IR/DialectImplementation.h"
 #include "mlir/IR/PatternMatch.h"
@@ -130,9 +131,9 @@ void fhe::CombineOp::print(::mlir::OpAsmPrinter &printer)
 {
     auto &op = *this;
     printer << "(";
-    assert(op.vectors().size() == op.indices().size() && "combine op must have indices entry for each operand");
-    auto indices = op.indices().getValue();
-    for (size_t i = 0; i < op.vectors().size(); ++i)
+    assert(op.getVectors().size() == op.getIndices().size() && "combine op must have indices entry for each operand");
+    auto indices = op.getIndices().getValue();
+    for (size_t i = 0; i < op.getVectors().size(); ++i)
     {
         if (i != 0)
             printer << ", ";
@@ -182,18 +183,18 @@ void fhe::CombineOp::print(::mlir::OpAsmPrinter &printer)
 #include "heco/IR/FHE/FHE.cpp.inc"
 
 ::mlir::LogicalResult fhe::MultiplyOp::inferReturnTypes(
-    ::mlir::MLIRContext *context, ::llvm::Optional<::mlir::Location> location, ::mlir::ValueRange operands,
-    ::mlir::DictionaryAttr attributes, ::mlir::RegionRange regions,
+    ::mlir::MLIRContext *context, ::std::optional<::mlir::Location> location, ::mlir::ValueRange operands,
+    ::mlir::DictionaryAttr attributes, ::mlir::OpaqueProperties properties, ::mlir::RegionRange regions,
     ::llvm::SmallVectorImpl<::mlir::Type> &inferredReturnTypes)
 {
     // Operand adaptors (https://mlir.llvm.org/docs/OpDefinitions/#operand-adaptors) provide a convenient way to access
     // operands when given as a "generic" triple of ValueRange, DictionaryAttr, RegionRange  instead of nicely
     // "packaged" inside the operation class.
-    auto op = MultiplyOpAdaptor(operands, attributes, regions);
+    auto op = MultiplyOpAdaptor(operands, attributes, properties, regions);
     auto plaintextType = Type();
     int size = -173;
     bool batched = false;
-    for (auto operand : op.x())
+    for (auto operand : op.getX())
     {
         if (auto secret_type = operand.getType().dyn_cast_or_null<SecretType>())
         {
@@ -215,18 +216,18 @@ void fhe::CombineOp::print(::mlir::OpAsmPrinter &printer)
 }
 
 ::mlir::LogicalResult fhe::AddOp::inferReturnTypes(
-    ::mlir::MLIRContext *context, ::llvm::Optional<::mlir::Location> location, ::mlir::ValueRange operands,
-    ::mlir::DictionaryAttr attributes, ::mlir::RegionRange regions,
+    ::mlir::MLIRContext *context, ::std::optional<::mlir::Location> location, ::mlir::ValueRange operands,
+    ::mlir::DictionaryAttr attributes, ::mlir::OpaqueProperties properties, ::mlir::RegionRange regions,
     ::llvm::SmallVectorImpl<::mlir::Type> &inferredReturnTypes)
 {
     // Operand adaptors (https://mlir.llvm.org/docs/OpDefinitions/#operand-adaptors) provide a convenient way to access
     // operands when given as a "generic" triple of ValueRange, DictionaryAttr, RegionRange  instead of nicely
     // "packaged" inside the operation class.
-    auto op = AddOpAdaptor(operands, attributes, regions);
+    auto op = AddOpAdaptor(operands, attributes, properties, regions);
     auto plaintextType = Type();
     int size = -1;
     bool batched = false;
-    for (auto operand : op.x())
+    for (auto operand : op.getX())
     {
         if (auto secret_type = operand.getType().dyn_cast_or_null<SecretType>())
         {
@@ -248,18 +249,18 @@ void fhe::CombineOp::print(::mlir::OpAsmPrinter &printer)
 }
 
 ::mlir::LogicalResult fhe::SubOp::inferReturnTypes(
-    ::mlir::MLIRContext *context, ::llvm::Optional<::mlir::Location> location, ::mlir::ValueRange operands,
-    ::mlir::DictionaryAttr attributes, ::mlir::RegionRange regions,
+    ::mlir::MLIRContext *context, ::std::optional<::mlir::Location> location, ::mlir::ValueRange operands,
+    ::mlir::DictionaryAttr attributes, ::mlir::OpaqueProperties properties, ::mlir::RegionRange regions,
     ::llvm::SmallVectorImpl<::mlir::Type> &inferredReturnTypes)
 {
     // Operand adaptors (https://mlir.llvm.org/docs/OpDefinitions/#operand-adaptors) provide a convenient way to access
     // operands when given as a "generic" triple of ValueRange, DictionaryAttr, RegionRange  instead of nicely
     // "packaged" inside the operation class.
-    auto op = SubOpAdaptor(operands, attributes, regions);
+    auto op = SubOpAdaptor(operands, attributes, properties, regions);
     auto plaintextType = Type();
     int size = -1;
     bool batched = false;
-    for (auto operand : op.x())
+    for (auto operand : op.getX())
     {
         if (auto secret_type = operand.getType().dyn_cast_or_null<SecretType>())
         {
@@ -281,21 +282,21 @@ void fhe::CombineOp::print(::mlir::OpAsmPrinter &printer)
 }
 
 ::mlir::LogicalResult fhe::ConstOp::inferReturnTypes(
-    ::mlir::MLIRContext *context, ::llvm::Optional<::mlir::Location> location, ::mlir::ValueRange operands,
-    ::mlir::DictionaryAttr attributes, ::mlir::RegionRange regions,
+    ::mlir::MLIRContext *context, ::std::optional<::mlir::Location> location, ::mlir::ValueRange operands,
+    ::mlir::DictionaryAttr attributes, ::mlir::OpaqueProperties properties, ::mlir::RegionRange regions,
     ::llvm::SmallVectorImpl<::mlir::Type> &inferredReturnTypes)
 {
     // Operand adaptors (https://mlir.llvm.org/docs/OpDefinitions/#operand-adaptors) provide a convenient way to access
     // operands when given as a "generic" triple of ValueRange, DictionaryAttr, RegionRange  instead of nicely
     // "packaged" inside the operation class.
-    auto op = ConstOpAdaptor(operands, attributes, regions);
-    if (DenseElementsAttr da = op.value().dyn_cast_or_null<DenseElementsAttr>())
+    auto op = ConstOpAdaptor(operands, attributes, properties, regions);
+    if (DenseElementsAttr da = op.getValue().dyn_cast_or_null<DenseElementsAttr>())
     {
         inferredReturnTypes.push_back(fhe::BatchedSecretType::get(context, da.getElementType(), da.getNumElements()));
     }
     else
     {
-        inferredReturnTypes.push_back(fhe::SecretType::get(context, op.value().getType()));
+        inferredReturnTypes.push_back(fhe::SecretType::get(context, op.getValue().getType()));
     }
     return ::mlir::success();
 }
@@ -308,7 +309,7 @@ void fhe::ConstOp::getAsmResultNames(function_ref<void(Value, StringRef)> setNam
     else
         type = getType().cast<BatchedSecretType>().getPlaintextType();
 
-    if (auto intCst = value().dyn_cast<IntegerAttr>())
+    if (auto intCst = getValue().dyn_cast<IntegerAttr>())
     {
         auto intType = type.dyn_cast<IntegerType>();
 
@@ -324,7 +325,7 @@ void fhe::ConstOp::getAsmResultNames(function_ref<void(Value, StringRef)> setNam
             specialName << '_' << type;
         setNameFn(getResult(), specialName.str());
     }
-    else if (auto fCst = value().dyn_cast<FloatAttr>())
+    else if (auto fCst = getValue().dyn_cast<FloatAttr>())
     {
         auto floatType = type.dyn_cast<FloatType>();
         SmallString<32> specialNameBuffer;
@@ -334,7 +335,7 @@ void fhe::ConstOp::getAsmResultNames(function_ref<void(Value, StringRef)> setNam
             specialName << "_s" << type;
         setNameFn(getResult(), specialName.str());
     }
-    else if (auto arrayCst = value().dyn_cast<ArrayAttr>())
+    else if (auto arrayCst = getValue().dyn_cast<ArrayAttr>())
     {
         // TODO: Somehow support array stuff better?
         setNameFn(getResult(), "vcst");
@@ -357,11 +358,11 @@ void fhe::ConstOp::getAsmResultNames(function_ref<void(Value, StringRef)> setNam
     {
         if (ot.getValue() == "seal::Ciphertext")
         {
-            if (auto ex_op = op.input().getDefiningOp<fhe::ExtractOp>())
+            if (auto ex_op = op.getInput().getDefiningOp<fhe::ExtractOp>())
             {
-                if (auto original_source = ex_op.vector().getDefiningOp<MaterializeOp>())
+                if (auto original_source = ex_op.getVector().getDefiningOp<MaterializeOp>())
                 {
-                    if (auto original_ot = original_source.input().getType().dyn_cast_or_null<emitc::OpaqueType>())
+                    if (auto original_ot = original_source.getInput().getType().dyn_cast_or_null<emitc::OpaqueType>())
                     {
                         if (original_ot.getValue() == "seal::Ciphertext")
                         {
@@ -379,15 +380,15 @@ void fhe::ConstOp::getAsmResultNames(function_ref<void(Value, StringRef)> setNam
                             // Note that we don't actually remove the first materialize and ex_op,
                             // since they'll be canonicalized away anyway as dead code if appropriate
 
-                            // rewriter.replaceOpWithNewOp<emitc::CallOp>(op, ex_op.vector(),
-                            // -ex_op.i().getLimitedValue(INT32_MAX));
-                            auto i = (int)ex_op.i().getLimitedValue(INT32_MAX);
+                            // rewriter.replaceOpWithNewOp<emitc::CallOp>(op, ex_op.getVector(),
+                            // -ex_op.getI().getLimitedValue(INT32_MAX));
+                            auto i = (int)ex_op.getI().getLimitedValue(INT32_MAX);
                             auto a0 = rewriter.getIndexAttr(0); // stands for "first operand"
                             auto a1 = rewriter.getSI32IntegerAttr(i);
                             auto aa = ArrayAttr::get(rewriter.getContext(), { a0, a1 });
                             rewriter.replaceOpWithNewOp<emitc::CallOp>(
                                 op, TypeRange(ot), llvm::StringRef("evaluator.rotate"), aa, ArrayAttr(),
-                                ValueRange(original_source.input()));
+                                ValueRange(original_source.getInput()));
                             return success();
                         }
                     }
@@ -402,19 +403,19 @@ void fhe::ConstOp::getAsmResultNames(function_ref<void(Value, StringRef)> setNam
 // where [-i] means "everything except i"
 ::mlir::LogicalResult fhe::InsertOp::canonicalize(InsertOp op, ::mlir::PatternRewriter &rewriter)
 {
-    if (auto ex_op = op.scalar().getDefiningOp<fhe::ExtractOp>())
+    if (auto ex_op = op.getScalar().getDefiningOp<fhe::ExtractOp>())
     {
-        auto i = (int)ex_op.i().getLimitedValue(INT32_MAX);
-        auto v1 = ex_op.vector();
-        auto bst = ex_op.vector().getType().dyn_cast<fhe::BatchedSecretType>();
-        if (bst == op.dest().getType())
+        auto i = (int)ex_op.getI().getLimitedValue(INT32_MAX);
+        auto v1 = ex_op.getVector();
+        auto bst = ex_op.getVector().getType().dyn_cast<fhe::BatchedSecretType>();
+        if (bst == op.getDest().getType())
         {
-            if (i == (int)op.i().getLimitedValue(INT32_MAX))
+            if (i == (int)op.getI().getLimitedValue(INT32_MAX))
             {
                 auto ai = rewriter.getIndexAttr(i);
                 auto ami = rewriter.getStringAttr("all");
                 auto aa = rewriter.getArrayAttr({ ai, ami });
-                rewriter.replaceOpWithNewOp<fhe::CombineOp>(op, bst, ValueRange({ v1, op.dest() }), aa);
+                rewriter.replaceOpWithNewOp<fhe::CombineOp>(op, bst, ValueRange({ v1, op.getDest() }), aa);
                 return success();
             }
         }
@@ -423,22 +424,22 @@ void fhe::ConstOp::getAsmResultNames(function_ref<void(Value, StringRef)> setNam
 }
 
 /// simplifies a constant operation to its value (used for constant folding?)
-::mlir::OpFoldResult fhe::ConstOp::fold(::llvm::ArrayRef<::mlir::Attribute> operands)
+::mlir::OpFoldResult fhe::ConstOp::fold(FoldAdaptor adaptor)
 {
-    return value();
+    return getValue();
 }
 
 /// simplifies away materialization(materialization(x)) to x if the types work
-::mlir::OpFoldResult fhe::MaterializeOp::fold(::llvm::ArrayRef<::mlir::Attribute> operands)
+::mlir::OpFoldResult fhe::MaterializeOp::fold(FoldAdaptor adaptor)
 {
-    if (auto m_op = input().getDefiningOp<fhe::MaterializeOp>())
-        if (m_op.input().getType() == result().getType())
-            return m_op.input();
+    if (auto m_op = getInput().getDefiningOp<fhe::MaterializeOp>())
+        if (m_op.getInput().getType() == getResult().getType())
+            return m_op.getInput();
     return {};
 }
 
 /// simplifies rotate(x,0) to x
-::mlir::OpFoldResult fhe::RotateOp::fold(::llvm::ArrayRef<::mlir::Attribute> operands)
+::mlir::OpFoldResult fhe::RotateOp::fold(FoldAdaptor adaptor)
 {
     bool ASSUME_VECTOR_CYCLICAL = true; // TODO: introduce a flag for this!!
 
@@ -446,8 +447,8 @@ void fhe::ConstOp::getAsmResultNames(function_ref<void(Value, StringRef)> setNam
     //   %op = rotate(%x) by 0
     // to
     //   %x
-    if (i() == 0)
-        return x();
+    if (getI() == 0)
+        return getX();
 
     // Simplify
     //   %op = rotate(%x) by -1
@@ -456,16 +457,16 @@ void fhe::ConstOp::getAsmResultNames(function_ref<void(Value, StringRef)> setNam
     // I.e. we wrap around rotations to de-duplicate them for later phases
     if (ASSUME_VECTOR_CYCLICAL)
     {
-        if (i() < 0)
+        if (getI() < 0)
         { // wrap around to positive values. Technically not always the best choice,
             // but in theory we could always revert that again later when generating code,
             // when we know what rotations are natively available
-            auto vec_size = x().getType().dyn_cast<BatchedSecretType>().getSize();
+            auto vec_size = getX().getType().dyn_cast<BatchedSecretType>().getSize();
             if (vec_size > 0)
             {
                 getOperation()->setAttr(
                     "i",
-                    IntegerAttr::get(IntegerType::get(getContext(), 32, mlir::IntegerType::Signed), vec_size + i()));
+                    IntegerAttr::get(IntegerType::get(getContext(), 32, mlir::IntegerType::Signed), vec_size + getI()));
             }
         }
     }
@@ -473,16 +474,22 @@ void fhe::ConstOp::getAsmResultNames(function_ref<void(Value, StringRef)> setNam
     return {};
 }
 /// simplifies add(x,0) and add(x) to x
-::mlir::OpFoldResult fhe::AddOp::fold(::llvm::ArrayRef<::mlir::Attribute> operands)
+::mlir::OpFoldResult fhe::AddOp::fold(FoldAdaptor adaptor)
 {
+    // add(x) -> x
+    if (getX().size() == 1)
+        return getX().front();
+
+    // add(x,0,y) -> add(x,y)
     auto neutral_element = 0;
     SmallVector<Value> new_operands;
-    for (auto v : x())
+    bool any_change = false;
+    for (auto v : getX())
     {
         bool omit = false;
         if (auto cst_op = v.getDefiningOp<fhe::ConstOp>())
         {
-            if (auto dea = cst_op.value().dyn_cast_or_null<DenseElementsAttr>())
+            if (auto dea = cst_op.getValue().dyn_cast_or_null<DenseElementsAttr>())
             {
                 if (dea.size() == 1)
                 {
@@ -499,12 +506,12 @@ void fhe::ConstOp::getAsmResultNames(function_ref<void(Value, StringRef)> setNam
                     }
                 }
             }
-            else if (auto ia = cst_op.value().dyn_cast_or_null<IntegerAttr>())
+            else if (auto ia = cst_op.getValue().dyn_cast_or_null<IntegerAttr>())
             {
                 if (ia.getInt() == neutral_element)
                     omit = true;
             }
-            else if (auto fa = cst_op.value().dyn_cast_or_null<FloatAttr>())
+            else if (auto fa = cst_op.getValue().dyn_cast_or_null<FloatAttr>())
             {
                 if (fa.getValueAsDouble() == neutral_element)
                     omit = true;
@@ -512,24 +519,40 @@ void fhe::ConstOp::getAsmResultNames(function_ref<void(Value, StringRef)> setNam
         }
         if (!omit)
             new_operands.push_back(v);
+        else
+            any_change = true;
     }
-    xMutable().assign(new_operands);
-    if (x().size() > 1)
-        return getResult();
+
+    if (any_change)
+    {
+        getXMutable().assign(new_operands);
+        if (getX().size() > 1)
+            return getResult();
+        else
+            return getX().front();
+    }
     else
-        return x().front();
+    {
+        return nullptr;
+    }
 }
 /// simplifies sub(x,0) and sub(x) to x
-::mlir::OpFoldResult fhe::SubOp::fold(::llvm::ArrayRef<::mlir::Attribute> operands)
+::mlir::OpFoldResult fhe::SubOp::fold(FoldAdaptor adaptor)
 {
+    // sub(x) -> x
+    if (getX().size() == 1)
+        return getX().front();
+
+    // sub(x,0) -> x
     auto neutral_element = 0;
     SmallVector<Value> new_operands;
-    for (auto v : x())
+    bool any_change = false;
+    for (auto v : getX())
     {
         bool omit = false;
         if (auto cst_op = v.getDefiningOp<fhe::ConstOp>())
         {
-            if (auto dea = cst_op.value().dyn_cast_or_null<DenseElementsAttr>())
+            if (auto dea = cst_op.getValue().dyn_cast_or_null<DenseElementsAttr>())
             {
                 if (dea.size() == 1)
                 {
@@ -546,12 +569,12 @@ void fhe::ConstOp::getAsmResultNames(function_ref<void(Value, StringRef)> setNam
                     }
                 }
             }
-            else if (auto ia = cst_op.value().dyn_cast_or_null<IntegerAttr>())
+            else if (auto ia = cst_op.getValue().dyn_cast_or_null<IntegerAttr>())
             {
                 if (ia.getInt() == neutral_element)
                     omit = true;
             }
-            else if (auto fa = cst_op.value().dyn_cast_or_null<FloatAttr>())
+            else if (auto fa = cst_op.getValue().dyn_cast_or_null<FloatAttr>())
             {
                 if (fa.getValueAsDouble() == neutral_element)
                     omit = true;
@@ -559,78 +582,145 @@ void fhe::ConstOp::getAsmResultNames(function_ref<void(Value, StringRef)> setNam
         }
         if (!omit)
             new_operands.push_back(v);
+        else
+            any_change = true;
     }
-    xMutable().assign(new_operands);
-    if (x().size() > 1)
-        return getResult();
+
+    if (any_change)
+    {
+        getXMutable().assign(new_operands);
+        if (getX().size() > 1)
+            return getResult();
+        else
+            return getX().front();
+    }
     else
-        return x().front();
+        return nullptr;
 }
-/// simplifies mul(x,1) and mul(x) to x
-::mlir::OpFoldResult fhe::MultiplyOp::fold(::llvm::ArrayRef<::mlir::Attribute> operands)
+
+/// simplifies mul(x,1) and mul(x) to x, simplifies mul(x,0,y) to plaintext(0)
+::mlir::OpFoldResult fhe::MultiplyOp::fold(FoldAdaptor adaptor)
 {
-    auto neutral_element = 1;
+    // mul(x) --> x
+    if (getX().size() == 1)
+        return getX().front();
+
+    // mul(x,1,y) --> mul(x,y) and mul(x,0,y) --> 0
     SmallVector<Value> new_operands;
-    for (auto v : x())
+    bool any_change = false;
+    for (auto v : getX())
     {
         bool omit = false;
         if (auto cst_op = v.getDefiningOp<fhe::ConstOp>())
         {
-            if (auto dea = cst_op.value().dyn_cast_or_null<DenseElementsAttr>())
+            if (auto dea = cst_op.getValue().dyn_cast_or_null<DenseElementsAttr>())
             {
                 if (dea.size() == 1)
                 {
                     if (dea.getElementType().isIntOrIndex())
                     {
-                        if (dea.value_begin<const IntegerAttr>()->getInt() == neutral_element)
+                        if (dea.value_begin<const IntegerAttr>()->getInt() == 1)
                             omit = true;
+                        else if (dea.value_begin<const IntegerAttr>()->getInt() == 0)
+                        {
+                            return *dea.value_begin<const IntegerAttr>();
+                        }
                     }
                     else if (dea.getElementType().isIntOrFloat())
                     {
                         // because we've already excluded IntOrIndex, it must be float
-                        if (dea.value_begin<const FloatAttr>()->getValueAsDouble() == neutral_element)
+                        if (dea.value_begin<const FloatAttr>()->getValueAsDouble() == 1)
                             omit = true;
+                        else if (dea.value_begin<const FloatAttr>()->getValueAsDouble() == 0)
+                        {
+                            return *dea.value_begin<const FloatAttr>();
+                        }
                     }
                 }
             }
-            else if (auto ia = cst_op.value().dyn_cast_or_null<IntegerAttr>())
+            else if (auto ia = cst_op.getValue().dyn_cast_or_null<IntegerAttr>())
             {
-                if (ia.getInt() == neutral_element)
+                if (ia.getInt() == 1)
                     omit = true;
+                else if (ia.getInt() == 0)
+                {
+                    return ia;
+                }
             }
-            else if (auto fa = cst_op.value().dyn_cast_or_null<FloatAttr>())
+            else if (auto fa = cst_op.getValue().dyn_cast_or_null<FloatAttr>())
             {
-                if (fa.getValueAsDouble() == neutral_element)
+                if (fa.getValueAsDouble() == 1)
                     omit = true;
+                else if (fa.getValueAsDouble() == 0)
+                {
+                    return fa;
+                }
+            }
+        }
+        else if (auto acst_op = v.getDefiningOp<arith::ConstantIntOp>())
+        {
+            if (acst_op.value() == 1)
+                omit = true;
+            else if (acst_op.value() == 0)
+            {
+                return acst_op.getValueAttr();
+            }
+        }
+        else if (auto acst_op = v.getDefiningOp<arith::ConstantIndexOp>())
+        {
+            if (acst_op.value() == 1)
+                omit = true;
+            else if (acst_op.value() == 0)
+            {
+                return acst_op.getValueAttr();
+            }
+        }
+        else if (auto acst_op = v.getDefiningOp<arith::ConstantFloatOp>())
+        {
+            if (acst_op.value().convertToDouble() == 1)
+                omit = true;
+            else if (acst_op.value().convertToDouble() == 0)
+            {
+                return acst_op.getValueAttr();
             }
         }
         if (!omit)
             new_operands.push_back(v);
+        else
+            any_change = true;
     }
-    xMutable().assign(new_operands);
-    if (x().size() > 1)
-        return getResult();
+
+    if (any_change)
+    {
+        getXMutable().assign(new_operands);
+        if (getX().size() > 1)
+            return getResult();
+        else
+            return getX().front();
+    }
     else
-        return x().front();
+    {
+        return nullptr;
+    }
 }
 
 /// Removes a combine if one of the operands completely covers the vector already:
 ///  e.g., fhe.combine(%8[0:63], %1) : !fhe.batched_secret<64 x f64>
 ///  can be simplified to %0 assuming the types match
-::mlir::OpFoldResult fhe::CombineOp::fold(::llvm::ArrayRef<::mlir::Attribute> operands)
+::mlir::OpFoldResult fhe::CombineOp::fold(FoldAdaptor adaptor)
 {
-    for (size_t i = 0; i < vectors().size(); ++i)
+    for (size_t i = 0; i < getVectors().size(); ++i)
     {
         auto size = getType().dyn_cast<fhe::BatchedSecretType>().getSize();
-        auto v = vectors()[i];
+        auto v = getVectors()[i];
         if (v.getType().dyn_cast<fhe::BatchedSecretType>().getSize() == size)
             // Check if the indices for this one cover everything
-            if (auto iaa = indices()[i].dyn_cast_or_null<ArrayAttr>())
+            if (auto iaa = getIndices()[i].dyn_cast_or_null<ArrayAttr>())
                 // check it matches size
                 if ((int)iaa.size() == size)
                     // Check there first one is 0
                     if (iaa[0].dyn_cast<IntegerAttr>().getValue() == 0)
-                        return vectors()[i];
+                        return getVectors()[i];
     }
     return Value(); // Unsuccessful, could not fold
 }

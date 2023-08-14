@@ -1,0 +1,84 @@
+// RUN: heco --nary --canonicalize < %s | FileCheck %s
+module {
+  func.func private @encryptedEigenfaces(%arg0: tensor<4x!fhe.secret<i16>>, %arg1: tensor<4x4xi16>) -> tensor<4x!fhe.secret<i16>> {
+    %c3 = arith.constant 3 : index
+    %c2 = arith.constant 2 : index
+    %c1 = arith.constant 1 : index
+    %c0 = arith.constant 0 : index
+    %0 = linalg.init_tensor [4] : tensor<4x!fhe.secret<i16>>
+    %1 = tensor.extract %arg1[%c0, %c0] : tensor<4x4xi16>
+    %2 = arith.muli %1, %1 : i16
+    %3 = tensor.extract %arg0[%c0] : tensor<4x!fhe.secret<i16>>
+    %4 = fhe.multiply(%3, %3) : (!fhe.secret<i16>, !fhe.secret<i16>) -> !fhe.secret<i16>
+    %5 = fhe.sub(%2, %4) : (i16, !fhe.secret<i16>) -> !fhe.secret<i16>
+    %6 = tensor.extract %arg1[%c0, %c1] : tensor<4x4xi16>
+    %7 = arith.muli %6, %6 : i16
+    %8 = tensor.extract %arg0[%c1] : tensor<4x!fhe.secret<i16>>
+    %9 = fhe.multiply(%8, %8) : (!fhe.secret<i16>, !fhe.secret<i16>) -> !fhe.secret<i16>
+    %10 = fhe.sub(%7, %9) : (i16, !fhe.secret<i16>) -> !fhe.secret<i16>
+    %11 = fhe.add(%5, %10) : (!fhe.secret<i16>, !fhe.secret<i16>) -> !fhe.secret<i16>
+    %12 = tensor.extract %arg1[%c0, %c2] : tensor<4x4xi16>
+    %13 = arith.muli %12, %12 : i16
+    %14 = tensor.extract %arg0[%c2] : tensor<4x!fhe.secret<i16>>
+    %15 = fhe.multiply(%14, %14) : (!fhe.secret<i16>, !fhe.secret<i16>) -> !fhe.secret<i16>
+    %16 = fhe.sub(%13, %15) : (i16, !fhe.secret<i16>) -> !fhe.secret<i16>
+    %17 = fhe.add(%11, %16) : (!fhe.secret<i16>, !fhe.secret<i16>) -> !fhe.secret<i16>
+    %18 = tensor.extract %arg1[%c0, %c3] : tensor<4x4xi16>
+    %19 = arith.muli %18, %18 : i16
+    %20 = tensor.extract %arg0[%c3] : tensor<4x!fhe.secret<i16>>
+    %21 = fhe.multiply(%20, %20) : (!fhe.secret<i16>, !fhe.secret<i16>) -> !fhe.secret<i16>
+    %22 = fhe.sub(%19, %21) : (i16, !fhe.secret<i16>) -> !fhe.secret<i16>
+    %23 = fhe.add(%17, %22) : (!fhe.secret<i16>, !fhe.secret<i16>) -> !fhe.secret<i16>
+    %24 = tensor.insert %23 into %0[%c0] : tensor<4x!fhe.secret<i16>>
+    %25 = tensor.extract %arg1[%c1, %c0] : tensor<4x4xi16>
+    %26 = arith.muli %25, %25 : i16
+    %27 = fhe.sub(%26, %4) : (i16, !fhe.secret<i16>) -> !fhe.secret<i16>
+    %28 = tensor.extract %arg1[%c1, %c1] : tensor<4x4xi16>
+    %29 = arith.muli %28, %28 : i16
+    %30 = fhe.sub(%29, %9) : (i16, !fhe.secret<i16>) -> !fhe.secret<i16>
+    %31 = fhe.add(%27, %30) : (!fhe.secret<i16>, !fhe.secret<i16>) -> !fhe.secret<i16>
+    %32 = tensor.extract %arg1[%c1, %c2] : tensor<4x4xi16>
+    %33 = arith.muli %32, %32 : i16
+    %34 = fhe.sub(%33, %15) : (i16, !fhe.secret<i16>) -> !fhe.secret<i16>
+    %35 = fhe.add(%31, %34) : (!fhe.secret<i16>, !fhe.secret<i16>) -> !fhe.secret<i16>
+    %36 = tensor.extract %arg1[%c1, %c3] : tensor<4x4xi16>
+    %37 = arith.muli %36, %36 : i16
+    %38 = fhe.sub(%37, %21) : (i16, !fhe.secret<i16>) -> !fhe.secret<i16>
+    %39 = fhe.add(%35, %38) : (!fhe.secret<i16>, !fhe.secret<i16>) -> !fhe.secret<i16>
+    %40 = tensor.insert %39 into %24[%c1] : tensor<4x!fhe.secret<i16>>
+    %41 = tensor.extract %arg1[%c2, %c0] : tensor<4x4xi16>
+    %42 = arith.muli %41, %41 : i16
+    %43 = fhe.sub(%42, %4) : (i16, !fhe.secret<i16>) -> !fhe.secret<i16>
+    %44 = tensor.extract %arg1[%c2, %c1] : tensor<4x4xi16>
+    %45 = arith.muli %44, %44 : i16
+    %46 = fhe.sub(%45, %9) : (i16, !fhe.secret<i16>) -> !fhe.secret<i16>
+    %47 = fhe.add(%43, %46) : (!fhe.secret<i16>, !fhe.secret<i16>) -> !fhe.secret<i16>
+    %48 = tensor.extract %arg1[%c2, %c2] : tensor<4x4xi16>
+    %49 = arith.muli %48, %48 : i16
+    %50 = fhe.sub(%49, %15) : (i16, !fhe.secret<i16>) -> !fhe.secret<i16>
+    %51 = fhe.add(%47, %50) : (!fhe.secret<i16>, !fhe.secret<i16>) -> !fhe.secret<i16>
+    %52 = tensor.extract %arg1[%c2, %c3] : tensor<4x4xi16>
+    %53 = arith.muli %52, %52 : i16
+    %54 = fhe.sub(%53, %21) : (i16, !fhe.secret<i16>) -> !fhe.secret<i16>
+    %55 = fhe.add(%51, %54) : (!fhe.secret<i16>, !fhe.secret<i16>) -> !fhe.secret<i16>
+    %56 = tensor.insert %55 into %40[%c2] : tensor<4x!fhe.secret<i16>>
+    %57 = tensor.extract %arg1[%c3, %c0] : tensor<4x4xi16>
+    %58 = arith.muli %57, %57 : i16
+    %59 = fhe.sub(%58, %4) : (i16, !fhe.secret<i16>) -> !fhe.secret<i16>
+    %60 = tensor.extract %arg1[%c3, %c1] : tensor<4x4xi16>
+    %61 = arith.muli %60, %60 : i16
+    %62 = fhe.sub(%61, %9) : (i16, !fhe.secret<i16>) -> !fhe.secret<i16>
+    %63 = fhe.add(%59, %62) : (!fhe.secret<i16>, !fhe.secret<i16>) -> !fhe.secret<i16>
+    %64 = tensor.extract %arg1[%c3, %c2] : tensor<4x4xi16>
+    %65 = arith.muli %64, %64 : i16
+    %66 = fhe.sub(%65, %15) : (i16, !fhe.secret<i16>) -> !fhe.secret<i16>
+    %67 = fhe.add(%63, %66) : (!fhe.secret<i16>, !fhe.secret<i16>) -> !fhe.secret<i16>
+    %68 = tensor.extract %arg1[%c3, %c3] : tensor<4x4xi16>
+    %69 = arith.muli %68, %68 : i16
+    %70 = fhe.sub(%69, %21) : (i16, !fhe.secret<i16>) -> !fhe.secret<i16>
+    %71 = fhe.add(%67, %70) : (!fhe.secret<i16>, !fhe.secret<i16>) -> !fhe.secret<i16>
+    %72 = tensor.insert %71 into %56[%c3] : tensor<4x!fhe.secret<i16>>
+    return %72 : tensor<4x!fhe.secret<i16>>
+  }
+}
+
