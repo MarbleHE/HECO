@@ -2,7 +2,7 @@
 > Welcome to the Artifact Evaluation version of HECO!   
 
 HECO is an end-to-end compiler for FHE that takes high-level imperative programs and emits efficient and secure FHE implementations.
-Currently, it supports Ring-LWE based schemes [B](https://eprint.iacr.org/2012/078)/[FV](https://eprint.iacr.org/2012/144), [BFV](https://eprint.iacr.org/2011/277) and [CKKS](https://eprint.iacr.org/2016/421) which offer powerful SIMD-like operations and can _batch_ many thousands of values into a single vector-like ciphertext.
+Currently, it supports Ring-LWE based schemes [B](https://eprint.iacr.org/2012/078)/[FV](https://eprint.iacr.org/2012/144), [BGV](https://eprint.iacr.org/2011/277) and [CKKS](https://eprint.iacr.org/2016/421) which offer powerful SIMD-like operations and can _batch_ many thousands of values into a single vector-like ciphertext.
 
 - [About HECO](#about-heco)
 - [Using HECO](#using-heco)
