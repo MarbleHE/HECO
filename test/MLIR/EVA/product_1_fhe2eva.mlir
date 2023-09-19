@@ -1,6 +1,6 @@
 //RUN:  fhe-tool -fhe2eva --canonicalize < %s | FileCheck %s
 module  {
-  func.func private @encryptedHammingDistance(%arg0: !fhe.batched_secret<4 x f64>, %arg1: !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64> {
+  func.func private @encryptedPoly(%arg0: !fhe.batched_secret<4 x f64>, %arg1: !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64> {
     %0 = fhe.multiply(%arg0, %arg0) : (!fhe.batched_secret<4 x f64>, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
     %1 = fhe.multiply(%0, %arg0) : (!fhe.batched_secret<4 x f64>, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
     %2 = fhe.multiply(%arg1, %arg1) : (!fhe.batched_secret<4 x f64>, !fhe.batched_secret<4 x f64>) -> !fhe.batched_secret<4 x f64>
@@ -10,7 +10,7 @@ module  {
 }
 
 // CHECK: module {
-// CHECK:   func.func private @encryptedHammingDistance(%arg0: !eva.cipher<4 x fixed_point : -1 : -1>, %arg1: !eva.cipher<4 x fixed_point : -1 : -1>) -> !eva.cipher<4 x fixed_point : -1 : -1> {
+// CHECK:   func.func private @encryptedPoly(%arg0: !eva.cipher<4 x fixed_point : -1 : -1>, %arg1: !eva.cipher<4 x fixed_point : -1 : -1>) -> !eva.cipher<4 x fixed_point : -1 : -1> {
 // CHECK:     %0 = eva.multiply(%arg0, %arg0) : (!eva.cipher<4 x fixed_point : -1 : -1>, !eva.cipher<4 x fixed_point : -1 : -1>) -> !eva.cipher<4 x fixed_point : -1 : -1>
 // CHECK:     %1 = eva.multiply(%0, %arg0) : (!eva.cipher<4 x fixed_point : -1 : -1>, !eva.cipher<4 x fixed_point : -1 : -1>) -> !eva.cipher<4 x fixed_point : -1 : -1>
 // CHECK:     %2 = eva.multiply(%arg1, %arg1) : (!eva.cipher<4 x fixed_point : -1 : -1>, !eva.cipher<4 x fixed_point : -1 : -1>) -> !eva.cipher<4 x fixed_point : -1 : -1>
