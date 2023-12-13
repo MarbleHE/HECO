@@ -26,4 +26,6 @@
 #define GET_OP_CLASSES
 #include "heco/IR/EVA/EVA.h.inc"
 
+#include "heco/IR/EVA/EVAAnalyses.h"
+
 #endif // HECO_IR_EVA_EVADIALECT_H
