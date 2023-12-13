@@ -1,3 +1,4 @@
+add_subdirectory(evarelinearize)
 add_subdirectory(evamatchscale)
 add_subdirectory(evalazymodswitch)
 add_subdirectory(evametadata)

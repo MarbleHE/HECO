@@ -11,6 +11,7 @@
 #include "heco/IR/EVA/EVADialect.h"
 #include "heco/IR/FHE/FHEDialect.h"
 #include "heco/IR/Poly/PolyDialect.h"
+#include "heco/Passes/evarelinearize/InsertRelinearize.h"
 #include "heco/Passes/evamatchscale/MatchScale.h"
 #include "heco/Passes/evalazymodswitch/LazyModswitch.h"
 #include "heco/Passes/evametadata/MarkMetadata.h"
@@ -164,6 +165,7 @@ int main(int argc, char **argv)
     PassRegistration<LowerBFVToLLVMPass>();
     PassRegistration<LowerFHEToEmitCPass>();
     PassRegistration<LowerFHEToEVAPass>();
+    PassRegistration<InsertRelinearizePass>();
     PassRegistration<MatchScalePass>();
     PassRegistration<LazyModswitchPass>();
     PassRegistration<MarkMetadataPass>();
