@@ -11,6 +11,7 @@
 #include "heco/IR/EVA/EVADialect.h"
 #include "heco/IR/FHE/FHEDialect.h"
 #include "heco/IR/Poly/PolyDialect.h"
+#include "heco/Passes/evalazymodswitch/LazyModswitch.h"
 #include "heco/Passes/bfv2emitc/LowerBFVToEmitC.h"
 #include "heco/Passes/bfv2llvm/LowerBFVToLLVM.h"
 #include "heco/Passes/fhe2bfv/LowerFHEToBFV.h"
@@ -159,6 +160,7 @@ int main(int argc, char **argv)
     PassRegistration<LowerBFVToEmitCPass>();
     PassRegistration<LowerBFVToLLVMPass>();
     PassRegistration<LowerFHEToEmitCPass>();
+    PassRegistration<LazyModswitchPass>();
 
     PassPipelineRegistration<>("full-pass", "Run all passes", fullPipelineBuilder);
     PassPipelineRegistration<>("fhe-pass", "Run FHE-level passes", fhePipelineBuilder);

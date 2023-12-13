@@ -29,6 +29,7 @@ set(LIBS
         HECOLowerBFVToLLVM
         HECOLowerFHEToBFV
         HECOLowerFHEToEmitC
+        HECOLazyModswitch
         HECOCatchAll
         )
 add_llvm_executable(heco heco.cpp)

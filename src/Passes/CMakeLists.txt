@@ -1,3 +1,4 @@
+add_subdirectory(evalazymodswitch)
 add_subdirectory(fhe2bfv)
 add_subdirectory(bfv2emitc)
 add_subdirectory(bfv2llvm)
