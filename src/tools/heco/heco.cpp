@@ -15,6 +15,7 @@
 #include "heco/Passes/bfv2emitc/LowerBFVToEmitC.h"
 #include "heco/Passes/bfv2llvm/LowerBFVToLLVM.h"
 #include "heco/Passes/fhe2bfv/LowerFHEToBFV.h"
+#include "heco/Passes/fhe2eva/LowerFHEToEVA.h"
 #include "heco/Passes/fhe2emitc/LowerFHEToEmitC.h"
 #include "heco/Passes/hir2hir/Batching.h"
 #include "heco/Passes/hir2hir/CombineSimplify.h"
@@ -160,6 +161,7 @@ int main(int argc, char **argv)
     PassRegistration<LowerBFVToEmitCPass>();
     PassRegistration<LowerBFVToLLVMPass>();
     PassRegistration<LowerFHEToEmitCPass>();
+    PassRegistration<LowerFHEToEVAPass>();
     PassRegistration<LazyModswitchPass>();
 
     PassPipelineRegistration<>("full-pass", "Run all passes", fullPipelineBuilder);

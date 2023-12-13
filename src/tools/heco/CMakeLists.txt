@@ -29,6 +29,7 @@ set(LIBS
         HECOLowerBFVToLLVM
         HECOLowerFHEToBFV
         HECOLowerFHEToEmitC
+        HECOLowerFHEToEVA
         HECOLazyModswitch
         HECOCatchAll
         )
