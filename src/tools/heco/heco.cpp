@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include "heco/IR/BFV/BFVDialect.h"
+#include "heco/IR/EVA/EVADialect.h"
 #include "heco/IR/FHE/FHEDialect.h"
 #include "heco/IR/Poly/PolyDialect.h"
 #include "heco/Passes/bfv2emitc/LowerBFVToEmitC.h"
@@ -41,6 +42,7 @@ using namespace mlir;
 using namespace heco;
 using namespace fhe;
 using namespace bfv;
+using namespace eva;
 using namespace poly;
 
 void fullPipelineBuilder(OpPassManager &manager)
@@ -110,6 +112,7 @@ int main(int argc, char **argv)
 
     mlir::DialectRegistry registry;
     registry.insert<FHEDialect>();
+    registry.insert<EVADialect>();
     registry.insert<BFVDialect>();
     registry.insert<PolyDialect>();
     registry.insert<func::FuncDialect>();
@@ -120,6 +123,7 @@ int main(int argc, char **argv)
     registry.insert<func::FuncDialect>();
     registry.insert<linalg::LinalgDialect>();
     context.loadDialect<FHEDialect>();
+    context.loadDialect<EVADialect>();
     context.loadDialect<BFVDialect>();
     context.loadDialect<PolyDialect>();
     context.loadDialect<func::FuncDialect>();

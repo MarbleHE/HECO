@@ -7,6 +7,7 @@ set(LIBS
         MLIREmitCDialect
         MLIROptLib
         HECOFHEDialect
+        HECOEVADialect
         HECOBFVDialect
         HECOPolyDialect
         MLIRAnalysis
