@@ -13,6 +13,7 @@
 #include "heco/IR/Poly/PolyDialect.h"
 #include "heco/Passes/evarelinearize/InsertRelinearize.h"
 #include "heco/Passes/evamatchscale/MatchScale.h"
+#include "heco/Passes/evawaterline/WaterlineRescale.h"
 #include "heco/Passes/evalazymodswitch/LazyModswitch.h"
 #include "heco/Passes/evametadata/MarkMetadata.h"
 #include "heco/Passes/bfv2emitc/LowerBFVToEmitC.h"
@@ -166,6 +167,7 @@ int main(int argc, char **argv)
     PassRegistration<LowerFHEToEmitCPass>();
     PassRegistration<LowerFHEToEVAPass>();
     PassRegistration<InsertRelinearizePass>();
+    PassRegistration<WaterlineRescalePass>();
     PassRegistration<MatchScalePass>();
     PassRegistration<LazyModswitchPass>();
     PassRegistration<MarkMetadataPass>();

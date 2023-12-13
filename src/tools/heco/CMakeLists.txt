@@ -31,6 +31,7 @@ set(LIBS
         HECOLowerFHEToEmitC
         HECOLowerFHEToEVA
         HECOInsertRelinearize
+        HECOWaterlineRescale
         HECOMatchScale
         HECOMarkMetadata
         HECOLazyModswitch
