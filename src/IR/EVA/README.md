@@ -42,18 +42,72 @@ Here follows the list of the passes in the recommended order of application:
 
 ### Lowering FHE to EVA (fhe2eva)
 
+```
+heco --fhe2eva --cannonicalize < <path to the input file>
+```
+
+This pass translates a program in FHE dialect to the EVA dialect.
+Unfortunetately, so far not all valid FHE programs are supported, yet.
+Here is the list of limitations:
+* All ciphertext values in the program have to be vectors of the same length equal to a power of two. As a result, combine, insert and extract operations are not supported.
+* Multiplication and addition must have exactly two operands.
 
 ### Waterline Rescale (evawaterline)
+```
+heco --evawaterline="source_scale=<source scale> scale_drop=<scale drop> waterline=<waterline>" < <path to the input file>
+```
 
+This pass inserts rescale operations to limit the maximal scale of the program.
+In the resulting program, a rescale operation will be applied to each partial result whose scale is above the waterline.
+This way we guarantee that "meaningful", i.e. non rescale, operations only operate on values with the scale at most the configured waterline.
+
+This pass takes three optional arguments (when the argument is missing, pass takes a default value):
+* source scale -- the scale of the source nodes (encrypted data taken by program as arguments).
+* scale dtop -- the number by which the scale is divided by the rescale operation.
+* waterline -- the threshold above which the rescale operations are inserted.
+
+For convenience, we assume all of the above and the scale to be powers of two and we represent them as the exponents.
+Thus, `source_scale=20` means that all arguments have the scale of $2^{20}$ and `scale_drop=20` means that the scale becomes $2^{20}$ times smaller after a rescale operation.
 
 ### Match Scale (evamatchscale)
 
+```
+heco --evamatchscale="source_scale=<source scale> scale_drop=<scale drop> waterline=<waterline>" < <path to the input file>
+```
+
+This pass ensures that operands of addition and subtraction operations have equal scales.
+It's achieved by multiplying the one with smaller scale by a vector of ones whose encryption has the apprioriate scale.
+
+This pass takes the same arguments as evawaterline (source scale, scale drop, waterline), which are used to calculate the
+scales of partial results in the program.
+
 
 ### Lazy Modswitch Insertion (evalazymodswitch)
+```
+heco --evamodswitch="source_modulo=<source modulo>" < <path to the input file>
+```
 
+This pass ensures that operands of multiplication, addition and subtraction operations have the same moduli.
+This is achieved by applying a modswitch operation to the operand with larger modulo.
+
+Evalazymodswitch and one optional argument (if it's not given, the pass assumes a default value):
+* source modulo -- the number $l$ of primes forming $Q = q_1 * q_2 * ... * q_l$ that it used to encrypt the arguments of the program.
 
 ### Relinearize (evarelinearize)
-
+```
+heco --evarelinearize < <path to the input file>
+```
+This pass inserts a relinearize operation after every multiplication.
+This is to make sure that the program only operates on polynomials with degree one in order to avoid overhead from processing higher degree polynomials.
 
 ### Mark Metadata (evametadata)
-
+```
+heco --evametadata="source_modulo=<source modulo> source_scale=<source scale> scale_drop=<scale_drop> waterline=<waterline>" < <path to the input file>
+```
+This pass extends all EVA operations with attributes informing about the scale and modulo of the result.
+The information is given in the same format as the arguments (scale is given as the exponent of the power of two and modulo as the number of primes in the product).
+This pass takes four optional arguments with the same semantics as those have in the above passes:
+* source modulo
+* source scale
+* scale drop
+* waterline
