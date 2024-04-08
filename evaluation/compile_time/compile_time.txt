@@ -1,0 +1,276 @@
+===-------------------------------------------------------------------------===
+                         ... Execution time report ...
+===-------------------------------------------------------------------------===
+  Total Execution Time: 1.2921 seconds
+
+  ----Wall Time----  ----Name----
+    1.2921 (100.0%)  root
+    0.7930 ( 61.4%)  Canonicalizer
+    0.2728 ( 21.1%)  NaryPass
+    0.0863 (  6.7%)  BatchingPass
+    0.0429 (  3.3%)  CSE
+    0.0373 (  2.9%)  Tensor2BatchedSecretPass
+    0.0318 (  2.5%)  UnrollLoopsPass
+    0.0171 (  1.3%)  InternalOperandBatchingPass
+    0.0047 (  0.4%)  CombineSimplifyPass
+    0.0027 (  0.2%)  Parser
+    0.0007 (  0.1%)  LowerFHEToBFVPass
+    0.0005 (  0.0%)  LowerBFVToEmitCPass
+    0.0001 (  0.0%)  Output
+    0.0000 (  0.0%)  (A) DominanceInfo
+    0.0023 (  0.2%)  Rest
+    1.2921 (100.0%)  Total
+Optimized: evaluation/compile_time/heco_input/hammingdistance_1024.mlir -> evaluation/compile_time/heco_output/hammingdistance_1024.mlir
+===-------------------------------------------------------------------------===
+                         ... Execution time report ...
+===-------------------------------------------------------------------------===
+  Total Execution Time: 0.0214 seconds
+
+  ----Wall Time----  ----Name----
+    0.0214 (100.0%)  root
+    0.0094 ( 43.9%)  Canonicalizer
+    0.0021 (  9.8%)  Parser
+    0.0019 (  9.1%)  BatchingPass
+    0.0014 (  6.4%)  CSE
+    0.0010 (  4.7%)  UnrollLoopsPass
+    0.0010 (  4.7%)  NaryPass
+    0.0010 (  4.7%)  Tensor2BatchedSecretPass
+    0.0006 (  2.6%)  LowerFHEToBFVPass
+    0.0003 (  1.5%)  LowerBFVToEmitCPass
+    0.0003 (  1.3%)  InternalOperandBatchingPass
+    0.0001 (  0.7%)  CombineSimplifyPass
+    0.0001 (  0.4%)  Output
+    0.0000 (  0.0%)  (A) DominanceInfo
+    0.0022 ( 10.2%)  Rest
+    0.0214 (100.0%)  Total
+Optimized: evaluation/compile_time/heco_input/hammingdistance_16.mlir -> evaluation/compile_time/heco_output/hammingdistance_16.mlir
+===-------------------------------------------------------------------------===
+                         ... Execution time report ...
+===-------------------------------------------------------------------------===
+  Total Execution Time: 0.1906 seconds
+
+  ----Wall Time----  ----Name----
+    0.1906 (100.0%)  root
+    0.1080 ( 56.7%)  Canonicalizer
+    0.0213 ( 11.2%)  NaryPass
+    0.0212 ( 11.1%)  BatchingPass
+    0.0109 (  5.7%)  UnrollLoopsPass
+    0.0108 (  5.7%)  CSE
+    0.0093 (  4.9%)  Tensor2BatchedSecretPass
+    0.0023 (  1.2%)  InternalOperandBatchingPass
+    0.0023 (  1.2%)  Parser
+    0.0012 (  0.6%)  CombineSimplifyPass
+    0.0006 (  0.3%)  LowerFHEToBFVPass
+    0.0004 (  0.2%)  LowerBFVToEmitCPass
+    0.0001 (  0.1%)  Output
+    0.0000 (  0.0%)  (A) DominanceInfo
+    0.0021 (  1.1%)  Rest
+    0.1906 (100.0%)  Total
+Optimized: evaluation/compile_time/heco_input/hammingdistance_256.mlir -> evaluation/compile_time/heco_output/hammingdistance_256.mlir
+===-------------------------------------------------------------------------===
+                         ... Execution time report ...
+===-------------------------------------------------------------------------===
+  Total Execution Time: 10.5526 seconds
+
+  ----Wall Time----  ----Name----
+   10.5526 (100.0%)  root
+    6.4223 ( 60.9%)  Canonicalizer
+    3.3705 ( 31.9%)  NaryPass
+    0.2463 (  2.3%)  BatchingPass
+    0.1518 (  1.4%)  CSE
+    0.1419 (  1.3%)  InternalOperandBatchingPass
+    0.1062 (  1.0%)  Tensor2BatchedSecretPass
+    0.0975 (  0.9%)  UnrollLoopsPass
+    0.0127 (  0.1%)  CombineSimplifyPass
+    0.0009 (  0.0%)  Parser
+    0.0006 (  0.0%)  LowerFHEToBFVPass
+    0.0005 (  0.0%)  Output
+    0.0004 (  0.0%)  LowerBFVToEmitCPass
+    0.0000 (  0.0%)  (A) DominanceInfo
+    0.0011 (  0.0%)  Rest
+   10.5526 (100.0%)  Total
+Optimized: evaluation/compile_time/heco_input/hammingdistance_4096.mlir -> evaluation/compile_time/heco_output/hammingdistance_4096.mlir
+===-------------------------------------------------------------------------===
+                         ... Execution time report ...
+===-------------------------------------------------------------------------===
+  Total Execution Time: 0.0138 seconds
+
+  ----Wall Time----  ----Name----
+    0.0138 (100.0%)  root
+    0.0044 ( 32.2%)  Canonicalizer
+    0.0026 ( 19.1%)  Parser
+    0.0008 (  5.7%)  BatchingPass
+    0.0006 (  4.6%)  LowerFHEToBFVPass
+    0.0005 (  4.0%)  Tensor2BatchedSecretPass
+    0.0005 (  3.7%)  CSE
+    0.0005 (  3.7%)  LowerBFVToEmitCPass
+    0.0003 (  2.5%)  UnrollLoopsPass
+    0.0002 (  1.6%)  NaryPass
+    0.0002 (  1.5%)  InternalOperandBatchingPass
+    0.0001 (  0.9%)  Output
+    0.0001 (  0.7%)  CombineSimplifyPass
+    0.0000 (  0.1%)  (A) DominanceInfo
+    0.0027 ( 19.8%)  Rest
+    0.0138 (100.0%)  Total
+Optimized: evaluation/compile_time/heco_input/hammingdistance_4.mlir -> evaluation/compile_time/heco_output/hammingdistance_4.mlir
+===-------------------------------------------------------------------------===
+                         ... Execution time report ...
+===-------------------------------------------------------------------------===
+  Total Execution Time: 0.0413 seconds
+
+  ----Wall Time----  ----Name----
+    0.0413 (100.0%)  root
+    0.0213 ( 51.5%)  Canonicalizer
+    0.0037 (  8.8%)  BatchingPass
+    0.0033 (  8.1%)  UnrollLoopsPass
+    0.0030 (  7.2%)  CSE
+    0.0026 (  6.3%)  NaryPass
+    0.0022 (  5.4%)  Tensor2BatchedSecretPass
+    0.0019 (  4.5%)  Parser
+    0.0004 (  0.9%)  InternalOperandBatchingPass
+    0.0003 (  0.8%)  LowerFHEToBFVPass
+    0.0003 (  0.6%)  LowerBFVToEmitCPass
+    0.0002 (  0.5%)  CombineSimplifyPass
+    0.0001 (  0.2%)  Output
+    0.0000 (  0.0%)  (A) DominanceInfo
+    0.0021 (  5.0%)  Rest
+    0.0413 (100.0%)  Total
+Optimized: evaluation/compile_time/heco_input/hammingdistance_64.mlir -> evaluation/compile_time/heco_output/hammingdistance_64.mlir
+===-------------------------------------------------------------------------===
+                         ... Execution time report ...
+===-------------------------------------------------------------------------===
+  Total Execution Time: 0.2469 seconds
+
+  ----Wall Time----  ----Name----
+    0.2469 (100.0%)  root
+    0.1380 ( 55.9%)  Canonicalizer
+    0.0436 ( 17.7%)  BatchingPass
+    0.0175 (  7.1%)  CSE
+    0.0173 (  7.0%)  UnrollLoopsPass
+    0.0143 (  5.8%)  Tensor2BatchedSecretPass
+    0.0072 (  2.9%)  NaryPass
+    0.0041 (  1.7%)  CombineSimplifyPass
+    0.0021 (  0.8%)  Parser
+    0.0003 (  0.1%)  LowerFHEToBFVPass
+    0.0003 (  0.1%)  LowerBFVToEmitCPass
+    0.0001 (  0.0%)  Output
+    0.0001 (  0.0%)  InternalOperandBatchingPass
+    0.0000 (  0.0%)  (A) DominanceInfo
+    0.0021 (  0.8%)  Rest
+    0.2469 (100.0%)  Total
+Optimized: evaluation/compile_time/heco_input/robertscross_16x16.mlir -> evaluation/compile_time/heco_output/robertscross_16x16.mlir
+===-------------------------------------------------------------------------===
+                         ... Execution time report ...
+===-------------------------------------------------------------------------===
+  Total Execution Time: 0.0150 seconds
+
+  ----Wall Time----  ----Name----
+    0.0150 (100.0%)  root
+    0.0059 ( 39.5%)  Canonicalizer
+    0.0021 ( 13.7%)  Parser
+    0.0012 (  7.9%)  BatchingPass
+    0.0008 (  5.5%)  CSE
+    0.0007 (  4.5%)  Tensor2BatchedSecretPass
+    0.0005 (  3.6%)  UnrollLoopsPass
+    0.0005 (  3.4%)  LowerFHEToBFVPass
+    0.0004 (  2.9%)  LowerBFVToEmitCPass
+    0.0003 (  2.0%)  NaryPass
+    0.0001 (  1.0%)  CombineSimplifyPass
+    0.0001 (  0.7%)  Output
+    0.0001 (  0.6%)  InternalOperandBatchingPass
+    0.0000 (  0.0%)  (A) DominanceInfo
+    0.0022 ( 14.8%)  Rest
+    0.0150 (100.0%)  Total
+Optimized: evaluation/compile_time/heco_input/robertscross_2x2.mlir -> evaluation/compile_time/heco_output/robertscross_2x2.mlir
+===-------------------------------------------------------------------------===
+                         ... Execution time report ...
+===-------------------------------------------------------------------------===
+  Total Execution Time: 0.9748 seconds
+
+  ----Wall Time----  ----Name----
+    0.9748 (100.0%)  root
+    0.5528 ( 56.7%)  Canonicalizer
+    0.1765 ( 18.1%)  BatchingPass
+    0.0703 (  7.2%)  CSE
+    0.0578 (  5.9%)  Tensor2BatchedSecretPass
+    0.0459 (  4.7%)  UnrollLoopsPass
+    0.0383 (  3.9%)  CombineSimplifyPass
+    0.0293 (  3.0%)  NaryPass
+    0.0015 (  0.2%)  Parser
+    0.0004 (  0.0%)  LowerBFVToEmitCPass
+    0.0003 (  0.0%)  LowerFHEToBFVPass
+    0.0001 (  0.0%)  Output
+    0.0001 (  0.0%)  InternalOperandBatchingPass
+    0.0000 (  0.0%)  (A) DominanceInfo
+    0.0016 (  0.2%)  Rest
+    0.9748 (100.0%)  Total
+Optimized: evaluation/compile_time/heco_input/robertscross_32x32.mlir -> evaluation/compile_time/heco_output/robertscross_32x32.mlir
+===-------------------------------------------------------------------------===
+                         ... Execution time report ...
+===-------------------------------------------------------------------------===
+  Total Execution Time: 0.0275 seconds
+
+  ----Wall Time----  ----Name----
+    0.0275 (100.0%)  root
+    0.0137 ( 49.9%)  Canonicalizer
+    0.0029 ( 10.6%)  BatchingPass
+    0.0020 (  7.4%)  Parser
+    0.0017 (  6.3%)  CSE
+    0.0016 (  5.9%)  UnrollLoopsPass
+    0.0016 (  5.9%)  Tensor2BatchedSecretPass
+    0.0008 (  2.8%)  NaryPass
+    0.0003 (  1.2%)  LowerFHEToBFVPass
+    0.0003 (  1.1%)  LowerBFVToEmitCPass
+    0.0002 (  0.7%)  CombineSimplifyPass
+    0.0001 (  0.3%)  Output
+    0.0001 (  0.2%)  InternalOperandBatchingPass
+    0.0000 (  0.0%)  (A) DominanceInfo
+    0.0021 (  7.7%)  Rest
+    0.0275 (100.0%)  Total
+Optimized: evaluation/compile_time/heco_input/robertscross_4x4.mlir -> evaluation/compile_time/heco_output/robertscross_4x4.mlir
+===-------------------------------------------------------------------------===
+                         ... Execution time report ...
+===-------------------------------------------------------------------------===
+  Total Execution Time: 3.0077 seconds
+
+  ----Wall Time----  ----Name----
+    3.0077 (100.0%)  root
+    1.5649 ( 52.0%)  Canonicalizer
+    0.5076 ( 16.9%)  BatchingPass
+    0.3643 ( 12.1%)  CombineSimplifyPass
+    0.2016 (  6.7%)  CSE
+    0.1619 (  5.4%)  Tensor2BatchedSecretPass
+    0.1215 (  4.0%)  UnrollLoopsPass
+    0.0836 (  2.8%)  NaryPass
+    0.0007 (  0.0%)  Parser
+    0.0005 (  0.0%)  LowerBFVToEmitCPass
+    0.0003 (  0.0%)  LowerFHEToBFVPass
+    0.0001 (  0.0%)  Output
+    0.0000 (  0.0%)  InternalOperandBatchingPass
+    0.0000 (  0.0%)  (A) DominanceInfo
+    0.0008 (  0.0%)  Rest
+    3.0077 (100.0%)  Total
+Optimized: evaluation/compile_time/heco_input/robertscross_64x64.mlir -> evaluation/compile_time/heco_output/robertscross_64x64.mlir
+===-------------------------------------------------------------------------===
+                         ... Execution time report ...
+===-------------------------------------------------------------------------===
+  Total Execution Time: 0.0432 seconds
+
+  ----Wall Time----  ----Name----
+    0.0432 (100.0%)  root
+    0.0243 ( 56.3%)  Canonicalizer
+    0.0075 ( 17.4%)  BatchingPass
+    0.0031 (  7.2%)  CSE
+    0.0025 (  5.9%)  Tensor2BatchedSecretPass
+    0.0019 (  4.4%)  UnrollLoopsPass
+    0.0013 (  2.9%)  NaryPass
+    0.0007 (  1.7%)  Parser
+    0.0005 (  1.1%)  CombineSimplifyPass
+    0.0002 (  0.5%)  LowerFHEToBFVPass
+    0.0002 (  0.4%)  LowerBFVToEmitCPass
+    0.0001 (  0.1%)  Output
+    0.0000 (  0.1%)  InternalOperandBatchingPass
+    0.0000 (  0.0%)  (A) DominanceInfo
+    0.0008 (  1.8%)  Rest
+    0.0432 (100.0%)  Total
+Optimized: evaluation/compile_time/heco_input/robertscross_8x8.mlir -> evaluation/compile_time/heco_output/robertscross_8x8.mlir
