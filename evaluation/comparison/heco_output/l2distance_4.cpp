@@ -1,7 +1,12 @@
-#include "emitc_helper.h"
-
-// Placeholder for compiled function, so that C++ compilation always goes through
-seal::Ciphertext encryptedL2Distance_4(seal::Ciphertext x, seal::Ciphertext y)
-{
-    assert(false && "Please compile the HECO inputs to replace this placeholder output.");
+seal::Ciphertext encryptedL2Distance_4(seal::Ciphertext v1, seal::Ciphertext v2) {
+  seal::Ciphertext v3 = evaluator_sub(v1, v2);
+  seal::Ciphertext v4 = evaluator_multiply(v3, v3);
+  seal::Ciphertext v5 = evaluator_rotate(v4, 2);
+  seal::Ciphertext v6 = evaluator_add(v4, v5);
+  seal::Ciphertext v7 = evaluator_rotate(v6, 1);
+  seal::Ciphertext v8 = evaluator_add(v6, v7);
+  seal::Ciphertext v9 = evaluator_rotate(v8, 2);
+  return v9;
 }
+
+

@@ -1,7 +1,6 @@
 [submodule "dependencies/llvm-project"]
 	path = dependencies/llvm-project
 	url = https://github.com/llvm/llvm-project.git
-	shallow = true
 [submodule "dependencies/SEAL"]
 	path = dependencies/SEAL
 	url = https://github.com/microsoft/SEAL.git

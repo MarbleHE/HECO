@@ -7,7 +7,7 @@ The files in this folder can be used to reproduce (the runtime component of) Fig
 
 In order to compile the programs from the high-level intermediate representation (HIR) form given here to *.cpp, run the following (assuming your current working directory is the repositoy root):
 ```sh
-./build/bin/heco --full-pass < evaluation/benchmark/heco_input/hammingdistance_4.mlir > evaluation/heco_output/hammingdist_4.mlir
+./build/bin/heco --full-pass < evaluation/benchmark/heco_input/hammingdistance_4.mlir > evaluation/benchmark/heco_output/hammingdist_4.mlir
 ./build/bin/emitc-translate --mlir-to-cpp  < evaluation/benchmark/heco_output/hammingdistance_4.mlir > evaluation/heco_output/hammingdist_4.cpp
 ```
 
@@ -34,7 +34,7 @@ The files in this folder can be used to reproduce Figure 6 ("Runtime [...] compa
 
 In order to compile the programs from the high-level intermediate representation (HIR) form given here to *.cpp, run the following (assuming your current working directory is the repositoy root):
 ```sh
-./build/bin/heco --full-pass < evaluation/comparison/heco_input/hammingdistance_4.mlir > evaluation/heco_output/hammingdist_4.mlir
+./build/bin/heco --full-pass < evaluation/comparison/heco_input/hammingdistance_4.mlir > evaluation/comparison/heco_output/hammingdist_4.mlir
 ./build/bin/emitc-translate --mlir-to-cpp < evaluation/comparison/heco_output/hammingdistance_4.mlir > evaluation/heco_output/hammingdist_4.cpp
 ```
 
@@ -68,7 +68,7 @@ The files in this folder can be used to reproduce Table 1 ("Compile time") from 
 MLIR includes utilities for detailed compile time reports, which can be used by passing `-mlir-timing -mlir-timing-display=list` to the compiler.
 Specifically, to evaluate, e.g., `hammingdist_4.mlir`, you should run the following (assuming your current working directory is the repositoy root):
 ```sh
-./build/bin/heco --full-pass -mlir-timing -mlir-timing-display=list < test/evaluation/hammingdistance_4.mlir
+./build/bin/heco --full-pass -mlir-timing -mlir-timing-display=list < evaluation/compile_time/heco_input/hammingdistance_4.mlir
 ```
 In order to avoid needing to compile each HECO input individually, you can instead use a helper script that does this for all files in the heco_input folder (assuming your current working directory is the repositoy root):
 ```sh

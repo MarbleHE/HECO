@@ -31,8 +31,7 @@ module  {
         // fetch img[x-1][y]
         %15 = arith.addi %x, %c-1 : index
         %16 = arith.muli %15, %c2 : index
-        %17 = arith.addi %y, %c-1 : index
-        %18 = arith.addi %16, %17 : index
+        %18 = arith.addi %16, %y : index
         %19 = arith.remui %18, %c4 : index
         %20 = tensor.extract %img[%19] : tensor<4x!fhe.secret<i16>>
 
