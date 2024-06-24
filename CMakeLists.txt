@@ -9,6 +9,12 @@ endif()
 cmake_policy(SET CMP0116 OLD)
 
 # ########################
+# Select Clang Toolchain #
+# ########################
+SET(CMAKE_C_COMPILER   "clang")
+SET(CMAKE_CXX_COMPILER "clang++")
+
+# ########################
 # Project Configuration #
 # ########################
 
