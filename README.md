@@ -199,6 +199,8 @@ To build the documentation from the TableGen description of the dialect operatio
 cmake --build build --target mlir-doc
 ```
 Alternatively, you can open this folder in vscode. You will want to build the `check-heco` target if you want to run the tests, or the `heco` target if you just want to build the command-line compiler.
+> **Note**
+> The `/test` folder is not currently maintained. Instead of running `check-heco`, please refer to `/evaluation`, which contains the tests/benchmarks for the USENIX Artifact Evaluation version of HECO!  
 
 # Development
  Please see MLIR's [Getting Started](https://mlir.llvm.org/getting_started/) for more details on MLIR/LLVM conventions.
