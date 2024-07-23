@@ -128,7 +128,7 @@ For normal use and evaluation, build MLIR and SEAL in Release Mode:
 >
 >cmake --build . --target check-mlir
 >
->cd ../../seal
+>cd ../../SEAL
 >
 >cmake -S . -B build
 >cmake --build build
@@ -159,7 +159,7 @@ cmake -G Ninja ../llvm \
 
 cmake --build . --target check-mlir 
 
-cd ../../seal
+cd ../../SEAL
 
 cmake -S . -B build
 cmake --build build
