@@ -96,7 +96,7 @@ If the version of `cmake` provided by your package manager is too old (<3.20), y
 
 HECO includes two dependencies (the [Microsoft SEAL](https://github.com/microsoft/seal) FHE library, and the [MLIR](https://mlir.llvm.org/) compiler framework) as git submodules, which you need to initialize after cloning:
 ```sh
-git submodule update --init --recursive
+git submodule update --init --recursive --progress
 ```
 
 For normal use and evaluation, build MLIR and SEAL in Release Mode:  
